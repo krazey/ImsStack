@@ -29,11 +29,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class MmTelFeatureRegistry {
     /** SRVCC state information */
-    public static final int SRVCC_STATE_NONE = 0;
-    public static final int SRVCC_STATE_STARTED = 1;
-    public static final int SRVCC_STATE_COMPLETED = 2;
-    public static final int SRVCC_STATE_FAILED = 3;
-    public static final int SRVCC_STATE_CANCELED = 4;
+    public static final int SRVCC_STATE_NONE = -1;
+    public static final int SRVCC_STATE_STARTED = 0;
+    public static final int SRVCC_STATE_COMPLETED = 1;
+    public static final int SRVCC_STATE_FAILED = 2;
+    public static final int SRVCC_STATE_CANCELED = 3;
 
     /**
      * Notifies the components who monitor this class that any states have changed.

@@ -27,6 +27,8 @@ import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -90,6 +92,7 @@ public class MtcApp implements Closeable {
     private ServiceStateListener mServiceStateListener = null;
     private CallListener mCallListener = null;
     private MtcJniProxy mMtcJniProxy;
+    protected SrvccStateListener mSrvccStateListener = null;
 
     public MtcApp(IBaseContext context) {
         mContext = context;
@@ -122,6 +125,15 @@ public class MtcApp implements Closeable {
         mContext.addCommonPackageListener(mHandler);
         mEmergencyServiceManager.init();
 
+        // SRVCC_STATE_TRACKING
+        MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
+                .getMmTelFeatureRegistry();
+
+        if (mmtelFr != null) {
+            mSrvccStateListener = new SrvccStateListener();
+            mmtelFr.addListener(mSrvccStateListener);
+        }
+
         bindJNIService();
     }
 
@@ -135,6 +147,15 @@ public class MtcApp implements Closeable {
         mCM.clear();
 
         initializeState();
+
+        if (mSrvccStateListener != null) {
+            MmTelFeatureRegistry mmtelFr = ImsServiceRegistry.getInstance(mContext.getSlotId())
+                    .getMmTelFeatureRegistry();
+            if (mmtelFr != null) {
+                mmtelFr.removeListener(mSrvccStateListener);
+            }
+            mSrvccStateListener = null;
+        }
     }
 
     public IMtcCallManager getCallManager() {
@@ -228,15 +249,19 @@ public class MtcApp implements Closeable {
         initializeState();
     }
 
-    public void notifySrvccStateChanged(int state) {
-        logi("notifySrvccStateChanged :: state=" + state);
+    @VisibleForTesting
+    protected class SrvccStateListener implements MmTelFeatureRegistry.Listener {
 
-        Parcel parcel = Parcel.obtain();
+        @Override
+        public void onSrvccStateChanged(int srvccState) {
+            logi("onSrvccStateChanged :: SRVCC State = " + srvccState);
+            Parcel parcel = Parcel.obtain();
 
-        parcel.writeInt(IUMtcService.SRVCC_STATE_CHANGED);
-        parcel.writeInt(state);
+            parcel.writeInt(IUMtcService.SRVCC_STATE_CHANGED);
+            parcel.writeInt(srvccState);
 
-        sendNotification(parcel);
+            sendNotification(parcel);
+        }
     }
 
     public void setTerminalBasedCallWaiting(boolean provisioned, boolean enabled) {

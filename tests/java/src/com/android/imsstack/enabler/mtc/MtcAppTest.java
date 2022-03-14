@@ -37,6 +37,7 @@ import com.android.imsstack.core.agents.ISharedState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.jni.JniImsListener;
 
 import org.junit.After;
@@ -99,6 +100,10 @@ public class MtcAppTest extends ImsStackTest {
         @Override
         public MtcCall createMtcCall(int callAttributes) {
             return mMtcCall;
+        }
+
+        public MmTelFeatureRegistry.Listener getSrvccListener() {
+            return mSrvccStateListener = new SrvccStateListener();
         }
     }
 
@@ -279,7 +284,9 @@ public class MtcAppTest extends ImsStackTest {
         mTestMtcApp.setNativeObj(1);
         assertTrue(mTestMtcApp.isServiceValid());
 
-        mTestMtcApp.notifySrvccStateChanged(1);
+        MmTelFeatureRegistry.Listener srvccListener = mTestMtcApp.getSrvccListener();
+        //SRVCC_STATE_STARTED
+        srvccListener.onSrvccStateChanged(0);
         processAllMessages();
 
         assertEquals(IUMtcService.SRVCC_STATE_CHANGED, mCommand);

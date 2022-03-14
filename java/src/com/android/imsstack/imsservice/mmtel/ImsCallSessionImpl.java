@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.telecom.Connection.RttModifyStatus;
+import android.telephony.PreciseCallState;
 import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSessionListener;
@@ -62,8 +63,6 @@ import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
-import com.android.imsstack.imsservice.mmtel.base.ISrvccStateListener;
-import com.android.imsstack.imsservice.mmtel.base.ISrvccStateTracker;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
@@ -121,7 +120,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private Runnable mStartFailedCallback = null;
     private ConferenceProxy mConferenceProxy = null;
     private MoPendingCall mMoPendingCall = null;
-    private SrvccStateListenerProxy mSrvccStateListener = null;
     private TtyModeListenerProxy mTtyModeListener = null;
     private CallApnStateListener mApnStateListener = null;
     private final ImsVideoCallSession mVideoCallSession;
@@ -167,14 +165,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         clearProposedCallProfile();
 
-        // SRVCC_STATE_TRACKING
-        ISrvccStateTracker sst = mCallContext.getSrvccStateTracker();
-
-        if (sst != null) {
-            mSrvccStateListener = new SrvccStateListenerProxy();
-            sst.addListener(mSrvccStateListener);
-        }
-
         // TTY_MODE
         TtyModeTracker tmt = mCallContext.getTtyModeTracker();
 
@@ -210,13 +200,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 garbageCalls.add(mCallContext.getSlotId(), this);
 
                 mCT.updateCallState(this, CallTracker.CALL_EVENT_DESTROY, null);
-                return;
-            }
-
-            if (!mCallDetails.is(CallDetails.NO_SRVCC_CHECK_ON_CLOSE)
-                    && checkSrvccAndCloseDelayed(this, 1000)) {
-                // Try to close the session again after 1 seconds
-                logi("Close is pending by SRVCC");
                 return;
             }
 
@@ -699,7 +682,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // Terminate the ongoing conference call
         clearConferenceProxy();
-
         mCall.terminate(ImsCallUtils.getTerminateCallReasonInfoCodeFromImsReasonInfo(reason));
 
         if (getState() != ImsCallSessionImplBase.State.TERMINATED) {
@@ -1151,6 +1133,33 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         return 0;
     }
 
+    public int getPreciseState() {
+        if (mState  == ImsCallSessionImplBase.State.ESTABLISHED) {
+            return PreciseCallState.PRECISE_CALL_STATE_ACTIVE;
+        } else if (mState  == ImsCallSessionImplBase.State.ESTABLISHING) {
+            return PreciseCallState.PRECISE_CALL_STATE_ALERTING;
+        } else if (mState  == ImsCallSessionImplBase.State.TERMINATED) {
+            return PreciseCallState.PRECISE_CALL_STATE_DISCONNECTED;
+        } else if (mState  == ImsCallSessionImplBase.State.TERMINATING) {
+            return PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING;
+        } else if (mCall.isOnHold()) {
+            return PreciseCallState.PRECISE_CALL_STATE_HOLDING;
+        } else if (mCall.isOnPreIncoming()) {
+            return PreciseCallState.PRECISE_CALL_STATE_INCOMING_SETUP;
+        } else if (mCallDetails.is(CallDetails.MO)
+                && (mState == ImsCallSessionImplBase.State.IDLE)) {
+            return PreciseCallState.PRECISE_CALL_STATE_DIALING;
+        } else if (!mCallDetails.is(CallDetails.MO)
+                && (mState == ImsCallSessionImplBase.State.IDLE)) {
+            return PreciseCallState.PRECISE_CALL_STATE_INCOMING;
+        } else if ((mCT.getActiveCalls() > 0) && !mCallDetails.is(CallDetails.MO)
+                && (mState == ImsCallSessionImplBase.State.IDLE)) {
+            return PreciseCallState.PRECISE_CALL_STATE_WAITING;
+        }
+
+        return PreciseCallState.PRECISE_CALL_STATE_NOT_VALID;
+    }
+
     public void alertUser() {
         if (mCall == null) {
             return;
@@ -1339,35 +1348,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private boolean checkSrvccAndCloseDelayed(final ImsCallSessionImpl session, int delayMillis) {
-        if (mSrvccStateListener != null) {
-            ISrvccStateTracker sst = mCallContext.getSrvccStateTracker();
-            if ((sst != null) && sst.isSrvccPending()) {
-                Handler h = mCallContext.getCallHandler();
-
-                // To remove a repeatable call when closing this call after close() is invoked.
-                // This handles any exceptional case when SRVCC event is not delivered.
-                session.mCallDetails.set(CallDetails.NO_SRVCC_CHECK_ON_CLOSE);
-
-                // Close delay interval: 1 seconds
-                return h.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                if (session != null) {
-                                    session.close();
-                                }
-                            } catch (Throwable t) {
-                                loge("checkSrvccAndCloseDelayed");
-                            }
-                        }
-                    }, delayMillis);
-            }
-        }
-
-        return false;
-    }
-
     private void clearConferenceProxy() {
         if (mConferenceProxy != null) {
             mConferenceProxy.removeListener(mListenerProxy, mConferenceListenerProxy);
@@ -1394,17 +1374,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private void clearSpecificFeatures() {
-        // SRVCC_STATE_TRACKING
-        if (mSrvccStateListener != null) {
-            ISrvccStateTracker sst = mCallContext.getSrvccStateTracker();
-
-            if (sst != null) {
-                sst.removeListener(mSrvccStateListener);
-            }
-
-            mSrvccStateListener = null;
-        }
-
         // TTY_MODE
         if (mTtyModeListener != null) {
             TtyModeTracker tmt = mCallContext.getTtyModeTracker();
@@ -2435,10 +2404,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
          */
         public static final int IMPLICIT_ON_HOLD = 0x00000100;
         /**
-         * Indicates that SRVCC needs to be checked or not.
-         */
-        public static final int NO_SRVCC_CHECK_ON_CLOSE = 0x00000200;
-        /**
          * Indicates that MO call session is transited to PROGRESSING.
          */
         public static final int MO_PROGRESSING = 0x00000400;
@@ -3117,49 +3082,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         return ImsReasonInfo.CODE_UNSPECIFIED;
-    }
-
-    private class SrvccStateListenerProxy implements ISrvccStateListener {
-        /**
-         * This is invoked if SRVCC handover is started.
-         */
-        @Override
-        public void onHandoverStarted() {
-            log("onHandoverStarted");
-        }
-
-        /**
-         * This is invoked if SRVCC handover is completed.
-         */
-        @Override
-        public void onHandoverCompleted() {
-            log("onHandoverCompleted");
-
-            ISrvccStateTracker sst = mCallContext.getSrvccStateTracker();
-
-            if ((sst != null) && sst.isSrvccCompleted()
-                    && (getState() != ImsCallSessionImplBase.State.TERMINATED)) {
-                mCallDetails.set(CallDetails.IMPLICIT_TERMINATED);
-                // TODO ag/18558824
-                //setTerminationReason(ImsReasonInfoEx.CODE_LOCAL_CALL_TERMINATED_BY_SRVCC);
-            }
-        }
-
-        /**
-         * This is invoked if SRVCC handover is canceled.
-         */
-        @Override
-        public void onHandoverCanceled() {
-            log("onHandoverCanceled");
-        }
-
-        /**
-         * This is invoked if SRVCC handover is failed.
-         */
-        @Override
-        public void onHandoverFailed() {
-            log("onHandoverFailed");
-        }
     }
 
     private class TtyModeListenerProxy implements TtyModeTracker.Listener {

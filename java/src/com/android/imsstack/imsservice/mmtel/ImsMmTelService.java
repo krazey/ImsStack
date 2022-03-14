@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsExternalCallState;
+import android.telephony.ims.SrvccCall;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.ImsFeature;
@@ -36,6 +37,7 @@ import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.MmTelFeatureRegistry;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.IndentingPrintWriter;
@@ -43,6 +45,7 @@ import com.android.imsstack.util.LocalLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Implements MmTelFeature to provide VoLTE/VT/Emergency features.
@@ -58,6 +61,7 @@ public class ImsMmTelService extends MmTelFeature
     private boolean mReady = false;
     private CapabilityCallbackProxy mCapabilityCallback;
     private ImsRegistrationTracker mRegTracker;
+    private final MmTelFeatureRegistry mMmTelFeatureRegistry;
     private final LocalLog mLocalLog = new LocalLog(LOG_SIZE);
     private final ImsServiceRegistry mServiceRegistry;
 
@@ -70,6 +74,8 @@ public class ImsMmTelService extends MmTelFeature
         int slotId = context.getPhoneId();
         mIContext = context;
         mServiceRegistry = serviceRegistry;
+        mMmTelFeatureRegistry = ImsServiceRegistry.getInstance(mIContext.getSlotId())
+                .getMmTelFeatureRegistry();
 
         initialize(mIContext.getContext(), slotId);
         setFeatureState(ImsFeature.STATE_INITIALIZING);
@@ -327,6 +333,29 @@ public class ImsMmTelService extends MmTelFeature
 
         // FIXME: P-GII
         // Update feature capabilities and IMS registration state
+    }
+
+    @Override
+    public void notifySrvccStarted(Consumer<List<SrvccCall>> consumer) {
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_STARTED);
+
+        List<SrvccCall> srvccCalls = getCallApp().getCallManager().getSrvccCalls();
+        consumer.accept(srvccCalls);
+    }
+
+    @Override
+    public void notifySrvccCompleted() {
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_COMPLETED);
+    }
+
+    @Override
+    public void notifySrvccFailed() {
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_FAILED);
+    }
+
+    @Override
+    public void notifySrvccCanceled() {
+        mMmTelFeatureRegistry.setSrvccState(MmTelFeatureRegistry.SRVCC_STATE_CANCELED);
     }
 
     @VisibleForTesting

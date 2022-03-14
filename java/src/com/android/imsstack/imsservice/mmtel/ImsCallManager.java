@@ -20,6 +20,7 @@ import android.os.PowerManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.SrvccCall;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.ImsWakeLock;
@@ -37,7 +38,10 @@ import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ImsCallManager {
@@ -204,10 +208,7 @@ public class ImsCallManager {
             return null;
         }
 
-        Map.Entry<String, ImsCallSessionImpl>[] entries =
-                mSessions.entrySet().toArray(new Map.Entry[mSessions.size()]);
-
-        for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+        for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
             ImsCallSessionImpl call = entry.getValue();
 
             if (call.getState() >= ImsCallSession.State.ESTABLISHED) {
@@ -268,6 +269,51 @@ public class ImsCallManager {
 
     public MtcApp getMtcApp() {
         return mMtcApp;
+    }
+
+    public List<SrvccCall> getSrvccCalls() {
+        List<SrvccCall> srvccCalls =  new ArrayList<SrvccCall>();
+        Set<Map.Entry<String, ImsCallSessionImpl>> sessionsEntrySet = null;
+        Set<Map.Entry<String, ImsCallSessionImpl>> pendingEntrySet = null;
+
+        synchronized (mSessions) {
+            if (!mSessions.isEmpty()) {
+                sessionsEntrySet = mSessions.entrySet();
+            }
+        }
+
+        synchronized (mPendingSessions) {
+            if (!mPendingSessions.isEmpty()) {
+                pendingEntrySet =  mPendingSessions.entrySet();
+            }
+        }
+
+        if (sessionsEntrySet != null) {
+            addSrvccCall(sessionsEntrySet, srvccCalls);
+        }
+
+        if (pendingEntrySet != null) {
+            addSrvccCall(pendingEntrySet, srvccCalls);
+        }
+
+        return srvccCalls;
+    }
+
+    private void addSrvccCall(Set<Map.Entry<String, ImsCallSessionImpl>> entries,
+            List<SrvccCall> srvccCalls) {
+
+        for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+            ImsCallSessionImpl callSession = entry.getValue();
+
+            String callId = callSession.getCallId();
+            int preciseState = callSession.getPreciseState();
+
+            log("addSrvccCall: callSession=" + callSession + ", callId="
+                    + callId + ", preciseState=" + preciseState);
+
+            srvccCalls.add(new SrvccCall(callId, preciseState,
+                    callSession.getCallProfile()));
+        }
     }
 
     private String createCallId() {
@@ -364,10 +410,7 @@ public class ImsCallManager {
             return;
         }
 
-        Map.Entry<String, ImsCallSessionImpl>[] entries
-                = mPendingSessions.entrySet().toArray(new Map.Entry[mPendingSessions.size()]);
-
-        for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+        for (Map.Entry<String, ImsCallSessionImpl> entry : mPendingSessions.entrySet()) {
             if (entry.getValue().getState() != ImsCallSession.State.NEGOTIATING) {
                 mPendingSessions.remove(entry.getKey());
             }
@@ -539,10 +582,7 @@ public class ImsCallManager {
                 return;
             }
 
-            Map.Entry<String, ImsCallSessionImpl>[] entries =
-                    mSessions.entrySet().toArray(new Map.Entry[mSessions.size()]);
-
-            for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+            for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
                 onCallDestroy((ImsCallSessionImpl)entry.getValue());
             }
         }
@@ -556,10 +596,8 @@ public class ImsCallManager {
             }
 
             int count = 0;
-            Map.Entry<String, ImsCallSessionImpl>[] entries =
-                    mSessions.entrySet().toArray(new Map.Entry[mSessions.size()]);
 
-            for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+            for (Map.Entry<String, ImsCallSessionImpl> entry : mSessions.entrySet()) {
                 ImsCallSessionImpl callSession = entry.getValue();
                 callSession.notifyCallTerminatedByServiceUnavailable();
 
@@ -583,10 +621,8 @@ public class ImsCallManager {
             }
 
             int count = 0;
-            Map.Entry<String, ImsCallSessionImpl>[] entries =
-                    mPendingSessions.entrySet().toArray(new Map.Entry[mPendingSessions.size()]);
 
-            for (Map.Entry<String, ImsCallSessionImpl> entry : entries) {
+            for (Map.Entry<String, ImsCallSessionImpl> entry : mPendingSessions.entrySet()) {
                 ImsCallSessionImpl callSession = entry.getValue();
 
                 if (callSession.getState() == ImsCallSession.State.IDLE) {
