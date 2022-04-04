@@ -144,14 +144,14 @@ SipHeaderBase - Class Member Function Implementations
 *****************************************************************************/
 SipHeaderBase::SipHeaderBase(SIP_INT32 eHdrType)
     : m_eHdrType(eHdrType)
-    , m_pValue(SIP_NULL)
+    , m_pszValue(SIP_NULL)
     , m_pParameters(SIP_NULL)
 {
 }
 
-SipHeaderBase::SipHeaderBase(const SipHeaderBase &objHeader)
+SipHeaderBase::SipHeaderBase(const SipHeaderBase& objHeader)
     : m_eHdrType(objHeader.m_eHdrType)
-    , m_pValue(SipPf_Strdup(objHeader.m_pValue))
+    , m_pszValue(SipPf_Strdup(objHeader.m_pszValue))
     , m_pParameters(SIP_NULL)
 {
     if (objHeader.m_pParameters != SIP_NULL)
@@ -166,9 +166,9 @@ SipHeaderBase::~SipHeaderBase()
     {
         delete m_pParameters;
     }
-    if (m_pValue != SIP_NULL)
+    if (m_pszValue != SIP_NULL)
     {
-        delete[] m_pValue;
+        delete[] m_pszValue;
     }
 }
 
@@ -229,52 +229,52 @@ SIP_BOOL SipHeaderBase::FindComment(SIP_CHAR* pszStart, SIP_CHAR* pszEnd,
 
 SIP_BOOL SipHeaderBase::IsValidHeader() const
 {
-    if (m_pValue != SIP_NULL)
+    if (m_pszValue != SIP_NULL)
     {
         return SIP_TRUE;
     }
     return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
 }
 
-SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR *pValue)
+SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
 {
-    return SetCharVar(pValue, m_pValue);
+    return SetCharVar(pszValue, m_pszValue);
 }
 
 const SIP_CHAR* SipHeaderBase::GetValue() const
 {
-    return m_pValue;
+    return m_pszValue;
 }
 
-SIP_BOOL SipHeaderBase::EncodeHeaderParameters(SIP_CHAR **ppucCurrPos,
-                                               SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipHeaderBase::EncodeHeaderParameters(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    SipParameterList *pParameterList =
-        (m_pParameters != SIP_NULL) ? m_pParameters->GetParameterList() : SIP_NULL;
+    SipParameterList* pParameterList =
+            (m_pParameters != SIP_NULL) ? m_pParameters->GetParameterList() : SIP_NULL;
 
     if ((bParams == SIP_TRUE) && (pParameterList != SIP_NULL))
     {
-        return pParameterList->EncodeList(ppucCurrPos,SIP_SEMI);
+        return pParameterList->EncodeList(ppCurrPos,SIP_SEMI);
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR **ppucCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    if (m_pValue == SIP_NULL)
+    if (m_pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No header Value to encode", SIP_ZERO, SIP_ZERO);
         return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
     }
 
-    SipPf_Strcpy(*ppucCurrPos, m_pValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    return EncodeHeaderParameters(ppucCurrPos,bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipHeaderBase::DecodeHeaderParameters(SIP_CHAR *pcStart,
-                                               SIP_CHAR *pcEnd, SIP_CHAR cDelimeter)
+SIP_BOOL SipHeaderBase::DecodeHeaderParameters(SIP_CHAR* pStart,
+        SIP_CHAR* pEnd, SIP_CHAR cDelimeter)
 {
     if (m_pParameters == SIP_NULL)
     {
@@ -287,9 +287,9 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(SIP_CHAR *pcStart,
         return SIP_FALSE;
     }
 
-    SipParameterList *pParameterList = m_pParameters->GetParameterList();
+    SipParameterList* pParameterList = m_pParameters->GetParameterList();
 
-    if (pParameterList->DecHdrSipParameterList(pcStart, pcEnd, cDelimeter) == SIP_FALSE)
+    if (pParameterList->DecHdrSipParameterList(pStart, pEnd, cDelimeter) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -297,49 +297,49 @@ SIP_BOOL SipHeaderBase::DecodeHeaderParameters(SIP_CHAR *pcStart,
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR *pucStartPt, SIP_UINT32 uiDecLen)
+SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "zero length buffer", SIP_ZERO, SIP_ZERO);
         return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre = SIP_NULL;
-    SIP_CHAR *pucTempNext = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
     /*First Check the presence of params i.e. ";" and decode if present*/
-    if (sipFindActualPos(pucStartPt, pucEndPt,&pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) == SIP_FALSE)
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
 
-        pucEndPt = pucTempPre;
+        pEndPt = pTempPre;
     }
     /*Now Decode the Value*/
-    SIP_CHAR *pValue = sipCreateString(pucStartPt, pucEndPt);
-    if (SetValue(pValue) == SIP_FALSE)
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
-        if (pValue != SIP_NULL)
+        if (pszValue != SIP_NULL)
         {
-            delete[] pValue;
+            delete[] pszValue;
         }
         return SIP_FALSE;
     }
-    delete[] pValue;
+    delete[] pszValue;
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 iHeaderType, SipHeaderBase *pHeader)
+SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipHeaderBase(*pHeader);
     }
-    return new SipHeaderBase(iHeaderType);
+    return new SipHeaderBase(eHeaderType);
 }
 
 /****************************************************************************
@@ -347,49 +347,47 @@ SipHeaderBase* SipHeaderBase::GetNewObj(SIP_INT32 iHeaderType, SipHeaderBase *pH
 *****************************************************************************/
 SipNameAddrHeader::SipNameAddrHeader(SIP_INT32 eHdrType)
     : SipHeaderBase(eHdrType)
-    , m_pobjNameAddr(SIP_NULL)
+    , m_pNameAddr(SIP_NULL)
 {
-    m_pobjNameAddr = new SipNameAddr();
+    m_pNameAddr = new SipNameAddr();
 }
 
-SipNameAddrHeader::SipNameAddrHeader(const SipNameAddrHeader &objSipNameAddrHeader)
+SipNameAddrHeader::SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader)
     : SipHeaderBase(objSipNameAddrHeader)
-    , m_pobjNameAddr(SIP_NULL)
+    , m_pNameAddr(SIP_NULL)
 {
-    if (objSipNameAddrHeader.m_pobjNameAddr != SIP_NULL)
+    if (objSipNameAddrHeader.m_pNameAddr != SIP_NULL)
     {
-        m_pobjNameAddr = new SipNameAddr(*(objSipNameAddrHeader.m_pobjNameAddr));
-        m_pobjNameAddr->SetParameterComponent(this);
+        m_pNameAddr = new SipNameAddr(*(objSipNameAddrHeader.m_pNameAddr));
+        m_pNameAddr->SetParameterComponent(this);
     }
 }
 
 SipNameAddrHeader::~SipNameAddrHeader()
 {
-    if (m_pobjNameAddr != SIP_NULL)
+    if (m_pNameAddr != SIP_NULL)
     {
-        m_pobjNameAddr->SetParameterComponent(SIP_NULL);
-        m_pobjNameAddr->SipDelete();
+        m_pNameAddr->SetParameterComponent(SIP_NULL);
+        m_pNameAddr->SipDelete();
     }
 }
 
-SIP_BOOL SipNameAddrHeader::SetAddrSpec (
-    SipAddrSpec    *pobjAddrSpec
-)
+SIP_BOOL SipNameAddrHeader::SetAddrSpec(SipAddrSpec* pAddrSpec)
 {
-    if (m_pobjNameAddr == SIP_NULL)
+    if (m_pNameAddr == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    if (m_pobjNameAddr->m_pobjAddrSpec != SIP_NULL)
+    if (m_pNameAddr->m_pAddrSpec != SIP_NULL)
     {
-        (m_pobjNameAddr->m_pobjAddrSpec)->SipDelete();
+        (m_pNameAddr->m_pAddrSpec)->SipDelete();
     }
 
-    m_pobjNameAddr->m_pobjAddrSpec  = pobjAddrSpec;
-    if (pobjAddrSpec)
+    m_pNameAddr->m_pAddrSpec  = pAddrSpec;
+    if (pAddrSpec)
     {
-        pobjAddrSpec->increment();
+        pAddrSpec->increment();
     }
 
     return SIP_TRUE;
@@ -397,67 +395,67 @@ SIP_BOOL SipNameAddrHeader::SetAddrSpec (
 
 SipNameAddr* SipNameAddrHeader::GetNameAddr()
 {
-    if (m_pobjNameAddr != SIP_NULL)
+    if (m_pNameAddr != SIP_NULL)
     {
-        m_pobjNameAddr->increment();
-        return m_pobjNameAddr;
+        m_pNameAddr->increment();
+        return m_pNameAddr;
     }
     return SIP_NULL;
 }
 
-SIP_BOOL  SipNameAddrHeader::IsValidComponent(const SIP_CHAR *pucComponent) const
+SIP_BOOL  SipNameAddrHeader::IsValidComponent(const SIP_CHAR* pszComponent) const
 {
     SIP_INT32 eHdrType = GetHdrType();
     if ((eHdrType == SipHeaderBase::TO) || (eHdrType == SipHeaderBase::FROM) ||
         (eHdrType == SipHeaderBase::CONTACT) || (eHdrType == SipHeaderBase::RECORD_ROUTE) ||
         (eHdrType == SipHeaderBase::ROUTE))
     {
-        if (SipPf_Stricmp(pucComponent, SIP_USER) == 0)
+        if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_PASSWORD) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_PASSWORD) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_HOST) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_HOST) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_PORT) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_PORT) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_USER_PRM) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_USER_PRM) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_METHOD) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
         {
             return SIP_FALSE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_MADDR_PRM) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_TTL_PRM) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_TTL_PRM) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_TRNSPORT_PRM) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_TRNSPORT_PRM) == 0)
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_LR_PRM) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_LR_PRM) == 0)
         {
             return SIP_TRUE;
         }
         else if ((eHdrType == SipHeaderBase::CONTACT) &&
-            (SipPf_Stricmp(pucComponent, SIP_OTHER_PRM) == 0))
+            (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0))
         {
             return SIP_TRUE;
         }
-        else if (SipPf_Stricmp(pucComponent, SIP_HEADERS) == 0)
+        else if (SipPf_Stricmp(pszComponent, SIP_HEADERS) == 0)
         {
             return SIP_TRUE;
         }
@@ -479,116 +477,105 @@ SIP_BOOL SipNameAddrHeader::IsPercentEncHdr() const
     return SIP_FALSE;
 }
 
-SIP_BOOL SipNameAddrHeader::SetNameAddr
-(
-    SipNameAddr         *pobjSipNameAddr
-)
+SIP_BOOL SipNameAddrHeader::SetNameAddr(SipNameAddr* pSipNameAddr)
 {
-
-    if (pobjSipNameAddr == SIP_NULL)
+    if (pSipNameAddr == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    if (m_pobjNameAddr != SIP_NULL)
+    if (m_pNameAddr != SIP_NULL)
     {
-        m_pobjNameAddr->SipDelete();
+        m_pNameAddr->SipDelete();
     }
 
-    pobjSipNameAddr->increment();
-    m_pobjNameAddr = pobjSipNameAddr;
+    pSipNameAddr->increment();
+    m_pNameAddr = pSipNameAddr;
     return SIP_TRUE;
 }
 
-SIP_BOOL SipNameAddrHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    if (m_pobjNameAddr == SIP_NULL)
+    if (m_pNameAddr == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "name address not present",SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "name address not present", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pobjNameAddr->SetParameterComponent(this);
-    if (m_pobjNameAddr->EncodeNameAddr(ppucCurrPos) == SIP_FALSE)
+    m_pNameAddr->SetParameterComponent(this);
+    if (m_pNameAddr->EncodeNameAddr(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode name address fail",SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode name address fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    return EncodeHeaderParameters(ppucCurrPos,bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipNameAddrHeader::DecodeHdr
-(
-    SIP_CHAR    *pucStartPt,
-    SIP_UINT32  uiDecLen
-)
+SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre= SIP_NULL;
-    SIP_CHAR *pucTempNext = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, RIGHT_ANGLE) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, RIGHT_ANGLE) == SIP_TRUE)
     {
-        if (m_pobjNameAddr->DecodeNameAddr(pucStartPt, pucTempPre) == SIP_FALSE)
+        if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
 
-        pucStartPt = pucTempNext;
-        pucTempNext = SIP_NULL;
-        if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempNext, SIP_SEMI) ==  SIP_TRUE)
+        pStartPt = pTempNext;
+        pTempNext = SIP_NULL;
+        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempNext, SIP_SEMI) ==  SIP_TRUE)
         {
-            pucTempNext = pucTempNext + SIP_TWO;
+            pTempNext = pTempNext + SIP_TWO;
         }
     }
     else
     {
-        SIP_INT32 uiLen = uiDecLen;
-        if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+        SIP_INT32 nLen = nDecLen;
+        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
         {
-            uiLen = pucTempPre - pucStartPt + SIP_ONE;
+            nLen = pTempPre - pStartPt + SIP_ONE;
         }
 
 #ifdef SIP_STRICT_PARSING
         if ((GetHdrType() == SipHeaderBase::CONTACT) &&
-            (IsValidAddress(pucStartPt, uiLen) == SIP_FALSE))
+            (IsValidAddress(pStartPt, nLen) == SIP_FALSE))
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Address Spec", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 #endif
-        SipAddrSpec *pobjAddrSpec = new SipAddrSpec();
-        if (pobjAddrSpec == SIP_NULL)
+        SipAddrSpec* pAddrSpec = new SipAddrSpec();
+        if (pAddrSpec == SIP_NULL)
         {
             return SIP_FALSE;
         }
 
         if (IsPercentEncHdr() == SIP_TRUE)
         {
-            pobjAddrSpec->SetParameterComponent(static_cast<IParameterComponent*>(this));
+            pAddrSpec->SetParameterComponent(static_cast<IParameterComponent*>(this));
         }
 
-        if (pobjAddrSpec->DecodeAddrSpec(pucStartPt, uiLen) == SIP_FALSE)
+        if (pAddrSpec->DecodeAddrSpec(pStartPt, nLen) == SIP_FALSE)
         {
-            pobjAddrSpec->SipDelete();
+            pAddrSpec->SipDelete();
             return SIP_FALSE;
         }
-        m_pobjNameAddr->m_pobjAddrSpec = pobjAddrSpec;
+        m_pNameAddr->m_pAddrSpec = pAddrSpec;
     }
 
-    return (pucTempNext != SIP_NULL) ?
-            DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) : SIP_TRUE;
+    return (pTempNext != SIP_NULL) ?
+            DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) : SIP_TRUE;
 }
 
 SipHeaderBase* SipNameAddrHeader::GetNewObj(SIP_INT32 eHdr, SipHeaderBase* pHeader)

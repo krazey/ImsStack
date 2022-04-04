@@ -48,17 +48,14 @@ class SipGeolocationErrorHeader : public SipHeaderBase
         SipGeolocationErrorHeader();
 
         /*Copy constructor*/
-        SipGeolocationErrorHeader(const SipGeolocationErrorHeader &objHeader);
+        SipGeolocationErrorHeader(const SipGeolocationErrorHeader& objHeader);
 
         /*destructor*/
         ~SipGeolocationErrorHeader();
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
         /*Sets */
-        SIP_BOOL SetErrCode
-            (
-             SIP_UINT32    uiErrCode
-            );
+        SIP_BOOL SetErrCode(SIP_UINT32 nErrCode);
 
         /*Gets */
         SIP_UINT32 GetErrCode() const;

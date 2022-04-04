@@ -78,32 +78,24 @@ class SipDateHeader : public SipHeaderBase
 
     private:
         /*Date */
-        SIP_UINT16                m_uiDate;
-        SIP_INT32            m_eMonth;
-        SIP_UINT16            m_uiYear;
+        SIP_UINT16 m_nDate;
+        SIP_INT32 m_eMonth;
+        SIP_UINT16 m_nYear;
 
         /*Time*/
-        SIP_UINT16                m_uiHour;
-        SIP_UINT16                m_uiMin;
-        SIP_UINT16                m_uiSec;
+        SIP_UINT16 m_nHour;
+        SIP_UINT16 m_nMin;
+        SIP_UINT16 m_nSec;
 
-        SIP_INT32            m_eWkDay;
+        SIP_INT32 m_eWkDay;
 
-        SIP_BOOL EncodeWeek(
-                SIP_CHAR     **ppucCurrPos
-                );
+        SIP_BOOL EncodeWeek(SIP_CHAR** ppCurrPos);
 
-        SIP_BOOL EncodeMonth(
-                SIP_CHAR     **ppucCurrPos
-                );
+        SIP_BOOL EncodeMonth(SIP_CHAR** ppCurrPos);
 
-        SIP_BOOL EncodeTime(
-                SIP_CHAR     **ppucCurrPos
-                );
+        SIP_BOOL EncodeTime(SIP_CHAR** ppCurrPos);
 
-        SIP_BOOL EncodeDate(
-                SIP_CHAR     **ppucCurrPos
-                );
+        SIP_BOOL EncodeDate(SIP_CHAR** ppCurrPos);
 
     public:
         /*constructor*/
@@ -112,65 +104,35 @@ class SipDateHeader : public SipHeaderBase
         /*destructor*/
         ~SipDateHeader();
 
-        SipDateHeader(const SipDateHeader &objHeader);
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        SipDateHeader(const SipDateHeader& objHeader);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR    **ppucCurrPos,
-             SIP_BOOL    bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
         /*set methods*/
-        SIP_BOOL SetDate
-            (
-             const SIP_UINT16    usDate
-            );
+        SIP_BOOL SetDate(const SIP_UINT16 nDate);
 
-        SIP_BOOL SetMonth
-            (
-             SIP_INT32        eMonth
-            );
+        SIP_BOOL SetMonth(SIP_INT32 eMonth);
 
-        SIP_BOOL SetYear
-            (
-             const SIP_UINT16    usYear
-            );
+        SIP_BOOL SetYear(const SIP_UINT16 nYear);
 
-        SIP_BOOL SetHour
-            (
-             const SIP_UINT16    usHour
-            );
+        SIP_BOOL SetHour(const SIP_UINT16 nHour);
 
-        SIP_BOOL SetMinute
-            (
-             const SIP_UINT16    usMin
-            );
+        SIP_BOOL SetMinute(const SIP_UINT16 nMin);
 
-        SIP_BOOL SetSecond
-            (
-             const SIP_UINT16    usSec
-            );
+        SIP_BOOL SetSecond(const SIP_UINT16 nSec);
 
-        SIP_BOOL SetWkDay
-            (
-             SIP_INT32    eWkDay
-            );
-
+        SIP_BOOL SetWkDay(SIP_INT32 eWkDay);
 
         /*Get methods*/
         inline SIP_UINT16 GetDate() const
         {
-            return m_uiDate;
+            return m_nDate;
         }
 
         inline SIP_INT32 GetMonth() const
@@ -178,24 +140,24 @@ class SipDateHeader : public SipHeaderBase
             return m_eMonth;
         }
 
-        inline SIP_UINT16  GetYear() const
+        inline SIP_UINT16 GetYear() const
         {
-            return m_uiYear;
+            return m_nYear;
         }
 
         inline SIP_UINT16 GetHour() const
         {
-            return m_uiHour;
+            return m_nHour;
         }
 
         inline SIP_UINT16 GetMinute() const
         {
-            return m_uiMin;
+            return m_nMin;
         }
 
         inline SIP_UINT16 GetSecond() const
         {
-            return m_uiSec;
+            return m_nSec;
         }
 
         inline SIP_INT32 GetWkDay() const

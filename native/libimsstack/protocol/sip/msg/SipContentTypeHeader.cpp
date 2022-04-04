@@ -65,7 +65,7 @@ SipContentTypeHeader::SipContentTypeHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader &objHeader)
+SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszMType(SipPf_Strdup(objHeader.m_pszMType))
     , m_pszMSubType(SipPf_Strdup(objHeader.m_pszMSubType))
@@ -102,11 +102,8 @@ SipContentTypeHeader::~SipContentTypeHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipContentTypeHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipContentTypeHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
@@ -114,15 +111,15 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos,m_pszMType);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszMType);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppucCurrPos);
+    SIP_ENC_SLASH(*ppCurrPos);
 
-    SipPf_Strcpy(*ppucCurrPos,m_pszMSubType);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszMSubType);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    return EncodeHeaderParameters(ppucCurrPos,bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /******************************************************************************
@@ -134,12 +131,9 @@ SIP_BOOL SipContentTypeHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipContentTypeHeader::SetMediaType
-(
- const SIP_CHAR  *pkszMtype
- )
+SIP_BOOL SipContentTypeHeader::SetMediaType(const SIP_CHAR* pszMtype)
 {
-    return SetCharVar(pkszMtype,m_pszMType);
+    return SetCharVar(pszMtype, m_pszMType);
 }
 /******************************************************************************
  * Function name      : SipContentTypeHeader::SetMediaType
@@ -150,12 +144,9 @@ SIP_BOOL SipContentTypeHeader::SetMediaType
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipContentTypeHeader::SetSubMediaType
-(
- const SIP_CHAR  *pkszMSubtype
- )
+SIP_BOOL SipContentTypeHeader::SetSubMediaType(const SIP_CHAR* pszMSubtype)
 {
-    return SetCharVar(pkszMSubtype,m_pszMSubType);
+    return SetCharVar(pszMSubtype, m_pszMSubType);
 }
 
 /******************************************************************************
@@ -169,29 +160,29 @@ SIP_BOOL SipContentTypeHeader::SetSubMediaType
  *****************************************************************************/
 SIP_CHAR* SipContentTypeHeader::GetBoundary()
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SipParameterList *pParameterList = pParameters->GetParameterList();
+    SipParameterList* pParameterList = pParameters->GetParameterList();
 
     if (pParameterList == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SIP_CHAR *pucVal = pParameterList->GetParamValue("boundary");
-    SIP_CHAR *pucStripDquoteVal = StripDQUOTE(pucVal);
-    if (pucStripDquoteVal == SIP_NULL)
+    SIP_CHAR* pszVal = pParameterList->GetParamValue("boundary");
+    SIP_CHAR* pszStripDquoteVal = StripDQUOTE(pszVal);
+    if (pszStripDquoteVal == SIP_NULL)
     {
-        return pucVal;
+        return pszVal;
     }
 
-    delete[] pucVal;
-    return pucStripDquoteVal;
+    delete[] pszVal;
+    return pszStripDquoteVal;
 }
 
 
@@ -205,54 +196,50 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
  * Side Effects      : none
  *****************************************************************************/
 
-SIP_BOOL SipContentTypeHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipContentTypeHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre = SIP_NULL;
-    SIP_CHAR *pucTempNext = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
     /*Find the SLASH*/
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SLASH) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing in Accept", SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SLASH missing in Accept", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszMType = sipCreateString(pucStartPt, pucTempPre);
+    m_pszMType = sipCreateString(pStartPt, pTempPre);
     if (m_pszMType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pucStartPt = pucTempNext;
-    pucTempNext  = SIP_NULL;
-    pucTempPre  = SIP_NULL;
+    pStartPt = pTempNext;
+    pTempNext = SIP_NULL;
+    pTempPre = SIP_NULL;
 
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
     {
-        pucTempPre = pucEndPt;
+        pTempPre = pEndPt;
     }
 
-    m_pszMSubType = sipCreateString(pucStartPt, pucTempPre);
+    m_pszMSubType = sipCreateString(pStartPt, pTempPre);
     if (m_pszMSubType == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (pucTempNext != SIP_NULL)
+    if (pTempNext != SIP_NULL)
     {
-        return DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI);
+        return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
     }
     return SIP_TRUE;
 }
@@ -278,20 +265,21 @@ SIP_BOOL SipContentTypeHeader::IsValidHeader() const
 
 SipHeaderBase* SipContentTypeHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipContentTypeHeader(*reinterpret_cast<SipContentTypeHeader*>(pHeader));
     }
     return new SipContentTypeHeader();
 }
 
-SIP_CHAR* SipContentTypeHeader::StripDQUOTE(const SIP_CHAR  *pszStr)
+SIP_CHAR* SipContentTypeHeader::StripDQUOTE(const SIP_CHAR* pszStr)
 {
-    SIP_INT32  nStrLen  = SipPf_Strlen(pszStr);
+    SIP_INT32 nStrLen = SipPf_Strlen(pszStr);
     if (nStrLen <= SIP_ONE)
     {
         return SIP_NULL;
     }
-    const SIP_CHAR *pEndPtr = pszStr + nStrLen - SIP_ONE;
+    const SIP_CHAR* pEndPtr = pszStr + nStrLen - SIP_ONE;
     if (IS_DQUOTE(*pszStr) && IS_DQUOTE(*pEndPtr))
     {
         return sipCreateString(pszStr + SIP_ONE, pEndPtr - SIP_ONE);

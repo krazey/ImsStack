@@ -58,11 +58,11 @@
 /*!
  * @brief This API encode SIP message and fill transport params
  *
- * @param[in,out] pobjSipMsg        : SIP message object used for forming raw SIP message
- * @param[in]     pobjTranspParam   : For Request message it contains transport information where
+ * @param[in,out] pSipMsg        : SIP message object used for forming raw SIP message
+ * @param[in]     pTranspParam   : For Request message it contains transport information where
  *    request to be send. For response, remote transport information is fetched from the Via header
- * @param[out]     ppobjTranspInfo    : Contains Encoder SIP message and final transport details.
- * @param[out]     pusError        : Appropriate error code as defined in SipEn_ErrorTypes in case
+ * @param[out]     ppTranspInfo    : Contains Encoder SIP message and final transport details.
+ * @param[out]     pnError        : Appropriate error code as defined in SipEn_ErrorTypes in case
  * of failure
  *
  * @return Status indicator
@@ -71,39 +71,34 @@
  * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
  *
  */
-SIP_BOOL SipTransportHandler::OnSendTransp
-(
- IN  SipMessage* pobjSipMsg,
- IN  SipTransportParameter* pobjTranspParam,
- IN  SIP_CHAR* pcSipBuffer,
- IN  SIP_UINT32 uiSipBufferLen,
- OUT SipTransportInfo** ppobjTranspInfo,
- OUT SIP_UINT16* pusError
- )
+SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
+        IN SipTransportParameter* pTranspParam, IN SIP_CHAR* pSipBuffer,
+        IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo,
+        OUT SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
 
     /* Input parameter validation */
-    if ((pobjSipMsg == SIP_NULL) || (pobjTranspParam == SIP_NULL))
+    if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL))
     {
         SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,"SendMsg invalid params",0,0);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pcNewBuffer = new SIP_CHAR[uiSipBufferLen + 1];
-    SipPf_Memcpy(pcNewBuffer, pcSipBuffer, uiSipBufferLen);
-    pcNewBuffer[uiSipBufferLen] = '\0';
+    SIP_CHAR* pcNewBuffer = new SIP_CHAR[nSipBufferLen + 1];
+    SipPf_Memcpy(pcNewBuffer, pSipBuffer, nSipBufferLen);
+    pcNewBuffer[nSipBufferLen] = '\0';
 
-    SipTransportBuffer* pobjTranspBuffer = new SipTransportBuffer(pcNewBuffer, uiSipBufferLen);
+    SipTransportBuffer* pTranspBuffer = new SipTransportBuffer(pcNewBuffer, nSipBufferLen);
 
-    if (pobjTranspBuffer == SIP_NULL)
+    if (pTranspBuffer == SIP_NULL)
     {
         delete[] pcNewBuffer;
         return SIP_FALSE;
     }
 
-    SIP_INT32 eMsgType = pobjSipMsg->GetMsgType();
-    SIP_INT32 eMethod = pobjSipMsg->GetMethodType();
+    SIP_INT32 eMsgType = pSipMsg->GetMsgType();
+    SIP_INT32 eMethod = pSipMsg->GetMethodType();
 
     /*No need to check Message Size Constraint for Response type and ACK which is sent directly */
     if (((SipMessage::REQ_TYPE == eMsgType) && (SipMessage::METHOD_ACK == eMethod)) ||
@@ -112,26 +107,26 @@ SIP_BOOL SipTransportHandler::OnSendTransp
         /* Send Directly to N/W */
 
         SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP,
-                "OnSendTransp: Send Directly to NW",SIP_ZERO,SIP_ZERO);
+                "OnSendTransp: Send Directly to NW", SIP_ZERO, SIP_ZERO);
 
-        SipTransportInfo *pobjTranspInfo = new SipTransportInfo(pobjTranspParam, pobjTranspBuffer);
+        SipTransportInfo* pTranspInfo = new SipTransportInfo(pTranspParam, pTranspBuffer);
 
-        if (pobjTranspInfo == SIP_NULL)
+        if (pTranspInfo == SIP_NULL)
         {
-            delete pobjTranspBuffer;
+            delete pTranspBuffer;
             return SIP_FALSE;
         }
 
-        SipTransportParameter* pobjActualDestParam = new SipTransportParameter(pobjTranspParam);
-        pobjTranspInfo->SetMsgSentTranspParam(pobjActualDestParam);
+        SipTransportParameter* pActualDestParam = new SipTransportParameter(pTranspParam);
+        pTranspInfo->SetMsgSentTranspParam(pActualDestParam);
 
         /* store sip message for retransmit purpose. deleted when transinfo is deleted */
         /* storing can be done outside of this api call also. for failure ack and 100 response txn
         gives sip message */
-        SipMessage* pStoredSipMsg = new SipMessage(*pobjSipMsg);
-        pobjTranspInfo->SetSentSipMsg(pStoredSipMsg);
+        SipMessage* pStoredSipMsg = new SipMessage(*pSipMsg);
+        pTranspInfo->SetSentSipMsg(pStoredSipMsg);
 
-        *ppobjTranspInfo = pobjTranspInfo;
+        *ppTranspInfo = pTranspInfo;
 
         /* No need to check the length */
         return SIP_TRUE;
@@ -140,24 +135,24 @@ SIP_BOOL SipTransportHandler::OnSendTransp
     /* Check for Message Exceed Constraints */
     SIP_BOOL bExceedMTU = SIP_FALSE;
 
-    SipTransportParameter* pobjActualDestParam = new SipTransportParameter(pobjTranspParam);
+    SipTransportParameter* pActualDestParam = new SipTransportParameter(pTranspParam);
 
-    SipTransportInfo *pobjTranspInfo = new SipTransportInfo(pobjTranspParam, pobjTranspBuffer);
+    SipTransportInfo* pTranspInfo = new SipTransportInfo(pTranspParam, pTranspBuffer);
 
-    if (pobjTranspInfo == SIP_NULL)
+    if (pTranspInfo == SIP_NULL)
     {
-        delete pobjActualDestParam;
-        delete pobjTranspBuffer;
+        delete pActualDestParam;
+        delete pTranspBuffer;
         return SIP_FALSE;
     }
-    pobjTranspInfo->SetMsgSentTranspParam(pobjActualDestParam);
-    pobjTranspInfo->SetExceedMTUFlag(bExceedMTU);
+    pTranspInfo->SetMsgSentTranspParam(pActualDestParam);
+    pTranspInfo->SetExceedMTUFlag(bExceedMTU);
 
     // store sip message for retransmit purpose. deleted when transinfo is deleted
-    SipMessage* pStoredSipMsg = new SipMessage(*pobjSipMsg);
-    pobjTranspInfo->SetSentSipMsg(pStoredSipMsg);
+    SipMessage* pStoredSipMsg = new SipMessage(*pSipMsg);
+    pTranspInfo->SetSentSipMsg(pStoredSipMsg);
 
-    *ppobjTranspInfo = pobjTranspInfo;
+    *ppTranspInfo = pTranspInfo;
 
     return SIP_TRUE;
 }
@@ -166,17 +161,17 @@ SIP_BOOL SipTransportHandler::OnSendTransp
  * @brief This API validates via header, txn mandatory headers and check the validiaty of the
  * received message as per the txn state
  *
- * @param[in,out] pobjSipMsg        : Parsed SIP message object of the received SIP RAW message
- * @param[in]    pobjTranspParam   : Transport details from where SIP message is received
+ * @param[in,out] pSipMsg        : Parsed SIP message object of the received SIP RAW message
+ * @param[in]    pTranspParam   : Transport details from where SIP message is received
  * @param[out]    peTranspStatus   : return the status of transport layer after processing.
  * Caller shall take necessary actions based on this status
- * @param[out]    ppobjTxnKey   :  New instance key of txn to which the message belongs
- * @param[out]     ppobjTranspInfo    : transport details of the existing transaction, obj of same
+ * @param[out]    ppTxnKey   :  New instance key of txn to which the message belongs
+ * @param[out]     ppTranspInfo    : transport details of the existing transaction, obj of same
  * ref as in txn obj
- * @param[out]     ppobjUserData    : It contains user data as given by the user. this data is
+ * @param[out]     ppUserData    : It contains user data as given by the user. this data is
  * retrieve from the txn obj for txn not existing it contains NULL.
  * NOTE: User data that is return is of same ref as in txn obj
- * @param[out]     pusError        : Appropriate error code as defined in SipEn_ErrorTypes in case
+ * @param[out]     pnError        : Appropriate error code as defined in SipEn_ErrorTypes in case
  * of failure
  *
  * @return Status indicator
@@ -185,17 +180,11 @@ SIP_BOOL SipTransportHandler::OnSendTransp
  * @retval Appropriate error code as defined in SipEn_ErrorTypes in case of failure
  *
  */
-SIP_BOOL SipTransportHandler::OnRecvTransp
-(
- IN     SipMessage        *pobjSipMsg,
- IN     SipTransportParameter        *pobjTranspParam,
- OUT SIP_INT32      *peTxnStatus,
- OUT SIP_BOOL         *pbTxnExist,
- OUT    SipTxnKey            **ppobjTxnKey,
- OUT    SIP_UINT16        *pusError
- )
+SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
+        IN SipTransportParameter* pTranspParam, OUT SIP_INT32* peTxnStatus,
+        OUT SIP_BOOL* pbTxnExist, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
-    (void) pobjTranspParam;
+    (void) pTranspParam;
 
     /* RFC 3261: Section 18.2.1
        Fetch value of the "sent-by" parameter in the top Via header field
@@ -206,63 +195,63 @@ SIP_BOOL SipTransportHandler::OnRecvTransp
     /* It's handled by the upper layer in the client side. */
 
     /* returns txn key from Sip message */
-    SipTxnKey    *pobjTxnKey = SIP_NULL;
-    if (SIP_FALSE == GetTxnKeyFromSipMsg(pobjSipMsg, &pobjTxnKey, pusError))
+    SipTxnKey* pTxnKey = SIP_NULL;
+    if (SIP_FALSE == GetTxnKeyFromSipMsg(pSipMsg, &pTxnKey, pnError))
     {
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTransp: GetTxnKeyFromSipMsg fail",SIP_ZERO,SIP_ZERO);
+                "OnRecvTransp: GetTxnKeyFromSipMsg fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (pobjTxnKey->GetMsgType() == SipMessage::REQ_TYPE)
+    if (pTxnKey->GetMsgType() == SipMessage::REQ_TYPE)
     {
-        if ((SipPf_Strcmp(ACK_METHOD, pobjTxnKey->GetMethod()) == SIP_EQUALS) ||
-            (SipPf_Strcmp(INVITE_METHOD, pobjTxnKey->GetMethod()) == SIP_EQUALS))
+        if ((SipPf_Strcmp(ACK_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS) ||
+            (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS))
         {
-            pobjTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
         }
         else
         {
-            pobjTxnKey->SetTxnType(SipTxn::NON_INV_SER_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INV_SER_TXN);
         }
     }
     else
     {
-        if (SipPf_Strcmp(INVITE_METHOD, pobjTxnKey->GetMethod()) == SIP_EQUALS)
+        if (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS)
         {
-            pobjTxnKey->SetTxnType(SipTxn::INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::INV_CLI_TXN);
         }
         else
         {
-            pobjTxnKey->SetTxnType(SipTxn::NON_INV_CLI_TXN);
+            pTxnKey->SetTxnType(SipTxn::NON_INV_CLI_TXN);
         }
     }
 
     /* Fetches object from Database[Utility func within txn] */
-    SipTxn     *pobjTxn = SIP_NULL;
-    SIP_BOOL    bTxnExist = SIP_TRUE;
-    if (GetTxnObjFromDb(pobjTxnKey, &pobjTxn, &bTxnExist, pusError) == SIP_FALSE)
+    SipTxn* pTxn = SIP_NULL;
+    SIP_BOOL bTxnExist = SIP_TRUE;
+    if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTransp: GetTxnObjFromDb fail",SIP_ZERO,SIP_ZERO);
+                "OnRecvTransp: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
 
-        delete pobjTxnKey;
+        delete pTxnKey;
         return SIP_FALSE;
     }
 
     *pbTxnExist = bTxnExist;
 
-    if (bTxnExist == SIP_NO )
+    if (bTxnExist == SIP_NO)
     {
-        if (pobjTxnKey->GetMsgType() == SipMessage::RESP_TYPE)
+        if (pTxnKey->GetMsgType() == SipMessage::RESP_TYPE)
         {
             /* Transaction for the response doesn't exist */
 
-            SIP_UINT16 usStatusCode = pobjSipMsg->GetStatusCode();
+            SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
 
             /* In case of retransmitted 2xx for INVITE, return as valid sip message */
-            if ((pobjSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
-                    && SIP_SUCCESSFUL_RESP(usStatusCode))
+            if ((pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
+                    && SIP_SUCCESSFUL_RESP(nStatusCode))
             {
                 *peTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
             }
@@ -277,11 +266,11 @@ SIP_BOOL SipTransportHandler::OnRecvTransp
             *peTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
         }
 
-        *ppobjTxnKey = pobjTxnKey;    // new instance
+        *ppTxnKey = pTxnKey;    // new instance
         return SIP_TRUE;
     }
 
-    *ppobjTxnKey  = pobjTxnKey; // New instance
+    *ppTxnKey = pTxnKey; // New instance
     *peTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* For Both Request and Response Notify Transaction Layer */
@@ -295,23 +284,17 @@ SIP_BOOL SipTransportHandler::OnRecvTransp
  * Preconditions/   :
  * Side Effects     :
  *****************************************************************************/
-SIP_BOOL SipTransportHandler::OnRecvTanspError
-(
- SIP_INT32    eTranspError,
- SipTxnKey            *pobjTxnKey,
- SIP_INT32    *peTxnStatus,
- SipTransportInfo        **ppobjTranspInfo,
- ISipUserData        *pobjUserData,
- SIP_UINT16        *pusError
- )
+SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey* pTxnKey,
+        SIP_INT32* peTxnStatus, SipTransportInfo** ppTranspInfo, ISipUserData* pUserData,
+        SIP_UINT16* pnError)
 {
-    (void)pobjUserData;
+    (void)pUserData;
     (void)eTranspError;
 
     /*Fetches object from Database[Utility func within txn] */
-    SipTxn  *pobjTxn = SIP_NULL;
+    SipTxn* pTxn = SIP_NULL;
     SIP_BOOL bTxnExist = SIP_FALSE;
-    if (GetTxnObjFromDb(pobjTxnKey, &pobjTxn, &bTxnExist, pusError) == SIP_FALSE)
+    if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -320,80 +303,80 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError
     {
         /* Transaction for the response doesn't exist */
         SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: Transaction Not Found",SIP_ZERO,SIP_ZERO);
+                "OnRecvTanspError: Transaction Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pobjTxn->increment();
+    pTxn->increment();
 
-    SipTransportInfo *pobjTranspInfo = pobjTxn->GetTranspInfo();
-    if (pobjTranspInfo == SIP_NULL)
+    SipTransportInfo* pTranspInfo = pTxn->GetTranspInfo();
+    if (pTranspInfo == SIP_NULL)
     {
-        pobjTxn->SipDelete();
+        pTxn->SipDelete();
 
         /*  stack error */
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: sipFetchElement Error",SIP_ZERO,SIP_ZERO);
-        *pusError = ETXN_STACKERROR;
+                "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
+        *pnError = ETXN_STACKERROR;
         return SIP_FALSE;
     }
 
-    SipTransportParameter *pobjMsgSentTransParam = pobjTranspInfo->GetMsgSentTranspParam();
-    if (pobjMsgSentTransParam == SIP_NULL)
+    SipTransportParameter* pMsgSentTransParam = pTranspInfo->GetMsgSentTranspParam();
+    if (pMsgSentTransParam == SIP_NULL)
     {
-        pobjTxn->SipDelete();
+        pTxn->SipDelete();
 
         /*  stack error */
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: sipFetchElement Error",SIP_ZERO,SIP_ZERO);
-        *pusError = ETXN_STACKERROR;
+                "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
+        *pnError = ETXN_STACKERROR;
         return SIP_FALSE;
     }
 
-    SIP_INT32 eTransportType = pobjMsgSentTransParam->GetTranspProtocol();
+    SIP_INT32 eTransportType = pMsgSentTransParam->GetTranspProtocol();
     if (eTransportType == SipTransportInfo::PROTOCOL_INVALID)
     {
-        pobjTxn->SipDelete();
+        pTxn->SipDelete();
 
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
                 "OnRecvTanspError: SipTransportInfo::PROTOCOL_INVALID\n",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_BOOL bExceedMTU = pobjTranspInfo->IsExceedMTU();
+    SIP_BOOL bExceedMTU = pTranspInfo->IsExceedMTU();
     /* Check if Error occurred due to switching to TCP (Message Len Constraint)*/
     if ((bExceedMTU == SIP_TRUE) && (eTransportType == SipTransportInfo::PROTOCOL_TCP))
     {
         /* Switch to previous Transport Information as initially given by stack user */
         /* Change Protocol in Buffer */
         SIP_BOOL bStatus = UpdateViaSipMsg(
-                pobjTranspInfo->GetSentSipMsg(),
-                pobjTranspInfo->GetTranspSipBuffer(),
+                pTranspInfo->GetSentSipMsg(),
+                pTranspInfo->GetTranspSipBuffer(),
                 SipTransportInfo::PROTOCOL_UDP);
         if (bStatus == SIP_FALSE)
         {
-            pobjTxn->SipDelete();
+            pTxn->SipDelete();
 
             SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                    "OnRecvTanspError: sipUpdateViaSipMsg Fails\n",SIP_ZERO,SIP_ZERO);
+                    "OnRecvTanspError: sipUpdateViaSipMsg Fails\n", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        pobjTranspInfo->SetExceedMTUFlag(SIP_FALSE);
+        pTranspInfo->SetExceedMTUFlag(SIP_FALSE);
 
         /* Change Protocol in Transport Information */
-        pobjMsgSentTransParam->setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+        pMsgSentTransParam->setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
 
         *peTxnStatus = SipTxn::STATUS_RETRANSMISSION;
 
-        *ppobjTranspInfo = pobjTranspInfo;
+        *ppTranspInfo = pTranspInfo;
 
-        pobjTxn->SipDelete();
+        pTxn->SipDelete();
         return SIP_TRUE;
     }
 
-    pobjTxn->SipDelete();
+    pTxn->SipDelete();
 
     return SIP_TRUE;
 }
@@ -407,22 +390,22 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError
  *****************************************************************************/
 SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnKey)
 {
-    SIP_UINT16 usError = 0;
-    SipTxnKey* pobjInviteTxnKey = new SipTxnKey(pAckTxnKey, &usError);
+    SIP_UINT16 nError = 0;
+    SipTxnKey* pInviteTxnKey = new SipTxnKey(pAckTxnKey, &nError);
 
-    pobjInviteTxnKey->SetMethod(INVITE_METHOD);
-    pobjInviteTxnKey->RemoveRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH);
+    pInviteTxnKey->SetMethod(INVITE_METHOD);
+    pInviteTxnKey->RemoveRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH);
 
-    SipTxn* pobjTxn = SIP_NULL;
+    SipTxn* pTxn = SIP_NULL;
     SIP_BOOL bTxnExist = SIP_TRUE;
-    if (GetTxnObjFromDb(pobjInviteTxnKey, &pobjTxn, &bTxnExist, &usError) == SIP_FALSE)
+    if (GetTxnObjFromDb(pInviteTxnKey, &pTxn, &bTxnExist, &nError) == SIP_FALSE)
     {
         bTxnExist = SIP_FALSE;
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "IsInviteTxnPresentForAckTxn: GetTxnObjFromDb fail",SIP_ZERO,SIP_ZERO);
+                "IsInviteTxnPresentForAckTxn: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
     }
 
-    delete pobjInviteTxnKey;
+    delete pInviteTxnKey;
 
     return (bTxnExist == SIP_TRUE) ? SIP_TRUE : SIP_FALSE;
 }
@@ -433,19 +416,15 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg
-(
- SipMessage            *pobjSipMsg,
- SipTransportBuffer        *pobjSentBuffer,
- SIP_INT32    eChangeProto
- )
+PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(SipMessage* pSipMsg,
+        SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
 {
-    SIP_CHAR    *pucSipBuffer = pobjSentBuffer->GetSipBuffer();
-    SIP_CHAR *pucTemp = SipPf_Strstr(pucSipBuffer,SIP_VIA_ENC_FORMAT_1);
-    if (pucTemp == SIP_NULL)
+    SIP_CHAR* pSipBuffer = pSentBuffer->GetSipBuffer();
+    SIP_CHAR* pszTemp = SipPf_Strstr(pSipBuffer, SIP_VIA_ENC_FORMAT_1);
+    if (pszTemp == SIP_NULL)
     {
-        pucTemp = SipPf_Strstr(pucSipBuffer,SIP_VIA_ENC_FORMAT_2);
-        if (pucTemp == SIP_NULL)
+        pszTemp = SipPf_Strstr(pSipBuffer, SIP_VIA_ENC_FORMAT_2);
+        if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
         }
@@ -453,47 +432,47 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg
 
     if (eChangeProto == SipTransportInfo::PROTOCOL_TCP)
     {
-        pucTemp = SipPf_Strstr(pucTemp,SIP_VIA_LINE_UDP);
-        if (pucTemp == SIP_NULL)
+        pszTemp = SipPf_Strstr(pszTemp, SIP_VIA_LINE_UDP);
+        if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
         }
         /* Curpos = "/UDP"  */
-        pucTemp = pucTemp + SIP_ONE;
+        pszTemp = pszTemp + SIP_ONE;
 
         /* Curpos = "UDP"  */
         /* Change UDP to TCP */
-        *pucTemp = 'T';
-        pucTemp = pucTemp + SIP_ONE;
-        *pucTemp = 'C';
+        *pszTemp = 'T';
+        pszTemp = pszTemp + SIP_ONE;
+        *pszTemp = 'C';
     }
     else if (eChangeProto == SipTransportInfo::PROTOCOL_UDP)
     {
-        pucTemp = SipPf_Strstr(pucTemp,SIP_VIA_LINE_TCP);
-        if (pucTemp == SIP_NULL)
+        pszTemp = SipPf_Strstr(pszTemp, SIP_VIA_LINE_TCP);
+        if (pszTemp == SIP_NULL)
         {
             return SIP_FALSE;
         }
 
         /* Curpos = "/TCP"  */
-        pucTemp = pucTemp + SIP_ONE;
+        pszTemp = pszTemp + SIP_ONE;
 
         /* Curpos = "TCP"  */
         /* Change TCP to UDP */
-        *pucTemp = 'U';
-        pucTemp = pucTemp + SIP_ONE;
-        *pucTemp = 'D';
+        *pszTemp = 'U';
+        pszTemp = pszTemp + SIP_ONE;
+        *pszTemp = 'D';
     }
     else
     {
         return SIP_FALSE;
     }
 
-    if (pobjSipMsg != SIP_NULL)
+    if (pSipMsg != SIP_NULL)
     {
         /* Update Via Hdr of Sip Message from UDP to TCP */
-        SipViaHeader *pobjViaHdr = (SipViaHeader *)pobjSipMsg->GetHdrObj(SipHeaderBase::VIA);
-        if (pobjViaHdr == SIP_NULL)
+        SipViaHeader* pViaHdr = (SipViaHeader*)pSipMsg->GetHdrObj(SipHeaderBase::VIA);
+        if (pViaHdr == SIP_NULL)
         {
             SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
 
@@ -501,13 +480,13 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg
         }
         if (eChangeProto == SipTransportInfo::PROTOCOL_TCP)
         {
-            pobjViaHdr->SetProtocolName(SIP_TRANSP_TCP);
+            pViaHdr->SetProtocolName(SIP_TRANSP_TCP);
         }
         else
         {
-            pobjViaHdr->SetProtocolName(SIP_TRANSP_UDP);
+            pViaHdr->SetProtocolName(SIP_TRANSP_UDP);
         }
-        pobjViaHdr->SipDelete();
+        pViaHdr->SipDelete();
     }
     return SIP_TRUE;
 }
@@ -518,46 +497,41 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg
-(
- IN        SipMessage    *pobjSipMsg,
- OUT        SipTxnKey        **ppobjTxnKey,
- OUT        SIP_UINT16    *pusError
- )
+PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(IN SipMessage* pSipMsg,
+        OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
-    SIP_INT32     eMsgType     = SipMessage::TYPE_INVALID;
-    SIP_INT32    eMethodType    = SipMessage::METHOD_INVALID;
+    SIP_INT32 eMsgType = SipMessage::TYPE_INVALID;
+    SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    SIP_BOOL bStatus  = CheckTxnMadatoryParams(    pobjSipMsg, &eMsgType,
-            &eMethodType);
+    SIP_BOOL bStatus  = CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType);
     if (bStatus == SIP_FALSE)
     {
         SIP_DEBUG_WARNING ( ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n",SIP_ZERO,SIP_ZERO );
+                "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO );
 
         return SIP_FALSE;
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP,
-            "GetTxnKeyFromSipMsg: eMsgType[%d], Method[%d]",eMsgType,eMethodType);
+    SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg: eMsgType[%d], Method[%d]",
+            eMsgType, eMethodType);
 
-    SipTxnKey *pobjTxnKey = new SipTxnKey(pobjSipMsg, pusError);
-    if (pobjTxnKey == SIP_NULL)
+    SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, pnError);
+    if (pTxnKey == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg:key Creation Fails",SIP_ZERO,SIP_ZERO);
+                "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    else if (*pusError == EERR_MALLOCFAILED)
+    else if (*pnError == EERR_MALLOCFAILED)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg:key Creation Fails",SIP_ZERO,SIP_ZERO);
-        delete pobjTxnKey;
+                "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
+        delete pTxnKey;
         return SIP_FALSE;
     }
 
-    *ppobjTxnKey = pobjTxnKey;
+    *ppTxnKey = pTxnKey;
     return SIP_TRUE;
 }
 
@@ -568,27 +542,22 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb
-(
- IN        SipTxnKey        *pobjTxnKey,
- OUT        SipTxn        **ppobjTxn,
- OUT        SIP_BOOL     *pbTxnExist,
- OUT        SIP_UINT16    *pusError
- )
+PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey,
+        OUT SipTxn** ppTxn, OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
 {
     SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(
-            reinterpret_cast<SIP_VOID*>(pobjTxnKey),
+            reinterpret_cast<SIP_VOID*>(pTxnKey),
             TXN_OPT_FETCH,
             SIP_NULL,
-            reinterpret_cast<SIP_VOID**>(ppobjTxn));
+            reinterpret_cast<SIP_VOID**>(ppTxn));
 
-    if ((bTxnExist == SIP_YES) && (*ppobjTxn == SIP_NULL))
+    if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
         /*  stack error */
-        *pusError = ETXN_STACKERROR;
+        *pnError = ETXN_STACKERROR;
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
                 "GetTxnObjFromDb: Stack Error,Db Status Error\n",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

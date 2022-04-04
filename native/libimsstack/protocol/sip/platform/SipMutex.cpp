@@ -30,7 +30,7 @@
 SipMutex::SipMutex()
     : pMutex(SIP_NULL)
 {
-    pthread_mutex_t *pThreadMutex = new pthread_mutex_t;
+    pthread_mutex_t* pThreadMutex = new pthread_mutex_t;
     if (pThreadMutex != SIP_NULL)
     {
         SIP_INT32 nRet = pthread_mutex_init(pThreadMutex, SIP_NULL);
@@ -48,7 +48,7 @@ SipMutex::SipMutex()
 
 SipMutex::~SipMutex()
 {
-    pthread_mutex_t *pThreadMutex = (pthread_mutex_t *)pMutex;
+    pthread_mutex_t* pThreadMutex = (pthread_mutex_t *)pMutex;
 
     if (pThreadMutex != SIP_NULL)
     {
@@ -59,7 +59,7 @@ SipMutex::~SipMutex()
 
 void SipMutex::Lock()
 {
-    pthread_mutex_t *pThreadMutex = (pthread_mutex_t *)pMutex;
+    pthread_mutex_t* pThreadMutex = (pthread_mutex_t *)pMutex;
 
     if (pThreadMutex == SIP_NULL)
     {
@@ -71,7 +71,7 @@ void SipMutex::Lock()
 
 void SipMutex::TryLock()
 {
-    pthread_mutex_t *pThreadMutex = (pthread_mutex_t *)pMutex;
+    pthread_mutex_t* pThreadMutex = (pthread_mutex_t *)pMutex;
 
     if (pThreadMutex == SIP_NULL)
     {
@@ -83,7 +83,7 @@ void SipMutex::TryLock()
 
 void SipMutex::Unlock()
 {
-    pthread_mutex_t *pThreadMutex = (pthread_mutex_t *)pMutex;
+    pthread_mutex_t* pThreadMutex = (pthread_mutex_t *)pMutex;
 
     if (pThreadMutex == SIP_NULL)
     {

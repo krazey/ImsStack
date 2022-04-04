@@ -51,7 +51,7 @@
 SipCSeqHeader::SipCSeqHeader()
     : SipHeaderBase(SipHeaderBase::CSEQ)
     , m_pszMethod(SIP_NULL)
-    , m_uiSeq(SIP_ZERO)
+    , m_nSeq(SIP_ZERO)
 {
 }
 
@@ -64,10 +64,10 @@ SipCSeqHeader::SipCSeqHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SipCSeqHeader::SipCSeqHeader(const SipCSeqHeader &objHeader)
+SipCSeqHeader::SipCSeqHeader(const SipCSeqHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
-    , m_uiSeq(objHeader.m_uiSeq)
+    , m_nSeq(objHeader.m_nSeq)
 {
 }
 /******************************************************************************
@@ -96,11 +96,7 @@ SipCSeqHeader::~SipCSeqHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SIP_BOOL SipCSeqHeader::EncodeHdr
-(
-    SIP_CHAR   **ppucCurrPos,
-    SIP_BOOL   /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipCSeqHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pszMethod == SIP_NULL)
     {
@@ -108,16 +104,16 @@ SIP_BOOL SipCSeqHeader::EncodeHdr
         return SIP_FALSE;
     }
 
-    SIP_CHAR ucBuf[MAX_CSEQ_LEN];
-    SipPf_Sprintf(ucBuf, (SIP_CHAR*)"%u", m_uiSeq);
+    SIP_CHAR szBuf[MAX_CSEQ_LEN];
+    SipPf_Sprintf(szBuf, (SIP_CHAR*)"%u", m_nSeq);
 
-    SipPf_Strcpy(*ppucCurrPos, ucBuf);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, szBuf);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SP(*ppucCurrPos);
+    SIP_ENC_SP(*ppCurrPos);
 
-    SipPf_Strcpy(*ppucCurrPos, m_pszMethod);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszMethod);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -131,12 +127,9 @@ SIP_BOOL SipCSeqHeader::EncodeHdr
  *
  * Side Effects  : none
  *****************************************************************************/
-SIP_BOOL SipCSeqHeader::SetMethod
-(
- const SIP_CHAR  *pkszMethod
- )
+SIP_BOOL SipCSeqHeader::SetMethod(const SIP_CHAR* pszMethod)
 {
-    return SetCharVar(pkszMethod,m_pszMethod);
+    return SetCharVar(pszMethod, m_pszMethod);
 }
 
 /******************************************************************************
@@ -148,28 +141,24 @@ SIP_BOOL SipCSeqHeader::SetMethod
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipCSeqHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindLWS(pucStartPt,  pucEndPt, &pucTempPre) == SIP_FALSE)
+    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "LWS missing in Cseq", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pszSeq = sipCreateString(pucStartPt, pucTempPre);
+    SIP_CHAR* pszSeq = sipCreateString(pStartPt, pTempPre);
     if (pszSeq == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -178,8 +167,8 @@ SIP_BOOL SipCSeqHeader::DecodeHdr
 
     if (SipPf_Atoi_IsZero(pszSeq) == SIP_FALSE)
     {
-        m_uiSeq = SipPf_Atoi_Unsigned(pszSeq);
-        if ((m_uiSeq > MAX_CSEQ) || (m_uiSeq == SIP_ZERO))
+        m_nSeq = SipPf_Atoi_Unsigned(pszSeq);
+        if ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO))
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
             delete[] pszSeq;
@@ -188,14 +177,14 @@ SIP_BOOL SipCSeqHeader::DecodeHdr
     }
     else
     {
-        m_uiSeq = SIP_ZERO;
+        m_nSeq = SIP_ZERO;
     }
     delete[] pszSeq;
 
-    pucTempPre = pucTempPre + SIP_ONE;
-    pucStartPt = sipSkipFwLWS(pucTempPre, pucEndPt);
+    pTempPre = pTempPre + SIP_ONE;
+    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
 
-    m_pszMethod = sipCreateString(pucStartPt, pucEndPt);
+    m_pszMethod = sipCreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -208,7 +197,7 @@ SIP_BOOL SipCSeqHeader::DecodeHdr
 SIP_BOOL SipCSeqHeader::IsValidHeader() const
 {
     if ((m_pszMethod == SIP_NULL) ||
-        ((m_uiSeq > MAX_CSEQ) || (m_uiSeq == SIP_ZERO)))
+        ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO)))
     {
         return SIP_FALSE;
     }
@@ -217,7 +206,8 @@ SIP_BOOL SipCSeqHeader::IsValidHeader() const
 
 SipHeaderBase* SipCSeqHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipCSeqHeader(*reinterpret_cast<SipCSeqHeader*>(pHeader));
     }
     return new SipCSeqHeader();

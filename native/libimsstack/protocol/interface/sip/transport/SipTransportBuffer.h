@@ -7,35 +7,37 @@ class SipTransportBuffer
 {
 
     /* Raw Message */
-    SIP_CHAR    *m_pucSipBuffer;
-    SIP_UINT32    m_usSipBufferLen;
+    SIP_CHAR* m_pSipBuffer;
+    SIP_UINT32 m_nSipBufferLen;
 
-    SipTransportBuffer& operator=(IN const SipTransportBuffer &objRHS);
-    SipTransportBuffer(IN const SipTransportBuffer &objRHS);
+    SipTransportBuffer& operator=(IN const SipTransportBuffer& objRHS);
+    SipTransportBuffer(IN const SipTransportBuffer& objRHS);
 
     public:
 
     SipTransportBuffer()
-        : m_pucSipBuffer(SIP_NULL)
-        , m_usSipBufferLen(SIP_ZERO)
+        : m_pSipBuffer(SIP_NULL)
+        , m_nSipBufferLen(SIP_ZERO)
     {}
-    SipTransportBuffer(SIP_CHAR* pucSipBuffer, SIP_UINT32 usSipBufferLen)
-        : m_pucSipBuffer(pucSipBuffer)
-        , m_usSipBufferLen(usSipBufferLen)
+    SipTransportBuffer(SIP_CHAR* pSipBuffer, SIP_UINT32 nSipBufferLen)
+        : m_pSipBuffer(pSipBuffer)
+        , m_nSipBufferLen(nSipBufferLen)
     {}
     /* Free Message Buffer */
     virtual ~SipTransportBuffer()
     {
-        if (m_pucSipBuffer != SIP_NULL)
+        if (m_pSipBuffer != SIP_NULL)
         {
-            delete[] m_pucSipBuffer;
+            delete[] m_pSipBuffer;
         }
     }
-    SIP_CHAR* GetSipBuffer() const {
-        return m_pucSipBuffer;
+    SIP_CHAR* GetSipBuffer() const
+    {
+        return m_pSipBuffer;
     }
-    SIP_UINT32 GetSipBufferLen() const{
-        return m_usSipBufferLen;
+    SIP_UINT32 GetSipBufferLen() const
+    {
+        return m_nSipBufferLen;
     }
 };
 

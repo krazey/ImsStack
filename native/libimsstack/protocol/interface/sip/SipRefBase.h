@@ -49,18 +49,20 @@
 class SipRefBase
 {
     protected:
-        SIP_INT16     m_usRefCount;
+        SIP_INT16 m_nRefCount;
     public:
         SipRefBase();
         virtual ~SipRefBase();
-        SIP_VOID     increment();
-        SIP_VOID     decrement();
+        SIP_VOID increment();
+        SIP_VOID decrement();
         virtual SIP_VOID SipDelete();
         /* TEST */ inline SIP_INT16 GetRefCount() const
-        { return m_usRefCount; }
+        {
+            return m_nRefCount;
+        }
     private:
-        SipRefBase& operator=(IN const SipRefBase &objRHS);
-        SipRefBase(IN const SipRefBase &objRHS);
+        SipRefBase& operator=(IN const SipRefBase& objRHS);
+        SipRefBase(IN const SipRefBase& objRHS);
 };
 
 

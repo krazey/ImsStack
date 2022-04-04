@@ -37,220 +37,198 @@
 
 extern SIP_VOID* sip_cbk_createAckRequest(IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData);
 
-static SIP_BOOL InvCliFsm_NullFxn
-(
-    IN     SipTxn        *pobjTxn,
-    IN     SIP_VOID     *pvData,
-    OUT SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_NullFxn(IN SipTxn* pTxn, IN SIP_VOID* pvData, OUT SIP_UINT16* pnError)
 {
-    (void)pvData; (void)pobjTxn;
+    (void)pvData; (void)pTxn;
     SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-            "InvCliFsm_NullFxn: Invalid Handling",SIP_ZERO,SIP_ZERO);
-    *pusError = ETXN_FSMEVENTERROR;
+            "InvCliFsm_NullFxn: Invalid Handling", SIP_ZERO, SIP_ZERO);
+    *pnError = ETXN_FSMEVENTERROR;
     return SIP_FALSE;
 }
 
-static SIP_BOOL sipInvCli_HandleFailureResp
-(
-    IN         SipTxn         *pobjTxn,
-    IN_OUT     SipTxnFsmData *pobjFsmData,
-    OUT        SIP_UINT16     *pusNewTxnState,
-    OUT        SIP_UINT16     *pusError
-)
+static SIP_BOOL sipInvCli_HandleFailureResp(IN SipTxn* pTxn, IN_OUT SipTxnFsmData* pFsmData,
+        OUT SIP_UINT16* pNewTxnState, OUT SIP_UINT16* pnError)
 {
-    SipMessage* pobjSipAckMsg = reinterpret_cast<SipMessage*>(sip_cbk_createAckRequest(
-            pobjFsmData->m_pobjSipMsgIn, pobjTxn->GetUserData()));
+    SipMessage* pSipAckMsg = reinterpret_cast<SipMessage*>(sip_cbk_createAckRequest(
+            pFsmData->m_pSipMsgIn, pTxn->GetUserData()));
 
-    if (pobjSipAckMsg == SIP_NULL)
+    if (pSipAckMsg == SIP_NULL)
     {
-        pobjTxn->PrepareACK(pobjFsmData->m_pobjSipMsgIn, SIP_FALSE, &pobjSipAckMsg);
+        pTxn->PrepareACK(pFsmData->m_pSipMsgIn, SIP_FALSE, &pSipAckMsg);
     }
 
-    if (pobjSipAckMsg == SIP_NULL)
+    if (pSipAckMsg == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "sipInvCli_HandleFailureResp:Failed \n",
-                SIP_ZERO,SIP_ZERO);
+                "sipInvCli_HandleFailureResp:Failed \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    const SipTxnTimerValues& pobjSipTxnTimers = pobjTxn->GetSipTxnTimers();
-    SIP_UINT32 usDurationTD = pobjSipTxnTimers.GetTimerValue(SipTxn::TIMERD);
+    const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
+    SIP_UINT32 nDurationTD = pSipTxnTimers.GetTimerValue(SipTxn::TIMERD);
 
     /* On basis of Transport Start Timer */
-    SIP_INT32 eTranspMsgSentProtocol = pobjTxn->GetMsgSentProto();
+    SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
 
     SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
             "sipInvCli_HandleFailureResp: Transport %d , TimerD: %d",
-            eTranspMsgSentProtocol, usDurationTD);
+            eTranspMsgSentProtocol, nDurationTD);
 
     /* For Unreliable Transport */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pobjTxn->StartTxnTimer(SipTxn::TIMERD, usDurationTD, pusError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMERD, nDurationTD, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "sipInvCli_HandleFailureResp:Failed \n",
-                    SIP_ZERO,SIP_ZERO);
-            delete pobjSipAckMsg;
+                    "sipInvCli_HandleFailureResp:Failed \n", SIP_ZERO, SIP_ZERO);
+            delete pSipAckMsg;
             return SIP_FALSE;
         }
         /* State Transition */
-        *pusNewTxnState = SipTxn::INV_CLI_COMPLETED_ST;
+        *pNewTxnState = SipTxn::INV_CLI_COMPLETED_ST;
     }
     else /* For Relaible Transport */
     {
         /* State Transition for Reliable Transport */
-        *pusNewTxnState = SipTxn::INV_CLI_TERMINATED_ST;
+        *pNewTxnState = SipTxn::INV_CLI_TERMINATED_ST;
     }
 
     /* OUT Paramet Set */
-    pobjFsmData->m_pobjSendSipMsg = pobjSipAckMsg;
+    pFsmData->m_pSendSipMsg = pSipAckMsg;
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_IdleStSendInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTxnKey* pobjNewTxnKey = new SipTxnKey(pobjTxn->GetTxnKey(), pusError);
+    SipTxnKey* pNewTxnKey = new SipTxnKey(pTxn->GetTxnKey(), pnError);
 
-    if ((pobjNewTxnKey == SIP_NULL) || (*pusError == E_ERR_PF_MALLOCFAILED))
+    if ((pNewTxnKey == SIP_NULL) || (*pnError == E_ERR_PF_MALLOCFAILED))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "InvCliFsm_IdleStSendInvReqEvt:pobjNewTxnKey memory fail",SIP_ZERO,SIP_ZERO);
+                "InvCliFsm_IdleStSendInvReqEvt:pNewTxnKey memory fail", SIP_ZERO, SIP_ZERO);
 
-        if (pobjNewTxnKey != SIP_NULL)
+        if (pNewTxnKey != SIP_NULL)
         {
-            delete pobjNewTxnKey;
+            delete pNewTxnKey;
         }
         return SIP_FALSE;
     }
 
-    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pobjNewTxnKey), TXN_OPT_CREATE,
-            SIP_NULL, reinterpret_cast<SIP_VOID**>(&pobjTxn)) == SIP_FALSE)
+    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE,
+            SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
-        delete pobjNewTxnKey;
+        delete pNewTxnKey;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "InvCliFsm_IdleStSendInvReqEvt:Adding Txn into DB Fails \n",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /* TxnObj is added to hash, hence increment ref count */
-    pobjTxn->increment();
+    pTxn->increment();
 
     /* Start Timers
        1. Retx Timer : Retransmission Timer for UDP only
        2. Txn Timer  : Req Timeout Timer for any Transport
      */
-    const SipTxnTimerValues& pobjSipTxnTimers = pobjTxn->GetSipTxnTimers();
-    SIP_UINT32 usDurationT1 = pobjSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
-    SIP_UINT32 usDurationTB = pobjSipTxnTimers.GetTimerValue(SipTxn::TIMERB);
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
-    SipTransportParameter    *pobjTranspParam = pobjFsmData->m_pobjTranspParam;
-    SIP_INT32 eTranspProtocol = pobjTranspParam->GetTranspProtocol();
+    const SipTxnTimerValues& pSipTxnTimers = pTxn->GetSipTxnTimers();
+    SIP_UINT32 nDurationT1 = pSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
+    SIP_UINT32 nDurationTB = pSipTxnTimers.GetTimerValue(SipTxn::TIMERB);
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
+    SipTransportParameter* pTranspParam = pFsmData->m_pTranspParam;
+    SIP_INT32 eTranspProtocol = pTranspParam->GetTranspProtocol();
 
     /* For Unreliable Transport : Start Timer A*/
     if (eTranspProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
-        if (pobjTxn->StartTxnTimer(SipTxn::TIMERA,usDurationT1,pusError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMERA, nDurationT1, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "InvCliFsm_IdleStSendInvReqEvt:StartTxnTimer A:Failed \n",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
 
-            pobjTxn->RemoveFromTxnPool();
+            pTxn->RemoveFromTxnPool();
             return SIP_FALSE;
         }
     }
     else /* For Reliable Transport : Start Timer B*/
     {
-        if (pobjTxn->StartTxnTimer(SipTxn::TIMERB,usDurationTB,pusError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMERB, nDurationTB, pnError) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "StartTxnTimer B:Failed \n",
-                    SIP_ZERO,SIP_ZERO);
+                    "StartTxnTimer B:Failed \n", SIP_ZERO, SIP_ZERO);
 
-            pobjTxn->RemoveFromTxnPool();
+            pTxn->RemoveFromTxnPool();
             return SIP_FALSE;
         }
     }
-    pobjTxn->SetMaxDuration(usDurationTB);
+    pTxn->SetMaxDuration(nDurationTB);
 
     /* Set Userdata into Txn object */
-    if (pobjFsmData->m_pobjUserData != SIP_NULL)
+    if (pFsmData->m_pUserData != SIP_NULL)
     {
-        SIP_VOID        *pvTUdata = pobjFsmData->m_pobjUserData->GetUserData();
-        ISipUserData    *pobjUserData = new ISipUserData(pvTUdata);
-        if (pobjUserData == SIP_NULL)
+        SIP_VOID* pvTUdata = pFsmData->m_pUserData->GetUserData();
+        ISipUserData* pUserData = new ISipUserData(pvTUdata);
+        if (pUserData == SIP_NULL)
         {
-            pobjTxn->RemoveFromTxnPool();
+            pTxn->RemoveFromTxnPool();
             return SIP_FALSE;
         }
-        pobjTxn->SetUserData(pobjUserData);
+        pTxn->SetUserData(pUserData);
     }
 
     /* Fill FSM data for stack manager */
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->bTxnCreated = SIP_TRUE;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->bTxnCreated = SIP_TRUE;
 
     /* State Transition */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_CALLING_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    SipTimeoutData *pobjTimeoutData = (SipTimeoutData *)pvData;
+    SipTimeoutData* pTimeoutData = (SipTimeoutData *)pvData;
 
-    (void)pobjTimeoutData;
+    (void)pTimeoutData;
 
-    SIP_UINT32 usDurationExpired = pobjTxn->GetDurationExpired();
+    SIP_UINT32 nDurationExpired = pTxn->GetDurationExpired();
 
-    const SipTxnTimerValues& objSipTxnTimers = pobjTxn->GetSipTxnTimers();
-    SIP_UINT32 usT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
+    const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
+    SIP_UINT32 nT1Val = objSipTxnTimers.GetTimerValue(SipTxn::TIMER1);
 
-    if (usDurationExpired == 0)
+    if (nDurationExpired == 0)
     {
        //Timer T1 already fired.
-       pobjTxn->IncrDurationExpired(usT1Val);
-       usDurationExpired = usT1Val;
+       pTxn->IncrDurationExpired(nT1Val);
+       nDurationExpired = nT1Val;
     }
 
-    SIP_INT32 eTranspMsgSentProtocol = pobjTxn->GetMsgSentProto();
-    SIP_UINT16 usReTxCount   = pobjTxn->GetReTxCount();
-    SIP_UINT32 uiDuration = SIP_ZERO;
-    SIP_UINT32 usMaxDuration = pobjTxn->GetMaxDuration();
+    SIP_INT32 eTranspMsgSentProtocol = pTxn->GetMsgSentProto();
+    SIP_UINT16 nReTxCount = pTxn->GetReTxCount();
+    SIP_UINT32 nDuration = SIP_ZERO;
+    SIP_UINT32 nMaxDuration = pTxn->GetMaxDuration();
 
     SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "InvCliFSM_TimerA_B_TimeoutEvt: Transport %d, Duration: %d"
-            ,eTranspMsgSentProtocol,usDurationExpired);
+            "InvCliFSM_TimerA_B_TimeoutEvt: Transport %d, Duration: %d",
+            eTranspMsgSentProtocol, nDurationExpired);
 
     /* For Unreliable Transport : Restart Timer */
     if (eTranspMsgSentProtocol == SipTransportInfo::PROTOCOL_UDP)
     {
         /* Check Max Retransmission Limit or Total expired
            time has crossed the Max duration limit or not */
-        if (usDurationExpired >= usMaxDuration)
+        if (nDurationExpired >= nMaxDuration)
         {
             /* Stop Retransmissions : May notify StackUSer on Termination of Txn */
             SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                     "TimerA_B_TimeoutEvt: Txn Ends RextCount %d Duration %d",
-                    usReTxCount,usDurationExpired);
-            pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
-            uiDuration = SIP_ZERO; //Transaction to be timedout immediately.
+                    nReTxCount, nDurationExpired);
+            pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+            nDuration = SIP_ZERO; //Transaction to be timedout immediately.
         }
         else
         {
@@ -258,14 +236,14 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt
             /* RFC 3261:17.1.1.2    Request is retransmitted with
                intervals that double after each transmission.
             */
-            usReTxCount             = usReTxCount + SIP_ONE;
-            SIP_UINT32 uiPow2     = SipNPower(SIP_TWO, usReTxCount);
-            uiDuration = uiPow2 * usT1Val;
+            nReTxCount = nReTxCount + SIP_ONE;
+            SIP_UINT32 nPow2 = SipNPower(SIP_TWO, nReTxCount);
+            nDuration = nPow2 * nT1Val;
 
             //Update the timer duration.
-            if ((usDurationExpired + uiDuration) >= usMaxDuration)
+            if ((nDurationExpired + nDuration) >= nMaxDuration)
             {
-                 uiDuration = usMaxDuration - usDurationExpired;
+                 nDuration = nMaxDuration - nDurationExpired;
             }
         }
    }
@@ -273,71 +251,66 @@ static SIP_BOOL InvCliFsm_CallingStTimerA_B_TimeoutEvt
    {
        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                "TimerA_B_TimeoutEvt: TCP Txn Ends  RextCount %d MaxDuration %d",
-               usReTxCount,usMaxDuration);
+               nReTxCount, nMaxDuration);
        /* Terminate Transaction */
-       pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
-       uiDuration = SIP_ZERO; //Transaction to be timedout immediately.
+       pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+       nDuration = SIP_ZERO; //Transaction to be timedout immediately.
     }
 
     /* Start Timer A with updated Duration */
-    if (uiDuration > SIP_ZERO)
+    if (nDuration > SIP_ZERO)
     {
-        if (pobjTxn->StartTxnTimer(SipTxn::TIMERA,uiDuration,pusError) == SIP_FALSE)
+        if (pTxn->StartTxnTimer(SipTxn::TIMERA, nDuration, pnError) == SIP_FALSE)
         {
            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                   "StartTxnTimer A:Failed \n",
-                   SIP_ZERO,SIP_ZERO);
+                   "StartTxnTimer A:Failed \n", SIP_ZERO, SIP_ZERO);
            return SIP_FALSE;
         }
-        pobjTxn->IncrTxnCount();
-        pobjTxn->IncrDurationExpired(uiDuration);
-        pobjTxn->SetCurrentDuration(uiDuration);
+        pTxn->IncrTxnCount();
+        pTxn->IncrDurationExpired(nDuration);
+        pTxn->SetCurrentDuration(nDuration);
     }
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
 
     /* Stop existing Txn timer */
-    pobjTxn->StopTxnTimer();
+    pTxn->StopTxnTimer();
 
     /* Get user data */
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
 
     /* Fill FSM data for stack manager */
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     // RPR handling for retransmission
-    SipMessage* pobjMsgIn = pobjFsmData->m_pobjSipMsgIn;
-    SIP_INT16 uiStatusCode = SIP_ZERO;
-    SipStatusLine* pobjStatusLine = pobjMsgIn->GetStatusLine();
+    SipMessage* pMsgIn = pFsmData->m_pSipMsgIn;
+    SIP_INT16 nStatusCode = SIP_ZERO;
+    SipStatusLine* pStatusLine = pMsgIn->GetStatusLine();
 
-    if (pobjStatusLine != SIP_NULL)
+    if (pStatusLine != SIP_NULL)
     {
-        pobjStatusLine->GetStatusCode(&uiStatusCode);
-        pobjStatusLine->SipDelete();
+        pStatusLine->GetStatusCode(&nStatusCode);
+        pStatusLine->SipDelete();
     }
 
-    if (uiStatusCode != 100)
+    if (nStatusCode != 100)
     {
-        SIP_BOOL bRSeqExist = pobjMsgIn->HasHeader(SipHeaderBase::RSEQ);
+        SIP_BOOL bRSeqExist = pMsgIn->HasHeader(SipHeaderBase::RSEQ);
 
         if (bRSeqExist == SIP_TRUE)
         {
-            SipTxnKey* pobjRprTxnKey = new SipTxnKey(pobjMsgIn, pusError);
+            SipTxnKey* pRprTxnKey = new SipTxnKey(pMsgIn, pnError);
 
-            if (SipTxnUtil::GetInstance()->AddTxnKey(pobjRprTxnKey) == SIP_FALSE)
+            if (SipTxnUtil::GetInstance()->AddTxnKey(pRprTxnKey) == SIP_FALSE)
             {
-                delete pobjRprTxnKey;
+                delete pRprTxnKey;
 
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                         "InvCliFsm_CallingStRecv1xxRespEvt: RprTxnKey insertion failed",
@@ -347,173 +320,155 @@ static SIP_BOOL InvCliFsm_CallingStRecv1xxRespEvt
     }
 
     /* State Transition */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_PROCEEDING_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_PROCEEDING_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CallingStRecv2xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CallingStRecv2xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
 
     /* Stop existing Txn timer */
-    pobjTxn->StopTxnTimer();
+    pTxn->StopTxnTimer();
 
     /* Get user data */
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
 
     /* Fill FSM data for stack manager */
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-    pobjFsmData->bTxnTerminated = SIP_TRUE;
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->bTxnTerminated = SIP_TRUE;
 
     /* State Transition */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CallingStRecv3xx6xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CallingStRecv3xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
     /* Stop Timer A/B */
-    pobjTxn->StopTxnTimer();
+    pTxn->StopTxnTimer();
 
-    /* Prepare failure ACK message and fill into pobjTxnFsmData.
+    /* Prepare failure ACK message and fill into pTxnFsmData.
        state txn is done in this fxn */
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
-    SIP_UINT16     usNewTxnState = SIP_ZERO;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
+    SIP_UINT16 nNewTxnState = SIP_ZERO;
 
-    if (sipInvCli_HandleFailureResp(pobjTxn, pobjFsmData, &usNewTxnState, pusError) == SIP_FALSE)
+    if (sipInvCli_HandleFailureResp(pTxn, pFsmData, &nNewTxnState, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "InvCliFsm_CallingStRecv3xx6xxRespEvt :Failed \n",
-                SIP_ZERO,SIP_ZERO);
+                "InvCliFsm_CallingStRecv3xx6xxRespEvt :Failed \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /* NOTE:
-       pobjTxnFsmData is updated with failure ACK message that needs to be send to network.
+       pTxnFsmData is updated with failure ACK message that needs to be send to network.
      */
 
-    if (usNewTxnState == SipTxn::INV_CLI_TERMINATED_ST)
+    if (nNewTxnState == SipTxn::INV_CLI_TERMINATED_ST)
     {
-        pobjFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->bTxnTerminated = SIP_TRUE;
     }
 
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* state transition*/
-    pobjTxn->SetTxnState(usNewTxnState);
+    pTxn->SetTxnState(nNewTxnState);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CallingStTranspErrorEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CallingStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
-    (void)pvData ; (void)pobjTxn;
-    pobjTxn->StopTxnTimer();
+    (void)pnError;
+    (void)pvData ; (void)pTxn;
+    pTxn->StopTxnTimer();
 
     /* State Transition */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
+    (void)pnError;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
 
     /* Get user data */
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-    SipMessage *pobjMsgIn   = pobjFsmData->m_pobjSipMsgIn;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    SipMessage* pMsgIn   = pFsmData->m_pSipMsgIn;
 
-    SIP_INT16 uiStatusCode = SIP_ZERO;
-    SipStatusLine* pobjStatusLine = pobjMsgIn->GetStatusLine();
+    SIP_INT16 nStatusCode = SIP_ZERO;
+    SipStatusLine* pStatusLine = pMsgIn->GetStatusLine();
 
-    if (pobjStatusLine != SIP_NULL)
+    if (pStatusLine != SIP_NULL)
     {
-        pobjStatusLine->GetStatusCode(&uiStatusCode);
-        pobjStatusLine->SipDelete();
+        pStatusLine->GetStatusCode(&nStatusCode);
+        pStatusLine->SipDelete();
     }
 
-    if (uiStatusCode != 100)
+    if (nStatusCode != 100)
     {
-        SIP_BOOL bRSeqExist = pobjMsgIn->HasHeader(SipHeaderBase::RSEQ);
+        SIP_BOOL bRSeqExist = pMsgIn->HasHeader(SipHeaderBase::RSEQ);
         if ( bRSeqExist == SIP_TRUE)
         {
-            SipTxnUtil *pObjSipTxnUtil = SipTxnUtil::GetInstance();
-            SipTxnKey *pobjTempTxnKey = new SipTxnKey(pobjMsgIn, pusError);
-            SipTxnKey *pobjINVTxnKey = pObjSipTxnUtil->SearchTxnKey(pobjTempTxnKey);
-            if (pobjINVTxnKey != SIP_NULL)
+            SipTxnUtil* pSipTxnUtil = SipTxnUtil::GetInstance();
+            SipTxnKey* pTempTxnKey = new SipTxnKey(pMsgIn, pnError);
+            SipTxnKey* pINVTxnKey = pSipTxnUtil->SearchTxnKey(pTempTxnKey);
+            if (pINVTxnKey != SIP_NULL)
             {
-                pobjFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
-                if (pobjTempTxnKey != SIP_NULL)
+                pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+                if (pTempTxnKey != SIP_NULL)
                 {
-                    delete pobjTempTxnKey;
-                    pobjTempTxnKey = SIP_NULL;
+                    delete pTempTxnKey;
+                    pTempTxnKey = SIP_NULL;
                 }
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                           "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Retransmitted message.",
-                           SIP_ZERO,SIP_ZERO);
+                        "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Retransmitted message.",
+                        SIP_ZERO, SIP_ZERO);
             }
             else
             {
-                pobjINVTxnKey = pObjSipTxnUtil->SearchTxnKey(pobjTempTxnKey, SIP_FALSE);
-                if (pobjINVTxnKey != SIP_NULL)
+                pINVTxnKey = pSipTxnUtil->SearchTxnKey(pTempTxnKey, SIP_FALSE);
+                if (pINVTxnKey != SIP_NULL)
                 {
-                    SIP_UINT32 nRseq = pobjTempTxnKey->GetRSeq();
-                    delete pobjTempTxnKey;
-                    pobjTempTxnKey = SIP_NULL;
-                    if (pobjINVTxnKey->GetRSeq() + 1 != nRseq)
+                    SIP_UINT32 nRseq = pTempTxnKey->GetRSeq();
+                    delete pTempTxnKey;
+                    pTempTxnKey = SIP_NULL;
+                    if (pINVTxnKey->GetRSeq() + 1 != nRseq)
                     {
-                        pobjFsmData->eTxnStatus = SipTxn::STATUS_STRAY_RESP;
+                        pFsmData->eTxnStatus = SipTxn::STATUS_STRAY_RESP;
                         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                                     "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Stray message.",
-                                     SIP_ZERO,SIP_ZERO);
+                                "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Stray message.",
+                                SIP_ZERO, SIP_ZERO);
                     }
                     else
                     {
-                        pobjINVTxnKey->SetRSeq(nRseq);
-                        pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+                        pINVTxnKey->SetRSeq(nRseq);
+                        pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
                         SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                                     "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Rseq is proper.",
-                                     SIP_ZERO,SIP_ZERO);
+                                "InvCliFsm_ProceedingStSendNon100ProvRespEvt: Rseq is proper.",
+                                SIP_ZERO, SIP_ZERO);
                     }
                 }
                 else
                 {
-                    if (pObjSipTxnUtil->AddTxnKey(pobjTempTxnKey) == SIP_FALSE)
+                    if (pSipTxnUtil->AddTxnKey(pTempTxnKey) == SIP_FALSE)
                     {
-                        delete pobjTempTxnKey;
-                        pobjTempTxnKey = SIP_NULL;
-                        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                                  "InvCliFsm_ProceedingStSendNon100ProvRespEvt: TxnKey insertion failed",
-                               SIP_ZERO,SIP_ZERO);
+                        delete pTempTxnKey;
+                        pTempTxnKey = SIP_NULL;
+                        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "TxnKey insertion failed",
+                                SIP_ZERO, SIP_ZERO);
                     }
-                    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+                    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
                 }
             }
         }
@@ -522,161 +477,128 @@ static SIP_BOOL InvCliFsm_ProceedingStRecv1xxRespEvt
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_ProceedingStRecv2xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_ProceedingStRecv2xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
 
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pobjTxn->GetTxnKey());
+    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
 
     /* Fill FSM data for stack manager */
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
-    pobjFsmData->bTxnTerminated = SIP_TRUE;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->bTxnTerminated = SIP_TRUE;
 
     /* State Transition */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_ProceedingStRecv3xx6xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_ProceedingStRecv3xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    SipTxnUtil::GetInstance()->DeleteTxnKey(pobjTxn->GetTxnKey());
+    SipTxnUtil::GetInstance()->DeleteTxnKey(pTxn->GetTxnKey());
 
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData*) pvData;
-    SIP_UINT16     usNewTxnState = SIP_ZERO;
-    /* Prepare failure ACK message and fill into pobjTxnFsmData.
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SIP_UINT16 nNewTxnState = SIP_ZERO;
+    /* Prepare failure ACK message and fill into pTxnFsmData.
        state txn is done in this fxn */
-    if (sipInvCli_HandleFailureResp(pobjTxn, pobjFsmData, &usNewTxnState, pusError) == SIP_FALSE)
+    if (sipInvCli_HandleFailureResp(pTxn, pFsmData, &nNewTxnState, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "InvCliFsm_ProceedingStRecv3xx6xxRespEvt :Fail",
-                SIP_ZERO,SIP_ZERO);
+                "InvCliFsm_ProceedingStRecv3xx6xxRespEvt :Fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /* NOTE:
-       pobjTxnFsmData is updated with failure ACK message that needs to be send to network.
+       pTxnFsmData is updated with failure ACK message that needs to be send to network.
      */
 
-    if (usNewTxnState == SipTxn::INV_CLI_TERMINATED_ST)
+    if (nNewTxnState == SipTxn::INV_CLI_TERMINATED_ST)
     {
-        pobjFsmData->bTxnTerminated = SIP_TRUE;
+        pFsmData->bTxnTerminated = SIP_TRUE;
     }
 
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* state transition*/
-    pobjTxn->SetTxnState(usNewTxnState);
+    pTxn->SetTxnState(nNewTxnState);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_ProceedingStTranspErrorEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_ProceedingStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
     (void)pvData;
     /* Transition to Terminated State */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CompletedStTimerD_TimeoutEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CompletedStTimerD_TimeoutEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    SipTimeoutData *pobjTimeoutData = (SipTimeoutData *)pvData;
+    SipTimeoutData* pTimeoutData = (SipTimeoutData *)pvData;
 
-    (void)pusError;
-    (void)pobjTimeoutData;
+    (void)pnError;
+    (void)pTimeoutData;
 
     /* Transition to Terminated State */
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CompletedStRecv1xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CompletedStRecv1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData *)pvData;
+    (void)pnError;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData *)pvData;
 
     /* Old response received , simply obsorved the messages*/
 
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_IGNORE_RESP;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->eTxnStatus = SipTxn::STATUS_IGNORE_RESP;
 
     /* old response received. remain in same state*/
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CompletedStRecv3xx6xxRespEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CompletedStRecv3xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
-    SipTxnFsmData *pobjFsmData = (SipTxnFsmData*) pvData;
+    (void)pnError;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
 
     /* This is receive of re-transmitted failure response. Failure ACK shall be sent */
-    pobjFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
-    pobjFsmData->m_pobjOutUserData = pobjTxn->GetUserData();
-    pobjFsmData->m_pobjTranspInfo = pobjTxn->GetTranspInfo();
+    pFsmData->eTxnStatus = SipTxn::STATUS_RETRANSMISSION;
+    pFsmData->m_pOutUserData = pTxn->GetUserData();
+    pFsmData->m_pTranspInfo = pTxn->GetTranspInfo();
 
     /* Remain in same state*/
     return SIP_TRUE;
 }
 
-static SIP_BOOL InvCliFsm_CompletedStTranspErrorEvt
-(
-    SipTxn        *pobjTxn,
-    SIP_VOID     *pvData,
-    SIP_UINT16     *pusError
-)
+static SIP_BOOL InvCliFsm_CompletedStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
+        SIP_UINT16* pnError)
 {
-    (void)pusError;
+    (void)pnError;
     (void)pvData;
 
-    pobjTxn->StopTxnTimer();
-    pobjTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
+    pTxn->StopTxnTimer();
+    pTxn->SetTxnState(SipTxn::INV_CLI_TERMINATED_ST);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL (*gpfSipInvClientTxnFsm[SipTxn::INV_CLI_INVALID_ST+1][SipTxn::INV_CLI_INVALID_EVT+1])
-(
-     SipTxn    *pobjTxn,
-     SIP_VOID    *pvData, /* Event specific data */
-     SIP_UINT16 *pusError
-) =
+SIP_BOOL (*gpfSipInvClientTxnFsm[SipTxn::INV_CLI_INVALID_ST+1][SipTxn::INV_CLI_INVALID_EVT+1]) (
+        SipTxn* pTxn, SIP_VOID* pvData, /* Event specific data */ SIP_UINT16* pnError) =
 {
     /* IDLE State:: S0*/
     {

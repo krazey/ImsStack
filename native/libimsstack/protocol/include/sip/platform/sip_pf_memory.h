@@ -65,17 +65,12 @@ SIP_VOID * SipPf_MallocMemset
  * Description     : This function is use to set memory with new
  * Return type     : SIP_VOID
  * Arguments       : [IN] pvMem_block:Pointer to the memory block to be set
- *                    [IN] uChars:Characters to be set with
+ *                    [IN] cChars:Characters to be set with
  *                    [IN] sztSize:Size of the character
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_VOID SipPf_Memset
-(
- SIP_VOID     *pvMem_block,
- SIP_UCHAR     uChars,
- SIP_SIZE_T     usSize
- );
+SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR cChars, SIP_SIZE_T nSize);
 
 /******************************************************************************
  * Function name   : SipPf_Memcpy
@@ -88,12 +83,7 @@ SIP_VOID SipPf_Memset
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_VOID    SipPf_Memcpy
-(
- SIP_VOID         *pvMem_Dest,
- const SIP_VOID     *pvMem_Source,
- SIP_SIZE_T         usSize
- );
+SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SIZE_T nSize);
 
 /******************************************************************************
  * Function name   : SipPf_Memcmp
@@ -105,12 +95,7 @@ SIP_VOID    SipPf_Memcpy
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_UINT32    SipPf_Memcmp
-(
- const SIP_VOID *pvMem1 ,
- const SIP_VOID *pvMem2,
- SIP_SIZE_T         usSize
- );
+SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize);
 
 
 /******************************************************************************
@@ -121,7 +106,7 @@ SIP_UINT32    SipPf_Memcmp
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_VOID    SipPf_Free(SIP_VOID **ppvMem);
+SIP_VOID SipPf_Free(SIP_VOID** ppvMem);
 
 /******************************************************************************
  * Function name   : SipPf_Realloc
@@ -132,11 +117,7 @@ SIP_VOID    SipPf_Free(SIP_VOID **ppvMem);
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_VOID* SipPf_Realloc
-(
- SIP_VOID *pvMem_ptr,
- SIP_SIZE_T usNew_Size
- );
+SIP_VOID* SipPf_Realloc(SIP_VOID* pvMem_ptr, SIP_SIZE_T nNew_Size);
 
 /****************************************************************************
  * Function name    : SipPf_CleanMalloc
@@ -153,10 +134,7 @@ SIP_VOID* SipPf_Realloc
  *                       updated
  *
  ****************************************************************************/
-SIP_VOID*    SipPf_CleanMalloc
-(
- SIP_SIZE_T     usMemBlockSize
- );
+SIP_VOID* SipPf_CleanMalloc(SIP_SIZE_T nMemBlockSize);
 
 
 #endif /*__SIP_PF_MEMORY_H__*/

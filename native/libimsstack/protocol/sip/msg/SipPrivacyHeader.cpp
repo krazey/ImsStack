@@ -61,18 +61,18 @@ SipPrivacyHeader::SipPrivacyHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader &objHeader)
+SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_objPrivacyList(SipVector<SIP_CHAR*>())
 {
-    SIP_UINT32 usSize = objHeader.m_objPrivacyList.GetSize();
-    for(SIP_UINT32 usCount = SIP_ZERO; usCount < usSize ; usCount++)
+    SIP_UINT32 nSize = objHeader.m_objPrivacyList.GetSize();
+    for(SIP_UINT32 nCount = SIP_ZERO; nCount < nSize ; nCount++)
     {
-        SIP_CHAR *pTempVal = objHeader.m_objPrivacyList.GetAt(usCount);
-        if (pTempVal != SIP_NULL)
+        SIP_CHAR* pszTempVal = objHeader.m_objPrivacyList.GetAt(nCount);
+        if (pszTempVal != SIP_NULL)
         {
-            SIP_CHAR* pobjVal = SipPf_Strdup(pTempVal);
-            m_objPrivacyList.Add(pobjVal);
+            SIP_CHAR* pszVal = SipPf_Strdup(pszTempVal);
+            m_objPrivacyList.Add(pszVal);
         }
     }
 }
@@ -104,30 +104,25 @@ SipPrivacyHeader::~SipPrivacyHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPrivacyHeader::EncodeHdr
-(
-    SIP_CHAR   **ppucCurrPos,
-    SIP_BOOL   /*bParams = SIP_TRUE*/
- )
+SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
+    SIP_UINT32 nCount = m_objPrivacyList.GetSize();
 
-    SIP_UINT32 usCount = m_objPrivacyList.GetSize();
-
-    if (usCount == 0)
+    if (nCount == 0)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty privacy values", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    for(SIP_UINT32 usIndex = SIP_ZERO; usIndex < usCount; usIndex++)
+    for(SIP_UINT32 nIndex = SIP_ZERO; nIndex < nCount; nIndex++)
     {
-        SIP_CHAR *pucPrivacy = m_objPrivacyList.GetAt(usIndex);
-        if (usIndex != SIP_ZERO)
+        SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(nIndex);
+        if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_SEMI(*ppucCurrPos);
+            SIP_ENC_SEMI(*ppCurrPos);
         }
-        SipPf_Strcpy(*ppucCurrPos, pucPrivacy);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
+        SipPf_Strcpy(*ppCurrPos, pszPrivacy);
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
     return SIP_TRUE;
 }
@@ -143,8 +138,8 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr
  *****************************************************************************/
 /*SIP_BOOL SipPrivacyHeader::DecodeHdr
   (
-  SIP_CHAR    *pucStartPt,
-  SIP_UINT32  uiDecLen
+  SIP_CHAR   * pStartPt,
+  SIP_UINT32  nDecLen
   )
   {
   return SIP_TRUE;
@@ -160,15 +155,12 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPrivacyHeader::AddPrivacy
-(
- const SIP_CHAR  *pszPrivacy
- )
+SIP_BOOL SipPrivacyHeader::AddPrivacy(const SIP_CHAR* pszPrivacy)
 {
-    SIP_CHAR* pcPrivacy =  SIP_NULL;
-    if (SetCharVar(pszPrivacy,pcPrivacy) == SIP_TRUE)
+    SIP_CHAR* pszTempPrivacy = SIP_NULL;
+    if (SetCharVar(pszPrivacy, pszTempPrivacy) == SIP_TRUE)
     {
-        return ((m_objPrivacyList.Add(pcPrivacy) >= 0) ? SIP_TRUE : SIP_FALSE);
+        return ((m_objPrivacyList.Add(pszTempPrivacy) >= 0) ? SIP_TRUE : SIP_FALSE);
     }
     return SIP_FALSE;
 }
@@ -182,37 +174,33 @@ SIP_BOOL SipPrivacyHeader::AddPrivacy
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPrivacyHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*"Privacy" HCOLON priv-value *(";" priv-value)*/
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPrivacyHeader::DecodeHdr:Privacy Value Missing",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    while(pucStartPt < pucEndPt)
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    while(pStartPt < pEndPt)
     {
-        SIP_CHAR *pucTempPos= SIP_NULL;
+        SIP_CHAR* pTempPos= SIP_NULL;
 
-        if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SIP_SEMI) == SIP_FALSE)
+        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
         {
-            pucTempPos = pucEndPt;
+            pTempPos = pEndPt;
         }
 
-        SIP_CHAR *pszPrivacy = sipCreateString(pucStartPt, pucTempPos);
+        SIP_CHAR* pszPrivacy = sipCreateString(pStartPt, pTempPos);
         if (pszPrivacy == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipPrivacyHeader::DecodeHdr:Memory Allocation failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
@@ -220,24 +208,24 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipPrivacyHeader::DecodeHdr:Adding in list failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             delete[] pszPrivacy;
             return SIP_FALSE;
         }
 
-        if (pucTempPos == pucEndPt)
+        if (pTempPos == pEndPt)
         {
             break;
         }
         else
         {
-            pucStartPt = pucTempPos + SIP_TWO;
-            pucStartPt = sipSkipFwLWS(pucStartPt, pucEndPt);
-            if (pucStartPt > pucEndPt)
+            pStartPt = pTempPos + SIP_TWO;
+            pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+            if (pStartPt > pEndPt)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "SipParameterList::DecHdrSipParameterList: No Parameter Present",
-                        SIP_ZERO,SIP_ZERO);
+                        SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
         }
@@ -248,7 +236,8 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr
 
 SipHeaderBase* SipPrivacyHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPrivacyHeader(*reinterpret_cast<SipPrivacyHeader*>(pHeader));
     }
     return new SipPrivacyHeader();

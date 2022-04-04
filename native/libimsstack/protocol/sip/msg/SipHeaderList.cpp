@@ -74,23 +74,23 @@ SipHeaderList::SipHeaderList(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderList::SipHeaderList(const SipHeaderList &objHeaderList)
+SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList)
     : SipHeaderBase(objHeaderList)
 {
 
-    SIP_UINT32 usSize = objHeaderList.m_headerList.GetSize();
-    for (SIP_UINT32 usCount = SIP_ZERO; usCount < usSize ; usCount++)
+    SIP_UINT32 nSize = objHeaderList.m_headerList.GetSize();
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize ; nCount++)
     {
-        SipHeaderBase *pobjOldHdrBase = objHeaderList.m_headerList.GetAt(usCount);
-        if (pobjOldHdrBase != SIP_NULL)
+        SipHeaderBase* pOldHdrBase = objHeaderList.m_headerList.GetAt(nCount);
+        if (pOldHdrBase != SIP_NULL)
         {
-            SipHeaderBase* pobjNewHdrBase = GetListObj(pobjOldHdrBase);
-            if (pobjNewHdrBase != SIP_NULL)
+            SipHeaderBase* pNewHdrBase = GetListObj(pOldHdrBase);
+            if (pNewHdrBase != SIP_NULL)
             {
-                if (m_headerList.Add(pobjNewHdrBase) < SIP_ZERO)
+                if (m_headerList.Add(pNewHdrBase) < SIP_ZERO)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list fail", SIP_ZERO, SIP_ZERO);
-                    pobjNewHdrBase->SipDelete();
+                    pNewHdrBase->SipDelete();
                 }
             }
             else
@@ -115,7 +115,7 @@ SipHeaderList::~SipHeaderList()
 {
     while(m_headerList.IsEmpty() != SIP_TRUE)
     {
-        SipHeaderBase *pHeaderBase = m_headerList.Top();
+        SipHeaderBase* pHeaderBase = m_headerList.Top();
         pHeaderBase->SipDelete();
         m_headerList.Pop();
     }
@@ -130,13 +130,9 @@ SipHeaderList::~SipHeaderList()
  *
  * Side Effects      : none
  *****************************************************************************/
- SIP_BOOL SipHeaderList::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams/*= SIP_TRUE*/
- )
+SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams/*= SIP_TRUE*/)
 {
-    return EncodeHdr(ppucCurrPos, bParams, ESIPMSGOPT_NONE);
+    return EncodeHdr(ppCurrPos, bParams, ESIPMSGOPT_NONE);
 }
 
 /******************************************************************************
@@ -148,12 +144,7 @@ SipHeaderList::~SipHeaderList()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaderList::EncodeHdr
-(
-SIP_CHAR    **ppucCurrPos,
-SIP_BOOL      bParams,
-SIP_UINT32    uiMsgOptions
-)
+SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
 {
     if (m_headerList.IsEmpty() == SIP_TRUE)
     {
@@ -161,57 +152,57 @@ SIP_UINT32    uiMsgOptions
         return SIP_FALSE;
     }
 
-    SipHeaderBase* pstHdrObj = m_headerList.GetAt(SIP_ZERO);
+    SipHeaderBase* pHeader = m_headerList.GetAt(SIP_ZERO);
 
-    if (pstHdrObj == SIP_NULL)
+    if (pHeader == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "pstHdrObj is NULL",SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "pHeader is NULL", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (pstHdrObj->EncodeHdr(ppucCurrPos, bParams) == SIP_FALSE)
+    if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_UINT32 usSize = m_headerList.GetSize();
+    SIP_UINT32 nSize = m_headerList.GetSize();
 
     /*Encoding of Next header elements in LIst*/
-    for (SIP_UINT32 usCount = SIP_ONE; usCount < usSize; usCount++)
+    for (SIP_UINT32 nCount = SIP_ONE; nCount < nSize; nCount++)
     {
-        pstHdrObj = m_headerList.GetAt(usCount);
-        if (pstHdrObj == SIP_NULL)
+        pHeader = m_headerList.GetAt(nCount);
+        if (pHeader == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "pstHdrObj is NULL", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "pHeader is NULL", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pstHdrObj->GetHdrType() == SipHeaderBase::UNKNOWN)
+        if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
         {
-            SIP_ENC_CRLF(*ppucCurrPos);
+            SIP_ENC_CRLF(*ppCurrPos);
         }
         /*case of Multiple line encoding*/
-        else if ((uiMsgOptions & ESIPMSGOPT_ENCMULTILINE) == ESIPMSGOPT_ENCMULTILINE)
+        else if ((nMsgOptions & ESIPMSGOPT_ENCMULTILINE) == ESIPMSGOPT_ENCMULTILINE)
         {
-            SIP_ENC_CRLF(*ppucCurrPos);
-            if ((uiMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
+            SIP_ENC_CRLF(*ppCurrPos);
+            if ((nMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
             {
                 SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "ShortForm Hdr", SIP_ZERO, SIP_ZERO);
-                sipEncodeShortHdrName(pstHdrObj->GetHdrType(), ppucCurrPos);
+                sipEncodeShortHdrName(pHeader->GetHdrType(), ppCurrPos);
             }
             else
             {
-                SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "Fullform Hdr",SIP_ZERO,SIP_ZERO);
-                sipEncodeHdrName(pstHdrObj->GetHdrType(), ppucCurrPos, uiMsgOptions);
+                SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "Fullform Hdr", SIP_ZERO, SIP_ZERO);
+                sipEncodeHdrName(pHeader->GetHdrType(), ppCurrPos, nMsgOptions);
             }
         }
-        else if (usCount < usSize)
+        else if (nCount < nSize)
         {
-            SIP_ENC_COMMA(*ppucCurrPos);
+            SIP_ENC_COMMA(*ppCurrPos);
         }
 
-        if (pstHdrObj->EncodeHdr(ppucCurrPos, bParams) == SIP_FALSE)
+        if (pHeader->EncodeHdr(ppCurrPos, bParams) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -243,10 +234,10 @@ SipHeaderBase* SipHeaderList::GetListObj()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase*pobjHdr)
+SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase*pHdr)
 {
     SIP_INT32 eHdrType = GetHdrType();
-    return gaFactoryArray[eHdrType](eHdrType,pobjHdr);
+    return gaFactoryArray[eHdrType](eHdrType, pHdr);
 }
 
 /******************************************************************************
@@ -258,14 +249,14 @@ SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase*pobjHdr)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pObj)
+SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pHeader)
 {
-    if (m_headerList.Add(pObj) < SIP_ZERO)
+    if (m_headerList.Add(pHeader) < SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Adding in list failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pObj->increment();
+    pHeader->increment();
     return SIP_TRUE;
 }
 
@@ -278,15 +269,15 @@ SIP_BOOL SipHeaderList::AddHeader(SipHeaderBase* pObj)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaderList::InsertHdrAtPos(SipHeaderBase* pObj,SIP_UINT32 nIndex)
+SIP_BOOL SipHeaderList::InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex)
 {
     if (nIndex > m_headerList.GetSize())
     {
         return SIP_FALSE;
     }
 
-    m_headerList.InsertAt(pObj,nIndex);
-    pObj->increment();
+    m_headerList.InsertAt(pHeader, nIndex);
+    pHeader->increment();
     return SIP_TRUE;
 }
 
@@ -303,7 +294,7 @@ void SipHeaderList::RemoveHdr(SIP_UINT32 nIndex)
 {
     if (nIndex < m_headerList.GetSize())
     {
-        SipHeaderBase *pHeaderBase = m_headerList.GetAt(nIndex);
+        SipHeaderBase* pHeaderBase = m_headerList.GetAt(nIndex);
         pHeaderBase->SipDelete();
         m_headerList.RemoveAt(nIndex);
     }
@@ -318,20 +309,20 @@ void SipHeaderList::RemoveHdr(SIP_UINT32 nIndex)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 usIndex)
+SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
 {
-    if (m_headerList.GetSize() < usIndex)
+    if (m_headerList.GetSize() < nIndex)
     {
         return SIP_NULL;
     }
 
-    SipHeaderBase *pobjHdr = m_headerList.GetAt(usIndex);
-    if (pobjHdr == SIP_NULL)
+    SipHeaderBase* pHdr = m_headerList.GetAt(nIndex);
+    if (pHdr == SIP_NULL)
     {
         return SIP_NULL;
     }
-    pobjHdr->increment();
-    return pobjHdr;
+    pHdr->increment();
+    return pHdr;
 }
 
 /******************************************************************************
@@ -343,53 +334,49 @@ SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 usIndex)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaderList::DecodeHdr
-(
- SIP_CHAR        *pucStartPt,
- SIP_UINT32     uiDecLen
- )
+SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO )
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return gHeaderAttributes[GetHdrType()][HEADER_EMPTY_BODY_ALLOWED];
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    while (pucStartPt <= pucEndPt)
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    while (pStartPt <= pEndPt)
     {
-        SIP_CHAR *pucTempPre= SIP_NULL;
-        SIP_CHAR *pucTempNext= SIP_NULL;
+        SIP_CHAR* pTempPre = SIP_NULL;
+        SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, COMMA) == SIP_FALSE)
+        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, COMMA) == SIP_FALSE)
         {
-            pucTempPre = pucEndPt;
-            pucTempNext = pucEndPt;
+            pTempPre = pEndPt;
+            pTempNext = pEndPt;
         }
 
-        SipHeaderBase *pobjHdrBase = GetListObj();
-        if (pobjHdrBase == SIP_NULL)
+        SipHeaderBase* pHdrBase = GetListObj();
+        if (pHdrBase == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        SIP_UINT32 uiLen = pucTempPre - pucStartPt + SIP_ONE;
-        if (pobjHdrBase->DecodeHdr(pucStartPt,uiLen) == SIP_FALSE)
+        SIP_UINT32 nLen = pTempPre - pStartPt + SIP_ONE;
+        if (pHdrBase->DecodeHdr(pStartPt, nLen) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Decoding Fail", SIP_ZERO, SIP_ZERO);
-            pobjHdrBase->SipDelete();
+            pHdrBase->SipDelete();
             return SIP_FALSE;
         }
 
-        if (AddHeader(pobjHdrBase) == SIP_FALSE)
+        if (AddHeader(pHdrBase) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Failed", SIP_ZERO, SIP_ZERO);
-            pobjHdrBase->SipDelete();//giri 25dec
+            pHdrBase->SipDelete();
             return SIP_FALSE;
         }
-        pobjHdrBase->SipDelete();
-        pucStartPt = (pucTempNext == pucEndPt) ? (pucTempNext + SIP_ONE) : pucTempNext;
+        pHdrBase->SipDelete();
+        pStartPt = (pTempNext == pEndPt) ? (pTempNext + SIP_ONE) : pTempNext;
     }
 
     return SIP_TRUE;
@@ -404,7 +391,7 @@ SIP_BOOL SipHeaderList::DecodeHdr
  * Side Effects      : none
  *****************************************************************************/
 
-SipHeaderBase* SipHeaderList:: GetNewListObj(SIP_INT32 eHdr, SipHeaderBase *pHeaderList)
+SipHeaderBase* SipHeaderList::GetNewListObj(SIP_INT32 eHdr, SipHeaderBase* pHeaderList)
 {
     if (pHeaderList != SIP_NULL)
     {

@@ -49,26 +49,26 @@ class SipUtil
         SipUtil();
         virtual ~SipUtil();
 
-        SIP_VOID RegisterTimer(ISipTimerUtil    *pObjTimerUtil);
-        SIP_VOID RegisterLogger(ISipLoggerUtil    *pObjLoggerUtil);
-        SIP_VOID RegisterNetwork(ISipNetworkUtil     *pObjNwUtil);
-        SIP_VOID RegisterTxnListener(ISipTxnListener *pobjTxnListener);
+        SIP_VOID RegisterTimer(ISipTimerUtil* pTimerUtil);
+        SIP_VOID RegisterLogger(ISipLoggerUtil* pLoggerUtil);
+        SIP_VOID RegisterNetwork(ISipNetworkUtil* pNwUtil);
+        SIP_VOID RegisterTxnListener(ISipTxnListener* pTxnListener);
         ISipTimerUtil* GetTimer();
         ISipLoggerUtil* GetLogger();
         ISipNetworkUtil* GetNetwork();
         ISipTxnListener* GetTxnListener();
 
     private:
-        ISipTimerUtil    *m_pObjTimerUtil;
-        ISipLoggerUtil    *m_pObjLoggerUtil;
-        ISipNetworkUtil    *m_pObjNetworkUtil;
-        ISipTxnListener *m_pObjTxnListener;
+        ISipTimerUtil* m_pTimerUtil;
+        ISipLoggerUtil* m_pLoggerUtil;
+        ISipNetworkUtil* m_pNetworkUtil;
+        ISipTxnListener* m_pTxnListener;
 
         /*******************************************************************
           Private Member Functions
          ********************************************************************/
-        SipUtil& operator=(IN const SipUtil &objRHS);
-        SipUtil(IN const SipUtil &objRHS);
+        SipUtil& operator=(IN const SipUtil& objRHS);
+        SipUtil(IN const SipUtil& objRHS);
 };
 
 

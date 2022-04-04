@@ -41,54 +41,48 @@
  *****************************************************************************/
 SipAuthInfoHeader::SipAuthInfoHeader()
     : SipHeaderBase(SipHeaderBase::AUTHENTICATION_INFO)
-    , m_pobjAiInfo(SIP_NULL)
+    , m_pAiInfo(SIP_NULL)
 {
 }
-SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader &objHeader)
+SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_pobjAiInfo(SIP_NULL)
+    , m_pAiInfo(SIP_NULL)
 {
-    m_pobjAiInfo = new SipNameValue(*(objHeader.m_pobjAiInfo));
+    m_pAiInfo = new SipNameValue(*(objHeader.m_pAiInfo));
 }
 
 SipAuthInfoHeader::~SipAuthInfoHeader()
 {
-    if (m_pobjAiInfo != SIP_NULL) {
-        m_pobjAiInfo->SipDelete();
+    if (m_pAiInfo != SIP_NULL)
+    {
+        m_pAiInfo->SipDelete();
     }
 }
 
-SIP_BOOL   SipAuthInfoHeader::EncodeHdr
-(
-    SIP_CHAR   **ppucCurrPos,
-    SIP_BOOL   /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (m_pobjAiInfo == SIP_NULL)
+    if (m_pAiInfo == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Auth info missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SIP_CHAR    *pucMsgCurrPtr  =  *ppucCurrPos;
-    SIP_BOOL bStatus = m_pobjAiInfo->EncodeFromList(&pucMsgCurrPtr);
+    SIP_CHAR* pMsgCurrPtr = *ppCurrPos;
+    SIP_BOOL bStatus = m_pAiInfo->EncodeFromList(&pMsgCurrPtr);
     if (bStatus == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value Encode fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    *ppucCurrPos = pucMsgCurrPtr;
+    *ppCurrPos = pMsgCurrPtr;
 
     return bStatus;
 }
 
-const SIP_CHAR* SipAuthInfoHeader::GetAiInfoVal
-(
- SIP_UINT32   usPos /*default value is zero*/
-)
+const SIP_CHAR* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nPos /*default value is zero*/)
 {
-    if ((m_pobjAiInfo != SIP_NULL) && (usPos < m_pobjAiInfo->m_valueList.GetSize()))
+    if ((m_pAiInfo != SIP_NULL) && (nPos < m_pAiInfo->m_valueList.GetSize()))
     {
-        return m_pobjAiInfo->m_valueList.GetAt(usPos);
+        return m_pAiInfo->m_valueList.GetAt(nPos);
     }
     return SIP_NULL;
 }
@@ -102,21 +96,17 @@ const SIP_CHAR* SipAuthInfoHeader::GetAiInfoVal
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipAuthInfoHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    m_pobjAiInfo = new SipNameValue(GetHdrType());
-    if (m_pobjAiInfo == SIP_NULL)
+    m_pAiInfo = new SipNameValue(GetHdrType());
+    if (m_pAiInfo == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    if (m_pobjAiInfo->DecHdrNameVal(pucStartPt, pucEndPt) == SIP_FALSE)
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    if (m_pAiInfo->DecHdrNameVal(pStartPt, pEndPt) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decoding fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -125,9 +115,10 @@ SIP_BOOL SipAuthInfoHeader::DecodeHdr
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipAuthInfoHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipAuthInfoHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipAuthInfoHeader(*reinterpret_cast<SipAuthInfoHeader*>(pHeader));
     }
     return new SipAuthInfoHeader();

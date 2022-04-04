@@ -48,36 +48,21 @@ class SipHeaderList : public SipHeaderBase
 
     public:
         SipHeaderList(SIP_INT32 eHdrType);
-        SipHeaderList(const SipHeaderList &objHeaderList);
+        SipHeaderList(const SipHeaderList& objHeaderList);
         ~SipHeaderList();
-        static SipHeaderBase* GetNewListObj
-            (
-             SIP_INT32,
-             SipHeaderBase *
-            );
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR    **ppucCurrPos,
-             SIP_BOOL      bParams,
-             SIP_UINT32    uiMsgOptions
-            );
+        static SipHeaderBase* GetNewListObj(SIP_INT32 eHdr, SipHeaderBase *pHeader);
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
-        SipHeaderBase* GetObj(SIP_UINT32 usIndex);
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions);
+
+        SipHeaderBase* GetObj(SIP_UINT32 nIndex);
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_UINT32     uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
         SipHeaderBase* GetListObj();
-        SipHeaderBase* GetListObj(SipHeaderBase*pobjHdr);
-        SIP_BOOL AddHeader(SipHeaderBase* pObj);
-        SIP_BOOL InsertHdrAtPos(SipHeaderBase* pObj, SIP_UINT32 nIndex);
+        SipHeaderBase* GetListObj(SipHeaderBase*pHeader);
+        SIP_BOOL AddHeader(SipHeaderBase* pHeader);
+        SIP_BOOL InsertHdrAtPos(SipHeaderBase* pHeader, SIP_UINT32 nIndex);
         void RemoveHdr(SIP_UINT32 nIndex);
 
         SIP_BOOL IsOptionalValHdr() const;

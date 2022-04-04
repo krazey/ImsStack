@@ -66,7 +66,7 @@ SipGeolocationRoutingHeader::SipGeolocationRoutingHeader()
  * Side Effects      : none
  *****************************************************************************/
 SipGeolocationRoutingHeader::SipGeolocationRoutingHeader(
-        const SipGeolocationRoutingHeader &objHeader)
+        const SipGeolocationRoutingHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pGeoLocationRoutingList(SIP_NULL)
 {
@@ -87,7 +87,8 @@ SipGeolocationRoutingHeader::SipGeolocationRoutingHeader(
  *****************************************************************************/
 SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader()
 {
-    if (m_pGeoLocationRoutingList != SIP_NULL) {
+    if (m_pGeoLocationRoutingList != SIP_NULL)
+    {
         m_pGeoLocationRoutingList->SipDelete();
     }
 }
@@ -101,11 +102,8 @@ SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pGeoLocationRoutingList == SIP_NULL)
     {
@@ -113,16 +111,12 @@ SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr
         return SIP_FALSE;
     }
 
-    return m_pGeoLocationRoutingList->EncodeFromList(ppucCurrPos);
+    return m_pGeoLocationRoutingList->EncodeFromList(ppCurrPos);
 }
 
-SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -135,16 +129,16 @@ SIP_BOOL SipGeolocationRoutingHeader::DecodeHdr
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    return m_pGeoLocationRoutingList->DecHdrNameVal(pucStartPt, pucEndPt);
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    return m_pGeoLocationRoutingList->DecHdrNameVal(pStartPt, pEndPt);
 }
 
-SipHeaderBase* SipGeolocationRoutingHeader::GetNewObj(SIP_INT32 /*eHdr*/,
-                                                      SipHeaderBase* pHeader)
+SipHeaderBase* SipGeolocationRoutingHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipGeolocationRoutingHeader(
-            *reinterpret_cast<SipGeolocationRoutingHeader*>(pHeader));
+                *reinterpret_cast<SipGeolocationRoutingHeader*>(pHeader));
     }
     return new SipGeolocationRoutingHeader();
 }

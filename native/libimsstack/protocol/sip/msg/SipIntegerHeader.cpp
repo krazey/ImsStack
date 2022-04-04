@@ -7,8 +7,8 @@
 
 #define MAX_LEN 20
 
-SipIntegerHeader::SipIntegerHeader(SIP_INT32 iHeaderType)
-    : SipHeaderBase(iHeaderType)
+SipIntegerHeader::SipIntegerHeader(SIP_INT32 eHeaderType)
+    : SipHeaderBase(eHeaderType)
 {
 }
 
@@ -41,35 +41,35 @@ SIP_UINT32 SipIntegerHeader::GetValueInt() const
     return SipPf_Atoi(GetValue());
 }
 
-SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR **ppucCurrPos,SIP_BOOL bParams)
+SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
-    const SIP_CHAR *pValue = GetValue();
+    const SIP_CHAR* pszValue = GetValue();
 
-    if ((pValue == SIP_NULL) && (GetHdrType() == SipHeaderBase::CONTENT_LENGTH))
+    if ((pszValue == SIP_NULL) && (GetHdrType() == SipHeaderBase::CONTENT_LENGTH))
     {
         SetValue("0");
     }
-    return SipHeaderBase::EncodeHdr(ppucCurrPos, bParams);
+    return SipHeaderBase::EncodeHdr(ppCurrPos, bParams);
 }
 
-SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR    *pucStartPt,SIP_UINT32  uiDecLen)
+SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pucStartPt,uiDecLen) == SIP_FALSE)
+    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    const SIP_CHAR *pValue = GetValue();
+    const SIP_CHAR* pszValue = GetValue();
 
-    if ((pValue != SIP_NULL) && (SipPf_Atoi_IsZero(pValue) == SIP_FALSE))
+    if ((pszValue != SIP_NULL) && (SipPf_Atoi_IsZero(pszValue) == SIP_FALSE))
     {
-        SIP_UINT32 uiValue = SipPf_Atoi(pValue);
-        SIP_INT32 iHeaderType = GetHdrType();
-        if ((iHeaderType == SipHeaderBase::MAX_FORWARDS) && (uiValue > MAX_MAXFD))
+        SIP_UINT32 nValue = SipPf_Atoi(pszValue);
+        SIP_INT32 eHeaderType = GetHdrType();
+        if ((eHeaderType == SipHeaderBase::MAX_FORWARDS) && (nValue > MAX_MAXFD))
         {
             return SIP_FALSE;
         }
-        else if ((iHeaderType == SipHeaderBase::EXPIRES_SEC) && (uiValue > MAX_EXPIRES))
+        else if ((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES))
         {
             return SIP_FALSE;
         }
@@ -80,7 +80,8 @@ SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR    *pucStartPt,SIP_UINT32  uiDecLe
 
 SipHeaderBase* SipIntegerHeader::GetNewObj(SIP_INT32 eHdr, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipIntegerHeader(*reinterpret_cast<SipIntegerHeader*>(pHeader));
     }
     return new SipIntegerHeader(eHdr);

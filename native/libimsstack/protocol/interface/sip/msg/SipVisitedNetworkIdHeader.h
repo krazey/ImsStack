@@ -44,7 +44,7 @@
 class SipVisitedNetworkIdHeader : public SipParameters
 {
     private:
-        SIP_CHAR        *m_pszVisitedNetwork;
+        SIP_CHAR* m_pszVisitedNetwork;
 
     public:
         /*constructor*/
@@ -55,21 +55,13 @@ class SipVisitedNetworkIdHeader : public SipParameters
 
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
         /*Gets the visited nw name*/
-        inline const SIP_CHAR* GetVisitedNw() const
+        inline const SIP_CHAR* GetVisitedNetwork() const
         {
             return m_pszVisitedNetwork;
         }

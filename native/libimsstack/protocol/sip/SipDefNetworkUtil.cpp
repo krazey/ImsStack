@@ -63,38 +63,28 @@ SipDefNetworkUtil::~SipDefNetworkUtil()
 {
 }
 
-SIP_BOOL SipDefNetworkUtil::SendToNetwork
-(
- SipTransportBuffer     *pobjTranspSipBuffer,
- SipTransportParameter            *pobjFinalTranspParam,
- ISipUserData            *pobjUserData
- )
+SIP_BOOL SipDefNetworkUtil::SendToNetwork(SipTransportBuffer* pTranspSipBuffer,
+        SipTransportParameter* pFinalTranspParam, ISipUserData* pUserData)
 {
-    (void)pobjTranspSipBuffer;
-    (void)pobjFinalTranspParam;
-    (void)pobjUserData;
+    (void)pTranspSipBuffer;
+    (void)pFinalTranspParam;
+    (void)pUserData;
     return SIP_TRUE;
 }
 
-SIP_BOOL SipDefNetworkUtil::CheckTCPConnection
-(
- SipTransportParameter            *pobjTransportParam,
- ISipUserData            *pobjUserData
- )
+SIP_BOOL SipDefNetworkUtil::CheckTCPConnection(SipTransportParameter* pTransportParam,
+        ISipUserData* pUserData)
 {
-    (void)pobjTransportParam;
-    (void)pobjUserData;
+    (void)pTransportParam;
+    (void)pUserData;
 
     return SIP_TRUE;
 }
-SIP_BOOL SipDefNetworkUtil::AbortTransmission
-(
- SipTransportParameter     *pobjTranspParam,
- ISipUserData        *pobjUserData
- )
+SIP_BOOL SipDefNetworkUtil::AbortTransmission(SipTransportParameter* pTranspParam,
+        ISipUserData* pUserData)
 {
-    (void)pobjTranspParam;
-    (void)pobjUserData;
+    (void)pTranspParam;
+    (void)pUserData;
 
     return SIP_TRUE;
 }

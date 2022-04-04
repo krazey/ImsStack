@@ -5513,7 +5513,7 @@ GLOBAL IMS_BOOL CompareTxnKeysForCancel(IN SipTxnKey *pstCancelKey, IN SipTxnKey
         }
 
         // Check 'sent-by' info. - port
-        if (pstCancelKey->m_usViaHostPort != pstTxnKey->m_usViaHostPort)
+        if (pstCancelKey->m_nViaHostPort != pstTxnKey->m_nViaHostPort)
         {
             return IMS_FALSE;
         }
@@ -5524,7 +5524,7 @@ GLOBAL IMS_BOOL CompareTxnKeysForCancel(IN SipTxnKey *pstCancelKey, IN SipTxnKey
     ///// Request-URI, To-Tag, From-Tag, Call-ID, CSeq, top Via header
 
     // CSeq number
-    if (pstCancelKey->m_uiCseqNum != pstTxnKey->m_uiCseqNum)
+    if (pstCancelKey->m_nCseqNum != pstTxnKey->m_nCseqNum)
     {
         return IMS_FALSE;
     }

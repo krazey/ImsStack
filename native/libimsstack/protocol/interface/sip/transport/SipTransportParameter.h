@@ -7,41 +7,41 @@ class SipTransportParameter
 {
     private:
         /* host =  hostname/IPv4address /IPv6reference */
-        SIP_CHAR    *m_pucHostAddress;
-        SIP_UINT16    m_usPort;
-        SIP_INT32  m_usTranspProtocol;
-        SIP_UINT32    m_uiSockId;
+        SIP_CHAR* m_pHostAddress;
+        SIP_UINT16 m_nPort;
+        SIP_INT32 m_nTranspProtocol;
+        SIP_UINT32 m_nSockId;
         /* Enable = SIP_TRUE and for Disable= SIP_FALSE */
-        SIP_BOOL     m_bMulticastEnable;
+        SIP_BOOL m_bMulticastEnable;
         /* Time to Live : Value starts from 0-255 only */
-        SIP_CHAR    m_cTTL;
+        SIP_CHAR m_cTTL;
 
-        SIP_INT32   m_usTranspIpType;
+        SIP_INT32 m_nTranspIpType;
 
-        SipTransportParameter& operator=(IN const SipTransportParameter &objRHS);
-        SipTransportParameter(IN const SipTransportParameter &objRHS);
+        SipTransportParameter& operator=(IN const SipTransportParameter& objRHS);
+        SipTransportParameter(IN const SipTransportParameter& objRHS);
 
     public:
 
         SipTransportParameter()
-            : m_pucHostAddress(SIP_NULL)
-            , m_usPort(SIP_ZERO)
-            , m_usTranspProtocol(SIP_INVALID)
-            , m_uiSockId(SIP_ZERO)
+            : m_pHostAddress(SIP_NULL)
+            , m_nPort(SIP_ZERO)
+            , m_nTranspProtocol(SIP_INVALID)
+            , m_nSockId(SIP_ZERO)
             , m_bMulticastEnable(SIP_FALSE)
             , m_cTTL(SIP_ZERO)
-            , m_usTranspIpType(SIP_INVALID)
+            , m_nTranspIpType(SIP_INVALID)
         {}
-        SipTransportParameter(SipTransportParameter* pobjTranspParam);
-        SipTransportParameter(SIP_CHAR* pucHostAddress,
-                SIP_UINT16 usPort, SIP_INT32 eTranspProtocol);
-        SipTransportParameter(SIP_CHAR* pucHostAddress,
-                SIP_UINT16 usPort, SIP_INT32 eTranspProtocol, SIP_UINT32 uiSockId);
+        SipTransportParameter(SipTransportParameter* pTranspParam);
+        SipTransportParameter(SIP_CHAR* pHostAddress,
+                SIP_UINT16 nPort, SIP_INT32 eTranspProtocol);
+        SipTransportParameter(SIP_CHAR* pHostAddress,
+                SIP_UINT16 nPort, SIP_INT32 eTranspProtocol, SIP_UINT32 nSockId);
         virtual ~SipTransportParameter()
         {
-            if (m_pucHostAddress != SIP_NULL)
+            if (m_pHostAddress != SIP_NULL)
             {
-                delete[] m_pucHostAddress;
+                delete[] m_pHostAddress;
             }
         }
         SIP_BOOL GetMulticastEnable() const
@@ -56,27 +56,27 @@ class SipTransportParameter
 
         SIP_INT32 GetTranspIpType() const
         {
-            return m_usTranspIpType;
+            return m_nTranspIpType;
         }
 
         SIP_INT32 GetTranspProtocol() const
         {
-            return m_usTranspProtocol;
+            return m_nTranspProtocol;
         }
 
         SIP_CHAR *GetHostAddress() const
         {
-            return m_pucHostAddress;
+            return m_pHostAddress;
         }
 
         SIP_UINT32 GetSockId() const
         {
-            return m_uiSockId;
+            return m_nSockId;
         }
 
         SIP_UINT16 GetPort() const
         {
-            return m_usPort;
+            return m_nPort;
         }
 
         SIP_VOID setMulticastEnable(SIP_BOOL bMulticastEnable)
@@ -89,26 +89,26 @@ class SipTransportParameter
             this->m_cTTL = cTTL;
         }
 
-        SIP_VOID setTanspIpType(SIP_INT32 uiTanspIpType)
+        SIP_VOID setTanspIpType(SIP_INT32 nTanspIpType)
         {
-            this->m_usTranspIpType = uiTanspIpType;
+            this->m_nTranspIpType = nTanspIpType;
         }
 
-        SIP_VOID setTranspProtocol(SIP_INT32 uiTranspProtocol)
+        SIP_VOID setTranspProtocol(SIP_INT32 nTranspProtocol)
         {
-            this->m_usTranspProtocol = uiTranspProtocol;
+            this->m_nTranspProtocol = nTranspProtocol;
         }
 
-        SIP_BOOL setHostAddress(const SIP_CHAR* pucHostAddress);
+        SIP_BOOL setHostAddress(const SIP_CHAR* pHostAddress);
 
-        SIP_VOID setSockId(SIP_UINT32 uiSockId)
+        SIP_VOID setSockId(SIP_UINT32 nSockId)
         {
-            this->m_uiSockId = uiSockId;
+            this->m_nSockId = nSockId;
         }
 
-        SIP_VOID setPort(SIP_UINT16 usPort)
+        SIP_VOID setPort(SIP_UINT16 nPort)
         {
-            this->m_usPort = usPort;
+            this->m_nPort = nPort;
         }
 };
 

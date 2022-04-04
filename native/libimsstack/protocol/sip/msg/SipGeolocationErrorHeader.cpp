@@ -64,7 +64,7 @@ SipGeolocationErrorHeader::SipGeolocationErrorHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipGeolocationErrorHeader::SipGeolocationErrorHeader(const SipGeolocationErrorHeader &objHeader)
+SipGeolocationErrorHeader::SipGeolocationErrorHeader(const SipGeolocationErrorHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -83,14 +83,11 @@ SipGeolocationErrorHeader::~SipGeolocationErrorHeader()
 }
 
 /*Sets */
-SIP_BOOL SipGeolocationErrorHeader::SetErrCode
-(
- SIP_UINT32    uiErrCode
- )
+SIP_BOOL SipGeolocationErrorHeader::SetErrCode(SIP_UINT32 nErrCode)
 {
-    SIP_CHAR ucLen[MAX_ERR_LEN];
-    SipPf_Sprintf(ucLen, (SIP_CHAR*)"%u", uiErrCode);
-    return SetValue(ucLen);
+    SIP_CHAR szLen[MAX_ERR_LEN];
+    SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", nErrCode);
+    return SetValue(szLen);
 }
 
 /*Gets */
@@ -101,7 +98,8 @@ SIP_UINT32 SipGeolocationErrorHeader::GetErrCode() const
 
 SipHeaderBase* SipGeolocationErrorHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipGeolocationErrorHeader(
             *reinterpret_cast<SipGeolocationErrorHeader*>(pHeader));
     }

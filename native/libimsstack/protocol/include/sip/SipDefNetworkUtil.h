@@ -10,27 +10,13 @@ class SipDefNetworkUtil: public ISipNetworkUtil
         SipDefNetworkUtil();
         ~SipDefNetworkUtil();
     public:
-        /**/
-        SIP_BOOL SendToNetwork
-            (
-             SipTransportBuffer     *pobjTranspSipBuffer,
-             SipTransportParameter            *pobjFinalTranspParam,
-             ISipUserData            *pobjUserData
-            );
+        SIP_BOOL SendToNetwork(SipTransportBuffer* pTranspSipBuffer,
+                SipTransportParameter* pFinalTranspParam, ISipUserData* pUserData);
 
-        /**/
-        SIP_BOOL CheckTCPConnection
-            (
-             SipTransportParameter            *pobjTransportParam,
-             ISipUserData            *pobjUserData
-            );
+        SIP_BOOL CheckTCPConnection(SipTransportParameter* pTransportParam,
+                ISipUserData* pUserData);
 
-        /**/
-        SIP_BOOL AbortTransmission
-            (
-             SipTransportParameter     *pobjTranspParam,
-             ISipUserData        *pobjUserData
-            );
+        SIP_BOOL AbortTransmission(SipTransportParameter* pTranspParam, ISipUserData* pUserData);
 };
 
 #endif // __ISIP_DEFNETWORKUTIL_H__

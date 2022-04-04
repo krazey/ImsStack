@@ -56,15 +56,15 @@ typedef enum   _SipEn_TraceTypes
     /*this enum when set tracks all messages     encoded and decoded*/
     ESIPTRACE_TYPEMESSAGE = (1<<0),
     /*when set tracks data flow.eg:list of headers     parsed,message length etc*/
-    ESIPTRACE_TYPENORMAL =   (1<<1),
-    ESIPTRACE_TYPEALL =       0x0F,    /* Set to print all the trace types */
+    ESIPTRACE_TYPENORMAL = (1<<1),
+    ESIPTRACE_TYPEALL = 0x0F,    /* Set to print all the trace types */
     ESIPTRACE_TYPEEND,
     ESIPTRACE_TYPENVALID = SIP_INVALID
 }SipEn_TraceTypes;
 
 typedef enum    _SipEn_TraceModules
 {
-    ESIPTRACE_MODFWK            = 0,
+    ESIPTRACE_MODFWK = 0,
     ESIPTRACE_MODTXN,
     ESIPTRACE_MODTRANSP,
     ESIPTRACE_MODENCODER,
@@ -78,7 +78,7 @@ typedef enum    _SipEn_TraceModules
     ESIPTRACE_MODSTRING,
     ESIPTRACE_MODALL,
     ESIPTRACE_MODEND,
-    ESIPTRACE_MODINVALID        = SIP_INVALID
+    ESIPTRACE_MODINVALID = SIP_INVALID
 }SipEn_TraceModules;
 
 
@@ -105,13 +105,8 @@ typedef enum    _SipEn_TraceModules
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-void SIP_TRACE_LOG
-(
- SIP_UINT32           nCategory,
- SIP_CHAR             *pszFilename,
- SIP_INT32             iLine,
- SIP_CHAR             *pcFormat,...
- );
+void SIP_TRACE_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
+        SIP_CHAR* pszFormat,...);
 
 class SipTrace
 {
@@ -120,39 +115,21 @@ class SipTrace
         virtual ~SipTrace();
 
         /* Enable Trace type for particular module */
-        SIP_BOOL EnableTrace
-            (
-             SipEn_TraceModules    eModule,
-             SIP_UINT32        ulTraceType
-            );
+        SIP_BOOL EnableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
 
         /* Enable Trace type for all module */
-        SIP_BOOL EnableTrace
-            (
-             SIP_UINT32        ulTraceType
-            );
+        SIP_BOOL EnableTrace(SIP_UINT32 nTraceType);
 
         /* disable Trace type for particular module */
-        SIP_BOOL DisableTrace
-            (
-             SipEn_TraceModules    eModule,
-             SIP_UINT32        ulTraceType
-            );
+        SIP_BOOL DisableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
 
         /* disable Trace type for all module */
-        SIP_BOOL DisableTrace
-            (
-             SIP_UINT32        ulTraceType
-            );
+        SIP_BOOL DisableTrace(SIP_UINT32 nTraceType);
 
-        SIP_BOOL IsTraceEnable
-            (
-             SipEn_TraceModules     eModule,
-             SipEn_TraceTypes        eTraceType
-            );
+        SIP_BOOL IsTraceEnable(SipEn_TraceModules eModule, SipEn_TraceTypes eTraceType);
 
     private:
-        SIP_INT16             m_ausModTrace[ESIPTRACE_MODEND];
+        SIP_INT16 m_ausModTrace[ESIPTRACE_MODEND];
 
 };
 

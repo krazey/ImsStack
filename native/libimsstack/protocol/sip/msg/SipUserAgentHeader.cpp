@@ -53,18 +53,18 @@ SipUserAgentHeader::SipUserAgentHeader(SIP_INT32 eHdrType)
 
 
 /*constructor*/
-SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader &objHeader)
+SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_objProductList(SipVector<SIP_CHAR*>())
 {
-    SIP_UINT32 usSize = objHeader.m_objProductList.GetSize();
-    for (SIP_UINT32 usCount = SIP_ZERO; usCount < usSize; usCount++)
+    SIP_UINT32 nSize = objHeader.m_objProductList.GetSize();
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
-        SIP_CHAR *pTempVal = objHeader.m_objProductList.GetAt(usCount);
-        if (pTempVal != SIP_NULL)
+        SIP_CHAR* pszTempszVal = objHeader.m_objProductList.GetAt(nCount);
+        if (pszTempszVal != SIP_NULL)
         {
-            SIP_CHAR* pobjVal = SipPf_Strdup(pTempVal);
-            m_objProductList.Add(pobjVal);
+            SIP_CHAR* pszVal = SipPf_Strdup(pszTempszVal);
+            m_objProductList.Add(pszVal);
         }
     }
 }
@@ -83,11 +83,7 @@ SipUserAgentHeader::~SipUserAgentHeader()
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL SipUserAgentHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
- )
+SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_objProductList.IsEmpty() == SIP_TRUE)
     {
@@ -96,16 +92,16 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr
         return SIP_FALSE;
     }
 
-    SIP_UINT32 usSize = m_objProductList.GetSize();
-    for (SIP_UINT32 uiIndex = SIP_ZERO; uiIndex <  usSize;uiIndex++)
+    SIP_UINT32 nSize = m_objProductList.GetSize();
+    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
     {
-        if (uiIndex != SIP_ZERO)
+        if (nIndex != SIP_ZERO)
         {
-            SIP_ENC_SP(*ppucCurrPos);
+            SIP_ENC_SP(*ppCurrPos);
         }
-        SIP_CHAR *pcVal = m_objProductList.GetAt(uiIndex);
-        SipPf_Strcpy(*ppucCurrPos,pcVal);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
+        SIP_CHAR* pszVal = m_objProductList.GetAt(nIndex);
+        SipPf_Strcpy(*ppCurrPos, pszVal);
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -113,24 +109,21 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr
 
 
 /*Sets */
-SIP_BOOL SipUserAgentHeader::AddProductNameVer
-(
- const SIP_CHAR    *pucProduct
- )
+SIP_BOOL SipUserAgentHeader::AddProductNameVer(const SIP_CHAR* pszProduct)
 {
-    if (pucProduct == SIP_NULL)
+    if (pszProduct == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pcProduct =  SipPf_Strdup(pucProduct);
-    if (pcProduct == SIP_NULL)
+    SIP_CHAR* pszTempProduct = SipPf_Strdup(pszProduct);
+    if (pszTempProduct == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Malloc Failed",SIP_ZERO,SIP_ZERO);
+                "Malloc Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_objProductList.Add(pcProduct);
+    m_objProductList.Add(pszTempProduct);
 
     return SIP_TRUE;
 }
@@ -144,47 +137,43 @@ SIP_BOOL SipUserAgentHeader::AddProductNameVer
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipUserAgentHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucTempPos= SIP_NULL;
-    SIP_CHAR *pucCommentStart= SIP_NULL;
-    SIP_CHAR *pucCommentEnd= SIP_NULL;
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
+    SIP_CHAR* pTempPos = SIP_NULL;
+    SIP_CHAR* pCommentStart = SIP_NULL;
+    SIP_CHAR* pCommentEnd = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     /*"UserAgent" HCOLON UserAgent-val *(LWS UserAgent-val) */
-    while (pucStartPt < pucEndPt)
+    while (pStartPt < pEndPt)
     {
-        SIP_BOOL bStatus = FindComment(pucStartPt, pucEndPt, pucCommentStart, pucCommentEnd);
+        SIP_BOOL bStatus = FindComment(pStartPt, pEndPt, pCommentStart, pCommentEnd);
 
-        if (sipFindLWS(pucStartPt, pucEndPt,&pucTempPos) == SIP_FALSE)
+        if (sipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
-            pucTempPos = pucEndPt;
+            pTempPos = pEndPt;
         }
 
         //check LWS is between comment
         if (bStatus == SIP_TRUE &&
-            (pucCommentStart < (pucTempPos) && (pucTempPos) < pucCommentEnd) == SIP_TRUE)
+            (pCommentStart < (pTempPos) && (pTempPos) < pCommentEnd) == SIP_TRUE)
         {
-            pucStartPt = pucCommentStart;
-            pucTempPos = pucCommentEnd;
+            pStartPt = pCommentStart;
+            pTempPos = pCommentEnd;
         }
 
-        SIP_CHAR *pszUserAgent = sipCreateString(pucStartPt,  pucTempPos);
+        SIP_CHAR* pszUserAgent = sipCreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "DecodeHdr:Memory Allocation failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
@@ -192,20 +181,19 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr
         {
             delete[] pszUserAgent;
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Adding in list failed",
-                    SIP_ZERO,SIP_ZERO);
+                    "DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pucTempPos == pucEndPt)
+        if (pTempPos == pEndPt)
         {
-            pucStartPt =pucEndPt;
+            pStartPt = pEndPt;
         }
         else
         {
-            pucTempPos = pucTempPos + SIP_ONE;
-            pucStartPt = sipSkipFwLWS(pucTempPos,pucEndPt);
-            pucTempPos = SIP_NULL;
+            pTempPos = pTempPos + SIP_ONE;
+            pStartPt = sipSkipFwLWS(pTempPos, pEndPt);
+            pTempPos = SIP_NULL;
         }
     }
 

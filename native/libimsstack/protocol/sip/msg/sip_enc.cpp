@@ -28,55 +28,55 @@
 #include "platform/sip_pf_memory.h"
 #include "msg/SipHeaders.h"
 
-SIP_CHAR*  SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPercentDecoding(SIP_CHAR* pszString)
 {
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
 
-    SIP_CHAR *pcDecodedString = new SIP_CHAR[(iLength + SIP_ONE)];
-    SipPf_Memset(pcDecodedString, SIP_NULL, (iLength + SIP_ONE));
-    SIP_CHAR *pcReturnString = pcDecodedString;
-    SIP_CHAR *pcStringTemp = pcString;
+    SIP_CHAR* pszDecodedString = new SIP_CHAR[(nLength + SIP_ONE)];
+    SipPf_Memset(pszDecodedString, SIP_NULL, (nLength + SIP_ONE));
+    SIP_CHAR* pszReturnString = pszDecodedString;
+    SIP_CHAR* pszStringTemp = pszString;
     SIP_BOOL bIsPercentDecoded = SIP_FALSE;
-    while (*pcStringTemp != SIP_NULL)
+    while (*pszStringTemp != SIP_NULL)
     {
         /*Search for the % char*/
-        if ((*pcStringTemp == PERCENT) && (iLength >= SIP_THREE))
+        if ((*pszStringTemp == PERCENT) && (nLength >= SIP_THREE))
         {
-            SIP_INT32 iConvertedChar = SIP_ZERO;
-            SipPf_Sscanf(pcStringTemp+SIP_ONE,(SIP_CHAR*)"%2X",(SIP_CHAR*)&iConvertedChar);
-            SipPf_Sprintf(pcDecodedString,(SIP_CHAR*)"%c",(SIP_CHAR)iConvertedChar);
-            iLength = iLength - SIP_THREE;
-            pcStringTemp = pcStringTemp + SIP_THREE;
+            SIP_INT32 nConvertedChar = SIP_ZERO;
+            SipPf_Sscanf(pszStringTemp + SIP_ONE, (SIP_CHAR*)"%2X", (SIP_CHAR*)&nConvertedChar);
+            SipPf_Sprintf(pszDecodedString, (SIP_CHAR*)"%c", (SIP_CHAR)nConvertedChar);
+            nLength = nLength - SIP_THREE;
+            pszStringTemp = pszStringTemp + SIP_THREE;
             bIsPercentDecoded = SIP_TRUE;
         }
         else
         {
-            *pcDecodedString = *pcStringTemp;
-            pcStringTemp++;
-            iLength--;
+            *pszDecodedString = *pszStringTemp;
+            pszStringTemp++;
+            nLength--;
         }
-        pcDecodedString = pcDecodedString + SIP_ONE;
+        pszDecodedString = pszDecodedString + SIP_ONE;
     }
 
-    delete[] pcString;
+    delete[] pszString;
 
     if (bIsPercentDecoded == SIP_TRUE)
     {
-        iLength = SipPf_Strlen(pcReturnString);
-        pcDecodedString = new SIP_CHAR[(iLength + SIP_ONE)];
-        SipPf_Memset(pcDecodedString, SIP_NULL, (iLength));
-        SipPf_Strcpy(pcDecodedString, pcReturnString);
-        delete[] pcReturnString;
+        nLength = SipPf_Strlen(pszReturnString);
+        pszDecodedString = new SIP_CHAR[(nLength + SIP_ONE)];
+        SipPf_Memset(pszDecodedString, SIP_NULL, (nLength));
+        SipPf_Strcpy(pszDecodedString, pszReturnString);
+        delete[] pszReturnString;
     }
     else
     {
-        pcDecodedString = pcReturnString;
+        pszDecodedString = pszReturnString;
     }
 
-    return pcDecodedString;
+    return pszDecodedString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pcString, SIP_CHAR* pcType)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pszString, SIP_CHAR* pType)
 {
     /**
      * user = 1*( unreserved / escaped / user-unreserved )
@@ -88,48 +88,48 @@ SIP_CHAR*  SipPercentEncoding::DoPerEnc_UserAndHeader(SIP_CHAR* pcString, SIP_CH
      * header 1*( hnv-unreserved / unreserved / escaped )
      * hnv-unreserved = "[" / "]" / "/" / "?" / ":" / "+" / "$"
      */
-    SIP_CHAR* pucCurrPt = pcString;
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
-    SIP_CHAR *pkucEndPt = pucCurrPt + iLength;
+    SIP_CHAR* pCurrPt = pszString;
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
+    SIP_CHAR* pEndPt = pCurrPt + nLength;
 
-    SIP_CHAR *pcEncodedString = new SIP_CHAR[(3*iLength)];
-    SipPf_Memset(pcEncodedString, SIP_NULL, (3*iLength));
-    SIP_CHAR *pcReturnString = pcEncodedString;
+    SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
+    SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
+    SIP_CHAR* pszReturnString = pEncodedString;
 
-    while(*(pucCurrPt) != SIP_NULL)
+    while(*(pCurrPt) != SIP_NULL)
     {
-        if (IS_UNRESERVED(*pucCurrPt) ||
-            ((SipPf_Strcmp(pcType, (SIP_CHAR *)SIP_USER) == 0) &&
-            IS_USER_UNRESERVED(*pucCurrPt)) ||
-            ((SipPf_Strcmp(pcType, (SIP_CHAR *)SIP_HEADERS) == 0) &&
-             IS_HNV_UNRESERVED(*pucCurrPt)))
+        if (IS_UNRESERVED(*pCurrPt) ||
+            ((SipPf_Strcmp(pType, (SIP_CHAR *)SIP_USER) == 0) &&
+            IS_USER_UNRESERVED(*pCurrPt)) ||
+            ((SipPf_Strcmp(pType, (SIP_CHAR *)SIP_HEADERS) == 0) &&
+             IS_HNV_UNRESERVED(*pCurrPt)))
         {
-            *pcEncodedString = *pucCurrPt;
-            pucCurrPt++;
-            pcEncodedString++;
+            *pEncodedString = *pCurrPt;
+            pCurrPt++;
+            pEncodedString++;
         }
-        else if ((pucCurrPt+SIP_TWO <= pkucEndPt) &&
-                (IS_ESCAPED(*pucCurrPt,*(pucCurrPt+SIP_ONE),*(pucCurrPt+SIP_TWO))))
+        else if ((pCurrPt+SIP_TWO <= pEndPt) &&
+                (IS_ESCAPED(*pCurrPt, *(pCurrPt + SIP_ONE), *(pCurrPt + SIP_TWO))))
         {
-            *pcEncodedString = *pucCurrPt;
-            *(pcEncodedString+SIP_ONE) = *(pucCurrPt+SIP_ONE);
-            *(pcEncodedString+SIP_TWO) = *(pucCurrPt+SIP_TWO);
-            pucCurrPt+=3;
-            pcEncodedString+=3;
+            *pEncodedString = *pCurrPt;
+            *(pEncodedString + SIP_ONE) = *(pCurrPt + SIP_ONE);
+            *(pEncodedString + SIP_TWO) = *(pCurrPt + SIP_TWO);
+            pCurrPt += 3;
+            pEncodedString += 3;
         }
         else
         {
-            *pcEncodedString = PERCENT;
-            pcEncodedString++;
-            SipPf_Sprintf(pcEncodedString,(SIP_CHAR *)"%02X",*pucCurrPt);
-            SipEnc_UpdateCurrPos(&pcEncodedString);
-            pucCurrPt++;
+            *pEncodedString = PERCENT;
+            pEncodedString++;
+            SipPf_Sprintf(pEncodedString, (SIP_CHAR *)"%02X", *pCurrPt);
+            SipEnc_UpdateCurrPos(&pEncodedString);
+            pCurrPt++;
         }
     }
-    return pcReturnString;
+    return pszReturnString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pszString)
 {
     /**
      * password = *( unreserved / escaped / "&" / "=" / "+" / "$"/ "," )
@@ -137,180 +137,180 @@ SIP_CHAR*  SipPercentEncoding::DoPerEnc_Password(SIP_CHAR* pcString)
      * mark = "-" / "_" / "." / "!" / "~" / "*" / "'" / "(" / ")"
      * escaped = "%"   HEXDIG   HEXDIG
      */
-    SIP_CHAR* pucCurrPt = pcString;
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
-    SIP_CHAR *pkucEndPt = pucCurrPt + iLength;
+    SIP_CHAR* pCurrPt = pszString;
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
+    SIP_CHAR* pEndPt = pCurrPt + nLength;
 
-    SIP_CHAR *pcEncodedString = new SIP_CHAR[(3*iLength)];
-    SipPf_Memset(pcEncodedString, SIP_NULL, (3*iLength));
-    SIP_CHAR *pcReturnString = pcEncodedString;
+    SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
+    SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
+    SIP_CHAR* pszReturnString = pEncodedString;
 
-    while(*(pucCurrPt) != SIP_NULL)
+    while(*(pCurrPt) != SIP_NULL)
     {
-        if (IS_UNRESERVED(*pucCurrPt) || IS_AMPERSAND(*pucCurrPt) ||
-            IS_EQUALS(*pucCurrPt) || IS_PLUS(*pucCurrPt) ||
-            IS_DOLLAR(*pucCurrPt) || IS_COMMA(*pucCurrPt))
+        if (IS_UNRESERVED(*pCurrPt) || IS_AMPERSAND(*pCurrPt) ||
+            IS_EQUALS(*pCurrPt) || IS_PLUS(*pCurrPt) ||
+            IS_DOLLAR(*pCurrPt) || IS_COMMA(*pCurrPt))
         {
-            *pcEncodedString = *pucCurrPt;
-            pucCurrPt++;
-            pcEncodedString++;
+            *pEncodedString = *pCurrPt;
+            pCurrPt++;
+            pEncodedString++;
         }
-        else if ((pucCurrPt+SIP_TWO <= pkucEndPt) &&
-                (IS_ESCAPED(*pucCurrPt, *(pucCurrPt+SIP_ONE), *(pucCurrPt+SIP_TWO))))
+        else if ((pCurrPt+SIP_TWO <= pEndPt) &&
+                (IS_ESCAPED(*pCurrPt, *(pCurrPt + SIP_ONE), *(pCurrPt + SIP_TWO))))
         {
-            *pcEncodedString = *pucCurrPt;
-            *(pcEncodedString+SIP_ONE) = *(pucCurrPt+SIP_ONE);
-            *(pcEncodedString+SIP_TWO) = *(pucCurrPt+SIP_TWO);
-            pucCurrPt+=3;
-            pcEncodedString+=3;
+            *pEncodedString = *pCurrPt;
+            *(pEncodedString + SIP_ONE) = *(pCurrPt + SIP_ONE);
+            *(pEncodedString + SIP_TWO) = *(pCurrPt + SIP_TWO);
+            pCurrPt += 3;
+            pEncodedString += 3;
         }
         else
         {
-            *pcEncodedString = PERCENT;
-            pcEncodedString++;
-            SipPf_Sprintf(pcEncodedString,(SIP_CHAR *)"%02X",*pucCurrPt);
-            SipEnc_UpdateCurrPos(&pcEncodedString);
-            pucCurrPt++;
+            *pEncodedString = PERCENT;
+            pEncodedString++;
+            SipPf_Sprintf(pEncodedString,(SIP_CHAR *)"%02X", *pCurrPt);
+            SipEnc_UpdateCurrPos(&pEncodedString);
+            pCurrPt++;
         }
     }
-    return pcReturnString;
+    return pszReturnString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_Host(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_Host(SIP_CHAR* pszString)
 {
     // host = hostname /  IPv4address /  IPv6reference
     // host : 1*(ALPHANUM , "." , ":" , "[" , "]" , "-")
-    SIP_CHAR* pucCurrPt = pcString;
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
+    SIP_CHAR* pCurrPt = pszString;
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
 
-    SIP_CHAR *pcEncodedString = new SIP_CHAR[(3*iLength)];
-    SipPf_Memset(pcEncodedString, SIP_NULL, (3*iLength));
-    SIP_CHAR *pcReturnString = pcEncodedString;
+    SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
+    SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
+    SIP_CHAR* pszReturnString = pEncodedString;
 
-    while(*(pucCurrPt) != SIP_NULL)
+    while(*(pCurrPt) != SIP_NULL)
     {
-        if (IS_ALPHANUM(*pucCurrPt) || IS_DOT(*pucCurrPt) || IS_COLON(*pucCurrPt) ||
-            IS_LSQURE(*pucCurrPt) || IS_RSQURE(*pucCurrPt) || IS_HYPHEN(*pucCurrPt))
+        if (IS_ALPHANUM(*pCurrPt) || IS_DOT(*pCurrPt) || IS_COLON(*pCurrPt) ||
+            IS_LSQURE(*pCurrPt) || IS_RSQURE(*pCurrPt) || IS_HYPHEN(*pCurrPt))
         {
-            *pcEncodedString = *pucCurrPt;
-            pucCurrPt++;
-            pcEncodedString++;
+            *pEncodedString = *pCurrPt;
+            pCurrPt++;
+            pEncodedString++;
         }
         else
         {
-            *pcEncodedString = PERCENT;
-            pcEncodedString++;
-            SipPf_Sprintf(pcEncodedString,(SIP_CHAR *)"%02X",*pucCurrPt);
-            SipEnc_UpdateCurrPos(&pcEncodedString);
-            pucCurrPt++;
+            *pEncodedString = PERCENT;
+            pEncodedString++;
+            SipPf_Sprintf(pEncodedString, (SIP_CHAR *)"%02X", *pCurrPt);
+            SipEnc_UpdateCurrPos(&pEncodedString);
+            pCurrPt++;
         }
     }
-    return pcReturnString;
+    return pszReturnString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_TokenParam(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_TokenParam(SIP_CHAR* pszString)
 {
     // token = 1*( alphanum / "-" / "." / "!" / "%" / "*" / "_" / "+" / "`" / "'" / "~" )
-    SIP_CHAR* pucCurrPt = pcString;
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
+    SIP_CHAR* pCurrPt = pszString;
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
 
-    SIP_CHAR *pcEncodedString = new SIP_CHAR[(3*iLength)];
-    SipPf_Memset(pcEncodedString, SIP_NULL, (3*iLength));
-    SIP_CHAR *pcReturnString = pcEncodedString;
+    SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
+    SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
+    SIP_CHAR* pszReturnString = pEncodedString;
 
-    while(*(pucCurrPt) != SIP_NULL)
+    while(*(pCurrPt) != SIP_NULL)
     {
-        if (IS_TOKEN(*pucCurrPt))
+        if (IS_TOKEN(*pCurrPt))
         {
-            *pcEncodedString = *pucCurrPt;
-            pucCurrPt++;
-            pcEncodedString++;
+            *pEncodedString = *pCurrPt;
+            pCurrPt++;
+            pEncodedString++;
         }
         else
         {
-            *pcEncodedString = PERCENT;
-            pcEncodedString++;
-            SipPf_Sprintf(pcEncodedString,(SIP_CHAR *)"%02X",*pucCurrPt);
-            SipEnc_UpdateCurrPos(&pcEncodedString);
-            pucCurrPt++;
+            *pEncodedString = PERCENT;
+            pEncodedString++;
+            SipPf_Sprintf(pEncodedString, (SIP_CHAR *)"%02X", *pCurrPt);
+            SipEnc_UpdateCurrPos(&pEncodedString);
+            pCurrPt++;
         }
     }
-    return pcReturnString;
+    return pszReturnString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_TtlParam(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_TtlParam(SIP_CHAR* pszString)
 {
     // ttl = 1*3DIGIT     ; 0 to 255
-    SIP_CHAR* pucCurrPt = pcString;
-    SIP_INT32 iLength = SipPf_Strlen(pcString);
+    SIP_CHAR* pCurrPt = pszString;
+    SIP_INT32 nLength = SipPf_Strlen(pszString);
 
-    SIP_CHAR *pcEncodedString = new SIP_CHAR[(3*iLength)];
-    SipPf_Memset(pcEncodedString, SIP_NULL, (3*iLength));
-    SIP_CHAR *pcReturnString = pcEncodedString;
+    SIP_CHAR* pEncodedString = new SIP_CHAR[(3 * nLength)];
+    SipPf_Memset(pEncodedString, SIP_NULL, (3 * nLength));
+    SIP_CHAR* pszReturnString = pEncodedString;
 
-    while(*(pucCurrPt) != SIP_NULL)
+    while(*(pCurrPt) != SIP_NULL)
     {
-        if (IS_DIGIT(*pucCurrPt))
+        if (IS_DIGIT(*pCurrPt))
         {
-            *pcEncodedString = *pucCurrPt;
-            pucCurrPt++;
-            pcEncodedString++;
+            *pEncodedString = *pCurrPt;
+            pCurrPt++;
+            pEncodedString++;
         }
         else
         {
-            *pcEncodedString = PERCENT;
-            pcEncodedString++;
-            SipPf_Sprintf(pcEncodedString,(SIP_CHAR *)"%02X",*pucCurrPt);
-            SipEnc_UpdateCurrPos(&pcEncodedString);
-            pucCurrPt++;
+            *pEncodedString = PERCENT;
+            pEncodedString++;
+            SipPf_Sprintf(pEncodedString, (SIP_CHAR *)"%02X", *pCurrPt);
+            SipEnc_UpdateCurrPos(&pEncodedString);
+            pCurrPt++;
         }
     }
-    return pcReturnString;
+    return pszReturnString;
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_MddrParam(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_MddrParam(SIP_CHAR* pszString)
 {
     // "maddr="   host
-    return DoPerEnc_Host(pcString);
+    return DoPerEnc_Host(pszString);
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_OtherParam(SIP_CHAR* pcString)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_OtherParam(SIP_CHAR* pszString)
 {
     // other-param : ( param-unreserved / unreserved /  escaped )
     // param-unreserved = "[" / "]" / "/" / ":" / "&" / "+"/ "$"
-    return DoPerEnc_TokenParam(pcString);
+    return DoPerEnc_TokenParam(pszString);
 }
 
-SIP_CHAR*  SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pcName, SIP_CHAR* pcValue)
+SIP_CHAR* SipPercentEncoding::DoPerEnc_Param(SIP_CHAR* pszName, SIP_CHAR* pszValue)
 {
 
-    if (SipPf_Stricmp(pcName, SIP_USER_PRM) == 0)
+    if (SipPf_Stricmp(pszName, SIP_USER_PRM) == 0)
     {
-        return DoPerEnc_TokenParam(pcValue);
+        return DoPerEnc_TokenParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_METHOD) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_METHOD) == 0)
     {
-        return DoPerEnc_TokenParam(pcValue);
+        return DoPerEnc_TokenParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_MADDR_PRM) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_MADDR_PRM) == 0)
     {
-        return DoPerEnc_MddrParam(pcValue);
+        return DoPerEnc_MddrParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_TTL_PRM) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_TTL_PRM) == 0)
     {
-        return DoPerEnc_TtlParam(pcValue);
+        return DoPerEnc_TtlParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_TRNSPORT_PRM) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_TRNSPORT_PRM) == 0)
     {
-        return DoPerEnc_TokenParam(pcValue);
+        return DoPerEnc_TokenParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_LR_PRM) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_LR_PRM) == 0)
     {
-        return DoPerEnc_TokenParam(pcValue);
+        return DoPerEnc_TokenParam(pszValue);
     }
-    else if (SipPf_Stricmp(pcName, SIP_HEADERS) == 0)
+    else if (SipPf_Stricmp(pszName, SIP_HEADERS) == 0)
     {
-        return DoPerEnc_UserAndHeader(pcValue, (SIP_CHAR *)SIP_HEADERS);
+        return DoPerEnc_UserAndHeader(pszValue, (SIP_CHAR *)SIP_HEADERS);
     }
-    return DoPerEnc_OtherParam(pcValue);
+    return DoPerEnc_OtherParam(pszValue);
 }

@@ -14,7 +14,7 @@ class SipContextUtils
         static SIP_VOID Destruct();
 
         SipTxnContext* Sip_CreateTxnContext();
-        void Sip_DestroyTxnContext(IN SipTxnContext *pstContext);
+        void Sip_DestroyTxnContext(IN SipTxnContext* pContext);
 };
 
 #endif //__SIP_CONTEXT_UTILS_H__

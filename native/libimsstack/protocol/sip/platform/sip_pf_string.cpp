@@ -74,7 +74,7 @@
  *                       updated
  *
  *****************************************************************************/
-void SipPf_Snprintf(SIP_CHAR *pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR *pszFormat, ...)
+void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...)
 {
     va_list arg;
     va_start(arg, pszFormat);
@@ -82,27 +82,27 @@ void SipPf_Snprintf(SIP_CHAR *pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR *p
     va_end(arg);
 }
 
-void SipPf_Sprintf(SIP_CHAR *pszBuffer, const SIP_CHAR *pszFormat, ...)
+void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...)
 {
     va_list arg;
     va_start(arg, pszFormat);
-    vsprintf(pszBuffer,pszFormat,arg);
+    vsprintf(pszBuffer, pszFormat, arg);
     va_end(arg);
     return;
 }
 
-void SipPf_Printf(SIP_CHAR *pszFormat, ...)
+void SipPf_Printf(SIP_CHAR* pszFormat, ...)
 {
     va_list arg;
     va_start(arg, pszFormat);
-    printf(pszFormat,arg);
+    printf(pszFormat, arg);
     va_end(arg);
     return;
 }
 
-void SipPf_Sscanf(SIP_CHAR *pszBuffer, SIP_CHAR *pszFormat,SIP_CHAR *pszCharAdd)
+void SipPf_Sscanf(SIP_CHAR* pszBuffer, SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd)
 {
-    sscanf(pszBuffer, pszFormat,pszCharAdd);
+    sscanf(pszBuffer, pszFormat, pszCharAdd);
     return;
 }
 
@@ -125,10 +125,7 @@ SIP_UINT32 SipPf_Rand()
  *                       updated
  *
  *****************************************************************************/
-    SIP_INT32 SipPf_Strlen
-(
- const SIP_CHAR *pszStr
- )
+SIP_INT32 SipPf_Strlen(const SIP_CHAR* pszStr)
 {
     if (pszStr == SIP_NULL)
     {
@@ -154,7 +151,7 @@ SIP_UINT32 SipPf_Rand()
  *                      Pointer to destination string
  * Argument           : pszDest: InOut
  *                      Destination string
- * Argument           : kpszSource: In
+ * Argument           : pszSource: In
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -162,23 +159,19 @@ SIP_UINT32 SipPf_Rand()
  *                       updated
  *
  *****************************************************************************/
-    SIP_CHAR* SipPf_Strcpy
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSrc
- )
+SIP_CHAR* SipPf_Strcpy(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc)
 {
-    if ((pszDest == SIP_NULL) || (kpszSrc == SIP_NULL))
+    if ((pszDest == SIP_NULL) || (pszSrc == SIP_NULL))
     {
         return pszDest;
     }
 
-    SIP_UINT32 ulSrcLen = SipPf_Strlen(kpszSrc);
+    SIP_UINT32 nSrcLen = SipPf_Strlen(pszSrc);
 
     pszDest[0] = '\0';
 
-    SipPf_Memcpy(pszDest, kpszSrc, ulSrcLen);
-    pszDest[ulSrcLen] = '\0';
+    SipPf_Memcpy(pszDest, pszSrc, nSrcLen);
+    pszDest[nSrcLen] = '\0';
 
     return pszDest;
 }
@@ -186,13 +179,13 @@ SIP_UINT32 SipPf_Rand()
 /******************************************************************************
  * Function name    : SipPf_Strncpy
  * Description        :  This function copies at most iNumChars
- from kpszSource to pszDest and terminates
+ from pszSource to pszDest and terminates
  pszDest with '\0'
  * Return type        : SIP_CHAR *
  *                      Pointer to pszDest
  * Argument           : pszDest: <InOut>
  *                      Destination string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      Source string
  * Argument           : iNumChars: <In>
  *                      Number of characters to copy
@@ -203,30 +196,25 @@ SIP_UINT32 SipPf_Rand()
  *
  ****************************************************************************/
 
-    SIP_CHAR* SipPf_Strncpy
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSrc,
- SIP_UINT32             ulNumChars
- )
+SIP_CHAR* SipPf_Strncpy(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc, SIP_UINT32 nNumChars)
 {
-    if ((pszDest == SIP_NULL) || (kpszSrc == SIP_NULL))
+    if ((pszDest == SIP_NULL) || (pszSrc == SIP_NULL))
     {
         return pszDest;
     }
 
     pszDest[0] = '\0';
 
-    SIP_UINT32 ulSrcLen = SipPf_Strlen(kpszSrc);
-    SIP_UINT32 ulCopysize = ulNumChars;
+    SIP_UINT32 nSrcLen = SipPf_Strlen(pszSrc);
+    SIP_UINT32 nCopySize = nNumChars;
 
-    if (ulSrcLen < ulNumChars)
+    if (nSrcLen < nNumChars)
     {
-        ulCopysize = ulSrcLen;
+        nCopySize = nSrcLen;
     }
 
-    SipPf_Memcpy(pszDest, kpszSrc, ulCopysize);
-    pszDest[ulCopysize] = '\0';
+    SipPf_Memcpy(pszDest, pszSrc, nCopySize);
+    pszDest[nCopySize] = '\0';
 
     return pszDest;
 
@@ -242,7 +230,7 @@ SIP_UINT32 SipPf_Rand()
  *                      Pointer to pszDest
  * Argument           : pszDest: <InOut>
  *                      Destination string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      <Source string>
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -250,22 +238,18 @@ SIP_UINT32 SipPf_Rand()
  *                       updated
  *
  ****************************************************************************/
-    SIP_CHAR*    SipPf_Strcat
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSrc
- )
+SIP_CHAR* SipPf_Strcat(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc)
 {
     if ((pszDest == SIP_NULL) || (pszDest == SIP_NULL))
     {
         return pszDest;
     }
 
-    SIP_UINT32 ulDestLen = SipPf_Strlen(pszDest);
-    SIP_UINT32 ulSrcLen = SipPf_Strlen(kpszSrc);
+    SIP_UINT32 nDestLen = SipPf_Strlen(pszDest);
+    SIP_UINT32 nSrcLen = SipPf_Strlen(pszSrc);
 
-    SipPf_Memcpy(pszDest + ulDestLen, kpszSrc, ulSrcLen);
-    pszDest[ulDestLen + ulSrcLen] = '\0';
+    SipPf_Memcpy(pszDest + nDestLen, pszSrc, nSrcLen);
+    pszDest[nDestLen + nSrcLen] = '\0';
 
     return pszDest;
 }
@@ -279,7 +263,7 @@ SIP_UINT32 SipPf_Rand()
  *                      Pointer to pszDest
  * Argument           : pszDest: <InOut>
  *                      Destination string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      Source string
  * Argument           : ssNumChars: <In>
  *                      Number of characters to concatenate
@@ -289,29 +273,24 @@ SIP_UINT32 SipPf_Rand()
  *                       updated
  *
  ****************************************************************************/
-    SIP_CHAR* SipPf_Strncat
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSrc,
- SIP_UINT32             ulNumChars
- )
+SIP_CHAR* SipPf_Strncat(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc, SIP_UINT32 nNumChars)
 {
     if ((pszDest == SIP_NULL) || (pszDest == SIP_NULL))
     {
         return pszDest;
     }
 
-    SIP_UINT32 ulDestLen = SipPf_Strlen(pszDest);
-    SIP_UINT32 ulSrcLen = SipPf_Strlen(kpszSrc);
+    SIP_UINT32 nDestLen = SipPf_Strlen(pszDest);
+    SIP_UINT32 nSrcLen = SipPf_Strlen(pszSrc);
 
-    SIP_UINT32 ulCopySize = ulNumChars;
-    if (ulSrcLen < ulNumChars)
+    SIP_UINT32 nCopySize = nNumChars;
+    if (nSrcLen < nNumChars)
     {
-        ulCopySize = ulSrcLen;
+        nCopySize = nSrcLen;
     }
 
-    SipPf_Memcpy(pszDest + ulDestLen, kpszSrc, ulCopySize);
-    pszDest[ulDestLen + ulCopySize] = '\0';
+    SipPf_Memcpy(pszDest + nDestLen, pszSrc, nCopySize);
+    pszDest[nDestLen + nCopySize] = '\0';
 
     return pszDest;
 }
@@ -320,72 +299,68 @@ SIP_UINT32 SipPf_Rand()
  * Function name    : SipPf_Strcmp
  * Description      : This function compares two strings. It is case sensitive comparison
  * Return type      : SIP_INT16
- > 0 : if kpszStr1 > kpszStr2
+ > 0 : if pszStr1 > pszStr2
 0 : if strings are same
-< 0 : if kpszStr1 < kpszStr2
+< 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
  * Side Effects    : Preconditions for the function to be required, argument list that will be updated
  *
  ****************************************************************************/
-    SIP_INT16  SipPf_Strcmp
-(
- const SIP_CHAR         *kpszStr1,
- const SIP_CHAR         *kpszStr2
- )
+SIP_INT16 SipPf_Strcmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
 {
-    if (kpszStr1 == SIP_NULL || kpszStr2 == SIP_NULL)
+    if (pszStr1 == SIP_NULL || pszStr2 == SIP_NULL)
     {
         return -1;
     }
 
-    while (*kpszStr1 && *kpszStr2)
+    while (*pszStr1 && *pszStr2)
     {
-        if (*kpszStr1 != *kpszStr2)
-            return (*kpszStr1) - (*kpszStr2);
+        if (*pszStr1 != *pszStr2)
+        {
+            return (*pszStr1) - (*pszStr2);
+        }
 
-        ++kpszStr1;
-        ++kpszStr2;
+        ++pszStr1;
+        ++pszStr2;
     }
 
-    return ((*kpszStr1 == 0) && (*kpszStr2 == 0)) ? 0 : -1;
+    return ((*pszStr1 == 0) && (*pszStr2 == 0)) ? 0 : -1;
 }
 
 /******************************************************************************
  * Function name    : SipPf_Stricmp
  * Description      : This function compares two strings. It is non-case sensitive comparison
  * Return type      : SIP_INT16
- > 0 : if kpszStr1 > kpszStr2
+ > 0 : if pszStr1 > pszStr2
 0 : if strings are same
-< 0 : if kpszStr1 < kpszStr2
+< 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
  * Side Effects    : Preconditions for the function to be required, argument list that will be updated
  *
  ****************************************************************************/
-    SIP_INT16  SipPf_Stricmp
-(
- const SIP_CHAR         *kpszStr1,
- const SIP_CHAR         *kpszStr2
- )
+SIP_INT16 SipPf_Stricmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
 {
-    if (kpszStr1 == SIP_NULL || kpszStr2 == SIP_NULL)
+    if (pszStr1 == SIP_NULL || pszStr2 == SIP_NULL)
     {
         return -1;
     }
 
-    while (*kpszStr1 && *kpszStr2)
+    while (*pszStr1 && *pszStr2)
     {
-        SIP_CHAR ch1 = SIP_TOLOWER(*kpszStr1);
-        SIP_CHAR ch2 = SIP_TOLOWER(*kpszStr2);
+        SIP_CHAR ch1 = SIP_TOLOWER(*pszStr1);
+        SIP_CHAR ch2 = SIP_TOLOWER(*pszStr2);
         if (ch1 != ch2)
+        {
             return ch1 - ch2;
+        }
 
-        ++kpszStr1;
-        ++kpszStr2;
+        ++pszStr1;
+        ++pszStr2;
     }
 
-    return ((*kpszStr1) == 0 && (*kpszStr2 == 0)) ? 0 : -1;
+    return ((*pszStr1) == 0 && (*pszStr2 == 0)) ? 0 : -1;
 }
 
 /******************************************************************************
@@ -393,41 +368,36 @@ SIP_UINT32 SipPf_Rand()
  * Description      : This function compares two strings for specified number of chars.
  *                      It is case sensitive comparison
  * Return type      : SIP_INT16
- > 0 : if kpszStr1 > kpszStr2
+ > 0 : if pszStr1 > pszStr2
 0 : if strings are same
-< 0 : if kpszStr1 < kpszStr2
+< 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
  * Side Effects    : Preconditions for the function to be required, argument list that will be updated
  *
  ****************************************************************************/
-    SIP_INT16  SipPf_Strncmp
-(
- const SIP_CHAR     *kpszStr1,
- const SIP_CHAR     *kpszStr2,
- SIP_UINT32         uiNumChars
- )
+SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2, SIP_UINT32 nNumChars)
 {
-    SIP_UINT32 ulCount = uiNumChars;
+    SIP_UINT32 nCount = nNumChars;
 
-    if ((kpszStr1 == SIP_NULL) || (kpszStr2 == SIP_NULL) || (ulCount == SIP_ZERO))
+    if ((pszStr1 == SIP_NULL) || (pszStr2 == SIP_NULL) || (nCount == SIP_ZERO))
     {
         return -1;
     }
 
-    while ((*kpszStr1) && (*kpszStr2) && (ulCount > SIP_ZERO))
+    while ((*pszStr1) && (*pszStr2) && (nCount > SIP_ZERO))
     {
-        if (*kpszStr1 != *kpszStr2)
+        if (*pszStr1 != *pszStr2)
         {
-            return (*kpszStr1) - (*kpszStr2);
+            return (*pszStr1) - (*pszStr2);
         }
 
-        ++kpszStr1;
-        ++kpszStr2;
-        ulCount--;
+        ++pszStr1;
+        ++pszStr2;
+        nCount--;
     }
 
-    return ulCount ? -(SIP_ONE) : SIP_ZERO;
+    return nCount ? -(SIP_ONE) : SIP_ZERO;
 }
 
 /******************************************************************************
@@ -435,56 +405,51 @@ SIP_UINT32 SipPf_Rand()
  * Description      : This function compares two strings for specified number of chars.
  *                      It is non-case sensitive comparison
  * Return type      : SIP_INT16
- > 0 : if kpszStr1 > kpszStr2
+ > 0 : if pszStr1 > pszStr2
 0 : if strings are same
-< 0 : if kpszStr1 < kpszStr2
+< 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
  * Side Effects    : Preconditions for the function to be required, argument list that will be updated
  *
  ****************************************************************************/
-    SIP_INT16  SipPf_Strnicmp
-(
- const SIP_CHAR     *kpszStr1,
- const SIP_CHAR     *kpszStr2,
- SIP_UINT32         uiNumChars
- )
+SIP_INT16 SipPf_Strnicmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2, SIP_UINT32 nNumChars)
 {
-    SIP_UINT32 ulCount = uiNumChars;
+    SIP_UINT32 nCount = nNumChars;
 
-    if ((kpszStr1 == SIP_NULL) || (kpszStr2 == SIP_NULL) || (ulCount == SIP_ZERO))
+    if ((pszStr1 == SIP_NULL) || (pszStr2 == SIP_NULL) || (nCount == SIP_ZERO))
     {
         return -(SIP_ONE);
     }
 
-    while ((*kpszStr1) && (*kpszStr2) && (ulCount > SIP_ZERO))
+    while ((*pszStr1) && (*pszStr2) && (nCount > SIP_ZERO))
     {
-        SIP_CHAR ch1 = SIP_TOLOWER(*kpszStr1);
-        SIP_CHAR ch2 = SIP_TOLOWER(*kpszStr2);
+        SIP_CHAR ch1 = SIP_TOLOWER(*pszStr1);
+        SIP_CHAR ch2 = SIP_TOLOWER(*pszStr2);
         if (ch1 != ch2)
         {
             return ch1 - ch2;
         }
 
-        ++kpszStr1;
-        ++kpszStr2;
-        ulCount--;
+        ++pszStr1;
+        ++pszStr2;
+        nCount--;
     }
 
-    return ulCount ? -(SIP_ONE) : SIP_ZERO;
+    return nCount ? -(SIP_ONE) : SIP_ZERO;
 }
 
 /******************************************************************************
  * Function name    : SipPf_Strstr
  * Description        : This function is used to find the first
- occurrence of the string kpszSource in
- the string  kpszDest.
+ occurrence of the string pszSource in
+ the string  pszDest.
  * Return type        : SIP_CHAR
  *                      Pointer to First occurrence of Source String
  *                        in Destination String or NULL.
- * Argument           : kpszDest: <In>
+ * Argument           : pszDest: <In>
  *                      Target string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -493,23 +458,19 @@ SIP_UINT32 SipPf_Rand()
  *
  ****************************************************************************/
 
-    SIP_CHAR*  SipPf_Strstr
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource
- )
+SIP_CHAR* SipPf_Strstr(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource)
 {
-    return (SIP_CHAR*)strstr( kpszDest, kpszSource);
+    return (SIP_CHAR*)strstr(pszDest, pszSource);
 }
 
 /******************************************************************************
  * Function name    : SipPf_Strchr
  * Description        :This function is used to find the first
  occurrence of the character  ucChar in
- the string  kpszDest.
+ the string  pszDest.
  * Return type        : SIP_CHAR
  *                      Pointer to First occurrence of ucChar
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      Source string
  * Argument           : cChar: <In>
  *                      character to search
@@ -520,24 +481,20 @@ SIP_UINT32 SipPf_Rand()
  *
  ****************************************************************************/
 
-    SIP_CHAR*  SipPf_Strchr
-(
- const SIP_CHAR         *kpszSource,
- SIP_CHAR             cChar
- )
+SIP_CHAR* SipPf_Strchr(const SIP_CHAR* pszSource, SIP_CHAR cChar)
 {
-    return (SIP_CHAR*)strchr( kpszSource, cChar);
+    return (SIP_CHAR*)strchr(pszSource, cChar);
 }
 
 /******************************************************************************
  * Function name    : SipPf_Strdup
  * Description        :  This function makes a copy of a string
  by allocating memory on the heap
- and copying kpszSource to the newly
+ and copying pszSource to the newly
  allocated buffer.
  * Return type        : SIP_CHAR
  *                      pointer to new string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      <Description>
 
  * Preconditions/
@@ -547,18 +504,15 @@ SIP_UINT32 SipPf_Rand()
  *
  ****************************************************************************/
 
-    SIP_CHAR* SipPf_Strdup
-(
- const SIP_CHAR *kpszSrc
- )
+SIP_CHAR* SipPf_Strdup(const SIP_CHAR* pszSrc)
 {
-    if (kpszSrc == SIP_NULL)
+    if (pszSrc == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SIP_UINT32 ulSrcLen = SipPf_Strlen(kpszSrc);
-    SIP_CHAR* pszTarget = new SIP_CHAR[ulSrcLen + 1];
+    SIP_UINT32 nSrcLen = SipPf_Strlen(pszSrc);
+    SIP_CHAR* pszTarget = new SIP_CHAR[nSrcLen + 1];
 
     if (pszTarget == SIP_NULL)
     {
@@ -566,7 +520,7 @@ SIP_UINT32 SipPf_Rand()
     }
 
     *pszTarget = '\0';
-    SipPf_Memcpy(pszTarget, kpszSrc, ulSrcLen+1);
+    SipPf_Memcpy(pszTarget, pszSrc, nSrcLen+1);
 
     return pszTarget;
 }
@@ -577,7 +531,7 @@ SIP_UINT32 SipPf_Rand()
  Source String to its integer equivalent.
  * Return type        : SIP_INT32
  *                      Integer equivalent
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -585,20 +539,16 @@ SIP_UINT32 SipPf_Rand()
  *                       updated
  *
  ****************************************************************************/
-SIP_INT32  SipPf_Atoi
-(
-
- const SIP_CHAR    *kpszStr
- )
+SIP_INT32 SipPf_Atoi(const SIP_CHAR* pszStr)
 {
-    if (kpszStr == SIP_NULL)
+    if (pszStr == SIP_NULL)
     {
         return SIP_ZERO;
     }
 
-    SIP_UINT32 nStrLen = SipPf_Strlen(kpszStr);
+    SIP_UINT32 nStrLen = SipPf_Strlen(pszStr);
 
-    if ((nStrLen > 11) && (kpszStr[SIP_ZERO] == '-'))
+    if ((nStrLen > 11) && (pszStr[SIP_ZERO] == '-'))
     {
         nStrLen = 11;
     }
@@ -610,17 +560,17 @@ SIP_INT32  SipPf_Atoi
     SIP_INT32 nValue = SIP_ZERO;
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nStrLen; ++nIndex)
     {
-        if ((kpszStr[nIndex] >= '0') && (kpszStr[nIndex] <= '9'))
+        if ((pszStr[nIndex] >= '0') && (pszStr[nIndex] <= '9'))
         {
-            nValue = nValue * 10 + (kpszStr[nIndex] - '0');
+            nValue = nValue * 10 + (pszStr[nIndex] - '0');
         }
-        else if (kpszStr[nIndex] == '.')
+        else if (pszStr[nIndex] == '.')
         {
             break;
         }
     }
 
-    if (kpszStr[SIP_ZERO] == '-')
+    if (pszStr[SIP_ZERO] == '-')
     {
         nValue *= (-1);
     }
@@ -628,17 +578,14 @@ SIP_INT32  SipPf_Atoi
     return nValue;
 }
 
-    SIP_UINT32  SipPf_Atoi_Unsigned
-(
- const SIP_CHAR    *kpszStr
- )
+SIP_UINT32 SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr)
 {
-    if (kpszStr == SIP_NULL)
+    if (pszStr == SIP_NULL)
     {
         return SIP_ZERO;
     }
 
-    SIP_UINT32 nStrLen = SipPf_Strlen(kpszStr);
+    SIP_UINT32 nStrLen = SipPf_Strlen(pszStr);
 
     if (nStrLen > 10) /*2^32 = 4294967296*/
     {
@@ -648,11 +595,11 @@ SIP_INT32  SipPf_Atoi
     SIP_UINT32 nValue = SIP_ZERO;
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nStrLen; ++nIndex)
     {
-        if (kpszStr[nIndex] >= '0' && kpszStr[nIndex] <= '9')
+        if (pszStr[nIndex] >= '0' && pszStr[nIndex] <= '9')
         {
-            nValue = nValue * 10 + (kpszStr[nIndex] - '0');
+            nValue = nValue * 10 + (pszStr[nIndex] - '0');
         }
-        else if (kpszStr[nIndex] == '.')
+        else if (pszStr[nIndex] == '.')
         {
             break;
         }
@@ -661,21 +608,18 @@ SIP_INT32  SipPf_Atoi
     return nValue;
 }
 
-    SIP_BOOL SipPf_Atoi_IsZero
-(
- const SIP_CHAR    *kpszStr
- )
+SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr)
 {
-    if (kpszStr == SIP_NULL)
+    if (pszStr == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    SIP_UINT32 nStrLen = SipPf_Strlen(kpszStr);
+    SIP_UINT32 nStrLen = SipPf_Strlen(pszStr);
 
     for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nStrLen; ++nIndex)
     {
-        if (kpszStr[nIndex] != '0')
+        if (pszStr[nIndex] != '0')
         {
             return SIP_FALSE;
         }
@@ -703,12 +647,7 @@ SIP_INT32  SipPf_Atoi
  *                       updated
  *
  ****************************************************************************/
-    SIP_CHAR*  SipPf_Itoa
-(
- SIP_INT32    iVal,
- SIP_CHAR        *pszDest,
- SIP_INT32    uiBase
- )
+SIP_CHAR* SipPf_Itoa(SIP_INT32 nVal, SIP_CHAR* pszDest, SIP_INT32 nBase)
 {
     if (pszDest == SIP_NULL)
     {
@@ -717,16 +656,16 @@ SIP_INT32  SipPf_Atoi
 
     *pszDest = '\0';
 
-    switch (uiBase)
+    switch (nBase)
     {
         case 8:
-            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%o", iVal);
+            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%o", nVal);
             break;
         case 10:
-            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%d", iVal);
+            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%d", nVal);
             break;
         case 16:
-            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%x", iVal);
+            SipPf_Sprintf(pszDest, (SIP_CHAR*)"%x", nVal);
             break;
         default:
             break;
@@ -743,7 +682,7 @@ SIP_INT32  SipPf_Atoi
  *                      Pointer to String or NULL.
  * Argument           : pszDest: <In>
  *                      Constant Pointer to Destination String
- * Argument           : kpszSource:
+ * Argument           : pszSource:
  Constant Pointer to source
  String
  *
@@ -754,13 +693,9 @@ SIP_INT32  SipPf_Atoi
  *
  ****************************************************************************/
 
-    SIP_CHAR*    SipPf_Strtok
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSource
- )
+SIP_CHAR* SipPf_Strtok(SIP_CHAR* pszDest, const SIP_CHAR* pszSource)
 {
-    return strtok(pszDest, kpszSource);
+    return strtok(pszDest, pszSource);
 }
 
 /******************************************************************************
@@ -780,18 +715,16 @@ SIP_INT32  SipPf_Atoi
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_CHAR* SipPf_Strrchr
-(
- SIP_CHAR    *pszSrc,
- SIP_CHAR    cChar
- )
+SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSrc, SIP_CHAR cChar)
 {
-    SIP_CHAR *pszDest = SIP_NULL;
+    SIP_CHAR* pszDest = SIP_NULL;
 
     do
     {
         if (*pszSrc == cChar)
-            pszDest = (SIP_CHAR*) pszSrc;
+        {
+            pszDest = (SIP_CHAR*)pszSrc;
+        }
 
         if ((*pszSrc) ==  SIP_NULL)
         {
@@ -814,52 +747,49 @@ SIP_INT32  SipPf_Atoi
  Stripped file name
  *
  * Argument      :
- *    [IN]        : pcFileName[IN] - Filename
+ *    [IN]        : pFileName[IN] - Filename
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-SIP_CHAR*    SipPf_StripFileName(SIP_CHAR *pcFileName)
+SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName)
 {
-    SIP_CHAR *pcTemp = SIP_NULL;
+    SIP_CHAR* pTemp = SIP_NULL;
 
 //Device file path name will come with forward slash
-    pcTemp = SipPf_Strrchr(pcFileName,'/');
-    pcTemp = pcTemp + SIP_ONE;
+    pTemp = SipPf_Strrchr(pszFileName,'/');
+    pTemp = pTemp + SIP_ONE;
 
 
-    return pcTemp;
+    return pTemp;
 }
 
 
-    SIP_BOOL SipPf_GetSystemTime
-(
- SipSt_Timestamp *pstTime
- )
+SIP_BOOL SipPf_GetSystemTime(SipSt_Timestamp* pstTime)
 {
     ISystemTime* pSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
     IMSDate Date = pSysTime->GetDate();
     IMSTime Time = pSysTime->GetLocalTime();
 
-    pstTime->wYear            = Date.nYear;
-    pstTime->wMonth            = Date.nMonth;;
-    pstTime->wDayOfWeek        = 0;
-    pstTime->wDay            = Date.nDay;
-    pstTime->wHour            = Time.nHour;
-    pstTime->wMinute        = Time.nMinute;
-    pstTime->wSecond        = Time.nSecond;
-    pstTime->wMilliseconds    = 0;
+    pstTime->wYear = Date.nYear;
+    pstTime->wMonth = Date.nMonth;;
+    pstTime->wDayOfWeek = 0;
+    pstTime->wDay = Date.nDay;
+    pstTime->wHour = Time.nHour;
+    pstTime->wMinute = Time.nMinute;
+    pstTime->wSecond = Time.nSecond;
+    pstTime->wMilliseconds = 0;
 
     return SIP_TRUE;
 }
 
-SIP_VOID SipPf_GetTime(SIP_CHAR *pcTime)
+SIP_VOID SipPf_GetTime(SIP_CHAR* pszTime)
 {
     SipSt_Timestamp stTime;
 
     SipPf_GetSystemTime(&stTime);
 
-    SipPf_Sprintf(pcTime,(SIP_CHAR*)"[%d/%d/%d][%d:%d:%d:%d]",
+    SipPf_Sprintf(pszTime,(SIP_CHAR*)"[%d/%d/%d][%d:%d:%d:%d]",
             stTime.wYear,
             stTime.wMonth,
             stTime.wDay,
@@ -870,21 +800,21 @@ SIP_VOID SipPf_GetTime(SIP_CHAR *pcTime)
     return;
 }
 
-SIP_VOID SipPf_GetRandomId(SIP_CHAR     *pucRandomNum)
+SIP_VOID SipPf_GetRandomId(SIP_CHAR* pszRandomNum)
 {
-    SipSt_Timestamp stTime = {SIP_ZERO,SIP_ZERO,SIP_ZERO,SIP_ZERO,SIP_ZERO,SIP_ZERO,
-            SIP_ZERO,SIP_ZERO};
+    SipSt_Timestamp stTime = {SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO,
+            SIP_ZERO, SIP_ZERO};
 
     /* calculate sys time and Get Random Number */
     SipPf_GetSystemTime(&stTime);
     /* Algorithm for generating random number */
-    SIP_INT32 iTotalMillisec =  (stTime.wHour* SIP_NUM_SEC_HOURS )
-        + (stTime.wHour*SIP_NUM_SEC_MIN *SIP_NUM_SEC_MIN*SIP_NUM_1000)
-        + (stTime.wMinute*SIP_NUM_SEC_MIN*SIP_NUM_1000)
-        + (stTime.wSecond*SIP_NUM_1000)
+    SIP_INT32 nTotalMillisec = (stTime.wHour * SIP_NUM_SEC_HOURS )
+        + (stTime.wHour * SIP_NUM_SEC_MIN * SIP_NUM_SEC_MIN * SIP_NUM_1000)
+        + (stTime.wMinute * SIP_NUM_SEC_MIN * SIP_NUM_1000)
+        + (stTime.wSecond * SIP_NUM_1000)
         +  stTime.wMilliseconds * SipPf_Rand();
-    SIP_UINT32 uiIdvalue = (SipPf_Rand() +iTotalMillisec);
-    SipPf_Itoa(uiIdvalue,(SIP_CHAR*)pucRandomNum,SIP_TEN);
+    SIP_UINT32 nIdvalue = (SipPf_Rand() + nTotalMillisec);
+    SipPf_Itoa(nIdvalue, (SIP_CHAR*)pszRandomNum, SIP_TEN);
     return;
 }
 

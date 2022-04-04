@@ -74,10 +74,10 @@ typedef struct _SipSt_Timestamp
   Declaration of Functions
  *****************************************************************************/
 
-void SipPf_Snprintf(SIP_CHAR *pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR *pszFormat, ...);
-void SipPf_Sprintf(SIP_CHAR *pszBuffer, const SIP_CHAR *pszFormat, ...);
-void SipPf_Printf(SIP_CHAR *pszFormat, ...);
-void SipPf_Sscanf(SIP_CHAR *pszBuffer, SIP_CHAR *pszFormat,SIP_CHAR *pszCharAdd);
+void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...);
+void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...);
+void SipPf_Printf(SIP_CHAR* pszFormat, ...);
+void SipPf_Sscanf(SIP_CHAR* pszBuffer, SIP_CHAR* pszFormat, SIP_CHAR* pszCharAdd);
 SIP_UINT32 SipPf_Rand();
 
 /************************************************************
@@ -95,10 +95,7 @@ SIP_UINT32 SipPf_Rand();
  *                       updated
  *
  ************************************************************/
-SIP_INT32 SipPf_Strlen
-(
- const SIP_CHAR *pszSource
- );
+SIP_INT32 SipPf_Strlen(const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Strcpy
@@ -108,7 +105,7 @@ SIP_INT32 SipPf_Strlen
  *                      Pointer to destination string
  * Argument           : pcDest: InOut
  *                      Destination string
- * Argument           : kpcSource: In
+ * Argument           : pcSource: In
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -117,11 +114,7 @@ SIP_INT32 SipPf_Strlen
  *
  ************************************************************/
 
-SIP_CHAR* SipPf_Strcpy
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSource
- );
+SIP_CHAR* SipPf_Strcpy(SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Strncpy
@@ -132,7 +125,7 @@ SIP_CHAR* SipPf_Strcpy
  *                      Pointer to pcDest
  * Argument           : pcDest: <InOut>
  *                      Destination string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Source string
  * Argument           : iNumChars: <In>
  *                      Number of characters to copy
@@ -143,12 +136,7 @@ SIP_CHAR* SipPf_Strcpy
  *
  ************************************************************/
 
-SIP_CHAR* SipPf_Strncpy
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSource,
- SIP_UINT32             uiNumChars
- );
+SIP_CHAR* SipPf_Strncpy(SIP_CHAR* pszDest, const SIP_CHAR* pszSource, SIP_UINT32 nNumChars);
 /************************************************************
  * Function name    : SipPf_Strcat
  * Description        : This function concatenates source string
@@ -157,7 +145,7 @@ SIP_CHAR* SipPf_Strncpy
  *                      Pointer to pcDest
  * Argument           : pcDest: <InOut>
  *                      Destination string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      <Source string>
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -165,11 +153,7 @@ SIP_CHAR* SipPf_Strncpy
  *                       updated
  *
  ************************************************************/
-SIP_CHAR*    SipPf_Strcat
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSource
- );
+SIP_CHAR* SipPf_Strcat(SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Strncat
@@ -180,7 +164,7 @@ SIP_CHAR*    SipPf_Strcat
  *                      Pointer to pcDest
  * Argument           : pcDest: <InOut>
  *                      Destination string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Source string
  * Argument           : ssNumChars: <In>
  *                      Number of characters to concatenate
@@ -190,24 +174,19 @@ SIP_CHAR*    SipPf_Strcat
  *                       updated
  *
  ************************************************************/
-SIP_CHAR* SipPf_Strncat
-(
- SIP_CHAR             *pszDest,
- const SIP_CHAR         *kpszSource,
- SIP_UINT32             uiNumChars
- );
+SIP_CHAR* SipPf_Strncat(SIP_CHAR* pszDest, const SIP_CHAR* pszSource, SIP_UINT32 nNumChars);
 
 /************************************************************
  * Function name    : SipPf_Strcmp
  * Description        : This function compares source string
  with target string
  * Return type        : SIP_INT16
- *                      greater than 0 if kpcDest > kpcSource
+ *                      greater than 0 if pcDest > pcSource
  o if strings are same
- less than 0 if kpcDest < kpcSource
- * Argument           : kpcDest: <In>
+ less than 0 if pcDest < pcSource
+ * Argument           : pcDest: <In>
  *                      Source string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Target string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -215,23 +194,19 @@ SIP_CHAR* SipPf_Strncat
  *                       updated
  *
  ************************************************************/
-SIP_INT16  SipPf_Strcmp
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource
- );
+SIP_INT16 SipPf_Strcmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Stricmp
  * Description        :  This function is used to Compare Source
  String with    Target String.
  * Return type        : SIP_INT16
- *                      greater than 0 if kpcDest > kpcSource
+ *                      greater than 0 if pcDest > pcSource
  o if strings are same
- less than 0 if kpcDest < kpcSource
- * Argument           : kpcDest: <In>
+ less than 0 if pcDest < pcSource
+ * Argument           : pcDest: <In>
  *                      Source string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Target string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -239,11 +214,7 @@ SIP_INT16  SipPf_Strcmp
  *                       updated
  *
  ************************************************************/
-SIP_INT16  SipPf_Stricmp
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource
- );
+SIP_INT16 SipPf_Stricmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Strncmp
@@ -251,11 +222,11 @@ SIP_INT16  SipPf_Stricmp
  of characters of the passed strings.
  * Return type        : SIP_INT16
  *                          0 if strings are similar.
- *                            +ve integer if kpcSource >kpcDest
- *                            -ve integer if kpcSource >kpcDest
- * Argument           : kpcDest: <In>
+ *                            +ve integer if pcSource >pcDest
+ *                            -ve integer if pcSource >pcDest
+ * Argument           : pcDest: <In>
  *                      Target string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                        Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -263,12 +234,8 @@ SIP_INT16  SipPf_Stricmp
  *                       updated
  *
  ************************************************************/
-SIP_INT16  SipPf_Strncmp
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource,
- SIP_UINT32             uiNumChars
- );
+SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource,
+        SIP_UINT32 nNumChars);
 
 /************************************************************
  * Function name    : SipPf_Strnicmp
@@ -276,11 +243,11 @@ SIP_INT16  SipPf_Strncmp
  of characters of the passed strings(case insensitive).
  * Return type        : SIP_INT16
  *                          0 if strings are similar.
- *                            +ve integer if kpszSource >kpszDest
- *                            -ve integer if kpszSource >kpszDest
- * Argument           : kpszDest: <In>
+ *                            +ve integer if pszSource >pszDest
+ *                            -ve integer if pszSource >pszDest
+ * Argument           : pszDest: <In>
  *                      Target string
- * Argument           : kpszSource: <In>
+ * Argument           : pszSource: <In>
  *                        Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -288,24 +255,20 @@ SIP_INT16  SipPf_Strncmp
  *                       updated
  *
  ************************************************************/
-SIP_INT16  SipPf_Strnicmp
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource,
- SIP_UINT32         uiNumChars
- );
+SIP_INT16 SipPf_Strnicmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource,
+        SIP_UINT32 nNumChars);
 
 /************************************************************
  * Function name    : SipPf_Strstr
  * Description        : This function is used to find the first
- occurrence of the string kpcSource in
- the string  kpcDest.
+ occurrence of the string pcSource in
+ the string  pcDest.
  * Return type        : SIP_CHAR
  *                      Pointer to First occurrence of Source String
  *                        in Destination String or NULL.
- * Argument           : kpcDest: <In>
+ * Argument           : pcDest: <In>
  *                      Target string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -314,20 +277,16 @@ SIP_INT16  SipPf_Strnicmp
  *
  ************************************************************/
 
-SIP_CHAR*  SipPf_Strstr
-(
- const SIP_CHAR         *kpszDest,
- const SIP_CHAR         *kpszSource
- );
+SIP_CHAR* SipPf_Strstr(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Strchr
  * Description        :This function is used to find the first
  occurrence of the character  ucChar in
- the string  kpcDest.
+ the string  pcDest.
  * Return type        : SIP_CHAR
  *                      Pointer to First occurrence of ucChar
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Source string
  * Argument           : cChar: <In>
  *                      character to search
@@ -337,20 +296,16 @@ SIP_CHAR*  SipPf_Strstr
  *                       updated
  *
  ************************************************************/
-SIP_CHAR*  SipPf_Strchr
-(
- const SIP_CHAR         *kpszSource,
- SIP_CHAR             cChar
- );
+SIP_CHAR* SipPf_Strchr(const SIP_CHAR* pszSource, SIP_CHAR cChar);
 /************************************************************
  * Function name    : SipPf_Strdup
  * Description        :  This function makes a copy of a string
  by allocating memory on the heap
- and copying kpcSource to the newly
+ and copying pcSource to the newly
  allocated buffer.
  * Return type        : SIP_CHAR
  *                      pointer to new string
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      <Description>
 
  * Preconditions/
@@ -359,10 +314,7 @@ SIP_CHAR*  SipPf_Strchr
  *                       updated
  *
  ************************************************************/
-SIP_CHAR* SipPf_Strdup
-(
- const SIP_CHAR    *kpszSource
- );
+SIP_CHAR* SipPf_Strdup(const SIP_CHAR* pszSource);
 
 /************************************************************
  * Function name    : SipPf_Atoi
@@ -370,7 +322,7 @@ SIP_CHAR* SipPf_Strdup
  Source String to its integer equivalent.
  * Return type        : SIP_INT32
  *                      Integer equivalent
- * Argument           : kpcSource: <In>
+ * Argument           : pcSource: <In>
  *                      Source string
  * Preconditions/
  * Side Effects    : Preconditions for the function to be
@@ -378,20 +330,11 @@ SIP_CHAR* SipPf_Strdup
  *                       updated
  *
  ************************************************************/
-SIP_INT32   SipPf_Atoi
-(
- const SIP_CHAR    *kpszSource
- );
+SIP_INT32 SipPf_Atoi(const SIP_CHAR* pszSource);
 
-SIP_UINT32  SipPf_Atoi_Unsigned
-(
- const SIP_CHAR    *kpszStr
- );
+SIP_UINT32 SipPf_Atoi_Unsigned(const SIP_CHAR* pszStr);
 
-SIP_BOOL SipPf_Atoi_IsZero
-(
- const SIP_CHAR    *kpszStr
- );
+SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr);
 /************************************************************
  * Function name    : SipPf_Itoa
  * Description        : This function is used to  convert Integer
@@ -410,12 +353,7 @@ SIP_BOOL SipPf_Atoi_IsZero
  *                       updated
  *
  ************************************************************/
-SIP_CHAR*  SipPf_Itoa
-(
- SIP_INT32    iVal,
- SIP_CHAR        *pszDest,
- SIP_INT32    uiBase
- );
+SIP_CHAR* SipPf_Itoa(SIP_INT32 nVal, SIP_CHAR* pszDest, SIP_INT32 nBase);
 /************************************************************
  * Function name    : SipPf_Strtok
  * Description        : This function is used to search
@@ -425,7 +363,7 @@ SIP_CHAR*  SipPf_Itoa
  *                      Pointer to String or NULL.
  * Argument           : pcDest: <In>
  *                      Constant Pointer to Destination String
- * Argument           : kpcSource:
+ * Argument           : pcSource:
  Constant Pointer to source
  String
  *
@@ -435,11 +373,7 @@ SIP_CHAR*  SipPf_Itoa
  *                       updated
  *
  ************************************************************/
-SIP_CHAR*    SipPf_Strtok
-(
- SIP_CHAR         *pszDest,
- const SIP_CHAR     *kpszSource
- );
+SIP_CHAR* SipPf_Strtok(SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
 
 /******************************************************************************
  * Function name    : SIP_Strrchr
@@ -458,7 +392,7 @@ SIP_CHAR*    SipPf_Strtok
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-SIP_CHAR *SipPf_Strrchr(SIP_CHAR *pszSource,SIP_CHAR cChar);
+SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSource, SIP_CHAR cChar);
 /******************************************************************************
  * Function name    : SIP_StripFileName
  * Description    : This function strips long file paths
@@ -474,15 +408,12 @@ SIP_CHAR *SipPf_Strrchr(SIP_CHAR *pszSource,SIP_CHAR cChar);
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-SIP_CHAR*    SipPf_StripFileName(SIP_CHAR *pcFileName);
+SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName);
 
-SIP_BOOL SipPf_GetSystemTime
-(
- SipSt_Timestamp *pstTime
- );
+SIP_BOOL SipPf_GetSystemTime(SipSt_Timestamp* pstTime);
 
-SIP_VOID SipPf_GetTime(SIP_CHAR *pcTime);
+SIP_VOID SipPf_GetTime(SIP_CHAR* pszTime);
 
-SIP_VOID SipPf_GetRandomId(SIP_CHAR     *pucRandomNum);
+SIP_VOID SipPf_GetRandomId(SIP_CHAR* pszRandomNum);
 
 #endif /*__SIP_PF_STRING_H__ */

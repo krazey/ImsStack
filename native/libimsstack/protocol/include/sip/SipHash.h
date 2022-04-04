@@ -48,10 +48,10 @@
  */
 typedef struct _Hash_StSearchElement
 {
-    SIP_VOID*  pvElement;    /* Hash element*/
-    SIP_VOID*  pvSearchKey;  /* Hash key*/
+    SIP_VOID* pvElement;    /* Hash element*/
+    SIP_VOID* pvSearchKey;  /* Hash key*/
 
-    struct _Hash_StSearchElement *pstNextElement;
+    struct _Hash_StSearchElement* pstNextElement;
 
     /*
      * Flag that will be set to true if the API Hash_HashTableRemove is
@@ -59,14 +59,14 @@ typedef struct _Hash_StSearchElement
      * invocation. As soon as the structures refCount reduces to zero, the
      * memory will be freed if this flag is set.
      */
-    SIP_BOOL  bRemove;
+    SIP_BOOL bRemove;
 
     /*
      * Keep track of how many check-outs of this data have happened. If the
      * refCount is greater than 1 and Hash_HashTableRemove is invoked,
      * memory will not be freed and the bRemove flag will be set.
      */
-    SIP_UINT32  uiRefCount;
+    SIP_UINT32 nRefCount;
 
 }Hash_StSearchElement;
 
@@ -77,32 +77,32 @@ typedef struct _Hash_StSearchElement
  */
 typedef struct _Hash_StShutDownElement
 {
-    SIP_VOID*  pvElement;    /* Hash element*/
-    SIP_VOID*  pvShutDownKey;  /* Hash key */
-    struct _Hash_StShutDownElement  *pstNextElement;
+    SIP_VOID* pvElement;    /* Hash element*/
+    SIP_VOID* pvShutDownKey;  /* Hash key */
+    struct _Hash_StShutDownElement* pstNextElement;
 }Hash_StShutDownElement;
 
 /*
  * The function to be used to calculate the hash value for the key passed.
  */
-typedef SIP_UINT32 (*Hash_fnCalculateHash) (SIP_VOID *pData);
+typedef SIP_UINT32 (*Hash_fnCalculateHash) (SIP_VOID* pData);
 
 
 /*
  * The function to be used to compare keys of 2 hash elements.
  */
-typedef SIP_CHAR (*Hash_fnCompareHashKey) (SIP_VOID *pKey1,\
-        SIP_VOID *pKey2);
+typedef SIP_CHAR (*Hash_fnCompareHashKey) (SIP_VOID* pKey1,\
+        SIP_VOID* pKey2);
 
 /*
  * The function to free the data stored in the hash element.
  */
-typedef SIP_VOID (*Hash_fnFreeHashElement) (SIP_VOID *pElement);
+typedef SIP_VOID (*Hash_fnFreeHashElement) (SIP_VOID* pElement);
 
 /*
  * The function to free the key stored in the hash element.
  */
-typedef SIP_VOID (*Hash_fnFreeHashKey) (SIP_VOID *pKey);
+typedef SIP_VOID (*Hash_fnFreeHashKey) (SIP_VOID* pKey);
 
 /*
  * Iterator needed to operate on all the hash elements. User will need to
@@ -111,8 +111,8 @@ typedef SIP_VOID (*Hash_fnFreeHashKey) (SIP_VOID *pKey);
  */
 typedef struct
 {
-    Hash_StSearchElement    *pCurrentElement;
-    SIP_UINT32        uiCurrentBucket;
+    Hash_StSearchElement* pCurrentElement;
+    SIP_UINT32 nCurrentBucket;
 } Hash_St_HashIterator;
 
 
@@ -124,21 +124,21 @@ class SipHash
 {
     private:
         /* function to calculate hash value */
-        Hash_fnCalculateHash    fpCalculateHash;
+        Hash_fnCalculateHash fpCalculateHash;
         /* function to compare keys of 2 elements */
-        Hash_fnCompareHashKey    fpCompareHash;
+        Hash_fnCompareHashKey fpCompareHash;
         /* function to free the data being stored */
-        Hash_fnFreeHashElement    fpFreeHashElement;
+        Hash_fnFreeHashElement fpFreeHashElement;
         /* function to free the key given for an element */
-        Hash_fnFreeHashKey    fpKeyFreeHashKey;
+        Hash_fnFreeHashKey fpKeyFreeHashKey;
 
-        SIP_UINT32    uiSearchBuckets;            /* Max number of buckets*/
+        SIP_UINT32 nSearchBuckets;            /* Max number of buckets*/
         /* Current number of hash element in each bucket */
-        SIP_UINT32    uiNumOfSearchElements;
+        SIP_UINT32 nNumOfSearchElements;
         /* Max number of hash elements in each bucket*/
-        SIP_UINT32    uiMaxNumberOfElements;
+        SIP_UINT32 nMaxNumberOfElements;
         /* Hash elements structure*/
-        Hash_StSearchElement    **ppstHashSearchChains;
+        Hash_StSearchElement** ppstHashSearchChains;
 
 #ifdef SIP_THREAD_SAFE
         /* One for each function - it should be ok for the current architechure where
@@ -152,8 +152,8 @@ class SipHash
         /****************************************************************************
           Private Member Functions
          *****************************************************************************/
-        SipHash& operator=(IN const SipHash &objRHS);
-        SipHash(IN const SipHash &objRHS);
+        SipHash& operator=(IN const SipHash& objRHS);
+        SipHash(IN const SipHash& objRHS);
 
     public:
         /****************************************************************************
@@ -179,22 +179,15 @@ class SipHash
          **  fpKeyFreeFunc  (IN)    : Function to invoke to free the
          **            element key when the hash entry
          **            has be deleted.
-         **  uiNumBuckets  (IN)    : number of chains in the hash table.
-         **  uiMaxElements  (IN)    : maximum number of elements to be allowed
+         **  nNumBuckets  (IN)    : number of chains in the hash table.
+         **  nMaxElements  (IN)    : maximum number of elements to be allowed
          **            in the hash table.
          **   pErr    (IN/OUT)  : Error variable returned in case of failure.
          **
          ******************************************************************************/
-        SipHash
-               (
-            Hash_fnCalculateHash    fpCalculateHash,
-            Hash_fnCompareHashKey   fpCompareHash,
-            Hash_fnFreeHashElement    fpElemFreeFunc,
-            Hash_fnFreeHashKey    fpKeyFreeHashKey,
-            SIP_UINT32      uiNumBuckets,
-            SIP_UINT32      uiMaxElements,
-            SIP_UINT16      *pusError
-               );
+        SipHash(Hash_fnCalculateHash fpCalculateHash, Hash_fnCompareHashKey fpCompareHash,
+                Hash_fnFreeHashElement fpElemFreeFunc, Hash_fnFreeHashKey fpKeyFreeHashKey,
+                SIP_UINT32 nNumBuckets, SIP_UINT32 nMaxElements, SIP_UINT16* pnError);
 
         /******************************************************************************
          ** FUNCTION:   Hash_DeInit
@@ -224,12 +217,7 @@ class SipHash
          **        of failure.
          **
          ******************************************************************************/
-        SIP_BOOL Hash_Add
-                  (
-                   SIP_VOID       *pvSearchElement,
-                   SIP_VOID       *pvSearchKey,
-                   SIP_UINT16    *pusError
-                  );
+        SIP_BOOL Hash_Add(SIP_VOID* pvSearchElement, SIP_VOID* pvSearchKey, SIP_UINT16* pnError);
 
         /******************************************************************************
          ** FUNCTION:   Hash_Fetch
@@ -245,11 +233,7 @@ class SipHash
          **        fetched from the hash table.
          **
          ******************************************************************************/
-        SIP_VOID* Hash_Fetch
-                   (
-                    SIP_VOID     *pvSearchKey,
-                    SIP_UINT16    *pusError
-                   );
+        SIP_VOID* Hash_Fetch(SIP_VOID* pvSearchKey, SIP_UINT16* pnError);
 
         /******************************************************************************
          ** FUNCTION:   Hash_Fetch
@@ -266,12 +250,7 @@ class SipHash
          **  ppKey (OUT) : Stored key
          **
          ******************************************************************************/
-        SIP_VOID* Hash_Fetch
-                   (
-                    SIP_VOID     *pvSearchKey,
-                    SIP_VOID     **ppKey,
-                    SIP_UINT16   *pusError
-                   );
+        SIP_VOID* Hash_Fetch(SIP_VOID* pvSearchKey, SIP_VOID** ppKey, SIP_UINT16* pnError);
 
         /******************************************************************************
          ** FUNCTION:   Hash_Release
@@ -291,10 +270,7 @@ class SipHash
          **        released.
          **
          ******************************************************************************/
-        SIP_VOID Hash_Release
-                   (
-                    SIP_VOID     *pvKey
-                   );
+        SIP_VOID Hash_Release(SIP_VOID* pvKey);
 
         /******************************************************************************
          ** FUNCTION: Hash_Remove
@@ -309,11 +285,7 @@ class SipHash
          **  pKey  (IN)  : Key corresponding to the element to be removed.
          **
          ******************************************************************************/
-        SIP_BOOL Hash_Remove
-                   (
-                    SIP_VOID     *pvSearchKey,
-                    SIP_UINT16    *pusError
-                   );
+        SIP_BOOL Hash_Remove(SIP_VOID* pvSearchKey, SIP_UINT16* pnError);
 
 
 
@@ -331,11 +303,7 @@ class SipHash
          **          element has to be retrieved.
          **
          ******************************************************************************/
-        void Hash_IterateNext
-                     (
-                      Hash_St_HashIterator   *pstIterator,
-                      SIP_UINT16    *pusError
-                     );
+        void Hash_IterateNext(Hash_St_HashIterator* pstIterator, SIP_UINT16* pnError);
 
 
         /******************************************************************************
@@ -347,10 +315,7 @@ class SipHash
          **  pIterator  (IN/OUT)  : Hash iterator to be inited.
          **
          ******************************************************************************/
-        void Hash_InitIterator
-                      (
-                       Hash_St_HashIterator   *pIterator
-                      );
+        void Hash_InitIterator(Hash_St_HashIterator* pIterator);
 
         /******************************************************************************
          ** FUNCTION: Hash_IsFree
@@ -364,9 +329,6 @@ class SipHash
          **  puiNumFreeEntries(OUT) : Number of free entries
          **
          ******************************************************************************/
-        SIP_BOOL Hash_IsFree
-                     (
-                      SIP_UINT16     *puiNumFreeEntries
-                     );
+        SIP_BOOL Hash_IsFree(SIP_UINT16* pNumFreeEntries);
 };
 #endif //__SIP_HASH_H__

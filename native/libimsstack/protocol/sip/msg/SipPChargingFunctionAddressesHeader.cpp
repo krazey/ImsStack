@@ -42,55 +42,53 @@
 
 SipPChargingFunctionAddressesHeader::SipPChargingFunctionAddressesHeader()
     : SipHeaderBase(SipHeaderBase::P_CHRG_FUN_ADDR)
-    , m_pobjChargeAddr(SIP_NULL)
+    , m_pChargeAddr(SIP_NULL)
 {
 }
 
 SipPChargingFunctionAddressesHeader::SipPChargingFunctionAddressesHeader(
-        const SipPChargingFunctionAddressesHeader &objHeader)
+        const SipPChargingFunctionAddressesHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_pobjChargeAddr(SIP_NULL)
+    , m_pChargeAddr(SIP_NULL)
 {
-    if (objHeader.m_pobjChargeAddr != SIP_NULL)
+    if (objHeader.m_pChargeAddr != SIP_NULL)
     {
-        m_pobjChargeAddr = new SipNameValue(*(objHeader.m_pobjChargeAddr));
+        m_pChargeAddr = new SipNameValue(*(objHeader.m_pChargeAddr));
     }
 }
 
 /*destructor*/
 SipPChargingFunctionAddressesHeader::~SipPChargingFunctionAddressesHeader()
 {
-    if (m_pobjChargeAddr != SIP_NULL) {
-        m_pobjChargeAddr->SipDelete();
+    if (m_pChargeAddr != SIP_NULL)
+    {
+        m_pChargeAddr->SipDelete();
     }
 }
 
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL     SipPChargingFunctionAddressesHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipPChargingFunctionAddressesHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    if (m_pobjChargeAddr == SIP_NULL)
+    if (m_pChargeAddr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipPChargingFunctionAddressesHeader::EncodeHdr:m_pobjChargeAddr missing",
-                SIP_ZERO,SIP_ZERO);
+                "SipPChargingFunctionAddressesHeader::EncodeHdr:m_pChargeAddr missing",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pobjChargeAddr->EncodeFromList(ppucCurrPos) == SIP_FALSE)
+    if (m_pChargeAddr->EncodeFromList(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
                 "SipPChargingFunctionAddressesHeader::EncodeHdr: Name Value Encoding failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /******************************************************************************
@@ -102,51 +100,47 @@ SIP_BOOL     SipPChargingFunctionAddressesHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipPChargingFunctionAddressesHeader::DecodeHdr",SIP_ZERO,SIP_ZERO);
+                "SipPChargingFunctionAddressesHeader::DecodeHdr", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR            *pucTempPre  = SIP_NULL;
-    SIP_CHAR            *pucTempNext  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
     /*Header value is the first node of SipParameterList
       and the other Node will contain SIP parameter*/
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (DecodeHeaderParameters(pucTempNext,pucEndPt,SIP_SEMI) == SIP_FALSE)
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPChargingFunctionAddressesHeader::DecodeHdr: Hdr Prm Decoding Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pucEndPt = pucTempPre;
+        pEndPt = pTempPre;
     }
 
     /*Decode the Header Value*/
-    m_pobjChargeAddr = new SipNameValue(GetHdrType());
-    if (m_pobjChargeAddr == SIP_NULL)
+    m_pChargeAddr = new SipNameValue(GetHdrType());
+    if (m_pChargeAddr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipAuthInfoHeader::DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pobjChargeAddr->DecHdrNameVal(pucStartPt, pucEndPt) == SIP_FALSE)
+    if (m_pChargeAddr->DecHdrNameVal(pStartPt, pEndPt) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipAuthInfoHeader::DecodeHdr: Name Value Decoding Successful",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -154,9 +148,10 @@ SIP_BOOL SipPChargingFunctionAddressesHeader::DecodeHdr
 }
 
 SipHeaderBase* SipPChargingFunctionAddressesHeader::GetNewObj(SIP_INT32 /*eHdr*/,
-                                                    SipHeaderBase* pHeader)
+        SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPChargingFunctionAddressesHeader(
             *reinterpret_cast<SipPChargingFunctionAddressesHeader*>(pHeader));
     }

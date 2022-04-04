@@ -129,7 +129,7 @@ Remarks
 PUBLIC GLOBAL
 RCPtr<SIPMessageBuffer> SIPMessageBuffer::GetInstance()
 {
-    static SIPMessageBuffer *pBuffer = IMS_NULL;
+    static SIPMessageBuffer* pBuffer = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 

@@ -42,27 +42,14 @@ class SipTransportHandler
         /************************************************************
           Member Functions
          **************************************************************/
-        SIP_BOOL UpdateViaSipMsg
-            (
-             SipMessage            *pobjSipMsg,
-             SipTransportBuffer        *pobjSentBuffer,
-             SIP_INT32    eChangeProto
-            );
+        SIP_BOOL UpdateViaSipMsg(SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer,
+                SIP_INT32 eChangeProto);
 
-        PRIVATE SIP_BOOL GetTxnKeyFromSipMsg
-            (
-             IN    SipMessage    *pobjSipMsg,
-             OUT    SipTxnKey        **ppobjTxnKey,
-             OUT    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL GetTxnKeyFromSipMsg(IN SipMessage* pSipMsg, OUT SipTxnKey** ppTxnKey,
+                OUT SIP_UINT16* pnError);
 
-        PRIVATE SIP_BOOL GetTxnObjFromDb
-            (
-             IN    SipTxnKey     *pobjTxnKey,
-             OUT    SipTxn        **ppobjTxn,
-             OUT    SIP_BOOL     *pbTxnExist,
-             OUT    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL GetTxnObjFromDb(IN SipTxnKey* pTxnKey, OUT SipTxn** ppTxn,
+                OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError);
 
     public:
 
@@ -70,35 +57,17 @@ class SipTransportHandler
           Member Functions
          **************************************************************/
 
-        SIP_BOOL OnSendTransp
-            (
-             IN  SipMessage* pobjSipMsg,
-             IN  SipTransportParameter* pobjTranspParam,
-             IN  SIP_CHAR* pcSipBuffer,
-             IN  SIP_UINT32 uiSipBufferLen,
-             OUT SipTransportInfo** ppobjTranspInfo,
-             OUT SIP_UINT16* pusError
-            );
+        SIP_BOOL OnSendTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,
+                IN SIP_CHAR* pSipBuffer, IN  SIP_UINT32 nSipBufferLen,
+                OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError);
 
-        SIP_BOOL OnRecvTransp
-            (
-             IN     SipMessage        *pobjSipMsg,
-             IN     SipTransportParameter        *pobjTranspParam,
-             OUT SIP_INT32    *peTxnStatus,
-             OUT SIP_BOOL         *pbTxnExist,
-             OUT    SipTxnKey            **ppobjTxnKey,
-             OUT    SIP_UINT16        *pusError
-            );
+        SIP_BOOL OnRecvTransp(IN SipMessage* pSipMsg, IN SipTransportParameter* pTranspParam,
+                OUT SIP_INT32* peTxnStatus, OUT SIP_BOOL* pbTxnExist, OUT SipTxnKey** ppTxnKey,
+                OUT SIP_UINT16* pnError);
 
-        SIP_BOOL OnRecvTanspError
-            (
-             SIP_INT32    eTranspError,
-             SipTxnKey            *pobjTxnKey,
-             SIP_INT32    *peTxnStatus,
-             SipTransportInfo        **ppobjTranspInfo,
-             ISipUserData        *pobjUserData,
-             SIP_UINT16        *pusError
-            );
+        SIP_BOOL OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey* pTxnKey,
+                SIP_INT32* peTxnStatus, SipTransportInfo** ppTranspInfo, ISipUserData* pUserData,
+                SIP_UINT16* pnError);
 
         SIP_BOOL IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnKey);
 };

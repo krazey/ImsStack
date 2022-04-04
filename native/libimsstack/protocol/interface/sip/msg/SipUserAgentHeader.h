@@ -49,31 +49,21 @@ class SipUserAgentHeader : public SipHeaderBase
     public:
         /*constructor*/
         SipUserAgentHeader(SIP_INT32 eHdrType);
-        SipUserAgentHeader(const SipUserAgentHeader &objHeader);
+        SipUserAgentHeader(const SipUserAgentHeader& objHeader);
 
         /*destructor*/
         virtual ~SipUserAgentHeader();
-        static SipHeaderBase* GetNewObj(SIP_INT32 eHdr,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
         /*Sets */
-        SIP_BOOL AddProductNameVer
-            (
-             const SIP_CHAR    *pucProduct
-            );
+        SIP_BOOL AddProductNameVer(const SIP_CHAR* pszProduct);
         inline SIP_BOOL IsValidHeader() const
         { return (m_objProductList.IsEmpty() == SIP_FALSE) ? SIP_TRUE : SIP_FALSE; }
 };

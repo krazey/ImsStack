@@ -45,54 +45,42 @@ class SipRetryAfterHeader : public SipHeaderBase
 {
     private:
         /*Delta seconds*/
-        SIP_UINT32        m_uiDeltaSec;
+        SIP_UINT32 m_nDeltaSec;
 
         /*Comment*/
-        SIP_CHAR        *m_pszComment;
+        SIP_CHAR* m_pszComment;
 
     public:
         /*constructor*/
         SipRetryAfterHeader();
 
-        SipRetryAfterHeader(const SipRetryAfterHeader &objHeader);
-
-
+        SipRetryAfterHeader(const SipRetryAfterHeader& objHeader);
 
         /*destructor*/
         ~SipRetryAfterHeader();
 
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
         /*Sets */
-        inline SIP_VOID SetDeltaSec(SIP_UINT32 uiDeltaSec)
+        inline SIP_VOID SetDeltaSec(SIP_UINT32 nDeltaSec)
         {
-            m_uiDeltaSec = uiDeltaSec;
+            m_nDeltaSec = nDeltaSec;
         }
         /*Gets */
         inline SIP_UINT32 GetDeltaSec() const
         {
-           return m_uiDeltaSec;
+           return m_nDeltaSec;
         }
 
         /*Sets */
-        SIP_BOOL SetComment
-            (
-             const SIP_CHAR    *pucComment
-            );
+        SIP_BOOL SetComment(const SIP_CHAR* pszComment);
         /*Gets */
         inline const SIP_CHAR* GetComment() const
         {

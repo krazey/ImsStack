@@ -40,7 +40,7 @@ class ISipUserData
 private:
     SIP_UINT32 m_nMsgOptions;
     SIP_BOOL m_bDeleteFlag;
-    SIP_VOID *m_pvUserData; /* Stack User Specific Data */
+    SIP_VOID* m_pvUserData; /* Stack User Specific Data */
 
 public:
     inline ISipUserData()
@@ -49,7 +49,7 @@ public:
         , m_pvUserData(SIP_NULL)
     { }
 
-    inline ISipUserData(SIP_VOID *pvUserData)
+    inline ISipUserData(SIP_VOID* pvUserData)
         : m_nMsgOptions(ESIPMSGOPT_NONE)
         , m_bDeleteFlag(SIP_FALSE)
         , m_pvUserData(pvUserData)
@@ -58,7 +58,7 @@ public:
     inline SIP_VOID* GetUserData() const
     { return m_pvUserData; }
 
-    inline void SetUserData(SIP_VOID *pvUserData)
+    inline void SetUserData(SIP_VOID* pvUserData)
     { m_pvUserData = pvUserData; }
 
     inline SIP_BOOL GetDeleteFlag() const

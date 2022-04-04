@@ -64,7 +64,7 @@ SipResourcePriorityHeader::SipResourcePriorityHeader()
  * Side Effects      : none
  *****************************************************************************/
 SipResourcePriorityHeader::SipResourcePriorityHeader(
-        const SipResourcePriorityHeader &objHeader)
+        const SipResourcePriorityHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszNameSpace(SipPf_Strdup(objHeader.m_pszNameSpace))
     , m_pszRPriority(SipPf_Strdup(objHeader.m_pszRPriority))
@@ -101,24 +101,21 @@ SipResourcePriorityHeader::~SipResourcePriorityHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipResourcePriorityHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL) )
     {
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos, m_pszNameSpace);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszNameSpace);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_DOT(*ppucCurrPos);
+    SIP_ENC_DOT(*ppCurrPos);
 
-    SipPf_Strcpy(*ppucCurrPos, m_pszRPriority);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszRPriority);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -133,12 +130,9 @@ SIP_BOOL SipResourcePriorityHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipResourcePriorityHeader::SetNameSpace
-(
- const SIP_CHAR * pkszNameSpace
- )
+SIP_BOOL SipResourcePriorityHeader::SetNameSpace(const SIP_CHAR* pszNameSpace)
 {
-    return SetCharVar(pkszNameSpace,m_pszNameSpace);
+    return SetCharVar(pszNameSpace, m_pszNameSpace);
 }
 
 /******************************************************************************
@@ -150,13 +144,9 @@ SIP_BOOL SipResourcePriorityHeader::SetNameSpace
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipResourcePriorityHeader::SetRPriority
-(
- const SIP_CHAR * pkszRPriority
- )
-
+SIP_BOOL SipResourcePriorityHeader::SetRPriority(const SIP_CHAR* pszRPriority)
 {
-    return SetCharVar(pkszRPriority,m_pszRPriority);
+    return SetCharVar(pszRPriority, m_pszRPriority);
 }
 
 /******************************************************************************
@@ -168,55 +158,52 @@ SIP_BOOL SipResourcePriorityHeader::SetRPriority
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipResourcePriorityHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt,  pucEndPt, &pucTempPre, SIP_DOT) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, SIP_DOT) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipResourcePriorityHeader::DecodeHdr: Dot missing in ResourcePriority",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pszNameSpace = sipCreateString(pucStartPt, pucTempPre);
+    m_pszNameSpace = sipCreateString(pStartPt, pTempPre);
     if (m_pszNameSpace == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "DecodeHdr:Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pucStartPt = pucTempPre + SIP_TWO;
-    m_pszRPriority = sipCreateString(pucStartPt, pucEndPt);
+    pStartPt = pTempPre + SIP_TWO;
+    m_pszRPriority = sipCreateString(pStartPt, pEndPt);
     if (m_pszRPriority == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "DecodeHdr:Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipResourcePriorityHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipResourcePriorityHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipResourcePriorityHeader(
             *reinterpret_cast<SipResourcePriorityHeader*>(pHeader));
     }

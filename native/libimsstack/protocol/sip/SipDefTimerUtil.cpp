@@ -72,57 +72,41 @@ SipDefTimerUtil::~SipDefTimerUtil()
 
 }
 
-SIP_BOOL SipDefTimerUtil::StartTimer
-(
- SIP_VOID        **ppvTimerId,
- SIP_UINT32        uiDuration,
- SIP_UINT16        usResetFlag,
- SIPCB_TIMERHANDLER        cbTimerHandler,
- SIP_VOID            *pvData
- )
+SIP_BOOL SipDefTimerUtil::StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration,
+        SIP_UINT16 nResetFlag, SIPCB_TIMERHANDLER cbTimerHandler, SIP_VOID* pvData)
 {
     if (ppvTimerId == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    (void)usResetFlag;
+    (void)nResetFlag;
 
-    return sip_cbk_startTimer(uiDuration, cbTimerHandler, pvData, ppvTimerId);
+    return sip_cbk_startTimer(nDuration, cbTimerHandler, pvData, ppvTimerId);
 
 }
-SIP_VOID* SipDefTimerUtil::StopTimer
-(
- SIP_VOID        *pvTimerId
- )
+SIP_VOID* SipDefTimerUtil::StopTimer(SIP_VOID* pvTimerId)
 {
     if (pvTimerId == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SIP_VOID *pvData = SIP_NULL;
+    SIP_VOID* pvData = SIP_NULL;
     sip_cbk_stopTimer(pvTimerId, &pvData);
 
     return pvData;
 }
 
-SIP_VOID* SipDefTimerUtil::StopTimerEx
-(
- SIP_VOID*     pvTimerId
- )
+SIP_VOID* SipDefTimerUtil::StopTimerEx(SIP_VOID* pvTimerId)
 {
     return StopTimer(pvTimerId);
 }
 
-SIP_BOOL SipDefTimerUtil::ResetTimer
-(
- SIP_VOID*    pvTimerId,
- SIP_UINT32    uiNewDuration
- )
+SIP_BOOL SipDefTimerUtil::ResetTimer(SIP_VOID* pvTimerId, SIP_UINT32 nNewDuration)
 {
     (void)pvTimerId;
-    (void)uiNewDuration;
+    (void)nNewDuration;
     return SIP_FALSE;
 }
 

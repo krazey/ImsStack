@@ -87,31 +87,31 @@ class SipTransportInfo
           Private    Member Variables
          **************************************************************/
         /* Number of Times message has been retransmitted */
-        SIP_CHAR            m_cNumTimeReqSent;
+        SIP_CHAR m_cNumTimeReqSent;
 
         /* Actual Transport used for Data Transmission :
            UPD on Size Constraint results
            in retransmssion, when TCP fails retry with the same UDP */
 
-        SipTransportParameter        *m_pobjActualDestParam;
+        SipTransportParameter* m_pActualDestParam;
 
         /*Transport parameter given by User */
-        SipTransportParameter        *m_pobjTranspParam;
+        SipTransportParameter* m_pTranspParam;
 
         /* Actual Sent Buffer*/
-        SipTransportBuffer    *m_pobjSentBuffer;
+        SipTransportBuffer* m_pSentBuffer;
 
         /* SipMessage Corresponding to actual sent buffer. used in callbacks to network */
-        SipMessage        *m_pobjSentSipMsg;
+        SipMessage* m_pSentSipMsg;
 
         /* Len > 200 bytes of MTU or Len > 1300 when MTU not known */
-        SIP_BOOL            m_bExceedMTU;
+        SIP_BOOL m_bExceedMTU;
 
         /***********************************************************
           Private Member Functions
          ************************************************************/
-        SipTransportInfo& operator=(IN const SipTransportInfo &objRHS);
-        SipTransportInfo(IN const SipTransportInfo &objRHS);
+        SipTransportInfo& operator=(IN const SipTransportInfo& objRHS);
+        SipTransportInfo(IN const SipTransportInfo& objRHS);
 
     public:
 
@@ -119,11 +119,8 @@ class SipTransportInfo
           Member Functions
          **************************************************************/
         SipTransportInfo();
-        SipTransportInfo
-            (
-             SipTransportParameter     *pobjTranspParam,
-             SipTransportBuffer    *pobjTransSipBuffer
-            );
+        SipTransportInfo(SipTransportParameter* pTranspParam,
+                SipTransportBuffer* pTransSipBuffer);
         virtual ~SipTransportInfo();
         /* Set APIs */
 
@@ -132,7 +129,7 @@ class SipTransportInfo
         /* Returns the Transport parameter to which the Req/Resp was sent initially */
         SipTransportParameter* GetMsgSentTranspParam();
 
-        SIP_BOOL SetMsgSentTranspParam(SipTransportParameter* pobjTranspParam);
+        SIP_BOOL SetMsgSentTranspParam(SipTransportParameter* pTranspParam);
 
         /* Returns the Transmitting SIP Buffer */
         SipTransportBuffer* GetTranspSipBuffer();
@@ -140,8 +137,8 @@ class SipTransportInfo
         SIP_BOOL IsExceedMTU();
 
         SIP_BOOL SetExceedMTUFlag(SIP_BOOL bFlag);
-        SIP_VOID SetSentSipMsg ( SipMessage*    _pObjSipMsg );
-        SipMessage*    GetSentSipMsg ();
+        SIP_VOID SetSentSipMsg(SipMessage* _pSipMsg);
+        SipMessage* GetSentSipMsg();
 
 };
 /****************************************************************************

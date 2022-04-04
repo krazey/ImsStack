@@ -31,11 +31,11 @@ class SipVector
 {
 public:
     SipVector();
-    SipVector(IN const SipVector<T> &objRHS);
+    SipVector(IN const SipVector<T>& objRHS);
     virtual ~SipVector();
 
 public:
-    SipVector<T>& operator=(IN const SipVector<T> &objRHS);
+    SipVector<T>& operator=(IN const SipVector<T>& objRHS);
 
 public:
     // Empty the vector
@@ -103,9 +103,9 @@ public:
     //
 
     // Insert another vector at a given index
-    inline SIP_SLONG InsertVectorAt(IN const SipVector<T> &objVector, IN SIP_UINT32 nIndex);
+    inline SIP_SLONG InsertVectorAt(IN const SipVector<T>& objVector, IN SIP_UINT32 nIndex);
     // Append another vector at the end of this one
-    inline SIP_SLONG AppendVector(IN const SipVector<T> &objVector);
+    inline SIP_SLONG AppendVector(IN const SipVector<T>& objVector);
 
     //
     // Add / Insert / Replace elements
@@ -160,7 +160,7 @@ SipVector<T>::SipVector()
 
 
 template <class T> inline
-SipVector<T>::SipVector(IN const SipVector<T> &objRHS)
+SipVector<T>::SipVector(IN const SipVector<T>& objRHS)
     : mVector(objRHS.mVector)
 {
 }
@@ -174,7 +174,7 @@ SipVector<T>::~SipVector()
 
 
 template <class T> inline
-SipVector<T>& SipVector<T>::operator=(IN const SipVector<T> &objRHS)
+SipVector<T>& SipVector<T>::operator=(IN const SipVector<T>& objRHS)
 {
     if (this != &objRHS)
     {
@@ -247,7 +247,7 @@ T& SipVector<T>::Top()
 
 
 template <class T> inline
-SIP_SLONG SipVector<T>::InsertVectorAt(IN const SipVector<T> &objVector, IN SIP_UINT32 nIndex)
+SIP_SLONG SipVector<T>::InsertVectorAt(IN const SipVector<T>& objVector, IN SIP_UINT32 nIndex)
 {
     const auto& it = mVector.begin();
     mVector.insert(it + nIndex, objVector.mVector.begin(), objVector.mVector.end());
@@ -256,7 +256,7 @@ SIP_SLONG SipVector<T>::InsertVectorAt(IN const SipVector<T> &objVector, IN SIP_
 
 
 template <class T> inline
-SIP_SLONG SipVector<T>::AppendVector(IN const SipVector<T> &objVector)
+SIP_SLONG SipVector<T>::AppendVector(IN const SipVector<T>& objVector)
 {
     return InsertVectorAt(objVector, GetSize());
 }

@@ -41,7 +41,7 @@
 #define SIP_MAX_HDR_LEN 32
 
 
-extern SIPHdrAccess* gpObjHdrAccess;
+extern SIPHdrAccess* gpHdrAccess;
 
 
 /******************************************************************************
@@ -53,22 +53,18 @@ extern SIPHdrAccess* gpObjHdrAccess;
  *
  * Side Effects          : none
  *****************************************************************************/
-    SIP_CHAR*  sipSkipRwWSP
-(
- SIP_CHAR            *pucStartPt,
- SIP_CHAR            *pucEndPt
- )
+SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*NULL validation*/
-    if ((pucStartPt == SIP_NULL) || (pucEndPt == SIP_NULL))
+    if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
     {
         return SIP_NULL;
     }
-    while ((pucEndPt > pucStartPt) && IS_WSP(*pucEndPt))
+    while ((pEndPt > pStartPt) && IS_WSP(*pEndPt))
     {
-        pucEndPt--;
+        pEndPt--;
     }
-    return pucEndPt;
+    return pEndPt;
 }
 
 
@@ -83,22 +79,17 @@ extern SIPHdrAccess* gpObjHdrAccess;
  *
  * Side Effects      : none
  *****************************************************************************/
-    SIP_BOOL sipFindPostDelimiter
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempLoc,
- SIP_CHAR        ucDelimiter
- )
+SIP_BOOL sipFindPostDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
+        SIP_CHAR cDelimiter)
 {
-    while (pucStartPt <= pucEndPt)
+    while (pStartPt <= pEndPt)
     {
-        if (*pucStartPt == ucDelimiter)
+        if (*pStartPt == cDelimiter)
         {
-            *pucTempLoc = pucStartPt + SIP_ONE;
+            *ppTempLoc = pStartPt + SIP_ONE;
             return SIP_TRUE;
         }
-        pucStartPt = pucStartPt + SIP_ONE;
+        pStartPt = pStartPt + SIP_ONE;
     }
     return SIP_FALSE;
 }
@@ -115,18 +106,14 @@ extern SIPHdrAccess* gpObjHdrAccess;
  *
  * Side Effects          : none
  *****************************************************************************/
-    SIP_INT32 sipGetUriType
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt
- )
+SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
-    SIP_UINT16 usSize = (pucEndPt - pucStartPt) + SIP_ONE;
-    if (SipPf_Memcmp(pucStartPt, SIP_SIP, usSize) == 0)
+    SIP_UINT32 nSize = (pEndPt - pStartPt) + SIP_ONE;
+    if (SipPf_Memcmp(pStartPt, SIP_SIP, nSize) == 0)
     {
         return SipUri::SCHEME_SIP;
     }
-    else if (SipPf_Memcmp(pucStartPt, SIP_SIPS, usSize) == 0)
+    else if (SipPf_Memcmp(pStartPt, SIP_SIPS, nSize) == 0)
     {
         return SipUri::SCHEME_SIPS;
     }
@@ -143,13 +130,10 @@ extern SIPHdrAccess* gpObjHdrAccess;
  *
  * Side Effects          : none
  *****************************************************************************/
-    SIP_INT32 sipGetHdrType
-(
- const SIP_CHAR    *pszHdrName
- )
+SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName)
 {
-    gpObjHdrAccess = SIPHdrAccess:: GetInstance();
-    return gpObjHdrAccess->GetHdrType(pszHdrName);
+    gpHdrAccess = SIPHdrAccess::GetInstance();
+    return gpHdrAccess->GetHdrType(pszHdrName);
 }
 
 /*****************************************************************************
@@ -161,10 +145,7 @@ extern SIPHdrAccess* gpObjHdrAccess;
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 CheckAndGetHdrEnumType
-(
-SIP_INT32 nType
-)
+SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
 {
     //support EXPIRES_ANY & EXPIRES_DATE
     if ((nType == SipHeaderBase::EXPIRES_ANY) || (nType == SipHeaderBase::EXPIRES_DATE))
@@ -187,21 +168,21 @@ SIP_INT32 nType
 /****************************************************************************
   Class Member Function Implementations
  *****************************************************************************/
-SIP_BOOL IsValidAddress(SIP_CHAR *pucStartPt, SIP_UINT32 uiDecLen)
+SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    SIP_CHAR            *pucTempLoc = SIP_NULL;
-    SIP_CHAR            *pucEndPt = pucStartPt +uiDecLen  - SIP_ONE;
+    SIP_CHAR* pTempLoc = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
     /*Find the Start of header parm*/
-    if (sipFindPostDelimiter(pucStartPt, pucEndPt, &pucTempLoc, QMARK) == SIP_FALSE)
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, QMARK) == SIP_FALSE)
     {
         return SIP_TRUE;
     }
 
-    pucStartPt = pucTempLoc;
-    pucTempLoc = SIP_NULL;
+    pStartPt = pTempLoc;
+    pTempLoc = SIP_NULL;
 
-    if (sipFindPostDelimiter(pucStartPt, pucEndPt, &pucTempLoc, PERCENT) == SIP_FALSE)
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTempLoc, PERCENT) == SIP_FALSE)
     {
         return SIP_TRUE;
     }

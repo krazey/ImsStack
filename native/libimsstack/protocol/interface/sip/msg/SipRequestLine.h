@@ -44,53 +44,32 @@
 class SipRequestLine: public SipRefBase , public IParameterComponent
 {
     private:
-        SIP_CHAR        *m_pszMethod;
-        SipAddrSpec        *m_pobjReqUri;
-        SIP_CHAR        *m_pszSipVersion;
+        SIP_CHAR* m_pszMethod;
+        SipAddrSpec* m_pReqUri;
+        SIP_CHAR* m_pszSipVersion;
 
     public:
         /*Constructor*/
         SipRequestLine();
 
-        SipRequestLine
-            (
-             SIP_CHAR        *pszMethod,
-             SipAddrSpec        *pobjReqUri,
-             const SIP_CHAR    *pszSipVersion
-            );
-        SipRequestLine(const SipRequestLine &objHeader);
+        SipRequestLine(SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* pszSipVersion);
+        SipRequestLine(const SipRequestLine& objHeader);
         /*Destructor*/
         ~SipRequestLine();
 
 
         /*Function for encoding*/
-        SIP_BOOL EncodeRequestLine
-            (
-             SIP_CHAR     **ppucCurrPos
-            );
+        SIP_BOOL EncodeRequestLine(SIP_CHAR** ppCurrPos);
 
         /*Function for decoding*/
-        SIP_BOOL DecodeRequestLine
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32 uiDecLen
-            );
+        SIP_BOOL DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
         /*Set Methods*/
-        SIP_BOOL SetMethod
-            (
-             const SIP_CHAR    *pkszMethod
-            );
+        SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
 
-        SIP_BOOL SetSipVersion
-            (
-             const SIP_CHAR    *pkszVer
-            );
+        SIP_BOOL SetSipVersion(const SIP_CHAR* pszVer);
 
-        SIP_BOOL SetReqUri
-            (
-             SipAddrSpec    *pobjAddrSpec
-            );
+        SIP_BOOL SetReqUri(SipAddrSpec* pAddrSpec);
 
         /*###TODO */
         inline const SIP_CHAR* GetMethod() const
@@ -104,7 +83,7 @@ class SipRequestLine: public SipRefBase , public IParameterComponent
         }
 
         SipAddrSpec* GetReqUri();
-        SIP_BOOL  IsValidComponent(const SIP_CHAR *pucComponent) const;
+        SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
 
 };
 

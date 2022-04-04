@@ -48,7 +48,7 @@ SipPolicyContactHeader::SipPolicyContactHeader()
 {
 }
 
-SipPolicyContactHeader::SipPolicyContactHeader(const SipPolicyContactHeader &objHeader)
+SipPolicyContactHeader::SipPolicyContactHeader(const SipPolicyContactHeader& objHeader)
     : SipNameAddrHeader(objHeader)
 {
 }
@@ -59,29 +59,26 @@ SipPolicyContactHeader::~SipPolicyContactHeader()
 {
 }
 
-SIP_BOOL SipPolicyContactHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipPolicyContactHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    if (m_pobjNameAddr == SIP_NULL)
+    if (m_pNameAddr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                    "Empty Addr Spec",SIP_ZERO,SIP_ZERO);
+                    "Empty Addr Spec", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    m_pobjNameAddr->SetParameterComponent(this);
+    m_pNameAddr->SetParameterComponent(this);
 
-    if (m_pobjNameAddr->EncodeNameAddr(ppucCurrPos) == SIP_FALSE)
+    if (m_pNameAddr->EncodeNameAddr(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "sipEncodePolicyContactHdr: Addr Spec failed",SIP_ZERO,SIP_ZERO);
+                "sipEncodePolicyContactHdr: Addr Spec failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /*This function has been added for Policy Contact Header Decoding purpose-- megha.r@*/
@@ -94,64 +91,60 @@ SIP_BOOL SipPolicyContactHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPolicyContactHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPolicyContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if ((uiDecLen == SIP_ZERO) || (m_pobjNameAddr == SIP_NULL))
+    if ((nDecLen == SIP_ZERO) || (m_pNameAddr == SIP_NULL))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer or nameAddr null",SIP_ZERO,SIP_ZERO);
+                "Empty buffer or nameAddr null", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Add reference for Percentage Encoding*/
     if (IsPercentEncHdr() == SIP_TRUE)
     {
-        m_pobjNameAddr->SetParameterComponent(static_cast<IParameterComponent*>(this));
+        m_pNameAddr->SetParameterComponent(static_cast<IParameterComponent*>(this));
     }
 
     //Check whether it is policyContact-info = LAQUOT policyContact-uri RAQUOT, if not Failure case
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR            *pucTempPre= SIP_NULL;
-    SIP_INT32            uiLen = SIP_ZERO;
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPre, RIGHT_ANGLE) == SIP_TRUE)
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_INT32 nLen = SIP_ZERO;
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_ANGLE) == SIP_TRUE)
     {
-        if (m_pobjNameAddr->DecodeNameAddr(pucStartPt, pucTempPre) == SIP_FALSE)
+        if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "%d::DecodeHdr:Name Addr decoding failed",
-                    GetHdrType(),SIP_ZERO);
+                    GetHdrType(), SIP_ZERO);
             return SIP_FALSE;
         }
         /*Now find the start of Sip Prm*/
-        uiLen = pucTempPre-pucStartPt;
-        pucStartPt = pucTempPre + SIP_TWO;
-        pucStartPt = sipSkipFwLWS( pucStartPt, pucEndPt);
-        pucTempPre = SIP_NULL;
-        SIP_CHAR *pucTempNext = SIP_NULL;
+        nLen = pTempPre-pStartPt;
+        pStartPt = pTempPre + SIP_TWO;
+        pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+        pTempPre = SIP_NULL;
+        SIP_CHAR* pTempNext = SIP_NULL;
 
-        //added the condition ((*pucStartPt)==';')
-        if (sipFindActualPos(pucStartPt, pucEndPt,
-                &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+        //added the condition ((*pStartPt)==';')
+        if (sipFindActualPos(pStartPt, pEndPt,
+                &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
         {
-            if (DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) == SIP_FALSE)
+            if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "%d::DecodeHdr: Prm decoding failed",
-                    GetHdrType(),SIP_ZERO);
+                    GetHdrType(), SIP_ZERO);
                 return SIP_FALSE;
             }
         }
         else
         {
-            if (uiLen != (SIP_INT32(uiDecLen-2)))
+            if (nLen != (SIP_INT32(nDecLen-2)))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "%d::DecodeHdr: Invalid Delimiter separating param",
-                        GetHdrType(),SIP_ZERO);
+                        GetHdrType(), SIP_ZERO);
                 return SIP_FALSE;
             }
         }
@@ -160,7 +153,7 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipNameAddr::DecodeNameAddr: Right Angle Not Found",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -168,9 +161,10 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr
 }
 
 
-SipHeaderBase* SipPolicyContactHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipPolicyContactHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPolicyContactHeader(*reinterpret_cast<SipPolicyContactHeader*>(pHeader));
     }
     return new SipPolicyContactHeader();

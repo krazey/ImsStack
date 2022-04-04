@@ -19,7 +19,7 @@ class SipMutex
         void Unlock();
 
     private:
-        void *pMutex;
+        void* pMutex;
 };
 
 #endif // __SIP_MUTEX_H__

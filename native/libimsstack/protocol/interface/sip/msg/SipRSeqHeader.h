@@ -47,16 +47,13 @@ class SipRSeqHeader : public SipHeaderBase
         /*constructor*/
         SipRSeqHeader();
 
-        SipRSeqHeader(const SipRSeqHeader &objHeader);
+        SipRSeqHeader(const SipRSeqHeader& objHeader);
 
         /*destructor*/
         ~SipRSeqHeader();
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
         /*Sets */
-        SIP_BOOL SetRSeqValue
-            (
-             SIP_UINT32    uiRSeqValue
-            );
+        SIP_BOOL SetRSeqValue(SIP_UINT32 nRSeqValue);
 
         /*Gets */
         SIP_UINT32 GetRSeqValue();

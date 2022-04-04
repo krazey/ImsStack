@@ -93,17 +93,12 @@ typedef enum   _SipEn_DebugTypes
  *    [IN]        : pszFilename[IN]  - Filename
  *    [IN]        : iLine[IN]           - Line number in file.
  eError[IN]        - Error
- pcFormat[IN]     - Format String
+ pszFormat[IN]     - Format String
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-void SIP_DEBUG_LOG
-(
- SIP_UINT32       nCategory,
- SIP_CHAR         *pszFilename,
- SIP_INT32         iLine,
- SIP_CHAR         *pcFormat,...
- );
+void SIP_DEBUG_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
+        SIP_CHAR* pszFormat,...);
 
 #endif //__SIP_DEBUG_H__

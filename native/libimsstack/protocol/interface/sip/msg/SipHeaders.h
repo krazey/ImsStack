@@ -85,76 +85,35 @@ class SipHeaders
 {
     //Request headers
 
-    SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END+SIP_ONE];
+    SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END + SIP_ONE];
 
     public:
     SipHeaders();
     virtual ~SipHeaders();
-    SIP_BOOL CopyHdrs(SipHeaders *pobjHdrs);
-    SIP_BOOL EncodeHdrs
-        (
-         SIP_CHAR     **ppucCurrPos,
-         SIP_UINT32     uiMsgOptions
-        );
+    SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
+    SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeHdrs
-        (
-         SIP_CHAR    *pucStartPt,
-         SIP_UINT32     uiDecLen,
-         SIP_CHAR     **pucHdrName,
-         SIP_CHAR     **pucHdrBody
-        );
+    SIP_BOOL DecodeHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
+            SIP_CHAR** ppHdrBody);
 
     SipHeaderBase* getHdrObj(SIP_INT32 eHdrType);
 
-    SipHeaderBase* getHdrObj
-        (
-         SIP_INT32 eIndex,
-         SIP_UINT16 usPos
-        );
-    SipHeaderBase* getListHdrObj(SIP_INT32 eIndex);
+    SipHeaderBase* getHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex);
 
-    SipHeaderBase* getNewHdrObj
-        (
-         SIP_INT32    eHdrType
-        );
+    SipHeaderBase* getNewHdrObj(SIP_INT32 eHdrType);
 
-    SIP_BOOL SetHdr
-        (
-         SipHeaderBase* pstObjHdr
-        ); //RTBD
-     SIP_BOOL  AppendHdr
-        (
-         SipHeaderBase* pobjHdr
-        );
-     SIP_BOOL InsertHdr
-        (
-         SipHeaderBase* pobjHdr,
-         SIP_UINT32 nIndex
-        );
-    SIP_VOID OverWriteHdrObj(IN SipHeaders* pobjSrcHdrs, IN SIP_BOOL bIgnoreUnknownHeader);
+    SIP_BOOL SetHdr(SipHeaderBase* pHeader);
+    SIP_BOOL AppendHdr(SipHeaderBase* pHdr);
+    SIP_BOOL InsertHdr(SipHeaderBase* pHdr, SIP_UINT32 nIndex);
+    SIP_VOID OverWriteHdrObj(IN SipHeaders* pSrcHdrs, IN SIP_BOOL bIgnoreUnknownHeader);
     SIP_BOOL RemoveHdr(SIP_INT32 eHdrType);
-    static SipHeaderBase* CreateCoreHdrObj
-        (
-        SIP_INT32     eHdrType
-        );
-    static SipHeaderBase* CloneHdrObj
-        (
-         SipHeaderBase* pobjHdr
-        );
+    static SipHeaderBase* CreateCoreHdrObj(SIP_INT32 eHdrType);
+    static SipHeaderBase* CloneHdrObj(SipHeaderBase* pHdr);
     static SIP_BOOL IsListHdr(SIP_INT32 eHdrType);
     private:
-    SIP_BOOL EncodeMandatoryHdrs
-        (
-         SIP_CHAR     **ppucCurrPos,
-         SIP_UINT32     uiMsgOptions
-        );
+    SIP_BOOL EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL EncodeContentHdrs
-        (
-         SIP_CHAR     **ppucCurrPos,
-         SIP_UINT32     uiMsgOptions
-        );
+    SIP_BOOL EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
 
 };
@@ -169,12 +128,7 @@ class SipHeaders
  * Side Effects          : none
  *****************************************************************************/
 
-SIP_BOOL sipEncodeHdrName
-(
- SIP_INT32        eHdrType,
- SIP_CHAR             **ppucMsgBuffCurrPos,
- SIP_UINT32             uiMsgOptions
- );
+SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_UINT32 nMsgOptions);
 
 /******************************************************************************
  * Function name      : sipEncodeHdrName
@@ -185,10 +139,6 @@ SIP_BOOL sipEncodeHdrName
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL sipEncodeShortHdrName
-(
- SIP_INT32        eHdrType,
- SIP_CHAR         **ppucMsgBuffCurrPos
- );
+SIP_BOOL sipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
 #endif //__SIP_HEADERS_H__

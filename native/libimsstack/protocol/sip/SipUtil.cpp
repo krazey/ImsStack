@@ -44,7 +44,7 @@
 /****************************************************************************
   Global Variables
  *****************************************************************************/
-static SipUtil *gpObjUtil = SIP_NULL;
+static SipUtil *gpUtil = SIP_NULL;
 
 /****************************************************************************
   Local Function Declaration [Static Functions]
@@ -62,95 +62,95 @@ static SipUtil *gpObjUtil = SIP_NULL;
 /****************************************************************************
   Function Implementation [STARTS]
  *****************************************************************************/
-    SipUtil::SipUtil()
-:m_pObjTxnListener(SIP_NULL)
+SipUtil::SipUtil()
+    : m_pTxnListener(SIP_NULL)
 {
     /* Create Default In-Build Services */
-    m_pObjLoggerUtil = new SipDefLoggerUtil();
-    m_pObjTimerUtil = new SipDefTimerUtil();
-    m_pObjNetworkUtil = new SipDefNetworkUtil();
+    m_pLoggerUtil = new SipDefLoggerUtil();
+    m_pTimerUtil = new SipDefTimerUtil();
+    m_pNetworkUtil = new SipDefNetworkUtil();
 }
 
 SipUtil::~SipUtil()
 {
-    if (m_pObjTxnListener != SIP_NULL)
+    if (m_pTxnListener != SIP_NULL)
     {
-        delete m_pObjTxnListener;
+        delete m_pTxnListener;
     }
 
-    if (m_pObjNetworkUtil != SIP_NULL)
+    if (m_pNetworkUtil != SIP_NULL)
     {
-        delete m_pObjNetworkUtil;
+        delete m_pNetworkUtil;
     }
 
-    if (m_pObjTimerUtil != SIP_NULL)
+    if (m_pTimerUtil != SIP_NULL)
     {
-        delete m_pObjTimerUtil;
+        delete m_pTimerUtil;
     }
 
-    if (m_pObjLoggerUtil != SIP_NULL)
+    if (m_pLoggerUtil != SIP_NULL)
     {
-        delete m_pObjLoggerUtil;
+        delete m_pLoggerUtil;
     }
 
 }
 
-SIP_VOID SipUtil::RegisterTimer(ISipTimerUtil *pObjTimerUtil)
+SIP_VOID SipUtil::RegisterTimer(ISipTimerUtil* pTimerUtil)
 {
-    if (m_pObjTimerUtil != SIP_NULL)
+    if (m_pTimerUtil != SIP_NULL)
     {
-        delete m_pObjTimerUtil;
+        delete m_pTimerUtil;
     }
 
-    m_pObjTimerUtil = pObjTimerUtil;
+    m_pTimerUtil = pTimerUtil;
 }
 
-SIP_VOID SipUtil::RegisterLogger(ISipLoggerUtil* pObjLoggerUtil)
+SIP_VOID SipUtil::RegisterLogger(ISipLoggerUtil* pLoggerUtil)
 {
-    if (m_pObjLoggerUtil != SIP_NULL)
+    if (m_pLoggerUtil != SIP_NULL)
     {
-        delete m_pObjLoggerUtil;
+        delete m_pLoggerUtil;
     }
 
-    m_pObjLoggerUtil = pObjLoggerUtil;
+    m_pLoggerUtil = pLoggerUtil;
 }
-SIP_VOID SipUtil::RegisterNetwork(ISipNetworkUtil* pObjNwUtil)
+SIP_VOID SipUtil::RegisterNetwork(ISipNetworkUtil* pNwUtil)
 {
-    if (m_pObjNetworkUtil != SIP_NULL)
+    if (m_pNetworkUtil != SIP_NULL)
     {
-        delete m_pObjNetworkUtil;
+        delete m_pNetworkUtil;
     }
 
-    m_pObjNetworkUtil = pObjNwUtil;
+    m_pNetworkUtil = pNwUtil;
 }
 
-SIP_VOID SipUtil::RegisterTxnListener(ISipTxnListener *pobjTxnListener)
+SIP_VOID SipUtil::RegisterTxnListener(ISipTxnListener* pTxnListener)
 {
-    if (m_pObjTxnListener != SIP_NULL)
+    if (m_pTxnListener != SIP_NULL)
     {
-        delete m_pObjTxnListener;
+        delete m_pTxnListener;
     }
 
-    m_pObjTxnListener = pobjTxnListener;
+    m_pTxnListener = pTxnListener;
 }
 
 ISipTimerUtil* SipUtil::GetTimer()
 {
-    return m_pObjTimerUtil;
+    return m_pTimerUtil;
 }
 
 ISipLoggerUtil* SipUtil::GetLogger()
 {
-    return m_pObjLoggerUtil;
+    return m_pLoggerUtil;
 }
 ISipNetworkUtil* SipUtil::GetNetwork()
 {
-    return m_pObjNetworkUtil;
+    return m_pNetworkUtil;
 }
 
 ISipTxnListener* SipUtil::GetTxnListener()
 {
-    return m_pObjTxnListener;
+    return m_pTxnListener;
 }
 
 /****************************************************************************
@@ -161,34 +161,34 @@ ISipTxnListener* SipUtil::GetTxnListener()
  *****************************************************************************/
 SIP_VOID SipUtil_Construct()
 {
-    SipUtil *pObj = gpObjUtil;
+    SipUtil* pUtil = gpUtil;
 
-    if (pObj)
+    if (pUtil)
     {
         return;
     }
 
-    pObj = new SipUtil();
-    gpObjUtil = pObj;
+    pUtil = new SipUtil();
+    gpUtil = pUtil;
 }
 
 SIP_VOID SipUtil_Destruct()
 {
-    SipUtil *pObj = gpObjUtil;
+    SipUtil* pUtil = gpUtil;
 
-    if (pObj == SIP_NULL)
+    if (pUtil == SIP_NULL)
     {
         return;
     }
 
-    delete pObj;
-    gpObjUtil = SIP_NULL;
+    delete pUtil;
+    gpUtil = SIP_NULL;
 }
 
 SipUtil* SipUtil_GetInstance()
 {
-    SipUtil *pObj = gpObjUtil;
-    return pObj;
+    SipUtil* pUtil = gpUtil;
+    return pUtil;
 }
 
 /****************************************************************************

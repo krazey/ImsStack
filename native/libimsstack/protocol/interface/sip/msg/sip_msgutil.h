@@ -102,7 +102,7 @@
 #define SIP_AINFO_LEN 20
 
 
-#define     MAXLETDIG 27
+#define MAXLETDIG 27
 
 #define MAX_CSEQ 4294967295
 
@@ -112,9 +112,9 @@
 
 #define MAX_MAXFD 255
 
-#define        MAX_CIDLEN 48
+#define MAX_CIDLEN 48
 
-#define        MAX_FEIDLEN 16
+#define MAX_FEIDLEN 16
 
 #define SIP_DIRECTIVE_SIZE 12
 
@@ -130,7 +130,7 @@
  * Side Effects          : none
  *****************************************************************************/
 
-SIP_BOOL SetCharVar(const SIP_CHAR* Value,SIP_CHAR* &Var);
+SIP_BOOL SetCharVar(const SIP_CHAR* pszValue, SIP_CHAR*& pszVar);
 /******************************************************************************
  * Function name      : HasSpace
  *
@@ -140,7 +140,7 @@ SIP_BOOL SetCharVar(const SIP_CHAR* Value,SIP_CHAR* &Var);
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL HasSpace(const SIP_CHAR* pcValue);
+SIP_BOOL HasSpace(const SIP_CHAR* pszValue);
 
 /*****************************************************************************
  * Function name      : sipGetMsgType
@@ -151,10 +151,7 @@ SIP_BOOL HasSpace(const SIP_CHAR* pcValue);
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetMsgType
-(
- SIP_CHAR        *pucStartPoint
- );
+SIP_INT32 sipGetMsgType(SIP_CHAR* pStartPoint);
 
 /*****************************************************************************
  * Function name      : sipFindTerminatingCRLF
@@ -165,13 +162,8 @@ SIP_INT32 sipGetMsgType
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL  sipFindTerminatingCRLF
-(
- SIP_CHAR        *pucStartPoint,
- SIP_CHAR        *pucEndPoint,
- SIP_CHAR        **pucLocation,
- SIP_BOOL        *pbHdrEnd
- );
+SIP_BOOL  sipFindTerminatingCRLF(SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation,
+        SIP_BOOL* pbHdrEnd);
 
 /******************************************************************************
  * Function name      : sipSkipFwSP
@@ -182,11 +174,7 @@ SIP_BOOL  sipFindTerminatingCRLF
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_CHAR* sipSkipFwSP
-(
- SIP_CHAR            *pucStartPt,
- SIP_CHAR            *pucEndPt
- );
+SIP_CHAR* sipSkipFwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 /******************************************************************************
@@ -198,11 +186,7 @@ SIP_CHAR* sipSkipFwSP
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_CHAR* sipSkipRwSP
-(
- SIP_CHAR            *pucStartPt,
- SIP_CHAR            *pucEndPt
- );
+SIP_CHAR* sipSkipRwSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 /******************************************************************************
@@ -214,11 +198,7 @@ SIP_CHAR* sipSkipRwSP
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_CHAR* sipSkipFwWSP
-(
- SIP_CHAR            *pucStartPt,
- SIP_CHAR            *pucEndPt
- );
+SIP_CHAR* sipSkipFwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 /******************************************************************************
@@ -230,11 +210,7 @@ SIP_CHAR* sipSkipFwWSP
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_CHAR*  sipSkipRwWSP
-(
- SIP_CHAR            *pucStartPt,
- SIP_CHAR            *pucEndPt
- );
+SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 /*****************************************************************************
@@ -247,11 +223,7 @@ SIP_CHAR*  sipSkipRwWSP
  * Side Effects          : none
  *****************************************************************************/
 
-SIP_CHAR* sipSkipFwLWS
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt
- );
+SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 
@@ -266,13 +238,8 @@ SIP_CHAR* sipSkipFwLWS
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL sipFindPostDelimiter
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempLoc,
- SIP_CHAR        ucDelimiter
- );
+SIP_BOOL sipFindPostDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
+        SIP_CHAR cDelimiter);
 
 
 /******************************************************************************
@@ -284,13 +251,8 @@ SIP_BOOL sipFindPostDelimiter
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL sipFindPreDelimiter
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempLoc,
- SIP_CHAR        ucDelimiter
- );
+SIP_BOOL sipFindPreDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
+        SIP_CHAR cDelimiter);
 
 
 
@@ -304,23 +266,14 @@ SIP_BOOL sipFindPreDelimiter
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL sipFindActualPos
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempPre,
- SIP_CHAR        **pucTempNext,
- SIP_CHAR        ucDelimiter
- );
+SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
+        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter);
 
 /******************************************************************************
  * Function name  : SipEnc_UpdateCurrPos
  * Description     :  This api will update the current position of the sip msg
  *****************************************************************************/
-SIP_VOID SipEnc_UpdateCurrPos
-(
- SIP_CHAR            **ppucMsgBuffer/*in -out param*/
- );
+SIP_VOID SipEnc_UpdateCurrPos(SIP_CHAR** ppMsgBuffer/*in -out param*/);
 
 /*****************************************************************************
  * Function name      : sipGetUriType
@@ -331,11 +284,7 @@ SIP_VOID SipEnc_UpdateCurrPos
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetUriType
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt
- );
+SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
 
 
@@ -348,24 +297,13 @@ SIP_INT32 sipGetUriType
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetHdrType
-(
- const SIP_CHAR    *pszHdrName
- );
+SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName);
 
-SIP_INT32 CheckAndGetHdrEnumType
-(
-SIP_INT32 nType
-);
+SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType);
 
-SIP_BOOL IsValidAddress
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32 uiDecLen
- );
+SIP_BOOL IsValidAddress(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-
-const SIP_INT16   arrSipHeadersType[SipHeaderBase::TYPE_END + 1]=
+const SIP_INT16 arrSipHeadersType[SipHeaderBase::TYPE_END + 1]=
 {
     1,1,0,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,
     0,0,0,0,1,1,0,1,1,0,1,1,1,0,1,1,1,1,
@@ -401,12 +339,12 @@ class SIPHdrAccess
         SIPHdrAccess();
         SIPHdrAccess(SIPHdrAccess const& copy);
 
-        SIP_INT32 GetHdrTypeCompact( SIP_CHAR HdrName);
+        SIP_INT32 GetHdrTypeCompact(SIP_CHAR cHdrName);
 
     public:
         static SIPHdrAccess* GetInstance();
         ~SIPHdrAccess(){}
         static void DestroyInstance();
-        SIP_INT32 GetHdrType( const SIP_CHAR *HdrName);
+        SIP_INT32 GetHdrType(const SIP_CHAR* pszHdrName);
 };
 #endif

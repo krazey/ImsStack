@@ -24,7 +24,7 @@ SipPPreferredServiceHeader::SipPPreferredServiceHeader()
 }
 
 SipPPreferredServiceHeader::SipPPreferredServiceHeader(
-    const SipPPreferredServiceHeader &objHeader)
+    const SipPPreferredServiceHeader& objHeader)
     : SipHeaderBase(objHeader)
 
 {
@@ -34,29 +34,24 @@ SipPPreferredServiceHeader::~SipPPreferredServiceHeader()
 {
 }
 
-SIP_BOOL SipPPreferredServiceHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPPreferredServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    sipSkipFwLWS(pucStartPt,pucEndPt);
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    sipSkipFwLWS(pStartPt, pEndPt);
 
     //validate urn:urn-7 mandatory prefix
-    SIP_CHAR *pszTempString = sipCreateString(pucStartPt,pucStartPt+SIP_NINE);
-    if (SipPf_Stricmp("urn:urn-7:",pszTempString) != SIP_ZERO)
+    SIP_CHAR* pszTempString = sipCreateString(pStartPt, pStartPt + SIP_NINE);
+    if (SipPf_Stricmp("urn:urn-7:", pszTempString ) != SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:value must start by urn:urn-7:",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr:value must start by urn:urn-7:", SIP_ZERO, SIP_ZERO);
         if (pszTempString != SIP_NULL)
         {
             delete[] pszTempString;
@@ -70,66 +65,64 @@ SIP_BOOL SipPPreferredServiceHeader::DecodeHdr
         delete[] pszTempString;
     }
 
-    SIP_CHAR            *pucTempCurr =pucStartPt+SIP_TEN;;
-    SIP_CHAR            *pucTempPre = SIP_NULL;
-    SIP_CHAR            *pucTempNext = SIP_NULL;
+    SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
     //Find First dot and validate SubService Id
-    if (sipFindActualPos(pucTempCurr,pucEndPt,&pucTempPre,&pucTempNext,SIP_DOT) == SIP_TRUE)
+    if (sipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {
-        while(pucTempNext <= pucEndPt)
+        while(pTempNext <= pEndPt)
         {
-            if ((IS_ALPHANUM(*pucTempNext) == SIP_FALSE) &&
-                !IS_HYPHEN(*pucTempNext) &&
-                (*pucTempNext != SIP_DOT))
+            if ((IS_ALPHANUM(*pTempNext) == SIP_FALSE) &&
+                !IS_HYPHEN(*pTempNext) &&
+                (*pTempNext != SIP_DOT))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "DecodeHdr:invalid subService id",
-                        SIP_ZERO,SIP_ZERO);
+                        "DecodeHdr:invalid subService id", SIP_ZERO, SIP_ZERO);
             }
-            if ((*pucTempNext == SIP_DOT) && (pucTempNext == pucEndPt))
+            if ((*pTempNext == SIP_DOT) && (pTempNext == pEndPt))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "DecodeHdr:invalid subService id",
-                        SIP_ZERO,SIP_ZERO);
+                        "DecodeHdr:invalid subService id", SIP_ZERO, SIP_ZERO);
             }
-            pucTempNext = pucTempNext + SIP_ONE;
+            pTempNext = pTempNext + SIP_ONE;
         }
     }
-    SIP_UINT16 uiCounter = SIP_ZERO;
+    SIP_UINT16 nCounter = SIP_ZERO;
     //Validate Top Lebel
-    while((uiCounter < MAXLETDIG) && (pucTempCurr < pucTempPre))
+    while((nCounter < MAXLETDIG) && (pTempCurr < pTempPre))
     {
-        if ((IS_ALPHANUM(*pucTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pucTempCurr))
+        if ((IS_ALPHANUM(*pTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pTempCurr))
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Top lebel is invalid",
-                    SIP_ZERO,SIP_ZERO);
+                    "DecodeHdr:Top lebel is invalid", SIP_ZERO, SIP_ZERO);
         }
-        pucTempCurr = pucTempCurr + SIP_ONE;
-        uiCounter++;
+        pTempCurr = pTempCurr + SIP_ONE;
+        nCounter++;
     }
 
     //create the service and copy
-    SIP_CHAR *pValue = sipCreateString(pucStartPt, pucEndPt);
-    if (SetValue(pValue) == SIP_FALSE)
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
-        if (pValue != SIP_NULL) {
-            delete[] pValue;
+                "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        if (pszValue != SIP_NULL)
+        {
+            delete[] pszValue;
         }
         return SIP_FALSE;
     }
-    delete[] pValue;
+    delete[] pszValue;
     return SIP_TRUE;
 
 }
 
 
-SipHeaderBase* SipPPreferredServiceHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipPPreferredServiceHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPPreferredServiceHeader(
             *reinterpret_cast<SipPPreferredServiceHeader*>(pHeader));
     }

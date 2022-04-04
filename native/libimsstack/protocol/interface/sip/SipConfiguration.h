@@ -76,127 +76,127 @@ class SipConfiguration
         /* Timer Values A-K */
 
         /* T1: RTT Estimate */
-        inline SIP_VOID SetT1(SIP_UINT32 usDur)
+        inline SIP_VOID SetT1(SIP_UINT32 nDur)
         {
-            m_usT1 = usDur;
+            m_nT1 = nDur;
         }
         inline SIP_UINT32 GetT1() const
         {
-            return m_usT1;
+            return m_nT1;
         }
 
         /* The Max Retransmit interval for non-INVITE Req and INVITE Resp */
-        inline SIP_VOID SetT2(SIP_UINT32 usDur)
+        inline SIP_VOID SetT2(SIP_UINT32 nDur)
         {
-            m_usT2 = usDur;
+            m_nT2 = nDur;
         }
         inline SIP_UINT32 GetT2() const
         {
-            return m_usT2;
+            return m_nT2;
         }
 
         /* Maximum duration a message will remain in the network */
-        inline SIP_VOID SetT4(SIP_UINT32 usDur)
+        inline SIP_VOID SetT4(SIP_UINT32 nDur)
         {
-            m_usT4 = usDur;
+            m_nT4 = nDur;
         }
         inline SIP_UINT32 GetT4() const
         {
-            return m_usT4;
+            return m_nT4;
         }
 
         inline SIP_UINT32 GetStackSettings() const
         {
-            return m_usParseStyle;
+            return m_nParseStyle;
         }
 
         /*TimerB  INVITE transaction timeout timer*/
-        inline SIP_VOID SetTimerB(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerB(SIP_UINT32 nDur)
         {
-            m_usTimerB = usDur;
+            m_nTimerB = nDur;
         }
         inline SIP_UINT32 GetTimerB() const
         {
-            return m_usTimerB;
+            return m_nTimerB;
         }
 
         /*timer C proxy INVITE transaction timeout*/
-        inline SIP_VOID SetTimerC(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerC(SIP_UINT32 nDur)
         {
-            m_usTimerC = usDur;
+            m_nTimerC = nDur;
         }
         inline SIP_UINT32 GetTimerC() const
         {
-            return m_usTimerC;
+            return m_nTimerC;
         }
 
-        inline SIP_VOID SetTimerCr(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerCr(SIP_UINT32 nDur)
         {
-            m_usTimerCr = usDur;
+            m_nTimerCr = nDur;
         }
         inline SIP_UINT32 GetTimerCr() const
         {
-            return m_usTimerCr;
+            return m_nTimerCr;
         }
 
         /*Timer D Wait time for response retransmits*/
-        inline SIP_VOID SetTimerD(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerD(SIP_UINT32 nDur)
         {
-            m_usTimerD_T3 = usDur;
+            m_nTimerD_T3 = nDur;
         }
         inline SIP_UINT32 GetTimerD() const
         {
-           return m_usTimerD_T3;
+           return m_nTimerD_T3;
         }
 
         /*Timer F non-INVITE transaction timeout timer*/
-        inline SIP_VOID SetTimerF(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerF(SIP_UINT32 nDur)
         {
-            m_usTimerF_T3 = usDur;
+            m_nTimerF_T3 = nDur;
         }
         inline SIP_UINT32 GetTimerF() const
         {
-           return m_usTimerF_T3;
+           return m_nTimerF_T3;
         }
 
         /*Timer H Wait time for ACK receipt*/
-        inline SIP_VOID SetTimerH(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerH(SIP_UINT32 nDur)
         {
-            m_usTimerH = usDur;
+            m_nTimerH = nDur;
         }
         inline SIP_UINT32 GetTimerH() const
         {
-           return m_usTimerH;
+           return m_nTimerH;
         }
 
         /*timer I Wait time for ACK retransmits*/
-        inline SIP_VOID SetTimerI(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerI(SIP_UINT32 nDur)
         {
-            m_usTimerI_T4 = usDur;
+            m_nTimerI_T4 = nDur;
         }
         inline SIP_UINT32 GetTimerI() const
         {
-            return m_usTimerI_T4;
+            return m_nTimerI_T4;
         }
 
         /*Timer J Wait time for non-INVITE request retransmits*/
-        inline SIP_VOID SetTimerJ(SIP_UINT32 usDur)
+        inline SIP_VOID SetTimerJ(SIP_UINT32 nDur)
         {
-            m_usTimerJ_T3 = usDur;
+            m_nTimerJ_T3 = nDur;
         }
         inline SIP_UINT32 GetTimerJ() const
         {
-            return m_usTimerJ_T3;
+            return m_nTimerJ_T3;
         }
 
         /*Timer K Wait time for response retransmits*/
-        SIP_VOID SetTimerK(SIP_UINT32 usDur)
+        SIP_VOID SetTimerK(SIP_UINT32 nDur)
         {
-            m_usTimerK_T4 = usDur;
+            m_nTimerK_T4 = nDur;
         }
         inline SIP_UINT32 GetTimerK() const
         {
-            return m_usTimerK_T4;
+            return m_nTimerK_T4;
         }
 
         static SipConfiguration* GetInstance();
@@ -205,31 +205,31 @@ class SipConfiguration
         static SipConfiguration* pSipConfig;
 
         SIP_BOOL bPANIHeaderForACK;
-        SIP_UINT32 m_usParseStyle;
+        SIP_UINT32 m_nParseStyle;
 
         /*Timer T1 RTT Estimate*/
-        SIP_UINT32 m_usT1;
+        SIP_UINT32 m_nT1;
         /*Timer T2 The maximum retransmit interval for non-INVITE requests and INVITE responses*/
-        SIP_UINT32 m_usT2;
+        SIP_UINT32 m_nT2;
         /* Maximum duration a message will remain in the network */
-        SIP_UINT32 m_usT4;
+        SIP_UINT32 m_nT4;
         /*TimerB  INVITE transaction timeout timer*/
-        SIP_UINT32 m_usTimerB;
+        SIP_UINT32 m_nTimerB;
         /*timer C proxy INVITE transaction timeout*/
-        SIP_UINT32 m_usTimerC;
-        SIP_UINT32 m_usTimerCr;
+        SIP_UINT32 m_nTimerC;
+        SIP_UINT32 m_nTimerCr;
         /*Timer D Wait time for response retransmits*/
-        SIP_UINT32 m_usTimerD_T3;
+        SIP_UINT32 m_nTimerD_T3;
         /*Timer F non-INVITE transaction timeout timer*/
-        SIP_UINT32 m_usTimerF_T3;
+        SIP_UINT32 m_nTimerF_T3;
         /*Timer H Wait time for ACK receipt*/
-        SIP_UINT32 m_usTimerH;
+        SIP_UINT32 m_nTimerH;
         /*timer I Wait time for ACK retransmits*/
-        SIP_UINT32 m_usTimerI_T4;
+        SIP_UINT32 m_nTimerI_T4;
         /*Timer J Wait time for non-INVITE request retransmits*/
-        SIP_UINT32 m_usTimerJ_T3;
+        SIP_UINT32 m_nTimerJ_T3;
         /*Timer K Wait time for response retransmits*/
-        SIP_UINT32 m_usTimerK_T4;
+        SIP_UINT32 m_nTimerK_T4;
 };
 
 #endif //__SIP_CONFIGURATION_H__

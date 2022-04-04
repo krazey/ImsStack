@@ -49,14 +49,14 @@
 /*constructor*/
 SipRetryAfterHeader::SipRetryAfterHeader()
     : SipHeaderBase(SipHeaderBase::RETRY_AFTER_SEC)
-    , m_uiDeltaSec(SIP_ZERO), m_pszComment(SIP_NULL)
+    , m_nDeltaSec(SIP_ZERO), m_pszComment(SIP_NULL)
 {
 }
 
 /*Copy constructor*/
-SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader &objHeader)
+SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_uiDeltaSec(objHeader.m_uiDeltaSec)
+    , m_nDeltaSec(objHeader.m_nDeltaSec)
     , m_pszComment(SipPf_Strdup(objHeader.m_pszComment))
 {
 }
@@ -72,36 +72,30 @@ SipRetryAfterHeader::~SipRetryAfterHeader()
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL SipRetryAfterHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
- )
+SIP_BOOL SipRetryAfterHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    SIP_CHAR ucLen[MAX_RETRY_AFTER_LEN];
-    SipPf_Sprintf(ucLen, (SIP_CHAR*)"%u", m_uiDeltaSec);
+    SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
+    SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", m_nDeltaSec);
 
-    SipPf_Strcpy(*ppucCurrPos,ucLen);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, szLen);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     if (m_pszComment != SIP_NULL)
     {
-        SIP_ENC_LPAREN(*ppucCurrPos);
-        SipPf_Strcpy(*ppucCurrPos,m_pszComment);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
-        SIP_ENC_RPAREN(*ppucCurrPos);
+        SIP_ENC_LPAREN(*ppCurrPos);
+        SipPf_Strcpy(*ppCurrPos, m_pszComment);
+        SipEnc_UpdateCurrPos(ppCurrPos);
+        SIP_ENC_RPAREN(*ppCurrPos);
     }
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /*Sets */
-SIP_BOOL SipRetryAfterHeader::SetComment
-(
- const SIP_CHAR    *pucComment
- )
+SIP_BOOL SipRetryAfterHeader::SetComment(const SIP_CHAR* pszComment)
 {
-    return SetCharVar(pucComment,m_pszComment);
+    return SetCharVar(pszComment, m_pszComment);
 }
 
 /******************************************************************************
@@ -113,45 +107,39 @@ SIP_BOOL SipRetryAfterHeader::SetComment
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipRetryAfterHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR            *pucCommentStart = SIP_NULL;
-    SIP_CHAR            *pucCommentEnd = SIP_NULL;
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR            *pucTempPre = SIP_NULL;
-    SIP_CHAR            *pucTempNext = SIP_NULL;
+    SIP_CHAR* pCommentStart = SIP_NULL;
+    SIP_CHAR* pCommentEnd = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    SIP_BOOL bStatus = FindComment(pucStartPt, pucEndPt, pucCommentStart, pucCommentEnd);
+    SIP_BOOL bStatus = FindComment(pStartPt, pEndPt, pCommentStart, pCommentEnd);
 
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (((bStatus == SIP_TRUE) && ((pucTempPre+1) > pucCommentEnd)) || (bStatus == SIP_FALSE))
+        if (((bStatus == SIP_TRUE) && ((pTempPre+1) > pCommentEnd)) || (bStatus == SIP_FALSE))
         {
-            if (DecodeHeaderParameters(pucTempNext,pucEndPt, SIP_SEMI) == SIP_FALSE)
+            if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
             {
                 return SIP_FALSE;
             }
-            pucEndPt = pucTempPre;
-            pucTempPre  = SIP_NULL;
-            pucTempNext  = SIP_NULL;
+            pEndPt = pTempPre;
+            pTempPre = SIP_NULL;
+            pTempNext = SIP_NULL;
         }
-
     }
     else
     {
         // if there is some extra string after comment ends
-        if ((bStatus == SIP_TRUE) && (pucCommentEnd != pucEndPt))
+        if ((bStatus == SIP_TRUE) && (pCommentEnd != pEndPt))
         {
             return SIP_FALSE;
         }
@@ -159,44 +147,41 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr
     }
 
     //if comment exists
-    if (pucCommentStart != SIP_NULL)
+    if (pCommentStart != SIP_NULL)
     {
-        m_pszComment = sipCreateString(pucCommentStart, pucCommentEnd);
+        m_pszComment = sipCreateString(pCommentStart, pCommentEnd);
         if (m_pszComment == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Memory Allocation failed",
-                    SIP_ZERO,SIP_ZERO);
+                    "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pucEndPt = pucCommentStart-2;
+        pEndPt = pCommentStart - 2;
     }
 
     /*Now decode the delta sec value*/
-    SIP_CHAR *pszValue = sipCreateString(pucStartPt, pucEndPt);
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:Memory Allocation failed",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (SipPf_Atoi_IsZero(pszValue) == SIP_FALSE)
     {
-        m_uiDeltaSec = SipPf_Atoi_Unsigned(pszValue);
-        if ((m_uiDeltaSec > MAX_CSEQ) || (m_uiDeltaSec == SIP_ZERO))
+        m_nDeltaSec = SipPf_Atoi_Unsigned(pszValue);
+        if ((m_nDeltaSec > MAX_CSEQ) || (m_nDeltaSec == SIP_ZERO))
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Retry After value is not valid",
-                    SIP_ZERO,SIP_ZERO);
+                    "DecodeHdr:Retry After value is not valid", SIP_ZERO, SIP_ZERO);
             delete[] pszValue;
             return SIP_FALSE;
         }
     }
     else
     {
-        m_uiDeltaSec = SIP_ZERO;
+        m_nDeltaSec = SIP_ZERO;
     }
     delete[] pszValue;
 
@@ -205,7 +190,8 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr
 
 SipHeaderBase* SipRetryAfterHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipRetryAfterHeader(*reinterpret_cast<SipRetryAfterHeader*>(pHeader));
     }
     return new SipRetryAfterHeader();

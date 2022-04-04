@@ -18,36 +18,36 @@
 class SipTxnTimerValues
 {
     /* T1: RTT Estimate */
-    SIP_UINT32    m_usT1Value;
+    SIP_UINT32 m_nT1Value;
 
     /* The maximum retransmit interval for non-INVITE Req and INVITE resp*/
-    SIP_UINT32    m_usT2Value;
+    SIP_UINT32 m_nT2Value;
 
     /* Maximum duration a message will remain in the network */
-    SIP_UINT32    m_usT4Value;
+    SIP_UINT32 m_nT4Value;
 
-    SIP_UINT32    m_usTimerA_Value;
-    SIP_UINT32    m_usTimerB_Value;
-    SIP_UINT32    m_usTimerD_Value;
-    SIP_UINT32    m_usTimerE_Value;
-    SIP_UINT32    m_usTimerF_Value;
-    SIP_UINT32    m_usTimerG_Value;
-    SIP_UINT32    m_usTimerH_Value;
-    SIP_UINT32    m_usTimerI_Value;
-    SIP_UINT32    m_usTimerJ_Value;
-    SIP_UINT32    m_usTimerK_Value;
+    SIP_UINT32 m_nTimerA_Value;
+    SIP_UINT32 m_nTimerB_Value;
+    SIP_UINT32 m_nTimerD_Value;
+    SIP_UINT32 m_nTimerE_Value;
+    SIP_UINT32 m_nTimerF_Value;
+    SIP_UINT32 m_nTimerG_Value;
+    SIP_UINT32 m_nTimerH_Value;
+    SIP_UINT32 m_nTimerI_Value;
+    SIP_UINT32 m_nTimerJ_Value;
+    SIP_UINT32 m_nTimerK_Value;
 
 public:
     SipTxnTimerValues();
     virtual ~SipTxnTimerValues(){}
 
-    SIP_VOID SetTimerValue(SIP_UINT32 usTimerType, SIP_UINT32 usDur);
-    SIP_UINT32 GetTimerValue(SIP_UINT32 usTimerType) const;
+    SIP_VOID SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur);
+    SIP_UINT32 GetTimerValue(SIP_UINT32 nTimerType) const;
     SIP_BOOL UpdateSipTimers(IN SIP_UINT32 nTimerOptions,
         const IN SipTxnTimerValues* ptrTxnSipTxnTimers);
 
 private:
-    SIP_BOOL IsTimerSet(IN SIP_UINT32 nTimerOptions,IN SIP_UINT32 nType);
+    SIP_BOOL IsTimerSet(IN SIP_UINT32 nTimerOptions, IN SIP_UINT32 nType);
     SIP_VOID PrintSIPTxnTimerValues() const;
 
     enum

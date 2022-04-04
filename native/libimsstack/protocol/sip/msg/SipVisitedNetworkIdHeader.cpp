@@ -53,25 +53,18 @@ SipVisitedNetworkIdHeader::~SipVisitedNetworkIdHeader()
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL SipVisitedNetworkIdHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
- )
+SIP_BOOL SipVisitedNetworkIdHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    (void)ppucCurrPos;
+    (void)ppCurrPos;
     (void)bParams;
     return SIP_TRUE;
 }
 
 /*Function for decoding of headers*/
-SIP_BOOL SipVisitedNetworkIdHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    (void)pucStartPt;
-    (void)uiDecLen;
+    (void)pStartPt;
+    (void)nDecLen;
     return SIP_TRUE;
 }

@@ -196,51 +196,20 @@
 
 //#define IS_LHEX(ch) (((ch >= 48) && (ch<= 57)) ||(((ch >= 61) && (ch<= 66))) )
 
-SIP_CHAR* sipSkipFwLWS
-(
- SIP_CHAR    *pucStartPt,
- SIP_CHAR    *pucEndPt
- );
+SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-SIP_BOOL sipFindLWS
-(
- SIP_CHAR    *pucStartPt,
- SIP_CHAR    *pucEndPt,
- SIP_CHAR    **pucTempLoc
- );
+SIP_BOOL sipFindLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc);
 
-SIP_BOOL sipFindPreDelimiter
-(
- SIP_CHAR    *pucStartPt,
- SIP_CHAR    *pucEndPt,
- SIP_CHAR    **pucTempLoc,
- SIP_CHAR    ucDelimiter
- );
+SIP_BOOL sipFindPreDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
+        SIP_CHAR cDelimiter);
 
-SIP_BOOL sipFindDelimiter
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempLoc,
- SIP_CHAR        ucDelimiter
- );
+SIP_BOOL sipFindDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
+        SIP_CHAR cDelimiter);
 
-SIP_CHAR* sipCreateString
-(
- const SIP_CHAR    *pucStartPt,
- const SIP_CHAR    *pucEndPt
- );
+SIP_CHAR* sipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt);
 
+SIP_CHAR* sipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-SIP_CHAR* sipSkipRwLWS
-(
- SIP_CHAR    *pucStartPt,
- SIP_CHAR    *pucEndPt
- );
-
-SIP_CHAR* SkipConsecutiveCRLFs
-(
- SIP_CHAR *pucStartPt
- );
+SIP_CHAR* SkipConsecutiveCRLFs(SIP_CHAR* pStartPt);
 
 #endif /* __SIP_ABNFUTIL_H__ */

@@ -45,55 +45,45 @@ class SipWarningHeader : public SipHeaderBase
 {
     private:
         /*warn-code*/
-        SIP_UINT32        m_uiWarnCode;
+        SIP_UINT32 m_nWarnCode;
 
         /*Protocol Version*/
-        SIP_CHAR        *m_pszWarnAgent;
+        SIP_CHAR* m_pszWarnAgent;
 
         /*Transport*/
-        SIP_CHAR        *m_pszWarnText;
+        SIP_CHAR* m_pszWarnText;
 
     public:
         /*constructor*/
         SipWarningHeader();
 
-        SipWarningHeader(const SipWarningHeader &objHeader);
+        SipWarningHeader(const SipWarningHeader& objHeader);
 
         /*destructor*/
         ~SipWarningHeader();
 
-        static    SipHeaderBase*  GetNewObj(SIP_INT32 , SipHeaderBase *);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
         /*Sets the visited nw name*/
-        inline SIP_VOID SetWarnCode(SIP_UINT32 uiWarnCode)
+        inline SIP_VOID SetWarnCode(SIP_UINT32 nWarnCode)
         {
-            m_uiWarnCode = uiWarnCode;
+            m_nWarnCode = nWarnCode;
         }
 
         /*Gets the visited nw name*/
         inline SIP_UINT32 GetWarnCode() const
         {
-            return m_uiWarnCode;
+            return m_nWarnCode;
         }
 
         /*Sets the visited nw name*/
-        SIP_BOOL SetWarnAgent
-            (
-             const SIP_CHAR    *pucWarnAgent
-            );
+        SIP_BOOL SetWarnAgent(const SIP_CHAR* pszWarnAgent);
 
         /*Gets the visited nw name*/
         inline SIP_CHAR* GetWarnAgent() const
@@ -102,10 +92,7 @@ class SipWarningHeader : public SipHeaderBase
         }
 
         /*Sets the visited nw name*/
-        SIP_BOOL SetWarnText
-            (
-             const SIP_CHAR    *pucWarnText
-            );
+        SIP_BOOL SetWarnText(const SIP_CHAR* pszWarnText);
 
         /*Gets the visited nw name*/
         inline const SIP_CHAR* GetWarnText() const

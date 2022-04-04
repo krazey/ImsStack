@@ -63,7 +63,7 @@ SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader()
  * Side Effects      : none
  *****************************************************************************/
 SipPVisitedNetworkIdHeader::SipPVisitedNetworkIdHeader(
-        const SipPVisitedNetworkIdHeader &objHeader)
+        const SipPVisitedNetworkIdHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -90,36 +90,32 @@ SipPVisitedNetworkIdHeader::~SipPVisitedNetworkIdHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*First Check the presence of Header Prm i.e. ";"
       And decode if present*/
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR            *pucTempPre  = SIP_NULL;
-    SIP_CHAR            *pucTempNext  = SIP_NULL;
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) == SIP_FALSE)
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "DecodeHdr: Hdr Prm Decoding Failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Update the End point for Previous Decoding*/
-        pucEndPt = pucTempPre;
+        pEndPt = pTempPre;
     }
 
     /* value can be token or quoted string
@@ -128,20 +124,21 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr
        vnetwork-param = generic-param
      */
     //--------------------------------------------------------------------------------
-    if ((DQUOTE == *pucStartPt)
-            && (pucEndPt != SIP_NULL && (DQUOTE == *pucEndPt) && BACKSLASH != *(pucEndPt-1)))
+    if ((DQUOTE == *pStartPt)
+            && (pEndPt != SIP_NULL && (DQUOTE == *pEndPt) && BACKSLASH != *(pEndPt-1)))
     {
-        pucStartPt=pucStartPt+SIP_ONE;
-        pucEndPt=pucEndPt-SIP_ONE;
+        pStartPt = pStartPt + SIP_ONE;
+        pEndPt = pEndPt - SIP_ONE;
     }
     //-----------------------------------------------------------------------------
-    SIP_CHAR *pszValue = sipCreateString(pucStartPt, pucEndPt);
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "DecodeHdr:Memory Allocation failed",
-                SIP_ZERO,SIP_ZERO);
-        if (pszValue != SIP_NULL) {
+                SIP_ZERO, SIP_ZERO);
+        if (pszValue != SIP_NULL)
+        {
             delete[] pszValue;
         }
         return SIP_FALSE;
@@ -151,9 +148,10 @@ SIP_BOOL SipPVisitedNetworkIdHeader::DecodeHdr
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipPVisitedNetworkIdHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipPVisitedNetworkIdHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPVisitedNetworkIdHeader(
             *reinterpret_cast<SipPVisitedNetworkIdHeader*>(pHeader));
     }

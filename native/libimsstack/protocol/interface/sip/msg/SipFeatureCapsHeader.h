@@ -48,16 +48,12 @@ class SipFeatureCapsHeader : public SipHeaderBase
         SipFeatureCapsHeader();
 
         /*Copy constructor*/
-        SipFeatureCapsHeader(const SipFeatureCapsHeader &objHeader);
+        SipFeatureCapsHeader(const SipFeatureCapsHeader& objHeader);
 
         /*destructor*/
         ~SipFeatureCapsHeader();
-        static    SipHeaderBase*  GetNewObj(SIP_INT32 , SipHeaderBase *);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 };
 #endif //__SIP_FEATURE_CAPS_HEADER_H__

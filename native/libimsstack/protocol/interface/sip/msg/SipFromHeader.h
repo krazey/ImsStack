@@ -51,17 +51,14 @@ class SipFromHeader : public SipNameAddrHeader
         SipFromHeader();
 
         /* ### TODO */
-        SipFromHeader(SIP_CHAR    *pszDispName);
-        SipFromHeader(const SipFromHeader &objHeader);
+        SipFromHeader(SIP_CHAR* pszDispName);
+        SipFromHeader(const SipFromHeader& objHeader);
         /*destructor*/
         ~SipFromHeader();
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
-        SIP_CHAR*    GetTag();
+        SIP_CHAR* GetTag();
 
-        SIP_BOOL SetTag
-            (
-             SIP_CHAR *pucFromTag
-            );
+        SIP_BOOL SetTag(SIP_CHAR* pszFromTag);
 };
 #endif //__SIP_FROM_HEADER_H__

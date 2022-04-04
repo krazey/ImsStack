@@ -45,47 +45,31 @@ class SipAcceptHeader : public SipHeaderBase
 {
     private:
         /*Media range*/
-        SIP_CHAR    *m_pszMType;
-
-        SIP_CHAR    *m_pszMSubType;
-
+        SIP_CHAR* m_pszMType;
+        SIP_CHAR* m_pszMSubType;
 
     public:
         /*constructor*/
         SipAcceptHeader();
 
         /*Copy constructor*/
-        SipAcceptHeader(const SipAcceptHeader &objHeader);
+        SipAcceptHeader(const SipAcceptHeader& objHeader);
 
         /*destructor*/
         ~SipAcceptHeader();
-        static SipHeaderBase*  GetNewObj(SIP_INT32,SipHeaderBase *);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR   **ppucCurrPos,
-             SIP_BOOL   bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR  *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
         SIP_BOOL IsValidHeader() const;
         /*set methods*/
-        SIP_BOOL SetMediaType
-            (
-             const SIP_CHAR  *pkszMType
-            );
+        SIP_BOOL SetMediaType(const SIP_CHAR* pszMType);
 
-        SIP_BOOL SetMediaSubType
-            (
-             const SIP_CHAR  *pkszMSubType
-            );
+        SIP_BOOL SetMediaSubType(const SIP_CHAR* pszMSubType);
 
         /*Get methods*/
         inline const SIP_CHAR* GetMType() const

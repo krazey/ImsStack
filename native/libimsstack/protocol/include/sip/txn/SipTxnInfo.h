@@ -26,22 +26,22 @@ class SipTxnInfo
         virtual ~SipTxnInfo();
 
         /*Recv Txn handling: When Txn Sending Failure ACK or 100 Trying Response */
-        SipMessage            *m_pobjSendSipMsg;
+        SipMessage* m_pSendSipMsg;
 
         /* Recv Txn handling: User data of existing transaction */
-        ISipUserData            *m_pobjUserData;
+        ISipUserData* m_pUserData;
 
         /* Recv Txn handling: Transport info of existing transaction */
-        SipTransportInfo         *m_pobjTranspInfo;
+        SipTransportInfo* m_pTranspInfo;
 
         /* Recv Txn handling : transaction status */
-        SIP_INT32        eTxnStatus;
+        SIP_INT32 eTxnStatus;
 
         /* Recv/Send Txn handling : transaction termination status */
-        SIP_BOOL             bTxnTerminated;
+        SIP_BOOL bTxnTerminated;
 
         /* Recv/Send Txn handling : transaction creation status */
-        SIP_BOOL             bTxnCreated;
+        SIP_BOOL bTxnCreated;
 };
 
 #endif

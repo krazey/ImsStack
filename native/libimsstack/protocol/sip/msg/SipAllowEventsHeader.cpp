@@ -51,7 +51,7 @@
  *****************************************************************************/
 SipAllowEventsHeader::SipAllowEventsHeader()
     : SipHeaderBase(SipHeaderBase::ALLOW_EVENTS)
-    , m_pobjEventTemplateList(SIP_NULL)
+    , m_pEventTemplateList(SIP_NULL)
 {
 }
 
@@ -65,12 +65,13 @@ SipAllowEventsHeader::SipAllowEventsHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader &objHeader)
+SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_pobjEventTemplateList(SIP_NULL)
+    , m_pEventTemplateList(SIP_NULL)
 {
-    if (objHeader.m_pobjEventTemplateList != SIP_NULL) {
-        m_pobjEventTemplateList = new SipParameterList(*(objHeader.m_pobjEventTemplateList));
+    if (objHeader.m_pEventTemplateList != SIP_NULL)
+    {
+        m_pEventTemplateList = new SipParameterList(*(objHeader.m_pEventTemplateList));
     }
 }
 
@@ -86,9 +87,9 @@ SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader &objHeader
  *****************************************************************************/
 SipAllowEventsHeader::~SipAllowEventsHeader()
 {
-    if (m_pobjEventTemplateList != SIP_NULL)
+    if (m_pEventTemplateList != SIP_NULL)
     {
-        m_pobjEventTemplateList->SipDelete();
+        m_pEventTemplateList->SipDelete();
     }
 }
 
@@ -101,45 +102,41 @@ SipAllowEventsHeader::~SipAllowEventsHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SIP_BOOL SipAllowEventsHeader::EncodeHdr
-(
-    SIP_CHAR   **ppucCurrPos,
-    SIP_BOOL   /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    const SIP_CHAR *pValue = GetValue();
-    if (pValue == SIP_NULL)
+    const SIP_CHAR* pszValue = GetValue();
+    if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing Event package", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos, pValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, pszValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    return (m_pobjEventTemplateList != SIP_NULL) ?
-        m_pobjEventTemplateList->EncodeList(ppucCurrPos,SIP_DOT) : SIP_TRUE;
+    return (m_pEventTemplateList != SIP_NULL) ?
+        m_pEventTemplateList->EncodeList(ppCurrPos,SIP_DOT) : SIP_TRUE;
 }
 
 
-SIP_BOOL SipAllowEventsHeader::AddEvtTemplate(const SIP_CHAR  *pkszEvntTmpl)
+SIP_BOOL SipAllowEventsHeader::AddEvtTemplate(const SIP_CHAR* pszEvntTmpl)
 {
-    if (m_pobjEventTemplateList == SIP_NULL)
+    if (m_pEventTemplateList == SIP_NULL)
     {
-        m_pobjEventTemplateList = new SipParameterList();
+        m_pEventTemplateList = new SipParameterList();
     }
 
-    if (m_pobjEventTemplateList == SIP_NULL)
+    if (m_pEventTemplateList == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pcEvTmpl =  SIP_NULL;
-    if (SetCharVar(pkszEvntTmpl,pcEvTmpl) == SIP_TRUE)
+    SIP_CHAR* pszTempEvTmpl = SIP_NULL;
+    if (SetCharVar(pszEvntTmpl, pszTempEvTmpl) == SIP_TRUE)
     {
-        SIP_BOOL bResult = m_pobjEventTemplateList->Add(pcEvTmpl);
-        delete[] pcEvTmpl;
+        SIP_BOOL bResult = m_pEventTemplateList->Add(pszTempEvTmpl);
+        delete[] pszTempEvTmpl;
         return bResult;
     }
 
@@ -156,50 +153,47 @@ SIP_BOOL SipAllowEventsHeader::AddEvtTemplate(const SIP_CHAR  *pkszEvntTmpl)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipAllowEventsHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR            *pucTempPos  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPos = SIP_NULL;
 
     /*Case of having event template*/
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SIP_DOT) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
-        pucTempPos = pucEndPt;
+        pTempPos = pEndPt;
     }
 
-    SIP_CHAR *pValue = sipCreateString(pucStartPt, pucTempPos);
-    if (SetValue(pValue) == SIP_FALSE)
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTempPos);
+    if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        if (pValue != SIP_NULL) {
-            delete[] pValue;
+        if (pszValue != SIP_NULL)
+        {
+            delete[] pszValue;
         }
         return SIP_FALSE;
     }
-    delete[] pValue;
+    delete[] pszValue;
 
-    if (pucTempPos != pucEndPt)
+    if (pTempPos != pEndPt)
     {
-        m_pobjEventTemplateList = new SipParameterList(GetHdrType());
-        if (m_pobjEventTemplateList == SIP_NULL)
+        m_pEventTemplateList = new SipParameterList(GetHdrType());
+        if (m_pEventTemplateList == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Update the tempPos to the start of eventTamplate*/
-        pucTempPos = pucTempPos + SIP_TWO;
-        if (m_pobjEventTemplateList->DecUriSipParameterList(pucTempPos,
-            pucEndPt, SIP_DOT) == SIP_FALSE)
+        pTempPos = pTempPos + SIP_TWO;
+        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos,
+                pEndPt, SIP_DOT) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Prm Decoding Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -208,7 +202,7 @@ SIP_BOOL SipAllowEventsHeader::DecodeHdr
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipAllowEventsHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipAllowEventsHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {

@@ -11,16 +11,9 @@ class ISipTxnListener
         virtual ~ISipTxnListener(){};
 
         /* read only txn key */
-        virtual SIP_BOOL TxnTimeout
-            (
-             ISipUserData        *pobjUserData,
-             SIP_INT32     ms_TimerType
-            )=0;
+        virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, SIP_INT32 ms_TimerType) = 0;
 
         /* read only txn key */
-        virtual SIP_BOOL TxnTerminated
-            (
-             ISipUserData        *pobjUserData
-            )=0;
+        virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData) = 0;
 };
 #endif //__ISIPTXNLISTENER_H__

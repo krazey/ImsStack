@@ -16,22 +16,14 @@ class SipDefTimerUtil: public ISipTimerUtil
         ~SipDefTimerUtil();
 
     public:
-        SIP_BOOL StartTimer(
-                SIP_VOID        **pvTimerId,
-                SIP_UINT32        uiDuration,
-                SIP_UINT16        usResetFlag,
-                SIPCB_TIMERHANDLER        cbTimerHandler,
-                SIP_VOID            *pvData);//{return SIP_TRUE;}
+        SIP_BOOL StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration, SIP_UINT16 nResetFlag,
+                SIPCB_TIMERHANDLER cbTimerHandler, SIP_VOID* pvData);//{return SIP_TRUE;}
 
-        SIP_VOID* StopTimer(
-                SIP_VOID        *pvTimerId);//{return SIP_TRUE;}
+        SIP_VOID* StopTimer(SIP_VOID* pvTimerId);//{return SIP_TRUE;}
 
-        SIP_BOOL ResetTimer    (
-                SIP_VOID*    pvTimerId,
-                SIP_UINT32    uiNewDuration);//{return SIP_TRUE;}
+        SIP_BOOL ResetTimer(SIP_VOID* pvTimerId, SIP_UINT32 nNewDuration);//{return SIP_TRUE;}
 
-        SIP_VOID* StopTimerEx(
-                SIP_VOID*     pvTimerId);//{return SIP_TRUE;}
+        SIP_VOID* StopTimerEx(SIP_VOID* pvTimerId);//{return SIP_TRUE;}
 };
 
 #endif //__SIP_DEFTIMERUTIL_H__

@@ -9,55 +9,39 @@
 class SipStatusLine: public SipRefBase
 {
     private:
-        SIP_CHAR        *m_pszSipVersion;
-        SIP_CHAR        *m_pszStatusCode;
-        SIP_CHAR        *m_pszRsnPhrase;
+        SIP_CHAR* m_pszSipVersion;
+        SIP_CHAR* m_pszStatusCode;
+        SIP_CHAR* m_pszRsnPhrase;
 
     public:
         /*constructor*/
         SipStatusLine()
-            :m_pszSipVersion(SIP_NULL),m_pszStatusCode(SIP_NULL),
+            : m_pszSipVersion(SIP_NULL), m_pszStatusCode(SIP_NULL),
             m_pszRsnPhrase(SIP_NULL)
         {}
 
-        SipStatusLine(const SIP_CHAR *pszStatusCode, const SIP_CHAR *pszRsnPhrase);
+        SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase);
 
-        SipStatusLine(const SIP_CHAR *pszSipVersion, const SIP_CHAR *pszStatusCode,
-                const SIP_CHAR *pszRsnPhrase);
+        SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
+                const SIP_CHAR* pszRsnPhrase);
 
-        SipStatusLine(const SipStatusLine &objHeader);
+        SipStatusLine(const SipStatusLine& objHeader);
         /*destructor*/
         ~SipStatusLine();
 
 
         /*Function for encoding*/
-        SIP_BOOL EncodeStatusLine
-            (
-             SIP_CHAR     **ppucCurrPos
-            );
+        SIP_BOOL EncodeStatusLine(SIP_CHAR** ppCurrPos);
 
         /*Function for decoding*/
-        SIP_BOOL DecodeStatusLine
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32 uiDecLen
-            );
+        SIP_BOOL DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
         /*Set Methods*/
-        SIP_BOOL SetStatusCode
-            (
-             const SIP_CHAR    *pkszStatusCode
-            );
+        SIP_BOOL SetStatusCode(const SIP_CHAR* pszStatusCode);
 
-        SIP_BOOL SetSipVersion
-            (
-             const SIP_CHAR    *pkszVer
-            );
+        SIP_BOOL SetSipVersion(const SIP_CHAR* pszVer);
 
-        SIP_BOOL SetRsnPhrase
-            (
-             const SIP_CHAR    *pkszRsnPhrase
-            );
+        SIP_BOOL SetRsnPhrase(const SIP_CHAR* pszRsnPhrase);
 
         /*Get methods*/
         inline const SIP_CHAR* GetStatusCode() const
@@ -65,7 +49,7 @@ class SipStatusLine: public SipRefBase
             return m_pszStatusCode;
         }
 
-        SIP_BOOL GetStatusCode(SIP_INT16 *pusStatusCode) const;
+        SIP_BOOL GetStatusCode(SIP_INT16* pnStatusCode) const;
 
         SIP_UINT16 GetStatusCodeAsInt() const;
 

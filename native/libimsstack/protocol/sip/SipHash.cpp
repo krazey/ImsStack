@@ -64,50 +64,42 @@
  **   pErr    (IN/OUT)  : Error variable returned in case of failure.
  **
  ******************************************************************************/
-    SipHash::SipHash
-            (
-             Hash_fnCalculateHash    fpCalculateHash,
-             Hash_fnCompareHashKey   fpCompareHash,
-             Hash_fnFreeHashElement  fpElemFreeFunc,
-             Hash_fnFreeHashKey    fpKeyFreeHashKey,
-             SIP_UINT32        uiNumBuckets,
-             SIP_UINT32        uiMaxElements,
-             SIP_UINT16        *pusError
-            )
-
+SipHash::SipHash(Hash_fnCalculateHash fpCalculateHash, Hash_fnCompareHashKey fpCompareHash,
+        Hash_fnFreeHashElement fpElemFreeFunc, Hash_fnFreeHashKey fpKeyFreeHashKey,
+        SIP_UINT32 nNumBuckets, SIP_UINT32 nMaxElements, SIP_UINT16* pnError)
 {
     SIP_TRACE_NORMAL(ESIPTRACE_MODHASH,
             "SipHash: Numberbuckets %d, MaxElements %d \n",
-            uiNumBuckets,uiMaxElements);
+            nNumBuckets, nMaxElements);
 
     /* Initialize the max number of buckets.*/
-    uiSearchBuckets   = uiNumBuckets;
-    uiNumOfSearchElements   = SIP_ZERO;
+    nSearchBuckets = nNumBuckets;
+    nNumOfSearchElements = SIP_ZERO;
 
     /* Initialize the max number of elements supported in each buckets.*/
-    uiMaxNumberOfElements   = uiMaxElements;
+    nMaxNumberOfElements = nMaxElements;
 
     /* Initialize functions */
-    this->fpCalculateHash    = fpCalculateHash;
-    this->fpCompareHash    = fpCompareHash;
-    this->fpFreeHashElement    = fpElemFreeFunc;
-    this->fpKeyFreeHashKey    = fpKeyFreeHashKey;
+    this->fpCalculateHash = fpCalculateHash;
+    this->fpCompareHash = fpCompareHash;
+    this->fpFreeHashElement = fpElemFreeFunc;
+    this->fpKeyFreeHashKey = fpKeyFreeHashKey;
 
     /* Initialize the hash elements */
-    ppstHashSearchChains   = (Hash_StSearchElement **) new Hash_StSearchElement*[uiNumBuckets];
+    ppstHashSearchChains = (Hash_StSearchElement **) new Hash_StSearchElement*[nNumBuckets];
 
     if (ppstHashSearchChains == SIP_NULL)
     {
-        *pusError = EERR_MALLOCFAILED;
+        *pnError = EERR_MALLOCFAILED;
         SIP_DEBUG_EXTRLBUG(ESIPTRACE_MODHASH,
-                "SipHash: Malloc Failed Seq:%d\n",SIP_ONE,SIP_ZERO);
+                "SipHash: Malloc Failed Seq:%d\n",SIP_ONE, SIP_ZERO);
         bInitialized = SIP_FALSE;
         return;
     }
 
-    for (SIP_UINT32 iIndex = SIP_ZERO; iIndex < uiNumBuckets; iIndex++)
+    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nNumBuckets; nIndex++)
     {
-        ppstHashSearchChains[iIndex] = SIP_NULL;
+        ppstHashSearchChains[nIndex] = SIP_NULL;
     }
     bInitialized = SIP_TRUE;
 }
@@ -126,13 +118,13 @@
  ******************************************************************************/
 SipHash::~SipHash()
 {
-    for (SIP_UINT32 iIndex = SIP_ZERO; iIndex < uiSearchBuckets ; iIndex++)
+    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSearchBuckets ; nIndex++)
     {
         /* Remove the entries from the search list.*/
-        if (uiNumOfSearchElements > SIP_ZERO)
+        if (nNumOfSearchElements > SIP_ZERO)
         {
-            Hash_StSearchElement *pstElement = ppstHashSearchChains[iIndex];
-            Hash_StSearchElement *pstTempElement = SIP_NULL;
+            Hash_StSearchElement* pstElement = ppstHashSearchChains[nIndex];
+            Hash_StSearchElement* pstTempElement = SIP_NULL;
 
             while (pstElement != SIP_NULL)
             {
@@ -158,10 +150,10 @@ SipHash::~SipHash()
         }
         else
         {
-            if (ppstHashSearchChains[iIndex] != SIP_NULL)
+            if (ppstHashSearchChains[nIndex] != SIP_NULL)
             {
-                delete ppstHashSearchChains[iIndex];
-                ppstHashSearchChains[iIndex] = SIP_NULL;
+                delete ppstHashSearchChains[nIndex];
+                ppstHashSearchChains[nIndex] = SIP_NULL;
             }
         }
     }
@@ -182,21 +174,15 @@ SipHash::~SipHash()
  **        of failure.
  **
  ******************************************************************************/
-    SIP_BOOL SipHash::Hash_Add
-               (
-                SIP_VOID       *pvSearchElement,
-                SIP_VOID       *pvSearchKey,
-                SIP_UINT16      *pusError
-               )
+SIP_BOOL SipHash::Hash_Add(SIP_VOID* pvSearchElement, SIP_VOID* pvSearchKey, SIP_UINT16* pnError)
 {
-    if (( pvSearchKey    == SIP_NULL)
-            || (fpCalculateHash  == SIP_NULL)
-            || (fpCompareHash   == SIP_NULL)
-            || (bInitialized == SIP_FALSE) )
+    if ((pvSearchKey == SIP_NULL)
+            || (fpCalculateHash == SIP_NULL)
+            || (fpCompareHash == SIP_NULL)
+            || (bInitialized == SIP_FALSE))
     {
-        *pusError = EERR_INVALIDPARAM;
-        SIP_DEBUG_WARNING(ESIPTRACE_MODHASH,
-                "Hash_Add: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+        *pnError = EERR_INVALIDPARAM;
+        SIP_DEBUG_WARNING(ESIPTRACE_MODHASH, "Hash_Add: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -204,31 +190,31 @@ SipHash::~SipHash()
     objMutex.Lock();
 #endif
 
-    if (uiNumOfSearchElements == (uiMaxNumberOfElements))
+    if (nNumOfSearchElements == (nMaxNumberOfElements))
     {
-        *pusError = EERR_HASHELEMENTSEXCEEDED;
+        *pnError = EERR_HASHELEMENTSEXCEEDED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODHASH,
-                "Hash_Add: Exceed Hash Elements \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Add: Exceed Hash Elements \n", SIP_ZERO, SIP_ZERO);
 #ifdef SIP_THREAD_SAFE
         objMutex.Unlock();
 #endif
         return SIP_FALSE;
     }
 
-    SIP_UINT32 iHashKey = fpCalculateHash(pvSearchKey);
-    SIP_UINT32 iBucket = iHashKey % uiSearchBuckets;
+    SIP_UINT32 nHashKey = fpCalculateHash(pvSearchKey);
+    SIP_UINT32 nBucket = nHashKey % nSearchBuckets;
 
     /* Ensure that the key is not already present */
-    Hash_StSearchElement *pstIterator = ppstHashSearchChains[iBucket];
+    Hash_StSearchElement* pstIterator = ppstHashSearchChains[nBucket];
 
     while (pstIterator != SIP_NULL)
     {
         if (fpCompareHash(pstIterator->pvSearchKey, pvSearchKey) == SIP_MATCHES)
         {
             /* The key already exists */
-            *pusError = EERR_HASHKEYALREADYEXISTS;
+            *pnError = EERR_HASHKEYALREADYEXISTS;
             SIP_DEBUG_WARNING(EERR_HASHKEYALREADYEXISTS,
-                    "Hash_Add: Key Already Exists \n",SIP_ZERO,SIP_ZERO);
+                    "Hash_Add: Key Already Exists \n", SIP_ZERO, SIP_ZERO);
 #ifdef SIP_THREAD_SAFE
             objMutex.Unlock();
 #endif
@@ -240,28 +226,28 @@ SipHash::~SipHash()
     /*  pstNewElement = (Hash_StSearchElement *)
         SipPf_Malloc(sizeof(Hash_StSearchElement));
      */
-    Hash_StSearchElement *pstNewElement = (Hash_StSearchElement *)
+    Hash_StSearchElement* pstNewElement = (Hash_StSearchElement *)
         new Hash_StSearchElement;
 
     if (pstNewElement == SIP_NULL)
     {
         /* e_Err_SipPf_MallocFailed */
-        *pusError = EERR_MALLOCFAILED;
+        *pnError = EERR_MALLOCFAILED;
         SIP_DEBUG_EXTRLBUG(ESIPTRACE_MODHASH,
-                "Hash_Add: Malloc Failed Seq:%d\n",SIP_ONE,SIP_ZERO);
+                "Hash_Add: Malloc Failed Seq:%d\n", SIP_ONE, SIP_ZERO);
 #ifdef SIP_THREAD_SAFE
         objMutex.Unlock();
 #endif
         return SIP_FALSE;
     }
 
-    pstNewElement->pvElement    = pvSearchElement;
-    pstNewElement->pvSearchKey    = pvSearchKey;
-    pstNewElement->pstNextElement  = SIP_NULL;
-    pstNewElement->bRemove    = SIP_FALSE;
-    pstNewElement->uiRefCount    = SIP_ONE;
+    pstNewElement->pvElement = pvSearchElement;
+    pstNewElement->pvSearchKey = pvSearchKey;
+    pstNewElement->pstNextElement = SIP_NULL;
+    pstNewElement->bRemove = SIP_FALSE;
+    pstNewElement->nRefCount = SIP_ONE;
 
-    pstIterator = ppstHashSearchChains[iBucket];
+    pstIterator = ppstHashSearchChains[nBucket];
 
     if (pstIterator == SIP_NULL)
         pstIterator = pstNewElement;
@@ -274,12 +260,12 @@ SipHash::~SipHash()
     }
 
     /* Push element into the bucket */
-    pstNewElement->pstNextElement     = ppstHashSearchChains[iBucket];
-    ppstHashSearchChains[iBucket]   = pstNewElement;
-    uiNumOfSearchElements = uiNumOfSearchElements + SIP_ONE;
+    pstNewElement->pstNextElement = ppstHashSearchChains[nBucket];
+    ppstHashSearchChains[nBucket] = pstNewElement;
+    nNumOfSearchElements = nNumOfSearchElements + SIP_ONE;
 
     SIP_TRACE_NORMAL(ESIPTRACE_MODHASH,
-            "Hash_Add --> Num of entries :%d",uiNumOfSearchElements,SIP_ZERO);
+            "Hash_Add --> Num of entries :%d", nNumOfSearchElements, SIP_ZERO);
 
 #ifdef SIP_THREAD_SAFE
     objMutex.Unlock();
@@ -299,20 +285,16 @@ SipHash::~SipHash()
  **        fetched from the hash table.
  **
  ******************************************************************************/
-    SIP_VOID* SipHash::Hash_Fetch
-              (
-               SIP_VOID     *pvSearchKey,
-               SIP_UINT16    *pusError
-              )
+SIP_VOID* SipHash::Hash_Fetch(SIP_VOID* pvSearchKey, SIP_UINT16* pnError)
 {
     if ((pvSearchKey == SIP_NULL)
             || (fpCalculateHash == SIP_NULL)
             || (fpCompareHash == SIP_NULL)
             || (bInitialized == SIP_FALSE))
     {
-        *pusError = EERR_INVALIDPARAM;
+        *pnError = EERR_INVALIDPARAM;
         SIP_DEBUG_WARNING(EERR_INVALIDPARAM,
-                "Hash_Fetch: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Fetch: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
 
@@ -320,16 +302,15 @@ SipHash::~SipHash()
     objMutex.Lock();
 #endif
 
-    SIP_UINT32 iHashKey  = fpCalculateHash(pvSearchKey);
-    SIP_UINT32 iBucket    = iHashKey % uiSearchBuckets;
-    Hash_StSearchElement *pstIterator = ppstHashSearchChains[iBucket];
+    SIP_UINT32 nHashKey = fpCalculateHash(pvSearchKey);
+    SIP_UINT32 nBucket = nHashKey % nSearchBuckets;
+    Hash_StSearchElement* pstIterator = ppstHashSearchChains[nBucket];
 
     while (pstIterator != SIP_NULL)
     {
-        if (fpCompareHash(pstIterator->pvSearchKey,pvSearchKey) ==
-                SIP_MATCHES)
+        if (fpCompareHash(pstIterator->pvSearchKey, pvSearchKey) == SIP_MATCHES)
         {
-            pstIterator->uiRefCount++;
+            pstIterator->nRefCount++;
             break;
         }
         pstIterator = pstIterator->pstNextElement;
@@ -341,9 +322,9 @@ SipHash::~SipHash()
 
     if (pstIterator == SIP_NULL)
     {
-        *pusError = EERR_HASHELEMENTSNOTFOUND;
+        *pnError = EERR_HASHELEMENTSNOTFOUND;
         SIP_DEBUG_WARNING(EERR_HASHELEMENTSNOTFOUND,
-                "Hash_Fetch: Element Not Found",SIP_ZERO,SIP_ZERO);
+                "Hash_Fetch: Element Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
     else
@@ -367,21 +348,15 @@ SipHash::~SipHash()
  **  ppKey (OUT) : Stored key
  **
  ******************************************************************************/
-SIP_VOID* SipHash::Hash_Fetch
-(
-SIP_VOID     *pvSearchKey,
-SIP_VOID     **ppKey,
-SIP_UINT16   *pusError
-)
+SIP_VOID* SipHash::Hash_Fetch(SIP_VOID* pvSearchKey, SIP_VOID** ppKey, SIP_UINT16* pnError)
 {
     if ((pvSearchKey == SIP_NULL)
             || (fpCalculateHash == SIP_NULL)
             || (fpCompareHash == SIP_NULL)
             || (bInitialized == SIP_FALSE))
     {
-        *pusError = EERR_INVALIDPARAM;
-        SIP_DEBUG_WARNING(EERR_INVALIDPARAM,
-                "Hash_Fetch: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+        *pnError = EERR_INVALIDPARAM;
+        SIP_DEBUG_WARNING(EERR_INVALIDPARAM, "Hash_Fetch: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
 
@@ -389,16 +364,15 @@ SIP_UINT16   *pusError
     objMutex.Lock();
 #endif
 
-    SIP_UINT32 iHashKey  = fpCalculateHash(pvSearchKey);
-    SIP_UINT32 iBucket    = iHashKey % uiSearchBuckets;
-    Hash_StSearchElement *pstIterator = ppstHashSearchChains[iBucket];
+    SIP_UINT32 nHashKey = fpCalculateHash(pvSearchKey);
+    SIP_UINT32 nBucket = nHashKey % nSearchBuckets;
+    Hash_StSearchElement* pstIterator = ppstHashSearchChains[nBucket];
 
     while (pstIterator != SIP_NULL)
     {
-        if (fpCompareHash(pstIterator->pvSearchKey,pvSearchKey) ==
-                SIP_MATCHES)
+        if (fpCompareHash(pstIterator->pvSearchKey, pvSearchKey) == SIP_MATCHES)
         {
-            pstIterator->uiRefCount++;
+            pstIterator->nRefCount++;
             break;
         }
         pstIterator = pstIterator->pstNextElement;
@@ -410,15 +384,14 @@ SIP_UINT16   *pusError
 
     if (pstIterator == SIP_NULL)
     {
-        *pusError = EERR_HASHELEMENTSNOTFOUND;
+        *pnError = EERR_HASHELEMENTSNOTFOUND;
         SIP_DEBUG_WARNING(EERR_HASHELEMENTSNOTFOUND,
-                "Hash_Fetch: Element Not Found",SIP_ZERO,SIP_ZERO);
+                "Hash_Fetch: Element Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
     else
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODHASH,
-                "Hash_Fetch",SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODHASH, "Hash_Fetch", SIP_ZERO, SIP_ZERO);
         *ppKey = pstIterator->pvSearchKey;
         return pstIterator->pvElement;
     }
@@ -440,10 +413,7 @@ SIP_UINT16   *pusError
  **        released.
  **
  ******************************************************************************/
-    SIP_VOID SipHash::Hash_Release
-              (
-               SIP_VOID     *pvSearchKey
-              )
+SIP_VOID SipHash::Hash_Release(SIP_VOID* pvSearchKey)
 {
     if ((pvSearchKey == SIP_NULL)
             || (fpCalculateHash == SIP_NULL)
@@ -452,7 +422,7 @@ SIP_UINT16   *pusError
     {
         /* EERR_INVALIDPARAM */
         SIP_DEBUG_WARNING(EERR_INVALIDPARAM,
-                "Hash_Release: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Release: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
@@ -460,39 +430,39 @@ SIP_UINT16   *pusError
     objMutex.Lock();
 #endif
 
-    SIP_UINT32 iHashKey  = fpCalculateHash(pvSearchKey);
-    SIP_UINT32 iBucket    = iHashKey % uiSearchBuckets;
-    Hash_StSearchElement **pstIterator = &(ppstHashSearchChains[iBucket]);
+    SIP_UINT32 nHashKey = fpCalculateHash(pvSearchKey);
+    SIP_UINT32 nBucket = nHashKey % nSearchBuckets;
+    Hash_StSearchElement** ppstIterator = &(ppstHashSearchChains[nBucket]);
 
-    while (*pstIterator != SIP_NULL)
+    while (*ppstIterator != SIP_NULL)
     {
-        if (fpCompareHash((*pstIterator)->pvSearchKey,pvSearchKey) ==
+        if (fpCompareHash((*ppstIterator)->pvSearchKey, pvSearchKey) ==
                 SIP_MATCHES)
         {
-            (*pstIterator)->uiRefCount--;
-            (*pstIterator)->uiRefCount--;
+            (*ppstIterator)->nRefCount--;
+            (*ppstIterator)->nRefCount--;
             break;
         }
-        pstIterator = &((*pstIterator)->pstNextElement);
+        ppstIterator = &((*ppstIterator)->pstNextElement);
     }
 
 
-    if ((*pstIterator) == SIP_NULL)
+    if ((*ppstIterator) == SIP_NULL)
     {
 #ifdef SIP_THREAD_SAFE
         objMutex.Unlock();
 #endif
         /* EERR_HASHELEMENTSNOTFOUND */
         SIP_DEBUG_WARNING(EERR_HASHELEMENTSNOTFOUND,
-                "Hash_Fetch: Element Not Found \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Fetch: Element Not Found \n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
-    if ((((*pstIterator)->bRemove) == SIP_TRUE)
-            && (SIP_ZERO == (*pstIterator)->uiRefCount))
+    if ((((*ppstIterator)->bRemove) == SIP_TRUE)
+            && (SIP_ZERO == (*ppstIterator)->nRefCount))
     {
-        Hash_StSearchElement *pstTempElement = *pstIterator;
-        *pstIterator = (*pstIterator)->pstNextElement;
+        Hash_StSearchElement* pstTempElement = *ppstIterator;
+        *ppstIterator = (*ppstIterator)->pstNextElement;
         if (pstTempElement->pvSearchKey != SIP_NULL)
         {
             fpKeyFreeHashKey(pstTempElement->pvSearchKey);
@@ -502,17 +472,17 @@ SIP_UINT16   *pusError
             fpFreeHashElement(pstTempElement->pvElement);
         }
 
-        uiNumOfSearchElements = uiNumOfSearchElements - SIP_ONE;
+        nNumOfSearchElements = nNumOfSearchElements - SIP_ONE;
         pstTempElement->pvElement = SIP_NULL;
         //    SipPf_Free((SIP_VOID**)&pstTempElement);
         delete pstTempElement;
         SIP_TRACE_NORMAL(ESIPTRACE_MODHASH,
                 "Hash_Release: - Element Freed: Num of entries :%d\n",
-                uiNumOfSearchElements,SIP_ZERO);
+                nNumOfSearchElements, SIP_ZERO);
     }
     else
     {
-        (*pstIterator)->uiRefCount = (*pstIterator)->uiRefCount + SIP_ONE;
+        (*ppstIterator)->nRefCount = (*ppstIterator)->nRefCount + SIP_ONE;
     }
 
 #ifdef SIP_THREAD_SAFE
@@ -534,20 +504,16 @@ SIP_UINT16   *pusError
  **  pKey  (IN)  : Key corresponding to the element to be removed.
  **
  ******************************************************************************/
-    SIP_BOOL SipHash::Hash_Remove
-              (
-               SIP_VOID     *pvSearchKey,
-               SIP_UINT16    *pusError
-              )
+SIP_BOOL SipHash::Hash_Remove(SIP_VOID* pvSearchKey, SIP_UINT16* pnError)
 {
     if ((pvSearchKey == SIP_NULL)
             || (fpCalculateHash == SIP_NULL)
             || (fpCompareHash == SIP_NULL)
             || (bInitialized == SIP_FALSE))
     {
-        *pusError = EERR_INVALIDPARAM;
+        *pnError = EERR_INVALIDPARAM;
         SIP_DEBUG_WARNING(EERR_INVALIDPARAM,
-                "Hash_Remove: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Remove: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -555,38 +521,37 @@ SIP_UINT16   *pusError
     objMutex.Lock();
 #endif
 
-    SIP_UINT32 iHashKey  = fpCalculateHash(pvSearchKey);
-    SIP_UINT32 iBucket    = iHashKey % uiSearchBuckets;
-    Hash_StSearchElement **pstIterator = &(ppstHashSearchChains[iBucket]);
+    SIP_UINT32 nHashKey = fpCalculateHash(pvSearchKey);
+    SIP_UINT32 nBucket = nHashKey % nSearchBuckets;
+    Hash_StSearchElement** ppstIterator = &(ppstHashSearchChains[nBucket]);
 
-    while (*pstIterator != SIP_NULL)
+    while (*ppstIterator != SIP_NULL)
     {
-        if (fpCompareHash((*pstIterator)->pvSearchKey,pvSearchKey) ==
-                SIP_MATCHES)
+        if (fpCompareHash((*ppstIterator)->pvSearchKey, pvSearchKey) == SIP_MATCHES)
         {
             break;
         }
-        pstIterator = &((*pstIterator)->pstNextElement);
+        ppstIterator = &((*ppstIterator)->pstNextElement);
     }
 
-    if (*pstIterator == SIP_NULL)
+    if (*ppstIterator == SIP_NULL)
     {
 
 #ifdef SIP_THREAD_SAFE
         objMutex.Unlock();
 #endif
-        *pusError = EERR_HASHELEMENTSNOTFOUND;
+        *pnError = EERR_HASHELEMENTSNOTFOUND;
         SIP_DEBUG_WARNING(EERR_HASHELEMENTSNOTFOUND,
-                "Hash_Fetch: Element Not Found \n",SIP_ZERO,SIP_ZERO);
+                "Hash_Fetch: Element Not Found \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    (*pstIterator)->uiRefCount =  (*pstIterator)->uiRefCount - SIP_ONE;
+    (*ppstIterator)->nRefCount = (*ppstIterator)->nRefCount - SIP_ONE;
 
-    if ((*pstIterator)->uiRefCount == SIP_ZERO)
+    if ((*ppstIterator)->nRefCount == SIP_ZERO)
     {
-        Hash_StSearchElement *pstTempElement = *pstIterator;
-        *pstIterator = (*pstIterator)->pstNextElement;
+        Hash_StSearchElement* pstTempElement = *ppstIterator;
+        *ppstIterator = (*ppstIterator)->pstNextElement;
         if (pstTempElement->pvSearchKey != SIP_NULL)
         {
             fpKeyFreeHashKey(pstTempElement->pvSearchKey);
@@ -596,25 +561,24 @@ SIP_UINT16   *pusError
             fpFreeHashElement(pstTempElement->pvElement);
         }
 
-        uiNumOfSearchElements = uiNumOfSearchElements - SIP_ONE;
+        nNumOfSearchElements = nNumOfSearchElements - SIP_ONE;
         pstTempElement->pvElement = SIP_NULL;
         //    SipPf_Free((SIP_VOID**)&pstTempElement);
         delete pstTempElement;
         SIP_TRACE_NORMAL(ESIPTRACE_MODHASH,
                 "*****Hash_Remove: Num of Entries Existing [%d]*****",
-                uiNumOfSearchElements,SIP_ZERO);
+                nNumOfSearchElements, SIP_ZERO);
     }
     else
     {
-        (*pstIterator)->bRemove = SIP_TRUE;
-        (*pstIterator)->uiRefCount = (*pstIterator)->uiRefCount + SIP_ONE;
+        (*ppstIterator)->bRemove = SIP_TRUE;
+        (*ppstIterator)->nRefCount = (*ppstIterator)->nRefCount + SIP_ONE;
         SIP_TRACE_NORMAL(ESIPTRACE_MODHASH,
                 "Hash_Remove: - Could not remove as \
-                Ref count for this element :%d",(*pstIterator)->uiRefCount,SIP_ZERO);
+                Ref count for this element :%d",(*pstIterator)->nRefCount, SIP_ZERO);
     }
 
-    SIP_DEBUG_WARNING(EERR_NOERR,
-                "Hash_Remove: elementCount=%d", uiNumOfSearchElements, SIP_ZERO);
+    SIP_DEBUG_WARNING(EERR_NOERR, "Hash_Remove: elementCount=%d", nNumOfSearchElements, SIP_ZERO);
 
 #ifdef SIP_THREAD_SAFE
     objMutex.Unlock();
@@ -634,20 +598,16 @@ SIP_UINT16   *pusError
  **          element has to be retrieved.
  **
  ******************************************************************************/
-    void SipHash::Hash_IterateNext
-                     (
-                      Hash_St_HashIterator   *pstIterator,
-                      SIP_UINT16      *pusError
-                     )
+void SipHash::Hash_IterateNext(Hash_St_HashIterator* pstIterator, SIP_UINT16* pnError)
 {
     if ((fpCalculateHash == SIP_NULL)
             || (fpCompareHash == SIP_NULL)
             || (SIP_NULL == ppstHashSearchChains)
             || (bInitialized == SIP_FALSE))
     {
-        *pusError = EERR_INVALIDPARAM;
+        *pnError = EERR_INVALIDPARAM;
         SIP_DEBUG_WARNING(ESIPTRACE_MODHASH,
-                "Hash_IterateNext: Invalid Hash \n",SIP_ZERO,SIP_ZERO);
+                "Hash_IterateNext: Invalid Hash \n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
@@ -659,7 +619,7 @@ SIP_UINT16   *pusError
     /*   If current element in the iterator points to a
          null node - keep it null else make it point to
          next element in the chain. */
-    Hash_StSearchElement *pstNextElem = (pstIterator->pCurrentElement == SIP_NULL)\
+    Hash_StSearchElement* pstNextElem = (pstIterator->pCurrentElement == SIP_NULL)\
               ? SIP_NULL : pstIterator->pCurrentElement->pstNextElement;
 
     /*
@@ -668,17 +628,17 @@ SIP_UINT16   *pusError
      */
     if (pstIterator->pCurrentElement != SIP_NULL)
     {
-        pstIterator->pCurrentElement->uiRefCount =
-            pstIterator->pCurrentElement->uiRefCount - SIP_ONE;
-        pstIterator->pCurrentElement->uiRefCount =
-            pstIterator->pCurrentElement->uiRefCount - SIP_ONE;
+        pstIterator->pCurrentElement->nRefCount =
+            pstIterator->pCurrentElement->nRefCount - SIP_ONE;
+        pstIterator->pCurrentElement->nRefCount =
+            pstIterator->pCurrentElement->nRefCount - SIP_ONE;
 
-        if ((pstIterator->pCurrentElement->uiRefCount == SIP_ZERO) && \
+        if ((pstIterator->pCurrentElement->nRefCount == SIP_ZERO) && \
                 (pstIterator->pCurrentElement->bRemove == SIP_TRUE))
         {
-            SIP_VOID *pKey = pstIterator->pCurrentElement->pvSearchKey;
-            Hash_StSearchElement **ppElement =
-                &(ppstHashSearchChains[pstIterator->uiCurrentBucket]);
+            SIP_VOID* pKey = pstIterator->pCurrentElement->pvSearchKey;
+            Hash_StSearchElement** ppElement =
+                &(ppstHashSearchChains[pstIterator->nCurrentBucket]);
 
             while (*ppElement != SIP_NULL)
             {
@@ -688,7 +648,7 @@ SIP_UINT16   *pusError
             }
             if (*ppElement != SIP_NULL)
             {
-                Hash_StSearchElement *pTempElement = *ppElement;
+                Hash_StSearchElement* pTempElement = *ppElement;
                 *ppElement = (*ppElement)->pstNextElement;
                 if (fpFreeHashElement != SIP_NULL)
                     fpFreeHashElement(pTempElement->pvElement);
@@ -697,14 +657,14 @@ SIP_UINT16   *pusError
 
                 delete pTempElement;
                 //      SipPf_Free((SIP_VOID **)&pTempElement);
-                uiNumOfSearchElements =
-                    uiNumOfSearchElements - SIP_ONE;
+                nNumOfSearchElements =
+                    nNumOfSearchElements - SIP_ONE;
             }
         }
         else
         {
-            pstIterator->pCurrentElement->uiRefCount =
-                pstIterator->pCurrentElement->uiRefCount + SIP_ONE;
+            pstIterator->pCurrentElement->nRefCount =
+                pstIterator->pCurrentElement->nRefCount + SIP_ONE;
         }
     }
 
@@ -714,8 +674,8 @@ SIP_UINT16   *pusError
              We have already taken the next element.
              Return now */
         pstIterator->pCurrentElement = pstNextElem;
-        pstIterator->pCurrentElement->uiRefCount =
-            pstIterator->pCurrentElement->uiRefCount + SIP_ONE;
+        pstIterator->pCurrentElement->nRefCount =
+            pstIterator->pCurrentElement->nRefCount + SIP_ONE;
 #ifdef SIP_THREAD_SAFE
         objMutex.Unlock();
 #endif
@@ -726,7 +686,7 @@ SIP_UINT16   *pusError
         of the chain. Check if it's the end of the last chain.
         If so, return */
     if ((pstNextElem == SIP_NULL) &&\
-            (pstIterator->uiCurrentBucket == uiSearchBuckets - SIP_ONE))
+            (pstIterator->nCurrentBucket == nSearchBuckets - SIP_ONE))
     {
         pstIterator->pCurrentElement = pstNextElem;
 #ifdef SIP_THREAD_SAFE
@@ -737,23 +697,23 @@ SIP_UINT16   *pusError
 
     /*   Find the next non-empty chain and
          make the iterator point to that */
-    pstIterator->uiCurrentBucket = pstIterator->uiCurrentBucket + SIP_ONE;
-    while (pstIterator->uiCurrentBucket != uiSearchBuckets - SIP_ONE)
+    pstIterator->nCurrentBucket = pstIterator->nCurrentBucket + SIP_ONE;
+    while (pstIterator->nCurrentBucket != nSearchBuckets - SIP_ONE)
     {
 
-        if (ppstHashSearchChains[pstIterator->uiCurrentBucket]!=SIP_NULL)
+        if (ppstHashSearchChains[pstIterator->nCurrentBucket]!=SIP_NULL)
             break;
-        pstIterator->uiCurrentBucket++;
+        pstIterator->nCurrentBucket++;
     }
 
     pstIterator->pCurrentElement = \
-                       ppstHashSearchChains[pstIterator->uiCurrentBucket];
+                       ppstHashSearchChains[pstIterator->nCurrentBucket];
 
     /*   Increment reference count of the element being
          returned unless we reached the end of the final
          bucket */
     if (pstIterator->pCurrentElement != SIP_NULL)
-        pstIterator->pCurrentElement->uiRefCount++;
+        pstIterator->pCurrentElement->nRefCount++;
 
 #ifdef SIP_THREAD_SAFE
     objMutex.Unlock();
@@ -770,42 +730,40 @@ SIP_UINT16   *pusError
  **  pstIterator  (IN/OUT)  : Hash iterator to be initialized.
  **
  ******************************************************************************/
-    void SipHash::Hash_InitIterator
-                     (
-                      Hash_St_HashIterator   *pstIterator
-                     )
+void SipHash::Hash_InitIterator(Hash_St_HashIterator* pstIterator)
 {
     if ((pstIterator == SIP_NULL) || (ppstHashSearchChains == SIP_NULL)
-            || (bInitialized == SIP_FALSE)) {
+            || (bInitialized == SIP_FALSE))
+    {
         return;
     }
 
-    pstIterator->uiCurrentBucket = SIP_ZERO;
+    pstIterator->nCurrentBucket = SIP_ZERO;
     pstIterator->pCurrentElement = SIP_NULL;
 
 #ifdef SIP_THREAD_SAFE
     objMutex.Lock();
 #endif
 
-    while (pstIterator->uiCurrentBucket <= uiSearchBuckets - SIP_ONE)
+    while (pstIterator->nCurrentBucket <= nSearchBuckets - SIP_ONE)
     {
-        if (ppstHashSearchChains[pstIterator->uiCurrentBucket] == SIP_NULL)
+        if (ppstHashSearchChains[pstIterator->nCurrentBucket] == SIP_NULL)
         {
-            pstIterator->uiCurrentBucket++;
+            pstIterator->nCurrentBucket++;
             continue;
         }
         else
         {
             pstIterator->pCurrentElement = ppstHashSearchChains\
-                               [pstIterator->uiCurrentBucket];
-            pstIterator->pCurrentElement->uiRefCount++;
+                               [pstIterator->nCurrentBucket];
+            pstIterator->pCurrentElement->nRefCount++;
             break;
         }
     }
 
     if (pstIterator->pCurrentElement == SIP_NULL)
     {
-        pstIterator->uiCurrentBucket = pstIterator->uiCurrentBucket - SIP_ONE;
+        pstIterator->nCurrentBucket = pstIterator->nCurrentBucket - SIP_ONE;
     }
 
 
@@ -826,16 +784,12 @@ SIP_UINT16   *pusError
  ** PARAMETERS:
  **  pHash   (IN)    : Hash table
  **
- **  puiNumFreeEntries(OUT) : Number of free entries
+ **  pNumFreeEntries(OUT) : Number of free entries
  **
  ******************************************************************************/
-    SIP_BOOL SipHash::Hash_IsFree
-                     (
-                      SIP_UINT16     *puiNumFreeEntries
-                     )
+SIP_BOOL SipHash::Hash_IsFree(SIP_UINT16* pNumFreeEntries)
 {
-
-    if ((puiNumFreeEntries == SIP_NULL) || (bInitialized == SIP_FALSE))
+    if ((pNumFreeEntries == SIP_NULL) || (bInitialized == SIP_FALSE))
     {
         return SIP_FALSE;
     }
@@ -843,15 +797,15 @@ SIP_UINT16   *pusError
 #ifdef SIP_THREAD_SAFE
     objMutex.Lock();
 #endif
-    *puiNumFreeEntries = uiMaxNumberOfElements\
-                 - uiNumOfSearchElements;
+    *pNumFreeEntries = nMaxNumberOfElements\
+                 - nNumOfSearchElements;
 
 #ifdef SIP_THREAD_SAFE
     objMutex.Unlock();
 #endif
     SIP_DEBUG_WARNING(ESIPTRACE_MODHASH,
-            "Hash_IsFree\n",SIP_ZERO,SIP_ZERO);
-    if (*puiNumFreeEntries != SIP_ZERO)
+            "Hash_IsFree\n", SIP_ZERO, SIP_ZERO);
+    if (*pNumFreeEntries != SIP_ZERO)
     {
         return SIP_TRUE;
     }

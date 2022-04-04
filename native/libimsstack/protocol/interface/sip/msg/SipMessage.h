@@ -97,120 +97,101 @@ class SipMessage: public SipRefBase
 
     private:
         /* eSipMsgType will tell the type of the message    */
-        SIP_INT32        m_eSipMsgType;
+        SIP_INT32 m_eSipMsgType;
 
         /*Request Line*/
-        SipRequestLine        *m_pObjReqLine;
+        SipRequestLine* m_pReqLine;
 
         /*Status Line*/
-        SipStatusLine        *m_pObjStatusLine;
+        SipStatusLine* m_pStatusLine;
 
         /*common(Request & Response Both)headers*/
-        SipHeaders            *m_objHdrs;
+        SipHeaders* m_objHdrs;
 
         /* List of SipMsgBody*/
-        SipMsgBodyList        *m_pObjMsgBodyList;
+        SipMsgBodyList* m_pMsgBodyList;
 
 #ifdef SIP_BADMESSAGE_PARSING
-        SIP_INT32   mbitMask;
-        SipHeaderList             *m_pobjBadHdrList;
+        SIP_INT32 mbitMask;
+        SipHeaderList* m_pBadHdrList;
 #endif
-        SIP_BOOL UpdateMessage(SIP_UINT32 uiMsgOptions);
+        SIP_BOOL UpdateMessage(SIP_UINT32 nMsgOptions);
 
     public:
         SipMessage();
         ~SipMessage();
-        SipMessage(SIP_INT32    eSipMsgType);
-        SipMessage(const SipMessage &objSipMsg);
-        SIP_BOOL EncodeMsg
-            (
-             SIP_CHAR        **ppucSipMsgBuffer, /* in-out parameter*/
-             SIP_UINT32        *puiSipMsgLength, /* in-out parameter*/
-             SIP_UINT32         uiMsgOptions
-            );
+        SipMessage(SIP_INT32 eSipMsgType);
+        SipMessage(const SipMessage& objSipMsg);
+        SIP_BOOL EncodeMsg(SIP_CHAR** ppSipMsgBuffer, /* in-out parameter*/
+                SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);
 
-        SIP_BOOL DecCompleteMsg
-            (
-             SIP_CHAR            * pucMsgBuff,
-             SIP_UINT32            uiMsgBuffLen
-            );
+        SIP_BOOL DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
 
-        SIP_BOOL DecodeMsg
-            (
-             SIP_CHAR * pucStartPt,
-             SIP_UINT32     uiMsgBuffLen
-            );
+        SIP_BOOL DecodeMsg(SIP_CHAR* pStartPt, SIP_UINT32 nMsgBuffLen);
 
-        SIP_BOOL DecMultiPartBody
-            (
-                SIP_CHAR            * pucBuffStart,
-                SIP_CHAR            * pucBuffEnd,
-                SIP_UINT32            uiMsgBuffLen
-            );
+        SIP_BOOL DecMultiPartBody(SIP_CHAR* pBuffStart, SIP_CHAR* pBuffEnd,
+                SIP_UINT32 nMsgBuffLen);
 
-        SipMsgBodyList *GetMsgBodyList(){
-            if (m_pObjMsgBodyList)
+        inline SipMsgBodyList* GetMsgBodyList()
+        {
+            if (m_pMsgBodyList)
             {
-                m_pObjMsgBodyList->increment();
+                m_pMsgBodyList->increment();
             }
-            return m_pObjMsgBodyList;
+            return m_pMsgBodyList;
         }
         SipMsgBody* GetMessageBody(SIP_INT32 nIndex);
 
-        SIP_BOOL SetRequestline(SipRequestLine* pobjReqLine);
-        SIP_BOOL SetHeader
-            (
-             SipHeaderBase* pobjHdr
-            );
-        SIP_BOOL AppendHeader
-           (
-            SipHeaderBase* pobjHdr
-           );
-        SIP_BOOL InsertHeader
-           (
-            SipHeaderBase* pobjHdr,
-            SIP_UINT32 nIndex
-           );
-        SIP_BOOL SetMessageBody(SipMsgBody* pObj);
+        SIP_BOOL SetRequestline(SipRequestLine* pReqLine);
+        SIP_BOOL SetHeader(SipHeaderBase* pHdr);
+        SIP_BOOL AppendHeader(SipHeaderBase* pHdr);
+        SIP_BOOL InsertHeader(SipHeaderBase* pHdr, SIP_UINT32 nIndex);
+        SIP_BOOL SetMessageBody(SipMsgBody* pMsgBody);
         SIP_BOOL SetMessageType(SIP_INT32 eMsgType);
         /* ### TODO */
-        inline SipHeaders* GetMsgHdrs() {
+        inline SipHeaders* GetMsgHdrs()
+        {
             return (m_objHdrs);
         }
-        inline SIP_INT32 GetMsgType() const {
+        inline SIP_INT32 GetMsgType() const
+        {
             return m_eSipMsgType;
         }
-        inline SipRequestLine* GetReqLine() {
-            if (m_pObjReqLine != SIP_NULL) {
-                m_pObjReqLine->increment();
+        inline SipRequestLine* GetReqLine()
+        {
+            if (m_pReqLine != SIP_NULL)
+            {
+                m_pReqLine->increment();
             }
-            return m_pObjReqLine;
+            return m_pReqLine;
         }
-        inline SipStatusLine* GetStatusLine() {
-            if (m_pObjStatusLine != SIP_NULL) {
-                m_pObjStatusLine->increment();
+        inline SipStatusLine* GetStatusLine()
+        {
+            if (m_pStatusLine != SIP_NULL)
+            {
+                m_pStatusLine->increment();
             }
-            return m_pObjStatusLine;
+            return m_pStatusLine;
         }
         SIP_INT32 GetMethodType();
         const SIP_CHAR* GetMethod(); /* Based on Req and Resp*/
         SipHeaderBase* GetHdrObj(SIP_INT32 eHdrType);
-        SipUnknownHeader* GetUnknownHdrObj(const SIP_CHAR* strHdrName);
+        SipUnknownHeader* GetUnknownHdrObj(const SIP_CHAR* pszHdrName);
         SipUnknownHeader* GetUnknownHdrObj(SIP_INT32 eType);
         SIP_BOOL HasHeader(SIP_INT32 eHdrType) const;
         SipHeaderList* GetHdrList(SIP_INT32 eHdrType);
-        SIP_VOID SetContentLengthHdr(SIP_UINT16 usLen, SIP_UINT32 uiMsgOptions);
-        SIP_BOOL SetHdrList(SipHeaderList* pstObjHdrList);
-        SIP_BOOL SetMsgBodyList(SipMsgBodyList *pobjMsgBodyList);
+        SIP_VOID SetContentLengthHdr(SIP_UINT16 nLen, SIP_UINT32 nMsgOptions);
+        SIP_BOOL SetHdrList(SipHeaderList* pHeaderList);
+        SIP_BOOL SetMsgBodyList(SipMsgBodyList* pMsgBodyList);
         inline SIP_UINT16 GetMsgBodyCount() const
         {
-            return (m_pObjMsgBodyList != SIP_NULL) ?
-                    m_pObjMsgBodyList->GetMsgBodyCount() : SIP_ZERO;
+            return (m_pMsgBodyList != SIP_NULL) ?
+                    m_pMsgBodyList->GetMsgBodyCount() : SIP_ZERO;
         }
-        SIP_BOOL AppendMessageBody(SipMsgBody *pObjMsgBody);
-        SipMsgBody* GetMsgBody(SIP_UINT32 uiPos);
+        SIP_BOOL AppendMessageBody(SipMsgBody* pMsgBody);
+        SipMsgBody* GetMsgBody(SIP_UINT32 nPos);
         SIP_BOOL RemoveHdr(SIP_INT32 eHdrType);
-        SIP_BOOL SetStatusLine(SipStatusLine *pobjStatusLine);
+        SIP_BOOL SetStatusLine(SipStatusLine* pStatusLine);
         SIP_BOOL IsReqLineExists();
         SIP_BOOL IsStatusLineExists();
         SIP_BOOL HasMIMEMessageBody();

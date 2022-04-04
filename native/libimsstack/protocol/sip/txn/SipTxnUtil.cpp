@@ -31,7 +31,7 @@ SipTxnUtil* SipTxnUtil::m_pSipTxnUtil = SIP_NULL;
  * Description        : This function is constructor for class SipTxnUtil
  */
 SipTxnUtil::SipTxnUtil()
-        :m_txnKeyList(SipVector<SipTxnKey*>())
+        : m_txnKeyList(SipVector<SipTxnKey*>())
 {
 }
 
@@ -50,76 +50,76 @@ SipTxnUtil* SipTxnUtil::GetInstance()
 /*
  * Description        : This function searches the list and return the specific TxnKey
  */
-SipTxnKey * SipTxnUtil::SearchTxnKey(SipTxnKey *pObjUserTxnkey, SIP_BOOL bCheckRSeq)
+SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
 {
-    if (pObjUserTxnkey == SIP_NULL)
+    if (pUserTxnkey == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::SearchTxnKey: Txn Object is Null",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
 
-    SIP_UINT32 usSize = m_txnKeyList.GetSize();
+    SIP_UINT32 nSize = m_txnKeyList.GetSize();
 
-    if (usSize <= SIP_ZERO)
+    if (nSize <= SIP_ZERO)
     {
         return SIP_NULL;
     }
 
-    SIP_UINT32 nStoredRules = pObjUserTxnkey->GetRules();
+    SIP_UINT32 nStoredRules = pUserTxnkey->GetRules();
 
-    pObjUserTxnkey->SetRules(SipTxnKey::RULE_COMPARE_TO_TAG);
+    pUserTxnkey->SetRules(SipTxnKey::RULE_COMPARE_TO_TAG);
 
     if (bCheckRSeq == SIP_TRUE)
     {
-        pObjUserTxnkey->AddRule(SipTxnKey::RULE_COMPARE_RSEQ);
+        pUserTxnkey->AddRule(SipTxnKey::RULE_COMPARE_RSEQ);
     }
 
-    SIP_UINT16 uIndex = SIP_ZERO;
-    while (uIndex < usSize)
+    SIP_UINT16 nIndex = SIP_ZERO;
+    while (nIndex < nSize)
     {
-        SipTxnKey*  pObjStoredTxnKey = m_txnKeyList.GetAt(uIndex++);
-        if (pObjStoredTxnKey == SIP_NULL)
+        SipTxnKey* pStoredTxnKey = m_txnKeyList.GetAt(nIndex++);
+        if (pStoredTxnKey == SIP_NULL)
         {
-            pObjUserTxnkey->SetRules(nStoredRules);
+            pUserTxnkey->SetRules(nStoredRules);
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::SearchTxnKey: Element Retrieval from List Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
             return SIP_NULL;
         }
 
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
             "SipTxnUtil::SearchTxnKey, CallID: %s, From Tag: %s.",
-            pObjStoredTxnKey->GetCallId(),pObjStoredTxnKey->GetFromTag());
+            pStoredTxnKey->GetCallId(), pStoredTxnKey->GetFromTag());
 
-        if (pObjStoredTxnKey->CompareKeysForRPR(pObjUserTxnkey) != SIP_MATCHES)
+        if (pStoredTxnKey->CompareKeysForRPR(pUserTxnkey) != SIP_MATCHES)
         {
             continue;
         }
 
-        pObjUserTxnkey->SetRules(nStoredRules);
+        pUserTxnkey->SetRules(nStoredRules);
 
-        return pObjStoredTxnKey;
+        return pStoredTxnKey;
     }
 
-    pObjUserTxnkey->SetRules(nStoredRules);
+    pUserTxnkey->SetRules(nStoredRules);
 
     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::SearchTxnKey: Element Not Found in the List",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
 
     return SIP_NULL;
 }
 
-SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey *pObjUserTxnkey, SipTxnKey *pObjStoredTxnKey)
+SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredTxnKey)
 {
-    if (pObjStoredTxnKey == SIP_NULL)
+    if (pStoredTxnKey == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    if (pObjStoredTxnKey->CompareKeysForRPR(pObjUserTxnkey) != SIP_MATCHES)
+    if (pStoredTxnKey->CompareKeysForRPR(pUserTxnkey) != SIP_MATCHES)
     {
         return SIP_FALSE;
     }
@@ -129,73 +129,73 @@ SIP_BOOL SipTxnUtil::IsTxnKeyMatched(SipTxnKey *pObjUserTxnkey, SipTxnKey *pObjS
 /*
  * Description        : This function Adds Tnx Key to the list
  */
-SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey*  pObj)
+SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
 {
-    if (m_txnKeyList.Add(pObj) < 0)
+    if (m_txnKeyList.Add(pTxnKey) < 0)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipTxnUtil::AddTxnKey:Adding in list failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey * pObjUserTxnkey, SIP_BOOL bCheckToTag)
+SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 {
-    if (pObjUserTxnkey == SIP_NULL)
+    if (pUserTxnkey == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::DeleteTxnKey: Txn Object is Null",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_UINT32 usSize = m_txnKeyList.GetSize();
-    if (usSize <= SIP_ZERO)
+    SIP_UINT32 nSize = m_txnKeyList.GetSize();
+    if (nSize <= SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::DeleteTxnKey: List Size Zero",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_UINT32 nStoredRules = pObjUserTxnkey->GetRules();
+    SIP_UINT32 nStoredRules = pUserTxnkey->GetRules();
 
-    pObjUserTxnkey->SetRules(SipTxnKey::RULE_NONE);
+    pUserTxnkey->SetRules(SipTxnKey::RULE_NONE);
 
     if (bCheckToTag == SIP_TRUE)
     {
-        pObjUserTxnkey->AddRule(SipTxnKey::RULE_COMPARE_TO_TAG);
+        pUserTxnkey->AddRule(SipTxnKey::RULE_COMPARE_TO_TAG);
     }
 
-    SIP_UINT32 uIndex = SIP_ZERO;
-    SipTxnKey*  pObjStoredTxnKey = SIP_NULL;
-    while (uIndex < usSize)
+    SIP_UINT32 nIndex = SIP_ZERO;
+    SipTxnKey* pStoredTxnKey = SIP_NULL;
+    while (nIndex < nSize)
     {
-        pObjStoredTxnKey = m_txnKeyList.GetAt(uIndex++);
-        if (pObjStoredTxnKey == SIP_NULL)
+        pStoredTxnKey = m_txnKeyList.GetAt(nIndex++);
+        if (pStoredTxnKey == SIP_NULL)
         {
-            pObjUserTxnkey->SetRules(nStoredRules);
+            pUserTxnkey->SetRules(nStoredRules);
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                 "SipTxnUtil::DeleteTxnKey: Element Retrieval from List Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (IsTxnKeyMatched(pObjUserTxnkey, pObjStoredTxnKey) == SIP_TRUE)
+        if (IsTxnKeyMatched(pUserTxnkey, pStoredTxnKey) == SIP_TRUE)
         {
-            sip_cbk_displayTxnKey((SIP_VOID*)pObjStoredTxnKey);
-            pObjStoredTxnKey->SipDelete();
-            m_txnKeyList.RemoveAt(uIndex - SIP_ONE);
+            sip_cbk_displayTxnKey((SIP_VOID*)pStoredTxnKey);
+            pStoredTxnKey->SipDelete();
+            m_txnKeyList.RemoveAt(nIndex - SIP_ONE);
             //Check again if further elements matches for the same txn key.
-            uIndex--;
-            usSize--;
+            nIndex--;
+            nSize--;
         }
     }
 
-    pObjUserTxnkey->SetRules(nStoredRules);
+    pUserTxnkey->SetRules(nStoredRules);
 
     return SIP_TRUE;
 }

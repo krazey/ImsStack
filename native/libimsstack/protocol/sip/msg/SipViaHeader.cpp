@@ -58,7 +58,7 @@ SipViaHeader::SipViaHeader()
     , m_pszProtocolVer(SIP_NULL)
     , m_pszTransport(SIP_NULL)
     , m_pszHost(SIP_NULL)
-    , m_usPort(SIP_ZERO)
+    , m_nPort(SIP_ZERO)
     , m_eHostType(SipAddrSpec::HOST_NAME)
 {
 }
@@ -71,13 +71,13 @@ SipViaHeader::SipViaHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipViaHeader::SipViaHeader(const SipViaHeader &objHeader)
+SipViaHeader::SipViaHeader(const SipViaHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszProtocolName(SipPf_Strdup(objHeader.GetProtocolName()))
     , m_pszProtocolVer(SipPf_Strdup(objHeader.GetProtocolVer()))
     , m_pszTransport(SipPf_Strdup(objHeader.GetTransport()))
     , m_pszHost(SipPf_Strdup(objHeader.GetHost()))
-    , m_usPort(objHeader.GetPort())
+    , m_nPort(objHeader.GetPort())
     , m_eHostType(objHeader.m_eHostType)
 {
 }
@@ -122,11 +122,7 @@ SipViaHeader::~SipViaHeader()
  * Side Effects      : none
  *****************************************************************************/
 
-SIP_BOOL SipViaHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipViaHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     /* Encoding of header value*/
     /*Encode sent protocol
@@ -135,46 +131,46 @@ SIP_BOOL SipViaHeader::EncodeHdr
     if (m_pszProtocolName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing Protocol ",SIP_ZERO,SIP_ZERO);
+                "Missing Protocol ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos, m_pszProtocolName);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszProtocolName);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppucCurrPos);
+    SIP_ENC_SLASH(*ppCurrPos);
 
     /*protocol-version*/
     if (m_pszProtocolVer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing Protocol Version ",SIP_ZERO,SIP_ZERO);
+                "Missing Protocol Version ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SipPf_Strcpy(*ppucCurrPos,m_pszProtocolVer);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszProtocolVer);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_SLASH(*ppucCurrPos);
+    SIP_ENC_SLASH(*ppCurrPos);
 
     /*transport*/
     if (m_pszTransport == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing Transport ",SIP_ZERO,SIP_ZERO);
+                "Missing Transport ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SipPf_Strcpy(*ppucCurrPos,m_pszTransport);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszTransport);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     /*put a space for LWS*/
-    SIP_ENC_SP(*ppucCurrPos);
+    SIP_ENC_SP(*ppCurrPos);
 
     /*Encode sent by*/
     /*sent-by = host [ COLON port ] */
     if (m_pszHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing Host ",SIP_ZERO,SIP_ZERO);
+                "Missing Host ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if ((m_eHostType == SipAddrSpec::HOST_IPV4) || (m_eHostType == SipAddrSpec::HOST_IPV6))
@@ -182,35 +178,35 @@ SIP_BOOL SipViaHeader::EncodeHdr
         if (m_eHostType == SipAddrSpec::HOST_IPV6)
         {
             //Left Square and Right Square Bracket already included in Host
-            SipPf_Strcpy(*ppucCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppucCurrPos);
+            SipPf_Strcpy(*ppCurrPos, m_pszHost);
+            SipEnc_UpdateCurrPos(ppCurrPos);
         }
         /*Case of IPV4*/
         else
         {
-            SipPf_Strcpy(*ppucCurrPos, m_pszHost);
-            SipEnc_UpdateCurrPos(ppucCurrPos);
+            SipPf_Strcpy(*ppCurrPos, m_pszHost);
+            SipEnc_UpdateCurrPos(ppCurrPos);
         }
     }
     /*Case of Host name*/
     else
     {
-        SipPf_Strcpy(*ppucCurrPos, m_pszHost);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
+        SipPf_Strcpy(*ppCurrPos, m_pszHost);
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
 #define MAX_PORT_LEN 20
-    if (m_usPort != SIP_ZERO)
+    if (m_nPort != SIP_ZERO)
     {
-        SIP_CHAR ucTmp[MAX_PORT_LEN];
-        SipPf_Sprintf(ucTmp, (SIP_CHAR*)"%u", m_usPort);
+        SIP_CHAR szTmp[MAX_PORT_LEN];
+        SipPf_Sprintf(szTmp, (SIP_CHAR*)"%u", m_nPort);
 
-        SIP_ENC_COLON(*ppucCurrPos);
+        SIP_ENC_COLON(*ppCurrPos);
 
-        SipPf_Strcpy(*ppucCurrPos, ucTmp);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
+        SipPf_Strcpy(*ppCurrPos, szTmp);
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 
@@ -224,12 +220,9 @@ SIP_BOOL SipViaHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::SetProtocolName
-(
- const SIP_CHAR    *pkszProtocolNm
- )
+SIP_BOOL SipViaHeader::SetProtocolName(const SIP_CHAR* pszProtocolNm)
 {
-    return SetCharVar(pkszProtocolNm,m_pszProtocolName);
+    return SetCharVar(pszProtocolNm, m_pszProtocolName);
 }
 
 /******************************************************************************
@@ -241,12 +234,9 @@ SIP_BOOL SipViaHeader::SetProtocolName
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::SetProtocolVer
-(
- const SIP_CHAR    *pkszProtocolVer
- )
+SIP_BOOL SipViaHeader::SetProtocolVer(const SIP_CHAR* pszProtocolVer)
 {
-    return SetCharVar(pkszProtocolVer,m_pszProtocolVer);
+    return SetCharVar(pszProtocolVer, m_pszProtocolVer);
 }
 
 /******************************************************************************
@@ -258,12 +248,9 @@ SIP_BOOL SipViaHeader::SetProtocolVer
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::SetTransport
-(
- const SIP_CHAR    *pkszTransport
- )
+SIP_BOOL SipViaHeader::SetTransport(const SIP_CHAR* pszTransport)
 {
-    return SetCharVar(pkszTransport,m_pszTransport);
+    return SetCharVar(pszTransport, m_pszTransport);
 }
 
 /******************************************************************************
@@ -275,12 +262,9 @@ SIP_BOOL SipViaHeader::SetTransport
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::SetHost
-(
- const SIP_CHAR    *pkszHost
- )
+SIP_BOOL SipViaHeader::SetHost(const SIP_CHAR* pszHost)
 {
-    return SetCharVar(pkszHost,m_pszHost);
+    return SetCharVar(pszHost, m_pszHost);
 }
 /******************************************************************************
  * Function name      : SipViaHeader::SetHost
@@ -292,12 +276,9 @@ SIP_BOOL SipViaHeader::SetHost
  * Side Effects      : none
  *****************************************************************************/
 
-SIP_BOOL SipViaHeader::SetPortNum
-(
- SIP_UINT16        usPort
- )
+SIP_BOOL SipViaHeader::SetPortNum(SIP_UINT16 nPort)
 {
-    m_usPort = usPort;
+    m_nPort = nPort;
     return SIP_TRUE;
 }
 
@@ -315,13 +296,13 @@ SIP_BOOL SipViaHeader::SetPortNum
  *****************************************************************************/
 const SIP_CHAR* SipViaHeader::GetBranch() const
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
         return SIP_NULL;
     }
-    SipParameterList *pParameterList = pParameters->GetParameterList();
+    SipParameterList* pParameterList = pParameters->GetParameterList();
 
     return pParameterList->GetParamValue("branch");
 }
@@ -335,12 +316,9 @@ const SIP_CHAR* SipViaHeader::GetBranch() const
  * Side Effects      : none
  *****************************************************************************/
 
-SIP_BOOL SipViaHeader::SetRecvdParam
-(
- const SIP_CHAR    *pkszRecvd
- )
+SIP_BOOL SipViaHeader::SetRecvdParam(const SIP_CHAR* pszRecvd)
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
@@ -354,11 +332,11 @@ SIP_BOOL SipViaHeader::SetRecvdParam
         return SIP_FALSE;
     }
 
-    const SIP_CHAR *pucRcvd = "received";
-    if (pParameters->AddParam(pucRcvd, pkszRecvd) == SIP_FALSE)
+    const SIP_CHAR* pszTempRcvd = "received";
+    if (pParameters->AddParam(pszTempRcvd, pszRecvd) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Set Received failed",SIP_ZERO,SIP_ZERO);
+                "Set Received failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;
@@ -374,12 +352,9 @@ SIP_BOOL SipViaHeader::SetRecvdParam
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::SetBranchParam
-(
- const SIP_CHAR    *pkszBranch
- )
+SIP_BOOL SipViaHeader::SetBranchParam(const SIP_CHAR* pszBranch)
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
@@ -390,15 +365,14 @@ SIP_BOOL SipViaHeader::SetBranchParam
     if (pParameters == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (pParameters->AddParam("branch", pkszBranch) == SIP_FALSE)
+    if (pParameters->AddParam("branch", pszBranch) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Set Branch failed",SIP_ZERO,SIP_ZERO);
+                "Set Branch failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;
@@ -413,11 +387,7 @@ SIP_BOOL SipViaHeader::SetBranchParam
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::DecHostPort
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt
- )
+SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     /*hostport = host [ COLON port ]
       host = hostname   /   IPv4address   /   IPv6reference
@@ -432,26 +402,26 @@ SIP_BOOL SipViaHeader::DecHostPort
       hex4 = 1*4HEXDIG
       port = 1*DIGIT */
 
-    SIP_CHAR *pucTempPre= SIP_NULL;
+    SIP_CHAR* pTempPre = SIP_NULL;
     /*check for IPV6 address*/
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPre, LEFT_SQUARE) == SIP_TRUE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_SQUARE) == SIP_TRUE)
     {
         m_eHostType = SipAddrSpec::HOST_IPV6;
-        pucStartPt = pucTempPre + SIP_ONE;
-        pucTempPre = SIP_NULL;
-        if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPre, RIGHT_SQUARE) == SIP_FALSE)
+        pStartPt = pTempPre + SIP_ONE;
+        pTempPre = SIP_NULL;
+        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_SQUARE) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO,SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pucTempPre = pucTempPre + SIP_ONE;
+        pTempPre = pTempPre + SIP_ONE;
     }
-    else if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPre, COLON) == SIP_FALSE)
+    else if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_FALSE)
     {
-        pucTempPre = pucEndPt;
+        pTempPre = pEndPt;
     }
 
-    m_pszHost = sipCreateString(pucStartPt, pucTempPre);
+    m_pszHost = sipCreateString(pStartPt, pTempPre);
     if (m_pszHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
@@ -467,19 +437,19 @@ SIP_BOOL SipViaHeader::DecHostPort
         }
     }
 
-    pucStartPt = pucTempPre;
-    pucTempPre = SIP_NULL;
+    pStartPt = pTempPre;
+    pTempPre = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPre, COLON) == SIP_TRUE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, COLON) == SIP_TRUE)
     {
-        pucTempPre = pucTempPre + SIP_TWO;
-        SIP_CHAR *pszPort = sipCreateString(pucTempPre, pucEndPt);
+        pTempPre = pTempPre + SIP_TWO;
+        SIP_CHAR* pszPort = sipCreateString(pTempPre, pEndPt);
         if (pszPort == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        m_usPort = SipPf_Atoi(pszPort);
+        m_nPort = SipPf_Atoi(pszPort);
         delete[] pszPort;
     }
 
@@ -495,111 +465,100 @@ SIP_BOOL SipViaHeader::DecHostPort
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipViaHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipViaHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre= SIP_NULL;
-    SIP_CHAR *pucTempNext= SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext= SIP_NULL;
 
     /*Search for the Protocol Name End*/
     /*sent-protocol = protocol-name SLASH protocol-version SLASH transport */
     /*Find First SLASH with Skipped LWS from both side*/
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SLASH) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Protocol Name Missing",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Protocol Name Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolName = sipCreateString(pucStartPt, pucTempPre);
+    m_pszProtocolName = sipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Update the Start Point to the Start of protocol version
       i.e. to the right of "/" (LWS Skipped) */
-    pucStartPt = pucTempNext;
-    pucTempPre = SIP_NULL;
-    pucTempNext = SIP_NULL;
+    pStartPt = pTempNext;
+    pTempPre = SIP_NULL;
+    pTempNext = SIP_NULL;
 
     /*Find Next SLASH with Skipped LWS from both side*/
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SLASH) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SLASH) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Protocol Version Missing",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Protocol Version Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszProtocolVer = sipCreateString(pucStartPt, pucTempPre);
+    m_pszProtocolVer = sipCreateString(pStartPt, pTempPre);
     if (m_pszProtocolVer == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Update the Start Point to the Start of Transport*/
-    pucStartPt = pucTempNext;
-    pucTempPre = SIP_NULL;
-    pucTempNext = SIP_NULL;
+    pStartPt = pTempNext;
+    pTempPre = SIP_NULL;
+    pTempNext = SIP_NULL;
 
     /*Find the LWS i.e. End of Transport*/
-    if (sipFindLWS(pucStartPt, pucEndPt, &pucTempPre) == SIP_FALSE)
+    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: LWS missing in Via",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: LWS missing in Via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_pszTransport = sipCreateString(pucStartPt, pucTempPre);
+    m_pszTransport = sipCreateString(pStartPt, pTempPre);
     if (m_pszTransport == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipViaHeader::DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipViaHeader::DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Skip Fw LWS And Get the Start of Sent by
       i.e. sent-by = host [ COLON port ]  */
-    pucTempPre = pucTempPre + SIP_ONE;
-    pucStartPt = sipSkipFwLWS(pucTempPre, pucEndPt);
-    pucTempPre = SIP_NULL;
-    pucTempNext = SIP_NULL;
+    pTempPre = pTempPre + SIP_ONE;
+    pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+    pTempPre = SIP_NULL;
+    pTempNext = SIP_NULL;
 
     /*Now check for the Via Prm*/
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
     {
-        pucTempPre = pucEndPt;
+        pTempPre = pEndPt;
     }
 
-    if (DecHostPort(pucStartPt, pucTempPre) == SIP_FALSE)
+    if (DecHostPort(pStartPt, pTempPre) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Host Port Decoding Fail in via",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Host Port Decoding Fail in via", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (pucTempNext != SIP_NULL)
+    if (pTempNext != SIP_NULL)
     {
-        return DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI);
+        return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
     }
 
     return SIP_TRUE;
@@ -616,7 +575,7 @@ SIP_BOOL SipViaHeader::IsValidHeader() const
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipViaHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipViaHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {

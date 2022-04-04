@@ -71,48 +71,43 @@
  *
  * Argument      :
  *    [IN]        : pszFilename[IN] - Filename
- *    [IN]        : iLine[IN]       - Line number in file.
+ *    [IN]        : nLine[IN]       - Line number in file.
  eError[IN]    - Error
  pcFormat[IN]     - Format String
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    void SIP_DEBUG_LOG
-(
- SIP_UINT32       nCategory,
- SIP_CHAR         *pszFilename,
- SIP_INT32         iLine,
- SIP_CHAR         *pcFormat,...
- )
+void SIP_DEBUG_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
+    SIP_CHAR* pszFormat,...)
 {
-    SipUtil* pObjUtil = SipUtil_GetInstance();
+    SipUtil* pUtil = SipUtil_GetInstance();
 
-    if (pObjUtil == SIP_NULL)
+    if (pUtil == SIP_NULL)
     {
         return;
     }
 
-    SIP_CHAR cTemp[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
+    SIP_CHAR szTemp[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
 
     va_list args;
-    va_start(args, pcFormat);
-    vsnprintf(cTemp, DEBUG_MSG_MAX_SIZE, pcFormat, args);
+    va_start(args, pszFormat);
+    vsnprintf(szTemp, DEBUG_MSG_MAX_SIZE, pszFormat, args);
     va_end(args);
 
-    SIP_CHAR* pcFileName = SipPf_Strdup(pszFilename);
+    SIP_CHAR* pszTempFilename = SipPf_Strdup(pszFilename);
 
-    const SIP_CHAR* pcTemp = (pcFileName != SIP_NULL) ?\
-            SipPf_StripFileName(pcFileName) : "xxx";
+    const SIP_CHAR* pTemp = (pszTempFilename != SIP_NULL) ?\
+            SipPf_StripFileName(pszTempFilename) : "xxx";
 
-    SIP_CHAR cFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
-    SipPf_Snprintf(cFrmtString, DEBUG_MSG_MAX_SIZE, "[%s:%d] %s", pcTemp, iLine, cTemp);
+    SIP_CHAR szFrmtString[DEBUG_MSG_MAX_SIZE + 1] = {SIP_ZERO};
+    SipPf_Snprintf(szFrmtString, DEBUG_MSG_MAX_SIZE, "[%s:%d] %s", pTemp, nLine, szTemp);
 
-    pObjUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, iLine, cFrmtString);
+    pUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, nLine, szFrmtString);
 
-    if (pcFileName != SIP_NULL)
+    if (pszTempFilename != SIP_NULL)
     {
-        delete[] pcFileName;
+        delete[] pszTempFilename;
     }
 }
 

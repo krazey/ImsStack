@@ -31,27 +31,27 @@
 #include "platform/sip_pf_memory.h"
 
 
-SIP_UINT32 SipNPower(SIP_UINT16 usBase,SIP_UINT16 usIndex)
+SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex)
 {
-    SIP_UINT32 uiRes = SIP_ONE;
+    SIP_UINT32 nRes = SIP_ONE;
 
-    while (usIndex)
+    while (nIndex)
     {
-        uiRes = uiRes * usBase;
-        usIndex = usIndex -1;
+        nRes = nRes * nBase;
+        nIndex = nIndex -1;
     }
 
-    return uiRes;
+    return nRes;
 }
 
-SIP_BOOL SipMemCheck(SIP_VOID *pvData, SIP_UINT16 *pusError)
+SIP_BOOL SipMemCheck(SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     if (pvData == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "New fails", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    if (*pusError == E_ERR_PF_MALLOCFAILED)
+    if (*pnError == E_ERR_PF_MALLOCFAILED)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Malloc fails", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -64,56 +64,52 @@ SIP_BOOL SipMemCheck(SIP_VOID *pvData, SIP_UINT16 *pusError)
  * Description    : Check Key Parameter to Start a Txn [Friend Function]
  * Return type    : SIP_BOOL
  *          Success/Failure
- * Argument     : pusError: <Out>
+ * Argument     : pnError: <Out>
  *          Error code.
  * Preconditions/
  * Side Effects    : None
  *****************************************************************************/
-    SIP_BOOL CheckTxnMadatoryParams
-(
- SipMessage    *pobjSipMsg,
- SIP_INT32   *peMsgType,
- SIP_INT32    *peMethodType
- )
+SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType,
+        SIP_INT32* peMethodType)
 {
-    SIP_INT32 eMsgType = pobjSipMsg->GetMsgType();
+    SIP_INT32 eMsgType = pSipMsg->GetMsgType();
     if (eMsgType == SipMessage::TYPE_INVALID)
     {
         return SIP_FALSE;
     }
 
-    SIP_INT32 eMethodType = pobjSipMsg->GetMethodType();
+    SIP_INT32 eMethodType = pSipMsg->GetMethodType();
 
     if (eMethodType == SipMessage::METHOD_INVALID)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Invalid Method Type(%d != %d)",
-                eMethodType, pobjSipMsg->GetMethodType());
+                eMethodType, pSipMsg->GetMethodType());
         return SIP_FALSE;
     }
 
     /* Step 1: Check for Mandatory Headers for Transaction key */
     /* Check for To Hdr */
-    if (pobjSipMsg->HasHeader(SipHeaderBase::TO) == SIP_FALSE)
+    if (pSipMsg->HasHeader(SipHeaderBase::TO) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'To' Hdr not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    else if (pobjSipMsg->HasHeader(SipHeaderBase::FROM) == SIP_FALSE)
+    else if (pSipMsg->HasHeader(SipHeaderBase::FROM) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'From' Hdr not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    else if (pobjSipMsg->HasHeader(SipHeaderBase::CSEQ) == SIP_FALSE)
+    else if (pSipMsg->HasHeader(SipHeaderBase::CSEQ) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'CSeq' Hdr not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    else if (pobjSipMsg->HasHeader(SipHeaderBase::CALL_ID) == SIP_FALSE)
+    else if (pSipMsg->HasHeader(SipHeaderBase::CALL_ID) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'CallID' Hdr not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    else if (pobjSipMsg->HasHeader(SipHeaderBase::VIA) == SIP_FALSE)
+    else if (pSipMsg->HasHeader(SipHeaderBase::VIA) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "'Via' Hdr not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -122,7 +118,7 @@ SIP_BOOL SipMemCheck(SIP_VOID *pvData, SIP_UINT16 *pusError)
     /* Step 2: Check for Request line */
     if (eMsgType == SipMessage::REQ_TYPE)
     {
-        if (pobjSipMsg->IsReqLineExists() == SIP_FALSE)
+        if (pSipMsg->IsReqLineExists() == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IsReqLineExists Fails", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -130,30 +126,26 @@ SIP_BOOL SipMemCheck(SIP_VOID *pvData, SIP_UINT16 *pusError)
     }
     else
     {
-        if (pobjSipMsg->IsStatusLineExists() == SIP_FALSE)
+        if (pSipMsg->IsStatusLineExists() == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "IsStatusLineExists Fails", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
-    *peMsgType    =  eMsgType;
-    *peMethodType  = eMethodType;
+    *peMsgType = eMsgType;
+    *peMethodType = eMethodType;
 
     return SIP_TRUE;
 }
 
-SIP_UINT32 GetRSeqNum
-(
- SipMessage    *pstMessage,
- SIP_INT32 eHdrType
-)
+SIP_UINT32 GetRSeqNum(SipMessage* pMessage, SIP_INT32 eHdrType)
 {
     SIP_UINT32 nRSeqNum = 0;
 
-    if (pstMessage != SIP_NULL &&
+    if (pMessage != SIP_NULL &&
         (eHdrType == SipHeaderBase::RSEQ || eHdrType == SipHeaderBase::RACK))
     {
-        SipHeaderBase* pHeader = pstMessage->GetHeader(eHdrType, 0);
+        SipHeaderBase* pHeader = pMessage->GetHeader(eHdrType, 0);
 
         if (pHeader != SIP_NULL)
         {

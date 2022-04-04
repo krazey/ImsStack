@@ -26,11 +26,11 @@ static SIPStackCallbacks gstSIPStackCallbacks =
     IMS_NULL // SIPStack_DisplayTxnKey
 };
 
-GLOBAL void SIPStackCallback_SetCallbacks(IN const SIPStackCallbacks &stCallbacks)
+GLOBAL void SIPStackCallback_SetCallbacks(IN const SIPStackCallbacks& objCallbacks)
 {
     //---------------------------------------------------------------------------------------------
 
-    gstSIPStackCallbacks = stCallbacks;
+    gstSIPStackCallbacks = objCallbacks;
 }
 
 // Implements the function prototypes for SIP stack transaction layer
@@ -111,7 +111,7 @@ GLOBAL SIP_VOID sip_cbk_preProcessMessageSentByStack(IN SIP_VOID* pvSipMsg,
 }
 
 GLOBAL SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pvSipMsg,
-        IN SIP_CHAR* pcBuffer, IN SIP_UINT32 uiBufferLen, IN ISipUserData* pUserData)
+        IN SIP_CHAR* pBuffer, IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData)
 {
     if (gstSIPStackCallbacks.pfnPostProcessMessageSentByStack == IMS_NULL)
     {
@@ -119,7 +119,7 @@ GLOBAL SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pvSipMsg,
     }
 
     (gstSIPStackCallbacks.pfnPostProcessMessageSentByStack)(pvSipMsg,
-            pcBuffer, uiBufferLen, pUserData);
+            pBuffer, nBufferLen, pUserData);
 }
 
 GLOBAL SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey)

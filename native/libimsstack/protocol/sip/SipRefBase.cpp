@@ -44,8 +44,7 @@
  *****************************************************************************/
 SipRefBase::SipRefBase()
 {
-    m_usRefCount = SIP_ONE;
-
+    m_nRefCount = SIP_ONE;
 }
 
 /******************************************************************************
@@ -57,7 +56,7 @@ SipRefBase::SipRefBase()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipRefBase:: ~SipRefBase()
+SipRefBase::~SipRefBase()
 {}
 
 /******************************************************************************
@@ -72,9 +71,9 @@ SipRefBase:: ~SipRefBase()
 /**
   Increment the total references to the object
  */
-SIP_VOID     SipRefBase::increment()
+SIP_VOID SipRefBase::increment()
 {
-    m_usRefCount++;
+    m_nRefCount++;
 }
 
 /******************************************************************************
@@ -88,9 +87,10 @@ SIP_VOID     SipRefBase::increment()
  *****************************************************************************/
 /**
   Decrement the total references to the object
- */SIP_VOID     SipRefBase::decrement()
+ */
+SIP_VOID SipRefBase::decrement()
 {
-    m_usRefCount--;
+    m_nRefCount--;
 }
 
 /******************************************************************************
@@ -107,8 +107,8 @@ SIP_VOID     SipRefBase::increment()
  */
 SIP_VOID SipRefBase::SipDelete()
 {
-    m_usRefCount--;
-    if (m_usRefCount == SIP_ZERO)
+    m_nRefCount--;
+    if (m_nRefCount == SIP_ZERO)
     {
         delete this;
     }

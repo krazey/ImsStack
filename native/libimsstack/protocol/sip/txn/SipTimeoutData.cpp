@@ -16,39 +16,34 @@
 
 SipTimeoutData::SipTimeoutData()
 {
-    m_eTxnType         = SipTxn::INVALID_TXN;
-    m_eTimerType     = SipTxn::TIMER_TYPE_INVALID;
-    m_pobjTxnKey     = SIP_NULL;
+    m_eTxnType = SipTxn::INVALID_TXN;
+    m_eTimerType = SipTxn::TIMER_TYPE_INVALID;
+    m_pTxnKey = SIP_NULL;
 }
 
-SipTimeoutData:: SipTimeoutData
-(
- SIP_INT32        eTxnType,
- SIP_INT32    eTimerType,
- SipTxnKey         *pobjTxnKey
- )
+SipTimeoutData::SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey)
 {
-    m_eTxnType         = eTxnType;
-    m_eTimerType     = eTimerType;
+    m_eTxnType = eTxnType;
+    m_eTimerType = eTimerType;
 
-    SIP_UINT16        nError;
-    m_pobjTxnKey     = new SipTxnKey(pobjTxnKey, &nError);
+    SIP_UINT16 nError;
+    m_pTxnKey = new SipTxnKey(pTxnKey, &nError);
     if (E_ERR_PF_MALLOCFAILED == nError)
     {
-        delete m_pobjTxnKey;
-        m_pobjTxnKey = SIP_NULL;
+        delete m_pTxnKey;
+        m_pTxnKey = SIP_NULL;
     }
 }
 
 SipTimeoutData::~SipTimeoutData()
 {
-    delete m_pobjTxnKey;
-    m_pobjTxnKey = SIP_NULL;
+    delete m_pTxnKey;
+    m_pTxnKey = SIP_NULL;
 }
 
 SipTxnKey *SipTimeoutData::GetTxnKey() const
 {
-    return m_pobjTxnKey;
+    return m_pTxnKey;
 }
 
 SIP_INT32 SipTimeoutData::GetTimerType() const
@@ -61,9 +56,9 @@ SIP_INT32 SipTimeoutData::GetTxnType() const
     return m_eTxnType;
 }
 
-SIP_BOOL SipTimeoutData::SetTxnKey(SipTxnKey *pobjTxnKey)
+SIP_BOOL SipTimeoutData::SetTxnKey(SipTxnKey* pTxnKey)
 {
-    this->m_pobjTxnKey = pobjTxnKey;
+    this->m_pTxnKey = pTxnKey;
     return SIP_TRUE;
 }
 

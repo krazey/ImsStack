@@ -30,7 +30,7 @@
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
 
-extern  SIP_CHAR    gaszSipHdr[][SIP_MAX_HDR_LEN];
+extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 /****************************************************************************
   Macro Definitions
@@ -52,7 +52,7 @@ SipInfoBase::SipInfoBase(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipInfoBase::SipInfoBase(const SipInfoBase &objHeader)
+SipInfoBase::SipInfoBase(const SipInfoBase& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -79,32 +79,28 @@ SipInfoBase::~SipInfoBase()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipInfoBase::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipInfoBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    const SIP_CHAR *pValue = GetValue();
+    const SIP_CHAR* pszValue = GetValue();
 
-    if (pValue == SIP_NULL)
+    if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    **ppucCurrPos = LEFT_ANGLE;
-    (*ppucCurrPos)++;
+    **ppCurrPos = LEFT_ANGLE;
+    (*ppCurrPos)++;
 
-    SipPf_Strcpy(*ppucCurrPos, pValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, pszValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    **ppucCurrPos = RIGHT_ANGLE;
-    (*ppucCurrPos)++;
+    **ppCurrPos = RIGHT_ANGLE;
+    (*ppCurrPos)++;
 
-    **ppucCurrPos = '\0';
+    **ppCurrPos = '\0';
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /******************************************************************************
@@ -116,57 +112,54 @@ SIP_BOOL SipInfoBase::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipInfoBase::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTemp = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTemp = SIP_NULL;
 
-    if (sipFindPostDelimiter(pucStartPt, pucEndPt, &pucTemp, LEFT_ANGLE) == SIP_FALSE)
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, LEFT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    pucStartPt = pucTemp;
-    pucTemp = SIP_NULL;
+    pStartPt = pTemp;
+    pTemp = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTemp, RIGHT_ANGLE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTemp, RIGHT_ANGLE) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pszValue = sipCreateString(pucStartPt, pucTemp);
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTemp);
     if (SetValue(pszValue) == SIP_FALSE)
     {
-        if (pszValue != SIP_NULL) {
+        if (pszValue != SIP_NULL)
+        {
             delete[] pszValue;
         }
         return SIP_FALSE;
     }
     delete[] pszValue;
 
-    SIP_INT32 iLen = pucTemp-pucStartPt;
-    pucStartPt = pucTemp + SIP_TWO;
+    SIP_INT32 nLen = pTemp-pStartPt;
+    pStartPt = pTemp + SIP_TWO;
 
-    pucStartPt = sipSkipFwLWS(pucStartPt, pucEndPt);
-    pucTemp = SIP_NULL;
+    pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
+    pTemp = SIP_NULL;
 
-    if (sipFindPostDelimiter(pucStartPt, pucEndPt, &pucTemp, SIP_SEMI) &&
-        ((*pucStartPt) == SIP_SEMI) == SIP_TRUE)
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, SIP_SEMI) &&
+            ((*pStartPt) == SIP_SEMI) == SIP_TRUE)
     {
-        return DecodeHeaderParameters(pucTemp, pucEndPt, SIP_SEMI);
+        return DecodeHeaderParameters(pTemp, pEndPt, SIP_SEMI);
     }
 
-    if (iLen != (uiDecLen-3))
+    if (nLen != (nDecLen-3))
     {
         return SIP_FALSE;
     }

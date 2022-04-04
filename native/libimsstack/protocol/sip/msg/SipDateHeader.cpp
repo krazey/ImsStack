@@ -81,10 +81,7 @@ const SIP_CHAR gaszMonth[][MAX_MONTH_LEN + SIP_ONE] =
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetWeekDayType
-(
- SIP_CHAR            *pszWeekDay
- )
+SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
 {
     switch(pszWeekDay[0])
     {
@@ -153,10 +150,7 @@ SIP_INT32 sipGetWeekDayType
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetMonthType
-(
- SIP_CHAR            *pszMonth
- )
+SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
 {
     switch(pszMonth[0])
     {
@@ -264,10 +258,10 @@ SIP_INT32 sipGetMonthType
  * Side Effects      : none
  *****************************************************************************/
 SipDateHeader::SipDateHeader()
-    : SipHeaderBase(SipHeaderBase::DATE), m_uiDate(SIP_ZERO)
-    , m_eMonth(SipDateHeader::UNKNOWN_MONTH), m_uiYear(SIP_ZERO)
-    , m_uiHour(SIP_ZERO), m_uiMin(SIP_ZERO)
-    , m_uiSec(SIP_ZERO), m_eWkDay(SipDateHeader::UNKNOWN_DAY)
+    : SipHeaderBase(SipHeaderBase::DATE), m_nDate(SIP_ZERO)
+    , m_eMonth(SipDateHeader::UNKNOWN_MONTH), m_nYear(SIP_ZERO)
+    , m_nHour(SIP_ZERO), m_nMin(SIP_ZERO)
+    , m_nSec(SIP_ZERO), m_eWkDay(SipDateHeader::UNKNOWN_DAY)
 {
 }
 
@@ -293,12 +287,12 @@ SipDateHeader::~SipDateHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipDateHeader::SipDateHeader(const SipDateHeader &objHeader)
+SipDateHeader::SipDateHeader(const SipDateHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_uiDate(objHeader.m_uiDate)
+    , m_nDate(objHeader.m_nDate)
     , m_eMonth(objHeader.m_eMonth)
-    , m_uiYear(objHeader.m_uiYear), m_uiHour(objHeader.m_uiHour)
-    , m_uiMin(objHeader.m_uiMin), m_uiSec(objHeader.m_uiSec)
+    , m_nYear(objHeader.m_nYear), m_nHour(objHeader.m_nHour)
+    , m_nMin(objHeader.m_nMin), m_nSec(objHeader.m_nSec)
     , m_eWkDay(objHeader.m_eWkDay)
 {
 }
@@ -313,13 +307,9 @@ SipDateHeader::SipDateHeader(const SipDateHeader &objHeader)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (EncodeDate(ppucCurrPos) ==  SIP_FALSE)
+    if (EncodeDate(ppCurrPos) ==  SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Date Encoding failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -329,56 +319,50 @@ SIP_BOOL SipDateHeader::EncodeHdr
 }
 
 
-SIP_BOOL SipDateHeader::EncodeWeek(
-        SIP_CHAR     **ppucCurrPos
-        )
+SIP_BOOL SipDateHeader::EncodeWeek(SIP_CHAR** ppCurrPos)
 {
-    SipPf_Strcpy(*ppucCurrPos,gaszWeekday[m_eWkDay]);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, gaszWeekday[m_eWkDay]);
+    SipEnc_UpdateCurrPos(ppCurrPos);
     return SIP_TRUE;
 }
 
-SIP_BOOL  SipDateHeader::EncodeTime(
-        SIP_CHAR     **ppucCurrPos
-        )
+SIP_BOOL SipDateHeader::EncodeTime(SIP_CHAR** ppCurrPos)
 {
-    SipPf_Sprintf(*ppucCurrPos, (SIP_CHAR*)"%02u:%02u:%02u", m_uiHour, m_uiMin, m_uiSec);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%02u:%02u:%02u", m_nHour, m_nMin, m_nSec);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL  SipDateHeader::EncodeDate(
-        SIP_CHAR     **ppucCurrPos
-        )
+SIP_BOOL SipDateHeader::EncodeDate(SIP_CHAR** ppCurrPos)
 {
-    SIP_CHAR    *pucMsgCurrPtr    =    *ppucCurrPos;
+    SIP_CHAR* pMsgCurrPtr = *ppCurrPos;
 
     //Date: Thu, 21 Feb 2002 13:02:03 GMT
-    EncodeWeek(&pucMsgCurrPtr);
+    EncodeWeek(&pMsgCurrPtr);
 
-    pucMsgCurrPtr[0] = COMMA;
-    pucMsgCurrPtr++;
+    pMsgCurrPtr[0] = COMMA;
+    pMsgCurrPtr++;
 
-    pucMsgCurrPtr[0] = SPACE;
-    pucMsgCurrPtr++;
+    pMsgCurrPtr[0] = SPACE;
+    pMsgCurrPtr++;
 
-    SipPf_Sprintf(pucMsgCurrPtr, (SIP_CHAR*)"%02u %s %4u", m_uiDate,
-            gaszMonth[m_eMonth], m_uiYear);
-    SipEnc_UpdateCurrPos(&pucMsgCurrPtr);
+    SipPf_Sprintf(pMsgCurrPtr, (SIP_CHAR*)"%02u %s %4u", m_nDate,
+            gaszMonth[m_eMonth], m_nYear);
+    SipEnc_UpdateCurrPos(&pMsgCurrPtr);
 
-    pucMsgCurrPtr[0] = SPACE;
-    pucMsgCurrPtr++;
+    pMsgCurrPtr[0] = SPACE;
+    pMsgCurrPtr++;
 
-    EncodeTime(&pucMsgCurrPtr);
+    EncodeTime(&pMsgCurrPtr);
 
-    pucMsgCurrPtr[0] = SPACE;
-    pucMsgCurrPtr++;
+    pMsgCurrPtr[0] = SPACE;
+    pMsgCurrPtr++;
 
-    SipPf_Strcpy(pucMsgCurrPtr,STR_GMT);
-    SipEnc_UpdateCurrPos(&pucMsgCurrPtr);
+    SipPf_Strcpy(pMsgCurrPtr,STR_GMT);
+    SipEnc_UpdateCurrPos(&pMsgCurrPtr);
 
-    *ppucCurrPos = pucMsgCurrPtr;
+    *ppCurrPos = pMsgCurrPtr;
     return SIP_TRUE;
 }
 
@@ -392,30 +376,26 @@ SIP_BOOL  SipDateHeader::EncodeDate(
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipDateHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Date: Thu, 21 Feb 2002 13:02:03 GMT*/
 
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPos = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, COMMA) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    SIP_CHAR* pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -431,49 +411,49 @@ SIP_BOOL SipDateHeader::DecodeHdr
     }
     delete[] pszTempValue;
 
-    if (*(pucTempPos + SIP_TWO) != SPACE)
+    if (*(pTempPos + SIP_TWO) != SPACE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Skip comma and a space and point to start of date */
-    pucStartPt = pucTempPos + SIP_THREE;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_THREE;
+    pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SPACE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Get the value of date*/
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_uiDate = SipPf_Atoi(pszTempValue);
+    m_nDate = SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
 
-    if (m_uiDate > DATE_VAL)
+    if (m_nDate > DATE_VAL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date", SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Update the start point to the start of Month*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SPACE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
@@ -489,114 +469,114 @@ SIP_BOOL SipDateHeader::DecodeHdr
     delete[] pszTempValue;
 
     /*Update the start point to the start of year*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SPACE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_UINT16 usTempLen = SipPf_Strlen(pszTempValue);
-    if (usTempLen != SIP_FOUR)
+    SIP_UINT16 nTempLen = SipPf_Strlen(pszTempValue);
+    if (nTempLen != SIP_FOUR)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Year", SIP_ZERO, SIP_ZERO);
         delete[] pszTempValue;
         return SIP_FALSE;
     }
 
-    m_uiYear = SipPf_Atoi(pszTempValue);
+    m_nYear = SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
 
     /*Update the start point to the start of Time(Hour)*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, COLON) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format",SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed",SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_uiHour= SipPf_Atoi(pszTempValue);
+    m_nHour= SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
 
-    if (m_uiHour >= HOUR_VAL)
+    if (m_nHour >= HOUR_VAL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Hour", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Update the start point to the start of Time(Min)*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, COLON) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_uiMin = SipPf_Atoi(pszTempValue);
+    m_nMin = SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
 
-    if (m_uiMin >= TIME_VAL)
+    if (m_nMin >= TIME_VAL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Minute Value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Update the start point to the start of Time(Sec)*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
     /*Check validity of Sec*/
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, SPACE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Date Format", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    pszTempValue = sipCreateString(pucStartPt, pucTempPos);
+    pszTempValue = sipCreateString(pStartPt, pTempPos);
     if (pszTempValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_uiSec = SipPf_Atoi(pszTempValue);
+    m_nSec = SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
-    if (m_uiSec >= TIME_VAL)
+    if (m_nSec >= TIME_VAL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Second Value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Check for GMT*/
-    pucStartPt = pucTempPos + SIP_TWO;
-    pucTempPos = SIP_NULL;
-    SIP_CHAR *pucTempGMT = sipCreateString(pucStartPt, pucEndPt);
-    if ((pucTempGMT != SIP_NULL) && (SipPf_Strcmp(pucTempGMT, "GMT") != 0))
+    pStartPt = pTempPos + SIP_TWO;
+    pTempPos = SIP_NULL;
+    SIP_CHAR* pszTempGMT = sipCreateString(pStartPt, pEndPt);
+    if ((pszTempGMT != SIP_NULL) && (SipPf_Strcmp(pszTempGMT, "GMT") != 0))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "GMT not matching", SIP_ZERO,SIP_ZERO);
-        delete[] pucTempGMT;
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "GMT not matching", SIP_ZERO, SIP_ZERO);
+        delete[] pszTempGMT;
         return SIP_FALSE;
     }
-    else if (pucTempGMT != SIP_NULL)
+    else if (pszTempGMT != SIP_NULL)
     {
-        delete[] pucTempGMT;
+        delete[] pszTempGMT;
     }
 
     return SIP_TRUE;
@@ -612,14 +592,11 @@ SIP_BOOL SipDateHeader::DecodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetDate
-(
- const SIP_UINT16    usDate
- )
+SIP_BOOL SipDateHeader::SetDate(const SIP_UINT16 nDate)
 {
-    if (usDate <= DATE_VAL && usDate > SIP_ZERO)
+    if ((nDate <= DATE_VAL) && (nDate > SIP_ZERO))
     {
-        m_uiDate = usDate;
+        m_nDate = nDate;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -635,10 +612,7 @@ SIP_BOOL SipDateHeader::SetDate
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetMonth
-(
- SIP_INT32        eMonth
- )
+SIP_BOOL SipDateHeader::SetMonth(SIP_INT32 eMonth)
 {
     if ((eMonth >= SipDateHeader::JANUARY) && (eMonth < SipDateHeader::UNKNOWN_MONTH))
     {
@@ -658,14 +632,11 @@ SIP_BOOL SipDateHeader::SetMonth
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetYear
-(
- const SIP_UINT16    usYear
- )
+SIP_BOOL SipDateHeader::SetYear(const SIP_UINT16 nYear)
 {
-    if (usYear >= YEAR_VAL)
+    if (nYear >= YEAR_VAL)
     {
-        m_uiYear = usYear;
+        m_nYear = nYear;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -681,14 +652,11 @@ SIP_BOOL SipDateHeader::SetYear
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetHour
-(
- const SIP_UINT16    usHour
- )
+SIP_BOOL SipDateHeader::SetHour(const SIP_UINT16 nHour)
 {
-    if (usHour <= TIME_VAL)
+    if (nHour <= TIME_VAL)
     {
-        m_uiHour = usHour;
+        m_nHour = nHour;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -704,14 +672,11 @@ SIP_BOOL SipDateHeader::SetHour
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetMinute
-(
- const SIP_UINT16    usMin
- )
+SIP_BOOL SipDateHeader::SetMinute(const SIP_UINT16 nMin)
 {
-    if (usMin <= TIME_VAL)
+    if (nMin <= TIME_VAL)
     {
-        m_uiMin = usMin;
+        m_nMin = nMin;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -727,14 +692,11 @@ SIP_BOOL SipDateHeader::SetMinute
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetSecond
-(
- const SIP_UINT16    usSec
- )
+SIP_BOOL SipDateHeader::SetSecond(const SIP_UINT16 nSec)
 {
-    if (usSec <= TIME_VAL)
+    if (nSec <= TIME_VAL)
     {
-        m_uiSec = usSec;
+        m_nSec = nSec;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -750,10 +712,7 @@ SIP_BOOL SipDateHeader::SetSecond
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipDateHeader::SetWkDay
-(
- SIP_INT32    eWkDay
- )
+SIP_BOOL SipDateHeader::SetWkDay(SIP_INT32 eWkDay)
 {
     if ((eWkDay >= SipDateHeader::MONDAY) && (eWkDay < SipDateHeader::UNKNOWN_DAY))
     {
@@ -765,7 +724,8 @@ SIP_BOOL SipDateHeader::SetWkDay
 
 SipHeaderBase* SipDateHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipDateHeader(*reinterpret_cast<SipDateHeader*>(pHeader));
     }
     return new SipDateHeader();

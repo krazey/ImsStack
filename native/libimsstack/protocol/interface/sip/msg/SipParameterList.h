@@ -50,130 +50,71 @@
 class SipNameValue : public SipRefBase
 {
     public:
-        SIP_CHAR *m_pszName;
+        SIP_CHAR* m_pszName;
         SipVector<SIP_CHAR *> m_valueList;
-        SIP_INT32    m_ePrmType;
-        SIP_CHAR     m_ucSep;
-        SIP_INT32    m_eHdrType;
+        SIP_INT32 m_ePrmType;
+        SIP_CHAR m_Sep;
+        SIP_INT32 m_eHdrType;
 
 
         SipNameValue();
-        SipNameValue(SIP_INT32    eHdrType);
-        SipNameValue(const SipNameValue &objNmVl);
+        SipNameValue(SIP_INT32 eHdrType);
+        SipNameValue(const SipNameValue& objNmVl);
         virtual ~SipNameValue();
-        SIP_BOOL DecUriNameVal
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt,
-             IParameterComponent     *pobjParameterComponent = SIP_NULL
-            );
+        SIP_BOOL DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+                IParameterComponent* pParameterComponent = SIP_NULL);
 
 
-        SIP_BOOL DecUriHdrNameVal
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt,
-             IParameterComponent     *pobjParameterComponent = SIP_NULL
-            );
+        SIP_BOOL DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+                IParameterComponent* pParameterComponent = SIP_NULL);
 
-        SIP_BOOL DecHdrNameVal
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt
-            );
+        SIP_BOOL DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 
-        SIP_BOOL SetSeparator
-            (
-             SIP_CHAR     ucSeparator
-            );
+        SIP_BOOL SetSeparator(SIP_CHAR cSeparator);
 
+        SIP_BOOL EncodeFromUriList(SIP_CHAR** ppCurrPos,
+                IParameterComponent* pParameterComponent = SIP_NULL);
 
-        SIP_BOOL EncodeFromUriList(
-                SIP_CHAR     **ppucCurrPos,
-                IParameterComponent     *pobjParameterComponent = SIP_NULL);
+        SIP_BOOL EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
+                IParameterComponent* pParameterComponent = SIP_NULL);
 
-
-        SIP_BOOL EncodeFromUriHdrList(
-                SIP_CHAR     **ppucCurrPos,
-                IParameterComponent     *pobjParameterComponent = SIP_NULL);
-
-        SIP_BOOL EncodeFromList(
-                SIP_CHAR     **ppucCurrPos
-                );
+        SIP_BOOL EncodeFromList(SIP_CHAR** ppCurrPos);
 };
 
 class SipParameterList: public SipRefBase
 {
     private:
         SipVector<SipNameValue*> m_objPrmList;
-        SIP_INT32    m_eHdrType;
+        SIP_INT32 m_eHdrType;
 
     public:
 
         SipParameterList();
-        SipParameterList(SIP_INT32    eHdrType);
-        SipParameterList(const SipParameterList &objPrmList);
+        SipParameterList(SIP_INT32 eHdrType);
+        SipParameterList(const SipParameterList& objPrmList);
         ~SipParameterList();
         /*Add only name*/
-        SIP_BOOL Add
-            (
-             const SIP_CHAR     *pszName
-            );
+        SIP_BOOL Add(const SIP_CHAR* pszName);
 
-        SIP_BOOL Add
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue
-            );
+        SIP_BOOL Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue);
 
-        SIP_BOOL Add
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue,
-             SIP_INT32    ePrmType
-            );
+        SIP_BOOL Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType);
 
-        SIP_BOOL EncodeList
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_CHAR    ucDelimiter
-            );
+        SIP_BOOL EncodeList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter);
 
-        SIP_BOOL EncodeUriParamList
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_CHAR    ucDelimiter,
-             IParameterComponent     *pobjParameterComponent = SIP_NULL
-            );
+        SIP_BOOL EncodeUriParamList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
+                IParameterComponent* pParameterComponent = SIP_NULL);
 
+        SIP_BOOL DecUriSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+                SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent = SIP_NULL);
 
-        SIP_BOOL DecUriSipParameterList
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt,
-             SIP_CHAR        ucDelimiter,
-             IParameterComponent     *pobjParameterComponent = SIP_NULL
-            );
+        SIP_BOOL DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+                SIP_CHAR cDelimiter, IParameterComponent* pParameterComponent = SIP_NULL);
 
-        SIP_BOOL DecUriHdrSipParameterList
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt,
-             SIP_CHAR        ucDelimiter,
-             IParameterComponent     *pobjParameterComponent = SIP_NULL
-            );
+        SIP_BOOL Remove(const SIP_CHAR* pszName);
 
-        SIP_BOOL Remove
-            (
-             const SIP_CHAR     *pszName
-            );
-
-        SIP_BOOL DecHdrSipParameterList
-            (
-             SIP_CHAR        *pucStartPt,
-             SIP_CHAR        *pucEndPt,
-             SIP_CHAR        ucDelimiter
-            );
+        SIP_BOOL DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
+                SIP_CHAR cDelimiter);
 
         inline SipVector<SipNameValue*>& GetList()
         {
@@ -185,36 +126,18 @@ class SipParameterList: public SipRefBase
             return m_objPrmList.GetSize();
         }
 
-        SIP_BOOL IsParamExists
-            (
-             const SIP_CHAR     *pszName,
-             SIP_UINT32 *pusPos
-            );
+        SIP_BOOL IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pPos);
 
         inline SipNameValue* GetNameValNode(SIP_UINT32 iIndex) const
         {
             return (iIndex < m_objPrmList.GetSize()) ? m_objPrmList.GetAt(iIndex) : SIP_NULL;
         }
 
-        SIP_BOOL FindElement(const SIP_CHAR *pszName,
-                    SipNameValue *&pobjNmvl,
-                    SIP_UINT32& iPos);
-        SIP_BOOL SetParamValue
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue,
-             SIP_UINT32     usPos = SIP_ZERO
-            );
-        SIP_CHAR* GetParamValue
-            (
-             const SIP_CHAR     *pszName,
-             SIP_UINT32     usPos = SIP_ZERO
-            );
-        SipNameValue* GetParamNode
-            (
-             const SIP_CHAR     *pszName,
-             SIP_UINT32    *pusPos
-            );
+        SIP_BOOL FindElement(const SIP_CHAR* pszName, SipNameValue *&pNmvl, SIP_UINT32& nPos);
+        SIP_BOOL SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
+                SIP_UINT32 nPos = SIP_ZERO);
+        SIP_CHAR* GetParamValue(const SIP_CHAR* pszName, SIP_UINT32 nPos = SIP_ZERO);
+        SipNameValue* GetParamNode(const SIP_CHAR* pszName, SIP_UINT32* pnPos);
 
         /* To Print all the header params & its values */
         SIP_VOID PrintParams();
@@ -231,62 +154,35 @@ class SipParameters
             INVALID = SIP_INVALID
         };
 
-        SipParameterList        *pParameterList;
+        SipParameterList* pParameterList;
 
         SipParameters();
         SipParameters(SipParameterList* pParameterList_);
-        SipParameters(const SipParameters &objParameters);
+        SipParameters(const SipParameters& objParameters);
         ~SipParameters();
 
-        SIP_BOOL AddParam
-            (
-             const SIP_CHAR     *pszName
-            );
+        SIP_BOOL AddParam(const SIP_CHAR* pszName);
 
-        SIP_BOOL AddParam
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue
-            );
+        SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue);
 
-        SIP_BOOL IsParamExists(const SIP_CHAR *pszName,
-                               SIP_UINT32 * pusPos);
+        SIP_BOOL IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pnPos);
 
-        SIP_BOOL AddParam
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue,
-             SIP_INT32    ePrmType
-            );
+        SIP_BOOL AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType);
 
-        SIP_BOOL RemoveParam
-            (
-             const SIP_CHAR     *pszName
-            );
+        SIP_BOOL RemoveParam(const SIP_CHAR* pszName);
 
-        SIP_VOID SetParameterList(SipParameterList *pobjSipPrm);
+        SIP_VOID SetParameterList(SipParameterList* pSipPrm);
 
         inline SIP_UINT32 GetParamCount() const
         {
             return (pParameterList != SIP_NULL) ? pParameterList->GetCount() : SIP_ZERO;
         }
         SipParameterList* GetParameterList();
-        SIP_CHAR* GetParamValue
-            (
-             const SIP_CHAR     *pszName
-            );
+        SIP_CHAR* GetParamValue(const SIP_CHAR* pszName);
 
-        SIP_BOOL SetParamValue
-            (
-             const SIP_CHAR     *pszName,
-             const SIP_CHAR     *pszValue,
-             SIP_UINT32     usPos  = SIP_ZERO
-            );
-        SipNameValue* GetParamNode
-            (
-             const SIP_CHAR     *pszName,
-             SIP_UINT32    *pusPos
-            );
+        SIP_BOOL SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
+                SIP_UINT32 nPos = SIP_ZERO);
+        SipNameValue* GetParamNode(const SIP_CHAR* pszName, SIP_UINT32* pnPos);
 };
 
 #endif //__SIP_PARAMETER_LIST_H__

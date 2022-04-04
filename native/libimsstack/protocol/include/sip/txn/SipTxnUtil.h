@@ -21,17 +21,17 @@
 class SipTxnUtil
 {
     private:
-        static SipTxnUtil *m_pSipTxnUtil;
+        static SipTxnUtil* m_pSipTxnUtil;
         SipVector<SipTxnKey*> m_txnKeyList;
         SipTxnUtil();
         ~SipTxnUtil(){}
         SipTxnUtil(SipTxnUtil const& copy);//Not Implemented
-        SIP_BOOL IsTxnKeyMatched(SipTxnKey *pObjUserTxnkey, SipTxnKey *pObjStoredTxnkey);
+        SIP_BOOL IsTxnKeyMatched(SipTxnKey* pUserTxnkey, SipTxnKey* pStoredTxnkey);
 
     public:
         static SipTxnUtil* GetInstance();
-        SipTxnKey* SearchTxnKey(SipTxnKey *pObjTxn, SIP_BOOL bCheckRSeq = SIP_TRUE);
-        SIP_BOOL AddTxnKey(SipTxnKey* pObj);
-        SIP_BOOL DeleteTxnKey(SipTxnKey* pObj, SIP_BOOL bCheckToTag = SIP_FALSE);
+        SipTxnKey* SearchTxnKey(SipTxnKey* pTxn, SIP_BOOL bCheckRSeq = SIP_TRUE);
+        SIP_BOOL AddTxnKey(SipTxnKey* pTxnKey);
+        SIP_BOOL DeleteTxnKey(SipTxnKey* pTxnKey, SIP_BOOL bCheckToTag = SIP_FALSE);
 };
 #endif

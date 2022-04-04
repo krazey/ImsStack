@@ -66,7 +66,7 @@ SipBadHeader::SipBadHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipBadHeader::SipBadHeader(const SipBadHeader &objHeader)
+SipBadHeader::SipBadHeader(const SipBadHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszHdrName(SipPf_Strdup(objHeader.m_pszHdrName))
 {
@@ -89,12 +89,9 @@ SipBadHeader::~SipBadHeader()
     }
 }
 
-SIP_BOOL SipBadHeader::SetHeaderName
-(
-    const SIP_CHAR    *pkszHdrName
-)
+SIP_BOOL SipBadHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    return SetCharVar(pkszHdrName,m_pszHdrName);
+    return SetCharVar(pszHdrName, m_pszHdrName);
 }
 
 /******************************************************************************
@@ -106,13 +103,9 @@ SIP_BOOL SipBadHeader::SetHeaderName
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipBadHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipBadHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    (void)ppucCurrPos;
+    (void)ppCurrPos;
     (void) bParams;
     return SIP_TRUE;
 }
@@ -126,14 +119,10 @@ SIP_BOOL SipBadHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipBadHeader::DecodeHdr
-(
-    SIP_CHAR    *pucStartPt,
-    SIP_UINT32  uiDecLen
-)
+SIP_BOOL SipBadHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    (void)pucStartPt;
-    (void)uiDecLen;
+    (void)pStartPt;
+    (void)nDecLen;
 
     return SIP_TRUE;
 }

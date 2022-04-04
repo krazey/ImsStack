@@ -196,112 +196,93 @@ class SipTxn : public SipRefBase
 
     private:
         /* Txn Type */
-        SIP_INT32            m_eTxnType;
+        SIP_INT32 m_eTxnType;
 
         /* Key which is stored in Txn Hash Table */
-        SipTxnKey                *m_pobjTxnKey;
+        SipTxnKey* m_pTxnKey;
 
-        SipMessage               *m_pobjSipMsg;
+        SipMessage* m_pSipMsg;
 
         /* SIP Transport */
-        SipTransportInfo            *m_pobjTranspInfo;
+        SipTransportInfo* m_pTranspInfo;
 
         /* User Specific Data or User Key Info */
-        ISipUserData            *m_pobjUserData;
+        ISipUserData* m_pUserData;
 
         /* FSM Current State */
-        SIP_UINT16            m_usTxnState;
+        SIP_UINT16 m_nTxnState;
 
         /* Counter for Number of Retransmissions */
-        SIP_UINT16            m_usReTxCount;
+        SIP_UINT16 m_nReTxCount;
 
         /* Transaction Related Timers */
         /* Type of Timer Started */
-        SIP_INT32        m_eTimerType;
+        SIP_INT32 m_eTimerType;
         /* Timer ID */
-        SIP_VOID                *m_pvTimerId;
+        SIP_VOID* m_pvTimerId;
         /* Maximum Timer Duration */
-        SIP_UINT32            m_usMaxDuration;
+        SIP_UINT32 m_nMaxDuration;
         /* Total Duration of Timer Expired : Elapsed Time */
-        SIP_UINT32            m_usDurationExpired;
+        SIP_UINT32 m_nDurationExpired;
         /* Current Value of Timer Duration */
-        SIP_UINT32            m_usCurrentDuration;
+        SIP_UINT32 m_nCurrentDuration;
 
-        SipTxnTimerValues        objTxnTimerValues;
+        SipTxnTimerValues objTxnTimerValues;
     public:
         SipTxn();
 
-        SipTxn
-            (
-             SIP_INT32        eTxnType,
-             SipTxnKey            *pobjTxnKey,
-             SipMessage        *pobjSipMsg,
-             SipTimerContext   *pobjSipTxnTimerContext,
-             SIP_UINT16         *pusError
-            );
+        SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
+                SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
 
         virtual ~SipTxn();
 
-        SIP_BOOL InvokeFsm
-            (    SIP_UINT16    usEvent,
-                 SIP_VOID        *pvData,
-                 SIP_UINT16    *pusError
-            );
+        SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
         SIP_BOOL AbortTxn();
 
         /* Abstract API to start Transaction Timer */
-        SIP_BOOL StartTxnTimer
-            (
-             SIP_UINT32    uieTimerType,
-             SIP_UINT32    uiDuration,
-             SIP_UINT16    *pusError
-            );
+        SIP_BOOL StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_UINT16* pnError);
 
         SIP_BOOL StopTxnTimer();
 
-        SIP_BOOL    PrepareACK
-            (
-             SipMessage            *pobjSipRespMsg,    /* IN */
-             SIP_BOOL                bSetMsgBody,        /* IN */
-             SipMessage            **ppobjSipAckMsg    /* OUT */
-            );
+        SIP_BOOL PrepareACK(IN SipMessage* pSipRespMsg, IN SIP_BOOL bSetMsgBody,
+                OUT SipMessage** ppSipAckMsg);
 
-        SIP_VOID     RemoveFromTxnPool();
+        SIP_VOID RemoveFromTxnPool();
 
-        SIP_BOOL        UpdateTranspInfo(SipTransportInfo *pobjTranspInfo);
+        SIP_BOOL UpdateTranspInfo(SipTransportInfo* pTranspInfo);
 
-        inline SIP_INT32         GetTxnType() const
+        inline SIP_INT32 GetTxnType() const
         {
             return  m_eTxnType;
         }
-        inline SipTxnKey*         GetTxnKey()
+        inline SipTxnKey* GetTxnKey()
         {
-            return m_pobjTxnKey;
+            return m_pTxnKey;
         }
         SipTransportInfo* GetTranspInfo();
         inline SIP_UINT16 GetTxnState() const
         {
-            return m_usTxnState;
+            return m_nTxnState;
         }
 
         inline SIP_UINT16 GetReTxCount() const
         {
-            return m_usReTxCount;
+            return m_nReTxCount;
         }
 
         inline SIP_UINT32 GetDurationExpired() const
         {
-            return m_usDurationExpired;
+            return m_nDurationExpired;
         }
 
         inline SIP_UINT32 GetMaxDuration() const
         {
-            return m_usMaxDuration;
+            return m_nMaxDuration;
         }
 
         inline SIP_UINT32 GetCurrentDuration() const
         {
-            return m_usCurrentDuration;
+            return m_nCurrentDuration;
         }
 
         SIP_VOID* GetTimerId();
@@ -312,43 +293,43 @@ class SipTxn : public SipRefBase
             return objTxnTimerValues;
         }
         /* Fill Transaction Properties */
-        inline SIP_VOID SetTxnState(SIP_UINT16 usTxnState)
+        inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState)
         {
-            m_usTxnState = usTxnState;
+            m_nTxnState = nTxnState;
         }
-        inline SIP_VOID SetMaxDuration(SIP_UINT32 uiMaxDuration)
+        inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration)
         {
-            m_usMaxDuration = uiMaxDuration;
+            m_nMaxDuration = nMaxDuration;
         }
-        inline SIP_VOID SetCurrentDuration(SIP_UINT32 uiCurDuration)
+        inline SIP_VOID SetCurrentDuration(SIP_UINT32 nCurDuration)
         {
-            m_usCurrentDuration = uiCurDuration;
+            m_nCurrentDuration = nCurDuration;
         }
-        inline SIP_VOID SetTimerId(SIP_VOID *pvTimerId)
+        inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId)
         {
             m_pvTimerId = pvTimerId;
         }
-        SIP_BOOL SetUserData(ISipUserData    *pobjUserData);
+        SIP_BOOL SetUserData(ISipUserData* pUserData);
         /* Increment Txn Count by one*/
         inline SIP_VOID IncrTxnCount()
         {
-            m_usReTxCount = m_usReTxCount + SIP_ONE;
+            m_nReTxCount = m_nReTxCount + SIP_ONE;
         }
 
-        inline SIP_VOID IncrDurationExpired(SIP_UINT32 uiDuration)
+        inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
         {
-            m_usDurationExpired = m_usDurationExpired + uiDuration;
+            m_nDurationExpired = m_nDurationExpired + nDuration;
         }
 
         SIP_BOOL IsTxnTerminated();
 
         SIP_VOID InitRetransmissionInfo();
 
-        SIP_VOID SetRespCode(SIP_UINT16 usRespCode);
+        SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
 };
 
 /*Timer Callback API*/
-SIP_VOID CbkTxnTimeout(SIP_VOID *pvobjTimeoutData, SIP_VOID *pvTimerId);
+SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId);
 
 SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey);
 

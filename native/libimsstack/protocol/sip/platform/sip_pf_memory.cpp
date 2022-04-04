@@ -70,14 +70,9 @@
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-    SIP_VOID SipPf_Memset
-(
- SIP_VOID         *pvMem_block,
- SIP_UCHAR     uChars,
- SIP_SIZE_T     usSize
- )
+SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR uChars, SIP_SIZE_T nSize)
 {
-    memset(pvMem_block,uChars,usSize);
+    memset(pvMem_block, uChars, nSize);
 }
 
 
@@ -92,15 +87,9 @@
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-    SIP_VOID    SipPf_Memcpy
-(
- SIP_VOID         *pvMem_Dest,
- const SIP_VOID     *pvMem_Source,
- SIP_SIZE_T         usSize
- )
-
+SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SIZE_T nSize)
 {
-    memcpy(pvMem_Dest,pvMem_Source,usSize);
+    memcpy(pvMem_Dest, pvMem_Source, nSize);
 }
 
 /******************************************************************************
@@ -113,14 +102,9 @@
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-    SIP_UINT32    SipPf_Memcmp
-(
- const SIP_VOID *pvMem1 ,
- const SIP_VOID *pvMem2,
- SIP_SIZE_T         usSize
- )
+SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize)
 {
-    return(memcmp(pvMem1,pvMem2,usSize));
+    return(memcmp(pvMem1, pvMem2, nSize));
 }
 
 /******************************************************************************
@@ -131,7 +115,7 @@
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-SIP_VOID    SipPf_Free(SIP_VOID **ppvMem)
+SIP_VOID SipPf_Free(SIP_VOID** ppvMem)
 {
     //free(*ppvMem);
     if (*ppvMem == SIP_NULL)
@@ -151,13 +135,9 @@ SIP_VOID    SipPf_Free(SIP_VOID **ppvMem)
  * Side Effect     : None
  * NOTE            : None
  *****************************************************************************/
-    SIP_VOID*    SipPf_Realloc
-(
- SIP_VOID *pvMem_ptr,
- SIP_SIZE_T usNew_Size
- )
+SIP_VOID* SipPf_Realloc(SIP_VOID* pvMem_ptr, SIP_SIZE_T usNew_Size)
 {
-    return realloc(pvMem_ptr,usNew_Size);
+    return realloc(pvMem_ptr, usNew_Size);
 }
 
 

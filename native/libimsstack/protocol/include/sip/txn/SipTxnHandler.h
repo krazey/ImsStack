@@ -29,136 +29,61 @@ class SipTxnHandler
 
     private:
         /* Based on Send/Receiving, Method and Request/Respose type Transaction is returnred */
-        SIP_INT32 GetTxnType
-            (
-             SIP_INT32    eMsgDir, /* ETXN_SEND or ETXN_RECV */
-             SIP_INT32    eMethodType,
-             SIP_INT32    eMsgType
-            );
+        SIP_INT32 GetTxnType(SIP_INT32 eMsgDir, /* ETXN_SEND or ETXN_RECV */
+                SIP_INT32 eMethodType, SIP_INT32 eMsgType);
 
-        SIP_BOOL GetTxnObjFromDb
-            (
-             SipTxnKey     *pobjTxnKey,
-             SipTxn        **ppobjTxn,
-             SIP_BOOL     *pbTxnExist,
-             SIP_UINT16    *pusError
-            );
+        SIP_BOOL GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppTxn, SIP_BOOL* pbTxnExist,
+                SIP_UINT16* pnError);
 
-        SIP_BOOL GetTxnObjFromDb
-            (
-             SipTxnKey     *pobjTxnKey,
-             SipTxn        **ppobjTxn,
-             SipTxnKey     **ppobjOutTxnKey,
-             SIP_BOOL     *pbTxnExist,
-             SIP_UINT16   *pusError
-            );
+        SIP_BOOL GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppTxn,
+                SipTxnKey** ppOutTxnKey, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError);
 
-        PRIVATE SIP_BOOL ValidateSendTxn
-            (
-             IN    SipMessage    *pobjSipMsg,
-             OUT    SIP_INT32     *peTxnType,
-             OUT    SipTxnKey        **ppobjTxnKey,
-             OUT    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_INT32* peTxnType,
+                OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError);
 
         /* method validates txn params from sip message and returns txn type */
-        PRIVATE SIP_BOOL ValidateRecvTxn
-            (
-             IN    SipMessage    *pobjSipMsg,
-             OUT    SIP_INT32    *peTxnType
-            );
+        PRIVATE SIP_BOOL ValidateRecvTxn(IN SipMessage* pSipMsg, OUT SIP_INT32* peTxnType);
 
         /* invoking client FSM to send request. returns new txn object*/
-        PRIVATE SIP_BOOL    HandleClientTxnSend
-            (
-             IN    SIP_INT32    eTxnType,
-             IN    SipTxnKey        *pobjTxnKey,
-             IN    SipTxnFsmData    *pObjTxnFsmData,
-             OUT    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL HandleClientTxnSend(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
+                IN SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError);
 
         /* invokes server FSM to send response */
-        PRIVATE SIP_BOOL HandleServerTxnSend
-            (
-             IN    SIP_INT32    eTxnType,
-             IN    SipTxnKey        *pobjTxnKey,
-             IN    SipTxnFsmData    *pObjTxnFsmData,
-             IN    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL HandleServerTxnSend(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
+                IN SipTxnFsmData* pTxnFsmData, IN SIP_UINT16* pnError);
 
         /* invoking client FSM to to handle received response. */
-        PRIVATE SIP_BOOL HandleClientTxnRecv
-            (
-             IN    SIP_INT32    eTxnType,
-             IN    SipTxnKey        *pobjTxnKey,
-             IN    SipTxnFsmData    *pObjTxnFsmData,
-             OUT SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL HandleClientTxnRecv(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
+                IN SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError);
 
         /* create server FSM to handle new received request. returns new txn object */
-        PRIVATE SIP_BOOL    HandleServerTxnRecv
-            (
-             IN    SIP_INT32    eTxnType,
-             IN    SipTxnKey        *pobjTxnKey,
-             IN    SipTxnFsmData    *pObjTxnFsmData,
-             OUT    SIP_UINT16    *pusError
-            );
+        PRIVATE SIP_BOOL HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN SipTxnKey* pTxnKey,
+                IN SipTxnFsmData* pTxnFsmData, OUT SIP_UINT16* pnError);
 
         /* Notifies to Transaction User using registered listener */
-        PRIVATE SIP_VOID NotifyTxnTermination
-            (
-             SipTxn            *pobjTxn
-            );
+        PRIVATE SIP_VOID NotifyTxnTermination(SipTxn* pTxn);
 
     public:
 
-        SIP_BOOL OnSendTxn
-            (
-             SipMessage    *pobjSipMsg,         IN_OUT
-             SipTransportParameter    *pobjTranspParam,    IN
-             ISipUserData    *pobjUserData,        IN
-             SipTxnKey        **ppobjTxnKey,        OUT
-             SipTxnInfo    *pobjTxnInfo,        OUT
-             SIP_UINT16    *pusError
-            );
+        SIP_BOOL OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParameter* pTranspParam,
+                IN ISipUserData* pUserData, IN SipTxnKey** ppTxnKey,
+                OUT SipTxnInfo* pTxnInfo, OUT SIP_UINT16* pnError);
 
-        SIP_BOOL OnRecvTxn
-            (
-             IN    SipMessage                *pobjSipMsg,
-             IN    SipTxnKey                 *pobjTxnKey,
-             IN    ISipUserData                *pobjUserData,
-             OUT SipTxnInfo                *pobjTxnInfo,
-             OUT SIP_UINT16                *pusError
-            );
+        SIP_BOOL OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
+                IN ISipUserData* pUserData, OUT SipTxnInfo* pTxnInfo,
+                OUT SIP_UINT16* pnError);
 
-        SIP_BOOL UpdateTxnDetails
-            (
-             SipTxnKey        *pobjTxnKey,
-             SipTransportInfo    *pobjTranspInfo,
-             SIP_UINT16    *pusError
-            );
+        SIP_BOOL UpdateTxnDetails(SipTxnKey* pTxnKey, SipTransportInfo* pTranspInfo,
+                SIP_UINT16* pnError);
 
-        SIP_BOOL OnRecvTranspError
-            (
-             SIP_INT32    eTransErrro,
-             SipTxnKey            *pobjTxnKey,
-             SIP_UINT16        *pusError
-            );
+        SIP_BOOL OnRecvTranspError(SIP_INT32 eTransErrro, SipTxnKey* pTxnKey,
+                SIP_UINT16* pnError);
 
-        SIP_BOOL OnSendTranspError
-            (
-             SipTxnKey            *pobjTxnKey
-            );
+        SIP_BOOL OnSendTranspError(SipTxnKey* pTxnKey);
 
-        SIP_BOOL TerminateTxn
-            (
-             SipTxnKey        *pobjTxnKey
-            );
+        SIP_BOOL TerminateTxn(SipTxnKey* pTxnKey);
 
-        SIP_BOOL DeleteTxn
-            (
-             SipTxnKey        *pobjTxnKey
-            );
+        SIP_BOOL DeleteTxn(SipTxnKey* pTxnKey);
 
 };
 #endif //__SIP_TXN_HANDLER_H__

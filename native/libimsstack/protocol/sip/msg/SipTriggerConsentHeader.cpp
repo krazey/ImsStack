@@ -42,76 +42,72 @@
 
 SipTriggerConsentHeader::SipTriggerConsentHeader()
     : SipHeaderBase(SipHeaderBase::TRIGGER_CONSENT)
-    , m_pobjSipUri(SIP_NULL)
+    , m_pSipUri(SIP_NULL)
 {
 }
 
-SipTriggerConsentHeader::SipTriggerConsentHeader(const SipTriggerConsentHeader &objHeader)
+SipTriggerConsentHeader::SipTriggerConsentHeader(const SipTriggerConsentHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_pobjSipUri(SIP_NULL)
+    , m_pSipUri(SIP_NULL)
 {
-    if (objHeader.m_pobjSipUri != SIP_NULL) {
-        m_pobjSipUri = new SipUri(*(objHeader.m_pobjSipUri));
+    if (objHeader.m_pSipUri != SIP_NULL)
+    {
+        m_pSipUri = new SipUri(*(objHeader.m_pSipUri));
     }
 }
 
 /*destructor*/
 SipTriggerConsentHeader::~SipTriggerConsentHeader()
 {
-    if (m_pobjSipUri != SIP_NULL) {
-        m_pobjSipUri->SipDelete();
+    if (m_pSipUri != SIP_NULL)
+    {
+        m_pSipUri->SipDelete();
     }
 }
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL     SipTriggerConsentHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipTriggerConsentHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
+        SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    if (m_pobjSipUri == SIP_NULL)
+    if (m_pSipUri == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: SIP Uri missing",SIP_ZERO,SIP_ZERO);
+                "EncodeHdr: SIP Uri missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pobjSipUri->EncodeSipUri(ppucCurrPos) == SIP_FALSE)
+    if (m_pSipUri->EncodeSipUri(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: SIP Uri Encoding Failed",SIP_ZERO,SIP_ZERO);
+                "EncodeHdr: SIP Uri Encoding Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 SipUri* SipTriggerConsentHeader::GetSipUri()
 {
-    if (m_pobjSipUri != SIP_NULL)
+    if (m_pSipUri != SIP_NULL)
     {
-        m_pobjSipUri->increment();
-        return m_pobjSipUri;
+        m_pSipUri->increment();
+        return m_pSipUri;
     }
     return SIP_NULL;
 }
 
-SIP_BOOL  SipTriggerConsentHeader::SetSipUri
-(
- SipUri * pobjSipUri
- )
+SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
 {
-    if (pobjSipUri == SIP_NULL)
+    if (pSipUri == SIP_NULL)
     {
         return SIP_FALSE;
     }
-    if ( m_pobjSipUri != SIP_NULL)
+    if ( m_pSipUri != SIP_NULL)
     {
-        m_pobjSipUri->SipDelete();
+        m_pSipUri->SipDelete();
     }
-    pobjSipUri->increment();
-    m_pobjSipUri = pobjSipUri;
+    pSipUri->increment();
+    m_pSipUri = pSipUri;
     return SIP_TRUE;
 }
 
@@ -125,88 +121,82 @@ SIP_BOOL  SipTriggerConsentHeader::SetSipUri
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipTriggerConsentHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
 
-    if (*pucStartPt == LEFT_ANGLE)
+    if (*pStartPt == LEFT_ANGLE)
     {
-        pucStartPt++;
+        pStartPt++;
     }
 
-    if (*pucEndPt == RIGHT_ANGLE)
+    if (*pEndPt == RIGHT_ANGLE)
     {
-        pucEndPt--;
+        pEndPt--;
     }
 
-    SIP_CHAR *pucTempPre  = SIP_NULL;
-    SIP_CHAR *pucTempNext  = SIP_NULL;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) == SIP_FALSE)
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr: Hdr Prm Decoding Failed",
-                    SIP_ZERO,SIP_ZERO);
+                    "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pucEndPt = pucTempPre;
+        pEndPt = pTempPre;
     }
     /*Update the decode length*/
-    uiDecLen = pucEndPt - pucStartPt + SIP_ONE;
+    nDecLen = pEndPt - pStartPt + SIP_ONE;
     /*Now Decode the SIP URI*/
-    m_pobjSipUri = new SipUri();
-    if (m_pobjSipUri == SIP_NULL)
+    m_pSipUri = new SipUri();
+    if (m_pSipUri == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     //skip "sip:" from the user name
-    SIP_CHAR *pucSIPScheme = SIP_NULL;
+    SIP_CHAR* pszSIPScheme = SIP_NULL;
 
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucSIPScheme, COLON) == SIP_TRUE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
     {
-        SIP_CHAR *pucTempScheme = sipCreateString(pucStartPt,pucSIPScheme);
-        if (SipPf_Stricmp(pucTempScheme,"sip")== SIP_ZERO)
+        SIP_CHAR* pszTempScheme = sipCreateString(pStartPt, pszSIPScheme);
+        if (SipPf_Stricmp(pszTempScheme, "sip")== SIP_ZERO)
         {
-            pucStartPt = pucSIPScheme + 2;
-            uiDecLen -= SipPf_Strlen("sip:");
+            pStartPt = pszSIPScheme + 2;
+            nDecLen -= SipPf_Strlen("sip:");
         }
-        if (pucTempScheme != SIP_NULL)
+        if (pszTempScheme != SIP_NULL)
         {
-            delete[] pucTempScheme;
+            delete[] pszTempScheme;
         }
     }
 
-    if (m_pobjSipUri->DecodeSipUri(pucStartPt, uiDecLen) == SIP_FALSE)
+    if (m_pSipUri->DecodeSipUri(pStartPt, nDecLen) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: SIP URI Decoding Failed",
-                SIP_ZERO,SIP_ZERO);
+                "DecodeHdr: SIP URI Decoding Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipTriggerConsentHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipTriggerConsentHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipTriggerConsentHeader(*reinterpret_cast<SipTriggerConsentHeader*>(pHeader));
     }
     return new SipTriggerConsentHeader();

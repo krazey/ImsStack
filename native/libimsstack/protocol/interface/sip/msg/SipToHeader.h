@@ -50,15 +50,12 @@ class SipToHeader : public SipNameAddrHeader
 
         /*destructor*/
         ~SipToHeader();
-        SipToHeader(const SipToHeader &objHeader);
+        SipToHeader(const SipToHeader& objHeader);
 
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
-        SIP_CHAR*    GetTag();
+        SIP_CHAR* GetTag();
 
-        SIP_BOOL SetTag
-            (
-             SIP_CHAR *pucToTag
-            );
+        SIP_BOOL SetTag(SIP_CHAR* pszToTag);
 };
 #endif //__SIP_TO_HEADER_H__

@@ -13,17 +13,17 @@
 #include "txn/SipTxn.h"
 #include "txn/SipTxnInfo.h"
 
-SipTxnInfo::SipTxnInfo    ():
-    m_pobjSendSipMsg(SIP_NULL),m_pobjUserData(SIP_NULL),
-    m_pobjTranspInfo(SIP_NULL),eTxnStatus(SipTxn::STATUS_INVALID),
-    bTxnTerminated(SIP_FALSE),bTxnCreated(SIP_FALSE)
+SipTxnInfo::SipTxnInfo()
+    : m_pSendSipMsg(SIP_NULL), m_pUserData(SIP_NULL),
+    m_pTranspInfo(SIP_NULL), eTxnStatus(SipTxn::STATUS_INVALID),
+    bTxnTerminated(SIP_FALSE), bTxnCreated(SIP_FALSE)
 {
 }
 
 SipTxnInfo::~SipTxnInfo()
 {
-    if (m_pobjSendSipMsg != SIP_NULL)
+    if (m_pSendSipMsg != SIP_NULL)
     {
-        m_pobjSendSipMsg->SipDelete();
+        m_pSendSipMsg->SipDelete();
     }
 }

@@ -14,13 +14,13 @@
 #include "txn/SipTxnFsmData.h"
 
 SipTxnFsmData::SipTxnFsmData()
-    : m_pobjSipMsgIn(SIP_NULL)
-    , m_pobjTranspParam(SIP_NULL)
-    , m_pobjUserData(SIP_NULL)
-    , m_pobjSendSipMsg(SIP_NULL)
+    : m_pSipMsgIn(SIP_NULL)
+    , m_pTranspParam(SIP_NULL)
+    , m_pUserData(SIP_NULL)
+    , m_pSendSipMsg(SIP_NULL)
     , eTxnStatus(SipTxn::STATUS_INVALID)
-    , m_pobjOutUserData(SIP_NULL)
-    , m_pobjTranspInfo(SIP_NULL)
+    , m_pOutUserData(SIP_NULL)
+    , m_pTranspInfo(SIP_NULL)
     , bTxnTerminated(SIP_FALSE)
     , bTxnCreated(SIP_FALSE)
 {
@@ -30,15 +30,15 @@ SipTxnFsmData::~SipTxnFsmData()
 {
 }
 
-SipTxnFsmData::SipTxnFsmData(SipMessage *pobjSipMsg,
-        SipTransportParameter *pobjTranspParam, ISipUserData *pobjUserData)
-    : m_pobjSipMsgIn(pobjSipMsg)
-    , m_pobjTranspParam(pobjTranspParam)
-    , m_pobjUserData(pobjUserData)
-    , m_pobjSendSipMsg(SIP_NULL)
+SipTxnFsmData::SipTxnFsmData(SipMessage* pSipMsg,
+        SipTransportParameter* pTranspParam, ISipUserData* pUserData)
+    : m_pSipMsgIn(pSipMsg)
+    , m_pTranspParam(pTranspParam)
+    , m_pUserData(pUserData)
+    , m_pSendSipMsg(SIP_NULL)
     , eTxnStatus(SipTxn::STATUS_INVALID)
-    , m_pobjOutUserData(SIP_NULL)
-    , m_pobjTranspInfo(SIP_NULL)
+    , m_pOutUserData(SIP_NULL)
+    , m_pTranspInfo(SIP_NULL)
     , bTxnTerminated(SIP_FALSE)
     , bTxnCreated(SIP_FALSE)
 {

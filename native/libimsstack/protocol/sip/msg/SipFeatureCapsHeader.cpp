@@ -64,7 +64,7 @@ SipFeatureCapsHeader::SipFeatureCapsHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipFeatureCapsHeader::SipFeatureCapsHeader(const SipFeatureCapsHeader &objHeader)
+SipFeatureCapsHeader::SipFeatureCapsHeader(const SipFeatureCapsHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -82,20 +82,16 @@ SipFeatureCapsHeader::~SipFeatureCapsHeader()
 {
 }
 
-SIP_BOOL SipFeatureCapsHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipFeatureCapsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pucStartPt,uiDecLen) == SIP_FALSE)
+    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {
       return SIP_FALSE;
     }
 
-    const SIP_CHAR *pValue = GetValue();
+    const SIP_CHAR* pszValue = GetValue();
 
-    if ((pValue != SIP_NULL) && (SipPf_Strlen(pValue) == SIP_ONE) && IS_ASTERISK(*pValue))
+    if ((pszValue != SIP_NULL) && (SipPf_Strlen(pszValue) == SIP_ONE) && IS_ASTERISK(*pszValue))
     {
         return SIP_FALSE;
     }
@@ -103,9 +99,10 @@ SIP_BOOL SipFeatureCapsHeader::DecodeHdr
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipFeatureCapsHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipFeatureCapsHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipFeatureCapsHeader(*reinterpret_cast<SipFeatureCapsHeader*>(pHeader));
     }
     return new SipFeatureCapsHeader();

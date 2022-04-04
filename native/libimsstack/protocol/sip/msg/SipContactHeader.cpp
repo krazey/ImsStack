@@ -47,7 +47,7 @@ SipContactHeader::SipContactHeader()
 {
 }
 
-SipContactHeader::SipContactHeader(const SipContactHeader &objHeader)
+SipContactHeader::SipContactHeader(const SipContactHeader& objHeader)
     : SipNameAddrHeader(objHeader)
 {
 }
@@ -58,28 +58,25 @@ SipContactHeader::~SipContactHeader()
 {
 }
 
-SIP_BOOL SipContactHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR    *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    pucEndPt = sipSkipRwLWS(pucStartPt,pucEndPt);
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
 
-    if ((pucStartPt == pucEndPt) && (*pucStartPt == ASTERISK))
+    if ((pStartPt == pEndPt) && (*pStartPt == ASTERISK))
     {
-        SIP_CHAR *pszValue = sipCreateString(pucStartPt, pucEndPt);
+        SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
         if (SetValue(pszValue) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-            if (pszValue != SIP_NULL) {
+            if (pszValue != SIP_NULL)
+            {
                 delete[] pszValue;
             }
             return SIP_FALSE;
@@ -88,7 +85,7 @@ SIP_BOOL SipContactHeader::DecodeHdr
     }
     else
     {
-        if (SipNameAddrHeader::DecodeHdr(pucStartPt,uiDecLen) == SIP_FALSE)
+        if (SipNameAddrHeader::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Address param Decoding Failed",
                 SIP_ZERO, SIP_ZERO);
@@ -100,9 +97,10 @@ SIP_BOOL SipContactHeader::DecodeHdr
 
 }
 
-SipHeaderBase* SipContactHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipContactHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipContactHeader(*reinterpret_cast<SipContactHeader*>(pHeader));
     }
     return new SipContactHeader();

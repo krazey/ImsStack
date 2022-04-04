@@ -44,49 +44,37 @@
 class SipRAcKHeader :public SipHeaderBase
 {
     private:
-
         /*Response Num*/
-        SIP_UINT32        m_uiResponseNum;
+        SIP_UINT32 m_nResponseNum;
 
         /*CSeq Num*/
-        SIP_UINT32        m_uiCSeqNum;
+        SIP_UINT32 m_nCSeqNum;
 
         /*Method*/
-        SIP_CHAR    *m_pszMethod;
-
+        SIP_CHAR* m_pszMethod;
 
     public:
         /*constructor*/
         SipRAcKHeader();
-        SipRAcKHeader(const SipRAcKHeader &objHeader);
+        SipRAcKHeader(const SipRAcKHeader& objHeader);
         /*destructor*/
         ~SipRAcKHeader();
-        static SipHeaderBase* GetNewObj(SIP_INT32,SipHeaderBase*);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR     **ppucCurrPos,
-             SIP_BOOL     bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR    *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
+
         /*set methods*/
-        SIP_BOOL SetMethod
-            (
-             const SIP_CHAR    *pkszMethod
-            );
-        inline SIP_VOID SetResponseNum(SIP_UINT32 uiResponseNum)
+        SIP_BOOL SetMethod(const SIP_CHAR* pszMethod);
+        inline SIP_VOID SetResponseNum(SIP_UINT32 nResponseNum)
         {
-            m_uiResponseNum = uiResponseNum;
+            m_nResponseNum = nResponseNum;
         }
 
-        inline SIP_VOID SetCSeqNum(SIP_UINT32 uiCSeqNum)
+        inline SIP_VOID SetCSeqNum(SIP_UINT32 nCSeqNum)
         {
-            m_uiCSeqNum = uiCSeqNum;
+            m_nCSeqNum = nCSeqNum;
         }
         /*Get methods*/
 
@@ -97,12 +85,12 @@ class SipRAcKHeader :public SipHeaderBase
 
         inline SIP_UINT32 GetResponseNum() const
         {
-            return m_uiResponseNum;
+            return m_nResponseNum;
         }
 
         inline SIP_UINT32 GetCSeqNum() const
         {
-            return m_uiCSeqNum;
+            return m_nCSeqNum;
         }
         inline SIP_BOOL IsValidHeader() const
         {

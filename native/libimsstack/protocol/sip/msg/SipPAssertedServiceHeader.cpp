@@ -23,7 +23,7 @@ SipPAssertedServiceHeader::SipPAssertedServiceHeader()
 {
 }
 
-SipPAssertedServiceHeader::SipPAssertedServiceHeader(const SipPAssertedServiceHeader &objHeader)
+SipPAssertedServiceHeader::SipPAssertedServiceHeader(const SipPAssertedServiceHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -33,30 +33,26 @@ SipPAssertedServiceHeader::~SipPAssertedServiceHeader()
 {
 }
 
-SIP_BOOL SipPAssertedServiceHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipPAssertedServiceHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     /*Case of nothing is present*/
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipPAssertedServiceHeader::DecodeHdr",SIP_ZERO,SIP_ZERO);
+                "SipPAssertedServiceHeader::DecodeHdr", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR            *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    sipSkipFwLWS(pucStartPt,pucEndPt);
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    sipSkipFwLWS(pStartPt, pEndPt);
 
     //validate the service id value
-    SIP_CHAR *pszTempString = sipCreateString(pucStartPt,pucStartPt+SIP_NINE);
-    if (SipPf_Stricmp("urn:urn-7:",pszTempString) != SIP_ZERO)
+    SIP_CHAR* pszTempString = sipCreateString(pStartPt, pStartPt + SIP_NINE);
+    if (SipPf_Stricmp("urn:urn-7:", pszTempString ) != SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPAssertedServiceHeader::DecodeHdr:value must start by urn:urn-7:",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         if (pszTempString != SIP_NULL)
         {
             delete[] pszTempString;
@@ -65,91 +61,93 @@ SIP_BOOL SipPAssertedServiceHeader::DecodeHdr
           return SIP_FALSE;
         #endif
     }
-    else if (pszTempString != SIP_NULL)
+    else if (pszTempString  != SIP_NULL)
     {
-        delete[] pszTempString;
+        delete[] pszTempString ;
     }
 
-    SIP_CHAR *pucTempCurr = pucStartPt+SIP_TEN;
+    SIP_CHAR* pTempCurr = pStartPt + SIP_TEN;
 
     //Service id Value Validations   toplebel.subservice id
     //fIND dot and validate topLevel ID and SubService Id
-    SIP_UINT16           uiTopLevelIDLen = 0;
-    SIP_CHAR            *pucTempPre = SIP_NULL;
-    SIP_CHAR            *pucTempNext = SIP_NULL;
+    SIP_UINT16 nTopLevelIDLen  = 0;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pucTempCurr, pucEndPt, &pucTempPre, &pucTempNext, SIP_DOT) == SIP_TRUE)
+    if (sipFindActualPos(pTempCurr, pEndPt, &pTempPre, &pTempNext, SIP_DOT) == SIP_TRUE)
     {
-        uiTopLevelIDLen = pucTempPre-pucTempCurr+1;
+        nTopLevelIDLen = pTempPre - pTempCurr + 1;
     }
     else
     {
-        uiTopLevelIDLen = pucEndPt-pucTempCurr+1;
+        nTopLevelIDLen = pEndPt - pTempCurr + 1;
     }
 
-    if ((uiTopLevelIDLen > MAXLETDIG) || (uiTopLevelIDLen <= 0))
+    if ((nTopLevelIDLen > MAXLETDIG) || (nTopLevelIDLen <= 0))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPAssertedServiceHeader::DecodeHdr:invalid subService id",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
     }
 
-    if (pucTempNext != SIP_NULL)
+    if (pTempNext != SIP_NULL)
     {
-        while(pucTempNext <= pucEndPt)
+        while(pTempNext <= pEndPt)
         {
-            if ((IS_ALPHANUM(*pucTempNext) == SIP_FALSE) &&
-                !IS_HYPHEN(*pucTempNext) &&
-                (*pucTempNext != SIP_DOT))
+            if ((IS_ALPHANUM(*pTempNext) == SIP_FALSE) &&
+                !IS_HYPHEN(*pTempNext) &&
+                (*pTempNext != SIP_DOT))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "SipPAssertedServiceHeader::DecodeHdr:invalid subService id",
-                        SIP_ZERO,SIP_ZERO);
+                        SIP_ZERO, SIP_ZERO);
             }
-            if ((*pucTempNext == SIP_DOT) && (pucTempNext == pucEndPt))
+            if ((*pTempNext == SIP_DOT) && (pTempNext == pEndPt))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                         "SipPAssertedServiceHeader::DecodeHdr:invalid subService id",
-                        SIP_ZERO,SIP_ZERO);
+                        SIP_ZERO, SIP_ZERO);
             }
-            pucTempNext = pucTempNext+SIP_ONE;
+            pTempNext = pTempNext + SIP_ONE;
         }
     }
 
-    SIP_UINT16 uiCounter=0;
+    SIP_UINT16 nCounter  = 0;
     //Validate Top Lebel
-    while((uiCounter < MAXLETDIG) && (pucTempCurr < pucTempPre))
+    while((nCounter  < MAXLETDIG) && (pTempCurr < pTempPre))
     {
-        if ((IS_ALPHANUM(*pucTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pucTempCurr))
+        if ((IS_ALPHANUM(*pTempCurr) == SIP_FALSE) && !IS_HYPHEN(*pTempCurr))
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "SipPAssertedServiceHeader::DecodeHdr:Top lebel is invalid",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
         }
-        pucTempCurr=pucTempCurr+SIP_ONE;
-        uiCounter++;
+        pTempCurr = pTempCurr + SIP_ONE;
+        nCounter++;
     }
 
     //create and copy the service id
-    SIP_CHAR *pValue = sipCreateString(pucStartPt, pucEndPt);
-    if (SetValue(pValue) == SIP_FALSE)
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+    if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SipPAssertedServiceHeader::DecodeHdr:Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
-        if (pValue != SIP_NULL) {
-            delete[] pValue;
+                SIP_ZERO, SIP_ZERO);
+        if (pszValue != SIP_NULL)
+        {
+            delete[] pszValue;
         }
         return SIP_FALSE;
     }
-    delete[] pValue;
+    delete[] pszValue;
 
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipPAssertedServiceHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipPAssertedServiceHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipPAssertedServiceHeader(
             *reinterpret_cast<SipPAssertedServiceHeader*>(pHeader));
     }

@@ -63,7 +63,7 @@ SipIdentityHeader::SipIdentityHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader &objHeader)
+SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -90,28 +90,24 @@ SipIdentityHeader::~SipIdentityHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipIdentityHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    const SIP_CHAR *pValue = GetValue();
-    if (pValue == SIP_NULL)
+    const SIP_CHAR* pszValue = GetValue();
+    if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Encode the Left DQoute*/
-    SIP_ENC_LDQUOT(*ppucCurrPos);
+    SIP_ENC_LDQUOT(*ppCurrPos);
 
     /*Encoding of header Value*/
-    SipPf_Strcpy(*ppucCurrPos, pValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, pszValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     /*Encode the right DQoute*/
-    SIP_ENC_RDQUOT(*ppucCurrPos);
+    SIP_ENC_RDQUOT(*ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -125,43 +121,40 @@ SIP_BOOL SipIdentityHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipIdentityHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipIdentityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /*Find the position of First DQUOTE*/
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTemp  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTemp = SIP_NULL;
 
-    if (sipFindPostDelimiter(pucStartPt, pucEndPt, &pucTemp, DQUOTE) == SIP_FALSE)
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, DQUOTE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "left DQUOTE not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pucStartPt = pucTemp;
-    pucTemp = SIP_NULL;
+    pStartPt = pTemp;
+    pTemp = SIP_NULL;
 
     /*Find the position of Second DQUOTE*/
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTemp, DQUOTE) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTemp, DQUOTE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "right DQUOTE not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pszValue = sipCreateString(pucStartPt, pucTemp);
+    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTemp);
     if (SIP_FALSE == SetValue(pszValue))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        if (pszValue != SIP_NULL) {
+        if (pszValue != SIP_NULL)
+        {
             delete[] pszValue;
         }
         return SIP_FALSE;
@@ -173,7 +166,8 @@ SIP_BOOL SipIdentityHeader::DecodeHdr
 
 SipHeaderBase* SipIdentityHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipIdentityHeader(*reinterpret_cast<SipIdentityHeader*>(pHeader));
     }
     return new SipIdentityHeader();

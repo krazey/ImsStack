@@ -8,22 +8,22 @@
 #include "msg/SipMessage.h"
 #include "msg/sip_msgutil.h"
 
-SipStatusLine::SipStatusLine(const SIP_CHAR *pszStatusCode, const SIP_CHAR *pszRsnPhrase)
+SipStatusLine::SipStatusLine(const SIP_CHAR* pszStatusCode, const SIP_CHAR* pszRsnPhrase)
     : m_pszSipVersion(SipPf_Strdup(SIP_SIPVER))
     , m_pszStatusCode(SipPf_Strdup(pszStatusCode))
     , m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
 {
 }
 
-SipStatusLine::SipStatusLine(const SIP_CHAR *pszSipVersion, const SIP_CHAR *pszStatusCode,
-        const SIP_CHAR *pszRsnPhrase)
+SipStatusLine::SipStatusLine(const SIP_CHAR* pszSipVersion, const SIP_CHAR* pszStatusCode,
+        const SIP_CHAR* pszRsnPhrase)
     : m_pszSipVersion(SipPf_Strdup(pszSipVersion))
     , m_pszStatusCode(SipPf_Strdup(pszStatusCode))
     , m_pszRsnPhrase(SipPf_Strdup(pszRsnPhrase))
 {
 }
 
-SipStatusLine::SipStatusLine(const SipStatusLine &objHeader)
+SipStatusLine::SipStatusLine(const SipStatusLine& objHeader)
     : m_pszSipVersion(SipPf_Strdup(objHeader.m_pszSipVersion))
     , m_pszStatusCode(SipPf_Strdup(objHeader.m_pszStatusCode))
     , m_pszRsnPhrase(SipPf_Strdup(objHeader.m_pszRsnPhrase))
@@ -47,71 +47,71 @@ SipStatusLine::~SipStatusLine()
 
 }
 
-SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR **ppucCurrPos)
+SIP_BOOL SipStatusLine::EncodeStatusLine(SIP_CHAR** ppCurrPos)
 {
     /*check for existence of version, status code and reason phrase*/
     if (m_pszStatusCode == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Status code missing",SIP_ZERO,SIP_ZERO);
+                "Status code missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pszRsnPhrase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Reason Phrase missing",SIP_ZERO,SIP_ZERO);
+                "Reason Phrase missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Sip Version missing",SIP_ZERO,SIP_ZERO);
+                "Sip Version missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /* Encode Sip Version*/
-    SipPf_Strcpy(*ppucCurrPos,m_pszSipVersion);
+    SipPf_Strcpy(*ppCurrPos, m_pszSipVersion);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     /* Put a space */
-    SIP_ENC_SP(*ppucCurrPos);
+    SIP_ENC_SP(*ppCurrPos);
 
     /*Encode Status Code*/
-    SipPf_Strcpy(*ppucCurrPos,m_pszStatusCode);
+    SipPf_Strcpy(*ppCurrPos, m_pszStatusCode);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     /* Put a space */
-    SIP_ENC_SP(*ppucCurrPos);
+    SIP_ENC_SP(*ppCurrPos);
 
-    SipPf_Strcpy(*ppucCurrPos,m_pszRsnPhrase);
+    SipPf_Strcpy(*ppCurrPos, m_pszRsnPhrase);
     /*Update the Msg Buffer's current position*/
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipStatusLine::SetStatusCode(const SIP_CHAR *pkszStatusCode)
+SIP_BOOL SipStatusLine::SetStatusCode(const SIP_CHAR* pszStatusCode)
 {
-    return SetCharVar(pkszStatusCode,m_pszStatusCode);
+    return SetCharVar(pszStatusCode, m_pszStatusCode);
 }
 
-SIP_BOOL SipStatusLine::SetSipVersion(const SIP_CHAR *pkszVer)
+SIP_BOOL SipStatusLine::SetSipVersion(const SIP_CHAR* pszVer)
 {
-    return SetCharVar(pkszVer, m_pszSipVersion);
+    return SetCharVar(pszVer, m_pszSipVersion);
 }
 
-SIP_BOOL SipStatusLine::SetRsnPhrase(const SIP_CHAR *pkszRsnPhrase)
+SIP_BOOL SipStatusLine::SetRsnPhrase(const SIP_CHAR* pszRsnPhrase)
 {
-    return SetCharVar(pkszRsnPhrase,m_pszRsnPhrase);
+    return SetCharVar(pszRsnPhrase, m_pszRsnPhrase);
 }
 
-SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16 *pusStatusCode) const
+SIP_BOOL SipStatusLine::GetStatusCode(SIP_INT16* pnStatusCode) const
 {
     if (m_pszStatusCode != SIP_NULL)
     {
-        *pusStatusCode = SipPf_Atoi(m_pszStatusCode);
+        *pnStatusCode = SipPf_Atoi(m_pszStatusCode);
         return SIP_TRUE;
     }
     return SIP_FALSE;

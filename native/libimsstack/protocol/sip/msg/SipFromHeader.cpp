@@ -64,7 +64,7 @@ SipFromHeader::SipFromHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipFromHeader::SipFromHeader(const SipFromHeader &objHeader)
+SipFromHeader::SipFromHeader(const SipFromHeader& objHeader)
     : SipNameAddrHeader(objHeader)
 {
 }
@@ -95,14 +95,14 @@ SipFromHeader::~SipFromHeader()
  *****************************************************************************/
 SIP_CHAR* SipFromHeader::GetTag()
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SipParameterList *pParameterList = pParameters->GetParameterList();
+    SipParameterList* pParameterList = pParameters->GetParameterList();
 
     if (pParameterList != SIP_NULL)
     {
@@ -120,12 +120,9 @@ SIP_CHAR* SipFromHeader::GetTag()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipFromHeader::SetTag
-(
- SIP_CHAR *pucFromTag
- )
+SIP_BOOL SipFromHeader::SetTag(SIP_CHAR* pszFromTag)
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
@@ -139,7 +136,7 @@ SIP_BOOL SipFromHeader::SetTag
         return SIP_FALSE;
     }
 
-    if (pParameters->AddParam("tag", pucFromTag) == SIP_FALSE)
+    if (pParameters->AddParam("tag", pszFromTag) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Set Tag failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;

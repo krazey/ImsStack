@@ -38,59 +38,60 @@
 #include "transport/SipTransportInfo.h"
 #include "SipTrace.h"
 
-SipTransportInfo::SipTransportInfo(SipTransportParameter *pobjTranspParam,
-                SipTransportBuffer *pobjTransSipBuffer)
-                :m_cNumTimeReqSent(SIP_ZERO), m_pobjActualDestParam (SIP_NULL),
-                m_pobjTranspParam (SIP_NULL), m_pobjSentBuffer (SIP_NULL),
-                m_pobjSentSipMsg (SIP_NULL), m_bExceedMTU (SIP_FALSE)
+SipTransportInfo::SipTransportInfo(SipTransportParameter* pTranspParam,
+        SipTransportBuffer* pTransSipBuffer)
+    : m_cNumTimeReqSent(SIP_ZERO), m_pActualDestParam(SIP_NULL),
+    m_pTranspParam(SIP_NULL), m_pSentBuffer(SIP_NULL),
+    m_pSentSipMsg(SIP_NULL), m_bExceedMTU(SIP_FALSE)
 {
-    if (pobjTranspParam == SIP_NULL){
+    if (pTranspParam == SIP_NULL)
+    {
         return;
     }
-    m_pobjTranspParam = new SipTransportParameter(pobjTranspParam);
-    m_pobjSentBuffer = pobjTransSipBuffer;
+    m_pTranspParam = new SipTransportParameter(pTranspParam);
+    m_pSentBuffer = pTransSipBuffer;
 }
 
 
 SipTransportInfo::~SipTransportInfo()
 {
-    if (m_pobjActualDestParam != SIP_NULL)
+    if (m_pActualDestParam != SIP_NULL)
     {
-        delete m_pobjActualDestParam;
-        m_pobjActualDestParam = SIP_NULL;
+        delete m_pActualDestParam;
+        m_pActualDestParam = SIP_NULL;
     }
 
-    if (m_pobjTranspParam != SIP_NULL)
+    if (m_pTranspParam != SIP_NULL)
     {
-        delete m_pobjTranspParam;
+        delete m_pTranspParam;
     }
 
-    if (m_pobjSentBuffer != SIP_NULL)
+    if (m_pSentBuffer != SIP_NULL)
     {
-        delete m_pobjSentBuffer;
+        delete m_pSentBuffer;
     }
 
-    if (m_pobjSentSipMsg != SIP_NULL)
+    if (m_pSentSipMsg != SIP_NULL)
     {
-        delete m_pobjSentSipMsg;
+        delete m_pSentSipMsg;
     }
 }
 
 
 SipTransportParameter* SipTransportInfo::GetMsgSentTranspParam()
 {
-    return m_pobjActualDestParam;
+    return m_pActualDestParam;
 }
 
-SIP_BOOL SipTransportInfo::SetMsgSentTranspParam(SipTransportParameter* pobjTranspParam)
+SIP_BOOL SipTransportInfo::SetMsgSentTranspParam(SipTransportParameter* pTranspParam)
 {
-    m_pobjActualDestParam = pobjTranspParam;
+    m_pActualDestParam = pTranspParam;
     return SIP_TRUE;
 }
 
 SipTransportBuffer* SipTransportInfo::GetTranspSipBuffer()
 {
-    return m_pobjSentBuffer;
+    return m_pSentBuffer;
 }
 
 SIP_BOOL SipTransportInfo::SetExceedMTUFlag(SIP_BOOL bFlag)
@@ -106,15 +107,15 @@ SIP_BOOL SipTransportInfo::IsExceedMTU()
 
 SipMessage* SipTransportInfo::GetSentSipMsg()
 {
-    return m_pobjSentSipMsg;
+    return m_pSentSipMsg;
 }
 
-SIP_VOID SipTransportInfo::SetSentSipMsg(SipMessage* _pObjSipMsg)
+SIP_VOID SipTransportInfo::SetSentSipMsg(SipMessage* _pSipMsg)
 {
-    if (m_pobjSentSipMsg != SIP_NULL)
+    if (m_pSentSipMsg != SIP_NULL)
     {
-        m_pobjSentSipMsg->SipDelete();
-        m_pobjSentSipMsg = SIP_NULL;
+        m_pSentSipMsg->SipDelete();
+        m_pSentSipMsg = SIP_NULL;
     }
-    m_pobjSentSipMsg = _pObjSipMsg;
+    m_pSentSipMsg = _pSipMsg;
 }

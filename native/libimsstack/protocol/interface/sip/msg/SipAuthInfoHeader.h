@@ -45,37 +45,26 @@ class SipAuthInfoHeader : public SipHeaderBase
 {
     private:
         /*Media Disp*/
-        SipNameValue*    m_pobjAiInfo;
+        SipNameValue* m_pAiInfo;
     public:
         /*constructor*/
         SipAuthInfoHeader();
-        SipAuthInfoHeader(const SipAuthInfoHeader &objHeader);
+        SipAuthInfoHeader(const SipAuthInfoHeader& objHeader);
 
         /*destructor*/
         ~SipAuthInfoHeader();
-        static  SipHeaderBase*  GetNewObj(SIP_INT32 , SipHeaderBase *);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
         /*virtual methods*/
         /*Function for encoding of headers*/
-        SIP_BOOL EncodeHdr
-            (
-             SIP_CHAR   **ppucCurrPos,
-             SIP_BOOL   bParams = SIP_TRUE
-            );
+        SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 
         /*Function for decoding of headers*/
-        SIP_BOOL DecodeHdr
-            (
-             SIP_CHAR  *pucStartPt,
-             SIP_UINT32  uiDecLen
-            );
+        SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-        const SIP_CHAR* GetAiInfoVal
-            (
-             SIP_UINT32   usPos = SIP_ZERO
-            );
+        const SIP_CHAR* GetAiInfoVal(SIP_UINT32 nPos = SIP_ZERO);
         inline SIP_BOOL IsValidHeader() const
         {
-            return (m_pobjAiInfo != SIP_NULL) ? SIP_TRUE : SIP_FALSE;
+            return (m_pAiInfo != SIP_NULL) ? SIP_TRUE : SIP_FALSE;
         }
 };
 #endif //__SIP_AUTH_INFO_HEADER_H__

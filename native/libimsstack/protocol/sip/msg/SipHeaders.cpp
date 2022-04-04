@@ -37,7 +37,7 @@
 
 #define NUM_OF_MANDATORY_HEADERS 5
 
-extern  SIP_CHAR    gaszSipHdr[][SIP_MAX_HDR_LEN];
+extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
 SipHeaderBase * (*gaFactoryArray[SipHeaderBase::TYPE_END+SIP_ONE])(SIP_INT32,SipHeaderBase *) = {
     SipHeaderBase::GetNewObj,//Allow
@@ -183,10 +183,7 @@ SipHeaders::SipHeaders()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaders::CreateCoreHdrObj
-(
- SIP_INT32    eHdrType
- )
+SipHeaderBase* SipHeaders::CreateCoreHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = CheckAndGetHdrEnumType(eHdrType);
     if ((eHdrType >= SIP_ZERO) && eHdrType < SipHeaderBase::TYPE_END)
@@ -205,45 +202,42 @@ SipHeaderBase* SipHeaders::CreateCoreHdrObj
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaders::CopyHdrs(SipHeaders *pobjHdrs)
+SIP_BOOL SipHeaders::CopyHdrs(SipHeaders* pHdrs)
 {
-    for (SIP_UINT32 uiCount = 0;uiCount < SipHeaderBase::TYPE_END; uiCount++ )
+    for (SIP_UINT32 nCount = 0; nCount < SipHeaderBase::TYPE_END; nCount++ )
     {
-        if (pobjHdrs->m_HeaderArray[uiCount] != SIP_NULL)
+        if (pHdrs->m_HeaderArray[nCount] != SIP_NULL)
         {
-            m_HeaderArray[uiCount] = (IsListHdr(uiCount) == SIP_TRUE) ?
-                SipHeaderList::GetNewListObj(uiCount,pobjHdrs->m_HeaderArray[uiCount]) :
-                gaFactoryArray[uiCount](uiCount,pobjHdrs->m_HeaderArray[uiCount]);
+            m_HeaderArray[nCount] = (IsListHdr(nCount) == SIP_TRUE) ?
+                SipHeaderList::GetNewListObj(nCount, pHdrs->m_HeaderArray[nCount]) :
+                gaFactoryArray[nCount](nCount, pHdrs->m_HeaderArray[nCount]);
         }
     }
     return SIP_TRUE;
 }
 
-SipHeaderBase* SipHeaders::CloneHdrObj
-(
- SipHeaderBase* pobjOld
- )
+SipHeaderBase* SipHeaders::CloneHdrObj(SipHeaderBase* pOld)
 {
-    if (pobjOld == SIP_NULL)
+    if (pOld == SIP_NULL)
     {
         return SIP_NULL;
     }
 
-    SIP_INT32 eHdrType = pobjOld->GetHdrType();
+    SIP_INT32 eHdrType = pOld->GetHdrType();
 
     return (eHdrType == SipHeaderBase::UNKNOWN) ?
-        SipHeaderList::GetNewListObj(eHdrType,pobjOld) :
-        gaFactoryArray[eHdrType](eHdrType,pobjOld);
+        SipHeaderList::GetNewListObj(eHdrType, pOld) :
+        gaFactoryArray[eHdrType](eHdrType, pOld);
 }
 
 
 SipHeaders::~SipHeaders()
 {
-    for (SIP_INT32 uiCount = 0; uiCount < SipHeaderBase::TYPE_END; uiCount++)
+    for (SIP_INT32 nCount = 0; nCount < SipHeaderBase::TYPE_END; nCount++)
     {
-        if (m_HeaderArray[uiCount] != SIP_NULL)
+        if (m_HeaderArray[nCount] != SIP_NULL)
         {
-            m_HeaderArray[uiCount]->SipDelete();
+            m_HeaderArray[nCount]->SipDelete();
         }
     }
 }
@@ -258,50 +252,46 @@ SipHeaders::~SipHeaders()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaders::getHdrObj
-(
- SIP_INT32 eIndex,
- SIP_UINT16 usPos
- )
+SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex)
 {
-    if ((eIndex < SIP_ZERO) || eIndex >= SipHeaderBase::TYPE_END)
+    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
     {
         return SIP_NULL;
     }
 
-    if (m_HeaderArray[eIndex] != SIP_NULL)
+    if (m_HeaderArray[eHdrType] != SIP_NULL)
     {
-        m_HeaderArray[eIndex]->increment();
+        m_HeaderArray[eHdrType]->increment();
 
-        return (IsListHdr(eIndex) == SIP_TRUE) ?
-            ((SipHeaderList*)m_HeaderArray[eIndex])->GetObj(usPos) :
-            m_HeaderArray[eIndex];
+        return (IsListHdr(eHdrType) == SIP_TRUE) ?
+            ((SipHeaderList*)m_HeaderArray[eHdrType])->GetObj(eIndex) :
+            m_HeaderArray[eHdrType];
     }
 
     return SIP_NULL;
 }
 
-SIP_VOID SipHeaders::OverWriteHdrObj(IN SipHeaders* pobjSrcHdrs, IN SIP_BOOL bIgnoreUnknownHeader)
+SIP_VOID SipHeaders::OverWriteHdrObj(IN SipHeaders* pSrcHdrs, IN SIP_BOOL bIgnoreUnknownHeader)
 {
     for (SIP_INT32 iCount = 0; iCount < SipHeaderBase::TYPE_END; iCount++)
     {
 
-        if ((pobjSrcHdrs->m_HeaderArray[iCount] == SIP_NULL) ||
+        if ((pSrcHdrs->m_HeaderArray[iCount] == SIP_NULL) ||
             ((iCount == SipHeaderBase::UNKNOWN) && (bIgnoreUnknownHeader == SIP_TRUE)))
         {
             continue;
         }
 
-        SipHeaderBase* pobjTemp = (IsListHdr(iCount) == SIP_TRUE) ?
-            SipHeaderList::GetNewListObj(iCount, pobjSrcHdrs->m_HeaderArray[iCount]) :
-            gaFactoryArray[iCount](iCount, pobjSrcHdrs->m_HeaderArray[iCount]);
+        SipHeaderBase* pTemp = (IsListHdr(iCount) == SIP_TRUE) ?
+            SipHeaderList::GetNewListObj(iCount, pSrcHdrs->m_HeaderArray[iCount]) :
+            gaFactoryArray[iCount](iCount, pSrcHdrs->m_HeaderArray[iCount]);
 
         if (m_HeaderArray[iCount] != SIP_NULL)
         {
             m_HeaderArray[iCount]->SipDelete();
         }
 
-        m_HeaderArray[iCount] = pobjTemp;
+        m_HeaderArray[iCount] = pTemp;
     }
 }
 
@@ -314,16 +304,16 @@ SIP_VOID SipHeaders::OverWriteHdrObj(IN SipHeaders* pobjSrcHdrs, IN SIP_BOOL bIg
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eIndex)
+SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType)
 {
-    if ((eIndex < SIP_ZERO) || eIndex >= SipHeaderBase::TYPE_END)
+    if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
     {
         return SIP_NULL;
     }
-    if (m_HeaderArray[eIndex] != SIP_NULL)
+    if (m_HeaderArray[eHdrType] != SIP_NULL)
     {
-        m_HeaderArray[eIndex]->increment();
-        return m_HeaderArray[eIndex];
+        m_HeaderArray[eHdrType]->increment();
+        return m_HeaderArray[eHdrType];
     }
     return SIP_NULL;
 }
@@ -337,10 +327,7 @@ SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eIndex)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaders::getNewHdrObj
-(
- SIP_INT32    eHdrType
- )
+SipHeaderBase* SipHeaders::getNewHdrObj(SIP_INT32 eHdrType)
 {
     eHdrType = CheckAndGetHdrEnumType(eHdrType);
     if ((eHdrType < SIP_ZERO) || eHdrType >= SipHeaderBase::TYPE_END)
@@ -349,12 +336,13 @@ SipHeaderBase* SipHeaders::getNewHdrObj
     }
     if (m_HeaderArray[eHdrType] != SIP_NULL)
     {
+        m_HeaderArray[eHdrType]->increment();
         return m_HeaderArray[eHdrType];
     }
 
-    m_HeaderArray[eHdrType] = (IsListHdr( eHdrType) == SIP_TRUE) ?
-        SipHeaderList::GetNewListObj(eHdrType,SIP_NULL) :
-        gaFactoryArray[eHdrType](eHdrType,SIP_NULL);
+    m_HeaderArray[eHdrType] = (IsListHdr(eHdrType) == SIP_TRUE) ?
+        SipHeaderList::GetNewListObj(eHdrType, SIP_NULL) :
+        gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
 
     return m_HeaderArray[eHdrType];
 }
@@ -366,7 +354,8 @@ SIP_BOOL SipHeaders::RemoveHdr(SIP_INT32 eHdrType)
     {
         return SIP_FALSE;
     }
-    if (m_HeaderArray[eHdrType] != SIP_NULL) {
+    if (m_HeaderArray[eHdrType] != SIP_NULL)
+    {
         (m_HeaderArray[eHdrType])->SipDelete();
     }
     m_HeaderArray[eHdrType] = SIP_NULL;
@@ -374,17 +363,14 @@ SIP_BOOL SipHeaders::RemoveHdr(SIP_INT32 eHdrType)
 }
 
 
-SIP_BOOL SipHeaders::SetHdr
-(
- SipHeaderBase* pobjHdr
-)
+SIP_BOOL SipHeaders::SetHdr(SipHeaderBase* pHdr)
 {
-    if ((pobjHdr == SIP_NULL) || (pobjHdr->IsValidHeader() == SIP_FALSE))
+    if ((pHdr == SIP_NULL) || (pHdr->IsValidHeader() == SIP_FALSE))
     {
         return SIP_FALSE;
     }
 
-    SIP_INT32 eHdrType = pobjHdr->GetHdrType();
+    SIP_INT32 eHdrType = pHdr->GetHdrType();
 
     if (IsListHdr(eHdrType) == SIP_TRUE)
     {
@@ -396,7 +382,7 @@ SIP_BOOL SipHeaders::SetHdr
         {
             m_HeaderArray[eHdrType] = getNewHdrObj(eHdrType);
         }
-        ((SipHeaderList*)m_HeaderArray[eHdrType])->AddHeader(pobjHdr);
+        ((SipHeaderList*)m_HeaderArray[eHdrType])->AddHeader(pHdr);
     }
     else
     {
@@ -405,30 +391,27 @@ SIP_BOOL SipHeaders::SetHdr
             m_HeaderArray[eHdrType]->SipDelete();
         }
 
-        m_HeaderArray[eHdrType] = pobjHdr;
-        pobjHdr->increment();
+        m_HeaderArray[eHdrType] = pHdr;
+        pHdr->increment();
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::AppendHdr
-(
- SipHeaderBase* pobjHdr
-)
+SIP_BOOL SipHeaders::AppendHdr(SipHeaderBase* pHdr)
 {
-    if ((pobjHdr == SIP_NULL) || (pobjHdr->IsValidHeader() == SIP_FALSE))
+    if ((pHdr == SIP_NULL) || (pHdr->IsValidHeader() == SIP_FALSE))
     {
         return SIP_FALSE;
     }
 
-    SIP_INT32 eHdrType = pobjHdr->GetHdrType();
+    SIP_INT32 eHdrType = pHdr->GetHdrType();
     if (IsListHdr(eHdrType) == SIP_TRUE)
     {
         if (m_HeaderArray[eHdrType] == SIP_NULL)
          {
              m_HeaderArray[eHdrType] = getNewHdrObj(eHdrType);
          }
-         ((SipHeaderList*)m_HeaderArray[eHdrType])->AddHeader(pobjHdr);
+         ((SipHeaderList*)m_HeaderArray[eHdrType])->AddHeader(pHdr);
     }
     else
     {
@@ -436,31 +419,27 @@ SIP_BOOL SipHeaders::AppendHdr
         {
             m_HeaderArray[eHdrType]->SipDelete();
         }
-        m_HeaderArray[eHdrType] = pobjHdr;
-        pobjHdr->increment();
+        m_HeaderArray[eHdrType] = pHdr;
+        pHdr->increment();
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::InsertHdr
-(
- SipHeaderBase* pobjHdr,
- SIP_UINT32 nIndex
-)
+SIP_BOOL SipHeaders::InsertHdr(SipHeaderBase* pHdr, SIP_UINT32 nIndex)
 {
-    if ((pobjHdr == SIP_NULL) || (pobjHdr->IsValidHeader() == SIP_FALSE))
+    if ((pHdr == SIP_NULL) || (pHdr->IsValidHeader() == SIP_FALSE))
     {
         return SIP_FALSE;
     }
 
-    SIP_INT32 eHdrType = pobjHdr->GetHdrType();
+    SIP_INT32 eHdrType = pHdr->GetHdrType();
     if (IsListHdr(eHdrType) == SIP_TRUE)
     {
         if (m_HeaderArray[eHdrType] == SIP_NULL)
         {
             m_HeaderArray[eHdrType] = getNewHdrObj(eHdrType);
         }
-        ((SipHeaderList*)m_HeaderArray[eHdrType])->InsertHdrAtPos(pobjHdr,nIndex);
+        ((SipHeaderList*)m_HeaderArray[eHdrType])->InsertHdrAtPos(pHdr, nIndex);
     }
     else
     {
@@ -468,17 +447,13 @@ SIP_BOOL SipHeaders::InsertHdr
         {
            m_HeaderArray[eHdrType]->SipDelete();
         }
-        m_HeaderArray[eHdrType] = pobjHdr;
-        pobjHdr->increment();
+        m_HeaderArray[eHdrType] = pHdr;
+        pHdr->increment();
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::EncodeMandatoryHdrs
-(
- SIP_CHAR   **ppucCurrPos,
- SIP_UINT32   uiMsgOptions
- )
+SIP_BOOL SipHeaders::EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
     SIP_INT32 arMandatoryHeaders[NUM_OF_MANDATORY_HEADERS] = {
         SipHeaderBase::VIA,
@@ -493,95 +468,87 @@ SIP_BOOL SipHeaders::EncodeMandatoryHdrs
         if (pHeaderObj == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,"Mandatory header %d unavailable",
-                arMandatoryHeaders[iCount], SIP_ZERO);
+                    arMandatoryHeaders[iCount], SIP_ZERO);
             return SIP_FALSE;
         }
 
-        sipEncodeHdrName(arMandatoryHeaders[iCount], ppucCurrPos, uiMsgOptions);
-        if (pHeaderObj->EncodeHdr(ppucCurrPos) == SIP_FALSE)
+        sipEncodeHdrName(arMandatoryHeaders[iCount], ppCurrPos, nMsgOptions);
+        if (pHeaderObj->EncodeHdr(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,"Mandatory header %d encode fail",
-                arMandatoryHeaders[iCount], SIP_ZERO);
+                    arMandatoryHeaders[iCount], SIP_ZERO);
             pHeaderObj->SipDelete();
             return SIP_FALSE;
 
         }
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppucCurrPos);
+        SIP_ENC_CRLF(*ppCurrPos);
     }
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::EncodeContentHdrs
-(
- SIP_CHAR   **ppucCurrPos,
- SIP_UINT32   uiMsgOptions
- )
+SIP_BOOL SipHeaders::EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
-    SipHeaderBase *pobjTemp = getHdrObj(SipHeaderBase::CONTENT_TYPE);
-    if (pobjTemp != SIP_NULL)
+    SipHeaderBase* pTemp = getHdrObj(SipHeaderBase::CONTENT_TYPE);
+    if (pTemp != SIP_NULL)
     {
-        sipEncodeHdrName(SipHeaderBase::CONTENT_TYPE, ppucCurrPos, uiMsgOptions);
-        if (pobjTemp->EncodeHdr(ppucCurrPos) == SIP_FALSE)
+        sipEncodeHdrName(SipHeaderBase::CONTENT_TYPE, ppCurrPos, nMsgOptions);
+        if (pTemp->EncodeHdr(ppCurrPos) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Content type encode fail",
-                SIP_ZERO, SIP_ZERO);
-            pobjTemp->SipDelete();
+                    SIP_ZERO, SIP_ZERO);
+            pTemp->SipDelete();
             return SIP_FALSE;
          }
-        pobjTemp->SipDelete();
-        SIP_ENC_CRLF(*ppucCurrPos);
+        pTemp->SipDelete();
+        SIP_ENC_CRLF(*ppCurrPos);
     }
     return SIP_TRUE;
 }
 
-SIP_BOOL SipHeaders::EncodeHdrs
-(
- SIP_CHAR   **ppucCurrPos,
- SIP_UINT32   uiMsgOptions
- )
+SIP_BOOL SipHeaders::EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions)
 {
-    if (EncodeMandatoryHdrs(ppucCurrPos, uiMsgOptions) == SIP_FALSE)
+    if (EncodeMandatoryHdrs(ppCurrPos, nMsgOptions) == SIP_FALSE)
     {
         return SIP_FALSE;
     }
 
-    SIP_INT32 iHdr = SipHeaderBase::ALLOW;
-    while (iHdr < SipHeaderBase::TYPE_END)
+    SIP_INT32 nHdr = SipHeaderBase::ALLOW;
+    while (nHdr < SipHeaderBase::TYPE_END)
     {
         /* Ignore mandatory headers & content headers which are separately encoded*/
-        if ((iHdr == SipHeaderBase::VIA) ||
-            (iHdr == SipHeaderBase::FROM) ||
-            (iHdr == SipHeaderBase::TO) ||
-            (iHdr == SipHeaderBase::CALL_ID) ||
-            (iHdr == SipHeaderBase::CSEQ) ||
-            (iHdr == SipHeaderBase::CONTENT_TYPE) ||
-            (iHdr == SipHeaderBase::CONTENT_LENGTH) ||
-            (iHdr == SipHeaderBase::UNKNOWN))
+        if ((nHdr == SipHeaderBase::VIA) ||
+            (nHdr == SipHeaderBase::FROM) ||
+            (nHdr == SipHeaderBase::TO) ||
+            (nHdr == SipHeaderBase::CALL_ID) ||
+            (nHdr == SipHeaderBase::CSEQ) ||
+            (nHdr == SipHeaderBase::CONTENT_TYPE) ||
+            (nHdr == SipHeaderBase::CONTENT_LENGTH) ||
+            (nHdr == SipHeaderBase::UNKNOWN))
         {
-            iHdr++;
+            nHdr++;
             continue;
         }
 
-        SipHeaderBase* pHeaderObj = getHdrObj(iHdr);
+        SipHeaderBase* pHeaderObj = getHdrObj(nHdr);
         if (pHeaderObj != SIP_NULL)
         {
-            sipEncodeHdrName(iHdr, ppucCurrPos, uiMsgOptions);
+            sipEncodeHdrName(nHdr, ppCurrPos, nMsgOptions);
 
-            if (pHeaderObj->EncodeHdr(ppucCurrPos, SIP_TRUE, uiMsgOptions) == SIP_FALSE)
+            if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode %d header Fail", iHdr, SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode %d header Fail", nHdr, SIP_ZERO);
                 pHeaderObj->SipDelete();
                 return SIP_FALSE;
             }
             pHeaderObj->SipDelete();
-            SIP_ENC_CRLF(*ppucCurrPos);
+            SIP_ENC_CRLF(*ppCurrPos);
         }
-        iHdr++;
+        nHdr++;
     }
 
-    if (EncodeContentHdrs(ppucCurrPos, uiMsgOptions) == SIP_FALSE)
+    if (EncodeContentHdrs(ppCurrPos, nMsgOptions) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode content header Fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -591,16 +558,16 @@ SIP_BOOL SipHeaders::EncodeHdrs
 
     if (pHeaderObj != SIP_NULL)
     {
-        if (pHeaderObj->EncodeHdr(ppucCurrPos, SIP_TRUE, uiMsgOptions) == SIP_FALSE)
+        if (pHeaderObj->EncodeHdr(ppCurrPos, SIP_TRUE, nMsgOptions) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode Unknown header Fail",
-                SIP_ZERO, SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             pHeaderObj->SipDelete();
             return SIP_FALSE;
         }
 
         pHeaderObj->SipDelete();
-        SIP_ENC_CRLF(*ppucCurrPos);
+        SIP_ENC_CRLF(*ppCurrPos);
     }
 
     return SIP_TRUE;
@@ -636,16 +603,10 @@ SIP_BOOL SipHeaders::IsListHdr(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaders::DecodeHdrs
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32     uiDecLen,
- SIP_CHAR    **pucHdrName,
- SIP_CHAR    **pucHdrBody
- )
-
+SIP_BOOL SipHeaders::DecodeHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
+        SIP_CHAR** ppHdrBody)
 {
-    if (pucStartPt == SIP_NULL || uiDecLen == SIP_ZERO)
+    if (pStartPt == SIP_NULL || nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid arguments", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -653,83 +614,83 @@ SIP_BOOL SipHeaders::DecodeHdrs
 
     /*Skip The LWS form the back*/
     /*Update the End point*/
-    SIP_CHAR    *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    pucEndPt = sipSkipRwLWS(pucStartPt,pucEndPt);
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
 
-    SIP_CHAR    *pucTempPos= SIP_NULL;
+    SIP_CHAR* pTempPos= SIP_NULL;
 
     /*Get the position previous to ":"*/
-    if (sipFindPreDelimiter(pucStartPt, pucEndPt, &pucTempPos, COLON) == SIP_FALSE)
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COLON) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "colon not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucTempNext = pucTempPos + SIP_TWO;
-    pucTempNext = sipSkipFwLWS(pucTempNext,pucEndPt);
+    SIP_CHAR* pTempNext = pTempPos + SIP_TWO;
+    pTempNext = sipSkipFwLWS(pTempNext, pEndPt);
 
     /*skip the WSP form back*/
-    pucTempPos = sipSkipRwWSP(pucStartPt,pucTempPos);
+    pTempPos = sipSkipRwWSP(pStartPt, pTempPos);
 
     /*Create  the header name*/
-    SIP_CHAR *pszHdrName = sipCreateString(pucStartPt, pucTempPos);
+    SIP_CHAR* pszHdrName = sipCreateString(pStartPt, pTempPos);
     if (pszHdrName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    *pucHdrName = SipPf_Strdup(pszHdrName);
+    *ppHdrName = SipPf_Strdup(pszHdrName);
 
     /*this will return the type of header on passing name*/
     SIP_INT32 eHdrType = sipGetHdrType(pszHdrName);
     delete[] pszHdrName;
 
     /*Get the header object*/
-    SipHeaderBase *pobjHdrBase = getNewHdrObj(eHdrType);
+    SipHeaderBase* pHdrBase = getNewHdrObj(eHdrType);
 
-    if (pobjHdrBase == SIP_NULL)
+    if (pHdrBase == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Getting object of header %d fail",
-            eHdrType, SIP_ZERO);
+                eHdrType, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Case of Unknown Header*/
     if (eHdrType == SipHeaderBase::UNKNOWN)
     {
-        SipUnknownHeader* pobjUnknown = new SipUnknownHeader();
-        if (pobjUnknown == SIP_NULL)
+        SipUnknownHeader* pUnknown = new SipUnknownHeader();
+        if (pUnknown == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        if (pobjUnknown->SetHeaderName(*pucHdrName) == SIP_FALSE)
+        if (pUnknown->SetHeaderName(*ppHdrName) == SIP_FALSE)
         {
-            pobjUnknown->SipDelete();
+            pUnknown->SipDelete();
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Set header name fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        SIP_CHAR *pszHdrValue = sipCreateString(pucTempNext, pucEndPt);
+        SIP_CHAR* pszHdrValue = sipCreateString(pTempNext, pEndPt);
         if (pszHdrValue == SIP_NULL)
         {
-            pobjUnknown->SipDelete();
-            if (pucTempNext > pucEndPt)
+            pUnknown->SipDelete();
+            if (pTempNext > pEndPt)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Unknown Hdr Contain Invalid Value",
-                    SIP_ZERO, SIP_ZERO);
+                        SIP_ZERO, SIP_ZERO);
                 return SIP_TRUE;
             }
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        *pucHdrBody = SipPf_Strdup(pszHdrValue);
+        *ppHdrBody = SipPf_Strdup(pszHdrValue);
 
-        if (pobjUnknown->SetHeaderValue(pszHdrValue) == SIP_FALSE)
+        if (pUnknown->SetHeaderValue(pszHdrValue) == SIP_FALSE)
         {
-            pobjUnknown->SipDelete();
+            pUnknown->SipDelete();
             delete[] pszHdrValue;
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Set header value fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
@@ -737,26 +698,26 @@ SIP_BOOL SipHeaders::DecodeHdrs
         delete[] pszHdrValue;
 
         /*Add the header into the unknown list*/
-        if (((SipHeaderList*)m_HeaderArray[SipHeaderBase::UNKNOWN])->AddHeader(pobjUnknown)
+        if (((SipHeaderList*)m_HeaderArray[SipHeaderBase::UNKNOWN])->AddHeader(pUnknown)
             == SIP_FALSE)
         {
-            pobjUnknown->SipDelete();
+            pUnknown->SipDelete();
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Add to list Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pobjUnknown->SipDelete();
+        pUnknown->SipDelete();
     }
     else
     {
         /*Update the Start Point to the start of hdr value*/
-        pucStartPt = pucTempNext;
+        pStartPt = pTempNext;
 
         /*Update the length for decoding*/
-        uiDecLen = pucEndPt - pucStartPt + SIP_ONE;
+        nDecLen = pEndPt - pStartPt + SIP_ONE;
 
         /*Call the Decoder function*/
-        *pucHdrBody = sipCreateString(pucTempNext,  pucEndPt);
-        if (pobjHdrBase->DecodeHdr(pucStartPt, uiDecLen) == SIP_FALSE)
+        *ppHdrBody = sipCreateString(pTempNext, pEndPt);
+        if (pHdrBase->DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Decode header %d fail", eHdrType, SIP_ZERO);
             return SIP_FALSE;
@@ -777,39 +738,30 @@ SIP_BOOL SipHeaders::DecodeHdrs
  * Side Effects          : none
  *****************************************************************************/
 
-SIP_BOOL sipEncodeHdrName
-(
- SIP_INT32        eHdrType,
- SIP_CHAR             **ppucMsgBuffCurrPos,
- SIP_UINT32             uiMsgOptions
- )
+SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_UINT32 nMsgOptions)
 {
     if (eHdrType < SIP_ZERO || eHdrType >= SipHeaderBase::TYPE_END)
     {
         return SIP_FALSE;
     }
 
-    if ((uiMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
+    if ((nMsgOptions & ESIPMSGOPT_ENCSHORTFORM) == ESIPMSGOPT_ENCSHORTFORM)
     {
-        sipEncodeShortHdrName(eHdrType, ppucMsgBuffCurrPos);
+        sipEncodeShortHdrName(eHdrType, ppMsgBuffCurrPos);
         return SIP_TRUE;
     }
 
-    SipPf_Strcpy(*ppucMsgBuffCurrPos,gaszSipHdr[eHdrType]);
-    SipEnc_UpdateCurrPos(ppucMsgBuffCurrPos);
+    SipPf_Strcpy(*ppMsgBuffCurrPos, gaszSipHdr[eHdrType]);
+    SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
 
-    SIP_ENC_COLON(*ppucMsgBuffCurrPos);
+    SIP_ENC_COLON(*ppMsgBuffCurrPos);
 
-    SIP_ENC_SP(*ppucMsgBuffCurrPos);
+    SIP_ENC_SP(*ppMsgBuffCurrPos);
 
     return SIP_TRUE;
 }
 
-SIP_BOOL sipEncodeShortHdrName
-(
- SIP_INT32        eHdrType,
- SIP_CHAR         **ppucMsgBuffCurrPos
- )
+SIP_BOOL sipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos)
 {
     if (eHdrType < SIP_ZERO || eHdrType >= SipHeaderBase::TYPE_END)
     {
@@ -819,76 +771,76 @@ SIP_BOOL sipEncodeShortHdrName
     switch (eHdrType)
     {
         case SipHeaderBase::VIA:
-            SIP_ENC_SHORT_VIA(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_VIA(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::TO:
-            SIP_ENC_SHORT_TO(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_TO(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::FROM:
-            SIP_ENC_SHORT_FROM(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_FROM(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::CALL_ID:
-            SIP_ENC_SHORT_CALLID(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_CALLID(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::CONTACT:
         case SipHeaderBase::CONTACT_WILD:
         case SipHeaderBase::CONTACT_ANY:
-            SIP_ENC_SHORT_CONTACT(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_CONTACT(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::CONTENT_TYPE:
-            SIP_ENC_SHORT_CONTENT_TYPE(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_CONTENT_TYPE(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::CONTENT_LENGTH:
-            SIP_ENC_SHORT_CONTENT_LENGTH(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_CONTENT_LENGTH(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::ACCEPT_CONTACT:
-            SIP_ENC_SHORT_ACCEPT_CONTACT(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_ACCEPT_CONTACT(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::SESSION_EXPIRES:
-            SIP_ENC_SHORT_SESSION_EXPIRES(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_SESSION_EXPIRES(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::SUPPORTED:
-            SIP_ENC_SHORT_SUPPORTED(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_SUPPORTED(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::REQUEST_DISPOSITION:
-            SIP_ENC_SHORT_REQUEST_DISPOSITION(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_REQUEST_DISPOSITION(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::REFERRED_BY:
-            SIP_ENC_SHORT_REFERRED_BY(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_REFERRED_BY(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::REFER_TO:
-            SIP_ENC_SHORT_REFER_TO(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_REFER_TO(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::CONTENT_ENCODING:
-            SIP_ENC_SHORT_CONTENT_ENCODING(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_CONTENT_ENCODING(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::SUBJECT:
-            SIP_ENC_SHORT_SUBJECT(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_SUBJECT(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::REJECT_CONTACT:
-            SIP_ENC_SHORT_REJECT_CONTACT(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_REJECT_CONTACT(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::EVENT:
-            SIP_ENC_SHORT_EVENT(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_EVENT(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::ALLOW_EVENTS:
-            SIP_ENC_SHORT_ALLOW_EVENTS(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_ALLOW_EVENTS(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::IDENTITY:
-            SIP_ENC_SHORT_IDENTITY(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_IDENTITY(*ppMsgBuffCurrPos);
             break;
         case SipHeaderBase::IDENTITY_INFO:
-            SIP_ENC_SHORT_IDENTITY_INFO(*ppucMsgBuffCurrPos);
+            SIP_ENC_SHORT_IDENTITY_INFO(*ppMsgBuffCurrPos);
             break;
         default:
-            SipPf_Strcpy(*ppucMsgBuffCurrPos,gaszSipHdr[eHdrType]);
-            SipEnc_UpdateCurrPos(ppucMsgBuffCurrPos);
+            SipPf_Strcpy(*ppMsgBuffCurrPos,gaszSipHdr[eHdrType]);
+            SipEnc_UpdateCurrPos(ppMsgBuffCurrPos);
             break;
     }
 
-    SIP_ENC_COLON(*ppucMsgBuffCurrPos);
+    SIP_ENC_COLON(*ppMsgBuffCurrPos);
 
-    SIP_ENC_SP(*ppucMsgBuffCurrPos);
+    SIP_ENC_SP(*ppMsgBuffCurrPos);
 
     return SIP_TRUE;
 }

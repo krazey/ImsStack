@@ -52,7 +52,7 @@ SipTimeStampHeader::SipTimeStampHeader()
 {
 }
 /*Copy Constructor*/
-SipTimeStampHeader::SipTimeStampHeader(const SipTimeStampHeader &objHeader)
+SipTimeStampHeader::SipTimeStampHeader(const SipTimeStampHeader& objHeader)
     : SipHeaderBase(objHeader)
     , m_pszTimeVal(SipPf_Strdup(objHeader.m_pszTimeVal))
     , m_pszDelay(SipPf_Strdup(objHeader.m_pszDelay))
@@ -84,11 +84,7 @@ SipTimeStampHeader::~SipTimeStampHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipTimeStampHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
- )
+SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     /*Encoding of header Value  i.e.
       "Timestamp" HCOLON 1*(DIGIT) [ "." *(DIGIT) ] [ LWS delay ]   */
@@ -96,41 +92,35 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr
     if (m_pszTimeVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: Missing TimeStamp ",SIP_ZERO,SIP_ZERO);
+                "EncodeHdr: Missing TimeStamp ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos, m_pszTimeVal);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszTimeVal);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     /*Encoding of Delay*/
     if (m_pszDelay != SIP_NULL)
     {
-        SIP_ENC_SP(*ppucCurrPos);
+        SIP_ENC_SP(*ppCurrPos);
 
-        SipPf_Strcpy(*ppucCurrPos, m_pszDelay);
-        SipEnc_UpdateCurrPos(ppucCurrPos);
+        SipPf_Strcpy(*ppCurrPos, m_pszDelay);
+        SipEnc_UpdateCurrPos(ppCurrPos);
     }
 
     return SIP_TRUE;
 }
 
 /*Sets */
-SIP_BOOL SipTimeStampHeader::SetTimeVal
-(
- const SIP_CHAR    *pucTimeVal
- )
+SIP_BOOL SipTimeStampHeader::SetTimeVal(const SIP_CHAR* pszTimeVal)
 {
-    return SetCharVar(pucTimeVal, m_pszTimeVal);
+    return SetCharVar(pszTimeVal, m_pszTimeVal);
 }
 
 /*Sets */
-SIP_BOOL SipTimeStampHeader::SetDelay
-(
- const SIP_CHAR    *pucDelay
- )
+SIP_BOOL SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
 {
-    return SetCharVar(pucDelay, m_pszDelay);
+    return SetCharVar(pszDelay, m_pszDelay);
 }
 
 
@@ -143,28 +133,24 @@ SIP_BOOL SipTimeStampHeader::SetDelay
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipTimeStampHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer",SIP_ZERO,SIP_ZERO);
+                "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre  = SIP_NULL;
     /*Find the LWS i.e. End of Transport*/
-    if (sipFindLWS(pucStartPt, pucEndPt, &pucTempPre) == SIP_FALSE)
+    if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
-        pucTempPre = pucEndPt;
+        pTempPre = pEndPt;
     }
 
-    m_pszTimeVal = sipCreateString(pucStartPt, pucTempPre);
+    m_pszTimeVal = sipCreateString(pStartPt, pTempPre);
     if (m_pszTimeVal == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
@@ -173,17 +159,17 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr
         return SIP_FALSE;
     }
 
-    if (pucTempPre != pucEndPt)
+    if (pTempPre != pEndPt)
     {
         /*point to the start of the LWS*/
-        pucTempPre = pucTempPre + SIP_ONE;
-        pucStartPt = sipSkipFwLWS(pucTempPre, pucEndPt);
-        m_pszDelay = sipCreateString(pucStartPt, pucEndPt);
+        pTempPre = pTempPre + SIP_ONE;
+        pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
+        m_pszDelay = sipCreateString(pStartPt, pEndPt);
         if (m_pszDelay == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                     "DecodeHdr:Memory Allocation Failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -193,7 +179,8 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr
 
 SipHeaderBase* SipTimeStampHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipTimeStampHeader(*reinterpret_cast<SipTimeStampHeader*>(pHeader));
     }
     return new SipTimeStampHeader();

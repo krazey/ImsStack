@@ -65,7 +65,7 @@ SipUnknownHeader::SipUnknownHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipUnknownHeader::SipUnknownHeader(const SipUnknownHeader &objHeader)
+SipUnknownHeader::SipUnknownHeader(const SipUnknownHeader& objHeader)
     : SipHeaderBase(SipHeaderBase::UNKNOWN)
     , m_pszHdrName(SipPf_Strdup(objHeader.m_pszHdrName))
     , m_pszHdrValue(SipPf_Strdup(objHeader.m_pszHdrValue))
@@ -102,11 +102,7 @@ SipUnknownHeader::~SipUnknownHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipUnknownHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     /*bParams = SIP_TRUE*/
-)
+SIP_BOOL SipUnknownHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pszHdrName == SIP_NULL)
     {
@@ -114,15 +110,15 @@ SIP_BOOL SipUnknownHeader::EncodeHdr
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos,m_pszHdrName);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszHdrName);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
-    SIP_ENC_COLON(*ppucCurrPos);
+    SIP_ENC_COLON(*ppCurrPos);
 
-    SIP_ENC_SP(*ppucCurrPos);
+    SIP_ENC_SP(*ppCurrPos);
 
-    SipPf_Strcpy(*ppucCurrPos,m_pszHdrValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
+    SipPf_Strcpy(*ppCurrPos, m_pszHdrValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
 }
@@ -136,31 +132,28 @@ SIP_BOOL SipUnknownHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipUnknownHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipUnknownHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    (void)pucStartPt;
-    (void)uiDecLen;
+    (void)pStartPt;
+    (void)nDecLen;
 
     return SIP_TRUE;
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderName(const SIP_CHAR *pkszHdrName)
+SIP_BOOL SipUnknownHeader::SetHeaderName(const SIP_CHAR* pszHdrName)
 {
-    return SetCharVar(pkszHdrName,m_pszHdrName);
+    return SetCharVar(pszHdrName, m_pszHdrName);
 }
 
-SIP_BOOL SipUnknownHeader::SetHeaderValue(const SIP_CHAR *pkszHdrValue)
+SIP_BOOL SipUnknownHeader::SetHeaderValue(const SIP_CHAR* pszHdrValue)
 {
-    return SetCharVar(pkszHdrValue,m_pszHdrValue);
+    return SetCharVar(pszHdrValue, m_pszHdrValue);
 }
 
-SipHeaderBase* SipUnknownHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase *pHeader)
+SipHeaderBase* SipUnknownHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipUnknownHeader(*reinterpret_cast<SipUnknownHeader*>(pHeader));
     }
     return new SipUnknownHeader();

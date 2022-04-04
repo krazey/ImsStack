@@ -51,7 +51,7 @@
  *****************************************************************************/
 SipEventHeader::SipEventHeader()
     : SipHeaderBase(SipHeaderBase::EVENT)
-    , m_pobjEventTemplateList(SIP_NULL)
+    , m_pEventTemplateList(SIP_NULL)
 {
 }
 
@@ -65,12 +65,13 @@ SipEventHeader::SipEventHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipEventHeader::SipEventHeader(const SipEventHeader &objHeader)
+SipEventHeader::SipEventHeader(const SipEventHeader& objHeader)
     : SipHeaderBase(objHeader)
-    , m_pobjEventTemplateList(SIP_NULL)
+    , m_pEventTemplateList(SIP_NULL)
 {
-    if (objHeader.m_pobjEventTemplateList != SIP_NULL) {
-        m_pobjEventTemplateList = new SipParameterList(*(objHeader.m_pobjEventTemplateList));
+    if (objHeader.m_pEventTemplateList != SIP_NULL)
+    {
+        m_pEventTemplateList = new SipParameterList(*(objHeader.m_pEventTemplateList));
     }
 }
 
@@ -86,9 +87,9 @@ SipEventHeader::SipEventHeader(const SipEventHeader &objHeader)
  *****************************************************************************/
 SipEventHeader::~SipEventHeader()
 {
-    if (m_pobjEventTemplateList != SIP_NULL)
+    if (m_pEventTemplateList != SIP_NULL)
     {
-        m_pobjEventTemplateList->SipDelete();
+        m_pEventTemplateList->SipDelete();
     }
 }
 
@@ -101,39 +102,35 @@ SipEventHeader::~SipEventHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipEventHeader::EncodeHdr
-(
-    SIP_CHAR     **ppucCurrPos,
-    SIP_BOOL     bParams /*Default = SIP_TRUE*/
-)
+SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
-    const SIP_CHAR *pValue = GetValue();
-    if (pValue == SIP_NULL)
+    const SIP_CHAR* pszValue = GetValue();
+    if (pszValue == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No Evt package", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Strcpy(*ppucCurrPos, pValue);
-    SipEnc_UpdateCurrPos(ppucCurrPos);
-    if (m_pobjEventTemplateList != SIP_NULL)
+    SipPf_Strcpy(*ppCurrPos, pszValue);
+    SipEnc_UpdateCurrPos(ppCurrPos);
+    if (m_pEventTemplateList != SIP_NULL)
     {
-        SipVector<SipNameValue*> &sipList = m_pobjEventTemplateList->GetList();
-        SIP_UINT32 usSize = sipList.GetSize();
-        for (SIP_UINT32 iIndex = SIP_ZERO; iIndex < usSize; iIndex++)
+        SipVector<SipNameValue*> &sipList = m_pEventTemplateList->GetList();
+        SIP_UINT32 nSize = sipList.GetSize();
+        for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
-            SipNameValue *pobjNmVl = sipList.GetAt(iIndex);
-            if (pobjNmVl != SIP_NULL)
+            SipNameValue* pNmVl = sipList.GetAt(nIndex);
+            if (pNmVl != SIP_NULL)
             {
-                SIP_ENC_DOT(*ppucCurrPos);
+                SIP_ENC_DOT(*ppCurrPos);
 
-                SipPf_Strcpy(*ppucCurrPos,pobjNmVl->m_pszName);
-                SipEnc_UpdateCurrPos(ppucCurrPos);
+                SipPf_Strcpy(*ppCurrPos, pNmVl->m_pszName);
+                SipEnc_UpdateCurrPos(ppCurrPos);
             }
         }
     }
 
-    return EncodeHeaderParameters(ppucCurrPos, bParams);
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /******************************************************************************
@@ -145,29 +142,26 @@ SIP_BOOL SipEventHeader::EncodeHdr
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipEventHeader::AddEventTemplate
-(
- const SIP_CHAR  *pkszEvntTmpl
- )
+SIP_BOOL SipEventHeader::AddEventTemplate(const SIP_CHAR* pszEvntTmpl)
 {
-    if (pkszEvntTmpl == SIP_NULL)
+    if (pszEvntTmpl == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODACCESSOR, "Empty value", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pobjEventTemplateList ==  SIP_NULL)
+    if (m_pEventTemplateList ==  SIP_NULL)
     {
-        m_pobjEventTemplateList = new SipParameterList();
+        m_pEventTemplateList = new SipParameterList();
     }
 
-    if (m_pobjEventTemplateList == SIP_NULL)
+    if (m_pEventTemplateList == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODACCESSOR, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    return m_pobjEventTemplateList->Add(pkszEvntTmpl);
+    return m_pEventTemplateList->Add(pszEvntTmpl);
 }
 
 
@@ -180,61 +174,58 @@ SIP_BOOL SipEventHeader::AddEventTemplate
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipEventHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (uiDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR *pucEndPt = pucStartPt + uiDecLen - SIP_ONE;
-    SIP_CHAR *pucTempPre  = SIP_NULL;
-    SIP_CHAR *pucTempNext  = SIP_NULL;
+    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindActualPos(pucStartPt, pucEndPt, &pucTempPre, &pucTempNext, SIP_SEMI) == SIP_TRUE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (DecodeHeaderParameters(pucTempNext, pucEndPt, SIP_SEMI) == SIP_FALSE)
+        if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
             return SIP_FALSE;
         }
-        pucEndPt = pucTempPre;
+        pEndPt = pTempPre;
     }
 
-    SIP_CHAR *pucTempPos  = SIP_NULL;
-    if (sipFindPreDelimiter(pucStartPt,pucEndPt,&pucTempPos,SIP_DOT) == SIP_FALSE)
+    SIP_CHAR* pTempPos = SIP_NULL;
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_DOT) == SIP_FALSE)
     {
-        pucTempPos = pucEndPt;
+        pTempPos = pEndPt;
     }
 
-    SIP_CHAR *pszEvent = sipCreateString(pucStartPt, pucTempPos);
+    SIP_CHAR* pszEvent = sipCreateString(pStartPt, pTempPos);
     if (SetValue(pszEvent) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        if (pszEvent != SIP_NULL) {
+        if (pszEvent != SIP_NULL)
+        {
             delete[] pszEvent;
         }
         return SIP_FALSE;
     }
     delete[] pszEvent;
 
-    if(pucTempPos != pucEndPt)
+    if (pTempPos != pEndPt)
     {
-        m_pobjEventTemplateList = new SipParameterList();
-        if (m_pobjEventTemplateList == SIP_NULL)
+        m_pEventTemplateList = new SipParameterList();
+        if (m_pEventTemplateList == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
-        pucTempPos = pucTempPos + SIP_TWO;
+        pTempPos = pTempPos + SIP_TWO;
 
-        if (m_pobjEventTemplateList->DecUriSipParameterList(pucTempPos,
-            pucEndPt, SIP_DOT) == SIP_FALSE)
+        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos,
+                pEndPt, SIP_DOT) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Event Package Decoding Failed",
                 SIP_ZERO, SIP_ZERO);
@@ -246,7 +237,8 @@ SIP_BOOL SipEventHeader::DecodeHdr
 
 SipHeaderBase* SipEventHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipEventHeader(*reinterpret_cast<SipEventHeader*>(pHeader));
     }
     return new SipEventHeader();

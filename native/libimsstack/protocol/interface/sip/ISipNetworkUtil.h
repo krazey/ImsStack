@@ -13,24 +13,14 @@ class ISipNetworkUtil
         ISipNetworkUtil(){};
         virtual ~ISipNetworkUtil(){};
 
-        virtual SIP_BOOL SendToNetwork
-            (
-             SipTransportBuffer    *pobjTranspSipBuffer,
-             SipTransportParameter        *pobjFinalTranspParam,
-             ISipUserData        *pobjUserData
-            )=0;
+        virtual SIP_BOOL SendToNetwork(SipTransportBuffer* pTranspSipBuffer,
+                SipTransportParameter* pFinalTranspParam, ISipUserData* pUserData) = 0;
 
-        virtual SIP_BOOL CheckTCPConnection
-            (
-             SipTransportParameter        *pobjTransportParam,
-             ISipUserData        *pobjUserData
-            )=0;
+        virtual SIP_BOOL CheckTCPConnection(SipTransportParameter* pTransportParam,
+                ISipUserData* pUserData) = 0;
 
-        virtual SIP_BOOL AbortTransmission
-            (
-             SipTransportParameter     *pobjTranspParam,
-             ISipUserData        *pobjUserData
-            )=0;
+        virtual SIP_BOOL AbortTransmission(SipTransportParameter* pTranspParam,
+                ISipUserData* pUserData) = 0;
 };
 
 #endif // __ISIPNETWORKUTIL_H__

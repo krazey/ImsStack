@@ -20,158 +20,158 @@
 #include "platform/sip_pf_memory.h"
 
 SipTxnKey::SipTxnKey()
-    :m_uiRSeqNum (SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
-    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_usViaHostPort (SIP_ZERO),
-    m_pszMethod (SIP_NULL), m_uiCseqNum (SIP_ZERO), m_pobjRequestUri(SIP_NULL),
+    :m_nRSeqNum (SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
+    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_nViaHostPort (SIP_ZERO),
+    m_pszMethod (SIP_NULL), m_nCseqNum (SIP_ZERO), m_pRequestUri(SIP_NULL),
     m_pszToTag(SIP_NULL), m_pszFromTag(SIP_NULL), m_pszCallId (SIP_NULL),
-    m_usRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
+    m_nRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
     m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
 }
 
-SipTxnKey::SipTxnKey(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
-    :m_uiRSeqNum (SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
-    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_usViaHostPort (SIP_ZERO),
-    m_pszMethod (SIP_NULL), m_uiCseqNum (SIP_ZERO), m_pobjRequestUri(SIP_NULL),
+SipTxnKey::SipTxnKey(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
+    : m_nRSeqNum (SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
+    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_nViaHostPort (SIP_ZERO),
+    m_pszMethod (SIP_NULL), m_nCseqNum (SIP_ZERO), m_pRequestUri(SIP_NULL),
     m_pszToTag(SIP_NULL), m_pszFromTag(SIP_NULL), m_pszCallId (SIP_NULL),
-    m_usRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
+    m_nRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
     m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
-    Init(pobjTxnKey, pusError);
+    Init(pTxnKey, pnError);
 }
 
-SipTxnKey::SipTxnKey(SipMessage *pobjSipMsg, SIP_UINT16 *pusError)
-    :m_uiRSeqNum(SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
-    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_usViaHostPort (SIP_ZERO),
-    m_pszMethod (SIP_NULL), m_uiCseqNum (SIP_ZERO), m_pobjRequestUri(SIP_NULL),
+SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError)
+    : m_nRSeqNum(SIP_ZERO), m_eMsgType(SipMessage::TYPE_INVALID),
+    m_pszViaBranchParam(SIP_NULL), m_pszViaHost (SIP_NULL), m_nViaHostPort (SIP_ZERO),
+    m_pszMethod (SIP_NULL), m_nCseqNum (SIP_ZERO), m_pRequestUri(SIP_NULL),
     m_pszToTag(SIP_NULL), m_pszFromTag(SIP_NULL), m_pszCallId (SIP_NULL),
-    m_usRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
+    m_nRespCode (SIP_ZERO), m_eTxnType(SipTxn::INVALID_TXN),
     m_nRules(RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH)
 {
-    m_eMsgType = pobjSipMsg->GetMsgType();
+    m_eMsgType = pSipMsg->GetMsgType();
 
     if (m_eMsgType == SipMessage::TYPE_INVALID)
     {
-        *pusError = EMSGERR_INVALIDMSGTYPE;
+        *pnError = EMSGERR_INVALIDMSGTYPE;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey Constructor: Invalid Txn\n",SIP_ZERO,SIP_ZERO);
+                "SipTxnKey Constructor: Invalid Txn\n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
     /* Fetch Branch : Branch can be null */
-    SipViaHeader *pobjViaHdr = (SipViaHeader*)pobjSipMsg->GetHdrObj(SipHeaderBase::VIA);
-    if (pobjViaHdr == SIP_NULL)
+    SipViaHeader* pViaHdr = (SipViaHeader*)pSipMsg->GetHdrObj(SipHeaderBase::VIA);
+    if (pViaHdr == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey Constructor: ViaHdr is NULL Txn\n",SIP_ZERO,SIP_ZERO);
+                "SipTxnKey Constructor: ViaHdr is NULL Txn\n", SIP_ZERO, SIP_ZERO);
         return;
     }
-    m_pszViaBranchParam = const_cast<SIP_CHAR*>(pobjViaHdr->GetBranch());
+    m_pszViaBranchParam = const_cast<SIP_CHAR*>(pViaHdr->GetBranch());
 
     /* Fetch Host : Host cannot be null */
-    m_pszViaHost = SipPf_Strdup(pobjViaHdr->GetHost());
+    m_pszViaHost = SipPf_Strdup(pViaHdr->GetHost());
 
     if (m_pszViaHost == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey Constructor: No m_pszViaHost \n",SIP_ZERO,SIP_ZERO);
+                "SipTxnKey Constructor: No m_pszViaHost \n", SIP_ZERO, SIP_ZERO);
         return;
     }
 
     /* Fetch Port : Port cannot be 0 */
-    m_usViaHostPort = pobjViaHdr->GetPort();
-    pobjViaHdr->SipDelete();
+    m_nViaHostPort = pViaHdr->GetPort();
+    pViaHdr->SipDelete();
 
     /* Fetch based on Message Type */
     if (m_eMsgType == SipMessage::REQ_TYPE)
     {
-        SipAddrSpec *pobjAddrSpec = SIP_NULL;
+        SipAddrSpec* pAddrSpec = SIP_NULL;
         /* Fetch Request URI */
-        SipRequestLine *pobjReqLine = pobjSipMsg->GetReqLine();
-        if (pobjReqLine == SIP_NULL)
+        SipRequestLine* pReqLine = pSipMsg->GetReqLine();
+        if (pReqLine == SIP_NULL)
         {
-            *pusError = EMSGERR_REQLINEMISSING;
+            *pnError = EMSGERR_REQLINEMISSING;
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "SipTxnKey::SipTxnKey(pobjTxnKey): EMSGERR_REQLINEMISSING",
-                    SIP_ZERO,SIP_ZERO);
+                    "SipTxnKey::SipTxnKey(pTxnKey): EMSGERR_REQLINEMISSING",
+                    SIP_ZERO, SIP_ZERO);
             return;
         }
-        pobjAddrSpec = pobjReqLine->GetReqUri();
-        pobjReqLine->SipDelete();
+        pAddrSpec = pReqLine->GetReqUri();
+        pReqLine->SipDelete();
 
-        m_pobjRequestUri = new SipAddrSpec(*pobjAddrSpec);
-        pobjAddrSpec->SipDelete();
+        m_pRequestUri = new SipAddrSpec(*pAddrSpec);
+        pAddrSpec->SipDelete();
 
-        if (m_pobjRequestUri == SIP_NULL)
+        if (m_pRequestUri == SIP_NULL)
         {
-            *pusError = E_ERR_PF_MALLOCFAILED;
+            *pnError = E_ERR_PF_MALLOCFAILED;
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "SipTxnKey::SipTxnKey(pobjTxnKey): Memory Allocation Failed",
-                    SIP_ZERO,SIP_ZERO);
+                    "SipTxnKey::SipTxnKey(pTxnKey): Memory Allocation Failed",
+                    SIP_ZERO, SIP_ZERO);
             return;
         }
 
         /* Fetch Method */
-        m_pszMethod = SipPf_Strdup(pobjReqLine->GetMethod());
+        m_pszMethod = SipPf_Strdup(pReqLine->GetMethod());
 
         /* Fetch CSeq Num */
-        SipCSeqHeader *pobjCseqHdr = (SipCSeqHeader *)pobjSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
-        if (pobjCseqHdr != SIP_NULL)
+        SipCSeqHeader* pCseqHdr = (SipCSeqHeader *)pSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+        if (pCseqHdr != SIP_NULL)
         {
-            m_uiCseqNum = pobjCseqHdr->GetCSeq();
-            pobjCseqHdr->SipDelete();
+            m_nCseqNum = pCseqHdr->GetCSeq();
+            pCseqHdr->SipDelete();
         }
     }
     else
     {
         /* Fetch Method */
-        SipCSeqHeader *pobjCseqHdr = (SipCSeqHeader *)pobjSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
-        if (pobjCseqHdr != SIP_NULL)
+        SipCSeqHeader* pCseqHdr = (SipCSeqHeader *)pSipMsg->GetHdrObj(SipHeaderBase::CSEQ);
+        if (pCseqHdr != SIP_NULL)
         {
-            m_pszMethod = SipPf_Strdup(pobjCseqHdr->GetMethod());
+            m_pszMethod = SipPf_Strdup(pCseqHdr->GetMethod());
 
             /* Fetch CSeq Num */
-            m_uiCseqNum = pobjCseqHdr->GetCSeq();
-            pobjCseqHdr->SipDelete();
+            m_nCseqNum = pCseqHdr->GetCSeq();
+            pCseqHdr->SipDelete();
         }
-        m_usRespCode = pobjSipMsg->GetStatusCode();
+        m_nRespCode = pSipMsg->GetStatusCode();
     }
 
     /* Fetch To-Tag */
-    SipToHeader *pobjToHdr = (SipToHeader *)pobjSipMsg->GetHdrObj(SipHeaderBase::TO);
-    if (pobjToHdr == SIP_NULL)
+    SipToHeader* pToHdr = (SipToHeader *)pSipMsg->GetHdrObj(SipHeaderBase::TO);
+    if (pToHdr == SIP_NULL)
     {
-        *pusError = EMSGERR_TOMISSING;
+        *pnError = EMSGERR_TOMISSING;
         return;
     }
-    m_pszToTag = pobjToHdr->GetTag();
+    m_pszToTag = pToHdr->GetTag();
 
-    pobjToHdr->SipDelete();
+    pToHdr->SipDelete();
 
     /* Fetch From-Tag */
-    SipFromHeader *pobjFromHdr = (SipFromHeader*)pobjSipMsg->GetHdrObj(SipHeaderBase::FROM);
-    if (pobjFromHdr == SIP_NULL)
+    SipFromHeader* pFromHdr = (SipFromHeader*)pSipMsg->GetHdrObj(SipHeaderBase::FROM);
+    if (pFromHdr == SIP_NULL)
     {
-        *pusError = EMSGERR_FROMMISSING;
+        *pnError = EMSGERR_FROMMISSING;
         return;
     }
-    m_pszFromTag = pobjFromHdr->GetTag();
+    m_pszFromTag = pFromHdr->GetTag();
 
-    pobjFromHdr->SipDelete();
+    pFromHdr->SipDelete();
 
     /* Fetch Call-ID */
-    SipHeaderBase *pobjCallHdr = pobjSipMsg->GetHdrObj(SipHeaderBase::CALL_ID);
-    if (pobjCallHdr != SIP_NULL)
+    SipHeaderBase* pCallHdr = pSipMsg->GetHdrObj(SipHeaderBase::CALL_ID);
+    if (pCallHdr != SIP_NULL)
     {
-        m_pszCallId = SipPf_Strdup(pobjCallHdr->GetValue());
-        pobjCallHdr->SipDelete();
+        m_pszCallId = SipPf_Strdup(pCallHdr->GetValue());
+        pCallHdr->SipDelete();
     }
 
-    SipRSeqHeader *pobjRSeqhdr = (SipRSeqHeader *)pobjSipMsg->GetHdrObj(SipHeaderBase::RSEQ);
-    if (pobjRSeqhdr != SIP_NULL)
+    SipRSeqHeader* pRSeqhdr = (SipRSeqHeader *)pSipMsg->GetHdrObj(SipHeaderBase::RSEQ);
+    if (pRSeqhdr != SIP_NULL)
     {
-        SetRSeq(pobjRSeqhdr->GetRSeqValue());
-        pobjRSeqhdr->SipDelete();
+        SetRSeq(pRSeqhdr->GetRSeqValue());
+        pRSeqhdr->SipDelete();
     }
 }
 
@@ -180,52 +180,46 @@ SipTxnKey::~SipTxnKey()
     Clear();
 }
 
-SIP_VOID SipTxnKey::Init(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
+SIP_VOID SipTxnKey::Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError)
 {
-    if (pobjTxnKey == SIP_NULL)
+    if (pTxnKey == SIP_NULL)
     {
         return;
     }
 
     Clear();
 
-    m_uiRSeqNum = pobjTxnKey->m_uiRSeqNum;
-    m_eMsgType = pobjTxnKey->m_eMsgType;
-    m_usRespCode = pobjTxnKey->m_usRespCode;
-    m_eTxnType = pobjTxnKey->m_eTxnType;
-    m_nRules = pobjTxnKey->m_nRules;
+    m_nRSeqNum = pTxnKey->m_nRSeqNum;
+    m_eMsgType = pTxnKey->m_eMsgType;
+    m_nRespCode = pTxnKey->m_nRespCode;
+    m_eTxnType = pTxnKey->m_eTxnType;
+    m_nRules = pTxnKey->m_nRules;
 
-    m_pszViaBranchParam = (SIP_CHAR *)SipPf_Strdup(
-            (SIP_CHAR *)pobjTxnKey->m_pszViaBranchParam);
+    m_pszViaBranchParam = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pTxnKey->m_pszViaBranchParam);
     if (m_pszViaBranchParam == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return;
     }
-    m_pszViaHost = (SIP_CHAR *)SipPf_Strdup(
-            (SIP_CHAR *)pobjTxnKey->m_pszViaHost);
+    m_pszViaHost = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pTxnKey->m_pszViaHost);
     if (m_pszViaHost == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         delete[] m_pszViaBranchParam;
         m_pszViaBranchParam = SIP_NULL;
         return;
     }
-    m_usViaHostPort = pobjTxnKey->m_usViaHostPort;
-    m_pszMethod = (SIP_CHAR *)SipPf_Strdup(
-            (SIP_CHAR *)pobjTxnKey->m_pszMethod);
+    m_nViaHostPort = pTxnKey->m_nViaHostPort;
+    m_pszMethod = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pTxnKey->m_pszMethod);
     if (m_pszMethod == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         delete[] m_pszViaHost;
         m_pszViaHost = SIP_NULL;
         delete[] m_pszViaBranchParam;
@@ -233,14 +227,13 @@ SIP_VOID SipTxnKey::Init(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
         return;
     }
 
-    m_uiCseqNum = pobjTxnKey->m_uiCseqNum;
-    m_pobjRequestUri = new SipAddrSpec(*(pobjTxnKey->m_pobjRequestUri));
-    if (m_pobjRequestUri == SIP_NULL)
+    m_nCseqNum = pTxnKey->m_nCseqNum;
+    m_pRequestUri = new SipAddrSpec(*(pTxnKey->m_pRequestUri));
+    if (m_pRequestUri == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         delete[] m_pszMethod;
         m_pszMethod = SIP_NULL;
         delete[] m_pszViaHost;
@@ -250,35 +243,33 @@ SIP_VOID SipTxnKey::Init(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
         return;
     }
 
-    if (pobjTxnKey->m_pszToTag != SIP_NULL)
+    if (pTxnKey->m_pszToTag != SIP_NULL)
     {
-        m_pszToTag = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pobjTxnKey->m_pszToTag);
+        m_pszToTag = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pTxnKey->m_pszToTag);
         if (m_pszToTag == SIP_NULL)
         {
-            *pusError = E_ERR_PF_MALLOCFAILED;
+            *pnError = E_ERR_PF_MALLOCFAILED;
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
                     "SipTxnKey::Init: Memory Allocation Failed",
-                    SIP_ZERO,SIP_ZERO);
+                    SIP_ZERO, SIP_ZERO);
             delete[] m_pszMethod;
             m_pszMethod = SIP_NULL;
             delete[] m_pszViaHost;
             m_pszViaHost = SIP_NULL;
             delete[] m_pszViaBranchParam;
             m_pszViaBranchParam = SIP_NULL;
-            delete m_pobjRequestUri;
-            m_pobjRequestUri = SIP_NULL;
+            delete m_pRequestUri;
+            m_pRequestUri = SIP_NULL;
             return;
         }
     }
 
-    m_pszFromTag = (SIP_CHAR *)SipPf_Strdup(
-            (SIP_CHAR *)pobjTxnKey->m_pszFromTag);
+    m_pszFromTag = (SIP_CHAR *)SipPf_Strdup((SIP_CHAR *)pTxnKey->m_pszFromTag);
     if (m_pszFromTag == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         delete[] m_pszToTag;
         m_pszToTag = SIP_NULL;
         delete[] m_pszMethod;
@@ -287,18 +278,17 @@ SIP_VOID SipTxnKey::Init(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
         m_pszViaHost = SIP_NULL;
         delete[] m_pszViaBranchParam;
         m_pszViaBranchParam = SIP_NULL;
-        delete m_pobjRequestUri;
-        m_pobjRequestUri = SIP_NULL;
+        delete m_pRequestUri;
+        m_pRequestUri = SIP_NULL;
         return;
     }
     m_pszCallId = (SIP_CHAR *)SipPf_Strdup(
-            (SIP_CHAR *)pobjTxnKey->m_pszCallId);
+            (SIP_CHAR *)pTxnKey->m_pszCallId);
     if (m_pszCallId == SIP_NULL)
     {
-        *pusError = E_ERR_PF_MALLOCFAILED;
+        *pnError = E_ERR_PF_MALLOCFAILED;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnKey::Init: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                "SipTxnKey::Init: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         delete[] m_pszFromTag;
         m_pszFromTag = SIP_NULL;
         delete[] m_pszToTag;
@@ -309,13 +299,13 @@ SIP_VOID SipTxnKey::Init(SipTxnKey *pobjTxnKey, SIP_UINT16 *pusError)
         m_pszViaHost = SIP_NULL;
         delete[] m_pszViaBranchParam;
         m_pszViaBranchParam = SIP_NULL;
-        delete m_pobjRequestUri;
-        m_pobjRequestUri = SIP_NULL;
+        delete m_pRequestUri;
+        m_pRequestUri = SIP_NULL;
         return;
     }
 }
 
-SIP_VOID SipTxnKey::SetCallId(const SIP_CHAR *pszCallId)
+SIP_VOID SipTxnKey::SetCallId(const SIP_CHAR* pszCallId)
 {
     if (m_pszCallId != SIP_NULL)
     {
@@ -325,57 +315,57 @@ SIP_VOID SipTxnKey::SetCallId(const SIP_CHAR *pszCallId)
     m_pszCallId = (SIP_CHAR *)SipPf_Strdup(pszCallId);
 }
 
-SIP_VOID SipTxnKey::SetFromTag(const SIP_CHAR *pszFromTag)
+SIP_VOID SipTxnKey::SetFromTag(const SIP_CHAR* pszFromTag)
 {
     if (m_pszFromTag != SIP_NULL)
     {
         delete[] m_pszFromTag;
     }
 
-    m_pszFromTag = (SIP_CHAR *)SipPf_Strdup(pszFromTag);
+    m_pszFromTag = (SIP_CHAR*)SipPf_Strdup(pszFromTag);
 }
 
-SIP_VOID SipTxnKey::SetMethod(const SIP_CHAR *pszMethod)
+SIP_VOID SipTxnKey::SetMethod(const SIP_CHAR* pszMethod)
 {
     if (m_pszMethod != SIP_NULL)
     {
         delete[] m_pszMethod;
     }
 
-    m_pszMethod = (SIP_CHAR *)SipPf_Strdup(pszMethod);
+    m_pszMethod = (SIP_CHAR*)SipPf_Strdup(pszMethod);
 }
 
-SIP_VOID SipTxnKey::SetRequestUri(SipAddrSpec *pobjRequestUri)
+SIP_VOID SipTxnKey::SetRequestUri(SipAddrSpec* pRequestUri)
 {
-    if (m_pobjRequestUri != SIP_NULL)
+    if (m_pRequestUri != SIP_NULL)
     {
-        m_pobjRequestUri->SipDelete();
+        m_pRequestUri->SipDelete();
     }
 
-    m_pobjRequestUri = pobjRequestUri;
+    m_pRequestUri = pRequestUri;
 }
 
-SIP_VOID SipTxnKey::SetToTag(const SIP_CHAR *pszToTag)
+SIP_VOID SipTxnKey::SetToTag(const SIP_CHAR* pszToTag)
 {
     if (m_pszToTag != SIP_NULL)
     {
         delete[] m_pszToTag;
     }
 
-    m_pszToTag = (SIP_CHAR *)SipPf_Strdup(pszToTag);
+    m_pszToTag = (SIP_CHAR*)SipPf_Strdup(pszToTag);
 }
 
-SIP_VOID SipTxnKey::SetViaBranchParam(const SIP_CHAR *pszViaBranchParam)
+SIP_VOID SipTxnKey::SetViaBranchParam(const SIP_CHAR* pszViaBranchParam)
 {
     if (m_pszViaBranchParam != SIP_NULL)
     {
         delete[] m_pszViaBranchParam;
     }
 
-    m_pszViaBranchParam = (SIP_CHAR *)SipPf_Strdup(pszViaBranchParam);
+    m_pszViaBranchParam = (SIP_CHAR*)SipPf_Strdup(pszViaBranchParam);
 }
 
-SIP_VOID SipTxnKey::SetViaHost(const SIP_CHAR *pszViaHost)
+SIP_VOID SipTxnKey::SetViaHost(const SIP_CHAR* pszViaHost)
 {
     if (m_pszViaHost != SIP_NULL)
     {
@@ -396,8 +386,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     if (pGeneratedKey->HasRule(RULE_COMPARE_VIA_BRANCH) == SIP_TRUE)
     {
-        if (SipPf_Stricmp(m_pszViaBranchParam,
-                pGeneratedKey->m_pszViaBranchParam) != SIP_EQUALS)
+        if (SipPf_Stricmp(m_pszViaBranchParam, pGeneratedKey->m_pszViaBranchParam) != SIP_EQUALS)
         {
             SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                     "txn-comparison: not-match >> Via branch", SIP_ZERO, SIP_ZERO);
@@ -405,11 +394,11 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         }
     }
 
-    if (m_uiCseqNum != pGeneratedKey->m_uiCseqNum)
+    if (m_nCseqNum != pGeneratedKey->m_nCseqNum)
     {
         SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                 "txn-comparison: not-match >> CSeq (s:%d, g:%d)",
-                m_uiCseqNum, pGeneratedKey->m_uiCseqNum);
+                m_nCseqNum, pGeneratedKey->m_nCseqNum);
         return SIP_NOT_MATCH;
     }
 
@@ -437,7 +426,7 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
         if (pGeneratedKey->m_eTxnType == SipTxn::INV_SER_TXN
                 && m_eTxnType == SipTxn::INV_SER_TXN)
         {
-            if (SIP_SUCCESSFUL_RESP(m_usRespCode))
+            if (SIP_SUCCESSFUL_RESP(m_nRespCode))
             {
                 bACKFor2xxSent = SIP_TRUE;
             }
@@ -477,13 +466,13 @@ SIP_INT32 SipTxnKey::CompareKeys(SipTxnKey* pGeneratedKey)
 
     if (pGeneratedKey->HasRule(RULE_COMPARE_RSEQ) == SIP_TRUE)
     {
-        if (m_uiRSeqNum != SIP_ZERO && pGeneratedKey->m_uiRSeqNum != SIP_ZERO)
+        if (m_nRSeqNum != SIP_ZERO && pGeneratedKey->m_nRSeqNum != SIP_ZERO)
         {
-            if (m_uiRSeqNum != pGeneratedKey->m_uiRSeqNum)
+            if (m_nRSeqNum != pGeneratedKey->m_nRSeqNum)
             {
                 SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                         "txn-comparison: not-match >> RSeq (s:%d, g:%d)",
-                        m_uiRSeqNum, pGeneratedKey->m_uiRSeqNum);
+                        m_nRSeqNum, pGeneratedKey->m_nRSeqNum);
                 return SIP_NOT_MATCH;
             }
         }
@@ -544,13 +533,13 @@ SIP_INT32 SipTxnKey::CompareKeysForRPR(SipTxnKey* pGeneratedKey)
 
     if (pGeneratedKey->HasRule(RULE_COMPARE_RSEQ) == SIP_TRUE)
     {
-        if (m_uiRSeqNum != SIP_ZERO && pGeneratedKey->m_uiRSeqNum != SIP_ZERO)
+        if (m_nRSeqNum != SIP_ZERO && pGeneratedKey->m_nRSeqNum != SIP_ZERO)
         {
-            if (m_uiRSeqNum != pGeneratedKey->m_uiRSeqNum)
+            if (m_nRSeqNum != pGeneratedKey->m_nRSeqNum)
             {
                 SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
                         "rpr-txn-comparison: not-match >> RSeq (s:%d, g:%d)",
-                        m_uiRSeqNum, pGeneratedKey->m_uiRSeqNum);
+                        m_nRSeqNum, pGeneratedKey->m_nRSeqNum);
                 return SIP_NOT_MATCH;
             }
         }
@@ -576,10 +565,10 @@ SIP_VOID SipTxnKey::Clear()
         delete[] m_pszMethod;
         m_pszMethod = SIP_NULL;
     }
-    if (m_pobjRequestUri != SIP_NULL)
+    if (m_pRequestUri != SIP_NULL)
     {
-        m_pobjRequestUri->SipDelete();
-        m_pobjRequestUri = SIP_NULL;
+        m_pRequestUri->SipDelete();
+        m_pRequestUri = SIP_NULL;
     }
     if (m_pszToTag != SIP_NULL)
     {
@@ -597,11 +586,11 @@ SIP_VOID SipTxnKey::Clear()
         m_pszCallId = SIP_NULL;
     }
 
-    m_uiRSeqNum = SIP_ZERO;
+    m_nRSeqNum = SIP_ZERO;
     m_eMsgType = SipMessage::TYPE_INVALID;
-    m_usViaHostPort = SIP_ZERO;
-    m_uiCseqNum = SIP_ZERO;
-    m_usRespCode = SIP_ZERO;
+    m_nViaHostPort = SIP_ZERO;
+    m_nCseqNum = SIP_ZERO;
+    m_nRespCode = SIP_ZERO;
     m_eTxnType = SipTxn::INVALID_TXN;
     m_nRules = RULE_COMPARE_TO_TAG | RULE_COMPARE_VIA_BRANCH;
 }

@@ -33,7 +33,7 @@
 /****************************************************************************
   Global Variables
  *****************************************************************************/
-SipTrace    *gpObjTrace = SIP_NULL;
+SipTrace    *gpTrace = SIP_NULL;
 
 /****************************************************************************
   Function Implementation [STARTS]
@@ -55,9 +55,9 @@ SipTrace    *gpObjTrace = SIP_NULL;
  ******************************************************************************/
 SipTrace::SipTrace()
 {
-    for (SIP_UINT16 usIndex = SIP_ZERO; usIndex < ESIPTRACE_MODEND; usIndex++)
+    for (SIP_UINT16 nIndex = SIP_ZERO; nIndex < ESIPTRACE_MODEND; nIndex++)
     {
-        m_ausModTrace[usIndex] =
+        m_ausModTrace[nIndex] =
             (ESIPTRACE_TYPEMESSAGE | ESIPTRACE_TYPENORMAL | ESIPTRACE_TYPEALL);
     }
 
@@ -98,18 +98,14 @@ SipTrace::~SipTrace()
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_BOOL SipTrace::EnableTrace
-(
- SipEn_TraceModules    eModule,
- SIP_UINT32        ulTraceType
- )
+SIP_BOOL SipTrace::EnableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType)
 {
     if (eModule >= ESIPTRACE_MODEND)
     {
         return SIP_FALSE;
     }
 
-    m_ausModTrace[eModule] = ulTraceType;
+    m_ausModTrace[eModule] = nTraceType;
     return SIP_TRUE;
 }
 
@@ -123,21 +119,17 @@ SipTrace::~SipTrace()
  successful
  *
  * Argument      :
- *    [IN]        : ulTraceType[IN] - Type of trace to be enabled.
+ *    [IN]        : nTraceType[IN] - Type of trace to be enabled.
  pusError[OUT]    - Error if any
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_BOOL SipTrace::EnableTrace
-(
- SIP_UINT32        ulTraceType
- )
+SIP_BOOL SipTrace::EnableTrace(SIP_UINT32 nTraceType)
 {
-
-    for (SIP_UINT16 usIndex = SIP_ZERO; usIndex < ESIPTRACE_MODEND; usIndex++)
+    for (SIP_UINT16 nIndex = SIP_ZERO; nIndex < ESIPTRACE_MODEND; nIndex++)
     {
-        m_ausModTrace[usIndex] = ulTraceType;
+        m_ausModTrace[nIndex] = nTraceType;
     }
     return SIP_TRUE;
 }
@@ -153,24 +145,20 @@ SipTrace::~SipTrace()
  *
  * Argument      :
  *    [IN]        : eModule[IN]   - Module
- *    [IN]        : ulTraceType[IN] - Type of trace to be disabled.
+ *    [IN]        : nTraceType[IN] - Type of trace to be disabled.
  pusError[OUT]    - Error if any
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_BOOL SipTrace::DisableTrace
-(
- SipEn_TraceModules    eModule,
- SIP_UINT32        ulTraceType
- )
+SIP_BOOL SipTrace::DisableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType)
 {
     if (eModule >= ESIPTRACE_MODEND)
     {
         return SIP_FALSE;
     }
 
-    m_ausModTrace[eModule] = m_ausModTrace[eModule] & ~ulTraceType;
+    m_ausModTrace[eModule] = m_ausModTrace[eModule] & ~nTraceType;
     return SIP_TRUE;
 }
 
@@ -184,21 +172,17 @@ SipTrace::~SipTrace()
  successful
  *
  * Argument      :
- *    [IN]        : ulTraceType[IN] - Type of trace to be enabled.
+ *    [IN]        : nTraceType[IN] - Type of trace to be enabled.
  pusError[OUT]    - Error if any
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_BOOL SipTrace::DisableTrace
-(
- SIP_UINT32        ulTraceType
- )
+SIP_BOOL SipTrace::DisableTrace(SIP_UINT32 nTraceType)
 {
-
-    for (SIP_UINT16 usIndex = SIP_ZERO; usIndex < ESIPTRACE_MODEND; usIndex++)
+    for (SIP_UINT16 nIndex = SIP_ZERO; nIndex < ESIPTRACE_MODEND; nIndex++)
     {
-        m_ausModTrace[usIndex] = m_ausModTrace[usIndex] & ~ulTraceType;
+        m_ausModTrace[nIndex] = m_ausModTrace[nIndex] & ~nTraceType;
     }
     return SIP_TRUE;
 }
@@ -213,16 +197,12 @@ SipTrace::~SipTrace()
  *
  * Argument      :
  *    [IN]        : eModule[IN]   - Module
- *    [IN]        : ulTraceType[IN] - Type of trace to.
+ *    [IN]        : nTraceType[IN] - Type of trace to.
  *
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    SIP_BOOL SipTrace::IsTraceEnable
-(
- SipEn_TraceModules     eModule,
- SipEn_TraceTypes        eTraceType
- )
+SIP_BOOL SipTrace::IsTraceEnable(SipEn_TraceModules eModule, SipEn_TraceTypes eTraceType)
 {
     if (eModule >= ESIPTRACE_MODEND)
     {
@@ -257,39 +237,35 @@ SipTrace::~SipTrace()
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-    void SIP_TRACE_LOG
-(
- SIP_UINT32       nCategory,
- SIP_CHAR             *pszFilename,
- SIP_INT32             iLine,
- SIP_CHAR             *pcFormat,...)
+void SIP_TRACE_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
+        SIP_CHAR* pszFormat,...)
 {
-    SipUtil* pObjUtil = SipUtil_GetInstance();
-    SipTrace* pObjTrace = SipTrace_GetInstance();
+    SipUtil* pUtil = SipUtil_GetInstance();
+    SipTrace* pTrace = SipTrace_GetInstance();
 
-    if ((pObjTrace == SIP_NULL) || (pObjUtil == SIP_NULL))
+    if ((pTrace == SIP_NULL) || (pUtil == SIP_NULL))
     {
         return;
     }
 
     va_list args;
-    va_start(args, pcFormat);
-    SIP_CHAR cTemp[SIP_TRACE_MAX_SIZE + 1]= {SIP_ZERO};
-    vsnprintf(cTemp, SIP_TRACE_MAX_SIZE, pcFormat, args);
+    va_start(args, pszFormat);
+    SIP_CHAR szTemp[SIP_TRACE_MAX_SIZE + 1]= {SIP_ZERO};
+    vsnprintf(szTemp, SIP_TRACE_MAX_SIZE, pszFormat, args);
     va_end(args);
 
-    SIP_CHAR* pcFileName = SipPf_Strdup(pszFilename);
-    const SIP_CHAR* pcTemp = (pcFileName != SIP_NULL) ?\
-            SipPf_StripFileName(pcFileName) : "xxx";
+    SIP_CHAR* pszTempFilename = SipPf_Strdup(pszFilename);
+    const SIP_CHAR* pTemp = (pszTempFilename != SIP_NULL) ?\
+            SipPf_StripFileName(pszTempFilename) : "xxx";
 
-    SIP_CHAR cFrmtString[SIP_TRACE_MAX_SIZE + 1] = {SIP_ZERO};
-    SipPf_Snprintf(cFrmtString, SIP_TRACE_MAX_SIZE, "[%s:%d] %s", pcTemp, iLine, cTemp);
+    SIP_CHAR szFrmtString[SIP_TRACE_MAX_SIZE + 1] = {SIP_ZERO};
+    SipPf_Snprintf(szFrmtString, SIP_TRACE_MAX_SIZE, "[%s:%d] %s", pTemp, nLine, szTemp);
 
-    pObjUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, iLine, cFrmtString);
+    pUtil->GetLogger()->DumpLog(nCategory, SIP_NULL, nLine, szFrmtString);
 
-    if (pcFileName != SIP_NULL)
+    if (pszTempFilename != SIP_NULL)
     {
-        delete[] pcFileName;
+        delete[] pszTempFilename;
     }
 }
 
@@ -301,34 +277,34 @@ SipTrace::~SipTrace()
  *****************************************************************************/
 void SipTrace_Construct()
 {
-    SipTrace *pObj = gpObjTrace;
+    SipTrace* pTrace = gpTrace;
 
-    if (pObj)
+    if (pTrace)
     {
         return;
     }
 
-    pObj = new SipTrace();
-    gpObjTrace = pObj;
+    pTrace = new SipTrace();
+    gpTrace = pTrace;
 }
 
 void SipTrace_Destruct()
 {
-    SipTrace *pObj = gpObjTrace;
+    SipTrace* pTrace = gpTrace;
 
-    if (pObj == SIP_NULL)
+    if (pTrace == SIP_NULL)
     {
         return;
     }
 
-    delete pObj;
-    gpObjTrace = SIP_NULL;
+    delete pTrace;
+    gpTrace = SIP_NULL;
 }
 
 SipTrace* SipTrace_GetInstance()
 {
-    SipTrace *pObj = gpObjTrace;
-    return pObj;
+    SipTrace* pTrace = gpTrace;
+    return pTrace;
 }
 
 /****************************************************************************

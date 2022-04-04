@@ -64,7 +64,7 @@ SipToHeader::SipToHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipToHeader::SipToHeader(const SipToHeader &objHeader)
+SipToHeader::SipToHeader(const SipToHeader& objHeader)
     : SipNameAddrHeader(objHeader)
 {
 }
@@ -92,13 +92,13 @@ SipToHeader::~SipToHeader()
  *****************************************************************************/
 SIP_CHAR* SipToHeader::GetTag()
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
         return SIP_NULL;
     }
-    SipParameterList *pParameterList = pParameters->GetParameterList();
+    SipParameterList* pParameterList = pParameters->GetParameterList();
 
     if (pParameterList == SIP_NULL)
     {
@@ -116,12 +116,9 @@ SIP_CHAR* SipToHeader::GetTag()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipToHeader::SetTag
-(
- SIP_CHAR *pucToTag
- )
+SIP_BOOL SipToHeader::SetTag(SIP_CHAR* pszToTag)
 {
-    SipParameters *pParameters = GetParameters();
+    SipParameters* pParameters = GetParameters();
 
     if (pParameters == SIP_NULL)
     {
@@ -133,15 +130,15 @@ SIP_BOOL SipToHeader::SetTag
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
                 "SetTag: Memory Allocation Failed",
-                SIP_ZERO,SIP_ZERO);
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_BOOL bStatus = pParameters->AddParam("tag", pucToTag);
+    SIP_BOOL bStatus = pParameters->AddParam("tag", pszToTag);
     if (bStatus == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SetTag: Set Tag failed",SIP_ZERO,SIP_ZERO);
+                "SetTag: Set Tag failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;

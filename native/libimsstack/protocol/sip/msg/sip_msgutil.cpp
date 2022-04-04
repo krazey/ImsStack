@@ -28,7 +28,7 @@
 
 SIPHdrAccess* SIPHdrAccess::s_pInstance = SIP_NULL;
 
-SIP_CHAR    gaszSipHdr[][SIP_MAX_HDR_LEN] =
+SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] =
 {
     "Allow",//0
     "Allow-Events",
@@ -159,7 +159,7 @@ SIP_CHAR    gaszSipHdr[][SIP_MAX_HDR_LEN] =
     "UNKNOWN",  //115
 };
 
-const SIP_CHAR*    gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] =
+const SIP_CHAR* gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] =
 {
     "Content-Type",           /*CONTENT_TYPE*/
     "Content-Disposition",    /*CONTENT_DISPOSITION*/
@@ -169,7 +169,7 @@ const SIP_CHAR*    gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] =
 };
 
 
-const SIP_CHAR    gaszSipHdrCompact[21] = "abcdefijklmnorstuvxy";
+const SIP_CHAR gaszSipHdrCompact[21] = "abcdefijklmnorstuvxy";
 const SIP_INT16 gaszSipHdrCompactEnum[20] = {
     SipHeaderBase::ACCEPT_CONTACT,
     SipHeaderBase::REFERRED_BY,
@@ -195,7 +195,7 @@ const SIP_INT16 gaszSipHdrCompactEnum[20] = {
 
 
 
-SIPHdrAccess *gpObjHdrAccess = SIP_NULL;
+SIPHdrAccess *gpHdrAccess = SIP_NULL;
 
 /*****************************************************************************
  * Function name      : SetCharVar
@@ -206,22 +206,22 @@ SIPHdrAccess *gpObjHdrAccess = SIP_NULL;
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL SetCharVar(const SIP_CHAR *pcSource,SIP_CHAR* &cDestination)
+SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
 {
-    if (pcSource == SIP_NULL)
+    if (pszSource == SIP_NULL)
     {
         return SIP_FALSE;
     }
 
-    if (cDestination != SIP_NULL)
+    if (pszDestination != SIP_NULL)
     {
-        delete[] cDestination;
+        delete[] pszDestination;
     }
 
-    cDestination = SipPf_Strdup(pcSource);
-    if (cDestination == SIP_NULL)
+    pszDestination = SipPf_Strdup(pszSource);
+    if (pszDestination == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,"Malloc Failed",SIP_ZERO,SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Malloc Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;
@@ -237,15 +237,15 @@ SIP_BOOL SetCharVar(const SIP_CHAR *pcSource,SIP_CHAR* &cDestination)
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL HasSpace(const SIP_CHAR* pcValue)
+SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
 {
-    while (*pcValue)
+    while (*pszValue)
     {
-        if (*pcValue == ' ')
+        if (*pszValue == ' ')
         {
             return SIP_TRUE;
         }
-        pcValue++;
+        pszValue++;
     }
     return SIP_FALSE;
 }
@@ -259,9 +259,9 @@ SIP_BOOL HasSpace(const SIP_CHAR* pcValue)
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 sipGetMsgType(SIP_CHAR *pucStartPoint)
+SIP_INT32 sipGetMsgType(SIP_CHAR* pszStartPoint)
 {
-    return (SipPf_Strncmp(SIP_SIPVER, pucStartPoint, SIP_FOUR) == 0) ?
+    return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ?
         SipMessage::RESP_TYPE : SipMessage::REQ_TYPE;
 }
 
@@ -275,48 +275,43 @@ SIP_INT32 sipGetMsgType(SIP_CHAR *pucStartPoint)
  *
  * Side Effects          : none
  *****************************************************************************/
-    SIP_BOOL  sipFindTerminatingCRLF
-(
- SIP_CHAR        *pucStartPoint,
- SIP_CHAR        *pucEndPoint,
- SIP_CHAR        **pucLocation,
- SIP_BOOL        *pbHdrEnd
- )
+SIP_BOOL  sipFindTerminatingCRLF(SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint,
+        SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
 {
     /* To check two consecutive CRLF */
-    SIP_UINT32 uiStrlen = pucEndPoint - pucStartPoint;
-    if (uiStrlen < SIP_THREE)
+    SIP_UINT32 nStrlen = pEndPoint - pStartPoint;
+    if (nStrlen < SIP_THREE)
     {
         return SIP_FALSE;
     }
-    SIP_CHAR *pucPrevPoint2 = pucStartPoint;
-    SIP_CHAR *pucPrevPoint1 = pucStartPoint + SIP_ONE;
-    pucStartPoint = pucStartPoint + SIP_TWO;
+    SIP_CHAR* pPrevPoint2 = pStartPoint;
+    SIP_CHAR* pPrevPoint1 = pStartPoint + SIP_ONE;
+    pStartPoint = pStartPoint + SIP_TWO;
     /*Check for CRLF*/
-    SIP_CHAR *pucNextPoint = pucStartPoint + SIP_ONE;
+    SIP_CHAR* pNextPoint = pStartPoint + SIP_ONE;
 
-    while (pucNextPoint <= pucEndPoint)
+    while (pNextPoint <= pEndPoint)
     {
-        if (IS_CRLF(*pucPrevPoint2, *pucPrevPoint1) &&
-            (IS_WSP(*pucStartPoint) == SIP_FALSE))
+        if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) &&
+            (IS_WSP(*pStartPoint) == SIP_FALSE))
         {
-            *pucLocation = pucPrevPoint2 - SIP_ONE;
-            if (IS_CRLF(*pucStartPoint, *pucNextPoint))
+            *ppLocation = pPrevPoint2 - SIP_ONE;
+            if (IS_CRLF(*pStartPoint, *pNextPoint))
             {
-                *pbHdrEnd = SIP_TRUE;
+               *pbHdrEnd = SIP_TRUE;
             }
             return SIP_TRUE;
         }
-        pucPrevPoint2 = pucPrevPoint1;
-        pucPrevPoint1 = pucStartPoint;
-        pucStartPoint++;
-        pucNextPoint = pucStartPoint + SIP_ONE;
+        pPrevPoint2 = pPrevPoint1;
+        pPrevPoint1 = pStartPoint;
+        pStartPoint++;
+        pNextPoint = pStartPoint + SIP_ONE;
     }
     /*Check For one CRLF at Extream End*/
-    if (IS_CRLF(*pucPrevPoint2, *pucPrevPoint1) &&
-        (IS_WSP(*pucStartPoint) == SIP_FALSE))
+    if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) &&
+        (IS_WSP(*pStartPoint) == SIP_FALSE))
     {
-        *pucLocation = pucPrevPoint2 - SIP_ONE;
+        *ppLocation = pPrevPoint2 - SIP_ONE;
         return SIP_TRUE;
     }
     return SIP_FALSE;
@@ -332,52 +327,46 @@ SIP_INT32 sipGetMsgType(SIP_CHAR *pucStartPoint)
  *
  * Side Effects      : none
  *****************************************************************************/
-    SIP_BOOL sipFindActualPos
-(
- SIP_CHAR        *pucStartPt,
- SIP_CHAR        *pucEndPt,
- SIP_CHAR        **pucTempPre,
- SIP_CHAR        **pucTempNext,
- SIP_CHAR        ucDelimiter
- )
+SIP_BOOL sipFindActualPos(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempPre,
+        SIP_CHAR** ppTempNext, SIP_CHAR cDelimiter)
 {
-    SIP_BOOL      bDQuote = SIP_FALSE;
-    SIP_CHAR        *pucPrevPt = pucStartPt;
-    SIP_CHAR        *pucStartTemp = pucStartPt;
+    SIP_BOOL bDQuote = SIP_FALSE;
+    SIP_CHAR* pPrevPt = pStartPt;
+    SIP_CHAR* pStartTemp = pStartPt;
 
-    while (pucStartPt <= pucEndPt)
+    while (pStartPt <= pEndPt)
     {
         /*Preventing the case of Feature Prm and quoted text*/
-        if ((*pucStartPt == DQUOTE) && (*pucPrevPt != BACKSLASH))
+        if ((*pStartPt == DQUOTE) && (*pPrevPt != BACKSLASH))
         {
             bDQuote = (SIP_BOOL)!bDQuote;
         }
-        if (*pucStartPt == ucDelimiter)
+        if (*pStartPt == cDelimiter)
         {
             /*for the case of quoted string we have to
               prevent returning in case of " ," and " ;" */
             if (bDQuote == SIP_FALSE)
             {
-                *pucTempPre = pucStartPt - SIP_ONE;
-                *pucTempNext = pucStartPt + SIP_ONE;
+                *ppTempPre = pStartPt - SIP_ONE;
+                *ppTempNext = pStartPt + SIP_ONE;
 
                 /*remove the LWS from Back*/
-                if (ucDelimiter != RIGHT_ANGLE)
+                if (cDelimiter != RIGHT_ANGLE)
                 {
-                    *pucTempPre = sipSkipRwLWS(pucStartTemp, *pucTempPre);
+                    *ppTempPre = sipSkipRwLWS(pStartTemp, *ppTempPre);
                 }
                 /*remove the LWS from start*/
-                if (ucDelimiter != LEFT_ANGLE)
+                if (cDelimiter != LEFT_ANGLE)
                 {
-                    *pucTempNext = sipSkipFwLWS(*pucTempNext, pucEndPt);
+                    *ppTempNext = sipSkipFwLWS(*ppTempNext, pEndPt);
                 }
 
                 /*Remove the LWS form both the side to get the actual pos*/
                 return SIP_TRUE;
             }
         }
-        pucPrevPt = pucStartPt;
-        pucStartPt = pucStartPt + SIP_ONE;
+        pPrevPt = pStartPt;
+        pStartPt = pStartPt + SIP_ONE;
     }
     return SIP_FALSE;
 }
@@ -386,14 +375,11 @@ SIP_INT32 sipGetMsgType(SIP_CHAR *pucStartPoint)
  * Function name  : SipEnc_UpdateCurrPos
  * Description     :  This api will update the current position of the sip msg
  *****************************************************************************/
-SIP_VOID SipEnc_UpdateCurrPos
-(
- SIP_CHAR **ppucMsgBuffer //in -out param
- )
+SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
 {
-    while (**ppucMsgBuffer != '\0')
+    while (**ppMsgBuffer != '\0')
     {
-        (*ppucMsgBuffer)++;
+        (*ppMsgBuffer)++;
     }
 }
 
@@ -408,36 +394,37 @@ SIP_VOID SipEnc_UpdateCurrPos
  * Side Effects          : none
  *****************************************************************************/
 
-SIPHdrAccess :: SIPHdrAccess()
+SIPHdrAccess::SIPHdrAccess()
 {
-    for (SIP_INT32 usHdrLenIndex = SIP_ZERO; usHdrLenIndex < SIP_MAX_HDR_LEN; usHdrLenIndex++)
+    for (SIP_INT32 nHdrLenIndex = SIP_ZERO; nHdrLenIndex < SIP_MAX_HDR_LEN; nHdrLenIndex++)
     {
-        SIP_INT32 usNoOfHdr = SIP_ZERO;
-        objHdrLenRecord[usHdrLenIndex].NoOfEntries = SIP_ZERO;
-        objHdrLenRecord[usHdrLenIndex].Hdrlen = usHdrLenIndex;
+        SIP_INT32 nNoOfHdr = SIP_ZERO;
+        objHdrLenRecord[nHdrLenIndex].NoOfEntries = SIP_ZERO;
+        objHdrLenRecord[nHdrLenIndex].Hdrlen = nHdrLenIndex;
 
-        for (SIP_INT32 usHdrIndex = SIP_ZERO; usHdrIndex < SipHeaderBase::TYPE_END; usHdrIndex++)
+        for (SIP_INT32 nHdrIndex = SIP_ZERO; nHdrIndex < SipHeaderBase::TYPE_END; nHdrIndex++)
         {
-            if (SipPf_Strlen(gaszSipHdr[usHdrIndex]) == usHdrLenIndex)
+            if (SipPf_Strlen(gaszSipHdr[nHdrIndex]) == nHdrLenIndex)
             {
-                objHdrLenRecord[usHdrLenIndex].NoOfEntries++;
-                objHdrLenRecord[usHdrLenIndex].objHeaders[usNoOfHdr].HdrType = usHdrIndex;
+                objHdrLenRecord[nHdrLenIndex].NoOfEntries++;
+                objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
 
-                SipPf_Memset(objHdrLenRecord[usHdrLenIndex].objHeaders[usNoOfHdr].HdrName, 0,
+                SipPf_Memset(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
                     SIP_MAX_HDR_LEN);
 
-                SipPf_Strncpy(objHdrLenRecord[usHdrLenIndex].objHeaders[usNoOfHdr].HdrName,
-                        gaszSipHdr[usHdrIndex], SipPf_Strlen(gaszSipHdr[usHdrIndex]));
-                usNoOfHdr++;
+                SipPf_Strncpy(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
+                        gaszSipHdr[nHdrIndex], SipPf_Strlen(gaszSipHdr[nHdrIndex]));
+                nNoOfHdr++;
             }
         }
     }
 }
 
 
-SIPHdrAccess* SIPHdrAccess :: GetInstance()
+SIPHdrAccess* SIPHdrAccess::GetInstance()
 {
-     if (s_pInstance == SIP_NULL) {
+     if (s_pInstance == SIP_NULL)
+     {
          s_pInstance = new SIPHdrAccess();
      }
      return s_pInstance;
@@ -445,7 +432,8 @@ SIPHdrAccess* SIPHdrAccess :: GetInstance()
 
 void SIPHdrAccess::DestroyInstance()
 {
-    if(s_pInstance != SIP_NULL) {
+    if (s_pInstance != SIP_NULL)
+    {
         delete s_pInstance;
     }
     s_pInstance = SIP_NULL;
@@ -460,76 +448,86 @@ void SIPHdrAccess::DestroyInstance()
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_INT32 SIPHdrAccess :: GetHdrType(const SIP_CHAR *pRcvdHdrName)
+SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
 {
-    if ( pRcvdHdrName == SIP_NULL) {
+    if (pszRcvdHdrName == SIP_NULL)
+    {
         return SipHeaderBase::TYPE_INVALID;
     }
 
-    SIP_INT32 uslen = SipPf_Strlen(pRcvdHdrName);
-    if ( uslen >= SIP_MAX_HDR_LEN) {
+    SIP_INT32 nlen = SipPf_Strlen(pszRcvdHdrName);
+    if ( nlen >= SIP_MAX_HDR_LEN)
+    {
         return SipHeaderBase::UNKNOWN;
-    } else if (uslen == SIP_ONE) {
-        return GetHdrTypeCompact(pRcvdHdrName[0]);
+    }
+    else if (nlen == SIP_ONE)
+    {
+        return GetHdrTypeCompact(pszRcvdHdrName[0]);
     }
 
     /*Content header are separately parsed based Content headers array gaszSipContentHdr
       and treated as known headers */
-    if (SipPf_Strnicmp(pRcvdHdrName, (SIP_CHAR *)"Content", SIP_SEVEN) == SIP_ZERO)
+    if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Content", SIP_SEVEN) == SIP_ZERO)
     {
         SIP_BOOL isContHdrFound = SIP_FALSE;
-        for (SIP_INT32 usNContHdr = SIP_ZERO; usNContHdr < SIP_CONTENT_HDRS_LEN; usNContHdr++) {
-              if (SipPf_Stricmp(gaszSipContentHdr[usNContHdr], pRcvdHdrName) == SIP_ZERO) {
-                  isContHdrFound = SIP_TRUE;
-                  break;
-              }
+        for (SIP_INT32 nNContHdr = SIP_ZERO; nNContHdr < SIP_CONTENT_HDRS_LEN; nNContHdr++)
+        {
+            if (SipPf_Stricmp(gaszSipContentHdr[nNContHdr], pszRcvdHdrName) == SIP_ZERO)
+            {
+                isContHdrFound = SIP_TRUE;
+                break;
+            }
         }
         //Other Content headers treated as unknown headers like Content-Length.
-        if (isContHdrFound == SIP_FALSE) {
+        if (isContHdrFound == SIP_FALSE)
+        {
             return SipHeaderBase::UNKNOWN;
         }
     } // Conversion for Expires / Retry-After Headers
-    else if (SipPf_Strnicmp(pRcvdHdrName, (SIP_CHAR *)"Expires", SIP_SEVEN) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Expires", SIP_SEVEN) == SIP_ZERO)
     {
         return SipHeaderBase::EXPIRES_SEC;
     }
-    else if (SipPf_Strnicmp(pRcvdHdrName, (SIP_CHAR *)"Retry-After", SIP_11) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Retry-After", SIP_11) == SIP_ZERO)
     {
         return SipHeaderBase::RETRY_AFTER_SEC;
     }
-    else if (SipPf_Strnicmp(pRcvdHdrName, (SIP_CHAR *)"Feature-Caps", SIP_12) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Feature-Caps", SIP_12) == SIP_ZERO)
     {
        return SipHeaderBase::UNKNOWN;
     }
 
-    for ( SIP_INT32 usNoOfHdr = SIP_ZERO; usNoOfHdr < objHdrLenRecord[uslen].NoOfEntries ;
-            usNoOfHdr++)
+    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < objHdrLenRecord[nlen].NoOfEntries ;
+            nNoOfHdr++)
     {
-        if (SipPf_Stricmp(objHdrLenRecord[uslen].objHeaders[usNoOfHdr].HdrName,
-                pRcvdHdrName) == SIP_ZERO)
+        if (SipPf_Stricmp(objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName,
+                pszRcvdHdrName) == SIP_ZERO)
         {
-            return objHdrLenRecord[uslen].objHeaders[usNoOfHdr].HdrType;
+            return objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
         }
     }
     return SipHeaderBase::UNKNOWN;
 }
 
-SIP_INT32 SIPHdrAccess :: GetHdrTypeCompact( SIP_CHAR RcvdHdrName)
+SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR RcvdHdrName)
 {
     SIP_CHAR lowHdrName = tolower(RcvdHdrName);
 
     /*Content-Length (l) header to be considered as unknown header to synch with Engine.*/
     /*Other content headers which has compact form (type - c & encoding - e) are known headers in engine*/
-    if (lowHdrName == 'l') {
+    if (lowHdrName == 'l')
+    {
         return SipHeaderBase::UNKNOWN;
     }
 
-    SIP_CHAR *ptemp = (SIP_CHAR *)gaszSipHdrCompact;
-    for ( SIP_INT32 i=0; (*ptemp != '\0'); i++)
+    SIP_CHAR* psztemp = (SIP_CHAR *)gaszSipHdrCompact;
+    for (SIP_INT32 i = 0; (*psztemp != '\0'); i++)
     {
-        if ( *ptemp == lowHdrName)
+        if (*psztemp == lowHdrName)
+        {
             return gaszSipHdrCompactEnum[i];
-        ptemp++;
+        }
+        psztemp++;
     }
     return SipHeaderBase::UNKNOWN;
 }

@@ -15,8 +15,8 @@ class SipTxnContext
         SipTxnContext& operator=(const SipTxnContext& objRHS);
 
     public:
-        SipTimerContext *pSipTimerContext;
-        SIP_VOID *pTxnContextData;
+        SipTimerContext* pSipTimerContext;
+        SIP_VOID* pTxnContextData;
 };
 
 

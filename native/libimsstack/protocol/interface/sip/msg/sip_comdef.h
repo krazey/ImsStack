@@ -225,25 +225,13 @@ typedef enum _sipEn_StatusType
   Structure Declaration
  *****************************************************************************/
 
-SIP_UINT32 SipNPower(SIP_UINT16 usBase,SIP_UINT16 usIndex);
+SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex);
 
-SIP_BOOL SipMemCheck
-(
- SIP_VOID *pvData,
- SIP_UINT16 *pusError
- );
+SIP_BOOL SipMemCheck(SIP_VOID* pvData, SIP_UINT16* pnError);
 
-SIP_BOOL CheckTxnMadatoryParams
-(
- SipMessage        *pobjSipMsg,
- SIP_INT32         *peMsgType,
- SIP_INT32        *peMethodType
- );
+SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType,
+        SIP_INT32* peMethodType);
 
-SIP_UINT32 GetRSeqNum
-(
- SipMessage    *pobjSipMsg,
- SIP_INT32 eHdrType
-);
+SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
 
 #endif // __SIP_COMDEF_H__

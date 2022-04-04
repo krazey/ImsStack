@@ -178,25 +178,24 @@ class SipHeaderBase: public SipRefBase
         };
 
     private:
-        int    m_eHdrType;
-        SIP_CHAR    *m_pValue;
-        SipParameters *m_pParameters;
+        int m_eHdrType;
+        SIP_CHAR* m_pszValue;
+        SipParameters* m_pParameters;
     public:
         SipHeaderBase(SIP_INT32 eHdrType);
-        SipHeaderBase(const SipHeaderBase &objHeader);
+        SipHeaderBase(const SipHeaderBase& objHeader);
         virtual ~SipHeaderBase();
         SIP_VOID InitParameters(SipParameters* pParameters);
-        SIP_BOOL EncodeHeaderParameters(SIP_CHAR **ppucMsgBuffCurrPos,
-                                        SIP_BOOL bParams = SIP_TRUE);
-        virtual SIP_BOOL EncodeHdr(SIP_CHAR **ppucMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
-        virtual SIP_BOOL EncodeHdr(SIP_CHAR **ppucMsgBuffCurrPos,
-                SIP_BOOL bParams,SIP_UINT32 uiMsgOptions)
+        SIP_BOOL EncodeHeaderParameters(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
+        virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
+        virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppMsgBuffCurrPos,
+                SIP_BOOL bParams,SIP_UINT32 nMsgOptions)
         {
-            (void) uiMsgOptions;
-            return EncodeHdr(ppucMsgBuffCurrPos, bParams);
+            (void) nMsgOptions;
+            return EncodeHdr(ppMsgBuffCurrPos, bParams);
         }
-        SIP_BOOL DecodeHeaderParameters(SIP_CHAR *pcStart, SIP_CHAR *pcEnd, SIP_CHAR cDelimeter);
-        virtual SIP_BOOL DecodeHdr(SIP_CHAR *pucStartPt, SIP_UINT32 uiDecLen);
+        SIP_BOOL DecodeHeaderParameters(SIP_CHAR* pStart, SIP_CHAR* pEnd, SIP_CHAR cDelimeter);
+        virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
         inline SIP_INT32 GetHdrType() const
         {
             return m_eHdrType;
@@ -207,9 +206,9 @@ class SipHeaderBase: public SipRefBase
         }
         SipParameters* GetParameters() const;
         virtual SIP_BOOL IsValidHeader() const;
-        virtual SIP_BOOL SetValue(const SIP_CHAR *pValue);
+        virtual SIP_BOOL SetValue(const SIP_CHAR* pszValue);
         virtual const SIP_CHAR* GetValue() const;
-        static SipHeaderBase* GetNewObj(SIP_INT32 iHeaderType, SipHeaderBase *pHeader);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 
     protected:
         static SIP_BOOL FindComment(SIP_CHAR* pszStart, SIP_CHAR* pszEnd,
@@ -221,24 +220,23 @@ class SipHeaderBase: public SipRefBase
 class SipNameAddrHeader : public SipHeaderBase , public IParameterComponent
 {
     protected:
-        SipNameAddr    *m_pobjNameAddr;
-
+        SipNameAddr* m_pNameAddr;
 
     public:
         SipNameAddrHeader(SIP_INT32 eHdrType);
-        SipNameAddrHeader(const SipNameAddrHeader &objSipNameAddrHeader);
+        SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader);
         virtual ~SipNameAddrHeader();
-        virtual SIP_BOOL IsValidComponent(const SIP_CHAR *pucComponent) const;
-        SIP_BOOL SetNameAddr(SipNameAddr *pobjSipNameAddr);
-        SIP_BOOL SetAddrSpec(SipAddrSpec *pobjAddrSpec);
+        virtual SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
+        SIP_BOOL SetNameAddr(SipNameAddr* pSipNameAddr);
+        SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
         SipNameAddr* GetNameAddr();
-        virtual SIP_BOOL EncodeHdr(SIP_CHAR **ppucCurrPos,SIP_BOOL bParams = SIP_TRUE);
-        virtual SIP_BOOL DecodeHdr(SIP_CHAR *pucStartPt,SIP_UINT32 uiDecLen);
+        virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
+        virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
         SIP_BOOL IsPercentEncHdr() const;
         inline SIP_BOOL IsValidHeader() const
         {
-            return (m_pobjNameAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
+            return (m_pNameAddr == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
         }
-        static SipHeaderBase* GetNewObj(SIP_INT32 iHeaderType, SipHeaderBase *pHeader);
+        static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);
 };
 #endif //__SIP_HEADER_BASE_H__

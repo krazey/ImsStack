@@ -45,7 +45,7 @@ SipReferSubHeader::SipReferSubHeader()
 {
 }
 
-SipReferSubHeader::SipReferSubHeader(const SipReferSubHeader &objHeader)
+SipReferSubHeader::SipReferSubHeader(const SipReferSubHeader& objHeader)
     : SipHeaderBase(objHeader)
 {
 }
@@ -64,22 +64,18 @@ SipReferSubHeader::~SipReferSubHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipReferSubHeader::DecodeHdr
-(
- SIP_CHAR    *pucStartPt,
- SIP_UINT32  uiDecLen
- )
+SIP_BOOL SipReferSubHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    if (SipHeaderBase::DecodeHdr(pucStartPt,uiDecLen) == SIP_FALSE)
+    if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {
-      return SIP_FALSE;
+        return SIP_FALSE;
     }
 
-    const SIP_CHAR *pValue = GetValue();
+    const SIP_CHAR* pszValue = GetValue();
 
-    if ((pValue != SIP_NULL) &&
-        (SipPf_Stricmp(pValue,"true") != SIP_ZERO) &&
-        (SipPf_Stricmp(pValue,"false") != SIP_ZERO))
+    if ((pszValue != SIP_NULL) &&
+        (SipPf_Stricmp(pszValue, "true") != SIP_ZERO) &&
+        (SipPf_Stricmp(pszValue, "false") != SIP_ZERO))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,"Invalid Only true or false allowed",
                           SIP_ZERO, SIP_ZERO);
@@ -91,7 +87,8 @@ SIP_BOOL SipReferSubHeader::DecodeHdr
 
 SipHeaderBase* SipReferSubHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
-    if (pHeader != SIP_NULL) {
+    if (pHeader != SIP_NULL)
+    {
         return new SipReferSubHeader(*reinterpret_cast<SipReferSubHeader*>(pHeader));
     }
     return new SipReferSubHeader();
