@@ -123,6 +123,8 @@ public class AosService implements IAosRegistration, IAosInfo {
             return;
         }
 
+        adjustCapabilities(pairs);
+
         if (mCapabilityPairs != null && mCapabilityPairs.equals(pairs)) {
             return;
         }
@@ -284,10 +286,8 @@ public class AosService implements IAosRegistration, IAosInfo {
             return;
         }
 
-        ImsLog.d(mSlotId, "notifyCapabilitiesChanged :: size(" +
-                mCapabilityPairs.getCapabilities().size() + ")");
+        ImsLog.d(mSlotId, mCapabilityPairs.toString());
 
-        /*
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_REQUEST_CAPABILITIES_CHANGED);
@@ -299,7 +299,20 @@ public class AosService implements IAosRegistration, IAosInfo {
         }
 
         sendRequest(parcel);
-        */
+    }
+
+    private void adjustCapabilities(CapabilityPairs pairs) {
+        /*
+         * Note : If LTE/NR-VIDEO capability is enabled, add IWLAN-VIDEO capability.
+         */
+        if (pairs.hasCapability(IAosRegistrationListener.NetworkType.LTE,
+                IAosRegistrationListener.Capability.VIDEO) ||
+                pairs.hasCapability(IAosRegistrationListener.NetworkType.NR,
+                IAosRegistrationListener.Capability.VIDEO)) {
+            ImsLog.d("Add Capability - IWLAN-VIDEO");
+            pairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                    IAosRegistrationListener.Capability.VIDEO);
+        }
     }
 
     private void onRegistered(int networkType, int featureTagBits,

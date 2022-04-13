@@ -90,6 +90,10 @@ public interface IAosRegistration {
                     mCapabilities.getOrDefault(networkType, 0) | capability);
         }
 
+        public boolean hasCapability(Integer networkType, Integer capability) {
+            return ((mCapabilities.getOrDefault(networkType, 0) & capability) > 0) ? true : false;
+        }
+
         /**
          * This method returns a pair of capabilities.
          *
@@ -117,6 +121,20 @@ public interface IAosRegistration {
 
             return this.getCapabilities().entrySet().stream().allMatch(
                     e -> e.getValue().equals(that.getCapabilities().get(e.getKey())));
+        }
+
+        @Override
+        public String toString() {
+            StringBuffer sb = new StringBuffer();
+
+            sb.append("{ Size=" + getCapabilities().size() + ", ");
+            for (Map.Entry<Integer, Integer> entry : getCapabilities().entrySet()) {
+                sb.append("( Network=" + entry.getKey() + ", ");
+                sb.append("Capabilities=" + entry.getValue() + " )");
+            }
+            sb.append(" }");
+
+            return sb.toString();
         }
     }
 }
