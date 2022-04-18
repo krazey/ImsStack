@@ -46,6 +46,7 @@ public:
 private:
     IMS_RESULT SendAccept();
     void UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISession* piSession);
+    IMS_BOOL IsCallWaiting();
 };
 
 #endif
