@@ -1463,8 +1463,9 @@ public class CarrierConfig {
 
     private static int moveItemToBundle(PersistableBundle src,
             PersistableBundle dst, String key, boolean removeKeyFromSrc) {
+        int count = 0;
+
         if (src.containsKey(key)) {
-            int count = 0;
             if (key.endsWith("_bool") || key.endsWith("_boolean")) {
                 dst.putBoolean(key, src.getBoolean(key));
                 count++;
@@ -1496,6 +1497,6 @@ public class CarrierConfig {
             }
         }
 
-        return 0;
+        return count;
     }
 }

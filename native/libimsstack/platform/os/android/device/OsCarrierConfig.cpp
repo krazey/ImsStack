@@ -621,5 +621,17 @@ void OsCarrierConfig::DisplaySpecificConfigs()
 
         piCc->ReleaseBundle();
     }
+
+    ICarrierConfig* piRegRetry = GetBundle("registration_retry_bundle");
+
+    if (piRegRetry != IMS_NULL)
+    {
+        IMS_SINT32 nDefaultPolicy = piRegRetry->GetInt("registration_retry_default_policy_int");
+
+        IMS_TRACE_D("carrier-config: bundle - registration_retry_default_policy_int=%d",
+                nDefaultPolicy, 0, 0);
+
+        piRegRetry->ReleaseBundle();
+    }
 }
 #endif
