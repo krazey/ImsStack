@@ -17,55 +17,27 @@
 #ifndef _CODEC_CONFIG_H_
 #define _CODEC_CONFIG_H_
 
-#include "AString.h"
-#include "ImsSlot.h"
+#include "CarrierConfig.h"
+#include "ICarrierConfig.h"
+#include "config/ImsCodec.h"
 
-class IConfigBuffer;
-
-class CodecConfig :
-        public ImsSlot
+class CodecConfig
 {
-private:
-    static const IMS_CHAR KEY_PAYLOAD_TYPE[];
-    static const IMS_CHAR KEY_NETWORK_TYPE[];
-    static const IMS_CHAR KEY_PRIORITY[];
-    static const IMS_CHAR KEY_BANDWIDTH[];
-
 public:
-    CodecConfig(IN IMS_SINT32 nCodecType_, IN CONST AString &strCodecName_,
-            IN CONST IMS_SINT32 nProfileNum_ = 0);
+    CodecConfig(IN IMS_SINT32 nCodec_, IN IMS_SINT32 nPayloadTypeNum_);
     virtual ~CodecConfig();
 
-private:
-    CodecConfig();
-    CodecConfig(IN CONST CodecConfig &objRHS);
-    CodecConfig& operator=(IN CONST CodecConfig &objRHS);
-
 public:
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer);
-    virtual AString GetFmtp() const;
-    virtual AString GetRtpMap() const;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
 
-    IMS_SINT32 GetCodecType() const;
-    const AString& GetCodecName() const;
-    IMS_SINT32 GetProfileNum() const;
+    IMS_SINT32 GetCodec() const;
     IMS_SINT32 GetPayloadType() const;
-    IMS_UINT32 GetAvailableNetworkType() const;
-    IMS_UINT32 GetPriority() const;
 
-    IMS_BOOL SetPriority(IMS_UINT32 priority);
+public:
 
 protected:
-    void GetSection(OUT AString &strSection) const;
-
-protected:
-    AString strSectionName;
-    IMS_SINT32 nProfileNum;
-    IMS_SINT32 nPayloadType;
-    IMS_UINT32 nNetworkType;
-    IMS_SINT32 nCodecType;
-    AString strCodecName;
-    IMS_UINT32 nPriority;
+    IMS_SINT32 m_nCodec;
+    IMS_SINT32 m_nPayloadType;
 };
 #endif                                              // _CODEC_CONFIG_H_

@@ -136,23 +136,8 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
         IMS_TRACE_E(0, "FormSDP() - INVALID : eMediaType[%d]", eMediaType, 0, 0);
         return IMS_FALSE;
     }
-
     MEDIA_CONTENT_TYPE eNeedToMakeMedia = eMediaType;
-    MediaSessionConfig* pMediaSessionConfig =
-            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(GetSlotId(),
-            m_pMediaEnvironment->eServiceType);
-    if (pMediaSessionConfig == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AudioConfiguration* pConfig = pMediaSessionConfig->GetAudioConfiguration(m_eSessionType);
-    if (pConfig == NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (pConfig->GetSdpKeepMLine() == IMS_TRUE && m_eNegoState == STATE_NEGOTIATED)
+    if (m_eNegoState == STATE_NEGOTIATED)
     {
         if (!MEDIA_IS_CONTAINED_THIS_TYPE(eNeedToMakeMedia, MEDIA_TYPE_AUDIO)
                 && m_pAudioNego->GetNegotiatedRtpPort() != -1 /*PORT_NONE*/)
@@ -262,13 +247,19 @@ IMS_BOOL MediaNego::FormSDP(OUT ISession* pSession, IN MEDIA_CONTENT_TYPE eMedia
         }
     }
 
-    if (pMediaSessionConfig->IsSessionLevelBandwidth())
+    MediaSessionConfig* pMediaSessionConfig =
+            MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(GetSlotId(),
+            m_pMediaEnvironment->eServiceType);
+    if (pMediaSessionConfig != IMS_NULL)
     {
-        IMS_TRACE_D("FormSDP() - Session level bandwidth [%d]", nTotalAs, 0, 0);
-        // remove session level bandwidth
-        pSession->GetSessionDescriptor()->RemoveAllBandwidths();
-        // add session level bandwidth
-        pSession->GetSessionDescriptor()->AddBandwidth(SdpBandwidth::TYPE_AS, nTotalAs);
+        if (pMediaSessionConfig->IsSessionLevelBandwidth())
+        {
+            IMS_TRACE_D("FormSDP() - Session level bandwidth [%d]", nTotalAs, 0, 0);
+            // remove session level bandwidth
+            pSession->GetSessionDescriptor()->RemoveAllBandwidths();
+            // add session level bandwidth
+            pSession->GetSessionDescriptor()->AddBandwidth(SdpBandwidth::TYPE_AS, nTotalAs);
+        }
     }
 
     // -- Step 4. Change the negotiation state ----------------------------------------------------
@@ -419,10 +410,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession * pSession, OUT IMS_SINT32* eAudioD
     {
         *eAudioDir = MEDIA_DIRECTION_INVALID;
 
-        // Check whether audio is mandatory for session negotiation
-        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO) &&
-                MEDIA_IS_CONTAINED_THIS_TYPE(pMediaSessionConfig->GetMediaMandatoryNego(),
-                MEDIA_TYPE_AUDIO))
+        if (MEDIA_IS_CONTAINED_THIS_TYPE(m_eSessionType, MEDIA_TYPE_AUDIO))
         {
             IMS_TRACE_E(0, "NegotiateSDP() - m line of audio is failed", 0, 0, 0);
             errorReason = ERROR_NO_AUDIO;

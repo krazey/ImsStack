@@ -48,8 +48,8 @@ void MediaSessionConfigFactory::CreateMediaSessionConfig(IN IMS_SINT32 nSlotId,
         m_mapListMediaSessionConfig.Add(nSlotId, pListMediaSessionConfig);
     }
 
-    MediaSessionConfig* mediaSessionConfig = new MediaSessionConfig(nSlotId, eServiceType);
-    pListMediaSessionConfig->Append(mediaSessionConfig);
+    MediaSessionConfig* objMediaSessionConfig = new MediaSessionConfig(nSlotId, eServiceType);
+    pListMediaSessionConfig->Append(objMediaSessionConfig);
 
     IMS_TRACE_D("CreateMediaSessionConfig - nSlotId[%d], listSize[%d], svc[%d]",
             nSlotId, pListMediaSessionConfig->GetSize(), (IMS_SINT32)eServiceType);
@@ -57,14 +57,14 @@ void MediaSessionConfigFactory::CreateMediaSessionConfig(IN IMS_SINT32 nSlotId,
 
 PUBLIC
 void MediaSessionConfigFactory::AddMediaSessionConfig(IN IMS_SINT32 nSlotId,
-        IN MediaSessionConfig* mediaSessionConfig)
+        IN MediaSessionConfig* objMediaSessionConfig)
 {
     IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
     if (pListMediaSessionConfig == IMS_NULL)
     {
         pListMediaSessionConfig = new IMSList<MediaSessionConfig*>();
-        pListMediaSessionConfig->Append(mediaSessionConfig);
+        pListMediaSessionConfig->Append(objMediaSessionConfig);
 
         IMS_TRACE_D("AddMediaSessionConfig - nSlotId[%d], listSize[%d]",
                 nSlotId, pListMediaSessionConfig->GetSize(), 0);
@@ -76,13 +76,13 @@ void MediaSessionConfigFactory::AddMediaSessionConfig(IN IMS_SINT32 nSlotId,
         for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
         {
             MediaSessionConfig* tempmediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
-            if (tempmediaSessionConfig == mediaSessionConfig) /// Already Have
+            if (tempmediaSessionConfig == objMediaSessionConfig) /// Already Have
             {
                 return;
             }
         }
 
-        pListMediaSessionConfig->Append(mediaSessionConfig);
+        pListMediaSessionConfig->Append(objMediaSessionConfig);
 
         IMS_TRACE_D("AddMediaSessionConfig - nSlotId[%d], listSize[%d]",
                 nSlotId, pListMediaSessionConfig->GetSize(), 0);
@@ -101,8 +101,8 @@ void MediaSessionConfigFactory::DestroyListSessionConfig(IN IMS_SINT32 nSlotId)
 
         for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
         {
-            MediaSessionConfig* mediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
-            DestroySessionConfig(mediaSessionConfig);
+            MediaSessionConfig* objMediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
+            DestroySessionConfig(objMediaSessionConfig);
         }
 
         pListMediaSessionConfig->Clear();
@@ -122,42 +122,43 @@ IMSList<MediaSessionConfig*>* MediaSessionConfigFactory::GetListSessionConfig(IN
     return IMS_NULL;
 }
 
+PUBLIC
 MediaSessionConfig* MediaSessionConfigFactory::FindMediaSessionConfig(IN IMS_SINT32 nSlotId,
         IN MEDIA_SERVICE_TYPE eServiceType)
 {
     IMSList<MediaSessionConfig*>* pListMediaSessionConfig = GetListSessionConfig(nSlotId);
 
-    MediaSessionConfig* mediaSessionConfig = IMS_NULL;
+    MediaSessionConfig* objMediaSessionConfig = IMS_NULL;
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
         for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
         {
-            mediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
+            objMediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
 
-            if (mediaSessionConfig->GetServiceType() == eServiceType ||
+            if (objMediaSessionConfig->GetServiceType() == eServiceType ||
                     MEDIA_SERVICE_NONE == eServiceType)
             {
-                return mediaSessionConfig;
+                return objMediaSessionConfig;
             }
         }
     }
 
     if (pListMediaSessionConfig != IMS_NULL)
     {
-        if (mediaSessionConfig == IMS_NULL && pListMediaSessionConfig->GetSize() > 0)
+        if (objMediaSessionConfig == IMS_NULL && pListMediaSessionConfig->GetSize() > 0)
         {
-            mediaSessionConfig = pListMediaSessionConfig->GetAt(0);
+            objMediaSessionConfig = pListMediaSessionConfig->GetAt(0);
         }
     }
 
-    if (mediaSessionConfig != NULL)
+    if (objMediaSessionConfig != NULL)
     {
         IMS_TRACE_D("FindMediaSessionConfig() - eServiceType[%d]",
-                mediaSessionConfig->GetServiceType(), 0, 0);
+                objMediaSessionConfig->GetServiceType(), 0, 0);
     }
 
-    return mediaSessionConfig;
+    return objMediaSessionConfig;
 }
 
 PUBLIC
@@ -169,24 +170,24 @@ void MediaSessionConfigFactory::DestroySessionConfig(IN MediaSessionConfig* pMed
 
         if (pListMediaSessionConfig != IMS_NULL)
         {
-            IMS_TRACE_D("DestroySessionConfig - list[%d]",
-                    pListMediaSessionConfig->GetSize(), 0, 0);
+            IMS_TRACE_D("DestroySessionConfig list[%d]", pListMediaSessionConfig->GetSize(), 0, 0);
 
             for (IMS_UINT32 nIdxList = 0; nIdxList < pListMediaSessionConfig->GetSize(); nIdxList++)
             {
-                MediaSessionConfig* mediaSessionConfig = pListMediaSessionConfig->GetAt(nIdxList);
+                MediaSessionConfig* objMediaSessionConfig =
+                        pListMediaSessionConfig->GetAt(nIdxList);
 
-                if (mediaSessionConfig == pMediaSessionConfig)
+                if (objMediaSessionConfig == pMediaSessionConfig)
                 {
                     pListMediaSessionConfig->RemoveAt(nIdxList);
                     return;
                 }
             }
         }
-
     }
 }
 
+PUBLIC
 MediaSessionConfigFactory* MediaSessionConfigFactory::GetInstance()
 {
     if (g_pMediaSessionConfigFactory == IMS_NULL)
@@ -197,6 +198,7 @@ MediaSessionConfigFactory* MediaSessionConfigFactory::GetInstance()
     return g_pMediaSessionConfigFactory;
 }
 
+PUBLIC
 void MediaSessionConfigFactory::ReleaseInstance(MediaSessionConfigFactory* pSessionConfigFactory)
 {
     if (pSessionConfigFactory != IMS_NULL && pSessionConfigFactory == g_pMediaSessionConfigFactory)

@@ -58,8 +58,6 @@ public :
     virtual IMS_BOOL UpdatePdnResource(IN IMS_SINT32 nPDNType, IN IMS_BOOL nIsIPv6);
     virtual void ResetPdnResource(IN IMS_SINT32 nPDNType = PDN_IMS);
     virtual void UpdateAPN(IN MEDIA_SERVICE_TYPE eMediaServiceType, PDNResource* pLocalPdn);
-    virtual void GetPdpProfileNum(IN AudioConfiguration* pAConfig, IMS_SINT32* nPdpProfileNum,
-            IMS_SINT32* nPdpProfileNum3G);
     virtual AString GetApnName(IN MEDIA_SERVICE_TYPE eServiceType);
     virtual IMS_UINT32 AcquireRtpPort(IN MediaConfiguration* pConfig);
     virtual IMS_UINT32 AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_UINT32 nRangeEnd);

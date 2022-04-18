@@ -20,149 +20,62 @@
 #include "MediaDef.h"
 #include "IMSList.h"
 #include "AString.h"
+#include "ICarrierConfigListener.h"
 
-class IConfigBuffer;
+class ICarrierConfig;
 class AudioConfiguration;
 class VideoConfiguration;
 class TextConfiguration;
 
-class MediaSessionConfig
+class MediaSessionConfig :
+        public ICarrierConfigListener
 {
 public:
-    // "audio"/"video" parameters
-    static const IMS_CHAR KEY_REF[];
-    static const IMS_CHAR KEY_SESSION_TYPE[];
-    static const IMS_CHAR KEY_AUDIO[];
-    static const IMS_CHAR KEY_AUDIO_CODEC[];
-    static const IMS_CHAR KEY_AUDIO_REF[];
-    static const IMS_CHAR KEY_VIDEO[];
-    static const IMS_CHAR KEY_VIDEO_CODEC[];
-    static const IMS_CHAR KEY_VIDEO_REF[];
-    static const IMS_CHAR KEY_TEXT[];
-    static const IMS_CHAR KEY_TEXT_CODEC[];
-    static const IMS_CHAR KEY_TEXT_REF[];
-    // General parameters
-    static const IMS_CHAR KEY_JITTER_BUFFER_SIZE[];
-    static const IMS_CHAR KEY_TELEPHONE_EVENT_DURATION[];
-    static const IMS_CHAR KEY_CODECS[];
-    static const IMS_CHAR KEY_CODECS_PROFILE_NUM[];
-    static const IMS_CHAR KEY_CODEC_LIST_SIZE[];
-    static const IMS_CHAR KEY_CODEC_REF[];
-    static const IMS_CHAR KEY_CODEC_TYPE[];
-
-protected:
-    // "media" section & parameters
-    static const IMS_CHAR SECTION_MEDIA[];
-    static const IMS_CHAR KEY_LOOPBACK[];
-    static const IMS_CHAR KEY_DEBUG_PCAP[];
-    static const IMS_CHAR KEY_SESSION_LEVEL_BW[];
-    static const IMS_CHAR KEY_MEDIA_MANDATORY_NEGO[];
-    static const IMS_CHAR KEY_RTP_ANALYZER[];
-    static const IMS_CHAR KEY_RTP_ANALYZER_OPTION[];
-    static const IMS_CHAR KEY_DEBUG_MMPF_AP_LOG[];
-    static const IMS_CHAR KEY_DEBUG_MMPF_CP_LOG[];
-
-public:
     MediaSessionConfig(IN IMS_SINT32 nSlotId = 0,
-            IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_NONE);
+            IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
     virtual ~MediaSessionConfig();
 
-    MEDIA_SERVICE_TYPE GetServiceType() const;
+    IMS_BOOL Create(IN IMS_SINT32 nSlotId);
     void SetServiceType(IN MEDIA_SERVICE_TYPE eServiceType);
+    void ToDebugString() const;
 
-private:
-    MediaSessionConfig(IN CONST MediaSessionConfig &objRHS);
-    MediaSessionConfig& operator=(IN CONST MediaSessionConfig &objRHS);
+    AudioConfiguration* GetAudioConfiguration() const;
+    VideoConfiguration* GetVideoConfiguration() const;
+    TextConfiguration* GetTextConfiguration() const;
 
-public:
-    virtual IMS_BOOL Create(IN IMS_SINT32 nSlotId, IN IConfigBuffer *piBuffer,
-            IN IMS_BOOL bVideo = IMS_TRUE);
-    virtual void ToDebugString() const;
-
-public:
-    AudioConfiguration* GetAudioConfiguration(
-                IN MEDIA_CONTENT_TYPE sessionType = MEDIA_TYPE_INVALID);
-    VideoConfiguration* GetVideoConfiguration(
-                IN MEDIA_CONTENT_TYPE sessionType = MEDIA_TYPE_INVALID);
-    TextConfiguration* GetTextConfiguration(
-                IN MEDIA_CONTENT_TYPE sessionType = MEDIA_TYPE_INVALID);
-
-    AudioConfiguration* GetAudioConfiguration(IN IMS_UINT32 nIndex,
-            OUT MEDIA_CONTENT_TYPE* pSessionType = NULL);
-    VideoConfiguration* GetVideoConfiguration(IN IMS_UINT32 nIndex,
-            OUT MEDIA_CONTENT_TYPE* pSessionType = NULL);
-    TextConfiguration* GetTextConfiguration(IN IMS_UINT32 nIndex,
-            OUT MEDIA_CONTENT_TYPE* pSessionType = NULL);
-
-    IMS_UINT32 GetAudioConfigSessionNum();
-    IMS_UINT32 GetVideoConfigSessionNum();
-    IMS_UINT32 GetTextConfigSessionNum();
-
-    IMS_BOOL Update(IN IConfigBuffer *piBuffer);
-    IMS_BOOL IsLoopback() const;
-    IMS_BOOL IsDebugPcap() const;
+    MEDIA_SERVICE_TYPE GetServiceType() const;
     IMS_BOOL IsSessionLevelBandwidth() const;
+    IMS_BOOL IsAnbrSupported() const;
+    IMS_BOOL IsSupportMultiConfigInEarlySession() const;
 
-    IMS_SINT32 GetMediaMandatoryNego() const;
-    IMS_SINT32 GetRTPAnalyzerList() const;
-    tRTP_ANALYZER_OPTION* GetRTPAnalyzerOptionList();
-
-    IMS_UINT32 GetMmpfDebugApLog() const;
-    IMS_UINT32 GetMmpfDebugCpLog() const;
-
-protected:
-    virtual AString GetMediaRef() const;
-    void Clear();
-
-public:
-    AudioConfiguration* CreateAudioConfiguration(
-                IN MEDIA_CONTENT_TYPE nSessionType = MEDIA_TYPE_INVALID);
-    VideoConfiguration* CreateVideoConfiguration(
-                IN MEDIA_CONTENT_TYPE nSessionType = MEDIA_TYPE_INVALID);
-    TextConfiguration* CreateTextConfiguration(
-                IN MEDIA_CONTENT_TYPE nSessionType = MEDIA_TYPE_INVALID);
-
-    IMS_BOOL CreateAudioConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_BOOL CreateVideoConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_BOOL CreateTextConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-
-    IMS_BOOL UpdateAudioConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_BOOL UpdateVideoConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_BOOL UpdateTextConfigs(IN CONST AString &strRef,
-            IN IMS_SINT32 nCount, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static const IMS_BOOL DEFAULT_SESSION_LEVEL_BW = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_ANBR_CAPABILITY = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_SUPPORT_MULTICONFIG = IMS_TRUE;
 
 private:
-    MEDIA_CONTENT_TYPE ConvertSessionType(IN CONST AString& strSessionType);
+    void Clear();
+    IMS_BOOL Update(IN ICarrierConfig* piCc);
+    void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
+
+    IMS_BOOL CreateAudioConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL CreateVideoConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL CreateTextConfiguration(IN ICarrierConfig* piCc);
+
+    IMS_BOOL UpdateAudioConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL UpdateVideoConfiguration(IN ICarrierConfig* piCc);
+    IMS_BOOL UpdateTextConfiguration(IN ICarrierConfig* piCc);
+
     void MakeAnalyzerList(IN CONST AString& strList);
     void MakeAnalyzerOptionList(IN CONST AString& strList);
 
-protected:
-    // Media parameters
-    IMS_UINT32 nIsLoopback;
-    IMS_BOOL bIsDebugPcap;
-    IMS_BOOL bIsSessLevelBW;
-
-    // Media RTP KPI Analyzer
-    IMS_SINT32 nRtpAnalyzerList;
-    tRTP_ANALYZER_OPTION* pRtpAnalyzerOptionList;
-
-    // Media - audio/video
-    IMSList<AudioConfiguration*> objAudioConfigs;
-    IMSList<VideoConfiguration*> objVideoConfigs;
-    IMSList<TextConfiguration*> objTextConfigs;
-
-    MEDIA_CONTENT_TYPE eMediaMandatoryNego;
-
-    IMS_SINT32 nDebugMmpfApLog;
-    IMS_SINT32 nDebugMmpfCpLog;
-
 private:
-    MEDIA_SERVICE_TYPE m_nServiceType;
+    AudioConfiguration* m_pAudioConfig;
+    VideoConfiguration* m_pVideoConfig;
+    TextConfiguration* m_pTextConfig;
 
+    MEDIA_SERVICE_TYPE m_nServiceType;
+    IMS_BOOL m_bIsSessLevelBW;
+    IMS_BOOL m_bAnbrSupported;
+    IMS_BOOL m_bSupportMultiConfigInEarlySession;
 };
 #endif // _MEDIA_SESSION_CONFIG_H_

@@ -131,55 +131,11 @@ AString MediaResourceMngr::GetApnName(IN MEDIA_SERVICE_TYPE eServiceType)
 }
 
 PUBLIC
-void MediaResourceMngr::GetPdpProfileNum(IN AudioConfiguration* pAConfig,
-        IMS_SINT32* nPdpProfileNum, IMS_SINT32* nPdpProfileNum3G)
-{
-    if (pAConfig == IMS_NULL)
-    {
-        IMS_TRACE_D("GetPdpProfileNum() - Can't get AudioConfiguration", 0, 0, 0);
-        return;
-    }
-
-    // 20150813 [VoWiFi] Getting IP address on 3G + WiFi (3GPP1 + 3GPP2 PDP Profile)
-    MEDIA_NETWORK_TYPE eNetworkType = MEDIA_NETWORK_NONE;
-    switch (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
-        m_nSlotId)->GetNetworkType())
-    {
-        case INetworkWatcher::RADIOTECH_TYPE_1xRTT:
-        case INetworkWatcher::RADIOTECH_TYPE_CDMA:
-        case INetworkWatcher::RADIOTECH_TYPE_EVDO_0:
-        case INetworkWatcher::RADIOTECH_TYPE_EVDO_A:
-        case INetworkWatcher::RADIOTECH_TYPE_EVDO_B:
-            eNetworkType = MEDIA_NETWORK_WCDMA;
-            break;
-        case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
-            eNetworkType = MEDIA_NETWORK_EHRPD;
-            break;
-        case INetworkWatcher::RADIOTECH_TYPE_LTE:    // FALL_THROUGH
-        default:
-            eNetworkType = MEDIA_NETWORK_LTE;
-            break;
-
-        IMS_TRACE_I("GetPdpProfileNum() - Network type[%d]", eNetworkType, 0, 0);
-    }
-
-    if (eNetworkType == MEDIA_NETWORK_WCDMA)
-    {
-        *nPdpProfileNum3G = pAConfig->GetPdpProfileNumOf3G();
-        IMS_TRACE_I("GetPdpProfileNum() - CDMA PDP Profile[%d]", nPdpProfileNum, 0, 0);
-    }
-    else
-    {
-        *nPdpProfileNum = pAConfig->GetPdpProfileNum();
-    }
-}
-
-PUBLIC
 IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN MediaConfiguration* pConfig)
 {
     if (pConfig == IMS_NULL)
     {
-        IMS_TRACE_E(0, "AcquireRtpPort() - config is null", 0, 0, 0);
+        IMS_TRACE_D("AcquireRtpPort() - config is null", 0, 0, 0);
         return 0;
     }
 
@@ -195,7 +151,8 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
     IMS_UINT32 nChosenPort = 0;
     IMS_BOOL bFoundSamePort = IMS_FALSE;
 
-    IMS_TRACE_I("AcquireRtpPort() - nRangeStart[%d], nRangeEnd[%d]", nRangeStart, nRangeEnd, 0);
+    IMS_TRACE_D("AcquireRtpPort() - nRangeStart[%d], nRangeEnd[%d]",
+            nRangeStart, nRangeEnd, 0);
 
     // STEP 0. Exception handling : INVALID case
     if (nRangeStart > RTP_PORT_MAX || nRangeEnd > RTP_PORT_MAX)
@@ -225,7 +182,8 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
         nInitialPort++;
     }
 
-    // STEP 3. Compare this number to activated RTP ports. If found a same number, increase number and re-find.
+    // STEP 3. Compare this number to activated RTP ports.
+    //      If found a same number, increase number and re-find.
     nChosenPort = nInitialPort;
 
     do {
@@ -277,7 +235,7 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
 PUBLIC
 void MediaResourceMngr::ReleaseRtpPort(IN IMS_UINT32 nPort)
 {
-    IMS_TRACE_D("ReleaseRtpPort [%d]",nPort,0,0);
+    IMS_TRACE_D("ReleaseRtpPort [%d]", nPort, 0, 0);
     IMS_UINT32 i = 0;
     for (i = 0; i < m_lstUsedRtpPort.GetSize(); i++)
     {
@@ -293,7 +251,7 @@ void MediaResourceMngr::ReleaseRtpPort(IN IMS_UINT32 nPort)
 
     if (nPort != 0)
     {
-        IMS_TRACE_E(0, "ReleaseRtpPort() - port[%d], Size[%d]",
+        IMS_TRACE_D("ReleaseRtpPort() - no matched port[%d], Size[%d]",
                 nPort, m_lstUsedRtpPort.GetSize(), 0);
     }
 }
@@ -463,44 +421,8 @@ IMS_SINT32 MediaResourceMngr::GetSupportedNetworkTypeFlag()
 {
     if (m_nSupportedNetworkTypeFlag == 0)   // initial check..
     {
-        AudioConfiguration* pAConfig = NULL;
-        for (IMS_UINT32 nServiceCnt = MEDIA_SERVICE_DEFAULT;
-                nServiceCnt <= MEDIA_SERVICE_EMERGENCY; nServiceCnt++)
-        {
-            for (IMS_UINT32 nSessioTypeCnt = MEDIA_TYPE_AUDIO;
-                    nSessioTypeCnt <= MEDIA_TYPE_AUDIOVIDEOTEXT; nSessioTypeCnt++)
-            {
-                if ((nSessioTypeCnt & MEDIA_TYPE_AUDIO) == 0)
-                {
-                    continue; // not matched
-                }
-
-                MediaSessionConfig* pMediaSessionConfig = MediaSessionConfigFactory::GetInstance()->
-                        FindMediaSessionConfig(m_nSlotId, (MEDIA_SERVICE_TYPE)nServiceCnt);
-
-                if (pMediaSessionConfig != NULL)
-                {
-                    pAConfig = pMediaSessionConfig->GetAudioConfiguration(
-                            (MEDIA_CONTENT_TYPE)nSessioTypeCnt);
-
-                    if (pAConfig != NULL)
-                    {
-                        IMSList<CodecConfig*> pAudioCodecs = pAConfig->GetCodecConfigs();
-                        // check supported audio NetworkType..
-                        for (IMS_UINT32 i = 0; i < pAudioCodecs.GetSize(); i++)
-                        {
-                            CodecConfig* pCodecConfig = pAudioCodecs.GetAt(i);
-                            if (pCodecConfig == IMS_NULL)
-                            {
-                                break;
-                            }
-                            m_nSupportedNetworkTypeFlag |= pCodecConfig->GetAvailableNetworkType();
-                        }
-                    }
-                }
-            }
-        }
-    }
+        m_nSupportedNetworkTypeFlag |= (IMS_UINT32)MEDIA_NETWORK_LTE;
+    }   // TODO_MEDIA Need to be updated later for NR
 
     IMS_TRACE_D("GetSupportedNetworkTypeFlag() - nSupportedNetworkTypeFlag[%d]",
             m_nSupportedNetworkTypeFlag, 0, 0);

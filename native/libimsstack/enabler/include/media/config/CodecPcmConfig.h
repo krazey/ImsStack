@@ -17,27 +17,18 @@
 #ifndef _CODEC_PCM_CONFIG_H_
 #define _CODEC_PCM_CONFIG_H_
 
-#include "IMSList.h"
 #include "config/CodecConfig.h"
 
-class CodecPCMConfig :
+class CodecPcmConfig :
         public CodecConfig
 {
 public:
-    CodecPCMConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nProfielNum_);
-    virtual ~CodecPCMConfig();
-
-private:
-    CodecPCMConfig();
-    CodecPCMConfig(IN CONST CodecPCMConfig &objRHS);
-    CodecPCMConfig& operator=(IN CONST CodecPCMConfig &objRHS);
+    CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
+    virtual ~CodecPcmConfig();
 
 public:
     // CodecConfig class
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer);
-    virtual AString GetRtpMap() const;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
-
-private:
 };
 #endif                                              // _CODEC_PCM_CONFIG_H_

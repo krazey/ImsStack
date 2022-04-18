@@ -14,130 +14,108 @@
  * limitations under the License.
  */
 
-#ifndef _AUDIO_CONFIG_H_
-#define _AUDIO_CONFIG_H_
+#ifndef _AUDIO_CONFIGURATION_H_
+#define _AUDIO_CONFIGURATION_H_
 
-#include "config/CodecConfig.h"
+#include "AString.h"
 #include "config/MediaConfiguration.h"
 
-class IConfigBuffer;
+class ICarrierConfig;
 
 class AudioConfiguration
         : public MediaConfiguration
 {
-    public:
-        AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType);
-        virtual ~AudioConfiguration();
+public:
+    AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
+    virtual ~AudioConfiguration();
 
-    private:
-        AudioConfiguration(IN CONST AudioConfiguration &objRHS);
-        AudioConfiguration& operator=(IN CONST AudioConfiguration &objRHS);
+public:
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
 
-    public:
-        virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex,
-                IN IMS_SINT32 nSlotID);
-        virtual void ToDebugString() const;
+protected:
+    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
+    virtual void ToDebugString() const;
 
-        IMS_SINT32 GetPdpProfileNum() const;
-        IMS_SINT32 GetPdpProfileNumOf3G() const;
-        // Jitter buffer control
-        IMS_SINT32 GetJitterBufferMaxSize() const;
-        IMS_SINT32 GetJitterBufferMinSize() const;
-        IMS_SINT32 GetJitterBufferSize() const;
-        // Common attributes
-        IMS_SINT32 GetPacketTime() const;
-        IMS_SINT32 GetMaxPacketTime() const;
-        IMS_SINT32 GetCandidatePriority() const;
-        // DTMF Telephone Event
-        IMS_SINT32 GetDTMFDuration() const;
-        IMS_SINT32 GetDTMFRetransmitDuration() const;
-        IMS_SINT32 GetDTMFInterval() const;
-        IMS_BOOL GetRearrangeModeSetByAs() const;
-        //[VOCODER_INTERFACE]
-        IMS_SINT32 GetModeChangeCapaAlwaysAnswer() const;
-        IMS_BOOL GetDmOperationPreferredMode() const;
-        IMS_BOOL GetAudioHalfRateMode() const;
+public:
+    IMS_SINT32 GetPtime() const;
+    IMS_SINT32 GetMaxPtime() const;
+    IMS_SINT32 GetMaxRed() const;
+    IMS_BOOL GetBandwidthNegoOption() const;
+    IMS_SINT32 GetRtpDscp() const;
+    IMS_SINT32 GetJitterBufferMinSize() const;
+    IMS_SINT32 GetJitterBufferMaxSize() const;
+    IMS_SINT32 GetJitterBufferAdjustTime() const;
+    IMS_SINT32 GetJitterBufferStepSize() const;
+    IMS_BOOL IsRtcpXrEnabled() const;
+    IMS_BOOL IsRtcpXrStatisticsEnabled() const;
+    IMS_BOOL IsRtcpXrVoipEnabled() const;
+    IMS_BOOL IsRtcpXrPlrEnabled() const;
+    IMS_BOOL IsRtcpXrPdrEnabled() const;
+    IMS_SINT32 GetDTMFDuration() const;
+    IMS_SINT32 GetModeChangeCapability() const;
+    IMS_SINT32 GetModeChangePeriod() const;
+    IMS_SINT32 GetModeChangeNeighbor() const;
+    const IMSVector<AString>& GetAudioCandidateAttribute() const;
 
-        const CodecConfig* GetCodecConfig() const;
-        const IMSList<CodecConfig*>& GetCodecConfigs() const;
+public:
+    enum
+    {
+        AUDIO_HALFRATE_SETTING = 10
+    };   // setting at "dm_operation_preferred_mode" Media DB table.
 
-        IMS_BOOL Update(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex);
+    enum
+    {
+        BW_OPTION_LOCAL_VALUE = 0,
+        BW_OPTION_REMOTE_VALUE = 1
+    };
 
-    protected:
-        void Clear();
-        IMS_BOOL CreateCodecConfigs(IN CONST AString &strRef, IN CONST IMS_SINT32 nCodecListSize,
-            IN IMS_SINT32 nSlotID = 0);
+    enum
+    {
+        DEFAULT_VOCODER_INTERFACE = 2
+    }; //[VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD.
 
-    private:
-        enum
-        {
-            DEFAULT_PTIME = 20
-        };
-        enum
-        {
-            DEFAULT_MAXPTIME = 60
-        };
-        enum
-        {
-            DEFAULT_DTMF_DURATION = 10
-        };
-        enum
-        {
-            DEFAULT_DTMF_RETRANSMIT_DURATION = 2
-        };
-        enum
-        {
-            DEFAULT_DTMF_INTERVAL = 3
-        };
-        enum
-        {
-            DEFAULT_JITTER_BUFFER_MAX_SIZE = 9,
-            DEFAULT_JITTER_BUFFER_MIN_SIZE = 4,
-            DEFAULT_JITTER_BUFFER_SIZE = 4
-        };
-        enum
-        {
-            AUDIO_HALFRATE_SETTING = 10
-        };   // setting at "dm_operation_preferred_mode" Media DB table.
+    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
 
-    public:
-        enum
-        {
-            DEFAULT_VOCODER_INTERFACE = 2
-        }; //[VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD.
+    static const IMS_SINT32 DEFAULT_PTIME = 20;
+    static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
+    static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
+    static const IMS_BOOL DEFAULT_BW_NEGO_OPERION = BW_OPTION_LOCAL_VALUE;
+    static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 184; // TODO_MEDIA check default value
+    static const IMS_SINT32 DEFAULT_JITTER_MIN = 4;
+    static const IMS_SINT32 DEFAULT_JITTER_MAX = 9;
+    static const IMS_SINT32 DEFAULT_JITTER_ADJUST = 4;
+    static const IMS_SINT32 DEFAULT_JITTER_STEP = 4;
+    static const IMS_BOOL DEFAULT_RTCPXR = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_RTCPXR_STATISTICS = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_RTCPXR_VOIP_METRICS = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_RTCPXR_PACKET_LOSS_RLE = IMS_FALSE;
+    static const IMS_BOOL DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE = IMS_FALSE;
+    static const IMS_SINT32 DEFAULT_DTMF_DURATION = 200;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
+    static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
+    #define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
 
-    private:
-        // sdp offer/answer
-        static const IMS_CHAR KEY_PTIME[];
-        static const IMS_CHAR KEY_MAXPTIME[];
-        static const IMS_CHAR KEY_CANDIDATE_PRIORITY[];
-        static const IMS_CHAR KEY_REARRANGE_MODE_SET_BY_AS[];
-        static const IMS_CHAR KEY_VOCODER_INTERFACE[];
-        static const IMS_CHAR KEY_DM_OPERATION_PREFERRED_MODE[];
-        static const IMS_CHAR KEY_MODE_CHANGE_CAPA_ALWAYS_ANSWER[];
-        static const IMS_CHAR KEY_USE_SINGLE_IP[];
-
-    private:
-        // PDP Profile number for CP audio
-        IMS_SINT32 nPdpProfileNum;
-        IMS_SINT32 nPdpProfileNumOf3G;
-        // Jitter buffer control
-        IMS_SINT32 nJitterBufferMaxSize;
-        IMS_SINT32 nJitterBufferMinSize;
-        IMS_SINT32 nJitterBufferSize;
-        // Common attributes
-        IMS_SINT32 nPacketTime;
-        IMS_SINT32 nMaxPacketTime;
-        IMS_SINT32 nCandidatePriority;
-        IMS_SINT32 nDtmfDuration;                  // duration / 20msec
-        IMS_SINT32 nDtmfRetransmitDuration;
-        IMS_SINT32 nDtmfInterval;
-        IMS_SINT32 nRearrangeModeSetByAs;
-        IMS_SINT32 nDmOperationPreferred_mode;
-        IMS_SINT32 nEvsCodecEnable;
-        IMS_SINT32 nModeChangeCapaAlwaysAnswer;
-        IMS_SINT32 nAudioHalfRateMode;
-        // Provisioned codecs
-        IMSList<CodecConfig*> objCodecConfigs;
+private:
+    IMS_SINT32 m_nAudioPtime;
+    IMS_SINT32 m_nAudioMaxPtime;
+    IMS_SINT32 m_nAudioMaxRed;
+    IMS_BOOL m_bAudioBwNegoOptionEnabled;
+    IMS_SINT32 m_nAudioRtpDscp;
+    IMS_SINT32 m_nJitterBufferMinSize;
+    IMS_SINT32 m_nJitterBufferMaxSize;
+    IMS_SINT32 m_nJitterBufferAdjustTime;
+    IMS_SINT32 m_nJitterBufferStepSize;
+    IMS_BOOL m_bAudioRtcpxrEnabled;
+    IMS_BOOL m_bAudioRtcpxrStatisticsEnabled;
+    IMS_BOOL m_bAudioRtcpxrVoipMetricsEnabled;
+    IMS_BOOL m_bAudioRtcpxrPacketLossRleEnabled;
+    IMS_BOOL m_bAudioRtcpxrPacketDuplicateRleEnabled;
+    IMS_SINT32 m_nDtmfDuration;
+    IMS_SINT32 m_nModeChangeCapability;
+    IMS_SINT32 m_nModeChangePeriod;
+    IMS_SINT32 m_nModeChangeNeighbor;
+    IMSVector<AString> m_objAudioCandidateAttribute;
 };
-#endif                                              // _AUDIO_CONFIG_H_
+#endif                                              // _AUDIO_CONFIGURATION_H_

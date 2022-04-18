@@ -14,25 +14,33 @@
  * limitations under the License.
  */
 
-#ifndef _CODEC_MPEG4_CONFIG_H_
-#define _CODEC_MPEG4_CONFIG_H_
+#include "ServiceTrace.h"
+#include "config/CodecPcmConfig.h"
 
-#include "config/CodecConfig.h"
+__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
-class CodecMPEG4Config :
-        public CodecConfig
+PUBLIC
+CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
+        CodecConfig(nType_, nPayloadTypeNum_)
 {
-public:
-    CodecMPEG4Config();
-    virtual ~CodecMPEG4Config();
+    IMS_TRACE_D("+CodecPcmConfig Type[%d]", nType_, 0, 0);
+}
 
-private:
-    CodecMPEG4Config(IN CONST CodecMPEG4Config &objRHS);
-    CodecMPEG4Config& operator=(IN CONST CodecMPEG4Config &objRHS);
+PUBLIC VIRTUAL
+CodecPcmConfig::~CodecPcmConfig()
+{
+    IMS_TRACE_D("~CodecPcmConfig", 0, 0, 0);
+}
 
-public:
-    // CodecConfig class
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer);
-    virtual void ToDebugString() const;
-};
-#endif                                              // _CODEC_MPEG4_CONFIG_H_
+PUBLIC VIRTUAL
+IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc)
+{
+    (void) piCc;
+    return IMS_TRUE;
+}
+
+PUBLIC VIRTUAL
+void CodecPcmConfig::ToDebugString() const
+{
+    CodecConfig::ToDebugString();
+}

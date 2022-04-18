@@ -14,32 +14,29 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "TextParser.h"
-#include "IConfigBuffer.h"
-#include "Configuration.h"
-#include "config/MediaSessionConfig.h"
-#include "config/CodecConfigFactory.h"
+#include "config/ImsCodec.h"
 #include "config/TextConfiguration.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CONF");
-
-PRIVATE GLOBAL
-const IMS_CHAR TextConfiguration::KEY_KEEP_REDLEVEL[] = "keep_redlevel";
+__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
-        MediaConfiguration(eSessionType),
-        nPdpProfileNum(-1),
-        nPdpProfileNumOf3G(-1),
-        nKeepRedlevel(-1)
+TextConfiguration::TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType) :
+        MediaConfiguration(_eSessionType),
+        nT140PayloadType(DEFAULT_PAYLOAD_T140),
+        nRedPayloadType(DEFAULT_PAYLOAD_RED),
+        bTextCodecEmptyRedundantEnabled(DEFAULT_EMPTY_REDUNDANT)
 {
+    IMS_TRACE_I("+TextConfiguration sessiontype[%d]", _eSessionType, 0, 0);
+    nAsBandwidthKbps = DEFAULT_AS;
+    nRsBandwidthBps = DEFAULT_RR;
+    nRrBandwidthBps = DEFAULT_RS;
 }
 
 PUBLIC
 TextConfiguration::~TextConfiguration()
 {
+    IMS_TRACE_I("~TextConfiguration", 0, 0, 0);
     Clear();
 }
 
@@ -49,47 +46,60 @@ Remarks
 
 */
 PUBLIC VIRTUAL
-IMS_BOOL TextConfiguration::Create(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex,
-        IN IMS_SINT32 nSlotID)
+IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
 {
-    if (piBuffer == IMS_NULL)
+    if (piCc == IMS_NULL)
     {
-        IMS_TRACE_D("piBuffer == IMS_NULL", 0, 0, 0);
+        IMS_TRACE_D("Create piCc is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_TEXT, nIndex))
+    // Media Configuration attributes
+    SetPorts(piCc, CarrierConfig::ImsRtt::KEY_TEXT_PORT_RTP_INT_ARRAY);
+    SetRtcpIntervals(piCc, CarrierConfig::ImsRtt::KEY_TEXT_RTCP_INTERVAL_INT_ARRAY);
+
+    nAsBandwidthKbps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_AS_BANDWIDTH_KBPS_INT);
+    nRrBandwidthBps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_RR_BANDWIDTH_BPS_INT);
+    nRsBandwidthBps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT);
+
+    nRtpInactivityTimerMillis = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT); // same with audio
+    nRtcpInactivityTimerMillis = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT); // same with audio
+
+    // Text Configuration attributes
+    // TODO_MEDIA need to add after creating HEVC in CarrierConfig
+    // bTextCodecEmptyRedundantEnabled = piCc->GetBoolean(
+    //     CarrierConfig::Assets::KEY_TEXT_CODEC_EMPTY_REDUNDANT_BOOL);
+
+    if (!CreateCodecConfigs(piCc))
     {
-        IMS_TRACE_D("CaptureSection", 0, 0, 0);
+        IMS_TRACE_E(0, "Create - CreateCodecConfigs failure ", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (!MediaConfiguration::Create(piBuffer, nIndex))
+   return IMS_TRUE;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
+IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
+{
+    if (piCc == IMS_NULL)
     {
-        IMS_TRACE_D("MediaConfiguration::Create", 0, 0, 0);
-        piBuffer->ReleaseSection();
         return IMS_FALSE;
     }
-
-    // mmpf configuration
-    nKeepRedlevel = piBuffer->ReadValueInt(KEY_KEEP_REDLEVEL);
-
-    // Codec information
-    const IMS_SINT32 nCodecListSize =
-            piBuffer->ReadValueInt(MediaSessionConfig::KEY_CODEC_LIST_SIZE);
-    const AString &strCodecRef = piBuffer->ReadValue(MediaSessionConfig::KEY_CODEC_REF);
 
     Clear();
-
-    // Creates a codec configuration
-    if (!CreateCodecConfigs(strCodecRef, nCodecListSize, nSlotID))
+    if (!Create(piCc))
     {
-        IMS_TRACE_E(0, "Create - CreateCodecConfigs failure [%s]", strCodecRef.GetStr(), 0, 0);
-        piBuffer->ReleaseSection();
+        IMS_TRACE_E(0, "Re-create TextConfiguration failure", 0, 0, 0);
         return IMS_FALSE;
     }
-
-    piBuffer->ReleaseSection();
 
     return IMS_TRUE;
 }
@@ -99,184 +109,71 @@ IMS_BOOL TextConfiguration::Create(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIn
 Remarks
 
 */
-PUBLIC VIRTUAL
+PROTECTED VIRTUAL
+IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
+{
+    if (piCc == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "CreateCodecConfigs - piCc is NULL", 0,0,0);
+        return IMS_FALSE;
+    }
+
+    //MediaTextCodecCapabilityPayloadTypesBundle
+    ICarrierConfig* piCcBundle = piCc->GetBundle(
+        CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+    if (piCcBundle == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    nT140PayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_T140_PAYLOAD_TYPE_INT);
+    nRedPayloadType = piCcBundle->GetInt(CarrierConfig::ImsRtt::KEY_RED_PAYLOAD_TYPE_INT);
+
+    piCcBundle->ReleaseBundle();
+    piCcBundle = IMS_NULL;
+
+    IMS_UINT32 nCodecCnt = 0;
+    if (nT140PayloadType > 0)
+    {
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_T140, nCodecCnt, nT140PayloadType);
+    }
+    if (nRedPayloadType > 0)
+    {
+        nCodecCnt = MakeCodec(piCc, ImsCodec::TEXT_RED, nCodecCnt, nRedPayloadType);
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
 void TextConfiguration::ToDebugString() const
 {
-
-
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("nPdpProfileNum (%d)", nPdpProfileNum, 0, 0);
+    IMS_TRACE_D("nT140PayloadType[%d], nRedPayloadType[%d], bTextCodecEmptyRedundantEnabled(%d)",
+            nT140PayloadType, nRedPayloadType, bTextCodecEmptyRedundantEnabled);
 
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
-        CodecConfig *pCodecConfig = objCodecConfigs.GetAt(i);
-
-        if (pCodecConfig == IMS_NULL)
-            continue;
-
-        pCodecConfig->ToDebugString();
+        ToDebugStringCodecs(objCodecConfigs.GetAt(i));
     }
 }
 
 PUBLIC
-IMS_SINT32 TextConfiguration::GetPdpProfileNum() const
+IMS_SINT32 TextConfiguration::GetT140PayloadType() const
 {
-    return nPdpProfileNum;
-}
-
-/*!
- * details :    configuration for mmpf to distingish with VZW and TMO requirement
- *              VZW requires primary only data should sent by T.140 payload not redundant payload
- */
-PUBLIC
-IMS_BOOL TextConfiguration::GetKeepRedLevel() const
-{
-    return (nKeepRedlevel > 0);
+    return nT140PayloadType;
 }
 
 PUBLIC
-const CodecConfig* TextConfiguration::GetCodecConfig() const
+IMS_SINT32 TextConfiguration::GetRedPayloadType() const
 {
-    if (objCodecConfigs.IsEmpty())
-        return IMS_NULL;
-
-    return objCodecConfigs.GetAt(0);
+    return nRedPayloadType;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-const IMSList<CodecConfig*>& TextConfiguration::GetCodecConfigs() const
+IMS_BOOL TextConfiguration::IsTextCodecEmptyRedundantEnabled() const
 {
-    return objCodecConfigs;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL TextConfiguration::Update(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex)
-{
-    if (piBuffer == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_TEXT, nIndex))
-    {
-        return IMS_FALSE;
-    }
-
-    // Remove writing code to DB
-    /*
-    // RTP / RTCP port numbers
-    //    piBuffer->WriteValueInt(MediaSessionConfig::KEY_PORT_RTP, nPortRtp);
-    //    piBuffer->WriteValueInt(MediaSessionConfig::KEY_PORT_RTCP, nPortRtcp);
-
-    // Codec information
-    //3 Codec Update ?
-
-    piBuffer->WriteToMedium();
-    */
-
-    piBuffer->ReleaseSection();
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-void TextConfiguration::Clear()
-{
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
-    {
-        CodecConfig *pCodecConfig = objCodecConfigs.GetAt(i);
-
-        if (pCodecConfig == IMS_NULL)
-        {
-            continue;
-        }
-
-        delete pCodecConfig;
-    }
-
-    objCodecConfigs.Clear();
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_BOOL TextConfiguration::CreateCodecConfigs(IN CONST AString &strRef,
-        IN CONST IMS_SINT32 nCodecListSize, IN IMS_SINT32 nSlotID)
-{
-    IConfigBuffer *piBuffer = Configuration::GetInstance()->CreateConfig(strRef, nSlotID);
-
-    if (piBuffer == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    for (IMS_SINT32 nIndex = 0; nIndex < nCodecListSize; ++nIndex)
-    {
-        if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_TEXT_CODEC, nIndex))
-        {
-            piBuffer->Destroy();
-            return IMS_FALSE;
-        }
-
-        const AString &strCodecName = piBuffer->ReadValue(MediaSessionConfig::KEY_CODEC_TYPE);
-
-        IMS_TRACE_D("CodecConfig text - session_type[%d], index[%d], codec[%s]",
-                GetSessionType(), nIndex, strCodecName.GetStr());
-
-        if (strCodecName.EqualsIgnoreCase("None") || strCodecName.Equals(""))
-        {
-            continue;
-        }
-
-        CodecConfig *pCodecConfig = CodecConfigFactory::CreateTCodecConfig(strCodecName, nIndex);
-
-        if (pCodecConfig == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, can't create a codec config(%s)",
-                    strCodecName.GetStr(), 0, 0);
-
-            piBuffer->Destroy();
-            return IMS_FALSE;
-        }
-
-        if (!pCodecConfig->Create(piBuffer))
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, Create failure", 0, 0, 0);
-
-            piBuffer->Destroy();
-            delete pCodecConfig;
-            return IMS_FALSE;
-        }
-
-        if (!objCodecConfigs.Append(pCodecConfig))
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, Append failure", 0, 0, 0);
-
-            piBuffer->Destroy();
-            return IMS_FALSE;
-        }
-    }
-
-    piBuffer->Destroy();
-
-    return IMS_TRUE;
+    return bTextCodecEmptyRedundantEnabled;
 }

@@ -19,21 +19,11 @@
 
 #include "AString.h"
 
-class IMSCodec
+class ImsCodec
 {
 public:
-    // Convert audio codec enum to string
-    static const IMS_CHAR* AtoString(IN IMS_SINT32 nType);
-    // Convert video codec enum to string
-    static const IMS_CHAR* VtoString(IN IMS_SINT32 nType);
-    // Convert text codec enum to string
-    static const IMS_CHAR* TtoString(IN IMS_SINT32 nType);
-    // Convert string to audio codec enum
-    static IMS_SINT32 AtoType(IN CONST AString &strName);
-    // Convert string to video codec enum
-    static IMS_SINT32 VtoType(IN CONST AString &strName);
-    // Convert string to text codec enum
-    static IMS_SINT32 TtoType(IN CONST AString &strName);
+    // Convert codec enum to string
+    static const IMS_CHAR* CodecToString(IN IMS_SINT32 nType);
 
 public:
     // Audio Codecs
@@ -42,12 +32,10 @@ public:
         AUDIO_NONE = 0,
         AUDIO_AMR = 1,
         AUDIO_AMR_WB,
-        AUDIO_EVRC,
-        AUDIO_EVRC0,
-        AUDIO_EVRCB,
         AUDIO_PCMA,
         AUDIO_PCMU,
         AUDIO_TELEPHONE_EVENT,
+        AUDIO_TELEPHONE_EVENT_WB,
         AUDIO_EVS,
         AUDIO_MAX = 99
     };
@@ -56,12 +44,8 @@ public:
     enum
     {
         VIDEO_NONE = 100,
-        VIDEO_H264 = 101,
-        VIDEO_H263,
-        VIDEO_H263_1998,
-        VIDEO_H263_2000,
-        VIDEO_MPEG4,
-        VIDEO_H265,
+        VIDEO_AVC= 101,
+        VIDEO_HEVC,
         VIDEO_MAX = 199
     };
 

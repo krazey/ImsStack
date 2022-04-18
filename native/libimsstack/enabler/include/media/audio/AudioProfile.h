@@ -46,7 +46,6 @@ public :
     {
     public :
         IMS_UINT32 nModeSetList;
-        IMS_UINT32 nDefaultRtpModeSet;    // default mode-set
         IMS_BOOL bSCREnable;
 
         enum
@@ -55,7 +54,6 @@ public :
             DEFAULT_MODECHANGE_CAPABILITY = 1,
             DEFAULT_MODECHANGE_PERIOD = 1,
             DEFAULT_MODECHANGE_NEIGHBOR = 0,
-            DEFAULT_ROBUSTSORTING = 0,
             DEFAULT_MAXRED = -1,
             DEFAULT_PTIME = -1,
             DEFAULT_MAXPTIME = -1,
@@ -66,7 +64,6 @@ public :
         IMS_SINT32 nModeChangeCapability;
         IMS_SINT32 nModeChangePeriod;
         IMS_SINT32 nModeChangeNeighbor;
-        IMS_SINT32 nRobustSorting;
 
         IMS_SINT32 nMaxRed;
         IMS_SINT32 nPtime;
@@ -85,13 +82,11 @@ public :
     public :
         AmrFmtp(IN AmrFmtp* pFmtp = NULL) :
                 nModeSetList(0),
-                nDefaultRtpModeSet(0),
                 bSCREnable(IMS_FALSE),
                 nOctetAlign(DEFAULT_OCTCTALIGN),
                 nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
                 nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
                 nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                nRobustSorting(DEFAULT_ROBUSTSORTING),
                 nMaxRed(DEFAULT_MAXRED),
                 nPtime(DEFAULT_PTIME),
                 nMaxPtime(DEFAULT_MAXPTIME),
@@ -110,13 +105,11 @@ public :
             }
 
             this->nModeSetList = pFmtp->nModeSetList;
-            this->nDefaultRtpModeSet = pFmtp->nDefaultRtpModeSet;
             this->bSCREnable = pFmtp->bSCREnable;
             this->nOctetAlign = pFmtp->nOctetAlign;
             this->nModeChangeCapability = pFmtp->nModeChangeCapability;
             this->nModeChangePeriod = pFmtp->nModeChangePeriod;
             this->nModeChangeNeighbor = pFmtp->nModeChangeNeighbor;
-            this->nRobustSorting = pFmtp->nRobustSorting;
 
             this->nMaxRed = pFmtp->nMaxRed;
             this->nPtime = pFmtp->nPtime;
@@ -136,13 +129,11 @@ public :
         AmrFmtp(IN IMS_UINT32 modeSet, IN IMS_SINT32 octetAlign,
                 IN IMS_SINT32 modeChangeCapablity) :
                 nModeSetList(modeSet),
-                nDefaultRtpModeSet(0),
                 bSCREnable(IMS_TRUE),
                 nOctetAlign(octetAlign),
                 nModeChangeCapability(modeChangeCapablity),
                 nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
                 nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
-                nRobustSorting(DEFAULT_ROBUSTSORTING),
                 nMaxRed(DEFAULT_MAXRED),
                 nPtime(DEFAULT_PTIME),
                 nMaxPtime(DEFAULT_MAXPTIME),
@@ -231,12 +222,8 @@ public :
         IMS_SINT32 nReceivedChAwRecv;   // -1 is channel aware mode disable,
                                         // 0(default) is not used at the start of the session,
                                         // but it'll be changed using CMR or RTCP app.
-        IMS_UINT32 nDefaultBandwidthList;
-        IMS_UINT32 nDefaultBitrateList;
-
         // AMR-WB IO parameter
         IMS_UINT32 nModeSetList;
-        IMS_UINT32 nDefaultRtpModeSet;    // default mode-set
         IMS_SINT32 nModeChangeCapability;
         IMS_SINT32 nModeChangePeriod;
         IMS_SINT32 nModeChangeNeighbor;
@@ -274,10 +261,7 @@ public :
                 nCmr(DEFAULT_CMR),
                 nChAwRecv(DEFAULT_CHANNEL_AWMODE),
                 nReceivedChAwRecv(DEFAULT_CHANNEL_AWMODE),
-                nDefaultBandwidthList(0),
-                nDefaultBitrateList(0),
                 nModeSetList(DEFAULT_MODESETLIST),
-                nDefaultRtpModeSet(DEFAULT_RTPMODESET),
                 nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
                 nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
                 nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
@@ -315,10 +299,7 @@ public :
             this->nCmr = pFmtp->nCmr;
             this->nChAwRecv = pFmtp->nChAwRecv;
             this->nReceivedChAwRecv = pFmtp->nReceivedChAwRecv;
-            this->nDefaultBandwidthList = pFmtp->nDefaultBandwidthList;
-            this->nDefaultBitrateList = pFmtp->nDefaultBitrateList;
             this->nModeSetList = pFmtp->nModeSetList;
-            this->nDefaultRtpModeSet = pFmtp->nDefaultRtpModeSet;
             this->nModeChangeCapability = pFmtp->nModeChangeCapability;
             this->nModeChangePeriod = pFmtp->nModeChangePeriod;
             this->nModeChangeNeighbor = pFmtp->nModeChangeNeighbor;
@@ -379,7 +360,7 @@ public :
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
             {
-                AudioProfile::AmrFmtp* fmtp = (AudioProfile::AmrFmtp*)this->pFmtp;
+                AudioProfile::AmrFmtp* fmtp = reinterpret_cast<AudioProfile::AmrFmtp*>(this->pFmtp);
                 if (fmtp != IMS_NULL)
                 {
                     delete fmtp;
@@ -387,7 +368,7 @@ public :
             }
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
             {
-                AudioProfile::EvsFmtp* fmtp = (AudioProfile::EvsFmtp*)this->pFmtp;
+                AudioProfile::EvsFmtp* fmtp = reinterpret_cast<AudioProfile::EvsFmtp*>(this->pFmtp);
                 if (fmtp != IMS_NULL)
                 {
                     delete fmtp;
@@ -396,7 +377,7 @@ public :
             else if (objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
             {
                 AudioProfile::TelephoneEventFmtp* fmtp =
-                        (AudioProfile::TelephoneEventFmtp*)this->pFmtp;
+                        reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(this->pFmtp);
                 if (fmtp != IMS_NULL)
                 {
                     delete fmtp;
@@ -498,7 +479,6 @@ public :
     IMS_SINT32 nCandidatePriority;
     IMS_SINT32 nNegotiatedPayloadIndex;
     IMS_BOOL bIsOfferCase;
-    IMS_BOOL bIsHold;
     //SRTP parameter
     CapaNego objCapaNego;
     IMS_BOOL bSupportSrtp;
@@ -528,7 +508,6 @@ public :
             nCandidatePriority(-1),
             nNegotiatedPayloadIndex(-1),
             bIsOfferCase(IMS_FALSE),
-            bIsHold(IMS_FALSE),
             objCapaNego(CapaNego()),
             bSupportSrtp(IMS_FALSE),
             bSupportCapaNegoForSrtp(IMS_FALSE),
@@ -608,7 +587,8 @@ public :
             if (pOldPayload->objRtpMap.strPayloadType.Equals("AMR") ||
                     pOldPayload->objRtpMap.strPayloadType.Equals("AMR-WB"))
             {
-                AudioProfile::AmrFmtp* pOld_AMRFmtp = (AudioProfile::AmrFmtp*)pOldPayload->pFmtp;
+                AudioProfile::AmrFmtp* pOld_AMRFmtp =
+                        reinterpret_cast<AudioProfile::AmrFmtp*>(pOldPayload->pFmtp);
                 if (pOld_AMRFmtp == IMS_NULL)
                 {
                     delete pNewPayload;
@@ -618,12 +598,12 @@ public :
                 }
 
                 AudioProfile::AmrFmtp* pNew_AmrFmtp = new AudioProfile::AmrFmtp(pOld_AMRFmtp);
-                pNewPayload->pFmtp = (void*)pNew_AmrFmtp;
+                pNewPayload->pFmtp = reinterpret_cast<void*>(pNew_AmrFmtp);
             }
             else if (pOldPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
             {
                 AudioProfile::TelephoneEventFmtp* pOld_TEFmtp =
-                        (AudioProfile::TelephoneEventFmtp*)pOldPayload->pFmtp;
+                        reinterpret_cast<AudioProfile::TelephoneEventFmtp*>(pOldPayload->pFmtp);
                 if (pOld_TEFmtp == IMS_NULL)
                 {
                     delete pNewPayload;
@@ -634,11 +614,12 @@ public :
 
                 AudioProfile::TelephoneEventFmtp* pNew_TEFmtp =
                         new AudioProfile::TelephoneEventFmtp(pOld_TEFmtp);
-                pNewPayload->pFmtp = (void*)pNew_TEFmtp;
+                pNewPayload->pFmtp = reinterpret_cast<void*>(pNew_TEFmtp);
             }
             else if (pOldPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("EVS"))
             {
-                AudioProfile::EvsFmtp* pOld_EVSFmtp =(AudioProfile::EvsFmtp*)pOldPayload->pFmtp;
+                AudioProfile::EvsFmtp* pOld_EVSFmtp =
+                        reinterpret_cast<AudioProfile::EvsFmtp*>(pOldPayload->pFmtp);
                 if (pOld_EVSFmtp == IMS_NULL)
                 {
                     delete pNewPayload;
@@ -648,7 +629,7 @@ public :
                 }
 
                 AudioProfile::EvsFmtp* pNew_EVSFmtp = new AudioProfile::EvsFmtp(pOld_EVSFmtp);
-                pNewPayload->pFmtp = (void*)pNew_EVSFmtp;
+                pNewPayload->pFmtp = reinterpret_cast<void*>(pNew_EVSFmtp);
             }
 
             this->lstPayload.Append(pNewPayload);
@@ -659,7 +640,7 @@ public :
         this->nMaxPtime = pProfile->nMaxPtime;
         this->nCandidatePriority = pProfile->nCandidatePriority;
         this->bIsOfferCase = pProfile->bIsOfferCase;
-        this->bIsHold = pProfile->bIsHold;
+
         this->objCapaNego = pProfile->objCapaNego;
         //SRTP
         this->bSupportSrtp = pProfile->bSupportSrtp;

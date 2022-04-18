@@ -110,9 +110,9 @@ enum RTPPyaloadHeaderMode
     // amr mode
     RTPPAYLOADHEADER_MODE_AMR_OCTETALIGNED     = 0, // octet aligned mode
     RTPPAYLOADHEADER_MODE_AMR_EFFICIENT        = 1, // efficient mode
-    // h.264 mode
-    RTPPAYLOADHEADER_MODE_H264_SINGLE_NAL_UNIT = 0, // packet mode 0
-    RTPPAYLOADHEADER_MODE_H264_NON_INTERLEAVED = 1, // packet mode 1
+    // avc mode
+    RTPPAYLOADHEADER_MODE_AVC_SINGLE_NAL_UNIT = 0, // packet mode 0
+    RTPPAYLOADHEADER_MODE_AVC_NON_INTERLEAVED = 1, // packet mode 1
     // evs mode
     RTPPAYLOADHEADER_MODE_EVS_COMPACT          = 0, // EVS compact format 0
     RTPPAYLOADHEADER_MODE_EVS_HEADER_FULL      = 1, // EVS header-full format 1
