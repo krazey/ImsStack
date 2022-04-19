@@ -18,7 +18,6 @@
 #include "IMSList.h"
 #include "IMSMSG.h"
 #include "ITimer.h"
-#include "ICoreTimer.h"
 
 class IMutex;
 
@@ -37,9 +36,6 @@ public:
     ITimer* CreateTimer();
     ITimer* CreateTimer(IN IMS_BOOL bAlarmTimer);
     void DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
-
-    ICoreTimer* CreateCoreTimer();
-    void DestroyCoreTimer(IN ICoreTimer *&piCoreTimer);
 
     void DispatchServiceMessage(IN IMSMSG &objMSG);
 

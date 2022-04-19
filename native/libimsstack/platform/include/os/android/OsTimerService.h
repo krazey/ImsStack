@@ -18,13 +18,13 @@
 
 #include "IMSList.h"
 #include "OsMutex.h"
-#include "OsPthread.h"
+#include "system-intf/ISystemListener.h"
 
-class OsCoreTimer;
 class OsTimer;
-class OsTimerThread;
+class OsTimerWrapper;
 
 class OsTimerService
+    : public ISystemListener
 {
 public :
     OsTimerService();
@@ -34,22 +34,24 @@ public :
     OsTimerService& operator=(IN const OsTimerService&) = delete;
 
 public:
-    void KillCoreTimer(IN OsCoreTimer* pTimer);
     void KillTimer(IN OsTimer* pTimer);
-
-    IMS_BOOL SetCoreTimer(IN IMS_UINT32 nDuration,
-            IN OsCoreTimer* pCoreTimer, IN IMS_BOOL bRepeat = IMS_FALSE);
-    IMS_BOOL SetTimer(IN IMS_UINT32 nDuration,
-            IN OsTimer* pTimer, IN IMS_BOOL bRepeat = IMS_FALSE);
+    IMS_BOOL SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer);
 
     static void CleanUp();
     static void StartUp();
     static OsTimerService* GetTimerService();
 
 private:
+    // ISystemListener class
+    void System_NotifyEvent(IN IMS_UINT32 nEvent,
+            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper);
+
+private:
     static OsTimerService* s_pTimerService;
 
-    OsTimerThread* m_pWorkerThread;
+    OsMutex m_objLockTimer;
+    IMSList<OsTimerWrapper*> m_objTimers;
 };
 
 #endif

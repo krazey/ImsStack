@@ -15,7 +15,6 @@
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ImsTimer.h"
-#include "ImsCoreTimer.h"
 #include "PlatformFactory.h"
 #include "ServiceTimer.h"
 
@@ -91,28 +90,6 @@ void TimerService::DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread/
     }
 
     piTimer = IMS_NULL;
-}
-
-PUBLIC
-ICoreTimer* TimerService::CreateCoreTimer()
-{
-    ImsCoreTimer *pCoreTimer = PlatformFactory::CreateCoreTimer();
-
-    IMS_ASSERT(pCoreTimer != IMS_NULL);
-
-    return pCoreTimer;
-}
-
-PUBLIC
-void TimerService::DestroyCoreTimer(IN ICoreTimer *&piCoreTimer)
-{
-    ImsCoreTimer *pCoreTimer = DYNAMIC_CAST(ImsCoreTimer*, piCoreTimer);
-
-    if (pCoreTimer != IMS_NULL)
-    {
-        delete pCoreTimer;
-        piCoreTimer = IMS_NULL;
-    }
 }
 
 PUBLIC

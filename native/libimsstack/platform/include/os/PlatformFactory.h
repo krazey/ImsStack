@@ -46,7 +46,6 @@ class IZLib;
 class ImsContentCursor;
 class ImsContentProvider;
 class ImsContentTable;
-class ImsCoreTimer;
 class ImsFile;
 class ImsMutex;
 class ImsNetworkConnection;
@@ -72,7 +71,6 @@ public:
     static IMS_ULONG GetCurrentThreadId();
 
     static ImsTimer* CreateTimer();
-    static ImsCoreTimer* CreateCoreTimer();
 
     static ISystemTime* CreateSystemTime();
     static void DestroySystemTime(IN ISystemTime*& piSysTime);

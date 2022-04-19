@@ -125,12 +125,6 @@ ImsTimer* PlatformFactory::CreateTimer()
 }
 
 PUBLIC GLOBAL
-ImsCoreTimer* PlatformFactory::CreateCoreTimer()
-{
-    return new OsCoreTimer();
-}
-
-PUBLIC GLOBAL
 ISystemTime* PlatformFactory::CreateSystemTime()
 {
     return new OsSystemTime();

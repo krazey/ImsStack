@@ -71,8 +71,7 @@ IMS_BOOL OsTimer::Equals(IN const ITimer* piTimer) const
  * If successful; otherwise, an error(0) is returned.
  */
 PUBLIC VIRTUAL
-IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration,
-        IN ITimerListener* piListener, IN IMS_BOOL bRepeat /*= IMS_FALSE*/)
+IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener)
 {
     if (m_nState == STATE_ACTIVE)
     {
@@ -85,7 +84,7 @@ IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration,
     m_nTimerId = CreateTimerId();
     m_piListener = piListener;
 
-    OsTimerService::GetTimerService()->SetTimer(nDuration, this, bRepeat);
+    OsTimerService::GetTimerService()->SetTimer(nDuration, this);
 
     IMS_TRACE_I("Timer :: Set (id=%" PFLS_u ",%d; duration=%d)",
             m_nTimerId, m_nInternalTimerId, nDuration);
@@ -143,61 +142,4 @@ PRIVATE
 IMS_UINTP OsTimer::CreateTimerId()
 {
     return reinterpret_cast<IMS_UINTP>(this);
-}
-
-
-
-PUBLIC
-OsCoreTimer::OsCoreTimer()
-    : m_nState(STATE_INACTIVE)
-    , m_nTimerId(0)
-{
-}
-
-PUBLIC VIRTUAL
-OsCoreTimer::~OsCoreTimer()
-{
-    if (m_nState == STATE_ACTIVE)
-    {
-        KillTimer();
-    }
-}
-
-/**
- * @brief Returns an identifier for the timer.
- *
- * If successful; otherwise, an error(0) is returned.
- */
-PUBLIC VIRTUAL
-IMS_UINTP OsCoreTimer::SetTimer(IN IMS_UINT32 nDuration,
-        IN ICoreTimerListener* piListener, IN IMS_BOOL bRepeat /*= IMS_FALSE*/)
-{
-    if (m_nState == STATE_ACTIVE)
-    {
-        IMS_TRACE_D("Core timer (%" PFLS_u ") is already active", m_nTimerId, 0, 0);
-        return 0;
-    }
-
-    m_nState = STATE_ACTIVE;
-    m_nTimerId = reinterpret_cast<IMS_UINTP>(this);
-    m_piListener = piListener;
-
-    OsTimerService::GetTimerService()->SetCoreTimer(nDuration, this, bRepeat);
-
-    IMS_TRACE_I("CoreTimer :: Set (id=%" PFLS_u "; duration=%d)", m_nTimerId, nDuration, 0);
-
-    return m_nTimerId;
-}
-
-PUBLIC VIRTUAL
-void OsCoreTimer::KillTimer()
-{
-    m_piListener = IMS_NULL;
-
-    if (m_nState == STATE_ACTIVE)
-    {
-        OsTimerService::GetTimerService()->KillCoreTimer(this);
-        m_nState = STATE_INACTIVE;
-        m_nTimerId = 0;
-    }
 }

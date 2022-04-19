@@ -851,7 +851,7 @@ void OsSslSocket::DoHandshake()
 
     if (m_piSslConnectRetryTimer != IMS_NULL)
     {
-        m_piSslConnectRetryTimer->SetTimer(SSL_CONNECT_RETRY_INTERVAL, this, IMS_FALSE);
+        m_piSslConnectRetryTimer->SetTimer(SSL_CONNECT_RETRY_INTERVAL, this);
     }
     else
     {

@@ -16,7 +16,6 @@
 #ifndef OS_TIMER_H_
 #define OS_TIMER_H_
 
-#include "ImsCoreTimer.h"
 #include "ImsTimer.h"
 
 class OsTimer
@@ -32,8 +31,7 @@ public:
 public:
     // ITimer class
     IMS_BOOL Equals(IN const ITimer* piTimer) const override;
-    IMS_UINTP SetTimer(IN IMS_UINT32 nDuration,
-            IN ITimerListener* piListener, IN IMS_BOOL bRepeat = IMS_FALSE) override;
+    IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener) override;
     void KillTimer() override;
 
     // ImsTimer class
@@ -62,36 +60,6 @@ private:
     IMS_UINTP m_nTimerId;
     // For internal uses :: compare the internal timer id with lParam
     IMS_UINT32 m_nInternalTimerId;
-};
-
-
-
-class OsCoreTimer
-    : public ImsCoreTimer
-{
-public:
-    OsCoreTimer();
-    virtual ~OsCoreTimer();
-
-    OsCoreTimer(IN const OsCoreTimer&) = delete;
-    OsCoreTimer& operator=(IN const OsCoreTimer&) = delete;
-
-public:
-    IMS_UINTP SetTimer(IN IMS_UINT32 nDuration,
-            IN ICoreTimerListener* piListener, IN IMS_BOOL bRepeated = IMS_FALSE) override;
-    void KillTimer() override;
-    inline IMS_UINTP GetTimerId() const
-    { return m_nTimerId; }
-
-private:
-    enum
-    {
-        STATE_INACTIVE = 0,
-        STATE_ACTIVE
-    };
-
-    IMS_SINT32 m_nState;
-    IMS_UINTP m_nTimerId;
 };
 
 #endif
