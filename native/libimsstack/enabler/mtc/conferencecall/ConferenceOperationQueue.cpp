@@ -70,14 +70,14 @@ PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
         IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
 {
-    Put(new ConferenceOperation(nType, GetNResetDelay()), bStandAloneOperation);
+    Put(new ConferenceOperation(nType, GetAndResetDelay()), bStandAloneOperation);
 }
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
         IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
 {
-    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetNResetDelay());
+    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUsers(objUsers);
     Put(pConferenceOperation, bStandAloneOperation);
 }
@@ -86,7 +86,7 @@ PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
         IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
 {
-    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetNResetDelay());
+    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUser(pConfUser);
     Put(pConferenceOperation, bStandAloneOperation);
 }
@@ -96,19 +96,19 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
         IN CallStartOperationParams* pParams,
         IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
 {
-    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetNResetDelay());
+    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetParam(pParams);
     Put(pConferenceOperation, bStandAloneOperation);
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINTP nCallId,
+void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
         IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
 {
-    //IMS_TRACE_D("CreateNPut : nCallId [%d]", nType, 0, 0);
+    //IMS_TRACE_D("CreateNPut : nConnectionId [%d]", nType, 0, 0);
 
-    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetNResetDelay());
-    pConferenceOperation->SetCallId(nCallId);
+    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
+    pConferenceOperation->SetConnectionId(nConnectionId);
     Put(pConferenceOperation, bStandAloneOperation);
 }
 
@@ -118,7 +118,7 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTe
 {
     //IMS_TRACE_D("CreateNPut : nTerminateReason [%d]", nType, 0, 0);
 
-    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetNResetDelay());
+    ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetTerminateReason(nTerminateReason);
     Put(pConferenceOperation, bStandAloneOperation);
 }
@@ -280,7 +280,7 @@ void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
                 //nothing to check.
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
-                if (pOperation->GetCallId() != pTempOperation->GetCallId())
+                if (pOperation->GetConnectionId() != pTempOperation->GetConnectionId())
                 {
                     continue;
                 }
@@ -374,7 +374,7 @@ IMS_BOOL ConferenceOperationQueue::IsSameOperation(IN IMS_UINT32 nOperationType,
 }
 
 PRIVATE
-IMS_UINT32 ConferenceOperationQueue::GetNResetDelay()
+IMS_UINT32 ConferenceOperationQueue::GetAndResetDelay()
 {
     IMS_UINT32 nTemp = m_nNextDelay;
     m_nNextDelay = 0;

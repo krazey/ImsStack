@@ -190,6 +190,8 @@ AString ParticipantInfo::GetRemoteUriForConferenceCall() const
         strUri = "sip:mmtel@conf-factory.ims.mnc[MNC2].mcc[MCC].3gppnetwork.org";
     }
 
+    IMS_TRACE_I("GetRemoteUriForConferenceCall [%s]", strUri.GetStr(), 0, 0);
+
     // TODO: exception handling: mcc/mnc is empty
     return strUri
             .Replace("[MCC]", GetMcc())

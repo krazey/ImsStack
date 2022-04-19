@@ -43,6 +43,12 @@ private:
     void AcceptResume(IN const android::Parcel& objParcel);
     void RejectResume(IN const android::Parcel& objParcel);
 
+    void StartGroupCall(IN const android::Parcel& objParcel);
+    void MergeToConference(IN const android::Parcel& objParcel);
+    void ExpandToConference(IN const android::Parcel& objParcel);
+    void AddToConference(IN const android::Parcel& objParcel);
+    void RemoveFromConference(IN const android::Parcel& objParcel);
+
 private:
     JniMtcCallThread* m_pThread;
     CBServiceNoti m_pfnNotifier;

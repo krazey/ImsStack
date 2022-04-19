@@ -10,8 +10,9 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-GroupCallController::GroupCallController(IN IMtcCallContext& objContext) :
-        ConferenceController(objContext)
+GroupCallController::GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,
+        IN CallConnectionIdManager& objConnectionIdManager) :
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager)
 {
     IMS_TRACE_I("+GroupCallController", 0, 0, 0);
 }
@@ -79,9 +80,10 @@ void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser*>& objUsers,
 }
 
 PUBLIC VIRTUAL
-void GroupCallController::StartConferenceCall(IN CallStartOperationParams* pParams)
+void GroupCallController::StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation*)
 {
-    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
+    // TODO: TEMP.
+    //IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
 
     /*
     {
@@ -93,8 +95,10 @@ void GroupCallController::StartConferenceCall(IN CallStartOperationParams* pPara
     */
 
     // TODO: CallType? start type?
+    /*
     piCall->StartConference(CallType::VOIP, pParams->objSuppServices, &(pParams->objMediaInfo),
             pParams->objUsers);
+    */
 }
 
 PROTECTED VIRTUAL

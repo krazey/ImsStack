@@ -3,19 +3,20 @@
 
 #include "ISubscriptionListener.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
+#include "call/IMtcCall.h"
 
 class ConferenceParticipantList;
 class ISession;
 class ICoreService;
 class ISubscription;
-class IMtcCallContext;
+class IMtcContext;
 enum class SubscriptionState;
 
 class ConferenceSubscription final :
         public ISubscriptionListener
 {
 public:
-    explicit ConferenceSubscription(IN IMtcCallContext& objContext,
+    explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener);
     ~ConferenceSubscription();
     ConferenceSubscription(IN const ConferenceSubscription&) = delete;
@@ -52,11 +53,10 @@ private:
 private:
     static const IMS_UINT32 MAX_RESUBS_COUNT = 3;
 
-    IMtcCallContext& m_objContext;
+    IMtcContext& m_objContext;
+    CallKey m_nConfCallKey;
     ConferenceParticipantList& m_objList;
     IConferenceSubscriptionListener& m_objListener;
-    ISession& m_objISession;
-    ICoreService& m_objICoreService;
     AString m_strTo;
     ISubscription* m_piSubscription;
     SubscriptionState m_nState;

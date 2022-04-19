@@ -9,6 +9,9 @@
 
 struct CallInfo;
 struct FailReason;
+class MediaInfo;
+class SuppService;
+class ConfUser;
 
 class JniMtcCallThread final :
         public BaseServiceThread
@@ -45,6 +48,19 @@ public:
     void OnUpdateFailed(IN const FailReason& objReason);
     void OnUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices);
+
+    void OnMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const IMSList<ConfUser*>& objUsers);
+    void OnMergeFailed(IN const FailReason& objReason);
+    void OnConferenceParticipantAdded();
+    void OnConferenceParticipantAddFailed(IN const FailReason& objReason);
+    void OnConferenceParticipantRemoved();
+    void OnConferenceParticipantRemoveFailed(IN const FailReason& objReason);
+    void OnConferenceInfoChanged(IN const AString& strDisplayText, IN const AString strSubject,
+            IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
+            IN const AString& strHost);
+    void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers);
 
 private:
     void SetCallDetails(IN_OUT android::Parcel& objParcel, IN CallInfo* pCallInfo,

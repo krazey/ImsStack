@@ -54,7 +54,8 @@ public:
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
 
-    void Attach(IN JniMtcCallThread* pJniMtcCallThread) override;
+    void Attach(IN JniMtcCallThread* pJniMtcCallThread,
+            IN JniMediaSessionThread* pJniMediaThread) override;
     void Detach() override;
 
     void Start(
@@ -65,9 +66,14 @@ public:
             IN JniMediaSessionThread* pJniMediaThread) override;
     void StartConference(
             IN CallType eCallType,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
             IN IMSList<ConfUser*> lstUsers) override;
+    void StartConference(
+            IN CallType eCallType,
+            IN const AString& strTarget,
+            IN const IMSList<ConfUser*> objUsers) override;
     void ExpandToConference(IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers) override;
     void MergeToConference(
             IN CallType eCallType, IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers)
@@ -94,6 +100,8 @@ public:
 
     inline CallKey GetKey() const override { return m_nKey; }
     inline CallStateName GetState() const override { return m_objStateMachine.GetState(); }
+    // TODO: TEMP for conference.
+    inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
     inline IMS_BOOL IsEct() const override { return m_bEct; }
@@ -130,6 +138,8 @@ public:
     { return m_objContext.GetAosConnector(eServiceType); }
     inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
     { return m_objContext.GetSipInterfaceFactory(); }
+    inline ConferenceManager& GetConferenceManager() override
+    { return m_objContext.GetConferenceManager(); }
 
     inline void SetSession(IN MtcSession* pSession) override { m_pSession = pSession; }
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }

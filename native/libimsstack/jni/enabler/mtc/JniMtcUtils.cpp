@@ -75,12 +75,12 @@ PUBLIC GLOBAL
 IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objParcel)
 {
     IMSList<ConfUser*> objUsers;
-
-    for (IMS_UINT32 index = 0; index < objParcel.readInt32(); index++)
+    IMS_UINT32 nUsersSize = objParcel.readInt32();
+    for (IMS_UINT32 index = 0; index < nUsersSize; index++)
     {
         ConfUser* pUser = new ConfUser();
 
-        pUser->nCallID = objParcel.readInt64();
+        pUser->nConnectionId = objParcel.readInt64(); // TODO: how to ... call key!!!!!???
         ConvertString(objParcel.readString16(), pUser->aStrTarget);
         ConvertString(objParcel.readString16(), pUser->aStrUserEntity);
         ConvertString(objParcel.readString16(), pUser->aStrEPEntity);
@@ -148,6 +148,29 @@ void JniMtcUtils::WriteSuppServicesToParcel(
         objParcel.writeString16(String16(pService->aStrValue.GetStr()));
         objParcel.writeInt32(pService->nValue);
         objParcel.writeInt32(pService->bValue);
+    }
+}
+
+PUBLIC GLOBAL
+void JniMtcUtils::WriteConfUsersToParcel(IN const IMSList<ConfUser*>& objUsers,
+        IN_OUT android::Parcel& objParcel)
+{
+    IMS_UINT32 nUsersSize = objUsers.GetSize();
+
+    objParcel.writeInt32(nUsersSize);
+    for(IMS_UINT32 i = 0; i < nUsersSize; i++)
+    {
+        ConfUser* pUser = objUsers.GetAt(i);
+
+        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId)); // TODO: Int32.
+        objParcel.writeString16(android::String16(pUser->aStrTarget.GetStr()));
+        objParcel.writeString16(android::String16(pUser->aStrUserEntity.GetStr()));
+        objParcel.writeString16(android::String16(pUser->aStrEPEntity.GetStr()));
+        objParcel.writeString16(android::String16(pUser->aStrDisplayName.GetStr()));
+        objParcel.writeInt32(pUser->eStatus);
+        objParcel.writeInt32(pUser->eStatusCode);
+        objParcel.writeInt32(pUser->eCCType);
+        objParcel.writeInt32(pUser->bAnonymize);
     }
 }
 

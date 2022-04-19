@@ -255,18 +255,27 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         setState(ImsCallSession.State.TERMINATED);
 
+        // Usually, it's to close the foreground session when this session is a conference.
+        mConferenceListenerProxy.closeSession();
         mVideoCallProvider.close();
 
         clearSpecificFeatures();
 
         // CALL_CONNECTION_ID
-        ImsCallConnectionIds.remove(mCallContext.getSlotId(), getCallConnectionId());
+        if (isMultiparty()) {
+            removeCallConnectionId();
+        } else if (!mCallDetails.is(CallDetails.MERGED)) {
+            ImsCallConnectionIds.remove(mCallContext.getSlotId(), getCallConnectionId());
+        }
 
         if (garbageCalls.contains(this)) {
             garbageCalls.remove(this);
         } else {
             mCT.updateCallState(this, CallTracker.CALL_EVENT_DESTROY, null);
         }
+
+        log("close callId=" + getCallId() + " host=" + isMultiparty() +
+                " participant=" + mCallDetails.is(CallDetails.MERGED));
 
         mCallback.setListener(null);
     }
@@ -1540,7 +1549,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (user != null) {
                 // Depends on the MTC enabler's behavior.
-                long callId = Call.getNativeCallIdFromCallId(user.getCallId()); //= 0;
+                // TODO: _CONFERENCE_CALL_CONNECTION_ID_
+                long callId = Long.parseLong(user.getCallId());
                 // MTC enabler expects to set the same value
                 // which has been updated by the event for conference participants' change.
                 String idForNative = user.getIdForNative();
@@ -1877,6 +1887,23 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         reason : IUMtcCall.Reject_Reason.REJECT_REASON_DECLINE_UPDATE);
             }
         });
+    }
+
+    private void removeCallConnectionId() {
+        ConferenceInfo ci = ConferenceInfoHelper.getConferenceInfo(mCall.getCallId());
+
+        if (ci == null) {
+            log("ConferenceInfo is null; " + mCall);
+            return;
+        }
+
+        List<ConferenceInfo.User> confUsers = ci.getUsers();
+
+        for (ConferenceInfo.User user : confUsers) {
+            if (!ConferenceInfo.User.STATUS_DISCONNECTED.equals(user.getStatus())) {
+                ImsCallConnectionIds.remove(mCallContext.getSlotId(), user.getCallConnectionId());
+            }
+        }
     }
 
     private void removeConferenceUsersOnDisconnected() {
@@ -4552,8 +4579,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
                 if (!isConferenceTransitionInProgress()) {
                     if (CallFeature.isCallEndNoticeEnabledOnMergeCompleted(slotId)) {
+                        // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                         ConferenceInfoHelper.setListenerForConferenceUser(
-                                mCall.getCallId(), mCall.getConferenceUserId(), null);
+                                mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
+                                null);
 
                         notifyCallTerminated(failInfo.Reason, failInfo.Code, failInfo.Phrase);
                     }
@@ -4696,6 +4725,27 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private class MtcConferenceListenerProxy extends MtcConference.Listener
             implements ConferenceInfo.User.Listener {
+        private int mSlotId = 0;
+        private boolean mIsConferenceHost = false;
+        // If this session is a conference session, this variable grabs
+        // the foreground session that was used in an initial merge.
+        // Otherwise, it's usually null.
+        private ImsCallSessionImpl mCallSession = null;
+
+        public void closeSession() {
+            if (mCallSession != null) {
+                mCallSession.closeInternal(mCallSession);
+                mCallSession = null;
+            }
+        }
+
+        public void setConferenceAttributes(int slotId,
+                boolean isConferenceHost, ImsCallSessionImpl callSession) {
+            mSlotId = slotId;
+            mIsConferenceHost = isConferenceHost;
+            mCallSession = callSession;
+        }
+
         @Override
         public void onConferenceUserStatusUpdated(ConferenceInfo.User user) {
             if (DBG) {
@@ -4703,15 +4753,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             if (ConferenceInfo.User.STATUS_DISCONNECTED.equals(user.getStatus())) {
-                if (isMultiparty()) {
+                ImsCallConnectionIds.remove(mSlotId, user.getCallConnectionId());
+
+                if (mIsConferenceHost) {
                     // CALL_CONNECTION_ID
-                    log("Conference host dropped");
-                    ImsCallConnectionIds.remove(mCallContext.getSlotId(), getCallConnectionId());
+                    log("Peer participant of conference host dropped");
                     setCallConnectionId(0);
-                } else {
-                    notifyCallTerminated(ImsReasonInfo.CODE_USER_TERMINATED_BY_REMOTE,
-                            ImsReasonInfo.CODE_UNSPECIFIED,
-                            ImsCallUtils.REASON_CALL_DISCONNECTED_FROM_CONFERENCE);
+                    closeSession();
                 }
             }
         }
@@ -5262,8 +5310,11 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 if (!isFirstCallMergeInitiator()) {
                     mCallDetails.set(CallDetails.MERGED);
 
+                    // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                     ConferenceInfoHelper.setListenerForConferenceUser(
-                            mCall.getCallId(), mCall.getConferenceUserId(), this);
+                            mCall.getCallConnectionId() + "", mCall.getConferenceUserId(), this);
+                    mConferenceListenerProxy.setConferenceAttributes(
+                            mCallContext.getSlotId(), false, null);
                 } else {
                     if (transientConfSession != null) {
                         transientConfSession.mCallDetails.set(CallDetails.MO_STARTED);
@@ -5284,9 +5335,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                         setCallConnectionId(0);
 
                         // CALL_CONNECTION_ID
+                        // TODO: _CONFERENCE_CALL_CONNECTION_ID_
                         ConferenceInfoHelper.setListenerForConferenceUser(
-                                mCall.getCallId(), mCall.getConferenceUserId(),
+                                mCall.getCallConnectionId() + "", mCall.getConferenceUserId(),
                                 transientConfSession.mConferenceListenerProxy);
+                        transientConfSession.mConferenceListenerProxy.setConferenceAttributes(
+                                mCallContext.getSlotId(), true, ImsCallSessionImpl.this);
                     }
 
                     ImsConferenceHelper ich = ImsConferenceHelper.getInstance();

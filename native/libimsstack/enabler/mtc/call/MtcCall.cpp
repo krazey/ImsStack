@@ -82,7 +82,8 @@ void MtcCall::HandleIncoming(
 }
 
 PUBLIC VIRTUAL
-void MtcCall::Attach(IN JniMtcCallThread* pJniMtcCallThread)
+void MtcCall::Attach(IN JniMtcCallThread* pJniMtcCallThread,
+        IN JniMediaSessionThread* pJniMediaThread)
 {
     IMS_TRACE_I("Attach : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -92,14 +93,15 @@ void MtcCall::Attach(IN JniMtcCallThread* pJniMtcCallThread)
         return;
     }
 
+    // TODO: will be removed and JniConnector will provide the getters.
     m_objUiNotifier.SetJniCallThread(pJniMtcCallThread);
+    m_objUiNotifier.SetJniMediaThread(pJniMediaThread);
 }
 
 PUBLIC VIRTUAL
 void MtcCall::Detach()
 {
     IMS_TRACE_I("Detach : key[%" PFLS_x "]", m_nKey, 0, 0);
-
     m_objUiNotifier.SetJniCallThread(IMS_NULL);
 }
 
@@ -312,10 +314,11 @@ void MtcCall::SendUssi(IN const AString& strUssi)
 
 PUBLIC VIRTUAL
 void MtcCall::StartConference(
-            IN CallType eCallType,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN MediaInfo* pMediaInfo,
-            IN IMSList<ConfUser*> lstUsers)
+        IN CallType eCallType,
+        IN const AString& strTarget,
+        IN MediaInfo* pMediaInfo,
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+        IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -327,7 +330,21 @@ void MtcCall::StartConference(
 
     m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
     {
-        return pState->StartConference(eCallType, objSuppServices, pMediaInfo, lstUsers);
+        return pState->StartConference(eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
+    });
+}
+
+PUBLIC VIRTUAL
+void MtcCall::StartConference(
+            IN CallType eCallType,
+            IN const AString& strTarget,
+            IN IMSList<ConfUser*> lstUsers)
+{
+    IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
+    {
+        return pState->StartConference(eCallType, strTarget, lstUsers);
     });
 }
 

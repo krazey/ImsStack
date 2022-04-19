@@ -8,13 +8,15 @@
 #include "CallInfo.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "helper/MtcSupplementaryService.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MergeController::MergeController(IN IMtcCallContext& objContext) :
-        ConferenceController(objContext)
+MergeController::MergeController(IN CallKey nConfCallKey, IMtcContext& objContext,
+        IN CallConnectionIdManager& objConnectionIdManager) :
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager)
 {
     IMS_TRACE_I("+MergeController", 0, 0, 0);
 }
@@ -26,11 +28,9 @@ MergeController::~MergeController()
 }
 
 PROTECTED VIRTUAL
-void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers,
-        IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-        IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
+void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers)
 {
-    IMS_TRACE_I("ProcessMerge", 0, 0, 0);
+    IMS_TRACE_I("ProcessMerge user size[%d]", objUsers.GetSize(), 0, 0);
 
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
@@ -47,12 +47,12 @@ void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers,
     }
 
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers, IMS_TRUE);
-    if (ConferenceConfiguration::IsReferUsed() == IMS_FALSE)
+    if (ConferenceConfigurationWrapper::IsReferUsed() == IMS_FALSE)
     {
-        return ProcessMergeWithoutRefer(objUsers, objCallInfo, objMediaInfo, objSuppServices);
+        return ProcessMergeWithoutRefer(objUsers);
     }
 
-    IMS_BOOL bSubFirstAndRefer = ConferenceConfiguration::IsSubscriptionFirst();
+    IMS_BOOL bSubFirstAndRefer = ConferenceConfigurationWrapper::IsSubscriptionFirst();
     IMS_SINT32 nOldState = GetState();
     SetState(STATE_MERGING);
 
@@ -61,23 +61,22 @@ void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers,
 
     if (nOldState == STATE_CREATED)
     {
-        CallStartOperationParams* pParams = new CallStartOperationParams(CONF_CREATE_MERGE,
-                objCallInfo, objMediaInfo, objUsers, objSuppServices);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
+        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
 
         if (bSubFirstAndRefer == IMS_TRUE &&
-                ConferenceConfiguration::IsConferenceSubscriptionRequired())
+                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
         {
             m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
     }
 
+    IMS_TRACE_I("ProcessMerge [%d]", m_objParticipantList.GetSize(), 0, 0);
     for (IMS_UINT32 i = nStartIndex; i < m_objParticipantList.GetSize(); i++)
     {
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE,
                 m_objParticipantList.GetConfUsers().GetAt(i));
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_TERMINATE_1TO1_SESSION,
-                m_objParticipantList.GetConfUsers().GetAt(i)->nCallID);
+                m_objParticipantList.GetConfUsers().GetAt(i)->nConnectionId);
     }
 
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
@@ -85,7 +84,7 @@ void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers,
     if (nOldState == STATE_CREATED)
     {
         if (bSubFirstAndRefer == IMS_FALSE &&
-                ConferenceConfiguration::IsConferenceSubscriptionRequired())
+                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired())
         {
             m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         }
@@ -95,13 +94,13 @@ void MergeController::ProcessMerge(IN IMSList<ConfUser*>& objUsers,
 }
 
 PUBLIC VIRTUAL
-void MergeController::StartConferenceCall(IN CallStartOperationParams* pParams)
+void MergeController::StartConferenceCall(
+        IN ConferenceOperationQueue::ConferenceOperation* /*pOperation*/)
 {
-
-    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
     // TODO: CallType?
-    piCall->StartConference(CallType::VOIP, pParams->objSuppServices, &(pParams->objMediaInfo),
-            pParams->objUsers);
+    // TODO: factory uri.
+    IMSList<ConfUser*> objTempUser;
+    GetConferenceCall()->StartConference(CallType::VOIP, AString::ConstNull(), objTempUser);
 }
 
 PROTECTED VIRTUAL
@@ -160,16 +159,14 @@ void MergeController::OnIndividualCallTerminated(IN IMS_UINTP nCallKey)
     ConferenceController::OnIndividualCallTerminated(nCallKey);
 
     if (m_pSubscription == IMS_NULL &&
-            ConferenceConfiguration::IsReferUsed() == IMS_FALSE)
+            ConferenceConfigurationWrapper::IsReferUsed() == IMS_FALSE)
     {
         UpdateUserStateBySessionTerminated(nCallKey);
     }
 }
 
 PRIVATE
-void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers,
-        IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
-        IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
+void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessMergeWithoutRefer", 0, 0, 0);
 
@@ -178,9 +175,7 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers,
 
     if (nOldState == STATE_CREATED)
     {
-        CallStartOperationParams* pParams = new CallStartOperationParams(CONF_CREATE_MERGE,
-                objCallInfo, objMediaInfo, objUsers, objSuppServices);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
+        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
         m_objOperationQueue.SetAddingOperationSetCompleted();
     }
@@ -195,7 +190,8 @@ void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
     for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
     {
         ConfUser* pUser = m_objParticipantList.GetConfUser(i);
-        if (m_objParticipantList.GetConfUser(i)->nCallID == nCallKey)
+        if (m_objConnectionIdManager.GetCallKey(
+                m_objParticipantList.GetConfUser(i)->nConnectionId) == nCallKey)
         {
             pUser->eStatus = CONFINFO_STATUS_DISCONNECTED;
             NotifyUsersInfo();
@@ -274,10 +270,8 @@ IMS_BOOL MergeController::RecoverOnConferenceCallFailed()
     IMS_TRACE_I("RecoverOnConferenceCallFailed", 0, 0, 0);
 
     IMtcCall* piConfCall = GetConferenceCall();
-
-    if (piConfCall == IMS_NULL ||
-            (piConfCall->GetState() != IMtcCall::State::ESTABLISHED &&
-                piConfCall->GetState() != IMtcCall::State::UPDATING))
+    if ((piConfCall->GetState() != IMtcCall::State::ESTABLISHED &&
+            piConfCall->GetState() != IMtcCall::State::UPDATING))
     {
         ClearIndividualCallOnMergeFailed();
         m_objNotifier.NotifyMergeFailed(FailReason(FAIL_REASON_SESSION_TERMINATED, -1));
@@ -306,6 +300,7 @@ void MergeController::ClearIndividualCallOnMergeFailed()
         {
             continue;
         }
+        CallKey nTempCallKey = m_objConnectionIdManager.GetCallKey(pTempUser->nConnectionId);
 
         IConferenceReference* piConfReference = m_objParticipantList.GetAt(i)->GetReference();
 
@@ -324,7 +319,7 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : refer is sent.", 0, 0, 0);
             // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
             // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
-            m_objNotifier.NotifyIndividualCallTerminated(pTempUser->stUCKey.aStrUIKey);
+            m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
             continue;
         }
 
@@ -334,17 +329,17 @@ void MergeController::ClearIndividualCallOnMergeFailed()
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : user state changed", 0, 0, 0);
             // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
             // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
-            m_objNotifier.NotifyIndividualCallTerminated(pTempUser->stUCKey.aStrUIKey);
+            m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
             continue;
         }
 
-        IMtcCall* piTemp = m_objCallManager.GetCallByCallKey(pTempUser->nCallID);
+        IMtcCall* piTemp = m_objCallManager.GetCallByCallKey(nTempCallKey);
         if (piTemp == IMS_NULL || piTemp->GetState() == IMtcCall::State::TERMINATING)
         {
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : 1-to-1 is terminating", 0, 0, 0);
             // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
             // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
-            m_objNotifier.NotifyIndividualCallTerminated(pTempUser->stUCKey.aStrUIKey);
+            m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
         }
     }
 }

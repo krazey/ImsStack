@@ -11,10 +11,15 @@
 #include "ussi/UssiConstants.h"
 #include "IuMtcService.h"
 #include "JniMtcCallThread.h"
+#include "conferencecall/IConferenceController.h"
+#include "conferencecall/ConferenceManager.h"
+#include "IMtcContext.h"
+
 
 PUBLIC
-MtcCallController::MtcCallController(IN IMtcCallManager& objCallManager) :
-        m_objCallManager(objCallManager)
+MtcCallController::MtcCallController(IN IMtcContext &objContext) :
+        m_objContext(objContext),
+        m_objCallManager(objContext.GetCallManager())
 {
 }
 
@@ -106,10 +111,11 @@ CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCal
 }
 
 PUBLIC
-void MtcCallController::Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread)
+void MtcCallController::Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
+        IN JniMediaSessionThread* pJniMediaThread)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Attach(pJniMtcCallThread);
+            ->Attach(pJniMtcCallThread, pJniMediaThread);
 }
 
 PUBLIC
@@ -242,15 +248,53 @@ void MtcCallController::SendTransaction(IN CallKey nCallKey, IN const AString& s
             ->SendUssi(strUssi);
 }
 
-PUBLIC
-void MtcCallController::HandleConference(IN CallKey /*nCallKey*/)
-{
 /*
+PUBLIC
+void MtcCallController::HandleConference(IN CallKey nCallKey, IN IMS_UINT32 nCmd,
+        IN IMSList<ConfUser*>& objUsers)
+{
     ConferenceCallProxy::GetInstance()->ProcessCmd(
             m_objContext.GetSlotId(),
             m_objCallManager.GetCallByCallKey(nCallKey),
             objMsg);
+}
 */
+
+PUBLIC
+void MtcCallController::MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+{
+    IConferenceController* pController =
+            m_objContext.GetConferenceManager().GetController(nCallKey);
+    if (pController == IMS_NULL)
+    {
+        pController = &m_objContext.GetConferenceManager().CreateController(
+                nCallKey, ConferenceType::MERGE_CALL);
+    }
+    pController->ProcessCommand(IConferenceController::MERGE, objUsers);
+}
+
+PUBLIC
+void MtcCallController::AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+{
+    IConferenceController* pController =
+            m_objContext.GetConferenceManager().GetController(nCallKey);
+    if (pController == IMS_NULL)
+    {
+        return;
+    }
+    pController->ProcessCommand(IConferenceController::ADD, objUsers);
+}
+
+PUBLIC
+void MtcCallController::RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers)
+{
+    IConferenceController* pController =
+            m_objContext.GetConferenceManager().GetController(nCallKey);
+    if (pController == IMS_NULL)
+    {
+        return;
+    }
+    pController->ProcessCommand(IConferenceController::REMOVE, objUsers);
 }
 
 PRIVATE

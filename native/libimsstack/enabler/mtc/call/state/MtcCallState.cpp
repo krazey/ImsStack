@@ -145,8 +145,18 @@ CallStateName MtcCallState::SendUssi(IN CONST AString& /* strUssi */)
 PUBLIC VIRTUAL
 CallStateName MtcCallState::StartConference(
         IN CallType /* eCallType */,
-        IN const IMSMap<IMS_UINT32, SuppService*>& /* lstSuppServices */,
+        IN const AString&,
         IN MediaInfo* /* pMediaInfo */,
+        IN const IMSMap<IMS_UINT32, SuppService*>& /* lstSuppServices */,
+        IN IMSList<ConfUser*> /* lstUsers */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL
+CallStateName MtcCallState::StartConference(
+        IN CallType /* eCallType */,
+        IN const AString& /* strTarget */,
         IN IMSList<ConfUser*> /* lstUsers */)
 {
     return GetStateName();

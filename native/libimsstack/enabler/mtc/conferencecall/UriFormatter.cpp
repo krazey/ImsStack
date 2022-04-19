@@ -24,10 +24,14 @@ const IMS_CHAR UriFormatter::STR_USER_PHONE[] = ";user=phone";
 PUBLIC GLOBAL
 AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallContext& objContext)
 {
-    if (ConferenceConfiguration::IsPaidPreferred())
+    if (ConferenceConfigurationWrapper::IsPaidPreferred())
     {
-        MessageUtil::GetRemoteUri(&(objContext.GetSession()->GetISession()),
-                objContext.GetCallInfo().ePeerType, strUri);
+        MtcSession* pMtcSession = objContext.GetSession();
+        if (pMtcSession != IMS_NULL)
+        {
+            MessageUtil::GetRemoteUri(&pMtcSession->GetISession(),
+                    objContext.GetCallInfo().ePeerType, strUri);
+        }
     }
     else
     {
@@ -43,6 +47,11 @@ PUBLIC GLOBAL
 AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallContext& objContext,
         IN const ConfUser* pConfUser)
 {
+    if (pConfUser == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "conf user null", 0, 0, 0);
+        return strUri;
+    }
 
     if ((pConfUser != IMS_NULL) && (pConfUser->aStrTarget.GetLength() <= 0))
     {
@@ -81,7 +90,7 @@ AString& UriFormatter::GetReferToForBye(OUT AString& strUri, IN const ConfUser* 
         return strUri;
     }
 
-    if (ConferenceConfiguration::IsReUseReferToUri() == IMS_TRUE)
+    if (ConferenceConfigurationWrapper::IsReUseReferToUri() == IMS_TRUE)
     {
         strUri = strInvitedUri;
         return strUri;

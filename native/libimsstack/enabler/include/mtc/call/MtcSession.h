@@ -63,6 +63,8 @@ public:
     { return m_objContext.GetAosConnector(eServiceType); }
     inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
     { return m_objContext.GetSipInterfaceFactory(); }
+    inline ConferenceManager& GetConferenceManager() override
+    { return m_objContext.GetConferenceManager(); }
     inline void SetSession(IN MtcSession* pSession) override { m_objContext.SetSession(pSession); }
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }
 

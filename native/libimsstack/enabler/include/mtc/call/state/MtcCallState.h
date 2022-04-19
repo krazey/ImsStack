@@ -43,8 +43,13 @@ public:
             IN JniMediaSessionThread* pJniMediaThread);
     virtual CallStateName StartConference(
             IN CallType eCallType,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN IMSList<ConfUser*> lstUsers);
+    virtual CallStateName StartConference(
+            IN CallType eCallType,
+            IN const AString& strTarget,
             IN IMSList<ConfUser*> lstUsers);
     virtual CallStateName ExpandToConference(
             IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers);

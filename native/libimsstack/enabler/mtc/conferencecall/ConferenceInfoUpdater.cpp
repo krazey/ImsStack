@@ -90,7 +90,7 @@ IMS_RESULT ConferenceInfoUpdater::ParseConferenceInfo(IN const AString& strEvent
 PROTECTED
 IMS_RESULT ConferenceInfoUpdater::CheckValidVersion() const
 {
-    if (ConferenceConfiguration::IsPackageVersionCheckRequired() == IMS_FALSE)
+    if (ConferenceConfigurationWrapper::IsPackageVersionCheckRequired() == IMS_FALSE)
     {
         return IMS_SUCCESS;
     }
@@ -226,7 +226,7 @@ IMS_BOOL ConferenceInfoUpdater::FindAndUpdate(IN IMS_UINT32 nPolicy)
 
     if ((m_nCurrentMatchPolicy == MATCH_POLICY_ORDER) &&
             (m_pConferenceInfo->GetState() == ConferenceInfo::STATE_FULL) &&
-            ConferenceConfiguration::IsSubscriptionForParticipantRequired())
+            ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired())
     {
         for (IMS_SINT32 index = (m_objNotMatchedUsers.GetSize() - 1); index >= 0; index--)
         {
@@ -623,6 +623,8 @@ PROTECTED
 void ConferenceInfoUpdater::Clear()
 {
     delete m_pConferenceInfo;
+    m_pConferenceInfo = IMS_NULL;
+
     m_nInfoState = ConferenceInfo::STATE_INVALID;
     m_objNotMatchedUsers.Clear();
     m_bHostInfoInUsers = IMS_FALSE;
@@ -937,7 +939,7 @@ const IMS_CHAR* ConferenceInfoUpdater::ConvertStatusToString(IN IMS_SINT32 nStat
 PRIVATE
 void ConferenceInfoUpdater::ModifyParticipantInfoByConfig(IN ConfUser* pConfUser)
 {
-    if (ConferenceConfiguration::IsDisconnectingStatusUsed() &&
+    if (ConferenceConfigurationWrapper::IsDisconnectingStatusUsed() &&
             (pConfUser->eStatus == STATUS_DISCONNECTING))
     {
         pConfUser->eStatus = STATUS_DISCONNECTED;

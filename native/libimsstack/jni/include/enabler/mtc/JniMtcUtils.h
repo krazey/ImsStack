@@ -24,6 +24,8 @@ public:
     static void WriteSuppServicesToParcel(
             IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
             IN_OUT android::Parcel& objParcel);
+    static void WriteConfUsersToParcel(IN const IMSList<ConfUser*>& objUsers,
+            IN_OUT android::Parcel& objParcel);
     static void WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT android::Parcel& objParcel);
     static void WriteFailReasonToParcel(IN const FailReason& objFailReason,
             IN_OUT android::Parcel& objParcel);

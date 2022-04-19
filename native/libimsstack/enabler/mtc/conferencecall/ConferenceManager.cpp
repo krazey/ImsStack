@@ -1,20 +1,23 @@
 #include "ServiceTrace.h"
 
-#include "call/IMtcCallContext.h"
+#include "IMtcContext.h"
 #include "conferencecall/ConferenceManager.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/MergeController.h"
 #include "conferencecall/GroupCallController.h"
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/ConferenceDef.h"
+#include "helper/CallStateProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 
 PUBLIC
-ConferenceManager::ConferenceManager() :
+ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
+        m_objContext(objContext),
         m_objControllers(IMSMap<CallKey, ConferenceController*>()),
-        m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>())
+        m_objDestroyer(ObjectAsyncDestroyer<ConferenceController>()),
+        m_objCallConnectionIdManager(CallConnectionIdManager(objContext))
 {
     IMS_TRACE_D("+ConferenceManager", 0, 0, 0);
 }
@@ -41,7 +44,7 @@ void ConferenceManager::OnClosed(IN ConferenceController* pController)
 }
 
 PUBLIC
-IConferenceController& ConferenceManager::CreateController(IN IMtcCallContext& objContext,
+IConferenceController& ConferenceManager::CreateController(IN CallKey nCallKey,
         IN ConferenceType eType)
 {
     ConferenceController* pController = IMS_NULL;
@@ -51,26 +54,31 @@ IConferenceController& ConferenceManager::CreateController(IN IMtcCallContext& o
     switch (eType)
     {
         case ConferenceType::PARTICIPANT:
-            pController = new ConferenceController(objContext);
+            pController =
+                    new ConferenceController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
         case ConferenceType::GROUP_CALL:
-            pController = new GroupCallController(objContext);
+            pController =
+                    new GroupCallController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
         case ConferenceType::MERGE_CALL:
-            pController = new MergeController(objContext);
+            pController =
+                    new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
         case ConferenceType::EXPAND_CALL:
-            pController = new ExpandController(objContext);
+            pController =
+                    new ExpandController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
 
         default:
             IMS_TRACE_E(0, "invalid conference manager type. Create MergeController", 0, 0, 0);
-            pController = new MergeController(objContext);
+            pController = new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
     }
 
     pController->SetListener(this);
-    m_objControllers.Add(objContext.GetCallKey(), pController);
+    m_objCallConnectionIdManager.OnConferenceCallStarted(pController, IMS_TRUE);
+    m_objControllers.Add(nCallKey, pController);
     return *pController;
 }
 
@@ -97,6 +105,7 @@ void ConferenceManager::ReleaseController(IN ConferenceController* pController)
         if (pController == pTempController)
         {
             m_objControllers.RemoveAt(i);
+            m_objCallConnectionIdManager.OnConferenceCallStarted(pController, IMS_FALSE);
             m_objDestroyer.Destroy(pController);
             break;
         }

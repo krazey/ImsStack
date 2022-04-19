@@ -24,7 +24,7 @@ union Key;
 class MtcCallController final
 {
 public:
-    MtcCallController(IN IMtcCallManager& objCallManager);
+    MtcCallController(IN IMtcContext& objContext);
     ~MtcCallController();
     MtcCallController(IN const MtcCallController&) = delete;
     MtcCallController& operator=(IN const MtcCallController&) = delete;
@@ -60,7 +60,8 @@ public:
      * @param nCallKey Key of the call to be manipulated.
      * @param pJniMtcCallThread Interface to send messages to the Java layer.
      */
-    void Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread);
+    void Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
+            IN JniMediaSessionThread* pJniMediaThread);
 
     /**
      * Disconnects from the interface to interact with the Java layer.
@@ -164,7 +165,15 @@ public:
     void SendTransaction(IN CallKey nCallKey, IN const AString& strUssi);
 
     // Handles conference call related IMS messages.
-    void HandleConference(IN CallKey nCallKey);
+    /*
+    void StartGroupCall(IN CallKey nCallKey, IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
+            IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
+            IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices);
+    */
+
+    void MergeToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers);
+    void AddToConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers);
+    void RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers);
 
     // TODO: Consider ECT, SRVCC
 
@@ -172,6 +181,7 @@ private:
     IMS_BOOL IsUssi(IN ISession* piSession);
     IMS_BOOL IsEct(IN ISession* piSession);
 
+    IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
 };
 

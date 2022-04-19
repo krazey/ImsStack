@@ -181,7 +181,7 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
     {
         m_objContext.GetCallInfo().bConference = IMS_TRUE;
         m_objContext.GetCallInfo().bConferenceSubscriptionRequired =
-                ConferenceConfiguration::IsConferenceSubscriptionRequired();
+                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired();
 
         objMediaManager.SetConferenceCall(IMS_TRUE);
     }

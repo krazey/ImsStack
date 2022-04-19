@@ -6,12 +6,14 @@
 #include "conferencecall/ExpandController.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/IConferenceReference.h"
+#include "IMtcContext.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ExpandController::ExpandController(IN IMtcCallContext& objContext)
-    : ConferenceController(objContext)
+ExpandController::ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
+        IN CallConnectionIdManager& objConnectionIdManager) :
+        ConferenceController(nConfCallKey, objContext, objConnectionIdManager)
 {
     IMS_TRACE_I("+ExpandController", 0, 0, 0);
 }
@@ -32,12 +34,12 @@ void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
         return ConferenceController::OnCallUpdated(nType, nCallKey);
     }
 
-    if (nCallKey != m_objConfCallContext.GetCallKey())
+    if (nCallKey != m_nConfCallKey)
     {
         return;
     }
 
-    if ((ConferenceConfiguration::GetReferTypeForInvite() == REFER_INVITE_SINGLE) ||
+    if ((ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE) ||
             GetState() != STATE_EXPANDING)
     {
         return;
@@ -50,7 +52,8 @@ void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
     IMS_TRACE_D("Updated : Add user of the exist 1-to-1 session", 0, 0, 0);
 
     ConfUser* p1to1User = new ConfUser();
-    SIPAddress objSIPAddress(m_objConfCallContext.GetParticipantInfo().GetRemoteUri());
+    SIPAddress objSIPAddress(
+            GetConferenceCall()->GetCallContext().GetParticipantInfo().GetRemoteUri());
     p1to1User->aStrTarget = objSIPAddress.GetUserInfoPart()->GetUser();
 
     m_objParticipantList.AddUser(p1to1User);
@@ -65,7 +68,7 @@ void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
     // LGU+
-    if ((ConferenceConfiguration::IsReferSubscriptionRequired() == IMS_FALSE) &&
+    if ((ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE) &&
             (GetState() == STATE_EXPANDING) &&
             (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
     {
@@ -175,8 +178,7 @@ void ExpandController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
 }
 
 PROTECTED
-void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
-        IN MediaInfo& objMediaInfo, IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
+void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessExpand", 0, 0, 0);
 
@@ -190,13 +192,11 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers, IN CallInf
     IMS_UINT32 nStartIndex = AddUserToParticipantList(objUsers);
     ClearListForConfUsers(objUsers);
 
-    IMS_SINT32 nReferType = ConferenceConfiguration::GetReferTypeForInvite();
+    IMS_SINT32 nReferType = ConferenceConfigurationWrapper::GetReferTypeForInvite();
 
     if (nReferType == REFER_INVITE_SINGLE) // SKT
     {
-        CallStartOperationParams* pParams = new CallStartOperationParams(CONF_CREATE_EXPAND,
-                objCallInfo, objMediaInfo, objUsers, objSuppServices);
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
+        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE,
                 m_objParticipantList.GetConfUsers().GetAt(nStartIndex));
@@ -215,10 +215,9 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers, IN CallInf
 }
 
 PUBLIC VIRTUAL
-void ExpandController::StartConferenceCall(IN CallStartOperationParams* pParams)
+void ExpandController::StartConferenceCall(
+        IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
-    IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
-
     // TODO: how to check nullcall? never be null so no need to check?
     /*
     if (piCall is null Call)
@@ -229,9 +228,8 @@ void ExpandController::StartConferenceCall(IN CallStartOperationParams* pParams)
     }
     */
 
-    // TODO: CallType? start type?
-    piCall->StartConference(CallType::VOIP, pParams->objSuppServices, &(pParams->objMediaInfo),
-            pParams->objUsers);
+    GetConferenceCall()->StartConference(
+            CallType::VOIP, AString::ConstNull(), pOperation->GetUsers());
 }
 
 PROTECTED VIRTUAL
@@ -283,7 +281,7 @@ void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
         IN IConferenceReference* piConfRef,
         IN SIPStatusCode nStatusCode/* = SIPStatusCode::SC_200*/)
 {
-    if (ConferenceConfiguration::IsReferSubscriptionRequired() &&
+    if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() &&
             (GetState() == STATE_JOINING) &&
             (piConfRef->GetType() == REFERENCE_TYPE_INVITE) &&
             SIPStatusCode::IsFinalFailure(nStatusCode.ToInt()))
@@ -358,13 +356,13 @@ void ExpandController::NotifyCmdResult()
 PRIVATE
 void ExpandController::StopMedia1to1Session()
 {
-    if (ConferenceConfiguration::GetReferTypeForInvite() != REFER_INVITE_SINGLE)
+    if (ConferenceConfigurationWrapper::GetReferTypeForInvite() != REFER_INVITE_SINGLE)
     {
         return;
     }
 
     // TODO: control media manager.
-    // m_objConfCallContext.GetMediaManager().SetLocalTone(IMS_FALSE);
+    // GetConferenceCall()->GetCallContext().GetMediaManager().SetLocalTone(IMS_FALSE);
     // TODO: check if this is still required. No explicit 'stop' is needed.
     // 1to1 calls.GetMediaManager().();
 }
@@ -448,11 +446,10 @@ void ExpandController::RecoverOnReferring()
         m_objOperationQueue.Clear();
         SetState(STATE_IDLE);
 
-        if (ConferenceConfiguration::GetReferTypeForInvite() == REFER_INVITE_SINGLE)
+        if (ConferenceConfigurationWrapper::GetReferTypeForInvite() == REFER_INVITE_SINGLE)
         {
             Resume1to1Session();
-            m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey())->Terminate(
-                    FailReason(FAIL_REASON_UNKNOWN, -1));
+            GetConferenceCall()->Terminate(FailReason(FAIL_REASON_UNKNOWN, -1));
         }
 
         return;

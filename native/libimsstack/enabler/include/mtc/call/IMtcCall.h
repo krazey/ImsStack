@@ -17,6 +17,7 @@ class JniMtcCallThread;
 class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
+class IMtcCallContext;
 enum class CallType;
 enum class UpdateType;
 struct FailReason;
@@ -40,7 +41,8 @@ public:
     virtual ~IMtcCall() {};
 
     // Sets thread to interact with the Java layer. Nothing happens if the thread is null.
-    virtual void Attach(IN JniMtcCallThread* pJniMtcCallThread) = 0;
+    virtual void Attach(IN JniMtcCallThread* pJniMtcCallThread,
+            IN JniMediaSessionThread* pJniMediaThread) = 0;
 
     // Unsets thread to interact with the Java layer.
     virtual void Detach() = 0;
@@ -55,10 +57,19 @@ public:
 
     virtual void StartConference(
             IN CallType eCallType,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN IMSList<ConfUser*> lstUsers) = 0;
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const IMSList<ConfUser*> objUsers) = 0;
+
+    virtual void StartConference(
+            IN CallType eCallType,
+            IN const AString& strTarget,
+            IN const IMSList<ConfUser*> objUsers) = 0;
+
+    // TODO: deprecated
     virtual void ExpandToConference(IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers) = 0;
+    // TODO: deprecated
     virtual void MergeToConference(
             IN CallType eCallType, IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers) = 0;
 
@@ -124,6 +135,9 @@ public:
      * @return Current state.
      */
     virtual State GetState() const = 0;
+
+    // TODO:
+    virtual IMtcCallContext& GetCallContext() const = 0;
 };
 
 #endif
