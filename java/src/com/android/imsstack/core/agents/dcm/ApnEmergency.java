@@ -14,7 +14,6 @@ import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.agents.dcmif.IDCUtil;
-import com.android.imsstack.external.data.DataPhoneConstants;
 import com.android.imsstack.util.ImsLog;
 
 public class ApnEmergency extends Apn {

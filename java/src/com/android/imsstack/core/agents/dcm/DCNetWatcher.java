@@ -32,7 +32,6 @@ import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.external.data.DataPhoneConstants;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
@@ -123,8 +122,6 @@ public class DCNetWatcher implements IDCNetWatcher {
 
     private boolean mDoingOffRadio = false;
 
-    private DataPhoneConstants.LteStateInfo mLteStateInfo =
-            DataPhoneConstants.LteStateInfo.fromInt(0);
     private int mDetachReasonCode = 0;
     private int mLteUpdateResult = ImsEventDef.IMS_LTE_INFO_UPDATE_RESULT_NO_ADD_INFO;
     private int mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
@@ -234,7 +231,6 @@ public class DCNetWatcher implements IDCNetWatcher {
         mImsVops = false;
         mEmcbs = false;
         mDoingOffRadio = false;
-        mLteStateInfo = DataPhoneConstants.LteStateInfo.fromInt(0);
         mNrRegistrationInfo = ImsEventDef.IMS_NR_INFO_UNKNOWN;
     }
 
@@ -324,11 +320,6 @@ public class DCNetWatcher implements IDCNetWatcher {
     }
 
     @Override
-    public int getLteStateInfo() {
-        return mLteStateInfo.getCode();
-    }
-
-    @Override
     public int getLteStateDetachReasonCause() {
         return mDetachReasonCode;
     }
@@ -374,14 +365,8 @@ public class DCNetWatcher implements IDCNetWatcher {
             return isEmergencyOnlyForVonr();
         }
 
-        if (mLteStateInfo == null) {
-            ImsLog.w(mSlotId, "LteStateInfo is null");
-            return false;
-        }
-
-        // only check the emergency attach case
-        return (mLteStateInfo.getCode() ==
-                DataPhoneConstants.LteStateInfo.EMERGENCY_ATTACHED.getCode());
+        // TODO: check EMERGENCY_ATTACHED
+        return false;
     }
     @Override
     public boolean isEmergencyServiceSupported() {
@@ -811,15 +796,7 @@ public class DCNetWatcher implements IDCNetWatcher {
     }
 
     private boolean isEmergencyOnlyForVonr() {
-        if (mLteStateInfo == null) {
-            return (mNrRegistrationInfo == ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION);
-        }
-
-        if (mLteStateInfo.getCode() ==
-                DataPhoneConstants.LteStateInfo.EMERGENCY_ATTACHED.getCode()) {
-            return true;
-        }
-
+        // TODO: check EMERGENCY_ATTACHED
         return (mNrRegistrationInfo == ImsEventDef.IMS_NR_INFO_EMERGENCY_REGISTRATION);
     }
 
@@ -1425,16 +1402,16 @@ public class DCNetWatcher implements IDCNetWatcher {
                 return;
             }
 
-            int code = intent.getIntExtra(DataPhoneConstants.LTE_STATE_INFO, 0);
+            int code = intent.getIntExtra(LTE_STATE_INFO, 0);
             int oldCode = mLteStateInfo.getCode();
-            mDetachReasonCode = intent.getIntExtra(DataPhoneConstants.LTE_DETACH_CAUSE, 0);
+            mDetachReasonCode = intent.getIntExtra(LTE_DETACH_CAUSE, 0);
 
             ImsLog.i(mSlotId, "LteStateInfo :: " +
-                    DataPhoneConstants.LteStateInfo.fromInt(oldCode) +
-                    " >> " + DataPhoneConstants.LteStateInfo.fromInt(code));
+                    LteStateInfo.fromInt(oldCode) +
+                    " >> " + LteStateInfo.fromInt(code));
 
-            mLteStateInfo = DataPhoneConstants.LteStateInfo.fromInt(code);
-            int lteUpdateResult = intent.getIntExtra(DataPhoneConstants.LTE_UPDATE_RESULT, 0);
+            mLteStateInfo = LteStateInfo.fromInt(code);
+            int lteUpdateResult = intent.getIntExtra(LTE_UPDATE_RESULT, 0);
 
             if (oldCode != code || mLteUpdateResult != lteUpdateResult) {
                 mLteUpdateResult = lteUpdateResult;
@@ -1468,7 +1445,7 @@ public class DCNetWatcher implements IDCNetWatcher {
             notifyRoamingState(mDataRoaming, mVoiceRoaming);
 
             handleVoiceServiceStateChanged();
-            notifyLteInfo(mLteStateInfo.getCode(), mLteUpdateResult);
+            notifyLteInfo(0, mLteUpdateResult);
         }
 
         private void handleNrRegistrationInfo(int state, int reason) {
@@ -1487,19 +1464,21 @@ public class DCNetWatcher implements IDCNetWatcher {
         private void notifyLteInfo(int code, int updateResult) {
             int state = ImsEventDef.IMS_LTE_INFO_UNKNOWN;
 
-            if (code == DataPhoneConstants.LteStateInfo.NORMAL_ATTACHED.getCode()) {
+            // TODO: check attach type
+            /*
+            if (code == LteStateInfo.NORMAL_ATTACHED.getCode()) {
                 state = ImsEventDef.IMS_LTE_INFO_NORMAL_ATTACHED;
-            } else if (code == DataPhoneConstants.LteStateInfo.EPS_ONLY_ATTACHED.getCode()) {
+            } else if (code == LteStateInfo.EPS_ONLY_ATTACHED.getCode()) {
                 state = ImsEventDef.IMS_LTE_INFO_EPS_ONLY_ATTACHED;
-            } else if (code == DataPhoneConstants.LteStateInfo.EMERGENCY_ATTACHED.getCode()) {
+            } else if (code == LteStateInfo.EMERGENCY_ATTACHED.getCode()) {
                 state = ImsEventDef.IMS_LTE_INFO_EMERGENCY_ATTACHED;
-            } else if (code == DataPhoneConstants.LteStateInfo.NORMAL_DETACHED.getCode()) {
+            } else if (code == LteStateInfo.NORMAL_DETACHED.getCode()) {
                 state = ImsEventDef.IMS_LTE_INFO_DETACHED;
-            } else if (code == DataPhoneConstants.LteStateInfo.REATTACH_REQUIRED.getCode()) {
+            } else if (code == LteStateInfo.REATTACH_REQUIRED.getCode()) {
                 state = ImsEventDef.IMS_LTE_INFO_REATTACH_REQUIRED;
             } else {
                 ImsLog.i(mSlotId, "invalid type = " + state);
-            }
+            }*/
 
             mSystem.notifyEvent(ImsEventDef.IMS_EVENT_LTE_INFO, state, updateResult);
         }

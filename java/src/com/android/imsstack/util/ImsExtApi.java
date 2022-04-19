@@ -11,9 +11,6 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-//import com.android.imsstack.external.data.DataPhoneConstants;
-//import com.android.imsstack.external.telephony.TelephonyIntents;
-//import com.android.imsstack.external.uicc.UiccManager;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.uicc.IccUtils;
 
@@ -27,37 +24,6 @@ public final class ImsExtApi {
     private static final char[] HEX_CHARS = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
-
-    public static class Intent {
-        // DataPhoneConstants (com.android.imsstack.external.data) {
-        public static final String ACTION_EPDN_FAILED
-                = "VOLTE_EMERGENCY_CALL_FAIL_CAUSE";
-                // DataPhoneConstants.ACTION_VOLTE_EMERGENCY_CALL_FAIL_CAUSE;
-        public static final String ACTION_ROAMING_IMS_PDN_FAILED
-                = "VOLTE_ROAMING_IMS_SETUP_FAIL";
-                // DataPhoneConstants.ACTION_VOLTE_ROAMING_IMS_SETUP_FAIL;
-        // }
-
-        // TelephonyIntents (com.android.imsstack.external.telephony) {
-        public static final String ACTION_SMOOTHED_RAT_AVAILABILITY_INFO
-                = "SMOOTHED_RAT_AVAILABILITY_INFO";
-                // TelephonyIntents.ACTION_SMOOTHED_RAT_AVAILABILITY_INFO;
-        public static final String ACTION_DATA_FAIL_SM_CAUSE_IND
-                = "DATA_FAIL_SM_CAUSE_IND";
-                // TelephonyIntents.ACTION_DATA_FAIL_SM_CAUSE_IND;
-        public static final String ACTION_SET_ACB_INFO_IND
-                = "SET_ACB_INFO_IND";
-                // TelephonyIntents.ACTION_SET_ACB_INFO_IND;
-        // Type: boolean
-        public static final String DATA_FAILURE_RETRY_STATUS_KEY
-                = "DATA_FAILURE_RETRY_STATUS_KEY";
-                // TelephonyIntents.DATA_FAILURE_RETRY_STATUS_KEY;
-        // Type: String[]
-        public static final String DATA_APN_TYPES_KEY
-                = "DATA_APN_TYPES_KEY";
-                // TelephonyIntents.DATA_APN_TYPES_KEY;
-        // }
-    }
 
     public static class Uicc {
         // UiccConstants.INTENT_VALUE_ICC_REMOVED
