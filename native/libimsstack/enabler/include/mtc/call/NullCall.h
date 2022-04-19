@@ -26,7 +26,8 @@ public:
     NullCall(IN const NullCall&) = delete;
     NullCall& operator=(IN const NullCall&) = delete;
 
-    inline void Attach(IN JniMtcCallThread*) override {}
+    inline void Attach(IN JniMtcCallThread*,
+            IN JniMediaSessionThread*) override {}
     inline void Detach() override {}
 
     inline void Start(
@@ -36,8 +37,10 @@ public:
             IN const IMSMap<IMS_UINT32, SuppService*>&,
             IN JniMediaSessionThread*) override {}
     inline void StartConference(
-            IN CallType, IN const IMSMap<IMS_UINT32, SuppService*>&, IN MediaInfo*,
-            IN IMSList<ConfUser*>) override {}
+            IN CallType, IN const AString&, IN MediaInfo*,
+            IN const IMSMap<IMS_UINT32, SuppService*>&, IN IMSList<ConfUser*>) override {}
+    inline void StartConference(
+            IN CallType, IN const AString&, IN IMSList<ConfUser*>) override {}
     inline void ExpandToConference(IN CallInfo*, IN IMSList<ConfUser*>) override {}
     inline void MergeToConference(IN CallType, IN CallInfo*, IN IMSList<ConfUser*>) override {}
     inline void HandleIncoming(IN ISession*, IN JniMtcServiceThread*) override {}
@@ -60,6 +63,7 @@ public:
 
     inline CallKey GetKey() const override { return -1; }
     inline State GetState() const override { return State::IDLE; }
+    inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
 };
 
 #endif

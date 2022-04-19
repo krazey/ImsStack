@@ -17,7 +17,7 @@ public:
         inline explicit ConferenceDescription() :
                 nMaxUserCount(DEFAULT_MAX_USER_COUNT)
         {}
-        ~ConferenceDescription();
+        inline ~ConferenceDescription() {}
         ConferenceDescription(IN const ConferenceDescription&) = delete;
         ConferenceDescription& operator=(IN const ConferenceDescription&) = delete;
 
@@ -42,7 +42,7 @@ public:
                 strDisplayText(AString::ConstNull()),
                 objUris(IMSList<AString>())
         {}
-        ~HostInfo();
+        inline ~HostInfo() {}
         HostInfo(IN const HostInfo&) = delete;
         HostInfo& operator=(IN const HostInfo&) = delete;
 
@@ -66,7 +66,7 @@ public:
         inline explicit ConferenceState() :
                 nUserCount(0)
         {}
-        ~ConferenceState();
+        inline ~ConferenceState() {}
         ConferenceState(IN const ConferenceState&) = delete;
         ConferenceState& operator=(IN const ConferenceState&) = delete;
 
@@ -94,7 +94,7 @@ public:
                     strDisplayText(AString::ConstNull()),
                     nStatus(STATUS_INVALID)
             {}
-            ~EndPoint();
+            inline ~EndPoint() {}
             EndPoint(IN const EndPoint&) = delete;
             EndPoint& operator=(IN const EndPoint&) = delete;
 
@@ -132,7 +132,7 @@ public:
                     strLabel(AString::ConstNull()),
                     nStatus(CONF_MEDIA_STATUS_SENDRECV)
             {}
-            ~Media();
+            inline ~Media() {}
         private:
             Media(IN const Media&) = delete;
             Media& operator=(IN const Media&) = delete;

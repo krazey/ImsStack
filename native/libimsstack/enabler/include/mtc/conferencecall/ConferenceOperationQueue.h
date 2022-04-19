@@ -40,14 +40,14 @@ public:
     {
     public:
         // constructor
-        inline ConferenceOperation(IN IMS_UINT32 nType, IN IMS_UINT32 nDelayMillisec)
-        {
-            m_nType = nType;
-            m_nDelayMillisec = nDelayMillisec;
-            m_pParam = IMS_NULL;
-            m_nCallId = 0;
-            m_nTerminateReason = FAIL_REASON_NONE;
-        }
+        inline ConferenceOperation(IN IMS_UINT32 nType, IN IMS_UINT32 nDelayMillisec) :
+                m_nType(nType),
+                m_nDelayMillisec(nDelayMillisec),
+                m_objConfUsers(IMSList<ConfUser*>()),
+                m_pParam(IMS_NULL),
+                m_nConnectionId(0),
+                m_nTerminateReason(FAIL_REASON_NONE)
+        {}
 
         // destructor
         inline ~ConferenceOperation()
@@ -66,8 +66,8 @@ public:
         inline void SetParam(IN CallStartOperationParams* pParam)
         { m_pParam = pParam; }
 
-        inline void SetCallId(IN IMS_UINTP nCallId)
-        { m_nCallId = nCallId; }
+        inline void SetConnectionId(IN IMS_UINT32 nConnectionId)
+        { m_nConnectionId = nConnectionId; }
 
         inline void SetTerminateReason(IN IMS_SINT32 nTerminateReason)
         { m_nTerminateReason = nTerminateReason; }
@@ -84,8 +84,8 @@ public:
         { return m_objConfUsers; }
         inline CallStartOperationParams* GetParam()
         { return m_pParam; }
-        inline IMS_UINTP GetCallId()
-        { return m_nCallId; }
+        inline IMS_UINT32 GetConnectionId()
+        { return m_nConnectionId; }
         inline IMS_SINT32 GetTerminateReason()
         { return m_nTerminateReason; }
 
@@ -94,7 +94,7 @@ public:
         IMS_UINT32 m_nDelayMillisec;
         IMSList<ConfUser*> m_objConfUsers;
         CallStartOperationParams* m_pParam;
-        IMS_UINTP m_nCallId; // TODO: this must be CallKey, too.
+        IMS_UINT32 m_nConnectionId;
         IMS_SINT32 m_nTerminateReason;
     };
 
@@ -118,7 +118,7 @@ public:
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
     void CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
-    void CreateNPut(IN IMS_UINT32 nType, IN IMS_UINTP nCallId,
+    void CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
     void CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
             IN IMS_BOOL bStandAloneOperation = IMS_FALSE);
@@ -141,7 +141,7 @@ private:
     void Put(IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation);
     void RemoveActiveOperation();
     IMS_BOOL IsSameOperation(IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser) const;
-    IMS_UINT32 GetNResetDelay();
+    IMS_UINT32 GetAndResetDelay();
 
     IMS_RESULT StartTimer(IN IMS_SINT32 nDuration);
     void StopTimer();

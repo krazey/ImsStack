@@ -176,6 +176,26 @@ void JniMtcCall::HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& obj
             RejectResume(objParcel);
             break;
 
+        case IuMtcCall::STARTCONF:
+            StartGroupCall(objParcel);
+            break;
+
+        case IuMtcCall::CONF_MERGE:
+            MergeToConference(objParcel);
+            break;
+
+        case IuMtcCall::CONF_EXPAND:
+            ExpandToConference(objParcel);
+            break;
+
+        case IuMtcCall::CONF_JOIN:
+            AddToConference(objParcel);
+            break;
+
+        case IuMtcCall::CONF_DROP:
+            RemoveFromConference(objParcel);
+            break;
+
         default:
             break;
     }
@@ -185,9 +205,11 @@ PRIVATE
 void JniMtcCall::Attach()
 {
     IMS_TRACE_D("Attach (%" PFLS_d ")", m_nCallKey, 0, 0);
-    m_objCallController.Attach(m_nCallKey, m_pThread);
+
+    // TODO: okay?? need to check timing
     m_pJniMediaSession = new JniMediaSession(m_pfnNotifier, m_nSlotId, m_nCallKey,
             reinterpret_cast<IMS_SINTP>(this));
+    m_objCallController.Attach(m_nCallKey, m_pThread, m_pJniMediaSession->GetThread());
 }
 
 PRIVATE
@@ -212,7 +234,7 @@ void JniMtcCall::Start(IN const android::Parcel& objParcel)
             objParcel);
 
     m_objCallController.Start(m_nCallKey, eCallType, strTarget,
-            pMediaInfo, objSuppService, IMS_NULL,m_pJniMediaSession->GetThread());
+            pMediaInfo, objSuppService, IMS_NULL, m_pJniMediaSession->GetThread());
 }
 
 PRIVATE
@@ -289,4 +311,64 @@ PRIVATE
 void JniMtcCall::RejectResume(IN const android::Parcel& objParcel)
 {
     m_objCallController.RejectResume(m_nCallKey, FailReason(objParcel.readInt32()));
+}
+
+PRIVATE
+void JniMtcCall::StartGroupCall(IN const android::Parcel& /*objParcel*/)
+{
+    /*
+    CallType eCallType = JniMtcUtils::ReadCallType(objParcel);
+
+    AString strTarget;
+    JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
+    MediaInfo* pMediaInfo = JniMtcUtils::ReadMediaInfo(objParcel);
+    IMSMap<IMS_UINT32, SuppService*> objSuppService = JniMtcUtils::ReadSupplementaryService(
+            objParcel);
+
+    m_objCallController.StartGroupCall(m_nCallKey, eCallType, strTarget,
+            pMediaInfo, objSuppService);
+    */
+}
+
+PRIVATE
+void JniMtcCall::MergeToConference(IN const android::Parcel& objParcel)
+{
+    // TODO: delete pointers after function call.
+    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        IMS_TRACE_D("MergeToConference callid=[%d]",
+                objUsers.GetAt(i)->nConnectionId, 0, 0);
+    }
+    m_objCallController.MergeToConference(m_nCallKey, objUsers);
+}
+
+PRIVATE
+void JniMtcCall::ExpandToConference(IN const android::Parcel& /*objParcel*/)
+{
+    //m_objCallController.ExpandToConference(m_nCallKey, ReadConferenceParticipants(objParcel));
+}
+
+PRIVATE
+void JniMtcCall::AddToConference(IN const android::Parcel& objParcel)
+{
+    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        IMS_TRACE_D("AddToConference nConnectionId=[%d]",
+                objUsers.GetAt(i)->nConnectionId, 0, 0);
+    }
+    m_objCallController.AddToConference(m_nCallKey, objUsers);
+}
+
+PRIVATE
+void JniMtcCall::RemoveFromConference(IN const android::Parcel& objParcel)
+{
+    IMSList<ConfUser*> objUsers = JniMtcUtils::ReadConferenceParticipants(objParcel);
+    for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
+    {
+        IMS_TRACE_D("RemoveFromConference nConnectionId=[%d]",
+                objUsers.GetAt(i)->nConnectionId, 0, 0);
+    }
+    m_objCallController.RemoveFromConference(m_nCallKey, objUsers);
 }

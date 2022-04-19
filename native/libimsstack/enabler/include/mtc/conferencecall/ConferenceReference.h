@@ -4,9 +4,10 @@
 #include "IReferenceListener.h"
 #include "conferencecall/IConferenceReference.h"
 
+class CallConnectionIdManager;
 class IReference;
 class IMtcCall;
-class IMtcCallContext;
+class IMtcContext;
 class IConferenceReferenceListener;
 
 class ConferenceReference final :
@@ -14,9 +15,9 @@ class ConferenceReference final :
         public IConferenceReference
 {
 public:
-    explicit ConferenceReference(IN IMtcCallContext& objConfCallContext, IN ConfUser* pConfUser,
-            IN IConferenceReferenceListener& objListener);
-    explicit ConferenceReference(IN IMtcCallContext& objConfCallContext,
+    explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
+            IN ConfUser* pConfUser, IN IConferenceReferenceListener& objListener);
+    explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
             IN IMSList<ConfUser*>& objConfUsers, IN IConferenceReferenceListener& objListener);
     virtual ~ConferenceReference();
     ConferenceReference(IN const ConferenceReference&) = delete;
@@ -30,7 +31,8 @@ public:
     void ReferenceTerminated(IN IReference* piReference) override;
 
     // IConferenceReference interface implementation
-    IMS_RESULT SendInvite(OUT AString& strReferToUri) override;
+    IMS_RESULT SendInvite(OUT AString& strReferToUri,
+            IN CallConnectionIdManager& objConnectionIdManager) override;
     IMS_RESULT SendBye(IN AString strInvitedUri = AString::ConstEmpty()) override;
     IMS_UINT32 GetType() const override;
     IMS_UINT32 GetResponseCode() const override;
@@ -47,13 +49,13 @@ private:
     static const IMS_CHAR METHOD_INVITE[];
     static const IMS_CHAR METHOD_BYE[];
 
-    IMtcCallContext& m_objConfCallContext;
+    IMtcContext& m_objContext;
+    CallKey m_nConfCallKey;
     IConferenceReferenceListener& m_objListener;
     IMS_UINT32 m_nType;
     ConfUser* m_pConfUser;
     IMSList<ConfUser*> m_objConfUsers;
     IReference* m_piReference;
-    IMS_BOOL m_bImplicitSubscription;
     IMS_BOOL m_bForceToTerminateInterface;
 };
 

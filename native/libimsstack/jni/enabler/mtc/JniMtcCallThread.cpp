@@ -172,6 +172,67 @@ void JniMtcCallThread::OnUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
     SendData2Java(objParcel);
 }
 
+PUBLIC
+void JniMtcCallThread::OnMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+        IN const IMSList<ConfUser*>& objUsers)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_MERGED);
+    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    JniMtcUtils::WriteConfUsersToParcel(objUsers, objParcel);
+    SendData2Java(objParcel);
+}
+
+PUBLIC
+void JniMtcCallThread::OnMergeFailed(IN const FailReason& /*objReason*/)
+{
+    // TODO:
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceParticipantAdded()
+{
+    // TODO:
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceParticipantAddFailed(IN const FailReason& /*objReason*/)
+{
+    // TODO:
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceParticipantRemoved()
+{
+    // TODO:
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceParticipantRemoveFailed(IN const FailReason& /*objReason*/)
+{
+    // TODO:
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceInfoChanged(IN const AString& /*strDisplayText*/,
+        IN const AString /*strSubject*/, IN IMS_UINT32 /*nUserCount*/,
+        IN IMS_UINT32 /*nMaxUserCount*/, IN const AString& /*strHost*/)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_NOTIFY_CONF_INFO);
+    SendData2Java(objParcel);
+}
+
+PUBLIC
+void JniMtcCallThread::OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::CONF_NOTIFY_USERS_INFO);
+    JniMtcUtils::WriteConfUsersToParcel(objUsers, objParcel);
+    SendData2Java(objParcel);
+}
+
 PRIVATE
 void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN CallInfo* pCallInfo,
         IN MediaInfo* pMediaInfo, IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices)

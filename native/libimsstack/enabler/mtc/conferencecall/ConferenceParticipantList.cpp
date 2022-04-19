@@ -2,6 +2,7 @@
 #include "AStringBuffer.h"
 #include "call/IMtcCallManager.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/CallConnectionIdManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -43,8 +44,8 @@ PUBLIC
 void ConferenceParticipantList::ConferenceParticipant::Login()
 {
     AStringBuffer objBuffer(256);
-    objBuffer.Append("CallID=");
-    objBuffer.Append(m_pConfUser->nCallID);
+    objBuffer.Append("ConnectionId=");
+    objBuffer.Append(m_pConfUser->nConnectionId);
     objBuffer.Append(" Target=");
     objBuffer.Append(m_pConfUser->aStrTarget);
     objBuffer.Append(" UserEntity=");
@@ -204,11 +205,11 @@ AString ConferenceParticipantList::GetReferInviteUri(IN const ConfUser* pConfUse
 }
 
 PUBLIC
-IMS_SINT32 ConferenceParticipantList::FindParticipant(IN IMS_UINTP nCallID)
+IMS_SINT32 ConferenceParticipantList::FindParticipant(IN IMS_UINT32 nConnectionId)
 {
     for (IMS_SINT32 i = 0; i < static_cast<IMS_SINT32>(m_objParticipants.GetSize()); i++)
     {
-        if (m_objParticipants.GetAt(i)->GetConfUser()->nCallID == nCallID)
+        if (m_objParticipants.GetAt(i)->GetConfUser()->nConnectionId == nConnectionId)
         {
             return i;
         }
@@ -218,7 +219,8 @@ IMS_SINT32 ConferenceParticipantList::FindParticipant(IN IMS_UINTP nCallID)
 }
 
 PUBLIC
-void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager)
+void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
+        IN CallConnectionIdManager& objConnectionIdManager)
 {
     IMSList<ConferenceParticipant*> objTemp;
 
@@ -231,7 +233,9 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager)
         {
             ConferenceParticipant* pTempParticipant = m_objParticipants.GetAt(nIndex);
             ConfUser* pTempUser = pTempParticipant ? pTempParticipant->GetConfUser() : IMS_NULL;
-            if (pTempUser && pTempUser->nCallID == piTempCall->GetKey())
+            if (pTempUser &&
+                    objConnectionIdManager.GetCallKey(
+                        pTempUser->nConnectionId) == piTempCall->GetKey())
             {
                 objTemp.Append(pTempParticipant);
                 break;

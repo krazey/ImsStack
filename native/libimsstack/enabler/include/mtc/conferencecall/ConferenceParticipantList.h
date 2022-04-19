@@ -7,6 +7,7 @@
 #include "conferencecall/ConferenceDef.h"
 #include "conferencecall/IConferenceReference.h"
 
+class CallConnectionIdManager;
 class IMtcCallManager;
 
 class ConferenceParticipantList final
@@ -127,8 +128,9 @@ public:
     void SetReferInviteUri(IN AString strReferInviteUri, IN const ConfUser* pConfUser);
     AString GetReferInviteUri(IN const ConfUser* pConfUser);
 
-    IMS_SINT32 FindParticipant(IN IMS_UINTP nCallID);
-    void ReOrder(IN IMtcCallManager& objCallManager);
+    IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
+    void ReOrder(IN IMtcCallManager& objCallManager,
+            IN CallConnectionIdManager& objConnectionIdManager);
     void Login();
 
     inline IMS_UINT32 GetSize() const

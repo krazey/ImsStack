@@ -9,6 +9,7 @@
 #include "call/IMtcCall.h"
 
 class ParticipantInfo;
+class JniMediaSessionThread;
 class JniMtcCallThread;
 class JniMtcServiceThread;
 class MediaInfo;
@@ -27,6 +28,8 @@ public:
     // _JNI_MTC_
     inline void SetJniCallThread(IN JniMtcCallThread* pThread) { m_pCallThread = pThread; }
     inline void SetJniServiceThread(IN JniMtcServiceThread* pThread) { m_pServiceThread = pThread; }
+    inline void SetJniMediaThread(IN JniMediaSessionThread* pThread) { m_pMediaThread = pThread; }
+    inline JniMediaSessionThread* GetJniMediaThread() { return m_pMediaThread; }
 
     void SendIncomingCallReceived(
             IN CallKey nKey,
@@ -89,6 +92,7 @@ private:
 
     JniMtcCallThread* m_pCallThread;
     JniMtcServiceThread* m_pServiceThread;
+    JniMediaSessionThread* m_pMediaThread;
 };
 
 #endif

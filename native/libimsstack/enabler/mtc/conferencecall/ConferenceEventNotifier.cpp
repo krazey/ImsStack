@@ -4,16 +4,22 @@
 #include "ServiceMSG.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
+#include "call/MtcUiNotifier.h"
 #include "conferencecall/ConferenceParticipantList.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "media/IMtcMediaManager.h"
 #include "helper/MtcSupplementaryService.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ConferenceEventNotifier::ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext) :
-        m_objConfCallContext(objConfCallContext)
+ConferenceEventNotifier::ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext,
+        IN CallConnectionIdManager& objConnectionIdManager) :
+        m_objConfCallContext(objConfCallContext),
+        m_objConnectionIdManager(objConnectionIdManager)
 {
+    // TODO: memory leak.
     IMS_TRACE_I("+ConferenceEventNotifier", 0, 0, 0);
 }
 
@@ -30,14 +36,9 @@ void ConferenceEventNotifier::NotifyMerged(IN ConferenceParticipantList& objPart
 
     objParticipantList.Login();
 
-    // TODO: param below is deleted in JNIUCSessionThread. so users must be copied.
-    // TODO: piCall->SetStartedToUI();
-    // TODO: add conference apis to JniMtcCallThread.
-    IUUCSessionConfMergedParam* pParam = new IUUCSessionConfMergedParam();
-    pParam->pCallInfo = CloneCallInfo();
-    pParam->pMediaInfo = CloneMediaInfo();
-    pParam->objSuppServices = m_objConfCallContext.GetSupplementaryService().GetAll();
-    pParam->lstConfUsers = objParticipantList.GetConfUsers(IMS_TRUE);
+    m_objConfCallContext.GetUiNotifier().SendMerged(CloneCallInfo(), CloneMediaInfo(),
+            m_objConfCallContext.GetSupplementaryService().GetAll(),
+            objParticipantList.GetConfUsers(IMS_TRUE));
 }
 
 PUBLIC
@@ -45,8 +46,7 @@ void ConferenceEventNotifier::NotifyMergeFailed(IN FailReason failReason)
 {
     IMS_TRACE_I("NotifyMergeFailed", 0, 0, 0);
 
-    IUUCSessionConfMergeFailedParam* pParam = new IUUCSessionConfMergeFailedParam();
-    pParam->failReason = failReason;
+    m_objConfCallContext.GetUiNotifier().SendMergeFailed(failReason);
 }
 
 PUBLIC
@@ -99,9 +99,7 @@ void ConferenceEventNotifier::NotifyDropped(IN FailReason failReason,
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
-    IUUCSessionConfDroppedParam* pParam = new IUUCSessionConfDroppedParam();
-    pParam->bResult = IMS_TRUE;
-    pParam->failReason = failReason;
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_TRUE, failReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -112,9 +110,7 @@ void ConferenceEventNotifier::NotifyDropFailed(IN FailReason failReason,
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
-    IUUCSessionConfDroppedParam* pParam = new IUUCSessionConfDroppedParam();
-    pParam->bResult = IMS_FALSE;
-    pParam->failReason = failReason;
+    m_objConfCallContext.GetUiNotifier().SendDropped(IMS_FALSE, failReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -125,9 +121,7 @@ void ConferenceEventNotifier::NotifyJoined(IN FailReason failReason,
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
-    IUUCSessionConfJoinedParam* pParam = new IUUCSessionConfJoinedParam();
-    pParam->bResult = IMS_TRUE;
-    pParam->failReason = failReason;
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_TRUE, failReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -138,10 +132,7 @@ void ConferenceEventNotifier::NotifyJoinFailed(IN FailReason failReason,
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 
-    IUUCSessionConfJoinedParam* pParam = new IUUCSessionConfJoinedParam();
-
-    pParam->bResult = IMS_FALSE;
-    pParam->failReason = failReason;
+    m_objConfCallContext.GetUiNotifier().SendJoined(IMS_FALSE, failReason);
 
     NotifyUsersInfo(objParticipantList);
 }
@@ -152,8 +143,8 @@ void ConferenceEventNotifier::NotifyConferenceInfo(IN ConferenceParticipantList&
     IMS_TRACE_I("NotifyConferenceInfo : max-user-count=[%d]",
             objParticipantList.GetMaxUserCount(), 0, 0);
 
-    IUUCSessionConfNotifyConfInfoParam* pParam = new IUUCSessionConfNotifyConfInfoParam();
-    pParam->nMaxUserCount = objParticipantList.GetMaxUserCount();
+    m_objConfCallContext.GetUiNotifier().SendNotifyConfInfo("", "",
+            objParticipantList.GetMaxUserCount(), objParticipantList.GetSize(), "");
 }
 
 PUBLIC
@@ -162,30 +153,36 @@ void ConferenceEventNotifier::NotifyUsersInfo(IN ConferenceParticipantList& objP
     IMS_TRACE_I("NotifyUsersInfo", 0, 0, 0);
     objParticipantList.Login();
 
-    IUUCSessionConfNotifyUsersInfoParam* pParam = new IUUCSessionConfNotifyUsersInfoParam();
-    pParam->objUsers = objParticipantList.GetConfUsers(IMS_TRUE);
-    CheckDisconnectedConfUsersInfo(objParticipantList, pParam->objUsers);
+    IMSList<ConfUser*> objUsers = objParticipantList.GetConfUsers(IMS_TRUE);
+    CheckDisconnectedConfUsersInfo(objParticipantList, objUsers);
+    m_objConfCallContext.GetUiNotifier().SendNotifyUsersInfo(objUsers);
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN AString& /*str1to1UiKey*/)
+void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
 {
     IMS_TRACE_I("NotifyIndividualCallTerminated ", 0, 0, 0);
 
     IUUCSessionTerminatedParam* pParam = new IUUCSessionTerminatedParam();
     pParam->failReason =
             FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED);
+
+    m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext().GetUiNotifier()
+            .SendTerminated(
+                FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED));
 }
 
 PRIVATE
 CallInfo* ConferenceEventNotifier::CloneCallInfo()
 {
+    // TODO: deprecated.
     return new CallInfo(m_objConfCallContext.GetCallInfo());
 }
 
 PRIVATE
 MediaInfo* ConferenceEventNotifier::CloneMediaInfo()
 {
+    // TODO: deprecated.
     MediaInfo objMediaInfo;
     m_objConfCallContext.GetMediaManager().GetMediaInfo(objMediaInfo);
     return new MediaInfo(objMediaInfo);
@@ -223,10 +220,13 @@ void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
             else
             {
                 pParticipant->SetDisconnectionNotified(IMS_TRUE);
+                m_objConnectionIdManager.OnConferenceParticipantDisconnected(
+                        pParticipant->GetConfUser()->nConnectionId);
             }
         }
         else
         {
+            // ??
             pParticipant->SetDisconnectionNotified(IMS_FALSE);
         }
     }

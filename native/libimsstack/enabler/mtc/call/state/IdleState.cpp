@@ -85,22 +85,52 @@ CallStateName IdleState::Start(
 PUBLIC VIRTUAL
 CallStateName IdleState::StartConference(
         IN CallType eCallType,
-        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+        IN const AString& strTarget,
         IN MediaInfo* pMediaInfo,
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
         IN IMSList<ConfUser*> lstUsers)
 {
-    m_eConferenceStartType = ConferenceType::START_CONFERENCE;
+    m_eConferenceStartType = ConferenceType::START_CONFERENCE; // TODO: deprecated.
 
     CallInfo& objCallInfo = m_objContext.GetCallInfo();
     objCallInfo.ePeerType = PeerType::MO;
     objCallInfo.eCallType = eCallType;
     objCallInfo.bConference = IMS_TRUE;
+    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget); // TODO:
 
     m_objContext.GetSupplementaryService().UpdateService(objSuppServices);
 
     m_objOperationAfterBlockCheck = [&]()
     {
         return ContinueConference(pMediaInfo, lstUsers);
+    };
+    m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
+            m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
+    return OnBlockChecked(m_pBlockChecker->Check());
+}
+
+PUBLIC VIRTUAL
+CallStateName IdleState::StartConference(
+        IN CallType eCallType,
+        IN const AString& strTarget,
+        IN IMSList<ConfUser*> lstUsers)
+{
+    IMS_TRACE_D("StartConference", 0, 0, 0);
+    m_eConferenceStartType = ConferenceType::START_CONFERENCE;
+
+    CallInfo& objCallInfo = m_objContext.GetCallInfo();
+    objCallInfo.ePeerType = PeerType::MO;
+    objCallInfo.eCallType = eCallType;
+    objCallInfo.bConference = IMS_TRUE;
+    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget);
+
+    m_objContext.GetSupplementaryService().UpdateService(IMSMap<IMS_UINT32, SuppService*>());
+
+    m_objOperationAfterBlockCheck = [&]()
+    {
+        return ContinueConference(new MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
+                DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID),
+                lstUsers);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -269,6 +299,7 @@ CallStateName IdleState::ContinueConference(
     {
         return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
     }
+    piSession->SetImplicitRoutingRequired(IMS_TRUE);
     m_objContext.SetSession(m_objContext.CreateSession(*piSession));
 
     IMSList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
@@ -278,8 +309,12 @@ CallStateName IdleState::ContinueConference(
     {
         m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
     }
-    // m_objContext.GetMediaManager().CreateMediaSession(pJniMediaThread);
-    // m_objContext.GetMediaManager().SetConferenceCall(m_objContext.GetCallInfo().bConference);
+    m_objContext.GetMediaManager().CreateMediaSession(
+            m_objContext.GetUiNotifier().GetJniMediaThread());
+    m_objContext.GetMediaManager().CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
+    m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
+
+    m_objContext.GetPreconditionManager().CreateQos(piSession);
 
     if (SendStartMessage(piSession) == IMS_FAILURE)
     {
@@ -422,8 +457,12 @@ IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(
 
 PRIVATE
 void IdleState::SetResourceListForConference(
-        IN_OUT IMessage& objMessage, IN IMSList<AString>& /* lstEntryUris */)
+        IN_OUT IMessage& objMessage, IN IMSList<AString>& lstEntryUris)
 {
+    if (lstEntryUris.GetSize() == 0)
+    {
+        return;
+    }
     objMessage.AddHeader(SIPHeaderName::CONTENT_TYPE, "multipart/mixed");
     // messageSender->SetResourceListsBody(pIMessage, AString::ConstNull(), lstEntryUris, IMS_TRUE);
 }
@@ -457,7 +496,7 @@ void IdleState::UpdateIncomingInformation(IN ISession* piSession)
     {
         m_objContext.GetCallInfo().bConference = IMS_TRUE;
         m_objContext.GetCallInfo().bConferenceSubscriptionRequired =
-                ConferenceConfiguration::IsConferenceSubscriptionRequired();
+                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired();
     }
 
     AString strContact;

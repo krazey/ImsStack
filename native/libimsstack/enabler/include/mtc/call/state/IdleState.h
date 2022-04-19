@@ -39,8 +39,14 @@ public:
             override;
     CallStateName StartConference(
             IN CallType eCallType,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
+            IN IMSList<ConfUser*> lstUsers)
+            override;
+    CallStateName StartConference(
+            IN CallType eCallType,
+            IN const AString& strTarget,
             IN IMSList<ConfUser*> lstUsers)
             override;
     CallStateName ExpandToConference(IN CallInfo* pCallInfo, IN IMSList<ConfUser*> lstUsers)

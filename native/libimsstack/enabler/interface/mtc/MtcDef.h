@@ -803,69 +803,40 @@ public:
     IMS_BOOL        bAnonymize;
 };
 
+// TODO: move to conference header / struct / ConferenceUser / aStr to str / remove unused.
 class ConfUser
 {
 public:
-    inline ConfUser()
-        : nCallID(0)
-        , aStrTarget(AString::ConstNull())
-        , aStrUserEntity(AString::ConstNull())
-        , aStrEPEntity(AString::ConstNull())
-        , aStrDisplayName(AString::ConstNull())
-        , eStatus(CONFINFO_STATUS_IDLE)
-        , eStatusCode(-1)
-        , eCCType(COPYCONTROLTYPE_TO)
-        , bAnonymize(IMS_FALSE)
-    {
-        IMS_TRACE_MEM("uc", "uc_M : ConfUser[%" PFLS_u "][%" PFLS_x "]", sizeof(ConfUser), this,
-                0);
-    }
-    inline ConfUser(IN const ConfUser &objRHS)
-        : nCallID(objRHS.nCallID)
-        , aStrTarget(objRHS.aStrTarget)
-        , aStrUserEntity(objRHS.aStrUserEntity)
-        , aStrEPEntity(objRHS.aStrEPEntity)
-        , aStrDisplayName(objRHS.aStrDisplayName)
-        , eStatus(objRHS.eStatus)
-        , eStatusCode(objRHS.eStatusCode)
-        , eCCType(objRHS.eCCType)
-        , bAnonymize(objRHS.bAnonymize)
-        , stUCKey(objRHS.stUCKey)
-    {
-        IMS_TRACE_MEM("uc", "uc_M : ConfUser[%" PFLS_u "][%" PFLS_x "]", sizeof(ConfUser), this,
-                0);
-    }
-    inline ~ConfUser()
-    {
-        IMS_TRACE_MEM("uc", "uc_F : ConfUser[%" PFLS_u "][%" PFLS_x "]", sizeof(ConfUser), this,
-                0);
-    }
+    inline ConfUser() :
+            nConnectionId(0),
+            aStrTarget(AString::ConstNull()),
+            aStrUserEntity(AString::ConstNull()),
+            aStrEPEntity(AString::ConstNull()),
+            aStrDisplayName(AString::ConstNull()),
+            eStatus(CONFINFO_STATUS_IDLE),
+            eStatusCode(-1),
+            eCCType(COPYCONTROLTYPE_TO),
+            bAnonymize(IMS_FALSE)
+    {}
+    inline ConfUser(IN const ConfUser &objRHS) :
+
+            nConnectionId(objRHS.nConnectionId),
+            aStrTarget(objRHS.aStrTarget),
+            aStrUserEntity(objRHS.aStrUserEntity),
+            aStrEPEntity(objRHS.aStrEPEntity),
+            aStrDisplayName(objRHS.aStrDisplayName),
+            eStatus(objRHS.eStatus),
+            eStatusCode(objRHS.eStatusCode),
+            eCCType(objRHS.eCCType),
+            bAnonymize(objRHS.bAnonymize)
+    {}
+    inline ~ConfUser() {}
+
+    ConfUser& operator=(IN const ConfUser&) = delete;
 
 public:
-    inline ConfUser& operator=(IN const ConfUser &objRHS)
-    {
-        if (this != &objRHS)
-        {
-            nCallID = objRHS.nCallID;
-            aStrTarget = objRHS.aStrTarget;
-            aStrUserEntity = objRHS.aStrUserEntity;
-            aStrEPEntity = objRHS.aStrEPEntity;
-            aStrDisplayName = objRHS.aStrDisplayName;
-            eStatus = objRHS.eStatus;
-            eStatusCode = objRHS.eStatusCode;
-            eCCType = objRHS.eCCType;
-            bAnonymize = objRHS.bAnonymize;
-            stUCKey = objRHS.stUCKey;
-        }
-
-        return (*this);
-    }
-
-public:
-    // TODO: not IMSKey, but CallKey. update this to CallKey
-    // TODO: new identity = 'connection id' or something like that is required.
-    // IMSKey for Session Paricinpant - ex) Merge
-    IMS_UINTP           nCallID;
+    // connection id for a specific MtcCall
+    IMS_UINT32          nConnectionId;
     // Phone Number for User Paricinpant - ex) Join
     AString             aStrTarget;
     // Main Key after subscription for confernece from NOTIFY
@@ -882,9 +853,6 @@ public:
     IMS_UINT32          eCCType;
     // from NOTIFY about Conference Event package
     IMS_BOOL            bAnonymize;
-
-    // Extra Information
-    UCKey               stUCKey;
 };
 
 class DialogInfo

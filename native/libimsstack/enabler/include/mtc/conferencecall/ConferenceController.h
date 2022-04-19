@@ -15,11 +15,12 @@
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "IMtcCallStateListener.h"
 
-class IMtcCallContext;
+class IMtcContext;
 class IConferenceReference;
 class ConfUser;
 class MediaInfo;
 class SuppService;
+class CallConnectionIdManager;
 struct CallInfo;
 struct CallStartOperationParams;
 
@@ -32,7 +33,8 @@ class ConferenceController :
         public ITimerListener
 {
 public:
-    explicit ConferenceController(IN IMtcCallContext& objContext);
+    explicit ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
+            IN CallConnectionIdManager& objConnectionIdManager);
     virtual ~ConferenceController();
     ConferenceController(IN const ConferenceController&) = delete;
     ConferenceController& operator=(IN const ConferenceController&) = delete;
@@ -64,8 +66,9 @@ public:
     void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
             IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices) override;
+    void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers) override;
     IMS_SINT32 GetState() const override;
-    IMS_UINT32 GetCallStatusInConference(IN CallKey nKey) const override;
+    IndividualCallState GetCallStatusInConference(IN CallKey nKey) const override;
 
     // IConferenceOperationQueueListener interfaces implementation
     void OnOperationReady() override;
@@ -74,10 +77,8 @@ protected:
     // basic operation set
     inline virtual void ProcessGroupCall(IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&,
             IN IMSMap<IMS_UINT32, SuppService*>&) {}
-    inline virtual void ProcessExpand(IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&,
-            IN IMSMap<IMS_UINT32, SuppService*>&) {}
-    inline virtual void ProcessMerge(IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&,
-            IN IMSMap<IMS_UINT32, SuppService*>&) {}
+    inline virtual void ProcessExpand(IN IMSList<ConfUser*>&) {}
+    inline virtual void ProcessMerge(IN IMSList<ConfUser*>&) {}
     virtual void ProcessJoin(IN IMSList<ConfUser*>& objUsers);
     virtual void ProcessDrop(IN IMSList<ConfUser*>& objUsers);
 
@@ -104,13 +105,13 @@ protected:
     void NotifyConferenceInfo();
     void NotifyUsersInfo();
 
-    virtual void StartConferenceCall(IN CallStartOperationParams* pParams);
+    inline virtual void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation*) {}
     virtual void SubscribeConference(IN IMS_BOOL bUnsub = IMS_FALSE);
     virtual void CheckUserEntityConnected(IN ConfUser* pConfUser);
     virtual void InviteParticipants(IN IMSList<ConfUser*> objUsers);
     virtual void RemoveParticipants(IN IMSList<ConfUser*> objUsers);
     virtual void NotifyCmdResult();
-    virtual void TerminateIndividualCall(IN IMS_UINTP nCallId);
+    virtual void TerminateIndividualCall(IN IMS_UINT32 nConnectionId);
     virtual void TerminateConference(IN IMS_SINT32 nTerminateReason);
 
     IMS_BOOL CompleteCurrentAndDoNextOperation(IN IMS_UINT32 nOperationType,
@@ -139,14 +140,6 @@ protected:
     const IMS_CHAR* ConvertStateToString(IN IMS_SINT32 nState) const;
 
 public:
-    enum
-    {
-        SESSION_1TO1_IDLE = 0,
-        SESSION_1TO1_INVITED,
-        SESSION_1TO1_JOINING,
-        SESSION_1TO1_JOINED
-    };
-
     enum
     {
         STATE_CREATED           = 0,
@@ -185,8 +178,10 @@ protected:
 
     // FIXME : has IMtcCall reference or has only call id?
 
-    IMtcCallContext& m_objConfCallContext;
+    CallKey m_nConfCallKey;
+    IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
+    CallConnectionIdManager& m_objConnectionIdManager;
     ConferenceParticipantList m_objParticipantList;
     ConferenceEventNotifier m_objNotifier;
     ConferenceOperationQueue m_objOperationQueue;

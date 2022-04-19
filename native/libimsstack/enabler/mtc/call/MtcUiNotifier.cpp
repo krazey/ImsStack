@@ -328,11 +328,7 @@ void MtcUiNotifier::SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
         return;
     }
 
-    IUUCSessionConfMergedParam* pParam = new IUUCSessionConfMergedParam();
-    pParam->pCallInfo = pCallInfo;
-    pParam->pMediaInfo = pMediaInfo;
-    pParam->objSuppServices = objSuppServices;
-    pParam->lstConfUsers = lstConfUser;
+    m_pCallThread->OnMerged(pCallInfo, pMediaInfo, objSuppServices, lstConfUser);
 }
 
 PUBLIC
@@ -345,8 +341,7 @@ void MtcUiNotifier::SendMergeFailed(IN const FailReason& objReason)
         return;
     }
 
-    IUUCSessionConfMergeFailedParam* pParam = new IUUCSessionConfMergeFailedParam();
-    pParam->failReason = objReason;
+    m_pCallThread->OnMergeFailed(objReason);
 }
 
 PUBLIC
@@ -359,9 +354,14 @@ void MtcUiNotifier::SendJoined(IN IMS_BOOL bResult, IN const FailReason& objReas
         return;
     }
 
-    IUUCSessionConfJoinedParam* pParam = new IUUCSessionConfJoinedParam();
-    pParam->bResult = bResult;
-    pParam->failReason = objReason;
+    if (bResult)
+    {
+        m_pCallThread->OnConferenceParticipantAdded();
+    }
+    else
+    {
+        m_pCallThread->OnConferenceParticipantAddFailed(objReason);
+    }
 }
 
 PUBLIC
@@ -374,9 +374,14 @@ void MtcUiNotifier::SendDropped(IN IMS_BOOL bResult, IN const FailReason& objRea
         return;
     }
 
-    IUUCSessionConfDroppedParam* pParam = new IUUCSessionConfDroppedParam();
-    pParam->bResult = bResult;
-    pParam->failReason = objReason;
+    if (bResult)
+    {
+        m_pCallThread->OnConferenceParticipantRemoved();
+    }
+    else
+    {
+        m_pCallThread->OnConferenceParticipantRemoveFailed(objReason);
+    }
 }
 
 PUBLIC
@@ -389,9 +394,7 @@ void MtcUiNotifier::SendNotifyUsersInfo(IN IMSList<ConfUser*> lstConfUser)
         return;
     }
 
-    IUUCSessionConfNotifyUsersInfoParam* pParam = new IUUCSessionConfNotifyUsersInfoParam();
-
-    pParam->objUsers = lstConfUser;
+    m_pCallThread->OnConferenceParticipantsInfoChanged(lstConfUser);
 }
 
 PUBLIC
@@ -407,12 +410,8 @@ void MtcUiNotifier::SendNotifyConfInfo(IN AString strDisplayText, IN AString str
         return;
     }
 
-    IUUCSessionConfNotifyConfInfoParam* pParam = new IUUCSessionConfNotifyConfInfoParam();
-    pParam->aStrDisplayText = strDisplayText;
-    pParam->aStrSubject = strSubject;
-    pParam->nMaxUserCount = nMaxUserCount;
-    pParam->nUserCount = nUserCount;
-    pParam->aStrHostEntity = strHostEntity;
+    m_pCallThread->OnConferenceInfoChanged(strDisplayText, strSubject, nUserCount, nMaxUserCount,
+            strHostEntity);
 }
 
 PUBLIC

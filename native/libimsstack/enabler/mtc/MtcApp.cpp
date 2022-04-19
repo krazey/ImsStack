@@ -15,7 +15,8 @@
 #include "MtcService.h"
 #include "helper/CallStateProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
-//#include "call/MtcCallController.h"
+#include "call/MtcCallController.h"
+#include "conferencecall/ConferenceManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -26,16 +27,16 @@ PUBLIC
 MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         IMSApp(MTC_APP_NAME),
         m_nSlotId(nSlotId),
-        m_strJniServiceName(AString::ConstNull()),
         m_objConfigurationProxy(MtcConfigurationProxy()),
         m_lstServices(IMSList<MtcService*>()),
         m_objDialingPlan(MtcDialingPlan(*this)),
         m_objCallManager(MtcCallManager(*this)),
-        m_objCallController(MtcCallController(m_objCallManager)),
+        m_objCallController(MtcCallController(*this)),
         m_objVonrManager(MtcVonrManager()),
         m_objCallStateProxy(CallStateProxy(m_objCallManager)),
         m_objImsEventReceiver(MtcImsEventReceiver(nSlotId)),
-        m_objSipInterfaceFactory(MtcSipInterfaceFactory())
+        m_objSipInterfaceFactory(MtcSipInterfaceFactory()),
+        m_objConferenceManager(ConferenceManager(*this))
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     Configuration::GetInstance()->SetAppConfig(
@@ -83,6 +84,7 @@ IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
     return IMS_NULL;
 }
 
+PUBLIC VIRTUAL
 MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)

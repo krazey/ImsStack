@@ -4,7 +4,7 @@
 #include "IMSTypeDef.h"
 
 // TODO: this class will be deprecated and replaced by the MtcConfigurationProxy
-class ConferenceConfiguration
+class ConferenceConfigurationWrapper
 {
 public:
     static IMS_BOOL IsSupported();

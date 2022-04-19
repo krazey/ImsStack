@@ -15,7 +15,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "vonr/MtcVonrManager.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
-
+#include "conferencecall/ConferenceManager.h"
 
 class MtcService;
 
@@ -35,19 +35,20 @@ public:
     virtual void Stop() override;
 
     // IMtcContext implementation
-    inline virtual IMS_SINT32 GetSlotId() override { return m_nSlotId; }
-    virtual IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
-    inline virtual MtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
-    inline virtual MtcCallController& GetCallController() override { return m_objCallController; }
-    inline virtual IMtcCallManager& GetCallManager() override { return m_objCallManager; }
-    inline virtual MtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
-    inline virtual MtcConfigurationProxy& GetConfigurationProxy() override
+    inline IMS_SINT32 GetSlotId() override { return m_nSlotId; }
+    IMtcService* GetServiceByType(IN ServiceType eServiceType) override;
+    inline MtcDialingPlan& GetDialingPlan() override { return m_objDialingPlan; }
+    inline MtcCallController& GetCallController() override { return m_objCallController; }
+    inline IMtcCallManager& GetCallManager() override { return m_objCallManager; }
+    inline MtcVonrManager& GetVonrManager() override { return m_objVonrManager; }
+    inline MtcConfigurationProxy& GetConfigurationProxy() override
     { return m_objConfigurationProxy; }
-    inline virtual CallStateProxy& GetCallStateProxy() override { return m_objCallStateProxy; }
+    inline CallStateProxy& GetCallStateProxy() override { return m_objCallStateProxy; }
     inline MtcImsEventReceiver& GetImsEventReceiver() override { return m_objImsEventReceiver; }
-    virtual MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override;
-    virtual MtcSipInterfaceFactory& GetSipInterfaceFactory() override
+    MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override;
+    MtcSipInterfaceFactory& GetSipInterfaceFactory() override
     { return m_objSipInterfaceFactory; }
+    inline ConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
 
 private:
     void InitConfiguration();
@@ -57,7 +58,6 @@ private:
 
 private:
     IMS_SINT32                  m_nSlotId;
-    AString                     m_strJniServiceName;
     MtcConfigurationProxy       m_objConfigurationProxy;
     IMSList<MtcService*>        m_lstServices;
     MtcDialingPlan              m_objDialingPlan;
@@ -67,6 +67,7 @@ private:
     CallStateProxy              m_objCallStateProxy;
     MtcImsEventReceiver         m_objImsEventReceiver;
     MtcSipInterfaceFactory      m_objSipInterfaceFactory;
+    ConferenceManager           m_objConferenceManager;
 };
 
 #endif

@@ -15,7 +15,8 @@ class ExpandController final :
         public ConferenceController
 {
 public:
-    explicit ExpandController(IN IMtcCallContext& objContext);
+    explicit ExpandController(IN CallKey nConfCallKey, IMtcContext& objContext,
+            IN CallConnectionIdManager& objConnectionIdManager);
     virtual ~ExpandController();
     ExpandController(IN const ExpandController&) = delete;
     ExpandController& operator=(IN const ExpandController&) = delete;
@@ -28,10 +29,8 @@ public:
             IN SIPStatusCode nSipFragCode, IN ReferSubscriptionState eState) override;
 
 protected:
-    void ProcessExpand(IN IMSList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo,
-            IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices) override;
-    void StartConferenceCall(IN CallStartOperationParams* pParams) override;
+    void ProcessExpand(IN IMSList<ConfUser*>& objUsers) override;
+    void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     IMS_BOOL IsStartFinalSipfragWaitTimer() const override;
     void Recover() override;
 

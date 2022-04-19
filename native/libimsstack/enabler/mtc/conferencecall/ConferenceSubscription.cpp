@@ -15,7 +15,8 @@
 #include "utility/MessageUtil.h"
 #include "configuration/ConfigDef.h"
 #include "MtcDef.h"
-#include "call/IMtcCallContext.h"
+#include "call/IMtcCall.h"
+#include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
@@ -25,18 +26,16 @@
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SubscriptionInterfaceHolder.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
 
 PUBLIC
-ConferenceSubscription::ConferenceSubscription(IN IMtcCallContext& objContext,
+ConferenceSubscription::ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
         IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener) :
         m_objContext(objContext),
+        m_nConfCallKey(nConfCallKey),
         m_objList(objList),
         m_objListener(objListener),
-        m_objISession(objContext.GetSession()->GetISession()), // never be NULL
-        m_objICoreService(*(objContext.GetService().GetICoreService())),
         m_strTo(AString::ConstNull()),
         m_piSubscription(IMS_NULL),
         m_nState(SubscriptionState::IDLE),
@@ -46,7 +45,7 @@ ConferenceSubscription::ConferenceSubscription(IN IMtcCallContext& objContext,
 {
     IMS_TRACE_I("+ConferenceSubscription", 0, 0, 0);
 
-    m_nDialogType = ConferenceConfiguration::IsSubscriptionOutDialog() ?
+    m_nDialogType = ConferenceConfigurationWrapper::IsSubscriptionOutDialog() ?
             CONF_SUBSCRIPTION_DIALOG_TYPE_OUT : CONF_SUBSCRIPTION_DIALOG_TYPE_IN;
 }
 
@@ -198,12 +197,15 @@ void ConferenceSubscription::CreateSubscription()
     if (m_nDialogType== CONF_SUBSCRIPTION_DIALOG_TYPE_OUT)
     {
         m_piSubscription = m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()
-                ->GetISubscription(&m_objICoreService, IMS_NULL, m_strTo, "conference");
+                ->GetISubscription(
+                    m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService(),
+                    IMS_NULL, m_strTo, "conference");
     }
     else
     {
         m_piSubscription = m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()
-                ->GetISubscription(&m_objISession, "conference");
+                ->GetISubscription(&m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)
+                ->GetCallContext().GetSession()->GetISession(), "conference");
     }
 }
 
@@ -273,7 +275,9 @@ void ConferenceSubscription::SetHeaders()
     piSipMessage->AddHeader(ISIPHeader::ACCEPT, ConferenceConst::APPLICATION_CONFERENCEINFO);
 
     // TODO: messageformatter.
-    IFeatureCaps* piFeatureCaps = m_objICoreService.GetFeatureCaps();
+    // TODO: null check?
+    IFeatureCaps* piFeatureCaps =
+            m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService()->GetFeatureCaps();
     if (piFeatureCaps != IMS_NULL)
     {
         piFeatureCaps->AddFeature("+g.3gpp.mid-call", AString::ConstEmpty(),

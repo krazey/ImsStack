@@ -1,6 +1,7 @@
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceController.h"
 #include "conferencecall/ConferenceReference.h"
+#include "conferencecall/CallConnectionIdManager.h"
 #include "IMessage.h"
 #include "call/IMtcCallManager.h"
 #include "IMtcService.h"
@@ -14,16 +15,19 @@
 #include "call/MtcSession.h"
 #include "ICoreService.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
 
 PUBLIC
-ConferenceController::ConferenceController(IN IMtcCallContext& objContext) :
-        m_objConfCallContext(objContext),
+ConferenceController::ConferenceController(IN CallKey nConfCallKey, IMtcContext& objContext,
+        IN CallConnectionIdManager& objConnectionIdManager) :
+        m_nConfCallKey(nConfCallKey),
+        m_objContext(objContext),
         m_objCallManager(objContext.GetCallManager()),
+        m_objConnectionIdManager(objConnectionIdManager),
         m_objParticipantList(ConferenceParticipantList()),
-        m_objNotifier(ConferenceEventNotifier(objContext)),
+        m_objNotifier(
+            ConferenceEventNotifier(GetConferenceCall()->GetCallContext(), objConnectionIdManager)),
         m_objOperationQueue(ConferenceOperationQueue()),
         m_pSubscription(IMS_NULL),
         m_objIConfReferences(IMSList<IConferenceReference*>()),
@@ -41,7 +45,7 @@ ConferenceController::~ConferenceController()
 {
     IMS_TRACE_I("~ConferenceController", 0, 0, 0);
 
-    m_objConfCallContext.GetCallStateProxy().RemoveListener(this);
+    m_objContext.GetCallStateProxy().RemoveListener(this);
 
     delete m_pSubscription;
 
@@ -148,7 +152,7 @@ void ConferenceController::OnReferenceStarted(IN IConferenceReference* piConfRef
         if (GetState() == STATE_JOINING)
         {
             ConfUser* pTempUser = IMS_NULL;
-            if (ConferenceConfiguration::IsReferSubscriptionRequired())
+            if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired())
             {
                 pTempUser = m_objParticipantList.GetConfUser(piConfRef);
             }
@@ -251,19 +255,33 @@ void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUse
         case IuMtcCall::STARTCONF:
             ProcessGroupCall(objUsers, objCallInfo, objMediaInfo, objSuppServices);
             break;
-        case IuMtcCall::CONF_EXPAND:
-            ProcessExpand(objUsers, objCallInfo, objMediaInfo, objSuppServices);
+
+        default:
+            IMS_TRACE_E(0, "invalid cmd. why here!!?", 0, 0, 0);
             break;
-        case IuMtcCall::CONF_MERGE:
-            ProcessMerge(objUsers, objCallInfo, objMediaInfo, objSuppServices);
+    }
+}
+
+PUBLIC VIRTUAL
+void ConferenceController::ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers)
+{
+    IMS_TRACE_D("ProcessCommand : [%d]", nCmd, 0, 0);
+
+    switch (nCmd)
+    {
+        case IConferenceController::EXPAND:
+            ProcessExpand(objUsers);
             break;
-        case IuMtcCall::CONF_JOIN:
+        case IConferenceController::MERGE:
+            ProcessMerge(objUsers);
+            break;
+        case IConferenceController::ADD:
             ProcessJoin(objUsers);
             break;
-        case IuMtcCall::CONF_DROP:
+        case IConferenceController::REMOVE:
             ProcessDrop(objUsers);
             break;
-        case IuMtcCall::CONF_JOINED: // participant case
+        case IConferenceController::JOINED: // participant case
             ProcessSubscribeOnParticipant();
             break;
 
@@ -280,14 +298,14 @@ IMS_SINT32 ConferenceController::GetState() const
 }
 
 PUBLIC VIRTUAL
-IMS_UINT32 ConferenceController::GetCallStatusInConference(IN CallKey nKey) const
+IndividualCallState ConferenceController::GetCallStatusInConference(IN CallKey nKey) const
 {
     IMS_TRACE_D("GetCallStatusInConference", 0, 0, 0);
 
     IMtcCall* piConfCall = GetConferenceCall();
     if (piConfCall->GetState() == State::TERMINATING)
     {
-        return SESSION_1TO1_IDLE;
+        return IndividualCallState::IDLE;
     }
 
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_REFER_INVITE)
@@ -295,20 +313,21 @@ IMS_UINT32 ConferenceController::GetCallStatusInConference(IN CallKey nKey) cons
         const IMSList<ConfUser*> objUsers = m_objOperationQueue.GetCurrentOperation()->GetUsers();
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
         {
-            if (nKey == objUsers.GetAt(i)->nCallID)
+            if (nKey == m_objConnectionIdManager.GetCallKey(objUsers.GetAt(i)->nConnectionId))
             {
                 IMS_TRACE_I("GetCallStatusInConference : Joining Call", 0, 0, 0);
-                return SESSION_1TO1_JOINING;
+                return IndividualCallState::JOINING;
             }
         }
     }
 
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_SESSION)
     {
-        if (nKey == m_objOperationQueue.GetCurrentOperation()->GetCallId())
+        if (nKey == m_objConnectionIdManager.GetCallKey(
+                m_objOperationQueue.GetCurrentOperation()->GetConnectionId()))
         {
             IMS_TRACE_I("GetCallStatusInConference : Joined and Terminating Call", 0, 0, 0);
-            return SESSION_1TO1_JOINED;
+            return IndividualCallState::JOINED;
         }
     }
 
@@ -316,14 +335,14 @@ IMS_UINT32 ConferenceController::GetCallStatusInConference(IN CallKey nKey) cons
     {
         ConfUser* pConfUser = m_objParticipantList.GetConfUser(i);
 
-        if (nKey == pConfUser->nCallID)
+        if (nKey == m_objConnectionIdManager.GetCallKey(pConfUser->nConnectionId))
         {
             IMS_TRACE_I("GetCallStatusInConference invited Call", 0, 0, 0);
-            return SESSION_1TO1_INVITED;
+            return IndividualCallState::INVITED;
         }
     }
 
-    return SESSION_1TO1_IDLE;
+    return IndividualCallState::IDLE;
 }
 
 PUBLIC VIRTUAL
@@ -349,7 +368,7 @@ void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& objUsers)
     }
 
     SetState(STATE_JOINING);
-    IMS_SINT32 nReferType = ConferenceConfiguration::GetReferTypeForInvite();
+    IMS_SINT32 nReferType = ConferenceConfigurationWrapper::GetReferTypeForInvite();
 
     if (nReferType == REFER_INVITE_SINGLE)
     {
@@ -369,7 +388,7 @@ void ConferenceController::ProcessJoin(IN IMSList<ConfUser*>& objUsers)
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE, objJoinList);
     }
 
-    if (ConferenceConfiguration::IsReferSubscriptionRequired() == IMS_FALSE)
+    if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE)
     {
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
@@ -382,7 +401,7 @@ void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& objUsers)
 {
     IMS_TRACE_I("ProcessDrop", 0, 0, 0);
 
-    IMS_SINT32 nIndex = m_objParticipantList.FindParticipant(objUsers.GetAt(0)->nCallID);
+    IMS_SINT32 nIndex = m_objParticipantList.FindParticipant(objUsers.GetAt(0)->nConnectionId);
 
     if (nIndex < 0)
     {
@@ -408,7 +427,7 @@ void ConferenceController::ProcessDrop(IN IMSList<ConfUser*>& objUsers)
 PROTECTED
 void ConferenceController::ProcessSubscribeOnParticipant()
 {
-    if (ConferenceConfiguration::IsSubscriptionForParticipantRequired() == IMS_FALSE)
+    if (ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired() == IMS_FALSE)
     {
         return;
     }
@@ -426,15 +445,17 @@ IMS_UINT32 ConferenceController::AddUserToParticipantList(IN IMSList<ConfUser*>&
     IMS_UINT32 nAddingSize = objConfUsers.GetSize();
     IMS_TRACE_D("AddUserToParticipantList start[%d] size[%d]", nStartIndex, nAddingSize, 0);
 
-    for (IMS_UINT32 i = 0; i < objConfUsers.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < nAddingSize; i++)
     {
         m_objParticipantList.AddUser(objConfUsers.GetAt(i));
     }
+    IMS_TRACE_D("AddUserToParticipantList size[%d]", m_objParticipantList.GetSize(), 0, 0);
 
     if (bReOrder && nAddingSize > 1)
     {
-        m_objParticipantList.ReOrder(m_objCallManager);
+        m_objParticipantList.ReOrder(m_objCallManager, m_objConnectionIdManager); // TODO: callid
     }
+    IMS_TRACE_D("AddUserToParticipantList size[%d]", m_objParticipantList.GetSize(), 0, 0);
     m_objParticipantList.Login();
     return nStartIndex;
 }
@@ -467,7 +488,8 @@ IMS_BOOL ConferenceController::CreateSubscription()
         return IMS_FALSE;
     }
 
-    m_pSubscription = new ConferenceSubscription(m_objConfCallContext, m_objParticipantList, *this);
+    m_pSubscription = new ConferenceSubscription(m_objContext, m_nConfCallKey,
+            m_objParticipantList, *this);
 
     return IMS_TRUE;
 }
@@ -515,7 +537,8 @@ IConferenceReference* ConferenceController::CreateReference(IN ConfUser* pUser)
 {
     IMS_TRACE_D("CreateReference", 0, 0, 0);
 
-    IConferenceReference* piConfRefer = new ConferenceReference(m_objConfCallContext, pUser, *this);
+    IConferenceReference* piConfRefer =
+            new ConferenceReference(m_objContext, m_nConfCallKey, pUser, *this);
     m_objParticipantList.SetReference(piConfRefer, pUser);
 
     return piConfRefer;
@@ -527,7 +550,7 @@ IConferenceReference* ConferenceController::CreateReference(IN IMSList<ConfUser*
     IMS_TRACE_D("CreateReference", 0, 0, 0);
 
     IConferenceReference* piConfRefer =
-            new ConferenceReference(m_objConfCallContext, objUsers, *this);
+            new ConferenceReference(m_objContext, m_nConfCallKey, objUsers, *this);
 
     for (IMS_UINT32 index = 0; index < objUsers.GetSize(); index++)
     {
@@ -625,13 +648,6 @@ void ConferenceController::NotifyUsersInfo()
 }
 
 PROTECTED VIRTUAL
-void ConferenceController::StartConferenceCall(IN CallStartOperationParams* pParams)
-{
-    delete pParams;
-    // do nothing in base class.
-}
-
-PROTECTED VIRTUAL
 void ConferenceController::SubscribeConference(IN IMS_BOOL bUnsub /*= IMS_FALSE*/)
 {
     IMS_TRACE_D("SubscribeConference [%s]", PS_BOOL(bUnsub), 0, 0);
@@ -682,7 +698,8 @@ void ConferenceController::InviteParticipants(IN IMSList<ConfUser*> objUsers)
 {
     IMS_TRACE_D("InviteParticipants : [%d] users", objUsers.GetSize(), 0, 0);
 
-    IMS_SINT32 nReferTypeForInvite = ConferenceConfiguration::GetReferTypeForInvite();
+    IMS_SINT32 nReferTypeForInvite = REFER_INVITE_SINGLE;
+    //ConferenceConfigurationWrapper::GetReferTypeForInvite();
     ClearOngoingReferences();
 
     if (nReferTypeForInvite == REFER_INVITE_SINGLE)
@@ -695,7 +712,7 @@ void ConferenceController::InviteParticipants(IN IMSList<ConfUser*> objUsers)
         m_objIConfReferences.Append(piConfRefer);
 
         AString strReferInviteUri;
-        IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri);
+        IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri, m_objConnectionIdManager);
         m_objParticipantList.SetReferInviteUri(strReferInviteUri, pTemp);
 
         if (nResult == IMS_FAILURE)
@@ -707,7 +724,7 @@ void ConferenceController::InviteParticipants(IN IMSList<ConfUser*> objUsers)
     {
         IConferenceReference* piConfRefer = CreateReference(objUsers);
         AString strReferInviteUri; // not used.
-        IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri);
+        IMS_RESULT nResult = piConfRefer->SendInvite(strReferInviteUri, m_objConnectionIdManager);
         m_objIConfReferences.Append(piConfRefer); // TODO: check api call order.
 
         for (IMS_UINT32 i = 0; i < objUsers.GetSize(); i++)
@@ -793,11 +810,12 @@ void ConferenceController::NotifyCmdResult()
 }
 
 PROTECTED VIRTUAL
-void ConferenceController::TerminateIndividualCall(IN IMS_UINTP nCallId)
+void ConferenceController::TerminateIndividualCall(IN IMS_UINT32 nConnectionId)
 {
-    IMS_TRACE_I("TerminateIndividualCall : [%" PFLS_u "]", nCallId, 0, 0);
+    IMS_TRACE_I("TerminateIndividualCall : [%d]", nConnectionId, 0, 0);
 
-    m_objCallManager.GetCallByCallKey(nCallId)->Terminate(FailReason(FAIL_REASON_CONF_JOINED, -1));
+    m_objCallManager.GetCallByCallKey(m_objConnectionIdManager.GetCallKey(nConnectionId))
+            ->Terminate(FailReason(FAIL_REASON_CONF_JOINED, -1));
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION);
 }
 
@@ -805,8 +823,7 @@ PROTECTED VIRTUAL
 void ConferenceController::TerminateConference(IN IMS_SINT32 nTerminateReason)
 {
     IMS_TRACE_I("TerminateConference", 0, 0, 0);
-    m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey())
-            ->Terminate(FailReason(nTerminateReason, -1));
+    GetConferenceCall()->Terminate(FailReason(nTerminateReason, -1));
     CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_CONFERENCE);
 }
 
@@ -838,7 +855,7 @@ void ConferenceController::DoNextOperation()
     switch (pOperation->GetType())
     {
         case CONTROL_OPERATION_CREATE_CONFERENCE_SESSION:
-            StartConferenceCall(pOperation->GetParam());
+            StartConferenceCall(pOperation);
             break;
         case CONTROL_OPERATION_SUBSCRIBE:
             SubscribeConference();
@@ -859,7 +876,7 @@ void ConferenceController::DoNextOperation()
             NotifyCmdResult();
             break;
         case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
-            TerminateIndividualCall(pOperation->GetCallId());
+            TerminateIndividualCall(pOperation->GetConnectionId());
             break;
         case CONTROL_OPERATION_TERMINATE_CONFERENCE:
             TerminateConference(pOperation->GetTerminateReason());
@@ -936,7 +953,7 @@ void ConferenceController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCall
     IMS_TRACE_I("OnCallUpdated : [%d]", nType, 0, 0);
 
     // check if it's conference session event.
-    if (nCallKey != m_objConfCallContext.GetCallKey())
+    if (nCallKey != m_nConfCallKey)
     {
         IMS_TRACE_I("OnCallUpdated : not a conference call state update", 0, 0, 0);
 
@@ -961,7 +978,7 @@ void ConferenceController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCall
             if (m_pSubscription && m_pSubscription->GetState() == SubscriptionState::ACTIVE)
             {
                 IMS_SINT32 nWaitTime =
-                        ConferenceConfiguration::GetWaitTimeNotifyTerminated();
+                        ConferenceConfigurationWrapper::GetWaitTimeNotifyTerminated();
                 if (nWaitTime >= 0)
                 {
                     m_objOperationQueue.AddDelay(nWaitTime);
@@ -985,7 +1002,8 @@ void ConferenceController::OnIndividualCallTerminated(IN IMS_UINTP nCallKey)
 
     if (m_objOperationQueue.GetTypeOfCurrentOperation() == CONTROL_OPERATION_TERMINATE_1TO1_SESSION)
     {
-        if (nCallKey == m_objOperationQueue.GetCurrentOperation()->GetCallId())
+        if (nCallKey == m_objConnectionIdManager.GetCallKey(
+                m_objOperationQueue.GetCurrentOperation()->GetConnectionId()))
         {
             CompleteCurrentAndDoNextOperation(CONTROL_OPERATION_TERMINATE_1TO1_SESSION);
             return;
@@ -1024,10 +1042,10 @@ void ConferenceController::NotifyResultToConferenceCall()
 PROTECTED
 void ConferenceController::GetFocusAddress(OUT AString& strAddress) const
 {
-    ISession& objSession = m_objConfCallContext.GetSession()->GetISession();
+    ISession& objSession = GetConferenceCall()->GetCallContext().GetSession()->GetISession();
     IMessage* piMessage = IMS_NULL;
 
-    if (m_objConfCallContext.GetCallInfo().ePeerType == PeerType::MO)
+    if (GetConferenceCall()->GetCallContext().GetCallInfo().ePeerType == PeerType::MO)
     {
         piMessage = objSession.GetPreviousResponse(IMessage::SESSION_START);
     }
@@ -1045,9 +1063,10 @@ void ConferenceController::Init()
     IMS_TRACE_I("Initialize", 0, 0, 0);
 
     m_objOperationQueue.SetListener(this);
-    m_objConfCallContext.GetCallStateProxy().AddListener(this);
+    m_objContext.GetCallStateProxy().AddListener(this);
 
-    AString strLocalId = m_objConfCallContext.GetService().GetICoreService()->GetLocalUserId();
+    AString strLocalId =
+            GetConferenceCall()->GetCallContext().GetService().GetICoreService()->GetLocalUserId();
     IMS_TRACE_I("Initialize : local user id=[%s]", strLocalId.GetStr(), 0, 0);
     m_objParticipantList.SetLocalUri(strLocalId);
 }
@@ -1055,7 +1074,7 @@ void ConferenceController::Init()
 PROTECTED
 IMtcCall* ConferenceController::GetConferenceCall() const
 {
-    return m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
+    return m_objCallManager.GetCallByCallKey(m_nConfCallKey);
 }
 
 PROTECTED

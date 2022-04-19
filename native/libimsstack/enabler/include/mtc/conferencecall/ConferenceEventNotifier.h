@@ -2,11 +2,11 @@
 #define CONFERENCE_EVENT_NOTIFIER_H_
 
 #include "call/IMtcCall.h"
-#include "FailReason.h"
 #include "MtcDef.h"
 
 class IMtcCall;
 class IMtcCallContext;
+class CallConnectionIdManager;
 class ConferenceParticipantList;
 
 class ConferenceEventNotifier final
@@ -14,7 +14,8 @@ class ConferenceEventNotifier final
 public:
     // TODO: update this to use JniMtcCallThread. IMtcCallContext should provide
     // TODO: objContext.GetUiNotifier().GetCallThread()
-    explicit ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext);
+    explicit ConferenceEventNotifier(IN IMtcCallContext& objConfCallContext,
+            IN CallConnectionIdManager& objConnectionIdManager);
     ~ConferenceEventNotifier();
     ConferenceEventNotifier(IN const ConferenceEventNotifier&) = delete;
     ConferenceEventNotifier& operator=(IN const ConferenceEventNotifier&) = delete;
@@ -40,7 +41,7 @@ public:
     void NotifyConferenceInfo(IN ConferenceParticipantList& objParticipantList);
     void NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList);
 
-    void NotifyIndividualCallTerminated(IN AString& str1to1UiKey);
+    void NotifyIndividualCallTerminated(IN CallKey nKey);
 
 private:
     CallInfo* CloneCallInfo();
@@ -51,6 +52,7 @@ private:
 
 private:
     IMtcCallContext& m_objConfCallContext;
+    CallConnectionIdManager& m_objConnectionIdManager;
 };
 
 #endif

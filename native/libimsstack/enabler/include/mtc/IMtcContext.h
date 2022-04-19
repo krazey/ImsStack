@@ -13,6 +13,7 @@ class CallStateProxy;
 class MtcAosConnector;
 class MtcImsEventReceiver;
 class MtcSipInterfaceFactory;
+class ConferenceManager;
 
 class IMtcContext
 {
@@ -28,6 +29,7 @@ public:
     virtual MtcImsEventReceiver& GetImsEventReceiver() = 0;
     virtual MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) = 0;
     virtual MtcSipInterfaceFactory& GetSipInterfaceFactory() = 0;
+    virtual ConferenceManager& GetConferenceManager() = 0;
 };
 
 #endif

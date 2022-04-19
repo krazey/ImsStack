@@ -16,7 +16,8 @@ class GroupCallController final :
         public ConferenceController
 {
 public:
-    explicit GroupCallController(IN IMtcCallContext& objContext);
+    explicit GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,
+            IN CallConnectionIdManager& objConnectionIdManager);
     virtual ~GroupCallController();
     GroupCallController(IN const GroupCallController&) = delete;
     GroupCallController& operator=(IN const GroupCallController&) = delete;
@@ -28,7 +29,7 @@ protected:
     void ProcessGroupCall(IN IMSList<ConfUser*>& objUsers, IN CallInfo& objCallInfo,
             IN MediaInfo& objMediaInfo,
             IN IMSMap<IMS_UINT32, SuppService*>& objSuppServices) override;
-    void StartConferenceCall(IN CallStartOperationParams* pParams) override;
+    void StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation* pOperation) override;
     void Recover() override;
 
 private:
