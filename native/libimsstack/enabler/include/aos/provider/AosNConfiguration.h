@@ -61,6 +61,7 @@ public:
     virtual IMS_BOOL IsDeregisterOn3gNetworks() const;
     virtual IMS_BOOL IsVideoOverWifiSupportedWithoutVoice() const;
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const;
+    virtual IMS_BOOL IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();

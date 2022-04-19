@@ -160,12 +160,8 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::InitializeServiceBlock()
 {
-    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: m_nVops(%d)", m_nVops, 0, 0);
-
-    IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
-
     // VOPS
-    if (!piConfig->IsVopsIgnoredForVolteEnabled())
+    if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
     {
         if (m_nVops == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
         {
@@ -197,15 +193,76 @@ void AosHandleMtc::InitializeServiceFeature()
         m_objFeatureTagList.AddFeature(ImsAosFeature::VIDEO);
     }
 
-    if (GET_N_CONFIG()->IsRttSupported())
+    if (GET_N_CONFIG(m_nSlotId)->IsRttSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
     }
 
-    // jryou: TODO: USSI check
+    // jryou: TODO: USSI/VERSTAT check
 
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
             m_objFeatureTagList.GetFeatures(), 0, 0);
+
+    InitializeFeatureTags();
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL
+void AosHandleMtc::InitializeFeatureTags()
+{
+    if (GET_N_CONFIG(m_nSlotId)->IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType())
+    {
+        if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
+        {
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+        }
+    }
+
+    m_objFeatureTagList.PrintFeatureTagList();
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL
+void AosHandleMtc::UpdateFeatureTags()
+{
+    AosHandle::UpdateFeatureTags();
+
+    if (GET_N_CONFIG(m_nSlotId)->IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType())
+    {
+        if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
+        {
+            if (IsEpdgEnabled() && m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) &&
+                    GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            {
+                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+            }
+
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+        }
+        else
+        {
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
+            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+            if (IsEpdgEnabled() && m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) &&
+                    GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            {
+                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+            }
+        }
+    }
+
+    m_objFeatureTagList.PrintFeatureTagList();
 }
 
 /*
@@ -433,14 +490,14 @@ IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 {
     if (IsEpdgEnabled())
     {
-        IMS_UINT32 nBlocks = BLOCK_VOWIFI_CAPABILITY;
+        IMS_BOOL bBlocked = AosHandle::IsHandleBlocked(BLOCK_VOWIFI_CAPABILITY);
 
-        if (GET_N_CONFIG()->IsVideoOverWifiSupportedWithoutVoice())
+        if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
         {
-            nBlocks |= BLOCK_VIWIFI_CAPABILITY;
+            bBlocked = bBlocked && AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY);
         }
 
-        return AosHandle::IsHandleBlocked(nBlocks);
+        return bBlocked;
     }
 
     return AosHandle::IsHandleBlocked(BLOCK_VOPS | BLOCK_VOLTE_CAPABILITY | BLOCK_NETWORK);

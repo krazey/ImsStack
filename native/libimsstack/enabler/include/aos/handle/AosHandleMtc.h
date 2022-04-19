@@ -28,6 +28,9 @@ public:
 protected:
     virtual void InitializeServiceBlock();
     virtual void InitializeServiceFeature();
+    virtual void InitializeFeatureTags();
+
+    virtual void UpdateFeatureTags();
 
     virtual void ProcessImsSuspended(IN IMS_UINT32 nReason = 0);
     virtual void ProcessImsResumed(IN IMS_UINT32 nReason = 0);

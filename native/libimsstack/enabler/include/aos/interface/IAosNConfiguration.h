@@ -265,6 +265,16 @@ public:
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const = 0;
 
     /**
+     * @brief Flag specifying if g.gsma.rcs.telephony feature tag is used
+     *        to specify available voice call type ("cs", "volte" or "cs,volte").
+     *        Example) g.gsma.rcs.telephony = "cs,volte"
+     *
+     * @return IMS_BOOL Return wherther the feature tag is used
+     *                  to specify available voice call type.
+     */
+    virtual IMS_BOOL IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
