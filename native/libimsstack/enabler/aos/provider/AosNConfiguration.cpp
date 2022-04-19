@@ -280,6 +280,12 @@ IMS_BOOL AosNConfiguration::IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocatio
 }
 
 PUBLIC VIRTUAL
+IMS_BOOL AosNConfiguration::IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType() const
+{
+    return m_objAsset.bUseGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType;
+}
+
+PUBLIC VIRTUAL
 IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);

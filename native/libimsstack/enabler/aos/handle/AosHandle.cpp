@@ -1102,7 +1102,7 @@ void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked
     A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: Updated feature = [%d]",
             m_objFeatureTagList.GetFeatures(), 0, 0);
 
-    // jryou: TODO: update extra feature tag
+    UpdateFeatureTags();
 }
 
 /*
@@ -1623,7 +1623,23 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandle::InitializeServiceFeature()
 {
+    /*
+        Will be implemented on child classes.
+    */
+}
 
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL
+void AosHandle::UpdateFeatureTags()
+{
+    if (m_objFeatureTagList.GetFeatures() == ImsAosFeature::NONE)
+    {
+        m_objFeatureTagList.ClearFeatureTags();
+    }
 }
 
 /*

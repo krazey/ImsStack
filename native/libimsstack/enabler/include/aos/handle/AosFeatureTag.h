@@ -67,6 +67,8 @@ public:
     IMS_UINT32 GetSize();
     AosFeatureTag* GetAt(IN IMS_UINT32 nIndex);
 
+    IMS_BOOL HasFeature(IN IMS_UINT32 nFeature);
+
     void PrintFeatureTagList();
 
 private:

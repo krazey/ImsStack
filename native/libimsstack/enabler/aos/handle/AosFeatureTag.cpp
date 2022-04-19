@@ -457,6 +457,17 @@ Remarks
 
 */
 PUBLIC
+IMS_BOOL AosFeatureTagList::HasFeature(IN IMS_UINT32 nFeature)
+{
+    return (m_nFeatures & nFeature) > 0;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
 void AosFeatureTagList::PrintFeatureTagList()
 {
     //IMS_TRACE_D("PrintFeatureTagList :: size(%d)", m_objFeatureTagList.GetSize(), 0, 0);
