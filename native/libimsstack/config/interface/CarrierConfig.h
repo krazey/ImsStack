@@ -1061,10 +1061,12 @@ public:
         {
             REG_ERROR_CODE_TIMER_F = 0,
             REG_ERROR_CODE_TRANSPORT = 1,
+            REG_ERROR_CODE_OTHER = 2,
             REG_ERROR_CODE_3XX = 3,
             REG_ERROR_CODE_4XX = 4,
             REG_ERROR_CODE_5XX = 5,
-            REG_ERROR_CODE_6XX = 6
+            REG_ERROR_CODE_6XX = 6,
+            REG_ERROR_CODE_ALL_RESP = 9
         };
     };
 

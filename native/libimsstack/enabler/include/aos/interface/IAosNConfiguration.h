@@ -826,6 +826,13 @@ public:
      */
     virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode() = 0;
 
+    /**
+     * @brief Indicate the error codes to attempt the initial registration with same PCSCF
+     *
+     * @return vector list
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf() = 0;
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

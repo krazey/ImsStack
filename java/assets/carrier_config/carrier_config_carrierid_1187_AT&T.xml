@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
+    <!-- ims. -->
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+
     <!-- Ims General -->
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
     <boolean name="use_tuple_element_for_geolocation_pidf_bool" value="true"/>
@@ -19,9 +24,29 @@
         <item value="0"/>
     </int-array>
     <int name="ims.isim_index_for_impu_int" value="0"/>
+    <int name="ims.registration_actual_wait_time_policy_int" value="1"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+    <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
+    <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
 
-    <!-- Assets: non-carrier configurations -->
+   <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
+     <int-array name="specific_registration_error_code_int_array" num="2">
+        <item value="0"/>
+        <item value="2"/>
+    </int-array>
+
+    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
+    <int name="registration_retry_sip_305_code_policy_int" value="2"/>
+    <int name="registration_retry_default_policy_int" value="1"/>
+
+    <!-- KEY_REREGISTRATION_RETRY_BUNDLE -->
+    <int name="reregistration_retry_sip_305_code_policy_int" value="2"/>
+    <int-array name="reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="9"/>
+    </int-array>
+
     <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="true"/>
     <!-- KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int name="subscription_error_retry_max_count_for_reg_event_with_initial_registration_int" value="1"/>

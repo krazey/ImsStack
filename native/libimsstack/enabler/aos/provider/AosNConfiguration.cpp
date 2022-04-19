@@ -561,6 +561,12 @@ IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegistrationErrorCode()
     return m_objSpecificRegErr.objSpecificRegErrCode;
 }
 
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetReregRetryErrCodeWithInitialRegWithSamePcscf()
+{
+    return m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf;
+}
+
 PRIVATE VIRTUAL
 void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {

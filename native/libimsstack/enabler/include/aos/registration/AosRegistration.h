@@ -246,14 +246,14 @@ protected:
     virtual void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0);
     virtual void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0);
 
-    virtual void ProcessStartFailed_305();
+    virtual IMS_BOOL ProcessStartFailed_305();
     virtual void ProcessStartFailed_403();
     virtual void ProcessStartFailed_420();
     virtual void ProcessStartFailed_421();
     virtual void ProcessStartFailed_423();
     virtual void ProcessStartFailed_503();
 
-    virtual void ProcessUpdateFailed_305();
+    virtual IMS_BOOL ProcessUpdateFailed_305();
     virtual void ProcessUpdateFailed_403();
     virtual void ProcessUpdateFailed_423();
 
@@ -356,6 +356,8 @@ private:
     void UpdateRegIpcanCategory();
     void UpdateCallingNumberVerification();
 
+    IMS_BOOL IsErrorCodeExisted(IN const IMSVector<IMS_SINT32>& objErrorCode,
+            IN IMS_SINT32 nCode) const;
     IMS_BOOL IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
 

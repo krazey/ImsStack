@@ -61,6 +61,14 @@ public:
 
     inline void SetAvailable(IN IMS_BOOL bAvailable)
     {
+        if (bAvailable)
+        {
+            if (m_piTimer != IMS_NULL)
+            {
+                StopTimer();
+            }
+        }
+
         m_bIsAvailable = bAvailable;
     }
 
