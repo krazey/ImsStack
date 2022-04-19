@@ -139,13 +139,13 @@ public class MergeProxy extends ConferenceProxy {
         }
 
         if (isInitialConferenceExtension()) {
-            MtcCallUtils.addUser(usersInfo, mForegroundCall.getNativeCallId(), "");
-            MtcCallUtils.addUser(usersInfo, mBackgroundCall.getNativeCallId(), "");
+            MtcCallUtils.addUser(usersInfo, mForegroundCall.getCallConnectionId(), "");
+            MtcCallUtils.addUser(usersInfo, mBackgroundCall.getCallConnectionId(), "");
         } else {
             if (confCall.equals(mForegroundCall)) {
-                MtcCallUtils.addUser(usersInfo, mBackgroundCall.getNativeCallId(), "");
+                MtcCallUtils.addUser(usersInfo, mBackgroundCall.getCallConnectionId(), "");
             } else {
-                MtcCallUtils.addUser(usersInfo, mForegroundCall.getNativeCallId(), "");
+                MtcCallUtils.addUser(usersInfo, mForegroundCall.getCallConnectionId(), "");
             }
         }
 

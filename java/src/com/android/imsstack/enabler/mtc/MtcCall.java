@@ -412,6 +412,8 @@ public class MtcCall extends Call implements ConferenceTracker {
         sb.append(callStateToString(getCallState()));
         sb.append(", index=");
         sb.append(getCallIndex());
+        sb.append(", connectionid=");
+        sb.append(getCallConnectionId() + "");
 
         if (mCallInfo == null) {
             sb.append(", { callInfo=null }");

@@ -275,6 +275,10 @@ public class Call implements Closeable {
         setCallExtraInt(EXTRA_CALL_CONNECTION_ID, ccId);
     }
 
+    public int getCallConnectionId() {
+        return getCallExtraInt(EXTRA_CALL_CONNECTION_ID, 0);
+    }
+
     public void terminate(int reason, boolean immediateCallback) {
         // no-op
     }

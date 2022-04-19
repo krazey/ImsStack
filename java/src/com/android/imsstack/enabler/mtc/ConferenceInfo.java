@@ -485,6 +485,8 @@ public final class ConferenceInfo {
             callId = User.DEFAULT_CALL_ID;
         }
 
+        callId = callConnectionId + "";
+
         User user = new User(callId, uid);
 
         user.initForInterimEvent(uid, uid, uid, "", status);
