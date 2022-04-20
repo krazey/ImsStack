@@ -18,6 +18,7 @@ public:
         , bCarrierCrossSimImsAvailable(IMS_FALSE)
         , bCarrierVolteTtySupported(IMS_FALSE)
         , objCarrierNrAvailabilities(IMSVector<IMS_SINT32>())
+        , nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED)
         , objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>())
         , bImsSingleRegistrationRequired(IMS_FALSE)
         , nSipServerPortNumber(5060)
@@ -82,6 +83,7 @@ public:
     IMS_BOOL bCarrierCrossSimImsAvailable;
     IMS_BOOL bCarrierVolteTtySupported;
     IMSVector<IMS_SINT32> objCarrierNrAvailabilities;
+    IMS_SINT32 nCarrierUssdMethod;
 
     /// ims.
     IMSVector<IMS_SINT32> objPcscfDiscoveryMethod;

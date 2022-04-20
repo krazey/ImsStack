@@ -309,6 +309,17 @@ public:
     virtual IMS_UINT32 GetIsimIndexForImpu() = 0;
 
     /**
+     * @brief Get USSD preference method.
+     *
+     * @return IMS_SINT32 Returns USSD preference value.
+     * @see CarrierConfig::USSD_OVER_CS_PREFERRED
+     *      CarrierConfig::USSD_OVER_IMS_PREFERRED
+     *      CarrierConfig::USSD_OVER_CS_ONLY
+     *      CarrierConfig::USSD_OVER_IMS_ONLY
+     */
+    virtual IMS_SINT32 GetUssdMethod() const = 0;
+
+    /**
      * @brief Get the preferred IP address type
      *
      *        If both IPv4 and IPv6 addresses are assigned by the network to the UE,
