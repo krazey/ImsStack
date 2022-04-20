@@ -216,6 +216,12 @@ public final class ImsPrivateProperties {
         public static final String KEY_VOWIFI_ENTITLEMENT_ID = "vowifi_entitlement_id";
 
         /**
+         * Keeps the test carrier id.
+         * Value : int
+         */
+        public static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+
+        /**
          * Configuration items which can be provisioned for a test purpose.
          *  - List of P-CSCF address
          *  - IMPI (Private user identity)
@@ -227,11 +233,23 @@ public final class ImsPrivateProperties {
         public static final String KEY_CONFIG_IMPU_LIST = "config_impu_list";
         public static final String KEY_CONFIG_HOME_DOMAIN_NAME = "config_home_domain_name";
 
-        /**
-         * Keeps the test carrier id.
-         * Value : int
-         */
-        public static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
+        public static final String[] CONFIG_PROPERTIES =
+            {
+                KEY_CONFIG_PCSCF_ADDRESS_LIST,
+                KEY_CONFIG_IMPI,
+                KEY_CONFIG_IMPU_LIST,
+                KEY_CONFIG_HOME_DOMAIN_NAME
+            };
+
+        public static boolean isConfigProperty(String key) {
+            for (String configKey : ImsPrivateProperties.Persistent.CONFIG_PROPERTIES) {
+                if (configKey.equals(key)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private static final String NAME = "persistent_prop";
         private static final String[] TEST_PROPERTIES =

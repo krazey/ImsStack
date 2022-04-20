@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.imsstack.core.agents;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.PersistableBundle;
 import android.telephony.CarrierConfigManager;
 import android.telephony.TelephonyManager;
@@ -38,6 +40,8 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,30 +49,97 @@ public class ConfigAgent implements ConfigInterface {
     private static final String CARRIER_ID_PREFIX = "carrier_config_carrierid_";
     private static final String MCC_MNC_PREFIX = "carrier_config_mccmnc_";
 
+    /** Intent for testing purpose. */
+    private static final String ACTION_TEST_CARRIER_CONFIG_PUT =
+            "com.android.imsstack.TEST_CARRIER_CONFIG_PUT";
+    private static final String ACTION_TEST_CARRIER_CONFIG_APPLY =
+            "com.android.imsstack.TEST_CARRIER_CONFIG_APPLY";
+    /** Extra parameters for ACTION_TEST_CARRIER_CONFIG_PUT */
+    private static final String KEY_NAME = "name";
+    private static final String KEY_VALUE = "value";
+
     private final int mSlotId;
     private final CarrierConfig mCarrierConfig;
+    private final IntentReceiver mIntentReceiver;
     private PersistableBundle mDefaultImsConfig;
+    private PersistableBundle mTestConfig;
     private XmlPullParserFactory mFactory;
 
     public ConfigAgent(int slotId) {
         mSlotId = slotId;
         mCarrierConfig = new CarrierConfig();
+        mIntentReceiver = new IntentReceiver();
     }
 
     @Override
     public void init(Context context) {
         mDefaultImsConfig = loadCarrierConfigFromXml(
                 CarrierConfig.DEFAULT_CARRIER_CONFIG_FILE, null);
+        mIntentReceiver.register();
     }
 
     @Override
     public void cleanup() {
-        // no-op
+        mIntentReceiver.unregister();
     }
 
     @Override
     public CarrierConfig getCarrierConfig() {
         return mCarrierConfig;
+    }
+
+    @Override
+    public PersistableBundle readTestConfig() {
+        if (mTestConfig != null) {
+            return mTestConfig;
+        }
+
+        InputStream is = null;
+
+        try {
+            is = AppContext.get().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+            mTestConfig = PersistableBundle.readFromStream(is);
+        } catch (FileNotFoundException e) {
+            ImsLog.d(mSlotId, "readTestConfig: not found");
+            mTestConfig = new PersistableBundle();
+        } catch (IOException e) {
+            ImsLog.d(mSlotId, "readTestConfig: " + e.toString());
+            mTestConfig = new PersistableBundle();
+        } finally {
+            IoUtils.closeQuietly(is);
+        }
+
+        return mTestConfig;
+    }
+
+    @Override
+    public boolean writeTestConfig(PersistableBundle config) {
+        if (config == null) {
+            return false;
+        }
+
+        AppContext.get().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+
+        if (!config.isEmpty()) {
+            OutputStream os = null;
+
+            try {
+                os = AppContext.get().openFileOutput(
+                        CarrierConfig.TEST_CARRIER_CONFIG_FILE,
+                        Context.MODE_APPEND);
+                config.writeToStream(os);
+                ImsLog.d(mSlotId, "writeTestConfig: Ok");
+                return true;
+            } catch (IOException e) {
+                ImsLog.d(mSlotId, "writeTestConfig: " + e.toString());
+            } finally {
+                IoUtils.closeQuietly(os);
+            }
+
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void updateCarrierConfig(int subId, SimCarrierId id) {
@@ -196,9 +267,9 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         // test-carrier-config
-        PersistableBundle testConfig = getTestCarrierConfig();
+        PersistableBundle testConfig = readTestConfig();
 
-        if (testConfig != null) {
+        if (!testConfig.isEmpty()) {
             config.putAll(testConfig);
         }
     }
@@ -321,23 +392,6 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         return CarrierConfig.CARRIER_CONFIG + "/" + fileName;
-    }
-
-    private PersistableBundle getTestCarrierConfig() {
-        InputStream is = null;
-
-        try {
-            is = AppContext.get().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
-            return PersistableBundle.readFromStream(is);
-        } catch (FileNotFoundException e) {
-            ImsLog.d(mSlotId, "getTestCarrierConfig: not found");
-        } catch (IOException e) {
-            ImsLog.e(mSlotId, "getTestCarrierConfig: " + e.toString());
-        } finally {
-            IoUtils.closeQuietly(is);
-        }
-
-        return null;
     }
 
     private PersistableBundle readConfigFromXml(XmlPullParser parser, SimCarrierId id)
@@ -475,5 +529,123 @@ public class ConfigAgent implements ConfigInterface {
         }
 
         return matchFound;
+    }
+
+    private final class IntentReceiver extends BroadcastReceiver {
+        private PersistableBundle mConfig;
+
+        public void register() {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(ACTION_TEST_CARRIER_CONFIG_PUT);
+            filter.addAction(ACTION_TEST_CARRIER_CONFIG_APPLY);
+
+            AppContext.get().registerReceiver(this, filter, null,
+                    AppContext.getMainHandler(), Context.RECEIVER_EXPORTED);
+        }
+
+        public void unregister() {
+            AppContext.get().unregisterReceiver(this);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ImsLog.d(mSlotId, "onReceive: " + intent);
+
+            String action = intent.getAction();
+
+            if (ACTION_TEST_CARRIER_CONFIG_PUT.equals(action)) {
+                String key = intent.getStringExtra(KEY_NAME);
+
+                if (ImsPrivateProperties.Persistent.isConfigProperty(key)) {
+                    String value = intent.getStringExtra(KEY_VALUE);
+
+                    ImsLog.d(mSlotId, "TestCarrierConfigPut: [" + key + "=" + value + "]");
+
+                    if (value == null) {
+                        value = "";
+                    }
+
+                    ImsPrivateProperties.Persistent.set(key, value, mSlotId);
+                } else {
+                    putConfig(key, intent);
+                }
+            } else if (ACTION_TEST_CARRIER_CONFIG_APPLY.equals(action)) {
+                ImsLog.d(mSlotId, "TestCarrierConfigApply");
+                if (mConfig != null) {
+                    writeTestConfig(mTestConfig);
+                    mConfig = null;
+                }
+            }
+        }
+
+        private void putConfig(String key, Intent intent) {
+            String valueForLog = "(unknown)";
+
+            if (mConfig == null) {
+                mConfig = new PersistableBundle();
+            }
+
+            if (mTestConfig == null) {
+                readTestConfig();
+            }
+
+            if (key.endsWith("_string")) {
+                String value = intent.getStringExtra(KEY_VALUE);
+                valueForLog = (value == null) ? "(null)" : value;
+                mConfig.putString(key, value);
+                mTestConfig.putString(key, value);
+                mCarrierConfig.getConfig().putString(key, value);
+            } else if (key.endsWith("_string_array")) {
+                String[] value = intent.getStringArrayExtra(KEY_VALUE);
+                valueForLog = (value == null) ? "(null)" : Arrays.toString(value);
+                mConfig.putStringArray(key, value);
+                mTestConfig.putStringArray(key, value);
+                mCarrierConfig.getConfig().putStringArray(key, value);
+            } else if (key.endsWith("_int")) {
+                int value = intent.getIntExtra(KEY_VALUE, -1);
+                valueForLog = String.valueOf(value);
+                mConfig.putInt(key, value);
+                mTestConfig.putInt(key, value);
+                mCarrierConfig.getConfig().putInt(key, value);
+            } else if (key.endsWith("_long")) {
+                long value = intent.getLongExtra(KEY_VALUE, -1L);
+                valueForLog = String.valueOf(value);
+                mConfig.putLong(key, value);
+                mTestConfig.putLong(key, value);
+                mCarrierConfig.getConfig().putLong(key, value);
+            } else if (key.endsWith("_double")) {
+                double value = intent.getDoubleExtra(KEY_VALUE, 0);
+                valueForLog = String.valueOf(value);
+                mConfig.putDouble(key, value);
+                mTestConfig.putDouble(key, value);
+                mCarrierConfig.getConfig().putDouble(key, value);
+            } else if (key.endsWith("_bool") || key.endsWith("_boolean")) {
+                boolean value = intent.getBooleanExtra(KEY_VALUE, false);
+                valueForLog = String.valueOf(value);
+                mConfig.putBoolean(key, value);
+                mTestConfig.putBoolean(key, value);
+                mCarrierConfig.getConfig().putBoolean(key, value);
+            } else if (key.endsWith("_int_array")) {
+                int[] value = intent.getIntArrayExtra(KEY_VALUE);
+                valueForLog = (value == null) ? "(null)" : Arrays.toString(value);
+                mConfig.putIntArray(key, value);
+                mTestConfig.putIntArray(key, value);
+                mCarrierConfig.getConfig().putIntArray(key, value);
+            } else if (key.endsWith("_double_array")) {
+                double[] value = intent.getDoubleArrayExtra(KEY_VALUE);
+                valueForLog = (value == null) ? "(null)" : Arrays.toString(value);
+                mConfig.putDoubleArray(key, value);
+                mTestConfig.putDoubleArray(key, value);
+                mCarrierConfig.getConfig().putDoubleArray(key, value);
+            } else if (key.endsWith("_long_array")) {
+                long[] value = intent.getLongArrayExtra(KEY_VALUE);
+                valueForLog = (value == null) ? "(null)" : Arrays.toString(value);
+                mConfig.putLongArray(key, value);
+                mTestConfig.putLongArray(key, value);
+                mCarrierConfig.getConfig().putLongArray(key, value);
+            }
+
+            ImsLog.d(mSlotId, "TestCarrierConfigPut: [" + key + "=" + valueForLog + "]");
+        }
     }
 }
