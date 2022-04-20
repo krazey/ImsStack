@@ -3001,6 +3001,7 @@ void AosRegistration::ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime)
     if (nWaitTime <= 0)
     {
         ProcessReinitiate();
+        return;
     }
 
     if (!IsAppReady())
@@ -4589,11 +4590,6 @@ void AosRegistration::ProcessSubscription_Success()
 PROTECTED VIRTUAL
 void AosRegistration::ProcessSubscription_Failed()
 {
-    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() ==
-            CarrierConfig::Assets::ERROR_POLICY_PDN_REACTIVATED)
-    {
-        ProcessDefaultFlowRecovery_Start();
-    }
 }
 
 PROTECTED VIRTUAL
@@ -4617,11 +4613,11 @@ void AosRegistration::UpdateReason()
 }
 
 PROTECTED VIRTUAL
-void AosRegistration::Subscription_StateChanged(IN IMS_SINT32 m_nState,
+void AosRegistration::Subscription_StateChanged(IN IMS_SINT32 nState,
         IN IMS_SINT32 nReason /*= 0 */)
 {
     A_IMS_TRACE_I(REGID, "Subscription_StateChanged :: state(%d) , reason (%d)",
-            m_nState, nReason, 0);
+            nState, nReason, 0);
 
     if (m_pSubscription == IMS_NULL || m_piRegistration == IMS_NULL)
     {
