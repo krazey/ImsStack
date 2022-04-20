@@ -38,6 +38,8 @@ import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterfaceBase;
 import com.android.imsstack.util.ImsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -51,6 +53,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
     // Variables--------------------------------------------------
     private Context mContext = null;
+    private SscTransactionFactory mSscTransactionFactory = null;
     private SscTransaction mSscTransaction = null;
 
     private SscServiceThread mSscServiceThread = null;
@@ -65,7 +68,9 @@ public class SscServiceImpl extends UtInterfaceBase {
 
     public SscServiceImpl(int slotId) {
         mSlotId = slotId;
+        SscConfig.init(mSlotId);
         mSscRequestQueue = new ConcurrentLinkedDeque<SscRequestData>();
+        setSscTransactionFactory(new SscTransactionFactory());
     }
 
     @Override
@@ -77,14 +82,11 @@ public class SscServiceImpl extends UtInterfaceBase {
     public void start(Context context) {
         ImsLog.d(mSlotId, "");
 
-        if (context == null) {
+        mContext = context;
+        if (mContext == null) {
             ImsLog.e("Context is null");
             return;
         }
-
-        mContext = context;
-
-        SscConfig.init(mSlotId);
 
         if (SscConfig.isUtSupported(mSlotId) == false) {
             ImsLog.w("XCAP/Ut is disabled");
@@ -181,15 +183,20 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
     }
 
-    /*
-    private void queryEntireXmlDoc() {
-        ImsLog.d(mSlotId, "");
-        SscRequestData requestData = new SscRequestData(0);
-        requestData.offerSscData(new SscServiceQueryData(mSlotId, ESsType.NONE,
-                SscConstant.EVENT_SSC_BASE, 0, 0));
-        postRequestMessage(requestData);
+    @VisibleForTesting
+    public void setSscTransactionFactory(SscTransactionFactory transactionFactory) {
+        mSscTransactionFactory = transactionFactory;
     }
-     */
+
+    @VisibleForTesting
+    public SscRequestHandler getRequestHandler() {
+        return mSscRequestHandler;
+    }
+
+    @VisibleForTesting
+    public SscCallbackHandler getCallBackHandler() {
+        return mSscCallbackHandler;
+    }
 
     @Override
     public int queryCallBarring(int condition) {
@@ -583,7 +590,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         }
 
         requestData.offerSscData(new OipServiceData(mSlotId, ESsType.OIP,
-                SscConstant.EVENT_SSC_UPDATE_OIR, tId, (enable ? 1 : 0)));
+                SscConstant.EVENT_SSC_UPDATE_OIP, tId, (enable ? 1 : 0)));
 
         postRequestMessage(requestData);
 
@@ -629,11 +636,11 @@ public class SscServiceImpl extends UtInterfaceBase {
     private void startTransaction(SscData data) {
         ImsLog.d("");
         if (data instanceof SscServiceQueryData) { // Query Case
-            mSscTransaction = SscTransactionFactory.getSscTransaction(data.getSlotId(),
+            mSscTransaction = mSscTransactionFactory.getSscTransaction(data.getSlotId(),
                     mSscCallbackHandler);
             mSscTransaction.startGetTransaction((SscServiceQueryData)data);
         } else if (data instanceof SscServiceData) { // Update case
-            mSscTransaction = SscTransactionFactory.getSscTransaction(data.getSlotId(),
+            mSscTransaction = mSscTransactionFactory.getSscTransaction(data.getSlotId(),
                     mSscCallbackHandler);
             mSscTransaction.startPutTransaction((SscServiceData)data);
         } else {
@@ -658,7 +665,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         if (isUtAvailable() == false) {
             ImsLog.w("Clear pending data due to Ut is not available");
             postFailResponseMessage(SscData);
-        } else if (SscData instanceof SscServiceData &&
+        } else if (SscData.getSsType() != ESsType.NONE &&
                 SscXmlGov.getInstance(mSlotId).isXmlDataPresent() == false) {
             ImsLog.w("Clear pending data due to entire query failed");
             postFailResponseMessage(SscData);
@@ -687,6 +694,10 @@ public class SscServiceImpl extends UtInterfaceBase {
     }
 
     private final class SscRequestHandler extends Handler {
+        private SscRequestHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
@@ -724,6 +735,10 @@ public class SscServiceImpl extends UtInterfaceBase {
     }
 
     private final class SscCallbackHandler extends Handler {
+        private SscCallbackHandler(Looper looper) {
+            super(looper);
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
@@ -1259,7 +1274,9 @@ public class SscServiceImpl extends UtInterfaceBase {
             if (SscConfig.isErrorPhraseDisplayedWith409(mSlotId)) {
                 if (data != null) {
                     ErrorResponseData errData = (ErrorResponseData) data;
-                    errorPhrase = errData.getErrorPhrase();
+                    if (errData.getErrorCode() == SscConstant.HTTP_CONFLICT) {
+                        errorPhrase = errData.getErrorPhrase();
+                    }
                 }
             }
 
@@ -1279,8 +1296,8 @@ public class SscServiceImpl extends UtInterfaceBase {
 
             ImsLog.d("SscServiceThread is running ... (" + Process.myTid() + ")");
 
-            mSscRequestHandler = new SscRequestHandler();
-            mSscCallbackHandler = new SscCallbackHandler();
+            mSscRequestHandler = new SscRequestHandler(Looper.myLooper());
+            mSscCallbackHandler = new SscCallbackHandler(Looper.myLooper());
             mSscRequestHandler.sendEmptyMessage(EVENT_UT_INITIALIZE_MODULES);
 
             Looper.loop();

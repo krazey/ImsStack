@@ -10,6 +10,8 @@ import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.HashMap;
 import java.util.Arrays;
 
@@ -41,9 +43,16 @@ public final class SscConfig {
 
         ConfigAgent ca = (ConfigAgent)AgentFactory.getInstance().getAgent(ConfigInterface.class,
                 slotId);
-        if (ca != null) {
-            mConfigAgent.put(slotId, ca);
+        setConfigAgent(slotId, ca);
+    }
+
+    @VisibleForTesting
+    public static void setConfigAgent(int slotId, ConfigAgent configAgent) {
+        if (configAgent == null) {
+            return;
         }
+
+        mConfigAgent.put(slotId, configAgent);
     }
 
     public static void clear(int slotId) {

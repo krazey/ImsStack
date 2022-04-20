@@ -13,6 +13,10 @@ public class ErrorResponseData extends SscServiceData {
         mErrorPhrase = errorPhrase;
     }
 
+    public int getErrorCode() {
+        return mErrorCode;
+    }
+
     public String getErrorPhrase() {
         return mErrorPhrase;
     }

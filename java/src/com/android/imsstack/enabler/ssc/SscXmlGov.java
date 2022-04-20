@@ -29,7 +29,7 @@ public class SscXmlGov {
     private Document mSimservDoc = null;
     private Document mSimservDocForUpdate = null;
 
-    public SscXmlGov() {
+    private SscXmlGov() {
         ImsLog.d("");
         mSscXmlCreator = new SscXmlCreator();
         mSscXmlParser = new SscXmlParser();

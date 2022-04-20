@@ -3,21 +3,18 @@ package com.android.imsstack.enabler.ssc;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.util.ImsLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.HashMap;
 
 public class SscServiceStateAgent {
-    private static SscServiceStateAgent sSscServiceStateAgent = null;
+    private static SscServiceStateAgent sSscServiceStateAgent = new SscServiceStateAgent();
     private HashMap<Integer, SscServiceState> mSscServiceState = new HashMap<>();
 
     public static SscServiceStateAgent getInstance() {
-        if (sSscServiceStateAgent == null) {
-            sSscServiceStateAgent = new SscServiceStateAgent();
-        }
-
         return sSscServiceStateAgent;
     }
 
-    // APIs for Multi-IMS
     public SscServiceState get(int slotId) {
         if (OperatorInfo.isSlotIdValid(slotId) != true) {
             ImsLog.w("Invalid SlotId(" + slotId + ")");
@@ -38,9 +35,7 @@ public class SscServiceStateAgent {
             return;
         }
 
-        SscServiceState serviceState = new SscServiceState();
-        serviceState.init(slotId);
-        mSscServiceState.put(slotId, serviceState);
+        setSscServiceState(slotId, new SscServiceState());
     }
 
     public void deInit(int slotId) {
@@ -50,7 +45,13 @@ public class SscServiceStateAgent {
         }
     }
 
-    // Method for GII
+    @VisibleForTesting
+    public void setSscServiceState(int slotId, SscServiceState sscServiceState) {
+        deInit(slotId);
+        sscServiceState.init(slotId);
+        mSscServiceState.put(slotId, sscServiceState);
+    }
+
     public boolean isUtAvailable(int slotId) {
         SscServiceState serviceState = get(slotId);
         if (serviceState == null) {
