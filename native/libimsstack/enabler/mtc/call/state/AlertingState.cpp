@@ -1,4 +1,5 @@
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/state/AlertingState.h"
@@ -35,11 +36,12 @@ CallStateName AlertingState::HandleUserAlert()
     IMS_BOOL bMediaNegotiated = IMS_TRUE;   // TODO:
     IMS_BOOL bRprSupport = m_objContext.GetSession()->GetExtensionSet()
             .IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR);
+    IMS_BOOL bIsCallWaiting = IsCallWaiting();
     if (m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
             SIPStatusCode::SC_180,
             bRprSupport, // TODO: From config: imsvoice.prack_supported_for_18x_bool
             !bMediaNegotiated,
-            IMS_FALSE) == IMS_FAILURE)
+            bIsCallWaiting) == IMS_FAILURE)
     {
         FailReason objReason(REJECT_REASON_SESSION_FAIL);
         m_objContext.GetSession()->GetMessageSender().Reject(objReason);
@@ -367,4 +369,21 @@ void AlertingState::UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISessio
                 m_objContext.GetCallInfo().eCallType, eNewCallType, 0);
         m_objContext.GetCallInfo().eCallType = eNewCallType;
     }
+}
+
+PRIVATE
+IMS_BOOL AlertingState::IsCallWaiting()
+{
+    IMSList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
+
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+    {
+        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
+        if (eState == IMtcCall::State::ESTABLISHED || eState == IMtcCall::State::UPDATING)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
