@@ -48,6 +48,7 @@
 
     <boolean name="carrier_wfc_ims_available_bool" value="true"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
-    <boolean name="use_g_gsma_rcs_telephony_feature_tag_to_specify_available_voice_call_type_bool" value="true"/>
+    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
+    <boolean name="cdmaless_feature_tag_required_bool" value="true"/>
 
 </carrier_config>

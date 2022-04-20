@@ -296,7 +296,7 @@
     <boolean name="use_security_server_port_in_reg_contact_of_initial_registration_bool" value="false"/>
     <boolean name="use_security_server_port_in_initial_registration_bool" value="false"/>
     <boolean name="remove_old_sa_on_establishing_sa_bool" value="false"/>
-    <boolean name="use_g_gsma_rcs_telephony_feature_tag_to_specify_available_voice_call_type_bool" value="false"/>
+    <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="false"/>
     <int-array name="pcscf_discovery_method_roaming_int_array" num="1">
         <item value="0"/>
     </int-array>
@@ -308,6 +308,7 @@
     <boolean name="registration_contact_validation_bool" value="false"/>
     <int name="registration_out_of_service_policy_int" value="0"/>
     <boolean name="video_over_wifi_supported_without_voice_bool" value="false"/>
+    <boolean name="cdmaless_feature_tag_required_bool" value="false"/>
 
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="0"/>

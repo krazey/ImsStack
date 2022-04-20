@@ -627,6 +627,7 @@ void AosHandle::Init()
 
     InitializeServiceBlock();
     InitializeServiceFeature();
+    InitializeFeatureTags();
 
     IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
     OnStateMessage(objMSG);
@@ -1626,6 +1627,23 @@ void AosHandle::InitializeServiceFeature()
     /*
         Will be implemented on child classes.
     */
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL
+void AosHandle::InitializeFeatureTags()
+{
+    m_objFeatureTagList.ClearFeatureTags();
+
+    // VZW Req. - VZ_REQ_IMS_22939
+    if (GET_N_CONFIG(m_nSlotId)->IsCdmalessFeatureTagRequired())
+    {
+        m_objFeatureTagList.AddFeatureTag("+cdmaless");
+    }
 }
 
 /*

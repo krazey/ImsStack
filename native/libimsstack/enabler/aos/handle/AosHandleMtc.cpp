@@ -202,8 +202,6 @@ void AosHandleMtc::InitializeServiceFeature()
 
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
             m_objFeatureTagList.GetFeatures(), 0, 0);
-
-    InitializeFeatureTags();
 }
 
 /*
@@ -214,16 +212,9 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::InitializeFeatureTags()
 {
-    if (GET_N_CONFIG(m_nSlotId)->IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType())
-    {
-        if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
-        {
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
-        }
-    }
+    AosHandle::InitializeFeatureTags();
 
-    m_objFeatureTagList.PrintFeatureTagList();
+    UpdateFeatureTags();
 }
 
 /*
@@ -234,9 +225,8 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::UpdateFeatureTags()
 {
-    AosHandle::UpdateFeatureTags();
-
-    if (GET_N_CONFIG(m_nSlotId)->IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType())
+    // VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6258874
+    if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
         if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
         {

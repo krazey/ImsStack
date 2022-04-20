@@ -266,13 +266,20 @@ public:
 
     /**
      * @brief Flag specifying if g.gsma.rcs.telephony feature tag is used
-     *        to specify available voice call type ("cs", "volte" or "cs,volte").
+     *        to indicate available voice call type ("cs", "volte" or "cs,volte").
      *        Example) g.gsma.rcs.telephony = "cs,volte"
      *
      * @return IMS_BOOL Return wherther the feature tag is used
-     *                  to specify available voice call type.
+     *                  to indicate available voice call type.
      */
-    virtual IMS_BOOL IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType() const = 0;
+    virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const = 0;
+
+    /**
+     * @brief Flag specifying if "+cdmaless" feature tag is required.
+     *
+     * @return IMS_BOOL Return wherther the feature tag is required.
+     */
+    virtual IMS_BOOL IsCdmalessFeatureTagRequired() const = 0;
 
     /**
      * @brief Get the registration retry base-time

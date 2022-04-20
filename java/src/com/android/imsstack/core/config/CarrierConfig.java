@@ -543,8 +543,8 @@ public class CarrierConfig {
                 "use_security_server_port_in_initial_registration_bool";
         public static final String KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL =
                 "remove_old_sa_on_establishing_sa_bool";
-        public static final String KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_TO_SPECIFY_AVAILABLE_VOICE_CALL_TYPE_BOOL =
-                "use_g_gsma_rcs_telephony_feature_tag_to_specify_available_voice_call_type_bool";
+        public static final String KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL =
+                "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
         public static final String KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY =
                 "pcscf_discovery_method_roaming_int_array";
         public static final String KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL =
@@ -563,6 +563,8 @@ public class CarrierConfig {
                 "registration_out_of_service_policy_int";
         public static final String KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL =
                 "video_over_wifi_supported_without_voice_bool";
+        public static final String KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL =
+                "cdmaless_feature_tag_required_bool";
         // Bundle {
         public static final String KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE =
                 "specific_registration_error_bundle";

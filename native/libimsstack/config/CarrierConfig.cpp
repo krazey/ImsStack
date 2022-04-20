@@ -762,8 +762,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_RE
         "use_security_server_port_in_initial_registration_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
         "remove_old_sa_on_establishing_sa_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_TO_SPECIFY_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
-        "use_g_gsma_rcs_telephony_feature_tag_to_specify_available_voice_call_type_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
+        "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY[] =
         "pcscf_discovery_method_roaming_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL[] =
@@ -782,6 +782,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_OUT_OF_SERVICE_POLICY_INT
         "registration_out_of_service_policy_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_OVER_WIFI_SUPPORTED_WITHOUT_VOICE_BOOL[] =
         "video_over_wifi_supported_without_voice_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL[] =
+        "cdmaless_feature_tag_required_bool";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE[] =
         "specific_registration_error_bundle";

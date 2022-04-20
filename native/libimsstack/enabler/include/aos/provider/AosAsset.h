@@ -13,7 +13,7 @@ public:
         : bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE)
         , bUseSecurityServerPortInInitialRegistration(IMS_FALSE)
         , bRemoveOldSaOnEstablishingSa(IMS_FALSE)
-        , bUseGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType(IMS_FALSE)
+        , bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE)
         , objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>())
         , bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE)
         , bSupportVerstatForRegistration(IMS_FALSE)
@@ -39,6 +39,7 @@ public:
         , objSupportedRoamingRats(IMSVector<IMS_SINT32>())
         , nEmergencyPreferredIpType(CarrierConfig::Ims::IP_VERSION_6)
         , nSipMessageThresholdForTransportChange(200)
+        , bCdmalessFeatureTagRequired(IMS_FALSE)
     {
     }
 
@@ -49,7 +50,7 @@ public:
     IMS_BOOL bUseSecurityServerPortInRegContactOfInitialRegistration;
     IMS_BOOL bUseSecurityServerPortInInitialRegistration;
     IMS_BOOL bRemoveOldSaOnEstablishingSa;
-    IMS_BOOL bUseGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType;
+    IMS_BOOL bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType;
     IMSVector<IMS_SINT32> objPcscfDiscoveryMethodRoaming;
     IMS_BOOL bHoldRegistrationWhenIpcanChangedWithImsActiveCall;
     IMS_BOOL bSupportVerstatForRegistration;
@@ -74,5 +75,6 @@ public:
     IMSVector<IMS_SINT32> objSupportedRoamingRats;
     IMS_SINT32 nEmergencyPreferredIpType;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
+    IMS_BOOL bCdmalessFeatureTagRequired;
 };
 #endif // _AOS_ASSET_H_

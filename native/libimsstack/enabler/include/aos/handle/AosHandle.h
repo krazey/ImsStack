@@ -197,6 +197,7 @@ protected:
 
     virtual void InitializeServiceBlock();
     virtual void InitializeServiceFeature();
+    virtual void InitializeFeatureTags();
 
     virtual void UpdateFeatureTags();
 

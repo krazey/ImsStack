@@ -280,9 +280,15 @@ IMS_BOOL AosNConfiguration::IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocatio
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL AosNConfiguration::IsUsedGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType() const
+IMS_BOOL AosNConfiguration::IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const
 {
-    return m_objAsset.bUseGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType;
+    return m_objAsset.bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType;
+}
+
+PUBLIC VIRTUAL
+IMS_BOOL AosNConfiguration::IsCdmalessFeatureTagRequired() const
+{
+    return m_objAsset.bCdmalessFeatureTagRequired;
 }
 
 PUBLIC VIRTUAL
@@ -895,8 +901,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_REGISTRATION_BOOL);
     m_objAsset.bRemoveOldSaOnEstablishingSa = piCc->GetBoolean(
             CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL);
-    m_objAsset.bUseGGsmaRcsTelephonyFeatureTagToSpecifyAvailableVoiceCallType = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_TO_SPECIFY_AVAILABLE_VOICE_CALL_TYPE_BOOL);
+    m_objAsset.bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL);
     m_objAsset.objPcscfDiscoveryMethodRoaming = piCc->GetIntArray(
             CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY);
     m_objAsset.bHoldRegistrationWhenIpcanChangedWithImsActiveCall = piCc->GetBoolean(
@@ -950,6 +956,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::Assets::KEY_EMERGENCY_PREFERRED_IPTYPE_INT);
     m_objAsset.nSipMessageThresholdForTransportChange = piCc->GetInt(
             CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
+    m_objAsset.bCdmalessFeatureTagRequired = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL);
 }
 
 PRIVATE
