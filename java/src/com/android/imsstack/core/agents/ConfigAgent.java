@@ -24,7 +24,6 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ConfigXmlUtils;
-import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
@@ -100,87 +99,6 @@ public class ConfigAgent implements ConfigInterface {
 
     private void overrideTestConfigs(PersistableBundle config) {
         ImsLog.i(mSlotId, "overrideTestConfigs...");
-
-        int adminFeatures = ImsDbController.Subscriber.getAdminFeatures(mSlotId);
-
-        ImsLog.d(mSlotId, "Subscription-attributes: 0x" + Integer.toHexString(adminFeatures));
-
-        if (!ImsDbController.isIsimEnabled(adminFeatures)
-                && !ImsDbController.isUsimEnabled(adminFeatures)) {
-            config.remove(CarrierConfig.Ims.KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);
-        } else {
-            int[] identityPriorities = null;
-
-            if (ImsDbController.isIsimEnabled(adminFeatures)
-                    && ImsDbController.isUsimEnabled(adminFeatures)) {
-                identityPriorities = new int[] { 0, 1 };
-            } else if (ImsDbController.isIsimEnabled(adminFeatures)) {
-                identityPriorities = new int[] { 0 };
-            } else {
-                identityPriorities = new int[] { 1 };
-            }
-
-            if (identityPriorities != null) {
-                config.putIntArray(
-                        CarrierConfig.Ims.KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY,
-                        identityPriorities);
-            }
-        }
-
-        String adminPcscf = ImsDbController.Subscriber.getAdminPcscf(mSlotId);
-
-        ImsLog.d(mSlotId, "P-CSCF discovery methods: " + adminPcscf);
-
-        if (!TextUtils.isEmpty(adminPcscf)) {
-            TextUtils.StringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
-
-            splitter.setString(adminPcscf);
-
-            int[] discoveryMethods = null;
-
-            for (String s : splitter) {
-                if (s.equalsIgnoreCase("PCO")) {
-                    discoveryMethods = new int[] { 0 };
-                } else if (s.equalsIgnoreCase("CONF")) {
-                    discoveryMethods = new int[] { 1 };
-                }
-                break;
-            }
-
-            if (discoveryMethods != null) {
-                config.putIntArray(
-                        CarrierConfig.Ims.KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY,
-                        discoveryMethods);
-            }
-        }
-
-        // SubscriberConfig: update configurable items
-        int pcscfPort = ImsDbController.Subscriber.getPcscfPort(mSlotId);
-
-        if (pcscfPort > 0) {
-            config.putInt(CarrierConfigManager.Ims.KEY_SIP_SERVER_PORT_NUMBER_INT, pcscfPort);
-        }
-
-        String configValue = ImsDbController.Subscriber.getPcscfAddress(mSlotId);
-
-        ImsPrivateProperties.Persistent.set(
-                ImsPrivateProperties.Persistent.KEY_CONFIG_PCSCF_ADDRESS_LIST,
-                configValue, mSlotId);
-
-        configValue = ImsDbController.Subscriber.getHomeDomainName(mSlotId);
-        ImsPrivateProperties.Persistent.set(
-                ImsPrivateProperties.Persistent.KEY_CONFIG_HOME_DOMAIN_NAME,
-                configValue, mSlotId);
-
-        configValue = ImsDbController.Subscriber.getImpi(mSlotId);
-        ImsPrivateProperties.Persistent.set(
-                ImsPrivateProperties.Persistent.KEY_CONFIG_IMPI,
-                configValue, mSlotId);
-
-        configValue = ImsDbController.Subscriber.getImpu(mSlotId);
-        ImsPrivateProperties.Persistent.set(
-                ImsPrivateProperties.Persistent.KEY_CONFIG_IMPU_LIST,
-                configValue, mSlotId);
 
         boolean usePredefinedUserAgent = ImsPrivateProperties.Persistent.getBoolean(
                 ImsPrivateProperties.Persistent.KEY_USE_PREDEFINED_USER_AGENT, false, mSlotId);
