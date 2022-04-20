@@ -8,6 +8,12 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.TelephonyManager;
 
+import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosRegistration;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
+import com.android.imsstack.system.ImsEventDef;
+
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
@@ -30,6 +36,8 @@ public final class ImsTestHelper {
     //     --ei "event" 1 --ei "type" 1 --ei "mode" 1 --ei "result" 1 -- ei "time" 0
     // notifyUacResponse(EVENT_UAC_RESPONSE, callType, sysMode, result, barringTime);
     private static final String INTENT_VONR = "com.android.imsstack.action.IMS_TEST_VONR";
+
+    private static final String INTENT_AOS_TEST = "com.android.imsstack.action.INTENT_AOS_TEST";
 
     private Context mContext;
     private ImsTestHelperReceiver mReceiver;
@@ -62,6 +70,7 @@ public final class ImsTestHelper {
 
         public ImsTestHelperReceiver() {
             mIntentFilter.addAction(INTENT_VONR);
+            mIntentFilter.addAction(INTENT_AOS_TEST);
         }
 
         public IntentFilter getFilter() {
@@ -78,6 +87,14 @@ public final class ImsTestHelper {
                 sendVoNREvent(intent.getIntExtra("event", -1), intent.getIntExtra("type", -1),
                         intent.getIntExtra("mode", -1), intent.getIntExtra("result", -1),
                         intent.getIntExtra("time", -1), intent.getIntExtra("slot", 0));
+            } else if (action.equals(INTENT_AOS_TEST)) {
+                String strEvent = intent.getStringExtra("event");
+                if (strEvent.equalsIgnoreCase("capa")) {
+                    sendCapabilitiesChanged(intent.getStringExtra("network"),
+                            intent.getStringExtra("voice"), intent.getStringExtra("video"));
+                } else if (strEvent.equalsIgnoreCase("vops")) {
+                    sendVopsChanged(intent.getIntExtra("state", 0));
+                }
             }
         }
 
@@ -122,6 +139,69 @@ public final class ImsTestHelper {
                 default:
                     break;
             }
+        }
+
+        // CAPABILITIES CHANGED TEST
+        // extra parameter : network type, voice capa, video capa
+        // network = LTE / NR / IWLAN / UTRAN (multiple use with comma separated)
+        // voice, video = 0 / 1 (multiple use with comma separated. Followed network input order.)
+        // ex) adb shell am broadcast -a com.android.imsstack.action.IMS_AOS_TEST
+        //     --es event capa --es network LTE,NR,IWLAN,UTRAN --es voice 1,1,0,0 --es video 0,0,1,0
+        private void sendCapabilitiesChanged(String strNetwork, String strVoice, String strVideo) {
+            ImsLog.d("sendCapabilitiesChanged :: network=" + strNetwork + ", voice=" + strVoice +
+                    ", video=" + strVideo);
+
+            AosFactory aosFactory = AosFactory.getInstance();
+            IAosRegistration iAosRegistration = aosFactory.getAosRegistration(0);
+
+            String[] strNetworks = strNetwork.split(",");
+            String[] strVoices = strVoice.split(",");
+            String[] strVideos = strVideo.split(",");
+
+            CapabilityPairs objCapabilityPairs = new CapabilityPairs();
+
+            for (int i = 0; i < strNetworks.length; i++)
+            {
+                int nNetwork = -1;
+                if (strNetworks[i].equalsIgnoreCase("LTE")) {
+                    nNetwork = IAosRegistrationListener.NetworkType.LTE;
+                } else if (strNetworks[i].equalsIgnoreCase("NR")) {
+                    nNetwork = IAosRegistrationListener.NetworkType.NR;
+                } else if (strNetworks[i].equalsIgnoreCase("UTRAN")) {
+                    nNetwork = IAosRegistrationListener.NetworkType.UTRAN;
+                } else if (strNetworks[i].equalsIgnoreCase("IWLAN")) {
+                    nNetwork = IAosRegistrationListener.NetworkType.IWLAN;
+                }
+
+                int nCapabilities = 0;
+                if (strVoices[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.VOICE;
+                }
+
+                if (strVideos[i].equals("1")) {
+                    nCapabilities |= IAosRegistrationListener.Capability.VIDEO;
+                }
+
+                objCapabilityPairs.addCapability(nNetwork, nCapabilities);
+            }
+
+            iAosRegistration.changeCapabilities(objCapabilityPairs);
+        }
+
+        // VOPS CHANGED TEST
+        // extra parameter : vops state
+        // state = 0 / 1
+        // ex) adb shell am broadcast -a com.android.imsstack.action.IMS_AOS_TEST
+        //     --es event vops --ei state 1
+        private void sendVopsChanged(int nState) {
+            ISystem iSystem = SystemInterface.getInstance().getSystem(0);
+            if (iSystem == null) {
+                return;
+            }
+
+            ImsLog.d("sendVopsChanged :: nState=" + nState);
+
+            iSystem.notifyEvent(ImsEventDef.IMS_EVENT_IMS_VOICE_OVER_PS_STATE, nState, 0);
         }
     }
 }
