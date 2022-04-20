@@ -52,6 +52,15 @@ public:
     static const IMS_CHAR KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[];
     // Public carrier-config - ends
 
+    // USSD Method
+    enum
+    {
+        USSD_OVER_CS_PREFERRED = 0,
+        USSD_OVER_IMS_PREFERRED,
+        USSD_OVER_CS_ONLY,
+        USSD_OVER_IMS_ONLY
+    };
+
     class Ims
     {
     public:

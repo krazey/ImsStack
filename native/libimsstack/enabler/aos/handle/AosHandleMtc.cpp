@@ -1,6 +1,7 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ServiceNetworkPolicy.h"
+#include "CarrierConfig.h"
 
 #include "AoSReason.h"
 
@@ -183,6 +184,8 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::InitializeServiceFeature()
 {
+    IAosNConfiguration* objConfig = GET_N_CONFIG(m_nSlotId);
+
     if (!IsHandleBlocked())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::MMTEL);
@@ -193,12 +196,20 @@ void AosHandleMtc::InitializeServiceFeature()
         m_objFeatureTagList.AddFeature(ImsAosFeature::VIDEO);
     }
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRttSupported())
+    if (objConfig->IsRttSupported())
     {
         m_objFeatureTagList.AddFeature(ImsAosFeature::TEXT);
     }
 
-    // jryou: TODO: USSI/VERSTAT check
+    if (objConfig->IsVerstatForRegistrationSupported())
+    {
+        m_objFeatureTagList.AddFeature(ImsAosFeature::VERSTAT);
+    }
+
+    if (objConfig->GetUssdMethod() != CarrierConfig::USSD_OVER_CS_ONLY)
+    {
+        m_objFeatureTagList.AddFeature(ImsAosFeature::USSI);
+    }
 
     A_IMS_TRACE_I(APPPROFILE, "InitializeServiceFeature :: Features(%x)",
             m_objFeatureTagList.GetFeatures(), 0, 0);
@@ -225,6 +236,8 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::UpdateFeatureTags()
 {
+    AosHandle::UpdateFeatureTags();
+
     // VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6258874
     if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {

@@ -67,6 +67,7 @@ public:
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();
     virtual IMS_UINT32 GetIsimIndexForImpu();
+    virtual IMS_SINT32 GetUssdMethod() const;
     virtual IMS_SINT32 GetPreferredIpType() const;
     virtual IMS_SINT32 GetEmergencyPreferredIpType() const;
     virtual IMS_SINT32 GetPcscfPort() const;

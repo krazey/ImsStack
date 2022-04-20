@@ -310,6 +310,12 @@ IMS_UINT32 AosNConfiguration::GetIsimIndexForImpu()
 }
 
 PUBLIC VIRTUAL
+IMS_SINT32 AosNConfiguration::GetUssdMethod() const
+{
+    return m_objCarrierConfig.nCarrierUssdMethod;
+}
+
+PUBLIC VIRTUAL
 IMS_SINT32 AosNConfiguration::GetPreferredIpType() const
 {
     return m_objCarrierConfig.nImsPreferredIpType;
@@ -791,6 +797,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL);
     m_objCarrierConfig.objCarrierNrAvailabilities = piCc->GetIntArray(
             CarrierConfig::KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY);
+    m_objCarrierConfig.nCarrierUssdMethod = piCc->GetInt(
+            CarrierConfig::KEY_CARRIER_USSD_METHOD_INT);
     /// ims.
     m_objCarrierConfig.objPcscfDiscoveryMethod = piCc->GetIntArray(
             CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY);
