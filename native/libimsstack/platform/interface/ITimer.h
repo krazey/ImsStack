@@ -55,8 +55,6 @@ public:
     nDuration               Timer duration (milli-seconds)
     piListener              Listener interface pointer, supplier should implement its listener
                             to receive notification of the timer expiration.
-    bRepeat                 Repeat or one-shot
-
     </table>
 
     Returns
@@ -66,8 +64,7 @@ public:
     IMS_UINTP               Timer id to identify this object
     </table>
     */
-    virtual IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener *piListener,
-            IN IMS_BOOL bRepeat = IMS_FALSE) = 0;
+    virtual IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener *piListener) = 0;
 
     /*
      Kills the running timer if it is not expired.

@@ -3,7 +3,6 @@
 
 #include "sip_pf_datatypes.h"
 #include "ISipTimerUtil.h"
-#include "ICoreTimer.h"
 
 /*This can be an inner private class of SipDefTimerUtil*/
 
@@ -11,7 +10,6 @@
 
 class SipDefTimerUtil: public ISipTimerUtil
 {
-    //    ICoreTimer* m_pTimer;
     //    DefTimerListener* m_pListener;
     public:
         SipDefTimerUtil();
