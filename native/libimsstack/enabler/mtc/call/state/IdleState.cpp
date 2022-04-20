@@ -527,7 +527,8 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
     IMSList<IMtcBlockRule*> lstRules;
 
-    lstRules.Append(new VopsBlockRule(m_objContext.GetImsEventReceiver()));
+    lstRules.Append(new VopsBlockRule(
+            m_objContext.GetService(), m_objContext.GetImsEventReceiver()));
     lstRules.Append(new NetworkBlockRule(
             m_objContext.GetService(),
             *PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_objContext.GetSlotId())));
