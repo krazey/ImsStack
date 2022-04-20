@@ -4,6 +4,7 @@
 #include "call/message/MessageFormatter.h"
 #include "Const3GPP.h"
 #include "helper/MtcLocationObject.h"
+#include "helper/MtcSupplementaryService.h"
 #include "FailReason.h"
 #include "ICoreService.h"
 #include "IFeatureCaps.h"
@@ -457,11 +458,15 @@ void MessageFormatter::SetKeepAliveProfile()
 PRIVATE
 void MessageFormatter::SetCallerIdHeader()
 {
-    // TODO, IMtcSupplementaryService::Get(SUPP_TYPE_CALLERID, IMtcSupplementaryService::SAT_CLIENT)
-    SuppService suppService;
-    suppService.nValue = CALLERID_IDENTITY;
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SUPP_TYPE_CALLERID);
 
-    if (suppService.nValue == CALLERID_RESTRICTED)
+    if (pSuppService == IMS_NULL)
+    {
+        return;
+    }
+
+    if (pSuppService->nValue == CALLERID_RESTRICTED)
     {
         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISIPHeader::PRIVACY);
 
@@ -476,7 +481,7 @@ void MessageFormatter::SetCallerIdHeader()
 
         MessageUtil::SetHeader(m_piNextMessage, strSipAddress, ISIPHeader::FROM);
     }
-    else if (suppService.nValue == CALLERID_IDENTITY)
+    else if (pSuppService->nValue == CALLERID_IDENTITY)
     {
         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_NONE, ISIPHeader::PRIVACY);
     }
