@@ -5,8 +5,6 @@ public class ImsEventDef
     // External Intent
     public static final String ACTION_IMS_STARTED =
             "com.android.imsstack.action.IMS_STARTED";
-    public static final String ACTION_SVC_STATUS_IND =
-            "com.android.imsstack.action.SVC_STATUS_IND";
     public static final String ACTION_CONFIG_UPDATE =
             "com.android.imsstack.action.CONFIG_UPDATE";
     public static final String ACTION_DOMAIN_NOTIFICATION =

@@ -43,7 +43,6 @@ import com.android.imsstack.core.service.CallSettingService;
 import com.android.imsstack.core.service.CallStateNotificationService;
 import com.android.imsstack.core.service.ECallStateService;
 import com.android.imsstack.core.service.EPDGCallService;
-import com.android.imsstack.core.service.RegiProcessService;
 import com.android.imsstack.core.service.SCMService;
 import com.android.imsstack.core.service.SrvccStateService;
 import com.android.imsstack.core.service.SubscriberInfoService;
@@ -212,7 +211,6 @@ public class VoLteService implements IVoLteService {
 
         mServics.put(TYPE_CALLSETTING, new CallSettingService());
         mServics.put(TYPE_SUBSCRIBEINFO, new SubscriberInfoService());
-        mServics.put(TYPE_REGIPROCESS, new RegiProcessService());
         mServics.put(TYPE_SRVCCSTATE, new SrvccStateService());
         mServics.put(TYPE_ACBSKIP, new SCMService());
         mServics.put(TYPE_CALLINFO, new CallInfoService());

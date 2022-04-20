@@ -34,12 +34,13 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.config.ProviderInterface.SMS;
 import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.AosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.IsimState;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
+import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPISIM;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsConstants;
@@ -51,6 +52,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 
 import java.util.Arrays;
+import java.util.Set;
 
 public class SIMStateAgent implements ISIMState, ISystemAPISIM {
     // Constants--------------------------------------------------
@@ -60,7 +62,7 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
     private static final int EVENT_SIM_STATE_CHANGED = 1001;
     private static final int EVENT_ISIM_STATE_CHANGED = 1002;
     private static final int EVENT_RETRY_GET_PSI_INFO = 1003;
-    private static final int EVENT_SVC_STATUS_IND = 1005;
+    private static final int EVENT_SERVICE_REGISTERED = 1004;
     private static final int EVENT_DATA_SUBSCRIPTION_CHANGED = 1006;
     private static final int EVENT_UPDATE_ISIM_STATE = 1007;
     private static final int EVENT_NATIVE_BOOT_COMPLETED = 1008;
@@ -117,6 +119,7 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
     private Handler mSIMStateHandler;
     private SIMStateReceiverListener mReceiverListener;
     private SubscriptionListenerProxy mSubscriptionListener;
+    private RegistrationListener mRegistrationListener;
 
     private RegistrantList mSimStateChangedRegistrants;
     private RegistrantList mIsimStateChangedRegistrants;
@@ -203,6 +206,16 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
             mSubscriptionListener = null;
         }
 
+        // TODO : Need to create Config
+        if (isPsiRequired()) {
+            IAosRegistration aosRegistration = AosFactory.getInstance().
+                    getAosRegistration(mSlotId);
+            if (aosRegistration != null) {
+                mRegistrationListener = new RegistrationListener();
+                aosRegistration.addListener(mRegistrationListener);
+            }
+        }
+
         ISharedState iss = (ISharedState)AgentFactory.getAgent(AgentFactory.SHARED_STATE, mSlotId);
         if (iss != null) {
             iss.registerForNativeBootComplete(mSIMStateHandler, EVENT_NATIVE_BOOT_COMPLETED, null);
@@ -226,6 +239,14 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
 
         if (mSystem != null) {
             mSystem.notifyISIMState(NOTIFICATION_ISIM_STATE_CHANGED, ISIM_STATE_SIM_REMOVED);
+        }
+
+        if (mRegistrationListener != null) {
+            IAosRegistration aosRegistration = AosFactory.getInstance().
+                    getAosRegistration(mSlotId);
+            if (aosRegistration != null) {
+                aosRegistration.removeListener(mRegistrationListener);
+            }
         }
 
         if (mSubscriptionListener != null) {
@@ -824,19 +845,10 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
         setIsimState(isimState, subId);
     }
 
-    private void handleSVCStatusInd(Intent intent) {
-        if (intent == null) {
-            return;
-        }
-
-        int regState = intent.getIntExtra("state", 1);
-
-        if (regState == 0) {
-            // when REG is done, if PSI value is not read, do retry
-            if (mPsiReadDone == false) {
-                mRetryCountForPsi = 0;
-                readPsiDelayed();
-            }
+    private void handleServiceRegistered() {
+        if (mPsiReadDone == false) {
+            mRetryCountForPsi = 0;
+            readPsiDelayed();
         }
     }
 
@@ -1048,10 +1060,6 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
 
         public SIMStateReceiverListener() {
             mIntentFilter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
-
-            if (isPsiRequired()) {
-                mIntentFilter.addAction(ImsEventDef.ACTION_SVC_STATUS_IND);
-            }
         }
 
         public IntentFilter getFilter() {
@@ -1072,9 +1080,6 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
             if (TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(action)) {
                 Message.obtain(mSIMStateHandler,
                     EVENT_SIM_STATE_CHANGED, intent).sendToTarget();
-            } else if (ImsEventDef.ACTION_SVC_STATUS_IND.equals(action)) {
-                Message.obtain(mSIMStateHandler,
-                    EVENT_SVC_STATUS_IND, intent).sendToTarget();
             }
         }
     }
@@ -1134,8 +1139,8 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
                         }
                     }
                     break;
-                case EVENT_SVC_STATUS_IND:
-                    handleSVCStatusInd((Intent)msg.obj);
+                case EVENT_SERVICE_REGISTERED:
+                    handleServiceRegistered();
                     break;
                 case EVENT_DATA_SUBSCRIPTION_CHANGED:
                     handleDataSubscriptionChanged(msg.arg1);
@@ -1173,6 +1178,15 @@ public class SIMStateAgent implements ISIMState, ISystemAPISIM {
             } else {
                 handleDataSubscriptionChanged(subId);
             }
+        }
+    }
+
+    private class RegistrationListener extends AosRegistrationListener {
+        @Override
+        public void notifyRegistered(int networkType, int featureTagBits,
+                Set<String> featureTags) {
+            ImsLog.i(mSlotId, "notifyRegistered");
+            Message.obtain(mSIMStateHandler, EVENT_SERVICE_REGISTERED).sendToTarget();
         }
     }
 }
