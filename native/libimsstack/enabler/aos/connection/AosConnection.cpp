@@ -89,6 +89,11 @@ IMS_BOOL AosConnection::Activate()
         return IMS_TRUE;
     }
 
+    if (m_nCnxType != NetworkPolicy::APN_EMERGENCY && IsActivationRequested())
+    {
+        return IMS_TRUE;
+    }
+
     SetActivationRequested(IMS_TRUE);
 
     if (m_piConnection->Activate(IMS_TRUE) == INetConnection::RESULT_DONE)
