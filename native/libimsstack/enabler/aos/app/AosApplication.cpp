@@ -757,9 +757,11 @@ void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = AoSReason::NONE */)
 
     m_piRegistration->Destroy();
 
-    if (nOffReason == AoSReason::IMS_DISABLED || nOffReason == AoSReason::POWER_OFF)
+    if (nOffReason == AoSReason::IMS_DISABLED ||
+            nOffReason == AoSReason::POWER_OFF ||
+            nOffReason == AoSReason::DATA_PERMANENTLY_FAILED)
     {
-        ProcessPdnReconnect();
+        ProcessPdnDisconnect();
         ClearOffReason();
     }
 }
@@ -1220,6 +1222,7 @@ PROTECTED VIRTUAL
 IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objMsg)
 {
     IMS_UINT32 nType = LONG_TO_INT(objMsg.nWparam);
+    IMS_UINT32 nReason = LONG_TO_INT(objMsg.nLparam);
 
     switch (nType)
     {
@@ -1231,7 +1234,15 @@ IMS_BOOL AosApplication::StateReady_Connection(IN IMSMSG& objMsg)
         case CONNECTION_DEACTIVATED:
             if (!IsEmergency())
             {
-                m_pConnector->Start();
+                if (nReason == AosConnector::REASON_PERMANENTLY_FAILED)
+                {
+                    m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED);
+                    m_pConnector->Stop();
+                }
+                else
+                {
+                    m_pConnector->Start();
+                }
             }
             break;
 
@@ -1511,7 +1522,7 @@ void AosApplication::ProcessRegFailed_StateConnecting(IN IMS_UINT32 nReason)
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT:
-            ProcessPdnReconnect();
+            ProcessPdnDisconnect();
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT:
@@ -1566,7 +1577,7 @@ void AosApplication::ProcessRegFailed_StateConnected(IN IMS_UINT32 nReason)
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT:
-            ProcessPdnReconnect();
+            ProcessPdnDisconnect();
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT:
@@ -1617,7 +1628,7 @@ void AosApplication::ProcessRegFailed_StateUpdating(IN IMS_UINT32 nReason)
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT:
-            ProcessPdnReconnect();
+            ProcessPdnDisconnect();
             break;
 
         case IAosRegistration::REASON_FAILURE_PDN_RECONNECT_WITH_AWT:
@@ -1651,9 +1662,18 @@ void AosApplication::ProcessConnectionUpdated_StateDisconnecting(IN IMS_UINT32 n
 }
 
 PROTECTED VIRTUAL
-void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT32 /* nReason */)
+void AosApplication::ProcessConnectionDeactivated(IN IMS_UINT32 nReason)
 {
-    CleanAll(AoSReason::DATA_DISCONNECTED);
+    if (nReason == AosConnector::REASON_PERMANENTLY_FAILED)
+    {
+        m_pCondition->SetBlock(BLOCK_PERMANENT_DATA_FAILED, IMS_FALSE);
+        CleanAll(AoSReason::DATA_PERMANENTLY_FAILED);
+    }
+    else
+    {
+        CleanAll(AoSReason::DATA_DISCONNECTED);
+    }
+
     Report_StateChanged(IMS_FALSE);
     ProcessStateStart();
 }
@@ -1929,6 +1949,8 @@ void AosApplication::ProcessRegAuthenticationFailed()
 
     CleanAll(AoSReason::IMS_DISABLED);
     Report_StateChanged(IMS_FALSE);
+
+    // TODO: PLMN block after checking configuration
 }
 
 PROTECTED VIRTUAL
@@ -1947,7 +1969,7 @@ void AosApplication::ProcessPingCommand()
 }
 
 PROTECTED VIRTUAL
-void AosApplication::ProcessPdnReconnect()
+void AosApplication::ProcessPdnDisconnect()
 {
     m_pConnector->Stop();
 }
