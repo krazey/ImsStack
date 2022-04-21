@@ -96,10 +96,13 @@ public:
     IMS_BOOL IsSupportedNetworkType(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const;
 
+    IMS_BOOL IsWifiTest() const;
+
 private:
     // ( 2^24 * BaseTime ) MUST be bigger than MaxTime
     static const IMS_UINT32 REASONABLE_MAX_FAILURE_COUNT = 24;
 
     IMS_BOOL m_bIsMtkChipset;
+    IMS_BOOL m_bIsWifiTest;
 };
 #endif // _AOS_UTIL_H_
