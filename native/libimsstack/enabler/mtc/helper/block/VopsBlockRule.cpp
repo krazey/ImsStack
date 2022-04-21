@@ -1,12 +1,13 @@
 #include "IMSEventDef.h"
+#include "IMtcService.h"
 #include "MtcImsEventReceiver.h"
 #include "helper/block/VopsBlockRule.h"
-#include "MtcDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-VopsBlockRule::VopsBlockRule(IN MtcImsEventReceiver& objEventReceiver) :
+VopsBlockRule::VopsBlockRule(IN IMtcService& objService, IN MtcImsEventReceiver& objEventReceiver) :
+        m_objService(objService),
         m_objEventReceiver(objEventReceiver)
 {
 }
@@ -19,6 +20,11 @@ VopsBlockRule::~VopsBlockRule()
 PUBLIC VIRTUAL
 VopsBlockRule::Result VopsBlockRule::Check(IN IMtcBlockRuleCheckListener& /* objListener */)
 {
+    if (m_objService.IsWlanIpCanType())
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
     if (m_objEventReceiver.GetWParam(IMS_EVENT_IMS_VOICE_OVER_PS_STATE) ==
             IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
