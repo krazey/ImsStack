@@ -30,7 +30,6 @@ public final class AgentFactory {
     public static final int ISIM = 9;
     public static final int SHARED_STATE = 10;
     public static final int SIM_STATE = 11;
-    public static final int SUBSCRIBER_INFO = 12;
     public static final int PHONE_STATE = 13;
     public static final int TELEPHONY_STATE = 14;
     public static final int TELEPHONY_SUBSCRIBER = 15;
@@ -222,6 +221,7 @@ public final class AgentFactory {
             synchronized(mLock) {
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
+                agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
             }
         }
     }

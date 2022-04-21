@@ -534,6 +534,15 @@ IMS_BOOL SubscriberConfig::ReadFrom()
         }
     }
 
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED,
+            IsIsimSupported(),
+            GetSlotId());
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_USIM_ENABLED,
+            IsUsimSupported(),
+            GetSlotId());
+
     //
     // Device supports the ISIM application, so the subscriber info. should be read from ISIM.
     //
@@ -594,6 +603,14 @@ IMS_BOOL SubscriberConfig::ReadFrom()
             GetSlotId());
 
     pSubsInfo->m_objPublicUserIds = strPublicUserIds.Split(',');
+
+    if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
+    {
+        piProperty->SetPersistent(
+                ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
+                pSubsInfo->m_objPublicUserIds.GetElementAt(0),
+                GetSlotId());
+    }
 
     pSubsInfo->m_strPhoneContext = piCc->GetString(
             CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING);
@@ -2472,12 +2489,11 @@ void SubscriberConfig::WriteProvisioning()
 {
     IMS_TRACE_D("WriteProvisioning...", 0, 0, 0);
 
+    IImsPrivateProperty* piProperty = GetPrivateProperty();
     ImsSubscriberInfo* pSubsInfo = GetSubscriberInfoEx();
 
     if (pSubsInfo != IMS_NULL)
     {
-        IImsPrivateProperty* piProperty = GetPrivateProperty();
-
         if (pSubsInfo->m_strHomeDomainName.GetLength() > 0)
         {
             piProperty->SetPersistent(
@@ -2514,7 +2530,36 @@ void SubscriberConfig::WriteProvisioning()
                     strPublicUserIds,
                     GetSlotId());
         }
+
+        IMS_SINT32 nPrimaryImpuIndex = 0;
+
+        if (IsIsimSupported())
+        {
+            nPrimaryImpuIndex = pSubsInfo->m_nRefIndexOfPrimaryImpu;
+
+            if (pSubsInfo->m_objPublicUserIds.GetCount() <= nPrimaryImpuIndex)
+            {
+                nPrimaryImpuIndex = 0;
+            }
+        }
+
+        if (pSubsInfo->m_objPublicUserIds.GetCount() > 0)
+        {
+            piProperty->SetPersistent(
+                    ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU,
+                    pSubsInfo->m_objPublicUserIds.GetElementAt(nPrimaryImpuIndex),
+                    GetSlotId());
+        }
     }
+
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED,
+            IsIsimSupported(),
+            GetSlotId());
+    piProperty->SetPersistentBoolean(
+            ImsPrivateProperties::Persistent::KEY_USIM_ENABLED,
+            IsUsimSupported(),
+            GetSlotId());
 }
 
 PRIVATE

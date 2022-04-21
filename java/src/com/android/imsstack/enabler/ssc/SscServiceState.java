@@ -1,9 +1,9 @@
 package com.android.imsstack.enabler.ssc;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.ISIMState;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcm.DCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -83,10 +83,10 @@ public class SscServiceState {
     public boolean isUtAvailable() {
         /*
         boolean admin_ims = false;
-        ISubscriberInfo subscriberInfo = (ISubscriberInfo)AgentFactory.getAgent(
-            AgentFactory.SUBSCRIBER_INFO, mSlotId);
-        if (subscriberInfo != null) {
-            admin_ims = subscriberInfo.isImsOn();
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, mSlotId);
+        if (subsInfo != null) {
+            admin_ims = subsInfo.isImsEnabled();
         }
 
         if (admin_ims != true) {

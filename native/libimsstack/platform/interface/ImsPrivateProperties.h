@@ -46,6 +46,15 @@ public:
         static const IMS_CHAR KEY_SIM_OPERATOR_SUB[];
 
         /**
+         * Tracks the configuration items that need to be shared with the native layer.
+         *  - ISIM/USIM enabled (that is currently used for IMS registration)
+         *  - Primary public user identity (that will be used for IMS registration)
+         */
+        static const IMS_CHAR KEY_ISIM_ENABLED[];
+        static const IMS_CHAR KEY_USIM_ENABLED[];
+        static const IMS_CHAR KEY_PRIMARY_IMPU[];
+
+        /**
          * Configuration items which can be provisioned for a test purpose.
          *  - List of P-CSCF address (comma-separated string)
          *  - IMPI (Private user identity)

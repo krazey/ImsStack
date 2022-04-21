@@ -4,22 +4,23 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IISIM;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Locale;
 
 public final class SscUtils {
     public static int getTelephonySimType(int slotId) {
-        ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(slotId);
-        if (subsriberinfo == null) {
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, slotId);
+
+        if (subsInfo == null) {
             return TelephonyManager.APPTYPE_ISIM;
         }
 
-        if (subsriberinfo.isIsimOn()) {
+        if (subsInfo.isIsimEnabled()) {
             return TelephonyManager.APPTYPE_ISIM;
         }
 
@@ -38,13 +39,15 @@ public final class SscUtils {
     }
 
     public static String getDomain(int slotId) {
-        ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(slotId);
-        if (subsriberinfo == null) {
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, slotId);
+
+        if (subsInfo == null) {
             return null;
         }
 
         String domain = null;
-        if (subsriberinfo.isIsimOn() == true) {
+        if (subsInfo.isIsimEnabled() == true) {
             IISIM isimAgent = (IISIM) AgentFactory.getAgent(AgentFactory.ISIM, slotId);
             String impi = isimAgent != null ? isimAgent.getImpi() : null;
             if (impi == null || impi.isEmpty()) {
@@ -52,7 +55,7 @@ public final class SscUtils {
                 return null;
             }
             domain = impi.substring(impi.lastIndexOf("@") + 1 , impi.length());
-        } else if (subsriberinfo.isUsimOn() == true) {
+        } else if (subsInfo.isUsimEnabled() == true) {
             ITelephonySubscriber ts = (ITelephonySubscriber)AgentFactory.getAgent(
                     AgentFactory.TELEPHONY_SUBSCRIBER, slotId);
             if (ts == null) {

@@ -50,6 +50,13 @@ PUBLIC GLOBAL
 const IMS_CHAR ImsPrivateProperties::Persistent::KEY_SIM_OPERATOR_SUB[] = "sim_operator_sub";
 
 PUBLIC GLOBAL
+const IMS_CHAR ImsPrivateProperties::Persistent::KEY_ISIM_ENABLED[] = "isim_enabled";
+PUBLIC GLOBAL
+const IMS_CHAR ImsPrivateProperties::Persistent::KEY_USIM_ENABLED[] = "usim_enabled";
+PUBLIC GLOBAL
+const IMS_CHAR ImsPrivateProperties::Persistent::KEY_PRIMARY_IMPU[] = "primary_impu";
+
+PUBLIC GLOBAL
 const IMS_CHAR ImsPrivateProperties::Persistent::KEY_CONFIG_PCSCF_ADDRESS_LIST[] =
         "config_pcscf_address_list";
 PUBLIC GLOBAL

@@ -39,7 +39,7 @@ public final class ImsDbController {
                 ProviderInterface.Subscriber.AdminFeatures.TESTMODE);
     }
 
-    public static boolean isTestModeForGCFEnabled(int adminFeatures) {
+    public static boolean isTestModeForGcfEnabled(int adminFeatures) {
         return isAdminFeatureEnabled(adminFeatures,
                 ProviderInterface.Subscriber.AdminFeatures.TESTMODE_GCF);
     }

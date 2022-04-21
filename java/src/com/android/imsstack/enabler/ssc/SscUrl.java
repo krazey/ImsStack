@@ -3,9 +3,8 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IISIM;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
@@ -243,8 +242,10 @@ public class SscUrl {
     }
 
     private String generateUrlAddress(int slotId) {
-        ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(slotId);
-        if (subsriberinfo == null) {
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, slotId);
+
+        if (subsInfo == null) {
             return null;
         }
 
@@ -255,7 +256,7 @@ public class SscUrl {
             IISIM isimAgent = (IISIM) AgentFactory.getAgent(AgentFactory.ISIM, slotId);
             String impi = isimAgent != null ? isimAgent.getImpi() : null;
 
-            if (subsriberinfo.isIsimOn() && !TextUtils.isEmpty(impi)) {
+            if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) {
                 String substringImpi = impi.substring(impi.lastIndexOf("@") + 1, impi.length());
                 ImsLog.d("substring of IMPI : " + substringImpi);
 

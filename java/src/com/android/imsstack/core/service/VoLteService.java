@@ -13,7 +13,7 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
 import com.android.imsstack.core.agents.agentif.ICallSetting;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
@@ -24,7 +24,6 @@ import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.IRegiProcess;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISIMState;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
@@ -45,7 +44,6 @@ import com.android.imsstack.core.service.ECallStateService;
 import com.android.imsstack.core.service.EPDGCallService;
 import com.android.imsstack.core.service.SCMService;
 import com.android.imsstack.core.service.SrvccStateService;
-import com.android.imsstack.core.service.SubscriberInfoService;
 import com.android.imsstack.core.service.TtyService;
 import com.android.imsstack.core.service.USATService;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
@@ -210,7 +208,6 @@ public class VoLteService implements IVoLteService {
         ImsLog.i("");
 
         mServics.put(TYPE_CALLSETTING, new CallSettingService());
-        mServics.put(TYPE_SUBSCRIBEINFO, new SubscriberInfoService());
         mServics.put(TYPE_SRVCCSTATE, new SrvccStateService());
         mServics.put(TYPE_ACBSKIP, new SCMService());
         mServics.put(TYPE_CALLINFO, new CallInfoService());
@@ -317,8 +314,9 @@ public class VoLteService implements IVoLteService {
                 policy |= LocationPolicy.POLICY_CACHED_ADDRESS_VALIDITY_DISTANCE;
                 policy |= LocationPolicy.POLICY_UPDATE_COUNTRY_VIA_OTHER_SCHEME;
 
-                ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(getSlotID());
-                if ((subsriberinfo != null) && subsriberinfo.isTestMode()) {
+                SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                        SubsInfoInterface.class, getSlotID());
+                if ((subsInfo != null) && subsInfo.isTestModeEnabled()) {
                     // For WFC E911 test which should be tested in Puerto Rico area,
                     // allow mock location
                     policy |= LocationPolicy.POLICY_ALLOW_MOCK_LOCATION_UPDATE;
@@ -460,8 +458,9 @@ public class VoLteService implements IVoLteService {
             updateServiceProvisioned(getSlotID());
 
             //enable video call with DISS
-            ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(getSlotID());
-            if ((subsriberinfo != null) && subsriberinfo.isTestMode()) {
+            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                    SubsInfoInterface.class, getSlotID());
+            if ((subsInfo != null) && subsInfo.isTestModeEnabled()) {
                 ICallSetting cso = (ICallSetting)AgentFactory.getAgent(
                         AgentFactory.CALL_SETTING, getSlotID());
                 if (cso != null) {
@@ -757,41 +756,40 @@ public class VoLteService implements IVoLteService {
 
     protected void initServiceProvisioningInfo(int availableServices) {
 
-        ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(mSlotID);
-        if (subsriberinfo != null) {
-            if (!subsriberinfo.isDMOn()) {
-                if (ImsConstants.USE_GOOGLE_NATIVE_APPS || subsriberinfo.isTestMode()) {
-                    ContentResolver cr = mContext.getContentResolver();
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, getSlotID());
 
-                    ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, mSlotID);
+        if (subsInfo != null) {
+            if (ImsConstants.USE_GOOGLE_NATIVE_APPS || subsInfo.isTestModeEnabled()) {
+                ContentResolver cr = mContext.getContentResolver();
 
-                    String soipEnableFromDB = DBUtils.CP.getString(cr
-                                                , ProviderInterface.SMS.CONTENT_URI
-                                                , ImsDbController.selectForSlot(mSlotID)
-                                                , ProviderInterface.SMS.SMS_OVER_IP_NETWORK
-                                                , null);
+                ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
+                    cr, ImsStateController.STATE_ACTIVE, mSlotID);
 
-                    if (TextUtils.isEmpty(soipEnableFromDB)) {
-                        soipEnableFromDB = "false";
-                    }
+                String soipEnableFromDB = DBUtils.CP.getString(cr
+                                            , ProviderInterface.SMS.CONTENT_URI
+                                            , ImsDbController.selectForSlot(mSlotID)
+                                            , ProviderInterface.SMS.SMS_OVER_IP_NETWORK
+                                            , null);
 
-                    if ("true".equalsIgnoreCase(soipEnableFromDB)) {
-                        ImsLog.i("add the SMS Service according to DB");
-                        availableServices |= IUIMS.M_APP_SMS;
-                    }
+                if (TextUtils.isEmpty(soipEnableFromDB)) {
+                    soipEnableFromDB = "false";
                 }
 
-                ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
-                if (system == null) {
-                    return;
+                if ("true".equalsIgnoreCase(soipEnableFromDB)) {
+                    ImsLog.i("add the SMS Service according to DB");
+                    availableServices |= IUIMS.M_APP_SMS;
                 }
-
-                system.notifyEvent(ImsEventDef.IMS_EVENT_SERVICE_SETTING,
-                    ImsEventDef.IMS_SERVICE_PRESENTITY, availableServices);
             }
-        }
 
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
+            if (system == null) {
+                return;
+            }
+
+            system.notifyEvent(ImsEventDef.IMS_EVENT_SERVICE_SETTING,
+                ImsEventDef.IMS_SERVICE_PRESENTITY, availableServices);
+        }
     }
 
     /**

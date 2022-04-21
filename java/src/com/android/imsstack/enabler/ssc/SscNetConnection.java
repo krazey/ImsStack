@@ -10,9 +10,7 @@ import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;

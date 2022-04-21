@@ -12,8 +12,7 @@ import android.telephony.ims.ImsSsInfo.Builder;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -164,8 +163,9 @@ public class SscServiceImpl extends UtInterfaceBase {
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
         ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
 
-        ISubscriberInfo subscriberInfo = SubscriberInfoAgent.getInstance(mSlotId);
-        if (subscriberInfo != null && subscriberInfo.isTestModeForGCF()) {
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, mSlotId);
+        if (subsInfo != null && subsInfo.isTestModeEnabledForGcf()) {
             netConnGov.init(mSlotId, mContext, EApnType.XCAP, false);
             httpConnectionGov.open(mSlotId, mContext, EApnType.XCAP);
         } else {

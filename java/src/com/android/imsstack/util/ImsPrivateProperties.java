@@ -222,6 +222,27 @@ public final class ImsPrivateProperties {
         public static final String KEY_TEST_CARRIER_ID = "test_carrier_id";
 
         /**
+         * Tracks the configuration items that need to be shared with the native layer.
+         *  - ISIM/USIM enabled (that is currently used for IMS registration)
+         *  - Primary public user identity (that will be used for IMS registration)
+         */
+        /**
+         * Keeps the current ISIM status.
+         * Value : boolean
+         */
+        public static final String KEY_ISIM_ENABLED = "isim_enabled";
+        /**
+         * Keeps the current USIM status.
+         * Value : boolean
+         */
+        public static final String KEY_USIM_ENABLED = "usim_enabled";
+        /**
+         * Keeps primary public user identity that will be ued for IMS registration.
+         * Value : string
+         */
+        public static final String KEY_PRIMARY_IMPU = "primary_impu";
+
+        /**
          * Configuration items which can be provisioned for a test purpose.
          *  - List of P-CSCF address
          *  - IMPI (Private user identity)

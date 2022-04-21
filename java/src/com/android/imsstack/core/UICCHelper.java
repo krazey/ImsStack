@@ -1,12 +1,10 @@
 package com.android.imsstack.core;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.VoLteFactory;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.IPreference;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.test.ImsTestMask;
@@ -64,14 +62,11 @@ public class UICCHelper {
             return null;
         }
 
-        IVoLteService voLteService = VoLteFactory.getInstance().getService(nSlotID);
-        if (voLteService != null) {
-            ISubscriberInfo subscriberInfo = (ISubscriberInfo)voLteService.
-                                                getService(IVoLteService.TYPE_SUBSCRIBEINFO);
-            if (subscriberInfo != null) {
-                if (!subscriberInfo.isIsimOn()) {
-                    return null;
-                }
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, nSlotID);
+        if (subsInfo != null) {
+            if (!subsInfo.isIsimEnabled()) {
+                return null;
             }
         }
 

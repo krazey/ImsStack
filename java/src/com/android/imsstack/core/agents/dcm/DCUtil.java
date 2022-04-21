@@ -16,8 +16,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.ISIMState;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.agents.dcmif.IDC;
@@ -412,9 +412,9 @@ public class DCUtil implements IDCUtil {
         int nCid = ci.getCid();
 
         if (nCid == (-1) || nCid > 0xfffffff) {
-            ISubscriberInfo subInfo = (ISubscriberInfo)AgentFactory.getAgent(
-                    AgentFactory.SUBSCRIBER_INFO, mSlotId);
-            if (subInfo != null && subInfo.isTestModeForGCF()) {
+            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                    SubsInfoInterface.class, mSlotId);
+            if (subsInfo != null && subsInfo.isTestModeEnabledForGcf()) {
                 /*
                     for some PTCRB test equipment, if Cid is null,
                     result will be failure. Therefore set default value to 0

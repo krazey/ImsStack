@@ -6,8 +6,8 @@ import android.os.Message;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
 import com.android.imsstack.core.agents.agentif.MsgProcInterface;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
@@ -43,18 +43,18 @@ public class ApnIms extends Apn {
     @Override
     public boolean connect() {
         synchronized (this) {
-            ISubscriberInfo subscriberInfo = (ISubscriberInfo)AgentFactory.getAgent(
-                    AgentFactory.SUBSCRIBER_INFO, nSlotId);
-            if (subscriberInfo != null) {
-                if (!subscriberInfo.isImsOn()) {
+            SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                    SubsInfoInterface.class, nSlotId);
+            if (subsInfo != null) {
+                if (!subsInfo.isImsEnabled()) {
                     ImsLog.w(nSlotId, "ims is off");
                     return false;
                 }
 
-                boolean bVxLTE = subscriberInfo.isVoLTEServiceOn()
-                        || subscriberInfo.isViLTEServiceOn();
-                boolean bVxWiFi = subscriberInfo.isVoWiFiServiceOn()
-                        || subscriberInfo.isViWiFiServiceOn();
+                boolean bVxLTE = subsInfo.isVoLteServiceOn()
+                        || subsInfo.isViLteServiceOn();
+                boolean bVxWiFi = subsInfo.isVoWiFiServiceOn()
+                        || subsInfo.isViWiFiServiceOn();
                 boolean bSmsOnlySupported = FeatureUtils.isSMSOnlySupported(mContext);
 
                 ImsLog.i(nSlotId, "support :: VxLTE=" + bVxLTE + ", VxWiFi=" + bVxWiFi

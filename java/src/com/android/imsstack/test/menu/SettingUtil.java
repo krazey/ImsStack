@@ -19,8 +19,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 
 import com.android.imsstack.R;
-import com.android.imsstack.core.agents.SubscriberInfoAgent;
-import com.android.imsstack.core.agents.agentif.ISubscriberInfo;
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SettingsUtils;
@@ -89,12 +89,14 @@ public class SettingUtil {
     }
 
     public static void displayColumns(String[] columns, int slotID) {
-        ISubscriberInfo subsriberinfo = SubscriberInfoAgent.getInstance(slotID);
-        if (subsriberinfo == null) {
+        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
+                SubsInfoInterface.class, slotID);
+
+        if (subsInfo == null) {
             return;
         }
 
-        if (!subsriberinfo.isDebugOn()) {
+        if (!subsInfo.isDebugEnabled()) {
             return;
         }
 
