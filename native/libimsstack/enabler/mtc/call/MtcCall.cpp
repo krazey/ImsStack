@@ -5,6 +5,7 @@
 #include "ISession.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
+#include "ServiceMutex.h"
 #include "ServiceTrace.h"
 #include "call/MtcCall.h"
 #include "call/state/AlertingState.h"
@@ -23,11 +24,14 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
+PRIVATE GLOBAL
+IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexService()->CreateMutex();
+
 PUBLIC
 MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN CallInfo objCallInfo) :
         m_objContext(objContext),
         m_objService(objService),
-        m_nKey(reinterpret_cast<CallKey>(this)),
+        m_nKey(CreateCallKey()),
         m_bEct(IMS_FALSE),
         m_bHeldByMe(IMS_FALSE),
         m_objCallInfo(objCallInfo),
@@ -929,6 +933,15 @@ void MtcCall::OnStateTransition(IN CallStateName eState)
             m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, m_objCallInfo, eState);
+}
+
+PRIVATE
+CallKey MtcCall::CreateCallKey()
+{
+    LockGuard objLock(s_pKeyCreationLock);
+
+    static CallKey nKey = 0;
+    return nKey++;
 }
 
 PRIVATE

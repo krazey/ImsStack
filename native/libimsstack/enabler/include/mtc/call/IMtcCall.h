@@ -22,7 +22,7 @@ enum class CallType;
 enum class UpdateType;
 struct FailReason;
 
-using CallKey = IMS_UINTP;
+using CallKey = IMS_ULONG;
 
 class IMtcCall
 {

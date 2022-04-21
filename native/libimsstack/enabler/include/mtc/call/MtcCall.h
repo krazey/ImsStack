@@ -24,6 +24,7 @@
 
 class IMtcContext;
 class IMtcService;
+class IMutex;
 class IReference;
 class ISession;
 class IMtcMediaManager;
@@ -183,6 +184,12 @@ public:
     void OnStateTransition(IN CallStateName eState) override;
 
 private:
+    static IMutex* s_pKeyCreationLock;
+
+    CallKey CreateCallKey();
+    void OnInternalFailure();
+    void SetVideoCapable(IN ISession* piSession);
+
     IMtcContext& m_objContext;
     IMtcService& m_objService;
 
@@ -202,9 +209,6 @@ private:
     MtcMediaManager m_objMediaManager;
     MtcPreconditionManager m_objPreconditionManager;
     MtcSupplementaryService m_objSupplementaryService;
-
-    void OnInternalFailure();
-    void SetVideoCapable(IN ISession* piSession);
 };
 
 #endif
