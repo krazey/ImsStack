@@ -1,12 +1,6 @@
-// TODO: this class will be deprecated.
-
-#include "ServiceMemory.h"
-#include "ServiceThread.h"
 #include "ServiceTrace.h"
-
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
-
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "MtcDef.h"
 #include "MtcContextRepository.h"
@@ -15,98 +9,87 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-#ifdef _PUBLIC_METHOD_
-#endif
-
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsSupported()
 {
-    return IsConferenceFeatureFlagged(FLAG_CONFERENCE);
+    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired()
 {
-    return IsConferenceFeatureFlagged(FLAG_CONFERENCE_SUBSCRIPTION);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1 ;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsReferSubscriptionRequired()
 {
-    return IsConferenceFeatureFlagged(FLAG_REFER_SUBSCRIPTION);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::SUPPORT_CONFERENCE_REFER_SUBSCRIBE);
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionOutDialog()
 {
-    return IsConferenceFeatureFlagged(FLAG_SUBSCRIPTION_OUTDIALOG);
-}
-
-PUBLIC GLOBAL
-IMS_BOOL ConferenceConfigurationWrapper::IsReferredByRequired()
-{
-    return IsConferenceFeatureFlagged(FLAG_REFERRED_BY);
-}
-
-PUBLIC GLOBAL
-IMS_BOOL ConferenceConfigurationWrapper::IsAddUserParameter()
-{
-    return IsConferenceFeatureFlagged(FLAG_ADD_USER_PARAMETER);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) > 0;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsPackageVersionCheckRequired()
 {
-    return IMS_FALSE;
-    //return IsConferenceFeatureFlagged(FLAG_PACKAGE_VERSION_CHECK);
-}
-
-PUBLIC GLOBAL
-IMS_BOOL ConferenceConfigurationWrapper::IsImplicitRoutingRequired()
-{
-    return IsConferenceFeatureFlagged(FLAG_IMPLICIT_ROUTING);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::CHECK_CONFERENCE_EVENT_PACKAGE_VERSION);
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionFirst()
 {
-    return IsConferenceFeatureFlagged(FLAG_SUBSCRIPTION_FIRST);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().GetInt(Feature::CONFERENCE_SIP_FLOW_ORDER) == 0;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsPaidPreferred()
 {
-    return IsConferenceFeatureFlagged(FLAG_PAID_PREFERRED);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::CONFERENCE_REFER_TO_URI_SOURCE_PAID);
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsReUseReferToUri()
 {
-    return IsConferenceFeatureFlagged(FLAG_REUSE_REFER_TO_URI_IN_INVITE);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE);
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsReferUsed()
 {
-    return IsConferenceFeatureFlagged(FLAG_USE_REFER);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().GetInt(Feature::CONFERENCE_INVITING_REFER_TYPE) == 1;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsDisconnectingStatusUsed()
 {
-    return IsConferenceFeatureFlagged(FLAG_USE_DISCONNECTING_STATUS);
+    // TODO: it's really not necessary?
+    return IMS_TRUE;
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsReferToExHeaderUsed()
 {
-    return IsConferenceFeatureFlagged(FLAG_USE_REFER_TO_EX_HDR);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::ADD_REPLACE_HEADER_FOR_CONFERENCE);
 }
 
 PUBLIC GLOBAL
 IMS_BOOL ConferenceConfigurationWrapper::IsSubscriptionForParticipantRequired()
 {
-    return IsConferenceFeatureFlagged(FLAG_SUBSCRIPTION_FOR_PARTICIPANT);
+    return MtcContextRepository::GetContext()
+            ->GetConfigurationProxy().Is(Feature::ENABLE_CONFERENCE_SUBSCRIBE_BY_PARTICIPANT);
 }
 
 PUBLIC GLOBAL
@@ -137,21 +120,6 @@ IMS_SINT32 ConferenceConfigurationWrapper::GetWaitTimeSipFrag()
 PUBLIC GLOBAL
 IMS_SINT32 ConferenceConfigurationWrapper::GetReferTypeForInvite()
 {
-    return MtcContextRepository::GetContext(ThreadService::GetCurrentSlotId())
+    return MtcContextRepository::GetContext()
             ->GetConfigurationProxy().GetInt(Feature::CONFERENCE_INVITING_REFER_TYPE);
-}
-
-#ifdef _PRIVATE_METHOD_
-#endif
-
-PRIVATE GLOBAL
-IMS_BOOL ConferenceConfigurationWrapper::IsConferenceFeatureFlagged(IN IMS_UINT32 nFeature)
-{
-    IMS_SINT32 nSlotId = ThreadService::GetCurrentSlotId();
-    // TODO, MTC BUILD
-    UNUSED_PARAM(nSlotId);
-    const AString& strFeatures = "0x2911000F";
-    IMS_UINT32 nConferenceFeatures = strFeatures.ToUInt32(IMS_NULL, 16);
-
-    return ((nConferenceFeatures&  nFeature) != 0);
 }

@@ -10,6 +10,7 @@
 #include "JniMtcCall.h"
 #include "IMtcService.h"
 #include "MtcApp.h"
+#include "MtcContextRepository.h"
 #include "MtcImsEventReceiver.h"
 #include "call/MtcCallManager.h"
 #include "MtcService.h"
@@ -39,6 +40,7 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objConferenceManager(ConferenceManager(*this))
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
+    MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
     Configuration::GetInstance()->SetAppConfig(
             ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
 }
@@ -47,6 +49,7 @@ PUBLIC VIRTUAL
 MtcApp::~MtcApp()
 {
     IMS_TRACE_I("~MtcApp [slot_%d]", m_nSlotId, 0, 0);
+    MtcContextRepository::GetInstance()->RemoveContext(m_nSlotId);
 }
 
 PUBLIC VIRTUAL

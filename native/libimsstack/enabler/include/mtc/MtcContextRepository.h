@@ -20,8 +20,8 @@ public:
 public:
     static IMtcContext* GetContext(IN IMS_SINT32 nSlotId = INVALID_SLOT_ID);
     IMtcContext* GetContextBySlot(IN IMS_SINT32 nSlotId);
-    void AddContext(IN IMtcContext* piContext);
-    void RemoveContext();
+    void AddContext(IN IMS_SINT32 nSlotId, IN IMtcContext* piContext);
+    void RemoveContext(IN IMS_SINT32 nSlotId);
 
 private:
     static MtcContextRepository* s_pThis;

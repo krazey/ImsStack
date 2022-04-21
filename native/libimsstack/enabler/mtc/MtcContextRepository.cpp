@@ -1,6 +1,5 @@
 #include "IMSTypeDef.h"
 #include "ServiceThread.h"
-
 #include "IMtcContext.h"
 #include "MtcContextRepository.h"
 
@@ -49,13 +48,13 @@ IMtcContext* MtcContextRepository::GetContextBySlot(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-void MtcContextRepository::AddContext(IN IMtcContext* piContext)
+void MtcContextRepository::AddContext(IN IMS_SINT32 nSlotId, IN IMtcContext* piContext)
 {
-    m_objContexts.Add(ThreadService::GetCurrentSlotId(), piContext);
+    m_objContexts.Add(nSlotId, piContext);
 }
 
 PUBLIC
-void MtcContextRepository::RemoveContext()
+void MtcContextRepository::RemoveContext(IN IMS_SINT32 nSlotId)
 {
-    m_objContexts.Remove(ThreadService::GetCurrentSlotId());
+    m_objContexts.Remove(nSlotId);
 }

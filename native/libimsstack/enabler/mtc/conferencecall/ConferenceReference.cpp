@@ -308,11 +308,6 @@ void ConferenceReference::SetReplaces(IN IMtcCall* piCall)
 PRIVATE
 void ConferenceReference::SetReferredByHeader()
 {
-    if (ConferenceConfigurationWrapper::IsReferredByRequired() == IMS_FALSE)
-    {
-        return;
-    }
-
     AString strLocalUri =
             m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService()->GetLocalUserId();
     if (strLocalUri.GetLength() <= 0)
