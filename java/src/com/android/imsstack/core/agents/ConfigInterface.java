@@ -16,6 +16,8 @@
 
 package com.android.imsstack.core.agents;
 
+import android.os.PersistableBundle;
+
 import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.core.config.CarrierConfig;
 
@@ -26,4 +28,20 @@ public interface ConfigInterface extends IAgent {
      * @return A CarrierConfig object.
      */
     CarrierConfig getCarrierConfig();
+
+    /**
+     * Reads the carrier configuration bundle for testing from the persistent storage.
+     *
+     * @return A PersistableBundle which contains the test configuration.
+     */
+    PersistableBundle readTestConfig();
+
+    /**
+     * Writes the carrier configuration for testing to the persistent storage.
+     *
+     * @param config A carrier configuration for testing.
+     *
+     * @return true if it's successfully written to the file, false otherwise.
+     */
+    boolean writeTestConfig(PersistableBundle config);
 }

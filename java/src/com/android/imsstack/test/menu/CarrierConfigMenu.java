@@ -46,10 +46,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -178,19 +176,13 @@ public class CarrierConfigMenu extends PreferenceActivity {
             return;
         }
 
-        InputStream is = null;
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
 
-        try {
-            is = AppContext.get().openFileInput(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
-            mTestConfig = PersistableBundle.readFromStream(is);
-        } catch (FileNotFoundException e) {
-            ImsLog.d(mSlotId, "initTestConfig: not found");
+        if (config != null) {
+            mTestConfig = config.readTestConfig();
+        } else {
             mTestConfig = new PersistableBundle();
-        } catch (IOException e) {
-            ImsLog.d(mSlotId, "initTestConfig: " + e.toString());
-            mTestConfig = new PersistableBundle();
-        } finally {
-            IoUtils.closeQuietly(is);
         }
     }
 
@@ -203,25 +195,14 @@ public class CarrierConfigMenu extends PreferenceActivity {
             return;
         }
 
-        AppContext.get().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotId);
 
-        if (!mTestConfig.isEmpty()) {
-            OutputStream os = null;
-
-            try {
-                os = AppContext.get().openFileOutput(
-                        CarrierConfig.TEST_CARRIER_CONFIG_FILE,
-                        Context.MODE_APPEND);
-                mTestConfig.writeToStream(os);
+        if (config != null) {
+            if (config.writeTestConfig(mTestConfig)) {
                 mConfigChanged = false;
                 ImsLog.d(mSlotId, "storeTestConfig: success.");
-            } catch (IOException e) {
-                ImsLog.d(mSlotId, "storeTestConfig: " + e.toString());
-            } finally {
-                IoUtils.closeQuietly(os);
             }
-        } else {
-            mConfigChanged = false;
         }
     }
 
@@ -283,7 +264,12 @@ public class CarrierConfigMenu extends PreferenceActivity {
                         mTestConfig.clear();
                     }
 
-                    AppContext.get().deleteFile(CarrierConfig.TEST_CARRIER_CONFIG_FILE);
+                    ConfigInterface config = AgentFactory.getInstance().getAgent(
+                            ConfigInterface.class, mSlotId);
+
+                    if (config != null) {
+                        config.writeTestConfig(mTestConfig);
+                    }
 
                     ImsLog.d(mSlotId, "CarrierConfig: test config cleared.");
                 }
