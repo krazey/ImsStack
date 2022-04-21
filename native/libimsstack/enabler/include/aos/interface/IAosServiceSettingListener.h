@@ -110,17 +110,17 @@ class AosServiceSettingListener
     : public IAosServiceSettingListener
 {
 public:
-    inline virtual void ServiceSetting_AirplaneChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServiceSetting_DataRoamingChanged(IN IMS_BOOL /*bIsAllowed*/){};
-    inline virtual void ServiceSetting_MobileDataChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
-            IN RoamingPreferredVoiceNetwork /*eState*/){};
-    inline virtual void ServiceSetting_ServiceChanged(IN ServiceSetting /*eState*/,
-            IN IMS_UINT32 /*nServiceBits*/){};
-    inline virtual void ServiceSetting_TtyChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/){};
+    inline void ServiceSetting_AirplaneChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_DataRoamingChanged(IN IMS_BOOL /*bIsAllowed*/) override {};
+    inline void ServiceSetting_MobileDataChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
+            IN RoamingPreferredVoiceNetwork /*eState*/) override {};
+    inline void ServiceSetting_ServiceChanged(IN ServiceSetting /*eState*/,
+            IN IMS_UINT32 /*nServiceBits*/) override {};
+    inline void ServiceSetting_TtyChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/) override {};
 };
 
 #endif // _INTERFACE_AOS_SERVICE_SETTING_LISTENER_H_

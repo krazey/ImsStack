@@ -63,6 +63,34 @@ public interface IAosRegistration {
     public void changeCapabilities(CapabilityPairs capabilityPairs);
 
     /**
+     * This method is called when controlling registration.
+     *
+     * @param requestType Type of int {@link RequestType},
+     * @param pcscfOrder Type of int {@link Pcscf},
+     * @see {@link #IAosRegistration.RequestType}
+     * @see {@link #IAosRegistration.Pcscf}
+     */
+    public void controlRegistration(int requestType, int pcscfOrder);
+
+    /**
+     * Request Type
+     */
+    class RequestType {
+        public static final int START = 0;
+        public static final int REFRESH = 1;
+        public static final int STOP = 2;
+    }
+
+    /**
+     * PCSCF
+     */
+    class Pcscf {
+        public static final int FIRST = 0;
+        public static final int CURRENT = 1;
+        public static final int NEXT = 2;
+    }
+
+    /**
      * CapabilityPairs
      */
     public final class CapabilityPairs {

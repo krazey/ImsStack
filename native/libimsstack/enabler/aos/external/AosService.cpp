@@ -241,6 +241,22 @@ void AosService::NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT3
 }
 
 PUBLIC VIRTUAL
+void AosService::ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder)
+{
+    IMS_TRACE_I("ControlRegistration :: nRequestType(%d), nPcscfOrder(%d)", nRequestType,
+            nPcscfOrder, 0);
+    for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
+    {
+        IAosRegistrationControlListener* piListener = m_objAosRegistrationControlListeners.GetAt(i);
+
+        if (piListener != IMS_NULL)
+        {
+            piListener->RegistrationControl_ControlRegistration(nRequestType, nPcscfOrder);
+        }
+    }
+}
+
+PUBLIC VIRTUAL
 void AosService::NotifyAirplaneSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyAirplaneSetting :: nIsOn(%d)", nIsOn, 0, 0);

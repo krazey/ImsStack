@@ -151,18 +151,18 @@ class AosServicePhoneListener
     : public IAosServicePhoneListener
 {
 public:
-    inline virtual void ServicePhone_AosStart(){};
-    inline virtual void ServicePhone_notifyIpcanHandoverFailure(
-            IN IMS_SINT32 /*nTargetNetwork*/, IN IMS_SINT32 /*nCauseCode*/){}
-    inline virtual void ServicePhone_IsimStateChanged(IN IsimState /*eState*/){};
-    inline virtual void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/){};
-    inline virtual void ServicePhone_MobileDataLimitChanged(IN IMS_BOOL /*bIsLimited*/){};
-    inline virtual void ServicePhone_NetworkVideoCapabilityChanged(IN IMS_BOOL /*bIsOn*/){};
-    inline virtual void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL /*bIsRefresh*/,
-            IN PhoneNumberState /*eState*/){};
-    inline virtual void ServicePhone_PlmnChanged(){};
-    inline virtual void ServicePhone_PowerOff(){};
-    inline virtual void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/){};
+    inline void ServicePhone_AosStart() override {};
+    inline void ServicePhone_notifyIpcanHandoverFailure(
+            IN IMS_SINT32 /*nTargetNetwork*/, IN IMS_SINT32 /*nCauseCode*/) override {}
+    inline void ServicePhone_IsimStateChanged(IN IsimState /*eState*/) override {};
+    inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) override {};
+    inline void ServicePhone_MobileDataLimitChanged(IN IMS_BOOL /*bIsLimited*/) override {};
+    inline void ServicePhone_NetworkVideoCapabilityChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL /*bIsRefresh*/,
+            IN PhoneNumberState /*eState*/) override {};
+    inline void ServicePhone_PlmnChanged() override {};
+    inline void ServicePhone_PowerOff() override {};
+    inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override {};
 };
 
 #endif // _INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_

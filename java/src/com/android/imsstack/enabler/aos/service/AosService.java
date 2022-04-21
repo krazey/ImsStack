@@ -135,6 +135,17 @@ public class AosService implements IAosRegistration, IAosInfo {
     }
 
     @Override
+    public void controlRegistration(int requestType, int pcscfOrder) {
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION);
+        parcel.writeInt(requestType);
+        parcel.writeInt(pcscfOrder);
+
+        sendRequest(parcel);
+    }
+
+    @Override
     public void notifyAirplaneSetting(boolean isOn) {
         sendRequest(IIAosService.J2N_NOTIFY_AIRPLANE_SETTING, isOn);
     }

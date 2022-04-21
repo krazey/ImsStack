@@ -16,6 +16,7 @@ public interface IIAosService {
     public static final int J2N_REQUEST_DEREGISTRATION = EVENT_J2N + 2;
     public static final int J2N_REQUEST_FULL_REGISTRATION = EVENT_J2N + 3;
     public static final int J2N_REQUEST_CAPABILITIES_CHANGED = EVENT_J2N + 4;
+    public static final int J2N_REQUEST_CONTROL_REGISTRATION = EVENT_J2N + 5;
 
     /// IAosInfo(Java) -> IAosServiceSettingListener(Native)
     public static final int J2N_NOTIFY_AIRPLANE_SETTING = EVENT_J2N_INFO + 1;

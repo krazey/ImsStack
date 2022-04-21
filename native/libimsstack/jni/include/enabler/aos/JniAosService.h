@@ -27,6 +27,7 @@ private:
     void TriggerSipDelegateDeregistration(IN const android::Parcel& objParcel);
     void TriggerFullNetworkRegistration(IN const android::Parcel& objParcel);
     void NotifyCapabilitiesChanged(IN const android::Parcel& objParcel);
+    void ControlRegistration(IN const android::Parcel& objParcel);
 
     void NotifyAirplaneSetting(IN const android::Parcel& objParcel);
     void NotifyDataRoamingSetting(IN const android::Parcel& objParcel);

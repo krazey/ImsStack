@@ -16,69 +16,70 @@ public:
     AosService(IN IMS_SINT32 nSlotId);
     virtual ~AosService();
 
-    virtual void SetJniAosService(IN JniAosService* pJniAosService) override;
+    void SetJniAosService(IN JniAosService* pJniAosService) override;
 
-    virtual void AddListener(IN IAosRegistrationControlListener* piListener) override;
-    virtual void RemoveListener(IN IAosRegistrationControlListener* piListener) override;
+    void AddListener(IN IAosRegistrationControlListener* piListener) override;
+    void RemoveListener(IN IAosRegistrationControlListener* piListener) override;
 
-    virtual void AddListener(IN IAosServiceSettingListener* piListener) override;
-    virtual void RemoveListener(IN IAosServiceSettingListener* piListener) override;
+    void AddListener(IN IAosServiceSettingListener* piListener) override;
+    void RemoveListener(IN IAosServiceSettingListener* piListener) override;
 
-    virtual void AddListener(IN IAosServicePhoneListener* piListener) override;
-    virtual void RemoveListener(IN IAosServicePhoneListener* piListener) override;
+    void AddListener(IN IAosServicePhoneListener* piListener) override;
+    void RemoveListener(IN IAosServicePhoneListener* piListener) override;
 
     /// Java -> Native
-    virtual void UpdateSipDelegateRegistration() override;
-    virtual void TriggerSipDelegateDeregistration() override;
-    virtual void TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
+    void UpdateSipDelegateRegistration() override;
+    void TriggerSipDelegateDeregistration() override;
+    void TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
             IN const AString& sipReason) override;
-    virtual void NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>&
+    void NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>&
             objCapabilities) override;
+    void ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder) override;
 
-    virtual void NotifyAirplaneSetting(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed) override;
-    virtual void NotifyMobileDataSetting(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyRoamingPreferredVoiceNetwork(IN IMS_UINT32 nState) override;
-    virtual void NotifyServiceSetting(IN IMS_UINT32 nState, IN IMS_UINT32 nServiceBits) override;
-    virtual void NotifyTtySetting(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyVideoSetting(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyVolteSetting(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyWfcSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyAirplaneSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed) override;
+    void NotifyMobileDataSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyRoamingPreferredVoiceNetwork(IN IMS_UINT32 nState) override;
+    void NotifyServiceSetting(IN IMS_UINT32 nState, IN IMS_UINT32 nServiceBits) override;
+    void NotifyTtySetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyVideoSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyVolteSetting(IN IMS_UINT32 nIsOn) override;
+    void NotifyWfcSetting(IN IMS_UINT32 nIsOn) override;
 
-    virtual void NotifyAosStart() override;
-    virtual void NotifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,
+    void NotifyAosStart() override;
+    void NotifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,
             IN IMS_SINT32 nCauseCode) override;
-    virtual void NotifyIsimState(IN IMS_UINT32 nState) override;
-    virtual void NotifyLocationInfo(IN IMS_UINT32 nState) override;
-    virtual void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) override;
-    virtual void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) override;
-    virtual void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) override;
-    virtual void NotifyPlmnChanged() override;
-    virtual void NotifyPowerOff() override;
-    virtual void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
+    void NotifyIsimState(IN IMS_UINT32 nState) override;
+    void NotifyLocationInfo(IN IMS_UINT32 nState) override;
+    void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) override;
+    void NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn) override;
+    void NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState) override;
+    void NotifyPlmnChanged() override;
+    void NotifyPowerOff() override;
+    void NotifyPreciseCallState(IN IMS_SINT32 nState) override;
 
     // Native -> Java
-    virtual void NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+    void NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) override;
 
-    virtual void NotifyRegistering(IN AosNetworkType eNetworkType,
+    void NotifyRegistering(IN AosNetworkType eNetworkType,
             IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags) override;
 
-    virtual void NotifyDeregistered(IN AosReasonCode eReason) override;
-    virtual void NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
+    void NotifyDeregistered(IN AosReasonCode eReason) override;
+    void NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
             IN IMS_SINT32 nCauseCode) override;
-    virtual void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
-    virtual void NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
+    void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
+    void NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
 
-    virtual void NotifyAosIsimState(IN AosIsimState eState) override;
-    virtual void NotifyRegEventState(IN AosRegEvent eState) override;
-    virtual void RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
-    virtual void RequestWifiService(IN IMS_BOOL bIsOn) override;
+    void NotifyAosIsimState(IN AosIsimState eState) override;
+    void NotifyRegEventState(IN AosRegEvent eState) override;
+    void RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand) override;
+    void RequestWifiService(IN IMS_BOOL bIsOn) override;
 
-    virtual IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
-    virtual IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
-    virtual IMS_BOOL IsSupportCapabilitiesForNetwork(AosNetworkType eNetworkType,
+    IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
+    IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
+    IMS_BOOL IsSupportCapabilitiesForNetwork(AosNetworkType eNetworkType,
             AosCapability eCapability) override;
 
 private:
