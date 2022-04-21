@@ -83,9 +83,9 @@ PUBLIC
 AosHandle::AosHandle
     (
         IN IAosAppContext* piAppContext,
-        IN CONST AString& strAppId,
-        IN CONST AString& strServiceId,
-        IN CONST IMS_UINT32 nServiceType
+        IN const AString& strAppId,
+        IN const AString& strServiceId,
+        IN const IMS_UINT32 nServiceType
     )
     : m_piAppContext(piAppContext)
     , m_nSlotId(piAppContext->GetSlotId())
@@ -923,6 +923,17 @@ Remarks
 
 */
 PROTECTED
+IMS_UINT32 AosHandle::GetMobileNetworkType() const
+{
+    return m_piAppContext->GetNetTracker()->GetMobileNetworkType();
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
 IMS_UINT32 AosHandle::GetBlock(IN IMS_UINT32 nEvent)
 {
     switch (nEvent)
@@ -1114,8 +1125,8 @@ void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked
         m_objFeatureTagList.AddFeature(nFeature);
     }
 
-    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: Updated feature = [%d]",
-            m_objFeatureTagList.GetFeatures(), 0, 0);
+    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: [%s/%s] Updated feature = [%d]",
+            m_strAppId.GetStr(), m_strServiceId.GetStr() , m_objFeatureTagList.GetFeatures());
 
     UpdateFeatureTags();
 }
@@ -2001,6 +2012,30 @@ const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
 
         case HANDLE_MSG_APP_STATUS:
             return "HANDLE_MSG_APP_STATUS";
+
+        default:
+            return "__INVALID__";
+    }
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED GLOBAL
+const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nType)
+{
+    switch (nType)
+    {
+        case NW_REPORT_RADIO_WLAN:
+            return "WLAN";
+
+        case NW_REPORT_RADIO_LTE:
+            return "LTE";
+
+        case NW_REPORT_RADIO_NR:
+            return "NR";
 
         default:
             return "__INVALID__";

@@ -63,9 +63,9 @@ public:
     AosHandle
     (
         IN IAosAppContext* piAppContext,
-        IN CONST AString& strAppId,
-        IN CONST AString& strServiceId,
-        IN CONST IMS_UINT32 nServiceType
+        IN const AString& strAppId,
+        IN const AString& strServiceId,
+        IN const IMS_UINT32 nServiceType
     );
     virtual ~AosHandle();
 
@@ -175,6 +175,7 @@ protected:
     IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const;
     IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat);
     IMS_UINT32 GetNetworkType() const;
+    IMS_UINT32 GetMobileNetworkType() const;
 
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
     IMS_UINT32 GetAosReason(IN IMS_UINT32 nFeature);
@@ -227,6 +228,7 @@ protected:
 
     static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* MsgToString(IN IMS_UINT32 nMsg);
+    static const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nType);
     const IMS_CHAR* ServiceTypeToString();
 
     enum

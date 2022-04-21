@@ -45,9 +45,9 @@ PUBLIC
 AosHandleMtc::AosHandleMtc
     (
         IN IAosAppContext* piAppContext,
-        IN CONST AString& strAppId,
-        IN CONST AString& strServiceId,
-        IN CONST IMS_SINT32 nServiceType
+        IN const AString& strAppId,
+        IN const AString& strServiceId,
+        IN const IMS_SINT32 nServiceType
     )
     : AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
     , m_nVops(IMS_VOICE_OVER_PS_SUPPORTED)
@@ -104,15 +104,25 @@ void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 n
 
     if (nState == IAosCallTracker::STATE_IDLE)
     {
-        if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+        if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
         {
-            A_IMS_TRACE_D(ServiceTypeToString(),
-                    "CallTracker_StateChanged :: handle vops block , state (%d)",
-                    m_nHoldingVopsState, 0, 0);
+            if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
+            {
+                A_IMS_TRACE_D(ServiceTypeToString(),
+                        "CallTracker_StateChanged :: handle vops block , state (%d)",
+                        m_nHoldingVopsState, 0, 0);
 
-            ProcessBlock(BLOCK_VOPS, IMS_TRUE);
-            m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
+                ProcessBlock(BLOCK_VOPS, IMS_TRUE);
+                m_nHoldingVopsState = IMS_VOICE_OVER_PS_SUPPORTED;
+            }
         }
+    }
+
+    if (nState == IAosCallTracker::STATE_IDLE || nState == IAosCallTracker::STATE_OFFHOOK)
+    {
+        // VZW Req. - VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
+        UpdateFeatureTags();
+        ProcessFeatureTagChange();
     }
 }
 
@@ -131,7 +141,7 @@ void AosHandleMtc::NetTracker_StatusChanged()
 
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
-    IMS_UINT32 nCurrNetworkType = piNetTracker->GetNetworkType();
+    IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
     IMS_CHAR acLog[256+1] = {0, };
     IMS_Sprintf(acLog, 256,
@@ -255,29 +265,42 @@ void AosHandleMtc::UpdateFeatureTags()
 {
     AosHandle::UpdateFeatureTags();
 
-    // VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6258874
+    /* VZW Req. - VZ_REQ_IMS_22939, VZ_REQ_VOWIFI_6230394
+                  VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
+    */
     if (GET_N_CONFIG(m_nSlotId)->IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType())
     {
-        if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
+        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
         {
-            if (IsEpdgEnabled() && m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) &&
-                    GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            if (m_objBindedFeatureTagList.HasFeatureTag("+g.gsma.rcs.telephony", "\"cs\""))
             {
                 m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
             }
-
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
         }
         else
         {
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
-            m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
-
-            if (IsEpdgEnabled() && m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) &&
-                    GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+            if (m_objFeatureTagList.HasFeature(ImsAosFeature::MMTEL))
             {
-                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "cs");
+                m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "volte");
+            }
+            else
+            {
+                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "cs");
+                m_objFeatureTagList.RemoveFeatureTag("+g.gsma.rcs.telephony", "volte");
+
+                if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
+                {
+                    if (m_objFeatureTagList.HasFeature(ImsAosFeature::VIDEO) && IsEpdgEnabled() &&
+                            !IsSupportedNetworkTypeForCellular(GetMobileNetworkType()))
+                    {
+                        m_objFeatureTagList.AddFeatureTag("+g.gsma.rcs.telephony", "\"cs\"");
+                    }
+                }
             }
         }
     }
@@ -348,8 +371,7 @@ void AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
     {
         ResetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
 
-        IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-        IMS_UINT32 nCurrNetworkType = piNetTracker->GetNetworkType();
+        IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
         if (IsSupportedNetworkType(nCurrNetworkType))
         {
@@ -401,7 +423,7 @@ void AosHandleMtc::CheckSuspended()
         SetSuspendedReason(AoSReason::SUSPEND_NO_SERVICE);
     }
 
-    IMS_UINT32 nCurrNetworkType = piNetTracker->GetNetworkType();
+    IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
     if (!IsSupportedNetworkType(nCurrNetworkType))
     {
@@ -473,12 +495,12 @@ void AosHandleMtc::Init()
         {
             IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
         }
+    }
 
-        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
-        if (piCallTracker != IMS_NULL)
-        {
-            piCallTracker->SetListener(this);
-        }
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    if (piCallTracker != IMS_NULL)
+    {
+        piCallTracker->SetListener(this);
     }
 }
 
@@ -517,7 +539,10 @@ IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 
         if (GET_N_CONFIG(m_nSlotId)->IsVideoOverWifiSupportedWithoutVoice())
         {
-            bBlocked = bBlocked && AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY);
+            // VZW Reqs. - VZ_REQ_VOWIFI_6230394
+            bBlocked = bBlocked &&
+                    (AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY) ||
+                    IsSupportedNetworkTypeForCellular(GetMobileNetworkType()));
         }
 
         return bBlocked;
@@ -595,6 +620,7 @@ void AosHandleMtc::ProcessCapabilitiesChanged(
             {
                 ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
                         BLOCK_VOWIFI_CAPABILITY : BLOCK_VOLTE_CAPABILITY, IMS_TRUE);
+
                 ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
                         BLOCK_VIWIFI_CAPABILITY : BLOCK_VILTE_CAPABILITY, IMS_TRUE);
             }
@@ -606,14 +632,15 @@ void AosHandleMtc::ProcessCapabilitiesChanged(
         IMS_UINT32 nNewCapabilities = objNewCapabilities.GetValue(nNetworkType);
 
         A_IMS_TRACE_D(APPPROFILE, "ProcessCapabilitiesChanged :: \
-                nNetworkType[%d], nNewCapabilities[%d], nCurrentRat[%d]",
-                nNetworkType, nNewCapabilities, nCurrentRat);
+                nNetworkType[%d], nNewCapabilities[%d], nCurrentRat[%s]",
+                nNetworkType, nNewCapabilities, RadioTypeToString(nCurrentRat));
 
         if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
         {
             ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
                     BLOCK_VOWIFI_CAPABILITY : BLOCK_VOLTE_CAPABILITY,
                     !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
+
             ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
                     BLOCK_VIWIFI_CAPABILITY : BLOCK_VILTE_CAPABILITY,
                     !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
@@ -631,8 +658,7 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::ProcessNetworkChanged()
 {
-    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-    IMS_UINT32 nNewNetwork = piNetTracker->GetNetworkType();
+    IMS_UINT32 nNewNetwork = GetNetworkType();
     IMS_UINT32 nCapabilities = static_cast<IMS_UINT32>(AosCapability::NONE);
 
     switch (nNewNetwork)
