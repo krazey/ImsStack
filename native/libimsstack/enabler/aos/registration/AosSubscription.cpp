@@ -738,6 +738,8 @@ PROTECTED VIRTUAL
 IMS_SINT32 AosSubscription::GetNextThrottlingTime(IN const IMSVector<IMS_SINT32>& objInterval)
 {
     IMS_UINT32 nMaxCount = objInterval.GetSize();
+
+    m_nThrottlingCount++;
     if (nMaxCount == 0)
     {
         IMS_UINT32 nRetryBaseTime = GET_N_CONFIG(
@@ -750,8 +752,6 @@ IMS_SINT32 AosSubscription::GetNextThrottlingTime(IN const IMSVector<IMS_SINT32>
 
     IMS_SINT32 nThrotllingTime = 0;
     IMS_UINT32 nTimeIndex = 0;
-
-    m_nThrottlingCount++;
 
     if (m_nThrottlingCount > nMaxCount)
     {
@@ -1042,7 +1042,7 @@ void AosSubscription::RegSubscription_StartFailed(IN IMS_SINT32 nReason)
     {
         case IRegSubscription::REASON_STATUS_CODE:
             ProcessStartFailed_StatusCode(AosUtil::GetInstance()->GetResponseCode(
-                m_piRegSubscription->GetPreviousResponse()));
+                    m_piRegSubscription->GetPreviousResponse()));
             break;
 
         case IRegSubscription::REASON_TRANSACTION_TIMEOUT:
