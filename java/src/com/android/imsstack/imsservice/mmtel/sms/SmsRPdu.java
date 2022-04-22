@@ -19,6 +19,7 @@ package com.android.imsstack.imsservice.mmtel.sms;
 
 import android.telephony.PhoneNumberUtils;
 
+import com.android.internal.util.HexDump;
 import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
@@ -103,6 +104,9 @@ public final class SmsRPdu {
         return mRpUserData;
     }
 
+    public int getRPCause() {
+        return mRpCause & 0xff;
+    }
     public byte[] getRpduByteArray() {
         return mRpdu;
     }
@@ -134,15 +138,16 @@ public final class SmsRPdu {
      */
     private byte[] getRpDataPdu() {
         ByteArrayOutputStream bo = new ByteArrayOutputStream(MAX_RPDU_LENGTH);
+        byte[] destinationAddress = HexDump.hexStringToByteArray(mDestAddr);
+        if (destinationAddress == null || destinationAddress.length == 0) {
+            return null;
+        }
         bo.write(MO_RP_DATA_MTI);
         byte mr = (byte) mMessageRef;
         bo.write(mr);
         // Originator address length is 0 for MO RP-Data
         bo.write(0x00);
-        byte[] destinationAddress = PhoneNumberUtils.networkPortionToCalledPartyBCD(mDestAddr);
-        if (destinationAddress == null) return null;
-        // destination address length bytes including type of address
-        bo.write(destinationAddress.length & 0xff);
+
         // destination address
         bo.write(destinationAddress, 0, destinationAddress.length);
         // user data length
@@ -178,7 +183,7 @@ public final class SmsRPdu {
         // FIXME: Need to update Accurate Cause Values
         // RP-CAUSE Header as per 3GPP 24.011 section 8.2.5.4
         bo.write(RP_CAUSE_LENGTH_INDICATOR);
-        bo.write(RP_CAUSE_PROTOCOL_UNSPECIFIED);
+        bo.write((byte) mRpCause);
         if (mRpUserData != null) {
             // RP_UD IEI
             bo.write(RP_UD_IEI);

@@ -77,10 +77,12 @@ public class SmsTransferLayer {
         /**
          * notifies the receipt of report for SMS-SUBMIT sent
          * @param token provided in {@link #sendMoTPdu(int, int, String, byte[])}
+         * @param messageRef TPMR value of respective SMS_SUBMIT message
          * @param result result of sending the SMS.
          * @param reason reason in case status is failure.
+         * @param cause cause for the Failure
          */
-        void notifySmsResult(int token, int result, int reason);
+        void notifySmsResult(int token, int messageRef, int result, int reason, int cause);
 
         /**
          * notifies ImsSmsImpl about the Incoming SMS-DELIVER or SMS-STATUS-REPORT message
@@ -160,7 +162,7 @@ public class SmsTransferLayer {
                     mSendSmsQueue.add(token);
                     mTokenMessageMap.put(token, tpduParameters);
                     return mSmsRL.sendRPMessage(token, SmsUtils.RP_DATA,
-                            smsc, address, pdu);
+                            smsc, address, pdu, 0);
                 } else {
                     if (mTokenMessageMap.containsKey(token)) {
                         Rlog.e(TAG, "sendMoTpdu: duplicate token - discarding the request");
@@ -191,11 +193,10 @@ public class SmsTransferLayer {
         Rlog.d(TAG, "sendReportTPdu");
         try {
             int messageType = SmsUtils.RP_ERROR;
-            //int smsSubmitToken;
             if (result == ImsSmsImplBase.DELIVER_STATUS_OK) {
                 messageType = SmsUtils.RP_ACK;
             }
-            return mSmsRL.sendRPMessage(token, messageType, null, null, null);
+            return mSmsRL.sendRPMessage(token, messageType, null, null, null, result);
         } catch (RuntimeException e) {
             Rlog.e(TAG, "sendReportTPdu Failed: " + e.getMessage());
             return SmsUtils.SMSTL_RESULT_EXCEPTION;
@@ -222,7 +223,7 @@ public class SmsTransferLayer {
                     Rlog.i(TAG, "sending token " + tpduParameters.mToken);
                     mSmsRL.sendRPMessage(tpduParameters.mToken, SmsUtils.RP_DATA,
                                          tpduParameters.mSmsc, tpduParameters.mDestinationAddress,
-                                         tpduParameters.mTpdu);
+                                         tpduParameters.mTpdu, 0);
                     break;
 
                 default :
@@ -331,7 +332,8 @@ public class SmsTransferLayer {
             }
         }
 
-        public void notifyRLReportIndication(int token, int result, int reason) {
+        public void notifyRLReportIndication(int token, int messageRef, int result,
+                                             int reason, int causeCode) {
             try {
                 Rlog.d(TAG, "notifyRLReportIndication");
                 TpduParam tpduParameters;
@@ -342,7 +344,7 @@ public class SmsTransferLayer {
                     return;
                 }
                 synchronized (mLock) {
-                    listener.notifySmsResult(token, result, reason);
+                    listener.notifySmsResult(token, messageRef, result, reason, causeCode);
                     if (mTokenMessageMap.containsKey(token)) {
                         mSendSmsQueue.remove(token);
                         mTokenMessageMap.remove(token);

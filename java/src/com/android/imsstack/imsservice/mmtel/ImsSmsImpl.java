@@ -193,17 +193,13 @@ public final class ImsSmsImpl extends ImsSmsImplBase {
     private class SmsTLListenerProxy implements SmsTransferLayer.Listener {
 
         @Override
-        public void notifySmsResult(int token, int result, int reason) {
+        public void notifySmsResult(int token, int messageRef, int result, int reason, int cause) {
             Rlog.d(TAG, "notifySmsResult");
             try {
-                int messageRef = 0;
-                // FIXME: extract and save messageref in SUBMIT message
                 if (result == SEND_STATUS_OK) {
                     onSendSmsResultSuccess(token, messageRef);
                 } else {
-                    // FIXME:extract the failure code and map to SmsManager.Result
-                    onSendSmsResultError(token, messageRef, result, reason,
-                                         RESULT_NO_NETWORK_ERROR);
+                    onSendSmsResultError(token, messageRef, result, reason, cause);
                 }
             } catch (RuntimeException e) {
                 Rlog.e(TAG, "notifySmsResult Failed: " + e.getMessage());

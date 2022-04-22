@@ -39,20 +39,24 @@ public class SmsRLStateMachine {
     private Handler mHandler = null;
     public int mToken;
     public int mMessageType;
+    public int mRetryCount = 0;
     public SmsRPdu mRPduData;
-    public String mDestinationAddress;
     private Runnable mTR1TimerHandler = null;
     private Runnable mTR2TimerHandler = null;
+    public String mPSISmsc;
+    public String mDestinationAddress;
+    public int mTpMr;
 
     public SmsRLStateMachine(int token, int messageType, MtsController mtsController,
                                     ImsCallContext context, SmsRelayLayer.Listener listener,
-                                                        String destinationAddress) {
+                                    String psiSmsc, String destinationAddress) {
         mCurrentState = SmsRLState.IDLE;
         mMtsController  = mtsController;
-        mMessageType = messageType;
         mContext = context;
         mHandler = mContext.getCallHandler();
+        mMessageType = messageType;
         mListener = listener;
+        mPSISmsc = psiSmsc;
         mDestinationAddress = destinationAddress;
         mToken = token;
     }
@@ -170,11 +174,11 @@ public class SmsRLStateMachine {
          * @param smsRLStateMachine the state machine object which holds details of
          * this Sms session
          * @param isSuccess the boolean value based on SIP Error response
-         * @param retryAfter the retryAfter value in SIP Response
+         * @param status the retryAfter value in SIP Response
          * @return the result of handling Sip response for RP Message
          */
         default int onSipResponseForRPMessage(SmsRLStateMachine smsRLStateMachine,
-                                              boolean isSuccess, int retryAfter) {
+                                              boolean isSuccess, int status) {
             Rlog.e(TAG, "Invalid Event");
             return SmsUtils.SMSRL_RESULT_INVALID_STATE;
         }
@@ -208,6 +212,8 @@ public class SmsRLStateMachine {
                 bo.write(rpdu, SmsUtils.RPDU_ORIGIN_ADDR_VALUE_INDEX, originAddressLength);
                 bo.write(tpdu, 0, tpdu.length);
                 byte[] frameworkPdu = bo.toByteArray();
+                smsRLStateMachine.mTpMr = tpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
+                smsRLStateMachine.mDestinationAddress = mtRPData.getOrigAddr();
                 int result = smsRLStateMachine.mListener
                                      .notifyRLDataIndication(smsRLStateMachine.mToken,
                                      SmsUtils.FORMAT_INT_3GPP, SmsUtils.RP_DATA,
@@ -232,7 +238,9 @@ public class SmsRLStateMachine {
             public int onRPDataFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu moRPData) {
                 Rlog.i(TAG, "IDLE State: onRPDataFromTL");
                 byte[] encodedPdu = null;
+                byte[] tpdu = moRPData.getUserData();
                 encodedPdu = moRPData.getRpduByteArray();
+                smsRLStateMachine.mTpMr = tpdu[SmsUtils.TPDU_MR_INDEX] & 0xff;
                 if (encodedPdu == null) {
                     Rlog.i(TAG, "Encoding Failed");
                     return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;
@@ -244,9 +252,9 @@ public class SmsRLStateMachine {
                 String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
                 Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
                 boolean result = smsRLStateMachine.mMtsController.sendMessage(
-                                                    SmsUtils.FORMAT_INT_3GPP,
-                                                    pdu64,
-                                                    smsRLStateMachine.mDestinationAddress,
+                                                SmsUtils.FORMAT_INT_3GPP, pdu64,
+                                                smsRLStateMachine.mPSISmsc,
+                                                smsRLStateMachine.mDestinationAddress,
                                                     moRPData.getMessageRef());
 
                 if (!result) {
@@ -291,12 +299,29 @@ public class SmsRLStateMachine {
                     smsRLStateMachine.mTR1TimerHandler = null;
                 }
 
-                smsRLStateMachine.mListener.notifyRLReportIndication(token,
-                                            ImsSmsImplBase.SEND_STATUS_OK,
-                                            SmsManager.RESULT_ERROR_NONE);
+                int tpMR = smsRLStateMachine.mTpMr;
+                smsRLStateMachine.mListener.notifyRLReportIndication(token, tpMR,
+                                        SmsRPErrorCause.getSendSmsStatusByRPCauseCode(0),
+                                        SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(0),
+                                                                 0);
                 smsRLStateMachine.setState(IDLE);
-
             }
+            @Override
+            public void onRPErrorFromNetwork(SmsRLStateMachine smsRLStateMachine,
+                                                                SmsRPdu moRPError) {
+                int causeCode = moRPError.getRPCause();
+                int token = smsRLStateMachine.mToken;
+                int tpMR = smsRLStateMachine.mTpMr;
+                //synchronized (mLock) {
+                smsRLStateMachine.mHandler.removeCallbacks(smsRLStateMachine.mTR1TimerHandler);
+                smsRLStateMachine.mListener.notifyRLReportIndication(token, tpMR,
+                                SmsRPErrorCause.getSendSmsStatusByRPCauseCode(causeCode),
+                                SmsRPErrorCause.getSendSmsStatusReasonByRPCauseCode(causeCode),
+                                causeCode);
+                //}
+                smsRLStateMachine.setState(IDLE);
+            }
+
             @Override
             public void onTR1TimerExpired(SmsRLStateMachine smsRLStateMachine) {
                 if (smsRLStateMachine.mListener == null) {
@@ -305,16 +330,29 @@ public class SmsRLStateMachine {
                 }
                 Rlog.i(TAG, "WAIT_FOR_RPACK_FROM_NW State: onTR1TimerExpired");
                 Rlog.i(TAG, "handleMessage: token = " + smsRLStateMachine.mToken);
+                //synchronized (mLock) {
                 smsRLStateMachine.mListener.notifyRLReportIndication(smsRLStateMachine.mToken,
-                                            ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
-                                            SmsManager.RESULT_ERROR_GENERIC_FAILURE);
+                                                smsRLStateMachine.mTpMr,
+                                                ImsSmsImplBase.SEND_STATUS_ERROR_RETRY,
+                                                SmsManager.RESULT_ERROR_GENERIC_FAILURE, 0);
+                //}
                 smsRLStateMachine.setState(IDLE);
             }
             @Override
             public int onSipResponseForRPMessage(SmsRLStateMachine smsRLStateMachine,
-                                                  boolean isSuccess, int retryAfter) {
-                //TODO: on Sip error response, need to stop timer and set to IDLE State
-                return SmsUtils.SMSRL_RESULT_INVALID_STATE;
+                                                  boolean isSuccess, int status) {
+                if (isSuccess) {
+                    Rlog.i(TAG, "2xx received: nothing to do");
+                    return SmsUtils.RESULT_SUCCESS;
+                }
+                smsRLStateMachine.mHandler.removeCallbacksAndMessages(smsRLStateMachine
+                                                                        .mTR1TimerHandler);
+                smsRLStateMachine.mListener.notifyRLReportIndication(smsRLStateMachine.mToken,
+                                                    smsRLStateMachine.mTpMr,
+                                                    status,
+                                                    SmsManager.RESULT_NETWORK_ERROR, 0);
+                smsRLStateMachine.setState(IDLE);
+                return SmsUtils.RESULT_SUCCESS;
             }
         },
 
@@ -335,9 +373,13 @@ public class SmsRLStateMachine {
 
                 String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
                 Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                Rlog.i(TAG, "dialled number: " + smsRLStateMachine.mDestinationAddress);
+                Rlog.i(TAG, "PSI/SMSC: " + smsRLStateMachine.mPSISmsc);
                 boolean result = smsRLStateMachine.mMtsController
                                             .sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
-                                            mtRPAck.getDestAddr(), mtRPAck.getMessageRef());
+                                            smsRLStateMachine.mPSISmsc,
+                                            smsRLStateMachine.mDestinationAddress,
+                                                         mtRPAck.getMessageRef());
                 if (!result) {
                     Rlog.i(TAG, "failed to send RpAck");
                     return SmsUtils.SMSRL_RESULT_INVALID_STATE;
@@ -353,15 +395,41 @@ public class SmsRLStateMachine {
                 return SmsUtils.RESULT_SUCCESS;
             }
             @Override
+            public int onRPErrorFromTL(SmsRLStateMachine smsRLStateMachine, SmsRPdu mtRPError) {
+                //TODO: to be handled in upcoming CL
+                byte[] encodedPdu = null;
+                Rlog.i(TAG, "onRPErrorFromTL: WAIT_TO_SEND_RPACK: ");
+                encodedPdu = mtRPError.getRpduByteArray();
+                if (encodedPdu == null) {
+                    Rlog.i(TAG, "Encoding Failed");
+                    return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;
+                }
+                String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
+                Rlog.i(TAG, "base 64 Encoded RPDU: " + pdu64);
+                Rlog.i(TAG, "dialled number: " + smsRLStateMachine.mDestinationAddress);
+                Rlog.i(TAG, "PSI/SMSC: " + smsRLStateMachine.mPSISmsc);
+                boolean result = smsRLStateMachine.mMtsController
+                                                  .sendMessage(SmsUtils.FORMAT_INT_3GPP, pdu64,
+                                                             smsRLStateMachine.mPSISmsc,
+                                                             smsRLStateMachine.mDestinationAddress,
+                                                             mtRPError.getMessageRef());
+                if (!result) {
+                    Rlog.i(TAG, "failed to send RpError");
+                    return SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED;
+                }
+                smsRLStateMachine.mHandler.removeCallbacksAndMessages(smsRLStateMachine
+                                                                       .mTR2TimerHandler);
+                smsRLStateMachine.setState(IDLE);
+                return SmsUtils.RESULT_SUCCESS;
+            }
+            @Override
             public void onTR2TimerExpired(SmsRLStateMachine smsRLStateMachine) {
                 smsRLStateMachine.setState(IDLE);
                 Rlog.i(TAG, "WAIT_TO_SEND_RPACK_TO_NW: onTR2TimerExpired");
                 //TODO: Send an RP-Error back to network
             }
-
         }
     }
-
     /**
      * Sets the state  of  state machine
      * @param state the state to be set as current state of state machine
@@ -449,10 +517,11 @@ public class SmsRLStateMachine {
      * Handles the state machine if there is any SIP-Error Response
      * for the RPDU sent
      * @param isSuccess indicates whether sip response is 2xx or not
-     * @param retryAfter the value of retryAfter header if any in response
+     * @param status the value of retryAfter header if any in response
      * @return the result of processing the SIP response
      */
-    public int onSipResponseForRPMessage(boolean isSuccess, int retryAfter) {
-        return mCurrentState.onSipResponseForRPMessage(this, isSuccess, retryAfter);
+    public int onSipResponseForRPMessage(boolean isSuccess, int status) {
+        return mCurrentState.onSipResponseForRPMessage(this, isSuccess, status);
     }
 }
+
