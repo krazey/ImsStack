@@ -5,11 +5,13 @@
 #include "ICoreService.h"
 #include "ICoreServiceListener.h"
 #include "interface/aos/IImsAosListener.h"
+#include "interface/aos/IImsAosMonitor.h"
 #include "IMSService.h"
 #include "IMSTypeDef.h"
 #include "IMtcContext.h"
 #include "IMtcService.h"
 #include "helper/SrvccEventHandler.h"
+#include "helper/MtcAosEventHandler.h"
 
 class JniMtcService;
 class JniMtcServiceThread;
@@ -18,8 +20,8 @@ class MtcService :
         public IMSService,
         public IMtcService,
         public ICoreServiceListener,
-        public IImsAosListener
-        //public IImsAosMonitor,
+        public IImsAosListener,
+        public IImsAosMonitor
         //public ISIPRoutingRejectListener
 {
 public:
@@ -68,10 +70,8 @@ public:
     void ImsAos_Resumed() override;
 
     // IIMSAoSAppMonitor implementation
-    /*
     void ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan) override;
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
-    */
 
     // ISIPRoutingRejectListener
     /*
@@ -95,6 +95,7 @@ private:
     ServiceStatus m_eStatus;
     ICoreService* m_piCoreService;
     MtcAosConnector* m_pAosConnector;
+    MtcAosEventHandler m_objAosEventHandler;
     SrvccEventHandler m_objSrvccEventHandler;
     JniMtcService* m_pJniService;
     IMS_BOOL m_bTerminalBasedCallWaitingEnabled;

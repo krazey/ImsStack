@@ -32,6 +32,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         m_eStatus(ServiceStatus::SERVICE_IDLE),
         m_piCoreService(IMS_NULL),
         m_pAosConnector(IMS_NULL),
+        m_objAosEventHandler(MtcAosEventHandler(*this, objContext.GetConfigurationProxy())),
         m_objSrvccEventHandler(SrvccEventHandler(objContext)),
         m_pJniService(IMS_NULL),
         m_bTerminalBasedCallWaitingEnabled(IMS_TRUE/*m_objContext.GetConfigurationProxy().Is(
@@ -155,17 +156,11 @@ void MtcService::CoreService_CapabilityQueryReceived(IN ICoreService* piService,
 }
 
 PUBLIC VIRTUAL
-void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nIpcan*/)
+void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan)
 {
-    IMS_TRACE_I("ImsAos_Connected emergency[%s]",
-            _TRACE_B_(m_eType == ServiceType::EMERGENCY), 0, 0);
-
-    // TODO: this must be called when registration is refreshed?
-    m_objContext.GetConfigurationProxy().OnRegistrationRefreshed();
-
-    IMS_UINT32 nMmtelConnected = nFeatures & ImsAosFeature::MMTEL ? ImsAosFeature::MMTEL : 0;
-    IMS_UINT32 nVideoConnected = nFeatures & ImsAosFeature::VIDEO ? ImsAosFeature::VIDEO : 0;
-    m_pJniService->GetThread()->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+    m_eStatus = ServiceStatus::SERVICE_ACTIVE;
+    m_objAosEventHandler.OnConnected(nFeatures, nIpcan,
+            m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
 }
 
 PUBLIC VIRTUAL
@@ -176,24 +171,40 @@ void MtcService::ImsAos_Connecting()
 PUBLIC VIRTUAL
 void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 {
-    Key nKey;
-    nKey.eServiceType = m_eType;
-    m_objContext.GetCallController().TerminateCalls(KeyType::SERVICE_TYPE, nKey, nReason);
+    m_objAosEventHandler.OnDisconnecting(nReason, m_objContext.GetCallController());
 }
 
 PUBLIC VIRTUAL
-void MtcService::ImsAos_Disconnected(IN IMS_UINT32 /*nReason*/)
+void MtcService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
 {
+    m_eStatus = ServiceStatus::SERVICE_IDLE;
+    m_objAosEventHandler.OnDisconnected(nReason, m_objContext.GetCallController(),
+            m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
 }
 
 PUBLIC VIRTUAL
-void MtcService::ImsAos_Suspended(IN IMS_UINT32 /*nReason*/)
+void MtcService::ImsAos_Suspended(IN IMS_UINT32 nReason)
 {
+    m_eStatus = ServiceStatus::SERVICE_SUSPENDED;
+    m_objAosEventHandler.OnSuspended(nReason, m_objContext.GetCallController());
 }
 
 PUBLIC VIRTUAL
 void MtcService::ImsAos_Resumed()
 {
+    m_objAosEventHandler.OnResumed();
+}
+
+PUBLIC VIRTUAL
+void MtcService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan)
+{
+    m_objAosEventHandler.OnServiceConnected(nServices, nIpcan);
+}
+
+PUBLIC VIRTUAL
+void MtcService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+{
+    m_objAosEventHandler.OnEventNotify(nType, nState);
 }
 
 PRIVATE
