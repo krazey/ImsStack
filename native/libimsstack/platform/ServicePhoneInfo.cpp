@@ -32,7 +32,6 @@ public:
     INetWatcherInfo* GetNetWatcherInfo(IN IMS_SINT32 nSlotId);
     ISRVCC* GetSrvcc(IN IMS_SINT32 nSlotId);
 
-    ICSCallInfo* GetCsCallInfo(IN IMS_SINT32 nSlotId);
     IPhoneInfoCall* GetPhoneInfoCall(IN IMS_SINT32 nSlotId);
 
     IISIM* GetIsim(IN IMS_SINT32 nSlotId);
@@ -45,7 +44,6 @@ private:
     INetWatcherInfo *piNetWatcherInfo;
     ISRVCC *piSrvcc;
 
-    ICSCallInfo *piCsCallInfo;
     IPhoneInfoCall *piPhoneInfoCall;
 
     IISIM *piIsim;
@@ -59,7 +57,6 @@ PhoneInfoHolder::PhoneInfoHolder()
     : piSubscriberInfo(IMS_NULL)
     , piNetWatcherInfo(IMS_NULL)
     , piSrvcc(IMS_NULL)
-    , piCsCallInfo(IMS_NULL)
     , piPhoneInfoCall(IMS_NULL)
     , piIsim(IMS_NULL)
     , piUsim(IMS_NULL)
@@ -73,7 +70,6 @@ PhoneInfoHolder::~PhoneInfoHolder()
     PlatformFactory::DestroySubscriberInfo(piSubscriberInfo);
     PlatformFactory::DestroyNetworkWatcher(piNetWatcherInfo);
     PlatformFactory::DestroySrvcc(piSrvcc);
-    PlatformFactory::DestroyCsCallInfo(piCsCallInfo);
     PlatformFactory::DestroyPhoneInfoCall(piPhoneInfoCall);
     PlatformFactory::DestroyIsim(piIsim);
     PlatformFactory::DestroyUsim(piUsim);
@@ -111,17 +107,6 @@ ISRVCC* PhoneInfoHolder::GetSrvcc(IN IMS_SINT32 nSlotId)
     }
 
     return piSrvcc;
-}
-
-PUBLIC
-ICSCallInfo* PhoneInfoHolder::GetCsCallInfo(IN IMS_SINT32 nSlotId)
-{
-    if (piCsCallInfo == IMS_NULL)
-    {
-        piCsCallInfo = PlatformFactory::CreateCsCallInfo(nSlotId);
-    }
-
-    return piCsCallInfo;
 }
 
 PUBLIC
@@ -324,16 +309,7 @@ void PhoneInfoService::DispatchServiceMessage(IN IMSMSG &objMSG)
 
     IMS_SINT32 nSlotId = LONG_TO_INT(objMSG.nWparam);
 
-    if (nMessage == IMS_MSG_CS_CALL_STATUS)
-    {
-        ICSCallInfo *piCCI = GetCSCallInfo(nSlotId);
-
-        if (piCCI != IMS_NULL)
-        {
-            piCCI->ProcessNotify(objMSG);
-        }
-    }
-    else if (nMessage == IMS_MSG_NETWORK_STATUS)
+    if (nMessage == IMS_MSG_NETWORK_STATUS)
     {
         INetWatcherInfo *piNWI = GetNetWatcherInfo(nSlotId);
 
@@ -382,13 +358,6 @@ ISubscriberInfo* PhoneInfoService::GetSubscriberInfo(IN IMS_SINT32 nSlotId /*= I
 {
     PhoneInfoHolder *pHolder = pPrivate->GetHolder(nSlotId);
     return pHolder->GetSubscriberInfo(nSlotId);
-}
-
-PUBLIC
-ICSCallInfo* PhoneInfoService::GetCSCallInfo(IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/)
-{
-    PhoneInfoHolder *pHolder = pPrivate->GetHolder(nSlotId);
-    return pHolder->GetCsCallInfo(nSlotId);
 }
 
 PUBLIC

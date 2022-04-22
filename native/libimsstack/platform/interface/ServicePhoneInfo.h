@@ -13,7 +13,6 @@
 #ifndef _SERVICE_IMS_PHONE_INFO_H_
 #define _SERVICE_IMS_PHONE_INFO_H_
 
-#include "IPhoneInfoCSCall.h"
 #include "IPhoneInfoCall.h"
 #include "IPhoneInfoDevice.h"
 #include "IPhoneInfoPower.h"
@@ -42,7 +41,6 @@ public:
 
     IDeviceInfo* GetDeviceInfo();
     ISubscriberInfo* GetSubscriberInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    ICSCallInfo* GetCSCallInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IPhoneInfoCall* GetPhoneInfoCall(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IISIM* GetISIM(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IPowerInfo* GetPowerInfo();

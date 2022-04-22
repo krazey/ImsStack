@@ -534,7 +534,6 @@ void OsThread::OnSystemMessage(IN IMSMSG& objMsg)
             NetworkService::GetNetworkService()->DispatchServiceMessage(objMsg);
             break;
 
-        case IMS_MSG_CS_CALL_STATUS:
         case IMS_MSG_NETWORK_STATUS:
         case IMS_MSG_BATTERY:
         case IMS_MSG_WIFI_STATUS:
@@ -585,7 +584,6 @@ IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
 {
     return ((nMsg == IMS_MSG_NETWORK)
             || (nMsg == IMS_MSG_SOCKET)
-            || (nMsg == IMS_MSG_CS_CALL_STATUS)
             || (nMsg == IMS_MSG_BATTERY)
             || (nMsg == IMS_MSG_NETWORK_STATUS)
             || (nMsg == IMS_MSG_TIMER)
