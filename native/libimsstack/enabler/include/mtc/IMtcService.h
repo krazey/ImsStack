@@ -33,13 +33,6 @@ public:
     virtual IMS_BOOL IsTerminalBasedCallWaitingEnabled() const = 0;
 };
 
-enum class IpCanType
-{
-    IPCAN_MOBILE = 0,
-    IPCAN_WLAN,
-    IPCAN_ANY
-};
-
 enum class ServiceStatus
 {
     SERVICE_IDLE,
