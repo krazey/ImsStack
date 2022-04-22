@@ -899,9 +899,12 @@ AString AosRegistration::FeatureToString()
 PROTECTED
 AosNetworkType AosRegistration::GetNetworkTypeForImsRegState()
 {
-    IMS_UINT32 nRat = m_piContext->GetNetTracker()->GetNetworkType();
+    if (m_pUtil->IsWifiTest())
+    {
+        return AosNetworkType::LTE;
+    }
 
-    switch (nRat)
+    switch (m_piContext->GetNetTracker()->GetNetworkType())
     {
         case NW_REPORT_RADIO_WLAN:
             return AosNetworkType::IWLAN;
@@ -2241,7 +2244,7 @@ void AosRegistration::SetTcpCriterionLength()
                 nSipThresholdSize;
     }
 
-    A_IMS_TRACE_I(REGID, "SetTcpCriterionLength :: TCP length (%d), MTC (%d), Threshold (%d)",
+    A_IMS_TRACE_I(REGID, "SetTcpCriterionLength :: TCP length (%d), MTU (%d), Threshold (%d)",
             nLength, nMtu, nSipThresholdSize);
 
     if (m_pSipProfile.IsNull())

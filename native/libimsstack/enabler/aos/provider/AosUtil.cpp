@@ -24,11 +24,16 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosUtil::AosUtil()
     : m_bIsMtkChipset(IMS_FALSE)
+    , m_bIsWifiTest(IMS_FALSE)
 {
-    IMS_TRACE_D("AosUtil()", 0, 0, 0);
-
     m_bIsMtkChipset = UtilService::GetUtilService()->GetSystemProperty(
             )->GetChipsetVendor().EqualsIgnoreCase("MediaTek");
+
+
+    m_bIsWifiTest = (UtilService::GetUtilService()->GetPrivateProperty()->GetPersistentInt(
+        ImsPrivateProperties::Persistent::KEY_WIFI_TEST, 0) == 1);
+
+    IMS_TRACE_D("AosUtil :: wifi(%d)", m_bIsWifiTest, 0, 0);
 }
 
 PUBLIC VIRTUAL
@@ -917,4 +922,10 @@ PUBLIC
 IMS_BOOL AosUtil::IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
 {
     return (nType == NW_REPORT_RADIO_LTE || nType == NW_REPORT_RADIO_NR);
+}
+
+PUBLIC
+IMS_BOOL AosUtil::IsWifiTest() const
+{
+    return m_bIsWifiTest;
 }

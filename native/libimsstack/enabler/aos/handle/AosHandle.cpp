@@ -1859,6 +1859,11 @@ PUBLIC VIRTUAL
 void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
+    if (AosUtil::GetInstance()->IsWifiTest())
+    {
+        return;
+    }
+
     ProcessCapabilitiesChanged(objCapabilities);
 }
 

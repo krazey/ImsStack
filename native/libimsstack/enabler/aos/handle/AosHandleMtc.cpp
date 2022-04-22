@@ -8,12 +8,12 @@
 #include "IImsAosListener.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosCallTracker.h"
-#include "interface/IAosConnection.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
 #include "interface/IAosService.h"
 
 #include "provider/AosProvider.h"
+#include "provider/AosUtil.h"
 #include "handle/AosHandleMtc.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
@@ -108,12 +108,8 @@ Remarks
 PUBLIC VIRTUAL
 void AosHandleMtc::NetTracker_StatusChanged()
 {
-    IMS_SINT32 nCnxType = m_piAppContext->GetConnection()->GetConnectionType();
-
-    if (nCnxType == NetworkPolicy::APN_WIFI)
+    if (AosUtil::GetInstance()->IsWifiTest())
     {
-        A_IMS_TRACE_D(APPPROFILE,
-                "NetTracker_StatusChanged :: nCnxType is WiFi, RAT change is ignored", 0, 0, 0);
         return;
     }
 
@@ -161,6 +157,11 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::InitializeServiceBlock()
 {
+    if (AosUtil::GetInstance()->IsWifiTest())
+    {
+        return;
+    }
+
     // VOPS
     if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
     {
@@ -367,12 +368,8 @@ Remarks
 PROTECTED VIRTUAL
 void AosHandleMtc::CheckSuspended()
 {
-    IMS_SINT32 nCnxType = m_piAppContext->GetConnection()->GetConnectionType();
-
-    if (nCnxType == NetworkPolicy::APN_WIFI)
+    if (AosUtil::GetInstance()->IsWifiTest())
     {
-        A_IMS_TRACE_D(APPPROFILE, "CheckSuspended :: nCnxType is WiFi, RAT check is skipped",
-                0, 0, 0);
         return;
     }
 
@@ -452,7 +449,14 @@ void AosHandleMtc::Init()
 
     if (!piConfig->IsVopsIgnoredForVolteEnabled())
     {
-        IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+        if (AosUtil::GetInstance()->IsWifiTest())
+        {
+            m_nVops = IMS_VOICE_OVER_PS_SUPPORTED;
+        }
+        else
+        {
+            IMS_EVENT_AddListenerForSlotId(IMS_EVENT_IMS_VOICE_OVER_PS_STATE, this, m_nSlotId);
+        }
 
         IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
         if (piCallTracker != IMS_NULL)
