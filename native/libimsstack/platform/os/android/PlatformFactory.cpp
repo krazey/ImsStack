@@ -32,7 +32,6 @@
 #include "PlatformFactory.h"
 #include "ServiceMemory.h"
 #include "ServiceNetworkPolicy.h"
-#include "device/OsCallInfo.h"
 #include "device/OsCarrierConfig.h"
 #include "device/OsDeviceInfo.h"
 #include "device/OsIsim.h"
@@ -408,25 +407,6 @@ void PlatformFactory::DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher)
     }
 
     piWifiWatcher = IMS_NULL;
-}
-
-PUBLIC GLOBAL
-ICSCallInfo* PlatformFactory::CreateCsCallInfo(IN IMS_SINT32 nSlotId)
-{
-    return new OsCallInfo(nSlotId);
-}
-
-PUBLIC GLOBAL
-void PlatformFactory::DestroyCsCallInfo(IN ICSCallInfo*& piCsCallInfo)
-{
-    OsCallInfo* pCallInfo = DYNAMIC_CAST(OsCallInfo*, piCsCallInfo);
-
-    if (pCallInfo != IMS_NULL)
-    {
-        delete pCallInfo;
-    }
-
-    piCsCallInfo = IMS_NULL;
 }
 
 PUBLIC GLOBAL

@@ -19,7 +19,6 @@
 #include "ImsFdSet.h"
 #include "ImsSocket.h"
 
-class ICSCallInfo;
 class IDeviceInfo;
 class IEventReceiver;
 class IEventSender;
@@ -122,9 +121,6 @@ public:
 
     static IWifiWatcher* CreateWifiWatcher();
     static void DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher);
-
-    static ICSCallInfo* CreateCsCallInfo(IN IMS_SINT32 nSlotId);
-    static void DestroyCsCallInfo(IN ICSCallInfo*& piCsCallInfo);
 
     static IPhoneInfoCall* CreatePhoneInfoCall(IN IMS_SINT32 nSlotId);
     static void DestroyPhoneInfoCall(IN IPhoneInfoCall*& piPhoneInfoCall);

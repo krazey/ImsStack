@@ -44,20 +44,18 @@
 #define IMS_MSG_BATTERY                     (IMS_MSG_SYSTEM_BASE + 4)
 // Event for mobile network status
 #define IMS_MSG_NETWORK_STATUS              (IMS_MSG_SYSTEM_BASE + 5)
-// Event for CS voice call status
-#define IMS_MSG_CS_CALL_STATUS              (IMS_MSG_SYSTEM_BASE + 6)
 // Event for Wi-Fi network status
-#define IMS_MSG_WIFI_STATUS                 (IMS_MSG_SYSTEM_BASE + 7)
+#define IMS_MSG_WIFI_STATUS                 (IMS_MSG_SYSTEM_BASE + 6)
 // Event for ISIM
-#define IMS_MSG_ISIM                        (IMS_MSG_SYSTEM_BASE + 8)
+#define IMS_MSG_ISIM                        (IMS_MSG_SYSTEM_BASE + 7)
 // Event for USIM
-#define IMS_MSG_USIM                        (IMS_MSG_SYSTEM_BASE + 9)
+#define IMS_MSG_USIM                        (IMS_MSG_SYSTEM_BASE + 8)
 // Event for Configuration
-#define IMS_MSG_CONFIGURATION               (IMS_MSG_SYSTEM_BASE + 10)
+#define IMS_MSG_CONFIGURATION               (IMS_MSG_SYSTEM_BASE + 9)
 // Event for TRM service priority status
-#define IMS_MSG_TRM_PRIORITY_STATUS         (IMS_MSG_SYSTEM_BASE + 11)
+#define IMS_MSG_TRM_PRIORITY_STATUS         (IMS_MSG_SYSTEM_BASE + 10)
 // Event for VoNR
-#define IMS_MSG_VONR                        (IMS_MSG_SYSTEM_BASE + 12)
+#define IMS_MSG_VONR                        (IMS_MSG_SYSTEM_BASE + 11)
 
 #define IMS_MSG_SYSTEM_MAX                  (IMS_MSG_SYSTEM_BASE + 100)
 
