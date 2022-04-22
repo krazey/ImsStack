@@ -43,7 +43,7 @@ public:
     }
 
 protected:
-    inline static void InvokeMessageCallback(IN IMSMSG& objMsg)
+    inline static void InvokeMessageCallback(IN ImsMessage& objMsg)
     { objMsg.InvokeCallback(); }
 
 private:

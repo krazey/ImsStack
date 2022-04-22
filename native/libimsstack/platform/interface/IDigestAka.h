@@ -16,9 +16,9 @@
 
 #include "ByteArray.h"
 
-class IDigestAKAListener;
+class IDigestAkaListener;
 
-class IDigestAKA
+class IDigestAka
 {
 public:
     /*
@@ -90,7 +90,7 @@ public:
     </table>
 
     */
-    virtual void SetListener(IN IDigestAKAListener *piListener) = 0;
+    virtual void SetListener(IN IDigestAkaListener* piListener) = 0;
 };
 
 #endif // _INTERFACE_IMS_DIGEST_AKA_H_

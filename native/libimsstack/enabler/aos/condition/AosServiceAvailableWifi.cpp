@@ -84,7 +84,7 @@ void AosServiceAvailableWifi::StartToCheckNetworkConnection()
     {
         A_IMS_TRACE_D(AOSTAG, "There is ongoing WiFi call. Checking ePDG connection", 0, 0, 0);
 
-        if (RequestNetPing() == INetPing::PING_STATUS_NOK)
+        if (RequestNetPing() == INetworkPing::PING_STATUS_NOK)
         {
             ProcessBadConnectionReported();
         }
@@ -138,7 +138,7 @@ void AosServiceAvailableWifi::DeregisterListener()
 }
 
 PRIVATE VIRTUAL
-void AosServiceAvailableWifi::NotifyStateChanged(IN class IWifiWatcher* pIWifiWatcher)
+void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher)
 {
     if (pIWifiWatcher == IMS_NULL)
     {
@@ -170,7 +170,8 @@ void AosServiceAvailableWifi::NotifyStateChanged(IN class IWifiWatcher* pIWifiWa
 }
 
 PRIVATE VIRTUAL
-void AosServiceAvailableWifi::NetPing_NotifyResult(IN INetPing* piPing, IN IMS_SINT32 nResult)
+void AosServiceAvailableWifi::NetworkPing_NotifyResult(
+            IN INetworkPing* piPing, IN IMS_SINT32 nResult)
 {
     A_IMS_TRACE_D(AOSTAG, "NetPing_NotifyResult :: result=%s", PingResultToString(nResult), 0, 0);
 
@@ -185,8 +186,8 @@ void AosServiceAvailableWifi::NetPing_NotifyResult(IN INetPing* piPing, IN IMS_S
 
     ClearBadNetworkState();
 
-    if (nResult == INetPing::PING_STATUS_DEAD_PEER ||
-            nResult == INetPing::PING_STATUS_TIMEDOUT)
+    if (nResult == INetworkPing::PING_STATUS_DEAD_PEER ||
+            nResult == INetworkPing::PING_STATUS_TIMEDOUT)
     {
         ProcessBadConnectionReported();
     }
@@ -348,7 +349,7 @@ void AosServiceAvailableWifi::ClearBadNetworkState()
 PRIVATE
 IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
 {
-    IMS_SINT32 nResult = INetPing::PING_STATUS_OK;
+    IMS_SINT32 nResult = INetworkPing::PING_STATUS_OK;
 
     IMS_UINT32 nNA;
     AString strIPA;
@@ -356,7 +357,7 @@ IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
             IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNA, strIPA);
 
     IPAddress objSrcIP(strIPA);
-    INetConnection* piNetCon = NetworkService::GetNetworkService()->FindConnection(objSrcIP);
+    INetworkConnection* piNetCon = NetworkService::GetNetworkService()->FindConnection(objSrcIP);
 
     if (piNetCon != IMS_NULL)
     {
@@ -367,13 +368,13 @@ IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
         IPAddress objDstIP(strPCSCF);
         IMS_SINT32 nPCSCFPort = 5060;
 
-        INetPing* piPing = piNetCon->CreateNetPing();
+        INetworkPing* piPing = piNetCon->CreatePing();
         piPing->SetListener(this);
         nResult = piPing->Ping(objSrcIP, objDstIP, nPCSCFPort, TIME_BAD_NETWORK_CHECK);
 
         A_IMS_TRACE_D(AOSTAG, "RequestNetPing :: Result=%s", PingResultToString(nResult), 0, 0);
 
-        if (nResult == INetPing::PING_STATUS_PENDING)
+        if (nResult == INetworkPing::PING_STATUS_PENDING)
         {
             m_nBadNetworkState = STATE_BAD_NETWORK_CHECKING;
             m_piNetPing = piPing;
@@ -392,19 +393,19 @@ const IMS_CHAR* AosServiceAvailableWifi::PingResultToString(IN IMS_SINT32 nResul
 {
     switch (nResult)
     {
-        case INetPing::PING_STATUS_OK:
+        case INetworkPing::PING_STATUS_OK:
             return "PING_STATUS_OK";
 
-        case INetPing::PING_STATUS_PENDING:
+        case INetworkPing::PING_STATUS_PENDING:
             return "PING_STATUS_PENDING";
 
-        case INetPing::PING_STATUS_NOK:
+        case INetworkPing::PING_STATUS_NOK:
             return "PING_STATUS_NOK";
 
-        case INetPing::PING_STATUS_DEAD_PEER:
+        case INetworkPing::PING_STATUS_DEAD_PEER:
             return "PING_STATUS_DEAD_PEER";
 
-        case INetPing::PING_STATUS_TIMEDOUT:
+        case INetworkPing::PING_STATUS_TIMEDOUT:
             return "PING_STATUS_TIMEDOUT";
 
         default:

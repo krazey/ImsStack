@@ -127,7 +127,7 @@ LocationProperties::~LocationProperties()
 
 PUBLIC
 OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , m_bIsStarted(IMS_FALSE)
     , m_strLastKnownCountry(COUNTRY_ISO_UNKNOWN)
     , m_pLocationProperties(IMS_NULL)

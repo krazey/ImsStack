@@ -18,7 +18,7 @@
 
 #include "ImsTypeDef.h"
 
-class IVoNRUACListener
+class IVoNrUacListener
 {
 public:
     /*
@@ -29,7 +29,7 @@ public:
         nSysMode : SYS_MODE_XXX (SYS_MODE_LTE, ...)
         nBarringTime : N/A
     */
-    virtual void VoNRUAC_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
+    virtual void VoNrUac_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
         IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime) = 0;
 
     enum
@@ -48,17 +48,17 @@ public:
     };
 };
 
-class IVoNRCallPreferenceListener
+class IVoNrCallPreferenceListener
 {
 public:
     /*
         This indication is sent when the UE has found service to redial the voice call/video call
         nSysMode : SYS_MODE_LTE, SYS_MODE_NR5G (Two types are only valid)
     */
-    virtual void VoNRCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode) = 0;
+    virtual void VoNrCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode) = 0;
 };
 
-class IVoNRHandoffListener
+class IVoNrHandoffListener
 {
 public:
     /*
@@ -67,7 +67,7 @@ public:
         nSourceRAT, nTargetRAT : RAT_LTE, RAT_NR5G (Two types are only valid)
         nReason : if need, parameters will be defined
     */
-    virtual void VoNRHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
+    virtual void VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
         IN IMS_UINT32 nSourceRAT, IN IMS_UINT32 nTargetRAT, IN IMS_SINT32 nReason) = 0;
 
     enum
@@ -79,13 +79,13 @@ public:
 };
 
 
-class IVoNR
+class IVoNr
 {
 public:
     /*
         Determine if VoNR is supported
     */
-    virtual IMS_BOOL IsVoNRSupported() const = 0;
+    virtual IMS_BOOL IsVoNrSupported() const = 0;
 
     /*
         Determine if UAC check is required
@@ -156,34 +156,34 @@ public:
     /*
         Adds the listener for UAC
     */
-    virtual void AddListenerForUAC(IN IVoNRUACListener* piListener) = 0;
+    virtual void AddListenerForUac(IN IVoNrUacListener* piListener) = 0;
 
     /*
         Removes the listener for UAC
     */
-    virtual void RemoveListenerForUAC(IN IVoNRUACListener* piListener) = 0;
+    virtual void RemoveListenerForUac(IN IVoNrUacListener* piListener) = 0;
 
     /*
         Adds the listener for call preference
     */
     virtual void AddListenerForCallPreference(
-        IN IVoNRCallPreferenceListener* piListener) = 0;
+            IN IVoNrCallPreferenceListener* piListener) = 0;
 
     /*
         Removes the listener for call preference
     */
     virtual void RemoveListenerForCallPreference(
-        IN IVoNRCallPreferenceListener* piListener) = 0;
+            IN IVoNrCallPreferenceListener* piListener) = 0;
 
     /*
         Adds the listener for handoff
     */
-    virtual void AddListenerForHandoff(IN IVoNRHandoffListener* piListener) = 0;
+    virtual void AddListenerForHandoff(IN IVoNrHandoffListener* piListener) = 0;
 
     /*
         Removes the listener for handoff
     */
-    virtual void RemoveListenerForHandoff(IN IVoNRHandoffListener* piListener) = 0;
+    virtual void RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener) = 0;
 
     enum
     {

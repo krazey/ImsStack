@@ -72,12 +72,12 @@ private:
 
 //LGU+ Knight
 #define IMS_SYS_GetTimeStringEx() \
-            SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeStringEx()
+        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeStringEx()
 
 #define IMS_SYS_Sleep(MS) \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->Sleep(MS)
 
 #define IMS_SYS_GetDiffGMTime(BEGIN,END) \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDiffGMTime(BEGIN,END);
+        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDiffGmTime(BEGIN,END);
 
 #endif // _SERVICE_IMS_SYSTEM_H_

@@ -29,7 +29,7 @@
 #include "RegContact.h"
 #include "RegStateTracker.h"
 
-class IDigestAKA;
+class IDigestAka;
 class ISIPGenericChallenge; // IMS_AUTH_NONCE_REUSE
 class SubscriberConfig;
 class IRegistrationListener;
@@ -49,7 +49,7 @@ class Registration
     , public IRefreshable
     , public IRegCapabilityChangeListener
     , public IRegInfoListener
-    , public IDigestAKAListener
+    , public IDigestAkaListener
 {
 public:
     Registration();
@@ -172,12 +172,12 @@ private:
     virtual void RegInfo_Updated(IN IMS_BOOL bStale = IMS_FALSE);
     virtual void RegInfo_UpdateFailed();
 
-    // IDigestAKAListener interface
-    virtual void AKA_OnResponse(IN const ByteArray &objRES,
+    // IDigestAkaListener interface
+    virtual void DigestAka_OnResponse(IN const ByteArray &objRES,
             IN const ByteArray &objIK = ByteArray::ConstNull(),
             IN const ByteArray &objCK = ByteArray::ConstNull());
-    virtual void AKA_OnAUTSFailed(IN const ByteArray &objAUTS);
-    virtual void AKA_OnMACFailed();
+    virtual void DigestAka_OnAutsFailed(IN const ByteArray &objAUTS);
+    virtual void DigestAka_OnMacFailed();
 
     // SIP_MESSAGE_MEDIATOR
     IMS_RESULT AdjustMessage(IN_OUT ISIPMessage *piSIPMsg,
@@ -187,7 +187,7 @@ private:
     void CheckUALocation(IN ISIPMessage *piSIPMsg);
     void ChoosePreferredContact();
     void ClearNextRequest();
-    IDigestAKA* CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig);
+    IDigestAka* CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig);
     IMS_BOOL CreateSA(IN CONST Credential &objCredential, IN CONST IMS_SA_KEY &objSAKey);
     IMS_SINT32 GetPortUC() const;
     IMS_SINT32 GetPortUS() const;
@@ -308,7 +308,7 @@ private:
     RegRefreshHelper *pRefreshHelper;
 
     // Digest AKA interface
-    IDigestAKA *piDigestAKA;
+    IDigestAka *piDigestAKA;
     IMS_SA_KEY objActiveSAKey;
     Credential objActiveCredential;
     // IMS_AUTH_NONCE_REUSE {

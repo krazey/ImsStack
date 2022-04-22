@@ -34,7 +34,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL Runnable_Run(IN IMSMSG &objMSG) = 0;
+    virtual IMS_BOOL Runnable_Run(IN ImsMessage &objMSG) = 0;
 };
 
 #endif // _INTERFACE_IMS_RUNNABLE_H_

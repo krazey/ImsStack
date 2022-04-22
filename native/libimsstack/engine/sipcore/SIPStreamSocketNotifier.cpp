@@ -53,7 +53,7 @@ SIPSocket* SIPStreamSocketNotifier::Accept()
         return IMS_NULL;
     }
 
-    INetSocket *piNewSocket = piSocket->Accept();
+    ISocket *piNewSocket = piSocket->Accept();
 
     if (piNewSocket != IMS_NULL)
     {
@@ -101,12 +101,12 @@ IMS_BOOL SIPStreamSocketNotifier::Create(IN CONST IPAddress &objIPA, IN IMS_UINT
         return IMS_FALSE;
     }
 
-    if (piSocket->Bind(objIPA, nPort) == INetSocket::RESULT_ERROR)
+    if (piSocket->Bind(objIPA, nPort) == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
 
-    if (piSocket->Listen() == INetSocket::RESULT_ERROR)
+    if (piSocket->Listen() == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
@@ -144,11 +144,11 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocketNotifier::Socket_ConnectionReceived(IN INetSocket *piSocket)
+void SIPStreamSocketNotifier::Socket_OnConnectionReceived(IN ISocket *piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
-    SIPSocket::Socket_ConnectionReceived(piSocket);
+    SIPSocket::Socket_OnConnectionReceived(piSocket);
 
     if (piListener != IMS_NULL)
     {
@@ -164,10 +164,10 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocketNotifier::Socket_Closed(IN INetSocket *piSocket,
-        IN IMS_SINT32 nReason /* = INetSocket::CLOSE_REASON_UNKNOWN */)
+void SIPStreamSocketNotifier::Socket_OnClosed(IN ISocket *piSocket,
+        IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------
 
-    SIPSocket::Socket_Closed(piSocket, nReason);
+    SIPSocket::Socket_OnClosed(piSocket, nReason);
 }

@@ -11,8 +11,8 @@
 class IMtcVonrListener;
 
 class MtcVonr :
-        public IVoNRUACListener, public IVoNRCallPreferenceListener, public IVoNRHandoffListener,
-        public INetWatcherListener, public ITimerListener
+        public IVoNrUacListener, public IVoNrCallPreferenceListener, public IVoNrHandoffListener,
+        public INetworkWatcherListener, public ITimerListener
 {
 public:
     explicit MtcVonr(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener);
@@ -21,19 +21,19 @@ public:
     enum class VonrInitType { NONE, LTE, NR, WIFI, EMERGENCY/* differently defined?*/ };
 
 public:
-    // IVoNRUACListener interface implementation
-    virtual void VoNRUAC_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
+    // IVoNrUacListener interface implementation
+    virtual void VoNrUac_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
             IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime);
 
-    // IVoNRCallPreferenceListener interface implementation
-    virtual void VoNRCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode);
+    // IVoNrCallPreferenceListener interface implementation
+    virtual void VoNrCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode);
 
-    // IVoNRHandoffListener interface implementation
-    virtual void VoNRHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
+    // IVoNrHandoffListener interface implementation
+    virtual void VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
             IN IMS_UINT32 nSourceRAT, IN IMS_UINT32 nTargetRAT, IN IMS_SINT32 nReason);
 
-    // INetWatcherListener interface implementation
-    virtual void NotifyNetWatcherStatus(IN class INetWatcherInfo* piNetWatcherInfo);
+    // INetworkWatcherListener interface implementation
+    virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
 
     // ITimerListener interface implementation.
     virtual void Timer_TimerExpired(IN ITimer *piTimer);
@@ -75,12 +75,12 @@ protected:
     IMS_UINT32          m_nSlotId;
     IMtcVonrListener*   m_piListener;
 
-    IVoNR*              m_piVonr;
+    IVoNr*              m_piVonr;
     IMS_SINTP           m_nCallKey;
     //IMtcCallManager*    m_piCallManager;
     IMS_UINT32          m_nDirection;
     IMS_UINT32          m_nUacType;
-    INetWatcherInfo*    m_piNetWatcherInfo;
+    INetworkWatcher*    m_piNetWatcherInfo;
     UacStatus           m_eUacStatus;
     IMS_SINT32          m_nCurrentNetwork;
     ITimer*             m_piTimer;

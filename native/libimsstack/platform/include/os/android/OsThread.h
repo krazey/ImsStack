@@ -37,7 +37,7 @@ public:
     IMS_BOOL Equals(IN const IThread* piThread) const override;
     const AString& GetName() const override;
     IMS_BOOL IsRunning() const override;
-    IMS_BOOL PostMessageI(IN IMSMSG& objMsg) override;
+    IMS_BOOL PostMessageI(IN ImsMessage& objMsg) override;
     IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg,
             IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
     void SetRunnable(IN IRunnable* piListener) override;
@@ -51,10 +51,10 @@ public:
     virtual void PostMessage(IN IMS_UINT32 nMessage);
 
 protected:
-    virtual void OnStart(IN IMSMSG& objMsg);
-    virtual void OnTerminate(IN IMSMSG& objMsg);
-    virtual void OnSystemMessage(IN IMSMSG& objMsg);
-    virtual void OnThreadMessage(IN IMSMSG& objMsg);
+    virtual void OnStart(IN ImsMessage& objMsg);
+    virtual void OnTerminate(IN ImsMessage& objMsg);
+    virtual void OnSystemMessage(IN ImsMessage& objMsg);
+    virtual void OnThreadMessage(IN ImsMessage& objMsg);
 
     void CleanUp();
     static IMS_BOOL IsSystemMessage(IN IMS_SINT32 nMessage);

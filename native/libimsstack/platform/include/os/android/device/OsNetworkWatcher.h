@@ -21,8 +21,8 @@
 #include "system-intf/ISystemListener.h"
 
 class OsNetworkWatcher
-    : public IMSSlot
-    , public INetWatcherInfo
+    : public ImsSlot
+    , public INetworkWatcher
     , public ISystemListener
 {
 public:
@@ -33,7 +33,7 @@ public:
     OsNetworkWatcher& operator=(IN const OsNetworkWatcher&) = delete;
 
 public:
-    // INetWatcherInfo
+    // INetworkWatcher
     IMS_UINT32 GetNetworkStatus(IN const AString& strProfile) override;
     NETRADIO_ENTYPE GetNetRadioTechType(IN const AString& strProfile,
             IN IMS_SINT32 nApnType = NetworkPolicy::APN_NONE) override;
@@ -57,7 +57,7 @@ public:
     IMS_SINT32 GetDataRoamingType() override;
     IMS_BOOL IsImsEmergencyCallSupported() override;
     IMS_BOOL IsImsVoiceCallSupported() override;
-    IMS_SINT32 GetLTERsrpStrength() override;
+    IMS_SINT32 GetLteRsrpStrength() override;
     IMS_BOOL IsLteEmergencyOnly() override;
     IMS_BOOL IsEmergencyAttachSupported() override;
     // 2nd PLMN info for MOCN

@@ -40,7 +40,7 @@ UceApp::UceApp(IN CONST IMS_SINT32 nSlotId, IN CONST AString &strAppName)
     IMS_TRACE_I("UceApp - strName (%s)", strAppName.GetStr(), 0, 0);
     m_strAppID = ImsServiceConfig::GetAppName(ImsAppId::UCE);
     m_strServiceID = ImsServiceConfig::GetServiceName(ImsServiceId::UCE);
-    m_piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_nSlotId);
+    m_piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotId);
     if (m_piNetWatcherInfo != IMS_NULL) {
         m_piNetWatcherInfo->RegisterObserver(this);
     } else {
@@ -136,7 +136,7 @@ IMS_BOOL UceApp::Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_
     return IMS_FALSE;
 }
 
-void UceApp::NotifyNetWatcherStatus(IN class INetWatcherInfo* piNetWatcherInfo)
+void UceApp::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
 {
     IMS_TRACE_I("NotifyNetWatcherStatus", 0, 0, 0);
 
@@ -235,7 +235,7 @@ void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason)
     }
     m_eAoSStatus = AOS_DISCONNECTED;
     IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_DISCONNECTED_IND, 0, 0);
-    MSGService::PostMessage( AString("JNIUCEServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIUCEServiceThread"), objUIMsg);
 
     if (m_pUceService != IMS_NULL) {
         m_pUceService->AoSDisconnected();
@@ -342,11 +342,11 @@ void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpc
 
     if (m_eAoSStatus == AOS_CONNECTED) {
         IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_REFRESHED_IND, m_RegisteredNetwork, 0);
-        MSGService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
     } else {
         IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_CONNECTED_IND, m_RegisteredServiceForJAVA,
                 m_RegisteredNetwork);
-        MSGService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
     }
 
     m_eAoSStatus = AOS_CONNECTED;
@@ -389,7 +389,7 @@ IMS_SINT32 UceApp::GetServiceNetworkType(IN IMS_UINT32 nIpcan)
         return nNetType;
     }
 
-    if (nIpcan == IIPCAN::CATEGORY_MOBILE) {
+    if (nIpcan == IIpcan::CATEGORY_MOBILE) {
         nNetType = ConvertNetworkType(m_piNetWatcherInfo->GetNetworkType());
     } else {
         nNetType = eUCE_RAT_WIFI;
@@ -400,30 +400,30 @@ IMS_SINT32 UceApp::GetServiceNetworkType(IN IMS_UINT32 nIpcan)
 IMS_SINT32 UceApp::ConvertNetworkType(IN IMS_SINT32 nRAT)
 {
     switch (nRAT) {
-        case INetWatcherInfo::RADIOTECH_TYPE_INVALID: // FALL-THROUGH
-        case INetWatcherInfo::RADIOTECH_TYPE_UNKNOWN:
+        case INetworkWatcher::RADIOTECH_TYPE_INVALID: // FALL-THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_UNKNOWN:
             return eUCE_RAT_INVALID;
 
-        case INetWatcherInfo::RADIOTECH_TYPE_GPRS: // FALL-THROUGH
-        case INetWatcherInfo::RADIOTECH_TYPE_EDGE:
+        case INetworkWatcher::RADIOTECH_TYPE_GPRS: // FALL-THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_EDGE:
             return eUCE_RAT_GERAN;
 
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPA: // FALL-THROUGH
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPAP: // FALL-THROUGH
-        case INetWatcherInfo::RADIOTECH_TYPE_UMTS: // FALL-THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA: // FALL-THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP: // FALL-THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS: // FALL-THROUGH
             return eUCE_RAT_UTRAN;
 
-        case INetWatcherInfo::RADIOTECH_TYPE_EHRPD:
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
             return eUCE_RAT_EHRPD;
 
-        case INetWatcherInfo::RADIOTECH_TYPE_LTE: {
+        case INetworkWatcher::RADIOTECH_TYPE_LTE: {
             if (m_piNetWatcherInfo->IsImsVoiceCallSupported()) {
                 return eUCE_RAT_LTE;
             }
             return eUCE_RAT_LTE_NO_VOPS;
         }
 
-        case INetWatcherInfo::RADIOTECH_TYPE_NR: {
+        case INetworkWatcher::RADIOTECH_TYPE_NR: {
             if (m_piNetWatcherInfo->IsImsVoiceCallSupported()) {
                 return eUCE_RAT_NR;
             }
@@ -449,7 +449,7 @@ void UceApp::NotifyRATChanged()
     }
 
     IMSMSG objUIMsg(IUUceService::UCE_NETWORK_CHANGED, 0, nNetworkType);
-    MSGService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
 }
 
 

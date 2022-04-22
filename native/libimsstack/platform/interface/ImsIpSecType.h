@@ -19,7 +19,7 @@
 #include "ImsTypeDef.h"
 
 // IP Security Type class
-class IPSecType
+class IpSecType
 {
 public:
     // Upper Layer Protocol

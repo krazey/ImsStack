@@ -76,8 +76,8 @@ public:
 
 public:
     IMS_UINT32 GetQueueSize();
-    IMS_BOOL Enqueue(IN const IMSMSG& objMsg);
-    IMSMSG Dequeue();
+    IMS_BOOL Enqueue(IN const ImsMessage& objMsg);
+    ImsMessage Dequeue();
     void CleanUp();
 
     // Internal signal flag to avoid timing issue
@@ -100,7 +100,7 @@ public:
 
     // Name of this thread
     AString m_strName;
-    IMSQueue<IMSMSG> m_objMsgQ;
+    IMSQueue<ImsMessage> m_objMsgQ;
 };
 
 
@@ -140,7 +140,7 @@ IMS_UINT32 OsThreadPrivate::GetQueueSize()
 }
 
 PUBLIC
-IMS_BOOL OsThreadPrivate::Enqueue(IN const IMSMSG& objMsg)
+IMS_BOOL OsThreadPrivate::Enqueue(IN const ImsMessage& objMsg)
 {
     IMS_UINT32 nOldSize = 0;
     IMS_UINT32 nNewSize = 0;
@@ -155,9 +155,9 @@ IMS_BOOL OsThreadPrivate::Enqueue(IN const IMSMSG& objMsg)
 }
 
 PUBLIC
-IMSMSG OsThreadPrivate::Dequeue()
+ImsMessage OsThreadPrivate::Dequeue()
 {
-    IMSMSG objMsg;
+    ImsMessage objMsg;
 
     m_objMsgQMutex.Lock();
     objMsg = m_objMsgQ.GetFront();
@@ -266,7 +266,7 @@ void OsThread::Deactivate()
     }
 
     // Terminate the thread
-    IMSMSG objMsg(IMS_MSG_TERMINATE, 0, 0);
+    ImsMessage objMsg(IMS_MSG_TERMINATE, 0, 0);
     PostMessageI(objMsg);
 
     IMS_PVOID pvReturnValue;
@@ -331,13 +331,13 @@ PUBLIC VIRTUAL
 IMS_BOOL OsThread::PostMessageI(IN IMS_UINT32 nMsg,
         IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
-    IMSMSG objMsg(nMsg, nWparam, nLparam);
+    ImsMessage objMsg(nMsg, nWparam, nLparam);
 
     return PostMessageI(objMsg);
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsThread::PostMessageI(IN IMSMSG& objMsg)
+IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
 {
     if (!m_pThreadP->m_bIsRunning)
     {
@@ -372,7 +372,7 @@ IMS_BOOL OsThread::PostMessageI(IN IMSMSG& objMsg)
 PUBLIC VIRTUAL
 void OsThread::PostMessage(IN IMS_UINT32 nMessage)
 {
-    IMSMSG objMsg(nMessage, 0, 0);
+    ImsMessage objMsg(nMessage, 0, 0);
 
     PostMessageI(objMsg);
 }
@@ -400,7 +400,7 @@ IMS_ULONG OsThread::GetCurrentThreadId()
 PROTECTED VIRTUAL
 IMS_ULONG OsThread::Run()
 {
-    IMSMSG objMsg;
+    ImsMessage objMsg;
     IMS_BOOL bLoop = IMS_TRUE;
     IMS_UINT32 nMsgCount = 0;
     IMS_SINT32 nWaitResult = 0;
@@ -501,7 +501,7 @@ IMS_ULONG OsThread::Run()
 }
 
 PROTECTED VIRTUAL
-void OsThread::OnStart(IN IMSMSG &objMsg)
+void OsThread::OnStart(IN ImsMessage &objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
@@ -513,7 +513,7 @@ void OsThread::OnStart(IN IMSMSG &objMsg)
 }
 
 PROTECTED VIRTUAL
-void OsThread::OnTerminate(IN IMSMSG& objMsg)
+void OsThread::OnTerminate(IN ImsMessage& objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
@@ -525,7 +525,7 @@ void OsThread::OnTerminate(IN IMSMSG& objMsg)
 }
 
 PROTECTED VIRTUAL
-void OsThread::OnSystemMessage(IN IMSMSG& objMsg)
+void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
@@ -550,13 +550,13 @@ void OsThread::OnSystemMessage(IN IMSMSG& objMsg)
             ConfigService::GetConfigService()->DispatchServiceMessage(objMsg);
             break;
         case IMS_MSG_VONR:
-            VoNRService::GetVoNRService()->DispatchServiceMessage(objMsg);
+            VoNrService::GetVoNrService()->DispatchServiceMessage(objMsg);
             break;
     }
 }
 
 PROTECTED VIRTUAL
-void OsThread::OnThreadMessage(IN IMSMSG& objMsg)
+void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
 {
     if (objMsg.HasCallback())
     {

@@ -1066,7 +1066,7 @@ AString System::GetIfaceName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 PUBLIC
 IMS_SINT32 System::GetIpcanCategory(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
-    // 0 - IIPCAN::CATEGORY_MOBILE
+    // 0 - IIpcan::CATEGORY_MOBILE
     return GetInt2(SystemConstants::GET_IPCAN_CATEGORY, nApnType, 0, nSlotId);
 }
 

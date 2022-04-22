@@ -37,7 +37,7 @@ public:
      *
      * @param nTargetNetwork is the technology that has failed to be changed to.
      * @param nCauseCode is the handover failure cause
-     * @see {@link IIPCAN#CATEGORY_MOBILE} and {@link IIPCAN#CATEGORY_WLAN}
+     * @see {@link IIpcan#CATEGORY_MOBILE} and {@link IIpcan#CATEGORY_WLAN}
      * @see class {@link android.telephony.DataFailCause}
      */
     virtual void ServicePhone_notifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,

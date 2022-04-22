@@ -138,13 +138,13 @@ OsUtil* OsUtil::GetInstance()
 }
 
 PRIVATE VIRTUAL
-void OsUtil::DigestSHA1(IN const AString& strIn, OUT AString &strOut)
+void OsUtil::DigestSha1(IN const AString& strIn, OUT AString &strOut)
 {
     System::GetInstance()->GetDigestSha1(strIn, strOut);
 }
 
 PRIVATE VIRTUAL
-AString OsUtil::GetUUID(IN IMS_SINT32 /*nOption = 0*/)
+AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
 {
     // This function will be re-written or reviewed whether it's really needed or not.
     /*

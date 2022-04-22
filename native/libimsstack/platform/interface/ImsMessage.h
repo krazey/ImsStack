@@ -16,7 +16,9 @@
 #include "IMSStrLib.h"
 #include "AString.h"
 
-class IMSMSG
+#define IMSMSG ImsMessage
+
+class ImsMessage
 {
 public:
     // This interface will be used in the system(platform) layer
@@ -25,11 +27,11 @@ public:
     class IMessageCallback
     {
     public:
-        virtual void MessageCallback_OnMessage(IN IMSMSG& objMsg) = 0;
+        virtual void MessageCallback_OnMessage(IN ImsMessage& objMsg) = 0;
     };
 
 public:
-    inline IMSMSG()
+    inline ImsMessage()
         : nMSG(0)
         , nWparam(0)
         , nLparam(0)
@@ -38,7 +40,7 @@ public:
         acActivityName[0] = '\0';
     }
 
-    inline IMSMSG(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
+    inline ImsMessage(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
             IN const AString &strTarget = AString::ConstEmpty())
         : nMSG(nMSG_)
         , nWparam(nWparam_)
@@ -55,7 +57,7 @@ public:
         }
     }
 
-    inline IMSMSG(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
+    inline ImsMessage(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
             IN IMessageCallback* piCallback_)
         : nMSG(nMSG_)
         , nWparam(nWparam_)
@@ -65,7 +67,7 @@ public:
         acActivityName[0] = '\0';
     }
 
-    inline ~IMSMSG()
+    inline ~ImsMessage()
     {}
 
     inline const IMS_CHAR* GetTargetName() const

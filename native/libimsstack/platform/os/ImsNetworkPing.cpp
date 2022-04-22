@@ -65,12 +65,12 @@ IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
 
     IMS_SINT32 nResult = m_piSocket->Connect(objDstIp, nDstPort);
 
-    if (nResult == INetSocket::RESULT_SUCCESS)
+    if (nResult == ISocket::RESULT_SUCCESS)
     {
         ClearResources();
         return PING_STATUS_OK;
     }
-    else if (nResult == INetSocket::RESULT_WOULDBLOCK)
+    else if (nResult == ISocket::RESULT_WOULDBLOCK)
     {
         if (m_piTimer != IMS_NULL)
         {
@@ -90,7 +90,7 @@ IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
 }
 
 PUBLIC VIRTUAL
-void ImsNetworkPing::SetListener(IN INetPingListener* piListener)
+void ImsNetworkPing::SetListener(IN INetworkPingListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -121,13 +121,13 @@ void ImsNetworkPing::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_DataReceived(IN INetSocket* /*piSocket*/)
+void ImsNetworkPing::Socket_OnDataReceived(IN ISocket* /*piSocket*/)
 {
     // no-op
 }
 
 PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_SendEnabled(IN INetSocket* piSocket)
+void ImsNetworkPing::Socket_OnSendEnabled(IN ISocket* piSocket)
 {
     if (m_piSocket != piSocket)
     {
@@ -143,13 +143,13 @@ void ImsNetworkPing::Socket_SendEnabled(IN INetSocket* piSocket)
 }
 
 PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_ConnectionReceived(IN INetSocket* /*piSocket*/)
+void ImsNetworkPing::Socket_OnConnectionReceived(IN ISocket* /*piSocket*/)
 {
     // no-op
 }
 
 PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_Connected(IN INetSocket* piSocket)
+void ImsNetworkPing::Socket_OnConnected(IN ISocket* piSocket)
 {
     if (m_piSocket != piSocket)
     {
@@ -165,8 +165,8 @@ void ImsNetworkPing::Socket_Connected(IN INetSocket* piSocket)
 }
 
 PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_Closed(IN INetSocket* piSocket,
-        IN IMS_SINT32 /*nReason = INetSocket::CLOSE_REASON_UNKNOWN*/)
+void ImsNetworkPing::Socket_OnClosed(IN ISocket* piSocket,
+        IN IMS_SINT32 /*nReason = ISocket::CLOSE_REASON_UNKNOWN*/)
 {
     if (m_piSocket != piSocket)
     {
@@ -218,9 +218,9 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp,
     }
 
     // Prepare socket
-    INetConnection* piNetConn = NetworkService::GetNetworkService()->FindConnection(objIp);
+    INetworkConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(objIp);
 
-    m_piSocket = NetworkService::GetNetworkService()->CreateSocket(piNetConn);
+    m_piSocket = NetworkService::GetNetworkService()->CreateSocket(piConnection);
 
     if (m_piSocket == IMS_NULL)
     {
@@ -231,17 +231,17 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp,
 
     m_piSocket->SetListener(this);
 
-    INetSocket::ADDRESS_FAMILY_ENTYPE enAddressFamily = INetSocket::ADDRESS_FAMILY_INET;
+    ISocket::ADDRESS_FAMILY_ENTYPE enAddressFamily = ISocket::ADDRESS_FAMILY_INET;
 
     if (!objIp.IsIPv4Address())
     {
-        enAddressFamily = INetSocket::ADDRESS_FAMILY_INET6;
+        enAddressFamily = ISocket::ADDRESS_FAMILY_INET6;
     }
 
-    INetSocket::SOCKET_RESULT enResult = m_piSocket->Open(
-            INetSocket::TYPE_STREAM, enAddressFamily);
+    ISocket::SOCKET_RESULT enResult = m_piSocket->Open(
+            ISocket::TYPE_STREAM, enAddressFamily);
 
-    if (enResult != INetSocket::RESULT_SUCCESS)
+    if (enResult != ISocket::RESULT_SUCCESS)
     {
         ClearResources();
         return IMS_FALSE;
@@ -249,11 +249,11 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp,
 
     IMS_SINT32 nOptVal = 1;
 
-    m_piSocket->SetOption(INetSocket::OPT_REUSEADDR, nOptVal);
-    m_piSocket->SetOption(INetSocket::OPT_LINGER, nOptVal);
+    m_piSocket->SetOption(ISocket::OPT_REUSEADDR, nOptVal);
+    m_piSocket->SetOption(ISocket::OPT_LINGER, nOptVal);
     // TOS : required ?
 
-    if (m_piSocket->Bind(objIp, GetRandomPort(objIp)) == INetSocket::RESULT_ERROR)
+    if (m_piSocket->Bind(objIp, GetRandomPort(objIp)) == ISocket::RESULT_ERROR)
     {
         ClearResources();
         return IMS_FALSE;
@@ -277,7 +277,7 @@ void ImsNetworkPing::NotifyResult(IN IMS_SINT32 nResult)
 
     if (m_piListener != IMS_NULL)
     {
-        m_piListener->NetPing_NotifyResult(this, nResult);
+        m_piListener->NetworkPing_NotifyResult(this, nResult);
     }
 }
 
@@ -308,7 +308,7 @@ IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IPAddress& objIp)
         // Generate random port number with values between 49152 and 65535
         IMS_SINT32 nPort = (IMS_SYS_GetRandom0() % (65535 - 49152 + 1)) + 49152;
 
-        if (pNetworkService->CheckIPAndPortAvailability(objIp, nPort, INetSocket::TYPE_STREAM))
+        if (pNetworkService->CheckIpAndPortAvailability(objIp, nPort, ISocket::TYPE_STREAM))
         {
             IMS_TRACE_D("NetPing :: random-port=%d(%d)", nPort, i, 0);
             return nPort;

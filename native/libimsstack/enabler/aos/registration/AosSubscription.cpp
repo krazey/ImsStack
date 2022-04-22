@@ -99,15 +99,15 @@ void AosSubscription::Initialize()
     SetRefreshPolicy();
     m_piRegSubscription->SetListener(this);
 
-    ITRM* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTRM();
-    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTRMSupported())
+    ITrm* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTrmSupported())
     {
         m_bIsTrmSupported = IMS_TRUE;
         m_piTrm = AosProvider::GetInstance()->GetTrm(m_piContext->GetSlotId());
     }
 
-    IVoNR* piServiceVonr = VoNRService::GetVoNRService()->GetVoNR(m_piContext->GetSlotId());
-    if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNRSupported())
+    IVoNr* piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_piContext->GetSlotId());
+    if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported())
     {
         m_piVonr = AosProvider::GetInstance()->GetVonr(m_piContext->GetSlotId());
         if (IsVonrSupported())

@@ -4,7 +4,6 @@
 #include "IPAddress.h"
 #include "IConnection.h"
 
-class INetConnection;
 class SIPProfile;
 class ISIPDialog;
 class ISIPServerConnection;

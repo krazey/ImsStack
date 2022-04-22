@@ -1871,7 +1871,7 @@ void Registration::ConnectionNotifierError_NotifyError(IN ISIPConnectionNotifier
     if (bActiveBindingsRestorationEnabled)
     {
         NetworkService *pNetworkService = NetworkService::GetNetworkService();
-        INetConnection *piConnection
+        INetworkConnection *piConnection
                 = pNetworkService->FindConnection(pStateTracker->GetIPAddress());
 
         // Checks if the data connection is lost or not...
@@ -1879,7 +1879,7 @@ void Registration::ConnectionNotifierError_NotifyError(IN ISIPConnectionNotifier
         // the error doesn't need to notify the application.
         if ((piConnection == IMS_NULL)
                 || ((piConnection != IMS_NULL)
-                    && (piConnection->GetState() != INetConnection::STATE_CONNECTED)))
+                    && (piConnection->GetState() != INetworkConnection::STATE_CONNECTED)))
         {
             IMS_TRACE_D("Registration :: Restoration(for active bindings) is enabled", 0, 0, 0);
             return;
@@ -2386,7 +2386,7 @@ Remarks
 
 */
 PRIVATE VIRTUAL
-void Registration::AKA_OnResponse(IN const ByteArray &objRES,
+void Registration::DigestAka_OnResponse(IN const ByteArray &objRES,
         IN const ByteArray &objIK /* = ByteArray::ConstNull() */,
         IN const ByteArray &objCK /* = ByteArray::ConstNull() */)
 {
@@ -2424,7 +2424,7 @@ Remarks
 
 */
 PRIVATE VIRTUAL
-void Registration::AKA_OnAUTSFailed(IN const ByteArray &objAUTS)
+void Registration::DigestAka_OnAutsFailed(IN const ByteArray &objAUTS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2462,7 +2462,7 @@ Remarks
 
 */
 PRIVATE VIRTUAL
-void Registration::AKA_OnMACFailed()
+void Registration::DigestAka_OnMacFailed()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2782,7 +2782,7 @@ Remarks
 
 */
 PRIVATE
-IDigestAKA* Registration::CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig)
+IDigestAka* Registration::CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2795,20 +2795,20 @@ IDigestAKA* Registration::CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig
 
     if (pSubsConfig->IsIsimSupported())
     {
-        IISIM *piISIM = pPhoneInfoService->GetISIM(GetSlotId());
+        IIsim* piIsim = pPhoneInfoService->GetIsim(GetSlotId());
 
-        if (piISIM != IMS_NULL)
+        if (piIsim != IMS_NULL)
         {
-            return piISIM->CreateDigestAKA();
+            return piIsim->CreateDigestAka();
         }
     }
     else
     {
-        IUSIM *piUSIM = pPhoneInfoService->GetUSIM(GetSlotId());
+        IUsim* piUsim = pPhoneInfoService->GetUsim(GetSlotId());
 
-        if (piUSIM != IMS_NULL)
+        if (piUsim != IMS_NULL)
         {
-            return piUSIM->CreateDigestAKA();
+            return piUsim->CreateDigestAka();
         }
     }
 
@@ -3007,9 +3007,9 @@ IMS_BOOL Registration::IsAkaSupported(IN CONST SubscriberConfig *pSubsConfig) co
     }
     else
     {
-        IUSIM *piUSIM = PhoneInfoService::GetPhoneInfoService()->GetUSIM(GetSlotId());
+        IUsim* piUsim = PhoneInfoService::GetPhoneInfoService()->GetUsim(GetSlotId());
 
-        if (piUSIM != IMS_NULL)
+        if (piUsim != IMS_NULL)
         {
             const Credential &objCredential = pSubsConfig->GetCredential();
 

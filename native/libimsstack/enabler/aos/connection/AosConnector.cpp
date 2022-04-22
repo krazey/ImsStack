@@ -299,7 +299,7 @@ IMS_BOOL AosConnector::IsIpv6DelayRequired()
         return IMS_FALSE;
     }
 
-    if (m_piConnection->GetIpcanCategory() != IIPCAN::CATEGORY_MOBILE)
+    if (m_piConnection->GetIpcanCategory() != IIpcan::CATEGORY_MOBILE)
     {
         return IMS_FALSE;
     }

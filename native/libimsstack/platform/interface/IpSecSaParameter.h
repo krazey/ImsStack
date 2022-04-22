@@ -21,7 +21,7 @@
 /**
  * @brief This class defines the parameters for IpSec security association.
  *
- * @see IIPSecPolicy
+ * @see IIpSecPolicy
  */
 class IpSecSaParameter
 {

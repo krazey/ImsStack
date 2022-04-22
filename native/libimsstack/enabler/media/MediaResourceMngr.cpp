@@ -57,7 +57,7 @@ IMS_BOOL MediaResourceMngr::UpdatePdnResource(IN IMS_SINT32 nPdnType, IN IMS_BOO
         // Stetp 0-1. Only modem IP will be used in LTE ran
         // Get current Radio Network
         IMS_SINT32 nRadioType = PhoneInfoService::GetPhoneInfoService()->
-                GetNetWatcherInfo(m_nSlotId)->GetNetworkType();
+                GetNetworkWatcher(m_nSlotId)->GetNetworkType();
         IMS_TRACE_D("UpdatePdnResource() - nRadioType[%d], nSlotID[%u]", nRadioType, m_nSlotId, 0);
         if ((ConvertMediaNetworkType(nRadioType) & GetSupportedNetworkTypeFlag()) == 0)
         {
@@ -108,7 +108,7 @@ void MediaResourceMngr::ResetPdnResource(IN IMS_SINT32 nPdnType)
 PUBLIC
 void MediaResourceMngr::UpdateAPN(IN MEDIA_SERVICE_TYPE eMediaServiceType, PDNResource* pLocalPdn)
 {
-    INetConnection* pConnection = GetNetConnection(eMediaServiceType);
+    INetworkConnection* pConnection = GetNetConnection(eMediaServiceType);
 
     if (pConnection == IMS_NULL)
     {
@@ -142,20 +142,20 @@ void MediaResourceMngr::GetPdpProfileNum(IN AudioConfiguration* pAConfig,
 
     // 20150813 [VoWiFi] Getting IP address on 3G + WiFi (3GPP1 + 3GPP2 PDP Profile)
     MEDIA_NETWORK_TYPE eNetworkType = MEDIA_NETWORK_NONE;
-    switch (PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(
+    switch (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
         m_nSlotId)->GetNetworkType())
     {
-        case INetWatcherInfo::RADIOTECH_TYPE_1xRTT:
-        case INetWatcherInfo::RADIOTECH_TYPE_CDMA:
-        case INetWatcherInfo::RADIOTECH_TYPE_EVDO_0:
-        case INetWatcherInfo::RADIOTECH_TYPE_EVDO_A:
-        case INetWatcherInfo::RADIOTECH_TYPE_EVDO_B:
+        case INetworkWatcher::RADIOTECH_TYPE_1xRTT:
+        case INetworkWatcher::RADIOTECH_TYPE_CDMA:
+        case INetworkWatcher::RADIOTECH_TYPE_EVDO_0:
+        case INetworkWatcher::RADIOTECH_TYPE_EVDO_A:
+        case INetworkWatcher::RADIOTECH_TYPE_EVDO_B:
             eNetworkType = MEDIA_NETWORK_WCDMA;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_EHRPD:
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
             eNetworkType = MEDIA_NETWORK_EHRPD;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_LTE:    // FALL_THROUGH
+        case INetworkWatcher::RADIOTECH_TYPE_LTE:    // FALL_THROUGH
         default:
             eNetworkType = MEDIA_NETWORK_LTE;
             break;
@@ -300,7 +300,7 @@ void MediaResourceMngr::ReleaseRtpPort(IN IMS_UINT32 nPort)
 
 /* IMediaConnectionWatcherListener Interface Impl */
 PUBLIC
-void MediaResourceMngr::NotifyMediaConnection(IN INetConnection *piNetConnection,
+void MediaResourceMngr::NotifyMediaConnection(IN INetworkConnection *piNetConnection,
         IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId)
 {
     (void)piNetConnection;
@@ -339,7 +339,7 @@ IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress &objIpAdd
         OUT IMS_BOOL &bWIFICondition, OUT IMS_UINT32 &nNetworkInterfaceId)
 {
     IMediaConnectionWatcher* piMediaConnectionWatcher = IMS_NULL;
-    INetConnection *piNetConnection  = IMS_NULL;
+    INetworkConnection *piNetConnection  = IMS_NULL;
     IMS_SINT32 nMediaConnectionType = IMediaConnectionWatcher::MEDIA_CONNECTION_INVALID;
     IMS_BOOL bRet = IMS_FALSE;
 
@@ -385,7 +385,7 @@ IMS_UINT32 MediaResourceMngr::GetRtpFragmentSize(IN IPAddress &objIpAddress)
 {
     IMediaConnectionWatcher* piMediaConnectionWatcher = GetMediaConnectionWatcher();
     IMS_SINT32 nRtpFragmentSize = 0;
-    INetConnection *piNetConnection  = IMS_NULL;
+    INetworkConnection *piNetConnection  = IMS_NULL;
     if (piMediaConnectionWatcher != IMS_NULL)
     {
         piMediaConnectionWatcher->GetRtpFragmentSize(objIpAddress, piNetConnection,
@@ -395,7 +395,7 @@ IMS_UINT32 MediaResourceMngr::GetRtpFragmentSize(IN IPAddress &objIpAddress)
 }
 
 PUBLIC
-INetConnection* MediaResourceMngr::GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType)
+INetworkConnection* MediaResourceMngr::GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType)
 {
     const NetworkPolicy* pImsNetworkPolicy = IMS_NULL;
 
@@ -416,7 +416,7 @@ INetConnection* MediaResourceMngr::GetNetConnection(IN MEDIA_SERVICE_TYPE eServi
         return IMS_NULL;
     }
 
-    INetConnection* pConnection = NetworkService::GetNetworkService()->FindConnection(
+    INetworkConnection* pConnection = NetworkService::GetNetworkService()->FindConnection(
             pImsNetworkPolicy->GetName(), m_nSlotId);
     if (pConnection == IMS_NULL)
     {
@@ -434,20 +434,20 @@ MEDIA_NETWORK_TYPE MediaResourceMngr::ConvertMediaNetworkType(IMS_SINT32 nRadioT
 
     switch (nRadioType)
     {
-        case INetWatcherInfo::RADIOTECH_TYPE_LTE :
+        case INetworkWatcher::RADIOTECH_TYPE_LTE :
             eMediaNetwork = MEDIA_NETWORK_LTE;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPAP :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP :
             eMediaNetwork = MEDIA_NETWORK_HSPA_PLUS;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_UMTS :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSDPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSUPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_CDMA :
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA :
+        case INetworkWatcher::RADIOTECH_TYPE_HSDPA :
+        case INetworkWatcher::RADIOTECH_TYPE_HSUPA :
+        case INetworkWatcher::RADIOTECH_TYPE_CDMA :
             eMediaNetwork = MEDIA_NETWORK_HSPA;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_EHRPD :
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD :
             eMediaNetwork = MEDIA_NETWORK_EHRPD;
             break;
         default :

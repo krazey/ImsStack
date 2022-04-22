@@ -18,28 +18,28 @@
 
 #include "ImsMessage.h"
 
-class IVoNR;
-class VoNRServicePrivate;
+class IVoNr;
+class VoNrServicePrivate;
 
-class VoNRService
+class VoNrService
 {
 private:
-    VoNRService();
-    ~VoNRService();
+    VoNrService();
+    ~VoNrService();
 
 private:
-    VoNRService(IN CONST VoNRService &objRHS);
-    VoNRService& operator=(IN CONST VoNRService &objRHS);
+    VoNrService(IN CONST VoNrService &objRHS);
+    VoNrService& operator=(IN CONST VoNrService &objRHS);
 
 public:
-    IVoNR* GetVoNR(IN IMS_SINT32 nSlotId);
+    IVoNr* GetVoNr(IN IMS_SINT32 nSlotId);
 
-    void DispatchServiceMessage(IN IMSMSG &objMSG);
+    void DispatchServiceMessage(IN ImsMessage &objMSG);
 
-    static VoNRService* GetVoNRService();
+    static VoNrService* GetVoNrService();
 
 private:
-    VoNRServicePrivate *pPrivate;
+    VoNrServicePrivate *pPrivate;
 };
 
 #endif // SERVICE_VONR_H_

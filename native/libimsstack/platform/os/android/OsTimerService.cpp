@@ -268,7 +268,7 @@ void OsTimerService::NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper)
         return;
     }
 
-    IMSMSG objMsg(IMS_MSG_TIMER,
+    ImsMessage objMsg(IMS_MSG_TIMER,
             pTimerWrapper->m_pTimer->GetTimerId(),
             pTimerWrapper->m_pTimer->GetInternalTimerId());
 
@@ -277,5 +277,5 @@ void OsTimerService::NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper)
             pTimerWrapper->m_pTimer->GetInternalTimerId(),
             m_objTimers.GetSize());
 
-    MSGService::PostMessageThread(piOwnerThread, objMsg);
+    MessageService::PostMessageThread(piOwnerThread, objMsg);
 }

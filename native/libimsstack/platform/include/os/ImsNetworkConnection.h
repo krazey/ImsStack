@@ -23,18 +23,18 @@
 typedef IMS_UINT32    IMS_CONNECTION;
 
 class ImsNetworkConnection
-    : public IMSSlot
-    , public INetConnection
+    : public ImsSlot
+    , public INetworkConnection
 {
 public:
     inline ImsNetworkConnection(IN IMS_SINT32 nSlotId)
-        : IMSSlot(nSlotId)
+        : ImsSlot(nSlotId)
     {}
     inline virtual ~ImsNetworkConnection()
     {}
 
 public:
-    inline virtual INetPing* CreateNetPing()
+    inline INetworkPing* CreatePing() override
     { return new ImsNetworkPing(); }
     virtual IMS_BOOL Create(IN const AString& strNetProfile) = 0;
     virtual IMS_BOOL Create(IN IMS_SINT32 nApnType) = 0;

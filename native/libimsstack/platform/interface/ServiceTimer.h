@@ -37,7 +37,7 @@ public:
     ITimer* CreateTimer(IN IMS_BOOL bAlarmTimer);
     void DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
 
-    void DispatchServiceMessage(IN IMSMSG &objMSG);
+    void DispatchServiceMessage(IN ImsMessage &objMSG);
 
     static TimerService* GetTimerService();
 

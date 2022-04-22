@@ -16,10 +16,10 @@
 
 #include "ImsTypeDef.h"
 
-class IDigestAKA;
-class IISIMListener;
+class IDigestAka;
+class IIsimListener;
 
-class IISIM
+class IIsim
 {
 public:
     /*
@@ -55,11 +55,11 @@ public:
     <table>
     return                  description
     ----------              ----------
-    IDigestAKA*             Pointer to IDigestAKA
+    IDigestAka*             Pointer to IDigestAka
     </table>
 
     */
-    virtual IDigestAKA* CreateDigestAKA() = 0;
+    virtual IDigestAka* CreateDigestAka() = 0;
 
     /*
 
@@ -67,7 +67,7 @@ public:
     The field type will be determined if needed.
 
     NOTE:
-     The result of this operation will be reported by the IISIMListener interface.
+     The result of this operation will be reported by the IIsimListener interface.
 
     Parameters
     <table>
@@ -92,7 +92,7 @@ public:
     Gets the home domain name.
 
     NOTE:
-     The result of this operation will be reported by the IISIMListener interface.
+     The result of this operation will be reported by the IIsimListener interface.
 
     Parameters
     <table>
@@ -116,7 +116,7 @@ public:
     Gets the private user identity.
 
     NOTE:
-     The result of this operation will be reported by the IISIMListener interface.
+     The result of this operation will be reported by the IIsimListener interface.
 
     Parameters
     <table>
@@ -133,14 +133,14 @@ public:
     </table>
 
     */
-    virtual IMS_RESULT GetIMPI() = 0;
+    virtual IMS_RESULT GetImpi() = 0;
 
     /*
 
     Gets the public user identities.
 
     NOTE:
-     The result of this operation will be reported by the IISIMListener interface.
+     The result of this operation will be reported by the IIsimListener interface.
 
     Parameters
     <table>
@@ -157,7 +157,7 @@ public:
     </table>
 
     */
-    virtual IMS_RESULT GetIMPU() = 0;
+    virtual IMS_RESULT GetImpu() = 0;
 
     /*
      Returns the state of ISIM.
@@ -182,7 +182,7 @@ public:
 
     Checks if the ISIM is ready or not.
     If the return value is IMS_FALSE, the application MUST wait for the invocation of
-    ISIM_OnStateChanged(...) method in the IISIMListener interface with STATE_READY.
+    ISIM_OnStateChanged(...) method in the IIsimListener interface with STATE_READY.
 
     Parameters
     <table>
@@ -219,7 +219,7 @@ public:
     </table>
 
     */
-    virtual void AddListener(IN IISIMListener *piListener) = 0;
+    virtual void AddListener(IN IIsimListener* piListener) = 0;
 
     /*
 
@@ -239,7 +239,7 @@ public:
     </table>
 
     */
-    virtual void RemoveListener(IN IISIMListener *piListener) = 0;
+    virtual void RemoveListener(IN IIsimListener* piListener) = 0;
 
 
     /*

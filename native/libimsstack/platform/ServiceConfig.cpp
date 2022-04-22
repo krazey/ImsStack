@@ -101,7 +101,7 @@ ICarrierConfig* ConfigService::GetCarrierConfig(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-void ConfigService::DispatchServiceMessage(IN IMSMSG& objMsg)
+void ConfigService::DispatchServiceMessage(IN ImsMessage& objMsg)
 {
     IMS_TRACE_D("ConfigService: DispatchServiceMessage - msg=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
             objMsg.GetName(), objMsg.nWparam, objMsg.nLparam);

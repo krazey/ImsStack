@@ -27,7 +27,7 @@ class SIPTransportHelper;
 
 
 class SIPTransport
-    : public IMSSlot
+    : public ImsSlot
     , public ISIPSocketListener
 {
 public:

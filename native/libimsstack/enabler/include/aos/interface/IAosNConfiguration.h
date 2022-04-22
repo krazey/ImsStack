@@ -642,7 +642,7 @@ public:
     /**
      * @brief Get the ipsec authentication algorithms which will be used.
      *
-     *        These algorithms consist of the IPSecType class
+     *        These algorithms consist of the IpSecType class
      *
      * @return IMSVector<IMS_SINT32>& Return what authentication algorithms will be used
      */
@@ -651,7 +651,7 @@ public:
     /**
      * @brief Get the ipsec encryption algorithms which will be used.
      *
-     *        These algorithms consist of the IPSecType class
+     *        These algorithms consist of the IpSecType class
      *
      * @return IMSVector<IMS_SINT32>& Return what encryption algorithms will be used
      */

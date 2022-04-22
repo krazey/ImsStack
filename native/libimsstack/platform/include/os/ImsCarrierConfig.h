@@ -20,12 +20,12 @@
 #include "ImsSlot.h"
 
 class ImsCarrierConfig
-    : public IMSSlot
+    : public ImsSlot
     , public ICarrierConfig
 {
 public:
     inline explicit ImsCarrierConfig(IN IMS_SINT32 nSlotId)
-            : IMSSlot(nSlotId)
+            : ImsSlot(nSlotId)
     {}
     inline virtual ~ImsCarrierConfig()
     {}

@@ -21,9 +21,9 @@
 #include "ITimer.h"
 
 class ImsNetworkPing
-    : public INetPing
+    : public INetworkPing
     , public ITimerListener
-    , public INetSocketListener
+    , public ISocketListener
 {
 public:
     ImsNetworkPing();
@@ -37,19 +37,19 @@ public:
     IMS_SINT32 Ping(IN const IPAddress& objSrcIp,
             IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort,
             IN IMS_SINT32 nWaitTime) override;
-    void SetListener(IN INetPingListener* piListener) override;
+    void SetListener(IN INetworkPingListener* piListener) override;
 
 protected:
     // ITimerListener
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    // INetSocketListener
-    void Socket_DataReceived(IN INetSocket* piSocket) override;
-    void Socket_SendEnabled(IN INetSocket* piSocket) override;
-    void Socket_ConnectionReceived(IN INetSocket* piSocket) override;
-    void Socket_Connected(IN INetSocket* piSocket) override;
-    void Socket_Closed(IN INetSocket* piSocket,
-            IN IMS_SINT32 nReason = INetSocket::CLOSE_REASON_UNKNOWN) override;
+    // ISocketListener
+    void Socket_OnDataReceived(IN ISocket* piSocket) override;
+    void Socket_OnSendEnabled(IN ISocket* piSocket) override;
+    void Socket_OnConnectionReceived(IN ISocket* piSocket) override;
+    void Socket_OnConnected(IN ISocket* piSocket) override;
+    void Socket_OnClosed(IN ISocket* piSocket,
+            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ClearResources();
     IMS_BOOL PrepareResources(IN const IPAddress& objIp, IN IMS_BOOL bTimerRequired);
@@ -68,11 +68,11 @@ private:
         STATE_PENDING = 1
     };
 
-    INetPingListener* m_piListener;
+    INetworkPingListener* m_piListener;
 
     IMS_SINT32 m_nState;
     ITimer* m_piTimer;
-    INetSocket* m_piSocket;
+    ISocket* m_piSocket;
 };
 
 #endif

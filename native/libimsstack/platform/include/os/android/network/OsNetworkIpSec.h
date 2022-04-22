@@ -24,7 +24,7 @@
 class OsIpSecPolicy;
 
 class OsNetworkIpSec
-    : public INetIPSec
+    : public INetworkIpSec
 {
 public:
     OsNetworkIpSec();
@@ -34,22 +34,22 @@ public:
     OsNetworkIpSec& operator=(IN const OsNetworkIpSec&) = delete;
 
 public:
-    // INetIPSec class
-    IIPSecPolicy* CreatePolicy() override;
-    void DestroyPolicy(IN IIPSecPolicy* piPolicy) override;
+    // INetworkIpSec class
+    IIpSecPolicy* CreatePolicy() override;
+    void DestroyPolicy(IN IIpSecPolicy* piPolicy) override;
     void DestroyAllPolicies() override;
-    IMS_BOOL AddPolicy(IN IIPSecPolicy* piPolicy) override;
-    void DeletePolicy(IN IIPSecPolicy* piPolicy) override;
+    IMS_BOOL AddPolicy(IN IIpSecPolicy* piPolicy) override;
+    void DeletePolicy(IN IIpSecPolicy* piPolicy) override;
     void FlushPolicies() override;
-    void DumpSAs(IN IIPSecPolicy* piPolicy) override;
-    IIPSecPolicy* GetPolicy(IN IMS_SINT32 nId) const override;
-    IMS_BOOL ApplyIpSecTransform(IN INetSocket* piSocket,
+    void DumpPolicy(IN IIpSecPolicy* piPolicy) override;
+    IIpSecPolicy* GetPolicy(IN IMS_SINT32 nId) const override;
+    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
             IN const SocketAddress& objLocal,
             IN const SocketAddress* pRemote = IMS_NULL) override;
-    IMS_BOOL ApplyIpSecTransform(IN INetSocket* piSocket,
-            IN INetSocket* piServerSocket) override;
+    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
+            IN ISocket* piServerSocket) override;
     void RemoveIpSecTransforms(IN IMS_SINT32 nSocketId) override;
-    void SetSDBFlushCapability(IN IMS_BOOL bCapability) override;
+    void SetSdbFlushCapability(IN IMS_BOOL bCapability) override;
 
 private:
     IMS_SINT32 GetAvailableId();

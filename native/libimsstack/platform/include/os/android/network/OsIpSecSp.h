@@ -22,7 +22,7 @@
 class OsIpSecSpPrivate;
 
 class OsIpSecSp
-    : public IIPSecSP
+    : public IIpSecSp
 {
 public:
     OsIpSecSp();
@@ -32,14 +32,14 @@ public:
     OsIpSecSp& operator=(IN const OsIpSecSp&) = delete;
 
 public:
-    // IIPSecSP class
+    // IIpSecSp class
     void SetTransportInfo(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
         IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction,
         IN IMS_UINT32 nDirection, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode) override;
     void SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
             IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm) override;
-    void DoneSP() override;
+    void DoneSp() override;
 
     void* GetConf();
     IMS_UINT32 GetSpi() const;

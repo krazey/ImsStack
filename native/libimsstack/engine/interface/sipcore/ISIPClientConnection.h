@@ -4,7 +4,6 @@
 #include "IPAddress.h"
 #include "ISIPConnection.h"
 
-class INetConnection;
 class ISIPRefresher;
 class ISIPConnectionNotifier;
 class ISIPClientConnectionListener;

@@ -29,7 +29,7 @@ class SIPSecurityHeader;
 
 
 class RegParameter
-    : public IMSSlot
+    : public ImsSlot
     , public IRegParameter
 {
 public:

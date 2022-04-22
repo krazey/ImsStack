@@ -876,7 +876,7 @@ void UceSubscribe::SubscribeTerminated()
     m_eQueryType = QUERY_CAPABILITY_TYPE_NONE;
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_DELETED_IND, 0, reinterpret_cast<IMS_UINTP>(this));
-    MSGService::PostMessage(m_strUceSubscribeManagerName, objUIMsg);
+    MessageService::PostMessage(m_strUceSubscribeManagerName, objUIMsg);
     SetState(ON);
 }
 
@@ -934,7 +934,7 @@ void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString st
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_RESPONSE_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
@@ -950,7 +950,7 @@ void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_CMD_ERROR_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
     m_nKey = 0;
 }
 
@@ -968,7 +968,7 @@ void UceSubscribe::SendPresenceNotifyInd(IMSList<AString> pidfXmls)
 
     IMSMSG objUIMsg(IUUceService::UCE_PRESENCE_NOTIFY_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList)
@@ -996,7 +996,7 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
     pList->Clear();
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeTerminatedInd()
@@ -1013,7 +1013,7 @@ void UceSubscribe::SendSubscribeTerminatedInd()
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_TERMINATED_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
     m_nKey = 0;
 }
 
@@ -1249,7 +1249,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISIPMessage* piSIPMessage)
         IMS_TRACE_D("No Reason header present", 0, 0, 0);
         IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0,
                       ImsAosControl::REGISTER_REINITIATE);
-        MSGService::PostMessage(m_strAppName, objMsg);
+        MessageService::PostMessage(m_strAppName, objMsg);
         return IMS_FALSE;
     }
     for (IMS_UINT32 i = 0; i < objReasonList.GetSize(); i++) {
@@ -1261,7 +1261,7 @@ IMS_BOOL UceSubscribe::Handle403FailureResponse(ISIPMessage* piSIPMessage)
         }
     }
     IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
-    MSGService::PostMessage(m_strAppName, objMsg);
+    MessageService::PostMessage(m_strAppName, objMsg);
     return IMS_FALSE;
 }
 

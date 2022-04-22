@@ -22,7 +22,7 @@
 class LocationProperties;
 
 class OsLocationInfo
-    : public IMSSlot
+    : public ImsSlot
     , public ILocationInfo
 {
 public:

@@ -106,7 +106,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
             pCmdParam->m_strEtag = str8ETag.string();
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MSGService::PostMessage(m_strTarget, objMSG);
+            MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
         case IUUceService::UCE_SEND_SINGLE_SUBSCRIBE_CMD: {
@@ -120,7 +120,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
             pCmdParam->m_strUser = str8User.string();
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MSGService::PostMessage(m_strTarget, objMSG );
+            MessageService::PostMessage(m_strTarget, objMSG );
         }
         break;
         case IUUceService::UCE_SEND_LIST_SUBSCRIBE_CMD: {
@@ -135,7 +135,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
                 pCmdParam->userList.Append(szUser);
             }
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MSGService::PostMessage(m_strTarget, objMSG );
+            MessageService::PostMessage(m_strTarget, objMSG );
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_CMD: {
@@ -150,7 +150,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
             pCmdParam->m_nMyCaps = pParcel.readInt32();
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MSGService::PostMessage(m_strTarget, objMSG );
+            MessageService::PostMessage(m_strTarget, objMSG );
         }
         break;
         case IUUceService::UCE_SEND_OPTIONS_RESP_CMD: {
@@ -166,7 +166,7 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
             pCmdParam->m_nMyCaps = pParcel.readInt32();
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
-            MSGService::PostMessage(m_strTarget, objMSG );
+            MessageService::PostMessage(m_strTarget, objMSG );
         }
         break;
         default:

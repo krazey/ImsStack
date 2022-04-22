@@ -16,7 +16,7 @@
 
 #include "ByteArray.h"
 
-class IDigestAKAListener
+class IDigestAkaListener
 {
 public:
     /*
@@ -41,7 +41,7 @@ public:
     </table>
 
     */
-    virtual void AKA_OnResponse(IN const ByteArray &objRES,
+    virtual void DigestAka_OnResponse(IN const ByteArray &objRES,
             IN const ByteArray &objIK = ByteArray::ConstNull(),
             IN const ByteArray &objCK = ByteArray::ConstNull()) = 0;
 
@@ -65,7 +65,7 @@ public:
     </table>
 
     */
-    virtual void AKA_OnAUTSFailed(IN const ByteArray &objAUTS) = 0;
+    virtual void DigestAka_OnAutsFailed(IN const ByteArray &objAUTS) = 0;
 
     /*
 
@@ -85,7 +85,7 @@ public:
     </table>
 
     */
-    virtual void AKA_OnMACFailed() = 0;
+    virtual void DigestAka_OnMacFailed() = 0;
 };
 
 #endif // _INTERFACE_IMS_DIGEST_AKA_LISTENER_H_

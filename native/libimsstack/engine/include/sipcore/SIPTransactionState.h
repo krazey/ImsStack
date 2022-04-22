@@ -19,7 +19,7 @@
 #include "SIPTimerValues.h"
 #include "SIPProfile.h"
 
-class INetConnection;
+class INetworkConnection;
 class ISIPTransactionStateListener;
 class ISIPTransportErrorListener;
 class SIPTransport;

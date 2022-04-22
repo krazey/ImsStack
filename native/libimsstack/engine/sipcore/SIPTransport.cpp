@@ -36,7 +36,7 @@ __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SIPTransport::SIPTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType_)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , nType(nType_)
     , bExplicitTargetProtocol(IMS_FALSE)
     , bIsRetransmission(IMS_FALSE)
@@ -1403,7 +1403,7 @@ IMS_BOOL SIPTransport::TransmitMessage(IN CONST IMS_BYTE *pBuffer, IN IMS_SINT32
         PrintMessage(GetSlotId(), IMS_TRUE, objTA_FarEnd, (const IMS_CHAR*) pBuffer, nBuffLen);
     }
 
-    if (nSentBytes == INetSocket::RESULT_ERROR)
+    if (nSentBytes == ISocket::RESULT_ERROR)
     {
         if (pSendBuffer != IMS_NULL)
         {

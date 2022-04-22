@@ -23,7 +23,7 @@
 class IConfigBuffer;
 
 class CodecConfig :
-        public IMSSlot
+        public ImsSlot
 {
 private:
     static const IMS_CHAR KEY_PAYLOAD_TYPE[];

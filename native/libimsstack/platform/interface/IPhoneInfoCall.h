@@ -15,7 +15,7 @@
 
 #include "AString.h"
 
-class IPhoneInfoCall
+class ICallInfo
 {
 public:
     /*
@@ -46,7 +46,7 @@ public:
         static final int TTY_MODE_HCO = 2;
         static final int TTY_MODE_VCO = 3;
     */
-    virtual IMS_UINT32 GetTTYMode() const = 0;
+    virtual IMS_UINT32 GetTtyMode() const = 0;
 
     /*
         #define IMS_RTT_MODE_NONE (0)
@@ -54,7 +54,7 @@ public:
         #define IMS_RTT_ALWAYS_VISIBLE (2)
         #define IMS_RTT_CAPABLE_OFF (3)
     */
-    virtual IMS_UINT32 GetRTTMode() const = 0;
+    virtual IMS_UINT32 GetRttMode() const = 0;
 
     /*
     Get Wifi Calling Mode Preferences
@@ -134,7 +134,7 @@ public:
     AString                 Address ID
     </table>
     */
-    virtual AString GetWifiCallingAddressID() = 0;
+    virtual AString GetWifiCallingAddressId() = 0;
 
     /*
     Get Call State in Other Slot
@@ -154,7 +154,7 @@ public:
     IMS_UINT32              call state
     </table>
     */
-    virtual IMS_SINT32 GetCSCallStateInOtherSlot() const = 0;
+    virtual IMS_SINT32 GetCsCallStateInOtherSlot() const = 0;
 
 };
 

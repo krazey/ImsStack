@@ -20,8 +20,8 @@
 #include "IPhoneInfoCall.h"
 
 class OsPhoneInfoCall
-    : public IMSSlot
-    , public IPhoneInfoCall
+    : public ImsSlot
+    , public ICallInfo
 {
 public:
     OsPhoneInfoCall(IN IMS_SINT32 nSlotId);
@@ -32,15 +32,15 @@ public:
 
 public:
     IMS_BOOL IsEmergencyNumber(IN const AString& strNumber) const override;
-    IMS_UINT32 GetTTYMode() const override;
-    IMS_UINT32 GetRTTMode() const override;
+    IMS_UINT32 GetTtyMode() const override;
+    IMS_UINT32 GetRttMode() const override;
 
     IMS_BOOL IsWifiCallingEnabled() override;
     IMS_UINT32 GetWifiCallingPreferences() override;
     IMS_BOOL IsWifiCallingProvisioned() override;
-    AString GetWifiCallingAddressID() override;
+    AString GetWifiCallingAddressId() override;
 
-    IMS_SINT32 GetCSCallStateInOtherSlot() const override;
+    IMS_SINT32 GetCsCallStateInOtherSlot() const override;
 };
 
 #endif

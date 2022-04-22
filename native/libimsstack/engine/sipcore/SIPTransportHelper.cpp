@@ -775,7 +775,7 @@ void SIPTransportHelper::SetIPQoS(IN SIPRTConfig::IPQoS *pIPQoS)
 
             if (pSocket != IMS_NULL)
             {
-                pSocket->SetOption(INetSocket::OPT_IP_QOS, pIPQoS->nValue);
+                pSocket->SetOption(ISocket::OPT_IP_QOS, pIPQoS->nValue);
             }
         }
         return;
@@ -809,7 +809,7 @@ void SIPTransportHelper::SetIPQoS(IN SIPRTConfig::IPQoS *pIPQoS)
 
         if (bMatched)
         {
-            pSocket->SetOption(INetSocket::OPT_IP_QOS, pIPQoS->nValue);
+            pSocket->SetOption(ISocket::OPT_IP_QOS, pIPQoS->nValue);
         }
     }
 }

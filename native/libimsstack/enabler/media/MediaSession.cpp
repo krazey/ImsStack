@@ -1335,7 +1335,7 @@ VIRTUAL void MediaSession::MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SIN
     IMS_TRACE_D("MediaSession_SendEventToUi() : CallKey[%" PFLS_u "] nEvent[%d], nResult[%d]",
             m_nCallKey, nEvent, nResult);
     IMSMSG objMsg(nEvent, m_nCallKey, nResult);
-    MSGService::PostMessage(MediaManager::GetThreadName(m_nSlotId), objMsg);
+    MessageService::PostMessage(MediaManager::GetThreadName(m_nSlotId), objMsg);
 }
 
 PROTECTED VIRTUAL
@@ -1345,7 +1345,7 @@ IMS_BOOL MediaSession::MediaSession_SendMsgToMediaManager(IN IMS_SINT32 nEvent,
     IMS_TRACE_D("MediaSession_SendMsgToMediaManager() : CallKey[%" PFLS_u "] nEvent[%d]",
             m_nCallKey, nEvent, 0);
     IMSMSG objMsg(nEvent, m_nCallKey, reinterpret_cast<IMS_UINTP>(param));
-    return MSGService::PostMessage(MediaManager::GetThreadName(m_nSlotId), objMsg);
+    return MessageService::PostMessage(MediaManager::GetThreadName(m_nSlotId), objMsg);
 }
 
 PROTECTED

@@ -41,21 +41,21 @@ public:
 
     static IMS_BOOL StartUp();
     static void CleanUp();
-    static IMS_BOOL CheckIPAndPortAvailability(IN const IPAddress& objIpAddr,
+    static IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
             IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType);
 
 protected:
-    // INetSocket class
+    // ISocket class
     inline IMS_SINT32 GetSocketId() const override
     { return m_hSocket; }
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN INetSocketListener* piListener,
+            IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Close() override;
-    void SetListener(IN INetSocketListener* piListener) override;
-    INetSocket* Accept() override;
+    void SetListener(IN ISocketListener* piListener) override;
+    ISocket* Accept() override;
     SOCKET_RESULT Bind(IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort) override;
     SOCKET_RESULT Connect(IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
     SOCKET_RESULT Listen(IN IMS_SINT32 nBackLog = MAX_BACKLOG
@@ -70,7 +70,7 @@ protected:
             OUT IMS_UINT32& nPeerPort) override;
     SOCKET_RESULT GetSockName(OUT IPAddress& objSocketAddress,
             OUT IMS_UINT32& nSocketPort) override;
-    IMS_BOOL Equals(IN const INetSocket* piSocket) override;
+    IMS_BOOL Equals(IN const ISocket* piSocket) override;
     IMS_SINT32 GetOption(IN IMS_SINT32 nOption) override;
     IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) override;
 
@@ -115,7 +115,7 @@ private:
     IMS_SLONG m_nSocketEvent;
 
     IThread* m_piOwnerThread;
-    INetSocketListener* m_piListener;
+    ISocketListener* m_piListener;
 
     // For close reason
     IMS_SINT32 m_nCloseReason;

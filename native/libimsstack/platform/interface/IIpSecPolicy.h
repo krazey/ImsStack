@@ -19,15 +19,15 @@
 #include "ImsTypeDef.h"
 #include "IMSList.h"
 
-class IIPSecSA;
-class IIPSecSP;
-class IIPSecPolicyListener;
+class IIpSecSa;
+class IIpSecSp;
+class IIpSecPolicyListener;
 
-class IIPSecPolicy
+class IIpSecPolicy
 {
 public:
     /*
-     Returns an Identifier of this IIPSecPolicy.
+     Returns an Identifier of this IIpSecPolicy.
     */
     virtual IMS_SINT32 GetId() const = 0;
 
@@ -49,7 +49,7 @@ public:
     </table>
 
     */
-    virtual IIPSecSP* CreateSP() = 0;
+    virtual IIpSecSp* CreateSp() = 0;
 
     /*
 
@@ -60,7 +60,7 @@ public:
     parameter               description
     ----------              ----------
     </table>
-    IIPSecSP*               Pointer to IIPSecSP
+    IIpSecSp*               Pointer to IIpSecSp
 
     Returns
     <table>
@@ -70,7 +70,7 @@ public:
     </table>
 
     */
-    virtual void DestroySP(IN IIPSecSP* piSP) = 0;
+    virtual void DestroySp(IN IIpSecSp* piSp) = 0;
 
     /*
 
@@ -86,11 +86,11 @@ public:
     <table>
     return                  description
     ----------              ----------
-    IIPSecSA*               Pointer to IIPSecSA
+    IIpSecSa*               Pointer to IIpSecSa
     </table>
 
     */
-    virtual IIPSecSA* CreateSA() = 0;
+    virtual IIpSecSa* CreateSa() = 0;
 
     /*
 
@@ -101,7 +101,7 @@ public:
     parameter               description
     ----------              ----------
     </table>
-    IIPSecSA*               Pointer to IIPSecSA
+    IIpSecSa*               Pointer to IIpSecSa
 
     Returns
     <table>
@@ -111,7 +111,7 @@ public:
     </table>
 
     */
-    virtual void DestroySA(IN IIPSecSA* piSA) = 0;
+    virtual void DestroySa(IN IIpSecSa* piSa) = 0;
 
     /*
 
@@ -149,7 +149,7 @@ public:
     </table>
 
     */
-    virtual void SetListener(IN IIPSecPolicyListener* piListener) = 0;
+    virtual void SetListener(IN IIpSecPolicyListener* piListener) = 0;
 
 };
 

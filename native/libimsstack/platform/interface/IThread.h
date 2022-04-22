@@ -131,7 +131,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual IMS_BOOL PostMessageI(IN IMSMSG &objMSG) = 0;
+    virtual IMS_BOOL PostMessageI(IN ImsMessage& objMsg) = 0;
 
     /*
 

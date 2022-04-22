@@ -52,7 +52,7 @@ private:
     void UnlockThreadPool() const;
 
 private:
-    friend class MSGService;
+    friend class MessageService;
 
     IMutex *piMutex;
     // List of (IThread*)

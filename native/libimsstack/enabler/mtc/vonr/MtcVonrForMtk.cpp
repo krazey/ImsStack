@@ -27,7 +27,7 @@ PUBLIC
 UCVoNRForMtk::UCVoNRForMtk(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener)
     : MtcVonr(nSlotId, piListener)
     , m_bEmergency(IMS_FALSE)
-    , m_nCurrentSysMode(IVoNR::SYS_MODE_UNKNOWN)
+    , m_nCurrentSysMode(IVoNr::SYS_MODE_UNKNOWN)
     , m_eTotalInitiateType(VonrInitType::NONE)
 {
     // --------------------------------------------------------------------------------------------
@@ -59,11 +59,11 @@ void UCVoNRForMtk::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
     // TODO, MTC BUILD
     // piUCSession->SetListener(this);
     SetUacType(eCallType, bEmergency);
-    m_bEmergency = (m_nUacType == IVoNR::TYPE_EMERGENCY);
+    m_bEmergency = (m_nUacType == IVoNr::TYPE_EMERGENCY);
 
     if (IsUacCheckRequired() == IMS_FALSE)
     {
-        NotifyCallState(IVoNR::STATE_START);
+        NotifyCallState(IVoNr::STATE_START);
         m_eUacStatus = UacStatus::SUCCESS;
         return;
     }
@@ -74,7 +74,7 @@ void UCVoNRForMtk::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
     }
 
     StartTimer(TIME_WAIT_UAC_RESPONSE);
-    NotifyCallState(IVoNR::STATE_START);
+    NotifyCallState(IVoNr::STATE_START);
     // TODO, MTC BUILD
     // piUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_WAIT_UAC);
 }
@@ -106,7 +106,7 @@ void UCVoNRForMtk::OnSessionStopped(IN IMS_UINTP nParam)
         return;
     }
 
-    NotifyCallState(IVoNR::STATE_IDLE);
+    NotifyCallState(IVoNr::STATE_IDLE);
 
     m_piListener->OnTerminated(this);
 }
@@ -130,11 +130,11 @@ void UCVoNRForMtk::NotifyCallState(IN IMS_UINT32 nState)
     IMS_BOOL bDiffVoiceDomain;
     GetOngoingSessionStatus(bSameType, bDiffType, bDiffVoiceDomain);
 
-    if (nState == IVoNR::STATE_START)
+    if (nState == IVoNr::STATE_START)
     {
         NotifyCallStart(bSameType, bDiffType, bDiffVoiceDomain);
     }
-    else if (nState == IVoNR::STATE_IDLE)
+    else if (nState == IVoNr::STATE_IDLE)
     {
         NotifyCallStop(bSameType, bDiffType, bDiffVoiceDomain);
     }
@@ -156,7 +156,7 @@ void UCVoNRForMtk::OnNotifyUacResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResul
     IMS_TRACE_I("OnNotifyUacResponse - Result[%d], Reason[%d], SysMode[%d]",
             nResult, nReason, nSysMode);
 
-    if (nSysMode != IVoNR::SYS_MODE_NR5G)
+    if (nSysMode != IVoNr::SYS_MODE_NR5G)
     {
         return;
     }
@@ -183,14 +183,14 @@ void UCVoNRForMtk::OnNotifyUacResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResul
     GetOngoingSessionStatus(bSameType, bDiffType, bDiffVoiceDomain);
     if (m_eUacStatus == UacStatus::SUCCESS && pIUCSession)
     {
-        SetImsVoice(IVoNR::STATE_START, bSameType, bDiffType, bDiffVoiceDomain);
+        SetImsVoice(IVoNr::STATE_START, bSameType, bDiffType, bDiffVoiceDomain);
         // TODO, MTC BUILD
         // pIUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_NONE);
     }
     else if (m_eUacStatus == UacStatus::FAILURE)
     {
-        SetImsVoice(IVoNR::STATE_IDLE, bSameType, bDiffType, bDiffVoiceDomain);
-        RequestCallPreference(IVoNR::RAT_LTE);
+        SetImsVoice(IVoNr::STATE_IDLE, bSameType, bDiffType, bDiffVoiceDomain);
+        RequestCallPreference(IVoNr::RAT_LTE);
     }
 }
 
@@ -199,7 +199,7 @@ void UCVoNRForMtk::OnNotifyCallPreferenceReady(IN IMS_UINT32 nSysMode)
 {
     // --------------------------------------------------------------------------------------------
     if (m_eUacStatus == UacStatus::SUCCESS
-            || nSysMode != IVoNR::SYS_MODE_LTE)
+            || nSysMode != IVoNr::SYS_MODE_LTE)
     {
         IMS_TRACE_I("OnNotifyCallPreferenceReady - invalid", 0, 0, 0);
         return;
@@ -223,9 +223,9 @@ void UCVoNRForMtk::OnNotifyCallPreferenceReady(IN IMS_UINT32 nSysMode)
     // }
 
     m_eUacStatus = UacStatus::SUCCESS;
-    NotifyCallState(IVoNR::STATE_START);
+    NotifyCallState(IVoNr::STATE_START);
 
-    // not to wait VoNRUAC_NotifyResponse for LTE.
+    // not to wait VoNrUac_NotifyResponse for LTE.
     // TODO, MTC BUILD
     // pIUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_NONE);
 }
@@ -235,8 +235,8 @@ IMS_BOOL UCVoNRForMtk::IsUacCheckRequired()
 {
     // --------------------------------------------------------------------------------------------
 #ifdef _VONR_TEST_
-    if (m_nUacType == IVoNR::TYPE_EMERGENCY
-            || m_nDirection == IVoNR::DIRECTION_MT
+    if (m_nUacType == IVoNr::TYPE_EMERGENCY
+            || m_nDirection == IVoNr::DIRECTION_MT
             || m_piListener->IsOtherSessionAlive(this, m_nUacType))
     {
         IMS_TRACE_I("IsUacCheckRequired : FALSE", 0, 0, 0);
@@ -244,8 +244,8 @@ IMS_BOOL UCVoNRForMtk::IsUacCheckRequired()
     }
 #else
     if (m_piVonr->IsUacCheckRequired(m_nUacType) == IMS_FALSE
-            || m_nUacType == IVoNR::TYPE_EMERGENCY
-            || m_nDirection == IVoNR::DIRECTION_MT
+            || m_nUacType == IVoNr::TYPE_EMERGENCY
+            || m_nDirection == IVoNr::DIRECTION_MT
             || m_piListener->IsOtherSessionAlive(this, m_nUacType))
     {
         IMS_TRACE_I("IsUacCheckRequired : FALSE", 0, 0, 0);
@@ -277,10 +277,10 @@ void UCVoNRForMtk::NotifyCallStart(IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType,
         return;
     }
 
-    SetVoice(IVoNR::STATE_START, bDiffType, bDiffVoiceDomain);
-    SetImsSession(IVoNR::STATE_START);
-    SetUacCheck(IVoNR::STATE_START);
-    SetImsVoice(IVoNR::STATE_START, bSameType, bDiffType, bDiffVoiceDomain);
+    SetVoice(IVoNr::STATE_START, bDiffType, bDiffVoiceDomain);
+    SetImsSession(IVoNr::STATE_START);
+    SetUacCheck(IVoNr::STATE_START);
+    SetImsVoice(IVoNr::STATE_START, bSameType, bDiffType, bDiffVoiceDomain);
 }
 
 PRIVATE
@@ -297,10 +297,10 @@ void UCVoNRForMtk::NotifyCallStop(IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType,
     IMS_TRACE_I("NotifyCallStop : SameType[%s] DiffType[%s] DiffDomain[%s]",
             _TRACE_B_(bSameType), _TRACE_B_(bDiffType), _TRACE_B_(bDiffVoiceDomain));
 
-    SetImsVoice(IVoNR::STATE_IDLE, bSameType, bDiffType, bDiffVoiceDomain);
-    SetUacCheck(IVoNR::STATE_IDLE);
-    SetImsSession(IVoNR::STATE_IDLE);
-    SetVoice(IVoNR::STATE_IDLE, bDiffType, bDiffVoiceDomain);
+    SetImsVoice(IVoNr::STATE_IDLE, bSameType, bDiffType, bDiffVoiceDomain);
+    SetUacCheck(IVoNr::STATE_IDLE);
+    SetImsSession(IVoNr::STATE_IDLE);
+    SetVoice(IVoNr::STATE_IDLE, bDiffType, bDiffVoiceDomain);
 }
 
 PRIVATE
@@ -312,34 +312,34 @@ void UCVoNRForMtk::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bDiffType,
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_D("SetVoice state[%d]", nState, 0, 0);
 
-    if (nState == IVoNR::STATE_START)
+    if (nState == IVoNr::STATE_START)
     {
         if (m_eTotalInitiateType == VonrInitType::NONE)
         {
             // this is first call
             // no diffType call is alive.
-            m_piVonr->SetVoice(IVoNR::MTK_CALL_START, m_bEmergency);
+            m_piVonr->SetVoice(IVoNr::MTK_CALL_START, m_bEmergency);
             return;
         }
 
         if (bDiffVoiceDomain)
         {
             // aduio + emc OR video + emc case.
-            m_piVonr->SetVoice(IVoNR::MTK_CALL_START, m_bEmergency);
+            m_piVonr->SetVoice(IVoNr::MTK_CALL_START, m_bEmergency);
         }
         else
         {
             // audio + video case.
         }
     }
-    else if (nState == IVoNR::STATE_IDLE)
+    else if (nState == IVoNr::STATE_IDLE)
     {
         if (bDiffType)
         {
             // audio + video case.
             return;
         }
-        m_piVonr->SetVoice(IVoNR::MTK_CALL_STOP, m_bEmergency);
+        m_piVonr->SetVoice(IVoNr::MTK_CALL_STOP, m_bEmergency);
     }
 }
 
@@ -359,22 +359,22 @@ void UCVoNRForMtk::SetImsVoice(IN IMS_UINT32 nState, IN IMS_BOOL bSameType, IN I
     IMS_TRACE_D("SetImsVoice state[%d] SysMode[%d] TotalInitiateType[%d]", nState,
             m_nCurrentSysMode, m_eTotalInitiateType);
 
-    if (nState == IVoNR::STATE_START)
+    if (nState == IVoNr::STATE_START)
     {
-        if (m_nDirection == IVoNR::DIRECTION_MO
-                && m_nCurrentSysMode == IVoNR::SYS_MODE_NR5G
+        if (m_nDirection == IVoNr::DIRECTION_MO
+                && m_nCurrentSysMode == IVoNr::SYS_MODE_NR5G
                 && m_eTotalInitiateType == VonrInitType::NONE)
         {
             // first call is started in NR5G. UAC check required.
-            // this is called after UAC response by MtcVonr::VoNRUAC_NotifyResponse()
+            // this is called after UAC response by MtcVonr::VoNrUac_NotifyResponse()
             // with m_eTotalInitiateType 'VonrInitType::NR5G'
             return;
         }
-        m_piVonr->SetImsVoice(IVoNR::MTK_CALL_START, m_nCurrentSysMode);
+        m_piVonr->SetImsVoice(IVoNr::MTK_CALL_START, m_nCurrentSysMode);
     }
-    else if (nState == IVoNR::STATE_IDLE)
+    else if (nState == IVoNr::STATE_IDLE)
     {
-        m_piVonr->SetImsVoice(IVoNR::MTK_CALL_STOP, m_nCurrentSysMode);
+        m_piVonr->SetImsVoice(IVoNr::MTK_CALL_STOP, m_nCurrentSysMode);
     }
 }
 
@@ -384,7 +384,7 @@ void UCVoNRForMtk::SetImsSession(IN IMS_UINT32 nState)
     // SetImsSession - ISESS
     // Indicate MD the start/stop of an IMS Session over 5G.
     // --------------------------------------------------------------------------------------------
-    if (m_nUacType == IVoNR::TYPE_EMERGENCY)
+    if (m_nUacType == IVoNr::TYPE_EMERGENCY)
     {
         return;
     }
@@ -392,24 +392,24 @@ void UCVoNRForMtk::SetImsSession(IN IMS_UINT32 nState)
     IMS_TRACE_D("SetImsSession state[%d] SysMode[%d] TotalInitiateType[%d]", nState,
             m_nCurrentSysMode, m_eTotalInitiateType);
 
-    if (nState == IVoNR::STATE_START)
+    if (nState == IVoNr::STATE_START)
     {
-        if (m_nCurrentSysMode != IVoNR::SYS_MODE_NR5G
+        if (m_nCurrentSysMode != IVoNr::SYS_MODE_NR5G
                 && m_eTotalInitiateType != VonrInitType::NR)
         {
             return;
         }
 
         //TODO:: SetImsSession required for 1stVoWifiCall - NR HO - 2ndNRCall(diff calltype)
-        if (m_nCurrentSysMode == IVoNR::SYS_MODE_WLAN
+        if (m_nCurrentSysMode == IVoNr::SYS_MODE_WLAN
                 || m_eTotalInitiateType == VonrInitType::WIFI)
         {
             return;
         }
 
-        m_piVonr->SetImsSession(m_nUacType, IVoNR::MTK_CALL_START);
+        m_piVonr->SetImsSession(m_nUacType, IVoNr::MTK_CALL_START);
     }
-    else if (nState == IVoNR::STATE_IDLE)
+    else if (nState == IVoNr::STATE_IDLE)
     {
         if (m_eTotalInitiateType == VonrInitType::LTE
                 || m_eTotalInitiateType == VonrInitType::WIFI)
@@ -417,7 +417,7 @@ void UCVoNRForMtk::SetImsSession(IN IMS_UINT32 nState)
             // call started in LTE/WIFI case.
             return;
         }
-        m_piVonr->SetImsSession(m_nUacType, IVoNR::MTK_CALL_STOP);
+        m_piVonr->SetImsSession(m_nUacType, IVoNr::MTK_CALL_STOP);
     }
 }
 
@@ -428,12 +428,12 @@ void UCVoNRForMtk::SetUacCheck(IN IMS_UINT32 nState)
     // Request/Clear UAC Check over 5G from MD.
     // It should bring start/stop for the IMS as same as SetImsSession()
     // --------------------------------------------------------------------------------------------
-    if (m_nDirection == IVoNR::DIRECTION_MT)
+    if (m_nDirection == IVoNr::DIRECTION_MT)
     {
         return;
     }
 
-    if (m_nUacType == IVoNR::TYPE_EMERGENCY)
+    if (m_nUacType == IVoNr::TYPE_EMERGENCY)
     {
         return;
     }
@@ -441,15 +441,15 @@ void UCVoNRForMtk::SetUacCheck(IN IMS_UINT32 nState)
     IMS_TRACE_D("SetUacCheck state[%d] SysMode[%d] TotalInitiateType[%d]", nState,
             m_nCurrentSysMode, m_eTotalInitiateType);
 
-    if (nState == IVoNR::STATE_START)
+    if (nState == IVoNr::STATE_START)
     {
-        if (m_nCurrentSysMode == IVoNR::SYS_MODE_NR5G
+        if (m_nCurrentSysMode == IVoNr::SYS_MODE_NR5G
                 || m_eTotalInitiateType == VonrInitType::NR)
         {
-            m_piVonr->SetUacCheck(m_nUacType, IVoNR::MTK_CALL_START);
+            m_piVonr->SetUacCheck(m_nUacType, IVoNr::MTK_CALL_START);
         }
     }
-    else if (nState == IVoNR::STATE_IDLE)
+    else if (nState == IVoNr::STATE_IDLE)
     {
         if (m_eTotalInitiateType == VonrInitType::LTE
                 || m_eTotalInitiateType == VonrInitType::WIFI)
@@ -457,7 +457,7 @@ void UCVoNRForMtk::SetUacCheck(IN IMS_UINT32 nState)
             // call started in LTE/WIFI case.
             return;
         }
-        m_piVonr->SetUacCheck(m_nUacType, IVoNR::MTK_CALL_STOP);
+        m_piVonr->SetUacCheck(m_nUacType, IVoNr::MTK_CALL_STOP);
     }
 }
 
@@ -466,8 +466,8 @@ void UCVoNRForMtk::GetOngoingSessionStatus(OUT IMS_BOOL &bSameType, OUT IMS_BOOL
         OUT IMS_BOOL &bDiffVoiceDomain)
 {
     // --------------------------------------------------------------------------------------------
-    IMS_BOOL bVoiceSession = m_piListener->IsOtherSessionAlive(this, IVoNR::TYPE_VOICE);
-    IMS_BOOL bVideoSession = m_piListener->IsOtherSessionAlive(this, IVoNR::TYPE_VIDEO);
+    IMS_BOOL bVoiceSession = m_piListener->IsOtherSessionAlive(this, IVoNr::TYPE_VOICE);
+    IMS_BOOL bVideoSession = m_piListener->IsOtherSessionAlive(this, IVoNr::TYPE_VIDEO);
 
     if (m_bEmergency)
     {
@@ -477,8 +477,8 @@ void UCVoNRForMtk::GetOngoingSessionStatus(OUT IMS_BOOL &bSameType, OUT IMS_BOOL
     }
     else
     {
-        bSameType = (m_nUacType == IVoNR::TYPE_VOICE) ? bVoiceSession : bVideoSession;
-        bDiffType = (m_nUacType == IVoNR::TYPE_VOICE) ? bVideoSession : bVoiceSession;
-        bDiffVoiceDomain = m_piListener->IsOtherSessionAlive(this, IVoNR::TYPE_EMERGENCY);
+        bSameType = (m_nUacType == IVoNr::TYPE_VOICE) ? bVoiceSession : bVideoSession;
+        bDiffType = (m_nUacType == IVoNr::TYPE_VOICE) ? bVideoSession : bVoiceSession;
+        bDiffVoiceDomain = m_piListener->IsOtherSessionAlive(this, IVoNr::TYPE_EMERGENCY);
     }
 }

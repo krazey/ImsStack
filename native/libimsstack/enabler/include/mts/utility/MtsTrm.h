@@ -11,7 +11,7 @@ public:
 };
 
 class MtsTrm final :
-        public ITRMListener,
+        public ITrmListener,
         public ITimerListener
 {
 public:
@@ -32,8 +32,8 @@ private:
 
     void ProcessTimerExpired();
 
-    // ITRMListener
-    void NotifyServicePriorityChanged();
+    // ITrmListener
+    void Trm_NotifyServicePriorityChanged();
 
     // ITimerListener Interface
     void Timer_TimerExpired(IN ITimer *piTimer);
@@ -41,7 +41,7 @@ private:
 private:
     IMS_SINT32 m_nSlotId;
     IMS_BOOL m_bIsTrmSet;
-    ITRM* m_piTrm;
+    ITrm* m_piTrm;
     ITimer* m_piMtsTrmTimer;
     IMSList<MtsTrmListener*> m_objTrmListeners;
 

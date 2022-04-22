@@ -244,7 +244,7 @@ AString ParticipantInfo::GetMcc() const
     AString strMcc;
     PhoneInfoService::GetPhoneInfoService()
             ->GetSubscriberInfo(m_objContext.GetSlotId())
-            ->GetMCC(strMcc);
+            ->GetMcc(strMcc);
     return strMcc;
 }
 
@@ -254,7 +254,7 @@ AString ParticipantInfo::GetMnc(IN IMS_UINT32 nLength) const
     AString strMnc;
     PhoneInfoService::GetPhoneInfoService()
             ->GetSubscriberInfo(m_objContext.GetSlotId())
-            ->GetMNC(strMnc);
+            ->GetMnc(strMnc);
     if (nLength == 3 && strMnc.GetLength() == 2)
     {
         strMnc.Prepend("0");

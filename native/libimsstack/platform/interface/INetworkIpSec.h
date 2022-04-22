@@ -19,10 +19,10 @@
 #include "SocketAddress.h"
 #include "ISocket.h"
 
-class INetSocket;
-class IIPSecPolicy;
+class ISocket;
+class IIpSecPolicy;
 
-class INetIPSec
+class INetworkIpSec
 {
 public:
     /*
@@ -39,11 +39,11 @@ public:
     <table>
     return                  description
     ----------              ----------
-    IIPSecPolicy*           Pointer to IIPSecPolicy
+    IIpSecPolicy*           Pointer to IIpSecPolicy
     </table>
 
     */
-    virtual IIPSecPolicy* CreatePolicy() = 0;
+    virtual IIpSecPolicy* CreatePolicy() = 0;
 
     /*
 
@@ -54,7 +54,7 @@ public:
     parameter               description
     ----------              ----------
     </table>
-    IIPSecPolicy*           Pointer to IIPSecPolicy
+    IIpSecPolicy*           Pointer to IIpSecPolicy
 
     Returns
     <table>
@@ -64,7 +64,7 @@ public:
     </table>
 
     */
-    virtual void DestroyPolicy(IN IIPSecPolicy* piIPSecPolicy) = 0;
+    virtual void DestroyPolicy(IN IIpSecPolicy* piPolicy) = 0;
 
     /*
 
@@ -95,7 +95,7 @@ public:
     parameter               description
     ----------              ----------
     </table>
-    IIPSecPolicy*           Pointer to IIPSecPolicy
+    IIpSecPolicy*           Pointer to IIpSecPolicy
 
     Returns
     <table>
@@ -105,7 +105,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL AddPolicy(IN IIPSecPolicy* piIPSecPolicy) = 0;
+    virtual IMS_BOOL AddPolicy(IN IIpSecPolicy* piPolicy) = 0;
 
     /*
 
@@ -116,7 +116,7 @@ public:
     parameter               description
     ----------              ----------
     </table>
-    IIPSecPolicy*           Pointer to IIPSecPolicy
+    IIpSecPolicy*           Pointer to IIpSecPolicy
 
     Returns
     <table>
@@ -126,7 +126,7 @@ public:
     </table>
 
     */
-    virtual void DeletePolicy(IN IIPSecPolicy* piIPSecPolicy) = 0;
+    virtual void DeletePolicy(IN IIpSecPolicy* piPolicy) = 0;
 
     /*
 
@@ -166,12 +166,12 @@ public:
     </table>
 
     */
-    virtual void DumpSAs(IN IIPSecPolicy* piPolicy) = 0;
+    virtual void DumpPolicy(IN IIpSecPolicy* piPolicy) = 0;
 
     /**
-     * @brief Gets the IIPSecPolicy which matches with the given IPSec identifier.
+     * @brief Gets the IIpSecPolicy which matches with the given IPSec identifier.
      */
-    virtual IIPSecPolicy* GetPolicy(IN IMS_SINT32 nId) const = 0;
+    virtual IIpSecPolicy* GetPolicy(IN IMS_SINT32 nId) const = 0;
 
     /**
      * @brief Applies an IPSec SA to the specified socket information.
@@ -183,7 +183,7 @@ public:
      * @return Returns IMS_TRUE if the operation is successfully done.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL ApplyIpSecTransform(IN INetSocket* piSocket,
+    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
             IN const SocketAddress& objLocal, IN const SocketAddress* pRemote = IMS_NULL) = 0;
 
     /**
@@ -195,8 +195,8 @@ public:
      * @return Returns IMS_TRUE if the operation is successfully done.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL ApplyIpSecTransform(IN INetSocket* piSocket,
-            IN INetSocket* piServerSocket) = 0;
+    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
+            IN ISocket* piServerSocket) = 0;
 
     /**
      * @brief Removes IPSec SA from the specified socket information.
@@ -225,7 +225,7 @@ public:
     </table>
 
     */
-    virtual void SetSDBFlushCapability(IN IMS_BOOL bCapability) = 0;
+    virtual void SetSdbFlushCapability(IN IMS_BOOL bCapability) = 0;
 };
 
 #endif // INTERFACE_NET_IPSEC_H_

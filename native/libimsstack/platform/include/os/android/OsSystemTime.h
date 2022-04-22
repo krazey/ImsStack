@@ -26,16 +26,16 @@ public:
     virtual ~OsSystemTime();
 
 public:
-    IMSDate GetDate() const override;
+    ImsDate GetDate() const override;
     void GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
             OUT IMS_SINT32& nDay, OUT IMS_SINT32& nDayOfWeek) const override;
 
-    IMSTime GetLocalTime() const override;
+    ImsTime GetLocalTime() const override;
     void GetLocalTime(OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute,
             OUT IMS_UINT32& nSecond) const override;
 
-    IMSGMTime GetGMTime() const override;
-    void GetGMTime(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
+    ImsGmTime GetGmTime() const override;
+    void GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
             OUT IMS_SINT32& nDay, OUT IMS_UINT32& nHour,
             OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const override;
 
@@ -47,12 +47,12 @@ public:
     AString GetTimeString() const override;
     AString GetTimeStringEx() const override;
 
-    AString GetGMTimeString() const override;
-    AString GetUTCFormat(IN IMS_BOOL bNumOffset = IMS_FALSE) const override;
+    AString GetGmTimeString() const override;
+    AString GetUtcFormat(IN IMS_BOOL bNumOffset = IMS_FALSE) const override;
 
     void Sleep(IN IMS_UINT32 nMilliSeconds) override;
 
-    IMS_SLONG GetDiffGMTime(IN const AString& strBegin,
+    IMS_SLONG GetDiffGmTime(IN const AString& strBegin,
             IN const AString& strEnd, IN IMS_BOOL bSummerTime = IMS_FALSE) override;
 
 public:

@@ -14,13 +14,13 @@
 
 #include "IPAddress.h"
 
-class INetPingListener;
+class INetworkPingListener;
 
-class INetPing
+class INetworkPing
 {
 public:
     /*
-     Destroy this INetPing object.
+     Destroy this INetworkPing object.
 
     Parameters
     <table>
@@ -81,7 +81,7 @@ public:
     </table>
 
     */
-    virtual void SetListener(IN INetPingListener* piListener) = 0;
+    virtual void SetListener(IN INetworkPingListener* piListener) = 0;
 
 public:
     // Ping result status

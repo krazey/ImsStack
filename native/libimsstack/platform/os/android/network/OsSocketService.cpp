@@ -919,11 +919,11 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
     switch (nEvent)
     {
         case IMS_SOCKET_DATA_RECEIVED: {
-            if (pSocket->GetSocketType() == INetSocket::TYPE_DGRAM)
+            if (pSocket->GetSocketType() == ISocket::TYPE_DGRAM)
             {
                 pSocket->NotifyDataReceived(nErrorCode);
             }
-            else if (pSocket->GetSocketType() == INetSocket::TYPE_STREAM)
+            else if (pSocket->GetSocketType() == ISocket::TYPE_STREAM)
             {
                 if (pSocket->IsServerSocket())
                 {
@@ -973,11 +973,11 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
             break;
         }
         case IMS_SOCKET_SEND_ENABLED: {
-            if (pSocket->GetSocketType() == INetSocket::TYPE_DGRAM)
+            if (pSocket->GetSocketType() == ISocket::TYPE_DGRAM)
             {
                 pSocket->NotifySendEnabled(nErrorCode);
             }
-            else if (pSocket->GetSocketType() == INetSocket::TYPE_STREAM)
+            else if (pSocket->GetSocketType() == ISocket::TYPE_STREAM)
             {
                 if (!pSocket->IsServerSocket())
                 {

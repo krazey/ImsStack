@@ -41,7 +41,7 @@ void CertificateHelper::Init()
     strCertificateName = CERTIFICATE;
 
     // Generate the fingerprint
-    UtilService::GetUtilService()->GetSystemUtil()->DigestSHA1(
+    UtilService::GetUtilService()->GetSystemUtil()->DigestSha1(
             strCertificateName, strFingerPrint);
 
     IMS_TRACE_D("Init :: Certificate(%s) -> Fingerprint(%s)",

@@ -20,12 +20,12 @@
 #include "ImsSlot.h"
 
 class ImsIsim
-    : public IMSSlot
-    , public IISIM
+    : public ImsSlot
+    , public IIsim
 {
 public:
     inline ImsIsim(IN IMS_SINT32 nSlotId)
-        : IMSSlot(nSlotId)
+        : ImsSlot(nSlotId)
     {}
     inline virtual ~ImsIsim()
     {}

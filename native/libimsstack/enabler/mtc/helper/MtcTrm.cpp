@@ -85,8 +85,8 @@ void UCTRM::Init( IN IMS_SINT32 nSlotID)
 
     IMS_TRACE_D("Init : Slot[%d]", nSlotID, 0, 0);
 
-    ITRM *pITRM = PhoneInfoService::GetPhoneInfoService()->GetTRM();
-    if (pITRM == IMS_NULL || !(pITRM->IsTRMSupported()))
+    ITrm *pITRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    if (pITRM == IMS_NULL || !(pITRM->IsTrmSupported()))
     {
         return;
     }
@@ -521,7 +521,7 @@ UCTRM::TRM::TRM(IN IMS_SINT32 nSlotID)
     m_bNSet = IMS_FALSE;
     m_bESet = IMS_FALSE;
 
-    m_pITRM = PhoneInfoService::GetPhoneInfoService()->GetTRM();
+    m_pITRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -533,12 +533,12 @@ UCTRM::TRM::~TRM()
 
     if (m_bNSet)
     {
-        m_pITRM->SetService(m_nSlotID, ITRM::SERVICE_VOLTE, ITRM::MODE_END);
+        m_pITRM->SetService(m_nSlotID, ITrm::SERVICE_VOLTE, ITrm::MODE_END);
     }
 
     if (m_bESet)
     {
-        m_pITRM->SetEmergencyService(m_nSlotID, ITRM::SERVICE_VOLTE, ITRM::MODE_END);
+        m_pITRM->SetEmergencyService(m_nSlotID, ITrm::SERVICE_VOLTE, ITrm::MODE_END);
     }
 
     m_pITRM = IMS_NULL;
@@ -556,8 +556,8 @@ IMS_BOOL UCTRM::TRM::SetNTRM(IN IMS_BOOL bSet)
         return IMS_FALSE;
     }
 
-    m_pITRM->SetService(m_nSlotID, ITRM::SERVICE_VOLTE,
-        (bSet) ? ITRM::MODE_START : ITRM::MODE_END);
+    m_pITRM->SetService(m_nSlotID, ITrm::SERVICE_VOLTE,
+        (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
 
     m_bNSet = bSet;
     return IMS_TRUE;
@@ -575,8 +575,8 @@ IMS_BOOL UCTRM::TRM::SetETRM(IN IMS_BOOL bSet)
         return IMS_FALSE;
     }
 
-    m_pITRM->SetEmergencyService(m_nSlotID, ITRM::SERVICE_VOLTE,
-        (bSet) ? ITRM::MODE_START : ITRM::MODE_END);
+    m_pITRM->SetEmergencyService(m_nSlotID, ITrm::SERVICE_VOLTE,
+        (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
 
     m_bESet = bSet;
     return IMS_TRUE;

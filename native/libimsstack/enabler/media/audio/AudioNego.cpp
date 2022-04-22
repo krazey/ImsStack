@@ -48,7 +48,7 @@ const AString AudioNego::AUDIO_CODEC_BITRATE_STRING[3][9] = {
 // == Constructor, Destructor, Operator Overloading ========================================
 PUBLIC
 AudioNego::AudioNego(IMS_SINT32 nSlotId) :
-        IMSSlot(nSlotId),
+        ImsSlot(nSlotId),
         m_lstOaModel(IMSList<OaModel*>()),
         m_objBaseProfile(AudioProfile()),
         m_pMediaEnvironment(IMS_NULL),

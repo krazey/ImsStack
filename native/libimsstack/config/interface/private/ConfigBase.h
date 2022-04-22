@@ -25,7 +25,7 @@ class IImsPrivateProperty;
 class IConfigBuffer;
 
 class ConfigBase
-    : public IMSSlot
+    : public ImsSlot
     , public ICarrierConfigListener
 {
 public:

@@ -352,7 +352,7 @@ void UceOptions::SendOptionsResponseInd(IN IMS_SINT32 nResponseCode, IN AString 
 
     IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_RESPONSE_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
 }
 
 void UceOptions::SendOptionsCommandError(IN IMS_UINT32 code)
@@ -364,7 +364,7 @@ void UceOptions::SendOptionsCommandError(IN IMS_UINT32 code)
 
     IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_CMD_ERROR_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
 }
 
 void UceOptions::OptionsTerminated()
@@ -372,7 +372,7 @@ void UceOptions::OptionsTerminated()
     IMS_TRACE_I("OptionsTerminated:send UCE_OPTIONS_DELETED_IND to manager", 0, 0, 0 );
 
     IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_DELETED_IND, 0, m_nKey);
-    MSGService::PostMessage(m_strManagerName, objUIMsg);
+    MessageService::PostMessage(m_strManagerName, objUIMsg);
 }
 
 void UceOptions::DestroyCapabilities()

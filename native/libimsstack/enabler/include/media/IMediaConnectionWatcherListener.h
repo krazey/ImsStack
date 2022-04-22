@@ -19,12 +19,12 @@
 
 #include "AString.h"
 
-class INetConnection;
+class INetworkConnection;
 
 class IMediaConnectionWatcherListener
 {
 public:
-    virtual void NotifyMediaConnection(IN INetConnection *piNetConnection,
+    virtual void NotifyMediaConnection(IN INetworkConnection *piNetConnection,
             IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId) = 0;
     virtual void NotifyIPChanged(IMS_BOOL bIsIPv6) = 0;
     virtual void NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID) = 0;

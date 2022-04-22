@@ -33,7 +33,7 @@ private:
 public:
     ICarrierConfig* GetCarrierConfig(IN IMS_SINT32 nSlotId);
 
-    void DispatchServiceMessage(IN IMSMSG& objMsg);
+    void DispatchServiceMessage(IN ImsMessage& objMsg);
     void LoadCarrierConfig(IN IMS_SINT32 nSlotId);
 
     static ConfigService* GetConfigService();

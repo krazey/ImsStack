@@ -119,7 +119,7 @@ static int jniSmsService_ReportSMS(IN IMS_UINT32 nType, IN IMS_UINTP pParam, IN 
     if (nType == IUSmsService::REPORT_MTS_MT_SMS)
     {
         IMSMSG objMsg(nType, 0, pParam);
-        MSGService::PostMessage(STR_SMS_SVC_THREAD_NAME[nSimSlot], objMsg);
+        MessageService::PostMessage(STR_SMS_SVC_THREAD_NAME[nSimSlot], objMsg);
 
         return JNISmsServicePrivate::GetInstance()->WaitCondition();
     }
@@ -215,7 +215,7 @@ void JNISmsService::HandleMessage(int nMsg, const Parcel& pParcel)
                     AString aStrActivity = EnablerUtils::GetEnablerThreadName(m_nSlotID);
                     aStrActivity.Append(".AndroidJavaWms");
                     IMS_TRACE_I("m_aStrTargetActivity [%s]", aStrActivity.GetStr(), 0, 0);
-                    MSGService::PostMessage(aStrActivity, objMSG);
+                    MessageService::PostMessage(aStrActivity, objMSG);
                 }
                 else
                 {
@@ -232,7 +232,7 @@ void JNISmsService::HandleMessage(int nMsg, const Parcel& pParcel)
                 AString aStrActivity = EnablerUtils::GetEnablerThreadName(m_nSlotID);
                 aStrActivity.Append(".AndroidJavaWms");
                 IMS_TRACE_I("m_aStrTargetActivity [%s]", aStrActivity.GetStr(), 0, 0);
-                MSGService::PostMessage(aStrActivity, objMSG);
+                MessageService::PostMessage(aStrActivity, objMSG);
             }
             break;
 

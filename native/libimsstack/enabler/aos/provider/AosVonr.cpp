@@ -44,10 +44,10 @@ AosVonr::AosVonr(IN IAosAppContext *piContext_)
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosVonr = %" PFLS_u "/%" PFLS_x, nSlotId,
         sizeof(AosVonr), this);
 
-    piVoNR = VoNRService::GetVoNRService()->GetVoNR(nSlotId);
+    piVoNR = VoNrService::GetVoNrService()->GetVoNr(nSlotId);
     if (piVoNR != IMS_NULL)
     {
-        if (!piVoNR->IsVoNRSupported())
+        if (!piVoNR->IsVoNrSupported())
         {
             piVoNR = IMS_NULL;
         }
@@ -228,18 +228,18 @@ void AosVonr::SetImsSignaling(IN IMS_BOOL bIsActive)
     {
         if (bIsActive)
         {
-            piVoNR->SetImsSession(IVoNR::TYPE_REG_SIGNAL, IVoNR::MTK_CALL_START);
-            piVoNR->SetUacCheck(IVoNR::TYPE_REG_SIGNAL, IVoNR::MTK_CALL_START);
+            piVoNR->SetImsSession(IVoNr::TYPE_REG_SIGNAL, IVoNr::MTK_CALL_START);
+            piVoNR->SetUacCheck(IVoNr::TYPE_REG_SIGNAL, IVoNr::MTK_CALL_START);
         }
         else
         {
-            piVoNR->SetUacCheck(IVoNR::TYPE_REG_SIGNAL, IVoNR::MTK_CALL_STOP);
-            piVoNR->SetImsSession(IVoNR::TYPE_REG_SIGNAL, IVoNR::MTK_CALL_STOP);
+            piVoNR->SetUacCheck(IVoNr::TYPE_REG_SIGNAL, IVoNr::MTK_CALL_STOP);
+            piVoNR->SetImsSession(IVoNr::TYPE_REG_SIGNAL, IVoNr::MTK_CALL_STOP);
         }
     }
     else
     {
-        IMS_UINT32 nType = (bIsActive) ? IVoNR::SIGNALING_TYPE_ACTIVE : IVoNR::SIGNALING_TYPE_IDLE;
+        IMS_UINT32 nType = (bIsActive) ? IVoNr::SIGNALING_TYPE_ACTIVE : IVoNr::SIGNALING_TYPE_IDLE;
         piVoNR->SetImsSignaling(nType);
     }
 }

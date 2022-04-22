@@ -42,8 +42,8 @@ public:
     OsVoNr& operator=(IN const OsVoNr&) = delete;
 
 public:
-    // IVoNR
-    IMS_BOOL IsVoNRSupported() const override;
+    // IVoNr
+    IMS_BOOL IsVoNrSupported() const override;
     IMS_BOOL IsUacCheckRequired(IN IMS_UINT32 nType) override;
     IMS_BOOL IsUeCapabilityVoNrEnabled() const override;
 
@@ -56,14 +56,14 @@ public:
     IMS_BOOL SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
     IMS_BOOL SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency) override;
 
-    void AddListenerForUAC(IN IVoNRUACListener* piListener) override;
-    void RemoveListenerForUAC(IN IVoNRUACListener* piListener) override;
+    void AddListenerForUac(IN IVoNrUacListener* piListener) override;
+    void RemoveListenerForUac(IN IVoNrUacListener* piListener) override;
 
-    void AddListenerForCallPreference(IN IVoNRCallPreferenceListener* piListener) override;
-    void RemoveListenerForCallPreference(IN IVoNRCallPreferenceListener* piListener) override;
+    void AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener) override;
+    void RemoveListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener) override;
 
-    void AddListenerForHandoff(IN IVoNRHandoffListener* piListener) override;
-    void RemoveListenerForHandoff(IN IVoNRHandoffListener* piListener) override;
+    void AddListenerForHandoff(IN IVoNrHandoffListener* piListener) override;
+    void RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener) override;
 
 protected:
     // ImsVoNr
@@ -329,7 +329,7 @@ private:
     static const IMS_CHAR* SysModeToString(IN IMS_UINT32 nSysMode);
     static const IMS_CHAR* UacReasonToString(IN IMS_UINT32 nReason);
 
-    // IVoNR::STATE_XXX
+    // IVoNr::STATE_XXX
     enum
     {
         NAS_IMS_CALL_STATUS_START = 0x0,
@@ -337,7 +337,7 @@ private:
         NAS_IMS_CALL_STATUS_CONNECTED = 0x2
     };
 
-    // IVoNR::SYS_MODE_XXX
+    // IVoNr::SYS_MODE_XXX
     enum
     {
         NAS_RADIO_IF_NO_SVC = 0x0,
@@ -346,7 +346,7 @@ private:
         NAS_RADIO_IF_NR5G = 0x0C
     };
 
-    // IVoNR::SYS_MODE_XXX for MTK Ims Session
+    // IVoNr::SYS_MODE_XXX for MTK Ims Session
     enum
     {
         MTK_RADIO_IF_LTE = 0,
@@ -357,7 +357,7 @@ private:
         MTK_RADIO_IF_NR5G = 5
     };
 
-    // IVoNRUACListener::REASON_XXX
+    // IVoNrUacListener::REASON_XXX
     enum
     {
         NAS_MMTEL_SUCCESS = 1,
@@ -369,7 +369,7 @@ private:
         NAS_MMTEL_SERVICE_AREA_RESTRICTION = 7
     };
 
-    // IVoNRUACListener::REASON_XXX
+    // IVoNrUacListener::REASON_XXX
     // Result of UAC Check for MTK
     enum
     {
@@ -381,14 +381,14 @@ private:
         MTK_UAC_CHECK_DEREGISTERED = 5
     };
 
-    // IVoNR::RAT_XXX for handoff information
+    // IVoNr::RAT_XXX for handoff information
     enum
     {
         WDS_BEARER_TECH_RAT_EX_3GPP_LTE = 0x03,
         WDS_BEARER_TECH_RAT_EX_3GPP_5G = 0x06
     };
 
-    // IVoNRHandoffListener::STATUS_HANDOFF_XXX
+    // IVoNrHandoffListener::STATUS_HANDOFF_XXX
     enum
     {
         RIL_HANDOFF_STATUS_PREFSYS_SUCCESS = 0,
@@ -398,7 +398,7 @@ private:
         RIL_HANDOFF_STATUS_FAILURE = 4
     };
 
-    // IVoNR::RAT_XXX for call preference
+    // IVoNr::RAT_XXX for call preference
     enum
     {
         NAS_RAT_MODE_PREF_NO = 0x0,
@@ -406,7 +406,7 @@ private:
         NAS_RAT_MODE_PREF_NR5G = 0x40
     };
 
-    // IVoNR::RAT_XXX for MTK call preference
+    // IVoNr::RAT_XXX for MTK call preference
     enum
     {
         MTK_RAT_MODE_PREF_NONE = 0,
@@ -425,7 +425,7 @@ private:
         MTK_MODE_PREF_RESP_NEED_RETRY = 6
     };
 
-    // IVoNR::SIGNALING_TYPE_XXX for IMS signaling UAC
+    // IVoNr::SIGNALING_TYPE_XXX for IMS signaling UAC
     enum
     {
         WDS_LTE_CALL_TYPE_DEFAULT = 0x0,
@@ -439,9 +439,9 @@ private:
     IMS_BOOL m_bVoNrSupported;
     IMS_BOOL m_bIsMtkChipset;
 
-    IMSList<IVoNRUACListener*> m_objUacListeners;
-    IMSList<IVoNRCallPreferenceListener*> m_objCallPreferenceListeners;
-    IMSList<IVoNRHandoffListener*> m_objHandoffListeners;
+    IMSList<IVoNrUacListener*> m_objUacListeners;
+    IMSList<IVoNrCallPreferenceListener*> m_objCallPreferenceListeners;
+    IMSList<IVoNrHandoffListener*> m_objHandoffListeners;
 
     IMSMap<IMS_UINT32, CallStateList*> m_objMoCallStates;
 };

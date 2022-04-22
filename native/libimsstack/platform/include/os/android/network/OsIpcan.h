@@ -20,7 +20,7 @@
 #include "IIpcan.h"
 
 class OsIpcan
-    : public IIPCAN
+    : public IIpcan
 {
 public:
     OsIpcan();
@@ -30,7 +30,7 @@ public:
     OsIpcan& operator=(IN const OsIpcan&) = delete;
 
 protected:
-    // IIPCAN class
+    // IIpcan class
     virtual void GetAccessInfo(IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni);
     virtual void GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni);
     virtual void GetLastAccessInfo(IN IMS_SINT32 nSlotId, OUT AccessNetworkInfo& objAni,

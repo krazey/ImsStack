@@ -1071,18 +1071,18 @@ void AosNConfiguration::InitIpsecAlgorithm(IN const ICarrierConfig* piCc)
         if (objEncryAlgo.GetAt(i) == CarrierConfig::Ims::IPSEC_ENCRYPTION_ALGORITHM_AES_CBC)
         {
             m_objCarrierConfig.objIpsecEncryptionAlgorithms.Push(
-                    IPSecType::ENCRYPTION_ALGORITHM_AES_CBC);
+                    IpSecType::ENCRYPTION_ALGORITHM_AES_CBC);
         }
         else if (objEncryAlgo.GetAt(i) ==
                 CarrierConfig::Ims::IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC)
         {
             m_objCarrierConfig.objIpsecEncryptionAlgorithms.Push(
-                    IPSecType::ENCRYPTION_ALGORITHM_DES_EDE3_CBC);
+                    IpSecType::ENCRYPTION_ALGORITHM_DES_EDE3_CBC);
         }
         else // IPSEC_ENCRYPTION_ALGORITHM_NULL
         {
             m_objCarrierConfig.objIpsecEncryptionAlgorithms.Push(
-                    IPSecType::ENCRYPTION_ALGORITHM_NO);
+                    IpSecType::ENCRYPTION_ALGORITHM_NO);
         }
 
     }

@@ -19,27 +19,28 @@
 #include "ServiceThread.h"
 #include "ServiceMessage.h"
 
-class ISRVCCListener
+class ISrvccListener;
+
+class ISrvcc
 {
 public:
-    typedef enum
+    enum SRVCC_EVENT_ENTYPE
     {
-        SRVCC_EVT_START = 0x01,
-        SRVCC_EVT_FAILURE,
-        SRVCC_EVT_SUCCESS,
-        SRVCC_EVT_CANCEL,
-        CALLEVENT_NOTUSED,
-    } SRVCC_EVENT_ENTYPE;
+        SRVCC_EVENT_START = 1,
+        SRVCC_EVENT_FAILURE = 2,
+        SRVCC_EVENT_SUCCESS = 3,
+        SRVCC_EVENT_CANCEL = 4
+    };
 
 public:
-    virtual void NotifySRVCC(IN ISRVCCListener::SRVCC_EVENT_ENTYPE eEvt) = 0;
+    virtual void SubscribeSrvccListener(IN ISrvccListener* piListener) = 0;
+    virtual void UnsubscribeSrvccListener(IN ISrvccListener* piListener) = 0;
 };
 
-class ISRVCC
+class ISrvccListener
 {
 public:
-    virtual void SubscribeSRVCCListener(IN ISRVCCListener *piListener) = 0;
-    virtual void UnsubscribeSRVCCListener(IN ISRVCCListener *piListener) = 0;
+    virtual void Srvcc_NotifyEventChanged(IN ISrvcc::SRVCC_EVENT_ENTYPE eEvent) = 0;
 };
 
 #endif //_INTERFACE_IMS_SRVCC_H_

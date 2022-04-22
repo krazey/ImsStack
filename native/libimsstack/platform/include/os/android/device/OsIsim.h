@@ -21,8 +21,8 @@
 #include "IMSMap.h"
 #include "system-intf/ISystemListener.h"
 
-class IDigestAKAListener;
-class IISIMListener;
+class IDigestAkaListener;
+class IIsimListener;
 class IThread;
 
 class IsimEfContent
@@ -144,7 +144,7 @@ private:
 
 
 class OsIsimDigestAka
-    : public IDigestAKA
+    : public IDigestAka
 {
 public:
     explicit OsIsimDigestAka(IN ImsIsim* pIsim);
@@ -156,7 +156,7 @@ public:
 public:
     void Destroy() override;
     IMS_RESULT GetAuthResponse(IN const ByteArray& objChallenge) override;
-    void SetListener(IN IDigestAKAListener* piListener) override;
+    void SetListener(IN IDigestAkaListener* piListener) override;
 
     void NotifyAutsFailed(IN const ByteArray& objAuts);
     void NotifyMacFailed();
@@ -165,7 +165,7 @@ public:
 
 private:
     ImsIsim* m_pIsim;
-    IDigestAKAListener* m_pDigestAkaListener;
+    IDigestAkaListener* m_pDigestAkaListener;
 };
 
 
@@ -185,17 +185,17 @@ public:
     // ImsIsim class
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 
-    // IISIM class
+    // IIsim class
     void ClearRecords() override;
-    IDigestAKA* CreateDigestAKA() override;
+    IDigestAka* CreateDigestAka() override;
     IMS_RESULT GetField(IN IMS_SINT32 nField) override;
     IMS_RESULT GetHomeDomainName() override;
-    IMS_RESULT GetIMPI() override;
-    IMS_RESULT GetIMPU() override;
+    IMS_RESULT GetImpi() override;
+    IMS_RESULT GetImpu() override;
     IMS_SINT32 GetState() const override;
     IMS_BOOL IsReady() override;
-    void AddListener(IN IISIMListener* piListener) override;
-    void RemoveListener(IN IISIMListener* piListener) override;
+    void AddListener(IN IIsimListener* piListener) override;
+    void RemoveListener(IN IIsimListener* piListener) override;
     IMS_RESULT Init() override;
     void Release() override;
     IMS_RESULT Start(IN IMS_SINT32 nEfs = EF_ALL) override;
@@ -252,7 +252,7 @@ public:
     static const IMS_SINT32 NOTIFICATION_ISIM_AUTH = 105;
 
 private:
-    IMSList<IISIMListener*> m_objIsimListeners;
+    IMSList<IIsimListener*> m_objIsimListeners;
     IMSList<OsIsimDigestAka*> m_objDigestAkas;
 
     IMS_BOOL m_bInitialized;

@@ -41,7 +41,7 @@ PUBLIC GLOBAL
 AString SIPUtil::GenerateCallId(IN const AString &strHost)
 {
     AString strCallId;
-    IMSTime stTime = IMS_SYS_GetLocalTime();
+    ImsTime stTime = IMS_SYS_GetLocalTime();
 
     if (strHost.GetLength() == 0)
     {
@@ -89,7 +89,7 @@ PUBLIC GLOBAL
 AString SIPUtil::GenerateTag(IN const AString &strMagicCookie)
 {
     AString strTagValue;
-    IMSTime stTime = IMS_SYS_GetLocalTime();
+    ImsTime stTime = IMS_SYS_GetLocalTime();
 
     if (strMagicCookie.GetLength() == 0)
     {
@@ -191,7 +191,7 @@ AString SIPUtil::GenerateViaBranch(
         IN const AString &strExtensionToken /* = AString::ConstNull() */)
 {
     AString strViaBranch;
-    IMSTime stTime = IMS_SYS_GetLocalTime();
+    ImsTime stTime = IMS_SYS_GetLocalTime();
 
     if (strExtensionToken.GetLength() > 0)
     {

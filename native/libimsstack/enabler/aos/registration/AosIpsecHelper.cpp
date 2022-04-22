@@ -230,10 +230,10 @@ IMS_BOOL AosIpsecHelper::MakeSas(IN const AString& strPcscf, IN const IPAddress&
     m_pNewIpsec->SetKeys(objIk, objCk);
 
     // create 2 SPs for UDP
-    m_pNewIpsec->CreateSps(IPSecType::TRANS_PROTOCOL_UDP);
+    m_pNewIpsec->CreateSps(IpSecType::TRANS_PROTOCOL_UDP);
 
     // create 4 SPs for TCP
-    m_pNewIpsec->CreateSps(IPSecType::TRANS_PROTOCOL_TCP);
+    m_pNewIpsec->CreateSps(IpSecType::TRANS_PROTOCOL_TCP);
 
     // create security associations
     m_pNewIpsec->CreateSas();
@@ -488,7 +488,7 @@ IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
 
     if (objEncryptionAlgs.GetSize() == 0)
     {
-        objEncryptionAlgs.Push(IPSecType::ENCRYPTION_ALGORITHM_NO);
+        objEncryptionAlgs.Push(IpSecType::ENCRYPTION_ALGORITHM_NO);
     }
 
     m_piRegParameter->RemoveSecurityClients();
@@ -686,9 +686,9 @@ IMS_UINT32 AosIpsecHelper::GetValidUePort()
 
     for (IMS_UINT32 i = 0; i < MAX_COUNT; i++)
     {
-        if (pNetworkService->CheckIPAndPortAvailability(objUeIPA, nUePort,
-                INetSocket::TYPE_STREAM) && pNetworkService->CheckIPAndPortAvailability(objUeIPA,
-                nUePort, INetSocket::TYPE_DGRAM))
+        if (pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort,
+                ISocket::TYPE_STREAM) && pNetworkService->CheckIpAndPortAvailability(objUeIPA,
+                nUePort, ISocket::TYPE_DGRAM))
         {
             return nUePort;
         }

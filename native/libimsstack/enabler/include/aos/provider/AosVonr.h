@@ -72,7 +72,7 @@ private:
     IMS_UINT32 nStartedModules;
     IMS_BOOL bIsStartUpdated;
 
-    IVoNR *piVoNR;
+    IVoNr *piVoNR;
     ITimer *piEndDelayTimer;
 
     AString strTag;

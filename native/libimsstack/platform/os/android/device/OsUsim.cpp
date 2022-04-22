@@ -68,7 +68,7 @@ public:
 LOCAL
 OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
 {
-    return DYNAMIC_CAST(OsUsim*, PhoneInfoService::GetPhoneInfoService()->GetUSIM(nSlotId));
+    return DYNAMIC_CAST(OsUsim*, PhoneInfoService::GetPhoneInfoService()->GetUsim(nSlotId));
 }
 
 LOCAL
@@ -152,7 +152,7 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
 
         if (m_piListener != IMS_NULL)
         {
-            m_piListener->AKA_OnMACFailed();
+            m_piListener->DigestAka_OnMacFailed();
         }
 
         return;
@@ -183,7 +183,7 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
 
     if (m_piListener == IMS_NULL)
     {
-        IMS_TRACE_E(0, "IDigestAKAListener is null", 0, 0, 0);
+        IMS_TRACE_E(0, "IDigestAkaListener is null", 0, 0, 0);
         return;
     }
 
@@ -219,7 +219,7 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
         ++nPos;
         objIk.Append(&pbyAuthRes[nPos], nTmpLen);
 
-        m_piListener->AKA_OnResponse(objRes, objIk, objCk);
+        m_piListener->DigestAka_OnResponse(objRes, objIk, objCk);
     }
     else if (pbyAuthRes[nPos] == 0xDC)
     {
@@ -229,11 +229,11 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
         ++nPos;
         objAuts.Append(&pbyAuthRes[nPos+1], pbyAuthRes[nPos]);
 
-        m_piListener->AKA_OnAUTSFailed(objAuts);
+        m_piListener->DigestAka_OnAutsFailed(objAuts);
     }
     else
     {
-        m_piListener->AKA_OnMACFailed();
+        m_piListener->DigestAka_OnMacFailed();
     }
 }
 
@@ -283,7 +283,7 @@ IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 }
 
 PROTECTED VIRTUAL
-void OsUsimDigestAka::SetListener(IN IDigestAKAListener* piListener)
+void OsUsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -338,7 +338,7 @@ void OsUsim::DestroyDigestAka(IN OsUsimDigestAka* pDigestAka)
 }
 
 PROTECTED VIRTUAL
-IDigestAKA* OsUsim::CreateDigestAKA()
+IDigestAka* OsUsim::CreateDigestAka()
 {
     OsUsimDigestAka* pDigestAka = new OsUsimDigestAka(this);
 

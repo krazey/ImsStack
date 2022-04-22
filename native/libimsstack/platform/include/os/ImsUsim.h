@@ -20,12 +20,12 @@
 #include "IUsim.h"
 
 class ImsUsim
-    : public IMSSlot
-    , public IUSIM
+    : public ImsSlot
+    , public IUsim
 {
 public:
     inline ImsUsim(IN IMS_SINT32 nSlotId)
-        : IMSSlot(nSlotId)
+        : ImsSlot(nSlotId)
     {}
     inline virtual ~ImsUsim()
     {}

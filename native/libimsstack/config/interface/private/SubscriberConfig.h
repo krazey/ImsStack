@@ -25,7 +25,7 @@
 #include "private/ImsSubscriberInfo.h"
 
 class IImsPrivateProperty;
-class IISIM;
+class IIsim;
 
 class AsyncConfigHelper;
 class ICarrierConfig;
@@ -34,7 +34,7 @@ class ISubscriberInfoListener;
 class SubscriberConfig
     : public ConfigBase
     , public ISubscriberConfig
-    , public IISIMListener
+    , public IIsimListener
     , public ITimerListener
 {
 public:
@@ -120,13 +120,13 @@ protected:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
-    // IISIMListener class
-    void ISIM_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues) override;
-    void ISIM_OnHomeDomainName(IN const ByteArray& objDomainName) override;
-    void ISIM_OnIMPI(IN const ByteArray& objPrivateUserId) override;
-    void ISIM_OnIMPU(IN const IMSList<ByteArray>& objPublicUserIds) override;
-    void ISIM_OnError(IN IMS_SINT32 nErrorCode) override;
-    void ISIM_OnStateChanged(IN IMS_SINT32 nState) override;
+    // IIsimListener class
+    void Isim_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues) override;
+    void Isim_OnHomeDomainName(IN const ByteArray& objDomainName) override;
+    void Isim_OnImpi(IN const ByteArray& objPrivateUserId) override;
+    void Isim_OnImpu(IN const IMSList<ByteArray>& objPublicUserIds) override;
+    void Isim_OnError(IN IMS_SINT32 nErrorCode) override;
+    void Isim_OnStateChanged(IN IMS_SINT32 nState) override;
 
     // ITimerListener class
     void Timer_TimerExpired(IN ITimer* piTimer) override;
@@ -252,7 +252,7 @@ private:
     // is PCSCF_DISCOVERY_METHOD_CONFIG.
     IMSVector<ServerAddress*> m_objPcscfAddresses;
 
-    IISIM* m_piIsim;
+    IIsim* m_piIsim;
     IMS_BOOL m_bFlagRequestPending;
     IMS_SINT32 m_nConfiguredIsimRecords;
     IMS_SINT32 m_nIsimRecords;

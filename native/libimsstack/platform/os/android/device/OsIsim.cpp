@@ -153,7 +153,7 @@ LOCAL const OsIsimStateMap SIM_STATE_MAP[] =
 LOCAL
 OsIsim* osIsim_GetInstance(IN IMS_SINT32 nSlotId)
 {
-    return DYNAMIC_CAST(OsIsim*, PhoneInfoService::GetPhoneInfoService()->GetISIM(nSlotId));
+    return DYNAMIC_CAST(OsIsim*, PhoneInfoService::GetPhoneInfoService()->GetIsim(nSlotId));
 }
 
 LOCAL
@@ -323,67 +323,67 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
     switch (pParam->m_nState)
     {
         case OsIsimStateParam::STATE_NOT_PRESENT: {
-            pIsim->SetState(IISIM::STATE_IDLE);
-            pIsim->NotifyError(IISIM::ERROR_NO_ISIM_APPLICATION);
+            pIsim->SetState(IIsim::STATE_IDLE);
+            pIsim->NotifyError(IIsim::ERROR_NO_ISIM_APPLICATION);
             break;
         }
         case OsIsimStateParam::STATE_NOT_READY: {
             // Case 1) Abnormal ISIM state notification (system crash, ...)
-            if (nState == IISIM::STATE_READY)
+            if (nState == IIsim::STATE_READY)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHING);
+                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             // Case 1) ISIM state notification when reading the file attributes
-            else if (nState == IISIM::STATE_INIT)
+            else if (nState == IIsim::STATE_INIT)
             {
-                pIsim->SetState(IISIM::STATE_IDLE);
+                pIsim->SetState(IIsim::STATE_IDLE);
             }
             // Case: Refresh is completed, but reading ISIM records fails.
-            else if (nState == IISIM::STATE_REFRESHED)
+            else if (nState == IIsim::STATE_REFRESHED)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHING);
+                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             break;
         }
         case OsIsimStateParam::STATE_LOADED: {
-            if (nState == IISIM::STATE_IDLE)
+            if (nState == IIsim::STATE_IDLE)
             {
-                pIsim->SetState(IISIM::STATE_INIT);
+                pIsim->SetState(IIsim::STATE_INIT);
             }
             // Case 1) Abnormal ISIM state notification (system crash, ...)
-            else if (nState == IISIM::STATE_REFRESHING)
+            else if (nState == IIsim::STATE_REFRESHING)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHED);
+                pIsim->SetState(IIsim::STATE_REFRESHED);
             }
             break;
         }
         case OsIsimStateParam::STATE_REFRESH_STARTED: {
             // Case 1) Normal ISIM refresh state notification
-            if (nState == IISIM::STATE_READY)
+            if (nState == IIsim::STATE_READY)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHING);
+                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             // Refresh is completed, but reading ISIM records fails.
-            else if (nState == IISIM::STATE_REFRESHED)
+            else if (nState == IIsim::STATE_REFRESHED)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHING);
+                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             // Refresh is started on INIT state (Normal SIM activation)
-            else if (nState == IISIM::STATE_INIT)
+            else if (nState == IIsim::STATE_INIT)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHING);
+                pIsim->SetState(IIsim::STATE_REFRESHING);
             }
             break;
         }
         case OsIsimStateParam::STATE_REFRESH_COMPLETED: {
-            if (nState == IISIM::STATE_REFRESHING)
+            if (nState == IIsim::STATE_REFRESHING)
             {
-                pIsim->SetState(IISIM::STATE_REFRESHED);
+                pIsim->SetState(IIsim::STATE_REFRESHED);
             }
             break;
         }
         case OsIsimStateParam::STATE_SIM_REMOVED: {
-            pIsim->SetState(IISIM::STATE_IDLE);
+            pIsim->SetState(IIsim::STATE_IDLE);
             break;
         }
         default: {
@@ -470,10 +470,10 @@ IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 {
     OsIsim* pIsim = osIsim_GetInstance(m_pIsim->GetSlotId());
 
-    if (pIsim->GetState() != IISIM::STATE_READY)
+    if (pIsim->GetState() != IIsim::STATE_READY)
     {
         IMS_TRACE_E(0, "Allowed in READY; state=%d", pIsim->GetState(), 0, 0);
-        if (pIsim->GetState() == IISIM::STATE_IDLE)
+        if (pIsim->GetState() == IIsim::STATE_IDLE)
         {
             pIsim->NotifyAuthResult(IMS_FAILURE);
         }
@@ -518,7 +518,7 @@ IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 }
 
 PUBLIC VIRTUAL
-void OsIsimDigestAka::SetListener(IN IDigestAKAListener* piListener)
+void OsIsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
 {
     m_pDigestAkaListener = piListener;
 }
@@ -532,7 +532,7 @@ void OsIsimDigestAka::NotifyAutsFailed(IN const ByteArray& objAuts)
         return;
     }
 
-    m_pDigestAkaListener->AKA_OnAUTSFailed(objAuts);
+    m_pDigestAkaListener->DigestAka_OnAutsFailed(objAuts);
 }
 
 PUBLIC
@@ -544,7 +544,7 @@ void OsIsimDigestAka::NotifyMacFailed()
         return;
     }
 
-    m_pDigestAkaListener->AKA_OnMACFailed();
+    m_pDigestAkaListener->DigestAka_OnMacFailed();
 }
 
 PUBLIC
@@ -557,7 +557,7 @@ void OsIsimDigestAka::NotifyResponse(IN const ByteArray& objRes,
         return;
     }
 
-    m_pDigestAkaListener->AKA_OnResponse(objRes, objIk, objCk);
+    m_pDigestAkaListener->DigestAka_OnResponse(objRes, objIk, objCk);
 }
 
 
@@ -565,7 +565,7 @@ void OsIsimDigestAka::NotifyResponse(IN const ByteArray& objRes,
 PUBLIC
 OsIsim::OsIsim(IN IMS_SINT32 nSlotId)
     : ImsIsim(nSlotId)
-    , m_objIsimListeners(IMSList<IISIMListener*>())
+    , m_objIsimListeners(IMSList<IIsimListener*>())
     , m_objDigestAkas(IMSList<OsIsimDigestAka*>())
     , m_bInitialized(IMS_FALSE)
     , m_piOwnerThread(IMS_NULL)
@@ -620,7 +620,7 @@ void OsIsim::ClearRecords()
 }
 
 PUBLIC VIRTUAL
-IDigestAKA* OsIsim::CreateDigestAKA()
+IDigestAka* OsIsim::CreateDigestAka()
 {
     OsIsimDigestAka* pDigestAka = new OsIsimDigestAka(this);
 
@@ -666,13 +666,13 @@ IMS_RESULT OsIsim::GetHomeDomainName()
 }
 
 PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetIMPI()
+IMS_RESULT OsIsim::GetImpi()
 {
     return GetRecord(EF_ID_IMPI);
 }
 
 PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetIMPU()
+IMS_RESULT OsIsim::GetImpu()
 {
     return GetRecord(EF_ID_IMPU);
 }
@@ -690,7 +690,7 @@ IMS_BOOL OsIsim::IsReady()
 }
 
 PUBLIC VIRTUAL
-void OsIsim::AddListener(IN IISIMListener* piListener)
+void OsIsim::AddListener(IN IIsimListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -699,7 +699,7 @@ void OsIsim::AddListener(IN IISIMListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piTmpListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -711,7 +711,7 @@ void OsIsim::AddListener(IN IISIMListener* piListener)
 }
 
 PUBLIC VIRTUAL
-void OsIsim::RemoveListener(IN IISIMListener* piListener)
+void OsIsim::RemoveListener(IN IIsimListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -720,7 +720,7 @@ void OsIsim::RemoveListener(IN IISIMListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piTmpListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piTmpListener = m_objIsimListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -1026,13 +1026,13 @@ void OsIsim::NotifyError(IN IMS_UINT32 nError)
 {
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piListener = m_objIsimListeners.GetAt(i);
 
         if (piListener == IMS_NULL)
         {
             continue;
         }
-        piListener->ISIM_OnError(nError);
+        piListener->Isim_OnError(nError);
     }
 }
 
@@ -1063,23 +1063,23 @@ void OsIsim::NotifyError(IN IMS_SINT32 nFileId, IN IMS_SINT32 nOperation)
         {
             if (nFileId == EF_ID_IMPI)
             {
-                nErrorReason = IISIM::ERROR_READ_IMPI_FAILED;
+                nErrorReason = IIsim::ERROR_READ_IMPI_FAILED;
             }
             else if (nFileId == EF_ID_DOMAIN)
             {
-                nErrorReason = IISIM::ERROR_READ_DOMAIN_FAILED;
+                nErrorReason = IIsim::ERROR_READ_DOMAIN_FAILED;
             }
             else if (nFileId == EF_ID_IMPU)
             {
-                nErrorReason = IISIM::ERROR_READ_IMPU_FAILED;
+                nErrorReason = IIsim::ERROR_READ_IMPU_FAILED;
             }
             else if (nFileId == EF_ID_IST)
             {
-                nErrorReason = IISIM::ERROR_READ_IST_FAILED;
+                nErrorReason = IIsim::ERROR_READ_IST_FAILED;
             }
             else if (nFileId == EF_ID_PCSCF)
             {
-                nErrorReason = IISIM::ERROR_READ_PCSCF_ADDRESS_FAILED;
+                nErrorReason = IIsim::ERROR_READ_PCSCF_ADDRESS_FAILED;
             }
             break;
         }
@@ -1089,7 +1089,7 @@ void OsIsim::NotifyError(IN IMS_SINT32 nFileId, IN IMS_SINT32 nOperation)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piListener = m_objIsimListeners.GetAt(i);
 
         if (piListener == IMS_NULL)
         {
@@ -1098,7 +1098,7 @@ void OsIsim::NotifyError(IN IMS_SINT32 nFileId, IN IMS_SINT32 nOperation)
 
         if (nErrorReason != -1)
         {
-            piListener->ISIM_OnError(nErrorReason);
+            piListener->Isim_OnError(nErrorReason);
         }
     }
 }
@@ -1109,7 +1109,7 @@ void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId,
 {
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piListener = m_objIsimListeners.GetAt(i);
 
         if (piListener == IMS_NULL)
         {
@@ -1119,19 +1119,19 @@ void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId,
         switch (nFileId)
         {
         case EF_ID_IMPI:
-            piListener->ISIM_OnIMPI(objContent.GetRecords().GetAt(0));
+            piListener->Isim_OnImpi(objContent.GetRecords().GetAt(0));
             break;
         case EF_ID_DOMAIN:
-            piListener->ISIM_OnHomeDomainName(objContent.GetRecords().GetAt(0));
+            piListener->Isim_OnHomeDomainName(objContent.GetRecords().GetAt(0));
             break;
         case EF_ID_IMPU:
-            piListener->ISIM_OnIMPU(objContent.GetRecords());
+            piListener->Isim_OnImpu(objContent.GetRecords());
             break;
         case EF_ID_IST:
-            piListener->ISIM_OnField(FIELD_IST, objContent.GetRecords());
+            piListener->Isim_OnField(FIELD_IST, objContent.GetRecords());
             break;
         case EF_ID_PCSCF:
-            piListener->ISIM_OnField(FIELD_PCSCF_ADDRESS, objContent.GetRecords());
+            piListener->Isim_OnField(FIELD_PCSCF_ADDRESS, objContent.GetRecords());
             break;
         default:
             break;
@@ -1145,7 +1145,7 @@ void OsIsim::ReleaseUimClient(IN IMS_BOOL bFromApp /*= IMS_FALSE*/)
     IMS_TRACE_I("ReleaseUIMClient - initialized=%s, fromApp=%s",
             _TRACE_B_(m_bInitialized), _TRACE_B_(bFromApp), 0);
 
-    m_nState = IISIM::STATE_IDLE;
+    m_nState = IIsim::STATE_IDLE;
     m_nCountForAuthFailed = 0;
     m_bInitialized = IMS_FALSE;
 }
@@ -1221,7 +1221,7 @@ void OsIsim::SetRecordAttributes(IN IMS_SINT32 nFileId,
 {
     IMS_SINT32 nState = GetState();
 
-    if ((nState == IISIM::STATE_IDLE) || (nState == IISIM::STATE_REFRESHING))
+    if ((nState == IIsim::STATE_IDLE) || (nState == IIsim::STATE_REFRESHING))
     {
         IMS_TRACE_D("EF(%X) can't be set in the state (IDLE or REFRESHING)", nFileId, 0, 0);
         return;
@@ -1322,11 +1322,11 @@ void OsIsim::SetState(IN IMS_SINT32 nState)
 
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
-        IISIMListener* piListener = m_objIsimListeners.GetAt(i);
+        IIsimListener* piListener = m_objIsimListeners.GetAt(i);
 
         if (piListener != IMS_NULL)
         {
-            piListener->ISIM_OnStateChanged(m_nState);
+            piListener->Isim_OnStateChanged(m_nState);
         }
     }
 }

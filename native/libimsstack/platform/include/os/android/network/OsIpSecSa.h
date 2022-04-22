@@ -22,7 +22,7 @@
 class OsIpSecSaPrivate;
 
 class OsIpSecSa
-    : public IIPSecSA
+    : public IIpSecSa
 {
 public:
     OsIpSecSa();
@@ -32,13 +32,13 @@ public:
     OsIpSecSa& operator=(IN const OsIpSecSa&) = delete;
 
 public:
-    // IIPSecSA class
-    void SetSA(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+    // IIpSecSa class
+    void SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
             IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
             IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode,
             IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm,
             IN const ByteArray& objAuthKey, IN const ByteArray& objEncryptionKey) override;
-    void DoneSA() override;
+    void DoneSa() override;
 
     void* GetKey();
     IMS_UINT32 GetSpi() const;

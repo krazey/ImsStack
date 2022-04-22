@@ -35,7 +35,7 @@ public:
     virtual void SetListener(IN IAosConnectionListener* piListener) = 0;
     virtual void RemoveListener(IN IAosConnectionListener* piListener) = 0;
 
-    // INetConnection Util
+    // INetworkConnection Util
     virtual IMS_SINT32 GetMtu() = 0;
     virtual const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) = 0;

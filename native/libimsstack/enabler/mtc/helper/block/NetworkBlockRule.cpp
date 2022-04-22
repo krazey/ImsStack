@@ -7,7 +7,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 NetworkBlockRule::NetworkBlockRule(
-        IN const IMtcService& objService, IN INetWatcherInfo& objNetWatcherInfo) :
+        IN const IMtcService& objService, IN INetworkWatcher& objNetWatcherInfo) :
         m_objService(objService),
         m_objNetWatcherInfo(objNetWatcherInfo)
 {

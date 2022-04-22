@@ -1178,7 +1178,7 @@ IMS_BOOL AosApplication::PreprocessStateMessage_Connection(IN IMSMSG& objMsg)
         {
             bEpdgEnabled = bCurrEpdgEnabled;
             UpdateMonitorNotify(IImsAosMonitor::TYPE_IPCAN, (bEpdgEnabled) ?
-                    IIPCAN::CATEGORY_WLAN : IIPCAN::CATEGORY_MOBILE);
+                    IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE);
         }
     }
 
@@ -1831,12 +1831,12 @@ void AosApplication::ProcessIpcanHandoverEvent(IN IMS_UINT32 nResult, IN IMS_UIN
         IMS_BOOL bIsRegStopNeeded = IMS_FALSE;
         IMS_UINT32 nCurrentIpcan = m_piContext->GetConnection()->GetIpcanCategory();
 
-        if (nCurrentIpcan == IIPCAN::CATEGORY_WLAN && nPreferredRat == CELLULAR_ONLY)
+        if (nCurrentIpcan == IIpcan::CATEGORY_WLAN && nPreferredRat == CELLULAR_ONLY)
         {
             bIsRegStopNeeded = IMS_TRUE;
         }
 
-        if (nCurrentIpcan == IIPCAN::CATEGORY_MOBILE && nPreferredRat == EPDG_ONLY)
+        if (nCurrentIpcan == IIpcan::CATEGORY_MOBILE && nPreferredRat == EPDG_ONLY)
         {
             bIsRegStopNeeded = IMS_TRUE;
         }
@@ -2475,7 +2475,7 @@ IMS_UINT32 AosApplication::UpdateConnectedServices(IN IMS_BOOL bEnforceUpdateReg
         if (piMonitor != IMS_NULL)
         {
             piMonitor->ImsAosMonitor_Connected(nReportServices,
-                    (bWlanIpcan) ? IIPCAN::CATEGORY_WLAN : IIPCAN::CATEGORY_MOBILE);
+                    (bWlanIpcan) ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE);
         }
     }
 
@@ -2785,8 +2785,8 @@ void AosApplication::Init()
 {
     A_IMS_TRACE_D(APPID, "Init", 0, 0, 0);
 
-    IVoNR* piServiceVonr = VoNRService::GetVoNRService()->GetVoNR(m_nSlotId);
-    m_bIsVonrSupported = (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNRSupported()) ?
+    IVoNr* piServiceVonr = VoNrService::GetVoNrService()->GetVoNr(m_nSlotId);
+    m_bIsVonrSupported = (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported()) ?
             IMS_TRUE : IMS_FALSE;
 
     m_piRegistration = m_piContext->GetRegistration();

@@ -30,7 +30,7 @@ class MediaConnectionWatcher :
 {
 private :
     class NetConnectionWatcher  // Internal-Class
-            : public INetConnectionListener
+            : public INetworkConnectionListener
     {
     public:
         NetConnectionWatcher();
@@ -40,21 +40,21 @@ private :
         IMS_SINT32 GetMediaConnectionType();
         IMS_UINT32 GetNetworkInterfaceID();
         void SetMediaConnectionType(IN IMS_SINT32 nMediaConnectionType);
-        IMS_BOOL SetINetConnection(IN INetConnection *piNetConnection);
+        IMS_BOOL SetINetConnection(IN INetworkConnection *piNetConnection);
         IMS_UINT32 GetListenerLength();
         void NotifyWifiEarlyRouteSetupChanged(IN IMS_SINT32 nMtuSize);
         IMS_SINT32 GetMtuSize();
 
     public:
-        /* INetConnectionListener Interface Impl */
-        virtual void Connection_Connected(IN INetConnection *piNetConnection);
-        virtual void Connection_Disconnected(IN INetConnection *piNetConnection,
+        /* INetworkConnectionListener Interface Impl */
+        virtual void NetworkConnection_OnConnected(IN INetworkConnection *piNetConnection);
+        virtual void NetworkConnection_OnDisconnected(IN INetworkConnection *piNetConnection,
             IN IMS_SINT32 nErrorCode);
-        virtual void Connection_ConnectionFailed(IN INetConnection *piNetConnection,
+        virtual void NetworkConnection_OnConnectionFailed(IN INetworkConnection *piNetConnection,
             IN IMS_SINT32 nErrorCode);
-        virtual void Connection_IpChanged(IN INetConnection *piNetConnection);
-        virtual void Connection_IpcanCatChanged(IN INetConnection *piNetConnection);
-        virtual void Connection_PcscfChanged(IN INetConnection *piNetConnection);
+        virtual void NetworkConnection_OnIpChanged(IN INetworkConnection *piNetConnection);
+        virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection *piNetConnection);
+        virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection *piNetConnection);
 
     private:
         IMS_BOOL hasListener(IN IMediaConnectionWatcherListener *piListener);
@@ -64,7 +64,7 @@ private :
 
     public:
         IMSList<IMediaConnectionWatcherListener *> m_objListeners;
-        INetConnection *m_piNetConnection;
+        INetworkConnection *m_piNetConnection;
 
     private:
         IMS_SINT32 m_nMediaConnectionType;
@@ -75,13 +75,13 @@ private:
     MediaConnectionWatcher();
     virtual ~MediaConnectionWatcher();
     MediaConnectionWatcher::NetConnectionWatcher* findNetConnectionWatcher(
-                IN INetConnection *piNetConnection);
+                IN INetworkConnection *piNetConnection);
     void clearMediaConnectionWatcher();
 
 public :
-    static IMS_SINT32 convertNetworkType(IN INetConnection *piNetConnection);
+    static IMS_SINT32 convertNetworkType(IN INetworkConnection *piNetConnection);
     static const IMS_CHAR* printNetworkType(IN IMS_SINT32 nMediaConnectionType);
-    static IMS_SINT32 CalculateRtpFragmentSize(IN INetConnection *piNetConnection/*,
+    static IMS_SINT32 CalculateRtpFragmentSize(IN INetworkConnection *piNetConnection/*,
             IN IMS_SINT32 nSlotId = 0*/);
     static IMS_SINT32 CalculateRtpFragmentSize(IN NetConnectionWatcher *pNetConnectionWatcher/*,
             IN IMS_SINT32 nSlotId = 0*/);
@@ -89,12 +89,12 @@ public :
     /* IMediaConnectionWatcher Interface Impl*/
     static MediaConnectionWatcher* GetMediaConnectionWatcher(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     virtual IMS_BOOL GetMediaConnectionType(IN AString &strPDN, IN IMS_SINT32 nSlotID,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
             OUT IMS_UINT32 &nNetworkInterfaceId);
     virtual IMS_BOOL GetMediaConnectionType(IN IPAddress &objIpAddress,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
             OUT IMS_UINT32 &nNetworkInterfaceId);
-    virtual IMS_BOOL GetMediaConnectionType(IN INetConnection *piNetConnection,
+    virtual IMS_BOOL GetMediaConnectionType(IN INetworkConnection *piNetConnection,
             OUT IMS_SINT32 &nMediaConnectionType, OUT IMS_UINT32 &nNetworkInterfaceId);
     virtual IMS_BOOL SetListener(IN IMediaConnectionWatcherListener* piListener,IN AString &strPDN,
             IN IMS_SINT32 nSlotID, OUT IMS_SINT32 &nMediaConnectionType,
@@ -105,10 +105,10 @@ public :
     virtual IMS_BOOL ReleaseListener(IMediaConnectionWatcherListener *piListener);
 
     virtual IMS_BOOL GetRtpFragmentSize(IN AString &strPDN, IN IMS_SINT32 nSlotID,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize);
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize);
     virtual IMS_BOOL GetRtpFragmentSize(IN IPAddress &objIpAddress,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize);
-    virtual IMS_BOOL GetRtpFragmentSize(IN INetConnection *piNetConnection,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize);
+    virtual IMS_BOOL GetRtpFragmentSize(IN INetworkConnection *piNetConnection,
             OUT IMS_SINT32 &nRtpFragmentSize);
 
     /* IEventListener Interfcace Impl */

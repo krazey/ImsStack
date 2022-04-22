@@ -180,7 +180,7 @@ IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfile* pAudioProf
     if (pConfig->GetAudioHalfRateMode())
     {
         IMS_SINT32 nlteRSRP =
-                PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo()->GetLTERsrpStrength();
+                PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher()->GetLteRsrpStrength();
         if (nlteRSRP < IMSMEDIA_AUDIO_HALFRATE_LTE_RSRP_THRESHOLD)
         {
             bAudioHalfRate = IMS_TRUE;
@@ -336,7 +336,7 @@ IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfile* pAudioProf
             pEvsFmtp->nDefaultRtpModeSet = pEvsConfig->GetDefaultRptModeSet();
 
             if (PhoneInfoService::GetPhoneInfoService()->
-                    GetNetWatcherInfo(nSlotId)->GetRoamingState() == IMS_TRUE)
+                    GetNetworkWatcher(nSlotId)->GetRoamingState() == IMS_TRUE)
             {
                 // In case of roaming use up to 13.2kbps as default bitrate
                 pEvsFmtp->nDefaultBitrateList = 0x1f;

@@ -14,23 +14,23 @@
 
 #include "ImsTypeDef.h"
 
-class INetPing;
+class INetworkPing;
 
-class INetPingListener
+class INetworkPingListener
 {
 public:
     /*
      Notify the application that the specified data connection is alive or not.
-    Application can query the result using INetPing interface.
+    Application can query the result using INetworkPing interface.
 
     Parameters
     <table>
     parameter               description
     ----------              ----------
     piNetPing               Ping interface to check connection aliveness
-    nResult                 INetPing::PING_STATUS_OK
-                            INetPing::PING_STATUS_DEAD_PEER
-                            INetPing::PING_STATUS_TIMEDOUT
+    nResult                 INetworkPing::PING_STATUS_OK
+                            INetworkPing::PING_STATUS_DEAD_PEER
+                            INetworkPing::PING_STATUS_TIMEDOUT
     </table>
 
     Returns
@@ -40,7 +40,7 @@ public:
     </table>
 
     */
-    virtual void NetPing_NotifyResult(IN INetPing* piNetPing, IN IMS_SINT32 nResult) = 0;
+    virtual void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult) = 0;
 };
 
 #endif // _INTERFACE_IMS_NET_PING_LISTENER_H_

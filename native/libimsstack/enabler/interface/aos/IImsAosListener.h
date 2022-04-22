@@ -39,8 +39,8 @@ public:
      *
      * @param nFeatures Indicate the features for registration (@see ImsAosFeature)
      * @param nIpcan Indicate the IP connectivity access network where IMS is registered. \n
-     *                  - IIPCAN::CATEGORY_MOBILE \n
-     *                  - IIPCAN::CATEGORY_WLAN
+     *                  - IIpcan::CATEGORY_MOBILE \n
+     *                  - IIpcan::CATEGORY_WLAN
      */
     virtual void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) = 0;
 

@@ -16,9 +16,9 @@
 
 #include "ImsTypeDef.h"
 
-class IDigestAKA;
+class IDigestAka;
 
-class IUSIM
+class IUsim
 {
 public:
     /*
@@ -35,11 +35,11 @@ public:
     <table>
     return                  description
     ----------              ----------
-    IDigestAKA*             Pointer to IDigestAKA
+    IDigestAka*             Pointer to IDigestAka
     </table>
 
     */
-    virtual IDigestAKA* CreateDigestAKA() = 0;
+    virtual IDigestAka* CreateDigestAka() = 0;
 };
 
 #endif // _INTERFACE_IMS_USIM_H_

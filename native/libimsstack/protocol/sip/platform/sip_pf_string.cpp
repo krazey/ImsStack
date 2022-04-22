@@ -768,8 +768,8 @@ SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName)
 SIP_BOOL SipPf_GetSystemTime(SipSt_Timestamp* pstTime)
 {
     ISystemTime* pSysTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
-    IMSDate Date = pSysTime->GetDate();
-    IMSTime Time = pSysTime->GetLocalTime();
+    ImsDate Date = pSysTime->GetDate();
+    ImsTime Time = pSysTime->GetLocalTime();
 
     pstTime->wYear = Date.nYear;
     pstTime->wMonth = Date.nMonth;;

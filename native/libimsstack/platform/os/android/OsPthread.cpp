@@ -231,7 +231,7 @@ void OsPthread::SetRunnable(IN IRunnable* /*piListener*/)
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsPthread::PostMessageI(IN IMSMSG& /*objMsg*/)
+IMS_BOOL OsPthread::PostMessageI(IN ImsMessage& /*objMsg*/)
 {
     return IMS_FALSE;
 }

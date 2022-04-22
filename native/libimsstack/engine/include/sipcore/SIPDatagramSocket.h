@@ -35,10 +35,10 @@ public:
 
 protected:
     // ISocketListener interface
-    virtual void Socket_DataReceived(IN INetSocket *piSocket);
-    virtual void Socket_SendEnabled(IN INetSocket *piSocket);
-    virtual void Socket_Closed(IN INetSocket *piSocket,
-            IN IMS_SINT32 nReason = INetSocket::CLOSE_REASON_UNKNOWN);
+    virtual void Socket_OnDataReceived(IN ISocket *piSocket);
+    virtual void Socket_OnSendEnabled(IN ISocket *piSocket);
+    virtual void Socket_OnClosed(IN ISocket *piSocket,
+            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN);
 
 private:
     ISIPDatagramSocketListener *piListener;

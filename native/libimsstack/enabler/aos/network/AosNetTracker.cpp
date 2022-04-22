@@ -323,7 +323,7 @@ Remarks
 PUBLIC VIRTUAL
 IMS_SINT32 AosNetTracker::GetMobileVoiceServiceState()
 {
-    return PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(
+    return PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(
             nSlotId)->GetNetVoiceServiceType();
 }
 
@@ -445,7 +445,7 @@ Remarks
 
 */
 PUBLIC VIRTUAL
-void AosNetTracker::NotifyNetWatcherStatus(IN class INetWatcherInfo *piNetWatcherInfo)
+void AosNetTracker::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
 {
     if (this->piNetWatcherInfo != piNetWatcherInfo)
     {
@@ -486,7 +486,7 @@ Remarks
 
 */
 PUBLIC VIRTUAL
-void AosNetTracker::NotifyStateChanged(IN class IWifiWatcher *pIWifiWatcher)
+void AosNetTracker::WifiWatcher_NotifyStateChanged(IN IWifiWatcher *pIWifiWatcher)
 {
     if (piWifiWatcher != pIWifiWatcher)
     {
@@ -676,7 +676,7 @@ void AosNetTracker::InitObject()
 
     pUtil = AosUtil::GetInstance();
 
-    piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(nSlotId);
+    piNetWatcherInfo = PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
     if (piNetWatcherInfo != IMS_NULL)
     {
         piNetWatcherInfo->RegisterObserver(this);
