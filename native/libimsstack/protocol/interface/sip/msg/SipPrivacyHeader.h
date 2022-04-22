@@ -63,5 +63,10 @@ class SipPrivacyHeader : public SipHeaderBase
         SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
         SIP_BOOL AddPrivacy(const SIP_CHAR* pszPrivacy);
+
+        inline SIP_BOOL IsValidHeader() const
+        {
+            return (m_objPrivacyList.GetSize() > 0) ? SIP_TRUE : SIP_FALSE;
+        }
 };
 #endif //__SIP_PRIVACY_HEADER_H__
