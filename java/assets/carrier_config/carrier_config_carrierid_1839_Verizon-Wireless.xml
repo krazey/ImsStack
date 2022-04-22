@@ -6,14 +6,39 @@
     <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
 
+    <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="imssms.support_limited_admin_sms_mode_bool" value="true"/>
+
+    <int name="ims.registration_actual_wait_time_policy_int" value="3"/>
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
+
+    <int name="ims.preferred_ims_dscp_int" value="2"/>
+
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int name="ims.wait_time_for_initial_registration_on_terminated_state_of_reg_event_int" value="60"/>
     <int-array name="ims.event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="2">
         <item value="2"/>
         <item value="5"/>
     </int-array>
+
+    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
+    <int name="specific_registration_error_final_type_int" value="2"/>
+    <int name="specific_registration_error_policy_int" value="2"/>
+    <int-array name="specific_registration_error_code_int_array" num="4">
+        <item value="0"/>
+        <item value="2"/>
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
+    <int-array name="specific_reregistration_error_code_int_array" num="2">
+        <item value="403"/>
+        <item value="404"/>
+    </int-array>
+    <int-array name="specific_registration_error_wait_time_sec_int_array" num="1">
+        <item value="30"/>
+    </int-array>
+
     <!-- KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE -->
     <int-array name="ims.registration_retry_random_upper_value_sec_int_array" num="6">
         <item value="0"/>
@@ -31,6 +56,37 @@
         <item value="480"/>
         <item value="900"/>
     </int-array>
+
+    <!-- KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE -->
+    <int-array name="ims.registration_permanent_error_code_int_array" num="4">
+        <item value="400"/>
+        <item value="402"/>
+        <item value="421"/>
+        <item value="484"/>
+    </int-array>
+    <int-array name="ims.registration_permanent_error_max_count_int_array" num="1">
+        <item value="2"/>
+    </int-array>
+
+    <!-- KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE -->
+    <boolean name="registration_error_code_with_retry_after_time_only_defined_bool" value="true"/>
+    <int-array name="registration_error_code_with_retry_after_time_int_array" num="5">
+        <item value="480"/>
+        <item value="486"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="600"/>
+    </int-array>
+    <int-array name="reregistration_error_code_with_retry_after_time_int_array" num="5">
+        <item value="480"/>
+        <item value="486"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="600"/>
+    </int-array>
+
+    <!-- KEY_REGISTRATION_RETRY_BUNDLE -->
+    <int name="registration_retry_default_policy_int" value="1"/>
 
     <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->
     <int name="subscription_terminated_error_code_for_reg_event_retry_max_count_int" value="2"/>

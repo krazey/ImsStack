@@ -183,7 +183,6 @@ void AosERegistration::Init()
     }
 
     InitFeatures();
-    InitRetryIntervals();
 }
 
 PROTECTED VIRTUAL

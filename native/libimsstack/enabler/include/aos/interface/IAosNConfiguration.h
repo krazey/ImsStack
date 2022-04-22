@@ -297,6 +297,14 @@ public:
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const = 0;
 
     /**
+     * @brief Flag indicating whether the defined error codes are only applied with Retry-After
+     *        header value.
+     *
+     * @return IMS_BOOL Return wherther the defined error codes is used.
+     */
+    virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -865,9 +873,24 @@ public:
      *        - Possible wildcard values except for error codes are,
      *        CarrierConfig::Assets::REG_ERROR_CODE_TIMER_F, etc
      *
-     * @return vector list
+     * @return vector error code list
      */
     virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode() = 0;
+
+    /**
+     * @brief Indicate the error codes for reregistration
+     *        see@GetSpecificRegistrationErrorCode
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetSpecificReregistrationErrorCode() = 0;
+
+    /**
+     * @brief Indicate the list of wait-time seconds when registration is retried.
+     *
+     * @return vector wait time list
+     */
+    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrWaitTime() = 0;
 
     /**
      * @brief Indicate the error codes to attempt the initial registration with same PCSCF
@@ -875,6 +898,37 @@ public:
      * @return vector error code list
      */
     virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf() = 0;
+
+    /**
+     * @brief Indicate the list of error responses. It shall not attempt any more IMS registrations
+     *        until power cycled, switched in and out of aireplane mode.
+     *
+     * @return vector permanent error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode() = 0;
+
+    /**
+     * @brief Indicate the number of error code considered the final result.
+     *
+     * @return vector max count list
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount() = 0;
+
+    /**
+     * @brief Indicate the list of the error response with time value containing Retry-After header
+     *        for registration retry.
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime() = 0;
+
+    /**
+     * @brief Indicate the list of the error response with time value containing Retry-After header
+     *        for reregistration retry.
+     *
+     * @return vector error code list
+     */
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
 
     enum
     {
@@ -900,4 +954,4 @@ private:
     friend class AosBuildDirector;
     virtual void Init(IN IMS_SINT32 nSlotId = IMS_SLOT_0) = 0;
 };
-#endif // _INTERFACE_AOS_NCONFIGURATION_H_
+#endif // INTERFACE_AOS_NCONFIGURATION_H_

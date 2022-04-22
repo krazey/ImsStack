@@ -78,6 +78,7 @@ public:
     virtual IMS_BOOL IsGeolocationPidfSupported(IN IMS_SINT32 nGeolocationPidfType) const;
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const;
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const;
+    virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();
@@ -130,7 +131,13 @@ public:
     virtual IMSVector<IMS_SINT32>& GetSmsOverImsSupportedRats();
     virtual IMSVector<IMS_SINT32>& GetSpecificRegErrNumMultipliedByPcscfNum();
     virtual IMSVector<IMS_SINT32>& GetSpecificRegistrationErrorCode();
+    virtual IMSVector<IMS_SINT32>& GetSpecificReregistrationErrorCode();
+    virtual IMSVector<IMS_SINT32>& GetSpecificRegErrWaitTime();
     virtual IMSVector<IMS_SINT32>& GetReregRetryErrCodeWithInitialRegWithSamePcscf();
+    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrCode();
+    virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
+    virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
+    virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
 
 private:
     friend class AosBuildDirector;

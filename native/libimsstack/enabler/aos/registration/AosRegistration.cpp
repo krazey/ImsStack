@@ -122,6 +122,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
     , m_nUpperBoundWaitTime(0)
     , m_nConsecutiveFailure(0)
     , m_nConsecutiveFailureForPdnReactivated(0)
+    , m_nForbiddenCount(0)
     , m_piOfflineRecoverTimer(IMS_NULL)
     , m_piStopRetryTimer(IMS_NULL)
     , m_piRefreshTimer(IMS_NULL)
@@ -519,62 +520,25 @@ AosRegistrationType AosRegistration::GetRegType()
 PUBLIC VIRTUAL
 IMS_BOOL AosRegistration::IsRegistered()
 {
-    IMS_BOOL bRegistered = IMS_FALSE;
-
-    switch (m_nState)
-    {
-        case STATE_REGISTERED: // FALL-THROUGH
-        case STATE_REFRESHING: // FALL-THROUGH
-        case STATE_REFRESHSTOP:
-            bRegistered = IMS_TRUE;
-            break;
-
-        default:
-            break;
-    }
-
-    return bRegistered;
+    return (IsRefreshing() || m_nState == STATE_REGISTERED);
 }
 
 PUBLIC VIRTUAL
 IMS_BOOL AosRegistration::IsRefreshing()
 {
-    IMS_BOOL bRefreshing = IMS_FALSE;
-
-    switch (m_nState)
-    {
-        case STATE_REFRESHING: // FALL-THROUGH
-        case STATE_REFRESHSTOP:
-            bRefreshing = IMS_TRUE;
-            break;
-
-        default:
-            break;
-    }
-
-    return bRefreshing;
+    return (m_nState == STATE_REFRESHING || m_nState == STATE_REFRESHSTOP);
 }
 
 PUBLIC VIRTUAL
 IMS_BOOL AosRegistration::IsRetryTimer()
 {
-    if (m_piStopRetryTimer != IMS_NULL || m_piOfflineRecoverTimer != IMS_NULL)
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
+    return (m_piStopRetryTimer != IMS_NULL || m_piOfflineRecoverTimer != IMS_NULL);
 }
 
 PROTECTED VIRTUAL
 IMS_BOOL AosRegistration::IsRetryHeld()
 {
-    if (m_nState == STATE_REGSTOP || m_nState == STATE_REFRESHSTOP)
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
+    return (m_nState == STATE_REGSTOP || m_nState == STATE_REFRESHSTOP);
 }
 
 PROTECTED VIRTUAL
@@ -862,7 +826,7 @@ IMS_BOOL AosRegistration::UpdatePreloadedRoute(IN const AString& strPcscf
         return IMS_FALSE;
     }
 
-    if (!strPcscf.IsNULL())
+    if (strPcscf.GetLength() > 0)
     {
         m_strPcscf = strPcscf;
     }
@@ -888,22 +852,22 @@ AString AosRegistration::FeatureToString()
         strFeature += "FEATURE_SUBSCRIPTION | ";
     }
 
-    if(m_nFeature & FEATURE_IPSEC)
+    if (m_nFeature & FEATURE_IPSEC)
     {
         strFeature += "FEATURE_IPSEC | ";
     }
 
-    if(m_nFeature & FEATURE_TRM)
+    if (m_nFeature & FEATURE_TRM)
     {
         strFeature += "FEATURE_TRM | ";
     }
 
-    if(m_nFeature & FEATURE_TRM_BLOCK)
+    if (m_nFeature & FEATURE_TRM_BLOCK)
     {
         strFeature += "FEATURE_TRM_BLOCK | ";
     }
 
-    if(m_nFeature & FEATURE_VONR)
+    if (m_nFeature & FEATURE_VONR)
     {
         strFeature += "FEATURE_VONR | ";
     }
@@ -1079,7 +1043,6 @@ void AosRegistration::Init()
     A_IMS_TRACE_D(REGID, "Init", 0, 0, 0);
 
     InitFeatures();
-    InitRetryIntervals();
 
     if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
@@ -1158,15 +1121,6 @@ void AosRegistration::InitFeatures()
     }
 
     A_IMS_TRACE_I(REGID, "InitFeature :: features (%s)", FeatureToString().GetStr(), 0, 0);
-}
-
-PROTECTED VIRTUAL
-void AosRegistration::InitRetryIntervals()
-{
-    A_IMS_TRACE_D(REGID, "InitRetryIntervals", 0, 0, 0);
-
-    m_objInitRetryIntervals.Clear();
-    m_objRefreshRetryIntervals.Clear();
 }
 
 PROTECTED VIRTUAL
@@ -2411,8 +2365,38 @@ void AosRegistration::UpdateTransactionStarted()
 PROTECTED VIRTUAL
 IMS_UINT32 AosRegistration::GetActualWaitTime()
 {
+    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
+            CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+    {
+        const IMSVector<IMS_SINT32>& objInterval =
+                GET_N_CONFIG(m_nSlotId)->GetRegistrationRetryIntervals();
+        IMS_UINT32 nSize = objInterval.GetSize();
+
+        if (nSize > 0)
+        {
+            IMS_SINT32 nAt = 0;
+            nAt = (m_nConsecutiveFailure > nSize) ? nSize : m_nConsecutiveFailure;
+
+            const IMSVector<IMS_SINT32>& objUpperRandom =
+                    GET_N_CONFIG(m_nSlotId)->GetRegistrationRandomRetryIntervals();
+
+            if (objUpperRandom.GetSize() == nSize)
+            {
+                IMS_UINT32 nAwt = objInterval.GetAt(nAt - 1);
+                if (objUpperRandom.GetAt(nAt - 1) > 0)
+                {
+                    nAwt += IMS_SYS_GetRandom(objUpperRandom.GetAt(nAt - 1) + 1);
+                }
+
+                A_IMS_TRACE_I(REGID, "GetActualWaitTime :: failure count (%d) , awt (%s)",
+                        m_nConsecutiveFailure, nAwt, 0);
+                return nAwt;
+            }
+        }
+    }
+
     A_IMS_TRACE_I(REGID,
-            "CalculateActualWaitTime :: max-time(%d), base-time(%d), consecutive-failures (%d)",
+            "GetActualWaitTime :: max-time(%d), base-time(%d), consecutive-failures (%d)",
             m_nRetryMaxTime, m_nRetryBaseTime, m_nConsecutiveFailure);
 
     return m_pUtil->WaitTimeForFlowRecovery(m_nRetryBaseTime,
@@ -3073,6 +3057,98 @@ void AosRegistration::ProcessSubReinitiate()
 }
 
 PROTECTED VIRTUAL
+IMS_BOOL AosRegistration::ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode)
+{
+    if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrCode(), nStatusCode))
+    {
+        return IMS_FALSE;
+    }
+
+    m_nForbiddenCount++;
+
+    IMS_SINT32 nMaxCount = (GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrMaxCount().GetSize() > 1) ?
+            GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrMaxCount().GetAt(0) : 1;
+
+
+    if (m_nForbiddenCount >= nMaxCount)
+    {
+        Destroy();
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
+    }
+    else
+    {
+        if (IsRegistered())
+        {
+            ProcessDefaultFlowRecovery_Update();
+        }
+        else
+        {
+            ProcessDefaultFlowRecovery_Start();
+        }
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
+IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode)
+{
+    if (IsRegistered())
+    {
+        if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetSpecificReregistrationErrorCode(),
+                nStatusCode))
+        {
+            return IMS_FALSE;
+        }
+    }
+    else
+    {
+        if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorCode(),
+                nStatusCode))
+        {
+            return IMS_FALSE;
+        }
+    }
+
+    DestroySubscription();
+
+    m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+    const AStringArray& objPuids = m_piContext->GetSubscriber()->GetConfiguredImpus();
+
+    if (objPuids.GetCount() > 1)
+    {
+        if (m_strPuid.EqualsIgnoreCase(objPuids.GetElementAt(0)))
+        {
+            if (SetNextPcscf())
+            {
+                StartTimer(TIMER_STOP_RETRY, GetSpecificErrWaitTime() * 1000);
+                SetState(STATE_REGSTOP);
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+            }
+            else
+            {
+                A_IMS_TRACE_D(REGID, "ProcessSubscriberFailed", 0, 0, 0);
+
+                m_strPuid = objPuids.GetElementAt(1);
+                const SIPAddress objAor(m_strPuid);
+
+                m_piRegistration->SetAOR(objAor);
+                m_piContext->GetPcscf()->SetAllPcscfValid();
+
+                ProcessImsiBasedSubscriber();
+
+                SetMode(MODE_LIMITED);
+                UpdateModeToHandles();
+            }
+            return IMS_TRUE;
+        }
+    }
+
+    ProcessImsiBasedSubscriber();
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
 IMS_BOOL AosRegistration::ProcessAkaResponseFailed()
 {
     return m_pIpsecHelper->Create(IMS_FALSE);
@@ -3116,13 +3192,27 @@ void AosRegistration::ProcessIpsecFallback(IN IMS_BOOL bIsIpsecRetry)
 }
 
 PROTECTED VIRTUAL
-void AosRegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
+void AosRegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode /* 0 */)
 {
     A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start", 0, 0, 0);
 
     IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy();
-    IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+    IMS_UINT32 nRetryAfter = 0;
     IMS_UINT32 nAwt = 0;
+
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDeifined())
+    {
+        if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithRetryAfterTime(),
+                nStatusCode))
+        {
+            nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+        }
+    }
+    else
+    {
+        nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+    }
 
     if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
     {
@@ -3177,7 +3267,37 @@ void AosRegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 /* nStatusC
         IncreaseConsecutiveFailCount();
     }
 
-    nAwt = GetActualWaitTime();
+    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+    {
+        if (nRetryAfter > 0)
+        {
+            nAwt = nRetryAfter;
+        }
+        else
+        {
+            nAwt = GetActualWaitTime();
+        }
+
+        m_piContext->GetPcscf()->SetCurrentPcscfInvalid();
+        if (SetNextPcscf())
+        {
+            StartTimer(TIMER_STOP_RETRY, nAwt * 1000);
+            SetState(STATE_REGSTOP);
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+
+        }
+        else
+        {
+            // TODO: T3402 block
+            m_nPdnReactivateWaitTime = nAwt;
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+        }
+        return;
+    }
+    else
+    {
+        nAwt = GetActualWaitTime();
+    }
 
     if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EACH_PCSCF)
     {
@@ -3496,6 +3616,11 @@ void AosRegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
+    if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
+    {
+        return;
+    }
+
     if (nStatusCode == SIPStatusCode::SC_305)
     {
         if (ProcessStartFailed_305())
@@ -3598,6 +3723,8 @@ void AosRegistration::ProcessStartFailed_TxnTimeout()
 PROTECTED VIRTUAL
 void AosRegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
+    // TODO: add the recovery for REASON_INTERNAL_ERROR
+
     if (IsErrorCodeExistedForSpecificRegistration(CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
     {
         ProcessDefaultFlowRecovery_Start();
@@ -4977,6 +5104,33 @@ void AosRegistration::ControlPrivateHeader()
 }
 
 PRIVATE
+IMS_UINT32 AosRegistration::GetSpecificErrWaitTime()
+{
+    IMSVector<IMS_SINT32>& objErrTime = GET_N_CONFIG(m_nSlotId)->GetSpecificRegErrWaitTime();
+    IMS_SINT32 nWaitTime = (objErrTime.GetSize() > 1) ? objErrTime.GetAt(0) : -1;
+
+    return ((nWaitTime > 0) ? static_cast<IMS_UINT32>(nWaitTime) : RETRY_DEFAULT_WAIT_TIME);
+}
+
+PRIVATE
+void AosRegistration::ProcessImsiBasedSubscriber()
+{
+    A_IMS_TRACE_D(REGID, "ProcessImsiBasedSubscriber", 0, 0, 0);
+
+    if (SetNextPcscf())
+    {
+        StartTimer(TIMER_STOP_RETRY, GetSpecificErrWaitTime() * 1000);
+        SetState(STATE_REGSTOP);
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
+    }
+    else
+    {
+        Destroy();
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_FORBIDDEN);
+    }
+}
+
+PRIVATE
 void AosRegistration::SetPlaniHeader()
 {
     IMS_BOOL bSet = IMS_FALSE;
@@ -5124,6 +5278,18 @@ void AosRegistration::UpdateRegIpcanCategory()
     m_nRegIpcanCategory = m_piContext->GetConnection()->GetIpcanCategory();
 }
 
+PRIVATE
+void AosRegistration::UpdateModeToHandles()
+{
+    IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
+
+    for (IMS_UINT32 nAt = 0; nAt < objHandles.GetSize(); ++nAt)
+    {
+        IAosHandle* piHandle = objHandles.GetValueAt(nAt);
+        piHandle->Request(IAosHandle::TYPE_LIMITED_MODE, (GetMode() == MODE_LIMITED) ?
+                IAosHandle::STATE_ADD : IAosHandle::STATE_REMOVE);
+    }
+}
 
 PRIVATE
 IMS_BOOL AosRegistration::IsErrorCodeExisted(IN const IMSVector<IMS_SINT32>& objErrorCode,

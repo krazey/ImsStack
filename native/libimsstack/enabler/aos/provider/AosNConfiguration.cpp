@@ -303,6 +303,12 @@ IMS_BOOL AosNConfiguration::IsCdmalessFeatureTagRequired() const
 }
 
 PUBLIC VIRTUAL
+IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const
+{
+    return m_objRegErrCodeWithRetryAfterTime.bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined;
+}
+
+PUBLIC VIRTUAL
 IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -591,9 +597,45 @@ IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegistrationErrorCode()
 }
 
 PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificReregistrationErrorCode()
+{
+    return m_objSpecificRegErr.objSpecificReregErrCode;
+}
+
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetSpecificRegErrWaitTime()
+{
+    return m_objSpecificRegErr.objSpecificRegErrWaitTimeSec;
+}
+
+PUBLIC VIRTUAL
 IMSVector<IMS_SINT32>& AosNConfiguration::GetReregRetryErrCodeWithInitialRegWithSamePcscf()
 {
     return m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf;
+}
+
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrCode()
+{
+    return m_objRegPermanentErrCode.objRegistrationPermanentErrorCode;
+}
+
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetRegPermanentErrMaxCount()
+{
+    return m_objRegPermanentErrCode.objRegistrationPermanentErrorMaxCount;
+}
+
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetRegErrCodeWithRetryAfterTime()
+{
+    return m_objRegErrCodeWithRetryAfterTime.objRegistrationErrorCodeWithRetryAfterTime;
+}
+
+PUBLIC VIRTUAL
+IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetryAfterTime()
+{
+    return m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime;
 }
 
 PRIVATE VIRTUAL
@@ -723,6 +765,37 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objRegRetryInterval.bUseRegistrationRetryIntervalForSubscriptionRetry =
                 piCcBundle->GetBoolean(
                 CarrierConfig::Ims::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+    }
+
+    // AosRegistrationPermanentErrorCodeBundle
+    piCcBundle = piCc->GetBundle(
+            CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objRegPermanentErrCode.objRegistrationPermanentErrorCode = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_INT_ARRAY);
+        m_objRegPermanentErrCode.objRegistrationPermanentErrorMaxCount = piCcBundle->GetIntArray(
+                CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_MAX_COUNT_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+    }
+
+    // AosRegistrationErrorCodeWithRetryAfterTimeBundle
+    piCcBundle = piCc->GetBundle(
+            CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objRegErrCodeWithRetryAfterTime.bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined =
+                piCc->GetBoolean(
+                CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL);
+        m_objRegErrCodeWithRetryAfterTime.objRegistrationErrorCodeWithRetryAfterTime =
+                piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
+        m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime =
+                piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
     }

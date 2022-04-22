@@ -154,7 +154,6 @@ protected:
     /// Initialize
     virtual void Init();
     virtual void InitFeatures();
-    virtual void InitRetryIntervals();
 
     virtual void CleanUp();
     virtual void DestroyEx();
@@ -253,6 +252,8 @@ protected:
     virtual void ProcessRegRequiredWithWaitTime(IN IMS_SINT32 nWaitTime);
     virtual void ProcessRegRequiredWithNextPcscf();
     virtual void ProcessSubReinitiate();
+    virtual IMS_BOOL ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode);
+    virtual IMS_BOOL ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode);
 
     virtual IMS_BOOL ProcessAkaResponseFailed();
     virtual void ProcessAwtRecovery();
@@ -366,10 +367,13 @@ protected:
 
 private:
     void ControlPrivateHeader();
+    IMS_UINT32 GetSpecificErrWaitTime();
+    void ProcessImsiBasedSubscriber();
     void SetPlaniHeader();
     void UpdateUserInfoInContact();
     void UpdateRegIpcanCategory();
     void UpdateCallingNumberVerification();
+    void UpdateModeToHandles();
 
     IMS_BOOL IsErrorCodeExisted(IN const IMSVector<IMS_SINT32>& objErrorCode,
             IN IMS_SINT32 nCode) const;
@@ -503,12 +507,7 @@ protected:
     IMS_UINT32 m_nUpperBoundWaitTime; /// used for flow recovery in RFC 5626
     IMS_UINT32 m_nConsecutiveFailure;
     IMS_UINT32 m_nConsecutiveFailureForPdnReactivated;
-
-    /// initial retry interval
-    IMSList<IMS_SINT32> m_objInitRetryIntervals;
-
-    /// refresh retry interval
-    IMSList<IMS_SINT32> m_objRefreshRetryIntervals;
+    IMS_UINT32 m_nForbiddenCount;
 
     /// timer
     /// this is used in the OFFLINE state without registration
@@ -550,6 +549,7 @@ protected:
     AString m_strTag;
 
     static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3; // 3 Sec.
+    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30; // 30 Sec
 
 private:
     /// IPCAN category being registered
