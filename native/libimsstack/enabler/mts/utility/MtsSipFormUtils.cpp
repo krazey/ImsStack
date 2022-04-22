@@ -107,7 +107,8 @@ IMS_BOOL MtsSipFormUtils::FormDestination(
              */
             strDest = ValidateAndUpdatePsi();
         }
-        if(!strDest.IsEmpty())
+
+        if (!strDest.IsEmpty())
         {
             IMS_TRACE_D("Destination address = %s", strDest.GetStr(), 0, 0);
             return IMS_TRUE;

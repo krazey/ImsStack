@@ -8,8 +8,6 @@ class IMtsClientListener
 public:
     virtual void Client_SendMo(IN IMSWMS_UINTP nWparam_,
         IN IWMSSmsSendRequestParam* nLparam_) = 0;
-    virtual void Client_ControlService(IN IMSWMS_UINTP nWparam_,
-        IN IWMSSmsServiceControlParam* nLparam_) = 0;
 };
 
 #endif

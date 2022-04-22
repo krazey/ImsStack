@@ -7,7 +7,7 @@
 #include "IMtsClient.h"
 #include "ImsServiceConfig.h"
 #include "IPageMessage.h"
-#include "IUSMS.h"
+#include "IUMts.h"
 
 #include "utility/MtsStrName.h"
 #include "utility/MtsDynamicLoader.h"
@@ -15,6 +15,7 @@
 #include "MtsApp.h"
 #include "MtsCallTracker.h"
 #include "MtsClient.h"
+#include "MtsClientFactory.h"
 #include "MtsService.h"
 #include "message/MtsMessageController.h"
 
@@ -104,14 +105,12 @@ void MtsApp::Start()
     CreateMtsClient(m_nSlotId);
     m_pMtsClient->SetServiceState(m_pMtsServiceState);
 
-    //Connect to WMS
+    //AndroidJavaWms
     /*===================*/
-    if (!m_pMtsClient->ConnectSC(m_nSlotId))
-    {
-        IMS_TRACE_I("Java MTS Connection is failed", 0, 0, 0);
-    }
+    IMtsClient* piClient = MtsClientFactory::GetIMtsJavaClient(m_nSlotId);
+    piClient->Init();
 
-    //5. Update IP Config & Make MtsServiceState
+    //Update IP Config & Make MtsServiceState
     GetSmOverIpConfigInfo(m_nSlotId);
 
     m_pCallTracker = new MtsCallTracker(m_nSlotId);
@@ -126,23 +125,10 @@ void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop : m_nSlotId : [%d]", m_nSlotId, 0, 0);
 
-    if (m_pMtsClient != IMS_NULL)
-    {
-        IMS_TRACE_I("UpdateMtsServiceState(STATE_NOTREADY)", 0, 0, 0);
-        m_pMtsClient->UpdateMtsServiceState(IMtsClient::STATE_NOTREADY, m_nSlotId);
-    }
-
     if (m_pMtsServiceState != IMS_NULL)
     {
         IMS_TRACE_I("SetIMSRegState(IMS_FALSE)", 0, 0, 0);
         m_pMtsServiceState->SetImsRegConnected(IMS_FALSE);
-    }
-
-    if (m_pMtsClient != IMS_NULL)
-    {
-        IMS_TRACE_I("Remove MtsApp in MtsClient (m_nSlotId:%d)", m_nSlotId, 0, 0);
-        m_pMtsClient->StopTimer(TIMER_SMS_CLIENT_RETRY);
-        m_pMtsClient->DisconnectSC(m_nSlotId);
     }
 
     if (m_pCallTracker != IMS_NULL)
@@ -168,7 +154,7 @@ void MtsApp::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
 
 PUBLIC VIRTUAL
 void MtsApp::RequestRegistrationSwitch(
-        IN IUSmsSendRequestParam* /*pToBeSentSms*/, IN IMS_BOOL /*bIsSmsEServiceType*/)
+        IN IUSendSmsRequestParam* /*pToBeSentSms*/, IN IMS_BOOL /*bIsSmsEServiceType*/)
 {
     IMS_TRACE_D("MtsApp::RequestRegistrationSwitch", 0, 0, 0);
 }
@@ -218,20 +204,20 @@ void MtsApp::MtsMessageController_NoTransaction()
 }
 
 PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnPreprocess(IN IMSMSG &/*objMSG*/)
+IMS_BOOL MtsApp::OnPreprocess(IN IMSMSG& /*objMSG*/)
 {
     IMS_TRACE_I("MtsApp::OnPreprocess : AppName=%s", GetName().GetStr(), 0, 0);
     return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
+IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("MtsApp::OnMessage : nMSG=%d", objMSG.nMSG, 0, 0);
 
-    if (IUSMS::SMSMO_SEND_REQUEST == objMSG.nMSG)
+    if (IUMts::MTS_MO_SEND_REQUEST == objMSG.nMSG)
     {
-        IUSmsSendRequestParam* pParam = reinterpret_cast<IUSmsSendRequestParam*>(objMSG.nLparam);
+        IUSendSmsRequestParam* pParam = reinterpret_cast<IUSendSmsRequestParam*>(objMSG.nLparam);
 
         if (pParam == IMS_NULL)
         {
@@ -246,7 +232,6 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
             if ((m_pMtsClient != IMS_NULL) && (!m_pMtsAppTrm->IsReady()))
             {
                 m_bTrmBlock = IMS_TRUE;
-                m_pMtsClient->UpdateMtsServiceState(IMtsClient::STATE_LIMITED, m_nSlotId);
             }
         }
         else
@@ -258,7 +243,7 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
 
         delete pParam;
     }
-    else if (SmsSvcInternal::SMSMT_RECVD == objMSG.nMSG)
+    else if (MtsServiceInternal::MTS_MT_RECVD == objMSG.nMSG)
     {
         IPageMessage* pParam = reinterpret_cast<IPageMessage*>(objMSG.nLparam);
 
@@ -273,7 +258,6 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
             if ((m_pMtsClient != IMS_NULL) && (!m_pMtsAppTrm->IsReady()))
             {
                 m_bTrmBlock = IMS_TRUE;
-                m_pMtsClient->UpdateMtsServiceState(IMtsClient::STATE_LIMITED, m_nSlotId);
             }
             else
             {
@@ -287,50 +271,6 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
 
         m_pMtsMessageController->ReceiveMtsMessage(pParam, IMS_FALSE);
     }
-    else if (objMSG.nMSG == IUSMS::SMS_SERVICE_CONTROL)
-    {
-        IUSmsServiceControlParam *pParam =
-                reinterpret_cast<IUSmsServiceControlParam*>(objMSG.nLparam);
-
-        if (pParam != IMS_NULL)
-        {
-            if (pParam->nCmd == IUSmsServiceControlParam::CMD_RECOVER_COMM_CHANNEL ||
-                pParam->nCmd == IUSmsServiceControlParam::CMD_RECOVER_COMM_CHANNEL_BY_MODEM_RESET)
-            {
-                IMS_TRACE_I("MtsApp::CMD_RECOVER_COMM_CHANNEL. SlotId[%d]", m_nSlotId, 0, 0);
-                if (pParam->nCmd ==
-                        IUSmsServiceControlParam::CMD_RECOVER_COMM_CHANNEL_BY_MODEM_RESET)
-                {
-                    MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-                    if (pMtsServiceState != IMS_NULL)
-                    {
-                        pMtsServiceState->SetMtsServiceState(IMtsClient::STATE_INIT);
-                    }
-                }
-                m_pMtsClient->SetSCCnxState(IMS_FALSE);
-
-                if (!m_pMtsClient->ConnectSC(m_nSlotId))
-                {
-                    IMS_TRACE_E(0, "Connecting MtsClient failed", 0, 0, 0);
-                    m_pMtsClient->Retry_SCCnx();
-                }
-            }
-
-            delete pParam;
-        }
-    }
-    else if (objMSG.nMSG == IUSMS::SMS_RECONNECT_SC) // SMS_Patch_0664
-    {
-        IUSmsReconnectScParam *pParam = reinterpret_cast<IUSmsReconnectScParam*>(objMSG.nLparam);
-        if (pParam != IMS_NULL)
-        {
-            if (!m_pMtsClient->ConnectSC(m_nSlotId))
-            {
-                IMS_TRACE_E(0, "Re-Connecting MtsClient failed", 0, 0, 0); // It's permanent Error.
-            }
-            delete pParam;
-        }
-    }
     else
     {
         IMS_TRACE_E(0, "OnMessage : Unknown message is received!!", 0, 0, 0);
@@ -340,9 +280,8 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG &objMSG)
 }
 
 PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnPostprocess(IN IMSMSG &/*objMSG*/)
+IMS_BOOL MtsApp::OnPostprocess(IN IMSMSG& /*objMSG*/)
 {
-    IMS_TRACE_I("MtsApp::OnPostprocess : AppName=%s", GetName().GetStr(), 0, 0);
     return IMS_FALSE;
 }
 
@@ -460,11 +399,6 @@ void MtsApp::CreateMtsClient(IN IMS_SINT32 nSlotId)
     {
         IMS_TRACE_E(0, "m_pMtsClient is NULL", 0, 0, 0);
     }
-
-    /*if (m_pMtsClient != IMS_NULL)
-    {
-        m_pMtsClient->RegisterApp(this);
-    }*/
 }
 
 PROTECTED VIRTUAL
@@ -573,7 +507,6 @@ void MtsApp::Trm_PriorityChanged()
         {
             if (m_bTrmBlock == IMS_TRUE)
             {
-                m_pMtsClient->UpdateMtsServiceState(IMtsClient::STATE_READY, m_nSlotId);
                 m_bTrmBlock = IMS_FALSE;
             }
         }

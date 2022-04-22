@@ -30,7 +30,7 @@ public:
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService);
 
     void OnImsConnected();
-    void OnImsConnected(IN IUSmsSendRequestParam* pToBeSentSms);
+    void OnImsConnected(IN IUSendSmsRequestParam* pToBeSentSms);
     void OnImsDisconnected(IN IMS_UINT32 nReason);
     void OnImsDisconnecting(IN IMS_UINT32 nReason);
     void OnImsSuspended(IN IMS_UINT32 nReason);

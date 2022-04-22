@@ -13,48 +13,29 @@ import com.android.imsstack.jni.JNIImsListener;
 import com.android.imsstack.util.ImsLog;
 
 public class MtsController {
-    // Anntation constants values are under consideration for refactoring.
     /* JNI Message */
-    private static final int JAVA2MTSENABLER             = 1000;
-    private static final int MTSENABLER2JAVA             = 1050;
+    private static final int JAVA2MTSENABLER = 1000;
+    private static final int MTSENABLER2JAVA = 1050;
 
-    private static final int NOTI_MTSENABLER_SEND_MO_SMS    = JAVA2MTSENABLER + 1;
-    //private static final int NOTI_IMS_PHONE_RESTARTED       = JAVA2MTSENABLER + 10;
-    //private static final int NOTI_SMS_SERVER_READY          = JAVA2MTSENABLER + 11;
-    //private static final int NOTI_SMS_SERVER_NOT_READY      = JAVA2MTSENABLER + 12;
-    private static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 13;
+    private static final int NOTI_MTSENABLER_SEND_MO_SMS = JAVA2MTSENABLER + 1;
+    private static final int NOTI_MTSENABLER_SEND_MT_RESULT = JAVA2MTSENABLER + 2;
 
-    private static final int NOTI_SMS_RAT_SELECTION          = JAVA2MTSENABLER + 14;
-    private static final int NOTI_EXIT_SCBM                  = JAVA2MTSENABLER + 15;
+    private static final int NOTI_MTS_RAT_SELECTION = JAVA2MTSENABLER + 10;
+    private static final int NOTI_EXIT_SCBM = JAVA2MTSENABLER + 11;
 
-    //private static final int CREATE_MTS_MANAGER          = MTSENABLER2JAVA + 1;
-    //private static final int DESTROY_MTS_MANAGER         = MTSENABLER2JAVA + 2;
-    //private static final int UPDATE_MTS_SVC_STATUS       = MTSENABLER2JAVA + 3;
-    //private static final int UPDATE_MTS_SMS_FORMAT       = MTSENABLER2JAVA + 4;
-    private static final int REPORT_MTS_MO_STATUS        = MTSENABLER2JAVA + 5;
-    private static final int REPORT_MTS_MT_SMS           = MTSENABLER2JAVA + 6;
+    private static final int REPORT_MTS_MO_STATUS = MTSENABLER2JAVA + 1;
+    private static final int REPORT_MTS_MT_SMS = MTSENABLER2JAVA + 2;
 
-    private static final int REQUEST_SMS_RAT_SELECTION       = MTSENABLER2JAVA + 7;
-    private static final int REQUEST_SMS_EXIT_RAT_SELECTION  = MTSENABLER2JAVA + 8;
+    private static final int REQUEST_MTS_RAT_SELECTION = MTSENABLER2JAVA + 10;
+    private static final int REQUEST_MTS_EXIT_RAT_SELECTION = MTSENABLER2JAVA + 11;
 
-    ////////////////////////////////////////////////////////////////////////
     /* MtsController Message */
-    // 1 : Create Mts Manager
-    //public static final int REQUEST_CREATE_MTS_MANAGER = 1;
-    // 2 : Destroy Mts Manager
-    //public static final int REQUEST_DESTROY_MTS_MANAGER = 2;
-    // 3 : Update IMS Service Status
-    //public static final int REQUEST_UPDATE_SERVICE_STATUS = 3;
-    // 4 : Request ISIM AUTH : (String nonce, int owner)
-    //public static final int REQUEST_UPDATE_SMS_FORMAT = 4;
-    // 5 : Request Report Mo Status
-    public static final int REQUEST_REPORT_MO_STATUS = 5;
-    // 6 : Request Report Mt SMS
-    public static final int REQUEST_REPORT_MT_SMS = 6;
-
+    // 1 : Request Report Mo Status
+    public static final int REQUEST_REPORT_MO_STATUS = 1;
+    // 2 : Request Report Mt SMS
+    public static final int REQUEST_REPORT_MT_SMS = 2;
     public static final int NOTIFICATION_MTS_SEND_MO_SMS = 101;
 
-    ////////////////////////////////////////////////////////////////////////
     /* GII-SMSImpl Message */
     public static final int MT_SUCCESS = 1;
     public static final int MT_FAILURE = 2;

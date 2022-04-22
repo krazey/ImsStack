@@ -12,55 +12,43 @@ class AString;
 class IThread;
 class System;
 
-class AndroidJavaWMS
-    : public IMtsClient
-    , public IMSActivityEx
-    , public IIMSActivityControl
+class AndroidJavaWMS :
+        public IMtsClient,
+        public IMSActivityEx
 {
 private:
-    AndroidJavaWMS(IN IMS_SINT32 nSlotID = 0);
+    AndroidJavaWMS(IN IMS_SINT32 nSlotId = 0);
     virtual ~AndroidJavaWMS(void);
 
 public:
-    static AndroidJavaWMS* GetAndroidJavaWMS(IN IMS_SINT32 nSlotID = 0);
-    static void DestroyAndroidJavaWMS(IN IMS_SINT32 nSlotID = 0);
+    static AndroidJavaWMS* GetAndroidJavaWMS(IN IMS_SINT32 nSlotId = 0);
+    static void DestroyAndroidJavaWMS(IN IMS_SINT32 nSlotId = 0);
     static IMS_BOOL StartUp();
     static void CleanUp();
-    virtual IMS_RESULT ConnectSC(IN IMS_UINT32 nSmsFormat, IN IMS_SINT32 nSlotID);
-    virtual void DisconnectSC(IN IMS_SINT32 nSlotID);
-    virtual IMS_RESULT Init();
-    virtual IMS_RESULT Release();
-    inline virtual IMSWMS_UINT32 GetFeature() { return FEATURE_NONE; }
-    virtual void UpdateServiceStatus(IN IMS_UINT32 status, IN IMS_SINT32 nSlotID);
-    virtual void UpdateSmsFormat(IN IMS_UINT32 nSmsFormat, IN IMS_SINT32 nSlotID);
-    virtual IMS_UINT32 ReportMtSMS(IN IMS_UINT32 smsformat, IN IMS_UINT32 smslength,
-            IN CONST IMS_BYTE* smsdata, IN IMS_SINT32 nSlotID);
-    virtual IMS_RESULT ReportMoStatus(IN IMS_UINT32 reason, IN IMS_UINT32 smsformat,
-            IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1, IN IMS_SINT32 nSlotID = -1);
+
+    // IMtsClient class
+    virtual IMS_RESULT Init() override;
+    virtual IMS_RESULT Release() override;
+    inline virtual IMSWMS_UINT32 GetFeature() override { return FEATURE_NONE; }
+    virtual IMS_UINT32 ReportMtSMS(
+            IN IMS_UINT32 nSmsFormat,
+            IN IMS_UINT32 nSmsLength,
+            IN CONST IMS_BYTE* pbySmsData,
+            IN IMS_SINT32 nSlotId) override;
+    virtual IMS_RESULT ReportMoStatus(
+            IN IMS_UINT32 nReason,
+            IN IMS_UINT32 nSmsFormat,
+            IN IMS_UINT8 nRetryAfter = 0,
+            IN IMS_SINT32 nSeqId = -1,
+            IN IMS_SINT32 nSlotId = -1) override;
+    inline virtual void SetListener(IN IMtsClientListener* iscl) override { (void) iscl; }
 
     // IMSActivityEx class
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-
-    // IIMSActivityControl class
-    virtual IMS_BOOL Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP /* nInParam */,
-        OUT IMS_UINTP * /* pnOutParam */);
-
-    IMS_SINT32 GetMsgID(IN CONST IMS_BYTE* smsdata, IN CONST IMS_UINT32 smsformat);
-    void ReleaseWMSClient();
-
-    inline void SetTransportID(IMS_UINT32 tid) { nTransportID = tid; }
-    inline IMS_SINT32 GetTransportID() { return nTransportID; }
-    inline virtual void SetListener(IN IMtsClientListener *iscl) { (void) iscl; }
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
 
 private:
-    static AndroidJavaWMS* pAndroidJavaWMS[];
-    IMS_BOOL isWmsConnected;
-    IMS_BOOL isSmsServerReady;
-    IMS_SINT32 nClientHandle;
-    IMS_UINT32 nTransportID;
-    IMS_UINT32 nSmsFormat;
-    IMS_UINT32 nStatus;
-    IMS_SINT32 mSlotID;
+    static AndroidJavaWMS* s_pAndroidJavaWms[];
+    IMS_SINT32 m_nSlotId;
 };
 
 #endif

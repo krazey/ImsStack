@@ -192,43 +192,20 @@ typedef unsigned int            IMSWMS_UINTP;
 
 // END :: definitions for 64-bit platform
 
-
-// ===================================
-// =====     to send msg to libims.so     ====
-
-// 1. Send MO Request
+// Send MO Request
 #define IMSWMS_SOLUTION_URI_LEN                        128
+
 class IWMSSmsSendRequestParam
 {
     public:
-        IMSWMS_UINT32      nSmsType;
-        IMSWMS_CHAR    szDestAddr[IMSWMS_SOLUTION_URI_LEN+1];
-        IMSWMS_UINT32     nSmsDataLen;
-        IMSWMS_BYTE    baSmsData[512];
-        IMSWMS_SINT32  nMsgID;
-        IMSWMS_BOOL    bIsAckorError;
-        IMSWMS_SINT32  nSeqId;
-        IMSWMS_SINT32  nSlotId;
+        IMSWMS_UINT32       m_nSmsType;
+        IMSWMS_CHAR         m_szDestAddr[IMSWMS_SOLUTION_URI_LEN+1];
+        IMSWMS_UINT32       m_nSmsDataLen;
+        IMSWMS_BYTE         m_baSmsData[512];
+        IMSWMS_SINT32       m_nMsgId;
+        IMSWMS_BOOL         m_bAckOrError;
+        IMSWMS_SINT32       m_nSeqId;
+        IMSWMS_SINT32       m_nSlotId;
 };
-
-// 2. Control messages for SMS app's communication channel
-class IWMSSmsServiceControlParam
-{
-public:
-    // SMS control event
-    enum
-    {
-        // If the modem interface is abnormally broken,
-        // it needs to recover the communication channel.
-        // So, if the connection recovery is required, this event will be posted.
-        CMD_RECOVER_COMM_CHANNEL = 1,
-        CMD_RECOVER_COMM_CHANNEL_BY_MODEM_RESET = 2
-    };
-
-public:
-    IMSWMS_SINT32 nCmd;
-    IMSWMS_SINT32 nSlotId;
-};
-// ===================================
 
 #endif

@@ -7,7 +7,7 @@
 #include "interface/aos/IImsAosMonitor.h"
 #include "interface/IMtsService.h"
 
-#include "IUSMS.h"
+#include "IUMts.h"
 
 class IImsAos;
 class MtsDynamicLoader;
@@ -61,7 +61,7 @@ public:
 
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
     void RequestRegistrationSwitch(
-            IN IUSmsSendRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
+            IN IUSendSmsRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
     IMS_BOOL IsEpdgConnected();
@@ -71,7 +71,7 @@ protected:
 
 private:
     void Init(
-            IN const AString &strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
+            IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
     void DeInit();
 
 protected:

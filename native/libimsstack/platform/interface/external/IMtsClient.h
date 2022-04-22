@@ -7,17 +7,20 @@
 class IMtsClient
 {
 public:
-    virtual IMSWMS_RESULT ConnectSC(IN IMSWMS_UINT32 nSmsFormat, IN IMSWMS_SINT32 nSlotID) = 0;
-    virtual void DisconnectSC(IN IMSWMS_SINT32 nSlotID) = 0;
     virtual IMSWMS_RESULT Init() = 0;
     virtual IMSWMS_RESULT Release() = 0;
     virtual IMSWMS_UINT32 GetFeature() = 0;
-    virtual void UpdateServiceStatus(IN IMSWMS_UINT32 status, IN IMSWMS_SINT32 nSlotID) = 0;
-    virtual void UpdateSmsFormat(IN IMSWMS_UINT32 nSmsFormat, IN IMSWMS_SINT32 nSlotID) = 0;
-    virtual IMSWMS_UINT32 ReportMtSMS(IN IMSWMS_UINT32 smsformat, IN IMSWMS_UINT32 smslength,
-            IN CONST IMSWMS_BYTE* smsdata, IN IMSWMS_SINT32 nSlotID) = 0;
-    virtual IMSWMS_RESULT ReportMoStatus(IN IMSWMS_UINT32 reason, IN IMSWMS_UINT32 smsformat,
-            IN IMSWMS_UINT8 nRetryAfter = 0, IN IMSWMS_SINT32 nSeqId = -1, IN IMSWMS_SINT32 nSlotID = -1) = 0;
+    virtual IMSWMS_UINT32 ReportMtSMS(
+            IN IMSWMS_UINT32 smsformat,
+            IN IMSWMS_UINT32 smslength,
+            IN CONST IMSWMS_BYTE* smsdata,
+            IN IMSWMS_SINT32 nSlotID) = 0;
+    virtual IMSWMS_RESULT ReportMoStatus(
+            IN IMSWMS_UINT32 reason,
+            IN IMSWMS_UINT32 smsformat,
+            IN IMSWMS_UINT8 nRetryAfter = 0,
+            IN IMSWMS_SINT32 nSeqId = -1,
+            IN IMSWMS_SINT32 nSlotID = -1) = 0;
     virtual void SetListener(IN IMtsClientListener* iscl) = 0;
 
 public:

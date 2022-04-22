@@ -48,12 +48,8 @@ const IMS_CHAR* MtsUtils::RegTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case MtsClient::TIMER_SMS_CLIENT_CNX_RETRY:
-            return "MtsClient : TIMER_SMS_CLIENT_CNX_RETRY";
-
         case MtsClient::TIMER_SMS_CALLBACK_MODE:
             return "MtsClient : TIMER_SMS_CALLBACK_MODE";
-
         default:
             return "__INVALID__";
     }

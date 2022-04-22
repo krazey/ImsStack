@@ -36,7 +36,7 @@ public:
     static IMSApp* GetInstance(IN IMS_SINT32 nSlotId);
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
     virtual void RequestRegistrationSwitch(
-            IN IUSmsSendRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
+            IN IUSendSmsRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
     MtsServiceState* GetMtsServiceState();
 
     // IMtsApp
@@ -58,9 +58,9 @@ public:
 
 protected:
     // IMSApp
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG & objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG &objMSG);
+    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
+    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
     virtual IIMSActivityControl* GetController();
 
     virtual void CreateMtsService(IN IMS_SINT32 nSlotId);

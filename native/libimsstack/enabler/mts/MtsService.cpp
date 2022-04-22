@@ -1,20 +1,20 @@
-#include "ServiceTrace.h"
-#include "ServiceMessage.h"
-#include "IMSCore.h"
 #include "Connector.h"
-#include "ISIPHeader.h"
-#include "IPageMessage.h"
-#include "IMessage.h"
+#include "EnablerUtils.h"
 #include "ICoreService.h"
+#include "IMessage.h"
+#include "IMSCore.h"
+#include "IPageMessage.h"
 #include "IServiceFilterCriteria.h"
-#include "ImsAos.h"
+#include "ISIPHeader.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"
-#include "IUSMS.h"
+#include "ImsAos.h"
+#include "IUMts.h"
 #include "MtsService.h"
+#include "ServiceTrace.h"
+#include "ServiceMessage.h"
 #include "utility/MtsDynamicLoader.h"
-#include "EnablerUtils.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -148,7 +148,7 @@ void MtsService::CoreService_PageMessageReceived(
 
     AString strTargetActivity = EnablerUtils::GetEnablerThreadName(m_nSlotId);
     strTargetActivity.Append(".MtsApp");
-    IMSMSG objMSG(SmsSvcInternal::SMSMT_RECVD, 0, reinterpret_cast<IMS_UINTP>(piMessage));
+    IMSMSG objMSG(MtsServiceInternal::MTS_MT_RECVD, 0, reinterpret_cast<IMS_UINTP>(piMessage));
     MessageService::PostMessage(strTargetActivity, objMSG);
 }
 
@@ -374,7 +374,7 @@ void MtsService::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
 
 PUBLIC
 void MtsService::RequestRegistrationSwitch(
-        IN IUSmsSendRequestParam* /*pToBeSentSms*/, IN IMS_BOOL /*bIsSmsEServiceType*/)
+        IN IUSendSmsRequestParam* /*pToBeSentSms*/, IN IMS_BOOL /*bIsSmsEServiceType*/)
 {
     IMS_TRACE_D("MtsService::RequestRegistrationSwitch", 0, 0, 0);
 }

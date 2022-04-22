@@ -42,23 +42,19 @@ cc_library_static {
     ],
     local_include_dirs: [
         "include",
-        "include/external",
         "include/os",
         "include/util",
     ] + [
         // Specifically, OS level include-path will be added.
-        "include/external/android",
         "include/os/android",
     ],
     // For unit-test
     export_include_dirs: [
         "include",
-        "include/external",
         "include/os",
         "include/util",
     ] + [
         // Specifically, OS level include-path will be added.
-        "include/external/android",
         "include/os/android",
     ],
     shared_libs: [

@@ -5,7 +5,6 @@
 #include "IImsAosInfo.h"
 #include "ImsAosParameter.h"
 #include "IMtsClient.h"
-#include "MtsClient.h"
 #include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
 #include "message/MtsMessageController.h"
@@ -104,10 +103,11 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
     UpdateServiceState();
 }
 
+// TODO: consider of utilizing this method for VZW E911 SMS case
 PUBLIC
 void MtsServiceState::SetImsRegConnected(IN IMS_BOOL /*bConnected*/, IMS_BOOL /*bIsEmergencyType*/)
 {
-    IMS_TRACE_I("SetImsRegConnected for VZW Emergency SMS", 0, 0, 0);
+    IMS_TRACE_I("MtsServiceState::SetImsRegConnected() For Only VZW", 0, 0, 0);
 }
 
 PUBLIC
@@ -226,22 +226,15 @@ void MtsServiceState::SetConnectedServices(IN IMS_UINT32 nServices)
 PUBLIC
 void MtsServiceState::OnImsConnected()
 {
-    /* even though sms enabler disabled AoS connection with DisableAoS(),
-       AoS connection information is reported. so, sms enabler should give it a touch to ignore the report.
-    */
-
     IMS_TRACE_I("MtsServiceState::OnImsConnected()", 0, 0, 0);
 
     SetImsRegConnected(IMS_TRUE);
 }
 
+// TODO: consider of utilizing this method for VZW E911 SMS case
 PUBLIC
-void MtsServiceState::OnImsConnected(IN IUSmsSendRequestParam* /*pToBeSentSms*/)
+void MtsServiceState::OnImsConnected(IN IUSendSmsRequestParam* /*pToBeSentSms*/)
 {
-    /* even though sms enabler disabled AoS connection with DisableAoS(),
-       AoS connection information is reported. so, sms enabler should give it a touch to ignore the report.
-    */
-
     IMS_TRACE_I("MtsServiceState::OnImsConnected() For Only VZW", 0, 0, 0);
 }
 
@@ -256,7 +249,7 @@ void MtsServiceState::OnImsDisconnected(IN IMS_UINT32 nReason)
     SetImsRegConnected(IMS_FALSE);
 
     // if ims data connection is disconnected, terminate all pending messages.
-    pMtsMessageController = GetMtsMessageController();//MtsMessage::GetMtsMessageController();
+    pMtsMessageController = GetMtsMessageController();
 
     if (pMtsMessageController != IMS_NULL)
     {
@@ -279,7 +272,7 @@ void MtsServiceState::OnImsSuspended(IN IMS_UINT32 nReason)
     SetImsSuspendState(IMS_TRUE);
 
     IMS_TRACE_I("Mts transaction permanent failure", 0, 0, 0);
-    pMtsMessageController = GetMtsMessageController();//MtsMessage::GetMtsMessageController();
+    pMtsMessageController = GetMtsMessageController();
 
     if (pMtsMessageController != IMS_NULL)
     {
@@ -329,29 +322,13 @@ IMS_SINT32 MtsServiceState::GetServiceState()
 PUBLIC
 void MtsServiceState::UpdateServiceState()
 {
-    MtsClient* pMtsClient = MtsClient::GetInstance(m_nSlotId);
-
-    if (pMtsClient == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "MtsClient is null", 0, 0, 0);
-        return;
-    }
-
-    IMS_BOOL bIsConnectSC = pMtsClient->GetSCCnxState();
-
-    if (bIsConnectSC != IMS_TRUE)
-    {
-        IMS_TRACE_E(0, "MtsClient does not conncted", 0, 0, 0);
-        return;
-    }
-
     IMS_SINT32 nTempState = GetServiceState();
+
     IMS_TRACE_I("nTempState(%d) m_nMtsServiceState(%d)", nTempState, m_nMtsServiceState, 0);
 
     if (nTempState != m_nMtsServiceState)
     {
         m_nMtsServiceState = nTempState;
-        pMtsClient->UpdateMtsServiceState(m_nMtsServiceState, m_nSlotId);
     }
 }
 

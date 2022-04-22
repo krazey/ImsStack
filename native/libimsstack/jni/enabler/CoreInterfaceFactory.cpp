@@ -20,9 +20,8 @@
 #include "AString.h"
 #include "JniMtcCall.h"
 #include "JniMtcService.h"
-#include "JNISmsService.h"
+#include "JniMtsService.h"
 
-#include "JNISmsSCBMService.h"
 // IMS_SERVICE_AOS
 #include "JniAosService.h"
 #include "JniUceService.h"
@@ -55,11 +54,11 @@ BaseService* CoreInterfaceFactory::GetInterface(IN IMS_SINT32 nInterfaceType,
         break;
 
     case IUIMS::APP_MTS:
-        pService = new JNISmsService(pNotifier, nSlotId);
+        pService = new JniMtsService(pNotifier, nSlotId);
         break;
 
     case IUIMS::MTS_EMERGENCY_SERVICE:
-        pService = new JNISmsSCBMService(pNotifier, nSlotId);
+        // TODO: If need, a JniService for E911 SMS will be added
         break;
 
 

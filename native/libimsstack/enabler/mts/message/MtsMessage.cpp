@@ -14,7 +14,7 @@
 #include "IMessageBodyPart.h"
 #include "IPageMessage.h"
 #include "interface/IMtsMessage.h"
-#include "IUSMS.h"
+#include "IUMts.h"
 #include "MtsClient.h"
 #include "utility/MtsDynamicLoader.h"
 #include "message/MtsMessageController.h"

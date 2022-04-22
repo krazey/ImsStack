@@ -4,7 +4,7 @@
 #include "IMSActivityEx.h"
 #include "ICoreService.h"
 #include "interface/IMtsService.h"
-#include "IUSMS.h"
+#include "IUMts.h"
 
 class IMtsMessage;
 class IMtsMessageControllerListener;
@@ -39,7 +39,7 @@ public:
     const AString& GetLastIpsmgwAddr();
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
-    void SendMtsMessage(IN IUSmsSendRequestParam* pSendParam, IN IMS_BOOL bIsSmsEServiceType);
+    void SendMtsMessage(IN IUSendSmsRequestParam* pSendParam, IN IMS_BOOL bIsSmsEServiceType);
     void ReceiveMtsMessage(IN IPageMessage* piPageMessage,  IN IMS_BOOL bIsSmsEServiceType);
 
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);

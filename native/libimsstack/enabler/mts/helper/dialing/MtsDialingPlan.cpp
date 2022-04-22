@@ -363,10 +363,13 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
 PROTECTED
 IMS_BOOL MtsDialingPlan::TranslateAsGlobal(IN const AString& strNumber, OUT AStringBuffer& objUri)
 {
-    (void)strNumber;
-    (void)objUri;
-
-    return IMS_FALSE;
+    /*
+     * TODO:
+     * Currenttly Request-URI set as the dialed number which is received form AP SMS stack.
+     * When PSI value can be checked then this method needs to be changed as normal.
+     */
+    objUri.Append(strNumber);
+    return IMS_TRUE;
 }
 
 PROTECTED
