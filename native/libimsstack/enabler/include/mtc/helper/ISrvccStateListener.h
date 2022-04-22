@@ -4,6 +4,15 @@
 #include "IMSTypeDef.h"
 #include "IMtcService.h"
 
+enum class SrvccState
+{
+    IDLE = -1,
+    STARTED,
+    SUCCEEDED,
+    FAILED,
+    CANCELED
+};
+
 class ISrvccStateListener
 {
 public:

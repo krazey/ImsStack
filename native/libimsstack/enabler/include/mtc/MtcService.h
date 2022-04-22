@@ -25,21 +25,17 @@ class MtcService :
 public:
     MtcService(IN IMtcContext& objContext, IN ServiceType eType);
     virtual ~MtcService();
-    MtcService(IN CONST MtcService&) = delete;
-    MtcService& operator=(IN CONST MtcService&) = delete;
+    MtcService(IN const MtcService&) = delete;
+    MtcService& operator=(IN const MtcService&) = delete;
 
     // IMtcService implementation
-    virtual void Init() override;
-    virtual void DeInit() override;
-    inline const AString& GetId() const override { return m_strServiceName; }
-
     inline ServiceType GetServiceType() const override { return m_eType; }
     void AddSrvccStateListener(IN ISrvccStateListener* piListener) override;
     void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) override;
 
-    inline IMS_BOOL IsActive() const override { return IMS_TRUE; }
-    inline IMS_BOOL IsEmergency() const override { return IMS_FALSE; }
-    inline IMS_BOOL IsWlanIpCanType() const override { return IMS_FALSE; }
+    inline IMS_BOOL IsActive() const override { return m_eStatus == ServiceStatus::SERVICE_ACTIVE; }
+    inline IMS_BOOL IsEmergency() const override { return m_eType == ServiceType::EMERGENCY; }
+    IMS_BOOL IsWlanIpCanType() const override;
     inline ServiceStatus GetServiceStatus() const override { return m_eStatus; }
     inline ICoreService* GetICoreService() const override { return m_piCoreService; }
     inline MtcAosConnector* GetAosConnector() const override { return m_pAosConnector; }
@@ -86,6 +82,8 @@ public:
     */
 
 private:
+    void Init();
+    AString GetServiceName(IN ServiceType eType) const;
     void AttachCoreServiceInterface();
     void AttachAosInterface();
     void SetServiceFilterCriteria();
@@ -100,8 +98,6 @@ private:
     SrvccEventHandler m_objSrvccEventHandler;
     JniMtcService* m_pJniService;
     IMS_BOOL m_bTerminalBasedCallWaitingEnabled;
-
-    static const IMS_CHAR MtcName[];
 };
 
 #endif

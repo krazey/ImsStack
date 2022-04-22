@@ -112,8 +112,10 @@ void MtcApp::InitConfiguration()
 PRIVATE
 void MtcApp::CreateServices()
 {
+    DestroyServices();
+
     m_lstServices.Append(new MtcService(*this, ServiceType::NORMAL));
-    //m_lstServices.Append(new MtcService(*this, ServiceType::EMERGENCY));
+    m_lstServices.Append(new MtcService(*this, ServiceType::EMERGENCY));
 }
 
 PRIVATE
@@ -127,5 +129,9 @@ void MtcApp::InitCallManager()
 PRIVATE
 void MtcApp::DestroyServices()
 {
-
+    for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
+    {
+        delete m_lstServices.GetAt(i);
+    }
+    m_lstServices.Clear();
 }

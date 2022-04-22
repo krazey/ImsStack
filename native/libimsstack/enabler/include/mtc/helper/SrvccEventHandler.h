@@ -3,7 +3,6 @@
 
 #include "IMSTypeDef.h"
 #include "IMSList.h"
-#include "IMtcService.h"
 #include "helper/ISrvccStateListener.h"
 
 class IMtcContext;

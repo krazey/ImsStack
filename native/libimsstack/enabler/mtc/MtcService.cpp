@@ -2,7 +2,7 @@
 #include "Connector.h"
 #include "ServiceMSG.h"
 #include "ServiceTrace.h"
-
+#include "IIPCAN.h"
 #include "IMSCore.h"
 #include "ImsServiceConfig.h"
 #include "IImsAos.h"
@@ -24,14 +24,12 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-const IMS_CHAR MtcService::MtcName[] = "mtc";
-
 PUBLIC
 MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
         IMSService(AString::ConstNull()),
         m_eType(eType),
         m_objContext(objContext),
-        m_strServiceName(ImsServiceConfig::GetServiceName(ImsServiceId::MTC)),
+        m_strServiceName(GetServiceName(eType)),
         m_eStatus(ServiceStatus::SERVICE_IDLE),
         m_piCoreService(IMS_NULL),
         m_pAosConnector(IMS_NULL),
@@ -41,7 +39,7 @@ MtcService::MtcService(IN IMtcContext& objContext, IN ServiceType eType) :
                 Feature::TERMINAL_BASED_CALL_WAIT_DEFAULT_ENABLED)*/)
 {
     IMS_TRACE_I("+MtcService [slot_%d]", m_objContext.GetSlotId(), 0, 0);
-    Init(); // public????
+    Init();
 }
 
 PUBLIC VIRTUAL
@@ -57,23 +55,6 @@ MtcService::~MtcService()
 }
 
 PUBLIC VIRTUAL
-void MtcService::Init()
-{
-    IMS_TRACE_I("Init", 0, 0, 0);
-
-    JniConnectorFactory::GetInstance()->GetMtcServiceConnector(m_objContext.GetSlotId())
-            ->SetEnablerService(this);
-    AttachCoreServiceInterface();
-    AttachAosInterface();
-}
-
-PUBLIC VIRTUAL
-void MtcService::DeInit()
-{
-    IMS_TRACE_I("DeInit", 0, 0, 0);
-}
-
-PUBLIC VIRTUAL
 void MtcService::AddSrvccStateListener(IN ISrvccStateListener* piListener)
 {
     m_objSrvccEventHandler.AddListener(piListener);
@@ -83,6 +64,17 @@ PUBLIC VIRTUAL
 void MtcService::RemoveSrvccStateListener(IN ISrvccStateListener* piListener)
 {
     m_objSrvccEventHandler.RemoveListener(piListener);
+}
+
+PUBLIC VIRTUAL
+IMS_BOOL MtcService::IsWlanIpCanType() const
+{
+    if (m_pAosConnector == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_pAosConnector->GetIpcanType() == IIPCAN::CATEGORY_WLAN;
 }
 
 PUBLIC VIRTUAL
@@ -152,7 +144,6 @@ PUBLIC VIRTUAL
 void MtcService::CoreService_UnsolicitedNotifyReceived(IN ICoreService* /*piService*/,
         IN IMessage* /*piNotify*/)
 {
-
 }
 
 PUBLIC VIRTUAL
@@ -167,7 +158,8 @@ void MtcService::CoreService_CapabilityQueryReceived(IN ICoreService* piService,
 PUBLIC VIRTUAL
 void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nIpcan*/)
 {
-    IMS_TRACE_I("ImsAos_Connected", 0, 0, 0);
+    IMS_TRACE_I("ImsAos_Connected emergency[%s]",
+            _TRACE_B_(m_eType == ServiceType::EMERGENCY), 0, 0);
 
     // TODO: this must be called when registration is refreshed?
     m_objContext.GetConfigurationProxy().OnRegistrationRefreshed();
@@ -193,7 +185,6 @@ void MtcService::ImsAos_Disconnecting(IN IMS_UINT32 nReason)
 PUBLIC VIRTUAL
 void MtcService::ImsAos_Disconnected(IN IMS_UINT32 /*nReason*/)
 {
-    // remove call?
 }
 
 PUBLIC VIRTUAL
@@ -204,6 +195,31 @@ void MtcService::ImsAos_Suspended(IN IMS_UINT32 /*nReason*/)
 PUBLIC VIRTUAL
 void MtcService::ImsAos_Resumed()
 {
+}
+
+PRIVATE
+void MtcService::Init()
+{
+    IMS_TRACE_I("Init", 0, 0, 0);
+
+    if (m_eType == ServiceType::NORMAL)
+    {
+        // TODO: emergency service connector.
+        JniConnectorFactory::GetInstance()->GetMtcServiceConnector(m_objContext.GetSlotId())
+                ->SetEnablerService(this);
+    }
+    AttachCoreServiceInterface();
+    AttachAosInterface();
+}
+
+PRIVATE
+AString MtcService::GetServiceName(IN ServiceType eType) const
+{
+    if (eType == ServiceType::EMERGENCY)
+    {
+        return ImsServiceConfig::GetServiceName(ImsServiceId::MTC_EMERGENCY);
+    }
+    return ImsServiceConfig::GetServiceName(ImsServiceId::MTC);
 }
 
 PRIVATE

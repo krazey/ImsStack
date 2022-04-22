@@ -18,6 +18,9 @@ MtcConfigurationManager::MtcConfigurationManager() :
 PUBLIC
 MtcConfigurationManager::~MtcConfigurationManager()
 {
+    ICarrierConfig* piCc = ConfigService::GetConfigService()
+            ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+    piCc->RemoveListener(this);
 }
 
 PUBLIC

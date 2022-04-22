@@ -4,7 +4,6 @@
 #include "helper/ISrvccStateListener.h"
 #include "IMSList.h"
 #include "IMtcContext.h"
-#include "IMtcService.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

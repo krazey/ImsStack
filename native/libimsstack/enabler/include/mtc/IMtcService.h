@@ -2,6 +2,7 @@
 #define INTERFACE_MTC_SERVICE_H_
 
 #include "IMSTypeDef.h"
+#include "helper/ISrvccStateListener.h"
 
 class AString;
 class ICoreService;
@@ -15,10 +16,6 @@ enum class SrvccState;
 class IMtcService
 {
 public:
-    virtual void Init() = 0;
-    virtual void DeInit() = 0;
-    virtual const AString& GetId() const = 0;
-
     virtual ServiceType GetServiceType() const = 0;
     virtual void AddSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
     virtual void RemoveSrvccStateListener(IN ISrvccStateListener* piListener) = 0;
@@ -55,15 +52,6 @@ enum class ServiceType
     UNKNOWN     = 0,
     NORMAL      = 1 << 0,
     EMERGENCY   = 1 << 1,
-};
-
-enum class SrvccState
-{
-    IDLE = -1,
-    STARTED,
-    SUCCEEDED,
-    FAILED,
-    CANCELED
 };
 
 #endif
