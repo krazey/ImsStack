@@ -445,6 +445,15 @@ void AosSubscriberManager::ConfigureAsDefault()
         }
 
         m_objPuids.AddElement(strImpu);
+
+        for (int i = 0; i < objPublicUserIds.GetCount(); i++)
+        {
+            if (i != nIndex && objPublicUserIds.GetElementAt(i).GetLength() > 0)
+            {
+                m_objPuids.AddElement(objPublicUserIds.GetElementAt(i));
+            }
+        }
+
     }
 
     if (m_objPuids.GetCount() > 0)
