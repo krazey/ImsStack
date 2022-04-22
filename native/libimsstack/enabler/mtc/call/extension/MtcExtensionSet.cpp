@@ -1,10 +1,12 @@
 #include "IMSList.h"
 #include "ISIPHeader.h"
+#include "ServiceTrace.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
+#include "call/extension/PreconditionExtension.h"
+#include "call/extension/RprExtension.h"
 #include "utility/MessageUtil.h"
-#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -87,38 +89,38 @@ IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessag
 }
 
 PUBLIC VIRTUAL
-void MtcExtensionSet::FormatRequest(IN IMS_UINT32 eMethod, IN_OUT IMessage& objRequest)
+void MtcExtensionSet::FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->FormatRequest(eMethod, objRequest);
+        m_objExtensions.GetValueAt(nIndex)->FormatRequest(nMethod, objRequest);
     }
 }
 
 PUBLIC VIRTUAL
-void MtcExtensionSet::FormatResponse(IN IMS_UINT32 eMethod, IN_OUT IMessage& objResponse)
+void MtcExtensionSet::FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->FormatResponse(eMethod, objResponse);
+        m_objExtensions.GetValueAt(nIndex)->FormatResponse(nMethod, objResponse);
     }
 }
 
 PUBLIC VIRTUAL
-void MtcExtensionSet::HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest)
+void MtcExtensionSet::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->HandleRequest(eMethod, objRequest);
+        m_objExtensions.GetValueAt(nIndex)->HandleRequest(nMethod, objRequest);
     }
 }
 
 PUBLIC VIRTUAL
-void MtcExtensionSet::HandleResponse(IN IMS_UINT32 eMethod, IN const IMessage& objResponse)
+void MtcExtensionSet::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.GetValueAt(nIndex)->HandleResponse(eMethod, objResponse);
+        m_objExtensions.GetValueAt(nIndex)->HandleResponse(nMethod, objResponse);
     }
 }
 
@@ -148,6 +150,14 @@ void MtcExtensionSet::Clear()
 PRIVATE
 IMtcExtension* MtcExtensionSet::CreateExtension(IN const AString& strOptionTag) const
 {
-    // General extension class
+    if (strOptionTag.EqualsIgnoreCase(OPTION_TAG_PRECONDITION))
+    {
+        return new PreconditionExtension();
+    }
+    else if (strOptionTag.EqualsIgnoreCase(OPTION_TAG_RPR))
+    {
+        return new RprExtension();
+    }
+
     return new MtcExtension(strOptionTag);
 }
