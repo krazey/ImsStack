@@ -6,7 +6,7 @@
         <param name="config_xml_file" type="TEXT" value="configuration.xml"/>
         <param name="media_xml_file" type="TEXT" value=""/>
         <param name="xml_base_tag" type="TEXT" value="0"/>
-        <param name="config_xml_modified_time" type="TEXT" value="4"/>
+        <param name="config_xml_modified_time" type="TEXT" value="5"/>
         <param name="IMSI" type="TEXT" value="0"/>
         <param name="make_db_on_next_time" type="TEXT" value="0"/>
         <param name="software_version" type="TEXT" value="0"/>
