@@ -1,12 +1,9 @@
 #include "IMessage.h"
-#include "IMSList.h"
 #include "ISIPHeader.h"
-#include "utility/MessageUtil.h"
+#include "ServiceTrace.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "SIPHeaderName.h"
-#include "SIPMethod.h"
-#include "ServiceTrace.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -50,68 +47,37 @@ const AString& MtcExtension::GetOptionTag() const
 }
 
 PUBLIC VIRTUAL
-void MtcExtension::FormatRequest(
-        IN IMS_UINT32 /* eMethod */, IN_OUT IMessage& /* objRequest */)
+void MtcExtension::FormatRequest(IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objRequest */)
 {
 }
 
 PUBLIC VIRTUAL
-void MtcExtension::FormatResponse(
-        IN IMS_UINT32 /* eMethod */, IN_OUT IMessage& /* objResponse */)
+void MtcExtension::FormatResponse(IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objResponse */)
 {
 }
 
 PUBLIC VIRTUAL
-void MtcExtension::HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest)
+void MtcExtension::HandleRequest(IN IMS_UINT32 /* nMethod */, IN const IMessage& objRequest)
 {
-    if (eMethod == IMessage::SESSION_PRACK)
-    {
-        return;
-    }
-
-    if (GetOptionTag().Equals(MtcExtensionSet::OPTION_TAG_PRECONDITION))
-    {
-        if (eMethod != IMessage::SESSION_START && eMethod != IMessage::SESSION_EARLY_UPDATE)
-        {
-            return;
-        }
-        else if (eMethod == IMessage::SESSION_EARLY_UPDATE && !MessageUtil::HasSdp(&objRequest))
-        {
-            IMS_TRACE_D("HandleRequest : don't check precondition feature without SDP.", 0, 0, 0);
-            return;
-        }
-    }
-
-    m_bRequiredOnRemote = MessageUtil::HasValue(
-            &objRequest, GetOptionTag(), ISIPHeader::REQUIRE);
-    m_bSupportedOnRemote = MessageUtil::HasValue(
-            &objRequest, GetOptionTag(), ISIPHeader::SUPPORTED);
+    UpdateFromRequireAndSupportedHeader(objRequest);
 }
 
 PUBLIC VIRTUAL
-void MtcExtension::HandleResponse(
-        IN IMS_UINT32 eMethod, IN const IMessage& objResponse)
+void MtcExtension::HandleResponse(IN IMS_UINT32 /* nMethod */, IN const IMessage& objResponse)
 {
-    if (eMethod == IMessage::SESSION_PRACK)
-    {
-        return;
-    }
+    UpdateFromRequireAndSupportedHeader(objResponse);
+}
 
-    if (GetOptionTag().Equals(MtcExtensionSet::OPTION_TAG_PRECONDITION))
-    {
-        if (eMethod != IMessage::SESSION_START)
-        {
-            return;
-        }
-        else if (!MessageUtil::HasSdp(&objResponse))
-        {
-            IMS_TRACE_D("HandleResponse : don't check precondition feature without SDP.", 0, 0, 0);
-            return;
-        }
-    }
+PRIVATE
+void MtcExtension::UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage)
+{
+    m_bRequiredOnRemote =
+            MessageUtil::HasValue(&objMessage, GetOptionTag(), ISIPHeader::REQUIRE);
+    m_bSupportedOnRemote =
+            MessageUtil::HasValue(&objMessage, GetOptionTag(), ISIPHeader::SUPPORTED);
 
-    m_bRequiredOnRemote = MessageUtil::HasValue(
-            &objResponse, GetOptionTag(), ISIPHeader::REQUIRE);
-    m_bSupportedOnRemote = MessageUtil::HasValue(
-            &objResponse, GetOptionTag(), ISIPHeader::SUPPORTED);
+    IMS_TRACE_D("UpdateFromRequireAndSupportedHeader : Tag[%s] Require[%s] Supported[%s]",
+            m_strOptionTag.GetStr(),
+            _TRACE_B_(m_bRequiredOnRemote),
+            _TRACE_B_(m_bSupportedOnRemote));
 }

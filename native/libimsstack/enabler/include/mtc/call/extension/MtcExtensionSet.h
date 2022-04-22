@@ -54,10 +54,10 @@ public:
      */
     IMS_BOOL IsSupportRequiredExtensions(IN const IMessage& objMessage) const;
 
-    void FormatRequest(IN IMS_UINT32 eMethod, IN_OUT IMessage& objRequest) override;
-    void FormatResponse(IN IMS_UINT32 eMethod, IN_OUT IMessage& objResponse) override;
-    void HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest) override;
-    void HandleResponse(IN IMS_UINT32 eMethod, IN const IMessage& objResponse) override;
+    void FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest) override;
+    void FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse) override;
+    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest) override;
+    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse) override;
 
 private:
     void CopyFrom(IN const MtcExtensionSet& objRhs);
