@@ -16,20 +16,15 @@
 
 package com.android.imsstack.enabler.media;
 
-import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.media.MediaSession;
-import com.android.imsstack.enabler.mtc.MtcMediaSession;
+import android.os.Parcel;
 
 /**
- * This creates MediaSession instance
+ * This is a Listener to handle requests from ImsStack (Media Enabler Native)
+ * to ImsMedia
  */
-public class MediaFactory {
-
+public interface IMediaListener {
     /**
-     * Creates and returns MediaSession instance
+     * Called when Message for ImsMedia is received
      */
-    public static MediaSession createMediaSession(
-        IBaseContext context, MtcMediaSession mtcMediaSession) {
-        return new MediaSession(context, mtcMediaSession);
-    }
+    public void onMediaMessage(Parcel parcel);
 }

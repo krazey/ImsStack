@@ -14,71 +14,59 @@
  * limitations under the License.
  */
 
-package com.android.imsstack.enabler.media.audio;
+package com.android.imsstack.enabler.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.ParcelFileDescriptor;
+import android.os.Parcel;
 import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
-import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
-import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.media.AudioSessionCallbackHandler;
 import com.android.imsstack.enabler.media.MediaConstants;
+import com.android.imsstack.enabler.media.MediaManagerHelper;
 import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.enabler.media.MediaSocket;
-import com.android.imsstack.enabler.media.audio.MediaAudioCallbackHandler;
-import com.android.imsstack.enabler.media.audio.MediaAudioListener;
-import com.android.imsstack.enabler.media.base.MediaSessionBase;
-import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
- * This manages Audio session communications between ImsStack and ImsMedia
+ * This manages audio session by communicating between ImsStack (media enabler native)
+ * and {@link ImsMediaManager}
  */
-public class MediaAudioSession  extends MediaSession {
+public class AudioSessionHandler  {
 
-    private MtcMediaSession mMtcMediaSession;
-    private MediaAudioSessionCallback mAudioSessionCallback;
+    private final AudioSessionCallbackProxy mAudioSessionCallback;
     private ImsAudioSession mAudioSession;
     private int mAudioSessionId;
     private DatagramSocket mRtpSocket, mRtcpSocket;
-    private MediaAudioListenerProxy mAudioListenerProxy;
-    private MediaAudioCallbackHandler mAudioCallbackHandler;
-    //private ImsMediaManager mImsMediaManager;
+    private final AudioSessionCallbackHandler mAudioSessionCallbackHandler;
+    private final MediaManagerHelper mMediaManager;
 
-    public MediaAudioSession(IBaseContext context, @NonNull MtcMediaSession mtcMediaSession) {
-        super(context, mtcMediaSession);
-        mAudioCallbackHandler = new MediaAudioCallbackHandler(mtcMediaSession);
-        mAudioSessionCallback = new MediaAudioSessionCallback();
-        mAudioListenerProxy   = new MediaAudioListenerProxy();
-        initMtcMediaSession(mtcMediaSession);
-        ImsLog.d("MediaAudioSession created");
+    public AudioSessionHandler(@NonNull MediaSession mediaSession,
+                                @NonNull MediaManagerHelper mediaManager) {
+        mMediaManager = mediaManager;
+        mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mediaSession);
+        mAudioSessionCallback = new AudioSessionCallbackProxy();
+        ImsLog.d("AudioSessionHandler created");
     }
 
     @VisibleForTesting
-    public MediaAudioSession(@NonNull IBaseContext context,
-        @NonNull MtcMediaSession mtcMediaSession,
-        @NonNull MediaAudioCallbackHandler audioCallbackHandler,
-        @NonNull ImsAudioSession audioSession,
-        @NonNull ImsMediaManager imsMediaManager,
-        @NonNull Executor executor) {
-        super(context, mtcMediaSession, imsMediaManager, executor);
-        mAudioCallbackHandler = audioCallbackHandler;
+    public AudioSessionHandler(@NonNull MediaManagerHelper mediaManager,
+        @NonNull AudioSessionCallbackHandler audioCallbackHandler,
+        @NonNull ImsAudioSession audioSession) {
+        mMediaManager = mediaManager;
+        mAudioSessionCallbackHandler = audioCallbackHandler;
         mAudioSession = audioSession;
-        mAudioSessionCallback = new MediaAudioSessionCallback();
-        mAudioListenerProxy   = new MediaAudioListenerProxy();
-        initMtcMediaSession(mtcMediaSession);
-        ImsLog.d("MediaAudioSession created");
+        mAudioSessionCallback = new AudioSessionCallbackProxy();
+        ImsLog.d("AudioSessionHandler created");
     }
 
     @VisibleForTesting
@@ -92,38 +80,117 @@ public class MediaAudioSession  extends MediaSession {
     }
 
     @VisibleForTesting
-    MediaAudioListener getAudioListenerProxy() {
-        return mAudioListenerProxy;
-    }
-
-    @VisibleForTesting
     int getAudioSessionId() {
         return mAudioSessionId;
-    }
-
-    private void initMtcMediaSession(MtcMediaSession mtcMediaSession) {
-        mMtcMediaSession = mtcMediaSession;
-        if (mtcMediaSession != null) {
-            mtcMediaSession.setMediaAudioListener(mAudioListenerProxy);
-        }
     }
 
     private ImsAudioSession getAudioSession() {
         return mAudioSession;
     }
 
-    public void close() {
-        ImsLog.d("clear the listener which was set");
-        if (mMtcMediaSession != null) {
-            mMtcMediaSession.setMediaAudioListener(null);
-            mMtcMediaSession = null;
+    public void onImsMediaAudioMessage(final int requestType, Parcel parcel) {
+        ImsLog.v("requestType= " + requestType);
+
+        switch (requestType) {
+            /**
+             * Requests (ImsStack -> ImsMedia)
+             */
+            case MediaConstants.REQUEST_OPEN_SESSION:
+            {
+                String localIpAddress = parcel.readString16();
+                int localPortNumber = parcel.readInt();
+                ImsLog.v("localIpAddress= " + localIpAddress
+                        + " localPortNumber= " + localPortNumber);
+
+                handleAudioOpenSession(localIpAddress, localPortNumber, null);
+            }
+            break;
+
+            case MediaConstants.REQUEST_CLOSE_SESSION:
+            {
+                handleAudioCloseSession();
+            }
+            break;
+
+            case MediaConstants.REQUEST_MODIFY_SESSION:
+            {
+                AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
+
+                handleAudioModifySession(audioConfig);
+            }
+            break;
+
+            case MediaConstants.REQUEST_ADD_CONFIG:
+            {
+                AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
+
+                handleAudioAddConfig(audioConfig);
+            }
+            break;
+
+            case MediaConstants.REQUEST_DELETE_CONFIG:
+            {
+                AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
+
+                handleAudioDeleteConfig(audioConfig);
+            }
+            break;
+
+            case MediaConstants.REQUEST_CONFIRM_CONFIG:
+            {
+                AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
+
+                handleAudioConfirmConfig(audioConfig);
+            }
+            break;
+
+            case MediaConstants.REQUEST_SEND_DTMF:
+            {
+                char dtmfDigit = (char)parcel.readByte();
+                int duration = parcel.readInt();
+                ImsLog.v("dtmfDigit=" + dtmfDigit + ", duration=" +duration);
+
+                handleAudioSendDtmf(dtmfDigit, duration);
+            }
+            break;
+
+            case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
+            {
+                MediaQualityThreshold threshold =
+                    MediaQualityThreshold.CREATOR.createFromParcel(parcel);
+                ImsLog.v("onAudioSetMediaQualityThreshold: " + threshold.toString());
+
+                handleAudioSetMediaQualityThreshold(threshold);
+            }
+            break;
+
+            case MediaConstants.REQUEST_HEADER_EXTENSION:
+            {
+                int rtpExtensionsListSize = parcel.readInt();
+                ArrayList rtpExtensions = new ArrayList<RtpHeaderExtension>();
+                if (rtpExtensionsListSize!=0) {
+                    for (int i = 0; i < rtpExtensionsListSize; ++i) {
+                        rtpExtensions.add(RtpHeaderExtension.CREATOR.createFromParcel(parcel));
+                    }
+                }
+
+                handleAudioSendHeaderExtension(rtpExtensions);
+            }
+            break;
+
+            default:
+            {
+                ImsLog.e("Invalid RequestType");
+            }
+            break;
         }
     }
 
     private void handleAudioOpenSession(String localIpAddress, int localPortNumber,
         AudioConfig audioConfig) {
+
         if(mAudioSession == null) {
-            if (isImsMediaConnected()) {
+            if (mMediaManager.isImsMediaConnected()) {
                 //TODO: ImsQOSManager to be used
                 mRtpSocket = MediaSocket.createDatagramSocket(localIpAddress,
                     localPortNumber);
@@ -132,28 +199,30 @@ public class MediaAudioSession  extends MediaSession {
 
                 if (mRtpSocket == null || mRtcpSocket == null) {
                     ImsLog.e("socket creation failed");
-                    if (mAudioCallbackHandler != null) {
-                        mAudioCallbackHandler.openSessionResponse(
+                    if (mAudioSessionCallbackHandler != null) {
+                        mAudioSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
                     return;
                 }
 
-                openSession(mRtpSocket, mRtcpSocket, ImsMediaSession.SESSION_TYPE_AUDIO,
+                mMediaManager.openSession(mRtpSocket, mRtcpSocket,
+                    ImsMediaSession.SESSION_TYPE_AUDIO,
                     audioConfig, mAudioSessionCallback);
             }
             else {
                 ImsLog.d("ImsMediaManager is not ready");
-                if (mAudioCallbackHandler != null) {
-                    mAudioCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_NOT_READY);
+                if (mAudioSessionCallbackHandler != null) {
+                    mAudioSessionCallbackHandler.openSessionResponse(
+                            ImsMediaSession.RESULT_NOT_READY);
                 }
             }
         }
         else {
             ImsLog.d("Audio Session is already created: SessionId="
                 + mAudioSession.getSessionId());
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.openSessionResponse(
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.openSessionResponse(
                     ImsMediaSession.RESULT_NOT_SUPPORTED);
             }
         }
@@ -162,7 +231,7 @@ public class MediaAudioSession  extends MediaSession {
     private void handleAudioCloseSession() {
 
         if (mAudioSession != null) {
-            closeSession(mAudioSession);
+            mMediaManager.closeSession(mAudioSession);
             mAudioSession = null;
         }
         //TODO: ImsQOSManager to be used
@@ -212,15 +281,16 @@ public class MediaAudioSession  extends MediaSession {
         }
     }
 
-    private class MediaAudioSessionCallback extends AudioSessionCallback {
+    private class AudioSessionCallbackProxy extends AudioSessionCallback {
 
         @Override
         public void onOpenSessionSuccess(ImsMediaSession session) {
 
             if (session == null) {
                 ImsLog.e("Audio Session is not created");
-                if (mAudioCallbackHandler != null) {
-                    mAudioCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_NO_MEMORY);
+                if (mAudioSessionCallbackHandler != null) {
+                    mAudioSessionCallbackHandler.openSessionResponse(
+                            ImsMediaSession.RESULT_NO_MEMORY);
                 }
                 return ;
             }
@@ -229,8 +299,8 @@ public class MediaAudioSession  extends MediaSession {
             mAudioSessionId = mAudioSession.getSessionId();
             ImsLog.d("Audio Session created: SessionId=" + mAudioSessionId);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_SUCCESS);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_SUCCESS);
             }
         }
 
@@ -238,8 +308,8 @@ public class MediaAudioSession  extends MediaSession {
         public void onOpenSessionFailure(final @ImsMediaSession.SessionOperationResult int error) {
             ImsLog.d("error=" + error);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.openSessionResponse(error);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.openSessionResponse(error);
             }
         }
 
@@ -247,8 +317,8 @@ public class MediaAudioSession  extends MediaSession {
         public void onSessionChanged(final @ImsMediaSession.SessionState int state) {
             ImsLog.d("state=" + state);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.sessionChanged(state);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.sessionChanged(state);
             }
         }
 
@@ -257,8 +327,8 @@ public class MediaAudioSession  extends MediaSession {
                 final @ImsMediaSession.SessionOperationResult int result) {
             ImsLog.d("result=" + result);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.modifySessionResponse(audioConfig, result);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.modifySessionResponse(audioConfig, result);
             }
         }
 
@@ -267,8 +337,8 @@ public class MediaAudioSession  extends MediaSession {
                 final @ImsMediaSession.SessionOperationResult int result) {
             ImsLog.d("result=" + result);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.addConfigResponse(audioConfig, result);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.addConfigResponse(audioConfig, result);
             }
         }
 
@@ -277,8 +347,8 @@ public class MediaAudioSession  extends MediaSession {
                 final @ImsMediaSession.SessionOperationResult int result) {
             ImsLog.d("result=" + result);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.confirmConfigResponse(audioConfig, result);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.confirmConfigResponse(audioConfig, result);
             }
         }
 
@@ -286,8 +356,8 @@ public class MediaAudioSession  extends MediaSession {
         public void onFirstMediaPacketReceived(final AudioConfig audioConfig) {
             ImsLog.d("FirstMediaPacketReceived for SessionId[" + getAudioSessionId() + "]");
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.firstMediaPacketReceived(audioConfig);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.firstMediaPacketReceived(audioConfig);
             }
         }
 
@@ -295,8 +365,8 @@ public class MediaAudioSession  extends MediaSession {
         public void onHeaderExtensionReceived(final List<RtpHeaderExtension> extensions) {
             ImsLog.d("onHeaderExtensionReceived");
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.headerExtensionReceived(extensions);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.headerExtensionReceived(extensions);
             }
         }
 
@@ -304,8 +374,8 @@ public class MediaAudioSession  extends MediaSession {
         public void notifyMediaInactivity(final @ImsMediaSession.PacketType int packetType) {
             ImsLog.d("packetType=" + packetType);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.onNotifyMediaInactivity(packetType);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.onNotifyMediaInactivity(packetType);
             }
         }
 
@@ -313,8 +383,8 @@ public class MediaAudioSession  extends MediaSession {
         public void notifyPacketLoss(final int packetLossPercentage) {
             ImsLog.d("packetLossPercentage=" + packetLossPercentage);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.onNotifyPacketLoss(packetLossPercentage);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.onNotifyPacketLoss(packetLossPercentage);
             }
         }
 
@@ -322,8 +392,8 @@ public class MediaAudioSession  extends MediaSession {
         public void notifyJitter(final int jitter) {
             ImsLog.d("jitter=" + jitter);
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.onNotifyJitter(jitter);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.onNotifyJitter(jitter);
             }
         }
 
@@ -331,70 +401,9 @@ public class MediaAudioSession  extends MediaSession {
         public void onMediaQualityChanged(@NonNull final CallQuality callQuality) {
             ImsLog.v("Media Quality Changed: " + callQuality.toString());
 
-            if (mAudioCallbackHandler != null) {
-                mAudioCallbackHandler.mediaQualityChanged(callQuality);
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.mediaQualityChanged(callQuality);
             }
         }
-
     }
-
-    private class MediaAudioListenerProxy extends MediaAudioListener {
-
-        @Override
-        public void onAudioOpenSession(@NonNull final String localIpAddress,
-            final int localPortNumber, @Nullable final AudioConfig audioConfig) {
-            ImsLog.v("localPortNumber= " + localPortNumber + " localIpAddress= " + localIpAddress);
-            handleAudioOpenSession(localIpAddress, localPortNumber, audioConfig);
-        }
-
-        @Override
-        public void onAudioCloseSession() {
-            ImsLog.v("onAudioCloseSession");
-            handleAudioCloseSession();
-        }
-
-        @Override
-        public void onAudioModifySession(@NonNull final AudioConfig audioConfig) {
-            ImsLog.v("onAudioModifySession");
-            handleAudioModifySession(audioConfig);
-        }
-
-        @Override
-        public void onAudioAddConfig(@NonNull final AudioConfig audioConfig) {
-            ImsLog.v("onIMMediaAddConfig");
-            handleAudioAddConfig(audioConfig);
-        }
-
-        @Override
-        public void onAudioDeleteConfig(@NonNull final AudioConfig audioConfig) {
-            ImsLog.v("onAudioDeleteConfig");
-            handleAudioDeleteConfig(audioConfig);
-        }
-
-        @Override
-        public void onAudioConfirmConfig(@NonNull final AudioConfig audioConfig) {
-            ImsLog.v("onAudioConfirmConfig");
-            handleAudioConfirmConfig(audioConfig);
-        }
-
-        @Override
-        public void onAudioSendDtmf(final char dtmfDigit, final int duration) {
-            ImsLog.v("dtmfDigit=" + dtmfDigit + ", duration=" +duration);
-            handleAudioSendDtmf(dtmfDigit, duration);
-        }
-
-        @Override
-        public void onAudioSetMediaQualityThreshold(
-            @NonNull final MediaQualityThreshold threshold) {
-            ImsLog.v("onAudioSetMediaQualityThreshold: " + threshold.toString());
-            handleAudioSetMediaQualityThreshold(threshold);
-        }
-
-        @Override
-        public void onAudioSendHeaderExtension(
-            @NonNull final List<RtpHeaderExtension> extensions) {
-            ImsLog.v("onAudioSendHeaderExtension");
-            handleAudioSendHeaderExtension(extensions);
-        }
-    };
 }

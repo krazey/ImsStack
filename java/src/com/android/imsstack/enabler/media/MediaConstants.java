@@ -17,11 +17,12 @@
 package com.android.imsstack.enabler.media;
 
 /**
- * This consists of constants required for MediaSession
+ * This consists of constants used by MediaSession
  */
 public class MediaConstants {
 
-    public static final int SOCKETS_MAX = 10;
+    // Maximum sockets that can be opened
+    public static final int SOCKETS_MAX = 40;
     public static final int IMS_MSG_BASE_MEDIA = 1400;
 
     // Requests

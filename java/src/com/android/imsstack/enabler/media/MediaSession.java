@@ -16,52 +16,129 @@
 
 package com.android.imsstack.enabler.media;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
-import android.telephony.imsmedia.RtpConfig;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.media.audio.MediaAudioSession;
-import com.android.imsstack.enabler.media.base.MediaSessionBase;
+import com.android.imsstack.enabler.media.AudioSessionHandler;
+import com.android.imsstack.enabler.media.IMediaListener;
+import com.android.imsstack.enabler.media.MediaManagerHelper;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
-import java.net.DatagramSocket;
 import java.util.concurrent.Executor;
 
 /**
  * This manages Media Sessions
  */
-public class MediaSession  extends MediaSessionBase {
+public class MediaSession {
 
-    @VisibleForTesting
-    ImsMediaManager mImsMediaManager;
+    private MtcMediaSession mMtcMediaSession;
+    private final IBaseContext mContext;
+    private AudioSessionHandler mAudioSessionHandler;
+    private final MediaListener mMediaListener;
+    private final MediaManagerHelper mMediaManager;
 
-    public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession){
-        super(context, mtcMediaSession);
+    public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
         ImsLog.v("MediaSession created");
+        mContext = context;
+        mMediaManager = new MediaManagerHelper(this);
+        createAudioSession();
+        mMediaListener = new MediaListener();
+        initMtcMediaSession(mtcMediaSession);
     }
 
     @VisibleForTesting
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
-        ImsMediaManager imsMediaManager, Executor executor){
-        super(context, mtcMediaSession, imsMediaManager, executor);
+        ImsMediaManager imsMediaManager, Executor executor) {
+        mContext = context;
+        mMediaManager = new MediaManagerHelper(context.getContext(), this,
+                imsMediaManager, executor);
+        mMediaListener = new MediaListener();
+        initMtcMediaSession(mtcMediaSession);
         ImsLog.v("MediaSession created");
     }
 
-    protected void openSession(@NonNull final DatagramSocket rtpSocket,
-            @NonNull final DatagramSocket rtcpSocket,
-            @NonNull final @ImsMediaSession.SessionType int sessionType,
-            @Nullable final RtpConfig rtpConfig,
-            @NonNull final ImsMediaManager.SessionCallback callback) {
-        getMediaManagerInstance().openSession(rtpSocket,
-                    rtcpSocket, sessionType, rtpConfig,
-                    getExecutor(), callback);
+    @VisibleForTesting
+    MediaManagerHelper getMediaManager() {
+        return mMediaManager;
     }
 
-    protected void closeSession(@NonNull final ImsMediaSession session) {
-        getMediaManagerInstance().closeSession(session);
+    @VisibleForTesting
+    IMediaListener getMediaListenerProxy() {
+        return mMediaListener;
     }
 
+    @VisibleForTesting
+    void setAudioSessionHandler(AudioSessionHandler audioSessionHandler) {
+        mAudioSessionHandler = audioSessionHandler;
+    }
+
+    private void createAudioSession() {
+        if (mAudioSessionHandler == null) {
+            mAudioSessionHandler = new AudioSessionHandler(this, mMediaManager);
+        }
+    }
+
+    private void initMtcMediaSession(MtcMediaSession mtcMediaSession) {
+        mMtcMediaSession = mtcMediaSession;
+        if (mtcMediaSession != null) {
+            mtcMediaSession.setMediaListener(mMediaListener);
+        }
+    }
+
+    /**
+     * Sends response to media enabler native
+     */
+    public void sendRequest(Parcel parcel) {
+        if (mMtcMediaSession != null) {
+            mMtcMediaSession.sendRequest(parcel);
+        }
+    }
+
+    /**
+     * Returns slotId
+     */
+    public int getSlotId() {
+        return mContext.getSlotId();
+    }
+
+    private class MediaListener implements IMediaListener {
+
+        @Override
+        public void onMediaMessage(Parcel parcel) {
+            final int requestType = parcel.readInt();
+            final int sessionType = parcel.readInt();
+            ImsLog.v("requestType=" + requestType + ", sessionType=" +sessionType);
+
+            switch (sessionType) {
+            case ImsMediaSession.SESSION_TYPE_AUDIO:
+                {
+                    createAudioSession();
+                    if (mAudioSessionHandler != null) {
+                        mAudioSessionHandler.onImsMediaAudioMessage(requestType, parcel);
+                    }
+                }
+                break;
+
+            case ImsMediaSession.SESSION_TYPE_VIDEO:
+                {
+                    ImsLog.v("SESSION_TYPE_VIDEO :: TODO");
+                }
+                break;
+
+            case ImsMediaSession.SESSION_TYPE_RTT:
+                {
+                    ImsLog.v("SESSION_TYPE_RTT :: TODO");
+                }
+                break;
+
+            default:
+                {
+                    ImsLog.e("Invalid SessionType");
+                }
+                break;
+            }
+        }
+    }
 }

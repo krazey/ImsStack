@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.imsstack.enabler.media.audio;
+package com.android.imsstack.enabler.media;
 
 import static org.junit.Assert.assertArrayEquals;
 

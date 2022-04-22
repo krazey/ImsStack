@@ -15,18 +15,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Parcel;
-import android.telephony.ims.RtpHeaderExtension;
-import android.telephony.imsmedia.AudioConfig;
-import android.telephony.imsmedia.ImsMediaSession;
-import android.telephony.imsmedia.MediaQualityThreshold;
 import android.view.Display;
 import android.view.Surface;
 import com.android.imsstack.R;
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.media.IMediaListener;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.media.MediaFactory;
-import com.android.imsstack.enabler.media.audio.MediaAudioListener;
-import com.android.imsstack.enabler.media.base.MediaSessionBase;
+import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.util.ImsLog;
 import java.io.File;
@@ -34,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 public class MtcMediaSession {
     /**
@@ -322,18 +317,18 @@ public class MtcMediaSession {
     private int mState = STATE_NONE;
     private MtcMediaSession.Listener mListener = null;
     private MtcMediaSession.RttListener mRttListener = null;
-    private MediaAudioListener mMediaAudioListener = null;
+    private IMediaListener mMediaListener = null;
     private MediaInfoEvent mMediaInfoEvent = null;
     private Bitmap mBackgroundBitmap = null;
     private boolean mVQINeedToBeReported = false;
     public int mSwivelState = STATE_SWIVEL_NORMAL;
     public int mPrevOrientation = 0;
-    private final MediaSessionBase mMediaSessionBase;
+    private final MediaSession mMediaSession;
 
     public MtcMediaSession(IBaseContext context, Call call) {
         mContext = context.getContext();
         mCall = call;
-        mMediaSessionBase = MediaFactory.createMediaSession(context, this);
+        mMediaSession = MediaFactory.createMediaSession(context, this);
     }
 
     public void dispose() {
@@ -345,7 +340,7 @@ public class MtcMediaSession {
             mCall = null;
             mListener = null;
             mRttListener = null;
-            mMediaAudioListener = null;
+            mMediaListener = null;
             mMediaInfoEvent = null;
         }
     }
@@ -362,9 +357,9 @@ public class MtcMediaSession {
         }
     }
 
-    public void setMediaAudioListener(MediaAudioListener listener) {
+    public void setMediaListener(IMediaListener listener) {
         synchronized (mLock) {
-            mMediaAudioListener = listener;
+            mMediaListener = listener;
         }
     }
 
@@ -1183,45 +1178,11 @@ public class MtcMediaSession {
     }
 
     private void onImsMediaManagerMessage(Parcel parcel) {
-        // TODO: To be moved to media
-        int msg = parcel.readInt();
-        final @ImsMediaSession.SessionType int sessionType = parcel.readInt();
-        parcel.setDataPosition(0);
 
-        switch (sessionType) {
-        case ImsMediaSession.SESSION_TYPE_AUDIO:
-            {
-                onImsMediaAudioMessage(parcel);
-            }
-            break;
-
-        case ImsMediaSession.SESSION_TYPE_VIDEO:
-            {
-                log("SESSION_TYPE_VIDEO :: TODO");
-            }
-            break;
-
-        case ImsMediaSession.SESSION_TYPE_RTT:
-            {
-                log("SESSION_TYPE_RTT :: TODO");
-            }
-            break;
-
-        default:
-            {
-                log("Invalid SessionType");
-            }
-            break;
-        }
-    }
-
-    private void onImsMediaAudioMessage(Parcel parcel) {
-        int msg = parcel.readInt();
-        final int sessionType = parcel.readInt();
-        MediaAudioListener listener = null;
+        IMediaListener listener = null;
 
         synchronized (mLock) {
-            listener = mMediaAudioListener;
+            listener = mMediaListener;
         }
 
         if (listener == null) {
@@ -1229,109 +1190,7 @@ public class MtcMediaSession {
             return;
         }
 
-        switch (msg) {
-        /**
-         * Requests (ImsStack -> ImsMedia)
-         */
-        case MediaConstants.REQUEST_OPEN_SESSION:
-        {
-            log("REQUEST_OPEN_SESSION");
-            String localIpAddress = parcel.readString16();
-            int localPortNumber = parcel.readInt();
-
-            listener.onAudioOpenSession(localIpAddress, localPortNumber, null);
-        }
-        break;
-
-        case MediaConstants.REQUEST_CLOSE_SESSION:
-        {
-            log("REQUEST_CLOSE_SESSION");
-
-            listener.onAudioCloseSession();
-        }
-        break;
-
-        case MediaConstants.REQUEST_MODIFY_SESSION:
-        {
-            log("REQUEST_MODIFY_SESSION");
-
-            AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
-
-            listener.onAudioModifySession(audioConfig);
-        }
-        break;
-
-        case MediaConstants.REQUEST_ADD_CONFIG:
-        {
-            log("REQUEST_ADD_CONFIG");
-
-            AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
-
-            listener.onAudioAddConfig(audioConfig);
-        }
-        break;
-
-        case MediaConstants.REQUEST_DELETE_CONFIG:
-        {
-            log("REQUEST_DELETE_CONFIG");
-
-            AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
-
-            listener.onAudioDeleteConfig(audioConfig);
-        }
-        break;
-
-        case MediaConstants.REQUEST_CONFIRM_CONFIG:
-        {
-            log("REQUEST_CONFIRM_CONFIG");
-
-            AudioConfig audioConfig = AudioConfig.CREATOR.createFromParcel(parcel);
-
-            listener.onAudioConfirmConfig(audioConfig);
-        }
-        break;
-
-        case MediaConstants.REQUEST_SEND_DTMF:
-        {
-            log("REQUEST_SEND_DTMF");
-
-            char dtmfDigit = (char)parcel.readByte();
-            int duration = parcel.readInt();
-
-            listener.onAudioSendDtmf(dtmfDigit, duration);
-        }
-        break;
-
-        case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
-        {
-            log("REQUEST_SET_MEDIA_QUALITY");
-
-            MediaQualityThreshold threshold =
-                MediaQualityThreshold.CREATOR.createFromParcel(parcel);
-
-            listener.onAudioSetMediaQualityThreshold(threshold);
-        }
-        break;
-
-        case MediaConstants.REQUEST_HEADER_EXTENSION:
-        {
-            log("REQUEST_HEADER_EXTENSION");
-
-            int rtpExtensionsListSize = parcel.readInt();
-            ArrayList rtpExtensions = new ArrayList<RtpHeaderExtension>();
-            if (rtpExtensionsListSize!=0) {
-                for (int i = 0; i < rtpExtensionsListSize; ++i) {
-                    rtpExtensions.add(RtpHeaderExtension.CREATOR.createFromParcel(parcel));
-                }
-            }
-
-            listener.onAudioSendHeaderExtension(rtpExtensions);
-        }
-        break;
-
-        default:
-            break;
-        }
+        listener.onMediaMessage(parcel);
     }
 
     private static boolean isMessageForImsMediaManager(int msg) {

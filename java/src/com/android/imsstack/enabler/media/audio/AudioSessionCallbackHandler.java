@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.imsstack.enabler.media.audio;
+package com.android.imsstack.enabler.media;
 
 import android.annotation.NonNull;
 import android.os.Parcel;
@@ -25,29 +25,31 @@ import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import com.android.imsstack.enabler.media.MediaConstants;
-import com.android.imsstack.enabler.mtc.MtcMediaSession;
+import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.util.ImsLog;
 import java.util.List;
 
 /**
- * This handles callbacks received from ImsMediaManager and sends to
+ * This handles callbacks received from {@link ImsMediaManager} and passes it to
  * ImsStack (Media Enabler Native)
  */
-public class MediaAudioCallbackHandler {
+public class AudioSessionCallbackHandler {
 
-    private final MtcMediaSession mMtcMediaSession;
+    private final MediaSession mMediaSession;
 
-    public MediaAudioCallbackHandler(@NonNull final MtcMediaSession mtcMediaSession){
-        mMtcMediaSession = mtcMediaSession;
+    public AudioSessionCallbackHandler(@NonNull final MediaSession mediaSession){
+        mMediaSession = mediaSession;
         ImsLog.v("Constructor - Exit");
     }
 
-    private final MtcMediaSession getMtcMediaSession() {
-        return mMtcMediaSession;
+    private final MediaSession getMediaSession() {
+        return mMediaSession;
     }
 
     /**
-     * Response for Open Session request.
+     * Handles the response for open session request
+     *
+     * @param result result of the open session request
      */
     public void openSessionResponse(@ImsMediaSession.SessionOperationResult int result) {
         ImsLog.d("openSession Result=" + result);
@@ -58,11 +60,13 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(result);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when any change occurs to the RTP session.
+     * Handles response when any change occurs to the RTP session
+     *
+     * @param state session state
      */
     public void sessionChanged(int state) {
         ImsLog.v("sessionChanged");
@@ -73,11 +77,14 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(state);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Response for Modify Session request.
+     * Handles response for Modify Session request
+     *
+     * @param audioConfig The AudioConfig passed in ImsMediaSession#modifySession()
+     * @param result The result of modify session
      */
     public void modifySessionResponse(AudioConfig audioConfig, int result) {
         ImsLog.v("modifySessionResponse");
@@ -89,11 +96,14 @@ public class MediaAudioCallbackHandler {
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Response for addConfig()
+     * Handles response for addConfig() request
+     *
+     * @param audioConfig The RTP config passed in ImsMediaSession#addConfig()
+     * @param result The result of adding a configuration
      */
     public void addConfigResponse(AudioConfig audioConfig, int result) {
         ImsLog.v("addConfigResponse");
@@ -105,11 +115,14 @@ public class MediaAudioCallbackHandler {
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Response for confirmConfig()
+     * Handles response for confirmConfig() request
+     *
+     * @param audioConfig The RTP config passed in ImsMediaSession#confirmConfig()
+     * @param result The result of confirm configuration
      */
     public void confirmConfigResponse(AudioConfig audioConfig, int result) {
         ImsLog.v("confirmConfigResponse");
@@ -121,11 +134,12 @@ public class MediaAudioCallbackHandler {
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when the first Rtp media packet is received
+     * Handles indication when the first Rtp media packet is received
+     * @param audioConfig the remote config where media packet is received
      */
     public void firstMediaPacketReceived(AudioConfig audioConfig) {
         ImsLog.v("firstMediaPacketReceived");
@@ -136,11 +150,13 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
      * Called when RTP header extension received from the other party
+     *
+     * @param rtpExtensions List of received RTP header extensions
      */
     public void headerExtensionReceived(List<RtpHeaderExtension> rtpExtensions) {
         ImsLog.v("headerExtensionReceived");
@@ -157,12 +173,14 @@ public class MediaAudioCallbackHandler {
             }
         }
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when media inactivity observed as per thresholds set by
+     * Handles notification when media inactivity observed as per thresholds set by
      * setMediaQualityThreshold()
+     *
+     * @param packetType either RTP or RTCP
      */
     public void onNotifyMediaInactivity(int packetType) {
         ImsLog.v("onNotifyMediaInactivity");
@@ -173,12 +191,14 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(packetType);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when RTP packet loss observed as per thresholds set by
+     * Handles notification when RTP packet loss observed as per thresholds set by
      * setMediaQualityThreshold()
+     *
+     * @param packetLossPercentage percentage of packet loss calculated over the duration
      */
     public void onNotifyPacketLoss(int packetLossPercentage) {
         ImsLog.v("onNotifyPacketLoss");
@@ -189,12 +209,14 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(packetLossPercentage);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when RTP jitter observed as per thresholds set by
+     * Handles notification when RTP jitter observed as per thresholds set by
      * setMediaQualityThreshold()
+     *
+     * @param jitter jitter of the RTP packets in milliseconds calculated over the duration
      */
     public void onNotifyJitter(int jitter) {
         ImsLog.v("onNotifyJitter");
@@ -205,11 +227,13 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(jitter);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
 
     /**
-     * Called when a change to media quality is occurred
+     * Handles notification when a change to media quality is occurred
+     *
+     * @param callQuality The media quality statistics since last report
      */
     public void mediaQualityChanged(CallQuality callQuality) {
         ImsLog.v("mediaQualityChanged");
@@ -220,7 +244,6 @@ public class MediaAudioCallbackHandler {
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         callQuality.writeToParcel(parcel,  Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
-        getMtcMediaSession().sendRequest(parcel);
+        getMediaSession().sendRequest(parcel);
     }
-
 }
