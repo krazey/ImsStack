@@ -17,7 +17,7 @@
 #ifndef IPSEC_SA_H_
 #define IPSEC_SA_H_
 
-#include "IMSIPSecType.h"
+#include "ImsTypeDef.h"
 
 class SAInfoP;
 

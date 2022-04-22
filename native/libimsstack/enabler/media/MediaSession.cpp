@@ -16,6 +16,8 @@
 
 // == INCLUDES =============================================================
 #include <AudioConfig.h>
+#include "ServiceMessage.h"
+#include "ServiceTrace.h"
 #include "IMSCore.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"

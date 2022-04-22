@@ -22,17 +22,15 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceThread.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 #include "ByteArray.h"
 
 #include "IUSMS.h"
-#include "IMSMSG.h"
 #include "IUSmsService.h"
 
 #include "AndroidJavaWms.h"
 #include "EnablerUtils.h"
-#include "IMSMsgDef.h"
 
 
 #define WMS_CONNECTIONID_INVALID            (-1)

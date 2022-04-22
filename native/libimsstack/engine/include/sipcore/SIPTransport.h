@@ -13,7 +13,7 @@
 #ifndef _SIP_TRANSPORT_H_
 #define _SIP_TRANSPORT_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "SIPPrivate.h"
 #include "SIPStackHeaders.h"
 #include "SIPTransportAddress.h"

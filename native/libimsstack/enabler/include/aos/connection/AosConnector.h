@@ -17,7 +17,6 @@
 #define AOS_CONNECTOR_H_
 
 #include "IMSTypeDef.h"
-#include "IIPCAN.h"
 #include "ITimer.h"
 
 #include "interface/IAosPcscf.h"

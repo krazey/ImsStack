@@ -16,8 +16,8 @@
 #ifndef IMS_NET_PING_H_
 #define IMS_NET_PING_H_
 
-#include "INetPing.h"
-#include "INetSocket.h"
+#include "INetworkPing.h"
+#include "ISocket.h"
 #include "ITimer.h"
 
 class ImsNetworkPing

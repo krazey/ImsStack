@@ -1,7 +1,7 @@
 #ifndef INTERFACE_XML_TRANSACTION_H_
 #define INTERFACE_XML_TRANSACTION_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IXmlRequest;
 class IXmlResponse;

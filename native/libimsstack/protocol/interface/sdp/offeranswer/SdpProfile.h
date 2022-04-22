@@ -16,7 +16,7 @@
 #ifndef SDP_PROFILE_H_
 #define SDP_PROFILE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class SdpProfilePrivate;
 

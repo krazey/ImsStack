@@ -15,9 +15,8 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
-#include "ServiceMSG.h"
-
-#include "INetWatcher.h"
+#include "ImsMessage.h"
+#include "INetworkWatcher.h"
 
 #include "AoSReason.h"
 #include "AoSAppRequestType.h"

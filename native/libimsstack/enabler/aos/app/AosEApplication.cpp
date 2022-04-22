@@ -15,8 +15,7 @@
  */
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"
-#include "IIPCAN.h"
-#include "IMSEventDef.h"
+#include "ImsEventDef.h"
 #include "CarrierConfig.h"
 #include "ImsAosParameter.h"
 #include "AoSAppRequestType.h"

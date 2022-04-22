@@ -18,9 +18,7 @@
 #define _IMS_AUDIO_NEGO_H_
 
 // == INCLUDES =========================================================
-#include "IMSMsgDef.h"
-#include "ServiceMSG.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 
 #include "media/IMedia.h"
 #include "ISession.h"

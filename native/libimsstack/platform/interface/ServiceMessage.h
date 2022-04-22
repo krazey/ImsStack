@@ -17,7 +17,7 @@
 
 #include "ServiceTrace.h"
 #include "AString.h"
-#include "IMSMSG.h"
+#include "ImsMessage.h"
 
 class IThread;
 class IMSActivity;

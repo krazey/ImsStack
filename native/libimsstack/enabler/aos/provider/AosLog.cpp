@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceTrace.h"
-#include "IMSEventDef.h"
+#include "ImsEventDef.h"
 #include "IRegistration.h"
 #include "AoSAppRequestType.h"
 #include "provider/AosLog.h"

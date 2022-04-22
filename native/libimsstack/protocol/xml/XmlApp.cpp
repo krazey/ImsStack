@@ -1,7 +1,7 @@
 #include "DomDocumentBuilderFactory.h"
 #include "IXmlTransactionProvider.h"
 #include "ServiceMemory.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "XmlApp.h"
 #include "XmlRequest.h"

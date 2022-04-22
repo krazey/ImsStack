@@ -17,7 +17,7 @@
 #include "ServiceConfig.h"
 
 #include "ICarrierConfig.h"
-#include "IMSIPSecType.h"
+#include "ImsIpSecType.h"
 
 #include "provider/AosNConfiguration.h"
 

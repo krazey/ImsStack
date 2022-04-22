@@ -16,8 +16,8 @@
 #ifndef IMS_USIM_H_
 #define IMS_USIM_H_
 
-#include "IMSSlot.h"
-#include "IUSIM.h"
+#include "ImsSlot.h"
+#include "IUsim.h"
 
 class ImsUsim
     : public IMSSlot

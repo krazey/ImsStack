@@ -16,7 +16,7 @@
 #ifndef OS_ISIM_H_
 #define OS_ISIM_H_
 
-#include "IDigestAKA.h"
+#include "IDigestAka.h"
 #include "ImsIsim.h"
 #include "IMSMap.h"
 #include "system-intf/ISystemListener.h"

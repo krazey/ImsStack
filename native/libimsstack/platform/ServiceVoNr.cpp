@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "SystemConfig.h"
 #include "PlatformFactory.h"
 #include "ImsVoNr.h"
-#include "ServiceVoNR.h"
+#include "ServiceVoNr.h"
 
 
 class VoNRHolder

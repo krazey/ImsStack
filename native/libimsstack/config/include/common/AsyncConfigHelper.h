@@ -13,7 +13,7 @@
 #ifndef _ASYNC_CONFIG_HELPER_H_
 #define _ASYNC_CONFIG_HELPER_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSActivityEx.h"
 
 class IAsyncConfig;

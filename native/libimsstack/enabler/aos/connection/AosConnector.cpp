@@ -18,7 +18,7 @@
 #include "ServiceNetworkPolicy.h"
 #include "ServiceEvent.h"
 #include "CarrierConfig.h"
-#include "IMSEventDef.h"
+#include "IIpcan.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosApplication.h"

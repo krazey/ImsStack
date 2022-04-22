@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceThread.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "BaseThread.h"
 
 __IMS_TRACE_TAG_BASE__;

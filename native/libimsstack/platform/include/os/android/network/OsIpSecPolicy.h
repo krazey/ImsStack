@@ -16,7 +16,7 @@
 #ifndef OS_IPSEC_POLICY_H_
 #define OS_IPSEC_POLICY_H_
 
-#include "IIPSecPolicy.h"
+#include "IIpSecPolicy.h"
 #include "IMSList.h"
 #include "ITimer.h"
 

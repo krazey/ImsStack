@@ -17,7 +17,7 @@
 #define OS_TRM_TIMER_H_
 
 #include "ITimer.h"
-#include "ITRMTimer.h"
+#include "ITrmTimer.h"
 
 class OsTrmTimer
     : public ITRMTimer

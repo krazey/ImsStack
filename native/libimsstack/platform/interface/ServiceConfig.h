@@ -17,7 +17,7 @@
 #define SERVICE_IMS_CONFIG_H_
 
 #include "ICarrierConfig.h"
-#include "IMSMSG.h"
+#include "ImsMessage.h"
 
 class ConfigServicePrivate;
 

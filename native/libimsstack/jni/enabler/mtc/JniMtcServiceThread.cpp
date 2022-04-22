@@ -3,7 +3,6 @@
 #include "JniMtcCall.h"
 #include "JniMtcServiceThread.h"
 #include "JniMtcUtils.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 #include "call/ParticipantInfo.h"
 #include <binder/Parcel.h>

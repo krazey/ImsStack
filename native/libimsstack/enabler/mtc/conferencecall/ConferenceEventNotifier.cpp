@@ -1,7 +1,6 @@
 #include "conferencecall/ConferenceEventNotifier.h"
 #include "IuMtcCall.h"
 #include "ServiceMemory.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"

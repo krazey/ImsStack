@@ -15,7 +15,7 @@
 #define _REGISTRATION_H_
 
 #include "ITimer.h"
-#include "IDigestAKAListener.h"
+#include "IDigestAkaListener.h"
 #include "ISIPClientConnectionListener.h"
 #include "ISIPErrorListener.h"
 // SIP_MESSAGE_MEDIATOR

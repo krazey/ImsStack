@@ -10,7 +10,6 @@
 
 */
 
-#include "INetWatcher.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"

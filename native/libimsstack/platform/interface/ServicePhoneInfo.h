@@ -18,12 +18,12 @@
 #include "IPhoneInfoPower.h"
 #include "IPhoneInfoSubscriber.h"
 #include "IPhoneInfoLocation.h"
-#include "INetWatcher.h"
+#include "INetworkWatcher.h"
 #include "IWifiWatcher.h"
-#include "IISIM.h"
-#include "IUSIM.h"
-#include "ISRVCC.h"
-#include "ITRM.h"
+#include "IIsim.h"
+#include "IUsim.h"
+#include "ISrvcc.h"
+#include "ITrm.h"
 
 class PhoneInfoServicePrivate;
 

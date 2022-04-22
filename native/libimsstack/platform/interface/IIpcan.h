@@ -15,7 +15,7 @@
 #define _INTERFACE_IMS_IP_CAN_H_
 
 #include "ByteArray.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsAccessNetworkInfoType.h"
 
 
 

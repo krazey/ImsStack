@@ -14,7 +14,7 @@
 #ifndef _INTERFACE_IMS_TRACE_TAG_H_
 #define _INTERFACE_IMS_TRACE_TAG_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 #define IMS_LOG_TAG "ImsStackN"
 

@@ -13,7 +13,7 @@
 #ifndef _IMS_STATEMAP_H_
 #define _IMS_STATEMAP_H_
 
-#include "IMSMSG.h"
+#include "ImsMessage.h"
 #include "IMSStateObject.h"
 
 #define INVALID_STATE    0xFFFFFFFF

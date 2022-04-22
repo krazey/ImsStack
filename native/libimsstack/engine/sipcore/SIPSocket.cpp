@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceUtil.h"
-#include "INetIPSec.h"
+#include "INetworkIpSec.h"
 #include "SIPPrivate.h"
 #include "SIPFeatures.h"
 #include "SIPDebug.h"

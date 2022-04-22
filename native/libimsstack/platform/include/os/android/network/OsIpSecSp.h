@@ -16,7 +16,7 @@
 #ifndef OS_IPSEC_SP_H_
 #define OS_IPSEC_SP_H_
 
-#include "IIPSecSP.h"
+#include "IIpSecSp.h"
 #include "IpSecSaParameter.h"
 
 class OsIpSecSpPrivate;

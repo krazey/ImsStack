@@ -18,7 +18,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSQueue.h"
 #include "OsMutex.h"
 #include "OsThread.h"
@@ -29,7 +29,7 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "ServiceVoNR.h"
+#include "ServiceVoNr.h"
 
 #define WAIT_TIMEOUT_FOR_IPC        1              // ms
 #define WAIT_TIMEOUT_FOR_RUN        10000          // us

@@ -16,7 +16,7 @@
 #ifndef INTERFACE_IMS_AOS_SERVICE_H_
 #define INTERFACE_IMS_AOS_SERVICE_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSMap.h"
 
 class IIAosService

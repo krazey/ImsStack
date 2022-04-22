@@ -15,7 +15,7 @@
 
 #include "AString.h"
 #include "ByteArray.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IUBaseParam.h"
 
 #define JAVA2SMSSERVICE         IMS_MSG_BASE_SERVICE

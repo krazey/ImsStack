@@ -13,7 +13,7 @@
 #ifndef _INTERFACE_IMS_MUTEX_H_
 #define _INTERFACE_IMS_MUTEX_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMutex
 {

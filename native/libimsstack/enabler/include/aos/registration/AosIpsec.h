@@ -19,7 +19,7 @@
 #include "IPAddress.h"
 #include "ByteArray.h"
 #include "SIPSecurityHeader.h"
-#include "IIPSecPolicyListener.h"
+#include "IIpSecPolicyListener.h"
 
 class INetIPSec;
 class IIPSecPolicy;

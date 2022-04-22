@@ -18,11 +18,11 @@
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
 #include "registration/AosIpsec.h"
-#include "INetIPSec.h"
-#include "IIPSecSP.h"
-#include "IIPSecSA.h"
-#include "IIPSecPolicy.h"
-#include "IMSIPSecType.h"
+#include "INetworkIpSec.h"
+#include "IIpSecSp.h"
+#include "IIpSecSa.h"
+#include "IIpSecPolicy.h"
+#include "ImsIpSecType.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AosIpsec");
 

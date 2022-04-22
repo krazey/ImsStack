@@ -17,6 +17,7 @@
 #include "ServiceEvent.h"
 #include "ServiceNetworkPolicy.h"
 #include "CarrierConfig.h"
+#include "INetworkWatcher.h"
 
 #include "AoSReason.h"
 

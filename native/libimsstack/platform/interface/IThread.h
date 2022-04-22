@@ -14,7 +14,7 @@
 #define _INTERFACE_IMS_THREAD_H_
 
 #include "AString.h"
-#include "IMSMSG.h"
+#include "ImsMessage.h"
 #include "IRunnable.h"
 
 class IThread

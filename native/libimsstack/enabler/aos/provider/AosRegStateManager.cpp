@@ -16,7 +16,7 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "IUIMS.h"
-#include "IMSEventDef.h"
+#include "ImsEventDef.h"
 #include "SIPStatusCode.h"
 #include "ImsAosParameter.h"
 #include "provider/AosRegStateManager.h"

@@ -16,7 +16,7 @@
 #ifndef OS_USIM_H_
 #define OS_USIM_H_
 
-#include "IDigestAKA.h"
+#include "IDigestAka.h"
 #include "ImsUsim.h"
 #include "system-intf/ISystemListener.h"
 

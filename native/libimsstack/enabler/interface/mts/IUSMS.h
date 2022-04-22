@@ -15,7 +15,7 @@
 #ifndef _IUSMS_H_
 #define _IUSMS_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 typedef int (*CBJniSmsService)(IN IMS_UINT32 nType, IN IMS_UINTP pParam, IN IMS_UINT32 slotId);
 

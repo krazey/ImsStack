@@ -1,7 +1,7 @@
 #ifndef MTC_INTERNAL_MSG_DEF_H_
 #define MTC_INTERNAL_MSG_DEF_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
 #include "CallInfo.h"
 #include "IMtcService.h"

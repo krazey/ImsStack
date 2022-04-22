@@ -248,7 +248,7 @@ typedef struct _tMediaValueInfo
 } tMediaValueInfo;
 
 // == INTERNAL MESSAGE ==========================================================
-#define MEDIA_INTERNAL_MSG_BASE             1500    // IMS_MSG_BASE_STREAMEDMEDIA + 100 (defined in IMSMsgDef.h)
+#define MEDIA_INTERNAL_MSG_BASE             1500    // IMS_MSG_BASE_STREAMEDMEDIA + 100
 #define MEDIA_INTERNAL_MSG_CONFIG_UPDATED   1501
 
 // == MACROS ==========================================================

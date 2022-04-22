@@ -2,7 +2,7 @@
 #define XML_APP_H_
 
 #include "AString.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 class DocumentBuilder;
 class IDocument;

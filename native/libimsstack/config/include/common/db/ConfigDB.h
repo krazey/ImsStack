@@ -13,7 +13,7 @@
 #ifndef _CONFIG_DB_H_
 #define _CONFIG_DB_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ConfigDB
 {

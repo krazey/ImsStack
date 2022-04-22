@@ -20,8 +20,8 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "IMSMsgDef.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsMessageDef.h"
+#include "ImsAccessNetworkInfoType.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"
 #include "IThread.h"

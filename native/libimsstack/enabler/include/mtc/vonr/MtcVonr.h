@@ -2,10 +2,9 @@
 #define MTC_VONR_H_
 
 
-#include "INetWatcher.h"
-#include "IVoNR.h"
+#include "INetworkWatcher.h"
+#include "IVoNr.h"
 #include "ServiceTimer.h"
-#include "ServiceVoNR.h"
 
 #include "call/IMtcCall.h"
 //#include "call/IMtcCallManager.h"

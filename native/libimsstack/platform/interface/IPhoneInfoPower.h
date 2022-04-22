@@ -13,12 +13,12 @@
 #ifndef _INTERFACE_IMS_PHONE_INFO_POWER_H_
 #define _INTERFACE_IMS_PHONE_INFO_POWER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 #include "IMSList.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 #include "ServiceThread.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 typedef enum
 {

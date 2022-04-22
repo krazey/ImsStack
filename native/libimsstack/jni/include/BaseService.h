@@ -14,8 +14,8 @@
 #define _BASE_SERVICE_H_
 
 #include "EnablerUtils.h"
+#include "ImsMessage.h"
 #include "IMSProcess.h"
-#include "ServiceMSG.h"
 #include <binder/Parcel.h>
 
 #define IMS_STL_USE

@@ -24,7 +24,6 @@
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
 #include "SipDefNetworkUtil.h"
-#include "INetSocket.h"
 /****************************************************************************
   Macro Definitions
  *****************************************************************************/

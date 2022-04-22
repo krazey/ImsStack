@@ -17,7 +17,7 @@
 #define IMS_SOCKET_H_
 
 #include "ImsNetworkConnection.h"
-#include "INetSocket.h"
+#include "ISocket.h"
 
 typedef IMS_SINT32    IMS_SOCKET;
 

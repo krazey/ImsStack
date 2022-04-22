@@ -16,6 +16,7 @@
 
 #include "MediaManager.h"
 #include "EnablerUtils.h"
+#include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "IMMedia.h"
 #include "JniConnectorFactory.h"

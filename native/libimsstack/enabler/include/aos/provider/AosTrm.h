@@ -17,7 +17,7 @@
 #define AOS_TRM_H_
 
 #include "ITimer.h"
-#include "ITRM.h"
+#include "ITrm.h"
 #include "interface/IAosTrm.h"
 
 class AosTrm

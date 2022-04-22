@@ -9,7 +9,6 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
 #include "ServiceTimer.h"
 
 #include "ICoreService.h"

@@ -1,7 +1,7 @@
 #ifndef CONFIG_MTC_H_
 #define CONFIG_MTC_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Configuration for MTC (Multimedia Telephony Call).

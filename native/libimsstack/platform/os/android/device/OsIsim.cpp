@@ -15,9 +15,9 @@
  */
 #include <utils/String8.h>
 
-#include "IDigestAKAListener.h"
-#include "IISIMListener.h"
-#include "IMSMsgDef.h"
+#include "IDigestAkaListener.h"
+#include "IIsimListener.h"
+#include "ImsMessageDef.h"
 #include "OsUtil.h"
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"

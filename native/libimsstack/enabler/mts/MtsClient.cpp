@@ -1,3 +1,4 @@
+#include "ImsMessage.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "SIPStatusCode.h"
@@ -10,7 +11,6 @@
 #include "utility/MtsDynamicLoader.h"
 #include "MtsClient.h"
 #include "IUSMS.h"
-#include "ServiceMSG.h"
 #include "MtsFactory.h"
 
 __IMS_TRACE_TAG_COM_SMS__;

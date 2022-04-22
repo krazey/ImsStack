@@ -2,7 +2,7 @@
 #define _P_ACCESS_NETWORK_INFO_HEADER_H_
 
 #include "IPAddress.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsAccessNetworkInfoType.h"
 
 class INetConnection;
 class ISIPMessage;

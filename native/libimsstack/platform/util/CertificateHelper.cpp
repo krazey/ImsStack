@@ -15,7 +15,7 @@
 #include "ServiceTrace.h"
 #include "ServiceFile.h"
 #include "ServiceUtil.h"
-#include "IMSConstDef.h"
+#include "ImsConstDef.h"
 #include "ByteArray.h"
 #include "CertificateHelper.h"
 

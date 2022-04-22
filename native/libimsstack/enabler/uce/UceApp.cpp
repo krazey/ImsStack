@@ -1,7 +1,7 @@
 #include "ImsServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "Configuration.h"
 
@@ -14,7 +14,7 @@
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsAosParameter.h"
-#include "IIPCAN.h"
+#include "IIpcan.h"
 
 #include "ServicePhoneInfo.h"
 #include "AoSAppRequestType.h"

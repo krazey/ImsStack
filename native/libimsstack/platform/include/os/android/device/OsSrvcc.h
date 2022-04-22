@@ -18,8 +18,8 @@
 
 #include "IEventListener.h"
 #include "IMSList.h"
-#include "IMSSlot.h"
-#include "ISRVCC.h"
+#include "ImsSlot.h"
+#include "ISrvcc.h"
 
 class OsSrvcc
     : public IMSSlot

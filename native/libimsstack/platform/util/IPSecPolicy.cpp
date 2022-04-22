@@ -15,7 +15,7 @@
  */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSTypeCast.h"
+#include "ImsIpSecType.h"
 #include "IPSecPolicy.h"
 #include "IPSecSA.h"
 

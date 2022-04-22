@@ -18,7 +18,7 @@
 
 #include "AString.h"
 #include "ITimer.h"
-#include "INetWatcher.h"
+#include "INetworkWatcher.h"
 #include "IWifiWatcher.h"
 #include "interface/IAosConnectionListener.h"
 #include "interface/IAosNetTracker.h"

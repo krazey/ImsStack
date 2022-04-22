@@ -18,7 +18,7 @@
 #ifdef __IMS_DEBUG__
 #include "AStringBuffer.h"
 #endif
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "ServiceThread.h"
 #include "ServiceTrace.h"
 #include "device/OsCarrierConfig.h"

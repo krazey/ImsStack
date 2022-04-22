@@ -17,7 +17,7 @@
 #define OS_IPCAN_H_
 
 #include "AStringArray.h"
-#include "IIPCAN.h"
+#include "IIpcan.h"
 
 class OsIpcan
     : public IIPCAN

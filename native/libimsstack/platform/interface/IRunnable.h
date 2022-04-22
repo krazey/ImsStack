@@ -13,7 +13,7 @@
 #ifndef _INTERFACE_IMS_RUNNABLE_H_
 #define _INTERFACE_IMS_RUNNABLE_H_
 
-#include "IMSMSG.h"
+#include "ImsMessage.h"
 
 class IRunnable
 {

@@ -15,9 +15,9 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
-#include "ServiceVoNR.h"
-#include "INetWatcher.h"
-#include "IVoNR.h"
+#include "ServiceVoNr.h"
+#include "INetworkWatcher.h"
+#include "IVoNr.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNetTracker.h"
 #include "provider/AosUtil.h"

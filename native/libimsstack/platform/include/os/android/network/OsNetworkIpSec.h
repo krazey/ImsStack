@@ -18,7 +18,7 @@
 
 #include "IMSList.h"
 #include "IMSMap.h"
-#include "INetIPSec.h"
+#include "INetworkIpSec.h"
 #include "IpSecSaParameter.h"
 
 class OsIpSecPolicy;

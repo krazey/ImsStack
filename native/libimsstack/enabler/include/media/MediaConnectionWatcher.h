@@ -18,7 +18,7 @@
 #define _IMS_MEDIA_CONNECTION_WATCHER_H_
 
 #include "IMSList.h"
-#include "INetConnection.h"
+#include "INetworkConnection.h"
 #include "IMediaConnectionWatcher.h"
 #include "IEventListener.h"
 

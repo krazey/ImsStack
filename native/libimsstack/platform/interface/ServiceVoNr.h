@@ -13,33 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef INTERFACE_IPSEC_POLICY_LISTENER_H_
-#define INTERFACE_IPSEC_POLICY_LISTENER_H_
+#ifndef SERVICE_VONR_H_
+#define SERVICE_VONR_H_
 
-#include "IMSTypeDef.h"
+#include "ImsMessage.h"
 
-class IIPSecPolicy;
+class IVoNR;
+class VoNRServicePrivate;
 
-class IIPSecPolicyListener
+class VoNRService
 {
+private:
+    VoNRService();
+    ~VoNRService();
+
+private:
+    VoNRService(IN CONST VoNRService &objRHS);
+    VoNRService& operator=(IN CONST VoNRService &objRHS);
+
 public:
-    /*
-    Notify SA lifetime expiration
+    IVoNR* GetVoNR(IN IMS_SINT32 nSlotId);
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
+    void DispatchServiceMessage(IN IMSMSG &objMSG);
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
+    static VoNRService* GetVoNRService();
 
-    */
-    virtual void ExpiredSAs(IN IIPSecPolicy* piNetIPSec) = 0;
+private:
+    VoNRServicePrivate *pPrivate;
 };
 
-#endif // INTERFACE_IPSEC_POLICY_LISTENER_H_
+#endif // SERVICE_VONR_H_

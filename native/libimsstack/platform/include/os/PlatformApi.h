@@ -16,7 +16,7 @@
 #ifndef PLATFORM_API_H_
 #define PLATFORM_API_H_
 
-#include "INetSocket.h"
+#include "ISocket.h"
 
 class PlatformApi
 {

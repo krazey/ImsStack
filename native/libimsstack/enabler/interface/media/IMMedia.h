@@ -18,7 +18,7 @@
 #define _IMMEDIA_H_
 
 #include <AudioConfig.h>
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
 #include "IPAddress.h"
 #include "MediaDef.h"

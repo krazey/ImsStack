@@ -20,7 +20,7 @@
 #include "IPAddress.h"
 
 #include "interface/IAosConnection.h"
-#include "INetConnection.h"
+#include "INetworkConnection.h"
 
 class IAosAppContext;
 

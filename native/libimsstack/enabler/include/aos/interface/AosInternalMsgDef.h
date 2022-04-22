@@ -16,7 +16,7 @@
 #ifndef AOS_INTERNAL_MSG_DEF_H_
 #define AOS_INTERNAL_MSG_DEF_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 typedef enum
 {

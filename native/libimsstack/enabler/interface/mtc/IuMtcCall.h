@@ -2,8 +2,8 @@
 #define INTERFACE_UI_MTC_CALL_H_
 
 #include "FailReason.h"
-#include "IMSMsgDef.h"
-#include "IMSMSG.h"
+#include "ImsMessageDef.h"
+#include "ImsMessage.h"
 #include "CallInfo.h"
 #include "MtcDef.h"
 #include "IMSMap.h"

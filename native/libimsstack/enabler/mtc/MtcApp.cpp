@@ -2,7 +2,6 @@
 #include "Configuration.h"
 #include "IMSList.h"
 #include "ImsServiceConfig.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 
 #include "JniConnector.h"

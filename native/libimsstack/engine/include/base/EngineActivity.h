@@ -13,7 +13,7 @@
 #ifndef _ENGINE_ACTIVITY_H_
 #define _ENGINE_ACTIVITY_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSActivity.h"
 
 class EngineActivity

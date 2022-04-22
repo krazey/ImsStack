@@ -18,7 +18,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "IMSMsgDef.h"
 #include "IMSQueue.h"
 #include "OsMutex.h"
 #include "OsPthread.h"

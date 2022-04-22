@@ -1,7 +1,7 @@
 #ifndef CONFIG_UCE_H_
 #define CONFIG_UCE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Configuration for UCE (User Capability Exchange).

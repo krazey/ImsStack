@@ -18,7 +18,7 @@
 #define _CODEC_CONFIG_H_
 
 #include "AString.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 
 class IConfigBuffer;
 

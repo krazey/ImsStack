@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "INetPingListener.h"
+#include "INetworkPingListener.h"
 #include "ImsNetworkPing.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"

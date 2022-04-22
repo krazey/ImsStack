@@ -17,8 +17,6 @@
 #ifndef _MEDIA_MSG_HANDLER_H_
 #define _MEDIA_MSG_HANDLER_H_
 
-#include "IMSMsgDef.h"
-#include "ServiceMSG.h"
 #include "JniMediaSessionThread.h"
 #include "IUMedia.h"
 #include "IMMedia.h"

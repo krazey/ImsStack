@@ -13,7 +13,7 @@
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceEvent.h"
 #include "SystemConfigManager.h"
 #include "Configuration.h"

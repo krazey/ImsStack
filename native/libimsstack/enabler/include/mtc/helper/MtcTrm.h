@@ -9,10 +9,9 @@
 #ifndef UC_TRM_H_
 #define UC_TRM_H_
 
-#include "IMSMsgDef.h"
 #include "IMSActivityEx.h"
 #include "IMSList.h"
-#include "ITRM.h"
+#include "ITrm.h"
 
 #include "define/MtcInternalMsgDef.h"
 #include "define/MtcStringDef.h"

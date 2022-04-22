@@ -1,8 +1,6 @@
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
-
-#include "IMSMSG.h"
 
 #include "SIPStatusCode.h"
 #include "ICoreService.h"

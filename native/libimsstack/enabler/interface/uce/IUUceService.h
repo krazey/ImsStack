@@ -17,7 +17,7 @@
 #define _IU_UCE_SERVICE_H_
 
 #include "AString.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 #define UI2UCEAPP IMS_MSG_BASE_UCE    // 3000
 #define UCEAPP2UI IMS_MSG_BASE_UCE + 50

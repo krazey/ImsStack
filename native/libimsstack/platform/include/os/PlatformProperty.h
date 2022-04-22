@@ -16,7 +16,7 @@
 #ifndef PLATFORM_PROPERTY_H_
 #define PLATFORM_PROPERTY_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class PlatformProperty
 {

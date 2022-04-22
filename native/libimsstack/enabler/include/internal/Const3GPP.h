@@ -13,7 +13,7 @@
 #ifndef _CONST_3GPP_H_
 #define _CONST_3GPP_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class Const3GPP
 {

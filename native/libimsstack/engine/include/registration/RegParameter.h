@@ -17,7 +17,7 @@
 #include "SIPAddress.h"
 #include "Credential.h"
 #include "IRegParameter.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "RegStateTracker.h"
 
 class ISIPMessage;

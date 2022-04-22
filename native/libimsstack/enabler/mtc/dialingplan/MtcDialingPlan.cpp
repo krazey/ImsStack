@@ -1,5 +1,5 @@
 #include "ImsIdentity.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsAccessNetworkInfoType.h"
 #include "IMSLib.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"

@@ -15,9 +15,9 @@
 #ifndef _INTERFACE_IMS_SRVCC_H_
 #define _INTERFACE_IMS_SRVCC_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "ServiceThread.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 class ISRVCCListener
 {

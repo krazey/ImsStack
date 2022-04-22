@@ -17,7 +17,7 @@
 #define IMS_TRACE_NODE_H_
 
 #include <stdarg.h>
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ImsTraceNode
 {

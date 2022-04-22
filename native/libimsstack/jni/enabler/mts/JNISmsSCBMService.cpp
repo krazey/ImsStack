@@ -4,7 +4,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "IMSProcess.h"
 
 #include "IUSMS.h"

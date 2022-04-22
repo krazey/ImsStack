@@ -15,8 +15,8 @@
 
 #include "IPAddress.h"
 #include "AStringArray.h"
-#include "IIPCAN.h"
-#include "INetPing.h"
+#include "IIpcan.h"
+#include "INetworkPing.h"
 
 class INetConnectionListener;
 class AccessNetworkInfo;

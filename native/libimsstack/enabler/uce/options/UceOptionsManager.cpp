@@ -3,7 +3,7 @@
 
 */
 
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 #include "ISIPMessage.h"
 #include "ISIPHeader.h"

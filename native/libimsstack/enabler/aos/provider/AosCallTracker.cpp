@@ -15,7 +15,7 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
-#include "IMSEventDef.h"
+#include "ImsEventDef.h"
 
 //#include "UCConnector.h" _UC_TO_MTC_
 

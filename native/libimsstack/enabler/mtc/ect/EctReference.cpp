@@ -8,8 +8,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
 #include "ServiceSystemTime.h"
+#include "ImsMessage.h"
 
 #include "ISession.h"
 #include "ISessionDescriptor.h"

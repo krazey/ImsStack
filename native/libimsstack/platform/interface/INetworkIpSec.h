@@ -17,7 +17,7 @@
 #define INTERFACE_NET_IPSEC_H_
 
 #include "SocketAddress.h"
-#include "INetSocket.h"
+#include "ISocket.h"
 
 class INetSocket;
 class IIPSecPolicy;

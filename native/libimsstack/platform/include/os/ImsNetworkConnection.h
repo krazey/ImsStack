@@ -17,8 +17,8 @@
 #define IMS_NETWORK_CONNECTION_H_
 
 #include "ImsNetworkPing.h"
-#include "IMSSlot.h"
-#include "INetConnection.h"
+#include "ImsSlot.h"
+#include "INetworkConnection.h"
 
 typedef IMS_UINT32    IMS_CONNECTION;
 

@@ -28,9 +28,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "ImsNetworkConnectionState.h"
-#include "INetIPSec.h"
+#include "INetworkIpSec.h"
 #include "OsUtil.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"

@@ -19,7 +19,7 @@
 #include "ServiceTrace.h"
 #include "OsMutex.h"
 #include "OsPthread.h"
-#include "INetConnection.h"
+#include "INetworkConnection.h"
 #include "provider/AosDnsQuery.h"
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");

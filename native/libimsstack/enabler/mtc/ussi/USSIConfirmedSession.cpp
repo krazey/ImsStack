@@ -10,7 +10,6 @@
 
 #include "SIPHeaderName.h"
 #include "SIPStatusCode.h"
-#include "IMSMSG.h"
 
 #include "ISIPHeader.h"
 #include "ISIPMessage.h"

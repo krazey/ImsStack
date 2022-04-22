@@ -3,10 +3,10 @@
 #define _UCE_APP_H_
 
 #include "IMSApp.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "interface/aos/IImsAosListener.h"
 #include "interface/aos/IImsAosMonitor.h"
-#include "INetWatcher.h"
+#include "INetworkWatcher.h"
 #include "ITimer.h"
 #include "def/UceDef.h"
 #include "IUce.h"

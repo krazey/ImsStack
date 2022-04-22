@@ -1,7 +1,7 @@
 #ifndef CONFIG_MTS_H_
 #define CONFIG_MTS_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Configuration for MTS (Multimedia Telephony SMS).

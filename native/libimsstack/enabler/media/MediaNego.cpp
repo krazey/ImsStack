@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "ServiceTrace.h"
 #include "IMSCore.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"

@@ -1,9 +1,9 @@
 #include "IMSActivity.h"
+#include "ImsMessage.h"
 #include "IMSTypeDef.h"
 #include "call/IMtcCallManager.h"
 #include "helper/CallStateProxy.h"
 #include "call/IMtcCall.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

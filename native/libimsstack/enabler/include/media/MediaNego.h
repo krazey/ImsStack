@@ -17,7 +17,7 @@
 #ifndef _IMS_MEDIA_NEGO_H_
 #define _IMS_MEDIA_NEGO_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "MediaDef.h"
 #include "audio/AudioNego.h"
 //#include "video/VideoNego.h"

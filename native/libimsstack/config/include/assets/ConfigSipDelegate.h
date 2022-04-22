@@ -1,7 +1,7 @@
 #ifndef CONFIG_SIP_DELEGATE_H_
 #define CONFIG_SIP_DELEGATE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Configuration for SipDelegate

@@ -17,8 +17,8 @@
 #ifndef _INTERFACE_MEDIA_SESSION_H_
 #define _INTERFACE_MEDIA_SESSION_H_
 
+#include "ImsMessage.h"
 #include "AString.h"
-#include "IMSMSG.h"
 #include "IMediaSessionClientListener.h"
 #include "IUMedia.h"
 #include "ISession.h"

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ServiceEvent.h"
+#include "ServiceTrace.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"

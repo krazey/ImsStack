@@ -17,7 +17,6 @@
 #ifndef _IMEDIA_MSG_HANDLER_H_
 #define _IMEDIA_MSG_HANDLER_H_
 
-#include "IMSMSG.h"
 #include "IUMedia.h"
 #include "IMMedia.h"
 

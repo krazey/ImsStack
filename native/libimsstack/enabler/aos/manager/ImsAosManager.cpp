@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMSG.h"
+#include "ImsMessage.h"
+#include "ServiceTrace.h"
 #include "IImsAos.h"
 #include "manager/ImsAosManager.h"
 

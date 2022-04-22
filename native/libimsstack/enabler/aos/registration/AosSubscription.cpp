@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 #include "ServiceMemory.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
-#include "ServiceVoNR.h"
-#include "IVoNR.h"
+#include "ServiceVoNr.h"
+#include "IVoNr.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
 #include "IRegistration.h"

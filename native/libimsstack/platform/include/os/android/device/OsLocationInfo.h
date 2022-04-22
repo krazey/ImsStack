@@ -16,7 +16,7 @@
 #ifndef OS_LOCATION_INFO_H_
 #define OS_LOCATION_INFO_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "IPhoneInfoLocation.h"
 
 class LocationProperties;

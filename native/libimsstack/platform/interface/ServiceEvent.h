@@ -13,7 +13,7 @@
 #ifndef _SERVICE_IMS_EVENT_H_
 #define _SERVICE_IMS_EVENT_H_
 
-#include "IMSEventDef.h"
+#include "ImsEventDef.h"
 #include "IEventListener.h"
 
 class EventServicePrivate;

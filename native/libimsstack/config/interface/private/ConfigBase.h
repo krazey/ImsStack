@@ -15,7 +15,7 @@
 
 #include "IMSList.h"
 #include "IMSMap.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 
 #include "ICarrierConfig.h"
 #include "IConfigurable.h"

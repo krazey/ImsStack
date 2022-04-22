@@ -15,7 +15,7 @@
 #define _UCE_DEF_H_
 
 #include "IMSTypeDef.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 
 #define MSG_THREAD_BASE                      0  // for thread operation
 #define MSG_THREAD_RECEIVED_NOTIFY_RLMI      50 // received notify msg include rlmi xml body.

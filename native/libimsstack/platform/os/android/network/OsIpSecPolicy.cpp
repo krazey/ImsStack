@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSTypeCast.h"
-#include "IIPSecPolicyListener.h"
-#include "IIPSecSA.h"
-#include "IIPSecSP.h"
+#include "IIpSecPolicyListener.h"
+#include "IIpSecSa.h"
+#include "IIpSecSp.h"
 #include "ITimer.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"

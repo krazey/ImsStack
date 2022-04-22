@@ -1,7 +1,7 @@
 #ifndef XML_API_H_
 #define XML_API_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * @brief This class provides the common XML APIs.

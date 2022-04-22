@@ -16,7 +16,7 @@
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServicePhoneInfo.h"
-#include "IIPCAN.h"
+#include "IIpcan.h"
 #include "provider/AosUtil.h"
 #include "provider/AosTrm.h"
 

@@ -12,7 +12,7 @@
 #ifndef _INTERFACE_IMS_NET_PING_LISTENER_H_
 #define _INTERFACE_IMS_NET_PING_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class INetPing;
 

@@ -13,7 +13,7 @@
 #ifndef _IMS_PROVISIONING_H_
 #define _IMS_PROVISIONING_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ImsProvisioning
 {

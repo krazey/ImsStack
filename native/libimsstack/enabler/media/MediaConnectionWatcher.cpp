@@ -18,7 +18,6 @@
 #include "IMSMap.h"
 #include "MediaConnectionWatcher.h"
 #include "IMediaConnectionWatcherListener.h"
-#include "IMSEventDef.h"
 #include "ServiceNetwork.h"
 #include "ServiceTrace.h"
 #include "ServicePhoneInfo.h"

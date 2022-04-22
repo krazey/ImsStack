@@ -13,8 +13,8 @@
 #ifndef _SIP_SOCKET_H_
 #define _SIP_SOCKET_H_
 
-#include "IMSSlot.h"
-#include "INetSocket.h"
+#include "ImsSlot.h"
+#include "ISocket.h"
 #include "SIPSocketAddress.h"
 
 class INetConnection;

@@ -16,9 +16,9 @@
 #ifndef SERVICE_IMS_NETWORK_H_
 #define SERVICE_IMS_NETWORK_H_
 
-#include "INetConnection.h"
-#include "INetSocket.h"
-#include "IMSMSG.h"
+#include "INetworkConnection.h"
+#include "ISocket.h"
+#include "ImsMessage.h"
 
 class INetIPSec;
 class IIPCAN;

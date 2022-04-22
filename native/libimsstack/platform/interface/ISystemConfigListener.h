@@ -12,7 +12,7 @@
 #ifndef _INTERFACE_SYSTEM_CONFIG_LISTENER_H_
 #define _INTERFACE_SYSTEM_CONFIG_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ISystemConfigListener
 {

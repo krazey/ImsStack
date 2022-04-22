@@ -16,7 +16,7 @@
 #ifndef AOS_SERVICE_AVAILABLE_WIFI_H_
 #define AOS_SERVICE_AVAILABLE_WIFI_H_
 
-#include "INetPingListener.h"
+#include "INetworkPingListener.h"
 #include "IWifiWatcher.h"
 #include "condition/AosServiceAvailable.h"
 

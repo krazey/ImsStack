@@ -18,7 +18,7 @@
 #include "ServiceNetwork.h"
 #include "TextParser.h"
 #include "NATHelper.h"
-#include "IDigestAKA.h"
+#include "IDigestAka.h"
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
 #include "Connector.h"

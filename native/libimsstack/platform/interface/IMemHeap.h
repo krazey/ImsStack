@@ -13,7 +13,7 @@
 #ifndef _INTERFACE_IMS_MEM_HEAP_H_
 #define _INTERFACE_IMS_MEM_HEAP_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IMemHeap
 {

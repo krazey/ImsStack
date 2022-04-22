@@ -21,7 +21,6 @@
 #include "JniMtcCall.h"
 #include "JniMediaSessionThread.h"
 #include "JniMtcUtils.h"
-#include "ServiceMSG.h"
 #include "ServiceTrace.h"
 
 using namespace android;

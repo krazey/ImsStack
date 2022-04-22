@@ -6,17 +6,15 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceThread.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 #include "ByteArray.h"
 
 #include "IUSMS.h"
-#include "IMSMSG.h"
 #include "IUSmsSCBMService.h"
 
 #include "AndroidJavaSCBM.h"
 #include "EnablerUtils.h"
-#include "IMSMsgDef.h"
 
 __IMS_TRACE_TAG_ADAPT__;
 

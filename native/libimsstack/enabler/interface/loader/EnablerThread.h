@@ -13,7 +13,7 @@
 #ifndef _ENABLER_THREAD_H_
 #define _ENABLER_THREAD_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSAppThread.h"
 
 class EnablerFactory;

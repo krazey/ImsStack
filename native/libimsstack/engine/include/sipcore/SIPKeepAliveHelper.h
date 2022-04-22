@@ -13,7 +13,7 @@
 #ifndef _SIP_KEEP_ALIVE_HELPER_H_
 #define _SIP_KEEP_ALIVE_HELPER_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "ISIPKeepAliveHelper.h"
 #include "ISIPKeepAliveListener.h"
 #include "SIPSocketAddress.h"

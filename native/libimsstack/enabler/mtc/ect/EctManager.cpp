@@ -9,7 +9,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 #include "ISession.h"
 #include "IMessage.h"

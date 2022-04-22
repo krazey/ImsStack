@@ -12,8 +12,8 @@
 #ifndef _SYSTEM_CONFIG_MANAGER_H_
 #define _SYSTEM_CONFIG_MANAGER_H_
 
-#include "IMSMsgDef.h"
-#include "IMSMSG.h"
+#include "ImsMessageDef.h"
+#include "ImsMessage.h"
 #include "IMSList.h"
 #include "IMSMap.h"
 #include "SystemConfig.h"

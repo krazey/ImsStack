@@ -17,7 +17,6 @@
 #define INTERFACE_AOS_CONNECTION_H_
 
 #include "IMSTypeDef.h"
-#include "IIPCAN.h"
 #include "AStringArray.h"
 #include "IPAddress.h"
 

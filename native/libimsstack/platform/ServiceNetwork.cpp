@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "ServiceNetwork.h"
 #include "ImsNetworkConnectionState.h"
 #include "ImsSocketState.h"
-#include "INetIPSec.h"
-#include "IIPCAN.h"
+#include "INetworkIpSec.h"
+#include "IIpcan.h"
 #include "PlatformApi.h"
 #include "PlatformFactory.h"
 

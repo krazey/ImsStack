@@ -11,7 +11,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IMSConstDef.h"
+#include "ImsConstDef.h"
 #include "private/ConfigurationManager.h"
 #include "ImsProvisioning.h"
 

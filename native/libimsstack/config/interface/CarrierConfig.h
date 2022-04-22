@@ -16,7 +16,7 @@
 #ifndef CARRIER_CONFIG_H_
 #define CARRIER_CONFIG_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class CarrierConfig
 {

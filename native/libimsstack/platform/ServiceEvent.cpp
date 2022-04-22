@@ -14,7 +14,7 @@
 #include "ServiceTrace.h"
 #include "ServiceMutex.h"
 #include "IMSMap.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IEventReceiver.h"
 #include "IEventSender.h"
 #include "IMSActivity.h"

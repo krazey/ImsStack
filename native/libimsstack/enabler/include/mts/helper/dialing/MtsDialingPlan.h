@@ -2,7 +2,7 @@
 #define MTS_DIALING_PLAN_H_
 
 #include "AStringBuffer.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsAccessNetworkInfoType.h"
 
 class MtsDialingPlan final
 {

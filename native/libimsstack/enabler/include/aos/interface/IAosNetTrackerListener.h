@@ -16,8 +16,6 @@
 #ifndef INTERFACE_AOS_NET_TRACKER_LISTENER_H_
 #define INTERFACE_AOS_NET_TRACKER_LISTENER_H_
 
-#include "INetWatcher.h"
-
 class IAosNetTrackerListener
 {
 public:

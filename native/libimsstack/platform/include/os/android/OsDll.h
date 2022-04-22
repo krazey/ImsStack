@@ -16,7 +16,7 @@
 #ifndef OS_DLL_H_
 #define OS_DLL_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class OsDll
 {

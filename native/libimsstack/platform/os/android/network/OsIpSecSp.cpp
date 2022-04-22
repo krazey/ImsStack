@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSIPSecType.h"
+#include "ImsIpSecType.h"
 #include "IMSStrLib.h"
 #include "ServiceMemory.h"
 #include "ServiceTimer.h"

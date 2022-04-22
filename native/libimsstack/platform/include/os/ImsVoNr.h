@@ -16,8 +16,8 @@
 #ifndef IMS_VONR_H_
 #define IMS_VONR_H_
 
-#include "IMSSlot.h"
-#include "IVoNR.h"
+#include "ImsSlot.h"
+#include "IVoNr.h"
 
 class ImsVoNr
     : public IMSSlot

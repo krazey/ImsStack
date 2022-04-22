@@ -17,7 +17,7 @@
 #ifndef OS_SUBSCRIBER_INFO_H_
 #define OS_SUBSCRIBER_INFO_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "IPhoneInfoSubscriber.h"
 
 class OsSubscriberInfo

@@ -1,7 +1,7 @@
 #ifndef XML_FACTORY_H_
 #define XML_FACTORY_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IXmlStreamWriter;
 class IXmlTransactionProvider;

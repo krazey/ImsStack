@@ -36,7 +36,6 @@ extern "C"
 #include <sys/socket.h>
 #include <sys/types.h>
 
-#include "IMSMsgDef.h"
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "ServiceTimer.h"

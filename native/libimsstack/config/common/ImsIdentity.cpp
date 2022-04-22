@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
 #include "AStringBuffer.h"
-#include "IMSAccessNetworkInfoType.h"
+#include "ImsAccessNetworkInfoType.h"
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
 #include "ImsIdentity.h"

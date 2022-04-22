@@ -13,7 +13,7 @@
 #ifndef _IMS_PRIVATE_PROPERTIES_H_
 #define _IMS_PRIVATE_PROPERTIES_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Constant values for IMS private properties.

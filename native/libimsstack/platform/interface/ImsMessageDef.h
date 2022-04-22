@@ -15,7 +15,7 @@
 #ifndef _IMS_MSGDEF_H_
 #define _IMS_MSGDEF_H_
 
-#include "IMSConstDef.h"
+#include "ImsConstDef.h"
 
 #define IMS_MSG_THREAD_BASE                0 // for thread operation
 #define IMS_MSG_SYSTEM_BASE                500 // for system operation

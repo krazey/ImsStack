@@ -15,7 +15,7 @@
 #ifndef _INTERFACE_IMS_TIMER_H_
 #define _INTERFACE_IMS_TIMER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ITimerListener;
 

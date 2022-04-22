@@ -19,7 +19,6 @@
 #include "ServiceUtil.h"
 #include "ServicePhoneInfo.h"
 #include "Configuration.h"
-#include "INetWatcher.h"
 #include "IConfigurable.h"
 #include "ISIPHeader.h"
 #include "ISIPMessage.h"

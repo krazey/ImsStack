@@ -2,8 +2,8 @@
 #define OBJECT_ASYNC_DESTROYER_H_
 
 #include "IMSTypeDef.h"
-#include "ServiceMSG.h"
 #include "IMSActivity.h"
+#include "ImsMessage.h"
 
 template <typename MtcObject>
 class ObjectAsyncDestroyer final :

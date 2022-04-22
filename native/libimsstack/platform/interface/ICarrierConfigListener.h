@@ -16,7 +16,7 @@
 #ifndef INTERFACE_CARRIER_CONFIG_LISTENER_H_
 #define INTERFACE_CARRIER_CONFIG_LISTENER_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ICarrierConfigListener
 {

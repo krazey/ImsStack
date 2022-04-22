@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "IMSMsgDef.h"
-#include "IMSConstDef.h"
 #include "IMSList.h"
 #include "IUUceService.h"
 #include "AString.h"

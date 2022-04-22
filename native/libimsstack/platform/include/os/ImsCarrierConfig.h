@@ -17,7 +17,7 @@
 #define IMS_CARRIER_CONFIG_H_
 
 #include "ICarrierConfig.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 
 class ImsCarrierConfig
     : public IMSSlot

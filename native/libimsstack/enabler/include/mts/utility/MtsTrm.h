@@ -2,7 +2,7 @@
 #define MTS_TRM_H_
 
 #include "ITimer.h"
-#include "ITRM.h"
+#include "ITrm.h"
 
 class MtsTrmListener
 {

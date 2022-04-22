@@ -15,7 +15,7 @@
  */
 #include "ImsCarrierConfig.h"
 #include "IMSMap.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "PlatformFactory.h"
 #include "ServiceConfig.h"
 #include "ServiceTrace.h"

@@ -1,7 +1,7 @@
 #ifndef CONFIG_MEDIA_H_
 #define CONFIG_MEDIA_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 /**
  * Configuration for media capabilities of IMS engine.

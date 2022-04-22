@@ -16,7 +16,7 @@
 #ifndef OS_PHONE_INFO_CALL_H_
 #define OS_PHONE_INFO_CALL_H_
 
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "IPhoneInfoCall.h"
 
 class OsPhoneInfoCall

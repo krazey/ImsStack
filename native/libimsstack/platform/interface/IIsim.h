@@ -14,7 +14,7 @@
 #ifndef _INTERFACE_IMS_ISIM_H_
 #define _INTERFACE_IMS_ISIM_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class IDigestAKA;
 class IISIMListener;

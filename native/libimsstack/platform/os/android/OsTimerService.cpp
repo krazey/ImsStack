@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "OsTimer.h"
 #include "OsTimerService.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "system-intf/System.h"
 #include "system-intf/SystemConstants.h"

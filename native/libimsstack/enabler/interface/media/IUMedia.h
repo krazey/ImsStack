@@ -18,7 +18,7 @@
 #define _IUMEDIA_H_
 
 #include "IMSTypeDef.h"
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IUEventParam.h"
 #include "IUIMS.h"
 

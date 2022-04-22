@@ -1,10 +1,11 @@
-#include "INetConnection.h"
-#include "INetWatcher.h"
+#include "INetworkConnection.h"
+#include "INetworkWatcher.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceNetworkPolicy.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
+#include "ServiceVoNr.h"
 
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCall.h"

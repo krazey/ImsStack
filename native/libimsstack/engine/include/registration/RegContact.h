@@ -14,7 +14,7 @@
 #define _REG_CONTACT_H_
 
 #include "AStringBuffer.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "IRegContact.h"
 #include "util/CallerCapability.h"
 

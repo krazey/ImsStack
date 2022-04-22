@@ -12,7 +12,7 @@
 
 #include "ServiceTrace.h"
 #include "ServiceThread.h"
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 
 #include "SIPParameter.h"
 #include "SIPParsingHelper.h"

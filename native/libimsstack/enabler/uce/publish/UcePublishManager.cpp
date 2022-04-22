@@ -1,4 +1,4 @@
-#include "ServiceMSG.h"
+#include "ServiceMessage.h"
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "SIPStatusCode.h"

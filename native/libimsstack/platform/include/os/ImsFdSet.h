@@ -16,7 +16,7 @@
 #ifndef IMS_FD_SET_H_
 #define IMS_FD_SET_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 class ImsFdSet
 {

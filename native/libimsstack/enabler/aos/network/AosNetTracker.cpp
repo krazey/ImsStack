@@ -20,7 +20,6 @@
 #include "ServiceTimer.h"
 #include "ServiceEvent.h"
 #include "ServiceNetworkPolicy.h"
-#include "IMSMsgDef.h"
 #include "CarrierConfig.h"
 
 #include "interface/IAosAppContext.h"

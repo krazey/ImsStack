@@ -20,15 +20,13 @@
 #include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
-#include "ServiceVoNR.h"
+#include "ServiceVoNr.h"
 
-#include "IIPCAN.h"
-#include "INetIPSec.h"
+#include "IIpcan.h"
+#include "INetworkIpSec.h"
 #include "ISipConfig.h"
 #include "ISubscriberConfig.h"
-#include "IVoNR.h"
-#include "IMSEventDef.h"
-#include "IMSIPSecType.h"
+#include "IVoNr.h"
 
 #include "CarrierConfig.h"
 

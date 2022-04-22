@@ -13,7 +13,7 @@
 #ifndef _CONFIG_APP_H_
 #define _CONFIG_APP_H_
 
-#include "IMSMsgDef.h"
+#include "ImsMessageDef.h"
 #include "IMSApp.h"
 #include "IEventListener.h"
 

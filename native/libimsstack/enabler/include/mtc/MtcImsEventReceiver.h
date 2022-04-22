@@ -11,7 +11,7 @@ class IMtcImsEventListener;
 using ImsEvent = IMS_SINT32;
 
 /*
- * This class receives event from Java layer defined in IMSEventDef.h. The users can read
+ * This class receives event from Java layer defined in ImsEventDef.h. The users can read
  * cached values or receive notification when the event occurs.
  * For supported events, see `RegisterSupportedEvents()`.
  */

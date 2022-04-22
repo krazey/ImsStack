@@ -15,11 +15,11 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceNetwork.h"
-#include "INetSocket.h"
+#include "ISocket.h"
 #include "IRegContact.h"
 #include "IRegParameter.h"
 #include "Credential.h"
-#include "IMSIPSecType.h"
+#include "ImsIpSecType.h"
 #include "ISIPTransportHelper.h"
 #include "SIPFactory.h"
 #include "interface/IAosAppContext.h"

@@ -16,7 +16,7 @@
 #ifndef IMS_IPSEC_TYPE_H_
 #define IMS_IPSEC_TYPE_H_
 
-#include "IMSTypeDef.h"
+#include "ImsTypeDef.h"
 
 // IP Security Type class
 class IPSecType

@@ -13,7 +13,7 @@
 #define _GEOLOCATION_PIDF_CREATOR_H_
 
 #include "ByteArray.h"
-#include "IMSSlot.h"
+#include "ImsSlot.h"
 #include "IPhoneInfoLocation.h"
 
 class ILocationProperties;

@@ -16,7 +16,6 @@
 
 #define IMS_STL_USE
 #include "ServiceTrace.h"
-#include "ServiceMSG.h"
 #include "IMSProcess.h"
 
 #include "JniConnectorFactory.h"

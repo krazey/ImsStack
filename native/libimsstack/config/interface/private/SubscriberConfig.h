@@ -16,7 +16,7 @@
 #ifndef SUBSCRIBER_CONFIG_H_
 #define SUBSCRIBER_CONFIG_H_
 
-#include "IISIMListener.h"
+#include "IIsimListener.h"
 #include "ITimer.h"
 
 #include "CarrierConfig.h"

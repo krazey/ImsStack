@@ -1,4 +1,5 @@
-#include "ServiceMSG.h"
+#include "ImsMessage.h"
+#include "ServiceTrace.h"
 #include "Connector.h"
 #include "IServiceFilterCriteria.h"
 #include "IPageMessage.h"
