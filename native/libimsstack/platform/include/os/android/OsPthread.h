@@ -40,7 +40,7 @@ public:
     IMS_BOOL IsRunning() const override;
     // Only for IThreadListener
     void SetRunnable(IN IRunnable* piListener) override;
-    IMS_BOOL PostMessageI(IN IMSMSG& objMsg) override;
+    IMS_BOOL PostMessageI(IN ImsMessage& objMsg) override;
     IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg,
             IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 

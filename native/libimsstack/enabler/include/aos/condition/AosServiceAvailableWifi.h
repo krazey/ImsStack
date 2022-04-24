@@ -22,7 +22,7 @@
 
 class AosServiceAvailableWifi
     : public AosServiceAvailable
-    , public INetPingListener
+    , public INetworkPingListener
     , public IWifiWatcherListener
 {
 public:
@@ -37,10 +37,10 @@ private:
     void DeregisterListener() final;
 
     // IWifiWatcherListener
-    void NotifyStateChanged(IN class IWifiWatcher* pIWifiWatcher) final;
+    void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher) final;
 
-    // INetPingListener
-    void NetPing_NotifyResult(IN INetPing* piNetPing, IN IMS_SINT32 nResult) final;
+    // INetworkPingListener
+    void NetworkPing_NotifyResult(IN INetworkPing* piPing, IN IMS_SINT32 nResult) final;
 
     void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx) final;
     void HandleRoamingChanged(IN IMS_UINT32 nState) final;
@@ -69,7 +69,7 @@ private:
     IMS_UINT32 m_nVoWiFiSetting;
     IMS_UINT32 m_nBadNetworkState;
     IMS_BOOL m_bWiFiState;
-    INetPing* m_piNetPing;
+    INetworkPing* m_piNetPing;
 
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;
 };

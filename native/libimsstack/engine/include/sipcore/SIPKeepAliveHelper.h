@@ -21,7 +21,7 @@
 
 
 class SIPKeepAliveHelper
-    : public IMSSlot
+    : public ImsSlot
     , public ISIPKeepAliveHelper
     , public ISIPKeepAliveListener
 {

@@ -44,7 +44,7 @@ OsTrmTimer::~OsTrmTimer()
 }
 
 PUBLIC VIRTUAL
-void OsTrmTimer::SetListener(IN ITRMTimerListener* piListener)
+void OsTrmTimer::SetListener(IN ITrmTimerListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -90,6 +90,6 @@ void OsTrmTimer::Timer_TimerExpired(IN ITimer* piTimer)
 
     if (m_piListener != IMS_NULL)
     {
-        m_piListener->ITRMTimer_Expired(m_nSlotId, m_nType);
+        m_piListener->TrmTimer_TimerExpired(m_nSlotId, m_nType);
     }
 }

@@ -381,7 +381,7 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     if (m_pstSsl == IMS_NULL)
     {
         IMS_TRACE_E(0, "SSL is null", 0, 0, 0);
-        return INetSocket::RESULT_ERROR;
+        return ISocket::RESULT_ERROR;
     }
 
     IMS_SINT32 nReadBytes = SSL_read(m_pstSsl, pBuffer, nBuffLen);
@@ -402,11 +402,11 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
             //read success, and there are more bytes to read. WOULD BLOCK
         case SSL_ERROR_WANT_READ: {
             IMS_TRACE_D("SSL::Receive - Operation is not completed (%d)", nReadBytes, 0, 0);
-            return INetSocket::RESULT_WOULDBLOCK;
+            return ISocket::RESULT_WOULDBLOCK;
         }
         case SSL_ERROR_ZERO_RETURN: {
             IMS_TRACE_D("SSL::Receive - SSL connection has been closed", 0, 0, 0);
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
         }
         case SSL_ERROR_SYSCALL: {
             IMS_SINT32 nError = errno;
@@ -416,10 +416,10 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 
             if ((nError == EINTR) || (nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
-                return INetSocket::RESULT_WOULDBLOCK;
+                return ISocket::RESULT_WOULDBLOCK;
             }
 
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
         }
         default: {
             IMS_SINT32 nError = errno;
@@ -429,10 +429,10 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 
             if ((nError == EINTR) || (nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
-                return INetSocket::RESULT_WOULDBLOCK;
+                return ISocket::RESULT_WOULDBLOCK;
             }
 
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
         }
     }
 }
@@ -443,7 +443,7 @@ IMS_SINT32 OsSsl::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     if (m_pstSsl == IMS_NULL)
     {
         IMS_TRACE_E(0, "SSL is null", 0, 0, 0);
-        return INetSocket::RESULT_ERROR;
+        return ISocket::RESULT_ERROR;
     }
 
     IMS_SINT32 nWrittenBytes = SSL_write(m_pstSsl, pBuffer, nBuffLen);
@@ -469,20 +469,20 @@ IMS_SINT32 OsSsl::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
         case SSL_ERROR_WANT_WRITE:
             // WOULDBLOCK
             IMS_TRACE_D("SSL::Send - Operation is not completed (%d)", nWrittenBytes, 0, 0);
-            return INetSocket::RESULT_WOULDBLOCK;
+            return ISocket::RESULT_WOULDBLOCK;
 
         case SSL_ERROR_ZERO_RETURN:
             IMS_TRACE_D("SSL::Send - SSL connection has been closed", 0, 0, 0);
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
 
         case SSL_ERROR_SYSCALL:
             IMS_TRACE_E(0, "SSL::Send - SSL_ERROR_SYSCALL", 0 , 0, 0);
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
 
         default:
             IMS_TRACE_E(0, "SSL::Send - SSL error(%d, %s)",
                     nErrorCode, ERR_error_string(nErrorCode, IMS_NULL), 0);
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
     }
 
     return nWrittenBytes;
@@ -582,8 +582,8 @@ void OsSslSocket::LoadLibrary()
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
-        IN INetSocketListener* piListener,
+ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
+        IN ISocketListener* piListener,
         IN ADDRESS_FAMILY_ENTYPE eAddrFamily /*= ADDRESS_FAMILY_INET*/)
 {
     if (m_pSsl == IMS_NULL)
@@ -592,7 +592,7 @@ INetSocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
         return RESULT_ERROR;
     }
 
-    if (OsSocket::Open(eType, piListener, eAddrFamily) == INetSocket::RESULT_ERROR)
+    if (OsSocket::Open(eType, piListener, eAddrFamily) == ISocket::RESULT_ERROR)
     {
         return RESULT_ERROR;
     }
@@ -600,14 +600,14 @@ INetSocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
     if (!m_pSsl->CreateSocket(GetSocket()))
     {
         IMS_TRACE_E(0, "Creating SSL socket failed", 0, 0, 0);
-        return INetSocket::RESULT_ERROR;
+        return ISocket::RESULT_ERROR;
     }
 
     return RESULT_SUCCESS;
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
+ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
         IN ADDRESS_FAMILY_ENTYPE eAddrFamily /*= ADDRESS_FAMILY_INET*/)
 {
     if (m_pSsl == IMS_NULL)
@@ -616,7 +616,7 @@ INetSocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
         return RESULT_ERROR;
     }
 
-    if (OsSocket::Open(eType, eAddrFamily) == INetSocket::RESULT_ERROR)
+    if (OsSocket::Open(eType, eAddrFamily) == ISocket::RESULT_ERROR)
     {
         return RESULT_ERROR;
     }
@@ -699,7 +699,7 @@ IMS_SINT32 OsSslSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
         }
     }
 
-    if (nWrittenBytes == INetSocket::RESULT_WOULDBLOCK)
+    if (nWrittenBytes == ISocket::RESULT_WOULDBLOCK)
     {
         SelectEventEx(FD_WRITE);
     }

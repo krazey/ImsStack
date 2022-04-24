@@ -1346,11 +1346,11 @@ void SubscriberConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues)
+void SubscriberConfig::Isim_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues)
 {
     switch (nField)
     {
-        case IISIM::FIELD_IST: {
+        case IIsim::FIELD_IST: {
             m_bFlagRequestPending = IMS_FALSE;
 
             if (!objValues.IsEmpty())
@@ -1367,7 +1367,7 @@ void SubscriberConfig::ISIM_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteA
             SendMessage(ACMSG_READ_ISIM_RECORD, 1, 0);
             break;
         }
-        case IISIM::FIELD_PCSCF_ADDRESS: {
+        case IIsim::FIELD_PCSCF_ADDRESS: {
             m_bFlagRequestPending = IMS_FALSE;
 
             if (!objValues.IsEmpty())
@@ -1452,7 +1452,7 @@ void SubscriberConfig::ISIM_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteA
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnHomeDomainName(IN const ByteArray& objDomainName)
+void SubscriberConfig::Isim_OnHomeDomainName(IN const ByteArray& objDomainName)
 {
     if (!IsIsimSupported())
     {
@@ -1484,7 +1484,7 @@ void SubscriberConfig::ISIM_OnHomeDomainName(IN const ByteArray& objDomainName)
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnIMPI(IN const ByteArray& objPrivateUserId)
+void SubscriberConfig::Isim_OnImpi(IN const ByteArray& objPrivateUserId)
 {
     if (!IsIsimSupported())
     {
@@ -1509,7 +1509,7 @@ void SubscriberConfig::ISIM_OnIMPI(IN const ByteArray& objPrivateUserId)
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnIMPU(IN const IMSList<ByteArray>& objPublicUserIds)
+void SubscriberConfig::Isim_OnImpu(IN const IMSList<ByteArray>& objPublicUserIds)
 {
     if (!IsIsimSupported())
     {
@@ -1586,7 +1586,7 @@ void SubscriberConfig::ISIM_OnIMPU(IN const IMSList<ByteArray>& objPublicUserIds
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
+void SubscriberConfig::Isim_OnError(IN IMS_SINT32 nErrorCode)
 {
     if (!IsIsimSupported())
     {
@@ -1594,20 +1594,20 @@ void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
         return;
     }
 
-    if (nErrorCode == IISIM::ERROR_REFRESH_REG_FAILED)
+    if (nErrorCode == IIsim::ERROR_REFRESH_REG_FAILED)
     {
         IMS_TRACE_D("Registering ISIM refresh callback failed; " \
                 "in this moment, ignore this error code...", 0, 0, 0);
         return;
     }
-    else if (nErrorCode == IISIM::ERROR_INTERFACE_CHANNEL_ERROR)
+    else if (nErrorCode == IIsim::ERROR_INTERFACE_CHANNEL_ERROR)
     {
         IMS_TRACE_D("ISIM communication channel has an error; initializing ISIM ...", 0, 0, 0);
 
         SendMessage(ACMSG_RECOVERY_REQUIRED, 0, 0);
         return;
     }
-    else if (nErrorCode == IISIM::ERROR_REFRESH_ERROR)
+    else if (nErrorCode == IIsim::ERROR_REFRESH_ERROR)
     {
         IMS_TRACE_D("ISIM refresh error; waits for ISIM initialization...", 0, 0, 0);
 
@@ -1623,7 +1623,7 @@ void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
     // Reset the all items
     ResetIsimRecord(m_nConfiguredIsimRecords);
 
-    if (nErrorCode == IISIM::ERROR_READ_DENIED)
+    if (nErrorCode == IIsim::ERROR_READ_DENIED)
     {
         IMS_TRACE_D("ISIM read denied - wait for PIN enabling ...", 0, 0, 0);
         return;
@@ -1631,9 +1631,9 @@ void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
 
     IMS_SINT32 nSubsConfigErrorCode = 0;
 
-    if ((nErrorCode == IISIM::ERROR_START_FAILED)
-        || (nErrorCode == IISIM::ERROR_CARD_ERROR)
-        || (nErrorCode == IISIM::ERROR_CARD_REMOVED))
+    if ((nErrorCode == IIsim::ERROR_START_FAILED)
+        || (nErrorCode == IIsim::ERROR_CARD_ERROR)
+        || (nErrorCode == IIsim::ERROR_CARD_REMOVED))
     {
         if (GetState() == STATE_PROVISIONED)
         {
@@ -1645,7 +1645,7 @@ void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
             SetState(STATE_PROVISIONING);
         }
     }
-    else if (nErrorCode == IISIM::ERROR_NO_ISIM_APPLICATION)
+    else if (nErrorCode == IIsim::ERROR_NO_ISIM_APPLICATION)
     {
         nSubsConfigErrorCode = ERROR_NO_ISIM_APPLICATION;
     }
@@ -1661,7 +1661,7 @@ void SubscriberConfig::ISIM_OnError(IN IMS_SINT32 nErrorCode)
 }
 
 PRIVATE VIRTUAL
-void SubscriberConfig::ISIM_OnStateChanged(IN IMS_SINT32 nState)
+void SubscriberConfig::Isim_OnStateChanged(IN IMS_SINT32 nState)
 {
     if (!IsIsimSupported())
     {
@@ -1677,11 +1677,11 @@ void SubscriberConfig::ISIM_OnStateChanged(IN IMS_SINT32 nState)
 
     switch (nState)
     {
-        case IISIM::STATE_IDLE: {
+        case IIsim::STATE_IDLE: {
             IMS_TRACE_D("ISIM is idle", 0, 0, 0);
             break;
         }
-        case IISIM::STATE_INIT: {
+        case IIsim::STATE_INIT: {
             IMS_TRACE_D("ISIM initialization is completed", 0, 0, 0);
 
             if (GetState() == STATE_REFRESHING)
@@ -1690,7 +1690,7 @@ void SubscriberConfig::ISIM_OnStateChanged(IN IMS_SINT32 nState)
 
                 // We can consider that "NO ISIM APPLICATION" is a temporary error
                 // such as subsystem silent restart, ...
-                if (m_nIsimErrorCode != IISIM::ERROR_NO_ISIM_APPLICATION)
+                if (m_nIsimErrorCode != IIsim::ERROR_NO_ISIM_APPLICATION)
                 {
                     break;
                 }
@@ -1721,14 +1721,14 @@ void SubscriberConfig::ISIM_OnStateChanged(IN IMS_SINT32 nState)
             SendMessage(ACMSG_START_PROVISIONING, 0, 0);
             break;
         }
-        case IISIM::STATE_READY: {
+        case IIsim::STATE_READY: {
             IMS_TRACE_D("ISIM is ready, the subscriber config can read a data from ISIM", 0, 0, 0);
             m_nStartRetryCount = 0;
             m_nIsimErrorCode = ISIM_NO_ERROR;
             SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
             break;
         }
-        case IISIM::STATE_REFRESHING: {
+        case IIsim::STATE_REFRESHING: {
             IMS_TRACE_D("ISIM refresh is started", 0, 0, 0);
             m_nIsimErrorCode = ISIM_NO_ERROR;
 
@@ -1745,7 +1745,7 @@ void SubscriberConfig::ISIM_OnStateChanged(IN IMS_SINT32 nState)
             SendMessage(ACMSG_REFRESH_STARTED, 0, 0);
             break;
         }
-        case IISIM::STATE_REFRESHED: {
+        case IIsim::STATE_REFRESHED: {
             IMS_TRACE_D("ISIM refresh is invoked, so the subscriber config will try " \
                     "to read a new records", 0, 0, 0);
 
@@ -1939,7 +1939,7 @@ void SubscriberConfig::InitProvisioning()
             m_piIsim->RemoveListener(this);
         }
 
-        m_piIsim = PhoneInfoService::GetPhoneInfoService()->GetISIM(GetSlotId());
+        m_piIsim = PhoneInfoService::GetPhoneInfoService()->GetIsim(GetSlotId());
 
         if (m_piIsim == IMS_NULL)
         {
@@ -2056,16 +2056,16 @@ void SubscriberConfig::StartProvisioning(IN IMS_BOOL bIsRefresh /*= IMS_FALSE*/)
             return;
         }
 
-        IMS_SINT32 nEFs = (IISIM::EF_IMPI | IISIM::EF_DOMAIN | IISIM::EF_IMPU);
+        IMS_SINT32 nEFs = (IIsim::EF_IMPI | IIsim::EF_DOMAIN | IIsim::EF_IMPU);
 
         if ((m_nConfiguredIsimRecords & ISIM_IST) == ISIM_IST)
         {
-            nEFs |= IISIM::EF_IST;
+            nEFs |= IIsim::EF_IST;
         }
 
         if ((m_nConfiguredIsimRecords & ISIM_PCSCF) == ISIM_PCSCF)
         {
-            nEFs |= IISIM::EF_PCSCF;
+            nEFs |= IIsim::EF_PCSCF;
         }
 
         if (m_piIsim->Start(nEFs) != IMS_SUCCESS)
@@ -2074,7 +2074,7 @@ void SubscriberConfig::StartProvisioning(IN IMS_BOOL bIsRefresh /*= IMS_FALSE*/)
 
             IMS_SINT32 nISIMState = m_piIsim->GetState();
 
-            if ((nISIMState == IISIM::STATE_INIT) || (nISIMState == IISIM::STATE_REFRESHED))
+            if ((nISIMState == IIsim::STATE_INIT) || (nISIMState == IIsim::STATE_REFRESHED))
             {
                 // 1s, 1s, 2s, 2s, 4s, ...
                 static const IMS_SINT32 RETRY_INTERVAL[5] = { 1, 1, 2, 2, 4 };
@@ -2148,7 +2148,7 @@ void SubscriberConfig::ReadIsimProvisioning()
         return;
     }
 
-    if (m_piIsim->GetState() != IISIM::STATE_READY)
+    if (m_piIsim->GetState() != IIsim::STATE_READY)
     {
         IMS_TRACE_D("ISIM is not ready; waits for the readiness of ISIM ...", 0, 0, 0);
         return;
@@ -2157,19 +2157,19 @@ void SubscriberConfig::ReadIsimProvisioning()
     // IMPI
     if (!IsIsimRecordSet(ISIM_IMPI))
     {
-        IMS_RESULT nResult = m_piIsim->GetIMPI();
+        IMS_RESULT nResult = m_piIsim->GetImpi();
 
         IMS_TRACE_D("Reading ISIM provisioning - IMPI ... result=%d", nResult, 0, 0);
 
         if (nResult == IMS_FAILURE)
         {
-            RecoverIsimProvisioning(IISIM::ERROR_READ_IMPI_FAILED);
+            RecoverIsimProvisioning(IIsim::ERROR_READ_IMPI_FAILED);
 
-            m_nIsimErrorCode = IISIM::ERROR_READ_IMPI_FAILED;
+            m_nIsimErrorCode = IIsim::ERROR_READ_IMPI_FAILED;
             SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
             return;
         }
-        else if (nResult == IISIM::RESULT_NO_RECORDS)
+        else if (nResult == IIsim::RESULT_NO_RECORDS)
         {
             SetIsimRecord(ISIM_IMPI);
             SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
@@ -2183,19 +2183,19 @@ void SubscriberConfig::ReadIsimProvisioning()
     // IMPU
     if (!IsIsimRecordSet(ISIM_IMPU))
     {
-        IMS_RESULT nResult = m_piIsim->GetIMPU();
+        IMS_RESULT nResult = m_piIsim->GetImpu();
 
         IMS_TRACE_D("Reading ISIM provisioning - IMPU ... result=%d", nResult, 0, 0);
 
         if (nResult == IMS_FAILURE)
         {
-            RecoverIsimProvisioning(IISIM::ERROR_READ_IMPU_FAILED);
+            RecoverIsimProvisioning(IIsim::ERROR_READ_IMPU_FAILED);
 
-            m_nIsimErrorCode = IISIM::ERROR_READ_IMPU_FAILED;
+            m_nIsimErrorCode = IIsim::ERROR_READ_IMPU_FAILED;
             SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
             return;
         }
-        else if (nResult == IISIM::RESULT_NO_RECORDS)
+        else if (nResult == IIsim::RESULT_NO_RECORDS)
         {
             SetIsimRecord(ISIM_IMPU);
             SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
@@ -2215,13 +2215,13 @@ void SubscriberConfig::ReadIsimProvisioning()
 
         if (nResult == IMS_FAILURE)
         {
-            RecoverIsimProvisioning(IISIM::ERROR_READ_DOMAIN_FAILED);
+            RecoverIsimProvisioning(IIsim::ERROR_READ_DOMAIN_FAILED);
 
-            m_nIsimErrorCode = IISIM::ERROR_READ_DOMAIN_FAILED;
+            m_nIsimErrorCode = IIsim::ERROR_READ_DOMAIN_FAILED;
             SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
             return;
         }
-        else if (nResult == IISIM::RESULT_NO_RECORDS)
+        else if (nResult == IIsim::RESULT_NO_RECORDS)
         {
             SetIsimRecord(ISIM_DOMAIN);
             SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
@@ -2235,17 +2235,17 @@ void SubscriberConfig::ReadIsimProvisioning()
     // IST (ISIM Service Table)
     if (((m_nConfiguredIsimRecords & ISIM_IST) == ISIM_IST) && !IsIsimRecordSet(ISIM_IST) )
     {
-        IMS_RESULT nResult = m_piIsim->GetField(IISIM::FIELD_IST);
+        IMS_RESULT nResult = m_piIsim->GetField(IIsim::FIELD_IST);
 
         IMS_TRACE_D("Reading ISIM provisioning - IST ... result=%d", nResult, 0, 0);
 
         if (nResult == IMS_FAILURE)
         {
-            m_nIsimErrorCode = IISIM::ERROR_READ_IST_FAILED;
+            m_nIsimErrorCode = IIsim::ERROR_READ_IST_FAILED;
             SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
             return;
         }
-        else if (nResult == IISIM::RESULT_NO_RECORDS)
+        else if (nResult == IIsim::RESULT_NO_RECORDS)
         {
             SetIsimRecord(ISIM_IST);
             SendMessage(ACMSG_READ_ISIM_RECORD, 0, 0);
@@ -2285,17 +2285,17 @@ void SubscriberConfig::ReadIsimProvisioning()
             }
         }
 
-        IMS_RESULT nResult = m_piIsim->GetField(IISIM::FIELD_PCSCF_ADDRESS);
+        IMS_RESULT nResult = m_piIsim->GetField(IIsim::FIELD_PCSCF_ADDRESS);
 
         IMS_TRACE_D("Reading ISIM provisioning - P-CSCF address ... result=%d", nResult, 0, 0);
 
         if (nResult == IMS_FAILURE)
         {
-            m_nIsimErrorCode = IISIM::ERROR_READ_PCSCF_ADDRESS_FAILED;
+            m_nIsimErrorCode = IIsim::ERROR_READ_PCSCF_ADDRESS_FAILED;
             SendMessage(ACMSG_NOTIFY_ERROR, 0, 0 /* Error Code */);
             return;
         }
-        else if (nResult == IISIM::RESULT_NO_RECORDS)
+        else if (nResult == IIsim::RESULT_NO_RECORDS)
         {
             for (IMS_UINT32 i = 0; i < m_objPcscfAddresses.GetSize(); ++i)
             {
@@ -2326,15 +2326,15 @@ void SubscriberConfig::ReadIsimProvisioning()
 PRIVATE
 void SubscriberConfig::RecoverIsimProvisioning(IN IMS_SINT32 nErrorCode)
 {
-    if ((nErrorCode == IISIM::ERROR_START_FAILED)
-            || (nErrorCode == IISIM::ERROR_READ_IMPI_FAILED)
-            || (nErrorCode == IISIM::ERROR_READ_IMPU_FAILED)
-            || (nErrorCode == IISIM::ERROR_READ_DOMAIN_FAILED))
+    if ((nErrorCode == IIsim::ERROR_START_FAILED)
+            || (nErrorCode == IIsim::ERROR_READ_IMPI_FAILED)
+            || (nErrorCode == IIsim::ERROR_READ_IMPU_FAILED)
+            || (nErrorCode == IIsim::ERROR_READ_DOMAIN_FAILED))
     {
-        if ((m_nIsimErrorCode == IISIM::ERROR_START_FAILED)
-                || (m_nIsimErrorCode == IISIM::ERROR_READ_IMPI_FAILED)
-                || (m_nIsimErrorCode == IISIM::ERROR_READ_IMPU_FAILED)
-                || (m_nIsimErrorCode == IISIM::ERROR_READ_DOMAIN_FAILED))
+        if ((m_nIsimErrorCode == IIsim::ERROR_START_FAILED)
+                || (m_nIsimErrorCode == IIsim::ERROR_READ_IMPI_FAILED)
+                || (m_nIsimErrorCode == IIsim::ERROR_READ_IMPU_FAILED)
+                || (m_nIsimErrorCode == IIsim::ERROR_READ_DOMAIN_FAILED))
         {
             IMS_TRACE_D("ISIM recovery is already installed ...", 0, 0, 0);
             return;
@@ -2704,15 +2704,15 @@ const IMS_CHAR* SubscriberConfig::IsimStateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {
-        case IISIM::STATE_IDLE:
+        case IIsim::STATE_IDLE:
             return "IDLE";
-        case IISIM::STATE_INIT:
+        case IIsim::STATE_INIT:
             return "INIT";
-        case IISIM::STATE_READY:
+        case IIsim::STATE_READY:
             return "READY";
-        case IISIM::STATE_REFRESHING:
+        case IIsim::STATE_REFRESHING:
             return "REFRESHING";
-        case IISIM::STATE_REFRESHED:
+        case IIsim::STATE_REFRESHED:
             return "REFRESHED";
         default:
             return "__INVALID__";

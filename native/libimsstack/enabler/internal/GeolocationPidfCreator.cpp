@@ -468,7 +468,7 @@ void geolocationPidfCreator_CreatePIDF(IN const AString &strEntityUri,
 
 PUBLIC
 GeolocationPidfCreator::GeolocationPidfCreator(IN IMS_SINT32 nSlotId_)
-    : IMSSlot(nSlotId_)
+    : ImsSlot(nSlotId_)
     , nFeatures(0)
     , strDeviceName(AString::ConstNull())
     , strDeviceId(AString::ConstNull())
@@ -493,7 +493,7 @@ IMS_BOOL GeolocationPidfCreator::Create(IN const AString &strEntityUri,
         IN const AString &strCountry, OUT ByteArray &objContent)
 {
     ISystemTime *piSystemTime = SystemTimeService::GetSystemTimeService()->GetSystemTime();
-    AString strTimeStamp = piSystemTime->GetUTCFormat();
+    AString strTimeStamp = piSystemTime->GetUtcFormat();
 
     geolocationPidfCreator_CreatePIDF(
             (strEntityUri.GetLength() > 0) ? strEntityUri : CreateEntityUri(GetSlotId()),

@@ -30,7 +30,7 @@ void androidJavaSCBM_sendMsgToJava(IN IMS_UINT32 nMsg, IMS_UINT32 pParam, IN IMS
 {
     IMSMSG objUIMsg(nMsg, 0, pParam);
     IMS_UINT32 nSlotId = nSlotID;
-    MSGService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSlotId], objUIMsg);
+    MessageService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSlotId], objUIMsg);
 }
 
 PRIVATE
@@ -217,7 +217,7 @@ IMS_BOOL AndroidJavaSCBM::OnMessage( IN IMSMSG &objMSG )
                     0, reinterpret_cast<IMS_UINTP>(pParam));
             AString aStrTargetActivity = EnablerUtils::GetEnablerThreadName(0);
             aStrTargetActivity.Append(".MtsApp");
-            MSGService::PostMessage(aStrTargetActivity, objMSG);
+            MessageService::PostMessage(aStrTargetActivity, objMSG);
         }
         break;
         case IUSmsSCBMService::NOTI_EXIT_SCBM:
@@ -230,7 +230,7 @@ IMS_BOOL AndroidJavaSCBM::OnMessage( IN IMSMSG &objMSG )
                     0, reinterpret_cast<IMS_UINTP>(pParam));
             AString aStrTargetActivity = EnablerUtils::GetEnablerThreadName(0);
             aStrTargetActivity.Append(".MtsApp");
-            MSGService::PostMessage(aStrTargetActivity, objMSG);
+            MessageService::PostMessage(aStrTargetActivity, objMSG);
         }
         break;
 

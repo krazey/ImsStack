@@ -33,7 +33,7 @@ PUBLIC
 AosTrm::AosTrm(IN IMS_SINT32 nSlotId_)
     : nSlotId(nSlotId_)
     , nServices(TYPE_NONE)
-    , nIPCANCategory(IIPCAN::CATEGORY_MOBILE)
+    , nIPCANCategory(IIpcan::CATEGORY_MOBILE)
     , bIsStartUpdated(IMS_FALSE)
     , bIsEmergencyStartUpdated(IMS_FALSE)
     , piTRM(IMS_NULL)
@@ -43,10 +43,10 @@ AosTrm::AosTrm(IN IMS_SINT32 nSlotId_)
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosTrm = %" PFLS_u "/%" PFLS_x, nSlotId,
         sizeof(AosTrm), this);
 
-    piTRM = PhoneInfoService::GetPhoneInfoService()->GetTRM();
+    piTRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
     if (piTRM != IMS_NULL)
     {
-        if (piTRM->IsTRMSupported())
+        if (piTRM->IsTrmSupported())
         {
             piTRM->RegisterObserver(this);
             piTRM->Enable(nSlotId);
@@ -157,7 +157,7 @@ IMS_BOOL AosTrm::IsReady()
         return IMS_TRUE;
     }
 
-    return piTRM->IsServiceAvailable(nSlotId, ITRM::SERVICE_REG);
+    return piTRM->IsServiceAvailable(nSlotId, ITrm::SERVICE_REG);
 }
 
 /*
@@ -202,7 +202,7 @@ void AosTrm::Set(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
         else
         {
             bIsStartUpdated = IMS_TRUE;
-            piTRM->SetService(nSlotId, ITRM::SERVICE_REG, ITRM::MODE_START);
+            piTRM->SetService(nSlotId, ITrm::SERVICE_REG, ITrm::MODE_START);
         }
     }
     else
@@ -243,7 +243,7 @@ void AosTrm::SetEmegency(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
         if (!bIsEmergencyStartUpdated)
         {
             bIsEmergencyStartUpdated = IMS_TRUE;
-            piTRM->SetEmergencyService(nSlotId, ITRM::SERVICE_REG, ITRM::MODE_START);
+            piTRM->SetEmergencyService(nSlotId, ITrm::SERVICE_REG, ITrm::MODE_START);
         }
     }
     else
@@ -251,7 +251,7 @@ void AosTrm::SetEmegency(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
         if (bIsEmergencyStartUpdated)
         {
             bIsEmergencyStartUpdated = IMS_FALSE;
-            piTRM->SetEmergencyService(nSlotId, ITRM::SERVICE_REG, ITRM::MODE_END);
+            piTRM->SetEmergencyService(nSlotId, ITrm::SERVICE_REG, ITrm::MODE_END);
         }
     }
 }
@@ -275,7 +275,7 @@ void AosTrm::SetIPCAN(IN IN IMS_UINT32 nCategory)
     }
 
     nIPCANCategory = nCategory;
-    piTRM->SetIPCAN(nSlotId, nIPCANCategory);
+    piTRM->SetIpcan(nSlotId, nIPCANCategory);
 }
 
 /*
@@ -368,7 +368,7 @@ void AosTrm::ProcessTimerExpired()
         {
             A_IMS_TRACE_I(AOSTAG, "ProcessTimerExpired :: set end to trm", 0, 0, 0);
             bIsStartUpdated = IMS_FALSE;
-            piTRM->SetService(nSlotId, ITRM::SERVICE_REG, ITRM::MODE_END);
+            piTRM->SetService(nSlotId, ITrm::SERVICE_REG, ITrm::MODE_END);
         }
     }
 }
@@ -379,7 +379,7 @@ Remarks
 
 */
 PRIVATE VIRTUAL
-void AosTrm::NotifyServicePriorityChanged()
+void AosTrm::Trm_NotifyServicePriorityChanged()
 {
     if (piTRM == IMS_NULL)
     {

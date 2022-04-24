@@ -53,7 +53,7 @@ SIPStreamSocket::SIPStreamSocket(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-SIPStreamSocket::SIPStreamSocket(IN IMS_SINT32 nSlotId, IN INetSocket *piSocket_)
+SIPStreamSocket::SIPStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket *piSocket_)
     : SIPSocket(nSlotId, SIPSocketAddress::SOCKET_TCP_CLIENT_BY_PEER)
     , bSecure(IMS_FALSE)
     , bSIPKeepAliveConfigured(IMS_FALSE)
@@ -117,7 +117,7 @@ SIPStreamSocket::~SIPStreamSocket()
 }
 
 PUBLIC VIRTUAL
-void SIPStreamSocket::ApplyIpSec(IN INetSocket* /*piAcceptedSocket = IMS_NULL*/)
+void SIPStreamSocket::ApplyIpSec(IN ISocket* /*piAcceptedSocket = IMS_NULL*/)
 {
     IPAddress objIpAddr;
     IMS_UINT32 nPort = 0;
@@ -153,7 +153,7 @@ IMS_BOOL SIPStreamSocket::Connect()
 
     IMS_SINT32 nResult = piSocket->Connect(objSA.GetIPAddress(), objSA.GetPort());
 
-    if (nResult == INetSocket::RESULT_WOULDBLOCK)
+    if (nResult == ISocket::RESULT_WOULDBLOCK)
     {
         SetState(STATE_CONNECTING);
 
@@ -162,7 +162,7 @@ IMS_BOOL SIPStreamSocket::Connect()
             IMS_TRACE_E(0, "Starting CONNECT_TIMER failed", 0, 0, 0);
         }
     }
-    else if (nResult == INetSocket::RESULT_SUCCESS)
+    else if (nResult == ISocket::RESULT_SUCCESS)
     {
         SetState(STATE_CONNECTED);
 
@@ -199,7 +199,7 @@ IMS_BOOL SIPStreamSocket::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPort
         return IMS_FALSE;
     }
 
-    if (piSocket->Bind(objIPA, nPort) == INetSocket::RESULT_ERROR)
+    if (piSocket->Bind(objIPA, nPort) == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
@@ -261,11 +261,11 @@ IMS_SINT32 SIPStreamSocket::Send(IN CONST IMS_BYTE *pBuffer, IN IMS_SINT32 nBuff
     {
         nSentBytes = piSocket->Send(&pBuffer[nTotalSentBytes], nSendingBytes);
 
-        if (nSentBytes == INetSocket::RESULT_ERROR)
+        if (nSentBytes == ISocket::RESULT_ERROR)
         {
-            return INetSocket::RESULT_ERROR;
+            return ISocket::RESULT_ERROR;
         }
-        else if (nSentBytes == INetSocket::RESULT_WOULDBLOCK)
+        else if (nSentBytes == ISocket::RESULT_WOULDBLOCK)
         {
             StartTxTimer(objTV_TCP.m_nTvWouldblockWaiting);
             return nTotalSentBytes;
@@ -300,7 +300,7 @@ void SIPStreamSocket::NotifyForceClosed()
     StopKeepAliveTimer();
 
     SetForcinglyClosed(IMS_TRUE);
-    SIPSocket::Socket_Closed(piSocket);
+    SIPSocket::Socket_OnClosed(piSocket);
 }
 
 /*
@@ -550,7 +550,7 @@ void SIPStreamSocket::Timer_TimerExpired(IN ITimer *piTimer)
         }
         else
         {
-            //SIPSocket::Socket_Closed(piSocket);
+            //SIPSocket::Socket_OnClosed(piSocket);
 
             StopKeepAliveTimer();
 
@@ -568,7 +568,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocket::Socket_DataReceived(IN INetSocket *piSocket)
+void SIPStreamSocket::Socket_OnDataReceived(IN ISocket *piSocket)
 {
     IMS_SINT32 nReadBytes;
     RCPtr<SIPMessageBuffer> pMessageBuffer = SIPMessageBuffer::GetInstance();
@@ -587,11 +587,11 @@ void SIPStreamSocket::Socket_DataReceived(IN INetSocket *piSocket)
 
         IMS_TRACE_I("SIPStreamSocket(%p) :: read-bytes=%d", piSocket, nReadBytes, 0);
 
-        if (nReadBytes == INetSocket::RESULT_ERROR)
+        if (nReadBytes == ISocket::RESULT_ERROR)
         {
             break;
         }
-        else if (nReadBytes == INetSocket::RESULT_WOULDBLOCK)
+        else if (nReadBytes == ISocket::RESULT_WOULDBLOCK)
         {
             break;
         }
@@ -608,8 +608,8 @@ void SIPStreamSocket::Socket_DataReceived(IN INetSocket *piSocket)
         }
     }
 
-    if ((nReadBytes == INetSocket::RESULT_ERROR)
-            || ((nReadBytes == INetSocket::RESULT_WOULDBLOCK) && (objMFraming.IsEmpty())))
+    if ((nReadBytes == ISocket::RESULT_ERROR)
+            || ((nReadBytes == ISocket::RESULT_WOULDBLOCK) && (objMFraming.IsEmpty())))
     {
         return;
     }
@@ -651,7 +651,7 @@ void SIPStreamSocket::Socket_DataReceived(IN INetSocket *piSocket)
         }
     }
 
-    SIPSocket::Socket_DataReceived(piSocket);
+    SIPSocket::Socket_OnDataReceived(piSocket);
 }
 
 /*
@@ -660,7 +660,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocket::Socket_SendEnabled(IN INetSocket *piSocket)
+void SIPStreamSocket::Socket_OnSendEnabled(IN ISocket *piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -671,7 +671,7 @@ void SIPStreamSocket::Socket_SendEnabled(IN INetSocket *piSocket)
 
     StopTxTimer();
 
-    SIPSocket::Socket_SendEnabled(piSocket);
+    SIPSocket::Socket_OnSendEnabled(piSocket);
 }
 
 /*
@@ -680,7 +680,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocket::Socket_Connected(IN INetSocket *piSocket)
+void SIPStreamSocket::Socket_OnConnected(IN ISocket *piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -696,7 +696,7 @@ void SIPStreamSocket::Socket_Connected(IN INetSocket *piSocket)
         StartKeepAliveTimer(0);
     }
 
-    SIPSocket::Socket_Connected(piSocket);
+    SIPSocket::Socket_OnConnected(piSocket);
 }
 
 /*
@@ -705,8 +705,8 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPStreamSocket::Socket_Closed(IN INetSocket *piSocket,
-        IN IMS_SINT32 nReason /* = INetSocket::CLOSE_REASON_UNKNOWN */)
+void SIPStreamSocket::Socket_OnClosed(IN ISocket *piSocket,
+        IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -725,7 +725,7 @@ void SIPStreamSocket::Socket_Closed(IN INetSocket *piSocket,
             bPassiveClosedNotification = IMS_TRUE;
         }
 
-        SIPSocket::Socket_Closed(piSocket, nReason);
+        SIPSocket::Socket_OnClosed(piSocket, nReason);
 
         if (bPassiveClosedNotification)
         {
@@ -735,7 +735,7 @@ void SIPStreamSocket::Socket_Closed(IN INetSocket *piSocket,
         return;
     }
 
-    SIPSocket::Socket_Closed(piSocket, nReason);
+    SIPSocket::Socket_OnClosed(piSocket, nReason);
 }
 
 /*

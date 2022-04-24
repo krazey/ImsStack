@@ -24,7 +24,7 @@
 //#include "text/TextNego.h"
 
 class MediaNego :
-        public IMSSlot
+        public ImsSlot
 {
 public:
     enum MediaNegoResult

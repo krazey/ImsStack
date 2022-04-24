@@ -37,9 +37,9 @@ public:
     static void LoadLibrary();
 
 protected:
-    // INetSocket class
+    // ISocket class
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN INetSocketListener* piListener,
+            IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAddrFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
             IN ADDRESS_FAMILY_ENTYPE eAddrFamily = ADDRESS_FAMILY_INET) override;

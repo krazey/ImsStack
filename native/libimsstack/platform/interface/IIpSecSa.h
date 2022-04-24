@@ -18,7 +18,7 @@
 
 #include "IPAddress.h"
 
-class IIPSecSA
+class IIpSecSa
 {
 public:
     /*
@@ -36,7 +36,7 @@ public:
     </table>
 
     */
-    virtual void SetSA
+    virtual void SetSa
         (
         IN const IPAddress &objSrcIPA,
         IN IMS_UINT32 nSrcPort,
@@ -66,7 +66,7 @@ public:
     </table>
 
     */
-    virtual void DoneSA() = 0;
+    virtual void DoneSa() = 0;
 
 };
 

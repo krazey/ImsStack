@@ -39,7 +39,7 @@ public:
 private:
     // IMSActivity class
     virtual IIMSActivityControl* GetController();
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN ImsMessage &objMSG);
 
 private:
     IMS_SINT32 nEvent;
@@ -88,7 +88,7 @@ IIMSActivityControl* EventActivity::GetController()
 }
 
 PRIVATE VIRTUAL
-IMS_BOOL EventActivity::DispatchMessage(IN IMSMSG &objMSG)
+IMS_BOOL EventActivity::DispatchMessage(IN ImsMessage &objMSG)
 {
     if (objMSG.GetName() == (IMS_MSG_USER + nEvent))
     {

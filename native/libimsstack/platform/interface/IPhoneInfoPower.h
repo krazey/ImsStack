@@ -131,7 +131,7 @@ public:
     }
 
 public:
-    inline void ProcessNotify(IN IMSMSG &objMSG)
+    inline void ProcessNotify(IN ImsMessage &objMSG)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
         (void)objMSG;

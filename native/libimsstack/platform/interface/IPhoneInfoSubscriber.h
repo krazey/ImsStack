@@ -31,13 +31,13 @@ class ISubscriberInfo
 public:
     // CDMA: MDN, WCDMA: MSISDN(?)
     virtual IMS_BOOL GetPhoneNumber(OUT AString &strPhoneNumber) const = 0;
-    virtual IMS_BOOL GetMCC(OUT AString &strMCC) const = 0;
-    virtual IMS_BOOL GetMNC(OUT AString &strMNC) const = 0;
+    virtual IMS_BOOL GetMcc(OUT AString &strMCC) const = 0;
+    virtual IMS_BOOL GetMnc(OUT AString &strMNC) const = 0;
     virtual IMS_BOOL GetOperator(OUT AString &strOperator) const = 0;
     virtual IMS_BOOL GetCountry(OUT AString &strCountry) const = 0;
     virtual IMS_BOOL GetNetworkCountry(OUT AString &strCountry) const = 0;
-    virtual IMS_BOOL GetSubscriberID(OUT AString &strIMSI) const = 0;
-    virtual IMS_BOOL GetEmergencyNumberListFromSIM(OUT AString &strENLFromSIM) const = 0;
+    virtual IMS_BOOL GetSubscriberId(OUT AString &strIMSI) const = 0;
+    virtual IMS_BOOL GetEmergencyNumberListFromSim(OUT AString &strENLFromSIM) const = 0;
     virtual IMS_SINT32 GetEmergencyPriorityFromModem() = 0;
     virtual IMS_BOOL IsUiccGbaSupported() = 0;
     virtual IMS_BOOL GetPreference(IN const AString &strFileName,

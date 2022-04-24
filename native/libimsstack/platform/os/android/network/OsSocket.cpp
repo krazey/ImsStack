@@ -269,7 +269,7 @@ void OsSocket::CleanUp()
 }
 
 PUBLIC GLOBAL
-IMS_BOOL OsSocket::CheckIPAndPortAvailability(IN const IPAddress& objIpAddr,
+IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
         IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
 {
     IMS_SINT32 nSockType = SOCK_DGRAM;
@@ -330,7 +330,7 @@ IMS_BOOL OsSocket::CheckIPAndPortAvailability(IN const IPAddress& objIpAddr,
 
         if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIPAndPortAvailability :: bind failed - %d(%s)",
+            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)",
                     errno, strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
@@ -356,7 +356,7 @@ IMS_BOOL OsSocket::CheckIPAndPortAvailability(IN const IPAddress& objIpAddr,
 
         if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIPAndPortAvailability :: bind failed - %d(%s)",
+            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)",
                     errno, strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
@@ -369,8 +369,8 @@ IMS_BOOL OsSocket::CheckIPAndPortAvailability(IN const IPAddress& objIpAddr,
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
-        IN INetSocketListener* piListener,
+ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
+        IN ISocketListener* piListener,
         IN ADDRESS_FAMILY_ENTYPE eAddressFamily /*= ADDRESS_FAMILY_INET*/)
 {
     SetListener(piListener);
@@ -379,7 +379,7 @@ INetSocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
+ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
         IN ADDRESS_FAMILY_ENTYPE eAddressFamily /*= ADDRESS_FAMILY_INET*/)
 {
     enum { PROTOCOL_TYPE = IPPROTO_IP };
@@ -474,13 +474,13 @@ INetSocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
 }
 
 PROTECTED VIRTUAL
-void OsSocket::SetListener(IN INetSocketListener* piListener)
+void OsSocket::SetListener(IN ISocketListener* piListener)
 {
     m_piListener = piListener;
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Close()
+ISocket::SOCKET_RESULT OsSocket::Close()
 {
     SetCloseReason(CLOSE_REASON_USER_ACTION);
     SetSocketConnected(IMS_FALSE);
@@ -538,7 +538,7 @@ INetSocket::SOCKET_RESULT OsSocket::Close()
 }
 
 PROTECTED VIRTUAL
-INetSocket* OsSocket::Accept()
+ISocket* OsSocket::Accept()
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -646,7 +646,7 @@ INetSocket* OsSocket::Accept()
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
+ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
         IN IMS_UINT32 nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
@@ -814,7 +814,7 @@ INetSocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
+ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
         IN IMS_UINT32 nHostPort)
 {
     if (m_hSocket == INVALID_SOCKET)
@@ -1086,7 +1086,7 @@ INetSocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/)
+ISocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1506,7 +1506,7 @@ RETRY_SENDTO:
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::GetPeerName(OUT IPAddress& objPeerAddress,
+ISocket::SOCKET_RESULT OsSocket::GetPeerName(OUT IPAddress& objPeerAddress,
         OUT IMS_UINT32& nPeerPort)
 {
     if (m_hSocket == INVALID_SOCKET)
@@ -1558,7 +1558,7 @@ INetSocket::SOCKET_RESULT OsSocket::GetPeerName(OUT IPAddress& objPeerAddress,
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::GetSockName(OUT IPAddress& objSocketAddress,
+ISocket::SOCKET_RESULT OsSocket::GetSockName(OUT IPAddress& objSocketAddress,
         OUT IMS_UINT32& nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
@@ -1610,7 +1610,7 @@ INetSocket::SOCKET_RESULT OsSocket::GetSockName(OUT IPAddress& objSocketAddress,
 }
 
 PROTECTED VIRTUAL
-IMS_BOOL OsSocket::Equals(IN const INetSocket* piNetSocket)
+IMS_BOOL OsSocket::Equals(IN const ISocket* piNetSocket)
 {
     const OsSocket* pSocket = DYNAMIC_CAST(const OsSocket*, piNetSocket);
 
@@ -1903,7 +1903,7 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
 }
 
 PROTECTED VIRTUAL
-INetSocket::SOCKET_RESULT OsSocket::Abort()
+ISocket::SOCKET_RESULT OsSocket::Abort()
 {
     SetCloseReason(CLOSE_REASON_USER_ACTION);
 
@@ -1999,7 +1999,7 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
     switch (nWparam)
     {
         case IMS_SOCKET_DATA_RECEIVED:
-            m_piListener->Socket_DataReceived(this);
+            m_piListener->Socket_OnDataReceived(this);
             break;
 
         case IMS_SOCKET_CLOSED: {
@@ -2015,19 +2015,19 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
                 break;
             }
 
-            m_piListener->Socket_Closed(this, GetCloseReason());
+            m_piListener->Socket_OnClosed(this, GetCloseReason());
             break;
         }
         case IMS_SOCKET_SEND_ENABLED:
-            m_piListener->Socket_SendEnabled(this);
+            m_piListener->Socket_OnSendEnabled(this);
             break;
 
         case IMS_SOCKET_CONNECTION_RECEIVED:
-            m_piListener->Socket_ConnectionReceived(this);
+            m_piListener->Socket_OnConnectionReceived(this);
             break;
 
         case IMS_SOCKET_CONNECTED:
-            m_piListener->Socket_Connected(this);
+            m_piListener->Socket_OnConnected(this);
             break;
 
         default:
@@ -2300,7 +2300,7 @@ IMS_SOCKET OsSocket::GetSocket() const
  * PATCH_FOR_NON_SOCKET
  */
 PROTECTED
-INetSocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
+ISocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
 {
     IMS_SOCKET hSocketToBeClosed = m_hSocket;
 
@@ -2333,7 +2333,7 @@ INetSocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
 PROTECTED
 void OsSocket::UnbindSocketFromIpSecTransform(IN IMS_SOCKET hSocket)
 {
-    INetIPSec* piIpSec = NetworkService::GetNetworkService()->GetIPSec();
+    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec();
 
     if (piIpSec != IMS_NULL)
     {

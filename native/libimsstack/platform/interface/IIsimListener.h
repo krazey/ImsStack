@@ -17,7 +17,7 @@
 #include "IMSList.h"
 #include "ByteArray.h"
 
-class IISIMListener
+class IIsimListener
 {
 public:
     /*
@@ -39,7 +39,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnField(IN IMS_SINT32 nField, IN CONST IMSList<ByteArray> &objValues) = 0;
+    virtual void Isim_OnField(IN IMS_SINT32 nField, IN CONST IMSList<ByteArray> &objValues) = 0;
 
     /*
 
@@ -59,7 +59,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnHomeDomainName(IN CONST ByteArray &objDomainName) = 0;
+    virtual void Isim_OnHomeDomainName(IN CONST ByteArray &objDomainName) = 0;
 
     /*
 
@@ -79,7 +79,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnIMPI(IN CONST ByteArray &objIMPI) = 0;
+    virtual void Isim_OnImpi(IN CONST ByteArray &objIMPI) = 0;
 
     /*
 
@@ -99,7 +99,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnIMPU(IN CONST IMSList<ByteArray> &objIMPUs) = 0;
+    virtual void Isim_OnImpu(IN CONST IMSList<ByteArray> &objIMPUs) = 0;
 
     /*
 
@@ -118,7 +118,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnError(IN IMS_SINT32 nErrorCode) = 0;
+    virtual void Isim_OnError(IN IMS_SINT32 nErrorCode) = 0;
 
     /*
 
@@ -137,7 +137,7 @@ public:
     </table>
 
     */
-    virtual void ISIM_OnStateChanged(IN IMS_SINT32 nState) = 0;
+    virtual void Isim_OnStateChanged(IN IMS_SINT32 nState) = 0;
 };
 
 #endif // _INTERFACE_IMS_ISIM_LISTENER_H_

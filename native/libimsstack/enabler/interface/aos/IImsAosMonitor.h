@@ -36,8 +36,8 @@ public:
      *
      * @param nServices Indicate the services. (@see ImsAosService)
      * @param nIpcan Indicate the IP connectivity access network where IMS is registered. \n
-     *                  - IIPCAN::CATEGORY_MOBILE \n
-     *                  - IIPCAN::CATEGORY_WLAN
+     *                  - IIpcan::CATEGORY_MOBILE \n
+     *                  - IIpcan::CATEGORY_WLAN
      */
     virtual void ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan) = 0;
 
@@ -64,7 +64,7 @@ public:
         TYPE_SERVICE_BLOCKED = 2,
 
         /// IP-CAN type notifiction between mobile and wlan
-        /// @param nState IIPCAN::CATEGORY_MOBILE, IIPCAN::CATEGORY_WLAN
+        /// @param nState IIpcan::CATEGORY_MOBILE, IIpcan::CATEGORY_WLAN
         TYPE_IPCAN = 3,
 
         /// Detailed state for the handover type

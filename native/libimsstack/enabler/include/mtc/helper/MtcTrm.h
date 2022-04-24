@@ -83,7 +83,7 @@ public:
     public:
         IMS_SINT32 m_nSlotID;
 
-        ITRM *m_pITRM;
+        ITrm *m_pITRM;
 
         IMS_BOOL m_bNSet;
         IMS_BOOL m_bESet;

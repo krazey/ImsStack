@@ -182,7 +182,7 @@ PUBLIC VIRTUAL
 void MediaManager::OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
     IMSMSG objMsg(nMsg, nCallKey, pParam, IMS_NULL);
-    MSGService::PostMessage(GetThreadName(m_nSlotId), objMsg);
+    MessageService::PostMessage(GetThreadName(m_nSlotId), objMsg);
 }
 
 PROTECTED

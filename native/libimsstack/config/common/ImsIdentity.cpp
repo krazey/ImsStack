@@ -258,8 +258,8 @@ AString ImsIdentity::CreateTemporaryHomeDomainName(IN IMS_SINT32 nSlotId /* = IM
     AString strMCC;
     AString strMNC;
 
-    piSubsInfo->GetMCC(strMCC);
-    piSubsInfo->GetMNC(strMNC);
+    piSubsInfo->GetMcc(strMCC);
+    piSubsInfo->GetMnc(strMNC);
 
     if ((strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
     {
@@ -312,9 +312,9 @@ AString ImsIdentity::CreateTemporaryPrivateUserId(IN IMS_SINT32 nSlotId /* = IMS
     AString strMCC;
     AString strMNC;
 
-    piSubsInfo->GetSubscriberID(strIMSI);
-    piSubsInfo->GetMCC(strMCC);
-    piSubsInfo->GetMNC(strMNC);
+    piSubsInfo->GetSubscriberId(strIMSI);
+    piSubsInfo->GetMcc(strMCC);
+    piSubsInfo->GetMnc(strMNC);
 
     if ((strIMSI.GetLength() == 0) || (strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
     {
@@ -356,9 +356,9 @@ AString ImsIdentity::CreateTemporaryPublicUserId(IN IMS_SINT32 nSlotId /* = IMS_
     AString strMCC;
     AString strMNC;
 
-    piSubsInfo->GetSubscriberID(strIMSI);
-    piSubsInfo->GetMCC(strMCC);
-    piSubsInfo->GetMNC(strMNC);
+    piSubsInfo->GetSubscriberId(strIMSI);
+    piSubsInfo->GetMcc(strMCC);
+    piSubsInfo->GetMnc(strMNC);
 
     if ((strIMSI.GetLength() == 0) || (strMCC.GetLength() == 0) || (strMNC.GetLength() == 0))
     {
@@ -443,8 +443,8 @@ IMS_BOOL ImsIdentity::GetMccMnc(IN const AString &strPLMN, IN IMS_SINT32 nMncDig
             return IMS_FALSE;
         }
 
-        piSubsInfo->GetMCC(strMcc);
-        piSubsInfo->GetMNC(strMnc);
+        piSubsInfo->GetMcc(strMcc);
+        piSubsInfo->GetMnc(strMnc);
     }
     else
     {

@@ -19,7 +19,7 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PRIVATE GLOBAL
-AString MSGService::GetThreadName(IN const AString& strTargetName)
+AString MessageService::GetThreadName(IN const AString& strTargetName)
 {
     // threadname.activitiname
     IMS_SINT32 nIndex = strTargetName.GetIndexOf('.');
@@ -28,7 +28,7 @@ AString MSGService::GetThreadName(IN const AString& strTargetName)
 }
 
 PUBLIC GLOBAL
-IMS_BOOL MSGService::PostMessage(IN const AString &strTarget, IN IMSMSG &objMSG)
+IMS_BOOL MessageService::PostMessage(IN const AString &strTarget, IN ImsMessage &objMSG)
 {
     AString strThreadName = GetThreadName(strTarget);
     ThreadService *pThreadService = ThreadService::GetThreadService();
@@ -57,7 +57,7 @@ IMS_BOOL MSGService::PostMessage(IN const AString &strTarget, IN IMSMSG &objMSG)
 }
 
 PUBLIC GLOBAL
-IMS_BOOL MSGService::PostMessageThread(IN IThread *piTargetThread, IN IMSMSG &objMSG)
+IMS_BOOL MessageService::PostMessageThread(IN IThread *piTargetThread, IN ImsMessage &objMSG)
 {
     if (piTargetThread == IMS_NULL)
     {
@@ -85,7 +85,8 @@ IMS_BOOL MSGService::PostMessageThread(IN IThread *piTargetThread, IN IMSMSG &ob
 }
 
 PUBLIC GLOBAL
-IMS_BOOL MSGService::PostMessageActivity(IN IMSActivity *pTargetActivity, IN IMSMSG &objMSG)
+IMS_BOOL MessageService::PostMessageActivity(IN IMSActivity *pTargetActivity,
+        IN ImsMessage &objMSG)
 {
     if (pTargetActivity == IMS_NULL)
     {

@@ -23,7 +23,7 @@
 class System;
 
 class OsEventReceiver
-    : public IMSSlot
+    : public ImsSlot
     , public IEventReceiver
     , public ISystemListener
 {

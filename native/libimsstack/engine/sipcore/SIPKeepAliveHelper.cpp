@@ -26,7 +26,7 @@ __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SIPKeepAliveHelper::SIPKeepAliveHelper(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , piListener(IMS_NULL)
 {
     objSA_NearEnd.SetType(SIPSocketAddress::SOCKET_UDP);

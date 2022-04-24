@@ -20,7 +20,7 @@
 
 PUBLIC
 OsEventReceiver::OsEventReceiver(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , m_piListener(IMS_NULL)
 {
 }

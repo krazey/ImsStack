@@ -30,7 +30,7 @@ OsTrm::OsTrm()
 {
     IMS_TRACE_I("OsTrm", 0, 0, 0);
 
-    if (!IsTRMSupported())
+    if (!IsTrmSupported())
     {
         return;
     }
@@ -96,7 +96,7 @@ void OsTrm::Disable(IN IMS_UINT32 nSlotId)
         pTrmInfo->Enable(IMS_FALSE);
         pTrmInfo->ClearEmergency();
         pTrmInfo->ClearServices();
-        pTrmInfo->SetIPCAN(IIPCAN::CATEGORY_MOBILE);
+        pTrmInfo->SetIpcan(IIpcan::CATEGORY_MOBILE);
         pTrmInfo->SetUpdatedService(SERVICE_NONE);
         SetTrmInfo(pTrmInfo, SERVICE_NONE, nSlotId);
     }
@@ -143,7 +143,7 @@ IMS_BOOL OsTrm::IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsTrm::IsTRMSupported()
+IMS_BOOL OsTrm::IsTrmSupported()
 {
     return SystemConfig::IsMultiLteEnabled();
 }
@@ -179,7 +179,7 @@ void OsTrm::SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
 }
 
 PUBLIC VIRTUAL
-void OsTrm::SetIPCAN(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
+void OsTrm::SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
 {
     LockGuard objLock(m_piLock);
 
@@ -194,19 +194,19 @@ void OsTrm::SetIPCAN(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
         return;
     }
 
-    pTrmInfo->SetIPCAN(nCategory);
+    pTrmInfo->SetIpcan(nCategory);
 
     if (IsEmergency())
     {
-        IMS_TRACE_I("SetIPCAN :: [%d][cat=%d] emergency service is going", nSlotId, nCategory, 0);
+        IMS_TRACE_I("SetIpcan :: [%d][cat=%d] emergency service is going", nSlotId, nCategory, 0);
         return;
     }
 
-    if (nCategory == IIPCAN::CATEGORY_WLAN)
+    if (nCategory == IIpcan::CATEGORY_WLAN)
     {
         SetIpcan_Wlan(nSlotId);
     }
-    else // IIPCAN::CATEGORY_MOBILE
+    else // IIpcan::CATEGORY_MOBILE
     {
         SetIpcan_Mobile(pTrmInfo, nSlotId);
     }
@@ -259,9 +259,9 @@ IMS_BOOL OsTrm::SetService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UI
 }
 
 PUBLIC VIRTUAL
-void OsTrm::ITRMTimer_Expired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
+void OsTrm::TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 {
-    IMS_TRACE_D("ITRMTimer_Expired :: [%d] type=%s", nSlotId, ServiceToString(nType), 0);
+    IMS_TRACE_D("TrmTimer_TimerExpired :: [%d] type=%s", nSlotId, ServiceToString(nType), 0);
 
     SetService(nSlotId, nType, MODE_END);
 }
@@ -564,7 +564,7 @@ IMS_BOOL OsTrm::IsWlan(IN IMS_UINT32 nSlotId)
         return IMS_FALSE;
     }
 
-    return (pTrmInfo->m_nIpcanCategory == IIPCAN::CATEGORY_WLAN);
+    return (pTrmInfo->m_nIpcanCategory == IIpcan::CATEGORY_WLAN);
 }
 
 PRIVATE
@@ -583,7 +583,7 @@ IMS_BOOL OsTrm::IsWlanInOtherSlot(IN IMS_UINT32 nSlotId)
             continue;
         }
 
-        if (pTrmInfo->m_nIpcanCategory == IIPCAN::CATEGORY_WLAN)
+        if (pTrmInfo->m_nIpcanCategory == IIpcan::CATEGORY_WLAN)
         {
             return IMS_TRUE;
         }
@@ -937,7 +937,7 @@ void OsTrm::UpdateServiceStateChanged(IN IMS_UINT32 nServiceType, IN IMS_UINT32 
     IMS_TRACE_D("UpdateServiceStateChanged :: type=%s, mode=%d, slot=%d",
         ServiceToString(nServiceType), nMode, nSlotId);
 
-    TRM_SERVICE_STATE_CHANGED *pParam = new TRM_SERVICE_STATE_CHANGED();
+    TrmStateParam* pParam = new TrmStateParam();
     pParam->nSlotId = nSlotId;
     pParam->nServiceType = nServiceType;
     pParam->nMode = nMode;

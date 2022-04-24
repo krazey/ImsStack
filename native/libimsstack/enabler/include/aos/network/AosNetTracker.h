@@ -30,7 +30,7 @@ class AosUtil;
 class AosNetTracker
     : public IAosNetTracker
     , public IAosConnectionListener
-    , public INetWatcherListener
+    , public INetworkWatcherListener
     , public IWifiWatcherListener
     , public IEventListener
     , public ITimerListener
@@ -63,11 +63,11 @@ public:
     virtual void SetListener(IN IAosNetTrackerListener *piListener);
     virtual void RemoveListener(IN IAosNetTrackerListener *piListener);
 
-    // INetWatcherListener
-    virtual void NotifyNetWatcherStatus(IN class INetWatcherInfo* piNetTrackerInfo);
+    // INetworkWatcherListener
+    virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
 
     // IWifiWatcherListener
-    virtual void NotifyStateChanged(IN class IWifiWatcher *pIWifiWatcher);
+    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher *pIWifiWatcher);
 
     // IEventListener
     virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent,
@@ -163,7 +163,7 @@ private:
     IMS_UINT32 nCnxPolicy;
     IMS_UINT32 nCnxPolicyInRoaming;
 
-    INetWatcherInfo *piNetWatcherInfo;
+    INetworkWatcher *piNetWatcherInfo;
     IWifiWatcher *piWifiWatcher;
 //    IAosAppContext *piAppContext;
     IAosConnection *piConnection;

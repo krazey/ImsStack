@@ -16,21 +16,21 @@
 #ifndef INTERFACE_TRM_TIMER_H_
 #define INTERFACE_TRM_TIMER_H_
 
-class ITRMTimerListener
+class ITrmTimerListener
 {
 public:
     /*
         Notifies the application that the service timer is expired.
     */
-    virtual void ITRMTimer_Expired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) = 0;
+    virtual void TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) = 0;
 };
 
-class ITRMTimer
+class ITrmTimer
 {
 public:
     /*
     */
-    virtual void SetListener(IN ITRMTimerListener *piListener) = 0;
+    virtual void SetListener(IN ITrmTimerListener* piListener) = 0;
 
     /*
     */

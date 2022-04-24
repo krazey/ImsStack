@@ -28,7 +28,7 @@ __IMS_TRACE_TAG_USER_DECL__("MED.MN");
 
 PUBLIC
 MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
-        IMSSlot(nSlotId),
+        ImsSlot(nSlotId),
         m_eNegoState(STATE_IDLE),
         m_pAudioNego(IMS_NULL),
         m_pMediaEnvironment(IMS_NULL),

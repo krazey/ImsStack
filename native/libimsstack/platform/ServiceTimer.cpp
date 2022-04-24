@@ -93,7 +93,7 @@ void TimerService::DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread/
 }
 
 PUBLIC
-void TimerService::DispatchServiceMessage(IN IMSMSG &objMSG)
+void TimerService::DispatchServiceMessage(IN ImsMessage &objMSG)
 {
     // FIX_TIMING_ISSUE: same timer id issue
     // If the internal timer id is MSG_PARAM_DESTROY,

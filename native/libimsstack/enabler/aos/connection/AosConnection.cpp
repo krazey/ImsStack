@@ -111,7 +111,7 @@ IMS_BOOL AosConnection::Activate()
 
     SetActivationRequested(IMS_TRUE);
 
-    if (m_piConnection->Activate(IMS_TRUE) == INetConnection::RESULT_DONE)
+    if (m_piConnection->Activate(IMS_TRUE) == INetworkConnection::RESULT_DONE)
     {
         SetState(STATE_ACTIVE);
         Notify();
@@ -308,7 +308,7 @@ Remarks
 PUBLIC VIRTUAL
 IMS_SINT32 AosConnection::GetIpcanCategory()
 {
-    return IsEpdgEnabled() ? IIPCAN::CATEGORY_WLAN : IIPCAN::CATEGORY_MOBILE;
+    return IsEpdgEnabled() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE;
 }
 
 /*
@@ -459,10 +459,10 @@ void AosConnection::UpdateIpcanForTrm()
 
     if (!bIsUpdated )
     {
-        ITRM* piPhoneTRM = PhoneInfoService::GetPhoneInfoService()->GetTRM();
+        ITrm* piPhoneTRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
         if (piPhoneTRM != IMS_NULL)
         {
-            bIsTrmSupported = piPhoneTRM->IsTRMSupported();
+            bIsTrmSupported = piPhoneTRM->IsTrmSupported();
         }
 
         bIsUpdated = IMS_TRUE;
@@ -484,7 +484,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_Connected(IN INetConnection* piNetConnection)
+void AosConnection::NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -506,7 +506,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_Disconnected(IN INetConnection* piNetConnection,
+void AosConnection::NetworkConnection_OnDisconnected(IN INetworkConnection* piNetConnection,
         IN IMS_SINT32 nErrorCode)
 {
     if (piNetConnection != m_piConnection)
@@ -526,7 +526,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_ConnectionFailed(IN INetConnection* piNetConnection,
+void AosConnection::NetworkConnection_OnConnectionFailed(IN INetworkConnection* piNetConnection,
         IN IMS_SINT32 nErrorCode)
 {
     if (piNetConnection != m_piConnection)
@@ -546,7 +546,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_IpChanged(IN INetConnection* piNetConnection)
+void AosConnection::NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -567,7 +567,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_IpcanCatChanged(IN INetConnection* piNetConnection)
+void AosConnection::NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -587,7 +587,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void AosConnection::Connection_PcscfChanged(IN INetConnection* piNetConnection)
+void AosConnection::NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {

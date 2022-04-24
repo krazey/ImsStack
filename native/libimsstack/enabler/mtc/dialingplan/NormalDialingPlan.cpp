@@ -263,7 +263,7 @@ AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(IN IMtcContext& objCo
     IMS_SINT32 nApnType = objContext.GetServiceByType(ServiceType::NORMAL)
             ->GetAosConnector()->GetConnectionType();
 
-     INetConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(
+     INetworkConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(
             nApnType, objContext.GetSlotId());
 
     if (piConnection != IMS_NULL)

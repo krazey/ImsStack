@@ -32,7 +32,7 @@ public:
     {}
 
 public:
-    // INetSocket class
+    // ISocket class
     inline SOCKET_ENTYPE GetSocketType() const override
     { return m_eType; }
 

@@ -32,7 +32,7 @@
 #include "audio/AudioProfileConfigurer.h"
 
 class AudioNego :
-        public IMSSlot
+        public ImsSlot
 {
 // == INNER CLASS ================================================================
 public :

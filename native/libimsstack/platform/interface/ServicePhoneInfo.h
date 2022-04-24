@@ -37,19 +37,19 @@ private:
     PhoneInfoService& operator=(IN const PhoneInfoService& objRHS);
 
 public:
-    void DispatchServiceMessage(IN IMSMSG &objMSG);
+    void DispatchServiceMessage(IN ImsMessage &objMSG);
 
     IDeviceInfo* GetDeviceInfo();
     ISubscriberInfo* GetSubscriberInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IPhoneInfoCall* GetPhoneInfoCall(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IISIM* GetISIM(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    ICallInfo* GetCallInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IIsim* GetIsim(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IPowerInfo* GetPowerInfo();
-    INetWatcherInfo* GetNetWatcherInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IWifiWatcher* GetWifiWatcher();
     ILocationInfo* GetLocationInfo(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    ISRVCC* GetSRVCC(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IUSIM* GetUSIM(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    ITRM* GetTRM();
+    ISrvcc* GetSrvcc(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IUsim* GetUsim(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    ITrm* GetTrm();
 
     static PhoneInfoService* GetPhoneInfoService();
 

@@ -191,7 +191,7 @@ void SystemConfigManager::CacheSystemFeatures()
 }
 
 PRIVATE VIRTUAL
-void SystemConfigManager::MessageCallback_OnMessage(IN IMSMSG& objMsg)
+void SystemConfigManager::MessageCallback_OnMessage(IN ImsMessage& objMsg)
 {
     IMS_TRACE_D("MessageCallback_OnMessage :: msg=%d", objMsg.GetName(), 0, 0);
 
@@ -297,7 +297,7 @@ void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
             pSlots->Append(pSC->nSlotId);
         }
 
-        IMSMSG objMsg(TMSG_CONFIG_CHANGED,
+        ImsMessage objMsg(TMSG_CONFIG_CHANGED,
                 nEvent, reinterpret_cast<IMS_UINTP>(pSlots), this);
 
         bNotificationSuccess = piProxyThread->PostMessageI(objMsg);
@@ -380,7 +380,7 @@ void SystemConfigManager::UpdateSystemConfig(IN IMS_SINT32 nEvent, IN IMS_SINT32
     {
         if (piProxyThread != IMS_NULL)
         {
-            IMSMSG objMsg(TMSG_FEATURE_PERMISSIONS_CHANGED, 0, 0, this);
+            ImsMessage objMsg(TMSG_FEATURE_PERMISSIONS_CHANGED, 0, 0, this);
             piProxyThread->PostMessageI(objMsg);
         }
         return;

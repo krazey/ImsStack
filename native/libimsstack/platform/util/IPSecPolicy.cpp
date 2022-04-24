@@ -30,10 +30,10 @@ public:
         , objUeIPv6(ByteArray::ConstNull())
         , objServerIPA(IPAddress::IPv6NONE)
         , objServerIPv6(ByteArray::ConstNull())
-        , nSecuProto(IPSecType::SECURITY_PROTOCOL_ESP)
-        , nMode(IPSecType::MODE_TRANSPORT)
-        , nAuthAlgo(IPSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , nEncrAlgo(IPSecType::ENCRYPTION_ALGORITHM_NO)
+        , nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP)
+        , nMode(IpSecType::MODE_TRANSPORT)
+        , nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+        , nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO)
         , objAuthKey(ByteArray::ConstNull())
         , objEncrKey(ByteArray::ConstNull())
         , strAuthHexKey(AString::ConstNull())
@@ -360,7 +360,7 @@ Remarks
 PRIVATE
 void IPSecPolicy::SetEncryptionKey()
 {
-    if (pPolicyInfoP->nEncrAlgo != IPSecType::ENCRYPTION_ALGORITHM_NO)
+    if (pPolicyInfoP->nEncrAlgo != IpSecType::ENCRYPTION_ALGORITHM_NO)
     {
         AString strHEX;
         for (IMS_SINT32 i = 0; i < pPolicyInfoP->objEncrKey.GetLength(); ++i)

@@ -18,7 +18,7 @@
 #include "IIpcan.h"
 #include "INetworkPing.h"
 
-class INetConnectionListener;
+class INetworkConnectionListener;
 class AccessNetworkInfo;
 
 // Default network id - system default id
@@ -28,7 +28,7 @@ class AccessNetworkInfo;
 
 // All the listener methods will be invoked in the caller's thread execution flow.
 // Let's share the network connection using the profile name such as ...
-class INetConnection
+class INetworkConnection
 {
 public:
     enum STATE_ENTYPE
@@ -48,10 +48,10 @@ public:
 public:
     // bEnableApn (true) : Applied for ims / internet APN; other APNs behave as on-demand.
     virtual RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIPCAN::CATEGORY_MOBILE) = 0;
+            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) = 0;
     // bDisableApn (true) : Applied for ims / internet APN; other APNs behave as on-demand.
     virtual RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIPCAN::CATEGORY_MOBILE) = 0;
+            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) = 0;
     virtual void GetAccessNetworkInfo(OUT AccessNetworkInfo &objAccessNetInfo) = 0;
     virtual void GetLastAccessNetworkInfo(OUT AccessNetworkInfo &objAccessNetInfo,
             OUT AString &strTimeStamp, OUT AString &strCellInfoAge) = 0;
@@ -83,36 +83,36 @@ public:
     virtual const AStringArray& GetPcscfAddress(
             IN IMS_SINT32 nIPVersion = 0 /* configuration-based */) = 0;
     virtual STATE_ENTYPE GetState() const = 0;
-    virtual IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIPCAN::CATEGORY_ANY) const = 0;
+    virtual IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const = 0;
     virtual IMS_BOOL SendPingToHostAddress(IN const IPAddress &objHostAddress) = 0;
     virtual IMS_BOOL IsePDGEnabled() const = 0;
     virtual IMS_BOOL IsMobileDataEnabled() const = 0;
     virtual IMS_SINT32 GetMtu() const = 0;
-    virtual void SetListener(IN INetConnectionListener *piListener) = 0;
+    virtual void SetListener(IN INetworkConnectionListener* piListener) = 0;
     // 0 : configuration-based
     // 4 : IPv4 local address preferred on dual IP
     // 6 : IPv6 local address preferred on dual IP
     virtual void SetPreferredIPVersion(
             IN IMS_SINT32 nPreferredIPVersion = 0 /* default-aos-connection-profile */) = 0;
 
-    virtual INetPing* CreateNetPing() = 0;
+    virtual INetworkPing* CreatePing() = 0;
 
-    //// For test environment - this method is provided to share the INetConnection.
-    virtual void AddReferenceListener(IN INetConnectionListener *piListener) = 0;
-    virtual void RemoveReferenceListener(IN INetConnectionListener *piListener) = 0;
+    //// For test environment - this method is provided to share the INetworkConnection.
+    virtual void AddReferenceListener(IN INetworkConnectionListener* piListener) = 0;
+    virtual void RemoveReferenceListener(IN INetworkConnectionListener* piListener) = 0;
 };
 
-class INetConnectionListener
+class INetworkConnectionListener
 {
 public:
-    virtual void Connection_Connected(IN INetConnection *piNetConnection) = 0;
-    virtual void Connection_Disconnected(IN INetConnection *piNetConnection,
+    virtual void NetworkConnection_OnConnected(IN INetworkConnection* piConnection) = 0;
+    virtual void NetworkConnection_OnDisconnected(IN INetworkConnection* piConnection,
             IN IMS_SINT32 nErrorCode) = 0;
-    virtual void Connection_ConnectionFailed(IN INetConnection *piNetConnection,
+    virtual void NetworkConnection_OnConnectionFailed(IN INetworkConnection* piConnection,
             IN IMS_SINT32 nErrorCode) = 0;
-    virtual void Connection_IpChanged(IN INetConnection *piNetConnection ) = 0;
-    virtual void Connection_IpcanCatChanged(IN INetConnection * piNetConnection) = 0;
-    virtual void Connection_PcscfChanged(IN INetConnection * piNetConnection) = 0;
+    virtual void NetworkConnection_OnIpChanged(IN INetworkConnection* piConnection) = 0;
+    virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piConnection) = 0;
+    virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piConnection) = 0;
 };
 
 #endif // _INTERFACE_IMS_NET_CONNECTION_H_

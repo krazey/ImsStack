@@ -34,9 +34,9 @@ public:
     void SetListener(IN ISIPStreamSocketListener *piListener);
 
 public:
-    virtual void Socket_ConnectionReceived(IN INetSocket *piSocket);
-    virtual void Socket_Closed(IN INetSocket *piSocket,
-            IN IMS_SINT32 nReason = INetSocket::CLOSE_REASON_UNKNOWN);
+    virtual void Socket_OnConnectionReceived(IN ISocket *piSocket);
+    virtual void Socket_OnClosed(IN ISocket *piSocket,
+            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN);
 
 private:
     ISIPStreamSocketListener *piListener;

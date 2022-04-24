@@ -25,7 +25,7 @@ class IMSStateMachine
 public:
     IMSStateMachine(IN IMS_UINT32 nState = INVALID_STATE);
     virtual ~IMSStateMachine();
-    IMS_BOOL OnStateMessage(IN IMSMSG &objMSG);
+    IMS_BOOL OnStateMessage(IN ImsMessage &objMSG);
 
 protected:
     IMS_BOOL SetState(IN IMS_UINT32 nState);

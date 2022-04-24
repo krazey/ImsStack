@@ -42,7 +42,7 @@ private:
     AosDnsQueryPrivate& operator=(IN CONST AosDnsQueryPrivate &objRHS);
 
 public:
-    void DoDnsQuery(IN AString &strDomainName_, IN INetConnection *piConnection_);
+    void DoDnsQuery(IN AString &strDomainName_, IN INetworkConnection *piConnection_);
     IMS_BOOL Start();
     IMS_BOOL Terminate();
 
@@ -53,7 +53,7 @@ private:
     IMS_BOOL SetEvent(IN IMS_UINT32 nEvent);
 
     void SetDomainName(IN AString &strDomainName_) { strDomainName = strDomainName_; };
-    void SetNetConnection(IN INetConnection *piConnection_) { piConnection = piConnection_; };
+    void SetNetConnection(IN INetworkConnection *piConnection_) { piConnection = piConnection_; };
 
 private:
     // Dns Query Event
@@ -71,7 +71,7 @@ private:
     OsMutex objMutex4Event;
     OsPthread *pThread;
     AString strDomainName;
-    INetConnection *piConnection;
+    INetworkConnection *piConnection;
     AosDnsQuery *pQueryer;
     IMS_BOOL bSignaled;
 };
@@ -284,7 +284,8 @@ Remarks
 
 */
 PUBLIC
-void AosDnsQueryPrivate::DoDnsQuery(IN AString &strDomainName_, IN INetConnection *piConnection_)
+void AosDnsQueryPrivate::DoDnsQuery(IN AString &strDomainName_,
+        IN INetworkConnection *piConnection_)
 {
     IMS_TRACE_D("DoDnsQuery :: domain = %s", strDomainName_.GetStr(), 0, 0);
 
@@ -394,7 +395,7 @@ Remarks
 
 */
 PUBLIC
-void AosDnsQuery::Request(IN AString &strDomainName_,  IN INetConnection *piConnection_)
+void AosDnsQuery::Request(IN AString &strDomainName_,  IN INetworkConnection *piConnection_)
 {
     strDomainName = strDomainName_;
     piConnection = piConnection_;

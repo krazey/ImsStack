@@ -23,7 +23,7 @@ __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
 OsSubscriberInfo::OsSubscriberInfo(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
 {
 }
 
@@ -44,14 +44,14 @@ IMS_BOOL OsSubscriberInfo::GetPhoneNumber(OUT AString& strPhoneNumber) const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsSubscriberInfo::GetMCC(OUT AString& strMcc) const
+IMS_BOOL OsSubscriberInfo::GetMcc(OUT AString& strMcc) const
 {
     System::GetInstance()->GetMcc(strMcc, GetSlotId());
     return IMS_TRUE;
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsSubscriberInfo::GetMNC(OUT AString& strMnc) const
+IMS_BOOL OsSubscriberInfo::GetMnc(OUT AString& strMnc) const
 {
     System::GetInstance()->GetMnc(strMnc, GetSlotId());
     return IMS_TRUE;
@@ -82,7 +82,7 @@ IMS_BOOL OsSubscriberInfo::GetNetworkCountry(OUT AString& strCountry) const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsSubscriberInfo::GetSubscriberID(OUT AString& strImsi) const
+IMS_BOOL OsSubscriberInfo::GetSubscriberId(OUT AString& strImsi) const
 {
     System::GetInstance()->GetSubscriberId(strImsi, GetSlotId());
 
@@ -93,7 +93,7 @@ IMS_BOOL OsSubscriberInfo::GetSubscriberID(OUT AString& strImsi) const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsSubscriberInfo::GetEmergencyNumberListFromSIM(OUT AString& strEnlFromSim) const
+IMS_BOOL OsSubscriberInfo::GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim) const
 {
     System::GetInstance()->GetEmergencyNumberListFromSim(strEnlFromSim, GetSlotId());
     return IMS_TRUE;

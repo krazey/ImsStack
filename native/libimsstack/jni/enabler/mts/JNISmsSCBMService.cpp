@@ -106,14 +106,14 @@ static int jniSmsSCBMService_ReportSCBM(IN IMS_UINT32 nType, IN IMS_UINTP pParam
     if (nType == IUSmsSCBMService::REQUEST_SMS_RAT_SELECTION)
     {
         IMSMSG objMsg(nType, 0, pParam);
-        MSGService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSimSlot], objMsg);
+        MessageService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSimSlot], objMsg);
 
         return JNISmsSCBMServicePrivate::GetInstance()->WaitCondition();
     }
     else if (nType == IUSmsSCBMService::REQUEST_SMS_EXIT_RAT_SELECTION)
     {
         IMSMSG objMsg(nType, 0, pParam);
-        MSGService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSimSlot], objMsg);
+        MessageService::PostMessage(STR_SMS_SCBM_SVC_THREAD_NAME[nSimSlot], objMsg);
     }
 
     return nResult;
@@ -201,7 +201,7 @@ void JNISmsSCBMService::HandleMessage(int nMsg, const Parcel& pParcel)
 
                     IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pResultRATSelection));
                     IMS_TRACE_I("m_aStrTargetActivity [%s]", m_aStrTargetActivity.GetStr(), 0, 0);
-                    MSGService::PostMessage(m_aStrTargetActivity, objMSG);
+                    MessageService::PostMessage(m_aStrTargetActivity, objMSG);
                 }
                 else
                 {
@@ -218,7 +218,7 @@ void JNISmsSCBMService::HandleMessage(int nMsg, const Parcel& pParcel)
 
                     IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pExitSCBM));
                     IMS_TRACE_I("m_aStrTargetActivity [%s]", m_aStrTargetActivity.GetStr(), 0, 0);
-                    MSGService::PostMessage(m_aStrTargetActivity, objMSG);
+                    MessageService::PostMessage(m_aStrTargetActivity, objMSG);
                 }
                 else
                 {
@@ -232,7 +232,7 @@ void JNISmsSCBMService::HandleMessage(int nMsg, const Parcel& pParcel)
             {
                 IMSMSG objMSG(nMsg, 0, 0);
                 IMS_TRACE_I("m_aStrTargetActivity [%s]", m_aStrTargetActivity.GetStr(), 0, 0);
-                MSGService::PostMessage(m_aStrTargetActivity, objMSG);
+                MessageService::PostMessage(m_aStrTargetActivity, objMSG);
             }
             break;
         default:

@@ -42,7 +42,7 @@ private:
     NetworkServicePrivate& operator=(IN const NetworkServicePrivate& objRHS);
 
 public:
-    inline IIPCAN* GetIPCAN()
+    inline IIpcan* GetIpcan()
     {
         if (piIPCAN == IMS_NULL)
         {
@@ -52,7 +52,7 @@ public:
         return piIPCAN;
     }
 
-    inline INetIPSec* GetIPSec()
+    inline INetworkIpSec* GetIpSec()
     {
         if (piNetIPSec == IMS_NULL)
         {
@@ -63,8 +63,8 @@ public:
     }
 
 public:
-    IIPCAN *piIPCAN;
-    INetIPSec *piNetIPSec;
+    IIpcan *piIPCAN;
+    INetworkIpSec *piNetIPSec;
 };
 
 
@@ -85,7 +85,7 @@ NetworkService::~NetworkService()
 }
 
 PUBLIC
-INetConnection* NetworkService::CreateConnection(IN const AString &strProfileName,
+INetworkConnection* NetworkService::CreateConnection(IN const AString &strProfileName,
         IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
 {
     ImsNetworkConnection *pConnection
@@ -115,7 +115,7 @@ INetConnection* NetworkService::CreateConnection(IN const AString &strProfileNam
 }
 
 PUBLIC
-INetConnection* NetworkService::CreateConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
+INetworkConnection* NetworkService::CreateConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     ImsNetworkConnection *pConnection
             = ImsNetworkConnectionState::GetInstance()->LookupHandle(nApnType, nSlotId);
@@ -144,7 +144,7 @@ INetConnection* NetworkService::CreateConnection(IN IMS_SINT32 nApnType, IN IMS_
 }
 
 PUBLIC
-void NetworkService::DestroyConnection(IN INetConnection *&piConnection)
+void NetworkService::DestroyConnection(IN INetworkConnection*& piConnection)
 {
     ImsNetworkConnection *pConnection =DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
 
@@ -158,27 +158,27 @@ void NetworkService::DestroyConnection(IN INetConnection *&piConnection)
 }
 
 PUBLIC
-INetConnection* NetworkService::FindConnection(IN const AString &strProfileName,
+INetworkConnection* NetworkService::FindConnection(IN const AString &strProfileName,
         IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
 {
     return ImsNetworkConnectionState::GetInstance()->LookupHandle(strProfileName, nSlotId);
 }
 
 PUBLIC
-INetConnection* NetworkService::FindConnection(IN IMS_SINT32 nApnType,
+INetworkConnection* NetworkService::FindConnection(IN IMS_SINT32 nApnType,
         IN IMS_SINT32 nSlotId)
 {
     return ImsNetworkConnectionState::GetInstance()->LookupHandle(nApnType, nSlotId);
 }
 
 PUBLIC
-INetConnection* NetworkService::FindConnection(IN const IPAddress &objIPAddress)
+INetworkConnection* NetworkService::FindConnection(IN const IPAddress &objIPAddress)
 {
     return ImsNetworkConnectionState::GetInstance()->LookupHandle(objIPAddress);
 }
 
 PUBLIC
-INetSocket* NetworkService::CreateSocket(IN INetConnection *piConnection)
+ISocket* NetworkService::CreateSocket(IN INetworkConnection *piConnection)
 {
     ImsNetworkConnection *pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
 
@@ -202,7 +202,7 @@ INetSocket* NetworkService::CreateSocket(IN INetConnection *piConnection)
 }
 
 PUBLIC
-INetSocket* NetworkService::CreateSocket(IN const IMS_CHAR *pszProfileName,
+ISocket* NetworkService::CreateSocket(IN const IMS_CHAR *pszProfileName,
         IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
 {
     ImsNetworkConnection *pConnection
@@ -228,7 +228,7 @@ INetSocket* NetworkService::CreateSocket(IN const IMS_CHAR *pszProfileName,
 }
 
 PUBLIC
-INetSocket* NetworkService::CreateSSLSocket(IN INetConnection *piConnection,
+ISocket* NetworkService::CreateSslSocket(IN INetworkConnection *piConnection,
         IN SSLCertificate *pCertificate)
 {
     ImsNetworkConnection *pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
@@ -253,7 +253,7 @@ INetSocket* NetworkService::CreateSSLSocket(IN INetConnection *piConnection,
 }
 
 PUBLIC
-INetSocket* NetworkService::CreateSSLSocket(IN const IMS_CHAR *pszProfileName,
+ISocket* NetworkService::CreateSslSocket(IN const IMS_CHAR *pszProfileName,
         IN SSLCertificate *pCertificate, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
 {
     ImsNetworkConnection *pConnection
@@ -279,7 +279,7 @@ INetSocket* NetworkService::CreateSSLSocket(IN const IMS_CHAR *pszProfileName,
 }
 
 PUBLIC
-void NetworkService::DestroySocket(IN INetSocket *&piSocket)
+void NetworkService::DestroySocket(IN ISocket *&piSocket)
 {
     ImsSocket *pSocket = DYNAMIC_CAST(ImsSocket*, piSocket);
 
@@ -291,26 +291,26 @@ void NetworkService::DestroySocket(IN INetSocket *&piSocket)
 }
 
 PUBLIC
-IMS_BOOL NetworkService::CheckIPAndPortAvailability(IN const IPAddress &objIP,
-        IN IMS_SINT32 nPort, IN INetSocket::SOCKET_ENTYPE enType)
+IMS_BOOL NetworkService::CheckIpAndPortAvailability(IN const IPAddress &objIP,
+        IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
 {
-    return PlatformApi::CheckIPAndPortAvailability(objIP, nPort, enType);
+    return PlatformApi::CheckIpAndPortAvailability(objIP, nPort, enType);
 }
 
 PUBLIC
-IIPCAN* NetworkService::GetIPCAN()
+IIpcan* NetworkService::GetIpcan()
 {
-    return pPrivate->GetIPCAN();
+    return pPrivate->GetIpcan();
 }
 
 PUBLIC
-INetIPSec* NetworkService::GetIPSec()
+INetworkIpSec* NetworkService::GetIpSec()
 {
-    return pPrivate->GetIPSec();
+    return pPrivate->GetIpSec();
 }
 
 PUBLIC
-void NetworkService::DispatchServiceMessage(IN IMSMSG &objMSG)
+void NetworkService::DispatchServiceMessage(IN ImsMessage &objMSG)
 {
     switch (objMSG.GetName())
     {
@@ -366,7 +366,7 @@ IMS_SINT32 NetworkService::GetSlotId(IN const IPAddress& objIPAddress)
 }
 
 PUBLIC GLOBAL
-IMS_SINT32 NetworkService::GetSlotId(IN INetConnection* piConnection)
+IMS_SINT32 NetworkService::GetSlotId(IN INetworkConnection* piConnection)
 {
     ImsNetworkConnection* pConnection = DYNAMIC_CAST(ImsNetworkConnection*, piConnection);
     return (pConnection != IMS_NULL) ? pConnection->GetSlotId() : IMS_SLOT_ANY;

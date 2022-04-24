@@ -18,9 +18,9 @@
 
 #include "ImsTypeDef.h"
 
-class IIPSecPolicy;
+class IIpSecPolicy;
 
-class IIPSecPolicyListener
+class IIpSecPolicyListener
 {
 public:
     /*
@@ -39,7 +39,7 @@ public:
     </table>
 
     */
-    virtual void ExpiredSAs(IN IIPSecPolicy* piNetIPSec) = 0;
+    virtual void IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy) = 0;
 };
 
 #endif // INTERFACE_IPSEC_POLICY_LISTENER_H_

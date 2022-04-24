@@ -22,9 +22,9 @@ __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
 OsSrvcc::OsSrvcc(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , m_bSrvccEventRegistered(IMS_FALSE)
-    , m_objSrvccListeners(IMSList<ISRVCCListener*>())
+    , m_objSrvccListeners(IMSList<ISrvccListener*>())
 {
 }
 
@@ -34,7 +34,7 @@ OsSrvcc::~OsSrvcc()
 }
 
 PUBLIC VIRTUAL
-void OsSrvcc::SubscribeSRVCCListener(IN ISRVCCListener* piListener)
+void OsSrvcc::SubscribeSrvccListener(IN ISrvccListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -43,7 +43,7 @@ void OsSrvcc::SubscribeSRVCCListener(IN ISRVCCListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objSrvccListeners.GetSize(); i++)
     {
-        ISRVCCListener* piTmpListener = m_objSrvccListeners.GetAt(i);
+        ISrvccListener* piTmpListener = m_objSrvccListeners.GetAt(i);
 
         if (piTmpListener == IMS_NULL)
         {
@@ -66,7 +66,7 @@ void OsSrvcc::SubscribeSRVCCListener(IN ISRVCCListener* piListener)
 }
 
 PUBLIC VIRTUAL
-void OsSrvcc::UnsubscribeSRVCCListener(IN ISRVCCListener* piListener)
+void OsSrvcc::UnsubscribeSrvccListener(IN ISrvccListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -75,7 +75,7 @@ void OsSrvcc::UnsubscribeSRVCCListener(IN ISRVCCListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objSrvccListeners.GetSize(); i++)
     {
-        ISRVCCListener* piTmpListener = m_objSrvccListeners.GetAt(i);
+        ISrvccListener* piTmpListener = m_objSrvccListeners.GetAt(i);
 
         if (piTmpListener == IMS_NULL)
         {
@@ -143,11 +143,12 @@ void OsSrvcc::NotifySrvccEvent(IN IMS_UINT32 nEvent)
 {
     for (IMS_UINT32 i = 0; i < m_objSrvccListeners.GetSize(); i++)
     {
-        ISRVCCListener* piListener = m_objSrvccListeners.GetAt(i);
+        ISrvccListener* piListener = m_objSrvccListeners.GetAt(i);
 
         if (piListener != IMS_NULL)
         {
-            piListener->NotifySRVCC(static_cast<ISRVCCListener::SRVCC_EVENT_ENTYPE>(nEvent));
+            piListener->Srvcc_NotifyEventChanged(
+                    static_cast<ISrvcc::SRVCC_EVENT_ENTYPE>(nEvent));
         }
     }
 }

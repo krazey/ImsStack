@@ -20,10 +20,10 @@
 #include "system-intf/System.h"
 
 PUBLIC GLOBAL
-IMS_BOOL PlatformApi::CheckIPAndPortAvailability(IN const IPAddress& objIp,
-        IN IMS_SINT32 nPort, IN INetSocket::SOCKET_ENTYPE enType)
+IMS_BOOL PlatformApi::CheckIpAndPortAvailability(IN const IPAddress& objIp,
+        IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
 {
-    return OsSocket::CheckIPAndPortAvailability(objIp, nPort, enType);
+    return OsSocket::CheckIpAndPortAvailability(objIp, nPort, enType);
 }
 
 PUBLIC GLOBAL

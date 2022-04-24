@@ -21,8 +21,8 @@
 #include "SIPSecurityHeader.h"
 #include "IIpSecPolicyListener.h"
 
-class INetIPSec;
-class IIPSecPolicy;
+class INetworkIpSec;
+class IIpSecPolicy;
 class UeIpsecInfo;
 class PcscfIpsecInfo;
 class IAosIpsecListener;
@@ -78,7 +78,7 @@ public:
  *        and Security Policies(SPs) in the kernel layer.
  */
 class AosIpsec
-    : public IIPSecPolicyListener
+    : public IIpSecPolicyListener
 {
 public:
     AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId);
@@ -117,8 +117,8 @@ public:
         SA_DIR_PS_UC,
     };
 
-    /// IIPSecPolicyListener Interface
-    virtual void ExpiredSAs(IN IIPSecPolicy* piIpsecPolicy);
+    /// IIpSecPolicyListener Interface
+    virtual void IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy);
 
     /// Create UE Transport Port and SPI Identity
     IMS_UINT32 CreateUePort();
@@ -164,7 +164,7 @@ public:
     void ManagePolicyLifetime(IN IMS_UINT32 nDuration);
 
     /// Get Policy Interface
-    IIPSecPolicy* GetPolicy();
+    IIpSecPolicy* GetPolicy();
 
     /// Get Integrity Algorithm
     IMS_UINT32 GetIntegrityAlgorithm();
@@ -211,8 +211,8 @@ public:
 
 private:
     IAosIpsecListener* m_piListener;
-    INetIPSec* m_piNetIpsec;
-    IIPSecPolicy* m_piPolicy;
+    INetworkIpSec* m_piNetIpsec;
+    IIpSecPolicy* m_piPolicy;
     UeIpsecInfo* m_pUeInfo;
     PcscfIpsecInfo* m_pPcscfInfo;
     IMS_UINT32 m_nSecuProto;

@@ -23,7 +23,7 @@ class IThread;
 class ISystemConfigListener;
 
 class SystemConfigManager
-    : public IMSMSG::IMessageCallback
+    : public ImsMessage::IMessageCallback
 {
 private:
     SystemConfigManager();
@@ -47,8 +47,8 @@ public:
     static void CacheSystemFeatures();
 
 private:
-    // IMSMSG::IMessageCallback class
-    virtual void MessageCallback_OnMessage(IN IMSMSG& objMsg);
+    // ImsMessage::IMessageCallback class
+    virtual void MessageCallback_OnMessage(IN ImsMessage& objMsg);
 
     void ClearAllConfigs();
     IMS_BOOL HasListener(IN ISystemConfigListener *piListener) const;
@@ -57,7 +57,7 @@ private:
             IN const __SystemConfig* pstSysConfig);
     void StoreConfig(IN IMS_SINT32 nCount, IN const __SystemConfig* pstSysConfig);
 
-    // Invoked by IMSFramework
+    // Invoked by ImsFramework
     // It's used to handle any events asynchronously.
     void SetProxyThread(IN IThread* piThread);
 

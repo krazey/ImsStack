@@ -20,28 +20,28 @@
 #include "IMSList.h"
 #include "ITimer.h"
 
-class IIPSecSP;
-class IIPSecSA;
+class IIpSecSp;
+class IIpSecSa;
 class OsIpSecSp;
 class OsIpSecSa;
 class IIPSecPolicyListener;
 
 class OsIpSecPolicy
-    : public IIPSecPolicy
+    : public IIpSecPolicy
     , public ITimerListener
 {
 public:
     OsIpSecPolicy(IN IMS_SINT32 nId);
     virtual ~OsIpSecPolicy();
 
-    // IIPSecPolicy Interface
+    // IIpSecPolicy Interface
     IMS_SINT32 GetId() const override;
-    IIPSecSP* CreateSP() override;
-    void DestroySP(IN IIPSecSP* piSp) override;
-    IIPSecSA* CreateSA() override;
-    void DestroySA(IN IIPSecSA* piSa) override;
+    IIpSecSp* CreateSp() override;
+    void DestroySp(IN IIpSecSp* piSp) override;
+    IIpSecSa* CreateSa() override;
+    void DestroySa(IN IIpSecSa* piSa) override;
     void ManageLifetime(IN IMS_UINT32 nDuration) override;
-    void SetListener(IN IIPSecPolicyListener* piListener) override;
+    void SetListener(IN IIpSecPolicyListener* piListener) override;
 
     void DestroyAllSas();
 
@@ -63,7 +63,7 @@ private:
     IMSList<OsIpSecSp*> m_objIpSecSps;
     IMSList<OsIpSecSa*> m_objIpSecSas;
 
-    IIPSecPolicyListener* m_piListener;
+    IIpSecPolicyListener* m_piListener;
     ITimer* m_piTimer;
 };
 

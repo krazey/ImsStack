@@ -59,7 +59,7 @@ __IMS_TRACE_TAG_ADAPT__;
 PUBLIC
 OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId)
     : ImsNetworkConnection(nSlotId)
-    , m_nIpcanCategory(IIPCAN::CATEGORY_MOBILE)
+    , m_nIpcanCategory(IIpcan::CATEGORY_MOBILE)
     , m_nState(STATE_IDLE)
     , m_nDataState(DATA_DISCONNECTED)
     , m_pPolicy(IMS_NULL)
@@ -74,7 +74,7 @@ OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId)
     , m_nConnectionHandle(0)
     , m_piOwnerThread(IMS_NULL)
     , m_piConnectionListener(IMS_NULL)
-    , m_objReferenceListeners(IMSList<INetConnectionListener*>())
+    , m_objReferenceListeners(IMSList<INetworkConnectionListener*>())
 {
     IMS_TRACE_D("Constructor :: Mobile network connection", 0, 0, 0);
 
@@ -122,9 +122,9 @@ const IPAddress& OsNetworkConnection::GetLocalAddress(
 }
 
 PRIVATE VIRTUAL
-INetConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
+INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
         IN IMS_BOOL bEnableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIPCAN::CATEGORY_MOBILE*/)
+        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
 {
     // If the connection with IMS APN is already established,
     // then it sends an event to the application.
@@ -166,9 +166,9 @@ INetConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
 }
 
 PRIVATE VIRTUAL
-INetConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
+INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
         IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIPCAN::CATEGORY_MOBILE*/)
+        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
 {
     IMS_TRACE_D("Mobile :: Deactivate() - apnType=%d, state=%d", GetApnType(), m_nDataState, 0);
 
@@ -202,7 +202,7 @@ INetConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
 PRIVATE VIRTUAL
 void OsNetworkConnection::GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo)
 {
-    if (m_nIpcanCategory == IIPCAN::CATEGORY_WLAN)
+    if (m_nIpcanCategory == IIpcan::CATEGORY_WLAN)
     {
         GetAccessNetworkInfoForWiFi(objAccessNetInfo);
         return;
@@ -400,26 +400,26 @@ const AStringArray& OsNetworkConnection::GetPcscfAddress(
 }
 
 PRIVATE VIRTUAL
-INetConnection::STATE_ENTYPE OsNetworkConnection::GetState() const
+INetworkConnection::STATE_ENTYPE OsNetworkConnection::GetState() const
 {
     return (m_nState == STATE_ACTIVE) ? STATE_CONNECTED : STATE_DISCONNECTED;
 }
 
 PRIVATE VIRTUAL
 IMS_BOOL OsNetworkConnection::IsConnected(
-        IN IMS_SINT32 nCategory /*= IIPCAN::CATEGORY_ANY*/) const
+        IN IMS_SINT32 nCategory /*= IIpcan::CATEGORY_ANY*/) const
 {
-    if (nCategory == IIPCAN::CATEGORY_ANY)
+    if (nCategory == IIpcan::CATEGORY_ANY)
     {
         return (m_nState == STATE_ACTIVE);
     }
-    else if ((nCategory == IIPCAN::CATEGORY_MOBILE)
-            && (m_nIpcanCategory == IIPCAN::CATEGORY_MOBILE))
+    else if ((nCategory == IIpcan::CATEGORY_MOBILE)
+            && (m_nIpcanCategory == IIpcan::CATEGORY_MOBILE))
     {
         return (m_nState == STATE_ACTIVE);
     }
-    else if ((nCategory == IIPCAN::CATEGORY_WLAN)
-            && (m_nIpcanCategory == IIPCAN::CATEGORY_WLAN))
+    else if ((nCategory == IIpcan::CATEGORY_WLAN)
+            && (m_nIpcanCategory == IIpcan::CATEGORY_WLAN))
     {
         return (m_nState == STATE_ACTIVE);
     }
@@ -441,7 +441,7 @@ IMS_BOOL OsNetworkConnection::SendPingToHostAddress(IN const IPAddress& objHostA
 PRIVATE VIRTUAL
 IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
 {
-    return IsConnected(IIPCAN::CATEGORY_WLAN);
+    return IsConnected(IIpcan::CATEGORY_WLAN);
 }
 
 PRIVATE VIRTUAL
@@ -457,7 +457,7 @@ IMS_SINT32 OsNetworkConnection::GetMtu() const
 }
 
 PRIVATE VIRTUAL
-void OsNetworkConnection::SetListener(IN INetConnectionListener* piListener)
+void OsNetworkConnection::SetListener(IN INetworkConnectionListener* piListener)
 {
     m_piConnectionListener = piListener;
 }
@@ -481,7 +481,7 @@ void OsNetworkConnection::SetPreferredIPVersion(
 }
 
 PRIVATE VIRTUAL
-void OsNetworkConnection::AddReferenceListener(IN INetConnectionListener* piListener)
+void OsNetworkConnection::AddReferenceListener(IN INetworkConnectionListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -490,7 +490,7 @@ void OsNetworkConnection::AddReferenceListener(IN INetConnectionListener* piList
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -502,7 +502,7 @@ void OsNetworkConnection::AddReferenceListener(IN INetConnectionListener* piList
 }
 
 PRIVATE VIRTUAL
-void OsNetworkConnection::RemoveReferenceListener(IN INetConnectionListener* piListener)
+void OsNetworkConnection::RemoveReferenceListener(IN INetworkConnectionListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -511,7 +511,7 @@ void OsNetworkConnection::RemoveReferenceListener(IN INetConnectionListener* piL
 
     for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
     {
-        INetConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
+        INetworkConnectionListener* piTmpListener = m_objReferenceListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -700,13 +700,13 @@ void OsNetworkConnection::System_NotifyEvent(IN IMS_UINT32 nEvent,
             break;
         }
         case IMS_SYSTEM_DATACONNECTION_IPCAN_CHANGED: {
-            if (nLParam == IIPCAN::CATEGORY_WLAN)
+            if (nLParam == IIpcan::CATEGORY_WLAN)
             {
-                SetIpcanCategory(IIPCAN::CATEGORY_WLAN);
+                SetIpcanCategory(IIpcan::CATEGORY_WLAN);
             }
             else
             {
-                SetIpcanCategory(IIPCAN::CATEGORY_MOBILE);
+                SetIpcanCategory(IIpcan::CATEGORY_MOBILE);
             }
             break;
         }
@@ -853,11 +853,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_CONNECTED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_Connected(this);
+                    piListener->NetworkConnection_OnConnected(this);
                 }
             }
             break;
@@ -865,11 +865,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_DISCONNECTED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_Disconnected(this, nErrorCode);
+                    piListener->NetworkConnection_OnDisconnected(this, nErrorCode);
                 }
             }
             break;
@@ -877,11 +877,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_CONNECT_FAILED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_ConnectionFailed(this, nErrorCode);
+                    piListener->NetworkConnection_OnConnectionFailed(this, nErrorCode);
                 }
             }
             break;
@@ -889,11 +889,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_IP_CHANGED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_IpChanged(this);
+                    piListener->NetworkConnection_OnIpChanged(this);
                 }
             }
             break;
@@ -901,11 +901,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_IPCAN_CAT_CHANGED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_IpcanCatChanged(this);
+                    piListener->NetworkConnection_OnIpcanChanged(this);
                 }
             }
             break;
@@ -913,11 +913,11 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
         case NET_PCSCF_CHANGED: {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
-                INetConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
+                INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
 
                 if (piListener != IMS_NULL)
                 {
-                    piListener->Connection_PcscfChanged(this);
+                    piListener->NetworkConnection_OnPcscfChanged(this);
                 }
             }
             break;
@@ -1028,7 +1028,7 @@ void OsNetworkConnection::NotifyDataConnected(IN IMS_SINT32 nErrorCode)
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_Connected(this);
+        m_piConnectionListener->NetworkConnection_OnConnected(this);
     }
 
     CallReferenceListeners(NET_CONNECTED, nErrorCode);
@@ -1052,7 +1052,7 @@ void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_Disconnected(this, nErrorCode);
+        m_piConnectionListener->NetworkConnection_OnDisconnected(this, nErrorCode);
     }
 
     CallReferenceListeners(NET_DISCONNECTED, nErrorCode);
@@ -1083,7 +1083,7 @@ void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_ConnectionFailed(this, nErrorCode);
+        m_piConnectionListener->NetworkConnection_OnConnectionFailed(this, nErrorCode);
     }
 
     CallReferenceListeners(NET_CONNECT_FAILED, nErrorCode);
@@ -1121,7 +1121,7 @@ void OsNetworkConnection::NotifyIpChanged(IN IMS_SINT32 nErrorCode)
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_IpChanged(this);
+        m_piConnectionListener->NetworkConnection_OnIpChanged(this);
     }
 
     CallReferenceListeners(NET_IP_CHANGED, nErrorCode);
@@ -1139,7 +1139,7 @@ void OsNetworkConnection::NotifyIpcanCatChanged()
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_IpcanCatChanged(this);
+        m_piConnectionListener->NetworkConnection_OnIpcanChanged(this);
     }
 
     CallReferenceListeners(NET_IPCAN_CAT_CHANGED);
@@ -1157,7 +1157,7 @@ void OsNetworkConnection::NotifyPcscfChanged()
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_PcscfChanged(this);
+        m_piConnectionListener->NetworkConnection_OnPcscfChanged(this);
     }
 
     CallReferenceListeners(NET_PCSCF_CHANGED);
@@ -1231,7 +1231,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     if (m_piConnectionListener != IMS_NULL)
     {
-        m_piConnectionListener->Connection_IpChanged(this);
+        m_piConnectionListener->NetworkConnection_OnIpChanged(this);
     }
 
     CallReferenceListeners(NET_IP_CHANGED, nErrorCode);
@@ -1256,7 +1256,7 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
         case NET_CONNECT_FAILED: // FALL-THROUGH
         case NET_IPCAN_CAT_CHANGED: // FALL-THROUGH
         case NET_PCSCF_CHANGED: {
-            IMSMSG objMsg(IMS_MSG_NETWORK, nEvent,
+            ImsMessage objMsg(IMS_MSG_NETWORK, nEvent,
                     static_cast<IMS_UINT32>(m_nConnectionHandle));
             m_piOwnerThread->PostMessageI(objMsg);
             break;
@@ -1269,7 +1269,7 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
 
 PRIVATE
 IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
-        IN IMS_SINT32 nIpcanCategory /*= IIPCAN::CATEGORY_MOBILE*/)
+        IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
 {
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {

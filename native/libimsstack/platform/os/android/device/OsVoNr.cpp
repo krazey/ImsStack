@@ -131,9 +131,9 @@ OsVoNr::OsVoNr(IN IMS_SINT32 nSlotId)
     , m_piOwnerThread(IMS_NULL)
     , m_bVoNrSupported(IMS_FALSE)
     , m_bIsMtkChipset(IMS_FALSE)
-    , m_objUacListeners(IMSList<IVoNRUACListener*>())
-    , m_objCallPreferenceListeners(IMSList<IVoNRCallPreferenceListener*>())
-    , m_objHandoffListeners(IMSList<IVoNRHandoffListener*>())
+    , m_objUacListeners(IMSList<IVoNrUacListener*>())
+    , m_objCallPreferenceListeners(IMSList<IVoNrCallPreferenceListener*>())
+    , m_objHandoffListeners(IMSList<IVoNrHandoffListener*>())
     , m_objMoCallStates(IMSMap<IMS_UINT32, CallStateList*>())
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
@@ -153,7 +153,7 @@ OsVoNr::~OsVoNr()
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::IsVoNRSupported() const
+IMS_BOOL OsVoNr::IsVoNrSupported() const
 {
     return m_bVoNrSupported;
 }
@@ -288,7 +288,7 @@ IMS_BOOL OsVoNr::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency)
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::AddListenerForUAC(IN IVoNRUACListener* piListener)
+void OsVoNr::AddListenerForUac(IN IVoNrUacListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -297,7 +297,7 @@ void OsVoNr::AddListenerForUAC(IN IVoNRUACListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objUacListeners.GetSize(); ++i)
     {
-        IVoNRUACListener* pTmpListener = m_objUacListeners.GetAt(i);
+        IVoNrUacListener* pTmpListener = m_objUacListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -309,7 +309,7 @@ void OsVoNr::AddListenerForUAC(IN IVoNRUACListener* piListener)
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForUAC(IN IVoNRUACListener* piListener)
+void OsVoNr::RemoveListenerForUac(IN IVoNrUacListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -318,7 +318,7 @@ void OsVoNr::RemoveListenerForUAC(IN IVoNRUACListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objUacListeners.GetSize(); ++i)
     {
-        IVoNRUACListener* pTmpListener = m_objUacListeners.GetAt(i);
+        IVoNrUacListener* pTmpListener = m_objUacListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -329,7 +329,7 @@ void OsVoNr::RemoveListenerForUAC(IN IVoNRUACListener* piListener)
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::AddListenerForCallPreference(IN IVoNRCallPreferenceListener* piListener)
+void OsVoNr::AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -338,7 +338,7 @@ void OsVoNr::AddListenerForCallPreference(IN IVoNRCallPreferenceListener* piList
 
     for (IMS_UINT32 i = 0; i < m_objCallPreferenceListeners.GetSize(); ++i)
     {
-        IVoNRCallPreferenceListener* pTmpListener = m_objCallPreferenceListeners.GetAt(i);
+        IVoNrCallPreferenceListener* pTmpListener = m_objCallPreferenceListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -350,7 +350,7 @@ void OsVoNr::AddListenerForCallPreference(IN IVoNRCallPreferenceListener* piList
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForCallPreference(IN IVoNRCallPreferenceListener* piListener)
+void OsVoNr::RemoveListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -359,7 +359,7 @@ void OsVoNr::RemoveListenerForCallPreference(IN IVoNRCallPreferenceListener* piL
 
     for (IMS_UINT32 i = 0; i < m_objCallPreferenceListeners.GetSize(); ++i)
     {
-        IVoNRCallPreferenceListener* pTmpListener = m_objCallPreferenceListeners.GetAt(i);
+        IVoNrCallPreferenceListener* pTmpListener = m_objCallPreferenceListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -370,7 +370,7 @@ void OsVoNr::RemoveListenerForCallPreference(IN IVoNRCallPreferenceListener* piL
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::AddListenerForHandoff(IN IVoNRHandoffListener* piListener)
+void OsVoNr::AddListenerForHandoff(IN IVoNrHandoffListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -379,7 +379,7 @@ void OsVoNr::AddListenerForHandoff(IN IVoNRHandoffListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objHandoffListeners.GetSize(); ++i)
     {
-        IVoNRHandoffListener* pTmpListener = m_objHandoffListeners.GetAt(i);
+        IVoNrHandoffListener* pTmpListener = m_objHandoffListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -391,7 +391,7 @@ void OsVoNr::AddListenerForHandoff(IN IVoNRHandoffListener* piListener)
 }
 
 PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForHandoff(IN IVoNRHandoffListener* piListener)
+void OsVoNr::RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -400,7 +400,7 @@ void OsVoNr::RemoveListenerForHandoff(IN IVoNRHandoffListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objHandoffListeners.GetSize(); ++i)
     {
-        IVoNRHandoffListener* pTmpListener = m_objHandoffListeners.GetAt(i);
+        IVoNrHandoffListener* pTmpListener = m_objHandoffListeners.GetAt(i);
 
         if (pTmpListener == piListener)
         {
@@ -590,16 +590,16 @@ IMS_UINT32 OsVoNr::GetHandoffStatus(IN IMS_UINT32 nStatus) const
     switch (nStatus)
     {
         case RIL_HANDOFF_STATUS_INIT:
-            return IVoNRHandoffListener::STATUS_HANDOFF_INIT;
+            return IVoNrHandoffListener::STATUS_HANDOFF_INIT;
 
         case RIL_HANDOFF_STATUS_SUCCESS:
-            return IVoNRHandoffListener::STATUS_HANDOFF_SUCCESS;
+            return IVoNrHandoffListener::STATUS_HANDOFF_SUCCESS;
 
         case RIL_HANDOFF_STATUS_FAILURE:
-            return IVoNRHandoffListener::STATUS_HANDOFF_FAILURE;
+            return IVoNrHandoffListener::STATUS_HANDOFF_FAILURE;
 
         default:
-            return IVoNRHandoffListener::STATUS_HANDOFF_FAILURE;
+            return IVoNrHandoffListener::STATUS_HANDOFF_FAILURE;
     }
 }
 
@@ -708,16 +708,16 @@ IMS_SINT32 OsVoNr::GetReasonForUac(IN IMS_UINT32 nResponse, OUT IMS_RESULT& nRes
         {
             case MTK_UAC_CHECK_NONE: //FALL-THROUGH
             case MTK_UAC_CHECK_OK:
-                return IVoNRUACListener::REASON_NO;
+                return IVoNrUacListener::REASON_NO;
 
             case MTK_UAC_CHECK_BARRED:
-                return IVoNRUACListener::REASON_ACCESS_BARRED;
+                return IVoNrUacListener::REASON_ACCESS_BARRED;
 
             case MTK_UAC_CHECK_NO_COVERAGE:
-                return IVoNRUACListener::REASON_NO_SERVICE;
+                return IVoNrUacListener::REASON_NO_SERVICE;
 
             default:
-                return IVoNRUACListener::REASON_UNKNOWN;
+                return IVoNrUacListener::REASON_UNKNOWN;
         }
     }
     else
@@ -725,7 +725,7 @@ IMS_SINT32 OsVoNr::GetReasonForUac(IN IMS_UINT32 nResponse, OUT IMS_RESULT& nRes
         if (nResponse == NAS_MMTEL_SUCCESS)
         {
             nResult = IMS_SUCCESS;
-            return IVoNRUACListener::REASON_NO;
+            return IVoNrUacListener::REASON_NO;
         }
         else
         {
@@ -735,25 +735,25 @@ IMS_SINT32 OsVoNr::GetReasonForUac(IN IMS_UINT32 nResponse, OUT IMS_RESULT& nRes
         switch (nResponse)
         {
             case NAS_MMTEL_ACCESS_BARRED:
-                return IVoNRUACListener::REASON_ACCESS_BARRED;
+                return IVoNrUacListener::REASON_ACCESS_BARRED;
 
             case NAS_MMTEL_INVALID_RAT:
-                return IVoNRUACListener::REASON_INVALID_RAT;
+                return IVoNrUacListener::REASON_INVALID_RAT;
 
             case NAS_MMTEL_INVALID_STATE:
-                return IVoNRUACListener::REASON_INVALID_STATE;
+                return IVoNrUacListener::REASON_INVALID_STATE;
 
             case NAS_MMTEL_NO_SERVICE:
-                return IVoNRUACListener::REASON_NO_SERVICE;
+                return IVoNrUacListener::REASON_NO_SERVICE;
 
             case NAS_MMTEL_T3346_ACTIVE:
-                return IVoNRUACListener::REASON_T3346_ACTIVE;
+                return IVoNrUacListener::REASON_T3346_ACTIVE;
 
             case NAS_MMTEL_SERVICE_AREA_RESTRICTION:
-                return IVoNRUACListener::REASON_SERVICE_AREA_RESTRICTION;
+                return IVoNrUacListener::REASON_SERVICE_AREA_RESTRICTION;
 
             default:
-                return IVoNRUACListener::REASON_UNKNOWN;
+                return IVoNrUacListener::REASON_UNKNOWN;
         }
     }
 }
@@ -969,10 +969,10 @@ void OsVoNr::NotifyCallReady(IN IMS_UINT32 nSysMode)
 
     for (IMS_UINT32 i = 0; i < m_objCallPreferenceListeners.GetSize(); i++)
     {
-        IVoNRCallPreferenceListener* piListener = m_objCallPreferenceListeners.GetAt(i);
+        IVoNrCallPreferenceListener* piListener = m_objCallPreferenceListeners.GetAt(i);
         if (piListener != IMS_NULL)
         {
-            piListener->VoNRCallPreference_NotifyCallReady(nConvertSysMode);
+            piListener->VoNrCallPreference_NotifyCallReady(nConvertSysMode);
         }
     }
 }
@@ -1010,10 +1010,10 @@ void OsVoNr::NotifyHandoffInformation(IN IMS_UINT32 nStatus,
 
     for (IMS_UINT32 i = 0; i < m_objHandoffListeners.GetSize(); i++)
     {
-        IVoNRHandoffListener* piListener = m_objHandoffListeners.GetAt(i);
+        IVoNrHandoffListener* piListener = m_objHandoffListeners.GetAt(i);
         if (piListener != IMS_NULL)
         {
-            piListener->VoNRHandoff_NotifyInformation(nHandoffStatus, nSRat, nTRat, nReason);
+            piListener->VoNrHandoff_NotifyInformation(nHandoffStatus, nSRat, nTRat, nReason);
         }
     }
 }
@@ -1042,10 +1042,10 @@ void OsVoNr::NotifyUacResponse(IN IMS_UINT32 nCallType, IN IMS_UINT32 nResult,
 
     for (IMS_UINT32 i = 0; i < m_objUacListeners.GetSize(); i++)
     {
-        IVoNRUACListener* piListener = m_objUacListeners.GetAt(i);
+        IVoNrUacListener* piListener = m_objUacListeners.GetAt(i);
         if (piListener != IMS_NULL)
         {
-            piListener->VoNRUAC_NotifyResponse(nImsCallType,
+            piListener->VoNrUac_NotifyResponse(nImsCallType,
                     nReportResult, nReason, nConvertSysMode, nBarringTime);
         }
     }
@@ -1470,13 +1470,13 @@ const IMS_CHAR* OsVoNr::HandoffStatusToString(IN IMS_UINT32 nStatus)
 {
     switch (nStatus)
     {
-        case IVoNRHandoffListener::STATUS_HANDOFF_INIT:
+        case IVoNrHandoffListener::STATUS_HANDOFF_INIT:
             return "STATUS_HANDOFF_INIT";
 
-        case IVoNRHandoffListener::STATUS_HANDOFF_SUCCESS:
+        case IVoNrHandoffListener::STATUS_HANDOFF_SUCCESS:
             return "STATUS_HANDOFF_SUCCESS";
 
-        case IVoNRHandoffListener::STATUS_HANDOFF_FAILURE:
+        case IVoNrHandoffListener::STATUS_HANDOFF_FAILURE:
             return "STATUS_HANDOFF_FAILURE";
 
         default:

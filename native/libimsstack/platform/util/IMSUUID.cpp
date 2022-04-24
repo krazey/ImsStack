@@ -55,7 +55,7 @@ AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
     switch (nVersion)
     {
     case IMSUUID::VERSION_1:
-        objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUUID();
+        objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
         break;
 
     case IMSUUID::VERSION_3:

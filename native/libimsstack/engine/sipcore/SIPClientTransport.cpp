@@ -574,8 +574,8 @@ IMS_BOOL SIPClientTransport::UpdateDestinationInfo(IN SipMessage *pstMessage,
         if (bDnsQueryRequired)
         {
             // Do DNS query ...
-            INetConnection *piConnection
-                    = NetworkService::GetNetworkService()->FindConnection(objIPA);
+            INetworkConnection *piConnection =
+                    NetworkService::GetNetworkService()->FindConnection(objIPA);
 
             if (piConnection == IMS_NULL)
             {

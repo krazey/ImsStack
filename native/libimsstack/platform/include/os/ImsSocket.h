@@ -32,7 +32,7 @@ typedef IMS_SINT32    IMS_SOCKET;
         (IMS_UINT16) ((LPARAM) & 0xFFFF)
 
 class ImsSocket
-    : public INetSocket
+    : public ISocket
 {
 public:
     inline ImsSocket()

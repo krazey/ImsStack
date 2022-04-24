@@ -124,7 +124,7 @@ IMS_BOOL SIPPortManager::IsPortAvailable(IN CONST IPAddress &objIP, IN IMS_SINT3
         return IMS_TRUE;
     }
 
-    return pNetworkService->CheckIPAndPortAvailability(objIP, nPort, INetSocket::TYPE_STREAM);
+    return pNetworkService->CheckIpAndPortAvailability(objIP, nPort, ISocket::TYPE_STREAM);
 }
 
 PRIVATE

@@ -22,7 +22,7 @@
 #include "config/AudioConfiguration.h"
 #include "IMediaConnectionWatcherListener.h"
 
-class INetConnection;
+class INetworkConnection;
 class IMediaConnectionWatcher;
 
 class MediaResourceMngr :
@@ -65,7 +65,7 @@ public :
     virtual IMS_UINT32 AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_UINT32 nRangeEnd);
     virtual void ReleaseRtpPort(IN IMS_UINT32 nPort);
     /* IMediaConnectionWatcherListener Interface Impl */
-    virtual void NotifyMediaConnection(IN INetConnection *piNetConnection,
+    virtual void NotifyMediaConnection(IN INetworkConnection *piNetConnection,
             IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId);
     virtual void NotifyIPChanged(IMS_BOOL bIsIPv6);
     virtual void NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID);
@@ -74,7 +74,7 @@ public :
             OUT IMS_BOOL &bWIFICondition, OUT IMS_UINT32 &nNetworkInterfaceId);
     virtual IMS_UINT32 GetRtpFragmentSize(IN IPAddress &objIpAddress);
     // == PRIVATE METHOD ============================================================
-    virtual INetConnection* GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType);
+    virtual INetworkConnection* GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType);
     virtual MEDIA_NETWORK_TYPE ConvertMediaNetworkType(IN IMS_SINT32 eRadioType);
     virtual IMS_SINT32 GetSupportedNetworkTypeFlag();
     IMS_BOOL SetMediaConnectionWatcherListener();

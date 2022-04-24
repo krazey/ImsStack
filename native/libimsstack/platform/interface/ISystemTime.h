@@ -15,7 +15,7 @@
 
 #include "AString.h"
 
-struct IMSDate
+struct ImsDate
 {
     IMS_SINT32 nYear;
     IMS_SINT32 nMonth;
@@ -23,7 +23,7 @@ struct IMSDate
     IMS_SINT32 nDayOfWeek;
 };
 
-struct IMSTime
+struct ImsTime
 {
     IMS_UINT32 nHour;
     IMS_UINT32 nMinute;
@@ -31,7 +31,7 @@ struct IMSTime
     IMS_UINT32 nMillisecond;
 };
 
-struct IMSGMTime
+struct ImsGmTime
 {
     IMS_SINT32 nYear;
     IMS_SINT32 nMonth;
@@ -44,16 +44,16 @@ struct IMSGMTime
 class ISystemTime
 {
 public:
-    virtual IMSDate GetDate() const = 0;
+    virtual ImsDate GetDate() const = 0;
     virtual void GetDate(OUT IMS_SINT32 &nYear, OUT IMS_SINT32 &nMonth,
             OUT IMS_SINT32 &nDay, OUT IMS_SINT32 &nDayOfWeek) const = 0;
 
-    virtual IMSTime GetLocalTime() const = 0;
+    virtual ImsTime GetLocalTime() const = 0;
     virtual void GetLocalTime(OUT IMS_UINT32 &nHour, OUT IMS_UINT32 &nMinute,
             OUT IMS_UINT32 &nSecond) const = 0;
 
-    virtual IMSGMTime GetGMTime() const = 0;
-    virtual void GetGMTime(OUT IMS_SINT32 &nYear,
+    virtual ImsGmTime GetGmTime() const = 0;
+    virtual void GetGmTime(OUT IMS_SINT32 &nYear,
             OUT IMS_SINT32 &nMonth, OUT IMS_SINT32 &nDay,
             OUT IMS_UINT32 &nHour, OUT IMS_UINT32 &nMinute, OUT IMS_UINT32 &nSecond) const = 0;
 
@@ -72,14 +72,14 @@ public:
     // LGU+ Knight
     virtual AString GetTimeStringEx() const = 0;
 
-    virtual AString GetGMTimeString() const = 0;
+    virtual AString GetGmTimeString() const = 0;
 
     // "YYYY-MM-DDTHH:MM:SSZ" or "YYYY-MM-DDTHH:MM:SS+09:00"
-    virtual AString GetUTCFormat(IN IMS_BOOL bNumOffset = IMS_FALSE) const = 0;
+    virtual AString GetUtcFormat(IN IMS_BOOL bNumOffset = IMS_FALSE) const = 0;
 
     virtual void Sleep(IN IMS_UINT32 nMilliSeconds) = 0;
 
-    virtual IMS_SLONG GetDiffGMTime(IN const AString& strBegin,
+    virtual IMS_SLONG GetDiffGmTime(IN const AString& strBegin,
             IN const AString& strEnd, IN IMS_BOOL bSummerTime = IMS_FALSE) = 0;
 };
 

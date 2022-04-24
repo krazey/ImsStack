@@ -22,8 +22,8 @@ class PlatformApi
 {
 public:
     // Checks if socket bind information is used or not.
-    static IMS_BOOL CheckIPAndPortAvailability(IN const IPAddress& objIp,
-            IN IMS_SINT32 nPort, IN INetSocket::SOCKET_ENTYPE enType);
+    static IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIp,
+            IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
     // Check if the specified database file exists or not.
     static IMS_BOOL CheckIfDatabaseExists(IN const AString& strDb);
     // Sets IMS debug flag

@@ -22,7 +22,7 @@ __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
 OsPhoneInfoCall::OsPhoneInfoCall(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
 {
 }
 
@@ -38,13 +38,13 @@ IMS_BOOL OsPhoneInfoCall::IsEmergencyNumber(IN const AString& strNumber) const
 }
 
 PUBLIC VIRTUAL
-IMS_UINT32 OsPhoneInfoCall::GetTTYMode() const
+IMS_UINT32 OsPhoneInfoCall::GetTtyMode() const
 {
     return System::GetInstance()->GetTtyMode(GetSlotId());
 }
 
 PUBLIC VIRTUAL
-IMS_UINT32 OsPhoneInfoCall::GetRTTMode() const
+IMS_UINT32 OsPhoneInfoCall::GetRttMode() const
 {
     return System::GetInstance()->GetRttMode(GetSlotId());
 }
@@ -68,13 +68,13 @@ IMS_BOOL OsPhoneInfoCall::IsWifiCallingProvisioned()
 }
 
 PUBLIC VIRTUAL
-AString OsPhoneInfoCall::GetWifiCallingAddressID()
+AString OsPhoneInfoCall::GetWifiCallingAddressId()
 {
     return System::GetInstance()->GetWifiCallingAddressId(GetSlotId());
 }
 
 PUBLIC VIRTUAL
-IMS_SINT32 OsPhoneInfoCall::GetCSCallStateInOtherSlot() const
+IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
     return System::GetInstance()->GetCallStateInOtherSlot(GetSlotId());
 }

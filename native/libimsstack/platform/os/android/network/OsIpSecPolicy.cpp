@@ -50,7 +50,7 @@ IMS_SINT32 OsIpSecPolicy::GetId() const
 }
 
 PUBLIC VIRTUAL
-IIPSecSP* OsIpSecPolicy::CreateSP()
+IIpSecSp* OsIpSecPolicy::CreateSp()
 {
     OsIpSecSp* pIpSecSp = new OsIpSecSp();
 
@@ -62,7 +62,7 @@ IIPSecSP* OsIpSecPolicy::CreateSP()
 }
 
 PUBLIC VIRTUAL
-void OsIpSecPolicy::DestroySP(IN IIPSecSP* piSp)
+void OsIpSecPolicy::DestroySp(IN IIpSecSp* piSp)
 {
     IMS_TRACE_D("DestroySP(%p)", piSp, 0, 0);
 
@@ -81,7 +81,7 @@ void OsIpSecPolicy::DestroySP(IN IIPSecSP* piSp)
 }
 
 PUBLIC VIRTUAL
-IIPSecSA* OsIpSecPolicy::CreateSA()
+IIpSecSa* OsIpSecPolicy::CreateSa()
 {
     OsIpSecSa* pIpSecSa = new OsIpSecSa();
 
@@ -93,7 +93,7 @@ IIPSecSA* OsIpSecPolicy::CreateSA()
 }
 
 PUBLIC VIRTUAL
-void OsIpSecPolicy::DestroySA(IN IIPSecSA* piSa)
+void OsIpSecPolicy::DestroySa(IN IIpSecSa* piSa)
 {
     IMS_TRACE_D("DestroySA(%p)", piSa, 0, 0);
 
@@ -123,7 +123,7 @@ void OsIpSecPolicy::ManageLifetime(IMS_UINT32 nDuration)
 }
 
 PUBLIC VIRTUAL
-void OsIpSecPolicy::SetListener(IN IIPSecPolicyListener* piListener)
+void OsIpSecPolicy::SetListener(IN IIpSecPolicyListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -219,7 +219,7 @@ void OsIpSecPolicy::Timer_TimerExpired(IN ITimer* piTimer)
         StopTimer();
 
         // Expired SA Life Time, Notify to Listener
-        m_piListener->ExpiredSAs(this);
+        m_piListener->IpSecPolicy_OnSecurityAssociationExpired(this);
     }
     else
     {

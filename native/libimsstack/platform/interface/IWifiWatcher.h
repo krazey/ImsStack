@@ -20,6 +20,8 @@
 #include "ServiceThread.h"
 #include "ServiceMessage.h"
 
+class IWifiWatcher;
+
 class IWifiWatcherListener
 {
 public:
@@ -38,7 +40,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void NotifyStateChanged(IN class IWifiWatcher *pIWifiWatcher) = 0;
+    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher) = 0;
 };
 
 class IWifiWatcher
@@ -141,7 +143,7 @@ public:
     }
 
 public:
-    inline void ProcessNotify(IN IMSMSG &objMSG)
+    inline void ProcessNotify(IN ImsMessage &objMSG)
     {
         (void)objMSG;
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
@@ -163,7 +165,7 @@ public:
 
                     if (piListener != IMS_NULL)
                     {
-                        piListener->NotifyStateChanged(this);
+                        piListener->WifiWatcher_NotifyStateChanged(this);
                     }
                 }
                 break;

@@ -213,24 +213,24 @@ MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcServic
 
     MEDIA_NETWORK_TYPE eMediaNetworkType = MEDIA_NETWORK_NONE;
     IMS_SINT32 eRadioType =
-            PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(nSlotId)->GetNetworkType();
+            PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId)->GetNetworkType();
 
     switch (eRadioType)
     {
-        case INetWatcherInfo::RADIOTECH_TYPE_LTE :
+        case INetworkWatcher::RADIOTECH_TYPE_LTE :
             eMediaNetworkType = MEDIA_NETWORK_LTE;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPAP :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP :
             eMediaNetworkType = MEDIA_NETWORK_HSPA_PLUS;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_UMTS :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSDPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_HSUPA :
-        case INetWatcherInfo::RADIOTECH_TYPE_CDMA :
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA :
+        case INetworkWatcher::RADIOTECH_TYPE_HSDPA :
+        case INetworkWatcher::RADIOTECH_TYPE_HSUPA :
+        case INetworkWatcher::RADIOTECH_TYPE_CDMA :
             eMediaNetworkType = MEDIA_NETWORK_HSPA;
             break;
-        case INetWatcherInfo::RADIOTECH_TYPE_EHRPD :
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD :
             eMediaNetworkType = MEDIA_NETWORK_EHRPD;
             break;
         default :

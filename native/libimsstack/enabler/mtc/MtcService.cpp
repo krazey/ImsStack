@@ -74,7 +74,7 @@ IMS_BOOL MtcService::IsWlanIpCanType() const
         return IMS_FALSE;
     }
 
-    return m_pAosConnector->GetIpcanType() == IIPCAN::CATEGORY_WLAN;
+    return m_pAosConnector->GetIpcanType() == IIpcan::CATEGORY_WLAN;
 }
 
 PUBLIC VIRTUAL

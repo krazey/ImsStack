@@ -22,7 +22,7 @@
 
 class AosTrm
     : public IAosTrm
-    , public ITRMListener
+    , public ITrmListener
     , public ITimerListener
 {
 public:
@@ -49,8 +49,8 @@ private:
 
     virtual void ProcessTimerExpired();
 
-    // ITRMListener
-    virtual void NotifyServicePriorityChanged();
+    // ITrmListener
+    virtual void Trm_NotifyServicePriorityChanged();
 
     // ITimerListener Interface
     virtual void Timer_TimerExpired(IN ITimer *piTimer);
@@ -62,7 +62,7 @@ private:
     IMS_BOOL bIsStartUpdated;
     IMS_BOOL bIsEmergencyStartUpdated;
 
-    ITRM *piTRM;
+    ITrm *piTRM;
     ITimer *piStopTimer;
     IMSList<IAosTrmListener*> objListeners;
 

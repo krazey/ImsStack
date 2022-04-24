@@ -22,7 +22,7 @@ __IMS_TRACE_TAG_BASE__;
 /**
  * @brief This class defines the parameters for IpSec security association.
  *
- * @see IIPSecPolicy
+ * @see IIpSecPolicy
  */
 
 PUBLIC

@@ -28,7 +28,7 @@ class SIPStreamSocket
 {
 public:
     explicit SIPStreamSocket(IN IMS_SINT32 nSlotId);
-    SIPStreamSocket(IN IMS_SINT32 nSlotId, IN INetSocket *piSocket_);
+    SIPStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket *piSocket_);
     virtual ~SIPStreamSocket();
 
 private:
@@ -36,7 +36,7 @@ private:
     SIPStreamSocket& operator=(IN CONST SIPStreamSocket &objRHS);
 
 public:
-    virtual void ApplyIpSec(IN INetSocket* piAcceptedSocket = IMS_NULL);
+    virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL);
     virtual IMS_BOOL Connect();
     virtual IMS_BOOL Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPort = 0,
             IN IMS_BOOL bSecure = IMS_FALSE);
@@ -59,11 +59,11 @@ protected:
     // ITimerListener interface
     virtual void Timer_TimerExpired(IN ITimer *piTimer);
 
-    virtual void Socket_DataReceived(IN INetSocket *piSocket);
-    virtual void Socket_SendEnabled(IN INetSocket *piSocket);
-    virtual void Socket_Connected(IN INetSocket *piSocket);
-    virtual void Socket_Closed(IN INetSocket *piSocket,
-            IN IMS_SINT32 nReason = INetSocket::CLOSE_REASON_UNKNOWN);
+    virtual void Socket_OnDataReceived(IN ISocket *piSocket);
+    virtual void Socket_OnSendEnabled(IN ISocket *piSocket);
+    virtual void Socket_OnConnected(IN ISocket *piSocket);
+    virtual void Socket_OnClosed(IN ISocket *piSocket,
+            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN);
 
 private:
     IMS_RESULT StartTxTimer(IN IMS_SINT32 nDuration);

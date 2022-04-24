@@ -20,7 +20,7 @@
 #include "ITrmTimer.h"
 
 class OsTrmTimer
-    : public ITRMTimer
+    : public ITrmTimer
     , public ITimerListener
 {
 public:
@@ -28,8 +28,8 @@ public:
     virtual ~OsTrmTimer();
 
 private:
-    // ITRMTimer
-    void SetListener(IN ITRMTimerListener* piListener) override;
+    // ITrmTimer
+    void SetListener(IN ITrmTimerListener* piListener) override;
     void Start() override;
     void Stop() override;
 
@@ -42,7 +42,7 @@ private:
     IMS_UINT32 m_nDuration;
 
     ITimer* m_piTrmTimer;
-    ITRMTimerListener* m_piListener;
+    ITrmTimerListener* m_piListener;
 };
 
 #endif

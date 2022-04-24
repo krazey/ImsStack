@@ -95,7 +95,7 @@ IMS_BOOL MtsUtils::IsEccNumber(IN const IMSWMS_CHAR* strDstAddr, IMS_SINT32 nSlo
     IMS_BOOL bIsEccNumber = IMS_FALSE;
     AString strDestAddr(strDstAddr);
 
-    if (PhoneInfoService::GetPhoneInfoService()->GetPhoneInfoCall(nSlotId)
+    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)
             ->IsEmergencyNumber(strDestAddr))
     {
         IMS_TRACE_I("IsEccNumber:This Number( %s ) is a ECC Number from PhoneInfoService",

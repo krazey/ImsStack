@@ -149,7 +149,7 @@ void MtsService::CoreService_PageMessageReceived(
     AString strTargetActivity = EnablerUtils::GetEnablerThreadName(m_nSlotId);
     strTargetActivity.Append(".MtsApp");
     IMSMSG objMSG(SmsSvcInternal::SMSMT_RECVD, 0, reinterpret_cast<IMS_UINTP>(piMessage));
-    MSGService::PostMessage(strTargetActivity, objMSG);
+    MessageService::PostMessage(strTargetActivity, objMSG);
 }
 
 PUBLIC
@@ -382,7 +382,7 @@ void MtsService::RequestRegistrationSwitch(
 PUBLIC
 IMS_BOOL MtsService::IsEpdgConnected()
 {
-    IMS_SINT32 nReportedIpcan = IIPCAN::CATEGORY_MOBILE;
+    IMS_SINT32 nReportedIpcan = IIpcan::CATEGORY_MOBILE;
     IMS_BOOL bIsEpdg = IMS_FALSE;
     IMS_TRACE_I("Start API IsEpdgConnected", 0, 0, 0);
 
@@ -395,7 +395,7 @@ IMS_BOOL MtsService::IsEpdgConnected()
         IMS_TRACE_E(0, "m_piImsAos is null", 0, 0, 0);
     }
 
-    if (nReportedIpcan == IIPCAN::CATEGORY_WLAN)
+    if (nReportedIpcan == IIpcan::CATEGORY_WLAN)
     {
         IMS_TRACE_I("IsEpdgConnected:bIsEpdg is true", 0, 0, 0);
         bIsEpdg = IMS_TRUE;

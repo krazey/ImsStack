@@ -100,7 +100,7 @@ MediaConnectionWatcher* MediaConnectionWatcher::GetMediaConnectionWatcher(IN IMS
 
 PUBLIC VIRTUAL
 IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN AString &strPdn, IN IMS_SINT32 nSlotID,
-        OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+        OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
         OUT IMS_UINT32 &nNetworkInterfaceId)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
@@ -143,7 +143,7 @@ EXIT_GetMediaConnectionType_PDN:
 
 PUBLIC VIRTUAL
 IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN IPAddress &objIpAddress,
-        OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+        OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
         OUT IMS_UINT32 &nNetworkInterfaceId)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
@@ -186,7 +186,7 @@ EXIT_GetMediaConnectionType_IPADDR:
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN INetConnection *piNetConnection,
+IMS_BOOL MediaConnectionWatcher::GetMediaConnectionType(IN INetworkConnection *piNetConnection,
         OUT IMS_SINT32 &nMediaConnectionType, OUT IMS_UINT32 &nNetworkInterfaceId)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
@@ -218,7 +218,7 @@ EXIT_GetMediaConnectionType_INETCON:
 
 PUBLIC VIRTUAL
 IMS_BOOL MediaConnectionWatcher::GetRtpFragmentSize(IN AString &strPdn, IN IMS_SINT32 nSlotID,
-        OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize)
+        OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
     IMS_BOOL bRet = IMS_TRUE;
@@ -258,7 +258,7 @@ EXIT_GetRtpFragmentSize_PDN:
 
 PUBLIC VIRTUAL
 IMS_BOOL MediaConnectionWatcher::GetRtpFragmentSize(IN IPAddress &objIpAddress,
-        OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize)
+        OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
     IMS_BOOL bRet = IMS_TRUE;
@@ -296,7 +296,7 @@ EXIT_GetRtpFragmentSize_IPADDR:
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL MediaConnectionWatcher::GetRtpFragmentSize(IN INetConnection *piNetConnection,
+IMS_BOOL MediaConnectionWatcher::GetRtpFragmentSize(IN INetworkConnection *piNetConnection,
         OUT IMS_SINT32 &nRtpFragmentSize)
 {
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
@@ -331,7 +331,7 @@ IMS_BOOL MediaConnectionWatcher::SetListener(IN IMediaConnectionWatcherListener*
         IN AString &strPdn, IN IMS_SINT32 nSlotID,
         OUT IMS_SINT32 &nMediaConnectionType, OUT IMS_UINT32 &nNetworkInterfaceId)
 {
-    INetConnection *piNetConnection = IMS_NULL;
+    INetworkConnection *piNetConnection = IMS_NULL;
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
 
     if (!GetMediaConnectionType(strPdn, nSlotID, piNetConnection, nMediaConnectionType,
@@ -374,7 +374,7 @@ IMS_BOOL MediaConnectionWatcher::SetListener(IN IMediaConnectionWatcherListener*
         IN IPAddress &objIpAddress, OUT IMS_SINT32 &nMediaConnectionType,
         OUT IMS_UINT32 &nNetworkInterfaceId)
 {
-    INetConnection *piNetConnection = IMS_NULL;
+    INetworkConnection *piNetConnection = IMS_NULL;
     NetConnectionWatcher *pNetConnectionWatcher = IMS_NULL;
 
     if (!GetMediaConnectionType(objIpAddress, piNetConnection, nMediaConnectionType,
@@ -459,7 +459,7 @@ void MediaConnectionWatcher::Event_NotifyEvent(IN IMS_SINT32 nEvent, IN IMS_UINT
 
 PRIVATE
 MediaConnectionWatcher::NetConnectionWatcher* MediaConnectionWatcher::findNetConnectionWatcher(
-        IN INetConnection *piNetConnection)
+        IN INetworkConnection *piNetConnection)
 {
     NetConnectionWatcher* pNetConnectionWatcher = IMS_NULL;
 
@@ -495,8 +495,8 @@ void MediaConnectionWatcher::clearMediaConnectionWatcher()
 }
 
 PUBLIC GLOBAL
-IMS_SINT32 MediaConnectionWatcher::CalculateRtpFragmentSize(IN INetConnection *piNetConnection/*,
-        IN IMS_SINT32 nSlotId*/)
+IMS_SINT32 MediaConnectionWatcher::CalculateRtpFragmentSize(IN INetworkConnection *piNetConnection
+        /*, IN IMS_SINT32 nSlotId*/)
 {
     IMS_SINT32 nRtpFragmentSize = 0;
     IMS_UINT32 nIPV6orV4 = IPAddress::IPV6;
@@ -616,7 +616,7 @@ Exit_CalculateRtpFragmentSize_NetWatcher:
 }
 
 PRIVATE GLOBAL
-IMS_SINT32  MediaConnectionWatcher::convertNetworkType(IN INetConnection *piNetConnection)
+IMS_SINT32  MediaConnectionWatcher::convertNetworkType(IN INetworkConnection *piNetConnection)
 {
     AString strRAT = AString::ConstNull();
 
@@ -765,7 +765,7 @@ void MediaConnectionWatcher::NetConnectionWatcher::SetMediaConnectionType(
 
 PUBLIC
 IMS_BOOL MediaConnectionWatcher::NetConnectionWatcher::SetINetConnection(
-        IN INetConnection *piNetConnection)
+        IN INetworkConnection *piNetConnection)
 {
     if (piNetConnection == IMS_NULL)
     {
@@ -835,10 +835,10 @@ IMS_SINT32 MediaConnectionWatcher::NetConnectionWatcher::GetMtuSize()
     return m_piNetConnection->GetMtu();
 }
 
-/* INetConnectionListener Interface Impl */
+/* INetworkConnectionListener Interface Impl */
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_Connected(
-        IN INetConnection *piNetConnection)
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnConnected(
+        IN INetworkConnection *piNetConnection)
 {
     IMS_TRACE_D("Connection_Connected() - Listener Size[%d]",
             m_objListeners.GetSize(), 0, 0);
@@ -876,9 +876,9 @@ void MediaConnectionWatcher::NetConnectionWatcher::Connection_Connected(
 }
 
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_Disconnected
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnDisconnected
 (
-        IN INetConnection *piNetConnection, IN IMS_SINT32 nErrorCode)
+        IN INetworkConnection *piNetConnection, IN IMS_SINT32 nErrorCode)
 {
     (void) piNetConnection;
     (void) nErrorCode;
@@ -891,8 +891,8 @@ void MediaConnectionWatcher::NetConnectionWatcher::Connection_Disconnected
 }
 
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_ConnectionFailed(
-        IN INetConnection *piNetConnection, IN IMS_SINT32 nErrorCode)
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnConnectionFailed(
+        IN INetworkConnection *piNetConnection, IN IMS_SINT32 nErrorCode)
 {
     (void) piNetConnection;
     (void) nErrorCode;
@@ -906,8 +906,8 @@ void MediaConnectionWatcher::NetConnectionWatcher::Connection_ConnectionFailed(
 }
 
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_IpChanged(
-        IN INetConnection *piNetConnection)
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnIpChanged(
+        IN INetworkConnection *piNetConnection)
 {
     IMS_TRACE_D("Connection_IpChanged() - Listener Size[%d]", m_objListeners.GetSize(), 0, 0);
     IMediaConnectionWatcherListener *piListener = IMS_NULL;
@@ -948,8 +948,8 @@ void MediaConnectionWatcher::NetConnectionWatcher::Connection_IpChanged(
 }
 
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_IpcanCatChanged(
-        IN INetConnection *piNetConnection)
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnIpcanChanged(
+        IN INetworkConnection *piNetConnection)
 {
     IMS_TRACE_D("Connection_IpcanCatChanged() - Listener Size[%d]", m_objListeners.GetSize(), 0, 0);
     IMediaConnectionWatcherListener *piListener = IMS_NULL;
@@ -1001,8 +1001,8 @@ void MediaConnectionWatcher::NetConnectionWatcher::Connection_IpcanCatChanged(
 }
 
 PUBLIC VIRTUAL
-void MediaConnectionWatcher::NetConnectionWatcher::Connection_PcscfChanged(
-        IN INetConnection *piNetConnection)
+void MediaConnectionWatcher::NetConnectionWatcher::NetworkConnection_OnPcscfChanged(
+        IN INetworkConnection *piNetConnection)
 {
     (void) piNetConnection;
 

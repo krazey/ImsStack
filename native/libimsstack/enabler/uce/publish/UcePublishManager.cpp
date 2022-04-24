@@ -1045,7 +1045,7 @@ void UcePublishManager::SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 n
 
         IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_CMD_ERROR_IND, 0,
                 reinterpret_cast<IMS_UINTP>(pParam));
-        MSGService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+        MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
     } else {
         IMS_TRACE_E(0,"SendPublishCommandErrorInd:Command Error Param creation is failed", 0, 0, 0);
     }
@@ -1076,7 +1076,7 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
 
             IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_UPDATED_IND, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
-            MSGService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+            MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
         } else {
             IMS_TRACE_E(0, "SendPublishResponseInd:UpdatedInd Param creation is failed", 0, 0, 0);
         }
@@ -1097,7 +1097,7 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
 
             IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_RESPONSE_IND, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
-            MSGService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+            MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
         } else {
             IMS_TRACE_E(0, "SendPublishResponseInd:ResponseInd Param creation is failed", 0, 0, 0);
         }
@@ -1110,7 +1110,7 @@ void UcePublishManager::SendUnpublishedInd()
         m_bUnpublishSent = IMS_TRUE;
         IMS_TRACE_I("SendUnpublishedInd", 0, 0, 0);
         IMSMSG objUIMsg(IUUceService::UCE_UNPUBLISHED_IND, 0, 0);
-        MSGService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+        MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
     }
 }
 
@@ -1360,13 +1360,13 @@ void UcePublishManager::SetPublishStateToAoS(IN IMS_UINT32 nState)
 {
     if (nState == PUBLISH_STARTED && m_bSetPublishStarted == IMS_FALSE) {
         IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_STARTED, 0, 0);
-        MSGService::PostMessage(m_strAppName, objMsg);
+        MessageService::PostMessage(m_strAppName, objMsg);
         m_bSetPublishStarted = IMS_TRUE;
         IMS_TRACE_D( "SetPublishStateToAoS:send Publish Started Msg to UceApp", 0, 0, 0 );
     }
     else if (nState == PUBLISH_STOPPED && m_bSetPublishStarted == IMS_TRUE) {
         IMSMSG objMsg(AoSAppRequest::COMMAND_SET_PUBLISH_TERMINATED, 0, 0);
-        MSGService::PostMessage(m_strAppName, objMsg);
+        MessageService::PostMessage(m_strAppName, objMsg);
         m_bSetPublishStarted = IMS_FALSE;
         IMS_TRACE_D( "SetPublishStateToAoS:send Publish Terminated Msg to UceApp", 0, 0, 0 );
     }
@@ -1426,7 +1426,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         IMS_TRACE_D("No Reason header present", 0, 0, 0);
         IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0,
                       ImsAosControl::REGISTER_REINITIATE);
-        MSGService::PostMessage(m_strAppName, objMsg);
+        MessageService::PostMessage(m_strAppName, objMsg);
         return IMS_TRUE;
     }
     for(IMS_UINT32 i = 0; i < objReasonList.GetSize(); i++) {
@@ -1438,7 +1438,7 @@ IMS_BOOL UcePublishManager::Process403Scenario()
         }
     }
     IMSMSG objMsg(AoSAppRequest::COMMAND_REGISTER_RECOVERY, 0, ImsAosControl::REGISTER_REINITIATE);
-    MSGService::PostMessage(m_strAppName, objMsg);
+    MessageService::PostMessage(m_strAppName, objMsg);
     return IMS_TRUE;
 }
 

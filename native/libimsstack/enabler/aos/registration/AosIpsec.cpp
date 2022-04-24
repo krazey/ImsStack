@@ -38,10 +38,10 @@ AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId)
     , m_piPolicy(IMS_NULL)
     , m_pUeInfo(new UeIpsecInfo())
     , m_pPcscfInfo(new PcscfIpsecInfo())
-    , m_nSecuProto(IPSecType::SECURITY_PROTOCOL_ESP)
-    , m_nAuthAlgo(IPSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-    , m_nEncrAlgo(IPSecType::ENCRYPTION_ALGORITHM_NO)
-    , m_nMode(IPSecType::MODE_TRANSPORT)
+    , m_nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP)
+    , m_nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+    , m_nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO)
+    , m_nMode(IpSecType::MODE_TRANSPORT)
     , m_bAddPolicy(IMS_FALSE)
     , m_bSaEstablished(IMS_FALSE)
     , m_bIgnorePolicyExpired(IMS_FALSE)
@@ -51,7 +51,7 @@ AosIpsec::AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId)
 
     m_strTag.Sprintf("%d", m_nSlotId);
 
-    m_piNetIpsec = NetworkService::GetNetworkService()->GetIPSec();
+    m_piNetIpsec = NetworkService::GetNetworkService()->GetIpSec();
 
     if (m_piNetIpsec == IMS_NULL)
     {
@@ -96,11 +96,11 @@ AosIpsec::~AosIpsec()
 }
 
 PUBLIC
-void AosIpsec::ExpiredSAs(IN IIPSecPolicy* piIpsecPolicy)
+void AosIpsec::IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy)
 {
     A_IMS_TRACE_I(AOSTAG, "Expires IPSec Policy", 0, 0, 0);
 
-    if (piIpsecPolicy != m_piPolicy)
+    if (piPolicy != m_piPolicy)
     {
         A_IMS_TRACE_D(AOSTAG, "Policy is mismatch", 0, 0, 0);
         return;
@@ -161,7 +161,7 @@ void AosIpsec::CreateSps(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_I(AOSTAG, "CreateSps :: type (%d)", nType, 0, 0);
 
-    if (IPSecType::TRANS_PROTOCOL_TCP == nType)
+    if (IpSecType::TRANS_PROTOCOL_TCP == nType)
     {
         CreateSpforTcp(TCP_CLIENT_OUTBOUND);
         CreateSpforTcp(TCP_CLIENT_INBOUND);
@@ -241,14 +241,14 @@ void AosIpsec::SetSecurityAlgorithm(IN IMS_UINT32 nSecuAlog, IN IMS_UINT32 nAuth
     A_IMS_TRACE_I(AOSTAG, "SetSecurityAlgorithm :: Securtiy (%d) , Auth (%d) , Encr (%d)",
             nSecuAlog, nAuthAlgo, nEncrAlgo);
 
-    this->m_nSecuProto = (nSecuAlog == IPSecType::SECURITY_PROTOCOL_AH) ?
-            IPSecType::SECURITY_PROTOCOL_AH : IPSecType::SECURITY_PROTOCOL_ESP;
+    this->m_nSecuProto = (nSecuAlog == IpSecType::SECURITY_PROTOCOL_AH) ?
+            IpSecType::SECURITY_PROTOCOL_AH : IpSecType::SECURITY_PROTOCOL_ESP;
     this->m_nAuthAlgo = nAuthAlgo;
     this->m_nEncrAlgo = nEncrAlgo;
 
     if (nEncrAlgo == SIPSecurityHeader::EALG_UNSPECIFIED)
     {
-        this->m_nEncrAlgo = IPSecType::ENCRYPTION_ALGORITHM_NO;
+        this->m_nEncrAlgo = IpSecType::ENCRYPTION_ALGORITHM_NO;
     }
 }
 
@@ -308,7 +308,7 @@ void AosIpsec::ManagePolicyLifetime(IN IMS_UINT32 nDuration)
 }
 
 PUBLIC
-IIPSecPolicy* AosIpsec::GetPolicy()
+IIpSecPolicy* AosIpsec::GetPolicy()
 {
     if (m_piPolicy != IMS_NULL)
     {
@@ -416,7 +416,7 @@ PUBLIC
 void AosIpsec::DumpSas()
 {
     A_IMS_TRACE_D(AOSTAG, "Display dump to IPSec Lib", 0, 0, 0);
-    m_piNetIpsec->DumpSAs(m_piPolicy);
+    m_piNetIpsec->DumpPolicy(m_piPolicy);
 }
 
 PRIVATE
@@ -424,16 +424,16 @@ void AosIpsec::CreateSpforUdp(IN IMS_UINT32 nDir)
 {
     A_IMS_TRACE_D(AOSTAG, "CreateSpforUdp :: Direction (%d)", nDir, 0, 0);
 
-    IIPSecSP* piSp = m_piPolicy->CreateSP();
+    IIpSecSp* piSp = m_piPolicy->CreateSp();
 
     if (nDir == DIRECTION_OUTBOUND)
     {
         piSp->SetTransportInfo
                 (
                 m_pUeInfo->objIpa, m_pUeInfo->nPortC, m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortS
-                , IPSecType::TRANS_PROTOCOL_UDP
-                , IPSecType::ACTION_APPLY
-                , IPSecType::DIRECTION_OUTBOUND
+                , IpSecType::TRANS_PROTOCOL_UDP
+                , IpSecType::ACTION_APPLY
+                , IpSecType::DIRECTION_OUTBOUND
                 , m_pPcscfInfo->nSpiS
                 , m_nMode
                 );
@@ -445,9 +445,9 @@ void AosIpsec::CreateSpforUdp(IN IMS_UINT32 nDir)
         piSp->SetTransportInfo
                 (
                 m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortC, m_pUeInfo->objIpa, m_pUeInfo->nPortS
-                , IPSecType::TRANS_PROTOCOL_UDP
-                , IPSecType::ACTION_PERMIT
-                , IPSecType::DIRECTION_INBOUND
+                , IpSecType::TRANS_PROTOCOL_UDP
+                , IpSecType::ACTION_PERMIT
+                , IpSecType::DIRECTION_INBOUND
                 , m_pUeInfo->nSpiS
                 , m_nMode
                 );
@@ -455,7 +455,7 @@ void AosIpsec::CreateSpforUdp(IN IMS_UINT32 nDir)
         piSp->SetSecurityAlgorithmInfo(m_nSecuProto, m_nAuthAlgo, m_nEncrAlgo);
     }
 
-    piSp->DoneSP();
+    piSp->DoneSp();
 }
 
 PRIVATE
@@ -463,7 +463,7 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_D(AOSTAG, "CreateSpforTcp :: type (%d)", nType, 0, 0);
 
-    IIPSecSP* piSp = m_piPolicy->CreateSP();
+    IIpSecSp* piSp = m_piPolicy->CreateSp();
 
     if (nType == TCP_CLIENT_OUTBOUND)
     {
@@ -471,9 +471,9 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
         piSp->SetTransportInfo
                 (
                 m_pUeInfo->objIpa, m_pUeInfo->nPortC, m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortS
-                , IPSecType::TRANS_PROTOCOL_TCP
-                , IPSecType::ACTION_APPLY
-                , IPSecType::DIRECTION_OUTBOUND
+                , IpSecType::TRANS_PROTOCOL_TCP
+                , IpSecType::ACTION_APPLY
+                , IpSecType::DIRECTION_OUTBOUND
                 , m_pPcscfInfo->nSpiS
                 , m_nMode
                 );
@@ -484,9 +484,9 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
         piSp->SetTransportInfo
                 (
                 m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortS, m_pUeInfo->objIpa, m_pUeInfo->nPortC
-                , IPSecType::TRANS_PROTOCOL_TCP
-                , IPSecType::ACTION_PERMIT
-                , IPSecType::DIRECTION_INBOUND
+                , IpSecType::TRANS_PROTOCOL_TCP
+                , IpSecType::ACTION_PERMIT
+                , IpSecType::DIRECTION_INBOUND
                 , m_pUeInfo->nSpiC
                 , m_nMode
                 );
@@ -497,9 +497,9 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
         piSp->SetTransportInfo
                 (
                 m_pUeInfo->objIpa, m_pUeInfo->nPortS, m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortC
-                , IPSecType::TRANS_PROTOCOL_TCP
-                , IPSecType::ACTION_APPLY
-                , IPSecType::DIRECTION_OUTBOUND
+                , IpSecType::TRANS_PROTOCOL_TCP
+                , IpSecType::ACTION_APPLY
+                , IpSecType::DIRECTION_OUTBOUND
                 , m_pPcscfInfo->nSpiC
                 , m_nMode
                 );
@@ -510,9 +510,9 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
         piSp->SetTransportInfo
                 (
                 m_pPcscfInfo->objIpa, m_pPcscfInfo->nPortC, m_pUeInfo->objIpa, m_pUeInfo->nPortS
-                , IPSecType::TRANS_PROTOCOL_TCP
-                , IPSecType::ACTION_PERMIT
-                , IPSecType::DIRECTION_INBOUND
+                , IpSecType::TRANS_PROTOCOL_TCP
+                , IpSecType::ACTION_PERMIT
+                , IpSecType::DIRECTION_INBOUND
                 , m_pUeInfo->nSpiS
                 , m_nMode
                 );
@@ -523,7 +523,7 @@ void AosIpsec::CreateSpforTcp(IN IMS_UINT32 nType)
     }
 
     piSp->SetSecurityAlgorithmInfo(m_nSecuProto, m_nAuthAlgo, m_nEncrAlgo);
-    piSp->DoneSP();
+    piSp->DoneSp();
 
 }
 
@@ -540,7 +540,7 @@ void AosIpsec::CreateSa(IN IMS_UINT32 nType)
         4. Uc <--- Ps
     */
 
-    IIPSecSA* piSp = m_piPolicy->CreateSA();
+    IIpSecSa* piSa = m_piPolicy->CreateSa();
 
     IPAddress objSrcIPA;
     IMS_UINT32 nSrcPort = 0;
@@ -586,7 +586,7 @@ void AosIpsec::CreateSa(IN IMS_UINT32 nType)
         return;
     }
 
-    piSp->SetSA
+    piSa->SetSa
             (
             objSrcIPA,
             nSrcPort,
@@ -601,7 +601,7 @@ void AosIpsec::CreateSa(IN IMS_UINT32 nType)
             m_pUeInfo->objCk
             );
 
-    piSp->DoneSA();
+    piSa->DoneSa();
 
 }
 

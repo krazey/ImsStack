@@ -21,10 +21,10 @@ MtsTrm::MtsTrm(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_MEM("MTSTRM_MEM", "Create : [SLOT%d] MtsTrm = %" PFLS_u "/%" PFLS_x, nSlotId,
             sizeof(MtsTrm), this);
 
-    m_piTrm = PhoneInfoService::GetPhoneInfoService()->GetTRM();
+    m_piTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
     if (m_piTrm != IMS_NULL)
     {
-        if (m_piTrm->IsTRMSupported())
+        if (m_piTrm->IsTrmSupported())
         {
             m_piTrm->RegisterObserver(this);
             m_piTrm->Enable(m_nSlotId);
@@ -138,7 +138,7 @@ IMS_BOOL MtsTrm::IsReady()
         return IMS_TRUE;
     }
 
-    return m_piTrm->IsServiceAvailable(m_nSlotId, ITRM::SERVICE_SMS);
+    return m_piTrm->IsServiceAvailable(m_nSlotId, ITrm::SERVICE_SMS);
 }
 
 PUBLIC
@@ -148,7 +148,7 @@ IMS_BOOL MtsTrm::IsTRMSupported()
     {
         return IMS_FALSE;
     }
-    return m_piTrm->IsTRMSupported();
+    return m_piTrm->IsTrmSupported();
 }
 
 PUBLIC
@@ -169,7 +169,7 @@ void MtsTrm::Set(IN IMS_BOOL bStart)
         }
         else
         {
-            if (m_piTrm->SetService(m_nSlotId, ITRM::SERVICE_SMS, ITRM::MODE_START))
+            if (m_piTrm->SetService(m_nSlotId, ITrm::SERVICE_SMS, ITrm::MODE_START))
             {
                 m_bIsTrmSet = IMS_TRUE;
             }
@@ -214,7 +214,7 @@ void MtsTrm::ProcessTimerExpired()
     if (m_bIsTrmSet)
     {
         IMS_TRACE_I("ProcessTimerExpired :: set end to trm", 0, 0, 0);
-        if (m_piTrm->SetService(m_nSlotId, ITRM::SERVICE_SMS, ITRM::MODE_END))
+        if (m_piTrm->SetService(m_nSlotId, ITrm::SERVICE_SMS, ITrm::MODE_END))
         {
             m_bIsTrmSet = IMS_FALSE;
         }
@@ -222,7 +222,7 @@ void MtsTrm::ProcessTimerExpired()
 }
 
 PRIVATE
-void MtsTrm::NotifyServicePriorityChanged()
+void MtsTrm::Trm_NotifyServicePriorityChanged()
 {
     if (m_piTrm == IMS_NULL)
     {

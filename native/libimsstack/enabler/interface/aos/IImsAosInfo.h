@@ -62,7 +62,7 @@ public:
     /**
      * @brief Get the IPCAN type.
      *
-     * @return IPCAN type for IMS (e.g. IIPCAN::CATEGORY_MOBILE, IIPCAN::CATEGORY_WLAN)
+     * @return IPCAN type for IMS (e.g. IIpcan::CATEGORY_MOBILE, IIpcan::CATEGORY_WLAN)
      */
     virtual IMS_SINT32 GetIpcanType() = 0;
 

@@ -23,16 +23,16 @@
 #include "ServiceThread.h"
 #include "ServiceMessage.h"
 
-class ITRMListener
+class ITrmListener
 {
 public:
     /*
         Notifies the application that the service priority is changed.
     */
-    virtual void NotifyServicePriorityChanged() = 0;
+    virtual void Trm_NotifyServicePriorityChanged() = 0;
 };
 
-class TRM_SERVICE_STATE_CHANGED
+class TrmStateParam
 {
 public:
     IMS_SINT32 nSlotId;
@@ -40,7 +40,7 @@ public:
     IMS_UINT32 nMode;
 };
 
-class ITRM
+class ITrm
 {
 public:
     enum
@@ -81,7 +81,7 @@ public:
     /*
         Check if TRM is supported or not
     */
-    virtual IMS_BOOL IsTRMSupported() = 0;
+    virtual IMS_BOOL IsTrmSupported() = 0;
 
     /*
         Set the emergency service start or end state
@@ -92,7 +92,7 @@ public:
     /*
         Set the IPCAN category (CATEGORY_MOBILE, CATEGORY_WLAN)
     */
-    virtual void SetIPCAN(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory) = 0;
+    virtual void SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory) = 0;
 
     /*
         Set the service start or end state
@@ -104,7 +104,7 @@ public:
     /*
         Register the listener for observing the call priority
     */
-    inline void RegisterObserver(IN ITRMListener *piListener)
+    inline void RegisterObserver(IN ITrmListener* piListener)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -130,7 +130,7 @@ public:
     /*
         Remove the listener for observing the call priority
     */
-    inline void RemoveObserver(IN ITRMListener *piListener)
+    inline void RemoveObserver(IN ITrmListener* piListener)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -147,7 +147,7 @@ public:
             {
                 for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); j++)
                 {
-                    ITRMListener *objListener = pObserverList->objListeners.GetAt(j);
+                    ITrmListener* objListener = pObserverList->objListeners.GetAt(j);
 
                     if (piListener == objListener)
                     {
@@ -161,14 +161,14 @@ public:
     }
 
 public:
-    inline void ProcessNotify(IN IMSMSG &objMSG)
+    inline void ProcessNotify(IN ImsMessage& objMSG)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        TRM_SERVICE_STATE_CHANGED *pParam = IMS_NULL;
+        TrmStateParam* pParam = IMS_NULL;
         if ((IMS_SINT32)objMSG.nWparam == SERVICE_CHANGED)
         {
-            pParam = (TRM_SERVICE_STATE_CHANGED *)objMSG.nLparam;
+            pParam = (TrmStateParam*)objMSG.nLparam;
         }
 
         for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
@@ -193,11 +193,11 @@ public:
 
                 for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); ++j)
                 {
-                    ITRMListener* piListener = pObserverList->objListeners.GetAt(j);
+                    ITrmListener* piListener = pObserverList->objListeners.GetAt(j);
 
                     if (piListener != IMS_NULL)
                     {
-                        piListener->NotifyServicePriorityChanged();
+                        piListener->Trm_NotifyServicePriorityChanged();
                     }
                 }
                 break;
@@ -227,7 +227,7 @@ protected:
         }
     }
 
-    inline void PostMsgEnablerThread(IN TRM_SERVICE_STATE_CHANGED *pParam)
+    inline void PostMsgEnablerThread(IN TrmStateParam* pParam)
     {
         for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
         {
@@ -260,7 +260,7 @@ private:
     class ObserverList
     {
         public:
-            inline ObserverList(IN ITRMListener *piListener)
+            inline ObserverList(IN ITrmListener* piListener)
             {
                 piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -274,7 +274,7 @@ private:
 
         public:
             IThread *piOwnerThread;
-            IMSList<ITRMListener*> objListeners;
+            IMSList<ITrmListener*> objListeners;
     };
 
 private:

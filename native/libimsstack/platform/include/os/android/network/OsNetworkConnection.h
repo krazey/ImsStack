@@ -66,11 +66,11 @@ public:
             IN IMS_SINT32 nIpVersion = 0/*configuration-based*/) const override;
 
 private:
-    // INetConnection class
+    // INetworkConnection class
     RESULT_ENTYPE Activate(IN IMS_BOOL bEnableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIPCAN::CATEGORY_MOBILE) override;
+            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) override;
     RESULT_ENTYPE Deactivate(IN IMS_BOOL bDisableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIPCAN::CATEGORY_MOBILE) override;
+            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) override;
     void GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo) override;
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
@@ -83,16 +83,16 @@ private:
     const AStringArray& GetPcscfAddress(
             IN IMS_SINT32 nIpVersion = 0/*configuration-based*/) override;
     STATE_ENTYPE GetState() const override;
-    IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIPCAN::CATEGORY_ANY) const override;
+    IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override;
     IMS_BOOL SendPingToHostAddress(IN const IPAddress& objHostAddress) override;
     IMS_BOOL IsePDGEnabled() const override;
     IMS_BOOL IsMobileDataEnabled() const override;
     IMS_SINT32 GetMtu() const override;
-    void SetListener(IN INetConnectionListener* piListener) override;
+    void SetListener(IN INetworkConnectionListener* piListener) override;
     void SetPreferredIPVersion(
             IN IMS_SINT32 nPreferredIPVersion = 0/*default-aos-connection-profile*/) override;
-    void AddReferenceListener(IN INetConnectionListener* piListener) override;
-    void RemoveReferenceListener(IN INetConnectionListener* piListener) override;
+    void AddReferenceListener(IN INetworkConnectionListener* piListener) override;
+    void RemoveReferenceListener(IN INetworkConnectionListener* piListener) override;
 
     // ImsNetworkConnection class
     IMS_BOOL Create(IN const AString& strNetProfile) override;
@@ -126,7 +126,7 @@ private:
     IMS_BOOL HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nErrorCode);
     void PostEvent(IN IMS_UINT32 nEvent);
     IMS_BOOL Release(IN IMS_BOOL bDisableApn = IMS_FALSE,
-            IN IMS_SINT32 nIpcanCategory = IIPCAN::CATEGORY_MOBILE);
+            IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE);
     void SetIpcanCategory(IN IMS_SINT32 nCategory);
     void SetState(IN IMS_UINT32 nState);
 
@@ -159,8 +159,8 @@ private:
     IMS_CONNECTION m_nConnectionHandle;
 
     IThread* m_piOwnerThread;
-    INetConnectionListener* m_piConnectionListener;
-    IMSList<INetConnectionListener*> m_objReferenceListeners;
+    INetworkConnectionListener* m_piConnectionListener;
+    IMSList<INetworkConnectionListener*> m_objReferenceListeners;
 };
 
 #endif

@@ -240,7 +240,7 @@ const IMSList<ExtraHeader*>& ExtraHeaders::GetHeaders() const
 
 PUBLIC
 RegParameter::RegParameter(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , bPolicyForAuthenticationCredentials(IMS_TRUE)
     , nTransportExt(SIP::TRANSPORT_EXT_ANY)
     , nTransportExtForRegOnly(SIP::TRANSPORT_EXT_ANY)

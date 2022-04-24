@@ -26,7 +26,7 @@ class IAosAppContext;
 
 class AosConnection
     : public IAosConnection
-    , public INetConnectionListener
+    , public INetworkConnectionListener
 {
 public:
     AosConnection(IN IAosAppContext* piAppContext);
@@ -66,15 +66,15 @@ protected:
     void SetState(IN IMS_UINT32 nState);
     void UpdateIpcanForTrm();
 
-    // INetConnectionListener
-    virtual void Connection_Connected(IN INetConnection* piNetConnection);
-    virtual void Connection_Disconnected(IN INetConnection* piNetConnection,
+    // INetworkConnectionListener
+    virtual void NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection);
+    virtual void NetworkConnection_OnDisconnected(IN INetworkConnection* piNetConnection,
             IN IMS_SINT32 nErrorCode);
-    virtual void Connection_ConnectionFailed(IN INetConnection* piNetConnection,
+    virtual void NetworkConnection_OnConnectionFailed(IN INetworkConnection* piNetConnection,
             IN IMS_SINT32 nErrorCode);
-    virtual void Connection_IpChanged(IN INetConnection* piNetConnection);
-    virtual void Connection_IpcanCatChanged(IN INetConnection* piNetConnection);
-    virtual void Connection_PcscfChanged(IN INetConnection* piNetConnection);
+    virtual void NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection);
+    virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection);
+    virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection);
 
     enum
     {
@@ -95,7 +95,7 @@ protected:
 
     IMS_SINT32 m_nCnxIpPriority;
 
-    INetConnection* m_piConnection;
+    INetworkConnection* m_piConnection;
 
     IMS_UINT32 m_nState;
 

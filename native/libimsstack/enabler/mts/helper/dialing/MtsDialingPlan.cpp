@@ -347,7 +347,8 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
         return IMS_NULL;
     }
 
-    INetConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(strProfile);
+    INetworkConnection* piConnection =
+            NetworkService::GetNetworkService()->FindConnection(strProfile);
 
     if (piConnection == IMS_NULL)
     {

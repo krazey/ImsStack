@@ -234,13 +234,13 @@ ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
 }
 
 PUBLIC GLOBAL
-INetIPSec* PlatformFactory::CreateNetworkIpSec()
+INetworkIpSec* PlatformFactory::CreateNetworkIpSec()
 {
     return new OsNetworkIpSec();
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyNetworkIpSec(IN INetIPSec*& piIpSec)
+void PlatformFactory::DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec)
 {
     OsNetworkIpSec* pIpSec = DYNAMIC_CAST(OsNetworkIpSec*, piIpSec);
 
@@ -253,13 +253,13 @@ void PlatformFactory::DestroyNetworkIpSec(IN INetIPSec*& piIpSec)
 }
 
 PUBLIC GLOBAL
-IIPCAN* PlatformFactory::CreateIpcan()
+IIpcan* PlatformFactory::CreateIpcan()
 {
     return new OsIpcan();
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyIpcan(IN IIPCAN*& piIpcan)
+void PlatformFactory::DestroyIpcan(IN IIpcan*& piIpcan)
 {
     OsIpcan* pIpcan = DYNAMIC_CAST(OsIpcan*, piIpcan);
 
@@ -372,13 +372,13 @@ void PlatformFactory::DestroySubscriberInfo(IN ISubscriberInfo*& piSubscriberInf
 }
 
 PUBLIC GLOBAL
-INetWatcherInfo* PlatformFactory::CreateNetworkWatcher(IN IMS_SINT32 nSlotId)
+INetworkWatcher* PlatformFactory::CreateNetworkWatcher(IN IMS_SINT32 nSlotId)
 {
     return new OsNetworkWatcher(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyNetworkWatcher(IN INetWatcherInfo*& piNetworkWatcher)
+void PlatformFactory::DestroyNetworkWatcher(IN INetworkWatcher*& piNetworkWatcher)
 {
     OsNetworkWatcher* pNetworkWatcher = DYNAMIC_CAST(OsNetworkWatcher*, piNetworkWatcher);
 
@@ -410,13 +410,13 @@ void PlatformFactory::DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher)
 }
 
 PUBLIC GLOBAL
-IPhoneInfoCall* PlatformFactory::CreatePhoneInfoCall(IN IMS_SINT32 nSlotId)
+ICallInfo* PlatformFactory::CreateCallInfo(IN IMS_SINT32 nSlotId)
 {
     return new OsPhoneInfoCall(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyPhoneInfoCall(IN IPhoneInfoCall*& piPhoneInfoCall)
+void PlatformFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCall)
 {
     OsPhoneInfoCall* pPhoneInfoCall = DYNAMIC_CAST(OsPhoneInfoCall*, piPhoneInfoCall);
 
@@ -429,13 +429,13 @@ void PlatformFactory::DestroyPhoneInfoCall(IN IPhoneInfoCall*& piPhoneInfoCall)
 }
 
 PUBLIC GLOBAL
-ISRVCC* PlatformFactory::CreateSrvcc(IN IMS_SINT32 nSlotId)
+ISrvcc* PlatformFactory::CreateSrvcc(IN IMS_SINT32 nSlotId)
 {
     return new OsSrvcc(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroySrvcc(IN ISRVCC*& piSrvcc)
+void PlatformFactory::DestroySrvcc(IN ISrvcc*& piSrvcc)
 {
     OsSrvcc* pSrvcc = DYNAMIC_CAST(OsSrvcc*, piSrvcc);
 
@@ -467,13 +467,13 @@ void PlatformFactory::DestroyLocationInfo(IN ILocationInfo*& piLocationInfo)
 }
 
 PUBLIC GLOBAL
-IISIM* PlatformFactory::CreateIsim(IN IMS_SINT32 nSlotId)
+IIsim* PlatformFactory::CreateIsim(IN IMS_SINT32 nSlotId)
 {
     return new OsIsim(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyIsim(IN IISIM*& piIsim)
+void PlatformFactory::DestroyIsim(IN IIsim*& piIsim)
 {
     OsIsim* pIsim = DYNAMIC_CAST(OsIsim*, piIsim);
 
@@ -486,13 +486,13 @@ void PlatformFactory::DestroyIsim(IN IISIM*& piIsim)
 }
 
 PUBLIC GLOBAL
-IUSIM* PlatformFactory::CreateUsim(IN IMS_SINT32 nSlotId)
+IUsim* PlatformFactory::CreateUsim(IN IMS_SINT32 nSlotId)
 {
     return new OsUsim(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyUsim(IN IUSIM*& piUsim)
+void PlatformFactory::DestroyUsim(IN IUsim*& piUsim)
 {
     OsUsim* pUsim = DYNAMIC_CAST(OsUsim*, piUsim);
 
@@ -505,13 +505,13 @@ void PlatformFactory::DestroyUsim(IN IUSIM*& piUsim)
 }
 
 PUBLIC GLOBAL
-ITRM* PlatformFactory::CreateTrm()
+ITrm* PlatformFactory::CreateTrm()
 {
     return new OsTrm();
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyTrm(IN ITRM*& piTrm)
+void PlatformFactory::DestroyTrm(IN ITrm*& piTrm)
 {
     OsTrm* pTrm = DYNAMIC_CAST(OsTrm*, piTrm);
 
@@ -524,13 +524,13 @@ void PlatformFactory::DestroyTrm(IN ITRM*& piTrm)
 }
 
 PUBLIC GLOBAL
-IVoNR* PlatformFactory::CreateVoNr(IN IMS_SINT32 nSlotId)
+IVoNr* PlatformFactory::CreateVoNr(IN IMS_SINT32 nSlotId)
 {
     return new OsVoNr(nSlotId);
 }
 
 PUBLIC GLOBAL
-void PlatformFactory::DestroyVoNr(IN IVoNR*& piVoNr)
+void PlatformFactory::DestroyVoNr(IN IVoNr*& piVoNr)
 {
     OsVoNr* pVoNr = DYNAMIC_CAST(OsVoNr*, piVoNr);
 

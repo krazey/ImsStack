@@ -28,34 +28,34 @@ class System;
 class TrmInfo
 {
 public:
-    TrmInfo(IN IMS_UINT32 nSlotId, IN ITRMTimerListener* piTimerListener)
+    TrmInfo(IN IMS_UINT32 nSlotId, IN ITrmTimerListener* piTimerListener)
         : m_nSlotId(nSlotId)
-        , m_nEmergencyServices(ITRM::SERVICE_NONE)
-        , m_nUpdatedEmergencyService(ITRM::SERVICE_NONE)
-        , m_nServices(ITRM::SERVICE_NONE)
-        , m_nUpdatedService(ITRM::SERVICE_NONE)
-        , m_nIpcanCategory(IIPCAN::CATEGORY_MOBILE)
+        , m_nEmergencyServices(ITrm::SERVICE_NONE)
+        , m_nUpdatedEmergencyService(ITrm::SERVICE_NONE)
+        , m_nServices(ITrm::SERVICE_NONE)
+        , m_nUpdatedService(ITrm::SERVICE_NONE)
+        , m_nIpcanCategory(IIpcan::CATEGORY_MOBILE)
         , m_bStarted(IMS_FALSE)
-        , m_objTimers(IMSMap<IMS_UINT32, ITRMTimer*>())
+        , m_objTimers(IMSMap<IMS_UINT32, ITrmTimer*>())
     {
-        ITRMTimer* piTimer = new OsTrmTimer(nSlotId, ITRM::SERVICE_REG, TIMER_REG_DURATION);
+        ITrmTimer* piTimer = new OsTrmTimer(nSlotId, ITrm::SERVICE_REG, TIMER_REG_DURATION);
         piTimer->SetListener(piTimerListener);
-        m_objTimers.Add(ITRM::SERVICE_REG, piTimer);
+        m_objTimers.Add(ITrm::SERVICE_REG, piTimer);
 
-        piTimer = new OsTrmTimer(nSlotId, ITRM::SERVICE_SMS, TIMER_SMS_DURATION);
+        piTimer = new OsTrmTimer(nSlotId, ITrm::SERVICE_SMS, TIMER_SMS_DURATION);
         piTimer->SetListener(piTimerListener);
-        m_objTimers.Add(ITRM::SERVICE_SMS, piTimer);
+        m_objTimers.Add(ITrm::SERVICE_SMS, piTimer);
 
-        piTimer = new OsTrmTimer(nSlotId, ITRM::SERVICE_UT, TIMER_UT_DURATION);
+        piTimer = new OsTrmTimer(nSlotId, ITrm::SERVICE_UT, TIMER_UT_DURATION);
         piTimer->SetListener(piTimerListener);
-        m_objTimers.Add(ITRM::SERVICE_UT, piTimer);
+        m_objTimers.Add(ITrm::SERVICE_UT, piTimer);
     }
 
     virtual ~TrmInfo()
     {
         for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
         {
-            ITRMTimer* piTimer = m_objTimers.GetValueAt(i);
+            ITrmTimer* piTimer = m_objTimers.GetValueAt(i);
             if (piTimer != IMS_NULL)
             {
                 piTimer->SetListener(IMS_NULL);
@@ -68,16 +68,16 @@ public:
 
     inline void ClearEmergency()
     {
-        m_nEmergencyServices = ITRM::SERVICE_NONE;
-        m_nUpdatedEmergencyService = ITRM::SERVICE_NONE;
+        m_nEmergencyServices = ITrm::SERVICE_NONE;
+        m_nUpdatedEmergencyService = ITrm::SERVICE_NONE;
     }
 
     inline void ClearServices()
     {
-        m_nServices = ITRM::SERVICE_NONE;
+        m_nServices = ITrm::SERVICE_NONE;
     }
 
-    inline ITRMTimer* GetTimer(IN IMS_UINT32 nType)
+    inline ITrmTimer* GetTimer(IN IMS_UINT32 nType)
     {
         IMS_SLONG nIndex = m_objTimers.GetIndexOfKey(nType);
 
@@ -93,7 +93,7 @@ public:
     {
         for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); i++)
         {
-            ITRMTimer* piTimer = m_objTimers.GetValueAt(i);
+            ITrmTimer* piTimer = m_objTimers.GetValueAt(i);
             if (piTimer != IMS_NULL)
             {
                 piTimer->Stop();
@@ -112,7 +112,7 @@ public:
             return;
         }
 
-        ITRMTimer* piTimer = m_objTimers.GetValueAt(nIndex);
+        ITrmTimer* piTimer = m_objTimers.GetValueAt(nIndex);
         if (piTimer != IMS_NULL)
         {
             piTimer->Start();
@@ -132,9 +132,9 @@ public:
     { return (m_nEmergencyServices & nService); }
 
     inline IMS_BOOL IsWlan() const
-    { return (m_nIpcanCategory == IIPCAN::CATEGORY_WLAN); }
+    { return (m_nIpcanCategory == IIpcan::CATEGORY_WLAN); }
 
-    inline void SetIPCAN(IN IMS_UINT32 nCategory)
+    inline void SetIpcan(IN IMS_UINT32 nCategory)
     { m_nIpcanCategory = nCategory; }
 
     inline void SetUpdatedEmergencyService(IN IMS_UINT32 nService)
@@ -164,7 +164,7 @@ public:
     IMS_UINT32 m_nIpcanCategory;
     IMS_BOOL m_bStarted;
 
-    IMSMap<IMS_UINT32, ITRMTimer*> m_objTimers;
+    IMSMap<IMS_UINT32, ITrmTimer*> m_objTimers;
 
     static const IMS_UINT32 TIMER_REG_DURATION = 10000; // 10s
     static const IMS_UINT32 TIMER_SMS_DURATION = 18000; // 10s
@@ -172,8 +172,8 @@ public:
 };
 
 class OsTrm
-    : public ITRM
-    , public ITRMTimerListener
+    : public ITrm
+    , public ITrmTimerListener
     , public ISystemListener
 {
 public:
@@ -184,19 +184,19 @@ public:
     OsTrm& operator=(IN const OsTrm&) = delete;
 
 public:
-    // ITRM
+    // ITrm
     void Enable(IN IMS_UINT32 nSlotId) override;
     void Disable(IN IMS_UINT32 nSlotId) override;
 
     IMS_BOOL IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) override;
-    IMS_BOOL IsTRMSupported() override;
+    IMS_BOOL IsTrmSupported() override;
     void SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
             IN IMS_UINT32 nMode) override;
-    void SetIPCAN(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory) override;
+    void SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory) override;
     IMS_BOOL SetService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode) override;
 
-    // ITRMTimerListener
-    void ITRMTimer_Expired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) override;
+    // ITrmTimerListener
+    void TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) override;
 
     // ISystemListener
     void System_NotifyEvent(IN IMS_UINT32 nEvent,

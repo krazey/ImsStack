@@ -59,9 +59,9 @@ OsSystemTime::~OsSystemTime()
 }
 
 PUBLIC VIRTUAL
-IMSDate OsSystemTime::GetDate() const
+ImsDate OsSystemTime::GetDate() const
 {
-    IMSDate stDate;
+    ImsDate stDate;
 
     GetDate(stDate.nYear, stDate.nMonth, stDate.nDay, stDate.nDayOfWeek);
 
@@ -88,12 +88,12 @@ void OsSystemTime::GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
 }
 
 PUBLIC VIRTUAL
-IMSTime OsSystemTime::GetLocalTime() const
+ImsTime OsSystemTime::GetLocalTime() const
 {
     IMS_UINT32 nHour = 0;
     IMS_UINT32 nMinute = 0;
     IMS_UINT32 nSecond = 0;
-    IMSTime stTime = { 0, 0, 0, 0 };
+    ImsTime stTime = { 0, 0, 0, 0 };
 
     /* Get the local time */
     GetLocalTime(nHour, nMinute, nSecond);
@@ -125,9 +125,9 @@ void OsSystemTime::GetLocalTime(OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute,
 }
 
 PUBLIC VIRTUAL
-IMSGMTime OsSystemTime::GetGMTime() const
+ImsGmTime OsSystemTime::GetGmTime() const
 {
-    IMSGMTime stGmTime = {0, 0, 0, 0, 0, 0};
+    ImsGmTime stGmTime = {0, 0, 0, 0, 0, 0};
     time_t now = 0;
     struct tm stTm = STRUCT_TM_INIT;
 
@@ -150,7 +150,7 @@ IMSGMTime OsSystemTime::GetGMTime() const
 }
 
 PUBLIC VIRTUAL
-void OsSystemTime::GetGMTime(OUT IMS_SINT32& nYear,
+void OsSystemTime::GetGmTime(OUT IMS_SINT32& nYear,
         OUT IMS_SINT32& nMonth, OUT IMS_SINT32& nDay,
         OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const
 {
@@ -298,7 +298,7 @@ AString OsSystemTime::GetTimeStringEx() const
 }
 
 PUBLIC VIRTUAL
-AString OsSystemTime::GetGMTimeString() const
+AString OsSystemTime::GetGmTimeString() const
 {
     time_t now = 0;
     struct tm stTm = STRUCT_TM_INIT;
@@ -344,7 +344,7 @@ AString OsSystemTime::GetGMTimeString() const
 }
 
 PUBLIC VIRTUAL
-AString OsSystemTime::GetUTCFormat(IN IMS_BOOL bNumOffset /*= IMS_FALSE*/) const
+AString OsSystemTime::GetUtcFormat(IN IMS_BOOL bNumOffset /*= IMS_FALSE*/) const
 {
     time_t now = 0;
     struct tm stTm = STRUCT_TM_INIT;
@@ -421,7 +421,7 @@ void OsSystemTime::Sleep(IN IMS_UINT32 nMilliSeconds)
 }
 
 PUBLIC VIRTUAL
-IMS_SLONG OsSystemTime::GetDiffGMTime(IN const AString& strBegin,
+IMS_SLONG OsSystemTime::GetDiffGmTime(IN const AString& strBegin,
         IN const AString& strEnd, IN IMS_BOOL bSummerTime /*= IMS_FALSE*/)
 {
     struct tm tmBegin = STRUCT_TM_INIT;

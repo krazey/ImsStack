@@ -25,7 +25,7 @@ const IMS_CHAR ConfigBase::SECTION_UNIQUENESS[] = "Uniqueness";
 
 PUBLIC
 ConfigBase::ConfigBase(IN IMS_SINT32 nSlotId_)
-    : IMSSlot(nSlotId_)
+    : ImsSlot(nSlotId_)
     , objConfigUpdateListeners(IMSMap< IMS_SINT32, IMSList<IConfigUpdateListener*> >())
 {
 }

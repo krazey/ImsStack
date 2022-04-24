@@ -763,7 +763,7 @@ IMS_BOOL AosSubscriberManager::UpdateImsi() const
     }
 
     AString strImsi;
-    piSubsInfo->GetSubscriberID(strImsi);
+    piSubsInfo->GetSubscriberId(strImsi);
 
     AString strImsiRecorded;
     piSubsInfo->GetPreference("impu_list", "imsi", strImsiRecorded);

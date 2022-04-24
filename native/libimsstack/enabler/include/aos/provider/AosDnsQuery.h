@@ -21,7 +21,7 @@
 #include "IPAddress.h"
 #include "interface/AosInternalMsgDef.h"
 
-class INetConnection;
+class INetworkConnection;
 class IAosDnsQueryListener;
 class AosDnsQueryPrivate;
 
@@ -38,7 +38,7 @@ private:
 
 public:
     void SetListener(IN IAosDnsQueryListener *piListener_);
-    void Request  (IN AString &strDomainName_,  IN INetConnection *piConnection_);
+    void Request  (IN AString &strDomainName_,  IN INetworkConnection *piConnection_);
 
     // Delete myself
     void Destroy();
@@ -67,7 +67,7 @@ private:
     AosDnsQueryPrivate *pPrivate;
     IAosDnsQueryListener *piListener;
     AString strDomainName;
-    INetConnection *piConnection;
+    INetworkConnection *piConnection;
     IMSList<IPAddress> objIPAs;
 };
 

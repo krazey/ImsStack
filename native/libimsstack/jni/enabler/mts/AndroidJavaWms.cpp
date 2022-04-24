@@ -81,7 +81,7 @@ void androidJavaWms_sendMsgToJava(IN IMS_UINT32 nMsg, IMS_UINTP pParam, IN IMS_S
 {
     IMSMSG objUIMsg(nMsg, 0, pParam);
     IMS_UINT32 nSlotId = nSlotID;
-    MSGService::PostMessage(STR_SMS_SVC_THREAD_NAME[nSlotId], objUIMsg);
+    MessageService::PostMessage(STR_SMS_SVC_THREAD_NAME[nSlotId], objUIMsg);
 }
 
 IMS_BOOL androidJavaWms_processSendMOSMS(IN IMS_UINT32 nSmsFormat,
@@ -138,7 +138,7 @@ IMS_BOOL androidJavaWms_processSendMOSMS(IN IMS_UINT32 nSmsFormat,
     AString aStrTargetActivity = EnablerUtils::GetEnablerThreadName(slotId);
     aStrTargetActivity.Append(".MtsApp");
     IMSMSG objMSG(IUSMS::SMSMO_SEND_REQUEST, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MSGService::PostMessage(aStrTargetActivity, objMSG);
+    MessageService::PostMessage(aStrTargetActivity, objMSG);
 
     return IMS_TRUE;
 }
@@ -420,7 +420,7 @@ IMS_BOOL AndroidJavaWMS::OnMessage( IN IMSMSG &objMSG )
                 AString aStrTargetActivity = EnablerUtils::GetEnablerThreadName(mSlotID);
                 aStrTargetActivity.Append(".MtsApp");
                 IMSMSG objMSG(IUSMS::SMS_RECONNECT_SC, 0, reinterpret_cast<IMS_UINTP>(pParam));
-                MSGService::PostMessage(aStrTargetActivity, objMSG);
+                MessageService::PostMessage(aStrTargetActivity, objMSG);
                 IMS_TRACE_D("OnMessage :: Retry ConnectSC, nSmsFormat:%d, nStatus:%d, mSlotID:%d", nSmsFormat, nStatus, mSlotID);
             }
         }

@@ -18,7 +18,7 @@
 
 #include "IPAddress.h"
 
-class IIPSecSP
+class IIpSecSp
 {
 public:
     /*
@@ -86,7 +86,7 @@ public:
     </table>
 
     */
-    virtual void DoneSP() = 0;
+    virtual void DoneSp() = 0;
 
 };
 

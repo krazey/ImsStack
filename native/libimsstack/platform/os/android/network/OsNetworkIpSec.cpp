@@ -40,7 +40,7 @@ OsNetworkIpSec::~OsNetworkIpSec()
 }
 
 PUBLIC VIRTUAL
-IIPSecPolicy* OsNetworkIpSec::CreatePolicy()
+IIpSecPolicy* OsNetworkIpSec::CreatePolicy()
 {
     OsIpSecPolicy* pPolicy = new OsIpSecPolicy(GetAvailableId());
 
@@ -52,7 +52,7 @@ IIPSecPolicy* OsNetworkIpSec::CreatePolicy()
 }
 
 PUBLIC VIRTUAL
-void OsNetworkIpSec::DestroyPolicy(IN IIPSecPolicy* piPolicy)
+void OsNetworkIpSec::DestroyPolicy(IN IIpSecPolicy* piPolicy)
 {
     OsIpSecPolicy* pPolicy = DYNAMIC_CAST(OsIpSecPolicy*, piPolicy);
 
@@ -109,7 +109,7 @@ void OsNetworkIpSec::DestroyAllPolicies()
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIPSecPolicy* piPolicy)
+IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIpSecPolicy* piPolicy)
 {
     IMS_TRACE_D("AddPolicy(SP+SA) -- starts", 0, 0, 0);
 
@@ -158,7 +158,7 @@ IMS_BOOL OsNetworkIpSec::AddPolicy(IN IIPSecPolicy* piPolicy)
 }
 
 PUBLIC VIRTUAL
-void OsNetworkIpSec::DeletePolicy(IN IIPSecPolicy* piPolicy)
+void OsNetworkIpSec::DeletePolicy(IN IIpSecPolicy* piPolicy)
 {
     IMS_TRACE_D("DeletePolicy(SP+SA) -- starts", 0, 0, 0);
 
@@ -188,13 +188,13 @@ void OsNetworkIpSec::FlushPolicies()
 }
 
 PUBLIC VIRTUAL
-void OsNetworkIpSec::DumpSAs(IN IIPSecPolicy* piPolicy)
+void OsNetworkIpSec::DumpPolicy(IN IIpSecPolicy* piPolicy)
 {
     (void)piPolicy;
 }
 
 PUBLIC VIRTUAL
-IIPSecPolicy* OsNetworkIpSec::GetPolicy(IN IMS_SINT32 nId) const
+IIpSecPolicy* OsNetworkIpSec::GetPolicy(IN IMS_SINT32 nId) const
 {
     for (IMS_UINT32 i = 0; i < m_objPolicy.GetSize(); i++)
     {
@@ -210,7 +210,7 @@ IIPSecPolicy* OsNetworkIpSec::GetPolicy(IN IMS_SINT32 nId) const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN INetSocket* piSocket,
+IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket,
         IN const SocketAddress& objLocal, IN const SocketAddress* pRemote /*= IMS_NULL*/)
 {
     if (piSocket == IMS_NULL)
@@ -226,7 +226,7 @@ IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN INetSocket* piSocket,
 
     IMS_SINT32 nTransportProtocol = IpSecSaParameter::Policy::TRANSPORT_PROTOCOL_UDP;
 
-    if (piSocket->GetSocketType() == INetSocket::SOCKET_ENTYPE::TYPE_STREAM)
+    if (piSocket->GetSocketType() == ISocket::SOCKET_ENTYPE::TYPE_STREAM)
     {
         nTransportProtocol = IpSecSaParameter::Policy::TRANSPORT_PROTOCOL_TCP;
     }
@@ -280,8 +280,8 @@ IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN INetSocket* piSocket,
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN INetSocket* piSocket,
-        IN INetSocket* piServerSocket)
+IMS_BOOL OsNetworkIpSec::ApplyIpSecTransform(IN ISocket* piSocket,
+        IN ISocket* piServerSocket)
 {
     if (piSocket == IMS_NULL || piServerSocket == IMS_NULL)
     {
@@ -359,7 +359,7 @@ void OsNetworkIpSec::RemoveIpSecTransforms(IN IMS_SINT32 nSocketId)
 }
 
 PUBLIC VIRTUAL
-void OsNetworkIpSec::SetSDBFlushCapability(IN IMS_BOOL bCapability)
+void OsNetworkIpSec::SetSdbFlushCapability(IN IMS_BOOL bCapability)
 {
     // Do not flush SDB always...
     (void) bCapability;
@@ -382,7 +382,7 @@ IMS_SINT32 OsNetworkIpSec::GetAvailableId()
         return nNewId;
     }
 
-    IIPSecPolicy* piPolicy = GetPolicy(nNewId);
+    IIpSecPolicy* piPolicy = GetPolicy(nNewId);
 
     while (piPolicy != IMS_NULL)
     {

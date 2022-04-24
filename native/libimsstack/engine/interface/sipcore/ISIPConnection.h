@@ -5,7 +5,6 @@
 #include "IConnection.h"
 #include "SIPTimerValues.h"
 
-class INetConnection;
 class ISIPDialog;
 class ISIPErrorListener;
 class ISIPMessage;

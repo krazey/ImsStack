@@ -24,7 +24,7 @@ __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
 OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , m_eNetStatusType(NW_REPORT_RADIO_NOSRV)
     , m_eNetServiceType(NW_REPORT_SRV_NOSRV)
     , m_eNetDomainType(NW_REPORT_DOMAIN_NOSRV)
@@ -513,7 +513,7 @@ IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
 }
 
 PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetLTERsrpStrength()
+IMS_SINT32 OsNetworkWatcher::GetLteRsrpStrength()
 {
     return System::GetInstance()->GetLteRsrpStrength(GetSlotId());
 }

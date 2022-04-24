@@ -21,10 +21,12 @@
 #include "ServiceMessage.h"
 #include "ServiceNetworkPolicy.h"
 
-class INetWatcherListener
+class INetworkWatcher;
+
+class INetworkWatcherListener
 {
 public:
-    virtual void NotifyNetWatcherStatus(IN class INetWatcherInfo *piNetWatcherInfo) = 0;
+    virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetworkWatcher) = 0;
 };
 
 typedef enum
@@ -69,7 +71,7 @@ typedef enum
     NW_REPORT_DOMAIN_MAX
 } NETDOMAIN_ENTYPE;
 
-class INetWatcherInfo
+class INetworkWatcher
 {
 public:
     // Same as OsNetworkConstants.h
@@ -125,7 +127,7 @@ public:
 
     virtual IMS_BOOL IsImsVoiceCallSupported() = 0;
 
-    virtual IMS_SINT32 GetLTERsrpStrength() = 0;
+    virtual IMS_SINT32 GetLteRsrpStrength() = 0;
 
     virtual IMS_BOOL IsLteEmergencyOnly() = 0;
 
@@ -134,7 +136,7 @@ public:
     virtual IMS_SINT32 GetMocnPlmnInfo() = 0;
 
 public:
-    inline void RegisterObserver(IN INetWatcherListener *piListener)
+    inline void RegisterObserver(IN INetworkWatcherListener* piListener)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -157,7 +159,7 @@ public:
         objObserverLists.Append( new ObserverList( piListener ) );
     }
 
-    inline void RemoveObserver(IN INetWatcherListener *piListener)
+    inline void RemoveObserver(IN INetworkWatcherListener* piListener)
     {
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -174,7 +176,7 @@ public:
             {
                 for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); j++)
                 {
-                    INetWatcherListener *objListener = pObserverList->objListeners.GetAt(j);
+                    INetworkWatcherListener* objListener = pObserverList->objListeners.GetAt(j);
 
                     if (piListener == objListener)
                     {
@@ -203,7 +205,7 @@ public:
     }
 
 public:
-    inline void ProcessNotify(IN IMSMSG &objMSG)
+    inline void ProcessNotify(IN ImsMessage& objMSG)
     {
         (void)objMSG;
         IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
@@ -221,11 +223,11 @@ public:
             {
                 for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); ++j)
                 {
-                    INetWatcherListener* piListener = pObserverList->objListeners.GetAt(j);
+                    INetworkWatcherListener* piListener = pObserverList->objListeners.GetAt(j);
 
                     if (piListener != IMS_NULL)
                     {
-                        piListener->NotifyNetWatcherStatus(this);
+                        piListener->NetworkWatcher_NotifyStatus(this);
                     }
                 }
                 break;
@@ -237,7 +239,7 @@ private:
     class ObserverList
     {
         public:
-            inline ObserverList(IN INetWatcherListener *piListener)
+            inline ObserverList(IN INetworkWatcherListener* piListener)
             {
                 piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -251,7 +253,7 @@ private:
 
         public:
             IThread *piOwnerThread;
-            IMSList<INetWatcherListener*> objListeners;
+            IMSList<INetworkWatcherListener*> objListeners;
     };
 
 private:

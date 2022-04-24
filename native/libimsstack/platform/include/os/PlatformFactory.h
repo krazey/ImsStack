@@ -19,27 +19,27 @@
 #include "ImsFdSet.h"
 #include "ImsSocket.h"
 
+class ICallInfo;
 class IDeviceInfo;
 class IEventReceiver;
 class IEventSender;
 class IFileUtil;
-class IIPCAN;
-class IISIM;
+class IIpcan;
+class IIsim;
 class ILocationInfo;
 class IMemHeap;
-class INetIPSec;
-class INetWatcherInfo;
-class IPhoneInfoCall;
+class INetworkIpSec;
+class INetworkWatcher;
 class IPowerInfo;
-class ISRVCC;
+class ISrvcc;
 class ISubscriberInfo;
 class ISystemProperty;
 class ISystemTime;
 class ISystemUtil;
-class ITRM;
 class IThread;
-class IUSIM;
-class IVoNR;
+class ITrm;
+class IUsim;
+class IVoNr;
 class IWifiWatcher;
 class IZLib;
 class ImsContentCursor;
@@ -91,11 +91,11 @@ public:
     static ImsNetworkConnection* CreateNetworkConnection(
             IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
 
-    static INetIPSec* CreateNetworkIpSec();
-    static void DestroyNetworkIpSec(IN INetIPSec*& piIpSec);
+    static INetworkIpSec* CreateNetworkIpSec();
+    static void DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec);
 
-    static IIPCAN* CreateIpcan();
-    static void DestroyIpcan(IN IIPCAN*& piIpcan);
+    static IIpcan* CreateIpcan();
+    static void DestroyIpcan(IN IIpcan*& piIpcan);
 
     static ImsFdSet* CreateFdSet(IN IMS_SINT32 nType = ImsFdSet::TYPE_SELECT);
     static ImsSocket* CreateSocket();
@@ -116,32 +116,32 @@ public:
     static ISubscriberInfo* CreateSubscriberInfo(IN IMS_SINT32 nSlotId);
     static void DestroySubscriberInfo(IN ISubscriberInfo*& piSubscriberInfo);
 
-    static INetWatcherInfo* CreateNetworkWatcher(IN IMS_SINT32 nSlotId);
-    static void DestroyNetworkWatcher(IN INetWatcherInfo*& piNetworkWatcher);
+    static INetworkWatcher* CreateNetworkWatcher(IN IMS_SINT32 nSlotId);
+    static void DestroyNetworkWatcher(IN INetworkWatcher*& piNetworkWatcher);
 
     static IWifiWatcher* CreateWifiWatcher();
     static void DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher);
 
-    static IPhoneInfoCall* CreatePhoneInfoCall(IN IMS_SINT32 nSlotId);
-    static void DestroyPhoneInfoCall(IN IPhoneInfoCall*& piPhoneInfoCall);
+    static ICallInfo* CreateCallInfo(IN IMS_SINT32 nSlotId);
+    static void DestroyCallInfo(IN ICallInfo*& piCallInfo);
 
-    static ISRVCC* CreateSrvcc(IN IMS_SINT32 nSlotId);
-    static void DestroySrvcc(IN ISRVCC*& piSrvcc);
+    static ISrvcc* CreateSrvcc(IN IMS_SINT32 nSlotId);
+    static void DestroySrvcc(IN ISrvcc*& piSrvcc);
 
     static ILocationInfo* CreateLocationInfo(IN IMS_SINT32 nSlotId);
     static void DestroyLocationInfo(IN ILocationInfo*& piLocationInfo);
 
-    static IISIM* CreateIsim(IN IMS_SINT32 nSlotId);
-    static void DestroyIsim(IN IISIM*& piIsim);
+    static IIsim* CreateIsim(IN IMS_SINT32 nSlotId);
+    static void DestroyIsim(IN IIsim*& piIsim);
 
-    static IUSIM* CreateUsim(IN IMS_SINT32 nSlotId);
-    static void DestroyUsim(IN IUSIM*& piUsim);
+    static IUsim* CreateUsim(IN IMS_SINT32 nSlotId);
+    static void DestroyUsim(IN IUsim*& piUsim);
 
-    static ITRM* CreateTrm();
-    static void DestroyTrm(IN ITRM*& piTrm);
+    static ITrm* CreateTrm();
+    static void DestroyTrm(IN ITrm*& piTrm);
 
-    static IVoNR* CreateVoNr(IN IMS_SINT32 nSlotId);
-    static void DestroyVoNr(IN IVoNR*& piVoNr);
+    static IVoNr* CreateVoNr(IN IMS_SINT32 nSlotId);
+    static void DestroyVoNr(IN IVoNr*& piVoNr);
 
     static ImsCarrierConfig* CreateCarrierConfig(IN IMS_SINT32 nSlotId);
     static void DestroyCarrierConfig(IN ImsCarrierConfig*& pCarrierConfig);

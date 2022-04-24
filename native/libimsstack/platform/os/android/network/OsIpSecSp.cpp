@@ -31,14 +31,14 @@ public:
         , m_nSrcPort(0)
         , m_objDstIp(IPAddress::IPv6NONE)
         , m_nDstPort(0)
-        , m_nTransportProtocol(IPSecType::TRANS_PROTOCOL_ANY)
-        , m_nAction(IPSecType::ACTION_APPLY)
-        , m_nDirection(IPSecType::DIRECTION_ANY)
-        , m_nMode(IPSecType::MODE_TRANSPORT)
+        , m_nTransportProtocol(IpSecType::TRANS_PROTOCOL_ANY)
+        , m_nAction(IpSecType::ACTION_APPLY)
+        , m_nDirection(IpSecType::DIRECTION_ANY)
+        , m_nMode(IpSecType::MODE_TRANSPORT)
         , m_nSpi(0)
-        , m_nSecurityProtocol(IPSecType::SECURITY_PROTOCOL_ESP)
-        , m_nAuthAlgorithm(IPSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , m_nEncryptionAlgorithm(IPSecType::ENCRYPTION_ALGORITHM_NO)
+        , m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP)
+        , m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+        , m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO)
         , m_objTunnelSrcIp(IPAddress::IPv6NONE)
         , m_objTunnelDstIp(IPAddress::IPv6NONE)
     {}
@@ -107,7 +107,7 @@ void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
 }
 
 PUBLIC VIRTUAL
-void OsIpSecSp::DoneSP()
+void OsIpSecSp::DoneSp()
 {
     SetTransportInfo();
     SetSecurityAlgorithmInfo();

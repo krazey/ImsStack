@@ -199,7 +199,7 @@ PRIVATE
 AString EmergencyNumberList::HandleENLForNetwork(IN const AString &strNumber,
         IN IMS_SINT32 nESCV)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_nSlotID)->GetRoamingState()
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
             == 0)
     {
         //Read configuration
@@ -223,7 +223,7 @@ PRIVATE
 AString EmergencyNumberList::HandleENLForUICC(IN const AString &strNumber,
         IN IMS_SINT32 nESCV)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_nSlotID)->GetRoamingState()
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
             == 1)
     {
         return ConstSosUrn::GENERIC;
@@ -250,7 +250,7 @@ Description:
 PRIVATE
 AString EmergencyNumberList::HandleNoENL(IN const AString &strNumber)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_nSlotID)->GetRoamingState()
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
             == 0)
     {
         //Read configuration
@@ -285,7 +285,7 @@ IMS_BOOL EmergencyNumberList::GetENL(OUT AStringBuffer &objENL,
     else if (nSource == ENL_UICC)
     {
         PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotID)
-                ->GetEmergencyNumberListFromSIM(strENL);
+                ->GetEmergencyNumberListFromSim(strENL);
     }
 
     IMS_TRACE_D("GetENL : Source[%d] Value[%s]", nSource, strENL.GetStr(), 0);

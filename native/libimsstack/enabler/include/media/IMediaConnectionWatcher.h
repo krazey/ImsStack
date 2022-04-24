@@ -19,7 +19,7 @@
 
 #include "IPAddress.h"
 
-class INetConnection;
+class INetworkConnection;
 class IMediaConnectionWatcherListener;
 
 class IMediaConnectionWatcher
@@ -37,12 +37,12 @@ public :
 
 public:
     virtual IMS_BOOL GetMediaConnectionType(IN AString &strPDN, IN IMS_SINT32 nSlotId,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
             OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
     virtual IMS_BOOL GetMediaConnectionType(IN IPAddress &objIpAddress,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
             OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
-    virtual IMS_BOOL GetMediaConnectionType(IN INetConnection *piNetConnection,
+    virtual IMS_BOOL GetMediaConnectionType(IN INetworkConnection *piNetConnection,
             OUT IMS_SINT32 &nMediaConnectionType, OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
     virtual IMS_BOOL SetListener(IN IMediaConnectionWatcherListener* piListener,
             IN AString &strPDN, IN IMS_SINT32 nSlotId, OUT IMS_SINT32 &nMediaConnectionType,
@@ -51,10 +51,10 @@ public:
             IN IPAddress &objIpAddress, OUT IMS_SINT32 &nMediaConnectionType,
             OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
     virtual IMS_BOOL GetRtpFragmentSize(IN AString &strPDN, IN IMS_SINT32 nSlotId,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
     virtual IMS_BOOL GetRtpFragmentSize(IN IPAddress &objIpAddress,
-            OUT INetConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
-    virtual IMS_BOOL GetRtpFragmentSize(IN INetConnection *piNetConnection,
+            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
+    virtual IMS_BOOL GetRtpFragmentSize(IN INetworkConnection *piNetConnection,
             OUT IMS_SINT32 &nRtpFragmentSize) = 0;
     virtual IMS_BOOL ReleaseListener(IMediaConnectionWatcherListener *piListener) = 0;
 };

@@ -85,7 +85,7 @@ IMS_BOOL MtcVonrManager::IsUacRequired(IN IMS_BOOL bWifi)
 #else
     // TODO, MTC BUILD
     return IMS_TRUE;
-    // return VoNRService::GetVoNRService()->GetVoNR(m_nSlotId)->IsVoNRSupported();
+    // return VoNrService::GetVoNrService()->GetVoNr(m_nSlotId)->IsVoNrSupported();
 
 #endif
 }

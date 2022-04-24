@@ -15,11 +15,9 @@
 
 #include "IPAddress.h"
 
-class INetSocketListener;
+class ISocketListener;
 
-
-
-class INetSocket
+class ISocket
 {
 public:
     // Return types of socket operation
@@ -134,7 +132,7 @@ public:
     </table>
     */
     virtual SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN INetSocketListener *piListener,
+            IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAF = ADDRESS_FAMILY_INET) = 0;
 
     /*
@@ -172,7 +170,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void SetListener( IN INetSocketListener* piListener ) = 0;
+    virtual void SetListener(IN ISocketListener* piListener) = 0;
     /*
 
     Remarks
@@ -208,7 +206,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual INetSocket* Accept() = 0;
+    virtual ISocket* Accept() = 0;
 
     /*
 
@@ -397,7 +395,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual IMS_BOOL Equals(IN const INetSocket *piNetSocket) = 0;
+    virtual IMS_BOOL Equals(IN const ISocket* piSocket) = 0;
 
     /*
 
@@ -441,7 +439,7 @@ public:
 
 
 
-class INetSocketListener
+class ISocketListener
 {
 public:
     /*
@@ -460,7 +458,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_DataReceived(IN INetSocket *piNetSocket) = 0;
+    virtual void Socket_OnDataReceived(IN ISocket* piSocket) = 0;
 
     /*
 
@@ -478,7 +476,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_SendEnabled(IN INetSocket *piNetSocket) = 0;
+    virtual void Socket_OnSendEnabled(IN ISocket* piSocket) = 0;
 
     /*
 
@@ -496,7 +494,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_ConnectionReceived(IN INetSocket *piNetSocket) = 0;
+    virtual void Socket_OnConnectionReceived(IN ISocket* piSocket) = 0;
 
     /*
 
@@ -514,7 +512,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_Connected(IN INetSocket *piNetSocket) = 0;
+    virtual void Socket_OnConnected(IN ISocket* piSocket) = 0;
 
     /*
 
@@ -532,8 +530,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_Closed(IN INetSocket *piNetSocket,
-            IN IMS_SINT32 nReason = INetSocket::CLOSE_REASON_UNKNOWN) = 0;
+    virtual void Socket_OnClosed(IN ISocket* piSocket,
+            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) = 0;
 };
 
 #endif // _INTERFACE_IMS_NET_SOCKET_H_

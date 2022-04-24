@@ -531,7 +531,7 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
             m_objContext.GetService(), m_objContext.GetImsEventReceiver()));
     lstRules.Append(new NetworkBlockRule(
             m_objContext.GetService(),
-            *PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(m_objContext.GetSlotId())));
+            *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext.GetCallManager()));
 
     if (m_objContext.GetService().GetServiceType() != ServiceType::EMERGENCY)

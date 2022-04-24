@@ -135,7 +135,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
     , m_nImsRegState(IMS_REG_STATE_DEREGISTERED)
     , m_nImsRegFeatures(ImsAosFeature::NONE)
     , m_pSipProfile(IMS_NULL)
-    , m_nRegIpcanCategory(IIPCAN::CATEGORY_MOBILE)
+    , m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
     , m_nPdnReactivateWaitTime(30)
 {
     // Init Object
@@ -461,11 +461,11 @@ IMS_UINT32 AosRegistration::GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nVa
         case PROPERTY_PROTECTED:
             nValue = AoSRegProtectedType::REG_UNPROTECTED;
 
-            if (GetRegIpcanCategory() == IIPCAN::CATEGORY_WLAN)
+            if (GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
                 nValue = AoSRegProtectedType::REG_PROTECTED;
             }
-            else if (GetRegIpcanCategory() == IIPCAN::CATEGORY_MOBILE)
+            else if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
             {
                 if ((m_pIpsecHelper != IMS_NULL) && m_pIpsecHelper->IsEstablished())
                 {
@@ -1069,10 +1069,10 @@ void AosRegistration::Init()
 
     if (m_pUtil->IsFeatureOn(FEATURE_IPSEC, m_nFeature))
     {
-        INetIPSec* piNetIpsec = NetworkService::GetNetworkService()->GetIPSec();
+        INetworkIpSec* piNetIpsec = NetworkService::GetNetworkService()->GetIpSec();
         if (piNetIpsec != IMS_NULL)
         {
-            piNetIpsec->SetSDBFlushCapability(IMS_TRUE);
+            piNetIpsec->SetSdbFlushCapability(IMS_TRUE);
             piNetIpsec->FlushPolicies();
         }
     }
@@ -1098,8 +1098,8 @@ void AosRegistration::InitFeatures()
         m_pUtil->AddFeature(FEATURE_IPSEC, m_nFeature);
    }
 
-    ITRM* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTRM();
-    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTRMSupported())
+    ITrm* piPhoneTrm = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    if (piPhoneTrm != IMS_NULL && piPhoneTrm->IsTrmSupported())
     {
         m_pUtil->AddFeature(FEATURE_TRM, m_nFeature);
 
@@ -1111,8 +1111,8 @@ void AosRegistration::InitFeatures()
 
     if (IsRegTypeEqual(AosRegistrationType::NORMAL))
     {
-        IVoNR* piServiceVonr  = VoNRService::GetVoNRService()->GetVoNR(m_nSlotId);
-        if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNRSupported())
+        IVoNr* piServiceVonr  = VoNrService::GetVoNrService()->GetVoNr(m_nSlotId);
+        if (piServiceVonr != IMS_NULL && piServiceVonr->IsVoNrSupported())
         {
             m_pUtil->AddFeature(FEATURE_VONR, m_nFeature);
         }
@@ -1192,7 +1192,7 @@ IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
                 CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI))
         {
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
-                    GetRegIpcanCategory() == IIPCAN::CATEGORY_WLAN)
+                    GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
                 bRequired = IMS_TRUE;
             }
@@ -1201,7 +1201,7 @@ IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
         if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfSupported(
                 CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR))
         {
-            if (GetRegIpcanCategory() == IIPCAN::CATEGORY_MOBILE)
+            if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
             {
                 bRequired = IMS_TRUE;
             }
@@ -1213,7 +1213,7 @@ IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
                 CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI))
         {
             if (GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable() &&
-                    GetRegIpcanCategory() == IIPCAN::CATEGORY_WLAN)
+                    GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN)
             {
                 bRequired = IMS_TRUE;
             }
@@ -1222,7 +1222,7 @@ IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
         if (GET_N_CONFIG(m_nSlotId)->IsGeolocationPidfSupported(
                 CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR))
         {
-            if (GetRegIpcanCategory() == IIPCAN::CATEGORY_MOBILE)
+            if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
             {
                 bRequired = IMS_TRUE;
             }
@@ -1238,7 +1238,7 @@ IMS_BOOL AosRegistration::IsGeolocationInfoRequired()
     if (piLs != IMS_NULL &&
             !piLs->IsPolicyEnabled(IAosLocationStarter::POLICY_START_ON_VOLTE_AVAILABLE))
     {
-        if (GetRegIpcanCategory() == IIPCAN::CATEGORY_MOBILE)
+        if (GetRegIpcanCategory() == IIpcan::CATEGORY_MOBILE)
         {
             return IMS_FALSE;
         }
@@ -5134,7 +5134,7 @@ void AosRegistration::SetPlaniHeader()
     IMS_BOOL bSet = IMS_FALSE;
     if (m_pIpsecHelper != IMS_NULL)
     {
-        if ((m_pIpsecHelper->IsEstablished()) && (GetRegIpcanCategory() == IIPCAN::CATEGORY_WLAN))
+        if ((m_pIpsecHelper->IsEstablished()) && (GetRegIpcanCategory() == IIpcan::CATEGORY_WLAN))
         {
             bSet = IMS_TRUE;
         }
@@ -5156,7 +5156,7 @@ void AosRegistration::SetPlaniHeader()
     if (bSet)
     {
         pPlaniHeader->strParameter =
-                SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetUTCFormat(IMS_TRUE);
+                SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetUtcFormat(IMS_TRUE);
         pPlaniHeader->strParameter.Replace(':', "%3A");
         pPlaniHeader->strParameter.Prepend('\"');
         pPlaniHeader->strParameter.Append('\"');

@@ -19,7 +19,7 @@
 
 
 
-class IIPCAN
+class IIpcan
 {
 public:
     /*

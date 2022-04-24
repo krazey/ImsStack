@@ -20,12 +20,12 @@
 #include "IVoNr.h"
 
 class ImsVoNr
-    : public IMSSlot
-    , public IVoNR
+    : public ImsSlot
+    , public IVoNr
 {
 public:
     inline ImsVoNr(IN IMS_SINT32 nSlotId)
-        : IMSSlot(nSlotId)
+        : ImsSlot(nSlotId)
     {}
     inline virtual ~ImsVoNr()
     {}

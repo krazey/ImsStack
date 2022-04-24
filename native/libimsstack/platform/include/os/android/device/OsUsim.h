@@ -21,10 +21,10 @@
 #include "system-intf/ISystemListener.h"
 
 class IThread;
-class IDigestAKAListener;
+class IDigestAkaListener;
 
 class OsUsimDigestAka
-    : public IDigestAKA
+    : public IDigestAka
 {
 public:
     explicit OsUsimDigestAka(IN ImsUsim* pUsim);
@@ -37,15 +37,15 @@ public:
     void OnAuthResponseReceived(IN const ByteArray& objAuthRes);
 
 protected:
-    // IDigestAKA class
+    // IDigestAka class
     void Destroy() override;
     IMS_RESULT GetAuthResponse(IN const ByteArray& objChallenge) override;
-    void SetListener(IN IDigestAKAListener* piListener) override;
+    void SetListener(IN IDigestAkaListener* piListener) override;
 
 private:
     ImsUsim* m_pUsim;
     ByteArray m_objAuthResponse;
-    IDigestAKAListener* m_piListener;
+    IDigestAkaListener* m_piListener;
 };
 
 class OsUsim
@@ -64,7 +64,7 @@ public:
     void DestroyDigestAka(IN OsUsimDigestAka* pDigestAka);
 
 protected:
-    IDigestAKA* CreateDigestAKA() override;
+    IDigestAka* CreateDigestAka() override;
 
     // ImsUsim class
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;

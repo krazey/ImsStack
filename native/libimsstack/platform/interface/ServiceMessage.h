@@ -22,14 +22,14 @@
 class IThread;
 class IMSActivity;
 
-class MSGService
+class MessageService
 {
 public:
-    static IMS_BOOL PostMessage(IN const AString &strTarget, IN IMSMSG &objMSG);
+    static IMS_BOOL PostMessage(IN const AString &strTarget, IN ImsMessage &objMSG);
 
-    static IMS_BOOL PostMessageThread(IN IThread *piTargetThread, IN IMSMSG &objMSG);
+    static IMS_BOOL PostMessageThread(IN IThread *piTargetThread, IN ImsMessage &objMSG);
 
-    static IMS_BOOL PostMessageActivity(IN IMSActivity *pTargetActivity, IN IMSMSG &objMSG);
+    static IMS_BOOL PostMessageActivity(IN IMSActivity *pTargetActivity, IN ImsMessage &objMSG);
 
 private:
     static AString GetThreadName(IN const AString& strTargetName);
@@ -38,10 +38,10 @@ private:
 //-------------------------------------------------------------------------------------------------
 
 #define IMS_MSG_PostThreadMessage(piThread, objMSG) \
-        MSGService::PostMessageThread(piThread, objMSG)
+        MessageService::PostMessageThread(piThread, objMSG)
 
 #define IMS_MSG_PostThreadMessageByName(strTarget, objMSG) \
-        MSGService::PostMessage(strTarget, objMSG)
+        MessageService::PostMessage(strTarget, objMSG)
 
 //-------------------------------------------------------------------------------------------------
 
@@ -50,17 +50,17 @@ private:
 #define IMS_MSG_CreateNPostThreadMessage(piThread, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessageThread(piThread, objMSG); \
-    IMS_TRACE_I("MsgService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessageThread(piThread, objMSG); \
+    IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0); \
 } while (0)
 
 #define IMS_MSG_CreateNPostThreadMessageByName(strTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessage(strTarget, objMSG); \
-    IMS_TRACE_I("MsgService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessage(strTarget, objMSG); \
+    IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0); \
 } while (0)
 
 #else
@@ -68,15 +68,15 @@ do \
 #define IMS_MSG_CreateNPostThreadMessage(piThread, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessageThread(piThread, objMSG); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessageThread(piThread, objMSG); \
 } while (0)
 
 #define IMS_MSG_CreateNPostThreadMessageByName(strTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessage(strTarget, objMSG); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessage(strTarget, objMSG); \
 } while (0)
 
 #endif // __IMS_MSG_TRACE__
@@ -84,10 +84,10 @@ do \
 //-------------------------------------------------------------------------------------------------
 
 #define IMS_MSG_PostActivityMessage(pTarget, objMSG) \
-        MSGService::PostMessageActivity(pTarget, objMSG)
+        MessageService::PostMessageActivity(pTarget, objMSG)
 
 #define IMS_MSG_PostActivityMessageByName(strTarget, objMSG) \
-        MSGService::PostMessage(strTarget, objMSG)
+        MessageService::PostMessage(strTarget, objMSG)
 
 //-------------------------------------------------------------------------------------------------
 
@@ -96,17 +96,17 @@ do \
 #define IMS_MSG_CreateNPostActivityMessage(pTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostActivityMessage(pTarget, objMSG); \
-    IMS_TRACE_I("MsgService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostActivityMessage(pTarget, objMSG); \
+    IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0); \
 } while (0)
 
 #define IMS_MSG_CreateNPostActivityMessageByName(strTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessage(strTarget, objMSG); \
-    IMS_TRACE_I("MsgService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessage(strTarget, objMSG); \
+    IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0); \
 } while (0)
 
 #else
@@ -114,15 +114,15 @@ do \
 #define IMS_MSG_CreateNPostActivityMessage(pTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessageActivity(pTarget, objMSG); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessageActivity(pTarget, objMSG); \
 } while (0)
 
 #define IMS_MSG_CreateNPostActivityMessageByName(strTarget, MSG, wParam, lParam) \
 do \
 { \
-    IMSMSG objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
-    MSGService::PostMessage(strTarget, objMSG); \
+    ImsMessage objMSG(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(wParam), (IMS_UINTP)(lParam)); \
+    MessageService::PostMessage(strTarget, objMSG); \
 } while (0)
 
 #endif // __IMS_MSG_TRACE__

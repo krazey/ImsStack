@@ -22,8 +22,8 @@
 #include "ISrvcc.h"
 
 class OsSrvcc
-    : public IMSSlot
-    , public ISRVCC
+    : public ImsSlot
+    , public ISrvcc
     , public IEventListener
 {
 public:
@@ -34,8 +34,8 @@ public:
     OsSrvcc& operator=(IN const OsSrvcc&) = delete;
 
 public:
-    void SubscribeSRVCCListener(IN ISRVCCListener* piListener) override;
-    void UnsubscribeSRVCCListener(IN ISRVCCListener* piListener) override;
+    void SubscribeSrvccListener(IN ISrvccListener* piListener) override;
+    void UnsubscribeSrvccListener(IN ISrvccListener* piListener) override;
 
 protected:
     // IEventListener class
@@ -50,7 +50,7 @@ private:
 private:
     IMS_BOOL m_bSrvccEventRegistered;
 
-    IMSList<ISRVCCListener*> m_objSrvccListeners;
+    IMSList<ISrvccListener*> m_objSrvccListeners;
 };
 
 #endif

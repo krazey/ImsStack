@@ -35,7 +35,7 @@ RegContact::RegContact(IN IMS_SINT32 nSlotId,
         IN CONST IPAddress &objIPA_, IN IMS_SINT32 nPort_,
         IN IRegCapabilityChangeListener *piListener_, IN IMS_SINT32 nRegId_ /* = (-1) */,
         IN CONST SIPProfile *pSIPProfile/* = IMS_NULL*/)
-    : IMSSlot(nSlotId)
+    : ImsSlot(nSlotId)
     , nState(STATE_CREATED)
     , pAOR(IMS_NULL)
     , objIPA(objIPA_)

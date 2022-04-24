@@ -39,11 +39,11 @@ public:
         , m_nSrcPort(0)
         , m_objDstIp(IPAddress::IPv6NONE)
         , m_nDstPort(0)
-        , m_nSecurityProtocol(IPSecType::SECURITY_PROTOCOL_ESP)
+        , m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP)
         , m_nSpi(0)
-        , m_nMode(IPSecType::MODE_TRANSPORT)
-        , m_nAuthAlgorithm(IPSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , m_nEncryptionAlgorithm(IPSecType::ENCRYPTION_ALGORITHM_NO)
+        , m_nMode(IpSecType::MODE_TRANSPORT)
+        , m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+        , m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO)
         , m_objAuthKey(ByteArray::ConstNull())
         , m_objEncryptionKey(ByteArray::ConstNull())
         , m_strAuthHexKey(AString::ConstNull())
@@ -87,7 +87,7 @@ OsIpSecSa::~OsIpSecSa()
 }
 
 PUBLIC VIRTUAL
-void OsIpSecSa::SetSA(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
         IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
         IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode,
         IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm,
@@ -107,7 +107,7 @@ void OsIpSecSa::SetSA(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
 }
 
 PUBLIC VIRTUAL
-void OsIpSecSa::DoneSA()
+void OsIpSecSa::DoneSa()
 {
     MakeSa();
 }
@@ -157,7 +157,7 @@ IpSecSaParameter OsIpSecSa::CreateSaParameter(IN IMS_SINT32 nId) const
 {
     ByteArray objAuthKey(m_pIpSecSaP->m_objAuthKey);
 
-    if (m_pIpSecSaP->m_nAuthAlgorithm == IPSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
+    if (m_pIpSecSaP->m_nAuthAlgorithm == IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
     {
         const IMS_BYTE byExtra[4] = { 0, 0, 0, 0 };
         objAuthKey.Append(byExtra, 4);

@@ -86,7 +86,7 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
 
 PUBLIC GLOBAL
 IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-        IN INetConnection* piConnection, IN const SIPMethod& /*objMethod*/,
+        IN INetworkConnection* piConnection, IN const SIPMethod& /*objMethod*/,
         IN const SIPProfile* pSIPProfile, OUT AString& strHeader)
 {
     if (piConnection == IMS_NULL)
@@ -136,7 +136,7 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 n
         IN const IPAddress &objIP, IN const SIPMethod& objMethod,
         IN const SIPProfile* pSIPProfile, OUT AString& strHeader)
 {
-    INetConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(objIP);
+    INetworkConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(objIP);
 
     if (piConnection != IMS_NULL)
     {
@@ -156,7 +156,7 @@ void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddre
         return;
     }
 
-    INetConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(objIP);
+    INetworkConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(objIP);
 
     if (piConnection == IMS_NULL)
     {
@@ -231,7 +231,7 @@ void PAccessNetworkInfoHeader::ReformPANIHeaderForTEL(IN_OUT AString &strHeader)
     if (piST != IMS_NULL)
     {
         // "YYYY-MM-DDTHH:MM:SS+09:00"
-        AString strUTCFormat = piST->GetUTCFormat(IMS_TRUE);
+        AString strUTCFormat = piST->GetUtcFormat(IMS_TRUE);
 
         if (strUTCFormat.GetLength() > 0)
         {
@@ -284,7 +284,7 @@ void PAccessNetworkInfoHeader::ReformPANIHeaderForCountryCode(IN IMS_SINT32 nSlo
 
 PRIVATE GLOBAL
 void PAccessNetworkInfoHeader::SetPrivateHeaderForTMUS(IN IMS_SINT32 nSlotId,
-        IN INetConnection *piConnection, IN_OUT ISIPMessage *&piSIPMsg)
+        IN INetworkConnection *piConnection, IN_OUT ISIPMessage *&piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -352,12 +352,12 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForTMUS(IN IMS_SINT32 nSlotId,
                 break;
             }
 
-            INetWatcherInfo *piNetWatcherInfo =
-            PhoneInfoService::GetPhoneInfoService()->GetNetWatcherInfo(nSlotId);
+            INetworkWatcher* piNetworkWatcher =
+                    PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
 
-            IMS_SINT32 nNetworkType = piNetWatcherInfo->GetNetworkType();
+            IMS_SINT32 nNetworkType = piNetworkWatcher->GetNetworkType();
 
-            if (nNetworkType == INetWatcherInfo::RADIOTECH_TYPE_UNKNOWN)
+            if (nNetworkType == INetworkWatcher::RADIOTECH_TYPE_UNKNOWN)
             {
                 // Timestamp for last known cell identity
                 strTimeStamp.Replace(':', "%3A");
@@ -390,7 +390,7 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForTMUS(IN IMS_SINT32 nSlotId,
 
 PRIVATE GLOBAL
 void PAccessNetworkInfoHeader::SetPrivateHeaderForMTS(IN IMS_SINT32 nSlotId,
-        IN INetConnection *piConnection, IN_OUT ISIPMessage *&piSIPMsg)
+        IN INetworkConnection *piConnection, IN_OUT ISIPMessage *&piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -458,7 +458,8 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForMTS(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::SetCNIHeader(IN IMS_SINT32 nSlotId, IN INetConnection *piConnection,
+void PAccessNetworkInfoHeader::SetCNIHeader(IN IMS_SINT32 nSlotId,
+        IN INetworkConnection *piConnection,
         IN const SIPProfile* pSIPProfile, IN_OUT ISIPMessage *&piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------

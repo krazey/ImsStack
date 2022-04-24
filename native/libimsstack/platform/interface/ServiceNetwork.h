@@ -20,8 +20,8 @@
 #include "ISocket.h"
 #include "ImsMessage.h"
 
-class INetIPSec;
-class IIPCAN;
+class INetworkIpSec;
+class IIpcan;
 class SSLCertificate;
 class NetworkServicePrivate;
 
@@ -35,7 +35,7 @@ private:
     NetworkService& operator=(IN const NetworkService& objRHS);
 
 public:
-    INetConnection* CreateConnection(IN const AString &strProfileName,
+    INetworkConnection* CreateConnection(IN const AString &strProfileName,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     /**
      * @brief Creates a data connection with the specified APN type.
@@ -48,9 +48,9 @@ public:
      * @param nSlotId The slot id
      * @return An instance of data connection.
      */
-    INetConnection* CreateConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    void DestroyConnection(IN INetConnection *&piConnection);
-    INetConnection* FindConnection(IN const AString &strProfileName,
+    INetworkConnection* CreateConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
+    void DestroyConnection(IN INetworkConnection*& piConnection);
+    INetworkConnection* FindConnection(IN const AString &strProfileName,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /**
@@ -64,33 +64,33 @@ public:
      * @param nSlotId The slot id
      * @return An instance of data connection.
      */
-    INetConnection* FindConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    INetConnection* FindConnection(IN const IPAddress &objIPAddress);
+    INetworkConnection* FindConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
+    INetworkConnection* FindConnection(IN const IPAddress &objIPAddress);
 
-    INetSocket* CreateSocket(IN INetConnection *piConnection);
-    INetSocket* CreateSocket(IN const IMS_CHAR *pszProfileName,
+    ISocket* CreateSocket(IN INetworkConnection* piConnection);
+    ISocket* CreateSocket(IN const IMS_CHAR *pszProfileName,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
-    INetSocket* CreateSSLSocket(IN INetConnection *piConnection,
+    ISocket* CreateSslSocket(IN INetworkConnection* piConnection,
             IN SSLCertificate *pCertificate);
-    INetSocket* CreateSSLSocket(IN const IMS_CHAR *pszProfileName,
+    ISocket* CreateSslSocket(IN const IMS_CHAR *pszProfileName,
             IN SSLCertificate *pCertificate, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void DestroySocket(IN INetSocket *&piSocket);
+    void DestroySocket(IN ISocket *&piSocket);
 
     // To check if the specified IP address & port number can be used to create a socket
-    IMS_BOOL CheckIPAndPortAvailability(IN const IPAddress &objIP,
-            IN IMS_SINT32 nPort, IN INetSocket::SOCKET_ENTYPE enType);
+    IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress &objIP,
+            IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
 
-    IIPCAN* GetIPCAN();
-    INetIPSec* GetIPSec();
+    IIpcan* GetIpcan();
+    INetworkIpSec* GetIpSec();
 
-    void DispatchServiceMessage(IN IMSMSG &objMSG);
+    void DispatchServiceMessage(IN ImsMessage &objMSG);
 
     static NetworkService* GetNetworkService();
 
     // Gets slot-id from the specified network connection
     static IMS_SINT32 GetSlotId(IN const IPAddress& objIPAddress);
-    static IMS_SINT32 GetSlotId(IN INetConnection* piConnection);
+    static IMS_SINT32 GetSlotId(IN INetworkConnection* piConnection);
 
 private:
     NetworkServicePrivate *pPrivate;

@@ -24,7 +24,7 @@ class IRegCapabilityChangeListener;
 
 
 class RegContact
-    : public IMSSlot
+    : public ImsSlot
     , public IRegContact
 {
 public:

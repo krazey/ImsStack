@@ -13,20 +13,20 @@
 #ifndef _IMS_SLOT_H_
 #define _IMS_SLOT_H_
 
-class IMSSlot
+class ImsSlot
 {
 public:
-    inline IMSSlot(IN IMS_SINT32 nSlotId_ = IMS_SLOT_0)
+    inline ImsSlot(IN IMS_SINT32 nSlotId_ = IMS_SLOT_0)
         : nSlotId(nSlotId_)
     {}
-    inline IMSSlot(IN const IMSSlot &objRHS)
+    inline ImsSlot(IN const ImsSlot &objRHS)
         : nSlotId(objRHS.nSlotId)
     {}
-    inline virtual ~IMSSlot()
+    inline virtual ~ImsSlot()
     {}
 
 public:
-    inline IMSSlot& operator=(IN const IMSSlot &objRHS)
+    inline ImsSlot& operator=(IN const ImsSlot &objRHS)
     {
         if (this != &objRHS)
         {

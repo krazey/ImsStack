@@ -58,7 +58,7 @@ IMS_BOOL SIPDatagramSocket::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPo
         return IMS_FALSE;
     }
 
-    if (piSocket->Bind(objIPA, nPort) == INetSocket::RESULT_ERROR)
+    if (piSocket->Bind(objIPA, nPort) == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
@@ -91,7 +91,7 @@ IMS_SINT32 SIPDatagramSocket::Send(IN CONST IMS_BYTE *pBuffer, IN IMS_SINT32 nBu
     if ((GetState() != STATE_CONNECTED)
             && (GetState() != STATE_CONNECTING))
     {
-        return INetSocket::RESULT_ERROR;
+        return ISocket::RESULT_ERROR;
     }
 
     return piSocket->SendTo(pBuffer, nBuffLen, objIPA, nPort);
@@ -116,7 +116,7 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_DataReceived(IN INetSocket *piSocket)
+void SIPDatagramSocket::Socket_OnDataReceived(IN ISocket *piSocket)
 {
     IMS_SINT32 nReadBytes;
     IMS_UINT32 nPort = 0;
@@ -150,7 +150,7 @@ void SIPDatagramSocket::Socket_DataReceived(IN INetSocket *piSocket)
         }
     }
 
-    SIPSocket::Socket_DataReceived(piSocket);
+    SIPSocket::Socket_OnDataReceived(piSocket);
 }
 
 /*
@@ -159,13 +159,13 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_SendEnabled(IN INetSocket *piSocket)
+void SIPDatagramSocket::Socket_OnSendEnabled(IN ISocket *piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
     SetState(STATE_CONNECTED);
 
-    SIPSocket::Socket_SendEnabled(piSocket);
+    SIPSocket::Socket_OnSendEnabled(piSocket);
 }
 
 /*
@@ -174,10 +174,10 @@ Remarks
 
 */
 PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_Closed(IN INetSocket *piSocket,
-        IN IMS_SINT32 nReason /* = INetSocket::CLOSE_REASON_UNKNOWN */)
+void SIPDatagramSocket::Socket_OnClosed(IN ISocket *piSocket,
+        IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------
 
-    SIPSocket::Socket_Closed(piSocket, nReason);
+    SIPSocket::Socket_OnClosed(piSocket, nReason);
 }

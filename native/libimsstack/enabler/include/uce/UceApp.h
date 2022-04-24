@@ -20,7 +20,7 @@ class UceApp
     , public IIMSActivityControl
     , public IImsAosListener
     , public IImsAosMonitor
-    , public INetWatcherListener
+    , public INetworkWatcherListener
     , public ITimerListener
 {
 /* -------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ protected:
     virtual IIMSActivityControl* GetController();
     virtual IMS_BOOL Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam,
             OUT IMS_UINTP* pnOutParam);
-    void NotifyNetWatcherStatus(IN class INetWatcherInfo* piNetWatcherInfo);
+    void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     void StopTimer(IN IMS_UINT32 nType);
     void ClearTimer();
@@ -101,7 +101,7 @@ private:
 
     IImsAos*                        m_piImsAos;
     IMS_SINT32                      m_eAoSStatus;
-    INetWatcherInfo*                m_piNetWatcherInfo;
+    INetworkWatcher*                m_piNetWatcherInfo;
     ITimer*                         m_piDeBounceTimer;
     IMS_SINT32                      m_RegisteredNetwork;
     IMS_SINT32                      m_eCurrentNetwork;
