@@ -102,6 +102,7 @@ public class SscConstant {
     // HTTP Error Code
     public static final int HTTP_NOT_MODIFIED = 304;
     public static final int HTTP_UNAUTHORIZED = 401;
+    public static final int HTTP_CONFLICT = 409;
     public static final int HTTP_PRECONDITION_FAILURE = 412;
 
     // Temp. SSC Block List

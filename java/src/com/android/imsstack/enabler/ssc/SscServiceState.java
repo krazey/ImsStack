@@ -67,6 +67,8 @@ public class SscServiceState {
     }
 
     public void deInit() {
+        resetAllUtStatus();
+
         IDCNetWatcher dnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.unregisterForPdnConnectionFailed(mHandler);
@@ -124,7 +126,7 @@ public class SscServiceState {
         return true;
     }
 
-    public void resetAllUtStatus() {
+    private void resetAllUtStatus() {
         ImsLog.d("");
 
         mUtBlockReason = SscConstant.BLOCK_REASON_NONE;

@@ -17,6 +17,22 @@ public class SscXmlFormat {
         private HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
         private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
 
+        public void setIsNoReplyTimerInRule(boolean isNoReplyTimerInRule) {
+            mIsNoReplyTimerInRule = isNoReplyTimerInRule;
+        }
+
+        public void setIsCfnlProvisioned(boolean isCfnlProvisioned) {
+            mIsCfnlProvisioned = isCfnlProvisioned;
+        }
+
+        public boolean getIsNoReplyTimerInRule() {
+            return mIsNoReplyTimerInRule;
+        }
+
+        public boolean getIsCfnlProvisioned() {
+            return mIsCfnlProvisioned;
+        }
+
         public HashMap<String, String> getTags() { return mTags; }
         public HashMap<String, HashMap<Integer, String>> getAudioRuleIds() { return mAudioRuleIds; }
         public HashMap<String, HashMap<Integer, String>> getVideoRuleIds() { return mVideoRuleIds; }
@@ -109,7 +125,12 @@ public class SscXmlFormat {
             return;
         }
 
-        mXmlDatas.put(slotId, new UtXmlData());
+        setUtXmlData(slotId, new UtXmlData());
+    }
+
+    private static void setUtXmlData(int slotId, UtXmlData data) {
+        mXmlDatas.remove(slotId);
+        mXmlDatas.put(slotId, data);
     }
 
     public static void reset(int slotId) {
@@ -253,7 +274,7 @@ public class SscXmlFormat {
             return false;
         }
 
-        return xmlData.mIsNoReplyTimerInRule;
+        return xmlData.getIsNoReplyTimerInRule();
     }
 
     public static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
@@ -262,7 +283,7 @@ public class SscXmlFormat {
             return;
         }
 
-        xmlData.mIsNoReplyTimerInRule = isNoReplyTimerInRule;
+        xmlData.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
     }
 
     public static boolean getIsCfnlProvisioned(int slotId) {
@@ -271,7 +292,7 @@ public class SscXmlFormat {
             return false;
         }
 
-        return xmlData.mIsCfnlProvisioned;
+        return xmlData.getIsCfnlProvisioned();
     }
 
     public static void setIsCfnlProvisioned(int slotId, boolean isCfnlProvisioned) {
@@ -280,6 +301,6 @@ public class SscXmlFormat {
             return;
         }
 
-        xmlData.mIsCfnlProvisioned = isCfnlProvisioned;
+        xmlData.setIsCfnlProvisioned(isCfnlProvisioned);
     }
 }

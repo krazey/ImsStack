@@ -37,7 +37,8 @@ public class SscXmlParser {
         ImsLog.d(queryData.getSlotId(), "");
 
         int responseCode = queryData.getResponseCode();
-        if (responseCode < 200 || responseCode >= 300) {
+        if (responseCode != SscConstant.HTTP_NOT_MODIFIED &&
+                (responseCode < 200 || responseCode >= 300)) {
             return getErrorPhrase(queryData, doc);
         }
 
@@ -87,6 +88,10 @@ public class SscXmlParser {
         int slotId = queryData.getSlotId();
         Node newElement = doc.getDocumentElement();
         if (newElement == null) {
+            return;
+        }
+
+        if (cachedDoc == null) {
             return;
         }
 
