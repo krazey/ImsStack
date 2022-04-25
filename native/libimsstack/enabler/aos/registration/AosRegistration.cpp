@@ -3091,6 +3091,12 @@ IMS_BOOL AosRegistration::ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode)
 PROTECTED VIRTUAL
 IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode)
 {
+    if (GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorPolicy() !=
+            CarrierConfig::Assets::ERROR_POLICY_SUBSCRIBER_FAILED)
+    {
+        return IMS_FALSE;
+    }
+
     if (IsRegistered())
     {
         if (!IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetSpecificReregistrationErrorCode(),
