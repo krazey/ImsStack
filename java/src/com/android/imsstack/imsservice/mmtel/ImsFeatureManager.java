@@ -232,19 +232,9 @@ public class ImsFeatureManager {
             return;
         }
 
-        ConfigInterface config = AgentFactory.getInstance().getAgent(
-                ConfigInterface.class, mContext.getSlotId());
-        boolean isUtRequiresImsReg = false;
-
-        if (config != null) {
-            isUtRequiresImsReg = config.getCarrierConfig().getBoolean(
-                    CarrierConfigManager.ImsSs.KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL);
-        }
-
         if (!mRegTracker.isCallVoiceSupported()
                 && !mRegTracker.isCallVideoSupported()
-                && !mRegTracker.isWifiCallSupported()
-                && isUtRequiresImsReg) {
+                && !mRegTracker.isWifiCallSupported()) {
             // Disable Ut interface if there are no IMS services
             log("Ut :: No IMS services available");
             return;
