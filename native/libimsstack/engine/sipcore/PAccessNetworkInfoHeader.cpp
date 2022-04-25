@@ -306,8 +306,8 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForTMUS(IN IMS_SINT32 nSlotId,
 
     if (piConnection->GetExtraInfo(EXTRA_POLICY_NAME, strPolicyName))
     {
-        NetworkServicePolicy *pNSP = NetworkServicePolicy::GetInstance();
-        const NetworkPolicy *pPolicy = pNSP->GetPolicy(NetworkPolicy::APN_EMERGENCY);
+        NetworkServicePolicy* pNsp = NetworkServicePolicy::GetInstance();
+        const NetworkPolicy* pPolicy = pNsp->GetPolicy(NetworkPolicy::APN_EMERGENCY, nSlotId);
 
         if ((pPolicy != IMS_NULL) && strPolicyName.Equals(pPolicy->GetName()))
         {
