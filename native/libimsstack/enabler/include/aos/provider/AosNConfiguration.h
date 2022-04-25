@@ -79,6 +79,7 @@ public:
     virtual IMS_BOOL IsGGsmaRcsTelephonyFeatureTagUsedAsAvailableVoiceCallType() const;
     virtual IMS_BOOL IsCdmalessFeatureTagRequired() const;
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const;
+    virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();

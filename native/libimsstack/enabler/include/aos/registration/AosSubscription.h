@@ -80,6 +80,7 @@ protected:
     virtual IMS_BOOL SendSubscribe();
     virtual IMS_BOOL ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed);
     virtual IMS_BOOL ProcessFailureResponse_504();
+    virtual IMS_BOOL IsRetryActionDueToRetrycounter();
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationWithNextPcscfRequired(IN IMS_SINT32 nStatusCode);
