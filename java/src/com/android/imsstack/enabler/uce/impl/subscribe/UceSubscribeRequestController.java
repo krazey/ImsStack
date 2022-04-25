@@ -1,6 +1,21 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.enabler.uce.impl.subscribe;
 
-import com.android.imsstack.enabler.uce.interf.UceEventListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
@@ -10,6 +25,7 @@ import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
+import com.android.internal.annotations.VisibleForTesting;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -34,6 +50,7 @@ public class UceSubscribeRequestController implements IUceJNIListener {
     private final Map<Integer, UceSubscribeRequest> mUceSubscribeRequestMap;
     private final UceSubscribeControllerHandler mUceSubscribeControllerHandler;
     private boolean mIsImsRegistered;
+    private UceJNI mUceJNI;
 
     private HashMap<Integer, UceSubscribeMessageHandler> mMessageHandler =
         new HashMap<Integer, UceSubscribeMessageHandler>();
@@ -44,14 +61,28 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
         mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
 
-        UceJNI.getInstance().addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
-        UceJNI.getInstance().addListener(mSlotId, this, UceMessage.UCE_PRESENCE_NOTIFY_IND);
-        UceJNI.getInstance().addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
-        UceJNI.getInstance().addListener(mSlotId, this,
-            UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
-        UceJNI.getInstance().addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
+        mUceJNI = UceJNI.getInstance();
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PRESENCE_NOTIFY_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
     }
 
+    @VisibleForTesting
+    public UceSubscribeRequestController(int slotId, UceJNI jni, Looper looper) {
+        mSlotId = slotId;
+        mIsImsRegistered = false;
+        mUceSubscribeRequestMap = new HashMap<Integer, UceSubscribeRequest>();
+        mUceSubscribeControllerHandler = new UceSubscribeControllerHandler(looper);
+
+        mUceJNI = jni;
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESPONSE_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_PRESENCE_NOTIFY_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_CMD_ERROR_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND);
+        mUceJNI.addListener(mSlotId, this, UceMessage.UCE_SUBSCRIBE_TERMINATED_IND);
+    }
     /**
      * Set the current ims registration status.
      * @param imsRegistered set to true if the ims registration is successful, false otherwise.
@@ -85,6 +116,38 @@ public class UceSubscribeRequestController implements IUceJNIListener {
         if (request.sendRequest(queryingUri)) {
             mUceSubscribeRequestMap.put(key, request);
         }
+    }
+
+    @VisibleForTesting
+    public void subscribeCapabilities(Collection<Uri> uris, SubscribeResponse cb,
+            UceSubscribeRequest request) {
+        if (!mIsImsRegistered) {
+            sendCommandError(cb, UceApiConstant.COMMAND_CODE_SERVICE_UNAVAILABLE);
+            return;
+        }
+        if (uris.isEmpty()) {
+            sendCommandError(cb, UceApiConstant.COMMAND_CODE_INVALID_PARAM);
+            return;
+        }
+
+        int key = UceUtils.generateKey();
+        ArrayList<String> queryingUri = new ArrayList<>();
+        uris.forEach(uri -> {
+            queryingUri.add(uri.toString());
+        });
+        if (request.sendRequest(queryingUri)) {
+            mUceSubscribeRequestMap.put(key, request);
+        }
+    }
+
+    @VisibleForTesting
+    public Handler getHandler() {
+        return mUceSubscribeControllerHandler;
+    }
+
+    @VisibleForTesting
+    public void setRequestWithKey(int key, UceSubscribeRequest request) {
+        mUceSubscribeRequestMap.put(key, request);
     }
 
     class UceSubscribeControllerHandler extends Handler {

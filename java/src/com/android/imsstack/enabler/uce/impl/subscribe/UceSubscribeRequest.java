@@ -5,6 +5,7 @@ import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
+import com.android.internal.annotations.VisibleForTesting;
 
 import android.os.Parcel;
 import android.text.TextUtils;
@@ -12,20 +13,36 @@ import android.net.Uri;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class UceSubscribeRequest {
-    private int mSlotId;
-    private SubscribeResponse callback;
-    private int mKey;
+    private final int mSlotId;
+    private final int mKey;
+    private final SubscribeResponse callback;
+    private final UceJNI mUceJNI;
 
     public UceSubscribeRequest(SubscribeResponse cb, int slotId, int key) {
         mKey = key;
         callback = cb;
         mSlotId = slotId;
+        mUceJNI = UceJNI.getInstance();
     }
 
+    @VisibleForTesting
+    public UceSubscribeRequest(SubscribeResponse cb, int slotId, int key, UceJNI jni) {
+        mKey = key;
+        callback = cb;
+        mSlotId = slotId;
+        mUceJNI = jni;
+    }
+
+    /**
+     * Send the SIP SUBSCRIBE method to get the other party's capabilities.
+     * @param remoteUris A {@link ArrayList} of the {@link String}s that the framework is
+     *                  requesting the UCE capabilities for.
+     */
     public boolean sendRequest(ArrayList<String> remoteUris) {
         ImsLog.i("");
         if (remoteUris == null || remoteUris.size() == 0) {
@@ -46,10 +63,17 @@ public class UceSubscribeRequest {
         for (int i = 0; i < size; i++) {
             parcel.writeString(remoteUris.get(i));
         }
-        UceJNI.getInstance().sendMessage(mSlotId, parcel);
+        mUceJNI.sendMessage(mSlotId, parcel);
         return true;
     }
 
+    /**
+     * Handles responses to SUBSCRIBE requests.
+     * @param responseCode the received sip response code.
+     * @param reason the received sip reason value.
+     * @param reasonHdrCause the received cause value of sip reason header
+     * @param reasonHdrText the received text value of sip reason header
+     */
     public void informNetworkResponse(int responseCode, String reason,
         int reasonHdrCause, String reasonHdrText) {
         ImsLog.d("informNetworkResponse:responseCode=" + responseCode +
@@ -65,6 +89,10 @@ public class UceSubscribeRequest {
         }
     }
 
+    /**
+     * Send command error regarding this request.
+     * @param code the command error code. it is one of the {@link UceApiConstant}.
+     */
     public void informCommandError(int code) {
         ImsLog.d("informCommandError:code=" + code);
         try {
@@ -74,6 +102,12 @@ public class UceSubscribeRequest {
         }
     }
 
+    /**
+     * Informe the received pidf xmls regarding this request
+     * @param pidfXmls A {@link List} of the {@link String}s that After sending list subscribe and
+     *                receiving one or more pidf xml, it is delivered in list form to notify
+     *                AOSP Framework.
+     */
     public void informCapabilitiesUpdate(List<String> pidfXmls) {
         try {
             callback.onNotifyCapabilitiesUpdate(pidfXmls);
@@ -82,6 +116,12 @@ public class UceSubscribeRequest {
         }
     }
 
+    /**
+     * The subscription associated operation has been terminated.
+     * @param reason The reason for the request being unable to process.
+     * @param retryAfterSecond The time in second the requesting application should
+     * wait before retrying, if non-zero.
+     */
     public void informTerminate(String reason, int retryAfterSecond) {
         try {
             callback.onTerminated(reason, TimeUnit.SECONDS.toMillis(retryAfterSecond));
@@ -90,6 +130,12 @@ public class UceSubscribeRequest {
         }
     }
 
+    /**
+     * Notify the framework that a resource in the RLMI XML contained in the NOTIFY response
+     * for the ongoing SUBSCRIBE dialog has been terminated.
+     * @param resourceInfoList The contact URIs which have been terminated. Each Resource info
+     *                        in the list is the contact URI and its terminated reason.
+     */
     public void informResourceTerminate(ArrayList<UceResourceInfo> resourceInfoList) {
         List<Pair<Uri, String>> uriTerminatedReason = new ArrayList<>();
         for (UceResourceInfo info : resourceInfoList) {
