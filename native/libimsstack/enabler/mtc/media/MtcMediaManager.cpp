@@ -446,6 +446,7 @@ void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS
 
     IMS_UINT32 nNetworkToneTimerDuration = 2000; // 2 sec
 
+    // TODO: temp code? is this going to move to Mtc Enablers?
     // will modify to check 180 response from all early dialogs
     b180Received = IMS_FALSE;
     IMSList<IMessage*> objResponses = piSession->GetPreviousResponses(IMessage::SESSION_START);
@@ -470,7 +471,8 @@ void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS
         nNetworkToneTimerDuration = 0;
     }
 
-    IMS_TRACE_D("Run", 0, 0, 0);
+    IMS_TRACE_D("Run EarlyDialog[%s] 180-Received[%s]",
+            _TRACE_B_(bEarly), _TRACE_B_(b180Received), 0);
 
     if (!m_piMediaSession->Run(GetMediaNegoId(piSession)))
     {

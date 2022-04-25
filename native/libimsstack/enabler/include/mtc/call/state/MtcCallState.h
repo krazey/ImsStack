@@ -14,14 +14,23 @@ class AString;
 class IMtcCallContext;
 class IReference;
 class ISession;
+class IMessage;
 class ISIPServerConnection;
 class JniMediaSessionThread;
 class JniMtcServiceThread;
 class MediaInfo;
+class MtcSession;
 enum class QosLossPolicy;
 struct FailReason;
 
 using CallStateName = IMtcCall::State;
+
+enum class ResultSetSdp
+{
+    NO_SDP,
+    FAILURE,
+    SUCCESS
+};
 
 class MtcCallState
 {
@@ -39,8 +48,7 @@ public:
             IN CallType eCallType,
             IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN JniMediaSessionThread* pJniMediaThread);
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices);
     virtual CallStateName StartConference(
             IN CallType eCallType,
             IN const AString& strTarget,
@@ -120,6 +128,7 @@ protected:
         TIMER_E911_WIFI_OPEN,
         TIMER_E911_LTE_START,
         TIMER_E911_WIFI_START,
+
         TIMER_E911_LTE_RINGBACK,
         TIMER_E911_WIFI_RINGBACK,
         TIMER_RETRY_AFTER,
@@ -135,6 +144,33 @@ protected:
     IMS_SINT32 ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReason);
     CallStateName TransitToTerminating(IN const FailReason& objReason);
     void NotifyHoldResumeState();
+
+    IMS_RESULT CreateISession();
+    ISession* GetISession();
+
+    void InitMediaSession(IN MediaInfo* pMediaInfo = IMS_NULL);
+    IMS_SINT32 OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage);
+    ResultSetSdp SetSdpToSend(IN IMS_BOOL bAllowReOffer, IN ISession* piSession = IMS_NULL);
+    void RunMedia(IN ISession* piSession, IN IMessage* piMessage);
+
+    IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert);
+    IMS_RESULT SendEarlyUpdate(IN MtcSession* pMtcSession);
+    IMS_RESULT SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession);
+    CallStateName RejectAndToTerminating(IN IMS_SINT32 nFailReason);
+    CallStateName RejectAndToTerminating(IN const FailReason& objFailReason);
+
+    void SendIncomingCallReceived();
+    void SendStarted();
+
+    // TODO: bCheckSdp to be TRUE for all cases??
+    void UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
+            IN IMS_BOOL bCheckeSdp = IMS_TRUE);
+    // TODO: more params required?
+    IMS_RESULT NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage,
+            IN IMS_UINT32 eMethod);
+
+    IMS_BOOL IsRprSupported() const;
+    IMS_BOOL IsCallWaiting() const;
 
     IMtcCallContext& m_objContext;
 

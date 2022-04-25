@@ -51,6 +51,7 @@ public:
 
 
 private:
+    IMS_RESULT SendAck(IN ISession* piSession); // TODO: differs from UpdatingState::SendAck()?
     void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
     void HandleRetryAfter(IN const FailReason& objReason);
     IMS_BOOL IsRttCapable(IN IMessage* piMessage);
@@ -58,10 +59,10 @@ private:
     void UpdateRemoteFeatures(IN IMessage* piMessage);
     void HandleTip(IN IMessage* piMessage);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
+    void SendProgressing();
     void OnStarted(IN ISession* piSession);
     void OnStartFailed(IN ISession* piSession, IN const FailReason& objReason);
     void DeleteInactiveSessions();
-    void UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage);
 
     IMSMap<ISession*, MtcSession*> m_objSessions;
     IMS_BOOL m_bRemoteAlerted;

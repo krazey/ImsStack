@@ -178,6 +178,7 @@ public:
             IN ISession* piSession = IMS_NULL);
     static IMS_BOOL IsSessionRefresh(IN ISession* piSession);
     static IMS_BOOL IsTextSession(IN ISession* piSession);
+    static IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode);
 
 public:
     static const IMS_CHAR STR_199[];

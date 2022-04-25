@@ -1,5 +1,7 @@
 #include "configuration/ConfigDef.h"
 #include "call/IMtcCallContext.h"
+#include "call/IMtcCallManager.h"
+#include "call/ParticipantInfo.h"
 #include "media/IMtcMediaManager.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
@@ -11,6 +13,14 @@
 #include "precondition/QosDef.h"
 #include "call/UpdatingInfo.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
+#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "utility/MessageUtil.h"
+#include "precondition/SdpPreconditionHelper.h"
+#include "precondition/IMtcPreconditionManager.h"
+#include "ISIPHeader.h"
+#include "IMessage.h"
+#include "SIPStatusCode.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -48,8 +58,7 @@ PUBLIC VIRTUAL
 CallStateName MtcCallState::Start(IN CallType /* eCallType */,
         IN CONST AString& /* strTarget */,
         IN MediaInfo* /* pMediaInfo */,
-        IN const IMSMap<IMS_UINT32, SuppService*>& /* lstSuppServices */,
-        IN JniMediaSessionThread* /* pJniMediaThread */)
+        IN const IMSMap<IMS_UINT32, SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
 }
@@ -459,4 +468,288 @@ void MtcCallState::NotifyHoldResumeState()
         m_objContext.GetUiNotifier().SendResumedBy(&(m_objContext.GetCallInfo()), &objMediaInfo,
                 m_objContext.GetSupplementaryService().GetAll());
     }
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::CreateISession()
+{
+    ISession* piSession = m_objContext.GetSipInterfaceFactory().GetISessionHolder()->GetISession(
+            m_objContext.GetService().GetICoreService(),
+            m_objContext.GetParticipantInfo().GetLocalUri(),
+            m_objContext.GetParticipantInfo().GetRemoteUri());
+    if (piSession == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+    piSession->SetImplicitRoutingRequired(IMS_TRUE);
+    m_objContext.SetSession(m_objContext.CreateSession(*piSession));
+
+    return IMS_SUCCESS;
+}
+
+PROTECTED
+ISession* MtcCallState::GetISession()
+{
+    return &m_objContext.GetSession()->GetISession();
+}
+
+PROTECTED
+void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo/* = IMS_NULL*/)
+{
+    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    if (pMediaInfo)
+    {
+        objMediaManager.SetMediaInfo(*pMediaInfo);
+    }
+    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+    {
+        objMediaManager.CreateMediaSession(
+                m_objContext.GetUiNotifier().GetJniMediaThread());
+    }
+    else
+    {
+        objMediaManager.CreateMediaSession(IMS_NULL);
+    }
+
+    objMediaManager.CreateMediaProfile(
+            &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);
+    objMediaManager.SetConferenceCall(m_objContext.GetCallInfo().bConference);
+}
+
+PROTECTED
+IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage)
+{
+    if (IMS_FALSE)
+    {
+        // TODO: IsInvalidOfferAnswer(); by RFC 6337
+        return FAIL_REASON_MEDIA_NEGOFAIL;
+    }
+
+    if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
+    {
+        IMS_TRACE_D("OnSdpReceived - No SDP", 0, 0, 0);
+        return FAIL_REASON_NONE;
+    }
+
+    if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    {
+        IMS_TRACE_D("OnSdpReceived - Nego SDP Failed", 0, 0, 0);
+        // TODO: return fail reasone? IMS_RESULT? it's always NEGOFAIL?
+        return FAIL_REASON_MEDIA_NEGOFAIL;
+    }
+
+    RunMedia(piSession, piMessage);
+
+    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(piSession);
+
+    IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
+    return FAIL_REASON_NONE;
+}
+
+PROTECTED
+ResultSetSdp MtcCallState::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
+        IN ISession* piSession/* = IMS_NULL*/)
+{
+    // TODO: RFC 6337 instead of bAllowReOffer?
+
+    if (piSession == IMS_NULL)
+    {
+        piSession = GetISession();
+    }
+
+    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    // TODO: need to check sending offer not in STATE_NEGOTIATED?
+    if (!bAllowReOffer &&
+            objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
+    {
+        IMS_TRACE_D("SetSdpToSend - nothing to update", 0, 0, 0);
+        return ResultSetSdp::NO_SDP;
+    }
+
+    if (objMediaManager.FormSdp(piSession, m_objContext.GetCallInfo().eCallType) == IMS_FAILURE)
+    {
+        IMS_TRACE_D("SetSdpToSend - Form SDP Failed", 0, 0, 0);
+        return ResultSetSdp::FAILURE;
+    }
+
+    IMS_TRACE_D("SetSdpToSend - Set Done", 0, 0, 0);
+
+    // TODO: bFailure to true for failure cases is not in this api?
+    m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
+
+    return ResultSetSdp::SUCCESS;
+}
+
+PROTECTED
+void MtcCallState::RunMedia(IN ISession* piSession, IN IMessage* piMessage)
+{
+    IMS_BOOL bEarly = !MessageUtil::IsResponseExist(piSession, SIPStatusCode::SC_200);
+    IMS_BOOL b180Received = m_objContext.GetCallInfo().ePeerType == PeerType::MO &&
+            MessageUtil::IsResponseExist(piSession, SIPStatusCode::SC_180);
+
+    m_objContext.GetMediaManager().Run(piSession, piMessage, bEarly, b180Received);
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
+{
+    ResultSetSdp eSetSdpResult = SetSdpToSend(IMS_FALSE);
+    if (eSetSdpResult == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    // TODO: determine the response code based on the configuration for KR carriers?
+    IMS_SINT32 nStatusCode = bUserAlert ? SIPStatusCode::SC_180 : SIPStatusCode::SC_183;
+
+    return m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
+            nStatusCode, IsRprSupported(), eSetSdpResult == ResultSetSdp::SUCCESS, IsCallWaiting());
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::SendEarlyUpdate(IN MtcSession* pMtcSession)
+{
+    IMS_TRACE_D("SendEarlyUpdate", 0, 0, 0);
+
+    if (SetSdpToSend(IMS_TRUE, &pMtcSession->GetISession()) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return pMtcSession->GetMessageSender()
+            .SendEarlyUpdate(UpdateType::NORMAL);
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode,
+        IN MtcSession* pMtcSession)
+{
+    IMS_TRACE_D("SendResponseToEarlyUpdate", 0, 0, 0);
+
+    // TODO: check status code in SetSdpToSend()?
+    if (SIPStatusCode::IsFinalSuccess(eStatusCode) &&
+            SetSdpToSend(IMS_FALSE, &pMtcSession->GetISession()) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return pMtcSession->GetMessageSender()
+            .RespondToEarlyUpdate(eStatusCode);
+}
+
+PROTECTED
+CallStateName MtcCallState::RejectAndToTerminating(IN IMS_SINT32 nFailReason)
+{
+    FailReason objReason(nFailReason);
+    return RejectAndToTerminating(objReason);
+}
+
+PROTECTED
+CallStateName MtcCallState::RejectAndToTerminating(IN const FailReason& objFailReason)
+{
+    m_objContext.GetSession()->GetMessageSender().Reject(objFailReason);
+    return TransitToTerminating(objFailReason);
+}
+
+PROTECTED
+void MtcCallState::SendIncomingCallReceived()
+{
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+
+    m_objContext.GetUiNotifier().SendIncomingCallReceived(
+            m_objContext.GetCallKey(),
+            m_objContext.GetCallInfo(),
+            objMediaInfo,
+            m_objContext.GetSupplementaryService().GetAll(),
+            m_objContext.GetParticipantInfo());
+}
+
+PROTECTED
+void MtcCallState::SendStarted()
+{
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+
+    m_objContext.GetUiNotifier().SendStarted(
+            &m_objContext.GetCallInfo(),
+            &objMediaInfo,
+            m_objContext.GetSupplementaryService().GetAll());
+}
+
+PROTECTED
+void MtcCallState::UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
+        IN IMS_BOOL bCheckeSdp/* = IMS_TRUE*/)
+{
+    if (bCheckeSdp && !MessageUtil::HasSdp(piMessage))
+    {
+        return;
+    }
+
+    IMS_BOOL bRemoteCapability = IMS_FALSE;
+    IMS_BOOL bHasSupportedHeader =
+            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISIPHeader::SUPPORTED);
+    IMS_BOOL bHasRequireHeader =
+            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISIPHeader::REQUIRE);
+
+    if ((!bCheckeSdp || SdpPreconditionHelper::IsPreconditionIncludedInSdp(piSession)) &&
+            (bHasSupportedHeader || bHasRequireHeader))
+    {
+        bRemoteCapability = IMS_TRUE;
+    }
+
+    IMS_TRACE_D("UpdatePreconditionCapability : Precondition Capability on remote UE[%s]",
+            _TRACE_B_(bRemoteCapability), 0, 0);
+
+    m_objContext.GetPreconditionManager().UpdatePreconditionCapability(
+            piSession, bRemoteCapability);
+}
+
+PROTECTED
+IMS_RESULT MtcCallState::NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage,
+        IN IMS_UINT32 eMethod)
+{
+    if (piMessage == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (piMessage->GetMessage()->GetType() == ISIPMessage::TYPE_RESPONSE)
+    {
+        pMtcSession->GetExtensionSet().HandleResponse(eMethod, *piMessage);
+    }
+    else
+    {
+        pMtcSession->GetExtensionSet().HandleRequest(eMethod, *piMessage);
+    }
+
+    if (!pMtcSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
+    {
+        return IMS_FAILURE;
+    }
+    return IMS_SUCCESS;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsRprSupported() const
+{
+    return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
+            MtcExtensionSet::OPTION_TAG_RPR);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsCallWaiting() const
+{
+    IMSList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
+
+    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
+    {
+        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
+        if (eState == IMtcCall::State::ESTABLISHED || eState == IMtcCall::State::UPDATING)
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }

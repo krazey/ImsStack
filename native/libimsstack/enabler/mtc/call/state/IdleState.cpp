@@ -29,8 +29,6 @@
 #include "call/MtcUiNotifier.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
-#include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
-#include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "SIPAddress.h"
 #include "SIPHeaderName.h"
 #include "utility/MessageUtil.h"
@@ -56,9 +54,9 @@ CallStateName IdleState::Start(
         IN CallType eCallType,
         IN const AString& strTarget,
         IN MediaInfo* pMediaInfo,
-        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-        IN JniMediaSessionThread* pJniMediaThread)
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
 {
+    IMS_TRACE_D("Start", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
     CallInfo& objCallInfo = m_objContext.GetCallInfo();
@@ -75,7 +73,7 @@ CallStateName IdleState::Start(
 
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueStart(pMediaInfo, pJniMediaThread);
+        return ContinueStart(pMediaInfo);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
             m_objContext.CreateBlockChecker(GetOutgoingCallBlockRules()));
@@ -90,6 +88,7 @@ CallStateName IdleState::StartConference(
         IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
         IN IMSList<ConfUser*> lstUsers)
 {
+    IMS_TRACE_D("StartConference", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::START_CONFERENCE; // TODO: deprecated.
 
     CallInfo& objCallInfo = m_objContext.GetCallInfo();
@@ -182,6 +181,7 @@ PUBLIC VIRTUAL
 CallStateName IdleState::HandleIncoming(
         IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
+    IMS_TRACE_D("HandleIncoming", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
@@ -260,26 +260,19 @@ CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 
 PRIVATE
 CallStateName IdleState::ContinueStart(
-        IN MediaInfo* pMediaInfo, IN JniMediaSessionThread* pJniMediaThread)
+        IN MediaInfo* pMediaInfo)
 {
-    ISession* piSession = m_objContext.GetSipInterfaceFactory().GetISessionHolder()->GetISession(
-            m_objContext.GetService().GetICoreService(),
-            m_objContext.GetParticipantInfo().GetLocalUri(),
-            m_objContext.GetParticipantInfo().GetRemoteUri());
-    if (piSession == IMS_NULL)
+    IMS_TRACE_D("ContinueStart", 0, 0, 0);
+    if (CreateISession() == IMS_FAILURE)
     {
         return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
     }
-    piSession->SetImplicitRoutingRequired(IMS_TRUE);
-    m_objContext.SetSession(m_objContext.CreateSession(*piSession));
 
-    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
-    m_objContext.GetMediaManager().CreateMediaSession(pJniMediaThread);
-    m_objContext.GetMediaManager().CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
+    InitMediaSession(pMediaInfo);
 
-    m_objContext.GetPreconditionManager().CreateQos(piSession);
+    m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
-    if (SendStartMessage(piSession) == IMS_FAILURE)
+    if (SendStartMessage() == IMS_FAILURE)
     {
         return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
     }
@@ -290,33 +283,20 @@ PRIVATE
 CallStateName IdleState::ContinueConference(
         IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers)
 {
-    ISession* piSession =
-            m_objContext.GetSipInterfaceFactory().GetISessionHolder()->GetISession(
-            m_objContext.GetService().GetICoreService(),
-            m_objContext.GetParticipantInfo().GetLocalUri(),
-            m_objContext.GetParticipantInfo().GetRemoteUri());
-    if (piSession == IMS_NULL)
+    IMS_TRACE_D("ContinueConference", 0, 0, 0);
+    if (CreateISession() == IMS_FAILURE)
     {
         return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
     }
-    piSession->SetImplicitRoutingRequired(IMS_TRUE);
-    m_objContext.SetSession(m_objContext.CreateSession(*piSession));
 
     IMSList<AString> lstUris = GetEntryUrisFromConferenceUsers(lstUsers);
-    SetResourceListForConference(*piSession->GetNextRequest(), lstUris);
+    SetResourceListForConference(*GetISession()->GetNextRequest(), lstUris);
 
-    if (pMediaInfo != IMS_NULL)
-    {
-        m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
-    }
-    m_objContext.GetMediaManager().CreateMediaSession(
-            m_objContext.GetUiNotifier().GetJniMediaThread());
-    m_objContext.GetMediaManager().CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
-    m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
+    InitMediaSession(pMediaInfo);
 
-    m_objContext.GetPreconditionManager().CreateQos(piSession);
+    m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
-    if (SendStartMessage(piSession) == IMS_FAILURE)
+    if (SendStartMessage() == IMS_FAILURE)
     {
         return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
     }
@@ -326,20 +306,16 @@ CallStateName IdleState::ContinueConference(
 PRIVATE
 CallStateName IdleState::ContinueHandleIncoming()
 {
-    ISession* piSession = &m_objContext.GetSession()->GetISession();
+    IMS_TRACE_D("ContinueHandleIncoming", 0, 0, 0);
+    ISession* piSession = GetISession();
 
     UpdateIncomingInformation(piSession);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.CreateMediaSession(IMS_NULL);
-    objMediaManager.CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
-    objMediaManager.SetConferenceCall(m_objContext.GetCallInfo().bConference);
+    InitMediaSession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    m_objContext.GetSession()->GetExtensionSet().HandleRequest(IMessage::SESSION_START, *piMessage);
-
-    if (!m_objContext.GetSession()->GetExtensionSet()
-            .IsSupportRequiredExtensions(*piMessage))
+    if (NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_START) ==
+            IMS_FAILURE)
     {
         FailReason objReason(REJECT_REASON_SESSION_NOTSUPPORT);
         m_objContext.GetSession()->GetMessageSender().Reject(objReason);
@@ -350,38 +326,23 @@ CallStateName IdleState::ContinueHandleIncoming()
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     objPreconditionManager.CreateQos(piSession);
+    UpdatePreconditionCapability(piSession, piMessage, IMS_FALSE);
 
-    IMS_BOOL bRemotePreconditionCapability = MessageUtil::HasValue(piMessage,
-            MessageUtil::STR_PRECONDITION, ISIPHeader::SUPPORTED) ||
-            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISIPHeader::REQUIRE);
-    objPreconditionManager.UpdatePreconditionCapability(piSession, bRemotePreconditionCapability);
-
-    if (m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_RPR))
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if ((MessageUtil::HasSdp(piMessage) &&
-                objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR) ||
-                (objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE))
-        {
-            FailReason objReason(REJECT_REASON_MEDIA_NEGOFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
-        }
+        return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+    }
 
-        if (objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
-        {
-            objPreconditionManager.UpdatePreconditionAttributes(piSession);
+    // TODO: OnPreconditionReceived()
+    // need to check the nego state?
+    if (!objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
+    {
+        objPreconditionManager.StartQosTimer(piSession);
+    }
 
-            if (!objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
-            {
-                objPreconditionManager.StartQosTimer(piSession);
-            }
-        }
-
-        objPreconditionManager.FormPreconditionSdp(piSession, IMS_FALSE);
-
-        if (m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
-                SIPStatusCode::SC_183, IMS_TRUE, IMS_TRUE, IMS_FALSE) == IMS_FAILURE)
+    if (IsRprSupported())
+    {
+        if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
             FailReason objReason(REJECT_REASON_SESSION_FAIL);
             m_objContext.GetSession()->GetMessageSender().Reject(objReason);
@@ -393,23 +354,25 @@ CallStateName IdleState::ContinueHandleIncoming()
     }
     else
     {
-        // 180? reject?
+        IMS_TRACE_D("ContinueHandleIncoming - RPR is not supported.", 0, 0, 0);
+
+        SendIncomingCallReceived();
+        return CallStateName::ALERTING;
     }
 
     return CallStateName::INCOMING;
 }
 
 PRIVATE
-IMS_RESULT IdleState::SendStartMessage(IN ISession* piSession)
+IMS_RESULT IdleState::SendStartMessage()
 {
     // StartE911StartTimer(m_pSessInfo->eCallType); -> Configs to be redefined
-
-    if (m_objContext.GetMediaManager().FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
+    if (m_objContext.GetMediaManager().FormSdp(GetISession(), CallType::VOIP) == IMS_FAILURE)
     {
         return IMS_FAILURE;
     }
 
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
+    m_objContext.GetPreconditionManager().FormPreconditionSdp(GetISession(), IMS_FALSE);
 
     MtcSession* pSession = m_objContext.GetSession();
     if (pSession == IMS_NULL)
@@ -470,6 +433,7 @@ void IdleState::SetResourceListForConference(
 PRIVATE
 void IdleState::UpdateIncomingInformation(IN ISession* piSession)
 {
+    IMS_TRACE_D("UpdateIncomingInformation", 0, 0, 0);
     if (piSession == IMS_NULL)
     {
         return;

@@ -146,11 +146,10 @@ void MtcCallController::HandleIncoming(
 PUBLIC
 void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices, IN IDialogEvent* /* pDialog */,
-        IN JniMediaSessionThread* pJniMediaThread)
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices, IN IDialogEvent* /* pDialog */)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Start(eCallType, strTarget, pMediaInfo, objSuppServices, pJniMediaThread);
+            ->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
 }
 
 PUBLIC

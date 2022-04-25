@@ -33,21 +33,11 @@ AlertingState::~AlertingState()
 PUBLIC VIRTUAL
 CallStateName AlertingState::HandleUserAlert()
 {
-    IMS_BOOL bMediaNegotiated = IMS_TRUE;   // TODO:
-    IMS_BOOL bRprSupport = m_objContext.GetSession()->GetExtensionSet()
-            .IsAvailableOnBoth(MtcExtensionSet::OPTION_TAG_RPR);
-    IMS_BOOL bIsCallWaiting = IsCallWaiting();
-    if (m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
-            SIPStatusCode::SC_180,
-            bRprSupport, // TODO: From config: imsvoice.prack_supported_for_18x_bool
-            !bMediaNegotiated,
-            bIsCallWaiting) == IMS_FAILURE)
+    IMS_TRACE_D("HandleUserAlert", 0, 0, 0);
+    if (SendProvisionalResponse(IMS_TRUE) == IMS_FAILURE)
     {
-        FailReason objReason(REJECT_REASON_SESSION_FAIL);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        return TransitToTerminating(objReason);
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
     }
-
     // m_objContext.GetTimer().Start(TIMER_MT_ALERTING,
     //         UCCONFIG_GET_INT(m_nSlotID, SESSION_TIME_MT_ALERTING) * 1000);
 
@@ -57,6 +47,7 @@ CallStateName AlertingState::HandleUserAlert()
 PUBLIC VIRTUAL
 CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
+    IMS_TRACE_D("Accept", 0, 0, 0);
     IMS_BOOL bCallTypeChanged = m_objContext.GetCallInfo().eCallType != eCallType;
 
     m_objContext.GetCallInfo().eCallType = eCallType;
@@ -72,26 +63,12 @@ CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
 
     m_objContext.GetTimer().StopAll();
 
-    ISession& objSession = m_objContext.GetSession()->GetISession();
-
-    if (objMediaManager.GetNegotiationState(&objSession) == NegotiationState::STATE_OFFER_RECEIVED)
-    {
-        if (objMediaManager.FormSdp(&objSession, CallType::VOIP) == IMS_FAILURE)
-        {
-            FailReason objReason(REJECT_REASON_MEDIA_FORMFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
-        }
-
-        m_objContext.GetPreconditionManager().FormPreconditionSdp(&objSession, IMS_FALSE);
-    }
-
     if (SendAccept() == IMS_FAILURE)
     {
-        return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
     }
 
-    objMediaManager.Run(&objSession, IMS_NULL, IMS_FALSE, IMS_FALSE);
+    RunMedia(GetISession(), IMS_NULL);
 
     return GetStateName();
 }
@@ -99,10 +76,9 @@ CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
 PUBLIC VIRTUAL
 CallStateName AlertingState::Reject(IN const FailReason& objReason)
 {
-    m_objContext.GetSession()->GetMessageSender().Reject(objReason);
+    IMS_TRACE_D("Reject", 0, 0, 0);
     // TODO: Convert reason (UCSession::ConvertRejectReasonToFailReason)
-
-    return TransitToTerminating(objReason);
+    return RejectAndToTerminating(objReason);
 }
 
 PUBLIC VIRTUAL
@@ -136,14 +112,12 @@ CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
 PUBLIC VIRTUAL
 CallStateName AlertingState::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
-    UNUSED_PARAM(piSession);
+    IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
 
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        FailReason objReason(REJECT_REASON_SESSION_FAIL_PRECONDITION);
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        return TransitToTerminating(objReason);
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL_PRECONDITION);
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
@@ -157,38 +131,28 @@ CallStateName AlertingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
 PUBLIC VIRTUAL
 CallStateName AlertingState::SessionStarted(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionStarted - ACK received", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
     UpdateCallTypeFromMessage(piMessage, piSession);
     m_objContext.GetSession()->GetExtensionSet().HandleRequest(IMessage::SESSION_ACK, *piMessage);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    if (MessageUtil::HasSdp(piMessage) &&
-            (objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_OFFER_SENT))
+    // TODO: need to check NegotiationState::STATE_OFFER_SENT?
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if (objMediaManager.NegotiateSdp(piSession) == IMS_FAILURE)
-        {
-            FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
-            m_objContext.GetSession()->GetMessageSender().Terminate(IMS_TRUE, objReason);
-            return TransitToTerminating(objReason);
-        }
-
-        objMediaManager.Run(piSession, piMessage, IMS_FALSE, IMS_FALSE);
+        // TODO TerminateAndToTerminating() ?
+        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        m_objContext.GetSession()->GetMessageSender().Terminate(IMS_TRUE, objReason);
+        return TransitToTerminating(objReason);
     }
 
-    MediaInfo objMediaInfo;
-    objMediaManager.GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendStarted(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll());
-
+    SendStarted();
     return CallStateName::ESTABLISHED;
 }
 
 PUBLIC VIRTUAL
 CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
 
     if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SIPMethod::CANCEL))
@@ -201,30 +165,20 @@ CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 PUBLIC VIRTUAL
 CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
     IMessage* piMessage = MessageUtil::GetPreviousResponse(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     UpdateCallTypeFromMessage(piMessage, piSession);
-    m_objContext.GetSession()->GetExtensionSet().HandleResponse(
-            IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-
-    if (MessageUtil::HasSdp(piMessage))
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if (objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
-        {
-            FailReason objReason(REJECT_REASON_MEDIA_NEGOFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
-        }
-
-        objPreconditionManager.UpdatePreconditionAttributes(piSession);
+        return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
     }
 
     if (SendAccept() == IMS_FAILURE)
     {
-        return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
     }
 
     return GetStateName();
@@ -245,59 +199,29 @@ CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSes
 PUBLIC VIRTUAL
 CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
-    UpdateCallTypeFromMessage(piMessage, piSession);
-    m_objContext.GetSession()->GetExtensionSet().HandleRequest(
-            IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    UpdateCallTypeFromMessage(piMessage, piSession); // TODO: why only in AlertingState?
+    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
-    if (!MessageUtil::HasSdp(piMessage))
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if (m_objContext.GetSession()->GetMessageSender()
-                .RespondToEarlyUpdate(SIPStatusCode::SC_200) == IMS_FAILURE)
+        if (SendResponseToEarlyUpdate(SIPStatusCode::SC_488, m_objContext.GetSession()) ==
+                IMS_FAILURE)
         {
-            return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
         }
-
         return GetStateName();
     }
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    if (objMediaManager.GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
+    // TODO: RFC 6337 offer/answer check.
+
+    if (SendResponseToEarlyUpdate(SIPStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
     {
-        if (m_objContext.GetSession()->GetMessageSender().
-                RespondToEarlyUpdate(SIPStatusCode::SC_400) == IMS_FAILURE)
-        {
-            FailReason objReason(REJECT_REASON_MEDIA_NEGOFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
-        }
-
-        return GetStateName();
-    }
-
-    if (objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
-    {
-        FailReason objReason(REJECT_REASON_MEDIA_NEGOFAIL);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        return TransitToTerminating(objReason);
-    }
-
-    if (objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
-    {
-        FailReason objReason(REJECT_REASON_MEDIA_FORMFAIL);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        return TransitToTerminating(objReason);
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
-
-    if (m_objContext.GetSession()->GetMessageSender()
-            .RespondToEarlyUpdate(SIPStatusCode::SC_200) == IMS_FAILURE)
-    {
-        return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
     }
 
     return CallStateName::ALERTING;
@@ -306,6 +230,7 @@ CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
 PUBLIC VIRTUAL
 CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionPRAckReceived", 0, 0, 0);
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     m_objContext.GetTimer().Stop(TIMER_MT_PRACK_WAIT);
@@ -314,49 +239,49 @@ CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
 
     UpdateCallTypeFromMessage(piMessage, piSession);
 
-    if (MessageUtil::HasSdp(piMessage))
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-        if (objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+        if (SendResponseToPrack(SIPStatusCode::SC_488) == IMS_FAILURE)
         {
-            FailReason objReason(REJECT_REASON_MEDIA_NEGOFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
+            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
         }
-
-        if (objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
-        {
-            FailReason objReason(REJECT_REASON_MEDIA_FORMFAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            return TransitToTerminating(objReason);
-        }
-
-        IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-        objPreconditionManager.UpdatePreconditionAttributes(piSession);
-        objPreconditionManager.FormPreconditionSdp(piSession, IMS_FALSE);
+        return GetStateName();
     }
 
-    if (m_objContext.GetSession()->GetMessageSender()
-            .RespondToPrack(SIPStatusCode::SC_200) == IMS_FAILURE)
-    {
-        return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
-    }
+    // TODO: RFC 6337 offer/answer check.
 
+    if (SendResponseToPrack(SIPStatusCode::SC_200) == IMS_FAILURE)
+    {
+        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+    }
     return CallStateName::ALERTING;
 }
 
 PRIVATE
 IMS_RESULT AlertingState::SendAccept()
 {
-    if (m_objContext.GetSession()->GetMessageSender().Accept() == IMS_FAILURE)
-    {
-        FailReason objReason(REJECT_REASON_SESSION_FAIL);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
+    IMS_TRACE_D("SendAccept", 0, 0, 0);
 
+    // TODO: "REJECT_REASON_MEDIA_FORMFAIL" is required?
+    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    {
         return IMS_FAILURE;
     }
 
-    return IMS_SUCCESS;
+    return m_objContext.GetSession()->GetMessageSender().Accept();
+}
+
+PRIVATE
+IMS_RESULT AlertingState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
+{
+    IMS_TRACE_D("SendResponseToPrack", 0, 0, 0);
+    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return m_objContext.GetSession()->GetMessageSender()
+            .RespondToPrack(eStatusCode);
 }
 
 PRIVATE
@@ -369,21 +294,4 @@ void AlertingState::UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISessio
                 m_objContext.GetCallInfo().eCallType, eNewCallType, 0);
         m_objContext.GetCallInfo().eCallType = eNewCallType;
     }
-}
-
-PRIVATE
-IMS_BOOL AlertingState::IsCallWaiting()
-{
-    IMSList<IMtcCall*> lstCalls = m_objContext.GetCallManager().GetCalls();
-
-    for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
-    {
-        IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::ESTABLISHED || eState == IMtcCall::State::UPDATING)
-        {
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
 }

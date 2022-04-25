@@ -13,7 +13,6 @@ class AString;
 class ConfUser;
 class IMessage;
 class IMtcCallContext;
-class JniMediaSessionThread;
 class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
@@ -34,8 +33,7 @@ public:
             IN CallType eCallType,
             IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN JniMediaSessionThread* pJniMediaThread)
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
             override;
     CallStateName StartConference(
             IN CallType eCallType,
@@ -70,11 +68,12 @@ private:
     };
 
     CallStateName ContinueStart(
-            IN MediaInfo* pMediaInfo, IN JniMediaSessionThread* pJniMediaThread);
+            IN MediaInfo* pMediaInfo);
     CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
 
-    IMS_RESULT SendStartMessage(IN ISession* piSession);
+    IMS_RESULT SendStartMessage();
+
     AString GenerateSessionId();
     IMSList<AString> GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers);
     void SetResourceListForConference(

@@ -9,6 +9,7 @@
 #include "media/IMtcMediaManager.h"
 #include "utility/MessageUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
+#include "ServiceTrace.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -26,6 +27,7 @@ EstablishedState::~EstablishedState()
 PUBLIC VIRTUAL
 CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 {
+    IMS_TRACE_D("Hold", 0, 0, 0);
     // TODO, notify held if eADir is inactive
 
     if (HandleUpdate(UpdateType::HOLD, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
@@ -40,6 +42,7 @@ CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 PUBLIC VIRTUAL
 CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
 {
+    IMS_TRACE_D("Resume", 0, 0, 0);
     if (HandleUpdate(UpdateType::RESUME, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
             IMS_FAILURE)
     {
@@ -52,6 +55,7 @@ CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
 PUBLIC VIRTUAL
 CallStateName EstablishedState::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
+    IMS_TRACE_D("Convert", 0, 0, 0);
     if (HandleUpdate(UpdateType::SESSION, eCallType, pMediaInfo) == IMS_FAILURE)
     {
         // TODO
@@ -63,6 +67,7 @@ CallStateName EstablishedState::Convert(IN CallType eCallType, IN MediaInfo* pMe
 PUBLIC VIRTUAL
 CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
 {
+    IMS_TRACE_D("Terminate", 0, 0, 0);
     FailReason objConvertedReason(objReason);
     objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
 
@@ -76,6 +81,7 @@ CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
 PUBLIC VIRTUAL
 CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
 
     return TransitToTerminating(TerminationHandler().Handle(*piSession));
@@ -84,6 +90,7 @@ CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
 PUBLIC VIRTUAL
 CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionUpdateReceived", 0, 0, 0);
     m_objContext.GetMediaManager().GetMediaInfo(
             m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
 
@@ -119,6 +126,7 @@ PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(IN UpdateType eUpdateType, IN CallType /* eCallType */,
         IN MediaInfo* pMediaInfo)
 {
+    IMS_TRACE_D("HandleUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
     m_objContext.GetMediaManager().GetMediaInfo(
             m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
@@ -150,6 +158,7 @@ IMS_RESULT EstablishedState::HandleUpdate(IN UpdateType eUpdateType, IN CallType
 PRIVATE
 IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 {
+    IMS_TRACE_D("HandleReceivedUpdate", 0, 0, 0);
     ISession& objSession = m_objContext.GetSession()->GetISession();
     if (m_objContext.GetMediaManager().NegotiateSdp(&objSession) == IMS_FAILURE)
     {
@@ -190,6 +199,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 PRIVATE
 IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName)
 {
+    IMS_TRACE_D("HandleReceivedUpdateWithoutOffer", 0, 0, 0);
     eStateName = CallStateName::UPDATING;
     IMessage* piMessage =
             m_objContext.GetSession()->GetISession().GetPreviousRequest(IMessage::SESSION_UPDATE);
@@ -216,6 +226,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdateWithoutOffer(OUT CallStateName&
 PRIVATE
 IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 {
+    IMS_TRACE_D("FormAutoAccept", 0, 0, 0);
     MtcSession* pSession = m_objContext.GetSession();
 
     AdjustDirectionWithHeldByMe();
@@ -245,6 +256,7 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 PRIVATE
 void EstablishedState::NotifyIncomingUpdate(IN CallType eCallType)
 {
+    IMS_TRACE_D("NotifyIncomingUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetAlerted();
 
     CallInfo& objInfo = m_objContext.GetCallInfo();

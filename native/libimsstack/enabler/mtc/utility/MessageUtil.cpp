@@ -1889,3 +1889,22 @@ IMS_BOOL MessageUtil::IsTextSession(IN ISession* piSession)
     IMS_TRACE_D("IsTextSession :: NOT TEXT SESSION", 0, 0, 0);
     return IMS_FALSE;
 }
+
+PUBLIC GLOBAL
+IMS_BOOL MessageUtil::IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode)
+{
+    IMS_BOOL bExist = IMS_FALSE;
+    IMSList<IMessage*> objResponses = piSession->GetPreviousResponses(IMessage::SESSION_START);
+
+    for (IMS_UINT32 i = 0; i < objResponses.GetSize(); i ++)
+    {
+        if (objResponses.GetAt(i)->GetStatusCode() == nStatusCode)
+        {
+            bExist = IMS_TRUE;
+            break;
+        }
+    }
+
+    IMS_TRACE_D("IsResponseExist : [%d][%s]", nStatusCode, _TRACE_B_(bExist), 0);
+    return bExist;
+}

@@ -45,8 +45,9 @@ public:
 
 private:
     IMS_RESULT SendAccept();
+    IMS_RESULT SendResponseToPrack(IN IMS_SINT32 eStatusCode);
+
     void UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISession* piSession);
-    IMS_BOOL IsCallWaiting();
 };
 
 #endif

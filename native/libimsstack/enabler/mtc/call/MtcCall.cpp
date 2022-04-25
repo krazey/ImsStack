@@ -114,12 +114,11 @@ void MtcCall::Start(
         IN CallType eCallType,
         IN const AString& strTarget,
         IN MediaInfo* pMediaInfo,
-        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-        IN JniMediaSessionThread* pJniMediaThread)
+        IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("Start : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    if (pMediaInfo == IMS_NULL || pJniMediaThread == IMS_NULL)
+    if (pMediaInfo == IMS_NULL)
     {
         delete pMediaInfo;
         OnInternalFailure();
@@ -128,7 +127,7 @@ void MtcCall::Start(
 
     m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
     {
-        return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices, pJniMediaThread);
+        return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
     });
 }
 

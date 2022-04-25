@@ -52,8 +52,7 @@ public:
             IN CallType eCallType,
             IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN JniMediaSessionThread* pJniMediaThread) = 0;
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices) = 0;
 
     virtual void StartConference(
             IN CallType eCallType,

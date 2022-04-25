@@ -92,7 +92,7 @@ public:
      */
     void Start(IN CallKey nCallKey, IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN IDialogEvent* pDialog, IN JniMediaSessionThread* pJniMediaThread);
+            IN IDialogEvent* pDialog);
 
     /**
      * Notifies the call that the user is alerted by the incoming call.
