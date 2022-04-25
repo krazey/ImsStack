@@ -20,6 +20,9 @@
 #include "IMSTypeDef.h"
 #include "AString.h"
 
+enum class AosPcscfOrder;
+enum class AosRegRequestType;
+
 class IAosRegistrationControlListener
 {
 public:
@@ -29,8 +32,8 @@ public:
             IN const AString& strTarget) = 0;
     virtual void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
-    virtual void RegistrationControl_ControlRegistration(IN IMS_SINT32 nRequestType,
-            IN IMS_SINT32 nPcscfOrder) = 0;
+    virtual void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
+            IN AosPcscfOrder eOrder) = 0;
 };
 
 class AosRegistrationControlListener
@@ -43,8 +46,28 @@ public:
             IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override {};
     inline void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override {};
-    inline void RegistrationControl_ControlRegistration(IN IMS_SINT32 /*nRequestType*/,
-            IN IMS_SINT32 /*nPcscfOrder*/) override {};
+    inline void RegistrationControl_ControlRegistration(IN AosRegRequestType /*nRequestType*/,
+            IN AosPcscfOrder /*nPcscfOrder*/) override {};
+};
+
+/**
+ * PCSCF order used in registration request
+ */
+enum class AosPcscfOrder
+{
+    FIRST = 0,
+    CURRENT = 1,
+    NEXT =2
+};
+
+/**
+ * Registration request type
+ */
+enum class AosRegRequestType
+{
+    START = 0,
+    REFRESH = 1,
+    STOP =2
 };
 
 #endif // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_

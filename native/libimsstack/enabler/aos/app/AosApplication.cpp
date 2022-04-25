@@ -33,6 +33,7 @@
 #include "interface/IAosRegStateManager.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
+#include "interface/IAosService.h"
 #include "handle/AosFeatureTag.h"
 #include "condition/AosCondition.h"
 #include "condition/AosECondition.h"
@@ -2781,6 +2782,31 @@ void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PROTECTED VIRTUAL
+void AosApplication::RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
+        IN AosPcscfOrder /* eOrder */)
+{
+    if (eType == AosRegRequestType::START)
+    {
+        // TODO: impl. except CURRENT
+        PostMessage(MSG_REG_RECOVER, 0, 0);
+        return;
+    }
+
+    if (eType == AosRegRequestType::REFRESH)
+    {
+        PostMessage(MSG_REG_UPDATE, 0, 1);
+        return;
+    }
+
+    if (eType == AosRegRequestType::STOP)
+    {
+        ProcessDisconnectingState();
+        PostMessage(MSG_REG_STOP, 0, 0);
+        return;
+    }
+}
+
+PROTECTED VIRTUAL
 void AosApplication::Init()
 {
     A_IMS_TRACE_D(APPID, "Init", 0, 0, 0);
@@ -2829,6 +2855,15 @@ void AosApplication::Init()
     {
         SetNetTrackerListener();
     }
+
+    if (m_nAppType == TYPE_NORMAL)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->AddListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        }
+    }
 }
 
 PROTECTED VIRTUAL
@@ -2839,6 +2874,15 @@ void AosApplication::CleanUp()
     CleanAll();
 
     StopTimer(TIMER_RECONFIG_GUARD);
+
+    if (m_nAppType == TYPE_NORMAL)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+        if (piService != IMS_NULL)
+        {
+            piService->RemoveListener(DYNAMIC_CAST(IAosRegistrationControlListener*, this));
+        }
+    }
 
     if (m_piNetTracker != IMS_NULL)
     {

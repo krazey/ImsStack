@@ -29,6 +29,7 @@
 #include "interface/IAosConditionListener.h"
 #include "interface/IAosConnectorListener.h"
 #include "interface/IAosNetTrackerListener.h"
+#include "interface/IAosRegistrationControlListener.h"
 #include "interface/IAosRegistrationListener.h"
 #include "provider/AosStaticProfile.h"
 
@@ -51,6 +52,7 @@ class AosApplication
     , public IEventListener
     , public ITimerListener
     , public IAosNetTrackerListener
+    , public AosRegistrationControlListener
 {
     DECLARE_STATE_MAP()
 
@@ -257,6 +259,10 @@ protected:
 
     // ITimerListener
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
+
+    // AosRegistrationControlListener
+    virtual void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
+            IN AosPcscfOrder eOrder);
 
 protected:
     enum

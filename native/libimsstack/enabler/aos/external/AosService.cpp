@@ -266,7 +266,9 @@ void AosService::ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 n
 
         if (piListener != IMS_NULL)
         {
-            piListener->RegistrationControl_ControlRegistration(nRequestType, nPcscfOrder);
+            piListener->RegistrationControl_ControlRegistration(
+                    static_cast<AosRegRequestType>(nRequestType),
+                    static_cast<AosPcscfOrder>(nPcscfOrder));
         }
     }
 }

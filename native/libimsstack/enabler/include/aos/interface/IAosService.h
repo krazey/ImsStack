@@ -30,6 +30,8 @@ enum class AosCapability;
 enum class AosIsimState;
 enum class AosRegEvent;
 enum class AosPhoneNumberRetryCommand;
+enum class AosRegRequestType;
+enum class AosPcscfOrder;
 
 class IAosService
 {
