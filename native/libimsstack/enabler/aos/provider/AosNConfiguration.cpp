@@ -309,6 +309,12 @@ IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const
 }
 
 PUBLIC VIRTUAL
+IMS_BOOL AosNConfiguration::IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const
+{
+    return m_objSpecificRegErr.bSpecificRegErrRetryCountSharedForRegAndRegEvent;
+}
+
+PUBLIC VIRTUAL
 IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -693,7 +699,8 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
                 CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MAX_COUNT_INT);
         m_objSpecificRegErr.nSpecificRegErrMinCount = piCcBundle->GetInt(
                 CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MIN_COUNT_INT);
-        m_objSpecificRegErr.bSpecificRegErrRetryCountSharedForRegAndRegEvent = piCc->GetBoolean(
+        m_objSpecificRegErr.bSpecificRegErrRetryCountSharedForRegAndRegEvent =
+                piCcBundle->GetBoolean(
                 CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_RETRY_COUNT_SHARED_FOR_REGISTRATION_AND_REG_EVENT_BOOL);
         m_objSpecificRegErr.objSpecificRegErrNumMultipliedByPcscfNum =
                 piCcBundle->GetIntArray(
@@ -707,7 +714,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objSpecificRegErr.objSpecificRegErrWaitTimeSec =
                 piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_WAIT_TIME_SEC_INT_ARRAY);
-        m_objSpecificRegErr.bSpecificReregFailureWithErrCodeInRoaming = piCc->GetBoolean(
+        m_objSpecificRegErr.bSpecificReregFailureWithErrCodeInRoaming = piCcBundle->GetBoolean(
                 CarrierConfig::Assets::KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
@@ -729,7 +736,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objRegRetry.objRegistrationRetryErrorCodeWithDifferentPcscf =
                 piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY);
-        m_objRegRetry.bRegistrationRetryWithIpVersionFallback = piCc->GetBoolean(
+        m_objRegRetry.bRegistrationRetryWithIpVersionFallback = piCcBundle->GetBoolean(
                 CarrierConfig::Assets::KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL);
         m_objRegRetry.nRegistrationRetryDefaultPolicy = piCcBundle->GetInt(
                 CarrierConfig::Assets::KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT);
@@ -746,7 +753,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objReregRetry.objReregistrationRetryErrorCodeWithInitialRegistration =
                 piCcBundle->GetIntArray(
                 CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY);
-        m_objReregRetry.bReregistrationRetryExpireTimeChecked = piCc->GetBoolean(
+        m_objReregRetry.bReregistrationRetryExpireTimeChecked = piCcBundle->GetBoolean(
                 CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL);
         m_objReregRetry.nReregistrationRetryMaxCountKeptRegistration = piCcBundle->GetInt(
                 CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT);
@@ -794,7 +801,7 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
     if (piCcBundle != IMS_NULL)
     {
         m_objRegErrCodeWithRetryAfterTime.bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined =
-                piCc->GetBoolean(
+                piCcBundle->GetBoolean(
                 CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL);
         m_objRegErrCodeWithRetryAfterTime.objRegistrationErrorCodeWithRetryAfterTime =
                 piCcBundle->GetIntArray(

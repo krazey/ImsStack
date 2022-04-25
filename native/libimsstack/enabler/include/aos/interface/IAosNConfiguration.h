@@ -305,6 +305,15 @@ public:
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const = 0;
 
     /**
+     * @brief Flag indicating whether the retry counter should be shared between REGISTER and
+     *        SUBSCRIBE for reg event package.
+     *
+     * @return IMS_BOOL Return whether to be suppoted retry count shared for registration and
+     *         reg event package
+     */
+    virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5

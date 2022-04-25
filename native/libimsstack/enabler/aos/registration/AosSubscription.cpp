@@ -21,6 +21,7 @@
 #include "ServiceEvent.h"
 #include "ServicePhoneInfo.h"
 #include "ServiceVoNr.h"
+#include "CarrierConfig.h"
 #include "IVoNr.h"
 #include "IRegInfoContact.h"
 #include "IRegSubscription.h"
@@ -33,6 +34,7 @@
 #include "interface/IAosConnection.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
+#include "provider/AosRetryRepository.h"
 #include "registration/AosRegistration.h"
 #include "provider/AosTrm.h"
 #include "provider/AosUtil.h"
@@ -429,7 +431,7 @@ PROTECTED VIRTUAL
 IMS_BOOL AosSubscription::ProcessFailureResponse_423(IN IMS_BOOL bIsRefreshed)
 {
     IMS_SINT32 nMinTime =
-        AosUtil::GetInstance()->GetMinExpiresValue(m_piRegSubscription->GetPreviousResponse());
+            AosUtil::GetInstance()->GetMinExpiresValue(m_piRegSubscription->GetPreviousResponse());
 
     if (nMinTime <= 0)
     {
@@ -466,6 +468,28 @@ IMS_BOOL AosSubscription::ProcessFailureResponse_504()
         return IMS_TRUE;
     }
 
+    return IMS_FALSE;
+}
+
+PROTECTED VIRTUAL
+IMS_BOOL AosSubscription::IsRetryActionDueToRetrycounter()
+{
+    IMS_BOOL bSupported = GET_N_CONFIG(
+            m_piContext->GetSlotId())->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired();
+    IMS_SINT32 nMaxCount = GET_N_CONFIG(
+            m_piContext->GetSlotId())->GetSpecificRegistrationErrorMaxCount();
+    if ((bSupported == IMS_TRUE) && (nMaxCount > 0))
+    {
+        IMS_BOOL bIncreseRetryCount = AosProvider::GetInstance()->GetRetryRepository(
+                m_piContext->GetSlotId())->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL);
+        if (bIncreseRetryCount == IMS_FALSE)
+        {
+            m_bIsErrChecked = IMS_TRUE;
+            IMS_TRACE_I("request initial registration with next pcscf", 0, 0, 0);
+            RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED_WITH_NEXT_PCSCF);
+            return IMS_TRUE;
+        }
+    }
     return IMS_FALSE;
 }
 
@@ -633,7 +657,11 @@ IMS_BOOL AosSubscription::ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode,
 
     m_bIsErrChecked = IMS_FALSE;
 
-    if (IsSubscriptionTerminated(nStatusCode) == IMS_TRUE)
+    if (IsRetryActionDueToRetrycounter() == IMS_TRUE)
+    {
+        return IMS_TRUE;
+    }
+    else if ((!m_bIsErrChecked) && (IsSubscriptionTerminated(nStatusCode) == IMS_TRUE))
     {
         return IMS_TRUE;
     }
@@ -935,6 +963,16 @@ PROTECTED VIRTUAL
 void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 nState)
 {
     (void) nState;
+
+    IMS_BOOL bSupported = GET_N_CONFIG(
+            m_piContext->GetSlotId())->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired();
+    IMS_SINT32 nMaxCount = GET_N_CONFIG(
+            m_piContext->GetSlotId())->GetSpecificRegistrationErrorMaxCount();
+    if ((bSupported == IMS_TRUE) && (nMaxCount > 0))
+    {
+        AosProvider::GetInstance()->GetRetryRepository(
+                m_piContext->GetSlotId())->ResetRetryCount(AosRetryRepository::TYPE_NORMAL);
+    }
 }
 
 PROTECTED VIRTUAL
@@ -995,7 +1033,7 @@ void AosSubscription::RegSubscription_NotifyReceived
         IMS_UINT32 nRetryAfter = static_cast<IMS_UINT32>(piRegInfoContact->GetRetryAfterValue());
 
         A_IMS_TRACE_I(AOSTAG, "State (%s), Event (%s)", RegInfoStateToString(nGetState),
-            RegInfoEventToString(nEvent), 0);
+                RegInfoEventToString(nEvent), 0);
 
         if (nGetState == IRegInfoContact::STATE_TERMINATED)
         {
