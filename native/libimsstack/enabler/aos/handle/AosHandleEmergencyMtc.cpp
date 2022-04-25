@@ -31,9 +31,9 @@ PUBLIC
 AosHandleEmergencyMtc::AosHandleEmergencyMtc
     (
         IN IAosAppContext* piAosAppContext,
-        IN CONST AString& strAppId,
-        IN CONST AString& strServiceId,
-        IN CONST IMS_SINT32 nServiceType
+        IN const AString& strAppId,
+        IN const AString& strServiceId,
+        IN const IMS_SINT32 nServiceType
     )
     : AosHandle(piAosAppContext, strAppId, strServiceId, nServiceType)
 {

@@ -29,8 +29,8 @@ Remarks
 PUBLIC
 AosFeatureTag::AosFeatureTag
     (
-        IN CONST AString& strName,
-        IN CONST AString& strValue /* = AString::ConstNull() */,
+        IN const AString& strName,
+        IN const AString& strValue /* = AString::ConstNull() */,
         IN IMS_UINT32 nType /* = 0 */,
         IN IMS_UINT32 nOption /* = OPTION_HEADER_PARAMETER */
     )
@@ -61,8 +61,8 @@ Remarks
 
 */
 PUBLIC
-void AosFeatureTag::SetFeatureTag(IN CONST AString& strName,
-        IN CONST AString& strValue /* = AString::ConstNull() */)
+void AosFeatureTag::SetFeatureTag(IN const AString& strName,
+        IN const AString& strValue /* = AString::ConstNull() */)
 {
     m_strName = strName;
     m_strValue = strValue;
@@ -93,8 +93,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTag::Equals(IN CONST AString& strName,
-        IN CONST AString& strValue /*= AString::ConstNull() */)
+IMS_BOOL AosFeatureTag::Equals(IN const AString& strName,
+        IN const AString& strValue /*= AString::ConstNull() */)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -185,8 +185,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTagList::AddFeatureTag(IN CONST AString& strName,
-        IN CONST AString& strValue /* = AString::ConstNull() */, IN IMS_UINT32 nType /*= 0*/,
+IMS_BOOL AosFeatureTagList::AddFeatureTag(IN const AString& strName,
+        IN const AString& strValue /* = AString::ConstNull() */, IN IMS_UINT32 nType /*= 0*/,
         IN IMS_UINT32 nOption /* = AosFeatureTag::OPTION_HEADER_PARAMETER */)
 {
     IMS_TRACE_I("AddFeatureTag :: name(%s) , value(%s)",
@@ -215,8 +215,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTagList::RemoveFeatureTag(IN CONST AString& strName,
-        IN CONST AString& strValue /* = AString::ConstNull()*/)
+IMS_BOOL AosFeatureTagList::RemoveFeatureTag(IN const AString& strName,
+        IN const AString& strValue /* = AString::ConstNull()*/)
 {
     IMS_TRACE_I("RemoveFeatureTag :: name(%s) , value(%s)",
             strName.GetStr(), strValue.GetStr(), 0);
@@ -483,10 +483,34 @@ Remarks
 
 */
 PUBLIC
+IMS_BOOL AosFeatureTagList::HasFeatureTag(IN const AString& strName, IN const AString& strValue)
+{
+    IMS_TRACE_I("HasFeatureTag :: name(%s) , value(%s)",
+            strName.GetStr(), strValue.GetStr(), 0);
+
+    for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
+    {
+        AosFeatureTag* pFeatureTag = m_objFeatureTagList.GetAt(i);
+
+        if (pFeatureTag->Equals(strName, strValue))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    IMS_TRACE_D("HasFeatureTag :: not exist", 0, 0, 0);
+
+    return IMS_FALSE;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
 void AosFeatureTagList::PrintFeatureTagList()
 {
-    //IMS_TRACE_D("PrintFeatureTagList :: size(%d)", m_objFeatureTagList.GetSize(), 0, 0);
-
     AString strLog;
     for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
     {
