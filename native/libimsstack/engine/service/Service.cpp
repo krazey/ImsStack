@@ -322,7 +322,7 @@ ISIPClientConnection* Service::CreateConnection(IN CONST SIPAddress *pFrom,
     IMS_BOOL bOverwriteTarget = IMS_FALSE;
     AString strTarget = pTo->ToString();
 
-    IMS_TRACE_P("Service::CreateConnection() - To (%s), Method (%s)",
+    IMS_TRACE_D("Service::CreateConnection() - To (%s), Method (%s)",
             SIPDebug::GetUri1(strTarget).GetStr(),
             objMethod.ToString().GetStr(), 0);
 
