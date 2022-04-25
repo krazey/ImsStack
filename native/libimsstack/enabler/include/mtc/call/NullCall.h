@@ -34,8 +34,7 @@ public:
             IN CallType,
             IN const AString&,
             IN MediaInfo*,
-            IN const IMSMap<IMS_UINT32, SuppService*>&,
-            IN JniMediaSessionThread*) override {}
+            IN const IMSMap<IMS_UINT32, SuppService*>&) override {}
     inline void StartConference(
             IN CallType, IN const AString&, IN MediaInfo*,
             IN const IMSMap<IMS_UINT32, SuppService*>&, IN IMSList<ConfUser*>) override {}

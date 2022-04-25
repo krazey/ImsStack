@@ -63,8 +63,7 @@ public:
             IN CallType eCallType,
             IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices,
-            IN JniMediaSessionThread* pJniMediaThread) override;
+            IN const IMSMap<IMS_UINT32, SuppService*>& objSuppServices) override;
     void StartConference(
             IN CallType eCallType,
             IN const AString& strTarget,

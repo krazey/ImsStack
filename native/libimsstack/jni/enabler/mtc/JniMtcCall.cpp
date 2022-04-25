@@ -234,7 +234,7 @@ void JniMtcCall::Start(IN const android::Parcel& objParcel)
             objParcel);
 
     m_objCallController.Start(m_nCallKey, eCallType, strTarget,
-            pMediaInfo, objSuppService, IMS_NULL, m_pJniMediaSession->GetThread());
+            pMediaInfo, objSuppService, IMS_NULL);
 }
 
 PRIVATE

@@ -124,22 +124,10 @@ CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     }
 
     // send early UPDATE
-    if (m_objContext.GetMediaManager().GetNegotiationState(piSession) !=
-            NegotiationState::STATE_NEGOTIATED)
-    {
-        return GetStateName();
-    }
-
-    if (m_objContext.GetMediaManager().FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
-    {
-        return GetStateName();
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
-    if (m_objSessions.GetValue(piSession)->GetMessageSender().SendEarlyUpdate(
-            UpdateType::NORMAL) == IMS_FAILURE)
+    if (SendEarlyUpdate(m_objSessions.GetValue(piSession)) == IMS_FAILURE)
     {
         IMS_TRACE_D("QosReserved : Fail to send early UPDATE.", 0, 0, 0);
+        // TODO: erroer handling.
     }
 
     return GetStateName();
@@ -169,14 +157,10 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
     IMessage* piMessage = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
 
     m_objContext.GetTimer().StopAll();
-
     m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
     UpdateCallType(piSession, piMessage, IMS_FALSE);
     HandleTip(piMessage);
-    m_objSessions.GetValue(piSession)->GetExtensionSet().HandleResponse(
-            IMessage::SESSION_START, *piMessage);
-
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
+    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START);
 
     if (MessageUtil::IsFocusConf(piMessage))
     {
@@ -184,13 +168,10 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
         m_objContext.GetCallInfo().bConferenceSubscriptionRequired =
                 ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired();
 
-        objMediaManager.SetConferenceCall(IMS_TRUE);
+        m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
     }
 
-    objMediaManager.CreateMediaProfile(piSession, IMS_FALSE, IMS_TRUE);
-
-    if (MessageUtil::HasSdp(piMessage) &&
-            objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
         m_objSessions.GetValue(piSession)->GetMessageSender().SendAck();
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
@@ -199,25 +180,15 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
         return TransitToTerminating(objReason);
     }
 
-    UpdatePreconditionCapability(piSession, piMessage);
-    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(piSession);
-    m_objContext.GetPreconditionManager().EnableRemoteCurrentStatus(piSession);
-
-    if (objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_OFFER_RECEIVED)
+    if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
     {
-        if (objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
-        {
-            m_objSessions.GetValue(piSession)->GetMessageSender().SendAck();
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
-        }
-
-        m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_FALSE);
+        RunMedia(piSession, piMessage);
     }
 
-    if (m_objSessions.GetValue(piSession)->GetMessageSender().SendAck() == IMS_FAILURE)
+    UpdatePreconditionCapability(piSession, piMessage);
+    m_objContext.GetPreconditionManager().EnableRemoteCurrentStatus(piSession);
+
+    if (SendAck(piSession) == IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
         HandleCancel(piSession, objReason);
@@ -225,7 +196,6 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
         return TransitToTerminating(objReason);
     }
 
-    objMediaManager.Run(piSession, piMessage, IMS_FALSE, IMS_FALSE);
     OnStarted(piSession);
 
     return CallStateName::ESTABLISHED;
@@ -281,15 +251,7 @@ CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 
     objMediaManager.Run(piSession, piMessage, IMS_TRUE, IMS_FALSE);
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendProgressing(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_bRemoteAlerted);
-
+    SendProgressing();
     return GetStateName();
 }
 
@@ -309,24 +271,27 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSessio
 PUBLIC VIRTUAL
 CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
+    IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
-    UpdateCallType(piSession, piMessage, IMS_TRUE);
-    m_objSessions.GetValue(piSession)->GetExtensionSet().HandleRequest(
-            IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    UpdateCallType(piSession, piMessage, IMS_TRUE); // TODO: why differs from AlertingState?
+    NegotiateExtension(
+            m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.HandleRingBackTone(piSession, piMessage);
+    // TODO: can this go into OnSdpReceived()?
+    m_objContext.GetMediaManager().HandleRingBackTone(piSession, piMessage);
 
-    if (!MessageUtil::HasSdp(piMessage))
+    // TODO: RFC 6337.
+
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if (m_objSessions.GetValue(piSession)->GetMessageSender()
-                .RespondToEarlyUpdate(SIPStatusCode::SC_200) == IMS_FAILURE)
+        if (SendResponseToEarlyUpdate(SIPStatusCode::SC_488, m_objSessions.GetValue(piSession)) ==
+                IMS_FAILURE)
         {
-            FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
+            FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
             return TransitToTerminating(objReason);
@@ -334,36 +299,10 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         return GetStateName();
     }
 
-    if (objMediaManager.GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
-    {
-        if (m_objSessions.GetValue(piSession)->GetMessageSender()
-                .RespondToEarlyUpdate(SIPStatusCode::SC_400) == IMS_FAILURE)
-        {
-            FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
-            HandleCancel(piSession, objReason);
-            OnStartFailed(piSession, objReason);
-            return TransitToTerminating(objReason);
-        }
-        return GetStateName();
-    }
+    UpdatePreconditionCapability(piSession, piMessage); // TODO: not in AlertingState?
 
-    if (objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR ||
-            objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
-    {
-        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
-        HandleCancel(piSession, objReason);
-        OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
-    }
-
-    UpdatePreconditionCapability(piSession, piMessage);
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.UpdatePreconditionAttributes(piSession);
-    objPreconditionManager.FormPreconditionSdp(piSession, IMS_FALSE);
-
-    if (m_objSessions.GetValue(piSession)->GetMessageSender()
-            .RespondToEarlyUpdate(SIPStatusCode::SC_200) == IMS_FAILURE)
+    if (SendResponseToEarlyUpdate(SIPStatusCode::SC_200, m_objSessions.GetValue(piSession)) ==
+            IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
         HandleCancel(piSession, objReason);
@@ -371,16 +310,7 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         return TransitToTerminating(objReason);
     }
 
-    objMediaManager.Run(piSession, piMessage, IMS_TRUE, IMS_FALSE /* 180Received - should fix*/);
-
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendProgressing(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll());
-
+    SendProgressing(); // TODO: enforce remote alert to false?
     return GetStateName();
 }
 
@@ -443,16 +373,12 @@ CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
             return GetStateName();
         }
 
-        if (objMediaManager.FormSdp(piSession, CallType::VOIP) == IMS_FAILURE)
+        if (SendEarlyUpdate(m_objSessions.GetValue(piSession)) == IMS_FAILURE)
         {
-            return GetStateName();
-        }
-
-        objPreconditionManager.FormPreconditionSdp(piSession, IMS_FALSE);
-        if (m_objSessions.GetValue(piSession)->GetMessageSender().SendEarlyUpdate(
-                UpdateType::NORMAL) == IMS_FAILURE)
-        {
-            IMS_TRACE_D("SessionPRAckDelivered : Fail to send early UPDATE.", 0, 0, 0);
+            FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
+            HandleCancel(piSession, objReason);
+            OnStartFailed(piSession, objReason);
+            return TransitToTerminating(objReason);
         }
     }
     else if (nStatusCode == SIPStatusCode::SC_200)
@@ -487,10 +413,9 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     IMessage* piMessage = MessageUtil::GetPreviousResponse(
             piSession, IMessage::SESSION_START, nIndex);
-    m_objSessions.GetValue(piSession)->GetExtensionSet().HandleResponse(
-            IMessage::SESSION_START, *piMessage);
-    if (!m_objSessions.GetValue(piSession)->GetExtensionSet()
-            .IsSupportRequiredExtensions(*piMessage))
+
+    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
+            IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -515,12 +440,12 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     UpdateCallType(piSession, piMessage, IMS_FALSE);
 
-    IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    objMediaManager.HandleRingBackTone(piSession, piMessage);
+    m_objContext.GetMediaManager().HandleRingBackTone(piSession, piMessage);
 
-    if (piSession->IsSDPNegotiationAllowedForNonRPR() && MessageUtil::HasSdp(piMessage))
+    if (piSession->IsSDPNegotiationAllowedForNonRPR())
     {
-        if (objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+        // TODO: not to update precondition attributes?
+        if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
         {
             FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
             HandleCancel(piSession, objReason);
@@ -534,18 +459,8 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
         m_objContext.GetPreconditionManager().EnableRemoteCurrentStatus(piSession);
     }
 
-    objMediaManager.Run(piSession, piMessage, IMS_TRUE, IMS_FALSE);
-
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendProgressing(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_bRemoteAlerted);
-
+    SendProgressing();
     return GetStateName();
 }
 
@@ -557,10 +472,9 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
 
     IMessage* piMessage = MessageUtil::GetPreviousResponse(
             piSession, IMessage::SESSION_START, nIndex);
-    m_objSessions.GetValue(piSession)->GetExtensionSet().HandleResponse(
-            IMessage::SESSION_START, *piMessage);
-    if (!m_objSessions.GetValue(piSession)->GetExtensionSet()
-            .IsSupportRequiredExtensions(*piMessage))
+
+    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
+            IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -588,8 +502,7 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.HandleRingBackTone(piSession, piMessage);
 
-    if (MessageUtil::HasSdp(piMessage) &&
-            objMediaManager.NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
         HandleCancel(piSession, objReason);
@@ -600,8 +513,6 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
     UpdatePreconditionCapability(piSession, piMessage);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.UpdatePreconditionAttributes(piSession);
-
     if (nStatusCode == SIPStatusCode::SC_180)
     {
         objPreconditionManager.EnableRemoteCurrentStatus(piSession);
@@ -619,24 +530,28 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
         }
     }
 
-    objMediaManager.Run(piSession, piMessage, IMS_TRUE, IMS_FALSE);
-
     if (objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED &&
             !objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
     {
         objPreconditionManager.StartQosTimer(piSession);
     }
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendProgressing(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_bRemoteAlerted);
-
+    SendProgressing();
     return GetStateName();
+}
+
+PRIVATE
+
+IMS_RESULT OutgoingState::SendAck(IN ISession* piSession)
+{
+    IMS_TRACE_D("SendAck", 0, 0, 0);
+
+    if (SetSdpToSend(IMS_FALSE, piSession) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return m_objSessions.GetValue(piSession)->GetMessageSender().SendAck();
 }
 
 PRIVATE
@@ -754,6 +669,18 @@ void OutgoingState::HandleCountrySpecificServiceUrn(IN IMessage* piMessage)
 }
 
 PRIVATE
+void OutgoingState::SendProgressing()
+{
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    m_objContext.GetUiNotifier().SendProgressing(
+            &m_objContext.GetCallInfo(),
+            &objMediaInfo,
+            m_objContext.GetSupplementaryService().GetAll(),
+            m_bRemoteAlerted);
+}
+
+PRIVATE
 void OutgoingState::OnStarted(IN ISession* piSession)
 {
     m_objContext.SetSession(m_objSessions.GetValue(piSession));
@@ -762,13 +689,7 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 
     if (!m_objContext.IsEct())
     {
-        MediaInfo objMediaInfo;
-        m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-        m_objContext.GetUiNotifier().SendStarted(
-                &m_objContext.GetCallInfo(),
-                &objMediaInfo,
-                m_objContext.GetSupplementaryService().GetAll());
+        SendStarted();
     }
 }
 
@@ -801,31 +722,4 @@ void OutgoingState::DeleteInactiveSessions()
             delete pDeleteSession;
         }
     }
-}
-
-PRIVATE
-void OutgoingState::UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage)
-{
-    if (!MessageUtil::HasSdp(piMessage))
-    {
-        return;
-    }
-
-    IMS_BOOL bRemoteCapability = IMS_FALSE;
-    IMS_BOOL bHasSupportedHeader =
-            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISIPHeader::SUPPORTED);
-    IMS_BOOL bHasRequireHeader =
-            MessageUtil::HasValue(piMessage, MessageUtil::STR_PRECONDITION, ISIPHeader::REQUIRE);
-
-    if (SdpPreconditionHelper::IsPreconditionIncludedInSdp(piSession) &&
-            (bHasSupportedHeader || bHasRequireHeader))
-    {
-        bRemoteCapability = IMS_TRUE;
-    }
-
-    IMS_TRACE_D("UpdatePreconditionCapability : Precondition Capability on remote UE[%d]",
-            bRemoteCapability, 0, 0);
-
-    m_objContext.GetPreconditionManager().UpdatePreconditionCapability(
-            piSession, bRemoteCapability);
 }

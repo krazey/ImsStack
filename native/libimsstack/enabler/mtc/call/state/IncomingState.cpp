@@ -79,16 +79,7 @@ CallStateName IncomingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
         return GetStateName();
     }
 
-    MediaInfo objMediaInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_objContext.GetParticipantInfo());
-
+    SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -157,16 +148,7 @@ CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
         return GetStateName();
     }
 
-    MediaInfo objMediaInfo;
-    objMediaManager.GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_objContext.GetParticipantInfo());
-
+    SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -254,16 +236,7 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         return GetStateName();
     }
 
-    MediaInfo objMediaInfo;
-    objMediaManager.GetMediaInfo(objMediaInfo);
-
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            objMediaInfo,
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_objContext.GetParticipantInfo());
-
+    SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
@@ -317,13 +290,7 @@ CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
         return GetStateName();
     }
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            *new MediaInfo(),   // TODO: get from media manager
-            m_objContext.GetSupplementaryService().GetAll(),
-            m_objContext.GetParticipantInfo());
-
+    SendIncomingCallReceived();
     return CallStateName::ALERTING;
 }
 
