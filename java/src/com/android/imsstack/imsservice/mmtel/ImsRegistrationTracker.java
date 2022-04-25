@@ -267,7 +267,11 @@ public final class ImsRegistrationTracker {
                 mRegImpl.notifyRegistered(radioTech, featureTags);
             }
 
-            if (updateNetworkType(networkType) || updateFeatures(featureTagBits)) {
+            boolean networkTypeChanged = updateNetworkType(networkType);
+
+            boolean featureChanged = updateFeatures(featureTagBits);
+
+            if (networkTypeChanged || featureChanged) {
                 updateFeatureCapabilities();
             }
         }
