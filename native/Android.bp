@@ -6,6 +6,7 @@ cc_defaults {
         "-Wall",
         "-Wno-psabi",
         "-Wno-non-virtual-dtor",
+        "-Wno-error=deprecated-declarations",
         "-D_REENTRANT",
         "-D__LINUX__",
         "-D_DEBUG",
