@@ -35,6 +35,10 @@
 #define __IMS_FALLTHROUGH__
 #endif
 
+#if defined(__clang__) && (__cplusplus >= 201103L)
+#define __IMS_DEPRECATED__(message) __attribute__((deprecated(message)))
+#endif
+
 #ifndef __IMS_DEPRECATED__
 #define __IMS_DEPRECATED__(message)
 #endif
