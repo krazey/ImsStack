@@ -22,10 +22,6 @@ cc_library_static {
     srcs: [
         "**/*.cpp",
     ],
-    exclude_srcs: [
-        "sipcore/SIPStack.cpp",
-        "sipcore/SIPStackHelper.cpp",
-    ],
     header_libs: [
         "libimsstack_config_headers",
         "libimsstack_engine_headers",
