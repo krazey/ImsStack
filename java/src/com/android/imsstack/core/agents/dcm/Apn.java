@@ -80,10 +80,6 @@ public abstract class Apn extends Handler implements IApn {
     protected static final int FEATURE_NONE = 0;
     protected static final int FEATURE_IPV6_DELAY = 0x00000001;
 
-    protected static final int PROTOCOL_IP = ApnSetting.PROTOCOL_IP;
-    protected static final int PROTOCOL_IPV6 = ApnSetting.PROTOCOL_IPV6;
-    protected static final int PROTOCOL_IPV4V6 = ApnSetting.PROTOCOL_IPV4V6;
-
     // Variables--------------------------------------------------
     protected static final Hashtable<Integer, String> sEventToString;
 
@@ -96,7 +92,7 @@ public abstract class Apn extends Handler implements IApn {
     protected EApnReqState   mAPNState = EApnReqState.APN_REQUEST_IDLE;
     protected int            mDataState = TelephonyManager.DATA_DISCONNECTED;
     protected String         mApnString = null;
-    protected int            mApnProtocol = PROTOCOL_IPV4V6;
+    protected int            mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
     protected int            mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int            mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
 
@@ -251,26 +247,20 @@ public abstract class Apn extends Handler implements IApn {
 
     @Override
     public int getIpVersion() {
-        if (mApnProtocol == PROTOCOL_IP) {
-            return EIpVersion.IPV4.getInt();
-        } else if (mApnProtocol == PROTOCOL_IPV6) {
-            return EIpVersion.IPV6.getInt();
-        } else {
-            int ipVersion = EIpVersion.IPV6V4.getInt();
-            if (mDcSettings != null) {
-                if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
-                    if (mDcSettings.getEmergencyPreferredIpVersion() ==
-                            CarrierConfig.Ims.IPV4_PREFERRED) {
-                        ipVersion = EIpVersion.IPV4V6.getInt();
-                    }
-                } else if (eType.getType() == DCConstants.TYPE_IMS) {
-                    if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Ims.IPV4_PREFERRED) {
-                        ipVersion = EIpVersion.IPV4V6.getInt();
-                    }
+        int ipVersion = EIpVersion.IPV6V4.getInt();
+        if (mDcSettings != null) {
+            if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
+                if (mDcSettings.getEmergencyPreferredIpVersion() ==
+                        CarrierConfig.Ims.IPV4_PREFERRED) {
+                    ipVersion = EIpVersion.IPV4V6.getInt();
+                }
+            } else if (eType.getType() == DCConstants.TYPE_IMS) {
+                if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Ims.IPV4_PREFERRED) {
+                    ipVersion = EIpVersion.IPV4V6.getInt();
                 }
             }
-            return ipVersion;
         }
+        return ipVersion;
     }
 
     @Override
