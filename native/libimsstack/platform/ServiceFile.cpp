@@ -1,71 +1,73 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090819  YR@                       Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsFile.h"
 #include "PlatformFactory.h"
 #include "ServiceFile.h"
+#include "ServiceMemory.h"
 
 class FileServicePrivate
 {
 public:
     inline FileServicePrivate()
-        : piFileUtil(IMS_NULL)
+        : m_piFileUtil(IMS_NULL)
     {}
     inline ~FileServicePrivate()
     {
-        PlatformFactory::DestroyFileUtil(piFileUtil);
+        PlatformFactory::DestroyFileUtil(m_piFileUtil);
     }
 
-private:
-    FileServicePrivate(IN const FileServicePrivate& objRHS);
-    FileServicePrivate& operator=(IN const FileServicePrivate& objRHS);
+    FileServicePrivate(IN const FileServicePrivate&) = delete;
+    FileServicePrivate& operator=(IN const FileServicePrivate&) = delete;
 
 public:
     inline IFileUtil* GetFileUtil()
     {
-        if (piFileUtil == IMS_NULL)
+        if (m_piFileUtil == IMS_NULL)
         {
-            piFileUtil = PlatformFactory::CreateFileUtil();
+            m_piFileUtil = PlatformFactory::CreateFileUtil();
         }
 
-        return piFileUtil;
+        return m_piFileUtil;
     }
 
 private:
-    IFileUtil *piFileUtil;
+    IFileUtil* m_piFileUtil;
 };
 
 
 
 PRIVATE
 FileService::FileService()
-    : pPrivate(new FileServicePrivate())
+    : m_pPrivate(new FileServicePrivate())
 {
 }
 
 PRIVATE
 FileService::~FileService()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
 IFile* FileService::CreateFile()
 {
-    ImsFile *pFile = PlatformFactory::CreateFile();
+    ImsFile* pFile = PlatformFactory::CreateFile();
 
     IMS_ASSERT(pFile != IMS_NULL);
 
@@ -73,9 +75,9 @@ IFile* FileService::CreateFile()
 }
 
 PUBLIC
-void FileService::DestroyFile(IN IFile *&piFile)
+void FileService::DestroyFile(IN IFile*& piFile)
 {
-    ImsFile *pFile = DYNAMIC_CAST(ImsFile*, piFile);
+    ImsFile* pFile = DYNAMIC_CAST(ImsFile*, piFile);
 
     if (pFile != IMS_NULL)
     {
@@ -87,18 +89,18 @@ void FileService::DestroyFile(IN IFile *&piFile)
 PUBLIC
 IFileUtil* FileService::GetFileUtil()
 {
-    return pPrivate->GetFileUtil();
+    return m_pPrivate->GetFileUtil();
 }
 
 PUBLIC GLOBAL
 FileService* FileService::GetFileService()
 {
-    static FileService *pFileService = IMS_NULL;
+    static FileService* s_pFileService = IMS_NULL;
 
-    if (pFileService == IMS_NULL)
+    if (s_pFileService == IMS_NULL)
     {
-        pFileService = new FileService();
+        s_pFileService = new FileService();
     }
 
-    return pFileService;
+    return s_pFileService;
 }

@@ -27,19 +27,19 @@ private:
     VoNrService();
     ~VoNrService();
 
-private:
-    VoNrService(IN CONST VoNrService &objRHS);
-    VoNrService& operator=(IN CONST VoNrService &objRHS);
+public:
+    VoNrService(IN const VoNrService&) = delete;
+    VoNrService& operator=(IN const VoNrService&) = delete;
 
 public:
     IVoNr* GetVoNr(IN IMS_SINT32 nSlotId);
 
-    void DispatchServiceMessage(IN ImsMessage &objMSG);
+    void DispatchServiceMessage(IN ImsMessage& objMsg);
 
     static VoNrService* GetVoNrService();
 
 private:
-    VoNrServicePrivate *pPrivate;
+    VoNrServicePrivate* m_pPrivate;
 };
 
-#endif // SERVICE_VONR_H_
+#endif

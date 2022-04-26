@@ -1,20 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120105  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceUtil.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsPrivateProperty.h"
 #include "PlatformApi.h"
 #include "PlatformFactory.h"
+#include "ServiceMemory.h"
+#include "ServiceUtil.h"
 
 PRIVATE
 UtilService::UtilService()
@@ -26,103 +29,71 @@ UtilService::~UtilService()
 {
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IImsPrivateProperty* UtilService::GetPrivateProperty()
 {
-    ImsPrivateProperty *pPrivateProperty = ImsPrivateProperty::GetInstance();
+    ImsPrivateProperty* pPrivateProperty = ImsPrivateProperty::GetInstance();
 
     IMS_ASSERT(pPrivateProperty != IMS_NULL);
 
     return pPrivateProperty;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 ISystemUtil* UtilService::GetSystemUtil()
 {
-    ISystemUtil *piSysUtil = PlatformFactory::GetSystemUtil();
+    ISystemUtil* piSysUtil = PlatformFactory::GetSystemUtil();
 
     IMS_ASSERT(piSysUtil != IMS_NULL);
 
     return piSysUtil;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 ISystemProperty* UtilService::GetSystemProperty()
 {
-    ISystemProperty *piSysProperty = PlatformFactory::GetSystemProperty();
+    ISystemProperty* piSysProperty = PlatformFactory::GetSystemProperty();
 
     IMS_ASSERT(piSysProperty != IMS_NULL);
 
     return piSysProperty;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IZLib* UtilService::GetZLib()
 {
-    IZLib *pZLib = PlatformFactory::GetZLib();
+    IZLib* piZLib = PlatformFactory::GetZLib();
 
-    IMS_ASSERT(pZLib != IMS_NULL);
+    IMS_ASSERT(piZLib != IMS_NULL);
 
-    return pZLib;
+    return piZLib;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void UtilService::SetDebugOn(IN IMS_BOOL bDebugOn)
 {
     PlatformApi::SetDebugOn(bDebugOn);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 UtilService* UtilService::GetUtilService()
 {
-    static UtilService *pUtilService = IMS_NULL;
+    static UtilService* s_pUtilService = IMS_NULL;
 
-    if (pUtilService == IMS_NULL)
+    if (s_pUtilService == IMS_NULL)
     {
-        pUtilService = new UtilService();
+        s_pUtilService = new UtilService();
     }
 
-    return pUtilService;
+    return s_pUtilService;
 }
 
-/*
-
-Remarks
- Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
-*/
+/**
+ * Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
+ */
 PUBLIC GLOBAL
-const AString& UtilService::GetLogString(IN const AString &strInput,
-        IN_OUT AString &strOutput, IN IMS_SINT32 nOutSize,
+const AString& UtilService::GetLogString(IN const AString& strInput,
+        IN_OUT AString& strOutput, IN IMS_SINT32 nOutSize,
         IN IMS_CHAR cDelimiter /* = 0 */)
 {
     if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())

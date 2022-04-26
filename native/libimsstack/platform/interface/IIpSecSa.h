@@ -21,53 +21,13 @@
 class IIpSecSa
 {
 public:
-    /*
+    virtual void SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+            IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode,
+            IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm,
+            IN const ByteArray& objAuthKey, IN const ByteArray& objEncryptionKey) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void SetSa
-        (
-        IN const IPAddress &objSrcIPA,
-        IN IMS_UINT32 nSrcPort,
-        IN const IPAddress &objDestIPA,
-        IN IMS_UINT32 nDestPort,
-        IN IMS_UINT32 nSecuProto,
-        IN IMS_UINT32 nSPI,
-        IN IMS_UINT32 nMode,
-        IN IMS_UINT32 nAuthAlgo,
-        IN IMS_UINT32 nEncrAlgo,
-        IN const ByteArray &objAuthKey,
-        IN const ByteArray &objEncrKey
-        ) = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
     virtual void DoneSa() = 0;
-
 };
 
-#endif // INTERFACE_IPSEC_SA_H_
+#endif

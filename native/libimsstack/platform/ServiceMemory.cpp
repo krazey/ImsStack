@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090819  YR@                       Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "PlatformFactory.h"
+#include "ServiceMemory.h"
 
 PRIVATE
 MemService::MemService()
@@ -26,7 +29,7 @@ MemService::~MemService()
 PUBLIC
 IMemHeap* MemService::GetMemHeap()
 {
-    IMemHeap *piHeap = PlatformFactory::GetHeap();
+    IMemHeap* piHeap = PlatformFactory::GetHeap();
 
     IMS_ASSERT(piHeap != IMS_NULL);
 
@@ -36,43 +39,15 @@ IMemHeap* MemService::GetMemHeap()
 PUBLIC GLOBAL
 MemService* MemService::GetMemService()
 {
-    static MemService *pMemService = IMS_NULL;
+    static MemService* s_pMemService = IMS_NULL;
 
-    if (pMemService == IMS_NULL)
+    if (s_pMemService == IMS_NULL)
     {
-        IMemHeap *piHeap = PlatformFactory::GetHeap();
-        void *pvMemService = piHeap->Alloc(sizeof(MemService));
+        IMemHeap* piHeap = PlatformFactory::GetHeap();
+        void* pvMemService = piHeap->Alloc(sizeof(MemService));
 
-        pMemService = new(pvMemService) MemService();
+        s_pMemService = new(pvMemService) MemService();
     }
 
-    return pMemService;
+    return s_pMemService;
 }
-
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-GLOBAL
-void* IMS_MEM_Realloc_C(IN void *pMem, IN IMS_SIZE_T nSize)
-{
-    return MemService::GetMemService()->GetMemHeap()->Realloc(pMem, nSize);
-}
-
-GLOBAL
-void* IMS_MEM_Alloc_C(IN IMS_SIZE_T nSize)
-{
-    return MemService::GetMemService()->GetMemHeap()->Alloc(nSize);
-}
-
-GLOBAL
-void IMS_MEM_Free_C(IN void *pMem)
-{
-    return MemService::GetMemService()->GetMemHeap()->Free(pMem);
-}
-
-#ifdef __cplusplus
-}
-#endif

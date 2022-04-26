@@ -1,21 +1,22 @@
-
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101020  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_EVENT_DEF_H_
+#define IMS_EVENT_DEF_H_
 
-    Description
-     This file defines the external (in/out) event for the IMS client platform.
-*/
-
-#ifndef _IMS_EVENT_DEF_H_
-#define _IMS_EVENT_DEF_H_
-
-//1 RVI to IMS native ----- starts{
-
+// Java to Native {
 #define IMS_EVENT_POWER_LOW_BATTERY (0x00000008)
 // WParam
 #define IMS_POWER_LOW_BATTERY (0)
@@ -395,11 +396,9 @@
 
 //1  MUST NOT use the above(>=) 0x80000000 from java to native
 
-//1 RVI to IMS native ----- ends}
+// Java to Native }
 
-
-//1 IMS native to RVI ----- starts{
-
+// Native to Java {
 // VT REG
 #define IMS_EVENT_REG_STATE (0x00000002)
 // wPARAM (HWORD) network type
@@ -704,7 +703,7 @@
 //#define IMS_CALL_MEDIA_BITRATE (0x00ff0000)
 
 
-//1 IMS native to RVI ----- ends}
+// Native to Java }
 
 // Macro definition for event parameters
 #define    IMS_MAKEPARAM(HIWORD, LOWORD) \
@@ -728,4 +727,4 @@
 #define TEST_MASK_IGNORE_FORBIDDEN_RESPONSE (0x0080)
 #define TEST_MASK_UNLOCK_EVS_NEGO_LIMIT (0x0100)
 
-#endif // _IMS_EVENT_DEF_H_
+#endif

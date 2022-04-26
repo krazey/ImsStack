@@ -1,38 +1,41 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090819  YR@                       Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_PHONE_INFO_POWER_H_
+#define INTERFACE_PHONE_INFO_POWER_H_
 
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_PHONE_INFO_POWER_H_
-#define _INTERFACE_IMS_PHONE_INFO_POWER_H_
-
-#include "ImsTypeDef.h"
 #include "IMSList.h"
 #include "ImsMessageDef.h"
-
-#include "ServiceThread.h"
 #include "ServiceMessage.h"
+#include "ServiceThread.h"
 
-typedef enum
+enum POWERLEVEL_ENTYPE
 {
     POWERLEVEL_LOW = 0,
     POWERLEVEL_HIGH,
 
     POWERLEVEL_OFF,
     POWERLEVEL_VALUE
-} POWERLEVEL_ENTYPE;
+};
+
+class IPowerInfo;
 
 class IPowerInfoListener
 {
 public:
-    virtual void NotifyPowerLevel(IN class IPowerInfo *piPowerInfo) = 0;
+    virtual void PowerInfo_NotifyPowerLevel(IN IPowerInfo* piPowerInfo) = 0;
 
 };
 
@@ -43,13 +46,13 @@ public:
     virtual IMS_UINT32 GetPowerValue() = 0;
 
 public:
-    inline void RegisterObserver(IN IPowerInfoListener *piListener)
+    inline void RegisterObserver(IN IPowerInfoListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -58,21 +61,21 @@ public:
 
             if (*pObserverList == piThread)
             {
-                pObserverList->objListeners.Append(piListener);
+                pObserverList->m_objListeners.Append(piListener);
                 return;
             }
         }
 
-        objObserverLists.Append(new ObserverList(piListener));
+        m_objObserverLists.Append(new ObserverList(piListener));
     }
 
-    inline void RemoveObserver(IN IPowerInfoListener *piListener)
+    inline void RemoveObserver(IN IPowerInfoListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -81,13 +84,13 @@ public:
 
             if (*pObserverList == piThread)
             {
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); j++)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); j++)
                 {
-                    IPowerInfoListener *objListener = pObserverList->objListeners.GetAt(j);
+                    IPowerInfoListener* piTmpListener = pObserverList->m_objListeners.GetAt(j);
 
-                    if (piListener == objListener)
+                    if (piListener == piTmpListener)
                     {
-                        pObserverList->objListeners.RemoveAt(j);
+                        pObserverList->m_objListeners.RemoveAt(j);
                         break;
                     }
                 }
@@ -96,13 +99,11 @@ public:
         }
     }
 
-    inline void PostMsgRegisteredThread(IN IMS_UINT32 eEvt)
+    inline void PostMsgRegisteredThread(IN IMS_UINT32 nEvent)
     {
-        (void)eEvt;
-
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -110,15 +111,15 @@ public:
             }
 
             IMS_MSG_CreateNPostThreadMessage(
-                    pObserverList->piOwnerThread, IMS_MSG_BATTERY, 0, eEvt);
+                    pObserverList->m_piOwnerThread, IMS_MSG_BATTERY, 0, nEvent);
         }
     }
 
-    inline void PostMsgRegisteredThread(IN POWERLEVEL_ENTYPE eEvt)
+    inline void PostMsgRegisteredThread(IN POWERLEVEL_ENTYPE enPowerLevel)
     {
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -126,19 +127,18 @@ public:
             }
 
             IMS_MSG_CreateNPostThreadMessage(
-                    pObserverList->piOwnerThread, IMS_MSG_BATTERY, 0, eEvt);
+                    pObserverList->m_piOwnerThread, IMS_MSG_BATTERY, 0, enPowerLevel);
         }
     }
 
 public:
-    inline void ProcessNotify(IN ImsMessage &objMSG)
+    inline void ProcessNotify(IN ImsMessage& /*objMsg*/)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
-        (void)objMSG;
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -147,13 +147,13 @@ public:
 
             if (*pObserverList == piThread)
             {
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); ++j)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); ++j)
                 {
-                    IPowerInfoListener* piListener = pObserverList->objListeners.GetAt(j);
+                    IPowerInfoListener* piListener = pObserverList->m_objListeners.GetAt(j);
 
                     if (piListener != IMS_NULL)
                     {
-                        piListener->NotifyPowerLevel(this);
+                        piListener->PowerInfo_NotifyPowerLevel(this);
                     }
                 }
                 break;
@@ -165,25 +165,24 @@ private:
     class ObserverList
     {
         public:
-            inline ObserverList(IN IPowerInfoListener *piListener)
+            inline ObserverList(IN IPowerInfoListener* piListener)
             {
-                piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-
-                objListeners.Append(piListener);
+                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+                m_objListeners.Append(piListener);
             }
 
-            inline IMS_BOOL operator==(IN IThread *piThread)
+            inline IMS_BOOL operator==(IN IThread* piThread)
             {
-                return piThread == piOwnerThread;
+                return piThread == m_piOwnerThread;
             }
 
         public:
-            IThread *piOwnerThread;
-            IMSList<IPowerInfoListener*> objListeners;
+            IThread* m_piOwnerThread;
+            IMSList<IPowerInfoListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> objObserverLists;
+    IMSList<ObserverList*> m_objObserverLists;
 };
 
-#endif // _INTERFACE_IMS_PHONE_INFO_POWER_H_
+#endif

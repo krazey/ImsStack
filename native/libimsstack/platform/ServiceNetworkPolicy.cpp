@@ -1,18 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091107  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SystemConfig.h"
 #include "ServiceNetworkPolicy.h"
+#include "SystemConfig.h"
 
 class NetworkPolicyHolder
 {
@@ -20,21 +23,24 @@ public:
     NetworkPolicyHolder();
     ~NetworkPolicyHolder();
 
+    NetworkPolicyHolder(IN const NetworkPolicyHolder&) = delete;
+    NetworkPolicyHolder& operator=(IN const NetworkPolicyHolder&) = delete;
+
 public:
     void InitPolicies();
-    IMS_BOOL AddPolicy(IN const NetworkPolicy &objPolicy);
-    const NetworkPolicy* GetPolicy(IN const AString &strName) const;
-    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nAPNType) const;
-    void RemovePolicy(IN const AString &strName);
+    IMS_BOOL AddPolicy(IN const NetworkPolicy& objPolicy);
+    const NetworkPolicy* GetPolicy(IN const AString& strName) const;
+    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType) const;
+    void RemovePolicy(IN const AString& strName);
     void RemoveAllPolicies();
 
 private:
-    IMSList<NetworkPolicy*> objPolicys;
+    IMSList<NetworkPolicy*> m_objPolicys;
 };
 
 PUBLIC
 NetworkPolicyHolder::NetworkPolicyHolder()
-    : objPolicys(IMSList<NetworkPolicy*>())
+    : m_objPolicys(IMSList<NetworkPolicy*>())
 {
     InitPolicies();
 }
@@ -42,16 +48,16 @@ NetworkPolicyHolder::NetworkPolicyHolder()
 PUBLIC
 NetworkPolicyHolder::~NetworkPolicyHolder()
 {
-    while (!objPolicys.IsEmpty())
+    while (!m_objPolicys.IsEmpty())
     {
-        NetworkPolicy *pPolicy = objPolicys.GetAt(0);
+        NetworkPolicy* pPolicy = m_objPolicys.GetAt(0);
 
         if (pPolicy != IMS_NULL)
         {
             delete pPolicy;
         }
 
-        objPolicys.RemoveAt(0);
+        m_objPolicys.RemoveAt(0);
     }
 }
 
@@ -60,32 +66,32 @@ void NetworkPolicyHolder::InitPolicies()
 {
     // "ims"
     NetworkPolicy* pPolicy = new NetworkPolicy(IMS_TRUE, "mobile_ims", NetworkPolicy::APN_IMS);
-    objPolicys.Append(pPolicy);
+    m_objPolicys.Append(pPolicy);
 
     // "emergency"
     pPolicy = new NetworkPolicy(IMS_FALSE, "mobile_emergency", NetworkPolicy::APN_EMERGENCY);
-    objPolicys.Append(pPolicy);
+    m_objPolicys.Append(pPolicy);
 
     // "internet"
     pPolicy = new NetworkPolicy(IMS_FALSE, "mobile_internet", NetworkPolicy::APN_INTERNET);
-    objPolicys.Append(pPolicy);
+    m_objPolicys.Append(pPolicy);
 
     // "wifi"
     pPolicy = new NetworkPolicy(IMS_FALSE, "wifi", NetworkPolicy::APN_WIFI);
-    objPolicys.Append(pPolicy);
+    m_objPolicys.Append(pPolicy);
 }
 
 PUBLIC
-IMS_BOOL NetworkPolicyHolder::AddPolicy(IN const NetworkPolicy &objPolicy)
+IMS_BOOL NetworkPolicyHolder::AddPolicy(IN const NetworkPolicy& objPolicy)
 {
-    NetworkPolicy *pNewPolicy = new NetworkPolicy(objPolicy);
+    NetworkPolicy* pNewPolicy = new NetworkPolicy(objPolicy);
 
     if (pNewPolicy == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!objPolicys.Append(pNewPolicy))
+    if (!m_objPolicys.Append(pNewPolicy))
     {
         delete pNewPolicy;
 
@@ -96,11 +102,11 @@ IMS_BOOL NetworkPolicyHolder::AddPolicy(IN const NetworkPolicy &objPolicy)
 }
 
 PUBLIC
-const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN const AString &strName) const
+const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN const AString& strName) const
 {
-    for (IMS_UINT32 i = 0; i < objPolicys.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objPolicys.GetSize(); ++i)
     {
-        const NetworkPolicy *pPolicy = objPolicys.GetAt(i);
+        const NetworkPolicy* pPolicy = m_objPolicys.GetAt(i);
 
         if (strName.Equals(pPolicy->GetName()))
         {
@@ -112,13 +118,13 @@ const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN const AString &strName) c
 }
 
 PUBLIC
-const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN IMS_SINT32 nAPNType) const
+const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN IMS_SINT32 nApnType) const
 {
-    if (nAPNType == NetworkPolicy::APN_NONE)
+    if (nApnType == NetworkPolicy::APN_NONE)
     {
-        for (IMS_UINT32 i = 0; i < objPolicys.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objPolicys.GetSize(); ++i)
         {
-            const NetworkPolicy *pPolicy = objPolicys.GetAt(i);
+            const NetworkPolicy* pPolicy = m_objPolicys.GetAt(i);
 
             if (pPolicy->IsPrimary())
             {
@@ -128,11 +134,11 @@ const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN IMS_SINT32 nAPNType) cons
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objPolicys.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objPolicys.GetSize(); ++i)
         {
-            const NetworkPolicy *pPolicy = objPolicys.GetAt(i);
+            const NetworkPolicy* pPolicy = m_objPolicys.GetAt(i);
 
-            if (pPolicy->GetAPNType() == nAPNType)
+            if (pPolicy->GetApnType() == nApnType)
             {
                 return pPolicy;
             }
@@ -143,15 +149,15 @@ const NetworkPolicy* NetworkPolicyHolder::GetPolicy(IN IMS_SINT32 nAPNType) cons
 }
 
 PUBLIC
-void NetworkPolicyHolder::RemovePolicy(IN const AString &strName)
+void NetworkPolicyHolder::RemovePolicy(IN const AString& strName)
 {
-    for (IMS_UINT32 i = 0; i < objPolicys.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objPolicys.GetSize(); ++i)
     {
-        NetworkPolicy *pPolicy = objPolicys.GetAt(i);
+        NetworkPolicy* pPolicy = m_objPolicys.GetAt(i);
 
         if (strName.Equals(pPolicy->GetName()))
         {
-            objPolicys.RemoveAt(i);
+            m_objPolicys.RemoveAt(i);
             delete pPolicy;
             return;
         }
@@ -161,9 +167,9 @@ void NetworkPolicyHolder::RemovePolicy(IN const AString &strName)
 PUBLIC
 void NetworkPolicyHolder::RemoveAllPolicies()
 {
-    for (IMS_UINT32 i = 0; i < objPolicys.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objPolicys.GetSize(); ++i)
     {
-        NetworkPolicy *pPolicy = objPolicys.GetAt(i);
+        NetworkPolicy* pPolicy = m_objPolicys.GetAt(i);
 
         if (pPolicy != IMS_NULL)
         {
@@ -171,7 +177,7 @@ void NetworkPolicyHolder::RemoveAllPolicies()
         }
     }
 
-    objPolicys.Clear();
+    m_objPolicys.Clear();
 }
 
 
@@ -182,9 +188,8 @@ public:
     NetworkServicePolicyPrivate();
     ~NetworkServicePolicyPrivate();
 
-private:
-    NetworkServicePolicyPrivate(IN const NetworkServicePolicyPrivate& objRHS);
-    NetworkServicePolicyPrivate& operator=(IN const NetworkServicePolicyPrivate& objRHS);
+    NetworkServicePolicyPrivate(IN const NetworkServicePolicyPrivate&) = delete;
+    NetworkServicePolicyPrivate& operator=(IN const NetworkServicePolicyPrivate&) = delete;
 
 public:
     inline NetworkPolicyHolder* GetHolder(IN IMS_SINT32 nSlotId) const
@@ -194,43 +199,43 @@ public:
             nSlotId = IMS_SLOT_0;
         }
 
-        return ppHolder[nSlotId];
+        return m_ppHolder[nSlotId];
     }
 
 private:
-    NetworkPolicyHolder **ppHolder;
+    NetworkPolicyHolder** m_ppHolder;
 };
 
 PUBLIC
 NetworkServicePolicyPrivate::NetworkServicePolicyPrivate()
-    : ppHolder(IMS_NULL)
+    : m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppHolder = new NetworkPolicyHolder*[nSimCount];
+    m_ppHolder = new NetworkPolicyHolder*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppHolder[i] = new NetworkPolicyHolder();
+        m_ppHolder[i] = new NetworkPolicyHolder();
     }
 }
 
 PUBLIC
 NetworkServicePolicyPrivate::~NetworkServicePolicyPrivate()
 {
-    if (ppHolder != IMS_NULL)
+    if (m_ppHolder != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppHolder[i] != IMS_NULL)
+            if (m_ppHolder[i] != IMS_NULL)
             {
-                delete ppHolder[i];
+                delete m_ppHolder[i];
             }
         }
 
-        delete[] ppHolder;
+        delete[] m_ppHolder;
     }
 }
 
@@ -255,10 +260,10 @@ NetworkPolicy::NetworkPolicy(IN IMS_BOOL bPrimary,
 }
 
 PUBLIC
-NetworkPolicy::NetworkPolicy(IN const NetworkPolicy& objOther)
-        : m_bPrimary(objOther.m_bPrimary)
-        , m_strName(objOther.m_strName)
-        , m_nApnType(objOther.m_nApnType)
+NetworkPolicy::NetworkPolicy(IN const NetworkPolicy& other)
+        : m_bPrimary(other.m_bPrimary)
+        , m_strName(other.m_strName)
+        , m_nApnType(other.m_nApnType)
 {
 }
 
@@ -268,13 +273,13 @@ NetworkPolicy::~NetworkPolicy()
 }
 
 PUBLIC
-NetworkPolicy& NetworkPolicy::operator=(IN const NetworkPolicy& objOther)
+NetworkPolicy& NetworkPolicy::operator=(IN const NetworkPolicy& other)
 {
-    if (this != &objOther)
+    if (this != &other)
     {
-        m_bPrimary = objOther.m_bPrimary;
-        m_strName = objOther.m_strName;
-        m_nApnType = objOther.m_nApnType;
+        m_bPrimary = other.m_bPrimary;
+        m_strName = other.m_strName;
+        m_nApnType = other.m_nApnType;
     }
 
     return (*this);
@@ -310,24 +315,24 @@ IMS_BOOL NetworkPolicy::IsWiFiPolicy(IN IMS_SINT32 nApnType)
 
 PRIVATE
 NetworkServicePolicy::NetworkServicePolicy()
-    : pPrivate(new NetworkServicePolicyPrivate())
+    : m_pPrivate(new NetworkServicePolicyPrivate())
 {
 }
 
 PRIVATE
 NetworkServicePolicy::~NetworkServicePolicy()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
-IMS_BOOL NetworkServicePolicy::AddPolicy(IN const AString &strName,
-        IN const NetworkPolicy &objPolicy, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
+IMS_BOOL NetworkServicePolicy::AddPolicy(IN const AString& strName,
+        IN const NetworkPolicy& objPolicy, IN IMS_SINT32 nSlotId)
 {
-    NetworkPolicyHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
 
     if (pHolder->GetPolicy(strName) != IMS_NULL)
     {
@@ -340,44 +345,44 @@ IMS_BOOL NetworkServicePolicy::AddPolicy(IN const AString &strName,
 
 PUBLIC
 const NetworkPolicy* NetworkServicePolicy::GetPolicy(
-        IN const AString &strName, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/) const
+        IN const AString& strName, IN IMS_SINT32 nSlotId) const
 {
-    NetworkPolicyHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetPolicy(strName);
 }
 
 PUBLIC
 const NetworkPolicy* NetworkServicePolicy::GetPolicy(
-        IN IMS_SINT32 nAPNType, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/) const
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) const
 {
-    NetworkPolicyHolder *pHolder = pPrivate->GetHolder(nSlotId);
-    return pHolder->GetPolicy(nAPNType);
+    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    return pHolder->GetPolicy(nApnType);
 }
 
 PUBLIC
 void NetworkServicePolicy::RemovePolicy(
-        IN const AString &strName, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
+        IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
-    NetworkPolicyHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     pHolder->RemovePolicy(strName);
 }
 
 PUBLIC
-void NetworkServicePolicy::RemoveAllPolicies(IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
+void NetworkServicePolicy::RemoveAllPolicies(IN IMS_SINT32 nSlotId)
 {
-    NetworkPolicyHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    NetworkPolicyHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     pHolder->RemoveAllPolicies();
 }
 
 PUBLIC GLOBAL
 NetworkServicePolicy* NetworkServicePolicy::GetInstance()
 {
-    static NetworkServicePolicy *pNetServicePolicy = IMS_NULL;
+    static NetworkServicePolicy* s_pNetServicePolicy = IMS_NULL;
 
-    if (pNetServicePolicy == IMS_NULL)
+    if (s_pNetServicePolicy == IMS_NULL)
     {
-        pNetServicePolicy = new NetworkServicePolicy();
+        s_pNetServicePolicy = new NetworkServicePolicy();
     }
 
-    return pNetServicePolicy;
+    return s_pNetServicePolicy;
 }

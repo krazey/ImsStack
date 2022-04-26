@@ -119,7 +119,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(IN const AString& strProfi
 
         return m_eNetStatusType;
     }
-    else if (pNetworkPolicy->GetAPNType() == NetworkPolicy::APN_WIFI)
+    else if (pNetworkPolicy->GetApnType() == NetworkPolicy::APN_WIFI)
     {
         IMS_TRACE_D("GetNetRadioTechType(WiFi)", 0, 0, 0);
 
@@ -249,13 +249,13 @@ NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType(IN const AString& strProfi
 
     if (pNetworkPolicy != IMS_NULL)
     {
-        IMS_TRACE_D("GetNetServiceType :: apnType=%d", pNetworkPolicy->GetAPNType(), 0, 0);
+        IMS_TRACE_D("GetNetServiceType :: apnType=%d", pNetworkPolicy->GetApnType(), 0, 0);
 
         if (pNetworkPolicy->IsMobilePolicy())
         {
             return GetNetServiceType();
         }
-        else if (pNetworkPolicy->GetAPNType() == NetworkPolicy::APN_WIFI)
+        else if (pNetworkPolicy->GetApnType() == NetworkPolicy::APN_WIFI)
         {
             return NW_REPORT_SRV_SRV;
         }

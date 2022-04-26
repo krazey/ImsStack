@@ -1,16 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20150705  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-#ifndef _SYSTEM_CONFIG_H_
-#define _SYSTEM_CONFIG_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SYSTEM_CONFIG_H_
+#define SYSTEM_CONFIG_H_
 
 #include "AString.h"
 
@@ -39,42 +43,42 @@ struct __SystemConfig
 class SystemConfig
 {
 public:
-    // Indicates that which event is occurred
+    /// Indicates that which event is occurred
     enum
     {
         EVENT_ON_BOOT = 0,
-        // When system configuration & subscriber are changed
-        //    - Operator/country changed
+        /// When system configuration & subscriber are changed
+        ///    - Operator/country changed
         EVENT_SUBSCRIPTION_CHANGED = 1,
-        // When all the configuration need to be reset including system configuration
+        /// When all the configuration need to be reset including system configuration
         EVENT_ALL_CONFIGURATION_CHANGED = 2,
-        // When service features are changed
+        /// When service features are changed
         EVENT_FEATURE_CHANGED = 3,
-        // Special case: DDS device (non-multi-IMS) : When DDS is changed
+        /// Special case: DDS device (non-multi-IMS) : When DDS is changed
         EVENT_DDS_CHANGED = 4,
-        // Special case: IMS feature permissions changed (i.e. when Google Fi SIM inserted)
-        // (System configuration is not required)
+        /// Special case: IMS feature permissions changed (i.e. when Google Fi SIM inserted)
+        /// (System configuration is not required)
         EVENT_FEATURE_PERMISSIONS_CHANGED = 5
     };
 
-    // Extra information
+    /// Extra information
     enum
     {
         EXTRA_INFO_NONE = 0,
         EXTRA_INFO_SIM_MOBILITY = 0x00000001,
         EXTRA_INFO_KR_ENABLER = 0x00000002,
 
-        // Special case: UE capability - VoNR enabled (not EPS-FB)
+        /// Special case: UE capability - VoNR enabled (not EPS-FB)
         EXTRA_INFO_NR_UE_CAPABILITY_VONR = 0x01000000,
-        // Special case: NSA mode when VoNR is enabled
+        /// Special case: NSA mode when VoNR is enabled
         EXTRA_INFO_NR_NSA_MODE = 0x10000000,
-        // Special case: DDS device (non-multi-IMS)
+        /// Special case: DDS device (non-multi-IMS)
         EXTRA_INFO_DDS = 0x20000000,
-        // Special case: To identify no SIM or SIM-REMOVED status
+        /// Special case: To identify no SIM or SIM-REMOVED status
         EXTRA_INFO_NO_UICC = 0x40000000
     };
 
-    // Features for functional level
+    /// Features for functional level
     enum
     {
         FEATURE_IPSEC = 0x00000001,
@@ -91,7 +95,7 @@ public:
         FEATURE_VT_IN_ROAMING = 0x00000800
     };
 
-    // Features for service level
+    /// Features for service level
     enum
     {
         FEATURE_S_VOLTE = 0x00000001,
@@ -105,15 +109,15 @@ public:
 
 public:
     SystemConfig();
-    SystemConfig(IN const __SystemConfig *pstConfig);
-    SystemConfig(IN const SystemConfig &objRHS);
+    SystemConfig(IN const __SystemConfig* pConfig);
+    SystemConfig(IN const SystemConfig& other);
     ~SystemConfig();
 
 public:
-    SystemConfig& operator=(IN const SystemConfig &objRHS);
+    SystemConfig& operator=(IN const SystemConfig& other);
 
 public:
-    IMS_BOOL Equals(IN const SystemConfig &objOther) const;
+    IMS_BOOL Equals(IN const SystemConfig& other) const;
 
     inline IMS_SINT32 GetSlotId() const;
 
@@ -162,7 +166,7 @@ private:
     static void UpdateGlobalConfigsOnFeatureChanged();
 
 public:
-    // Types of multi-sim
+    /// Types of multi-sim
     enum
     {
         MULTI_SIM_NONE = 0, // Single SIM
@@ -172,7 +176,7 @@ public:
     };
 
 private:
-    // Global configurations
+    /// Global configurations
     enum
     {
         CONFIG_MULTI_IMS = 0x0001,
@@ -181,40 +185,40 @@ private:
 
     friend class SystemConfigManager;
 
-    static IMS_SINT32 nMultiSimConfig;
-    static IMS_SINT32 nGlobalConfigs;
+    static IMS_SINT32 s_nMultiSimConfig;
+    static IMS_SINT32 s_nGlobalConfigs;
 
     // ImsStack's package name
-    static AString strPackageName;
+    static AString s_strPackageName;
 
     // Slot id
-    IMS_SINT32 nSlotId;
+    IMS_SINT32 m_nSlotId;
 
     // Platform configuration to identify the operator
-    AString strOperator;
-    AString strCountry;
+    AString m_strOperator;
+    AString m_strCountry;
 
     // Enabler configuration
-    AString strEnablerType;
-    IMS_SINT32 nExtraInfo;
+    AString m_strEnablerType;
+    IMS_SINT32 m_nExtraInfo;
 
     // Runtime features
-    IMS_SINT32 nFeatures;
-    IMS_SINT32 nServiceFeatures;
+    IMS_SINT32 m_nFeatures;
+    IMS_SINT32 m_nServiceFeatures;
 };
 
 inline IMS_SINT32 SystemConfig::GetSlotId() const
-{ return nSlotId; }
+{ return m_nSlotId; }
 
 inline const AString& SystemConfig::GetOperator() const
-{ return strOperator; }
+{ return m_strOperator; }
 inline const AString& SystemConfig::GetCountry() const
-{ return strCountry; }
+{ return m_strCountry; }
 
 inline const AString& SystemConfig::GetEnablerType() const
-{ return strEnablerType; }
+{ return m_strEnablerType; }
 inline IMS_SINT32 SystemConfig::GetExtraInfo() const
-{ return nExtraInfo; }
+{ return m_nExtraInfo; }
 inline IMS_BOOL SystemConfig::IsSimMobilityEnabled() const
 { return IsExtraInfoSet(EXTRA_INFO_SIM_MOBILITY); }
 inline IMS_BOOL SystemConfig::IsKREnablerEnabled() const
@@ -229,8 +233,8 @@ inline IMS_BOOL SystemConfig::IsUeCapabilityVoNrEnabled() const
 { return IsExtraInfoSet(EXTRA_INFO_NR_UE_CAPABILITY_VONR); }
 
 inline IMS_SINT32 SystemConfig::GetFeatures() const
-{ return nFeatures; }
+{ return m_nFeatures; }
 inline IMS_SINT32 SystemConfig::GetServiceFeatures() const
-{ return nServiceFeatures; }
+{ return m_nServiceFeatures; }
 
-#endif // _SYSTEM_CONFIG_H_
+#endif

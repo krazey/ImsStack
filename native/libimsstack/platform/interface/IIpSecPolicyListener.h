@@ -23,23 +23,12 @@ class IIpSecPolicy;
 class IIpSecPolicyListener
 {
 public:
-    /*
-    Notify SA lifetime expiration
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the liftime of security association is expired.
+     *
+     * @param piIpSecPolicy The pointer of IIpSecPolicy
+     */
     virtual void IpSecPolicy_OnSecurityAssociationExpired(IN IIpSecPolicy* piPolicy) = 0;
 };
 
-#endif // INTERFACE_IPSEC_POLICY_LISTENER_H_
+#endif

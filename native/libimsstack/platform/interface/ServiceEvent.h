@@ -1,20 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101006  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_EVENT_H_
+#define SERVICE_EVENT_H_
 
-    Description
-
-*/
-
-#ifndef _SERVICE_IMS_EVENT_H_
-#define _SERVICE_IMS_EVENT_H_
-
-#include "ImsEventDef.h"
 #include "IEventListener.h"
+#include "ImsEventDef.h"
 
 class EventServicePrivate;
 
@@ -25,14 +28,15 @@ private:
     EventService();
     ~EventService();
 
-    EventService(IN const EventService& objRHS);
-    EventService& operator=(IN const EventService& objRHS);
+public:
+    EventService(IN const EventService&) = delete;
+    EventService& operator=(IN const EventService&) = delete;
 
 public:
-    void AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener,
+    void AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
             IN IMS_SINT32 nSlotId);
 
-    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener,
+    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
             IN IMS_SINT32 nSlotId);
 
     void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
@@ -43,7 +47,7 @@ public:
     static EventService* GetEventService();
 
 private:
-    EventServicePrivate *pPrivate;
+    EventServicePrivate* m_pPrivate;
 };
 
 #define IMS_EVENT_AddListenerForSlotId(nEvent, piListener, nSlotId) \
@@ -55,4 +59,4 @@ private:
 #define IMS_EVENT_SendEventForSlotId(nEvent, nWParam, nLParam, nSlotId) \
         EventService::GetEventService()->SendEvent(nEvent, nWParam, nLParam, nSlotId)
 
-#endif // _SERVICE_IMS_EVENT_H_
+#endif

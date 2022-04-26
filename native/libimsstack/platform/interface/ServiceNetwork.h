@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SERVICE_IMS_NETWORK_H_
-#define SERVICE_IMS_NETWORK_H_
+#ifndef SERVICE_NETWORK_H_
+#define SERVICE_NETWORK_H_
 
+#include "ImsMessage.h"
 #include "INetworkConnection.h"
 #include "ISocket.h"
-#include "ImsMessage.h"
 
-class INetworkIpSec;
 class IIpcan;
-class SSLCertificate;
+class INetworkIpSec;
 class NetworkServicePrivate;
+class SSLCertificate;
 
 class NetworkService
 {
@@ -31,12 +31,13 @@ private:
     NetworkService();
     ~NetworkService();
 
-    NetworkService(IN const NetworkService& objRHS);
-    NetworkService& operator=(IN const NetworkService& objRHS);
+public:
+    NetworkService(IN const NetworkService&) = delete;
+    NetworkService& operator=(IN const NetworkService&) = delete;
 
 public:
-    INetworkConnection* CreateConnection(IN const AString &strProfileName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    INetworkConnection* CreateConnection(IN const AString& strProfileName,
+            IN IMS_SINT32 nSlotId);
     /**
      * @brief Creates a data connection with the specified APN type.
      *
@@ -50,8 +51,11 @@ public:
      */
     INetworkConnection* CreateConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     void DestroyConnection(IN INetworkConnection*& piConnection);
-    INetworkConnection* FindConnection(IN const AString &strProfileName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    inline INetworkConnection* FindConnection(IN const AString& strProfileName)
+            __IMS_DEPRECATED__("Use FindConnection(IMS_SINT32,IMS_SINT32) instead")
+    { return FindConnection(strProfileName, IMS_SLOT_0); }
+    INetworkConnection* FindConnection(IN const AString& strProfileName, IN IMS_SINT32 nSlotId)
+            __IMS_DEPRECATED__("Use FindConnection(IMS_SINT32,IMS_SINT32) instead");
 
     /**
      * @brief Finds a data connection with the specified APN type.
@@ -65,35 +69,35 @@ public:
      * @return An instance of data connection.
      */
     INetworkConnection* FindConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    INetworkConnection* FindConnection(IN const IPAddress &objIPAddress);
+    INetworkConnection* FindConnection(IN const IPAddress& objIpAddr);
 
     ISocket* CreateSocket(IN INetworkConnection* piConnection);
-    ISocket* CreateSocket(IN const IMS_CHAR *pszProfileName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    ISocket* CreateSocket(IN const IMS_CHAR* pszProfileName,
+            IN IMS_SINT32 nSlotId);
 
     ISocket* CreateSslSocket(IN INetworkConnection* piConnection,
-            IN SSLCertificate *pCertificate);
-    ISocket* CreateSslSocket(IN const IMS_CHAR *pszProfileName,
-            IN SSLCertificate *pCertificate, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void DestroySocket(IN ISocket *&piSocket);
+            IN SSLCertificate* pCertificate);
+    ISocket* CreateSslSocket(IN const IMS_CHAR* pszProfileName,
+            IN SSLCertificate* pCertificate, IN IMS_SINT32 nSlotId);
+    void DestroySocket(IN ISocket*& piSocket);
 
     // To check if the specified IP address & port number can be used to create a socket
-    IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress &objIP,
+    IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
             IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
 
     IIpcan* GetIpcan();
     INetworkIpSec* GetIpSec();
 
-    void DispatchServiceMessage(IN ImsMessage &objMSG);
+    void DispatchServiceMessage(IN ImsMessage& objMsg);
 
     static NetworkService* GetNetworkService();
 
     // Gets slot-id from the specified network connection
-    static IMS_SINT32 GetSlotId(IN const IPAddress& objIPAddress);
+    static IMS_SINT32 GetSlotId(IN const IPAddress& objIpAddr);
     static IMS_SINT32 GetSlotId(IN INetworkConnection* piConnection);
 
 private:
-    NetworkServicePrivate *pPrivate;
+    NetworkServicePrivate* m_pPrivate;
 };
 
-#endif // SERVICE_IMS_NETWORK_H_
+#endif

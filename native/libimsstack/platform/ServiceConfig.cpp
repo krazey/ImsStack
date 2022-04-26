@@ -139,12 +139,12 @@ void ConfigService::LoadCarrierConfig(IN IMS_SINT32 nSlotId)
 PUBLIC GLOBAL
 ConfigService* ConfigService::GetConfigService()
 {
-    static ConfigService *pConfigService = IMS_NULL;
+    static ConfigService* s_pConfigService = IMS_NULL;
 
-    if (pConfigService == IMS_NULL)
+    if (s_pConfigService == IMS_NULL)
     {
-        pConfigService = new ConfigService();
+        s_pConfigService = new ConfigService();
     }
 
-    return pConfigService;
+    return s_pConfigService;
 }

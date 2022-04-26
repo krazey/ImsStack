@@ -1,41 +1,43 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090819  YR@                       Created
-    20131212  yongnam.cha@              Modify ~ThreadService()
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceMutex.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsThread.h"
 #include "PlatformFactory.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
 #include "ServiceThread.h"
 
 PRIVATE
 ThreadService::ThreadService()
 {
-    piMutex = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PRIVATE
 ThreadService::~ThreadService()
 {
-    if (piMutex != IMS_NULL)
+    if (m_piLock != IMS_NULL)
     {
-        MutexService::GetMutexService()->DestroyMutex(piMutex);
+        MutexService::GetMutexService()->DestroyMutex(m_piLock);
     }
 }
 
 PUBLIC
-IThread* ThreadService::Create(IN const AString &strName, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
+IThread* ThreadService::Create(IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
-    ImsThread *pThread = PlatformFactory::CreateThread();
+    ImsThread* pThread = PlatformFactory::CreateThread();
 
     IMS_ASSERT(pThread != IMS_NULL);
 
@@ -55,7 +57,7 @@ IThread* ThreadService::Create(IN const AString &strName, IN IMS_SINT32 nSlotId/
         return IMS_NULL;
     }
 
-    objThreads.Append(pThread);
+    m_objThreads.Append(pThread);
 
     UnlockThreadPool();
 
@@ -63,9 +65,9 @@ IThread* ThreadService::Create(IN const AString &strName, IN IMS_SINT32 nSlotId/
 }
 
 PUBLIC
-IThread* ThreadService::CreateEx(IN const AString &strName, IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
+IThread* ThreadService::CreateEx(IN const AString& strName, IN IMS_SINT32 nSlotId)
 {
-    ImsThread *pThread = PlatformFactory::CreateThreadEx();
+    ImsThread* pThread = PlatformFactory::CreateThreadEx();
 
     IMS_ASSERT(pThread != IMS_NULL);
 
@@ -85,7 +87,7 @@ IThread* ThreadService::CreateEx(IN const AString &strName, IN IMS_SINT32 nSlotI
         return IMS_NULL;
     }
 
-    objThreads.Append(pThread);
+    m_objThreads.Append(pThread);
 
     UnlockThreadPool();
 
@@ -93,9 +95,9 @@ IThread* ThreadService::CreateEx(IN const AString &strName, IN IMS_SINT32 nSlotI
 }
 
 PUBLIC
-void ThreadService::Destroy(IN IThread *&piThread)
+void ThreadService::Destroy(IN IThread*& piThread)
 {
-    ImsThread *pThread = DYNAMIC_CAST(ImsThread*, piThread);
+    ImsThread* pThread = DYNAMIC_CAST(ImsThread*, piThread);
 
     if (pThread == IMS_NULL)
     {
@@ -106,13 +108,13 @@ void ThreadService::Destroy(IN IThread *&piThread)
 
     LockThreadPool();
 
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IThread *piExThread = objThreads.GetAt(i);
+        IThread* piExThread = m_objThreads.GetAt(i);
 
         if (piExThread == piThread)
         {
-            objThreads.RemoveAt(i);
+            m_objThreads.RemoveAt(i);
             bThreadFound = IMS_TRUE;
             break;
         }
@@ -128,16 +130,16 @@ void ThreadService::Destroy(IN IThread *&piThread)
 }
 
 PUBLIC
-IMS_BOOL ThreadService::Contains(IN const IThread *piThread) const
+IMS_BOOL ThreadService::Contains(IN const IThread* piThread) const
 {
     if (piThread == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IThread *piExThread = objThreads.GetAt(i);
+        IThread* piExThread = m_objThreads.GetAt(i);
 
         IMS_ASSERT(piExThread != IMS_NULL);
 
@@ -154,7 +156,7 @@ IMS_BOOL ThreadService::Contains(IN const IThread *piThread) const
 }
 
 PUBLIC
-IMS_BOOL ThreadService::ContainsLocked(IN const IThread *piThread) const
+IMS_BOOL ThreadService::ContainsLocked(IN const IThread* piThread) const
 {
     if (piThread == IMS_NULL)
     {
@@ -186,9 +188,9 @@ IThread* ThreadService::GetCurrentThread() const
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        ImsThread *pThread = DYNAMIC_CAST(ImsThread*, objThreads.GetAt(i));
+        ImsThread* pThread = DYNAMIC_CAST(ImsThread*, m_objThreads.GetAt(i));
 
         if (pThread != IMS_NULL)
         {
@@ -206,11 +208,11 @@ IThread* ThreadService::GetCurrentThread() const
 }
 
 PUBLIC
-IThread* ThreadService::GetThread(IN const AString &strName) const
+IThread* ThreadService::GetThread(IN const AString& strName) const
 {
-    for (IMS_UINT32 i = 0; i < objThreads.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objThreads.GetSize(); ++i)
     {
-        IThread *piExThread = objThreads.GetAt(i);
+        IThread* piExThread = m_objThreads.GetAt(i);
 
         IMS_ASSERT(piExThread != IMS_NULL);
 
@@ -227,11 +229,11 @@ IThread* ThreadService::GetThread(IN const AString &strName) const
 }
 
 PUBLIC
-IThread* ThreadService::GetThreadLocked(IN const AString &strName) const
+IThread* ThreadService::GetThreadLocked(IN const AString& strName) const
 {
     LockThreadPool();
 
-    IThread *piThread = GetThread(strName);
+    IThread* piThread = GetThread(strName);
 
     UnlockThreadPool();
 
@@ -241,14 +243,14 @@ IThread* ThreadService::GetThreadLocked(IN const AString &strName) const
 PUBLIC GLOBAL
 ThreadService* ThreadService::GetThreadService()
 {
-    static ThreadService *pThreadService = IMS_NULL;
+    static ThreadService* s_pThreadService = IMS_NULL;
 
-    if (pThreadService == IMS_NULL)
+    if (s_pThreadService == IMS_NULL)
     {
-        pThreadService = new ThreadService();
+        s_pThreadService = new ThreadService();
     }
 
-    return pThreadService;
+    return s_pThreadService;
 }
 
 PUBLIC GLOBAL
@@ -261,11 +263,11 @@ IMS_SINT32 ThreadService::GetCurrentSlotId(IN IMS_SINT32 nDefaultSlotId/* = IMS_
 PRIVATE
 void ThreadService::LockThreadPool() const
 {
-    piMutex->Lock();
+    m_piLock->Lock();
 }
 
 PRIVATE
 void ThreadService::UnlockThreadPool() const
 {
-    piMutex->Unlock();
+    m_piLock->Unlock();
 }

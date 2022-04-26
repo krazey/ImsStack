@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091107  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SERVICE_IMS_NETWORK_POLICY_H_
-#define _SERVICE_IMS_NETWORK_POLICY_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_NETWORK_POLICY_H_
+#define SERVICE_NETWORK_POLICY_H_
 
 #include "AString.h"
 
@@ -22,15 +25,13 @@ class NetworkPolicy
 public:
     explicit NetworkPolicy(IN IMS_BOOL bPrimary = IMS_FALSE);
     NetworkPolicy(IN IMS_BOOL bPrimary, IN const AString& strName, IN IMS_SINT32 nApnType);
-    NetworkPolicy(IN const NetworkPolicy& objOther);
+    NetworkPolicy(IN const NetworkPolicy& other);
     ~NetworkPolicy();
 
 public:
-    NetworkPolicy& operator=(IN const NetworkPolicy& objOther);
+    NetworkPolicy& operator=(IN const NetworkPolicy& other);
 
 public:
-    inline IMS_SINT32 GetAPNType() const
-    { return m_nApnType; }
     inline IMS_SINT32 GetApnType() const
     { return m_nApnType; }
     inline const AString& GetName() const
@@ -46,18 +47,18 @@ public:
     static IMS_BOOL IsWiFiPolicy(IN IMS_SINT32 nApnType);
 
 public:
-    // APN types
+    /// APN types
     enum
     {
         APN_NONE = (-1),
 
-        // Mobile
+        /// Mobile
         APN_IMS = 1,
         APN_INTERNET = 2,
         APN_EMERGENCY = 9,
         APN_MOBILE_MAX,
 
-        // WiFi
+        /// WiFi
         APN_WIFI = 21,
         APN_WIFI_MAX
     };
@@ -77,24 +78,28 @@ private:
     NetworkServicePolicy();
     ~NetworkServicePolicy();
 
-    NetworkServicePolicy(IN const NetworkServicePolicy& objRHS);
-    NetworkServicePolicy& operator=(IN const NetworkServicePolicy& objRHS);
+public:
+    NetworkServicePolicy(IN const NetworkServicePolicy&) = delete;
+    NetworkServicePolicy& operator=(IN const NetworkServicePolicy&) = delete;
 
 public:
-    IMS_BOOL AddPolicy(IN const AString &strName,
-            IN const NetworkPolicy &objPolicy, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    const NetworkPolicy* GetPolicy(IN const AString &strName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nAPNType,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
-    void RemovePolicy(IN const AString &strName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void RemoveAllPolicies(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IMS_BOOL AddPolicy(IN const AString& strName,
+            IN const NetworkPolicy& objPolicy, IN IMS_SINT32 nSlotId);
+    const NetworkPolicy* GetPolicy(IN const AString& strName,
+            IN IMS_SINT32 nSlotId) const;
+    inline const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType)
+            __IMS_DEPRECATED__("Use GetPolicy(IMS_SINT32,IMS_SINT32) instead")
+    { return GetPolicy(nApnType, IMS_SLOT_0); }
+    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType,
+            IN IMS_SINT32 nSlotId) const;
+    void RemovePolicy(IN const AString& strName,
+            IN IMS_SINT32 nSlotId);
+    void RemoveAllPolicies(IN IMS_SINT32 nSlotId);
 
     static NetworkServicePolicy* GetInstance();
 
 private:
-    NetworkServicePolicyPrivate *pPrivate;
+    NetworkServicePolicyPrivate* m_pPrivate;
 };
 
-#endif // _SERVICE_IMS_NETWORK_POLICY_H_
+#endif

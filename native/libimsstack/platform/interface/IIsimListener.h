@@ -1,143 +1,69 @@
-
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100927  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_ISIM_LISTENER_H_
+#define INTERFACE_ISIM_LISTENER_H_
 
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_ISIM_LISTENER_H_
-#define _INTERFACE_IMS_ISIM_LISTENER_H_
-
-#include "IMSList.h"
 #include "ByteArray.h"
+#include "IMSList.h"
 
 class IIsimListener
 {
 public:
-    /*
+    /**
+     * @brief Notifies the application that the specified field value is retrieved.
+     *
+     * @param nField The field type to be requested
+     * @param objValues The field values
+     */
+    virtual void Isim_OnField(IN IMS_SINT32 nField, IN const IMSList<ByteArray>& objValues) = 0;
 
-    Notifies the application that the specified field value is retrieved.
+    /**
+     * @brief Notifies the application that the home domain name is retrieved.
+     *
+     * @param objDomainName The home domain name
+     */
+    virtual void Isim_OnHomeDomainName(IN const ByteArray& objDomainName) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nField                  Field type to be requested
-    objValues               Field values
-    </table>
+    /**
+     * @brief Notifies the application that the private user identity is retrieved.
+     *
+     * @param objImpi The private user identity
+     */
+    virtual void Isim_OnImpi(IN const ByteArray& objImpi) = 0;
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
+    /**
+     * @brief Notifies the application that the public user identities are retrieved.
+     *
+     * @param objImpus The list of public user identity
+     */
+    virtual void Isim_OnImpu(IN const IMSList<ByteArray>& objImpus) = 0;
 
-    */
-    virtual void Isim_OnField(IN IMS_SINT32 nField, IN CONST IMSList<ByteArray> &objValues) = 0;
-
-    /*
-
-    Notifies the application that the home domain name is retrieved.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    objDomainName           Home domain name
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void Isim_OnHomeDomainName(IN CONST ByteArray &objDomainName) = 0;
-
-    /*
-
-    Notifies the application that the private user identity is retrieved.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    objIMPI                 Private user identity
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void Isim_OnImpi(IN CONST ByteArray &objIMPI) = 0;
-
-    /*
-
-    Notifies the application that the public user identities are retrieved.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    objIMPUs                List of public user identity
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void Isim_OnImpu(IN CONST IMSList<ByteArray> &objIMPUs) = 0;
-
-    /*
-
-    Notifies the application that the error occurrs in the ISIM module.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the error occurrs in the ISIM module.
+     *
+     * @param nErrorCode The error code
+     */
     virtual void Isim_OnError(IN IMS_SINT32 nErrorCode) = 0;
 
-    /*
-
-    Notifies the application that the ISIM state is changed.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
+    /**
+     * @brief Notifies the application that the ISIM state is changed.
+     *
+     * @param nState The ISIM state
+     */
     virtual void Isim_OnStateChanged(IN IMS_SINT32 nState) = 0;
 };
 
-#endif // _INTERFACE_IMS_ISIM_LISTENER_H_
+#endif

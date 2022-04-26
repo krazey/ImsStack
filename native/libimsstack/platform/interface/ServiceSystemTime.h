@@ -1,18 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090305  lovil@                    Created
-    20090831  yhrhee@                   Modified
-    </table>
-
-    Description
-     This file defines the system utility functions.
-*/
-
-#ifndef _SERVICE_IMS_SYSTEM_H_
-#define _SERVICE_IMS_SYSTEM_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_SYSTEM_TIME_H_
+#define SERVICE_SYSTEM_TIME_H_
 
 #include "ISystemTime.h"
 
@@ -24,8 +26,9 @@ private:
     SystemTimeService();
     ~SystemTimeService();
 
-    SystemTimeService(IN const SystemTimeService& objRHS);
-    SystemTimeService& operator=(IN const SystemTimeService& objRHS);
+public:
+    SystemTimeService(IN const SystemTimeService&) = delete;
+    SystemTimeService& operator=(IN const SystemTimeService&) = delete;
 
 public:
     ISystemTime* GetSystemTime();
@@ -33,10 +36,9 @@ public:
     static SystemTimeService* GetSystemTimeService();
 
 private:
-    SystemTimeServicePrivate *pPrivate;
+    SystemTimeServicePrivate* m_pPrivate;
 };
 
-//-------------------------------------------------------------------------------------------------
 #define IMS_SYS_GetDate() \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDate()
 
@@ -70,14 +72,13 @@ private:
 #define IMS_SYS_GetTimeString() \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeString()
 
-//LGU+ Knight
 #define IMS_SYS_GetTimeStringEx() \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeStringEx()
 
 #define IMS_SYS_Sleep(MS) \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->Sleep(MS)
 
-#define IMS_SYS_GetDiffGMTime(BEGIN,END) \
+#define IMS_SYS_GetDiffGmTime(BEGIN,END) \
         SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDiffGmTime(BEGIN,END);
 
-#endif // _SERVICE_IMS_SYSTEM_H_
+#endif

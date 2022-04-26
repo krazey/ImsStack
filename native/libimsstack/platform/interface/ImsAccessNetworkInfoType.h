@@ -1,19 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101005  hwangoo.park@             Created
-    </table>
-
-    Description
-    This file defines the data structures for Access Network Info. which the device is attached.
-    It defines only the wireless requirements : 3GPP / 3GPP2 / WLAN.
-    DSL / Ethernet related information is excluded in this file.
-*/
-
-#ifndef _IMS_ACCESS_NETWORK_INFO_TYPE_H_
-#define _IMS_ACCESS_NETWORK_INFO_TYPE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_ACCESS_NETWORK_INFO_TYPE_H_
+#define IMS_ACCESS_NETWORK_INFO_TYPE_H_
 
 #include "IMSNew.h"
 
@@ -159,12 +160,12 @@ public:
     }
 
 public:
-    // Access-type
+    /// Access-type
     enum
     {
         TYPE_NONE = 0,
 
-        // 3GPP
+        /// 3GPP
         TYPE_3GPP_GERAN,
         TYPE_3GPP_UTRAN_FDD,
         TYPE_3GPP_UTRAN_TDD,
@@ -173,12 +174,12 @@ public:
         TYPE_3GPP_NR_FDD,
         TYPE_3GPP_NR_TDD,
 
-        // 3GPP2
+        /// 3GPP2
         TYPE_3GPP2_1X,
         TYPE_3GPP2_1X_HRPD,
         TYPE_3GPP2_UMB,
 
-        // WIFI
+        /// WIFI
         TYPE_IEEE_802_11,
         TYPE_IEEE_802_11A,
         TYPE_IEEE_802_11B,
@@ -190,7 +191,7 @@ public:
         TYPE_MAX
     };
 
-    // Access-class
+    /// Access-class
     enum
     {
         CLASS_NONE = 0,
@@ -229,4 +230,4 @@ public:
     AccessInfo uniAI;
 };
 
-#endif // _IMS_ACCESS_NETWORK_INFO_TYPE_H_
+#endif

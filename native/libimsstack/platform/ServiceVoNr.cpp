@@ -14,40 +14,38 @@
  * limitations under the License.
  */
 #include "ImsMessageDef.h"
-#include "SystemConfig.h"
-#include "PlatformFactory.h"
 #include "ImsVoNr.h"
+#include "PlatformFactory.h"
 #include "ServiceVoNr.h"
+#include "SystemConfig.h"
 
-
-class VoNRHolder
+class VoNrHolder
 {
 public:
-    inline VoNRHolder()
-        : piVoNR(IMS_NULL)
+    inline VoNrHolder()
+        : m_piVoNr(IMS_NULL)
     {}
-    inline ~VoNRHolder()
+    inline ~VoNrHolder()
     {
-        PlatformFactory::DestroyVoNr(piVoNR);
+        PlatformFactory::DestroyVoNr(m_piVoNr);
     }
 
-private:
-    VoNRHolder(IN CONST VoNRHolder &objRHS);
-    VoNRHolder& operator=(IN CONST VoNRHolder &objRHS);
+    VoNrHolder(IN const VoNrHolder&) = delete;
+    VoNrHolder& operator=(IN const VoNrHolder&) = delete;
 
 public:
-    inline IVoNr* GetVoNR(IN IMS_SINT32 nSlotId)
+    inline IVoNr* GetVoNr(IN IMS_SINT32 nSlotId)
     {
-        if (piVoNR == IMS_NULL)
+        if (m_piVoNr == IMS_NULL)
         {
-            piVoNR = PlatformFactory::CreateVoNr(nSlotId);
+            m_piVoNr = PlatformFactory::CreateVoNr(nSlotId);
         }
 
-        return piVoNR;
+        return m_piVoNr;
     }
 
 private:
-    IVoNr *piVoNR;
+    IVoNr* m_piVoNr;
 };
 
 class VoNrServicePrivate
@@ -56,96 +54,94 @@ public:
     VoNrServicePrivate();
     ~VoNrServicePrivate();
 
-private:
-    VoNrServicePrivate(IN CONST VoNrServicePrivate &objRHS);
-    VoNrServicePrivate& operator=(IN CONST VoNrServicePrivate &objRHS);
+    VoNrServicePrivate(IN const VoNrServicePrivate&) = delete;
+    VoNrServicePrivate& operator=(IN const VoNrServicePrivate&) = delete;
 
 public:
-    VoNRHolder* GetHolder(IN IMS_SINT32 nSlotId);
+    VoNrHolder* GetHolder(IN IMS_SINT32 nSlotId);
 
 private:
-    VoNRHolder **ppHolder;
+    VoNrHolder** m_ppHolder;
 };
 
 PUBLIC
 VoNrServicePrivate::VoNrServicePrivate()
-    : ppHolder(IMS_NULL)
+    : m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppHolder = new VoNRHolder*[nSimCount];
+    m_ppHolder = new VoNrHolder*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppHolder[i] = new VoNRHolder();
+        m_ppHolder[i] = new VoNrHolder();
     }
 }
 
 PUBLIC
 VoNrServicePrivate::~VoNrServicePrivate()
 {
-    if (ppHolder != IMS_NULL)
+    if (m_ppHolder != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppHolder[i] != IMS_NULL)
+            if (m_ppHolder[i] != IMS_NULL)
             {
-                delete ppHolder[i];
+                delete m_ppHolder[i];
             }
         }
 
-        delete[] ppHolder;
+        delete[] m_ppHolder;
     }
 }
 
 PUBLIC
-VoNRHolder* VoNrServicePrivate::GetHolder(IN IMS_SINT32 nSlotId)
+VoNrHolder* VoNrServicePrivate::GetHolder(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
         nSlotId = IMS_SLOT_0;
     }
 
-    return ppHolder[nSlotId];
+    return m_ppHolder[nSlotId];
 }
 
 PRIVATE
 VoNrService::VoNrService()
-    : pPrivate(new VoNrServicePrivate())
+    : m_pPrivate(new VoNrServicePrivate())
 {
 }
 
 PRIVATE
 VoNrService::~VoNrService()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
 IVoNr* VoNrService::GetVoNr(IN IMS_SINT32 nSlotId)
 {
-    VoNRHolder *pHolder = pPrivate->GetHolder(nSlotId);
-    return pHolder->GetVoNR(nSlotId);
+    VoNrHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
+    return pHolder->GetVoNr(nSlotId);
 }
 
 PUBLIC
-void VoNrService::DispatchServiceMessage(IN IMSMSG &objMSG)
+void VoNrService::DispatchServiceMessage(IN ImsMessage& objMsg)
 {
-    switch (objMSG.GetName())
+    switch (objMsg.GetName())
     {
-        case IMS_MSG_VONR:
-        {
-            IMS_SINT32 nSlotId = LONG_TO_SINT(objMSG.nWparam);
-            ImsVoNr* pVoNR = DYNAMIC_CAST(ImsVoNr*, GetVoNr(nSlotId));
+        case IMS_MSG_VONR: {
+            IMS_SINT32 nSlotId = LONG_TO_SINT(objMsg.nWparam);
+            ImsVoNr* pVoNr = DYNAMIC_CAST(ImsVoNr*, GetVoNr(nSlotId));
 
-            if (pVoNR != IMS_NULL)
+            if (pVoNr != IMS_NULL)
             {
-                pVoNR->DispatchServiceMessage(objMSG.nWparam, objMSG.nLparam);
+                pVoNr->DispatchServiceMessage(objMsg.nWparam, objMsg.nLparam);
             }
             break;
         }
@@ -159,12 +155,12 @@ void VoNrService::DispatchServiceMessage(IN IMSMSG &objMSG)
 PUBLIC GLOBAL
 VoNrService* VoNrService::GetVoNrService()
 {
-    static VoNrService *pVoNRService = IMS_NULL;
+    static VoNrService* s_pVoNrService = IMS_NULL;
 
-    if (pVoNRService == IMS_NULL)
+    if (s_pVoNrService == IMS_NULL)
     {
-        pVoNRService = new VoNrService();
+        s_pVoNrService = new VoNrService();
     }
 
-    return pVoNRService;
+    return s_pVoNrService;
 }

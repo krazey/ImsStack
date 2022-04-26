@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090831  yhrhee@                   Created
-    </table>
-
-    Description
-    IMS File Service
-*/
-
-#ifndef _SERVICE_IMS_FILE_H_
-#define _SERVICE_IMS_FILE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_FILE_H_
+#define SERVICE_FILE_H_
 
 #include "IFile.h"
 
@@ -23,21 +26,20 @@ private:
     FileService();
     ~FileService();
 
-    FileService(IN const FileService& objRHS);
-    FileService& operator=(IN const FileService& objRHS);
+public:
+    FileService(IN const FileService&) = delete;
+    FileService& operator=(IN const FileService&) = delete;
 
 public:
     IFile* CreateFile();
-    void DestroyFile(IN IFile *&piFile);
+    void DestroyFile(IN IFile*& piFile);
     IFileUtil* GetFileUtil();
 
     static FileService* GetFileService();
 
 private:
-    FileServicePrivate *pPrivate;
+    FileServicePrivate* m_pPrivate;
 };
-
-//-------------------------------------------------------------------------------------------------
 
 #define IMS_FILE_Create() \
         FileService::GetFileService()->CreateFile()
@@ -63,4 +65,4 @@ private:
 #define IMS_FILE_GetSeparator() \
         FileService::GetFileService()->GetFileUtil()->GetFileSeparator()
 
-#endif // _SERVICE_IMS_FILE_H_
+#endif

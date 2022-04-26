@@ -1,27 +1,37 @@
-
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101006  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_EVENT_SENDER_H_
-#define _INTERFACE_IMS_EVENT_SENDER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_EVENT_SENDER_H_
+#define INTERFACE_EVENT_SENDER_H_
 
 #include "ImsTypeDef.h"
 
 class IEventSender
 {
 public:
+    /**
+     * @brief Sends the specified event to the upper(Java) layer.
+     *
+     * @param nEvent The event type
+     * @param nWParam The first parameter for this event
+     * @param nLParam The second parameter for this event
+     * @param nSlotId The slot-id
+     */
     virtual void SendEvent(IN IMS_SINT32 nEvent,
             IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) = 0;
+            IN IMS_SINT32 nSlotId) = 0;
 };
 
-#endif // _INTERFACE_IMS_EVENT_SENDER_H_
+#endif

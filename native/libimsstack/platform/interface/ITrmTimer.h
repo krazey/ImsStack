@@ -19,26 +19,20 @@
 class ITrmTimerListener
 {
 public:
-    /*
-        Notifies the application that the service timer is expired.
-    */
+    /**
+     * @brief Notifies the application that the service timer is expired.
+     */
     virtual void TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) = 0;
 };
 
 class ITrmTimer
 {
 public:
-    /*
-    */
     virtual void SetListener(IN ITrmTimerListener* piListener) = 0;
 
-    /*
-    */
     virtual void Start() = 0;
 
-    /*
-    */
     virtual void Stop() = 0;
 };
 
-#endif // INTERFACE_TRM_TIMER_H_
+#endif

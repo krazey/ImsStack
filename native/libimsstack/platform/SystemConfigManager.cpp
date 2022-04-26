@@ -1,33 +1,36 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170501  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceMutex.h"
-#include "PlatformProperty.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IThread.h"
 #include "ISystemConfigListener.h"
+#include "PlatformProperty.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
+#include "ServiceTrace.h"
 #include "SystemConfigManager.h"
 
 __IMS_TRACE_TAG_BASE__;
 
 PRIVATE
 SystemConfigManager::SystemConfigManager()
-    : piLockForConfigs(IMS_NULL)
-    , piLockForListeners(IMS_NULL)
-    , piProxyThread(IMS_NULL)
+    : m_piLockForConfigs(IMS_NULL)
+    , m_piLockForListeners(IMS_NULL)
+    , m_piProxyThread(IMS_NULL)
 {
-    piLockForConfigs = MutexService::GetMutexService()->CreateMutex();
-    piLockForListeners = MutexService::GetMutexService()->CreateMutex();
+    m_piLockForConfigs = MutexService::GetMutexService()->CreateMutex();
+    m_piLockForListeners = MutexService::GetMutexService()->CreateMutex();
 
     SystemConfig::CacheGlobalConfigs();
 }
@@ -37,8 +40,8 @@ SystemConfigManager::~SystemConfigManager()
 {
     ClearAllConfigs();
 
-    MutexService::GetMutexService()->DestroyMutex(piLockForConfigs);
-    MutexService::GetMutexService()->DestroyMutex(piLockForListeners);
+    MutexService::GetMutexService()->DestroyMutex(m_piLockForConfigs);
+    MutexService::GetMutexService()->DestroyMutex(m_piLockForListeners);
 }
 
 PUBLIC
@@ -51,30 +54,30 @@ IMS_SINT32 SystemConfigManager::GetActiveSlotId() const
 
     IMS_SINT32 nActiveSlotId = IMS_SLOT_0;
 
-    LockGuard objLock(piLockForConfigs);
+    LockGuard objLock(m_piLockForConfigs);
 
     if (SystemConfig::IsMultiImsEnabled() || SystemConfig::IsMultiImsEnabledOnDssv())
     {
-        for (IMS_UINT32 i = 0; i < objSystemConfigs.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objSystemConfigs.GetSize(); i++)
         {
-            const SystemConfig* pSC = objSystemConfigs.GetValueAt(i);
+            const SystemConfig* pConfig = m_objSystemConfigs.GetValueAt(i);
 
-            if (pSC->GetOperator().GetLength() > 0)
+            if (pConfig->GetOperator().GetLength() > 0)
             {
-                nActiveSlotId = pSC->GetSlotId();
+                nActiveSlotId = pConfig->GetSlotId();
                 break;
             }
         }
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objSystemConfigs.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objSystemConfigs.GetSize(); i++)
         {
-            const SystemConfig* pSC = objSystemConfigs.GetValueAt(i);
+            const SystemConfig* pConfig = m_objSystemConfigs.GetValueAt(i);
 
-            if (pSC->IsDds())
+            if (pConfig->IsDds())
             {
-                nActiveSlotId = pSC->GetSlotId();
+                nActiveSlotId = pConfig->GetSlotId();
                 break;
             }
         }
@@ -84,27 +87,27 @@ IMS_SINT32 SystemConfigManager::GetActiveSlotId() const
 }
 
 PUBLIC
-const SystemConfig* SystemConfigManager::GetConfig(IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/) const
+const SystemConfig* SystemConfigManager::GetConfig(IN IMS_SINT32 nSlotId) const
 {
     if (nSlotId < IMS_SLOT_0)
     {
         nSlotId = IMS_SLOT_0;
     }
 
-    LockGuard objLock(piLockForConfigs);
+    LockGuard objLock(m_piLockForConfigs);
 
-    IMS_SLONG nIndex = objSystemConfigs.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objSystemConfigs.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objSystemConfigs.GetValueAt(nIndex);
+    return m_objSystemConfigs.GetValueAt(nIndex);
 }
 
 PUBLIC
-const SystemConfig* SystemConfigManager::GetOldConfig(IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/) const
+const SystemConfig* SystemConfigManager::GetOldConfig(IN IMS_SINT32 nSlotId) const
 {
     if (nSlotId < IMS_SLOT_0)
     {
@@ -113,31 +116,31 @@ const SystemConfig* SystemConfigManager::GetOldConfig(IN IMS_SINT32 nSlotId /*= 
 
     nSlotId += OLD_CONFIG_INDEX_BASE;
 
-    LockGuard objLock(piLockForConfigs);
+    LockGuard objLock(m_piLockForConfigs);
 
-    IMS_SLONG nIndex = objSystemConfigs.GetIndexOfKey(nSlotId);
+    IMS_SLONG nIndex = m_objSystemConfigs.GetIndexOfKey(nSlotId);
 
     if (nIndex < 0)
     {
         return IMS_NULL;
     }
 
-    return objSystemConfigs.GetValueAt(nIndex);
+    return m_objSystemConfigs.GetValueAt(nIndex);
 }
 
 PUBLIC
-void SystemConfigManager::AddListener(IN ISystemConfigListener *piListener)
+void SystemConfigManager::AddListener(IN ISystemConfigListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    LockGuard objLock(piLockForListeners);
+    LockGuard objLock(m_piLockForListeners);
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISystemConfigListener *piTmpListener = objListeners.GetAt(i);
+        ISystemConfigListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piListener == piTmpListener)
         {
@@ -145,26 +148,26 @@ void SystemConfigManager::AddListener(IN ISystemConfigListener *piListener)
         }
     }
 
-    objListeners.Append(piListener);
+    m_objListeners.Append(piListener);
 }
 
 PUBLIC
-void SystemConfigManager::RemoveListener(IN ISystemConfigListener *piListener)
+void SystemConfigManager::RemoveListener(IN ISystemConfigListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    LockGuard objLock(piLockForListeners);
+    LockGuard objLock(m_piLockForListeners);
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISystemConfigListener *piTmpListener = objListeners.GetAt(i);
+        ISystemConfigListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piListener == piTmpListener)
         {
-            objListeners.RemoveAt(i);
+            m_objListeners.RemoveAt(i);
             return;
         }
     }
@@ -173,14 +176,14 @@ void SystemConfigManager::RemoveListener(IN ISystemConfigListener *piListener)
 PUBLIC GLOBAL
 SystemConfigManager* SystemConfigManager::GetInstance()
 {
-    static SystemConfigManager *pSystemConfigManager = IMS_NULL;
+    static SystemConfigManager* s_pSystemConfigManager = IMS_NULL;
 
-    if (pSystemConfigManager == IMS_NULL)
+    if (s_pSystemConfigManager == IMS_NULL)
     {
-        pSystemConfigManager = new SystemConfigManager();
+        s_pSystemConfigManager = new SystemConfigManager();
     }
 
-    return pSystemConfigManager;
+    return s_pSystemConfigManager;
 }
 
 PUBLIC GLOBAL
@@ -197,39 +200,39 @@ void SystemConfigManager::MessageCallback_OnMessage(IN ImsMessage& objMsg)
 
     switch (objMsg.GetName())
     {
-    case TMSG_CONFIG_CHANGED: {
-        IMS_SINT32 nEvent = LONG_TO_INT(objMsg.nWparam);
-        IMSList<IMS_SINT32>* pSlots = reinterpret_cast<IMSList<IMS_SINT32>*>(objMsg.nLparam);
+        case TMSG_CONFIG_CHANGED: {
+            IMS_SINT32 nEvent = LONG_TO_INT(objMsg.nWparam);
+            IMSList<IMS_SINT32>* pSlots = reinterpret_cast<IMSList<IMS_SINT32>*>(objMsg.nLparam);
 
-        if (pSlots != IMS_NULL)
-        {
-            for (IMS_UINT32 i = 0; i < pSlots->GetSize(); ++i)
+            if (pSlots != IMS_NULL)
             {
-                NotifyConfigChanged(nEvent, pSlots->GetAt(i));
-            }
+                for (IMS_UINT32 i = 0; i < pSlots->GetSize(); ++i)
+                {
+                    NotifyConfigChanged(nEvent, pSlots->GetAt(i));
+                }
 
-            delete pSlots;
+                delete pSlots;
+            }
+            break;
         }
-        break;
-    }
-    case TMSG_FEATURE_PERMISSIONS_CHANGED: {
-        IMS_TRACE_I("Cache system features", 0, 0, 0);
-        CacheSystemFeatures();
-        break;
-    }
-    default:
-        break;
+        case TMSG_FEATURE_PERMISSIONS_CHANGED: {
+            IMS_TRACE_I("Cache system features", 0, 0, 0);
+            CacheSystemFeatures();
+            break;
+        }
+        default:
+            break;
     }
 }
 
 PRIVATE
 void SystemConfigManager::ClearAllConfigs()
 {
-    LockGuard objLock(piLockForConfigs);
+    LockGuard objLock(m_piLockForConfigs);
 
-    for (IMS_UINT32 i = 0; i < objSystemConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objSystemConfigs.GetSize(); ++i)
     {
-        SystemConfig *pConfig = objSystemConfigs.GetValueAt(i);
+        SystemConfig* pConfig = m_objSystemConfigs.GetValueAt(i);
 
         if (pConfig != IMS_NULL)
         {
@@ -237,17 +240,17 @@ void SystemConfigManager::ClearAllConfigs()
         }
     }
 
-    objSystemConfigs.Clear();
+    m_objSystemConfigs.Clear();
 }
 
 PRIVATE
-IMS_BOOL SystemConfigManager::HasListener(IN ISystemConfigListener *piListener) const
+IMS_BOOL SystemConfigManager::HasListener(IN ISystemConfigListener* piListener) const
 {
-    LockGuard objLock(piLockForListeners);
+    LockGuard objLock(m_piLockForListeners);
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISystemConfigListener *piTmpListener = objListeners.GetAt(i);
+        ISystemConfigListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piListener == piTmpListener)
         {
@@ -264,14 +267,14 @@ void SystemConfigManager::NotifyConfigChanged(IN IMS_SINT32 nEvent, IN IMS_SINT3
     IMSList<ISystemConfigListener*> objTmpListeners;
 
     {
-        LockGuard objLock(piLockForListeners);
+        LockGuard objLock(m_piLockForListeners);
 
-        objTmpListeners = objListeners;
+        objTmpListeners = m_objListeners;
     }
 
     for (IMS_UINT32 i = 0; i < objTmpListeners.GetSize(); ++i)
     {
-        ISystemConfigListener *piListener = objTmpListeners.GetAt(i);
+        ISystemConfigListener* piListener = objTmpListeners.GetAt(i);
 
         if ((piListener != IMS_NULL) && HasListener(piListener))
         {
@@ -282,25 +285,25 @@ void SystemConfigManager::NotifyConfigChanged(IN IMS_SINT32 nEvent, IN IMS_SINT3
 
 PRIVATE
 void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
-        IN IMS_SINT32 nCount, IN const __SystemConfig* pstSysConfig)
+        IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
 {
     IMS_BOOL bNotificationSuccess = IMS_FALSE;
 
-    if ((nCount > 0) && (piProxyThread != IMS_NULL))
+    if ((nCount > 0) && (m_piProxyThread != IMS_NULL))
     {
         IMSList<IMS_SINT32>* pSlots = new IMSList<IMS_SINT32>();
 
         for (IMS_SINT32 i = 0; i < nCount; ++i)
         {
-            const __SystemConfig *pSC = &pstSysConfig[i];
+            const __SystemConfig* pConfig = &pSysConfig[i];
 
-            pSlots->Append(pSC->nSlotId);
+            pSlots->Append(pConfig->nSlotId);
         }
 
         ImsMessage objMsg(TMSG_CONFIG_CHANGED,
                 nEvent, reinterpret_cast<IMS_UINTP>(pSlots), this);
 
-        bNotificationSuccess = piProxyThread->PostMessageI(objMsg);
+        bNotificationSuccess = m_piProxyThread->PostMessageI(objMsg);
 
         if (!bNotificationSuccess)
         {
@@ -312,33 +315,33 @@ void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
     {
         for (IMS_SINT32 i = 0; i < nCount; ++i)
         {
-            const __SystemConfig *pSC = &pstSysConfig[i];
+            const __SystemConfig* pConfig = &pSysConfig[i];
 
-            NotifyConfigChanged(nEvent, pSC->nSlotId);
+            NotifyConfigChanged(nEvent, pConfig->nSlotId);
         }
     }
 }
 
 PRIVATE
 void SystemConfigManager::StoreConfig(IN IMS_SINT32 nCount,
-        IN const __SystemConfig* pstSysConfig)
+        IN const __SystemConfig* pSysConfig)
 {
-    LockGuard objLock(piLockForConfigs);
+    LockGuard objLock(m_piLockForConfigs);
 
     for (IMS_SINT32 i = 0; i < nCount; ++i)
     {
-        SystemConfig *pNewConfig = new SystemConfig(&pstSysConfig[i]);
+        SystemConfig* pNewConfig = new SystemConfig(&pSysConfig[i]);
 
         IMS_TRACE_I("(%d)=%s", i, pNewConfig->ToString().GetStr(), 0);
 
         // Remove old config. if present
         IMS_SINT32 nOldConfigId = pNewConfig->GetSlotId() + OLD_CONFIG_INDEX_BASE;
-        IMS_SLONG nOldConfigIndex = objSystemConfigs.GetIndexOfKey(nOldConfigId);
+        IMS_SLONG nOldConfigIndex = m_objSystemConfigs.GetIndexOfKey(nOldConfigId);
 
         if (nOldConfigIndex >= 0)
         {
-            SystemConfig *pOldConfig = objSystemConfigs.GetValueAt(nOldConfigIndex);
-            objSystemConfigs.RemoveAt(nOldConfigIndex);
+            SystemConfig* pOldConfig = m_objSystemConfigs.GetValueAt(nOldConfigIndex);
+            m_objSystemConfigs.RemoveAt(nOldConfigIndex);
 
             if (pOldConfig != IMS_NULL)
             {
@@ -348,45 +351,45 @@ void SystemConfigManager::StoreConfig(IN IMS_SINT32 nCount,
 
         // Move current config. to old config.
         IMS_SINT32 nConfigId = pNewConfig->GetSlotId();
-        IMS_SLONG nConfigIndex = objSystemConfigs.GetIndexOfKey(nConfigId);
+        IMS_SLONG nConfigIndex = m_objSystemConfigs.GetIndexOfKey(nConfigId);
 
         if (nConfigIndex >= 0)
         {
-            SystemConfig *pConfig = objSystemConfigs.GetValueAt(nConfigIndex);
-            objSystemConfigs.RemoveAt(nConfigIndex);
+            SystemConfig* pConfig = m_objSystemConfigs.GetValueAt(nConfigIndex);
+            m_objSystemConfigs.RemoveAt(nConfigIndex);
 
             if (pConfig != IMS_NULL)
             {
-                objSystemConfigs.SetValue(nConfigId + OLD_CONFIG_INDEX_BASE, pConfig);
+                m_objSystemConfigs.SetValue(nConfigId + OLD_CONFIG_INDEX_BASE, pConfig);
             }
         }
 
         // Set new config. as a current config.
-        objSystemConfigs.SetValue(nConfigId, pNewConfig);
+        m_objSystemConfigs.SetValue(nConfigId, pNewConfig);
     }
 }
 
 PRIVATE
 void SystemConfigManager::SetProxyThread(IN IThread* piThread)
 {
-    piProxyThread = piThread;
+    m_piProxyThread = piThread;
 }
 
 PRIVATE
 void SystemConfigManager::UpdateSystemConfig(IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount,
-        IN const __SystemConfig* pstSysConfig)
+        IN const __SystemConfig* pSysConfig)
 {
     if (nEvent == SystemConfig::EVENT_FEATURE_PERMISSIONS_CHANGED)
     {
-        if (piProxyThread != IMS_NULL)
+        if (m_piProxyThread != IMS_NULL)
         {
             ImsMessage objMsg(TMSG_FEATURE_PERMISSIONS_CHANGED, 0, 0, this);
-            piProxyThread->PostMessageI(objMsg);
+            m_piProxyThread->PostMessageI(objMsg);
         }
         return;
     }
 
-    if (pstSysConfig == IMS_NULL)
+    if (pSysConfig == IMS_NULL)
     {
         return;
     }
@@ -398,7 +401,7 @@ void SystemConfigManager::UpdateSystemConfig(IN IMS_SINT32 nEvent, IN IMS_SINT32
         ClearAllConfigs();
     }
 
-    StoreConfig(nCount, pstSysConfig);
+    StoreConfig(nCount, pSysConfig);
 
-    PostConfigChanged(nEvent, nCount, pstSysConfig);
+    PostConfigChanged(nEvent, nCount, pSysConfig);
 }

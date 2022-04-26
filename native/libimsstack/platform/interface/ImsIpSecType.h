@@ -18,11 +18,10 @@
 
 #include "ImsTypeDef.h"
 
-// IP Security Type class
 class IpSecType
 {
 public:
-    // Upper Layer Protocol
+    /// Transport protocol of upper layer
     enum
     {
         TRANS_PROTOCOL_UDP = 0,
@@ -30,7 +29,7 @@ public:
         TRANS_PROTOCOL_ANY
     };
 
-    // Action
+    /// Action
     enum
     {
         ACTION_APPLY = 0,
@@ -39,7 +38,7 @@ public:
         ACTION_BYPASS
     };
 
-    // Direction
+    /// Direction
     enum
     {
         DIRECTION_INBOUND = 0,
@@ -47,28 +46,28 @@ public:
         DIRECTION_ANY
     };
 
-    // Mode
+    /// Mode
     enum
     {
         MODE_TRANSPORT = 0,
         MODE_TUNNEL
     };
 
-    // Security Protocol
+    /// Security Protocol
     enum
     {
         SECURITY_PROTOCOL_AH = 0,
         SECURITY_PROTOCOL_ESP
     };
 
-    // Integrity Algorithm
+    /// Integrity Algorithm
     enum
     {
         INTEGRITY_ALGORITHM_HMAC_MD5_96 = 0,
         INTEGRITY_ALGORITHM_HMAC_SHA_1_96
     };
 
-    // Encryption Algorithm
+    /// Encryption Algorithm
     enum
     {
         ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 0,
@@ -77,4 +76,4 @@ public:
     };
 };
 
-#endif // IMS_IPSEC_TYPE_H_
+#endif

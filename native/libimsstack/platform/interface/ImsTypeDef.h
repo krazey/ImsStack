@@ -1,18 +1,20 @@
 /*
-    Author
-    IMSers
-    <table>
-    Date      Description
-    --------  ----------
-    20090302  Created
-    </table>
-
-    Description
-     This file defines a basic data types for IMS client platform.
-*/
-
-#ifndef _IMS_TYPE_DEF_H_
-#define _IMS_TYPE_DEF_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_TYPE_DEF_H_
+#define IMS_TYPE_DEF_H_
 
 #if defined(__LINUX__)
 
@@ -26,11 +28,15 @@
 
 #endif
 
-// Q-OS, C++17
+// C++17
 #if (__cplusplus >= 201703L)
 #define __IMS_FALLTHROUGH__    [[fallthrough]];
 #else
 #define __IMS_FALLTHROUGH__
+#endif
+
+#ifndef __IMS_DEPRECATED__
+#define __IMS_DEPRECATED__(message)
 #endif
 
 #ifndef IMS_NULL
@@ -259,16 +265,8 @@ typedef unsigned int            IMS_UINTP;
 #define NULL                    (0)
 #endif
 
-#ifndef TRUE
-#define TRUE                    (1==1)
-#endif
-
 #ifndef true
 #define true                    (1==1)
-#endif
-
-#ifndef FALSE
-#define FALSE                   (1==0)
 #endif
 
 #ifndef false
@@ -277,23 +275,7 @@ typedef unsigned int            IMS_UINTP;
 
 
 
-#if defined(WIN32)
-
-#define        __IMS_FILE__            __FILE__
-#define        __IMS_LINE__            __LINE__
-#if (_MSC_VER >= 1400)
-#define        __IMS_FUNC__            __FUNCTION__
-#else
-#define        __IMS_FUNC__            __FILE__
-#endif
-
-#elif defined(WINCE)
-
-#define        __IMS_FILE__            __FILE__
-#define        __IMS_LINE__            __LINE__
-#define        __IMS_FUNC__            __FUNCTION__
-
-#elif defined(__arm)
+#if defined(__arm)
 
 #if defined(__clang__)
 #define        __IMS_FILE__            __FILE__
@@ -302,18 +284,6 @@ typedef unsigned int            IMS_UINTP;
 #endif
 #define        __IMS_LINE__            __LINE__
 #define        __IMS_FUNC__            __func__
-
-#elif defined(__TMS470__)
-
-#define        __IMS_FILE__            __FILE__
-#define        __IMS_LINE__            __LINE__
-#define        __IMS_FUNC__            __FILE__
-
-#elif defined(__ICCARM__)
-
-#define        __IMS_FILE__            __FILE__
-#define        __IMS_LINE__            __LINE__
-#define        __IMS_FUNC__            __FILE__
 
 #elif defined(__LINUX__)
 
@@ -326,6 +296,7 @@ typedef unsigned int            IMS_UINTP;
 #define        __IMS_FILE__            "N/A"
 #define        __IMS_LINE__            0
 #define        __IMS_FUNC__            "N/A"
+
 #endif
 
 // To fix a type casting problem according to the device platform.
@@ -342,4 +313,4 @@ do \
     TraceService_Assert(#CONDITION,__IMS_FUNC__,__IMS_LINE__); \
 } while (0)
 
-#endif // _IMS_TYPE_DEF_H_
+#endif

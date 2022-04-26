@@ -1,25 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090819  YR@                       Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_NETWORK_WATCHER_H_
+#define INTERFACE_NETWORK_WATCHER_H_
 
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_NET_WATCHER_H_
-#define _INTERFACE_IMS_NET_WATCHER_H_
-
-#include "ImsTypeDef.h"
 #include "IMSList.h"
 #include "ImsMessageDef.h"
-
-#include "ServiceThread.h"
 #include "ServiceMessage.h"
 #include "ServiceNetworkPolicy.h"
+#include "ServiceThread.h"
 
 class INetworkWatcher;
 
@@ -138,11 +139,11 @@ public:
 public:
     inline void RegisterObserver(IN INetworkWatcherListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -151,21 +152,21 @@ public:
 
             if (*pObserverList == piThread)
             {
-                pObserverList->objListeners.Append( piListener );
+                pObserverList->m_objListeners.Append(piListener);
                 return;
             }
         }
 
-        objObserverLists.Append( new ObserverList( piListener ) );
+        m_objObserverLists.Append(new ObserverList(piListener));
     }
 
     inline void RemoveObserver(IN INetworkWatcherListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -174,13 +175,14 @@ public:
 
             if (*pObserverList == piThread)
             {
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); j++)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); j++)
                 {
-                    INetworkWatcherListener* objListener = pObserverList->objListeners.GetAt(j);
+                    INetworkWatcherListener* piTmpListener =
+                            pObserverList->m_objListeners.GetAt(j);
 
-                    if (piListener == objListener)
+                    if (piListener == piTmpListener)
                     {
-                        pObserverList->objListeners.RemoveAt(j);
+                        pObserverList->m_objListeners.RemoveAt(j);
                         break;
                     }
                 }
@@ -190,29 +192,28 @@ public:
     }
     inline void PostMsgRegisteredThread(IN IMS_SINT32 nSlotId)
     {
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
                 continue;
             }
 
-            IMS_MSG_CreateNPostThreadMessage(pObserverList->piOwnerThread,
+            IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
                     IMS_MSG_NETWORK_STATUS, nSlotId, 0);
         }
     }
 
 public:
-    inline void ProcessNotify(IN ImsMessage& objMSG)
+    inline void ProcessNotify(IN ImsMessage& /*objMsg*/)
     {
-        (void)objMSG;
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -221,9 +222,9 @@ public:
 
             if (*pObserverList == piThread)
             {
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); ++j)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); ++j)
                 {
-                    INetworkWatcherListener* piListener = pObserverList->objListeners.GetAt(j);
+                    INetworkWatcherListener* piListener = pObserverList->m_objListeners.GetAt(j);
 
                     if (piListener != IMS_NULL)
                     {
@@ -241,23 +242,22 @@ private:
         public:
             inline ObserverList(IN INetworkWatcherListener* piListener)
             {
-                piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-
-                objListeners.Append(piListener);
+                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+                m_objListeners.Append(piListener);
             }
 
-            inline IMS_BOOL operator==(IN IThread *piThread)
+            inline IMS_BOOL operator==(IN IThread* piThread)
             {
-                return piThread == piOwnerThread;
+                return piThread == m_piOwnerThread;
             }
 
         public:
-            IThread *piOwnerThread;
-            IMSList<INetworkWatcherListener*> objListeners;
+            IThread* m_piOwnerThread;
+            IMSList<INetworkWatcherListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> objObserverLists;
+    IMSList<ObserverList*> m_objObserverLists;
 };
 
-#endif // _INTERFACE_IMS_NET_WATCHER_H_
+#endif

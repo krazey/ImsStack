@@ -232,7 +232,7 @@ void OsNetworkConnection::GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessN
 
 PRIVATE VIRTUAL
 void OsNetworkConnection::GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
-        OUT AString& strTimeStamp, OUT AString& strCellInfoAge)
+        OUT AString& strTimestamp, OUT AString& strCellInfoAge)
 {
     AStringArray objCellIdentities = System::GetInstance()->GetLastAccessNetworkInfo(
             RADIOTECH_TYPE_INVALID, GetSlotId());
@@ -244,7 +244,7 @@ void OsNetworkConnection::GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAcc
 
     if (objCellIdentities.IsEmpty() || (objCellIdentities.GetCount() < 4))
     {
-        strTimeStamp = AString::ConstNull();
+        strTimestamp = AString::ConstNull();
         strCellInfoAge = AString::ConstNull();
         return;
     }
@@ -252,7 +252,7 @@ void OsNetworkConnection::GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAcc
     const AString& strNetworkType = objCellIdentities.GetElementAt(0);
     IMS_SINT32 nNetworkType = strNetworkType.ToInt32();
 
-    strTimeStamp = objCellIdentities.GetElementAt(1);
+    strTimestamp = objCellIdentities.GetElementAt(1);
     strCellInfoAge = objCellIdentities.GetElementAt(2);
 
     // Removes the 1st and 2nd and 3rd element
@@ -463,7 +463,7 @@ void OsNetworkConnection::SetListener(IN INetworkConnectionListener* piListener)
 }
 
 PRIVATE VIRTUAL
-void OsNetworkConnection::SetPreferredIPVersion(
+void OsNetworkConnection::SetPreferredIpVersion(
         IN IMS_SINT32 nPreferredIpVersion /*= 0 default-aos-connection-profile*/)
 {
     IMS_TRACE_D("Preferred IP version: %d >> %d",
@@ -643,7 +643,7 @@ const AString& OsNetworkConnection::GetProfileName() const
 PRIVATE VIRTUAL
 IMS_SINT32 OsNetworkConnection::GetApnType() const
 {
-    return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetAPNType() : NetworkPolicy::APN_IMS;
+    return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetApnType() : NetworkPolicy::APN_IMS;
 }
 
 PRIVATE VIRTUAL

@@ -97,12 +97,6 @@ IMS_BOOL OsUtil::IsDebugMode() const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL OsUtil::IsProductOverlayFs() const
-{
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL
 IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
 {
     if (m_bImsDebugOn)

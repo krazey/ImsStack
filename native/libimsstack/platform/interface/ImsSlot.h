@@ -1,36 +1,44 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170516  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_SLOT_H_
+#define IMS_SLOT_H_
 
-    Description
-    This class is a base class to support a multiple SIM architecture.
-*/
-
-#ifndef _IMS_SLOT_H_
-#define _IMS_SLOT_H_
+#include "ImsTypeDef.h"
 
 class ImsSlot
 {
 public:
-    inline ImsSlot(IN IMS_SINT32 nSlotId_ = IMS_SLOT_0)
-        : nSlotId(nSlotId_)
+    inline ImsSlot() __IMS_DEPRECATED__("Use ImsSlot(IMS_SINT32) instead")
+        : m_nSlotId(IMS_SLOT_0)
     {}
-    inline ImsSlot(IN const ImsSlot &objRHS)
-        : nSlotId(objRHS.nSlotId)
+    inline ImsSlot(IN IMS_SINT32 nSlotId)
+        : m_nSlotId(nSlotId)
+    {}
+    inline ImsSlot(IN const ImsSlot& other)
+        : m_nSlotId(other.m_nSlotId)
     {}
     inline virtual ~ImsSlot()
     {}
 
 public:
-    inline ImsSlot& operator=(IN const ImsSlot &objRHS)
+    inline ImsSlot& operator=(IN const ImsSlot& other)
     {
-        if (this != &objRHS)
+        if (this != &other)
         {
-            nSlotId = objRHS.nSlotId;
+            m_nSlotId = other.m_nSlotId;
         }
 
         return *this;
@@ -38,10 +46,10 @@ public:
 
 public:
     inline IMS_SINT32 GetSlotId() const
-    { return nSlotId; }
+    { return m_nSlotId; }
 
 private:
-    IMS_SINT32 nSlotId;
+    IMS_SINT32 m_nSlotId;
 };
 
-#endif // _IMS_SLOT_H_
+#endif

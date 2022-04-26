@@ -1,23 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090831  yhrhee@                   Created
-    </table>
-
-    Description
-     IMS Trace Service
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsTrace.h"
 #include "PlatformFactory.h"
+#include "ServiceMemory.h"
+#include "ServiceTrace.h"
 
 #define __IMS_TRACE_TAG_DEF__(ENUM,NAME,MODULE)           { NAME, IMS_TRACE_MODULE_##MODULE },
 
-LOCAL const IMSTraceTag gstIMSTraceTag[IMS_TRACE_TAG_MAX + 1] =
+LOCAL const ImsTraceTag s_objImsTraceTag[IMS_TRACE_TAG_MAX + 1] =
 {
     { __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT },
 
@@ -33,65 +36,64 @@ class TraceServicePrivate
 {
 public:
     inline TraceServicePrivate()
-        : pTrace(IMS_NULL)
+        : m_pTrace(IMS_NULL)
     {}
     inline ~TraceServicePrivate()
     {
-        if (pTrace != IMS_NULL)
+        if (m_pTrace != IMS_NULL)
         {
-            delete pTrace;
+            delete m_pTrace;
         }
     }
 
-private:
-    TraceServicePrivate(IN const TraceServicePrivate& objRHS);
-    TraceServicePrivate& operator=(IN const TraceServicePrivate& objRHS);
+    TraceServicePrivate(IN const TraceServicePrivate&) = delete;
+    TraceServicePrivate& operator=(IN const TraceServicePrivate&) = delete;
 
 public:
     inline ImsTrace* GetTrace()
     {
-        if (pTrace == IMS_NULL)
+        if (m_pTrace == IMS_NULL)
         {
-            pTrace = PlatformFactory::CreateTrace();
+            m_pTrace = PlatformFactory::CreateTrace();
         }
 
-        return pTrace;
+        return m_pTrace;
     }
 
 private:
-    ImsTrace *pTrace;
+    ImsTrace* m_pTrace;
 };
 
 
 
 PRIVATE GLOBAL
-IMS_SINT32 TraceService::sLoggableForDebug = -1;
+IMS_SINT32 TraceService::s_nLoggableForDebug = -1;
 
 PRIVATE
 TraceService::TraceService()
-    : pPrivate(new TraceServicePrivate())
+    : m_pPrivate(new TraceServicePrivate())
 {
     for (IMS_SINT32 i = 0; i < IMS_TRACE_TAG_MAX + 1; ++i)
     {
-        TRACE_TAG[i] = const_cast<IMSTraceTag*>(&gstIMSTraceTag[i]);
+        m_objTraceTag[i] = const_cast<ImsTraceTag*>(&s_objImsTraceTag[i]);
     }
 
-    sLoggableForDebug = ImsTrace::IsLoggable(ITrace::CAT_D);
+    s_nLoggableForDebug = ImsTrace::IsLoggable(ITrace::CAT_D);
 }
 
 PRIVATE
 TraceService::~TraceService()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
-const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR *pszFileName) const
+const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR* pszFileName) const
 {
-    ImsTrace *pTrace = pPrivate->GetTrace();
+    ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {
@@ -102,10 +104,10 @@ const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR *pszFileName) const
 }
 
 PUBLIC
-const IMS_CHAR* TraceService::GetFileName(IN_OUT IMS_CHAR *pszOutFileName,
-        IN const IMS_CHAR *pszFileName) const
+const IMS_CHAR* TraceService::GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
+        IN const IMS_CHAR* pszFileName) const
 {
-    ImsTrace *pTrace = pPrivate->GetTrace();
+    ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {
@@ -118,24 +120,24 @@ const IMS_CHAR* TraceService::GetFileName(IN_OUT IMS_CHAR *pszOutFileName,
 PUBLIC
 ITrace* TraceService::GetTrace()
 {
-    return pPrivate->GetTrace();
+    return m_pPrivate->GetTrace();
 }
 
 PUBLIC
-const IMSTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTAG) const
+const ImsTraceTag& TraceService::GetTraceTag(IN IMS_SINT32 nTag) const
 {
-    if ((nTAG < 0) || (nTAG > IMS_TRACE_TAG_MAX))
+    if ((nTag < 0) || (nTag > IMS_TRACE_TAG_MAX))
     {
-        return (*TRACE_TAG[IMS_TRACE_TAG_MAX]);
+        return (*m_objTraceTag[IMS_TRACE_TAG_MAX]);
     }
 
-    return (*TRACE_TAG[nTAG]);
+    return (*m_objTraceTag[nTag]);
 }
 
 PUBLIC
 void TraceService::SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule)
 {
-    ImsTrace *pTrace = pPrivate->GetTrace();
+    ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {
@@ -146,12 +148,12 @@ void TraceService::SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule)
 }
 
 PUBLIC
-void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR *pszTag,
-        IN IMS_UINT32 nModule, IN const IMS_CHAR *pszFormat,
-        IN const IMS_CHAR *pszFileName,IN IMS_UINT32 nLine,
-        IN const IMS_CHAR *A1, IN const IMS_CHAR *A2, IN const IMS_CHAR *A3)
+void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat,
+        IN const IMS_CHAR* pszFileName,IN IMS_UINT32 nLine,
+        IN const IMS_CHAR* pszArg1, IN const IMS_CHAR* pszArg2, IN const IMS_CHAR* pszArg3)
 {
-    ImsTrace *pTrace = pPrivate->GetTrace();
+    ImsTrace* pTrace = m_pPrivate->GetTrace();
 
     if (pTrace == IMS_NULL)
     {
@@ -162,26 +164,26 @@ void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR *p
     IMS_CHAR _buffer_A2[512 + 7] = {0,};
     IMS_CHAR _buffer_A3[512 + 7] = {0,};
     pTrace->OutP(nCategory, pszTag, nModule, pszFormat, pszFileName, nLine
-                   , pTrace->EncryptPrivacyLog(_buffer_A1, A1)
-                   , pTrace->EncryptPrivacyLog(_buffer_A2, A2)
-                   , pTrace->EncryptPrivacyLog(_buffer_A3, A3));
+                   , pTrace->EncryptPrivacyLog(_buffer_A1, pszArg1)
+                   , pTrace->EncryptPrivacyLog(_buffer_A2, pszArg2)
+                   , pTrace->EncryptPrivacyLog(_buffer_A3, pszArg3));
 }
 
 PUBLIC GLOBAL
 TraceService* TraceService::GetTraceService()
 {
-    static TraceService *pTraceService = IMS_NULL;
+    static TraceService* s_pTraceService = IMS_NULL;
 
-    if (pTraceService == IMS_NULL)
+    if (s_pTraceService == IMS_NULL)
     {
-        pTraceService = new TraceService();
+        s_pTraceService = new TraceService();
     }
 
-    return pTraceService;
+    return s_pTraceService;
 }
 
 GLOBAL
-void TraceService_Assert(IN const IMS_CHAR *pszCondition, IN const IMS_CHAR *pszModule,
+void TraceService_Assert(IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule,
         IN IMS_UINT16 nLine)
 {
     TraceService::GetTraceService()->GetTrace()->Out(ITrace::CAT_E, "ASSERT",
@@ -189,7 +191,7 @@ void TraceService_Assert(IN const IMS_CHAR *pszCondition, IN const IMS_CHAR *psz
 }
 
 GLOBAL
-const IMSTraceTag& TraceService_GetTraceTag(IN IMS_SINT32 nTAG)
+const ImsTraceTag& TraceService_GetTraceTag(IN IMS_SINT32 nTag)
 {
-    return TraceService::GetTraceService()->GetTraceTag(nTAG);
+    return TraceService::GetTraceService()->GetTraceTag(nTag);
 }

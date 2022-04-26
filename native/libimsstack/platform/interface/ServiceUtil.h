@@ -1,21 +1,24 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120105  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SERVICE_IMS_UTIL_H_
-#define _SERVICE_IMS_UTIL_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_UTIL_H_
+#define SERVICE_UTIL_H_
 
 #include "IImsPrivateProperty.h"
-#include "ISystemUtil.h"
 #include "ISystemProperty.h"
+#include "ISystemUtil.h"
 #include "IZLib.h"
 
 class UtilService
@@ -23,6 +26,10 @@ class UtilService
 private:
     UtilService();
     ~UtilService();
+
+public:
+    UtilService(IN const UtilService&) = delete;
+    UtilService& operator=(IN const UtilService&) = delete;
 
 public:
     IImsPrivateProperty* GetPrivateProperty();
@@ -37,12 +44,11 @@ public:
     static UtilService* GetUtilService();
 
     // Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
-    static const AString& GetLogString(IN const AString &strInput,
-            IN_OUT AString &strOutput, IN IMS_SINT32 nOutSize,
+    static const AString& GetLogString(IN const AString& strInput,
+            IN_OUT AString& strOutput, IN IMS_SINT32 nOutSize,
             IN IMS_CHAR cDelimiter = 0 /* no delimiter */);
 };
 
-//-------------------------------------------------------------------------------------------------
 #define IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() \
         UtilService::GetUtilService()->GetSystemProperty()->IsServerInfoHiddenInLog()
 
@@ -61,4 +67,4 @@ public:
 #define IMS_UTIL_ZLIB_Uncompress(COMP_DATA, DATA) \
         UtilService::GetUtilService()->GetZLib()->Uncompress(COMP_DATA, DATA)
 
-#endif // _SERVICE_IMS_UTIL_H_
+#endif

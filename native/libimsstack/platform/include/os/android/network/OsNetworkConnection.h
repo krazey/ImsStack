@@ -73,7 +73,7 @@ private:
             IN IMS_SINT32 nIpcanCategory = IIpcan::CATEGORY_MOBILE) override;
     void GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo) override;
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
-            OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
+            OUT AString& strTimestamp, OUT AString& strCellInfoAge) override;
     IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) override;
     IMS_SINT32 GetHostByName(IN const AString& strHostName,
             OUT IMSList<IPAddress>& objIpAddrs,
@@ -89,8 +89,8 @@ private:
     IMS_BOOL IsMobileDataEnabled() const override;
     IMS_SINT32 GetMtu() const override;
     void SetListener(IN INetworkConnectionListener* piListener) override;
-    void SetPreferredIPVersion(
-            IN IMS_SINT32 nPreferredIPVersion = 0/*default-aos-connection-profile*/) override;
+    void SetPreferredIpVersion(
+            IN IMS_SINT32 nPreferredIpVersion = 0/*default-aos-connection-profile*/) override;
     void AddReferenceListener(IN INetworkConnectionListener* piListener) override;
     void RemoveReferenceListener(IN INetworkConnectionListener* piListener) override;
 

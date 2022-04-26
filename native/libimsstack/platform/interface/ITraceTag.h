@@ -1,18 +1,20 @@
-
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100219  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_TRACE_TAG_H_
-#define _INTERFACE_IMS_TRACE_TAG_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_TRACE_TAG_H_
+#define INTERFACE_TRACE_TAG_H_
 
 #include "ImsTypeDef.h"
 
@@ -23,14 +25,14 @@
 
 // MAIN macro definition for TRACE module
 #define __IMS_TRACE_TAG__(TAG) \
-static const IMSTraceTag &gstTAG = TraceService_GetTraceTag(IMS_TRACE_TAG_##TAG);
+static const ImsTraceTag& s_objTag = TraceService_GetTraceTag(IMS_TRACE_TAG_##TAG);
 
-#define __IMS_TRACE_NAME__              (gstTAG.pszName)
-#define __IMS_TRACE_MODULE__            (gstTAG.nModule)
+#define __IMS_TRACE_NAME__              (s_objTag.pszName)
+#define __IMS_TRACE_MODULE__            (s_objTag.nModule)
 
 // User-defined tag
 #define __IMS_TRACE_TAG_USER_DECL__(TAG) \
-static const IMSTraceTag gstTAG = { TAG, IMS_TRACE_MODULE_DEFAULT };
+static const ImsTraceTag s_objTag = { TAG, IMS_TRACE_MODULE_DEFAULT };
 
 ////
 // TRACE TAG ENUMERATION DEFINITION FOR IMS CLIENT PLATFORM
@@ -77,15 +79,15 @@ typedef enum _IMS_TRACE_MODULE_ENTYPE_
 ////
 // STRUCTURE FOR TRACE TAG & FILTER
 ////
-typedef struct _IMSTraceTag_
+typedef struct _ImsTraceTag_
 {
-    const IMS_CHAR *pszName;
+    const IMS_CHAR* pszName;
     IMS_UINT32 nModule;
-} IMSTraceTag;
+} ImsTraceTag;
 
 // Function prototype to get the trace tag
-extern const IMSTraceTag& TraceService_GetTraceTag(IN IMS_SINT32 nTAG);
+extern const ImsTraceTag& TraceService_GetTraceTag(IN IMS_SINT32 nTag);
 
 #include "ITraceTagDecl.h"
 
-#endif // _INTERFACE_IMS_TRACE_TAG_H_
+#endif

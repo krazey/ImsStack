@@ -21,73 +21,15 @@
 class IIpSecSp
 {
 public:
-    /*
+    virtual void SetTransportInfo(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+        IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+        IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction,
+        IN IMS_UINT32 nDirection, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
+    virtual void SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
+            IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm) = 0;
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void SetTransportInfo
-        (
-        IN const IPAddress &objSrcIPA,
-        IN IMS_UINT32 nSrcPort,
-        IN const IPAddress &objDestIPA,
-        IN IMS_UINT32 nDestPort,
-        IN IMS_UINT32 nTransProtocol,    // TCP | UDP
-        IN IMS_UINT32 nAction,           // APPLY | PERMIT | DROP | BYPASS
-        IN IMS_UINT32 nDirection,        // INBOUND | OUTBOUND
-        IN IMS_UINT32 nSPI,
-        IN IMS_UINT32 nMode              // TRANSPORT | TUNNEL
-        ) = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void SetSecurityAlgorithmInfo
-        (
-        IN IMS_UINT32 nSecuProto,       // AH | ESP | ESP_AUTH | ESP_NULL
-        IN IMS_UINT32 nAuthAlgo,        // HMAC -MD5 | HMAC-SHA-1
-        IN IMS_UINT32 nEncrAlgo         // DES | 3DES | AES
-        ) = 0;
-
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
     virtual void DoneSp() = 0;
-
 };
 
-#endif // INTERFACE_IPSEC_SP_H_
+#endif

@@ -21,16 +21,17 @@
 class IVoNrUacListener
 {
 public:
-    /*
-        This indication is sent to notify the UAC response
-        nType : TYPE_XXX (TYPE_VOICE, ...)
-        nResult : IMS_FAILURE, IMS_SUCCESS
-        nReason : REASON_XXX (REASON_NO, ...)
-        nSysMode : SYS_MODE_XXX (SYS_MODE_LTE, ...)
-        nBarringTime : N/A
-    */
+    /**
+     * @brief Notifies the application that the UAC response is received.
+     *
+     * @param nType TYPE_XXX (TYPE_VOICE, ...)
+     * @param nResult IMS_FAILURE, IMS_SUCCESS
+     * @param nReason REASON_XXX (REASON_NO, ...)
+     * @param nSysMode SYS_MODE_XXX (SYS_MODE_LTE, ...)
+     * @param nBarringTime N/A
+     */
     virtual void VoNrUac_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
-        IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime) = 0;
+            IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime) = 0;
 
     enum
     {
@@ -51,24 +52,28 @@ public:
 class IVoNrCallPreferenceListener
 {
 public:
-    /*
-        This indication is sent when the UE has found service to redial the voice call/video call
-        nSysMode : SYS_MODE_LTE, SYS_MODE_NR5G (Two types are only valid)
-    */
+    /**
+     * @brief This indication is sent when the UE has found service to redial
+     *        the voice call/video call.
+     *
+     * @param nSysMode SYS_MODE_LTE, SYS_MODE_NR5G (Two types are only valid)
+     */
     virtual void VoNrCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode) = 0;
 };
 
 class IVoNrHandoffListener
 {
 public:
-    /*
-        This indication is that a handoff is in progress or has been completed.
-        nStatus : STATUS_HANDOFF_XXX (STATUS_HANDOFF_INIT, ...)
-        nSourceRAT, nTargetRAT : RAT_LTE, RAT_NR5G (Two types are only valid)
-        nReason : if need, parameters will be defined
-    */
+    /**
+     * @brief This indication is that a handoff is in progress or has been completed.
+     *
+     * @param nStatus STATUS_HANDOFF_XXX (STATUS_HANDOFF_INIT, ...)
+     * @param nSourceRat RAT_LTE, RAT_NR5G (Two types are only valid)
+     * @param nTargetRat RAT_LTE, RAT_NR5G (Two types are only valid)
+     * @param nReason if need, parameters will be defined
+     */
     virtual void VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
-        IN IMS_UINT32 nSourceRAT, IN IMS_UINT32 nTargetRAT, IN IMS_SINT32 nReason) = 0;
+            IN IMS_UINT32 nSourceRat, IN IMS_UINT32 nTargetRat, IN IMS_SINT32 nReason) = 0;
 
     enum
     {
@@ -82,107 +87,114 @@ public:
 class IVoNr
 {
 public:
-    /*
-        Determine if VoNR is supported
-    */
+    /**
+     * @brief Determine if VoNR is supported.
+     */
     virtual IMS_BOOL IsVoNrSupported() const = 0;
 
-    /*
-        Determine if UAC check is required
-    */
+    /**
+     * @brief Determine if UAC check is required.
+     */
     virtual IMS_BOOL IsUacCheckRequired(IN IMS_UINT32 nType) = 0;
 
     /**
-     * Checks if VoNR is enabled as UE capabilities in modem.
+     * @brief Checks if VoNR is enabled as UE capabilities in modem.
      */
     virtual IMS_BOOL IsUeCapabilityVoNrEnabled() const = 0;
 
-    /*
-        Notify ims call state to modem
-        nModule : MODULE_XXX (MODULE_UC, ...)
-        nType : TYPE_XXX (TYPY_VOICE, ...)
-        nState : STATE_XXX (STATE_START, ...)
-        nSysMode : SYS_MODE_LTE, SYS_MODE_NR5G, SYS_MODE_WLAN
-        nDirection : DIRECTION_MO, DIRECTION_MT
-        return : IMS_FALSE - invalid information
-    */
-    virtual IMS_BOOL NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState,
-        IN IMS_UINT32 nSysMode, IN IMS_UINT32 nDirection) = 0;
+    /**
+     * @brief Notify ims call state to modem.
+     *
+     * @param nModule MODULE_XXX (MODULE_UC, ...)
+     * @param nType TYPE_XXX (TYPY_VOICE, ...)
+     * @param nState STATE_XXX (STATE_START, ...)
+     * @param nSysMode SYS_MODE_LTE, SYS_MODE_NR5G, SYS_MODE_WLAN
+     * @param nDirection DIRECTION_MO, DIRECTION_MT
+     * @return IMS_FALSE - invalid information
+     */
+    virtual IMS_BOOL NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
+            IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nDirection) = 0;
 
-    /*
-        This command sets the RATs to be scanned to perform silent redial
-        for the MMTEL voice call/video call originated.
-        response is called as VoNR_NotifyCallReady() function.
-        nRAT : RAT_LTE, RAT_NR5G
-        nType : TYPE_VOICE, TYPE_VIDEO (Two types are only allowed)
-        return : CALL_PREF_REQUEST_XXX (CALL_PREF_REQUEST_SUCCESS, ...)
+    /**
+     * @brief This command sets the RATs to be scanned to perform silent redial
+     *        for the MMTEL voice call/video call originated.
+     *        The response is called as VoNR_NotifyCallReady() function.
+     *
+     * @param nRat RAT_LTE, RAT_NR5G
+     * @param nType TYPE_VOICE, TYPE_VIDEO (Two types are only allowed)
+     * @return CALL_PREF_REQUEST_XXX (CALL_PREF_REQUEST_SUCCESS, ...)
     */
-    virtual IMS_SINT32 RequestCallPreference(IN IMS_UINT32 nRAT, IN IMS_UINT32 nType) = 0;
+    virtual IMS_SINT32 RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType) = 0;
 
-    /*
-        Set Ims Session State for MTK UAC operation
-        nType : TYPE_VOICE, TYPE_VIDEO, TYPE_SMS, TYPE_REG_SIGNAL (Four types are only allowed)
-        nState : MTK_CALL_START, MTK_CALL_STOP
-    */
+    /**
+     * @brief Sets Ims Session State for MTK UAC operation.
+     *
+     * @param nType TYPE_VOICE, TYPE_VIDEO, TYPE_SMS, TYPE_REG_SIGNAL (Four types are only allowed)
+     * @param nState MTK_CALL_START, MTK_CALL_STOP
+     */
     virtual IMS_BOOL SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState) = 0;
 
-    /*
-        Set IMS Voice State to VDM for MTK
-        nState : MTK_CALL_START, MTK_CALL_STOP
-        nSysMode : SYS_MODE_XXX (SYS_MODE_LTE, SYS_MODE_NR5G, SYS_MODE_WLAN, ...)
-    */
+    /**
+     * @brief Sets IMS Voice State to VDM for MTK.
+     *
+     * @param nState MTK_CALL_START, MTK_CALL_STOP
+     * @param nSysMode SYS_MODE_XXX (SYS_MODE_LTE, SYS_MODE_NR5G, SYS_MODE_WLAN, ...)
+     */
     virtual IMS_BOOL SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode) = 0;
 
-    /*
-        Set Ims Signaling for UAC
-        nType : SIGNALING_TYPE_XXX (SIGNALING_TYPE_IDLE, ...)
-    */
+    /**
+     * @brief Sets Ims Signaling for UAC.
+     *
+     * @param nType SIGNALING_TYPE_XXX (SIGNALING_TYPE_IDLE, ...)
+     */
     virtual IMS_BOOL SetImsSignaling(IN IMS_UINT32 nType) = 0;
 
-    /*
-        Set UAC Check for MTK
-        nType : TYPE_VOICE, TYPE_VIDEO, TYPE_SMS, TYPE_REG_SIGNAL (Four types are only allowed)
-        nState : MTK_CALL_START, MTK_CALL_STOP
-    */
+    /**
+     * @brief Sets UAC Check for MTK.
+     *
+     * @param nType TYPE_VOICE, TYPE_VIDEO, TYPE_SMS, TYPE_REG_SIGNAL (Four types are only allowed)
+     * @param nState MTK_CALL_START, MTK_CALL_STOP
+     */
     virtual IMS_BOOL SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState) = 0;
 
-    /*
-        Set Voice State to VDM for MTK
-        nState : MTK_CALL_START, MTK_CALL_STOP
-        bIsEmergency : IMS_TRUE, IMS_FALSE
-    */
+    /**
+     * @brief Sets Voice State to VDM for MTK.
+     *
+     * @param nState MTK_CALL_START, MTK_CALL_STOP
+     * @param bIsEmergency IMS_TRUE, IMS_FALSE
+     */
     virtual IMS_BOOL SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency) = 0;
 
-    /*
-        Adds the listener for UAC
-    */
+    /**
+     * @brief Adds the listener for UAC.
+     */
     virtual void AddListenerForUac(IN IVoNrUacListener* piListener) = 0;
 
-    /*
-        Removes the listener for UAC
-    */
+    /**
+     * @brief Removes the listener for UAC.
+     */
     virtual void RemoveListenerForUac(IN IVoNrUacListener* piListener) = 0;
 
-    /*
-        Adds the listener for call preference
-    */
+    /**
+     * @brief Adds the listener for call preference.
+     */
     virtual void AddListenerForCallPreference(
             IN IVoNrCallPreferenceListener* piListener) = 0;
 
-    /*
-        Removes the listener for call preference
-    */
+    /**
+     * @brief Removes the listener for call preference.
+     */
     virtual void RemoveListenerForCallPreference(
             IN IVoNrCallPreferenceListener* piListener) = 0;
 
-    /*
-        Adds the listener for handoff
-    */
+    /**
+     * @brief Adds the listener for handoff.
+     */
     virtual void AddListenerForHandoff(IN IVoNrHandoffListener* piListener) = 0;
 
-    /*
-        Removes the listener for handoff
-    */
+    /**
+     * @brief Removes the listener for handoff.
+     */
     virtual void RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener) = 0;
 
     enum
@@ -263,4 +275,4 @@ public:
     };
 };
 
-#endif // INTERFACE_VONR_H_
+#endif

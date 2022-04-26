@@ -40,7 +40,6 @@ public:
     // ISystemProperty class
     const AString& GetChipsetVendor() const override;
     IMS_BOOL IsDebugMode() const override;
-    IMS_BOOL IsProductOverlayFs() const override;
     IMS_BOOL IsServerInfoHiddenInLog() const override;
     IMS_BOOL IsUserMode() const override;
 

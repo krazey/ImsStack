@@ -1,45 +1,46 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090305  lovil@                    Created
-    20090831  yhrhee@                   Modified
-    20131212  yongnam.cha@              Modify CreateTimer()
-    </table>
-
-    Description
-    IMS Timer Service
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceMutex.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ImsTimer.h"
 #include "PlatformFactory.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
 #include "ServiceTimer.h"
 
 PRIVATE
 TimerService::TimerService()
 {
-    piMutex = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PRIVATE
 TimerService::~TimerService()
 {
-    MutexService::GetMutexService()->DestroyMutex(piMutex);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
 PUBLIC
 ITimer* TimerService::CreateTimer()
 {
-    ImsTimer *pTimer = PlatformFactory::CreateTimer();
+    ImsTimer* pTimer = PlatformFactory::CreateTimer();
 
     IMS_ASSERT(pTimer != IMS_NULL);
 
-    piMutex->Lock();
-    objTimers.Append(pTimer);
-    piMutex->Unlock();
+    m_piLock->Lock();
+    m_objTimers.Append(pTimer);
+    m_piLock->Unlock();
 
     return pTimer;
 }
@@ -51,20 +52,20 @@ ITimer* TimerService::CreateTimer(IN IMS_BOOL /* bAlarmTimer = IMS_FALSE */)
 }
 
 PUBLIC
-void TimerService::DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread/* = IMS_TRUE*/)
+void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread/* = IMS_TRUE*/)
 {
-    ImsTimer *pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
+    ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
 
     if (pTimer == IMS_NULL)
     {
         return;
     }
 
-    piMutex->Lock();
+    m_piLock->Lock();
 
-    for (IMS_UINT32 i = 0; i < objTimers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
     {
-        ITimer *piExTimer = objTimers.GetAt(i);
+        ITimer* piExTimer = m_objTimers.GetAt(i);
 
         if (piExTimer == IMS_NULL)
         {
@@ -73,12 +74,12 @@ void TimerService::DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread/
 
         if (piExTimer->Equals(piTimer))
         {
-            objTimers.RemoveAt(i);
+            m_objTimers.RemoveAt(i);
             break;
         }
     }
 
-    piMutex->Unlock();
+    m_piLock->Unlock();
 
     if (bOnOwnerThread)
     {
@@ -93,14 +94,14 @@ void TimerService::DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread/
 }
 
 PUBLIC
-void TimerService::DispatchServiceMessage(IN ImsMessage &objMSG)
+void TimerService::DispatchServiceMessage(IN ImsMessage& objMsg)
 {
     // FIX_TIMING_ISSUE: same timer id issue
     // If the internal timer id is MSG_PARAM_DESTROY,
     // then it indicates that the timer is killed and needs to be destroyed.
-    if (objMSG.nLparam == ImsTimer::MSG_PARAM_DESTROY)
+    if (objMsg.nLparam == ImsTimer::MSG_PARAM_DESTROY)
     {
-        ImsTimer *pTimer = reinterpret_cast<ImsTimer*>(objMSG.nWparam);
+        ImsTimer* pTimer = reinterpret_cast<ImsTimer*>(objMsg.nWparam);
 
         if (pTimer != IMS_NULL)
         {
@@ -110,39 +111,39 @@ void TimerService::DispatchServiceMessage(IN ImsMessage &objMSG)
     }
 
     // Check if the expired timer exists in the timer aggregate.
-    piMutex->Lock();
+    m_piLock->Lock();
 
-    for (IMS_UINT32 i = 0; i < objTimers.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
     {
-        ITimer *pTimer = objTimers.GetAt(i);
+        ITimer* piTimer = m_objTimers.GetAt(i);
 
-        if (pTimer != IMS_NULL)
+        if (piTimer != IMS_NULL)
         {
-            ImsTimer *pIMSTimer = DYNAMIC_CAST(ImsTimer*, pTimer);
+            ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
             // Compare Timer ID
-            if (pIMSTimer->GetTimerId() == objMSG.nWparam)
+            if (pTimer->GetTimerId() == objMsg.nWparam)
             {
-                piMutex->Unlock();
+                m_piLock->Unlock();
 
-                pIMSTimer->DispatchServiceMessage(objMSG.nWparam, objMSG.nLparam);
+                pTimer->DispatchServiceMessage(objMsg.nWparam, objMsg.nLparam);
                 return;
             }
         }
     }
 
-    piMutex->Unlock();
+    m_piLock->Unlock();
 }
 
 // Creates the singleton class and return it
 PUBLIC GLOBAL
 TimerService* TimerService::GetTimerService()
 {
-    static TimerService *pTimerService = IMS_NULL;
+    static TimerService* s_pTimerService = IMS_NULL;
 
-    if (pTimerService == IMS_NULL)
+    if (s_pTimerService == IMS_NULL)
     {
-        pTimerService = new TimerService();
+        s_pTimerService = new TimerService();
     }
 
-    return pTimerService;
+    return s_pTimerService;
 }

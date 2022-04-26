@@ -1,26 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101006  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceMutex.h"
-#include "IMSMap.h"
-#include "ImsMessageDef.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IEventReceiver.h"
 #include "IEventSender.h"
 #include "IMSActivity.h"
-#include "SystemConfig.h"
+#include "IMSMap.h"
+#include "ImsMessageDef.h"
 #include "PlatformFactory.h"
 #include "ServiceEvent.h"
+#include "ServiceMemory.h"
+#include "ServiceMutex.h"
+#include "ServiceTrace.h"
+#include "SystemConfig.h"
 
 __IMS_TRACE_TAG_BASE__;
 
@@ -29,28 +32,31 @@ class EventActivity
     : public IMSActivity
 {
 public:
-    EventActivity(IN IMS_SINT32 nEvent_, IN IEventListener *piListener_);
+    EventActivity(IN IMS_SINT32 nEvent, IN IEventListener* piListener);
     virtual ~EventActivity();
 
+    EventActivity(IN const EventActivity&) = delete;
+    EventActivity& operator=(IN const EventActivity&) = delete;
+
 public:
-    IMS_BOOL IsSameListener(IN IEventListener *piListener);
+    IMS_BOOL IsSameListener(IN IEventListener* piListener);
     void NotifyEvent(IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
 private:
     // IMSActivity class
     virtual IIMSActivityControl* GetController();
-    virtual IMS_BOOL DispatchMessage(IN ImsMessage &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN ImsMessage& objMsg);
 
 private:
-    IMS_SINT32 nEvent;
-    IEventListener *piListener;
+    IMS_SINT32 m_nEvent;
+    IEventListener* m_piListener;
 };
 
 PUBLIC
-EventActivity::EventActivity(IN IMS_SINT32 nEvent_, IN IEventListener *piListener_)
+EventActivity::EventActivity(IN IMS_SINT32 nEvent, IN IEventListener* piListener)
     : IMSActivity()
-    , nEvent(nEvent_)
-    , piListener(piListener_)
+    , m_nEvent(nEvent)
+    , m_piListener(piListener)
 {
 }
 
@@ -60,9 +66,9 @@ EventActivity::~EventActivity()
 }
 
 PUBLIC
-IMS_BOOL EventActivity::IsSameListener(IN IEventListener *piListener)
+IMS_BOOL EventActivity::IsSameListener(IN IEventListener* piListener)
 {
-    if (this->piListener == piListener)
+    if (m_piListener == piListener)
     {
         return IMS_TRUE;
     }
@@ -73,12 +79,12 @@ IMS_BOOL EventActivity::IsSameListener(IN IEventListener *piListener)
 PUBLIC
 void EventActivity::NotifyEvent(IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         return;
     }
 
-    PostMessage(IMS_MSG_USER + nEvent, nWParam, nLParam);
+    PostMessage(IMS_MSG_USER + m_nEvent, nWParam, nLParam);
 }
 
 PRIVATE VIRTUAL
@@ -88,14 +94,14 @@ IIMSActivityControl* EventActivity::GetController()
 }
 
 PRIVATE VIRTUAL
-IMS_BOOL EventActivity::DispatchMessage(IN ImsMessage &objMSG)
+IMS_BOOL EventActivity::DispatchMessage(IN ImsMessage& objMsg)
 {
-    if (objMSG.GetName() == (IMS_MSG_USER + nEvent))
+    if (objMsg.GetName() == (IMS_MSG_USER + m_nEvent))
     {
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
-            piListener->Event_NotifyEvent(nEvent,
-                    LONG_TO_INT(objMSG.nWparam), LONG_TO_INT(objMSG.nLparam));
+            m_piListener->Event_NotifyEvent(m_nEvent,
+                    LONG_TO_INT(objMsg.nWparam), LONG_TO_INT(objMsg.nLparam));
         }
     }
 
@@ -108,16 +114,15 @@ class EventHolder
     : public IEventReceiverListener
 {
 public:
-    EventHolder(IN IMS_SINT32 nSlotId_);
+    EventHolder(IN IMS_SINT32 nSlotId);
     virtual ~EventHolder();
 
-private:
-    EventHolder(IN const EventHolder& objRHS);
-    EventHolder& operator=(IN const EventHolder& objRHS);
+    EventHolder(IN const EventHolder&) = delete;
+    EventHolder& operator=(IN const EventHolder&) = delete;
 
 public:
-    IMS_BOOL AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener);
-    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener);
+    IMS_BOOL AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener);
+    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener);
     void SetUnregisteredEvents();
 
 private:
@@ -126,36 +131,36 @@ private:
             IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
 private:
-    IMutex *piLock;
-    IEventReceiver *piReceiver;
+    IMutex* m_piLock;
+    IEventReceiver* m_piReceiver;
     // <Event, EventActivity>
-    IMSMap<IMS_SINT32, IMSList<EventActivity*> > objEventMap;
+    IMSMap<IMS_SINT32, IMSList<EventActivity*> > m_objEventMap;
 };
 
 PUBLIC
-EventHolder::EventHolder(IN IMS_SINT32 nSlotId_)
-    : piLock(IMS_NULL)
-    , piReceiver(PlatformFactory::CreateEventReceiver(nSlotId_))
-    , objEventMap(IMSMap<IMS_SINT32, IMSList<EventActivity*> >())
+EventHolder::EventHolder(IN IMS_SINT32 nSlotId)
+    : m_piLock(IMS_NULL)
+    , m_piReceiver(PlatformFactory::CreateEventReceiver(nSlotId))
+    , m_objEventMap(IMSMap<IMS_SINT32, IMSList<EventActivity*> >())
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 
-    piReceiver->SetListener(this);
+    m_piReceiver->SetListener(this);
 }
 
 PUBLIC VIRTUAL
 EventHolder::~EventHolder()
 {
     {
-        LockGuard objLock(piLock);
+        LockGuard objLock(m_piLock);
 
-        for (IMS_UINT32 i = 0; i < objEventMap.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objEventMap.GetSize(); ++i)
         {
-            IMSList<EventActivity*> &objActivities = objEventMap.GetValueAt(i);
+            IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
 
             for (IMS_UINT32 j = 0; j < objActivities.GetSize(); ++j)
             {
-                EventActivity *pActivity = objActivities.GetAt(j);
+                EventActivity* pActivity = objActivities.GetAt(j);
 
                 if (pActivity != IMS_NULL)
                 {
@@ -165,24 +170,24 @@ EventHolder::~EventHolder()
         }
     }
 
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 
-    piReceiver->SetListener(IMS_NULL);
+    m_piReceiver->SetListener(IMS_NULL);
 
-    PlatformFactory::DestroyEventReceiver(piReceiver);
+    PlatformFactory::DestroyEventReceiver(m_piReceiver);
 }
 
 PUBLIC
-IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener)
+IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objEventMap.GetIndexOfKey(nEvent);
+    IMS_SLONG nIndex = m_objEventMap.GetIndexOfKey(nEvent);
 
     if (nIndex < 0)
     {
         IMSList<EventActivity*> objActivities;
-        EventActivity *pActivity = new EventActivity(nEvent, piListener);
+        EventActivity* pActivity = new EventActivity(nEvent, piListener);
 
         if (pActivity == IMS_NULL)
         {
@@ -195,19 +200,19 @@ IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piLis
             return IMS_FALSE;
         }
 
-        objEventMap.Add(nEvent, objActivities);
+        m_objEventMap.Add(nEvent, objActivities);
 
         // Set the event
-        piReceiver->SetEvent(nEvent);
+        m_piReceiver->SetEvent(nEvent);
 
         return IMS_TRUE;
     }
 
-    IMSList<EventActivity*> &objActivities = objEventMap.GetValueAt(nIndex);
+    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objActivities.GetSize(); ++i)
     {
-        EventActivity *pActivity = objActivities.GetAt(i);
+        EventActivity* pActivity = objActivities.GetAt(i);
 
         if (pActivity == IMS_NULL)
         {
@@ -222,7 +227,7 @@ IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piLis
     }
 
     // Not found; so add a new listener
-    EventActivity *pActivity = new EventActivity(nEvent, piListener);
+    EventActivity* pActivity = new EventActivity(nEvent, piListener);
 
     if (pActivity == IMS_NULL)
     {
@@ -239,22 +244,22 @@ IMS_BOOL EventHolder::AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piLis
 }
 
 PUBLIC
-void EventHolder::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener)
+void EventHolder::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objEventMap.GetIndexOfKey(nEvent);
+    IMS_SLONG nIndex = m_objEventMap.GetIndexOfKey(nEvent);
 
     if (nIndex < 0)
     {
         return;
     }
 
-    IMSList<EventActivity*> &objActivities = objEventMap.GetValueAt(nIndex);
+    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     for (IMS_UINT32 i = 0; i < objActivities.GetSize(); ++i)
     {
-        EventActivity *pActivity = objActivities.GetAt(i);
+        EventActivity* pActivity = objActivities.GetAt(i);
 
         if (pActivity == IMS_NULL)
         {
@@ -271,24 +276,24 @@ void EventHolder::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener *piList
 
     if (objActivities.IsEmpty())
     {
-        objEventMap.RemoveAt(nIndex);
+        m_objEventMap.RemoveAt(nIndex);
 
         // Set the event
-        piReceiver->ResetEvent(nEvent);
+        m_piReceiver->ResetEvent(nEvent);
     }
 }
 
 PUBLIC
 void EventHolder::SetUnregisteredEvents()
 {
-    if (!objEventMap.IsEmpty())
+    if (!m_objEventMap.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objEventMap.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objEventMap.GetSize(); i++)
         {
-            IMS_SINT32 nEvent = objEventMap.GetKeyAt(i);
-            const IMSList<EventActivity*> &objActivities = objEventMap.GetValueAt(i);
+            IMS_SINT32 nEvent = m_objEventMap.GetKeyAt(i);
+            const IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(i);
 
-            piReceiver->SetEvent(nEvent);
+            m_piReceiver->SetEvent(nEvent);
 
             IMS_TRACE_I("UnregisteredEvents :: event=%08X, listeners=%d",
                     nEvent, objActivities.GetSize(), 0);
@@ -304,9 +309,9 @@ PRIVATE VIRTUAL
 IMS_BOOL EventHolder::EventReceiver_NotifyEvent(IN IMS_SINT32 nEvent,
         IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_SLONG nIndex = objEventMap.GetIndexOfKey(nEvent);
+    IMS_SLONG nIndex = m_objEventMap.GetIndexOfKey(nEvent);
 
     if (nIndex < 0)
     {
@@ -316,7 +321,7 @@ IMS_BOOL EventHolder::EventReceiver_NotifyEvent(IN IMS_SINT32 nEvent,
 
     IMS_TRACE_I("EventReceiver :: E (%d), W (%d), L (%d)", nEvent, nWParam, nLParam);
 
-    IMSList<EventActivity*> &objActivities = objEventMap.GetValueAt(nIndex);
+    IMSList<EventActivity*>& objActivities = m_objEventMap.GetValueAt(nIndex);
 
     if (objActivities.IsEmpty())
     {
@@ -326,7 +331,7 @@ IMS_BOOL EventHolder::EventReceiver_NotifyEvent(IN IMS_SINT32 nEvent,
 
     for (IMS_UINT32 i = 0; i < objActivities.GetSize(); ++i)
     {
-        EventActivity *pActivity = objActivities.GetAt(i);
+        EventActivity* pActivity = objActivities.GetAt(i);
 
         if (pActivity != IMS_NULL)
         {
@@ -346,9 +351,8 @@ public:
     EventServicePrivate();
     ~EventServicePrivate();
 
-private:
-    EventServicePrivate(IN const EventServicePrivate& objRHS);
-    EventServicePrivate& operator=(IN const EventServicePrivate& objRHS);
+    EventServicePrivate(IN const EventServicePrivate&) = delete;
+    EventServicePrivate& operator=(IN const EventServicePrivate&) = delete;
 
 public:
     inline EventHolder* GetHolder(IN IMS_SINT32 nSlotId)
@@ -358,52 +362,52 @@ public:
             nSlotId = IMS_SLOT_0;
         }
 
-        return ppHolder[nSlotId];
+        return m_ppHolder[nSlotId];
     }
 
     inline IEventSender* GetSender() const
-    { return piSender; }
+    { return m_piSender; }
 
 private:
-    IEventSender *piSender;
+    IEventSender* m_piSender;
 
-    EventHolder **ppHolder;
+    EventHolder** m_ppHolder;
 };
 
 PUBLIC
 EventServicePrivate::EventServicePrivate()
-    : piSender(PlatformFactory::CreateEventSender())
-    , ppHolder(IMS_NULL)
+    : m_piSender(PlatformFactory::CreateEventSender())
+    , m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppHolder = new EventHolder*[nSimCount];
+    m_ppHolder = new EventHolder*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppHolder[i] = new EventHolder(i);
+        m_ppHolder[i] = new EventHolder(i);
     }
 }
 
 PUBLIC VIRTUAL
 EventServicePrivate::~EventServicePrivate()
 {
-    if (ppHolder != IMS_NULL)
+    if (m_ppHolder != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppHolder[i] != IMS_NULL)
+            if (m_ppHolder[i] != IMS_NULL)
             {
-                delete ppHolder[i];
+                delete m_ppHolder[i];
             }
         }
 
-        delete[] ppHolder;
+        delete[] m_ppHolder;
     }
 
-    PlatformFactory::DestroyEventSender(piSender);
+    PlatformFactory::DestroyEventSender(m_piSender);
 }
 
 
@@ -411,35 +415,35 @@ EventServicePrivate::~EventServicePrivate()
 // EventService class
 PRIVATE
 EventService::EventService()
-    : pPrivate(new EventServicePrivate())
+    : m_pPrivate(new EventServicePrivate())
 {
 }
 
 PRIVATE
 EventService::~EventService()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
 PUBLIC
-void EventService::AddListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener,
+void EventService::AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
         IN IMS_SINT32 nSlotId)
 {
-    EventHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    EventHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
 
     pHolder->AddListener(nEvent, piListener);
 }
 
 PUBLIC
-void EventService::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener *piListener,
+void EventService::RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
         IN IMS_SINT32 nSlotId)
 {
-    EventHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    EventHolder* m_pHolder = m_pPrivate->GetHolder(nSlotId);
 
-    pHolder->RemoveListener(nEvent, piListener);
+    m_pHolder->RemoveListener(nEvent, piListener);
 }
 
 PUBLIC
@@ -447,25 +451,25 @@ void EventService::SendEvent(IN IMS_SINT32 nEvent,
         IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
         IN IMS_SINT32 nSlotId)
 {
-    pPrivate->GetSender()->SendEvent(nEvent, nWParam, nLParam, nSlotId);
+    m_pPrivate->GetSender()->SendEvent(nEvent, nWParam, nLParam, nSlotId);
 }
 
 PUBLIC
 void EventService::SetUnregisteredEvents(IN IMS_SINT32 nSlotId)
 {
-    EventHolder *pHolder = pPrivate->GetHolder(nSlotId);
+    EventHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     pHolder->SetUnregisteredEvents();
 }
 
 PUBLIC GLOBAL
 EventService* EventService::GetEventService()
 {
-    static EventService *pEventService = IMS_NULL;
+    static EventService* s_pEventService = IMS_NULL;
 
-    if (pEventService == IMS_NULL)
+    if (s_pEventService == IMS_NULL)
     {
-        pEventService = new EventService();
+        s_pEventService = new EventService();
     }
 
-    return pEventService;
+    return s_pEventService;
 }

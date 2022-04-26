@@ -431,7 +431,7 @@ void OsWifiConnection::SetListener(IN INetworkConnectionListener* piListener)
 }
 
 PRIVATE VIRTUAL
-void OsWifiConnection::SetPreferredIPVersion(
+void OsWifiConnection::SetPreferredIpVersion(
         IN IMS_SINT32 nPreferredIpVersion /*= 0 default-aos-connection-profile*/)
 {
     IMS_TRACE_D("Preferred IP version: %d >> %d",
@@ -587,7 +587,7 @@ const AString& OsWifiConnection::GetProfileName() const
 PRIVATE VIRTUAL
 IMS_SINT32 OsWifiConnection::GetApnType() const
 {
-    return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetAPNType() : NetworkPolicy::APN_WIFI;
+    return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetApnType() : NetworkPolicy::APN_WIFI;
 }
 
 PRIVATE VIRTUAL

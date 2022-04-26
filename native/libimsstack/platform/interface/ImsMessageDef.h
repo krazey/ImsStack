@@ -1,19 +1,20 @@
 /*
-    Author
-    IMSers
-    <table>
-    Date      Description
-    --------  ----------
-    20090711  Created
-    20100330  re-arrange
-    </table>
-
-    Description
-    This file defines a top-level event category for IMS client platform.
-*/
-
-#ifndef _IMS_MSGDEF_H_
-#define _IMS_MSGDEF_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_MESSAGE_DEF_H_
+#define IMS_MESSAGE_DEF_H_
 
 #include "ImsConstDef.h"
 
@@ -64,24 +65,18 @@
 #define IMS_MSG_BASE_SESSION                (IMS_MSG_APP_BASE + 200)
 //1400
 #define IMS_MSG_BASE_STREAMEDMEDIA          (IMS_MSG_APP_BASE + 400)
-#define IMS_MSG_BASE_FRAMEDMEDIA            (IMS_MSG_APP_BASE + 600)
 #define IMS_MSG_BASE_UCE                    (IMS_MSG_APP_BASE + 2000)//3000
 
 //// APP_INTERNAL
 // Event for IMS application(for internal message)
-#define IMS_MSG_UC                          (IMS_MSG_APP_INTERNAL + 2000)
+#define IMS_MSG_XML                         (IMS_MSG_APP_INTERNAL + 1000)
 #define IMS_MSG_MTC                         (IMS_MSG_APP_INTERNAL + 2000)
-#define IMS_MSG_AOS                         (IMS_MSG_APP_INTERNAL + 5000)
-
-#define IMS_MSG_XML                         (IMS_MSG_APP_INTERNAL + 5200)
-#define IMS_MSG_MMTEL_PROV                  (IMS_MSG_APP_INTERNAL + 5300)
-#define IMS_MSG_CIQ                         (IMS_MSG_APP_INTERNAL + 5400)
-#define IMS_MSG_UCE                         (IMS_MSG_APP_INTERNAL + 5500)
-#define IMS_MSG_EAB_XDM                     (IMS_MSG_APP_INTERNAL + 5600)
-#define IMS_MSG_SMS                         (IMS_MSG_APP_INTERNAL + 5700)
-#define IMS_MSG_PRES                        (IMS_MSG_APP_INTERNAL + 5800)
+#define IMS_MSG_AOS                         (IMS_MSG_APP_INTERNAL + 3000)
+#define IMS_MSG_SMS                         (IMS_MSG_APP_INTERNAL + 4000)
+#define IMS_MSG_UCE                         (IMS_MSG_APP_INTERNAL + 5000)
+#define IMS_MSG_SIP_DELEGATE                (IMS_MSG_APP_INTERNAL + 6000)
 
 //// USER_BASE
 #define IMS_MSG_USER                        (IMS_MSG_USER_BASE + 0)
 
-#endif // _IMS_MSGDEF_H_
+#endif

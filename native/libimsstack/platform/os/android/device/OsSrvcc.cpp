@@ -147,8 +147,7 @@ void OsSrvcc::NotifySrvccEvent(IN IMS_UINT32 nEvent)
 
         if (piListener != IMS_NULL)
         {
-            piListener->Srvcc_NotifyEventChanged(
-                    static_cast<ISrvcc::SRVCC_EVENT_ENTYPE>(nEvent));
+            piListener->Srvcc_NotifyEventChanged(static_cast<IMS_SINT32>(nEvent));
         }
     }
 }

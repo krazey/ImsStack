@@ -1,24 +1,20 @@
 /*
-    Author
-    IMSers
-    <table>
-    Date      Description
-    --------  ----------
-    20100209  Created
-    </table>
-
-    Description
-     This file defines a type-casting method for IMS client platform without any dependency
-     of compiler.
-*/
-
-#ifndef _IMS_TYPE_CAST_H_
-#define _IMS_TYPE_CAST_H_
-
-#if defined(WINCE) || defined(WIN32)
-
-#define    IMS_RTTI_ENABLED
-#endif // defined(WINCE) || defined(WIN32)
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef IMS_TYPE_CAST_H_
+#define IMS_TYPE_CAST_H_
 
 #ifdef IMS_RTTI_ENABLED
 
@@ -37,4 +33,4 @@
 
 #endif // IMS_RTTI_ENABLED
 
-#endif // _IMS_TYPE_CAST_H_
+#endif

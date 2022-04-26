@@ -16,19 +16,17 @@
 #ifndef INTERFACE_TRM_H_
 #define INTERFACE_TRM_H_
 
-#include "ImsTypeDef.h"
 #include "IMSList.h"
 #include "ImsMessageDef.h"
-
-#include "ServiceThread.h"
 #include "ServiceMessage.h"
+#include "ServiceThread.h"
 
 class ITrmListener
 {
 public:
-    /*
-        Notifies the application that the service priority is changed.
-    */
+    /**
+     * @brief Notifies the application that the service priority is changed.
+     */
     virtual void Trm_NotifyServicePriorityChanged() = 0;
 };
 
@@ -63,54 +61,54 @@ public:
         SERVICE_CHANGED = 100
     };
 
-    /*
-        Enable TRM
-    */
+    /**
+     * @brief Enable TRM.
+     */
     virtual void Enable(IN IMS_UINT32 nSlotId) = 0;
 
-    /*
-        Disable TRM
-    */
+    /**
+     * @brief Disable TRM.
+     */
     virtual void Disable(IN IMS_UINT32 nSlotId) = 0;
 
-    /*
-        Check if service is available or not
-    */
+    /**
+     * @brief Check if service is available or not.
+     */
     virtual IMS_BOOL IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType) = 0;
 
-    /*
-        Check if TRM is supported or not
-    */
+    /**
+     * @brief Check if TRM is supported or not.
+     */
     virtual IMS_BOOL IsTrmSupported() = 0;
 
-    /*
-        Set the emergency service start or end state
-    */
+    /**
+     * @brief Set the emergency service start or end state.
+     */
     virtual void SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
         IN IMS_UINT32 nMode) = 0;
 
-    /*
-        Set the IPCAN category (CATEGORY_MOBILE, CATEGORY_WLAN)
-    */
+    /**
+     * @brief Set the IPCAN category (CATEGORY_MOBILE, CATEGORY_WLAN).
+     */
     virtual void SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory) = 0;
 
-    /*
-        Set the service start or end state
-    */
+    /**
+     * @brief Set the service start or end state.
+     */
     virtual IMS_BOOL SetService(IN IMS_UINT32 nSlotId,
             IN IMS_UINT32 nType, IN IMS_UINT32 nMode) = 0;
 
 public:
-    /*
-        Register the listener for observing the call priority
-    */
+    /**
+     * @brief Register the listener for observing the call priority.
+     */
     inline void RegisterObserver(IN ITrmListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -119,24 +117,24 @@ public:
 
             if (*pObserverList == piThread)
             {
-                pObserverList->objListeners.Append(piListener);
+                pObserverList->m_objListeners.Append(piListener);
                 return;
             }
         }
 
-        objObserverLists.Append(new ObserverList(piListener));
+        m_objObserverLists.Append(new ObserverList(piListener));
     }
 
-    /*
-        Remove the listener for observing the call priority
-    */
+    /**
+     * @brief Remove the listener for observing the call priority.
+     */
     inline void RemoveObserver(IN ITrmListener* piListener)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); i++)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -145,13 +143,13 @@ public:
 
             if (*pObserverList == piThread)
             {
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); j++)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); j++)
                 {
-                    ITrmListener* objListener = pObserverList->objListeners.GetAt(j);
+                    ITrmListener* piTmpListener = pObserverList->m_objListeners.GetAt(j);
 
-                    if (piListener == objListener)
+                    if (piListener == piTmpListener)
                     {
-                        pObserverList->objListeners.RemoveAt(j);
+                        pObserverList->m_objListeners.RemoveAt(j);
                         break;
                     }
                 }
@@ -161,19 +159,19 @@ public:
     }
 
 public:
-    inline void ProcessNotify(IN ImsMessage& objMSG)
+    inline void ProcessNotify(IN ImsMessage& objMsg)
     {
-        IThread *piThread = ThreadService::GetThreadService()->GetCurrentThread();
-
+        IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
         TrmStateParam* pParam = IMS_NULL;
-        if ((IMS_SINT32)objMSG.nWparam == SERVICE_CHANGED)
+
+        if (LONG_TO_INT(objMsg.nWparam) == SERVICE_CHANGED)
         {
-            pParam = (TrmStateParam*)objMSG.nLparam;
+            pParam = reinterpret_cast<TrmStateParam*>(objMsg.nLparam);
         }
 
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
@@ -182,7 +180,7 @@ public:
 
             if (*pObserverList == piThread)
             {
-                if ((IMS_SINT32)objMSG.nWparam == SERVICE_CHANGED)
+                if (LONG_TO_INT(objMsg.nWparam) == SERVICE_CHANGED)
                 {
                     if (pParam != IMS_NULL)
                     {
@@ -191,9 +189,9 @@ public:
                     break;
                 }
 
-                for (IMS_UINT32 j = 0; j < pObserverList->objListeners.GetSize(); ++j)
+                for (IMS_UINT32 j = 0; j < pObserverList->m_objListeners.GetSize(); ++j)
                 {
-                    ITrmListener* piListener = pObserverList->objListeners.GetAt(j);
+                    ITrmListener* piListener = pObserverList->m_objListeners.GetAt(j);
 
                     if (piListener != IMS_NULL)
                     {
@@ -213,36 +211,36 @@ public:
 protected:
     inline void PostMsgRegisteredThread()
     {
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
                 continue;
             }
 
-            IMS_MSG_CreateNPostThreadMessage(pObserverList->piOwnerThread,
+            IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
                     IMS_MSG_TRM_PRIORITY_STATUS, 0, 0);
         }
     }
 
     inline void PostMsgEnablerThread(IN TrmStateParam* pParam)
     {
-        for (IMS_UINT32 i = 0; i < objObserverLists.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
-            ObserverList *pObserverList = objObserverLists.GetAt(i);
+            ObserverList* pObserverList = m_objObserverLists.GetAt(i);
 
             if (pObserverList == IMS_NULL)
             {
                 continue;
             }
 
-            if (pObserverList->piOwnerThread != IMS_NULL)
+            if (pObserverList->m_piOwnerThread != IMS_NULL)
             {
-                if (pObserverList->piOwnerThread->GetSlotId() == pParam->nSlotId)
+                if (pObserverList->m_piOwnerThread->GetSlotId() == pParam->nSlotId)
                 {
-                    IMS_MSG_CreateNPostThreadMessage(pObserverList->piOwnerThread,
+                    IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
                         IMS_MSG_TRM_PRIORITY_STATUS, SERVICE_CHANGED, pParam);
                     return;
                 }
@@ -262,23 +260,22 @@ private:
         public:
             inline ObserverList(IN ITrmListener* piListener)
             {
-                piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-
-                objListeners.Append(piListener);
+                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+                m_objListeners.Append(piListener);
             }
 
             inline IMS_BOOL operator==(IN IThread *piThread)
             {
-                return piThread == piOwnerThread;
+                return piThread == m_piOwnerThread;
             }
 
         public:
-            IThread *piOwnerThread;
-            IMSList<ITrmListener*> objListeners;
+            IThread* m_piOwnerThread;
+            IMSList<ITrmListener*> m_objListeners;
     };
 
 private:
-    IMSList<ObserverList*> objObserverLists;
+    IMSList<ObserverList*> m_objObserverLists;
 };
 
-#endif // INTERFACE_TRM_H_
+#endif

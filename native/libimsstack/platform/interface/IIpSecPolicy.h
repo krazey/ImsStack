@@ -16,7 +16,6 @@
 #ifndef INTERFACE_IPSEC_POLICY_H_
 #define INTERFACE_IPSEC_POLICY_H_
 
-#include "ImsTypeDef.h"
 #include "IMSList.h"
 
 class IIpSecSa;
@@ -26,131 +25,55 @@ class IIpSecPolicyListener;
 class IIpSecPolicy
 {
 public:
-    /*
-     Returns an Identifier of this IIpSecPolicy.
-    */
+    /**
+     * @brief Returns an Identifier of this IIPSecPolicy.
+     *
+     * @return An identifier of this IpSec policy.
+     */
     virtual IMS_SINT32 GetId() const = 0;
 
-    /*
-
-    Creates SP Configuration
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IIPSecSAD*              Pointer to IIPSecSAD
-    </table>
-
-    */
+    /**
+     * @brief Creates SP configuration.
+     *
+     * @return A pointer of IIPSecSP.
+     */
     virtual IIpSecSp* CreateSp() = 0;
 
-    /*
-
-    Destroy SP Configuration
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-    IIpSecSp*               Pointer to IIpSecSp
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Destroys SP configuration.
+     *
+     * @param piSP The pointer of IIPSecSP
+     */
     virtual void DestroySp(IN IIpSecSp* piSp) = 0;
 
-    /*
-
-    Creates SA Configuration
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IIpSecSa*               Pointer to IIpSecSa
-    </table>
-
-    */
+    /**
+     * @brief Creates SA configuration.
+     *
+     * @return A pointer of IIPSecSA.
+     */
     virtual IIpSecSa* CreateSa() = 0;
 
-    /*
-
-    Destroy SA Configuration
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-    IIpSecSa*               Pointer to IIpSecSa
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Destroys SA configuration.
+     *
+     * @param piSA The pointer of IIPSecSA
+     */
     virtual void DestroySa(IN IIpSecSa* piSa) = 0;
 
-    /*
-
-    Manage SAs lifetime
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Manages the lifetime of this security association.
+     *
+     * @param nDuration The duration of this security association
+     */
     virtual void ManageLifetime(IN IMS_UINT32 nDuration) = 0;
 
-    /*
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-
-    </table>
-
-    */
+    /**
+     * @brief Sets the listener for IpSec policy.
+     *
+     * @param piListener The listener to be set
+     */
     virtual void SetListener(IN IIpSecPolicyListener* piListener) = 0;
 
 };
 
-#endif // INTERFACE_IPSEC_POLICY_H_
+#endif

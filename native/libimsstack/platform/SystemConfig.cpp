@@ -1,80 +1,83 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20150705  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IMSStrLib.h"
+#include "ServiceMemory.h"
 #include "SystemConfig.h"
 
 PRIVATE GLOBAL
-IMS_SINT32 SystemConfig::nMultiSimConfig = (-1);
+IMS_SINT32 SystemConfig::s_nMultiSimConfig = (-1);
 
 PRIVATE GLOBAL
-IMS_SINT32 SystemConfig::nGlobalConfigs = 0;
+IMS_SINT32 SystemConfig::s_nGlobalConfigs = 0;
 
 PRIVATE GLOBAL
-AString SystemConfig::strPackageName = AString::ConstNull();
+AString SystemConfig::s_strPackageName = AString::ConstNull();
 
 PUBLIC
 SystemConfig::SystemConfig()
-    : nSlotId(0)
-    , strOperator(AString::ConstNull())
-    , strCountry(AString::ConstNull())
-    , strEnablerType(AString::ConstNull())
-    , nExtraInfo(EXTRA_INFO_NONE)
-    , nFeatures(0)
-    , nServiceFeatures(0)
+    : m_nSlotId(0)
+    , m_strOperator(AString::ConstNull())
+    , m_strCountry(AString::ConstNull())
+    , m_strEnablerType(AString::ConstNull())
+    , m_nExtraInfo(EXTRA_INFO_NONE)
+    , m_nFeatures(0)
+    , m_nServiceFeatures(0)
 {
 }
 
 PUBLIC
-SystemConfig::SystemConfig(IN const __SystemConfig *pstConfig)
+SystemConfig::SystemConfig(IN const __SystemConfig* pConfig)
 {
-    if (pstConfig != IMS_NULL)
+    if (pConfig != IMS_NULL)
     {
-        nSlotId = pstConfig->nSlotId;
+        m_nSlotId = pConfig->nSlotId;
 
-        strOperator = static_cast<const IMS_CHAR*>(pstConfig->acOperator);
-        strCountry = static_cast<const IMS_CHAR*>(pstConfig->acCountry);
+        m_strOperator = static_cast<const IMS_CHAR*>(pConfig->acOperator);
+        m_strCountry = static_cast<const IMS_CHAR*>(pConfig->acCountry);
 
-        strEnablerType = static_cast<const IMS_CHAR*>(pstConfig->acEnablerType);
-        nExtraInfo = pstConfig->nExtraInfo;
+        m_strEnablerType = static_cast<const IMS_CHAR*>(pConfig->acEnablerType);
+        m_nExtraInfo = pConfig->nExtraInfo;
 
-        nFeatures = pstConfig->nFeatures;
-        nServiceFeatures = pstConfig->nServiceFeatures;
+        m_nFeatures = pConfig->nFeatures;
+        m_nServiceFeatures = pConfig->nServiceFeatures;
     }
     else
     {
-        nSlotId = 0;
+        m_nSlotId = 0;
 
-        strOperator = AString::ConstNull();
-        strCountry = AString::ConstNull();
+        m_strOperator = AString::ConstNull();
+        m_strCountry = AString::ConstNull();
 
-        strEnablerType = AString::ConstNull();
-        nExtraInfo = EXTRA_INFO_NONE;
+        m_strEnablerType = AString::ConstNull();
+        m_nExtraInfo = EXTRA_INFO_NONE;
 
-        nFeatures = 0;
-        nServiceFeatures = 0;
+        m_nFeatures = 0;
+        m_nServiceFeatures = 0;
     }
 }
 
 PUBLIC
-SystemConfig::SystemConfig(IN const SystemConfig &objRHS)
-    : nSlotId(objRHS.nSlotId)
-    , strOperator(objRHS.strOperator)
-    , strCountry(objRHS.strCountry)
-    , strEnablerType(objRHS.strEnablerType)
-    , nExtraInfo(objRHS.nExtraInfo)
-    , nFeatures(objRHS.nFeatures)
-    , nServiceFeatures(objRHS.nServiceFeatures)
+SystemConfig::SystemConfig(IN const SystemConfig& other)
+    : m_nSlotId(other.m_nSlotId)
+    , m_strOperator(other.m_strOperator)
+    , m_strCountry(other.m_strCountry)
+    , m_strEnablerType(other.m_strEnablerType)
+    , m_nExtraInfo(other.m_nExtraInfo)
+    , m_nFeatures(other.m_nFeatures)
+    , m_nServiceFeatures(other.m_nServiceFeatures)
 {
 }
 
@@ -83,53 +86,38 @@ SystemConfig::~SystemConfig()
 {
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SystemConfig& SystemConfig::operator=(IN const SystemConfig &objRHS)
+SystemConfig& SystemConfig::operator=(IN const SystemConfig& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nSlotId = objRHS.nSlotId;
+        m_nSlotId = other.m_nSlotId;
 
-        strOperator = objRHS.strOperator;
-        strCountry = objRHS.strCountry;
+        m_strOperator = other.m_strOperator;
+        m_strCountry = other.m_strCountry;
 
-        strEnablerType = objRHS.strEnablerType;
-        nExtraInfo = objRHS.nExtraInfo;
+        m_strEnablerType = other.m_strEnablerType;
+        m_nExtraInfo = other.m_nExtraInfo;
 
-        nFeatures = objRHS.nFeatures;
-        nServiceFeatures = objRHS.nServiceFeatures;
+        m_nFeatures = other.m_nFeatures;
+        m_nServiceFeatures = other.m_nServiceFeatures;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SystemConfig::Equals(IN const SystemConfig &objOther) const
+IMS_BOOL SystemConfig::Equals(IN const SystemConfig& other) const
 {
-    return (nSlotId == objOther.nSlotId)
-            && strOperator.EqualsIgnoreCase(objOther.strOperator)
-            && strCountry.EqualsIgnoreCase(objOther.strCountry)
-            && strEnablerType.EqualsIgnoreCase(objOther.strEnablerType)
-            && (nExtraInfo == objOther.nExtraInfo)
-            && (nFeatures == objOther.nFeatures)
-            && (nServiceFeatures == objOther.nServiceFeatures);
+    return (m_nSlotId == other.m_nSlotId)
+            && m_strOperator.EqualsIgnoreCase(other.m_strOperator)
+            && m_strCountry.EqualsIgnoreCase(other.m_strCountry)
+            && m_strEnablerType.EqualsIgnoreCase(other.m_strEnablerType)
+            && (m_nExtraInfo == other.m_nExtraInfo)
+            && (m_nFeatures == other.m_nFeatures)
+            && (m_nServiceFeatures == other.m_nServiceFeatures);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString SystemConfig::ToString() const
 {
@@ -138,53 +126,41 @@ AString SystemConfig::ToString() const
     strSystemConfig.Sprintf("[ SystemConfig :: slotId=%d, op=%s, co=%s"
             ", enablerType=%s, extraInfo=%08x"
             ", features=%08x, serviceFeatures=%08x ]",
-            nSlotId, strOperator.GetStr(), strCountry.GetStr(),
-            strEnablerType.GetStr(), nExtraInfo,
-            nFeatures, nServiceFeatures);
+            m_nSlotId, m_strOperator.GetStr(), m_strCountry.GetStr(),
+            m_strEnablerType.GetStr(), m_nExtraInfo,
+            m_nFeatures, m_nServiceFeatures);
 
     return strSystemConfig;
 }
 
-/*
-
-Remarks
- The caller MUTS free the memory of the pointer variable which returns from this method.
-*/
+/**
+ * The caller MUTS free the memory of the pointer variable which returns from this method.
+ */
 PUBLIC
 __SystemConfig* SystemConfig::ToSystemConfig() const
 {
-    __SystemConfig *pstConfig = new __SystemConfig;
+    __SystemConfig* pConfig = new __SystemConfig;
 
-    pstConfig->nSlotId = nSlotId;
+    pConfig->nSlotId = m_nSlotId;
 
-    IMS_StrCpy(pstConfig->acOperator, IMS_SC_SIZE_16 + 1, strOperator.GetStr());
-    IMS_StrCpy(pstConfig->acCountry, IMS_SC_SIZE_8 + 1, strCountry.GetStr());
+    IMS_StrCpy(pConfig->acOperator, IMS_SC_SIZE_16 + 1, m_strOperator.GetStr());
+    IMS_StrCpy(pConfig->acCountry, IMS_SC_SIZE_8 + 1, m_strCountry.GetStr());
 
-    IMS_StrCpy(pstConfig->acEnablerType, IMS_SC_SIZE_16 + 1, strEnablerType.GetStr());
-    pstConfig->nExtraInfo = nExtraInfo;
+    IMS_StrCpy(pConfig->acEnablerType, IMS_SC_SIZE_16 + 1, m_strEnablerType.GetStr());
+    pConfig->nExtraInfo = m_nExtraInfo;
 
-    pstConfig->nFeatures = nFeatures;
-    pstConfig->nServiceFeatures = nServiceFeatures;
+    pConfig->nFeatures = m_nFeatures;
+    pConfig->nServiceFeatures = m_nServiceFeatures;
 
-    return pstConfig;
+    return pConfig;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 const AString& SystemConfig::GetPackageName()
 {
-    return strPackageName;
+    return s_strPackageName;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_SINT32 SystemConfig::GetMaxSimSlot()
 {
@@ -202,40 +178,25 @@ IMS_SINT32 SystemConfig::GetMaxSimSlot()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_SINT32 SystemConfig::GetMultiSimConfig()
 {
-    if (nMultiSimConfig < 0)
+    if (s_nMultiSimConfig < 0)
     {
         // FIXME: multi-sim config.
-        nMultiSimConfig = MULTI_SIM_NONE;
+        s_nMultiSimConfig = MULTI_SIM_NONE;
     }
 
-    return nMultiSimConfig;
+    return s_nMultiSimConfig;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsMultiImsEnabled()
 {
     // As a default, single IMS is required on dual SIM environment.
-    return (nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
+    return (s_nGlobalConfigs & CONFIG_MULTI_IMS) != 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsMultiImsEnabledOnDssv()
 {
@@ -243,34 +204,19 @@ IMS_BOOL SystemConfig::IsMultiImsEnabledOnDssv()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsMultiLteEnabled()
 {
     // LTE+LTE DSDS
-    return (nGlobalConfigs & CONFIG_MULTI_LTE) != 0;
+    return (s_nGlobalConfigs & CONFIG_MULTI_LTE) != 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsMultiSimEnabled()
 {
     return (GetMultiSimConfig() != MULTI_SIM_NONE);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsOperatorChanged(IN const SystemConfig* pOldConfig,
             IN const SystemConfig* pNewConfig)
@@ -308,11 +254,6 @@ IMS_BOOL SystemConfig::IsOperatorChanged(IN const SystemConfig* pOldConfig,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsServiceFeatureChanged(IN const SystemConfig* pOldConfig,
         IN const SystemConfig* pNewConfig)
@@ -325,11 +266,6 @@ IMS_BOOL SystemConfig::IsServiceFeatureChanged(IN const SystemConfig* pOldConfig
     return pNewConfig->GetServiceFeatures() != pOldConfig->GetServiceFeatures();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsDdsChanged(IN const SystemConfig* pOldConfig,
         IN const SystemConfig* pNewConfig)
@@ -343,11 +279,6 @@ IMS_BOOL SystemConfig::IsDdsChanged(IN const SystemConfig* pOldConfig,
             || (!pNewConfig->IsDds() && pOldConfig->IsDds());
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsSimMobilityChanged(IN const SystemConfig* pOldConfig,
         IN const SystemConfig* pNewConfig)
@@ -361,38 +292,23 @@ IMS_BOOL SystemConfig::IsSimMobilityChanged(IN const SystemConfig* pOldConfig,
             || (!pNewConfig->IsSimMobilityEnabled() && pOldConfig->IsSimMobilityEnabled());
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SystemConfig::IsExtraInfoSet(IN IMS_SINT32 nExtraInfo) const
 {
-    return (this->nExtraInfo & nExtraInfo) != 0;
+    return (m_nExtraInfo & nExtraInfo) != 0;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL
 void SystemConfig::CacheGlobalConfigs()
 {
-    nGlobalConfigs = 0;
+    s_nGlobalConfigs = 0;
 
-    strPackageName = "com.android.imsstack";
+    s_strPackageName = "com.android.imsstack";
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL
 void SystemConfig::UpdateGlobalConfigsOnFeatureChanged()
 {
     // DSDV-SV
-    // nGlobalConfigs |= CONFIG_MULTI_IMS;
+    // s_nGlobalConfigs |= CONFIG_MULTI_IMS;
 }

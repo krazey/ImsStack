@@ -1,19 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090305  lovil@                    Created
-    20090831  yhrhee@                   Modified
-    </table>
-
-    Description
-    It's a timer interface provided by Platform interface layer.
-    It can be used after allocating a timer interface from timer service.
-*/
-
-#ifndef _INTERFACE_IMS_TIMER_H_
-#define _INTERFACE_IMS_TIMER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_TIMER_H_
+#define INTERFACE_TIMER_H_
 
 #include "ImsTypeDef.h"
 
@@ -22,69 +23,30 @@ class ITimerListener;
 class ITimer
 {
 public:
-    /*
-     Check if the specified timer is equal to the current object.
+    /**
+     * @brief Checks if the specified timer is equal to the current object.
+     *
+     * @param piTimer The pointer to ITimer to be checked
+     * @return IMS_TRUE if the specified timer is equal, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL Equals(IN const ITimer* piTimer) const = 0;
 
-    Remarks
+    /**
+     * @brief Starts a timer.
+     *
+     * @param nDuration The timer duration (milli-seconds)
+     * @param piListener The listener interface pointer, supplier should implement its listener
+     *                   to receive notification of the timer expiration.
+     * @return A timer id to identify this object.
+     */
+    virtual IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener) = 0;
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    piTimer                 Pointer to ITimer to be checked
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_BOOL
-    </table>
-    */
-    virtual IMS_BOOL Equals(IN const ITimer *piTimer) const = 0;
-
-    /*
-     Starts the timer.
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nDuration               Timer duration (milli-seconds)
-    piListener              Listener interface pointer, supplier should implement its listener
-                            to receive notification of the timer expiration.
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_UINTP               Timer id to identify this object
-    </table>
-    */
-    virtual IMS_UINTP SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener *piListener) = 0;
-
-    /*
-     Kills the running timer if it is not expired.
-
-    Remarks
-     The application MUST destroy the pointer of ITimer
-    with TimerService::GetTimerService()->Destroy() after calling this method.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
+    /**
+     * @brief Stops the running timer if it is not expired.
+     *
+     * NOTE: The application MUST destroy the pointer of ITimer
+     *       with TimerService::GetTimerService()->Destroy() after calling this method.
+     */
     virtual void KillTimer() = 0;
 };
 
@@ -93,23 +55,12 @@ public:
 class ITimerListener
 {
 public:
-    /*
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    piTimer                 Timer object to be expired
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
-    virtual void Timer_TimerExpired(IN ITimer *piTimer) = 0;
+    /**
+     * @brief Notifies the application that the specified timer is expired.
+     *
+     * @param piTimer The timer that is expired
+     */
+    virtual void Timer_TimerExpired(IN ITimer* piTimer) = 0;
 };
 
-#endif // _INTERFACE_IMS_TIMER_H_
+#endif

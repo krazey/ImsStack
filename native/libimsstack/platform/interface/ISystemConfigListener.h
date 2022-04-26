@@ -1,45 +1,38 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170501  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-#ifndef _INTERFACE_SYSTEM_CONFIG_LISTENER_H_
-#define _INTERFACE_SYSTEM_CONFIG_LISTENER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SYSTEM_CONFIG_LISTENER_H_
+#define INTERFACE_SYSTEM_CONFIG_LISTENER_H_
 
 #include "ImsTypeDef.h"
 
 class ISystemConfigListener
 {
 public:
-    /*
-     Notifies the applications when system configuration is changed.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    nEvent                  Event to indicate which configuration is changed
-    nSlotId                 Slot id for the following events:
-                                SystemConfig#EVENT_SYSTEM_CONFIGURATION_CHANGED
-                                SystemConfig#EVENT_SUBSCRIPTION_CHANGED
-                            If nSlotId is IMS_SLOT_ANY, then the application considers that
-                            all (both SIM slots) the configurations are changed.
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-    */
+    /**
+     * @brief Notifies the applications when system configuration is changed.
+     *
+     * @param nEvent An event to indicate which configuration is changed
+     * @param nSlotId A slot id for the following events.\n
+     *                #SystemConfig#EVENT_SYSTEM_CONFIGURATION_CHANGED\n
+     *                #SystemConfig#EVENT_SUBSCRIPTION_CHANGED\n
+     *                If nSlotId is IMS_SLOT_ANY, then the application considers that
+     *                all (SIM slots) the configurations are changed.
+     */
     virtual void SystemConfig_ConfigurationChanged(
             IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId = IMS_SLOT_ANY) = 0;
 };
 
-#endif // _INTERFACE_SYSTEM_CONFIG_LISTENER_H_
+#endif

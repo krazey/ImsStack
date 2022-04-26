@@ -1,19 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090305  lovil@                    Created
-    20090831  yhrhee@                   Modified
-    20131212  yongnam.cha@              Featuring for RCS BB
-    </table>
-
-    Description
-     MS Timer Service
-*/
-
-#ifndef _SERVICE_IMS_TIMER_H_
-#define _SERVICE_IMS_TIMER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SERVICE_TIMER_H_
+#define SERVICE_TIMER_H_
 
 #include "IMSList.h"
 #include "ImsMessage.h"
@@ -21,29 +22,28 @@
 
 class IMutex;
 
-
-
 class TimerService
 {
 private:
     TimerService();
     ~TimerService();
 
-    TimerService(IN const TimerService& objRHS);
-    TimerService& operator=(IN const TimerService& objRHS);
+public:
+    TimerService(IN const TimerService&) = delete;
+    TimerService& operator=(IN const TimerService&) = delete;
 
 public:
     ITimer* CreateTimer();
     ITimer* CreateTimer(IN IMS_BOOL bAlarmTimer);
-    void DestroyTimer(IN ITimer *&piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
+    void DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread = IMS_TRUE);
 
-    void DispatchServiceMessage(IN ImsMessage &objMSG);
+    void DispatchServiceMessage(IN ImsMessage& objMsg);
 
     static TimerService* GetTimerService();
 
 private:
-    IMutex *piMutex;
-    IMSList<ITimer*> objTimers;
+    IMutex* m_piLock;
+    IMSList<ITimer*> m_objTimers;
 };
 
-#endif // _SERVICE_IMS_TIMER_H_
+#endif

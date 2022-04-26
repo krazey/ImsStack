@@ -1,161 +1,121 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120102  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _INTERFACE_IMS_PHONE_INFO_CALL_H_
-#define _INTERFACE_IMS_PHONE_INFO_CALL_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_PHONE_INFO_CALL_H_
+#define INTERFACE_PHONE_INFO_CALL_H_
 
 #include "AString.h"
 
 class ICallInfo
 {
 public:
-    /*
-     Checks if the MERONG number is blocked number or not.
+    /// TTY mode
+    enum
+    {
+        TTY_MODE_OFF = 0,
+        TTY_MODE_FULL = 1,
+        TTY_MODE_HCO = 2,
+        TTY_MODE_VCO = 3
+    };
 
-    Remarks
+    /// RTT mode
+    enum
+    {
+        RTT_MODE_NONE = 0,
+        RTT_MODE_VISIBLE_DURING_CALLS = 1,
+        RTT_MODE_ALWAYS_VISIBLE = 2,
+        RTT_MODE_CAPABLE_OFF = 3
+    };
 
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    strNumber               Originator's number to be checked
-    </table>
+    /// Wi-Fi calling mode
+    enum
+    {
+        WFC_MODE_WFC_PREFERRED = 0,
+        WFC_MODE_WFC_ONLY = 1,
+        WFC_MODE_CELLULAR_PREFERRED = 2
+    };
 
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_TRUE                The specified number is blocked
-    IMS_FALSE               The specified number is not blocked
-    </table>
-    */
-    virtual IMS_BOOL IsEmergencyNumber(IN const AString &strNumber) const = 0;
+public:
+    /**
+     * @brief Checks if a number is an emergency number or not.
+     *
+     * @param strNumber The number to be checked
+     * @return IMS_TRUE if the specified number is an emergency number, IMS_FALSE otherwise.
+     */
+    virtual IMS_BOOL IsEmergencyNumber(IN const AString& strNumber) const = 0;
 
-    /*
-        static final int TTY_MODE_OFF = 0;
-        static final int TTY_MODE_FULL = 1;
-        static final int TTY_MODE_HCO = 2;
-        static final int TTY_MODE_VCO = 3;
-    */
+    /**
+     * @brief Returns the TTY mode.
+     *
+     * @return The TTY mode setting.\n
+     *         #TTY_MODE_OFF\n
+     *         #TTY_MODE_FULL\n
+     *         #TTY_MODE_HCO\n
+     *         #TTY_MODE_VCO
+     */
     virtual IMS_UINT32 GetTtyMode() const = 0;
 
-    /*
-        #define IMS_RTT_MODE_NONE (0)
-        #define IMS_RTT_VISIBLE_DURING_CALLS (1)
-        #define IMS_RTT_ALWAYS_VISIBLE (2)
-        #define IMS_RTT_CAPABLE_OFF (3)
-    */
+    /**
+     * @brief Returns the RTT mode.
+     *
+     * @return The RTT mode setting.\n
+     *         #RTT_MODE_NONE\n
+     *         #RTT_MODE_VISIBLE_DURING_CALLS\n
+     *         #RTT_MODE_ALWAYS_VISIBLE\n
+     *         #RTT_MODE_CAPABLE_OFF
+     */
     virtual IMS_UINT32 GetRttMode() const = 0;
 
-    /*
-    Get Wifi Calling Mode Preferences
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_UINT32              0: wfc preferred, 1: wfc only, 2: cellular preferred
-    </table>
-    */
+    /**
+     * @brief Checks if the Wi-Fi calling is enabled or not.
+     *
+     * @return IMS_TRUE if the Wi-Fi calling is enabled, IMS_FALSE otherwise.
+     */
     virtual IMS_BOOL IsWifiCallingEnabled() = 0;
 
-    /*
-    Get Wifi Calling Mode Preferences
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_UINT32              0: wfc preferred, 1: wfc only, 2: cellular preferred
-    </table>
-    */
+    /**
+     * @brief Returns the Wi-Fi calling mode.
+     *
+     * @return The Wi-Fi calling mode.\n
+     *         #WFC_MODE_WFC_PREFERRED\n
+     *         #WFC_MODE_WFC_ONLY\n
+     *         #WFC_MODE_CELLULAR_PREFERRED
+     */
     virtual IMS_UINT32 GetWifiCallingPreferences() = 0;
 
-    /*
-    Get Wifi Calling Provisioned
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_BOOL                TRUE : provisioned, FALSE: not provisioned
-    </table>
-    */
+    /**
+     * @brief Checks if the Wi-Fi calling is provisioned or not.
+     *
+     * @return IMS_TRUE if the Wi-Fi calling is provisioned, IMS_FALSE otherwise.
+     */
     virtual IMS_BOOL IsWifiCallingProvisioned() = 0;
 
-    /*
-    Get Wifi Calling Provisioned
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    AString                 Address ID
-    </table>
-    */
+    /**
+     * @brief Returns the Wi-Fi calling address identifier (emergency address id).
+     *
+     * @return The Wi-Fi calling address identifier.
+     *         If the Wi-Fi calling is provisioned, it returns non-Null string.
+     */
     virtual AString GetWifiCallingAddressId() = 0;
 
-    /*
-    Get Call State in Other Slot
-
-    Remarks
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    IMS_UINT32              call state
-    </table>
-    */
+    /**
+     * @brief Returns the CS call state on the other slot.
+     *
+     * @return The call state.
+     */
     virtual IMS_SINT32 GetCsCallStateInOtherSlot() const = 0;
-
 };
 
-#endif // _INTERFACE_IMS_PHONE_INFO_CALL_H_
+#endif
