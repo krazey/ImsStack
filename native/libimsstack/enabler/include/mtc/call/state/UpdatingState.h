@@ -19,12 +19,15 @@ public:
 
     CallStateName AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     CallStateName RejectConvert(IN const FailReason& objReason) override;
+    CallStateName CancelConvert(IN const FailReason& objReason) override;
     CallStateName Terminate(IN const FailReason& objReason) override;
 
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionUpdated(IN ISession* piSession) override;
     CallStateName SessionUpdateFailed(IN ISession* piSession) override;
-    // TODO, Cancel, EarlyMediaUpdate, PR
+    // TODO, PR
+
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
 private:
     IMS_RESULT HandleSdpAnswer();
@@ -34,7 +37,7 @@ private:
     CallStateName HandleRequestedModificationSucceeded();
     CallStateName HandleReceivedModificationSucceeded();
     void RecoverModificationFailure();
-    void NotifyIncomingUpdate();
+    void StopTimer();
 
 };
 

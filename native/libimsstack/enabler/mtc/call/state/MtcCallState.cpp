@@ -1,26 +1,27 @@
-#include "configuration/ConfigDef.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
-#include "call/ParticipantInfo.h"
-#include "media/IMtcMediaManager.h"
-#include "IuMtcCall.h"
-#include "IuMtcService.h"
-#include "call/state/MtcCallState.h"
-#include "MtcDef.h"
-#include "helper/MtcTimerWrapper.h"
-#include "call/MtcUiNotifier.h"
 #include "call/MtcSession.h"
-#include "precondition/QosDef.h"
+#include "call/MtcUiNotifier.h"
+#include "call/ParticipantInfo.h"
+#include "call/state/MtcCallState.h"
 #include "call/UpdatingInfo.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
-#include "utility/MessageUtil.h"
-#include "precondition/SdpPreconditionHelper.h"
-#include "precondition/IMtcPreconditionManager.h"
-#include "ISIPHeader.h"
 #include "IMessage.h"
+#include "ISIPHeader.h"
+#include "IuMtcCall.h"
+#include "IuMtcService.h"
+#include "media/IMtcMediaManager.h"
+#include "MtcDef.h"
+#include "precondition/IMtcPreconditionManager.h"
+#include "precondition/QosDef.h"
+#include "precondition/SdpPreconditionHelper.h"
 #include "SIPStatusCode.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -673,6 +674,24 @@ void MtcCallState::SendStarted()
             &m_objContext.GetCallInfo(),
             &objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices());
+}
+
+PROTECTED
+void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
+{
+    IMS_TRACE_D("SendIncomingUpdate", 0, 0, 0);
+
+    m_objContext.GetUpdatingInfo().SetAlerted();
+
+    CallInfo& objInfo = m_objContext.GetCallInfo();
+    objInfo.eCallType = eCallType;
+
+    m_objContext.GetUiNotifier().SendIncomingUpdate(&objInfo,
+            &m_objContext.GetUpdatingInfo().GetAlertingInfo(),
+            m_objContext.GetSupplementaryService().GetServices());
+
+    m_objContext.GetTimer().Start(TIMER_CONVERT_USER_RESPONSE,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_USER_RESPONSE_TIMER));
 }
 
 PROTECTED

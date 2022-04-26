@@ -134,6 +134,9 @@ protected:
         TIMER_MO_NOANSWER,
         TIMER_MT_ALERTING,
         TIMER_MT_PRACK_WAIT,
+
+        TIMER_CONVERT_USER_RESPONSE,
+        TIMER_CONVERT_REMOTE_RESPONSE,
     };
 
     void HandleTerminate(IN const FailReason& objReason);
@@ -159,6 +162,7 @@ protected:
 
     void SendIncomingCallReceived();
     void SendStarted();
+    void SendIncomingUpdate(IN CallType eCallType);
 
     // TODO: bCheckSdp to be TRUE for all cases??
     void UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
