@@ -583,45 +583,72 @@ PRIVATE
 IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
 {
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
+    AStringArray objValidImpus;
 
-    IMS_UINT32 nValidImpuCount = 0;
-    AString strFirstImpu(AString::ConstEmpty());
-
-    for (IMS_SINT32 nAt = 0; nAt  < piSubsConfig->GetPublicUserIds().GetCount(); ++nAt)
+    for (IMS_SINT32 nAt = 0; nAt < piSubsConfig->GetPublicUserIds().GetCount(); ++nAt)
     {
         const AString& strTemp = piSubsConfig->GetPublicUserIds().GetElementAt(nAt);
         if (strTemp.GetLength() != 0)
         {
-            nValidImpuCount++;
-
-            if (nValidImpuCount == 1)
-            {
-                strFirstImpu = strTemp;
-            }
+            objValidImpus.AddElement(strTemp);
         }
     }
 
     A_IMS_TRACE_I(AOSTAG, "GetImpuFromIsim :: total size (%d) , valid size (%d)",
-            piSubsConfig->GetPublicUserIds().GetCount(), nValidImpuCount, 0);
+            piSubsConfig->GetPublicUserIds().GetCount(), objValidImpus.GetCount(), 0);
 
-    if (nValidImpuCount == 0)
+    if (objValidImpus.GetCount() == 0)
     {
-        A_IMS_TRACE_I(AOSTAG, "NO valid IMPU", 0, 0, 0);
+        A_IMS_TRACE_I(AOSTAG, "No valid IMPU", 0, 0, 0);
         return IMS_FALSE;
     }
 
+    if (GET_N_CONFIG(m_nSlotId)->IsSupportLimitedAdminSmsMode())
+    {
+        if (objValidImpus.GetCount() == 1)
+        {
+            objImpus.AddElement(objValidImpus.GetElementAt(0));
+            return IMS_TRUE;
+        }
+
+        if (!IsPrimaryImpuValid(objValidImpus))
+        {
+            objImpus.AddElement(objValidImpus.GetElementAt(0));
+            return IMS_TRUE;
+        }
+
+        if (IsSipUri(objValidImpus.GetElementAt(1)))
+        {
+            objImpus.AddElement(objValidImpus.GetElementAt(1));
+            objImpus.AddElement(objValidImpus.GetElementAt(0));
+            return IMS_TRUE;
+        }
+
+        for (IMS_SINT32 nAt = 0; nAt < objValidImpus.GetCount(); ++nAt)
+        {
+            if (IsSipUri(objValidImpus.GetElementAt(nAt)))
+            {
+                objImpus.AddElement(objValidImpus.GetElementAt(nAt));
+                objImpus.AddElement(objValidImpus.GetElementAt(nAt));
+                break;
+            }
+        }
+
+        return (objImpus.GetCount() > 0) ? IMS_TRUE : IMS_FALSE;
+    }
+
     AString strImpu = piSubsConfig->GetPublicUserIds().GetElementAt(
-            (nValidImpuCount == 1) ? 0 : GetIsimAt());
+            (objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
 
     if (strImpu.GetLength() == 0)
     {
-        if (strFirstImpu.GetLength() == 0)
+        if (objValidImpus.GetElementAt(0).GetLength() == 0)
         {
             return IMS_FALSE;
         }
         else
         {
-            strImpu = strFirstImpu;
+            strImpu = objValidImpus.GetElementAt(0);
         }
     }
 
@@ -741,8 +768,8 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus,
 PRIVATE
 void AosSubscriberManager::RemoveImpu() const
 {
-    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(
-            m_nSlotId);
+    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->
+            GetSubscriberInfo(m_nSlotId);
     if (piSubsInfo != null)
     {
         piSubsInfo->SetPreference("impu_list", "size", "0");
@@ -755,8 +782,8 @@ IMS_BOOL AosSubscriberManager::UpdateImsi() const
 {
     IMS_BOOL bIsUpdated = IMS_FALSE;
 
-    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(
-            m_nSlotId);
+    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->
+            GetSubscriberInfo(m_nSlotId);
     if (piSubsInfo == null)
     {
         return bIsUpdated;
@@ -1203,6 +1230,78 @@ void AosSubscriberManager::NotifyMonitorState(IN IMS_UINT32 nState) const
             piListener->AosSubscriberManager_NotifyState(nState);
         }
     }
+}
+
+PRIVATE
+IMS_BOOL AosSubscriberManager::IsPrimaryImpuValid(IN const AStringArray& objImpus) const
+{
+    AString strPhoneNumber;
+    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->
+            GetPhoneNumber(strPhoneNumber);
+
+    if (strPhoneNumber.GetLength() == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    AString strMsisdn;
+    if (strPhoneNumber.GetLength() > USIM_MSISDN_LENGTH)
+    {
+        strMsisdn = strPhoneNumber.GetSubStr(strPhoneNumber.GetLength() - USIM_MSISDN_LENGTH);
+    }
+    else
+    {
+        strMsisdn = strPhoneNumber;
+    }
+
+    IMS_BOOL bIsAllZero = IMS_TRUE;
+    for (IMS_SINT32 nAt = 0; nAt < strMsisdn.GetLength(); ++nAt)
+    {
+        if (strMsisdn[nAt] != '0')
+        {
+            bIsAllZero = IMS_FALSE;
+            break;
+        }
+    }
+
+    if (bIsAllZero)
+    {
+        return IMS_FALSE;
+    }
+
+    const AString& strMsisdnImpu = objImpus.GetElementAt(1);
+    SIPAddress objSipAddress;
+
+    if (!objSipAddress.Create(strMsisdnImpu))
+    {
+        return IMS_FALSE;
+    }
+
+    AString strUser = objSipAddress.GetUser();
+    if (!strUser.EndsWith(strMsisdn))
+    {
+        return IMS_FALSE;
+    }
+
+    return IMS_TRUE;
+}
+
+PRIVATE
+IMS_BOOL AosSubscriberManager::IsSipUri(IN const AString& strImpu) const
+{
+    SIPAddress objSipAddress;
+    if (strImpu.GetLength() > 0)
+    {
+        if (objSipAddress.Create(strImpu))
+        {
+            if (objSipAddress.IsSchemeSIP() || objSipAddress.IsSchemeSIPS())
+            {
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
