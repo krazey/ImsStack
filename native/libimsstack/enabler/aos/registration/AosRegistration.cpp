@@ -2577,6 +2577,7 @@ void AosRegistration::ClearRetryValues(IN IMS_BOOL bRegSuccess /* = IMS_FALSE */
     if (bRegSuccess)
     {
         m_nConsecutiveFailureForPdnReactivated = 0;
+        m_nForbiddenCount = 0;
     }
 
     m_nConsecutiveFailure = 0;
@@ -3104,6 +3105,17 @@ IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode)
         {
             return IMS_FALSE;
         }
+        else
+        {
+            if (m_nConsecutiveFailure == 1 && GetState() == STATE_REFRESHING)
+            {
+                A_IMS_TRACE_I(REGID,
+                    "ProcessSubscriberFailed :: ignore subscriber failure", 0, 0, 0);
+                ClearRetryValues();
+                PostMessage(MSG_REG_REINITIATE, 0, 0);
+                return IMS_TRUE;
+            }
+        }
     }
     else
     {
@@ -3342,14 +3354,25 @@ void AosRegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode
 }
 
 PROTECTED VIRTUAL
-void AosRegistration::ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 /* nStatusCode */ /* = 0 */)
+void AosRegistration::ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode /* = 0 */)
 {
     A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Update", 0, 0, 0);
 
-    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
-            CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
+    IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy();
+    IMS_UINT32 nRetryAfter = 0;
+
+    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDeifined())
     {
-        IMS_UINT32 nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+        if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithRetryAfterTime(),
+                nStatusCode))
+        {
+            nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
+        }
+    }
+
+    if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_FAILURE_TO_EVERY_PCSCF)
+    {
+        nRetryAfter = m_pUtil->GetRetryAfterValue(m_piRegistration);
 
         DestroyEx();
 
@@ -3371,25 +3394,82 @@ void AosRegistration::ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 /* nStatus
             ReportTryingState();
         }
 
-        return;
     }
-
-    DestroyEx();
-
-    if (SetNextPcscf(IMS_FALSE))
+    else if (nAwtPolicy == CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
     {
-        if (!CreateRegistration())
+        if (nStatusCode == SIPStatusCode::SC_481)
         {
-            ProcessUnpredictableFailure();
+            ProcessReinitiate(IMS_FALSE);
             return;
         }
 
-        SetState(STATE_REGISTERING);
-        ReportTryingState();
+        IncreaseConsecutiveFailCount();
+
+        if (nRetryAfter == 0)
+        {
+            nRetryAfter = GetActualWaitTime();
+        }
+
+        if (m_nConsecutiveFailure == 1 && !IsRegExpiredDuringAwt(nRetryAfter))
+        {
+            StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
+            SetState(STATE_REFRESHSTOP);
+        }
+        else
+        {
+            if (m_nConsecutiveFailure == 1)
+            {
+                StartTimer(TIMER_OFFLINE_RECOVER, nRetryAfter * 1000);
+                SetState(STATE_OFFLINE);
+            }
+            else
+            {
+                StartTimer(TIMER_STOP_RETRY, nRetryAfter * 1000);
+                SetState(STATE_REGSTOP);
+
+                m_piContext->GetPcscf()->SetCurrentPcscfTried();
+            }
+
+            DestroySubscription();
+
+            if (!SetNextPcscf())
+            {
+                // TODO: T3402 block
+                m_nPdnReactivateWaitTime = nRetryAfter;
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT_WITH_AWT);
+                return;
+            }
+
+            /* TODO: check to need about outage case
+            if (IsRegFailedWithOutage(nStatusCode))
+            {
+                ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_OUTAGE);
+                return;
+            }
+            */
+        }
+
+        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
     }
     else
     {
-        ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        DestroyEx();
+
+        if (SetNextPcscf(IMS_FALSE))
+        {
+            if (!CreateRegistration())
+            {
+                ProcessUnpredictableFailure();
+                return;
+            }
+
+            SetState(STATE_REGISTERING);
+            ReportTryingState();
+        }
+        else
+        {
+            ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
+        }
     }
 }
 
@@ -3727,7 +3807,6 @@ PROTECTED VIRTUAL
 void AosRegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
     // TODO: add the recovery for REASON_INTERNAL_ERROR
-
     if (IsErrorCodeExistedForSpecificRegistration(CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
     {
         ProcessDefaultFlowRecovery_Start();
@@ -3762,6 +3841,11 @@ void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
     A_IMS_TRACE_I(REGID, "ProcessUpdateFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
     if (ProcessUnpredictableFailureHeldByCall())
+    {
+        return;
+    }
+
+    if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
     {
         return;
     }
@@ -3831,6 +3915,13 @@ void AosRegistration::ProcessUpdateFailed_TxnTimeout()
 PROTECTED VIRTUAL
 void AosRegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
 {
+    if (GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy() ==
+            CarrierConfig::Ims::AWT_POLICY_SPECIFIED_INTERVAL)
+    {
+        ProcessDefaultFlowRecovery_Update();
+        return;
+    }
+
     if (IsErrorCodeExisted(GET_N_CONFIG(
             m_nSlotId)->GetReregRetryErrCodeWithInitialRegWithSamePcscf(),
             CarrierConfig::Assets::REG_ERROR_CODE_OTHER))
@@ -5338,6 +5429,35 @@ IMS_BOOL AosRegistration::IsPdnReactivationRequired()
         m_nConsecutiveFailureForPdnReactivated = 0;
         ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_PDN_RECONNECT);
         return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL AosRegistration::IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt)
+{
+    IMS_SINT32 nExpireTime = GetRegExpires();
+    IMS_SINT32 nRemainTime = 0;
+
+    if (nExpireTime > 0 && nAwt > 0)
+    {
+        if (nExpireTime > 1200)
+        {
+            nRemainTime = 600 - nAwt;
+        }
+        else
+        {
+            nRemainTime = (nExpireTime / 2) - nAwt;
+        }
+
+        A_IMS_TRACE_I(REGID, "IsRegExpiredDuringAwt :: Expire(%d) , AWT(%d) , Remain(%d)",
+                nExpireTime, nAwt, nRemainTime);
+
+        if (nRemainTime <= 0)
+        {
+            return IMS_TRUE;
+        }
     }
 
     return IMS_FALSE;
