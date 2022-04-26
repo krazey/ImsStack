@@ -156,6 +156,8 @@ protected:
     IMS_RESULT SendProvisionalResponse(IN IMS_BOOL bUserAlert);
     IMS_RESULT SendEarlyUpdate(IN MtcSession* pMtcSession);
     IMS_RESULT SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession);
+    IMS_RESULT SendResponseToPrack(IN IMS_SINT32 eStatusCode);
+
     CallStateName RejectAndToTerminating(IN IMS_SINT32 nFailReason);
     CallStateName RejectAndToTerminating(IN const FailReason& objFailReason);
 

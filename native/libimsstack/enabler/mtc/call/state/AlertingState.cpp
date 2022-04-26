@@ -272,19 +272,6 @@ IMS_RESULT AlertingState::SendAccept()
 }
 
 PRIVATE
-IMS_RESULT AlertingState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
-{
-    IMS_TRACE_D("SendResponseToPrack", 0, 0, 0);
-    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    return m_objContext.GetSession()->GetMessageSender()
-            .RespondToPrack(eStatusCode);
-}
-
-PRIVATE
 void AlertingState::UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISession* piSession)
 {
     CallType eNewCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_FALSE);

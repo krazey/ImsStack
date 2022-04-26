@@ -638,6 +638,19 @@ IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode,
 }
 
 PROTECTED
+IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
+{
+    IMS_TRACE_D("SendResponseToPrack", 0, 0, 0);
+    if (SetSdpToSend(IMS_FALSE) == ResultSetSdp::FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return m_objContext.GetSession()->GetMessageSender()
+            .RespondToPrack(eStatusCode);
+}
+
+PROTECTED
 CallStateName MtcCallState::RejectAndToTerminating(IN IMS_SINT32 nFailReason)
 {
     FailReason objReason(nFailReason);

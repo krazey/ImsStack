@@ -323,6 +323,14 @@ CallStateName IdleState::ContinueHandleIncoming()
     }
 
     m_objContext.GetCallInfo().eCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE);
+    if (m_objContext.GetCallInfo().eCallType == CallType::UNKNOWN)
+    {
+        // UE must send full media list for the incoming INVITE w/o SDP
+        // TODO: but, let us optimize.
+        m_objContext.GetCallInfo().eCallType = CallType::VOIP;
+        m_objContext.GetMediaManager().UpdateMediaDirection(
+                MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
+    }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     objPreconditionManager.CreateQos(piSession);
