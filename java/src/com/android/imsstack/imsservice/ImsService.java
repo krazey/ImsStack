@@ -62,12 +62,11 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     @Override
     public @ImsServiceCapability long getImsServiceCapabilities() {
-        //TODO uncomment below statements for SIP Delegate Support.
-        //Currently SingleRegistration is not supported so we can comment it.
-        //return super.CAPABILITY_SIP_DELEGATE_CREATION;
-
-        logi("getImsServiceCapabilities: CAPABILITY_TERMINAL_BASED_CALL_WAITING");
-        return (CAPABILITY_TERMINAL_BASED_CALL_WAITING);
+      //TODO uncomment below statements for SIP Delegate Support.
+      //logi("getImsServiceCapabilities:CAPABILITY_SIP_DELEGATE_CREATION");
+      //return CAPABILITY_SIP_DELEGATE_CREATION;
+        logi("getImsServiceCapabilities");
+        return super.getImsServiceCapabilities();
     }
 
     @Override
