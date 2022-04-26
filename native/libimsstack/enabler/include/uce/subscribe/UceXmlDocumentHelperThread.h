@@ -36,7 +36,7 @@ class UceXmlDocumentHelperThread
 typedef IMS_BOOL (UceXmlDocumentHelperThread::*msgHandler)(IMSMSG &objMsg);
 
 public:
-    UceXmlDocumentHelperThread(IN CONST AString &strQueryName_);
+    UceXmlDocumentHelperThread(IN CONST AString &strQueryName_, IN IMS_SINT32 nSimSlot = 0);
     virtual ~UceXmlDocumentHelperThread();
     IMS_BOOL Start(IN CONST AString &strName, IN IMS_UINT32 _nIndex = 10);
     void Terminate();
@@ -63,6 +63,7 @@ private:
     IMS_RESULT ParseRLMIList(IN IDocument* piDocument);
 
 private:
+    IMS_SINT32 m_nSimSlot;
     IMS_UINT32 m_nIndex;
     AString m_strQueryName;
     AString m_strThreadName;
