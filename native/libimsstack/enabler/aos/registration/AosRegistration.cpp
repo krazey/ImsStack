@@ -3110,7 +3110,7 @@ IMS_BOOL AosRegistration::ProcessSubscriberFailed(IN IMS_SINT32 nStatusCode)
             if (m_nConsecutiveFailure == 1 && GetState() == STATE_REFRESHING)
             {
                 A_IMS_TRACE_I(REGID,
-                    "ProcessSubscriberFailed :: ignore subscriber failure", 0, 0, 0);
+                        "ProcessSubscriberFailed :: ignore subscriber failure", 0, 0, 0);
                 ClearRetryValues();
                 PostMessage(MSG_REG_REINITIATE, 0, 0);
                 return IMS_TRUE;
@@ -3216,7 +3216,7 @@ void AosRegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode
     IMS_UINT32 nRetryAfter = 0;
     IMS_UINT32 nAwt = 0;
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDeifined())
+    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
     {
         if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetRegErrCodeWithRetryAfterTime(),
                 nStatusCode))
@@ -3361,7 +3361,7 @@ void AosRegistration::ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCod
     IMS_SINT32 nAwtPolicy = GET_N_CONFIG(m_nSlotId)->GetRegistrationActualWaitTimePolicy();
     IMS_UINT32 nRetryAfter = 0;
 
-    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDeifined())
+    if (GET_N_CONFIG(m_nSlotId)->IsRegErrCodeWithRetryAfterTimeOnlyDefined())
     {
         if (IsErrorCodeExisted(GET_N_CONFIG(m_nSlotId)->GetReregErrCodeWithRetryAfterTime(),
                 nStatusCode))

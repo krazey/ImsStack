@@ -303,7 +303,7 @@ IMS_BOOL AosNConfiguration::IsCdmalessFeatureTagRequired() const
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const
+IMS_BOOL AosNConfiguration::IsRegErrCodeWithRetryAfterTimeOnlyDefined() const
 {
     return m_objRegErrCodeWithRetryAfterTime.bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined;
 }

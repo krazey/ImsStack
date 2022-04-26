@@ -302,7 +302,7 @@ public:
      *
      * @return IMS_BOOL Return wherther the defined error codes is used.
      */
-    virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDeifined() const = 0;
+    virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const = 0;
 
     /**
      * @brief Flag indicating whether the retry counter should be shared between REGISTER and
