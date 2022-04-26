@@ -279,6 +279,18 @@ public class ImsMmTelService extends MmTelFeature
         // Update feature capabilities and IMS registration state
     }
 
+    @Override
+    public void setTerminalBasedCallWaiting(boolean provisioned, boolean enabled) {
+        logi("setTerminalBasedCallWaiting: isProvisioned = " + provisioned +
+                " ,isEnabled = " + enabled);
+
+        ImsCallApp callApp = getCallApp();
+
+        if (callApp != null) {
+            callApp.getCallManager().getMtcApp().setTerminalBasedCallWaiting(provisioned, enabled);
+        }
+    }
+
     private ImsCallApp createCallApp() {
         ImsServiceManager sm = ImsServiceManager.getDefault();
         return sm.createCallApp(mIContext.getPhoneId(),
