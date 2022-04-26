@@ -3065,7 +3065,7 @@ IMS_BOOL AosRegistration::ProcessForbiddenFailed(IN IMS_SINT32 nStatusCode)
 
     m_nForbiddenCount++;
 
-    IMS_SINT32 nMaxCount = (GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrMaxCount().GetSize() > 1) ?
+    IMS_SINT32 nMaxCount = (GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrMaxCount().GetSize() > 0) ?
             GET_N_CONFIG(m_nSlotId)->GetRegPermanentErrMaxCount().GetAt(0) : 1;
 
 
