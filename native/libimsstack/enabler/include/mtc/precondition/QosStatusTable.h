@@ -102,7 +102,7 @@ private:
     QosStatusTable& operator=(IN CONST QosStatusTable &objRHS);
 
 public:
-    void UpdateStatusTable(IN IMedia* piMedia);
+    void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);
 
     void UpdateLocalCurrentStatus(IN IMS_SINT32 eSdpMediaType, IN IMS_BOOL bLocalQoSEnabled);
     void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);

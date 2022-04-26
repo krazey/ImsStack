@@ -163,6 +163,7 @@ protected:
     // TODO: bCheckSdp to be TRUE for all cases??
     void UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
             IN IMS_BOOL bCheckeSdp = IMS_TRUE);
+    void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
     // TODO: more params required?
     IMS_RESULT NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage,
             IN IMS_UINT32 eMethod);

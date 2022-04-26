@@ -193,7 +193,7 @@ IMS_RESULT UpdatingState::HandleSdpAnswer()
     }
 
     m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
-    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(piSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
     return IMS_SUCCESS;
 }

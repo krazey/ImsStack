@@ -19,11 +19,7 @@ private:
     QosTimer& operator=(IN CONST QosTimer &objRHS);
 
 public:
-    // ITimerListener implementation
     virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer);
-
-public:
-    // void SetListener(IN IQosTimerListener* pListener);
 
     void StartQosTimer(IN QosTimerType eType, IN IMS_SINT32 nDuration);
     void StopQosTimer(IN QosTimerType eType);

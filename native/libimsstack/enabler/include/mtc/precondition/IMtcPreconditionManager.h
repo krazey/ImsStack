@@ -42,16 +42,7 @@ public:
      * @param eType The type to check for the QosStatus in the side of local, remote, or all
      * @return returns QosStatus in the given ISession.
      */
-    virtual IMS_BOOL IsQosEnabled(IN ISession* piSession, IN QosCheckType eType) = 0;
-
-    // /**
-    //  * @brief Get QoS status of the local side with the particular media type.
-    //  * @param piSession ISession instance to find QoS status for the specific session.
-    //  * @param eMediaType Media type to find the QoS status.
-    //  * @return returns QoS status in the given ISession and Media type.
-    //  */
-    // virtual QosStatus GetLocalQosStatusWithMediaType(IN ISession* piSession,
-    //         IN IMS_UINT32 eMediaType) = 0;
+    virtual IMS_BOOL IsResourceReserved(IN ISession* piSession, IN QosCheckType eType) = 0;
 
     /**
      * @brief Start the timer related to QoS.
@@ -92,13 +83,15 @@ public:
      */
     virtual IMS_BOOL HasPreconditionCapability(IN ISession* piSession) = 0;
 
+    virtual IMS_BOOL IsPreconditionSupportedInLocal() = 0;
+
     /**
      * @brief This method is to update precondition attributes from the QosData and the received
      *        SDP. Also if there is additional media line in the SDP, it creates QosStatusRecord
      *        for that. And it removes QosStatusRecord of unused media.
      * @param piSession ISession instance to find the QosData and QosStatusTable.
      */
-    virtual void UpdatePreconditionAttributes(IN ISession* piSession) = 0;
+    virtual void UpdateQosAttributesFromSdp(IN ISession* piSession) = 0;
 
     /**
      * @brief To form the precondition attributes of SDP.
@@ -120,7 +113,7 @@ public:
      * @param piSession ISession instance to find the QosStatusTable.
      * @return Returns the media types which are enabled.
      */
-    virtual IMS_UINT32 EnableLocalCurrentStatus(IN ISession* piSession) = 0;
+    virtual IMS_UINT32 SetLocalResourceAvailable(IN ISession* piSession) = 0;
 
     /**
      * @brief Enable the current status of the remote side. It should be called when the UE
@@ -128,7 +121,7 @@ public:
      *        precondition information in the past.
      * @param piSession ISession instance to find the QosStatusTable.
      */
-    virtual void EnableRemoteCurrentStatus(IN ISession* piSession) = 0;
+    virtual void SetRemoteResourceAvailable(IN ISession* piSession) = 0;
 };
 
 #endif

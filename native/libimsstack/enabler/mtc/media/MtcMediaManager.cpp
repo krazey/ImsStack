@@ -85,7 +85,7 @@ void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL b
     IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%d] Result[%d] Media[%d]",
             nNegoId, bSuccess, eMediaType);
 
-    m_pQosListener->QosStatusChanged(m_objProfileManager.GetSessionWithNegoId(nNegoId),
+    m_pQosListener->OnQosStatusChanged(m_objProfileManager.GetSessionWithNegoId(nNegoId),
             (bSuccess) ? QosStatus::AVAILABLE : QosStatus::LOST,
             MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
 }
