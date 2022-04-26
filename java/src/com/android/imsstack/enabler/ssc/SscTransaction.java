@@ -259,7 +259,7 @@ public class SscTransaction {
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
                 if (SscConfig.isGbaSupported(mSlotId)) {
                     if (getGbaKey(true) == false) {
-                        SscServiceStateAgent.getInstance().setGBARequestFailed(mSlotId, true);
+                        SscServiceStateAgent.getInstance().setGbaRequestFailed(mSlotId, true);
                         sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                         return;
                     }
@@ -528,7 +528,7 @@ public class SscTransaction {
                     netConnectionGov.disconnect(mSlotId);
                 }
                 stopConnectionTimer(true);
-                SscServiceStateAgent.getInstance().setPDNConnectionTimerExpired(mSlotId, true);
+                SscServiceStateAgent.getInstance().setPdnConnectionTimerExpired(mSlotId, true);
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
             }
             break;
@@ -541,7 +541,7 @@ public class SscTransaction {
 */
         case EVENT_SRV_RETRY_REQUIRED :
             /* TODO: check when implementing NAPTR/SRV
-            if (SscServiceStateAgent.getInstance().getAllSRVAddrTried(mSlotId) == true) {
+            if (SscServiceStateAgent.getInstance().getAllSrvAddrTried(mSlotId) == true) {
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
             } else {
                 SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);

@@ -119,7 +119,7 @@ public class SscHttpConnection implements ISscHttpConnection {
 
             if (nw == null) {
                 ImsLog.e("Network is null; apnType=" + mApnType);
-                SscServiceStateAgent.getInstance().setDNSQueryFailed(mSlotId, true);
+                SscServiceStateAgent.getInstance().setDnsQueryFailed(mSlotId, true);
                 return REQUEST_FAILED;
             }
 
@@ -228,7 +228,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             displayHeaders(false, "");
         } catch (UnknownHostException e) {
             ImsLog.e(e.toString());
-            SscServiceStateAgent.getInstance().setDNSQueryFailed(mSlotId, true);
+            SscServiceStateAgent.getInstance().setDnsQueryFailed(mSlotId, true);
             return REQUEST_FAILED;
         } catch (Exception e) {
             ImsLog.e(e.toString());

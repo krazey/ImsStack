@@ -53,7 +53,6 @@ public class SscServiceState {
 
     private boolean mAllSRVAddrTried = false;
     private boolean mIsAfterSimRemoved = false;
-    private boolean mIsInitialQueryDone = false;
 
     private Handler mHandler = null;
 
@@ -147,8 +146,6 @@ public class SscServiceState {
 
         mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
-        mIsInitialQueryDone = false;
-
         ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
         authAgent.setIsCredentialInfoUpdated(false);
         authAgent.setETag("");
@@ -220,15 +217,15 @@ public class SscServiceState {
     }
 
     // This method called by HTTPConnection
-    public void setDNSQueryFailed(boolean input) {
+    public void setDnsQueryFailed(boolean input) {
         setUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE, input);
     }
 
-    public void setGBARequestFailed(boolean input) {
+    public void setGbaRequestFailed(boolean input) {
         setUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE, input);
     }
 
-    public void setPDNConnectionTimerExpired(boolean input) {
+    public void setPdnConnectionTimerExpired(boolean input) {
         setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED, input);
     }
 
@@ -236,40 +233,32 @@ public class SscServiceState {
         setUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED, input);
     }
 
-    public void setAllSRVAddrTried(boolean input) {
+    public void setAllSrvAddrTried(boolean input) {
         mAllSRVAddrTried = input;
-    }
-
-    public void setIsInitialQueryDone(boolean input) {
-        mIsInitialQueryDone = input;
     }
 
     public boolean getPdnConnectionFailed() {
         return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE);
     }
 
-    public boolean getDNSQueryFailed() {
+    public boolean getDnsQueryFailed() {
         return isUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
     }
 
-    public boolean getGBARequestFailed() {
+    public boolean getGbaRequestFailed() {
         return isUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE);
     }
 
-    public boolean getPDNConnectionTimerExpired() {
+    public boolean getPdnConnectionTimerExpired() {
         return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED);
     }
 
-    public boolean getAllSRVAddrTried() {
+    public boolean getAllSrvAddrTried() {
         return mAllSRVAddrTried;
     }
 
     public boolean getSocketConnectionExpired() {
         return isUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED);
-    }
-
-    public boolean getIsInitialQueryDone() {
-        return mIsInitialQueryDone;
     }
 
     private void startUtBlockTimer(long duration) {

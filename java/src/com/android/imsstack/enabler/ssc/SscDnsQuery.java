@@ -92,7 +92,7 @@ public final class SscDnsQuery {
             if (queryObject != null) {
                 ImsLog.d ("retrieved next available SRV record");
             } else {
-                SscServiceStateAgent.getInstance().setAllSRVAddrTried(slotId, true);
+                SscServiceStateAgent.getInstance().setAllSrvAddrTried(slotId, true);
                 ImsLog.d ("First AFG query Failed & query object null");
             }
             return queryObject;
