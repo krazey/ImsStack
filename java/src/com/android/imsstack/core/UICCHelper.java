@@ -7,7 +7,6 @@ import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.IPreference;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.test.ImsTestMask;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
 
@@ -58,7 +57,7 @@ public class UICCHelper {
         }
 
         if ((ImsTestMode.getInstance().getTestMode(nSlotID).getExtraTestmask() &
-                ImsTestMask.TEST_MASK_IMS_STATUS_TO_UICC_OFF) > 0) {
+                ImsTestMode.TEST_MASK_IMS_STATUS_TO_UICC_OFF) > 0) {
             return null;
         }
 

@@ -8,7 +8,6 @@ import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.LocationAgentManager;
 import com.android.imsstack.core.agents.PhoneNumberAgent;
-import com.android.imsstack.core.agents.PhoneLogSendAgent;
 import com.android.imsstack.core.config.ECallConfigUtil;
 import com.android.imsstack.core.service.VoLteService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
@@ -24,12 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VoLteFactory {
 
     public static final int AGENT_DEFAULT = 0;
-    public static final int AGENT_RILCOMMAND = 1;
-    public static final int AGENT_MLT = 2;
-    public static final int AGENT_PHONENUMBER = 3;
-    public static final int AGENT_PHONELOGSEND = 4;
-    public static final int AGENT_LOCATION_AGENT_MANAGER = 5;
-    public static final int AGENT_MAX = 6;
+    public static final int AGENT_PHONENUMBER = 1;
+    public static final int AGENT_LOCATION_AGENT_MANAGER = 2;
+    public static final int AGENT_MAX = 3;
 
     private Context mContext = null;
 
@@ -174,13 +170,7 @@ public class VoLteFactory {
             return;
         }
 
-        // If L+L supports, tuneaway control is not required. It's replaced by TRM.
-        if (!MSimUtils.isMultiLteEnabled()) {
-            sAgents.put(AGENT_RILCOMMAND, RilCommandProxy.getInstance(mContext));
-        }
-
         sAgents.put(AGENT_PHONENUMBER, PhoneNumberAgent.getInstance());
-        sAgents.put(AGENT_PHONELOGSEND, PhoneLogSendAgent.getInstance());
         sAgents.put(AGENT_LOCATION_AGENT_MANAGER, new LocationAgentManager(mContext));
     }
 

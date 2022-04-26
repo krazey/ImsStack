@@ -31,6 +31,12 @@ public final class ImsTestMode {
      */
     public static final int CONFIG_LOCAL_HOLD_TONE = 0x00000100;
 
+    /**
+     * Bitmask: for getExtraTestmask()
+     */
+    public static final int TEST_MASK_ROAMING_CONDITION = 0x0002;
+    public static final int TEST_MASK_IMS_STATUS_TO_UICC_OFF = 0x0008;
+
     private static final Uri SETTING_CONTENT_URI
             = Uri.parse("content://" + ProviderInterface.AUTHORITY + "/gims_setting");
     private static final String SETTING_TEST_MASK = "setting_test_mask";

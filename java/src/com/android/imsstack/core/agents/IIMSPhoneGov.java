@@ -29,7 +29,6 @@ import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.FeatureUtils;
-import com.android.imsstack.util.ImsFeatures;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;

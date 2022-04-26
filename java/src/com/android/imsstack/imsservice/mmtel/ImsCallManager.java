@@ -19,9 +19,7 @@ import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.ImsWakeLock;
-import com.android.imsstack.core.agents.agentif.IRilCommand;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
@@ -111,9 +109,6 @@ public class ImsCallManager {
         synchronized (mSessions) {
             mSessions.clear();
         }
-
-        // MULTI_SIM_TUNE_AWAY_CONTROL
-        enableTuneAway();
     }
 
     public ImsCallSessionImpl createSession(ImsCallProfile profile) {
@@ -419,9 +414,6 @@ public class ImsCallManager {
                 if (sst != null) {
                     sst.start();
                 }
-
-                // MULTI_SIM_TUNE_AWAY_CONTROL
-                disableTuneAway();
             }
         }
 
@@ -466,9 +458,6 @@ public class ImsCallManager {
                 if (sst != null) {
                     sst.stop();
                 }
-
-                // MULTI_SIM_TUNE_AWAY_CONTROL
-                enableTuneAway();
 
                 // CALL_CONNECTION_ID
                 ImsCallConnectionIds.removeAll(mCallContext.getSlotId());
@@ -676,24 +665,6 @@ public class ImsCallManager {
 
         if (callSession != null) {
             callSession.updateCallProfileByCallManager();
-        }
-    }
-
-    private static void disableTuneAway() {
-        IRilCommand rc = (IRilCommand)VoLteFactory.getInstance().getAgent(
-                VoLteFactory.AGENT_RILCOMMAND);
-
-        if (rc != null) {
-            rc.disableTuneAway();
-        }
-    }
-
-    private static void enableTuneAway() {
-        IRilCommand rc = (IRilCommand)VoLteFactory.getInstance().getAgent(
-                VoLteFactory.AGENT_RILCOMMAND);
-
-        if (rc != null) {
-            rc.enableTuneAway();
         }
     }
 

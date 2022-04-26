@@ -57,7 +57,6 @@ import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.test.ImsTestMask;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.CarrierConfigUtils;
 import com.android.imsstack.util.DBUtils;
@@ -509,7 +508,7 @@ public class VoLteService implements IVoLteService {
                     mContext.getContentResolver(), mSlotID) == 1 ? true : false;
             if (bRoamingEnabled ||
                     (ImsTestMode.getInstance().getTestMode(mSlotID).getExtraTestmask() &
-                        ImsTestMask.TEST_MASK_ROAMING_CONDITION) > 0) {
+                        ImsTestMode.TEST_MASK_ROAMING_CONDITION) > 0) {
                 ImsLog.d("IMS roaming is supported or allowed by test mode");
             }
 
