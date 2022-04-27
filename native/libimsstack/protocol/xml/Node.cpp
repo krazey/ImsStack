@@ -7,7 +7,9 @@
 #include "ServiceTrace.h"
 #include "TextImpl.h"
 
+#ifdef __IMS_XML_DEBUG__
 __IMS_TRACE_TAG_XML__;
+#endif
 
 PUBLIC
 Node::Node()
@@ -26,7 +28,9 @@ Node::Node()
         , m_strPrefix(AString::ConstNull())
         , m_pstNode(IMS_NULL)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Constructor :: Node", 0, 0, 0);
+#endif
 }
 
 PUBLIC
@@ -46,7 +50,9 @@ Node::Node(IN xmlNodePtr pstNode)
         , m_strPrefix(AString::ConstNull())
         , m_pstNode(pstNode)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Constructor :: Node(node) w/ %s", m_strNodeName.GetStr(), 0, 0);
+#endif
 
     if (m_pstNode->nsDef != IMS_NULL)
     {
@@ -84,7 +90,9 @@ Node::Node(IN xmlDocPtr pstDoc)
         , m_strPrefix(AString::ConstNull())
         , m_pstNode(IMS_NULL)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Constructor :: Node(doc) w/ %s", m_strNodeName.GetStr(), 0, 0);
+#endif
 
     if (pstDoc->oldNs != IMS_NULL)
     {
@@ -112,7 +120,9 @@ Node::Node(IN xmlAttrPtr pstAttr)
         , m_strPrefix(AString::ConstNull())
         , m_pstNode(IMS_NULL)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Constructor :: Node(attr) w/ %s", m_strNodeName.GetStr(), 0, 0);
+#endif
 
     if (pstAttr->children != IMS_NULL)
     {
@@ -131,7 +141,9 @@ Node::Node(IN xmlAttrPtr pstAttr)
 PUBLIC VIRTUAL
 Node::~Node()
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Destructor :: Node(%s)", m_strNodeName.GetStr(), 0, 0);
+#endif
 
     if (m_pNodeList != IMS_NULL)
     {
@@ -376,7 +388,9 @@ void Node::SetTextContent(IN const AString& strTextContext)
 PUBLIC VIRTUAL
 void Node::DestroyNodeList(IN INodeList*& piNodeList)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Node::DestroyNodeList", 0, 0, 0);
+#endif
 
     NodeList* pNodeList = DYNAMIC_CAST(NodeList*, piNodeList);
 
@@ -391,7 +405,9 @@ void Node::DestroyNodeList(IN INodeList*& piNodeList)
 PUBLIC VIRTUAL
 void Node::DestroyNamedNodeMap(IN INamedNodeMap*& piNamedNodeMap)
 {
+#ifdef __IMS_XML_DEBUG__
     IMS_TRACE_D("Node::DestroyNamedNodeMap", 0, 0, 0);
+#endif
 
     NamedNodeMap* pNamedNodeMap= DYNAMIC_CAST(NamedNodeMap*, piNamedNodeMap);
 
