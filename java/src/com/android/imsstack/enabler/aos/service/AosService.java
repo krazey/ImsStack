@@ -24,6 +24,7 @@ import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener.NetworkType;
 import com.android.imsstack.enabler.aos.IIAosService;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListener;
@@ -53,6 +54,8 @@ public class AosService implements IAosRegistration, IAosInfo {
     private long mNativeObject = 0;
     private JNIImsListenerProxy mNativeListener = new JNIImsListenerProxy();
     private int mSlotId = MSimUtils.DEFAULT_SLOT_ID;
+
+    private int mRegisteredNetworkType = NetworkType.NONE;
 
     public void start(int slotId) {
         mSlotId = slotId;
@@ -158,6 +161,11 @@ public class AosService implements IAosRegistration, IAosInfo {
         parcel.writeInt(pcscfOrder);
 
         sendRequest(parcel);
+    }
+
+    @Override
+    public int getRegisteredNetworkType() {
+        return mRegisteredNetworkType;
     }
 
     @Override
@@ -343,6 +351,7 @@ public class AosService implements IAosRegistration, IAosInfo {
 
     private void onRegistered(int networkType, int featureTagBits,
             Set<String> featureTags) {
+        mRegisteredNetworkType = networkType;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyRegistered(networkType, featureTagBits, featureTags);
         }
@@ -356,6 +365,7 @@ public class AosService implements IAosRegistration, IAosInfo {
     }
 
     private void onDeregistered(int reason) {
+        mRegisteredNetworkType = NetworkType.NONE;
         for (IAosRegistrationListener l : mAosRegistationListeners) {
             l.notifyDeregistered(reason);
         }
