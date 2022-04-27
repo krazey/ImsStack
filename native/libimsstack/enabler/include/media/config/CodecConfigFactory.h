@@ -17,7 +17,13 @@
 #ifndef _CODEC_CONFIG_FACTORY_H_
 #define _CODEC_CONFIG_FACTORY_H_
 
-#include "AString.h"
+#include "config/CodecAmrConfig.h"
+#include "config/CodecPcmConfig.h"
+#include "config/CodecTelephoneEventConfig.h"
+#include "config/CodecEvsConfig.h"
+#include "config/CodecAvcConfig.h"
+#include "config/CodecHevcConfig.h"
+#include "config/CodecT140Config.h"
 
 class CodecConfig;
 
@@ -27,8 +33,12 @@ private:
     CodecConfigFactory();
 
 public:
-    static CodecConfig* CreateACodecConfig(IN CONST AString &strName, IN CONST IMS_SINT32 nIndex);
-    static CodecConfig* CreateVCodecConfig(IN CONST AString &strName, IN CONST IMS_SINT32 nIndex);
-    static CodecConfig* CreateTCodecConfig(IN CONST AString &strName, IN CONST IMS_SINT32 nIndex);
+    static CodecConfig* CreateAudioPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+        IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateVideoPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+        IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
+        IMS_SINT32 nPayloadTypeNum);
 };
-#endif                                              // _CODEC_CONFIG_FACTORY_H_
+#endif
+// _CODEC_CONFIG_FACTORY_H_

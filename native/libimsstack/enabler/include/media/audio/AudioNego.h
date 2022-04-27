@@ -93,28 +93,6 @@ public :
         };
     };
 
-    class NegoListSet
-    {
-    public :
-        IMS_UINT32 nNegoList;
-        IMS_UINT32 nDefaultNegoList;
-
-    public :
-        NegoListSet() :
-                nNegoList(0),
-                nDefaultNegoList(0)
-        {};
-
-        ~NegoListSet()
-        {};
-
-        void Clear()
-        {
-            nNegoList = 0;
-            nDefaultNegoList = 0;
-        };
-    };
-
     // == Constructor, Destructor, Operator Overloading ========================================
 protected :
     AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
@@ -186,23 +164,22 @@ protected :
             IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
     IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT NegoListSet* pBandwidthNegoList,
-            OUT NegoListSet* pBitrateNegoList, OUT NegoListSet* pModeSetNegoList);
+            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
+            OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
     IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
     IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList,
-            OUT IMS_UINT32* pnNegoDefaultRtpModeSet);
+            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList);
     IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
     IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
             IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoModeSet, OUT IMS_UINT32* nNegoDefaultRtpModeSet);
+            OUT IMS_UINT32* nNegoModeSet);
     IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
             IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT NegoListSet* nNegoBwList, OUT NegoListSet* nNegoBrList,
-            OUT NegoListSet* nNegoModeList);
+            OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
+            OUT IMS_UINT32* nNegoModeList);
     IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, OUT NegoListSet* nNegoBwList,
-            OUT NegoListSet* nNegoBrList, OUT NegoListSet* nNegoModeList);
+            IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
+            OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
     IMS_BOOL FindTelephoneEventInProfile(IN AudioProfile* pProfile,
             IN AudioProfile::Payload* pPayload);
     IMS_SINT32 FindPayloadIndexFromProfile(IN AString strCodecName, IN AudioProfile* pProfile,
@@ -210,7 +187,7 @@ protected :
     void RearrangeModeSetByAs(OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6,
             IN IMS_SINT32 nAs);
     MEDIA_DIRECTION UpdateDirectionToMine(IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir,
-            IN IMS_BOOL bIsMtCase, IN IMS_SINT32 nIsDirLooseCheck = 0);
+            IN IMS_BOOL bIsMtCase);
     AString MakeCryptoAttributeFromSrtpProfile(IN AudioProfile* pProfile);
     IMS_BOOL MakeSrtpProfileFromCapaNego(IN_OUT AudioProfile* pProfile);
     IMS_BOOL MakeSrtpProfileFromCryptoAttr(OUT AudioProfile* pProfile , IN AString CryptoAttr);
@@ -227,7 +204,6 @@ protected:
 
 private:
     MEDIA_CONTENT_TYPE m_eSessionType;
-    IMS_BOOL m_bMandatoryNego;
     static const AString EVS_BR[12];
     static const AString EVS_BW[4] ;
 public:

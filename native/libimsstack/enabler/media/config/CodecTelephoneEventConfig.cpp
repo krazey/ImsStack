@@ -14,131 +14,64 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "IConfigBuffer.h"
-#include "config/IMSCodec.h"
 #include "config/CodecTelephoneEventConfig.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CONF");
-
-PRIVATE GLOBAL
-const IMS_CHAR CodecTelephoneEventConfig::KEY_EVENTS[] = "events";
-PRIVATE GLOBAL
-const IMS_CHAR CodecTelephoneEventConfig::KEY_REDUNDANCY_COUNT[] = "redundancy_count";
+__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecTelephoneEventConfig::CodecTelephoneEventConfig() :
-        CodecConfig(IMSCodec::AUDIO_TELEPHONE_EVENT,
-                IMSCodec::AtoString(IMSCodec::AUDIO_TELEPHONE_EVENT)),
-        strEvents(AString::ConstNull()),
-        nRedundancyCount(5)
+CodecTelephoneEventConfig::CodecTelephoneEventConfig(IN IMS_SINT32 nType_,
+        IN IMS_SINT32 nPayloadTypeNum_) :
+        CodecConfig(nType_, nPayloadTypeNum_),
+        m_strEvents(DEFAULT_EVENT),
+        m_nRedundancyCount(DEFAULT_REDUNDANT_COUNT),
+        m_nSamplingRate(DEFAULT_SAMPLING_RATE_WB)
 {
+    IMS_TRACE_D("+CodecTelephoneEventConfig Type[%d]", nType_, 0, 0);
 }
 
 PUBLIC VIRTUAL
 CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
 {
+    IMS_TRACE_D("~CodecTelephoneEventConfig", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL
-IMS_BOOL CodecTelephoneEventConfig::Create(IN IConfigBuffer *piBuffer)
+IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* piCc)
 {
-    if (piBuffer == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
+    (void) piCc;
 
-    AString strSection;
-
-    GetSection(strSection);
-
-    if (!piBuffer->CaptureSection(strSection.GetStr()))
-    {
-        return IMS_FALSE;
-    }
-
-    // Set payload type parameter
-    CodecConfig::Create(piBuffer);
-
-    // Events parameter
-    strEvents = piBuffer->ReadValue(KEY_EVENTS);
-
-    // Redundancy count parameter
-    nRedundancyCount = piBuffer->ReadValueInt(KEY_REDUNDANCY_COUNT);
-
-    piBuffer->ReleaseSection();
+    m_strEvents = DEFAULT_EVENT;
+    m_nRedundancyCount = DEFAULT_REDUNDANT_COUNT;
+    m_nSamplingRate = (GetPayloadType() == ImsCodec::AUDIO_TELEPHONE_EVENT) ?
+            DEFAULT_SAMPLING_RATE : DEFAULT_SAMPLING_RATE_WB;
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-AString CodecTelephoneEventConfig::GetFmtp() const
-{
-    if (strEvents.GetLength() > 0)
-    {
-        return strEvents;
-    }
-
-    return AString::ConstNull();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-AString CodecTelephoneEventConfig::GetRtpMap() const
-{
-    AString strRTPMAP;
-
-    strRTPMAP.Sprintf("%s/8000", GetCodecName().GetStr());
-
-    return strRTPMAP;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL
 void CodecTelephoneEventConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
-    IMS_TRACE_D("events (%s), redundancy_count (%d)", strEvents.GetStr(), nRedundancyCount, 0);
+    IMS_TRACE_D("strEvents(%s)", m_strEvents.GetStr(), 0, 0);
+    IMS_TRACE_D("nRedundancyCount(%d), nSamplingRate(%d)", m_nRedundancyCount, m_nSamplingRate, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& CodecTelephoneEventConfig::GetEvents() const
 {
-    return strEvents;
+    return m_strEvents;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 CodecTelephoneEventConfig::GetRedundancyCount() const
 {
-    return nRedundancyCount;
+    return m_nRedundancyCount;
+}
+
+PUBLIC
+IMS_SINT32 CodecTelephoneEventConfig::GetSamplingRate() const
+{
+    return m_nSamplingRate;
 }

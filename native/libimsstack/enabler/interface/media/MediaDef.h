@@ -27,18 +27,7 @@
 typedef enum
 {
     MEDIA_SERVICE_NONE = -1,
-    MEDIA_SERVICE_FMC,                      // = 0
-    MEDIA_SERVICE_VOIP,                     // = 1
-    MEDIA_SERVICE_VSC,                      // = 2
-    MEDIA_SERVICE_VT,                       // = 3
-    MEDIA_SERVICE_UC,                       // = 4
-    MEDIA_SERVICE_E911,                     // = 5
-    MEDIA_SERVICE_NOTUSED,
-
-    // Service Type will be remained only default and emergency
-    // or
-    // media will not care service type.
-    MEDIA_SERVICE_DEFAULT, // = 0
+    MEDIA_SERVICE_DEFAULT  = 0,
     MEDIA_SERVICE_EMERGENCY,
 } MEDIA_SERVICE_TYPE;
 

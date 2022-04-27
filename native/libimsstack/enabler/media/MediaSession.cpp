@@ -15,13 +15,11 @@
  */
 
 // == INCLUDES =============================================================
-#include <AudioConfig.h>
 #include "ServiceMessage.h"
 #include "ServiceTrace.h"
 #include "IMSCore.h"
 #include "ICoreService.h"
 #include "ISessionDescriptor.h"
-#include "IConfigBuffer.h"
 #include "Configuration.h"
 #include "MediaDef.h"
 #include "EnablerUtils.h"
@@ -698,19 +696,11 @@ IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
         return IMS_FALSE;
     }
 
-    IConfigBuffer *piBuffer = Configuration::GetInstance()->CreateConfig(strMediaRef, m_nSlotId);
-    if (piBuffer == IMS_NULL)
+    if (!pMediaSessionConfig->Create(m_nSlotId))     // todo
     {
         return IMS_FALSE;
     }
 
-    if (!pMediaSessionConfig->Create(m_nSlotId, piBuffer, 0))
-    {
-        piBuffer->Destroy();
-        return IMS_FALSE;
-    }
-
-    piBuffer->Destroy();
     return IMS_TRUE;
 }
 

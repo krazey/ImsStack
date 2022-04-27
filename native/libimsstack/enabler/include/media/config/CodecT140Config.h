@@ -23,34 +23,23 @@ class CodecT140Config :
         public CodecConfig
 {
 public:
-    CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nProfielNum_);
+    CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
     virtual ~CodecT140Config();
-
-private:
-    CodecT140Config();
-    CodecT140Config(IN CONST CodecT140Config &objRHS);
-    CodecT140Config& operator=(IN CONST CodecT140Config &objRHS);
 
 public:
     // CodecConfig class
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer);
-    virtual AString GetFmtp() const;
-    virtual AString GetRtpMap() const;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
 
     IMS_SINT32 GetRedLevel() const;
-    IMS_SINT32 GetRedPayload() const;
     IMS_SINT32 GetSamplingRate() const;
 
-private:
-    // "T140" parameters
-    static const IMS_CHAR KEY_REDUNDANCY[];
-    static const IMS_CHAR KEY_RED_SUBTYPE[];
-    static const IMS_CHAR KEY_SAMPLING_RATE[];
+    static const IMS_SINT32 DEFAULT_RED_LEVEL = 3;
+    static const IMS_SINT32 DEFAULT_RED_LEVEL_NONE = 1;
+    static const IMS_SINT32 DEFAULT_TEXT_SAMPLING_RATE = 1000;
 
 private:
-    IMS_SINT32 nRedLevel;
-    IMS_SINT32 nRedPayload;
-    IMS_SINT32 nSamplingRate;
+    IMS_SINT32 m_nRedLevel;
+    IMS_SINT32 m_nTextSamplingRate;
 };
 #endif                                              // _CODEC_T140_CONFIG_H_

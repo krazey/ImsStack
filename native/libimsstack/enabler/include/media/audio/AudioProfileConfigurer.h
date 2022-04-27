@@ -17,7 +17,6 @@
 #ifndef _AUDIO_PROFILE_CONFIGURER_INTERFACE_H_
 #define _AUDIO_PROFILE_CONFIGURER_INTERFACE_H_
 
-#include "config/AudioConfiguration.h"
 #include "audio/AudioProfile.h"
 
 class MediaSession;
@@ -37,11 +36,9 @@ public:
             IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
             IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
             OUT AudioProfile* pNegotiatedProfile);
-    static IMS_BOOL CheckHoldDirection(IN AudioConfiguration* pConfig, IN MEDIA_DIRECTION eDir,
-            IN AudioProfile* pSrcProfile = NULL);
     static const IMS_SINT32* GetAmrAsArray(IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet,
             IN IMS_BOOL bIpV6);
-    static const IMS_SINT32* GetEVSASArray(IN IMS_SINT32 nEVSFormat, IN IMS_BOOL bIpV6);
+    static const IMS_SINT32* GetEvsAsArray(IN IMS_SINT32 nEVSFormat, IN IMS_BOOL bIpV6);
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_SINT32 nOctet,
             IN IMS_BOOL bIpV6, IN IMS_SINT32 nModeSet, IN IMS_BOOL bGetMaxValue = IMS_FALSE);
     static IMS_SINT32 ConvertToBandwidthAS(IN IMS_SINT32 eCodec, IN IMS_BOOL bIpV6,

@@ -17,38 +17,34 @@
 #ifndef _CODEC_TELEPHONE_EVENT_CONFIG_H_
 #define _CODEC_TELEPHONE_EVENT_CONFIG_H_
 
-#include "IMSList.h"
+#include "AString.h"
 #include "config/CodecConfig.h"
 
 class CodecTelephoneEventConfig :
         public CodecConfig
 {
 public:
-    CodecTelephoneEventConfig();
+    CodecTelephoneEventConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
     virtual ~CodecTelephoneEventConfig();
-
-private:
-    CodecTelephoneEventConfig(IN CONST CodecTelephoneEventConfig &objRHS);
-    CodecTelephoneEventConfig& operator=(IN CONST CodecTelephoneEventConfig &objRHS);
 
 public:
     // CodecConfig class
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer);
-    virtual AString GetFmtp() const;
-    virtual AString GetRtpMap() const;
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
 
     const AString& GetEvents() const;
     IMS_SINT32 GetRedundancyCount() const;
+    IMS_SINT32 GetSamplingRate() const;
+
+    #define DEFAULT_EVENT "0-15"
+    static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT = 3;
+    static const IMS_SINT32 DEFAULT_SAMPLING_RATE = 8000;
+    static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB = 16000;
+
 
 private:
-    static const IMS_CHAR KEY_EVENTS[];
-    static const IMS_CHAR KEY_REDUNDANCY_COUNT[];
-
-private:
-    // Events (comma-separated value list)
-    AString strEvents;
-    // Redundancy for reliability
-    IMS_SINT32 nRedundancyCount;
+    AString m_strEvents;
+    IMS_SINT32 m_nRedundancyCount;
+    IMS_SINT32 m_nSamplingRate;
 };
 #endif                                              // _CODEC_TELEPHONE_EVENT_CONFIG_H_

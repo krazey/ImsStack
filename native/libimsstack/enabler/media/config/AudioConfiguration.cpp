@@ -14,646 +14,381 @@
  * limitations under the License.
  */
 
-#include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "TextParser.h"
-#include "IConfigBuffer.h"
-#include "Configuration.h"
-#include "config/MediaSessionConfig.h"
-#include "config/CodecConfigFactory.h"
+#include "IMSVector.h"
+#include "config/ImsCodec.h"
 #include "config/AudioConfiguration.h"
-#include "config/IMSCodec.h"
-#include "config/CodecTelephoneEventConfigEx.h"
-#include "config/CodecAMRConfigEx.h"
-#include "config/CodecEVSConfig.h"
-#include "mmpf/MMPFBoardConfigInfo.h"
 
-__IMS_TRACE_TAG_USER_DECL__("CONF");
-
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_PTIME[] = "ptime";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_MAXPTIME[] = "maxptime";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_CANDIDATE_PRIORITY[] = "candidate_priority";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_REARRANGE_MODE_SET_BY_AS[] = "rearrange_mode_set_by_as";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_VOCODER_INTERFACE[] = "vocoder_interface";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_DM_OPERATION_PREFERRED_MODE[] =
-        "dm_operation_preferred_mode";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_USE_SINGLE_IP[] = "use_single_ip";
-PRIVATE GLOBAL
-const IMS_CHAR AudioConfiguration::KEY_MODE_CHANGE_CAPA_ALWAYS_ANSWER[] =
-        "mode_change_capa_always_answer";
+__IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
 AudioConfiguration::AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType) :
         MediaConfiguration(eSessionType),
-        nPdpProfileNum(-1),
-        nPdpProfileNumOf3G(-1),
-        nJitterBufferMaxSize(DEFAULT_JITTER_BUFFER_MAX_SIZE),
-        nJitterBufferMinSize(DEFAULT_JITTER_BUFFER_MIN_SIZE),
-        nJitterBufferSize(DEFAULT_JITTER_BUFFER_SIZE),
-        nPacketTime(DEFAULT_PTIME),
-        nMaxPacketTime(DEFAULT_MAXPTIME),
-        nCandidatePriority(-1),
-        nDtmfDuration(DEFAULT_DTMF_DURATION),
-        nDtmfRetransmitDuration(DEFAULT_DTMF_RETRANSMIT_DURATION),
-        nDtmfInterval(DEFAULT_DTMF_INTERVAL),
-        nRearrangeModeSetByAs(1),
-        nDmOperationPreferred_mode(0),
-        nEvsCodecEnable(0),
-        nModeChangeCapaAlwaysAnswer(0),
-        nAudioHalfRateMode(0),
-        objCodecConfigs(IMSList<CodecConfig*>())
+        m_nAudioPtime(DEFAULT_PTIME),
+        m_nAudioMaxPtime(DEFAULT_MAX_PTIME),
+        m_nAudioMaxRed(DEFAULT_MAX_RED),
+        m_bAudioBwNegoOptionEnabled(DEFAULT_BW_NEGO_OPERION),
+        m_nAudioRtpDscp(DEFAULT_AUDIO_DSCP),
+        m_nJitterBufferMinSize(DEFAULT_JITTER_MIN),
+        m_nJitterBufferMaxSize(DEFAULT_JITTER_MAX),
+        m_nJitterBufferAdjustTime(DEFAULT_JITTER_ADJUST),
+        m_nJitterBufferStepSize(DEFAULT_JITTER_STEP),
+        m_bAudioRtcpxrEnabled(DEFAULT_RTCPXR),
+        m_bAudioRtcpxrStatisticsEnabled(DEFAULT_RTCPXR_STATISTICS),
+        m_bAudioRtcpxrVoipMetricsEnabled(DEFAULT_RTCPXR_VOIP_METRICS),
+        m_bAudioRtcpxrPacketLossRleEnabled(DEFAULT_RTCPXR_PACKET_LOSS_RLE),
+        m_bAudioRtcpxrPacketDuplicateRleEnabled(DEFAULT_RTCPXR_PACKET_DUPLICATE_RLE),
+        m_nDtmfDuration(DEFAULT_DTMF_DURATION),
+        m_nModeChangeCapability(DEFAULT_MODECHANGE_CAPABILITY),
+        m_nModeChangePeriod(DEFAULT_MODECHANGE_PERIOD),
+        m_nModeChangeNeighbor(DEFAULT_MODECHANGE_NEIGHBOR),
+        m_objAudioCandidateAttribute(IMSVector<AString>())
 {
-    IMS_TRACE_I("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
+    IMS_TRACE_D("+AudioConfiguration eSessionType(%d)", eSessionType, 0, 0);
+    m_objAudioCandidateAttribute.Push(DEFAULT_CANDIDATE_ATTRIBUTE);
 }
 
 PUBLIC
 AudioConfiguration::~AudioConfiguration()
 {
+    IMS_TRACE_I("~AudioConfiguration", 0, 0, 0);
     Clear();
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL AudioConfiguration::Create(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex,
-        IN IMS_SINT32 nSlotID)
+IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
 {
-    if (piBuffer == IMS_NULL)
+    IMS_TRACE_D("Create", 0, 0, 0);
+
+    if (piCc == IMS_NULL)
     {
-        IMS_TRACE_D("piBuffer == IMS_NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "piCc is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_AUDIO, nIndex))
+    // Media Configuration attributes
+    SetPorts(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_PORT_RTP_INT_ARRAY);
+    SetRtcpIntervals(piCc, CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INTERVAL_INT_ARRAY);
+
+    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_AS_BANDWIDTH_KBPS_INT);
+    nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RS_BANDWIDTH_BPS_INT);
+    nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_RR_BANDWIDTH_BPS_INT);
+
+    nRtpInactivityTimerMillis = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT);
+    nRtcpInactivityTimerMillis = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
+
+    // Audio Configuration attributes
+
+    // m_nAudioPtime = DEFAULT_PTIME;    // already set by default at creator
+    m_nAudioMaxPtime = piCc->GetInt(CarrierConfig::ImsVoice::KEY_AUDIO_MAXPTIME_INT);
+
+    m_nAudioMaxRed = m_nAudioMaxPtime - m_nAudioPtime;
+    m_bAudioBwNegoOptionEnabled = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL);
+    // m_nAudioRtpDscp = DEFAULT_AUDIO_DSCP;      // already set by default at creator
+    IMSVector<IMS_SINT32> objAudioJitterBufferSize =
+            piCc->GetIntArray(CarrierConfig::ImsVoice::KEY_AUDIO_JITTER_BUFFER_SIZE_INT_ARRAY);
+    if (!objAudioJitterBufferSize.IsEmpty())
     {
-        IMS_TRACE_D("CaptureSection", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (!MediaConfiguration::Create(piBuffer, nIndex))
-    {
-        IMS_TRACE_D("MediaConfiguration::Create", 0, 0, 0);
-        piBuffer->ReleaseSection();
-        return IMS_FALSE;
-    }
-
-    // Jitter buffer control (initial / min / max)
-    const AString &strJitterBufferSize =
-            piBuffer->ReadValue(MediaSessionConfig::KEY_JITTER_BUFFER_SIZE);
-    IMSList<AString> objTokens = strJitterBufferSize.Split(TextParser::CHAR_COMMA);
-
-    if (!objTokens.IsEmpty())
-    {
-        nJitterBufferSize = objTokens.GetAt(0).ToInt32();
-
-        if (objTokens.GetSize() > 1)
+        m_nJitterBufferMinSize = objAudioJitterBufferSize.GetAt(0);
+        if (objAudioJitterBufferSize.GetSize() > 1)
         {
-            nJitterBufferMinSize = objTokens.GetAt(1).ToInt32();
-
-            if (objTokens.GetSize() > 2)
+            m_nJitterBufferMaxSize = objAudioJitterBufferSize.GetAt(1);
+            if (objAudioJitterBufferSize.GetSize() > 2)
             {
-                nJitterBufferMaxSize = objTokens.GetAt(2).ToInt32();
+                m_nJitterBufferAdjustTime = objAudioJitterBufferSize.GetAt(2);
+                if (objAudioJitterBufferSize.GetSize() > 3)
+                {
+                    m_nJitterBufferStepSize = objAudioJitterBufferSize.GetAt(3);
+                }
             }
         }
     }
+
+    //rtcp-xr
+    m_bAudioRtcpxrEnabled = piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL);
+    m_bAudioRtcpxrStatisticsEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_STATISTICS_BOOL);
+    m_bAudioRtcpxrVoipMetricsEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_VOIP_METRICS_BOOL);
+    m_bAudioRtcpxrPacketLossRleEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_LOSS_RLE_BOOL);
+    m_bAudioRtcpxrPacketDuplicateRleEnabled = piCc->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_PACKET_DUPLICATE_RLE_BOOL);
 
     // DTMF Duration Parameter
-    const AString &strDTMFDuration =
-            piBuffer->ReadValue(MediaSessionConfig::KEY_TELEPHONE_EVENT_DURATION);
-    objTokens = strDTMFDuration.Split(TextParser::CHAR_COMMA);
-
-    if (!objTokens.IsEmpty())
+    IMSVector<IMS_SINT32> objAudioTelephonyEventDurations =
+            piCc->GetIntArray(CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY);
+    if (!objAudioTelephonyEventDurations.IsEmpty())
     {
-        nDtmfDuration= objTokens.GetAt(0).ToInt32();
-
-        if (objTokens.GetSize() > 1)
-        {
-            nDtmfRetransmitDuration = objTokens.GetAt(1).ToInt32();
-
-            if (objTokens.GetSize() > 2)
-            {
-                nDtmfInterval = objTokens.GetAt(2).ToInt32();
-            }
-        }
+        m_nDtmfDuration= objAudioTelephonyEventDurations.GetAt(0);
     }
 
-    // Common attributes
-    nPacketTime = piBuffer->ReadValueInt(KEY_PTIME);
-    nMaxPacketTime = piBuffer->ReadValueInt(KEY_MAXPTIME);
-    nCandidatePriority =  piBuffer->ReadValueInt(KEY_CANDIDATE_PRIORITY);
-    nRearrangeModeSetByAs = piBuffer->ReadValueInt(KEY_REARRANGE_MODE_SET_BY_AS);
-
-    IMS_SINT32 nDmOperation_mode = piBuffer->ReadValueInt(KEY_DM_OPERATION_PREFERRED_MODE);
-
-    if (nDmOperation_mode > 0)
-    {
-        nDmOperationPreferred_mode = 1;
-    }
-    else
-    {
-        nDmOperationPreferred_mode = 0;
-    }
-
-    if (nDmOperation_mode == AUDIO_HALFRATE_SETTING)
-    {
-        nAudioHalfRateMode = 1;
-    }
-    else
-    {
-        nAudioHalfRateMode = 0;
-    }
-
-    IMS_TRACE_D("Create - nDmOperationPreferred_mode : %d, nAudioHalfRateMode : %d",
-            nDmOperationPreferred_mode, nAudioHalfRateMode, 0);
-
-    nModeChangeCapaAlwaysAnswer = piBuffer->ReadValueInt(KEY_MODE_CHANGE_CAPA_ALWAYS_ANSWER);
-
-    // Codec information
-    const IMS_SINT32 nCodecListSize =
-            piBuffer->ReadValueInt(MediaSessionConfig::KEY_CODEC_LIST_SIZE);
-    const AString &strCodecRef = piBuffer->ReadValue(MediaSessionConfig::KEY_CODEC_REF);
-
-    Clear();
-
-    //AP Audio
-    //IFeatureUtil* iFeatureUtil = UtilService::GetUtilService()->GetFeatureUtil();
-    //nEvsCodecEnable = iFeatureUtil->IsFeatureSupported(IFeatureUtil::FEATURE_MEDIA_EVS);
+    m_nModeChangeCapability = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_CAPABILITY_INT);
+    m_nModeChangePeriod = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_PERIOD_INT);
+    m_nModeChangeNeighbor = piCc->GetInt(
+            CarrierConfig::ImsVoice::KEY_CODEC_ATTRIBUTE_MODE_CHANGE_NEIGHBOR_INT);
 
     // Creates a codec configuration
-    if (!CreateCodecConfigs(strCodecRef, nCodecListSize, nSlotID))
+    if (!CreateCodecConfigs(piCc))
     {
-        IMS_TRACE_E(0, "Create - CreateCodecConfigs failure [%s]", strCodecRef.GetStr(), 0, 0);
-        piBuffer->ReleaseSection();
+        IMS_TRACE_E(0, "Create - CreateCodecConfigs failure", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    piBuffer->ReleaseSection();
+    ToDebugString();
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::Update(IN ICarrierConfig* piCc)
+{
+    if (piCc == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    Clear();
+    if (!Create(piCc))
+    {
+        IMS_TRACE_E(0, "Re-create AudioConfiguration failure", 0, 0, 0);
+        return IMS_FALSE;
+    }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
+PROTECTED VIRTUAL
+IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
+{
+    IMS_TRACE_D("CreateCodecConfigs", 0, 0, 0);
+
+    if (piCc == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "piCc is NULL", 0,0,0);
+        return IMS_FALSE;
+    }
+
+    ICarrierConfig* piCcBundle = piCc->GetBundle(
+            CarrierConfig::ImsVoice::KEY_AUDIO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+
+    if (piCcBundle == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "piCcBundle is NULL", 0,0,0);
+        return IMS_FALSE;
+    }
+
+    IMSVector<IMS_SINT32> objEvsPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_TYPE_INT_ARRAY);
+    IMSVector<IMS_SINT32> objAmrwbPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_TYPE_INT_ARRAY);
+    IMSVector<IMS_SINT32> objAmrnbPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_TYPE_INT_ARRAY);
+    IMSVector<IMS_SINT32> objDtmfwbPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_DTMFWB_PAYLOAD_TYPE_INT_ARRAY);
+    IMSVector<IMS_SINT32> objDtmfnbPayloadType = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_DTMFNB_PAYLOAD_TYPE_INT_ARRAY);
+
+    piCcBundle->ReleaseBundle();
+    piCcBundle = IMS_NULL;
+
+    IMS_UINT32 nCodecCnt = 0;
+    AString strTemp;
+
+    if (objEvsPayloadType.GetSize() > 0)
+    {
+        // nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_EVS, nCodecCnt, objEvsPayloadType);
+        // TODO_MEDIA evs is not supported for now
+    }
+    if (objAmrwbPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_AMR_WB, nCodecCnt, objAmrwbPayloadType);
+    }
+    if (objAmrnbPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_AMR, nCodecCnt, objAmrnbPayloadType);
+    }
+    if (objDtmfwbPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_TELEPHONE_EVENT_WB, nCodecCnt,
+                objDtmfwbPayloadType);
+    }
+    if (objDtmfnbPayloadType.GetSize() > 0)
+    {
+        nCodecCnt = MakeEachCodecs(piCc, ImsCodec::AUDIO_TELEPHONE_EVENT, nCodecCnt,
+                objDtmfnbPayloadType);
+    }
+
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
 void AudioConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("jitter_buffer_size[%d], jitter_buffer_min_size[%d], jitter_buffer_max_size[%d]",
-            nJitterBufferSize, nJitterBufferMinSize, nJitterBufferMaxSize);
-    IMS_TRACE_D("ptime[%d], maxptime[%d]", nPacketTime, nMaxPacketTime, 0);
-    IMS_TRACE_D("DTMFDuration[%d], DTMFRetransmitDuration[%d], DTMFInterval(%d)",
-            nDtmfDuration, nDtmfRetransmitDuration, nDtmfInterval);
-    IMS_TRACE_D("nCandidatePriority[%d]", nCandidatePriority, 0, 0);
-    IMS_TRACE_D("octet-align[%d], nModeChangeCapaAlwaysAnswer(%d)",
-            nModeChangeCapaAlwaysAnswer, 0, 0);
+    IMS_TRACE_D("m_nAudioPtime[%d], m_nAudioMaxPtime[%d], m_nAudioMaxRed[%d]",
+            m_nAudioPtime, m_nAudioMaxPtime, m_nAudioMaxRed);
+    IMS_TRACE_D("m_bAudioBwNegoOptionEnabled[%d], m_nAudioRtpDscp[%d], DTMFDuration[%d]",
+            m_bAudioBwNegoOptionEnabled, m_nAudioRtpDscp, m_nDtmfDuration);
+    IMS_TRACE_D("jitter_buffer_min[%d], jitter_buffer_max[%d]",
+            m_nJitterBufferMinSize, m_nJitterBufferMaxSize, 0);
+    IMS_TRACE_D("jitter_buffer_adjust_time[%d], jitter_buffer_step_size[%d]",
+            m_nJitterBufferAdjustTime, m_nJitterBufferStepSize, 0);
+    IMS_TRACE_D("m_bAudioRtcpxrEnabled[%d], m_bAudioRtcpxrStatisticsEnabled[%d]",
+            m_bAudioRtcpxrEnabled, m_bAudioRtcpxrStatisticsEnabled, 0);
+    IMS_TRACE_D("m_bAudioRtcpxrVoipMetricsEnabled[%d], m_bAudioRtcpxrPacketLossRleEnabled[%d], \
+            m_bAudioRtcpxrPacketDuplicateRleEnabled[%d]",
+            m_bAudioRtcpxrVoipMetricsEnabled, m_bAudioRtcpxrPacketLossRleEnabled,
+            m_bAudioRtcpxrPacketDuplicateRleEnabled);
+    IMS_TRACE_D("m_nModeChangeCapability(%d), m_nModeChangePeriod(%d), m_nModeChangeNeighbor(%d)",
+            m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 
+    for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); ++i)
+    {
+        IMS_TRACE_D("m_objAudioCandidateAttribute[%d] : [%s]",
+            i, m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);
+    }
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
-        CodecConfig *pCodecConfig = objCodecConfigs.GetAt(i);
-
-        if (pCodecConfig == IMS_NULL)
-        {
-            continue;
-        }
-
-        pCodecConfig->ToDebugString();
+        ToDebugStringCodecs(objCodecConfigs.GetAt(i));
     }
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetPdpProfileNum() const
+IMS_SINT32 AudioConfiguration::GetPtime() const
 {
-    return nPdpProfileNum;
+    return m_nAudioPtime;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetPdpProfileNumOf3G() const
+IMS_SINT32 AudioConfiguration::GetMaxPtime() const
 {
-    return nPdpProfileNumOf3G;
+    return m_nAudioMaxPtime;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetJitterBufferMaxSize() const
+IMS_SINT32 AudioConfiguration::GetMaxRed() const
 {
-    return nJitterBufferMaxSize;
+    return m_nAudioMaxRed;
+}
+
+PUBLIC
+IMS_BOOL AudioConfiguration::GetBandwidthNegoOption() const
+{
+    return m_bAudioBwNegoOptionEnabled;
+}
+
+PUBLIC
+IMS_SINT32 AudioConfiguration::GetRtpDscp() const
+{
+    return ((m_nAudioRtpDscp >= 0) ? m_nAudioRtpDscp : 0);
 }
 
 PUBLIC
 IMS_SINT32 AudioConfiguration::GetJitterBufferMinSize() const
 {
-    return nJitterBufferMinSize;
+    return m_nJitterBufferMinSize;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetJitterBufferSize() const
+IMS_SINT32 AudioConfiguration::GetJitterBufferMaxSize() const
 {
-    return nJitterBufferSize;
+    return m_nJitterBufferMaxSize;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetPacketTime() const
+IMS_SINT32 AudioConfiguration::GetJitterBufferAdjustTime() const
 {
-    return nPacketTime;
+    return m_nJitterBufferAdjustTime;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetMaxPacketTime() const
+IMS_SINT32 AudioConfiguration::GetJitterBufferStepSize() const
 {
-    return nMaxPacketTime;
+    return m_nJitterBufferStepSize;
 }
 
+/*!
+ * @brief   GetRtcpXr
+ * @details Get RTCP-XR enable
+ */
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetCandidatePriority() const
+IMS_BOOL AudioConfiguration::IsRtcpXrEnabled() const
 {
-    return nCandidatePriority;
+    return m_bAudioRtcpxrEnabled;
+}
+
+/*!
+ * @brief   GetRtcpXrStatistics
+ * @details Get RTCP-XR statistic metrics enable
+ */
+PUBLIC
+IMS_BOOL AudioConfiguration::IsRtcpXrStatisticsEnabled() const
+{
+    return m_bAudioRtcpxrStatisticsEnabled;
+}
+
+/*!
+ * @brief   GetRtcpXrVoip
+ * @details Get RTCP-XR Voip metrics enable
+ */
+PUBLIC
+IMS_BOOL AudioConfiguration::IsRtcpXrVoipEnabled() const
+{
+    return m_bAudioRtcpxrVoipMetricsEnabled;
+}
+
+/*!
+ * @brief   GetRtcpXrPlr
+ * @details Get RTCP-XR packet loss rle enable
+ */
+PUBLIC
+IMS_BOOL AudioConfiguration::IsRtcpXrPlrEnabled() const
+{
+    return m_bAudioRtcpxrPacketLossRleEnabled;
+}
+
+/*!
+ * @brief   GetRtcpXrPdr
+ * @details Get RTCP-XR packet duplicate rle enable
+ */
+PUBLIC
+IMS_BOOL AudioConfiguration::IsRtcpXrPdrEnabled() const
+{
+    return m_bAudioRtcpxrPacketDuplicateRleEnabled;
 }
 
 PUBLIC
 IMS_SINT32 AudioConfiguration::GetDTMFDuration() const
 {
-    return nDtmfDuration;
+    return m_nDtmfDuration;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetDTMFRetransmitDuration() const
+IMS_SINT32 AudioConfiguration::GetModeChangeCapability() const
 {
-    return nDtmfRetransmitDuration;
+    return m_nModeChangeCapability;
 }
 
 PUBLIC
-IMS_SINT32 AudioConfiguration::GetDTMFInterval() const
+IMS_SINT32 AudioConfiguration::GetModeChangePeriod() const
 {
-    return nDtmfInterval;
+    return m_nModeChangePeriod;
 }
 
 PUBLIC
-const CodecConfig* AudioConfiguration::GetCodecConfig() const
+IMS_SINT32 AudioConfiguration::GetModeChangeNeighbor() const
 {
-    if (objCodecConfigs.IsEmpty())
-        return IMS_NULL;
-
-    return objCodecConfigs.GetAt(0);
+    return m_nModeChangeNeighbor;
 }
 
 PUBLIC
-const IMSList<CodecConfig*>& AudioConfiguration::GetCodecConfigs() const
+const IMSVector<AString>& AudioConfiguration::GetAudioCandidateAttribute() const
 {
-    return objCodecConfigs;
-}
-
-PUBLIC
-IMS_BOOL AudioConfiguration::GetRearrangeModeSetByAs() const
-{
-    return (nRearrangeModeSetByAs == 1);
-}
-
-PUBLIC
-IMS_SINT32 AudioConfiguration::GetModeChangeCapaAlwaysAnswer() const
-{
-    return nModeChangeCapaAlwaysAnswer;
-}
-
-PUBLIC
-IMS_BOOL AudioConfiguration::GetDmOperationPreferredMode() const
-{
-    return (nDmOperationPreferred_mode == 1);
-}
-
-PUBLIC
-IMS_BOOL AudioConfiguration::GetAudioHalfRateMode() const
-{
-    return (nAudioHalfRateMode == 1);
-}
-
-PUBLIC
-IMS_BOOL AudioConfiguration::Update(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex)
-{
-    if (piBuffer == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_AUDIO, nIndex))
-    {
-        return IMS_FALSE;
-    }
-
-    const AString &strSessionType = piBuffer->ReadValue(MediaSessionConfig::KEY_SESSION_TYPE);
-
-    IMS_TRACE_I("Update - Audio configuration :: type [%s], index[%d]",
-            strSessionType.GetStr(), nIndex, 0);
-
-    // Remove writing code to DB
-    /*
-    // RTP / RTCP port numbers
-    //    piBuffer->WriteValueInt(MediaSessionConfig::KEY_PORT_RTP, nPortRtp);
-    //    piBuffer->WriteValueInt(MediaSessionConfig::KEY_PORT_RTCP, nPortRtcp);
-
-    // Jitter buffer control
-    AString strJitterBufferSize;
-    strJitterBufferSize.Sprintf("%d,%d,%d", nJitterBufferSize, nJitterBufferMinSize, nJitterBufferMaxSize);
-
-    piBuffer->WriteValue(MediaSessionConfig::KEY_JITTER_BUFFER_SIZE, strJitterBufferSize);
-
-    // Common attributes
-    piBuffer->WriteValueInt(KEY_PTIME, nPacketTime);
-    piBuffer->WriteValueInt(KEY_MAXPTIME, nMaxPacketTime);
-
-    piBuffer->WriteToMedium();
-    */
-
-    // AV Config update
-    MediaConfiguration::Update(piBuffer, nIndex);
-
-    // Codec information
-    const IMS_SINT32 nCodecListSize =
-            piBuffer->ReadValueInt(MediaSessionConfig::KEY_CODEC_LIST_SIZE);
-    const AString &strCodecRef = piBuffer->ReadValue(MediaSessionConfig::KEY_CODEC_REF);
-
-    Clear();
-
-    // Re-Creates a codec configuration
-    if (!CreateCodecConfigs(strCodecRef, nCodecListSize))
-    {
-        IMS_TRACE_E(0, "Create - CreateCodecConfigs failure [%s]", strCodecRef.GetStr(), 0, 0);
-        piBuffer->ReleaseSection();
-        return IMS_FALSE;
-    }
-
-    piBuffer->ReleaseSection();
-    return IMS_TRUE;
-}
-
-PROTECTED
-void AudioConfiguration::Clear()
-{
-    for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
-    {
-        CodecConfig* pCodecConfig = objCodecConfigs.GetAt(i);
-
-        if (pCodecConfig)
-        {
-            delete pCodecConfig;
-        }
-    }
-    objCodecConfigs.Clear();
-}
-
-PROTECTED
-IMS_BOOL AudioConfiguration::CreateCodecConfigs(IN CONST AString &strRef,
-        IN CONST IMS_SINT32 nCodecListSize, IN IMS_SINT32 nSlotID)
-{
-    IConfigBuffer *piBuffer = Configuration::GetInstance()->CreateConfig(strRef, nSlotID);
-
-    if (piBuffer == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    #if defined(IMS_CODEC_AMRWB_DISABLE)
-    {
-        IMS_TRACE_D("CreateCodecConfigs - IMS_CODEC_AMRWB_DISABLE", 0, 0, 0);
-    }
-    #endif
-
-    for (IMS_SINT32 nIndex = 0; nIndex < nCodecListSize; ++nIndex)
-    {
-        if (!piBuffer->CaptureSection(MediaSessionConfig::KEY_AUDIO_CODEC, nIndex))
-        {
-            piBuffer->Destroy();
-            return IMS_FALSE;
-        }
-
-        const AString &strCodecName = piBuffer->ReadValue(MediaSessionConfig::KEY_CODEC_TYPE);
-
-        IMS_TRACE_D("CodecConfig audio - session_type[%d], index[%d], codec[%s]",
-                GetSessionType(), nIndex, strCodecName.GetStr());
-
-        if (strCodecName.EqualsIgnoreCase("None") || strCodecName.Equals("")) continue;
-
-        CodecConfig *pCodecConfig = CodecConfigFactory::CreateACodecConfig(strCodecName, nIndex);
-
-        if (pCodecConfig == IMS_NULL)
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, can't create a codec config[%s]",
-                    strCodecName.GetStr(), 0, 0);
-
-            piBuffer->Destroy();
-            return IMS_FALSE;
-        }
-
-        if (!pCodecConfig->Create(piBuffer))
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, Create failure", 0, 0, 0);
-            piBuffer->Destroy();
-            Clear();
-            delete pCodecConfig;
-            return IMS_FALSE;
-        }
-
-        // Chipset Feature
-        if (!MMPFBoardConfigInfo::IsAMRWBCodecSupport())
-        {
-            IMS_SINT32 nCodecType = IMSCodec::AtoType(pCodecConfig->GetCodecName());
-            IMS_BOOL bRemove = IMS_FALSE;
-            CodecTelephoneEventConfigEx* pTeleEventConfig = IMS_NULL;
-            CodecAMRConfigEx *pAmrConfig = IMS_NULL;
-            switch(nCodecType)
-            {
-                case IMSCodec::AUDIO_AMR:
-                {
-                    pAmrConfig = REINTERPRET_CAST(CodecAMRConfigEx*, pCodecConfig);
-                    if (pAmrConfig->GetSamplingRate() == 16000)
-                    {
-                        bRemove = IMS_TRUE;
-                    }
-                }
-                break;
-                case IMSCodec::AUDIO_AMR_WB:
-                {
-                    bRemove = IMS_TRUE;
-                }
-                break;
-                case IMSCodec::AUDIO_TELEPHONE_EVENT:
-                {
-                    pTeleEventConfig = REINTERPRET_CAST(CodecTelephoneEventConfigEx*, pCodecConfig);
-                    if (pTeleEventConfig->GetSamplingRate() == 16000)
-                    {
-                        bRemove = IMS_TRUE;
-                    }
-                }
-                break;
-                default:
-                {
-                    // Do Nothing;
-                }
-                break;
-            }
-
-            if (bRemove)
-            {
-                if (pCodecConfig != IMS_NULL)
-                {
-                    IMS_TRACE_D("CreateCodecConfigs - Remove[Payload Num : %d, Name : %s]",
-                            pCodecConfig->GetProfileNum(),
-                            pCodecConfig->GetCodecName().GetStr(), 0);
-
-                    delete pCodecConfig;
-                    pCodecConfig = IMS_NULL;
-                }
-
-                continue;
-            }
-        }
-
-        // Chipset Feature
-        if (nEvsCodecEnable == 0)
-        {
-            IMS_SINT32 nCodecType = IMSCodec::AtoType(pCodecConfig->GetCodecName());
-            if (nCodecType == IMSCodec::AUDIO_EVS)
-            {
-                IMS_TRACE_D("CreateCodecConfigs - Remove[Payload Num : %d, Name : EVS]",
-                        pCodecConfig->GetProfileNum(), 0, 0);
-                delete pCodecConfig;
-                pCodecConfig = IMS_NULL;
-                continue;
-            }
-        }
-
-        //GPRI
-        {
-            IMS_SINT32 nCodecType = IMSCodec::AtoType(pCodecConfig->GetCodecName());
-            IMS_SINT32 nSamplingRate = 0;
-            IMS_SINT32 nOctetAlign = 0;
-            IMS_SINT32 nBw = 0;
-
-            eCodecNameList eCodecType = CODEC_NONE;
-
-            switch(nCodecType)
-            {
-                case IMSCodec::AUDIO_AMR_WB:
-                case IMSCodec::AUDIO_AMR:
-                {
-                    CodecAMRConfigEx *pAmrConfig = IMS_NULL;
-                    pAmrConfig = REINTERPRET_CAST(CodecAMRConfigEx*, pCodecConfig);
-
-                    if (pAmrConfig != NULL)
-                    {
-                        nSamplingRate = pAmrConfig->GetSamplingRate();
-                        nOctetAlign = pAmrConfig->GetOctetAlign();
-                    }
-
-                    if (nSamplingRate == 16000)
-                    {
-                        eCodecType = CODEC_AMR_WB_BE;
-
-                        if (nOctetAlign == 1)
-                        {
-                            eCodecType = CODEC_AMR_WB_OA;
-                        }
-                    }
-                    else if (nSamplingRate == 8000)
-                    {
-                        eCodecType = CODEC_AMR_NB_BE;
-
-                        if (nOctetAlign == 1)
-                        {
-                            eCodecType = CODEC_AMR_NB_OA;
-                        }
-                    }
-                    break;
-                }
-                case IMSCodec::AUDIO_EVS:
-                {
-                    CodecEVSConfig *pEvsConfig = IMS_NULL;
-                    pEvsConfig = REINTERPRET_CAST(CodecEVSConfig*, pCodecConfig);
-
-                    eCodecType = CODEC_EVS;
-
-                    if (pEvsConfig != NULL)
-                    {
-                        nBw = pEvsConfig->GetBwList();
-
-                        if (nBw == (1 << CodecEVSConfig::EVS_BANDWIDTH_NB))
-                        {
-                            eCodecType = CODEC_EVS_NB;
-                        }
-                        else if (nBw == (1 << CodecEVSConfig::EVS_BANDWIDTH_WB))
-                        {
-                            eCodecType = CODEC_EVS_WB;
-                        }
-                        else if (nBw == (1 << CodecEVSConfig::EVS_BANDWIDTH_SWB))
-                        {
-                            eCodecType = CODEC_EVS_SWB;
-                        }
-                        else if (nBw == (1 << CodecEVSConfig::EVS_BANDWIDTH_FB))
-                        {
-                            eCodecType = CODEC_EVS_FB;
-                        }
-                    }
-                    break;
-                }
-                default:
-                {
-                    //Telephone Event, PCM-A, PCM-U
-                    eCodecType = CODEC_NONE;
-                    break;
-                }
-            }
-
-            if (eCodecType < CODEC_NONE)
-            {
-                for (IMS_UINT32 i = 0; i < listCodecPriority.GetSize(); i++)
-                {
-                    if (listCodecPriority.GetAt(i) == eCodecType)
-                    {
-                        IMS_TRACE_D("CreateCodecConfig SetPriority pPayloadNum[%d], Priority[%d]",
-                                pCodecConfig->GetPayloadType(), i, 0);
-                        pCodecConfig->SetPriority((IMS_UINT32) i);
-                        break;
-                    }
-                    else
-                    {
-                        IMS_TRACE_D("CreateCodecConfig Skip pPayloadNum[%d], \
-                                listCodecPriority.GetAt[%d]: [%d]",
-                                pCodecConfig->GetPayloadType(), i, listCodecPriority.GetAt(i));
-                    }
-                }
-            }
-        }
-
-        IMS_UINT32 nCodecIndex = 0;
-
-        for (nCodecIndex = 0; nCodecIndex < objCodecConfigs.GetSize(); nCodecIndex++)
-        {
-            CodecConfig* tempConfig = objCodecConfigs.GetAt(nCodecIndex);
-            if (tempConfig->GetPriority() > pCodecConfig->GetPriority())
-            {
-                break;
-            }
-        }
-
-        if (objCodecConfigs.InsertAt(pCodecConfig,nCodecIndex))
-        {
-            IMS_TRACE_D("CreateCodecConfig Codec Added pPayloadNum[%d], Index[%d], Priority[%d]",
-                    pCodecConfig->GetPayloadType(),nCodecIndex,pCodecConfig->GetPriority());
-        }
-        else
-        {
-            IMS_TRACE_E(0, "CreateCodecConfigs fail, InsertAt failure pPayloadNum[%d] Index[%d]",
-                    pCodecConfig->GetPayloadType(),nCodecIndex, 0);
-            piBuffer->Destroy();
-            Clear();
-
-            return IMS_FALSE;
-        }
-    }
-
-    piBuffer->Destroy();
-
-    return IMS_TRUE;
+    return m_objAudioCandidateAttribute;
 }

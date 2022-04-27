@@ -14,53 +14,53 @@
  * limitations under the License.
  */
 
-#ifndef _TEXT_CONFIG_H_
-#define _TEXT_CONFIG_H_
+#ifndef _TEXT_CONFIGURATION_H_
+#define _TEXT_CONFIGURATION_H_
 
-#include "config/CodecConfig.h"
 #include "config/MediaConfiguration.h"
 
-class IConfigBuffer;
+class ICarrierConfig;
 
 class TextConfiguration :
         public MediaConfiguration
 {
 public:
-    TextConfiguration(MEDIA_CONTENT_TYPE eSessionType);
+    TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
     virtual ~TextConfiguration();
 
-private:
-    TextConfiguration(IN CONST TextConfiguration &objRHS);
-    TextConfiguration& operator=(IN CONST TextConfiguration &objRHS);
-
 public:
-    virtual IMS_BOOL Create(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex,
-            IN IMS_SINT32 nSlotID);
-    virtual void ToDebugString() const;
-
-    IMS_SINT32 GetPdpProfileNum() const;
-    IMS_BOOL GetKeepRedLevel() const;
-
-    const CodecConfig* GetCodecConfig() const;
-    const IMSList<CodecConfig*>& GetCodecConfigs() const;
-
-    IMS_BOOL Update(IN IConfigBuffer *piBuffer, IN IMS_UINT32 nIndex);
+    virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
+    virtual IMS_BOOL Update(IN ICarrierConfig* piCc);
 
 protected:
-    void Clear();
-    IMS_BOOL CreateCodecConfigs(IN CONST AString &strRef, IN CONST IMS_SINT32 nCodecListSize,
-            IN IMS_SINT32 nSlotID = 0);
+    virtual IMS_BOOL CreateCodecConfigs(IN ICarrierConfig* piCc);
+    virtual void ToDebugString() const;
+
+public:
+    IMS_SINT32 GetT140PayloadType() const;
+    IMS_SINT32 GetRedPayloadType() const;
+    IMS_BOOL IsTextCodecEmptyRedundantEnabled() const;
+
+    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
+
+    static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
+    static const IMS_SINT32 DEFAULT_RTP_PORT_END = 50060;
+    static const IMS_SINT32 DEFAULT_RTCP_PORT = 50011;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL_LIVE = 5;
+    static const IMS_SINT32 DEFAULT_RTCP_INVERVAL = 5;
+    static const IMS_SINT32 DEFAULT_AS = 4;
+    static const IMS_SINT32 DEFAULT_RS = 300;
+    static const IMS_SINT32 DEFAULT_RR = 100;
+    static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = 20000;
+    static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 200000;
+
+    static const IMS_SINT32 DEFAULT_PAYLOAD_T140 = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_PAYLOAD_RED = NEED_TO_CHECK_I;
+    static const IMS_BOOL DEFAULT_EMPTY_REDUNDANT = IMS_FALSE;
 
 private:
-
-    // PDP Profile number for CP audio
-    IMS_SINT32 nPdpProfileNum;
-    IMS_SINT32 nPdpProfileNumOf3G;
-    IMS_SINT32 nKeepRedlevel;
-
-    static const IMS_CHAR KEY_KEEP_REDLEVEL[];
-
-    // Provisioned codecs
-    IMSList<CodecConfig*> objCodecConfigs;
+    IMS_SINT32 nT140PayloadType;
+    IMS_SINT32 nRedPayloadType;
+    IMS_BOOL bTextCodecEmptyRedundantEnabled;
 };
-#endif                                              // _TEXT_CONFIG_H_
+#endif                                              // _TEXT_CONFIGURATION_H_

@@ -120,7 +120,7 @@ AudioMediaSession::UpdateRtpConfig(
     m_objAudioConfig.setRemoteAddress(
                 android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
     m_objAudioConfig.setRemotePort(pDestProfile->nDataPort);
-    m_objAudioConfig.setDscp(m_pConfig->GetSocketTos());
+    m_objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
     m_objAudioConfig.setMaxMtuBytes(1500); // NEXT_ITEM
 
     MediaManager* manager = MediaManager::GetInstance(m_nSlodId);
