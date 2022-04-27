@@ -18,6 +18,7 @@
 #define JNI_MEDIA_SESSION_THREAD_H_
 
 #include <AudioConfig.h>
+#include <MediaQualityThreshold.h>
 #include "BaseServiceThread.h"
 #include "IMMedia.h"
 
@@ -39,6 +40,7 @@ public:
     IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam);
     IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam);
     IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam);
+    IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam);
 
 protected:
     virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const;

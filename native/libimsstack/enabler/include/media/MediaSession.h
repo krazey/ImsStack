@@ -141,6 +141,10 @@ public:
             IN IMS_SINT32 nDuration);
 private:
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
+    void UpdateRtpConfig(IN IMS_UINTP nNegoId);
+    void UpdateAudioRtpConfig(IN IMS_UINTP nNegoId);
+    void UpdateMediaQualityThreshold(IN IMS_UINTP nNegoId);
+    void UpdateAudioQualityThreshold(IN IMS_UINTP nNegoId);
 
 protected:
     IMS_UINTP CreateMediaNego(IN IMS_UINTP nNegoId);
@@ -163,8 +167,6 @@ protected:
     void ProcessOfferSdp(IN IMS_UINTP nNegoId, IN IMS_UINT32 nReUsed);
     void ProcessAnswerSdp(IN IMS_UINTP nNegoId);
     IMS_BOOL ProcessRun(IN IMS_UINTP nNegoId);
-    void UpdateRtpConfig(IN IMS_UINTP nNegoId);
-    void UpdateAudioRtpConfig(IN IMS_UINTP nNegoId);
     void UpdateLocalAddress(IN IMS_UINTP nNegoId);
 
     //IMediaSessionListener

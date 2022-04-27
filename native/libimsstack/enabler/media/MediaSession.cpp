@@ -510,8 +510,8 @@ MEDIA_DIRECTION MediaSession::GetNegotiatedDirection(IN IMS_UINTP nNegoId,
     if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_AUDIO))
     {
         AudioNego* pAudioNego = pMediaNego->GetAudioNego();
-        if (pAudioNego == IMS_NULL) return MEDIA_DIRECTION_INVALID;
-        return pAudioNego->GetNegotiatedDirection();
+        return (pAudioNego == IMS_NULL) ? MEDIA_DIRECTION_INVALID :
+                pAudioNego->GetNegotiatedDirection();
     }
     else if (MEDIA_IS_CONTAINED_THIS_TYPE(type, MEDIA_TYPE_VIDEO))
     {
@@ -702,6 +702,78 @@ IMS_BOOL MediaSession::CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType)
     }
 
     return IMS_TRUE;
+}
+
+PRIVATE
+void MediaSession::UpdateRtpConfig(IN IMS_UINTP nNegoId)
+{
+    UpdateAudioRtpConfig(nNegoId);
+}
+
+PRIVATE
+void MediaSession::UpdateAudioRtpConfig(IN IMS_UINTP nNegoId)
+{
+    IMS_TRACE_I("UpdateAudioRtpConfig() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+    MediaNego* pMediaNego = FindMediaNego(nNegoId);
+    if (pMediaNego == IMS_NULL)
+    {
+        return;
+    }
+
+    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
+    if (pAudioNego == IMS_NULL)
+    {
+        return;
+    }
+
+    AudioProfile* pSrcProfile = IMS_NULL;
+    AudioProfile* pDestProfile = IMS_NULL;
+    AudioProfile* pNegoProfile = IMS_NULL;
+
+    if (pAudioNego->GetNegotiatedProfileSet(
+            pSrcProfile, pDestProfile, pNegoProfile) == IMS_TRUE)
+    {
+        AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+        if (pAudioSession != IMS_NULL)
+        {
+            pAudioSession->UpdateRtpConfig(pSrcProfile, pDestProfile, pNegoProfile);
+        }
+    }
+}
+
+PRIVATE
+void MediaSession::UpdateMediaQualityThreshold(IN IMS_UINTP nNegoId)
+{
+    UpdateAudioQualityThreshold(nNegoId);
+}
+
+PRIVATE
+void MediaSession::UpdateAudioQualityThreshold(IN IMS_UINTP nNegoId)
+{
+    IMS_TRACE_I("UpdateAudioQualityThreshold() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
+
+    AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
+    if (pAudioSession == IMS_NULL)
+    {
+        return;
+    }
+    MEDIA_DIRECTION eDir = GetNegotiatedDirection(nNegoId, MEDIA_TYPE_AUDIO);
+    IMS_BOOL bIsHold = IMS_FALSE;
+    switch (eDir)
+    {
+    case MEDIA_DIRECTION_SEND_RECEIVE:
+        bIsHold = IMS_FALSE;
+        break;
+    case MEDIA_DIRECTION_INACTIVE:
+    case MEDIA_DIRECTION_RECEIVE:
+    case MEDIA_DIRECTION_SEND:
+        bIsHold = IMS_TRUE;
+        break;
+    default:
+        return;
+    }
+
+    pAudioSession->UpdateMediaQualityThreshold(bIsHold);
 }
 
 // == PROTECTED METHOD ==========================================================
@@ -1226,6 +1298,9 @@ IMS_BOOL MediaSession::ProcessRun(IN IMS_UINTP nNegoId)
         else if (m_nCommandBuffer == IMMedia::REQUEST_MODIFY_SESSION
                 && isJustConfirmedWithMultiConfig == IMS_FALSE)
         {
+            UpdateMediaQualityThreshold(nNegoId);
+            pAudioSession->SetMediaQuality();
+
             UpdateRtpConfig(nNegoId);
             pAudioSession->Modify();
         }
@@ -1279,43 +1354,6 @@ void MediaSession::UpdateLocalAddress(IN IMS_UINTP nNegoId)
     if (pAudioSession != IMS_NULL)
     {
         pAudioSession->UpdateLocalEndPoint(objLocalAddr, nPort);
-    }
-}
-
-PROTECTED
-void MediaSession::UpdateRtpConfig(IN IMS_UINTP nNegoId)
-{
-    UpdateAudioRtpConfig(nNegoId);
-}
-
-PROTECTED
-void MediaSession::UpdateAudioRtpConfig(IN IMS_UINTP nNegoId)
-{
-    IMS_TRACE_I("UpdateAudioRtpConfig() - nNegoId[%" PFLS_x "]", nNegoId, 0, 0);
-    MediaNego* pMediaNego = FindMediaNego(nNegoId);
-    if (pMediaNego == IMS_NULL)
-    {
-        return;
-    }
-
-    AudioNego* pAudioNego = pMediaNego->GetAudioNego();
-    if (pAudioNego == IMS_NULL)
-    {
-        return;
-    }
-
-    AudioProfile* pSrcProfile = IMS_NULL;
-    AudioProfile* pDestProfile = IMS_NULL;
-    AudioProfile* pNegoProfile = IMS_NULL;
-
-    if (pAudioNego->GetNegotiatedProfileSet(
-            pSrcProfile, pDestProfile, pNegoProfile) == IMS_TRUE)
-    {
-        AudioMediaSession* pAudioSession = FindAudioSession(nNegoId);
-        if (pAudioSession != IMS_NULL)
-        {
-            pAudioSession->UpdateRtpConfig(pSrcProfile, pDestProfile, pNegoProfile);
-        }
     }
 }
 

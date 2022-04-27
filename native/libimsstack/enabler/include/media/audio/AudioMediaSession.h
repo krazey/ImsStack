@@ -19,6 +19,7 @@
 
 // == INCLUDES =============================================================
 #include <AudioConfig.h>
+#include <MediaQualityThreshold.h>
 #include "BaseSession.h"
 #include "audio/AudioDef.h"
 #include "audio/AudioProfile.h"
@@ -37,7 +38,7 @@ private:
 public:
     AudioMediaSession(IN IMS_SINT32 nSlodId = 0);
     virtual ~AudioMediaSession();
-    void SetConfig(AudioConfiguration* pConfig);
+    void SetConfig(IN AudioConfiguration* pConfig);
 
     /*
     * Set AudioConfig for libimsmedia from src/dest/negotiated profile
@@ -46,10 +47,11 @@ public:
     * @param pNegotiatedProfile : negotiated profile of the SDP negotiation
     * return IMS_BOOL : false for error, true for successful
     */
-    IMS_BOOL UpdateRtpConfig(AudioProfile* pSrcProfile, AudioProfile* pDestProfile,
-            AudioProfile* pNegoProfile);
-    IMS_BOOL UpdateLocalEndPoint(AudioProfile* pNegoProfile);
-    void UpdateLocalEndPoint(IPAddress objLocalAddr, IMS_UINT32 nPort);
+    IMS_BOOL UpdateRtpConfig(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
+            IN AudioProfile* pNegoProfile);
+    IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold);
+    IMS_BOOL UpdateLocalEndPoint(IN AudioProfile* pNegoProfile);
+    void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
 
     /*
     * request OPEN_SESSION with updated AudioConfig
@@ -75,10 +77,16 @@ public:
     * request CONFIRM_CONFIG with updated AudioConfig
     */
     IMS_BOOL Confirm();
+
     /*
     * request CLOSE_SESSION with updated AudioConfig
     */
     IMS_BOOL Close();
+
+    /*
+    * request SET_MEDIA_QUALITY with Audio Media qualityThreshold
+    */
+    IMS_BOOL SetMediaQuality();
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
     //notification - do it later
 //    virtual void SendNotifyToListener(IN IMS_SINT32 nNotify);
@@ -89,6 +97,7 @@ public:
 protected:
     AudioConfiguration* m_pConfig;
     AudioConfig m_objAudioConfig;
+    MediaQualityThreshold m_objMediaQualityThreshold;
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
 };

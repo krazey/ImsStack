@@ -173,7 +173,13 @@ IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 
 PROTECTED VIRTUAL
 void MediaConfiguration::ToDebugString() const
 {
-    IMS_TRACE_D("session_type[%d]", (IMS_SINT32)eSessionType, 0, 0);
+    IMS_TRACE_D("session_type[%d], nRtcpLiveInterval[%d], nRtcpInterval[%d]",
+            (IMS_SINT32)eSessionType, nRtcpLiveInterval, nRtcpInterval);
+    IMS_TRACE_D("nPortRtp[%d], nPortRtpEnd[%d], nPortRtcp[%d]", nPortRtp, nPortRtpEnd, nPortRtcp);
+    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps[%d]",
+            nAsBandwidthKbps, nRsBandwidthBps, nRrBandwidthBps);
+    IMS_TRACE_D("nRtpInactivityTimerMillis[%d], nRtcpInactivityTimerMillis[%d]",
+            nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis, 0);
 }
 
 PROTECTED VIRTUAL

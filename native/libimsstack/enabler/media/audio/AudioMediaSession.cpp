@@ -38,6 +38,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         BaseSession(nSlotId),
         m_pConfig(IMS_NULL),
         m_objAudioConfig(AudioConfig()),
+        m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IPAddress::IPv6NONE),
         m_nLocalPort(0)
 {
@@ -51,14 +52,14 @@ AudioMediaSession::~AudioMediaSession()
 }
 
 PUBLIC
-void AudioMediaSession::SetConfig(AudioConfiguration* pConfig)
+void AudioMediaSession::SetConfig(IN AudioConfiguration* pConfig)
 {
     m_pConfig = pConfig;
 }
 
 PUBLIC IMS_BOOL
 AudioMediaSession::UpdateRtpConfig(
-        AudioProfile* pSrcProfile, AudioProfile* pDestProfile, AudioProfile* pNegoProfile)
+        IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile, IN AudioProfile* pNegoProfile)
 {
     if (pSrcProfile == IMS_NULL || pDestProfile == IMS_NULL || pNegoProfile == IMS_NULL)
     {
@@ -404,7 +405,45 @@ AudioMediaSession::UpdateRtpConfig(
 }
 
 PUBLIC
-IMS_BOOL AudioMediaSession::UpdateLocalEndPoint(AudioProfile* pNegoProfile)
+IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold)
+{
+    // TODO_MEDIA need to get real value when it's ready.
+    if (bIsHold)
+    {
+        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(0);
+        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(10000);
+        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(0);
+        m_objMediaQualityThreshold.setRtpPacketLossRate(0);
+        m_objMediaQualityThreshold.setJitterDurationMillis(0);
+        m_objMediaQualityThreshold.setRtpJitterMillis(0);
+    }
+    else
+    {
+        m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
+                m_pConfig->GetRtpInactivityTimerMillis());
+        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis
+                (m_pConfig->GetRtcpInactivityTimerMillis());
+        m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(15000);
+        m_objMediaQualityThreshold.setRtpPacketLossRate(30);
+        m_objMediaQualityThreshold.setJitterDurationMillis(15000);
+        m_objMediaQualityThreshold.setRtpJitterMillis(100);
+    }
+
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - IsHold[%d], RtpInactivity[%d], RtcpInactivity[%d]",
+            bIsHold, m_objMediaQualityThreshold.getRtpInactivityTimerMillis(),
+            m_objMediaQualityThreshold.getRtcpInactivityTimerMillis());
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - PacketLossDurationMillis[%d], PacketLossRate[%d]",
+            m_objMediaQualityThreshold.getRtpPacketLossDurationMillis(),
+            m_objMediaQualityThreshold.getRtpPacketLossRate(), 0);
+    IMS_TRACE_D("UpdateMediaQualityThreshold() - JitterDurationMillis[%d], JitterMillis[%d]",
+            m_objMediaQualityThreshold.getJitterDurationMillis(),
+            m_objMediaQualityThreshold.getRtpJitterMillis(), 0);
+
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::UpdateLocalEndPoint(IN AudioProfile* pNegoProfile)
 {
     if (pNegoProfile == IMS_NULL)
     {
@@ -421,7 +460,7 @@ IMS_BOOL AudioMediaSession::UpdateLocalEndPoint(AudioProfile* pNegoProfile)
 }
 
 PUBLIC
-void AudioMediaSession::UpdateLocalEndPoint(IPAddress objLocalAddr, IMS_UINT32 nPort)
+void AudioMediaSession::UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort)
 {
     m_objLocalAddress = objLocalAddr;
     m_nLocalPort = nPort;
@@ -535,6 +574,24 @@ IMS_BOOL AudioMediaSession::SendDtmf(IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDurat
         pParam->m_nDuration = nDuration;
         bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_SEND_DTMF, pParam);
+    }
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::SetMediaQuality()
+{
+    IMS_TRACE_I("SetMediaQuality()", 0, 0, 0);
+    IMS_BOOL bResult = IMS_FALSE;
+
+    if (m_piMediaSessionListener != IMS_NULL)
+    {
+        ImsMediaMsgSetMediaQualityParam* pParam = new ImsMediaMsgSetMediaQualityParam();
+        pParam->m_eMediaType = MEDIA_TYPE_AUDIO;
+        pParam->m_objMediaQualityThreshold = m_objMediaQualityThreshold;
+
+        bResult = m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                IMMedia::REQUEST_SET_MEDIA_QUALITY, pParam);
     }
     return bResult;
 }

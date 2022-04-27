@@ -138,7 +138,7 @@ public:
     static const IMS_SINT32 DEFAULT_RS = 600;
     static const IMS_SINT32 DEFAULT_RR = 2000;
     static const IMS_SINT32 DEFAULT_RTP_INACTIVITY = 20000;
-    static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 200000;
+    static const IMS_SINT32 DEFAULT_RTCP_INACTIVITY = 20000;
 
 protected:
     MEDIA_CONTENT_TYPE eSessionType;

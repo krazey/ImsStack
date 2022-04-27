@@ -73,35 +73,27 @@ IMS_BOOL MediaMsgHandler::SendMessageToMediaService(IN IMS_SINT32 eEvent,
         return IMS_FALSE;
     }
 
-    if (eEvent == IMMedia::REQUEST_OPEN_SESSION)
+    switch (eEvent)
     {
+    case IMMedia::REQUEST_OPEN_SESSION:
         return m_pThread->OnOpenSession((ImsMediaMsgOpenConfigParam*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_MODIFY_SESSION)
-    {
+    case IMMedia::REQUEST_MODIFY_SESSION:
         return m_pThread->OnModifySession((ImsMediaMsgConfigParam*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_CLOSE_SESSION)
-    {
+    case IMMedia::REQUEST_CLOSE_SESSION:
         return m_pThread->OnCloseSession((ImsMediaMsgParamBase*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_ADD_CONFIG)
-    {
+    case IMMedia::REQUEST_ADD_CONFIG:
         return m_pThread->OnAddConfig((ImsMediaMsgConfigParam*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_DELETE_CONFIG)
-    {
+    case IMMedia::REQUEST_DELETE_CONFIG:
         return m_pThread->OnDeleteConfig((ImsMediaMsgConfigParam*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_CONFIRM_CONFIG)
-    {
+    case IMMedia::REQUEST_CONFIRM_CONFIG:
         return m_pThread->OnConfirmConfig((ImsMediaMsgConfigParam*)pParam);
-    }
-    else if (eEvent == IMMedia::REQUEST_SEND_DTMF)
-    {
+    case IMMedia::REQUEST_SEND_DTMF:
         return m_pThread->OnSendDtmf((ImsMediaMsgDtmfParam*)pParam);
+    case IMMedia::REQUEST_SET_MEDIA_QUALITY:
+        return m_pThread->OnSetMediaQualityThreshold((ImsMediaMsgSetMediaQualityParam*)pParam);
+    default:
+        return IMS_TRUE;
     }
-    return IMS_TRUE;
 }
 
 /*

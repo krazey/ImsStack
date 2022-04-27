@@ -18,6 +18,7 @@
 #define _IMMEDIA_H_
 
 #include <AudioConfig.h>
+#include <MediaQualityThreshold.h>
 #include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
 #include "IPAddress.h"
@@ -98,8 +99,21 @@ public:
     ImsMediaMsgParamBase() :
             m_eMediaType(MEDIA_TYPE_INVALID)
     {};
+
 public:
     MEDIA_CONTENT_TYPE m_eMediaType;
+};
+
+class ImsMediaMsgSetMediaQualityParam :
+        public ImsMediaMsgParamBase
+{
+public:
+    ImsMediaMsgSetMediaQualityParam() :
+            m_objMediaQualityThreshold(MediaQualityThreshold())
+    {};
+
+public:
+    MediaQualityThreshold m_objMediaQualityThreshold;
 };
 
 class ImsMediaMsgConfigParam :

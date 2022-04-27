@@ -17,7 +17,6 @@
 #define IMS_STL_USE
 
 #include <binder/Parcel.h>
-#include <AudioConfig.h>
 #include "JniMtcCall.h"
 #include "JniMediaSessionThread.h"
 #include "JniMtcUtils.h"
@@ -160,6 +159,23 @@ IMS_BOOL JniMediaSessionThread::OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam)
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeByte(pParam->m_dtmfCode);
     objParcel.writeInt32(pParam->m_nDuration);
+
+    delete pParam;
+
+    SendData2Java(objParcel, IMS_TRUE);
+
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
+        IN ImsMediaMsgSetMediaQualityParam* pParam)
+{
+    IMS_TRACE_D("OnSetMediaQualityThreshold", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IMMedia::REQUEST_SET_MEDIA_QUALITY);
+    objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
+    pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
 
     delete pParam;
 
