@@ -2,10 +2,13 @@
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
 #include "call/state/UpdatingState.h"
-#include "call/termination/UpdateErrorHandler.h"
 #include "call/termination/TerminationHandler.h"
+#include "call/termination/UpdateErrorHandler.h"
 #include "call/UpdatingInfo.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
 #include "IMessage.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
@@ -36,6 +39,8 @@ PUBLIC VIRTUAL
 CallStateName UpdatingState::AcceptConvert(IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("AcceptConvert", 0, 0, 0);
+
+    m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
 
     MtcSession* pSession = m_objContext.GetSession();
     ISession& objSession = pSession->GetISession();
@@ -82,6 +87,8 @@ CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
 {
     IMS_TRACE_D("RejectConvert", 0, 0, 0);
 
+    m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
+
     if (m_objContext.GetSession()->GetISession().GetState() == ISession::STATE_ESTABLISHED)
     {
         if (SendUpdate() == IMS_FAILURE)
@@ -101,9 +108,26 @@ CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
 }
 
 PUBLIC VIRTUAL
+CallStateName UpdatingState::CancelConvert(IN const FailReason& objReason)
+{
+    IMS_TRACE_D("CancelConvert", 0, 0, 0);
+
+    m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
+
+    if (m_objContext.GetSession()->GetMessageSender().CancelUpdate(objReason) == IMS_FAILURE)
+    {
+        // TODO
+    }
+
+    return CallStateName::UPDATING;
+}
+
+PUBLIC VIRTUAL
 CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
+
+    StopTimer();
 
     FailReason objConvertedReason(objReason);
     objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
@@ -120,6 +144,8 @@ CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
+    StopTimer();
+
     m_objContext.GetMediaManager().Terminate();
 
     return TransitToTerminating(TerminationHandler().Handle(*piSession));
@@ -129,6 +155,8 @@ PUBLIC VIRTUAL
 CallStateName UpdatingState::SessionUpdated(IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionUpdated", 0, 0, 0);
+
+    StopTimer();
 
     if (HandleSdpAnswer() == IMS_FAILURE)
     {
@@ -150,6 +178,8 @@ CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionUpdateFailed", 0, 0, 0);
 
+    StopTimer();
+
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_UPDATE);
     FailReason objReason = UpdateErrorHandler(m_objContext).Handle(piResponse);
 
@@ -163,6 +193,26 @@ CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;
     }
+}
+
+PUBLIC VIRTUAL
+CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    IMS_TRACE_D("OnTimerExpired : %d", nType, 0, 0);
+
+    switch (nType)
+    {
+        case TIMER_CONVERT_USER_RESPONSE:
+            return RejectConvert(FailReason(REJECT_REASON_TO_MT_UPDATE));
+            break;
+        case TIMER_CONVERT_REMOTE_RESPONSE:
+            return CancelConvert(FailReason(FAIL_REASON_TO_MO_UPDATE));
+            break;
+        default:
+            break;
+    }
+
+    return GetStateName();
 }
 
 PRIVATE
@@ -242,6 +292,9 @@ IMS_RESULT UpdatingState::SendUpdate()
         // TODO
     }
 
+    m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
+
     return IMS_SUCCESS;
 }
 
@@ -281,7 +334,9 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
     if (m_objContext.GetUpdatingInfo().IsRequestedModifying() == IMS_FALSE &&
             m_objContext.GetUpdatingInfo().IsModified())
     {
-        NotifyIncomingUpdate();
+        CallType eCallType = CallType::VOIP;
+        // TODO, update CallType
+        SendIncomingUpdate(eCallType);
         return CallStateName::UPDATING;
     }
 
@@ -316,7 +371,9 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 
     if (m_objContext.GetUpdatingInfo().IsModified())
     {
-        NotifyIncomingUpdate();
+        CallType eCallType = CallType::VOIP;
+        // TODO, update CallType
+        SendIncomingUpdate(eCallType);
         return CallStateName::UPDATING;
     }
 
@@ -354,16 +411,17 @@ void UpdatingState::RecoverModificationFailure()
 }
 
 PRIVATE
-void UpdatingState::NotifyIncomingUpdate()
+void UpdatingState::StopTimer()
 {
-    IMS_TRACE_D("NotifyIncomingUpdate", 0, 0, 0);
+    IMS_TRACE_D("StopTimer", 0, 0, 0);
 
-    CallType eCallType = CallType::VOIP;
-    // TODO, update CallType
-    CallInfo& objInfo = m_objContext.GetCallInfo();
-    objInfo.eCallType = eCallType;
+    if (m_objContext.GetUpdatingInfo().IsModifier())
+    {
+        m_objContext.GetTimer().Stop(TIMER_CONVERT_REMOTE_RESPONSE);
+    }
 
-    m_objContext.GetUiNotifier().SendIncomingUpdate(&objInfo,
-            &m_objContext.GetUpdatingInfo().GetAlertingInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
+    if (m_objContext.GetUpdatingInfo().IsAlerted())
+    {
+        m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
+    }
 }

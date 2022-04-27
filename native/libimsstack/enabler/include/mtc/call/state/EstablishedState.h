@@ -29,7 +29,6 @@ private:
     IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
-    void NotifyIncomingUpdate(IN CallType eCallType);
     void AdjustDirectionWithHeldByMe();
 
 };

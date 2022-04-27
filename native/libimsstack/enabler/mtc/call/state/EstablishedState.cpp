@@ -4,12 +4,15 @@
 #include "call/state/EstablishedState.h"
 #include "call/termination/TerminationHandler.h"
 #include "call/UpdatingInfo.h"
-#include "IMessage.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
+#include "helper/MtcTimerWrapper.h"
+#include "IMessage.h"
 #include "media/IMtcMediaManager.h"
-#include "utility/MessageUtil.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ServiceTrace.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -150,7 +153,8 @@ IMS_RESULT EstablishedState::HandleUpdate(IN UpdateType eUpdateType, IN CallType
         // TODO
     }
 
-    // TODO, start timer
+    m_objContext.GetTimer().Start(TIMER_CONVERT_REMOTE_RESPONSE,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::CONVERT_REMOTE_RESPONSE_TIMER));
 
     return IMS_SUCCESS;
 }
@@ -176,7 +180,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
     {
         CallType eCallType = CallType::VOIP;
         // TODO, update CallType
-        NotifyIncomingUpdate(eCallType);
+        SendIncomingUpdate(eCallType);
 
         return IMS_SUCCESS;
     }
@@ -251,20 +255,6 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
     }
 
     return IMS_SUCCESS;
-}
-
-PRIVATE
-void EstablishedState::NotifyIncomingUpdate(IN CallType eCallType)
-{
-    IMS_TRACE_D("NotifyIncomingUpdate", 0, 0, 0);
-    m_objContext.GetUpdatingInfo().SetAlerted();
-
-    CallInfo& objInfo = m_objContext.GetCallInfo();
-    objInfo.eCallType = eCallType;
-
-    m_objContext.GetUiNotifier().SendIncomingUpdate(&objInfo,
-            &m_objContext.GetUpdatingInfo().GetAlertingInfo(),
-            m_objContext.GetSupplementaryService().GetServices());
 }
 
 PRIVATE
