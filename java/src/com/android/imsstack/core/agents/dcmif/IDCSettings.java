@@ -26,4 +26,9 @@ public interface IDCSettings extends IDC {
      * Return preferred IP version for emergency connection
      */
     int getEmergencyPreferredIpVersion();
+
+    /**
+     * Return whether the casueCode should be handled as permanent failure
+     */
+    boolean isPermanentFailure(int causeCode);
 }

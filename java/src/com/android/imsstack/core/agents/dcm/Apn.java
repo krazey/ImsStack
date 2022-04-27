@@ -671,17 +671,6 @@ public abstract class Apn extends Handler implements IApn {
         return false;
     }
 
-    protected boolean isPermanentFailure(int causeCode) {
-        boolean ret = false;
-
-        int subId = MSimUtils.getSubId(nSlotId);
-        if (subId != MSimUtils.INVALID_SUB_ID) {
-            ret = DataFailCause.isPermanentFailure(mContext, causeCode, subId);
-        }
-
-        return ret;
-    }
-
     /**
      * Send message to oneself(Apn) to clean up call stack.
      * after sometime.. we will invoke JNI api to notify network data status.
@@ -865,7 +854,8 @@ public abstract class Apn extends Handler implements IApn {
                     // To Be update
                     break;
                 case TelephonyManager.DATA_DISCONNECTED:
-                    if (causeCode != DataFailCause.NONE) {
+                    if (mPreciseDcState == TelephonyManager.DATA_CONNECTING &&
+                            causeCode != DataFailCause.NONE) {
                         // initial connection failure
                         handleInitialConnectionFailure(causeCode);
                     }
@@ -898,8 +888,8 @@ public abstract class Apn extends Handler implements IApn {
 
         private void handleInitialConnectionFailure(int causeCode) {
             ImsLog.i(nSlotId, "handleInitialConnectionFailed");
-            if (isPermanentFailure(causeCode)) {
-                mESMCausePermanentFailure = true;
+            if (mDcSettings != null) {
+                mESMCausePermanentFailure = mDcSettings.isPermanentFailure(causeCode);
             }
             Message msg = Message.obtain();
             msg.what = EVENT_DATA_CONNECTION_FAILED;
