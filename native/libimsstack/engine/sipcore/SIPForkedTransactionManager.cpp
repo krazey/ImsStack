@@ -125,7 +125,7 @@ SIPClientTransactionState* SIPForkedTransactionManager::Lookup(IN SipMessage *ps
         return pCTState.Get();
     }
 
-    SipHeader *pstHeader;
+    SipHeaderBase *pstHeader;
     AString strNewLocalTag;
     AString strNewRemoteTag;
     AString strCallId;

@@ -55,7 +55,7 @@ IMS_BOOL SIPServerTransport::FormViaHeader(IN_OUT SipMessage *&pstMessage,
         IN CONST SIPProfile */*pSIPProfile = IMS_NULL*/)
 {
     // Get the topmost Via header from the message
-    SipHeader *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
+    SipHeaderBase *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
     AString strRPort(SIP::STR_RPORT);
     const SIPTransportAddress &objFarEnd = GetAddress(TA_FAR);
 
@@ -137,7 +137,7 @@ IMS_BOOL SIPServerTransport::UpdateDestinationInfo(IN SipMessage *pstMessage,
     //   Via header (if none given, then a default port is 5060).
     // 3. If neither "maddr" nor "received" parameter are present, the destination info. is set
     //   to the address / port of the topmost Via header.
-    SipHeader *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
+    SipHeaderBase *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
     AString strSentBy = SIPStack::GetSentByFromVia(pstViaHeader);
     AString strViaHost;
     IMS_SINT32 nViaPort;
@@ -227,7 +227,7 @@ PUBLIC VIRTUAL
 IMS_SINT32 SIPServerTransport::ValidateViaHeader(IN SipMessage *pstMessage)
 {
     // Get the topmost Via header from the message
-    SipHeader *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
+    SipHeaderBase *pstViaHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::VIA);
 
     //---------------------------------------------------------------------------------------------
 

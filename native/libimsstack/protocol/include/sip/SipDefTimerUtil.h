@@ -17,7 +17,7 @@ class SipDefTimerUtil: public ISipTimerUtil
 
     public:
         SIP_BOOL StartTimer(SIP_VOID** ppvTimerId, SIP_UINT32 nDuration, SIP_UINT16 nResetFlag,
-                SIPCB_TIMERHANDLER cbTimerHandler, SIP_VOID* pvData);//{return SIP_TRUE;}
+                SipTimerCallback pfnTimerCallback, SIP_VOID* pvData);//{return SIP_TRUE;}
 
         SIP_VOID* StopTimer(SIP_VOID* pvTimerId);//{return SIP_TRUE;}
 

@@ -291,7 +291,7 @@ Remarks
 
 */
 PUBLIC
-void SIPMessageBodyPart::SetHeader(IN SipHeader *pstHeader,
+void SIPMessageBodyPart::SetHeader(IN SipHeaderBase *pstHeader,
         IN IMS_SINT32 nType /* = ISIPMessageBodyPart::CONTENT_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------

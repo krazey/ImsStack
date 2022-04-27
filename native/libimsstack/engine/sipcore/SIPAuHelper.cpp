@@ -354,14 +354,14 @@ public:
 
 public:
     IMS_BOOL AddChallenge(IN ISIPGenericChallenge *piChallenge);
-    IMS_BOOL AddChallenge(IN IMS_SINT32 nType, IN SipHeader *pstHeader);
+    IMS_BOOL AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase *pstHeader);
     IMS_BOOL AddCredential(IN CONST Credential &objCredential);
     IMS_BOOL AddHeader(IN_OUT SipMessage *&pstMessage);
     IMS_BOOL CalculateResponse();
     void Clear();
     IMS_BOOL FormCredentials(IN CONST SIPMethod &objMethod, IN CONST AString &strURI,
             IN CONST AString &strEntityBody, IN_OUT SIPGenericResponse &objResponse,
-            OUT SipHeader *&pstHeader);
+            OUT SipHeaderBase *&pstHeader);
     ISIPGenericChallenge* GetChallenge(IN IMS_SINT32 nIndex) const;
     IMS_BOOL IsChallengePresent() const;
     IMS_BOOL IsCredentialPresent() const;
@@ -480,7 +480,7 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN ISIPGenericChallenge *piChallenge)
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeader *pstHeader)
+IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase *pstHeader)
 {
     SIPGenericChallenge *pChallenge = new SIPGenericChallenge(nType);
 
@@ -616,7 +616,7 @@ IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage *&pstMessage)
             return IMS_FALSE;
         }
 
-        SipHeader *pstHeader = SIPStack::CreateHeader(pResponse->nType);
+        SipHeaderBase *pstHeader = SIPStack::CreateHeader(pResponse->nType);
 
         if (pstHeader == IMS_NULL)
         {
@@ -772,7 +772,7 @@ void SIPAuHelperPrivate::Clear()
 PUBLIC
 IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SIPMethod &objMethod,
         IN CONST AString &strURI, IN CONST AString &strEntityBody,
-        IN_OUT SIPGenericResponse &objResponse, OUT SipHeader *&pstHeader)
+        IN_OUT SIPGenericResponse &objResponse, OUT SipHeaderBase *&pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1190,7 +1190,7 @@ IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage *pstMessage)
     {
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeader *pstHeader = SIPStack::GetHeader(
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(
                     pstMessage, ISIPHeader::WWW_AUTHENTICATE, i);
 
             if (SIPStack::IsValidHeader(pstHeader))
@@ -1213,7 +1213,7 @@ IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage *pstMessage)
     {
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeader *pstHeader = SIPStack::GetHeader(
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(
                     pstMessage, ISIPHeader::PROXY_AUTHENTICATE, i);
 
             if (SIPStack::IsValidHeader(pstHeader))

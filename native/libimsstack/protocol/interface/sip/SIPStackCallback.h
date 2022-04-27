@@ -23,7 +23,7 @@ typedef SIP_BOOL (*SIPStack_FetchTransaction)
 typedef SIP_BOOL (*SIPStack_ReleaseTransaction)
         (IN SIP_VOID*, IN SIP_INT32, OUT SIP_VOID**, OUT SIP_VOID**);
 typedef SIP_BOOL (*SIPStack_StartTimer)
-        (IN SIP_UINT32, IN SIPCB_TIMERHANDLER, IN SIP_VOID*, OUT SIP_VOID**);
+        (IN SIP_UINT32, IN SipTimerCallback, IN SIP_VOID*, OUT SIP_VOID**);
 typedef SIP_BOOL (*SIPStack_StopTimer)
         (IN SIP_VOID*, OUT SIP_VOID**);
 typedef SIP_VOID (*SIPStack_OnTimerExpired)

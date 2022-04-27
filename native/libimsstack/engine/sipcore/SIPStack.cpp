@@ -1,15 +1,18 @@
 /*
-    Author
-    <table>
-    date      author                description
-    --------  --------------        ----------
-    01/01/2015  vijay.nair@               Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceUtil.h"
 #include "IMSStrLib.h"
@@ -29,7 +32,7 @@
 #include "SIPTxnKey.h"
 #include "SIPUtil.h"
 #include "SIPFeatures.h"
-#include "SIPStack_SIP.h"
+#include "SIPStack.h"
 
 __IMS_TRACE_TAG_SIP__;
 
@@ -225,7 +228,7 @@ LOCAL IMS_BOOL FormAddrSpec(IN CONST SipAddrSpec *pstAddrSpec, IN IMS_BOOL bPara
 Remarks
 
 */
-LOCAL IMS_BOOL GetParameter(IN SipHeader* pstHeader, IN CONST AString &strName,
+LOCAL IMS_BOOL GetParameter(IN SipHeaderBase* pstHeader, IN CONST AString &strName,
         OUT SipNameValue *&pstParam)
 {
     SIPStackError(EERR_NOERR);
@@ -367,7 +370,7 @@ GLOBAL SipEn_ErrorTypes GetLastError()
 Remarks
 
 */
-GLOBAL IMS_BOOL AppendHeader(IN SipHeader* pstHeader, IN_OUT SipMessage *&pstMessage)
+GLOBAL IMS_BOOL AppendHeader(IN SipHeaderBase* pstHeader, IN_OUT SipMessage *&pstMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -412,7 +415,7 @@ GLOBAL IMS_BOOL AppendMessageBody(IN SipMsgBody *pstMsgBody, IN_OUT SipMessage *
 Remarks
 
 */
-GLOBAL IMS_BOOL PrependHeader(IN SipHeader* pstHeader, IN_OUT SipMessage *&pstMessage)
+GLOBAL IMS_BOOL PrependHeader(IN SipHeaderBase* pstHeader, IN_OUT SipMessage *&pstMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -466,7 +469,7 @@ GLOBAL IMS_BOOL PrependUnknownHeader(IN CONST AString &strName, IN CONST AString
 Remarks
 
 */
-GLOBAL SipHeader* CloneHeader(IN SipHeader *pstHeader)
+GLOBAL SipHeaderBase* CloneHeader(IN SipHeaderBase *pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -525,7 +528,7 @@ GLOBAL SipMsgBody* CloneMessageBody(IN SipMsgBody *pstMsgBody)
 Remarks
 
 */
-GLOBAL SipHeader* CopyHeader(IN SipHeader *pstHeader)
+GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase *pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -545,7 +548,7 @@ GLOBAL SipHeader* CopyHeader(IN SipHeader *pstHeader)
 Remarks
 
 */
-GLOBAL SipHeader* CopyHeader(IN SipHeader *pstDest, IN SipHeader *pstSrc)
+GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase *pstDest, IN SipHeaderBase *pstSrc)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -675,7 +678,7 @@ GLOBAL IMS_BOOL CorrectMessageBody(IN_OUT SipMessage *&pstMessage)
 Remarks
 
 */
-GLOBAL SipHeader* CreateHeader(IN IMS_SINT32 nType_)
+GLOBAL SipHeaderBase* CreateHeader(IN IMS_SINT32 nType_)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -687,7 +690,7 @@ GLOBAL SipHeader* CreateHeader(IN IMS_SINT32 nType_)
 Remarks
 
 */
-GLOBAL SipHeader* CreateHeader(IN IMS_SINT32 nType, IN SipAddrSpec *pstAddrSpec)
+GLOBAL SipHeaderBase* CreateHeader(IN IMS_SINT32 nType, IN SipAddrSpec *pstAddrSpec)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -793,8 +796,8 @@ GLOBAL IMS_BOOL CreateMIMEHeader(IN_OUT SipMsgBody *pstMsgBody)
 Remarks
 
 */
-GLOBAL SipHeader* CreateViaHeader(IN CONST AString &strSentProtocol,IN CONST AString &strSentBy,
-        IN CONST AString &strBranch)
+GLOBAL SipHeaderBase* CreateViaHeader(IN CONST AString &strSentProtocol,
+        IN CONST AString &strSentBy, IN CONST AString &strBranch)
 {
     SipViaHeader* pVia = new SipViaHeader();
 
@@ -939,7 +942,7 @@ Remarks
 
 */
 
-GLOBAL SipHeader* DecodeHeader(IN IMS_SINT32 nType_, IN CONST AString &strName,
+GLOBAL SipHeaderBase* DecodeHeader(IN IMS_SINT32 nType_, IN CONST AString &strName,
         IN CONST AString &strBody)
 {
     SipEn_HdrType nType = (SipEn_HdrType)nType_;
@@ -1094,7 +1097,9 @@ GLOBAL IMS_BOOL DecodeMessageBody(IN SipMessage *pstMessage)
 
         IMS_UINT32 uiBuffLen = 0;
         pstMsgBody->GetMsgBuffLen(&uiBuffLen);
-        objCompBodyPart.Attach(reinterpret_cast<const IMS_BYTE*>(pszbuffer), (IMS_SINT32)uiBuffLen);
+        objCompBodyPart.Attach(
+                reinterpret_cast<const IMS_BYTE*>(pszbuffer),
+                (IMS_SINT32)uiBuffLen);
 
         pstMsgBody->SipDelete();
 
@@ -1164,7 +1169,7 @@ GLOBAL IMS_BOOL EncodeAddrSpec(IN CONST SipAddrSpec *pstAddrSpec, IN IMS_BOOL bP
 Remarks
 
 */
-GLOBAL IMS_BOOL EncodeHeaderBody(IN CONST SipHeader *pstHeader, IN IMS_BOOL bParams,
+GLOBAL IMS_BOOL EncodeHeaderBody(IN CONST SipHeaderBase *pstHeader, IN IMS_BOOL bParams,
         OUT AString &strHeaderBody)
 {
     //---------------------------------------------------------------------------------------------
@@ -1536,7 +1541,7 @@ IMS_BOOL hasParamList(SipEn_HdrType eType)
             return IMS_FALSE;
     }
 }
-GLOBAL IMSList<SIPParameter*> ExtractParameters(IN SipHeader *pstHeader)
+GLOBAL IMSList<SIPParameter*> ExtractParameters(IN SipHeaderBase *pstHeader)
 {
     IMSList<SIPParameter*> objParams;
     SipParameters* pstParam = GetParameters(pstHeader, IMS_FALSE);
@@ -1748,7 +1753,7 @@ GLOBAL void FreeAddrSpec(IN SipAddrSpec *&pstAddrSpec)
 Remarks
 
 */
-GLOBAL void FreeHeader(IN SipHeader *pstHeader)
+GLOBAL void FreeHeader(IN SipHeaderBase *pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1763,7 +1768,7 @@ GLOBAL void FreeHeader(IN SipHeader *pstHeader)
 Remarks
 
 */
-GLOBAL void FreeHeaderEx(IN SipHeader *&pstHeader)
+GLOBAL void FreeHeaderEx(IN SipHeaderBase *&pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2553,7 +2558,7 @@ GLOBAL IMS_SINT32 GetHeaderTypeFromName(IN CONST AString &strName)
 Remarks
 
 */
-GLOBAL SipAddrSpec* GetAddrSpec(IN SipHeader* pstHeader)
+GLOBAL SipAddrSpec* GetAddrSpec(IN SipHeaderBase* pstHeader)
 {
     if (pstHeader == SIP_NULL)
     {
@@ -2648,7 +2653,7 @@ GLOBAL SipAddrSpec* GetAddrSpec(IN SipMessage *pstMessage, IN IMS_SINT32 nType,
 Remarks
 
 */
-GLOBAL AString GetChallengeScheme(IN SipHeader *pstHeader)
+GLOBAL AString GetChallengeScheme(IN SipHeaderBase *pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2843,7 +2848,7 @@ GLOBAL IMS_BOOL GetEventHeader(IN SipMessage *pstMessage, OUT AString &strEvent,
 Remarks
 
 */
-GLOBAL SipHeader* GetHeader(IN SipMessage *pstMessage, IN IMS_SINT32 nType_,
+GLOBAL SipHeaderBase* GetHeader(IN SipMessage *pstMessage, IN IMS_SINT32 nType_,
         IN IMS_UINT32 nIndex /* = 0 */)
 {
     SipEn_HdrType nType = GetHdrEnumType((SipEn_HdrType)nType_);
@@ -3300,7 +3305,7 @@ GLOBAL AString GetParameter(IN SipAddrSpec *pstAddrSpec, IN CONST AString &strNa
 Remarks
 
 */
-GLOBAL AString GetParameter(IN SipHeader* pstHeader, IN CONST AString &strName,
+GLOBAL AString GetParameter(IN SipHeaderBase* pstHeader, IN CONST AString &strName,
         IN IMS_UINT32 nIndex /* = 0 */)
 {
     (void) nIndex;
@@ -3395,7 +3400,7 @@ GLOBAL IMS_SINT32 GetParameterCount(IN SipAddrSpec *pstAddrSpec)
 Remarks
 
 */
-GLOBAL IMS_SINT32 GetParameterCount(IN SipHeader* pstHeader)
+GLOBAL IMS_SINT32 GetParameterCount(IN SipHeaderBase* pstHeader)
 {
     SIPStackError(EERR_NOERR);
 
@@ -3449,7 +3454,7 @@ GLOBAL SipAddrSpec* GetRequestUri(IN SipMessage *pstMessage)
 Remarks
 
 */
-GLOBAL AString GetSentByFromVia(IN SipHeader* pstHeader)
+GLOBAL AString GetSentByFromVia(IN SipHeaderBase* pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -3499,7 +3504,7 @@ GLOBAL AString GetSentByFromVia(IN SipHeader* pstHeader)
 Remarks
 
 */
-GLOBAL AString GetSentProtocolFromVia(IN SipHeader *pstHeader)
+GLOBAL AString GetSentProtocolFromVia(IN SipHeaderBase *pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -3727,7 +3732,7 @@ GLOBAL IMS_BOOL GetSubscriptionStateHeader(IN SipMessage *pstMessage,
 Remarks
 
 */
-GLOBAL SipHeader* GetUnknownHeader(IN SipMessage *pstMessage, IN CONST AString &strName,
+GLOBAL SipHeaderBase* GetUnknownHeader(IN SipMessage *pstMessage, IN CONST AString &strName,
         IN IMS_UINT32 nIndex/* = 0*/)
 {
     //---------------------------------------------------------------------------------------------
@@ -3764,7 +3769,7 @@ GLOBAL SipHeader* GetUnknownHeader(IN SipMessage *pstMessage, IN CONST AString &
 Remarks
 
 */
-GLOBAL AString GetUnknownHeaderName(IN SipHeader *pstHeader)
+GLOBAL AString GetUnknownHeaderName(IN SipHeaderBase *pstHeader)
 {
     SIPStackError(EERR_NOERR);
 
@@ -3791,7 +3796,7 @@ GLOBAL AString GetUnknownHeaderName(IN SipHeader *pstHeader)
 Remarks
 
 */
-GLOBAL AString GetUnknownHeaderBody(IN SipHeader *pstHeader)
+GLOBAL AString GetUnknownHeaderBody(IN SipHeaderBase *pstHeader)
 {
     SIPStackError(EERR_NOERR);
 
@@ -3820,7 +3825,7 @@ Remarks
 */
 GLOBAL AString GetViaBranchParameter(IN SipMessage *pstMessage)
 {
-    SipHeader *pstHeader = GetHeader(pstMessage, ESIPHDR_VIA);
+    SipHeaderBase *pstHeader = GetHeader(pstMessage, ESIPHDR_VIA);
 
     //-----------------------------------------------------------------------------------------
 
@@ -3852,7 +3857,7 @@ GLOBAL SipEn_HdrType GetHdrEnumType(IN SipEn_HdrType nType)
 Remarks
 
 */
-GLOBAL IMS_BOOL HasParameter(IN SipHeader* pstHeader, IN CONST AString &strName)
+GLOBAL IMS_BOOL HasParameter(IN SipHeaderBase* pstHeader, IN CONST AString &strName)
 {
     SIPStackError(EERR_NOERR);
 
@@ -4001,7 +4006,7 @@ GLOBAL IMS_BOOL HasSDPMessageBody(IN SipMessage *pstMessage)
 Remarks
 
 */
-GLOBAL IMS_BOOL InsertHeader(IN SipHeader* pstHeader, IN IMS_UINT32 nIndex,
+GLOBAL IMS_BOOL InsertHeader(IN SipHeaderBase* pstHeader, IN IMS_UINT32 nIndex,
         IN_OUT SipMessage *&pstMessage)
 {
     //---------------------------------------------------------------------------------------------
@@ -4077,7 +4082,7 @@ Remarks
 */
 GLOBAL IMS_BOOL IsHeaderPresent(IN SipMessage *pstMessage, IN IMS_SINT32 nType_)
 {
-    SipHeader* pstHdr = GetHeader(pstMessage, (SipEn_HdrType)nType_);
+    SipHeaderBase* pstHdr = GetHeader(pstMessage, (SipEn_HdrType)nType_);
 
     if (pstHdr == IMS_NULL)
     {
@@ -4140,7 +4145,8 @@ GLOBAL IMS_BOOL IsMessageRPR(IN SipMessage *pstMessage)
         return IMS_FALSE;
     }
 
-    // If the message is a provisional response, but does not contain a RSeq header, then return FALSE.
+    // If the message is a provisional response,
+    // but does not contain a RSeq header, then return FALSE.
     IMS_SINT32 nRSeqCount = GetHeaderCount(pstMessage, ESIPHDR_RSEQ);
 
     if (nRSeqCount == 0)
@@ -4354,7 +4360,7 @@ Remarks
 
 */
 #ifdef SIP_TOBEPORTED
-GLOBAL IMS_BOOL IsUriSchemeAllowed(IN SipHeader *pstHeader)
+GLOBAL IMS_BOOL IsUriSchemeAllowed(IN SipHeaderBase *pstHeader)
 {
     SipAddrSpec *pstAddrSpec = IMS_NULL;
 
@@ -4404,7 +4410,7 @@ GLOBAL IMS_BOOL IsUriSchemeAllowed(IN SipHeader *pstHeader)
 Remarks
 
 */
-GLOBAL IMS_BOOL IsUriSchemeSupported(IN SipHeader *pstHeader)
+GLOBAL IMS_BOOL IsUriSchemeSupported(IN SipHeaderBase *pstHeader)
 {
     SipAddrSpec *pstAddrSpec = IMS_NULL;
 
@@ -4574,7 +4580,7 @@ Remarks
 
 */
 
-GLOBAL IMS_BOOL RemoveParameter(IN CONST AString &strName, IN_OUT SipHeader*& pstHeader)
+GLOBAL IMS_BOOL RemoveParameter(IN CONST AString &strName, IN_OUT SipHeaderBase*& pstHeader)
 {
     if (pstHeader == IMS_NULL)
     {
@@ -4666,7 +4672,7 @@ GLOBAL void RemoveUserAndPassword(IN_OUT SipAddrSpec *&pstAddrSpec)
 Remarks
 
 */
-GLOBAL IMS_BOOL SetChallengeScheme(IN CONST AString &strScheme, IN_OUT SipHeader *&pstHeader)
+GLOBAL IMS_BOOL SetChallengeScheme(IN CONST AString &strScheme, IN_OUT SipHeaderBase *&pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -4713,7 +4719,7 @@ GLOBAL IMS_BOOL SetContent(IN CONST IMS_BYTE *pContent, IN IMS_SINT32 nContentLe
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("SIPStack_SIP::SetContent pstMsgBody->GetBodyType() = [%d]",
+    IMS_TRACE_D("SIPStack::SetContent pstMsgBody->GetBodyType() = [%d]",
             pstMsgBody->GetBodyType(), 0, 0);
 
     if (pstMsgBody->GetBodyType() == ESIPINVALIDBODY)
@@ -4736,7 +4742,7 @@ GLOBAL IMS_BOOL SetContent(IN CONST IMS_BYTE *pContent, IN IMS_SINT32 nContentLe
 Remarks
 
 */
-GLOBAL IMS_BOOL SetHeader(IN SipHeader*pstHeader, IN_OUT SipMessage *&pstMessage)
+GLOBAL IMS_BOOL SetHeader(IN SipHeaderBase*pstHeader, IN_OUT SipMessage *&pstMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -4811,7 +4817,7 @@ GLOBAL IMS_BOOL SetMethod(IN CONST SIPMethod &objMethod, IN_OUT SipMessage *&pst
 Remarks
 
 */
-GLOBAL IMS_BOOL SetMIMEHeader(IN IMS_SINT32 nType, IN SipHeader *pstHeader,
+GLOBAL IMS_BOOL SetMIMEHeader(IN IMS_SINT32 nType, IN SipHeaderBase *pstHeader,
         IN_OUT SipMsgBody *&pstMsgBody)
 {
     (void) nType;
@@ -4912,7 +4918,7 @@ GLOBAL IMS_BOOL SetMIMEHeader(IN IMS_SINT32 nType, IN CONST AString &strName,
 Remarks
 
 */
-SipParameters* GetParameters(IN SipHeader* pHeader, IN IMS_BOOL bCreateIfNotPresent)
+SipParameters* GetParameters(IN SipHeaderBase* pHeader, IN IMS_BOOL bCreateIfNotPresent)
 {
     // TODO: this logic should be reviewed about the SipParameters variable handling.
     SipParameters* pParams = pHeader->GetParameters();
@@ -4927,7 +4933,7 @@ SipParameters* GetParameters(IN SipHeader* pHeader, IN IMS_BOOL bCreateIfNotPres
     return pParams;
 }
 
-GLOBAL IMS_BOOL SetParameter(IN SipHeader* pstHeader,
+GLOBAL IMS_BOOL SetParameter(IN SipHeaderBase* pstHeader,
         IN CONST AString &strName, IN CONST AString &strValue)
 {
     SIPStackError(EERR_NOERR);
@@ -5031,7 +5037,7 @@ GLOBAL IMS_BOOL SetStatusLine(IN IMS_SINT32 nStatusCode, IN CONST AString &strRe
     return IMS_FALSE;
 }
 
-GLOBAL IMS_BOOL SetUnknownHeader(IN SipHeader *pstHeader,
+GLOBAL IMS_BOOL SetUnknownHeader(IN SipHeaderBase *pstHeader,
         IN CONST AString &strName, IN_OUT SipMessage *&pstMessage)
 {
     if (pstHeader == IMS_NULL)
@@ -5299,8 +5305,8 @@ GLOBAL IMS_BOOL GetEntityBody(IN SipMessage *pstMessage, OUT AString &strEntityB
     IMS_MEM_Memset(pTmpBuffer, 0x00, nBuffLen);
 
     // Allocate a memory and initialize the entity-body buffer.
-    // This will be filled with the entire entity-body and then passed to IMSDigest_CalculateHEntity()
-    // to calculate the hash of the entity-body.
+    // This will be filled with the entire entity-body and then passed to
+    // IMSDigest_CalculateHEntity() to calculate the hash of the entity-body.
     if (sip_formMimeBody(IMS_NULL, pstMessage->slMessageBody,
             static_cast<SipContentTypeHeader*>(stHeader.pHeader),
             pTmpBuffer, &nBuffLen, SIPStackError()) == SIP_FALSE)
@@ -5408,7 +5414,10 @@ GLOBAL SIPTxnKey* CreateTxnKeyFromKey(IN SipTxnKey *pstTxnKey)
     SIPMethod objMethod(static_cast<const IMS_CHAR*>(pstTxnKey->GetMethod()));
     AString strViaBranch(TxnKey_GetViaBranch(pstTxnKey));
 
-    return new SIPTxnKey(objMethod, pstTxnKey->GetRespCode(), strViaBranch, pstTxnKey->GetCSeqNum());
+    return new SIPTxnKey(objMethod,
+            pstTxnKey->GetRespCode(),
+            strViaBranch,
+            pstTxnKey->GetCSeqNum());
 }
 
 /*
@@ -5451,7 +5460,8 @@ GLOBAL IMS_BOOL CompareTxnKeysForAck(IN SipTxnKey *pstTxnKey1, IN SipTxnKey *pst
             || (IMS_StrCmp(pstTxnKey1->GetCallId(), pstTxnKey2->GetCallId()) != 0)
             || (IMS_StrICmp(pstTxnKey1->GetFromTag(), pstTxnKey2->GetFromTag()) != 0)
             || (IMS_StrICmp(pstTxnKey1->GetToTag(), pstTxnKey2->GetToTag()) != 0)
-            || (IMS_StrICmp(pstTxnKey1->GetViaBranchParam(), pstTxnKey2->GetViaBranchParam()) != 0))
+            || (IMS_StrICmp(pstTxnKey1->GetViaBranchParam(),
+                    pstTxnKey2->GetViaBranchParam()) != 0))
     {
         return IMS_FALSE;
     }
@@ -5481,7 +5491,8 @@ GLOBAL IMS_BOOL CompareTxnKeysForCancel(IN SipTxnKey *pstCancelKey, IN SipTxnKey
         IMS_TRACE_D("Transaction Matching -----> Compliant to RFC 3261", 0, 0, 0);
 
         // Request was generated by a client transaction compliant to RFC 3261.
-        // Therefore, the branch parameter will be unique across all transactions sent by that client.
+        // Therefore, the branch parameter will be unique across all transactions
+        // sent by that client.
         if (IMS_StrICmp(pstCancelKey->m_pszViaBranchParam, pstTxnKey->m_pszViaBranchParam) != 0)
         {
             return IMS_FALSE;
@@ -5671,16 +5682,16 @@ GLOBAL void FreeTxnKey(IN SipTxnKey *&pstTxnKey)
 Remarks
 
 */
-GLOBAL void FreeTxnBuffer(IN SipTxnBuffer *&pstTxnBuffer)
+GLOBAL void FreeTxn(IN SipTxn*& pTxn)
 {
     //---------------------------------------------------------------------------------------------
 
-    if (pstTxnBuffer != IMS_NULL)
+    if (pTxn != IMS_NULL)
     {
-        pstTxnBuffer->SipDelete();
+        pTxn->SipDelete();
     }
 
-    pstTxnBuffer = IMS_NULL;
+    pTxn = IMS_NULL;
 }
 
 /*
@@ -5715,7 +5726,7 @@ GLOBAL void TerminateTransaction(IN SipTxnKey *pstTxnKey)
 Remarks
 
 */
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimerType enTimerType)
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipEn_TimerType enTimerType)
 {
     static const IMS_CHAR* acTimerType[] =
         {
@@ -5747,16 +5758,16 @@ GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimerType enTimerType)
 Remarks
 
 */
-GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTxnTimeoutData *pstData)
+GLOBAL const IMS_CHAR* GetTimerTypeAsString(IN SipTimeoutData* pData)
 {
     //---------------------------------------------------------------------------------------------
 
-    if (pstData == IMS_NULL)
+    if (pData == IMS_NULL)
     {
         return "__INVALID__";
     }
 
-    return GetTimerTypeAsString(static_cast<SipEn_TimerType>(pstData->GetTimerType()));
+    return GetTimerTypeAsString(static_cast<SipEn_TimerType>(pData->GetTimerType()));
 }
 
 /*
@@ -5765,7 +5776,7 @@ Remarks
 
 */
 GLOBAL void InvokeTimerCallback(IN SipTimerCallback pfnCallback,
-        IN SipTxnTimeoutData *pstData, IN IMS_PVOID pvExtraParam)
+        IN SipTimeoutData* pData, IN IMS_PVOID pvExtraParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -5774,7 +5785,7 @@ GLOBAL void InvokeTimerCallback(IN SipTimerCallback pfnCallback,
         return;
     }
 
-    pfnCallback(pstData, pvExtraParam);
+    pfnCallback(pData, pvExtraParam);
 }
 
 /*

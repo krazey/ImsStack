@@ -231,7 +231,7 @@ IMS_RESULT SIPMessage::AddHeader(IN IMS_SINT32 nType, IN CONST AString &strValue
     }
     else
     {
-        SipHeader *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
+        SipHeaderBase *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
 
         if (pstHeader == IMS_NULL)
         {
@@ -290,7 +290,7 @@ AString SIPMessage::GetHeader(IN IMS_SINT32 nType, IN IMS_SINT32 nIndex /* = 0 *
             return AString::ConstNull();
         }
 
-        SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, nType, nIndex);
+        SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, nType, nIndex);
         AString strHeader;
 
         SIPStack::EncodeHeaderBody(pstHeader, IMS_TRUE, strHeader);
@@ -352,7 +352,7 @@ IMSList<AString> SIPMessage::GetHeaders(IN IMS_SINT32 nType,
 
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, nType, i);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, nType, i);
 
             if (SIPStack::IsValidHeader(pstHeader))
             {
@@ -391,7 +391,7 @@ IMS_RESULT SIPMessage::PrependHeader(IN IMS_SINT32 nType, IN CONST AString &strV
     }
     else
     {
-        SipHeader *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
+        SipHeaderBase *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
 
         if (pstHeader == IMS_NULL)
         {
@@ -451,7 +451,7 @@ IMS_RESULT SIPMessage::SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue
     }
     else
     {
-        SipHeader *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
+        SipHeaderBase *pstHeader = SIPStack::DecodeHeader(nType, strName, strValue);
 
         if (pstHeader == IMS_NULL)
         {
@@ -1237,7 +1237,7 @@ IMS_BOOL SIPMessage::ExtractBodyParts()
         SIPStack::FreeMessageBody(pstMsgBody);
 
         // Set "Content-" headers
-        SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTENT_TYPE);
+        SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTENT_TYPE);
         pBodyPart->SetHeader(pstHeader, ISIPMessageBodyPart::CONTENT_TYPE);
 
         SIPStack::FreeHeaderEx(pstHeader);
@@ -1340,7 +1340,7 @@ IMS_BOOL SIPMessage::ExtractUnknownHeaders()
 
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::UNKNOWN, i);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::UNKNOWN, i);
 
             objUnknownHeaders.AddHeader(SIPStack::GetUnknownHeaderName(pstHeader),
                     SIPStack::GetUnknownHeaderBody(pstHeader));

@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_TRANSACTION_TIMER_H_
-#define _SIP_TRANSACTION_TIMER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_TRANSACTION_TIMER_H_
+#define SIP_TRANSACTION_TIMER_H_
 
 #include "ITimer.h"
 
@@ -19,28 +22,27 @@ class SIPTransactionTimer
     : public ITimerListener
 {
 public:
-    SIPTransactionTimer(IN SipTxnTimeoutData *pstData_, IN SipTimerCallback pfnTimerCallback_);
+    SIPTransactionTimer(IN SipTimeoutData* pData, IN SipTimerCallback pfnTimerCallback);
     virtual ~SIPTransactionTimer();
 
-private:
-    SIPTransactionTimer(IN CONST SIPTransactionTimer &objRHS);
-    SIPTransactionTimer& operator=(IN CONST SIPTransactionTimer &objRHS);
+    SIPTransactionTimer(IN const SIPTransactionTimer&) = delete;
+    SIPTransactionTimer& operator=(IN const SIPTransactionTimer&) = delete;
 
 public:
     IMS_BOOL Start(IN IMS_SINT32 nDuration);
-    void Stop(OUT SipTxnTimeoutData *&pstData_);
+    void Stop(OUT SipTimeoutData*& pData);
 
-    static void FreeTimer(IN void *pvTimerHandle);
-    static void TimerExpired(IN SipTimerType enTimer);
+    static void FreeTimer(IN void* pvTimerHandle);
+    static void TimerExpired(IN SipEn_TimerType enTimerType);
 
 private:
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
-    ITimer *piTimer;
-    SipTxnTimeoutData *pstData;
-    SipTimerCallback pfnTimerCallback;
+    ITimer* m_piTimer;
+    SipTimeoutData* m_pData;
+    SipTimerCallback m_pfnTimerCallback;
 };
 
-#endif // _SIP_TRANSACTION_TIMER_H_
+#endif

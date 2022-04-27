@@ -481,7 +481,7 @@ void SIPServerTransactionState::RejectRequest(IN IMS_SINT32 nStatusCode,
         AString strRA_Value;
         strRA_Value.SetNumber(SIPHeaderUtil::GenerateRetryAfterSeconds(10));
 
-        SipHeader *pstHeader = SIPStack::DecodeHeader(ISIPHeader::RETRY_AFTER_SEC, strRA_Value);
+        SipHeaderBase *pstHeader = SIPStack::DecodeHeader(ISIPHeader::RETRY_AFTER_SEC, strRA_Value);
 
         if (pstHeader != IMS_NULL)
         {
@@ -523,7 +523,7 @@ void SIPServerTransactionState::RejectRequest(IN IMS_SINT32 nStatusCode,
         AString strRA_Value;
         strRA_Value.SetNumber(SIPHeaderUtil::GenerateRetryAfterSeconds(10));
 
-        SipHeader *pstHeader = SIPStack::DecodeHeader(ISIPHeader::RETRY_AFTER_SEC, strRA_Value);
+        SipHeaderBase *pstHeader = SIPStack::DecodeHeader(ISIPHeader::RETRY_AFTER_SEC, strRA_Value);
 
         if (pstHeader != IMS_NULL)
         {
@@ -551,7 +551,7 @@ void SIPServerTransactionState::RejectRequest(IN IMS_SINT32 nStatusCode,
                 continue;
             }
 
-            SipHeader *pstHeader = SIPStack::DecodeHeader(
+            SipHeaderBase *pstHeader = SIPStack::DecodeHeader(
                     ISIPHeader::ALLOW, SIPMethod::ToName(i));
 
             if (pstHeader != IMS_NULL)
@@ -587,7 +587,7 @@ void SIPServerTransactionState::RejectRequest(IN IMS_SINT32 nStatusCode,
                 strHName = SIPHeaderName::USER_AGENT;
             }
 
-            SipHeader *pstUserAgent = SIPStack::DecodeHeader(
+            SipHeaderBase *pstUserAgent = SIPStack::DecodeHeader(
                     ISIPHeader::UNKNOWN, strHName, strUAString);
 
             if (pstUserAgent != IMS_NULL)
@@ -1008,8 +1008,8 @@ PRIVATE
 IMS_BOOL SIPServerTransactionState::InitResponse(IN IMS_SINT32 nStatusCode,
         OUT SipMessage *&pstOutMessage)
 {
-    SipHeader *pstGetHdr;
-    SipHeader *pstHeader;
+    SipHeaderBase *pstGetHdr;
+    SipHeaderBase *pstHeader;
 
     SIPMethod objMethod = SIPStack::GetMethod(pstLastMessage);
 
@@ -1223,7 +1223,7 @@ IMS_BOOL SIPServerTransactionState::InitResponse(IN IMS_SINT32 nStatusCode,
         if (strSessionId.GetLength() > 0)
         {
             const AString SESSION_ID(SIPHeaderName::SESSION_ID);
-            SipHeader *pstSessionId = SIPStack::DecodeHeader(
+            SipHeaderBase *pstSessionId = SIPStack::DecodeHeader(
                     ISIPHeader::UNKNOWN, SESSION_ID, strSessionId);
 
             if (pstSessionId != IMS_NULL)
