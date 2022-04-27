@@ -821,7 +821,7 @@ void UceSubscribe::CreateXMLDocumentHelperThread()
 {
     IMS_TRACE_D( "CreateXMLDocumentHelperThread() ", 0, 0, 0 );
     if (m_pUceXmlDocumentHelperThread == IMS_NULL) {
-        m_pUceXmlDocumentHelperThread = new UceXmlDocumentHelperThread(GetName());
+        m_pUceXmlDocumentHelperThread = new UceXmlDocumentHelperThread(GetName(), m_nSimSlot);
         if (m_pUceXmlDocumentHelperThread != IMS_NULL) {
             m_pUceXmlDocumentHelperThread->Start(m_strXMLDocumentHelperThreadName);
         }

@@ -36,8 +36,10 @@
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
 PUBLIC
-UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(IN CONST AString &strQueryName)
-    : m_nIndex(10)
+UceXmlDocumentHelperThread::UceXmlDocumentHelperThread(IN CONST AString &strQueryName,
+    IN IMS_SINT32 nSimSlot)
+    : m_nSimSlot(nSimSlot)
+    , m_nIndex(10)
     , m_strQueryName(strQueryName)
     , m_strThreadName(AString::ConstNull())
     , m_piThread(IMS_NULL)
@@ -77,7 +79,7 @@ IMS_BOOL UceXmlDocumentHelperThread::Start(IN CONST AString &strName, IN IMS_UIN
         return IMS_TRUE;
     }
 
-    m_piThread = ThreadService::GetThreadService()->Create(m_strThreadName);
+    m_piThread = ThreadService::GetThreadService()->Create(m_strThreadName, m_nSimSlot);
 
     if (m_piThread == IMS_NULL) {
         IMS_TRACE_I("Start : creating a thread (%s) failed.", m_strThreadName.GetStr(), 0, 0);
