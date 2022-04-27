@@ -88,6 +88,15 @@ public interface IAosRegistration {
     public void controlRegistration(int requestType, int pcscfOrder);
 
     /**
+     * This method is returns the network type in whtich the IMS registered.
+     *
+     * @return int returns NetworkType {@link IAosRegistrationListener.NetworkType}
+     *    {@code IAosRegistrationListener.NetworkType.NONE} if IMS is not registered,
+     *    The NetworkType is returns, if IMS is registered.
+     */
+    public int getRegisteredNetworkType();
+
+    /**
      * Request Type
      */
     class RequestType {
