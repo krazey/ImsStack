@@ -201,10 +201,10 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData *pUserData,
 }
 
 LOCAL SIP_BOOL SIPStackTxnLayer_StartTimer(IN SIP_UINT32 nDuration,
-        IN SIPCB_TIMERHANDLER pfnTimerExpired, IN SIP_VOID *pvData, OUT SIP_VOID **ppvHandle)
+        IN SipTimerCallback pfnTimerCallback, IN SIP_VOID *pvData, OUT SIP_VOID **ppvHandle)
 {
-    SipTxnTimeoutData *pTimeoutData = reinterpret_cast<SipTxnTimeoutData*>(pvData);
-    SIPTransactionTimer *pTimer = new SIPTransactionTimer(pTimeoutData, pfnTimerExpired);
+    SipTimeoutData* pTimeoutData = reinterpret_cast<SipTimeoutData*>(pvData);
+    SIPTransactionTimer* pTimer = new SIPTransactionTimer(pTimeoutData, pfnTimerCallback);
 
     if (pTimer == IMS_NULL)
     {
@@ -230,7 +230,7 @@ LOCAL SIP_BOOL SIPStackTxnLayer_StopTimer(IN SIP_VOID *pvHandle, OUT SIP_VOID **
         return SIP_FALSE;
     }
 
-    pTimer->Stop(reinterpret_cast<SipTxnTimeoutData *&>(*ppvData));
+    pTimer->Stop(reinterpret_cast<SipTimeoutData*&>(*ppvData));
 
     delete pTimer;
 

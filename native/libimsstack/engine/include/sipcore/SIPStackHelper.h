@@ -13,11 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef SIP_STACK_HEADERS_H_
-#define SIP_STACK_HEADERS_H_
+#ifndef SIP_STACK_HELPER_H_
+#define SIP_STACK_HELPER_H_
 
-#include "SIPStack.h"
-#include "SIPStackHelper.h"
-#include "SIPStackCallback.h"
+#include "msg/SipAddrSpec.h"
+
+#include "AString.h"
+
+class ISIPHeader;
+
+namespace SIPStack
+{
+
+GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
+        OUT IMSList<ISIPHeader*> &objHeaders);
+
+GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
+        OUT IMSList<ISIPHeader*> &objHeaders);
+
+}
 
 #endif

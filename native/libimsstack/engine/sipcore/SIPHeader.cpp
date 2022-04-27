@@ -186,7 +186,7 @@ SIPHeader::SIPHeader(IN CONST AString &strName_)
 }
 
 /*
- Constructs a new SIPHeader from the pointer to SipHeader structure.
+ Constructs a new SIPHeader from the pointer to SipHeaderBase structure.
 
 Remarks
 
@@ -194,7 +194,7 @@ Parameters
 <table>
 parameter               description
 ----------              ----------
-pstHeader               Pointer to SipHeader (which is defined by SIP stack)
+pstHeader               Pointer to SipHeaderBase (which is defined by SIP stack)
 </table>
 
 Returns
@@ -204,7 +204,7 @@ return                  description
 </table>
 */
 PUBLIC
-SIPHeader::SIPHeader(IN CONST SipHeader *pstHeader)
+SIPHeader::SIPHeader(IN CONST SipHeaderBase *pstHeader)
     : nType(ISIPHeader::ANY)
     , strName(AString::ConstNull())
     , strBody(AString::ConstNull())
@@ -216,7 +216,7 @@ SIPHeader::SIPHeader(IN CONST SipHeader *pstHeader)
 
     if (nType == ISIPHeader::UNKNOWN)
     {
-        strName = SIPStack::GetUnknownHeaderName(const_cast<SipHeader*>(pstHeader));
+        strName = SIPStack::GetUnknownHeaderName(const_cast<SipHeaderBase*>(pstHeader));
     }
     else
     {
@@ -242,7 +242,7 @@ SIPHeader::SIPHeader(IN CONST SipHeader *pstHeader)
             && (nType != ISIPHeader::P_ASSERTED_IDENTITY)
             && (nType != ISIPHeader::UNKNOWN))
     {
-        objParams = SIPStack::ExtractParameters(const_cast<SipHeader*>(pstHeader));
+        objParams = SIPStack::ExtractParameters(const_cast<SipHeaderBase*>(pstHeader));
     }
 }
 
@@ -1178,7 +1178,7 @@ IMS_BOOL SIPHeader::Decode(IN CONST AString &strBody_,
         return IMS_TRUE;
     }
 
-    SipHeader *pstHeader = SIPStack::DecodeHeader(nType, strName, strTrimmedBody);
+    SipHeaderBase *pstHeader = SIPStack::DecodeHeader(nType, strName, strTrimmedBody);
 
     if (pstHeader == IMS_NULL)
     {

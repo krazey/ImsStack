@@ -36,7 +36,7 @@ SIPDialogState::PendingRemoteTarget::PendingRemoteTarget()
 
 PUBLIC
 SIPDialogState::PendingRemoteTarget::PendingRemoteTarget(
-        IN CONST AString &strKey_, IN SipHeader *pstHeader_)
+        IN CONST AString &strKey_, IN SipHeaderBase *pstHeader_)
     : strKey(strKey_)
     , pstHeader(pstHeader_)
 {
@@ -170,7 +170,7 @@ IMS_SINT32 SIPDialogState::CheckToTagValidity(IN CONST SIPMessageInfo &objMInfo)
     AString strNewLocalTag;
     AString strNewRemoteTag;
 
-    SipHeader *pstHeader;
+    SipHeaderBase *pstHeader;
 
     if (SIPStack::IsRequestMessage(pstMessage))
     {
@@ -489,7 +489,7 @@ Remarks
 
 */
 PUBLIC
-SipHeader* SIPDialogState::GetLocalTargetURI() const
+SipHeaderBase* SIPDialogState::GetLocalTargetURI() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -504,8 +504,8 @@ Remarks
 PUBLIC
 IMS_BOOL SIPDialogState::InitDialogDetails(IN SipMessage *pstMessage)
 {
-    SipHeader *pstHeader;
-    SipHeader *pstTmpHeader;
+    SipHeaderBase *pstHeader;
+    SipHeaderBase *pstTmpHeader;
 
     //---------------------------------------------------------------------------------------------
 
@@ -654,7 +654,7 @@ IMS_BOOL SIPDialogState::InitDialogDetails(IN IMS_SINT32 nTrigger, IN SIPDialogS
         nLocalCSeq = 1;
 
 #ifdef __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
-        SipHeader *pstTmpHeader = SIPStack::CloneHeader(pstRemoteURI);
+        SipHeaderBase *pstTmpHeader = SIPStack::CloneHeader(pstRemoteURI);
 
         if (pstTmpHeader != IMS_NULL)
         {
@@ -698,7 +698,7 @@ PUBLIC
 IMS_BOOL SIPDialogState::InitRequest(IN CONST SIPMethod &objMethod,
         IN_OUT SipMessage *&pstMessage)
 {
-    SipHeader *pstHeader;
+    SipHeaderBase *pstHeader;
 
     //---------------------------------------------------------------------------------------------
 
@@ -757,7 +757,7 @@ IMS_BOOL SIPDialogState::InitRequest(IN CONST SIPMethod &objMethod,
     // Route
     for (IMS_UINT32 i = 0; i < objRouteSet.GetSize(); ++i)
     {
-        SipHeader *pstHeader = objRouteSet.GetAt(i);
+        SipHeaderBase *pstHeader = objRouteSet.GetAt(i);
 
         if (pstHeader != IMS_NULL)
         {
@@ -931,7 +931,7 @@ IMS_SINT32 SIPDialogState::UpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo
             // Only RPR's with a different tag cause formation of different call legs.
             // As we don't support multiple call legs, for now we will update the to-tag
             // for any incoming response.
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::TO);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::TO);
             AString strMsgTag = SIPStack::GetParameter(pstHeader, SIP::STR_TAG);
             SIPStack::FreeHeaderEx(pstHeader);
 
@@ -979,7 +979,7 @@ IMS_SINT32 SIPDialogState::UpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo
             //  b) If the original call was from the other end,
             //    and the From tag in the dialog state is NULL,
             //    then we need to update it with the received tag.
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
             AString strMsgTag = SIPStack::GetParameter(pstHeader, SIP::STR_TAG);
             SIPStack::FreeHeaderEx(pstHeader);
 
@@ -1320,7 +1320,7 @@ void SIPDialogState::ClearRouteSet()
 
     for (IMS_UINT32 i = 0; i < objRouteSet.GetSize(); ++i)
     {
-        SipHeader *pstHeader = objRouteSet.GetAt(i);
+        SipHeaderBase *pstHeader = objRouteSet.GetAt(i);
 
         SIPStack::FreeHeaderEx(pstHeader);
     }
@@ -1346,8 +1346,8 @@ IMS_BOOL SIPDialogState::CreateRouteSet(IN CONST SIPMessageInfo &objMInfo)
 
         if (nHCount != 0)
         {
-            SipHeader *pstRRHdr;
-            SipHeader *pstHeader;
+            SipHeaderBase *pstRRHdr;
+            SipHeaderBase *pstHeader;
 
             IMS_SINT32 nIndex;
 
@@ -1420,8 +1420,8 @@ Remarks
 PRIVATE
 IMS_BOOL SIPDialogState::UpdateComponents(IN CONST SIPMessageInfo &objMInfo)
 {
-    SipHeader *pstHeader;
-    SipHeader *pstTmpHeader;
+    SipHeaderBase *pstHeader;
+    SipHeaderBase *pstTmpHeader;
     SipMessage *pstMessage = objMInfo.GetMessage();
 
     IMS_SINT32 nHType;
@@ -1549,7 +1549,7 @@ IMS_BOOL SIPDialogState::UpdateContact(IN CONST SIPMessageInfo &objMInfo)
         {
             SIPStack::FreeHeader(pstLocalTargetURI);
 
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTACT_NORMAL);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTACT_NORMAL);
 
             if (pstHeader != IMS_NULL)
             {
@@ -1586,7 +1586,8 @@ IMS_BOOL SIPDialogState::UpdateContact(IN CONST SIPMessageInfo &objMInfo)
             {
                 SIPStack::FreeHeader(pstRemoteTargetURI);
 
-                SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTACT_NORMAL);
+                SipHeaderBase *pstHeader = SIPStack::GetHeader(
+                        pstMessage, ISIPHeader::CONTACT_NORMAL);
 
                 if (pstHeader != IMS_NULL)
                 {
@@ -1632,7 +1633,7 @@ IMS_BOOL SIPDialogState::UpdateRemoteURI(IN CONST SIPMessageInfo &objMInfo)
         return IMS_FALSE;
     }
 
-    SipHeader *pstTmpHeader;
+    SipHeaderBase *pstTmpHeader;
     IMS_SINT32 nHType;
 
     if (SIPStack::IsRequestMessage(pstMessage))
@@ -1653,7 +1654,7 @@ IMS_BOOL SIPDialogState::UpdateRemoteURI(IN CONST SIPMessageInfo &objMInfo)
     // Remote URI & Tag
     SIPStack::FreeHeader(pstRemoteURI);
 
-    SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, nHType);
+    SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, nHType);
 
 #ifdef __IMS_SIP_DIALOG_COMPONENT_BY_REFERENCE__
     pstTmpHeader = pstHeader;
@@ -1728,7 +1729,7 @@ void SIPDialogState::UpdateSessionId(IN CONST SIPMessageInfo &objMInfo)
         return;
     }
 
-    SipHeader *pstHeader = SIPStack::GetUnknownHeader(
+    SipHeaderBase *pstHeader = SIPStack::GetUnknownHeader(
                 objMInfo.GetMessage(), SIPHeaderName::SESSION_ID);
 
     if (SIPStack::IsValidHeader(pstHeader))
@@ -1842,8 +1843,8 @@ void SIPDialogState::AddPendingRemoteTarget(IN CONST SIPMessageInfo &objMInfo)
         }
     }
 
-    SipHeader *pstContact = IMS_NULL;
-    SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTACT_NORMAL);
+    SipHeaderBase *pstContact = IMS_NULL;
+    SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::CONTACT_NORMAL);
 
     if (SIPStack::IsValidHeader(pstHeader))
     {
@@ -2114,7 +2115,7 @@ Remarks
 
 */
 PRIVATE GLOBAL
-IMS_SINT32 SIPDialogState::CompareHeaders(IN SipHeader *pstNewH, IN SipHeader *pstExistingH,
+IMS_SINT32 SIPDialogState::CompareHeaders(IN SipHeaderBase *pstNewH, IN SipHeaderBase *pstExistingH,
         IN IMS_BOOL bToTagLenient, IN IMS_SINT32 nForkedMessage)
 {
     IMS_BOOL bToTagComparison = IMS_FALSE;
@@ -2289,7 +2290,7 @@ IMS_BOOL SIPDialogState::IsTargetRefreshMessage(IN SipMessage *pstMessage)
             if (SIPStack::IsMessageRPR(pstMessage) != IMS_TRUE)
             {
                 // Check if the message has a To-Tag or not
-                SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::TO);
+                SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::TO);
 
                 // Get To-Tag parameter from To header
                 AString strToTag = SIPStack::GetParameter(pstHeader, SIP::STR_TAG);

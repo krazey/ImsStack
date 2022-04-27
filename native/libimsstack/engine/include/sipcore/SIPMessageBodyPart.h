@@ -48,7 +48,7 @@ public:
     virtual void SetContent(IN CONST ByteArray &objContent);
 
     IMS_BOOL FormMessageBody();
-    void SetHeader(IN SipHeader *pstHeader,
+    void SetHeader(IN SipHeaderBase *pstHeader,
             IN IMS_SINT32 nType = ISIPMessageBodyPart::CONTENT_UNKNOWN);
     inline SipMsgBody* GetMessageBody() const
     { return pstMsgBody; }

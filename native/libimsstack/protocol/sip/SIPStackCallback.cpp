@@ -57,14 +57,14 @@ GLOBAL SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey,
 }
 
 GLOBAL SIP_BOOL sip_cbk_startTimer(IN SIP_UINT32 nDuration,
-        IN SIPCB_TIMERHANDLER pfnTimerHandler, IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle)
+        IN SipTimerCallback pfnTimerCallback, IN SIP_VOID* pvData, IN SIP_VOID** ppvHandle)
 {
     if (gstSIPStackCallbacks.pfnStartTimer == IMS_NULL)
     {
         return SIP_FALSE;
     }
 
-    return (gstSIPStackCallbacks.pfnStartTimer)(nDuration, pfnTimerHandler, pvData, ppvHandle);
+    return (gstSIPStackCallbacks.pfnStartTimer)(nDuration, pfnTimerCallback, pvData, ppvHandle);
 }
 
 GLOBAL SIP_BOOL sip_cbk_stopTimer(IN SIP_VOID* pvHandle, IN SIP_VOID** ppvData)

@@ -45,7 +45,7 @@ public:
     {
     public:
         PendingRemoteTarget();
-        PendingRemoteTarget(IN CONST AString &strKey_, IN SipHeader *pstHeader_);
+        PendingRemoteTarget(IN CONST AString &strKey_, IN SipHeaderBase *pstHeader_);
         ~PendingRemoteTarget();
 
     private:
@@ -54,7 +54,7 @@ public:
 
     public:
         AString strKey;
-        SipHeader *pstHeader;
+        SipHeaderBase *pstHeader;
     };
 
 public:
@@ -76,7 +76,7 @@ public:
     const ISIPHeader* GetContactHeader() const;
     AString GetLocalTag() const;
     AString GetRemoteTag() const;
-    SipHeader* GetLocalTargetURI() const;
+    SipHeaderBase* GetLocalTargetURI() const;
     inline IMS_UINT32 GetNextCSeqNumber()
     { return (++nLocalCSeq); }
     // HEADER_REQ_SESSION-ID
@@ -131,7 +131,7 @@ private:
     void SetFromChangeOption(IN IMS_SINT32 nOption);
     void UpdateFromChangeOption(IN CONST SIPMessageInfo &objMInfo);
 
-    static IMS_SINT32 CompareHeaders(IN SipHeader *pstNewH, IN SipHeader *pstExistingH,
+    static IMS_SINT32 CompareHeaders(IN SipHeaderBase *pstNewH, IN SipHeaderBase *pstExistingH,
             IN IMS_BOOL bToTagLenient, IN IMS_SINT32 nForkedMessage);
     static IMS_BOOL IsTargetRefreshMessage(IN SipMessage *pstMessage);
 
@@ -181,10 +181,10 @@ protected:
     IMS_BOOL bIsCaller; // caller or callee
 
     // Local URI
-    SipHeader *pstLocalURI;
+    SipHeaderBase *pstLocalURI;
 
     // Remote URI
-    SipHeader *pstRemoteURI;
+    SipHeaderBase *pstRemoteURI;
 
     // One of dialog ID
     AString strCallId;
@@ -200,13 +200,13 @@ protected:
     IMS_BOOL bSecure;
 
     // Route set
-    IMSList<SipHeader*> objRouteSet;
+    IMSList<SipHeaderBase*> objRouteSet;
 
     // Local target URI : multiple may be used
-    SipHeader *pstLocalTargetURI;
+    SipHeaderBase *pstLocalTargetURI;
 
     // Remote target URI (Contact list need to be managed ???)
-    SipHeader *pstRemoteTargetURI;
+    SipHeaderBase *pstRemoteTargetURI;
     // REMOTE_TARGET_UPDATE_FROM_MID_DIALOG_REQUEST
     IMSList<PendingRemoteTarget*> objPendingRemoteTargets;
 

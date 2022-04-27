@@ -32,7 +32,7 @@ public:
     SIPHeader();
     explicit SIPHeader(IN IMS_SINT32 nType_);
     explicit SIPHeader(IN CONST AString &strName_);
-    explicit SIPHeader(IN CONST SipHeader *pstHeader);
+    explicit SIPHeader(IN CONST SipHeaderBase *pstHeader);
     virtual ~SIPHeader();
 
 private:

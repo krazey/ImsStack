@@ -189,7 +189,7 @@ IMS_BOOL SIPClientTransport::FormViaHeader(IN_OUT SipMessage *&pstMessage,
     // Create a Via branch
     AString strBranch = SIPUtil::GenerateViaBranch(strExtensionTokenForViaBranch);
 
-    SipHeader *pstHeader = SIPStack::CreateViaHeader(strSentProtocol, strSentBy, strBranch);
+    SipHeaderBase *pstHeader = SIPStack::CreateViaHeader(strSentProtocol, strSentBy, strBranch);
 
     if (pstHeader == IMS_NULL)
     {

@@ -65,17 +65,14 @@ void SIPStackState::CleanUp()
                     continue;
                 }
 
-                SipTxnKey *pstKey = pTransaction->GetKey();
-                SipTxnBuffer *pstBuffer = pTransaction->GetBuffer();
+                SipTxnKey* pKey = pTransaction->GetKey();
 
-                SIPStack::TerminateTransaction(pstKey);
+                SIPStack::TerminateTransaction(pKey);
 
                 IMS_TRACE_D("StackState (Transaction) - Call ID (%s), Via Branch (%s)",
-                        SIPDebug::GetCharA1(SIPStack::TxnKey_GetCallId(pstKey), 8, '@'),
-                        SIPStack::TxnKey_GetViaBranch(pstKey), 0);
+                        SIPDebug::GetCharA1(SIPStack::TxnKey_GetCallId(pKey), 8, '@'),
+                        SIPStack::TxnKey_GetViaBranch(pKey), 0);
 
-                SIPStack::FreeTxnKey(pstKey);
-                SIPStack::FreeTxnBuffer(pstBuffer);
                 delete pTransaction;
             }
         }
@@ -167,7 +164,7 @@ IMS_BOOL SIPStackState::FetchTransaction(IN SipTxnKey *pKey, IN IMS_SINT32 nOpti
     }
 
     pOutKey = pTransaction->GetKey();
-    pTxn = pTransaction->GetBuffer();
+    pTxn = pTransaction->GetTxn();
 
     return IMS_TRUE;
 }
@@ -195,7 +192,7 @@ IMS_BOOL SIPStackState::ReleaseTransaction(IN SipTxnKey *pKey, IN IMS_SINT32 nOp
     if (nOption == TXN_REMOVE)
     {
         pOutKey = pTransaction->GetKey();
-        pTxn = pTransaction->GetBuffer();
+        pTxn = pTransaction->GetTxn();
 
         delete pTransaction;
     }

@@ -163,7 +163,7 @@ IMS_BOOL SIPClientTransactionState::FormMessageForResubmissionRequest()
 
     if (bFromTagRemovalRequired)
     {
-        SipHeader *pstFromHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
+        SipHeaderBase *pstFromHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
         SIPStack::RemoveParameter(SIP::STR_TAG, pstFromHeader);
         SIPStack::FreeHeaderEx(pstFromHeader);
     }
@@ -176,7 +176,7 @@ IMS_BOOL SIPClientTransactionState::FormMessageForResubmissionRequest()
     strHBody.Append(TextParser::CHAR_SP);
     strHBody.Append(objMethod.ToString());
 
-    SipHeader *pstHeader = SIPStack::DecodeHeader(ISIPHeader::CSEQ, strHBody);
+    SipHeaderBase *pstHeader = SIPStack::DecodeHeader(ISIPHeader::CSEQ, strHBody);
 
     if (!SIPStack::SetHeader(pstHeader, pstMessage))
     {
@@ -408,8 +408,8 @@ Remarks
 PUBLIC
 IMS_BOOL SIPClientTransactionState::InitCancel(IN CONST SIPClientTransactionState *pInviteTState)
 {
-    SipHeader *pstGetHdr;
-    SipHeader *pstHeader;
+    SipHeaderBase *pstGetHdr;
+    SipHeaderBase *pstHeader;
     SIPMethod objMethod(SIPMethod::CANCEL);
 
     //---------------------------------------------------------------------------------------------
@@ -1230,7 +1230,7 @@ IMS_BOOL SIPClientTransactionState::CorrectRouteHeader(IN_OUT SipMessage *&pstMe
     //    --> This addr-spec SHOULD be set in the Request-Line
     SipAddrSpec *pstReqLineAddrSpec = SIPStack::GetRequestUri(pstMessage);
 
-    SipHeader *pstRouteHeader = SIPStack::CreateHeader(ISIPHeader::ROUTE, pstReqLineAddrSpec);
+    SipHeaderBase *pstRouteHeader = SIPStack::CreateHeader(ISIPHeader::ROUTE, pstReqLineAddrSpec);
     SIPStack::FreeAddrSpec(pstReqLineAddrSpec);
 
     if (!SIPStack::AppendHeader(pstRouteHeader, pstMessage))
@@ -1464,8 +1464,8 @@ PRIVATE
 IMS_BOOL SIPClientTransactionState::InitAck(IN_OUT SipMessage *&pstAckMessage,
         IN SipMessage* pstRespMessage)
 {
-    SipHeader *pstGetHdr;
-    SipHeader *pstHeader;
+    SipHeaderBase *pstGetHdr;
+    SipHeaderBase *pstHeader;
     SIPMethod objMethodACK(SIPMethod::ACK);
 
     //---------------------------------------------------------------------------------------------
@@ -1649,7 +1649,7 @@ IMS_BOOL SIPClientTransactionState::SetDialogRelatedHeaders(IN CONST SIPMethod &
             // Add Call-ID in here
             const IPAddress &objAddress = pTransport->GetIPAddress();
             AString strCallId = SIPUtil::GenerateCallId(objAddress.ToString());
-            SipHeader *pstHeader = SIPStack::DecodeHeader(ISIPHeader::CALL_ID, strCallId);
+            SipHeaderBase *pstHeader = SIPStack::DecodeHeader(ISIPHeader::CALL_ID, strCallId);
 
             if (pstHeader == IMS_NULL)
                 return IMS_FALSE;
@@ -1670,7 +1670,7 @@ IMS_BOOL SIPClientTransactionState::SetDialogRelatedHeaders(IN CONST SIPMethod &
                 if (strSessionId.GetLength() > 0)
                 {
                     const AString SESSION_ID(SIPHeaderName::SESSION_ID);
-                    SipHeader *pstSessionId = SIPStack::DecodeHeader(
+                    SipHeaderBase *pstSessionId = SIPStack::DecodeHeader(
                             ISIPHeader::UNKNOWN, SESSION_ID, strSessionId);
 
                     if (pstSessionId != IMS_NULL)
@@ -1686,7 +1686,7 @@ IMS_BOOL SIPClientTransactionState::SetDialogRelatedHeaders(IN CONST SIPMethod &
         if (!objMethod.Equals(SIPMethod::CANCEL)
                 && !objMethod.Equals(SIPMethod::ACK))
         {
-            SipHeader *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
+            SipHeaderBase *pstHeader = SIPStack::GetHeader(pstMessage, ISIPHeader::FROM);
 
             if (!SIPStack::HasParameter(pstHeader, SIP::STR_TAG))
             {
@@ -1715,7 +1715,7 @@ Remarks
 PRIVATE
 IMS_BOOL SIPClientTransactionState::SetMandatoryHeaders(IN CONST SIPMethod &objMethod)
 {
-    SipHeader *pstHeader;
+    SipHeaderBase *pstHeader;
 
     //---------------------------------------------------------------------------------------------
 
@@ -1774,7 +1774,7 @@ void SIPClientTransactionState::SetPANIHeader(IN CONST SIPMethod& objMethod,
     {
         if (strPANI.GetLength() > 0)
         {
-            SipHeader* pstHeader = SIPStack::DecodeHeader(
+            SipHeaderBase* pstHeader = SIPStack::DecodeHeader(
                     ISIPHeader::P_ACCESS_NETWORK_INFO, AString::ConstNull(), strPANI);
 
             if (pstHeader != IMS_NULL)
