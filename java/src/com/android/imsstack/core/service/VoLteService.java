@@ -44,7 +44,6 @@ import com.android.imsstack.core.service.ECallStateService;
 import com.android.imsstack.core.service.EPDGCallService;
 import com.android.imsstack.core.service.SCMService;
 import com.android.imsstack.core.service.SrvccStateService;
-import com.android.imsstack.core.service.TtyService;
 import com.android.imsstack.core.service.USATService;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IService;
@@ -84,7 +83,6 @@ public class VoLteService implements IVoLteService {
     private int mCount = 0;
 
     private SubscriptionListenerProxy mSubscriptionListener = null;
-    private TtyService mTtyService = null;
 
     /**
      * Temporary information
@@ -399,11 +397,6 @@ public class VoLteService implements IVoLteService {
             gba.cleanup();
         }
 
-        if (mTtyService != null) {
-            mTtyService.cleanup(mContext);
-            mTtyService = null;
-        }
-
         ICallSettingService callSettingService =
                 (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
         if (callSettingService != null) {
@@ -428,9 +421,6 @@ public class VoLteService implements IVoLteService {
     }
 
     protected void operatorSpecificImsBootCompleted() {
-        mTtyService = new TtyService();
-        mTtyService.start((IVoLteService)this);
-
         ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
         ISIMState stg = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotID);
 
