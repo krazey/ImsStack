@@ -125,6 +125,9 @@ private:
     void NotifyState(IN IMS_UINT32 nState) const;
     void NotifyMonitorState(IN IMS_UINT32 nState) const;
 
+    IMS_BOOL IsPrimaryImpuValid(IN const AStringArray& objImpus) const;
+    IMS_BOOL IsSipUri(IN const AString& strImpu) const;
+
     // ISubscriberConfigListener
     void SubscriberConfig_InitCompleted() override;
     void SubscriberConfig_RefreshCompleted() override;
@@ -175,6 +178,7 @@ private:
     static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
     static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
+    static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;
 
     AString m_strTag;
 };
