@@ -255,7 +255,6 @@ public class ProviderDBUpdateHelper {
         }
 
         setCustomUserAgentHeader(context);
-        setForTMO(context);
 
         release();
 
@@ -863,17 +862,6 @@ public class ProviderDBUpdateHelper {
                 Log.d(TAG, "Updating ISIM/USIM feature failed");
             }
             setCustomUserAgentHeader(context);
-        }
-    }
-
-    private void setForTMO(Context context) {
-        // Set trace flag depending on "P log" or "admin_debug" property
-        int adminFeatures = ImsDbController.Subscriber.getAdminFeatures(mSlotId);
-
-        if (ImsDbController.isDebugEnabled(adminFeatures)) {
-            ImsLog.updateConfig("0x0001000F", mSlotId);
-        } else {
-            ImsLog.updateConfig("0x0001010F", mSlotId);
         }
     }
 
