@@ -50,21 +50,6 @@ public class ApnIms extends Apn {
                     ImsLog.w(nSlotId, "ims is off");
                     return false;
                 }
-
-                boolean bVxLTE = subsInfo.isVoLteServiceOn()
-                        || subsInfo.isViLteServiceOn();
-                boolean bVxWiFi = subsInfo.isVoWiFiServiceOn()
-                        || subsInfo.isViWiFiServiceOn();
-                boolean bSmsOnlySupported = FeatureUtils.isSMSOnlySupported(mContext);
-
-                ImsLog.i(nSlotId, "support :: VxLTE=" + bVxLTE + ", VxWiFi=" + bVxWiFi
-                        + ", SMSOnly=" + bSmsOnlySupported);
-
-                if (!bSmsOnlySupported) {
-                    if (bVxLTE != true && bVxWiFi != true) {
-                        return false;
-                    }
-                }
             }
 
             if (isApnEmployed() == false) {
