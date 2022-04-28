@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Message;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 
 import com.android.imsstack.core.agents.agentif.MsgProcInterface;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -132,7 +133,7 @@ public class ApnXcap extends Apn {
             }
 
             // Check to get Ipv6
-            if (mApnProtocol != PROTOCOL_IP) {
+            if (mApnProtocol != ApnSetting.PROTOCOL_IP) {
                 if (procWaitingLocalAddressForIpv6() == true) {
                     ImsLog.i("can't obtain IPv6, wait " +
                             OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL + "ms");
