@@ -44,7 +44,10 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nI
     }
     else
     {
-        pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+        if (pServiceThread)
+        {
+            pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+        }
         // TODO: this must be called when registration is refreshed?
         m_objConfiguration.OnRegistrationRefreshed();
     }
@@ -82,7 +85,10 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
     }
     else
     {
-        pServiceThread->OnServiceChanged(IuMtcService::SERVICE_NONE, 0);
+        if (pServiceThread)
+        {
+            pServiceThread->OnServiceChanged(IuMtcService::SERVICE_NONE, 0);
+        }
     }
 }
 
