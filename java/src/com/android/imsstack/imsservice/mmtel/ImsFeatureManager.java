@@ -232,15 +232,12 @@ public class ImsFeatureManager {
             return;
         }
 
-        if (!mRegTracker.isCallVoiceSupported()
-                && !mRegTracker.isCallVideoSupported()
-                && !mRegTracker.isWifiCallSupported()) {
-            // Disable Ut interface if there are no IMS services
-            log("Ut :: No IMS services available");
+        if (mUt == null) {
+            log("Ut :: mUt is null");
             return;
         }
 
-        if ((mUt != null) && mUt.isUtAvailable()) {
+        if (mUt.isUtAvailable()) {
             enableFeature(ImsConfig.FeatureConstants.FEATURE_TYPE_UT_OVER_LTE);
             enableFeature(ImsConfig.FeatureConstants.FEATURE_TYPE_UT_OVER_WIFI);
         }
