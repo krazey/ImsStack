@@ -172,7 +172,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
     m_objContext.GetMediaManager().GetMediaInfo(
             m_objContext.GetUpdatingInfo().GetAlertingInfo());
 
-    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(&objSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(&objSession);
 
     eStateName = CallStateName::UPDATING;
 

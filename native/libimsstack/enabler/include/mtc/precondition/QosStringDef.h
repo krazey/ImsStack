@@ -10,7 +10,7 @@
 class QosStringDef
 {
 public:
-    inline static const IMS_CHAR* QOS_PS_MediaType(IN IMS_SINT32 eSdpMediaType)
+    inline static const IMS_CHAR* PS_SdpMediaType(IN IMS_SINT32 eSdpMediaType)
     {
         switch (eSdpMediaType)
         {
@@ -25,7 +25,7 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_AttrType(IN IMS_SINT32 eAttrType)
+    inline static const IMS_CHAR* PS_QosAttribute(IN IMS_SINT32 eAttrType)
     {
         switch (eAttrType)
         {
@@ -40,7 +40,7 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_CheckType(IN QosCheckType eCheckType)
+    inline static const IMS_CHAR* PS_QosCheckType(IN QosCheckType eCheckType)
     {
         switch (eCheckType)
         {
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_DirTag(IN IMS_SINT32 eDirTag)
+    inline static const IMS_CHAR* PS_QosDir(IN IMS_SINT32 eDirTag)
     {
         switch (eDirTag)
         {
@@ -72,7 +72,7 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_StrengthTag(IN IMS_SINT32 eStrengthTag)
+    inline static const IMS_CHAR* PS_QosStrength(IN IMS_SINT32 eStrengthTag)
     {
         switch (eStrengthTag)
         {
@@ -93,12 +93,12 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_LossPolicy(IN QosLossPolicy ePolicy)
+    inline static const IMS_CHAR* PS_QosLossPolicy(IN QosLossPolicy ePolicy)
     {
         switch (ePolicy)
         {
-            case QosLossPolicy::MAINTAIN_ASIS:
-                return "maintain-asis";
+            case QosLossPolicy::MAINTAIN:
+                return "maintain";
             case QosLossPolicy::MODIFY:
                 return "modify";
             case QosLossPolicy::RELEASE:
@@ -108,7 +108,7 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_Status(IN QosStatus eStatus)
+    inline static const IMS_CHAR* PS_QosStatus(IN QosStatus eStatus)
     {
         switch (eStatus)
         {
@@ -123,60 +123,60 @@ public:
         }
     }
 
-    inline static const IMS_CHAR* QOS_PS_TimerType(IN QosTimerType eTimerType)
+    inline static const IMS_CHAR* PS_QosTimerType(IN QosTimerType eTimerType)
     {
         switch (eTimerType)
         {
             case QosTimerType::WAIT_AVAILABLE:
-                return "timer - wait available";
+                return "wait available";
             case QosTimerType::GUARD_INACTIVE:
-                return "timer - guard inactive";
+                return "guard inactive";
             case QosTimerType::FORCE_AVAILABLE:
-                return "timer - force available";
+                return "force available";
             default:
                 return "invalid";
         }
     }
 };
 
-#ifndef QOS_PS_MediaType
-#define QOS_PS_MediaType(A) \
-QosStringDef::QOS_PS_MediaType(A)
+#ifndef PS_SdpMediaType
+#define PS_SdpMediaType(A) \
+QosStringDef::PS_SdpMediaType(A)
 #endif
 
-#ifndef QOS_PS_AttrType
-#define QOS_PS_AttrType(A) \
-QosStringDef::QOS_PS_AttrType(A)
+#ifndef PS_QosAttribute
+#define PS_QosAttribute(A) \
+QosStringDef::PS_QosAttribute(A)
 #endif
 
-#ifndef QOS_PS_CheckType
-#define QOS_PS_CheckType(A) \
-QosStringDef::QOS_PS_CheckType(A)
+#ifndef PS_QosCheckType
+#define PS_QosCheckType(A) \
+QosStringDef::PS_QosCheckType(A)
 #endif
 
-#ifndef QOS_PS_DirTag
-#define QOS_PS_DirTag(A) \
-QosStringDef::QOS_PS_DirTag(A)
+#ifndef PS_QosDir
+#define PS_QosDir(A) \
+QosStringDef::PS_QosDir(A)
 #endif
 
-#ifndef QOS_PS_StrengthTag
-#define QOS_PS_StrengthTag(A) \
-QosStringDef::QOS_PS_StrengthTag(A)
+#ifndef PS_QosStrength
+#define PS_QosStrength(A) \
+QosStringDef::PS_QosStrength(A)
 #endif
 
-#ifndef QOS_PS_LossPolicy
-#define QOS_PS_LossPolicy(A) \
-QosStringDef::QOS_PS_LossPolicy(A)
+#ifndef PS_QosLossPolicy
+#define PS_QosLossPolicy(A) \
+QosStringDef::PS_QosLossPolicy(A)
 #endif
 
-#ifndef QOS_PS_Status
-#define QOS_PS_Status(A) \
-QosStringDef::QOS_PS_Status(A)
+#ifndef PS_QosStatus
+#define PS_QosStatus(A) \
+QosStringDef::PS_QosStatus(A)
 #endif
 
-#ifndef QOS_PS_TimerType
-#define QOS_PS_TimerType(A) \
-QosStringDef::QOS_PS_TimerType(A)
+#ifndef PS_QosTimerType
+#define PS_QosTimerType(A) \
+QosStringDef::PS_QosTimerType(A)
 #endif
 
 #endif

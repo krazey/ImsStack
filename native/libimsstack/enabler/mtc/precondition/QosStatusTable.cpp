@@ -3,8 +3,7 @@
 #include "media/IMedia.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/QosStatusTable.h"
-// #include "define/MtcStringDef.h"
-// #include "precondition/QosStringDef.h"
+#include "precondition/QosStringDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -30,7 +29,7 @@ QosStatusTable::~QosStatusTable()
 }
 
 PUBLIC
-void QosStatusTable::UpdateStatusTable(IN IMedia* piMedia)
+void QosStatusTable::UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia)
 {
     if (piMedia == IMS_NULL)
     {
@@ -56,7 +55,7 @@ void QosStatusTable::UpdateStatusTable(IN IMedia* piMedia)
 
     if (pRemoteSdp == IMS_NULL)
     {
-        IMS_TRACE_D("UpdateStatusTable : no SDP from remote", 0, 0, 0);
+        IMS_TRACE_D("UpdateStatusTableWithRemoteSdp : no SDP from remote", 0, 0, 0);
         return;
     }
 
@@ -64,12 +63,13 @@ void QosStatusTable::UpdateStatusTable(IN IMedia* piMedia)
 
     if (pRemoteSdp->GetPort() <= 0)
     {
-        IMS_TRACE_D("UpdateStatusTable : %d - port is 0, no update.", eSdpMediaType, 0, 0);
+        IMS_TRACE_D("UpdateStatusTableWithRemoteSdp : %s - port is 0, no update.",
+                PS_SdpMediaType(eSdpMediaType), 0, 0);
         return;
     }
     else
     {
-        IMS_TRACE_D("UpdateStatusTable : %d", eSdpMediaType, 0, 0);
+        IMS_TRACE_D("UpdateStatusTableWithRemoteSdp : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
     }
 
     InitializeDesChecked(eSdpMediaType);
@@ -85,8 +85,9 @@ void QosStatusTable::UpdateLocalCurrentStatus(IN IMS_SINT32 eSdpMediaType,
     IMS_BOOL bLocalCurrentEnabled =
             IsCurrentStatusEnabled(eSdpMediaType, SdpPrecondition::STATUS_LOCAL);
 
-    IMS_TRACE_D("UpdateLocalCurrentStatus : [%d] QoS Status[%d] Local Status[%d]",
-            eSdpMediaType, bLocalQoSEnabled, bLocalCurrentEnabled);
+    IMS_TRACE_D("UpdateLocalCurrentStatus : [%s] QoS Status[%s] Local Status[%s]",
+            PS_SdpMediaType(eSdpMediaType), _TRACE_B_(bLocalQoSEnabled),
+            _TRACE_B_(bLocalCurrentEnabled));
 
     if (bLocalQoSEnabled == bLocalCurrentEnabled)
     {
@@ -110,8 +111,8 @@ void QosStatusTable::EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType)
 
     if (eRemoteCurrDir > SdpPrecondition::DIRECTION_NONE) // compare with desired direction?
     {
-        IMS_TRACE_D("EnableRemoteCurrentStatus : Remote Current Dir is %d, not to update.",
-                eRemoteCurrDir, 0, 0);
+        IMS_TRACE_D("EnableRemoteCurrentStatus : Remote Current Dir is %s, not to update.",
+                PS_QosDir(eRemoteCurrDir), 0, 0);
         return;
     }
 
@@ -202,9 +203,11 @@ void QosStatusTable::SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 
 
     if ((pRecord->eDirTag != eDirTag))
     {
-        IMS_TRACE_D("SetDirectionTag : media[%d] attr[%d] status[%d]",
-                eSdpMediaType, eAttrType, eStatusType);
-        IMS_TRACE_D("SetDirectionTag : [%d] -> [%d]", pRecord->eDirTag, eDirTag, 0);
+        IMS_TRACE_D("SetDirectionTag : media[%s] attr[%s] status[%s]",
+                PS_SdpMediaType(eSdpMediaType), PS_QosAttribute(eAttrType),
+                (eStatusType == SdpPrecondition::STATUS_LOCAL) ? "local" : "remote");
+        IMS_TRACE_D("SetDirectionTag : [%s] -> [%s]",
+                PS_QosDir(pRecord->eDirTag), PS_QosDir(eDirTag), 0);
 
         pRecord->eDirTag = eDirTag;
     }
@@ -226,9 +229,12 @@ void QosStatusTable::SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 e
     if ((eStrengthTag == SdpPrecondition::STRENGTH_NOTUSED)
             || (pRecord->eStrengthTag > eStrengthTag))
     {
-        IMS_TRACE_D("SetStrengthTag : media %d status %d dir %d", eSdpMediaType, eStatusType,
-                eDirTag);
-        IMS_TRACE_D("SetStrengthTag : [%d] -> [%d]", pRecord->eStrengthTag, eStrengthTag, 0);
+        IMS_TRACE_D("SetStrengthTag : media[%s] status[%s] dir[%s]",
+                PS_SdpMediaType(eSdpMediaType),
+                (eStatusType == SdpPrecondition::STATUS_LOCAL) ? "local" : "remote",
+                PS_QosDir(eDirTag));
+        IMS_TRACE_D("SetStrengthTag : [%s] -> [%s]", PS_QosStrength(pRecord->eStrengthTag),
+                PS_QosStrength(eStrengthTag), 0);
 
         pRecord->eStrengthTag = eStrengthTag;
     }
@@ -253,7 +259,7 @@ void QosStatusTable::CreateStatusRecords(IN IMS_SINT32 eSdpMediaType)
 
     AddStatusRecord(eSdpMediaType);
 
-    IMS_TRACE_D("CreateStatusRecords : %d", eSdpMediaType, 0, 0);
+    IMS_TRACE_D("CreateStatusRecords : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
 }
 
 PUBLIC
@@ -323,7 +329,7 @@ void QosStatusTable::AddStatusRecord(IN IMS_SINT32 eSdpMediaType)
 PRIVATE
 void QosStatusTable::InitializeDesChecked(IN IMS_SINT32 eSdpMediaType)
 {
-    IMS_TRACE_D("InitializeDesChecked : %d", eSdpMediaType, 0, 0);
+    IMS_TRACE_D("InitializeDesChecked : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
 
     IMSList<QosStatusRecord*>& lstStatusRecords = GetStatusRecords(eSdpMediaType);
 

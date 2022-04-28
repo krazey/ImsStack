@@ -300,7 +300,7 @@ CallStateName IdleState::ContinueHandleIncoming()
 
     // TODO: OnPreconditionReceived()
     // need to check the nego state?
-    if (!objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
+    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
     {
         objPreconditionManager.StartQosTimer(piSession);
     }

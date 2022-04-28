@@ -12,13 +12,13 @@
 #include "offeranswer/SdpPrecondition.h"
 #include "offeranswer/SdpSegmentedPrecondition.h"
 #include "precondition/SdpPreconditionHelper.h"
+#include "precondition/QosStringDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC GLOBAL
 void SdpPreconditionHelper::FormPreconditionSdp(IN ISession* piSession,
-        IN QosStatusTable* pStatusTable, IN IMS_BOOL bCheckQosWhileCallUpgrade,
-        IN IMS_BOOL bUseConf /*= IMS_FALSE*/)
+        IN QosStatusTable* pStatusTable, IN IMS_BOOL bUseConf)
 {
     if (piSession == IMS_NULL || pStatusTable == IMS_NULL)
     {
@@ -27,9 +27,7 @@ void SdpPreconditionHelper::FormPreconditionSdp(IN ISession* piSession,
     }
 
     IMSList<IMedia*> lstMedias = piSession->GetMedia();
-    IMS_UINT32 nSize = lstMedias.GetSize();
-
-    for (IMS_UINT32 index = 0; index < nSize; index++)
+    for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         IMedia* piMedia = lstMedias.GetAt(index);
         if (piMedia == IMS_NULL || piMedia->GetState() == IMedia::STATE_DELETED)
@@ -57,19 +55,13 @@ void SdpPreconditionHelper::FormPreconditionSdp(IN ISession* piSession,
 
         if (pLocalSdp->GetPort() <= 0)
         {
-            IMS_TRACE_D("FormPreconditionSdp : %d, don't form qos attributes, port is %d.",
-                    eSdpMediaType, pLocalSdp->GetPort(), 0);
+            IMS_TRACE_D("FormPreconditionSdp : %s, don't form qos attributes, port is %d.",
+                    PS_SdpMediaType(eSdpMediaType), pLocalSdp->GetPort(), 0);
             continue;
         }
 
-        if (!bCheckQosWhileCallUpgrade && (piSession->GetState() >= ISession::STATE_ESTABLISHED))
-        {
-            IMS_TRACE_D("FormPreconditionSdp : %d is added by call upgrade.",
-                    eSdpMediaType, 0, 0);
-            pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType, IMS_TRUE);
-        }
-
-        IMS_TRACE_D("FormPreconditionSdp : %d, start forming", eSdpMediaType, 0, 0);
+        IMS_TRACE_D("FormPreconditionSdp : %s, start forming",
+                PS_SdpMediaType(eSdpMediaType), 0, 0);
 
         FormCurrentAttribute(piMediaDescriptor, pStatusTable);
         FormDesiredAttribute(piMediaDescriptor, pStatusTable);
@@ -244,12 +236,12 @@ IMS_BOOL SdpPreconditionHelper::IsPreconditionIncludedInSdp(IN ISession* piSessi
         }
     }
 
-    IMS_TRACE_D("IsPreconditionIncludedInSdp : %d", bResult, 0, 0);
+    IMS_TRACE_D("IsPreconditionIncludedInSdp : %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
 }
 
 PUBLIC GLOBAL
-IMS_BOOL SdpPreconditionHelper::IsQosActivatedInSdp(IN ISession* piSession,
+IMS_BOOL SdpPreconditionHelper::IsLocalResourceReservedInSdp(IN ISession* piSession,
         IN IMS_SINT32 nServiceMethod)
 {
     if (piSession == IMS_NULL)
@@ -260,7 +252,7 @@ IMS_BOOL SdpPreconditionHelper::IsQosActivatedInSdp(IN ISession* piSession,
     IMessage* piRequestMessage = piSession->GetPreviousRequest(nServiceMethod);
     if (piRequestMessage == IMS_NULL)
     {
-        IMS_TRACE_D("IsQosActivatedInSdp : no request", 0, 0, 0);
+        IMS_TRACE_D("IsLocalResourceReservedInSdp : no request", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -268,20 +260,20 @@ IMS_BOOL SdpPreconditionHelper::IsQosActivatedInSdp(IN ISession* piSession,
 
     if (piRequestMessage->GetState() == IMessage::STATE_SENT)
     {
-        IMS_TRACE_D("IsQosActivatedInSdp : Check QoS attributes from Request[%d]", nServiceMethod,
-                0, 0);
+        IMS_TRACE_D("IsLocalResourceReservedInSdp : Check QoS attributes from Request[%d]",
+                nServiceMethod, 0, 0);
 
         piSipMessage = piRequestMessage->GetMessage();
     }
     else
     {
-        IMS_TRACE_D("IsQosActivatedInSdp : Check QoS attributes from Response[%d]", nServiceMethod,
-                0, 0);
+        IMS_TRACE_D("IsLocalResourceReservedInSdp : Check QoS attributes from Response[%d]",
+                nServiceMethod, 0, 0);
 
         IMSList<IMessage*> lstResponseMessages = piSession->GetPreviousResponses(nServiceMethod);
         if (lstResponseMessages.GetSize() <= 0)
         {
-            IMS_TRACE_D("IsQosActivatedInSdp : no responses", 0, 0, 0);
+            IMS_TRACE_D("IsLocalResourceReservedInSdp : no responses", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -297,7 +289,7 @@ IMS_BOOL SdpPreconditionHelper::IsQosActivatedInSdp(IN ISession* piSession,
 
         if (piResponseMessage == IMS_NULL)
         {
-            IMS_TRACE_D("IsQosActivatedInSdp : No Response to request from DUT.", 0, 0, 0);
+            IMS_TRACE_D("IsLocalResourceReservedInSdp : No Response to request from DUT.", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -306,15 +298,15 @@ IMS_BOOL SdpPreconditionHelper::IsQosActivatedInSdp(IN ISession* piSession,
 
     if (piSipMessage == IMS_NULL)
     {
-        IMS_TRACE_D("IsQosActivatedInSdp : piSipMessage is null", 0, 0, 0);
+        IMS_TRACE_D("IsLocalResourceReservedInSdp : piSipMessage is null", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_BOOL bResult = (CheckActivatedQosInSdp(piSipMessage, SdpMedia::TYPE_AUDIO) &&
-            CheckActivatedQosInSdp(piSipMessage, SdpMedia::TYPE_VIDEO) &&
-            CheckActivatedQosInSdp(piSipMessage, SdpMedia::TYPE_TEXT));
+    IMS_BOOL bResult = (HasReservedResourceInSdp(piSipMessage, SdpMedia::TYPE_AUDIO) &&
+            HasReservedResourceInSdp(piSipMessage, SdpMedia::TYPE_VIDEO) &&
+            HasReservedResourceInSdp(piSipMessage, SdpMedia::TYPE_TEXT));
 
-    IMS_TRACE_D("IsQosActivatedInSdp : Result - %d", bResult, 0, 0);
+    IMS_TRACE_D("IsLocalResourceReservedInSdp : Result - %s", _TRACE_B_(bResult), 0, 0);
     return bResult;
 }
 
@@ -434,12 +426,12 @@ void SdpPreconditionHelper::FormConfirmAttribute(IN IMediaDescriptor* piMediaDes
 
     if (pStatusTable->IsCurrentStatusEnabled(eSdpMediaType, SdpPrecondition::STATUS_REMOTE))
     {
-        IMS_TRACE_D("FormConfirmAttribute : %d, don't form confirm attribute",
-                eSdpMediaType, 0, 0);
+        IMS_TRACE_D("FormConfirmAttribute : %s, don't form confirm attribute",
+                PS_SdpMediaType(eSdpMediaType), 0, 0);
         return;
     }
 
-    IMS_TRACE_D("FormConfirmAttribute : %d", eSdpMediaType, 0, 0);
+    IMS_TRACE_D("FormConfirmAttribute : %s", PS_SdpMediaType(eSdpMediaType), 0, 0);
 
     IMS_SINT32 eDirTag = pStatusTable->GetDirectionTag(eSdpMediaType, SdpAttribute::CONF,
             SdpPrecondition::STATUS_REMOTE);
@@ -507,19 +499,19 @@ IMediaDescriptor* SdpPreconditionHelper::GetMediaDescriptor(IN IMedia* piMedia)
 }
 
 PRIVATE GLOBAL
-IMS_BOOL SdpPreconditionHelper::CheckActivatedQosInSdp(IN ISIPMessage* piSipMessage,
+IMS_BOOL SdpPreconditionHelper::HasReservedResourceInSdp(IN ISIPMessage* piSipMessage,
         IN IMS_SINT32 eSdpMediaType)
 {
     if (piSipMessage == IMS_NULL)
     {
-        IMS_TRACE_D("CheckActivatedQosInSdp : SIPMessage is null.", 0, 0, 0);
+        IMS_TRACE_D("HasReservedResourceInSdp : SIPMessage is null.", 0, 0, 0);
         return IMS_FALSE;
     }
 
     ISIPMessageBodyPart* piBodyPart = piSipMessage->GetSDPBodyPart();
     if (piBodyPart == IMS_NULL)
     {
-        IMS_TRACE_D("CheckActivatedQosInSdp : ISIPMessageBodyPart is null.", 0, 0, 0);
+        IMS_TRACE_D("HasReservedResourceInSdp : ISIPMessageBodyPart is null.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -531,7 +523,7 @@ IMS_BOOL SdpPreconditionHelper::CheckActivatedQosInSdp(IN ISIPMessage* piSipMess
 
     if (!objParser.Decode(strSdp))
     {
-        IMS_TRACE_D("CheckActivatedQosInSdp : Parsing SDP is failed.", 0, 0, 0);
+        IMS_TRACE_D("HasReservedResourceInSdp : Parsing SDP is failed.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -548,11 +540,12 @@ IMS_BOOL SdpPreconditionHelper::CheckActivatedQosInSdp(IN ISIPMessage* piSipMess
             continue;
         }
 
-        IMS_TRACE_D("CheckActivatedQosInSdp : MediaType from parsed SDP [%d]", nSdpMediaType, 0, 0);
+        IMS_TRACE_D("HasReservedResourceInSdp : MediaType from parsed SDP [%s]",
+                PS_SdpMediaType(nSdpMediaType), 0, 0);
 
         if (objSdpMedia.GetPort() == 0)
         {
-            IMS_TRACE_D("CheckActivatedQosInSdp : Port is 0.", 0, 0, 0);
+            IMS_TRACE_D("HasReservedResourceInSdp : Port is 0.", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -560,7 +553,7 @@ IMS_BOOL SdpPreconditionHelper::CheckActivatedQosInSdp(IN ISIPMessage* piSipMess
                 objMediaDescription.GetAttributes(SdpAttribute::CURR);
         if (objAttributes.GetSize() <= 0)
         {
-            IMS_TRACE_D("CheckActivatedQosInSdp : There's no Current attributes.", 0, 0, 0);
+            IMS_TRACE_D("HasReservedResourceInSdp : There's no Current attributes.", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -576,6 +569,6 @@ IMS_BOOL SdpPreconditionHelper::CheckActivatedQosInSdp(IN ISIPMessage* piSipMess
         }
     }
 
-    IMS_TRACE_D("CheckActivatedQosInSdp : There's no %d.", eSdpMediaType, 0, 0);
+    IMS_TRACE_D("HasReservedResourceInSdp : There's no %s.", PS_SdpMediaType(eSdpMediaType), 0, 0);
     return IMS_TRUE;
 }

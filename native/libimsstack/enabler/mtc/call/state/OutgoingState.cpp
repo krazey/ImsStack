@@ -103,7 +103,7 @@ CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
         return GetStateName();
     }
 
-    if (!objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
+    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
     {
         IMS_TRACE_D("QosReserved : Resources of all media are not reserved.", 0, 0, 0);
         return GetStateName();
@@ -117,7 +117,8 @@ CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     }
 
     if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
-            SdpPreconditionHelper::IsQosActivatedInSdp(piSession, IMessage::SESSION_EARLY_UPDATE))
+            SdpPreconditionHelper::IsLocalResourceReservedInSdp(
+            piSession, IMessage::SESSION_EARLY_UPDATE))
     {
         IMS_TRACE_D("QosReserved : UE already send early UPDATE with activated QoS.", 0, 0, 0);
         return GetStateName();
@@ -186,7 +187,7 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
     }
 
     UpdatePreconditionCapability(piSession, piMessage);
-    m_objContext.GetPreconditionManager().EnableRemoteCurrentStatus(piSession);
+    m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
 
     if (SendAck(piSession) == IMS_FAILURE)
     {
@@ -247,7 +248,7 @@ CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 
     // update remote qos status
     UpdatePreconditionCapability(piSession, piMessage);
-    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(piSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
     objMediaManager.Run(piSession, piMessage, IMS_TRUE, IMS_FALSE);
 
@@ -342,23 +343,27 @@ CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
     UpdatePreconditionCapability(piSession, piMessage);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.UpdatePreconditionAttributes(piSession);
+
+    SetLocalQosAvailableForWifiCalling(piSession);
 
     if (!objPreconditionManager.HasPreconditionCapability(piSession))
     {
         return GetStateName();
     }
 
-    IMS_BOOL bLocalQosEnabled =
-            objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS);
-
-    if (!bLocalQosEnabled)
+    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
     {
         return GetStateName();
     }
 
-    if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
-            SdpPreconditionHelper::IsQosActivatedInSdp(piSession, IMessage::SESSION_EARLY_UPDATE))
+    if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) &&
+            SdpPreconditionHelper::IsLocalResourceReservedInSdp(
+            piSession, IMessage::SESSION_EARLY_UPDATE))
+    {
+        return GetStateName();
+    }
+
+    if (SdpPreconditionHelper::IsLocalResourceReservedInSdp(piSession, IMessage::SESSION_START))
     {
         return GetStateName();
     }
@@ -456,7 +461,7 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     if (nStatusCode == SIPStatusCode::SC_180/* && local precondition support? */)
     {
-        m_objContext.GetPreconditionManager().EnableRemoteCurrentStatus(piSession);
+        m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
     }
 
     // TODO: StartE911RingBackTimer(m_pSessInfo->eCallType);
@@ -515,7 +520,7 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     if (nStatusCode == SIPStatusCode::SC_180)
     {
-        objPreconditionManager.EnableRemoteCurrentStatus(piSession);
+        objPreconditionManager.SetRemoteResourceAvailable(piSession);
     }
 
     if (m_objSessions.GetValue(piSession)->GetMessageSender().SendPrack() == IMS_FAILURE)
@@ -531,7 +536,7 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
     }
 
     if (objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED &&
-            !objPreconditionManager.IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
+            !objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
     {
         objPreconditionManager.StartQosTimer(piSession);
     }

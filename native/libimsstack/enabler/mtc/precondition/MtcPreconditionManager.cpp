@@ -7,8 +7,7 @@
 #include "Configuration.h"
 #include "ISubscriberConfig.h"
 #include "ServiceTrace.h"
-// #include "define/MtcStringDef.h"
-// #include "precondition/QosStringDef.h"
+#include "precondition/QosStringDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -42,7 +41,6 @@ void MtcPreconditionManager::CreateQos(IN ISession* piSession)
     CreateStatusTable(piSession);
 
     InitializeCapability(piSession);
-    InitializeLocalCurrentStatus(piSession);
 }
 
 PUBLIC VIRTUAL
@@ -63,20 +61,18 @@ void MtcPreconditionManager::SetListener(IN IMtcPreconditionListener* pListener)
 }
 
 PUBLIC VIRTUAL
-IMS_BOOL MtcPreconditionManager::IsQosEnabled(IN ISession* piSession, IN QosCheckType eType)
+IMS_BOOL MtcPreconditionManager::IsResourceReserved(IN ISession* piSession, IN QosCheckType eType)
 {
-    IMS_TRACE_D("IsQosEnabled", 0, 0, 0);
-
     if (!IsPreconditionSupportedInLocal())
     {
+        IMS_TRACE_D("IsResourceReserved : don't use precondition mechanism.", 0, 0, 0);
         return IMS_TRUE;
     }
 
     IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
-
     if (eMediaTypes == MEDIATYPE_NONE)
     {
-        IMS_TRACE_D("IsQosEnabled : can't get media types from SDP.", 0, 0, 0);
+        IMS_TRACE_D("IsResourceReserved : can't get media types from SDP.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -84,11 +80,14 @@ IMS_BOOL MtcPreconditionManager::IsQosEnabled(IN ISession* piSession, IN QosChec
     IMS_BOOL bVideoEnabled = IMS_TRUE;
     IMS_BOOL bTextEnabled = IMS_TRUE;
 
-    QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-
-    // all, remote case
     if (eType != QosCheckType::LOCAL_STATUS)
     {
+        QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
+        if (pStatusTable == IMS_NULL)
+        {
+            return IMS_FALSE;
+        }
+
         if (eMediaTypes & MEDIATYPE_AUDIO)
         {
             bAudioEnabled = pStatusTable->IsCurrentStatusEnabled(
@@ -108,46 +107,46 @@ IMS_BOOL MtcPreconditionManager::IsQosEnabled(IN ISession* piSession, IN QosChec
         }
     }
 
-    // all, local case
     if (eType != QosCheckType::REMOTE_STATUS)
     {
         if (eMediaTypes & MEDIATYPE_AUDIO)
         {
-            bAudioEnabled = pStatusTable->IsCurrentStatusEnabled(
-                    SdpMedia::TYPE_AUDIO, SdpPrecondition::STATUS_LOCAL) && bAudioEnabled;
+            bAudioEnabled = bAudioEnabled &&
+                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_AUDIO));
         }
 
         if (eMediaTypes & MEDIATYPE_VIDEO)
         {
-            bVideoEnabled = pStatusTable->IsCurrentStatusEnabled(
-                    SdpMedia::TYPE_VIDEO, SdpPrecondition::STATUS_LOCAL) && bVideoEnabled;
+            bVideoEnabled = bVideoEnabled &&
+                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_VIDEO));
         }
 
         if (eMediaTypes & MEDIATYPE_TEXT)
         {
-            bTextEnabled = pStatusTable->IsCurrentStatusEnabled(
-                    SdpMedia::TYPE_TEXT, SdpPrecondition::STATUS_LOCAL) && bTextEnabled;
+            bTextEnabled = bTextEnabled &&
+                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_TEXT));
         }
     }
 
-    IMS_TRACE_D("IsQosEnabled : audio[%d] video[%d] text[%d]",
-            bAudioEnabled, bVideoEnabled, bTextEnabled);
+    IMS_BOOL bResult = bAudioEnabled && bVideoEnabled && bTextEnabled;
+    IMS_TRACE_D("IsResourceReserved : CheckType[%s] Result[%s]",
+            PS_QosCheckType(eType), _TRACE_B_(bResult), 0);
 
-    return (bAudioEnabled && bVideoEnabled && bTextEnabled) ? IMS_TRUE : IMS_FALSE;
+    return bResult;
 }
 
 PUBLIC VIRTUAL
 void MtcPreconditionManager::StartQosTimer(IN ISession* piSession,
         IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
 {
-    QosTimer* pQosTimer = GetQosTimer(piSession);
-
-    if (!pQosTimer)
+    if (!IsPreconditionSupportedInLocal())
     {
+        IMS_TRACE_D("StartQosTimer : don't use precondition mechanism.", 0, 0, 0);
         return;
     }
 
-    if (!IsPreconditionSupportedInLocal())
+    QosTimer* pTimer = GetQosTimer(piSession);
+    if (pTimer == IMS_NULL)
     {
         return;
     }
@@ -159,11 +158,12 @@ void MtcPreconditionManager::StartQosTimer(IN ISession* piSession,
         nDuration =
                 m_objContext.GetConfigurationProxy().GetInt(Feature::DEDICATED_BEARER_WAIT_TIMER);
 
-        if (nDuration < 0)
+        // TODO: restore when QoS event from media module is activated.
+        // if (nDuration < 0)
         {
             IMS_TRACE_D("StartQosTimer : start the timer to enable QoS by force.", 0, 0, 0);
             eType = QosTimerType::FORCE_AVAILABLE;
-            nDuration = 1000;
+            nDuration = 500;
         }
     }
     else if (eType == QosTimerType::GUARD_INACTIVE)
@@ -171,29 +171,31 @@ void MtcPreconditionManager::StartQosTimer(IN ISession* piSession,
         nDuration = 1000;
     }
 
-    pQosTimer->StartQosTimer(eType, nDuration);
+    IMS_TRACE_D("StartQosTimer : Type[%s] Duration[%d]", PS_QosTimerType(eType), nDuration, 0);
+    pTimer->StartQosTimer(eType, nDuration);
 }
 
 PUBLIC VIRTUAL
 void MtcPreconditionManager::StopQosTimer(IN ISession* piSession,
         IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
 {
-    QosTimer* pQosTimer = GetQosTimer(piSession);
-    if (pQosTimer == IMS_NULL)
+    QosTimer* pTimer = GetQosTimer(piSession);
+    if (pTimer == IMS_NULL)
     {
         return;
     }
 
-    pQosTimer->StopQosTimer(eType);
+    IMS_TRACE_D("StopQosTimer : Type[%s]", PS_QosTimerType(eType), 0, 0);
+    pTimer->StopQosTimer(eType);
 }
 
 PUBLIC VIRTUAL
 void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession)
 {
+    IMS_TRACE_D("StopAllQosTimer", 0, 0, 0);
     StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
     StopQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
     StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
-
 }
 
 PUBLIC VIRTUAL
@@ -201,70 +203,88 @@ void MtcPreconditionManager::UpdatePreconditionCapability(IN ISession* piSession
         IN IMS_BOOL bCapability)
 {
     IMS_BOOL bLocalCapa = IsPreconditionSupportedInLocal();
+    IMS_TRACE_D("UpdatePreconditionCapability : Local[%s] Remote[%s]",
+            _TRACE_B_(bLocalCapa), _TRACE_B_(bCapability), 0);
 
-    // TODO: check qos attributes in SDP body of received SIP message.
     m_objCapabilities.Add(piSession, (bLocalCapa && bCapability));
 }
 
 PUBLIC VIRTUAL
 IMS_BOOL MtcPreconditionManager::HasPreconditionCapability(IN ISession* piSession)
 {
-    return m_objCapabilities.GetValue(piSession);
+    IMS_SLONG nIndex = m_objCapabilities.GetIndexOfKey(piSession);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_D("HasPreconditionCapability : no capability.", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    return m_objCapabilities.GetValueAt(nIndex);
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::UpdatePreconditionAttributes(IN ISession* piSession)
+IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
 {
-    if (!piSession)
+    IMS_BOOL bSupport = IMS_FALSE;
+
+    CallType eCallType = m_objContext.GetCallInfo().eCallType;
+    switch (eCallType)
+    {
+        case CallType::VOIP:
+            bSupport = IsPreconditionSupportedInLocal(MEDIATYPE_AUDIO);
+            break;
+        case CallType::VT:
+            bSupport = IsPreconditionSupportedInLocal(MEDIATYPE_AUDIO) ||
+                    IsPreconditionSupportedInLocal(MEDIATYPE_VIDEO);
+            break;
+        case CallType::RTT:
+            bSupport = IsPreconditionSupportedInLocal(MEDIATYPE_AUDIO) ||
+                    IsPreconditionSupportedInLocal(MEDIATYPE_TEXT);
+            break;
+        case CallType::VIDEO_RTT:
+            bSupport = IsPreconditionSupportedInLocal(MEDIATYPE_AUDIO) ||
+                    IsPreconditionSupportedInLocal(MEDIATYPE_VIDEO) ||
+                    IsPreconditionSupportedInLocal(MEDIATYPE_TEXT);
+            break;
+        default:
+            break;
+    }
+
+    IMS_TRACE_D("IsPreconditionSupportedInLocal : CallType[%d] Result[%s]",
+            eCallType, _TRACE_B_(bSupport), 0);
+    return bSupport;
+}
+
+PUBLIC VIRTUAL
+void MtcPreconditionManager::UpdateQosAttributesFromSdp(IN ISession* piSession)
+{
+    if (piSession == IMS_NULL)
     {
         return;
     }
 
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-    if (!pStatusTable)
+    if (pStatusTable == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_D("UpdatePreconditionAttributes", 0, 0, 0);
+    IMS_TRACE_D("UpdateQosAttributesFromSdp", 0, 0, 0);
 
-    IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
-
-    if (eMediaTypes & MEDIATYPE_AUDIO)
-    {
-        UpdateStatusRecords(piSession, MEDIATYPE_AUDIO);
-    }
-
-    if (eMediaTypes & MEDIATYPE_VIDEO)
-    {
-        UpdateStatusRecords(piSession, MEDIATYPE_VIDEO);
-    }
-
-    if (eMediaTypes & MEDIATYPE_TEXT)
-    {
-        UpdateStatusRecords(piSession, MEDIATYPE_TEXT);
-    }
-
-    pStatusTable->RemoveUnusedStatusRecords(eMediaTypes);
+    UpdateStatusRecords(piSession);
 
     IMSList<IMedia*> lstMedias = piSession->GetMedia();
-    IMS_UINT32 nSize = lstMedias.GetSize();
-
-    IMS_TRACE_D("UpdatePreconditionAttributes : media size[%d]", nSize, 0, 0);
-
-    IMS_BOOL bIncludePrecondition = SdpPreconditionHelper::IsPreconditionIncludedInSdp(piSession);
-
-    for (IMS_UINT32 index = 0; index < nSize; index++)
+    for (IMS_UINT32 index = 0; index < lstMedias.GetSize(); index++)
     {
         IMedia* piMedia = lstMedias.GetAt(index);
-        if (!piMedia)
+        if (piMedia == IMS_NULL)
         {
             continue;
         }
 
-        if (bIncludePrecondition)
+        if (SdpPreconditionHelper::IsPreconditionIncludedInSdp(piSession))
         {
-            pStatusTable->UpdateStatusTable(piMedia);
+            pStatusTable->UpdateStatusTableWithRemoteSdp(piMedia);
         }
     }
 }
@@ -315,27 +335,27 @@ void MtcPreconditionManager::FormPreconditionSdp(IN ISession* piSession, IN IMS_
         IMS_UINT32 eMediaType =
                 SdpPreconditionHelper::GetMediaType(pLocalSdp, piMedia->GetState());
 
-        pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType,
-                IsReserved(GetQosStatus(piSession, eMediaType)));
-    }
+        IMS_BOOL bCheckQosWhileCallUpgrade = (m_objContext.GetConfigurationProxy().GetInt(
+                Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) == 2);
 
-    IMS_BOOL bCheckQosWhileCallUpgrade = IMS_TRUE;
-    if (m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) != 2)
-    {
-        bCheckQosWhileCallUpgrade = IMS_FALSE;
+        if (!bCheckQosWhileCallUpgrade && IsConfirmedDialog(piSession))
+        {
+            SetQosStatus(piSession, QosStatus::AVAILABLE, eMediaType);
+        }
+
+        pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType,
+                IsStatusAvailable(GetQosStatus(piSession, eMediaType)));
     }
 
     IMS_BOOL bUseConf = (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
-    if (piSession->GetState() >= ISession::STATE_ESTABLISHED)
+    if (IsConfirmedDialog(piSession))
     {
         // TODO: check if the confirmation status should be added when UE uses qos check
         // for upgrading the call.
         bUseConf = IMS_FALSE;
     }
 
-    SdpPreconditionHelper::FormPreconditionSdp(
-            piSession, pStatusTable, bCheckQosWhileCallUpgrade, bUseConf);
+    SdpPreconditionHelper::FormPreconditionSdp(piSession, pStatusTable, bUseConf);
 }
 
 PUBLIC VIRTUAL
@@ -346,8 +366,10 @@ void MtcPreconditionManager::RemovePreconditionSdp(IN ISession* piSession)
 }
 
 PUBLIC VIRTUAL
-IMS_UINT32 MtcPreconditionManager::EnableLocalCurrentStatus(IN ISession* piSession)
+IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession)
 {
+    IMS_TRACE_D("SetLocalResourceAvailable", 0, 0, 0);
+
     IMS_UINT32 eEnabledMediaTypes = MEDIATYPE_NONE;
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)
@@ -361,45 +383,48 @@ IMS_UINT32 MtcPreconditionManager::EnableLocalCurrentStatus(IN ISession* piSessi
         eMediaTypes = GetMediaTypesFromCallType();
     }
 
-    if ((eMediaTypes & MEDIATYPE_AUDIO) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_AUDIO, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_AUDIO) &&
+            GetQosStatus(piSession, MEDIATYPE_AUDIO) != QosStatus::AVAILABLE)
     {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE);
+        SetQosStatus(piSession, QosStatus::AVAILABLE, MEDIATYPE_AUDIO);
+        pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(MEDIATYPE_AUDIO), IMS_TRUE);
         eEnabledMediaTypes |= MEDIATYPE_AUDIO;
     }
 
-    if ((eMediaTypes & MEDIATYPE_VIDEO) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_VIDEO, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_VIDEO) &&
+            GetQosStatus(piSession, MEDIATYPE_VIDEO) != QosStatus::AVAILABLE)
     {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE);
+        SetQosStatus(piSession, QosStatus::AVAILABLE, MEDIATYPE_VIDEO);
+        pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(MEDIATYPE_VIDEO), IMS_TRUE);
         eEnabledMediaTypes |= MEDIATYPE_VIDEO;
     }
 
-    if ((eMediaTypes & MEDIATYPE_TEXT) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_TEXT, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_TEXT) &&
+            GetQosStatus(piSession, MEDIATYPE_TEXT) != QosStatus::AVAILABLE)
     {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE);
+        SetQosStatus(piSession, QosStatus::AVAILABLE, MEDIATYPE_TEXT);
+        pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(MEDIATYPE_TEXT), IMS_TRUE);
         eEnabledMediaTypes |= MEDIATYPE_TEXT;
     }
 
-    IMS_TRACE_D("EnableLocalCurrentStatus : Enabled Media Types[%d]", eEnabledMediaTypes, 0, 0);
+    IMS_TRACE_D("SetLocalResourceAvailable : Enabled Media Types[%d]", eEnabledMediaTypes, 0, 0);
     return eEnabledMediaTypes;
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::EnableRemoteCurrentStatus(IN ISession* piSession)
+void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
 {
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)
     {
-        IMS_TRACE_D("EnableRemoteCurrentStatus : can't get StatusTable", 0, 0, 0);
+        IMS_TRACE_D("SetRemoteResourceAvailable : can't get StatusTable", 0, 0, 0);
         return;
     }
 
     IMSList<IMedia*> lstMedias = piSession->GetMedia();
     IMS_UINT32 nSize = lstMedias.GetSize();
 
-    IMS_TRACE_D("EnableRemoteCurrentStatus : media size[%d]", nSize, 0, 0);
+    IMS_TRACE_D("SetRemoteResourceAvailable : media size[%d]", nSize, 0, 0);
 
     for (IMS_UINT32 index = 0; index < nSize; index++)
     {
@@ -420,105 +445,71 @@ void MtcPreconditionManager::EnableRemoteCurrentStatus(IN ISession* piSession)
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::QosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
+void MtcPreconditionManager::OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
         IN IMS_UINT32 eMediaType)
 {
     if (piSession == IMS_NULL)
     {
-        IMS_TRACE_D("QosStatusChanged : ISession is null", 0, 0, 0);
+        IMS_TRACE_D("OnQosStatusChanged : ISession is null", 0, 0, 0);
         return;
     }
 
-    // 1. Update QosData
-    QosData* pQosData = GetQosData(piSession);
-    if (pQosData == IMS_NULL)
+    // 1. Update QosData and check QosStatus if it needs to be updated or not.
+    QosStatus eCurrStatus = GetQosStatus(piSession, eMediaType);
+    eStatus = IsDefaultBearerUsed(eMediaType) ? QosStatus::AVAILABLE : eStatus;
+
+    if (eCurrStatus == eStatus)
     {
-        IMS_TRACE_D("QosStatusChanged : QosData is null", 0, 0, 0);
+        IMS_TRACE_D("OnQosStatusChanged : there's no update for status.", 0, 0, 0);
         return;
     }
 
-    QosStatus ePreviousStatus = QosStatus::IDLE;
+    IMS_TRACE_D("OnQosStatusChanged", 0, 0, 0);
 
-    if (eMediaType & MEDIATYPE_AUDIO)
-    {
-        ePreviousStatus = pQosData->GetAudioStatus();
-        pQosData->SetAudioStatus(eStatus);
-    }
+    SetQosStatus(piSession, eStatus, eMediaType);
 
-    if (eMediaType & MEDIATYPE_VIDEO)
-    {
-        ePreviousStatus = pQosData->GetVideoStatus();
-        pQosData->SetVideoStatus(eStatus);
-    }
-
-    if (eMediaType & MEDIATYPE_TEXT)
-    {
-        ePreviousStatus = pQosData->GetTextStatus();
-        pQosData->SetTextStatus(eStatus);
-    }
-
-    IMS_TRACE_D("QosStatusChanged : MediaType[%d] Status[%d]->[%d]",
-            eMediaType, ePreviousStatus, eStatus);
-
+    // 2. Update QosStatusTable
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)
     {
-        IMS_TRACE_D("QosStatusChanged : QosStatusTable is null", 0, 0, 0);
         return;
     }
 
-    IMS_BOOL bLocalCurrReserved = pStatusTable->IsCurrentStatusEnabled(GetSdpMediaType(eMediaType),
-            SdpPrecondition::STATUS_LOCAL);
-    IMS_BOOL bReserved = (IsDefaultBearerUsed(eMediaType)) ? IMS_TRUE : IsReserved(eStatus);
+    pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(eMediaType), IsStatusAvailable(eStatus));
 
-    if (bReserved != bLocalCurrReserved)
+    // 3. Handle Qos Timer
+    HandleQosTimer(piSession, eCurrStatus, eStatus);
+
+    if (eCurrStatus == QosStatus::IDLE && eStatus == QosStatus::AVAILABLE)
     {
-        // 2. Update StatusTable
-        pStatusTable->UpdateLocalCurrentStatus(GetSdpMediaType(eMediaType), bReserved);
-
-        // 3. Check QosTimer and start or stop the timer.
-        IMS_BOOL bNeedToNotify = CheckQosTimers(piSession, bReserved);
-        if (bNeedToNotify)
-        {
-            NotifyQosStatusToListener(piSession, bReserved, eMediaType);
-        }
-    }
-
-    QosTimer* pTimer = GetQosTimer(piSession);
-    IMS_BOOL bInactiveGuardTimerActivated =
-            (pTimer && pTimer->IsQosTimerActivated(QosTimerType::GUARD_INACTIVE)) ?
-            IMS_TRUE : IMS_FALSE;
-
-    if (!IsReserved(eStatus) && !bInactiveGuardTimerActivated)
-    {
-        InitializeStatusForLostQos(eMediaType, pQosData);
+        NotifyQosStatusToListener(piSession, IsStatusAvailable(eStatus), eMediaType);
     }
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::OnWaitTimerExpired(IN QosTimer* pQosTimer)
+void MtcPreconditionManager::OnWaitTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnWaitTimerExpired", 0, 0, 0);
-    NotifyReserveFailedByQosTimerExpired(pQosTimer);
+    HandleReservationFailureByTimerExpiration(pTimer);
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::OnGuardInactiveTimerExpired(IN QosTimer* pQosTimer)
+void MtcPreconditionManager::OnGuardInactiveTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnGuardInactiveTimerExpired", 0, 0, 0);
-    NotifyReserveFailedByQosTimerExpired(pQosTimer);
+    HandleReservationFailureByTimerExpiration(pTimer);
 }
 
 PUBLIC VIRTUAL
-void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pQosTimer)
+void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnForceAvailableTimerExpired", 0, 0, 0);
 
     ISession* piSession = IMS_NULL;
     for (IMS_UINT32 index = 0; index < m_objQosTimers.GetSize(); index++)
     {
-        QosTimer* pTimer = m_objQosTimers.GetValueAt(index);
-        if (pTimer == pQosTimer)
+        QosTimer* pTempTimer = m_objQosTimers.GetValueAt(index);
+        if (pTempTimer == pTimer)
         {
             piSession = m_objQosTimers.GetKeyAt(index);
             break;
@@ -530,30 +521,20 @@ void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pQosTimer
         return;
     }
 
-    QosData *pQosData = GetQosData(piSession);
-    if (pQosData == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_UINT32 eEnabledMediaTypes = EnableLocalCurrentStatus(piSession);
-    StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
+    IMS_UINT32 eEnabledMediaTypes = SetLocalResourceAvailable(piSession);
 
     if (eEnabledMediaTypes & MEDIATYPE_AUDIO)
     {
-        pQosData->SetAudioStatus(QosStatus::AVAILABLE);
         m_pListener->QosReserved(piSession, MEDIATYPE_AUDIO);
     }
 
     if (eEnabledMediaTypes & MEDIATYPE_VIDEO)
     {
-        pQosData->SetVideoStatus(QosStatus::AVAILABLE);
         m_pListener->QosReserved(piSession, MEDIATYPE_VIDEO);
     }
 
     if (eEnabledMediaTypes & MEDIATYPE_TEXT)
     {
-        pQosData->SetTextStatus(QosStatus::AVAILABLE);
         m_pListener->QosReserved(piSession, MEDIATYPE_TEXT);
     }
 }
@@ -561,25 +542,23 @@ void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pQosTimer
 PRIVATE
 void MtcPreconditionManager::CreateQosTimer(IN ISession* piSession)
 {
-    QosTimer* pQosTimer = GetQosTimer(piSession);
-    if (pQosTimer != IMS_NULL)
+    QosTimer* pTimer = GetQosTimer(piSession);
+    if (pTimer != IMS_NULL)
     {
         IMS_TRACE_D("CreateQosTimer : Timer has been already created.", 0, 0, 0);
         return;
     }
 
-    pQosTimer = new QosTimer(this);
-    // pQosTimer->SetListener(this);
+    IMS_TRACE_D("CreateQosTimer", 0, 0, 0);
 
-    m_objQosTimers.Add(piSession, pQosTimer);
-    IMS_TRACE_D("CreateQosTimer : QosTimer size [%d]", m_objQosTimers.GetSize(), 0, 0);
+    pTimer = new QosTimer(this);
+    m_objQosTimers.Add(piSession, pTimer);
 }
 
 PRIVATE
 void MtcPreconditionManager::RemoveQosTimer(IN ISession* piSession)
 {
     QosTimer* pTimer = GetQosTimer(piSession);
-
     if (pTimer != IMS_NULL)
     {
         delete pTimer;
@@ -599,17 +578,16 @@ void MtcPreconditionManager::CreateStatusTable(IN ISession* piSession)
         return;
     }
 
+    IMS_TRACE_D("CreateStatusTable", 0, 0, 0);
+
     pStatusTable = new QosStatusTable();
     m_objStatusTables.Add(piSession, pStatusTable);
-
-    IMS_TRACE_D("CreateStatusTable : size[%d]", m_objStatusTables.GetSize(), 0, 0);
 }
 
 PRIVATE
 void MtcPreconditionManager::RemoveStatusTable(IN ISession* piSession)
 {
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-
     if (pStatusTable != IMS_NULL)
     {
         delete pStatusTable;
@@ -622,27 +600,50 @@ void MtcPreconditionManager::RemoveStatusTable(IN ISession* piSession)
 PRIVATE
 void MtcPreconditionManager::CreateQosData(IN ISession* piSession)
 {
-    QosData* pQosData = GetQosData(piSession);
-    if (pQosData != IMS_NULL)
+    QosData* pData = GetQosData(piSession);
+    if (pData != IMS_NULL)
     {
         IMS_TRACE_D("CreateQosData : already have QosData.", 0, 0, 0);
         return;
     }
 
-    pQosData = new QosData();
-    m_objQosDatas.Add(piSession, pQosData);
+    IMS_TRACE_D("CreateQosData", 0, 0, 0);
 
-    IMS_TRACE_D("CreateQosData : size[%d]", m_objQosDatas.GetSize(), 0, 0);
+    pData = new QosData();
+    m_objQosDatas.Add(piSession, pData);
+
+    QosStatus eAudioStatus =
+            IsDefaultBearerUsed(MEDIATYPE_AUDIO) ? QosStatus::AVAILABLE : QosStatus::IDLE;
+    QosStatus eVideoStatus =
+            IsDefaultBearerUsed(MEDIATYPE_VIDEO) ? QosStatus::AVAILABLE : QosStatus::IDLE;
+    QosStatus eTextStatus =
+            IsDefaultBearerUsed(MEDIATYPE_TEXT) ? QosStatus::AVAILABLE : QosStatus::IDLE;
+
+    if (m_objContext.GetService().IsWlanIpCanType() &&
+            !(m_objContext.GetConfigurationProxy().Is(Feature::ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI)))
+    {
+        IMS_TRACE_D("CreateQosData : set all statuses as available because of wifi call.", 0, 0, 0);
+        eAudioStatus = QosStatus::AVAILABLE;
+        eVideoStatus = QosStatus::AVAILABLE;
+        eTextStatus = QosStatus::AVAILABLE;
+    }
+
+    IMS_TRACE_D("CreateQosData : audio[%s] video[%s] text[%s]",
+            _TRACE_B_(IsStatusAvailable(eAudioStatus)), _TRACE_B_(IsStatusAvailable(eVideoStatus)),
+            _TRACE_B_(IsStatusAvailable(eTextStatus)));
+
+    pData->SetAudioStatus(eAudioStatus);
+    pData->SetVideoStatus(eVideoStatus);
+    pData->SetTextStatus(eTextStatus);
 }
 
 PRIVATE
 void MtcPreconditionManager::RemoveQosData(IN ISession* piSession)
 {
-    QosData* pQosData = GetQosData(piSession);
-
-    if (pQosData != IMS_NULL)
+    QosData* pData = GetQosData(piSession);
+    if (pData != IMS_NULL)
     {
-        delete pQosData;
+        delete pData;
         m_objQosDatas.Remove(piSession);
     }
 
@@ -652,6 +653,8 @@ void MtcPreconditionManager::RemoveQosData(IN ISession* piSession)
 PRIVATE
 void MtcPreconditionManager::DestroyAll()
 {
+    IMS_TRACE_D("DestroyAll", 0, 0, 0);
+
     for (IMS_UINT32 index = 0; index < m_objQosDatas.GetSize(); index++)
     {
         delete m_objQosDatas.GetValueAt(index);
@@ -672,34 +675,49 @@ PRIVATE
 QosData* MtcPreconditionManager::GetQosData(IN ISession* piSession)
 {
     IMS_SLONG nIndex = m_objQosDatas.GetIndexOfKey(piSession);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_D("GetQosData : fail to get QosData.", 0, 0, 0);
+        return IMS_NULL;
+    }
 
-    return (nIndex >= 0) ? m_objQosDatas.GetValueAt(nIndex) : IMS_NULL;
+    return m_objQosDatas.GetValueAt(nIndex);
 }
 
 PRIVATE
 QosTimer* MtcPreconditionManager::GetQosTimer(IN ISession* piSession)
 {
     IMS_SLONG nIndex = m_objQosTimers.GetIndexOfKey(piSession);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_D("GetQosTimer : fail to get QosTimer.", 0, 0, 0);
+        return IMS_NULL;
+    }
 
-    return (nIndex >= 0) ? m_objQosTimers.GetValueAt(nIndex) : IMS_NULL;
+    return m_objQosTimers.GetValueAt(nIndex);
 }
 
 PRIVATE
 QosStatusTable* MtcPreconditionManager::GetQosStatusTable(IN ISession* piSession)
 {
     IMS_SLONG nIndex = m_objStatusTables.GetIndexOfKey(piSession);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_D("GetQosStatusTable : fail to get QosStatusTable.", 0, 0, 0);
+        return IMS_NULL;
+    }
 
-    return (nIndex >= 0) ? m_objStatusTables.GetValueAt(nIndex) : IMS_NULL;
+    return m_objStatusTables.GetValueAt(nIndex);
 }
 
 PRIVATE
-void MtcPreconditionManager::NotifyReserveFailedByQosTimerExpired(IN QosTimer* pQosTimer)
+void MtcPreconditionManager::HandleReservationFailureByTimerExpiration(IN QosTimer* pTimer)
 {
     ISession* piSession = IMS_NULL;
     for (IMS_UINT32 index = 0; index < m_objQosTimers.GetSize(); index++)
     {
-        QosTimer* pTimer = m_objQosTimers.GetValueAt(index);
-        if (pTimer == pQosTimer)
+        QosTimer* pTempTimer = m_objQosTimers.GetValueAt(index);
+        if (pTempTimer == pTimer)
         {
             piSession = m_objQosTimers.GetKeyAt(index);
             break;
@@ -708,52 +726,29 @@ void MtcPreconditionManager::NotifyReserveFailedByQosTimerExpired(IN QosTimer* p
 
     if (piSession == IMS_NULL)
     {
-        IMS_TRACE_D("NotifyReserveFailedByQoSTimerExpired : can't find ISession", 0, 0, 0);
+        IMS_TRACE_D("HandleReservationFailureByTimerExpiration : can't find ISession", 0, 0, 0);
         return;
     }
 
-    QosData* pQosData = GetQosData(piSession);
-    if (pQosData == IMS_NULL)
-    {
-        IMS_TRACE_D("NotifyReserveFailedByQoSTimerExpired : can't find QosData", 0, 0, 0);
-        return;
-    }
-
-    QosLossPolicy eAction = GetActionForQosLoss(piSession);
-
-    IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
-    InitializeStatusForLostQos(eMediaTypes, pQosData);
-
-    if (eAction != QosLossPolicy::MAINTAIN)
-    {
-        m_pListener->QosReserveFailed(piSession, eAction);
-    }
+    NotifyQosStatusToListener(piSession, IMS_FALSE, MEDIATYPE_NONE);
+    InitializeStatusForLostQos(piSession);
 }
 
 PRIVATE
 QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession)
 {
     QosLossPolicy eAction = QosLossPolicy::MAINTAIN;
-
     if (piSession == IMS_NULL)
     {
         return eAction;
     }
 
-    QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-    if (pStatusTable == IMS_NULL)
-    {
-        IMS_TRACE_D("GetActionForQosLoss : StatusTable is null.", 0, 0, 0);
-        return eAction;
-    }
-
     IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
 
-    if ((eMediaTypes & MEDIATYPE_AUDIO) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_AUDIO, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_AUDIO) &&
+            !IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_AUDIO)))
     {
-        QosLossPolicy ePartialAction = (IsDefaultBearerUsed(MEDIATYPE_AUDIO)) ?
-                QosLossPolicy::MAINTAIN : GetQosLossPolicy(MEDIATYPE_AUDIO);
+        QosLossPolicy ePartialAction = GetQosLossPolicy(MEDIATYPE_AUDIO);
 
         if (eAction < ePartialAction)
         {
@@ -761,11 +756,10 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
         }
     }
 
-    if ((eMediaTypes & MEDIATYPE_VIDEO) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_VIDEO, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_VIDEO) &&
+            !IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_VIDEO)))
     {
-        QosLossPolicy ePartialAction = (IsDefaultBearerUsed(MEDIATYPE_VIDEO)) ?
-                QosLossPolicy::MAINTAIN : GetQosLossPolicy(MEDIATYPE_VIDEO);
+        QosLossPolicy ePartialAction = GetQosLossPolicy(MEDIATYPE_VIDEO);
 
         if (eAction < ePartialAction)
         {
@@ -773,11 +767,10 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
         }
     }
 
-    if ((eMediaTypes & MEDIATYPE_TEXT) && !pStatusTable->IsCurrentStatusEnabled(
-            SdpMedia::TYPE_TEXT, SdpPrecondition::STATUS_LOCAL))
+    if ((eMediaTypes & MEDIATYPE_TEXT) &&
+            !IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_TEXT)))
     {
-        QosLossPolicy ePartialAction = (IsDefaultBearerUsed(MEDIATYPE_TEXT)) ?
-                QosLossPolicy::MAINTAIN : GetQosLossPolicy(MEDIATYPE_TEXT);
+        QosLossPolicy ePartialAction = GetQosLossPolicy(MEDIATYPE_TEXT);
 
         if (eAction < ePartialAction)
         {
@@ -785,101 +778,112 @@ QosLossPolicy MtcPreconditionManager::GetActionForQosLoss(IN ISession* piSession
         }
     }
 
-    IMS_TRACE_D("GetActionForQosLoss : The next Action is %d", eAction, 0, 0);
+    IMS_TRACE_D("GetActionForQosLoss : The next Action is %s", PS_QosLossPolicy(eAction), 0, 0);
     return eAction;
 }
 
 PRIVATE
-void MtcPreconditionManager::InitializeStatusForLostQos(
-        IN IMS_UINT32 eMediaTypes, IN QosData* pQosData)
+void MtcPreconditionManager::InitializeStatusForLostQos(IN ISession* piSession)
 {
+    IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
+
     IMS_TRACE_D("InitializeStatusForLostQos : MediaTypes[%d]", eMediaTypes, 0, 0);
 
-    if ((eMediaTypes & MEDIATYPE_AUDIO) && pQosData->GetAudioStatus() == QosStatus::LOST)
+    if ((eMediaTypes & MEDIATYPE_AUDIO) &&
+            GetQosStatus(piSession, MEDIATYPE_AUDIO) == QosStatus::LOST)
     {
-        pQosData->SetAudioStatus(QosStatus::IDLE);
+        SetQosStatus(piSession, QosStatus::IDLE, MEDIATYPE_AUDIO);
     }
 
-    if ((eMediaTypes & MEDIATYPE_VIDEO) && pQosData->GetVideoStatus() == QosStatus::LOST)
+    if ((eMediaTypes & MEDIATYPE_VIDEO) &&
+            GetQosStatus(piSession, MEDIATYPE_VIDEO) == QosStatus::LOST)
     {
-        pQosData->SetVideoStatus(QosStatus::IDLE);
+        SetQosStatus(piSession, QosStatus::IDLE, MEDIATYPE_VIDEO);
     }
 
-    if ((eMediaTypes & MEDIATYPE_TEXT) && pQosData->GetTextStatus() == QosStatus::LOST)
+    if ((eMediaTypes & MEDIATYPE_TEXT) &&
+            GetQosStatus(piSession, MEDIATYPE_TEXT) == QosStatus::LOST)
     {
-        pQosData->SetTextStatus(QosStatus::IDLE);
+        SetQosStatus(piSession, QosStatus::IDLE, MEDIATYPE_TEXT);
     }
 }
 
 PRIVATE
-void MtcPreconditionManager::UpdateStatusRecords(IN ISession* piSession,
-        IN IMS_UINT32 eMediaType)
+void MtcPreconditionManager::UpdateStatusRecords(IN ISession* piSession)
 {
+    IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
+    if (eMediaTypes == MEDIATYPE_NONE)
+    {
+        IMS_TRACE_D("UpdateStatusRecords : no media line to update.", 0, 0, 0);
+        return;
+    }
+
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)
     {
         return;
     }
 
-    IMS_TRACE_D("UpdateStatusRecords : MediaType[%d]", eMediaType, 0, 0);
-    IMS_SINT32 eSdpMediaType = GetSdpMediaType(eMediaType);
+    IMS_TRACE_D("UpdateStatusRecords : MediaTypes[%d]", eMediaTypes, 0, 0);
 
-    if (pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+    if (eMediaTypes & MEDIATYPE_AUDIO)
     {
-        pStatusTable->CreateStatusRecords(eSdpMediaType);
+        IMS_SINT32 eSdpMediaType = GetSdpMediaType(MEDIATYPE_AUDIO);
+
+        if (pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+        {
+            pStatusTable->CreateStatusRecords(eSdpMediaType);
+            pStatusTable->UpdateLocalCurrentStatus(
+                    eSdpMediaType, IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_AUDIO)));
+        }
     }
 
-    IMS_BOOL bCheckQosWhileCallUpgrade = IMS_TRUE;
-    if (m_objContext.GetConfigurationProxy().GetInt(
-            Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) != 2)
+    if (eMediaTypes & MEDIATYPE_VIDEO)
     {
-        bCheckQosWhileCallUpgrade = IMS_FALSE;
+        IMS_SINT32 eSdpMediaType = GetSdpMediaType(MEDIATYPE_VIDEO);
+
+        if (pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+        {
+            pStatusTable->CreateStatusRecords(eSdpMediaType);
+            pStatusTable->UpdateLocalCurrentStatus(
+                    eSdpMediaType, IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_VIDEO)));
+        }
     }
 
-    if ((piSession->GetState() <= ISession::STATE_ESTABLISHED) || bCheckQosWhileCallUpgrade)
+    if (eMediaTypes & MEDIATYPE_TEXT)
     {
-        pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType,
-                IsReserved(GetQosStatus(piSession, eMediaType)));
+        IMS_SINT32 eSdpMediaType = GetSdpMediaType(MEDIATYPE_TEXT);
+
+        if (pStatusTable->IsStatusRecordsListEmpty(eSdpMediaType))
+        {
+            pStatusTable->CreateStatusRecords(eSdpMediaType);
+            pStatusTable->UpdateLocalCurrentStatus(
+                    eSdpMediaType, IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_TEXT)));
+        }
     }
+
+    pStatusTable->RemoveUnusedStatusRecords(eMediaTypes);
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::CheckQosTimers(IN ISession* piSession, IN IMS_BOOL bLocalReserved)
+void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrStatus,
+        IN QosStatus eNewStatus)
 {
-    IMS_TRACE_D("CheckQosTimers : local reserved [%d]", bLocalReserved, 0, 0);
-    QosTimer* pQosTimer = GetQosTimer(piSession);
+    IMS_TRACE_D("HandleQosTimer", 0, 0, 0);
 
-    if (bLocalReserved) // QosStatus::IDLE or QosStatus::LOST -> QosStatus::AVAILABLE
+    if (eCurrStatus == QosStatus::IDLE && eNewStatus == QosStatus::AVAILABLE)
     {
-        if (IsQosEnabled(piSession, QosCheckType::LOCAL_STATUS))
-        {
-            // UE should stop QoS Timers related to QoS activation when all medias are enabled.
-            StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
-            StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
-        }
-
-        if (pQosTimer && pQosTimer->IsQosTimerActivated(QosTimerType::GUARD_INACTIVE))
-        {
-            StopQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
-            return IMS_FALSE;
-        }
+        StopQosTimer(piSession);
+        StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
     }
-    else // QosStatus::IDLE or QosStatus::AVAILABLE -> QosStatus::LOST
+    else if (eCurrStatus == QosStatus::AVAILABLE && eNewStatus == QosStatus::LOST)
     {
-        if (pQosTimer && (pQosTimer->IsQosTimerActivated(QosTimerType::WAIT_AVAILABLE) ||
-                pQosTimer->IsQosTimerActivated(QosTimerType::FORCE_AVAILABLE)))
-        {
-            IMS_TRACE_D("CheckQosTimers : There is timer for waiting enable QoS.", 0, 0, 0);
-            return IMS_FALSE;
-        }
-        else
-        {
-            StartQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
-            return IMS_FALSE;
-        }
+        StartQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
     }
-
-    return IMS_TRUE;
+    else if (eCurrStatus == QosStatus::LOST && eNewStatus == QosStatus::AVAILABLE)
+    {
+        StopQosTimer(piSession, QosTimerType::GUARD_INACTIVE);
+    }
 }
 
 PRIVATE
@@ -902,11 +906,10 @@ void MtcPreconditionManager::NotifyQosStatusToListener(IN ISession* piSession,
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsReserved(IN QosStatus eStatus)
+IMS_BOOL MtcPreconditionManager::IsStatusAvailable(IN QosStatus eStatus)
 {
     return (eStatus == QosStatus::AVAILABLE) ? IMS_TRUE : IMS_FALSE;
 }
-
 
 PRIVATE
 IMediaDescriptor* MtcPreconditionManager::GetMediaDescriptor(IN IMedia* piMedia)
@@ -1033,39 +1036,15 @@ IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType)
 PRIVATE
 void MtcPreconditionManager::InitializeCapability(IN ISession* piSession)
 {
-    IMS_BOOL bLocalSupport = IsPreconditionSupportedInLocal();
-    m_objCapabilities.Add(piSession, bLocalSupport);
-}
-
-PRIVATE
-void MtcPreconditionManager::InitializeLocalCurrentStatus(IN ISession* piSession)
-{
-    IMS_UINT32 eMediaTypes = SdpPreconditionHelper::GetMediaTypesBySdp(piSession);
-    if (eMediaTypes == MEDIATYPE_NONE)
-    {
-        eMediaTypes = GetMediaTypesFromCallType();
-    }
-
-    QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
-    if (!pStatusTable)
+    if (m_objCapabilities.GetIndexOfKey(piSession) >= 0)
     {
         return;
     }
 
-    if (eMediaTypes & MEDIATYPE_AUDIO && IsDefaultBearerUsed(MEDIATYPE_AUDIO))
-    {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_AUDIO, IMS_TRUE);
-    }
+    IMS_BOOL bLocalCapability = IsPreconditionSupportedInLocal();
+    IMS_TRACE_D("InitializeCapability : %s", _TRACE_B_(bLocalCapability), 0, 0);
 
-    if (eMediaTypes & MEDIATYPE_VIDEO && IsDefaultBearerUsed(MEDIATYPE_VIDEO))
-    {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_VIDEO, IMS_TRUE);
-    }
-
-    if (eMediaTypes & MEDIATYPE_TEXT && IsDefaultBearerUsed(MEDIATYPE_TEXT))
-    {
-        pStatusTable->UpdateLocalCurrentStatus(SdpMedia::TYPE_TEXT, IMS_TRUE);
-    }
+    m_objCapabilities.Add(piSession, bLocalCapability);
 }
 
 PRIVATE
@@ -1106,84 +1085,108 @@ QosLossPolicy MtcPreconditionManager::GetQosLossPolicy(IN IMS_UINT32 eMediaType)
 PRIVATE
 QosStatus MtcPreconditionManager::GetQosStatus(IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
-    QosData* pQosData = GetQosData(piSession);
-    if (pQosData == IMS_NULL)
+    QosData* pData = GetQosData(piSession);
+    QosStatus eStatus = QosStatus::IDLE;
+
+    if (pData == IMS_NULL)
     {
-        return QosStatus::IDLE;
+        return eStatus;
     }
 
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        return pQosData->GetAudioStatus();
+        eStatus = pData->GetAudioStatus();
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
-        return pQosData->GetVideoStatus();
+        eStatus = pData->GetVideoStatus();
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
-        return pQosData->GetTextStatus();
+        eStatus = pData->GetTextStatus();
     }
 
-    return QosStatus::IDLE;
+    return eStatus;
 }
 
 PRIVATE
-IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(
-        IN IMS_UINT32 eMediaType /*= MEDIATYPE_NONE*/)
+void MtcPreconditionManager::SetQosStatus(IN ISession* piSession, QosStatus eStatus,
+        IN IMS_UINT32 eMediaType)
+{
+    QosData* pData = GetQosData(piSession);
+    if (pData == IMS_NULL)
+    {
+        return;
+    }
+
+    if (!IsNeedToUpdateQosStatus(GetQosStatus(piSession, eMediaType), eStatus))
+    {
+        IMS_TRACE_D("SetQosStatus : nothing to update", 0, 0, 0);
+        return;
+    }
+
+    if (eMediaType == MEDIATYPE_AUDIO)
+    {
+        pData->SetAudioStatus(eStatus);
+    }
+    else if (eMediaType == MEDIATYPE_VIDEO)
+    {
+        pData->SetVideoStatus(eStatus);
+    }
+    else if (eMediaType == MEDIATYPE_TEXT)
+    {
+        pData->SetTextStatus(eStatus);
+    }
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsNeedToUpdateQosStatus(
+        IN QosStatus eCurrStatus, IN QosStatus eNewStatus)
+{
+    if ((eCurrStatus == QosStatus::IDLE && eNewStatus == QosStatus::AVAILABLE) ||
+            (eCurrStatus == QosStatus::AVAILABLE && eNewStatus == QosStatus::LOST) ||
+            (eCurrStatus == QosStatus::LOST && eNewStatus != QosStatus::LOST))
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eMediaType)
 {
     IMS_BOOL bSupport = IMS_FALSE;
 
-    IMS_BOOL bAudioSupport =
-            m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED);
-    IMS_BOOL bVideoSupport =
-            m_objContext.GetConfigurationProxy().Is(Feature::VIDEO_QOS_PRECONDITION_SUPPORTED);
-    IMS_BOOL bTextSupport =
-            m_objContext.GetConfigurationProxy().Is(Feature::TEXT_QOS_PRECONDITION_SUPPORTED);
-
-
-    if (eMediaType != MEDIATYPE_NONE)
+    if (eMediaType == MEDIATYPE_AUDIO)
     {
-        if (eMediaType == MEDIATYPE_AUDIO)
-        {
-            bSupport = bAudioSupport;
-        }
-        else if (eMediaType == MEDIATYPE_VIDEO)
-        {
-            bSupport = bVideoSupport;
-        }
-        else if (eMediaType == MEDIATYPE_TEXT)
-        {
-            bSupport = bTextSupport;
-        }
-
-        IMS_TRACE_D("IsPreconditionSupportedInLocal : MediaType[%d] Result[%d]",
-                eMediaType, bSupport, 0);
-
-        return bSupport;
+        bSupport =
+                m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED);
+    }
+    else if (eMediaType == MEDIATYPE_VIDEO)
+    {
+        bSupport =
+                m_objContext.GetConfigurationProxy().Is(Feature::VIDEO_QOS_PRECONDITION_SUPPORTED);
+    }
+    else if (eMediaType == MEDIATYPE_TEXT)
+    {
+        bSupport =
+                m_objContext.GetConfigurationProxy().Is(Feature::TEXT_QOS_PRECONDITION_SUPPORTED);
     }
 
-    CallType eCallType = m_objContext.GetCallInfo().eCallType;
+    IMS_TRACE_D("IsPreconditionSupportedInLocal : MediaType[%d] Result[%s]",
+            eMediaType, _TRACE_B_(bSupport), 0);
 
-    switch (eCallType)
-    {
-        case CallType::VOIP:
-            bSupport = bAudioSupport;
-            break;
-        case CallType::VT:
-            bSupport = bAudioSupport | bVideoSupport;
-            break;
-        case CallType::RTT:
-            bSupport = bAudioSupport | bTextSupport;
-            break;
-        case CallType::VIDEO_RTT:
-            bSupport = bAudioSupport | bVideoSupport | bTextSupport;
-            break;
-        default:
-            break;
-    }
-
-    IMS_TRACE_D("IsPreconditionSupportedInLocal : CallType[%d] Result[%d]",
-            eCallType, bSupport, 0);
     return bSupport;
+}
+
+PRIVATE
+IMS_BOOL MtcPreconditionManager::IsConfirmedDialog(IN const ISession* piSession)
+{
+    if (piSession && piSession->GetState() >= ISession::STATE_ESTABLISHED)
+    {
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }

@@ -526,7 +526,7 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 
     RunMedia(piSession, piMessage);
 
-    m_objContext.GetPreconditionManager().UpdatePreconditionAttributes(piSession);
+    m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(piSession);
 
     IMS_TRACE_D("OnSdpReceived - Nego Done", 0, 0, 0);
     return FAIL_REASON_NONE;
@@ -720,6 +720,21 @@ void MtcCallState::UpdatePreconditionCapability(IN ISession* piSession, IN IMess
 
     m_objContext.GetPreconditionManager().UpdatePreconditionCapability(
             piSession, bRemoteCapability);
+}
+
+PROTECTED
+void MtcCallState::SetLocalQosAvailableForWifiCalling(IN ISession* piSession)
+{
+    IMS_TRACE_D("SetLocalQosAvailableForWifiCalling", 0, 0, 0);
+
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+
+    if (!m_objContext.GetService().IsWlanIpCanType())
+    {
+        return;
+    }
+
+    objPreconditionManager.SetLocalResourceAvailable(piSession);
 }
 
 PROTECTED
