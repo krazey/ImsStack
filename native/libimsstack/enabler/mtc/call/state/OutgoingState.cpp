@@ -159,17 +159,13 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     IMessage* piMessage = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
 
     m_objContext.GetTimer().StopAll();
-    m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
-    UpdateCallType(piSession, piMessage, IMS_FALSE);
+    m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
-    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START);
+    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage);
 
     if (MessageUtil::IsFocusConf(piMessage))
     {
         m_objContext.GetCallInfo().bConference = IMS_TRUE;
-        m_objContext.GetCallInfo().bConferenceSubscriptionRequired =
-                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired();
-
         m_objContext.GetMediaManager().SetConferenceCall(IMS_TRUE);
     }
 
@@ -234,10 +230,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
 
-    m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
-    UpdateCallType(piSession, piMessage, IMS_TRUE);
-    m_objSessions.GetValue(piSession)->GetExtensionSet().HandleResponse(
-            IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_EARLY_UPDATE, *piMessage);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
@@ -276,10 +269,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
-    m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
-    UpdateCallType(piSession, piMessage, IMS_TRUE);  // TODO: why differs from AlertingState?
-    NegotiateExtension(
-            m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_EARLY_UPDATE);
+    m_objSessions.GetValue(piSession)->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage);
 
     // TODO: which operator requires this?
     // m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
@@ -328,7 +319,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
 
     m_objContext.GetSipInterfaceFactory().GetISessionHolder()->AddISession(piForkedSession);
 
-    m_objSessions.Add(piForkedSession, m_objContext.CreateSession(*piForkedSession));
+    CallType eCallType = m_objSessions.GetValue(piSession)->GetCallType();
+    m_objSessions.Add(piForkedSession, m_objContext.CreateSession(*piForkedSession, eCallType));
     m_objContext.GetMediaManager().CreateMediaProfile(piForkedSession, IMS_TRUE, IMS_TRUE);
     m_objContext.GetPreconditionManager().CreateQos(piForkedSession);
 
@@ -344,6 +336,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* p
     IMS_TRACE_D("SessionPRAckDelivered", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
     UpdatePreconditionCapability(piSession, piMessage);
+
+    m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_PRACK, *piMessage);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
 
@@ -421,9 +415,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
+    m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
 
-    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
-            IMS_FAILURE)
+    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage) == IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -446,8 +440,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         // TODO: An early dialog is terminated
         return GetStateName();
     }
-
-    UpdateCallType(piSession, piMessage, IMS_FALSE);
 
     m_objContext.GetMediaManager().UpdatePemType(piSession, piMessage);
 
@@ -480,9 +472,9 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
+    m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
 
-    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
-            IMS_FAILURE)
+    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage) == IMS_FAILURE)
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -505,8 +497,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         // TODO: An early dialog is terminated
         return GetStateName();
     }
-
-    UpdateCallType(piSession, piMessage, IMS_FALSE);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.UpdatePemType(piSession, piMessage);
@@ -683,7 +673,7 @@ CallStateName OutgoingState::ContinueSilentRetry()
 {
     IMS_TRACE_D("ContinueRetrySilent", 0, 0, 0);
 
-    if (CreateISession() == IMS_FAILURE)
+    if (CreateISession(m_objContext.GetCallInfo().eInitialCallType) == IMS_FAILURE)
     {
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
@@ -705,30 +695,6 @@ CallStateName OutgoingState::ContinueSilentRetry()
     }
 
     return GetStateName();
-}
-
-PRIVATE
-IMS_BOOL OutgoingState::IsRttCapable(IN IMessage* piMessage)
-{
-    AString strContact;
-    MessageUtil::GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strContact);
-    return MessageUtil::ContainsTag(strContact, "text");
-}
-
-PRIVATE
-void OutgoingState::UpdateCallType(
-        IN ISession* /* piSession */, IN IMessage* /* piMessage */, IN IMS_BOOL /* bPeerView */)
-{
-    CallType eCallType = /* MessageUtil::CheckSessionType(piMessage, piSession, bPeerView,
-            m_objContext.GetCallInfo().eServiceType) */
-            CallType::VOIP;
-    if (eCallType == CallType::UNKNOWN)
-    {
-        IMS_TRACE_I("UpdateCallType : NOT UPDATE", 0, 0, 0);
-        return;
-    }
-
-    m_objContext.GetCallInfo().eCallType = eCallType;
 }
 
 PRIVATE
@@ -772,7 +738,7 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 
     // TODO: stop call init timers
 
-    if (!m_objContext.IsEct())
+    if (!m_objContext.GetCallInfo().bEct)
     {
         SendStarted();
     }

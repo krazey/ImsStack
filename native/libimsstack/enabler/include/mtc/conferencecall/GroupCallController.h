@@ -9,8 +9,8 @@ class IConferenceReference;
 class ConfUser;
 class MediaInfo;
 class SuppService;
-struct CallInfo;
 struct CallStartOperationParams;
+struct CallInfo;
 
 class GroupCallController final : public ConferenceController
 {

@@ -4,7 +4,6 @@
 #include "conferencecall/GroupCallController.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceOperationQueue.h"
-#
 
 __IMS_TRACE_TAG_COM_MTC__;
 

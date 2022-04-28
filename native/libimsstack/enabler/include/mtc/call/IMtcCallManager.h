@@ -4,7 +4,6 @@
 #include "IMSList.h"
 #include "IMSTypeDef.h"
 #include "call/IMtcCall.h"
-#include "CallInfo.h"
 #include "IMtcService.h"
 #include "MtcDef.h"
 

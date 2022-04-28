@@ -399,7 +399,7 @@ void MtcCallState::NotifyHoldResumeState()
 }
 
 PROTECTED
-IMS_RESULT MtcCallState::CreateISession()
+IMS_RESULT MtcCallState::CreateISession(IN CallType eCallType)
 {
     ISession* piSession = m_objContext.GetSipInterfaceFactory().GetISessionHolder()->GetISession(
             m_objContext.GetService().GetICoreService(),
@@ -409,7 +409,7 @@ IMS_RESULT MtcCallState::CreateISession()
     {
         return IMS_FAILURE;
     }
-    m_objContext.SetSession(m_objContext.CreateSession(*piSession));
+    m_objContext.SetSession(m_objContext.CreateSession(*piSession, eCallType));
 
     return IMS_SUCCESS;
 }
@@ -502,7 +502,7 @@ ResultSetSdp MtcCallState::SetSdpToSend(
         return ResultSetSdp::NO_SDP;
     }
 
-    if (objMediaManager.FormSdp(piSession, m_objContext.GetCallInfo().eCallType) == IMS_FAILURE)
+    if (objMediaManager.FormSdp(piSession, m_objContext.GetSession()->GetCallType()) == IMS_FAILURE)
     {
         IMS_TRACE_D("SetSdpToSend - Form SDP Failed", 0, 0, 0);
         return ResultSetSdp::FAILURE;
@@ -635,10 +635,7 @@ void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
 
     m_objContext.GetUpdatingInfo().SetAlerted();
 
-    CallInfo& objInfo = m_objContext.GetCallInfo();
-    objInfo.eCallType = eCallType;
-
-    m_objContext.GetUiNotifier().SendIncomingUpdate(&objInfo,
+    m_objContext.GetUiNotifier().SendIncomingUpdate(eCallType, &m_objContext.GetCallInfo(),
             &m_objContext.GetUpdatingInfo().GetAlertingInfo(),
             m_objContext.GetSupplementaryService().GetServices());
 
@@ -690,21 +687,11 @@ void MtcCallState::SetLocalQosAvailableForWifiCalling(IN ISession* piSession)
 }
 
 PROTECTED
-IMS_RESULT MtcCallState::NegotiateExtension(
-        IN MtcSession* pMtcSession, IN IMessage* piMessage, IN IMS_UINT32 eMethod)
+IMS_RESULT MtcCallState::NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage)
 {
     if (piMessage == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
     {
         return IMS_FAILURE;
-    }
-
-    if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
-    {
-        pMtcSession->GetExtensionSet().HandleResponse(eMethod, *piMessage);
-    }
-    else
-    {
-        pMtcSession->GetExtensionSet().HandleRequest(eMethod, *piMessage);
     }
 
     if (!pMtcSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))

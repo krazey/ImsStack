@@ -112,8 +112,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
-    UpdateCallTypeFromMessage(piMessage, piSession);
-    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
+    m_objContext.GetSession()->HandleResponse(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -160,9 +160,8 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-
-    UpdateCallTypeFromMessage(piMessage, piSession);
-    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (!MessageUtil::HasSdp(piMessage))
     {
@@ -215,8 +214,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* pi
     IMS_TRACE_D("SessionPRAckReceived", 0, 0, 0);
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
-
-    UpdateCallTypeFromMessage(piMessage, piSession);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -255,16 +253,4 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession
 {
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_TO_MT_PRACK));
-}
-
-PRIVATE
-void IncomingState::UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISession* piSession)
-{
-    CallType eNewCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_FALSE);
-    if (eNewCallType != CallType::UNKNOWN)
-    {
-        IMS_TRACE_D("UpdateCallTypeFromMessage : [%d] -> [%d]",
-                m_objContext.GetCallInfo().eCallType, eNewCallType, 0);
-        m_objContext.GetCallInfo().eCallType = eNewCallType;
-    }
 }

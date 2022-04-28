@@ -50,7 +50,7 @@ class MtcCall final :
         public IMtcCallStateWatcher<CallStateName>
 {
 public:
-    MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN CallInfo objCallInfo);
+    MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo);
     virtual ~MtcCall();
     MtcCall(IN const MtcCall&) = delete;
     MtcCall& operator=(IN const MtcCall&) = delete;
@@ -61,7 +61,6 @@ public:
 
     void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
-
     void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMSList<ConfUser*> lstUsers) override;
@@ -91,7 +90,6 @@ public:
     inline IMtcCallContext& GetCallContext() const override { return *(IMtcCallContext*)this; }
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
-    inline IMS_BOOL IsEct() const override { return m_bEct; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
@@ -104,8 +102,9 @@ public:
         return m_objPreconditionManager;
     }
     UpdatingInfo& GetUpdatingInfo() override;
-    MtcSession* CreateSession(IN ISession& objSession) override;
+    MtcSession* CreateSession(IN ISession& objSession, IN CallType eCallType) override;
     IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override;
+    JniCallInfo CreateJniCallInfo() override;
     void DeleteUpdatingInfo() override;
     inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
@@ -192,7 +191,6 @@ private:
 
     CallKey CreateCallKey();
     void OnInternalFailure();
-    void SetVideoCapable(IN ISession* piSession);
     void OnAttached();
 
     IMtcContext& m_objContext;
@@ -200,15 +198,14 @@ private:
 
     CallKey m_nKey;
 
-    IMS_BOOL m_bEct;
     IMS_BOOL m_bHeldByMe;
 
     CallInfo m_objCallInfo;
     ParticipantInfo m_objParticipantInfo;
     UpdatingInfo* m_pUpdatingInfo;
+    MtcSession* m_pSession;
 
     MtcCallStateMachine<MtcCallState, CallStateName> m_objStateMachine;
-    MtcSession* m_pSession;
     MtcTimerWrapper m_objTimer;
     MtcUiNotifier m_objUiNotifier;
     MtcMediaManager m_objMediaManager;

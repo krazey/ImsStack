@@ -3,9 +3,8 @@
 
 #include "IMSList.h"
 #include "IMSTypeDef.h"
-#include "call/IMtcCall.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 
 class AString;
 class ISession;

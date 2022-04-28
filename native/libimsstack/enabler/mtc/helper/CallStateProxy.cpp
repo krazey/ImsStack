@@ -63,16 +63,16 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
 }
 
 PUBLIC
-void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN CallInfo& objCallInfo,
-        IN IMtcCall::State eState, IN IMS_SINT32 nReason /* = FAIL_REASON_NONE*/)
+void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState,
+        IN CallType eCallType, IN IMS_BOOL bEmergency,
+        IN IMS_SINT32 nReason /* = FAIL_REASON_NONE */)
 {
     IMS_TRACE_D("UpdateCallState", 0, 0, 0);
     IMS_BOOL bTotalCallStateUpdated = UpdateTotalCallState();
 
     CallStateDetails* pDetails =
             new CallStateDetails(nCallkey, static_cast<IMtcCallStateListener::State>(eState),
-                    static_cast<IMtcCallStateListener::Type>(objCallInfo.eCallType),
-                    objCallInfo.bEmergency, nReason);
+                    static_cast<IMtcCallStateListener::Type>(eCallType), bEmergency, nReason);
 
     if (m_objSynchronousListeners.GetSize() > 0)
     {

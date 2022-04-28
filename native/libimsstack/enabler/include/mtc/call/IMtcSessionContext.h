@@ -13,6 +13,10 @@ class IMtcSessionContext : public IMtcCallContext
 public:
     virtual ~IMtcSessionContext(){};
 
+    virtual CallType GetCallType() const = 0;
+    virtual IMS_BOOL IsVideoCapable() const = 0;
+    virtual IMS_BOOL IsRttCapable() const = 0;
+
     virtual ISession& GetISession() = 0;
     virtual MessageSender& GetMessageSender() = 0;
     virtual MtcExtensionSet& GetExtensionSet() = 0;

@@ -215,7 +215,14 @@ void JniMtcCall::Open(IN const android::Parcel& objParcel)
 {
     IMS_TRACE_D("Open (%" PFLS_d ")", m_nCallKey, 0, 0);
 
-    CallInfo objCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+    JniCallInfo objJniCallInfo = JniMtcUtils::ReadCallInfo(objParcel);
+
+    CallInfo objCallInfo;
+    objCallInfo.bWifi = objJniCallInfo.bWifi;
+    objCallInfo.bEmergency = objJniCallInfo.bEmergency;
+    objCallInfo.bOffline = objJniCallInfo.bOffline;
+    objCallInfo.bUssi = objJniCallInfo.bUssi;
+
     m_nCallKey = m_objCallController.Open(ServiceType::NORMAL, objCallInfo);
     Attach();
 }

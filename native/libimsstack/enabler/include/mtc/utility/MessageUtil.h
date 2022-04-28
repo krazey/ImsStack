@@ -2,9 +2,9 @@
 #define MTC_MESSAGE_UTIL_H_
 
 #include "AString.h"
-#include "CallInfo.h"
 #include "IMtcService.h"
 #include "MtcDef.h"
+#include "call/IMtcCall.h"
 
 class AStringBuffer;
 class ConfUser;
@@ -22,7 +22,7 @@ class MessageUtil
 {
 public:
     // Changed :: GetResponseMsg -> GetPreviousResponse
-    static IMessage* GetPreviousResponse(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
+    static IMessage* GetPreviousResponse(IN const ISession* piSession, IN IMS_SINT32 eServiceMethod,
             IN IMS_SINT32 nResponseIndex = INVALID_INDEX);
     // Changed :: GetRemotePreviousMsg -> GetRemotePreviousMessage
     static IMessage* GetRemotePreviousMessage(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
@@ -117,7 +117,7 @@ public:
     // Removed :: IsQoSAttr
     // Changed :: HasSDP -> HasSdp
     static IMS_BOOL HasSdp(IN const IMessage* piMessage);
-    static IMS_BOOL IsFocusConf(IN IMessage* piMessage);
+    static IMS_BOOL IsFocusConf(IN const IMessage* piMessage);
     // Removed :: IsRestoration -> IsInitialRegistrationRequired
     static IMS_BOOL IsInitialRegistrationRequired(IN const IMessage* piMessage);
     static IMS_BOOL ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
@@ -147,7 +147,8 @@ public:
     static IMS_RESULT SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
             IN const AString& strContentId, IN IMSList<AString>& lstEntryUri,
             IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl = IMS_TRUE);
-    static IMS_BOOL IsVideoFeatureIncluded(IN IMessage* piMessage);
+    static IMS_BOOL IsVideoFeatureIncluded(IN const IMessage* piMessage);
+    static IMS_BOOL IsTextFeatureIncluded(IN const IMessage* piMessage);
 
 private:
     static ISipMessage* GetSipMessage(IN const IMessage* piMessage);
@@ -167,7 +168,7 @@ public:
     static ServiceType CheckServiceType(IN IMessage* piMessage, IN IMtcCall* pSession = IMS_NULL,
             IN ISession* piSession = IMS_NULL);
     static CallType GetCallType(
-            IN IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView);
+            IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView);
     static CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNego,
             IN IMS_BOOL bPeerView);  // TODO: change name of bPeerView
     static CallType GetCallTypeFromAcceptContact(
@@ -224,6 +225,7 @@ public:
     static const IMS_CHAR STR_TIMER[];
     static const IMS_CHAR STR_URN[];
     static const IMS_CHAR STR_VIDEO[];
+    static const IMS_CHAR STR_TEXT[];
 
 private:
     static const IMS_SINT32 INVALID_INDEX;

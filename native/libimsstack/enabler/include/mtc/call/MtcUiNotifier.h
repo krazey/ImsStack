@@ -8,6 +8,7 @@
 #include "define/MtcStringDef.h"
 #include "call/IMtcCall.h"
 
+class IMtcCallContext;
 class ParticipantInfo;
 class JniMediaSessionThread;
 class JniMtcCallThread;
@@ -17,10 +18,13 @@ class SuppService;
 struct CallInfo;
 struct FailReason;
 
+// TODO: remove unused parameter
+// TODO: get SuppService from the context
+
 class MtcUiNotifier final
 {
 public:
-    MtcUiNotifier();
+    explicit MtcUiNotifier(IN IMtcCallContext& objContext);
     ~MtcUiNotifier();
     MtcUiNotifier(IN const MtcUiNotifier&) = delete;
     MtcUiNotifier& operator=(IN const MtcUiNotifier&) = delete;
@@ -54,8 +58,8 @@ public:
     void SendTerminated(IN const FailReason& objReason);
     void SendIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendIncomingUpdate(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+    void SendIncomingUpdate(IN CallType eCallTypeToUpdate, IN CallInfo* pCallInfo,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendUpdateFailed(IN const FailReason& objReason);
@@ -86,6 +90,8 @@ public:
 
 private:
     IMS_BOOL IsAvailableToSend();
+
+    IMtcCallContext& m_objContext;
 
     JniMtcCallThread* m_pCallThread;
     JniMtcServiceThread* m_pServiceThread;

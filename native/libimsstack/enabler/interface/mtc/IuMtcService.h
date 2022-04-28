@@ -4,7 +4,6 @@
 #include "FailReason.h"
 #include "ImsMessageDef.h"
 #include "IUBaseParam.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
 #include "IMSMap.h"
 
@@ -110,28 +109,6 @@ public:
 public:
     AString strUIKey;
     IMS_UINTP nIMSKey;
-};
-
-class IUUCServiceOpenSessionParam : public IUUCServiceBaseParam
-{
-public:
-    inline IUUCServiceOpenSessionParam() :
-            IUUCServiceBaseParam(),
-            pService(IMS_NULL),
-            eCallType(CallType::VOIP)
-    {
-        IMS_TRACE_MEM("uc", "uc_M : IUUCServiceOpenSessionParam[%" PFLS_u "][%" PFLS_x "]",
-                sizeof(IUUCServiceOpenSessionParam), this, 0);
-    }
-    inline virtual ~IUUCServiceOpenSessionParam()
-    {
-        IMS_TRACE_MEM("uc", "uc_F : IUUCServiceOpenSessionParam[%" PFLS_u "][%" PFLS_x "]",
-                sizeof(IUUCServiceOpenSessionParam), this, 0);
-    }
-
-public:
-    IMtcService* pService;
-    CallType eCallType;
 };
 
 class IUUCServiceAttachSessionParam : public IUUCServiceBaseParam

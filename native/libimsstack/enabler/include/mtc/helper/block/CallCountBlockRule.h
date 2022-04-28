@@ -1,7 +1,6 @@
 #ifndef CALL_COUNT_BLOCK_RULE_H_
 #define CALL_COUNT_BLOCK_RULE_H_
 
-#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 

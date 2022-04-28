@@ -1,5 +1,4 @@
 #include "IMessage.h"
-#include "ImsAosParameter.h"
 #include "IMSTypeDef.h"
 #include "IReference.h"
 #include "ISession.h"
@@ -15,39 +14,37 @@
 #include "call/state/OutgoingState.h"
 #include "call/state/TerminatingState.h"
 #include "call/state/UpdatingState.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/CallStateProxy.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/block/MtcBlockChecker.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
-#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PRIVATE GLOBAL IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexService()->CreateMutex();
 
 PUBLIC
-MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN CallInfo objCallInfo) :
+MtcCall::MtcCall(
+        IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo) :
         m_objContext(objContext),
         m_objService(objService),
         m_nKey(CreateCallKey()),
-        m_bEct(IMS_FALSE),
         m_bHeldByMe(IMS_FALSE),
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
+        m_pSession(IMS_NULL),
         m_objStateMachine(
                 MtcCallStateMachine<MtcCallState, CallStateName>(CallStateName::IDLE, *this, this)),
-        m_pSession(IMS_NULL),
         m_objTimer(MtcTimerWrapper()),
-        m_objUiNotifier(MtcUiNotifier()),
+        m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this)),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy()))
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
-
-    m_objCallInfo.eServiceType = objService.GetServiceType();
 
     m_objTimer.SetListener(this);
     m_objPreconditionManager.SetListener(this);
@@ -377,16 +374,35 @@ PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
     return *m_pUpdatingInfo;
 }
 
-PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession& objSession)
+PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession& objSession, IN CallType eCallType)
 {
     objSession.SetListener(this);
-    return new MtcSession(*this, objSession);
+    return new MtcSession(*this, objSession, eCallType);
 }
 
 PUBLIC VIRTUAL IMtcBlockChecker* MtcCall::CreateBlockChecker(
         IN const IMSList<IMtcBlockRule*>& lstRules)
 {
     return new MtcBlockChecker(lstRules, *this);
+}
+
+PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
+{
+    JniCallInfo objJniCallInfo;
+    objJniCallInfo.eServiceType = GetService().GetServiceType();
+    objJniCallInfo.eCallType = GetSession() ? GetSession()->GetCallType() : CallType::UNKNOWN;
+    objJniCallInfo.bWifi = m_objCallInfo.bWifi;
+    objJniCallInfo.bEmergency = m_objCallInfo.bEmergency;
+    objJniCallInfo.bOffline = m_objCallInfo.bOffline;
+    objJniCallInfo.bUssi = m_objCallInfo.bUssi;
+    objJniCallInfo.bConference = m_objCallInfo.bConference;
+    objJniCallInfo.bConferenceEnabled = IMS_TRUE;  // TODO: Any meaning to use this?
+    objJniCallInfo.bConferenceSubscriptionRequired =
+            m_objContext.GetConfigurationProxy().Is(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
+    objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;
+    objJniCallInfo.bVideoCapable = GetSession() ? GetSession()->IsVideoCapable() : IMS_FALSE;
+
+    return objJniCallInfo;
 }
 
 PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
@@ -450,8 +466,6 @@ PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
         OnInternalFailure();
         return;
     }
-
-    SetVideoCapable(piSession);  // TODO: move into CallInfo
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -884,7 +898,9 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
     IMS_TRACE_I(
             "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
-    GetCallStateProxy().UpdateCallState(m_nKey, m_objCallInfo, eState);
+    GetCallStateProxy().UpdateCallState(m_nKey, eState,
+            GetSession() ? GetSession()->GetCallType() : CallType::UNKNOWN,
+            m_objCallInfo.bEmergency);
 }
 
 PRIVATE
@@ -906,43 +922,6 @@ void MtcCall::OnInternalFailure()
             {
                 return pState->OnInternalFailure();
             });
-}
-
-PRIVATE
-void MtcCall::SetVideoCapable(IN ISession* piSession)
-{
-    MtcAosConnector* pAosConnector = GetAosConnector(m_objCallInfo.eServiceType);
-    if (pAosConnector == IMS_NULL)
-    {
-        return;
-    }
-
-    IMS_UINT32 nFeatures = pAosConnector->GetFeatures();
-    if ((nFeatures & ImsAosFeature::MMTEL) && (nFeatures & ImsAosFeature::VIDEO))
-    {
-        IMessage* piMessage;
-        if (m_objCallInfo.ePeerType == PeerType::MO)
-        {
-            piMessage = piSession->GetPreviousResponse(IMessage::SESSION_START);
-        }
-        else
-        {
-            piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-
-            if (piMessage == IMS_NULL)
-            {
-                piMessage = MessageUtil::GetRemotePreviousMessage(
-                        piSession, IMessage::SESSION_START, false);
-            }
-        }
-
-        if (piMessage == IMS_NULL)
-        {
-            return;
-        }
-
-        GetCallInfo().bVideoCapable = MessageUtil::IsVideoFeatureIncluded(piMessage);
-    }
 }
 
 PRIVATE

@@ -6,7 +6,6 @@
 #include "IMSMap.h"
 
 class ParticipantInfo;
-struct CallInfo;
 
 class JniMtcServiceThread final : public BaseServiceThread
 {
