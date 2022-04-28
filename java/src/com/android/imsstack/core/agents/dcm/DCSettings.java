@@ -120,6 +120,23 @@ public class DCSettings implements IDCSettings {
         }
         return CarrierConfig.Ims.IPV6_PREFERRED;
     }
+
+    @Override
+    public boolean isPermanentFailure(int causeCode) {
+        if (mCarrierConfig != null) {
+            int[] permanentFailure = mCarrierConfig.getIntArray(
+                    CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+            if (permanentFailure != null) {
+                for (int i = 0; i < permanentFailure.length ; i++) {
+                    if (permanentFailure[i] == causeCode) {
+                        ImsLog.w(mSlotId, "permanent failure cause " + causeCode);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
     // Private/Protected methods ---------------------------------
     //----------------------------------------------------------------------------------------------
 }

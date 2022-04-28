@@ -765,6 +765,10 @@ public class DCApn implements IDCApn {
             return;
         }
 
+        if (dataConnectionState.getState() == TelephonyManager.DATA_SUSPENDED) {
+            return;
+        }
+
         Message msg = Message.obtain();
         msg.what = Apn.EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED;
         msg.obj = dataConnectionState;
