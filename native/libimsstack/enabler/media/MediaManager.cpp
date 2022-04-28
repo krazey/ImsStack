@@ -281,17 +281,14 @@ PROTECTED
 IMS_BOOL MediaManager::handleRequestMsg(IN IMSMSG& objMsg)
 {
     IMS_TRACE_I("handleRequestMsg() - MSG[%d]", objMsg.nMSG, 0, 0);
-    if (objMsg.nWparam != IMS_NULL)
+
+    MediaSessionNode* pNode = FindSessionNode(objMsg.nWparam);
+    if (pNode == IMS_NULL || pNode->pMessageHandler == IMS_NULL)
     {
-        MediaSessionNode* pNode = FindSessionNode(objMsg.nWparam);
-        if (pNode == IMS_NULL || pNode->pMessageHandler == IMS_NULL)
-        {
-            return IMS_FALSE;
-        }
-        ImsMediaMsgParamBase* param = reinterpret_cast<ImsMediaMsgParamBase*>(objMsg.nLparam);
-        return pNode->pMessageHandler->SendMessageToMediaService(objMsg.nMSG, param);
+        return IMS_FALSE;
     }
-    return IMS_FALSE;
+    ImsMediaMsgParamBase* param = reinterpret_cast<ImsMediaMsgParamBase*>(objMsg.nLparam);
+    return pNode->pMessageHandler->SendMessageToMediaService(objMsg.nMSG, param);
 }
 
 PROTECTED
