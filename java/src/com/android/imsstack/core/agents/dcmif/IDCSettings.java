@@ -30,5 +30,5 @@ public interface IDCSettings extends IDC {
     /**
      * Return whether the casueCode should be handled as permanent failure
      */
-    boolean isPermanentFailure(int causeCode);
+    boolean isPermanentFailure(EApnType apnType, int causeCode);
 }

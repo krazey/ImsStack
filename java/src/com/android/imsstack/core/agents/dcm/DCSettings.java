@@ -5,6 +5,7 @@ import android.telephony.CarrierConfigManager;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ConfigInterface;
+import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.CarrierConfig;
@@ -122,10 +123,20 @@ public class DCSettings implements IDCSettings {
     }
 
     @Override
-    public boolean isPermanentFailure(int causeCode) {
+    public boolean isPermanentFailure(EApnType apnType, int causeCode) {
         if (mCarrierConfig != null) {
-            int[] permanentFailure = mCarrierConfig.getIntArray(
-                    CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+            int[] permanentFailure = null;
+
+            if (apnType == EApnType.IMS) {
+                permanentFailure = mCarrierConfig.getIntArray(
+                        CarrierConfig.Assets.KEY_PERMANENT_PDN_FAILURE_INT_ARRAY);
+            } else if (apnType == EApnType.XCAP) {
+                permanentFailure = mCarrierConfig.getIntArray(
+                        CarrierConfig.ImsSs.KEY_UT_SM_CAUSE_PERMANENT_BLOCK_INT_ARRAY);
+            } else {
+                return false;
+            }
+
             if (permanentFailure != null) {
                 for (int i = 0; i < permanentFailure.length ; i++) {
                     if (permanentFailure[i] == causeCode) {
