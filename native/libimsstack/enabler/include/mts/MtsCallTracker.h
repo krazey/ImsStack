@@ -3,13 +3,10 @@
 
 #include "IMSList.h"
 #include "IMSMap.h"
-
-//#include "../../../EnablerInterface/uca/IUCCallListener.h" _UC_TO_MTC_
-#include "interface/IMtsCallTracker.h"
+#include "IMtsCallTracker.h"
 
 class MtsCallTracker final :
         public IMtsCallTracker
-        //, public IUCCallListener _UC_TO_MTC_
 {
 public:
     MtsCallTracker(IN IMS_SINT32 nSlotId_);

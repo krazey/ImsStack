@@ -1,7 +1,7 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 
-#include "interface/IMtsCallTrackerListener.h"
+#include "IMtsCallTrackerListener.h"
 #include "MtsCallTracker.h"
 
 __IMS_TRACE_TAG_COM_SMS__;

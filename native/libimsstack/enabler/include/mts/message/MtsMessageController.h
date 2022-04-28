@@ -3,7 +3,7 @@
 
 #include "IMSActivityEx.h"
 #include "ICoreService.h"
-#include "interface/IMtsService.h"
+#include "IMtsService.h"
 #include "IUMts.h"
 
 class IMtsMessage;

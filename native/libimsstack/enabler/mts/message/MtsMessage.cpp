@@ -13,7 +13,7 @@
 #include "IMessage.h"
 #include "IMessageBodyPart.h"
 #include "IPageMessage.h"
-#include "interface/IMtsMessage.h"
+#include "IMtsMessage.h"
 #include "IUMts.h"
 #include "MtsClient.h"
 #include "utility/MtsDynamicLoader.h"
