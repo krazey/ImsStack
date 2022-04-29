@@ -1,7 +1,7 @@
 #include "ServiceTrace.h"
 
 #include "MtsApp.h"
-#include "interface/IMtsApp.h"
+#include "IMtsApp.h"
 #include "MtsFactory.h"
 #include "utility/MtsUtils.h"
 

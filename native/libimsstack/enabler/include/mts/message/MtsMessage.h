@@ -1,7 +1,7 @@
 #ifndef MTS_MESSAGE_H_
 #define MTS_MESSAGE_H_
 
-#include "interface/IMtsMessage.h"
+#include "IMtsMessage.h"
 #include "IPageMessageListener.h"
 #include "IMessage.h"
 #include "message/MtsMessageController.h"

@@ -2,14 +2,14 @@
 #define MTS_APP_H_
 
 #include "IMSApp.h"
-#include "interface/IMtsMessageControllerListener.h"
-#include "interface/IMtsApp.h"
+#include "IMtsMessageControllerListener.h"
+#include "IMtsApp.h"
 #include "IMSService.h"
 #include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
 
 
-#include "interface/IMtsCallTrackerListener.h"
+#include "IMtsCallTrackerListener.h"
 
 #include "utility/MtsTrm.h"
 

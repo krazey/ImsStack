@@ -5,7 +5,7 @@
 #include "ICoreServiceListener.h"
 #include "interface/aos/IImsAosListener.h"
 #include "interface/aos/IImsAosMonitor.h"
-#include "interface/IMtsService.h"
+#include "IMtsService.h"
 
 #include "IUMts.h"
 
