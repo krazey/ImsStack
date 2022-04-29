@@ -1627,6 +1627,7 @@ void    UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
             StopTimer(TIMER_EXPONENTIAL);
             StopTimer(TIMER_RETRY);
             StopTimer(TIMER_RETRYAFTER);
+            return;
         }
         break;
         default:
