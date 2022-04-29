@@ -27,6 +27,8 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-
+    local_include_dirs: [
+        "include/aos",
+    ],
     test_config: "ImsStackNativeEnablerTests.xml",
 }

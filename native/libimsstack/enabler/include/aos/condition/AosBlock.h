@@ -30,22 +30,23 @@ public:
     AosBlock(IN IAosAppContext* piAppContext);
     virtual ~AosBlock();
 
-    virtual void SetListener(IN IAosBlockListener* piListener);
-    virtual void RemoveListener(IN IAosBlockListener* piListener);
+    void SetListener(IN IAosBlockListener* piListener) override;
+    void RemoveListener(IN IAosBlockListener* piListener) override;
 
-    virtual void SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE);
-    virtual void ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE);
-    virtual void ClearAllBlockReasons();
-    virtual void PrintBlockReasons();
+    void SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
+    void ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
+    void ClearAllBlockReasons() override;
+    void PrintBlockReasons() override;
 
-    virtual void GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
-            IN SERVICE_TYPE eType = SERVICE_CELLULAR);
+    void GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
+            IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
-    virtual IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason,
-            IN IMS_BOOL bOnlyEnabled = IMS_FALSE, IN SERVICE_TYPE eType = SERVICE_CELLULAR);
+    IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled = IMS_FALSE,
+            IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
-    virtual IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR);
+    IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
+    IMS_BOOL IsListened(IN IAosBlockListener* piListener);
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
 private :

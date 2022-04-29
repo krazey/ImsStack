@@ -6,6 +6,11 @@ cc_test {
     srcs: [
         "**/*.cpp",
     ],
-
+    include_dirs: [
+        "packages/modules/ImsStack/tests/native/libimsstack/enabler/include/aos",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
     test_config: "ImsStackNativeEnablerAosTests.xml",
 }
