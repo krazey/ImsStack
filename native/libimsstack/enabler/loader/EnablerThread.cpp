@@ -9,7 +9,7 @@
     Description
 
 */
-
+#include "DeviceConfig.h"
 #include "ServiceConfig.h"
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
@@ -59,7 +59,8 @@ IMS_BOOL EnablerThread::Initialize()
 PROTECTED VIRTUAL
 IMS_BOOL EnablerThread::OnStart(IN IMSMSG &objMSG)
 {
-    IMS_TRACE_D("OnStart :: slotId=%d", GetSlotId(), 0, 0);
+    IMS_TRACE_D("OnStart :: slotId=%d, %s",
+            GetSlotId(), DeviceConfig::ToString().GetStr(), 0);
 
     IMSAppThread::OnStart(objMSG);
 

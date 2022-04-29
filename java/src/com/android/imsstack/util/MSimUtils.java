@@ -26,11 +26,6 @@ public final class MSimUtils {
     public static final int DEFAULT_SLOT_ID = 0;
     public static final int PREFERRED_NETWORK_MODE = Phone.PREFERRED_NT_MODE;
 
-    public static final int MULTI_SIM_NONE = 0; // Single SIM
-    public static final int MULTI_SIM_DSDS = 1;
-    public static final int MULTI_SIM_DSDA = 2;
-    public static final int MULTI_SIM_TSTS = 3;
-
     // Intent extra: WfcInformation, Hidden menu
     public static final String EXTRA_KEY_SLOT_ID = "SLOT_ID";
 
@@ -40,8 +35,6 @@ public final class MSimUtils {
     // 0x7FFFFFFB
     private static final int DUMMY_SUB_ID_BASE
             = (SubscriptionManager.MAX_SUBSCRIPTION_ID_VALUE - MAX_PHONE_COUNT_TRI_SIM);
-    private static final String MSIM_CONFIG
-            = TelephonyProperties.multi_sim_config().orElse("");
     private static final boolean MULTI_IMS = false;
     private static final boolean MULTI_LTE = false;
     private static boolean sSingleImsEnabledOnDsdv = false;
@@ -69,34 +62,7 @@ public final class MSimUtils {
     }
 
     public static int getMaxSimSlot() {
-        int simConfig = getMultiSimEnabled();
-
-        switch (simConfig)
-        {
-        case MULTI_SIM_DSDS:
-        case MULTI_SIM_DSDA:
-            return 2;
-        case MULTI_SIM_TSTS:
-            return 3;
-        default:
-            return 1;
-        }
-    }
-
-    public static int getMultiSimEnabled() {
-        if (sMultiSim < MULTI_SIM_NONE) {
-            if (MSIM_CONFIG.equals("dsds")) {
-                sMultiSim = MULTI_SIM_DSDS;
-            } else if (MSIM_CONFIG.equals("dsda")) {
-                sMultiSim = MULTI_SIM_DSDA;
-            } else if (MSIM_CONFIG.equals("tsts")) {
-                sMultiSim = MULTI_SIM_TSTS;
-            } else {
-                sMultiSim = MULTI_SIM_NONE;
-            }
-        }
-
-        return sMultiSim;
+        return getPhoneCount();
     }
 
     public static int getNetworkMode(ContentResolver cr, int phoneId) {
@@ -191,16 +157,7 @@ public final class MSimUtils {
     }
 
     public static boolean isMultiSimEnabled() {
-        if (isMultiSimEnabledInternal()) {
-            return true;
-        }
-
-        TelephonyManager tm = AppContext.getTelephonyManager();
-        if (tm == null) {
-            return isMultiSimEnabledInternal();
-        }
-
-        return tm.getActiveModemCount() > 1;
+        return getMaxSimSlot() > 1;
     }
 
     public static boolean isSimLoaded(int slotId) {
@@ -235,8 +192,4 @@ public final class MSimUtils {
         return isMultiSimEnabled() && ImsProperties.TARGET_COUNTRY.equals("AU");
     }
     // }
-
-    private static boolean isMultiSimEnabledInternal() {
-        return getMultiSimEnabled() > MULTI_SIM_NONE;
-    }
 }

@@ -30,6 +30,10 @@ public final class ImsUtils {
     public static final int NR_NETWORK_MODE_NSA = 1;
     // }
 
+    private static final String KEY_VOLTE_AVAIL_OVR = "persist.dbg.volte_avail_ovr";
+    private static final String KEY_VT_AVAIL_OVR = "persist.dbg.vt_avail_ovr";
+    private static final String KEY_WFC_AVAIL_OVR = "persist.dbg.wfc_avail_ovr";
+
     /** Service capabilities from device configuration. */
     private static ServiceCaps sServiceCapsByDeviceConfig = null;
     /**
@@ -211,6 +215,48 @@ public final class ImsUtils {
         for (int i = 0; i < sImsManagers.length; i++) {
             sImsManagers[i] = ImsManager.getInstance(AppContext.get(), i);
         }
+    }
+
+    public static boolean isVoLteEnabledByDevice(Context c, int phoneId) {
+        boolean voLteEnabled = c.getResources().getBoolean(
+                com.android.internal.R.bool.config_device_volte_available);
+
+        if (!voLteEnabled) {
+            return ImsProperties.System.getInt(KEY_VOLTE_AVAIL_OVR, -1) == 1
+                    || ImsProperties.System.getInt(
+                            KEY_VOLTE_AVAIL_OVR + Integer.toString(phoneId),
+                            -1) == 1;
+        }
+
+        return voLteEnabled;
+    }
+
+    public static boolean isVtEnabledByDevice(Context c, int phoneId) {
+        boolean vtEnabled = c.getResources().getBoolean(
+                com.android.internal.R.bool.config_device_vt_available);
+
+        if (!vtEnabled) {
+            return ImsProperties.System.getInt(KEY_VT_AVAIL_OVR, -1) == 1
+                    || ImsProperties.System.getInt(
+                            KEY_VT_AVAIL_OVR + Integer.toString(phoneId),
+                            -1) == 1;
+        }
+
+        return vtEnabled;
+    }
+
+    public static boolean isWfcEnabledByDevice(Context c, int phoneId) {
+        boolean wfcEnabled = c.getResources().getBoolean(
+                com.android.internal.R.bool.config_device_wfc_ims_available);
+
+        if (!wfcEnabled) {
+            return ImsProperties.System.getInt(KEY_WFC_AVAIL_OVR, -1) == 1
+                    || ImsProperties.System.getInt(
+                            KEY_WFC_AVAIL_OVR + Integer.toString(phoneId),
+                            -1) == 1;
+        }
+
+        return wfcEnabled;
     }
 
     public static ServiceCaps getServiceCapsByPlatform(Context c, int phoneId) {

@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "DeviceConfig.h"
 #include "IMSStrLib.h"
 #include "ServiceMemory.h"
 #include "SystemConfig.h"
-
-PRIVATE GLOBAL
-IMS_SINT32 SystemConfig::s_nMultiSimConfig = (-1);
 
 PRIVATE GLOBAL
 IMS_SINT32 SystemConfig::s_nGlobalConfigs = 0;
@@ -164,30 +162,7 @@ const AString& SystemConfig::GetPackageName()
 PUBLIC GLOBAL
 IMS_SINT32 SystemConfig::GetMaxSimSlot()
 {
-    IMS_SINT32 nMSimConfig = GetMultiSimConfig();
-
-    switch (nMSimConfig)
-    {
-    case MULTI_SIM_DSDS:
-    case MULTI_SIM_DSDA:
-        return 2;
-    case MULTI_SIM_TSTS:
-        return 3;
-    default:
-        return 1;
-    }
-}
-
-PUBLIC GLOBAL
-IMS_SINT32 SystemConfig::GetMultiSimConfig()
-{
-    if (s_nMultiSimConfig < 0)
-    {
-        // FIXME: multi-sim config.
-        s_nMultiSimConfig = MULTI_SIM_NONE;
-    }
-
-    return s_nMultiSimConfig;
+    return DeviceConfig::GetActiveModemCount();
 }
 
 PUBLIC GLOBAL
@@ -214,7 +189,7 @@ IMS_BOOL SystemConfig::IsMultiLteEnabled()
 PUBLIC GLOBAL
 IMS_BOOL SystemConfig::IsMultiSimEnabled()
 {
-    return (GetMultiSimConfig() != MULTI_SIM_NONE);
+    return GetMaxSimSlot() > 1;
 }
 
 PUBLIC GLOBAL

@@ -9,18 +9,19 @@ import com.android.imsstack.jni.JNIIms;
  * It provides the configuration to identify the operator, country, and features.
  */
 public final class SystemConfig {
-    public static final int EVENT_ON_BOOT = 0;
+    public static final int EVENT_DEVICE_CONFIG = 0;
+    public static final int EVENT_ON_BOOT = 1;
     // When system configuration & subscriber are changed
-    public static final int EVENT_SUBSCRIPTION_CHANGED = 1;
+    public static final int EVENT_SUBSCRIPTION_CHANGED = 2;
     // When all the configuration need to be reset including system configuration
-    public static final int EVENT_ALL_CONFIGURATION_CHANGED = 2;
+    public static final int EVENT_ALL_CONFIGURATION_CHANGED = 3;
     // When service features are changed
-    public static final int EVENT_FEATURE_CHANGED = 3;
+    public static final int EVENT_FEATURE_CHANGED = 4;
     // Special case: DDS device (non-multi-IMS) : When DDS is changed
-    public static final int EVENT_DDS_CHANGED = 4;
+    public static final int EVENT_DDS_CHANGED = 5;
     // Special case: IMS feature permissions changed (i.e. when Google Fi SIM inserted)
     // (System configuration is not required)
-    public static final int EVENT_FEATURE_PERMISSIONS_CHANGED = 5;
+    public static final int EVENT_FEATURE_PERMISSIONS_CHANGED = 6;
 
     // Extra info.
     public static final int EXTRA_INFO_NONE = 0;
@@ -198,6 +199,19 @@ public final class SystemConfig {
         }
 
         setConfiguration(event, p);
+    }
+
+    public static void setDeviceConfig(int activeModemCount, boolean imsEmergencyEnabled,
+            boolean voLteEnabled, boolean vtEnabled, boolean wfcEnabled) {
+        Parcel p = Parcel.obtain();
+
+        p.writeInt(activeModemCount);
+        p.writeInt(imsEmergencyEnabled ? 1 : 0);
+        p.writeInt(voLteEnabled ? 1 : 0);
+        p.writeInt(vtEnabled ? 1 : 0);
+        p.writeInt(wfcEnabled ? 1 : 0);
+
+        setConfiguration(EVENT_DEVICE_CONFIG, p);
     }
 
     private static void setConfiguration(int event, Parcel p) {
