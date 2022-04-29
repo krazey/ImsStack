@@ -56,7 +56,7 @@ void MtcConfigurationUpdater::UpdateByCarrierConfig(IN ICarrierConfig* piCc,
     objItems.nRingbackTimer =
             piCc->GetInt(CarrierConfig::ImsVoice::KEY_RINGBACK_TIMER_MILLIS_INT);
     objItems.strConferenceFactoryUri =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
+            piCc->GetString(CarrierConfig::ImsVoice::KEY_CONFERENCE_FACTORY_URI_STRING);
     objItems.bOipSourceFromHeader =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_OIP_SOURCE_FROM_HEADER_BOOL);
     objItems.nMoCallRequestTimeout =

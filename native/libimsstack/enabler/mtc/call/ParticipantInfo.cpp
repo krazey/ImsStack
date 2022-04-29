@@ -9,6 +9,8 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -153,15 +155,15 @@ AString ParticipantInfo::GetLocalUriForEmergencyCall() const
 PRIVATE
 AString ParticipantInfo::GetRemoteUriForConferenceCall() const
 {
-    AString strUri = "";    // TODO: from config
+    // TODO: this will be moved to DialingPlan.
+    AString strUri = m_objContext.GetConfigurationProxy().GetStr(
+            Feature::CONFERENCE_FACTORY_URI, 0);
 
-    if (strUri.GetLength() <= 0 || strUri.EqualsIgnoreCase("standard"))
+    IMS_TRACE_D("GetRemoteUriForConferenceCall uri from config[%s]", strUri.GetStr(), 0, 0);
+
+    if (strUri.GetLength() <= 0)
     {
         strUri = "sip:mmtel@conf-factory.ims.mnc[MNC].mcc[MCC].3gppnetwork.org";
-    }
-    else if (strUri.EqualsIgnoreCase("standard_MNC2"))
-    {
-        strUri = "sip:mmtel@conf-factory.ims.mnc[MNC2].mcc[MCC].3gppnetwork.org";
     }
 
     IMS_TRACE_I("GetRemoteUriForConferenceCall [%s]", strUri.GetStr(), 0, 0);

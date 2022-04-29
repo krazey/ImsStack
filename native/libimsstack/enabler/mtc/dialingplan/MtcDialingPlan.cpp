@@ -7,8 +7,6 @@
 #include "AString.h"
 #include "SIP.h"
 #include "SIPAddress.h"
-#include "configuration/ConfigDef.h"
-#include "configuration/MtcConfigurationProxy.h"
 #include "IMtcContext.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialingplan/EmergencyDialingPlan.h"
