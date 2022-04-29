@@ -176,10 +176,10 @@ public:
     void RemoveFromConference(IN CallKey nCallKey, IN IMSList<ConfUser*>& objUsers);
 
     // TODO: Consider ECT, SRVCC
+    void Transfer(IN CallKey nCallKey, IN const AString& strTarget);
 
 private:
     IMS_BOOL IsUssi(IN ISession* piSession);
-    IMS_BOOL IsEct(IN ISession* piSession);
 
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;

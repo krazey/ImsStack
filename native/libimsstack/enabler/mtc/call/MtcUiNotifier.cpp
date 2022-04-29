@@ -436,18 +436,15 @@ void MtcUiNotifier::SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
 }
 
 PUBLIC
-void MtcUiNotifier::SendECTCompleted(IN IMS_BOOL bResult, IN const FailReason& objReason)
+void MtcUiNotifier::SendEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason)
 {
-    IMS_TRACE_I("SendECTCompleted : Result[%s] %s", PS_BOOL(bResult), PS_FR(objReason), 0);
+    IMS_TRACE_I("SendECTCompleted : Result[%d]", nResult, 0, 0);
 
     if (!IsAvailableToSend())
     {
         return;
     }
-
-    IUUCSessionECTCompletedParam* pParam = new IUUCSessionECTCompletedParam();
-    pParam->bResult = bResult;
-    pParam->failReason = objReason;
+    m_pCallThread->OnEctCompleted(nResult, objReason);
 }
 
 PUBLIC

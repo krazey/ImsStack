@@ -233,6 +233,16 @@ void JniMtcCallThread::OnConferenceParticipantsInfoChanged(IN const IMSList<Conf
     SendData2Java(objParcel);
 }
 
+void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::ECT_COMPLETED);
+    IMS_SINT32 _nResult = nResult == IMS_SUCCESS ? 1 : 0;
+    objParcel.writeInt32(_nResult);
+    JniMtcUtils::WriteFailReasonToParcel(objReason, objParcel);
+    SendData2Java(objParcel);
+}
+
 PRIVATE
 void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN CallInfo* pCallInfo,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)

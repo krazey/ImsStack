@@ -17,6 +17,7 @@
 #include "dialingplan/MtcDialingPlan.h"
 #include "call/MtcCallController.h"
 #include "conferencecall/ConferenceManager.h"
+#include "ect/EctManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -36,7 +37,8 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         m_objCallStateProxy(CallStateProxy(m_objCallManager)),
         m_objImsEventReceiver(MtcImsEventReceiver(nSlotId)),
         m_objSipInterfaceFactory(MtcSipInterfaceFactory()),
-        m_objConferenceManager(ConferenceManager(*this))
+        m_objConferenceManager(ConferenceManager(*this)),
+        m_pEctManager(IMS_NULL)
 {
     IMS_TRACE_I("+MtcApp [slot_%d]", nSlotId, 0, 0);
     MtcContextRepository::GetInstance()->AddContext(nSlotId, this);
@@ -66,6 +68,7 @@ void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
     DestroyServices();
+    delete m_pEctManager;
 }
 
 PUBLIC VIRTUAL
@@ -100,6 +103,17 @@ MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
     }
 
     return IMS_NULL;
+}
+
+PUBLIC VIRTUAL
+EctManager* MtcApp::GetEctManager()
+{
+    if (m_pEctManager == IMS_NULL)
+    {
+        m_pEctManager = new EctManager(*this);
+    }
+
+    return m_pEctManager;
 }
 
 PRIVATE

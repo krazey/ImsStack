@@ -18,6 +18,7 @@
 #include "conferencecall/ConferenceManager.h"
 
 class MtcService;
+class EctManager;
 
 class MtcApp :
         public IMSApp,
@@ -46,9 +47,10 @@ public:
     inline CallStateProxy& GetCallStateProxy() override { return m_objCallStateProxy; }
     inline MtcImsEventReceiver& GetImsEventReceiver() override { return m_objImsEventReceiver; }
     MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override;
-    MtcSipInterfaceFactory& GetSipInterfaceFactory() override
+    inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
     { return m_objSipInterfaceFactory; }
     inline ConferenceManager& GetConferenceManager() override { return m_objConferenceManager; }
+    EctManager* GetEctManager() override;
 
 private:
     void InitConfiguration();
@@ -68,6 +70,7 @@ private:
     MtcImsEventReceiver         m_objImsEventReceiver;
     MtcSipInterfaceFactory      m_objSipInterfaceFactory;
     ConferenceManager           m_objConferenceManager;
+    EctManager*                 m_pEctManager;
 };
 
 #endif

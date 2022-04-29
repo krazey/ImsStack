@@ -84,7 +84,7 @@ public:
     void SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_SINTP nReplaceKey = 0, IN IMS_UINTP nType = 0);
-    void SendECTCompleted(IN IMS_BOOL bResult, IN const FailReason& objReason);
+    void SendEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);
     void SendCallPushCompleted(IN IMS_BOOL bResult, IN const FailReason& objReason);
 
 private:

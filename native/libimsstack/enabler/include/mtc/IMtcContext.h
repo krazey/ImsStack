@@ -14,6 +14,7 @@ class MtcAosConnector;
 class MtcImsEventReceiver;
 class MtcSipInterfaceFactory;
 class ConferenceManager;
+class EctManager;
 
 class IMtcContext
 {
@@ -30,6 +31,7 @@ public:
     virtual MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) = 0;
     virtual MtcSipInterfaceFactory& GetSipInterfaceFactory() = 0;
     virtual ConferenceManager& GetConferenceManager() = 0;
+    virtual EctManager* GetEctManager() = 0;
 };
 
 #endif

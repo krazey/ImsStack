@@ -14,7 +14,7 @@
 #include "conferencecall/IConferenceController.h"
 #include "conferencecall/ConferenceManager.h"
 #include "IMtcContext.h"
-
+#include "ect/EctManager.h"
 
 PUBLIC
 MtcCallController::MtcCallController(IN IMtcContext &objContext) :
@@ -134,10 +134,7 @@ void MtcCallController::HandleIncoming(
     {
         // TODO: eCallType = IuMtcService::CALLTYPE_USSI;
     }
-    else if (IsEct(piSession))
-    {
-        // TODO: eCallType = ECT ?
-    }
+
     CallInfo objCallInfo;
     m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)
             ->HandleIncoming(piSession, pServiceThread);
@@ -296,6 +293,12 @@ void MtcCallController::RemoveFromConference(IN CallKey nCallKey, IN IMSList<Con
     pController->ProcessCommand(IConferenceController::REMOVE, objUsers);
 }
 
+PUBLIC
+void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarget)
+{
+    m_objContext.GetEctManager()->Transfer(nCallKey, strTarget);
+}
+
 PRIVATE
 IMS_BOOL MtcCallController::IsUssi(IN ISession* piSession)
 {
@@ -308,22 +311,4 @@ IMS_BOOL MtcCallController::IsUssi(IN ISession* piSession)
     return MessageUtil::ContainsValue(
             piMessage, USSDConstants::HEADER_USSD_PACKAGE, ISIPHeader::UNKNOWN,
             USSDConstants::HEADER_RECVINFO);
-}
-
-PRIVATE
-IMS_BOOL MtcCallController::IsEct(IN ISession* piSession)
-{
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    if (piMessage == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    AString strRequireHeader;
-    MessageUtil::GetHeader(piMessage, ISIPHeader::REQUIRE, strRequireHeader);
-
-    return (m_objCallManager.GetCalls().GetSize() > 1 &&
-            MessageUtil::IsHeaderPresent(piMessage, ISIPHeader::REPLACES) &&
-            MessageUtil::ContainsTag(strRequireHeader, "replaces") &&
-            MessageUtil::IsFocusConf(piMessage) == IMS_FALSE);
 }

@@ -49,6 +49,9 @@ private:
     void AddToConference(IN const android::Parcel& objParcel);
     void RemoveFromConference(IN const android::Parcel& objParcel);
 
+    void Transfer();
+    void TransferWithNumber(IN const android::Parcel& objParcel);
+
 private:
     JniMtcCallThread* m_pThread;
     CBServiceNoti m_pfnNotifier;

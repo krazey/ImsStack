@@ -62,6 +62,8 @@ public:
             IN const AString& strHost);
     void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers);
 
+    void OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);
+
 private:
     void SetCallDetails(IN_OUT android::Parcel& objParcel, IN CallInfo* pCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);

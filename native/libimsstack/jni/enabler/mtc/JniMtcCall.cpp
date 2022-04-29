@@ -195,7 +195,12 @@ void JniMtcCall::HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& obj
         case IuMtcCall::CONF_DROP:
             RemoveFromConference(objParcel);
             break;
-
+        case IuMtcCall::ECT_START:
+            Transfer();
+            break;
+        case IuMtcCall::ECT_START_BLIND:
+            TransferWithNumber(objParcel);
+            break;
         default:
             break;
     }
@@ -371,4 +376,18 @@ void JniMtcCall::RemoveFromConference(IN const android::Parcel& objParcel)
                 objUsers.GetAt(i)->nConnectionId, 0, 0);
     }
     m_objCallController.RemoveFromConference(m_nCallKey, objUsers);
+}
+
+PRIVATE
+void JniMtcCall::Transfer()
+{
+    m_objCallController.Transfer(m_nCallKey, AString::ConstNull());
+}
+
+PRIVATE
+void JniMtcCall::TransferWithNumber(IN const android::Parcel& objParcel)
+{
+    AString strTarget;
+    JniMtcUtils::ConvertString(objParcel.readString16(), strTarget);
+    m_objCallController.Transfer(m_nCallKey, strTarget);
 }

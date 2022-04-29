@@ -137,6 +137,8 @@ public:
     { return m_objContext.GetSipInterfaceFactory(); }
     inline ConferenceManager& GetConferenceManager() override
     { return m_objContext.GetConferenceManager(); }
+    inline EctManager* GetEctManager() override
+    { return m_objContext.GetEctManager(); }
 
     inline void SetSession(IN MtcSession* pSession) override { m_pSession = pSession; }
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }
