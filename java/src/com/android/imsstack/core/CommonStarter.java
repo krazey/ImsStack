@@ -155,6 +155,16 @@ public class CommonStarter {
 
         ImsLog.init();
 
+        SystemConfig.setDeviceConfig(
+                MSimUtils.getMaxSimSlot(),
+                true, // imsEmergencyEnabled
+                ImsUtils.isVoLteEnabledByDevice(
+                        context, MSimUtils.DEFAULT_PHONE_ID),
+                ImsUtils.isVtEnabledByDevice(
+                        context, MSimUtils.DEFAULT_PHONE_ID),
+                ImsUtils.isWfcEnabledByDevice(
+                        context, MSimUtils.DEFAULT_PHONE_ID));
+
         SystemInterface.getInstance().init();
 
         AosFactory.getInstance().init();

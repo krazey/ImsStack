@@ -16,6 +16,7 @@
 #ifndef IMS_MAIN_H_
 #define IMS_MAIN_H_
 
+#include "DeviceConfig.h"
 #include "SystemConfig.h"
 
 class ImsMain
@@ -27,6 +28,7 @@ public:
     // For system configuration or re-configuration
     static void SetConfiguration(IN IMS_SINT32 nEvent,
             IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig);
+    static void SetDeviceConfig(IN const __DeviceConfig& objConfig);
 
     static void Initialize();
     static void Uninitialize();

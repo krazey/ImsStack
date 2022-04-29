@@ -218,6 +218,17 @@ int SendData2JavaEx(long nNativeObject,
     return 1;
 }
 
+IMS_BOOL ReadDeviceConfig(IN android::Parcel* pParcel, OUT __DeviceConfig& objConfig)
+{
+    objConfig.nActiveModemCount = pParcel->readInt32();
+    objConfig.nImsEmergencyEnabled = pParcel->readInt32();
+    objConfig.nVoLteEnabled = pParcel->readInt32();
+    objConfig.nVtEnabled = pParcel->readInt32();
+    objConfig.nWfcEnabled = pParcel->readInt32();
+
+    return IMS_TRUE;
+}
+
 __SystemConfig* CreateSystemConfig(IN android::Parcel* pParcel, OUT IMS_SINT32& nCount)
 {
     nCount = pParcel->readInt32();
@@ -405,6 +416,17 @@ static int JNI_SetConfiguration(JNIEnv *env, jobject /* object */,
     if (event == SystemConfig::EVENT_ON_BOOT)
     {
         SetSystemConfigOnBootup(pParcel);
+    }
+    else if (event == SystemConfig::EVENT_DEVICE_CONFIG)
+    {
+        __DeviceConfig objConfig;
+
+        if (ReadDeviceConfig(pParcel, objConfig))
+        {
+            ImsMain::SetDeviceConfig(objConfig);
+        }
+
+        delete pParcel;
     }
     else
     {

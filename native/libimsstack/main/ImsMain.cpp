@@ -40,6 +40,12 @@ void ImsMain::SetConfiguration(IN IMS_SINT32 nEvent,
 }
 
 PUBLIC GLOBAL
+void ImsMain::SetDeviceConfig(IN const __DeviceConfig& objConfig)
+{
+    DeviceConfig::SetConfig(objConfig);
+}
+
+PUBLIC GLOBAL
 void ImsMain::Initialize()
 {
     PlatformProperty::Initialize();
@@ -70,7 +76,7 @@ void ImsMain::Start()
     EngineState::Initialize();
     EnablerLoader::GetInstance()->Init();
 
-    IMS_TRACE_I("ImsMain: start", 0, 0, 0);
+    IMS_TRACE_I("ImsMain: start - %s", DeviceConfig::ToString().GetStr(), 0, 0);
 }
 
 PUBLIC GLOBAL

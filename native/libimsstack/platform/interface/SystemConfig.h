@@ -46,19 +46,20 @@ public:
     /// Indicates that which event is occurred
     enum
     {
-        EVENT_ON_BOOT = 0,
+        EVENT_DEVICE_CONFIG = 0,
+        EVENT_ON_BOOT = 1,
         /// When system configuration & subscriber are changed
         ///    - Operator/country changed
-        EVENT_SUBSCRIPTION_CHANGED = 1,
+        EVENT_SUBSCRIPTION_CHANGED = 2,
         /// When all the configuration need to be reset including system configuration
-        EVENT_ALL_CONFIGURATION_CHANGED = 2,
+        EVENT_ALL_CONFIGURATION_CHANGED = 3,
         /// When service features are changed
-        EVENT_FEATURE_CHANGED = 3,
+        EVENT_FEATURE_CHANGED = 4,
         /// Special case: DDS device (non-multi-IMS) : When DDS is changed
-        EVENT_DDS_CHANGED = 4,
+        EVENT_DDS_CHANGED = 5,
         /// Special case: IMS feature permissions changed (i.e. when Google Fi SIM inserted)
         /// (System configuration is not required)
-        EVENT_FEATURE_PERMISSIONS_CHANGED = 5
+        EVENT_FEATURE_PERMISSIONS_CHANGED = 6
     };
 
     /// Extra information
@@ -143,7 +144,6 @@ public:
 
     static const AString& GetPackageName();
     static IMS_SINT32 GetMaxSimSlot();
-    static IMS_SINT32 GetMultiSimConfig();
     static IMS_BOOL IsMultiImsEnabled();
     // DSSV-DV (Dual SIM Single VoLTE - Dual VoLTE for emergency
     static IMS_BOOL IsMultiImsEnabledOnDssv();
@@ -165,16 +165,6 @@ private:
     static void CacheGlobalConfigs();
     static void UpdateGlobalConfigsOnFeatureChanged();
 
-public:
-    /// Types of multi-sim
-    enum
-    {
-        MULTI_SIM_NONE = 0, // Single SIM
-        MULTI_SIM_DSDS = 1,
-        MULTI_SIM_DSDA = 2,
-        MULTI_SIM_TSTS = 3
-    };
-
 private:
     /// Global configurations
     enum
@@ -185,7 +175,6 @@ private:
 
     friend class SystemConfigManager;
 
-    static IMS_SINT32 s_nMultiSimConfig;
     static IMS_SINT32 s_nGlobalConfigs;
 
     // ImsStack's package name
