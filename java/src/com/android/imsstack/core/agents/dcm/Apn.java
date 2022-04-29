@@ -450,8 +450,6 @@ public abstract class Apn extends Handler implements IApn {
     protected void releaseNetwork() {
         ImsLog.d(nSlotId, "type = " + eType.getString());
 
-        mESMCausePermanentFailure = false;
-
         ConnectivityManager cm = (mContext == null) ? null :
                 mContext.getSystemService(ConnectivityManager.class);
 
@@ -878,9 +876,7 @@ public abstract class Apn extends Handler implements IApn {
 
         private void handleInitialConnectionFailure(int causeCode) {
             ImsLog.i(nSlotId, "handleInitialConnectionFailed");
-            if (mDcSettings != null) {
-                mESMCausePermanentFailure = mDcSettings.isPermanentFailure(causeCode);
-            }
+
             Message msg = Message.obtain();
             msg.what = EVENT_DATA_CONNECTION_FAILED;
             msg.obj = causeCode;

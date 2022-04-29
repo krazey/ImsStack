@@ -90,7 +90,7 @@ public class ApnIms extends Apn {
                 setDataState(dataState);
             }
 
-            sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
+            sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
         }
     }
 
@@ -160,7 +160,7 @@ public class ApnIms extends Apn {
                 }
                 handleIpcanCategory(mNetworkType);
 
-                sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_CONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_CONNECTED);
             }
         }
     }
@@ -184,7 +184,7 @@ public class ApnIms extends Apn {
 
                 setDataState(curDataState);
 
-                sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_DISCONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
             }
         }
     }
@@ -203,7 +203,7 @@ public class ApnIms extends Apn {
                 return;
             }
 
-            sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_IP_CHANGED);
+            sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_IP_CHANGED);
         }
     }
 
@@ -212,7 +212,7 @@ public class ApnIms extends Apn {
         public void procMsg(Message msg) {
             ImsLog.i(nSlotId, "PCSCF address is changed");
 
-            sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_PCSCF_CHANGED);
+            sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_PCSCF_CHANGED);
         }
     }
 
@@ -230,8 +230,16 @@ public class ApnIms extends Apn {
                 return;
             }
 
-            if (mESMCausePermanentFailure) {
-                sendDataStateUpdateMessage(EApnType.IMS, EDataState.DATA_STATE_CONNECT_FAILED);
+            if (msg.obj == null) {
+                ImsLog.w(nSlotId, "msg.obj is null");
+                return;
+            }
+
+            int causeCode = (int)msg.obj;
+            if (mDcSettings != null) {
+                if (mDcSettings.isPermanentFailure(eType, causeCode)) {
+                    sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_CONNECT_FAILED);
+                }
             }
         }
     }

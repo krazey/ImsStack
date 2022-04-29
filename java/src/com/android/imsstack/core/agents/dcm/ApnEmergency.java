@@ -66,8 +66,7 @@ public class ApnEmergency extends Apn {
         setAPNReqState(EApnReqState.APN_REQUEST_IDLE);
 
         if (isPdnConnected) {
-            sendDataStateUpdateMessage(EApnType.EMERGENCY,
-                    EDataState.DATA_STATE_DISCONNECTED);
+            sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
         }
     }
 
@@ -124,7 +123,7 @@ public class ApnEmergency extends Apn {
                 }
                 handleIpcanCategory(mNetworkType);
 
-                sendDataStateUpdateMessage(EApnType.EMERGENCY, EDataState.DATA_STATE_CONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_CONNECTED);
             }
         }
     }
@@ -143,7 +142,7 @@ public class ApnEmergency extends Apn {
                 ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-                sendDataStateUpdateMessage(EApnType.EMERGENCY, EDataState.DATA_STATE_DISCONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
             }
         }
     }
@@ -162,7 +161,7 @@ public class ApnEmergency extends Apn {
                 return;
             }
 
-            sendDataStateUpdateMessage(EApnType.EMERGENCY, EDataState.DATA_STATE_IP_CHANGED);
+            sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_IP_CHANGED);
         }
     }
 
@@ -180,7 +179,7 @@ public class ApnEmergency extends Apn {
                 ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-                sendDataStateUpdateMessage(EApnType.EMERGENCY, EDataState.DATA_STATE_DISCONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
             }
         }
     }

@@ -81,7 +81,7 @@ public class ApnXcap extends Apn {
             setDataState(dataState);
         }
 
-        sendDataStateUpdateMessage(EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
+        sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
     }
 
     // Private/Protected methods ---------------------------------
@@ -145,7 +145,7 @@ public class ApnXcap extends Apn {
                 ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-                sendDataStateUpdateMessage(EApnType.XCAP, EDataState.DATA_STATE_CONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_CONNECTED);
             }
         }
     }
@@ -164,7 +164,7 @@ public class ApnXcap extends Apn {
 
                 setDataState(curDataState);
 
-                sendDataStateUpdateMessage(EApnType.XCAP, EDataState.DATA_STATE_DISCONNECTED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
 
                 disconnect(0);
             }
@@ -183,7 +183,7 @@ public class ApnXcap extends Apn {
                     return;
                 }
 
-                sendDataStateUpdateMessage(EApnType.XCAP, EDataState.DATA_STATE_IP_CHANGED);
+                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_IP_CHANGED);
                 return;
             }
 
@@ -245,8 +245,17 @@ public class ApnXcap extends Apn {
                 return;
             }
 
-            if (isESMCausePermanentFailure()) {
-                notifyPdnConnectionFailed(EApnType.XCAP);
+            if (msg.obj == null) {
+                ImsLog.w(nSlotId, "msg.obj is null");
+                return;
+            }
+
+            int causeCode = (int)msg.obj;
+            if (mDcSettings != null) {
+                if (mDcSettings.isPermanentFailure(eType, causeCode)) {
+                    mESMCausePermanentFailure = true;
+                    notifyPdnConnectionFailed(eType);
+                }
             }
         }
     }
