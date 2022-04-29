@@ -11,6 +11,7 @@
 
 #include "ServiceMemory.h"
 #include "ServicePhoneInfo.h"
+#include "ServiceSystemTime.h"
 #include "ServiceUtil.h"
 #include "IMSMD5.h"
 #include "IMSSHA1.h"
@@ -54,10 +55,15 @@ AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
 
     switch (nVersion)
     {
-    case IMSUUID::VERSION_1:
-        objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
+    case IMSUUID::VERSION_1: {
+        // TODO: need to be adapted.
+        // objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
+        IMS_UINT32 nMicroSecs = IMS_SYS_GetTimeInMicroSeconds();
+        AString strRandom;
+        strRandom.SetNumber(nMicroSecs);
+        GetUUIDv4(strRandom, objUUID);
         break;
-
+    }
     case IMSUUID::VERSION_3:
         GetUUIDv3(strName, objUUID);
         break;
