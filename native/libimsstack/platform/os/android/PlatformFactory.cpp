@@ -13,10 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "OsContentTable.h"
-#include "OsContentCursor.h"
-#include "OsContentProvider.h"
-#include "OsDb.h"
 #include "OsEventReceiver.h"
 #include "OsEventSender.h"
 #include "OsFile.h"
@@ -178,24 +174,6 @@ void PlatformFactory::DestroyEventSender(IN IEventSender*& piEventSender)
     }
 
     piEventSender = IMS_NULL;
-}
-
-PUBLIC GLOBAL
-ImsContentTable* PlatformFactory::CreateContentTable()
-{
-    return new OsContentTable();
-}
-
-PUBLIC GLOBAL
-ImsContentCursor* PlatformFactory::CreateContentCursor()
-{
-    return new OsContentCursor();
-}
-
-PUBLIC GLOBAL
-ImsContentProvider* PlatformFactory::CreateContentProvider()
-{
-    return new OsContentProvider();
 }
 
 // Platform: network

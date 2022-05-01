@@ -16,33 +16,15 @@
 #ifndef CONFIG_LOADER_H_
 #define CONFIG_LOADER_H_
 
-#include "IMSMap.h"
 #include "IConfigBuffer.h"
 
 class ConfigLoader
 {
-private:
-    ConfigLoader();
+public:
+    ConfigLoader() = delete;
 
 public:
-    static IConfigBuffer* GetConfig(IN const AString& strConfName, IN IMS_SINT32 nId);
     static IConfigBuffer* GetConfig(IN const AString& strConfData);
-    static const AString& GetConfName(IN IMS_SINT32 nConfName, IN IMS_SINT32 nId);
-    static IMS_BOOL LoadIndexConfig(IN IMS_SINT32 nId);
-
-public:
-    enum
-    {
-        CONFIG_INVALID = (-1),
-
-        CONFIG_SUBSCRIBER = 0,
-        CONFIG_MEDIA,
-
-        CONFIG_MAX
-    };
-
-private:
-    static IMSMap<IMS_SINT32, AString> s_objIndexConfig;
 };
 
 #endif

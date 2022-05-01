@@ -70,12 +70,6 @@ public:
 private:
     IMS_SINT32 m_nSlotID;
     IMS_SINT32 m_nURNMappingType;
-
-    static const IMS_CHAR DB_PATH[];
-    static const IMS_CHAR CONFIGURATION_TABLE[];
-    static const IMS_CHAR CONFIGURATION_FIELD[];
-    static const IMS_CHAR CONFIGURATION_MAPPING_TYPE[];
-
     IMSMap<AString, AString> m_objEMCConfigStrMap;
 };
 

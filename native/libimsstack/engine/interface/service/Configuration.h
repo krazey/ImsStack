@@ -87,7 +87,7 @@ public:
      *               IN const ImsRegistry &objRegistry);
      */
     IMS_RESULT SetAppConfig(IN const AString &strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+            IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Sets the registry for an IMS application and binds it to a parent UI(JAVA)
@@ -138,17 +138,6 @@ public:
      * @return An instance of Configuration that enables dynamic installation of IMS applications.
      */
     static Configuration* GetInstance();
-
-    /**
-     * @brief Creates a new configuration buffer with the specified configuration name.
-     *
-     * @param strConfName a configuration name to be parsed
-     * @param nSlotId slot id to be parsed
-     * @return Pointer to IConfigBuffer or null
-     * @note IMS EXTENSION METHOD
-     */
-    IConfigBuffer* CreateConfig(IN const AString &strConfName,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /**
      * @brief Returns a configuration information of a media profile.

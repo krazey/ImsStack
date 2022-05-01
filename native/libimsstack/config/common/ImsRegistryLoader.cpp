@@ -397,8 +397,7 @@ IMS_BOOL RegistryLoader::ValidateUniqueness(
 }
 
 PUBLIC GLOBAL
-IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString &strAppId, IN IMS_SINT32 nSlotId,
-        OUT ImsRegistry &objRegistry)
+IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString& strAppId, OUT ImsRegistry& objRegistry)
 {
     IConfigBuffer* piBuffer = IMS_NULL;
     const AString strContent = StaticConfig::GetConfig(strAppId);
@@ -409,8 +408,7 @@ IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString &strAppId, IN IMS_SINT3
     }
     else
     {
-        IMS_TRACE_D("No matched static configurtion: fallback to legacy.", 0, 0, 0);
-        piBuffer = ConfigLoader::GetConfig(strAppId, nSlotId);
+        IMS_TRACE_D("No matched static configurtion: fallback to legacy is failed.", 0, 0, 0);
     }
 
     if (piBuffer == IMS_NULL)

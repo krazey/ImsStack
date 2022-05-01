@@ -10,19 +10,18 @@
 
 */
 
-#ifndef _IMS_REGISTRY_LOADER_H_
-#define _IMS_REGISTRY_LOADER_H_
+#ifndef IMS_REGISTRY_LOADER_H_
+#define IMS_REGISTRY_LOADER_H_
 
 #include "ImsRegistry.h"
 
 class ImsRegistryLoader
 {
-private:
-    ImsRegistryLoader();
+public:
+    ImsRegistryLoader() = delete;
 
 public:
-    static IMS_BOOL GetRegistry(IN const AString &strAppId, IN IMS_SINT32 nSlotId,
-            OUT ImsRegistry &objRegistry);
+    static IMS_BOOL GetRegistry(IN const AString& strAppId, OUT ImsRegistry& objRegistry);
 };
 
-#endif // _IMS_REGISTRY_LOADER_H_
+#endif

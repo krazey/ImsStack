@@ -71,7 +71,7 @@ IMS_RESULT Configuration::SetAppConfig(IN const AString &strAppId,
 
     ImsRegistry objRegistry;
 
-    if (!ImsRegistryLoader::GetRegistry(strAppId, nSlotId, objRegistry))
+    if (!ImsRegistryLoader::GetRegistry(strAppId, objRegistry))
     {
         return IMS_FAILURE;
     }
@@ -155,13 +155,6 @@ Configuration* Configuration::GetInstance()
 }
 
 //// IMS extensions
-
-PUBLIC
-IConfigBuffer* Configuration::CreateConfig(IN const AString &strConfName,
-        IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/)
-{
-    return ConfigLoader::GetConfig(strConfName, nSlotId);
-}
 
 PUBLIC
 const IMediaConfig* Configuration::GetMediaConfig(IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/) const

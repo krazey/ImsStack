@@ -7,23 +7,12 @@
 #include "dialingplan/ConstSosUrn.h"
 #include "IMSMap.h"
 
-#include "ServiceContentProvider.h"
-#include "IContentProvider.h"
-#include "IContentTable.h"
-#include "IContentCursor.h"
-
 __IMS_TRACE_TAG_IMS__;
-
-const IMS_CHAR EmergencyNumberList::DB_PATH[]
-        = IMS_SOLUTION_STORAGE_ROOT_DIR "/databases/gims.db";
-const IMS_CHAR EmergencyNumberList::CONFIGURATION_TABLE[] = "gims_com_emergency";
-const IMS_CHAR EmergencyNumberList::CONFIGURATION_FIELD[] = "urn_for_operator_policy";
-const IMS_CHAR EmergencyNumberList::CONFIGURATION_MAPPING_TYPE[] = "urn_mapping_type_for_ESCV";
 
 PUBLIC
 EmergencyNumberList::EmergencyNumberList(IN IMS_SINT32 nSlotID)
     : m_nSlotID(nSlotID)
-    , m_nURNMappingType(URN_MAPPING_TYPE_NONE)
+    , m_nURNMappingType(URN_MAPPING_TYPE_3GPP_STANDARD)
     , m_objEMCConfigStrMap(IMSMap<AString, AString>())
 {
     if (ReadOperatorConfig() == IMS_FAILURE)
@@ -376,83 +365,7 @@ Read DB and return the result with IMSMap
 PRIVATE
 IMS_RESULT EmergencyNumberList::ReadOperatorConfig()
 {
-    AString strEMCConfig;
-    IMSList<AString> lstEMCConfigStr;
-
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_D("ReadOperatorConfig - Load", 0, 0, 0);
-
-    IContentProvider* pIContentProvider = IMS_DB_CreateProvider(DB_PATH);
-    IContentTable* pIContentTable = IMS_NULL;
-    IContentCursor* pIContentCursor = IMS_NULL;
-
-    if (pIContentProvider == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "IMS_DB_CreateProvider() failed", 0, 0, 0);
-        return IMS_FAILURE;
-    }
-
-    pIContentTable = pIContentProvider->CreateTableEx(CONFIGURATION_TABLE);
-    if (pIContentTable == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "CreateTableEx() failed", 0, 0, 0);
-        IMS_DB_DestroyProvider(pIContentProvider);
-        return IMS_FAILURE;
-    }
-
-    pIContentProvider->AddTable(CONFIGURATION_TABLE, pIContentTable);
-    AString aStrWhere = AString::ConstNull();
-    aStrWhere.Sprintf("id='%d'", m_nSlotID);
-    pIContentCursor = pIContentProvider->ManagedQuery(CONFIGURATION_TABLE, aStrWhere);
-    if (pIContentCursor == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "ManageQuery() failed", 0, 0, 0);
-
-        IMS_DB_DestroyTable(pIContentTable);
-        IMS_DB_DestroyProvider(pIContentProvider);
-
-        return IMS_FAILURE;
-    }
-
-    // Flush
-    strEMCConfig = pIContentCursor->GetString(CONFIGURATION_FIELD);
-    if (strEMCConfig.GetLength() > 0)
-    {
-        lstEMCConfigStr = strEMCConfig.Split(TextParser::CHAR_SEMICOLON);
-
-        for (IMS_UINT32 nIndex = 0; nIndex < lstEMCConfigStr.GetSize(); nIndex++)
-        {
-            AString strKey = AString::ConstEmpty();
-            AString strValue = AString::ConstEmpty();
-
-            lstEMCConfigStr.GetAt(nIndex).SplitF(TextParser::CHAR_COMMA, strKey, strValue);
-
-            m_objEMCConfigStrMap.Add(strKey, strValue);
-            IMS_TRACE_D("ReadOperatorConfig : key[%s] value[%s]",
-                    strKey.GetStr(), strValue.GetStr(), 0);
-        }
-    }
-
-/*
-read configuration to select SOS URN according to operator`s requirement
-
-type1 : 3GPP standard
-type2 : default sos urn regardless of ESCV
-type3 : default sos urn when  ESCV is multiple.
-*/
-    IMS_BOOL bOK = IMS_FALSE;
-    IMS_SINT32 nResult = pIContentCursor->GetInt(CONFIGURATION_MAPPING_TYPE, &bOK);
-    if (bOK)
-    {
-        IMS_TRACE_D("ReadOperatorConfig : mapping type for ESCV [%d]", nResult, 0, 0);
-        m_nURNMappingType = nResult;
-    }
-
-    IMS_DB_DestroyTable(pIContentTable);
-    IMS_DB_DestroyProvider(pIContentProvider);
-    IMS_TRACE_D("ReadOperatorConfig - Complete", 0, 0, 0);
-
+    IMS_TRACE_D("ReadOperatorConfig: no-op", 0, 0, 0);
     return IMS_SUCCESS;
 }
 

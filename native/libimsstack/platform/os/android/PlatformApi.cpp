@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "OsDb.h"
 #include "OsUtil.h"
 #include "PlatformApi.h"
 #include "network/OsSocket.h"
@@ -24,12 +23,6 @@ IMS_BOOL PlatformApi::CheckIpAndPortAvailability(IN const IPAddress& objIp,
         IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType)
 {
     return OsSocket::CheckIpAndPortAvailability(objIp, nPort, enType);
-}
-
-PUBLIC GLOBAL
-IMS_BOOL PlatformApi::CheckIfDatabaseExists(IN const AString& strDb)
-{
-    return OsDb::Exists(strDb);
 }
 
 PUBLIC GLOBAL

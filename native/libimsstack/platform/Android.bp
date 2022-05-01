@@ -36,7 +36,6 @@ cc_library_static {
     ],
     include_dirs: [
         "system/libbase/include",
-        "external/sqlite/dist",
         "external/zlib",
     ],
     local_include_dirs: [
@@ -59,7 +58,6 @@ cc_library_static {
     shared_libs: [
         "libssl",
         "libcrypto",
-        "libsqlite",
         "libcutils",
     ],
 }

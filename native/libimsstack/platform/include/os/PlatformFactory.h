@@ -42,9 +42,6 @@ class IUsim;
 class IVoNr;
 class IWifiWatcher;
 class IZLib;
-class ImsContentCursor;
-class ImsContentProvider;
-class ImsContentTable;
 class ImsFile;
 class ImsMutex;
 class ImsNetworkConnection;
@@ -79,11 +76,6 @@ public:
 
     static IEventSender* CreateEventSender();
     static void DestroyEventSender(IN IEventSender*& piEventSender);
-
-    // DB - ContentProvider
-    static ImsContentTable* CreateContentTable();
-    static ImsContentCursor* CreateContentCursor();
-    static ImsContentProvider* CreateContentProvider();
 
     // Platform: network
     static ImsNetworkConnection* CreateNetworkConnection(

@@ -341,8 +341,7 @@ IMS_BOOL MediaConfig::CreateMediaProfile(IN const AString &strName)
     }
     else
     {
-        IMS_TRACE_D("No matched static configurtion: fallback to legacy.", 0, 0, 0);
-        piBuffer = GetConfigBuffer(ConfigLoader::CONFIG_MEDIA);
+        IMS_TRACE_D("No matched static configurtion: fallback to legacy is failed.", 0, 0, 0);
     }
 
     if (piBuffer == IMS_NULL)
@@ -402,8 +401,7 @@ IMS_BOOL MediaConfig::ReadFrom()
     }
     else
     {
-        IMS_TRACE_D("No matched static configurtion: fallback to legacy.", 0, 0, 0);
-        piBuffer = GetConfigBuffer(ConfigLoader::CONFIG_MEDIA);
+        IMS_TRACE_D("No matched static configurtion: fallback to legacy is failed.", 0, 0, 0);
     }
 
     if (piBuffer == IMS_NULL)
@@ -482,8 +480,7 @@ IMS_BOOL MediaConfig::ReadMediaProfile(IN const AString &strMProfName,
     }
     else
     {
-        IMS_TRACE_D("No matched static configurtion: fallback to legacy.", 0, 0, 0);
-        piBuffer = GetConfigBuffer(strConfName);
+        IMS_TRACE_D("No matched static configurtion: fallback to legacy is failed.", 0, 0, 0);
     }
 
     if (piBuffer == IMS_NULL)

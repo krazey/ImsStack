@@ -24,7 +24,6 @@ cc_library_shared {
         "libgui",
         "liblog",
         "libnativehelper",
-        "libsqlite",
         "libutils",
         // TLS
         "libcrypto",

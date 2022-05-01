@@ -244,19 +244,6 @@ IMS_BOOL ConfigBase::NotifyUpdate(IN IMS_SINT32 nCPI,
 }
 
 PROTECTED
-IConfigBuffer* ConfigBase::GetConfigBuffer(IN IMS_SINT32 nConfig) const
-{
-    const AString &strConfName = ConfigLoader::GetConfName(nConfig, GetSlotId());
-    return ConfigLoader::GetConfig(strConfName, GetSlotId());
-}
-
-PROTECTED
-IConfigBuffer* ConfigBase::GetConfigBuffer(IN const AString& strConfigName) const
-{
-    return ConfigLoader::GetConfig(strConfigName, GetSlotId());
-}
-
-PROTECTED
 IConfigBuffer* ConfigBase::GetConfigBufferFromContent(IN const AString& strContent) const
 {
     return ConfigLoader::GetConfig(strContent);

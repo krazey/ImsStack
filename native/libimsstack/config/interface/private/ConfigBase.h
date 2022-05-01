@@ -54,8 +54,6 @@ protected:
             IN const AString &strConfName = AString::ConstNull(),
             IN const AString &strExtraParam = AString::ConstNull());
 
-    IConfigBuffer* GetConfigBuffer(IN IMS_SINT32 nConfig) const;
-    IConfigBuffer* GetConfigBuffer(IN const AString& strConfigName) const;
     IConfigBuffer* GetConfigBufferFromContent(IN const AString& strContent) const;
 
     ICarrierConfig* GetCarrierConfig();

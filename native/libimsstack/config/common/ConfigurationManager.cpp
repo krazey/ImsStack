@@ -24,6 +24,9 @@
 
 __IMS_TRACE_TAG_CONF__;
 
+LOCAL
+const IMS_CHAR SUBSCRIBER_CONFIG_NAMES[] = "subscriber,subscriber_fake";
+
 template<class T>
 LOCAL
 void configurationManager_DestroyConfig(IN T*& pBase)
@@ -313,9 +316,6 @@ void ConfigurationHolder::InitConfigs(IN IMS_SINT32 nId)
 PUBLIC
 void ConfigurationHolder::RefreshConfigs(IN IMS_SINT32 nId)
 {
-    // Loads an index configuration
-    ConfigLoader::LoadIndexConfig(nId);
-
     if (!bCreated)
     {
         if (CreateConfigs(nId))
@@ -377,7 +377,7 @@ void ConfigurationHolder::DestroyConfigs()
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSubscriberConfig(IN IMS_SINT32 nId)
 {
-    const AString &strConfName = ConfigLoader::GetConfName(ConfigLoader::CONFIG_SUBSCRIBER, nId);
+    const AString strConfName = SUBSCRIBER_CONFIG_NAMES;
     IMSList<AString> objConfNames = strConfName.Split(',');
 
     if (objConfNames.IsEmpty())
@@ -403,7 +403,7 @@ IMS_BOOL ConfigurationHolder::CreateSubscriberConfig(IN IMS_SINT32 nId)
 PRIVATE
 IMS_BOOL ConfigurationHolder::CreateSubscriberConfigIfNotPresent(IN IMS_SINT32 nId)
 {
-    const AString &strConfName = ConfigLoader::GetConfName(ConfigLoader::CONFIG_SUBSCRIBER, nId);
+    const AString strConfName = SUBSCRIBER_CONFIG_NAMES;
     IMSList<AString> objConfNames = strConfName.Split(',');
 
     if (objConfNames.IsEmpty())
@@ -619,13 +619,6 @@ IMS_BOOL ConfigurationManagerPrivate::Initialize(
 
         if (pHolder == IMS_NULL)
         {
-            continue;
-        }
-
-        // Loads an index configuration
-        if (!ConfigLoader::LoadIndexConfig(i))
-        {
-            // No information for this slot
             continue;
         }
 
