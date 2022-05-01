@@ -58,10 +58,10 @@ public:
     virtual IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason) const;
     virtual IMS_BOOL IsReady();
 
-    virtual void CheckServiceAvailable(IN SERVICE_TYPE eType = SERVICE_WHOLE);
+    virtual IMS_UINT32 CheckServiceAvailable(IN SERVICE_TYPE eType = SERVICE_WHOLE);
 
     // TODO : Need to check
-    virtual void CheckBadNetwork(IN SERVICE_TYPE eType);
+    virtual IMS_BOOL CheckBadNetwork(IN SERVICE_TYPE eType);
 
     virtual void PrintBlockReasons() const;
 
@@ -76,6 +76,23 @@ public:
        REQUEST_PDN_DISCONNECT
     };
     // eReason : AoSReason
+
+    enum
+    {
+        LISTENER_NONE = 0x00,
+        LISTENER_BLOCK = 0x01,
+        LISTENER_NETTRACKER = 0x02,
+        LISTENER_SUBSCRIBER = 0x04,
+        LISTENER_CALLTRACKER = 0x08,
+        LISTENER_ALL = 0xFF
+    };
+
+    enum
+    {
+        CHECK_NONE = 0x0,
+        CHECK_CELLULAR = 0x1,
+        CHECK_WIFI = 0x2
+    };
 
 protected:
     virtual void AddServiceAvailable();
@@ -172,22 +189,13 @@ protected:
         HOLD_EVENT_IMS_SERVICE = 0x02
     };
 
-    enum
-    {
-        LISTENER_NONE = 0x00,
-        LISTENER_BLOCK = 0x01,
-        LISTENER_NETTRACKER = 0x02,
-        LISTENER_SUBSCRIBER = 0x04,
-        LISTENER_CALLTRACKER = 0x08,
-        LISTENER_ALL = 0xFF
-    };
-
 protected:
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
     IAosConditionListener* m_piListener;
     AosServiceAvailableCellular* m_pAvailableCellular;
     AosServiceAvailableWifi* m_pAvailableWiFi;
+    IAosBlock* m_piBlock;
     SERVICE_TYPE m_eServiceType;
     IMS_BOOL m_bIsRefreshStarted;
     IMS_BOOL m_bIsCombindAttached;
@@ -199,6 +207,9 @@ protected:
 
     AString m_strTag;
     static const IMS_UINT32 RAT_CHANGE_GUARD_TIME_MILLIS = 2000;
+
+private:
+    friend class AosConditionTest;
 };
 
 #endif // AOS_CONDITION_H_

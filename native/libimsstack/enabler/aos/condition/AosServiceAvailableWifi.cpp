@@ -268,22 +268,28 @@ void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UINT32 nState)
 PRIVATE VIRTUAL
 void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
 {
+    IAosBlock* piBlock = m_piAppContext->GetBlock();
+    if (piBlock == IMS_NULL)
+    {
+        return;
+    }
+
     if (m_bWiFiState == IMS_FALSE)
     {
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_WIFI_NO_WIFI);
+        piBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_WIFI_NO_WIFI);
+        piBlock->ResetBlockReason(BLOCK_WIFI_NO_WIFI);
     }
 
     if (m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED)
     {
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+        piBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+        piBlock->ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     }
 }
 
@@ -316,6 +322,11 @@ void AosServiceAvailableWifi::HandleLocationInfoChanged()
 PRIVATE VIRTUAL
 IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
 {
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     if (!GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
         A_IMS_TRACE_I(AOSTAG, "CheckServiceAvailable :: Wifi Service config is not available",
