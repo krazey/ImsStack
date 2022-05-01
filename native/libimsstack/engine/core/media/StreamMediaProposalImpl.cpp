@@ -32,30 +32,6 @@ StreamMediaProposalImpl::~StreamMediaProposalImpl()
 }
 
 PRIVATE VIRTUAL
-IMS_BOOL StreamMediaProposalImpl::CanRead() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaProposalImpl::CanWrite() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaProposalImpl::Exists() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
 IMS_SINT32 StreamMediaProposalImpl::GetDirection() const
 {
     //---------------------------------------------------------------------------------------------
@@ -140,14 +116,6 @@ IMS_RESULT StreamMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
 }
 
 PRIVATE VIRTUAL
-void StreamMediaProposalImpl::SetMediaListener(IN IMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) piListener;
-}
-
-PRIVATE VIRTUAL
 IMediaDescriptor* StreamMediaProposalImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
@@ -169,79 +137,4 @@ void StreamMediaProposalImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
     //---------------------------------------------------------------------------------------------
 
     (void) nPosition;
-}
-
-// IStreamMedia interface
-PRIVATE VIRTUAL
-void* StreamMediaProposalImpl::GetReceivingPlayer() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_NULL;
-}
-
-PRIVATE VIRTUAL
-void* StreamMediaProposalImpl::GetSendingPlayer() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_NULL;
-}
-
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaProposalImpl::GetStreamType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pMediaProposal->GetStreamType();
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaProposalImpl::SetPreferredQuality(IN IMS_SINT32 nQuality)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) nQuality;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_FAILURE;
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaProposalImpl::SetSource(IN CONST AString &strSource)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strSource;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_FAILURE;
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaProposalImpl::SetStreamType(IN IMS_SINT32 nType)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) nType;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_FAILURE;
 }

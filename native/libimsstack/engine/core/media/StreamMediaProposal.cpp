@@ -20,9 +20,8 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 
 PUBLIC
-StreamMediaProposal::StreamMediaProposal(IN ISDPOAState *piOAState_, IN IMS_SINT32 nStreamType_)
+StreamMediaProposal::StreamMediaProposal(IN ISDPOAState *piOAState_)
     : MediaProposal(piOAState_)
-    , nStreamType(nStreamType_)
 {
 }
 
@@ -40,12 +39,4 @@ IMS_SINT32 StreamMediaProposal::GetType() const
     //---------------------------------------------------------------------------------------------
 
     return IMSCore::MEDIA_TYPE_STREAM;
-}
-
-PUBLIC
-IMS_SINT32 StreamMediaProposal::GetStreamType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nStreamType;
 }

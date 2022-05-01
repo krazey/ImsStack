@@ -32,30 +32,6 @@ FramedMediaProposalImpl::~FramedMediaProposalImpl()
 }
 
 PRIVATE VIRTUAL
-IMS_BOOL FramedMediaProposalImpl::CanRead() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL FramedMediaProposalImpl::CanWrite() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL FramedMediaProposalImpl::Exists() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_FALSE;
-}
-
-PRIVATE VIRTUAL
 IMS_SINT32 FramedMediaProposalImpl::GetDirection() const
 {
     //---------------------------------------------------------------------------------------------
@@ -140,14 +116,6 @@ IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
 }
 
 PRIVATE VIRTUAL
-void FramedMediaProposalImpl::SetMediaListener(IN IMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) piListener;
-}
-
-PRIVATE VIRTUAL
 IMediaDescriptor* FramedMediaProposalImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
@@ -169,139 +137,4 @@ void FramedMediaProposalImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
     //---------------------------------------------------------------------------------------------
 
     (void) nPosition;
-}
-
-// IFramedMedia interface
-PRIVATE VIRTUAL
-void FramedMediaProposalImpl::Cancel(IN CONST AString &strMessageId)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strMessageId;
-}
-
-PRIVATE VIRTUAL
-const AStringArray& FramedMediaProposalImpl::GetAcceptedContentTypes() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pMediaProposal->GetAcceptedContentTypes();
-}
-
-PRIVATE VIRTUAL
-const AString& FramedMediaProposalImpl::GetContentType(IN CONST AString &strMessageId) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strMessageId;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
-
-    return AString::ConstNull();
-}
-
-
-PRIVATE VIRTUAL
-AString FramedMediaProposalImpl::GetHeader(IN CONST AString &strMessageId,
-        IN CONST AString &strName) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strMessageId;
-    (void) strName;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
-
-    return AString::ConstNull();
-}
-
-PRIVATE VIRTUAL
-const ByteArray& FramedMediaProposalImpl::ReceiveBytes(IN CONST AString &strMessageId) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strMessageId;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
-
-    return ByteArray::ConstNull();
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT FramedMediaProposalImpl::ReceiveFile(IN CONST AString &strMessageId,
-        IN CONST AString &strLocator)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strMessageId;
-    (void) strLocator;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
-
-    return IMS_FAILURE;
-}
-
-PRIVATE VIRTUAL
-AString FramedMediaProposalImpl::SendBytes(IN CONST ByteArray &objContent,
-        IN CONST AString &strContentType, IN CONST IMSMap<AString, AStringArray> &objHeaders)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) objContent;
-    (void) strContentType;
-    (void) objHeaders;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::INVALID_OPERATION);
-
-    return AString::ConstNull();
-}
-
-PRIVATE VIRTUAL
-AString FramedMediaProposalImpl::SendFile(IN CONST AString &strLocator,
-        IN CONST AString &strContentType, IN CONST IMSMap<AString, AStringArray> &objHeaders)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) strLocator;
-    (void) strContentType;
-    (void) objHeaders;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::INVALID_OPERATION);
-
-    return AString::ConstNull();
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT FramedMediaProposalImpl::SetAcceptedContentTypes(
-        IN CONST AStringArray &objAcceptedContentTypes)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) objAcceptedContentTypes;
-
-    IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
-
-    IMS::SetLastError(IMSError::ILLEGAL_STATE);
-
-    return IMS_FAILURE;
-}
-
-PRIVATE VIRTUAL
-void FramedMediaProposalImpl::SetListener(IN IFramedMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    (void) piListener;
 }

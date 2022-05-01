@@ -26,10 +26,10 @@
  *     des, curr, conf, mid, ice-pwd, ice-ufrag, candidate, remote-candidates, sendonly,\n
  *     recvonly, sendrecv, inactive, csup, creq, acap, tcap, pcfg, acfg, 3gpp_sync_info
  *
- *     - RTP/AVP (IStreamMedia) : rtpmap, fmtp, dccp-service-code, rtcp-mux, rtp-fb,
+ *     - RTP/AVP (StreamMedia) : rtpmap, fmtp, dccp-service-code, rtcp-mux, rtp-fb,
  *         ptime, maxptime, framesize, framerate, quality
- *     - TCP (IBasicReliableMedia) : setup, connection
- *     - TCP/MSRP (IFramedMedia) : setup, connection, accept-types, accept-wrapped-types,
+ *     - TCP (BasicReliableMedia) : setup, connection
+ *     - TCP/MSRP (FramedMedia) : setup, connection, accept-types, accept-wrapped-types,
  *         max-size, path
  */
 class IMediaDescriptor

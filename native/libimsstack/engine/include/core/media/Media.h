@@ -38,9 +38,6 @@ private:
 
 public:
     // IMedia interface
-    virtual IMS_BOOL CanRead() const;
-    virtual IMS_BOOL CanWrite() const;
-    virtual IMS_BOOL Exists() const;
     virtual IMS_SINT32 GetType() const = 0;
 
     IMS_SINT32 GetDirection() const;
@@ -81,12 +78,12 @@ protected:
     virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
 
     virtual MediaProposal* CreateMediaProposal(IN ISDPOAState *piOAState) = 0;
-    virtual IMS_BOOL PreviewInitInstance() = 0;
-    virtual IMS_BOOL PostInitInstance() = 0;
-    virtual void PreviewCleanupMedia() = 0;
-    virtual void PostCleanupMedia() = 0;
-    virtual void PreviewRemoveMedia() = 0;
-    virtual void PostRemoveMedia() = 0;
+    virtual IMS_BOOL PreviewInitInstance();
+    virtual IMS_BOOL PostInitInstance();
+    virtual void PreviewCleanupMedia();
+    virtual void PostCleanupMedia();
+    virtual void PreviewRemoveMedia();
+    virtual void PostRemoveMedia();
 
     IMS_BOOL InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDirection);
     IMS_BOOL InitInstance(IN CONST IMSList<IMS_SINT32> &objMids);

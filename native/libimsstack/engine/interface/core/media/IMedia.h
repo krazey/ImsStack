@@ -25,8 +25,8 @@ class IMediaListener;
  * support the media plane.
  *
  * While IMedia is a generic media flow-independent interface, the four media types interfaces
- * extend IMedia according to the transport protocol. IStreamMedia uses RTP/AVP
- * for the basic profile, and RTP/AVPF also in the "mmtel" profile, IFramedMedia uses TCP/MSRP,
+ * extend IMedia according to the transport protocol. StreamMedia uses RTP/AVP
+ * for the basic profile, and RTP/AVPF also in the "mmtel" profile, FramedMedia uses TCP/MSRP,
  * IBasicUnreliableMedia uses UDP, and IBasicReliableMedia is based on TCP.\n
  * A media object part of a session implements one of the four media type interface.
  * Because of this mapping, each media type has its specific uses.
@@ -34,30 +34,6 @@ class IMediaListener;
 class IMedia
 {
 public:
-    /**
-     * @brief Checks if it is possible to read from the data flow.
-     *
-     * @return If a data flow allows read, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     * @deprecated NOT_USED
-     */
-    virtual IMS_BOOL CanRead() const = 0;
-
-    /**
-     * @brief Checks if it is possible to write to the data flow.
-     *
-     * @return If a data flow allows write, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     * @deprecated NOT_USED
-     */
-    virtual IMS_BOOL CanWrite() const = 0;
-
-    /**
-     * @brief Checks if there is a data flow for this IMedia.
-     *
-     * @return If a data flow exists, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
-     * @deprecated NOT_USED
-     */
-    virtual IMS_BOOL Exists() const = 0;
-
     /**
      * @brief Returns the current direction of this IMedia.
      *
@@ -129,17 +105,6 @@ public:
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     virtual IMS_RESULT SetDirection(IN IMS_SINT32 nDirection) = 0;
-
-    /**
-     * @brief Sets a listener for this IMedia, replacing any previous IMediaListener.
-     *
-     * The method IMediaListener::Media_ModeChanged(...) is called directly
-     * after setting a IMediaListener with this method.
-     *
-     * @param piListener Listener to be set
-     * @deprecated NOT_USED
-     */
-    virtual void SetMediaListener(IN IMediaListener *piListener) = 0;
 
     //// IMS extensions
 
