@@ -11,12 +11,10 @@ import android.net.NetworkRequest;
 import android.net.TelephonyNetworkSpecifier;
 import android.os.Handler;
 import android.os.Message;
-import android.telephony.AccessNetworkConstants;
 import android.telephony.DataFailCause;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
-import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISubscription;
@@ -35,7 +33,9 @@ import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.FeatureConfig;
-import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.enabler.aos.AosFactory;
+import com.android.imsstack.enabler.aos.IAosRegistration;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
@@ -49,7 +49,6 @@ import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -839,7 +838,14 @@ public abstract class Apn extends Handler implements IApn {
                     handleHandoverStart(networkType);
                     break;
                 case TelephonyManager.DATA_DISCONNECTING:
-                    // To Be update
+                    IAosRegistration aosReg = AosFactory.getInstance().getAosRegistration(nSlotId);
+                    if (aosReg != null) {
+                        if (aosReg.getRegisteredNetworkType()
+                                != IAosRegistrationListener.NetworkType.NONE) {
+                            aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                                    IAosRegistration.Pcscf.CURRENT);
+                        }
+                    }
                     break;
                 case TelephonyManager.DATA_DISCONNECTED:
                     if (mPreciseDcState == TelephonyManager.DATA_CONNECTING &&
