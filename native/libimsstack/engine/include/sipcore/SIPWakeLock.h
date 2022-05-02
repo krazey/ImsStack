@@ -12,7 +12,7 @@
 #ifndef _SIP_WAKE_LOCK_H_
 #define _SIP_WAKE_LOCK_H_
 
-#include "SIPMethod.h"
+#include "SipMethod.h"
 
 
 

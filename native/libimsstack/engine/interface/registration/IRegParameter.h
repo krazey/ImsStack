@@ -2,9 +2,9 @@
 #define _INTERFACE_REG_PARAMETER_H_
 
 #include "AStringArray.h"
-#include "SIPSecurityHeader.h"
-#include "SIPTimerValues.h"
-#include "SIPAddress.h"
+#include "SipSecurityHeader.h"
+#include "SipTimerValues.h"
+#include "SipAddress.h"
 
 class ISIPMessageBodyPart;
 

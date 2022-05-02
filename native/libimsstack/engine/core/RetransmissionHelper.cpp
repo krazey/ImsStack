@@ -14,7 +14,7 @@
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "IMSLib.h"
-#include "SIPConfigProxy.h"
+#include "SipConfigProxy.h"
 #include "base/IMS.h"
 #include "IRetransmissionHelperListener.h"
 #include "Service.h"

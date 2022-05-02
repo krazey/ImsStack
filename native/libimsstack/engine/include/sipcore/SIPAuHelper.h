@@ -13,7 +13,7 @@
 #ifndef _SIP_AUTHENTICATION_HELPER_H_
 #define _SIP_AUTHENTICATION_HELPER_H_
 
-#include "ISIPGenericChallenge.h"
+#include "ISipGenericChallenge.h"
 #include "Credential.h"
 #include "SIPStackHeaders.h"
 

@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIPStatusCode.h"
-#include "ISIPIPSecStateListener.h"
+#include "SipStatusCode.h"
+#include "ISipIpSecStateListener.h"
 #include "SIPIPSecState.h"
 
 __IMS_TRACE_TAG_SIP__;

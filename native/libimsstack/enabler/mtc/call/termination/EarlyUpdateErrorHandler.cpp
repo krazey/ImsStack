@@ -1,6 +1,6 @@
 #include "IMessage.h"
 #include "ServiceTrace.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "call/termination/EarlyUpdateErrorHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

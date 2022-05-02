@@ -2,7 +2,7 @@
 #define _INTERFACE_REG_INFO_CONTACT_H_
 
 #include "IMSMap.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 /**
  * @brief This class provides an interface to access the contact element

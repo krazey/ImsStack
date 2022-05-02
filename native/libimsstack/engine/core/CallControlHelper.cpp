@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "TextParser.h"
-#include "ISIPDialog.h"
+#include "ISipDialog.h"
 #include "Replaces.h"
 #include "CallControlHelper.h"
 

@@ -9,7 +9,7 @@
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "ISession.h"
 #include "IMessage.h"
 

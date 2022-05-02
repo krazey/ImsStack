@@ -1,7 +1,7 @@
 #ifndef SDP_PRECONDITION_HELPER_H_
 #define SDP_PRECONDITION_HELPER_H_
 
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 
 #include "ISession.h"
 #include "media/IMediaDescriptor.h"

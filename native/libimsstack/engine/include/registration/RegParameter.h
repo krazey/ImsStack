@@ -14,7 +14,7 @@
 #define _REG_PARAMETER_H_
 
 #include "AStringArray.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "Credential.h"
 #include "IRegParameter.h"
 #include "ImsSlot.h"

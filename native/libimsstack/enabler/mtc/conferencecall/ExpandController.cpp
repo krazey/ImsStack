@@ -1,5 +1,5 @@
 #include "ServiceTrace.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "call/IMtcCallManager.h"
 #include "call/IMtcCallContext.h"
 #include "call/ParticipantInfo.h"

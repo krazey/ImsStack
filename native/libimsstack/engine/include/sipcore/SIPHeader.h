@@ -18,7 +18,7 @@
 #ifndef _SIP_HEADER_H_
 #define _SIP_HEADER_H_
 
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "SIPStackHeaders.h"
 
 class SIPParameter;

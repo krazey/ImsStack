@@ -27,7 +27,7 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPClientConnection.h"
 #include "SIPDialog.h"
 

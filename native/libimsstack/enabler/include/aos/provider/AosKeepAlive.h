@@ -17,7 +17,7 @@
 #define AOS_KEEP_ALIVE_H_
 
 #include "ITimer.h"
-#include "ISIPKeepAliveHelperListener.h"
+#include "ISipKeepAliveHelperListener.h"
 #include "IPAddress.h"
 
 class ISIPKeepAliveHelper;

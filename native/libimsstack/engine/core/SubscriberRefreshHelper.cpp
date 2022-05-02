@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISIPMessage.h"
-#include "SIPStatusCode.h"
+#include "ISipMessage.h"
+#include "SipStatusCode.h"
 #include "SubState.h"
 #include "SubscriberRefreshHelper.h"
 

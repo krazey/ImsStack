@@ -22,7 +22,7 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "SIPDialogSubscribeUsage.h"
 
 __IMS_TRACE_TAG_SIP__;

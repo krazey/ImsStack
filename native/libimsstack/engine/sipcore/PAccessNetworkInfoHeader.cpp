@@ -19,12 +19,12 @@
 #include "ServiceUtil.h"
 #include "AccessNetworkInfoFormatter.h"
 #include "private/SipConfigV.h"
-#include "SIPFeatures.h"
-#include "SIPFactory.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "ISIPRTConfigHelper.h"
-#include "SIPConfigProxy.h"
+#include "SipFeatures.h"
+#include "SipFactory.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "ISipRtConfigHelper.h"
+#include "SipConfigProxy.h"
 #include "PAccessNetworkInfoHeader.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

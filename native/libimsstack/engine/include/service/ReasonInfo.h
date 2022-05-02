@@ -13,7 +13,7 @@
 #ifndef _REASON_INFO_H_
 #define _REASON_INFO_H_
 
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "IReasonInfo.h"
 
 

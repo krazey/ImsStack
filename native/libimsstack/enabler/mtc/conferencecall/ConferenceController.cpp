@@ -6,7 +6,7 @@
 #include "call/IMtcCallManager.h"
 #include "IMtcService.h"
 #include "ISession.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "IuMtcService.h"
 #include "utility/MessageUtil.h"
 #include "ServiceMemory.h"

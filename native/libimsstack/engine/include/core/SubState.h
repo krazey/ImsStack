@@ -13,7 +13,7 @@
 #ifndef _SUB_STATE_H_
 #define _SUB_STATE_H_
 
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 #include "util/EventPackage.h"
 #include "SIPHeaderProperty.h"
 

@@ -1,7 +1,7 @@
 #ifndef _INTERFACE_SIP_CONNECTION_FACTORY_H_
 #define _INTERFACE_SIP_CONNECTION_FACTORY_H_
 
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "base/IMethod.h"
 
 class ISIPClientConnection;

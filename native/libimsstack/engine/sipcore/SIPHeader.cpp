@@ -18,9 +18,9 @@
 #include "ServiceMemory.h"
 #include "AStringBuffer.h"
 #include "SIPPrivate.h"
-#include "SIPHeaderName.h"
-#include "SIPAddress.h"
-#include "SIPParameter.h"
+#include "SipHeaderName.h"
+#include "SipAddress.h"
+#include "SipParameter.h"
 #include "SIPHeader.h"
 
 

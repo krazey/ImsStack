@@ -16,9 +16,9 @@
 #include "ServiceNetworkPolicy.h"
 #include "ServiceUtil.h"
 #include "AStringBuffer.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "SIPConfigProxy.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "SipConfigProxy.h"
 #include "util/UserAgentHeader.h"
 
 

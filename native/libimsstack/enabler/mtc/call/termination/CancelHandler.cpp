@@ -1,4 +1,4 @@
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "call/termination/CancelHandler.h"
 #include "utility/MessageUtil.h"
 

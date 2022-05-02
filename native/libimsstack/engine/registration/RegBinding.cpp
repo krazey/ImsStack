@@ -12,11 +12,11 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIP.h"
-#include "SIPDebug.h"
-#include "ISIPConnectionNotifier.h"
+#include "Sip.h"
+#include "SipDebug.h"
+#include "ISipConnectionNotifier.h"
 #include "util/SIPConnectionNotifierManager.h"
-#include "SIPConfigProxy.h"
+#include "SipConfigProxy.h"
 #include "IRegistrationEx.h"
 #include "IRegContact.h"
 // REG_RESTORATION_FOR_ACTIVE_BINDING

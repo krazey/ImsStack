@@ -1,7 +1,7 @@
 #include "ServiceTrace.h"
 
-#include "SIP.h"
-#include "SIPAddress.h"
+#include "Sip.h"
+#include "SipAddress.h"
 #include "TextParser.h"
 
 #include "utility/MessageUtil.h"

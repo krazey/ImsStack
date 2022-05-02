@@ -1,7 +1,7 @@
 #ifndef _INTERFACE_REGISTRATION_H_
 #define _INTERFACE_REGISTRATION_H_
 
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "IRegBase.h"
 #include "IRegContact.h"
 #include "IRegParameter.h"

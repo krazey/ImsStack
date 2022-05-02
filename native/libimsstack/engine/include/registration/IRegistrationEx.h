@@ -14,7 +14,7 @@
 #define _INTERFACE_REGISTRATION_EX_H_
 
 #include "IRegistration.h"
-#include "ISIPConnectionNotifierErrorListener.h"
+#include "ISipConnectionNotifierErrorListener.h"
 
 class RegInfo;
 class RegObserver;

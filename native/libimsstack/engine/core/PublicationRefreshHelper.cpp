@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "PubState.h"
 #include "PublicationRefreshHelper.h"
 

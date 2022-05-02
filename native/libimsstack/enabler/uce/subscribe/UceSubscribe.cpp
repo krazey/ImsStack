@@ -2,13 +2,13 @@
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
 
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "ICoreService.h"
 #include "ISubscription.h"
-#include "ISIPHeader.h"
-#include "SIPParsingHelper.h"
+#include "ISipHeader.h"
+#include "SipParsingHelper.h"
 #include "IMessage.h"
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 #include "TextParser.h"
 
 #include "ImsAosParameter.h"

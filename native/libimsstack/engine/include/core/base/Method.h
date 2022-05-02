@@ -16,11 +16,11 @@
 // IMS_AUTH_SIP_DIGEST
 #include "IMSMap.h"
 #include "EngineActivity.h"
-#include "SIP.h"
-#include "ISIPClientConnectionListener.h"
-#include "ISIPErrorListener.h"
-#include "ISIPClientConnection.h"
-#include "SIPAddress.h"
+#include "Sip.h"
+#include "ISipClientConnectionListener.h"
+#include "ISipErrorListener.h"
+#include "ISipClientConnection.h"
+#include "SipAddress.h"
 // SIP_MESSAGE_MEDIATOR
 #include "base/IMessageMediator.h"
 

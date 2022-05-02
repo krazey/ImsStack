@@ -13,10 +13,10 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "SIPFeatures.h"
-#include "SIPDebug.h"
+#include "SipFeatures.h"
+#include "SipDebug.h"
 // HEADER_REQ_SESSION-ID
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 #include "SIPMessage.h"
 #include "SIPDialogSharedState.h"
 #include "SIPDialogState.h"

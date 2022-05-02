@@ -1,5 +1,5 @@
 #include "IMessage.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "call/extension/MtcExtension.h"
 #include "call/extension/MtcExtensionSet.h"

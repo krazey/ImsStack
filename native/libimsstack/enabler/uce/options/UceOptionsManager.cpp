@@ -5,12 +5,12 @@
 
 #include "ServiceMessage.h"
 
-#include "ISIPMessage.h"
-#include "ISIPHeader.h"
+#include "ISipMessage.h"
+#include "ISipHeader.h"
 #include "IMessage.h"
 #include "ICoreService.h"
 #include "ICapabilities.h"
-#include "SIP.h"
+#include "Sip.h"
 
 #include "IUce.h"
 #include "IUUceService.h"

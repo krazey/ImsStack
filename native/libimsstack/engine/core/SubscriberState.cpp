@@ -12,11 +12,11 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISIPHeader.h"
-#include "SIP.h"
-#include "SIPHeaderName.h"
-#include "SIPParsingHelper.h"
-#include "SIPStatusCode.h"
+#include "ISipHeader.h"
+#include "Sip.h"
+#include "SipHeaderName.h"
+#include "SipParsingHelper.h"
+#include "SipStatusCode.h"
 #include "SubscriberState.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

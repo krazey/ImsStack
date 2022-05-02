@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceMutex.h"
-#include "ISIPDialog.h"
-#include "ISIPServerConnection.h"
+#include "ISipDialog.h"
+#include "ISipServerConnection.h"
 #include "util/IForkedDialogMethod.h"
 #include "util/ForkedDialogMethodManager.h"
 

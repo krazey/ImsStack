@@ -16,7 +16,7 @@
 #include "SystemConfig.h"
 #include "private/ConfigurationManager.h"
 #include "private/SubscriberConfig.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "base/SubscriberTracker.h"
 
 __IMS_TRACE_TAG_IMS__;

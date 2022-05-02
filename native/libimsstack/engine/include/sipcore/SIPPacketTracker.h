@@ -13,8 +13,8 @@
 #ifndef _SIP_PACKET_TRACKER_H_
 #define _SIP_PACKET_TRACKER_H_
 
-#include "ISIPMessage.h"
-#include "ISIPPacketTracker.h"
+#include "ISipMessage.h"
+#include "ISipPacketTracker.h"
 
 
 

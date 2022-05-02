@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "TextParser.h"
 #include "Feature.h"
-#include "ISIPHeader.h"
-#include "SIPParameter.h"
+#include "ISipHeader.h"
+#include "SipParameter.h"
 #include "util/PreferenceHeader.h"
 
 

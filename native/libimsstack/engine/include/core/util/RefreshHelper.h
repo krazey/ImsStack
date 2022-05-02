@@ -14,9 +14,9 @@
 #define _REFRESH_HELPER_H_
 
 #include "ITimer.h"
-#include "ISIPClientConnectionListener.h"
-#include "ISIPErrorListener.h"
-#include "ISIPClientConnection.h"
+#include "ISipClientConnectionListener.h"
+#include "ISipErrorListener.h"
+#include "ISipClientConnection.h"
 // SIP_MESSAGE_MEDIATOR
 #include "base/IMessageMediator.h"
 

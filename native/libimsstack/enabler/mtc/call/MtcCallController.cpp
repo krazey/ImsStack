@@ -3,7 +3,7 @@
 #include "call/IMtcCallManager.h"
 #include "IMtcContext.h"
 #include "ISession.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "IMtcService.h"
 #include "utility/MessageUtil.h"
 #include "call/MtcCallController.h"

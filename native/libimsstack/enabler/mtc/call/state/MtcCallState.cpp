@@ -12,7 +12,7 @@
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "IMessage.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "media/IMtcMediaManager.h"
@@ -20,7 +20,7 @@
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

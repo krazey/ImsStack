@@ -14,9 +14,9 @@
 #include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
 #include "SIPPrivate.h"
-#include "SIPFeatures.h"
-#include "SIPConfigProxy.h"
-#include "SIPDebug.h"
+#include "SipFeatures.h"
+#include "SipConfigProxy.h"
+#include "SipDebug.h"
 #include "SIPServerTransactionState.h"
 #include "SIPServerConnection.h"
 

@@ -18,7 +18,7 @@
 
 #include "IPAddress.h"
 #include "ByteArray.h"
-#include "SIPSecurityHeader.h"
+#include "SipSecurityHeader.h"
 #include "IIpSecPolicyListener.h"
 
 class INetworkIpSec;

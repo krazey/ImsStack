@@ -13,7 +13,7 @@
 #ifndef _SIP_MESSAGE_H_
 #define _SIP_MESSAGE_H_
 
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 #include "SIPHeader.h"
 #include "SIPMessageBodyPart.h"
 

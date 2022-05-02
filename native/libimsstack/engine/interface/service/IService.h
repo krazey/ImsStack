@@ -4,7 +4,7 @@
 #include "IPAddress.h"
 #include "AStringArray.h"
 #include "IConnection.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 class SIPProfile;
 class IRegInfo;

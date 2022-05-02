@@ -11,10 +11,10 @@
 */
 
 #include "ServiceMemory.h"
-#include "SIP.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "SIPParsingHelper.h"
+#include "Sip.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "SipParsingHelper.h"
 #include "util/OperatorFeatureResolver.h"
 
 PUBLIC GLOBAL

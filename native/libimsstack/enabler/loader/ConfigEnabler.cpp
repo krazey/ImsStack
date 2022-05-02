@@ -23,8 +23,8 @@
 
 #include "Configuration.h"
 
-#include "ISIPRTConfigHelper.h"
-#include "SIPFactory.h"
+#include "ISipRtConfigHelper.h"
+#include "SipFactory.h"
 
 #include "ConfigAppFactory.h"
 #include "ConfigEnabler.h"

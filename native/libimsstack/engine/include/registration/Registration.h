@@ -16,8 +16,8 @@
 
 #include "ITimer.h"
 #include "IDigestAkaListener.h"
-#include "ISIPClientConnectionListener.h"
-#include "ISIPErrorListener.h"
+#include "ISipClientConnectionListener.h"
+#include "ISipErrorListener.h"
 // SIP_MESSAGE_MEDIATOR
 #include "base/IMessageMediator.h"
 #include "IRegistrationEx.h"

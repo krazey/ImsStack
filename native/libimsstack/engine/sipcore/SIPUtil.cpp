@@ -19,7 +19,7 @@
 #include "IMSMD5.h"
 #include "IMSStrLib.h"
 #include "SIPPrivate.h"
-#include "SIPFeatures.h"
+#include "SipFeatures.h"
 #include "SIPUtil.h"
 
 // HEADER_REQ_SESSION-ID

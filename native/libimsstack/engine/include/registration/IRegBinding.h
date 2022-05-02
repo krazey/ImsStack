@@ -15,7 +15,7 @@
 
 #include "AStringArray.h"
 #include "IPAddress.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 class CallerCapability;
 class SIPProfile;
@@ -391,7 +391,7 @@ public:
     <table>
     return                  description
     ----------              ----------
-    IMS_SINT32              Transport extension (SIP::TRANSPORT_EXT_XXX in SIP.h)
+    IMS_SINT32              Transport extension (SIP::TRANSPORT_EXT_XXX in Sip.h)
     </table>
 
     */

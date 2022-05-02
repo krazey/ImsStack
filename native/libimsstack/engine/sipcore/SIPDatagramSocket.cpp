@@ -14,7 +14,7 @@
 #include "ByteArray.h"
 #include "ISIPDatagramSocketListener.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPRTConfigUtils.h"
 #include "SIPMessageBuffer.h"
 #include "SIPDatagramSocket.h"

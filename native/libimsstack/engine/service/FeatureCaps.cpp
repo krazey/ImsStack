@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "Feature.h"
-#include "ISIPMessage.h"
-#include "SIPMethod.h"
+#include "ISipMessage.h"
+#include "SipMethod.h"
 #include "util/CallerCapability.h"
 #include "FeatureCaps.h"
 

@@ -24,7 +24,7 @@
 #include "ect/IEctReferenceListener.h"
 #include "IMtcApp.h"
 #include "call/IMtcCall.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "INotificationListener.h"
 
 

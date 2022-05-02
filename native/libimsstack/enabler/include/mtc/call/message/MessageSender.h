@@ -2,7 +2,7 @@
 #define MTC_MESSAGE_SENDER_H_
 
 #include "call/message/MessageFormatter.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "MtcDef.h"
 
 class IMtcSessionContext;

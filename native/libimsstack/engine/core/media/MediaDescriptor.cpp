@@ -16,7 +16,7 @@
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpMediaFormatParameter.h"
 #include "offeranswer/SdpMediaParameter.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "base/IMS.h"
 #include "media/IMediaState.h"
 #include "media/MediaDescriptor.h"

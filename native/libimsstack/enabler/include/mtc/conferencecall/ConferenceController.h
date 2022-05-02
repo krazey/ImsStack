@@ -2,7 +2,7 @@
 #define CONFERENCE_CONTROLLER_H_
 
 #include "ServiceTimer.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "conferencecall/IConferenceSubscriptionListener.h"
 #include "conferencecall/IConferenceReferenceListener.h"
 #include "call/MtcUiNotifier.h"

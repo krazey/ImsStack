@@ -16,9 +16,9 @@
 #include "RCObject.h"
 #include "AStringArray.h"
 #include "IPAddress.h"
-#include "SIPAddress.h"
-#include "SIPSecurityHeader.h"
-#include "SIPProfile.h"
+#include "SipAddress.h"
+#include "SipSecurityHeader.h"
+#include "SipProfile.h"
 
 class RegContact;
 

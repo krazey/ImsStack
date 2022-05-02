@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
 #include "SIPStackHeaders.h"
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 #include "IOnSIPErrorListener.h"
 #include "SIPFactoryProxy.h"
 // SIP_MESSAGE_TRACKER

@@ -9,7 +9,7 @@
 #include "helper/MtcTimerWrapper.h"
 #include "IMessage.h"
 #include "ISession.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "utility/MessageUtil.h"
 #include "helper/MtcSupplementaryService.h"
 #include "precondition/QosDef.h"

@@ -16,7 +16,7 @@
 #include "AStringBuffer.h"
 #include "INamedNodeMap.h"
 #include "INode.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "RegInfoConst.h"
 #include "RegInfoContact.h"
 
