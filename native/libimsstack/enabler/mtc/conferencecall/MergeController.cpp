@@ -307,8 +307,8 @@ void MergeController::ClearIndividualCallOnMergeFailed()
         if (piConfReference != IMS_NULL)
         {
             IMS_UINT32 nResponseCode = piConfReference->GetResponseCode();
-            if (SIPStatusCode::IsFinalFailure(nResponseCode)
-                    || nResponseCode == SIPStatusCode::SC_INVALID)
+            if (SIPStatusCode::IsFinalFailure(nResponseCode) ||
+                    nResponseCode == SIPStatusCode::SC_INVALID)
             {
                 // refer is rejected. so, call can be maintained
                 IMS_TRACE_I("ClearIndividualCallOnMergeFailed : refer is rejected.", 0, 0, 0);
@@ -317,8 +317,6 @@ void MergeController::ClearIndividualCallOnMergeFailed()
 
             // refer is sent. so, call is considered terminated
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : refer is sent.", 0, 0, 0);
-            // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
-            // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
             m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
             continue;
         }
@@ -327,8 +325,6 @@ void MergeController::ClearIndividualCallOnMergeFailed()
         {
             // state is updated already
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : user state changed", 0, 0, 0);
-            // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
-            // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
             m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
             continue;
         }
@@ -337,8 +333,6 @@ void MergeController::ClearIndividualCallOnMergeFailed()
         if (piTemp == IMS_NULL || piTemp->GetState() == IMtcCall::State::TERMINATING)
         {
             IMS_TRACE_I("ClearIndividualCallOnMergeFailed : 1-to-1 is terminating", 0, 0, 0);
-            // TODO: objContext.GetCallManager().GetCallByCallKey(pTempUser->nCallKey)
-            // TODO: get JniMtcCallThread from IMtcCallContext of confuser.
             m_objNotifier.NotifyIndividualCallTerminated(nTempCallKey);
         }
     }

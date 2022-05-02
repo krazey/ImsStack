@@ -162,9 +162,12 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
 {
     IMS_TRACE_I("NotifyIndividualCallTerminated ", 0, 0, 0);
 
-    IUUCSessionTerminatedParam* pParam = new IUUCSessionTerminatedParam();
-    pParam->failReason =
-            FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED);
+    IMtcCall* piCall = m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey);
+    if (piCall->GetKey() == -1)
+    {
+        IMS_TRACE_I("NotifyIndividualCallTerminated - call is already deleted.", 0, 0, 0);
+        return;
+    }
 
     m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext().GetUiNotifier()
             .SendTerminated(

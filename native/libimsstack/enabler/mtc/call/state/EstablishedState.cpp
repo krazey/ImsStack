@@ -4,6 +4,8 @@
 #include "call/state/EstablishedState.h"
 #include "call/termination/TerminationHandler.h"
 #include "call/UpdatingInfo.h"
+#include "conferencecall/ConferenceManager.h"
+#include "conferencecall/IConferenceController.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
@@ -86,6 +88,11 @@ CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
+
+    if (IsConferenceCallParticipant())
+    {
+        return TransitToTerminating(FailReason(FAIL_REASON_CONF_JOINED));
+    }
 
     return TransitToTerminating(TerminationHandler().Handle(*piSession));
 }
@@ -287,4 +294,32 @@ void EstablishedState::AdjustDirectionWithHeldByMe()
     */
 
     m_objContext.GetMediaManager().SetMediaInfo(objInfo);
+}
+
+PRIVATE
+IMS_BOOL EstablishedState::IsConferenceCallParticipant()
+{
+    IMSList<IMtcCall*> objConfCalls = m_objContext.GetCallManager().GetCallsInConference();
+    if (objConfCalls.GetSize() == 0)
+    {
+        return IMS_FALSE;
+    }
+
+    IConferenceController* piConfController =
+            m_objContext.GetConferenceManager().GetController(objConfCalls.GetAt(0)->GetKey());
+    if (piConfController == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    CallKey nKey = m_objContext.GetCallKey();
+    if (piConfController->GetCallStatusInConference(nKey) ==  IndividualCallState::JOINED ||
+            piConfController->GetCallStatusInConference(nKey) == IndividualCallState::JOINING)
+    {
+        IMS_TRACE_I("IsConferenceCallParticipant [%" PFLS_x "] call is joining to conference call",
+                nKey, 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
