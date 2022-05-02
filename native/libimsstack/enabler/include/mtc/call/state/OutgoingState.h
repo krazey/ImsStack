@@ -51,6 +51,7 @@ public:
 
 
 private:
+    IMS_RESULT SendPrack(IN ISession* piSession); // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession); // TODO: differs from UpdatingState::SendAck()?
     void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
     void HandleRetryAfter(IN const FailReason& objReason);

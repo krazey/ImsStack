@@ -505,16 +505,20 @@ void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo/* = IMS_NULL*/)
 PROTECTED
 IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMessage)
 {
-    if (IMS_FALSE)
-    {
-        // TODO: IsInvalidOfferAnswer(); by RFC 6337
-        return FAIL_REASON_MEDIA_NEGOFAIL;
-    }
-
     if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
     {
-        IMS_TRACE_D("OnSdpReceived - No SDP", 0, 0, 0);
+        IMS_TRACE_D("OnSdpReceived - No SDP received.", 0, 0, 0);
         return FAIL_REASON_NONE;
+    }
+
+    if (IsNeedToIgnore(piSession, piMessage) == IMS_TRUE)
+    {
+        return FAIL_REASON_NONE;
+    }
+
+    if (IsInvalidOfferAnswer(piSession, piMessage) == IMS_TRUE)
+    {
+        return FAIL_REASON_MEDIA_NEGOFAIL;
     }
 
     if (m_objContext.GetMediaManager().NegotiateSdp(piSession) != NegotiationResult::NO_ERROR)
@@ -544,9 +548,15 @@ ResultSetSdp MtcCallState::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
     }
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    // TODO: need to check sending offer not in STATE_NEGOTIATED?
+    NegotiationState eState = objMediaManager.GetNegotiationState(piSession);
+
+    if (eState == NegotiationState::STATE_OFFER_SENT)
+    {
+        return ResultSetSdp::NO_SDP;
+    }
+
     if (!bAllowReOffer &&
-            objMediaManager.GetNegotiationState(piSession) == NegotiationState::STATE_NEGOTIATED)
+            eState == NegotiationState::STATE_NEGOTIATED)
     {
         IMS_TRACE_D("SetSdpToSend - nothing to update", 0, 0, 0);
         return ResultSetSdp::NO_SDP;
@@ -767,6 +777,102 @@ IMS_BOOL MtcCallState::IsRprSupported() const
 {
     return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
             MtcExtensionSet::OPTION_TAG_RPR);
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const
+{
+    if (IsPreviewOfAnswer(piSession, piMessage))
+    {
+        return IMS_TRUE;
+    }
+
+    NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
+    if (eState != NegotiationState::STATE_NEGOTIATED)
+    {
+        return IMS_FALSE;
+    }
+
+    if (piMessage->GetMethod().Equals(SIPMethod::INVITE))
+    {
+        if (piMessage->GetMessage()->GetType() == ISIPMessage::TYPE_RESPONSE)
+        {
+            IMS_SINT32 nConfig = piSession->GetConfiguration();
+            if ((nConfig & ISession::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE) !=
+                    ISession::CONFIG_NONE)
+            {
+                IMS_TRACE_I("IsOfferToIgnore - Ignore a subsequent OFFER in a response", 0, 0, 0);
+                return IMS_TRUE;
+            }
+
+            IMS_TRACE_I("IsOfferToIgnore - Handle a subsequent OFFER in a response", 0, 0, 0);
+            return IMS_FALSE;
+        }
+    }
+
+    if (piMessage->GetMethod().Equals(SIPMethod::ACK))
+    {
+        // TODO: isn't this invalid so need to terminate the call drop?
+        IMS_TRACE_I("IsOfferToIgnore - Offer is included in ACK", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsInvalidOfferAnswer(IN ISession* piSession,
+        IN const IMessage* piMessage) const
+{
+    // TODO: check if no SDP in OFFER_SENT state.
+
+    NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
+    if (eState == NegotiationState::STATE_OFFER_RECEIVED)
+    {
+        IMS_TRACE_E(0, "offer is received in STATE_OFFER_RECEIVED state", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    if (eState == NegotiationState::STATE_NEGOTIATED)
+    {
+        if (piMessage->GetMethod().Equals(SIPMethod::INVITE) == IMS_FALSE)
+        {
+            if (piMessage->GetMessage()->GetType() == ISIPMessage::TYPE_RESPONSE)
+            {
+                IMS_TRACE_E(0, "invalid Offer is received.", 0, 0, 0);
+                return IMS_TRUE;
+            }
+        }
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const
+{
+    if (piSession->IsSDPNegotiationAllowedForNonRPR())
+    {
+        return IMS_FALSE;
+    }
+
+    if (piMessage->GetMethod().Equals(SIPMethod::INVITE) == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    if (SIPStatusCode::IsProvisional(piMessage->GetStatusCode()) == IMS_FALSE)
+    {
+        return IMS_FALSE;
+    }
+
+    if (piMessage->GetMessage()->IsMessageRPR())
+    {
+        return IMS_FALSE;
+    }
+
+    IMS_TRACE_I("IsPreviewOfAnswer it's a preview. wait the real Answer", 0, 0, 0);
+    return IMS_TRUE;
 }
 
 PROTECTED
