@@ -173,6 +173,9 @@ protected:
             IN IMS_UINT32 eMethod);
 
     IMS_BOOL IsRprSupported() const;
+    IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
+    IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
+    IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsCallWaiting() const;
 
     IMtcCallContext& m_objContext;
