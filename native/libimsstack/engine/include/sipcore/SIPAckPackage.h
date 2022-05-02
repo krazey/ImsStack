@@ -15,7 +15,7 @@
 
 #include "IMSList.h"
 #include "SIPStackHeaders.h"
-#include "ISIPAckPackage.h"
+#include "ISipAckPackage.h"
 
 class SIPClientTransactionState;
 class SIPAck;

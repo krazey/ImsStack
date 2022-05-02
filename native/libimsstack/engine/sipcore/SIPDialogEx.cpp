@@ -13,7 +13,7 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPDialogInviteUsage.h"
 #include "SIPDialogSubscribeUsage.h"
 #include "SIPDialogEx.h"

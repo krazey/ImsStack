@@ -13,7 +13,7 @@
 #ifndef _PUB_STATE_H_
 #define _PUB_STATE_H_
 
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 #include "util/EventPackage.h"
 #include "SIPHeaderProperty.h"
 

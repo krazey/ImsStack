@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 #include "SIPHeader.h"
 #include "SIPUnknownHeaders.h"
 

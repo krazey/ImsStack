@@ -3,7 +3,7 @@
 #include "IMessage.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "call/termination/UpdateErrorHandler.h"
 
 __IMS_TRACE_TAG_COM_MTC__;

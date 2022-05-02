@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
-#include "SIPDebug.h"
-#include "SIPFactory.h"
+#include "SipDebug.h"
+#include "SipFactory.h"
 #include "RegFlow.h"
 
 __IMS_TRACE_TAG_REG__;

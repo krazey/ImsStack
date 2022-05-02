@@ -5,7 +5,7 @@
 #include "IMSCore.h"
 #include "IPageMessage.h"
 #include "IServiceFilterCriteria.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "IIpcan.h"

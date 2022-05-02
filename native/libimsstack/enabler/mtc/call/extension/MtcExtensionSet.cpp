@@ -1,5 +1,5 @@
 #include "IMSList.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "ServiceTrace.h"
 #include "call/extension/IMtcExtension.h"
 #include "call/extension/MtcExtension.h"

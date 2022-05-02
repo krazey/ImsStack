@@ -13,7 +13,7 @@
 #ifndef _SIP_CONNECTION_NOTIFIER_IMPL_H_
 #define _SIP_CONNECTION_NOTIFIER_IMPL_H_
 
-#include "ISIPConnectionNotifier.h"
+#include "ISipConnectionNotifier.h"
 #include "IOnSIPServerConnectionListener.h"
 #include "IOnSIPConnectionNotifierErrorListener.h"
 

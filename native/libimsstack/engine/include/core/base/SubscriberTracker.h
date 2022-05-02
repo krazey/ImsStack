@@ -15,7 +15,7 @@
 
 #include "IMSList.h"
 #include "IMSMap.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "ISubscriberInfoListener.h"
 
 class IMutex;

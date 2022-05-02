@@ -19,7 +19,7 @@
 #include "Configuration.h"
 #include "IConfigurable.h"
 #include "ISubscriberConfig.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "ImsIdentity.h"
 #include "IRegistration.h"
 #include "RegistrationManager.h"

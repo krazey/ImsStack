@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "ISIPErrorListener.h"
+#include "ISipErrorListener.h"
 #include "SIPDialogImpl.h"
 #include "SIPServerConnection.h"
 #include "SIPServerConnectionImpl.h"

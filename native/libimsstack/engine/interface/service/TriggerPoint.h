@@ -2,7 +2,7 @@
 #define _TRIGGER_POINT_H_
 
 #include "AStringArray.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 
 class ISIPMessage;
 class ISIPHeader;

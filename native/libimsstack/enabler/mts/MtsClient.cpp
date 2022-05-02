@@ -1,7 +1,7 @@
 #include "ImsMessage.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "SystemConfig.h"
 
 #include "IMtsClient.h"

@@ -1,5 +1,5 @@
 #include "IMessage.h"
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 #include "IMSList.h"
 #include "call/extension/MtcExtension.h"
 #include <gmock/gmock.h>

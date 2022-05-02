@@ -16,8 +16,8 @@
 #include "IPAddress.h"
 #include "RCObject.h"
 #include "SIPDialogEx.h"
-#include "SIPTimerValues.h"
-#include "SIPProfile.h"
+#include "SipTimerValues.h"
+#include "SipProfile.h"
 
 class INetworkConnection;
 class ISIPTransactionStateListener;

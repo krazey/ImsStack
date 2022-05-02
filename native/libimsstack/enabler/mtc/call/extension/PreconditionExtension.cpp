@@ -1,5 +1,5 @@
 #include "IMessage.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "ServiceTrace.h"
 #include "call/extension/MtcExtensionSet.h"
 #include "call/extension/PreconditionExtension.h"

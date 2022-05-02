@@ -1,7 +1,7 @@
 #ifndef _INTERFACE_MESSAGE_H_
 #define _INTERFACE_MESSAGE_H_
 
-#include "SIPMethod.h"
+#include "SipMethod.h"
 
 class ISIPMessage;
 class IMessageBodyPart;

@@ -14,7 +14,7 @@
 #define _SIP_CONNECTION_NOTIFIER_MANAGER_H_
 
 #include "IPAddress.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 class ISIPConnectionNotifier;
 class SIPConnectionNotifierManagerPrivate;

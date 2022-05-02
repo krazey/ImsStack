@@ -8,13 +8,13 @@
 #include "ServiceTrace.h"
 #include "AStringBuffer.h"
 
-#include "SIPHeaderName.h"
-#include "SIPStatusCode.h"
+#include "SipHeaderName.h"
+#include "SipStatusCode.h"
 
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "ISIPClientConnection.h"
-#include "ISIPServerConnection.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "ISipClientConnection.h"
+#include "ISipServerConnection.h"
 
 #include "ussi/USSIConfirmedSession.h"
 #include "ussi/UssiConstants.h"

@@ -12,9 +12,9 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "SIPStatusCode.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "SipStatusCode.h"
 #include "base/IMS.h"
 #include "base/IRefreshListener.h"
 #include "Service.h"

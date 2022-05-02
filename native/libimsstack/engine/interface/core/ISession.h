@@ -2,7 +2,7 @@
 #define _INTERFACE_SESSION_H_
 
 #include "IServiceMethod.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 
 class ISIPHeader;
 class ISIPClientConnection;

@@ -11,7 +11,7 @@
 */
 
 #include "ServiceMemory.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "util/EventPackage.h"
 
 

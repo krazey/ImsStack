@@ -13,7 +13,7 @@
 #ifndef _SIP_PRIVATE_H_
 #define _SIP_PRIVATE_H_
 
-#include "SIP.h"
+#include "Sip.h"
 #include "ServiceTrace.h"
 
 

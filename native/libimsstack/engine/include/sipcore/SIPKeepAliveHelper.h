@@ -14,7 +14,7 @@
 #define _SIP_KEEP_ALIVE_HELPER_H_
 
 #include "ImsSlot.h"
-#include "ISIPKeepAliveHelper.h"
+#include "ISipKeepAliveHelper.h"
 #include "ISIPKeepAliveListener.h"
 #include "SIPSocketAddress.h"
 

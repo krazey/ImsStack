@@ -28,7 +28,7 @@
 #ifndef _SIP_DIALOG_IMPL_H_
 #define _SIP_DIALOG_IMPL_H_
 
-#include "ISIPDialog.h"
+#include "ISipDialog.h"
 
 class SIPDialog;
 

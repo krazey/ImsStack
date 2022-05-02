@@ -8,7 +8,7 @@
 #include "ServiceTrace.h"
 
 #include "IMessage.h"
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 
 #include "ussi/UssiConstants.h"
 #include "ussi/USSISession.h"

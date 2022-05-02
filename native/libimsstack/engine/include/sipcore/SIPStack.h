@@ -17,9 +17,9 @@
 #define SIP_STACK_H_
 
 #include "ByteArray.h"
-#include "SIPMethod.h"
-#include "SIPParameter.h"
-#include "SIPStatusCode.h"
+#include "SipMethod.h"
+#include "SipParameter.h"
+#include "SipStatusCode.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxnKey.h"
 #include "sip_error.h"

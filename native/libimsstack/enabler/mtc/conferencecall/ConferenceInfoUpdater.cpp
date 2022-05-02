@@ -1,6 +1,6 @@
 #include "ServiceTrace.h"
-#include "SIPAddress.h"
-#include "SIPParameter.h"
+#include "SipAddress.h"
+#include "SipParameter.h"
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "conferencecall/ConferenceInfoUpdater.h"
 #include "conferencecall/ConferenceConst.h"

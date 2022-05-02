@@ -2,7 +2,7 @@
 #define _INTERFACE_REG_CONTACT_H_
 
 #include "IPAddress.h"
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 class IRegContactListener;
 

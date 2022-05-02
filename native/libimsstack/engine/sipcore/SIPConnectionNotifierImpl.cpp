@@ -13,8 +13,8 @@
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
 #include "SIPConnectionNotifier.h"
-#include "ISIPServerConnectionListener.h"
-#include "ISIPConnectionNotifierErrorListener.h"
+#include "ISipServerConnectionListener.h"
+#include "ISipConnectionNotifierErrorListener.h"
 #include "SIPConnectionNotifierImpl.h"
 
 __IMS_TRACE_TAG_SIP__;

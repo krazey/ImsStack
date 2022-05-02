@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 #include "RegRefreshHelper.h"
 
 __IMS_TRACE_TAG_REG__;

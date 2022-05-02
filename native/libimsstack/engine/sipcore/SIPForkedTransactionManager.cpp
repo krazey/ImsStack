@@ -11,10 +11,10 @@
 */
 
 #include "ServiceTrace.h"
-#include "ISIPHeader.h"
-#include "SIP.h"
-#include "SIPStatusCode.h"
-#include "SIPDebug.h"
+#include "ISipHeader.h"
+#include "Sip.h"
+#include "SipStatusCode.h"
+#include "SipDebug.h"
 #include "SIPClientTransactionState.h"
 #include "SIPForkedTransactionManager.h"
 

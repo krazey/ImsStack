@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ISIPClientTransmissionListener.h"
-#include "SIPConfigProxy.h"
+#include "SipConfigProxy.h"
 #include "SIPFactoryProxy.h"
 #include "SIPTransportHelper.h"
 #include "SIPTransport.h"

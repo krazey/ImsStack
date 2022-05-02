@@ -16,10 +16,10 @@
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 
-#include "ISIPHeader.h"
-#include "ISIPKeepAliveHelper.h"
+#include "ISipHeader.h"
+#include "ISipKeepAliveHelper.h"
 
-#include "SIPFactory.h"
+#include "SipFactory.h"
 
 #include "provider/AosUtil.h"
 #include "provider/AosKeepAlive.h"

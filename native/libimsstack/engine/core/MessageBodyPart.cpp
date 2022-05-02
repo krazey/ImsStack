@@ -12,7 +12,7 @@
 */
 
 #include "ServiceMemory.h"
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 #include "base/IMS.h"
 #include "IMessage.h"
 #include "MessageBodyPart.h"

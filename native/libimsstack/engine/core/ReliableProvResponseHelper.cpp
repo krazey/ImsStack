@@ -12,8 +12,8 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
 #include "ReliableProvResponseHelper.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;

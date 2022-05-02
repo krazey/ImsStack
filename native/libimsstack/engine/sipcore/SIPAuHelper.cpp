@@ -14,8 +14,8 @@
 #include "ServiceSystemTime.h"
 #include "IMSDigest.h"
 #include "SIPPrivate.h"
-#include "ISIPHeader.h"
-#include "SIPDebug.h"
+#include "ISipHeader.h"
+#include "SipDebug.h"
 #include "SIPAuHelper.h"
 
 __IMS_TRACE_TAG_SIP__;

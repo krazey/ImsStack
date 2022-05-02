@@ -14,7 +14,7 @@
 #include "IMSLib.h"
 #include "IMSStrLib.h"
 #include "SIPPrivate.h"
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 #include "SIPMessageFraming.h"
 
 __IMS_TRACE_TAG_SIP__;

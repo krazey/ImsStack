@@ -20,8 +20,8 @@
 
 #include "ServiceMemory.h"
 #include "SIPPrivate.h"
-#include "ISIPHeader.h"
-#include "SIPFeatures.h"
+#include "ISipHeader.h"
+#include "SipFeatures.h"
 #include "SIPDialogUsage.h"
 
 __IMS_TRACE_TAG_SIP__;

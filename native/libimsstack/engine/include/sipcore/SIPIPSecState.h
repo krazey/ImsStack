@@ -17,7 +17,7 @@
 #include "SIPStackHeaders.h"
 #include "SIPTxnKey.h"
 #include "SIPTransportAddress.h"
-#include "ISIPIPSecState.h"
+#include "ISipIpSecState.h"
 
 
 

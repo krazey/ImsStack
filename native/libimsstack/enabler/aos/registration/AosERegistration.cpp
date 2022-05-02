@@ -16,7 +16,7 @@
 #include "ServiceTrace.h"
 
 #include "CarrierConfig.h"
-#include "SIPStatusCode.h"
+#include "SipStatusCode.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"

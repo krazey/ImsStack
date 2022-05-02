@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "RegContact.h"
-#include "SIPConfigProxy.h"
+#include "SipConfigProxy.h"
 #include "RegStateTracker.h"
 
 __IMS_TRACE_TAG_REG__;

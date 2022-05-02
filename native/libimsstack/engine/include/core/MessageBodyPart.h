@@ -14,7 +14,7 @@
 #ifndef _MESSAGE_BODY_PART_H_
 #define _MESSAGE_BODY_PART_H_
 
-#include "ISIPMessageBodyPart.h"
+#include "ISipMessageBodyPart.h"
 #include "IMessageBodyPart.h"
 
 class IMessage;

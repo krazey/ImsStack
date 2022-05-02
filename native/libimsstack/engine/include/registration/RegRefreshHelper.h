@@ -13,7 +13,7 @@
 #ifndef _REGISTRATION_REFRESH_HELPER_H_
 #define _REGISTRATION_REFRESH_HELPER_H_
 
-#include "SIPAddress.h"
+#include "SipAddress.h"
 #include "util/RefreshHelper.h"
 
 class ISIPConnection;

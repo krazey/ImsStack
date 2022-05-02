@@ -13,7 +13,7 @@
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
 #include "ServiceThread.h"
-#include "SIPConfigProxy.h"
+#include "SipConfigProxy.h"
 #include "RegKey.h"
 #include "FakeRegistration.h"
 #include "Registration.h"

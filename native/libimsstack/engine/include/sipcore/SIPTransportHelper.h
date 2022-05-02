@@ -16,7 +16,7 @@
 // TCP active connection MUST be created at the start time of raw SIP message transmission.
 #include "IMSMap.h"
 #include "EngineActivity.h"
-#include "ISIPTransportHelper.h"
+#include "ISipTransportHelper.h"
 #include "ISIPDatagramSocketListener.h"
 #include "ISIPStreamSocketListener.h"
 #include "SIPTransportAddress.h"

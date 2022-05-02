@@ -13,7 +13,7 @@
 #ifndef _SIP_MESSAGE_BODY_PART_H_
 #define _SIP_MESSAGE_BODY_PART_H_
 
-#include "ISIPMessageBodyPart.h"
+#include "ISipMessageBodyPart.h"
 #include "SIPStackHeaders.h"
 #include "SIPUnknownHeaders.h"
 

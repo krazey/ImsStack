@@ -12,12 +12,12 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPFactoryProxy.h"
 #include "SIPRTConfigUtils.h"
 #include "SIPTransportHelper.h"
 #include "SIPSocket.h"
-#include "ISIPKeepAliveHelperListener.h"
+#include "ISipKeepAliveHelperListener.h"
 #include "SIPKeepAliveHelper.h"
 
 __IMS_TRACE_TAG_SIP__;

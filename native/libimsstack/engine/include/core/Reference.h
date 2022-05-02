@@ -14,7 +14,7 @@
 #ifndef _REFERENCE_H_
 #define _REFERENCE_H_
 
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "ServiceMethod.h"
 #include "util/IDialogMethod.h"
 #include "ISubscriptionState.h"

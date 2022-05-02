@@ -11,10 +11,10 @@
 */
 
 #include "ServiceMemory.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
-#include "SIPAddress.h"
+#include "SipDebug.h"
+#include "SipAddress.h"
 #include "SIPServerTransport.h"
 
 __IMS_TRACE_TAG_SIP__;

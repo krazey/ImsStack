@@ -14,7 +14,7 @@
 #include "ServiceNetwork.h"
 #include "ByteArray.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPRTConfigUtils.h"
 #include "ISIPStreamSocketListener.h"
 #include "SIPStreamSocket.h"

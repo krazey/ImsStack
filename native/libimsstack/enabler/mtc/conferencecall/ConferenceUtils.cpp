@@ -1,7 +1,7 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#include "SIPAddress.h"
+#include "SipAddress.h"
 
 #include "call/IMtcCallManager.h"
 

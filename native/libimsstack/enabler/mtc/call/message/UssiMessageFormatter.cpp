@@ -1,8 +1,8 @@
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "call/message/UssiMessageFormatter.h"
 #include "ussi/UssiConstants.h"
 #include "utility/MessageUtil.h"
-#include "SIPHeaderName.h"
+#include "SipHeaderName.h"
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */

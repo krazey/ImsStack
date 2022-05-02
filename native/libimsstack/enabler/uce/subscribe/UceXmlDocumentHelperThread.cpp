@@ -14,9 +14,9 @@
 #include "ServiceThread.h"
 #include "ServiceMessage.h"
 
-#include "SIPParameter.h"
-#include "SIPParsingHelper.h"
-#include "ISIPHeader.h"
+#include "SipParameter.h"
+#include "SipParsingHelper.h"
+#include "ISipHeader.h"
 
 #include "INodeList.h"
 #include "IXmlTransaction.h"

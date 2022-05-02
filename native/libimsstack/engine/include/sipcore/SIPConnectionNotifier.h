@@ -16,7 +16,7 @@
 #include "Connection.h"
 #include "ISIPServerTransactionStateListener.h"
 #include "ISIPSocketListener.h"
-#include "SIPProfile.h"
+#include "SipProfile.h"
 #include "SIPTransportAddress.h"
 
 class SIPTransportHelper;

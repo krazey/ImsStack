@@ -12,7 +12,7 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "base/IMS.h"
 #include "ISessionState.h"
 #include "offeranswer/SdpSessionParameter.h"

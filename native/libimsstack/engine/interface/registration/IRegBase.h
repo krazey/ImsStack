@@ -1,7 +1,7 @@
 #ifndef _INTERFACE_REG_BASE_H_
 #define _INTERFACE_REG_BASE_H_
 
-#include "ISIPMessage.h"
+#include "ISipMessage.h"
 
 class IMessageMediator;
 

@@ -16,7 +16,7 @@
 #include "SIPKeepAliveHelper.h"
 #include "SIPMessageTracker.h"
 #include "SIPPacketTracker.h"
-#include "SIPRoutingRejectNotifier.h"
+#include "SipRoutingRejectNotifier.h"
 #include "SIPRTConfigHelper.h"
 #include "SIPTransportHelper.h"
 #include "SIPFactoryProxy.h"

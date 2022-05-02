@@ -13,11 +13,11 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "SIPHeaderName.h"
-#include "ISIPMessage.h"
-#include "ISIPHeader.h"
-#include "SIPParameter.h"
-#include "SIPParsingHelper.h"
+#include "SipHeaderName.h"
+#include "ISipMessage.h"
+#include "ISipHeader.h"
+#include "SipParameter.h"
+#include "SipParsingHelper.h"
 #include "TriggerPoint.h"
 
 __IMS_TRACE_TAG_IMS__;

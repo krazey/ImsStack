@@ -13,7 +13,7 @@
 #ifndef _SIP_SERVER_CONNECTION_IMPL_H_
 #define _SIP_SERVER_CONNECTION_IMPL_H_
 
-#include "ISIPServerConnection.h"
+#include "ISipServerConnection.h"
 #include "IOnSIPErrorListener.h"
 
 class SIPDialogImpl;

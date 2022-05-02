@@ -18,7 +18,7 @@
 #include "ISIPTransportErrorListener.h"
 #include "SIPMessage.h"
 #include "SIPDialog.h"
-#include "SIPTimerValues.h"
+#include "SipTimerValues.h"
 
 class SIPProfile;
 class IOnSIPErrorListener;

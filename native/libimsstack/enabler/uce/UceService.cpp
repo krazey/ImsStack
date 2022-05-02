@@ -10,7 +10,7 @@
 #include "ImsServiceConfig.h"
 
 #include "IFeatureCaps.h"
-#include "SIPMethod.h"
+#include "SipMethod.h"
 #include "IUce.h"
 #include "UceService.h"
 #include "options/UceOptionsManager.h"

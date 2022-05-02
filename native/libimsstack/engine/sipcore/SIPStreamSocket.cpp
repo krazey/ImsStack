@@ -19,7 +19,7 @@
 #include "ISIPSocketListener.h"
 #include "ISIPStreamSocketListener.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
+#include "SipDebug.h"
 #include "SIPRTConfigUtils.h"
 #include "SIPMessageBuffer.h"
 #include "SIPStreamSocket.h"

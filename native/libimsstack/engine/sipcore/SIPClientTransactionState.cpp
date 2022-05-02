@@ -11,12 +11,12 @@
 */
 
 #include "ServiceMemory.h"
-#include "ISIPHeader.h"
+#include "ISipHeader.h"
 #include "SIPPrivate.h"
-#include "SIPDebug.h"
-#include "SIPHeaderName.h"
-#include "SIPFeatures.h"
-#include "SIPConfigProxy.h"
+#include "SipDebug.h"
+#include "SipHeaderName.h"
+#include "SipFeatures.h"
+#include "SipConfigProxy.h"
 #include "SIPStackHeaders.h"
 #include "SIPStackState.h"
 #include "SIPTxnContextData.h"

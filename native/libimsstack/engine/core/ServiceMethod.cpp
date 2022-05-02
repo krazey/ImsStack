@@ -10,15 +10,15 @@
 */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "ISIPHeader.h"
-#include "ISIPMessage.h"
-#include "ISIPDialog.h"
-#include "ISIPServerConnection.h"
-#include "SIPStatusCode.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "ISipDialog.h"
+#include "ISipServerConnection.h"
+#include "SipStatusCode.h"
 
-#include "SIPConfigProxy.h"
-#include "SIPParsingHelper.h"
-#include "SIPParameter.h"
+#include "SipConfigProxy.h"
+#include "SipParsingHelper.h"
+#include "SipParameter.h"
 
 #include "base/IMS.h"
 #include "Service.h"
