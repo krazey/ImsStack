@@ -43,7 +43,6 @@ SIPClientConnection::SIPClientConnection()
     , strTargetURI(AString::ConstNull())
     , pCTState(IMS_NULL)
     , pAuHelper(IMS_NULL)
-    , piRefresher(IMS_NULL)
     , piListener(IMS_NULL)
     , pTransmissionProxy(IMS_NULL)
 {
@@ -67,7 +66,6 @@ SIPClientConnection::SIPClientConnection(IN CONST AString &strTargetURI_)
     , strTargetURI(strTargetURI_)
     , pCTState(IMS_NULL)
     , pAuHelper(IMS_NULL)
-    , piRefresher(IMS_NULL)
     , piListener(IMS_NULL)
 {
     pCTState = new SIPClientTransactionState(GetSlotId());
@@ -90,7 +88,6 @@ SIPClientConnection::SIPClientConnection(IN SIPClientTransactionState *pCTState_
     , strTargetURI(AString::ConstNull())
     , pCTState(pCTState_)
     , pAuHelper(IMS_NULL)
-    , piRefresher(IMS_NULL)
     , piListener(IMS_NULL)
 {
     pCTState->SetListener(this);
@@ -557,29 +554,6 @@ void SIPClientConnection::SetSIPProfile(IN SIPProfile *pProfile)
     {
         pCTState->SetSIPProfile(pProfile);
     }
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_RESULT SIPClientConnection::EnableRefresh(IN ISIPRefresher *piRefresher)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
-    {
-        SIPPrivate::SetLastError(SIPError::INVALID_STATE);
-        return IMS_FAILURE;
-    }
-
-    this->piRefresher = piRefresher;
-
-    SIPPrivate::SetLastError(SIPError::NO_ERROR);
-
-    return IMS_SUCCESS;
 }
 
 /*

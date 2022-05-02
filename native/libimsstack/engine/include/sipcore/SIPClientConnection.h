@@ -21,7 +21,6 @@
 #include "SIPClientTransactionState.h"
 
 class IOnSIPClientConnectionListener;
-class ISIPRefresher;
 class ISIPGenericChallenge;
 class ISIPAckPackage;
 class SIPConnectionNotifier;
@@ -67,7 +66,6 @@ public:
     virtual void SetSIPProfile(IN SIPProfile *pProfile);
 
     // ISIPClientConnection interface
-    IMS_RESULT EnableRefresh(IN ISIPRefresher *piRefresher);
     IMS_RESULT InitAck();
     SIPClientConnection* InitCancel();
     IMS_RESULT InitRequest(IN CONST AString &strMethod, IN SIPConnectionNotifier *pSCN);
@@ -141,7 +139,6 @@ private:
     IMSList<SIPMessage*> objResponseMessages;
     SIPAuHelper *pAuHelper;
 
-    ISIPRefresher *piRefresher;
     IOnSIPClientConnectionListener *piListener;
 
     // UDP_FALLBACK

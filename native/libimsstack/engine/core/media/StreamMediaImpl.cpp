@@ -13,7 +13,6 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "base/IMS.h"
-#include "media/IMediaListener.h"
 #include "media/MediaDescriptor.h"
 #include "media/StreamMediaProposalImpl.h"
 #include "media/StreamMediaImpl.h"
@@ -24,8 +23,7 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 StreamMediaImpl::StreamMediaImpl(IN StreamMedia *pStreamMedia_)
-    : piMediaListener(IMS_NULL)
-    , pStreamMediaProposal(IMS_NULL)
+    : pStreamMediaProposal(IMS_NULL)
     , pStreamMedia(pStreamMedia_)
 {
     pStreamMedia->SetMediaListener(this);
@@ -73,30 +71,6 @@ Media* StreamMediaImpl::GetMedia() const
 }
 
 // IMedia interface
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaImpl::CanRead() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->CanRead();
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaImpl::CanWrite() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->CanWrite();
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaImpl::Exists() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->Exists();
-}
-
 PRIVATE VIRTUAL
 IMS_SINT32 StreamMediaImpl::GetDirection() const
 {
@@ -180,14 +154,6 @@ IMS_RESULT StreamMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
 }
 
 PRIVATE VIRTUAL
-void StreamMediaImpl::SetMediaListener(IN IMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piMediaListener = piListener;
-}
-
-PRIVATE VIRTUAL
 IMediaDescriptor* StreamMediaImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
@@ -262,73 +228,4 @@ void StreamMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media *pMedia)
         delete pStreamMediaProposal;
         pStreamMediaProposal = IMS_NULL;
     }
-}
-
-PRIVATE VIRTUAL
-void StreamMediaImpl::OnMedia_ModeChanged(IN Media *pMedia)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pStreamMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piMediaListener->Media_ModeChanged(this);
-}
-
-// IStreamMedia interface
-PRIVATE VIRTUAL
-void* StreamMediaImpl::GetReceivingPlayer() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetReceivingPlayer();
-}
-
-PRIVATE VIRTUAL
-void* StreamMediaImpl::GetSendingPlayer() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetSendingPlayer();
-}
-
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaImpl::GetStreamType() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->GetStreamType();
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaImpl::SetPreferredQuality(IN IMS_SINT32 nQuality)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->SetPreferredQuality(nQuality);
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaImpl::SetSource(IN CONST AString &strSource)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->SetSource(strSource);
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaImpl::SetStreamType(IN IMS_SINT32 nType)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pStreamMedia->SetStreamType(nType);
 }

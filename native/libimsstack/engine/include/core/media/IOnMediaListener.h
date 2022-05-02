@@ -70,25 +70,6 @@ public:
 
     */
     virtual void OnMedia_FictitiousMediaDestroyed(IN Media *pMedia) = 0;
-
-    /*
-     The method is called when some media mode property has changed.
-
-    Parameters
-    <table>
-    parameter               description
-    ----------              ----------
-    pMedia                  Concerned Media object
-    </table>
-
-    Returns
-    <table>
-    return                  description
-    ----------              ----------
-    </table>
-
-    */
-    virtual void OnMedia_ModeChanged(IN Media *pMedia) = 0;
 };
 
 #endif // _INTERFACE_ON_MEDIA_LISTENER_H_

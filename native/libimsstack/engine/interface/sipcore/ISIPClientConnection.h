@@ -4,7 +4,6 @@
 #include "IPAddress.h"
 #include "ISIPConnection.h"
 
-class ISIPRefresher;
 class ISIPConnectionNotifier;
 class ISIPClientConnectionListener;
 class ISIPGenericChallenge;
@@ -22,25 +21,6 @@ class ISIPClientConnection
     : public ISIPConnection
 {
 public:
-    /**
-     * @brief Enables the refresh for the request to be sent.
-     *
-     * The method return a refresh ID, which can be used to update or stop the refresh.
-     *
-     * Passing NULL as listener does not clear a previously set listener and does not stop
-     * a refresh.\n Refreshing should be stopped by calling Stop() method.\n
-     * Calling EnableRefresh() for the second time with a non-NULL value does not overwrite
-     * the previously set listener. In this case, the previsously set listener remains valid,
-     * and the method throws an exception, SIPError::INVALID_STATE.
-     *
-     * @param pRefresher Callback interface for refresh events\n
-     *                   If this is null, the method returns 0 and refresh is not enabled
-     * @return Refresh identifier.\n
-     *         It succeeds, returns non-zero value. Otherwise, returns zero.
-     * @deprecated NOT_USED
-     */
-    virtual IMS_RESULT EnableRefresh(IN ISIPRefresher *piRefresher) = 0;
-
     /**
      * @brief Convenience method to initialize ISIPClientConnection with SIP request method, ACK.
      *

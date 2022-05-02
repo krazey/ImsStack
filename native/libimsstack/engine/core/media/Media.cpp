@@ -70,53 +70,6 @@ Media::~Media()
     IMS_TRACE_D("Destructor :: Media", 0, 0, 0);
 }
 
-// IMedia interface
-PUBLIC VIRTUAL
-IMS_BOOL Media::CanRead() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (Exists()
-            && ((nDirection == DIRECTION_RECEIVE)
-                || (nDirection == DIRECTION_SEND_RECEIVE)))
-    {
-        return IMS_TRUE;
-    }
-
-    // Check points : the flow contains, or is capable to contain, data available for read.
-
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL
-IMS_BOOL Media::CanWrite() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (Exists()
-            && ((nDirection == DIRECTION_SEND)
-                || (nDirection == DIRECTION_SEND_RECEIVE))
-                && (nState == STATE_ACTIVE))
-    {
-        return IMS_TRUE;
-    }
-
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL
-IMS_BOOL Media::Exists() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Subclass MUST implement this method.
-
-    // It becomes "TRUE" when the data flow is set up according to the procedures
-    // of the media type transport protocol, "FALSE" when the media flow is torn down.
-
-    return IMS_FALSE;
-}
-
 PUBLIC
 IMS_SINT32 Media::GetDirection() const
 {
@@ -846,6 +799,44 @@ SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
     }
 
     return IMS_NULL;
+}
+
+PROTECTED VIRTUAL
+IMS_BOOL Media::PreviewInitInstance()
+{
+    // no-op
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
+IMS_BOOL Media::PostInitInstance()
+{
+    // no-op
+    return IMS_TRUE;
+}
+
+PROTECTED VIRTUAL
+void Media::PreviewCleanupMedia()
+{
+    // no-op
+}
+
+PROTECTED VIRTUAL
+void Media::PostCleanupMedia()
+{
+    // no-op
+}
+
+PROTECTED VIRTUAL
+void Media::PreviewRemoveMedia()
+{
+    // no-op
+}
+
+PROTECTED VIRTUAL
+void Media::PostRemoveMedia()
+{
+    // no-op
 }
 
 PROTECTED

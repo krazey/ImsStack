@@ -391,19 +391,6 @@ Remarks
 
 */
 PRIVATE VIRTUAL
-IMS_RESULT SIPClientConnectionImpl::EnableRefresh(IN ISIPRefresher *piRefresher)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->EnableRefresh(piRefresher);
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL
 IMS_RESULT SIPClientConnectionImpl::InitAck()
 {
     //---------------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ class StreamMediaProposal
     : public MediaProposal
 {
 public:
-    StreamMediaProposal(IN ISDPOAState *piOAState_, IN IMS_SINT32 nStreamType_);
+    StreamMediaProposal(IN ISDPOAState *piOAState_);
     virtual ~StreamMediaProposal();
 
 private:
@@ -31,12 +31,6 @@ private:
 public:
     // MediaProposal class
     virtual IMS_SINT32 GetType() const;
-
-    // IStreamMedia interface
-    IMS_SINT32 GetStreamType() const;
-
-private:
-    IMS_SINT32 nStreamType;
 };
 
 #endif // _STREAM_MEDIA_PROPOSAL_H_

@@ -66,7 +66,6 @@ private:
     virtual void SetTransactionTimerValues(IN CONST SIPTimerValues &objTV);
 
     // ISIPClientConnection interface implementation
-    virtual IMS_RESULT EnableRefresh(IN ISIPRefresher *piRefresher);
     virtual IMS_RESULT InitAck();
     virtual ISIPClientConnection* InitCancel();
     virtual IMS_RESULT InitRequest(IN CONST AString &strMethod, IN ISIPConnectionNotifier *piSCN);

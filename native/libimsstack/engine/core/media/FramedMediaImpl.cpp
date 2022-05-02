@@ -12,8 +12,6 @@
 
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "media/IMediaListener.h"
-#include "media/IFramedMediaListener.h"
 #include "media/MediaDescriptor.h"
 #include "media/FramedMediaProposalImpl.h"
 #include "media/FramedMediaImpl.h"
@@ -24,13 +22,10 @@ __IMS_TRACE_TAG_IMS_CORE__;
 
 PUBLIC
 FramedMediaImpl::FramedMediaImpl(IN FramedMedia *pFramedMedia_)
-    : piMediaListener(IMS_NULL)
-    , piFramedMediaListener(IMS_NULL)
-    , pFramedMediaProposal(IMS_NULL)
+    : pFramedMediaProposal(IMS_NULL)
     , pFramedMedia(pFramedMedia_)
 {
     pFramedMedia->SetMediaListener(this);
-    pFramedMedia->SetListener(this);
 }
 
 PUBLIC VIRTUAL
@@ -72,30 +67,6 @@ Media* FramedMediaImpl::GetMedia() const
     //---------------------------------------------------------------------------------------------
 
     return pFramedMedia;
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL FramedMediaImpl::CanRead() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->CanRead();
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL FramedMediaImpl::CanWrite() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->CanWrite();
-}
-
-PRIVATE VIRTUAL
-IMS_BOOL FramedMediaImpl::Exists() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->Exists();
 }
 
 PRIVATE VIRTUAL
@@ -180,14 +151,6 @@ IMS_RESULT FramedMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
 }
 
 PRIVATE VIRTUAL
-void FramedMediaImpl::SetMediaListener(IN IMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piMediaListener = piListener;
-}
-
-PRIVATE VIRTUAL
 IMediaDescriptor* FramedMediaImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
@@ -263,236 +226,4 @@ void FramedMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media *pMedia)
         delete pFramedMediaProposal;
         pFramedMediaProposal = IMS_NULL;
     }
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnMedia_ModeChanged(IN Media *pMedia)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piMediaListener->Media_ModeChanged(this);
-}
-
-// IFramedMedia interface
-PRIVATE VIRTUAL
-void FramedMediaImpl::Cancel(IN CONST AString &strMessageId)
-{
-    //---------------------------------------------------------------------------------------------
-
-    pFramedMedia->Cancel(strMessageId);
-}
-
-PRIVATE VIRTUAL
-const AStringArray& FramedMediaImpl::GetAcceptedContentTypes() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetAcceptedContentTypes();
-}
-
-PRIVATE VIRTUAL
-const AString& FramedMediaImpl::GetContentType(IN CONST AString &strMessageId) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetContentType(strMessageId);
-}
-
-PRIVATE VIRTUAL
-AString FramedMediaImpl::GetHeader(IN CONST AString &strMessageId, IN CONST AString &strName) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->GetHeader(strMessageId, strName);
-}
-
-PRIVATE VIRTUAL
-const ByteArray& FramedMediaImpl::ReceiveBytes(IN CONST AString &strMessageId) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->ReceiveBytes(strMessageId);
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT FramedMediaImpl::ReceiveFile(IN CONST AString &strMessageId, IN CONST AString &strLocator)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->ReceiveFile(strMessageId, strLocator);
-}
-
-PRIVATE VIRTUAL
-AString FramedMediaImpl::SendBytes(IN CONST ByteArray &objContent, IN CONST AString &strContentType,
-        IN CONST IMSMap<AString, AStringArray> &objHeaders)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->SendBytes(objContent, strContentType, objHeaders);
-}
-
-PRIVATE VIRTUAL
-AString FramedMediaImpl::SendFile(IN CONST AString &strLocator, IN CONST AString &strContentType,
-        IN CONST IMSMap<AString, AStringArray> &objHeaders)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->SendFile(strLocator, strContentType, objHeaders);
-}
-
-PRIVATE VIRTUAL
-IMS_RESULT FramedMediaImpl::SetAcceptedContentTypes(IN CONST AStringArray &objAcceptedContentTypes)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pFramedMedia->SetAcceptedContentTypes(objAcceptedContentTypes);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::SetListener(IN IFramedMediaListener *piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piFramedMediaListener = piListener;
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_ConnectionError(IN FramedMedia *pMedia)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_ConnectionError(this);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_ContentReceived(IN FramedMedia *pMedia,
-        IN CONST AString &strMessageId, IN IMS_SINT32 nSize, IN CONST AString &strFileName)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_ContentReceived(this, strMessageId, nSize, strFileName);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_ContentReceiveFailed(IN FramedMedia *pMedia,
-        IN CONST AString &strMessageId)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_ContentReceiveFailed(this, strMessageId);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_DeliveryFailure(IN FramedMedia *pMedia,
-        IN CONST AString &strMessageId, IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReasonPhrase)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_DeliveryFailure(this,
-            strMessageId, nStatusCode, strReasonPhrase);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_DeliverySuccess(IN FramedMedia *pMedia,
-        IN CONST AString &strMessageId)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_DeliverySuccess(this, strMessageId);
-}
-
-PRIVATE VIRTUAL
-void FramedMediaImpl::OnFramedMedia_TransferProgress(IN FramedMedia *pMedia,
-        IN CONST AString &strMessageId, IN IMS_SINT32 nTransferredBytes,
-        IN IMS_SINT32 nTotalBytes)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pFramedMedia != pMedia)
-    {
-        IMS_TRACE_E(0, "MEDIA MISMATCHED", 0, 0, 0);
-        return;
-    }
-
-    if (piFramedMediaListener == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
-        return;
-    }
-
-    piFramedMediaListener->FramedMedia_TransferProgress(this,
-            strMessageId, nTransferredBytes, nTotalBytes);
 }
