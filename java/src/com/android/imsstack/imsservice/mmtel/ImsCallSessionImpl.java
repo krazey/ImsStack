@@ -12,7 +12,6 @@
 package com.android.imsstack.imsservice.mmtel;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.location.Location;
 import android.os.AsyncResult;
 import android.os.Handler;
@@ -43,7 +42,6 @@ import com.android.imsstack.enabler.mtc.CallInfo;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfo;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
-import com.android.imsstack.enabler.mtc.ConferenceInfo.User;
 import com.android.imsstack.enabler.mtc.FailInfo;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
@@ -67,14 +65,11 @@ import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFactory;
 import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.FeatureUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executor;
+
 
 public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     private static final boolean DBG = ImsLog.isDebuggable();
@@ -1284,8 +1279,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (ipcanCategory == IApn.IPCAN_CATEGORY_WLAN) {
                 log("Wi-Fi calling...");
-                profile.setCallExtra(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
-                        Integer.toString(TelephonyManager.NETWORK_TYPE_IWLAN));
+                profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
+                        TelephonyManager.NETWORK_TYPE_IWLAN);
             }
             else
             {
@@ -1975,7 +1970,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // Call RAT type : LTE / IWLAN / UNKNOWN
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
-                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_STRING, profile);
+                ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, profile);
 
         // Calling number verification status
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
@@ -3224,7 +3219,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             return false;
         }
 
-        String oldRatType = profile.getCallExtra(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, null);
+        int oldRatType = profile.getCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
+                TelephonyManager.NETWORK_TYPE_UNKNOWN);
         int ratType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
         if (isInitialSet && ImsCallUtils.isEmergencyCallViaWfc(profile)) {
@@ -3249,13 +3245,12 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
 
         if (ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-            String newRatType = Integer.toString(ratType);
 
-            if (!newRatType.equals(oldRatType)) {
-                logi("Call RAT changed :: " + ((oldRatType == null) ? "none" : oldRatType)
-                        + " >> " + newRatType);
+            if (ratType != oldRatType) {
+                logi("Call RAT changed :: " + ((oldRatType == 0) ? "none" : oldRatType)
+                        + " >> " + ratType);
 
-                profile.setCallExtra(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, newRatType);
+                profile.setCallExtraInt(ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ratType);
                 return true;
             }
         }
