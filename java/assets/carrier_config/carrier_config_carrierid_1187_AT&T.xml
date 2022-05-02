@@ -69,4 +69,8 @@
     <!--Ut/Xcap Assets -->
     <boolean name="ut_query_cf_all_and_cf_all_conditional_support_bool" value="false"/>
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="true"/>
+
+    <!-- MTC -->
+    <string name="imsvoice.conference_factory_uri_string">sip:n-way_voice@one.att.net</string>
+
 </carrier_config>
