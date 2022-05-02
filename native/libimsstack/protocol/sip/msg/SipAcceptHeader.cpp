@@ -207,6 +207,12 @@ SIP_BOOL SipAcceptHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
+    if ((SipPf_Strcmp(m_pszMType, "*") == 0) && (SipPf_Strcmp(m_pszMSubType, "*") != 0))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid mType/mSubType", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     if (pTempNext != SIP_NULL)
     {
         return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
@@ -219,7 +225,11 @@ SIP_BOOL SipAcceptHeader::IsValidHeader() const
     if (((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL)) ||
         ((m_pszMType != SIP_NULL) && (m_pszMSubType != SIP_NULL)))
     {
-         return SIP_TRUE;
+        if ((SipPf_Strcmp(m_pszMType, "*") == 0) && (SipPf_Strcmp(m_pszMSubType, "*") != 0))
+        {
+            return SIP_FALSE;
+        }
+        return SIP_TRUE;
     }
     return SIP_FALSE;
 }
