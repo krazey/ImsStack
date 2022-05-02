@@ -3845,6 +3845,14 @@ void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
         return;
     }
 
+    if (nStatusCode == SIPStatusCode::SC_305)
+    {
+        if (ProcessUpdateFailed_305())
+        {
+            return;
+        }
+    }
+
     if (ProcessForbiddenFailed(nStatusCode) || ProcessSubscriberFailed(nStatusCode))
     {
         return;
@@ -3863,14 +3871,6 @@ void AosRegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
     {
         ProcessDefaultFlowRecovery_Update(nStatusCode);
         return;
-    }
-
-    if (nStatusCode == SIPStatusCode::SC_305)
-    {
-        if (ProcessUpdateFailed_305())
-        {
-            return;
-        }
     }
 
     switch (nStatusCode)
