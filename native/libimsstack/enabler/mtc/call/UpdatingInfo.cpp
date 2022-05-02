@@ -132,23 +132,6 @@ IMS_BOOL UpdatingInfo::IsNeedToAlert()
         return IMS_TRUE;
     }
 
-    if (m_objNegotiatedInfo.eAQuality != m_objAlertingInfo.eAQuality)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objAlertingInfo.eVDir != DIRECTION_INVALID &&
-            (m_objNegotiatedInfo.eVQuality != m_objAlertingInfo.eVQuality))
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objAlertingInfo.eTDir != DIRECTION_INVALID &&
-            (m_objNegotiatedInfo.eGTTMode != m_objAlertingInfo.eGTTMode))
-    {
-        return IMS_TRUE;
-    }
-
     return IMS_FALSE;
 }
 
@@ -187,23 +170,6 @@ IMS_BOOL UpdatingInfo::IsRequestedModifying()
         return IMS_TRUE;
     }
 
-    if (m_objModifyingInfo.eAQuality != m_objNegotiatedInfo.eAQuality)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objModifyingInfo.eVDir != DIRECTION_INVALID &&
-            (m_objModifyingInfo.eVQuality != m_objNegotiatedInfo.eVQuality))
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objModifyingInfo.eTDir != DIRECTION_INVALID &&
-            (m_objModifyingInfo.eGTTMode != m_objNegotiatedInfo.eGTTMode))
-    {
-        return IMS_TRUE;
-    }
-
     return IMS_FALSE;
 }
 
@@ -220,23 +186,6 @@ IMS_BOOL UpdatingInfo::IsModified()
     if (m_objNegotiatedInfo.eTDir != m_objModifiedInfo.eTDir &&
             (m_objNegotiatedInfo.eTDir == DIRECTION_INVALID ||
             m_objModifiedInfo.eTDir == DIRECTION_INVALID))
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objModifiedInfo.eAQuality != m_objNegotiatedInfo.eAQuality)
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objModifiedInfo.eVDir != DIRECTION_INVALID &&
-            (m_objModifiedInfo.eVQuality != m_objNegotiatedInfo.eVQuality))
-    {
-        return IMS_TRUE;
-    }
-
-    if (m_objModifiedInfo.eTDir != DIRECTION_INVALID &&
-            (m_objModifiedInfo.eGTTMode != m_objNegotiatedInfo.eGTTMode))
     {
         return IMS_TRUE;
     }
