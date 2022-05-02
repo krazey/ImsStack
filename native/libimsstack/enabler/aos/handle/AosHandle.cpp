@@ -1898,74 +1898,8 @@ Remarks
 
 */
 PUBLIC VIRTUAL
-void AosHandle::ServicePhone_MobileDataLimitChanged(IN IMS_BOOL /*bIsLimited*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_DataRoamingChanged(IN IMS_BOOL /*bIsAllowed*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_MobileDataChanged(IN IMS_BOOL /*bIsOn*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
 void AosHandle::ServiceSetting_RoamingPreferredVoiceNetworkChanged(
         IN RoamingPreferredVoiceNetwork /*eState*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/)
-{
-
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/)
 {
 
 }

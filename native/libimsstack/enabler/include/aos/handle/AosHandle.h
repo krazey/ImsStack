@@ -24,7 +24,6 @@
 #include "interface/IAosCallTrackerListener.h"
 #include "interface/IAosNetTrackerListener.h"
 #include "interface/IAosRegistrationControlListener.h"
-#include "interface/IAosServicePhoneListener.h"
 #include "interface/IAosServiceSettingListener.h"
 #include "interface/IAosService.h"
 
@@ -42,7 +41,6 @@ class AosHandle
     , public IImsAos
     , public IMSStateMachine
     , public AosRegistrationControlListener
-    , public AosServicePhoneListener
     , public AosServiceSettingListener
 {
     DECLARE_STATE_MAP()
@@ -128,17 +126,9 @@ public:
     virtual void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/);
 
-    // IAosServicePhoneListener
-    virtual void ServicePhone_MobileDataLimitChanged(IN IMS_BOOL bIsLimited);
-
     // IAosServiceSettingListener
-    virtual void ServiceSetting_DataRoamingChanged(IN IMS_BOOL bIsAllowed);
-    virtual void ServiceSetting_MobileDataChanged(IN IMS_BOOL bIsOn);
     virtual void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
             IN RoamingPreferredVoiceNetwork eState);
-    virtual void ServiceSetting_VolteChanged(IN IMS_BOOL bIsOn);
-    virtual void ServiceSetting_VideoChanged(IN IMS_BOOL bIsOn);
-    virtual void ServiceSetting_WfcChanged(IN IMS_BOOL bIsOn);
 
     enum
     {
