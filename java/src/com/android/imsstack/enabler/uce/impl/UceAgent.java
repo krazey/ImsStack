@@ -18,34 +18,33 @@ package com.android.imsstack.enabler.uce.impl;
 
 import android.content.Context;
 import android.net.Uri;
-import android.os.Looper;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.text.TextUtils;
 
-import com.android.imsstack.enabler.uce.impl.options.UceOptionsRequestController;
-import com.android.internal.annotations.VisibleForTesting;
-
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IPreference;
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.uce.impl.configuration.UceConfiguration;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
-import com.android.imsstack.enabler.uce.impl.define.UceResponseData;
 import com.android.imsstack.enabler.uce.impl.define.UceOptionsReceivedData;
+import com.android.imsstack.enabler.uce.impl.define.UceResponseData;
 import com.android.imsstack.enabler.uce.impl.jni.IUceJNIListener;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
-import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
+import com.android.imsstack.enabler.uce.impl.options.UceOptionsRequestController;
 import com.android.imsstack.enabler.uce.impl.options.UceOptionsResponseCallback;
 import com.android.imsstack.enabler.uce.impl.publish.UcePublishRequestController;
 import com.android.imsstack.enabler.uce.impl.subscribe.UceSubscribeRequestController;
+import com.android.imsstack.enabler.uce.impl.utils.UceUtils;
 import com.android.imsstack.enabler.uce.interf.OptionsResponse;
 import com.android.imsstack.enabler.uce.interf.PublishResponse;
 import com.android.imsstack.enabler.uce.interf.SubscribeResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
 import com.android.imsstack.enabler.uce.interf.UceEventListener;
+import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -469,9 +468,9 @@ public class UceAgent extends Thread implements IUceJNIListener {
 
     @Override
     public void onServiceStatusMessage(Parcel parcel) {
-        ImsLog.d("");
         Message msg = Message.obtain();
         int messageType = parcel.readInt();
+        ImsLog.d("messageType:" + messageType);
 
         if (messageType == UceMessage.UCE_IMS_AGENT_CONNECTED_IND) {
             mImsRegistered = true;
