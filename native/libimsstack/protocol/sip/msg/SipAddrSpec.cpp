@@ -1122,6 +1122,16 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPos = SIP_NULL;
 
+    /* Decode user:password part in SIP URI */
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
+    {
+        if (DecUserInfo(pStartPt, pTempPos) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "User Info Decode Failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+        pStartPt = pTempPos + SIP_TWO;
+    }
     /* Decode headers part in SIP URI */
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, QMARK) == SIP_TRUE)
     {
@@ -1165,16 +1175,6 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
         pEndPt = pTempPos;
         pTempPos = SIP_NULL;
-    }
-    /* Decode user:password part in SIP URI */
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, ATRATE) == SIP_TRUE)
-    {
-        if (DecUserInfo(pStartPt, pTempPos) == SIP_FALSE)
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "User Info Decode Failed", SIP_ZERO, SIP_ZERO);
-            return SIP_FALSE;
-        }
-        pStartPt = pTempPos + SIP_TWO;
     }
     /* Decode host:port part in SIP URI */
     if (DecHostPort(pStartPt, pEndPt) == SIP_FALSE)
