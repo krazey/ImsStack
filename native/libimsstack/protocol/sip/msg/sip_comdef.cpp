@@ -151,8 +151,8 @@ SIP_UINT32 GetRSeqNum(SipMessage* pMessage, SIP_INT32 eHdrType)
         {
             if (eHdrType == SipHeaderBase::RSEQ)
             {
-                SipRSeqHeader* pRSeq = (SipRSeqHeader*)pHeader;
-                nRSeqNum = pRSeq->GetRSeqValue();
+                SipIntegerHeader* pRSeq = (SipIntegerHeader*)pHeader;
+                nRSeqNum = pRSeq->GetValueInt();
             }
             else
             {

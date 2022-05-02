@@ -112,6 +112,8 @@
 
 #define MAX_MAXFD 255
 
+#define MAX_ERROR_CODE 9999
+
 #define MAX_CIDLEN 48
 
 #define MAX_FEIDLEN 16

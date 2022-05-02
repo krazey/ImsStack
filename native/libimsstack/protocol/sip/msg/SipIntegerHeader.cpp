@@ -31,6 +31,14 @@ SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
         }
     }
 
+    if (nValue > MAX_ERROR_CODE)
+    {
+        if (GetHdrType() == SipHeaderBase::GEOLOCATION_ERROR)
+        {
+            return SIP_FALSE;
+        }
+    }
+
     SIP_CHAR szValue[MAX_LEN];
     SipPf_Sprintf(szValue, (SIP_CHAR*)"%u", nValue);
     return SetValue(szValue);
@@ -70,6 +78,10 @@ SIP_BOOL SipIntegerHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             return SIP_FALSE;
         }
         else if ((eHeaderType == SipHeaderBase::EXPIRES_SEC) && (nValue > MAX_EXPIRES))
+        {
+            return SIP_FALSE;
+        }
+        else if ((eHeaderType == SipHeaderBase::GEOLOCATION_ERROR) && (nValue > MAX_ERROR_CODE))
         {
             return SIP_FALSE;
         }

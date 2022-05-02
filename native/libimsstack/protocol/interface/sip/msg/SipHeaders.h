@@ -52,7 +52,6 @@
 #include "msg/SipEventHeader.h"
 #include "msg/SipReferSubHeader.h"
 #include "msg/SipRAcKHeader.h"
-#include "msg/SipRSeqHeader.h"
 #include "msg/SipInfoBase.h"
 #include "msg/SipDateHeader.h"
 #include "msg/SipIdentityHeader.h"
@@ -66,7 +65,6 @@
 #include "msg/SipPChargingVectorHeader.h"
 
 #include "msg/SipFeatureCapsHeader.h"
-#include "msg/SipGeolocationErrorHeader.h"
 #include "msg/SipGeolocationRoutingHeader.h"
 #include "msg/SipPAssertedServiceHeader.h"
 #include "msg/SipPolicyContactHeader.h"

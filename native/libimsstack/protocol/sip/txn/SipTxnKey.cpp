@@ -167,10 +167,10 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError)
         pCallHdr->SipDelete();
     }
 
-    SipRSeqHeader* pRSeqhdr = (SipRSeqHeader *)pSipMsg->GetHdrObj(SipHeaderBase::RSEQ);
+    SipIntegerHeader* pRSeqhdr = (SipIntegerHeader*)pSipMsg->GetHdrObj(SipHeaderBase::RSEQ);
     if (pRSeqhdr != SIP_NULL)
     {
-        SetRSeq(pRSeqhdr->GetRSeqValue());
+        SetRSeq(pRSeqhdr->GetValueInt());
         pRSeqhdr->SipDelete();
     }
 }

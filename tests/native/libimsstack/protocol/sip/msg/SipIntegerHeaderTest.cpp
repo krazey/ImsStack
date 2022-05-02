@@ -63,6 +63,14 @@ TEST_F(SipIntegerHeaderTest, SetValueInt) {
     EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->SetValueInt(MAX_MAXFD + 1));
     pMaxForwardsHeader->SipDelete();
 
+    SipIntegerHeader *pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
+            SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
+    ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->SetValueInt(20));
+    EXPECT_EQ(20, pGeoLocationErrorHeader->GetValueInt());
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->SetValueInt(MAX_ERROR_CODE + 1));
+    pGeoLocationErrorHeader->SipDelete();
+
     SipIntegerHeader *pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_SE));
     ASSERT_TRUE(pMinSeHeader != nullptr);
@@ -90,6 +98,13 @@ TEST_F(SipIntegerHeaderTest, SetValueInt) {
     EXPECT_EQ(SIP_TRUE, pMaxBreadthHeader->SetValueInt(20));
     EXPECT_EQ(20, pMaxBreadthHeader->GetValueInt());
     pMaxBreadthHeader->SipDelete();
+
+    SipIntegerHeader *pRSeqHeader = reinterpret_cast<SipIntegerHeader*>(
+            SipHeaders::CreateCoreHdrObj(SipHeaderBase::RSEQ));
+    ASSERT_TRUE(pRSeqHeader != nullptr);
+    EXPECT_EQ(SIP_TRUE, pRSeqHeader->SetValueInt(20));
+    EXPECT_EQ(20, pRSeqHeader->GetValueInt());
+    pRSeqHeader->SipDelete();
 }
 
 TEST_F(SipIntegerHeaderTest, EncodeHdr) {
@@ -260,6 +275,19 @@ TEST_F(SipIntegerHeaderTest, DecodeHdr) {
     ASSERT_TRUE(pMaxForwardsHeader != nullptr);
     EXPECT_EQ(SIP_FALSE, pMaxForwardsHeader->DecodeHdr((char*)"256", 3));
     pMaxForwardsHeader->SipDelete();
+
+    SipIntegerHeader *pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
+            SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
+    ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr((char*)"", 0));
+    EXPECT_EQ(SIP_TRUE, pGeoLocationErrorHeader->DecodeHdr((char*)"2505", 4));
+    EXPECT_EQ(2505, pGeoLocationErrorHeader->GetValueInt());
+    pGeoLocationErrorHeader->SipDelete();
+    pGeoLocationErrorHeader = reinterpret_cast<SipIntegerHeader*>(
+            SipHeaders::CreateCoreHdrObj(SipHeaderBase::GEOLOCATION_ERROR));
+    ASSERT_TRUE(pGeoLocationErrorHeader != nullptr);
+    EXPECT_EQ(SIP_FALSE, pGeoLocationErrorHeader->DecodeHdr((char*)"10000", 5));
+    pGeoLocationErrorHeader->SipDelete();
 
     SipIntegerHeader *pMinSeHeader = reinterpret_cast<SipIntegerHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::MIN_SE));

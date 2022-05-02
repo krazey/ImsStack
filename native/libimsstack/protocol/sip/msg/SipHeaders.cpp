@@ -89,7 +89,7 @@ SipHeaderBase * (*gaFactoryArray[SipHeaderBase::TYPE_END+SIP_ONE])(SIP_INT32,Sip
     SipHeaderBase::GetNewObj,//    SipHeaderBase::REPLACES,
     SipHeaderBase::GetNewObj,//    SipHeaderBase::REQUIRE,
     SipNameAddrHeader::GetNewObj,//    SipHeaderBase::ROUTE,
-    SipRSeqHeader::GetNewObj,//    SipHeaderBase::RSEQ,
+    SipIntegerHeader::GetNewObj,//    SipHeaderBase::RSEQ,
     SipHeaderBase::GetNewObj,//    SipHeaderBase::SECURITY_CLIENT,//50
     SipHeaderBase::GetNewObj,//    SipHeaderBase::SECURITY_VERIFY,
     SipHeaderBase::GetNewObj,//    SipHeaderBase::SECURITY_SERVER,
@@ -146,7 +146,7 @@ SipHeaderBase * (*gaFactoryArray[SipHeaderBase::TYPE_END+SIP_ONE])(SIP_INT32,Sip
     SipUserAgentHeader::GetNewObj,//    SipHeaderBase::USER_AGENT,
     SipFeatureCapsHeader::GetNewObj,//    SipHeaderBase::FEATURE_CAPS,
     SipNameAddrHeader::GetNewObj,//    SipHeaderBase::GEOLOCATION,
-    SipGeolocationErrorHeader::GetNewObj,//    SipHeaderBase::GEOLOCATION_ERROR,
+    SipIntegerHeader::GetNewObj,//    SipHeaderBase::GEOLOCATION_ERROR,
     SipGeolocationRoutingHeader::GetNewObj,//    SipHeaderBase::GEOLOCATION_ROUTING,
     SipHeaderBase::GetNewObj,//    SipHeaderBase::INFO_PACKAGE,//110
     SipIntegerHeader::GetNewObj,//    SipHeaderBase::MAX_BREADTH,
