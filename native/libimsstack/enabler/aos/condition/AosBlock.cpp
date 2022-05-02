@@ -51,16 +51,9 @@ void AosBlock::SetListener(IN IAosBlockListener* piListener)
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
+    if (IsListened(piListener))
     {
-        IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
-
-        if (pTmpListener == piListener)
-        {
-            A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_X ") is already set",
-                    piListener, 0, 0);
-            return;
-        }
+        return;
     }
 
     m_objListeners.Append(piListener);
@@ -332,6 +325,28 @@ IMS_BOOL AosBlock::IsCleared(IN SERVICE_TYPE nType/* = SERVICE_CELLULAR*/)
     return bResult;
 }
 
+PUBLIC
+IMS_BOOL AosBlock::IsListened(IN IAosBlockListener* piListener)
+{
+    if (piListener == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
+    {
+        IAosBlockListener* pTmpListener = m_objListeners.GetAt(i);
+
+        if (pTmpListener == piListener)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsListened :: (%" PFLS_X ") is exist", piListener, 0, 0);
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
+}
+
 PUBLIC GLOBAL
 const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReason)
 {
@@ -374,7 +389,7 @@ const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReason)
             return "TTY_MODE_ON";
 
         case BLOCK_TEMPORARY_DATA_DEACTIVATED:
-            return "BLOCK_TEMPORARY_DATA_DEACTIVATED";
+            return "TEMPORARY_DATA_DEACTIVATED";
 
         case BLOCK_CELLULAR_AIRPLANE_MODE_ON:
             return "CELLULAR_AIRPLANE_MODE_ON";
