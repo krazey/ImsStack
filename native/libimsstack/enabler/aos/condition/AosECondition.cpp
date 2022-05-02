@@ -46,7 +46,7 @@ AosECondition::~AosECondition()
 PUBLIC VIRTUAL
 IMS_BOOL AosECondition::IsReady()
 {
-    IMS_BOOL bReturn = m_piAppContext->GetBlock()->IsCleared();
+    IMS_BOOL bReturn = m_piBlock->IsCleared();
     A_IMS_TRACE_I(APPPROFILE, "IsReady(%s)", _TRACE_B_(bReturn), 0, 0);
 
     return bReturn;

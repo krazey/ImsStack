@@ -47,6 +47,9 @@ private:
             IN PhoneNumberState /*eState*/) final {};
     inline void ServicePhone_PlmnChanged() final {};
     inline void ServicePhone_PowerOff() final {};
+
+private:
+    friend class AosEConditionTest;
 };
 
 #endif // AOS_E_CONDITION_H_
