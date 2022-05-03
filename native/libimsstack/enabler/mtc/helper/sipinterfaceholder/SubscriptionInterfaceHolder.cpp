@@ -7,7 +7,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 SubscriptionInterfaceHolder::SubscriptionInterfaceHolder(IN IInterfaceHolderListener& objListener) :
         m_objListener(objListener)
@@ -24,13 +23,13 @@ SubscriptionInterfaceHolder::~SubscriptionInterfaceHolder()
 
     for (IMS_SINT32 i = m_objSubscriptionTerminatedGuardTimers.GetSize() - 1; i >= 0; i--)
     {
-         StopTimer(m_objSubscriptionTerminatedGuardTimers.GetKeyAt(i));
+        StopTimer(m_objSubscriptionTerminatedGuardTimers.GetKeyAt(i));
     }
     m_objSubscriptionTerminatedGuardTimers.Clear();
 }
 
-PUBLIC VIRTUAL
-void SubscriptionInterfaceHolder::SubscriptionTerminated(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void SubscriptionInterfaceHolder::SubscriptionTerminated(
+        IN ISubscription* piSubscription)
 {
     IMS_TRACE_D("SubscriptionTerminated", 0, 0, 0);
 
@@ -38,8 +37,7 @@ void SubscriptionInterfaceHolder::SubscriptionTerminated(IN ISubscription* piSub
     ReleaseISubscription(piSubscription, IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-void SubscriptionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void SubscriptionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 {
     IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
 
@@ -58,8 +56,8 @@ void SubscriptionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PUBLIC
-ISubscription* SubscriptionInterfaceHolder::GetISubscription(IN ISession* piSession,
-        IN const AString& strEvent)
+ISubscription* SubscriptionInterfaceHolder::GetISubscription(
+        IN ISession* piSession, IN const AString& strEvent)
 {
     IMS_TRACE_D("GetISubscription", 0, 0, 0);
 
@@ -80,8 +78,8 @@ ISubscription* SubscriptionInterfaceHolder::GetISubscription(IN ICoreService* pi
 }
 
 PUBLIC
-void SubscriptionInterfaceHolder::ReleaseISubscription(IN ISubscription* piSubscription,
-        IN IMS_BOOL bTerminated/* = IMS_FALSE*/)
+void SubscriptionInterfaceHolder::ReleaseISubscription(
+        IN ISubscription* piSubscription, IN IMS_BOOL bTerminated /* = IMS_FALSE*/)
 {
     IMS_TRACE_D("ReleaseISubscription", 0, 0, 0);
 
@@ -147,8 +145,8 @@ void SubscriptionInterfaceHolder::ClearISubscriptions()
 }
 
 PRIVATE
-IMS_RESULT SubscriptionInterfaceHolder::StartTimer(IN ISubscription* piSubscription,
-        IN IMS_SINT32 nDuration)
+IMS_RESULT SubscriptionInterfaceHolder::StartTimer(
+        IN ISubscription* piSubscription, IN IMS_SINT32 nDuration)
 {
     IMS_TRACE_D("StartTimer subscription duration[%d]", nDuration, 0, 0);
 
@@ -161,7 +159,6 @@ IMS_RESULT SubscriptionInterfaceHolder::StartTimer(IN ISubscription* piSubscript
     if (piTempTimer != IMS_NULL)
     {
         return IMS_FAILURE;
-
     }
 
     piTempTimer = TimerService::GetTimerService()->CreateTimer();

@@ -2,14 +2,10 @@
 #include "call/termination/TerminationHandler.h"
 
 PUBLIC
-TerminationHandler::TerminationHandler()
-{
-}
+TerminationHandler::TerminationHandler() {}
 
 PUBLIC
-TerminationHandler::~TerminationHandler()
-{
-}
+TerminationHandler::~TerminationHandler() {}
 
 PUBLIC
 FailReason TerminationHandler::Handle(IN const ISession& objSession) const

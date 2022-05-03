@@ -14,9 +14,7 @@ class IMtcContext;
 class MtcCall;
 class NullCall;
 
-class MtcCallManager final :
-        public IMtcCallManager,
-        public IMtcCallStateListener
+class MtcCallManager final : public IMtcCallManager, public IMtcCallStateListener
 {
 public:
     MtcCallManager(IN IMtcContext& objContext);
@@ -36,13 +34,13 @@ public:
     IMSList<IMtcCall*> GetCallsByServiceType(IN ServiceType eServiceType) override;
     IMSList<IMtcCall*> GetCallsInConference() override;
 
-    void OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-            IN Type eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
+    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
 
 private:
-    IMS_SINT32 GetFirstIndexByFilter(IN std::function<IMS_BOOL (MtcCall*)> objFilter);
-    IMSList<IMtcCall*> GetCallsByFilter(IN std::function<IMS_BOOL (MtcCall*)> objFilter);
+    IMS_SINT32 GetFirstIndexByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
+    IMSList<IMtcCall*> GetCallsByFilter(IN std::function<IMS_BOOL(MtcCall*)> objFilter);
 
     static NullCall* const s_pNullCall;
 

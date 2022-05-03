@@ -25,13 +25,9 @@ AlertingState::AlertingState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL
-AlertingState::~AlertingState()
-{
-}
+PUBLIC VIRTUAL AlertingState::~AlertingState() {}
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::HandleUserAlert()
+PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 {
     IMS_TRACE_D("HandleUserAlert", 0, 0, 0);
     if (SendProvisionalResponse(IMS_TRUE) == IMS_FAILURE)
@@ -44,8 +40,7 @@ CallStateName AlertingState::HandleUserAlert()
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Accept", 0, 0, 0);
     IMS_BOOL bCallTypeChanged = m_objContext.GetCallInfo().eCallType != eCallType;
@@ -73,27 +68,23 @@ CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::Reject(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName AlertingState::Reject(IN const FailReason& objReason)
 {
     IMS_TRACE_D("Reject", 0, 0, 0);
     return RejectIncomingAndToTerminating(objReason);
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::HandleSrvccSuccess()
+PUBLIC VIRTUAL CallStateName AlertingState::HandleSrvccSuccess()
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
+PUBLIC VIRTUAL CallStateName AlertingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
@@ -108,8 +99,8 @@ CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
+PUBLIC VIRTUAL CallStateName AlertingState::QosReserveFailed(
+        IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
 
@@ -127,8 +118,7 @@ CallStateName AlertingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionStarted(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStarted - ACK received", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
@@ -149,8 +139,7 @@ CallStateName AlertingState::SessionStarted(IN ISession* piSession)
     return CallStateName::ESTABLISHED;
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
@@ -159,20 +148,18 @@ CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
         return CallStateName::TERMINATING;
     }
 
-    m_objContext.GetUiNotifier().SendStartFailed(
-            piMessage->GetMethod().Equals(SipMethod::CANCEL) ?
-            CancelHandler().Handle(*piMessage) :
-            TerminationHandler().Handle(*piSession));
+    m_objContext.GetUiNotifier().SendStartFailed(piMessage->GetMethod().Equals(SipMethod::CANCEL)
+                    ? CancelHandler().Handle(*piMessage)
+                    : TerminationHandler().Handle(*piSession));
 
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piMessage =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
     UpdateCallTypeFromMessage(piMessage, piSession);
     NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
@@ -189,8 +176,8 @@ CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateFailed(
+        IN ISession* /* piSession */)
 {
     /*
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
@@ -202,15 +189,14 @@ CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSes
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
-    UpdateCallTypeFromMessage(piMessage, piSession); // TODO: why only in AlertingState?
+    UpdateCallTypeFromMessage(piMessage, piSession);  // TODO: why only in AlertingState?
     NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
@@ -233,8 +219,7 @@ CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
     return CallStateName::ALERTING;
 }
 
-PUBLIC VIRTUAL
-CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionPRAckReceived", 0, 0, 0);
     // FIXME: It's same as IncomingState except QoS check and UI notifying

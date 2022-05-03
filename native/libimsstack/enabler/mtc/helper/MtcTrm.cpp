@@ -23,27 +23,26 @@ __IMS_TRACE_TAG_COM_UC__;
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-UCTRM::UCTRM()
-    : IMSActivityEx(AString::ConstNull())
+UCTRM::UCTRM() :
+        IMSActivityEx(AString::ConstNull())
 {
     IMS_TRACE_MEM("uc", "uc_M : UCTRM[%" PFLS_u "][%" PFLS_x "]", sizeof(UCTRM), this, 0);
 
     m_pIMutex = MutexService::GetMutexService()->CreateMutex();
 
-    m_lstCT_Handler = IMSList<CT_Handler *>();
-    m_lstTRM = IMSList<TRM *>();
+    m_lstCT_Handler = IMSList<CT_Handler*>();
+    m_lstTRM = IMSList<TRM*>();
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCTRM::~UCTRM()
+PUBLIC VIRTUAL UCTRM::~UCTRM()
 {
     IMS_TRACE_MEM("uc", "uc_F : UCTRM[%" PFLS_u "][%" PFLS_x "]", sizeof(UCTRM), this, 0);
 
     for (IMS_UINT32 index = 0; index < m_lstCT_Handler.GetSize(); index++)
     {
-        CT_Handler *pHandler = m_lstCT_Handler.GetAt(index);
+        CT_Handler* pHandler = m_lstCT_Handler.GetAt(index);
         delete pHandler;
         pHandler = IMS_NULL;
     }
@@ -51,7 +50,7 @@ UCTRM::~UCTRM()
 
     for (IMS_UINT32 index = 0; index < m_lstTRM.GetSize(); index++)
     {
-        TRM *pTRM = m_lstTRM.GetAt(index);
+        TRM* pTRM = m_lstTRM.GetAt(index);
         delete pTRM;
         pTRM = IMS_NULL;
     }
@@ -63,10 +62,9 @@ UCTRM::~UCTRM()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC GLOBAL
-UCTRM *UCTRM::GetInstance()
+PUBLIC GLOBAL UCTRM* UCTRM::GetInstance()
 {
-    static UCTRM *s_pUCTRM = IMS_NULL;
+    static UCTRM* s_pUCTRM = IMS_NULL;
 
     if (s_pUCTRM == IMS_NULL)
     {
@@ -79,13 +77,13 @@ UCTRM *UCTRM::GetInstance()
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-void UCTRM::Init( IN IMS_SINT32 nSlotID)
+void UCTRM::Init(IN IMS_SINT32 nSlotID)
 {
     LockGuard objLock(m_pIMutex);
 
     IMS_TRACE_D("Init : Slot[%d]", nSlotID, 0, 0);
 
-    ITrm *pITRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
+    ITrm* pITRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
     if (pITRM == IMS_NULL || !(pITRM->IsTrmSupported()))
     {
         return;
@@ -110,8 +108,7 @@ void UCTRM::DeInit(IN IMS_SINT32 nSlotID)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCTRM::OnMessage(IN IMSMSG &objMSG)
+PUBLIC VIRTUAL IMS_BOOL UCTRM::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("OnMessage[%d]", objMSG.nMSG, 0, 0);
 
@@ -129,7 +126,7 @@ IMS_BOOL UCTRM::OnMessage(IN IMSMSG &objMSG)
 PUBLIC
 void UCTRM::SetTRM(IN IMS_SINT32 nSlotID, IN IMS_UINT32 eType, IN IMS_BOOL bSet)
 {
-    TRM *pTRM = IMS_NULL;
+    TRM* pTRM = IMS_NULL;
     IMS_BOOL bSetTRM = IMS_FALSE;
     IMS_BOOL bOnCall = IMS_FALSE;
 
@@ -181,7 +178,7 @@ void UCTRM::SetTRM(IN IMS_SINT32 nSlotID, IN IMS_UINT32 eType, IN IMS_BOOL bSet)
 PUBLIC
 IMS_BOOL UCTRM::IsTRM(IN IMS_SINT32 nSlotID, IN IMS_UINT32 eType)
 {
-    TRM *pTRM = IMS_NULL;
+    TRM* pTRM = IMS_NULL;
     IMS_BOOL bTRM = IMS_FALSE;
 
     pTRM = getTRM(nSlotID);
@@ -213,7 +210,7 @@ IMS_BOOL UCTRM::IsTRM(IN IMS_SINT32 nSlotID, IN IMS_UINT32 eType)
 PRIVATE
 void UCTRM::openCT_Handler(IN IMS_SINT32 nSlotID)
 {
-    CT_Handler *pHandler = new CT_Handler(nSlotID);
+    CT_Handler* pHandler = new CT_Handler(nSlotID);
     m_lstCT_Handler.Append(pHandler);
 
     IMS_TRACE_D("openCT_Handler : slotID[%d] Size[%d]", nSlotID, m_lstCT_Handler.GetSize(), 0);
@@ -235,8 +232,7 @@ void UCTRM::closeCT_Handler(IN IMS_SINT32 nSlotID)
 
     for (index = 0; index < size; index++)
     {
-
-        CT_Handler *pHandler = m_lstCT_Handler.GetAt(index);
+        CT_Handler* pHandler = m_lstCT_Handler.GetAt(index);
 
         if (pHandler->m_nSlotID == nSlotID)
         {
@@ -254,7 +250,7 @@ void UCTRM::closeCT_Handler(IN IMS_SINT32 nSlotID)
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-UCTRM::CT_Handler *UCTRM::getCT_Handler(IN IMS_SINT32 nSlotID)
+UCTRM::CT_Handler* UCTRM::getCT_Handler(IN IMS_SINT32 nSlotID)
 {
     IMS_UINT32 size = m_lstCT_Handler.GetSize();
 
@@ -266,8 +262,7 @@ UCTRM::CT_Handler *UCTRM::getCT_Handler(IN IMS_SINT32 nSlotID)
 
     for (IMS_UINT32 index = 0; index < size; index++)
     {
-
-        CT_Handler *pHandler = m_lstCT_Handler.GetAt(index);
+        CT_Handler* pHandler = m_lstCT_Handler.GetAt(index);
 
         if (pHandler->m_nSlotID == nSlotID)
         {
@@ -284,7 +279,7 @@ UCTRM::CT_Handler *UCTRM::getCT_Handler(IN IMS_SINT32 nSlotID)
 PRIVATE
 void UCTRM::openTRM(IN IMS_SINT32 nSlotID)
 {
-    TRM *pTRM = new TRM(nSlotID);
+    TRM* pTRM = new TRM(nSlotID);
     m_lstTRM.Append(pTRM);
 
     IMS_TRACE_D("openTRM : slotID[%d] Size[%d]", nSlotID, m_lstTRM.GetSize(), 0);
@@ -306,8 +301,7 @@ void UCTRM::closeTRM(IN IMS_SINT32 nSlotID)
 
     for (index = 0; index < size; index++)
     {
-
-        TRM *pTRM = m_lstTRM.GetAt(index);
+        TRM* pTRM = m_lstTRM.GetAt(index);
 
         if (pTRM->m_nSlotID == nSlotID)
         {
@@ -324,7 +318,7 @@ void UCTRM::closeTRM(IN IMS_SINT32 nSlotID)
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-UCTRM::TRM *UCTRM::getTRM(IN IMS_SINT32 nSlotID)
+UCTRM::TRM* UCTRM::getTRM(IN IMS_SINT32 nSlotID)
 {
     IMS_UINT32 size = m_lstTRM.GetSize();
 
@@ -336,8 +330,7 @@ UCTRM::TRM *UCTRM::getTRM(IN IMS_SINT32 nSlotID)
 
     for (IMS_UINT32 index = 0; index < size; index++)
     {
-
-        TRM *pTRM = m_lstTRM.GetAt(index);
+        TRM* pTRM = m_lstTRM.GetAt(index);
 
         if (pTRM->m_nSlotID == nSlotID)
         {
@@ -348,7 +341,6 @@ UCTRM::TRM *UCTRM::getTRM(IN IMS_SINT32 nSlotID)
     IMS_TRACE_D("getTRM : slotID[%d] size[%d] - Not Found ", nSlotID, size, 0);
     return IMS_NULL;
 }
-
 
 /* ------------------------------------------------------------------------------------------------
     SUBCLASS
@@ -362,8 +354,7 @@ UCTRM::TRM *UCTRM::getTRM(IN IMS_SINT32 nSlotID)
 PUBLIC
 UCTRM::CT_Handler::CT_Handler(IN IMS_SINT32 nSlotID)
 {
-    IMS_TRACE_MEM("uc", "uc_M : CT_Handler[%" PFLS_u "][%" PFLS_x "]", sizeof(CT_Handler), this,
-            0);
+    IMS_TRACE_MEM("uc", "uc_M : CT_Handler[%" PFLS_u "][%" PFLS_x "]", sizeof(CT_Handler), this, 0);
 
     m_nSlotID = nSlotID;
 
@@ -373,11 +364,9 @@ UCTRM::CT_Handler::CT_Handler(IN IMS_SINT32 nSlotID)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCTRM::CT_Handler::~CT_Handler()
+PUBLIC VIRTUAL UCTRM::CT_Handler::~CT_Handler()
 {
-    IMS_TRACE_MEM("uc", "uc_F : CT_Handler[%" PFLS_u "][%" PFLS_x "]", sizeof(CT_Handler), this,
-            0);
+    IMS_TRACE_MEM("uc", "uc_F : CT_Handler[%" PFLS_u "][%" PFLS_x "]", sizeof(CT_Handler), this, 0);
 
     // TODO, MTC BUILD
     // CallStateProxy::GetInstance()->RemoveListener(m_nSlotID, this);
@@ -385,8 +374,7 @@ UCTRM::CT_Handler::~CT_Handler()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCTRM::CT_Handler::OnMessage(IN IMSMSG &objMSG)
+PUBLIC VIRTUAL IMS_BOOL UCTRM::CT_Handler::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("OnMessage[%d]", objMSG.nMSG, 0, 0);
 
@@ -409,106 +397,72 @@ IMS_BOOL UCTRM::CT_Handler::OnMessage(IN IMSMSG &objMSG)
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallChangedState(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallChangedState(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallChangedTotalState(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallChangedTotalState(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateIdle(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallStateIdle(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateOffhook(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallStateOffhook(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateRingback(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallStateRingback(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateRinging(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallStateRinging(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateAlerting(IN IMSMSG &/*objMSG*/)
-{
-
-}
+void UCTRM::CT_Handler::handleCallStateAlerting(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallStateTerminating(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallStateTerminating(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateIdle(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateIdle(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateOffhook(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateOffhook(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateRingback(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateRingback(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateRinging(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateRinging(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateAlerting(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateAlerting(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PRIVATE
-void UCTRM::CT_Handler::handleCallTotalStateTerminating(IN IMSMSG &/*objMSG*/)
-{
-}
+void UCTRM::CT_Handler::handleCallTotalStateTerminating(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
@@ -526,8 +480,7 @@ UCTRM::TRM::TRM(IN IMS_SINT32 nSlotID)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCTRM::TRM::~TRM()
+PUBLIC VIRTUAL UCTRM::TRM::~TRM()
 {
     IMS_TRACE_MEM("uc", "uc_F : TRM[%" PFLS_u "][%" PFLS_x "]", sizeof(TRM), this, 0);
 
@@ -556,8 +509,7 @@ IMS_BOOL UCTRM::TRM::SetNTRM(IN IMS_BOOL bSet)
         return IMS_FALSE;
     }
 
-    m_pITRM->SetService(m_nSlotID, ITrm::SERVICE_VOLTE,
-        (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
+    m_pITRM->SetService(m_nSlotID, ITrm::SERVICE_VOLTE, (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
 
     m_bNSet = bSet;
     return IMS_TRUE;
@@ -575,8 +527,8 @@ IMS_BOOL UCTRM::TRM::SetETRM(IN IMS_BOOL bSet)
         return IMS_FALSE;
     }
 
-    m_pITRM->SetEmergencyService(m_nSlotID, ITrm::SERVICE_VOLTE,
-        (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
+    m_pITRM->SetEmergencyService(
+            m_nSlotID, ITrm::SERVICE_VOLTE, (bSet) ? ITrm::MODE_START : ITrm::MODE_END);
 
     m_bESet = bSet;
     return IMS_TRUE;

@@ -10,14 +10,10 @@ const AString CancelHandler::REASON_TEXT_CALL_COMPLETED = "call completed elsewh
 const AString CancelHandler::REASON_TEXT_CALL_DECLINED = "declined";
 
 PUBLIC
-CancelHandler::CancelHandler()
-{
-}
+CancelHandler::CancelHandler() {}
 
 PUBLIC
-CancelHandler::~CancelHandler()
-{
-}
+CancelHandler::~CancelHandler() {}
 
 PUBLIC
 FailReason CancelHandler::Handle(IN const IMessage& objMessage) const
@@ -39,13 +35,11 @@ FailReason CancelHandler::GetFailReasonFromReasonHeader(
 {
     AString strNormalizedText = strText.SimplifyWSP().MakeLower();
 
-    if (nCause == SipStatusCode::SC_200 &&
-            strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
+    if (nCause == SipStatusCode::SC_200 && strNormalizedText.Contains(REASON_TEXT_CALL_COMPLETED))
     {
         return FailReason(FAIL_REASON_SESSION_MULTIDEVICE_ACCEPTED);
     }
-    else if (nCause == SipStatusCode::SC_600 &&
-            strNormalizedText.Contains(REASON_TEXT_CALL_BUSY))
+    else if (nCause == SipStatusCode::SC_600 && strNormalizedText.Contains(REASON_TEXT_CALL_BUSY))
     {
         return FailReason(FAIL_REASON_SESSION_MULTIDEVICE_REJECTED);
     }

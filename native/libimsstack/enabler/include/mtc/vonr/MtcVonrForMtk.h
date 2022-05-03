@@ -15,8 +15,7 @@
 
 #include "vonr/MtcVonr.h"
 
-class UCVoNRForMtk
-    : public MtcVonr
+class UCVoNRForMtk : public MtcVonr
 {
 public:
     explicit UCVoNRForMtk(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener);
@@ -24,8 +23,8 @@ public:
 
 public:
     // for MtcVonr child classes
-    void CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
-            IN IMS_BOOL bEmergency) override;
+    void CheckBarring(
+            IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency) override;
 
 protected:
     virtual void OnSessionStopped(IN IMS_UINTP nParam);
@@ -36,8 +35,8 @@ protected:
     virtual IMS_BOOL IsUacCheckRequired();
 
 private:
-    void NotifyCallStart(IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType,
-            IN IMS_BOOL bDiffVoiceDomain);
+    void NotifyCallStart(
+            IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType, IN IMS_BOOL bDiffVoiceDomain);
     void NotifyCallStop(IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType, IN IMS_BOOL bDiffVoiceDomain);
     void SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bDiffType, IN IMS_BOOL bDiffVoiceDomain);
     void SetImsVoice(IN IMS_UINT32 nState, IN IMS_BOOL bSameType, IN IMS_BOOL bDiffType,
@@ -45,12 +44,12 @@ private:
     void SetImsSession(IN IMS_UINT32 nState);
     void SetUacCheck(IN IMS_UINT32 nState);
 
-    void GetOngoingSessionStatus(OUT IMS_BOOL &bSameType, OUT IMS_BOOL &bDiffType,
-            OUT IMS_BOOL &bDiffVoiceDomain);
+    void GetOngoingSessionStatus(
+            OUT IMS_BOOL& bSameType, OUT IMS_BOOL& bDiffType, OUT IMS_BOOL& bDiffVoiceDomain);
 
 private:
-    IMS_BOOL   m_bEmergency;
+    IMS_BOOL m_bEmergency;
     IMS_UINT32 m_nCurrentSysMode;
     VonrInitType m_eTotalInitiateType;
 };
-#endif // UC_VONR_FOR_MTK_H_
+#endif  // UC_VONR_FOR_MTK_H_

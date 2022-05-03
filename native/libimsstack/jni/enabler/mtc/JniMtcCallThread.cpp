@@ -19,8 +19,7 @@ JniMtcCallThread::JniMtcCallThread() :
     IMS_TRACE_D("+JniMtcCallThread", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-JniMtcCallThread::~JniMtcCallThread()
+PUBLIC VIRTUAL JniMtcCallThread::~JniMtcCallThread()
 {
     IMS_TRACE_D("~JniMtcCallThread", 0, 0, 0);
 }
@@ -47,7 +46,7 @@ void JniMtcCallThread::OnStartFailed(IN const FailReason& objReason)
 PUBLIC
 void JniMtcCallThread::OnProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMS_BOOL bAlerted/* = IMS_FALSE*/)
+        IN IMS_BOOL bAlerted /* = IMS_FALSE*/)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::PROGRESSING);

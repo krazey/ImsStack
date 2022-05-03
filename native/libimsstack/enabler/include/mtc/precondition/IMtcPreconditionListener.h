@@ -9,7 +9,7 @@ enum class QosLossPolicy;
 class IMtcPreconditionListener
 {
 public:
-    virtual ~IMtcPreconditionListener() {};
+    virtual ~IMtcPreconditionListener(){};
 
     virtual void QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
     virtual void QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) = 0;

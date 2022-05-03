@@ -8,8 +8,7 @@
 class IMtcContext;
 class IConferenceController;
 
-class CallConnectionIdManager final :
-        public IMtcCallStateListener
+class CallConnectionIdManager final : public IMtcCallStateListener
 {
 public:
     explicit CallConnectionIdManager(IN IMtcContext& objContext);
@@ -18,8 +17,8 @@ public:
     CallConnectionIdManager& operator=(IN const CallConnectionIdManager&) = delete;
 
     // IMtcCallStateListener interface implementation
-    void OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-            IN Type eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
+    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     void OnTotalCallStateChanged(IN State eState) override;
     inline IMS_BOOL IsSynchronousCallRequired() override { return IMS_TRUE; }
 

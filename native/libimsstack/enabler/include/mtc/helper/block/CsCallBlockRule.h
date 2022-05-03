@@ -5,8 +5,7 @@
 
 class MtcImsEventReceiver;
 
-class CsCallBlockRule final:
-        public IMtcBlockRule
+class CsCallBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CsCallBlockRule(IN MtcImsEventReceiver& objEventReceiver);

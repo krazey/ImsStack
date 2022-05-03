@@ -13,14 +13,14 @@ class JniMtcServiceThread;
 class MtcAosEventHandler
 {
 public:
-    explicit MtcAosEventHandler(IN IMtcService& objService,
-            IN MtcConfigurationProxy& objConfiguration);
+    explicit MtcAosEventHandler(
+            IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration);
     ~MtcAosEventHandler();
     MtcAosEventHandler(IN const MtcAosEventHandler&) = delete;
     MtcAosEventHandler& operator=(IN const MtcAosEventHandler&) = delete;
 
-    void OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan,
-            IN JniMtcServiceThread* pServiceThread);
+    void OnConnected(
+            IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan, IN JniMtcServiceThread* pServiceThread);
     void OnDisconnecting(IN IMS_UINT32 nReason, IN MtcCallController& objCallController);
     void OnDisconnected(IN IMS_UINT32 nReason, IN MtcCallController& objCallController,
             IN JniMtcServiceThread* pServiceThread);

@@ -18,15 +18,13 @@ class QosData
 {
 public:
     inline QosData() :
-        eAudioStatus(QosStatus::IDLE),
-        eVideoStatus(QosStatus::IDLE),
-        eTextStatus(QosStatus::IDLE)
+            eAudioStatus(QosStatus::IDLE),
+            eVideoStatus(QosStatus::IDLE),
+            eTextStatus(QosStatus::IDLE)
     {
     }
 
-    inline virtual ~QosData()
-    {
-    }
+    inline virtual ~QosData() {}
 
 public:
     inline QosStatus GetAudioStatus() { return eAudioStatus; }
@@ -38,7 +36,7 @@ public:
     inline void SetTextStatus(IN QosStatus eStatus) { eTextStatus = eStatus; }
 
 private:
-    QosData& operator=(IN const QosData &objRHS);
+    QosData& operator=(IN const QosData& objRHS);
 
 private:
     QosStatus eAudioStatus;
@@ -56,8 +54,8 @@ public:
     virtual ~MtcPreconditionManager();
 
 private:
-    MtcPreconditionManager(IN CONST MtcPreconditionManager &objRHS);
-    MtcPreconditionManager& operator=(IN CONST MtcPreconditionManager &objRHS);
+    MtcPreconditionManager(IN CONST MtcPreconditionManager& objRHS);
+    MtcPreconditionManager& operator=(IN CONST MtcPreconditionManager& objRHS);
 
 public:
     virtual void CreateQos(IN ISession* piSession) override;
@@ -65,14 +63,14 @@ public:
     virtual void SetListener(IN IMtcPreconditionListener* pListener) override;
     virtual IMS_BOOL IsResourceReserved(IN ISession* piSession, IN QosCheckType eType) override;
 
-    virtual void StartQosTimer(IN ISession* piSession,
-            IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
-    virtual void StopQosTimer(IN ISession* piSession,
-            IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
+    virtual void StartQosTimer(
+            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
+    virtual void StopQosTimer(
+            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) override;
     virtual void StopAllQosTimer(IN ISession* piSession) override;
 
-    virtual void UpdatePreconditionCapability(IN ISession* piSession,
-            IN IMS_BOOL bCapability) override;
+    virtual void UpdatePreconditionCapability(
+            IN ISession* piSession, IN IMS_BOOL bCapability) override;
     virtual IMS_BOOL HasPreconditionCapability(IN ISession* piSession) override;
     virtual IMS_BOOL IsPreconditionSupportedInLocal() override;
     virtual void UpdateQosAttributesFromSdp(IN ISession* piSession) override;
@@ -82,8 +80,8 @@ public:
     virtual void SetRemoteResourceAvailable(IN ISession* piSession) override;
 
 public:
-    virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
-            IN IMS_UINT32 eMediaType) override;
+    virtual void OnQosStatusChanged(
+            IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) override;
 
     virtual void OnWaitTimerExpired(IN QosTimer* pTimer);
     virtual void OnGuardInactiveTimerExpired(IN QosTimer* pTimer);
@@ -111,8 +109,8 @@ private:
     void UpdateStatusRecords(IN ISession* piSession);
 
     void HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrStatus, IN QosStatus eNewStatus);
-    void NotifyQosStatusToListener(IN ISession* piSession, IN IMS_BOOL bReserved,
-            IN IMS_UINT32 eMediaTypes);
+    void NotifyQosStatusToListener(
+            IN ISession* piSession, IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes);
 
     IMS_BOOL IsStatusAvailable(IN QosStatus eStatus);
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* piMedia);

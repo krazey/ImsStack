@@ -39,8 +39,7 @@ MtcExtensionSet::MtcExtensionSet(IN const MtcExtensionSet& objRhs)
     CopyFrom(objRhs);
 }
 
-PUBLIC VIRTUAL
-MtcExtensionSet::~MtcExtensionSet()
+PUBLIC VIRTUAL MtcExtensionSet::~MtcExtensionSet()
 {
     Clear();
 }
@@ -80,16 +79,16 @@ IMS_BOOL MtcExtensionSet::IsSupportRequiredExtensions(IN const IMessage& pMessag
         const AString& strOptionTag = lstRequiredExtensions.GetAt(nIndex);
         if (!IsAvailableOnLocal(strOptionTag))
         {
-            IMS_TRACE_I("IsSupportRequiredExtensions : Not support %s",
-                    strOptionTag.GetStr(), 0, 0);
+            IMS_TRACE_I(
+                    "IsSupportRequiredExtensions : Not support %s", strOptionTag.GetStr(), 0, 0);
             return IMS_FALSE;
         }
     }
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void MtcExtensionSet::FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest)
+PUBLIC VIRTUAL void MtcExtensionSet::FormatRequest(
+        IN IMS_UINT32 nMethod, IN_OUT IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
@@ -97,8 +96,8 @@ void MtcExtensionSet::FormatRequest(IN IMS_UINT32 nMethod, IN_OUT IMessage& objR
     }
 }
 
-PUBLIC VIRTUAL
-void MtcExtensionSet::FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse)
+PUBLIC VIRTUAL void MtcExtensionSet::FormatResponse(
+        IN IMS_UINT32 nMethod, IN_OUT IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
@@ -106,8 +105,8 @@ void MtcExtensionSet::FormatResponse(IN IMS_UINT32 nMethod, IN_OUT IMessage& obj
     }
 }
 
-PUBLIC VIRTUAL
-void MtcExtensionSet::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void MtcExtensionSet::HandleRequest(
+        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
@@ -115,8 +114,8 @@ void MtcExtensionSet::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& ob
     }
 }
 
-PUBLIC VIRTUAL
-void MtcExtensionSet::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+PUBLIC VIRTUAL void MtcExtensionSet::HandleResponse(
+        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
 {
     for (IMS_UINT32 nIndex = 0; nIndex < m_objExtensions.GetSize(); nIndex++)
     {
@@ -131,8 +130,7 @@ void MtcExtensionSet::CopyFrom(IN const MtcExtensionSet& objRhs)
 
     for (IMS_UINT32 nIndex = 0; nIndex < objRhs.m_objExtensions.GetSize(); nIndex++)
     {
-        m_objExtensions.Add(
-                objRhs.m_objExtensions.GetKeyAt(nIndex),
+        m_objExtensions.Add(objRhs.m_objExtensions.GetKeyAt(nIndex),
                 objRhs.m_objExtensions.GetValueAt(nIndex)->Clone());
     }
 }

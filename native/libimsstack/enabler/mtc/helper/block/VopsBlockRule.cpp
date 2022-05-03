@@ -12,13 +12,10 @@ VopsBlockRule::VopsBlockRule(IN IMtcService& objService, IN MtcImsEventReceiver&
 {
 }
 
-PUBLIC VIRTUAL
-VopsBlockRule::~VopsBlockRule()
-{
-}
+PUBLIC VIRTUAL VopsBlockRule::~VopsBlockRule() {}
 
-PUBLIC VIRTUAL
-VopsBlockRule::Result VopsBlockRule::Check(IN IMtcBlockRuleCheckListener& /* objListener */)
+PUBLIC VIRTUAL VopsBlockRule::Result VopsBlockRule::Check(
+        IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (m_objService.IsWlanIpCanType())
     {
@@ -29,9 +26,7 @@ VopsBlockRule::Result VopsBlockRule::Check(IN IMtcBlockRuleCheckListener& /* obj
             IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         IMS_TRACE_I("Check : VoPS is not supported", 0, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
     }
 
     return Result(Result::Status::UNBLOCKED);

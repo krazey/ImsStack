@@ -31,12 +31,12 @@ public:
     void NotifyExpandFailed(IN FailReason failReason);
 
     void NotifyDropped(IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
-    void NotifyDropFailed(IN FailReason failReason,
-            IN ConferenceParticipantList& objParticipantList);
+    void NotifyDropFailed(
+            IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
 
     void NotifyJoined(IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
-    void NotifyJoinFailed(IN FailReason failReason,
-            IN ConferenceParticipantList& objParticipantList);
+    void NotifyJoinFailed(
+            IN FailReason failReason, IN ConferenceParticipantList& objParticipantList);
 
     void NotifyConferenceInfo(IN ConferenceParticipantList& objParticipantList);
     void NotifyUsersInfo(IN ConferenceParticipantList& objParticipantList);

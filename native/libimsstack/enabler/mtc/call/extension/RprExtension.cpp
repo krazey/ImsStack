@@ -17,19 +17,15 @@ RprExtension::RprExtension(IN const RprExtension& objRhs) :
 {
 }
 
-PUBLIC VIRTUAL
-RprExtension::~RprExtension()
-{
-}
+PUBLIC VIRTUAL RprExtension::~RprExtension() {}
 
-PUBLIC VIRTUAL
-IMtcExtension* RprExtension::Clone() const
+PUBLIC VIRTUAL IMtcExtension* RprExtension::Clone() const
 {
     return new RprExtension(*this);
 }
 
-PUBLIC VIRTUAL
-void RprExtension::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void RprExtension::HandleRequest(
+        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
 {
     if (nMethod != IMessage::SESSION_START)
     {
@@ -39,8 +35,8 @@ void RprExtension::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRe
     MtcExtension::HandleRequest(nMethod, objRequest);
 }
 
-PUBLIC VIRTUAL
-void RprExtension::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+PUBLIC VIRTUAL void RprExtension::HandleResponse(
+        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
 {
     if (nMethod != IMessage::SESSION_START)
     {

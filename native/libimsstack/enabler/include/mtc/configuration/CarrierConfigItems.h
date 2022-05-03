@@ -68,7 +68,7 @@ public:
             bTextQosPreconditionSupported(IMS_TRUE),
             nPolicyOnTextQosDeactivation(2),
             objPidfShortCodes(IMSVector<AString>()),
-            bEmergencyCallOverEmergencyPdn(IMS_FALSE), //wifi
+            bEmergencyCallOverEmergencyPdn(IMS_FALSE),  // wifi
             nCountryCode(0),
             bRetryEmergencyOnImsPdnBool(IMS_FALSE),
             bEmergencyQosPreconditionSupported(IMS_TRUE),
@@ -89,14 +89,13 @@ public:
         objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=2;text=\"RTP/RTCP time-out\"");
         objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=3;text=\"Media bearer loss\"");
         objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=4;text=\"SIP timeout - no ACK\"");
-        objCallTerminateReasonHeaders.Push(
-                "RELEASE_CAUSE;cause=5;text=\"SIP response time-out\"");
+        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=5;text=\"SIP response time-out\"");
         objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=6;text=\"Call-setup time-out\"");
         objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=7;text=\"Redirection failure\"");
     }
 
-    CarrierConfigItems(IN const CarrierConfigItems&) = delete; // not planed
-    CarrierConfigItems& operator=(IN const CarrierConfigItems&) = delete; // not planed
+    CarrierConfigItems(IN const CarrierConfigItems&) = delete;             // not planed
+    CarrierConfigItems& operator=(IN const CarrierConfigItems&) = delete;  // not planed
 
 public:
     // ims configurations

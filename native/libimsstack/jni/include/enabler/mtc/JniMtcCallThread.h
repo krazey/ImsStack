@@ -13,8 +13,7 @@ class MediaInfo;
 class SuppService;
 class ConfUser;
 
-class JniMtcCallThread final :
-        public BaseServiceThread
+class JniMtcCallThread final : public BaseServiceThread
 {
 public:
     JniMtcCallThread();
@@ -58,8 +57,7 @@ public:
     void OnConferenceParticipantRemoved();
     void OnConferenceParticipantRemoveFailed(IN const FailReason& objReason);
     void OnConferenceInfoChanged(IN const AString& strDisplayText, IN const AString strSubject,
-            IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount,
-            IN const AString& strHost);
+            IN IMS_UINT32 nUserCount, IN IMS_UINT32 nMaxUserCount, IN const AString& strHost);
     void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers);
 
     void OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);

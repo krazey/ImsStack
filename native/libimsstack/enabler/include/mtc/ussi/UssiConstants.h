@@ -33,4 +33,4 @@ public:
     static const IMS_SINT32 XML_BUFFER_SIZE;
 };
 
-#endif // USSI_CONSTANTS_
+#endif  // USSI_CONSTANTS_

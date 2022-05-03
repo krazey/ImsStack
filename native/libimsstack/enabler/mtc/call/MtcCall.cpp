@@ -24,8 +24,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PRIVATE GLOBAL
-IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexService()->CreateMutex();
+PRIVATE GLOBAL IMutex* MtcCall::s_pKeyCreationLock = MutexService::GetMutexService()->CreateMutex();
 
 PUBLIC
 MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN CallInfo objCallInfo) :
@@ -37,8 +36,8 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN Call
         m_objCallInfo(objCallInfo),
         m_objParticipantInfo(ParticipantInfo(*this)),
         m_pUpdatingInfo(IMS_NULL),
-        m_objStateMachine(MtcCallStateMachine<MtcCallState, CallStateName>(
-            CallStateName::IDLE, *this, this)),
+        m_objStateMachine(
+                MtcCallStateMachine<MtcCallState, CallStateName>(CallStateName::IDLE, *this, this)),
         m_pSession(IMS_NULL),
         m_objTimer(MtcTimerWrapper()),
         m_objUiNotifier(MtcUiNotifier()),
@@ -54,15 +53,13 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN Call
     m_objPreconditionManager.SetListener(this);
 }
 
-PUBLIC VIRTUAL
-MtcCall::~MtcCall()
+PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
     IMS_TRACE_D("~MtcCall key[%" PFLS_x "]", m_nKey, 0, 0);
     delete m_pSession;
 }
 
-PUBLIC VIRTUAL
-void MtcCall::HandleIncoming(
+PUBLIC VIRTUAL void MtcCall::HandleIncoming(
         IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
     IMS_TRACE_I("HandleIncoming : key[%" PFLS_x "]", m_nKey, 0, 0);
@@ -79,15 +76,15 @@ void MtcCall::HandleIncoming(
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->HandleIncoming(piSession, pServiceThread);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->HandleIncoming(piSession, pServiceThread);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Attach(IN JniMtcCallThread* pJniMtcCallThread,
-        IN JniMediaSessionThread* pJniMediaThread)
+PUBLIC VIRTUAL void MtcCall::Attach(
+        IN JniMtcCallThread* pJniMtcCallThread, IN JniMediaSessionThread* pJniMediaThread)
 {
     IMS_TRACE_I("Attach : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -102,19 +99,14 @@ void MtcCall::Attach(IN JniMtcCallThread* pJniMtcCallThread,
     m_objUiNotifier.SetJniMediaThread(pJniMediaThread);
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Detach()
+PUBLIC VIRTUAL void MtcCall::Detach()
 {
     IMS_TRACE_I("Detach : key[%" PFLS_x "]", m_nKey, 0, 0);
     m_objUiNotifier.SetJniCallThread(IMS_NULL);
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Start(
-        IN CallType eCallType,
-        IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,
+        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_I("Start : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -125,47 +117,47 @@ void MtcCall::Start(
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::HandleUserAlert()
+PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
 {
     IMS_TRACE_I("HandleUserAlert : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->HandleUserAlert();
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->HandleUserAlert();
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("Accept : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Accept(eCallType, pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Accept(eCallType, pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Reject(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::Reject(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Reject : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Reject(objReason);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Reject(objReason);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Hold(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("Hold : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -175,14 +167,14 @@ void MtcCall::Hold(IN MediaInfo* pMediaInfo)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Hold(pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Hold(pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Resume(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("Resume : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -192,14 +184,14 @@ void MtcCall::Resume(IN MediaInfo* pMediaInfo)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Resume(pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Resume(pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("AcceptResume : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -209,25 +201,25 @@ void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->AcceptResume(eCallType, pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->AcceptResume(eCallType, pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::RejectResume(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::RejectResume(IN const FailReason& objReason)
 {
     IMS_TRACE_I("RejectResume : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->RejectResume(objReason);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->RejectResume(objReason);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("Convert : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -237,14 +229,14 @@ void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Convert(eCallType, pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Convert(eCallType, pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_I("AcceptConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -254,73 +246,70 @@ void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->AcceptConvert(eCallType, pMediaInfo);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->AcceptConvert(eCallType, pMediaInfo);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::RejectConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const FailReason& objReason)
 {
     IMS_TRACE_I("RejectConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->RejectConvert(objReason);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->RejectConvert(objReason);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::CancelConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const FailReason& objReason)
 {
     IMS_TRACE_I("CancelConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->CancelConvert(objReason);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->CancelConvert(objReason);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL void MtcCall::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Terminate : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->Terminate(objReason);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->Terminate(objReason);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration)
+PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration)
 {
     IMS_TRACE_I("SendDtmf : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SendDtmf(strSignal, nDuration);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SendDtmf(strSignal, nDuration);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SendUssi(IN const AString& strUssi)
+PUBLIC VIRTUAL void MtcCall::SendUssi(IN const AString& strUssi)
 {
     IMS_TRACE_I("SendUssi : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SendUssi(strUssi);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SendUssi(strUssi);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::StartConference(
-        IN CallType eCallType,
-        IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const AString& strTarget,
+        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
@@ -331,50 +320,49 @@ void MtcCall::StartConference(
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->StartConference(eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->StartConference(
+                        eCallType, strTarget, pMediaInfo, objSuppServices, lstUsers);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN IMSList<ConfUser*> lstUsers)
+PUBLIC VIRTUAL void MtcCall::StartConference(
+        IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->StartConference(eCallType, strTarget, lstUsers);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->StartConference(eCallType, strTarget, lstUsers);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::HandleSrvccSuccess()
+PUBLIC VIRTUAL void MtcCall::HandleSrvccSuccess()
 {
     IMS_TRACE_I("HandleSrvccSuccess : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->HandleSrvccSuccess();
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->HandleSrvccSuccess();
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
+PUBLIC VIRTUAL void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
 {
     IMS_TRACE_I("HandleSrvccFailure : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->HandleSrvccFailure(eUpdateType);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->HandleSrvccFailure(eUpdateType);
+            });
 }
 
-PUBLIC VIRTUAL
-UpdatingInfo& MtcCall::GetUpdatingInfo()
+PUBLIC VIRTUAL UpdatingInfo& MtcCall::GetUpdatingInfo()
 {
     if (m_pUpdatingInfo == IMS_NULL)
     {
@@ -384,29 +372,25 @@ UpdatingInfo& MtcCall::GetUpdatingInfo()
     return *m_pUpdatingInfo;
 }
 
-PUBLIC VIRTUAL
-MtcSession* MtcCall::CreateSession(IN ISession& objSession)
+PUBLIC VIRTUAL MtcSession* MtcCall::CreateSession(IN ISession& objSession)
 {
     objSession.SetListener(this);
     return new MtcSession(*this, objSession);
 }
 
-PUBLIC VIRTUAL
-IMtcBlockChecker* MtcCall::CreateBlockChecker(
+PUBLIC VIRTUAL IMtcBlockChecker* MtcCall::CreateBlockChecker(
         IN const IMSList<IMtcBlockRule*>& lstRules)
 {
     return new MtcBlockChecker(lstRules, *this);
 }
 
-PUBLIC VIRTUAL
-void MtcCall::DeleteUpdatingInfo()
+PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 {
     delete m_pUpdatingInfo;
     m_pUpdatingInfo = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionAlerting(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionAlerting(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionAlerting : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -416,14 +400,15 @@ void MtcCall::SessionAlerting(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionAlerting(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionAlerting(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference)
+PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
+        IN ISession* piSession, IN IReference* piReference)
 {
     IMS_TRACE_I("SessionReferenceReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -438,20 +423,20 @@ void MtcCall::SessionReferenceReceived(IN ISession* piSession, IN IReference* pi
         if (piReference != IMS_NULL)
         {
             piReference->Reject();
-            piReference->Destroy(); // TODO: Use ReferenceInterfaceHolder
+            piReference->Destroy();  // TODO: Use ReferenceInterfaceHolder
         }
         OnInternalFailure();
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionReferenceReceived(piSession, piReference);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionReferenceReceived(piSession, piReference);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionStarted(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionStarted : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -461,16 +446,16 @@ void MtcCall::SessionStarted(IN ISession* piSession)
         return;
     }
 
-    SetVideoCapable(piSession); // TODO: move into CallInfo
+    SetVideoCapable(piSession);  // TODO: move into CallInfo
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionStarted(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionStarted(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionStartFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionStartFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -480,14 +465,14 @@ void MtcCall::SessionStartFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionStartFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionStartFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionTerminated : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -497,14 +482,14 @@ void MtcCall::SessionTerminated(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionTerminated(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionTerminated(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionUpdated(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionUpdated(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionUpdated : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -514,14 +499,14 @@ void MtcCall::SessionUpdated(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionUpdated(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionUpdated(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionUpdateFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionUpdateFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -531,14 +516,14 @@ void MtcCall::SessionUpdateFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionUpdateFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionUpdateFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionUpdateReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -548,14 +533,14 @@ void MtcCall::SessionUpdateReceived(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionUpdateReceived(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionUpdateReceived(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionCancelDelivered(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionCancelDelivered(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionCancelDelivered : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -565,14 +550,14 @@ void MtcCall::SessionCancelDelivered(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionCancelDelivered(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionCancelDelivered(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionCancelDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -582,14 +567,14 @@ void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionCancelDeliveryFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionCancelDeliveryFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionEarlyMediaUpdated : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -599,14 +584,14 @@ void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionEarlyMediaUpdated(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionEarlyMediaUpdated(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionEarlyMediaUpdateFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -616,14 +601,14 @@ void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionEarlyMediaUpdateFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionEarlyMediaUpdateFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionEarlyMediaUpdateReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -633,14 +618,15 @@ void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionEarlyMediaUpdateReceived(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionEarlyMediaUpdateReceived(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionForkedResponseReceived(IN ISession* piSession, IN ISession* piForkedSession)
+PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
+        IN ISession* piSession, IN ISession* piForkedSession)
 {
     IMS_TRACE_I("SessionForkedResponseReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -662,14 +648,14 @@ void MtcCall::SessionForkedResponseReceived(IN ISession* piSession, IN ISession*
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionForkedResponseReceived(piSession, piForkedSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionForkedResponseReceived(piSession, piForkedSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckDelivered : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -679,14 +665,14 @@ void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionPRAckDelivered(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionPRAckDelivered(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -696,14 +682,14 @@ void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionPRAckDeliveryFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionPRAckDeliveryFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionPRAckReceived(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionPRAckReceived(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionPRAckReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -713,14 +699,15 @@ void MtcCall::SessionPRAckReceived(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionPRAckReceived(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionPRAckReceived(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionProvisionalResponseReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
+PUBLIC VIRTUAL void MtcCall::SessionProvisionalResponseReceived(
+        IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_I("SessionProvisionalResponseReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -730,14 +717,14 @@ void MtcCall::SessionProvisionalResponseReceived(IN ISession* piSession, IN IMS_
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionProvisionalResponseReceived(piSession, nIndex);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionProvisionalResponseReceived(piSession, nIndex);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_I("SessionRPRDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -747,14 +734,14 @@ void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionRPRDeliveryFailed(piSession);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionRPRDeliveryFailed(piSession);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
+PUBLIC VIRTUAL void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_I("SessionRPRReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
 
@@ -764,14 +751,14 @@ void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionRPRReceived(piSession, nIndex);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionRPRReceived(piSession, nIndex);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::SessionTransactionReceived(
+PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
         IN ISession* piSession, IN ISipServerConnection* piSipServerConnection)
 {
     IMS_TRACE_I("SessionTransactionReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
@@ -782,14 +769,14 @@ void MtcCall::SessionTransactionReceived(
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->SessionTransactionReceived(piSession, piSipServerConnection);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->SessionTransactionReceived(piSession, piSipServerConnection);
+            });
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
+PUBLIC VIRTUAL IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage)
 {
     IMS_TRACE_I("MessageMediator_AdjustMessage : key[%" PFLS_x "]", m_nKey, 0, 0);
@@ -800,39 +787,39 @@ IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
         return IMS_FAILURE;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->MessageMediator_AdjustMessage(piSipMessage, nMessage);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->MessageMediator_AdjustMessage(piSipMessage, nMessage);
+            });
 
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
 {
     IMS_TRACE_I("OnTimerExpired : key[%" PFLS_x "] type[%d]", m_nKey, nType, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->OnTimerExpired(nType);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnTimerExpired(nType);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
+PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 {
-    IMS_TRACE_I("OnBlockChecked : key[%" PFLS_x "] result[%d]",
-            m_nKey, static_cast<IMS_SINT32>(objResult.eStatus), 0);
+    IMS_TRACE_I("OnBlockChecked : key[%" PFLS_x "] result[%d]", m_nKey,
+            static_cast<IMS_SINT32>(objResult.eStatus), 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->OnBlockChecked(objResult);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnBlockChecked(objResult);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     IMS_TRACE_I("QosReserved : key[%" PFLS_x "] MediaType[%d]", m_nKey, eMediaType, 0);
 
@@ -842,14 +829,14 @@ void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->QosReserved(piSession, eMediaType);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->QosReserved(piSession, eMediaType);
+            });
 }
 
-PUBLIC VIRTUAL
-void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
+PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
     IMS_TRACE_I("QosReserveFailed : key[%" PFLS_x "] NextAction[%d]", m_nKey, eNextAction, 0);
 
@@ -859,14 +846,14 @@ void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAct
         return;
     }
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->QosReserveFailed(piSession, eNextAction);
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->QosReserveFailed(piSession, eNextAction);
+            });
 }
 
-PUBLIC VIRTUAL
-MtcCallState* MtcCall::CreateState(IN CallStateName eState)
+PUBLIC VIRTUAL MtcCallState* MtcCall::CreateState(IN CallStateName eState)
 {
     switch (eState)
     {
@@ -887,11 +874,10 @@ MtcCallState* MtcCall::CreateState(IN CallStateName eState)
     }
 }
 
-PUBLIC VIRTUAL
-void MtcCall::OnStateTransition(IN CallStateName eState)
+PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
 {
-    IMS_TRACE_I("OnStateTransition : key[%" PFLS_x "] state[%d]",
-            m_nKey, static_cast<IMS_SINT32>(eState), 0);
+    IMS_TRACE_I("OnStateTransition : key[%" PFLS_x "] state[%d]", m_nKey,
+            static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, m_objCallInfo, eState);
 }
@@ -910,10 +896,11 @@ void MtcCall::OnInternalFailure()
 {
     IMS_TRACE_I("OnInternalFailure : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation([&](MtcCallState* pState)
-    {
-        return pState->OnInternalFailure();
-    });
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnInternalFailure();
+            });
 }
 
 PRIVATE
@@ -939,8 +926,8 @@ void MtcCall::SetVideoCapable(IN ISession* piSession)
 
             if (piMessage == IMS_NULL)
             {
-                piMessage = MessageUtil::GetRemotePreviousMessage(piSession,
-                        IMessage::SESSION_START, false);
+                piMessage = MessageUtil::GetRemotePreviousMessage(
+                        piSession, IMessage::SESSION_START, false);
             }
         }
 

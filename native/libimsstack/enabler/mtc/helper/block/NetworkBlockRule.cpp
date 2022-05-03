@@ -13,13 +13,10 @@ NetworkBlockRule::NetworkBlockRule(
 {
 }
 
-PUBLIC VIRTUAL
-NetworkBlockRule::~NetworkBlockRule()
-{
-}
+PUBLIC VIRTUAL NetworkBlockRule::~NetworkBlockRule() {}
 
-PUBLIC VIRTUAL
-NetworkBlockRule::Result NetworkBlockRule::Check(IN IMtcBlockRuleCheckListener& /* objListener */)
+PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
+        IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (IsInEpdg(m_objService) || IsWifiRegistered(m_objService.GetAosConnector()))
     {
@@ -27,16 +24,13 @@ NetworkBlockRule::Result NetworkBlockRule::Check(IN IMtcBlockRuleCheckListener& 
     }
 
     IMS_UINT32 nNetworkType = m_objNetWatcherInfo.GetNetRadioTechType();
-    if (nNetworkType == NW_REPORT_RADIO_LTE ||
-            nNetworkType == NW_REPORT_RADIO_NR)
+    if (nNetworkType == NW_REPORT_RADIO_LTE || nNetworkType == NW_REPORT_RADIO_NR)
     {
         return Result(Result::Status::UNBLOCKED);
     }
 
     IMS_TRACE_I("Check : Network type[%d] is not applicable", nNetworkType, 0, 0);
-    return Result(
-            Result::Status::BLOCKED,
-            FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+    return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
 }
 
 PRIVATE

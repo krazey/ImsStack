@@ -17,8 +17,8 @@ class IConferenceReference
 {
 public:
     virtual ~IConferenceReference() {}
-    virtual IMS_RESULT SendInvite(OUT AString& strReferToUri,
-            IN CallConnectionIdManager& objConnectionIdManager) = 0;
+    virtual IMS_RESULT SendInvite(
+            OUT AString& strReferToUri, IN CallConnectionIdManager& objConnectionIdManager) = 0;
     virtual IMS_RESULT SendBye(IN AString strInvitedUri = AString::ConstEmpty()) = 0;
     virtual IMS_UINT32 GetType() const = 0;
     virtual IMS_UINT32 GetResponseCode() const = 0;

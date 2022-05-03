@@ -23,47 +23,41 @@ MtcExtension::MtcExtension(IN const MtcExtension& objRhs) :
 {
 }
 
-PUBLIC VIRTUAL
-MtcExtension::~MtcExtension()
-{
-}
+PUBLIC VIRTUAL MtcExtension::~MtcExtension() {}
 
-PUBLIC VIRTUAL
-IMtcExtension* MtcExtension::Clone() const
+PUBLIC VIRTUAL IMtcExtension* MtcExtension::Clone() const
 {
     return new MtcExtension(*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcExtension::IsAvailableOnRemote() const
+PUBLIC VIRTUAL IMS_BOOL MtcExtension::IsAvailableOnRemote() const
 {
     return m_bRequiredOnRemote || m_bSupportedOnRemote;
 }
 
-PUBLIC VIRTUAL
-const AString& MtcExtension::GetOptionTag() const
+PUBLIC VIRTUAL const AString& MtcExtension::GetOptionTag() const
 {
     return m_strOptionTag;
 }
 
-PUBLIC VIRTUAL
-void MtcExtension::FormatRequest(IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objRequest */)
+PUBLIC VIRTUAL void MtcExtension::FormatRequest(
+        IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objRequest */)
 {
 }
 
-PUBLIC VIRTUAL
-void MtcExtension::FormatResponse(IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objResponse */)
+PUBLIC VIRTUAL void MtcExtension::FormatResponse(
+        IN IMS_UINT32 /* nMethod */, IN_OUT IMessage& /* objResponse */)
 {
 }
 
-PUBLIC VIRTUAL
-void MtcExtension::HandleRequest(IN IMS_UINT32 /* nMethod */, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void MtcExtension::HandleRequest(
+        IN IMS_UINT32 /* nMethod */, IN const IMessage& objRequest)
 {
     UpdateFromRequireAndSupportedHeader(objRequest);
 }
 
-PUBLIC VIRTUAL
-void MtcExtension::HandleResponse(IN IMS_UINT32 /* nMethod */, IN const IMessage& objResponse)
+PUBLIC VIRTUAL void MtcExtension::HandleResponse(
+        IN IMS_UINT32 /* nMethod */, IN const IMessage& objResponse)
 {
     UpdateFromRequireAndSupportedHeader(objResponse);
 }
@@ -71,13 +65,11 @@ void MtcExtension::HandleResponse(IN IMS_UINT32 /* nMethod */, IN const IMessage
 PRIVATE
 void MtcExtension::UpdateFromRequireAndSupportedHeader(IN const IMessage& objMessage)
 {
-    m_bRequiredOnRemote =
-            MessageUtil::HasValue(&objMessage, GetOptionTag(), ISipHeader::REQUIRE);
+    m_bRequiredOnRemote = MessageUtil::HasValue(&objMessage, GetOptionTag(), ISipHeader::REQUIRE);
     m_bSupportedOnRemote =
             MessageUtil::HasValue(&objMessage, GetOptionTag(), ISipHeader::SUPPORTED);
 
     IMS_TRACE_D("UpdateFromRequireAndSupportedHeader : Tag[%s] Require[%s] Supported[%s]",
-            m_strOptionTag.GetStr(),
-            _TRACE_B_(m_bRequiredOnRemote),
+            m_strOptionTag.GetStr(), _TRACE_B_(m_bRequiredOnRemote),
             _TRACE_B_(m_bSupportedOnRemote));
 }

@@ -9,8 +9,7 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 MtcBlockChecker::MtcBlockChecker(
-        IN const IMSList<IMtcBlockRule*>& lstRules,
-        IN IMtcBlockCheckListener& objListener) :
+        IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener& objListener) :
         m_objListener(objListener),
         m_lstRules(lstRules),
         m_nPendingCount(0)
@@ -27,8 +26,7 @@ MtcBlockChecker::~MtcBlockChecker()
     }
 }
 
-PUBLIC GLOBAL
-IMSList<IMtcBlockRule*> MtcBlockChecker::GetCallUpdateRules(
+PUBLIC GLOBAL IMSList<IMtcBlockRule*> MtcBlockChecker::GetCallUpdateRules(
         IN IMtcCallContext& /* objContext */)
 {
     IMSList<IMtcBlockRule*> lstRules;

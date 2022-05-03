@@ -22,26 +22,22 @@ IncomingState::IncomingState(IN IMtcCallContext& objContext) :
     IMS_TRACE_D("+IncomingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IncomingState::~IncomingState()
+PUBLIC VIRTUAL IncomingState::~IncomingState()
 {
     IMS_TRACE_D("~IncomingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::HandleSrvccSuccess()
+PUBLIC VIRTUAL CallStateName IncomingState::HandleSrvccSuccess()
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
+PUBLIC VIRTUAL CallStateName IncomingState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
@@ -56,11 +52,11 @@ CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL CallStateName IncomingState::QosReserved(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     if (!m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_RPR))
+                MtcExtensionSet::OPTION_TAG_RPR))
     {
         return GetStateName();
     }
@@ -75,8 +71,9 @@ CallStateName IncomingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     IMS_TRACE_D("QosReserved : Media[%d] is reserved.", eMediaType, 0, 0);
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession)) ?
-            QosCheckType::ALL_STATUS : QosCheckType::LOCAL_STATUS;
+    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+            ? QosCheckType::ALL_STATUS
+            : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
     {
         return GetStateName();
@@ -86,8 +83,8 @@ CallStateName IncomingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     return CallStateName::ALERTING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
+PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
+        IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
@@ -107,8 +104,7 @@ CallStateName IncomingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
@@ -116,12 +112,11 @@ CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piMessage =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
     UpdateCallTypeFromMessage(piMessage, piSession);
     NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
@@ -140,8 +135,9 @@ CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
         }
     }
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession)) ?
-            QosCheckType::ALL_STATUS : QosCheckType::LOCAL_STATUS;
+    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+            ? QosCheckType::ALL_STATUS
+            : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
     {
         return GetStateName();
@@ -151,8 +147,8 @@ CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
     return CallStateName::ALERTING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
+        IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
     /*
@@ -165,8 +161,7 @@ CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSes
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
@@ -176,8 +171,8 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
 
     if (!MessageUtil::HasSdp(piMessage))
     {
-        if (m_objContext.GetSession()->GetMessageSender()
-                .RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
+        if (m_objContext.GetSession()->GetMessageSender().RespondToEarlyUpdate(
+                    SipStatusCode::SC_200) == IMS_FAILURE)
         {
             m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
             return CallStateName::TERMINATING;
@@ -209,8 +204,9 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         objPreconditionManager.StartQosTimer(piSession);
     }
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession)) ?
-            QosCheckType::ALL_STATUS : QosCheckType::LOCAL_STATUS;
+    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+            ? QosCheckType::ALL_STATUS
+            : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
     {
         return GetStateName();
@@ -220,8 +216,7 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
     return CallStateName::ALERTING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionPRAckReceived", 0, 0, 0);
     m_objContext.GetTimer().Stop(TIMER_MT_PRACK_WAIT);
@@ -256,8 +251,9 @@ CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
         objPreconditionManager.StartQosTimer(piSession);
     }
 
-    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession)) ?
-            QosCheckType::ALL_STATUS : QosCheckType::LOCAL_STATUS;
+    QosCheckType eCheckType = (objPreconditionManager.HasPreconditionCapability(piSession))
+            ? QosCheckType::ALL_STATUS
+            : QosCheckType::LOCAL_STATUS;
     if (!objPreconditionManager.IsResourceReserved(piSession, eCheckType))
     {
         return GetStateName();

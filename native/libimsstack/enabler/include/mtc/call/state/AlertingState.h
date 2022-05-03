@@ -18,8 +18,7 @@ enum class QosLossPolicy;
 /**
  * Represents the state that a call is incoming and it have alerted to the UI.
  */
-class AlertingState :
-        public MtcCallState
+class AlertingState : public MtcCallState
 {
 public:
     explicit AlertingState(IN IMtcCallContext& objContext);

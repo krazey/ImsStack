@@ -33,42 +33,45 @@ public:
     public:
         // TODO: determine copy or just reference.
         inline void SetConfUser(IN const ConfUser* pConfUser)
-        { m_pConfUser = new ConfUser(*pConfUser); }
-        inline ConfUser* GetConfUser()
-        { return m_pConfUser; }
+        {
+            m_pConfUser = new ConfUser(*pConfUser);
+        }
+        inline ConfUser* GetConfUser() { return m_pConfUser; }
 
-        inline const AString& GetUserEntity() const
-        { return m_pConfUser->aStrUserEntity; }
+        inline const AString& GetUserEntity() const { return m_pConfUser->aStrUserEntity; }
 
         inline void SetReference(IN IConferenceReference* piReference)
-        { m_pIReference = piReference; }
-        inline IConferenceReference* GetReference()
-        { return m_pIReference; }
+        {
+            m_pIReference = piReference;
+        }
+        inline IConferenceReference* GetReference() { return m_pIReference; }
 
         inline void SetReferInviteUri(IN AString strReferInviteUri)
-        { m_strReferInviteUri = strReferInviteUri; }
-        inline const AString& GetReferInviteUri()
-        { return m_strReferInviteUri; }
+        {
+            m_strReferInviteUri = strReferInviteUri;
+        }
+        inline const AString& GetReferInviteUri() { return m_strReferInviteUri; }
 
-        inline void SetInfoUpdated(IN IMS_BOOL bInfoUpdated)
-        { m_bInfoUpdated = bInfoUpdated; }
-        inline IMS_BOOL IsInfoUpdated()
-        { return m_bInfoUpdated; }
+        inline void SetInfoUpdated(IN IMS_BOOL bInfoUpdated) { m_bInfoUpdated = bInfoUpdated; }
+        inline IMS_BOOL IsInfoUpdated() { return m_bInfoUpdated; }
 
         inline void SetMatchingCompleted(IN IMS_BOOL bMatchingCompleted)
-        { m_bMatchingCompleted = bMatchingCompleted; }
-        inline IMS_BOOL IsMatchingCompleted()
-        { return m_bMatchingCompleted; }
+        {
+            m_bMatchingCompleted = bMatchingCompleted;
+        }
+        inline IMS_BOOL IsMatchingCompleted() { return m_bMatchingCompleted; }
 
         inline void SetDisconnectionNotified(IN IMS_BOOL bDisconnectionNotified)
-        { m_bDisconnectionNotified = bDisconnectionNotified; }
-        inline IMS_BOOL IsDisconnectionNotified()
-        { return m_bDisconnectionNotified; }
+        {
+            m_bDisconnectionNotified = bDisconnectionNotified;
+        }
+        inline IMS_BOOL IsDisconnectionNotified() { return m_bDisconnectionNotified; }
 
         inline void SetDisconnectedExplicitly(IN IMS_BOOL bDisconnectedExplicitly)
-        { m_bDisconnectedExplicitly = bDisconnectedExplicitly; }
-        inline IMS_BOOL IsDisconnectedExplicitly()
-        { return m_bDisconnectedExplicitly; }
+        {
+            m_bDisconnectedExplicitly = bDisconnectedExplicitly;
+        }
+        inline IMS_BOOL IsDisconnectedExplicitly() { return m_bDisconnectedExplicitly; }
 
         void Login();
 
@@ -93,35 +96,29 @@ public:
     ConferenceParticipantList& operator=(IN const ConferenceParticipantList&) = delete;
 
 public:
-    inline void SetLocalUri(IN const AString& strLocalUri)
-    { m_strLocalUri = strLocalUri;}
+    inline void SetLocalUri(IN const AString& strLocalUri) { m_strLocalUri = strLocalUri; }
 
-    inline const AString& GetLocalUri() const
-    { return m_strLocalUri;}
+    inline const AString& GetLocalUri() const { return m_strLocalUri; }
 
-    inline void SetXmlVersion(IN IMS_SINT32 nVersion)
-    { m_nVersion = nVersion;}
+    inline void SetXmlVersion(IN IMS_SINT32 nVersion) { m_nVersion = nVersion; }
 
-    inline IMS_SINT32 GetXmlVersion() const
-    { return m_nVersion;}
+    inline IMS_SINT32 GetXmlVersion() const { return m_nVersion; }
 
-    inline void SetMaxUserCount(IN IMS_SINT32 nMaxUserCount)
-    { m_nMaxUserCount = nMaxUserCount;}
+    inline void SetMaxUserCount(IN IMS_SINT32 nMaxUserCount) { m_nMaxUserCount = nMaxUserCount; }
 
-    inline IMS_SINT32 GetMaxUserCount() const
-    { return m_nMaxUserCount;}
+    inline IMS_SINT32 GetMaxUserCount() const { return m_nMaxUserCount; }
 
     void AddUser(IN const ConfUser* pConfUser);
     void RemoveUser(IN const ConfUser* pConfUser);
     ConfUser* GetConfUser(IN IConferenceReference* piConfReference) const;
 
-    IMS_BOOL IsConnectedUser(IN const ConfUser* pConfUser,
-            IN IMS_BOOL bIncludingConnecting = IMS_FALSE) const;
+    IMS_BOOL IsConnectedUser(
+            IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting = IMS_FALSE) const;
 
     // the order of this ConfUser is same with the order of REFER sent.
     IMSList<ConfUser*> GetConfUsers(IN IMS_BOOL bCopy = IMS_FALSE) const;
 
-    void SetReference(IN IConferenceReference* piReference,IN const ConfUser* pConfUser);
+    void SetReference(IN IConferenceReference* piReference, IN const ConfUser* pConfUser);
     IConferenceReference* GetReference(IN const ConfUser* pConfUser) const;
     void ResetReference(IN IConferenceReference* piConfReference);
 
@@ -129,15 +126,16 @@ public:
     AString GetReferInviteUri(IN const ConfUser* pConfUser);
 
     IMS_SINT32 FindParticipant(IN IMS_UINT32 nConnectionId);
-    void ReOrder(IN IMtcCallManager& objCallManager,
-            IN CallConnectionIdManager& objConnectionIdManager);
+    void ReOrder(
+            IN IMtcCallManager& objCallManager, IN CallConnectionIdManager& objConnectionIdManager);
     void Login();
 
-    inline IMS_UINT32 GetSize() const
-    { return m_objParticipants.GetSize(); }
+    inline IMS_UINT32 GetSize() const { return m_objParticipants.GetSize(); }
 
-    inline ConferenceParticipant* GetAt(IN IMS_UINT32 nAt) // t.t
-    { return m_objParticipants.GetAt(nAt); }
+    inline ConferenceParticipant* GetAt(IN IMS_UINT32 nAt)  // t.t
+    {
+        return m_objParticipants.GetAt(nAt);
+    }
 
     ConfUser* GetConfUser(IN IMS_UINT32 nIndex) const;
 

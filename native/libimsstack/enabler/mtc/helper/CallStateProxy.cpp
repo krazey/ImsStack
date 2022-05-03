@@ -8,7 +8,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 CallStateProxy::CallStateProxy(IN IMtcCallManager& objCallManager) :
         IMSActivity(),
@@ -20,10 +19,7 @@ CallStateProxy::CallStateProxy(IN IMtcCallManager& objCallManager) :
     IMS_TRACE_D("+CallStateProxy", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CallStateProxy::~CallStateProxy()
-{
-}
+PUBLIC VIRTUAL CallStateProxy::~CallStateProxy() {}
 
 PUBLIC
 void CallStateProxy::AddListener(IN IMtcCallStateListener* pListener)
@@ -68,15 +64,15 @@ void CallStateProxy::RemoveListener(IN IMtcCallStateListener* pListener)
 
 PUBLIC
 void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN CallInfo& objCallInfo,
-        IN IMtcCall::State eState, IN IMS_SINT32 nReason/* = FAIL_REASON_NONE*/)
+        IN IMtcCall::State eState, IN IMS_SINT32 nReason /* = FAIL_REASON_NONE*/)
 {
     IMS_TRACE_D("UpdateCallState", 0, 0, 0);
     IMS_BOOL bTotalCallStateUpdated = UpdateTotalCallState();
 
-    CallStateDetails* pDetails = new CallStateDetails(nCallkey,
-            static_cast<IMtcCallStateListener::State>(eState),
-            static_cast<IMtcCallStateListener::Type>(objCallInfo.eCallType),
-            objCallInfo.bEmergency, nReason);
+    CallStateDetails* pDetails =
+            new CallStateDetails(nCallkey, static_cast<IMtcCallStateListener::State>(eState),
+                    static_cast<IMtcCallStateListener::Type>(objCallInfo.eCallType),
+                    objCallInfo.bEmergency, nReason);
 
     if (m_objSynchronousListeners.GetSize() > 0)
     {
@@ -93,19 +89,17 @@ void CallStateProxy::UpdateCallState(IN CallKey nCallkey, IN CallInfo& objCallIn
     }
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL CallStateProxy::DispatchMessage(IN IMSMSG& objMsg)
+PROTECTED VIRTUAL IMS_BOOL CallStateProxy::DispatchMessage(IN IMSMSG& objMsg)
 {
-
     switch (objMsg.GetName())
     {
         case MESSAGE_ASYNC_NOTIFY:
-            {
-                CallStateDetails* pDetails = reinterpret_cast<CallStateDetails*>(objMsg.nWparam);
-                NotifyToListeners(IMS_FALSE, pDetails, static_cast<IMS_BOOL>(objMsg.nLparam));
-                delete pDetails;
-                return IMS_TRUE;
-            }
+        {
+            CallStateDetails* pDetails = reinterpret_cast<CallStateDetails*>(objMsg.nWparam);
+            NotifyToListeners(IMS_FALSE, pDetails, static_cast<IMS_BOOL>(objMsg.nLparam));
+            delete pDetails;
+            return IMS_TRUE;
+        }
         default:
             break;
     }
@@ -159,8 +153,8 @@ IMtcCall::State CallStateProxy::CalculateTotalCallState()
 }
 
 PRIVATE
-void CallStateProxy::NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
-        IN IMS_BOOL bTotalCallStateUpdated)
+void CallStateProxy::NotifyToListeners(
+        IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails, IN IMS_BOOL bTotalCallStateUpdated)
 {
     IMS_TRACE_D("NotifyToListeners sync[%s]", _TRACE_B_(bSynchronous), 0, 0);
     IMSList<IMtcCallStateListener*> pListener =
@@ -174,10 +168,10 @@ void CallStateProxy::NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDet
 }
 
 PRIVATE
-void CallStateProxy::NotifyCallState(IN IMSList<IMtcCallStateListener*> objListeners,
-        IN CallStateDetails* pDetails)
+void CallStateProxy::NotifyCallState(
+        IN IMSList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
     {
         objListeners.GetAt(i)->OnCallStateChanged(pDetails->nCallKey, pDetails->eState,
                 pDetails->eType, pDetails->bEmergency, pDetails->nReason);
@@ -187,9 +181,9 @@ void CallStateProxy::NotifyCallState(IN IMSList<IMtcCallStateListener*> objListe
 PRIVATE
 void CallStateProxy::NotifyTotalCallState(IN IMSList<IMtcCallStateListener*> objListeners)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); i++)
     {
-        objListeners.GetAt(i)
-                ->OnTotalCallStateChanged(static_cast<IMtcCallStateListener::State>(m_eTotalState));
+        objListeners.GetAt(i)->OnTotalCallStateChanged(
+                static_cast<IMtcCallStateListener::State>(m_eTotalState));
     }
 }

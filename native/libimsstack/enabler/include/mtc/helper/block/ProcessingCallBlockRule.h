@@ -6,8 +6,7 @@
 
 class IMtcCallManager;
 
-class ProcessingCallBlockRule final:
-        public IMtcBlockRule
+class ProcessingCallBlockRule final : public IMtcBlockRule
 {
 public:
     explicit ProcessingCallBlockRule(IN IMtcCallManager& objCallManager);

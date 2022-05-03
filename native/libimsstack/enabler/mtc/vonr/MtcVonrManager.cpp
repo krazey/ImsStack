@@ -19,26 +19,24 @@
 #include "vonr/MtcVonrForQct.h"
 #include "vonr/MtcVonrManager.h"
 
-
 __IMS_TRACE_TAG_COM_UC__;
-
 
 PUBLIC
 // TODO, MTC BUILD
 MtcVonrManager::MtcVonrManager()
-// MtcVonrManager::MtcVonrManager(IN IMS_UINT32 nSlotId)
-//     : m_nSlotId(nSlotId)
-//     , m_objUCVoNRs(IMSList<MtcVonr*>())
-    : m_eTotalInitiateType(MtcVonr::VonrInitType::NONE)
-    , m_bMtk(IMS_FALSE)
+        // MtcVonrManager::MtcVonrManager(IN IMS_UINT32 nSlotId)
+        //     : m_nSlotId(nSlotId)
+        //     , m_objUCVoNRs(IMSList<MtcVonr*>())
+        :
+        m_eTotalInitiateType(MtcVonr::VonrInitType::NONE),
+        m_bMtk(IMS_FALSE)
 {
     //---------------------------------------------------------------------------------------------
     IMS_TRACE_I("+MtcVonrManager", 0, 0, 0);
     Initialize();
 }
 
-PUBLIC VIRTUAL
-MtcVonrManager::~MtcVonrManager()
+PUBLIC VIRTUAL MtcVonrManager::~MtcVonrManager()
 {
     //---------------------------------------------------------------------------------------------
     IMS_TRACE_I("~MtcVonrManager : [%" PFLS_x "]", this, 0, 0);
@@ -51,8 +49,7 @@ MtcVonrManager::~MtcVonrManager()
     // m_objUCVoNRs.Clear();
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MtcVonrManager::IsSupported()
+PUBLIC GLOBAL IMS_BOOL MtcVonrManager::IsSupported()
 {
     //---------------------------------------------------------------------------------------------
     // TODO: use carrier-config
@@ -91,8 +88,8 @@ IMS_BOOL MtcVonrManager::IsUacRequired(IN IMS_BOOL bWifi)
 }
 
 PUBLIC
-void MtcVonrManager::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
-        IN IMS_BOOL bEmergency)
+void MtcVonrManager::CheckBarring(
+        IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency)
 {
     //---------------------------------------------------------------------------------------------
     IMS_TRACE_D("CheckBarring", 0, 0, 0);
@@ -101,8 +98,7 @@ void MtcVonrManager::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
     pVoNR->CheckBarring(piMtcCall, eCallType, bEmergency);
 }
 
-PUBLIC VIRTUAL
-void MtcVonrManager::OnTerminated(IN MtcVonr* pUCVoNR)
+PUBLIC VIRTUAL void MtcVonrManager::OnTerminated(IN MtcVonr* pUCVoNR)
 {
     //---------------------------------------------------------------------------------------------
     IMS_TRACE_D("OnTerminated", 0, 0, 0);
@@ -116,8 +112,8 @@ void MtcVonrManager::OnTerminated(IN MtcVonr* pUCVoNR)
     // }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcVonrManager::IsOtherSessionAlive(IN MtcVonr* pUCVoNR, IN IMS_UINT32 nUacType)
+PUBLIC VIRTUAL IMS_BOOL MtcVonrManager::IsOtherSessionAlive(
+        IN MtcVonr* pUCVoNR, IN IMS_UINT32 nUacType)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -145,8 +141,7 @@ IMS_BOOL MtcVonrManager::IsOtherSessionAlive(IN MtcVonr* pUCVoNR, IN IMS_UINT32 
     return bResult;
 }
 
-PUBLIC VIRTUAL
-void MtcVonrManager::SetInitiateType(IN MtcVonr::VonrInitType eType)
+PUBLIC VIRTUAL void MtcVonrManager::SetInitiateType(IN MtcVonr::VonrInitType eType)
 {
     //---------------------------------------------------------------------------------------------
     if (m_eTotalInitiateType != MtcVonr::VonrInitType::NONE)
@@ -158,8 +153,7 @@ void MtcVonrManager::SetInitiateType(IN MtcVonr::VonrInitType eType)
     m_eTotalInitiateType = eType;
 }
 
-PUBLIC VIRTUAL
-MtcVonr::VonrInitType MtcVonrManager::GetTotalInitiateType()
+PUBLIC VIRTUAL MtcVonr::VonrInitType MtcVonrManager::GetTotalInitiateType()
 {
     //---------------------------------------------------------------------------------------------
     return m_eTotalInitiateType;

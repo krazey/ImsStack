@@ -13,90 +13,90 @@ class ISession;
 class IuMtcService
 {
 public:
-
-    static const IMS_SINT32 EVENT_U2I               = IMS_MSG_BASE_SERVICE;
-    static const IMS_SINT32 EVENT_I2U               = IMS_MSG_BASE_SERVICE + 100;
-    static const IMS_SINT32 MAXIMUM                 = (EVENT_I2U + 99);
+    static const IMS_SINT32 EVENT_U2I = IMS_MSG_BASE_SERVICE;
+    static const IMS_SINT32 EVENT_I2U = IMS_MSG_BASE_SERVICE + 100;
+    static const IMS_SINT32 MAXIMUM = (EVENT_I2U + 99);
 
     // --- Event : UI to IMS ----------------------------------------------------------------------
-    static const IMS_SINT32 OPEN_SESSION                    = (EVENT_U2I + 1);
-    static const IMS_SINT32 ATTCH_SESSION                   = (EVENT_U2I + 2);
-    static const IMS_SINT32 CLOSE_SESSION                   = (EVENT_U2I + 3);
-    static const IMS_SINT32 REGISTER_SERVICE                = (EVENT_U2I + 4);
-    static const IMS_SINT32 SRVCC_STATE_CHANGED             = (EVENT_U2I + 5);
+    static const IMS_SINT32 OPEN_SESSION = (EVENT_U2I + 1);
+    static const IMS_SINT32 ATTCH_SESSION = (EVENT_U2I + 2);
+    static const IMS_SINT32 CLOSE_SESSION = (EVENT_U2I + 3);
+    static const IMS_SINT32 REGISTER_SERVICE = (EVENT_U2I + 4);
+    static const IMS_SINT32 SRVCC_STATE_CHANGED = (EVENT_U2I + 5);
     static const IMS_SINT32 SET_TERMINAL_BASED_CALL_WAITING = (EVENT_U2I + 6);
 
     // HO
-    static const IMS_SINT32 HO_CONFIRM              = (EVENT_U2I + 50 + 1);
-    static const IMS_SINT32 HO_HANDOVER             = (EVENT_U2I + 50 + 2);
+    static const IMS_SINT32 HO_CONFIRM = (EVENT_U2I + 50 + 1);
+    static const IMS_SINT32 HO_HANDOVER = (EVENT_U2I + 50 + 2);
 
     // --- Event : IMS to UI ----------------------------------------------------------------------
-    static const IMS_SINT32 SERVICE_CHANGED         = (EVENT_I2U + 1);
-    static const IMS_SINT32 E_SERVICE_CHANGED       = (EVENT_I2U + 2);
-    static const IMS_SINT32 INCOMING_CALL           = (EVENT_I2U + 3);
-    static const IMS_SINT32 INCOMING_CALL_INFO      = (EVENT_I2U + 4);
-    static const IMS_SINT32 AUTO_REJECTED_CALL      = (EVENT_I2U + 5);
+    static const IMS_SINT32 SERVICE_CHANGED = (EVENT_I2U + 1);
+    static const IMS_SINT32 E_SERVICE_CHANGED = (EVENT_I2U + 2);
+    static const IMS_SINT32 INCOMING_CALL = (EVENT_I2U + 3);
+    static const IMS_SINT32 INCOMING_CALL_INFO = (EVENT_I2U + 4);
+    static const IMS_SINT32 AUTO_REJECTED_CALL = (EVENT_I2U + 5);
 
     // HO
-    static const IMS_SINT32 HO_CONFIRMED            = (EVENT_I2U + 50 + 1);
+    static const IMS_SINT32 HO_CONFIRMED = (EVENT_I2U + 50 + 1);
 
-    static const IMS_SINT32 DIALOGS_NOTIFY_INFO     = (EVENT_I2U + 60 + 1);
-
-    enum
-    {
-        SERVICE_NONE            = 0,
-        SERVICE_VOIP            = 1,
-        SERVICE_VT              = 2,
-        SERVICE_UC              = 3,
-        SERVICE_EMERGENCY       = 4,
-        SERVICE_OPENING         = 5,
-    }; // SERVICE_STATE
+    static const IMS_SINT32 DIALOGS_NOTIFY_INFO = (EVENT_I2U + 60 + 1);
 
     enum
     {
-        ES_IDLE                 = 0,
-        ES_OPENING              = 1,
-        ES_OPENED               = 2,
-        ES_UNAVAILABLE          = 3,
-        ES_ES                   = 4,
+        SERVICE_NONE = 0,
+        SERVICE_VOIP = 1,
+        SERVICE_VT = 2,
+        SERVICE_UC = 3,
+        SERVICE_EMERGENCY = 4,
+        SERVICE_OPENING = 5,
+    };  // SERVICE_STATE
+
+    enum
+    {
+        ES_IDLE = 0,
+        ES_OPENING = 1,
+        ES_OPENED = 2,
+        ES_UNAVAILABLE = 3,
+        ES_ES = 4,
     };
 
     enum
     {
-        SERVICESTATUS_REASON_UNKNOWN            = 0,
-        SERVICESTATUS_REASON_NETWORKDISABLE     = 1,
-        SERVICESTATUS_REASON_SIMSINVALID        = 2,
-        SERVICESTATUS_REASON_BYSERVER           = 3,
-        SERVICESTATUS_REASON_USERSELECT         = 4,
-        SERVICESTATUS_REASON_FORBIDDEN          = 5,
+        SERVICESTATUS_REASON_UNKNOWN = 0,
+        SERVICESTATUS_REASON_NETWORKDISABLE = 1,
+        SERVICESTATUS_REASON_SIMSINVALID = 2,
+        SERVICESTATUS_REASON_BYSERVER = 3,
+        SERVICESTATUS_REASON_USERSELECT = 4,
+        SERVICESTATUS_REASON_FORBIDDEN = 5,
     };
 
     enum
     {
-        ES_IDLE_REASON_UNKNOWN      = -1,
-        ES_IDLE_REASON_NONE         = 0,
-        ES_IDLE_REASON_WITH_ECM     = 1,
+        ES_IDLE_REASON_UNKNOWN = -1,
+        ES_IDLE_REASON_NONE = 0,
+        ES_IDLE_REASON_WITH_ECM = 1,
     };
 
     enum
     {
         ES_UNAVAILABLE_REASON_UNKNOWN = -1,
-        ES_UNAVAILABLE_REASON_NONE    = 0,
+        ES_UNAVAILABLE_REASON_NONE = 0,
         ES_UNAVAILABLE_REASON_NO_CSFB = 1,
-        ES_UNAVAILABLE_REASON_SSAC    = 2
+        ES_UNAVAILABLE_REASON_SSAC = 2
     };
 
     inline static IMS_BOOL IsMsg(IN IMS_SINT32 nMsg)
-    { return ((nMsg > EVENT_U2I) && (nMsg < MAXIMUM)); }
-
+    {
+        return ((nMsg > EVENT_U2I) && (nMsg < MAXIMUM));
+    }
 };
 
 class IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceBaseParam()
-        : strUIKey(AString::ConstNull())
-        , nIMSKey(0)
+    inline IUUCServiceBaseParam() :
+            strUIKey(AString::ConstNull()),
+            nIMSKey(0)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceBaseParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceBaseParam), this, 0);
@@ -108,18 +108,17 @@ public:
     }
 
 public:
-    AString             strUIKey;
-    IMS_UINTP           nIMSKey;
+    AString strUIKey;
+    IMS_UINTP nIMSKey;
 };
 
-class IUUCServiceOpenSessionParam
-    : public IUUCServiceBaseParam
+class IUUCServiceOpenSessionParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceOpenSessionParam()
-        : IUUCServiceBaseParam()
-        , pService(IMS_NULL)
-        , eCallType(CallType::VOIP)
+    inline IUUCServiceOpenSessionParam() :
+            IUUCServiceBaseParam(),
+            pService(IMS_NULL),
+            eCallType(CallType::VOIP)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceOpenSessionParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceOpenSessionParam), this, 0);
@@ -131,17 +130,16 @@ public:
     }
 
 public:
-    IMtcService*         pService;
+    IMtcService* pService;
     CallType eCallType;
 };
 
-class IUUCServiceAttachSessionParam
-    : public IUUCServiceBaseParam
+class IUUCServiceAttachSessionParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceAttachSessionParam()
-        : IUUCServiceBaseParam()
-        , nSessionKey(0)
+    inline IUUCServiceAttachSessionParam() :
+            IUUCServiceBaseParam(),
+            nSessionKey(0)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceAttachSessionParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceAttachSessionParam), this, 0);
@@ -153,11 +151,10 @@ public:
     }
 
 public:
-    IMS_UINTP        nSessionKey;
+    IMS_UINTP nSessionKey;
 };
 
-class IUUCServiceCloseSessionParam
-    : public IUUCServiceBaseParam
+class IUUCServiceCloseSessionParam : public IUUCServiceBaseParam
 {
 public:
     inline IUUCServiceCloseSessionParam()
@@ -174,13 +171,12 @@ public:
 public:
 };
 
-class IUUCServiceRegisterServiceParam
-    : public IUUCServiceBaseParam
+class IUUCServiceRegisterServiceParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceRegisterServiceParam()
-        : IUUCServiceBaseParam()
-        , strServiceName(AString::ConstNull())
+    inline IUUCServiceRegisterServiceParam() :
+            IUUCServiceBaseParam(),
+            strServiceName(AString::ConstNull())
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceRegisterServiceParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceRegisterServiceParam), this, 0);
@@ -192,17 +188,16 @@ public:
     }
 
 public:
-    AString            strServiceName;
+    AString strServiceName;
 };
 
-class IUUCServiceChangedStatusParam
-    : public IUUCServiceBaseParam
+class IUUCServiceChangedStatusParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceChangedStatusParam()
-        : IUUCServiceBaseParam()
-        , eStatus(IuMtcService::SERVICE_NONE)
-        , eReason(IuMtcService::SERVICESTATUS_REASON_UNKNOWN)
+    inline IUUCServiceChangedStatusParam() :
+            IUUCServiceBaseParam(),
+            eStatus(IuMtcService::SERVICE_NONE),
+            eReason(IuMtcService::SERVICESTATUS_REASON_UNKNOWN)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceChangedStatusParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceChangedStatusParam), this, 0);
@@ -214,18 +209,17 @@ public:
     }
 
 public:
-    IMS_SINT32        eStatus;
-    IMS_SINT32        eReason;
+    IMS_SINT32 eStatus;
+    IMS_SINT32 eReason;
 };
 
-class IUUCEServiceChangedStatusParam
-    : public IUUCServiceBaseParam
+class IUUCEServiceChangedStatusParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCEServiceChangedStatusParam()
-        : IUUCServiceBaseParam()
-        , eStatus(IuMtcService::SERVICE_NONE)
-        , eReason(IuMtcService::SERVICESTATUS_REASON_UNKNOWN)
+    inline IUUCEServiceChangedStatusParam() :
+            IUUCServiceBaseParam(),
+            eStatus(IuMtcService::SERVICE_NONE),
+            eReason(IuMtcService::SERVICESTATUS_REASON_UNKNOWN)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCEServiceChangedStatusParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCEServiceChangedStatusParam), this, 0);
@@ -237,8 +231,8 @@ public:
     }
 
 public:
-    IMS_SINT32        eStatus;
-    IMS_SINT32        eReason;
+    IMS_SINT32 eStatus;
+    IMS_SINT32 eReason;
 };
 
 /*
@@ -371,14 +365,13 @@ public:
 };
 */
 
-class IUUCHOConfirmParam
-    : public IUUCServiceBaseParam
+class IUUCHOConfirmParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCHOConfirmParam()
-        : IUUCServiceBaseParam()
-        , eFrom(-1)
-        , eTo(-1)
+    inline IUUCHOConfirmParam() :
+            IUUCServiceBaseParam(),
+            eFrom(-1),
+            eTo(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCHOConfirmParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCHOConfirmParam), this, 0);
@@ -390,18 +383,17 @@ public:
     }
 
 public:
-    IMS_SINT32                eFrom;
-    IMS_SINT32                eTo;
+    IMS_SINT32 eFrom;
+    IMS_SINT32 eTo;
 };
 
-class IUUCHOHandOverParam
-    : public IUUCServiceBaseParam
+class IUUCHOHandOverParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCHOHandOverParam()
-        : IUUCServiceBaseParam()
-        , eFrom(-1)
-        , eTo(-1)
+    inline IUUCHOHandOverParam() :
+            IUUCServiceBaseParam(),
+            eFrom(-1),
+            eTo(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCHOHandOverParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCHOHandOverParam), this, 0);
@@ -413,18 +405,17 @@ public:
     }
 
 public:
-    IMS_SINT32                eFrom;
-    IMS_SINT32                eTo;
+    IMS_SINT32 eFrom;
+    IMS_SINT32 eTo;
 };
 
-class IUUCHOConfirmedParam
-    : public IUUCServiceBaseParam
+class IUUCHOConfirmedParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCHOConfirmedParam()
-        : IUUCServiceBaseParam()
-        , eResult(-1)
-        , eReason(-1)
+    inline IUUCHOConfirmedParam() :
+            IUUCServiceBaseParam(),
+            eResult(-1),
+            eReason(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCHOConfirmedParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCHOConfirmedParam), this, 0);
@@ -436,17 +427,16 @@ public:
     }
 
 public:
-    IMS_SINT32                eResult;
-    IMS_SINT32                eReason;
+    IMS_SINT32 eResult;
+    IMS_SINT32 eReason;
 };
 
-class IUUCServiceDialogsNotifyInfoParam
-    : public IUUCServiceBaseParam
+class IUUCServiceDialogsNotifyInfoParam : public IUUCServiceBaseParam
 {
 public:
-    inline IUUCServiceDialogsNotifyInfoParam()
-        : IUUCServiceBaseParam()
-        , lstDialogInfos(IMSList<DialogInfo*>())
+    inline IUUCServiceDialogsNotifyInfoParam() :
+            IUUCServiceBaseParam(),
+            lstDialogInfos(IMSList<DialogInfo*>())
     {
         IMS_TRACE_MEM("uc", "uc_M : IUUCServiceDialogsNotifyInfoParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IUUCServiceDialogsNotifyInfoParam), this, 0);
@@ -468,8 +458,7 @@ public:
     }
 
 public:
-    IMSList<DialogInfo*>   lstDialogInfos;
-
+    IMSList<DialogInfo*> lstDialogInfos;
 };
 
-#endif // INTERFACE_UI_MTC_SERVICE_H_
+#endif  // INTERFACE_UI_MTC_SERVICE_H_

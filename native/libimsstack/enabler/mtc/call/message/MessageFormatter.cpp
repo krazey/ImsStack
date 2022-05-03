@@ -37,15 +37,11 @@ MessageFormatter::MessageFormatter(IN IMtcSessionContext& objContext) :
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-MessageFormatter::~MessageFormatter()
-{
-}
+PUBLIC VIRTUAL MessageFormatter::~MessageFormatter() {}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormStartMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
 {
     if (InitVariables(FormType::START) == IMS_FAILURE)
     {
@@ -68,8 +64,8 @@ IMS_RESULT MessageFormatter::FormStartMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(IN IMS_BOOL bIncludeAlertInfo)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(
+        IN IMS_BOOL bIncludeAlertInfo)
 {
     if (InitVariables(FormType::PROVISIONAL_RESPONSE) == IMS_FAILURE)
     {
@@ -86,8 +82,7 @@ IMS_RESULT MessageFormatter::FormProvisionalResponseMessage(IN IMS_BOOL bInclude
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormPrackMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormPrackMessage()
 {
     if (InitVariables(FormType::PRACK) == IMS_FAILURE)
     {
@@ -99,8 +94,7 @@ IMS_RESULT MessageFormatter::FormPrackMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormPrackResponseMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormPrackResponseMessage()
 {
     if (InitVariables(FormType::PRACK_RESPONSE) == IMS_FAILURE)
     {
@@ -114,8 +108,7 @@ IMS_RESULT MessageFormatter::FormPrackResponseMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormEarlyUpdateMessage(IN UpdateType eUpdateType)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormEarlyUpdateMessage(IN UpdateType eUpdateType)
 {
     if (InitVariables(FormType::EARLY_UPDATE) == IMS_FAILURE)
     {
@@ -132,8 +125,7 @@ IMS_RESULT MessageFormatter::FormEarlyUpdateMessage(IN UpdateType eUpdateType)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormEarlyUpdateResponseMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormEarlyUpdateResponseMessage()
 {
     if (InitVariables(FormType::EARLY_UPDATE_RESPONSE) == IMS_FAILURE)
     {
@@ -147,8 +139,7 @@ IMS_RESULT MessageFormatter::FormEarlyUpdateResponseMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormAcceptMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptMessage()
 {
     if (InitVariables(FormType::ACCEPT) == IMS_FAILURE)
     {
@@ -164,8 +155,7 @@ IMS_RESULT MessageFormatter::FormAcceptMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormRejectMessage(
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormRejectMessage(
         IN const FailReason& objReason, OUT IMS_SINT32& eStatusCode, OUT AString& strPhrase)
 {
     if (InitVariables(FormType::REJECT) == IMS_FAILURE)
@@ -181,8 +171,7 @@ IMS_RESULT MessageFormatter::FormRejectMessage(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormAckMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAckMessage()
 {
     if (InitVariables(FormType::ACK) == IMS_FAILURE)
     {
@@ -194,9 +183,8 @@ IMS_RESULT MessageFormatter::FormAckMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormUpdateMessage(IN UpdateType eUpdateType,
-        IN IMS_BOOL bIncludeAlertInfo)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormUpdateMessage(
+        IN UpdateType eUpdateType, IN IMS_BOOL bIncludeAlertInfo)
 {
     if (InitVariables(FormType::UPDATE) == IMS_FAILURE)
     {
@@ -216,8 +204,7 @@ IMS_RESULT MessageFormatter::FormUpdateMessage(IN UpdateType eUpdateType,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
 {
     if (InitVariables(FormType::ACCEPT_UPDATE) == IMS_FAILURE)
     {
@@ -231,8 +218,7 @@ IMS_RESULT MessageFormatter::FormAcceptUpdateMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormCancelUpdateMessage(IN const FailReason& objReason)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormCancelUpdateMessage(IN const FailReason& objReason)
 {
     if (InitVariables(FormType::CANCEL_UPDATE) == IMS_FAILURE)
     {
@@ -248,8 +234,7 @@ IMS_RESULT MessageFormatter::FormCancelUpdateMessage(IN const FailReason& objRea
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailReason& objReason)
+PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailReason& objReason)
 {
     if (InitVariables(FormType::TERMINATE) == IMS_FAILURE)
     {
@@ -265,8 +250,7 @@ IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailReason& objReason
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PROTECTED VIRTUAL
-void MessageFormatter::SetLocation()
+PROTECTED VIRTUAL void MessageFormatter::SetLocation()
 {
     ISipMessage* piSipMessage = m_piNextMessage->GetMessage();
     if (piSipMessage == IMS_NULL)
@@ -274,7 +258,7 @@ void MessageFormatter::SetLocation()
         return;
     }
 
-    IMtcCall* piUcSession = IMS_NULL; // TODO
+    IMtcCall* piUcSession = IMS_NULL;  // TODO
 
     UCLocationObject objLocation;
     // TODO, avoid to use ISipMessage as parameter
@@ -317,7 +301,7 @@ void MessageFormatter::SetPPreferredServiceHeader()
 PRIVATE
 void MessageFormatter::SetAcceptContactHeader()
 {
-    AString strAcceptContact ;
+    AString strAcceptContact;
     strAcceptContact.Append(TextParser::CHAR_ASTERISK);
     strAcceptContact.Append(TextParser::CHAR_SEMICOLON);
 
@@ -341,8 +325,8 @@ void MessageFormatter::SetAcceptContactHeader()
 PRIVATE
 void MessageFormatter::SetAcceptHeader()
 {
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP,
-            ISipHeader::ACCEPT);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, MessageUtil::STR_ACCEPT_TYPE_APPLICATION_SDP, ISipHeader::ACCEPT);
     MessageUtil::AddValueIfNotExists(m_piNextMessage,
             MessageUtil::STR_ACCEPT_TYPE_APPLICATION_3GPP_IMS_XML, ISipHeader::ACCEPT);
 }
@@ -377,21 +361,21 @@ void MessageFormatter::AddSrvccFeature()
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_A, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_B, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         piFeatureCaps->AddFeature(MessageUtil::STR_SRVCC_FEATURE_M, AString::ConstEmpty(),
                 SipMethod::INVITE, ISipMessage::TYPE_REQUEST);
@@ -410,19 +394,19 @@ void MessageFormatter::SetSrvccContactParameter()
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_A,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_A, 0);
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_B,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_B, 0);
     }
 
     if (MessageUtil::ContainsValue(piPreviousMessage, MessageUtil::STR_SRVCC_FEATURE_M,
-            ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
+                ISipHeader::UNKNOWN, SipHeaderName::FEATURE_CAPS))
     {
         m_objSession.SetContactParameter(MessageUtil::STR_SRVCC_FEATURE_M, 0);
     }
@@ -433,7 +417,7 @@ void MessageFormatter::SetSrvccContactParameter()
 PRIVATE
 void MessageFormatter::SetKeepAliveProfile()
 {
-    IMS_BOOL bKeepAlive = IMS_FALSE; // TODO, SESSION_SP_KEEP_ALIVE
+    IMS_BOOL bKeepAlive = IMS_FALSE;  // TODO, SESSION_SP_KEEP_ALIVE
 
     if (!bKeepAlive)
     {
@@ -492,7 +476,7 @@ void MessageFormatter::SetCallerIdHeader()
 PRIVATE
 void MessageFormatter::SetTipHeader()
 {
-    IMS_BOOL bTip = IMS_FALSE; // TODO, SESSION_SP_TIP
+    IMS_BOOL bTip = IMS_FALSE;  // TODO, SESSION_SP_TIP
     if (!bTip)
     {
         return;
@@ -514,8 +498,8 @@ void MessageFormatter::SetTipHeader()
 
     if (bAddTagToSupported)
     {
-        MessageUtil::AddValueIfNotExists(m_piNextMessage, Sip::STR_FROM_CHANGE,
-                ISipHeader::SUPPORTED);
+        MessageUtil::AddValueIfNotExists(
+                m_piNextMessage, Sip::STR_FROM_CHANGE, ISipHeader::SUPPORTED);
     }
 
     if (m_eFormType != FormType::PROVISIONAL_RESPONSE)
@@ -523,13 +507,13 @@ void MessageFormatter::SetTipHeader()
         return;
     }
 
-    IMS_SINT32 eTipMode = TIP_MODE_TEMPORARY; // TODO, SESSION_SP_TIP_MODE
+    IMS_SINT32 eTipMode = TIP_MODE_TEMPORARY;  // TODO, SESSION_SP_TIP_MODE
     if (eTipMode != TIP_MODE_TEMPORARY)
     {
         return;
     }
 
-    IMS_SINT32 eTipType = TIP_TYPE_IDENTITY; // TODO, from user settings
+    IMS_SINT32 eTipType = TIP_TYPE_IDENTITY;  // TODO, from user settings
     if (eTipType == TIP_TYPE_RESTRICTED)
     {
         MessageUtil::SetHeader(m_piNextMessage, MessageUtil::STR_ID, ISipHeader::PRIVACY);
@@ -554,17 +538,17 @@ void MessageFormatter::SetSupportedHeader()
 
     MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_199, ISipHeader::SUPPORTED);
 
-    IMS_BOOL bHistoryInfo = IMS_FALSE; // TODO
+    IMS_BOOL bHistoryInfo = IMS_FALSE;  // TODO
     if (bHistoryInfo)
     {
-        MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_HISTINFO,
-                ISipHeader::SUPPORTED);
+        MessageUtil::AddValueIfNotExists(
+                m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
     }
 
     if (m_objContext.IsEct())
     {
-        MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_REPLACES,
-                ISipHeader::SUPPORTED);
+        MessageUtil::AddValueIfNotExists(
+                m_piNextMessage, MessageUtil::STR_REPLACES, ISipHeader::SUPPORTED);
     }
 }
 
@@ -575,7 +559,7 @@ void MessageFormatter::SetPreconditionHeader()
 {
     if (m_eFormType != FormType::START &&
             !m_objContext.GetExtensionSet().IsAvailableOnBoth(
-            MtcExtensionSet::OPTION_TAG_PRECONDITION))
+                    MtcExtensionSet::OPTION_TAG_PRECONDITION))
     {
         return;
     }
@@ -589,33 +573,33 @@ void MessageFormatter::SetPreconditionHeader()
         {
             bInclude = IMS_TRUE;
         }
-            break;
+        break;
         case FormType::EARLY_UPDATE:
         {
             bInclude = IMS_TRUE;
-            eHeaderType = ISipHeader::REQUIRE; // TODO, B_SEND_UPDATE_WITH_REQUIRE_PRECONDITION
+            eHeaderType = ISipHeader::REQUIRE;  // TODO, B_SEND_UPDATE_WITH_REQUIRE_PRECONDITION
         }
-            break;
+        break;
         case FormType::UPDATE:
         {
-            bInclude = IMS_TRUE; // TODO, B_PRECONDITION_SUPPORTED_IN_REINVITE
+            bInclude = IMS_TRUE;  // TODO, B_PRECONDITION_SUPPORTED_IN_REINVITE
         }
-            break;
-        case FormType::PROVISIONAL_RESPONSE: // FALL_THROUGH
-        case FormType::PRACK_RESPONSE: // FALL_THROUGH
-        case FormType::EARLY_UPDATE_RESPONSE: // FALL_THROUGH
+        break;
+        case FormType::PROVISIONAL_RESPONSE:   // FALL_THROUGH
+        case FormType::PRACK_RESPONSE:         // FALL_THROUGH
+        case FormType::EARLY_UPDATE_RESPONSE:  // FALL_THROUGH
         case FormType::ACCEPT:
         {
             bInclude = IMS_TRUE;
             eHeaderType = ISipHeader::REQUIRE;
         }
-            break;
+        break;
         case FormType::ACCEPT_UPDATE:
         {
-            bInclude = IMS_TRUE; // TODO, check condition
+            bInclude = IMS_TRUE;  // TODO, check condition
             eHeaderType = ISipHeader::REQUIRE;
         }
-            break;
+        break;
         default:
             break;
     }
@@ -635,8 +619,8 @@ void MessageFormatter::SetPEarlyMediaHeader()
 {
     // TODO : check condition
 
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, MessageUtil::STR_SUPPORTED,
-            ISipHeader::P_EARLY_MEDIA);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, MessageUtil::STR_SUPPORTED, ISipHeader::P_EARLY_MEDIA);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -663,8 +647,8 @@ void MessageFormatter::SetReasonHeader(IN CONST AString& strReason)
         return;
     }
 
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, strReason, ISipHeader::UNKNOWN,
-            SipHeaderName::REASON);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, strReason, ISipHeader::UNKNOWN, SipHeaderName::REASON);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -867,7 +851,7 @@ void MessageFormatter::GetTerminateReason(IN const FailReason& objReason, OUT AS
         case FAIL_REASON_SESSION_CANCELED:
             strReason = MessageUtil::STR_RELEASE_CAUSE_4;
             break;
-        case FAIL_REASON_SESSION_RES_TIMEOUT: // FALL_THROUGH
+        case FAIL_REASON_SESSION_RES_TIMEOUT:  // FALL_THROUGH
         case FAIL_REASON_TO_MO_PROGRESSING:
             strReason = MessageUtil::STR_RELEASE_CAUSE_5;
             break;
@@ -902,12 +886,12 @@ IMS_RESULT MessageFormatter::SetNextMessage()
 {
     switch (m_eFormType)
     {
-        case FormType::START: // FALL_THROUGH
-        case FormType::PRACK: // FALL_THROUGH
-        case FormType::EARLY_UPDATE: // FALL_THROUGH
-        case FormType::ACK: // FALL_THROUGH
-        case FormType::UPDATE: // FALL_THROUGH
-        case FormType::CANCEL_UPDATE: // FALL_THROUGH
+        case FormType::START:          // FALL_THROUGH
+        case FormType::PRACK:          // FALL_THROUGH
+        case FormType::EARLY_UPDATE:   // FALL_THROUGH
+        case FormType::ACK:            // FALL_THROUGH
+        case FormType::UPDATE:         // FALL_THROUGH
+        case FormType::CANCEL_UPDATE:  // FALL_THROUGH
         case FormType::TERMINATE:
         {
             m_piNextMessage = m_objSession.GetNextRequest();
@@ -916,12 +900,12 @@ IMS_RESULT MessageFormatter::SetNextMessage()
                 return IMS_FAILURE;
             }
         }
-            break;
-        case FormType::PROVISIONAL_RESPONSE: // FALL_THROUGH
-        case FormType::PRACK_RESPONSE: // FALL_THROUGH
-        case FormType::EARLY_UPDATE_RESPONSE: // FALL_THROUGH
-        case FormType::ACCEPT: // FALL_THROUGH
-        case FormType::REJECT: // FALL_THROUGH
+        break;
+        case FormType::PROVISIONAL_RESPONSE:   // FALL_THROUGH
+        case FormType::PRACK_RESPONSE:         // FALL_THROUGH
+        case FormType::EARLY_UPDATE_RESPONSE:  // FALL_THROUGH
+        case FormType::ACCEPT:                 // FALL_THROUGH
+        case FormType::REJECT:                 // FALL_THROUGH
         case FormType::ACCEPT_UPDATE:
         {
             m_piNextMessage = m_objSession.GetNextResponse();
@@ -930,7 +914,7 @@ IMS_RESULT MessageFormatter::SetNextMessage()
                 return IMS_FAILURE;
             }
         }
-            break;
+        break;
         default:
             return IMS_FAILURE;
             break;

@@ -22,4 +22,4 @@ private:
     IMutex* m_piLock;
     IMSMap<IMS_UINT32, IMtcApp*> m_objMtcApps;
 };
-#endif // MTC_FACTORY_H_
+#endif  // MTC_FACTORY_H_

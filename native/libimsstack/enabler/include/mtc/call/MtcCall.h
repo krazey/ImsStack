@@ -59,25 +59,15 @@ public:
             IN JniMediaSessionThread* pJniMediaThread) override;
     void Detach() override;
 
-    void Start(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
+    void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
 
-    void StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+    void StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMSList<ConfUser*> lstUsers) override;
-    void StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
+    void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const IMSList<ConfUser*> objUsers) override;
-    void HandleIncoming(
-            IN ISession* piSession,
-            IN JniMtcServiceThread* pServiceThread) override;
+    void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     void HandleUserAlert() override;
     void Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
     void Reject(IN const FailReason& objReason) override;
@@ -110,42 +100,58 @@ public:
     inline MtcUiNotifier& GetUiNotifier() override { return m_objUiNotifier; }
     inline IMtcMediaManager& GetMediaManager() override { return m_objMediaManager; }
     inline IMtcPreconditionManager& GetPreconditionManager() override
-    { return m_objPreconditionManager; }
+    {
+        return m_objPreconditionManager;
+    }
     UpdatingInfo& GetUpdatingInfo() override;
     MtcSession* CreateSession(IN ISession& objSession) override;
     IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override;
     void DeleteUpdatingInfo() override;
     inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
-    { return m_objSupplementaryService; }
+    {
+        return m_objSupplementaryService;
+    }
     inline IMS_SINT32 GetSlotId() override { return m_objContext.GetSlotId(); }
     inline MtcDialingPlan& GetDialingPlan() override { return m_objContext.GetDialingPlan(); }
     inline IMtcService* GetServiceByType(IN ServiceType eServiceType) override
-    { return m_objContext.GetServiceByType(eServiceType); }
+    {
+        return m_objContext.GetServiceByType(eServiceType);
+    }
     inline IMtcCallManager& GetCallManager() override { return m_objContext.GetCallManager(); }
     inline MtcCallController& GetCallController() override
-    { return m_objContext.GetCallController(); }
+    {
+        return m_objContext.GetCallController();
+    }
     inline MtcVonrManager& GetVonrManager() override { return m_objContext.GetVonrManager(); }
     inline MtcConfigurationProxy& GetConfigurationProxy() override
-    { return m_objContext.GetConfigurationProxy(); }
+    {
+        return m_objContext.GetConfigurationProxy();
+    }
     inline CallStateProxy& GetCallStateProxy() override { return m_objContext.GetCallStateProxy(); }
     inline MtcImsEventReceiver& GetImsEventReceiver() override
-    { return m_objContext.GetImsEventReceiver(); }
+    {
+        return m_objContext.GetImsEventReceiver();
+    }
     inline MtcAosConnector* GetAosConnector(IN ServiceType eServiceType) override
-    { return m_objContext.GetAosConnector(eServiceType); }
+    {
+        return m_objContext.GetAosConnector(eServiceType);
+    }
     inline MtcSipInterfaceFactory& GetSipInterfaceFactory() override
-    { return m_objContext.GetSipInterfaceFactory(); }
+    {
+        return m_objContext.GetSipInterfaceFactory();
+    }
     inline ConferenceManager& GetConferenceManager() override
-    { return m_objContext.GetConferenceManager(); }
-    inline EctManager* GetEctManager() override
-    { return m_objContext.GetEctManager(); }
+    {
+        return m_objContext.GetConferenceManager();
+    }
+    inline EctManager* GetEctManager() override { return m_objContext.GetEctManager(); }
 
     inline void SetSession(IN MtcSession* pSession) override { m_pSession = pSession; }
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_bHeldByMe = bHeldByMe; }
 
     void SessionAlerting(IN ISession* piSession) override;
-    void SessionReferenceReceived(
-            IN ISession* piSession, IN IReference* piReference) override;
+    void SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference) override;
     void SessionStarted(IN ISession* piSession) override;
     void SessionStartFailed(IN ISession* piSession) override;
     void SessionTerminated(IN ISession* piSession) override;

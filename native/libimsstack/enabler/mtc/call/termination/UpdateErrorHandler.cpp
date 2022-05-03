@@ -15,9 +15,7 @@ UpdateErrorHandler::UpdateErrorHandler(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC
-UpdateErrorHandler::~UpdateErrorHandler()
-{
-}
+UpdateErrorHandler::~UpdateErrorHandler() {}
 
 PUBLIC
 FailReason UpdateErrorHandler::Handle(IN const IMessage* piMessage) const
@@ -85,8 +83,7 @@ FailReason UpdateErrorHandler::GetFailReasonFor4xxResponse(IN const IMessage& ob
             return FailReason(FAIL_REASON_SESSION_DESTROYED, nStatusCode);
 
         case SipStatusCode::SC_491:
-            return FailReason(
-                    FAIL_REASON_SESSION_RETRY,
+            return FailReason(FAIL_REASON_SESSION_RETRY,
                     GetGlareTimeMillisecond(m_objContext.GetCallInfo().ePeerType));
     }
 

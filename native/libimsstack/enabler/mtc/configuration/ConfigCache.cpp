@@ -12,8 +12,7 @@ ConfigCache::ConfigCache() :
     IMS_TRACE_I("+ConfigCache", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-ConfigCache::~ConfigCache()
+PUBLIC VIRTUAL ConfigCache::~ConfigCache()
 {
     IMS_TRACE_I("~ConfigCache", 0, 0, 0);
     m_objBooleanCache.Clear();
@@ -40,7 +39,6 @@ void ConfigCache::PutCache(IN Feature eFeature, IN IMS_BOOL bValue)
 PUBLIC
 void ConfigCache::PutCache(IN Feature eFeature, const IN AString& strValue)
 {
-
     IMS_TRACE_I("PutCache. Feature = [%d] value=[%s]", eFeature, strValue.GetStr(), 0);
 
     m_objStringCache.SetValue(eFeature, strValue);
@@ -137,9 +135,7 @@ IMS_BOOL ConfigCache::HasStringCache(IN Feature eFeature) const
 PUBLIC
 IMS_BOOL ConfigCache::IsEmpty() const
 {
-    if (m_objIntegerCache.IsEmpty() &&
-            m_objBooleanCache.IsEmpty() &&
-            m_objStringCache.IsEmpty())
+    if (m_objIntegerCache.IsEmpty() && m_objBooleanCache.IsEmpty() && m_objStringCache.IsEmpty())
     {
         return IMS_TRUE;
     }

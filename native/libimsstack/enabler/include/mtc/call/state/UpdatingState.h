@@ -5,8 +5,7 @@
 #include "call/state/MtcCallState.h"
 #include "MtcDef.h"
 
-class UpdatingState :
-        public MtcCallState
+class UpdatingState : public MtcCallState
 {
 public:
     UpdatingState(IN IMtcCallContext& objContext);
@@ -38,7 +37,6 @@ private:
     CallStateName HandleReceivedModificationSucceeded();
     void RecoverModificationFailure();
     void StopTimer();
-
 };
 
 #endif

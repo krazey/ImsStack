@@ -6,8 +6,7 @@
 
 class IMtcCallManager;
 
-class CallCountBlockRule final:
-        public IMtcBlockRule
+class CallCountBlockRule final : public IMtcBlockRule
 {
 public:
     explicit CallCountBlockRule(IN IMS_UINT32 nMaxCount, IN IMtcCallManager& objCallManager);

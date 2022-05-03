@@ -27,9 +27,7 @@ ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC
-ParticipantInfo::~ParticipantInfo()
-{
-}
+ParticipantInfo::~ParticipantInfo() {}
 
 /*
 PUBLIC
@@ -77,8 +75,8 @@ AString ParticipantInfo::GetRemoteUri() const
         return GetRemoteUriForConferenceCall();
     }
 
-    const SuppService* pSuppService = m_objContext.GetSupplementaryService()
-            .Get(SuppType::TARGET_URI);
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SuppType::TARGET_URI);
     if (pSuppService != IMS_NULL)
     {
         IMS_TRACE_D("GetRemoteUri : From supplementary service[%s]",
@@ -93,8 +91,7 @@ AString ParticipantInfo::GetRemoteUri() const
 PUBLIC
 AString ParticipantInfo::GetRemoteDisplayName() const
 {
-    const SuppService* pSuppService = m_objContext.GetSupplementaryService()
-            .Get(SuppType::CNAP);
+    const SuppService* pSuppService = m_objContext.GetSupplementaryService().Get(SuppType::CNAP);
     if (pSuppService != IMS_NULL)
     {
         return pSuppService->strValue;
@@ -106,8 +103,8 @@ AString ParticipantInfo::GetRemoteDisplayName() const
 PUBLIC
 OipType ParticipantInfo::GetOipType() const
 {
-    const SuppService* pSuppService = m_objContext.GetSupplementaryService()
-            .Get(SuppType::CALLER_ID);
+    const SuppService* pSuppService =
+            m_objContext.GetSupplementaryService().Get(SuppType::CALLER_ID);
     if (pSuppService != IMS_NULL)
     {
         return static_cast<OipType>(pSuppService->nValue);
@@ -118,8 +115,8 @@ OipType ParticipantInfo::GetOipType() const
 PUBLIC
 void ParticipantInfo::SetRemoteNumber(IN const AString& strRemoteNumber)
 {
-    m_strRemoteUri = m_objContext.GetDialingPlan().GetToUri(strRemoteNumber,
-            m_objContext.GetCallInfo());
+    m_strRemoteUri =
+            m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
 }
 
 PUBLIC
@@ -156,8 +153,8 @@ PRIVATE
 AString ParticipantInfo::GetRemoteUriForConferenceCall() const
 {
     // TODO: this will be moved to DialingPlan.
-    AString strUri = m_objContext.GetConfigurationProxy().GetStr(
-            Feature::CONFERENCE_FACTORY_URI, 0);
+    AString strUri =
+            m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
 
     IMS_TRACE_D("GetRemoteUriForConferenceCall uri from config[%s]", strUri.GetStr(), 0, 0);
 
@@ -169,8 +166,7 @@ AString ParticipantInfo::GetRemoteUriForConferenceCall() const
     IMS_TRACE_I("GetRemoteUriForConferenceCall [%s]", strUri.GetStr(), 0, 0);
 
     // TODO: exception handling: mcc/mnc is empty
-    return strUri
-            .Replace("[MCC]", GetMcc())
+    return strUri.Replace("[MCC]", GetMcc())
             .Replace("[MNC]", GetMnc(3))
             .Replace("[MNC2]", GetMnc(2));
 }

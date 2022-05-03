@@ -6,7 +6,6 @@
 #include "conferencecall/ConferenceOperationQueue.h"
 #
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
@@ -17,14 +16,12 @@ GroupCallController::GroupCallController(IN CallKey nConfCallKey, IMtcContext& o
     IMS_TRACE_I("+GroupCallController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-GroupCallController::~GroupCallController()
+PUBLIC VIRTUAL GroupCallController::~GroupCallController()
 {
     IMS_TRACE_I("~GroupCallController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void GroupCallController::OnReferenceStartFailed(IN IConferenceReference* piConfRef)
+PUBLIC VIRTUAL void GroupCallController::OnReferenceStartFailed(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStartFailed", 0, 0, 0);
 
@@ -54,8 +51,7 @@ void GroupCallController::OnReferenceStartFailed(IN IConferenceReference* piConf
 #ifdef _PROTECTED_METHOD_
 #endif
 
-PROTECTED VIRTUAL
-void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser*>& objUsers,
+PROTECTED VIRTUAL void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser*>& objUsers,
         IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,
         IN IMSMap<SuppType, SuppService*>& objSuppServices)
 {
@@ -69,8 +65,8 @@ void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser*>& objUsers,
     SetState(STATE_GROUPCALLING);
     AddUserToParticipantList(objUsers);
 
-    CallStartOperationParams* pParams = new CallStartOperationParams(CONF_CREATE_START, objCallInfo,
-            objMediaInfo, objUsers, objSuppServices);
+    CallStartOperationParams* pParams = new CallStartOperationParams(
+            CONF_CREATE_START, objCallInfo, objMediaInfo, objUsers, objSuppServices);
 
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, pParams);
     m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
@@ -79,11 +75,11 @@ void GroupCallController::ProcessGroupCall(IN IMSList<ConfUser*>& objUsers,
     m_objOperationQueue.SetAddingOperationSetCompleted();
 }
 
-PUBLIC VIRTUAL
-void GroupCallController::StartConferenceCall(IN ConferenceOperationQueue::ConferenceOperation*)
+PUBLIC VIRTUAL void GroupCallController::StartConferenceCall(
+        IN ConferenceOperationQueue::ConferenceOperation*)
 {
     // TODO: TEMP.
-    //IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
+    // IMtcCall* piCall = m_objCallManager.GetCallByCallKey(m_objConfCallContext.GetCallKey());
 
     /*
     {
@@ -101,8 +97,7 @@ void GroupCallController::StartConferenceCall(IN ConferenceOperationQueue::Confe
     */
 }
 
-PROTECTED VIRTUAL
-void GroupCallController::Recover()
+PROTECTED VIRTUAL void GroupCallController::Recover()
 {
     IMS_TRACE_I("Recover", 0, 0, 0);
 

@@ -12,13 +12,9 @@ TerminalBasedCallWaitingBlockRule::TerminalBasedCallWaitingBlockRule(
 {
 }
 
-PUBLIC VIRTUAL
-TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlockRule()
-{
-}
+PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlockRule() {}
 
-PUBLIC VIRTUAL
-TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Check(
+PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (GetActiveCallCount(m_objCallManager.GetCalls()) > 0)
@@ -26,9 +22,7 @@ TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Che
         if (m_objService.IsTerminalBasedCallWaitingEnabled() == IMS_FALSE)
         {
             IMS_TRACE_I("Check : Terminal based call waiting is not enabled", 0, 0, 0);
-            return Result(
-                    Result::Status::BLOCKED,
-                    FailReason(REJECT_REASON_DECLINE_CW));
+            return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_DECLINE_CW));
         }
     }
 

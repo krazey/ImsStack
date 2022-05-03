@@ -34,8 +34,8 @@ public:
     AString GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
             IN Scheme eScheme = Scheme::UNKNOWN);
 
-    void OnCountrySpecificServiceUrnReceived(IN const AString &strNumber,
-            IN const AString &strServiceUrn);
+    void OnCountrySpecificServiceUrnReceived(
+            IN const AString& strNumber, IN const AString& strServiceUrn);
 
 private:
     IMS_BOOL IsUriForm(IN const AString& strNumber);

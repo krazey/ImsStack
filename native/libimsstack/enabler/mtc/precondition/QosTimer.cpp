@@ -4,7 +4,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 QosTimer::QosTimer(IN IQosTimerListener* pListener) :
         m_objTimers(IMSMap<QosTimerType, ITimer*>()),
@@ -13,8 +12,7 @@ QosTimer::QosTimer(IN IQosTimerListener* pListener) :
     IMS_TRACE_D("+QosTimer", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-QosTimer::~QosTimer()
+PUBLIC VIRTUAL QosTimer::~QosTimer()
 {
     IMS_TRACE_D("~QosTimer", 0, 0, 0);
 
@@ -38,8 +36,7 @@ QosTimer::~QosTimer()
     }
 }
 
-PUBLIC VIRTUAL
-void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
+PUBLIC VIRTUAL void QosTimer::Timer_TimerExpired(IN ITimer* piExpiredTimer)
 {
     if (!m_pQosTimerListener)
     {

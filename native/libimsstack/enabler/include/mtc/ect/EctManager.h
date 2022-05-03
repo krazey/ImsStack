@@ -8,8 +8,7 @@
 
 class IMtcContext;
 
-class EctManager final :
-        public IEctControllerListener
+class EctManager final : public IEctControllerListener
 {
 public:
     explicit EctManager(IN IMtcContext& objContext);

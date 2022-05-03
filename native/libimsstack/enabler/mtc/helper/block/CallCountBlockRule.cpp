@@ -12,21 +12,15 @@ CallCountBlockRule::CallCountBlockRule(
 {
 }
 
-PUBLIC VIRTUAL
-CallCountBlockRule::~CallCountBlockRule()
-{
-}
+PUBLIC VIRTUAL CallCountBlockRule::~CallCountBlockRule() {}
 
-PUBLIC VIRTUAL
-CallCountBlockRule::Result CallCountBlockRule::Check(
+PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     if (GetActiveCallCount(m_objCallManager.GetCalls()) > m_nMaxCount)
     {
         IMS_TRACE_I("Check : Max call count[%d] reached", m_nMaxCount, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_BUSY_MAXCALL));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_MAXCALL));
     }
 
     return Result(Result::Status::UNBLOCKED);

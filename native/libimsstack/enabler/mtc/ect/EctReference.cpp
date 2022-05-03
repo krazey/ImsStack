@@ -5,7 +5,6 @@
  * brief :
  */
 
-
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceSystemTime.h"
@@ -46,34 +45,33 @@ const IMS_CHAR UCECTReference::STR_NOTIFY_603DECLINED[] = "SIP/2.0 603 Declined"
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-UCECTReference::UCECTReference(IN IMtcApp* pApp,
-        IN IUCECTReferenceListener* pListener,
-        IN IMtcCall* pBySession)
-    : IMSActivityEx(AString::ConstNull())
-    , m_eState(ECT_REFER_IDLE)
-    , m_eOldState(ECT_REFER_IDLE)
-    , m_pApp(pApp)
-    , m_nSlotID(0)
-    , m_pListener(pListener)
-    , m_bReferSub(IMS_TRUE)
-    , m_pBySession(pBySession)
-    , m_aStrReferTo(AString::ConstNull())
-    , m_aStrReplace(AString::ConstNull())
-    , m_aStrReferToEx(AString::ConstNull())
-    , m_aStrMethod(AString::ConstNull())
-    , m_aStrUserID(AString::ConstNull())
-    , m_pIReference(IMS_NULL)
-    , m_pTimer(new MtcTimerWrapper())
-    , m_n1xxWaitTime(0)
-    , m_nFinalWaitTime(0)
-    , m_bReferredBy(IMS_FALSE)
+UCECTReference::UCECTReference(
+        IN IMtcApp* pApp, IN IUCECTReferenceListener* pListener, IN IMtcCall* pBySession) :
+        IMSActivityEx(AString::ConstNull()),
+        m_eState(ECT_REFER_IDLE),
+        m_eOldState(ECT_REFER_IDLE),
+        m_pApp(pApp),
+        m_nSlotID(0),
+        m_pListener(pListener),
+        m_bReferSub(IMS_TRUE),
+        m_pBySession(pBySession),
+        m_aStrReferTo(AString::ConstNull()),
+        m_aStrReplace(AString::ConstNull()),
+        m_aStrReferToEx(AString::ConstNull()),
+        m_aStrMethod(AString::ConstNull()),
+        m_aStrUserID(AString::ConstNull()),
+        m_pIReference(IMS_NULL),
+        m_pTimer(new MtcTimerWrapper()),
+        m_n1xxWaitTime(0),
+        m_nFinalWaitTime(0),
+        m_bReferredBy(IMS_FALSE)
 {
     // TODO, MTC BUILD
     // IMS_TRACE_MEM("uc", "uc_M[%d] : UCECTReference[%" PFLS_u "][%" PFLS_x "]",
     //         m_pApp->GetSlotID(), sizeof(UCECTReference), this);
 
-    IMS_TRACE_D("+UCECTReference : To[%s] By[%" PFLS_u "]", m_aStrReferTo.GetStr(), m_pBySession,
-            0);
+    IMS_TRACE_D(
+            "+UCECTReference : To[%s] By[%" PFLS_u "]", m_aStrReferTo.GetStr(), m_pBySession, 0);
     SetState(ECT_REFER_IDLE);
 
     // TODO, MTC BUILD
@@ -87,8 +85,7 @@ UCECTReference::UCECTReference(IN IMtcApp* pApp,
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCECTReference::~UCECTReference()
+PUBLIC VIRTUAL UCECTReference::~UCECTReference()
 {
     IMS_TRACE_MEM("uc", "uc_F[%d] : UCECTReference[%" PFLS_u "][%" PFLS_x "]", m_nSlotID,
             sizeof(UCECTReference), this);
@@ -120,15 +117,14 @@ UCECTReference::~UCECTReference()
     {
         m_pApp = IMS_NULL;
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-void UCECTReference::Init(IN const AString &aStrSipMethod, IN const AString &aStrReferTo,
-        IN const AString &aStrReplace /*= AString::ConstNull()*/,
-        IN const AString &aStrReferToEx /*= AString::ConstNull()*/)
+void UCECTReference::Init(IN const AString& aStrSipMethod, IN const AString& aStrReferTo,
+        IN const AString& aStrReplace /*= AString::ConstNull()*/,
+        IN const AString& aStrReferToEx /*= AString::ConstNull()*/)
 {
     IMS_TRACE_I("Init : [%s]", aStrSipMethod.GetStr(), 0, 0);
     IMS_TRACE_D("Init : [%s][%s]", aStrReferTo.GetStr(), aStrReplace.GetStr(), 0);
@@ -143,8 +139,7 @@ void UCECTReference::Init(IN const AString &aStrSipMethod, IN const AString &aSt
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::ReferenceDelivered(IN IReference *piReference)
+PUBLIC VIRTUAL void UCECTReference::ReferenceDelivered(IN IReference* piReference)
 {
     IMS_SINT32 eFailReason = FAIL_REASON_NONE;
 
@@ -167,7 +162,7 @@ void UCECTReference::ReferenceDelivered(IN IReference *piReference)
             IMS_TRACE_I("ReferenceDelivered[%s] : Response[%d]", PrintState(m_eOldState),
                     nStatusCode, 0);
 
-            if (SipStatusCode::IsFinalSuccess( nStatusCode ))
+            if (SipStatusCode::IsFinalSuccess(nStatusCode))
             {
             }
             else
@@ -177,16 +172,15 @@ void UCECTReference::ReferenceDelivered(IN IReference *piReference)
         }
         else
         {
-            IMS_TRACE_E(0, "ReferenceDelivered[%s] : IMessage is NULL", PrintState(m_eOldState), 0,
-                    0);
+            IMS_TRACE_E(
+                    0, "ReferenceDelivered[%s] : IMessage is NULL", PrintState(m_eOldState), 0, 0);
             eFailReason = FAIL_REASON_CONF_INTERNAL_ERROR;
         }
-
     }
 
     if (eFailReason == FAIL_REASON_NONE)
     {
-        if ( m_bReferSub )
+        if (m_bReferSub)
         {
             SetState(ECT_REFER_SUBSCRIBED);
         }
@@ -198,15 +192,13 @@ void UCECTReference::ReferenceDelivered(IN IReference *piReference)
         SetState(ECT_REFER_DELIVERYFAILED);
         SendDeliveryFailedToListn(eFailReason);
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::ReferenceDeliveryFailed( IN IReference * piReference )
+PUBLIC VIRTUAL void UCECTReference::ReferenceDeliveryFailed(IN IReference* piReference)
 {
-    IMS_TRACE_I("ReferenceDeliveryFailed[%s]", PrintState(), 0, 0 );
+    IMS_TRACE_I("ReferenceDeliveryFailed[%s]", PrintState(), 0, 0);
 
     SetState(ECT_REFER_DELIVERYFAILED);
 
@@ -221,13 +213,12 @@ void UCECTReference::ReferenceDeliveryFailed( IN IReference * piReference )
     {
         SendDeliveryFailedToListn(FAIL_REASON_CONF_INTERNAL_ERROR);
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::ReferenceNotify(IN IReference * /*piReference*/, IN IMessage *piNotify)
+PUBLIC VIRTUAL void UCECTReference::ReferenceNotify(
+        IN IReference* /*piReference*/, IN IMessage* piNotify)
 {
     AString aStrSubState;
     MessageUtil::GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE, aStrSubState);
@@ -235,7 +226,7 @@ void UCECTReference::ReferenceNotify(IN IReference * /*piReference*/, IN IMessag
     AString aStrID;
     MessageUtil::GetParameterValue(piNotify, MessageUtil::STR_ID, ISipHeader::EVENT, aStrID);
 
-    IMS_TRACE_I("ReferenceNotify[%s]", PrintState(), 0, 0 );
+    IMS_TRACE_I("ReferenceNotify[%s]", PrintState(), 0, 0);
 
     HandleNotify(piNotify, aStrSubState, nStatusCode);
     SendNotifyToListn(piNotify, aStrSubState, nStatusCode, aStrID);
@@ -243,10 +234,9 @@ void UCECTReference::ReferenceNotify(IN IReference * /*piReference*/, IN IMessag
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::ReferenceTerminated( IN IReference * /*piReference*/ )
+PUBLIC VIRTUAL void UCECTReference::ReferenceTerminated(IN IReference* /*piReference*/)
 {
-    IMS_TRACE_I("ReferenceTerminated[%s]", PrintState(), 0, 0 );
+    IMS_TRACE_I("ReferenceTerminated[%s]", PrintState(), 0, 0);
 
     if (GetState() == ECT_REFER_TERMINATED)
     {
@@ -259,8 +249,7 @@ void UCECTReference::ReferenceTerminated( IN IReference * /*piReference*/ )
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::NotificationDelivered(IN IServiceMethod *piMethod)
+PUBLIC VIRTUAL void UCECTReference::NotificationDelivered(IN IServiceMethod* piMethod)
 {
     IMS_TRACE_I("NotificationDelivered[%s]", PrintState(), 0, 0);
 
@@ -271,9 +260,8 @@ void UCECTReference::NotificationDelivered(IN IServiceMethod *piMethod)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::NotificationDeliveryFailed(IN IServiceMethod *piMethod,
-        IN IMS_SINT32 nStatusCode)
+PUBLIC VIRTUAL void UCECTReference::NotificationDeliveryFailed(
+        IN IServiceMethod* piMethod, IN IMS_SINT32 nStatusCode)
 {
     IMS_TRACE_I("NotificationDeliveryFailed[%s] : nStatusCode[%d]", PrintState(), nStatusCode, 0);
 
@@ -293,30 +281,30 @@ PUBLIC
 void UCECTReference::SendNotificationTrying()
 {
     m_pTimer->Start(TIMER_WAIT_NOTIFYDELIVERY, ECT_NOTIFYDELIVERY_WAIT_TIME);
-    m_pIReference->SendNotification(ISubscriptionState::STATE_ACTIVE,
-            STR_NOTIFY_100TRYING, ISubscriptionState::REASON_NONE);
+    m_pIReference->SendNotification(ISubscriptionState::STATE_ACTIVE, STR_NOTIFY_100TRYING,
+            ISubscriptionState::REASON_NONE);
 }
 
 PUBLIC
 void UCECTReference::SendNotificationSuccess()
 {
     m_pTimer->Start(TIMER_WAIT_NOTIFYDELIVERY, ECT_NOTIFYDELIVERY_WAIT_TIME);
-    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED,
-            STR_NOTIFY_200OK, ISubscriptionState::REASON_NONE);
+    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED, STR_NOTIFY_200OK,
+            ISubscriptionState::REASON_NONE);
 }
 
 PUBLIC
 void UCECTReference::SendNotificationFailure()
 {
-    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED,
-            STR_NOTIFY_403FORBIDDEN, ISubscriptionState::REASON_NONE);
+    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED, STR_NOTIFY_403FORBIDDEN,
+            ISubscriptionState::REASON_NONE);
 }
 
 PUBLIC
 void UCECTReference::SendNotificationDeclined()
 {
-    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED,
-            STR_NOTIFY_603DECLINED, ISubscriptionState::REASON_NONE);
+    m_pIReference->SendNotification(ISubscriptionState::STATE_TERMINATED, STR_NOTIFY_603DECLINED,
+            ISubscriptionState::REASON_NONE);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -340,11 +328,10 @@ IMS_UINT32 UCECTReference::GetOldState()
 PUBLIC
 void UCECTReference::SetState(IN IMS_UINT32 eState)
 {
-    IMS_TRACE_I("SetState : [%s] -> [%s]", PrintState(m_eState), PrintState(eState), 0 );
+    IMS_TRACE_I("SetState : [%s] -> [%s]", PrintState(m_eState), PrintState(eState), 0);
 
     m_eOldState = m_eState;
     m_eState = eState;
-
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -352,7 +339,7 @@ void UCECTReference::SetState(IN IMS_UINT32 eState)
 PUBLIC
 IMS_BOOL UCECTReference::Refer()
 {
-    IMS_TRACE_I("Refer", 0, 0, 0 );
+    IMS_TRACE_I("Refer", 0, 0, 0);
 
     if (!CreateRefer())
     {
@@ -367,11 +354,11 @@ IMS_BOOL UCECTReference::Refer()
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-IMS_SINT32 UCECTReference::GetFailReason( IN IMS_SINT32 nStatusCode )
+IMS_SINT32 UCECTReference::GetFailReason(IN IMS_SINT32 nStatusCode)
 {
     IMS_SINT32 nReason = FAIL_REASON_NONE;
 
-    switch ( nStatusCode )
+    switch (nStatusCode)
     {
         default:
             nReason = FAIL_REASON_UNKNOWN;
@@ -383,8 +370,7 @@ IMS_SINT32 UCECTReference::GetFailReason( IN IMS_SINT32 nStatusCode )
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCECTReference::OnMessage(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL UCECTReference::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("UCECTReference : Msg[%d]", objMSG.nMSG, 0, 0);
 
@@ -395,8 +381,7 @@ IMS_BOOL UCECTReference::OnMessage(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCECTReference::UCTimer_Expired(IN IMS_SINT32 eType)
+PUBLIC VIRTUAL void UCECTReference::UCTimer_Expired(IN IMS_SINT32 eType)
 {
     // TODO, MTC BUILD
     // IMS_UINT32 eSize = m_pTimer->GetSize();
@@ -421,11 +406,11 @@ void UCECTReference::UCTimer_Expired(IN IMS_SINT32 eType)
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED
-IMS_BOOL UCECTReference::HandleMessage(IN IMSMSG &objMSG)
+IMS_BOOL UCECTReference::HandleMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("HandleMessage : Msg[%d]", objMSG.nMSG, 0, 0);
 
-    switch(objMSG.nMSG)
+    switch (objMSG.nMSG)
     {
         default:
             break;
@@ -436,8 +421,7 @@ IMS_BOOL UCECTReference::HandleMessage(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCECTReference::CreateRefer()
+PROTECTED VIRTUAL IMS_BOOL UCECTReference::CreateRefer()
 {
     if (m_pIReference != IMS_NULL)
     {
@@ -465,8 +449,7 @@ IMS_BOOL UCECTReference::CreateRefer()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendDeliveredToListn()
+PROTECTED VIRTUAL void UCECTReference::SendDeliveredToListn()
 {
     IMS_TRACE_I("SendDeliveredToListn", 0, 0, 0);
 
@@ -477,8 +460,8 @@ void UCECTReference::SendDeliveredToListn()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendDeliveryFailedToListn(IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
+PROTECTED VIRTUAL void UCECTReference::SendDeliveryFailedToListn(
+        IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
 {
     IMS_TRACE_I("SendDeliveryFailedToListn : Reason[%d]Code[%d]", eReason, eCode, 0);
 
@@ -493,9 +476,8 @@ void UCECTReference::SendDeliveryFailedToListn(IN IMS_SINT32 eReason, IN IMS_SIN
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendNotifyToListn(IN IMessage* /*pNotify*/, IN AString aStrSubState,
-        IN IMS_SINT32 nStatusCode, IN AString aStrEventID)
+PROTECTED VIRTUAL void UCECTReference::SendNotifyToListn(IN IMessage* /*pNotify*/,
+        IN AString aStrSubState, IN IMS_SINT32 nStatusCode, IN AString aStrEventID)
 {
     IMS_TRACE_I("SendNotifyToListn ", 0, 0, 0);
 
@@ -511,8 +493,8 @@ void UCECTReference::SendNotifyToListn(IN IMessage* /*pNotify*/, IN AString aStr
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendTerminatedToListn(IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
+PROTECTED VIRTUAL void UCECTReference::SendTerminatedToListn(
+        IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
 {
     IMS_TRACE_I("SendTerminatedToListn : Reason[%d]Code[%d]", eReason, eCode, 0);
 
@@ -527,8 +509,8 @@ void UCECTReference::SendTerminatedToListn(IN IMS_SINT32 eReason, IN IMS_SINT32 
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendFailedToListn(IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
+PROTECTED VIRTUAL void UCECTReference::SendFailedToListn(
+        IN IMS_SINT32 eReason, IN IMS_SINT32 eCode /*= -1*/)
 {
     IMS_TRACE_I("SendFailedToListn : Reason[%d]Code[%d]", eReason, eCode, 0);
 
@@ -543,8 +525,7 @@ void UCECTReference::SendFailedToListn(IN IMS_SINT32 eReason, IN IMS_SINT32 eCod
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendNotifyDeliveredToListn(IN IServiceMethod* /*piMethod*/)
+PROTECTED VIRTUAL void UCECTReference::SendNotifyDeliveredToListn(IN IServiceMethod* /*piMethod*/)
 {
     IMS_TRACE_I("SendNotifyDeliveredToListn ", 0, 0, 0);
 
@@ -556,9 +537,8 @@ void UCECTReference::SendNotifyDeliveredToListn(IN IServiceMethod* /*piMethod*/)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SendNotifyDeliveryFailedToListn(IN IServiceMethod* /*piMethod*/,
-        IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL void UCECTReference::SendNotifyDeliveryFailedToListn(
+        IN IServiceMethod* /*piMethod*/, IN IMS_SINT32 nStatusCode)
 {
     IMS_TRACE_I("SendNotifyDeliveryFailedToListn ", 0, 0, 0);
 
@@ -572,8 +552,7 @@ void UCECTReference::SendNotifyDeliveryFailedToListn(IN IServiceMethod* /*piMeth
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::SetReferredByH(IN IMessage* pIMessage)
+PROTECTED VIRTUAL void UCECTReference::SetReferredByH(IN IMessage* pIMessage)
 {
     AString aStrReferBy = GetReferredByHrd();
 
@@ -596,8 +575,7 @@ void UCECTReference::SetReferredByH(IN IMessage* pIMessage)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString UCECTReference::GetReferredByHrd()
+PROTECTED VIRTUAL AString UCECTReference::GetReferredByHrd()
 {
     AString aStrReferBy = AString::ConstNull();
 
@@ -609,9 +587,9 @@ AString UCECTReference::GetReferredByHrd()
 
     // TODO, MTC BUILD
     // aStrReferBy = m_pBySession->GetService()->GetICoreService()->GetLocalUserId();
-    if (aStrReferBy == AString::ConstEmpty()|| aStrReferBy == AString::ConstNull())
+    if (aStrReferBy == AString::ConstEmpty() || aStrReferBy == AString::ConstNull())
     {
-        IMS_TRACE_E(0,"aStrReferBy is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "aStrReferBy is NULL", 0, 0, 0);
     }
 
     IMS_TRACE_D("GetReferredByHrd [%s]", aStrReferBy.GetStr(), 0, 0);
@@ -620,8 +598,7 @@ AString UCECTReference::GetReferredByHrd()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString UCECTReference::GetReferToExHdr()
+PROTECTED VIRTUAL AString UCECTReference::GetReferToExHdr()
 {
     IMS_TRACE_D("GetReferToExHdr : Ext[%s]", m_aStrReferToEx.GetStr(), 0, 0);
     return m_aStrReferToEx;
@@ -629,11 +606,10 @@ AString UCECTReference::GetReferToExHdr()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCECTReference::SendRefer()
+PROTECTED VIRTUAL IMS_BOOL UCECTReference::SendRefer()
 {
-    IMS_TRACE_I("SendRefer : Sub[%s] ReferredBy[%s]", PS_BOOL(m_bReferSub), PS_BOOL(m_bReferredBy),
-            0);
+    IMS_TRACE_I(
+            "SendRefer : Sub[%s] ReferredBy[%s]", PS_BOOL(m_bReferSub), PS_BOOL(m_bReferredBy), 0);
 
     if (m_bReferredBy)
     {
@@ -653,14 +629,12 @@ IMS_BOOL UCECTReference::SendRefer()
 
     SetState(ECT_REFER_SENT);
     return IMS_TRUE;
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCECTReference::HandleNotify(IN IMessage* /*pNotify*/, IN AString aStrSubState,
-        IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL UCECTReference::HandleNotify(
+        IN IMessage* /*pNotify*/, IN AString aStrSubState, IN IMS_SINT32 nStatusCode)
 {
     IMS_TRACE_I("HandleNotify", 0, 0, 0);
 
@@ -679,13 +653,11 @@ IMS_BOOL UCECTReference::HandleNotify(IN IMessage* /*pNotify*/, IN AString aStrS
     }
 
     return IMS_TRUE;
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCECTReference::ProcessTimer_Notify_Completed()
+PROTECTED VIRTUAL IMS_BOOL UCECTReference::ProcessTimer_Notify_Completed()
 {
     IMS_TRACE_I("ProcessTimer_Notify_Completed :", 0, 0, 0);
 
@@ -722,13 +694,11 @@ const IMS_CHAR* UCECTReference::PrintState(IN IMS_SINT32 eState /*= -1*/)
         default:
             return "__INVALID__";
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCECTReference::LoadConfig()
+PROTECTED VIRTUAL void UCECTReference::LoadConfig()
 {
     m_bReferSub = IMS_TRUE;
     m_bReferredBy = IMS_TRUE;

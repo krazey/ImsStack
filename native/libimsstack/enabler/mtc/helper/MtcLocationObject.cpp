@@ -29,17 +29,11 @@
 
 __IMS_TRACE_TAG_COM_UC__;
 
-
-PUBLIC GLOBAL
-const IMS_CHAR UCLocationObject::STR_APPLICATION_PIDF_XML[] = "application/pidf+xml";
-PUBLIC GLOBAL
-const IMS_CHAR UCLocationObject::STR_GEOLOCATION[] = "Geolocation";
-PUBLIC GLOBAL
-const IMS_CHAR UCLocationObject::STR_GEOLOCATION_ROUTING[] = "Geolocation-Routing";
-PUBLIC GLOBAL
-const IMS_CHAR UCLocationObject::STR_NO[] = "no";
-PUBLIC GLOBAL
-const IMS_CHAR UCLocationObject::STR_YES[] = "yes";
+PUBLIC GLOBAL const IMS_CHAR UCLocationObject::STR_APPLICATION_PIDF_XML[] = "application/pidf+xml";
+PUBLIC GLOBAL const IMS_CHAR UCLocationObject::STR_GEOLOCATION[] = "Geolocation";
+PUBLIC GLOBAL const IMS_CHAR UCLocationObject::STR_GEOLOCATION_ROUTING[] = "Geolocation-Routing";
+PUBLIC GLOBAL const IMS_CHAR UCLocationObject::STR_NO[] = "no";
+PUBLIC GLOBAL const IMS_CHAR UCLocationObject::STR_YES[] = "yes";
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
@@ -52,8 +46,7 @@ UCLocationObject::UCLocationObject()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCLocationObject::~UCLocationObject()
+PUBLIC VIRTUAL UCLocationObject::~UCLocationObject()
 {
     IMS_TRACE_MEM("uc", "uc_F : UCLocationObject[%" PFLS_u "][%" PFLS_x "]",
             sizeof(UCLocationObject), this, 0);
@@ -61,12 +54,11 @@ UCLocationObject::~UCLocationObject()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCLocationObject::IsGeolocationInfoRequired(IN IMtcCall *pSession)
+PUBLIC VIRTUAL IMS_BOOL UCLocationObject::IsGeolocationInfoRequired(IN IMtcCall* pSession)
 {
     // TODO, MTC BUILD
     IMS_SINT32 nSlotID = 0;
-    IMtcService *pService = IMS_NULL;
+    IMtcService* pService = IMS_NULL;
     MtcSupplementaryService* pMtcSuppService = IMS_NULL;
     UNUSED_PARAM(pSession);
     // IMS_SINT32 nSlotID = pSession->GetSlotID();
@@ -78,15 +70,15 @@ IMS_BOOL UCLocationObject::IsGeolocationInfoRequired(IN IMtcCall *pSession)
         return IMS_FALSE;
     }
 
-    if (!(IsGeolocationPidfSupported(nSlotID,
-            CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR)
-        || IsGeolocationPidfSupported(nSlotID,
-            CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI)))
+    if (!(IsGeolocationPidfSupported(
+                  nSlotID, CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR) ||
+                IsGeolocationPidfSupported(
+                        nSlotID, CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI)))
     {
         return IMS_FALSE;
     }
 
-    const SuppService *pSuppService = pMtcSuppService->Get(SuppType::GEOLOCATION);
+    const SuppService* pSuppService = pMtcSuppService->Get(SuppType::GEOLOCATION);
     if (pSuppService == IMS_NULL || !pSuppService->bValue)
     {
         return IMS_FALSE;
@@ -99,7 +91,7 @@ IMS_BOOL UCLocationObject::IsGeolocationInfoRequired(IN IMtcCall *pSession)
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT IMessage *piMessage,
+void UCLocationObject::SetLocation(IN IMtcCall* pSession, IN_OUT IMessage* piMessage,
         IN IMS_BOOL bGeolocationRouting /* = IMS_FALSE */)
 {
     if (!IsGeolocationInfoRequired(pSession))
@@ -113,7 +105,7 @@ void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT IMessage *piMes
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT ISipMessage *piSIPMessage,
+void UCLocationObject::SetLocation(IN IMtcCall* pSession, IN_OUT ISipMessage* piSIPMessage,
         IN IMS_BOOL bGeolocationRouting /* = IMS_FALSE */)
 {
     // TODO, MTC BUILD
@@ -125,8 +117,8 @@ void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT ISipMessage *pi
         return;
     }
 
-    GeolocationPidfCreator *pPidfCreator = GeolocationHelper::GetInstance()->GetPidfCreator(
-            nSlotID);
+    GeolocationPidfCreator* pPidfCreator =
+            GeolocationHelper::GetInstance()->GetPidfCreator(nSlotID);
     if (pPidfCreator == IMS_NULL)
     {
         IMS_TRACE_D("SetLocation : GeolocationPidfCreator is null", 0, 0, 0);
@@ -143,7 +135,7 @@ void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT ISipMessage *pi
     AString strContentLength;
     strContentLength.SetNumber(objContent.GetLength());
 
-    const ISubscriberConfig *pISubscriberConfig =
+    const ISubscriberConfig* pISubscriberConfig =
             Configuration::GetInstance()->GetSubscriberConfig(nSlotID);
 
     if (pISubscriberConfig == IMS_NULL)
@@ -155,10 +147,10 @@ void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT ISipMessage *pi
     AString strCID;
     MessageUtil::GenerateContentId(pISubscriberConfig->GetHomeDomainName(), strCID);
 
-    ISipMessageBodyPart *piBodyPart = piSIPMessage->CreateSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSIPMessage->CreateSdpBodyPart();
     piBodyPart->SetContent(objContent);
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN, strContentLength,
-            SipHeaderName::CONTENT_LENGTH);
+    piBodyPart->SetHeader(
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strContentLength, SipHeaderName::CONTENT_LENGTH);
 
     AString strContentID;
     strContentID.Sprintf("<%s>", strCID.GetStr());
@@ -167,17 +159,17 @@ void UCLocationObject::SetLocation(IN IMtcCall *pSession, IN_OUT ISipMessage *pi
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_TYPE, STR_APPLICATION_PIDF_XML);
     piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_DISPOSITION, "render; handling=optional");
 
-    piSIPMessage->SetHeader(ISipHeader::UNKNOWN, strCID.Sprintf("<cid:%s>", strCID.GetStr()),
-            STR_GEOLOCATION);
-    piSIPMessage->SetHeader(ISipHeader::UNKNOWN, bGeolocationRouting ? STR_YES : STR_NO,
-            STR_GEOLOCATION_ROUTING);
+    piSIPMessage->SetHeader(
+            ISipHeader::UNKNOWN, strCID.Sprintf("<cid:%s>", strCID.GetStr()), STR_GEOLOCATION);
+    piSIPMessage->SetHeader(
+            ISipHeader::UNKNOWN, bGeolocationRouting ? STR_YES : STR_NO, STR_GEOLOCATION_ROUTING);
 
     IMS_TRACE_I("SetLocation : Done", 0, 0, 0);
 }
 
 PRIVATE
-IMS_BOOL UCLocationObject::IsGeolocationPidfSupported(IN IMS_SINT32 nSlotId,
-        IN IMS_SINT32 nGeolocationPidfType) const
+IMS_BOOL UCLocationObject::IsGeolocationPidfSupported(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nGeolocationPidfType) const
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
     IMSVector<IMS_SINT32> objGeolocationPidfTypes = piCc->GetIntArray(

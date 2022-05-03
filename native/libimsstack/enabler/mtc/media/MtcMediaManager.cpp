@@ -30,8 +30,7 @@ MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
     IMS_TRACE_D("+MtcMediaManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
 }
 
-PUBLIC VIRTUAL
-MtcMediaManager::~MtcMediaManager()
+PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
     IMS_TRACE_D("~MtcMediaManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
 
@@ -52,9 +51,8 @@ MtcMediaManager::~MtcMediaManager()
     DestroyMediaSession();
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
-        IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_Notify(
+        IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
     /**
      * REPORT_SUCCESS
@@ -70,132 +68,121 @@ void MtcMediaManager::MediaSession_Notify(IN IMS_UINT32 eReportType,
     IMS_TRACE_D("MediaSession_Notify : Report[%d] Media[%d]", eReportType, eMediaType, 0);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 eReportType, IN RtpError eError,
-        IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyFailures(IN IMS_UINT32 eReportType,
+        IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
-    IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]",
-            eReportType, eError, eMediaType);
+    IMS_TRACE_D("MediaSession_NotifyFailures : Report[%d] Error[%d] Media[%d]", eReportType, eError,
+            eMediaType);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId, IN IMS_BOOL bSuccess,
-        IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_NotifyQos(IN IMS_UINTP nNegoId,
+        IN IMS_BOOL bSuccess, IN MEDIA_CONTENT_TYPE eMediaType /*= MEDIA_TYPE_INVALID*/)
 {
-    IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%d] Result[%d] Media[%d]",
-            nNegoId, bSuccess, eMediaType);
+    IMS_TRACE_D("MediaSession_NotifyQos : NegoId[%d] Result[%d] Media[%d]", nNegoId, bSuccess,
+            eMediaType);
 
     m_pQosListener->OnQosStatusChanged(m_objProfileManager.GetSessionWithNegoId(nNegoId),
             (bSuccess) ? QosStatus::AVAILABLE : QosStatus::LOST,
             MtcMediaUtil::GetMediaTypesFromMediaContents(eMediaType));
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg)
 {
     IMS_TRACE_D("MediaSession_RTPInfo", 0, 0, 0);
     UNUSED_PARAM(pMsg);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg)
+PUBLIC VIRTUAL void MtcMediaManager::MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg)
 {
     IMS_TRACE_D("MediaSession_DRAInfo", 0, 0, 0);
     UNUSED_PARAM(pMsg);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetCallListener(IN IUCMediaListener* pListener)
+PUBLIC VIRTUAL void MtcMediaManager::SetCallListener(IN IUCMediaListener* pListener)
 {
     m_pCallListener = pListener;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetQosListener(IN IMediaQosEventListener* pListener)
+PUBLIC VIRTUAL void MtcMediaManager::SetQosListener(IN IMediaQosEventListener* pListener)
 {
     m_pQosListener = pListener;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetMediaInfo(IN const MediaInfo& objInfo)
+PUBLIC VIRTUAL void MtcMediaManager::SetMediaInfo(IN const MediaInfo& objInfo)
 {
     *m_pOldMediaInfo = *m_pMediaInfo;
     *m_pMediaInfo = objInfo;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::UpdateMediaDirection(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir)
+PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaDirection(
+        IN IMS_UINT32 eMediaType, IN IMS_SINT32 eDir)
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
         m_pOldMediaInfo->eADir = m_pMediaInfo->eADir;
         m_pMediaInfo->eADir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : audio [%d]->[%d]",
-                m_pOldMediaInfo->eADir, m_pMediaInfo->eADir, 0);
+        IMS_TRACE_D("UpdateMediaDirection : audio [%d]->[%d]", m_pOldMediaInfo->eADir,
+                m_pMediaInfo->eADir, 0);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
         m_pOldMediaInfo->eVDir = m_pMediaInfo->eVDir;
         m_pMediaInfo->eVDir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : video [%d]->[%d]",
-                m_pOldMediaInfo->eVDir, m_pMediaInfo->eVDir, 0);
+        IMS_TRACE_D("UpdateMediaDirection : video [%d]->[%d]", m_pOldMediaInfo->eVDir,
+                m_pMediaInfo->eVDir, 0);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
         m_pOldMediaInfo->eTDir = m_pMediaInfo->eTDir;
         m_pMediaInfo->eTDir = eDir;
-        IMS_TRACE_D("UpdateMediaDirection : text [%d]->[%d]",
-                m_pOldMediaInfo->eTDir, m_pMediaInfo->eTDir, 0);
+        IMS_TRACE_D("UpdateMediaDirection : text [%d]->[%d]", m_pOldMediaInfo->eTDir,
+                m_pMediaInfo->eTDir, 0);
     }
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::UpdateMediaQuality(IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality)
+PUBLIC VIRTUAL void MtcMediaManager::UpdateMediaQuality(
+        IN IMS_UINT32 eMediaType, IN IMS_SINT32 eQuality)
 {
     if (eMediaType == MEDIATYPE_AUDIO)
     {
         m_pOldMediaInfo->eAQuality = m_pMediaInfo->eAQuality;
         m_pMediaInfo->eAQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : audio [%d]->[%d]",
-                m_pOldMediaInfo->eAQuality, m_pMediaInfo->eAQuality, 0);
+        IMS_TRACE_D("UpdateMediaQuality : audio [%d]->[%d]", m_pOldMediaInfo->eAQuality,
+                m_pMediaInfo->eAQuality, 0);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
     {
         m_pOldMediaInfo->eVQuality = m_pMediaInfo->eVQuality;
         m_pMediaInfo->eVQuality = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : video [%d]->[%d]",
-                m_pOldMediaInfo->eVQuality, m_pMediaInfo->eVQuality, 0);
+        IMS_TRACE_D("UpdateMediaQuality : video [%d]->[%d]", m_pOldMediaInfo->eVQuality,
+                m_pMediaInfo->eVQuality, 0);
     }
     else if (eMediaType == MEDIATYPE_TEXT)
     {
         m_pOldMediaInfo->eGTTMode = m_pMediaInfo->eGTTMode;
         m_pMediaInfo->eGTTMode = eQuality;
-        IMS_TRACE_D("UpdateMediaQuality : text [%d]->[%d]",
-                m_pOldMediaInfo->eGTTMode, m_pMediaInfo->eGTTMode, 0);
+        IMS_TRACE_D("UpdateMediaQuality : text [%d]->[%d]", m_pOldMediaInfo->eGTTMode,
+                m_pMediaInfo->eGTTMode, 0);
     }
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::GetMediaInfo(OUT MediaInfo& objInfo)
+PUBLIC VIRTUAL void MtcMediaManager::GetMediaInfo(OUT MediaInfo& objInfo)
 {
     objInfo = *m_pMediaInfo;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::GetOldMediaInfo(OUT MediaInfo& objInfo)
+PUBLIC VIRTUAL void MtcMediaManager::GetOldMediaInfo(OUT MediaInfo& objInfo)
 {
     objInfo = *m_pOldMediaInfo;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::RestoreMediaInfo()
+PUBLIC VIRTUAL void MtcMediaManager::RestoreMediaInfo()
 {
     MediaInfo objOldMediaInfo(*m_pOldMediaInfo);
     SetMediaInfo(objOldMediaInfo);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThread)
+PUBLIC VIRTUAL void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThread)
 {
     MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
     if (!pMediaManager)
@@ -217,8 +204,8 @@ void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThre
 
     IMS_TRACE_D("CreateMediaSession", 0, 0, 0);
 
-    m_piMediaSession = pMediaManager->CreateSession(eMediaServiceType, m_objContext.GetCallKey(),
-            pJniMediaThread);
+    m_piMediaSession = pMediaManager->CreateSession(
+            eMediaServiceType, m_objContext.GetCallKey(), pJniMediaThread);
 
     if (m_piMediaSession == IMS_NULL)
     {
@@ -229,8 +216,8 @@ void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThre
     m_piMediaSession->SetMtcListener(this);
 
     MediaEnvironment* pEnvironment = new MediaEnvironment();
-    pEnvironment->eNetworkType = MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(),
-            m_objContext.GetSlotId());
+    pEnvironment->eNetworkType =
+            MtcMediaUtil::GetMediaNetworkType(&m_objContext.GetService(), m_objContext.GetSlotId());
     pEnvironment->eServiceType = eMediaServiceType;
     pEnvironment->pIService = (IService*)m_objContext.GetService().GetICoreService();
 
@@ -241,8 +228,7 @@ void MtcMediaManager::CreateMediaSession(IN JniMediaSessionThread* pJniMediaThre
     }
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::DestroyMediaSession()
+PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
 {
     MediaManager* pMediaManager = MediaManager::GetInstance(m_objContext.GetSlotId());
     if (!pMediaManager)
@@ -255,9 +241,8 @@ void MtcMediaManager::DestroyMediaSession()
     pMediaManager->DestroySession((MediaSession*)m_piMediaSession);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
-        IN IMS_BOOL bOrigin)
+PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
+        IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOrigin)
 {
     IMS_TRACE_D("CreateMediaProfile", 0, 0, 0);
     m_objProfileManager.CreateMediaProfile(piSession, bForked, bOrigin, m_piMediaSession);
@@ -288,26 +273,22 @@ void MtcMediaManager::SetLocalTone(IN IMS_BOOL bLocalTone)
     m_bLocalTone = bLocalTone;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcMediaManager::IsLocalTone()
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsLocalTone()
 {
     return m_bLocalTone;
 }
 
-PUBLIC VIRTUAL
-MediaState MtcMediaManager::GetState()
+PUBLIC VIRTUAL MediaState MtcMediaManager::GetState()
 {
     return m_eState;
 }
 
-PUBLIC VIRTUAL
-MediaState MtcMediaManager::GetOldState()
+PUBLIC VIRTUAL MediaState MtcMediaManager::GetOldState()
 {
     return m_eOldState;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallType)
+PUBLIC VIRTUAL IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallType)
 {
     if (GetNegotiationState(piSession) == NegotiationState::STATE_OFFER_SENT)
     {
@@ -329,17 +310,15 @@ IMS_RESULT MtcMediaManager::FormSdp(IN ISession* piSession, IN CallType eCallTyp
     return (bResult) ? IMS_SUCCESS : IMS_FAILURE;
 }
 
-PUBLIC VIRTUAL
-NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
+PUBLIC VIRTUAL NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
 {
     MediaNego::MediaNegoResult eErrorReason = MediaNego::MediaNegoResult::NO_ERROR;
     IMS_SINT32 eADir = DIRECTION_INVALID;
     IMS_SINT32 eVDir = DIRECTION_INVALID;
     IMS_SINT32 eTDir = DIRECTION_INVALID;
 
-
-    m_piMediaSession->NegotiateSDP(GetMediaNegoId(piSession), piSession, &eADir,
-            &eVDir, &eTDir, eErrorReason);
+    m_piMediaSession->NegotiateSDP(
+            GetMediaNegoId(piSession), piSession, &eADir, &eVDir, &eTDir, eErrorReason);
 
     IMS_TRACE_D("NegotiateSdp : %d", eErrorReason, 0, 0);
 
@@ -348,15 +327,14 @@ NegotiationResult MtcMediaManager::NegotiateSdp(IN ISession* piSession)
         MediaInfo objInfo(eADir, eVDir, eTDir, GetNegotiatedQuality(piSession, MEDIATYPE_AUDIO),
                 GetNegotiatedQuality(piSession, MEDIATYPE_VIDEO),
                 MtcMediaUtil::GetGttModeFromTextQuality(
-                GetNegotiatedQuality(piSession, MEDIATYPE_TEXT)));
+                        GetNegotiatedQuality(piSession, MEDIATYPE_TEXT)));
         SetMediaInfo(objInfo);
     }
 
     return eErrorReason;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::RestoreSdp(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcMediaManager::RestoreSdp(IN ISession* piSession)
 {
     RestoreMediaInfo();
     FinalizeSdp(piSession);
@@ -378,8 +356,8 @@ void MtcMediaManager::FinalizeSdp(IN ISession* piSession)
     m_piMediaSession->FinalizeSDP(GetMediaNegoId(piSession), piSession);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::HandleRingBackTone(IN ISession* piSession, IN IMessage* piMessage)
+PUBLIC VIRTUAL void MtcMediaManager::HandleRingBackTone(
+        IN ISession* piSession, IN IMessage* piMessage)
 {
     IMS_TRACE_D("HandleRingBackTone", 0, 0, 0);
 
@@ -388,10 +366,10 @@ void MtcMediaManager::HandleRingBackTone(IN ISession* piSession, IN IMessage* pi
 }
 
 PUBLIC
-void MtcMediaManager::HandleDynamicNetworkTone(IN ISession* piSession, IN IMS_BOOL b180Received,
-        OUT IMS_UINT32& nDuration)
+void MtcMediaManager::HandleDynamicNetworkTone(
+        IN ISession* piSession, IN IMS_BOOL b180Received, OUT IMS_UINT32& nDuration)
 {
-    if (m_objProfileManager.IsConfirmed(piSession)) // Confirmed Dialog State
+    if (m_objProfileManager.IsConfirmed(piSession))  // Confirmed Dialog State
     {
         if (m_pMediaInfo->eADir != DIRECTION_RECEIVE)
         {
@@ -400,7 +378,7 @@ void MtcMediaManager::HandleDynamicNetworkTone(IN ISession* piSession, IN IMS_BO
             m_objContext.GetSupplementaryService().Delete(SuppType::ENFORCE_LT);
         }
     }
-    else // Early Dialog State
+    else  // Early Dialog State
     {
         // if (KEY_IGNORE_P_EARLY_MEDIA_HEADER_BOOL == TRUE && vzw case) return;
         // else ..
@@ -424,9 +402,8 @@ void MtcMediaManager::SetNetworkToneRtpTimer(IN IMS_UINT32 eMediaTypes, IN IMS_U
     m_piMediaSession->SetNetworkToneRTPTimer(eContents, nDuration);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly,
-        IN IMS_BOOL b180Received)
+PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage,
+        IN IMS_BOOL bEarly, IN IMS_BOOL b180Received)
 {
     if (GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
     {
@@ -445,7 +422,7 @@ void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS
         return;
     }
 
-    IMS_UINT32 nNetworkToneTimerDuration = 2000; // 2 sec
+    IMS_UINT32 nNetworkToneTimerDuration = 2000;  // 2 sec
 
     // TODO: temp code? is this going to move to Mtc Enablers?
     // will modify to check 180 response from all early dialogs
@@ -472,8 +449,8 @@ void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS
         nNetworkToneTimerDuration = 0;
     }
 
-    IMS_TRACE_D("Run EarlyDialog[%s] 180-Received[%s]",
-            _TRACE_B_(bEarly), _TRACE_B_(b180Received), 0);
+    IMS_TRACE_D(
+            "Run EarlyDialog[%s] 180-Received[%s]", _TRACE_B_(bEarly), _TRACE_B_(b180Received), 0);
 
     if (!m_piMediaSession->Run(GetMediaNegoId(piSession)))
     {
@@ -485,8 +462,7 @@ void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS
     m_objProfileManager.UpdateProfileForMediaActivation(piSession);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::Terminate()
+PUBLIC VIRTUAL void MtcMediaManager::Terminate()
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
 
@@ -494,19 +470,17 @@ void MtcMediaManager::Terminate()
     m_piMediaSession->Terminate();
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaTypes,
-        IN IMS_UINT32 nPort)
+PUBLIC VIRTUAL void MtcMediaManager::SetRtpPort(
+        IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort)
 {
     IMS_TRACE_D("SetRtpPort : MediaType[%d] Port[%d]", eMediaTypes, nPort, 0);
 
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
-    m_piMediaSession->SetOptions(GetMediaNegoId(piSession), IMediaSession::OptionType::SET_RTP_PORT,
-            eContents, nPort);
+    m_piMediaSession->SetOptions(
+            GetMediaNegoId(piSession), IMediaSession::OptionType::SET_RTP_PORT, eContents, nPort);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::RequestVideoDataUsage()
+PUBLIC VIRTUAL void MtcMediaManager::RequestVideoDataUsage()
 {
     IMS_TRACE_D("RequestVideoDataUsage", 0, 0, 0);
 
@@ -515,31 +489,29 @@ void MtcMediaManager::RequestVideoDataUsage()
     m_piMediaSession->SendMessage(objMsg);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetEnforcedDirection(IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir)
+PUBLIC VIRTUAL void MtcMediaManager::SetEnforcedDirection(
+        IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir)
 {
     IMS_TRACE_D("SetEnforcedDirection : MediaType[%d] Dir[%d]", eMediaTypes, eDir, 0);
 
     // check if negoId is necessary or not by the Media side.
     MEDIA_CONTENT_TYPE eContents = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaTypes);
-    m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SET_DIRECTION, eContents,
-            eDir);
+    m_piMediaSession->SetOptions(
+            IMS_NULL, IMediaSession::OptionType::SET_DIRECTION, eContents, eDir);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcMediaManager::GetCvoResult(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::GetCvoResult(IN ISession* piSession)
 {
     IMS_BOOL bResult = IMS_FALSE;
     UNUSED_PARAM(piSession);
-    //bResult = m_piMediaSession->GetNegotiatedCVOResult(GetMediaNegoId(piSession));
+    // bResult = m_piMediaSession->GetNegotiatedCVOResult(GetMediaNegoId(piSession));
 
     IMS_TRACE_D("GetCvoResult : %d", bResult, 0, 0);
 
     return bResult;
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SendFastVideoUpdate()
+PUBLIC VIRTUAL void MtcMediaManager::SendFastVideoUpdate()
 {
     IMS_TRACE_D("SendFastVideoUpdate", 0, 0, 0);
 
@@ -548,8 +520,7 @@ void MtcMediaManager::SendFastVideoUpdate()
     m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SEND_FAST_VIDEO_UPDATE, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
+PUBLIC VIRTUAL void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
 {
     IMS_TRACE_D("SetConferenceCall : %d", bConference, 0, 0);
 
@@ -558,8 +529,7 @@ void MtcMediaManager::SetConferenceCall(IN IMS_BOOL bConference)
     m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SET_CONFERENCE_ENABLE, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
 {
     IMS_TRACE_D("SetConfirmedSession", 0, 0, 0);
 
@@ -569,18 +539,16 @@ void MtcMediaManager::SetConfirmedSession(IN ISession* piSession)
     m_objProfileManager.HandleProfilesInConfirmedState(piSession, m_piMediaSession);
 }
 
-PUBLIC VIRTUAL
-void MtcMediaManager::UpdateStatsReportOption(IN IMS_UINT32 eAction)
+PUBLIC VIRTUAL void MtcMediaManager::UpdateStatsReportOption(IN IMS_UINT32 eAction)
 {
     IMS_TRACE_D("UpdateStatsReportOption : %d", eAction, 0, 0);
 
     // param is not defined for this option.
-    m_piMediaSession->SetOptions(IMS_NULL, IMediaSession::OptionType::SET_DRA_REPORT_OPTION,
-            eAction, 0);
+    m_piMediaSession->SetOptions(
+            IMS_NULL, IMediaSession::OptionType::SET_DRA_REPORT_OPTION, eAction, 0);
 }
 
-PUBLIC VIRTUAL
-NegotiationState MtcMediaManager::GetNegotiationState(IN ISession* piSession)
+PUBLIC VIRTUAL NegotiationState MtcMediaManager::GetNegotiationState(IN ISession* piSession)
 {
     if (!m_piMediaSession)
     {
@@ -594,44 +562,41 @@ NegotiationState MtcMediaManager::GetNegotiationState(IN ISession* piSession)
     return eState;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(IN ISession* piSession,
-        IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedDirection(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     MEDIA_CONTENT_TYPE eContent = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
 
-    MEDIA_DIRECTION eDir = m_piMediaSession->GetNegotiatedDirection(GetMediaNegoId(piSession),
-            eContent);
+    MEDIA_DIRECTION eDir =
+            m_piMediaSession->GetNegotiatedDirection(GetMediaNegoId(piSession), eContent);
     IMS_TRACE_D("GetNegotiatedDirection : %d", eDir, 0, 0);
 
     return eDir;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(IN ISession* piSession, IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL IMS_SINT32 MtcMediaManager::GetNegotiatedQuality(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     MEDIA_CONTENT_TYPE eContent = MtcMediaUtil::GetMediaContentsFromMediaTypes(eMediaType);
-    IMS_SINT32 eQuality = m_piMediaSession->GetNegotiatedQuality(GetMediaNegoId(piSession),
-            eContent);
+    IMS_SINT32 eQuality =
+            m_piMediaSession->GetNegotiatedQuality(GetMediaNegoId(piSession), eContent);
 
     IMS_TRACE_D("GetNegotiatedQuality : %d", eQuality, 0, 0);
 
     return eQuality;
 }
 
-PUBLIC VIRTUAL
-CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSession)
+PUBLIC VIRTUAL CallType MtcMediaManager::GetNegotiatedCallType(IN ISession* piSession)
 {
-    MEDIA_CONTENT_TYPE eContents = m_piMediaSession->GetNegotiatedMediaType(
-            GetMediaNegoId(piSession));
+    MEDIA_CONTENT_TYPE eContents =
+            m_piMediaSession->GetNegotiatedMediaType(GetMediaNegoId(piSession));
 
     IMS_TRACE_D("GetNegotiatedCallType : %d", eContents, 0, 0);
 
     return MtcMediaUtil::GetCallTypeFromMediaContents(eContents);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcMediaManager::IsAudioQualityHd()
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioQualityHd()
 {
     switch (m_pMediaInfo->eAQuality)
     {
@@ -649,14 +614,12 @@ IMS_BOOL MtcMediaManager::IsAudioQualityHd()
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-PemType MtcMediaManager::GetPemType(IN ISession* piSession)
+PUBLIC VIRTUAL PemType MtcMediaManager::GetPemType(IN ISession* piSession)
 {
     return m_objProfileManager.GetPemType(piSession);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
+PUBLIC VIRTUAL IMS_BOOL MtcMediaManager::IsAudioMediaActivated()
 {
     return (m_pMediaInfo->eADir != DIRECTION_INACTIVE) ? IMS_TRUE : IMS_FALSE;
 }
@@ -714,10 +677,10 @@ void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IMessage* piMessa
     // if (KEY_IGNORE_P_EARLY_MEDIA_HEADER_BOOL == IMS_TRUE) return;
 
     AString strPemValue;
-    IMS_RESULT nResult = MessageUtil::GetHeaderValue(piMessage, ISipHeader::P_EARLY_MEDIA,
-            strPemValue);
+    IMS_RESULT nResult =
+            MessageUtil::GetHeaderValue(piMessage, ISipHeader::P_EARLY_MEDIA, strPemValue);
 
-    if (nResult == IMS_FAILURE) // no P-Early-Media header or no value
+    if (nResult == IMS_FAILURE)  // no P-Early-Media header or no value
     {
         // TMUS : Set PemType::NONE after UE receives 180 response
         return;
@@ -762,7 +725,7 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession)
      * NOTE 1 : In-band information received from the network overrides any locally generated
      * communication progress information also when the most recently received P-Early-Media header
      * fields of all early dialogs contain "inactive" or "recvonly".
-    */
+     */
     SetLocalTone(IMS_FALSE);
 
     // Add asset to distinguish the way playing local tone with P-Early-Media value.
@@ -830,9 +793,7 @@ IMS_UINTP MtcMediaManager::GetMediaNegoId(IN ISession* piSession)
 }
 
 PRIVATE
-void MtcMediaManager::HandleMediaSuccess()
-{
-}
+void MtcMediaManager::HandleMediaSuccess() {}
 
 PRIVATE
 void MtcMediaManager::HandleReceivingRtpDataStarted()
@@ -841,26 +802,16 @@ void MtcMediaManager::HandleReceivingRtpDataStarted()
 }
 
 PRIVATE
-void MtcMediaManager::HandleReceivingRtpDataFailed()
-{
-}
+void MtcMediaManager::HandleReceivingRtpDataFailed() {}
 
 PRIVATE
-void MtcMediaManager::HandleMediaError()
-{
-}
+void MtcMediaManager::HandleMediaError() {}
 
 PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneStarted()
-{
-}
+void MtcMediaManager::HandleReceivingNetworkToneStarted() {}
 
 PRIVATE
-void MtcMediaManager::HandleReceivingNetworkToneFailed()
-{
-}
+void MtcMediaManager::HandleReceivingNetworkToneFailed() {}
 
 PRIVATE
-void MtcMediaManager::HandleReceivedDtmfEvent()
-{
-}
+void MtcMediaManager::HandleReceivedDtmfEvent() {}

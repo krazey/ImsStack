@@ -4,9 +4,7 @@
 #ifndef MTC_VONR_MANAGER_H_
 #define MTC_VONR_MANAGER_H_
 
-
-class MtcVonrManager :
-        IMtcVonrListener
+class MtcVonrManager : IMtcVonrListener
 {
 public:
     explicit MtcVonrManager();
@@ -33,9 +31,9 @@ private:
     void DestroyMtcVonr(IN MtcVonr* pMtcVonr);
 
 private:
-    IMSList<MtcVonr*>   m_lstMtcVonrs;
-    MtcVonr::VonrInitType          m_eTotalInitiateType;
-    IMS_BOOL            m_bMtk;
+    IMSList<MtcVonr*> m_lstMtcVonrs;
+    MtcVonr::VonrInitType m_eTotalInitiateType;
+    IMS_BOOL m_bMtk;
 };
 
-#endif // MTC_VONR_MANAGER_H_
+#endif  // MTC_VONR_MANAGER_H_

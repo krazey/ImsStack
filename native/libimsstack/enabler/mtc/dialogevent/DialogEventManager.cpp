@@ -5,7 +5,6 @@
  * brief :
  */
 
-
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceMessage.h"
@@ -46,24 +45,24 @@ __IMS_TRACE_TAG_COM_UC__;
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-DEMngr::DEMngr(IN IMtcApp* pApp)
-    : IMSActivityEx(AString::ConstNull())
-    , m_pApp(pApp)
-    , m_pListener(IMS_NULL)
-    , m_pTimer(IMS_NULL)
-    , m_aStrJNIServiceName(AString::ConstNull())
-    , m_bDestroy(IMS_FALSE)
-    , m_eCallState(0)
-    , m_nSlotID(0)
-    , m_pService(IMS_NULL)
-    , m_pISubscription(IMS_NULL)
-    , m_objDialogs(IMSMap<AString, IDialogEvent*>())
-    , m_nExpireTime(7200)
-    , m_nVersion(0)
-    , m_eState(0)
-    , m_aStrEntity(AString::ConstNull())
-    , m_eTerminatedReason(0)
-    , m_nRetryAfter(0)
+DEMngr::DEMngr(IN IMtcApp* pApp) :
+        IMSActivityEx(AString::ConstNull()),
+        m_pApp(pApp),
+        m_pListener(IMS_NULL),
+        m_pTimer(IMS_NULL),
+        m_aStrJNIServiceName(AString::ConstNull()),
+        m_bDestroy(IMS_FALSE),
+        m_eCallState(0),
+        m_nSlotID(0),
+        m_pService(IMS_NULL),
+        m_pISubscription(IMS_NULL),
+        m_objDialogs(IMSMap<AString, IDialogEvent*>()),
+        m_nExpireTime(7200),
+        m_nVersion(0),
+        m_eState(0),
+        m_aStrEntity(AString::ConstNull()),
+        m_eTerminatedReason(0),
+        m_nRetryAfter(0)
 {
     // TODO, MTC BUILD
     // IMS_TRACE_MEM("uc", "uc_M[%d] : DEMngr[%" PFLS_u "][%" PFLS_x "]", m_pApp->GetSlotID(),
@@ -92,8 +91,8 @@ DEMngr::DEMngr(IN IMtcApp* pApp)
 PUBLIC
 DEMngr::~DEMngr()
 {
-    IMS_TRACE_MEM("uc", "uc_F[%d] : DEMngr[%" PFLS_u "][%" PFLS_x "]", m_nSlotID, sizeof(DEMngr),
-            this);
+    IMS_TRACE_MEM(
+            "uc", "uc_F[%d] : DEMngr[%" PFLS_u "][%" PFLS_x "]", m_nSlotID, sizeof(DEMngr), this);
 
     DestroyAllDialog();
 
@@ -127,8 +126,7 @@ DEMngr::~DEMngr()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::Init(IN IDEMngrListener* pListener)
+PUBLIC VIRTUAL void DEMngr::Init(IN IDEMngrListener* pListener)
 {
     IMS_TRACE_D("Init", 0, 0, 0);
 
@@ -142,8 +140,7 @@ void DEMngr::Init(IN IDEMngrListener* pListener)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::DeInit()
+PUBLIC VIRTUAL void DEMngr::DeInit()
 {
     IMS_TRACE_I("DeInit", 0, 0, 0);
 
@@ -159,8 +156,7 @@ void DEMngr::DeInit()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::Start(IN AString aStrJNIServiceName)
+PUBLIC VIRTUAL void DEMngr::Start(IN AString aStrJNIServiceName)
 {
     IMS_TRACE_I("Start : [%s]", aStrJNIServiceName.GetStr(), 0, 0);
 
@@ -173,8 +169,7 @@ void DEMngr::Start(IN AString aStrJNIServiceName)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL DEMngr::Stop(IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
+PUBLIC VIRTUAL IMS_BOOL DEMngr::Stop(IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
 {
     IMS_BOOL bReturn = IMS_FALSE;
 
@@ -193,12 +188,11 @@ IMS_BOOL DEMngr::Stop(IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL DEMngr::OnMessage(IN IMSMSG &objMSG)
+PUBLIC VIRTUAL IMS_BOOL DEMngr::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("OnMessage[%d]", objMSG.nMSG, 0, 0);
 
-    switch(objMSG.nMSG)
+    switch (objMSG.nMSG)
     {
         default:
             HandleThisMsg(objMSG);
@@ -210,17 +204,16 @@ IMS_BOOL DEMngr::OnMessage(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::SubscriptionForkedNotify(IN ISubscription* piSubscription,
-        IN ISubscription* piForkedSubscription)
+PUBLIC VIRTUAL void DEMngr::SubscriptionForkedNotify(
+        IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription)
 {
     PostMessage(DEMNGR_S_FORKEDNOTIFY, (IMS_UINTP)piSubscription, (IMS_UINTP)piForkedSubscription);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage *piNotify)
+PUBLIC VIRTUAL void DEMngr::SubscriptionNotify(
+        IN ISubscription* piSubscription, IN IMessage* piNotify)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
     IMSList<IMessageBodyPart*> objBodyParts = piNotify->GetBodyParts();
@@ -236,7 +229,7 @@ void DEMngr::SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage *p
 
     for (IMS_UINT32 index = 0; index < objBodyParts.GetSize(); index++)
     {
-        IMessageBodyPart *pIBodyPart = objBodyParts.GetAt(index);
+        IMessageBodyPart* pIBodyPart = objBodyParts.GetAt(index);
         if (pIBodyPart == IMS_NULL)
         {
             IMS_TRACE_D("SubscriptionNotify : pIBodyPart[%d] is NULL", index, 0, 0);
@@ -255,7 +248,6 @@ void DEMngr::SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage *p
         {
             bUpdated = IMS_TRUE;
         }
-
     }
 
     IMS_TRACE_I("SubscriptionNotify : Update[%s]", PS_BOOL(bUpdated), 0, 0);
@@ -264,37 +256,32 @@ void DEMngr::SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage *p
     {
         PostMessage(DEMNGR_S_NOTIFY, reinterpret_cast<IMS_UINTP>(piSubscription), 0);
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::SubscriptionStarted(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void DEMngr::SubscriptionStarted(IN ISubscription* piSubscription)
 {
     PostMessage(DEMNGR_S_STARTED, (IMS_UINTP)piSubscription, 0);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::SubscriptionStartFailed(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void DEMngr::SubscriptionStartFailed(IN ISubscription* piSubscription)
 {
     PostMessage(DEMNGR_S_STARTFAILED, (IMS_UINTP)piSubscription, 0);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::SubscriptionTerminated(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void DEMngr::SubscriptionTerminated(IN ISubscription* piSubscription)
 {
     PostMessage(DEMNGR_S_TERMINATED, (IMS_UINTP)piSubscription, 0);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void DEMngr::UCTimer_Expired(IN IMS_SINT32 eType)
+PUBLIC VIRTUAL void DEMngr::UCTimer_Expired(IN IMS_SINT32 eType)
 {
     // TODO, MTC BUILD
     // IMS_UINT32 eSize = m_pTimer->GetSize();
@@ -362,13 +349,13 @@ IMS_BOOL DEMngr::Subscribe(IN ICoreService* pICoreService)
 {
     if (pICoreService == IMS_NULL)
     {
-        IMS_TRACE_E( 0, "Subscribe : pICoreService is NULL.", 0, 0, 0 );
+        IMS_TRACE_E(0, "Subscribe : pICoreService is NULL.", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (m_pService == IMS_NULL)
     {
-        IMS_TRACE_E( 0, "Subscribe : m_pService is NULL.", 0, 0, 0 );
+        IMS_TRACE_E(0, "Subscribe : m_pService is NULL.", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -491,8 +478,8 @@ IDialogEvent* DEMngr::GetDialog(IN AString aStrID)
 
         if (pDialog->GetID().Equals(aStrID))
         {
-            IMS_TRACE_I("GetDialog : Dialogs[%d] Index[%d] [%s]"
-                        , m_objDialogs.GetSize(), index, aStrID.GetStr());
+            IMS_TRACE_I("GetDialog : Dialogs[%d] Index[%d] [%s]", m_objDialogs.GetSize(), index,
+                    aStrID.GetStr());
             return pDialog;
         }
     }
@@ -551,10 +538,9 @@ void DEMngr::DestroyAllDialog()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleThisMsg(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL void DEMngr::HandleThisMsg(IN IMSMSG& objMSG)
 {
-    switch(objMSG.nMSG)
+    switch (objMSG.nMSG)
     {
         case DEMNGR_S_FORKEDNOTIFY:
             HandleForkedNotify(objMSG);
@@ -581,13 +567,11 @@ void DEMngr::HandleThisMsg(IN IMSMSG &objMSG)
         default:
             break;
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IDialogEvent* DEMngr::Dialog_Create(IN IElement* pDialogElement)
+PROTECTED VIRTUAL IDialogEvent* DEMngr::Dialog_Create(IN IElement* pDialogElement)
 {
     IDialogEvent* pDialog = IMS_NULL;
 
@@ -605,16 +589,14 @@ IDialogEvent* DEMngr::Dialog_Create(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IDialogEvent* DEMngr::Dialog_CreateCom()
+PROTECTED VIRTUAL IDialogEvent* DEMngr::Dialog_CreateCom()
 {
     return new UCDialog(m_pApp);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString DEMngr::GetFromURI()
+PROTECTED VIRTUAL AString DEMngr::GetFromURI()
 {
     AString aStrURI = AString::ConstNull();
 
@@ -623,8 +605,7 @@ AString DEMngr::GetFromURI()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString DEMngr::GetToURI()
+PROTECTED VIRTUAL AString DEMngr::GetToURI()
 {
     AString aStrURI = AString::ConstNull();
 
@@ -633,8 +614,7 @@ AString DEMngr::GetToURI()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString DEMngr::GetRequestURI()
+PROTECTED VIRTUAL AString DEMngr::GetRequestURI()
 {
     AString aStrURI = AString::ConstNull();
 
@@ -643,8 +623,7 @@ AString DEMngr::GetRequestURI()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::SetHeaderSubscribe()
+PROTECTED VIRTUAL void DEMngr::SetHeaderSubscribe()
 {
     IMessage* pIMessage = IMS_NULL;
 
@@ -656,7 +635,7 @@ void DEMngr::SetHeaderSubscribe()
     }
 
     ISipMessage* pISIPMessage = pIMessage->GetMessage();
-    if(pISIPMessage == IMS_NULL)
+    if (pISIPMessage == IMS_NULL)
     {
         IMS_TRACE_E(0, "SetHeaderSubscribe : pISIPMessage is NULL.", 0, 0, 0);
         return;
@@ -670,27 +649,19 @@ void DEMngr::SetHeaderSubscribe()
         aStrExpireTime.SetNumber(m_nExpireTime);
         pISIPMessage->SetHeader(ISipHeader::EXPIRES_SEC, aStrExpireTime);
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::SetHeaderUnSubscribe()
-{
-}
+PROTECTED VIRTUAL void DEMngr::SetHeaderUnSubscribe() {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleForkedNotify(IN IMSMSG &/*objMSG*/)
-{
-}
+PROTECTED VIRTUAL void DEMngr::HandleForkedNotify(IN IMSMSG& /*objMSG*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleNotify(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL void DEMngr::HandleNotify(IN IMSMSG& objMSG)
 {
     ISubscription* pISubscription = reinterpret_cast<ISubscription*>(objMSG.nWparam);
 
@@ -701,8 +672,7 @@ void DEMngr::HandleNotify(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleStarted(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL void DEMngr::HandleStarted(IN IMSMSG& objMSG)
 {
     ISubscription* pISubscription = reinterpret_cast<ISubscription*>(objMSG.nWparam);
 
@@ -713,8 +683,7 @@ void DEMngr::HandleStarted(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleStartFailed(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL void DEMngr::HandleStartFailed(IN IMSMSG& objMSG)
 {
     IMS_UINT32 nStatusCode = SipStatusCode::SC_INVALID;
     ISubscription* pISubscription = reinterpret_cast<ISubscription*>(objMSG.nWparam);
@@ -742,8 +711,7 @@ void DEMngr::HandleStartFailed(IN IMSMSG &objMSG)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleTerminated(IN IMSMSG &/*objMSG*/)
+PROTECTED VIRTUAL void DEMngr::HandleTerminated(IN IMSMSG& /*objMSG*/)
 {
     if (m_pISubscription != IMS_NULL)
     {
@@ -765,8 +733,8 @@ void DEMngr::HandleTerminated(IN IMSMSG &/*objMSG*/)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleFailureRes(IN ISubscription* pISubscription, IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleFailureRes(
+        IN ISubscription* pISubscription, IN IMS_SINT32 nStatusCode)
 {
     IMS_BOOL bHandle = IMS_FALSE;
 
@@ -781,14 +749,14 @@ IMS_BOOL DEMngr::HandleFailureRes(IN ISubscription* pISubscription, IN IMS_SINT3
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleFailureRes_423(IN ISubscription* pISubscription)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleFailureRes_423(IN ISubscription* pISubscription)
 {
     IMS_BOOL bHandle = IMS_FALSE;
     IMS_SINT32 nMins = -1;
 
-    nMins = MessageUtil::GetHeaderValueInt(pISubscription->GetPreviousResponse(
-                IMessage::SUBSCRIPTION_SUBSCRIBE), ISipHeader::MIN_EXPIRES);
+    nMins = MessageUtil::GetHeaderValueInt(
+            pISubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE),
+            ISipHeader::MIN_EXPIRES);
 
     if (nMins == -1)
     {
@@ -802,21 +770,20 @@ IMS_BOOL DEMngr::HandleFailureRes_423(IN ISubscription* pISubscription)
         m_pISubscription = IMS_NULL;
     }
 
-    m_nExpireTime = (nMins + nMins/2);
+    m_nExpireTime = (nMins + nMins / 2);
     Subscribe(m_pService->GetICoreService());
     bHandle = IMS_TRUE;
 
     IMS_TRACE_I("HandleFailureRes_423 : [%d][%d][%s]", nMins, m_nExpireTime, PS_BOOL(bHandle));
     return bHandle;
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleSubState(IN AString aStrSubState)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleSubState(IN AString aStrSubState)
 {
-    if (aStrSubState == IMS_NULL) return IMS_FALSE;
+    if (aStrSubState == IMS_NULL)
+        return IMS_FALSE;
 
     IMSList<AString> objSplitSemiColon = aStrSubState.Split(';');
 
@@ -832,7 +799,7 @@ IMS_BOOL DEMngr::HandleSubState(IN AString aStrSubState)
         m_eTerminatedReason = DIALOG_TERMINATED_REASON_UNKNOWN;
         m_nRetryAfter = 0;
 
-        for (IMS_UINT32 i=1; i<objSplitSemiColon.GetSize(); i++)
+        for (IMS_UINT32 i = 1; i < objSplitSemiColon.GetSize(); i++)
         {
             IMSList<AString> objSplitEqual = objSplitSemiColon.GetAt(i).Split('=');
 
@@ -841,8 +808,8 @@ IMS_BOOL DEMngr::HandleSubState(IN AString aStrSubState)
                 continue;
             }
 
-            if ((objSplitEqual.GetAt(0).GetLength()==0)
-                    || (objSplitEqual.GetAt(1).GetLength()==0))
+            if ((objSplitEqual.GetAt(0).GetLength() == 0) ||
+                    (objSplitEqual.GetAt(1).GetLength() == 0))
             {
                 continue;
             }
@@ -868,19 +835,18 @@ IMS_BOOL DEMngr::HandleSubState(IN AString aStrSubState)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleRetryByTerminated()
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleRetryByTerminated()
 {
     IMS_BOOL bHandle = IMS_FALSE;
     IMS_BOOL bReAttemptNeeded = IMS_FALSE;
 
     // RFC 3265
-    switch(m_eTerminatedReason)
+    switch (m_eTerminatedReason)
     {
         // The subscription has been terminated, but the subscriber SHOULD retry immediately
         // with a new subscription
         // The "retry-after" parameter has no semantics for "deactivated".
-        case DIALOG_TERMINATED_REASON_DEACTIVATED :
+        case DIALOG_TERMINATED_REASON_DEACTIVATED:
             bReAttemptNeeded = IMS_TRUE;
             m_nRetryAfter = 0;
             break;
@@ -888,18 +854,18 @@ IMS_BOOL DEMngr::HandleRetryByTerminated()
         // The subscription has been terminated, but the client SHOULD retry at some later time.
         // If a "retry-after" parameter isalso present, the client SHOULD wait at least the number
         // of seconds specified by that parameter before attempting to re-subscribe.
-        case DIALOG_TERMINATED_REASON_PROBATION :
+        case DIALOG_TERMINATED_REASON_PROBATION:
             bReAttemptNeeded = IMS_TRUE;
             break;
 
         // Clients SHOULD NOT attempt to re-subscribe
-        case DIALOG_TERMINATED_REASON_REJECTED :
+        case DIALOG_TERMINATED_REASON_REJECTED:
             bReAttemptNeeded = IMS_FALSE;
             break;
 
         // Clients MAY re-subscribe immediately.
         // The "retry-after" parameter has no semantics for "timeout"
-        case DIALOG_TERMINATED_REASON_TIMEOUT :
+        case DIALOG_TERMINATED_REASON_TIMEOUT:
             bReAttemptNeeded = IMS_TRUE;
             m_nRetryAfter = 0;
             break;
@@ -907,24 +873,24 @@ IMS_BOOL DEMngr::HandleRetryByTerminated()
         // If a "retry-after" parameter is also present, the client SHOULD wait at least the number
         // of seconds specified by that parameter before attempting to re-subscribe; otherwise,
         // the client MAY retry immediately, but will likely get put back into pending state.
-        case DIALOG_TERMINATED_REASON_GIVEUP :
+        case DIALOG_TERMINATED_REASON_GIVEUP:
             bReAttemptNeeded = IMS_TRUE;
             break;
 
         // Clients SHOULD NOT attempt to re-subscribe.
-        case DIALOG_TERMINATED_REASON_NORESOURCE :
+        case DIALOG_TERMINATED_REASON_NORESOURCE:
             bReAttemptNeeded = IMS_FALSE;
             break;
 
         // If no reason code or an unknown reason code is present,
         // the client MAY attempt to re-subscribe at any time
-        case DIALOG_TERMINATED_REASON_UNKNOWN :
+        case DIALOG_TERMINATED_REASON_UNKNOWN:
             bReAttemptNeeded = IMS_TRUE;
             m_nRetryAfter = 0;
             break;
 
-        case DIALOG_TERMINATED_REASON_NONE : // FALL-THROUGH
-        default :
+        case DIALOG_TERMINATED_REASON_NONE:  // FALL-THROUGH
+        default:
             bReAttemptNeeded = IMS_FALSE;
             break;
     }
@@ -938,7 +904,7 @@ IMS_BOOL DEMngr::HandleRetryByTerminated()
         {
             if (m_pTimer)
             {
-                m_pTimer->Start(TIMER_BASE_TERMINATED_RETRY, m_nRetryAfter*1000);
+                m_pTimer->Start(TIMER_BASE_TERMINATED_RETRY, m_nRetryAfter * 1000);
             }
         }
         else
@@ -956,8 +922,7 @@ IMS_BOOL DEMngr::HandleRetryByTerminated()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubscription)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubscription)
 {
     IMS_BOOL bHandle = IMS_FALSE;
 
@@ -988,13 +953,12 @@ IMS_BOOL DEMngr::HandleUnSubCompleted(IN ISubscription* pISubscription)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::HandleDialogInfo(IN const AString &aStrDialogInfo)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::HandleDialogInfo(IN const AString& aStrDialogInfo)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
-    DocumentBuilder *pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
+    DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
 
     if (pDocumentBuilder == IMS_NULL)
     {
@@ -1002,7 +966,7 @@ IMS_BOOL DEMngr::HandleDialogInfo(IN const AString &aStrDialogInfo)
         return IMS_FALSE;
     }
 
-    IDocument *piDocument = pDocumentBuilder->Parse(aStrDialogInfo);
+    IDocument* piDocument = pDocumentBuilder->Parse(aStrDialogInfo);
     if (piDocument == IMS_NULL)
     {
         IMS_TRACE_E(0, "Parsing ConfInfo is failed", 0, 0, 0);
@@ -1010,7 +974,7 @@ IMS_BOOL DEMngr::HandleDialogInfo(IN const AString &aStrDialogInfo)
         return IMS_FALSE;
     }
 
-    IElement *pIElement = piDocument->GetDocumentElement();
+    IElement* pIElement = piDocument->GetDocumentElement();
     if (pIElement == IMS_NULL)
     {
         IMS_TRACE_E(0, "Root element is null", 0, 0, 0);
@@ -1057,8 +1021,8 @@ IMS_BOOL DEMngr::HandleDialogInfo(IN const AString &aStrDialogInfo)
         bUpdated |= pDialog->Update(pDialogElement);
     }
 
-    IMS_TRACE_I("HandleDialogInfo : Dialogs[%d] Updated[%s]"
-                , pINodeListDialog->GetLength(), PS_BOOL(bUpdated), 0);
+    IMS_TRACE_I("HandleDialogInfo : Dialogs[%d] Updated[%s]", pINodeListDialog->GetLength(),
+            PS_BOOL(bUpdated), 0);
 
     pIElement->DestroyNodeList(pINodeListDialog);
     piDocument->DestroyDocument();
@@ -1069,8 +1033,7 @@ IMS_BOOL DEMngr::HandleDialogInfo(IN const AString &aStrDialogInfo)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::UpdateDialogInfo(IN IElement* pDialogInfoElement)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::UpdateDialogInfo(IN IElement* pDialogInfoElement)
 {
     if (pDialogInfoElement == IMS_NULL)
     {
@@ -1084,8 +1047,7 @@ IMS_BOOL DEMngr::UpdateDialogInfo(IN IElement* pDialogInfoElement)
 
     IMS_TRACE_I("UpdateDialogInfo : Version[%d][%d]", m_nVersion, aStrVersion.ToInt32(), 0);
     IMS_TRACE_I("UpdateDialogInfo : State[%d][%d]", m_eState, ConvertInfoState(aStrState), 0);
-    IMS_TRACE_D("UpdateDialogInfo : Entity[%s][%s]", m_aStrEntity.GetStr(), aStrEntity.GetStr(),
-            0);
+    IMS_TRACE_D("UpdateDialogInfo : Entity[%s][%s]", m_aStrEntity.GetStr(), aStrEntity.GetStr(), 0);
 
     m_nVersion = aStrVersion.ToInt32();
     m_eState = ConvertInfoState(aStrState);
@@ -1096,28 +1058,20 @@ IMS_BOOL DEMngr::UpdateDialogInfo(IN IElement* pDialogInfoElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleChangedCallState(IN IMSMSG &/*objMsg*/)
-{
-}
+PROTECTED VIRTUAL void DEMngr::HandleChangedCallState(IN IMSMSG& /*objMsg*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::HandleChangedTotalCallState(IN IMSMSG &/*objMsg*/)
-{
-}
+PROTECTED VIRTUAL void DEMngr::HandleChangedTotalCallState(IN IMSMSG& /*objMsg*/) {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMSList<DialogInfo*> DEMngr::GetDialogInfos()
+PROTECTED VIRTUAL IMSList<DialogInfo*> DEMngr::GetDialogInfos()
 {
     IMSList<DialogInfo*> lstDialogInfos = IMSList<DialogInfo*>();
 
     for (IMS_UINT32 index = 0; index < m_objDialogs.GetSize(); index++)
     {
-
         IDialogEvent* pDialog = m_objDialogs.GetValueAt(index);
 
         if (pDialog == IMS_NULL)
@@ -1149,7 +1103,6 @@ IMSList<DialogInfo*> DEMngr::GetDialogInfos()
         lstDialogInfos.Append(pDialogInfo);
 
         pDialogInfo->pMediaInfo = GetMediaInfo(pDialog);
-
     }
 
     IMS_TRACE_I("GetDialogInfos : [%d]", lstDialogInfos.GetSize(), 0, 0);
@@ -1158,8 +1111,7 @@ IMSList<DialogInfo*> DEMngr::GetDialogInfos()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_SINT32 DEMngr::GetStateReason(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
+PROTECTED VIRTUAL IMS_SINT32 DEMngr::GetStateReason(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
 {
     IMS_SINT32 eReason = -1;
     AString aStrStateEvent = pDialog->GetStateEvent();
@@ -1170,8 +1122,7 @@ IMS_SINT32 DEMngr::GetStateReason(IN IMS_UINT32 eState, IN IDialogEvent* pDialog
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_SINT32 DEMngr::GetStateCode(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
+PROTECTED VIRTUAL IMS_SINT32 DEMngr::GetStateCode(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
 {
     IMS_SINT32 eCode = -1;
     AString aStrStateCode = pDialog->GetStateCode();
@@ -1182,8 +1133,7 @@ IMS_SINT32 DEMngr::GetStateCode(IN IMS_UINT32 eState, IN IDialogEvent* pDialog)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::IsInitiator(IN IDialogEvent* pDialog)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::IsInitiator(IN IDialogEvent* pDialog)
 {
     IMS_BOOL bIs = IMS_FALSE;
     AString aStrDirection = AString::ConstNull();
@@ -1200,8 +1150,7 @@ IMS_BOOL DEMngr::IsInitiator(IN IDialogEvent* pDialog)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::IsConf(IN IDialogEvent* /*pDialog*/)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::IsConf(IN IDialogEvent* /*pDialog*/)
 {
     IMS_BOOL bIs = IMS_FALSE;
 
@@ -1211,8 +1160,7 @@ IMS_BOOL DEMngr::IsConf(IN IDialogEvent* /*pDialog*/)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL DEMngr::IsCallPull(IN IDialogEvent* pDialog)
+PROTECTED VIRTUAL IMS_BOOL DEMngr::IsCallPull(IN IDialogEvent* pDialog)
 {
     IMS_BOOL bIs = IMS_FALSE;
 
@@ -1224,10 +1172,9 @@ IMS_BOOL DEMngr::IsCallPull(IN IDialogEvent* pDialog)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-MediaInfo* DEMngr::GetMediaInfo(IN IDialogEvent* /*pDialog*/)
+PROTECTED VIRTUAL MediaInfo* DEMngr::GetMediaInfo(IN IDialogEvent* /*pDialog*/)
 {
-    MediaInfo* pMediaInfo = IMS_NULL; // CHECK
+    MediaInfo* pMediaInfo = IMS_NULL;  // CHECK
 
     IMS_TRACE_I("GetMediaInfo", 0, 0, 0);
     return pMediaInfo;
@@ -1235,8 +1182,7 @@ MediaInfo* DEMngr::GetMediaInfo(IN IDialogEvent* /*pDialog*/)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-AString DEMngr::ConvertNumber(IN AString aStrIdentity)
+PROTECTED VIRTUAL AString DEMngr::ConvertNumber(IN AString aStrIdentity)
 {
     AString aStrNumber = AString::ConstNull();
 
@@ -1255,7 +1201,7 @@ AString DEMngr::ConvertNumber(IN AString aStrIdentity)
                 aStrNumber = objSIPAddress.GetUser();
             }
         }
-        else if(objSIPAddress.IsSchemeTel())
+        else if (objSIPAddress.IsSchemeTel())
         {
             aStrNumber = objSIPAddress.GetHost();
         }
@@ -1271,8 +1217,7 @@ AString DEMngr::ConvertNumber(IN AString aStrIdentity)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::SendTerminatedToListn(IN FailReason terminatedReason)
+PROTECTED VIRTUAL void DEMngr::SendTerminatedToListn(IN FailReason terminatedReason)
 {
     if (m_pListener == IMS_NULL)
     {
@@ -1283,24 +1228,23 @@ void DEMngr::SendTerminatedToListn(IN FailReason terminatedReason)
     pParam->terminatedReason = terminatedReason;
     pParam->bDestroy = m_bDestroy;
 
-    IMS_TRACE_I("SendTerminatedToListn : %s Destroy[%s]"
-                , PS_FR(terminatedReason), PS_BOOL(m_bDestroy), 0);
+    IMS_TRACE_I("SendTerminatedToListn : %s Destroy[%s]", PS_FR(terminatedReason),
+            PS_BOOL(m_bDestroy), 0);
 
     m_pListener->DEMngr_Terminated((IMS_UINTP)pParam);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos)
+PROTECTED VIRTUAL void DEMngr::SendNotifyInfoToUI(IN IMSList<DialogInfo*> lstDialogInfos)
 {
     IUUCServiceDialogsNotifyInfoParam* pParam = new IUUCServiceDialogsNotifyInfoParam();
     pParam->lstDialogInfos = lstDialogInfos;
 
     IMS_TRACE_I("SendNotifyInfoToUI", 0, 0, 0);
 
-    IMS_MSG_CreateNPostThreadMessageByName(m_aStrJNIServiceName, IuMtcService::DIALOGS_NOTIFY_INFO,
-            0, (IMS_UINTP)pParam);
+    IMS_MSG_CreateNPostThreadMessageByName(
+            m_aStrJNIServiceName, IuMtcService::DIALOGS_NOTIFY_INFO, 0, (IMS_UINTP)pParam);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1339,7 +1283,6 @@ IMS_UINT32 DEMngr::ConvertInfoState(IN AString aStrState)
     IMS_TRACE_I("ConvertInfoState : [%s][%d]", aStrState.GetStr(), eState, 0);
     return eState;
 }
-
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
@@ -1384,24 +1327,21 @@ IMS_UINT32 DEMngr::ConvertTerminatedReason(IN AString aStrReason)
 // TODO: VIRTUAL -> UC_CONFG ------------------------------------------ START
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::LoadConfig()
+PROTECTED VIRTUAL void DEMngr::LoadConfig()
 {
     IMS_TRACE_I("LoadConfig", 0, 0, 0);
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::AddEventListn()
+PROTECTED VIRTUAL void DEMngr::AddEventListn()
 {
-    //2 TODO : UC_CONFIG
+    // 2 TODO : UC_CONFIG
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void DEMngr::DeleteEventListn()
+PROTECTED VIRTUAL void DEMngr::DeleteEventListn()
 {
-    //2 TODO : UC_CONFIG
+    // 2 TODO : UC_CONFIG
 }

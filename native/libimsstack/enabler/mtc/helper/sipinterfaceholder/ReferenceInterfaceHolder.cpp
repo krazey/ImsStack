@@ -6,7 +6,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 ReferenceInterfaceHolder::ReferenceInterfaceHolder(IN IInterfaceHolderListener& objListener) :
         m_objListener(objListener)
@@ -28,8 +27,7 @@ ReferenceInterfaceHolder::~ReferenceInterfaceHolder()
     m_objReferenceTerminatedGuardTimers.Clear();
 }
 
-PUBLIC VIRTUAL
-void ReferenceInterfaceHolder::ReferenceTerminated(IN IReference* piReference)
+PUBLIC VIRTUAL void ReferenceInterfaceHolder::ReferenceTerminated(IN IReference* piReference)
 {
     IMS_TRACE_D("ReferenceTerminated", 0, 0, 0);
 
@@ -37,8 +35,7 @@ void ReferenceInterfaceHolder::ReferenceTerminated(IN IReference* piReference)
     ReleaseIReference(piReference, IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-void ReferenceInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void ReferenceInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 {
     IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
 
@@ -58,8 +55,8 @@ void ReferenceInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PUBLIC
-IReference* ReferenceInterfaceHolder::GetIReference(IN ISession* piSession,
-        IN const AString& strReferTo, IN const AString& strMethod)
+IReference* ReferenceInterfaceHolder::GetIReference(
+        IN ISession* piSession, IN const AString& strReferTo, IN const AString& strMethod)
 {
     IMS_TRACE_D("GetIReference", 0, 0, 0);
 
@@ -69,8 +66,8 @@ IReference* ReferenceInterfaceHolder::GetIReference(IN ISession* piSession,
 }
 
 PUBLIC
-void ReferenceInterfaceHolder::ReleaseIReference(IN IReference* piReference,
-        IN IMS_BOOL bTerminated/* = IMS_FALSE*/)
+void ReferenceInterfaceHolder::ReleaseIReference(
+        IN IReference* piReference, IN IMS_BOOL bTerminated /* = IMS_FALSE*/)
 {
     IMS_TRACE_D("ReleaseIReference", 0, 0, 0);
 
@@ -139,8 +136,7 @@ void ReferenceInterfaceHolder::ClearIReferences()
 }
 
 PRIVATE
-IMS_RESULT ReferenceInterfaceHolder::StartTimer(IN IReference* piReference,
-        IN IMS_SINT32 nDuration)
+IMS_RESULT ReferenceInterfaceHolder::StartTimer(IN IReference* piReference, IN IMS_SINT32 nDuration)
 {
     IMS_TRACE_D("StartTimer reference duration[%d]", nDuration, 0, 0);
 

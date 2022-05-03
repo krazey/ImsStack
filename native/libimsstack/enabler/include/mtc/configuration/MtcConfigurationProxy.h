@@ -29,7 +29,7 @@ public:
     void PutConfigCache(IN Feature eFeature, IN IMS_BOOL bValue);
     void PutConfigCache(IN Feature eFeature, IN const AString& strValue);
 
-    void OnRegistrationRefreshed(); // called by MtcService.
+    void OnRegistrationRefreshed();  // called by MtcService.
 
 private:
     MtcConfigurationManager m_objManager;

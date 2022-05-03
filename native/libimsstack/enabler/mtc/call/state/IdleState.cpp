@@ -44,17 +44,10 @@ IdleState::IdleState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL
-IdleState::~IdleState()
-{
-}
+PUBLIC VIRTUAL IdleState::~IdleState() {}
 
-PUBLIC VIRTUAL
-CallStateName IdleState::Start(
-        IN CallType eCallType,
-        IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices)
+PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AString& strTarget,
+        IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     IMS_TRACE_D("Start", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
@@ -80,22 +73,18 @@ CallStateName IdleState::Start(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL
-CallStateName IdleState::StartConference(
-        IN CallType eCallType,
-        IN const AString& strTarget,
-        IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMSList<ConfUser*> lstUsers)
+PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
+        IN const AString& strTarget, IN MediaInfo* pMediaInfo,
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
-    m_eConferenceStartType = ConferenceType::START_CONFERENCE; // TODO: deprecated.
+    m_eConferenceStartType = ConferenceType::START_CONFERENCE;  // TODO: deprecated.
 
     CallInfo& objCallInfo = m_objContext.GetCallInfo();
     objCallInfo.ePeerType = PeerType::MO;
     objCallInfo.eCallType = eCallType;
     objCallInfo.bConference = IMS_TRUE;
-    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget); // TODO:
+    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget);  // TODO:
 
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
 
@@ -108,11 +97,8 @@ CallStateName IdleState::StartConference(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL
-CallStateName IdleState::StartConference(
-        IN CallType eCallType,
-        IN const AString& strTarget,
-        IN IMSList<ConfUser*> lstUsers)
+PUBLIC VIRTUAL CallStateName IdleState::StartConference(
+        IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("StartConference", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::START_CONFERENCE;
@@ -125,8 +111,9 @@ CallStateName IdleState::StartConference(
 
     m_objOperationAfterBlockCheck = [&]()
     {
-        return ContinueConference(new MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID,
-                DIRECTION_INVALID, AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID),
+        return ContinueConference(
+                new MediaInfo(DIRECTION_SEND_RECEIVE, DIRECTION_INVALID, DIRECTION_INVALID,
+                        AUDIO_QUALITY_NONE, VIDEO_QUALITY_NONE, GTT_MODE_INVALID),
                 lstUsers);
     };
     m_pBlockChecker = std::unique_ptr<IMtcBlockChecker>(
@@ -134,8 +121,7 @@ CallStateName IdleState::StartConference(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL
-CallStateName IdleState::HandleIncoming(
+PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
         IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
     IMS_TRACE_D("HandleIncoming", 0, 0, 0);
@@ -155,8 +141,7 @@ CallStateName IdleState::HandleIncoming(
     return OnBlockChecked(m_pBlockChecker->Check());
 }
 
-PUBLIC VIRTUAL
-CallStateName IdleState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
 
@@ -166,8 +151,7 @@ CallStateName IdleState::Terminate(IN const FailReason& objReason)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
+PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 {
     switch (objResult.eStatus)
     {
@@ -215,8 +199,7 @@ CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 // }
 
 PRIVATE
-CallStateName IdleState::ContinueStart(
-        IN MediaInfo* pMediaInfo)
+CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
     if (CreateISession() == IMS_FAILURE)
@@ -357,8 +340,7 @@ IMS_RESULT IdleState::SendStartMessage()
         return IMS_FAILURE;
     }
 
-    m_objContext.GetTimer().Start(
-            MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
+    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
             m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
 
     return IMS_SUCCESS;
@@ -369,15 +351,14 @@ AString IdleState::GenerateSessionId()
 {
     // Pseudo-random 128-bit system secret key
     AString strSessionId;
-    strSessionId.Sprintf("%08x%08x%08x%08x", IMS_SYS_GetTimeInMicroSeconds(),
-            IMS_SYS_GetRandom0(), IMS_SYS_GetRandom0(), IMS_SYS_GetRandom0());
+    strSessionId.Sprintf("%08x%08x%08x%08x", IMS_SYS_GetTimeInMicroSeconds(), IMS_SYS_GetRandom0(),
+            IMS_SYS_GetRandom0(), IMS_SYS_GetRandom0());
 
     return strSessionId;
 }
 
 PRIVATE
-IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(
-        IN const IMSList<ConfUser*>& lstUsers)
+IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers)
 {
     // TODO: Pass param as entry URIs for MtcCall I/F.
     // So this method will be moved to outside of MtcCall
@@ -439,10 +420,9 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
     IMSList<IMtcBlockRule*> lstRules;
 
-    lstRules.Append(new VopsBlockRule(
-            m_objContext.GetService(), m_objContext.GetImsEventReceiver()));
-    lstRules.Append(new NetworkBlockRule(
-            m_objContext.GetService(),
+    lstRules.Append(
+            new VopsBlockRule(m_objContext.GetService(), m_objContext.GetImsEventReceiver()));
+    lstRules.Append(new NetworkBlockRule(m_objContext.GetService(),
             *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
     lstRules.Append(new ProcessingCallBlockRule(m_objContext.GetCallManager()));
 
@@ -453,8 +433,7 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 
     lstRules.Append(new CallCountBlockRule(3, m_objContext.GetCallManager()));
     lstRules.Append(new TerminalBasedCallWaitingBlockRule(
-            m_objContext.GetService(),
-            m_objContext.GetCallManager()));
+            m_objContext.GetService(), m_objContext.GetCallManager()));
 
     return lstRules;
 }

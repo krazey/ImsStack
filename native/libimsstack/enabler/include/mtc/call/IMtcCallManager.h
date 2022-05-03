@@ -12,7 +12,7 @@
 class IMtcCallManager
 {
 public:
-    virtual ~IMtcCallManager() {};
+    virtual ~IMtcCallManager(){};
 
     // Creates a new call and starts to manage it. Returns the created call.
     virtual IMtcCall* CreateCall(IN ServiceType eServiceType, IN CallInfo& pCallInfo) = 0;

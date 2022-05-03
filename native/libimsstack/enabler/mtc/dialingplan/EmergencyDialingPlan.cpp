@@ -6,9 +6,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL
-AString& EmergencyDialingPlan::GetTranslatedUri(IN IMtcContext& objContext,
-        IN_OUT AString& strNumber)
+PUBLIC GLOBAL AString& EmergencyDialingPlan::GetTranslatedUri(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     if (IsTestNumber(strNumber))
     {
@@ -17,14 +16,13 @@ AString& EmergencyDialingPlan::GetTranslatedUri(IN IMtcContext& objContext,
     }
 
     EmergencyNumberList* pEnl = new EmergencyNumberList(objContext.GetSlotId());
-    strNumber = pEnl->GetEmergencyServiceURN(strNumber); // TODO:
+    strNumber = pEnl->GetEmergencyServiceURN(strNumber);  // TODO:
     delete pEnl;
 
     return strNumber;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL EmergencyDialingPlan::IsTestNumber(IN const AString& /*strNumber*/)
+PRIVATE GLOBAL IMS_BOOL EmergencyDialingPlan::IsTestNumber(IN const AString& /*strNumber*/)
 {
     // TODO: vzw.
     return IMS_FALSE;

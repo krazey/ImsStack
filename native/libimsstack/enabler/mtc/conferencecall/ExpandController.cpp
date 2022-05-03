@@ -18,17 +18,15 @@ ExpandController::ExpandController(IN CallKey nConfCallKey, IMtcContext& objCont
     IMS_TRACE_I("+ExpandController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-ExpandController::~ExpandController()
+PUBLIC VIRTUAL ExpandController::~ExpandController()
 {
     IMS_TRACE_I("~ExpandController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
+PUBLIC VIRTUAL void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
 {
     // TODO: session updated...
-    //if (ntype != SESSION_UPDATED)
+    // if (ntype != SESSION_UPDATED)
     if (IMS_FALSE)
     {
         return ConferenceController::OnCallUpdated(nType, nCallKey);
@@ -63,14 +61,12 @@ void ExpandController::OnCallUpdated(IN IMS_UINT32 nType, IN IMS_UINTP nCallKey)
     SetState(STATE_IDLE);
 }
 
-PUBLIC VIRTUAL
-void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
+PUBLIC VIRTUAL void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
     // LGU+
     if ((ConferenceConfigurationWrapper::IsReferSubscriptionRequired() == IMS_FALSE) &&
-            (GetState() == STATE_EXPANDING) &&
-            (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
+            (GetState() == STATE_EXPANDING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE))
     {
         m_objNotifier.NotifyExpanded();
     }
@@ -80,8 +76,7 @@ void ExpandController::OnReferenceStarted(IN IConferenceReference* piConfRef)
     }
 }
 
-PUBLIC VIRTUAL
-void ExpandController::OnReferenceStartFailed(IN IConferenceReference* piConfRef)
+PUBLIC VIRTUAL void ExpandController::OnReferenceStartFailed(IN IConferenceReference* piConfRef)
 {
     IMS_TRACE_D("OnReferenceStartFailed", 0, 0, 0);
 
@@ -114,16 +109,14 @@ void ExpandController::OnReferenceStartFailed(IN IConferenceReference* piConfRef
     }
 }
 
-PUBLIC VIRTUAL
-void ExpandController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
+PUBLIC VIRTUAL void ExpandController::OnReferenceUpdated(IN IConferenceReference* piConfRef,
         IN SipStatusCode nSipFragCode, IN ReferSubscriptionState eState)
 {
     IMS_TRACE_D("OnReferenceUpdated : R-NOTIFY is received.", 0, 0, 0);
 
     if (piConfRef->GetType() != REFERENCE_TYPE_INVITE)
     {
-        return ConferenceController::OnReferenceUpdated(piConfRef, nSipFragCode,
-                eState);
+        return ConferenceController::OnReferenceUpdated(piConfRef, nSipFragCode, eState);
     }
 
     ConfUser* pTempUser = m_objParticipantList.GetConfUser(piConfRef);
@@ -194,7 +187,7 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
 
     IMS_SINT32 nReferType = ConferenceConfigurationWrapper::GetReferTypeForInvite();
 
-    if (nReferType == REFER_INVITE_SINGLE) // SKT
+    if (nReferType == REFER_INVITE_SINGLE)  // SKT
     {
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_CREATE_CONFERENCE_SESSION, objUsers);
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
@@ -204,18 +197,17 @@ void ExpandController::ProcessExpand(IN IMSList<ConfUser*>& objUsers)
         // Terminate the exist 1-to-1 session : it is triggered by GII operation.
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_NOTIFY_RESULT_TO_UI);
     }
-    else if (nReferType == REFER_INVITE_MULTIPLE) // LGU+
+    else if (nReferType == REFER_INVITE_MULTIPLE)  // LGU+
     {
-        m_objOperationQueue.CreateNPut(CONTROL_OPERATION_REFER_INVITE,
-                m_objParticipantList.GetConfUsers());
+        m_objOperationQueue.CreateNPut(
+                CONTROL_OPERATION_REFER_INVITE, m_objParticipantList.GetConfUsers());
         m_objOperationQueue.CreateNPut(CONTROL_OPERATION_SUBSCRIBE);
     }
 
     m_objOperationQueue.SetAddingOperationSetCompleted();
 }
 
-PUBLIC VIRTUAL
-void ExpandController::StartConferenceCall(
+PUBLIC VIRTUAL void ExpandController::StartConferenceCall(
         IN ConferenceOperationQueue::ConferenceOperation* pOperation)
 {
     // TODO: how to check nullcall? never be null so no need to check?
@@ -232,8 +224,7 @@ void ExpandController::StartConferenceCall(
             CallType::VOIP, AString::ConstNull(), pOperation->GetUsers());
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
+PROTECTED VIRTUAL IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
 {
     if (GetState() != STATE_EXPANDING)
     {
@@ -255,8 +246,7 @@ IMS_BOOL ExpandController::IsStartFinalSipfragWaitTimer() const
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void ExpandController::Recover()
+PROTECTED VIRTUAL void ExpandController::Recover()
 {
     IMS_TRACE_I("Recover", 0, 0, 0);
     switch (m_objOperationQueue.GetTypeOfCurrentOperation())
@@ -276,14 +266,12 @@ void ExpandController::Recover()
     }
 }
 
-PROTECTED VIRTUAL
-void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
+PROTECTED VIRTUAL void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
         IN IConferenceReference* piConfRef,
-        IN SipStatusCode nStatusCode/* = SipStatusCode::SC_200*/)
+        IN SipStatusCode nStatusCode /* = SipStatusCode::SC_200*/)
 {
     if (ConferenceConfigurationWrapper::IsReferSubscriptionRequired() &&
-            (GetState() == STATE_JOINING) &&
-            (piConfRef->GetType() == REFERENCE_TYPE_INVITE) &&
+            (GetState() == STATE_JOINING) && (piConfRef->GetType() == REFERENCE_TYPE_INVITE) &&
             SipStatusCode::IsFinalFailure(nStatusCode.ToInt()))
     {
         switch (nStatusCode.ToInt())
@@ -337,8 +325,7 @@ void ExpandController::UpdateUserStatusByReferResult(IN ConfUser* pUser,
             pUser->eStatusCode, 0);
 }
 
-PROTECTED VIRTUAL
-void ExpandController::NotifyCmdResult()
+PROTECTED VIRTUAL void ExpandController::NotifyCmdResult()
 {
     IMS_SINT32 nOldState = GetState();
     ConferenceController::NotifyCmdResult();
@@ -389,8 +376,7 @@ void ExpandController::ProcessJoinAfterExpand()
     // Invite other participants when conference session is expanded.
     if (IsReadyToPerformCmd() == IMS_FALSE)
     {
-        m_objNotifier.NotifyJoinFailed(
-                FailReason(FAIL_REASON_UNKNOWN, -1), m_objParticipantList);
+        m_objNotifier.NotifyJoinFailed(FailReason(FAIL_REASON_UNKNOWN, -1), m_objParticipantList);
     }
 
     SetState(STATE_JOINING);

@@ -7,7 +7,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 SrvccEventHandler::SrvccEventHandler(IN IMtcContext& objContext) :
         m_objContext(objContext),
@@ -74,14 +73,14 @@ void SrvccEventHandler::HandleCalls()
     switch (m_eState)
     {
         case SrvccState::SUCCEEDED:
-            m_objContext.GetCallController(); // avoid build error.
-            //m_objContext.GetCallController().RemoveCalls(KeyType::NONE, Key::...);
+            m_objContext.GetCallController();  // avoid build error.
+            // m_objContext.GetCallController().RemoveCalls(KeyType::NONE, Key::...);
             return;
         case SrvccState::CANCELED:
-            //m_objContext.GetCallController().UpdateCalls(Reason SrvccCanceled...);
+            // m_objContext.GetCallController().UpdateCalls(Reason SrvccCanceled...);
             return;
         case SrvccState::FAILED:
-            //m_objContext.GetCallController().UpdateCalls(Reason SrvccFailed...);
+            // m_objContext.GetCallController().UpdateCalls(Reason SrvccFailed...);
             return;
         default:
             // do nothing

@@ -5,8 +5,7 @@
 #include "call/state/MtcCallState.h"
 #include "MtcDef.h"
 
-class EstablishedState :
-        public MtcCallState
+class EstablishedState : public MtcCallState
 {
 public:
     EstablishedState(IN IMtcCallContext& objContext);
@@ -24,8 +23,8 @@ public:
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
 
 private:
-    IMS_RESULT HandleUpdate(IN UpdateType eUpdateType, IN CallType eCallType,
-            IN MediaInfo* pMediaInfo);
+    IMS_RESULT HandleUpdate(
+            IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo);
     IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);

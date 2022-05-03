@@ -16,15 +16,15 @@ enum class IndividualCallState
 class IConferenceController
 {
 public:
-enum /*class Command*/
-{
-    GROUPCALL,
-    MERGE,
-    EXPAND,
-    ADD,
-    REMOVE,
-    JOINED
-};
+    enum /*class Command*/
+    {
+        GROUPCALL,
+        MERGE,
+        EXPAND,
+        ADD,
+        REMOVE,
+        JOINED
+    };
     virtual ~IConferenceController() {}
     virtual void ProcessCommand(IN IMS_UINT32 nCmd, IN IMSList<ConfUser*>& objUsers,
             IN CallInfo& objCallInfo, IN MediaInfo& objMediaInfo,

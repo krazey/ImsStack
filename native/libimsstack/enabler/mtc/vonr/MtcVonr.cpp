@@ -16,26 +16,24 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
-MtcVonr::MtcVonr(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener)
-    : m_nSlotId(nSlotId)
-    , m_piListener(piListener)
-    , m_piVonr(IMS_NULL)
-    , m_nCallKey(-1)
-    , m_nDirection(IVoNr::DIRECTION_MO)
-    , m_nUacType(IVoNr::TYPE_VOICE)
-    , m_piNetWatcherInfo(IMS_NULL)
-    , m_eUacStatus(UacStatus::IDLE)
-    , m_nCurrentNetwork(INetworkWatcher::RADIOTECH_TYPE_INVALID)
-    , m_piTimer(IMS_NULL)
+MtcVonr::MtcVonr(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener) :
+        m_nSlotId(nSlotId),
+        m_piListener(piListener),
+        m_piVonr(IMS_NULL),
+        m_nCallKey(-1),
+        m_nDirection(IVoNr::DIRECTION_MO),
+        m_nUacType(IVoNr::TYPE_VOICE),
+        m_piNetWatcherInfo(IMS_NULL),
+        m_eUacStatus(UacStatus::IDLE),
+        m_nCurrentNetwork(INetworkWatcher::RADIOTECH_TYPE_INVALID),
+        m_piTimer(IMS_NULL)
 {
     IMS_TRACE_I("+MtcVonr", 0, 0, 0);
     Initialize();
 }
 
-PUBLIC VIRTUAL
-MtcVonr::~MtcVonr()
+PUBLIC VIRTUAL MtcVonr::~MtcVonr()
 {
     IMS_TRACE_I("~MtcVonr : [%" PFLS_x "]", this, 0, 0);
 
@@ -57,35 +55,31 @@ MtcVonr::~MtcVonr()
 #if _IVONR_LISTENER_INTERFACE_
 #endif
 
-PUBLIC VIRTUAL
-void MtcVonr::VoNrUac_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
+PUBLIC VIRTUAL void MtcVonr::VoNrUac_NotifyResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
         IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime)
 {
     OnNotifyUacResponse(nType, nResult, nReason, nSysMode, nBarringTime);
 }
 
-PUBLIC VIRTUAL
-void MtcVonr::VoNrCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode)
+PUBLIC VIRTUAL void MtcVonr::VoNrCallPreference_NotifyCallReady(IN IMS_UINT32 nSysMode)
 {
     OnNotifyCallPreferenceReady(nSysMode);
 }
 
-PUBLIC VIRTUAL
-void MtcVonr::VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
+PUBLIC VIRTUAL void MtcVonr::VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
         IN IMS_UINT32 nSourceRAT, IN IMS_UINT32 nTargetRAT, IN IMS_SINT32 nReason)
 {
     (void)nStatus;
     (void)nSourceRAT;
     (void)nTargetRAT;
     (void)nReason;
-    //TODO : If you need the implement for "WLAN to 5G NR Handover case" ...
+    // TODO : If you need the implement for "WLAN to 5G NR Handover case" ...
 }
 
 #if _INETWATCHER_LISTENER_INTERFACE_
 #endif
 
-PUBLIC VIRTUAL
-void MtcVonr::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
+PUBLIC VIRTUAL void MtcVonr::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
 {
     if (m_piNetWatcherInfo != piNetWatcherInfo)
     {
@@ -94,26 +88,25 @@ void MtcVonr::NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo)
     }
 
     IMS_SINT32 nReportedNetwork = m_piNetWatcherInfo->GetNetworkType();
-/*
-    IMtcCall* piMtcCall = GetCall();
-    if (piMtcCall &&
-            piMtcCall->GetState() == IMtcCall::RINGBACK &&
-            m_nCurrentNetwork != nReportedNetwork &&
-            IsAvailableNetwork(nReportedNetwork) &&
-            m_eUacStatus == UacStatus::SUCCESS)
-    {
-        IMS_TRACE_D("NotifyNetWatcherStatus [%d]", nReportedNetwork, 0, 0);
-        NotifyCallState(IVoNr::STATE_START);
-    }
-*/
+    /*
+        IMtcCall* piMtcCall = GetCall();
+        if (piMtcCall &&
+                piMtcCall->GetState() == IMtcCall::RINGBACK &&
+                m_nCurrentNetwork != nReportedNetwork &&
+                IsAvailableNetwork(nReportedNetwork) &&
+                m_eUacStatus == UacStatus::SUCCESS)
+        {
+            IMS_TRACE_D("NotifyNetWatcherStatus [%d]", nReportedNetwork, 0, 0);
+            NotifyCallState(IVoNr::STATE_START);
+        }
+    */
     m_nCurrentNetwork = nReportedNetwork;
 }
 
 #if _ITIMER_LISTENER_INTERFACE_
 #endif
 
-PUBLIC VIRTUAL
-void MtcVonr::Timer_TimerExpired(IN ITimer *piTimer)
+PUBLIC VIRTUAL void MtcVonr::Timer_TimerExpired(IN ITimer* piTimer)
 {
     IMS_TRACE_D("Timer_TimerExpired status[%d]", m_eUacStatus, 0, 0);
 
@@ -131,16 +124,16 @@ void MtcVonr::Timer_TimerExpired(IN ITimer *piTimer)
         {
             return;
         }
-/*
-        IMS_UINT32 nBlockType = IMtcCallContext::VONR_BLOCK_TYPE_FINAL_FAILURE;
-        if (GetSysMode() == IVoNr::SYS_MODE_NR5G)
-        {
-            // call drop
-            nBlockType = IMtcCallContext::VONR_BLOCK_TYPE_FINAL_FAILURE_ABNORMAL;
-        }
+        /*
+                IMS_UINT32 nBlockType = IMtcCallContext::VONR_BLOCK_TYPE_FINAL_FAILURE;
+                if (GetSysMode() == IVoNr::SYS_MODE_NR5G)
+                {
+                    // call drop
+                    nBlockType = IMtcCallContext::VONR_BLOCK_TYPE_FINAL_FAILURE_ABNORMAL;
+                }
 
-        piMtcCall->SetUacBlockType(nBlockType);
-*/
+                piMtcCall->SetUacBlockType(nBlockType);
+        */
     }
     else
     {
@@ -152,9 +145,8 @@ void MtcVonr::Timer_TimerExpired(IN ITimer *piTimer)
 #if _PUBLIC_METHOD_
 #endif
 
-PUBLIC VIRTUAL
-void MtcVonr::CheckBarring(IN IMtcCall* /*piMtcCall*/, IN CallType /*eCallType*/,
-        IN IMS_BOOL /*bEmergency*/)
+PUBLIC VIRTUAL void MtcVonr::CheckBarring(
+        IN IMtcCall* /*piMtcCall*/, IN CallType /*eCallType*/, IN IMS_BOOL /*bEmergency*/)
 {
     // must override.
 }
@@ -168,33 +160,29 @@ IMS_UINT32 MtcVonr::GetUacType()
 #if _PROTECTED_METHOD_
 #endif
 
-PROTECTED VIRTUAL
-void MtcVonr::OnSessionStopped(IN IMS_UINTP /*nParam*/)
+PROTECTED VIRTUAL void MtcVonr::OnSessionStopped(IN IMS_UINTP /*nParam*/)
 {
     // must override.
 }
 
-PROTECTED VIRTUAL
-void MtcVonr::NotifyCallState(IN IMS_UINT32 /*nState*/)
+PROTECTED VIRTUAL void MtcVonr::NotifyCallState(IN IMS_UINT32 /*nState*/)
 {
     // must override.
 }
 
-PROTECTED VIRTUAL
-void MtcVonr::OnNotifyUacResponse(IN IMS_UINT32 /*nType*/, IN IMS_RESULT /*nResult*/,
-        IN IMS_SINT32 /*nReason*/, IN IMS_UINT32 /*nSysMode*/, IN IMS_UINT32 /*nBarringTime*/)
+PROTECTED VIRTUAL void MtcVonr::OnNotifyUacResponse(IN IMS_UINT32 /*nType*/,
+        IN IMS_RESULT /*nResult*/, IN IMS_SINT32 /*nReason*/, IN IMS_UINT32 /*nSysMode*/,
+        IN IMS_UINT32 /*nBarringTime*/)
 {
     // must override.
 }
 
-PROTECTED VIRTUAL
-void MtcVonr::OnNotifyCallPreferenceReady(IN IMS_UINT32 /*nSysMode*/)
+PROTECTED VIRTUAL void MtcVonr::OnNotifyCallPreferenceReady(IN IMS_UINT32 /*nSysMode*/)
 {
     // must override.
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL MtcVonr::IsUacCheckRequired()
+PROTECTED VIRTUAL IMS_BOOL MtcVonr::IsUacCheckRequired()
 {
     // must override.
     return IMS_TRUE;
@@ -232,16 +220,16 @@ PROTECTED
 IMS_RESULT MtcVonr::UpdateSessionInfo(IN IMtcCall* /*piMtcCall*/)
 {
     IMS_TRACE_D("UpdateSessionInfo", 0, 0, 0);
-/*
-    if (piMtcCallContext == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
+    /*
+        if (piMtcCallContext == IMS_NULL)
+        {
+            return IMS_FAILURE;
+        }
 
-    m_nCallKey = piMtcCallContext->GetKey();
-    m_piCallList = piMtcCallContext->GetSessList();
-    m_nDirection = GetConvertedDirection(piMtcCall->GetPeerType());
-*/
+        m_nCallKey = piMtcCallContext->GetKey();
+        m_piCallList = piMtcCallContext->GetSessList();
+        m_nDirection = GetConvertedDirection(piMtcCall->GetPeerType());
+    */
     return IMS_SUCCESS;
 }
 
@@ -279,7 +267,7 @@ IMS_UINT32 MtcVonr::GetSysMode()
 
     if (bWLAN)
     {
-        //only working for MTK
+        // only working for MTK
         nSysMode = IVoNr::SYS_MODE_WLAN;
     }
     else
@@ -351,7 +339,7 @@ IMtcCall* MtcVonr::GetCall()
 
     return m_piCallList->GetWithSessionKey(m_nCallKey);
     */
-   return IMS_NULL;
+    return IMS_NULL;
 }
 
 PROTECTED
@@ -361,9 +349,9 @@ IMS_BOOL MtcVonr::IsAvailableNetwork(IN IMS_SINT32 nRadiotechType)
 
     IMS_BOOL bReturn = IMS_TRUE;
 
-    if (nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_LTE
-            && nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_LTE_CA
-            && nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_NR)
+    if (nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_LTE &&
+            nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_LTE_CA &&
+            nRadiotechType != INetworkWatcher::RADIOTECH_TYPE_NR)
     {
         bReturn = IMS_FALSE;
     }

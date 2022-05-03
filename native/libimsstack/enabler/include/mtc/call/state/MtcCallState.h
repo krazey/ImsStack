@@ -44,21 +44,13 @@ public:
     virtual void OnExit();
     inline CallStateName GetStateName() const { return m_eStateName; }
 
-    virtual CallStateName Start(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    virtual CallStateName StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+    virtual CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
+    virtual CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMSList<ConfUser*> lstUsers);
     virtual CallStateName StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN IMSList<ConfUser*> lstUsers);
+            IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers);
     virtual CallStateName HandleIncoming(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);
     virtual CallStateName HandleUserAlert();
@@ -103,8 +95,7 @@ public:
     virtual CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex);
     virtual CallStateName SessionTransactionReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
-    virtual CallStateName MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage *piSipMessage,
+    virtual CallStateName MessageMediator_AdjustMessage(IN_OUT ISipMessage* piSipMessage,
             IN IMS_SINT32 nMessage = IMessageMediator::MESSAGE_NORMAL);
     virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType);
 
@@ -163,12 +154,12 @@ protected:
     void SendIncomingUpdate(IN CallType eCallType);
 
     // TODO: bCheckSdp to be TRUE for all cases??
-    void UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
-            IN IMS_BOOL bCheckeSdp = IMS_TRUE);
+    void UpdatePreconditionCapability(
+            IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
     void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
     // TODO: more params required?
-    IMS_RESULT NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage,
-            IN IMS_UINT32 eMethod);
+    IMS_RESULT NegotiateExtension(
+            IN MtcSession* pMtcSession, IN IMessage* piMessage, IN IMS_UINT32 eMethod);
 
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;

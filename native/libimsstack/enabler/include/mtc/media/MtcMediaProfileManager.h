@@ -11,16 +11,16 @@ class MediaProfile
 {
 public:
     inline MediaProfile() :
-        nNegoId(IMS_NULL),
-        ePemType(PemType::NONE),
-        bActive(IMS_FALSE),
-        bConfirmed(IMS_FALSE),
-        bForked(IMS_FALSE),
-        bOriginalProfile(IMS_TRUE)
+            nNegoId(IMS_NULL),
+            ePemType(PemType::NONE),
+            bActive(IMS_FALSE),
+            bConfirmed(IMS_FALSE),
+            bForked(IMS_FALSE),
+            bOriginalProfile(IMS_TRUE)
     {
     }
 
-    inline MediaProfile(IN const MediaProfile &objRHS)
+    inline MediaProfile(IN const MediaProfile& objRHS)
     {
         nNegoId = objRHS.nNegoId;
         ePemType = objRHS.ePemType;
@@ -39,7 +39,7 @@ public:
     }
 
 private:
-    MediaProfile& operator=(IN const MediaProfile &objRHS);
+    MediaProfile& operator=(IN const MediaProfile& objRHS);
     friend class MtcMediaProfileManager;
 
 private:
@@ -58,8 +58,8 @@ public:
     virtual ~MtcMediaProfileManager();
 
 public:
-    void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
-            IMS_BOOL bOriginalProfile, IN IMediaSession* piMediaSession);
+    void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked, IMS_BOOL bOriginalProfile,
+            IN IMediaSession* piMediaSession);
     void DestroyMediaProfile(IN ISession* piSession, IN IMediaSession* piMediaSession);
     void DestroyAllMediaProfiles(IN IMediaSession* piMediaSession);
 
@@ -76,23 +76,23 @@ public:
     void SetForked(IN ISession* piSession, IN IMS_BOOL bForked);
     void SetAsOriginalProfile(IN ISession* piSession, IN IMS_BOOL bOriginalProfile);
 
-    IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession); // EarlySession? or ISession?
+    IMS_BOOL IsPemSendInOtherEarlySession(IN ISession* piSession);  // EarlySession? or ISession?
     IMS_BOOL IsConfirmedDialogState();
     void UpdateProfileForMediaActivation(IN ISession* piActiveSession);
-    void HandleProfilesInConfirmedState(IN ISession* piConfirmedSession,
-            IN IMediaSession* piMediaSession);
+    void HandleProfilesInConfirmedState(
+            IN ISession* piConfirmedSession, IN IMediaSession* piMediaSession);
 
     ISession* GetSessionWithNegoId(IN IMS_UINTP nNegoId);
 
 private:
     IMS_BOOL IsMediaProfilePresent(IN ISession* piSession);
     MediaProfile* GetMediaProfile(IN ISession* piSession);
-    //IMS_BOOL IsCreateMediaProfile(); // does it need..?
-    //IMS_BOOL AddMediaSetWithOriginNegoId(); // does it need...?
+    // IMS_BOOL IsCreateMediaProfile(); // does it need..?
+    // IMS_BOOL AddMediaSetWithOriginNegoId(); // does it need...?
 
 private:
-    //MtcMediaManager* m_pMediaManager;
-    //IMS_UINTP pFirstMediaNegoId;
+    // MtcMediaManager* m_pMediaManager;
+    // IMS_UINTP pFirstMediaNegoId;
     IMSMap<ISession*, MediaProfile*> m_objMediaProfiles;
 };
 

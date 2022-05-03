@@ -19,22 +19,17 @@ PreconditionExtension::PreconditionExtension(IN const PreconditionExtension& obj
 {
 }
 
-PUBLIC VIRTUAL
-PreconditionExtension::~PreconditionExtension()
-{
-}
+PUBLIC VIRTUAL PreconditionExtension::~PreconditionExtension() {}
 
-PUBLIC VIRTUAL
-IMtcExtension* PreconditionExtension::Clone() const
+PUBLIC VIRTUAL IMtcExtension* PreconditionExtension::Clone() const
 {
     return new PreconditionExtension(*this);
 }
 
-PUBLIC VIRTUAL
-void PreconditionExtension::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
+PUBLIC VIRTUAL void PreconditionExtension::HandleRequest(
+        IN IMS_UINT32 nMethod, IN const IMessage& objRequest)
 {
-    if (nMethod != IMessage::SESSION_START &&
-            nMethod != IMessage::SESSION_EARLY_UPDATE &&
+    if (nMethod != IMessage::SESSION_START && nMethod != IMessage::SESSION_EARLY_UPDATE &&
             nMethod != IMessage::SESSION_PRACK)
     {
         return;
@@ -49,8 +44,8 @@ void PreconditionExtension::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessa
     MtcExtension::HandleRequest(nMethod, objRequest);
 }
 
-PUBLIC VIRTUAL
-void PreconditionExtension::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
+PUBLIC VIRTUAL void PreconditionExtension::HandleResponse(
+        IN IMS_UINT32 nMethod, IN const IMessage& objResponse)
 {
     if (nMethod != IMessage::SESSION_START)
     {

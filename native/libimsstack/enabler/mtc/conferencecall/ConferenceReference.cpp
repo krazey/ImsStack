@@ -31,9 +31,7 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceReference::METHOD_INVITE[] = "INVITE";
+PUBLIC GLOBAL const IMS_CHAR ConferenceReference::METHOD_INVITE[] = "INVITE";
 const IMS_CHAR ConferenceReference::METHOD_BYE[] = "BYE";
 
 PUBLIC
@@ -66,18 +64,16 @@ ConferenceReference::ConferenceReference(IN IMtcContext& objContext, IN CallKey 
     IMS_TRACE_I("+ConferenceReference", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-ConferenceReference::~ConferenceReference()
+PUBLIC VIRTUAL ConferenceReference::~ConferenceReference()
 {
     IMS_TRACE_I("~ConferenceReference", 0, 0, 0);
-    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()
-            ->ReleaseIReference(m_piReference, m_bForceToTerminateInterface);
+    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->ReleaseIReference(
+            m_piReference, m_bForceToTerminateInterface);
 
     m_objConfUsers.Clear();
 }
 
-PUBLIC VIRTUAL
-void ConferenceReference::ReferenceDelivered(IN IReference* piReference)
+PUBLIC VIRTUAL void ConferenceReference::ReferenceDelivered(IN IReference* piReference)
 {
     IMS_TRACE_I("ReferenceDelivered", 0, 0, 0);
 
@@ -106,26 +102,24 @@ void ConferenceReference::ReferenceDelivered(IN IReference* piReference)
     }
 }
 
-PUBLIC VIRTUAL
-void ConferenceReference::ReferenceDeliveryFailed(IN IReference* piReference)
+PUBLIC VIRTUAL void ConferenceReference::ReferenceDeliveryFailed(IN IReference* piReference)
 {
     IMS_TRACE_I("ReferenceDeliveryFailed", 0, 0, 0);
 
-    (void) piReference;
+    (void)piReference;
     m_objListener.OnReferenceStartFailed(this);
 }
 
-PUBLIC VIRTUAL
-void ConferenceReference::ReferenceNotify(IN IReference* piReference,
-        IN IMessage* piNotify)
+PUBLIC VIRTUAL void ConferenceReference::ReferenceNotify(
+        IN IReference* piReference, IN IMessage* piNotify)
 {
-    (void) piReference;
+    (void)piReference;
 
     AString strSubState;
     MessageUtil::GetHeaderValue(piNotify, ISipHeader::SUBSCRIPTION_STATE, strSubState);
     IMS_SINT32 nStatusCode = MessageUtil::GetStatusCodeInNotify(piNotify);
-    IMS_TRACE_I("ReferenceNotify : state[%s] status-code[%d]",
-            strSubState.GetStr(), nStatusCode, 0);
+    IMS_TRACE_I(
+            "ReferenceNotify : state[%s] status-code[%d]", strSubState.GetStr(), nStatusCode, 0);
 
     ReferSubscriptionState eState = ReferSubscriptionState::INVALID;
     if (strSubState.Equals("active"))
@@ -140,34 +134,33 @@ void ConferenceReference::ReferenceNotify(IN IReference* piReference,
     m_objListener.OnReferenceUpdated(this, nStatusCode, eState);
 }
 
-PUBLIC VIRTUAL
-void ConferenceReference::ReferenceTerminated(IN IReference* piReference)
+PUBLIC VIRTUAL void ConferenceReference::ReferenceTerminated(IN IReference* piReference)
 {
     IMS_TRACE_I("ReferenceTerminated", 0, 0, 0);
 
-    (void) piReference;
-    m_objListener.OnReferenceUpdated(this, SipStatusCode::SC_INVALID,
-            ReferSubscriptionState::TERMINATED);
+    (void)piReference;
+    m_objListener.OnReferenceUpdated(
+            this, SipStatusCode::SC_INVALID, ReferSubscriptionState::TERMINATED);
     // do not add logic here. instance will be destroyed before here.
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT ConferenceReference::SendInvite(OUT AString& strReferToUri,
-        IN CallConnectionIdManager& objConnectionIdManager)
+PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendInvite(
+        OUT AString& strReferToUri, IN CallConnectionIdManager& objConnectionIdManager)
 {
     IMS_TRACE_I("SendInvite", 0, 0, 0);
 
     // TODO: how to get CallState through IMtcCallContext.
-    if (m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)->GetState()
-                == IMtcCall::State::TERMINATING)
+    if (m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)->GetState() ==
+            IMtcCall::State::TERMINATING)
     {
         return IMS_FAILURE;
     }
 
     m_nType = REFERENCE_TYPE_INVITE;
-    IMtcCall* pi1To1Call = m_pConfUser == IMS_NULL ? IMS_NULL :
-            m_objContext.GetCallManager().GetCallByCallKey(
-            objConnectionIdManager.GetCallKey(m_pConfUser->nConnectionId));
+    IMtcCall* pi1To1Call = m_pConfUser == IMS_NULL
+            ? IMS_NULL
+            : m_objContext.GetCallManager().GetCallByCallKey(
+                      objConnectionIdManager.GetCallKey(m_pConfUser->nConnectionId));
 
     // 1. Form Refer-To URI
     GetReferToUri(strReferToUri, pi1To1Call);
@@ -178,9 +171,12 @@ IMS_RESULT ConferenceReference::SendInvite(OUT AString& strReferToUri,
     }
 
     // 2. get IReference interface
-    m_piReference = m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()
-            ->GetIReference(&m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)
-            ->GetCallContext().GetSession()->GetISession(),
+    m_piReference = m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->GetIReference(
+            &m_objContext.GetCallManager()
+                     .GetCallByCallKey(m_nConfCallKey)
+                     ->GetCallContext()
+                     .GetSession()
+                     ->GetISession(),
             strReferToUri, METHOD_INVITE);
 
     if (m_piReference == IMS_NULL)
@@ -195,7 +191,7 @@ IMS_RESULT ConferenceReference::SendInvite(OUT AString& strReferToUri,
         IMessage* piReferMessage = m_piReference->GetNextRequest();
         // UriFormatter??
 
-        AString strContentDisposition= "recipient-list";
+        AString strContentDisposition = "recipient-list";
         piReferMessage->AddHeader(SipHeaderName::CONTENT_DISPOSITION, strContentDisposition);
 
         MessageUtil::SetResourceListByConfUser(
@@ -216,12 +212,12 @@ IMS_RESULT ConferenceReference::SendInvite(OUT AString& strReferToUri,
 
     // 6. Send Refer
     // m_bImplicitSubscription should be set by conference configuration
-    return m_piReference->ReferEx(ConferenceConfigurationWrapper::IsReferSubscriptionRequired(),
-            strHeadersForReferTo);
+    return m_piReference->ReferEx(
+            ConferenceConfigurationWrapper::IsReferSubscriptionRequired(), strHeadersForReferTo);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT ConferenceReference::SendBye(IN AString strInvitedUri/* = AString::ConstEmpty()*/)
+PUBLIC VIRTUAL IMS_RESULT ConferenceReference::SendBye(
+        IN AString strInvitedUri /* = AString::ConstEmpty()*/)
 {
     IMS_TRACE_I("SendBye", 0, 0, 0);
 
@@ -229,9 +225,12 @@ IMS_RESULT ConferenceReference::SendBye(IN AString strInvitedUri/* = AString::Co
     AString strReferToUri;
     UriFormatter::GetReferToForBye(strReferToUri, m_pConfUser, strInvitedUri);
 
-    m_piReference = m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()
-            ->GetIReference(&m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)
-            ->GetCallContext().GetSession()->GetISession(),
+    m_piReference = m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->GetIReference(
+            &m_objContext.GetCallManager()
+                     .GetCallByCallKey(m_nConfCallKey)
+                     ->GetCallContext()
+                     .GetSession()
+                     ->GetISession(),
             strReferToUri, METHOD_BYE);
 
     if (m_piReference == IMS_NULL)
@@ -247,18 +246,15 @@ IMS_RESULT ConferenceReference::SendBye(IN AString strInvitedUri/* = AString::Co
     return m_piReference->Refer(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 ConferenceReference::GetType() const
+PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetType() const
 {
     IMS_TRACE_I("GetType : [%d]", m_nType, 0, 0);
 
     return m_nType;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 ConferenceReference::GetResponseCode() const
+PUBLIC VIRTUAL IMS_UINT32 ConferenceReference::GetResponseCode() const
 {
-
     IMessage* piReferMessage = m_piReference->GetPreviousResponse(IMessage::REFERENCE_REFER);
 
     if (piReferMessage == IMS_NULL)
@@ -287,8 +283,7 @@ void ConferenceReference::GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1to1
     // Send Refer with Target number - multiple refer with resource list
     else if (m_objConfUsers.GetSize() > 0)
     {
-        strUri = m_objContext.GetConfigurationProxy().GetStr(
-                Feature::CONFERENCE_FACTORY_URI, 0);
+        strUri = m_objContext.GetConfigurationProxy().GetStr(Feature::CONFERENCE_FACTORY_URI, 0);
     }
 }
 

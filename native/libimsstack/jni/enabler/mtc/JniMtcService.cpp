@@ -8,7 +8,6 @@
 #include "JniMtcService.h"
 #include "JniMtcServiceThread.h"
 
-
 __IMS_TRACE_TAG_USER_DECL__("JNI.MTC");
 
 JniMtcService::JniMtcService(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId) :
@@ -37,8 +36,7 @@ JniMtcService::~JniMtcService()
     }
 }
 
-PUBLIC VIRTUAL
-int JniMtcService::SendData(IN const android::Parcel& objParcel)
+PUBLIC VIRTUAL int JniMtcService::SendData(IN const android::Parcel& objParcel)
 {
     int nMsg = objParcel.readInt32();
 
@@ -94,8 +92,8 @@ JniMtcServiceThread* JniMtcService::GetThread()
     return m_pThread;
 }
 
-PROTECTED VIRTUAL
-void JniMtcService::HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+PROTECTED VIRTUAL void JniMtcService::HandleMessage(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     IMS_TRACE_D("HandleServiceMessage() MSG=[%d]", nMsg, 0, 0);
 
@@ -121,8 +119,9 @@ void JniMtcService::Attach()
         return;
     }
 
-    m_piMtcService = JniConnectorFactory::GetInstance()->GetMtcServiceConnector(m_nSlotId)->
-            GetEnablerService();
+    m_piMtcService = JniConnectorFactory::GetInstance()
+                             ->GetMtcServiceConnector(m_nSlotId)
+                             ->GetEnablerService();
     if (m_piMtcService)
     {
         m_piMtcService->SetJniService(this);

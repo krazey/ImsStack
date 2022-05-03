@@ -6,8 +6,7 @@
 class IMtcService;
 class MtcImsEventReceiver;
 
-class VopsBlockRule final:
-        public IMtcBlockRule
+class VopsBlockRule final : public IMtcBlockRule
 {
 public:
     explicit VopsBlockRule(IN IMtcService& objService, IN MtcImsEventReceiver& objEventReceiver);

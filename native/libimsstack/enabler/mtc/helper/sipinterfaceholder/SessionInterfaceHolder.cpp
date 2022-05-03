@@ -4,9 +4,7 @@
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 #include "helper/sipinterfaceholder/IInterfaceHolderListener.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
-
 
 PUBLIC
 SessionInterfaceHolder::SessionInterfaceHolder(IN IInterfaceHolderListener& objListener) :
@@ -29,16 +27,14 @@ SessionInterfaceHolder::~SessionInterfaceHolder()
     m_objTerminatedGuardTimers.Clear();
 }
 
-PUBLIC VIRTUAL
-void SessionInterfaceHolder::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL void SessionInterfaceHolder::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
     ReleaseISession(piSession, IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 {
     IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
 
@@ -58,8 +54,8 @@ void SessionInterfaceHolder::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PUBLIC
-ISession* SessionInterfaceHolder::GetISession(IN ICoreService* piCoreService,
-        IN const AString& strFrom, IN const AString& strTo)
+ISession* SessionInterfaceHolder::GetISession(
+        IN ICoreService* piCoreService, IN const AString& strFrom, IN const AString& strTo)
 {
     IMS_TRACE_D("GetISession", 0, 0, 0);
 
@@ -76,8 +72,8 @@ void SessionInterfaceHolder::AddISession(IN ISession* piSession)
 }
 
 PUBLIC
-void SessionInterfaceHolder::ReleaseISession(IN ISession* piSession,
-        IN IMS_BOOL bTerminated/* = IMS_FALSE*/)
+void SessionInterfaceHolder::ReleaseISession(
+        IN ISession* piSession, IN IMS_BOOL bTerminated /* = IMS_FALSE*/)
 {
     if (piSession == IMS_NULL)
     {
@@ -132,9 +128,7 @@ IMS_BOOL SessionInterfaceHolder::IsReadyToDestroy(IN ISession* piSession)
 PRIVATE
 void SessionInterfaceHolder::ClearISessions()
 {
-
     IMS_TRACE_D("ClearISessions", 0, 0, 0);
-
 
     for (IMS_UINT32 i = 0; i < m_objISessions.GetSize(); i++)
     {

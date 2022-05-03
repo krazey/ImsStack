@@ -32,148 +32,115 @@ MtcCallState::MtcCallState(IN CallStateName eStateName, IN IMtcCallContext& objC
 {
 }
 
-PUBLIC VIRTUAL
-MtcCallState::~MtcCallState()
-{
-}
+PUBLIC VIRTUAL MtcCallState::~MtcCallState() {}
 
-PUBLIC VIRTUAL
-void MtcCallState::OnEnter()
-{
-}
+PUBLIC VIRTUAL void MtcCallState::OnEnter() {}
 
-PUBLIC VIRTUAL
-void MtcCallState::OnExit()
-{
-}
+PUBLIC VIRTUAL void MtcCallState::OnExit() {}
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::HandleIncoming(
-        IN ISession* /* piSession */,
-        IN JniMtcServiceThread* /*pServiceThread*/)
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncoming(
+        IN ISession* /* piSession */, IN JniMtcServiceThread* /*pServiceThread*/)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Start(IN CallType /* eCallType */,
-        IN CONST AString& /* strTarget */,
-        IN MediaInfo* /* pMediaInfo */,
+PUBLIC VIRTUAL CallStateName MtcCallState::Start(IN CallType /* eCallType */,
+        IN CONST AString& /* strTarget */, IN MediaInfo* /* pMediaInfo */,
         IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::HandleUserAlert()
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleUserAlert()
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Accept(IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Reject(IN const FailReason& /* objReason */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Hold(IN MediaInfo* /* pMediaInfo */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Resume(IN MediaInfo* /* pMediaInfo */)
-{
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL
-CallStateName MtcCallState::AcceptResume(
+PUBLIC VIRTUAL CallStateName MtcCallState::Accept(
         IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::RejectResume(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::Reject(IN const FailReason& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Convert(
+PUBLIC VIRTUAL CallStateName MtcCallState::Hold(IN MediaInfo* /* pMediaInfo */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::Resume(IN MediaInfo* /* pMediaInfo */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::AcceptResume(
         IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::AcceptConvert(
+PUBLIC VIRTUAL CallStateName MtcCallState::RejectResume(IN const FailReason& /* objReason */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::Convert(
         IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::RejectConvert(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::AcceptConvert(
+        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::CancelConvert(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::RejectConvert(IN const FailReason& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::Terminate(IN const FailReason& /* objReason */)
+PUBLIC VIRTUAL CallStateName MtcCallState::CancelConvert(IN const FailReason& /* objReason */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SendDtmf(
+PUBLIC VIRTUAL CallStateName MtcCallState::Terminate(IN const FailReason& /* objReason */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
         IN CONST AString& /* strSignal */, IN IMS_SINT32 /* nDuration */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SendUssi(IN CONST AString& /* strUssi */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SendUssi(IN CONST AString& /* strUssi */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::StartConference(
-        IN CallType /* eCallType */,
-        IN const AString&,
-        IN MediaInfo* /* pMediaInfo */,
+PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
+        IN const AString&, IN MediaInfo* /* pMediaInfo */,
         IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */,
         IN IMSList<ConfUser*> /* lstUsers */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::StartConference(
-        IN CallType /* eCallType */,
-        IN const AString& /* strTarget */,
-        IN IMSList<ConfUser*> /* lstUsers */)
+PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
+        IN const AString& /* strTarget */, IN IMSList<ConfUser*> /* lstUsers */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::HandleSrvccSuccess()
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
 {
     switch (GetStateName())
     {
@@ -194,179 +161,154 @@ CallStateName MtcCallState::HandleSrvccSuccess()
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionAlerting(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionAlerting(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionReferenceReceived(
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionReferenceReceived(
         IN ISession* /* piSession */, IN IReference* /* piReference */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionStarted(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionStarted(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionStartFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionStartFailed(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionTerminated(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionTerminated(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionUpdated(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionUpdated(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionUpdateFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionUpdateFailed(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionUpdateReceived(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionUpdateReceived(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionCancelDelivered(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionCancelDelivered(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionCancelDeliveryFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionCancelDeliveryFailed(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionEarlyMediaUpdated(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionEarlyMediaUpdated(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionEarlyMediaUpdateFailed(
+        IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionEarlyMediaUpdateReceived(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionEarlyMediaUpdateReceived(
+        IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionForkedResponseReceived(
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionForkedResponseReceived(
         IN ISession* /* piSession */, IN ISession* /* piForkedSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionPRAckDelivered(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionPRAckDelivered(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionPRAckDeliveryFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionPRAckDeliveryFailed(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionPRAckReceived(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionPRAckReceived(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionProvisionalResponseReceived(
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionProvisionalResponseReceived(
         IN ISession* /* piSession */, IN IMS_UINT32 /* nIndex */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionRPRDeliveryFailed(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionRPRDeliveryFailed(IN ISession* /* piSession */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionRPRReceived(
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionRPRReceived(
         IN ISession* /* piSession */, IN IMS_UINT32 /* nIndex */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::SessionTransactionReceived(
+PUBLIC VIRTUAL CallStateName MtcCallState::SessionTransactionReceived(
         IN ISession* /* piSession */, IN ISipServerConnection* /* piSipServerConnection */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage* /*piSipMessage*/,
-            IN IMS_SINT32 /*nMessage = IMessageMediator::MESSAGE_NORMAL*/)
+PUBLIC VIRTUAL CallStateName MtcCallState::MessageMediator_AdjustMessage(
+        IN_OUT ISipMessage* /*piSipMessage*/,
+        IN IMS_SINT32 /*nMessage = IMessageMediator::MESSAGE_NORMAL*/)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::OnTimerExpired(IN IMS_SINT32 /* nType */)
+PUBLIC VIRTUAL CallStateName MtcCallState::OnTimerExpired(IN IMS_SINT32 /* nType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::OnBlockChecked(IN IMtcBlockChecker::Result /* objResult */)
+PUBLIC VIRTUAL CallStateName MtcCallState::OnBlockChecked(
+        IN IMtcBlockChecker::Result /* objResult */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::QosReserved(
+PUBLIC VIRTUAL CallStateName MtcCallState::QosReserved(
         IN ISession* /* piSession */, IN IMS_UINT32 /* eMediaType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::QosReserveFailed(
+PUBLIC VIRTUAL CallStateName MtcCallState::QosReserveFailed(
         IN ISession* /* piSession */, IN QosLossPolicy /* eNextAction */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName MtcCallState::OnInternalFailure()
+PUBLIC VIRTUAL CallStateName MtcCallState::OnInternalFailure()
 {
     return CallStateName::TERMINATING;
 }
@@ -473,7 +415,7 @@ ISession* MtcCallState::GetISession()
 }
 
 PROTECTED
-void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo/* = IMS_NULL*/)
+void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo /* = IMS_NULL*/)
 {
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     if (pMediaInfo)
@@ -482,8 +424,7 @@ void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo/* = IMS_NULL*/)
     }
     if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
-        objMediaManager.CreateMediaSession(
-                m_objContext.GetUiNotifier().GetJniMediaThread());
+        objMediaManager.CreateMediaSession(m_objContext.GetUiNotifier().GetJniMediaThread());
     }
     else
     {
@@ -530,8 +471,8 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
 }
 
 PROTECTED
-ResultSetSdp MtcCallState::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
-        IN ISession* piSession/* = IMS_NULL*/)
+ResultSetSdp MtcCallState::SetSdpToSend(
+        IN IMS_BOOL bAllowReOffer, IN ISession* piSession /* = IMS_NULL*/)
 {
     // TODO: RFC 6337 instead of bAllowReOffer?
 
@@ -548,8 +489,7 @@ ResultSetSdp MtcCallState::SetSdpToSend(IN IMS_BOOL bAllowReOffer,
         return ResultSetSdp::NO_SDP;
     }
 
-    if (!bAllowReOffer &&
-            eState == NegotiationState::STATE_NEGOTIATED)
+    if (!bAllowReOffer && eState == NegotiationState::STATE_NEGOTIATED)
     {
         IMS_TRACE_D("SetSdpToSend - nothing to update", 0, 0, 0);
         return ResultSetSdp::NO_SDP;
@@ -605,13 +545,12 @@ IMS_RESULT MtcCallState::SendEarlyUpdate(IN MtcSession* pMtcSession)
         return IMS_FAILURE;
     }
 
-    return pMtcSession->GetMessageSender()
-            .SendEarlyUpdate(UpdateType::NORMAL);
+    return pMtcSession->GetMessageSender().SendEarlyUpdate(UpdateType::NORMAL);
 }
 
 PROTECTED
-IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode,
-        IN MtcSession* pMtcSession)
+IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(
+        IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession)
 {
     IMS_TRACE_D("SendResponseToEarlyUpdate", 0, 0, 0);
 
@@ -622,8 +561,7 @@ IMS_RESULT MtcCallState::SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode,
         return IMS_FAILURE;
     }
 
-    return pMtcSession->GetMessageSender()
-            .RespondToEarlyUpdate(eStatusCode);
+    return pMtcSession->GetMessageSender().RespondToEarlyUpdate(eStatusCode);
 }
 
 PROTECTED
@@ -635,8 +573,7 @@ IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
         return IMS_FAILURE;
     }
 
-    return m_objContext.GetSession()->GetMessageSender()
-            .RespondToPrack(eStatusCode);
+    return m_objContext.GetSession()->GetMessageSender().RespondToPrack(eStatusCode);
 }
 
 PROTECTED
@@ -653,10 +590,8 @@ void MtcCallState::SendIncomingCallReceived()
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            objMediaInfo,
+    m_objContext.GetUiNotifier().SendIncomingCallReceived(m_objContext.GetCallKey(),
+            m_objContext.GetCallInfo(), objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo());
 }
@@ -667,9 +602,7 @@ void MtcCallState::SendStarted()
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    m_objContext.GetUiNotifier().SendStarted(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
+    m_objContext.GetUiNotifier().SendStarted(&m_objContext.GetCallInfo(), &objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices());
 }
 
@@ -692,8 +625,8 @@ void MtcCallState::SendIncomingUpdate(IN CallType eCallType)
 }
 
 PROTECTED
-void MtcCallState::UpdatePreconditionCapability(IN ISession* piSession, IN IMessage* piMessage,
-        IN IMS_BOOL bCheckeSdp/* = IMS_TRUE*/)
+void MtcCallState::UpdatePreconditionCapability(
+        IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp /* = IMS_TRUE*/)
 {
     if (bCheckeSdp && !MessageUtil::HasSdp(piMessage))
     {
@@ -735,8 +668,8 @@ void MtcCallState::SetLocalQosAvailableForWifiCalling(IN ISession* piSession)
 }
 
 PROTECTED
-IMS_RESULT MtcCallState::NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage,
-        IN IMS_UINT32 eMethod)
+IMS_RESULT MtcCallState::NegotiateExtension(
+        IN MtcSession* pMtcSession, IN IMessage* piMessage, IN IMS_UINT32 eMethod)
 {
     if (piMessage == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
     {
@@ -808,8 +741,8 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
 }
 
 PROTECTED
-IMS_BOOL MtcCallState::IsInvalidOfferAnswer(IN ISession* piSession,
-        IN const IMessage* piMessage) const
+IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
+        IN ISession* piSession, IN const IMessage* piMessage) const
 {
     // TODO: check if no SDP in OFFER_SENT state.
 

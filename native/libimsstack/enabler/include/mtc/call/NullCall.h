@@ -17,8 +17,7 @@ struct FailReason;
 /**
  * This class represents the call that doesn't exist. It has no states and basically does nothing.
  */
-class NullCall final
-        : public IMtcCall
+class NullCall final : public IMtcCall
 {
 public:
     NullCall() {}
@@ -26,21 +25,19 @@ public:
     NullCall(IN const NullCall&) = delete;
     NullCall& operator=(IN const NullCall&) = delete;
 
-    inline void Attach(IN JniMtcCallThread*,
-            IN JniMediaSessionThread*) override {}
+    inline void Attach(IN JniMtcCallThread*, IN JniMediaSessionThread*) override {}
     inline void Detach() override {}
 
-    inline void Start(
-            IN CallType,
-            IN const AString&,
-            IN MediaInfo*,
-            IN const IMSMap<SuppType, SuppService*>&) override {}
+    inline void Start(IN CallType, IN const AString&, IN MediaInfo*,
+            IN const IMSMap<SuppType, SuppService*>&) override
+    {
+    }
 
-    inline void StartConference(
-            IN CallType, IN const AString&, IN MediaInfo*,
-            IN const IMSMap<SuppType, SuppService*>&, IN IMSList<ConfUser*>) override {}
-    inline void StartConference(
-            IN CallType, IN const AString&, IN IMSList<ConfUser*>) override {}
+    inline void StartConference(IN CallType, IN const AString&, IN MediaInfo*,
+            IN const IMSMap<SuppType, SuppService*>&, IN IMSList<ConfUser*>) override
+    {
+    }
+    inline void StartConference(IN CallType, IN const AString&, IN IMSList<ConfUser*>) override {}
     inline void HandleIncoming(IN ISession*, IN JniMtcServiceThread*) override {}
     inline void HandleUserAlert() override {}
     inline void Accept(IN CallType, IN MediaInfo*) override {}

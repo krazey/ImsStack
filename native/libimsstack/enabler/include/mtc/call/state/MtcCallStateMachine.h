@@ -7,15 +7,16 @@
 #include <functional>
 
 class IMutex;
-template <typename State, typename StateName> class IMtcCallStateFactory;
-template <typename StateName> class IMtcCallStateWatcher;
+template <typename State, typename StateName>
+class IMtcCallStateFactory;
+template <typename StateName>
+class IMtcCallStateWatcher;
 
 template <typename State, typename StateName>
 class MtcCallStateMachine
 {
 public:
-    explicit MtcCallStateMachine(
-            IN StateName eInitialState,
+    explicit MtcCallStateMachine(IN StateName eInitialState,
             IN IMtcCallStateFactory<State, StateName>& objStateFactory,
             IN IMtcCallStateWatcher<StateName>* pTransitionWatcher = IMS_NULL);
     ~MtcCallStateMachine();
@@ -28,7 +29,7 @@ public:
      * @param objOperation Function to run. The current state instance is passed to the parameter.
      *                     It should returns the next state name.
      */
-    void RunStateOperation(IN std::function<StateName (State*)> objOperation);
+    void RunStateOperation(IN std::function<StateName(State*)> objOperation);
 
     /**
      * Returns the current state name.
@@ -51,7 +52,7 @@ template <typename State, typename StateName>
 class IMtcCallStateFactory
 {
 public:
-    ~IMtcCallStateFactory() {};
+    ~IMtcCallStateFactory(){};
 
     /**
      * Creates new state instance corresponding to given `eState`.
@@ -66,7 +67,7 @@ template <typename StateName>
 class IMtcCallStateWatcher
 {
 public:
-    ~IMtcCallStateWatcher() {};
+    ~IMtcCallStateWatcher(){};
 
     /**
      * Notifies when transition to another state happens.
@@ -78,8 +79,7 @@ public:
 
 PUBLIC
 template <typename State, typename StateName>
-MtcCallStateMachine<State, StateName>::MtcCallStateMachine(
-        IN StateName eInitialState,
+MtcCallStateMachine<State, StateName>::MtcCallStateMachine(IN StateName eInitialState,
         IN IMtcCallStateFactory<State, StateName>& objStateFactory,
         IN IMtcCallStateWatcher<StateName>* pTransitionWatcher) :
         m_objStateFactory(objStateFactory),
@@ -100,7 +100,7 @@ MtcCallStateMachine<State, StateName>::~MtcCallStateMachine()
 PUBLIC
 template <typename State, typename StateName>
 void MtcCallStateMachine<State, StateName>::RunStateOperation(
-        IN std::function<StateName (State*)> objOperation)
+        IN std::function<StateName(State*)> objOperation)
 {
     StateName eNextState = objOperation(m_pCurrentState.get());
     TransitToState(eNextState);

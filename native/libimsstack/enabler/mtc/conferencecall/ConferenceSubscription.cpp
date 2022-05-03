@@ -28,7 +28,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 ConferenceSubscription::ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,
         IN ConferenceParticipantList& objList, IN IConferenceSubscriptionListener& objListener) :
@@ -45,8 +44,9 @@ ConferenceSubscription::ConferenceSubscription(IN IMtcContext& objContext, IN Ca
 {
     IMS_TRACE_I("+ConferenceSubscription", 0, 0, 0);
 
-    m_nDialogType = ConferenceConfigurationWrapper::IsSubscriptionOutDialog() ?
-            CONF_SUBSCRIPTION_DIALOG_TYPE_OUT : CONF_SUBSCRIPTION_DIALOG_TYPE_IN;
+    m_nDialogType = ConferenceConfigurationWrapper::IsSubscriptionOutDialog()
+            ? CONF_SUBSCRIPTION_DIALOG_TYPE_OUT
+            : CONF_SUBSCRIPTION_DIALOG_TYPE_IN;
 }
 
 PUBLIC
@@ -56,16 +56,14 @@ ConferenceSubscription::~ConferenceSubscription()
     ReleaseISubscription();
 }
 
-PUBLIC VIRTUAL
-void ConferenceSubscription::SubscriptionNotify(IN ISubscription* piSubscription,
-        IN IMessage* piNotify)
+PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionNotify(
+        IN ISubscription* piSubscription, IN IMessage* piNotify)
 {
     (void)piSubscription;
     UpdateConferenceInfo(piNotify);
 }
 
-PUBLIC VIRTUAL
-void ConferenceSubscription::SubscriptionStarted(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStarted(IN ISubscription* piSubscription)
 {
     (void)piSubscription;
     IMS_TRACE_I("SubscriptionStarted", 0, 0, 0);
@@ -89,8 +87,8 @@ void ConferenceSubscription::SubscriptionStarted(IN ISubscription* piSubscriptio
     }
 }
 
-PUBLIC VIRTUAL
-void ConferenceSubscription::SubscriptionStartFailed(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionStartFailed(
+        IN ISubscription* piSubscription)
 {
     IMessage* piMessage = piSubscription->GetPreviousResponse(IMessage::SUBSCRIPTION_SUBSCRIBE);
 
@@ -131,8 +129,7 @@ void ConferenceSubscription::SubscriptionStartFailed(IN ISubscription* piSubscri
     m_objListener.OnSubscriptionUpdated(SubscriptionUpdateType::FAILED);
 }
 
-PUBLIC VIRTUAL
-void ConferenceSubscription::SubscriptionTerminated(IN ISubscription* piSubscription)
+PUBLIC VIRTUAL void ConferenceSubscription::SubscriptionTerminated(IN ISubscription* piSubscription)
 {
     (void)piSubscription;
 
@@ -146,7 +143,7 @@ IMS_RESULT ConferenceSubscription::Subscribe(IN const AString& strTo)
     IMS_TRACE_I("Subscribe : (%s)",
             m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_OUT ? "OUT" : "IN", 0, 0);
 
-    if (m_piSubscription == IMS_NULL) // TODO: is this required?
+    if (m_piSubscription == IMS_NULL)  // TODO: is this required?
     {
         m_strTo = strTo;
         CreateSubscription();
@@ -194,18 +191,23 @@ void ConferenceSubscription::CreateSubscription()
     IMS_TRACE_I("CreateSubscription : (%s)",
             m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_OUT ? "OUT" : "IN", 0, 0);
 
-    if (m_nDialogType== CONF_SUBSCRIPTION_DIALOG_TYPE_OUT)
+    if (m_nDialogType == CONF_SUBSCRIPTION_DIALOG_TYPE_OUT)
     {
-        m_piSubscription = m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()
-                ->GetISubscription(
-                    m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService(),
-                    IMS_NULL, m_strTo, "conference");
+        m_piSubscription =
+                m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()->GetISubscription(
+                        m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService(),
+                        IMS_NULL, m_strTo, "conference");
     }
     else
     {
-        m_piSubscription = m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()
-                ->GetISubscription(&m_objContext.GetCallManager().GetCallByCallKey(m_nConfCallKey)
-                ->GetCallContext().GetSession()->GetISession(), "conference");
+        m_piSubscription =
+                m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()->GetISubscription(
+                        &m_objContext.GetCallManager()
+                                 .GetCallByCallKey(m_nConfCallKey)
+                                 ->GetCallContext()
+                                 .GetSession()
+                                 ->GetISession(),
+                        "conference");
     }
 }
 
@@ -267,7 +269,7 @@ void ConferenceSubscription::SetHeaders()
     }
 
     ISipMessage* piSipMessage = piMessage->GetMessage();
-    if(!piSipMessage)
+    if (!piSipMessage)
     {
         return;
     }
@@ -280,8 +282,8 @@ void ConferenceSubscription::SetHeaders()
             m_objContext.GetServiceByType(ServiceType::NORMAL)->GetICoreService()->GetFeatureCaps();
     if (piFeatureCaps != IMS_NULL)
     {
-        piFeatureCaps->AddFeature("+g.3gpp.mid-call", AString::ConstEmpty(),
-                SipMethod::SUBSCRIBE, ISipMessage::TYPE_REQUEST);
+        piFeatureCaps->AddFeature("+g.3gpp.mid-call", AString::ConstEmpty(), SipMethod::SUBSCRIBE,
+                ISipMessage::TYPE_REQUEST);
     }
 
     IMS_TRACE_I("SetHeaders : [%d]", m_nExpires, 0, 0);
@@ -417,7 +419,7 @@ IMS_BOOL ConferenceSubscription::OnReceiving423(IN ISubscription* piSubscription
 
     ReleaseISubscription();
 
-    m_nExpires = (nExpires + nExpires / 2); // where is this from?
+    m_nExpires = (nExpires + nExpires / 2);  // where is this from?
     CreateSubscription();
     Subscribe();
 
@@ -427,7 +429,7 @@ IMS_BOOL ConferenceSubscription::OnReceiving423(IN ISubscription* piSubscription
 PRIVATE
 void ConferenceSubscription::ReleaseISubscription()
 {
-    m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()
-            ->ReleaseISubscription(m_piSubscription);
+    m_objContext.GetSipInterfaceFactory().GetISubscriptionHolder()->ReleaseISubscription(
+            m_piSubscription);
     m_piSubscription = IMS_NULL;
 }

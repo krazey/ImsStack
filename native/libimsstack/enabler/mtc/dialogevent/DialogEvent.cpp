@@ -5,8 +5,6 @@
  * brief :
  */
 
-
-
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
@@ -40,27 +38,27 @@ __IMS_TRACE_TAG_COM_UC__;
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
-UCDialog::UCDialog(IN IMtcApp* pApp)
-    : m_nInfoVersion(0)
-    , m_eInfoState(DEMngr::DIALOGINFO_STATE_IDLE)
-    , m_aStrInfoEntity(AString::ConstNull())
-    , m_aStrID(AString::ConstNull())
-    , m_aStrCallID(AString::ConstNull())
-    , m_aStrLocalTag(AString::ConstNull())
-    , m_aStrRemoteTag(AString::ConstNull())
-    , m_aStrDirection(AString::ConstNull())
-    , m_eState(0)
-    , m_aStrState_Event(AString::ConstNull())
-    , m_aStrState_Code(AString::ConstNull())
-    , m_nDuration(0)
-    , m_aStrReplaces_CallID(AString::ConstNull())
-    , m_aStrReplaces_LocalTag(AString::ConstNull())
-    , m_aStrReplaces_RemoteTag(AString::ConstNull())
-    , m_aStrReferredBy(AString::ConstNull())
-    , m_aStrReferredBy_Display(AString::ConstNull())
-    , m_bEnablePulled(IMS_FALSE)
-    , m_pApp(pApp)
-    , m_nSlotID(0)
+UCDialog::UCDialog(IN IMtcApp* pApp) :
+        m_nInfoVersion(0),
+        m_eInfoState(DEMngr::DIALOGINFO_STATE_IDLE),
+        m_aStrInfoEntity(AString::ConstNull()),
+        m_aStrID(AString::ConstNull()),
+        m_aStrCallID(AString::ConstNull()),
+        m_aStrLocalTag(AString::ConstNull()),
+        m_aStrRemoteTag(AString::ConstNull()),
+        m_aStrDirection(AString::ConstNull()),
+        m_eState(0),
+        m_aStrState_Event(AString::ConstNull()),
+        m_aStrState_Code(AString::ConstNull()),
+        m_nDuration(0),
+        m_aStrReplaces_CallID(AString::ConstNull()),
+        m_aStrReplaces_LocalTag(AString::ConstNull()),
+        m_aStrReplaces_RemoteTag(AString::ConstNull()),
+        m_aStrReferredBy(AString::ConstNull()),
+        m_aStrReferredBy_Display(AString::ConstNull()),
+        m_bEnablePulled(IMS_FALSE),
+        m_pApp(pApp),
+        m_nSlotID(0)
 {
     // TODO, MTC BUILD
     // IMS_TRACE_MEM("uc", "uc_M[%d] : UCDialog[%" PFLS_u "][%" PFLS_x "]"
@@ -71,23 +69,20 @@ UCDialog::UCDialog(IN IMtcApp* pApp)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-UCDialog::~UCDialog()
+PUBLIC VIRTUAL UCDialog::~UCDialog()
 {
-    IMS_TRACE_MEM("uc", "uc_F[%d] : UCDialog[%" PFLS_u "][%" PFLS_x "]"
-                    , m_nSlotID, sizeof(UCDialog), this);
+    IMS_TRACE_MEM("uc", "uc_F[%d] : UCDialog[%" PFLS_u "][%" PFLS_x "]", m_nSlotID,
+            sizeof(UCDialog), this);
 
     if (m_pApp != IMS_NULL)
     {
         m_pApp = IMS_NULL;
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::Init(IN IElement* pDialogElement)
+PUBLIC VIRTUAL AString UCDialog::Init(IN IElement* pDialogElement)
 {
     AString aStrID = AString::ConstNull();
 
@@ -106,8 +101,7 @@ AString UCDialog::Init(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCDialog::DeInit()
+PUBLIC VIRTUAL void UCDialog::DeInit()
 {
     IMS_TRACE_I("DeInit", 0, 0, 0);
 
@@ -119,9 +113,8 @@ void UCDialog::DeInit()
 ------------------------------------------------------------------------------------------------ */
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogInfo(IN IMS_UINT32 nVersion, IN IMS_UINT32 eState,
-        IN AString aStrEntity)
+PUBLIC VIRTUAL IMS_BOOL UCDialog::UpdateDialogInfo(
+        IN IMS_UINT32 nVersion, IN IMS_UINT32 eState, IN AString aStrEntity)
 {
     IMS_TRACE_D("UpdateDialogInfo : [%d][%d][%s]", nVersion, eState, aStrEntity.GetStr());
 
@@ -134,8 +127,7 @@ IMS_BOOL UCDialog::UpdateDialogInfo(IN IMS_UINT32 nVersion, IN IMS_UINT32 eState
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCDialog::Update(IN IElement* pDialogElement)
+PUBLIC VIRTUAL IMS_BOOL UCDialog::Update(IN IElement* pDialogElement)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
@@ -162,8 +154,7 @@ IMS_BOOL UCDialog::Update(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCDialog::IsDialog(IN IElement* pDialogElement)
+PUBLIC VIRTUAL IMS_BOOL UCDialog::IsDialog(IN IElement* pDialogElement)
 {
     IMS_BOOL bIs = IMS_FALSE;
     AString aStrID;
@@ -187,8 +178,7 @@ IMS_BOOL UCDialog::IsDialog(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetID()
+PUBLIC VIRTUAL AString UCDialog::GetID()
 {
     IMS_TRACE_D("GetID : [%s]", m_aStrID.GetStr(), 0, 0);
     return m_aStrID;
@@ -196,8 +186,7 @@ AString UCDialog::GetID()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetCallID()
+PUBLIC VIRTUAL AString UCDialog::GetCallID()
 {
     IMS_TRACE_D("GetCallID : [%s]", m_aStrCallID.GetStr(), 0, 0);
     return m_aStrCallID;
@@ -205,8 +194,7 @@ AString UCDialog::GetCallID()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetLocalTag()
+PUBLIC VIRTUAL AString UCDialog::GetLocalTag()
 {
     IMS_TRACE_I("GetLocalTag : [%s]", m_aStrLocalTag.GetStr(), 0, 0);
     return m_aStrLocalTag;
@@ -214,8 +202,7 @@ AString UCDialog::GetLocalTag()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetRemoteTag()
+PUBLIC VIRTUAL AString UCDialog::GetRemoteTag()
 {
     IMS_TRACE_I("GetRemoteTag : [%s]", m_aStrRemoteTag.GetStr(), 0, 0);
     return m_aStrRemoteTag;
@@ -223,8 +210,7 @@ AString UCDialog::GetRemoteTag()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetDirection()
+PUBLIC VIRTUAL AString UCDialog::GetDirection()
 {
     IMS_TRACE_I("GetDirection : [%s]", m_aStrDirection.GetStr(), 0, 0);
     return m_aStrDirection;
@@ -232,8 +218,7 @@ AString UCDialog::GetDirection()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_UINT32 UCDialog::GetState()
+PUBLIC VIRTUAL IMS_UINT32 UCDialog::GetState()
 {
     IMS_TRACE_I("GetState : [%d]", m_eState, 0, 0);
     return m_eState;
@@ -241,8 +226,7 @@ IMS_UINT32 UCDialog::GetState()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetStateEvent()
+PUBLIC VIRTUAL AString UCDialog::GetStateEvent()
 {
     IMS_TRACE_I("GetStateEvent : [%s]", m_aStrState_Event.GetStr(), 0, 0);
     return m_aStrState_Event;
@@ -250,8 +234,7 @@ AString UCDialog::GetStateEvent()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetStateCode()
+PUBLIC VIRTUAL AString UCDialog::GetStateCode()
 {
     IMS_TRACE_I("GetStateCode : [%s]", m_aStrState_Code.GetStr(), 0, 0);
     return m_aStrState_Code;
@@ -259,8 +242,7 @@ AString UCDialog::GetStateCode()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_UINT32 UCDialog::GetDuration()
+PUBLIC VIRTUAL IMS_UINT32 UCDialog::GetDuration()
 {
     IMS_TRACE_I("GetDuration : [%d]", m_nDuration, 0, 0);
     return m_nDuration;
@@ -268,8 +250,7 @@ IMS_UINT32 UCDialog::GetDuration()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetReferredBy()
+PUBLIC VIRTUAL AString UCDialog::GetReferredBy()
 {
     IMS_TRACE_D("GetReferredBy : [%s]", m_aStrReferredBy.GetStr(), 0, 0);
     return m_aStrReferredBy;
@@ -277,8 +258,7 @@ AString UCDialog::GetReferredBy()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetReferredByDisplay()
+PUBLIC VIRTUAL AString UCDialog::GetReferredByDisplay()
 {
     IMS_TRACE_D("GetReferredByDisplay : [%s]", m_aStrReferredBy_Display.GetStr(), 0, 0);
     return m_aStrReferredBy_Display;
@@ -286,8 +266,7 @@ AString UCDialog::GetReferredByDisplay()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCDialog::GetLocal(OUT DialogLR* pstDialogLR)
+PUBLIC VIRTUAL void UCDialog::GetLocal(OUT DialogLR* pstDialogLR)
 {
     pstDialogLR->aStrIdentity = m_stLocal.aStrIdentity;
     pstDialogLR->aStrIdentity_Display = m_stLocal.aStrIdentity_Display;
@@ -295,21 +274,19 @@ void UCDialog::GetLocal(OUT DialogLR* pstDialogLR)
 
     IMS_TRACE_D("GetLocal : Identity[%s][%s]", pstDialogLR->aStrIdentity.GetStr(),
             pstDialogLR->aStrTarget_Uri.GetStr(), 0);
-    IMS_TRACE_D("GetLocal : Identity_Display[%s]", pstDialogLR->aStrIdentity_Display.GetStr(), 0,
-            0);
+    IMS_TRACE_D(
+            "GetLocal : Identity_Display[%s]", pstDialogLR->aStrIdentity_Display.GetStr(), 0, 0);
 
     for (IMS_UINT32 index = 0; index < m_stLocal.objTargetParam.GetSize(); index++)
     {
         pstDialogLR->objTargetParam.Add(m_stLocal.objTargetParam.GetKeyAt(index),
                 m_stLocal.objTargetParam.GetValueAt(index));
     }
-
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetLocalIdentity()
+PUBLIC VIRTUAL AString UCDialog::GetLocalIdentity()
 {
     IMS_TRACE_D("GetLocalIdentity : [%s]", m_stLocal.aStrIdentity.GetStr(), 0, 0);
     return m_stLocal.aStrIdentity;
@@ -317,8 +294,7 @@ AString UCDialog::GetLocalIdentity()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetLocalIdentityDisplay()
+PUBLIC VIRTUAL AString UCDialog::GetLocalIdentityDisplay()
 {
     IMS_TRACE_D("GetLocalIdentityDisplay : [%s]", m_stLocal.aStrIdentity_Display.GetStr(), 0, 0);
     return m_stLocal.aStrIdentity_Display;
@@ -326,8 +302,7 @@ AString UCDialog::GetLocalIdentityDisplay()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetLocalpVal(IN AString aStrpName)
+PUBLIC VIRTUAL AString UCDialog::GetLocalpVal(IN AString aStrpName)
 {
     AString aStrpVal = AString::ConstNull();
     IMS_SLONG nIndexKey = m_stLocal.objTargetParam.GetIndexOfKey(aStrpName);
@@ -345,8 +320,7 @@ AString UCDialog::GetLocalpVal(IN AString aStrpName)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-void UCDialog::GetRemote(OUT DialogLR* pstDialogLR)
+PUBLIC VIRTUAL void UCDialog::GetRemote(OUT DialogLR* pstDialogLR)
 {
     pstDialogLR->aStrIdentity = m_stRemote.aStrIdentity;
     pstDialogLR->aStrIdentity_Display = m_stRemote.aStrIdentity_Display;
@@ -354,8 +328,8 @@ void UCDialog::GetRemote(OUT DialogLR* pstDialogLR)
 
     IMS_TRACE_D("GetRemote : Identity[%s][%s]", pstDialogLR->aStrIdentity.GetStr(),
             pstDialogLR->aStrTarget_Uri.GetStr(), 0);
-    IMS_TRACE_D("GetRemote : Identity_Display[%s]", pstDialogLR->aStrIdentity_Display.GetStr(), 0,
-            0);
+    IMS_TRACE_D(
+            "GetRemote : Identity_Display[%s]", pstDialogLR->aStrIdentity_Display.GetStr(), 0, 0);
 
     for (IMS_UINT32 index = 0; index < m_stRemote.objTargetParam.GetSize(); index++)
     {
@@ -366,8 +340,7 @@ void UCDialog::GetRemote(OUT DialogLR* pstDialogLR)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetRemoteIdentity()
+PUBLIC VIRTUAL AString UCDialog::GetRemoteIdentity()
 {
     IMS_TRACE_D("GetRemoteIdentity : [%s]", m_stRemote.aStrIdentity.GetStr(), 0, 0);
     return m_stRemote.aStrIdentity;
@@ -375,8 +348,7 @@ AString UCDialog::GetRemoteIdentity()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetRemoteIdentityDisplay()
+PUBLIC VIRTUAL AString UCDialog::GetRemoteIdentityDisplay()
 {
     IMS_TRACE_D("GetRemoteIdentityDisplay : [%s]", m_stRemote.aStrIdentity_Display.GetStr(), 0, 0);
     return m_stRemote.aStrIdentity_Display;
@@ -384,8 +356,7 @@ AString UCDialog::GetRemoteIdentityDisplay()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-AString UCDialog::GetRemotepVal(IN AString aStrpName)
+PUBLIC VIRTUAL AString UCDialog::GetRemotepVal(IN AString aStrpName)
 {
     AString aStrpVal;
     IMS_SLONG nIndexKey = m_stRemote.objTargetParam.GetIndexOfKey(aStrpName);
@@ -403,8 +374,7 @@ AString UCDialog::GetRemotepVal(IN AString aStrpName)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-IMS_BOOL UCDialog::EnablePulled()
+PUBLIC VIRTUAL IMS_BOOL UCDialog::EnablePulled()
 {
     IMS_TRACE_I("EnablePulled : [%s]", PS_BOOL(m_bEnablePulled), 0, 0);
     return m_bEnablePulled;
@@ -412,8 +382,7 @@ IMS_BOOL UCDialog::EnablePulled()
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialog(IN IElement* pDialogElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialog(IN IElement* pDialogElement)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
     AString aStrDialog_ID = AString::ConstNull();
@@ -441,14 +410,13 @@ IMS_BOOL UCDialog::UpdateDialog(IN IElement* pDialogElement)
         bUpdated = IMS_TRUE;
     }
 
-    IMS_TRACE_D("UpdateDialog : CallID[%s][%s]", m_aStrCallID.GetStr(),
-            aStrDialog_CallID.GetStr(), 0);
+    IMS_TRACE_D(
+            "UpdateDialog : CallID[%s][%s]", m_aStrCallID.GetStr(), aStrDialog_CallID.GetStr(), 0);
     if (!m_aStrCallID.Equals(aStrDialog_CallID))
     {
         m_aStrCallID = aStrDialog_CallID;
         bUpdated = IMS_TRUE;
     }
-
 
     IMS_TRACE_D("UpdateDialog : LocalTag[%s][%s]", m_aStrLocalTag.GetStr(),
             aStrDialog_LocalTag.GetStr(), 0);
@@ -480,8 +448,7 @@ IMS_BOOL UCDialog::UpdateDialog(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogState(IN IElement* pStateElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogState(IN IElement* pStateElement)
 {
     if (pStateElement == IMS_NULL)
     {
@@ -533,8 +500,7 @@ IMS_BOOL UCDialog::UpdateDialogState(IN IElement* pStateElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogDuration(IN IElement* pDurationElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogDuration(IN IElement* pDurationElement)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
     AString aStrDuration;
@@ -563,10 +529,8 @@ IMS_BOOL UCDialog::UpdateDialogDuration(IN IElement* pDurationElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogReplaces(IN IElement* pReplacesElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogReplaces(IN IElement* pReplacesElement)
 {
-
     if (pReplacesElement == IMS_NULL)
     {
         IMS_TRACE_I("UpdateDialogReplaces : pReplacesElement is null", 0, 0, 0);
@@ -617,8 +581,7 @@ IMS_BOOL UCDialog::UpdateDialogReplaces(IN IElement* pReplacesElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogReferredBy(IN IElement* pReferredByElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogReferredBy(IN IElement* pReferredByElement)
 {
     if (pReferredByElement == IMS_NULL)
     {
@@ -658,8 +621,8 @@ IMS_BOOL UCDialog::UpdateDialogReferredBy(IN IElement* pReferredByElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogLR(IN IElement* pLRElement, IN DialogLR* pstDialogLR)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLR(
+        IN IElement* pLRElement, IN DialogLR* pstDialogLR)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
@@ -687,8 +650,8 @@ IMS_BOOL UCDialog::UpdateDialogLR(IN IElement* pLRElement, IN DialogLR* pstDialo
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogLRIdentity(IN IElement* pIdentityElement, IN DialogLR* pstDialogLR)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRIdentity(
+        IN IElement* pIdentityElement, IN DialogLR* pstDialogLR)
 {
     if (pIdentityElement == IMS_NULL)
     {
@@ -733,8 +696,8 @@ IMS_BOOL UCDialog::UpdateDialogLRIdentity(IN IElement* pIdentityElement, IN Dial
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogLRTarget(IN IElement* pTargetElement, IN DialogLR* pstDialogLR)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRTarget(
+        IN IElement* pTargetElement, IN DialogLR* pstDialogLR)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
     AString aStrTarget_Uri = AString::ConstNull();
@@ -768,8 +731,8 @@ IMS_BOOL UCDialog::UpdateDialogLRTarget(IN IElement* pTargetElement, IN DialogLR
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogLRTarget_Param(IN IElement* pTargetElement, IN DialogLR* pstDialogLR)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogLRTarget_Param(
+        IN IElement* pTargetElement, IN DialogLR* pstDialogLR)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
@@ -826,7 +789,6 @@ IMS_BOOL UCDialog::UpdateDialogLRTarget_Param(IN IElement* pTargetElement, IN Di
             IMS_TRACE_D("UpdateDialogLRTarget_Param : ADDED [%d][%s][%s]", index,
                     aStrParam_name.GetStr(), aStrParam_value.GetStr());
         }
-
     }
 
     pTargetElement->DestroyNodeList(pINodeList);
@@ -837,8 +799,7 @@ IMS_BOOL UCDialog::UpdateDialogLRTarget_Param(IN IElement* pTargetElement, IN Di
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateEnablePulled(IN IElement* pDialogElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateEnablePulled(IN IElement* pDialogElement)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
@@ -854,8 +815,7 @@ IMS_BOOL UCDialog::UpdateEnablePulled(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateOnHold(IN IElement* pDialogElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateOnHold(IN IElement* pDialogElement)
 {
     IMS_BOOL bIs = IMS_FALSE;
 
@@ -881,8 +841,7 @@ IMS_BOOL UCDialog::UpdateOnHold(IN IElement* pDialogElement)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-IMS_BOOL UCDialog::UpdateDialogExtraInfo(IN IElement* pDialogElement)
+PROTECTED VIRTUAL IMS_BOOL UCDialog::UpdateDialogExtraInfo(IN IElement* pDialogElement)
 {
     IMS_BOOL bUpdated = IMS_FALSE;
 
@@ -933,7 +892,7 @@ IMS_UINT32 UCDialog::ConvertDialogState(IN AString aStrState)
 PROTECTED
 AString UCDialog::GetValueElement(IN IElement* pIElement)
 {
-    INode *piNode = DYNAMIC_CAST(INode*, pIElement);
+    INode* piNode = DYNAMIC_CAST(INode*, pIElement);
     if (piNode == IMS_NULL)
     {
         IMS_TRACE_I("GetValueElement : piNode is NULL", 0, 0, 0);
@@ -953,17 +912,17 @@ AString UCDialog::GetValueElement(IN IElement* pIElement)
         return AString::ConstNull();
     }
 
-    IText *piText = DYNAMIC_CAST(IText*, piNodeChild);
+    IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
     AString aStrValue = piText->GetData();
 
-    IMS_TRACE_D("GetValueElement : [%s]", aStrValue.GetStr(), 0 , 0);
+    IMS_TRACE_D("GetValueElement : [%s]", aStrValue.GetStr(), 0, 0);
     return aStrValue;
 }
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED
-AString UCDialog::GetValueSubElement(IN IElement* pIElement, IN const IMS_CHAR *strSubElement)
+AString UCDialog::GetValueSubElement(IN IElement* pIElement, IN const IMS_CHAR* strSubElement)
 {
     INodeList* pINodeList = pIElement->GetElementsByTagName(strSubElement);
     if (pINodeList == IMS_NULL)
@@ -1007,8 +966,8 @@ AString UCDialog::GetValueSubElement(IN IElement* pIElement, IN const IMS_CHAR *
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED
-IElement* UCDialog::GetSubElement(IN IElement* pIElement, IN const IMS_CHAR *strSubElement,
-        IN IMS_UINT32 nIndex /* = 0 */)
+IElement* UCDialog::GetSubElement(
+        IN IElement* pIElement, IN const IMS_CHAR* strSubElement, IN IMS_UINT32 nIndex /* = 0 */)
 {
     INodeList* pINodeList = pIElement->GetElementsByTagName(strSubElement);
     if (pINodeList == IMS_NULL)
@@ -1036,8 +995,8 @@ IElement* UCDialog::GetSubElement(IN IElement* pIElement, IN const IMS_CHAR *str
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED
-IMSList<IElement*> UCDialog::GetSubElementList(IN IElement* pIElement,
-        IN const IMS_CHAR *strSubElement)
+IMSList<IElement*> UCDialog::GetSubElementList(
+        IN IElement* pIElement, IN const IMS_CHAR* strSubElement)
 {
     IMSList<IElement*> lstElements;
 
@@ -1068,7 +1027,7 @@ IMSList<IElement*> UCDialog::GetSubElementList(IN IElement* pIElement,
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
 PROTECTED
-AString UCDialog::GetAttributeFromElement(IN IElement* pIElement, IN const IMS_CHAR *strAttribute)
+AString UCDialog::GetAttributeFromElement(IN IElement* pIElement, IN const IMS_CHAR* strAttribute)
 {
     AString aStrAttribute;
 
@@ -1086,21 +1045,12 @@ AString UCDialog::GetAttributeFromElement(IN IElement* pIElement, IN const IMS_C
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCDialog::LoadConfig()
-{
-}
+PROTECTED VIRTUAL void UCDialog::LoadConfig() {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCDialog::AddEventListn()
-{
-}
+PROTECTED VIRTUAL void UCDialog::AddEventListn() {}
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PROTECTED VIRTUAL
-void UCDialog::DeleteEventListn()
-{
-}
+PROTECTED VIRTUAL void UCDialog::DeleteEventListn() {}

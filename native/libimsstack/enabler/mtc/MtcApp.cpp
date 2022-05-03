@@ -23,7 +23,6 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 LOCAL const IMS_CHAR MTC_APP_NAME[] = "MtcApp";
 
-
 PUBLIC
 MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
         IMSApp(MTC_APP_NAME),
@@ -46,15 +45,13 @@ MtcApp::MtcApp(IN IMS_SINT32 nSlotId) :
             ImsServiceConfig::GetAppName(ImsAppId::MTC), nSlotId);
 }
 
-PUBLIC VIRTUAL
-MtcApp::~MtcApp()
+PUBLIC VIRTUAL MtcApp::~MtcApp()
 {
     IMS_TRACE_I("~MtcApp [slot_%d]", m_nSlotId, 0, 0);
     MtcContextRepository::GetInstance()->RemoveContext(m_nSlotId);
 }
 
-PUBLIC VIRTUAL
-void MtcApp::Start()
+PUBLIC VIRTUAL void MtcApp::Start()
 {
     IMS_TRACE_I("Start", 0, 0, 0);
 
@@ -63,16 +60,14 @@ void MtcApp::Start()
     InitCallManager();
 }
 
-PUBLIC VIRTUAL
-void MtcApp::Stop()
+PUBLIC VIRTUAL void MtcApp::Stop()
 {
     IMS_TRACE_I("Stop", 0, 0, 0);
     DestroyServices();
     delete m_pEctManager;
 }
 
-PUBLIC VIRTUAL
-IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
+PUBLIC VIRTUAL IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
@@ -89,8 +84,7 @@ IMtcService* MtcApp::GetServiceByType(IN ServiceType eServiceType)
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
+PUBLIC VIRTUAL MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
 {
     for (IMS_UINT32 i = 0; i < m_lstServices.GetSize(); i++)
     {
@@ -105,8 +99,7 @@ MtcAosConnector* MtcApp::GetAosConnector(IN ServiceType eServiceType)
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-EctManager* MtcApp::GetEctManager()
+PUBLIC VIRTUAL EctManager* MtcApp::GetEctManager()
 {
     if (m_pEctManager == IMS_NULL)
     {
@@ -135,8 +128,8 @@ PRIVATE
 void MtcApp::InitCallManager()
 {
     m_objCallManager.Init();
-    JniConnectorFactory::GetInstance()->GetMtcCallConnector(m_nSlotId)->
-            SetEnablerService(static_cast<MtcCallController*>(&m_objCallController));
+    JniConnectorFactory::GetInstance()->GetMtcCallConnector(m_nSlotId)->SetEnablerService(
+            static_cast<MtcCallController*>(&m_objCallController));
 }
 
 PRIVATE

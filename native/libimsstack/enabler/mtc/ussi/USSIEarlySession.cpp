@@ -5,7 +5,6 @@
  * brief : Create USSIEarlySession
  */
 
-
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 
@@ -22,7 +21,6 @@
 
 __IMS_TRACE_TAG_COM_UC__;
 
-
 /* ------------------------------------------------------------------------------------------------
     Constructor, Destructor
 ------------------------------------------------------------------------------------------------ */
@@ -31,8 +29,8 @@ __IMS_TRACE_TAG_COM_UC__;
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
 USSIEarlySession::USSIEarlySession(IN ISession* pISession, IN IMtcCall* pSession)
-    // TODO, MTC BUILD
-    // : EarlySession(pISession, pSession)
+// TODO, MTC BUILD
+// : EarlySession(pISession, pSession)
 {
     // TODO, MTC BUILD
     UNUSED_PARAM(pISession);
@@ -43,19 +41,22 @@ USSIEarlySession::USSIEarlySession(IN ISession* pISession, IN IMtcCall* pSession
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-USSIEarlySession::~USSIEarlySession()
+PUBLIC VIRTUAL USSIEarlySession::~USSIEarlySession()
 {
     IMS_TRACE_MEM("uc", "uc_F : USSIEarlySession[%" PFLS_u "][%" PFLS_x "]",
             sizeof(USSIEarlySession), this, 0);
 }
 
 // TODO, MTC BUILD
-// /* ------------------------------------------------------------------------------------------------
+// /*
+
 //     State Machine METHODS
-// ------------------------------------------------------------------------------------------------ */
-// /* ------------------------------------------------------------------------------------------------
-//  ----------------------------------------------------------------------------------------------- */
+
+// */
+// /*
+
+//  -----------------------------------------------------------------------------------------------
+//  */
 // PROTECTED VIRTUAL
 // IMS_BOOL USSIEarlySession::StateIDLE_Start(IN IMSMSG &objMsg)
 // {
@@ -97,10 +98,9 @@ USSIEarlySession::~USSIEarlySession()
 
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIEarlySession::StateIDLE_IncomingSession(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIEarlySession::StateIDLE_IncomingSession(IN IMSMSG &objMsg)
 // {
 //     IEarlySessionIncomingParam* pParam
 //             = reinterpret_cast<IEarlySessionIncomingParam*>(objMsg.nLparam);
@@ -151,10 +151,10 @@ USSIEarlySession::~USSIEarlySession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIEarlySession::StateESTABLISHING_SSStarted(IN IMSMSG &/*objMsg*/)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIEarlySession::StateESTABLISHING_SSStarted(IN IMSMSG
+// &/*objMsg*/)
 // {
 //     IMessage* pIMessage = MessageUtil::GetPreviousResponse(m_pISession, IMessage::SESSION_START);
 //     FailReason failReason;
@@ -167,7 +167,8 @@ USSIEarlySession::~USSIEarlySession()
 //     if (UpdateRemoteFeatures(pIMessage)) {
 //     }
 
-//     if (m_pMessage->SendAck(m_pISession, m_pService, m_pSessInfo, m_pSuppService, m_nLocalFeatures,
+//     if (m_pMessage->SendAck(m_pISession, m_pService, m_pSessInfo, m_pSuppService,
+//     m_nLocalFeatures,
 //             m_nSupportedFeatures, m_nRequireFeatures) == IMS_FAILURE)
 //     {
 //         failReason.eReason = FAIL_REASON_SESSION_UNKNOWN;
@@ -196,10 +197,9 @@ USSIEarlySession::~USSIEarlySession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIEarlySession::StateALERTING_UserAlert(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIEarlySession::StateALERTING_UserAlert(IN IMSMSG &objMsg)
 // {
 //     IEarlySessionUserAlertParam* pParam
 //             = reinterpret_cast<IEarlySessionUserAlertParam*>(objMsg.nLparam);
@@ -218,13 +218,12 @@ USSIEarlySession::~USSIEarlySession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIEarlySession::StateALERTING_Accept(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIEarlySession::StateALERTING_Accept(IN IMSMSG &objMsg)
 // {
-//     IEarlySessionAcceptParam* pParam = reinterpret_cast<IEarlySessionAcceptParam*>(objMsg.nLparam);
-//     FailReason rejectReason;
+//     IEarlySessionAcceptParam* pParam =
+//     reinterpret_cast<IEarlySessionAcceptParam*>(objMsg.nLparam); FailReason rejectReason;
 //     IMessage* pIMessage = m_pISession->GetNextResponse();
 
 //     IMS_TRACE_I("StateALERTING_Accept", 0, 0, 0);
@@ -235,7 +234,8 @@ USSIEarlySession::~USSIEarlySession()
 //     m_pMessage->AddRecvInfoHeader(pIMessage, FormRecvInfoHeader());
 //     m_pMessage->AddAcceptHeader(pIMessage, FormAcceptHeader());
 
-//     if (m_pMessage->Accept(m_pISession, m_pService, m_pSessInfo, m_pSuppService, m_nLocalFeatures,
+//     if (m_pMessage->Accept(m_pISession, m_pService, m_pSessInfo, m_pSuppService,
+//     m_nLocalFeatures,
 //             m_nSupportedFeatures, m_nRequireFeatures) == IMS_FAILURE)
 //     {
 //         rejectReason.eReason = REJECT_REASON_SESSION_FAIL;
@@ -260,11 +260,9 @@ USSIEarlySession::~USSIEarlySession()
 //     return IMS_TRUE;
 // }
 
+// /*
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIEarlySession::SendStartedToListn()
+// */ PROTECTED VIRTUAL void USSIEarlySession::SendStartedToListn()
 // {
 //     IMS_TRACE_I("SendStartedToListn", 0, 0, 0);
 //     IMessage* pIMessage = m_pISession->GetPreviousRequest(IMessage::SESSION_START);
@@ -287,10 +285,9 @@ USSIEarlySession::~USSIEarlySession()
 //     m_pListener->Early_Started((IMS_UINTP)pParam);
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIEarlySession::AddUSSIHeaders(IN IMessage* pIMessage)
+// /*
+
+// */ PROTECTED VIRTUAL void USSIEarlySession::AddUSSIHeaders(IN IMessage* pIMessage)
 // {
 //     IMS_TRACE_I("AddUSSIHeaders", 0, 0, 0);
 
@@ -312,10 +309,9 @@ USSIEarlySession::~USSIEarlySession()
 //     return objRecvInfoHeaders;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMSList<AString> USSIEarlySession::FormAcceptHeader()
+// /*
+
+// */ PROTECTED VIRTUAL IMSList<AString> USSIEarlySession::FormAcceptHeader()
 // {
 //     IMS_TRACE_I("FormAcceptHeader", 0, 0, 0);
 
@@ -328,10 +324,9 @@ USSIEarlySession::~USSIEarlySession()
 //     return objAcceptHeaders;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMSList<AString> USSIEarlySession::FormContentTypeHeader()
+// /*
+
+// */ PROTECTED VIRTUAL IMSList<AString> USSIEarlySession::FormContentTypeHeader()
 // {
 //     IMS_TRACE_I("FormContentTypeHeader", 0, 0, 0);
 
@@ -341,10 +336,9 @@ USSIEarlySession::~USSIEarlySession()
 //     return objContentTypeHeaders;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIEarlySession::LoadConfig()
+// /*
+
+// */ PROTECTED VIRTUAL void USSIEarlySession::LoadConfig()
 // {
 //     return EarlySession::LoadConfig();
 // }

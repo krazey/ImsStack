@@ -4,7 +4,6 @@
 #include "helper/IMtcTimerListener.h"
 #include "helper/MtcTimerWrapper.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
@@ -14,18 +13,16 @@ MtcTimerWrapper::MtcTimerWrapper() :
 {
 }
 
-PUBLIC VIRTUAL
-MtcTimerWrapper::~MtcTimerWrapper()
+PUBLIC VIRTUAL MtcTimerWrapper::~MtcTimerWrapper()
 {
     StopAll();
 }
 
-PUBLIC VIRTUAL
-void MtcTimerWrapper::Timer_TimerExpired(IN ITimer *piTimer)
+PUBLIC VIRTUAL void MtcTimerWrapper::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    for (IMS_UINT32 i = 0; i < m_lstTimers.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_lstTimers.GetSize(); i++)
     {
-        MtcTimer *pTimer = m_lstTimers.GetAt(i);
+        MtcTimer* pTimer = m_lstTimers.GetAt(i);
         if (pTimer->piTimer == piTimer)
         {
             m_piListener->OnTimerExpired(pTimer->eType);
@@ -35,7 +32,7 @@ void MtcTimerWrapper::Timer_TimerExpired(IN ITimer *piTimer)
 }
 
 PUBLIC
-void MtcTimerWrapper::SetListener(IN IMtcTimerListener *piListener)
+void MtcTimerWrapper::SetListener(IN IMtcTimerListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -79,7 +76,7 @@ void MtcTimerWrapper::Stop(IN IMS_UINT32 eType)
         delete pTimer;
         m_lstTimers.RemoveAt(i);
 
-        return ;
+        return;
     }
 
     IMS_TRACE_I("Stop : Not Found Type[%d]", eType, 0, 0);

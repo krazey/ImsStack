@@ -78,9 +78,8 @@ const IMS_SINT32 MessageUtil::INVALID_INDEX = -1;
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMessage* MessageUtil::GetPreviousResponse(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
-        IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
+PUBLIC GLOBAL IMessage* MessageUtil::GetPreviousResponse(IN ISession* piSession,
+        IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
 {
     if (piSession == IMS_NULL)
     {
@@ -105,8 +104,7 @@ IMessage* MessageUtil::GetPreviousResponse(IN ISession* piSession, IN IMS_SINT32
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMessage* MessageUtil::GetRemotePreviousMessage(IN ISession* piSession,
+PUBLIC GLOBAL IMessage* MessageUtil::GetRemotePreviousMessage(IN ISession* piSession,
         IN IMS_SINT32 eServiceMethod, IN IMS_BOOL bIsUac,
         IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
 {
@@ -125,9 +123,8 @@ IMessage* MessageUtil::GetRemotePreviousMessage(IN ISession* piSession,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetResponseStatusCode(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
-        IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetResponseStatusCode(IN ISession* piSession,
+        IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
 {
     IMessage* piPreviousMessage = GetPreviousResponse(piSession, eServiceMethod, nResponseIndex);
     if (piPreviousMessage == IMS_NULL)
@@ -140,9 +137,8 @@ IMS_SINT32 MessageUtil::GetResponseStatusCode(IN ISession* piSession, IN IMS_SIN
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetRemoteUris(IN ISession* piSession, IN PeerType ePeerType,
-        OUT IMSList<AString>& lstUris)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetRemoteUris(
+        IN ISession* piSession, IN PeerType ePeerType, OUT IMSList<AString>& lstUris)
 {
     lstUris.Clear();
 
@@ -191,9 +187,8 @@ IMS_RESULT MessageUtil::GetRemoteUris(IN ISession* piSession, IN PeerType ePeerT
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetRemoteUri(IN ISession* piSession, IN PeerType ePeerType,
-        OUT AString& strUri)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetRemoteUri(
+        IN ISession* piSession, IN PeerType ePeerType, OUT AString& strUri)
 {
     strUri = AString::ConstNull();
 
@@ -217,8 +212,8 @@ IMS_RESULT MessageUtil::GetRemoteUri(IN ISession* piSession, IN PeerType ePeerTy
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetSessionId(IN ISession* piSession, OUT AString& strSessionId)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetSessionId(
+        IN ISession* piSession, OUT AString& strSessionId)
 {
     strSessionId = AString::ConstNull();
 
@@ -238,9 +233,8 @@ IMS_RESULT MessageUtil::GetSessionId(IN ISession* piSession, OUT AString& strSes
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetHeaders(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT IMSList<AString>& lstHeaders,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetHeaders(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT IMSList<AString>& lstHeaders,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     lstHeaders.Clear();
@@ -262,9 +256,9 @@ IMS_RESULT MessageUtil::GetHeaders(IN const IMessage* piMessage, IN IMS_SINT32 e
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetHeader(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT AString& strHeader, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetHeader(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT AString& strHeader,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strHeader = AString::ConstNull();
 
@@ -288,9 +282,9 @@ IMS_RESULT MessageUtil::GetHeader(IN const IMessage* piMessage, IN IMS_SINT32 eH
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetHeaderValue(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT AString& strValue, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetHeaderValue(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT AString& strValue,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strValue = AString::ConstNull();
 
@@ -322,9 +316,8 @@ IMS_RESULT MessageUtil::GetHeaderValue(IN const IMessage* piMessage, IN IMS_SINT
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetHeaderValueInt(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetHeaderValueInt(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     IMSList<AString> lstHeaders;
     if (GetHeaders(piMessage, eHeaderType, lstHeaders, strHeaderName) == IMS_FAILURE)
@@ -350,8 +343,7 @@ IMS_SINT32 MessageUtil::GetHeaderValueInt(IN const IMessage* piMessage, IN IMS_S
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetParameterValue(IN const IMessage* piMessage,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetParameterValue(IN const IMessage* piMessage,
         IN const AString& strParameterName, IN IMS_SINT32 eHeaderType, OUT AString& strValue,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -398,9 +390,8 @@ IMS_RESULT MessageUtil::GetParameterValue(IN const IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUserParts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT IMSList<AString> lstUserParts,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserParts(IN IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT IMSList<AString> lstUserParts,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     lstUserParts.Clear();
@@ -443,8 +434,7 @@ IMS_RESULT MessageUtil::GetUserParts(IN IMessage* piMessage, IN IMS_SINT32 eHead
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUserPart(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserPart(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         OUT AString& strUserPart, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strUserPart = AString::ConstNull();
@@ -469,8 +459,7 @@ IMS_RESULT MessageUtil::GetUserPart(IN IMessage* piMessage, IN IMS_SINT32 eHeade
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         OUT IMSList<AString>& lstUserIds,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -492,8 +481,8 @@ IMS_RESULT MessageUtil::GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeader
             // TODO, Contains / GetIndexOf
             if (objSipAddress.GetUser().Contains(TextParser::CHAR_SEMICOLON))
             {
-                strUserPart = objSipAddress.GetUser().GetSubStr(0,
-                        objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON));
+                strUserPart = objSipAddress.GetUser().GetSubStr(
+                        0, objSipAddress.GetUser().GetIndexOf(TextParser::CHAR_SEMICOLON));
             }
             else
             {
@@ -518,8 +507,7 @@ IMS_RESULT MessageUtil::GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeader
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         OUT AString& strUserId, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strUserId = AString::ConstNull();
@@ -544,9 +532,8 @@ IMS_RESULT MessageUtil::GetUserId(IN IMessage* piMessage, IN IMS_SINT32 eHeaderT
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT IMSList<AString>& lstDisplayNames,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetDisplayNames(IN IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT IMSList<AString>& lstDisplayNames,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     lstDisplayNames.Clear();
@@ -574,9 +561,9 @@ IMS_RESULT MessageUtil::GetDisplayNames(IN IMessage* piMessage, IN IMS_SINT32 eH
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT AString& strDisplayName, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetDisplayName(IN IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT AString& strDisplayName,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strDisplayName = AString::ConstNull();
 
@@ -600,8 +587,7 @@ IMS_RESULT MessageUtil::GetDisplayName(IN IMessage* piMessage, IN IMS_SINT32 eHe
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetHosts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetHosts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         OUT IMSList<AString>& lstHosts, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     lstHosts.Clear();
@@ -629,8 +615,7 @@ IMS_RESULT MessageUtil::GetHosts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderTy
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetHost(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetHost(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         OUT AString& strHost, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strHost = AString::ConstNull();
@@ -655,8 +640,7 @@ IMS_RESULT MessageUtil::GetHost(IN IMessage* piMessage, IN IMS_SINT32 eHeaderTyp
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetParameterValueFromUri(IN IMessage* piMessage,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetParameterValueFromUri(IN IMessage* piMessage,
         IN const AString& strParameterName, IN IMS_SINT32 eHeaderType, OUT AString& strValue,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -709,8 +693,7 @@ IMS_RESULT MessageUtil::GetParameterValueFromUri(IN IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
         IN IMS_SINT32 eHeaderType, OUT IMSList<AString>& lstUris,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -746,8 +729,7 @@ IMS_RESULT MessageUtil::GetUris(IN IMessage* piMessage, IN IMS_BOOL bWithParamet
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParameters,
         IN IMS_SINT32 eHeaderType, OUT AString& strUri,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
@@ -773,8 +755,7 @@ IMS_RESULT MessageUtil::GetUri(IN IMessage* piMessage, IN IMS_BOOL bWithParamete
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     IMSList<AString> lstHeaders;
@@ -811,10 +792,8 @@ IMS_SINT32 MessageUtil::GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeade
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetSosTypeFromServiceUrn(
-        IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetSosTypeFromServiceUrn(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     AString strValue;
     if (GetUrnValue(piMessage, STR_SERVICE, eHeaderType, strValue, strHeaderName) == IMS_FAILURE)
@@ -877,9 +856,8 @@ IMS_SINT32 MessageUtil::GetSosTypeFromServiceUrn(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetCauseFromReasonHeader(IN const IMessage* piMessage,
-        IN const AString& strProtocol /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetCauseFromReasonHeader(
+        IN const IMessage* piMessage, IN const AString& strProtocol /*= AString::ConstNull()*/)
 {
     AString strText;
     IMS_SINT32 nCause;
@@ -891,8 +869,7 @@ IMS_SINT32 MessageUtil::GetCauseFromReasonHeader(IN const IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
         OUT IMS_SINT32& nCause, OUT AString& strText,
         IN const AString& strProtocol /*= AString::ConstNull()*/)
 {
@@ -931,16 +908,14 @@ IMS_RESULT MessageUtil::GetCauseAndTextFromReasonHeader(IN const IMessage* piMes
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetSupportedFeatures(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetSupportedFeatures(IN IMessage* piMessage)
 {
     return GetFeatures(piMessage, ISipHeader::SUPPORTED);
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetRequireFeatures(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetRequireFeatures(IN IMessage* piMessage)
 {
     return GetFeatures(piMessage, ISipHeader::REQUIRE);
 }
@@ -948,8 +923,8 @@ IMS_SINT32 MessageUtil::GetRequireFeatures(IN IMessage* piMessage)
 /* -------------------------------------------------------------------------------------------------
     only one Ims3gpp type body is applicable
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetIms3gppFromBody(
+        IN const IMessage* piMessage, OUT Ims3gpp& objIms3gpp)
 {
     ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
@@ -989,8 +964,7 @@ IMS_RESULT MessageUtil::GetIms3gppFromBody(IN const IMessage* piMessage, OUT Ims
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::GetStatusCodeInNotify(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::GetStatusCodeInNotify(IN IMessage* piMessage)
 {
     if (!ContainsValue(piMessage, STR_CONTENT_TYPE_SIP_FRAG, ISipHeader::CONTENT_TYPE))
     {
@@ -1033,8 +1007,7 @@ IMS_SINT32 MessageUtil::GetStatusCodeInNotify(IN IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::HasSdp(IN const IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::HasSdp(IN const IMessage* piMessage)
 {
     ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
@@ -1052,8 +1025,7 @@ IMS_BOOL MessageUtil::HasSdp(IN const IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsFocusConf(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsFocusConf(IN IMessage* piMessage)
 {
     IMSList<AString> lstHeaders;
     if (GetHeaders(piMessage, ISipHeader::CONTACT_NORMAL, lstHeaders) == IMS_FAILURE)
@@ -1063,8 +1035,8 @@ IMS_BOOL MessageUtil::IsFocusConf(IN IMessage* piMessage)
 
     for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
     {
-        ISipHeader* piSipHeader = SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL,
-                lstHeaders.GetAt(i));
+        ISipHeader* piSipHeader =
+                SipParsingHelper::CreateHeader(ISipHeader::CONTACT_NORMAL, lstHeaders.GetAt(i));
         if (piSipHeader == IMS_NULL)
         {
             continue;
@@ -1092,8 +1064,7 @@ IMS_BOOL MessageUtil::IsFocusConf(IN IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsInitialRegistrationRequired(IN const IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsInitialRegistrationRequired(IN const IMessage* piMessage)
 {
     Ims3gpp objIms3gpp;
     if (GetIms3gppFromBody(piMessage, objIms3gpp) == IMS_FAILURE)
@@ -1102,9 +1073,9 @@ IMS_BOOL MessageUtil::IsInitialRegistrationRequired(IN const IMessage* piMessage
     }
 
     if (objIms3gpp.GetAlternativeService().GetType() ==
-            Ims3gpp::AlternativeService::TYPE_RESTORATION &&
+                    Ims3gpp::AlternativeService::TYPE_RESTORATION &&
             objIms3gpp.GetAlternativeService().GetAction() ==
-            Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION)
+                    Ims3gpp::AlternativeService::ACTION_INITIAL_REGISTRATION)
     {
         return IMS_TRUE;
     }
@@ -1114,9 +1085,9 @@ IMS_BOOL MessageUtil::IsInitialRegistrationRequired(IN const IMessage* piMessage
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::ContainsValue(IN IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::ContainsValue(IN IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     IMSList<AString> lstHeaders;
     if (GetHeaders(piMessage, eHeaderType, lstHeaders, strHeaderName) != IMS_SUCCESS)
@@ -1137,9 +1108,9 @@ IMS_BOOL MessageUtil::ContainsValue(IN IMessage* piMessage, IN const AString& st
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::HasValue(IN const IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::HasValue(IN const IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     IMSList<AString> lstHeaders;
     if (GetHeaders(piMessage, eHeaderType, lstHeaders, strHeaderName) != IMS_SUCCESS)
@@ -1160,9 +1131,8 @@ IMS_BOOL MessageUtil::HasValue(IN const IMessage* piMessage, IN const AString& s
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsHeaderPresent(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ISipMessage* piSipMessage = GetSipMessage(piMessage);
     if (piSipMessage == IMS_NULL)
@@ -1175,8 +1145,8 @@ IMS_BOOL MessageUtil::IsHeaderPresent(IN const IMessage* piMessage, IN IMS_SINT3
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::ContainsTag(IN const AString& strHeader, IN const AString& strTag)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::ContainsTag(
+        IN const AString& strHeader, IN const AString& strTag)
 {
     if (strHeader.GetLength() < 1 || strTag.GetLength() < 1)
     {
@@ -1189,7 +1159,7 @@ IMS_BOOL MessageUtil::ContainsTag(IN const AString& strHeader, IN const AString&
     }
 
     // TODO, MTC BUILD
-    //AString strDecodedHeader = UCEscape::Decode((IMS_CHAR *)strHeader.GetStr());
+    // AString strDecodedHeader = UCEscape::Decode((IMS_CHAR *)strHeader.GetStr());
     AString strDecodedHeader;
     if (strDecodedHeader.Contains(strTag))
     {
@@ -1201,8 +1171,7 @@ IMS_BOOL MessageUtil::ContainsTag(IN const AString& strHeader, IN const AString&
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::ContainsAddressInPaid(
+PUBLIC GLOBAL IMS_BOOL MessageUtil::ContainsAddressInPaid(
         IN const IMessage* piMessage, IN const AString& strAddress)
 {
     if (strAddress.GetLength() <= 0)
@@ -1239,8 +1208,7 @@ IMS_BOOL MessageUtil::ContainsAddressInPaid(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::SetHeader(IN IMessage* piMessage, IN const AString& strValue,
+PUBLIC GLOBAL IMS_RESULT MessageUtil::SetHeader(IN IMessage* piMessage, IN const AString& strValue,
         IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     ISipMessage* piSipMessage = GetSipMessage(piMessage);
@@ -1254,9 +1222,9 @@ IMS_RESULT MessageUtil::SetHeader(IN IMessage* piMessage, IN const AString& strV
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::AddValueIfNotExists(IN IMessage* piMessage, IN const AString& strValue,
-        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::AddValueIfNotExists(IN IMessage* piMessage,
+        IN const AString& strValue, IN IMS_SINT32 eHeaderType,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     if (HasValue(piMessage, strValue, eHeaderType, strHeaderName) == IMS_TRUE)
     {
@@ -1274,9 +1242,8 @@ IMS_RESULT MessageUtil::AddValueIfNotExists(IN IMessage* piMessage, IN const ASt
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::GenerateContentId(IN const AString& strHost, OUT AString& strContentId,
-        IN IMS_BOOL bAngleQuote /*= IMS_FALSE*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GenerateContentId(IN const AString& strHost,
+        OUT AString& strContentId, IN IMS_BOOL bAngleQuote /*= IMS_FALSE*/)
 {
     strContentId = AString::ConstNull();
 
@@ -1307,17 +1274,16 @@ IMS_RESULT MessageUtil::GenerateContentId(IN const AString& strHost, OUT AString
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::SetResourceListByConfUser(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN IMSList<ConfUser*>& lstConfUser,
-        IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::SetResourceListByConfUser(IN_OUT IMessage* piMessage,
+        IN const AString& strContentId, IN IMSList<ConfUser*>& lstConfUser, IN IMS_BOOL bMultiPart,
+        IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
 {
     AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
     objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
     objXml += "<list>\n";
 
-    for (IMS_UINT32 i = 0 ; i < lstConfUser.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstConfUser.GetSize(); i++)
     {
         ConfUser* pConfUser = lstConfUser.GetAt(i);
         if (pConfUser == IMS_NULL)
@@ -1362,24 +1328,24 @@ IMS_RESULT MessageUtil::SetResourceListByConfUser(IN_OUT IMessage* piMessage,
         objXml += " />\n";
     }
 
-    objXml += "</list>\n""</resource-lists>";
+    objXml += "</list>\n"
+              "</resource-lists>";
 
     return SetResourceList(piMessage, strContentId, bMultiPart, objXml);
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_RESULT MessageUtil::SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
-        IN const AString& strContentId, IN IMSList<AString>& lstEntryUri,
-        IN IMS_BOOL bMultiPart, IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
+        IN const AString& strContentId, IN IMSList<AString>& lstEntryUri, IN IMS_BOOL bMultiPart,
+        IN IMS_BOOL bCopyControl /*= IMS_TRUE*/)
 {
     AStringBuffer objXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
     objXml += "<resource-lists xmlns=\"urn:ietf:params:xml:ns:resource-lists\"";
     objXml += " xmlns:cp=\"urn:ietf:params:xml:ns:copyControl\">\n";
     objXml += "<list>\n";
 
-    for (IMS_UINT32 i = 0 ; i < lstEntryUri.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < lstEntryUri.GetSize(); i++)
     {
         objXml += "<entry uri=\"";
         objXml += lstEntryUri.GetAt(i);
@@ -1392,15 +1358,15 @@ IMS_RESULT MessageUtil::SetResourceListByEntryUri(IN_OUT IMessage* piMessage,
         objXml += " />\n";
     }
 
-    objXml += "</list>\n""</resource-lists>";
+    objXml += "</list>\n"
+              "</resource-lists>";
 
     return SetResourceList(piMessage, strContentId, bMultiPart, objXml);
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsVideoFeatureIncluded(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsVideoFeatureIncluded(IN IMessage* piMessage)
 {
     AString strContact;
     GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strContact);
@@ -1410,8 +1376,7 @@ IMS_BOOL MessageUtil::IsVideoFeatureIncluded(IN IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL
-ISipMessage* MessageUtil::GetSipMessage(IN const IMessage* piMessage)
+PRIVATE GLOBAL ISipMessage* MessageUtil::GetSipMessage(IN const IMessage* piMessage)
 {
     if (piMessage == IMS_NULL)
     {
@@ -1423,9 +1388,8 @@ ISipMessage* MessageUtil::GetSipMessage(IN const IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL
-IMS_RESULT MessageUtil::GetAddresses(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT IMSList<SipAddress>& lstAddresses,
+PRIVATE GLOBAL IMS_RESULT MessageUtil::GetAddresses(IN IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT IMSList<SipAddress>& lstAddresses,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     lstAddresses.Clear();
@@ -1455,9 +1419,8 @@ IMS_RESULT MessageUtil::GetAddresses(IN IMessage* piMessage, IN IMS_SINT32 eHead
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL
-void MessageUtil::GetParameterValueFromUnknownHeaderBody(IN const AString& strBody,
-        IN const AString& strParameterName, OUT AString& strValue)
+PRIVATE GLOBAL void MessageUtil::GetParameterValueFromUnknownHeaderBody(
+        IN const AString& strBody, IN const AString& strParameterName, OUT AString& strValue)
 {
     strValue = AString::ConstNull();
 
@@ -1466,8 +1429,8 @@ void MessageUtil::GetParameterValueFromUnknownHeaderBody(IN const AString& strBo
     for (IMS_UINT32 i = 0; i < lstParameters.GetSize(); i++)
     {
         AString& strParameter = lstParameters.GetAt(i);
-        IMS_SINT32 nEqualPosition = TextParser::GetIndexOfDelimiter(strParameter,
-                TextParser::CHAR_EQUAL);
+        IMS_SINT32 nEqualPosition =
+                TextParser::GetIndexOfDelimiter(strParameter, TextParser::CHAR_EQUAL);
 
         if (nEqualPosition == AString::NPOS)
         {
@@ -1484,9 +1447,8 @@ void MessageUtil::GetParameterValueFromUnknownHeaderBody(IN const AString& strBo
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL
-IMS_RESULT MessageUtil::GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
-        IN IMS_SINT32 eHeaderType, OUT AString& strValue,
+PRIVATE GLOBAL IMS_RESULT MessageUtil::GetUrnValue(IN const IMessage* piMessage,
+        IN const AString& strId, IN IMS_SINT32 eHeaderType, OUT AString& strValue,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strValue = AString::ConstNull();
@@ -1521,9 +1483,8 @@ IMS_RESULT MessageUtil::GetUrnValue(IN const IMessage* piMessage, IN const AStri
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL
-IMS_RESULT MessageUtil::SetResourceList(IN_OUT IMessage* piMessage, IN const AString& strContentId,
-        IN IMS_BOOL bMultiPart, IN AStringBuffer& objXml)
+PRIVATE GLOBAL IMS_RESULT MessageUtil::SetResourceList(IN_OUT IMessage* piMessage,
+        IN const AString& strContentId, IN IMS_BOOL bMultiPart, IN AStringBuffer& objXml)
 {
     if (piMessage == IMS_NULL)
     {
@@ -1539,8 +1500,8 @@ IMS_RESULT MessageUtil::SetResourceList(IN_OUT IMessage* piMessage, IN const ASt
     piBodyPart->SetHeader(SipHeaderName::CONTENT_TYPE, STR_CONTENT_TYPE_RESOURCE_LISTS_XML);
     if (bMultiPart)
     {
-        piBodyPart->SetHeader(SipHeaderName::CONTENT_DISPOSITION,
-                STR_CONTENT_DISPOSITION_RECIPIENT_LIST);
+        piBodyPart->SetHeader(
+                SipHeaderName::CONTENT_DISPOSITION, STR_CONTENT_DISPOSITION_RECIPIENT_LIST);
 
         AString strContentLength;
         strContentLength.SetNumber(objXml.GetLength());
@@ -1575,14 +1536,14 @@ IMS_RESULT MessageUtil::SetResourceList(IN_OUT IMessage* piMessage, IN const ASt
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-ServiceType MessageUtil::CheckServiceType(IN IMessage* piMessage,
-        IN IMtcCall * /*pSession = IMS_NULL*/, IN ISession * /*piSession = IMS_NULL*/)
+PUBLIC GLOBAL ServiceType MessageUtil::CheckServiceType(IN IMessage* piMessage,
+        IN IMtcCall* /*pSession = IMS_NULL*/, IN ISession* /*piSession = IMS_NULL*/)
 {
     ServiceType eServiceType = ServiceType::UNKNOWN;
-    AString strContact;// = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
-    AString strVoIP;// = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VOIP);
-    AString strVT;// = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VT);
+    AString strContact;  // = GetHeader(piMessage, ISipHeader::CONTACT_NORMAL);
+    AString strVoIP;     // = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H,
+                         // SESSIONTYPE_VOIP);
+    AString strVT;  // = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VT);
 
     // TODO, remove
     if (piMessage == IMS_NULL)
@@ -1599,8 +1560,7 @@ ServiceType MessageUtil::CheckServiceType(IN IMessage* piMessage,
     IMS_TRACE_I("CheckServiceType : Contact[%s] VoIP[%s] VT[%s]", strContact.GetStr(),
             strVoIP.GetStr(), strVT.GetStr());
 
-    if (ContainsTag(strContact, strVoIP)
-            && ContainsTag(strContact, strVT))
+    if (ContainsTag(strContact, strVoIP) && ContainsTag(strContact, strVT))
     {
         eServiceType = ServiceType::NORMAL;
     }
@@ -1618,8 +1578,7 @@ ServiceType MessageUtil::CheckServiceType(IN IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-CallType MessageUtil::GetCallType(
+PUBLIC GLOBAL CallType MessageUtil::GetCallType(
         IN IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView)
 {
     if (HasSdp(piMessage))
@@ -1632,13 +1591,12 @@ CallType MessageUtil::GetCallType(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-CallType MessageUtil::GetCallTypeFromSdp(
+PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromSdp(
         IN ISession* piSession, IN IMS_BOOL bNegoSDP, IN IMS_BOOL bPeerView)
 {
     IMS_BOOL bAudio = IMS_FALSE;
     IMS_BOOL bVideo = IMS_FALSE;
-    //IMS_BOOL bText = IMS_FALSE;
+    // IMS_BOOL bText = IMS_FALSE;
 
     if (piSession == IMS_NULL)
     {
@@ -1646,11 +1604,11 @@ CallType MessageUtil::GetCallTypeFromSdp(
         return CallType::UNKNOWN;
     }
 
-    IMSList<IMedia *> lstIMedia = piSession->GetMedia();
-    for (IMS_UINT32 index = 0; index < lstIMedia.GetSize(); index++ )
+    IMSList<IMedia*> lstIMedia = piSession->GetMedia();
+    for (IMS_UINT32 index = 0; index < lstIMedia.GetSize(); index++)
     {
-        IMedia *pIMedia = lstIMedia.GetAt(index);
-        IMediaDescriptor *pDescriptor = IMS_NULL;
+        IMedia* pIMedia = lstIMedia.GetAt(index);
+        IMediaDescriptor* pDescriptor = IMS_NULL;
         if (bPeerView)
         {
             if (pIMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
@@ -1672,14 +1630,14 @@ CallType MessageUtil::GetCallTypeFromSdp(
             return CallType::UNKNOWN;
         }
 
-        SdpMedia *pSDPMedia = IMS_NULL;
+        SdpMedia* pSDPMedia = IMS_NULL;
         if (bPeerView)
         {
-            pSDPMedia = (SdpMedia *)pDescriptor->GetMediaDescriptionEx();
+            pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
         }
         else
         {
-            pSDPMedia = (SdpMedia *)pDescriptor->GetMediaDescriptionExAsLocal();
+            pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionExAsLocal();
         }
 
         if (pSDPMedia != IMS_NULL)
@@ -1719,13 +1677,13 @@ CallType MessageUtil::GetCallTypeFromSdp(
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-CallType MessageUtil::GetCallTypeFromAcceptContact(IN IMessage* piMessage,
-        IN ISession * /*piSession = IMS_NULL*/)
+PUBLIC GLOBAL CallType MessageUtil::GetCallTypeFromAcceptContact(
+        IN IMessage* piMessage, IN ISession* /*piSession = IMS_NULL*/)
 {
-    AString strAcceptContact;// = GetHeader(piMessage, ISipHeader::ACCEPT_CONTACT);
-    AString strVoIP;// = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VOIP);
-    AString strVT;// = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VT);
+    AString strAcceptContact;  // = GetHeader(piMessage, ISipHeader::ACCEPT_CONTACT);
+    AString strVoIP;           // = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H,
+                               // SESSIONTYPE_VOIP);
+    AString strVT;  // = UCCONFIG_GET_STR(m_nSlotID, SESSION_GET_ACCEPTCONTACT_H, SESSIONTYPE_VT);
 
     if (piMessage == IMS_NULL)
     {
@@ -1742,8 +1700,7 @@ CallType MessageUtil::GetCallTypeFromAcceptContact(IN IMessage* piMessage,
     IMS_TRACE_I("CheckSessionTypeByAcceptContact : AcceptContact[%s] VoIP[%s] VT[%s]",
             strAcceptContact.GetStr(), strVoIP.GetStr(), strVT.GetStr());
 
-    if (ContainsTag(strAcceptContact, strVoIP)
-            && ContainsTag(strAcceptContact, strVT))
+    if (ContainsTag(strAcceptContact, strVoIP) && ContainsTag(strAcceptContact, strVT))
     {
         return CallType::VT;
     }
@@ -1756,9 +1713,8 @@ CallType MessageUtil::GetCallTypeFromAcceptContact(IN IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_SINT32 MessageUtil::CheckRttUpdateRequest(IN IMessage* piMessage,
-        IN ISession* piSession /*= IMS_NULL*/)
+PUBLIC GLOBAL IMS_SINT32 MessageUtil::CheckRttUpdateRequest(
+        IN IMessage* piMessage, IN ISession* piSession /*= IMS_NULL*/)
 {
     IMS_SINT32 eRttUpdateRequest = GTT_MODE_INVALID;
 
@@ -1772,11 +1728,11 @@ IMS_SINT32 MessageUtil::CheckRttUpdateRequest(IN IMessage* piMessage,
         return eRttUpdateRequest;
     }
 
-    IMSList<IMedia *> lstIMedia = piSession->GetMedia();
+    IMSList<IMedia*> lstIMedia = piSession->GetMedia();
     for (IMS_UINT32 index = 0; index < lstIMedia.GetSize(); index++)
     {
-        IMedia *pIMedia = lstIMedia.GetAt(index);
-        IMediaDescriptor *pDescriptor = IMS_NULL;
+        IMedia* pIMedia = lstIMedia.GetAt(index);
+        IMediaDescriptor* pDescriptor = IMS_NULL;
         if (pIMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
         {
             pDescriptor = pIMedia->GetProposal()->GetMediaDescriptor();
@@ -1791,7 +1747,7 @@ IMS_SINT32 MessageUtil::CheckRttUpdateRequest(IN IMessage* piMessage,
             return eRttUpdateRequest;
         }
 
-        SdpMedia *pSDPMedia = (SdpMedia *)pDescriptor->GetMediaDescriptionEx();
+        SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
         if (pSDPMedia != IMS_NULL)
         {
             if (pSDPMedia->GetType() == SdpMedia::TYPE_TEXT)
@@ -1814,8 +1770,7 @@ IMS_SINT32 MessageUtil::CheckRttUpdateRequest(IN IMessage* piMessage,
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsSessionRefresh(IN ISession* piSession)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsSessionRefresh(IN ISession* piSession)
 {
     IMS_BOOL bIs = IMS_FALSE;
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
@@ -1829,10 +1784,10 @@ IMS_BOOL MessageUtil::IsSessionRefresh(IN ISession* piSession)
     /* Re-INVITE Case */
     if (piMessage->GetMethod().Equals(SipMethod::INVITE))
     {
-        //4 TODO : Check Session Refresh with Re-INVITE
+        // 4 TODO : Check Session Refresh with Re-INVITE
         if (0)
         {
-            IMS_TRACE_D("IsSessRefresh :: Re-INVITE CASE - NO SDP", 0, 0, 0 );
+            IMS_TRACE_D("IsSessRefresh :: Re-INVITE CASE - NO SDP", 0, 0, 0);
             bIs = IMS_TRUE;
         }
     }
@@ -1853,15 +1808,14 @@ Exit_IsSessRefresh:
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsTextSession(IN ISession* piSession)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsTextSession(IN ISession* piSession)
 {
-    IMSList<IMedia *> lstIMedia = piSession->GetMedia();
+    IMSList<IMedia*> lstIMedia = piSession->GetMedia();
 
     for (IMS_UINT32 index = 0; index < lstIMedia.GetSize(); index++)
     {
-        IMedia *pIMedia = lstIMedia.GetAt(index);
-        IMediaDescriptor *pDescriptor = IMS_NULL;
+        IMedia* pIMedia = lstIMedia.GetAt(index);
+        IMediaDescriptor* pDescriptor = IMS_NULL;
 
         if (pIMedia->GetUpdateState() == IMedia::UPDATE_MODIFIED)
         {
@@ -1874,7 +1828,7 @@ IMS_BOOL MessageUtil::IsTextSession(IN ISession* piSession)
 
         if (pDescriptor != IMS_NULL)
         {
-            SdpMedia *pSDPMedia = (SdpMedia *)pDescriptor->GetMediaDescriptionEx();
+            SdpMedia* pSDPMedia = (SdpMedia*)pDescriptor->GetMediaDescriptionEx();
             if (pSDPMedia != IMS_NULL)
             {
                 if (pSDPMedia->GetType() == SdpMedia::TYPE_TEXT && pSDPMedia->GetPort() != 0)
@@ -1890,13 +1844,13 @@ IMS_BOOL MessageUtil::IsTextSession(IN ISession* piSession)
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MessageUtil::IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsResponseExist(
+        IN ISession* piSession, IN IMS_SINT32 nStatusCode)
 {
     IMS_BOOL bExist = IMS_FALSE;
     IMSList<IMessage*> objResponses = piSession->GetPreviousResponses(IMessage::SESSION_START);
 
-    for (IMS_UINT32 i = 0; i < objResponses.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < objResponses.GetSize(); i++)
     {
         if (objResponses.GetAt(i)->GetStatusCode() == nStatusCode)
         {

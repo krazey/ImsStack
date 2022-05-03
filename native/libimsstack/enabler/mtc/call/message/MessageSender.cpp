@@ -20,9 +20,7 @@ MessageSender::MessageSender(IN IMtcSessionContext& objContext) :
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC
-MessageSender::~MessageSender()
-{
-}
+MessageSender::~MessageSender() {}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
@@ -157,7 +155,6 @@ IMS_RESULT MessageSender::Reject(IN const FailReason& objReason)
 {
     CreateFormatter();
 
-
     IMS_SINT32 eStatusCode;
     AString strPhrase;
 
@@ -271,14 +268,14 @@ void MessageSender::CreateFormatter()
         return;
     }
 
-    IMS_BOOL bEmergency = IMS_FALSE; // TODO
+    IMS_BOOL bEmergency = IMS_FALSE;  // TODO
     if (bEmergency)
     {
         m_pFormatter = new EmergencyMessageFormatter(m_objContext);
         return;
     }
 
-    IMS_BOOL bUssi = IMS_FALSE; // TODO
+    IMS_BOOL bUssi = IMS_FALSE;  // TODO
     if (bUssi)
     {
         m_pFormatter = new UssiMessageFormatter(m_objContext);

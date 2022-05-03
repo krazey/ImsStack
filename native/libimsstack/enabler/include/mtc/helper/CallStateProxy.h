@@ -10,8 +10,7 @@
 
 class IMtcCallManager;
 
-struct
-CallStateDetails
+struct CallStateDetails
 {
 public:
     inline CallStateDetails(IN CallKey _nCallKey, IN IMtcCallStateListener::State _eState,
@@ -19,10 +18,11 @@ public:
             IN IMS_SINT32 _nReason) :
             nCallKey(_nCallKey),
             eState(_eState),
-            eType(_eType), // for Aos, java.
+            eType(_eType),  // for Aos, java.
             bEmergency(_bEmergency),
-            nReason(_nReason) // for CallInfoService.java
-    {}
+            nReason(_nReason)  // for CallInfoService.java
+    {
+    }
     inline virtual ~CallStateDetails() {}
 
 private:
@@ -34,11 +34,10 @@ public:
     IMtcCallStateListener::State eState;
     IMtcCallStateListener::Type eType;
     IMS_BOOL bEmergency;
-    IMS_SINT32 nReason; // enum class????
+    IMS_SINT32 nReason;  // enum class????
 };
 
-class CallStateProxy final :
-    public IMSActivity
+class CallStateProxy final : public IMSActivity
 {
 public:
     CallStateProxy(IN IMtcCallManager& objCallManager);
@@ -63,8 +62,8 @@ private:
 
     void NotifyToListeners(IN IMS_BOOL bSynchronous, IN CallStateDetails* pDetails,
             IN IMS_BOOL bTotalCallStateUpdated);
-    void NotifyCallState(IN IMSList<IMtcCallStateListener*> objListeners,
-            IN CallStateDetails* pDetails);
+    void NotifyCallState(
+            IN IMSList<IMtcCallStateListener*> objListeners, IN CallStateDetails* pDetails);
     void NotifyTotalCallState(IN IMSList<IMtcCallStateListener*> objListeners);
 
 private:

@@ -12,7 +12,4 @@ TerminatingState::TerminatingState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL
-TerminatingState::~TerminatingState()
-{
-}
+PUBLIC VIRTUAL TerminatingState::~TerminatingState() {}

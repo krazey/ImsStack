@@ -8,11 +8,10 @@ class MessageSender;
 class MtcExtensionSet;
 class ISession;
 
-class IMtcSessionContext :
-        public IMtcCallContext
+class IMtcSessionContext : public IMtcCallContext
 {
 public:
-    virtual ~IMtcSessionContext() {};
+    virtual ~IMtcSessionContext(){};
 
     virtual ISession& GetISession() = 0;
     virtual MessageSender& GetMessageSender() = 0;

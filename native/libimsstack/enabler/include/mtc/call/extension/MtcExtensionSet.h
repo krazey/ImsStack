@@ -12,8 +12,7 @@ class IMtcExtension;
  * Holds a set of extensions supported by the local.
  * It provides the methods to inspect if they are available in the call.
  */
-class MtcExtensionSet final :
-        public IMtcMessageHandler
+class MtcExtensionSet final : public IMtcMessageHandler
 {
 public:
     static const AString OPTION_TAG_EARLY_DIALOG_TERMINATED;

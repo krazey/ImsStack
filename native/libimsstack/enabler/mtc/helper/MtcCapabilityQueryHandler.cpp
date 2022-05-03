@@ -17,13 +17,10 @@
 #include "AStringBuffer.h"
 #include "Configuration.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
-
-PUBLIC GLOBAL
-void MtcCapabilityQueryHandler::HandleIncomingCapabilityQuery(IN ICoreService* piService,
-        IN ICapabilities* piCapabilities, IN const AString& strAppId,
+PUBLIC GLOBAL void MtcCapabilityQueryHandler::HandleIncomingCapabilityQuery(
+        IN ICoreService* piService, IN ICapabilities* piCapabilities, IN const AString& strAppId,
         IN const AString& strServiceId, IN IMS_SINT32 nSlotId)
 {
     if (piCapabilities == IMS_NULL)
@@ -45,26 +42,24 @@ void MtcCapabilityQueryHandler::HandleIncomingCapabilityQuery(IN ICoreService* p
     piCapabilities->Destroy();
 }
 
-PRIVATE GLOBAL
-void MtcCapabilityQueryHandler::SetHeaderForCapabilityQuery(IN ICoreService* piService,
-        IN IMessage* piMessage)
+PRIVATE GLOBAL void MtcCapabilityQueryHandler::SetHeaderForCapabilityQuery(
+        IN ICoreService* piService, IN IMessage* piMessage)
 {
     piMessage->AddHeader(SipHeaderName::SUPPORTED, MessageUtil::STR_TIMER);
     piMessage->AddHeader(SipHeaderName::SUPPORTED, Sip::STR_100REL);
-     // TODO: supportability check.
+    // TODO: supportability check.
     piMessage->AddHeader(SipHeaderName::SUPPORTED, MessageUtil::STR_PRECONDITION);
 
     ISipHeader* piContactHeader = piService->GetContactHeader();
     if (piContactHeader != IMS_NULL)
     {
-        piMessage->GetMessage()->SetHeader(ISipHeader::CONTACT_NORMAL,
-                piContactHeader->ToStringWithoutName());
+        piMessage->GetMessage()->SetHeader(
+                ISipHeader::CONTACT_NORMAL, piContactHeader->ToStringWithoutName());
         piContactHeader->Destroy();
     }
 }
 
-PRIVATE GLOBAL
-void MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService* piService,
+PRIVATE GLOBAL void MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService* piService,
         IN IMessage* piMessage, IN const AString& strAppId, IN const AString& strServiceId,
         IN IMS_SINT32 nSlotId)
 {
@@ -84,7 +79,7 @@ void MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService* piSer
 
     const AString strMprofName = piCoreServiceConfig->GetMediaProfile();
     AString strSDP;
-    const IMediaConfig *pIMediaConfig = Configuration::GetInstance()->GetMediaConfig(nSlotId);
+    const IMediaConfig* pIMediaConfig = Configuration::GetInstance()->GetMediaConfig(nSlotId);
 
     // session-level description
     SetSessionLevelDescription(piService, strSDP);
@@ -117,15 +112,14 @@ void MtcCapabilityQueryHandler::SetBodyForCapabilityQuery(IN ICoreService* piSer
     pIBodyPart->SetContent(ByteArray(strSDP));
 }
 
-PRIVATE GLOBAL
-void MtcCapabilityQueryHandler::SetSessionLevelDescription(IN ICoreService* piService,
-        OUT AString& strDesc)
+PRIVATE GLOBAL void MtcCapabilityQueryHandler::SetSessionLevelDescription(
+        IN ICoreService* piService, OUT AString& strDesc)
 {
     SdpSessionDescription objSessionDesc;
 
     // Create a session-level mandatory descriptions
-    if (!objSessionDesc.CreateMandatoryLines(piService->GetAuthorizedUserId().GetUri(),
-            piService->GetIPAddress()))
+    if (!objSessionDesc.CreateMandatoryLines(
+                piService->GetAuthorizedUserId().GetUri(), piService->GetIPAddress()))
     {
         IMS_TRACE_E(0, "Creating a session descriptor failed", 0, 0, 0);
         return;
@@ -134,8 +128,8 @@ void MtcCapabilityQueryHandler::SetSessionLevelDescription(IN ICoreService* piSe
     strDesc.Append(objSessionDesc.Encode());
 }
 
-PRIVATE GLOBAL
-AString MtcCapabilityQueryHandler::GetAdjustedCodecList(IN const AStringArray& objAudioCaps)
+PRIVATE GLOBAL AString MtcCapabilityQueryHandler::GetAdjustedCodecList(
+        IN const AStringArray& objAudioCaps)
 {
     SdpMediaDescription objMediaDesc;
     objMediaDesc.Decode(objAudioCaps);
@@ -189,18 +183,18 @@ AString MtcCapabilityQueryHandler::GetAdjustedCodecList(IN const AStringArray& o
         for (IMS_UINT32 i = 0; i < objAVCodecs.GetSize(); i++)
         {
             const SdpAvCodec& objAVCodec = objAVCodecs.GetAt(i);
-            AString strALine = objAVCodec.ToSdp(); // including '/r/n'
+            AString strALine = objAVCodec.ToSdp();  // including '/r/n'
             IMS_TRACE_D("attribute=[%s]", strALine.GetStr(), 0, 0);
 
             SdpAttribute objRtpMap;
-             //remove a= and CRLF
+            // remove a= and CRLF
             objRtpMap.Decode(strALine.GetSubStr(2, strALine.GetLength() - 4));
 
             objMediaDesc.AddAttribute(objRtpMap);
 
             AString strPayloadType;
             strPayloadType.SetNumber(objAVCodec.GetPayloadType());
-            objFormats.AddElement(strPayloadType); // payload number
+            objFormats.AddElement(strPayloadType);  // payload number
         }
 
         SdpMedia& objMedia = const_cast<SdpMedia&>(objMediaDesc.GetMedia());

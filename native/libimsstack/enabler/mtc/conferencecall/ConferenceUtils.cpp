@@ -9,9 +9,8 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
-PUBLIC GLOBAL
-const AString& ConferenceUtils::GetUserPart(IN const AString& strUri, OUT AString& strUserPart)
+PUBLIC GLOBAL const AString& ConferenceUtils::GetUserPart(
+        IN const AString& strUri, OUT AString& strUserPart)
 {
     if (strUri.Contains("sip") || strUri.Contains("tel"))
     {

@@ -10,9 +10,7 @@ class ISession;
 class ICoreService;
 class IInterfaceHolderListener;
 
-class SessionInterfaceHolder final :
-        public ISessionListener,
-        public ITimerListener
+class SessionInterfaceHolder final : public ISessionListener, public ITimerListener
 {
 public:
     explicit SessionInterfaceHolder(IN IInterfaceHolderListener& objListener);
@@ -45,10 +43,10 @@ public:
     inline void SessionTransactionReceived(IN ISession*, IN ISipServerConnection*) override {}
 
     // ITimerListener interface implementation.
-    void Timer_TimerExpired(IN ITimer* piTimer) override ;
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    ISession* GetISession(IN ICoreService* pICoreService, IN const AString& strFrom,
-            IN const AString& strTo);
+    ISession* GetISession(
+            IN ICoreService* pICoreService, IN const AString& strFrom, IN const AString& strTo);
     void AddISession(IN ISession* piSession);
     void ReleaseISession(IN ISession* piSession, IN IMS_BOOL bTerminated = IMS_FALSE);
 
@@ -63,7 +61,7 @@ private:
 
 private:
     IInterfaceHolderListener& m_objListener;
-    IMSList<ISession* > m_objISessions;
+    IMSList<ISession*> m_objISessions;
     IMSMap<ITimer*, ISession*> m_objTerminatedGuardTimers;
 
     static const IMS_UINT32 TIME_TRANSACTION_TERMINATED_GUARD = 128000;

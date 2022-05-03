@@ -10,8 +10,7 @@ MtcMediaProfileManager::MtcMediaProfileManager() :
     IMS_TRACE_D("+MtcMediaProfileManager", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-MtcMediaProfileManager::~MtcMediaProfileManager()
+PUBLIC VIRTUAL MtcMediaProfileManager::~MtcMediaProfileManager()
 {
     IMS_TRACE_D("~MtcMediaProfileManager", 0, 0, 0);
 }
@@ -29,7 +28,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
 
     IMS_UINTP nParamId = 0;
 
-    if (bForked == IMS_TRUE) // forked session
+    if (bForked == IMS_TRUE)  // forked session
     {
         for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
         {
@@ -48,7 +47,7 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
         }
     }
 
-    if (bOriginalProfile == IMS_FALSE) // virtual early session
+    if (bOriginalProfile == IMS_FALSE)  // virtual early session
     {
         nParamId = 0;
     }
@@ -62,8 +61,8 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
 }
 
 PUBLIC
-void MtcMediaProfileManager::DestroyMediaProfile(IN ISession* piSession,
-        IN IMediaSession* piMediaSession)
+void MtcMediaProfileManager::DestroyMediaProfile(
+        IN ISession* piSession, IN IMediaSession* piMediaSession)
 {
     IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
 
@@ -227,8 +226,8 @@ void MtcMediaProfileManager::SetForked(IN ISession* piSession, IN IMS_BOOL bFork
 }
 
 PUBLIC
-void MtcMediaProfileManager::SetAsOriginalProfile(IN ISession* piSession,
-        IN IMS_BOOL bOriginalProfile)
+void MtcMediaProfileManager::SetAsOriginalProfile(
+        IN ISession* piSession, IN IMS_BOOL bOriginalProfile)
 {
     MediaProfile* pProfile = GetMediaProfile(piSession);
 
@@ -317,8 +316,8 @@ void MtcMediaProfileManager::UpdateProfileForMediaActivation(IN ISession* piActi
 }
 
 PUBLIC
-void MtcMediaProfileManager::HandleProfilesInConfirmedState(IN ISession* piConfirmedSession,
-        IN IMediaSession* piMediaSession)
+void MtcMediaProfileManager::HandleProfilesInConfirmedState(
+        IN ISession* piConfirmedSession, IN IMediaSession* piMediaSession)
 {
     IMS_TRACE_D("HandleProfilesInConfirmedState", 0, 0, 0);
     SetConfirmed(piConfirmedSession, IMS_TRUE);

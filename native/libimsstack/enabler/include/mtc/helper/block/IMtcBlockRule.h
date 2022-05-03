@@ -25,10 +25,14 @@ public:
 
         Result(IN Status _eStatus, IN const FailReason& _objReason) :
                 eStatus(_eStatus),
-                objReason(_objReason) {}
+                objReason(_objReason)
+        {
+        }
 
         Result(IN Status _eStatus) :
-                Result(_eStatus, FailReason(FAIL_REASON_NONE)) {}
+                Result(_eStatus, FailReason(FAIL_REASON_NONE))
+        {
+        }
 
         Status eStatus;
         FailReason objReason;

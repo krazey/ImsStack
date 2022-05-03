@@ -24,13 +24,9 @@ EstablishedState::EstablishedState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL
-EstablishedState::~EstablishedState()
-{
-}
+PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Hold", 0, 0, 0);
     // TODO, notify held if eADir is inactive
@@ -44,8 +40,7 @@ CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Resume", 0, 0, 0);
     if (HandleUpdate(UpdateType::RESUME, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
@@ -57,8 +52,8 @@ CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName EstablishedState::Convert(
+        IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Convert", 0, 0, 0);
     if (HandleUpdate(UpdateType::SESSION, eCallType, pMediaInfo) == IMS_FAILURE)
@@ -69,8 +64,7 @@ CallStateName EstablishedState::Convert(IN CallType eCallType, IN MediaInfo* pMe
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
     FailReason objConvertedReason(objReason);
@@ -84,26 +78,22 @@ CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
 
-    m_objContext.GetUiNotifier().SendTerminated(
-            IsConferenceCallParticipant() ?
-            FailReason(FAIL_REASON_CONF_JOINED) :
-            TerminationHandler().Handle(*piSession));
+    m_objContext.GetUiNotifier().SendTerminated(IsConferenceCallParticipant()
+                    ? FailReason(FAIL_REASON_CONF_JOINED)
+                    : TerminationHandler().Handle(*piSession));
 
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionUpdateReceived", 0, 0, 0);
-    m_objContext.GetMediaManager().GetMediaInfo(
-            m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
 
     // TODO, conference
 
@@ -134,13 +124,12 @@ CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 }
 
 PRIVATE
-IMS_RESULT EstablishedState::HandleUpdate(IN UpdateType eUpdateType, IN CallType /* eCallType */,
-        IN MediaInfo* pMediaInfo)
+IMS_RESULT EstablishedState::HandleUpdate(
+        IN UpdateType eUpdateType, IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("HandleUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
-    m_objContext.GetMediaManager().GetMediaInfo(
-            m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
+    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
     m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
 
     MtcSession* pSession = m_objContext.GetSession();
@@ -177,8 +166,7 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
         // TODO
     }
 
-    m_objContext.GetMediaManager().GetMediaInfo(
-            m_objContext.GetUpdatingInfo().GetAlertingInfo());
+    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetAlertingInfo());
 
     m_objContext.GetPreconditionManager().UpdateQosAttributesFromSdp(&objSession);
 
@@ -314,7 +302,7 @@ IMS_BOOL EstablishedState::IsConferenceCallParticipant()
     }
 
     CallKey nKey = m_objContext.GetCallKey();
-    if (piConfController->GetCallStatusInConference(nKey) ==  IndividualCallState::JOINED ||
+    if (piConfController->GetCallStatusInConference(nKey) == IndividualCallState::JOINED ||
             piConfController->GetCallStatusInConference(nKey) == IndividualCallState::JOINING)
     {
         IMS_TRACE_I("IsConferenceCallParticipant [%" PFLS_x "] call is joining to conference call",

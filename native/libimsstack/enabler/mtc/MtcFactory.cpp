@@ -8,15 +8,14 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcFactory::MtcFactory():
+MtcFactory::MtcFactory() :
         m_objMtcApps(IMSMap<IMS_UINT32, IMtcApp*>())
 {
     IMS_TRACE_I("+MtcFactory", 0, 0, 0);
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
-PUBLIC VIRTUAL
-MtcFactory::~MtcFactory()
+PUBLIC VIRTUAL MtcFactory::~MtcFactory()
 {
     IMS_TRACE_I("~MtcFactory", 0, 0, 0);
 
@@ -30,10 +29,9 @@ MtcFactory::~MtcFactory()
     m_objMtcApps.Clear();
 }
 
-PUBLIC GLOBAL
-MtcFactory* MtcFactory::GetInstance()
+PUBLIC GLOBAL MtcFactory* MtcFactory::GetInstance()
 {
-    static MtcFactory *pFactory = IMS_NULL;
+    static MtcFactory* pFactory = IMS_NULL;
 
     if (pFactory == IMS_NULL)
     {

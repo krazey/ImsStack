@@ -7,16 +7,15 @@
 #include "precondition/IQosTimerListener.h"
 #include "precondition/QosDef.h"
 
-class QosTimer :
-        public ITimerListener
+class QosTimer : public ITimerListener
 {
 public:
     QosTimer(IN IQosTimerListener* pListener);
     virtual ~QosTimer();
 
 private:
-    QosTimer(IN CONST QosTimer &objRHS);
-    QosTimer& operator=(IN CONST QosTimer &objRHS);
+    QosTimer(IN CONST QosTimer& objRHS);
+    QosTimer& operator=(IN CONST QosTimer& objRHS);
 
 public:
     virtual void Timer_TimerExpired(IN ITimer* piExpiredTimer);

@@ -8,21 +8,18 @@
 
 using namespace android;
 
-PUBLIC GLOBAL
-void JniMtcUtils::ConvertString(IN const String16& strSource, OUT AString& strDest)
+PUBLIC GLOBAL void JniMtcUtils::ConvertString(IN const String16& strSource, OUT AString& strDest)
 {
     String8 str8(strSource);
     strDest = str8.string();
 }
 
-PUBLIC GLOBAL
-CallType JniMtcUtils::ReadCallType(IN const android::Parcel& objParcel)
+PUBLIC GLOBAL CallType JniMtcUtils::ReadCallType(IN const android::Parcel& objParcel)
 {
     return static_cast<CallType>(objParcel.readInt32());
 }
 
-PUBLIC GLOBAL
-CallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
+PUBLIC GLOBAL CallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 {
     CallInfo objCallInfo;
 
@@ -35,8 +32,7 @@ CallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
     return objCallInfo;
 }
 
-PUBLIC GLOBAL
-MediaInfo* JniMtcUtils::ReadMediaInfo(IN const Parcel& objParcel)
+PUBLIC GLOBAL MediaInfo* JniMtcUtils::ReadMediaInfo(IN const Parcel& objParcel)
 {
     MediaInfo* pMediaInfo = new MediaInfo();
 
@@ -50,13 +46,13 @@ MediaInfo* JniMtcUtils::ReadMediaInfo(IN const Parcel& objParcel)
     return pMediaInfo;
 }
 
-PUBLIC GLOBAL
-IMSMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(IN const Parcel& objParcel)
+PUBLIC GLOBAL IMSMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(
+        IN const Parcel& objParcel)
 {
     IMSMap<SuppType, SuppService*> objSupp;
 
     IMS_UINT32 nSuppService = objParcel.readInt32();
-    for(IMS_UINT32 index = 0; index < nSuppService; index++)
+    for (IMS_UINT32 index = 0; index < nSuppService; index++)
     {
         SuppService* pSuppService = new SuppService();
 
@@ -69,8 +65,7 @@ IMSMap<SuppType, SuppService*> JniMtcUtils::ReadSupplementaryService(IN const Pa
     return objSupp;
 }
 
-PUBLIC GLOBAL
-IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objParcel)
+PUBLIC GLOBAL IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objParcel)
 {
     IMSList<ConfUser*> objUsers;
     IMS_UINT32 nUsersSize = objParcel.readInt32();
@@ -78,7 +73,7 @@ IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objP
     {
         ConfUser* pUser = new ConfUser();
 
-        pUser->nConnectionId = objParcel.readInt64(); // TODO: how to ... call key!!!!!???
+        pUser->nConnectionId = objParcel.readInt64();  // TODO: how to ... call key!!!!!???
         ConvertString(objParcel.readString16(), pUser->aStrTarget);
         ConvertString(objParcel.readString16(), pUser->aStrUserEntity);
         ConvertString(objParcel.readString16(), pUser->aStrEPEntity);
@@ -94,8 +89,8 @@ IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN const Parcel& objP
     return objUsers;
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteCallInfoToParcel(IN CallInfo* pCallInfo, IN_OUT Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
+        IN CallInfo* pCallInfo, IN_OUT Parcel& objParcel)
 {
     objParcel.writeInt32(static_cast<IMS_SINT32>(pCallInfo->eServiceType));
     objParcel.writeInt32(static_cast<IMS_SINT32>(pCallInfo->eCallType));
@@ -107,7 +102,7 @@ void JniMtcUtils::WriteCallInfoToParcel(IN CallInfo* pCallInfo, IN_OUT Parcel& o
     objParcel.writeInt32(bOffline);
     IMS_SINT32 bUssi = (pCallInfo->bUssi) ? 1 : 0;
     objParcel.writeInt32(bUssi);
-    IMS_SINT32 bConf = (pCallInfo->bConference) ? 1 : 0; // nConf? nIsConf?
+    IMS_SINT32 bConf = (pCallInfo->bConference) ? 1 : 0;  // nConf? nIsConf?
     objParcel.writeInt32(bConf);
     IMS_SINT32 bEnabledConf = (pCallInfo->bConferenceEnabled) ? 1 : 0;
     objParcel.writeInt32(bEnabledConf);
@@ -119,9 +114,8 @@ void JniMtcUtils::WriteCallInfoToParcel(IN CallInfo* pCallInfo, IN_OUT Parcel& o
     objParcel.writeInt32(bVideoCapable);
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteMediaInfoToParcel(IN MediaInfo* pMediaInfo,
-        IN_OUT Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteMediaInfoToParcel(
+        IN MediaInfo* pMediaInfo, IN_OUT Parcel& objParcel)
 {
     objParcel.writeInt32(pMediaInfo->eAQuality);
     objParcel.writeInt32(pMediaInfo->eVQuality);
@@ -131,14 +125,13 @@ void JniMtcUtils::WriteMediaInfoToParcel(IN MediaInfo* pMediaInfo,
     objParcel.writeInt32(pMediaInfo->eGTTMode);
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteSuppServicesToParcel(
+PUBLIC GLOBAL void JniMtcUtils::WriteSuppServicesToParcel(
         IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN_OUT Parcel& objParcel)
 {
     IMS_UINT32 nSuppService = objSuppServices.GetSize();
 
     objParcel.writeInt32(nSuppService);
-    for( IMS_UINT32 index = 0; index < nSuppService; index++)
+    for (IMS_UINT32 index = 0; index < nSuppService; index++)
     {
         SuppService* pService = objSuppServices.GetValueAt(index);
 
@@ -149,18 +142,17 @@ void JniMtcUtils::WriteSuppServicesToParcel(
     }
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteConfUsersToParcel(IN const IMSList<ConfUser*>& objUsers,
-        IN_OUT android::Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteConfUsersToParcel(
+        IN const IMSList<ConfUser*>& objUsers, IN_OUT android::Parcel& objParcel)
 {
     IMS_UINT32 nUsersSize = objUsers.GetSize();
 
     objParcel.writeInt32(nUsersSize);
-    for(IMS_UINT32 i = 0; i < nUsersSize; i++)
+    for (IMS_UINT32 i = 0; i < nUsersSize; i++)
     {
         ConfUser* pUser = objUsers.GetAt(i);
 
-        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId)); // TODO: Int32.
+        objParcel.writeInt64(static_cast<IMS_SINTP>(pUser->nConnectionId));  // TODO: Int32.
         objParcel.writeString16(android::String16(pUser->aStrTarget.GetStr()));
         objParcel.writeString16(android::String16(pUser->aStrUserEntity.GetStr()));
         objParcel.writeString16(android::String16(pUser->aStrEPEntity.GetStr()));
@@ -172,8 +164,8 @@ void JniMtcUtils::WriteConfUsersToParcel(IN const IMSList<ConfUser*>& objUsers,
     }
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteDialogInfoToParcel(
+        IN DialogInfo* pInfo, IN_OUT Parcel& objParcel)
 {
     objParcel.writeString16(String16(pInfo->aStrID.GetStr()));
 
@@ -195,9 +187,8 @@ void JniMtcUtils::WriteDialogInfoToParcel(IN DialogInfo* pInfo, IN_OUT Parcel& o
     objParcel.writeInt32(bEnablePull);
 }
 
-PUBLIC GLOBAL
-void JniMtcUtils::WriteFailReasonToParcel(IN const FailReason& objFailReason,
-        IN_OUT Parcel& objParcel)
+PUBLIC GLOBAL void JniMtcUtils::WriteFailReasonToParcel(
+        IN const FailReason& objFailReason, IN_OUT Parcel& objParcel)
 {
     objParcel.writeInt32(objFailReason.nReason);
     objParcel.writeInt32(objFailReason.nExtra);

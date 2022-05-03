@@ -11,8 +11,7 @@
 
 class ICarrierConfig;
 
-class MtcConfigurationManager final :
-        public ICarrierConfigListener
+class MtcConfigurationManager final : public ICarrierConfigListener
 {
 public:
     MtcConfigurationManager();
@@ -26,25 +25,26 @@ public:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
     // ims public carrier-configs ==> can be obtained by engine config.
-    IMS_SINT32 GetRequestUriType() const; // KEY_REQUEST_URI_TYPE_INT // tel = 0, sip = 1
-    IMS_BOOL IsSupportSipSessionIdHeader() const; //KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL
+    IMS_SINT32 GetRequestUriType() const;          // KEY_REQUEST_URI_TYPE_INT // tel = 0, sip = 1
+    IMS_BOOL IsSupportSipSessionIdHeader() const;  // KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL
 
     // voice configurations
-    IMS_BOOL IsIncludeCallerIdServiceCodesInSipInvite() const; // KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL
-    IMS_BOOL IsMultiendpointSupported() const; // KEY_MULTIENDPOINT_SUPPORTED_BOOL
-    IMS_BOOL IsSessionTimerSupported() const; // KEY_SESSION_TIMER_SUPPORTED_BOOL
-    IMS_SINT32 GetSessionPrivacyType() const; // KEY_SESSION_PRIVACY_TYPE_INT
-    IMS_BOOL IsPrackSupportedFor18x() const; // KEY_PRACK_SUPPORTED_FOR_18X_BOOL
-    IMS_SINT32 GetConferenceSubscribeType() const; // KEY_CONFERENCE_SUBSCRIBE_TYPE_INT
-    IMS_BOOL IsVoiceQosPreconditionSupported() const; // KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL
-    IMS_BOOL IsVoiceOnDefaultBearerSupported() const; // KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL
-    IMS_SINT32 GetDedicatedBearerWaitTimer() const; // KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT
-    IMS_BOOL IsSrvccType(IN IMS_SINT32 nType) const; // KEY_SRVCC_TYPE_INT_ARRAY
-    IMS_SINT32 GetRingingTimer() const; // KEY_RINGING_TIMER_MILLIS_INT
-    IMS_SINT32 GetRingbackTimer() const; // KEY_RINGBACK_TIMER_MILLIS_INT
-    const AString GetConferenceFactoryUri() const; // KEY_CONFERENCE_FACTORY_URI_STRING
-    IMS_BOOL IsOipSourceFromHeader() const; // KEY_OIP_SOURCE_FROM_HEADER_BOOL
-    IMS_SINT32 GetMoCallRequestTimeout() const; // KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT
+    IMS_BOOL IsIncludeCallerIdServiceCodesInSipInvite()
+            const;  // KEY_INCLUDE_CALLER_ID_SERVICE_CODES_IN_SIP_INVITE_BOOL
+    IMS_BOOL IsMultiendpointSupported() const;         // KEY_MULTIENDPOINT_SUPPORTED_BOOL
+    IMS_BOOL IsSessionTimerSupported() const;          // KEY_SESSION_TIMER_SUPPORTED_BOOL
+    IMS_SINT32 GetSessionPrivacyType() const;          // KEY_SESSION_PRIVACY_TYPE_INT
+    IMS_BOOL IsPrackSupportedFor18x() const;           // KEY_PRACK_SUPPORTED_FOR_18X_BOOL
+    IMS_SINT32 GetConferenceSubscribeType() const;     // KEY_CONFERENCE_SUBSCRIBE_TYPE_INT
+    IMS_BOOL IsVoiceQosPreconditionSupported() const;  // KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL
+    IMS_BOOL IsVoiceOnDefaultBearerSupported() const;  // KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL
+    IMS_SINT32 GetDedicatedBearerWaitTimer() const;    // KEY_DEDICATED_BEARER_WAIT_TIMER_MILLIS_INT
+    IMS_BOOL IsSrvccType(IN IMS_SINT32 nType) const;   // KEY_SRVCC_TYPE_INT_ARRAY
+    IMS_SINT32 GetRingingTimer() const;                // KEY_RINGING_TIMER_MILLIS_INT
+    IMS_SINT32 GetRingbackTimer() const;               // KEY_RINGBACK_TIMER_MILLIS_INT
+    const AString GetConferenceFactoryUri() const;     // KEY_CONFERENCE_FACTORY_URI_STRING
+    IMS_BOOL IsOipSourceFromHeader() const;            // KEY_OIP_SOURCE_FROM_HEADER_BOOL
+    IMS_SINT32 GetMoCallRequestTimeout() const;        // KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT
     IMS_SINT32 Get18xTimer() const;
     IMS_BOOL IsSupportConferenceReferSubscribe() const;
     IMS_BOOL IsEnableConferenceSubscribeByParticipant() const;
@@ -64,10 +64,10 @@ public:
     IMS_BOOL IsDefaultEpsBearerContextUsageRestrictionOnCellular() const;
     IMS_SINT32 GetSilentRedialInterval() const;
     IMS_SINT32 GetCallTypeAfterAudioAndVideoCallMerged() const;
-    IMS_BOOL IsShortCallCode(IN IMS_SINT32 nCode) const; // int array parsing.
+    IMS_BOOL IsShortCallCode(IN IMS_SINT32 nCode) const;  // int array parsing.
     IMS_BOOL IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability() const;
     IMS_BOOL IsAllowMultipleCallIncludingVideoCall() const;
-    IMS_BOOL IsRejectCodeForCsfb(IN IMS_SINT32 nCode) const; // int array parsing.
+    IMS_BOOL IsRejectCodeForCsfb(IN IMS_SINT32 nCode) const;  // int array parsing.
     IMS_SINT32 GetSilentRedialMaxRetryCount() const;
     IMS_SINT32 GetPolicyFor403ResponseForInvite() const;
     IMS_SINT32 GetPolicyForCheckingQosWhileCallUpgrading() const;
@@ -76,8 +76,8 @@ public:
     const AString GetCallRejectReasonPhrase(IN RejectType eType) const;
 
     // vt configurations
-    IMS_BOOL IsVideoOnDefaultBearerSupported() const; // KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL
-    IMS_BOOL IsVideoQosPreconditionSupported() const; // KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL
+    IMS_BOOL IsVideoOnDefaultBearerSupported() const;  // KEY_VIDEO_ON_DEFAULT_BEARER_SUPPORTED_BOOL
+    IMS_BOOL IsVideoQosPreconditionSupported() const;  // KEY_VIDEO_QOS_PRECONDITION_SUPPORTED_BOOL
     IMS_SINT32 GetConvertRemoteResponseTimer() const;
     IMS_SINT32 GetConvertUserResponseTimer() const;
     IMS_SINT32 GetPolicyOnVideoQosDeactivation() const;
@@ -87,18 +87,19 @@ public:
     IMS_BOOL IsSupportVideoTextFeatureInContactHeaderSimultaneously() const;
 
     // rtt configurations
-    IMS_BOOL IsTextOnDefaultBearerSupported() const; // KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL
-    IMS_BOOL IsTextQosPreconditionSupported() const; // KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL
+    IMS_BOOL IsTextOnDefaultBearerSupported() const;  // KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL
+    IMS_BOOL IsTextQosPreconditionSupported() const;  // KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL
     IMS_SINT32 GetPolicyOnTextQosDeactivation() const;
 
     // wfc configurations
-    IMS_BOOL IsPidfShortCode(const AString& strCode) const; // KEY_PIDF_SHORT_CODE_STRING_ARRAY
-    IMS_BOOL IsEmergencyCallOverEmergencyPdn() const; // KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL
+    IMS_BOOL IsPidfShortCode(const AString& strCode) const;  // KEY_PIDF_SHORT_CODE_STRING_ARRAY
+    IMS_BOOL IsEmergencyCallOverEmergencyPdn() const;  // KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_BOOL
     IMS_SINT32 GetCountryCode() const;
 
     // emergency configurations
     IMS_BOOL IsRetryEmergencyOnImsPdnBool() const;
-    IMS_BOOL IsEmergencyQosPreconditionSupported() const; // KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL
+    IMS_BOOL IsEmergencyQosPreconditionSupported()
+            const;  // KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL
     IMS_BOOL IsEmergencyCallOverEmergencyPdnOnCellular() const;
     IMS_BOOL IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall() const;
     IMS_SINT32 GetEmergencyTCallTimer() const;
@@ -123,7 +124,8 @@ public:
     IMS_BOOL IsCarrierSpecificSipHeader(IN const AString& strHeader) const;
     IMS_BOOL IsCheckAvchangeFeatureForCallConvertingCapability() const;
     IMS_BOOL IsSupportRegistrationRecoveryForFailureOfSessionRefresh() const;
-    IMS_BOOL IsCallMaintainingOnRegistrationSupended(IN IMS_SINT32 nSuspendType) const; //AoSReason?
+    IMS_BOOL IsCallMaintainingOnRegistrationSupended(
+            IN IMS_SINT32 nSuspendType) const;  // AoSReason?
     IMS_BOOL IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsUseMcidSupplementaryService() const;
     IMS_BOOL IsUseMmcSupplementaryService() const;
@@ -136,7 +138,8 @@ public:
     IMS_BOOL IsIgnorePrackDeliveryFailure() const;
     IMS_BOOL IsSupportVideoCallOnlyInVopsOffStatus() const;
     IMS_BOOL IsBlockWifiEmergencyCallIfNotProvisioned() const;
-    IMS_BOOL IsRegistrationDisconnectReasonToTerminateOngoingCall(IN IMS_SINT32 nReason) const;//AoS
+    IMS_BOOL IsRegistrationDisconnectReasonToTerminateOngoingCall(
+            IN IMS_SINT32 nReason) const;  // AoS
     IMS_SINT32 GetWifiEmergency18xTimer() const;
     IMS_BOOL IsSupportCanidInfo() const;
     IMS_BOOL IsUseCarrierSpecificContactHeaderForOptionsResponse() const;

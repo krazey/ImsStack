@@ -10,9 +10,7 @@ class IMtcCall;
 class IMtcContext;
 class IConferenceReferenceListener;
 
-class ConferenceReference final :
-        public IReferenceListener,
-        public IConferenceReference
+class ConferenceReference final : public IReferenceListener, public IConferenceReference
 {
 public:
     explicit ConferenceReference(IN IMtcContext& objContext, IN CallKey nConfCallKey,
@@ -37,7 +35,9 @@ public:
     IMS_UINT32 GetType() const override;
     IMS_UINT32 GetResponseCode() const override;
     inline void SetForceToTerminateInterface(IN IMS_BOOL bTerminate) override
-    { m_bForceToTerminateInterface = bTerminate;}
+    {
+        m_bForceToTerminateInterface = bTerminate;
+    }
 
 private:
     void GetReferToUri(OUT AString& strUri, IN IMtcCall* pi1To1Call) const;

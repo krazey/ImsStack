@@ -12,8 +12,7 @@ class SuppService;
 struct CallInfo;
 struct CallStartOperationParams;
 
-class GroupCallController final :
-        public ConferenceController
+class GroupCallController final : public ConferenceController
 {
 public:
     explicit GroupCallController(IN CallKey nConfCallKey, IMtcContext& objContext,

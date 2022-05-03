@@ -65,7 +65,7 @@ void ConferenceParticipantList::AddUser(IN const ConfUser* pConfUser)
 {
     ConferenceParticipant* pParticipant = new ConferenceParticipant();
     m_objParticipants.Append(pParticipant);
-    pParticipant->SetConfUser(pConfUser); // TODO: CopyConfUser
+    pParticipant->SetConfUser(pConfUser);  // TODO: CopyConfUser
 }
 
 PUBLIC
@@ -98,8 +98,8 @@ ConfUser* ConferenceParticipantList::GetConfUser(IN IConferenceReference* piConf
 }
 
 PUBLIC
-IMS_BOOL ConferenceParticipantList::IsConnectedUser(IN const ConfUser* pConfUser,
-        IN IMS_BOOL bIncludingConnecting/* = IMS_FALSE*/) const
+IMS_BOOL ConferenceParticipantList::IsConnectedUser(
+        IN const ConfUser* pConfUser, IN IMS_BOOL bIncludingConnecting /* = IMS_FALSE*/) const
 {
     if (pConfUser == IMS_NULL)
     {
@@ -128,7 +128,7 @@ IMS_BOOL ConferenceParticipantList::IsConnectedUser(IN const ConfUser* pConfUser
 }
 
 PUBLIC
-IMSList<ConfUser*> ConferenceParticipantList::GetConfUsers(IN IMS_BOOL bCopy/* = IMS_FALSE*/) const
+IMSList<ConfUser*> ConferenceParticipantList::GetConfUsers(IN IMS_BOOL bCopy /* = IMS_FALSE*/) const
 {
     IMSList<ConfUser*> objTempUsers;
     for (IMS_UINT32 i = 0; i < m_objParticipants.GetSize(); i++)
@@ -148,8 +148,8 @@ IMSList<ConfUser*> ConferenceParticipantList::GetConfUsers(IN IMS_BOOL bCopy/* =
 }
 
 PUBLIC
-void ConferenceParticipantList::SetReference(IN IConferenceReference* piReference,
-        IN const ConfUser* pConfUser)
+void ConferenceParticipantList::SetReference(
+        IN IConferenceReference* piReference, IN const ConfUser* pConfUser)
 {
     ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
     if (pTemp != IMS_NULL)
@@ -183,8 +183,8 @@ void ConferenceParticipantList::ResetReference(IN IConferenceReference* piConfRe
 }
 
 PUBLIC
-void ConferenceParticipantList::SetReferInviteUri(IN AString strReferInviteUri,
-        IN const ConfUser* pConfUser)
+void ConferenceParticipantList::SetReferInviteUri(
+        IN AString strReferInviteUri, IN const ConfUser* pConfUser)
 {
     ConferenceParticipant* pTemp = m_objParticipants.GetAt(FindParticipant(pConfUser));
     if (pTemp != IMS_NULL)
@@ -219,13 +219,13 @@ IMS_SINT32 ConferenceParticipantList::FindParticipant(IN IMS_UINT32 nConnectionI
 }
 
 PUBLIC
-void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
-        IN CallConnectionIdManager& objConnectionIdManager)
+void ConferenceParticipantList::ReOrder(
+        IN IMtcCallManager& objCallManager, IN CallConnectionIdManager& objConnectionIdManager)
 {
     IMSList<ConferenceParticipant*> objTemp;
 
     IMSList<IMtcCall*> objCalls = objCallManager.GetCalls();
-     for (IMS_UINT32 nSessIndex = 0; nSessIndex < objCalls.GetSize(); nSessIndex ++)
+    for (IMS_UINT32 nSessIndex = 0; nSessIndex < objCalls.GetSize(); nSessIndex++)
     {
         IMtcCall* piTempCall = objCalls.GetAt(nSessIndex);
 
@@ -234,8 +234,8 @@ void ConferenceParticipantList::ReOrder(IN IMtcCallManager& objCallManager,
             ConferenceParticipant* pTempParticipant = m_objParticipants.GetAt(nIndex);
             ConfUser* pTempUser = pTempParticipant ? pTempParticipant->GetConfUser() : IMS_NULL;
             if (pTempUser &&
-                    objConnectionIdManager.GetCallKey(
-                        pTempUser->nConnectionId) == piTempCall->GetKey())
+                    objConnectionIdManager.GetCallKey(pTempUser->nConnectionId) ==
+                            piTempCall->GetKey())
             {
                 objTemp.Append(pTempParticipant);
                 break;
@@ -273,7 +273,7 @@ ConfUser* ConferenceParticipantList::GetConfUser(IN IMS_UINT32 nIndex) const
 
 PUBLIC
 IMS_UINT32 ConferenceParticipantList::GetConnectedParticipantSize(
-        IN IMS_BOOL bIncludingConnecting/* = IMS_FALSE*/)
+        IN IMS_BOOL bIncludingConnecting /* = IMS_FALSE*/)
 {
     IMS_UINT32 nCount = 0;
     IMSList<ConfUser*> objConfUsers = GetConfUsers();

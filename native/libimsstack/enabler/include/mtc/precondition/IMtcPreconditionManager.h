@@ -11,7 +11,7 @@ class IMtcPreconditionListener;
 class IMtcPreconditionManager
 {
 public:
-    virtual ~IMtcPreconditionManager() {};
+    virtual ~IMtcPreconditionManager(){};
 
     /**
      * @brief Create QosTimer, QosData, QosStatusTable to handle the behavior related to
@@ -49,8 +49,8 @@ public:
      * @param piSession ISession instance to find QoS timer for the specific session.
      * @param eType The type of QoS timer to start.
      */
-    virtual void StartQosTimer(IN ISession* piSession,
-            IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) = 0;
+    virtual void StartQosTimer(
+            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) = 0;
 
     /**
      * @brief Stop the timer related to QoS.
@@ -58,8 +58,8 @@ public:
      * @param piSession ISession instance to find QoS timer for the specific session.
      * @param eType The type of QoS timer to stop.
      */
-    virtual void StopQosTimer(IN ISession* piSession,
-            IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) = 0;
+    virtual void StopQosTimer(
+            IN ISession* piSession, IN QosTimerType eType = QosTimerType::WAIT_AVAILABLE) = 0;
 
     /**
      * @brief Stop all the timers related to QoS.
