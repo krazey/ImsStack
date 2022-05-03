@@ -544,6 +544,9 @@ protected:
     /// the features for notifying ims registration callback in telephony ims
     IMS_UINT32 m_nImsRegFeatures;
 
+    /// the network that is notified with registration callback of telephony ims
+    AosNetworkType m_eImsRegNetwork;
+
     /// this is used to set SIP Profile on run-time
     RCPtr<SipProfile> m_pSipProfile;
 

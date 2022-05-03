@@ -134,6 +134,7 @@ AosRegistration::AosRegistration(IN IAosAppContext* piAppContext, IN AString& st
     , m_nNetworkBindingFeatures(0)
     , m_nImsRegState(IMS_REG_STATE_DEREGISTERED)
     , m_nImsRegFeatures(ImsAosFeature::NONE)
+    , m_eImsRegNetwork(AosNetworkType::NONE)
     , m_pSipProfile(IMS_NULL)
     , m_nRegIpcanCategory(IIpcan::CATEGORY_MOBILE)
     , m_nPdnReactivateWaitTime(30)
@@ -947,13 +948,14 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
     }
 
     IMS_UINT32 nImsRegFeatures = GetRegFeatures();
+    AosNetworkType eImsRegNetwork = GetNetworkTypeForImsRegState();
     if (m_nImsRegState == nImsRegState)
     {
         if (m_nImsRegState == IMS_REG_STATE_DEREGISTERED)
         {
             return;
         }
-        if (m_nImsRegFeatures == nImsRegFeatures)
+        if (m_nImsRegFeatures == nImsRegFeatures && m_eImsRegNetwork == eImsRegNetwork)
         {
             return;
         }
@@ -961,6 +963,7 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
 
     m_nImsRegState = nImsRegState;
     m_nImsRegFeatures = nImsRegFeatures;
+    m_eImsRegNetwork = eImsRegNetwork;
 
     IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (piService != IMS_NULL)
@@ -972,14 +975,12 @@ void AosRegistration::UpdateDetailState(IN IMS_UINT32 nState)
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERING)
         {
             IMSList<AString> objFeatureTags = IMSList<AString>();
-            piService->NotifyRegistering(GetNetworkTypeForImsRegState(),
-                    m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistering(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
         else if (m_nImsRegState == IMS_REG_STATE_REGISTERED)
         {
             IMSList<AString> objFeatureTags = IMSList<AString>();
-            piService->NotifyRegistered(GetNetworkTypeForImsRegState(),
-                    m_nImsRegFeatures, objFeatureTags);
+            piService->NotifyRegistered(m_eImsRegNetwork, m_nImsRegFeatures, objFeatureTags);
         }
     }
 }
