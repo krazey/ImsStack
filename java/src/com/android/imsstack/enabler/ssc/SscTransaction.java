@@ -28,13 +28,14 @@ import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
+import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
-import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.util.ImsLog;
 
-import java.lang.ref.WeakReference;
 import org.w3c.dom.Document;
+
+import java.lang.ref.WeakReference;
 
 public class SscTransaction {
     // Constants--------------------------------------------------
@@ -415,7 +416,7 @@ public class SscTransaction {
 
         Pair<String, String> keyPair = gba.getGbaKey(appType, gbaMode, isTls, nafFqdn,
                 securityProtocol, isForced);
-        if (keyPair == null) {
+        if (keyPair == null || keyPair.first == null || keyPair.second == null) {
             ImsLog.e(mSlotId, "gba failure");
             authAgent.setIsCredentialInfoUpdated(false);
             return false;

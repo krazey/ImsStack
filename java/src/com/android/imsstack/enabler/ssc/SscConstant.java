@@ -121,16 +121,17 @@ public class SscConstant {
     public static final int HTTP_CONFLICT = 409;
     public static final int HTTP_PRECONDITION_FAILURE = 412;
 
-    // Temp. SSC Block List
+    // Temp. Ssc Block List
     public static final int BLOCK_REASON_GBA_FAILURE                        = 0x00000001;
     public static final int BLOCK_REASON_DNS_QUERY_FAILURE                  = 0x00000002;
-    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE             = 0x00000004;
+    public static final int BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED    = 0x00000004;
     public static final int BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED       = 0x00000008;
-    public static final int BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED    = 0x00000010;
+    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP        = 0x00000010;
     public static final int BLOCK_REASON_BY_RESPONSE_CODE_TEMP              = 0x00000020;
 
-    // Perm. SSC Block List
-    public static final int BLOCK_REASON_BY_RESPONSE_CODE_PERM              = 0x00010000;
+    // Perm. Ssc Block List
+    public static final int BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM        = 0x00010000;
+    public static final int BLOCK_REASON_BY_RESPONSE_CODE_PERM              = 0x00020000;
 
     public static final int BLOCK_REASON_NONE = 0;
 }

@@ -16,12 +16,14 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.os.AsyncResult;
+import android.os.Handler;
+import android.os.Message;
+
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcm.DCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
@@ -31,20 +33,18 @@ import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
 import com.android.imsstack.util.ImsExtApi;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.internal.telephony.IccCardConstants;
-
-import android.os.AsyncResult;
-import android.os.Handler;
-import android.os.Message;
+import com.android.internal.annotations.VisibleForTesting;
 
 public class SscServiceState {
-    // Constants--------------------------------------------------
-    private static final int EVENT_PDN_CONNECTION_FAILED = 1001;
-    private static final int EVENT_ALARM_TIMER_EXPIRED = 1002;
-    private static final int EVENT_AIRPLANE_MODE_CHANGED = 1003;
-    private static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1004;
-    private static final int EVENT_SIM_STATE_CHANGED = 1005;
-    // Variables--------------------------------------------------
+    @VisibleForTesting
+    public static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
+    @VisibleForTesting
+    public static final int EVENT_PDN_CONNECTION_FAILED = 1002;
+    @VisibleForTesting
+    public static final int EVENT_AIRPLANE_MODE_CHANGED = 1003;
+    @VisibleForTesting
+    public static final int EVENT_SIM_STATE_CHANGED = 1004;
+
     private int mSlotId = -1;
     private int mCurrentRat = -1;
     private int mTimerId = -1;
@@ -52,20 +52,15 @@ public class SscServiceState {
     private int mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
 
     private boolean mAllSRVAddrTried = false;
-    private boolean mIsAfterSimRemoved = false;
 
-    private Handler mHandler = null;
+    @VisibleForTesting
+    public Handler mHandler = null;
 
-    // Public methods --------------------------------------------
     public void init(int slotId) {
         ImsLog.d("");
-
         mSlotId = slotId;
-
-        // Load and Set Rule Id
-        SscXmlFormat.init(mSlotId);
-
         mHandler = new SscServiceStateHandler();
+        SscXmlFormat.init(mSlotId);
 
         IDCNetWatcher dnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
@@ -79,6 +74,8 @@ public class SscServiceState {
         if (ss != null) {
             ss.registerForSimStateChanged(mHandler, EVENT_SIM_STATE_CHANGED, null);
         }
+
+        updateUtServiceFeature();
     }
 
     public void deInit() {
@@ -98,20 +95,6 @@ public class SscServiceState {
     }
 
     public boolean isUtAvailable() {
-        /*
-        boolean admin_ims = false;
-        SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
-                SubsInfoInterface.class, mSlotId);
-        if (subsInfo != null) {
-            admin_ims = subsInfo.isImsEnabled();
-        }
-
-        if (admin_ims != true) {
-            ImsLog.i("Admin Ims : false");
-            return false;
-        }
-         */
-
         if (!SscConfig.isUtSupported(mSlotId)) {
             ImsLog.i("Ut not supported");
             return false;
@@ -125,15 +108,7 @@ public class SscServiceState {
         }
 
         if (mUtBlockReason != SscConstant.BLOCK_REASON_NONE) {
-            ImsLog.w("mUtBlockReason = " + mUtBlockReason);
-            return false;
-        }
-
-        IDCApn dcApn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
-        IApn apn = (dcApn != null) ? dcApn.getApnControl(EApnType.XCAP.getType()) : null;
-        boolean pdnBlocked = (apn != null) ? apn.isESMCausePermanentFailure() : false;
-        if (pdnBlocked) {
-            ImsLog.w("pdnBlocked");
+            ImsLog.w("mUtBlockReason = " + getBlockedReasonString());
             return false;
         }
 
@@ -141,96 +116,44 @@ public class SscServiceState {
         return true;
     }
 
-    private void resetAllUtStatus() {
-        ImsLog.d("");
-
-        mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
-
-        ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
-        authAgent.setIsCredentialInfoUpdated(false);
-        authAgent.setETag("");
-
-        stopUtBlockTimer(true);
-        updateUtServiceFeature();
-
-        SscXmlFormat.reset(mSlotId);
-    }
-
-    private void setUtBlock(int nBlockReason, boolean isEnable) {
-        ImsLog.d("mUtBlockReason : " + mUtBlockReason + " nBlockReason : " + nBlockReason
-                + " isEnable : " + isEnable);
-
-        if (SscConfig.isCsfbSupported(mSlotId) == false) {
-            if (nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP
-                    && nBlockReason != SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE
-                    && nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM) {
-                // TODO: Need to check requirements for GBA and PDN connection failure.
-                // do not block when connection error if CSFB not supported
-                return;
-            }
-        }
-
-        if (isEnable) {
-            mUtBlockReason |= nBlockReason;
-        } else {
-            mUtBlockReason &= ~nBlockReason;
-        }
-
-        updateUtServiceFeature();
-
-        if (!isEnable) {
-            // don't need to start block timer
-            return;
-        }
-
-        switch (nBlockReason) {
-            case SscConstant.BLOCK_REASON_GBA_FAILURE : // fall-through
-            case SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE : // fall-through
-            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED : // fall-through
-            case SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED :
-                startUtBlockTimer(SscConfig.getTimerForTempBlockWithAnyReason(mSlotId));
-                break;
-            case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE :
-            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP :
-                startUtBlockTimer(SscConfig.getTimerForTempBlock(mSlotId));
-                break;
-            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM :
-                // don't start timer
-                break;
-            default :
-                ImsLog.e("worng block reason");
-                break;
-        }
-    }
-
-    private boolean isUtBlock(int nBlockReason) {
-        return ((mUtBlockReason & nBlockReason) > 0) ? true : false;
-    }
-
-    // This method called by Transaction
     public void setErrorResponseCode(int responseCode) {
         if (SscConfig.isTemporaryErrorCode(mSlotId, responseCode)) {
-            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP, true);
+            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP);
         } else if (SscConfig.isPermanentErrorCode(mSlotId, responseCode)) {
-            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM, true);
+            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
         }
     }
 
-    // This method called by HTTPConnection
     public void setDnsQueryFailed(boolean input) {
-        setUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE, input);
+        if (input) {
+            setUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
+        } else {
+            resetUtBlock(SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE);
+        }
     }
 
     public void setGbaRequestFailed(boolean input) {
-        setUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE, input);
+        if (input) {
+            setUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE);
+        } else {
+            resetUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE);
+        }
     }
 
     public void setPdnConnectionTimerExpired(boolean input) {
-        setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED, input);
+        if (input) {
+            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED);
+        } else {
+            resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED);
+        }
     }
 
     public void setSocketConnectionExpired(boolean input) {
-        setUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED, input);
+        if (input) {
+            setUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED);
+        } else {
+            resetUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED);
+        }
     }
 
     public void setAllSrvAddrTried(boolean input) {
@@ -238,7 +161,8 @@ public class SscServiceState {
     }
 
     public boolean getPdnConnectionFailed() {
-        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE);
+        return isUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
+                | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
     }
 
     public boolean getDnsQueryFailed() {
@@ -261,8 +185,79 @@ public class SscServiceState {
         return isUtBlock(SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED);
     }
 
+    private void resetAllUtStatus() {
+        ImsLog.d("");
+
+        mUtBlockReason = SscConstant.BLOCK_REASON_NONE;
+
+        ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
+        authAgent.setIsCredentialInfoUpdated(false);
+        authAgent.setETag("");
+
+        stopUtBlockTimer(true);
+        updateUtServiceFeature();
+
+        SscXmlFormat.reset(mSlotId);
+    }
+
+    private void setUtBlock(int nBlockReason) {
+        ImsLog.d("mUtBlockReason : " + mUtBlockReason + " nBlockReason : " + nBlockReason);
+
+        if (!SscConfig.isCsfbSupported(mSlotId)) {
+            if (nBlockReason != SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM
+                    && nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP
+                    && nBlockReason != SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM) {
+                // do not block unless specific error reasons when CSFB not supported
+                return;
+            }
+        }
+
+        long blockTimeMilliSeconds = 0;
+        switch (nBlockReason) {
+            case SscConstant.BLOCK_REASON_GBA_FAILURE : // fall-through
+            case SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE : // fall-through
+            case SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED : // fall-through
+            case SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED : // fall-through
+                blockTimeMilliSeconds = SscConfig.getTimerForTempBlockWithAnyReason(mSlotId);
+                if (blockTimeMilliSeconds > 0) {
+                    startUtBlockTimer(blockTimeMilliSeconds);
+                    mUtBlockReason |= nBlockReason;
+                    updateUtServiceFeature();
+                }
+                break;
+            case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP : // fall-through
+            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP :
+                blockTimeMilliSeconds = SscConfig.getTimerForTempBlock(mSlotId);
+                if (blockTimeMilliSeconds > 0) {
+                    startUtBlockTimer(blockTimeMilliSeconds);
+                    mUtBlockReason |= nBlockReason;
+                    updateUtServiceFeature();
+                }
+                break;
+            case SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM : // fall-through
+            case SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM :
+                // don't start timer
+                mUtBlockReason |= nBlockReason;
+                updateUtServiceFeature();
+                break;
+            default :
+                ImsLog.e("worng block reason");
+                break;
+        }
+    }
+
+    private void resetUtBlock(int nBlockReason) {
+        ImsLog.d("mUtBlockReason : " + mUtBlockReason + " nBlockReason : " + nBlockReason);
+        mUtBlockReason &= ~nBlockReason;
+        updateUtServiceFeature();
+    }
+
+    private boolean isUtBlock(int nBlockReason) {
+        return ((mUtBlockReason & nBlockReason) > 0) ? true : false;
+    }
+
     private void startUtBlockTimer(long duration) {
-        IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
+        IAlarmTimer atm = getTimerAgent();
         if (atm == null) {
             ImsLog.e("AlamTimerManager is null");
             return;
@@ -295,7 +290,7 @@ public class SscServiceState {
             return;
         }
 
-        IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
+        IAlarmTimer atm = getTimerAgent();
         if (atm == null) {
             ImsLog.e(" AlamTimerManager is null");
             return;
@@ -307,6 +302,11 @@ public class SscServiceState {
 
         atm.unregisterForTimerExpired(mUtBlockTimerId, mHandler);
         mUtBlockTimerId = (-1);
+    }
+
+    @VisibleForTesting
+    protected IAlarmTimer getTimerAgent() {
+        return (IAlarmTimer) AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
     }
 
     private void updateUtServiceFeature() {
@@ -324,10 +324,17 @@ public class SscServiceState {
             }
 
             ImsLog.d("Message : " + msg.what);
-
             switch(msg.what) {
+                case EVENT_UT_BLOCK_TIMER_EXPIRED:
+                    int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
+                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED
+                            | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED
+                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP
+                            | SscConstant.BLOCK_REASON_GBA_FAILURE
+                            | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP;
+                    resetUtBlock(allTempBlockReasons);
+                    break;
                 case EVENT_PDN_CONNECTION_FAILED:
-                {
                     AsyncResult ar = (AsyncResult)msg.obj;
                     if (ar == null) {
                         return;
@@ -341,41 +348,32 @@ public class SscServiceState {
                     ImsLog.d("ApnType : " + apnType.toString());
                     // Change only for XCAP apn type.
                     if (apnType == EApnType.XCAP) {
-                        setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE, true);
+                        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+                        IApn apn = (dcapn != null)
+                                ? dcapn.getApnControl(EApnType.XCAP.getType()) : null;
+                        boolean isPermanentFailure = (apn != null)
+                                ? apn.isESMCausePermanentFailure() : false;
+                        if (isPermanentFailure) {
+                            // TODO: how to reset permanent failure of ApnXcap?
+                            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM);
+                        } else {
+                            // TODO: Need to check KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY
+                            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
+                        }
                     }
                     break;
-                }
-                case EVENT_UT_BLOCK_TIMER_EXPIRED:
-                {
-                    ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
-                    if (isUtBlock(SscConstant.BLOCK_REASON_GBA_FAILURE) == true
-                            && authAgent.isCredentialInfoUpdated()) {
-                        authAgent.setIsCredentialInfoUpdated(false);
-                    }
-
-                    int allTempBlockReasons = SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE
-                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED
-                            | SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED
-                            | SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE
-                            | SscConstant.BLOCK_REASON_GBA_FAILURE
-                            | SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP;
-                    setUtBlock(allTempBlockReasons, false);
-                    break;
-                }
                 case EVENT_AIRPLANE_MODE_CHANGED:
-                {
                     IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
                             DCFactory.NETWORK_WATCHER, mSlotId);
                     if (dcnw != null) {
                         if (dcnw.isAirplaneMode()) {
-                            setUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE, false);
-                            setUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM, false);
+                            // TODO: need to reset permanent error here and ApnXcap
+                            resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
+                            resetUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
                         }
                     }
                     break;
-                }
                 case EVENT_SIM_STATE_CHANGED:
-                {
                     ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
                     if (ss == null) {
                         ImsLog.e("ISIMState is null");
@@ -384,21 +382,44 @@ public class SscServiceState {
 
                     if (ImsExtApi.Uicc.SIM_REMOVED.equalsIgnoreCase(ss.getIccState())) {
                         resetAllUtStatus();
-                        mIsAfterSimRemoved = true;
-                    } else if (mIsAfterSimRemoved && IccCardConstants.INTENT_VALUE_ICC_LOADED.equalsIgnoreCase(ss.getIccState())) {
-                        mIsAfterSimRemoved = false;
                     }
                     break;
-                }
                 default:
                     ImsLog.e("Invalid Message");
                     break;
             }
 
-            IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
-            IApn apn = (dcapn != null) ? dcapn.getApnControl(EApnType.XCAP.getType()) : null;
-            boolean pdnBlockedBy33 = (apn != null) ? apn.isESMCausePermanentFailure() : false;
-            ImsLog.d("mUtBlockReason = " + mUtBlockReason + ", pdnBlockedBy33 = " + pdnBlockedBy33 + ")");
+            ImsLog.d("mUtBlockReason = " + mUtBlockReason);
         }
+    }
+
+    private String getBlockedReasonString() {
+        String reasons = "";
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_GBA_FAILURE) > 0) {
+            reasons += " BLOCK_REASON_GBA_FAILURE";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_DNS_QUERY_FAILURE) > 0) {
+            reasons += " BLOCK_REASON_DNS_QUERY_FAILURE";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED) > 0) {
+            reasons += " BLOCK_REASON_SOCKET_CONNECTION_TIMER_EXPIRED";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED) > 0) {
+            reasons += " BLOCK_REASON_PDN_CONNECTION_TIMER_EXPIRED";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP) > 0) {
+            reasons += " BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_TEMP) > 0) {
+            reasons += " BLOCK_REASON_BY_RESPONSE_CODE_TEMP";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM) > 0) {
+            reasons += " BLOCK_REASON_PDN_CONNECTION_FAILURE_PERM";
+        }
+        if ((mUtBlockReason & SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM) > 0) {
+            reasons += " BLOCK_REASON_BY_RESPONSE_CODE_PERM";
+        }
+
+        return reasons;
     }
 }
