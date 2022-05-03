@@ -293,9 +293,13 @@ void AosServiceAvailable::Notify()
     A_IMS_TRACE_I(AOSTAG, "Notify", 0, 0, 0);
 
     m_bAvailableLastNotified = bAvailable;
-    m_piAppContext->GetBlock()->GetBlockReasons(m_objBlockReasonsLastNotified);
 
-    m_piAppContext->GetBlock()->PrintBlockReasons();
+    IAosBlock* piBlock = m_piAppContext->GetBlock();
+    if (piBlock != IMS_NULL)
+    {
+        piBlock->GetBlockReasons(m_objBlockReasonsLastNotified);
+        piBlock->PrintBlockReasons();
+    }
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
     {
@@ -325,8 +329,14 @@ void AosServiceAvailable::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 n
 PROTECTED
 IMS_BOOL AosServiceAvailable::IsSameAsBeforeUnavailableReason()
 {
+    IAosBlock* piBlock = m_piAppContext->GetBlock();
+    if (piBlock == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     IMSList<IMS_UINT32> objCurrReason;
-    m_piAppContext->GetBlock()->GetBlockReasons(objCurrReason);
+    piBlock->GetBlockReasons(objCurrReason);
 
     return AosUtil::GetInstance()->IsListEqual(objCurrReason,
             m_objBlockReasonsLastNotified, IMS_TRUE);

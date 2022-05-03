@@ -35,19 +35,28 @@ AosServiceAvailableCellular::~AosServiceAvailableCellular()
 PRIVATE VIRTUAL
 void AosServiceAvailableCellular::HandleNetworkStateChanged()
 {
-    m_bNetworkServiceIn =
-            m_piAppContext->GetNetTracker()->IsServiceIN(IAosNetTracker::TYPE_MOBILE);
+    IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
+    if (piNetTracker != IMS_NULL)
+    {
+        m_bNetworkServiceIn = piNetTracker->IsServiceIN(IAosNetTracker::TYPE_MOBILE);
+    }
 
     A_IMS_TRACE_I(AOSTAG, "HandleNetworkStateChanged :: Is Service In - (%s)",
             _TRACE_B_(m_bNetworkServiceIn), 0, 0);
 
+    IAosBlock* piBlock = m_piAppContext->GetBlock();
+    if (piBlock == IMS_NULL)
+    {
+        return;
+    }
+
     if (m_bNetworkServiceIn)
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+        piBlock->ResetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
     }
     else
     {
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+        piBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
     }
 }
 
@@ -142,6 +151,11 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
 PRIVATE VIRTUAL
 IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
 {
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
+
     if (!GET_N_CONFIG(m_nSlotId)->IsVoLteAvailable())
     {
         A_IMS_TRACE_I(AOSTAG, "CheckServiceAvailable :: Cellular service config is not available",

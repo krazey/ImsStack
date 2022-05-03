@@ -56,11 +56,19 @@ protected:
     }
 
     virtual void TearDown() override {
-        if(pAosBlock){
+        if (pAosBlock) {
             delete pAosBlock;
         }
     }
 };
+
+// Testing is not required.
+// TEST_F(AosBlockTest, Constructor) {
+// }
+
+// Testing is not required.
+// TEST_F(AosBlockTest, Destructor) {
+// }
 
 TEST_F(AosBlockTest, SetListener) {
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
@@ -282,9 +290,9 @@ TEST_F(AosBlockTest, ClearAllBlockReasons) {
     EXPECT_TRUE(pAosBlock->IsCleared());
 }
 
-TEST_F(AosBlockTest, PrintBlockReasons) {
-    // No testing is required.
-}
+// Testing is not required.
+// TEST_F(AosBlockTest, PrintBlockReasons) {
+// }
 
 TEST_F(AosBlockTest, GetBlockReasons) {
     pAosBlock->SetBlockReason(BLOCK_AC_INCOMPLETED);

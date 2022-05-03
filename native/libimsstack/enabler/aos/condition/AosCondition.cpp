@@ -45,6 +45,7 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext)
     , m_piListener(IMS_NULL)
     , m_pAvailableCellular(IMS_NULL)
     , m_pAvailableWiFi(IMS_NULL)
+    , m_piBlock(m_piAppContext->GetBlock())
     , m_eServiceType(GetServiceType())
     , m_bIsRefreshStarted(IMS_FALSE)
     , m_bIsCombindAttached(IMS_FALSE)
@@ -59,7 +60,9 @@ AosCondition::AosCondition(IN IAosAppContext* piAppContext)
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosCondition = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosCondition), this);
 
-    IMS_SINT32 nCnxType = m_piAppContext->GetConnection()->GetConnectionType();
+    IAosConnection* piAosConnection = m_piAppContext->GetConnection();
+    IMS_SINT32 nCnxType = (piAosConnection != IMS_NULL) ? piAosConnection->GetConnectionType() :
+            NetworkPolicy::APN_NONE;
 
     if ((nCnxType == NetworkPolicy::APN_WIFI) || (nCnxType == NetworkPolicy::APN_EMERGENCY))
     {
@@ -86,29 +89,37 @@ void AosCondition::Start()
     if (IsListenerEnabled(LISTENER_BLOCK))
     {
         SetInitialBlockReason();
-        m_piAppContext->GetBlock()->SetListener(this);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->SetListener(this);
+        }
     }
 
     if (IsListenerEnabled(LISTENER_NETTRACKER))
     {
         IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-        piNetTracker->SetListener(this);
-        piNetTracker->SetRATGuardTime(RAT_CHANGE_GUARD_TIME_MILLIS);
+        if (piNetTracker != IMS_NULL)
+        {
+            piNetTracker->SetListener(this);
+            piNetTracker->SetRATGuardTime(RAT_CHANGE_GUARD_TIME_MILLIS);
+        }
     }
 
     if (IsListenerEnabled(LISTENER_SUBSCRIBER))
     {
         IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
-        piSubscriber->SetListener(this);
+        if (piSubscriber != IMS_NULL)
+        {
+            piSubscriber->SetListener(this);
+        }
     }
 
     if (IsListenerEnabled(LISTENER_CALLTRACKER))
     {
-        IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
-
-        if (piCt != IMS_NULL)
+        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        if (piCallTracker != IMS_NULL)
         {
-            piCt->SetListener(this);
+            piCallTracker->SetListener(this);
         }
     }
 }
@@ -120,29 +131,38 @@ void AosCondition::Stop()
 
     if (IsListenerEnabled(LISTENER_CALLTRACKER))
     {
-        IAosCallTracker* piCt = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+        IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
 
-        if (piCt != IMS_NULL)
+        if (piCallTracker != IMS_NULL)
         {
-            piCt->RemoveListener(this);
+            piCallTracker->RemoveListener(this);
         }
     }
 
     if (IsListenerEnabled(LISTENER_SUBSCRIBER))
     {
         IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
-        piSubscriber->SetListener(IMS_NULL);
+        if (piSubscriber != IMS_NULL)
+        {
+            piSubscriber->SetListener(IMS_NULL);
+        }
     }
 
     if (IsListenerEnabled(LISTENER_NETTRACKER))
     {
         IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
-        piNetTracker->RemoveListener(this);
+        if (piNetTracker != IMS_NULL)
+        {
+            piNetTracker->RemoveListener(this);
+        }
     }
 
     if (IsListenerEnabled(LISTENER_BLOCK))
     {
-        m_piAppContext->GetBlock()->RemoveListener(this);
+        if (m_piBlock != IMS_NULL)
+        {
+            m_piBlock->RemoveListener(this);
+        }
     }
 
     RemoveEventListener();
@@ -162,19 +182,19 @@ void AosCondition::SetListener(IN IAosConditionListener* piListener)
 PUBLIC VIRTUAL
 void AosCondition::SetBlock(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
-    m_piAppContext->GetBlock()->SetBlockReason(eReason, bNotify);
+    m_piBlock->SetBlockReason(eReason, bNotify);
 }
 
 PUBLIC VIRTUAL
 void AosCondition::ResetBlock(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
-    m_piAppContext->GetBlock()->ResetBlockReason(eReason, bNotify);
+    m_piBlock->ResetBlockReason(eReason, bNotify);
 }
 
 PUBLIC VIRTUAL
 IMS_BOOL AosCondition::IsReasonBlocked(IN BLOCK_REASON eReason) const
 {
-    return m_piAppContext->GetBlock()->IsReasonBlocked(eReason);
+    return m_piBlock->IsReasonBlocked(eReason);
 }
 
 PUBLIC VIRTUAL
@@ -202,46 +222,56 @@ IMS_BOOL AosCondition::IsReady()
 }
 
 PUBLIC VIRTUAL
-void AosCondition::CheckServiceAvailable(IN SERVICE_TYPE eType)
+IMS_UINT32 AosCondition::CheckServiceAvailable(IN SERVICE_TYPE eType)
 {
+    IMS_UINT32 nCheck = CHECK_NONE;
+
     if (m_pAvailableCellular != IMS_NULL &&
             (eType == SERVICE_CELLULAR || eType == SERVICE_WHOLE))
     {
         m_pAvailableCellular->RefreshServiceAvailablility();
+        nCheck |= CHECK_CELLULAR;
     }
 
     if (m_pAvailableWiFi != IMS_NULL &&
             (eType == SERVICE_WIFI || eType == SERVICE_WHOLE))
     {
         m_pAvailableWiFi->RefreshServiceAvailablility();
+        nCheck |= CHECK_WIFI;
     }
+
+    return nCheck;
 }
 
 PUBLIC VIRTUAL
-void AosCondition::CheckBadNetwork(IN SERVICE_TYPE eType)
+IMS_BOOL AosCondition::CheckBadNetwork(IN SERVICE_TYPE eType)
 {
     A_IMS_TRACE_D(APPPROFILE, "CheckBadNetwork :: Type[%d]", eType, 0, 0);
+    IMS_BOOL bCheck = IMS_FALSE;
 
     if (m_pAvailableWiFi == IMS_NULL || eType != SERVICE_WIFI)
     {
-        return;
+        return bCheck;
     }
 
     if (m_bCellServiceAvailable)
     {
         m_pAvailableWiFi->StartToCheckNetworkConnection();
+        bCheck = IMS_TRUE;
     }
     else
     {
         A_IMS_TRACE_D(APPPROFILE,
                 "CheckBadNetwork :: Need to check network, but cellular is unavailable", 0, 0, 0);
     }
+
+    return bCheck;
 }
 
 PUBLIC VIRTUAL
 void AosCondition::PrintBlockReasons() const
 {
-    m_piAppContext->GetBlock()->PrintBlockReasons();
+    m_piBlock->PrintBlockReasons();
 }
 
 PROTECTED VIRTUAL
@@ -283,25 +313,34 @@ void AosCondition::RemoveServiceAvailable()
 PROTECTED VIRTUAL
 void AosCondition::AddAosServiceListener()
 {
-    AosProvider::GetInstance()->GetService(m_nSlotId)->AddListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
-    AosProvider::GetInstance()->GetService(m_nSlotId)->AddListener(
-            DYNAMIC_CAST(IAosServiceSettingListener*, this));
+    IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (pService != IMS_NULL)
+    {
+        pService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+        pService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
+    }
 }
 
 PROTECTED VIRTUAL
 void AosCondition::RemoveAosServiceListener()
 {
-    AosProvider::GetInstance()->GetService(m_nSlotId)->RemoveListener(
-            DYNAMIC_CAST(IAosServiceSettingListener*, this));
-    AosProvider::GetInstance()->GetService(m_nSlotId)->RemoveListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (pService != IMS_NULL)
+    {
+        pService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
+        pService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    }
 }
 
 PROTECTED VIRTUAL
 void AosCondition::AddEventListener()
 {
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_LTE_INFO, this, m_nSlotId);
+
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
+        return;
+    }
 
     if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
     {
@@ -459,7 +498,10 @@ void AosCondition::ServiceAvailable_Changed()
         }
     }
 
-    m_piListener->Condition_Changed();
+    if (m_piListener != IMS_NULL)
+    {
+        m_piListener->Condition_Changed();
+    }
 }
 
 PROTECTED VIRTUAL
@@ -657,7 +699,7 @@ void AosCondition::SetInitialBlockReason()
 PRIVATE
 void AosCondition::SetStartBlockReason()
 {
-    m_piAppContext->GetBlock()->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+    m_piBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
 }
 
 PRIVATE
@@ -666,11 +708,11 @@ void AosCondition::ProcessBlockReason(IN IMS_BOOL bIsBlockSet,
 {
     if (bIsBlockSet)
     {
-        m_piAppContext->GetBlock()->SetBlockReason(eReason, bNotify);
+        m_piBlock->SetBlockReason(eReason, bNotify);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(eReason, bNotify);
+        m_piBlock->ResetBlockReason(eReason, bNotify);
     }
 }
 
@@ -869,6 +911,11 @@ SERVICE_TYPE AosCondition::GetServiceType()
 {
     SERVICE_TYPE eType = SERVICE_CELLULAR;
 
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
+        return eType;
+    }
+
     if (GET_N_CONFIG(m_nSlotId)->IsVoLteAvailable() &&
             GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
@@ -919,7 +966,7 @@ void AosCondition::UpdateRegistrationMode() const
 {
     IAosSubscriber* piSubscriber = m_piAppContext->GetSubscriber();
 
-    if (m_piAppContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) &&
+    if (m_piBlock->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) &&
             piSubscriber->IsReady())
     {
         IMS_SINT32 nImpuCount = piSubscriber->GetConfiguredImpus().GetCount();
