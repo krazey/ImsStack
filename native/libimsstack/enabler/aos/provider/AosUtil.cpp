@@ -701,7 +701,7 @@ IMS_BOOL AosUtil::IsListEqual(IN const IMSList<IMS_UINT32>& objLeft,
 }
 
 PUBLIC
-IMS_BOOL AosUtil::IsElementsExistInList(IN const IMSList<IMS_UINT32>& objElements,
+IMS_BOOL AosUtil::IsElementExistInList(IN const IMSList<IMS_UINT32>& objElements,
         IN const IMSList<IMS_UINT32>& objTarget)
 {
     for (IMS_UINT32 nAt = 0; nAt < objElements.GetSize(); nAt++)

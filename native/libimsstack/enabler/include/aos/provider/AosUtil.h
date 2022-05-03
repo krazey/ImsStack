@@ -85,7 +85,7 @@ public:
             IN IMS_BOOL bIsIpAddress = IMS_FALSE);
     IMS_BOOL IsListEqual(IN const IMSList<IMS_UINT32>& objLeft,
             IN const IMSList<IMS_UINT32>& objRight, IN IMS_BOOL bOrderChecked);
-    IMS_BOOL IsElementsExistInList(IN const IMSList<IMS_UINT32>& objElements,
+    IMS_BOOL IsElementExistInList(IN const IMSList<IMS_UINT32>& objElements,
             IN const IMSList<IMS_UINT32>& objTarget);
 
 
