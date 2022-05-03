@@ -561,7 +561,7 @@ void AosRegistration::SetState(IN IMS_UINT32 nState)
 
     A_IMS_TRACE_I(REGID, "SetState :: old state(%s) to state(%s)",
             AosProvider::GetLog()->RegStateToString(this->m_nState),
-            AosProvider::GetLog()->RegStateToString(m_nState), 0);
+            AosProvider::GetLog()->RegStateToString(nState), 0);
 
     m_nState = nState;
 
@@ -2953,7 +2953,7 @@ void AosRegistration::ProcessRegTerminated()
 
     if (IsRetryTimer())
     {
-        Destroy();
+        DestroyEx();
         A_IMS_TRACE_D(REGID, "ProcessRegTerminated :: ignore and restore after expiring timer",
             0, 0, 0);
         return;
