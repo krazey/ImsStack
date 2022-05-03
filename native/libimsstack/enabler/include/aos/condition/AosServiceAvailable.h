@@ -36,9 +36,9 @@ public:
     void RemoveListener(IN IAosServiceAvailableListener* piListener);
     void RefreshServiceAvailablility();
     IMS_BOOL IsAvailable();
+    IMS_UINT32 HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
 
     inline virtual void StartToCheckNetworkConnection(){};
-    virtual void HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
     virtual IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE);
 
 protected:
@@ -83,6 +83,7 @@ public:
 protected:
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
+    IAosBlock* m_piBlock;
     AString m_strTag;
     AString m_strName;
 
@@ -94,6 +95,9 @@ private:
 
     static IMSList<IMS_UINT32> m_objBlockReasonsLastNotified;
     IMSList<IAosServiceAvailableListener*> m_objListeners;
+
+private:
+    friend class AosServiceAvailableTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_H_

@@ -35,6 +35,7 @@ PROTECTED
 AosServiceAvailable::AosServiceAvailable(AString strName) :
         m_piAppContext(IMS_NULL),
         m_nSlotId(IMS_SLOT_0),
+        m_piBlock(IMS_NULL),
         m_strName(strName),
         m_bAirplaneMode(IMS_FALSE),
         m_bRoamingState(IMS_FALSE),
@@ -61,6 +62,7 @@ void AosServiceAvailable::Init(IN IAosAppContext* piAppContext)
 
     m_piAppContext = piAppContext;
     m_nSlotId = m_piAppContext->GetSlotId();
+    m_piBlock = m_piAppContext->GetBlock();
 
     m_strTag.Sprintf("%d", m_nSlotId);
 
@@ -143,59 +145,65 @@ IMS_BOOL AosServiceAvailable::IsAvailable()
     return m_bAvailableLastNotified;
 }
 
-PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
-        IN IMS_BOOL bNeedToCheckAvailable /*= IMS_TRUE*/)
-{
-    (void)bNeedToCheckAvailable;
-    return IMS_FALSE;
-}
-
-PUBLIC VIRTUAL void AosServiceAvailable::HandleEvent(
+PUBLIC
+IMS_UINT32 AosServiceAvailable::HandleEvent(
         IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
     A_IMS_TRACE_I(
             AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)", EventToString(eEvent), nState, nStateEx);
 
+    IMS_UINT32 eReturn = -1;
+
     switch (eEvent)
     {
         case EVENT_CALL:
             HandleCallStateChanged(nState, nStateEx);
+            eReturn = EVENT_CALL;
             break;
 
         case EVENT_NETWORK:
             HandleNetworkStateChanged();
+            eReturn = EVENT_NETWORK;
             break;
 
         case EVENT_BLOCK:
             HandleBlockChanged(nState, nStateEx);
+            eReturn = EVENT_BLOCK;
             break;
 
         case EVENT_AIRPLANE:
             HandleAirplaneModeChanged(nState);
+            eReturn = EVENT_AIRPLANE;
             break;
 
         case EVENT_ROAMING:
             HandleRoamingChanged(nState);
+            eReturn = EVENT_ROAMING;
             break;
 
         case EVENT_VOLTE_SETTING:
             HandleVolteSettingChanged(nState);
+            eReturn = EVENT_VOLTE_SETTING;
             break;
 
         case EVENT_VOPS:
             HandleVopsChanged(nState);
+            eReturn = EVENT_VOPS;
             break;
 
         case EVENT_WFC_SETTING:
             HandleWfcSettingChanged(nState);
+            eReturn = EVENT_WFC_SETTING;
             break;
 
         case EVENT_LOCATION:
             HandleLocationInfoChanged();
+            eReturn = EVENT_LOCATION;
             break;
 
         case EVENT_WIFI_STATE:
             HandleWiFiConnectionChanged();
+            eReturn = EVENT_WIFI_STATE;
             break;
 
         default:
@@ -203,6 +211,14 @@ PUBLIC VIRTUAL void AosServiceAvailable::HandleEvent(
     }
 
     Notify();
+
+    return eReturn;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
+        IN IMS_BOOL /*bNeedToCheckAvailable*/ /*= IMS_TRUE*/)
+{
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosServiceAvailable::HandleCallStateChanged(
@@ -281,11 +297,10 @@ void AosServiceAvailable::Notify()
 
     m_bAvailableLastNotified = bAvailable;
 
-    IAosBlock* piBlock = m_piAppContext->GetBlock();
-    if (piBlock != IMS_NULL)
+    if (m_piBlock != IMS_NULL)
     {
-        piBlock->GetBlockReasons(m_objBlockReasonsLastNotified);
-        piBlock->PrintBlockReasons();
+        m_piBlock->GetBlockReasons(m_objBlockReasonsLastNotified);
+        m_piBlock->PrintBlockReasons();
     }
 
     for (IMS_UINT32 nIndex = 0; nIndex < m_objListeners.GetSize(); nIndex++)
@@ -316,14 +331,13 @@ void AosServiceAvailable::RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 n
 PROTECTED
 IMS_BOOL AosServiceAvailable::IsSameAsBeforeUnavailableReason()
 {
-    IAosBlock* piBlock = m_piAppContext->GetBlock();
-    if (piBlock == IMS_NULL)
+    if (m_piBlock == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     IMSList<IMS_UINT32> objCurrReason;
-    piBlock->GetBlockReasons(objCurrReason);
+    m_piBlock->GetBlockReasons(objCurrReason);
 
     return AosUtil::GetInstance()->IsListEqual(
             objCurrReason, m_objBlockReasonsLastNotified, IMS_TRUE);
