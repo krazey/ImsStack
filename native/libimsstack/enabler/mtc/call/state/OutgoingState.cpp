@@ -66,7 +66,8 @@ CallStateName OutgoingState::Terminate(IN const FailReason& objReason)
 
     HandleCancel(&m_objContext.GetSession()->GetISession(), objConvertedReason);
 
-    return TransitToTerminating(objConvertedReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objConvertedReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -141,7 +142,9 @@ CallStateName OutgoingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
     {
         FailReason objReason(FAIL_REASON_SESSION_PRECONDITION);
         HandleCancel(piSession, objReason);
-        return TransitToTerminating(objReason);
+        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
@@ -179,7 +182,8 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
@@ -195,7 +199,8 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
         FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     OnStarted(piSession);
@@ -214,7 +219,7 @@ CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 
     OnStartFailed(piSession, objReason);
 
-    return TransitToTerminating(objReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -226,7 +231,7 @@ CallStateName OutgoingState::SessionTerminated(IN ISession* piSession)
     FailReason objReason = TerminationHandler().Handle(*piSession);
     OnStartFailed(piSession, objReason);
 
-    return TransitToTerminating(objReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -267,7 +272,7 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSessio
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
 
-    return TransitToTerminating(objReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -296,7 +301,8 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
             FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
-            return TransitToTerminating(objReason);
+
+            return CallStateName::TERMINATING;
         }
         return GetStateName();
     }
@@ -309,7 +315,8 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     SendProgressing(); // TODO: enforce remote alert to false?
@@ -386,7 +393,8 @@ CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
             FailReason objReason(FAIL_REASON_SESSION_SETUPFAILED);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
-            return TransitToTerminating(objReason);
+
+            return CallStateName::TERMINATING;
         }
     }
     else if (nStatusCode == SipStatusCode::SC_200)
@@ -410,7 +418,7 @@ CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISession* piSession)
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
 
-    return TransitToTerminating(objReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -430,7 +438,8 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
@@ -458,7 +467,8 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     if (nStatusCode == SipStatusCode::SC_180/* && local precondition support? */)
@@ -487,7 +497,8 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
@@ -515,7 +526,8 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
         HandleCancel(piSession, objReason);
         OnStartFailed(piSession, objReason);
-        return TransitToTerminating(objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     UpdatePreconditionCapability(piSession, piMessage);
@@ -534,7 +546,8 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
             FailReason objReason(FAIL_REASON_UNKNOWN);
             HandleCancel(piSession, objReason);
             OnStartFailed(piSession, objReason);
-            return TransitToTerminating(objReason);
+
+            return CallStateName::TERMINATING;
         }
     }
 
@@ -696,6 +709,8 @@ void OutgoingState::OnStartFailed(IN ISession* piSession, IN const FailReason& o
     {
         HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
     }
+
+    m_objContext.GetUiNotifier().SendStartFailed(objReason);
 }
 
 PRIVATE

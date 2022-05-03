@@ -141,7 +141,6 @@ protected:
 
     void HandleTerminate(IN const FailReason& objReason);
     IMS_SINT32 ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReason);
-    CallStateName TransitToTerminating(IN const FailReason& objReason);
     void NotifyHoldResumeState();
 
     IMS_RESULT CreateISession();
@@ -157,8 +156,7 @@ protected:
     IMS_RESULT SendResponseToEarlyUpdate(IN IMS_SINT32 eStatusCode, IN MtcSession* pMtcSession);
     IMS_RESULT SendResponseToPrack(IN IMS_SINT32 eStatusCode);
 
-    CallStateName RejectAndToTerminating(IN IMS_SINT32 nFailReason);
-    CallStateName RejectAndToTerminating(IN const FailReason& objFailReason);
+    CallStateName RejectIncomingAndToTerminating(IN const FailReason& objFailReason);
 
     void SendIncomingCallReceived();
     void SendStarted();

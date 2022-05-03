@@ -79,8 +79,9 @@ CallStateName EstablishedState::Terminate(IN const FailReason& objReason)
     // SetTerminateCodeForInvitedSessionToConf
 
     HandleTerminate(objConvertedReason);
+    m_objContext.GetUiNotifier().SendTerminated(objConvertedReason);
 
-    return TransitToTerminating(objConvertedReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -89,12 +90,12 @@ CallStateName EstablishedState::SessionTerminated(IN ISession* piSession)
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
 
-    if (IsConferenceCallParticipant())
-    {
-        return TransitToTerminating(FailReason(FAIL_REASON_CONF_JOINED));
-    }
+    m_objContext.GetUiNotifier().SendTerminated(
+            IsConferenceCallParticipant() ?
+            FailReason(FAIL_REASON_CONF_JOINED) :
+            TerminationHandler().Handle(*piSession));
 
-    return TransitToTerminating(TerminationHandler().Handle(*piSession));
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL

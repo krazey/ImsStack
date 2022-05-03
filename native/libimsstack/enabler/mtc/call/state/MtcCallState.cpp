@@ -175,7 +175,23 @@ CallStateName MtcCallState::StartConference(
 PUBLIC VIRTUAL
 CallStateName MtcCallState::HandleSrvccSuccess()
 {
-    return TransitToTerminating(FailReason(FAIL_REASON_SESSION_SRVCC));
+    switch (GetStateName())
+    {
+        case CallStateName::IDLE:
+        case CallStateName::OUTGOING:
+        case CallStateName::INCOMING:
+        case CallStateName::ALERTING:
+            m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_SESSION_SRVCC));
+            break;
+        case CallStateName::ESTABLISHED:
+        case CallStateName::UPDATING:
+            m_objContext.GetUiNotifier().SendTerminated(FailReason(FAIL_REASON_SESSION_SRVCC));
+            break;
+        case CallStateName::TERMINATING:
+            break;
+    }
+
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -367,7 +383,6 @@ void MtcCallState::HandleTerminate(IN const FailReason& objReason)
     }
 
     pSession->GetMessageSender().Terminate(IMS_TRUE, objReason);
-    m_objContext.GetUiNotifier().SendTerminated(objReason);
 }
 
 PROTECTED
@@ -401,28 +416,6 @@ IMS_SINT32 MtcCallState::ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReaso
     IMS_TRACE_I("ConvertTerminateReasonToFailReason : [%d]->[%s]", eReason,
             PS_FailReason(eFailReason), 0);
     return eFailReason;
-}
-
-PROTECTED
-CallStateName MtcCallState::TransitToTerminating(IN const FailReason& objReason)
-{
-    switch (GetStateName())
-    {
-    case CallStateName::IDLE:
-    case CallStateName::OUTGOING:
-    case CallStateName::INCOMING:
-    case CallStateName::ALERTING:
-        m_objContext.GetUiNotifier().SendStartFailed(objReason);
-        break;
-    case CallStateName::ESTABLISHED:
-    case CallStateName::UPDATING:
-        m_objContext.GetUiNotifier().SendTerminated(objReason);
-        break;
-    case CallStateName::TERMINATING:
-        break;
-    }
-
-    return CallStateName::TERMINATING;
 }
 
 PROTECTED
@@ -647,17 +640,11 @@ IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
 }
 
 PROTECTED
-CallStateName MtcCallState::RejectAndToTerminating(IN IMS_SINT32 nFailReason)
-{
-    FailReason objReason(nFailReason);
-    return RejectAndToTerminating(objReason);
-}
-
-PROTECTED
-CallStateName MtcCallState::RejectAndToTerminating(IN const FailReason& objFailReason)
+CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const FailReason& objFailReason)
 {
     m_objContext.GetSession()->GetMessageSender().Reject(objFailReason);
-    return TransitToTerminating(objFailReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objFailReason);
+    return CallStateName::TERMINATING;
 }
 
 PROTECTED

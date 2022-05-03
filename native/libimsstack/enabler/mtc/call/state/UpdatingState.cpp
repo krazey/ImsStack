@@ -135,8 +135,9 @@ CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
     // SetTerminateCodeForInvitedSessionToConf
 
     HandleTerminate(objConvertedReason);
+    m_objContext.GetUiNotifier().SendTerminated(objConvertedReason);
 
-    return TransitToTerminating(objConvertedReason);
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -147,8 +148,9 @@ CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
     StopTimer();
 
     m_objContext.GetMediaManager().Terminate();
+    m_objContext.GetUiNotifier().SendTerminated(TerminationHandler().Handle(*piSession));
 
-    return TransitToTerminating(TerminationHandler().Handle(*piSession));
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -186,6 +188,7 @@ CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
     if (objReason.nReason == FAIL_REASON_SESSION_DESTROYED)
     {
         HandleTerminate(objReason);
+        m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;
     }
     else    // TODO: retry

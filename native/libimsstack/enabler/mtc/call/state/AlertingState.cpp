@@ -36,7 +36,7 @@ CallStateName AlertingState::HandleUserAlert()
     IMS_TRACE_D("HandleUserAlert", 0, 0, 0);
     if (SendProvisionalResponse(IMS_TRUE) == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
     // m_objContext.GetTimer().Start(TIMER_MT_ALERTING,
     //         UCCONFIG_GET_INT(m_nSlotID, SESSION_TIME_MT_ALERTING) * 1000);
@@ -65,7 +65,7 @@ CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
 
     if (SendAccept() == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
 
     RunMedia(GetISession(), IMS_NULL);
@@ -77,8 +77,7 @@ PUBLIC VIRTUAL
 CallStateName AlertingState::Reject(IN const FailReason& objReason)
 {
     IMS_TRACE_D("Reject", 0, 0, 0);
-    // TODO: Convert reason (UCSession::ConvertRejectReasonToFailReason)
-    return RejectAndToTerminating(objReason);
+    return RejectIncomingAndToTerminating(objReason);
 }
 
 PUBLIC VIRTUAL
@@ -99,8 +98,8 @@ CallStateName AlertingState::OnTimerExpired(IN IMS_SINT32 nType)
     switch (nType)
     {
         case TIMER_MT_ALERTING:
-            // TODO: reject w/ REJECT_REASON_TO_MT_NOANSWER
-            // return TransitToTerminating(objReason);
+            // TODO: reject w/ REJECT_REASON_TO_MT_NOANSWER and terminate
+            // m_objContext.GetUiNotifier().SendStartFailed(objReason);
             return GetStateName();
         default:
             break;
@@ -117,7 +116,7 @@ CallStateName AlertingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
     if (eNextAction == QosLossPolicy::RELEASE)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL_PRECONDITION);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL_PRECONDITION));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
@@ -142,7 +141,8 @@ CallStateName AlertingState::SessionStarted(IN ISession* piSession)
         // TODO TerminateAndToTerminating() ?
         FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
         m_objContext.GetSession()->GetMessageSender().Terminate(IMS_TRUE, objReason);
-        return TransitToTerminating(objReason);
+        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+        return CallStateName::TERMINATING;
     }
 
     SendStarted();
@@ -154,12 +154,17 @@ CallStateName AlertingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
-
-    if (piMessage != IMS_NULL && piMessage->GetMethod().Equals(SipMethod::CANCEL))
+    if (piMessage == IMS_NULL)
     {
-        return TransitToTerminating(CancelHandler().Handle(*piMessage));
+        return CallStateName::TERMINATING;
     }
-    return TransitToTerminating(TerminationHandler().Handle(*piSession));
+
+    m_objContext.GetUiNotifier().SendStartFailed(
+            piMessage->GetMethod().Equals(SipMethod::CANCEL) ?
+            CancelHandler().Handle(*piMessage) :
+            TerminationHandler().Handle(*piSession));
+
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -173,12 +178,12 @@ CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
     }
 
     if (SendAccept() == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
 
     return GetStateName();
@@ -193,7 +198,8 @@ CallStateName AlertingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSes
     TODO: failure handler
     */
 
-    return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+    m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -212,7 +218,7 @@ CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession()) ==
                 IMS_FAILURE)
         {
-            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
         }
         return GetStateName();
     }
@@ -221,7 +227,7 @@ CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
 
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
 
     return CallStateName::ALERTING;
@@ -243,7 +249,7 @@ CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
     {
         if (SendResponseToPrack(SipStatusCode::SC_488) == IMS_FAILURE)
         {
-            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
         }
         return GetStateName();
     }
@@ -252,7 +258,7 @@ CallStateName AlertingState::SessionPRAckReceived(IN ISession* piSession)
 
     if (SendResponseToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
     return CallStateName::ALERTING;
 }

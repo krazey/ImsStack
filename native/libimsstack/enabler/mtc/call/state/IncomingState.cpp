@@ -47,7 +47,8 @@ CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
     {
         case TIMER_MT_PRACK_WAIT:
             // TODO: reject w/ REJECT_REASON_TO_MT_PRACK
-            return TransitToTerminating(FailReason(FAIL_REASON_UNKNOWN));
+            m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+            return CallStateName::TERMINATING;
         default:
             break;
     }
@@ -94,7 +95,8 @@ CallStateName IncomingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
         FailReason objReason(REJECT_REASON_SESSION_FAIL_PRECONDITION);
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
         m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        return TransitToTerminating(objReason);
+        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+        return CallStateName::TERMINATING;
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
@@ -109,7 +111,9 @@ PUBLIC VIRTUAL
 CallStateName IncomingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
-    return TransitToTerminating(TerminationHandler().Handle(*piSession));
+
+    m_objContext.GetUiNotifier().SendStartFailed(TerminationHandler().Handle(*piSession));
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -123,7 +127,7 @@ CallStateName IncomingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
@@ -157,7 +161,8 @@ CallStateName IncomingState::SessionEarlyMediaUpdateFailed(IN ISession* /* piSes
     TODO: failure handler
     */
 
-    return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+    m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
+    return CallStateName::TERMINATING;
 }
 
 PUBLIC VIRTUAL
@@ -174,7 +179,8 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         if (m_objContext.GetSession()->GetMessageSender()
                 .RespondToEarlyUpdate(SipStatusCode::SC_200) == IMS_FAILURE)
         {
-            return TransitToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+            m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
+            return CallStateName::TERMINATING;
         }
 
         return GetStateName();
@@ -187,14 +193,14 @@ CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession()) ==
                 IMS_FAILURE)
         {
-            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
         }
         return GetStateName();
     }
 
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
@@ -229,7 +235,7 @@ CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
         if (SendResponseToEarlyUpdate(SipStatusCode::SC_488, m_objContext.GetSession()) ==
                 IMS_FAILURE)
         {
-            return RejectAndToTerminating(REJECT_REASON_MEDIA_NEGOFAIL);
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
         }
         return GetStateName();
     }
@@ -238,7 +244,7 @@ CallStateName IncomingState::SessionPRAckReceived(IN ISession* piSession)
 
     if (SendResponseToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {
-        return RejectAndToTerminating(REJECT_REASON_SESSION_FAIL);
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
     }
 
     SetLocalQosAvailableForWifiCalling(piSession);
