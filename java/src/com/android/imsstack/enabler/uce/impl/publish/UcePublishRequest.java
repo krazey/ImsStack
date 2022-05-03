@@ -16,18 +16,18 @@
 
 package com.android.imsstack.enabler.uce.impl.publish;
 
+import android.os.Parcel;
+import android.text.TextUtils;
+
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IPreference;
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.uce.impl.define.UceConstant;
 import com.android.imsstack.enabler.uce.impl.define.UceMessage;
 import com.android.imsstack.enabler.uce.impl.jni.UceJNI;
 import com.android.imsstack.enabler.uce.interf.PublishResponse;
 import com.android.imsstack.enabler.uce.interf.UceApiConstant;
+import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
-
-import android.os.Parcel;
-import android.text.TextUtils;
 
 public class UcePublishRequest {
     private final int mSlotId;
@@ -77,7 +77,6 @@ public class UcePublishRequest {
      * The capabilities of this device have been updated and should be published to the network.
      */
     public boolean sendRequest() {
-        ImsLog.d("sendRequest:PIDF XML=" + mPidfXml);
         if (TextUtils.isEmpty(mPidfXml)) {
             ImsLog.e("pidfXml is empty");
             informCommandError(UceApiConstant.COMMAND_CODE_INVALID_PARAM);
@@ -94,10 +93,16 @@ public class UcePublishRequest {
 
         parcel.writeInt(UceMessage.UCE_SEND_PUBLISH_CMD);
         parcel.writeInt(mKey);
+        parcel.writeString(mPidfXml);
         parcel.writeInt(mExtended);
         parcel.writeLong(mCapability);
-        parcel.writeString(mPidfXml);
-        parcel.writeString(etag);
+        if (etag.isEmpty()) {
+            parcel.writeInt(0);
+        } else {
+            parcel.writeInt(1);
+            parcel.writeString(etag);
+        }
+
         mUceJNI.sendMessage(mSlotId, parcel);
         return true;
     }

@@ -83,6 +83,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mContext = context;
         mUceEventListener = null;
         mUceJNI = UceJNI.getInstance();
+        mUceJNI.init(mSlotId);
         return;
     }
 
@@ -202,6 +203,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
     @VisibleForTesting
     public void setUceJni(UceJNI jni) {
         mUceJNI = jni;
+        mUceJNI.init(mSlotId);
     }
 
     @VisibleForTesting
@@ -215,7 +217,6 @@ public class UceAgent extends Thread implements IUceJNIListener {
         mUceSubscribeRequestController = new UceSubscribeRequestController(mSlotId, mLoop);
         mUceOptionsRequestController = new UceOptionsRequestController(mSlotId, mLoop);
 
-        mUceJNI.init(mSlotId);
         mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_CONNECTED_IND);
         mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_DISCONNECTED_IND);
         mUceJNI.addListener(mSlotId, this, UceMessage.UCE_IMS_AGENT_REFRESHED_IND);

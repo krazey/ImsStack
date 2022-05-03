@@ -166,6 +166,8 @@ public class UceJNI {
                         return;
                     }
                     objMsgHandler.onMessage(nMsgType, baData, mCopyParcel);
+                } else {
+                    ImsLog.i("do not contain this msg type : " + nMsgType);
                 }
             }
             ImsLog.i("nMsgType : " + nMsgType);

@@ -94,16 +94,19 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel) {
             IUcePubCmdPrm *pCmdParam = new IUcePubCmdPrm();
 
             pCmdParam->m_nKey = pParcel.readInt32();
-            pCmdParam->m_nExtended = pParcel.readInt32();
-            pCmdParam->m_nCapability = pParcel.readInt32();
 
             String16 str16PidfXml = pParcel.readString16();
             String8 str8PidfXml((const char16_t*)str16PidfXml);
             pCmdParam->m_strPidfXml = str8PidfXml.string();
 
-            String16 str16ETag = pParcel.readString16();
-            String8 str8ETag((const char16_t*)str16ETag);
-            pCmdParam->m_strEtag = str8ETag.string();
+            pCmdParam->m_nExtended = pParcel.readInt32();
+            pCmdParam->m_nCapability = pParcel.readInt32();
+
+            if (pParcel.readInt32() == 1) {
+                String16 str16ETag = pParcel.readString16();
+                String8 str8ETag((const char16_t*)str16ETag);
+                pCmdParam->m_strEtag = str8ETag.string();
+            }
 
             IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pCmdParam));
             MessageService::PostMessage(m_strTarget, objMSG);
