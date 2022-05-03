@@ -5,6 +5,7 @@
 #include "ServiceTrace.h"
 #include "ServiceUtil.h"
 #include "AString.h"
+#include "CarrierConfig.h"
 
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -282,7 +283,7 @@ NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcContext& objContex
     switch (nValue)
     {
         // TODO: default is... TEL or SIP? Let's say SIP!
-        case 1:
+        case CarrierConfig::Ims::REQUEST_URI_FORMAT_TEL:
             return Scheme::TEL;
         default:
             return Scheme::SIP;
