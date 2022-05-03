@@ -432,7 +432,7 @@ void UcePublishManager::PublicationDelivered(IN IPublication *piPublication)
         IMS_TRACE_I("PublicationDelivered:IPublication from Engine is not mine.", 0, 0, 0);
         return;
     }
-    IMSMSG objMsg(PUBLISHED, 0, 0);
+    IMSMSG objMsg(PUBLISH_SUCCEEDED, 0, 0);
     OnStateMessage( objMsg );
 }
 
@@ -954,7 +954,7 @@ IMS_BOOL UcePublishManager::StateTERMINATING_Failed(IN IMSMSG &objMsg)
 IMS_BOOL UcePublishManager::StateALL_Terminated(IN IMSMSG &objMsg)
 {
     (void)objMsg;
-    IMS_TRACE_I( "StateALL_Terminated:current State[%s]", StateToString(), 0, 0 );
+    IMS_TRACE_I( "StateALL_Terminated:current State[%s]", StateToString(m_eState), 0, 0 );
     StopTimer(TIMER_ALL);
     DestroyPublication();
     switch(GetState()) {
@@ -1045,7 +1045,7 @@ void UcePublishManager::SendPublishCommandErrorInd(IMS_UINT32 nKey, IMS_UINT32 n
 
         IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_CMD_ERROR_IND, 0,
                 reinterpret_cast<IMS_UINTP>(pParam));
-        MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+        MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
     } else {
         IMS_TRACE_E(0,"SendPublishCommandErrorInd:Command Error Param creation is failed", 0, 0, 0);
     }
@@ -1076,7 +1076,7 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
 
             IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_UPDATED_IND, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
-            MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+            MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
         } else {
             IMS_TRACE_E(0, "SendPublishResponseInd:UpdatedInd Param creation is failed", 0, 0, 0);
         }
@@ -1097,7 +1097,7 @@ void UcePublishManager::SendPublishResponseInd(IMS_UINT32 nKey, IMS_SINT32 nResp
 
             IMSMSG objUIMsg(IUUceService::UCE_PUBLISH_RESPONSE_IND, 0,
                     reinterpret_cast<IMS_UINTP>(pParam));
-            MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+            MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
         } else {
             IMS_TRACE_E(0, "SendPublishResponseInd:ResponseInd Param creation is failed", 0, 0, 0);
         }
@@ -1110,7 +1110,7 @@ void UcePublishManager::SendUnpublishedInd()
         m_bUnpublishSent = IMS_TRUE;
         IMS_TRACE_I("SendUnpublishedInd", 0, 0, 0);
         IMSMSG objUIMsg(IUUceService::UCE_UNPUBLISHED_IND, 0, 0);
-        MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
     }
 }
 
@@ -1259,6 +1259,7 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
         const IMS_BYTE* pszXML = reinterpret_cast<const IMS_BYTE*>(m_strPidfXml.GetStr());
         objContent.Attach( pszXML, m_strPidfXml.GetLength() );
     } else {
+        IMS_TRACE_E( 0,"[ERROR]SetPidfXmlBody:m_strPidfXml is null or empty",0,0,0);
         return IMS_FALSE;
     }
 
@@ -1642,7 +1643,7 @@ void    UcePublishManager::StopTimer(INTERNAL_TIMER eTimer)
 
 void UcePublishManager::HandleExponentialRetryTimer()
 {
-    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%d]", StateToString(), 0, 0);
+    IMS_TRACE_I("HandleExponentialRetryTimer:Current State[%d]", StateToString(m_eState), 0, 0);
     if(GetState() == PUBLISHING) {
         if (RetryPublish(INITIAL) == IMS_TRUE) {
             return;
@@ -1659,7 +1660,7 @@ void UcePublishManager::HandleExponentialRetryTimer()
 
 void UcePublishManager::HandleRetryTimer()
 {
-    IMS_TRACE_I("HandleRetryTimer:Current State[%d]", StateToString(), 0, 0);
+    IMS_TRACE_I("HandleRetryTimer:Current State[%d]", StateToString(m_eState), 0, 0);
     if(GetState() == PUBLISHING) {
         if (RetryPublish(INITIAL) == IMS_TRUE) {
             return;
@@ -1677,7 +1678,7 @@ void UcePublishManager::HandleRetryTimer()
 
 void UcePublishManager::HandleRetryAfterTimer()
 {
-    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%d]", StateToString(), 0, 0);
+    IMS_TRACE_I("HandleRetryAfterTimer:Current State[%d]", StateToString(m_eState), 0, 0);
     if(GetState() == PUBLISHING) {
         if (RetryPublish(INITIAL) == IMS_TRUE) {
             return;
@@ -1732,7 +1733,8 @@ void UcePublishManager::ClearPendingPublishRequest()
 
 IMS_BOOL UcePublishManager::SetState( IMS_UINT32 _eState )
 {
-    IMS_TRACE_I("SetState - State : [ %s ] -> [ %s ]", StateToString(), StateToString(_eState ), 0);
+    IMS_TRACE_I("SetState - State : [ %s ] -> [ %s ]", StateToString(m_eState),
+                StateToString(_eState ), 0);
     m_eState = _eState;
     if (m_eState == PUBLISHED || m_eState == REFRESHING) {
         SetPublishStateToAoS(PUBLISH_STARTED);
@@ -1741,24 +1743,6 @@ IMS_BOOL UcePublishManager::SetState( IMS_UINT32 _eState )
     }
     IMSStateMachine::SetState( _eState );
     return IMS_TRUE;
-}
-
-const IMS_CHAR* UcePublishManager::StateToString( )
-{
-    static const char* szState[] = {
-        "IDLE",
-        "ON",
-        "PUBLISHING",
-        "PUBLISHED",
-        "REFRESHING",
-        "TERMINATING",
-        "ERROR",
-    };
-    if (sizeof(szState)/sizeof(char*)-1 <= m_eState) {
-        IMS_TRACE_E( 0, "StateToString:State Error", 0, 0, 0 );
-        return szState[ sizeof(szState)/sizeof(char*)-1 ];
-    }
-    return szState[ m_eState ];
 }
 
 const IMS_CHAR* UcePublishManager::StateToString( IMS_UINT32 _eState )

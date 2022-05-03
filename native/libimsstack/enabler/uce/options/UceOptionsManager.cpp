@@ -178,7 +178,7 @@ void UceOptionsManager::SendOptionsReceivedInd(IN IMS_UINT32 nKey, IN AString fr
 
     IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_RECEIVED_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
 }
 
 void UceOptionsManager::SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT32 code)
@@ -190,5 +190,5 @@ void UceOptionsManager::SendOptionsCommandError(IN IMS_UINT32 nKey, IN IMS_UINT3
 
     IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_CMD_ERROR_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
 }

@@ -191,7 +191,6 @@ private:
     void ClearPendingPublishRequest();
 
     IMS_BOOL SetState( IMS_UINT32 _eState );
-    const IMS_CHAR* StateToString( );
     const IMS_CHAR* StateToString( IMS_UINT32 _eState );
 /* -------------------------------------------------------------------------------------------------
     Variables

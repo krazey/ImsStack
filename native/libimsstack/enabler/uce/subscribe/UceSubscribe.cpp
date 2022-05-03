@@ -934,7 +934,7 @@ void UceSubscribe::SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString st
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_RESPONSE_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
@@ -950,7 +950,7 @@ void UceSubscribe::SendSubscribeCommandErrorInd(IMS_UINT32 nCommandError)
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_CMD_ERROR_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
     m_nKey = 0;
 }
 
@@ -968,7 +968,7 @@ void UceSubscribe::SendPresenceNotifyInd(IMSList<AString> pidfXmls)
 
     IMSMSG objUIMsg(IUUceService::UCE_PRESENCE_NOTIFY_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUser*>* pList)
@@ -996,7 +996,7 @@ void UceSubscribe::SendSubscribeResourceTerminatedInd(IMSList<UceNonCapabilityUs
     pList->Clear();
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_RESOURCE_TERMINATED_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
 }
 
 void UceSubscribe::SendSubscribeTerminatedInd()
@@ -1013,7 +1013,7 @@ void UceSubscribe::SendSubscribeTerminatedInd()
 
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_TERMINATED_IND, 0,
             reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage( AString("JNIEABServiceThread"), objUIMsg);
+    MessageService::PostMessage( AString("JniUceServiceThread"), objUIMsg);
     m_nKey = 0;
 }
 
