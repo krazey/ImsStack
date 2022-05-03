@@ -16,9 +16,9 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include "IMSList.h"
+#include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
-
-using ::testing::Return;
 
 class AosUtilTest : public ::testing::Test {
 public:
@@ -31,7 +31,7 @@ protected:
     }
 
     virtual void TearDown() override {
-        if(pAosUtil){
+        if (pAosUtil) {
             delete pAosUtil;
         }
     }
@@ -178,4 +178,49 @@ TEST_F(AosUtilTest, CompareListIPv6) {
 
     EXPECT_TRUE(pAosUtil->IsStrExistInList(leftArrayExist, rightArray, IMS_TRUE));
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
+}
+
+TEST_F(AosUtilTest, ManageIntList) {
+    IMSList<IMS_UINT32> reasons;
+    IMSList<IMS_UINT32> compareReasons;
+    IMSList<IMS_UINT32> combineReasons;
+    reasons.Clear();
+    compareReasons.Clear();
+    combineReasons.Clear();
+
+    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_OUT_OF_SERVICE, reasons);
+    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+
+    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, compareReasons);
+    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, compareReasons);
+
+    EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
+    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
+
+    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->RemoveElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+
+    pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
+    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
+
+    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
+    EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
+
+    pAosUtil->RemoveElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
+    EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, compareReasons));
+
+    pAosUtil->CombineLists(reasons, compareReasons, combineReasons);
+    EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));
+
+    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, combineReasons);
+    EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));
+
+    pAosUtil->RemoveElementToList(BLOCK_CELLULAR_VOPS_OFF, combineReasons);
+    pAosUtil->RemoveElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, combineReasons);
+    EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, combineReasons));
 }

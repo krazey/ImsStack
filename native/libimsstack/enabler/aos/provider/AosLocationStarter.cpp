@@ -283,7 +283,7 @@ void AosLocationStarter::HandleStartConditionChanged()
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON))
     {
         piBlock->GetBlockReasons(objBlocks, SERVICE_CELLULAR);
-        if (!AosUtil::GetInstance()->IsElementsExistInList(m_objVolteBlockReasons,objBlocks))
+        if (!AosUtil::GetInstance()->IsElementExistInList(m_objVolteBlockReasons,objBlocks))
         {
             bStart = IMS_TRUE;
         }
@@ -293,7 +293,7 @@ void AosLocationStarter::HandleStartConditionChanged()
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON))
     {
         piBlock->GetBlockReasons(objBlocks, SERVICE_WIFI);
-        if (!AosUtil::GetInstance()->IsElementsExistInList(m_objWfcBlockReasons, objBlocks))
+        if (!AosUtil::GetInstance()->IsElementExistInList(m_objWfcBlockReasons, objBlocks))
         {
             bStart = IMS_TRUE;
         }
