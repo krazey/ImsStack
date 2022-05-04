@@ -35,16 +35,15 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define REGID m_strTag.GetStr()
 
 PUBLIC
-AosERegistration::AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId)
-    : AosRegistration(piAppContext, strRegId)
-    , m_bReinitiationRequested(IMS_FALSE)
+AosERegistration::AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId) :
+        AosRegistration(piAppContext, strRegId),
+        m_bReinitiationRequested(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosERegistration = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosERegistration), this);
 };
 
-PUBLIC VIRTUAL
-AosERegistration::~AosERegistration()
+PUBLIC VIRTUAL AosERegistration::~AosERegistration()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosERegistration = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosERegistration), this);
@@ -56,16 +55,15 @@ AosERegistration::~AosERegistration()
     }
 }
 
-PUBLIC VIRTUAL
-void AosERegistration::Start()
+PUBLIC VIRTUAL void AosERegistration::Start()
 {
-    A_IMS_TRACE_I(REGID, "Start :: state(%s)",
-            AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
+    A_IMS_TRACE_I(
+            REGID, "Start :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
     IMS_UINT32 nScheme = GET_N_CONFIG(m_nSlotId)->GetPreferredEmergencyRegistration();
 
-    if (IsFakeModeCondition() || (nScheme ==
-            CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP))
+    if (IsFakeModeCondition() ||
+            (nScheme == CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_SKIP))
     {
         SetMode(MODE_FAKE);
         SetFakeReg(IMS_TRUE);
@@ -86,19 +84,18 @@ void AosERegistration::Start()
     AosRegistration::Start();
 }
 
-PUBLIC VIRTUAL
-void AosERegistration::Update(IN IMS_BOOL bIgnoreRetryTimer /* = IMS_FALSE */,
+PUBLIC VIRTUAL void AosERegistration::Update(IN IMS_BOOL bIgnoreRetryTimer /* = IMS_FALSE */,
         IN IMS_BOOL bExplicitUpdate /* = IMS_TRUE */)
 {
-    (void) bIgnoreRetryTimer;
-    (void) bExplicitUpdate;
+    (void)bIgnoreRetryTimer;
+    (void)bExplicitUpdate;
 
-    A_IMS_TRACE_I(REGID, "Update :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState),
-            0, 0);
+    A_IMS_TRACE_I(
+            REGID, "Update :: state(%s)", AosProvider::GetLog()->RegStateToString(m_nState), 0, 0);
 
     switch (m_nState)
     {
-        case STATE_REGSTOP: // FALL-THROUGH
+        case STATE_REGSTOP:  // FALL-THROUGH
         case STATE_REFRESHSTOP:
             ProcessRetryInRegStopped();
             break;
@@ -112,8 +109,8 @@ void AosERegistration::Update(IN IMS_BOOL bIgnoreRetryTimer /* = IMS_FALSE */,
     }
 }
 
-PUBLIC VIRTUAL
-void AosERegistration::RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason /* = 0 */)
+PUBLIC VIRTUAL void AosERegistration::RequestCmd(
+        IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason /* = 0 */)
 {
     if (nCmdType == CMD_FAKE_MODE)
     {
@@ -123,7 +120,7 @@ void AosERegistration::RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason 
         {
             m_piContext->GetPcscf()->RemoveCurrentPcscf();
 
-            if (SetFirstPcscf(IMS_FALSE) == IMS_FALSE )
+            if (SetFirstPcscf(IMS_FALSE) == IMS_FALSE)
             {
                 Destroy();
                 ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
@@ -138,8 +135,7 @@ void AosERegistration::RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason 
     AosRegistration::RequestCmd(nCmdType, nReason);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
 {
     A_IMS_TRACE_I(REGID, "OnMessage :: (%s)",
             AosProvider::GetLog()->RegMessageToString(objMsg.nMSG), 0, 0);
@@ -153,8 +149,8 @@ IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
 
         case MSG_REG_REINITIATE_WITH_REG_STATE:
             SetReinitiationRequested(IMS_FALSE);
-            ProcessReinitiateWithRegState(((static_cast<IMS_SINT32>(objMsg.nWparam)) > 0) ?
-                    IMS_TRUE : IMS_FALSE);
+            ProcessReinitiateWithRegState(
+                    ((static_cast<IMS_SINT32>(objMsg.nWparam)) > 0) ? IMS_TRUE : IMS_FALSE);
             break;
 
         default:
@@ -164,8 +160,7 @@ IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::Init()
+PROTECTED VIRTUAL void AosERegistration::Init()
 {
     A_IMS_TRACE_D(REGID, "Init", 0, 0, 0);
 
@@ -185,29 +180,26 @@ void AosERegistration::Init()
     InitFeatures();
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosERegistration::IsFakeModeCondition()
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::IsFakeModeCondition()
 {
     return m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
             m_piContext->GetNetTracker()->IsEmergencyLteAttach();
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosERegistration::IsReinitiationRequested() const
+PROTECTED VIRTUAL IMS_BOOL AosERegistration::IsReinitiationRequested() const
 {
     return m_bReinitiationRequested;
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessAuthenticationFailed()
+PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 {
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode /* = 0 */)
+PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
+        IN IMS_SINT32 nStatusCode /* = 0 */)
 {
-    (void) nStatusCode;
+    (void)nStatusCode;
 
     if (IsReinitiationRequested())
     {
@@ -218,8 +210,7 @@ void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCod
 
     if (IsFakeRegistration())
     {
-        A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: fake E-REG is failed",
-                0, 0, 0);
+        A_IMS_TRACE_I(REGID, "ProcessDefaultFlowRecovery_Start :: fake E-REG is failed", 0, 0, 0);
         ProcessUnpredictableFailure();
         return;
     }
@@ -236,22 +227,21 @@ void AosERegistration::ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCod
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode /* = 0 */)
+PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
+        IN IMS_SINT32 nStatusCode /* = 0 */)
 {
-    (void) nStatusCode;
+    (void)nStatusCode;
 
     SetState(STATE_REFRESHSTOP);
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
     switch (nStatusCode)
     {
-         // 423
+            // 423
         case SipStatusCode::SC_423:
             ProcessStartFailed_423();
             break;
@@ -263,28 +253,25 @@ void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
     }
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessStartFailed_TxnTimeout()
+PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_TxnTimeout()
 {
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
-    (void) nReason;
+    (void)nReason;
 
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
+PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
 {
     A_IMS_TRACE_I(REGID, "ProcessUpdateFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
     switch (nStatusCode)
     {
-        //423
+        // 423
         case SipStatusCode::SC_423:
             ProcessUpdateFailed_423();
             break;
@@ -296,22 +283,19 @@ void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
     }
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessUpdateFailed_TxnTimeout()
+PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_TxnTimeout()
 {
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
 {
-    (void) nReason;
+    (void)nReason;
 
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessECallStarted()
+PROTECTED VIRTUAL void AosERegistration::ProcessECallStarted()
 {
     if (GetState() == STATE_REFRESHSTOP)
     {
@@ -320,8 +304,7 @@ void AosERegistration::ProcessECallStarted()
     }
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessFakeMode()
+PROTECTED VIRTUAL void AosERegistration::ProcessFakeMode()
 {
     A_IMS_TRACE_I(REGID, "ProcessFakeMode", 0, 0, 0);
 
@@ -331,8 +314,7 @@ void AosERegistration::ProcessFakeMode()
     PostMessage(MSG_REG_REINITIATE, 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered)
+PROTECTED VIRTUAL void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered)
 {
     A_IMS_TRACE_I(REGID, "ProcessFakeModeWithRegState", 0, 0, 0);
 
@@ -342,8 +324,7 @@ void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered)
     PostMessage(MSG_REG_REINITIATE_WITH_REG_STATE, bIsRegistered ? 1 : 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered)
+PROTECTED VIRTUAL void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered)
 {
     A_IMS_TRACE_I(REGID, "ProcessReinitiate - bIsRegistered [%s]",
             (bIsRegistered == IMS_TRUE) ? "TRUE" : "FALSE", 0, 0);
@@ -368,16 +349,14 @@ void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered)
     ReportTryingState();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
+PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
 {
     A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
 
     m_bReinitiationRequested = bRequest;
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::ProcessTransactionTimerExpired()
+PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
 
@@ -399,8 +378,8 @@ void AosERegistration::ProcessTransactionTimerExpired()
     }
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh)
+PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
+        OUT IMS_BOOL& bDoImplicitRefresh)
 {
     A_IMS_TRACE_I(REGID, "Registration_RefreshTimerExpired", 0, 0, 0);
 
@@ -413,8 +392,8 @@ void AosERegistration::Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplici
 
     if (!IsTransactionStarted())
     {
-        A_IMS_TRACE_I(REGID, "Registration_RefreshTimerExpired :: transaction is not started",
-                0, 0, 0);
+        A_IMS_TRACE_I(
+                REGID, "Registration_RefreshTimerExpired :: transaction is not started", 0, 0, 0);
         SetState(STATE_REFRESHSTOP);
         return;
     }
@@ -434,22 +413,19 @@ void AosERegistration::Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplici
     ReportTryingState();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::Registration_Started()
+PROTECTED VIRTUAL void AosERegistration::Registration_Started()
 {
     StopTimer(TIMER_TRANSACTION);
     AosRegistration::Registration_Started();
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosERegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
 {
     StopTimer(TIMER_TRANSACTION);
     AosRegistration::Registration_StartFailed(nReason);
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::Registration_Terminated(IN IMS_SINT32 nReason)
+PROTECTED VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 nReason)
 {
     if (IsImsCall())
     {
@@ -467,8 +443,8 @@ void AosERegistration::Registration_Terminated(IN IMS_SINT32 nReason)
     }
 }
 
-PROTECTED VIRTUAL
-void AosERegistration::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 m_nState)
+PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
+        IN IMS_UINT32 nType, IN IMS_UINT32 m_nState)
 {
     if (nType != IAosCallTracker::TYPE_EMERGENCY)
     {

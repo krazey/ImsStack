@@ -85,4 +85,4 @@ public:
     virtual void ImsAos_Resumed() = 0;
 };
 
-#endif // INTERFACE_IMS_AOS_LISTENER_H_
+#endif  // INTERFACE_IMS_AOS_LISTENER_H_

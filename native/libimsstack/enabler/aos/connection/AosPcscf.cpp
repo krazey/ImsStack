@@ -46,17 +46,17 @@ Remarks
 
 */
 PUBLIC
-AosPcscf::AosPcscf(IN IAosAppContext* piAppContext)
-    : m_piAppContext(piAppContext)
-    , m_piListener(IMS_NULL)
-    , m_piDnsQueryRetryTimer(IMS_NULL)
-    , m_eRegType(AosRegistrationType::NORMAL)
-    , m_nChangedType(TYPE_CHANGED_DIFFERENT)
-    , m_bIsConfigured(IMS_FALSE)
-    , m_nCurrentPcscfIndex(0)
-    , m_bIsDnsQueryRetry(IMS_FALSE)
-    , m_bOtherIpTypeRequired(IMS_FALSE)
-    , m_nDiscoveryMethodIndex(0)
+AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
+        m_piAppContext(piAppContext),
+        m_piListener(IMS_NULL),
+        m_piDnsQueryRetryTimer(IMS_NULL),
+        m_eRegType(AosRegistrationType::NORMAL),
+        m_nChangedType(TYPE_CHANGED_DIFFERENT),
+        m_bIsConfigured(IMS_FALSE),
+        m_nCurrentPcscfIndex(0),
+        m_bIsDnsQueryRetry(IMS_FALSE),
+        m_bOtherIpTypeRequired(IMS_FALSE),
+        m_nDiscoveryMethodIndex(0)
 {
     m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -69,8 +69,7 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosPcscf::~AosPcscf()
+PUBLIC VIRTUAL AosPcscf::~AosPcscf()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosPcscf = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosPcscf), this);
@@ -81,8 +80,7 @@ AosPcscf::~AosPcscf()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::Init()
+PROTECTED VIRTUAL void AosPcscf::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
@@ -94,8 +92,7 @@ void AosPcscf::Init()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::CleanUp()
+PROTECTED VIRTUAL void AosPcscf::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
@@ -109,8 +106,7 @@ void AosPcscf::CleanUp()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
+PUBLIC VIRTUAL void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
 {
     A_IMS_TRACE_I(APPPROFILE, "Configure :: nIpVersion(%d)", nIpVersion, 0, 0);
 
@@ -133,8 +129,8 @@ void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
 
         if (!IsConfigured() && (m_piDnsQueryRetryTimer == IMS_NULL))
         {
-            IMS_SINT32 nOtherIpType = (nIpType == IPAddress::IPV6) ?
-                    IPAddress::IPV4 : IPAddress::IPV6;
+            IMS_SINT32 nOtherIpType =
+                    (nIpType == IPAddress::IPV6) ? IPAddress::IPV4 : IPAddress::IPV6;
             if (IsLocalAddressValid(nOtherIpType))
             {
                 ClearDiscoveryContents();
@@ -149,8 +145,7 @@ void AosPcscf::Configure(IN IMS_UINT32 nIpVersion /* = IPAddress::UNKNOWN */)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::IsConfigured() const
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsConfigured() const
 {
     A_IMS_TRACE_I(APPPROFILE, "IsConfigured :: (%s)", _TRACE_B_(m_bIsConfigured), 0, 0);
     return m_bIsConfigured;
@@ -161,8 +156,7 @@ IMS_BOOL AosPcscf::IsConfigured() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::IsAsyncDnsDiscovery() const
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsAsyncDnsDiscovery() const
 {
     return (m_eRegType == AosRegistrationType::RCS);
 }
@@ -172,8 +166,7 @@ IMS_BOOL AosPcscf::IsAsyncDnsDiscovery() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::IsSinglePcoScheme()
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsSinglePcoScheme()
 {
     const ISubscriberConfig* piSubsConfig =
             GetSubscriberConfig((IsFakeDiscoverySchemes()) ? IAosSubscriber::FAKE : -1);
@@ -207,8 +200,7 @@ IMS_BOOL AosPcscf::IsSinglePcoScheme()
 Remarks
 
 */
-PUBLIC VIRTUAL
-const AStringArray& AosPcscf::GetPcscfs()
+PUBLIC VIRTUAL const AStringArray& AosPcscf::GetPcscfs()
 {
     m_objCurrAddresses.RemoveAllElements();
 
@@ -229,8 +221,7 @@ const AStringArray& AosPcscf::GetPcscfs()
 Remarks
 
 */
-PUBLIC VIRTUAL
-const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
+PUBLIC VIRTUAL const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
 {
     m_objCurrPorts.Clear();
 
@@ -251,8 +242,7 @@ const IMSList<IMS_SINT32>& AosPcscf::GetPcscfsPorts()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
+PUBLIC VIRTUAL void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
         IN IMSList<IMS_SINT32> objPorts /* = IMSList<IMS_SINT32>() */)
 {
     ClearPcscfList();
@@ -263,8 +253,7 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
     {
         IPAddress objIpa(objPcscfs.GetElementAt(nAt));
 
-        if ((objPorts.GetSize() != 0) &&
-                (objPorts.GetAt(static_cast<IMS_UINT32>(nAt)) != IMS_NULL))
+        if ((objPorts.GetSize() != 0) && (objPorts.GetAt(static_cast<IMS_UINT32>(nAt)) != IMS_NULL))
         {
             nPort = objPorts.GetAt(static_cast<IMS_UINT32>(nAt));
         }
@@ -281,8 +270,7 @@ void AosPcscf::UpdatePcscfs(IN const AStringArray& objPcscfs,
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::HasPcscf(IN IMS_SINT32 nIndex)
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::HasPcscf(IN IMS_SINT32 nIndex)
 {
     if (nIndex <= (static_cast<IMS_SINT32>(m_objPcscfList.GetSize()) - 1))
     {
@@ -297,8 +285,7 @@ IMS_BOOL AosPcscf::HasPcscf(IN IMS_SINT32 nIndex)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosPcscf::GetPcscfCount()
+PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetPcscfCount()
 {
     return m_objPcscfList.GetSize();
 }
@@ -308,9 +295,8 @@ IMS_UINT32 AosPcscf::GetPcscfCount()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::SetCurrentPcscfInvalid(IN IMS_BOOL bIsTimer /* = IMS_FALSE */,
-        IN IMS_UINT32 nSeconds /* = 0 */)
+PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfInvalid(
+        IN IMS_BOOL bIsTimer /* = IMS_FALSE */, IN IMS_UINT32 nSeconds /* = 0 */)
 {
     if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
     {
@@ -334,8 +320,7 @@ void AosPcscf::SetCurrentPcscfInvalid(IN IMS_BOOL bIsTimer /* = IMS_FALSE */,
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::RemoveCurrentPcscf()
+PUBLIC VIRTUAL void AosPcscf::RemoveCurrentPcscf()
 {
     if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
     {
@@ -354,8 +339,7 @@ void AosPcscf::RemoveCurrentPcscf()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::SetAllPcscfValid()
+PUBLIC VIRTUAL void AosPcscf::SetAllPcscfValid()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
     {
@@ -372,8 +356,7 @@ void AosPcscf::SetAllPcscfValid()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::IsAllPcscfTried()
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsAllPcscfTried()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
     {
@@ -392,8 +375,7 @@ IMS_BOOL AosPcscf::IsAllPcscfTried()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::SetCurrentPcscfTried()
+PUBLIC VIRTUAL void AosPcscf::SetCurrentPcscfTried()
 {
     if (m_nCurrentPcscfIndex < m_objPcscfList.GetSize())
     {
@@ -410,8 +392,7 @@ void AosPcscf::SetCurrentPcscfTried()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::ResetAllPcscfTried()
+PUBLIC VIRTUAL void AosPcscf::ResetAllPcscfTried()
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objPcscfList.GetSize(); nAt++)
     {
@@ -428,8 +409,7 @@ void AosPcscf::ResetAllPcscfTried()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     if ((m_objPcscfList.GetSize() - 1) < m_nCurrentPcscfIndex)
     {
@@ -442,7 +422,6 @@ IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
         return IMS_FALSE;
     }
 
-
     objPcscf = pPcscf->GetAddress();
     nPort = pPcscf->GetPort();
 
@@ -452,8 +431,8 @@ IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
     }
 
     A_IMS_TRACE_I(APPPROFILE, "GetCurrentPcscf :: (%s, %d) at index(%d)",
-            IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() ?
-            "xxx" : objPcscf.GetStr(), nPort, m_nCurrentPcscfIndex);
+            IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() ? "xxx" : objPcscf.GetStr(), nPort,
+            m_nCurrentPcscfIndex);
 
     return IMS_TRUE;
 }
@@ -463,8 +442,7 @@ IMS_BOOL AosPcscf::GetCurrentPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosPcscf::GetCurrentIndex() const
+PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetCurrentIndex() const
 {
     return m_nCurrentPcscfIndex;
 }
@@ -474,8 +452,7 @@ IMS_UINT32 AosPcscf::GetCurrentIndex() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::IsFirstPcscf()
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::IsFirstPcscf()
 {
     return (m_nCurrentPcscfIndex == 0) ? IMS_TRUE : IMS_FALSE;
 }
@@ -485,8 +462,7 @@ IMS_BOOL AosPcscf::IsFirstPcscf()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     if (m_objPcscfList.IsEmpty())
     {
@@ -498,7 +474,6 @@ IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
     {
         return IMS_FALSE;
     }
-
 
     objPcscf = pPcscf->GetAddress();
     nPort = pPcscf->GetPort();
@@ -515,8 +490,7 @@ IMS_BOOL AosPcscf::GetFirstPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::HasNextPcscf()
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::HasNextPcscf()
 {
     return (GetNextPcscfIndex() >= 0);
 }
@@ -526,8 +500,7 @@ IMS_BOOL AosPcscf::HasNextPcscf()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosPcscf::GetNextPcscfIndex()
+PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
 {
     for (IMS_UINT32 nAt = m_nCurrentPcscfIndex + 1; nAt < m_objPcscfList.GetSize(); nAt++)
     {
@@ -559,8 +532,7 @@ IMS_SINT32 AosPcscf::GetNextPcscfIndex()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 {
     IMS_SINT32 nNextPcscfIndex = GetNextPcscfIndex();
 
@@ -581,8 +553,8 @@ IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
     m_nCurrentPcscfIndex = nNextPcscfIndex;
 
     A_IMS_TRACE_I(APPPROFILE, "GetNextPcscf :: (%s, %d) at index(%d)",
-            IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() ?
-            "xxx" : objPcscf.GetStr(), nPort, nNextPcscfIndex);
+            IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() ? "xxx" : objPcscf.GetStr(), nPort,
+            nNextPcscfIndex);
 
     return IMS_TRUE;
 }
@@ -592,8 +564,7 @@ IMS_BOOL AosPcscf::GetNextPcscf(OUT AString& objPcscf, OUT IMS_UINT32& nPort)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::SetFirstPcscfIndex()
+PUBLIC VIRTUAL void AosPcscf::SetFirstPcscfIndex()
 {
     m_nCurrentPcscfIndex = 0;
 }
@@ -603,8 +574,7 @@ void AosPcscf::SetFirstPcscfIndex()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
+PUBLIC VIRTUAL IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
 {
     const AStringArray& objCurrPcscfs = GetPcscfs();
     AString strCurrPcscf;
@@ -655,8 +625,7 @@ IMS_BOOL AosPcscf::CheckAndProcessChangeFromPco()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosPcscf::GetChangedType()
+PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetChangedType()
 {
     return m_nChangedType;
 }
@@ -666,10 +635,9 @@ IMS_UINT32 AosPcscf::GetChangedType()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::RequestCmd(IN IMS_UINT32 nType)
+PUBLIC VIRTUAL void AosPcscf::RequestCmd(IN IMS_UINT32 nType)
 {
-    (void) nType;
+    (void)nType;
 }
 
 /*
@@ -677,11 +645,9 @@ void AosPcscf::RequestCmd(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosPcscf::SetListener(IN IAosPcscfListener* piListener)
+PUBLIC VIRTUAL void AosPcscf::SetListener(IN IAosPcscfListener* piListener)
 {
-    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set",
-            piListener, 0, 0);
+    A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
 
     m_piListener = piListener;
 }
@@ -830,8 +796,7 @@ void AosPcscf::SetConfigured(IN IMS_BOOL bConfigured)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosPcscf::IsFakeDiscoverySchemes() const
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::IsFakeDiscoverySchemes() const
 {
     return (m_eRegType == AosRegistrationType::EMERGENCY ||
             m_eRegType == AosRegistrationType::FAKE);
@@ -842,8 +807,7 @@ IMS_BOOL AosPcscf::IsFakeDiscoverySchemes() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
+PROTECTED VIRTUAL void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_D(APPPROFILE, "ProcessDiscovery :: IPV(%d)", nIpVersion, 0, 0);
 
@@ -886,8 +850,7 @@ void AosPcscf::ProcessDiscovery(IN IMS_SINT32 nIpVersion)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMethod)
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMethod)
 {
     const ISubscriberConfig* piSubsConfig =
             GetSubscriberConfig((IsFakeDiscoverySchemes()) ? IAosSubscriber::FAKE : -1);
@@ -918,8 +881,7 @@ IMS_BOOL AosPcscf::GetNextDiscoveryMethod(OUT IMS_SINT32& nMethod)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_I(APPPROFILE, "GetFromPco :: IPv(%d)", nIpVersion, 0, 0);
 
@@ -955,7 +917,6 @@ IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
                 AddPcscf(objIpa.ToString(), nPort);
             }
         }
-
     }
     else
     {
@@ -971,8 +932,7 @@ IMS_BOOL AosPcscf::GetFromPco(IN IMS_SINT32 nIpVersion)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 {
     A_IMS_TRACE_I(APPPROFILE, "GetFromConf :: IPv(%d)", nIpVersion, 0, 0);
 
@@ -1044,9 +1004,8 @@ IMS_BOOL AosPcscf::GetFromConf(IN IMS_SINT32 nIpVersion)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosPcscf::ProcessDnsQuery(IN const AString& strHost, IN IMS_SINT32 nPort,
-        IN IMS_SINT32 nIpVersion)
+PROTECTED VIRTUAL IMS_BOOL AosPcscf::ProcessDnsQuery(
+        IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion)
 {
     IMSList<IPAddress> objIpas;
 
@@ -1092,8 +1051,8 @@ IMS_BOOL AosPcscf::ProcessDnsQuery(IN const AString& strHost, IN IMS_SINT32 nPor
 Remarks
 
 */
-PROTECTED VIRTUAL
-const ISubscriberConfig* AosPcscf::GetSubscriberConfig(IN IMS_SINT32 nType /* = -1 */)
+PROTECTED VIRTUAL const ISubscriberConfig* AosPcscf::GetSubscriberConfig(
+        IN IMS_SINT32 nType /* = -1 */)
 {
     return m_piAppContext->GetSubscriber()->GetSubscriberConfig(nType);
 }
@@ -1103,8 +1062,7 @@ const ISubscriberConfig* AosPcscf::GetSubscriberConfig(IN IMS_SINT32 nType /* = 
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
+PROTECTED VIRTUAL IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
 {
     return GET_N_CONFIG(m_piAppContext->GetSlotId())->GetPcscfPort();
 }
@@ -1114,8 +1072,7 @@ IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::CleanAll()
+PROTECTED VIRTUAL void AosPcscf::CleanAll()
 {
     SetConfigured(IMS_FALSE);
     ClearPcscfList();
@@ -1128,8 +1085,7 @@ void AosPcscf::CleanAll()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ClearDiscoveryContents()
+PROTECTED VIRTUAL void AosPcscf::ClearDiscoveryContents()
 {
     ClearTimers();
     ClearRetryHostList();
@@ -1143,8 +1099,7 @@ void AosPcscf::ClearDiscoveryContents()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ClearPcscfList()
+PROTECTED VIRTUAL void AosPcscf::ClearPcscfList()
 {
     A_IMS_TRACE_I(APPPROFILE, "ClearPcscfList :: size(%d)", m_objPcscfList.GetSize(), 0, 0);
 
@@ -1165,8 +1120,7 @@ void AosPcscf::ClearPcscfList()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ClearRetryHostList()
+PROTECTED VIRTUAL void AosPcscf::ClearRetryHostList()
 {
     A_IMS_TRACE_I(APPPROFILE, "ClearRetryHostList :: size(%d)", m_objRetryHostList.GetSize(), 0, 0);
 
@@ -1187,13 +1141,12 @@ void AosPcscf::ClearRetryHostList()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
+PROTECTED VIRTUAL void AosPcscf::ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCpi,
         IN const AString& strConfName /* = AString::ConstNull() */,
         IN const AString& strExtraParam /* = AString::ConstNull() */)
 {
-    (void) strConfName;
-    (void) strExtraParam;
+    (void)strConfName;
+    (void)strExtraParam;
 
     A_IMS_TRACE_I(APPPROFILE, "ConfigUpdate_NotifyUpdated :: (%d)", nCpi, 0, 0);
 }
@@ -1238,7 +1191,7 @@ PRIVATE
 IMS_SINT32 AosPcscf::GetPcscfPort()
 {
     const ISubscriberConfig* piSubConfig = Configuration::GetInstance()->GetSubscriberConfig(
-        AString::ConstNull(), m_piAppContext->GetSlotId());
+            AString::ConstNull(), m_piAppContext->GetSlotId());
 
     if (piSubConfig != IMS_NULL)
     {
@@ -1349,8 +1302,8 @@ void AosPcscf::ProcessDnsRetryTimerExpired()
 
         if (!IsConfigured() && m_bOtherIpTypeRequired)
         {
-            IMS_SINT32 nOtherIpType = (nIpVersion == IPAddress::IPV6) ?
-                    IPAddress::IPV4 : IPAddress::IPV6;
+            IMS_SINT32 nOtherIpType =
+                    (nIpVersion == IPAddress::IPV6) ? IPAddress::IPV4 : IPAddress::IPV6;
             if (IsLocalAddressValid(nOtherIpType))
             {
                 ClearDiscoveryContents();
@@ -1365,8 +1318,7 @@ void AosPcscf::ProcessDnsRetryTimerExpired()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
+PROTECTED VIRTUAL void AosPcscf::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
     if (nDuration == 0)
     {
@@ -1398,8 +1350,7 @@ void AosPcscf::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::StopTimer(IN IMS_UINT32 nType)
+PROTECTED VIRTUAL void AosPcscf::StopTimer(IN IMS_UINT32 nType)
 {
     ITimer** ppiTimer = IMS_NULL;
 
@@ -1426,8 +1377,7 @@ void AosPcscf::StopTimer(IN IMS_UINT32 nType)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::ClearTimers()
+PROTECTED VIRTUAL void AosPcscf::ClearTimers()
 {
     if (m_piDnsQueryRetryTimer != IMS_NULL)
     {
@@ -1440,8 +1390,7 @@ void AosPcscf::ClearTimers()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosPcscf::Timer_TimerExpired(IN ITimer* piTimer)
+PROTECTED VIRTUAL void AosPcscf::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -1456,14 +1405,12 @@ void AosPcscf::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-
 /*
 
 Remarks
 
 */
-PROTECTED GLOBAL
-const IMS_CHAR* AosPcscf::TimerToString(IN IMS_UINT32 nType)
+PROTECTED GLOBAL const IMS_CHAR* AosPcscf::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {

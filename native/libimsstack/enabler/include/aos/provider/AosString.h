@@ -61,4 +61,4 @@ public:
     static const IMS_CHAR PRESENCE[];
 };
 
-#endif // AOS_STRING_H_
+#endif  // AOS_STRING_H_

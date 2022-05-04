@@ -33,15 +33,15 @@ class IAosAppContext;
 class AosServicePhoneListener;
 class AosServiceSettingListener;
 
-class AosHandle
-    : public IAosHandle
-    , public IAosCallTrackerListener
-    , public IAosNetTrackerListener
-    , public IEventListener
-    , public IImsAos
-    , public IMSStateMachine
-    , public AosRegistrationControlListener
-    , public AosServiceSettingListener
+class AosHandle :
+        public IAosHandle,
+        public IAosCallTrackerListener,
+        public IAosNetTrackerListener,
+        public IEventListener,
+        public IImsAos,
+        public IMSStateMachine,
+        public AosRegistrationControlListener,
+        public AosServiceSettingListener
 {
     DECLARE_STATE_MAP()
 
@@ -58,13 +58,8 @@ class AosHandle
     DECLARE_STATE_MSG_MAP(STATE_DISCONNECTING)
 
 public:
-    AosHandle
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_UINT32 nServiceType
-    );
+    AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_UINT32 nServiceType);
     virtual ~AosHandle();
 
     // IAosHandle
@@ -115,8 +110,8 @@ public:
     virtual void NetTracker_StatusChanged();
 
     // IEventListener
-    virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam,
-            IN IMS_UINT32 nLParam);
+    virtual void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
     // IAosRegistrationControlListener
     inline virtual void RegistrationControl_UpdateSipDelegateRegistration(){};
@@ -300,4 +295,4 @@ protected:
 
     AString m_strTag;
 };
-#endif // AOS_HANDLE_H_
+#endif  // AOS_HANDLE_H_

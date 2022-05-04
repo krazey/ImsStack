@@ -37,8 +37,7 @@ private:
 
 public:
     IAosHandle* GetAosHandle(IN const AString& strAppId, IN const AString& strSrvId);
-    IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId,
-            IN const AString& strSrvId);
+    IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId, IN const AString& strSrvId);
     IMSList<IAosHandle*> GetAllAosHandles(IN const AString& strAppId);
 
     IAosAppContext* GetAosAppContext(IN const AString& strProfileId);
@@ -56,4 +55,4 @@ private:
     IMSMap<AString, IAosAppContext*> m_objAppContext;
     AosBuildDirector* m_pBuildDirector;
 };
-#endif // AOS_MNGR_H_
+#endif  // AOS_MNGR_H_

@@ -21,17 +21,14 @@
 #include "manager/AosMngrAdaptor.h"
 #include "manager/AosFactory.h"
 
-
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-PRIVATE GLOBAL
-AosFactory* AosFactory::m_gpAosFactory = IMS_NULL;
+PRIVATE GLOBAL AosFactory* AosFactory::m_gpAosFactory = IMS_NULL;
 
-PRIVATE GLOBAL
-IMutex* AosFactory::m_gpiLock = IMS_NULL;
+PRIVATE GLOBAL IMutex* AosFactory::m_gpiLock = IMS_NULL;
 
-PRIVATE GLOBAL
-IMSMap<IMS_SINT32, ImsAosManager*> AosFactory::m_objManagers = IMSMap<IMS_SINT32, ImsAosManager*>();
+PRIVATE GLOBAL IMSMap<IMS_SINT32, ImsAosManager*> AosFactory::m_objManagers =
+        IMSMap<IMS_SINT32, ImsAosManager*>();
 
 PUBLIC
 AosFactory::AosFactory()
@@ -41,14 +38,12 @@ AosFactory::AosFactory()
     m_gpiLock = MutexService::GetMutexService()->CreateMutex();
 }
 
-PUBLIC VIRTUAL
-AosFactory::~AosFactory()
+PUBLIC VIRTUAL AosFactory::~AosFactory()
 {
     MutexService::GetMutexService()->DestroyMutex(m_gpiLock);
 }
 
-PUBLIC GLOBAL
-ImsAosManager* AosFactory::GetManager(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+PUBLIC GLOBAL ImsAosManager* AosFactory::GetManager(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     if (m_gpiLock == IMS_NULL)
     {
@@ -68,8 +63,7 @@ ImsAosManager* AosFactory::GetManager(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
     return m_objManagers.GetValueAt(nIndex);
 }
 
-PUBLIC GLOBAL
-void AosFactory::Start(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+PUBLIC GLOBAL void AosFactory::Start(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_gpiLock);
 
@@ -88,12 +82,11 @@ void AosFactory::Start(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
     AString strName;
     strName.Sprintf("ImsAosManager%d", nSlotId);
 
-    ImsAosManager *pAoSMngr = new AosMngrAdaptor(strName, nSlotId);
+    ImsAosManager* pAoSMngr = new AosMngrAdaptor(strName, nSlotId);
     m_objManagers.Add(nSlotId, pAoSMngr);
 }
 
-PUBLIC GLOBAL
-void AosFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+PUBLIC GLOBAL void AosFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_gpiLock);
 
@@ -104,7 +97,7 @@ void AosFactory::Stop(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 
     IMS_TRACE_D("Stop :: slot(%d)", nSlotId, 0, 0);
 
-    ImsAosManager *pAoSMngr = GetManager(nSlotId);
+    ImsAosManager* pAoSMngr = GetManager(nSlotId);
     if (pAoSMngr != IMS_NULL)
     {
         delete pAoSMngr;

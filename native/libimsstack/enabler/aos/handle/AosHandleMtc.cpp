@@ -42,28 +42,23 @@ Remarks
 
 */
 PUBLIC
-AosHandleMtc::AosHandleMtc
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    )
-    : AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
-    , m_nVops(IMS_VOICE_OVER_PS_SUPPORTED)
+AosHandleMtc::AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+        IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
+        m_nVops(IMS_VOICE_OVER_PS_SUPPORTED)
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x,
-            strAppId.GetStr(), sizeof(AosHandleMtc), this);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
+            sizeof(AosHandleMtc), this);
 
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
-            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::IWLAN),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
-            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::NR),
             static_cast<IMS_UINT32>(AosCapability::VOICE) |
-            static_cast<IMS_UINT32>(AosCapability::VIDEO));
+                    static_cast<IMS_UINT32>(AosCapability::VIDEO));
 }
 
 /*
@@ -71,8 +66,7 @@ AosHandleMtc::AosHandleMtc
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandleMtc::~AosHandleMtc()
+PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleMtc = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleMtc), this);
@@ -83,8 +77,7 @@ AosHandleMtc::~AosHandleMtc()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandleMtc::App_Notify()
+PUBLIC VIRTUAL void AosHandleMtc::App_Notify()
 {
     AosHandle::App_Notify();
 }
@@ -94,8 +87,8 @@ void AosHandleMtc::App_Notify()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(
+        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
     if (nType != IAosCallTracker::TYPE_NORMAL)
     {
@@ -131,8 +124,7 @@ void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 n
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandleMtc::NetTracker_StatusChanged()
+PUBLIC VIRTUAL void AosHandleMtc::NetTracker_StatusChanged()
 {
     if (AosUtil::GetInstance()->IsWifiTest())
     {
@@ -143,11 +135,13 @@ void AosHandleMtc::NetTracker_StatusChanged()
     IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
     IMS_UINT32 nCurrNetworkType = GetNetworkType();
 
-    IMS_CHAR acLog[256+1] = {0, };
+    IMS_CHAR acLog[256 + 1] = {
+            0,
+    };
     IMS_Sprintf(acLog, 256,
             "m_bNetSrvIn(%s) -> bCurrSrvIn(%s) , m_nNetworkType(%x) -> nCurrNetworkType(%x) (%s)",
-            (m_bNetSrvIn)? "IN SRV" : "NO SRV", (bCurrSrvIn)? "IN SRV" : "NO SRV",
-            m_nNetworkType, nCurrNetworkType,
+            (m_bNetSrvIn) ? "IN SRV" : "NO SRV", (bCurrSrvIn) ? "IN SRV" : "NO SRV", m_nNetworkType,
+            nCurrNetworkType,
             (IsSupportedNetworkTypeForCellular(nCurrNetworkType)) ? "LTE/NR" : "NOT LTE/NR");
 
     A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: %s", acLog, 0, 0);
@@ -180,8 +174,7 @@ void AosHandleMtc::NetTracker_StatusChanged()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::InitializeServiceBlock()
+PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceBlock()
 {
     if (AosUtil::GetInstance()->IsWifiTest())
     {
@@ -208,8 +201,7 @@ void AosHandleMtc::InitializeServiceBlock()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::InitializeServiceFeature()
+PROTECTED VIRTUAL void AosHandleMtc::InitializeServiceFeature()
 {
     IAosNConfiguration* objConfig = GET_N_CONFIG(m_nSlotId);
 
@@ -247,8 +239,7 @@ void AosHandleMtc::InitializeServiceFeature()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::InitializeFeatureTags()
+PROTECTED VIRTUAL void AosHandleMtc::InitializeFeatureTags()
 {
     AosHandle::InitializeFeatureTags();
 
@@ -260,8 +251,7 @@ void AosHandleMtc::InitializeFeatureTags()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::UpdateFeatureTags()
+PROTECTED VIRTUAL void AosHandleMtc::UpdateFeatureTags()
 {
     AosHandle::UpdateFeatureTags();
 
@@ -313,8 +303,7 @@ void AosHandleMtc::UpdateFeatureTags()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL void AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
@@ -348,8 +337,7 @@ void AosHandleMtc::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL void AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
@@ -403,8 +391,7 @@ void AosHandleMtc::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::CheckSuspended()
+PROTECTED VIRTUAL void AosHandleMtc::CheckSuspended()
 {
     if (AosUtil::GetInstance()->IsWifiTest())
     {
@@ -440,8 +427,7 @@ void AosHandleMtc::CheckSuspended()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
+PROTECTED VIRTUAL void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AoSReason::SUSPEND_NO_SERVICE)
     {
@@ -458,8 +444,7 @@ void AosHandleMtc::SetSuspendedReason(IN IMS_UINT32 nReason)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
+PROTECTED VIRTUAL void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AoSReason::SUSPEND_NO_SERVICE)
     {
@@ -476,8 +461,7 @@ void AosHandleMtc::ResetSuspendedReason(IN IMS_UINT32 nReason)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::Init()
+PROTECTED VIRTUAL void AosHandleMtc::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
@@ -509,8 +493,7 @@ void AosHandleMtc::Init()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::CleanUp()
+PROTECTED VIRTUAL void AosHandleMtc::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
@@ -530,8 +513,7 @@ void AosHandleMtc::CleanUp()
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandleMtc::IsHandleBlocked() const
+PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 {
     if (IsEpdgEnabled())
     {
@@ -542,7 +524,7 @@ IMS_BOOL AosHandleMtc::IsHandleBlocked() const
             // VZW Reqs. - VZ_REQ_VOWIFI_6230394
             bBlocked = bBlocked &&
                     (AosHandle::IsHandleBlocked(BLOCK_VIWIFI_CAPABILITY) ||
-                    IsSupportedNetworkTypeForCellular(GetMobileNetworkType()));
+                            IsSupportedNetworkTypeForCellular(GetMobileNetworkType()));
         }
 
         return bBlocked;
@@ -556,12 +538,11 @@ IMS_BOOL AosHandleMtc::IsHandleBlocked() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandleMtc::IsBlockForMobile(IN IMS_UINT32 nBlock) const
+PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForMobile(IN IMS_UINT32 nBlock) const
 {
     switch (nBlock)
     {
-        case BLOCK_VOWIFI_CAPABILITY: // FALL-THROUGH
+        case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
         case BLOCK_VIWIFI_CAPABILITY:
             return IMS_FALSE;
 
@@ -577,14 +558,13 @@ IMS_BOOL AosHandleMtc::IsBlockForMobile(IN IMS_UINT32 nBlock) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) const
+PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) const
 {
     switch (nBlock)
     {
-        case BLOCK_VOLTE_CAPABILITY: // FALL-THROUGH
-        case BLOCK_VILTE_CAPABILITY: // FALL-THROUGH
-        case BLOCK_VOPS: // FALL-THROUGH
+        case BLOCK_VOLTE_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_VILTE_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_VOPS:              // FALL-THROUGH
         case BLOCK_NETWORK:
             return IMS_FALSE;
 
@@ -600,8 +580,7 @@ IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ProcessCapabilitiesChanged(
+PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {
     A_IMS_TRACE_I(APPPROFILE, "ProcessCapabilitiesChanged :: Size[%d]",
@@ -618,11 +597,13 @@ void AosHandleMtc::ProcessCapabilitiesChanged(
         {
             if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
             {
-                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
-                        BLOCK_VOWIFI_CAPABILITY : BLOCK_VOLTE_CAPABILITY, IMS_TRUE);
+                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
+                                                                   : BLOCK_VOLTE_CAPABILITY,
+                        IMS_TRUE);
 
-                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
-                        BLOCK_VIWIFI_CAPABILITY : BLOCK_VILTE_CAPABILITY, IMS_TRUE);
+                ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
+                                                                   : BLOCK_VILTE_CAPABILITY,
+                        IMS_TRUE);
             }
 
             m_objCapabilities.SetValue(nNetworkType, 0);
@@ -637,12 +618,12 @@ void AosHandleMtc::ProcessCapabilitiesChanged(
 
         if (IsNetworkTypeMatchedToRat(nNetworkType, nCurrentRat))
         {
-            ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
-                    BLOCK_VOWIFI_CAPABILITY : BLOCK_VOLTE_CAPABILITY,
+            ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
+                                                               : BLOCK_VOLTE_CAPABILITY,
                     !IsCapabilityExisted(nNewCapabilities, AosCapability::VOICE));
 
-            ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ?
-                    BLOCK_VIWIFI_CAPABILITY : BLOCK_VILTE_CAPABILITY,
+            ProcessBlock((nCurrentRat == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
+                                                               : BLOCK_VILTE_CAPABILITY,
                     !IsCapabilityExisted(nNewCapabilities, AosCapability::VIDEO));
         }
 
@@ -655,8 +636,7 @@ void AosHandleMtc::ProcessCapabilitiesChanged(
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ProcessNetworkChanged()
+PROTECTED VIRTUAL void AosHandleMtc::ProcessNetworkChanged()
 {
     IMS_UINT32 nNewNetwork = GetNetworkType();
     IMS_UINT32 nCapabilities = static_cast<IMS_UINT32>(AosCapability::NONE);
@@ -664,30 +644,29 @@ void AosHandleMtc::ProcessNetworkChanged()
     switch (nNewNetwork)
     {
         case NW_REPORT_RADIO_LTE:
-            nCapabilities = m_objCapabilities.GetValue(
-                    static_cast<IMS_UINT32>(AosNetworkType::LTE));
+            nCapabilities =
+                    m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::LTE));
             break;
 
         case NW_REPORT_RADIO_NR:
-            nCapabilities = m_objCapabilities.GetValue(
-                    static_cast<IMS_UINT32>(AosNetworkType::NR));
+            nCapabilities = m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::NR));
             break;
 
         case NW_REPORT_RADIO_WLAN:
-            nCapabilities = m_objCapabilities.GetValue(
-                    static_cast<IMS_UINT32>(AosNetworkType::IWLAN));
+            nCapabilities =
+                    m_objCapabilities.GetValue(static_cast<IMS_UINT32>(AosNetworkType::IWLAN));
             break;
 
         default:
             return;
     }
 
-    ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ?
-            BLOCK_VOWIFI_CAPABILITY : BLOCK_VOLTE_CAPABILITY,
+    ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VOWIFI_CAPABILITY
+                                                       : BLOCK_VOLTE_CAPABILITY,
             !IsCapabilityExisted(nCapabilities, AosCapability::VOICE));
 
-    ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ?
-            BLOCK_VIWIFI_CAPABILITY : BLOCK_VILTE_CAPABILITY,
+    ProcessBlock((nNewNetwork == NW_REPORT_RADIO_WLAN) ? BLOCK_VIWIFI_CAPABILITY
+                                                       : BLOCK_VILTE_CAPABILITY,
             !IsCapabilityExisted(nCapabilities, AosCapability::VIDEO));
 }
 
@@ -696,8 +675,7 @@ void AosHandleMtc::ProcessNetworkChanged()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState)
 {
     if (nState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
@@ -706,13 +684,13 @@ void AosHandleMtc::ProcessVopsStateChanged(IN IMS_UINT32 nState)
         if (piCallTracker != IMS_NULL && piCallTracker->IsNormalCallActive())
         {
             A_IMS_TRACE_I(ServiceTypeToString(),
-                    "ProcessVopsStateChanged :: pending the block feature, state (%d)",
-                    nState, 0, 0);
+                    "ProcessVopsStateChanged :: pending the block feature, state (%d)", nState, 0,
+                    0);
             m_nHoldingVopsState = nState;
             return;
         }
     }
-    else // IMS_VOICE_OVER_PS_SUPPORTED
+    else  // IMS_VOICE_OVER_PS_SUPPORTED
     {
         if (m_nHoldingVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
         {

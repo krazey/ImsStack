@@ -25,4 +25,4 @@ public:
 
     virtual void Registration_PreNotify(IN IMS_UINT32 nPreReason) = 0;
 };
-#endif // INTERFACE_AOS_REGISTRATION_LISTENER_H_
+#endif  // INTERFACE_AOS_REGISTRATION_LISTENER_H_

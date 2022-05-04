@@ -46,4 +46,4 @@ private:
     IMSMap<IMS_SINT32, IAosNetTracker*> m_objNetTracker;
     IMSMap<AString, IAosAppContext*> m_objAppContext;
 };
-#endif // AOS_BUILD_DIRECTOR_H_
+#endif  // AOS_BUILD_DIRECTOR_H_

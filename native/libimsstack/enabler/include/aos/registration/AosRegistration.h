@@ -54,18 +54,18 @@ class AosSubscription;
 
 enum class AosNetworkType;
 
-class AosRegistration
-    : public IMSActivityEx
-    , public IAosRegistration
-    , public IRegistrationListener
-    , public IAosSubscriptionListener
-    , public IAosBlockListener
-    , public IAosCallTrackerListener
-    , public IAosNetTrackerListener
-    , public IAosTrmListener
-    , public ITimerListener
-    , public IAosKeepAliveListener
-    , public IMessageMediator
+class AosRegistration :
+        public IMSActivityEx,
+        public IAosRegistration,
+        public IRegistrationListener,
+        public IAosSubscriptionListener,
+        public IAosBlockListener,
+        public IAosCallTrackerListener,
+        public IAosNetTrackerListener,
+        public IAosTrmListener,
+        public ITimerListener,
+        public IAosKeepAliveListener,
+        public IMessageMediator
 {
 public:
     AosRegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -74,8 +74,8 @@ public:
     /// IAosRegistration
     virtual void Start();
     virtual void Stop();
-    virtual void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
-            IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
+    virtual void Update(
+            IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE, IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
     virtual void Reconfig();
 
     virtual void Destroy();
@@ -85,8 +85,8 @@ public:
     virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
 
     virtual IMS_UINT32 GetMode();
-    virtual IMS_UINT32 GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue,
-            OUT AString& strValue);
+    virtual IMS_UINT32 GetProperty(
+            IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue);
     virtual IMS_UINT32 GetState();
     virtual AosRegistrationType GetRegType();
 
@@ -135,8 +135,8 @@ protected:
     IMS_SINT32 GetRegExpires();
 
     void IncreaseConsecutiveFailCount();
-    IMS_BOOL UpdatePreloadedRoute(IN const AString& strPcscf = AString::ConstNull(),
-            IN const IMS_UINT32 nPcscfPort = 0);
+    IMS_BOOL UpdatePreloadedRoute(
+            IN const AString& strPcscf = AString::ConstNull(), IN const IMS_UINT32 nPcscfPort = 0);
 
     AosNetworkType GetNetworkTypeForImsRegState();
     IMS_SINT32 GetRegIpcanCategory();
@@ -176,10 +176,10 @@ protected:
     virtual IMS_BOOL UpdateNetworkRegBinding();
     virtual IMS_BOOL UpdateNetworkRegFeatureBinding();
 
-    virtual IMS_BOOL SendRegister(IN IMS_BOOL bRestore = IMS_FALSE,
-            IN IMS_BOOL bInitial = IMS_FALSE);
-    virtual IMS_BOOL SendRegisterEx(IN IMS_SINT32 nMinExpireValue,
-            IN IMS_BOOL bAddHalfExpireValue = IMS_FALSE);
+    virtual IMS_BOOL SendRegister(
+            IN IMS_BOOL bRestore = IMS_FALSE, IN IMS_BOOL bInitial = IMS_FALSE);
+    virtual IMS_BOOL SendRegisterEx(
+            IN IMS_SINT32 nMinExpireValue, IN IMS_BOOL bAddHalfExpireValue = IMS_FALSE);
     virtual IMS_BOOL SendDeregister();
 
     virtual IMS_BOOL AddOperation_OnSendRegister();
@@ -216,8 +216,8 @@ protected:
     virtual IMS_BOOL SetFirstPcscf(IN IMS_BOOL bUpdateParameter = IMS_TRUE);
     virtual IMS_BOOL SetNextPcscf(IN IMS_BOOL bUpdateParameter = IMS_TRUE);
     virtual IMS_BOOL TryNextPcscf();
-    virtual IMS_BOOL TryNextPcscf(IN IMS_BOOL bFlowRecoveryOnAllFail,
-            IN IMS_BOOL bHonorRetryAfter = IMS_FALSE);
+    virtual IMS_BOOL TryNextPcscf(
+            IN IMS_BOOL bFlowRecoveryOnAllFail, IN IMS_BOOL bHonorRetryAfter = IMS_FALSE);
     virtual IMS_BOOL IsNextPcscf();
     virtual IMS_BOOL IsRetryStopped();
 
@@ -286,10 +286,10 @@ protected:
     virtual void RecordImpu();
 
     /// IRegistrationListener
-    virtual void Registration_AuthenticationChallenged(IN IMS_SINT32 nAlgorithm,
-            OUT IMS_BOOL& bResponseToChallenge);
-    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult,
-            IN const ByteArray& objIK, IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA);
+    virtual void Registration_AuthenticationChallenged(
+            IN IMS_SINT32 nAlgorithm, OUT IMS_BOOL& bResponseToChallenge);
+    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult, IN const ByteArray& objIK,
+            IN const ByteArray& objCK, OUT IMS_BOOL& bResultOfSA);
     virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
     virtual void Registration_Started();
     virtual void Registration_StartFailed(IN IMS_SINT32 nReason);
@@ -359,11 +359,11 @@ protected:
     /// IAosTrmListener
     virtual void Trm_PriorityChanged();
 
-    virtual IMS_RESULT MessageMediator_AdjustMessage(IN_OUT ISipMessage* piSipMsg,
-            IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+    virtual IMS_RESULT MessageMediator_AdjustMessage(
+            IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
 
-    virtual IMS_BOOL AddLocationHeaderBody(IN_OUT ISipMessage* piSipMsg,
-            IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
+    virtual IMS_BOOL AddLocationHeaderBody(
+            IN_OUT ISipMessage* piSipMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL);
 
 private:
     void ControlPrivateHeader();
@@ -375,8 +375,8 @@ private:
     void UpdateCallingNumberVerification();
     void UpdateModeToHandles();
 
-    IMS_BOOL IsErrorCodeExisted(IN const IMSVector<IMS_SINT32>& objErrorCode,
-            IN IMS_SINT32 nCode) const;
+    IMS_BOOL IsErrorCodeExisted(
+            IN const IMSVector<IMS_SINT32>& objErrorCode, IN IMS_SINT32 nCode) const;
     IMS_BOOL IsErrorCodeExistedForSpecificRegistration(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsPdnReactivationRequired();
     IMS_BOOL IsRegExpiredDuringAwt(IN IMS_UINT32 nAwt);
@@ -489,11 +489,11 @@ protected:
     IMS_BOOL m_bIsAppReady;
 
     /// reg info
-    AString m_strRegId;       /// aos_reg_0
-    AosRegistrationType m_eRegType;    /// normal, emergency, fake
-    IMS_UINT32 m_nFlowId;     /// 1, 2, 3, ...
-    IMS_BOOL m_bFakeReg;      /// fake registration for emergency
-    IMS_UINT32 m_nRegMode;    /// normal, limited, fake
+    AString m_strRegId;              /// aos_reg_0
+    AosRegistrationType m_eRegType;  /// normal, emergency, fake
+    IMS_UINT32 m_nFlowId;            /// 1, 2, 3, ...
+    IMS_BOOL m_bFakeReg;             /// fake registration for emergency
+    IMS_UINT32 m_nRegMode;           /// normal, limited, fake
 
     /// this is used for registration
     AString m_strPuid;        /// current
@@ -503,9 +503,9 @@ protected:
 
     /// throttling
     IMS_UINT32 m_nPcscfIndex;
-    IMS_UINT32 m_nRetryBaseTime;  /// base-time for flow recovery in RFC 5626
-    IMS_UINT32 m_nRetryMaxTime;   /// max-time for flow recovery in RFC 5626
-    IMS_UINT32 m_nUpperBoundWaitTime; /// used for flow recovery in RFC 5626
+    IMS_UINT32 m_nRetryBaseTime;       /// base-time for flow recovery in RFC 5626
+    IMS_UINT32 m_nRetryMaxTime;        /// max-time for flow recovery in RFC 5626
+    IMS_UINT32 m_nUpperBoundWaitTime;  /// used for flow recovery in RFC 5626
     IMS_UINT32 m_nConsecutiveFailure;
     IMS_UINT32 m_nConsecutiveFailureForPdnReactivated;
     IMS_UINT32 m_nForbiddenCount;
@@ -552,8 +552,8 @@ protected:
 
     AString m_strTag;
 
-    static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3; // 3 Sec.
-    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30; // 30 Sec
+    static const IMS_UINT32 INTERNAL_ERROR_INTERVAL = 3;   // 3 Sec.
+    static const IMS_UINT32 RETRY_DEFAULT_WAIT_TIME = 30;  // 30 Sec
 
 private:
     /// IPCAN category being registered
@@ -565,4 +565,4 @@ private:
     static const IMS_UINT32 SIP_MTU_MAX_SIZE_VIA_WIFI = 1280;
 };
 
-#endif // AOS_REGISTRATION_H_
+#endif  // AOS_REGISTRATION_H_

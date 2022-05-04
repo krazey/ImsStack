@@ -46,8 +46,8 @@ public:
      *                          and the re-registration is tryied.
      * @param bExplicitUpdate If the registration is trying, it is performed after completing it.
      */
-    virtual void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
-            IN IMS_BOOL bExplicitUpdate = IMS_TRUE) = 0;
+    virtual void Update(
+            IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE, IN IMS_BOOL bExplicitUpdate = IMS_TRUE) = 0;
 
     /**
      * @brief Update the registration with the changed feature-tag.
@@ -86,8 +86,8 @@ public:
      * @param nValue Indicate the output integer value.
      * @param strValue Indicate the output string value.
      */
-    virtual IMS_UINT32 GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue,
-            OUT AString& strValue) = 0;
+    virtual IMS_UINT32 GetProperty(
+            IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) = 0;
 
     /**
      * @brief Get the registration state. (@see STATE_XXX enum)
@@ -304,7 +304,7 @@ protected:
     friend class AosBuildDirector;
     friend class AosAppContext;
 
-     /**
+    /**
      * @brief Initialize the registration class
      */
     virtual void Init() = 0;
@@ -314,4 +314,4 @@ protected:
      */
     virtual void CleanUp() = 0;
 };
-#endif // INTERFACE_AOS_REGISTRATION_H_
+#endif  // INTERFACE_AOS_REGISTRATION_H_

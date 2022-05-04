@@ -18,8 +18,7 @@
 
 #include "registration/AosRegistration.h"
 
-class AosERegistration
-    : public AosRegistration
+class AosERegistration : public AosRegistration
 {
 public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -27,8 +26,8 @@ public:
 
     /// IAosRegistration
     virtual void Start();
-    virtual void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
-            IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
+    virtual void Update(
+            IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE, IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
 
     virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
 
@@ -60,14 +59,13 @@ protected:
     virtual void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
     virtual void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
 
-
     virtual void SetReinitiationRequested(IN IMS_BOOL bRequest);
 
     /// Timer
     virtual void ProcessTransactionTimerExpired();
 
     /// IRegistrationListener
-    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL &bDoImplicitRefresh);
+    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
     virtual void Registration_Started();
     virtual void Registration_StartFailed(IN IMS_SINT32 nReason);
     virtual void Registration_Terminated(IN IMS_SINT32 nReason);
@@ -78,4 +76,4 @@ protected:
 protected:
     IMS_BOOL m_bReinitiationRequested;
 };
-#endif // AOS_E_REGISTRATION_H_
+#endif  // AOS_E_REGISTRATION_H_

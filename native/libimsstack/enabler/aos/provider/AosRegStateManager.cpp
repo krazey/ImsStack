@@ -26,50 +26,46 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define AOSTAG m_strTag.GetStr()
 
 PUBLIC
-AosRegStateManager::AosRegStateManager()
-    : m_nSlotId(IMS_SLOT_0)
-    , m_nRegState(IMS_REG_OFF)
-    , m_nERegState(IMS_REG_OFF)
-    , m_nRegServices(ImsAosService::NONE)
-    , m_nReportedRegServices(IMS_REGISTRATION_SERVICE_NONE)
-    , m_nRegDetailState(IMS_REGISTRATION_INVALID)
-    , m_nReportedRegDetailState(IMS_REGISTRATION_INVALID)
-    , m_nRegReason(0)
-    , m_nRegRespCode(SipStatusCode::SC_INVALID)
-    , m_bLimitedMode(IMS_FALSE)
+AosRegStateManager::AosRegStateManager() :
+        m_nSlotId(IMS_SLOT_0),
+        m_nRegState(IMS_REG_OFF),
+        m_nERegState(IMS_REG_OFF),
+        m_nRegServices(ImsAosService::NONE),
+        m_nReportedRegServices(IMS_REGISTRATION_SERVICE_NONE),
+        m_nRegDetailState(IMS_REGISTRATION_INVALID),
+        m_nReportedRegDetailState(IMS_REGISTRATION_INVALID),
+        m_nRegReason(0),
+        m_nRegRespCode(SipStatusCode::SC_INVALID),
+        m_bLimitedMode(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosRegStateManager = %" PFLS_u "/%" PFLS_x,
             sizeof(AosRegStateManager), this, 0);
 }
 
-PUBLIC VIRTUAL
-AosRegStateManager::~AosRegStateManager()
+PUBLIC VIRTUAL AosRegStateManager::~AosRegStateManager()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosRegStateManager = %" PFLS_u "/%" PFLS_x,
             sizeof(AosRegStateManager), this, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 AosRegStateManager::GetSlotId() const
+PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetSlotId() const
 {
     return m_nSlotId;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetSlotId(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void AosRegStateManager::SetSlotId(IN IMS_SINT32 nSlotId)
 {
     m_nSlotId = nSlotId;
 
     m_strTag.Sprintf("%d", m_nSlotId);
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetImsRegState(IN IMS_UINT32 nState, IN IMS_BOOL bLimited)
+PUBLIC VIRTUAL void AosRegStateManager::SetImsRegState(IN IMS_UINT32 nState, IN IMS_BOOL bLimited)
 {
     if (m_nRegState != nState)
     {
         m_nRegState = nState;
-     }
+    }
 
     if (nState == IMS_REG_ON)
     {
@@ -77,20 +73,18 @@ void AosRegStateManager::SetImsRegState(IN IMS_UINT32 nState, IN IMS_BOOL bLimit
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 AosRegStateManager::GetImsRegState()
+PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetImsRegState()
 {
     return m_nRegState;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetEImsRegState(IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosRegStateManager::SetEImsRegState(IN IMS_UINT32 nState)
 {
     m_nERegState = nState;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetRegState(IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosRegStateManager::SetRegState(
+        IN IMS_UINT32 nServiceType, IN IMS_UINT32 nState)
 {
     if (ConvertServiceType(nServiceType) == IUIMS::APP_UNKNOWN)
     {
@@ -117,8 +111,7 @@ void AosRegStateManager::SetRegState(IN IMS_UINT32 nServiceType, IN IMS_UINT32 n
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 AosRegStateManager::ConvertServiceType(IMS_UINT32 nServiceType)
+PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::ConvertServiceType(IMS_UINT32 nServiceType)
 {
     switch (nServiceType)
     {
@@ -133,42 +126,38 @@ IMS_SINT32 AosRegStateManager::ConvertServiceType(IMS_UINT32 nServiceType)
     }
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetDetailState(IN IMS_SINT32 nState)
+PUBLIC VIRTUAL void AosRegStateManager::SetDetailState(IN IMS_SINT32 nState)
 {
     m_nRegDetailState = nState;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 AosRegStateManager::GetDetailState()
+PUBLIC VIRTUAL IMS_SINT32 AosRegStateManager::GetDetailState()
 {
     return m_nRegDetailState;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetReason(IN IMS_UINT32 nReason)
+PUBLIC VIRTUAL void AosRegStateManager::SetReason(IN IMS_UINT32 nReason)
 {
     m_nRegReason = nReason;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::EnforceUpdateRegistration()
+PUBLIC VIRTUAL void AosRegStateManager::EnforceUpdateRegistration()
 {
     // RIL_INTEGRATION
     m_nReportedRegServices = GetConvertedRegServices();
-    m_nReportedRegDetailState = (m_nRegDetailState == IMS_REGISTRATION_STOP) ?
-            IMS_REGISTRATION_OFFLINE : m_nRegDetailState;
+    m_nReportedRegDetailState = (m_nRegDetailState == IMS_REGISTRATION_STOP)
+            ? IMS_REGISTRATION_OFFLINE
+            : m_nRegDetailState;
 
     IMS_EVENT_SendEventForSlotId(IMS_EVENT_REGISTRATION,
-            IMS_MAKEPARAM(((IsRegistered(m_nReportedRegDetailState)) ? 1 : 0),
-            m_nReportedRegServices), IMS_MAKEPARAM(m_nRegReason, m_nReportedRegDetailState),
-            GetSlotId());
+            IMS_MAKEPARAM(
+                    ((IsRegistered(m_nReportedRegDetailState)) ? 1 : 0), m_nReportedRegServices),
+            IMS_MAKEPARAM(m_nRegReason, m_nReportedRegDetailState), GetSlotId());
 
     m_nRegReason = 0;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::UpdateRegistration()
+PUBLIC VIRTUAL void AosRegStateManager::UpdateRegistration()
 {
     // RIL_INTEGRATION
     IMS_UINT32 nService = GetConvertedRegServices();
@@ -203,25 +192,23 @@ void AosRegStateManager::UpdateRegistration()
 
         IMS_EVENT_SendEventForSlotId(IMS_EVENT_REGISTRATION,
                 IMS_MAKEPARAM(((IsRegistered(m_nReportedRegDetailState)) ? 1 : 0),
-                m_nReportedRegServices), IMS_MAKEPARAM(nReason, m_nReportedRegDetailState),
-                GetSlotId());
+                        m_nReportedRegServices),
+                IMS_MAKEPARAM(nReason, m_nReportedRegDetailState), GetSlotId());
     }
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::ClearRegServices()
+PUBLIC VIRTUAL void AosRegStateManager::ClearRegServices()
 {
     m_nRegServices = ImsAosService::NONE;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 AosRegStateManager::GetRegServices() const
+PUBLIC VIRTUAL IMS_UINT32 AosRegStateManager::GetRegServices() const
 {
     return m_nRegServices;
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::UpdateRegServices(IN IMS_BOOL bUpdateCurrState /* = IMS_FALSE */)
+PUBLIC VIRTUAL void AosRegStateManager::UpdateRegServices(
+        IN IMS_BOOL bUpdateCurrState /* = IMS_FALSE */)
 {
     if (bUpdateCurrState)
     {
@@ -233,14 +220,12 @@ void AosRegStateManager::UpdateRegServices(IN IMS_BOOL bUpdateCurrState /* = IMS
     }
 }
 
-PUBLIC VIRTUAL
-void AosRegStateManager::SetRegRespCode(IN IMS_SINT32 nRespCode)
+PUBLIC VIRTUAL void AosRegStateManager::SetRegRespCode(IN IMS_SINT32 nRespCode)
 {
     m_nRegRespCode = nRespCode;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosRegStateManager::IsLimitedMode() const
+PUBLIC VIRTUAL IMS_BOOL AosRegStateManager::IsLimitedMode() const
 {
     return m_bLimitedMode;
 }
@@ -286,8 +271,8 @@ IMS_UINT32 AosRegStateManager::GetConvertedRegServices()
 PROTECTED
 IMS_BOOL AosRegStateManager::IsRegistered(IN IMS_UINT32 nDetailState) const
 {
-    if (nDetailState == IMS_REGISTRATION_REGISTERED
-            || nDetailState == IMS_REGISTRATION_REREGISTERING)
+    if (nDetailState == IMS_REGISTRATION_REGISTERED ||
+            nDetailState == IMS_REGISTRATION_REREGISTERING)
     {
         return IMS_TRUE;
     }

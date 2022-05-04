@@ -19,7 +19,6 @@
 class IAosRetryRepository
 {
 public:
-
     /**
      * @brief increase retry count
      *

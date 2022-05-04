@@ -26,4 +26,4 @@ typedef enum
     AOSMSG_MAX
 } AOSMSG_ENTYPE;
 
-#endif // AOS_INTERNAL_MSG_DEF_H_
+#endif  // AOS_INTERNAL_MSG_DEF_H_

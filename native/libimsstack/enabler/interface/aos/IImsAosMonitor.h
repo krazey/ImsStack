@@ -77,7 +77,7 @@ public:
         /// Service is blocked with outage reason phrase in 503 response for reregistration
         /// during active IMS call
         SERVICE_BLOCKED_REG_OUTAGE = 200,
-     };
+    };
 };
 
-#endif // INTERFACE_IMS_AOS_MONITOR_H_
+#endif  // INTERFACE_IMS_AOS_MONITOR_H_

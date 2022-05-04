@@ -26,8 +26,7 @@ class IImsAos;
  * @brief This class provides the base class based on IMS Application for AoS interfaces.
  */
 
-class ImsAosManager
-    : public IMSApp
+class ImsAosManager : public IMSApp
 {
 public:
     ImsAosManager(IN const AString& strAppName);
@@ -35,8 +34,8 @@ public:
 
     /// Implement child class
     virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId,
-            IN const AString& strServiceId);
+    virtual IMSList<IImsAos*> GetImsAosList(
+            IN const AString& strAppId, IN const AString& strServiceId);
     virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId);
 
     /// IMSApp Class
@@ -45,4 +44,4 @@ public:
     virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
 };
 
-#endif // IMS_AOS_MANAGER_H_
+#endif  // IMS_AOS_MANAGER_H_

@@ -30,18 +30,18 @@ Remarks
 
 */
 PUBLIC
-AosTrm::AosTrm(IN IMS_SINT32 nSlotId_)
-    : nSlotId(nSlotId_)
-    , nServices(TYPE_NONE)
-    , nIPCANCategory(IIpcan::CATEGORY_MOBILE)
-    , bIsStartUpdated(IMS_FALSE)
-    , bIsEmergencyStartUpdated(IMS_FALSE)
-    , piTRM(IMS_NULL)
-    , piStopTimer(IMS_NULL)
-    , objListeners(IMSList<IAosTrmListener*>())
+AosTrm::AosTrm(IN IMS_SINT32 nSlotId_) :
+        nSlotId(nSlotId_),
+        nServices(TYPE_NONE),
+        nIPCANCategory(IIpcan::CATEGORY_MOBILE),
+        bIsStartUpdated(IMS_FALSE),
+        bIsEmergencyStartUpdated(IMS_FALSE),
+        piTRM(IMS_NULL),
+        piStopTimer(IMS_NULL),
+        objListeners(IMSList<IAosTrmListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosTrm = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosTrm), this);
+            sizeof(AosTrm), this);
 
     piTRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
     if (piTRM != IMS_NULL)
@@ -65,11 +65,10 @@ AosTrm::AosTrm(IN IMS_SINT32 nSlotId_)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosTrm::~AosTrm()
+PUBLIC VIRTUAL AosTrm::~AosTrm()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosTrm = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosTrm), this);
+            sizeof(AosTrm), this);
 
     if (piTRM != IMS_NULL)
     {
@@ -88,8 +87,7 @@ AosTrm::~AosTrm()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosTrm::SetListener(IN IAosTrmListener *piListener)
+PUBLIC VIRTUAL void AosTrm::SetListener(IN IAosTrmListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -98,7 +96,7 @@ void AosTrm::SetListener(IN IAosTrmListener *piListener)
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IAosTrmListener *piTmpListener = objListeners.GetAt(i);
+        IAosTrmListener* piTmpListener = objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -117,8 +115,7 @@ void AosTrm::SetListener(IN IAosTrmListener *piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosTrm::RemoveListener(IN IAosTrmListener *piListener)
+PUBLIC VIRTUAL void AosTrm::RemoveListener(IN IAosTrmListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -127,7 +124,7 @@ void AosTrm::RemoveListener(IN IAosTrmListener *piListener)
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IAosTrmListener *piTmpListener = objListeners.GetAt(i);
+        IAosTrmListener* piTmpListener = objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -144,8 +141,7 @@ void AosTrm::RemoveListener(IN IAosTrmListener *piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosTrm::IsReady()
+PUBLIC VIRTUAL IMS_BOOL AosTrm::IsReady()
 {
     if (piTRM == IMS_NULL)
     {
@@ -165,8 +161,7 @@ IMS_BOOL AosTrm::IsReady()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosTrm::IsTRMSupported()
+PUBLIC VIRTUAL IMS_BOOL AosTrm::IsTRMSupported()
 {
     return (piTRM != IMS_NULL);
 }
@@ -176,8 +171,7 @@ IMS_BOOL AosTrm::IsTRMSupported()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosTrm::Set(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
+PUBLIC VIRTUAL void AosTrm::Set(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
 {
     A_IMS_TRACE_I(AOSTAG, "Set :: type (%d) , start (%d)", nType, bStart, 0);
 
@@ -228,10 +222,9 @@ void AosTrm::Set(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosTrm::SetEmegency(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
+PUBLIC VIRTUAL void AosTrm::SetEmegency(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
 {
-    (void) nType;
+    (void)nType;
 
     if (piTRM == IMS_NULL)
     {
@@ -261,8 +254,7 @@ void AosTrm::SetEmegency(IN IMS_UINT32 nType, IN IMS_BOOL bStart)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosTrm::SetIPCAN(IN IN IMS_UINT32 nCategory)
+PUBLIC VIRTUAL void AosTrm::SetIPCAN(IN IN IMS_UINT32 nCategory)
 {
     if (piTRM == IMS_NULL)
     {
@@ -359,8 +351,7 @@ void AosTrm::StopTimer()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosTrm::ProcessTimerExpired()
+PRIVATE VIRTUAL void AosTrm::ProcessTimerExpired()
 {
     if (bIsStartUpdated)
     {
@@ -378,8 +369,7 @@ void AosTrm::ProcessTimerExpired()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosTrm::Trm_NotifyServicePriorityChanged()
+PRIVATE VIRTUAL void AosTrm::Trm_NotifyServicePriorityChanged()
 {
     if (piTRM == IMS_NULL)
     {
@@ -388,7 +378,7 @@ void AosTrm::Trm_NotifyServicePriorityChanged()
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IAosTrmListener *piListener = objListeners.GetAt(i);
+        IAosTrmListener* piListener = objListeners.GetAt(i);
 
         if (piListener == IMS_NULL)
         {
@@ -404,8 +394,7 @@ void AosTrm::Trm_NotifyServicePriorityChanged()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosTrm::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void AosTrm::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {

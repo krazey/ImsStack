@@ -36,7 +36,7 @@ public:
     virtual void SetCSCallStateWatchMode() = 0;
     virtual void SetActiveCSCallState(IN IMS_UINT32 nActiveCSState) = 0;
 
-    virtual void SetListener(IN IAosCallTrackerListener *piListener) = 0;
+    virtual void SetListener(IN IAosCallTrackerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosCallTrackerListener* piListener) = 0;
 
     enum
@@ -58,10 +58,10 @@ public:
 
     enum
     {
-       SESSION_TYPE_NONE = 0x00000000,
-       SESSION_TYPE_VOIP = 0x00000001,
-       Session_TYPE_VS = 0x00000002,
-       SESSION_TYPE_VT = 0x00000004
+        SESSION_TYPE_NONE = 0x00000000,
+        SESSION_TYPE_VOIP = 0x00000001,
+        Session_TYPE_VS = 0x00000002,
+        SESSION_TYPE_VT = 0x00000004
     };
 };
-#endif // INTERFACE_AOS_CALL_TRACKER_H_
+#endif  // INTERFACE_AOS_CALL_TRACKER_H_

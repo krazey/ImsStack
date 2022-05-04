@@ -35,21 +35,16 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define REGID m_strTag.GetStr()
 
 PUBLIC
-AosIpsecHelper::AosIpsecHelper
-(
-    IN IRegContact* piRegContact,
-    IN IRegParameter* piRegParameter,
-    IN IAosAppContext* piAppContext,
-    IN AString& strRegId
-)
-    : m_piRegContact(piRegContact)
-    , m_piRegParameter(piRegParameter)
-    , m_piContext(piAppContext)
-    , m_strRegId(strRegId)
-    , m_pOldIpsec(IMS_NULL)
-    , m_pCurrIpsec(IMS_NULL)
-    , m_pNewIpsec(IMS_NULL)
-    , m_pUeIpsecInfo(IMS_NULL)
+AosIpsecHelper::AosIpsecHelper(IN IRegContact* piRegContact, IN IRegParameter* piRegParameter,
+        IN IAosAppContext* piAppContext, IN AString& strRegId) :
+        m_piRegContact(piRegContact),
+        m_piRegParameter(piRegParameter),
+        m_piContext(piAppContext),
+        m_strRegId(strRegId),
+        m_pOldIpsec(IMS_NULL),
+        m_pCurrIpsec(IMS_NULL),
+        m_pNewIpsec(IMS_NULL),
+        m_pUeIpsecInfo(IMS_NULL)
 {
     m_strTag.Sprintf("%d:%s", m_piContext->GetSlotId(), m_strRegId.GetStr());
 
@@ -59,8 +54,7 @@ AosIpsecHelper::AosIpsecHelper
     m_pUeIpsecInfo = new UeIpsecInfo();
 };
 
-PUBLIC VIRTUAL
-AosIpsecHelper::~AosIpsecHelper()
+PUBLIC VIRTUAL AosIpsecHelper::~AosIpsecHelper()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosIpsecHelper = %" PFLS_u "/%" PFLS_x, REGID,
             sizeof(AosIpsecHelper), this);
@@ -76,8 +70,7 @@ AosIpsecHelper::~AosIpsecHelper()
     Destroy();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::Create(IN IMS_BOOL bInitial)
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::Create(IN IMS_BOOL bInitial)
 {
     A_IMS_TRACE_I(REGID, "Create", 0, 0, 0);
 
@@ -116,8 +109,7 @@ IMS_BOOL AosIpsecHelper::Create(IN IMS_BOOL bInitial)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::CreateOnChallenging()
+PUBLIC VIRTUAL void AosIpsecHelper::CreateOnChallenging()
 {
     A_IMS_TRACE_I(REGID, "CreateOnChallenging", 0, 0, 0);
 
@@ -139,12 +131,11 @@ void AosIpsecHelper::CreateOnChallenging()
     m_pNewIpsec = new AosIpsec(this, m_piContext->GetSlotId());
 
     // set UE Port & SPI using previous values
-    m_pNewIpsec->SetUePortsAndSpis(m_pUeIpsecInfo->nPortC, m_pUeIpsecInfo->nPortS \
-            , m_pUeIpsecInfo->nSpiC, m_pUeIpsecInfo->nSpiS);
+    m_pNewIpsec->SetUePortsAndSpis(m_pUeIpsecInfo->nPortC, m_pUeIpsecInfo->nPortS,
+            m_pUeIpsecInfo->nSpiC, m_pUeIpsecInfo->nSpiS);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::SetPcscfPortnSpi()
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::SetPcscfPortnSpi()
 {
     A_IMS_TRACE_I(REGID, "SetPcscfPortnSpi", 0, 0, 0);
 
@@ -178,8 +169,7 @@ IMS_BOOL AosIpsecHelper::SetPcscfPortnSpi()
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::IsPcscfServerPortDifferent()
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::IsPcscfServerPortDifferent()
 {
     if (m_pNewIpsec == IMS_NULL)
     {
@@ -199,8 +189,7 @@ IMS_BOOL AosIpsecHelper::IsPcscfServerPortDifferent()
     return (currPcscfPort != newPcscfPort);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::UpdatePreloadedRoute(IN const AString& strPcscf)
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::UpdatePreloadedRoute(IN const AString& strPcscf)
 {
     if (m_pNewIpsec == IMS_NULL)
     {
@@ -208,15 +197,14 @@ IMS_BOOL AosIpsecHelper::UpdatePreloadedRoute(IN const AString& strPcscf)
     }
 
     m_piRegParameter->RemoveAllPreloadedRoutes();
-    m_piRegParameter->AddPreloadedRoute(strPcscf,
-            static_cast<IMS_SINT32>(m_pNewIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER)));
+    m_piRegParameter->AddPreloadedRoute(
+            strPcscf, static_cast<IMS_SINT32>(m_pNewIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER)));
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::MakeSas(IN const AString& strPcscf, IN const IPAddress& objIpa,
-        IN const ByteArray& objIk, IN const ByteArray& objCk)
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::MakeSas(IN const AString& strPcscf,
+        IN const IPAddress& objIpa, IN const ByteArray& objIk, IN const ByteArray& objCk)
 {
     A_IMS_TRACE_D(REGID, "MakeSas", 0, 0, 0);
 
@@ -257,8 +245,7 @@ IMS_BOOL AosIpsecHelper::MakeSas(IN const AString& strPcscf, IN const IPAddress&
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm)
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm)
 {
     A_IMS_TRACE_I(REGID, "ProcessAuthChallenged", 0, 0, 0);
 
@@ -273,8 +260,8 @@ IMS_BOOL AosIpsecHelper::ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm)
     }
 
     // if it requires to remove the old SAs when making a new SA.
-    IMS_BOOL bOldSaRemovedOnEstablisingSa = GET_N_CONFIG(
-            m_piContext->GetSlotId())->IsOldSaOnEstablishingSaRemoved();
+    IMS_BOOL bOldSaRemovedOnEstablisingSa =
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsOldSaOnEstablishingSaRemoved();
     if (bOldSaRemovedOnEstablisingSa == IMS_TRUE)
     {
         if (m_pOldIpsec != IMS_NULL)
@@ -287,8 +274,7 @@ IMS_BOOL AosIpsecHelper::ProcessAuthChallenged(IN IMS_SINT32 nAlgorithm)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::ProcessRegStarted()
+PUBLIC VIRTUAL void AosIpsecHelper::ProcessRegStarted()
 {
     /*
         This is to prevent a memory leakage and crash!!
@@ -318,16 +304,14 @@ void AosIpsecHelper::ProcessRegStarted()
     CloseUnsecureTCPSocket();
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::ProcessRegStartFailed()
+PUBLIC VIRTUAL void AosIpsecHelper::ProcessRegStartFailed()
 {
     A_IMS_TRACE_I(REGID, "ProcessRegStartFailed()", 0, 0, 0);
 
     CloseUnsecureTCPSocket();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
 {
     if (m_pNewIpsec == IMS_NULL)
     {
@@ -344,7 +328,7 @@ IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
         A_IMS_TRACE_I(REGID, "established new SA set , replace current SA", 0, 0, 0);
 
         // UE can delete the old IPsec when an IPsec is newly established.
-        if (m_pOldIpsec !=  IMS_NULL)
+        if (m_pOldIpsec != IMS_NULL)
         {
             CloseSecureTCPSocket(m_pOldIpsec);
 
@@ -352,13 +336,13 @@ IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
             m_pOldIpsec = IMS_NULL;
         }
 
-        m_pOldIpsec = m_pCurrIpsec; // old SA
+        m_pOldIpsec = m_pCurrIpsec;  // old SA
         m_pCurrIpsec = m_pNewIpsec;  // new SA
         m_pNewIpsec = IMS_NULL;
 
         // set SA lifetime
-        m_pCurrIpsec->ManagePolicyLifetime(nExpireTime * 1000 +
-                IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS);
+        m_pCurrIpsec->ManagePolicyLifetime(
+                nExpireTime * 1000 + IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS);
 
         /*
             Maintain the lifetime of the old SA.
@@ -382,22 +366,20 @@ IMS_BOOL AosIpsecHelper::ProcessRegUpdated()
         }
 
         // update lifetime
-        m_pCurrIpsec->ManagePolicyLifetime(nExpireTime * 1000 +
-                IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS);
+        m_pCurrIpsec->ManagePolicyLifetime(
+                nExpireTime * 1000 + IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS);
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::InitIpsec()
+PUBLIC VIRTUAL void AosIpsecHelper::InitIpsec()
 {
     // set socket operation related to IPSEC
     AosUtil::GetInstance()->SetSocketOptionLinger(0, m_piContext->GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosIpsecHelper::IsEstablished()
+PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::IsEstablished()
 {
     if ((m_pOldIpsec != IMS_NULL) && m_pOldIpsec->IsSaEstablished())
     {
@@ -417,21 +399,20 @@ IMS_BOOL AosIpsecHelper::IsEstablished()
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::SetSecurityServerPortInRegContact()
+PUBLIC VIRTUAL void AosIpsecHelper::SetSecurityServerPortInRegContact()
 {
-    IMS_BOOL bServerPortInRegContact = GET_N_CONFIG(
-            m_piContext->GetSlotId())->IsSecurityServerPortInRegContactOfInitialRegistrationUsed();
+    IMS_BOOL bServerPortInRegContact =
+            GET_N_CONFIG(m_piContext->GetSlotId())
+                    ->IsSecurityServerPortInRegContactOfInitialRegistrationUsed();
     if (bServerPortInRegContact == IMS_TRUE)
     {
         A_IMS_TRACE_I(REGID, "SetSecurityServerPortInRegContact", 0, 0, 0);
-        m_piRegContact->SetPort(static_cast<IMS_SINT32>(
-                m_pNewIpsec->GetUePort(AosIpsec::TYPE_SERVER)));
+        m_piRegContact->SetPort(
+                static_cast<IMS_SINT32>(m_pNewIpsec->GetUePort(AosIpsec::TYPE_SERVER)));
     }
 }
 
-PUBLIC VIRTUAL
-void AosIpsecHelper::IgnoreCurrentPolicyExpired()
+PUBLIC VIRTUAL void AosIpsecHelper::IgnoreCurrentPolicyExpired()
 {
     if (m_pCurrIpsec != IMS_NULL)
     {
@@ -439,20 +420,18 @@ void AosIpsecHelper::IgnoreCurrentPolicyExpired()
     }
 }
 
-PROTECTED VIRTUAL
-void AosIpsecHelper::SetSecurityServerPortInRegistration()
+PROTECTED VIRTUAL void AosIpsecHelper::SetSecurityServerPortInRegistration()
 {
-    IMS_BOOL bServerPortInRegistration = GET_N_CONFIG(
-            m_piContext->GetSlotId())->IsSecurityServerPortInInitialRegistrationUsed();
+    IMS_BOOL bServerPortInRegistration =
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsSecurityServerPortInInitialRegistrationUsed();
     if (bServerPortInRegistration == IMS_TRUE)
     {
-        m_piRegParameter->SetPort(static_cast<IMS_SINT32>(
-                m_pNewIpsec->GetUePort(AosIpsec::TYPE_SERVER)));
+        m_piRegParameter->SetPort(
+                static_cast<IMS_SINT32>(m_pNewIpsec->GetUePort(AosIpsec::TYPE_SERVER)));
     }
 }
 
-PROTECTED VIRTUAL
-void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
+PROTECTED VIRTUAL void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
 {
     m_pUeIpsecInfo->nPortC = GetValidUePort();
 
@@ -472,19 +451,18 @@ void AosIpsecHelper::SetUePortnSpi(IN IMS_BOOL bInitial)
             m_pUeIpsecInfo->nSpiC, m_pUeIpsecInfo->nSpiS);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
+PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
 {
-    const IMSVector<IMS_SINT32>& objAuthenticationAlgs = GET_N_CONFIG(
-            m_piContext->GetSlotId())->GetIpsecAuthenticationAlgorithms();
+    const IMSVector<IMS_SINT32>& objAuthenticationAlgs =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecAuthenticationAlgorithms();
     if (objAuthenticationAlgs.GetSize() == 0)
     {
         A_IMS_TRACE_I(REGID, "ipsec integrity algorithm is invalid", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32>& objEncryptionAlgs = GET_N_CONFIG(
-            m_piContext->GetSlotId())->GetIpsecEncryptionAlgorithms();
+    IMSVector<IMS_SINT32>& objEncryptionAlgs =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetIpsecEncryptionAlgorithms();
 
     if (objEncryptionAlgs.GetSize() == 0)
     {
@@ -513,8 +491,7 @@ IMS_BOOL AosIpsecHelper::SetSecurityClientHeader()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosIpsecHelper::CheckSecurityServerHeader()
+PROTECTED VIRTUAL IMS_BOOL AosIpsecHelper::CheckSecurityServerHeader()
 {
     A_IMS_TRACE_I(REGID, "CheckSecurityServerHeader", 0, 0, 0);
 
@@ -528,8 +505,7 @@ IMS_BOOL AosIpsecHelper::CheckSecurityServerHeader()
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-void AosIpsecHelper::ProcessPolicyExpired(IN AosIpsec* pIpsec)
+PROTECTED VIRTUAL void AosIpsecHelper::ProcessPolicyExpired(IN AosIpsec* pIpsec)
 {
     A_IMS_TRACE_I(REGID, "ProcessPolicyExpired", 0, 0, 0);
 
@@ -552,8 +528,7 @@ void AosIpsecHelper::ProcessPolicyExpired(IN AosIpsec* pIpsec)
     }
 }
 
-PROTECTED VIRTUAL
-void AosIpsecHelper::IPSecPolicyExpired(IN AosIpsec* pIpsec)
+PROTECTED VIRTUAL void AosIpsecHelper::IPSecPolicyExpired(IN AosIpsec* pIpsec)
 {
     A_IMS_TRACE_I(REGID, "IPSecPolicyExpired", 0, 0, 0);
 
@@ -612,8 +587,8 @@ void AosIpsecHelper::CloseUnsecureTCPSocket()
     IPAddress objIpaPcscf(objPcscf);
     IPAddress objIpaLocal = m_piContext->GetConnection()->GetLocalAddress(objIpaPcscf.GetVersion());
 
-    SipFactory::GetTransportHelper(m_piContext->GetSlotId())->DestroyTcpSocket(
-            objIpaLocal, 0, objIpaPcscf, nPort);
+    SipFactory::GetTransportHelper(m_piContext->GetSlotId())
+            ->DestroyTcpSocket(objIpaLocal, 0, objIpaPcscf, nPort);
 }
 
 PRIVATE
@@ -631,11 +606,11 @@ void AosIpsecHelper::CloseSecureTCPSocket(IN AosIpsec* pIpsec)
     IMS_UINT32 nPcscfSPort = pIpsec->GetPcscfPort(AosIpsec::TYPE_SERVER);
 
     // Disconnect TCP client connection
-    IMS_TRACE_D("UE Port(%d), PCSCF (%s, %d)", nUeCPort,
-            objPcscfIpAddr.ToString().GetStr(), nPcscfSPort);
+    IMS_TRACE_D("UE Port(%d), PCSCF (%s, %d)", nUeCPort, objPcscfIpAddr.ToString().GetStr(),
+            nPcscfSPort);
 
-    SipFactory::GetTransportHelper(m_piContext->GetSlotId())->DestroyTcpSocket(objUeIpa,
-            nUeCPort, objPcscfIpAddr, nPcscfSPort);
+    SipFactory::GetTransportHelper(m_piContext->GetSlotId())
+            ->DestroyTcpSocket(objUeIpa, nUeCPort, objPcscfIpAddr, nPcscfSPort);
 
     // Disconnect TCP server connection if being not used for other IPSec
     IMS_SINT32 nRefCnt = 0;
@@ -671,8 +646,8 @@ void AosIpsecHelper::CloseSecureTCPSocket(IN AosIpsec* pIpsec)
 
     if (nRefCnt <= 1)
     {
-        SipFactory::GetTransportHelper(m_piContext->GetSlotId())->DestroyTcpSocket(objUeIpa, 0,
-                objPcscfIpAddr, nPcscfCPort, IMS_TRUE);
+        SipFactory::GetTransportHelper(m_piContext->GetSlotId())
+                ->DestroyTcpSocket(objUeIpa, 0, objPcscfIpAddr, nPcscfCPort, IMS_TRUE);
     }
 }
 
@@ -686,9 +661,8 @@ IMS_UINT32 AosIpsecHelper::GetValidUePort()
 
     for (IMS_UINT32 i = 0; i < MAX_COUNT; i++)
     {
-        if (pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort,
-                ISocket::TYPE_STREAM) && pNetworkService->CheckIpAndPortAvailability(objUeIPA,
-                nUePort, ISocket::TYPE_DGRAM))
+        if (pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort, ISocket::TYPE_STREAM) &&
+                pNetworkService->CheckIpAndPortAvailability(objUeIPA, nUePort, ISocket::TYPE_DGRAM))
         {
             return nUePort;
         }

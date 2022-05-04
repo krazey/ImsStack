@@ -21,4 +21,4 @@ class IAosNetTrackerListener
 public:
     virtual void NetTracker_StatusChanged() = 0;
 };
-#endif // INTERFACE_AOS_NET_TRACKER_LISTENER_H_
+#endif  // INTERFACE_AOS_NET_TRACKER_LISTENER_H_

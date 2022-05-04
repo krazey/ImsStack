@@ -37,7 +37,6 @@ class ImsAosFeatureTag;
 class IImsAos
 {
 public:
-
     /**
      * @brief Control the operation for registration
      *
@@ -70,18 +69,18 @@ public:
     virtual IMS_UINT32 GetSuspendedReason() = 0;
 
     /**
-      * @brief Indicate whether the feature is registered or not
-      *
-      * @param nFeature Indicate the feature for registration. (@see ImsAosFeature)
-      * @return If the feature is registered, returns IMS_TRUE.
-      */
+     * @brief Indicate whether the feature is registered or not
+     *
+     * @param nFeature Indicate the feature for registration. (@see ImsAosFeature)
+     * @return If the feature is registered, returns IMS_TRUE.
+     */
     virtual IMS_BOOL IsFeatureConnected(IN IMS_UINT32 nFeature) = 0;
 
-     /**
-      * @brief Indicate whether the service is connected or not
-      *
-      * @return If the service is connected, returns IMS_TRUE.
-      */
+    /**
+     * @brief Indicate whether the service is connected or not
+     *
+     * @return If the service is connected, returns IMS_TRUE.
+     */
     virtual IMS_BOOL IsImsConnected() = 0;
 
     /**
@@ -124,4 +123,4 @@ public:
     virtual void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag) = 0;
 };
 
-#endif // INTERFACE_IMS_AOS_H_
+#endif  // INTERFACE_IMS_AOS_H_

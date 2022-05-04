@@ -18,15 +18,14 @@
 
 #include "interface/IAosBuilder.h"
 
-class AosBuilder
-    : public IAosBuilder
+class AosBuilder : public IAosBuilder
 {
-// Operation
+    // Operation
 public:
     AosBuilder();
     virtual ~AosBuilder();
 
-     /// AosAppContext
+    /// AosAppContext
     virtual IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie);
     virtual IAosApplication* BuildApp(IN IAosAppContext* piAppContext);
     virtual IAosHandle* BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
@@ -47,4 +46,4 @@ public:
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId);
     virtual IAosNConfiguration* BuildNConfiguration();
 };
-#endif // AOS_BUILDER_H_
+#endif  // AOS_BUILDER_H_

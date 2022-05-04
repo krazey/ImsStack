@@ -32,18 +32,13 @@ Remarks
 
 */
 PUBLIC
-AosHandleMts::AosHandleMts
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    )
-    : AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
-    , m_bSmsOverIp(IMS_TRUE)
+AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+        IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
+        m_bSmsOverIp(IMS_TRUE)
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x,
-            strAppId.GetStr(), sizeof(AosHandleMts), this);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
+            sizeof(AosHandleMts), this);
 
     m_objCapabilities.Add(static_cast<IMS_UINT32>(AosNetworkType::LTE),
             static_cast<IMS_UINT32>(AosCapability::SMS));
@@ -58,8 +53,7 @@ AosHandleMts::AosHandleMts
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandleMts::~AosHandleMts()
+PUBLIC VIRTUAL AosHandleMts::~AosHandleMts()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleMts), this);
@@ -70,8 +64,7 @@ AosHandleMts::~AosHandleMts()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMts::Init()
+PROTECTED VIRTUAL void AosHandleMts::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
@@ -85,8 +78,7 @@ void AosHandleMts::Init()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMts::CleanUp()
+PROTECTED VIRTUAL void AosHandleMts::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
@@ -136,11 +128,10 @@ void AosHandleMts::EnableAoS()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMts::InitializeServiceBlock()
+PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
-    A_IMS_TRACE_I(APPPROFILE,
-            "InitializeServiceBlock :: m_bSmsOverIp(%s)", _TRACE_B_(m_bSmsOverIp), 0, 0);
+    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: m_bSmsOverIp(%s)", _TRACE_B_(m_bSmsOverIp),
+            0, 0);
 
     if (!GET_N_CONFIG(m_nSlotId)->IsSmsOverIpEnabled())
     {
@@ -154,8 +145,7 @@ void AosHandleMts::InitializeServiceBlock()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMts::InitializeServiceFeature()
+PROTECTED VIRTUAL void AosHandleMts::InitializeServiceFeature()
 {
     if (!m_bBlocked)
     {
@@ -168,8 +158,7 @@ void AosHandleMts::InitializeServiceFeature()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleMts::ProcessCapabilitiesChanged(
+PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/)
 {
     /* jryou:: Temp blocked until GII is changed to consider SMS capability.

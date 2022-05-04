@@ -28,25 +28,24 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define AOSTAG m_strTag.GetStr()
 
-PRIVATE GLOBAL
-IMSList<IMS_UINT32> AosServiceAvailable::m_objBlockReasonsLastNotified = IMSList<IMS_UINT32>();
+PRIVATE GLOBAL IMSList<IMS_UINT32> AosServiceAvailable::m_objBlockReasonsLastNotified =
+        IMSList<IMS_UINT32>();
 
 PROTECTED
-AosServiceAvailable::AosServiceAvailable(AString strName)
-    : m_piAppContext(IMS_NULL)
-    , m_nSlotId(IMS_SLOT_0)
-    , m_strName(strName)
-    , m_bAirplaneMode(IMS_FALSE)
-    , m_bRoamingState(IMS_FALSE)
-    , m_bAvailableLastNotified(IMS_FALSE)
-    , m_objListeners(IMSList<IAosServiceAvailableListener*>())
+AosServiceAvailable::AosServiceAvailable(AString strName) :
+        m_piAppContext(IMS_NULL),
+        m_nSlotId(IMS_SLOT_0),
+        m_strName(strName),
+        m_bAirplaneMode(IMS_FALSE),
+        m_bRoamingState(IMS_FALSE),
+        m_bAvailableLastNotified(IMS_FALSE),
+        m_objListeners(IMSList<IAosServiceAvailableListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailable = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailable), this, 0);
 }
 
-PROTECTED VIRTUAL
-AosServiceAvailable::~AosServiceAvailable()
+PROTECTED VIRTUAL AosServiceAvailable::~AosServiceAvailable()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosServiceAvailable = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailable), this, 0);
@@ -144,20 +143,18 @@ IMS_BOOL AosServiceAvailable::IsAvailable()
     return m_bAvailableLastNotified;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
+PUBLIC VIRTUAL IMS_BOOL AosServiceAvailable::StopToCheckNetworkConnection(
         IN IMS_BOOL bNeedToCheckAvailable /*= IMS_TRUE*/)
 {
-    (void) bNeedToCheckAvailable;
+    (void)bNeedToCheckAvailable;
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-void AosServiceAvailable::HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState,
-        IN IMS_SINT32 nStateEx)
+PUBLIC VIRTUAL void AosServiceAvailable::HandleEvent(
+        IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)",
-            EventToString(eEvent), nState, nStateEx);
+    A_IMS_TRACE_I(
+            AOSTAG, "HandleEvent :: E(%s)/S1(%d)/S2(%d)", EventToString(eEvent), nState, nStateEx);
 
     switch (eEvent)
     {
@@ -208,74 +205,64 @@ void AosServiceAvailable::HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState
     Notify();
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleCallStateChanged(
+        IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
-    A_IMS_TRACE_I(AOSTAG, "HandleCallStateChanged :: nState(%d) nStateEx(%d)",
-            nState, nStateEx, 0);
+    A_IMS_TRACE_I(AOSTAG, "HandleCallStateChanged :: nState(%d) nStateEx(%d)", nState, nStateEx, 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleNetworkStateChanged()
+PROTECTED VIRTUAL void AosServiceAvailable::HandleNetworkStateChanged()
 {
     A_IMS_TRACE_I(AOSTAG, "HandleNetworkStateChanged", 0, 0, 0);
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailable::HandleBlockChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
+PRIVATE VIRTUAL void AosServiceAvailable::HandleBlockChanged(
+        IN IMS_UINT32 nState, IN IMS_UINT32 nStateEx)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleBlockChanged :: Reason(%s) - %s",
-            AosBlock::BlockReasonToString(nState), (nStateEx > 0) ? "BLOCK" : "NOT_BLOCK" , 0);
+            AosBlock::BlockReasonToString(nState), (nStateEx > 0) ? "BLOCK" : "NOT_BLOCK", 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleRoamingChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleRoamingChanged :: nState(%d)", nState, 0, 0);
 
     m_bRoamingState = (nState == IMS_ROAMING_STATE_ON) ? IMS_TRUE : IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleAirplaneModeChanged :: nState(%d)", nState, 0, 0);
 
     m_bAirplaneMode = (nState > 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleVolteSettingChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleVolteSettingChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleVolteSettingChanged :: nState(%d)", nState, 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleVopsChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleVopsChanged :: nState(%d)", nState, 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleWfcSettingChanged(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void AosServiceAvailable::HandleWfcSettingChanged(IN IMS_UINT32 nState)
 {
     A_IMS_TRACE_I(AOSTAG, "HandleWfcSettingChanged :: nState(%d)", nState, 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleWiFiConnectionChanged()
+PROTECTED VIRTUAL void AosServiceAvailable::HandleWiFiConnectionChanged()
 {
     A_IMS_TRACE_I(AOSTAG, "HandleWiFiConnectionChanged", 0, 0, 0);
 }
 
-PROTECTED VIRTUAL
-void AosServiceAvailable::HandleLocationInfoChanged()
+PROTECTED VIRTUAL void AosServiceAvailable::HandleLocationInfoChanged()
 {
     A_IMS_TRACE_I(AOSTAG, "HandleLocationInfoChanged", 0, 0, 0);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL AosServiceAvailable::CheckServiceAvailable()
+PROTECTED VIRTUAL IMS_BOOL AosServiceAvailable::CheckServiceAvailable()
 {
     return IMS_TRUE;
 }
@@ -338,12 +325,11 @@ IMS_BOOL AosServiceAvailable::IsSameAsBeforeUnavailableReason()
     IMSList<IMS_UINT32> objCurrReason;
     piBlock->GetBlockReasons(objCurrReason);
 
-    return AosUtil::GetInstance()->IsListEqual(objCurrReason,
-            m_objBlockReasonsLastNotified, IMS_TRUE);
+    return AosUtil::GetInstance()->IsListEqual(
+            objCurrReason, m_objBlockReasonsLastNotified, IMS_TRUE);
 }
 
-PROTECTED GLOBAL
-const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT32 eEvent)
+PROTECTED GLOBAL const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT32 eEvent)
 {
     switch (eEvent)
     {
@@ -351,7 +337,7 @@ const IMS_CHAR* AosServiceAvailable::EventToString(IN IMS_UINT32 eEvent)
             return "EVENT_AIRPLANE";
 
         case EVENT_ROAMING:
-             return "EVENT_ROAMING";
+            return "EVENT_ROAMING";
 
         case EVENT_VOLTE_SETTING:
             return "EVENT_VOLTE_SETTING";

@@ -34,27 +34,25 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define AOSTAG m_strTag.GetStr()
 
 PUBLIC
-AosServiceAvailableWifi::AosServiceAvailableWifi()
-    : AosServiceAvailable("AosServiceAvailableWifi")
-    , m_strCountry(AString::ConstEmpty())
-    , m_nVoWiFiSetting(IMS_FALSE)
-    , m_nBadNetworkState(STATE_BAD_NETWORK_NONE)
-    , m_bWiFiState(IMS_FALSE)
-    , m_piNetPing(IMS_NULL)
+AosServiceAvailableWifi::AosServiceAvailableWifi() :
+        AosServiceAvailable("AosServiceAvailableWifi"),
+        m_strCountry(AString::ConstEmpty()),
+        m_nVoWiFiSetting(IMS_FALSE),
+        m_nBadNetworkState(STATE_BAD_NETWORK_NONE),
+        m_bWiFiState(IMS_FALSE),
+        m_piNetPing(IMS_NULL)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailableWifi = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableWifi), this, 0);
 }
 
-PUBLIC VIRTUAL
-AosServiceAvailableWifi::~AosServiceAvailableWifi()
+PUBLIC VIRTUAL AosServiceAvailableWifi::~AosServiceAvailableWifi()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosServiceAvailableWifi = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableWifi), this, 0);
 }
 
-PUBLIC VIRTUAL
-void AosServiceAvailableWifi::StartToCheckNetworkConnection()
+PUBLIC VIRTUAL void AosServiceAvailableWifi::StartToCheckNetworkConnection()
 {
     IAosCallTracker* piCT = AosProvider::GetInstance()->GetCallTracker(m_piAppContext->GetSlotId());
 
@@ -91,8 +89,7 @@ void AosServiceAvailableWifi::StartToCheckNetworkConnection()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
+PUBLIC VIRTUAL IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
         IN IMS_BOOL bNeedToCheckAvailable /*= IMS_TRUE*/)
 {
     if (m_nBadNetworkState == STATE_BAD_NETWORK_NONE)
@@ -101,8 +98,8 @@ IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
         return IMS_FALSE;
     }
 
-    IMS_BOOL bWasDetected = (m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED) ?
-            IMS_TRUE : IMS_FALSE;
+    IMS_BOOL bWasDetected =
+            (m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED) ? IMS_TRUE : IMS_FALSE;
 
     ClearBadNetworkState();
 
@@ -114,8 +111,7 @@ IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
     return bWasDetected;
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::RegisterListener()
+PRIVATE VIRTUAL void AosServiceAvailableWifi::RegisterListener()
 {
     AosServiceAvailable::RegisterListener();
 
@@ -128,8 +124,7 @@ void AosServiceAvailableWifi::RegisterListener()
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::DeregisterListener()
+PRIVATE VIRTUAL void AosServiceAvailableWifi::DeregisterListener()
 {
     IWifiWatcher* piWifiWatcher = PhoneInfoService::GetPhoneInfoService()->GetWifiWatcher();
     piWifiWatcher->RemoveObserver(this);
@@ -137,8 +132,8 @@ void AosServiceAvailableWifi::DeregisterListener()
     AosServiceAvailable::DeregisterListener();
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(
+        IN IWifiWatcher* pIWifiWatcher)
 {
     if (pIWifiWatcher == IMS_NULL)
     {
@@ -169,9 +164,8 @@ void AosServiceAvailableWifi::WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pI
     HandleEvent(EVENT_WIFI_STATE, 0, -1);
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::NetworkPing_NotifyResult(
-            IN INetworkPing* piPing, IN IMS_SINT32 nResult)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::NetworkPing_NotifyResult(
+        IN INetworkPing* piPing, IN IMS_SINT32 nResult)
 {
     A_IMS_TRACE_D(AOSTAG, "NetPing_NotifyResult :: result=%s", PingResultToString(nResult), 0, 0);
 
@@ -193,9 +187,8 @@ void AosServiceAvailableWifi::NetworkPing_NotifyResult(
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleCallStateChanged(IN IMS_UINT32 nState,
-        IN IMS_SINT32 nStateEx)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleCallStateChanged(
+        IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx)
 {
     A_IMS_TRACE_D(AOSTAG, "HandleCallStateChanged :: nType(%d), nState(%d)", nState, nStateEx, 0);
 
@@ -209,8 +202,7 @@ void AosServiceAvailableWifi::HandleCallStateChanged(IN IMS_UINT32 nState,
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32 nState)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
@@ -228,8 +220,7 @@ void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
@@ -248,8 +239,7 @@ void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UINT32 nState)
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UINT32 nState)
 {
     // TODO : How to set initial value for m_nVoWiFiSetting?
     if (nState == IMS_WFC_ON)
@@ -265,8 +255,7 @@ void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
 {
     IAosBlock* piBlock = m_piAppContext->GetBlock();
     if (piBlock == IMS_NULL)
@@ -293,11 +282,12 @@ void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableWifi::HandleLocationInfoChanged()
+PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
 {
-    ILocationProperties* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(
-            m_nSlotId)->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
+    ILocationProperties* piLocation =
+            PhoneInfoService::GetPhoneInfoService()
+                    ->GetLocationInfo(m_nSlotId)
+                    ->GetLocationProperties(ILocationInfo::LOCATION_POSITION_N_COUNTRY);
 
     if (piLocation == IMS_NULL)
     {
@@ -306,8 +296,8 @@ void AosServiceAvailableWifi::HandleLocationInfoChanged()
 
     AString strNewCountry = piLocation->GetCountry();
 
-    A_IMS_TRACE_I(AOSTAG, "HandleLocationInfoChanged :: FROM (%s) TO (%s)",
-            m_strCountry.GetStr(), strNewCountry.GetStr(), 0);
+    A_IMS_TRACE_I(AOSTAG, "HandleLocationInfoChanged :: FROM (%s) TO (%s)", m_strCountry.GetStr(),
+            strNewCountry.GetStr(), 0);
 
     IMS_BOOL bIsCountrySame = strNewCountry.Equals(m_strCountry);
     m_strCountry = strNewCountry;
@@ -319,8 +309,7 @@ void AosServiceAvailableWifi::HandleLocationInfoChanged()
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
+PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
 {
     if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
     {
@@ -329,8 +318,8 @@ IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
 
     if (!GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
-        A_IMS_TRACE_I(AOSTAG, "CheckServiceAvailable :: Wifi Service config is not available",
-                0, 0, 0);
+        A_IMS_TRACE_I(
+                AOSTAG, "CheckServiceAvailable :: Wifi Service config is not available", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -374,7 +363,7 @@ IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
     {
         AString strPCSCF;
         m_piAppContext->GetRegistration()->GetProperty(
-                        IAosRegistration::PROPERTY_PCSCF_ADDRESS, nNA, strPCSCF);
+                IAosRegistration::PROPERTY_PCSCF_ADDRESS, nNA, strPCSCF);
 
         IPAddress objDstIP(strPCSCF);
         IMS_SINT32 nPCSCFPort = 5060;

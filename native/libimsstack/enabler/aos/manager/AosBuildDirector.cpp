@@ -41,20 +41,18 @@
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
-AosBuildDirector::AosBuildDirector(IN IAosBuilder* piBuilder, IN IMS_SINT32 nSlotId)
-    : m_nSlotId(nSlotId)
-    , m_piBuilder(piBuilder)
-    , m_objConnection(IMSMap<IMS_SINT32, IAosConnection*>())
-    , m_objNetTracker(IMSMap<IMS_SINT32, IAosNetTracker*>())
-    , m_objAppContext(IMSMap<AString, IAosAppContext*>())
+AosBuildDirector::AosBuildDirector(IN IAosBuilder* piBuilder, IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_piBuilder(piBuilder),
+        m_objConnection(IMSMap<IMS_SINT32, IAosConnection*>()),
+        m_objNetTracker(IMSMap<IMS_SINT32, IAosNetTracker*>()),
+        m_objAppContext(IMSMap<AString, IAosAppContext*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosBuildDirector = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosBuildDirector), this);
 };
 
-
-PUBLIC VIRTUAL
-AosBuildDirector::~AosBuildDirector()
+PUBLIC VIRTUAL AosBuildDirector::~AosBuildDirector()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosBuildDirector = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosBuildDirector), this);
@@ -63,7 +61,7 @@ AosBuildDirector::~AosBuildDirector()
 PUBLIC
 IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
 {
-     // MUST maintain the order
+    // MUST maintain the order
     IMS_TRACE_D("ConstructAos :: slot ID(%d), app ID %s", m_nSlotId, pProfile->GetId().GetStr(), 0);
 
     /// AosAppContext
@@ -71,7 +69,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     piAppContext->SetSlotId(m_nSlotId);
 
     /// AosConnection
-    IAosConnection *piConnection = IMS_NULL;
+    IAosConnection* piConnection = IMS_NULL;
     if (m_objConnection.GetIndexOfKey(pProfile->GetConnectionType()) < 0)
     {
         piConnection = m_piBuilder->BuildConnection(piAppContext);
@@ -84,7 +82,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
         piAppContext->SetConnection(piConnection);
     }
 
-     /// AosNetTracker
+    /// AosNetTracker
     if (m_objNetTracker.GetIndexOfKey(pProfile->GetConnectionType()) < 0)
     {
         IAosNetTracker* piNetTracker = m_piBuilder->BuildNetTracker(piAppContext);
@@ -97,7 +95,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     }
 
     /// AoSBlock
-     piAppContext->SetBlock(m_piBuilder->BuildBlock(piAppContext));
+    piAppContext->SetBlock(m_piBuilder->BuildBlock(piAppContext));
 
     /// AoSRegistration
     IAosRegistration* piRegistration = m_piBuilder->BuildRegistration(piAppContext);
@@ -110,7 +108,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     piAppContext->SetSubscriber(piSubscriber);
 
     /// AoSPcscf
-    IAosPcscf *piPcscf = m_piBuilder->BuildPcscf(piAppContext);
+    IAosPcscf* piPcscf = m_piBuilder->BuildPcscf(piAppContext);
     piPcscf->Init();
     piAppContext->SetPcscf(piPcscf);
 
@@ -124,10 +122,11 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     for (IMS_UINT32 i = 0; i < objProfiles.GetSize(); i++)
     {
         AosServiceProfile* pServiceProfile = objProfiles.GetAt(i);
-        if (pServiceProfile == IMS_NULL) continue;
+        if (pServiceProfile == IMS_NULL)
+            continue;
 
-        IAosHandle* piHandle = m_piBuilder->BuildHandle(piAppContext,
-                pServiceProfile->GetAppId(), pServiceProfile->GetServiceId());
+        IAosHandle* piHandle = m_piBuilder->BuildHandle(
+                piAppContext, pServiceProfile->GetAppId(), pServiceProfile->GetServiceId());
 
         piAppContext->AddHandle(pServiceProfile->GetServiceId(), piHandle);
         piHandle->Init();
@@ -146,12 +145,12 @@ void AosBuildDirector::ConstructProvider()
 
     AosProvider::GetInstance()->SetMsgHandler(m_piBuilder->BuildMsgHandler(), m_nSlotId);
     AosProvider::GetInstance()->SetService(m_piBuilder->BuildService(m_nSlotId), m_nSlotId);
-    AosProvider::GetInstance()->SetSubscriberManager(m_piBuilder->
-            BuildSubscriberManager(m_nSlotId), m_nSlotId);
+    AosProvider::GetInstance()->SetSubscriberManager(
+            m_piBuilder->BuildSubscriberManager(m_nSlotId), m_nSlotId);
     AosProvider::GetInstance()->SetCallTracker(m_piBuilder->BuildCallTracker(m_nSlotId), m_nSlotId);
     AosProvider::GetInstance()->SetRegStateManager(m_piBuilder->BuildRegStateManager(), m_nSlotId);
-    AosProvider::GetInstance()->SetRetryRepository(m_piBuilder->BuildRetryRepository(m_nSlotId),
-            m_nSlotId);
+    AosProvider::GetInstance()->SetRetryRepository(
+            m_piBuilder->BuildRetryRepository(m_nSlotId), m_nSlotId);
 }
 
 PUBLIC

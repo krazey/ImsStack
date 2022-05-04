@@ -29,34 +29,30 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define APPPROFILE m_strTag.GetStr()
 
 PUBLIC
-AosSubscriber::AosSubscriber(IN IAosAppContext* piAppContext)
-    : m_piAppContext(piAppContext)
-    , m_nSlotId(m_piAppContext->GetSlotId())
-    , m_piListener(IMS_NULL)
-    , m_eRegType(AosRegistrationType::NORMAL)
+AosSubscriber::AosSubscriber(IN IAosAppContext* piAppContext) :
+        m_piAppContext(piAppContext),
+        m_nSlotId(m_piAppContext->GetSlotId()),
+        m_piListener(IMS_NULL),
+        m_eRegType(AosRegistrationType::NORMAL)
 {
-    m_strTag.Sprintf("%d:%s", m_nSlotId,
-            m_piAppContext->GetProfileId().GetStr());
+    m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
 
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosSubscriber = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosSubscriber), this);
 }
 
-PUBLIC VIRTUAL
-AosSubscriber::~AosSubscriber()
+PUBLIC VIRTUAL AosSubscriber::~AosSubscriber()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosSubscriber = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosSubscriber), this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosSubscriber::IsReady() const
+PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsReady() const
 {
     return GET_MANAGER(m_nSlotId)->IsReady(m_eRegType == AosRegistrationType::FAKE);
 }
 
-PUBLIC VIRTUAL
-void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
+PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
 {
     A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
     m_piListener = piListener;
@@ -71,20 +67,18 @@ void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-const AStringArray& AosSubscriber::GetConfiguredImpus() const
+PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetConfiguredImpus() const
 {
     return GET_MANAGER(m_nSlotId)->GetConfiguredImpus(m_eRegType == AosRegistrationType::FAKE);
 }
 
-PUBLIC VIRTUAL
-const AStringArray& AosSubscriber::GetFakeImpus() const
+PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetFakeImpus() const
 {
     return GET_MANAGER(m_nSlotId)->GetFakeImpus();
 }
 
-PUBLIC VIRTUAL
-const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(IN IMS_SINT32 nType /*= NORMAL*/) const
+PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
+        IN IMS_SINT32 nType /*= NORMAL*/) const
 {
     return GET_MANAGER(m_nSlotId)->GetSubscriberConfig(nType);
 }
@@ -111,7 +105,6 @@ void AosSubscriber::Init()
         GET_MANAGER(m_nSlotId)->AddListener(this);
     }
     A_IMS_TRACE_D(APPPROFILE, "Init - AddListener :: (%" PFLS_X ")", this, 0, 0);
-
 }
 
 PRIVATE

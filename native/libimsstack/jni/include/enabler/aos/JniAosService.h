@@ -21,8 +21,7 @@
 class JniAosServiceThread;
 class IAosService;
 
-class JniAosService
-    : public BaseService
+class JniAosService : public BaseService
 {
 public:
     JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId);
@@ -74,4 +73,4 @@ private:
     JniAosServiceThread* m_pJniAosServiceThread;
 };
 
-#endif // JNI_AOS_SERVICE_H_
+#endif  // JNI_AOS_SERVICE_H_

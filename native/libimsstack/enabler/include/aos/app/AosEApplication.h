@@ -23,10 +23,9 @@
  *
  * It controls the specific operation for emergency AoS
  *
-*/
+ */
 
-class AosEApplication
-    : public AosApplication
+class AosEApplication : public AosApplication
 {
 public:
     AosEApplication(IN IAosAppContext* piAppContext, IN AString& strAppId);
@@ -93,4 +92,4 @@ protected:
 
     IMS_BOOL m_bIsCallTerminating;
 };
-#endif // AOS_E_APPLICATION_H_
+#endif  // AOS_E_APPLICATION_H_

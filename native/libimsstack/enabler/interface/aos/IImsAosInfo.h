@@ -188,4 +188,4 @@ public:
     };
 };
 
-#endif // INTERFACE_IMS_AOS_INFO_H_
+#endif  // INTERFACE_IMS_AOS_INFO_H_

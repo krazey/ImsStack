@@ -25,20 +25,19 @@ class INetworkConnection;
 class IAosDnsQueryListener;
 class AosDnsQueryPrivate;
 
-class AosDnsQuery
-    : public IMSActivityEx
+class AosDnsQuery : public IMSActivityEx
 {
 public:
     AosDnsQuery();
     virtual ~AosDnsQuery();
 
 private:
-    AosDnsQuery(IN CONST AosDnsQuery &objRHS);
-    AosDnsQuery& operator=(IN CONST AosDnsQuery &objRHS);
+    AosDnsQuery(IN CONST AosDnsQuery& objRHS);
+    AosDnsQuery& operator=(IN CONST AosDnsQuery& objRHS);
 
 public:
-    void SetListener(IN IAosDnsQueryListener *piListener_);
-    void Request  (IN AString &strDomainName_,  IN INetworkConnection *piConnection_);
+    void SetListener(IN IAosDnsQueryListener* piListener_);
+    void Request(IN AString& strDomainName_, IN INetworkConnection* piConnection_);
 
     // Delete myself
     void Destroy();
@@ -49,7 +48,7 @@ public:
 
 private:
     // IMSActivityEx
-    IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
     enum
     {
@@ -64,10 +63,10 @@ public:
     static IMS_UINT32 nIdentity;
 
 private:
-    AosDnsQueryPrivate *pPrivate;
-    IAosDnsQueryListener *piListener;
+    AosDnsQueryPrivate* pPrivate;
+    IAosDnsQueryListener* piListener;
     AString strDomainName;
-    INetworkConnection *piConnection;
+    INetworkConnection* piConnection;
     IMSList<IPAddress> objIPAs;
 };
 
@@ -78,4 +77,4 @@ public:
     virtual void DnsQuery_Done(IN IMS_BOOL bResult, IN IMSList<IPAddress> objIPs) = 0;
 };
 
-#endif // AOS_DNS_QUERY_H_
+#endif  // AOS_DNS_QUERY_H_

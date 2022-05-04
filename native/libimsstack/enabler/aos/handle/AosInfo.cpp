@@ -32,35 +32,28 @@
 //__IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
-AosInfo::AosInfo(IN IAosAppContext* piContext)
-    : m_piContext(piContext)
+AosInfo::AosInfo(IN IAosAppContext* piContext) :
+        m_piContext(piContext)
 {
 }
 
-PUBLIC VIRTUAL
-AosInfo::~AosInfo()
-{
+PUBLIC VIRTUAL AosInfo::~AosInfo() {}
 
-}
-
-PRIVATE VIRTUAL
-AString AosInfo::GetAssociatedUri()
+PRIVATE VIRTUAL AString AosInfo::GetAssociatedUri()
 {
     AString strAssociatedUri;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_ASSOCIATED_URI,
-            nNa, strAssociatedUri);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_ASSOCIATED_URI, nNa, strAssociatedUri);
     return strAssociatedUri;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 AosInfo::GetConnectionType()
+PRIVATE VIRTUAL IMS_SINT32 AosInfo::GetConnectionType()
 {
     return m_piContext->GetConnection()->GetConnectionType();
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetImsFeatures()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetImsFeatures()
 {
     IMSMap<AString, IAosHandle*>& objHandles = m_piContext->GetHandles();
     IMS_UINT32 nFeatures = ImsAosFeature::NONE;
@@ -79,8 +72,7 @@ IMS_UINT32 AosInfo::GetImsFeatures()
     return nFeatures;
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetImsState()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetImsState()
 {
     IMS_UINT32 nAppState = m_piContext->GetApp()->GetAppState();
     IMS_UINT32 nState = IMS_STATE_UNAVAILABLE;
@@ -98,12 +90,12 @@ IMS_UINT32 AosInfo::GetImsState()
             }
             break;
 
-        case IAosApplication::STATE_READY: // FALL-THROUGH
+        case IAosApplication::STATE_READY:  // FALL-THROUGH
         case IAosApplication::STATE_CONNECTING:
             nState = IMS_STATE_PENDING;
             break;
 
-        case IAosApplication::STATE_CONNECTED: // FALL-THROUGH
+        case IAosApplication::STATE_CONNECTED:  // FALL-THROUGH
         case IAosApplication::STATE_UPDATING:
             nState = IMS_STATE_AVAILABLE;
             break;
@@ -115,84 +107,74 @@ IMS_UINT32 AosInfo::GetImsState()
     return nState;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 AosInfo::GetIpcanType()
+PRIVATE VIRTUAL IMS_SINT32 AosInfo::GetIpcanType()
 {
     return m_piContext->GetConnection()->GetIpcanCategory();
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetLastPathHeaderValue()
+PRIVATE VIRTUAL AString AosInfo::GetLastPathHeaderValue()
 {
     AString strLastPath;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_LAST_PATH,
-            nNa, strLastPath);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_LAST_PATH, nNa, strLastPath);
     return strLastPath;
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetLocalAddress()
+PRIVATE VIRTUAL AString AosInfo::GetLocalAddress()
 {
     AString strLocalAddress;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_LOCAL_ADDRESS,
-            nNa, strLocalAddress);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNa, strLocalAddress);
     return strLocalAddress;
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetLocalPort()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetLocalPort()
 {
     AString strNa;
     IMS_UINT32 nLocalPort;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_LOCAL_PORT,
-            nLocalPort, strNa);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_LOCAL_PORT, nLocalPort, strNa);
     return nLocalPort;
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetRegisteredNetworkType()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetRegisteredNetworkType()
 {
     AString strNa;
     IMS_UINT32 nNetworkType;
-    m_piContext->GetApp()->GetProperty(IAosApplication::PROPERTY_REGISTERED_RAT,
-            nNetworkType, strNa);
+    m_piContext->GetApp()->GetProperty(
+            IAosApplication::PROPERTY_REGISTERED_RAT, nNetworkType, strNa);
     return nNetworkType;
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetPathHeaderValue()
+PRIVATE VIRTUAL AString AosInfo::GetPathHeaderValue()
 {
     AString strPath;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_PATH,
-            nNa, strPath);
+    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_PATH, nNa, strPath);
     return strPath;
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetPcscfAddress()
+PRIVATE VIRTUAL AString AosInfo::GetPcscfAddress()
 {
     AString strPcscfAddress;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_PCSCF_ADDRESS,
-            nNa, strPcscfAddress);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_PCSCF_ADDRESS, nNa, strPcscfAddress);
     return strPcscfAddress;
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetPcscfPort()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetPcscfPort()
 {
     AString strNa;
     IMS_UINT32 nPcscfPort;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_PCSCF_PORT,
-            nPcscfPort, strNa);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_PCSCF_PORT, nPcscfPort, strNa);
     return nPcscfPort;
 }
 
-PRIVATE VIRTUAL
-IMS_UINT32 AosInfo::GetRegistrationMode()
+PRIVATE VIRTUAL IMS_UINT32 AosInfo::GetRegistrationMode()
 {
     IMS_UINT32 nMode = REG_MODE_UNKNOWN;
     switch (m_piContext->GetRegistration()->GetMode())
@@ -223,28 +205,25 @@ IMS_UINT32 AosInfo::GetRegistrationMode()
     return nMode;
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetSupportedHeaderValue()
+PRIVATE VIRTUAL AString AosInfo::GetSupportedHeaderValue()
 {
     AString strSupported;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_SUPPORTED,
-            nNa, strSupported);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_SUPPORTED, nNa, strSupported);
     return strSupported;
 }
 
-PRIVATE VIRTUAL
-AString AosInfo::GetServiceRouteHeaderValue()
+PRIVATE VIRTUAL AString AosInfo::GetServiceRouteHeaderValue()
 {
     AString strServiceRoute;
     IMS_UINT32 nNa;
-    m_piContext->GetRegistration()->GetProperty(IAosRegistration::PROPERTY_SERVICE_ROUTE,
-            nNa, strServiceRoute);
+    m_piContext->GetRegistration()->GetProperty(
+            IAosRegistration::PROPERTY_SERVICE_ROUTE, nNa, strServiceRoute);
     return strServiceRoute;
 }
 
-PRIVATE VIRTUAL
-void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
+PRIVATE VIRTUAL void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
 {
     if (bIsInitialized)
     {
@@ -256,14 +235,12 @@ void AosInfo::NotifyEmergencyCallState(IN IMS_BOOL bIsInitialized)
     }
 }
 
-PRIVATE VIRTUAL
-void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
+PRIVATE VIRTUAL void AosInfo::NotifyPublishState(IN IMS_BOOL bIsStarted)
 {
     m_piContext->GetApp()->NotifyPublishState(bIsStarted);
 }
 
-PRIVATE VIRTUAL
-void AosInfo::NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
+PRIVATE VIRTUAL void AosInfo::NotifyEmergencySmsState(IN IMS_BOOL bIsInitialized)
 {
     if (bIsInitialized)
     {

@@ -23,4 +23,4 @@ class IAosCallTrackerListener
 public:
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState) = 0;
 };
-#endif // INTERFACE_AOS_CALL_TRACKER_LISTENER_H_
+#endif  // INTERFACE_AOS_CALL_TRACKER_LISTENER_H_

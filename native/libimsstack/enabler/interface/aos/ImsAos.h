@@ -60,8 +60,8 @@ public:
      * @param nSlotId Slot id
      * @see IImsAos
      */
-    static IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static IMSList<IImsAos*> GetImsAosList(
+            IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 };
 
-#endif // IMS_AOS_H_
+#endif  // IMS_AOS_H_

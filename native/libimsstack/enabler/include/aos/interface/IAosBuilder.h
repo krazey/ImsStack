@@ -42,7 +42,7 @@ class IAosRetryRepository;
 class IAosBuilder
 {
 public:
-    virtual ~IAosBuilder() {};
+    virtual ~IAosBuilder(){};
 
     /// AosAppContext
     virtual IAosAppContext* BuildAppContext(IN AosStaticProfile* pProflie) = 0;
@@ -65,4 +65,4 @@ public:
     virtual IAosRetryRepository* BuildRetryRepository(IN IMS_SINT32 nSlotId) = 0;
     virtual IAosNConfiguration* BuildNConfiguration() = 0;
 };
-#endif // INTERFACE_AOS_BUILDER_H_
+#endif  // INTERFACE_AOS_BUILDER_H_

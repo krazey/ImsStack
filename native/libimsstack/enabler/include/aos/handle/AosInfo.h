@@ -21,8 +21,7 @@
 
 class IAosAppContext;
 
-class AosInfo
-    : public IImsAosInfo
+class AosInfo : public IImsAosInfo
 {
 public:
     AosInfo(IN IAosAppContext* piContext);
@@ -54,4 +53,4 @@ private:
 private:
     IAosAppContext* m_piContext;
 };
-#endif // AOS_INFO_H_
+#endif  // AOS_INFO_H_

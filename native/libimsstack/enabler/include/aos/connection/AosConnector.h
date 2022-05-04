@@ -27,10 +27,7 @@ class IAosConnection;
 class IAosConnectorListener;
 class AosUtil;
 
-class AosConnector
-    : public IAosConnectionListener
-    , public IAosPcscfListener
-    , public ITimerListener
+class AosConnector : public IAosConnectionListener, public IAosPcscfListener, public ITimerListener
 {
 public:
     AosConnector(IN IAosAppContext* piAppContext);
@@ -173,9 +170,9 @@ protected:
     AString strTag;
 
     static const IMS_UINT32 READY_RECOVERY_DEFAULT_COUNT = 3;
-    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20; // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20; // 20 Sec.
-    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800; // 1800 Sec.
-    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4; // 4 Sec.
+    static const IMS_UINT32 READY_RECOVERY_DEFAULT_TIME = 20;  // 20 Sec.
+    static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;     // 20 Sec.
+    static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;    // 1800 Sec.
+    static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;    // 4 Sec.
 };
-#endif // AOS_CONNECTOR_H_
+#endif  // AOS_CONNECTOR_H_

@@ -18,17 +18,11 @@
 
 #include "handle/AosHandle.h"
 
-class AosHandleMtc
-    : public AosHandle
+class AosHandleMtc : public AosHandle
 {
 public:
-    AosHandleMtc
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    );
+    AosHandleMtc(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleMtc();
 
     // IAosHandle
@@ -69,4 +63,4 @@ protected:
 private:
     IMS_UINT32 m_nVops;
 };
-#endif // AOS_HANDLE_MTC_H_
+#endif  // AOS_HANDLE_MTC_H_

@@ -52,30 +52,26 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 PUBLIC
 AosBuilder::AosBuilder()
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosBuilder = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosBuilder), this, 0);
+    IMS_TRACE_MEM(
+            "AOS_MEM", "AOS_M : AosBuilder = %" PFLS_u "/%" PFLS_x, sizeof(AosBuilder), this, 0);
 }
 
-PUBLIC VIRTUAL
-AosBuilder::~AosBuilder()
+PUBLIC VIRTUAL AosBuilder::~AosBuilder()
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosBuilder = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosBuilder), this, 0);
+    IMS_TRACE_MEM(
+            "AOS_MEM", "AOS_F : AosBuilder = %" PFLS_u "/%" PFLS_x, sizeof(AosBuilder), this, 0);
 }
 
-PUBLIC VIRTUAL
-IAosAppContext* AosBuilder::BuildAppContext(IN AosStaticProfile* pProflie)
+PUBLIC VIRTUAL IAosAppContext* AosBuilder::BuildAppContext(IN AosStaticProfile* pProflie)
 {
     IMS_TRACE_D("BuildAppContext :: profile id (%s)", pProflie->GetId().GetStr(), 0, 0);
 
     return new AosAppContext(pProflie);
 }
 
-PUBLIC VIRTUAL
-IAosApplication* AosBuilder::BuildApp(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosApplication* AosBuilder::BuildApp(IN IAosAppContext* piAppContext)
 {
-    if (piAppContext->GetStaticProfile()->GetRegistrationType() ==
-            AosRegistrationType::EMERGENCY)
+    if (piAppContext->GetStaticProfile()->GetRegistrationType() == AosRegistrationType::EMERGENCY)
     {
         return new AosEApplication(piAppContext, piAppContext->GetStaticProfile()->GetId());
     }
@@ -83,9 +79,8 @@ IAosApplication* AosBuilder::BuildApp(IN IAosAppContext* piAppContext)
     return new AosApplication(piAppContext, piAppContext->GetStaticProfile()->GetId());
 }
 
-PUBLIC VIRTUAL
-IAosHandle* AosBuilder::BuildHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
-        IN const AString& strSrvId)
+PUBLIC VIRTUAL IAosHandle* AosBuilder::BuildHandle(
+        IN IAosAppContext* piAppContext, IN const AString& strAppId, IN const AString& strSrvId)
 {
     IMS_UINT32 nType = ImsAosService::NONE;
 
@@ -105,8 +100,8 @@ IAosHandle* AosBuilder::BuildHandle(IN IAosAppContext* piAppContext, IN const AS
 
         return new AosHandleMts(piAppContext, strAppId, strSrvId, nType);
     }
-    else if (strSrvId.EqualsIgnoreCase(ImsServiceConfig::GetServiceName(
-            ImsServiceId::MTC_EMERGENCY)))
+    else if (strSrvId.EqualsIgnoreCase(
+                     ImsServiceConfig::GetServiceName(ImsServiceId::MTC_EMERGENCY)))
     {
         nType = ImsAosService::EMERGENCY_MTC;
         IMS_TRACE_D("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandleEmergencyMtc)",
@@ -114,8 +109,8 @@ IAosHandle* AosBuilder::BuildHandle(IN IAosAppContext* piAppContext, IN const AS
 
         return new AosHandleEmergencyMtc(piAppContext, strAppId, strSrvId, nType);
     }
-    else if (strSrvId.EqualsIgnoreCase(ImsServiceConfig::GetServiceName(
-            ImsServiceId::MTS_EMERGENCY)))
+    else if (strSrvId.EqualsIgnoreCase(
+                     ImsServiceConfig::GetServiceName(ImsServiceId::MTS_EMERGENCY)))
     {
         nType = ImsAosService::EMERGENCY_MTS;
         IMS_TRACE_D("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandleEmergencyMts)",
@@ -143,102 +138,87 @@ IAosHandle* AosBuilder::BuildHandle(IN IAosAppContext* piAppContext, IN const AS
     }
     */
 
-     IMS_TRACE_I("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandle)",
-            strAppId.GetStr(), strSrvId.GetStr(), 0);
+    IMS_TRACE_I("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandle)", strAppId.GetStr(),
+            strSrvId.GetStr(), 0);
 
     return new AosHandle(piAppContext, strAppId, strSrvId, nType);
 }
 
-PUBLIC VIRTUAL
-IAosRegistration* AosBuilder::BuildRegistration(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosRegistration* AosBuilder::BuildRegistration(IN IAosAppContext* piAppContext)
 {
-    if (piAppContext->GetStaticProfile()->GetRegistrationType() ==
-            AosRegistrationType::EMERGENCY)
+    if (piAppContext->GetStaticProfile()->GetRegistrationType() == AosRegistrationType::EMERGENCY)
     {
-        return new AosERegistration(piAppContext,
-                piAppContext->GetStaticProfile()->GetRegistrationId());
+        return new AosERegistration(
+                piAppContext, piAppContext->GetStaticProfile()->GetRegistrationId());
     }
 
-    return new AosRegistration(piAppContext,
-            piAppContext->GetStaticProfile()->GetRegistrationId());
+    return new AosRegistration(piAppContext, piAppContext->GetStaticProfile()->GetRegistrationId());
 }
 
-PUBLIC VIRTUAL
-IAosSubscriber* AosBuilder::BuildSubscriber(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosSubscriber* AosBuilder::BuildSubscriber(IN IAosAppContext* piAppContext)
 {
     return new AosSubscriber(piAppContext);
 }
 
-PUBLIC VIRTUAL
-IAosPcscf* AosBuilder::BuildPcscf(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosPcscf* AosBuilder::BuildPcscf(IN IAosAppContext* piAppContext)
 {
     return new AosPcscf(piAppContext);
 }
 
-PUBLIC VIRTUAL
-IAosBlock* AosBuilder::BuildBlock(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosBlock* AosBuilder::BuildBlock(IN IAosAppContext* piAppContext)
 {
     return new AosBlock(piAppContext);
 }
 
-PUBLIC VIRTUAL
-IAosConnection* AosBuilder::BuildConnection(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosConnection* AosBuilder::BuildConnection(IN IAosAppContext* piAppContext)
 {
-     return new AosConnection(piAppContext);
+    return new AosConnection(piAppContext);
 }
 
-PUBLIC VIRTUAL
-IAosNetTracker* AosBuilder::BuildNetTracker(IN IAosAppContext* piAppContext)
+PUBLIC VIRTUAL IAosNetTracker* AosBuilder::BuildNetTracker(IN IAosAppContext* piAppContext)
 {
     return new AosNetTracker(piAppContext);
 }
 
-PUBLIC VIRTUAL
-IAosCallTracker* AosBuilder::BuildCallTracker(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IAosCallTracker* AosBuilder::BuildCallTracker(IN IMS_SINT32 nSlotId)
 {
     return new AosCallTracker(nSlotId);
 }
 
-PUBLIC VIRTUAL
-IAosRegStateManager* AosBuilder::BuildRegStateManager()
+PUBLIC VIRTUAL IAosRegStateManager* AosBuilder::BuildRegStateManager()
 {
     return new AosRegStateManager();
 }
 
-PUBLIC VIRTUAL
-IAosMsgHandler* AosBuilder::BuildMsgHandler()
+PUBLIC VIRTUAL IAosMsgHandler* AosBuilder::BuildMsgHandler()
 {
     IMS_TRACE_D("BuildMsgHandler", 0, 0, 0);
 
     return new AosMsgHandler();
 }
 
-PUBLIC VIRTUAL
-IAosService* AosBuilder::BuildService(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IAosService* AosBuilder::BuildService(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("BuildService", 0, 0, 0);
 
     return new AosService(nSlotId);
 }
 
-PUBLIC VIRTUAL
-IAosSubscriberManager* AosBuilder::BuildSubscriberManager(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IAosSubscriberManager* AosBuilder::BuildSubscriberManager(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("BuildSubscriberManager", 0, 0, 0);
 
     return new AosSubscriberManager(nSlotId);
 }
 
-PUBLIC VIRTUAL
-IAosRetryRepository* AosBuilder::BuildRetryRepository(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL IAosRetryRepository* AosBuilder::BuildRetryRepository(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("BuildRetryRepository", 0, 0, 0);
 
     return new AosRetryRepository(nSlotId);
 }
 
-PUBLIC VIRTUAL
-IAosNConfiguration* AosBuilder::BuildNConfiguration()
+PUBLIC VIRTUAL IAosNConfiguration* AosBuilder::BuildNConfiguration()
 {
     IMS_TRACE_D("BuildNConfiguration", 0, 0, 0);
 

@@ -66,8 +66,8 @@ public:
      * @see class {@link #ServiceSetting}
      * @see class {@link #IUIMS}
      */
-    virtual void ServiceSetting_ServiceChanged(IN ServiceSetting eState,
-            IN IMS_UINT32 nServiceBits) = 0;
+    virtual void ServiceSetting_ServiceChanged(
+            IN ServiceSetting eState, IN IMS_UINT32 nServiceBits) = 0;
 
     /**
      * Called to notify the change of TTY setting.
@@ -121,21 +121,20 @@ enum class ServiceSetting
     PRESENTITY = 2
 };
 
-class AosServiceSettingListener
-    : public IAosServiceSettingListener
+class AosServiceSettingListener : public IAosServiceSettingListener
 {
 public:
-    inline void ServiceSetting_AirplaneChanged(IN IMS_BOOL /*bIsOn*/) override {};
-    inline void ServiceSetting_DataRoamingChanged(IN IMS_BOOL /*bIsAllowed*/) override {};
-    inline void ServiceSetting_MobileDataChanged(IN IMS_BOOL /*bIsOn*/) override {};
+    inline void ServiceSetting_AirplaneChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServiceSetting_DataRoamingChanged(IN IMS_BOOL /*bIsAllowed*/) override{};
+    inline void ServiceSetting_MobileDataChanged(IN IMS_BOOL /*bIsOn*/) override{};
     inline void ServiceSetting_RoamingPreferredVoiceNetworkChanged(
-            IN RoamingPreferredVoiceNetwork /*eState*/) override {};
-    inline void ServiceSetting_ServiceChanged(IN ServiceSetting /*eState*/,
-            IN IMS_UINT32 /*nServiceBits*/) override {};
-    inline void ServiceSetting_TtyChanged(IN IMS_BOOL /*bIsOn*/) override {};
-    inline void ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/) override {};
-    inline void ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/) override {};
-    inline void ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/) override {};
+            IN RoamingPreferredVoiceNetwork /*eState*/) override{};
+    inline void ServiceSetting_ServiceChanged(
+            IN ServiceSetting /*eState*/, IN IMS_UINT32 /*nServiceBits*/) override{};
+    inline void ServiceSetting_TtyChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServiceSetting_VideoChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServiceSetting_VolteChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServiceSetting_WfcChanged(IN IMS_BOOL /*bIsOn*/) override{};
 };
 
-#endif // INTERFACE_AOS_SERVICE_SETTING_LISTENER_H_
+#endif  // INTERFACE_AOS_SERVICE_SETTING_LISTENER_H_

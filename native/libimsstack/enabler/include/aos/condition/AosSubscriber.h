@@ -24,9 +24,7 @@ class AosStaticProfile;
 class AosUtil;
 class AosServicePhoneListener;
 
-class AosSubscriber
-    : public IAosSubscriber
-    , public IAosSubscriberManagerListener
+class AosSubscriber : public IAosSubscriber, public IAosSubscriberManagerListener
 {
 public:
     AosSubscriber(IN IAosAppContext* piAppContext);
@@ -58,4 +56,4 @@ private:
     AString m_strTag;
 };
 
-#endif // AOS_SUBSCRIBER_H_
+#endif  // AOS_SUBSCRIBER_H_

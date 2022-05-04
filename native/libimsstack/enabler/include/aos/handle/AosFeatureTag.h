@@ -25,13 +25,12 @@
 class AosFeatureTag
 {
 public:
-    AosFeatureTag(IN const AString& strName,
-            IN const AString& strValue = AString::ConstNull(), IN IMS_UINT32 nType = 0,
-            IN IMS_UINT32 nOption = OPTION_HEADER_PARAMETER);
+    AosFeatureTag(IN const AString& strName, IN const AString& strValue = AString::ConstNull(),
+            IN IMS_UINT32 nType = 0, IN IMS_UINT32 nOption = OPTION_HEADER_PARAMETER);
     virtual ~AosFeatureTag();
 
-    void SetFeatureTag(IN const AString& strName,
-            IN const AString& strValue = AString::ConstNull());
+    void SetFeatureTag(
+            IN const AString& strName, IN const AString& strValue = AString::ConstNull());
 
     IMS_BOOL Equals(IN AosFeatureTag* pFeatureTag);
     IMS_BOOL Equals(IN const AString& strName, IN const AString& strValue = AString::ConstNull());
@@ -63,8 +62,8 @@ public:
     IMS_BOOL AddFeatureTag(IN const AString& strName,
             IN const AString& strValue = AString::ConstNull(), IN IMS_UINT32 nType = 0,
             IN IMS_UINT32 nOption = AosFeatureTag::OPTION_HEADER_PARAMETER);
-    IMS_BOOL RemoveFeatureTag(IN const AString& strName,
-            IN const AString& strValue = AString::ConstNull());
+    IMS_BOOL RemoveFeatureTag(
+            IN const AString& strName, IN const AString& strValue = AString::ConstNull());
 
     void AddFeature(IN IMS_UINT32 nFeature);
     void RemoveFeature(IN IMS_UINT32 nFeature);
@@ -91,4 +90,4 @@ private:
     IMSList<AosFeatureTag*> m_objFeatureTagList;
     IMS_UINT32 m_nFeatures;
 };
-#endif // AOS_FEATURE_TAG_H_
+#endif  // AOS_FEATURE_TAG_H_

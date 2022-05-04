@@ -23,21 +23,20 @@
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
-AosMngrAdaptor::AosMngrAdaptor(IN const AString& strAppName, IN IMS_SINT32 nSlotId)
-    : ImsAosManager(strAppName)
-    , m_nSlotId(nSlotId)
+AosMngrAdaptor::AosMngrAdaptor(IN const AString& strAppName, IN IMS_SINT32 nSlotId) :
+        ImsAosManager(strAppName),
+        m_nSlotId(nSlotId)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosMngrAdaptor = %" PFLS_u "/%" PFLS_x, m_nSlotId,
-        sizeof(AosMngrAdaptor), this);
+            sizeof(AosMngrAdaptor), this);
 
     m_pAdaptee = new AosMngr(m_nSlotId);
 }
 
-PUBLIC VIRTUAL
-AosMngrAdaptor::~AosMngrAdaptor()
+PUBLIC VIRTUAL AosMngrAdaptor::~AosMngrAdaptor()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosMngrAdaptor = %" PFLS_u "/%" PFLS_x, m_nSlotId,
-        sizeof(AosMngrAdaptor), this);
+            sizeof(AosMngrAdaptor), this);
 
     if (m_pAdaptee != IMS_NULL)
     {
@@ -46,8 +45,8 @@ AosMngrAdaptor::~AosMngrAdaptor()
     }
 }
 
-PUBLIC VIRTUAL
-IImsAos* AosMngrAdaptor::GetImsAos(IN const AString& strAppId, IN const AString& strServiceId)
+PUBLIC VIRTUAL IImsAos* AosMngrAdaptor::GetImsAos(
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
     IMS_TRACE_D("GetImsAos :: [%s/%s]", strAppId.GetStr(), strServiceId.GetStr(), 0);
 
@@ -56,16 +55,15 @@ IImsAos* AosMngrAdaptor::GetImsAos(IN const AString& strAppId, IN const AString&
     return DYNAMIC_CAST(IImsAos*, pHandle);
 }
 
-PUBLIC VIRTUAL
-IMSList<IImsAos*> AosMngrAdaptor::GetImsAosList(IN const AString& strAppId,
-    IN const AString& strServiceId)
+PUBLIC VIRTUAL IMSList<IImsAos*> AosMngrAdaptor::GetImsAosList(
+        IN const AString& strAppId, IN const AString& strServiceId)
 {
     IMS_TRACE_D("GetImsAosList :: [%s/%s]", strAppId.GetStr(), strServiceId.GetStr(), 0);
 
     IMSList<IImsAos*> objImsAos;
     IMSList<IAosHandle*> objHandles = m_pAdaptee->GetAllAosHandles(strAppId, strServiceId);
 
-    for (IMS_UINT32 i = 0 ; i < objHandles.GetSize() ; i++)
+    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); i++)
     {
         IAosHandle* piHandle = objHandles.GetAt(i);
 
@@ -76,15 +74,14 @@ IMSList<IImsAos*> AosMngrAdaptor::GetImsAosList(IN const AString& strAppId,
     return objImsAos;
 }
 
-PUBLIC VIRTUAL
-IMSList<IImsAos*> AosMngrAdaptor::GetImsAosList(IN const AString& strAppId)
+PUBLIC VIRTUAL IMSList<IImsAos*> AosMngrAdaptor::GetImsAosList(IN const AString& strAppId)
 {
     IMS_TRACE_D("GetImsAosList :: AppId(%s)", strAppId.GetStr(), 0, 0);
 
     IMSList<IImsAos*> objImsAos;
     IMSList<IAosHandle*> objHandles = m_pAdaptee->GetAllAosHandles(strAppId);
 
-    for (IMS_UINT32 i = 0 ; i < objHandles.GetSize() ; i++)
+    for (IMS_UINT32 i = 0; i < objHandles.GetSize(); i++)
     {
         IAosHandle* piHandle = objHandles.GetAt(i);
 

@@ -21,42 +21,38 @@
 #include "provider/AosUtil.h"
 #include "provider/AosMsgHandler.h"
 
-
 //__IMS_TRACE_TAG_USER_DECL__("AOS");
-
 
 class AosMessage
 {
 public:
-    AosMessage()
-        : piListener(IMS_NULL)
-        , piTimer(IMS_NULL)
-        , nMessage(-1)
-        , nDuration(0)
-        , bDead(IMS_FALSE)
+    AosMessage() :
+            piListener(IMS_NULL),
+            piTimer(IMS_NULL),
+            nMessage(-1),
+            nDuration(0),
+            bDead(IMS_FALSE)
     {
-        IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMessage = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosMessage), this, 0);
+        IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMessage = %" PFLS_u "/%" PFLS_x, sizeof(AosMessage),
+                this, 0);
     }
 
-    AosMessage(IN CONST IAosMsgHandlerListener* piListener,
-        IN CONST ITimer* piTimer,
-        IN IMS_SINT32 nMessage,
-        IN IMS_SINT32 nDuration)
-        : piListener(piListener)
-        , piTimer(piTimer)
-        , nMessage(nMessage)
-        , nDuration(nDuration)
-        , bDead(IMS_FALSE)
+    AosMessage(IN CONST IAosMsgHandlerListener* piListener, IN CONST ITimer* piTimer,
+            IN IMS_SINT32 nMessage, IN IMS_SINT32 nDuration) :
+            piListener(piListener),
+            piTimer(piTimer),
+            nMessage(nMessage),
+            nDuration(nDuration),
+            bDead(IMS_FALSE)
     {
-        IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMessage = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosMessage), this, 0);
+        IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMessage = %" PFLS_u "/%" PFLS_x, sizeof(AosMessage),
+                this, 0);
     }
 
     virtual ~AosMessage()
     {
-        IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosMessage = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosMessage), this, 0);
+        IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosMessage = %" PFLS_u "/%" PFLS_x, sizeof(AosMessage),
+                this, 0);
     }
 
     IMS_BOOL IsEqual(IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
@@ -92,18 +88,17 @@ private:
     IMS_BOOL bDead;
 };
 
-
 /*
 
 Remarks
 
 */
 PUBLIC
-AosMsgHandler::AosMsgHandler()
-    : objMessages(IMSMap<ITimer*, AosMessage*>())
+AosMsgHandler::AosMsgHandler() :
+        objMessages(IMSMap<ITimer*, AosMessage*>())
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMsgHandler = %" PFLS_u "/%" PFLS_x,
-        sizeof(AosMsgHandler), this, 0);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosMsgHandler = %" PFLS_u "/%" PFLS_x, sizeof(AosMsgHandler),
+            this, 0);
 }
 
 /*
@@ -111,19 +106,18 @@ AosMsgHandler::AosMsgHandler()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosMsgHandler::~AosMsgHandler()
+PUBLIC VIRTUAL AosMsgHandler::~AosMsgHandler()
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosMsgHandler = %" PFLS_u "/%" PFLS_x,
-        sizeof(AosMsgHandler), this, 0);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosMsgHandler = %" PFLS_u "/%" PFLS_x, sizeof(AosMsgHandler),
+            this, 0);
 
     for (IMS_UINT32 i = 0; i < objMessages.GetSize(); ++i)
     {
-        AosMessage *pMsg = objMessages.GetValueAt(i);
+        AosMessage* pMsg = objMessages.GetValueAt(i);
 
         if (pMsg != IMS_NULL)
         {
-            ITimer *piTimer = const_cast<ITimer*>(pMsg->GetTimer());
+            ITimer* piTimer = const_cast<ITimer*>(pMsg->GetTimer());
             if (piTimer != IMS_NULL)
             {
                 StopTimer(piTimer);
@@ -142,8 +136,8 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL AosMsgHandler::HasMessage(IN CONST IAosMsgHandlerListener* piListener,
-    IN IMS_SINT32 nMessage, OUT IMS_SINT32& nAt)
+IMS_BOOL AosMsgHandler::HasMessage(
+        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage, OUT IMS_SINT32& nAt)
 {
     if (objMessages.IsEmpty())
     {
@@ -152,7 +146,7 @@ IMS_BOOL AosMsgHandler::HasMessage(IN CONST IAosMsgHandlerListener* piListener,
 
     for (IMS_UINT32 i = 0; i < objMessages.GetSize(); ++i)
     {
-        AosMessage *pMsg = objMessages.GetValueAt(i);
+        AosMessage* pMsg = objMessages.GetValueAt(i);
 
         if (pMsg != IMS_NULL)
         {
@@ -199,11 +193,9 @@ void AosMsgHandler::StopTimer(IN ITimer* piTimer)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosMsgHandler::SendEmptyMessageDelayed(
-    IN CONST IAosMsgHandlerListener* piListener,
-    IN IMS_SINT32 nMessage,
-    IN IMS_SINT32 nDuration)
+PUBLIC VIRTUAL IMS_BOOL AosMsgHandler::SendEmptyMessageDelayed(
+        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage,
+        IN IMS_SINT32 nDuration)
 {
     if (nDuration < 0)
     {
@@ -242,9 +234,8 @@ IMS_BOOL AosMsgHandler::SendEmptyMessageDelayed(
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosMsgHandler::RemoveMessages(IN CONST IAosMsgHandlerListener* piListener,
-    IN IMS_SINT32 nMessage)
+PUBLIC VIRTUAL void AosMsgHandler::RemoveMessages(
+        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
 {
     IMS_SINT32 nAt = (-1);
     if (HasMessage(piListener, nMessage, nAt))
@@ -266,9 +257,8 @@ void AosMsgHandler::RemoveMessages(IN CONST IAosMsgHandlerListener* piListener,
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosMsgHandler::HasMessages(IN CONST IAosMsgHandlerListener* piListener,
-    IN IMS_SINT32 nMessage)
+PUBLIC VIRTUAL IMS_BOOL AosMsgHandler::HasMessages(
+        IN CONST IAosMsgHandlerListener* piListener, IN IMS_SINT32 nMessage)
 {
     if (objMessages.IsEmpty())
     {
@@ -277,9 +267,9 @@ IMS_BOOL AosMsgHandler::HasMessages(IN CONST IAosMsgHandlerListener* piListener,
 
     for (IMS_UINT32 i = 0; i < objMessages.GetSize(); ++i)
     {
-        AosMessage *pMsg = objMessages.GetValueAt(i);
+        AosMessage* pMsg = objMessages.GetValueAt(i);
 
-        if (pMsg->IsEqual(piListener,nMessage))
+        if (pMsg->IsEqual(piListener, nMessage))
         {
             return IMS_TRUE;
         }
@@ -295,8 +285,7 @@ IMS_BOOL AosMsgHandler::HasMessages(IN CONST IAosMsgHandlerListener* piListener,
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosMsgHandler::Timer_TimerExpired(IN ITimer *piTimer)
+PUBLIC VIRTUAL void AosMsgHandler::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -310,7 +299,7 @@ void AosMsgHandler::Timer_TimerExpired(IN ITimer *piTimer)
         return;
     }
 
-    AosMessage *pMsg = objMessages.GetValueAt(nIndex);
+    AosMessage* pMsg = objMessages.GetValueAt(nIndex);
 
     if (pMsg != IMS_NULL)
     {

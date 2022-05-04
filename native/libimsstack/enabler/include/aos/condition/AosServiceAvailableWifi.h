@@ -20,10 +20,10 @@
 #include "IWifiWatcher.h"
 #include "condition/AosServiceAvailable.h"
 
-class AosServiceAvailableWifi
-    : public AosServiceAvailable
-    , public INetworkPingListener
-    , public IWifiWatcherListener
+class AosServiceAvailableWifi :
+        public AosServiceAvailable,
+        public INetworkPingListener,
+        public IWifiWatcherListener
 {
 public:
     AosServiceAvailableWifi();
@@ -74,4 +74,4 @@ private:
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;
 };
 
-#endif // AOS_SERVICE_AVAILABLE_WIFI_H_
+#endif  // AOS_SERVICE_AVAILABLE_WIFI_H_

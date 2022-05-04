@@ -42,13 +42,12 @@ public:
     */
     virtual IMS_UINT32 GetNetworkType() = 0;
 
-
     virtual void SetRATGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime) = 0;
 
-    virtual void SetListener(IN IAosNetTrackerListener *piListener) = 0;
-    virtual void RemoveListener(IN IAosNetTrackerListener *piListener) = 0;
+    virtual void SetListener(IN IAosNetTrackerListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosNetTrackerListener* piListener) = 0;
 
     enum
     {
@@ -57,4 +56,4 @@ public:
         TYPE_WLAN
     };
 };
-#endif // INTERFACE_AOS_NET_TRACKER_H_
+#endif  // INTERFACE_AOS_NET_TRACKER_H_

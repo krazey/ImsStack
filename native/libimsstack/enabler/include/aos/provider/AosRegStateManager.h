@@ -19,8 +19,7 @@
 #include "IMSTypeDef.h"
 #include "interface/IAosRegStateManager.h"
 
-class AosRegStateManager
-    : public IAosRegStateManager
+class AosRegStateManager : public IAosRegStateManager
 {
 public:
     AosRegStateManager();
@@ -72,4 +71,4 @@ protected:
 
     AString m_strTag;
 };
-#endif // AOS_REG_STATE_MANAGER_H_
+#endif  // AOS_REG_STATE_MANAGER_H_

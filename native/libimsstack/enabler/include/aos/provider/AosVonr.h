@@ -21,17 +21,15 @@
 
 class IAosAppContext;
 
-class AosVonr
-    : public IAosVonr
-    , public ITimerListener
+class AosVonr : public IAosVonr, public ITimerListener
 {
 public:
-    AosVonr(IN IAosAppContext *piContext_);
+    AosVonr(IN IAosAppContext* piContext_);
     virtual ~AosVonr();
 
 private:
-    AosVonr(IN const AosVonr &objRHS);
-    AosVonr& operator=(IN const AosVonr &objRHS);
+    AosVonr(IN const AosVonr& objRHS);
+    AosVonr& operator=(IN const AosVonr& objRHS);
 
 private:
     // IAosVonr
@@ -58,7 +56,7 @@ private:
     void StopAllTimers();
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
     enum
@@ -67,16 +65,16 @@ private:
     };
 
 private:
-    IAosAppContext *piContext;
+    IAosAppContext* piContext;
     IMS_SINT32 nSlotId;
     IMS_UINT32 nStartedModules;
     IMS_BOOL bIsStartUpdated;
 
-    IVoNr *piVoNR;
-    ITimer *piEndDelayTimer;
+    IVoNr* piVoNR;
+    ITimer* piEndDelayTimer;
 
     AString strTag;
 
     static const IMS_UINT32 TIMER_END_DELAY_INTERVAL = 1000;
 };
-#endif // AOS_VONR_H_
+#endif  // AOS_VONR_H_

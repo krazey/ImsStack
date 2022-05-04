@@ -24,8 +24,7 @@ class IAosServicePhoneListener;
 class JniAosService;
 class JniAosServiceThread;
 
-class AosService
-    : public IAosService
+class AosService : public IAosService
 {
 public:
     AosService(IN IMS_SINT32 nSlotId);
@@ -45,10 +44,10 @@ public:
     /// Java -> Native
     void UpdateSipDelegateRegistration() override;
     void TriggerSipDelegateDeregistration() override;
-    void TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
-            IN const AString& sipReason) override;
-    void NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>&
-            objCapabilities) override;
+    void TriggerFullNetworkRegistration(
+            IN IMS_SINT32 nSipCode, IN const AString& sipReason) override;
+    void NotifyCapabilitiesChanged(
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
     void ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder) override;
 
     void NotifyAirplaneSetting(IN IMS_UINT32 nIsOn) override;
@@ -62,8 +61,8 @@ public:
     void NotifyWfcSetting(IN IMS_UINT32 nIsOn) override;
 
     void NotifyAosStart() override;
-    void NotifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,
-            IN IMS_SINT32 nCauseCode) override;
+    void NotifyIpcanHandoverFailure(
+            IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) override;
     void NotifyIsimState(IN IMS_UINT32 nState) override;
     void NotifyLocationInfo(IN IMS_UINT32 nState) override;
     void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) override;
@@ -77,12 +76,12 @@ public:
     void NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
             IN const IMSList<AString>& objFeatureTags) override;
 
-    void NotifyRegistering(IN AosNetworkType eNetworkType,
-            IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags) override;
+    void NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
+            IN const IMSList<AString>& objFeatureTags) override;
 
     void NotifyDeregistered(IN AosReasonCode eReason) override;
-    void NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
-            IN IMS_SINT32 nCauseCode) override;
+    void NotifyTechnologyChangeFailed(
+            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) override;
     void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris) override;
     void NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
             IN AosNetworkType eNetworkType, IN AosReasonCode eReason) override;
@@ -94,8 +93,8 @@ public:
 
     IMSMap<IMS_UINT32, IMS_UINT32>& GetCapabilities() override;
     IMS_UINT32 GetCapabilitiesForNetwork(AosNetworkType eNetworkType) override;
-    IMS_BOOL IsSupportCapabilitiesForNetwork(AosNetworkType eNetworkType,
-            AosCapability eCapability) override;
+    IMS_BOOL IsSupportCapabilitiesForNetwork(
+            AosNetworkType eNetworkType, AosCapability eCapability) override;
 
 private:
     void Init();
@@ -119,4 +118,4 @@ private:
     JniAosService* m_pJniAosService;
 };
 
-#endif // AOS_SERVICE_H_
+#endif  // AOS_SERVICE_H_

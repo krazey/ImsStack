@@ -23,23 +23,20 @@
 class ISipKeepAliveHelper;
 class IAosKeepAliveListener;
 
-class AosKeepAlive
-    : public ISipKeepAliveHelperListener
-    , public ITimerListener
+class AosKeepAlive : public ISipKeepAliveHelperListener, public ITimerListener
 {
-
 public:
     AosKeepAlive(IN IMS_SINT32 nSlotId_);
     virtual ~AosKeepAlive();
 
-    virtual void SetListener(IN IAosKeepAliveListener *piListener);
+    virtual void SetListener(IN IAosKeepAliveListener* piListener);
 
     // nRepeatTime is millisecond
     void Start(IN IMS_UINT32 nRepeatTime, IN IMS_BOOL bCheckingPong = IMS_TRUE);
     void Stop();
 
-    void SetTransport(IN CONST IPAddress &objSourceIPA, IN IMS_SINT32 nSourcePort,
-            IN CONST IPAddress &objDestIPA, IN IMS_SINT32 nDestPort,
+    void SetTransport(IN CONST IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
+            IN CONST IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
             IN IMS_SINT32 nProtocol = AosKeepAlive::TRANSPORT_UDP);
 
     enum
@@ -68,7 +65,7 @@ private:
     virtual void KeepAliveHelper_PongReceived();
 
     // ITimerListener Interface
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
@@ -79,10 +76,10 @@ private:
     };
 
 private:
-    ISipKeepAliveHelper *piKAHelper;
-    IAosKeepAliveListener *piListener;
-    ITimer *piKeepAliveTimer;
-    ITimer *piPongWATTimer;
+    ISipKeepAliveHelper* piKAHelper;
+    IAosKeepAliveListener* piListener;
+    ITimer* piKeepAliveTimer;
+    ITimer* piPongWATTimer;
     IMS_UINT32 nKATime;
     IMS_BOOL bIsPongChecked;
     IMS_SINT32 nSlotId;
@@ -96,4 +93,4 @@ public:
     virtual void KeepAlive_DetectedFlowFailed() = 0;
 };
 
-#endif // AOS_KEEP_ALIVE_H_
+#endif  // AOS_KEEP_ALIVE_H_

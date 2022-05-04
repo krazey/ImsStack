@@ -25,8 +25,8 @@ public:
 class IAosTrm
 {
 public:
-    virtual void SetListener(IN IAosTrmListener *piListener) = 0;
-    virtual void RemoveListener(IN IAosTrmListener *piListener) = 0;
+    virtual void SetListener(IN IAosTrmListener* piListener) = 0;
+    virtual void RemoveListener(IN IAosTrmListener* piListener) = 0;
 
     virtual IMS_BOOL IsReady() = 0;
     virtual IMS_BOOL IsTRMSupported() = 0;
@@ -36,10 +36,10 @@ public:
 
     enum
     {
-        TYPE_NONE            = 0,
-        TYPE_REG             = (0x0001),
-        TYPE_SUB             = (0x0002),
-        TYPE_PDN             = (0x0004)
+        TYPE_NONE = 0,
+        TYPE_REG = (0x0001),
+        TYPE_SUB = (0x0002),
+        TYPE_PDN = (0x0004)
     };
 };
-#endif // INTERFACE_AOS_TRM_H_
+#endif  // INTERFACE_AOS_TRM_H_

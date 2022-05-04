@@ -36,15 +36,15 @@ Remarks
 
 */
 PUBLIC
-AosConnection::AosConnection(IN IAosAppContext* piAppContext)
-    : m_piContext(piAppContext)
-    , m_nSlotId(piAppContext->GetSlotId())
-    , m_nCnxType(NetworkPolicy::APN_NONE)
-    , m_nCnxIpPriority(0)
-    , m_piConnection(IMS_NULL)
-    , m_nState(STATE_IDLE)
-    , m_bActivationRequested(IMS_FALSE)
-    , m_bOnDemandControl(IMS_FALSE)
+AosConnection::AosConnection(IN IAosAppContext* piAppContext) :
+        m_piContext(piAppContext),
+        m_nSlotId(piAppContext->GetSlotId()),
+        m_nCnxType(NetworkPolicy::APN_NONE),
+        m_nCnxIpPriority(0),
+        m_piConnection(IMS_NULL),
+        m_nState(STATE_IDLE),
+        m_bActivationRequested(IMS_FALSE),
+        m_bOnDemandControl(IMS_FALSE)
 {
     m_nCnxIpPriority = 64;
     m_nCnxType = piAppContext->GetStaticProfile()->GetConnectionType();
@@ -57,8 +57,8 @@ AosConnection::AosConnection(IN IAosAppContext* piAppContext)
     m_piConnection = NetworkService::GetNetworkService()->CreateConnection(m_nCnxType, m_nSlotId);
     if (m_piConnection == IMS_NULL)
     {
-        A_IMS_TRACE_D(CNXID, "AosConnection :: network connection (%d) is failed",
-                m_nCnxType, 0, 0);
+        A_IMS_TRACE_D(
+                CNXID, "AosConnection :: network connection (%d) is failed", m_nCnxType, 0, 0);
         return;
     }
 
@@ -72,8 +72,7 @@ AosConnection::AosConnection(IN IAosAppContext* piAppContext)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosConnection::~AosConnection()
+PUBLIC VIRTUAL AosConnection::~AosConnection()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosConnection = %" PFLS_u "/%" PFLS_x, CNXID,
             sizeof(AosConnection), this);
@@ -93,8 +92,7 @@ AosConnection::~AosConnection()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosConnection::Activate()
+PUBLIC VIRTUAL IMS_BOOL AosConnection::Activate()
 {
     A_IMS_TRACE_I(CNXID, "Activate :: state(%s)", StateToString(m_nState), 0, 0);
 
@@ -129,8 +127,7 @@ IMS_BOOL AosConnection::Activate()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosConnection::Deactivate()
+PUBLIC VIRTUAL void AosConnection::Deactivate()
 {
     A_IMS_TRACE_I(CNXID, "Deactivate :: state(%s)", StateToString(m_nState), 0, 0);
 
@@ -148,8 +145,7 @@ void AosConnection::Deactivate()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosConnection::GetState()
+PUBLIC VIRTUAL IMS_UINT32 AosConnection::GetState()
 {
     A_IMS_TRACE_D(CNXID, "GetState :: state(%s)", StateToString(m_nState), 0, 0);
     return m_nState;
@@ -160,8 +156,7 @@ IMS_UINT32 AosConnection::GetState()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosConnection::GetConnectionType()
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetConnectionType()
 {
     return m_nCnxType;
 }
@@ -171,8 +166,7 @@ IMS_SINT32 AosConnection::GetConnectionType()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosConnection::GetPreferredIpVersion()
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetPreferredIpVersion()
 {
     return m_nCnxIpPriority;
 }
@@ -182,8 +176,7 @@ IMS_SINT32 AosConnection::GetPreferredIpVersion()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosConnection::SetListener(IN IAosConnectionListener* piListener)
+PUBLIC VIRTUAL void AosConnection::SetListener(IN IAosConnectionListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
@@ -191,16 +184,14 @@ void AosConnection::SetListener(IN IAosConnectionListener* piListener)
 
         if (pTmpListener == piListener)
         {
-            A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is already set",
-                    piListener, 0, 0);
+            A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is already set", piListener, 0, 0);
             return;
         }
     }
 
     m_objListeners.Append(piListener);
 
-    A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is set",
-            piListener, 0, 0);
+    A_IMS_TRACE_D(CNXID, "SetListener :: (%" PFLS_x ") is set", piListener, 0, 0);
 }
 
 /*
@@ -208,8 +199,7 @@ void AosConnection::SetListener(IN IAosConnectionListener* piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
+PUBLIC VIRTUAL void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
@@ -219,8 +209,7 @@ void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
         {
             m_objListeners.RemoveAt(i);
 
-            A_IMS_TRACE_D(CNXID, "RemoveListener :: (%" PFLS_x ") is removed",
-                    piListener, 0, 0);
+            A_IMS_TRACE_D(CNXID, "RemoveListener :: (%" PFLS_x ") is removed", piListener, 0, 0);
             return;
         }
     }
@@ -231,8 +220,7 @@ void AosConnection::RemoveListener(IN IAosConnectionListener* piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosConnection::GetMtu()
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetMtu()
 {
     if (GetState() == STATE_ACTIVE)
     {
@@ -249,8 +237,7 @@ IMS_SINT32 AosConnection::GetMtu()
 Remarks
 
 */
-PUBLIC VIRTUAL
-const IPAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
+PUBLIC VIRTUAL const IPAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetLocalAddress(nIpVersion);
 }
@@ -260,8 +247,8 @@ const IPAddress& AosConnection::GetLocalAddress(IN IMS_SINT32 nIpVersion /* = 0 
 Remarks
 
 */
-PUBLIC VIRTUAL
-const AStringArray& AosConnection::GetPcscfAddress(IN IMS_SINT32 nIpVersion /* = 0 */)
+PUBLIC VIRTUAL const AStringArray& AosConnection::GetPcscfAddress(
+        IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetPcscfAddress(nIpVersion);
 }
@@ -271,8 +258,7 @@ const AStringArray& AosConnection::GetPcscfAddress(IN IMS_SINT32 nIpVersion /* =
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
         OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion /* = 0 */)
 {
     return m_piConnection->GetHostByName(strHostName, objIps, nIpVersion);
@@ -283,8 +269,7 @@ IMS_SINT32 AosConnection::GetHostByName(IN const AString& strHostName,
 Remarks
 
 */
-PUBLIC VIRTUAL
-const AString& AosConnection::GetIfaceName()
+PUBLIC VIRTUAL const AString& AosConnection::GetIfaceName()
 {
     return m_piConnection->GetIfaceName();
 }
@@ -294,8 +279,7 @@ const AString& AosConnection::GetIfaceName()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosConnection::IsEpdgEnabled()
+PUBLIC VIRTUAL IMS_BOOL AosConnection::IsEpdgEnabled()
 {
     return m_piConnection->IsePDGEnabled();
 }
@@ -305,8 +289,7 @@ IMS_BOOL AosConnection::IsEpdgEnabled()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosConnection::GetIpcanCategory()
+PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetIpcanCategory()
 {
     return IsEpdgEnabled() ? IIpcan::CATEGORY_WLAN : IIpcan::CATEGORY_MOBILE;
 }
@@ -316,8 +299,7 @@ IMS_SINT32 AosConnection::GetIpcanCategory()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress)
+PUBLIC VIRTUAL IMS_BOOL AosConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress)
 {
     A_IMS_TRACE_D(CNXID, "SendPingToHostAddress :: host address (%s)",
             objHostAddress.ToString().GetStr(), 0, 0);
@@ -330,8 +312,7 @@ IMS_BOOL AosConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
+PUBLIC GLOBAL const IMS_CHAR* AosConnection::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
     {
@@ -392,7 +373,6 @@ void AosConnection::Notify(IN IMS_UINT32 nType /* = TYPE_STATE_CHANGED */)
     }
 }
 
-
 /*
 
 Remarks
@@ -437,8 +417,8 @@ void AosConnection::SetState(IN IMS_UINT32 nState)
     IMS_UINT32 nOldState = m_nState;
 
     m_nState = nState;
-    A_IMS_TRACE_D(CNXID, "SetState :: OLD(%s) -> NEW(%s)",
-            StateToString(nOldState), StateToString(nState), 0);
+    A_IMS_TRACE_D(CNXID, "SetState :: OLD(%s) -> NEW(%s)", StateToString(nOldState),
+            StateToString(nState), 0);
 }
 
 /*
@@ -457,7 +437,7 @@ void AosConnection::UpdateIpcanForTrm()
     static IMS_BOOL bIsUpdated = IMS_FALSE;
     static IMS_BOOL bIsTrmSupported = IMS_FALSE;
 
-    if (!bIsUpdated )
+    if (!bIsUpdated)
     {
         ITrm* piPhoneTRM = PhoneInfoService::GetPhoneInfoService()->GetTrm();
         if (piPhoneTRM != IMS_NULL)
@@ -483,8 +463,8 @@ void AosConnection::UpdateIpcanForTrm()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnected(
+        IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -505,9 +485,8 @@ void AosConnection::NetworkConnection_OnConnected(IN INetworkConnection* piNetCo
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnDisconnected(IN INetworkConnection* piNetConnection,
-        IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnDisconnected(
+        IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -525,9 +504,8 @@ void AosConnection::NetworkConnection_OnDisconnected(IN INetworkConnection* piNe
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnConnectionFailed(IN INetworkConnection* piNetConnection,
-        IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnConnectionFailed(
+        IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -545,8 +523,8 @@ void AosConnection::NetworkConnection_OnConnectionFailed(IN INetworkConnection* 
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpChanged(
+        IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -566,8 +544,8 @@ void AosConnection::NetworkConnection_OnIpChanged(IN INetworkConnection* piNetCo
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnIpcanChanged(
+        IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {
@@ -586,8 +564,8 @@ void AosConnection::NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNe
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosConnection::NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection)
+PROTECTED VIRTUAL void AosConnection::NetworkConnection_OnPcscfChanged(
+        IN INetworkConnection* piNetConnection)
 {
     if (piNetConnection != m_piConnection)
     {

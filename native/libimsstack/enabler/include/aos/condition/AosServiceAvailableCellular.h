@@ -18,8 +18,7 @@
 
 #include "condition/AosServiceAvailable.h"
 
-class AosServiceAvailableCellular
-    : public AosServiceAvailable
+class AosServiceAvailableCellular : public AosServiceAvailable
 {
 public:
     AosServiceAvailableCellular();
@@ -40,4 +39,4 @@ private:
     IMS_BOOL m_bNetworkServiceIn;
 };
 
-#endif // AOS_SERVICE_AVAILABLE_CELLULAR_H_
+#endif  // AOS_SERVICE_AVAILABLE_CELLULAR_H_

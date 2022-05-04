@@ -25,28 +25,27 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define AOSTAG m_strTag.GetStr()
 
 PUBLIC
-AosRetryRepository::AosRetryRepository(IN IMS_SINT32 nSlotId)
-    : m_nSlotId(nSlotId)
-    , m_nRetryCount(0)
-    , m_nEmergencyRetryCount(0)
+AosRetryRepository::AosRetryRepository(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_nRetryCount(0),
+        m_nEmergencyRetryCount(0)
 {
     m_strTag.Sprintf("%d", m_nSlotId);
 
     IMS_TRACE_D("AosRetryRepository [slot_%d]", m_nSlotId, 0, 0);
 }
 
-PUBLIC VIRTUAL
-AosRetryRepository::~AosRetryRepository()
+PUBLIC VIRTUAL AosRetryRepository::~AosRetryRepository()
 {
     IMS_TRACE_D("~AosRetryRepository()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosRetryRepository::IncreaseRetryCount(IN IMS_UINT32 nType /* = TYPE_NORMAL */)
+PUBLIC VIRTUAL IMS_BOOL AosRetryRepository::IncreaseRetryCount(
+        IN IMS_UINT32 nType /* = TYPE_NORMAL */)
 {
     IMS_SINT32 nMaxCount = GET_N_CONFIG(m_nSlotId)->GetSpecificRegistrationErrorMaxCount();
-    A_IMS_TRACE_I(AOSTAG, "retryCont: %d, emergencyRetryCount: %d, maxCount: %d",
-            m_nRetryCount, m_nEmergencyRetryCount, nMaxCount);
+    A_IMS_TRACE_I(AOSTAG, "retryCont: %d, emergencyRetryCount: %d, maxCount: %d", m_nRetryCount,
+            m_nEmergencyRetryCount, nMaxCount);
 
     if (nType == TYPE_NORMAL)
     {
@@ -78,8 +77,7 @@ IMS_BOOL AosRetryRepository::IncreaseRetryCount(IN IMS_UINT32 nType /* = TYPE_NO
     }
 }
 
-PUBLIC VIRTUAL
-void AosRetryRepository::ResetRetryCount(IN IMS_UINT32 nType /* = TYPE_NORMAL */)
+PUBLIC VIRTUAL void AosRetryRepository::ResetRetryCount(IN IMS_UINT32 nType /* = TYPE_NORMAL */)
 {
     if (nType == TYPE_NORMAL)
     {

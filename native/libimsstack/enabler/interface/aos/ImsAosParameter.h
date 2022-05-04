@@ -94,14 +94,14 @@ public:
         NONE = 0,
 
         /// MTC
-        MMTEL = (0x00000001), // "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\""
-        VIDEO = (0x00000002), // "video"
-        TEXT = (0x00000004), // "text"
-        USSI = (0x00000008), // "+g.3gpp.nw-init-ussi"
-        VERSTAT = (0x00000010), // "+g.3gpp.verstat"
+        MMTEL = (0x00000001),    // "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\""
+        VIDEO = (0x00000002),    // "video"
+        TEXT = (0x00000004),     // "text"
+        USSI = (0x00000008),     // "+g.3gpp.nw-init-ussi"
+        VERSTAT = (0x00000010),  // "+g.3gpp.verstat"
 
         /// MTS
-        SMSIP = (0x00000020), // "+g.3gpp.smsip"
+        SMSIP = (0x00000020),  // "+g.3gpp.smsip"
 
         /// SIP Controller
         STANDALONE_MSG = (0x00000040),
@@ -125,7 +125,6 @@ public:
     };
 };
 
-
 /**
  * @brief This class provides the feature-tag data for IImsAos#UpdateFeature()
  *
@@ -135,13 +134,15 @@ public:
 class ImsAosFeatureTag
 {
 public:
-    ImsAosFeatureTag(IN AString strName, IN AString strValue)
-        : m_strName(strName)
-        , m_strValue(strValue) {}
+    ImsAosFeatureTag(IN AString strName, IN AString strValue) :
+            m_strName(strName),
+            m_strValue(strValue)
+    {
+    }
     virtual ~ImsAosFeatureTag() {}
 
-    inline AString& GetName() {return m_strName;}
-    inline AString& GetValue() {return m_strValue;}
+    inline AString& GetName() { return m_strName; }
+    inline AString& GetValue() { return m_strValue; }
 
 private:
     AString m_strName;
@@ -166,4 +167,4 @@ public:
     };
 };
 
-#endif // IMS_AOS_PARAMETER_H_
+#endif  // IMS_AOS_PARAMETER_H_

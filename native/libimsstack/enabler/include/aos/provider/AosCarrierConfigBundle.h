@@ -24,10 +24,10 @@
 struct AosMmtelRequiresProvisioningBundle
 {
 public:
-    AosMmtelRequiresProvisioningBundle()
-        : objCapabilityTypeVoice(IMSVector<IMS_SINT32>())
-        , objCapabilityTypeVideo(IMSVector<IMS_SINT32>())
-        , objCapabilityTypeSms(IMSVector<IMS_SINT32>())
+    AosMmtelRequiresProvisioningBundle() :
+            objCapabilityTypeVoice(IMSVector<IMS_SINT32>()),
+            objCapabilityTypeVideo(IMSVector<IMS_SINT32>()),
+            objCapabilityTypeSms(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -44,10 +44,10 @@ public:
 struct AosNotifyTerminatedForRegEventWithInitialRegistrationBundle
 {
 public:
-    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle()
-        : nWaitTimeForInitRegOnTerminatedstate(0)
-        , objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
-        , objEventToFollowWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
+    AosNotifyTerminatedForRegEventWithInitialRegistrationBundle() :
+            nWaitTimeForInitRegOnTerminatedstate(0),
+            objEventForInitRegOnTerminatedState(IMSVector<IMS_SINT32>()),
+            objEventToFollowWtForInitRegOnTerminatedState(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -65,10 +65,10 @@ public:
 struct AosRegistrationRetryIntervalBundle
 {
 public:
-    AosRegistrationRetryIntervalBundle()
-        : objRegistrationRetryRandomUpperValueSec(IMSVector<IMS_SINT32>())
-        , objRegistrationRetryIntervalSec(IMSVector<IMS_SINT32>())
-        , bUseRegistrationRetryIntervalForSubscriptionRetry(IMS_TRUE)
+    AosRegistrationRetryIntervalBundle() :
+            objRegistrationRetryRandomUpperValueSec(IMSVector<IMS_SINT32>()),
+            objRegistrationRetryIntervalSec(IMSVector<IMS_SINT32>()),
+            bUseRegistrationRetryIntervalForSubscriptionRetry(IMS_TRUE)
     {
     }
 
@@ -85,11 +85,10 @@ public:
 struct AosRegistrationPermanentErrorCodeBundle
 {
 public:
-    AosRegistrationPermanentErrorCodeBundle()
-        : objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>())
-        , objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>())
+    AosRegistrationPermanentErrorCodeBundle() :
+            objRegistrationPermanentErrorCode(IMSVector<IMS_SINT32>()),
+            objRegistrationPermanentErrorMaxCount(IMSVector<IMS_SINT32>())
     {
-
     }
 
     AosRegistrationPermanentErrorCodeBundle(
@@ -102,4 +101,4 @@ public:
     IMSVector<IMS_SINT32> objRegistrationPermanentErrorMaxCount;
 };
 
-#endif // AOS_CARRIER_CONFIG_BUNDLE_H_
+#endif  // AOS_CARRIER_CONFIG_BUNDLE_H_

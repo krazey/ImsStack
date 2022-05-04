@@ -23,26 +23,21 @@
 //__IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
-AosStaticProfile::AosStaticProfile()
-    : m_eProfileType(Type::NORMAL)
-    , m_eRegistrationType(AosRegistrationType::NORMAL)
-    , m_nConnectionType(NetworkPolicy::APN_IMS)
-    , m_nRegistrationFlowId(0)
-    , m_objServiceProfiles(IMSList<AosServiceProfile*>())
+AosStaticProfile::AosStaticProfile() :
+        m_eProfileType(Type::NORMAL),
+        m_eRegistrationType(AosRegistrationType::NORMAL),
+        m_nConnectionType(NetworkPolicy::APN_IMS),
+        m_nRegistrationFlowId(0),
+        m_objServiceProfiles(IMSList<AosServiceProfile*>())
 {
-
 }
 
-PUBLIC VIRTUAL
-AosStaticProfile::~AosStaticProfile()
-{
-
-}
+PUBLIC VIRTUAL AosStaticProfile::~AosStaticProfile() {}
 
 PUBLIC
 void AosStaticProfile::SetProflieType(IN Type eType)
 {
-     if (eType == Type::NORMAL)
+    if (eType == Type::NORMAL)
     {
         m_strId = AString("aos_normal");
         m_nConnectionType = NetworkPolicy::APN_IMS;
@@ -125,7 +120,7 @@ AosRegistrationType AosStaticProfile::GetRegistrationType() const
 PUBLIC
 const IMSList<AosServiceProfile*>& AosStaticProfile::GetServiceProfiles() const
 {
-   return m_objServiceProfiles;
+    return m_objServiceProfiles;
 }
 
 PRIVATE

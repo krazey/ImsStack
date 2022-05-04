@@ -42,4 +42,4 @@ public:
     // Event Log
     static const IMS_CHAR* EventToString(IN IMS_SINT32 nEvent);
 };
-#endif // AOS_LOG_H_
+#endif  // AOS_LOG_H_

@@ -28,20 +28,19 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define TO_BOOLEAN(n) (n > 0)
 
 PUBLIC
-AosService::AosService(IN IMS_SINT32 nSlotId)
-    : m_nSlotId(nSlotId)
-    , m_objAosRegistrationControlListeners(IMSList<IAosRegistrationControlListener*>())
-    , m_objAosServiceSettingListeners(IMSList<IAosServiceSettingListener*>())
-    , m_objAosServicePhoneListeners(IMSList<IAosServicePhoneListener*>())
-    , m_objCapabilities(IMSMap<IMS_UINT32, IMS_UINT32>())
-    , m_pJniAosService(IMS_NULL)
+AosService::AosService(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_objAosRegistrationControlListeners(IMSList<IAosRegistrationControlListener*>()),
+        m_objAosServiceSettingListeners(IMSList<IAosServiceSettingListener*>()),
+        m_objAosServicePhoneListeners(IMSList<IAosServicePhoneListener*>()),
+        m_objCapabilities(IMSMap<IMS_UINT32, IMS_UINT32>()),
+        m_pJniAosService(IMS_NULL)
 {
     IMS_TRACE_I("+AosService [slot_%d]", m_nSlotId, 0, 0);
     Init();
 }
 
-PUBLIC VIRTUAL
-AosService::~AosService()
+PUBLIC VIRTUAL AosService::~AosService()
 {
     IMS_TRACE_I("~AosService [slot_%d]", m_nSlotId, 0, 0);
 
@@ -53,15 +52,13 @@ AosService::~AosService()
     CleanUp();
 }
 
-PUBLIC VIRTUAL
-void AosService::SetJniAosService(IN JniAosService* pJniAosService)
+PUBLIC VIRTUAL void AosService::SetJniAosService(IN JniAosService* pJniAosService)
 {
     IMS_TRACE_I("SetJniAosService", 0, 0, 0);
     m_pJniAosService = pJniAosService;
 }
 
-PUBLIC VIRTUAL
-void AosService::AddListener(IN IAosRegistrationControlListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosRegistrationControlListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -82,8 +79,7 @@ void AosService::AddListener(IN IAosRegistrationControlListener* piListener)
     m_objAosRegistrationControlListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void AosService::RemoveListener(IN IAosRegistrationControlListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosRegistrationControlListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -103,8 +99,7 @@ void AosService::RemoveListener(IN IAosRegistrationControlListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::AddListener(IN IAosServiceSettingListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosServiceSettingListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -113,8 +108,7 @@ void AosService::AddListener(IN IAosServiceSettingListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
     {
-        IAosServiceSettingListener* piTempListener =
-                m_objAosServiceSettingListeners.GetAt(i);
+        IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -125,8 +119,7 @@ void AosService::AddListener(IN IAosServiceSettingListener* piListener)
     m_objAosServiceSettingListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -135,8 +128,7 @@ void AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
     {
-        IAosServiceSettingListener* piTempListener =
-                m_objAosServiceSettingListeners.GetAt(i);
+        IAosServiceSettingListener* piTempListener = m_objAosServiceSettingListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -146,8 +138,7 @@ void AosService::RemoveListener(IN IAosServiceSettingListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::AddListener(IN IAosServicePhoneListener* piListener)
+PUBLIC VIRTUAL void AosService::AddListener(IN IAosServicePhoneListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -156,8 +147,7 @@ void AosService::AddListener(IN IAosServicePhoneListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
     {
-        IAosServicePhoneListener* piTempListener =
-                m_objAosServicePhoneListeners.GetAt(i);
+        IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -168,8 +158,7 @@ void AosService::AddListener(IN IAosServicePhoneListener* piListener)
     m_objAosServicePhoneListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
+PUBLIC VIRTUAL void AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -178,8 +167,7 @@ void AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
 
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
     {
-        IAosServicePhoneListener* piTempListener =
-                m_objAosServicePhoneListeners.GetAt(i);
+        IAosServicePhoneListener* piTempListener = m_objAosServicePhoneListeners.GetAt(i);
 
         if (piListener == piTempListener)
         {
@@ -189,8 +177,7 @@ void AosService::RemoveListener(IN IAosServicePhoneListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::UpdateSipDelegateRegistration()
+PUBLIC VIRTUAL void AosService::UpdateSipDelegateRegistration()
 {
     IMS_TRACE_I("UpdateSipDelegateRegistration", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
@@ -204,8 +191,7 @@ void AosService::UpdateSipDelegateRegistration()
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::TriggerSipDelegateDeregistration()
+PUBLIC VIRTUAL void AosService::TriggerSipDelegateDeregistration()
 {
     IMS_TRACE_I("TriggerSipDelegateDeregistration", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
@@ -219,9 +205,8 @@ void AosService::TriggerSipDelegateDeregistration()
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
-        IN const AString& strSipReason)
+PUBLIC VIRTUAL void AosService::TriggerFullNetworkRegistration(
+        IN IMS_SINT32 nSipCode, IN const AString& strSipReason)
 {
     IMS_TRACE_I("TriggerFullNetworkRegistration :: nSipCode(%d), strSipReason(%s)", nSipCode,
             strSipReason.GetStr(), 0);
@@ -236,9 +221,8 @@ void AosService::TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>&
-        objCapabilities)
+PUBLIC VIRTUAL void AosService::NotifyCapabilitiesChanged(
+        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     IMS_TRACE_I("NotifyCapabilitiesChanged", 0, 0, 0);
     PrintCapabilities(objCapabilities);
@@ -255,8 +239,8 @@ void AosService::NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT3
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder)
+PUBLIC VIRTUAL void AosService::ControlRegistration(
+        IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder)
 {
     IMS_TRACE_I("ControlRegistration :: nRequestType(%d), nPcscfOrder(%d)", nRequestType,
             nPcscfOrder, 0);
@@ -273,8 +257,7 @@ void AosService::ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 n
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyAirplaneSetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyAirplaneSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyAirplaneSetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -288,8 +271,7 @@ void AosService::NotifyAirplaneSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed)
+PUBLIC VIRTUAL void AosService::NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed)
 {
     IMS_TRACE_I("NotifyDataRoamingSetting :: nIsAllowed(%d)", nIsAllowed, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -303,8 +285,7 @@ void AosService::NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyMobileDataSetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyMobileDataSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyMobileDataSetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -318,8 +299,7 @@ void AosService::NotifyMobileDataSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyRoamingPreferredVoiceNetwork(IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyRoamingPreferredVoiceNetwork(IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("NotifyRoamingPreferredVoiceNetwork :: nState(%d)", nState, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -334,8 +314,8 @@ void AosService::NotifyRoamingPreferredVoiceNetwork(IN IMS_UINT32 nState)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyServiceSetting(IN IMS_UINT32 nState, IN IMS_UINT32 nServiceBits)
+PUBLIC VIRTUAL void AosService::NotifyServiceSetting(
+        IN IMS_UINT32 nState, IN IMS_UINT32 nServiceBits)
 {
     IMS_TRACE_I("NotifyServiceSetting :: nState(%d), nServiceBits(%d)", nState, nServiceBits, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -344,14 +324,13 @@ void AosService::NotifyServiceSetting(IN IMS_UINT32 nState, IN IMS_UINT32 nServi
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServiceSetting_ServiceChanged(static_cast<ServiceSetting>(nState),
-                    nServiceBits);
+            piListener->ServiceSetting_ServiceChanged(
+                    static_cast<ServiceSetting>(nState), nServiceBits);
         }
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyTtySetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyTtySetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyTtySetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -365,8 +344,7 @@ void AosService::NotifyTtySetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyVideoSetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyVideoSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyVideoSetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -380,8 +358,7 @@ void AosService::NotifyVideoSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyVolteSetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyVolteSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyVolteSetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -395,8 +372,7 @@ void AosService::NotifyVolteSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyWfcSetting(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyWfcSetting(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyWfcSetting :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServiceSettingListeners.GetSize(); ++i)
@@ -410,8 +386,7 @@ void AosService::NotifyWfcSetting(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyAosStart()
+PUBLIC VIRTUAL void AosService::NotifyAosStart()
 {
     IMS_TRACE_I("NotifyAosStart", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -425,25 +400,23 @@ void AosService::NotifyAosStart()
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode)
+PUBLIC VIRTUAL void AosService::NotifyIpcanHandoverFailure(
+        IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode)
 {
-    IMS_TRACE_I("NotifyIpcanHandoverFailure :: nTargetNetwork(%d), nCauseCode(%d)",
-            nTargetNetwork, nCauseCode, 0);
+    IMS_TRACE_I("NotifyIpcanHandoverFailure :: nTargetNetwork(%d), nCauseCode(%d)", nTargetNetwork,
+            nCauseCode, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
     {
         IAosServicePhoneListener* piListener = m_objAosServicePhoneListeners.GetAt(i);
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServicePhone_notifyIpcanHandoverFailure(
-                    nTargetNetwork, nCauseCode);
+            piListener->ServicePhone_notifyIpcanHandoverFailure(nTargetNetwork, nCauseCode);
         }
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyIsimState(IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyIsimState(IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("NotifyIsimState :: nState(%d)", nState, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -457,8 +430,7 @@ void AosService::NotifyIsimState(IN IMS_UINT32 nState)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyLocationInfo(IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyLocationInfo(IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("NotifyLocationInfo :: nState(%d)", nState, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -472,8 +444,7 @@ void AosService::NotifyLocationInfo(IN IMS_UINT32 nState)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited)
+PUBLIC VIRTUAL void AosService::NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited)
 {
     IMS_TRACE_I("NotifyMobileDataLimit :: nIsLimited(%d)", nIsLimited, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -487,8 +458,7 @@ void AosService::NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn)
+PUBLIC VIRTUAL void AosService::NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn)
 {
     IMS_TRACE_I("NotifyNetworkVideoCapability :: nIsOn(%d)", nIsOn, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -502,8 +472,8 @@ void AosService::NotifyNetworkVideoCapability(IN IMS_UINT32 nIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyPhoneNumberState(
+        IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("NotifyPhoneNumberState :: nIsRefresh(%d), nState(%d)", nIsRefresh, nState, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -512,14 +482,13 @@ void AosService::NotifyPhoneNumberState(IN IMS_UINT32 nIsRefresh, IN IMS_UINT32 
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServicePhone_PhoneNumberStateChanged(TO_BOOLEAN(nIsRefresh),
-                    static_cast<PhoneNumberState>(nState));
+            piListener->ServicePhone_PhoneNumberStateChanged(
+                    TO_BOOLEAN(nIsRefresh), static_cast<PhoneNumberState>(nState));
         }
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyPlmnChanged()
+PUBLIC VIRTUAL void AosService::NotifyPlmnChanged()
 {
     IMS_TRACE_I("NotifyPlmnChanged", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -533,8 +502,7 @@ void AosService::NotifyPlmnChanged()
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyPowerOff()
+PUBLIC VIRTUAL void AosService::NotifyPowerOff()
 {
     IMS_TRACE_I("NotifyPowerOff", 0, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -548,8 +516,7 @@ void AosService::NotifyPowerOff()
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyPreciseCallState(IN IMS_SINT32 nState)
+PUBLIC VIRTUAL void AosService::NotifyPreciseCallState(IN IMS_SINT32 nState)
 {
     IMS_TRACE_I("NotifyPreciseCallState :: nState(%d)", nState, 0, 0);
     for (IMS_UINT32 i = 0; i < m_objAosServicePhoneListeners.GetSize(); ++i)
@@ -558,38 +525,34 @@ void AosService::NotifyPreciseCallState(IN IMS_SINT32 nState)
 
         if (piListener != IMS_NULL)
         {
-            piListener->ServicePhone_PreciseCallStateChanged(
-                    static_cast<PreciseCallState>(nState));
+            piListener->ServicePhone_PreciseCallStateChanged(static_cast<PreciseCallState>(nState));
         }
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyRegistered(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-        IN const IMSList<AString>& objFeatureTags)
+PUBLIC VIRTUAL void AosService::NotifyRegistered(IN AosNetworkType eNetworkType,
+        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistered", 0, 0, 0);
     if (Attach())
     {
-        m_pJniAosService->GetThread()->NotifyRegistered(static_cast<IMS_SINT32>(eNetworkType),
-                nFeatureTagBits, objFeatureTags);
+        m_pJniAosService->GetThread()->NotifyRegistered(
+                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyRegistering(IN AosNetworkType eNetworkType, IN IMS_UINT32 nFeatureTagBits,
-        IN const IMSList<AString>& objFeatureTags)
+PUBLIC VIRTUAL void AosService::NotifyRegistering(IN AosNetworkType eNetworkType,
+        IN IMS_UINT32 nFeatureTagBits, IN const IMSList<AString>& objFeatureTags)
 {
     IMS_TRACE_I("NotifyRegistering", 0, 0, 0);
     if (Attach())
     {
-        m_pJniAosService->GetThread()->NotifyRegistering(static_cast<IMS_SINT32>(eNetworkType),
-                nFeatureTagBits, objFeatureTags);
+        m_pJniAosService->GetThread()->NotifyRegistering(
+                static_cast<IMS_SINT32>(eNetworkType), nFeatureTagBits, objFeatureTags);
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyDeregistered(IN AosReasonCode eReason)
+PUBLIC VIRTUAL void AosService::NotifyDeregistered(IN AosReasonCode eReason)
 {
     IMS_TRACE_I("NotifyDeregistered", 0, 0, 0);
     if (Attach())
@@ -598,9 +561,8 @@ void AosService::NotifyDeregistered(IN AosReasonCode eReason)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
-        IN IMS_SINT32 nCauseCode)
+PUBLIC VIRTUAL void AosService::NotifyTechnologyChangeFailed(
+        IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode)
 {
     IMS_TRACE_I("NotifyTechnologyChangeFailed", 0, 0, 0);
     if (Attach())
@@ -610,8 +572,7 @@ void AosService::NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
+PUBLIC VIRTUAL void AosService::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
 {
     IMS_TRACE_I("NotifyAssociatedUriChanged", 0, 0, 0);
     if (Attach())
@@ -620,9 +581,8 @@ void AosService::NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
-        IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
+PUBLIC VIRTUAL void AosService::NotifyCapabilitiesUpdateFailed(
+        IN AosCapability eCapabilities, IN AosNetworkType eNetworkType, IN AosReasonCode eReason)
 {
     IMS_TRACE_I("NotifyCapabilitiesUpdateFailed", 0, 0, 0);
     if (Attach())
@@ -633,8 +593,7 @@ void AosService::NotifyCapabilitiesUpdateFailed(IN AosCapability eCapabilities,
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyAosIsimState(IN AosIsimState eState)
+PUBLIC VIRTUAL void AosService::NotifyAosIsimState(IN AosIsimState eState)
 {
     IMS_TRACE_I("NotifyAosIsimState", 0, 0, 0);
     if (Attach())
@@ -643,8 +602,7 @@ void AosService::NotifyAosIsimState(IN AosIsimState eState)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::NotifyRegEventState(IN AosRegEvent eState)
+PUBLIC VIRTUAL void AosService::NotifyRegEventState(IN AosRegEvent eState)
 {
     IMS_TRACE_I("NotifyRegEventState", 0, 0, 0);
     if (Attach())
@@ -653,8 +611,7 @@ void AosService::NotifyRegEventState(IN AosRegEvent eState)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
+PUBLIC VIRTUAL void AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
 {
     IMS_TRACE_I("RequestPhoneNumberRetry", 0, 0, 0);
     if (Attach())
@@ -663,8 +620,7 @@ void AosService::RequestPhoneNumberRetry(IN AosPhoneNumberRetryCommand eCommand)
     }
 }
 
-PUBLIC VIRTUAL
-void AosService::RequestWifiService(IN IMS_BOOL bIsOn)
+PUBLIC VIRTUAL void AosService::RequestWifiService(IN IMS_BOOL bIsOn)
 {
     IMS_TRACE_I("RequestWifiService", 0, 0, 0);
     if (Attach())
@@ -673,15 +629,13 @@ void AosService::RequestWifiService(IN IMS_BOOL bIsOn)
     }
 }
 
-PUBLIC VIRTUAL
-IMSMap<IMS_UINT32, IMS_UINT32>& AosService::GetCapabilities()
+PUBLIC VIRTUAL IMSMap<IMS_UINT32, IMS_UINT32>& AosService::GetCapabilities()
 {
     IMS_TRACE_I("GetCapabilities", 0, 0, 0);
     return m_objCapabilities;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 AosService::GetCapabilitiesForNetwork(AosNetworkType eNetworkType)
+PUBLIC VIRTUAL IMS_UINT32 AosService::GetCapabilitiesForNetwork(AosNetworkType eNetworkType)
 {
     if (m_objCapabilities.GetIndexOfKey(static_cast<IMS_UINT32>(eNetworkType)) < 0)
     {
@@ -691,12 +645,12 @@ IMS_UINT32 AosService::GetCapabilitiesForNetwork(AosNetworkType eNetworkType)
     return m_objCapabilities.GetValue(static_cast<IMS_UINT32>(eNetworkType));
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosService::IsSupportCapabilitiesForNetwork(AosNetworkType eNetworkType,
-        AosCapability eCapability)
+PUBLIC VIRTUAL IMS_BOOL AosService::IsSupportCapabilitiesForNetwork(
+        AosNetworkType eNetworkType, AosCapability eCapability)
 {
-    return (GetCapabilitiesForNetwork(eNetworkType) & static_cast<IMS_UINT32>(eCapability)) > 0 ?
-            IMS_TRUE : IMS_FALSE;
+    return (GetCapabilitiesForNetwork(eNetworkType) & static_cast<IMS_UINT32>(eCapability)) > 0
+            ? IMS_TRUE
+            : IMS_FALSE;
 }
 
 PRIVATE
@@ -722,8 +676,8 @@ IMS_BOOL AosService::Attach()
         return IMS_TRUE;
     }
 
-    m_pJniAosService = JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->
-            GetJniService();
+    m_pJniAosService =
+            JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->GetJniService();
     if (m_pJniAosService)
     {
         m_pJniAosService->SetAosService(static_cast<IAosService*>(this));
@@ -731,16 +685,16 @@ IMS_BOOL AosService::Attach()
     }
     else
     {
-        JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->
-                SetEnablerService(static_cast<IAosService*>(this));
+        JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->SetEnablerService(
+                static_cast<IAosService*>(this));
     }
 
     IMS_TRACE_I("Attach() :: %s", _TRACE_B_(bIsAttached), 0, 0);
     return bIsAttached;
 }
 
-PRIVATE GLOBAL
-void AosService::PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+PRIVATE GLOBAL void AosService::PrintCapabilities(
+        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     AString strCapabilities;
 
@@ -751,12 +705,11 @@ void AosService::PrintCapabilities(IN const IMSMap<IMS_UINT32, IMS_UINT32>& objC
         strCapabilities.Append(" : ");
         strCapabilities.Append(CapabilitiesToString(objCapabilities.GetValueAt(i)));
     }
-    IMS_TRACE_I("PrintCapabilities :: size(%d), Capabilities(%s)", nSize,
-            strCapabilities.GetStr(), 0);
+    IMS_TRACE_I(
+            "PrintCapabilities :: size(%d), Capabilities(%s)", nSize, strCapabilities.GetStr(), 0);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* AosService::NetworkTypeToString(IN IMS_SINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosService::NetworkTypeToString(IN IMS_SINT32 nType)
 {
     switch (static_cast<AosNetworkType>(nType))
     {
@@ -783,8 +736,7 @@ const IMS_CHAR* AosService::NetworkTypeToString(IN IMS_SINT32 nType)
     }
 }
 
-PUBLIC GLOBAL
-const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapabilities)
+PUBLIC GLOBAL const AString AosService::CapabilitiesToString(IN IMS_UINT32 nCapabilities)
 {
     AString strCapabilities = "[ ";
 

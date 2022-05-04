@@ -35,12 +35,13 @@ public:
         NONE = 0,
 
         /// Indicate that service is out-of-service.
-        OUT_OF_SERVICE = 10000, // SRV_OUT
-        /// Indicate that power is down.
+        OUT_OF_SERVICE = 10000,  // SRV_OUT
+                                 /// Indicate that power is down.
         POWER_OFF,
         /// Indicate that the current RAT is not supported in IMS services. e.g.) not LTE/NR/WLAN
-        NO_RAT_COVERAGE, // NO_LTE_COVERAGE
-        /// Indicate that IMS services are not available based on network feature or something
+        NO_RAT_COVERAGE,  // NO_LTE_COVERAGE
+                          /// Indicate that IMS services are not available based on network feature
+                          /// or something
         SERVICE_POLICY,
         /// Indicate that service is blocked temporarily. After IMS call is terminated,
         /// the initial registration is tried.
@@ -48,10 +49,10 @@ public:
         /// Indicate that data connection is disconnected.
         DATA_DISCONNECTED,
         /// Indicate that registration is terminated with the specific causes.
-        REG_TERMINATED, // REG_REFRESH_FORBIDDEN, REG_TERMINATED_EXPIRE
-        /// Indicate that the initial registration is tried soon.
-        REG_NEW_REQUIRED, // INITIAL_REG_REQUESTED
-        /// Indicate that the reason is not specified.
+        REG_TERMINATED,  // REG_REFRESH_FORBIDDEN, REG_TERMINATED_EXPIRE
+                         /// Indicate that the initial registration is tried soon.
+        REG_NEW_REQUIRED,  // INITIAL_REG_REQUESTED
+                           /// Indicate that the reason is not specified.
         NOT_SPECIFIED
     };
 
@@ -64,7 +65,7 @@ public:
         /// Indicate that service is out-of-service.
         SUSPEND_OUT_OF_SERVICE = 0x0001,
         /// Indicate that the current RAT is not supported in IMS services. e.g.) not LTE/NR/WLAN
-        SUSPEND_NO_RAT_COVERAGE = 0x0002 // SUSPEND_NO_LTE_COVERAGE
+        SUSPEND_NO_RAT_COVERAGE = 0x0002  // SUSPEND_NO_LTE_COVERAGE
     };
 };
-#endif // IMS_AOS_REASON_H_
+#endif  // IMS_AOS_REASON_H_

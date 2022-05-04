@@ -23,10 +23,10 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define APPPROFILE m_strTag.GetStr()
 
 PUBLIC
-AosBlock::AosBlock(IN IAosAppContext* piAppContext)
-    : m_piAppContext(piAppContext)
-    , BLOCK_ENABLED(1)
-    , objServiceBlockReasons(IMSList<IMS_UINT32>())
+AosBlock::AosBlock(IN IAosAppContext* piAppContext) :
+        m_piAppContext(piAppContext),
+        BLOCK_ENABLED(1),
+        objServiceBlockReasons(IMSList<IMS_UINT32>())
 {
     m_strTag.Sprintf("%d:%s", m_piAppContext->GetSlotId(), m_piAppContext->GetProfileId().GetStr());
 
@@ -34,8 +34,7 @@ AosBlock::AosBlock(IN IAosAppContext* piAppContext)
             sizeof(AosBlock), this);
 }
 
-PUBLIC VIRTUAL
-AosBlock::~AosBlock()
+PUBLIC VIRTUAL AosBlock::~AosBlock()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosBlock = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosBlock), this);
@@ -43,8 +42,7 @@ AosBlock::~AosBlock()
     m_objListeners.Clear();
 }
 
-PUBLIC VIRTUAL
-void AosBlock::SetListener(IN IAosBlockListener* piListener)
+PUBLIC VIRTUAL void AosBlock::SetListener(IN IAosBlockListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -61,8 +59,7 @@ void AosBlock::SetListener(IN IAosBlockListener* piListener)
     A_IMS_TRACE_D(APPPROFILE, "SetListener :: (%" PFLS_X ") is set", piListener, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
+PUBLIC VIRTUAL void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -77,15 +74,15 @@ void AosBlock::RemoveListener(IN IAosBlockListener* piListener)
         {
             m_objListeners.RemoveAt(i);
 
-            A_IMS_TRACE_D(APPPROFILE, "RemoveListener :: (%" PFLS_X ") is removed",
-                    piListener, 0, 0);
+            A_IMS_TRACE_D(
+                    APPPROFILE, "RemoveListener :: (%" PFLS_X ") is removed", piListener, 0, 0);
             return;
         }
     }
 }
 
-PUBLIC VIRTUAL
-void AosBlock::SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
+PUBLIC VIRTUAL void AosBlock::SetBlockReason(
+        IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
     if (IsReasonBlocked(eReason))
     {
@@ -118,8 +115,8 @@ void AosBlock::SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = 
     }
 }
 
-PUBLIC VIRTUAL
-void AosBlock::ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
+PUBLIC VIRTUAL void AosBlock::ResetBlockReason(
+        IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* = IMS_TRUE */)
 {
     if (!IsReasonBlocked(eReason))
     {
@@ -152,8 +149,7 @@ void AosBlock::ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify /* 
     }
 }
 
-PUBLIC VIRTUAL
-void AosBlock::ClearAllBlockReasons()
+PUBLIC VIRTUAL void AosBlock::ClearAllBlockReasons()
 {
     A_IMS_TRACE_I(APPPROFILE, "ClearAllBlockReasons", 0, 0, 0);
     m_objBlock.RemoveAll();
@@ -163,8 +159,7 @@ void AosBlock::ClearAllBlockReasons()
     Notify(BLOCK_MAX, IMS_FALSE);
 }
 
-PUBLIC VIRTUAL
-void AosBlock::PrintBlockReasons()
+PUBLIC VIRTUAL void AosBlock::PrintBlockReasons()
 {
     AString strLogCom;
     AString strLogCell;
@@ -174,9 +169,9 @@ void AosBlock::PrintBlockReasons()
     {
         if (m_objBlock.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
         {
-           strLogCom.Append("[");
-           strLogCom.Append(BlockReasonToString(i));
-           strLogCom.Append("]");
+            strLogCom.Append("[");
+            strLogCom.Append(BlockReasonToString(i));
+            strLogCom.Append("]");
         }
     }
 
@@ -184,9 +179,9 @@ void AosBlock::PrintBlockReasons()
     {
         if (m_objBlockCellular.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
         {
-           strLogCell.Append("[");
-           strLogCell.Append(BlockReasonToString(i));
-           strLogCell.Append("]");
+            strLogCell.Append("[");
+            strLogCell.Append(BlockReasonToString(i));
+            strLogCell.Append("]");
         }
     }
 
@@ -194,9 +189,9 @@ void AosBlock::PrintBlockReasons()
     {
         if (m_objBlockWifi.GetValueAt(&REASON[i]) == &BLOCK_ENABLED)
         {
-           strLogWifi.Append("[");
-           strLogWifi.Append(BlockReasonToString(i));
-           strLogWifi.Append("]");
+            strLogWifi.Append("[");
+            strLogWifi.Append(BlockReasonToString(i));
+            strLogWifi.Append("]");
         }
     }
 
@@ -208,9 +203,8 @@ void AosBlock::PrintBlockReasons()
             m_objBlockWifi.GetSize(), strLogWifi.GetStr(), 0);
 }
 
-PUBLIC VIRTUAL
-void AosBlock::GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
-        IN SERVICE_TYPE eType /* = SERVICE_WHOLE*/)
+PUBLIC VIRTUAL void AosBlock::GetBlockReasons(
+        OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType /* = SERVICE_WHOLE*/)
 {
     objReasons.Clear();
 
@@ -245,26 +239,24 @@ void AosBlock::GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
+PUBLIC VIRTUAL IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
         IN IMS_BOOL bOnlyEnabled /* = IMS_FALSE */,
-        IN SERVICE_TYPE eServiceType/* = SERVICE_CELLULAR*/)
+        IN SERVICE_TYPE eServiceType /* = SERVICE_CELLULAR*/)
 {
     if (bOnlyEnabled)
     {
         if (eServiceType == SERVICE_CELLULAR &&
-                m_objBlockCellular.GetSize() +  m_objBlock.GetSize() != 1)
+                m_objBlockCellular.GetSize() + m_objBlock.GetSize() != 1)
         {
             return IMS_FALSE;
         }
         else if (eServiceType == SERVICE_WIFI &&
-                m_objBlockWifi.GetSize() +  m_objBlock.GetSize() != 1)
+                m_objBlockWifi.GetSize() + m_objBlock.GetSize() != 1)
         {
             return IMS_FALSE;
         }
         else if (eServiceType == SERVICE_WHOLE &&
-                m_objBlockCellular.GetSize() +  m_objBlockWifi.GetSize() +
-                m_objBlock.GetSize() != 1)
+                m_objBlockCellular.GetSize() + m_objBlockWifi.GetSize() + m_objBlock.GetSize() != 1)
         {
             return IMS_FALSE;
         }
@@ -292,8 +284,7 @@ IMS_BOOL AosBlock::IsReasonBlocked(IN BLOCK_REASON eReason,
     return bResult;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL AosBlock::IsCleared(IN SERVICE_TYPE nType/* = SERVICE_CELLULAR*/)
+PUBLIC VIRTUAL IMS_BOOL AosBlock::IsCleared(IN SERVICE_TYPE nType /* = SERVICE_CELLULAR*/)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -313,8 +304,7 @@ IMS_BOOL AosBlock::IsCleared(IN SERVICE_TYPE nType/* = SERVICE_CELLULAR*/)
     }
     else if (nType == SERVICE_WHOLE)
     {
-        if (m_objBlockCellular.IsEmpty() && m_objBlockWifi.IsEmpty() &&
-                m_objBlock.IsEmpty())
+        if (m_objBlockCellular.IsEmpty() && m_objBlockWifi.IsEmpty() && m_objBlock.IsEmpty())
         {
             bResult = IMS_TRUE;
         }
@@ -347,8 +337,7 @@ IMS_BOOL AosBlock::IsListened(IN IAosBlockListener* piListener)
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReason)
+PUBLIC GLOBAL const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReason)
 {
     switch (nReason)
     {
@@ -438,15 +427,14 @@ const IMS_CHAR* AosBlock::BlockReasonToString(IN IMS_UINT32 nReason)
 PRIVATE
 void AosBlock::Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable)
 {
-    for(IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
+    for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
     {
         IAosBlockListener* piListener = m_objListeners.GetAt(nAt);
         piListener->Block_Changed(eReason, (bIsEnable) ? 1 : 0);
     }
 }
 
-PRIVATE GLOBAL
-IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
+PRIVATE GLOBAL IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
 {
     if (eReason >= BLOCK_CELLULAR_START && eReason <= BLOCK_CELLULAR_END)
     {
@@ -456,14 +444,13 @@ IMS_UINT32 AosBlock::GetBlockType(IN BLOCK_REASON eReason)
     {
         return BLOCK_WIFI;
     }
-    else // if (eReason >= BLOCK_START && eReason <= BLOCK_END)
+    else  // if (eReason >= BLOCK_START && eReason <= BLOCK_END)
     {
         return BLOCK_COMMON;
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
+PRIVATE GLOBAL const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
 {
     switch (eType)
     {
@@ -471,7 +458,7 @@ const IMS_CHAR* AosBlock::ServiceTypeToString(IN SERVICE_TYPE eType)
             return "SERVICE_CELLULAR";
 
         case SERVICE_WIFI:
-             return "SERVICE_WIFI";
+            return "SERVICE_WIFI";
 
         case SERVICE_WHOLE:
             return "SERVICE_WHOLE";

@@ -23,4 +23,4 @@ class IAosBlockListener
 public:
     virtual void Block_Changed(IN IMS_UINT32 nType = 0, IN IMS_UINT32 nParam = 0) = 0;
 };
-#endif // INTERFACE_AOS_BLOCK_LISTENER_H_
+#endif  // INTERFACE_AOS_BLOCK_LISTENER_H_

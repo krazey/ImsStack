@@ -24,4 +24,4 @@ public:
     virtual void AosSubscriberManager_NotifyState(IMS_UINT32 nState) = 0;
 };
 
-#endif // INTERFACE_AOS_SUBSCRIBER_MANAGER_LISTENER_H_
+#endif  // INTERFACE_AOS_SUBSCRIBER_MANAGER_LISTENER_H_

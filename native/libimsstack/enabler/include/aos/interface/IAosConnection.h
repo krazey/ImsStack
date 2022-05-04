@@ -39,8 +39,8 @@ public:
     virtual IMS_SINT32 GetMtu() = 0;
     virtual const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0) = 0;
-    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName,
-                    OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion = 0) = 0;
+    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
+            IN IMS_SINT32 nIpVersion = 0) = 0;
     virtual const AString& GetIfaceName() = 0;
     virtual IMS_BOOL IsEpdgEnabled() = 0;
     virtual IMS_SINT32 GetIpcanCategory() = 0;
@@ -61,4 +61,4 @@ public:
         IP_VERSION_64 = 64
     };
 };
-#endif // INTERFACE_AOS_CONNECTION_H_
+#endif  // INTERFACE_AOS_CONNECTION_H_

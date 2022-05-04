@@ -27,17 +27,12 @@ Remarks
 
 */
 PUBLIC
-AosHandleUce::AosHandleUce
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    )
-    : AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
+AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+        IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleUce = %" PFLS_u "/%" PFLS_x,
-            strAppId.GetStr(), sizeof(AosHandleUce), this);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleUce = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
+            sizeof(AosHandleUce), this);
 
     /* @jryou: temp blocked. Defined in VZWAoSHandle.
     AddConfig(CONFIG_LIMITED_MODE | CONFIG_SRLTE_MODE);
@@ -49,8 +44,7 @@ AosHandleUce::AosHandleUce
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandleUce::~AosHandleUce()
+PUBLIC VIRTUAL AosHandleUce::~AosHandleUce()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleUce = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleUce), this);

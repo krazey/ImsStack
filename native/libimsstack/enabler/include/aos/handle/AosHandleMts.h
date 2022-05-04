@@ -18,18 +18,12 @@
 
 #include "handle/AosHandle.h"
 
-class AosHandleMts
-    : public AosHandle
+class AosHandleMts : public AosHandle
 {
-// Operation
+    // Operation
 public:
-    AosHandleMts
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    );
+    AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleMts();
 
 protected:
@@ -43,4 +37,4 @@ protected:
 private:
     IMS_BOOL m_bSmsOverIp;
 };
-#endif // AOS_HANDLE_MTS_H_
+#endif  // AOS_HANDLE_MTS_H_

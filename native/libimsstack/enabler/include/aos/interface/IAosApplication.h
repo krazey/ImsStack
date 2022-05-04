@@ -24,7 +24,7 @@
  * It controls the overall operation of the AoS module and sends the information
  * suitable for the necessary module and triggers the required operations.
  *
-*/
+ */
 
 class IAosApplication
 {
@@ -34,8 +34,8 @@ public:
     virtual IMS_BOOL RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) = 0;
 
     virtual const AString& GetActivityName() = 0;
-    virtual void GetProperty(IN IMS_UINT32 nType, OUT IMS_UINT32& nValue,
-            OUT AString& strValue) = 0;
+    virtual void GetProperty(
+            IN IMS_UINT32 nType, OUT IMS_UINT32& nValue, OUT AString& strValue) = 0;
     virtual IMS_UINT32 GetAppState() = 0;
     virtual IMS_UINT32 GetOffReason() = 0;
 
@@ -77,4 +77,4 @@ protected:
     virtual void Init() = 0;
     virtual void CleanUp() = 0;
 };
-#endif // INTERFACE_AOS_APPLICATION_H_
+#endif  // INTERFACE_AOS_APPLICATION_H_

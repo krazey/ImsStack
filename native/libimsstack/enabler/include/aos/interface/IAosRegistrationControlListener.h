@@ -28,26 +28,25 @@ class IAosRegistrationControlListener
 public:
     virtual void RegistrationControl_UpdateSipDelegateRegistration() = 0;
     virtual void RegistrationControl_TriggerSipDelegateDeregistration() = 0;
-    virtual void RegistrationControl_TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
-            IN const AString& strTarget) = 0;
+    virtual void RegistrationControl_TriggerFullNetworkRegistration(
+            IN IMS_SINT32 nSipCode, IN const AString& strTarget) = 0;
     virtual void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
-    virtual void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
-            IN AosPcscfOrder eOrder) = 0;
+    virtual void RegistrationControl_ControlRegistration(
+            IN AosRegRequestType eType, IN AosPcscfOrder eOrder) = 0;
 };
 
-class AosRegistrationControlListener
-    : public IAosRegistrationControlListener
+class AosRegistrationControlListener : public IAosRegistrationControlListener
 {
 public:
-    inline void RegistrationControl_UpdateSipDelegateRegistration() override {};
-    inline void RegistrationControl_TriggerSipDelegateDeregistration() override {};
+    inline void RegistrationControl_UpdateSipDelegateRegistration() override{};
+    inline void RegistrationControl_TriggerSipDelegateDeregistration() override{};
     inline void RegistrationControl_TriggerFullNetworkRegistration(
-            IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override {};
+            IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override{};
     inline void RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override {};
-    inline void RegistrationControl_ControlRegistration(IN AosRegRequestType /*nRequestType*/,
-            IN AosPcscfOrder /*nPcscfOrder*/) override {};
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override{};
+    inline void RegistrationControl_ControlRegistration(
+            IN AosRegRequestType /*nRequestType*/, IN AosPcscfOrder /*nPcscfOrder*/) override{};
 };
 
 /**
@@ -57,7 +56,7 @@ enum class AosPcscfOrder
 {
     FIRST = 0,
     CURRENT = 1,
-    NEXT =2
+    NEXT = 2
 };
 
 /**
@@ -67,7 +66,7 @@ enum class AosRegRequestType
 {
     START = 0,
     REFRESH = 1,
-    STOP =2
+    STOP = 2
 };
 
-#endif // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_
+#endif  // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_

@@ -40,8 +40,8 @@ public:
     virtual IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex) = 0;
     virtual IMS_UINT32 GetPcscfCount() = 0;
 
-    virtual void SetCurrentPcscfInvalid(IN IMS_BOOL bIsTimer = IMS_FALSE,
-            IN IMS_UINT32 nSeconds = 0) = 0;
+    virtual void SetCurrentPcscfInvalid(
+            IN IMS_BOOL bIsTimer = IMS_FALSE, IN IMS_UINT32 nSeconds = 0) = 0;
     virtual void RemoveCurrentPcscf() = 0;
     virtual void SetAllPcscfValid() = 0;
 
@@ -62,7 +62,7 @@ public:
     virtual void SetFirstPcscfIndex() = 0;
 
     virtual IMS_BOOL CheckAndProcessChangeFromPco() = 0;
-    virtual IMS_UINT32 GetChangedType()= 0;
+    virtual IMS_UINT32 GetChangedType() = 0;
 
     virtual void RequestCmd(IN IMS_UINT32 nType) = 0;
 
@@ -81,6 +81,7 @@ public:
         TYPE_CHANGED_DIFFERENT,
         TYPE_CHANGED_REORDER
     };
+
 protected:
     friend class AosBuildDirector;
     friend class AosAppContext;
@@ -94,4 +95,4 @@ public:
     virtual void Pcscf_NotifyResult(IN IMS_BOOL bResult) = 0;
 };
 
-#endif // INTERFACE_AOS_PCSCF_H_
+#endif  // INTERFACE_AOS_PCSCF_H_

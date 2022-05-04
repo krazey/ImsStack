@@ -27,17 +27,16 @@ class IAosAppContext;
 class IAosConnection;
 class AosUtil;
 
-class AosNetTracker
-    : public IAosNetTracker
-    , public IAosConnectionListener
-    , public INetworkWatcherListener
-    , public IWifiWatcherListener
-    , public IEventListener
-    , public ITimerListener
+class AosNetTracker :
+        public IAosNetTracker,
+        public IAosConnectionListener,
+        public INetworkWatcherListener,
+        public IWifiWatcherListener,
+        public IEventListener,
+        public ITimerListener
 {
-
 public:
-    AosNetTracker(IN IAosAppContext *piAppContext_);
+    AosNetTracker(IN IAosAppContext* piAppContext_);
     virtual ~AosNetTracker();
 
 public:
@@ -60,18 +59,18 @@ public:
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime);
     virtual void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime);
 
-    virtual void SetListener(IN IAosNetTrackerListener *piListener);
-    virtual void RemoveListener(IN IAosNetTrackerListener *piListener);
+    virtual void SetListener(IN IAosNetTrackerListener* piListener);
+    virtual void RemoveListener(IN IAosNetTrackerListener* piListener);
 
     // INetworkWatcherListener
     virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
 
     // IWifiWatcherListener
-    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher *pIWifiWatcher);
+    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher);
 
     // IEventListener
-    virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    virtual void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
 private:
     void InitConfig();
@@ -83,7 +82,7 @@ private:
     void UpdateVoiceNetwork();
     void Notify();
 
-    void GetStatus(OUT IMS_SINT32 &nService, OUT IMS_UINT32 &nRadioTech, OUT IMS_BOOL &bIsIN);
+    void GetStatus(OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIN);
     IMS_UINT32 GetAccessPolicy() const;
 
     void ProcessNetworkChanged(IMS_SINT32 nReason);
@@ -124,7 +123,7 @@ private:
     virtual void AosConnection_ConnectionFailed();
 
     // ITimerListener
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     // LOG
     AString FeaturesToString();
@@ -136,10 +135,10 @@ private:
 
     enum
     {
-        FEATURE_NONE            = (0x0),
-        FEATURE_IN_GUARD        = (0x01 << 0),
-        FEATURE_OUT_GUARD       = (0x01 << 1),
-        FEATURE_RAT_GUARD       = (0x01 << 2),
+        FEATURE_NONE = (0x0),
+        FEATURE_IN_GUARD = (0x01 << 0),
+        FEATURE_OUT_GUARD = (0x01 << 1),
+        FEATURE_RAT_GUARD = (0x01 << 2),
         FEATURE_VOICE_RAT_GUARD = (0x01 << 3)
     };
 
@@ -163,11 +162,11 @@ private:
     IMS_UINT32 nCnxPolicy;
     IMS_UINT32 nCnxPolicyInRoaming;
 
-    INetworkWatcher *piNetWatcherInfo;
-    IWifiWatcher *piWifiWatcher;
-//    IAosAppContext *piAppContext;
-    IAosConnection *piConnection;
-    AosUtil *pUtil;
+    INetworkWatcher* piNetWatcherInfo;
+    IWifiWatcher* piWifiWatcher;
+    //    IAosAppContext *piAppContext;
+    IAosConnection* piConnection;
+    AosUtil* pUtil;
 
     IMS_SINT32 nSlotId;
     IMS_SINT32 nNetServiceType;
@@ -199,10 +198,10 @@ private:
     IMS_UINT32 nRatTime;
     IMS_UINT32 nVoiceRatGuardTime;
 
-    ITimer *piServiceInTimer;
-    ITimer *piServiceOutTimer;
-    ITimer *piRatTimer;
-    ITimer *piVoiceRatTimer;
+    ITimer* piServiceInTimer;
+    ITimer* piServiceOutTimer;
+    ITimer* piRatTimer;
+    ITimer* piVoiceRatTimer;
 
     IMSList<IAosNetTrackerListener*> objListeners;
 
@@ -212,4 +211,4 @@ private:
     static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
 };
 
-#endif // AOS_NET_TRACKER_H_
+#endif  // AOS_NET_TRACKER_H_

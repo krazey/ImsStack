@@ -53,10 +53,10 @@ public:
      */
     virtual void UpdateSipDelegateRegistration() = 0;
     virtual void TriggerSipDelegateDeregistration() = 0;
-    virtual void TriggerFullNetworkRegistration(IN IMS_SINT32 nSipCode,
-            IN const AString& sipReason) = 0;
-    virtual void NotifyCapabilitiesChanged(IN const IMSMap<IMS_UINT32, IMS_UINT32>&
-            objCapabilities) = 0;
+    virtual void TriggerFullNetworkRegistration(
+            IN IMS_SINT32 nSipCode, IN const AString& sipReason) = 0;
+    virtual void NotifyCapabilitiesChanged(
+            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder) = 0;
 
     /**
@@ -78,8 +78,8 @@ public:
      *
      */
     virtual void NotifyAosStart();
-    virtual void NotifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,
-            IN IMS_SINT32 nCauseCode) = 0;
+    virtual void NotifyIpcanHandoverFailure(
+            IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) = 0;
     virtual void NotifyIsimState(IN IMS_UINT32 nState) = 0;
     virtual void NotifyLocationInfo(IN IMS_UINT32 nState) = 0;
     virtual void NotifyMobileDataLimit(IN IMS_UINT32 nIsLimited) = 0;
@@ -130,8 +130,8 @@ public:
      * @see class AosNetworkType
      * @see class android.telephony.DataFailCause
      */
-    virtual void NotifyTechnologyChangeFailed(IN AosNetworkType eNetworkType,
-            IN IMS_SINT32 nCauseCode) = 0;
+    virtual void NotifyTechnologyChangeFailed(
+            IN AosNetworkType eNetworkType, IN IMS_SINT32 nCauseCode) = 0;
 
     /**
      * This device's subscriber associated {@link Uri}s have changed, which are used to filter out
@@ -215,8 +215,8 @@ public:
      * @see class AosNetworkType
      * @see class AosCapability
      */
-    virtual IMS_BOOL IsSupportCapabilitiesForNetwork(AosNetworkType eNetworkType,
-            AosCapability eCapability);
+    virtual IMS_BOOL IsSupportCapabilitiesForNetwork(
+            AosNetworkType eNetworkType, AosCapability eCapability);
 };
 
 /**
@@ -305,8 +305,8 @@ enum class AosRegEvent
 enum class AosPhoneNumberRetryCommand
 {
     INITIAL = 0,
-    REFRESH =1,
+    REFRESH = 1,
     CLEAR = 2,
 };
 
-#endif // INTERFACE_AOS_SERVICE_H_
+#endif  // INTERFACE_AOS_SERVICE_H_

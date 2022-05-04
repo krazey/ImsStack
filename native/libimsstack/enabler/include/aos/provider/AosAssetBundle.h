@@ -24,17 +24,17 @@
 struct AosSpecificRegistrationErrorBundle
 {
 public:
-    AosSpecificRegistrationErrorBundle()
-        : nSpecificRegErrFinalType(0)
-        , nSpecificRegErrPolicy(0)
-        , nSpecificRegErrMaxCount(0)
-        , nSpecificRegErrMinCount(0)
-        , bSpecificRegErrRetryCountSharedForRegAndRegEvent(IMS_FALSE)
-        , objSpecificRegErrNumMultipliedByPcscfNum(IMSVector<IMS_SINT32>())
-        , objSpecificRegErrCode(IMSVector<IMS_SINT32>())
-        , objSpecificReregErrCode(IMSVector<IMS_SINT32>())
-        , objSpecificRegErrWaitTimeSec(IMSVector<IMS_SINT32>())
-        , bSpecificReregFailureWithErrCodeInRoaming(IMS_FALSE)
+    AosSpecificRegistrationErrorBundle() :
+            nSpecificRegErrFinalType(0),
+            nSpecificRegErrPolicy(0),
+            nSpecificRegErrMaxCount(0),
+            nSpecificRegErrMinCount(0),
+            bSpecificRegErrRetryCountSharedForRegAndRegEvent(IMS_FALSE),
+            objSpecificRegErrNumMultipliedByPcscfNum(IMSVector<IMS_SINT32>()),
+            objSpecificRegErrCode(IMSVector<IMS_SINT32>()),
+            objSpecificReregErrCode(IMSVector<IMS_SINT32>()),
+            objSpecificRegErrWaitTimeSec(IMSVector<IMS_SINT32>()),
+            bSpecificReregFailureWithErrCodeInRoaming(IMS_FALSE)
     {
     }
 
@@ -58,21 +58,20 @@ public:
 struct AosRegistrationRetryBundle
 {
 public:
-    AosRegistrationRetryBundle()
-        : nRegistrationRetryMinCount(0)
-        , nRegistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
-        , objRegistrationRetryErrorCodeWithoutIpsec(IMSVector<IMS_SINT32>())
-        , nRegistrationRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE)
-        , objRegistrationRetryErrorCodeWithDifferentPcscf(IMSVector<IMS_SINT32>())
-        , bRegistrationRetryWithIpVersionFallback(IMS_FALSE)
-        , nRegistrationRetryDefaultPolicy(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC)
-        , nRegistrationRetrySip503CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
+    AosRegistrationRetryBundle() :
+            nRegistrationRetryMinCount(0),
+            nRegistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP),
+            objRegistrationRetryErrorCodeWithoutIpsec(IMSVector<IMS_SINT32>()),
+            nRegistrationRetryTimerFPolicy(CarrierConfig::Assets::TIMER_F_POLICY_NONE),
+            objRegistrationRetryErrorCodeWithDifferentPcscf(IMSVector<IMS_SINT32>()),
+            bRegistrationRetryWithIpVersionFallback(IMS_FALSE),
+            nRegistrationRetryDefaultPolicy(CarrierConfig::Assets::DEFAULT_RETRY_POLICY_SPEC),
+            nRegistrationRetrySip503CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_3GPP)
     {
     }
 
     AosRegistrationRetryBundle(IN const AosRegistrationRetryBundle&) = delete;
-    AosRegistrationRetryBundle& operator=(
-            IN const AosRegistrationRetryBundle&) = delete;
+    AosRegistrationRetryBundle& operator=(IN const AosRegistrationRetryBundle&) = delete;
 
 public:
     IMS_SINT32 nRegistrationRetryMinCount;
@@ -88,19 +87,18 @@ public:
 struct AosReregistrationRetryBundle
 {
 public:
-    AosReregistrationRetryBundle()
-        : objReregistrationRetryErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>())
-        , bReregistrationRetryExpireTimeChecked(IMS_FALSE)
-        , nReregistrationRetryMaxCountKeptRegistration(0)
-        , objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf(
-                IMSVector<IMS_SINT32>())
-        , nReregistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT)
+    AosReregistrationRetryBundle() :
+            objReregistrationRetryErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
+            bReregistrationRetryExpireTimeChecked(IMS_FALSE),
+            nReregistrationRetryMaxCountKeptRegistration(0),
+            objReregistrationRetryErrorCodeWithInitialRegistrationWithSamePcscf(
+                    IMSVector<IMS_SINT32>()),
+            nReregistrationRetrySip305CodePolicy(CarrierConfig::Assets::SIP_305_CODE_POLICY_DEFAULT)
     {
     }
 
     AosReregistrationRetryBundle(IN const AosReregistrationRetryBundle&) = delete;
-    AosReregistrationRetryBundle& operator=(
-            IN const AosReregistrationRetryBundle&) = delete;
+    AosReregistrationRetryBundle& operator=(IN const AosReregistrationRetryBundle&) = delete;
 
 public:
     IMSVector<IMS_SINT32> objReregistrationRetryErrorCodeWithInitialRegistration;
@@ -113,10 +111,9 @@ public:
 struct AosReregistrationErrorPolicyDuringCallBundle
 {
 public:
-    AosReregistrationErrorPolicyDuringCallBundle()
-        : objReregistrationErrorCodeWithCallEnd(IMSVector<IMS_SINT32>())
-        , objReregistrationErrorCauseWithPdnReactivationAfterCallEnd(
-                IMSVector<IMS_SINT32>())
+    AosReregistrationErrorPolicyDuringCallBundle() :
+            objReregistrationErrorCodeWithCallEnd(IMSVector<IMS_SINT32>()),
+            objReregistrationErrorCauseWithPdnReactivationAfterCallEnd(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -133,9 +130,9 @@ public:
 struct AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle
 {
 public:
-    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle()
-        : nSubErrRetryMaxCountWithInitReg(0)
-        , objSubErrCodeWithInitReg(IMSVector<IMS_SINT32>())
+    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle() :
+            nSubErrRetryMaxCountWithInitReg(0),
+            objSubErrCodeWithInitReg(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -152,9 +149,9 @@ public:
 struct AosSubscriptionTerminatedErrorCodeForRegEventBundle
 {
 public:
-    AosSubscriptionTerminatedErrorCodeForRegEventBundle()
-        : nSubTerminatedErrCodeRetryMaxCount(0)
-        , objSubscriptionTerminatedErrorCodeForRegEvent(IMSVector<IMS_SINT32>())
+    AosSubscriptionTerminatedErrorCodeForRegEventBundle() :
+            nSubTerminatedErrCodeRetryMaxCount(0),
+            objSubscriptionTerminatedErrorCodeForRegEvent(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -171,10 +168,10 @@ public:
 struct AosRegistrationErrorCodeWithRetryAfterTimeBundle
 {
 public:
-    AosRegistrationErrorCodeWithRetryAfterTimeBundle()
-        : bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined(IMS_FALSE)
-        , objRegistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>())
-        , objReregistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>())
+    AosRegistrationErrorCodeWithRetryAfterTimeBundle() :
+            bRegistrationErrorCodeWithRetryAfterTimeOnlyDefined(IMS_FALSE),
+            objRegistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>()),
+            objReregistrationErrorCodeWithRetryAfterTime(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -192,9 +189,9 @@ public:
 struct AosRegistrationWithFeatureTagUnavailableBundle
 {
 public:
-    AosRegistrationWithFeatureTagUnavailableBundle()
-        : objRegistrationWithFeatureTagUnavailable(IMSVector<IMS_SINT32>())
-        , objRegistrationWithFeatureTagUnavailablePolicy(IMSVector<IMS_SINT32>())
+    AosRegistrationWithFeatureTagUnavailableBundle() :
+            objRegistrationWithFeatureTagUnavailable(IMSVector<IMS_SINT32>()),
+            objRegistrationWithFeatureTagUnavailablePolicy(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -208,4 +205,4 @@ public:
     IMSVector<IMS_SINT32> objRegistrationWithFeatureTagUnavailablePolicy;
 };
 
-#endif // AOS_ASSET_BUNDLE_H_
+#endif  // AOS_ASSET_BUNDLE_H_

@@ -22,8 +22,7 @@
  * @brief This class manages shared retry counter for the specific error for registration
  */
 
-class AosRetryRepository
-    : public IAosRetryRepository
+class AosRetryRepository : public IAosRetryRepository
 {
 public:
     AosRetryRepository(IN IMS_SINT32 nSlotId);
@@ -45,4 +44,4 @@ private:
     IMS_SINT32 m_nRetryCount;
     IMS_SINT32 m_nEmergencyRetryCount;
 };
-#endif // AOS_RETRYREPOSITORY_H_
+#endif  // AOS_RETRYREPOSITORY_H_

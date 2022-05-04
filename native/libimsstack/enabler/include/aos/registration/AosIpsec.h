@@ -33,14 +33,15 @@ class IAosIpsecListener;
 class UeIpsecInfo
 {
 public:
-    UeIpsecInfo()
-        : nSpiC(0)
-        , nSpiS(0)
-        , nPortC(0)
-        , nPortS(0)
+    UeIpsecInfo() :
+            nSpiC(0),
+            nSpiS(0),
+            nPortC(0),
+            nPortS(0)
     {
     }
     ~UeIpsecInfo() {}
+
 public:
     IMS_UINT32 nSpiC;
     IMS_UINT32 nSpiS;
@@ -57,14 +58,15 @@ public:
 class PcscfIpsecInfo
 {
 public:
-    PcscfIpsecInfo()
-        : nSpiC(0)
-        , nSpiS(0)
-        , nPortC(0)
-        , nPortS(0)
+    PcscfIpsecInfo() :
+            nSpiC(0),
+            nSpiS(0),
+            nPortC(0),
+            nPortS(0)
     {
     }
     ~PcscfIpsecInfo() {}
+
 public:
     IMS_UINT32 nSpiC;
     IMS_UINT32 nSpiS;
@@ -77,8 +79,7 @@ public:
  * @brief This class manages the ipsec related data for making Security Associations(SAs)
  *        and Security Policies(SPs) in the kernel layer.
  */
-class AosIpsec
-    : public IIpSecPolicyListener
+class AosIpsec : public IIpSecPolicyListener
 {
 public:
     AosIpsec(IN IAosIpsecListener* piListener, IN IMS_SINT32 nSlotId);
@@ -145,16 +146,16 @@ public:
     void SetKeys(IN const ByteArray& objAuthKey, IN const ByteArray& objEncrKey);
 
     /// Set Integrity Algorithm
-    void SetSecurityAlgorithm(IN IMS_UINT32 nSecuAlog, IN IMS_UINT32 nAuthAlgo,
-        IN IMS_UINT32 nEncrAlgo);
+    void SetSecurityAlgorithm(
+            IN IMS_UINT32 nSecuAlog, IN IMS_UINT32 nAuthAlgo, IN IMS_UINT32 nEncrAlgo);
 
     /// Set UE Ports(C,S) and SPIs(C,S)
-    void SetUePortsAndSpis(IN IMS_UINT32 nPortC, IN IMS_UINT32 nPortS, IN IMS_UINT32 nSpiC,
-        IN IMS_UINT32 nSpiS);
+    void SetUePortsAndSpis(
+            IN IMS_UINT32 nPortC, IN IMS_UINT32 nPortS, IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS);
 
     /// Set PCSCF Ports(C,S) and SPIs(C,S)
-    void SetPcscfPortsAndSpis(IN IMS_UINT32 nPortC, IN IMS_UINT32 nPortS, IN IMS_UINT32 nSpiC,
-        IN IMS_UINT32 nSpiS);
+    void SetPcscfPortsAndSpis(
+            IN IMS_UINT32 nPortC, IN IMS_UINT32 nPortS, IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS);
 
     /// Make Security Client Header
     void MakeSecurityClientH(IN SipSecurityHeader& objSecuH, IN IMS_BOOL bSpi3gpp = IMS_TRUE);
@@ -238,7 +239,6 @@ public:
      * @param pAosIpsec Expired AosIpsec.
      */
     virtual void IPSecPolicyExpired(IN AosIpsec* pAosIpsec) = 0;
-
 };
 
-#endif // AOS_IPSEC_H_
+#endif  // AOS_IPSEC_H_

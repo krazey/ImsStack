@@ -28,14 +28,10 @@ Remarks
 
 */
 PUBLIC
-AosHandleEmergencyMtc::AosHandleEmergencyMtc
-    (
-        IN IAosAppContext* piAosAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    )
-    : AosHandle(piAosAppContext, strAppId, strServiceId, nServiceType)
+AosHandleEmergencyMtc::AosHandleEmergencyMtc(IN IAosAppContext* piAosAppContext,
+        IN const AString& strAppId, IN const AString& strServiceId,
+        IN const IMS_SINT32 nServiceType) :
+        AosHandle(piAosAppContext, strAppId, strServiceId, nServiceType)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleEmergencyMtc = %" PFLS_u "/%" PFLS_x,
             strAppId.GetStr(), sizeof(AosHandleEmergencyMtc), this);
@@ -46,8 +42,7 @@ AosHandleEmergencyMtc::AosHandleEmergencyMtc
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandleEmergencyMtc::~AosHandleEmergencyMtc()
+PUBLIC VIRTUAL AosHandleEmergencyMtc::~AosHandleEmergencyMtc()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleEmergencyMtc = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleEmergencyMtc), this);
@@ -58,8 +53,7 @@ AosHandleEmergencyMtc::~AosHandleEmergencyMtc()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandleEmergencyMtc::Init()
+PROTECTED VIRTUAL void AosHandleEmergencyMtc::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 }

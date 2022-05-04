@@ -35,4 +35,4 @@ private:
     IMSList<AosStaticProfile*> m_objProfiles;
 };
 
-#endif // AOS_STATIC_CONFIG_H_
+#endif  // AOS_STATIC_CONFIG_H_

@@ -24,60 +24,61 @@
 struct AosCarrierConfig
 {
 public:
-    AosCarrierConfig()
-        : bSupportEmergencySmsOverIms(IMS_FALSE)
-        , bCarrierVolteAvailable(IMS_FALSE)
-        , bCarrierVtAvailable(IMS_FALSE)
-        , bCarrierWfcImsAvailable(IMS_FALSE)
-        , bRttSupported(IMS_FALSE)
-        , bCarrierCrossSimImsAvailable(IMS_FALSE)
-        , bCarrierVolteTtySupported(IMS_FALSE)
-        , objCarrierNrAvailabilities(IMSVector<IMS_SINT32>())
-        , nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED)
-        , objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>())
-        , bImsSingleRegistrationRequired(IMS_FALSE)
-        , nSipServerPortNumber(5060)
-        , bKeepPdnUpInNoVops(IMS_FALSE)
-        , nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP)
-        , nIpv4SipMtuSizeCellular(1500)
-        , nIpv6SipMtuSizeCellular(1500)
-        , objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>())
-        , bSipOverIpsecEnabled(IMS_FALSE) // default - IMS_TRUE
-        , objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>())
-        , objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>())
-        , nRegistrationExpiryTimerSec(600000)
-        , nRegistrationRetryBaseTimerMillis(30000)
-        , nRegistrationRetryMaxTimerMillis(1800000)
-        , bRegistrationEventPackageSupported(IMS_TRUE)
-        , nRegistrationSubscribeExpiryTimerSec(600000)
-        , objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>())
-        , objSupportedRats(IMSVector<IMS_SINT32>())
-        , bCarrierVolteRoamingAvailable(IMS_TRUE)
-        , bSmsOverImsSupported(IMS_TRUE)
-        , objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>())
-        , bEmergencyCallbackModeSupported(IMS_FALSE)
-        , objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>())
-        , nEmergencyRegistrationTimerMillis(10000)
-        , nRefreshGeolocationTimeoutMillis(5000)
-        , nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6)
-        , objImsIdentityPriority(IMSVector<IMS_SINT32>())
-        , nIsimIndexForImpu(1)
-        , objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>())
-        , bUnsubscribeRegistrationEventPackage(IMS_FALSE)
-        , bRegistrationEventForCatRequired(IMS_FALSE)
-        , nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE)
-        , nImsSignallingDscp(46)
-        , nRegistrationPreferredAccesstypeFeatureTag(
-                CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED)
-        , nRegistrationActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE)
-        , bSupportLimitedAdminSmsMode(IMS_FALSE)
-        , bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE)
-        , bDisableT3482ForEmergency(IMS_FALSE)
-        , nRegistrationTimerForEmergencyCallMillis(0)
-        , nPreferredEmergencyRegistration(
-                CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK)
-        , bUpdateRegistrationWithCountryChange(IMS_FALSE)
-        , nRegistrationPrivateHeader(0)
+    AosCarrierConfig() :
+            bSupportEmergencySmsOverIms(IMS_FALSE),
+            bCarrierVolteAvailable(IMS_FALSE),
+            bCarrierVtAvailable(IMS_FALSE),
+            bCarrierWfcImsAvailable(IMS_FALSE),
+            bRttSupported(IMS_FALSE),
+            bCarrierCrossSimImsAvailable(IMS_FALSE),
+            bCarrierVolteTtySupported(IMS_FALSE),
+            objCarrierNrAvailabilities(IMSVector<IMS_SINT32>()),
+            nCarrierUssdMethod(CarrierConfig::USSD_OVER_CS_PREFERRED),
+            objPcscfDiscoveryMethod(IMSVector<IMS_SINT32>()),
+            bImsSingleRegistrationRequired(IMS_FALSE),
+            nSipServerPortNumber(5060),
+            bKeepPdnUpInNoVops(IMS_FALSE),
+            nSipPreferredTransport(CarrierConfig::Ims::PREFERRED_TRANSPORT_DYNAMIC_UDP_TCP),
+            nIpv4SipMtuSizeCellular(1500),
+            nIpv6SipMtuSizeCellular(1500),
+            objImsPdnEnabledInNoVopsSupport(IMSVector<IMS_SINT32>()),
+            bSipOverIpsecEnabled(IMS_FALSE)  // default - IMS_TRUE
+            ,
+            objIpsecAuthenticationAlgorithms(IMSVector<IMS_SINT32>()),
+            objIpsecEncryptionAlgorithms(IMSVector<IMS_SINT32>()),
+            nRegistrationExpiryTimerSec(600000),
+            nRegistrationRetryBaseTimerMillis(30000),
+            nRegistrationRetryMaxTimerMillis(1800000),
+            bRegistrationEventPackageSupported(IMS_TRUE),
+            nRegistrationSubscribeExpiryTimerSec(600000),
+            objGeolocationPidfInSipRegisterSupport(IMSVector<IMS_SINT32>()),
+            objSupportedRats(IMSVector<IMS_SINT32>()),
+            bCarrierVolteRoamingAvailable(IMS_TRUE),
+            bSmsOverImsSupported(IMS_TRUE),
+            objSmsOverImsSupportedRats(IMSVector<IMS_SINT32>()),
+            bEmergencyCallbackModeSupported(IMS_FALSE),
+            objEmergencyOverImsSupportedRats(IMSVector<IMS_SINT32>()),
+            nEmergencyRegistrationTimerMillis(10000),
+            nRefreshGeolocationTimeoutMillis(5000),
+            nImsPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
+            objImsIdentityPriority(IMSVector<IMS_SINT32>()),
+            nIsimIndexForImpu(1),
+            objUpdateRegistrationWithRatChange(IMSVector<IMS_SINT32>()),
+            bUnsubscribeRegistrationEventPackage(IMS_FALSE),
+            bRegistrationEventForCatRequired(IMS_FALSE),
+            nPreferredImsDscp(CarrierConfig::Ims::PREFERRED_DSCP_NONE),
+            nImsSignallingDscp(46),
+            nRegistrationPreferredAccesstypeFeatureTag(
+                    CarrierConfig::Ims::PREFERRED_ACCESSTYPE_FEATURE_TAG_ENABLED),
+            nRegistrationActualWaitTimePolicy(CarrierConfig::Ims::AWT_POLICY_RFC_RULE),
+            bSupportLimitedAdminSmsMode(IMS_FALSE),
+            bReleaseEmergencyPdnWithEmergencyCallEnd(IMS_FALSE),
+            bDisableT3482ForEmergency(IMS_FALSE),
+            nRegistrationTimerForEmergencyCallMillis(0),
+            nPreferredEmergencyRegistration(
+                    CarrierConfig::ImsEmergency::PREFERRED_EMERGENCY_REGISTRATION_FALLBACK),
+            bUpdateRegistrationWithCountryChange(IMS_FALSE),
+            nRegistrationPrivateHeader(0)
     {
         // temp setting
         objSupportedRats.Push(CarrierConfig::Ims::ACCESS_NETWORK_TYPE_IWLAN);
@@ -165,4 +166,4 @@ public:
     IMS_BOOL bUpdateRegistrationWithCountryChange;
     IMS_SINT32 nRegistrationPrivateHeader;
 };
-#endif // AOS_CARRIER_CONFIG_H_
+#endif  // AOS_CARRIER_CONFIG_H_

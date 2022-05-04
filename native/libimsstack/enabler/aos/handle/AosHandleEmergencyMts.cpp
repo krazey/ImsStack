@@ -27,14 +27,10 @@ Remarks
 
 */
 PUBLIC
-AosHandleEmergencyMts::AosHandleEmergencyMts
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    )
-    : AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
+AosHandleEmergencyMts::AosHandleEmergencyMts(IN IAosAppContext* piAppContext,
+        IN const AString& strAppId, IN const AString& strServiceId,
+        IN const IMS_SINT32 nServiceType) :
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleEmergencyMts = %" PFLS_u "/%" PFLS_x,
             strAppId.GetStr(), sizeof(AosHandleEmergencyMts), this);
@@ -45,8 +41,7 @@ AosHandleEmergencyMts::AosHandleEmergencyMts
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandleEmergencyMts::~AosHandleEmergencyMts()
+PUBLIC VIRTUAL AosHandleEmergencyMts::~AosHandleEmergencyMts()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [%s] AosHandleEmergencyMts = %" PFLS_u "/%" PFLS_x,
             m_strAppId.GetStr(), sizeof(AosHandleEmergencyMts), this);

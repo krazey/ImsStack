@@ -18,20 +18,14 @@
 
 #include "handle/AosHandle.h"
 
-class AosHandleEmergencyMts
-    : public AosHandle
+class AosHandleEmergencyMts : public AosHandle
 {
-// Operation
+    // Operation
 public:
-    AosHandleEmergencyMts
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    );
+    AosHandleEmergencyMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleEmergencyMts();
 
 private:
 };
-#endif // AOS_HANDLE_EMERGENCY_MTS_H_
+#endif  // AOS_HANDLE_EMERGENCY_MTS_H_

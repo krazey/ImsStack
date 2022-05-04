@@ -33,16 +33,16 @@ Remarks
 
 */
 PUBLIC
-AosVonr::AosVonr(IN IAosAppContext *piContext_)
-    : piContext(piContext_)
-    , nSlotId(piContext_->GetSlotId())
-    , nStartedModules(MODULE_NONE)
-    , bIsStartUpdated(IMS_FALSE)
-    , piVoNR(IMS_NULL)
-    , piEndDelayTimer(IMS_NULL)
+AosVonr::AosVonr(IN IAosAppContext* piContext_) :
+        piContext(piContext_),
+        nSlotId(piContext_->GetSlotId()),
+        nStartedModules(MODULE_NONE),
+        bIsStartUpdated(IMS_FALSE),
+        piVoNR(IMS_NULL),
+        piEndDelayTimer(IMS_NULL)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosVonr = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosVonr), this);
+            sizeof(AosVonr), this);
 
     piVoNR = VoNrService::GetVoNrService()->GetVoNr(nSlotId);
     if (piVoNR != IMS_NULL)
@@ -61,11 +61,10 @@ AosVonr::AosVonr(IN IAosAppContext *piContext_)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosVonr::~AosVonr()
+PUBLIC VIRTUAL AosVonr::~AosVonr()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosVonr = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosVonr), this);
+            sizeof(AosVonr), this);
 
     piVoNR = IMS_NULL;
     StopAllTimers();
@@ -76,8 +75,7 @@ AosVonr::~AosVonr()
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL AosVonr::IsSupported() const
+PRIVATE VIRTUAL IMS_BOOL AosVonr::IsSupported() const
 {
     return (piVoNR != IMS_NULL);
 }
@@ -87,8 +85,7 @@ IMS_BOOL AosVonr::IsSupported() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL AosVonr::Set(IN IMS_UINT32 nModule, IN IMS_BOOL bIsSending)
+PRIVATE VIRTUAL IMS_BOOL AosVonr::Set(IN IMS_UINT32 nModule, IN IMS_BOOL bIsSending)
 {
     A_IMS_TRACE_I(AOSTAG, "Set :: module (%d) , sending (%d)", nModule, bIsSending, 0);
 
@@ -183,7 +180,6 @@ IMS_BOOL AosVonr::IsStarted(IN IMS_UINT32 nModule)
     return (nStartedModules & nModule);
 }
 
-
 /*
 
 Remarks
@@ -274,7 +270,7 @@ Remarks
 PRIVATE
 void AosVonr::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 {
-    ITimer **ppiTimer = IMS_NULL;
+    ITimer** ppiTimer = IMS_NULL;
 
     switch (nType)
     {
@@ -302,7 +298,7 @@ Remarks
 PRIVATE
 void AosVonr::StopTimer(IN IMS_UINT32 nType)
 {
-    ITimer **ppiTimer = IMS_NULL;
+    ITimer** ppiTimer = IMS_NULL;
 
     switch (nType)
     {
@@ -338,8 +334,7 @@ void AosVonr::StopAllTimers()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosVonr::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void AosVonr::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -358,8 +353,7 @@ void AosVonr::Timer_TimerExpired(IN ITimer *piTimer)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* AosVonr::TimerToString(IN IMS_UINT32 nType)
+PRIVATE GLOBAL const IMS_CHAR* AosVonr::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {

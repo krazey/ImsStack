@@ -18,8 +18,7 @@
 
 #include "interface/IAosAppContext.h"
 
-class AosAppContext
-    : public IAosAppContext
+class AosAppContext : public IAosAppContext
 {
 public:
     AosAppContext(IN AosStaticProfile* pProfile);
@@ -74,5 +73,5 @@ private:
     IAosBlock* m_piBlock;
     IAosSubscriber* m_piSubscriber;
     IAosPcscf* m_piPcscf;
- };
-#endif // AOS_APP_CONTEXT_H_
+};
+#endif  // AOS_APP_CONTEXT_H_

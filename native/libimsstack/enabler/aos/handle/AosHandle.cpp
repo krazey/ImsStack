@@ -48,30 +48,30 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define APPPROFILE m_strTag.GetStr()
 
 BEGIN_STATE_MAP(AosHandle)
-    STATE_ENTRY(STATE_DISCONNECTED)
-    STATE_ENTRY(STATE_CONNECTING)
-    STATE_ENTRY(STATE_CONNECTED)
-    STATE_ENTRY(STATE_DISCONNECTING)
+STATE_ENTRY(STATE_DISCONNECTED)
+STATE_ENTRY(STATE_CONNECTING)
+STATE_ENTRY(STATE_CONNECTED)
+STATE_ENTRY(STATE_DISCONNECTING)
 END_STATE_MAP()
 
 BEGIN_STATE_MSG_MAP(AosHandle, STATE_DISCONNECTED)
-    STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateDisconnected)
-    STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateDisconnected)
+STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateDisconnected)
+STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateDisconnected)
 END_STATE_MSG_MAP()
 
 BEGIN_STATE_MSG_MAP(AosHandle, STATE_CONNECTING)
-    STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateConnecting)
-    STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateConnecting)
+STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateConnecting)
+STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateConnecting)
 END_STATE_MSG_MAP()
 
 BEGIN_STATE_MSG_MAP(AosHandle, STATE_CONNECTED)
-    STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateConnected)
-    STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateConnected)
+STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateConnected)
+STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateConnected)
 END_STATE_MSG_MAP()
 
 BEGIN_STATE_MSG_MAP(AosHandle, STATE_DISCONNECTING)
-    STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateDisconnecting)
-    STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateDisconnecting)
+STATE_MSG_ENTRY(HANDLE_MSG_BLOCK_STATUS, &AosHandle::StateDisconnecting)
+STATE_MSG_ENTRY(HANDLE_MSG_APP_STATUS, &AosHandle::StateDisconnecting)
 END_STATE_MSG_MAP()
 
 /*
@@ -80,37 +80,34 @@ Remarks
 
 */
 PUBLIC
-AosHandle::AosHandle
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_UINT32 nServiceType
-    )
-    : m_piAppContext(piAppContext)
-    , m_nSlotId(piAppContext->GetSlotId())
-    , m_strAppId(strAppId)
-    , m_strServiceId(strServiceId)
-    , m_nServiceType(nServiceType)
-    , m_nReqType(DETACH)
-    , m_bBind(IMS_FALSE)
-    , m_bNetworkBind(IMS_TRUE)
-    , m_bNotify(IMS_FALSE)
-    , m_piListener(IMS_NULL)
-    , m_piMonitor(IMS_NULL)
-    , m_piInfo(IMS_NULL)
-    , m_nReason(AoSReason::NONE)
-    , m_nSuspendedReason(AoSReason::SUSPEND_NONE)
-    , m_bBlocked(IMS_FALSE)
-    , m_nBlocks(BLOCK_NONE)
-    , m_nHoldingBlocksForMobile(BLOCK_NONE)
-    , m_nHoldingBlocksForWifi(BLOCK_NONE)
-    , m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED)
-    , m_bNetSrvIn(IMS_FALSE)
-    , m_nNetworkType(NW_REPORT_RADIO_INVALID)
-    , m_nAppState(APP_STATE_DISCONNECTED)
+AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+        IN const AString& strServiceId, IN const IMS_UINT32 nServiceType) :
+        m_piAppContext(piAppContext),
+        m_nSlotId(piAppContext->GetSlotId()),
+        m_strAppId(strAppId),
+        m_strServiceId(strServiceId),
+        m_nServiceType(nServiceType),
+        m_nReqType(DETACH),
+        m_bBind(IMS_FALSE),
+        m_bNetworkBind(IMS_TRUE),
+        m_bNotify(IMS_FALSE),
+        m_piListener(IMS_NULL),
+        m_piMonitor(IMS_NULL),
+        m_piInfo(IMS_NULL),
+        m_nReason(AoSReason::NONE),
+        m_nSuspendedReason(AoSReason::SUSPEND_NONE),
+        m_bBlocked(IMS_FALSE),
+        m_nBlocks(BLOCK_NONE),
+        m_nHoldingBlocksForMobile(BLOCK_NONE),
+        m_nHoldingBlocksForWifi(BLOCK_NONE),
+        m_nHoldingVopsState(IMS_VOICE_OVER_PS_SUPPORTED),
+        m_bNetSrvIn(IMS_FALSE),
+        m_nNetworkType(NW_REPORT_RADIO_INVALID),
+        m_nAppState(APP_STATE_DISCONNECTED)
 {
-    IMS_CHAR acLog[256+1] = {0, };
+    IMS_CHAR acLog[256 + 1] = {
+            0,
+    };
     IMS_Sprintf(acLog, 256, "APP(%s)/SERVICE(%s)/TYPE(%d)", m_strAppId.GetStr(),
             m_strServiceId.GetStr(), m_nServiceType);
 
@@ -127,10 +124,11 @@ AosHandle::AosHandle
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosHandle::~AosHandle()
+PUBLIC VIRTUAL AosHandle::~AosHandle()
 {
-    IMS_CHAR acLog[256+1] = {0, };
+    IMS_CHAR acLog[256 + 1] = {
+            0,
+    };
     IMS_Sprintf(acLog, 256, "APP(%s)/SERVICE(%s)/TYPE(%d)", m_strAppId.GetStr(),
             m_strServiceId.GetStr(), m_nServiceType);
 
@@ -143,8 +141,7 @@ AosHandle::~AosHandle()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AString& AosHandle::GetAppId()
+PUBLIC VIRTUAL AString& AosHandle::GetAppId()
 {
     return m_strAppId;
 }
@@ -154,8 +151,7 @@ AString& AosHandle::GetAppId()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AString& AosHandle::GetServiceId()
+PUBLIC VIRTUAL AString& AosHandle::GetServiceId()
 {
     return m_strServiceId;
 }
@@ -165,8 +161,7 @@ AString& AosHandle::GetServiceId()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosHandle::GetServiceType()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetServiceType()
 {
     return m_nServiceType;
 }
@@ -176,8 +171,7 @@ IMS_UINT32 AosHandle::GetServiceType()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IImsAosMonitor* AosHandle::GetMonitor()
+PUBLIC VIRTUAL IImsAosMonitor* AosHandle::GetMonitor()
 {
     return m_piMonitor;
 }
@@ -187,8 +181,7 @@ IImsAosMonitor* AosHandle::GetMonitor()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 AosHandle::GetRequestType()
+PUBLIC VIRTUAL IMS_SINT32 AosHandle::GetRequestType()
 {
     return m_nReqType;
 }
@@ -198,12 +191,10 @@ IMS_SINT32 AosHandle::GetRequestType()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
+PUBLIC VIRTUAL void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
 {
-    A_IMS_TRACE_I(APPPROFILE, "SetRequestType :: [%s/%s] [%s]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(),
-            (nReqType == ATTACH)? "ATTACH" : "DETACH");
+    A_IMS_TRACE_I(APPPROFILE, "SetRequestType :: [%s/%s] [%s]", m_strAppId.GetStr(),
+            m_strServiceId.GetStr(), (nReqType == ATTACH) ? "ATTACH" : "DETACH");
 
     m_nReqType = nReqType;
 }
@@ -213,8 +204,7 @@ void AosHandle::SetRequestType(IN IMS_SINT32 nReqType)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::IsRegBinded()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegBinded()
 {
     return m_bBind;
 }
@@ -224,12 +214,10 @@ IMS_BOOL AosHandle::IsRegBinded()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
+PUBLIC VIRTUAL void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
 {
-    A_IMS_TRACE_I(APPPROFILE, "SetRegBinded :: [%s/%s] [%s]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(),
-            (bBind) ? "ATTACHED" : "DETACHED");
+    A_IMS_TRACE_I(APPPROFILE, "SetRegBinded :: [%s/%s] [%s]", m_strAppId.GetStr(),
+            m_strServiceId.GetStr(), (bBind) ? "ATTACHED" : "DETACHED");
 
     m_bBind = bBind;
 }
@@ -239,8 +227,7 @@ void AosHandle::SetRegBinded(IN IMS_BOOL bBind)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::IsNetworkRegBinded()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsNetworkRegBinded()
 {
     return m_bNetworkBind;
 }
@@ -250,17 +237,15 @@ IMS_BOOL AosHandle::IsNetworkRegBinded()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
+PUBLIC VIRTUAL void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
 {
     if (bNetworkBind == m_bNetworkBind)
     {
         return;
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "SetNetworkRegBinded :: [%s/%s] [%s]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(),
-            (bNetworkBind) ? "ATTACHED" : "DETACHED");
+    A_IMS_TRACE_I(APPPROFILE, "SetNetworkRegBinded :: [%s/%s] [%s]", m_strAppId.GetStr(),
+            m_strServiceId.GetStr(), (bNetworkBind) ? "ATTACHED" : "DETACHED");
 
     m_bNetworkBind = bNetworkBind;
 }
@@ -270,8 +255,7 @@ void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosFeatureTagList& AosHandle::GetFeatureTagList()
+PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetFeatureTagList()
 {
     return m_objFeatureTagList;
 }
@@ -281,8 +265,7 @@ AosFeatureTagList& AosHandle::GetFeatureTagList()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosFeatureTagList& AosHandle::GetBindedFeatureTagList()
+PUBLIC VIRTUAL AosFeatureTagList& AosHandle::GetBindedFeatureTagList()
 {
     return m_objBindedFeatureTagList;
 }
@@ -292,27 +275,25 @@ AosFeatureTagList& AosHandle::GetBindedFeatureTagList()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::ProcessFeatureTagChange()
+PUBLIC VIRTUAL void AosHandle::ProcessFeatureTagChange()
 {
-    A_IMS_TRACE_I(APPPROFILE, "ProcessFeatureTagChange :: [%s/%s]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
+    A_IMS_TRACE_I(APPPROFILE, "ProcessFeatureTagChange :: [%s/%s]", m_strAppId.GetStr(),
+            m_strServiceId.GetStr(), 0);
 
     if (m_objFeatureTagList.Equals(m_objBindedFeatureTagList) == IMS_FALSE)
     {
         IMS_UINT32 nState = GetState();
-        A_IMS_TRACE_I(APPPROFILE,
-                "ProcessFeatureTagChange :: Feature tag is changed, nState [%s]",
+        A_IMS_TRACE_I(APPPROFILE, "ProcessFeatureTagChange :: Feature tag is changed, nState [%s]",
                 StateToString(nState), 0, 0);
 
         switch (nState)
         {
-            case STATE_CONNECTING: // FALL-THROUGH
+            case STATE_CONNECTING:  // FALL-THROUGH
             case STATE_CONNECTED:
                 m_piAppContext->GetApp()->Reconfig();
                 break;
 
-            case STATE_DISCONNECTING: // FALL-THROUGH
+            case STATE_DISCONNECTING:  // FALL-THROUGH
             case STATE_DISCONNECTED:
                 break;
             default:
@@ -326,11 +307,10 @@ void AosHandle::ProcessFeatureTagChange()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
+PUBLIC VIRTUAL void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
 {
-    (void) nType;
-    (void) nState;
+    (void)nType;
+    (void)nState;
 }
 
 /*
@@ -338,17 +318,16 @@ void AosHandle::Request(IN IMS_UINT32 nType, IN IMS_UINT32 nState /* = 0 */)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
+PUBLIC VIRTUAL void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 {
-    A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [%s/%s] [state(%d)]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(), nState);
+    A_IMS_TRACE_I(APPPROFILE, "App_StateChanged :: [%s/%s] [state(%d)]", m_strAppId.GetStr(),
+            m_strServiceId.GetStr(), nState);
 
     switch (nState)
     {
-        case IAosApplication::APP_DISCONNECTED: // FALL-THROUGH
-        case IAosApplication::APP_CONNECTED: // FALL-THROUGH
-        case IAosApplication::APP_UPDATING: // FALL-THROUGH
+        case IAosApplication::APP_DISCONNECTED:  // FALL-THROUGH
+        case IAosApplication::APP_CONNECTED:     // FALL-THROUGH
+        case IAosApplication::APP_UPDATING:      // FALL-THROUGH
         case IAosApplication::APP_DISCONNECTING:
         {
             IMSMSG objMSG(HANDLE_MSG_APP_STATUS, nState, nParam);
@@ -365,31 +344,29 @@ void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nParam)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::App_Notify()
+PUBLIC VIRTUAL void AosHandle::App_Notify()
 {
     if (m_piListener == IMS_NULL)
     {
-        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no listener",
-                m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
+        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no listener", m_strAppId.GetStr(),
+                m_strServiceId.GetStr(), 0);
         return;
     }
 
     if (m_bNotify == IMS_FALSE)
     {
-        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no notification",
-                m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
+        A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no notification", m_strAppId.GetStr(),
+                m_strServiceId.GetStr(), 0);
         return;
     }
-
 
     if (!CheckAppNotificationAndSetAppState())
     {
         return;
     }
 
-    A_IMS_TRACE_I(APPPROFILE, "App_Notify :: [%s/%s]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
+    A_IMS_TRACE_I(
+            APPPROFILE, "App_Notify :: [%s/%s]", m_strAppId.GetStr(), m_strServiceId.GetStr(), 0);
 
     // notify the state to Enabler
     switch (GetState())
@@ -430,11 +407,10 @@ void AosHandle::App_Notify()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
+PUBLIC VIRTUAL void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
 {
-    (void) nType;
-    (void) bBlocked;
+    (void)nType;
+    (void)bBlocked;
 }
 
 /*
@@ -442,8 +418,7 @@ void AosHandle::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
+PUBLIC VIRTUAL IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 {
     A_IMS_TRACE_I(APPPROFILE, "Control :: Type[%d]", nType, 0, 0);
 
@@ -455,8 +430,7 @@ IMS_BOOL AosHandle::Control(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IImsAosInfo* AosHandle::GetAosInfo()
+PUBLIC VIRTUAL IImsAosInfo* AosHandle::GetAosInfo()
 {
     return m_piInfo;
 }
@@ -466,8 +440,7 @@ IImsAosInfo* AosHandle::GetAosInfo()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosHandle::GetFeatures()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
 {
     return IsImsConnected() ? m_objBindedFeatureTagList.GetFeatures() : ImsAosFeature::NONE;
 }
@@ -477,8 +450,7 @@ IMS_UINT32 AosHandle::GetFeatures()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 AosHandle::GetSuspendedReason()
+PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetSuspendedReason()
 {
     return m_nSuspendedReason;
 }
@@ -488,8 +460,7 @@ IMS_UINT32 AosHandle::GetSuspendedReason()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature)
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature)
 {
     return (GetFeatures() & nFeature) > 0;
 }
@@ -499,13 +470,12 @@ IMS_BOOL AosHandle::IsFeatureConnected(IN IMS_UINT32 nFeature)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::IsImsConnected()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsConnected()
 {
     IMS_UINT32 nState = GetState();
 
-    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: [%s] connected(%s)",
-            m_strServiceId.GetStr(), _TRACE_B_(nState == STATE_CONNECTED), 0);
+    A_IMS_TRACE_D(APPPROFILE, "IsImsConnected :: [%s] connected(%s)", m_strServiceId.GetStr(),
+            _TRACE_B_(nState == STATE_CONNECTED), 0);
 
     return (nState == STATE_CONNECTED);
 }
@@ -515,11 +485,10 @@ IMS_BOOL AosHandle::IsImsConnected()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL AosHandle::IsImsSuspended()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsImsSuspended()
 {
-    A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: [%s] reason(%x)",
-            m_strServiceId.GetStr(), m_nSuspendedReason, 0);
+    A_IMS_TRACE_D(APPPROFILE, "IsImsSuspended :: [%s] reason(%x)", m_strServiceId.GetStr(),
+            m_nSuspendedReason, 0);
 
     return (m_nSuspendedReason != AoSReason::SUSPEND_NONE);
 }
@@ -529,8 +498,7 @@ IMS_BOOL AosHandle::IsImsSuspended()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::SetListener(IN IImsAosListener* piListener)
+PUBLIC VIRTUAL void AosHandle::SetListener(IN IImsAosListener* piListener)
 {
     m_piListener = piListener;
 }
@@ -540,8 +508,7 @@ void AosHandle::SetListener(IN IImsAosListener* piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
+PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 {
     m_piMonitor = piMonitor;
 }
@@ -551,8 +518,7 @@ void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
+PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
 {
     // It is for SipController so it will be overridden in AosSipController
 }
@@ -562,8 +528,7 @@ void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*objFeatureTag*/)
+PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*objFeatureTag*/)
 {
     // It is for SipController so it will be overridden in AosSipControllers
 }
@@ -573,11 +538,9 @@ void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*objFeatureTag*/)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_D(APPPROFILE,
-            "CallTracker_StateChanged :: nType=%d, nState=%d", nType, nState, 0);
+    A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType, nState, 0);
     // Implemented in child
 }
 
@@ -586,8 +549,7 @@ void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nSta
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::NetTracker_StatusChanged()
+PUBLIC VIRTUAL void AosHandle::NetTracker_StatusChanged()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
 
@@ -596,7 +558,7 @@ void AosHandle::NetTracker_StatusChanged()
     if (bCurrSrvIn != m_bNetSrvIn)
     {
         A_IMS_TRACE_I(APPPROFILE, "NetTracker_StatusChanged :: service state changed >> (%s)",
-                (bCurrSrvIn)? "IN_SERVICE" : "OUT_OF_SERVICE", 0, 0);
+                (bCurrSrvIn) ? "IN_SERVICE" : "OUT_OF_SERVICE", 0, 0);
 
         // IN Service
         if (bCurrSrvIn)
@@ -618,8 +580,7 @@ void AosHandle::NetTracker_StatusChanged()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::Init()
+PROTECTED VIRTUAL void AosHandle::Init()
 {
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
@@ -652,8 +613,7 @@ void AosHandle::Init()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::CleanUp()
+PROTECTED VIRTUAL void AosHandle::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
@@ -686,8 +646,8 @@ Remarks
 PROTECTED
 void AosHandle::SetHandleState(IN IMS_UINT32 nState)
 {
-    A_IMS_TRACE_I(APPPROFILE, "SetHandleState :: %s >> %s",
-            StateToString(GetState()), StateToString(nState), 0);
+    A_IMS_TRACE_I(APPPROFILE, "SetHandleState :: %s >> %s", StateToString(GetState()),
+            StateToString(nState), 0);
 
     SetState(nState);
 
@@ -788,11 +748,11 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
     {
         case AoSReason::NONE:
             break;
-        case AoSReason::BAD_BATTERY: // FALL-THROUGH
+        case AoSReason::BAD_BATTERY:  // FALL-THROUGH
         case AoSReason::POWER_OFF:
             nImsAosReason = ImsAosReason::POWER_OFF;
             break;
-        case AoSReason::AIRPLANE_MODE: //FALL-THROUGH
+        case AoSReason::AIRPLANE_MODE:  // FALL-THROUGH
         case AoSReason::DATA_DISCONNECTED:
             nImsAosReason = ImsAosReason::DATA_DISCONNECTED;
             break;
@@ -808,8 +768,8 @@ IMS_UINT32 AosHandle::GetImsAosReason(IN IMS_UINT32 nAosReason)
         case AoSReason::SRV_OUT:
             nImsAosReason = ImsAosReason::OUT_OF_SERVICE;
             break;
-        case AoSReason::REG_REFRESH_FORBIDDEN: // FALL-THROUGH
-        case AoSReason::REG_TERMINATED_EXPIRE: // FALL-THROUGH
+        case AoSReason::REG_REFRESH_FORBIDDEN:  // FALL-THROUGH
+        case AoSReason::REG_TERMINATED_EXPIRE:  // FALL-THROUGH
         case AoSReason::REG_TERMINATED:
             nImsAosReason = ImsAosReason::REG_TERMINATED;
             break;
@@ -879,8 +839,8 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL AosHandle::IsCapabilityExisted(IN IMS_UINT32 nCapabilities,
-        IN AosCapability eCapability) const
+IMS_BOOL AosHandle::IsCapabilityExisted(
+        IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const
 {
     return (nCapabilities & static_cast<IMS_UINT32>(eCapability));
 }
@@ -980,14 +940,14 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
 
     switch (nBlock)
     {
-        case BLOCK_VOLTE_CAPABILITY: // FALL-THROUGH
-        case BLOCK_VOWIFI_CAPABILITY: // FALL-THROUGH
-        case BLOCK_NETWORK: // FALL-THROUGH
+        case BLOCK_VOLTE_CAPABILITY:   // FALL-THROUGH
+        case BLOCK_VOWIFI_CAPABILITY:  // FALL-THROUGH
+        case BLOCK_NETWORK:            // FALL-THROUGH
         case BLOCK_VOPS:
             nFeature = ImsAosFeature::MMTEL;
             break;
 
-        case BLOCK_VILTE_CAPABILITY: // FALL-THROUGH
+        case BLOCK_VILTE_CAPABILITY:  // FALL-THROUGH
         case BLOCK_VIWIFI_CAPABILITY:
             nFeature = ImsAosFeature::VIDEO;
             break;
@@ -1081,15 +1041,15 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded,
-        IN IMS_BOOL bPreProcess /* = IMS_TRUE */)
+void AosHandle::ProcessBlock(
+        IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess /* = IMS_TRUE */)
 {
     if (bPreProcess && GET_N_CONFIG(m_nSlotId)->IsWfcImsAvailable())
     {
         if (PreProcessBlock(nBlock, bAdded))
         {
             A_IMS_TRACE_D(APPPROFILE, "ProcessBlock :: WIFI(%s) , not handled(%x)",
-                _TRACE_B_(IsEpdgEnabled()), m_nBlocks, 0);
+                    _TRACE_B_(IsEpdgEnabled()), m_nBlocks, 0);
             return;
         }
     }
@@ -1126,7 +1086,7 @@ void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked
     }
 
     A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: [%s/%s] Updated feature = [%d]",
-            m_strAppId.GetStr(), m_strServiceId.GetStr() , m_objFeatureTagList.GetFeatures());
+            m_strAppId.GetStr(), m_strServiceId.GetStr(), m_objFeatureTagList.GetFeatures());
 
     UpdateFeatureTags();
 }
@@ -1137,8 +1097,8 @@ Remarks
 
 */
 PROTECTED
-void AosHandle::ProcessCheckBlock(IN IMS_UINT32 nBlock/* = 0 */,
-        IN IMS_BOOL bRunStateMachine/* = IMS_TRUE */)
+void AosHandle::ProcessCheckBlock(
+        IN IMS_UINT32 nBlock /* = 0 */, IN IMS_BOOL bRunStateMachine /* = IMS_TRUE */)
 {
     IMS_BOOL bCurrBlocked = IMS_FALSE;
 
@@ -1158,7 +1118,7 @@ void AosHandle::ProcessCheckBlock(IN IMS_UINT32 nBlock/* = 0 */,
             OnStateMessage(objMSG);
         }
 
-        ProcessBlockChanged(); // jryou: this was for update "cs,volte"
+        ProcessBlockChanged();  // jryou: this was for update "cs,volte"
     }
     else
     {
@@ -1185,8 +1145,7 @@ IMS_BOOL AosHandle::IsHandleBlocked(IN IMS_UINT32 nType) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsHandleBlocked() const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsHandleBlocked() const
 {
     return (m_nBlocks != BLOCK_NONE);
 }
@@ -1196,18 +1155,14 @@ IMS_BOOL AosHandle::IsHandleBlocked() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessBlockChanged()
-{
-}
+PROTECTED VIRTUAL void AosHandle::ProcessBlockChanged() {}
 
 /*
 
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 /* nBlock */) const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 /* nBlock */) const
 {
     return IMS_FALSE;
 }
@@ -1217,8 +1172,7 @@ IMS_BOOL AosHandle::IsBlockForMobile(IN IMS_UINT32 /* nBlock */) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 /* nBlock */) const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 /* nBlock */) const
 {
     return IMS_FALSE;
 }
@@ -1228,8 +1182,7 @@ IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 /* nBlock */) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessCapabilitiesChanged(
+PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
 {
     // Implemented in child
@@ -1240,8 +1193,7 @@ void AosHandle::ProcessCapabilitiesChanged(
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessNetworkChanged()
+PROTECTED VIRTUAL void AosHandle::ProcessNetworkChanged()
 {
     // Implemented in child
 }
@@ -1251,8 +1203,7 @@ void AosHandle::ProcessNetworkChanged()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
+PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
 {
     // Implemented in child
 }
@@ -1262,11 +1213,10 @@ void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnected :: (%s)",
-            m_strServiceId.GetStr(), MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnected :: (%s)", m_strServiceId.GetStr(),
+            MsgToString(objMSG.nMSG), 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1298,7 +1248,6 @@ IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
         {
             break;
         }
-
     }
     return IMS_TRUE;
 }
@@ -1308,11 +1257,10 @@ IMS_BOOL AosHandle::StateDisconnected(IN IMSMSG& objMSG)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnecting :: (%s)" ,
-            m_strServiceId.GetStr(), MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnecting :: (%s)", m_strServiceId.GetStr(),
+            MsgToString(objMSG.nMSG), 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1372,7 +1320,6 @@ IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
         {
             break;
         }
-
     }
     return IMS_TRUE;
 }
@@ -1382,11 +1329,10 @@ IMS_BOOL AosHandle::StateConnecting(IN IMSMSG& objMSG)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnected :: (%s)" ,
-            m_strServiceId.GetStr(), MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "[%s] StateConnected :: (%s)", m_strServiceId.GetStr(),
+            MsgToString(objMSG.nMSG), 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1465,7 +1411,6 @@ IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
         {
             break;
         }
-
     }
     return IMS_TRUE;
 }
@@ -1475,11 +1420,10 @@ IMS_BOOL AosHandle::StateConnected(IN IMSMSG& objMSG)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
 {
-    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnecting :: (%s)",
-            m_strServiceId.GetStr(), MsgToString(objMSG.nMSG), 0);
+    A_IMS_TRACE_I(APPPROFILE, "[%s] StateDisconnecting :: (%s)", m_strServiceId.GetStr(),
+            MsgToString(objMSG.nMSG), 0);
 
     m_bNotify = IMS_FALSE;
 
@@ -1585,7 +1529,6 @@ IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
         {
             break;
         }
-
     }
     return IMS_TRUE;
 }
@@ -1595,8 +1538,7 @@ IMS_BOOL AosHandle::StateDisconnecting(IN IMSMSG& objMSG)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsBlocked() const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlocked() const
 {
     A_IMS_TRACE_I(APPPROFILE, "IsBlocked :: (%s)", _TRACE_B_(m_bBlocked), 0, 0);
 
@@ -1608,8 +1550,7 @@ IMS_BOOL AosHandle::IsBlocked() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsSupportedNetworkType(IN IMS_UINT32 nType) const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsSupportedNetworkType(IN IMS_UINT32 nType) const
 {
     return AosUtil::GetInstance()->IsSupportedNetworkType(nType);
 }
@@ -1619,8 +1560,7 @@ IMS_BOOL AosHandle::IsSupportedNetworkType(IN IMS_UINT32 nType) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL AosHandle::IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
 {
     return AosUtil::GetInstance()->IsSupportedNetworkTypeForCellular(nType);
 }
@@ -1630,8 +1570,7 @@ IMS_BOOL AosHandle::IsSupportedNetworkTypeForCellular(IN IMS_UINT32 nType) const
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::InitializeServiceBlock()
+PROTECTED VIRTUAL void AosHandle::InitializeServiceBlock()
 {
     /*
         The child class will implement this method because the block condition may be changed
@@ -1646,8 +1585,7 @@ void AosHandle::InitializeServiceBlock()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::InitializeServiceFeature()
+PROTECTED VIRTUAL void AosHandle::InitializeServiceFeature()
 {
     /*
         Will be implemented on child classes.
@@ -1659,8 +1597,7 @@ void AosHandle::InitializeServiceFeature()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::InitializeFeatureTags()
+PROTECTED VIRTUAL void AosHandle::InitializeFeatureTags()
 {
     m_objFeatureTagList.ClearFeatureTags();
 
@@ -1676,8 +1613,7 @@ void AosHandle::InitializeFeatureTags()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::UpdateFeatureTags()
+PROTECTED VIRTUAL void AosHandle::UpdateFeatureTags()
 {
     if (m_objFeatureTagList.GetFeatures() == ImsAosFeature::NONE)
     {
@@ -1690,13 +1626,11 @@ void AosHandle::UpdateFeatureTags()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
-        A_IMS_TRACE_D(APPPROFILE, "ProcessImsSuspended :: ims isn't connected",
-                0, 0, 0);
+        A_IMS_TRACE_D(APPPROFILE, "ProcessImsSuspended :: ims isn't connected", 0, 0, 0);
         return;
     }
 
@@ -1719,8 +1653,7 @@ void AosHandle::ProcessImsSuspended(IN IMS_UINT32 nReason /* = 0 */)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
+PROTECTED VIRTUAL void AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 {
     if (IsImsConnected() == IMS_FALSE)
     {
@@ -1753,8 +1686,7 @@ void AosHandle::ProcessImsResumed(IN IMS_UINT32 nReason /* = 0 */)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::CheckSuspended()
+PROTECTED VIRTUAL void AosHandle::CheckSuspended()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     IMS_BOOL bCurrSrvIn = !piNetTracker->IsSuspended();
@@ -1776,8 +1708,7 @@ void AosHandle::CheckSuspended()
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
+PROTECTED VIRTUAL void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AoSReason::SUSPEND_NO_SERVICE)
     {
@@ -1790,8 +1721,7 @@ void AosHandle::SetSuspendedReason(IN IMS_UINT32 nReason)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
+PROTECTED VIRTUAL void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
 {
     if (nReason == AoSReason::SUSPEND_NO_SERVICE)
     {
@@ -1804,8 +1734,7 @@ void AosHandle::ResetSuspendedReason(IN IMS_UINT32 nReason)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void AosHandle::ReportRegState()
+PROTECTED VIRTUAL void AosHandle::ReportRegState()
 {
     IAosRegStateManager* piRSM = AosProvider::GetInstance()->GetRegStateManager(m_nSlotId);
     if (piRSM == IMS_NULL)
@@ -1818,9 +1747,9 @@ void AosHandle::ReportRegState()
         case STATE_CONNECTED:
             piRSM->SetRegState(m_nServiceType, IMS_REG_ON);
             break;
-        case STATE_DISCONNECTED: // FALL-THROUGH
-        case STATE_CONNECTING: // FALL-THROUGH
-        case STATE_DISCONNECTING: // FALL-THROUGH
+        case STATE_DISCONNECTED:   // FALL-THROUGH
+        case STATE_CONNECTING:     // FALL-THROUGH
+        case STATE_DISCONNECTING:  // FALL-THROUGH
         default:
             piRSM->SetRegState(m_nServiceType, IMS_REG_OFF);
             break;
@@ -1832,8 +1761,7 @@ void AosHandle::ReportRegState()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::Event_NotifyEvent(
+PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
     A_IMS_TRACE_I(APPPROFILE, "Event_NotifyEvent :: [E(%s)/W(%d)/L(%d)]",
@@ -1880,9 +1808,8 @@ void AosHandle::Event_NotifyEvent(
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
+PUBLIC VIRTUAL void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
+        IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities)
 {
     if (AosUtil::GetInstance()->IsWifiTest())
     {
@@ -1897,11 +1824,9 @@ void AosHandle::RegistrationControl_NotifyCapabilitiesChanged(
 Remarks
 
 */
-PUBLIC VIRTUAL
-void AosHandle::ServiceSetting_RoamingPreferredVoiceNetworkChanged(
+PUBLIC VIRTUAL void AosHandle::ServiceSetting_RoamingPreferredVoiceNetworkChanged(
         IN RoamingPreferredVoiceNetwork /*eState*/)
 {
-
 }
 
 /*
@@ -1909,8 +1834,7 @@ void AosHandle::ServiceSetting_RoamingPreferredVoiceNetworkChanged(
 Remarks
 
 */
-PROTECTED GLOBAL
-const IMS_CHAR* AosHandle::StateToString(IN IMS_UINT32 nState)
+PROTECTED GLOBAL const IMS_CHAR* AosHandle::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
     {
@@ -1936,8 +1860,7 @@ const IMS_CHAR* AosHandle::StateToString(IN IMS_UINT32 nState)
 Remarks
 
 */
-PROTECTED GLOBAL
-const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
+PROTECTED GLOBAL const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
 {
     switch (nMsg)
     {
@@ -1957,8 +1880,7 @@ const IMS_CHAR* AosHandle::MsgToString(IN IMS_UINT32 nMsg)
 Remarks
 
 */
-PROTECTED GLOBAL
-const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nType)
+PROTECTED GLOBAL const IMS_CHAR* AosHandle::RadioTypeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {

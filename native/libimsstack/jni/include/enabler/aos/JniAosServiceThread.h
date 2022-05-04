@@ -18,8 +18,7 @@
 
 #include "BaseServiceThread.h"
 
-class JniAosServiceThread final
-    : public BaseServiceThread
+class JniAosServiceThread final : public BaseServiceThread
 {
 public:
     JniAosServiceThread();
@@ -36,8 +35,8 @@ public:
     void NotifyDeregistered(IN IMS_SINT32 nReason);
     void NotifyTechnologyChangeFailed(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode);
     void NotifyAssociatedUriChanged(IN const IMSList<AString>& objUris);
-    void NotifyCapabilitiesUpdateFailed(IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType,
-            IN IMS_SINT32 nReason);
+    void NotifyCapabilitiesUpdateFailed(
+            IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason);
 
     void NotifyAosIsimState(IN IMS_UINT32 nState);
     void NotifyRegEventState(IN IMS_UINT32 nState);
@@ -48,4 +47,4 @@ private:
     IMS_SINT32 m_nSlotId;
 };
 
-#endif // JNI_AOS_SERVICE_THREAD_H_
+#endif  // JNI_AOS_SERVICE_THREAD_H_

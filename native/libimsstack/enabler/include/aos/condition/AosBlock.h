@@ -23,8 +23,7 @@
 class IAosAppContext;
 class IAosBlockListener;
 
-class AosBlock
-    : public IAosBlock
+class AosBlock : public IAosBlock
 {
 public:
     AosBlock(IN IAosAppContext* piAppContext);
@@ -38,8 +37,8 @@ public:
     void ClearAllBlockReasons() override;
     void PrintBlockReasons() override;
 
-    void GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
-            IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
+    void GetBlockReasons(
+            OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
     IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled = IMS_FALSE,
             IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
@@ -49,7 +48,7 @@ public:
     IMS_BOOL IsListened(IN IAosBlockListener* piListener);
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
-private :
+private:
     void Notify(IN BLOCK_REASON eReason, IN IMS_BOOL bIsEnable);
     static IMS_UINT32 GetBlockType(IN BLOCK_REASON eReason);
     static const IMS_CHAR* ServiceTypeToString(IN SERVICE_TYPE eType);
@@ -76,4 +75,4 @@ private:
     AString m_strTag;
     IMSList<IMS_UINT32> objServiceBlockReasons;
 };
-#endif // AOS_BLOCK_H_
+#endif  // AOS_BLOCK_H_

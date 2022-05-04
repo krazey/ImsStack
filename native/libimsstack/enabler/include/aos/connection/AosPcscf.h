@@ -29,16 +29,15 @@ class IAosAppContext;
 class IAosPcscfListener;
 class ITimerListener;
 
-class Pcscf
-    : public ITimerListener
+class Pcscf : public ITimerListener
 {
 public:
-    Pcscf(IN const AString& strAddress, IN IMS_SINT32 nPort)
-        : m_strAddress(strAddress)
-        , m_nPort(nPort)
-        , m_bIsAvailable(IMS_TRUE)
-        , m_bIsTried(IMS_FALSE)
-        , m_piTimer(IMS_NULL)
+    Pcscf(IN const AString& strAddress, IN IMS_SINT32 nPort) :
+            m_strAddress(strAddress),
+            m_nPort(nPort),
+            m_bIsAvailable(IMS_TRUE),
+            m_bIsTried(IMS_FALSE),
+            m_piTimer(IMS_NULL)
     {
     }
 
@@ -75,11 +74,11 @@ public:
 
     inline void SetUnavailableWithDuration(IN IMS_UINT32 nSeconds)
     {
-       m_bIsAvailable = IMS_FALSE;
-       if (nSeconds > 0)
-       {
-           StartTimer(nSeconds * 1000);
-       }
+        m_bIsAvailable = IMS_FALSE;
+        if (nSeconds > 0)
+        {
+            StartTimer(nSeconds * 1000);
+        }
     }
 
     inline void SetPort(IN IMS_SINT32 nPort) { m_nPort = nPort; }
@@ -129,31 +128,20 @@ private:
 class RetryHost
 {
 public:
-    RetryHost(IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion)
-        : m_strHost(strHost)
-        , m_nPort(nPort)
-        , m_nIpVersion(nIpVersion)
+    RetryHost(IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion) :
+            m_strHost(strHost),
+            m_nPort(nPort),
+            m_nIpVersion(nIpVersion)
     {
     }
 
-    virtual ~RetryHost()
-    {
-    }
+    virtual ~RetryHost() {}
 
-    inline const AString& GetHost()
-    {
-        return m_strHost;
-    }
+    inline const AString& GetHost() { return m_strHost; }
 
-    inline IMS_SINT32 GetPort()
-    {
-        return m_nPort;
-    }
+    inline IMS_SINT32 GetPort() { return m_nPort; }
 
-    inline IMS_SINT32 GetIpVersion()
-    {
-        return m_nIpVersion;
-    }
+    inline IMS_SINT32 GetIpVersion() { return m_nIpVersion; }
 
 private:
     AString m_strHost;
@@ -161,9 +149,7 @@ private:
     IMS_SINT32 m_nIpVersion;
 };
 
-class AosPcscf
-    : public IAosPcscf
-    , public ITimerListener
+class AosPcscf : public IAosPcscf, public ITimerListener
 {
 public:
     AosPcscf(IN IAosAppContext* piAppContext);
@@ -186,8 +172,8 @@ public:
     virtual IMS_BOOL HasPcscf(IN IMS_SINT32 nIndex);
     virtual IMS_UINT32 GetPcscfCount();
 
-    virtual void SetCurrentPcscfInvalid(IN IMS_BOOL bIsTimer = IMS_FALSE,
-            IN IMS_UINT32 nSeconds = 0);
+    virtual void SetCurrentPcscfInvalid(
+            IN IMS_BOOL bIsTimer = IMS_FALSE, IN IMS_UINT32 nSeconds = 0);
     virtual void RemoveCurrentPcscf();
     virtual void SetAllPcscfValid();
 
@@ -233,8 +219,8 @@ protected:
 
     virtual IMS_BOOL GetFromPco(IN IMS_SINT32 nIpVersion);
     virtual IMS_BOOL GetFromConf(IN IMS_SINT32 nIpVersion);
-    virtual IMS_BOOL ProcessDnsQuery(IN const AString& strHost, IN IMS_SINT32 nPort,
-            IN IMS_SINT32 nIpVersion);
+    virtual IMS_BOOL ProcessDnsQuery(
+            IN const AString& strHost, IN IMS_SINT32 nPort, IN IMS_SINT32 nIpVersion);
 
     virtual const ISubscriberConfig* GetSubscriberConfig(IN IMS_SINT32 nType = -1);
     virtual IMS_SINT32 GetDefaultPcscfPort();
@@ -296,4 +282,4 @@ protected:
 
     AString m_strTag;
 };
-#endif // AOS_PCSCF_H_
+#endif  // AOS_PCSCF_H_

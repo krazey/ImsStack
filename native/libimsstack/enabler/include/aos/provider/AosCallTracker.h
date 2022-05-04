@@ -20,17 +20,14 @@
 #include "IMSMap.h"
 
 #include "IEventListener.h"
-//#include "IUCCallListener.h" _UC_TO_MTC_
+// #include "IUCCallListener.h" _UC_TO_MTC_
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosServicePhoneListener.h"
 
 class AosServicePhoneListener;
 
-class AosCallTracker
-    : public IAosCallTracker
-    , public IEventListener
-    , public AosServicePhoneListener
-    //, public IUCCallListener _UC_TO_MTC_
+class AosCallTracker : public IAosCallTracker, public IEventListener, public AosServicePhoneListener
+//, public IUCCallListener _UC_TO_MTC_
 {
 public:
     AosCallTracker(IN IMS_SINT32 nSlotId_);
@@ -48,17 +45,17 @@ public:
     virtual void SetCSCallStateWatchMode();
     virtual void SetActiveCSCallState(IN IMS_UINT32 nActiveCSState);
 
-    virtual void SetListener(IN IAosCallTrackerListener *piListener);
+    virtual void SetListener(IN IAosCallTrackerListener* piListener);
     virtual void RemoveListener(IN IAosCallTrackerListener* piListener);
 
 protected:
-    void AddOrUpdateCall(IN IMSMap<IMS_SINTP, IMS_UINT32> &objCalls,
-            IN IMS_SINTP nKey,IN IMS_UINT32 nState);
-    void RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32> &objCalls, IN IMS_SINTP nKey);
+    void AddOrUpdateCall(
+            IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey, IN IMS_UINT32 nState);
+    void RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey);
 
     IMS_UINT32 GetConvertedState(IN IMS_UINT32 nState);
-    IMS_UINT32 GetTotalState(IN IMSMap<IMS_SINTP, IMS_UINT32> &objCalls);
-    IMS_UINT32 GetTotalSessionType(IN IMSMap<IMS_SINTP, IMS_UINT32> &objSessionTypes);
+    IMS_UINT32 GetTotalState(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls);
+    IMS_UINT32 GetTotalSessionType(IN IMSMap<IMS_SINTP, IMS_UINT32>& objSessionTypes);
 
     IMS_UINT32 GetState(IN IMS_UINT32 nType) const;
     void SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
@@ -71,8 +68,8 @@ protected:
             IN IMS_SINTP nKey, IN IMS_UINT32 nState, IN IMS_SINT32 nSessionType);
 
     // IEventListener
-    virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    virtual void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
     // AosServicePhoneListener
     virtual void ServicePhone_PreciseCallStateChanged(IN PreciseCallState eState);
@@ -103,4 +100,4 @@ protected:
 private:
     AString strTag;
 };
-#endif // AOS_CALL_TRACKER_H_
+#endif  // AOS_CALL_TRACKER_H_

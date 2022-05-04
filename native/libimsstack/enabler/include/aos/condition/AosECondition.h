@@ -18,8 +18,7 @@
 
 #include "condition/AosCondition.h"
 
-class AosECondition
-    : public AosCondition
+class AosECondition : public AosCondition
 {
 public:
     AosECondition(IN IAosAppContext* piAppContext);
@@ -28,11 +27,11 @@ public:
     IMS_BOOL IsReady() final;
 
 private:
-    inline void AddServiceAvailable() final {};
-    inline void RemoveServiceAvailable() final {};
+    inline void AddServiceAvailable() final{};
+    inline void RemoveServiceAvailable() final{};
 
-    inline void AddEventListener() final {};
-    inline void RemoveEventListener() final {};
+    inline void AddEventListener() final{};
+    inline void RemoveEventListener() final{};
 
     void AddAosServiceListener() final;
     void RemoveAosServiceListener() final;
@@ -42,14 +41,14 @@ private:
 
     // AosServicePhoneListener
     void ServicePhone_AosStart() final;
-    inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) final {};
-    inline void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL /*bIsRefresh*/,
-            IN PhoneNumberState /*eState*/) final {};
-    inline void ServicePhone_PlmnChanged() final {};
-    inline void ServicePhone_PowerOff() final {};
+    inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) final{};
+    inline void ServicePhone_PhoneNumberStateChanged(
+            IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) final{};
+    inline void ServicePhone_PlmnChanged() final{};
+    inline void ServicePhone_PowerOff() final{};
 
 private:
     friend class AosEConditionTest;
 };
 
-#endif // AOS_E_CONDITION_H_
+#endif  // AOS_E_CONDITION_H_

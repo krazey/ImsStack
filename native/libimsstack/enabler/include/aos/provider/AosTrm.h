@@ -20,17 +20,14 @@
 #include "ITrm.h"
 #include "interface/IAosTrm.h"
 
-class AosTrm
-    : public IAosTrm
-    , public ITrmListener
-    , public ITimerListener
+class AosTrm : public IAosTrm, public ITrmListener, public ITimerListener
 {
 public:
     AosTrm(IN IMS_SINT32 nSlotId_);
     virtual ~AosTrm();
 
-    virtual void SetListener(IN IAosTrmListener *piListener);
-    virtual void RemoveListener(IN IAosTrmListener *piListener);
+    virtual void SetListener(IN IAosTrmListener* piListener);
+    virtual void RemoveListener(IN IAosTrmListener* piListener);
 
     virtual IMS_BOOL IsReady();
     virtual IMS_BOOL IsTRMSupported();
@@ -53,7 +50,7 @@ private:
     virtual void Trm_NotifyServicePriorityChanged();
 
     // ITimerListener Interface
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
     IMS_SINT32 nSlotId;
@@ -62,12 +59,12 @@ private:
     IMS_BOOL bIsStartUpdated;
     IMS_BOOL bIsEmergencyStartUpdated;
 
-    ITrm *piTRM;
-    ITimer *piStopTimer;
+    ITrm* piTRM;
+    ITimer* piStopTimer;
     IMSList<IAosTrmListener*> objListeners;
 
     AString strTag;
 
     static const IMS_UINT32 TIME_STOP_DELAY = 1000;
 };
-#endif // AOS_TRM_H_
+#endif  // AOS_TRM_H_

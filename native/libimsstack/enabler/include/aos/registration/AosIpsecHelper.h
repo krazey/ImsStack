@@ -25,8 +25,7 @@ class IAosAppContext;
 /**
  * @brief This class manages related ipsec information from AosRegistration.
  */
-class AosIpsecHelper
-    : public IAosIpsecListener
+class AosIpsecHelper : public IAosIpsecListener
 {
 public:
     AosIpsecHelper(IN IRegContact* piRegContact, IN IRegParameter* piRegParameter,
@@ -93,4 +92,4 @@ protected:
     static const IMS_UINT32 IPSEC_PORT_INTERVAL = 1000;
     static const IMS_UINT32 IPSEC_UPDATE_GUARD_LIFE_TIME_MILLIS = 30000;
 };
-#endif // AOS_IPSEC_HELPER_H_
+#endif  // AOS_IPSEC_HELPER_H_

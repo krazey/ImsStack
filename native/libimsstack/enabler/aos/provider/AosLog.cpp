@@ -21,7 +21,6 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-
 class Application
 {
 public:
@@ -87,7 +86,6 @@ public:
         TIMER_APP_TERMINATED,
         TIMER_PDN_BLOCKED
     };
-
 };
 
 class Registration
@@ -169,8 +167,7 @@ AosLog::AosLog()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosLog::~AosLog()
+PUBLIC VIRTUAL AosLog::~AosLog()
 {
     IMS_TRACE_D("~AosLog()", 0, 0, 0);
 }
@@ -180,8 +177,7 @@ AosLog::~AosLog()
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -243,8 +239,7 @@ const IMS_CHAR* AosLog::AppMessageToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -267,8 +262,7 @@ const IMS_CHAR* AosLog::AppPendingToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -330,8 +324,7 @@ const IMS_CHAR* AosLog::AppRequestToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -356,7 +349,6 @@ const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
         default:
             return "__INVALID__";
     }
-
 }
 
 /*
@@ -364,8 +356,7 @@ const IMS_CHAR* AosLog::AppStateToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -403,8 +394,7 @@ const IMS_CHAR* AosLog::AppTimerToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -451,8 +441,7 @@ const IMS_CHAR* AosLog::RegMessageToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -475,8 +464,7 @@ const IMS_CHAR* AosLog::RegModeToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -505,10 +493,9 @@ const IMS_CHAR* AosLog::RegPendingToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
 {
-    switch(nType)
+    switch (nType)
     {
         case IRegistration::REASON_NONE:
             return "RESULT_NONE";
@@ -550,8 +537,7 @@ const IMS_CHAR* AosLog::RegReasonToString(IN IMS_SINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -586,8 +572,7 @@ const IMS_CHAR* AosLog::RegStateToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -622,8 +607,7 @@ const IMS_CHAR* AosLog::RegTimerToString(IN IMS_UINT32 nType)
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
+PUBLIC GLOBAL const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
 {
     switch (nEvent)
     {
@@ -682,7 +666,7 @@ const IMS_CHAR* AosLog::EventToString(IN IMS_SINT32 nEvent)
             return "IMS_EVENT_ROAMING_PREFERRED_VOICE_CALL_NETWORK";
 
         case IMS_EVENT_VOLTE_SETTING:
-             return "IMS_EVENT_VOLTE_SETTING";
+            return "IMS_EVENT_VOLTE_SETTING";
 
         case IMS_EVENT_DATA_ROAMING_SETTING:
             return "IMS_EVENT_DATA_ROAMING_SETTING";

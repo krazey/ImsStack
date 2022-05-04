@@ -24,9 +24,7 @@
 
 class IAosAppContext;
 
-class AosConnection
-    : public IAosConnection
-    , public INetworkConnectionListener
+class AosConnection : public IAosConnection, public INetworkConnectionListener
 {
 public:
     AosConnection(IN IAosAppContext* piAppContext);
@@ -45,8 +43,8 @@ public:
     virtual IMS_SINT32 GetMtu();
     virtual const IPAddress& GetLocalAddress(IN IMS_SINT32 nIpVersion = 0);
     virtual const AStringArray& GetPcscfAddress(IN IMS_SINT32 nIpVersion = 0);
-    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName,
-            OUT IMSList<IPAddress>& objIps, IN IMS_SINT32 nIpVersion = 0);
+    virtual IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIps,
+            IN IMS_SINT32 nIpVersion = 0);
     virtual const AString& GetIfaceName();
     virtual IMS_BOOL IsEpdgEnabled();
     virtual IMS_SINT32 GetIpcanCategory();
@@ -68,10 +66,10 @@ protected:
 
     // INetworkConnectionListener
     virtual void NetworkConnection_OnConnected(IN INetworkConnection* piNetConnection);
-    virtual void NetworkConnection_OnDisconnected(IN INetworkConnection* piNetConnection,
-            IN IMS_SINT32 nErrorCode);
-    virtual void NetworkConnection_OnConnectionFailed(IN INetworkConnection* piNetConnection,
-            IN IMS_SINT32 nErrorCode);
+    virtual void NetworkConnection_OnDisconnected(
+            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode);
+    virtual void NetworkConnection_OnConnectionFailed(
+            IN INetworkConnection* piNetConnection, IN IMS_SINT32 nErrorCode);
     virtual void NetworkConnection_OnIpChanged(IN INetworkConnection* piNetConnection);
     virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piNetConnection);
     virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piNetConnection);
@@ -107,4 +105,4 @@ protected:
     AString m_strTag;
 };
 
-#endif // AOS_CONNECTION_H_
+#endif  // AOS_CONNECTION_H_

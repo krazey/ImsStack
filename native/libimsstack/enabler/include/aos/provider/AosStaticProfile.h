@@ -41,14 +41,16 @@ enum class AosRegistrationType
 class AosServiceProfile
 {
 public:
-    AosServiceProfile(IN AString strAppId, IN AString strServiceId)
-        : m_strAppId(strAppId)
-        , m_ServiceId(strServiceId) {}
+    AosServiceProfile(IN AString strAppId, IN AString strServiceId) :
+            m_strAppId(strAppId),
+            m_ServiceId(strServiceId)
+    {
+    }
 
     virtual ~AosServiceProfile() {}
 
-    inline AString& GetAppId() {return m_strAppId;}
-    inline AString& GetServiceId() {return m_ServiceId;}
+    inline AString& GetAppId() { return m_strAppId; }
+    inline AString& GetServiceId() { return m_ServiceId; }
 
 public:
     AString m_strAppId;
@@ -96,4 +98,4 @@ private:
     IMSList<AosServiceProfile*> m_objServiceProfiles;
 };
 
-#endif // AOS_STATIC_PROFILE_H_
+#endif  // AOS_STATIC_PROFILE_H_

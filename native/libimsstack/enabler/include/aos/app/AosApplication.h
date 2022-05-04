@@ -41,18 +41,18 @@ class AosCondition;
 class AosConnector;
 class AosUtil;
 
-class AosApplication
-    : public IMSActivityEx
-    , public IMSStateMachine
-    , public IAosApplication
-    , public IAosConditionListener
-    , public IAosConnectorListener
-    , public IAosRegistrationListener
-    , public IAosCallTrackerListener
-    , public IEventListener
-    , public ITimerListener
-    , public IAosNetTrackerListener
-    , public AosRegistrationControlListener
+class AosApplication :
+        public IMSActivityEx,
+        public IMSStateMachine,
+        public IAosApplication,
+        public IAosConditionListener,
+        public IAosConnectorListener,
+        public IAosRegistrationListener,
+        public IAosCallTrackerListener,
+        public IEventListener,
+        public ITimerListener,
+        public IAosNetTrackerListener,
+        public AosRegistrationControlListener
 {
     DECLARE_STATE_MAP()
 
@@ -122,8 +122,7 @@ protected:
     virtual IMS_BOOL IsUpdateAvailable();
     virtual IMS_BOOL IsRegReconfigAvailable();
     virtual IMS_BOOL IsReconfigHandleChanged();
-    virtual IMS_BOOL IsRequestCmdHeldByCondition(IN IMS_UINT32 nCommand,
-            IN IMS_UINT32 nReason = 0);
+    virtual IMS_BOOL IsRequestCmdHeldByCondition(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
     virtual IMS_BOOL IsAllHandleDetached();
     virtual IMS_BOOL IsConditionTimerSkippedDueToTimer();
     virtual IMS_BOOL IsRegUpdatedByNrLteRatChange();
@@ -254,15 +253,15 @@ protected:
     virtual void NetTracker_StatusChanged();
 
     // IEventListener
-    virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam,
-            IN IMS_UINT32 nLParam);
+    virtual void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
     // ITimerListener
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     // AosRegistrationControlListener
-    virtual void RegistrationControl_ControlRegistration(IN AosRegRequestType eType,
-            IN AosPcscfOrder eOrder);
+    virtual void RegistrationControl_ControlRegistration(
+            IN AosRegRequestType eType, IN AosPcscfOrder eOrder);
 
 protected:
     enum
@@ -402,4 +401,4 @@ protected:
     static const IMS_UINT32 APP_START_WAITING_TIME_MILLIS = 4000;
     static const IMS_UINT32 UNEXPECTED_ERROR_APP_START_WAITING_TIME_MILLIS = 10000;
 };
-#endif // AOS_APPLICATION_H_
+#endif  // AOS_APPLICATION_H_

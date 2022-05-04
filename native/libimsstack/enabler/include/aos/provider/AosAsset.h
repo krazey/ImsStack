@@ -24,37 +24,37 @@
 struct AosAsset
 {
 public:
-    AosAsset()
-        : bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE)
-        , bUseSecurityServerPortInInitialRegistration(IMS_FALSE)
-        , bRemoveOldSaOnEstablishingSa(IMS_FALSE)
-        , bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE)
-        , objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>())
-        , bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE)
-        , bSupportVerstatForRegistration(IMS_FALSE)
-        , bNoInitialRegistrationOnPcscfChange(IMS_FALSE)
-        , bEmergencyCallBasedOnPAssociatedUriOfNormalRegistration(IMS_FALSE)
-        , bSipOverIpsecEnabledInRoaming(IMS_TRUE)
-        , bRegistrationContactValidation(IMS_FALSE)
-        , nRegistrationOutOfServicePolicy(CarrierConfig::Ims::REGISTRATION_OOS_POLICY_DEFAULT)
-        , objVowifiSubscriptionErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>())
-        , objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>())
-        , objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
-                IMSVector<IMS_SINT32>())
-        , bIgnoreVopsForVolteEnable(IMS_FALSE)
-        , bSmsOverImsAvailableInNoVops(IMS_FALSE)
-        , bImsDeregisterOn3gNetworks(IMS_FALSE)
-        , bVideoOverWifiSupportedWithoutVoice(IMS_FALSE)
-        , bRequiredEmergencyRegistrationInRoaming(IMS_FALSE)
-        , objClearPermanentPdnFailure(IMSVector<IMS_SINT32>())
-        , bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE)
-        , bRequiredVolteBlockBySetting(IMS_FALSE)
-        , bRequiredVolteBlockByAirplaneMode(IMS_FALSE)
-        , bRequiredWfcBlockByAirplaneMode(IMS_FALSE)
-        , objSupportedRoamingRats(IMSVector<IMS_SINT32>())
-        , nEmergencyPreferredIpType(CarrierConfig::Ims::IP_VERSION_6)
-        , nSipMessageThresholdForTransportChange(200)
-        , bCdmalessFeatureTagRequired(IMS_FALSE)
+    AosAsset() :
+            bUseSecurityServerPortInRegContactOfInitialRegistration(IMS_FALSE),
+            bUseSecurityServerPortInInitialRegistration(IMS_FALSE),
+            bRemoveOldSaOnEstablishingSa(IMS_FALSE),
+            bUseGGsmaRcsTelephonyFeatureTagAsAvailableVoiceCallType(IMS_FALSE),
+            objPcscfDiscoveryMethodRoaming(IMSVector<IMS_SINT32>()),
+            bHoldRegistrationWhenIpcanChangedWithImsActiveCall(IMS_FALSE),
+            bSupportVerstatForRegistration(IMS_FALSE),
+            bNoInitialRegistrationOnPcscfChange(IMS_FALSE),
+            bEmergencyCallBasedOnPAssociatedUriOfNormalRegistration(IMS_FALSE),
+            bSipOverIpsecEnabledInRoaming(IMS_TRUE),
+            bRegistrationContactValidation(IMS_FALSE),
+            nRegistrationOutOfServicePolicy(CarrierConfig::Ims::REGISTRATION_OOS_POLICY_DEFAULT),
+            objVowifiSubscriptionErrorCodeWithInitialRegistration(IMSVector<IMS_SINT32>()),
+            objSubscriptionErrorCodeForStoppingByExpirationTime(IMSVector<IMS_SINT32>()),
+            objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
+                    IMSVector<IMS_SINT32>()),
+            bIgnoreVopsForVolteEnable(IMS_FALSE),
+            bSmsOverImsAvailableInNoVops(IMS_FALSE),
+            bImsDeregisterOn3gNetworks(IMS_FALSE),
+            bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
+            bRequiredEmergencyRegistrationInRoaming(IMS_FALSE),
+            objClearPermanentPdnFailure(IMSVector<IMS_SINT32>()),
+            bUseWfcCountryCodeAvailabilityCheck(IMS_FALSE),
+            bRequiredVolteBlockBySetting(IMS_FALSE),
+            bRequiredVolteBlockByAirplaneMode(IMS_FALSE),
+            bRequiredWfcBlockByAirplaneMode(IMS_FALSE),
+            objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
+            nEmergencyPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
+            nSipMessageThresholdForTransportChange(200),
+            bCdmalessFeatureTagRequired(IMS_FALSE)
     {
     }
 
@@ -92,4 +92,4 @@ public:
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_BOOL bCdmalessFeatureTagRequired;
 };
-#endif // AOS_ASSET_H_
+#endif  // AOS_ASSET_H_

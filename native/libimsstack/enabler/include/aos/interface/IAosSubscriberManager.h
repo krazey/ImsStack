@@ -41,4 +41,4 @@ protected:
     friend class AosAppContext;
 };
 
-#endif // INTERFACE_AOS_SUBSCRIBER_MANAGERH_
+#endif  // INTERFACE_AOS_SUBSCRIBER_MANAGERH_

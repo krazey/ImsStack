@@ -33,4 +33,4 @@ public:
     };
 };
 
-#endif // INTERFACE_AOS_VONR_H_
+#endif  // INTERFACE_AOS_VONR_H_

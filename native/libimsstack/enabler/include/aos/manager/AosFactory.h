@@ -44,4 +44,4 @@ private:
     static IMSMap<IMS_SINT32, ImsAosManager*> m_objManagers;
 };
 
-#endif //AOS_FACTORY_H_
+#endif  // AOS_FACTORY_H_

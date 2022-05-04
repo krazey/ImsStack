@@ -68,31 +68,31 @@ public:
     void SetNConfiguration(IN IAosNConfiguration* piNc, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetRegStateManager(IN IAosRegStateManager* piRsm, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetSubscriberManager(IN IAosSubscriberManager* piSubscriberManager,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void SetSubscriberManager(
+            IN IAosSubscriberManager* piSubscriberManager, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetTrm(IN IAosTrm* piTrm, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     void SetVonr(IN IAosVonr* piVonr, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    void SetRetryRepository(IN IAosRetryRepository* piRetryRepository,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void SetRetryRepository(
+            IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
 private:
     class ProviderParam
     {
     public:
-        inline ProviderParam()
-            : m_piCallTracker(IMS_NULL)
-            , m_piLocationStarter(IMS_NULL)
-            , m_piMsgHandler(IMS_NULL)
-            , m_piNConfiguration(IMS_NULL)
-            , m_piRegStateManager(IMS_NULL)
-            , m_piService(IMS_NULL)
-            , m_piSubscriberManager(IMS_NULL)
-            , m_piTrm(IMS_NULL)
-            , m_piVonr(IMS_NULL)
-            , m_piRetryRepository(IMS_NULL)
-        {}
-        inline ~ProviderParam()
-        {}
+        inline ProviderParam() :
+                m_piCallTracker(IMS_NULL),
+                m_piLocationStarter(IMS_NULL),
+                m_piMsgHandler(IMS_NULL),
+                m_piNConfiguration(IMS_NULL),
+                m_piRegStateManager(IMS_NULL),
+                m_piService(IMS_NULL),
+                m_piSubscriberManager(IMS_NULL),
+                m_piTrm(IMS_NULL),
+                m_piVonr(IMS_NULL),
+                m_piRetryRepository(IMS_NULL)
+        {
+        }
+        inline ~ProviderParam() {}
 
     public:
         IAosCallTracker* m_piCallTracker;
@@ -111,4 +111,4 @@ private:
     // <slot-id, ProviderParam>
     IMSMap<IMS_SINT32, ProviderParam*> m_objParam;
 };
-#endif // AOS_PROVIDER_H_
+#endif  // AOS_PROVIDER_H_

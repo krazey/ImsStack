@@ -15,25 +15,23 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define AOSTAG m_strTag.GetStr()
 
 PUBLIC
-AosServiceAvailableCellular::AosServiceAvailableCellular()
-    : AosServiceAvailable("AosServiceAvailableCellular")
-    , m_bVolteSetting(IMS_FALSE)
-    , m_bVopsState(IMS_FALSE)
-    , m_bNetworkServiceIn(IMS_FALSE)
+AosServiceAvailableCellular::AosServiceAvailableCellular() :
+        AosServiceAvailable("AosServiceAvailableCellular"),
+        m_bVolteSetting(IMS_FALSE),
+        m_bVopsState(IMS_FALSE),
+        m_bNetworkServiceIn(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosServiceAvailableCellular = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableCellular), this, 0);
 }
 
-PUBLIC VIRTUAL
-AosServiceAvailableCellular::~AosServiceAvailableCellular()
+PUBLIC VIRTUAL AosServiceAvailableCellular::~AosServiceAvailableCellular()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosServiceAvailableCellular = %" PFLS_u "/%" PFLS_x,
             sizeof(AosServiceAvailableCellular), this, 0);
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableCellular::HandleNetworkStateChanged()
+PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
 {
     IAosNetTracker* piNetTracker = m_piAppContext->GetNetTracker();
     if (piNetTracker != IMS_NULL)
@@ -60,8 +58,7 @@ void AosServiceAvailableCellular::HandleNetworkStateChanged()
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
+PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleRoamingChanged(nState);
 
@@ -81,8 +78,7 @@ void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL
-void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
+PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN IMS_UINT32 nState)
 {
     AosServiceAvailable::HandleAirplaneModeChanged(nState);
 
@@ -148,8 +144,7 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
+PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
 {
     if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
     {

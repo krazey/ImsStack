@@ -37,14 +37,13 @@ public:
     void RefreshServiceAvailablility();
     IMS_BOOL IsAvailable();
 
-    inline virtual void StartToCheckNetworkConnection() {};
-    virtual void HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState,
-            IN IMS_SINT32 nStateEx);
+    inline virtual void StartToCheckNetworkConnection(){};
+    virtual void HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
     virtual IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE);
 
 protected:
-    inline virtual void RegisterListener() {};
-    inline virtual void DeregisterListener() {};
+    inline virtual void RegisterListener(){};
+    inline virtual void DeregisterListener(){};
 
     virtual void HandleCallStateChanged(IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
     virtual void HandleNetworkStateChanged();
@@ -97,4 +96,4 @@ private:
     IMSList<IAosServiceAvailableListener*> m_objListeners;
 };
 
-#endif // AOS_SERVICE_AVAILABLE_H_
+#endif  // AOS_SERVICE_AVAILABLE_H_

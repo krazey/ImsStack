@@ -40,8 +40,8 @@ public:
      * @see {@link IIpcan#CATEGORY_MOBILE} and {@link IIpcan#CATEGORY_WLAN}
      * @see class {@link android.telephony.DataFailCause}
      */
-    virtual void ServicePhone_notifyIpcanHandoverFailure(IN IMS_SINT32 nTargetNetwork,
-            IN IMS_SINT32 nCauseCode) = 0;
+    virtual void ServicePhone_notifyIpcanHandoverFailure(
+            IN IMS_SINT32 nTargetNetwork, IN IMS_SINT32 nCauseCode) = 0;
 
     /**
      * Called to notify the change of ISIM state.
@@ -85,8 +85,8 @@ public:
      * @param nState is type of PhoneNumberState.
      * @see enum class {@link #PhoneNumberState}
      */
-    virtual void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL bIsRefresh,
-            IN PhoneNumberState eState) = 0;
+    virtual void ServicePhone_PhoneNumberStateChanged(
+            IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) = 0;
 
     /**
      * Called to notify the change of PLMN.
@@ -162,22 +162,23 @@ enum class PreciseCallState
     DISCONNECTING = 8
 };
 
-class AosServicePhoneListener
-    : public IAosServicePhoneListener
+class AosServicePhoneListener : public IAosServicePhoneListener
 {
 public:
-    inline void ServicePhone_AosStart() override {};
+    inline void ServicePhone_AosStart() override{};
     inline void ServicePhone_notifyIpcanHandoverFailure(
-            IN IMS_SINT32 /*nTargetNetwork*/, IN IMS_SINT32 /*nCauseCode*/) override {}
-    inline void ServicePhone_IsimStateChanged(IN IsimState /*eState*/) override {};
-    inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) override {};
-    inline void ServicePhone_MobileDataLimitChanged(IN IMS_BOOL /*bIsLimited*/) override {};
-    inline void ServicePhone_NetworkVideoCapabilityChanged(IN IMS_BOOL /*bIsOn*/) override {};
-    inline void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL /*bIsRefresh*/,
-            IN PhoneNumberState /*eState*/) override {};
-    inline void ServicePhone_PlmnChanged() override {};
-    inline void ServicePhone_PowerOff() override {};
-    inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override {};
+            IN IMS_SINT32 /*nTargetNetwork*/, IN IMS_SINT32 /*nCauseCode*/) override
+    {
+    }
+    inline void ServicePhone_IsimStateChanged(IN IsimState /*eState*/) override{};
+    inline void ServicePhone_LocationInfoChanged(IN LocationInfo /*eState*/) override{};
+    inline void ServicePhone_MobileDataLimitChanged(IN IMS_BOOL /*bIsLimited*/) override{};
+    inline void ServicePhone_NetworkVideoCapabilityChanged(IN IMS_BOOL /*bIsOn*/) override{};
+    inline void ServicePhone_PhoneNumberStateChanged(
+            IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/) override{};
+    inline void ServicePhone_PlmnChanged() override{};
+    inline void ServicePhone_PowerOff() override{};
+    inline void ServicePhone_PreciseCallStateChanged(IN PreciseCallState /*eState*/) override{};
 };
 
-#endif // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_
+#endif  // INTERFACE_AOS_SERVICE_PHONE_LISTENER_H_

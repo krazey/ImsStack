@@ -26,12 +26,12 @@
 
 class AosStaticProfile;
 
-class AosSubscriberManager
-    : public IAosSubscriberManager
-    , public ISubscriberConfigListener
-    , public IConfigUpdateListener
-    , public ITimerListener
-    , public AosServicePhoneListener
+class AosSubscriberManager :
+        public IAosSubscriberManager,
+        public ISubscriberConfigListener,
+        public IConfigUpdateListener,
+        public ITimerListener,
+        public AosServicePhoneListener
 {
 public:
     AosSubscriberManager(IN IMS_SINT32 nSlotId);
@@ -102,7 +102,7 @@ private:
 
     void RemoveImpu() const;
     IMS_BOOL UpdateImsi() const;
-    IMS_BOOL UpdateImsIdentity(IN IMS_UINT32 nIdentity) ;
+    IMS_BOOL UpdateImsIdentity(IN IMS_UINT32 nIdentity);
     IMS_UINT32 GetIdentity(IN Index eIndex) const;
 
     IMS_BOOL ProcessFallback(IN IMS_BOOL bToUsim);
@@ -143,8 +143,8 @@ private:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // AosServicePhoneListener
-    void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL bIsRefresh,
-            IN PhoneNumberState eState) override;
+    void ServicePhone_PhoneNumberStateChanged(
+            IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
     void ServicePhone_IsimStateChanged(IN IsimState eState) override;
 
     // Log
@@ -183,4 +183,4 @@ private:
     AString m_strTag;
 };
 
-#endif // AOS_SUBSCRIBER_MANAGERH_
+#endif  // AOS_SUBSCRIBER_MANAGERH_

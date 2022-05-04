@@ -35,16 +35,16 @@ class AosServiceAvailableWifi;
 class AosServicePhoneListener;
 class AosServiceSettingListener;
 
-class AosCondition
-    : public IEventListener
-    , public ITimerListener
-    , public IAosBlockListener
-    , public IAosCallTrackerListener
-    , public IAosNetTrackerListener
-    , public IAosServiceAvailableListener
-    , public IAosSubscriberListener
-    , public AosServicePhoneListener
-    , public AosServiceSettingListener
+class AosCondition :
+        public IEventListener,
+        public ITimerListener,
+        public IAosBlockListener,
+        public IAosCallTrackerListener,
+        public IAosNetTrackerListener,
+        public IAosServiceAvailableListener,
+        public IAosSubscriberListener,
+        public AosServicePhoneListener,
+        public AosServiceSettingListener
 {
 public:
     AosCondition(IN IAosAppContext* piAppContext);
@@ -69,11 +69,11 @@ public:
     // nCommand
     enum
     {
-       REQUEST_NONE = 0,
-       REQUEST_STOP,
-       REQUEST_DESTROY,
-       REQUEST_RECOVER,
-       REQUEST_PDN_DISCONNECT
+        REQUEST_NONE = 0,
+        REQUEST_STOP,
+        REQUEST_DESTROY,
+        REQUEST_RECOVER,
+        REQUEST_PDN_DISCONNECT
     };
     // eReason : AoSReason
 
@@ -105,8 +105,8 @@ protected:
     virtual void RemoveEventListener();
 
     // IEventListener Interface
-    void Event_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // IAosCallTrackerListener
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
@@ -130,15 +130,15 @@ protected:
     // AosServicePhoneListener
     void ServicePhone_AosStart() override;
     void ServicePhone_LocationInfoChanged(IN LocationInfo eState) override;
-    void ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL bIsRefresh,
-            IN PhoneNumberState eState) override;
+    void ServicePhone_PhoneNumberStateChanged(
+            IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState) override;
     void ServicePhone_PlmnChanged() override;
     void ServicePhone_PowerOff() override;
 
     // AosServiceSettingListener
     void ServiceSetting_AirplaneChanged(IN IMS_BOOL bIsOn) override;
-    void ServiceSetting_ServiceChanged(IN ServiceSetting eState,
-            IN IMS_UINT32 nServiceBits) override;
+    void ServiceSetting_ServiceChanged(
+            IN ServiceSetting eState, IN IMS_UINT32 nServiceBits) override;
     void ServiceSetting_TtyChanged(IN IMS_BOOL bIsOn) override;
 
     void AddListener(IN IMS_UINT32 nType);
@@ -154,15 +154,14 @@ private:
     void SetInitialBlockReason();
     void SetStartBlockReason();
 
-    void ProcessBlockReason(IN IMS_BOOL bIsBlockSet,
-            IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE);
+    void ProcessBlockReason(
+            IN IMS_BOOL bIsBlockSet, IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE);
     void ProcessAosStartEvent();
     void ProcessAirPlaneEvent(IN IMS_BOOL bIsOn);
     void ProcessPowerEvent();
     void ProcessRoamingEvent(IN IMS_UINT32 nPsState, IN IMS_UINT32 nCsState);
     void ProcessPlmnEvent();
-    void ProcessPhoneNumberAvailableEvent(IN IMS_BOOL bIsRefresh,
-            IN PhoneNumberState eState);
+    void ProcessPhoneNumberAvailableEvent(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
     void ProcessImsServiceEvent(IN ServiceSetting eState, IN IMS_UINT32 nServiceBits);
     void ProcessVolteCallSetting(IN IMS_UINT32 nState);
     void ProcessTtyEvent(IN IMS_BOOL bIsOn);
@@ -174,8 +173,8 @@ private:
     void ResetImsDisableReason();
 
     SERVICE_TYPE GetServiceType();
-    void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState,
-            IN IMS_SINT32 nStateEx = -1, IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
+    void SendConditionEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx = -1,
+            IN SERVICE_TYPE eServiceType = SERVICE_WHOLE);
 
     IMS_BOOL IsClearReason(IN IAosNConfiguration::ClearReason eReason) const;
 
@@ -212,4 +211,4 @@ private:
     friend class AosConditionTest;
 };
 
-#endif // AOS_CONDITION_H_
+#endif  // AOS_CONDITION_H_

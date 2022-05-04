@@ -39,20 +39,20 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 #define ID_FAKE "fake"
 
 PUBLIC
-AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId)
-    : m_nSlotId(nSlotId)
-    , m_objListeners(IMSList<IAosSubscriberManagerListener*>())
-    , m_objMonitorListeners(IMSList<IAosSubscriberManagerListener*>())
-    , m_bIsim(IMS_FALSE)
-    , m_bUsim(IMS_FALSE)
-    , m_bUsimFallback(IMS_FALSE)
-    , m_bIsRefreshStarted(IMS_FALSE)
-    , m_nIsimRecoveryCount(0)
-    , m_piTimerToIccLoadedWaiting(IMS_NULL)
-    , m_piTimerToIsimRecovery(IMS_NULL)
-    , m_piTimerToPhoneRestartRecovery(IMS_NULL)
-    , m_bIsProvisioned(IMS_FALSE)
-    , m_bIsProvisionedForFake(IMS_FALSE)
+AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_objListeners(IMSList<IAosSubscriberManagerListener*>()),
+        m_objMonitorListeners(IMSList<IAosSubscriberManagerListener*>()),
+        m_bIsim(IMS_FALSE),
+        m_bUsim(IMS_FALSE),
+        m_bUsimFallback(IMS_FALSE),
+        m_bIsRefreshStarted(IMS_FALSE),
+        m_nIsimRecoveryCount(0),
+        m_piTimerToIccLoadedWaiting(IMS_NULL),
+        m_piTimerToIsimRecovery(IMS_NULL),
+        m_piTimerToPhoneRestartRecovery(IMS_NULL),
+        m_bIsProvisioned(IMS_FALSE),
+        m_bIsProvisionedForFake(IMS_FALSE)
 {
     m_strTag.Sprintf("%d", m_nSlotId);
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosSubscriberManager = %" PFLS_u "/%" PFLS_x,
@@ -60,8 +60,7 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId)
     Init();
 }
 
-PUBLIC VIRTUAL
-AosSubscriberManager::~AosSubscriberManager()
+PUBLIC VIRTUAL AosSubscriberManager::~AosSubscriberManager()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosSubscriberManager = %" PFLS_u "/%" PFLS_x,
             m_nSlotId, sizeof(AosSubscriberManager), this);
@@ -73,7 +72,7 @@ PUBLIC
 IMS_BOOL AosSubscriberManager::IsReady(IN IMS_BOOL bIsFake /*= IMS_FALSE*/) const
 {
     IMS_BOOL bIsProvisioned = IsProvisioned(bIsFake);
-    A_IMS_TRACE_I(AOSTAG, "IsReady : (%s)",_TRACE_B_(bIsProvisioned), 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "IsReady : (%s)", _TRACE_B_(bIsProvisioned), 0, 0);
 
     return bIsProvisioned;
 }
@@ -175,8 +174,8 @@ const AStringArray& AosSubscriberManager::GetConfiguredImpus(
 PUBLIC
 const AStringArray& AosSubscriberManager::GetFakeImpus() const
 {
-    const ISubscriberConfig* piConfig = Configuration::GetInstance()->GetSubscriberConfig(
-            ID_FAKE, m_nSlotId);
+    const ISubscriberConfig* piConfig =
+            Configuration::GetInstance()->GetSubscriberConfig(ID_FAKE, m_nSlotId);
 
     if (piConfig == IMS_NULL)
     {
@@ -196,15 +195,14 @@ const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
         return Configuration::GetInstance()->GetSubscriberConfig(ID_FAKE, m_nSlotId);
     }
 
-    return Configuration::GetInstance()->GetSubscriberConfig(
-            AString::ConstNull(), m_nSlotId);
+    return Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
 }
 
 PRIVATE
 void AosSubscriberManager::Init()
 {
-    const ISubscriberConfig* piSubsConfig = Configuration::GetInstance()->GetSubscriberConfig(
-            AString::ConstNull(), m_nSlotId);
+    const ISubscriberConfig* piSubsConfig =
+            Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
     if (piSubsConfig != IMS_NULL)
     {
         piSubsConfig->SetListener(this);
@@ -222,8 +220,8 @@ void AosSubscriberManager::Init()
         RemoveImpu();
     }
 
-    A_IMS_TRACE_I(AOSTAG, "Init :: ISIM(%s) , USIM(%s)",
-            (IsIsim()) ? "ON" : "OFF", (IsUsim()) ? "ON" : "OFF", 0);
+    A_IMS_TRACE_I(AOSTAG, "Init :: ISIM(%s) , USIM(%s)", (IsIsim()) ? "ON" : "OFF",
+            (IsUsim()) ? "ON" : "OFF", 0);
 
     ConfigureAsDefault();
     ConfigureAsFake();
@@ -247,8 +245,8 @@ void AosSubscriberManager::CleanUp()
 
     RemoveConfigUpdateListener();
 
-    const ISubscriberConfig* piSubsConfig = Configuration::GetInstance()->GetSubscriberConfig(
-            AString::ConstNull(), m_nSlotId);
+    const ISubscriberConfig* piSubsConfig =
+            Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
     if (piSubsConfig != IMS_NULL)
     {
         piSubsConfig->RemoveListener(this);
@@ -273,8 +271,8 @@ void AosSubscriberManager::SetUsim(IN IMS_BOOL bOn)
 }
 
 PRIVATE
-void AosSubscriberManager::SetProvisioned(IN IMS_BOOL bProvision,
-        IN IMS_UINT32 nType /*= IAosSubscriber::NORMAL*/)
+void AosSubscriberManager::SetProvisioned(
+        IN IMS_BOOL bProvision, IN IMS_UINT32 nType /*= IAosSubscriber::NORMAL*/)
 {
     if (nType == IAosSubscriber::FAKE)
     {
@@ -352,8 +350,7 @@ IMS_BOOL AosSubscriberManager::IsTimerRunning(IN IMS_UINT32 nType) const
 PRIVATE
 IMS_BOOL AosSubscriberManager::IsSupportFallback(IN IMS_UINT32 nIdentity) const
 {
-    IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->
-            GetImsIdentityPriority();
+    IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->GetImsIdentityPriority();
 
     return (GetIdentity(Index::SECOND) == nIdentity);
 }
@@ -453,7 +450,6 @@ void AosSubscriberManager::ConfigureAsDefault()
                 m_objPuids.AddElement(objPublicUserIds.GetElementAt(i));
             }
         }
-
     }
 
     if (m_objPuids.GetCount() > 0)
@@ -491,8 +487,7 @@ void AosSubscriberManager::ConfigureAsFake()
         m_objPuidsForFake.AddElement(strImpu);
         SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
 
-        A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: IMPU(%s) is provisioned",
-                strImpu.GetStr(), 0,0);
+        A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: IMPU(%s) is provisioned", strImpu.GetStr(), 0, 0);
         NotifyMonitorState(IAosSubscriber::READY);
     }
 }
@@ -658,8 +653,7 @@ IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
 }
 
 PRIVATE
-IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus,
-        IN IMS_BOOL bDbWritable)
+IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN IMS_BOOL bDbWritable)
 {
     // according to IR.92, generate temp identities
     A_IMS_TRACE_I(AOSTAG, "GetTemporaryImpu", 0, 0, 0);
@@ -755,8 +749,7 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus,
         if (!piConfigurable->Update(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER))
         {
             A_IMS_TRACE_D(AOSTAG, "updating (%s) is failed",
-                    UpdateEventToString(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER),
-                    0, 0);
+                    UpdateEventToString(IConfigurable::CP_I_WRITE_PROVISIONING_SUBSCRIBER), 0, 0);
             return IMS_FALSE;
         }
     }
@@ -768,8 +761,8 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus,
 PRIVATE
 void AosSubscriberManager::RemoveImpu() const
 {
-    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->
-            GetSubscriberInfo(m_nSlotId);
+    ISubscriberInfo* piSubsInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId);
     if (piSubsInfo != null)
     {
         piSubsInfo->SetPreference("impu_list", "size", "0");
@@ -782,8 +775,8 @@ IMS_BOOL AosSubscriberManager::UpdateImsi() const
 {
     IMS_BOOL bIsUpdated = IMS_FALSE;
 
-    ISubscriberInfo* piSubsInfo = PhoneInfoService::GetPhoneInfoService()->
-            GetSubscriberInfo(m_nSlotId);
+    ISubscriberInfo* piSubsInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId);
     if (piSubsInfo == null)
     {
         return bIsUpdated;
@@ -817,7 +810,7 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
     }
 
     if (!piConfigurable->Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM,
-            (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM) ? "true" : "false"))
+                (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM) ? "true" : "false"))
     {
         A_IMS_TRACE_D(AOSTAG, "Updating (%s) is failed",
                 UpdateEventToString(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM), 0, 0);
@@ -825,7 +818,7 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
     }
 
     if (!piConfigurable->Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM,
-            (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM) ? "true" : "false"))
+                (nIdentity == CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM) ? "true" : "false"))
     {
         A_IMS_TRACE_D(AOSTAG, "Updating (%s) is failed",
                 UpdateEventToString(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_USIM), 0, 0);
@@ -835,8 +828,8 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
     SetIsim(piSubsConfig->IsIsimSupported());
     SetUsim(piSubsConfig->IsUsimSupported());
 
-    A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: ISIM(%s),USIM(%s) are updated",
-            _TRACE_B_(IsIsim()), _TRACE_B_(IsUsim()), 0);
+    A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: ISIM(%s),USIM(%s) are updated", _TRACE_B_(IsIsim()),
+            _TRACE_B_(IsUsim()), 0);
 
     return IMS_TRUE;
 }
@@ -844,8 +837,7 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
 PRIVATE
 IMS_UINT32 AosSubscriberManager::GetIdentity(IN Index eIndex) const
 {
-    IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->
-            GetImsIdentityPriority();
+    IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->GetImsIdentityPriority();
 
     if (objIdentityPriorities.IsEmpty() ||
             (objIdentityPriorities.GetSize() <= static_cast<IMS_UINT32>(eIndex)))
@@ -863,7 +855,6 @@ IMS_UINT32 AosSubscriberManager::GetIdentity(IN Index eIndex) const
 
         default:
             return CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF;
-
     }
 }
 
@@ -873,14 +864,13 @@ IMS_BOOL AosSubscriberManager::ProcessFallback(IN IMS_BOOL bToUsim)
     A_IMS_TRACE_I(AOSTAG, "ProcessFallback :: Dir(%s) , USIM fallback(%s)",
             (bToUsim) ? "ISIM to USIM" : "USIM to ISIM", _TRACE_B_(m_bUsimFallback), 0);
 
-
     if (!bToUsim && !m_bUsimFallback)
     {
         return IMS_FALSE;
     }
 
-    if (UpdateImsIdentity(bToUsim ? CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM :
-            CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM) == IMS_FALSE)
+    if (UpdateImsIdentity(bToUsim ? CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_USIM
+                                  : CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_ISIM) == IMS_FALSE)
     {
         return IMS_FALSE;
     }
@@ -941,8 +931,8 @@ IMS_BOOL AosSubscriberManager::ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi
 }
 
 PRIVATE
-void AosSubscriberManager::ProcessPhoneNumberAvailable(IN IMS_BOOL /*bIsRefresh*/,
-        IN PhoneNumberState /*eState*/)
+void AosSubscriberManager::ProcessPhoneNumberAvailable(
+        IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/)
 {
     if (IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY))
     {
@@ -984,8 +974,7 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(IN IMS_BOOL /*bIsRefresh*
             return;
         }
 
-        A_IMS_TRACE_D(AOSTAG, "temporary IMPU(%s) is provisioned",
-                strTemporaryImpu.GetStr(), 0, 0);
+        A_IMS_TRACE_D(AOSTAG, "temporary IMPU(%s) is provisioned", strTemporaryImpu.GetStr(), 0, 0);
 
         if (strImpu.EqualsIgnoreCase(strTemporaryImpu))
         {
@@ -1006,8 +995,7 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(IN IMS_BOOL /*bIsRefresh*
 PRIVATE
 void AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
 {
-    if (eState == IsimState::LOADED ||
-            eState == IsimState::REFRESH_STARTED ||
+    if (eState == IsimState::LOADED || eState == IsimState::REFRESH_STARTED ||
             eState == IsimState::REFRESH_COMPLETED)
     {
         ProcessFallback(IMS_FALSE);
@@ -1031,9 +1019,10 @@ void AosSubscriberManager::ProcessIsimRecovery()
 
         if (IsIsimRecoveryAllowed())
         {
-            StartTimer(TIMER_ISIM_RECOVERY, ISIM_RECOVERY_DEFAULT_INTERVAL * 1000 *
-                    AosUtil::GetInstance()->Pow(ISIM_RECOVERY_DEFAULT_INTERVAL,
-                    m_nIsimRecoveryCount));
+            StartTimer(TIMER_ISIM_RECOVERY,
+                    ISIM_RECOVERY_DEFAULT_INTERVAL * 1000 *
+                            AosUtil::GetInstance()->Pow(
+                                    ISIM_RECOVERY_DEFAULT_INTERVAL, m_nIsimRecoveryCount));
             m_nIsimRecoveryCount++;
             return;
         }
@@ -1067,8 +1056,8 @@ void AosSubscriberManager::ProcessIsimRecoveryTimerExpired()
     StopTimer(TIMER_ISIM_RECOVERY);
 
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-    IConfigurable* piConfigurable = (piSubsConfig != IMS_NULL) ?
-            piSubsConfig->GetConfigurable() : IMS_NULL;
+    IConfigurable* piConfigurable =
+            (piSubsConfig != IMS_NULL) ? piSubsConfig->GetConfigurable() : IMS_NULL;
 
     if (piConfigurable != IMS_NULL)
     {
@@ -1117,9 +1106,7 @@ void AosSubscriberManager::SetConfigUpdateListener()
 }
 
 PRIVATE
-void AosSubscriberManager::RemoveConfigUpdateListener()
-{
-}
+void AosSubscriberManager::RemoveConfigUpdateListener() {}
 
 PRIVATE
 void AosSubscriberManager::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
@@ -1177,7 +1164,7 @@ void AosSubscriberManager::StopTimer(IN IMS_UINT32 nType)
 
     if (*ppiTimer == IMS_NULL)
     {
-         return;
+        return;
     }
 
     AosUtil::GetInstance()->StopTimer(*ppiTimer, TimerToString(nType));
@@ -1236,8 +1223,8 @@ PRIVATE
 IMS_BOOL AosSubscriberManager::IsPrimaryImpuValid(IN const AStringArray& objImpus) const
 {
     AString strPhoneNumber;
-    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->
-            GetPhoneNumber(strPhoneNumber);
+    PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId)->GetPhoneNumber(
+            strPhoneNumber);
 
     if (strPhoneNumber.GetLength() == 0)
     {
@@ -1311,8 +1298,7 @@ void AosSubscriberManager::SubscriberConfig_InitCompleted()
     {
         A_IMS_TRACE_I(AOSTAG, "SubscriberConfig_InitCompleted :: ISIM is OK", 0, 0, 0);
 
-        IAosService* piService = AosProvider::GetInstance()->
-                GetService(m_nSlotId);
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
         if (piService != IMS_NULL)
         {
             piService->NotifyAosIsimState(AosIsimState::VALID);
@@ -1364,8 +1350,7 @@ void AosSubscriberManager::SubscriberConfig_RefreshCompleted()
 
         Restart();
 
-        IAosService* piService = AosProvider::GetInstance()->
-                GetService(m_nSlotId);
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
         if (IsProvisioned())
         {
             NotifyState(IAosSubscriber::REFRESH_COMPLETED);
@@ -1500,8 +1485,8 @@ void AosSubscriberManager::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PRIVATE
-void AosSubscriberManager::ServicePhone_PhoneNumberStateChanged(IN IMS_BOOL bIsRefresh,
-        IN PhoneNumberState eState)
+void AosSubscriberManager::ServicePhone_PhoneNumberStateChanged(
+        IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState)
 {
     A_IMS_TRACE_I(AOSTAG, "ServicePhone_PhoneNumberStateChanged :: bIsRefresh(%s), eState(%d)",
             _TRACE_B_(bIsRefresh), eState, 0);
@@ -1515,8 +1500,7 @@ void AosSubscriberManager::ServicePhone_IsimStateChanged(IN IsimState eState)
     ProcessIsimStateChange(eState);
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* AosSubscriberManager::UpdateEventToString(IN IMS_UINT32 nEvent)
+PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::UpdateEventToString(IN IMS_UINT32 nEvent)
 {
     switch (nEvent)
     {
@@ -1555,8 +1539,7 @@ const IMS_CHAR* AosSubscriberManager::UpdateEventToString(IN IMS_UINT32 nEvent)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* AosSubscriberManager::TimerToString(IN IMS_UINT32 nType)
+PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -1574,8 +1557,7 @@ const IMS_CHAR* AosSubscriberManager::TimerToString(IN IMS_UINT32 nType)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* AosSubscriberManager::TypeToString(IN AosRegistrationType eType)
+PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::TypeToString(IN AosRegistrationType eType)
 {
     switch (eType)
     {
@@ -1593,8 +1575,7 @@ const IMS_CHAR* AosSubscriberManager::TypeToString(IN AosRegistrationType eType)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* AosSubscriberManager::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::StateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {

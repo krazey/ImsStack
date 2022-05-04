@@ -18,20 +18,14 @@
 
 #include "handle/AosHandle.h"
 
-class AosHandleUce
-    : public AosHandle
+class AosHandleUce : public AosHandle
 {
-// Operation
+    // Operation
 public:
-    AosHandleUce
-    (
-        IN IAosAppContext* piAppContext,
-        IN const AString& strAppId,
-        IN const AString& strServiceId,
-        IN const IMS_SINT32 nServiceType
-    );
+    AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+            IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
     virtual ~AosHandleUce();
 
 private:
 };
-#endif // AOS_HANDLE_UCE_H_
+#endif  // AOS_HANDLE_UCE_H_

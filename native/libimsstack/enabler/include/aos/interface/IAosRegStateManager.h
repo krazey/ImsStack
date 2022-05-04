@@ -41,4 +41,4 @@ public:
 
     virtual IMS_BOOL IsLimitedMode() const = 0;
 };
-#endif // INTERFACE_AOS_REG_STATE_MANAGER_H_
+#endif  // INTERFACE_AOS_REG_STATE_MANAGER_H_

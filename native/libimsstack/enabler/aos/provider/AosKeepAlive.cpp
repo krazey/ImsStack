@@ -36,19 +36,19 @@ Remarks
 
 */
 PUBLIC
-AosKeepAlive::AosKeepAlive(IN IMS_SINT32 nSlotId_)
-    : piKAHelper(IMS_NULL)
-    , piListener(IMS_NULL)
-    , piKeepAliveTimer(IMS_NULL)
-    , piPongWATTimer(IMS_NULL)
-    , nKATime(0)
-    , bIsPongChecked(IMS_TRUE)
-    , nSlotId(nSlotId_)
+AosKeepAlive::AosKeepAlive(IN IMS_SINT32 nSlotId_) :
+        piKAHelper(IMS_NULL),
+        piListener(IMS_NULL),
+        piKeepAliveTimer(IMS_NULL),
+        piPongWATTimer(IMS_NULL),
+        nKATime(0),
+        bIsPongChecked(IMS_TRUE),
+        nSlotId(nSlotId_)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosKeepAlive = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosKeepAlive), this);
+            sizeof(AosKeepAlive), this);
 
-    piKAHelper = SipFactory::CreateKeepAliveHelper(nSlotId) ;
+    piKAHelper = SipFactory::CreateKeepAliveHelper(nSlotId);
 
     strTag.Sprintf("%d", nSlotId);
 }
@@ -58,11 +58,10 @@ AosKeepAlive::AosKeepAlive(IN IMS_SINT32 nSlotId_)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosKeepAlive::~AosKeepAlive()
+PUBLIC VIRTUAL AosKeepAlive::~AosKeepAlive()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosKeepAlive = %" PFLS_u "/%" PFLS_x, nSlotId,
-        sizeof(AosKeepAlive), this);
+            sizeof(AosKeepAlive), this);
 
     if (piKAHelper != IMS_NULL)
     {
@@ -76,7 +75,7 @@ Remarks
 
 */
 PUBLIC
-void AosKeepAlive::SetListener(IN IAosKeepAliveListener *piListener)
+void AosKeepAlive::SetListener(IN IAosKeepAliveListener* piListener)
 {
     this->piListener = piListener;
 }
@@ -128,9 +127,9 @@ Remarks
 
 */
 PUBLIC
-void AosKeepAlive::SetTransport(IN CONST IPAddress &objSourceIPA, IN IMS_SINT32 nSourcePort,
-            IN CONST IPAddress &objDestIPA, IN IMS_SINT32 nDestPort,
-            IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
+void AosKeepAlive::SetTransport(IN CONST IPAddress& objSourceIPA, IN IMS_SINT32 nSourcePort,
+        IN CONST IPAddress& objDestIPA, IN IMS_SINT32 nDestPort,
+        IN IMS_SINT32 nProtocol /* = AosKeepAlive::TRANSPORT_UDP */)
 {
     piKAHelper->SetTransportTupleS(objSourceIPA, nSourcePort, nProtocol);
     piKAHelper->SetTransportTupleD(objDestIPA, nDestPort);
@@ -144,7 +143,7 @@ Remarks
 PRIVATE
 void AosKeepAlive::SendPING()
 {
-    A_IMS_TRACE_I(AOSTAG, "SendPING",0, 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "SendPING", 0, 0, 0);
 
     static const ByteArray objCRLF("\r\n\r\n");
     piKAHelper->SendPacket(objCRLF);
@@ -222,7 +221,7 @@ void AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
         return;
     }
 
-    ITimer **ppiTimer = IMS_NULL;
+    ITimer** ppiTimer = IMS_NULL;
 
     switch (nType)
     {
@@ -236,7 +235,6 @@ void AosKeepAlive::StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
 
         default:
             return;
-
     }
 
     if (*ppiTimer != IMS_NULL)
@@ -255,7 +253,7 @@ Remarks
 PRIVATE
 void AosKeepAlive::StopTimer(IN IMS_UINT32 nType)
 {
-    ITimer **ppiTimer = IMS_NULL;
+    ITimer** ppiTimer = IMS_NULL;
 
     switch (nType)
     {
@@ -303,8 +301,7 @@ void AosKeepAlive::ClearTimer()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosKeepAlive::KeepAliveHelper_PongReceived()
+PRIVATE VIRTUAL void AosKeepAlive::KeepAliveHelper_PongReceived()
 {
     A_IMS_TRACE_I(AOSTAG, "KeepAliveHelper_PongReceived", 0, 0, 0);
 
@@ -316,8 +313,7 @@ void AosKeepAlive::KeepAliveHelper_PongReceived()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void AosKeepAlive::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void AosKeepAlive::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -342,8 +338,7 @@ void AosKeepAlive::Timer_TimerExpired(IN ITimer *piTimer)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* AosKeepAlive::TimerToString(IN IMS_UINT32 nType)
+PRIVATE GLOBAL const IMS_CHAR* AosKeepAlive::TimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {

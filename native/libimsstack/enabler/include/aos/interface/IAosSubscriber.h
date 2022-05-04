@@ -42,7 +42,7 @@ public:
 
         REFRESH_STARTED = 2,
         REFRESH_COMPLETED = 3,
-        REFRESH_FAILED = 4 // refresh is done but credentials are missing.
+        REFRESH_FAILED = 4  // refresh is done but credentials are missing.
     };
 
     // GetSubscriberConfig(nType)
@@ -59,4 +59,4 @@ protected:
     virtual void CleanUp() = 0;
 };
 
-#endif // INTERFACE_AOS_SUBSCRIBER_H_
+#endif  // INTERFACE_AOS_SUBSCRIBER_H_

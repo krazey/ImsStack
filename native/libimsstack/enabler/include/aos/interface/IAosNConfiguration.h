@@ -965,17 +965,17 @@ public:
 
     enum class ClearReason
     {
-        SIM_STATE     = 0x01,
-        AIRPLANE      = 0x02,
-        PLMN_CHANGED  = 0x04,
-        RAT_CHANGED   = 0x08,
-        WIFI_CHANGED  = 0x10,
+        SIM_STATE = 0x01,
+        AIRPLANE = 0x02,
+        PLMN_CHANGED = 0x04,
+        RAT_CHANGED = 0x08,
+        WIFI_CHANGED = 0x10,
         VOLTE_SETTING = 0x20,
-        WFC_SETTING   = 0x40
+        WFC_SETTING = 0x40
     };
 
 private:
     friend class AosBuildDirector;
     virtual void Init(IN IMS_SINT32 nSlotId = IMS_SLOT_0) = 0;
 };
-#endif // INTERFACE_AOS_NCONFIGURATION_H_
+#endif  // INTERFACE_AOS_NCONFIGURATION_H_

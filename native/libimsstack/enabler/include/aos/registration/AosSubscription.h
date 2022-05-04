@@ -30,18 +30,11 @@ class IAosTrm;
 /**
  * @brief This class provides a IMS subscription for reg event package.
  */
-class AosSubscription
-    : public IRegSubscriptionListener
-    , public ITimerListener
+class AosSubscription : public IRegSubscriptionListener, public ITimerListener
 {
 public:
-    AosSubscription
-    (
-        IN IAosAppContext* piContext,
-        IN IRegSubscription* piRegSubscription,
-        IN const AString& strAoR,
-        IN const SipAddress& objContactAddress
-    );
+    AosSubscription(IN IAosAppContext* piContext, IN IRegSubscription* piRegSubscription,
+            IN const AString& strAoR, IN const SipAddress& objContactAddress);
 
     virtual ~AosSubscription();
 
@@ -110,8 +103,8 @@ protected:
     virtual void ProcessNotifyState_InvalidBody();
 
     // IRegSubscriptionListener
-    virtual void RegSubscription_NotifyReceived
-            (IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody);
+    virtual void RegSubscription_NotifyReceived(
+            IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody);
     virtual void RegSubscription_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
     virtual void RegSubscription_Started();
     virtual void RegSubscription_StartFailed(IN IMS_SINT32 nReason);
@@ -208,4 +201,4 @@ private:
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;
 };
 
-#endif //AOS_SUBSCRIPTION_H_
+#endif  // AOS_SUBSCRIPTION_H_

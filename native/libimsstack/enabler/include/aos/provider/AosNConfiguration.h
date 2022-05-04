@@ -33,9 +33,7 @@ class ICarrierConfig;
  *
  *        This configuration is based on carrier and asset configuration
  */
-class AosNConfiguration
-    : public ICarrierConfigListener
-    , public IAosNConfiguration
+class AosNConfiguration : public ICarrierConfigListener, public IAosNConfiguration
 {
 public:
     AosNConfiguration();
@@ -173,8 +171,7 @@ private:
 
     AosSpecificRegistrationErrorBundle m_objSpecificRegErr;
 
-    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle
-            m_objSubErrCodeWithInitReg;
+    AosSubscriptionErrorCodeForRegEventWithInitialRegistrationBundle m_objSubErrCodeWithInitReg;
     AosSubscriptionTerminatedErrorCodeForRegEventBundle m_objSubTerminatedErrCode;
 
     IMS_UINT32 m_nEventForInitRegOnTerminatedState;
@@ -183,4 +180,4 @@ private:
 
     AString m_strLogTag;
 };
-#endif // AOS_NCONFIGURATION_H_
+#endif  // AOS_NCONFIGURATION_H_

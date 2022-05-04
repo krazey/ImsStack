@@ -28,4 +28,4 @@ public:
     virtual void AosConnection_ConnectionFailed() = 0;
 };
 
-#endif // INTERFACE_AoS_CONNECTION_LISTENER_H_
+#endif  // INTERFACE_AoS_CONNECTION_LISTENER_H_

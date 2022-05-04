@@ -24,8 +24,7 @@
 class AString;
 class AosMngr;
 
-class AosMngrAdaptor
-    : public ImsAosManager
+class AosMngrAdaptor : public ImsAosManager
 {
 public:
     AosMngrAdaptor(IN const AString& strAppName, IN IMS_SINT32 nSlotId);
@@ -37,12 +36,12 @@ private:
 
 public:
     virtual IImsAos* GetImsAos(IN const AString& strAppId, IN const AString& strServiceId);
-    virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId,
-            IN const AString& strServiceId);
+    virtual IMSList<IImsAos*> GetImsAosList(
+            IN const AString& strAppId, IN const AString& strServiceId);
     virtual IMSList<IImsAos*> GetImsAosList(IN const AString& strAppId);
 
 private:
     IMS_SINT32 m_nSlotId;
     AosMngr* m_pAdaptee;
 };
-#endif // AOS_MNGR_ADAPTOR_H_
+#endif  // AOS_MNGR_ADAPTOR_H_

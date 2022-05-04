@@ -76,9 +76,9 @@ public:
     //
     enum
     {
-        //UC to Aos - Registration request reason
+        // UC to Aos - Registration request reason
         REQUEST_NONE = 0,
         REQUEST_OFFLINE
     };
 };
-#endif // AOS_REASON_H_
+#endif  // AOS_REASON_H_

@@ -65,4 +65,4 @@ private:
     virtual void SetSubscriber(IN IAosSubscriber* piSubscriber) = 0;
     virtual void SetPcscf(IN IAosPcscf* piPcscf) = 0;
 };
-#endif // INTERFACE_AOS_APP_CONTEXT_H_
+#endif  // INTERFACE_AOS_APP_CONTEXT_H_

@@ -27,20 +27,17 @@ Remarks
 
 */
 PUBLIC
-AosFeatureTag::AosFeatureTag
-    (
-        IN const AString& strName,
-        IN const AString& strValue /* = AString::ConstNull() */,
-        IN IMS_UINT32 nType /* = 0 */,
-        IN IMS_UINT32 nOption /* = OPTION_HEADER_PARAMETER */
-    )
-    : m_strName(strName)
-    , m_strValue(strValue)
-    , m_nType(nType)
-    , m_nOption(nOption)
+AosFeatureTag::AosFeatureTag(
+        IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */,
+        IN IMS_UINT32 nType /* = 0 */, IN IMS_UINT32 nOption /* = OPTION_HEADER_PARAMETER */
+        ) :
+        m_strName(strName),
+        m_strValue(strValue),
+        m_nType(nType),
+        m_nOption(nOption)
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosFeatureTag = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosFeatureTag), this, 0);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosFeatureTag = %" PFLS_u "/%" PFLS_x, sizeof(AosFeatureTag),
+            this, 0);
 }
 
 /*
@@ -48,11 +45,10 @@ AosFeatureTag::AosFeatureTag
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosFeatureTag::~AosFeatureTag()
+PUBLIC VIRTUAL AosFeatureTag::~AosFeatureTag()
 {
-    IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosFeatureTag = %" PFLS_u "/%" PFLS_x,
-            sizeof(AosFeatureTag), this, 0);
+    IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosFeatureTag = %" PFLS_u "/%" PFLS_x, sizeof(AosFeatureTag),
+            this, 0);
 }
 
 /*
@@ -61,8 +57,8 @@ Remarks
 
 */
 PUBLIC
-void AosFeatureTag::SetFeatureTag(IN const AString& strName,
-        IN const AString& strValue /* = AString::ConstNull() */)
+void AosFeatureTag::SetFeatureTag(
+        IN const AString& strName, IN const AString& strValue /* = AString::ConstNull() */)
 {
     m_strName = strName;
     m_strValue = strValue;
@@ -78,8 +74,8 @@ IMS_BOOL AosFeatureTag::Equals(IN AosFeatureTag* pFeatureTag)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
-    if (m_strName.EqualsIgnoreCase(pFeatureTag->GetName())
-            && m_strValue.EqualsIgnoreCase(pFeatureTag->GetValue()))
+    if (m_strName.EqualsIgnoreCase(pFeatureTag->GetName()) &&
+            m_strValue.EqualsIgnoreCase(pFeatureTag->GetValue()))
     {
         bResult = IMS_TRUE;
     }
@@ -93,8 +89,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTag::Equals(IN const AString& strName,
-        IN const AString& strValue /*= AString::ConstNull() */)
+IMS_BOOL AosFeatureTag::Equals(
+        IN const AString& strName, IN const AString& strValue /*= AString::ConstNull() */)
 {
     IMS_BOOL bResult = IMS_FALSE;
 
@@ -156,8 +152,8 @@ Remarks
 
 */
 PUBLIC
-AosFeatureTagList::AosFeatureTagList()
-    : m_nFeatures(ImsAosFeature::NONE)
+AosFeatureTagList::AosFeatureTagList() :
+        m_nFeatures(ImsAosFeature::NONE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosFeatureTagList = %" PFLS_u "/%" PFLS_x,
             sizeof(AosFeatureTagList), this, 0);
@@ -170,8 +166,7 @@ AosFeatureTagList::AosFeatureTagList()
 Remarks
 
 */
-PUBLIC VIRTUAL
-AosFeatureTagList::~AosFeatureTagList()
+PUBLIC VIRTUAL AosFeatureTagList::~AosFeatureTagList()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : AosFeatureTagList = %" PFLS_u "/%" PFLS_x,
             sizeof(AosFeatureTagList), this, 0);
@@ -189,8 +184,7 @@ IMS_BOOL AosFeatureTagList::AddFeatureTag(IN const AString& strName,
         IN const AString& strValue /* = AString::ConstNull() */, IN IMS_UINT32 nType /*= 0*/,
         IN IMS_UINT32 nOption /* = AosFeatureTag::OPTION_HEADER_PARAMETER */)
 {
-    IMS_TRACE_I("AddFeatureTag :: name(%s) , value(%s)",
-            strName.GetStr(), strValue.GetStr(), 0);
+    IMS_TRACE_I("AddFeatureTag :: name(%s) , value(%s)", strName.GetStr(), strValue.GetStr(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
     {
@@ -215,11 +209,10 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTagList::RemoveFeatureTag(IN const AString& strName,
-        IN const AString& strValue /* = AString::ConstNull()*/)
+IMS_BOOL AosFeatureTagList::RemoveFeatureTag(
+        IN const AString& strName, IN const AString& strValue /* = AString::ConstNull()*/)
 {
-    IMS_TRACE_I("RemoveFeatureTag :: name(%s) , value(%s)",
-            strName.GetStr(), strValue.GetStr(), 0);
+    IMS_TRACE_I("RemoveFeatureTag :: name(%s) , value(%s)", strName.GetStr(), strValue.GetStr(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
     {
@@ -348,7 +341,6 @@ Remarks
 PUBLIC
 IMS_BOOL AosFeatureTagList::Equals(IN AosFeatureTagList& objTargetList)
 {
-
     if (GetFeatures() != objTargetList.GetFeatures())
     {
         IMS_TRACE_I("Equals :: Feature is different", 0, 0, 0);
@@ -407,8 +399,8 @@ void AosFeatureTagList::Copy(IN AosFeatureTagList& objSourceList)
     for (IMS_UINT32 i = 0; i < objSourceList.GetSize(); ++i)
     {
         AosFeatureTag* pFeatureTag = objSourceList.GetAt(i);
-        AddFeatureTag(pFeatureTag->GetName(), pFeatureTag->GetValue(),
-                pFeatureTag->GetType(), pFeatureTag->GetOption());
+        AddFeatureTag(pFeatureTag->GetName(), pFeatureTag->GetValue(), pFeatureTag->GetType(),
+                pFeatureTag->GetOption());
     }
 
     CopyFeatures(objSourceList.GetFeatures());
@@ -438,8 +430,7 @@ void AosFeatureTagList::CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatur
     for (IMS_UINT32 i = 0; i < objFeatureTag.GetSize(); ++i)
     {
         AosFeatureTag* pFeatureTag = new AosFeatureTag(
-                objFeatureTag.GetAt(i)->GetName(),
-                objFeatureTag.GetAt(i)->GetValue());
+                objFeatureTag.GetAt(i)->GetName(), objFeatureTag.GetAt(i)->GetValue());
         m_objFeatureTagList.Append(pFeatureTag);
     }
 }
@@ -485,8 +476,7 @@ Remarks
 PUBLIC
 IMS_BOOL AosFeatureTagList::HasFeatureTag(IN const AString& strName, IN const AString& strValue)
 {
-    IMS_TRACE_I("HasFeatureTag :: name(%s) , value(%s)",
-            strName.GetStr(), strValue.GetStr(), 0);
+    IMS_TRACE_I("HasFeatureTag :: name(%s) , value(%s)", strName.GetStr(), strValue.GetStr(), 0);
 
     for (IMS_UINT32 i = 0; i < m_objFeatureTagList.GetSize(); ++i)
     {

@@ -44,8 +44,7 @@ const IMS_CHAR FeatureTags::FILE_TRANSFER_VIA_SMS[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.ftsms\"";
 const IMS_CHAR FeatureTags::CALL_COMPOSER_ENRICHED_CALLING[] =
         "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callcomposer\"";
-const IMS_CHAR FeatureTags::CALL_COMPOSER_VIA_TELEPHONY[] =
-        "+g.gsma.callcomposer";
+const IMS_CHAR FeatureTags::CALL_COMPOSER_VIA_TELEPHONY[] = "+g.gsma.callcomposer";
 const IMS_CHAR FeatureTags::POST_CALL[] =
         "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.gsma.callunanswered\"";
 const IMS_CHAR FeatureTags::SHARED_MAP[] =
@@ -60,15 +59,11 @@ const IMS_CHAR FeatureTags::CHATBOT_COMMUNICATION_USING_SESSION[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot\"";
 const IMS_CHAR FeatureTags::CHATBOT_COMMUNICATION_USING_STANDALONE_MSG[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"";
-const IMS_CHAR FeatureTags::CHATBOT_VERSION_SUPPORTED[] =
-        "+g.gsma.rcs.botversion=\"#=1\"";
-const IMS_CHAR FeatureTags::CHATBOT_VERSION_V2_SUPPORTED[] =
-        "+g.gsma.rcs.botversion=\"#=1,#=2\"";
-const IMS_CHAR FeatureTags::CHATBOT_ROLE[] =
-        "+g.gsma.rcs.isbot";
+const IMS_CHAR FeatureTags::CHATBOT_VERSION_SUPPORTED[] = "+g.gsma.rcs.botversion=\"#=1\"";
+const IMS_CHAR FeatureTags::CHATBOT_VERSION_V2_SUPPORTED[] = "+g.gsma.rcs.botversion=\"#=1,#=2\"";
+const IMS_CHAR FeatureTags::CHATBOT_ROLE[] = "+g.gsma.rcs.isbot";
 const IMS_CHAR FeatureTags::MMTEL[] =
         "+g.3gpp.icsi-ref=\"urn%3Aurn-7%3A3gpp-service.ims.icsi.mmtel\"";
-const IMS_CHAR FeatureTags::VIDEO[] =
-        "video";
+const IMS_CHAR FeatureTags::VIDEO[] = "video";
 const IMS_CHAR FeatureTags::PRESENCE[] =
         "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"";

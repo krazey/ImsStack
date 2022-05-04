@@ -34,9 +34,9 @@
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 PUBLIC
-AosProvider::AosProvider()
-    : m_piLock(IMS_NULL)
-    , m_objParam(IMSMap<IMS_SINT32, ProviderParam*>())
+AosProvider::AosProvider() :
+        m_piLock(IMS_NULL),
+        m_objParam(IMSMap<IMS_SINT32, ProviderParam*>())
 
 {
     IMS_TRACE_D("AosProvider()", 0, 0, 0);
@@ -49,16 +49,14 @@ AosProvider::AosProvider()
     }
 }
 
-PUBLIC VIRTUAL
-AosProvider::~AosProvider()
+PUBLIC VIRTUAL AosProvider::~AosProvider()
 {
     IMS_TRACE_D("~AosProvider()", 0, 0, 0);
 
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-PUBLIC GLOBAL
-AosProvider* AosProvider::GetInstance()
+PUBLIC GLOBAL AosProvider* AosProvider::GetInstance()
 {
     static AosProvider* s_pProvider = IMS_NULL;
 
@@ -70,8 +68,7 @@ AosProvider* AosProvider::GetInstance()
     return s_pProvider;
 }
 
-PUBLIC GLOBAL
-AosLog* AosProvider::GetLog()
+PUBLIC GLOBAL AosLog* AosProvider::GetLog()
 {
     static AosLog* s_pLog = IMS_NULL;
 
@@ -132,8 +129,7 @@ IAosService* AosProvider::GetService(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 }
 
 PUBLIC
-IAosSubscriberManager* AosProvider::GetSubscriberManager(
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+IAosSubscriberManager* AosProvider::GetSubscriberManager(IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     return m_objParam.GetValue(nSlotId)->m_piSubscriberManager;
 }
@@ -157,8 +153,7 @@ IAosRetryRepository* AosProvider::GetRetryRepository(IN IMS_SINT32 nSlotId /* = 
 }
 
 PUBLIC
-void AosProvider::SetCallTracker(IN IAosCallTracker* piCt,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetCallTracker(IN IAosCallTracker* piCt, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
@@ -170,8 +165,8 @@ void AosProvider::SetCallTracker(IN IAosCallTracker* piCt,
 }
 
 PUBLIC
-void AosProvider::SetLocationStarter(IN IAosLocationStarter* piLs,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetLocationStarter(
+        IN IAosLocationStarter* piLs, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
@@ -199,8 +194,8 @@ void AosProvider::SetMsgHandler(IN IAosMsgHandler* piMh, IN IMS_SINT32 nSlotId /
 }
 
 PUBLIC
-void AosProvider::SetNConfiguration(IN IAosNConfiguration* piNc,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetNConfiguration(
+        IN IAosNConfiguration* piNc, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
@@ -212,8 +207,8 @@ void AosProvider::SetNConfiguration(IN IAosNConfiguration* piNc,
 }
 
 PUBLIC
-void AosProvider::SetRegStateManager(IN IAosRegStateManager* piRsm,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetRegStateManager(
+        IN IAosRegStateManager* piRsm, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
@@ -242,8 +237,7 @@ void AosProvider::SetService(IN IAosService* piService, IN IMS_SINT32 nSlotId /*
 
 PUBLIC
 void AosProvider::SetSubscriberManager(
-        IN IAosSubscriberManager* piSubscriberManager,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+        IN IAosSubscriberManager* piSubscriberManager, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 
@@ -279,8 +273,8 @@ void AosProvider::SetVonr(IN IAosVonr* piVonr, IN IMS_SINT32 nSlotId /* = IMS_SL
 }
 
 PUBLIC
-void AosProvider::SetRetryRepository(IN IAosRetryRepository* piRetryRepository,
-        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
+void AosProvider::SetRetryRepository(
+        IN IAosRetryRepository* piRetryRepository, IN IMS_SINT32 nSlotId /* = IMS_SLOT_0 */)
 {
     LockGuard objLock(m_piLock);
 

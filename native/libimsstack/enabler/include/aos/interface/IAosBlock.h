@@ -112,7 +112,6 @@ typedef enum
  */
 class IAosBlock
 {
-
 public:
     /**
      * @brief
@@ -135,7 +134,7 @@ public:
      */
     virtual void SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
 
-        /**
+    /**
      * @brief
      *
      * @param
@@ -161,16 +160,16 @@ public:
      *
      * @param
      */
-    virtual void GetBlockReasons(OUT IMSList<IMS_UINT32> &objReasons,
-            IN SERVICE_TYPE eType = SERVICE_WHOLE) = 0;
+    virtual void GetBlockReasons(
+            OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_WHOLE) = 0;
 
     /**
      * @brief
      *
      * @param
      */
-    virtual IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason,
-            IN IMS_BOOL bOnlyEnabled = IMS_FALSE, IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
+    virtual IMS_BOOL IsReasonBlocked(IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled = IMS_FALSE,
+            IN SERVICE_TYPE eType = SERVICE_CELLULAR) = 0;
 
     /**
      * @brief
@@ -186,4 +185,4 @@ public:
      */
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 };
-#endif // INTERFACE_AOS_BLOCK_H_
+#endif  // INTERFACE_AOS_BLOCK_H_

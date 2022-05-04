@@ -18,8 +18,8 @@ public:
     // nReqType is set from AoSHandle
     enum
     {
-        DETACH = 0,   // This service will be removed in Registration
-        ATTACH        // This service will be added in Registration
+        DETACH = 0,  // This service will be removed in Registration
+        ATTACH       // This service will be added in Registration
     };
     virtual IMS_SINT32 GetRequestType() = 0;
     virtual void SetRequestType(IN IMS_SINT32 nReqType) = 0;
@@ -78,4 +78,4 @@ protected:
     virtual void Init() = 0;
     virtual void CleanUp() = 0;
 };
-#endif // _INTERFACE_AOS_HANDLE_H_
+#endif  // _INTERFACE_AOS_HANDLE_H_
