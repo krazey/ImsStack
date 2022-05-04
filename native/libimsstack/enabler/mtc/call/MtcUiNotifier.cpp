@@ -15,17 +15,11 @@ MtcUiNotifier::MtcUiNotifier() :
 }
 
 PUBLIC
-MtcUiNotifier::~MtcUiNotifier()
-{
-}
-
+MtcUiNotifier::~MtcUiNotifier() {}
 
 PUBLIC
-void MtcUiNotifier::SendIncomingCallReceived(
-        IN CallKey nKey,
-        IN CallInfo& objCallInfo,
-        IN MediaInfo& objMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
+        IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN ParticipantInfo& objParticipantInfo)
 {
     if (!m_pServiceThread)
@@ -258,7 +252,7 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType, IN IMS_UINTP nImsKey,
     }
 
     IUUCSessionNotifyInfoParam* pParam = new IUUCSessionNotifyInfoParam();
-    //pParam->strUIKey = m_strUiKey;
+    // pParam->strUIKey = m_strUiKey;
     pParam->nIMSKey = nImsKey;
     pParam->eType = eType;
     pParam->aStrValue = strValue;
@@ -299,8 +293,7 @@ void MtcUiNotifier::SendExpandFailed(IN const FailReason& objReason)
 
 PUBLIC
 void MtcUiNotifier::SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMS_SINTP nReplaceKey /*= 0 */)
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nReplaceKey /*= 0 */)
 {
     IMS_TRACE_I("SendExpandedBy", 0, 0, 0);
 
@@ -318,8 +311,7 @@ void MtcUiNotifier::SendExpandedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaI
 
 PUBLIC
 void MtcUiNotifier::SendMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMSList<ConfUser*> lstConfUser)
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMSList<ConfUser*> lstConfUser)
 {
     IMS_TRACE_I("SendMerged", 0, 0, 0);
 
@@ -402,22 +394,22 @@ void MtcUiNotifier::SendNotifyConfInfo(IN AString strDisplayText, IN AString str
         IN IMS_SINT32 nMaxUserCount, IN IMS_UINT32 nUserCount, IN AString strHostEntity)
 {
     IMS_TRACE_D("SendNotifyConfInfo : [%s][%s]", strDisplayText.GetStr(), strSubject.GetStr(), 0);
-    IMS_TRACE_D("SendNotifyConfInfo : [%d][%d][%s]", nMaxUserCount, nUserCount,
-            strHostEntity.GetStr());
+    IMS_TRACE_D(
+            "SendNotifyConfInfo : [%d][%d][%s]", nMaxUserCount, nUserCount, strHostEntity.GetStr());
 
     if (!IsAvailableToSend())
     {
         return;
     }
 
-    m_pCallThread->OnConferenceInfoChanged(strDisplayText, strSubject, nUserCount, nMaxUserCount,
-            strHostEntity);
+    m_pCallThread->OnConferenceInfoChanged(
+            strDisplayText, strSubject, nUserCount, nMaxUserCount, strHostEntity);
 }
 
 PUBLIC
 void MtcUiNotifier::SendReplacedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN IMS_SINTP nKey, IN IMS_UINTP nType)
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IMS_SINTP nKey,
+        IN IMS_UINTP nType)
 {
     IMS_TRACE_I("SendReplacedBy : Key[%" PFLS_u "]", nKey, 0, 0);
 

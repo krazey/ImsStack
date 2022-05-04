@@ -5,7 +5,6 @@
 
 class AStringBuffer;
 
-
 class EmergencyNumberList
 {
 public:
@@ -13,26 +12,26 @@ public:
     virtual ~EmergencyNumberList();
 
 private:
-    EmergencyNumberList(IN const EmergencyNumberList &objRHS);
-    EmergencyNumberList& operator=(IN const EmergencyNumberList &objRHS);
+    EmergencyNumberList(IN const EmergencyNumberList& objRHS);
+    EmergencyNumberList& operator=(IN const EmergencyNumberList& objRHS);
+
 public:
-    AString GetEmergencyServiceURN(IN const AString &strNumber);
-    //will be deleted_S
-    IMS_SINT32 GetEmergencyServiceCategory(IN const AString &strNumber);
-    //will be deleted_E
+    AString GetEmergencyServiceURN(IN const AString& strNumber);
+    // will be deleted_S
+    IMS_SINT32 GetEmergencyServiceCategory(IN const AString& strNumber);
+    // will be deleted_E
 
 private:
-    IMS_SINT32 GetEmergencyServiceCategory(IN const AString &strNumber,
-            OUT IMS_SINT32 &nSource);
-    IMS_SINT32 GetEmergencyServiceCategoryEx(IN const AString &strNumber,
-            IN IMS_SINT32 nSource = ENL_NETWORK);
+    IMS_SINT32 GetEmergencyServiceCategory(IN const AString& strNumber, OUT IMS_SINT32& nSource);
+    IMS_SINT32 GetEmergencyServiceCategoryEx(
+            IN const AString& strNumber, IN IMS_SINT32 nSource = ENL_NETWORK);
     IMS_SINT32 GetPrimaryENLSource() const;
-    AString HandleENLForNetwork(IN const AString &strNumber, IN IMS_SINT32 nESCV);
-    AString HandleENLForUICC(IN const AString &strNumber, IN IMS_SINT32 nESCV);
-    AString HandleNoENL(IN const AString &strNumber);
-    IMS_BOOL GetENL(OUT AStringBuffer &objENL, IN IMS_SINT32 nSource = ENL_NETWORK);
-    IMS_SINT32 GetESCV(IN const AString &strNumber, IN const AString &strENL);
-    AString GetOperatorConfigURN(IN const AString &strNumber);
+    AString HandleENLForNetwork(IN const AString& strNumber, IN IMS_SINT32 nESCV);
+    AString HandleENLForUICC(IN const AString& strNumber, IN IMS_SINT32 nESCV);
+    AString HandleNoENL(IN const AString& strNumber);
+    IMS_BOOL GetENL(OUT AStringBuffer& objENL, IN IMS_SINT32 nSource = ENL_NETWORK);
+    IMS_SINT32 GetESCV(IN const AString& strNumber, IN const AString& strENL);
+    AString GetOperatorConfigURN(IN const AString& strNumber);
     IMS_RESULT ReadOperatorConfig();
     AString TranslateAsEmergencyServiceURN(IN IMS_SINT32 nESCV);
     const IMS_CHAR* ConvertSourceToString(IN IMS_SINT32 nSource);
@@ -61,11 +60,10 @@ public:
     enum
     {
         URN_MAPPING_TYPE_NONE = 0,
-        URN_MAPPING_TYPE_3GPP_STANDARD, // 24.229 : the UE shall map any one of multiple ESCV.
-        URN_MAPPING_TYPE_GENERIC_ONLY, // use generic sos urn regardless of ESCV
-        URN_MAPPING_TYPE_GENERIC_MULTIPLE_ESCV // use generic sos urn  when  ESCV is multiple.
+        URN_MAPPING_TYPE_3GPP_STANDARD,  // 24.229 : the UE shall map any one of multiple ESCV.
+        URN_MAPPING_TYPE_GENERIC_ONLY,   // use generic sos urn regardless of ESCV
+        URN_MAPPING_TYPE_GENERIC_MULTIPLE_ESCV  // use generic sos urn  when  ESCV is multiple.
     };
-
 
 private:
     IMS_SINT32 m_nSlotID;

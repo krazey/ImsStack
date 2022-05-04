@@ -11,9 +11,7 @@ class ICoreService;
 class ISubscription;
 class IInterfaceHolderListener;
 
-class SubscriptionInterfaceHolder final :
-        public ISubscriptionListener,
-        public ITimerListener
+class SubscriptionInterfaceHolder final : public ISubscriptionListener, public ITimerListener
 {
 public:
     explicit SubscriptionInterfaceHolder(IN IInterfaceHolderListener& objListener);
@@ -24,7 +22,7 @@ public:
 public:
     // ISubscriptionListener interface implementation
     inline void SubscriptionForkedNotify(IN ISubscription*, IN ISubscription*) override {}
-    inline void SubscriptionNotify(IN ISubscription* , IN IMessage*) override {}
+    inline void SubscriptionNotify(IN ISubscription*, IN IMessage*) override {}
     inline void SubscriptionStarted(IN ISubscription*) override {}
     inline void SubscriptionStartFailed(IN ISubscription*) override {}
     void SubscriptionTerminated(IN ISubscription* piSubscription) override;
@@ -36,8 +34,8 @@ public:
     ISubscription* GetISubscription(IN ICoreService* piCoreService, IN const AString& strFrom,
             IN const AString& strTo, IN const AString& strEvent);
 
-    void ReleaseISubscription(IN ISubscription* piSubscription,
-            IN IMS_BOOL bTerminated = IMS_FALSE);
+    void ReleaseISubscription(
+            IN ISubscription* piSubscription, IN IMS_BOOL bTerminated = IMS_FALSE);
 
 private:
     IMS_BOOL IsReadyToDestroy(IN ISubscription* piSubscription);

@@ -11,7 +11,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey) :
         m_objContext(objContext),
@@ -26,8 +25,7 @@ EctController::~EctController()
     IMS_TRACE_D("~EctController", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void EctController::Transfer(IN const AString& strNumber)
+PUBLIC VIRTUAL void EctController::Transfer(IN const AString& strNumber)
 {
     UNUSED_PARAM(strNumber);
     IMS_TRACE_D("Transfer - blind [%s]", strNumber.GetStr(), 0, 0);
@@ -35,8 +33,7 @@ void EctController::Transfer(IN const AString& strNumber)
     NotifyResult(IMS_FAILURE, FAIL_REASON_ECT_COMPLETED);
 }
 
-PUBLIC VIRTUAL
-void EctController::Transfer()
+PUBLIC VIRTUAL void EctController::Transfer()
 {
     IMS_TRACE_D("Transfer - consultative", 0, 0, 0);
     if (IsValid() == IMS_FALSE)
@@ -61,8 +58,7 @@ IMtcCall* EctController::GetTransferor() const
     return m_objContext.GetCallManager().GetCallByCallKey(m_nTransferorKey);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL EctController::IsValid() const
+PROTECTED VIRTUAL IMS_BOOL EctController::IsValid() const
 {
     // TODO: base shouldn't do anything.
     // TODO: need to consider the 3rd incoming call case?
@@ -75,8 +71,8 @@ IMS_BOOL EctController::IsValid() const
 }
 
 PROTECTED
-void EctController::NotifyResult(IN IMS_RESULT nResult,
-        IN IMS_SINT32 nReason/* = FAIL_REASON_NONE*/) const
+void EctController::NotifyResult(
+        IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = FAIL_REASON_NONE*/) const
 {
     // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
     MtcUiNotifier& objNotifier = GetTransferor()->GetCallContext().GetUiNotifier();

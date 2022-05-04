@@ -12,4 +12,4 @@ public:
     virtual MtcVonr::VonrInitType GetTotalInitiateType() = 0;
 };
 
-#endif // INTERFACE_MTC_VONR_LISTENER_H_
+#endif  // INTERFACE_MTC_VONR_LISTENER_H_

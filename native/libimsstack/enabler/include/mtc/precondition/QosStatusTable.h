@@ -29,12 +29,10 @@ public:
     {
     }
 
-    inline ~QosStatusRecord()
-    {
-    }
+    inline ~QosStatusRecord() {}
 
 public:
-    inline QosStatusRecord& operator=(IN const QosStatusRecord &objRHS)
+    inline QosStatusRecord& operator=(IN const QosStatusRecord& objRHS)
     {
         if (this != &objRHS)
         {
@@ -98,8 +96,8 @@ public:
     ~QosStatusTable();
 
 private:
-    QosStatusTable(IN CONST QosStatusTable &objRHS);
-    QosStatusTable& operator=(IN CONST QosStatusTable &objRHS);
+    QosStatusTable(IN CONST QosStatusTable& objRHS);
+    QosStatusTable& operator=(IN CONST QosStatusTable& objRHS);
 
 public:
     void UpdateStatusTableWithRemoteSdp(IN IMedia* piMedia);
@@ -108,10 +106,10 @@ public:
     void EnableRemoteCurrentStatus(IN IMS_SINT32 eSdpMediaType);
     IMS_BOOL IsCurrentStatusEnabled(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType);
 
-    IMS_SINT32 GetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
-            IN IMS_SINT32 eStatusType);
-    IMS_SINT32 GetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
-            IN IMS_SINT32 eDirTag);
+    IMS_SINT32 GetDirectionTag(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType, IN IMS_SINT32 eStatusType);
+    IMS_SINT32 GetStrengthTag(
+            IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
     void SetDirectionTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,
             IN IMS_SINT32 eStatusType, IN IMS_SINT32 eDirTag);
     void SetStrengthTag(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eStatusType,
@@ -125,10 +123,8 @@ private:
     void AddStatusRecord(IN IMS_SINT32 eSdpMediaType);
     void InitializeDesChecked(IN IMS_SINT32 eSdpMediaType);
 
-    void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor,
-            IN IMS_SINT32 eSdpMediaType);
-    void UpdateDesiredStatus(IN IMediaDescriptor* piMediaDescriptor,
-            IN IMS_SINT32 eSdpMediaType);
+    void UpdateCurrentStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
+    void UpdateDesiredStatus(IN IMediaDescriptor* piMediaDescriptor, IN IMS_SINT32 eSdpMediaType);
 
     IMSList<QosStatusRecord*>& GetStatusRecords(IN IMS_SINT32 eSdpMediaType);
     IMSList<QosStatusRecord*> GetStatusRecords(IN IMS_SINT32 eSdpMediaType, IN IMS_SINT32 eAttrType,

@@ -22,7 +22,7 @@ class MtcService :
         public ICoreServiceListener,
         public IImsAosListener,
         public IImsAosMonitor
-        //public ISipRoutingRejectListener
+// public ISipRoutingRejectListener
 {
 public:
     MtcService(IN IMtcContext& objContext, IN ServiceType eType);
@@ -46,21 +46,23 @@ public:
     void SetJniService(IN JniMtcService* pJniService) override;
     void SetTerminalBasedCallWaiting(IN IMS_BOOL bProvisioned, IN IMS_BOOL bEnabled) override;
     IMS_BOOL IsTerminalBasedCallWaitingEnabled() const override
-    { return m_bTerminalBasedCallWaitingEnabled; }
+    {
+        return m_bTerminalBasedCallWaitingEnabled;
+    }
 
     // ICoreServiceListener implementation
-    void CoreService_PageMessageReceived(IN ICoreService* piService,
-            IN IPageMessage* piMessage) override;
-    void CoreService_ReferenceReceived(IN ICoreService* piService,
-            IN IReference* piReference) override;
-    void CoreService_ServiceClosed(IN ICoreService* piService,
-            IN IReasonInfo* piReasonInfo) override;
-    void CoreService_SessionInvitationReceived(IN ICoreService* piService,
-            IN ISession* piSession) override;
-    void CoreService_UnsolicitedNotifyReceived(IN ICoreService* piService,
-            IN IMessage* piNotify) override;
-    void CoreService_CapabilityQueryReceived(IN ICoreService* piService,
-            IN ICapabilities* piCapabilities) override;
+    void CoreService_PageMessageReceived(
+            IN ICoreService* piService, IN IPageMessage* piMessage) override;
+    void CoreService_ReferenceReceived(
+            IN ICoreService* piService, IN IReference* piReference) override;
+    void CoreService_ServiceClosed(
+            IN ICoreService* piService, IN IReasonInfo* piReasonInfo) override;
+    void CoreService_SessionInvitationReceived(
+            IN ICoreService* piService, IN ISession* piSession) override;
+    void CoreService_UnsolicitedNotifyReceived(
+            IN ICoreService* piService, IN IMessage* piNotify) override;
+    void CoreService_CapabilityQueryReceived(
+            IN ICoreService* piService, IN ICapabilities* piCapabilities) override;
 
     void ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan) override;
     void ImsAos_Connecting() override;

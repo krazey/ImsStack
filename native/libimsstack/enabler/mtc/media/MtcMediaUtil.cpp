@@ -5,26 +5,22 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL
-IMS_SINT32 MtcMediaUtil::GetMediaDirectionFromSdp()
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetMediaDirectionFromSdp()
 {
     return DIRECTION_INVALID;
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 MtcMediaUtil::GetMediaTypesFromSdp()
+PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromSdp()
 {
     return MEDIATYPE_NONE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MtcMediaUtil::IsMediaPortValid()
+PUBLIC GLOBAL IMS_BOOL MtcMediaUtil::IsMediaPortValid()
 {
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-CallType MtcMediaUtil::GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes)
+PUBLIC GLOBAL CallType MtcMediaUtil::GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes)
 {
     CallType eCallType = CallType::UNKNOWN;
 
@@ -49,8 +45,8 @@ CallType MtcMediaUtil::GetCallTypeFromMediaTypes(IN IMS_UINT32 eMediaTypes)
     return eCallType;
 }
 
-PUBLIC GLOBAL
-CallType MtcMediaUtil::GetCallTypeFromMediaContents(IN MEDIA_CONTENT_TYPE eMediaContents)
+PUBLIC GLOBAL CallType MtcMediaUtil::GetCallTypeFromMediaContents(
+        IN MEDIA_CONTENT_TYPE eMediaContents)
 {
     CallType eCallType = CallType::UNKNOWN;
 
@@ -76,8 +72,7 @@ CallType MtcMediaUtil::GetCallTypeFromMediaContents(IN MEDIA_CONTENT_TYPE eMedia
     return eCallType;
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 MtcMediaUtil::GetMediaTypesFromCallType(IN CallType eCallType)
+PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromCallType(IN CallType eCallType)
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
 
@@ -103,8 +98,8 @@ IMS_UINT32 MtcMediaUtil::GetMediaTypesFromCallType(IN CallType eCallType)
     return eMediaTypes;
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 MtcMediaUtil::GetMediaTypesFromMediaContents(IN MEDIA_CONTENT_TYPE eMediaContents)
+PUBLIC GLOBAL IMS_UINT32 MtcMediaUtil::GetMediaTypesFromMediaContents(
+        IN MEDIA_CONTENT_TYPE eMediaContents)
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
 
@@ -126,13 +121,13 @@ IMS_UINT32 MtcMediaUtil::GetMediaTypesFromMediaContents(IN MEDIA_CONTENT_TYPE eM
     return eMediaTypes;
 }
 
-PUBLIC GLOBAL
-MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromMediaTypes(IN IMS_UINT32 eMediaTypes)
+PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromMediaTypes(
+        IN IMS_UINT32 eMediaTypes)
 {
     MEDIA_CONTENT_TYPE eContents = MEDIA_TYPE_INVALID;
 
-    if ((eMediaTypes & MEDIATYPE_AUDIO) && (eMediaTypes & MEDIATYPE_VIDEO)
-            && (eMediaTypes & MEDIATYPE_TEXT))
+    if ((eMediaTypes & MEDIATYPE_AUDIO) && (eMediaTypes & MEDIATYPE_VIDEO) &&
+            (eMediaTypes & MEDIATYPE_TEXT))
     {
         eContents = MEDIA_TYPE_AUDIOVIDEOTEXT;
     }
@@ -164,8 +159,7 @@ MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromMediaTypes(IN IMS_UINT32 eM
     return eContents;
 }
 
-PUBLIC GLOBAL
-MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromCallType(IN CallType eCallType)
+PUBLIC GLOBAL MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromCallType(IN CallType eCallType)
 {
     MEDIA_CONTENT_TYPE eMediaContentTypes = MEDIA_TYPE_INVALID;
 
@@ -191,8 +185,7 @@ MEDIA_CONTENT_TYPE MtcMediaUtil::GetMediaContentsFromCallType(IN CallType eCallT
     return eMediaContentTypes;
 }
 
-PUBLIC GLOBAL
-MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceType eServiceType)
+PUBLIC GLOBAL MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceType eServiceType)
 {
     if (eServiceType == ServiceType::EMERGENCY)
     {
@@ -202,9 +195,8 @@ MEDIA_SERVICE_TYPE MtcMediaUtil::GetMediaServiceType(IN ServiceType eServiceType
     return MEDIA_SERVICE_DEFAULT;
 }
 
-PUBLIC GLOBAL
-MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcService,
-        IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(
+        IN IMtcService* piMtcService, IN IMS_SINT32 nSlotId)
 {
     if (piMtcService->IsWlanIpCanType())
     {
@@ -217,23 +209,23 @@ MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcServic
 
     switch (eRadioType)
     {
-        case INetworkWatcher::RADIOTECH_TYPE_LTE :
+        case INetworkWatcher::RADIOTECH_TYPE_LTE:
             eMediaNetworkType = MEDIA_NETWORK_LTE;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_HSPAP :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP:
             eMediaNetworkType = MEDIA_NETWORK_HSPA_PLUS;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_UMTS :
-        case INetworkWatcher::RADIOTECH_TYPE_HSPA :
-        case INetworkWatcher::RADIOTECH_TYPE_HSDPA :
-        case INetworkWatcher::RADIOTECH_TYPE_HSUPA :
-        case INetworkWatcher::RADIOTECH_TYPE_CDMA :
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS:
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA:
+        case INetworkWatcher::RADIOTECH_TYPE_HSDPA:
+        case INetworkWatcher::RADIOTECH_TYPE_HSUPA:
+        case INetworkWatcher::RADIOTECH_TYPE_CDMA:
             eMediaNetworkType = MEDIA_NETWORK_HSPA;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_EHRPD :
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
             eMediaNetworkType = MEDIA_NETWORK_EHRPD;
             break;
-        default :
+        default:
             eMediaNetworkType = MEDIA_NETWORK_LTE;
             break;
     }
@@ -241,8 +233,7 @@ MEDIA_NETWORK_TYPE MtcMediaUtil::GetMediaNetworkType(IN IMtcService* piMtcServic
     return eMediaNetworkType;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 MtcMediaUtil::GetFailReasonFromReportType(IN IMS_UINT32 eReportType)
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetFailReasonFromReportType(IN IMS_UINT32 eReportType)
 {
     IMS_SINT32 eFailReason = FAIL_REASON_MEDIA_UNKNOWN;
     UNUSED_PARAM(eReportType);
@@ -268,12 +259,11 @@ IMS_SINT32 MtcMediaUtil::GetFailReasonFromReportType(IN IMS_UINT32 eReportType)
     return eFailReason;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality)
+PUBLIC GLOBAL IMS_SINT32 MtcMediaUtil::GetGttModeFromTextQuality(IN IMS_UINT32 eTextQuality)
 {
     IMS_SINT32 eGTTMode = GTT_MODE_INVALID;
 
-    switch (eTextQuality) // This Text Quality is matched with the values defined in TextDef.h.
+    switch (eTextQuality)  // This Text Quality is matched with the values defined in TextDef.h.
     {
         case TEXT_QUALITY_NONE:
             eGTTMode = GTT_MODE_INVALID;

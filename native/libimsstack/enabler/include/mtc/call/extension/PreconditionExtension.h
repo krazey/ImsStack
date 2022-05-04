@@ -9,8 +9,7 @@ class IMessage;
 /**
  * This class represents the precondition extension.
  */
-class PreconditionExtension final :
-        public MtcExtension
+class PreconditionExtension final : public MtcExtension
 {
 public:
     explicit PreconditionExtension();

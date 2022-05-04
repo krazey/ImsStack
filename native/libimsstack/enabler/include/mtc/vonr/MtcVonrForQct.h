@@ -15,8 +15,7 @@
 
 #include "vonr/MtcVonr.h"
 
-class UCVoNRForQct
-    : public MtcVonr
+class UCVoNRForQct : public MtcVonr
 {
 public:
     explicit UCVoNRForQct(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener);
@@ -24,8 +23,8 @@ public:
 
 public:
     // for MtcVonr child classes
-    void CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
-            IN IMS_BOOL bEmergency) override;
+    void CheckBarring(
+            IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency) override;
 
 protected:
     virtual void OnSessionStopped(IN IMS_UINTP nParam);
@@ -38,4 +37,4 @@ protected:
 private:
     IMS_UINT32 GetConvertedCallState(IN IMS_UINT32 nState, IN IMS_UINT32 nDirection);
 };
-#endif // UC_VONR_FOR_QCT_H_
+#endif  // UC_VONR_FOR_QCT_H_

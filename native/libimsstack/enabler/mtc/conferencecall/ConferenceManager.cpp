@@ -11,7 +11,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 ConferenceManager::ConferenceManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
@@ -44,8 +43,8 @@ void ConferenceManager::OnClosed(IN ConferenceController* pController)
 }
 
 PUBLIC
-IConferenceController& ConferenceManager::CreateController(IN CallKey nCallKey,
-        IN ConferenceType eType)
+IConferenceController& ConferenceManager::CreateController(
+        IN CallKey nCallKey, IN ConferenceType eType)
 {
     ConferenceController* pController = IMS_NULL;
 
@@ -62,8 +61,7 @@ IConferenceController& ConferenceManager::CreateController(IN CallKey nCallKey,
                     new GroupCallController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
         case ConferenceType::MERGE_CALL:
-            pController =
-                    new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
+            pController = new MergeController(nCallKey, m_objContext, m_objCallConnectionIdManager);
             break;
         case ConferenceType::EXPAND_CALL:
             pController =

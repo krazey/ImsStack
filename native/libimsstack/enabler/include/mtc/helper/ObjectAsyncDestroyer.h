@@ -6,8 +6,7 @@
 #include "ImsMessage.h"
 
 template <typename MtcObject>
-class ObjectAsyncDestroyer final :
-        public IMSActivity
+class ObjectAsyncDestroyer final : public IMSActivity
 {
 public:
     inline explicit ObjectAsyncDestroyer() {}
@@ -17,7 +16,7 @@ public:
 
     // IMSActivity implementation
     inline IIMSActivityControl* GetController() override { return IMS_NULL; }
-    inline IMS_BOOL DispatchMessage(IN IMSMSG &objMsg) override;
+    inline IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;
 
     inline void Destroy(IN MtcObject* pObject);
 
@@ -25,9 +24,8 @@ private:
     static const IMS_UINT32 MSG_DESTROY_OBJECT = 0;
 };
 
-PUBLIC VIRTUAL
-template <typename MtcObject> inline
-IMS_BOOL ObjectAsyncDestroyer<MtcObject>::DispatchMessage(IN IMSMSG& objMsg)
+PUBLIC VIRTUAL template <typename MtcObject>
+inline IMS_BOOL ObjectAsyncDestroyer<MtcObject>::DispatchMessage(IN IMSMSG& objMsg)
 {
     switch (objMsg.GetName())
     {
@@ -40,8 +38,8 @@ IMS_BOOL ObjectAsyncDestroyer<MtcObject>::DispatchMessage(IN IMSMSG& objMsg)
 }
 
 PUBLIC
-template <typename MtcObject> inline
-void ObjectAsyncDestroyer<MtcObject>::Destroy(IN MtcObject* pObject)
+template <typename MtcObject>
+inline void ObjectAsyncDestroyer<MtcObject>::Destroy(IN MtcObject* pObject)
 {
     PostMessage(MSG_DESTROY_OBJECT, 0, reinterpret_cast<IMS_UINTP>(pObject));
 }

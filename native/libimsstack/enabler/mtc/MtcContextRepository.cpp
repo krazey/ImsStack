@@ -12,12 +12,9 @@ MtcContextRepository::MtcContextRepository() :
 }
 
 PUBLIC
-MtcContextRepository::~MtcContextRepository()
-{
-}
+MtcContextRepository::~MtcContextRepository() {}
 
-PUBLIC GLOBAL
-MtcContextRepository* MtcContextRepository::GetInstance()
+PUBLIC GLOBAL MtcContextRepository* MtcContextRepository::GetInstance()
 {
     if (s_pThis == IMS_NULL)
     {
@@ -26,8 +23,8 @@ MtcContextRepository* MtcContextRepository::GetInstance()
     return s_pThis;
 }
 
-PUBLIC GLOBAL
-IMtcContext* MtcContextRepository::GetContext(IN IMS_SINT32 nSlotId/* = INVALID_SLOT_ID*/)
+PUBLIC GLOBAL IMtcContext* MtcContextRepository::GetContext(
+        IN IMS_SINT32 nSlotId /* = INVALID_SLOT_ID*/)
 {
     if (nSlotId == INVALID_SLOT_ID)
     {

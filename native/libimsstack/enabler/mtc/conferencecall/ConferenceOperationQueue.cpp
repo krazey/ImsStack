@@ -16,16 +16,14 @@
 
 #include "conferencecall/ConferenceOperationQueue.h"
 
-
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PRIVATE
-ConferenceOperationQueue::ConferenceOperationQueue()
-    : m_piListener(IMS_NULL)
-    , m_pIDelayedOperationTimer(IMS_NULL)
-    , m_nNextDelay(0)
-    , m_bNeedToStartOperationSet(IMS_FALSE)
+ConferenceOperationQueue::ConferenceOperationQueue() :
+        m_piListener(IMS_NULL),
+        m_pIDelayedOperationTimer(IMS_NULL),
+        m_nNextDelay(0),
+        m_bNeedToStartOperationSet(IMS_FALSE)
 {
     IMS_TRACE_D("+ConferenceOperationQueue", 0, 0, 0);
 }
@@ -38,8 +36,7 @@ ConferenceOperationQueue::~ConferenceOperationQueue()
     StopTimer();
 }
 
-PUBLIC VIRTUAL
-void ConferenceOperationQueue::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void ConferenceOperationQueue::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if ((m_pIDelayedOperationTimer != IMS_NULL) && (m_pIDelayedOperationTimer == piTimer))
     {
@@ -67,15 +64,15 @@ void ConferenceOperationQueue::AddDelay(IN IMS_UINT32 nDelayMillisec)
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
-        IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPut(
+        IN IMS_UINT32 nType, IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     Put(new ConferenceOperation(nType, GetAndResetDelay()), bStandAloneOperation);
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
-        IN IMSList<ConfUser*> objUsers, IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMSList<ConfUser*> objUsers,
+        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUsers(objUsers);
@@ -84,7 +81,7 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pConfUser,
-        IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConfUser(pConfUser);
@@ -92,9 +89,8 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN ConfUser* pCon
 }
 
 PUBLIC
-void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
-        IN CallStartOperationParams* pParams,
-        IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN CallStartOperationParams* pParams,
+        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetParam(pParams);
@@ -103,9 +99,9 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType,
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nConnectionId,
-        IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
-    //IMS_TRACE_D("CreateNPut : nConnectionId [%d]", nType, 0, 0);
+    // IMS_TRACE_D("CreateNPut : nConnectionId [%d]", nType, 0, 0);
 
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetConnectionId(nConnectionId);
@@ -114,9 +110,9 @@ void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_UINT32 nCo
 
 PUBLIC
 void ConferenceOperationQueue::CreateNPut(IN IMS_UINT32 nType, IN IMS_SINT32 nTerminateReason,
-        IN IMS_BOOL bStandAloneOperation/* = IMS_FALSE*/)
+        IN IMS_BOOL bStandAloneOperation /* = IMS_FALSE*/)
 {
-    //IMS_TRACE_D("CreateNPut : nTerminateReason [%d]", nType, 0, 0);
+    // IMS_TRACE_D("CreateNPut : nTerminateReason [%d]", nType, 0, 0);
 
     ConferenceOperation* pConferenceOperation = new ConferenceOperation(nType, GetAndResetDelay());
     pConferenceOperation->SetTerminateReason(nTerminateReason);
@@ -154,15 +150,15 @@ ConferenceOperationQueue::ConferenceOperation* ConferenceOperationQueue::GetNext
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("GetNextOperation : size=[%d] type=[%s]",
-            m_objOperationQueue.GetSize(), ConvertOperationToString(pFirstOperation->GetType()), 0);
+    IMS_TRACE_D("GetNextOperation : size=[%d] type=[%s]", m_objOperationQueue.GetSize(),
+            ConvertOperationToString(pFirstOperation->GetType()), 0);
 
     return pFirstOperation;
 }
 
 PUBLIC
-IMS_BOOL ConferenceOperationQueue::CompleteCurrentOperation(IN IMS_UINT32 nOperationType,
-        IN ConfUser* pConfUser/* = IMS_NULL*/)
+IMS_BOOL ConferenceOperationQueue::CompleteCurrentOperation(
+        IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser /* = IMS_NULL*/)
 {
     // this is called to check a type of operation done.
     IMS_TRACE_D("CompleteCurrentOperation : [%s]", ConvertOperationToString(nOperationType), 0, 0);
@@ -215,8 +211,8 @@ IMS_BOOL ConferenceOperationQueue::HasPendingOperation() const
 {
     for (IMS_UINT32 i = 0; i < m_objOperationQueue.GetSize(); i++)
     {
-        if (m_objOperationQueue.GetAt(i) != IMS_NULL
-                && m_objOperationQueue.GetAt(i)->GetDelayMilliSec() > DELAY_IMMEDIATELY)
+        if (m_objOperationQueue.GetAt(i) != IMS_NULL &&
+                m_objOperationQueue.GetAt(i)->GetDelayMilliSec() > DELAY_IMMEDIATELY)
         {
             IMS_TRACE_D("HasPendingOperation : HAS!", 0, 0, 0);
             return IMS_TRUE;
@@ -249,35 +245,35 @@ void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
                 }
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_SUBSCRIBE:
-                //nothing to check.
+                // nothing to check.
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_UNSUBSCRIBE:
-                //nothing to check.
+                // nothing to check.
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_REFER_INVITE:
                 // TODO: to check all users in the list?
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER)
-                        != pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
+                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
+                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
                 {
                     continue;
                 }
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_REFER_BYE:
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER)
-                        != pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
+                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
+                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
                 {
                     continue;
                 }
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_CHECK_CONNECTED:
-                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER)
-                        != pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
+                if (pOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER) !=
+                        pTempOperation->GetUsers().GetAt(ACTIVE_OPERATION_NUMBER))
                 {
                     continue;
                 }
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_NOTIFY_RESULT_TO_UI:
-                //nothing to check.
+                // nothing to check.
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_TERMINATE_1TO1_SESSION:
                 if (pOperation->GetConnectionId() != pTempOperation->GetConnectionId())
@@ -292,10 +288,10 @@ void ConferenceOperationQueue::Remove(IN ConferenceOperation* pOperation)
                 }
                 __IMS_FALLTHROUGH__
             case CONTROL_OPERATION_DESTROY_CONTROLLER:
-                //nothing to check.
+                // nothing to check.
                 __IMS_FALLTHROUGH__
             default:
-                //invalid operation type
+                // invalid operation type
                 delete pTempOperation;
                 // stop timer?????
                 break;
@@ -316,8 +312,8 @@ void ConferenceOperationQueue::Clear()
 }
 
 PRIVATE
-void ConferenceOperationQueue::Put(IN ConferenceOperation* pOperation,
-        IN IMS_BOOL bStandAloneOperation)
+void ConferenceOperationQueue::Put(
+        IN ConferenceOperation* pOperation, IN IMS_BOOL bStandAloneOperation)
 {
     IMS_TRACE_D("Put : [%s]", ConvertOperationToString(pOperation->GetType()), 0, 0);
 
@@ -341,8 +337,7 @@ PRIVATE
 void ConferenceOperationQueue::RemoveActiveOperation()
 {
     IMS_UINT32 nSize = m_objOperationQueue.GetSize();
-    IMS_TRACE_D("RemoveActiveOperation : size=[%d] type=[%s]",
-            nSize,
+    IMS_TRACE_D("RemoveActiveOperation : size=[%d] type=[%s]", nSize,
             ConvertOperationToString(m_objOperationQueue.GetAt(ACTIVE_OPERATION_NUMBER)->GetType()),
             0);
 
@@ -353,18 +348,16 @@ void ConferenceOperationQueue::RemoveActiveOperation()
 
     delete m_objOperationQueue.GetAt(ACTIVE_OPERATION_NUMBER);
     m_objOperationQueue.RemoveAt(ACTIVE_OPERATION_NUMBER);
-
 }
 
 PRIVATE
-IMS_BOOL ConferenceOperationQueue::IsSameOperation(IN IMS_UINT32 nOperationType,
-        IN ConfUser* pConfUser) const
+IMS_BOOL ConferenceOperationQueue::IsSameOperation(
+        IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser) const
 {
     ConferenceOperation* pCurrentOperation = m_objOperationQueue.GetAt(ACTIVE_OPERATION_NUMBER);
     if (pCurrentOperation->GetType() == nOperationType)
     {
-        if (pConfUser == IMS_NULL
-                || pCurrentOperation->GetUsers().GetAt(0) == pConfUser)
+        if (pConfUser == IMS_NULL || pCurrentOperation->GetUsers().GetAt(0) == pConfUser)
         {
             return IMS_TRUE;
         }

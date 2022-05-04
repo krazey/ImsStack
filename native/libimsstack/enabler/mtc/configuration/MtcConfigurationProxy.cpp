@@ -5,7 +5,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 MtcConfigurationProxy::MtcConfigurationProxy() :
         m_objManager(MtcConfigurationManager()),
@@ -16,7 +15,7 @@ MtcConfigurationProxy::MtcConfigurationProxy() :
 PUBLIC
 MtcConfigurationProxy::~MtcConfigurationProxy()
 {
-    if (m_pCache) // just to skip unnecessary operation in normal case.
+    if (m_pCache)  // just to skip unnecessary operation in normal case.
     {
         delete m_pCache;
     }
@@ -38,7 +37,7 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
         return m_pCache->GetBooleanCache(eFeature);
     }
 
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::SUPPORT_SIP_SESSION_ID_HEADER:
             return m_objManager.IsSupportSipSessionIdHeader();
@@ -92,7 +91,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_objManager.IsEmergencyQosPreconditionSupported();
         case Feature::EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR:
             return m_objManager.IsEmergencyCallOverEmergencyPdnOnCellular();
-        case Feature::EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL:
+        case Feature::
+                EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL:
             return m_objManager
                     .IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall();
         case Feature::CHECK_CONFERENCE_EVENT_PACKAGE_VERSION:
@@ -163,7 +163,7 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
 PUBLIC
 IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN const AString& strAdditionalInfo) const
 {
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::PIDF_SHORT_CODE:
             return m_objManager.IsPidfShortCode(strAdditionalInfo);
@@ -178,7 +178,7 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN const AString& strAdd
 PUBLIC
 IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const
 {
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::SRVCC_TYPE:
             return m_objManager.IsSrvccType(nAdditionalInfo);
@@ -189,13 +189,13 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
         case Feature::CALL_MAINTAINING_ON_REGISTRATION_SUPENDED:
             return m_objManager.IsCallMaintainingOnRegistrationSupended(nAdditionalInfo);
         case Feature::REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED:
-            return m_objManager
-                    .IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(nAdditionalInfo);
+            return m_objManager.IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(
+                    nAdditionalInfo);
         case Feature::VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE:
             return m_objManager.IsVilteToVolteRetryFailureResponseCode(nAdditionalInfo);
         case Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL:
-            return m_objManager
-                    .IsRegistrationDisconnectReasonToTerminateOngoingCall(nAdditionalInfo);
+            return m_objManager.IsRegistrationDisconnectReasonToTerminateOngoingCall(
+                    nAdditionalInfo);
         default:
             IMS_TRACE_E(0, "invalid feature [%d]", eFeature, 0, 0);
             return IMS_FALSE;
@@ -210,7 +210,7 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
         return m_pCache->GetIntegerCache(eFeature);
     }
 
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::REQUEST_URI_TYPE:
             return m_objManager.GetRequestUriType();
@@ -307,10 +307,10 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
 }
 
 PUBLIC
-IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature, IN IMS_BOOL bWParam,
-        IN IMS_BOOL bLParam) const
+IMS_SINT32 MtcConfigurationProxy::GetInt(
+        IN Feature eFeature, IN IMS_BOOL bWParam, IN IMS_BOOL bLParam) const
 {
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::INFORMATION_LEVEL_OF_GEOLOCATION_PIDF:
             return m_objManager.GetInformationLevelOfGeolocationPidf(bWParam, bLParam);
@@ -321,21 +321,21 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature, IN IMS_BOOL bWPara
 }
 
 PUBLIC
-const AString MtcConfigurationProxy::GetStr(IN Feature eFeature,
-        IN IMS_SINT32 nAdditionalInfo) const
+const AString MtcConfigurationProxy::GetStr(
+        IN Feature eFeature, IN IMS_SINT32 nAdditionalInfo) const
 {
     if (m_pCache && m_pCache->HasStringCache(eFeature))
     {
         return m_pCache->GetStringCache(eFeature);
     }
 
-    switch(eFeature)
+    switch (eFeature)
     {
         case Feature::CONFERENCE_FACTORY_URI:
             return m_objManager.GetConferenceFactoryUri();
         case Feature::CALL_TERMINATE_REASON_HEADER:
-            return m_objManager
-                    .GetCallTerminateReasonHeader(static_cast<TerminateType>(nAdditionalInfo));
+            return m_objManager.GetCallTerminateReasonHeader(
+                    static_cast<TerminateType>(nAdditionalInfo));
         case Feature::CALL_REJECT_REASON_PHRASE:
             return m_objManager.GetCallRejectReasonPhrase(static_cast<RejectType>(nAdditionalInfo));
         default:

@@ -19,11 +19,10 @@ class MtcUiNotifier;
 class UpdatingInfo;
 struct CallInfo;
 
-class IMtcCallContext :
-        public IMtcContext
+class IMtcCallContext : public IMtcContext
 {
 public:
-    virtual ~IMtcCallContext() {};
+    virtual ~IMtcCallContext(){};
 
     virtual IMS_UINTP GetCallKey() const = 0;
     virtual IMS_BOOL IsEct() const = 0;
@@ -47,7 +46,6 @@ public:
     virtual IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) = 0;
 
     virtual void DeleteUpdatingInfo() = 0;
-
 };
 
 #endif

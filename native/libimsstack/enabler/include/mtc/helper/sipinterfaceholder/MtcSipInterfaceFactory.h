@@ -7,8 +7,7 @@ class SessionInterfaceHolder;
 class ReferenceInterfaceHolder;
 class SubscriptionInterfaceHolder;
 
-class MtcSipInterfaceFactory final :
-        public IInterfaceHolderListener
+class MtcSipInterfaceFactory final : public IInterfaceHolderListener
 {
 public:
     explicit MtcSipInterfaceFactory();

@@ -20,10 +20,23 @@ public:
     MessageFormatter& operator=(IN CONST MessageFormatter&) = delete;
 
 private:
-    enum class FormType {
-            NONE, START, PROVISIONAL_RESPONSE, PRACK, PRACK_RESPONSE, EARLY_UPDATE,
-            EARLY_UPDATE_RESPONSE, ACCEPT, REJECT, ACK, UPDATE, ACCEPT_UPDATE, CANCEL_UPDATE,
-            TERMINATE, };
+    enum class FormType
+    {
+        NONE,
+        START,
+        PROVISIONAL_RESPONSE,
+        PRACK,
+        PRACK_RESPONSE,
+        EARLY_UPDATE,
+        EARLY_UPDATE_RESPONSE,
+        ACCEPT,
+        REJECT,
+        ACK,
+        UPDATE,
+        ACCEPT_UPDATE,
+        CANCEL_UPDATE,
+        TERMINATE,
+    };
 
 public:
     virtual IMS_RESULT FormStartMessage();

@@ -10,18 +10,26 @@ public:
     FailReason(IN IMS_SINT32 _nReason, IN IMS_SINT32 _nExtra, IN AString _strExtra) :
             nReason(_nReason),
             nExtra(_nExtra),
-            strExtra(_strExtra) {}
+            strExtra(_strExtra)
+    {
+    }
 
     FailReason(IN IMS_SINT32 _nReason, IN IMS_SINT32 _nExtra) :
-            FailReason(_nReason, _nExtra, AString::ConstNull()) {}
+            FailReason(_nReason, _nExtra, AString::ConstNull())
+    {
+    }
 
     FailReason(IN IMS_SINT32 _nReason) :
-            FailReason(_nReason, -1) {}
+            FailReason(_nReason, -1)
+    {
+    }
 
     FailReason(IN const FailReason& objRhs) :
             nReason(objRhs.nReason),
             nExtra(objRhs.nExtra),
-            strExtra(objRhs.strExtra) {}
+            strExtra(objRhs.strExtra)
+    {
+    }
 
     FailReason& operator=(const FailReason& objRhs)
     {
@@ -156,28 +164,28 @@ enum
 // FAIL_REASON_SESSION_SETUPFAILED
 enum
 {
-    CODE_SETUPFAILED_NONE                = 0,
-    CODE_SETUPFAILED_OPENFAIL            = 1,
-    CODE_SETUPFAILED_STARTFAIL           = 3,
-    CODE_SETUPFAILED_ACCEPTFAIL          = 5,
-    CODE_SETUPFAILED_BLOCK_1XRETRY       = 6,
+    CODE_SETUPFAILED_NONE = 0,
+    CODE_SETUPFAILED_OPENFAIL = 1,
+    CODE_SETUPFAILED_STARTFAIL = 3,
+    CODE_SETUPFAILED_ACCEPTFAIL = 5,
+    CODE_SETUPFAILED_BLOCK_1XRETRY = 6,
 };
 
 // FAIL_REASON_SESSION_RETRY1X
 enum
 {
-    CODE_1XRETRY_NONE                = 0,
-    CODE_1XRETRY_NORMAL                = 1,
-    CODE_1XRETRY_SILENT_REDIAL        = 2,
-    CODE_1XRETRY_PRIORITY_SET        = 3,
+    CODE_1XRETRY_NONE = 0,
+    CODE_1XRETRY_NORMAL = 1,
+    CODE_1XRETRY_SILENT_REDIAL = 2,
+    CODE_1XRETRY_PRIORITY_SET = 3,
 };
 
 // FAIL_REASON_SESSION_RETRYVOLTE
 enum
 {
-    CODE_VoLTERETRY_NORMAL                = 0,
-    CODE_VoLTERETRY_EMERGENCY            = 1,
-    CODE_VoLTERETRY_OFFLINE                = 2,
+    CODE_VoLTERETRY_NORMAL = 0,
+    CODE_VoLTERETRY_EMERGENCY = 1,
+    CODE_VoLTERETRY_OFFLINE = 2,
 };
 
 enum
@@ -198,62 +206,62 @@ enum
 
 enum
 {
-    REJECT_REASON_INVALID                               = -1,
-    REJECT_REASON_UNKNOWN                               = 0,
+    REJECT_REASON_INVALID = -1,
+    REJECT_REASON_UNKNOWN = 0,
 
-    REJECT_REASON_DECLINE_USER                          = 2100,
-    REJECT_REASON_DECLINE_NOANSWER                      = 2101,
-    REJECT_REASON_DECLINE_NOBATTERY                     = 2102,
-    REJECT_REASON_DECLINE_NORMAL                        = 2103,
-    REJECT_REASON_DECLINE_CW                            = 2104,
-    REJECT_REASON_DECLINE_UPDATE                        = 2105,
+    REJECT_REASON_DECLINE_USER = 2100,
+    REJECT_REASON_DECLINE_NOANSWER = 2101,
+    REJECT_REASON_DECLINE_NOBATTERY = 2102,
+    REJECT_REASON_DECLINE_NORMAL = 2103,
+    REJECT_REASON_DECLINE_CW = 2104,
+    REJECT_REASON_DECLINE_UPDATE = 2105,
 
-    REJECT_REASON_SERVICE_UNAVAILABLE                   = 2110,
-    REJECT_REASON_SERVICE_TTY                           = 2111,
+    REJECT_REASON_SERVICE_UNAVAILABLE = 2110,
+    REJECT_REASON_SERVICE_TTY = 2111,
 
-    REJECT_REASON_BUSY_ISCSCALL                         = 2120,
+    REJECT_REASON_BUSY_ISCSCALL = 2120,
 
-    REJECT_REASON_BUSY_ISEMERGENCY                      = 2123,
-    REJECT_REASON_BUSY_ISWIFICALL                       = 2124,
-    REJECT_REASON_BUSY_ISOTHERSCALL                     = 2125,
-    REJECT_REASON_BUSY_ESTABLISHING                     = 2126,
-    REJECT_REASON_BUSY_ALERTING                         = 2127,
-    REJECT_REASON_BUSY_MAXCALL                          = 2128,
-    REJECT_REASON_BUSY_NORMAL                           = 2129,
-    REJECT_REASON_BUSY_IGNORE                           = 2130,
-    REJECT_REASON_BUSY_HIDE                             = 2131,
+    REJECT_REASON_BUSY_ISEMERGENCY = 2123,
+    REJECT_REASON_BUSY_ISWIFICALL = 2124,
+    REJECT_REASON_BUSY_ISOTHERSCALL = 2125,
+    REJECT_REASON_BUSY_ESTABLISHING = 2126,
+    REJECT_REASON_BUSY_ALERTING = 2127,
+    REJECT_REASON_BUSY_MAXCALL = 2128,
+    REJECT_REASON_BUSY_NORMAL = 2129,
+    REJECT_REASON_BUSY_IGNORE = 2130,
+    REJECT_REASON_BUSY_HIDE = 2131,
 
-    REJECT_REASON_SESSION_NOTSUPPORT                    = 2140,
-    REJECT_REASON_SESSION_NOTACCEPTABLE                 = 2141,
-    REJECT_REASON_SESSION_NOTACCEPTABLEHERE             = 2142,
-    REJECT_REASON_SESSION_UPDATE                        = 2143,
-    REJECT_REASON_SESSION_BAD                           = 2144,
-    REJECT_REASON_SESSION_FAIL                          = 2145,
-    REJECT_REASON_SESSION_FAIL_PRECONDITION             = 2146,
-    REJECT_REASON_SESSION_INVALID_REFERRER_IDENTITY     = 2147,
+    REJECT_REASON_SESSION_NOTSUPPORT = 2140,
+    REJECT_REASON_SESSION_NOTACCEPTABLE = 2141,
+    REJECT_REASON_SESSION_NOTACCEPTABLEHERE = 2142,
+    REJECT_REASON_SESSION_UPDATE = 2143,
+    REJECT_REASON_SESSION_BAD = 2144,
+    REJECT_REASON_SESSION_FAIL = 2145,
+    REJECT_REASON_SESSION_FAIL_PRECONDITION = 2146,
+    REJECT_REASON_SESSION_INVALID_REFERRER_IDENTITY = 2147,
 
-    REJECT_REASON_MEDIA_INITFAIL                        = 2160,
-    REJECT_REASON_MEDIA_CODEC                           = 2161,
-    REJECT_REASON_MEDIA_LOWEST_BIT_RATE                 = 2162,
-    REJECT_REASON_MEDIA_CHECK_RADIO_CONNECTION          = 2163,
-    REJECT_REASON_MEDIA_NEGOFAIL                        = 2164,
-    REJECT_REASON_MEDIA_FORMFAIL                        = 2165,
-    REJECT_REASON_MEDIA_NODATA                          = 2166,
-    REJECT_REASON_MEDIA_FAIL                            = 2167,
+    REJECT_REASON_MEDIA_INITFAIL = 2160,
+    REJECT_REASON_MEDIA_CODEC = 2161,
+    REJECT_REASON_MEDIA_LOWEST_BIT_RATE = 2162,
+    REJECT_REASON_MEDIA_CHECK_RADIO_CONNECTION = 2163,
+    REJECT_REASON_MEDIA_NEGOFAIL = 2164,
+    REJECT_REASON_MEDIA_FORMFAIL = 2165,
+    REJECT_REASON_MEDIA_NODATA = 2166,
+    REJECT_REASON_MEDIA_FAIL = 2167,
 
-    REJECT_REASON_CONF_JOINED                           = 2170,
+    REJECT_REASON_CONF_JOINED = 2170,
 
-    REJECT_REASON_TO_MO_PROGRESSING                     = 2181,
-    REJECT_REASON_TO_MO_STARTED                         = 2182,
-    REJECT_REASON_TO_MO_UPDATE                          = 2183,
-    REJECT_REASON_TO_MT_NOANSWER                        = 2184,
-    REJECT_REASON_TO_MT_UPDATE                          = 2185,
-    REJECT_REASON_TO_MT_PRACK                           = 2186,
-    REJECT_REASON_TO_MO_WAIT_TERMINATED                 = 2187,
-    REJECT_REASON_TO_MT_WAIT_TERMINATED                 = 2188,
-    REJECT_REASON_TO_CONV_WAIT_TERMINATED               = 2189,
+    REJECT_REASON_TO_MO_PROGRESSING = 2181,
+    REJECT_REASON_TO_MO_STARTED = 2182,
+    REJECT_REASON_TO_MO_UPDATE = 2183,
+    REJECT_REASON_TO_MT_NOANSWER = 2184,
+    REJECT_REASON_TO_MT_UPDATE = 2185,
+    REJECT_REASON_TO_MT_PRACK = 2186,
+    REJECT_REASON_TO_MO_WAIT_TERMINATED = 2187,
+    REJECT_REASON_TO_MT_WAIT_TERMINATED = 2188,
+    REJECT_REASON_TO_CONV_WAIT_TERMINATED = 2189,
 
-    REJECT_REASON_MAX                                   = 2199,
+    REJECT_REASON_MAX = 2199,
 };
 
 #endif

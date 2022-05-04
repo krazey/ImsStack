@@ -10,13 +10,9 @@ ProcessingCallBlockRule::ProcessingCallBlockRule(IN IMtcCallManager& objCallMana
 {
 }
 
-PUBLIC VIRTUAL
-ProcessingCallBlockRule::~ProcessingCallBlockRule()
-{
-}
+PUBLIC VIRTUAL ProcessingCallBlockRule::~ProcessingCallBlockRule() {}
 
-PUBLIC VIRTUAL
-ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
+PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
     IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
@@ -24,33 +20,25 @@ ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
     if (IsOtherIdleCallExists(lstCalls))
     {
         IMS_TRACE_I("Check : Idle call exists", 0, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_BUSY_NORMAL));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_NORMAL));
     }
 
     if (IsIncomingCallExists(lstCalls))
     {
         IMS_TRACE_I("Check : Incoming call exists", 0, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_BUSY_ALERTING));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ALERTING));
     }
 
     if (IsOutgoingCallExists(lstCalls))
     {
         IMS_TRACE_I("Check : Outgoing call exists", 0, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_BUSY_ESTABLISHING));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ESTABLISHING));
     }
 
     if (IsEmergencyCallExists(m_objCallManager))
     {
         IMS_TRACE_I("Check : Emergency call exists", 0, 0, 0);
-        return Result(
-                Result::Status::BLOCKED,
-                FailReason(REJECT_REASON_BUSY_ISEMERGENCY));
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ISEMERGENCY));
     }
 
     return Result(Result::Status::UNBLOCKED);
@@ -68,7 +56,7 @@ IMS_BOOL ProcessingCallBlockRule::IsOtherIdleCallExists(IN const IMSList<IMtcCal
         {
             nCount += 1;
 
-            if (nCount >= 2)    // 1 for current (checking) call, 1 for existing call
+            if (nCount >= 2)  // 1 for current (checking) call, 1 for existing call
             {
                 return IMS_TRUE;
             }
@@ -83,8 +71,7 @@ IMS_BOOL ProcessingCallBlockRule::IsIncomingCallExists(IN const IMSList<IMtcCall
     for (IMS_UINT32 nIndex = 0; nIndex < lstCalls.GetSize(); nIndex++)
     {
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
-        if (eState == IMtcCall::State::INCOMING ||
-                eState == IMtcCall::State::ALERTING)
+        if (eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
         {
             return IMS_TRUE;
         }

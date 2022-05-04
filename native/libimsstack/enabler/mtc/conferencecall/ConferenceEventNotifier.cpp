@@ -22,8 +22,7 @@ ConferenceEventNotifier::ConferenceEventNotifier(IN IMtcCallContext& objConfCall
     IMS_TRACE_I("+ConferenceEventNotifier", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-ConferenceEventNotifier::~ConferenceEventNotifier()
+PUBLIC VIRTUAL ConferenceEventNotifier::~ConferenceEventNotifier()
 {
     IMS_TRACE_I("~ConferenceEventNotifier", 0, 0, 0);
 }
@@ -93,8 +92,8 @@ void ConferenceEventNotifier::NotifyExpandFailed(IN FailReason failReason)
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyDropped(IN FailReason failReason,
-        IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyDropped(
+        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropped", 0, 0, 0);
 
@@ -104,8 +103,8 @@ void ConferenceEventNotifier::NotifyDropped(IN FailReason failReason,
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyDropFailed(IN FailReason failReason,
-        IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyDropFailed(
+        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyDropFailed", 0, 0, 0);
 
@@ -115,8 +114,8 @@ void ConferenceEventNotifier::NotifyDropFailed(IN FailReason failReason,
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyJoined(IN FailReason failReason,
-        IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyJoined(
+        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoined", 0, 0, 0);
 
@@ -126,8 +125,8 @@ void ConferenceEventNotifier::NotifyJoined(IN FailReason failReason,
 }
 
 PUBLIC
-void ConferenceEventNotifier::NotifyJoinFailed(IN FailReason failReason,
-        IN ConferenceParticipantList& objParticipantList)
+void ConferenceEventNotifier::NotifyJoinFailed(
+        IN FailReason failReason, IN ConferenceParticipantList& objParticipantList)
 {
     IMS_TRACE_I("NotifyJoinFailed", 0, 0, 0);
 
@@ -139,11 +138,11 @@ void ConferenceEventNotifier::NotifyJoinFailed(IN FailReason failReason,
 PUBLIC
 void ConferenceEventNotifier::NotifyConferenceInfo(IN ConferenceParticipantList& objParticipantList)
 {
-    IMS_TRACE_I("NotifyConferenceInfo : max-user-count=[%d]",
-            objParticipantList.GetMaxUserCount(), 0, 0);
+    IMS_TRACE_I("NotifyConferenceInfo : max-user-count=[%d]", objParticipantList.GetMaxUserCount(),
+            0, 0);
 
-    m_objConfCallContext.GetUiNotifier().SendNotifyConfInfo("", "",
-            objParticipantList.GetMaxUserCount(), objParticipantList.GetSize(), "");
+    m_objConfCallContext.GetUiNotifier().SendNotifyConfInfo(
+            "", "", objParticipantList.GetMaxUserCount(), objParticipantList.GetSize(), "");
 }
 
 PUBLIC
@@ -169,9 +168,12 @@ void ConferenceEventNotifier::NotifyIndividualCallTerminated(IN CallKey nKey)
         return;
     }
 
-    m_objConfCallContext.GetCallManager().GetCallByCallKey(nKey)->GetCallContext().GetUiNotifier()
+    m_objConfCallContext.GetCallManager()
+            .GetCallByCallKey(nKey)
+            ->GetCallContext()
+            .GetUiNotifier()
             .SendTerminated(
-                FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED));
+                    FailReason(FAIL_REASON_SESSION_TERMINATED, FAIL_REASON_SESSION_TERMINATED));
 }
 
 PRIVATE
@@ -205,10 +207,9 @@ void ConferenceEventNotifier::CheckDisconnectedConfUsersInfo(
         }
 
         IMS_UINT32 nStatus = pParticipant->GetConfUser()->eStatus;
-        if (nStatus == CONFINFO_STATUS_DISCONNECTED ||
-                nStatus == CONFINFO_STATUS_DISCONNECTING ||
+        if (nStatus == CONFINFO_STATUS_DISCONNECTED || nStatus == CONFINFO_STATUS_DISCONNECTING ||
                 (nStatus >= CONFINFO_STATUS_FAIL && nStatus <= CONFINFO_STATUS_INTSERVERERROR))
-                // TODO: list up all the status names, not range.
+        // TODO: list up all the status names, not range.
         {
             if (pParticipant->IsDisconnectionNotified())
             {

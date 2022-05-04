@@ -8,33 +8,21 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_INFO[] = "conference-info";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_DESCRIPTION[] = "conference-description";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_HOST_INFO[] = "host-info";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_STATE[] = "conference-state";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_USERS[] = "users";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_INFO[] = "conference-info";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_DESCRIPTION[] =
+        "conference-description";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_HOST_INFO[] = "host-info";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_CONFERENCE_STATE[] = "conference-state";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_USERS[] = "users";
 
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_DISPLAY_TEXT[] = "display-text";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_ENTRY[] = "entry";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_URI[] = "uri";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ELEMENT_STATUS[] = "status";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_DISPLAY_TEXT[] = "display-text";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_ENTRY[] = "entry";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_URI[] = "uri";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ELEMENT_STATUS[] = "status";
 
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ATTR_VERSION[] = "version";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ATTR_STATE[] = "state";
-PUBLIC GLOBAL
-const IMS_CHAR ConferenceInfo::ATTR_ENTITY[] = "entity";
-
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_VERSION[] = "version";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_STATE[] = "state";
+PUBLIC GLOBAL const IMS_CHAR ConferenceInfo::ATTR_ENTITY[] = "entity";
 
 PUBLIC
 ConferenceInfo::User::~User()
@@ -253,7 +241,7 @@ void ConferenceInfo::CreateConferenceDescription(IN const INode* piNode)
 PRIVATE
 void ConferenceInfo::CreateHostInfo(IN const INode* piNode)
 {
-    //IMS_TRACE_I("CreateHostInfo", 0, 0, 0);
+    // IMS_TRACE_I("CreateHostInfo", 0, 0, 0);
     const IMS_CHAR ELEMET_URIS[] = "uris";
 
     if (piNode == IMS_NULL)
@@ -281,7 +269,7 @@ void ConferenceInfo::CreateHostInfo(IN const INode* piNode)
     }
 
     AString strUri;
-    IElement* piTemp = objEntries.GetAt(0); // only the first host uri is required.
+    IElement* piTemp = objEntries.GetAt(0);  // only the first host uri is required.
     GetSubElementValue(piTemp, ELEMENT_URI, strUri);
     m_objHostInfo.objUris.Append(strUri);
 
@@ -304,8 +292,8 @@ void ConferenceInfo::CreateConferenceState(IN const INode* piNode)
     if (GetSubElementValue(piElement, ELEMENT_USER_COUNT, strUserCount).GetLength() > 0)
     {
         m_objConferenceState.nUserCount = strUserCount.ToInt32();
-        IMS_TRACE_I("CreateConferenceState : user-count=[%d]",
-                m_objConferenceState.nUserCount, 0, 0);
+        IMS_TRACE_I(
+                "CreateConferenceState : user-count=[%d]", m_objConferenceState.nUserCount, 0, 0);
     }
 }
 
@@ -375,8 +363,8 @@ void ConferenceInfo::CreateEndPointEntity(IN const IElement* piUserElement, IN U
         pEndPoint->nState = ConvertState(piEndPointElement->GetAttribute(ATTR_STATE));
 
         AString strStatus;
-        pEndPoint->nStatus = ConvertStatus(
-                GetSubElementValue(piEndPointElement, ELEMENT_STATUS, strStatus));
+        pEndPoint->nStatus =
+                ConvertStatus(GetSubElementValue(piEndPointElement, ELEMENT_STATUS, strStatus));
 
         GetSubElementValue(piEndPointElement, ELEMENT_DISPLAY_TEXT, pEndPoint->strDisplayText);
 
@@ -395,23 +383,23 @@ void ConferenceInfo::CreateEndPointEntity(IN const IElement* piUserElement, IN U
 PRIVATE
 void ConferenceInfo::CreateMedia(IN const IElement* piEndPointElement, IN User::EndPoint* pEndPoint)
 {
-    (void) pEndPoint;
-    (void) piEndPointElement;
+    (void)pEndPoint;
+    (void)piEndPointElement;
     // TODO: Create media.
 }
 
 PRIVATE
-void ConferenceInfo::CreateCallInfo(IN const IElement* piEndPointElement,
-        IN User::EndPoint* pEndPoint)
+void ConferenceInfo::CreateCallInfo(
+        IN const IElement* piEndPointElement, IN User::EndPoint* pEndPoint)
 {
-    (void) pEndPoint;
-    (void) piEndPointElement;
+    (void)pEndPoint;
+    (void)piEndPointElement;
     // TODO: Create Call Info
 }
 
 PRIVATE
-const IElement* ConferenceInfo::GetSubElement(IN const IElement* piElement,
-        IN const IMS_CHAR* pszSubElementName)
+const IElement* ConferenceInfo::GetSubElement(
+        IN const IElement* piElement, IN const IMS_CHAR* pszSubElementName)
 {
     INode* piNode = piElement->GetFirstChild();
 
@@ -431,7 +419,7 @@ PRIVATE
 const IMSList<IElement*>& ConferenceInfo::GetSubElements(const IN IElement* piElement,
         IN const IMS_CHAR* pszSubElementName, OUT IMSList<IElement*>& objSubElements)
 {
-    //IMS_TRACE_I("GetSubElements : (%s)", pszSubElementName, 0, 0);
+    // IMS_TRACE_I("GetSubElements : (%s)", pszSubElementName, 0, 0);
     if (piElement == IMS_NULL)
     {
         IMS_TRACE_I("GetSubElements : element is null", 0, 0, 0);
@@ -469,9 +457,9 @@ const AString& ConferenceInfo::GetSubElementValue(IN const IElement* piElement,
 
             if (piNode_Value != IMS_NULL)
             {
-                 strSubElementValue = piNode_Value->GetNodeValue();
-                 IMS_TRACE_I("GetSubElementValue : value=(%s)", strSubElementValue.GetStr(), 0, 0);
-                 return strSubElementValue;
+                strSubElementValue = piNode_Value->GetNodeValue();
+                IMS_TRACE_I("GetSubElementValue : value=(%s)", strSubElementValue.GetStr(), 0, 0);
+                return strSubElementValue;
             }
         }
 
@@ -537,7 +525,7 @@ IMS_UINT32 ConferenceInfo::ConvertStatus(IN const AString& strStatus)
     {
         return STATUS_DISCONNECTING;
     }
-    else if (strStatus.Equals("connect-fail")) // in case participant rejects conference
+    else if (strStatus.Equals("connect-fail"))  // in case participant rejects conference
     {
         return STATUS_FAIL;
     }

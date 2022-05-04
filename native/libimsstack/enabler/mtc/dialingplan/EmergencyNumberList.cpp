@@ -10,10 +10,10 @@
 __IMS_TRACE_TAG_IMS__;
 
 PUBLIC
-EmergencyNumberList::EmergencyNumberList(IN IMS_SINT32 nSlotID)
-    : m_nSlotID(nSlotID)
-    , m_nURNMappingType(URN_MAPPING_TYPE_3GPP_STANDARD)
-    , m_objEMCConfigStrMap(IMSMap<AString, AString>())
+EmergencyNumberList::EmergencyNumberList(IN IMS_SINT32 nSlotID) :
+        m_nSlotID(nSlotID),
+        m_nURNMappingType(URN_MAPPING_TYPE_3GPP_STANDARD),
+        m_objEMCConfigStrMap(IMSMap<AString, AString>())
 {
     if (ReadOperatorConfig() == IMS_FAILURE)
     {
@@ -21,8 +21,7 @@ EmergencyNumberList::EmergencyNumberList(IN IMS_SINT32 nSlotID)
     }
 }
 
-PUBLIC VIRTUAL
-EmergencyNumberList::~EmergencyNumberList()
+PUBLIC VIRTUAL EmergencyNumberList::~EmergencyNumberList()
 {
     m_objEMCConfigStrMap.Clear();
 }
@@ -34,15 +33,15 @@ Description:
 Follow the step based on 3GPP 24.229
 */
 PUBLIC
-AString EmergencyNumberList::GetEmergencyServiceURN(IN const AString &strNumber)
+AString EmergencyNumberList::GetEmergencyServiceURN(IN const AString& strNumber)
 {
     IMS_SINT32 nSource = ENL_NETWORK;
     IMS_SINT32 nESCV = GetEmergencyServiceCategory(strNumber, nSource);
 
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("GetEmergencyServiceURN : [%s], nSource[%s] ESCV[%d]",
-            strNumber.GetStr(), ConvertSourceToString(nSource), nESCV);
+    IMS_TRACE_I("GetEmergencyServiceURN : [%s], nSource[%s] ESCV[%d]", strNumber.GetStr(),
+            ConvertSourceToString(nSource), nESCV);
 
     if (nESCV > ESCV_INVALID && m_nURNMappingType != URN_MAPPING_TYPE_GENERIC_ONLY)
     {
@@ -65,7 +64,7 @@ Description:
 Will be deleted. Old solution.
 */
 PUBLIC
-IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategory(IN const AString &strNumber)
+IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategory(IN const AString& strNumber)
 {
     IMS_SINT32 nESCV = ESCV_INVALID;
     IMS_SINT32 nPrimaryENL = GetPrimaryENLSource();
@@ -107,8 +106,8 @@ Description:
 Return ESCV with the priority
 */
 PRIVATE
-IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategory(IN const AString &strNumber,
-        OUT IMS_SINT32 &nSource)
+IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategory(
+        IN const AString& strNumber, OUT IMS_SINT32& nSource)
 {
     IMS_SINT32 nESCV = ESCV_INVALID;
     IMS_SINT32 nPrimaryENL = GetPrimaryENLSource();
@@ -147,8 +146,8 @@ IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategory(IN const AString &st
 Remarks
 */
 PRIVATE
-IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategoryEx(IN const AString &strNumber,
-        IN IMS_SINT32 nSource /* = ENL_NETWORK */)
+IMS_SINT32 EmergencyNumberList::GetEmergencyServiceCategoryEx(
+        IN const AString& strNumber, IN IMS_SINT32 nSource /* = ENL_NETWORK */)
 {
     IMS_SINT32 nESCV = ESCV_INVALID;
 
@@ -175,7 +174,8 @@ IMS_SINT32 EmergencyNumberList::GetPrimaryENLSource() const
 {
     //---------------------------------------------------------------------------------------------
     // 0 : UICC, 1 : Network
-    return PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotID)
+    return PhoneInfoService::GetPhoneInfoService()
+            ->GetSubscriberInfo(m_nSlotID)
             ->GetEmergencyPriorityFromModem();
 }
 
@@ -185,13 +185,12 @@ Remarks
 Description:
 */
 PRIVATE
-AString EmergencyNumberList::HandleENLForNetwork(IN const AString &strNumber,
-        IN IMS_SINT32 nESCV)
+AString EmergencyNumberList::HandleENLForNetwork(IN const AString& strNumber, IN IMS_SINT32 nESCV)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
-            == 0)
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState() ==
+            0)
     {
-        //Read configuration
+        // Read configuration
         AString strURNForOp = GetOperatorConfigURN(strNumber);
         if (strURNForOp.GetLength() > 0)
         {
@@ -199,7 +198,7 @@ AString EmergencyNumberList::HandleENLForNetwork(IN const AString &strNumber,
         }
     }
 
-    //standard policy
+    // standard policy
     return TranslateAsEmergencyServiceURN(nESCV);
 }
 
@@ -209,25 +208,24 @@ Remarks
 Description:
 */
 PRIVATE
-AString EmergencyNumberList::HandleENLForUICC(IN const AString &strNumber,
-        IN IMS_SINT32 nESCV)
+AString EmergencyNumberList::HandleENLForUICC(IN const AString& strNumber, IN IMS_SINT32 nESCV)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
-            == 1)
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState() ==
+            1)
     {
         return ConstSosUrn::GENERIC;
     }
     else
     {
-        //Read configuration
+        // Read configuration
         AString strURNForOp = GetOperatorConfigURN(strNumber);
         if (strURNForOp.GetLength() > 0)
         {
-             return strURNForOp;
+            return strURNForOp;
         }
     }
 
-    //standard policy
+    // standard policy
     return TranslateAsEmergencyServiceURN(nESCV);
 }
 
@@ -237,16 +235,16 @@ Remarks
 Description:
 */
 PRIVATE
-AString EmergencyNumberList::HandleNoENL(IN const AString &strNumber)
+AString EmergencyNumberList::HandleNoENL(IN const AString& strNumber)
 {
-    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState()
-            == 0)
+    if (PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_nSlotID)->GetRoamingState() ==
+            0)
     {
-        //Read configuration
+        // Read configuration
         AString strURNForOp = GetOperatorConfigURN(strNumber);
         if (strURNForOp.GetLength() > 0)
         {
-             return strURNForOp;
+            return strURNForOp;
         }
     }
 
@@ -260,8 +258,8 @@ Description:
 Return Emergency number list if exist
 */
 PRIVATE
-IMS_BOOL EmergencyNumberList::GetENL(OUT AStringBuffer &objENL,
-        IN IMS_SINT32 nSource /* = ENL_NETWORK */)
+IMS_BOOL EmergencyNumberList::GetENL(
+        OUT AStringBuffer& objENL, IN IMS_SINT32 nSource /* = ENL_NETWORK */)
 {
     AString strENL;
 
@@ -273,7 +271,8 @@ IMS_BOOL EmergencyNumberList::GetENL(OUT AStringBuffer &objENL,
     }
     else if (nSource == ENL_UICC)
     {
-        PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotID)
+        PhoneInfoService::GetPhoneInfoService()
+                ->GetSubscriberInfo(m_nSlotID)
                 ->GetEmergencyNumberListFromSim(strENL);
     }
 
@@ -295,7 +294,7 @@ Description:
 Return Emergency service category value in the ENL
 */
 PRIVATE
-IMS_SINT32 EmergencyNumberList::GetESCV(IN const AString &strNumber, IN const AString &strENL)
+IMS_SINT32 EmergencyNumberList::GetESCV(IN const AString& strNumber, IN const AString& strENL)
 {
     IMS_CHAR cDelimiter = '\0';
 
@@ -312,10 +311,9 @@ IMS_SINT32 EmergencyNumberList::GetESCV(IN const AString &strNumber, IN const AS
 
     IMSList<AString> objTokens = strENL.Split(cDelimiter);
 
-
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); i++)
     {
-        const AString &strToken = objTokens.GetAt(i);
+        const AString& strToken = objTokens.GetAt(i);
 
         AString strValue1 = strToken.GetSubStr(0, 2);
         AString strValue2 = strToken.GetSubStr(2);
@@ -329,7 +327,6 @@ IMS_SINT32 EmergencyNumberList::GetESCV(IN const AString &strNumber, IN const AS
         }
     }
 
-
     return ESCV_INVALID;
 }
 
@@ -341,11 +338,11 @@ Return the matched URN regarding the number
 if stored number with URN exists in the configuration.xx.xx.xml
 */
 PRIVATE
-AString EmergencyNumberList::GetOperatorConfigURN(IN const AString &strNumber)
+AString EmergencyNumberList::GetOperatorConfigURN(IN const AString& strNumber)
 {
-    for(IMS_UINT32 index = 0; index < m_objEMCConfigStrMap.GetSize(); index ++)
+    for (IMS_UINT32 index = 0; index < m_objEMCConfigStrMap.GetSize(); index++)
     {
-        if(strNumber.Equals(m_objEMCConfigStrMap.GetKeyAt(index)))
+        if (strNumber.Equals(m_objEMCConfigStrMap.GetKeyAt(index)))
         {
             IMS_TRACE_I("GetOperatorConfigURN : find the matched URN", 0, 0, 0);
             return m_objEMCConfigStrMap.GetValueAt(index);
@@ -384,7 +381,7 @@ AString EmergencyNumberList::TranslateAsEmergencyServiceURN(IN IMS_SINT32 nESCV)
 
     //---------------------------------------------------------------------------------------------
 
-    //Check if ESCV is multiple value
+    // Check if ESCV is multiple value
     if ((m_nURNMappingType == URN_MAPPING_TYPE_GENERIC_MULTIPLE_ESCV) && IsMultipleESCV(nESCV))
     {
         return ConstSosUrn::GENERIC;
@@ -410,7 +407,7 @@ AString EmergencyNumberList::TranslateAsEmergencyServiceURN(IN IMS_SINT32 nESCV)
     {
         strURN = ConstSosUrn::MOUNTAIN;
     }
-    else//invalid case or not matched case
+    else  // invalid case or not matched case
     {
         strURN = ConstSosUrn::GENERIC;
     }
@@ -429,7 +426,7 @@ Print Source which includes ENL for debugging
 PRIVATE
 const IMS_CHAR* EmergencyNumberList::ConvertSourceToString(IN IMS_SINT32 nSource)
 {
-    switch(nSource)
+    switch (nSource)
     {
         case ENL_NETWORK:
             return "ENL_NETWORK";

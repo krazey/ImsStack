@@ -25,12 +25,11 @@ public:
     virtual void Refer_Notify_DeliveryFailed(IN IMS_UINTP nParam) = 0;
 };
 
-// ------------------------------------------------------------------------------------------------
 class IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenBaseParam()
-        : pRefer(IMS_NULL)
+    inline IECTReferListenBaseParam() :
+            pRefer(IMS_NULL)
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenBaseParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenBaseParam), this, 0);
@@ -42,21 +41,18 @@ public:
     }
 
 private:
-    IECTReferListenBaseParam(IN const IECTReferListenBaseParam &objRHS);
-    IECTReferListenBaseParam& operator=(IN const IECTReferListenBaseParam &objRHS);
+    IECTReferListenBaseParam(IN const IECTReferListenBaseParam& objRHS);
+    IECTReferListenBaseParam& operator=(IN const IECTReferListenBaseParam& objRHS);
 
 public:
-
-    UCECTReference*    pRefer;
+    UCECTReference* pRefer;
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenDeliveredParam
-    : public IECTReferListenBaseParam
+class IECTReferListenDeliveredParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenDeliveredParam()
-        : IECTReferListenBaseParam()
+    inline IECTReferListenDeliveredParam() :
+            IECTReferListenBaseParam()
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenDeliveredParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenDeliveredParam), this, 0);
@@ -68,22 +64,19 @@ public:
     }
 
 private:
-    IECTReferListenDeliveredParam(IN const IECTReferListenDeliveredParam &objRHS);
-    IECTReferListenDeliveredParam& operator=(IN const IECTReferListenDeliveredParam &objRHS);
+    IECTReferListenDeliveredParam(IN const IECTReferListenDeliveredParam& objRHS);
+    IECTReferListenDeliveredParam& operator=(IN const IECTReferListenDeliveredParam& objRHS);
 
 public:
-
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenDeliveryFailedParam
-    : public IECTReferListenBaseParam
+class IECTReferListenDeliveryFailedParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenDeliveryFailedParam()
-        : IECTReferListenBaseParam()
-        , eReason(-1)
-        , eCode(-1)
+    inline IECTReferListenDeliveryFailedParam() :
+            IECTReferListenBaseParam(),
+            eReason(-1),
+            eCode(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenDeliveryFailedParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenDeliveryFailedParam), this, 0);
@@ -95,26 +88,23 @@ public:
     }
 
 private:
-    IECTReferListenDeliveryFailedParam(IN const IECTReferListenDeliveryFailedParam &objRHS);
+    IECTReferListenDeliveryFailedParam(IN const IECTReferListenDeliveryFailedParam& objRHS);
     IECTReferListenDeliveryFailedParam& operator=(
-            IN const IECTReferListenDeliveryFailedParam &objRHS);
+            IN const IECTReferListenDeliveryFailedParam& objRHS);
 
 public:
-    IMS_SINT32      eReason;
-    IMS_SINT32      eCode;
-
+    IMS_SINT32 eReason;
+    IMS_SINT32 eCode;
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenNotifyParam
-    : public IECTReferListenBaseParam
+class IECTReferListenNotifyParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenNotifyParam()
-        : IECTReferListenBaseParam()
-        , aStrSubState(AString::ConstNull())
-        , nStatusCode(0)
-        , aStrEventID(AString::ConstNull())
+    inline IECTReferListenNotifyParam() :
+            IECTReferListenBaseParam(),
+            aStrSubState(AString::ConstNull()),
+            nStatusCode(0),
+            aStrEventID(AString::ConstNull())
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenNotifyParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenNotifyParam), this, 0);
@@ -126,25 +116,22 @@ public:
     }
 
 private:
-    IECTReferListenNotifyParam(IN const IECTReferListenNotifyParam &objRHS);
-    IECTReferListenNotifyParam& operator=(IN const IECTReferListenNotifyParam &objRHS);
+    IECTReferListenNotifyParam(IN const IECTReferListenNotifyParam& objRHS);
+    IECTReferListenNotifyParam& operator=(IN const IECTReferListenNotifyParam& objRHS);
 
 public:
-    AString         aStrSubState;
-    IMS_SINT32      nStatusCode;
-    AString         aStrEventID;
-
+    AString aStrSubState;
+    IMS_SINT32 nStatusCode;
+    AString aStrEventID;
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenTerminatedParam
-    : public IECTReferListenBaseParam
+class IECTReferListenTerminatedParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenTerminatedParam()
-        : IECTReferListenBaseParam()
-        , eReason(-1)
-        , eCode(-1)
+    inline IECTReferListenTerminatedParam() :
+            IECTReferListenBaseParam(),
+            eReason(-1),
+            eCode(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenTerminatedParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenTerminatedParam), this, 0);
@@ -156,24 +143,21 @@ public:
     }
 
 private:
-    IECTReferListenTerminatedParam(IN const IECTReferListenTerminatedParam &objRHS);
-    IECTReferListenTerminatedParam& operator=(IN const IECTReferListenTerminatedParam &objRHS);
+    IECTReferListenTerminatedParam(IN const IECTReferListenTerminatedParam& objRHS);
+    IECTReferListenTerminatedParam& operator=(IN const IECTReferListenTerminatedParam& objRHS);
 
 public:
-    IMS_SINT32      eReason;
-    IMS_SINT32      eCode;
-
+    IMS_SINT32 eReason;
+    IMS_SINT32 eCode;
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenFailedParam
-    : public IECTReferListenBaseParam
+class IECTReferListenFailedParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenFailedParam()
-        : IECTReferListenBaseParam()
-        , eReason(-1)
-        , eCode(-1)
+    inline IECTReferListenFailedParam() :
+            IECTReferListenBaseParam(),
+            eReason(-1),
+            eCode(-1)
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenFailedParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenFailedParam), this, 0);
@@ -185,22 +169,19 @@ public:
     }
 
 private:
-    IECTReferListenFailedParam(IN const IECTReferListenFailedParam &objRHS);
-    IECTReferListenFailedParam& operator=(IN const IECTReferListenFailedParam &objRHS);
+    IECTReferListenFailedParam(IN const IECTReferListenFailedParam& objRHS);
+    IECTReferListenFailedParam& operator=(IN const IECTReferListenFailedParam& objRHS);
 
 public:
-    IMS_SINT32      eReason;
-    IMS_SINT32      eCode;
-
+    IMS_SINT32 eReason;
+    IMS_SINT32 eCode;
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenNotifyDeliveredParam
-    : public IECTReferListenBaseParam
+class IECTReferListenNotifyDeliveredParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenNotifyDeliveredParam()
-        : IECTReferListenBaseParam()
+    inline IECTReferListenNotifyDeliveredParam() :
+            IECTReferListenBaseParam()
     {
         IMS_TRACE_MEM("uc", "uc_M : IECTReferListenNotifyDeliveredParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenNotifyDeliveredParam), this, 0);
@@ -212,40 +193,40 @@ public:
     }
 
 private:
-    IECTReferListenNotifyDeliveredParam(IN const IECTReferListenNotifyDeliveredParam &objRHS);
+    IECTReferListenNotifyDeliveredParam(IN const IECTReferListenNotifyDeliveredParam& objRHS);
     IECTReferListenNotifyDeliveredParam& operator=(
-            IN const IECTReferListenNotifyDeliveredParam &objRHS);
+            IN const IECTReferListenNotifyDeliveredParam& objRHS);
 
 public:
 };
 
-// ------------------------------------------------------------------------------------------------
-class IECTReferListenNotifyDeliveryFailedParam
-    : public IECTReferListenBaseParam
+class IECTReferListenNotifyDeliveryFailedParam : public IECTReferListenBaseParam
 {
 public:
-    inline IECTReferListenNotifyDeliveryFailedParam()
-        : IECTReferListenBaseParam()
-        , nStatusCode(-1)
+    inline IECTReferListenNotifyDeliveryFailedParam() :
+            IECTReferListenBaseParam(),
+            nStatusCode(-1)
     {
-        IMS_TRACE_MEM("uc", "uc_M : IECTReferListenNotifyDeliveryFailedParam" \
+        IMS_TRACE_MEM("uc",
+                "uc_M : IECTReferListenNotifyDeliveryFailedParam"
                 "[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenNotifyDeliveryFailedParam), this, 0);
     }
     inline virtual ~IECTReferListenNotifyDeliveryFailedParam()
     {
-        IMS_TRACE_MEM("uc", "uc_F : IECTReferListenNotifyDeliveryFailedParam" \
+        IMS_TRACE_MEM("uc",
+                "uc_F : IECTReferListenNotifyDeliveryFailedParam"
                 "[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IECTReferListenNotifyDeliveryFailedParam), this, 0);
     }
 
 private:
     IECTReferListenNotifyDeliveryFailedParam(
-            IN const IECTReferListenNotifyDeliveryFailedParam &objRHS);
+            IN const IECTReferListenNotifyDeliveryFailedParam& objRHS);
     IECTReferListenNotifyDeliveryFailedParam& operator=(
-            IN const IECTReferListenNotifyDeliveryFailedParam &objRHS);
+            IN const IECTReferListenNotifyDeliveryFailedParam& objRHS);
 
 public:
-    IMS_SINT32      nStatusCode;
+    IMS_SINT32 nStatusCode;
 };
 #endif /*  INTERFACE_UC_ECT_REFERENCE_LISTENER_H_ */

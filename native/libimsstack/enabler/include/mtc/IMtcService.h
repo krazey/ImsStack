@@ -42,9 +42,9 @@ enum class ServiceStatus
 
 enum class ServiceType
 {
-    UNKNOWN     = 0,
-    NORMAL      = 1 << 0,
-    EMERGENCY   = 1 << 1,
+    UNKNOWN = 0,
+    NORMAL = 1 << 0,
+    EMERGENCY = 1 << 1,
 };
 
 #endif

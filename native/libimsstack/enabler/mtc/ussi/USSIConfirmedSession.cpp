@@ -33,11 +33,12 @@ __IMS_TRACE_TAG_COM_UC__;
 ------------------------------------------------------------------------------------------------ */
 PUBLIC
 USSIConfirmedSession::USSIConfirmedSession(IN IMtcCall* pSession)
-    // TODO, MTC BUILD
-    // : ConfirmedSession(pSession)
-    : m_pISIPClientConnection(IMS_NULL)
-    , m_pISIPServerConnection(IMS_NULL)
-    , m_nUSSType(USSDDataParser::AnyExtension::USS_TYPE_NONE)
+        // TODO, MTC BUILD
+        // : ConfirmedSession(pSession)
+        :
+        m_pISIPClientConnection(IMS_NULL),
+        m_pISIPServerConnection(IMS_NULL),
+        m_nUSSType(USSDDataParser::AnyExtension::USS_TYPE_NONE)
 {
     // TODO, MTC BUILD
     UNUSED_PARAM(pSession);
@@ -47,8 +48,7 @@ USSIConfirmedSession::USSIConfirmedSession(IN IMtcCall* pSession)
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC VIRTUAL
-USSIConfirmedSession::~USSIConfirmedSession()
+PUBLIC VIRTUAL USSIConfirmedSession::~USSIConfirmedSession()
 {
     IMS_TRACE_MEM("uc", "uc_F : USSIConfirmedSession[%" PFLS_u "][%" PFLS_x "]",
             sizeof(USSIConfirmedSession), this, 0);
@@ -67,10 +67,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 }
 
 // TODO, MTC BUILD
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// IMS_BOOL USSIConfirmedSession::Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam,
+// /*
+
+// */ PUBLIC VIRTUAL IMS_BOOL USSIConfirmedSession::Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP
+// nInParam,
 //         OUT IMS_UINTP* /*pnOutParam*/)
 // {
 //     if (nCmdType == CMD_HANDLING_RESULT)
@@ -87,22 +87,21 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// void USSIConfirmedSession::SetUSSType(IN IMS_UINT32 nUSSType)
+// /*
+
+// */ PUBLIC VIRTUAL void USSIConfirmedSession::SetUSSType(IN IMS_UINT32 nUSSType)
 // {
 //     if ((m_nUSSType == USSDDataParser::AnyExtension::USS_TYPE_NONE)
-//             || (m_nUSSType != nUSSType && nUSSType != USSDDataParser::AnyExtension::USS_TYPE_NONE))
+//             || (m_nUSSType != nUSSType && nUSSType !=
+//             USSDDataParser::AnyExtension::USS_TYPE_NONE))
 //     {
 //         m_nUSSType = nUSSType;
 //     }
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIConfirmedSession::OnMessage(IN IMSMSG &objMSG)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIConfirmedSession::OnMessage(IN IMSMSG &objMSG)
 // {
 //     IMS_TRACE_I("OnMessage : Msg[%d]", objMSG.nMSG, 0, 0);
 
@@ -120,10 +119,9 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// IMS_BOOL USSIConfirmedSession::IsUSSIInfoReceived(IN ISipMessage* pISIPMessage)
+// /*
+
+// */ PUBLIC VIRTUAL IMS_BOOL USSIConfirmedSession::IsUSSIInfoReceived(IN ISipMessage* pISIPMessage)
 // {
 //     IMS_TRACE_I("IsUSSIInfoReceived()", 0, 0, 0);
 
@@ -136,10 +134,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIConfirmedSession::StateXXX_SS_TransactionReceived(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIConfirmedSession::StateXXX_SS_TransactionReceived(IN IMSMSG
+// &objMsg)
 // {
 //     m_pISIPServerConnection = reinterpret_cast<ISipServerConnection*>(objMsg.nLparam);
 
@@ -171,10 +169,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIConfirmedSession::StateXXX_SS_SendTransaction(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIConfirmedSession::StateXXX_SS_SendTransaction(IN IMSMSG
+// &objMsg)
 // {
 //     IConfirmedSendTransactionParam* pTransactionParam
 //             = reinterpret_cast<IConfirmedSendTransactionParam*>(objMsg.nLparam);
@@ -192,7 +190,8 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     IMS_TRACE_D("StateXXX_SS_SendTransaction : USSI[%s]", strUSSIString.GetStr(), 0, 0);
 
 //     if (SetUSSIBody(
-//             m_pISIPClientConnection->GetMessage(), strUSSIString, USSDDataParser::ERROR_CODE_NONE))
+//             m_pISIPClientConnection->GetMessage(), strUSSIString,
+//             USSDDataParser::ERROR_CODE_NONE))
 //     {
 //         m_pISIPClientConnection->SetListener(this);
 //         m_pISIPClientConnection->SetErrorListener(this);
@@ -212,13 +211,14 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSIConfirmedSession::StateCONVERSATION_SS_Terminated(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSIConfirmedSession::StateCONVERSATION_SS_Terminated(IN IMSMSG
+// &objMsg)
 // {
 //     IMS_SINT32 eTerminationReason = LONG_TO_SINT(objMsg.nWparam);
-//     FailReason failReason(UC_FAILURE(m_nSlotID)->TerminationReasonToFailReason(eTerminationReason),
+//     FailReason
+//     failReason(UC_FAILURE(m_nSlotID)->TerminationReasonToFailReason(eTerminationReason),
 //             eTerminationReason);
 
 //     IMS_TRACE_I("StateCONVERSATION_SS_Terminated", 0, 0, 0);
@@ -241,10 +241,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIConfirmedSession::SendUSSITransactionToListn(IN ISipMessage* pISIPMessage)
+// /*
+
+// */ PROTECTED VIRTUAL void USSIConfirmedSession::SendUSSITransactionToListn(IN ISipMessage*
+// pISIPMessage)
 // {
 //     IConfirmedTransactionReceivedParam* pParam = new IConfirmedTransactionReceivedParam();
 //     pParam->pISIPMessage = pISIPMessage;
@@ -254,10 +254,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     m_pListener->Confirmed_TransactionReceived((IMS_UINTP)pParam);
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIConfirmedSession::ClientConnection_NotifyResponse(IN ISipClientConnection *piSCC,
+// /*
+
+// */ PROTECTED VIRTUAL void USSIConfirmedSession::ClientConnection_NotifyResponse(IN
+// ISipClientConnection *piSCC,
 //         IN ISipClientConnection * /* piForkedSCC = IMS_NULL */)
 // {
 //     if (piSCC == IMS_NULL)
@@ -290,10 +290,9 @@ USSIConfirmedSession::~USSIConfirmedSession()
 
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIConfirmedSession::Error_NotifyError(IN ISipConnection* /*piSC*/,
+// /*
+
+// */ PROTECTED VIRTUAL void USSIConfirmedSession::Error_NotifyError(IN ISipConnection* /*piSC*/,
 //         IN IMS_SINT32 /*nCode*/, IN const AString& /*strMessage*/)
 // {
 //     if (m_pISIPClientConnection != IMS_NULL)
@@ -305,10 +304,10 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     IMS_TRACE_I("Error_NotifyError", 0, 0, 0);
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIConfirmedSession::SendTransactionWithErrorCode(IMS_UINT32 nErrorCode)
+// /*
+
+// */ PROTECTED VIRTUAL void USSIConfirmedSession::SendTransactionWithErrorCode(IMS_UINT32
+// nErrorCode)
 // {
 //     IMS_TRACE_D("SendTransactionWithErrorCode", 0, 0, 0);
 
@@ -339,18 +338,17 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     }
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSIConfirmedSession::LoadConfig()
+// /*
+
+// */ PROTECTED VIRTUAL void USSIConfirmedSession::LoadConfig()
 // {
 //     return ConfirmedSession::LoadConfig();
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PRIVATE VIRTUAL
-// void USSIConfirmedSession::SendTransactionResponse(IN IMS_UINT32 nResponseCode,
+// /*
+
+// */ PRIVATE VIRTUAL void USSIConfirmedSession::SendTransactionResponse(IN IMS_UINT32
+// nResponseCode,
 //         IN const AString& strPhrase /*= AString::ConstEmpty()*/)
 // {
 //     if (m_pISIPServerConnection == IMS_NULL)
@@ -369,10 +367,9 @@ USSIConfirmedSession::~USSIConfirmedSession()
 //     m_pISIPServerConnection = IMS_NULL;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PRIVATE VIRTUAL
-// IMS_BOOL USSIConfirmedSession::SetUSSIBody(IN ISipMessage* pISIPMessage,
+// /*
+
+// */ PRIVATE VIRTUAL IMS_BOOL USSIConfirmedSession::SetUSSIBody(IN ISipMessage* pISIPMessage,
 //         IN const AString& strUSSDStr, IN IMS_UINT32 nErrorCode)
 // {
 //     ISipMessageBodyPart *piBodyPart = pISIPMessage->CreateBodyPart();

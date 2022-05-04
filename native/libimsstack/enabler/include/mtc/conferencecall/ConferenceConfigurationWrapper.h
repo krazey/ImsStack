@@ -26,10 +26,10 @@ public:
     static IMS_BOOL IsSubscriptionForParticipantRequired();
 
     // timer value. (-1) : permanent. (0) : not wait
-    static IMS_SINT32 GetWaitTimeInitiation(); // 12s
+    static IMS_SINT32 GetWaitTimeInitiation();  // 12s
     static IMS_SINT32 GetWaitTimeNotifyActive();
-    static IMS_SINT32 GetWaitTimeNotifyTerminated(); // 3s
-    static IMS_SINT32 GetWaitTimeSipFrag(); // 2s
+    static IMS_SINT32 GetWaitTimeNotifyTerminated();  // 3s
+    static IMS_SINT32 GetWaitTimeSipFrag();           // 2s
 
     static IMS_SINT32 GetReferTypeForInvite();
 };

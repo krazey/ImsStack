@@ -5,27 +5,19 @@
  * brief : Create USSIEarlySession
  */
 
-
 #ifndef USSI_EARLYSESSION_H_
 #define USSI_EARLYSESSION_H_
 
 #include "call/IMtcCall.h"
 
 class USSIEarlySession
-    // TODO, MTC BUILD
-    // : public EarlySession
+// TODO, MTC BUILD
+// : public EarlySession
 {
-
-/* ------------------------------------------------------------------------------------------------
-    Constructor, Destructor, Operator Overloading
------------------------------------------------------------------------------------------------- */
 public:
     USSIEarlySession(IN ISession* pISession, IN IMtcCall* pSession);
     virtual ~USSIEarlySession();
 
-/* ------------------------------------------------------------------------------------------------
-    State Machine METHODS
------------------------------------------------------------------------------------------------- */
 protected:
     // TODO, MTC BUILD
     // virtual IMS_BOOL StateIDLE_Start(IN IMSMSG &objMsg);
@@ -42,11 +34,9 @@ protected:
     // virtual IMSList<AString> FormContentTypeHeader();
     // virtual void LoadConfig();
 
-// ------------------------------------------------------------------------------------------------
-// Variable
-// ------------------------------------------------------------------------------------------------
+    // Variable
+
 protected:
 private:
-
 };
 #endif /*  USSI_EARLYSESSION_H_ */

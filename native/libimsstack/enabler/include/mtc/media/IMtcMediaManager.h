@@ -20,7 +20,7 @@ using NegotiationState = NEGO_STATE;
 class IMtcMediaManager
 {
 public:
-    virtual ~IMtcMediaManager() {};
+    virtual ~IMtcMediaManager(){};
 
     /**
      * @brief
@@ -61,8 +61,8 @@ public:
      * @param bForked Set IMS_TRUE if it is forking case, otherwise set IMS_FALSE.
      * @param bOriginalProfile Set IMS_FALSE if it is an early-session case, otherwise set IMS_TRUE.
      */
-    virtual void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
-            IN IMS_BOOL bOriginalProfile) = 0;
+    virtual void CreateMediaProfile(
+            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) = 0;
 
     /**
      * @brief To check if the ringback tone is played with a locally generated tone.
@@ -137,21 +137,21 @@ public:
      * @param eMediaTypes Media types for setting the RTP port.
      * @param nPort The number to set the port.
      */
-    virtual void SetRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaTypes,
-            IN IMS_UINT32 nPort) = 0;
+    virtual void SetRtpPort(
+            IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) = 0;
 
     /**
      * @brief Request video data usage when the call is terminated.
      */
     virtual void RequestVideoDataUsage() = 0;
 
-    virtual void SetEnforcedDirection(/* IN ISession* piSession, */IN IMS_UINT32 eMediaTypes,
-            IN IMS_SINT32 eDir) = 0;
+    virtual void SetEnforcedDirection(
+            /* IN ISession* piSession, */ IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir) = 0;
     virtual IMS_BOOL GetCvoResult(IN ISession* piSession) = 0;
     virtual void SendFastVideoUpdate(/* IN ISession* piSession */) = 0;
-    virtual void SetConferenceCall(/* IN ISession* piSession, */IN IMS_BOOL bConference) = 0;
+    virtual void SetConferenceCall(/* IN ISession* piSession, */ IN IMS_BOOL bConference) = 0;
     virtual void SetConfirmedSession(IN ISession* piSession) = 0;
-    virtual void UpdateStatsReportOption(/* IN ISession* piSession, */IN IMS_UINT32 eAction) = 0;
+    virtual void UpdateStatsReportOption(/* IN ISession* piSession, */ IN IMS_UINT32 eAction) = 0;
 
     /**
      * @brief Get NegotiationState via MediaSession.
@@ -165,8 +165,7 @@ public:
      * @param piSession ISession instance to get media profile id.
      * @return Negotiated direction.
      */
-    virtual IMS_SINT32 GetNegotiatedDirection(IN ISession* piSession,
-            IN IMS_UINT32 eMediaType) = 0;
+    virtual IMS_SINT32 GetNegotiatedDirection(IN ISession* piSession, IN IMS_UINT32 eMediaType) = 0;
 
     /**
      * @brief Get the negotiated quality via MediaSession.

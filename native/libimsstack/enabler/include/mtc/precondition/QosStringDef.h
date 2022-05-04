@@ -140,43 +140,35 @@ public:
 };
 
 #ifndef PS_SdpMediaType
-#define PS_SdpMediaType(A) \
-QosStringDef::PS_SdpMediaType(A)
+#define PS_SdpMediaType(A) QosStringDef::PS_SdpMediaType(A)
 #endif
 
 #ifndef PS_QosAttribute
-#define PS_QosAttribute(A) \
-QosStringDef::PS_QosAttribute(A)
+#define PS_QosAttribute(A) QosStringDef::PS_QosAttribute(A)
 #endif
 
 #ifndef PS_QosCheckType
-#define PS_QosCheckType(A) \
-QosStringDef::PS_QosCheckType(A)
+#define PS_QosCheckType(A) QosStringDef::PS_QosCheckType(A)
 #endif
 
 #ifndef PS_QosDir
-#define PS_QosDir(A) \
-QosStringDef::PS_QosDir(A)
+#define PS_QosDir(A) QosStringDef::PS_QosDir(A)
 #endif
 
 #ifndef PS_QosStrength
-#define PS_QosStrength(A) \
-QosStringDef::PS_QosStrength(A)
+#define PS_QosStrength(A) QosStringDef::PS_QosStrength(A)
 #endif
 
 #ifndef PS_QosLossPolicy
-#define PS_QosLossPolicy(A) \
-QosStringDef::PS_QosLossPolicy(A)
+#define PS_QosLossPolicy(A) QosStringDef::PS_QosLossPolicy(A)
 #endif
 
 #ifndef PS_QosStatus
-#define PS_QosStatus(A) \
-QosStringDef::PS_QosStatus(A)
+#define PS_QosStatus(A) QosStringDef::PS_QosStatus(A)
 #endif
 
 #ifndef PS_QosTimerType
-#define PS_QosTimerType(A) \
-QosStringDef::PS_QosTimerType(A)
+#define PS_QosTimerType(A) QosStringDef::PS_QosTimerType(A)
 #endif
 
 #endif

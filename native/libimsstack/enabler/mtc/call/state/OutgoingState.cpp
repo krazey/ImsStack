@@ -40,14 +40,12 @@ OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
 {
 }
 
-PUBLIC VIRTUAL
-OutgoingState::~OutgoingState()
+PUBLIC VIRTUAL OutgoingState::~OutgoingState()
 {
     DeleteInactiveSessions();
 }
 
-PUBLIC VIRTUAL
-void OutgoingState::OnEnter()
+PUBLIC VIRTUAL void OutgoingState::OnEnter()
 {
     MtcSession* pSession = m_objContext.GetSession();
     if (pSession)
@@ -56,8 +54,7 @@ void OutgoingState::OnEnter()
     }
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
 
@@ -70,8 +67,7 @@ CallStateName OutgoingState::Terminate(IN const FailReason& objReason)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::HandleSrvccFailure(IN UpdateType eUpdateType)
+PUBLIC VIRTUAL CallStateName OutgoingState::HandleSrvccFailure(IN UpdateType eUpdateType)
 {
     const IMS_UINT32 nLast = m_objSessions.GetSize() - 1;
 
@@ -86,14 +82,13 @@ CallStateName OutgoingState::HandleSrvccFailure(IN UpdateType eUpdateType)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 /* nType */)
+PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 /* nType */)
 {
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL CallStateName OutgoingState::QosReserved(
+        IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
     IMS_TRACE_D("QosReserved : MediaType[%d]", eMediaType, 0, 0);
 
@@ -119,7 +114,7 @@ CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
 
     if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) != IMS_NULL &&
             SdpPreconditionHelper::IsLocalResourceReservedInSdp(
-            piSession, IMessage::SESSION_EARLY_UPDATE))
+                    piSession, IMessage::SESSION_EARLY_UPDATE))
     {
         IMS_TRACE_D("QosReserved : UE already send early UPDATE with activated QoS.", 0, 0, 0);
         return GetStateName();
@@ -135,8 +130,8 @@ CallStateName OutgoingState::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
+PUBLIC VIRTUAL CallStateName OutgoingState::QosReserveFailed(
+        IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
     if (eNextAction == QosLossPolicy::RELEASE)
     {
@@ -155,8 +150,7 @@ CallStateName OutgoingState::QosReserveFailed(IN ISession* piSession, IN QosLoss
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStarted", 0, 0, 0);
     IMessage* piMessage = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
@@ -208,8 +202,7 @@ CallStateName OutgoingState::SessionStarted(IN ISession* piSession)
     return CallStateName::ESTABLISHED;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
@@ -222,8 +215,7 @@ CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
     m_objContext.GetMediaManager().Terminate();
@@ -234,12 +226,11 @@ CallStateName OutgoingState::SessionTerminated(IN ISession* piSession)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piMessage =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
     UpdateCallType(piSession, piMessage, IMS_TRUE);
@@ -261,12 +252,11 @@ CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession* piSession)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
-    IMessage* piResponse = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_EARLY_UPDATE);
+    IMessage* piResponse =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
     FailReason objReason = EarlyUpdateErrorHandler().Handle(piResponse);
 
     HandleCancel(piSession, objReason);
@@ -275,14 +265,13 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateFailed(IN ISession* piSessio
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateReceived", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
     m_objContext.GetCallInfo().bRttCapable = IsRttCapable(piMessage);
-    UpdateCallType(piSession, piMessage, IMS_TRUE); // TODO: why differs from AlertingState?
+    UpdateCallType(piSession, piMessage, IMS_TRUE);  // TODO: why differs from AlertingState?
     NegotiateExtension(
             m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
@@ -307,7 +296,7 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         return GetStateName();
     }
 
-    UpdatePreconditionCapability(piSession, piMessage); // TODO: not in AlertingState?
+    UpdatePreconditionCapability(piSession, piMessage);  // TODO: not in AlertingState?
 
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objSessions.GetValue(piSession)) ==
             IMS_FAILURE)
@@ -319,12 +308,11 @@ CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN ISession* piSess
         return CallStateName::TERMINATING;
     }
 
-    SendProgressing(); // TODO: enforce remote alert to false?
+    SendProgressing();  // TODO: enforce remote alert to false?
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionForkedResponseReceived(
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
         IN ISession* piSession, IN ISession* piForkedSession)
 {
     IMS_TRACE_D("SessionForkedResponseReceived", 0, 0, 0);
@@ -345,8 +333,7 @@ CallStateName OutgoingState::SessionForkedResponseReceived(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionPRAckDelivered", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousResponse(IMessage::SESSION_PRACK);
@@ -368,7 +355,7 @@ CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
 
     if (piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE) &&
             SdpPreconditionHelper::IsLocalResourceReservedInSdp(
-            piSession, IMessage::SESSION_EARLY_UPDATE))
+                    piSession, IMessage::SESSION_EARLY_UPDATE))
     {
         return GetStateName();
     }
@@ -405,32 +392,29 @@ CallStateName OutgoingState::SessionPRAckDelivered(IN ISession* piSession)
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionPRAckDeliveryFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionPRAckDeliveryFailed", 0, 0, 0);
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START);
-    FailReason objReason = FailReason(
-            nStatusCode == SipStatusCode::SC_INVALID ?
-            FAIL_REASON_SESSION_RES_TIMEOUT :
-            FAIL_REASON_SESSION_SETUPFAILED,
-            nStatusCode);
+    FailReason objReason =
+            FailReason(nStatusCode == SipStatusCode::SC_INVALID ? FAIL_REASON_SESSION_RES_TIMEOUT
+                                                                : FAIL_REASON_SESSION_SETUPFAILED,
+                    nStatusCode);
     HandleCancel(piSession, objReason);
     OnStartFailed(piSession, objReason);
 
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionProvisionalResponseReceived(
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionProvisionalResponseReceived", 0, 0, 0);
     m_objContext.GetTimer().Stop(TIMER_MO_1XX_WAIT);
     m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
 
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_START, nIndex);
+    IMessage* piMessage =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
 
     if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
             IMS_FAILURE)
@@ -444,8 +428,8 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
-            piSession, IMessage::SESSION_START, nIndex);
+    IMS_SINT32 nStatusCode =
+            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
     // TODO: move to SessionAlerting
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -471,7 +455,7 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
         return CallStateName::TERMINATING;
     }
 
-    if (nStatusCode == SipStatusCode::SC_180/* && local precondition support? */)
+    if (nStatusCode == SipStatusCode::SC_180 /* && local precondition support? */)
     {
         m_objContext.GetPreconditionManager().SetRemoteResourceAvailable(piSession);
     }
@@ -481,15 +465,15 @@ CallStateName OutgoingState::SessionProvisionalResponseReceived(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL
-CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
+PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
+        IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionRPRReceived", 0, 0, 0);
     m_objContext.GetTimer().Stop(TIMER_MO_1XX_WAIT);
     m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
 
-    IMessage* piMessage = MessageUtil::GetPreviousResponse(
-            piSession, IMessage::SESSION_START, nIndex);
+    IMessage* piMessage =
+            MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
 
     if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_START) ==
             IMS_FAILURE)
@@ -503,8 +487,8 @@ CallStateName OutgoingState::SessionRPRReceived(IN ISession* piSession, IN IMS_U
 
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
 
-    IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
-            piSession, IMessage::SESSION_START, nIndex);
+    IMS_SINT32 nStatusCode =
+            MessageUtil::GetResponseStatusCode(piSession, IMessage::SESSION_START, nIndex);
     // TODO: move to SessionAlerting
     if (nStatusCode == SipStatusCode::SC_180)
     {
@@ -638,7 +622,8 @@ void OutgoingState::UpdateCallType(
         IN ISession* /* piSession */, IN IMessage* /* piMessage */, IN IMS_BOOL /* bPeerView */)
 {
     CallType eCallType = /* MessageUtil::CheckSessionType(piMessage, piSession, bPeerView,
-            m_objContext.GetCallInfo().eServiceType) */ CallType::VOIP;
+            m_objContext.GetCallInfo().eServiceType) */
+            CallType::VOIP;
     if (eCallType == CallType::UNKNOWN)
     {
         IMS_TRACE_I("UpdateCallType : NOT UPDATE", 0, 0, 0);
@@ -675,11 +660,8 @@ void OutgoingState::SendProgressing()
 {
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
-    m_objContext.GetUiNotifier().SendProgressing(
-            &m_objContext.GetCallInfo(),
-            &objMediaInfo,
-            m_objContext.GetSupplementaryService().GetServices(),
-            m_bRemoteAlerted);
+    m_objContext.GetUiNotifier().SendProgressing(&m_objContext.GetCallInfo(), &objMediaInfo,
+            m_objContext.GetSupplementaryService().GetServices(), m_bRemoteAlerted);
 }
 
 PRIVATE
@@ -704,8 +686,8 @@ void OutgoingState::OnStartFailed(IN ISession* piSession, IN const FailReason& o
         return;
     }
 
-    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_R_RAT
-            && objReason.nExtra == CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
+    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_R_RAT &&
+            objReason.nExtra == CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
     {
         HandleCountrySpecificServiceUrn(piSession->GetPreviousResponse(IMessage::SESSION_START));
     }

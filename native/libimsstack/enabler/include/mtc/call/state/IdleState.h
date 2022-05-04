@@ -20,8 +20,7 @@ class SuppService;
 /**
  * Represents the state that any messages have not been sent to the remote.
  */
-class IdleState :
-        public MtcCallState
+class IdleState : public MtcCallState
 {
 public:
     explicit IdleState(IN IMtcCallContext& objContext);
@@ -29,24 +28,14 @@ public:
     IdleState(IN const IdleState&) = delete;
     IdleState& operator=(IN const IdleState&) = delete;
 
-    CallStateName Start(
-            IN CallType eCallType,
-            IN const AString& strTarget,
+    CallStateName Start(IN CallType eCallType, IN const AString& strTarget,
             IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices)
-            override;
-    CallStateName StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN IMSList<ConfUser*> lstUsers)
-            override;
-    CallStateName StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN IMSList<ConfUser*> lstUsers)
-            override;
+            IN const IMSMap<SuppType, SuppService*>& objSuppServices) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+            IN IMSList<ConfUser*> lstUsers) override;
+    CallStateName StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN IMSList<ConfUser*> lstUsers) override;
     CallStateName HandleIncoming(
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     CallStateName Terminate(IN const FailReason& objReason) override;
@@ -62,8 +51,7 @@ private:
         MERGE,
     };
 
-    CallStateName ContinueStart(
-            IN MediaInfo* pMediaInfo);
+    CallStateName ContinueStart(IN MediaInfo* pMediaInfo);
     CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
 
@@ -80,7 +68,7 @@ private:
 
     ConferenceType m_eConferenceStartType;  // TODO: usage?
     std::unique_ptr<IMtcBlockChecker> m_pBlockChecker;
-    std::function<CallStateName ()> m_objOperationAfterBlockCheck;
+    std::function<CallStateName()> m_objOperationAfterBlockCheck;
 };
 
 #endif

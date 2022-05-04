@@ -16,12 +16,10 @@
 
 __IMS_TRACE_TAG_COM_UC__;
 
-
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PUBLIC GLOBAL
-void USSDDataCreator::GetXMLBody(IN const AString& strUSSDStr, OUT AStringBuffer& objXML,
-        IN IMS_SINT32 nSlotID,
+PUBLIC GLOBAL void USSDDataCreator::GetXMLBody(IN const AString& strUSSDStr,
+        OUT AStringBuffer& objXML, IN IMS_SINT32 nSlotID,
         IN IMS_UINT32 nUSSType /*= USSDDataParser::AnyExtension::USS_TYPE_NONE*/,
         IN IMS_UINT32 nErrorCode /*= USSDDataParser::ERROR_CODE_NONE*/)
 {
@@ -33,8 +31,8 @@ void USSDDataCreator::GetXMLBody(IN const AString& strUSSDStr, OUT AStringBuffer
 
     // TODO, MTC BUILD
     UNUSED_PARAM(nSlotID);
-    objXML.Append(CreateAttribute(USSDConstants::ELEMENT_LANGUAGE,
-            USSDConstants::ELEMENT_LANGUAGE_EN));
+    objXML.Append(
+            CreateAttribute(USSDConstants::ELEMENT_LANGUAGE, USSDConstants::ELEMENT_LANGUAGE_EN));
 
     // ussd-string
     objXML.Append(TextParser::CHAR_HTAB);
@@ -87,8 +85,8 @@ void USSDDataCreator::GetXMLBody(IN const AString& strUSSDStr, OUT AStringBuffer
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PRIVATE GLOBAL
-const AString USSDDataCreator::CreateStartElement(IN const AString &strStartElementName)
+PRIVATE GLOBAL const AString USSDDataCreator::CreateStartElement(
+        IN const AString& strStartElementName)
 {
     if (strStartElementName.GetLength() <= 0)
     {
@@ -110,9 +108,8 @@ const AString USSDDataCreator::CreateStartElement(IN const AString &strStartElem
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PRIVATE GLOBAL
-const AString USSDDataCreator::CreateAttribute(IN const AString &strAttributeName,
-        IN const AString &strValue)
+PRIVATE GLOBAL const AString USSDDataCreator::CreateAttribute(
+        IN const AString& strAttributeName, IN const AString& strValue)
 {
     if (strAttributeName.GetLength() <= 0 || strValue.GetLength() <= 0)
     {
@@ -139,8 +136,7 @@ const AString USSDDataCreator::CreateAttribute(IN const AString &strAttributeNam
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PRIVATE GLOBAL
-const AString USSDDataCreator::CreateEndElement(IN const AString &strEndElementName)
+PRIVATE GLOBAL const AString USSDDataCreator::CreateEndElement(IN const AString& strEndElementName)
 {
     if (strEndElementName.GetLength() <= 0)
     {
@@ -163,8 +159,8 @@ const AString USSDDataCreator::CreateEndElement(IN const AString &strEndElementN
 
 /* ------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------ */
-PRIVATE GLOBAL
-void USSDDataCreator::GetErrorCode(IN IMS_UINT32 nErrorCode, IN AString &strErrorCode)
+PRIVATE GLOBAL void USSDDataCreator::GetErrorCode(
+        IN IMS_UINT32 nErrorCode, IN AString& strErrorCode)
 {
     if (nErrorCode == USSDDataParser::ERROR_CODE_NONE)
     {

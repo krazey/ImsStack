@@ -17,16 +17,13 @@
 #include "ect/EctManager.h"
 
 PUBLIC
-MtcCallController::MtcCallController(IN IMtcContext &objContext) :
+MtcCallController::MtcCallController(IN IMtcContext& objContext) :
         m_objContext(objContext),
         m_objCallManager(objContext.GetCallManager())
 {
 }
 
-PUBLIC VIRTUAL
-MtcCallController::~MtcCallController()
-{
-}
+PUBLIC VIRTUAL MtcCallController::~MtcCallController() {}
 
 PUBLIC
 void MtcCallController::TerminateCalls(
@@ -106,16 +103,14 @@ void MtcCallController::RemoveCalls(IN KeyType eKeyType, IN Key nKey)
 PUBLIC
 CallKey MtcCallController::Open(IN ServiceType eServiceType, IN CallInfo& objCallInfo)
 {
-    return m_objCallManager.CreateCall(eServiceType, objCallInfo)
-            ->GetKey();
+    return m_objCallManager.CreateCall(eServiceType, objCallInfo)->GetKey();
 }
 
 PUBLIC
 void MtcCallController::Attach(IN CallKey nCallKey, IN JniMtcCallThread* pJniMtcCallThread,
         IN JniMediaSessionThread* pJniMediaThread)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Attach(pJniMtcCallThread, pJniMediaThread);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Attach(pJniMtcCallThread, pJniMediaThread);
 }
 
 PUBLIC
@@ -128,7 +123,7 @@ void MtcCallController::Detach(IN CallKey nCallKey)
 
 PUBLIC
 void MtcCallController::HandleIncoming(
-        IN IMtcService* pService, IN ISession* piSession,IN JniMtcServiceThread* pServiceThread)
+        IN IMtcService* pService, IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
     if (IsUssi(piSession))
     {
@@ -145,103 +140,88 @@ void MtcCallController::Start(IN CallKey nCallKey, IN CallType eCallType,
         IN const AString& strTarget, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices, IN IDialogEvent* /* pDialog */)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Start(eCallType, strTarget, pMediaInfo, objSuppServices);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Start(
+            eCallType, strTarget, pMediaInfo, objSuppServices);
 }
 
 PUBLIC
 void MtcCallController::HandleUserAlert(IN CallKey nCallKey)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->HandleUserAlert();
+    m_objCallManager.GetCallByCallKey(nCallKey)->HandleUserAlert();
 }
 
 PUBLIC
-void MtcCallController::Accept(IN CallKey nCallKey, IN CallType eCallType,
-        IN MediaInfo* pMediaInfo)
+void MtcCallController::Accept(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Accept(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Accept(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::Reject(IN CallKey nCallKey, IN const FailReason& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Reject(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Reject(objReason);
 }
 
 PUBLIC
 void MtcCallController::Hold(IN CallKey nCallKey, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Hold(pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Hold(pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::Resume(IN CallKey nCallKey, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Resume(pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Resume(pMediaInfo);
 }
 
 PUBLIC
-void MtcCallController::AcceptResume(IN CallKey nCallKey, IN CallType eCallType,
-        IN MediaInfo* pMediaInfo)
+void MtcCallController::AcceptResume(
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->AcceptResume(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptResume(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::RejectResume(IN CallKey nCallKey, IN const FailReason& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->RejectResume(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->RejectResume(objReason);
 }
 
 PUBLIC
 void MtcCallController::Terminate(IN CallKey nCallKey, IN const FailReason& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Terminate(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Terminate(objReason);
 }
 
 PUBLIC
-void MtcCallController::Update(IN CallKey nCallKey, IN CallType eCallType,
-        IN MediaInfo* pMediaInfo)
+void MtcCallController::Update(IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->Convert(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->Convert(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::CancelUpdate(IN CallKey nCallKey, IN const FailReason& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->CancelConvert(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->CancelConvert(objReason);
 }
 
 PUBLIC
-void MtcCallController::AcceptUpdate(IN CallKey nCallKey, IN CallType eCallType,
-        IN MediaInfo* pMediaInfo)
+void MtcCallController::AcceptUpdate(
+        IN CallKey nCallKey, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->AcceptConvert(eCallType, pMediaInfo);
+    m_objCallManager.GetCallByCallKey(nCallKey)->AcceptConvert(eCallType, pMediaInfo);
 }
 
 PUBLIC
 void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const FailReason& objReason)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->RejectConvert(objReason);
+    m_objCallManager.GetCallByCallKey(nCallKey)->RejectConvert(objReason);
 }
 
 PUBLIC
 void MtcCallController::SendTransaction(IN CallKey nCallKey, IN const AString& strUssi)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)
-            ->SendUssi(strUssi);
+    m_objCallManager.GetCallByCallKey(nCallKey)->SendUssi(strUssi);
 }
 
 /*
@@ -308,7 +288,6 @@ IMS_BOOL MtcCallController::IsUssi(IN ISession* piSession)
         return IMS_FALSE;
     }
 
-    return MessageUtil::ContainsValue(
-            piMessage, USSDConstants::HEADER_USSD_PACKAGE, ISipHeader::UNKNOWN,
-            USSDConstants::HEADER_RECVINFO);
+    return MessageUtil::ContainsValue(piMessage, USSDConstants::HEADER_USSD_PACKAGE,
+            ISipHeader::UNKNOWN, USSDConstants::HEADER_RECVINFO);
 }

@@ -20,8 +20,7 @@ JniMtcServiceThread::JniMtcServiceThread() :
     IMS_TRACE_D("+JniMtcServiceThread", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-JniMtcServiceThread::~JniMtcServiceThread()
+PUBLIC VIRTUAL JniMtcServiceThread::~JniMtcServiceThread()
 {
     IMS_TRACE_D("~JniMtcServiceThread", 0, 0, 0);
 }
@@ -64,7 +63,7 @@ void JniMtcServiceThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallI
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 
-    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr())); // TODO: Log.
+    objParcel.writeString16(android::String16(AString("MTCLOG").GetStr()));  // TODO: Log.
 
     SendData2Java(objParcel);
 }

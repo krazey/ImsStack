@@ -4,7 +4,6 @@
  * brief : Create USSISession
  */
 
-
 #include "ServiceTrace.h"
 
 #include "IMessage.h"
@@ -25,8 +24,8 @@ __IMS_TRACE_TAG_COM_UC__;
 
 // TODO, MTC BUILD
 PUBLIC
-USSISession::USSISession(IN IMtcApp* pApp, IN IMtcService* pService, IN AString aStrUIKey,
-        IN IMS_UINTP nIMSKey)
+USSISession::USSISession(
+        IN IMtcApp* pApp, IN IMtcService* pService, IN AString aStrUIKey, IN IMS_UINTP nIMSKey)
 // PUBLIC
 // USSISession::USSISession(IN IMtcApp* pApp, IN IMtcService* pService, IN AString aStrUIKey,
 //         IN IMS_UINTP nIMSKey, IN IUCSessionListener* pListener)
@@ -36,33 +35,36 @@ USSISession::USSISession(IN IMtcApp* pApp, IN IMtcService* pService, IN AString 
     UNUSED_PARAM(pService);
     UNUSED_PARAM(aStrUIKey);
     UNUSED_PARAM(nIMSKey);
-    IMS_TRACE_MEM("uc", "uc_M : USSISession[%" PFLS_u "][%" PFLS_x "]", sizeof(USSISession), this,
-            0);
+    IMS_TRACE_MEM(
+            "uc", "uc_M : USSISession[%" PFLS_u "][%" PFLS_x "]", sizeof(USSISession), this, 0);
     //---------------------------------------------------------------------------------------------
 }
 
-PUBLIC VIRTUAL
-USSISession::~USSISession()
+PUBLIC VIRTUAL USSISession::~USSISession()
 {
-    IMS_TRACE_MEM("uc", "uc_F : USSISession[%" PFLS_u "][%" PFLS_x "]", sizeof(USSISession), this,
-            0);
+    IMS_TRACE_MEM(
+            "uc", "uc_F : USSISession[%" PFLS_u "][%" PFLS_x "]", sizeof(USSISession), this, 0);
     //---------------------------------------------------------------------------------------------
 }
 
 // TODO, MTC BUILD
 
-// /* M ----------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// AString USSISession::GetToURI(IN ICoreService* /*pIService*/, IN ISession* /*pISession*/,
+// /* M
+// ----------------------------------------------------------------------------------------------
+
+// */ PUBLIC VIRTUAL AString USSISession::GetToURI(IN ICoreService* /*pIService*/, IN ISession*
+// /*pISession*/,
 //         IN const AString &/*aStrNumber*/)
 // {
 //     return AString::ConstNull();
 // }
 
 // // TODO, MTC BUILD
-// // /* M ----------------------------------------------------------------------------------------------
-// // ------------------------------------------------------------------------------------------------ */
+// // /* M
+// ----------------------------------------------------------------------------------------------
+// //
+
+// */
 // // PROTECTED VIRTUAL
 // // EarlySession* USSISession::EarlySession_CreateCom(IN ISession* pISession)
 // // {
@@ -70,8 +72,11 @@ USSISession::~USSISession()
 // //     return pUSSIEarlySession;
 // // }
 
-// // /* M ----------------------------------------------------------------------------------------------
-// // ------------------------------------------------------------------------------------------------ */
+// // /* M
+// ----------------------------------------------------------------------------------------------
+// //
+
+// */
 // // PROTECTED VIRTUAL
 // // ConfirmedSession* USSISession::ConfirmedSession_CreateCom(IN ISession* /*pISession*/)
 // // {
@@ -79,12 +84,16 @@ USSISession::~USSISession()
 // //     return pUSSIConfirmedSession;
 // // }
 
-// /* ------------------------------------------------------------------------------------------------
-//     State Machine METHODS
-// ------------------------------------------------------------------------------------------------ */
+// /*
 
-// /* ------------------------------------------------------------------------------------------------
-//  ------------------------------------------------------------------------------------------------ */
+//     State Machine METHODS
+
+// */
+
+// /*
+
+//  ------------------------------------------------------------------------------------------------
+//  */
 // PROTECTED VIRTUAL
 // IMS_BOOL USSISession::StateIDLE_Start(IN IMSMSG &objMsg)
 // {
@@ -123,10 +132,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::StateIDLE_IncomingSession(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::StateIDLE_IncomingSession(IN IMSMSG &objMsg)
 // {
 //     IUUCServiceIncomingSessionParam* pParam
 //             = reinterpret_cast<IUUCServiceIncomingSessionParam*>(objMsg.nLparam);
@@ -161,10 +169,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::StateRINGING_Started(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::StateRINGING_Started(IN IMSMSG &objMsg)
 // {
 //     IEarlySessionRequestReceivedParam* pParam
 //             = reinterpret_cast<IEarlySessionRequestReceivedParam*>(objMsg.nLparam);
@@ -248,10 +255,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::StateCONVERSATION_Terminate(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::StateCONVERSATION_Terminate(IN IMSMSG &objMsg)
 // {
 //     IUUCSessionTerminateParam* pParam
 //             = reinterpret_cast<IUUCSessionTerminateParam*>(objMsg.nLparam);
@@ -278,10 +284,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::StateCONVERSATION_SendTransaction(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::StateCONVERSATION_SendTransaction(IN IMSMSG &objMsg)
 // {
 //     IUUCSessionSendTransactionParam* pParam
 //             = reinterpret_cast<IUUCSessionSendTransactionParam*>(objMsg.nLparam);
@@ -298,10 +303,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::StateXXX_SS_UpdateReceived(IN IMSMSG &objMsg)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::StateXXX_SS_UpdateReceived(IN IMSMSG &objMsg)
 // {
 //     IConfirmedTransactionReceivedParam* pParam
 //             = reinterpret_cast<IConfirmedTransactionReceivedParam*>(objMsg.nLparam);
@@ -322,10 +326,8 @@ USSISession::~USSISession()
 
 //         if (IsPreviousRequestByeMessage())
 //         {
-//             IMS_TRACE_I("StateXXX_SS_UpdateReceived : prev. request was BYE, no action", 0, 0, 0);
-//             delete pUSSDData;
-//             delete pParam;
-//             return IMS_TRUE;
+//             IMS_TRACE_I("StateXXX_SS_UpdateReceived : prev. request was BYE, no action", 0, 0,
+//             0); delete pUSSDData; delete pParam; return IMS_TRUE;
 //         }
 
 //         USSIConfirmedSession* pUSSIConfirmedSession
@@ -357,10 +359,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// IMS_BOOL USSISession::Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam,
+// /*
+
+// */ PUBLIC VIRTUAL IMS_BOOL USSISession::Control(IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam,
 //         OUT IMS_UINTP* pnOutParam)
 // {
 //     IMS_TRACE_I("Control : CmdType [%d]", nCmdType, 0, 0);
@@ -397,20 +398,19 @@ USSISession::~USSISession()
 //     }
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PUBLIC VIRTUAL
-// void USSISession::Confirmed_TransactionReceived(IN IMS_UINTP nParam)
+// /*
+
+// */ PUBLIC VIRTUAL void USSISession::Confirmed_TransactionReceived(IN IMS_UINTP nParam)
 // {
 //     IMS_TRACE_I("Confirmed_TransactionReceived[%s]", PrintState(), 0, 0);
 
 //     PostMessage(UCSESSION_SS_UPDATERECEIVED, 0, nParam);
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::SetUSSIBody(IN ISipMessage* pISIPMessage, IN const AString& strUSSDStr,
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::SetUSSIBody(IN ISipMessage* pISIPMessage, IN const
+// AString& strUSSDStr,
 //         IN IMS_BOOL bMultiPart/* = IMS_TRUE*/)
 // {
 //     ISipMessageBodyPart *piBodyPart = pISIPMessage->CreateBodyPart();
@@ -439,10 +439,9 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PRIVATE
-// USSDDataParser* USSISession::GetParsedUSSIData(IN ISipMessage* pISIPMessage)
+// /*
+
+// */ PRIVATE USSDDataParser* USSISession::GetParsedUSSIData(IN ISipMessage* pISIPMessage)
 // {
 //     IMSList<ISipMessageBodyPart*> objBodyParts = pISIPMessage->GetBodyParts();
 
@@ -476,10 +475,9 @@ USSISession::~USSISession()
 //     return pUSSDDataParser;
 // }
 
-// /* ------------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// IMS_BOOL USSISession::SendUSSIResultToUI(IN USSDDataParser* pUSSDData)
+// /*
+
+// */ PROTECTED VIRTUAL IMS_BOOL USSISession::SendUSSIResultToUI(IN USSDDataParser* pUSSDData)
 // {
 //     if (pUSSDData == IMS_NULL)
 //     {
@@ -534,10 +532,10 @@ USSISession::~USSISession()
 //     return IMS_TRUE;
 // }
 
-// /* M ----------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PROTECTED VIRTUAL
-// void USSISession::LoadConfig()
+// /* M
+// ----------------------------------------------------------------------------------------------
+
+// */ PROTECTED VIRTUAL void USSISession::LoadConfig()
 // {
 //     UCSession::LoadConfig();
 
@@ -547,10 +545,10 @@ USSISession::~USSISession()
 //     SetLocalSupportedFeature(FEATURE_PEM, IMS_FALSE);
 // }
 
-// /* M ----------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PRIVATE
-// IMS_BOOL USSISession::IsUEInitiated()
+// /* M
+// ----------------------------------------------------------------------------------------------
+
+// */ PRIVATE IMS_BOOL USSISession::IsUEInitiated()
 // {
 //     IMessage* pIMessage = m_pISession->GetPreviousRequest(IMessage::SESSION_START);
 //     if (pIMessage != IMS_NULL
@@ -562,10 +560,10 @@ USSISession::~USSISession()
 //     return IMS_FALSE;
 // }
 
-// /* M ----------------------------------------------------------------------------------------------
-// ------------------------------------------------------------------------------------------------ */
-// PRIVATE
-// IMS_BOOL USSISession::IsPreviousRequestByeMessage()
+// /* M
+// ----------------------------------------------------------------------------------------------
+
+// */ PRIVATE IMS_BOOL USSISession::IsPreviousRequestByeMessage()
 // {
 //     IMessage* pIMessage = m_pISession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
 

@@ -11,7 +11,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 CallConnectionIdManager::CallConnectionIdManager(IN IMtcContext& objContext) :
         m_objContext(objContext),
@@ -30,9 +29,8 @@ CallConnectionIdManager::~CallConnectionIdManager()
     m_objControllers.Clear();
 }
 
-PUBLIC VIRTUAL
-void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-        IN Type /*eType*/, IN IMS_BOOL /*bEmergency*/, IN IMS_SINT32 /*nReason*/)
+PUBLIC VIRTUAL void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCallKey,
+        IN State eState, IN Type /*eType*/, IN IMS_BOOL /*bEmergency*/, IN IMS_SINT32 /*nReason*/)
 {
     if (eState == State::IDLE)
     {
@@ -40,8 +38,11 @@ void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCallKey, IN State e
         return;
     }
 
-    if (m_objContext.GetCallManager().GetCallByCallKey(nCallKey)
-            ->GetCallContext().GetCallInfo().bConference == IMS_TRUE)
+    if (m_objContext.GetCallManager()
+                    .GetCallByCallKey(nCallKey)
+                    ->GetCallContext()
+                    .GetCallInfo()
+                    .bConference == IMS_TRUE)
     {
         IMS_TRACE_D("OnCallStateChanged conference call. ignored.", 0, 0, 0);
         return;
@@ -61,15 +62,13 @@ void CallConnectionIdManager::OnCallStateChanged(IN CallKey nCallKey, IN State e
 
         RemoveKeyConnectionId(GetListIndexByCallKey(nCallKey));
     }
-    else if (eState == State::OUTGOING ||
-            eState == State::INCOMING) // TODO: all?
+    else if (eState == State::OUTGOING || eState == State::INCOMING)  // TODO: all?
     {
         AddKeyConnectionId(nCallKey);
     }
 }
 
-PUBLIC VIRTUAL
-void CallConnectionIdManager::OnTotalCallStateChanged(IN State eState)
+PUBLIC VIRTUAL void CallConnectionIdManager::OnTotalCallStateChanged(IN State eState)
 {
     if (eState == State::IDLE)
     {
@@ -80,8 +79,8 @@ void CallConnectionIdManager::OnTotalCallStateChanged(IN State eState)
 }
 
 PUBLIC
-void CallConnectionIdManager::OnConferenceCallStarted(IN IConferenceController* piController,
-        IN IMS_BOOL bStarted)
+void CallConnectionIdManager::OnConferenceCallStarted(
+        IN IConferenceController* piController, IN IMS_BOOL bStarted)
 {
     IMS_TRACE_D("OnConferenceCallStarted", 0, 0, 0);
     if (bStarted)
@@ -149,7 +148,7 @@ IMS_UINT32 CallConnectionIdManager::GetNewIndex()
 {
     if (m_objCallKeyConnections.IsEmpty())
     {
-        return 1; // ID starts from 1.
+        return 1;  // ID starts from 1.
     }
 
     for (IMS_UINT32 i = 0; i < m_objCallKeyConnections.GetSize(); i++)
@@ -163,7 +162,8 @@ IMS_UINT32 CallConnectionIdManager::GetNewIndex()
     }
 
     return m_objCallKeyConnections.GetValueAt(m_objCallKeyConnections.GetSize() - 1)
-            ->nConnectionId + 1;
+                   ->nConnectionId +
+            1;
 }
 
 PRIVATE
@@ -220,8 +220,8 @@ void CallConnectionIdManager::AddKeyConnectionId(IN CallKey nCallKey)
         m_objCallKeyConnections.InsertAt(pNewKeyConnection, nNewIndex - 1);
     }
 
-    IMS_TRACE_D("AddKeyConnectionId : list[%s] ID=[%d] key=[%" PFLS_x "]",
-            GetIds().GetStr(), nNewIndex, nCallKey);
+    IMS_TRACE_D("AddKeyConnectionId : list[%s] ID=[%d] key=[%" PFLS_x "]", GetIds().GetStr(),
+            nNewIndex, nCallKey);
 }
 
 PRIVATE

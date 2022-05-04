@@ -20,17 +20,16 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 const IMS_CHAR UriFormatter::STR_USER_PHONE[] = ";user=phone";
 
-
-PUBLIC GLOBAL
-AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallContext& objContext)
+PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
+        OUT AString& strUri, IN IMtcCallContext& objContext)
 {
     if (ConferenceConfigurationWrapper::IsPaidPreferred())
     {
         MtcSession* pMtcSession = objContext.GetSession();
         if (pMtcSession != IMS_NULL)
         {
-            MessageUtil::GetRemoteUri(&pMtcSession->GetISession(),
-                    objContext.GetCallInfo().ePeerType, strUri);
+            MessageUtil::GetRemoteUri(
+                    &pMtcSession->GetISession(), objContext.GetCallInfo().ePeerType, strUri);
         }
     }
     else
@@ -43,9 +42,8 @@ AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallConte
     return strUri;
 }
 
-PUBLIC GLOBAL
-AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallContext& objContext,
-        IN const ConfUser* pConfUser)
+PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
+        OUT AString& strUri, IN IMtcCallContext& objContext, IN const ConfUser* pConfUser)
 {
     if (pConfUser == IMS_NULL)
     {
@@ -65,9 +63,8 @@ AString& UriFormatter::GetReferToForInvite(OUT AString& strUri, IN IMtcCallConte
     return strUri;
 }
 
-PUBLIC GLOBAL
-AString& UriFormatter::GetReferToForBye(OUT AString& strUri, IN const ConfUser* pConfUser,
-        IN const AString& strInvitedUri)
+PUBLIC GLOBAL AString& UriFormatter::GetReferToForBye(
+        OUT AString& strUri, IN const ConfUser* pConfUser, IN const AString& strInvitedUri)
 {
     AString strUserEntity = pConfUser ? pConfUser->aStrUserEntity : AString::ConstNull();
     if (strUserEntity.GetLength() == 0)
@@ -119,8 +116,8 @@ AString& UriFormatter::GetReferToForBye(OUT AString& strUri, IN const ConfUser* 
     return strUri;
 }
 
-PRIVATE GLOBAL
-void UriFormatter::ConvertToValidSipUri(IN_OUT AString& strUri, IN IMtcCallContext& objContext)
+PRIVATE GLOBAL void UriFormatter::ConvertToValidSipUri(
+        IN_OUT AString& strUri, IN IMtcCallContext& objContext)
 {
     if (strUri.Contains(ConferenceConst::ANONYMOUS_URI))
     {
@@ -134,7 +131,7 @@ void UriFormatter::ConvertToValidSipUri(IN_OUT AString& strUri, IN IMtcCallConte
     // converting TEL to SIP uri.
     if (objSipAddress.IsSchemeTel())
     {
-         AString strUserPart = objSipAddress.GetHost();
+        AString strUserPart = objSipAddress.GetHost();
 
         if ((strUserPart.GetLength() > 0) && (strUserPart.Contains(TextParser::CHAR_SEMICOLON)))
         {
@@ -152,8 +149,8 @@ void UriFormatter::ConvertToValidSipUri(IN_OUT AString& strUri, IN IMtcCallConte
     {
         if (strUri.GetLength() > 0)
         {
-            strUri = objContext.GetDialingPlan().GetToUri(strUri,
-                    objContext.GetCallInfo(), Scheme::SIP);
+            strUri = objContext.GetDialingPlan().GetToUri(
+                    strUri, objContext.GetCallInfo(), Scheme::SIP);
         }
         else
         {

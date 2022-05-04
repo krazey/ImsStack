@@ -7,7 +7,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 MtcConfigurationManager::MtcConfigurationManager() :
         m_objCarrierConfig(CarrierConfigItems()),
@@ -18,8 +17,8 @@ MtcConfigurationManager::MtcConfigurationManager() :
 PUBLIC
 MtcConfigurationManager::~MtcConfigurationManager()
 {
-    ICarrierConfig* piCc = ConfigService::GetConfigService()
-            ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+    ICarrierConfig* piCc =
+            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
     piCc->RemoveListener(this);
 }
 
@@ -27,8 +26,8 @@ PUBLIC
 void MtcConfigurationManager::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
-    ICarrierConfig* piCc = ConfigService::GetConfigService()
-            ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+    ICarrierConfig* piCc =
+            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
     piCc->AddListener(this);
 
     UpdateFullConfig(piCc);
@@ -41,13 +40,13 @@ void MtcConfigurationManager::UpdateFullConfig(ICarrierConfig* piCc)
     MtcConfigurationUpdater::Update(piCc, m_objCarrierConfig, m_objAsset);
 }
 
-PUBLIC VIRTUAL
-void MtcConfigurationManager::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void MtcConfigurationManager::CarrierConfig_NotifyConfigChanged(
+        IN IMS_SINT32 nSlotId)
 {
     if (nSlotId == ThreadService::GetCurrentSlotId())
     {
-        ICarrierConfig* piCc = ConfigService::GetConfigService()
-                ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+        ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(
+                ThreadService::GetCurrentSlotId());
         UpdateFullConfig(piCc);
     }
 }
@@ -122,7 +121,7 @@ IMS_SINT32 MtcConfigurationManager::GetDedicatedBearerWaitTimer() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSrvccType(IN IMS_SINT32 nType) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objSrvccTypes.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objSrvccTypes.GetSize(); i++)
     {
         if (m_objCarrierConfig.objSrvccTypes.GetAt(i) == nType)
         {
@@ -280,7 +279,7 @@ IMS_SINT32 MtcConfigurationManager::GetCallTypeAfterAudioAndVideoCallMerged() co
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsShortCallCode(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objShortCallCodes.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objShortCallCodes.GetSize(); i++)
     {
         if (m_objCarrierConfig.objShortCallCodes.GetAt(i) == nCode)
         {
@@ -291,8 +290,8 @@ IMS_BOOL MtcConfigurationManager::IsShortCallCode(IN IMS_SINT32 nCode) const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::
-        IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability() const
+IMS_BOOL MtcConfigurationManager::IsValidateVerstatFeatureInRegistrationToCheckNetworkCapability()
+        const
 {
     return m_objCarrierConfig.bValidateVerstatFeatureInRegistrationToCheckNetworkCapability;
 }
@@ -306,7 +305,7 @@ IMS_BOOL MtcConfigurationManager::IsAllowMultipleCallIncludingVideoCall() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRejectCodeForCsfb(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objRejectCodeForCsfbs.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objRejectCodeForCsfbs.GetSize(); i++)
     {
         if (m_objCarrierConfig.objRejectCodeForCsfbs.GetAt(i) == nCode)
         {
@@ -444,7 +443,7 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyOnTextQosDeactivation() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsPidfShortCode(const AString& strCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objPidfShortCodes.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objPidfShortCodes.GetSize(); i++)
     {
         if (m_objCarrierConfig.objPidfShortCodes.GetAt(i).Equals(strCode))
         {
@@ -455,7 +454,7 @@ IMS_BOOL MtcConfigurationManager::IsPidfShortCode(const AString& strCode) const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsEmergencyCallOverEmergencyPdn() const //wifi
+IMS_BOOL MtcConfigurationManager::IsEmergencyCallOverEmergencyPdn() const  // wifi
 {
     return m_objCarrierConfig.bEmergencyCallOverEmergencyPdn;
 }
@@ -485,8 +484,9 @@ IMS_BOOL MtcConfigurationManager::IsEmergencyCallOverEmergencyPdnOnCellular() co
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::
-        IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall() const
+IMS_BOOL
+MtcConfigurationManager::IsEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall()
+        const
 {
     return m_objCarrierConfig
             .bEmergencyRetryWithoutChecking380ContentForNonUeDetectableEmergencyCall;
@@ -598,7 +598,7 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfViwifiCall() c
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCarrierSpecificSipHeader(IN const AString& strHeader) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objCarrierSpecificSipHeaders.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objAsset.objCarrierSpecificSipHeaders.GetSize(); i++)
     {
         if (m_objAsset.objCarrierSpecificSipHeaders.GetAt(i).Equals(strHeader))
         {
@@ -624,7 +624,7 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCallMaintainingOnRegistrationSupended(
         IN IMS_SINT32 nSuspendType) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objCallMaintainingOnRegistrationSupendeds.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objAsset.objCallMaintainingOnRegistrationSupendeds.GetSize(); i++)
     {
         if (m_objAsset.objCallMaintainingOnRegistrationSupendeds.GetAt(i) == nSuspendType)
         {
@@ -639,7 +639,7 @@ IMS_BOOL MtcConfigurationManager::IsRequiringEmergencyCallWhenVideoEmergencyCall
         IN IMS_SINT32 nCode) const
 {
     for (IMS_UINT32 i = 0;
-             i < m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.GetSize(); i ++)
+            i < m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.GetSize(); i++)
     {
         if (m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.GetAt(i) == nCode)
         {
@@ -688,7 +688,7 @@ IMS_BOOL MtcConfigurationManager::IsAddReplaceHeaderForConference() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsVilteToVolteRetryFailureResponseCode(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objVilteToVolteRetryFailureResponseCodes.GetSize(); i ++)
+    for (IMS_UINT32 i = 0; i < m_objAsset.objVilteToVolteRetryFailureResponseCodes.GetSize(); i++)
     {
         if (m_objAsset.objVilteToVolteRetryFailureResponseCodes.GetAt(i) == nCode)
         {
@@ -727,7 +727,7 @@ IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoi
         IN IMS_SINT32 nReason) const
 {
     for (IMS_UINT32 i = 0;
-            i < m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls.GetSize(); i ++)
+            i < m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls.GetSize(); i++)
     {
         if (m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls.GetAt(i) == nReason)
         {
@@ -756,8 +756,8 @@ IMS_BOOL MtcConfigurationManager::IsUseCarrierSpecificContactHeaderForOptionsRes
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::
-        IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration() const
+IMS_BOOL
+MtcConfigurationManager::IsUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration() const
 {
     return m_objAsset.bUseCarrierSpecificRejectPhraseForIncomingCallDuringNoRegistration;
 }
@@ -787,8 +787,8 @@ IMS_BOOL MtcConfigurationManager::IsCheckServerOutageReasonForVxlteCall() const
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::
-        IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType() const
+IMS_BOOL MtcConfigurationManager::IsSetVideoTextFeatureExclusivelyInContactHeaderBySessionType()
+        const
 {
     return m_objAsset.bSetVideoTextFeatureExclusivelyInContactHeaderBySessionType;
 }
@@ -839,7 +839,7 @@ IMS_SINT32 MtcConfigurationManager::GetInformationLevelOfGeolocationPidf(
     {
         return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(2);
     }
-    else// if (!bEmergency && bWifi)
+    else  // if (!bEmergency && bWifi)
     {
         return m_objAsset.objInformationLevelOfGeolocationPidfs.GetAt(3);
     }

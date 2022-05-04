@@ -14,8 +14,7 @@ class MtcSupplementaryService final
 {
 public:
     explicit MtcSupplementaryService(IN MtcConfigurationProxy& objConfigurationProxy,
-            IN IMSMap<SuppType, SuppService*> objSuppServices =
-                IMSMap<SuppType, SuppService*>());
+            IN IMSMap<SuppType, SuppService*> objSuppServices = IMSMap<SuppType, SuppService*>());
     ~MtcSupplementaryService();
     MtcSupplementaryService(const MtcSupplementaryService&) = delete;
     MtcSupplementaryService& operator=(const MtcSupplementaryService&) = delete;
@@ -49,7 +48,7 @@ public:
 private:
     ISipHeader* GetHistoryInfoHeader(IN IMessage* piMessage);
     IMS_BOOL GetCdivCause(IN const SipAddress* pAddress, OUT IMS_SINT32& nCause);
-    IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString &strTarget);
+    IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     IMS_SINT32 GetCallingNumVerificationResult(IN AString& strValue);
     IMS_BOOL IsIncomingUssdCall(IN IMessage* piMessage);

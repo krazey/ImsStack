@@ -41,8 +41,8 @@ public:
 
 public:
     // IMtcCallStateListener interface implementation
-    void OnCallStateChanged(IN CallKey nCallKey, IN State eState,
-            IN Type eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
+    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
     inline void OnTotalCallStateChanged(IN State) override {}
     inline IMS_BOOL IsSynchronousCallRequired() { return IMS_TRUE; }
 
@@ -59,7 +59,9 @@ public:
     void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     inline void SetListener(IConferenceControllerListener* piListener)
-    { m_piListener = piListener; }
+    {
+        m_piListener = piListener;
+    }
 
     // TODO: need to optimize.
     // IConferenceController interfaces implementation
@@ -75,8 +77,10 @@ public:
 
 protected:
     // basic operation set
-    inline virtual void ProcessGroupCall(IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&,
-            IN IMSMap<SuppType, SuppService*>&) {}
+    inline virtual void ProcessGroupCall(
+            IN IMSList<ConfUser*>&, IN CallInfo&, IN MediaInfo&, IN IMSMap<SuppType, SuppService*>&)
+    {
+    }
     inline virtual void ProcessExpand(IN IMSList<ConfUser*>&) {}
     inline virtual void ProcessMerge(IN IMSList<ConfUser*>&) {}
     virtual void ProcessJoin(IN IMSList<ConfUser*>& objUsers);
@@ -85,8 +89,8 @@ protected:
     void ProcessSubscribeOnParticipant();
 
     // ConfUser to Participant
-    IMS_UINT32 AddUserToParticipantList(IN IMSList<ConfUser*>& objConfUsers,
-            IN IMS_BOOL bReOrder = IMS_FALSE);
+    IMS_UINT32 AddUserToParticipantList(
+            IN IMSList<ConfUser*>& objConfUsers, IN IMS_BOOL bReOrder = IMS_FALSE);
 
     void ClearListForConfUsers(IN IMSList<ConfUser*>& objUsers);
 
@@ -114,8 +118,8 @@ protected:
     virtual void TerminateIndividualCall(IN IMS_UINT32 nConnectionId);
     virtual void TerminateConference(IN IMS_SINT32 nTerminateReason);
 
-    IMS_BOOL CompleteCurrentAndDoNextOperation(IN IMS_UINT32 nOperationType,
-            IN ConfUser* pConfUser = IMS_NULL);
+    IMS_BOOL CompleteCurrentAndDoNextOperation(
+            IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser = IMS_NULL);
     void DoNextOperation();
 
     void CheckNStartFinalSipfragWaitTimer(IN IMS_UINT32 nNewCondition);
@@ -142,36 +146,36 @@ protected:
 public:
     enum
     {
-        STATE_CREATED           = 0,
-        STATE_GROUPCALLING      = 1,
-        STATE_EXPANDING         = 2,
-        STATE_MERGING           = 3,
-        STATE_JOINING           = 4,
-        STATE_DROPPING          = 5,
-        STATE_IDLE              = 6
+        STATE_CREATED = 0,
+        STATE_GROUPCALLING = 1,
+        STATE_EXPANDING = 2,
+        STATE_MERGING = 3,
+        STATE_JOINING = 4,
+        STATE_DROPPING = 5,
+        STATE_IDLE = 6
     };
 
 protected:
     enum
     {
-        SESSION_STARTED      = 0,
-        SESSION_STARTFAILED  = 1,
-        SESSION_TERMINATED   = 2,
-        SESSION_DESTROYED    = 3
+        SESSION_STARTED = 0,
+        SESSION_STARTFAILED = 1,
+        SESSION_TERMINATED = 2,
+        SESSION_DESTROYED = 3
     };
 
     enum
     {
-        REFER_INVITE_NONE       = 0,
-        REFER_INVITE_SINGLE     = 1,
-        REFER_INVITE_MULTIPLE   = 2
+        REFER_INVITE_NONE = 0,
+        REFER_INVITE_SINGLE = 1,
+        REFER_INVITE_MULTIPLE = 2
     };
 
     enum
     {
-        CONDITION_NONE                  = 0,
-        CONDITION_SIPFRAG_100_RECEIVED  = 1,
-        CONDITION_1TO1_TERMINATED       = 2
+        CONDITION_NONE = 0,
+        CONDITION_SIPFRAG_100_RECEIVED = 1,
+        CONDITION_1TO1_TERMINATED = 2
     };
 
     IConferenceControllerListener* m_piListener;

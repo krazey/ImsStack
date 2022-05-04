@@ -37,7 +37,6 @@ private:
     MediaInfo m_objModifiedInfo;
     IMS_BOOL m_bModifier;
     IMS_BOOL m_bAlerted;
-
 };
 
 #endif

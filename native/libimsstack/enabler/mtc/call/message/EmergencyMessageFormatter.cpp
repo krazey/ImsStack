@@ -23,15 +23,11 @@ EmergencyMessageFormatter::EmergencyMessageFormatter(IN IMtcSessionContext& objC
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-EmergencyMessageFormatter::~EmergencyMessageFormatter()
-{
-}
+PUBLIC VIRTUAL EmergencyMessageFormatter::~EmergencyMessageFormatter() {}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT EmergencyMessageFormatter::FormStartMessage()
+PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage()
 {
     if (MessageFormatter::FormStartMessage() == IMS_FAILURE)
     {
@@ -42,8 +38,8 @@ IMS_RESULT EmergencyMessageFormatter::FormStartMessage()
 
     m_eNormalAosRegMode = GetAoSRegMode(ServiceType::NORMAL);
     m_eEmergencyAosRegMode = GetAoSRegMode(ServiceType::EMERGENCY);
-    if ((m_eNormalAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN) || (m_eEmergencyAosRegMode ==
-            IImsAosInfo::REG_MODE_UNKNOWN))
+    if ((m_eNormalAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN) ||
+            (m_eEmergencyAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN))
     {
         return IMS_FAILURE;
     }
@@ -118,7 +114,7 @@ void EmergencyMessageFormatter::SetPPreferredIdentityHeaderByDeviceId()
         return;
     }
 
-    IMS_SINT32 nSlotId = 0; // TODO
+    IMS_SINT32 nSlotId = 0;  // TODO
     AString strImei;
     PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo()->GetDeviceId(nSlotId, strImei);
 

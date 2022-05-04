@@ -3,8 +3,7 @@
 
 #include "call/message/MessageFormatter.h"
 
-class UssiMessageFormatter :
-        public MessageFormatter
+class UssiMessageFormatter : public MessageFormatter
 {
 public:
     UssiMessageFormatter(IN IMtcSessionContext& objContext);

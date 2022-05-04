@@ -6,14 +6,10 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-EarlyUpdateErrorHandler::EarlyUpdateErrorHandler()
-{
-}
+EarlyUpdateErrorHandler::EarlyUpdateErrorHandler() {}
 
 PUBLIC
-EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler()
-{
-}
+EarlyUpdateErrorHandler::~EarlyUpdateErrorHandler() {}
 
 PUBLIC
 FailReason EarlyUpdateErrorHandler::Handle(IN const IMessage* piMessage) const

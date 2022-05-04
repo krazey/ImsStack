@@ -6,12 +6,11 @@
 
 class IMtcCallManager;
 
-class TerminalBasedCallWaitingBlockRule final:
-        public IMtcBlockRule
+class TerminalBasedCallWaitingBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit TerminalBasedCallWaitingBlockRule(IN IMtcService& objService,
-            IN IMtcCallManager& objCallManager);
+    explicit TerminalBasedCallWaitingBlockRule(
+            IN IMtcService& objService, IN IMtcCallManager& objCallManager);
     virtual ~TerminalBasedCallWaitingBlockRule();
     TerminalBasedCallWaitingBlockRule(IN const TerminalBasedCallWaitingBlockRule&) = delete;
     TerminalBasedCallWaitingBlockRule& operator=(

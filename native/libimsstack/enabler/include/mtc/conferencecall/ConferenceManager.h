@@ -13,8 +13,7 @@ class IMtcContext;
 class CallStateProxy;
 enum class ConferenceType;
 
-class ConferenceManager final :
-        public IConferenceControllerListener
+class ConferenceManager final : public IConferenceControllerListener
 {
 public:
     explicit ConferenceManager(IN IMtcContext& objContext);
@@ -41,7 +40,7 @@ private:
 enum class ConferenceType
 {
     PARTICIPANT,
-    GROUP_CALL, // aka. start conference
+    GROUP_CALL,  // aka. start conference
     MERGE_CALL,
     EXPAND_CALL
 };

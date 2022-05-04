@@ -21,9 +21,7 @@ StartErrorHandler::StartErrorHandler(IN IMtcCallContext& objContext) :
 }
 
 PUBLIC
-StartErrorHandler::~StartErrorHandler()
-{
-}
+StartErrorHandler::~StartErrorHandler() {}
 
 PUBLIC
 FailReason StartErrorHandler::Handle(IN const IMessage* piMessage) const
@@ -36,8 +34,7 @@ FailReason StartErrorHandler::Handle(IN const IMessage* piMessage) const
 
     FailReason objReason = HandleResponse(*piMessage);
 
-    if (m_objContext.GetCallInfo().bEmergency &&
-            IsRetry1xRequiredForEmergencyCall(*piMessage))
+    if (m_objContext.GetCallInfo().bEmergency && IsRetry1xRequiredForEmergencyCall(*piMessage))
     {
         return FailReason(FAIL_REASON_SESSION_RETRY1X);
     }
@@ -104,8 +101,7 @@ FailReason StartErrorHandler::Handle380Response(IN const IMessage& objMessage) c
 {
     IMS_SINT32 eSosType =
             MessageUtil::GetSosTypeFromServiceUrn(&objMessage, ISipHeader::CONTACT_NORMAL);
-    if (eSosType != CODE_EMERGENCYSERVICE_INVALID &&
-            IsNonUeDetectableEmergencyCall(objMessage))
+    if (eSosType != CODE_EMERGENCYSERVICE_INVALID && IsNonUeDetectableEmergencyCall(objMessage))
     {
         return FailReason(FAIL_REASON_SESSION_RETRY_R_RAT, eSosType);
     }
@@ -130,54 +126,44 @@ FailReason StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) c
     switch (nStatusCode)
     {
         case SipStatusCode::SC_401:
-            return FailReason(
-                    FAIL_REASON_SESSION_SERVER_AUTH,
+            return FailReason(FAIL_REASON_SESSION_SERVER_AUTH,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_403:
             return FailReason(FAIL_REASON_SESSION_FORBIDDEN, nStatusCode);
         case SipStatusCode::SC_404:
             return Handle404Response();
         case SipStatusCode::SC_406:
-            return FailReason(
-                    FAIL_REASON_SESSION_NOTACCEPTABLE,
+            return FailReason(FAIL_REASON_SESSION_NOTACCEPTABLE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_407:
             return Handle407Response();
         case SipStatusCode::SC_408:
-            return FailReason(
-                    FAIL_REASON_SESSION_TIMEOUT,
+            return FailReason(FAIL_REASON_SESSION_TIMEOUT,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_415:
         case SipStatusCode::SC_416:
-            return FailReason(
-                    FAIL_REASON_SESSION_NOTSUPPORTED,
+            return FailReason(FAIL_REASON_SESSION_NOTSUPPORTED,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_422:
             // re-INVITE is sent by the engine without notification if it has Min-SE header
             return FailReason(FAIL_REASON_SESSION_RETRY1X);
         case SipStatusCode::SC_480:
-            return FailReason(
-                    FAIL_REASON_SESSION_TEMPUNAVAILABLE,
+            return FailReason(FAIL_REASON_SESSION_TEMPUNAVAILABLE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_484:
-            return FailReason(
-                    FAIL_REASON_SESSION_BADADDRESS,
+            return FailReason(FAIL_REASON_SESSION_BADADDRESS,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_486:
             return FailReason(
-                    FAIL_REASON_SESSION_BUSY,
-                    MessageUtil::GetCauseFromReasonHeader(&objMessage));
+                    FAIL_REASON_SESSION_BUSY, MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_487:
-            return FailReason(
-                    FAIL_REASON_SESSION_SERVER_REQUEST_TERMINATED,
+            return FailReason(FAIL_REASON_SESSION_SERVER_REQUEST_TERMINATED,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_488:
-            return FailReason(
-                    FAIL_REASON_SESSION_NOTACCEPTABLEHERE,
+            return FailReason(FAIL_REASON_SESSION_NOTACCEPTABLEHERE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_499:
-            return FailReason(
-                    FAIL_REASON_SESSION_NOTREACHABLE,
+            return FailReason(FAIL_REASON_SESSION_NOTREACHABLE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
     }
 
@@ -200,7 +186,7 @@ FailReason StartErrorHandler::Handle404Response() const
 PRIVATE
 FailReason StartErrorHandler::Handle407Response() const
 {
-    RecoverRegistration(); // FIXME: INVITE auth
+    RecoverRegistration();  // FIXME: INVITE auth
     return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_407);
 }
 
@@ -237,14 +223,12 @@ FailReason StartErrorHandler::Handle500Response(IN const IMessage& objMessage) c
         if (IsIpcanResourceUnavailable(objMessage))
         {
             // TS 24.229 5.1.3.1: There's the method to examine headers but no further behavior.
-            return FailReason(
-                    FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
+            return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         }
     }
 
-    return FailReason(
-            FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
+    return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
             MessageUtil::GetCauseFromReasonHeader(&objMessage));
 }
 
@@ -259,15 +243,13 @@ FailReason StartErrorHandler::Handle503Response(IN const IMessage& objMessage) c
         return FailReason(FAIL_REASON_SESSION_RETRY1X);
     }
 
-    return FailReason(
-            FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
+    return FailReason(FAIL_REASON_SESSION_SERVER_INTERNAL_ERROR,
             MessageUtil::GetCauseFromReasonHeader(&objMessage));
 }
 
 PRIVATE
 FailReason StartErrorHandler::Handle504Response(IN const IMessage& objMessage) const
 {
-
     if (MessageUtil::ContainsAddressInPaid(&objMessage, GetPathHeader()) ||
             MessageUtil::ContainsAddressInPaid(&objMessage, GetServiceRouteHeader()))
     {
@@ -291,8 +273,7 @@ FailReason StartErrorHandler::Handle6xxResponse(IN const IMessage& objMessage) c
     switch (nStatusCode)
     {
         case SipStatusCode::SC_603:
-            return FailReason(
-                    FAIL_REASON_SESSION_SERVER_DECLINE,
+            return FailReason(FAIL_REASON_SESSION_SERVER_DECLINE,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
     }
 
@@ -326,8 +307,8 @@ IMS_BOOL StartErrorHandler::IsRetry1xRequiredForEmergencyCall(IN const IMessage&
 PRIVATE
 IMS_BOOL StartErrorHandler::IsNonUeDetectableEmergencyCall(IN const IMessage& objMessage) const
 {
-    if (m_objContext.GetConfigurationProxy()
-            .Is(Feature::EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
+    if (m_objContext.GetConfigurationProxy().Is(Feature::
+                        EMERGENCY_RETRY_WITHOUT_CHECKING380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL))
     {
         return IMS_TRUE;
     }

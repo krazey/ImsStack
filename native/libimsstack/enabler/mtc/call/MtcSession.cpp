@@ -19,8 +19,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession) 
     }
 }
 
-PUBLIC VIRTUAL
-MtcSession::~MtcSession()
+PUBLIC VIRTUAL MtcSession::~MtcSession()
 {
     IMS_TRACE_I("~MtcSession", 0, 0, 0);
     GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);

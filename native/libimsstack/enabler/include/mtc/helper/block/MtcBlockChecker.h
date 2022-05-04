@@ -13,9 +13,7 @@ class IMtcCallContext;
  * This class checks if a call operation is blocked or not for the given ruleset.
  * Also it provides rulesets for each call operation.
  */
-class MtcBlockChecker final :
-        public IMtcBlockChecker,
-        public IMtcBlockRuleCheckListener
+class MtcBlockChecker final : public IMtcBlockChecker, public IMtcBlockRuleCheckListener
 {
 public:
     /**
@@ -25,8 +23,7 @@ public:
      * @param objListener Listener to be notified the result if pending.
      */
     MtcBlockChecker(
-            IN const IMSList<IMtcBlockRule*>& lstRules,
-            IN IMtcBlockCheckListener& objListener);
+            IN const IMSList<IMtcBlockRule*>& lstRules, IN IMtcBlockCheckListener& objListener);
 
     ~MtcBlockChecker();
 

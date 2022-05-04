@@ -15,8 +15,8 @@ public:
     ConferenceInfoUpdater& operator=(IN const ConferenceInfoUpdater&) = delete;
 
 public:
-    IMS_UINT32 Update(IN ConferenceParticipantList* pParticipantList,
-            IN const AString& strEventPackage);
+    IMS_UINT32 Update(
+            IN ConferenceParticipantList* pParticipantList, IN const AString& strEventPackage);
 
 protected:
     IMS_RESULT ParseConferenceInfo(IN const AString& strEventPackage);
@@ -28,10 +28,9 @@ protected:
     void SetParticipantsMatchingStarted();
     void SetDeletedParticipantToDisconnected();
 
-    IMS_SINT32 FindParticipant(IN const ConferenceInfo::User* pUser,
-            IN IMS_UINT32 nIndexInXml);
-    IMS_SINT32 FindParticipantByOrder(IN IMS_UINT32 nIndexInXml,
-            IN const ConferenceInfo::User* pUser);
+    IMS_SINT32 FindParticipant(IN const ConferenceInfo::User* pUser, IN IMS_UINT32 nIndexInXml);
+    IMS_SINT32 FindParticipantByOrder(
+            IN IMS_UINT32 nIndexInXml, IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByOrderLegId(IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByReferToUri(IN const ConferenceInfo::User* pUser);
     IMS_SINT32 FindParticipantByUserEntity(IN const ConferenceInfo::User* pUser);
@@ -49,8 +48,8 @@ protected:
     IMS_BOOL IsAnonymousUri(IN const AString& strUserEntity) const;
     IMS_BOOL IsSamePrivacyUri(IN const AString& strUriA, IN const AString& strUriB) const;
     IMS_BOOL IsAllParticipantUpdated() const;
-    IMS_BOOL IsInvalidStatusUpdate(IN IMS_UINT32 nParticipantIndex,
-            IN const ConferenceInfo::User* pUser) const;
+    IMS_BOOL IsInvalidStatusUpdate(
+            IN IMS_UINT32 nParticipantIndex, IN const ConferenceInfo::User* pUser) const;
     IMSList<ConferenceInfo::User*> GetSameUserEntities(IN const ConferenceInfo::User* pUser) const;
     void AddNotMatchedUserList(IN ConferenceInfo::User* pUser);
     void RemoveFromNotMatchedUserList(IN ConferenceInfo::User* pUser);
@@ -66,26 +65,25 @@ private:
 public:
     enum
     {
-        RESULT_UPDATED              = 0,
-        RESULT_MALFORMED_XML        = 1,
-        RESULT_NOTHING_UPDATED      = 2, // ambiguous??
-        RESULT_INVALID_VERSION      = 3, // ambiguous??
-        RESULT_INFO_DELETED         = 4,
-        RESULT_AMBIGUOUS            = 5
+        RESULT_UPDATED = 0,
+        RESULT_MALFORMED_XML = 1,
+        RESULT_NOTHING_UPDATED = 2,  // ambiguous??
+        RESULT_INVALID_VERSION = 3,  // ambiguous??
+        RESULT_INFO_DELETED = 4,
+        RESULT_AMBIGUOUS = 5
     };
 
     enum
     {
-        MATCH_POLICY_NOT_DEFINED           = 0,
-        MATCH_POLICY_ORDER_LEG_ID          = 1,
-        MATCH_POLICY_ORDER                 = 2,
-        MATCH_POLICY_REFER_TO_URI          = 3,
-        MATCH_POLICY_USERENTITY            = 4,
-        MATCH_POLICY_INVALID_ANONYMOUS     = 5
+        MATCH_POLICY_NOT_DEFINED = 0,
+        MATCH_POLICY_ORDER_LEG_ID = 1,
+        MATCH_POLICY_ORDER = 2,
+        MATCH_POLICY_REFER_TO_URI = 3,
+        MATCH_POLICY_USERENTITY = 4,
+        MATCH_POLICY_INVALID_ANONYMOUS = 5
     };
 
 private:
-
     ConferenceInfo* m_pConferenceInfo;
     ConferenceParticipantList* m_pParticipantList;
     IMS_UINT32 m_nInfoState;

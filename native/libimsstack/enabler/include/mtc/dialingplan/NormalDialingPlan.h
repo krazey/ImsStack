@@ -21,8 +21,8 @@ public:
 
     enum class LocalNumberPolicy
     {
-        HOME, // refers. ImsIdentity::DIALING_POLICY_HOME_LOCAL
-        GEO, // refers. ImsIdentity::DIALING_POLICY_GEO_LOCAL
+        HOME,  // refers. ImsIdentity::DIALING_POLICY_HOME_LOCAL
+        GEO,   // refers. ImsIdentity::DIALING_POLICY_GEO_LOCAL
         GEO_LOCAL_ONLY_IN_ROAMING
     };
 
@@ -34,14 +34,14 @@ public:
     };
 
     // TODO: removing bAquot is for VZW GetEntryUri. should not be required.
-    static AString& GetTranslatedUri(IN IMtcContext& objContext, IN_OUT AString& strNumber,
-            Scheme eScheme);
-    static AString& GetTranslatedUriForDialString(IN IMtcContext& objContext,
-            IN_OUT AString& strNumber);
+    static AString& GetTranslatedUri(
+            IN IMtcContext& objContext, IN_OUT AString& strNumber, Scheme eScheme);
+    static AString& GetTranslatedUriForDialString(
+            IN IMtcContext& objContext, IN_OUT AString& strNumber);
 
 private:
-    static AString& Translate(IN IMtcContext& objContext, IN_OUT AString& strNumber,
-            IN Scheme eScheme);
+    static AString& Translate(
+            IN IMtcContext& objContext, IN_OUT AString& strNumber, IN Scheme eScheme);
 
     static void FormSipUri(IN IMtcContext& objContext, IN_OUT AString& strNumber);
     static void FormTelUri(IN IMtcContext& objContext, IN_OUT AString& strNumber);
@@ -56,8 +56,8 @@ private:
     static NumberFormat GetDialedNumberFormat(IN const AString& strNumber);
 
     // For geo-local number format
-    static AccessNetworkInfo& GetAccessNetworkInfo(IN IMtcContext& objContext,
-            OUT AccessNetworkInfo& objAni);
+    static AccessNetworkInfo& GetAccessNetworkInfo(
+            IN IMtcContext& objContext, OUT AccessNetworkInfo& objAni);
 
     static Scheme GetScheme(IN IMtcContext& objContext);
     static NumberFormat GetNumberFormat(IN IMtcContext& objContext);

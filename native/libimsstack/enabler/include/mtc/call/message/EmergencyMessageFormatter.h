@@ -4,8 +4,7 @@
 #include "IMtcService.h"
 #include "call/message/MessageFormatter.h"
 
-class EmergencyMessageFormatter :
-        public MessageFormatter
+class EmergencyMessageFormatter : public MessageFormatter
 {
 public:
     EmergencyMessageFormatter(IN IMtcSessionContext& objContext);

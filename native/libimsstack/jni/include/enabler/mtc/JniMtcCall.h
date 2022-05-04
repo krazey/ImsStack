@@ -10,8 +10,7 @@
 
 class MtcCallController;
 
-class JniMtcCall final :
-        public BaseService
+class JniMtcCall final : public BaseService
 {
 public:
     JniMtcCall(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nCallKey = -1, IN IMS_SINT32 nSlotId = 0);
@@ -30,7 +29,7 @@ private:
     void Attach();
     void Open(IN const android::Parcel& objParcel);
     void Start(IN const android::Parcel& objParcel);
-    void OnUserAlert(IN const android::Parcel& objParcel); //naming...
+    void OnUserAlert(IN const android::Parcel& objParcel);  // naming...
     void Accept(IN const android::Parcel& objParcel);
     void Reject(IN const android::Parcel& objParcel);
     void Hold(IN const android::Parcel& objParcel);

@@ -10,8 +10,7 @@ class IMessage;
 /**
  * This class provides basic methods for general extensions without any extension-specific logic.
  */
-class MtcExtension :
-        public IMtcExtension
+class MtcExtension : public IMtcExtension
 {
 public:
     explicit MtcExtension(IN const AString& strOptionTag);

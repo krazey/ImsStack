@@ -13,15 +13,11 @@ UssiMessageFormatter::UssiMessageFormatter(IN IMtcSessionContext& objContext) :
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-UssiMessageFormatter::~UssiMessageFormatter()
-{
-}
+PUBLIC VIRTUAL UssiMessageFormatter::~UssiMessageFormatter() {}
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT UssiMessageFormatter::FormStartMessage()
+PUBLIC VIRTUAL IMS_RESULT UssiMessageFormatter::FormStartMessage()
 {
     if (MessageFormatter::FormStartMessage() == IMS_FAILURE)
     {
@@ -37,8 +33,7 @@ IMS_RESULT UssiMessageFormatter::FormStartMessage()
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC VIRTUAL
-IMS_RESULT UssiMessageFormatter::FormAcceptMessage()
+PUBLIC VIRTUAL IMS_RESULT UssiMessageFormatter::FormAcceptMessage()
 {
     if (MessageFormatter::FormAcceptMessage() == IMS_FAILURE)
     {
@@ -67,14 +62,14 @@ void UssiMessageFormatter::SetRecvInfoHeader()
 PRIVATE
 void UssiMessageFormatter::SetAcceptHeader()
 {
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, USSDConstants::HEADER_APPLICATION_SDP,
-            ISipHeader::ACCEPT);
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, USSDConstants::HEADER_APPLICATION_IMSXML,
-            ISipHeader::ACCEPT);
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, USSDConstants::HEADER_APPLICATION_USSDXML,
-            ISipHeader::ACCEPT);
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, USSDConstants::HEADER_MULTIPART_MIXED,
-            ISipHeader::ACCEPT);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, USSDConstants::HEADER_APPLICATION_SDP, ISipHeader::ACCEPT);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, USSDConstants::HEADER_APPLICATION_IMSXML, ISipHeader::ACCEPT);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, USSDConstants::HEADER_APPLICATION_USSDXML, ISipHeader::ACCEPT);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, USSDConstants::HEADER_MULTIPART_MIXED, ISipHeader::ACCEPT);
 
     return;
 }
@@ -84,8 +79,8 @@ void UssiMessageFormatter::SetAcceptHeader()
 PRIVATE
 void UssiMessageFormatter::SetContentTypeHeader()
 {
-    MessageUtil::AddValueIfNotExists(m_piNextMessage, USSDConstants::HEADER_MULTIPART_MIXED,
-            ISipHeader::CONTENT_TYPE);
+    MessageUtil::AddValueIfNotExists(
+            m_piNextMessage, USSDConstants::HEADER_MULTIPART_MIXED, ISipHeader::CONTENT_TYPE);
 
     return;
 }

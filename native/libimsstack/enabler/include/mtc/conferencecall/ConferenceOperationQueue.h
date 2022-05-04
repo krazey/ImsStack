@@ -22,7 +22,8 @@ public:
             objMediaInfo(_objMediaInfo),
             objUsers(_objUsers),
             objSuppServices(_objSuppServices)
-    {}
+    {
+    }
 
 public:
     IMS_UINT32 nType;
@@ -32,8 +33,7 @@ public:
     IMSMap<SuppType, SuppService*>& objSuppServices;
 };
 
-class ConferenceOperationQueue final :
-        public ITimerListener
+class ConferenceOperationQueue final : public ITimerListener
 {
 public:
     struct ConferenceOperation
@@ -47,7 +47,8 @@ public:
                 m_pParam(IMS_NULL),
                 m_nConnectionId(0),
                 m_nTerminateReason(FAIL_REASON_NONE)
-        {}
+        {
+        }
 
         // destructor
         inline ~ConferenceOperation()
@@ -58,36 +59,33 @@ public:
 
         // setters
         inline void SetConfUsers(IN IMSList<ConfUser*> objConfUsers)
-        { m_objConfUsers = objConfUsers; }
+        {
+            m_objConfUsers = objConfUsers;
+        }
 
-        inline void SetConfUser(IN ConfUser* pConfUser)
-        { m_objConfUsers.Append(pConfUser); }
+        inline void SetConfUser(IN ConfUser* pConfUser) { m_objConfUsers.Append(pConfUser); }
 
-        inline void SetParam(IN CallStartOperationParams* pParam)
-        { m_pParam = pParam; }
+        inline void SetParam(IN CallStartOperationParams* pParam) { m_pParam = pParam; }
 
         inline void SetConnectionId(IN IMS_UINT32 nConnectionId)
-        { m_nConnectionId = nConnectionId; }
+        {
+            m_nConnectionId = nConnectionId;
+        }
 
         inline void SetTerminateReason(IN IMS_SINT32 nTerminateReason)
-        { m_nTerminateReason = nTerminateReason; }
+        {
+            m_nTerminateReason = nTerminateReason;
+        }
 
-        inline void RemoveTimerValue()
-        { m_nDelayMillisec = 0; }
+        inline void RemoveTimerValue() { m_nDelayMillisec = 0; }
 
         // getters
-        inline IMS_UINT32 GetType()
-        { return m_nType; }
-        inline IMS_UINT32 GetDelayMilliSec()
-        { return m_nDelayMillisec; }
-        inline const IMSList<ConfUser*>& GetUsers() const
-        { return m_objConfUsers; }
-        inline CallStartOperationParams* GetParam()
-        { return m_pParam; }
-        inline IMS_UINT32 GetConnectionId()
-        { return m_nConnectionId; }
-        inline IMS_SINT32 GetTerminateReason()
-        { return m_nTerminateReason; }
+        inline IMS_UINT32 GetType() { return m_nType; }
+        inline IMS_UINT32 GetDelayMilliSec() { return m_nDelayMillisec; }
+        inline const IMSList<ConfUser*>& GetUsers() const { return m_objConfUsers; }
+        inline CallStartOperationParams* GetParam() { return m_pParam; }
+        inline IMS_UINT32 GetConnectionId() { return m_nConnectionId; }
+        inline IMS_SINT32 GetTerminateReason() { return m_nTerminateReason; }
 
     private:
         IMS_UINT32 m_nType;
@@ -105,7 +103,6 @@ public:
     ConferenceOperationQueue& operator=(IN const ConferenceOperationQueue&) = delete;
 
 public:
-
     // implements ITimerListener interfaces.
     void Timer_TimerExpired(IN ITimer* piTimer) override;
     void SetListener(IN IConferenceOperationQueueListener* piListener);
@@ -126,8 +123,8 @@ public:
     void SetAddingOperationSetCompleted();
 
     ConferenceOperationQueue::ConferenceOperation* GetNextOperation();
-    IMS_BOOL CompleteCurrentOperation(IN IMS_UINT32 nOperationType,
-            IN ConfUser* pConfUser = IMS_NULL);
+    IMS_BOOL CompleteCurrentOperation(
+            IN IMS_UINT32 nOperationType, IN ConfUser* pConfUser = IMS_NULL);
     ConferenceOperationQueue::ConferenceOperation* GetCurrentOperation() const;
     IMS_UINT32 GetTypeOfCurrentOperation() const;
     const IMSList<ConfUser*>& GetUsersOfCurrentOperation() const;
@@ -150,7 +147,7 @@ private:
 
 private:
     static const IMS_UINT32 DELAY_IMMEDIATELY = 0;
-    static const IMS_UINT32 ACTIVE_OPERATION_NUMBER = 0; // 0th operation is the active one.
+    static const IMS_UINT32 ACTIVE_OPERATION_NUMBER = 0;  // 0th operation is the active one.
     static const IMS_UINT32 TIMER_PERFORM_DELAYED_OPERATION = 0;
 
     IMSList<ConferenceOperation*> m_objOperationQueue;

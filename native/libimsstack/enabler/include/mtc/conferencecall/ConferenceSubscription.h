@@ -12,8 +12,7 @@ class ISubscription;
 class IMtcContext;
 enum class SubscriptionState;
 
-class ConferenceSubscription final :
-        public ISubscriptionListener
+class ConferenceSubscription final : public ISubscriptionListener
 {
 public:
     explicit ConferenceSubscription(IN IMtcContext& objContext, IN CallKey nConfCallKey,

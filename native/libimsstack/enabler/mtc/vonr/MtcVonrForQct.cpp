@@ -21,17 +21,15 @@
 
 __IMS_TRACE_TAG_COM_UC__;
 
-
 PUBLIC
-UCVoNRForQct::UCVoNRForQct(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener)
-    : MtcVonr(nSlotId, piListener)
+UCVoNRForQct::UCVoNRForQct(IN IMS_UINT32 nSlotId, IN IMtcVonrListener* piListener) :
+        MtcVonr(nSlotId, piListener)
 {
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_I("+UCVoNRForQct", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-UCVoNRForQct::~UCVoNRForQct()
+PUBLIC VIRTUAL UCVoNRForQct::~UCVoNRForQct()
 {
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_I("~UCVoNRForQct : [%" PFLS_x "]", this, 0, 0);
@@ -39,9 +37,8 @@ UCVoNRForQct::~UCVoNRForQct()
 
 #if _PUBLIC_METHOD_
 #endif
-PUBLIC VIRTUAL
-void UCVoNRForQct::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
-        IN IMS_BOOL bEmergency)
+PUBLIC VIRTUAL void UCVoNRForQct::CheckBarring(
+        IN IMtcCall* piMtcCall, IN CallType eCallType, IN IMS_BOOL bEmergency)
 {
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_I("CheckBarring - eCallType[%d]", eCallType, 0, 0);
@@ -79,8 +76,7 @@ void UCVoNRForQct::CheckBarring(IN IMtcCall* piMtcCall, IN CallType eCallType,
 
 #if _PROTECTED_METHOD_
 #endif
-PROTECTED VIRTUAL
-void UCVoNRForQct::OnSessionStopped(IN IMS_UINTP nParam)
+PROTECTED VIRTUAL void UCVoNRForQct::OnSessionStopped(IN IMS_UINTP nParam)
 {
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_I("OnSessionStopped", 0, 0, 0);
@@ -112,8 +108,7 @@ void UCVoNRForQct::OnSessionStopped(IN IMS_UINTP nParam)
     m_piListener->OnTerminated(this);
 }
 
-PROTECTED VIRTUAL
-void UCVoNRForQct::NotifyCallState(IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void UCVoNRForQct::NotifyCallState(IN IMS_UINT32 nState)
 {
     // --------------------------------------------------------------------------------------------
     IMS_TRACE_I("NotifyCallState - nState[%d], nDirection[%d]", nState, m_nDirection, 0);
@@ -127,15 +122,14 @@ void UCVoNRForQct::NotifyCallState(IN IMS_UINT32 nState)
     // }
 }
 
-PROTECTED VIRTUAL
-void UCVoNRForQct::OnNotifyUacResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
+PROTECTED VIRTUAL void UCVoNRForQct::OnNotifyUacResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResult,
         IN IMS_SINT32 nReason, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nBarringTime)
 {
     // --------------------------------------------------------------------------------------------
     (void)nBarringTime;
 
-    IMS_TRACE_I("OnNotifyUacResponse - Result[%d], Reason[%d], SysMode[%d]",
-            nResult, nReason, nSysMode);
+    IMS_TRACE_I("OnNotifyUacResponse - Result[%d], Reason[%d], SysMode[%d]", nResult, nReason,
+            nSysMode);
 
     if (nSysMode != IVoNr::SYS_MODE_NR5G)
     {
@@ -169,12 +163,10 @@ void UCVoNRForQct::OnNotifyUacResponse(IN IMS_UINT32 nType, IN IMS_RESULT nResul
     }
 }
 
-PROTECTED VIRTUAL
-void UCVoNRForQct::OnNotifyCallPreferenceReady(IN IMS_UINT32 nSysMode)
+PROTECTED VIRTUAL void UCVoNRForQct::OnNotifyCallPreferenceReady(IN IMS_UINT32 nSysMode)
 {
     // --------------------------------------------------------------------------------------------
-    if (m_eUacStatus == UacStatus::SUCCESS
-            || nSysMode != IVoNr::SYS_MODE_LTE)
+    if (m_eUacStatus == UacStatus::SUCCESS || nSysMode != IVoNr::SYS_MODE_LTE)
     {
         IMS_TRACE_I("OnNotifyCallPreferenceReady - invalid", 0, 0, 0);
         return;
@@ -206,21 +198,19 @@ void UCVoNRForQct::OnNotifyCallPreferenceReady(IN IMS_UINT32 nSysMode)
     // pIUCSession->SetUacBlockType(IMtcCall::VONR_BLOCK_TYPE_NONE);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL UCVoNRForQct::IsUacCheckRequired()
+PROTECTED VIRTUAL IMS_BOOL UCVoNRForQct::IsUacCheckRequired()
 {
     // --------------------------------------------------------------------------------------------
 #ifdef _VONR_TEST_
-    if (m_nUacType == IVoNr::TYPE_EMERGENCY
-            || m_nDirection == IVoNr::DIRECTION_MT)
+    if (m_nUacType == IVoNr::TYPE_EMERGENCY || m_nDirection == IVoNr::DIRECTION_MT)
     {
         IMS_TRACE_I("IsUacCheckRequired : FALSE", 0, 0, 0);
         return IMS_FALSE;
     }
 #else
-    if (m_nUacType == IVoNr::TYPE_EMERGENCY
-            || m_piVonr->IsUacCheckRequired(m_nUacType) == IMS_FALSE
-            || m_nDirection == IVoNr::DIRECTION_MT)
+    if (m_nUacType == IVoNr::TYPE_EMERGENCY ||
+            m_piVonr->IsUacCheckRequired(m_nUacType) == IMS_FALSE ||
+            m_nDirection == IVoNr::DIRECTION_MT)
     {
         IMS_TRACE_I("IsUacCheckRequired : FALSE", 0, 0, 0);
         return IMS_FALSE;

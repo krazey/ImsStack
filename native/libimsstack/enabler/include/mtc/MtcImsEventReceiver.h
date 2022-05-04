@@ -15,8 +15,7 @@ using ImsEvent = IMS_SINT32;
  * cached values or receive notification when the event occurs.
  * For supported events, see `RegisterSupportedEvents()`.
  */
-class MtcImsEventReceiver final :
-        public IEventListener
+class MtcImsEventReceiver final : public IEventListener
 {
 public:
     static const IMS_UINT32 UNKNOWN_VALUE;

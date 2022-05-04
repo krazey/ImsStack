@@ -9,9 +9,9 @@
 class IMediaQosEventListener
 {
 public:
-    virtual ~IMediaQosEventListener() {};
+    virtual ~IMediaQosEventListener(){};
 
-    virtual void OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
-            IN IMS_UINT32 eMediaType) = 0;
+    virtual void OnQosStatusChanged(
+            IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType) = 0;
 };
 #endif

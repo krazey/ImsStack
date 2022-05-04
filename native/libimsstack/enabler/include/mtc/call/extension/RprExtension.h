@@ -9,8 +9,7 @@ class IMessage;
 /**
  * This class represents the 100rel extension.
  */
-class RprExtension final :
-        public MtcExtension
+class RprExtension final : public MtcExtension
 {
 public:
     explicit RprExtension();

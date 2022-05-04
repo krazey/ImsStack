@@ -5,7 +5,6 @@
  * brief :
  */
 
-
 #ifndef INTERFACE_DIALOG_EVENT_MNGR_LISTENER_H_
 #define INTERFACE_DIALOG_EVENT_MNGR_LISTENER_H_
 
@@ -18,8 +17,6 @@ public:
     virtual void DEMngr_Terminated(IN IMS_UINTP nParam) = 0;
 };
 
-
-// ------------------------------------------------------------------------------------------------
 class IDEMngrListenBaseParam
 {
 public:
@@ -35,21 +32,19 @@ public:
     }
 
 private:
-    IDEMngrListenBaseParam(IN const IDEMngrListenBaseParam &objRHS);
-    IDEMngrListenBaseParam& operator=(IN const IDEMngrListenBaseParam &objRHS);
+    IDEMngrListenBaseParam(IN const IDEMngrListenBaseParam& objRHS);
+    IDEMngrListenBaseParam& operator=(IN const IDEMngrListenBaseParam& objRHS);
 
 public:
 };
 
-// ------------------------------------------------------------------------------------------------
-class IDEMngrTerminatedParam
-    : public IDEMngrListenBaseParam
+class IDEMngrTerminatedParam : public IDEMngrListenBaseParam
 {
 public:
-    inline IDEMngrTerminatedParam()
-        : IDEMngrListenBaseParam()
-        , terminatedReason(FailReason(FAIL_REASON_NONE))
-        , bDestroy(IMS_FALSE)
+    inline IDEMngrTerminatedParam() :
+            IDEMngrListenBaseParam(),
+            terminatedReason(FailReason(FAIL_REASON_NONE)),
+            bDestroy(IMS_FALSE)
     {
         IMS_TRACE_MEM("uc", "uc_M : IDEMngrTerminatedParam[%" PFLS_u "][%" PFLS_x "]",
                 sizeof(IDEMngrTerminatedParam), this, 0);
@@ -61,13 +56,12 @@ public:
     }
 
 private:
-    IDEMngrTerminatedParam(IN const IDEMngrTerminatedParam &objRHS);
-    IDEMngrTerminatedParam& operator=(IN const IDEMngrTerminatedParam &objRHS);
+    IDEMngrTerminatedParam(IN const IDEMngrTerminatedParam& objRHS);
+    IDEMngrTerminatedParam& operator=(IN const IDEMngrTerminatedParam& objRHS);
 
 public:
-    FailReason      terminatedReason;
-    IMS_BOOL        bDestroy;
-
+    FailReason terminatedReason;
+    IMS_BOOL bDestroy;
 };
 
 #endif /*  INTERFACE_DIALOG_EVENT_MNGR_LISTENER_H_ */

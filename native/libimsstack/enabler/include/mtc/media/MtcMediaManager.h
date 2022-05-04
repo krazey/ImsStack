@@ -15,9 +15,7 @@
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaProfileManager.h"
 
-class MtcMediaManager :
-        public IMtcMediaManager,
-        public IMediaSessionClientListener
+class MtcMediaManager : public IMtcMediaManager, public IMediaSessionClientListener
 {
 public:
     MtcMediaManager(IN IMtcCallContext& objContext);
@@ -54,13 +52,13 @@ public:
     virtual void DestroyMediaSession() override;
 
     /* Media Profile */
-    virtual void CreateMediaProfile(IN ISession* piSession, IN IMS_BOOL bForked,
-            IN IMS_BOOL bOriginalProfile) override;
-    void DestroyMediaProfile(IN ISession* piSession); // called when SetConfirmedSession()
-    void DestroyAllMediaProfiles(); // called when terminate media
+    virtual void CreateMediaProfile(
+            IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) override;
+    void DestroyMediaProfile(IN ISession* piSession);  // called when SetConfirmedSession()
+    void DestroyAllMediaProfiles();                    // called when terminate media
 
     /* Local Tone - public or private */
-    void SetLocalTone(IN IMS_BOOL bLocalTone); // private?
+    void SetLocalTone(IN IMS_BOOL bLocalTone);  // private?
     virtual IMS_BOOL IsLocalTone() override;
 
     /* Media State */
@@ -75,9 +73,9 @@ public:
 
     /* RBT & Network Tone */
     virtual void HandleRingBackTone(IN ISession* piSession, IN IMessage* piMessage) override;
-    void HandleDynamicNetworkTone(IN ISession* piSession, IN IMS_BOOL b180Received,
-            OUT IMS_UINT32& nDuration);
-    void SetNetworkToneRtpTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration); // TBD
+    void HandleDynamicNetworkTone(
+            IN ISession* piSession, IN IMS_BOOL b180Received, OUT IMS_UINT32& nDuration);
+    void SetNetworkToneRtpTimer(IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nDuration);  // TBD
 
     /* Media Operations */
     virtual void Run(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bEarly,
@@ -90,8 +88,8 @@ public:
        MediaSession::GetNegotiatedQuality(), MediaSession::GetNegotiatedCodecBitrate()
        MediaSession::GetNegotiatedCodecBandWidth() */
 
-    virtual void SetRtpPort(IN ISession* piSession, IN IMS_UINT32 eMediaTypes,
-            IN IMS_UINT32 nPort) override;
+    virtual void SetRtpPort(
+            IN ISession* piSession, IN IMS_UINT32 eMediaTypes, IN IMS_UINT32 nPort) override;
     virtual void RequestVideoDataUsage() override;
     virtual void SetEnforcedDirection(IN IMS_UINT32 eMediaTypes, IN IMS_SINT32 eDir) override;
     virtual IMS_BOOL GetCvoResult(IN ISession* piSession) override;
@@ -101,10 +99,10 @@ public:
     virtual void UpdateStatsReportOption(IN IMS_UINT32 eAction) override;
 
     virtual NegotiationState GetNegotiationState(IN ISession* piSession) override;
-    virtual IMS_SINT32 GetNegotiatedDirection(IN ISession* piSession,
-            IN IMS_UINT32 eMediaType) override;
-    virtual IMS_SINT32 GetNegotiatedQuality(IN ISession* piSession,
-            IN IMS_UINT32 eMediaType) override;
+    virtual IMS_SINT32 GetNegotiatedDirection(
+            IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    virtual IMS_SINT32 GetNegotiatedQuality(
+            IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
     virtual CallType GetNegotiatedCallType(IN ISession* piSession) override;
 
     /* Provide information of MtcMediaManager */
@@ -138,7 +136,7 @@ private:
     MediaInfo* m_pMediaInfo;
     MediaInfo* m_pOldMediaInfo;
     IMS_BOOL m_bLocalTone;
-    IMS_UINT32 m_eRtpBlockedMediaTypes; // m_bAudioRTPBlock, m_bVideoRTPBlock, m_bTextRTPBlock
+    IMS_UINT32 m_eRtpBlockedMediaTypes;  // m_bAudioRTPBlock, m_bVideoRTPBlock, m_bTextRTPBlock
     IMediaSession* m_piMediaSession;
     MediaState m_eState;
     MediaState m_eOldState;

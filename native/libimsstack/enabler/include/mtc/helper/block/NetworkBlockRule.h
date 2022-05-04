@@ -6,8 +6,7 @@
 
 class INetworkWatcher;
 
-class NetworkBlockRule final:
-        public IMtcBlockRule
+class NetworkBlockRule final : public IMtcBlockRule
 {
 public:
     explicit NetworkBlockRule(

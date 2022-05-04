@@ -30,11 +30,11 @@ public:
     static IMS_SINT32 GetResponseStatusCode(IN ISession* piSession, IN IMS_SINT32 eServiceMethod,
             IN IMS_SINT32 nResponseIndex = INVALID_INDEX);
     // Changed :: GetRemoteURIs -> GetRemoteUris
-    static IMS_RESULT GetRemoteUris(IN ISession* piSession, IN PeerType ePeerType,
-            OUT IMSList<AString>& lstUris);
+    static IMS_RESULT GetRemoteUris(
+            IN ISession* piSession, IN PeerType ePeerType, OUT IMSList<AString>& lstUris);
     // Changed :: GetRemoteURI -> GetRemoteUri
-    static IMS_RESULT GetRemoteUri(IN ISession* piSession, IN PeerType ePeerType,
-            OUT AString& strUri);
+    static IMS_RESULT GetRemoteUri(
+            IN ISession* piSession, IN PeerType ePeerType, OUT AString& strUri);
     // Changed :: GetSessionID -> GetSessionId
     static IMS_RESULT GetSessionId(IN ISession* piSession, OUT AString& strSessionId);
 
@@ -97,13 +97,12 @@ public:
     static IMS_SINT32 GetFeatures(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull());
     // Changed :: GetSOSTypeFromServiceURN -> GetSosTypeFromServiceUrn
-    static IMS_SINT32 GetSosTypeFromServiceUrn(
-            IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            IN const AString& strHeaderName = AString::ConstNull());
+    static IMS_SINT32 GetSosTypeFromServiceUrn(IN const IMessage* piMessage,
+            IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName = AString::ConstNull());
 
     // Changed :: GetCauseFromReason -> GetCauseFromReasonHeader
-    static IMS_SINT32 GetCauseFromReasonHeader(IN const IMessage* piMessage,
-            IN const AString& strProtocol = AString::ConstNull());
+    static IMS_SINT32 GetCauseFromReasonHeader(
+            IN const IMessage* piMessage, IN const AString& strProtocol = AString::ConstNull());
     static IMS_RESULT GetCauseAndTextFromReasonHeader(IN const IMessage* piMessage,
             OUT IMS_SINT32& nCause, OUT AString& strText,
             IN const AString& strProtocol = AString::ConstNull());
@@ -156,8 +155,8 @@ private:
     static IMS_RESULT GetAddresses(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             OUT IMSList<SipAddress>& lstAddresses,
             IN const AString& strHeaderName = AString::ConstNull());
-    static void GetParameterValueFromUnknownHeaderBody(IN const AString& strBody,
-            IN const AString& strParameterName, OUT AString& strValue);
+    static void GetParameterValueFromUnknownHeaderBody(
+            IN const AString& strBody, IN const AString& strParameterName, OUT AString& strValue);
     static IMS_RESULT GetUrnValue(IN const IMessage* piMessage, IN const AString& strId,
             IN IMS_SINT32 eHeaderType, OUT AString& strValue,
             IN const AString& strHeaderName = AString::ConstNull());
@@ -166,16 +165,16 @@ private:
 
 public:
     // legacy API
-    static ServiceType CheckServiceType(IN IMessage* piMessage, IN IMtcCall *pSession = IMS_NULL,
+    static ServiceType CheckServiceType(IN IMessage* piMessage, IN IMtcCall* pSession = IMS_NULL,
             IN ISession* piSession = IMS_NULL);
-    static CallType GetCallType(IN IMessage* piMessage, IN ISession* piSession,
-            IN IMS_BOOL bPeerView);
+    static CallType GetCallType(
+            IN IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView);
     static CallType GetCallTypeFromSdp(IN ISession* piSession, IN IMS_BOOL bNego,
-            IN IMS_BOOL bPeerView); // TODO: change name of bPeerView
-    static CallType GetCallTypeFromAcceptContact(IN IMessage* piMessage,
-            IN ISession* piSession = IMS_NULL);
-    static IMS_SINT32 CheckRttUpdateRequest(IN IMessage* piMessage,
-            IN ISession* piSession = IMS_NULL);
+            IN IMS_BOOL bPeerView);  // TODO: change name of bPeerView
+    static CallType GetCallTypeFromAcceptContact(
+            IN IMessage* piMessage, IN ISession* piSession = IMS_NULL);
+    static IMS_SINT32 CheckRttUpdateRequest(
+            IN IMessage* piMessage, IN ISession* piSession = IMS_NULL);
     static IMS_BOOL IsSessionRefresh(IN ISession* piSession);
     static IMS_BOOL IsTextSession(IN ISession* piSession);
     static IMS_BOOL IsResponseExist(IN ISession* piSession, IN IMS_SINT32 nStatusCode);
@@ -229,7 +228,6 @@ public:
 
 private:
     static const IMS_SINT32 INVALID_INDEX;
-
 };
 
 #endif

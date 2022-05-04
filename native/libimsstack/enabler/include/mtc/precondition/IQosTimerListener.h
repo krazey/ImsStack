@@ -8,7 +8,7 @@ class QosTimer;
 class IQosTimerListener
 {
 public:
-    virtual ~IQosTimerListener() {};
+    virtual ~IQosTimerListener(){};
 
     /**
      * @brief This method is to notify the timer expiration waiting for the QoS connection.

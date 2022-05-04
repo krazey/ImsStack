@@ -17,20 +17,20 @@
 __IMS_TRACE_TAG_COM_UC__;
 
 PUBLIC
-USSDDataParser::USSDDataParser()
-    : m_strLanguage(AString::ConstNull())
-    , m_strUSSDString(AString::ConstNull())
-    , m_nErrorCode(ERROR_CODE_NONE)
+USSDDataParser::USSDDataParser() :
+        m_strLanguage(AString::ConstNull()),
+        m_strUSSDString(AString::ConstNull()),
+        m_nErrorCode(ERROR_CODE_NONE)
 {
     IMS_TRACE_MEM("uc", "uc_M : USSDDataParser[%" PFLS_u "][%" PFLS_x "]", sizeof(USSDDataParser),
             this, 0);
 }
 
 PUBLIC
-USSDDataParser::USSDDataParser(IN const AString &strUSSIBody)
-    : m_strLanguage(AString::ConstNull())
-    , m_strUSSDString(AString::ConstNull())
-    , m_nErrorCode(ERROR_CODE_NONE)
+USSDDataParser::USSDDataParser(IN const AString& strUSSIBody) :
+        m_strLanguage(AString::ConstNull()),
+        m_strUSSDString(AString::ConstNull()),
+        m_nErrorCode(ERROR_CODE_NONE)
 {
     IMS_TRACE_MEM("uc", "uc_M : USSDDataParser[%" PFLS_u "][%" PFLS_x "]", sizeof(USSDDataParser),
             this, 0);
@@ -64,10 +64,10 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
+IMS_BOOL USSDDataParser::Parse(IN const AString& strUSSIBody)
 {
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
-    DocumentBuilder *pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
+    DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
 
     //---------------------------------------------------------------------------------------------
 
@@ -77,7 +77,7 @@ IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
         return IMS_FALSE;
     }
 
-    IDocument *piDocument = pDocumentBuilder->Parse(strUSSIBody);
+    IDocument* piDocument = pDocumentBuilder->Parse(strUSSIBody);
 
     if (piDocument == IMS_NULL)
     {
@@ -87,7 +87,7 @@ IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
         return IMS_FALSE;
     }
 
-    IElement *piElement = piDocument->GetDocumentElement();
+    IElement* piElement = piDocument->GetDocumentElement();
 
     if (piElement == IMS_NULL)
     {
@@ -102,17 +102,16 @@ IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
 
     if (!strTagName.EqualsIgnoreCase(USSDConstants::ELEMENT_USSD_DATA))
     {
-        IMS_TRACE_E(0, "Root element (%s) is not matched in 'ussd-data'",
-                strTagName.GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Root element (%s) is not matched in 'ussd-data'", strTagName.GetStr(), 0, 0);
 
         piDocument->DestroyDocument();
         pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);
         return IMS_FALSE;
     }
 
-    INodeList *piNodeListEvents = piElement->GetChildNodes();
-    if (piNodeListEvents == IMS_NULL
-            || piNodeListEvents->GetLength() <= 0)
+    INodeList* piNodeListEvents = piElement->GetChildNodes();
+    if (piNodeListEvents == IMS_NULL || piNodeListEvents->GetLength() <= 0)
     {
         IMS_TRACE_E(0, "no 'ussd-data' NodeList", 0, 0, 0);
         piDocument->DestroyDocument();
@@ -122,7 +121,7 @@ IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
 
     for (IMS_SINT32 i = 0; i < piNodeListEvents->GetLength(); i++)
     {
-        INode *piNodeEvent = piNodeListEvents->Item(i);
+        INode* piNodeEvent = piNodeListEvents->Item(i);
         if (piNodeEvent == IMS_NULL)
         {
             continue;
@@ -133,20 +132,18 @@ IMS_BOOL USSDDataParser::Parse(IN const AString &strUSSIBody)
         if (strName.EqualsIgnoreCase(USSDConstants::ELEMENT_LANGUAGE))
         {
             INode* piNodeChild = piNodeEvent->GetFirstChild();
-            if (piNodeChild != IMS_NULL
-                    && piNodeChild->GetNodeType() == INode::TEXT_NODE)
+            if (piNodeChild != IMS_NULL && piNodeChild->GetNodeType() == INode::TEXT_NODE)
             {
-                IText *piText = DYNAMIC_CAST(IText*, piNodeChild);
+                IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
                 m_strLanguage = piText->GetData();
             }
         }
         else if (strName.EqualsIgnoreCase(USSDConstants::ELEMENT_USSD_STRING))
         {
             INode* piNodeChild = piNodeEvent->GetFirstChild();
-            if (piNodeChild != IMS_NULL
-                    && piNodeChild->GetNodeType() == INode::TEXT_NODE)
+            if (piNodeChild != IMS_NULL && piNodeChild->GetNodeType() == INode::TEXT_NODE)
             {
-                IText *piText = DYNAMIC_CAST(IText*, piNodeChild);
+                IText* piText = DYNAMIC_CAST(IText*, piNodeChild);
                 m_strUSSDString = piText->GetData();
             }
         }
@@ -178,7 +175,7 @@ Remarks
 
 */
 PRIVATE
-void USSDDataParser::CreateAnyExtension(IN INode *piNode)
+void USSDDataParser::CreateAnyExtension(IN INode* piNode)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -188,7 +185,7 @@ void USSDDataParser::CreateAnyExtension(IN INode *piNode)
         return;
     }
 
-    INode *piElement = piNode->GetFirstChild();
+    INode* piElement = piNode->GetFirstChild();
     AString strName;
 
     while (piElement != IMS_NULL)
@@ -205,7 +202,7 @@ void USSDDataParser::CreateAnyExtension(IN INode *piNode)
         }
         else if (strName.EqualsIgnoreCase(USSDConstants::ELEMENT_ALERTING_PATTERN))
         {
-            INode *piNode_Value = piElement->GetFirstChild();
+            INode* piNode_Value = piElement->GetFirstChild();
 
             if (piNode_Value != IMS_NULL)
             {

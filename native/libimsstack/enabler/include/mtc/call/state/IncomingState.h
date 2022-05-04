@@ -20,8 +20,7 @@ class SuppService;
 /**
  * Represents the state that a call is incoming but haven't alerted to the UI.
  */
-class IncomingState :
-        public MtcCallState
+class IncomingState : public MtcCallState
 {
 public:
     IncomingState(IN IMtcCallContext& objContext);

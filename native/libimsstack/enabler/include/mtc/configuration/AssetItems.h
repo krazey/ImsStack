@@ -67,8 +67,8 @@ public:
         objInformationLevelOfGeolocationPidfs.Push(0);
     }
 
-    AssetItems(IN const AssetItems&) = delete; // not planed
-    AssetItems& operator=(IN const AssetItems&) = delete; // not planed
+    AssetItems(IN const AssetItems&) = delete;             // not planed
+    AssetItems& operator=(IN const AssetItems&) = delete;  // not planed
 
 public:
     IMS_BOOL bCheckConferenceEventPackageVersion;
@@ -87,8 +87,8 @@ public:
     IMSVector<AString> objCarrierSpecificSipHeaders;
     IMS_BOOL bCheckAvchangeFeatureForCallConvertingCapability;
     IMS_BOOL bSupportRegistrationRecoveryForFailureOfSessionRefresh;
-    IMSVector<IMS_SINT32> objCallMaintainingOnRegistrationSupendeds; // name?
-    IMSVector<IMS_SINT32> objRequiringEmergencyCallWhenVideoEmergencyCallFaileds; // name?
+    IMSVector<IMS_SINT32> objCallMaintainingOnRegistrationSupendeds;               // name?
+    IMSVector<IMS_SINT32> objRequiringEmergencyCallWhenVideoEmergencyCallFaileds;  // name?
     IMS_BOOL bUseMcidSupplementaryService;
     IMS_BOOL bUseMmcSupplementaryService;
     IMS_BOOL bUseLtePreferredStatusForServiceCapability;

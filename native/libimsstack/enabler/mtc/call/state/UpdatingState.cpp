@@ -23,20 +23,18 @@ UpdatingState::UpdatingState(IN IMtcCallContext& objContext) :
     IMS_TRACE_D("+UpdatingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-UpdatingState::~UpdatingState()
+PUBLIC VIRTUAL UpdatingState::~UpdatingState()
 {
     IMS_TRACE_D("~UpdatingState", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void UpdatingState::OnExit()
+PUBLIC VIRTUAL void UpdatingState::OnExit()
 {
     m_objContext.DeleteUpdatingInfo();
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::AcceptConvert(IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
+PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
+        IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("AcceptConvert", 0, 0, 0);
 
@@ -62,8 +60,7 @@ CallStateName UpdatingState::AcceptConvert(IN CallType /* eCallType */, IN Media
 
     m_objContext.GetPreconditionManager().FormPreconditionSdp(&objSession, IMS_FALSE);
 
-    m_objContext.GetMediaManager().GetMediaInfo(
-            m_objContext.GetUpdatingInfo().GetModifiedInfo());
+    m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetModifiedInfo());
 
     if (pSession->GetMessageSender().AcceptUpdate() == IMS_FAILURE)
     {
@@ -82,8 +79,7 @@ CallStateName UpdatingState::AcceptConvert(IN CallType /* eCallType */, IN Media
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
 {
     IMS_TRACE_D("RejectConvert", 0, 0, 0);
 
@@ -107,8 +103,7 @@ CallStateName UpdatingState::RejectConvert(IN const FailReason& objReason)
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::CancelConvert(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::CancelConvert(IN const FailReason& objReason)
 {
     IMS_TRACE_D("CancelConvert", 0, 0, 0);
 
@@ -122,8 +117,7 @@ CallStateName UpdatingState::CancelConvert(IN const FailReason& objReason)
     return CallStateName::UPDATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
+PUBLIC VIRTUAL CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
 
@@ -140,8 +134,7 @@ CallStateName UpdatingState::Terminate(IN const FailReason& objReason)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
@@ -153,8 +146,7 @@ CallStateName UpdatingState::SessionTerminated(IN ISession* piSession)
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::SessionUpdated(IN ISession* /* piSession */)
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionUpdated", 0, 0, 0);
 
@@ -175,8 +167,7 @@ CallStateName UpdatingState::SessionUpdated(IN ISession* /* piSession */)
     return HandleModificationSucceeded();
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
+PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionUpdateFailed", 0, 0, 0);
 
@@ -191,15 +182,14 @@ CallStateName UpdatingState::SessionUpdateFailed(IN ISession* piSession)
         m_objContext.GetUiNotifier().SendTerminated(objReason);
         return CallStateName::TERMINATING;
     }
-    else    // TODO: retry
+    else  // TODO: retry
     {
         RecoverModificationFailure();
         return CallStateName::ESTABLISHED;
     }
 }
 
-PUBLIC VIRTUAL
-CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL CallStateName UpdatingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     IMS_TRACE_D("OnTimerExpired : %d", nType, 0, 0);
 
@@ -277,8 +267,7 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetUpdatingInfo().GetModifiedInfo().eADir = DIRECTION_INVALID;
 
     m_objContext.GetUpdatingInfo().SetModifier();
-    m_objContext.GetMediaManager().SetMediaInfo(
-            m_objContext.GetUpdatingInfo().GetModifyingInfo());
+    m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
     MtcSession* pSession = m_objContext.GetSession();
     if (m_objContext.GetMediaManager().FormSdp(&(pSession->GetISession()), CallType::VOIP) ==
@@ -321,12 +310,11 @@ CallStateName UpdatingState::HandleModificationSucceeded()
 
     if (eCallStateName == CallStateName::ESTABLISHED)
     {
-        m_objContext.GetMediaManager().Run(&m_objContext.GetSession()->GetISession(),
-                IMS_NULL, IMS_FALSE, IMS_FALSE);
+        m_objContext.GetMediaManager().Run(
+                &m_objContext.GetSession()->GetISession(), IMS_NULL, IMS_FALSE, IMS_FALSE);
     }
 
     return eCallStateName;
-
 }
 
 PRIVATE
@@ -366,8 +354,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 
     if (m_objContext.GetUpdatingInfo().IsAlerted())
     {
-        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()),
-                &objMediaInfo, m_objContext.GetSupplementaryService().GetServices());
+        m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()), &objMediaInfo,
+                m_objContext.GetSupplementaryService().GetServices());
 
         return CallStateName::ESTABLISHED;
     }
@@ -385,8 +373,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
         return CallStateName::ESTABLISHED;
     }
 
-    m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(),
-            &objMediaInfo, m_objContext.GetSupplementaryService().GetServices());
+    m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(), &objMediaInfo,
+            m_objContext.GetSupplementaryService().GetServices());
 
     return CallStateName::ESTABLISHED;
 }

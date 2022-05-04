@@ -11,8 +11,7 @@ class ConfUser;
 struct CallInfo;
 struct CallStartOperationParams;
 
-class MergeController final :
-        public ConferenceController
+class MergeController final : public ConferenceController
 {
 public:
     explicit MergeController(IN CallKey nConfCallKey, IMtcContext& objContext,

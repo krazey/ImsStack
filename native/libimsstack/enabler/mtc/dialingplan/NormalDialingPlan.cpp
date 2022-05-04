@@ -16,24 +16,21 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PUBLIC GLOBAL
-AString& NormalDialingPlan::GetTranslatedUri(IN IMtcContext& objContext, IN AString& strNumber,
-        Scheme eScheme)
+PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUri(
+        IN IMtcContext& objContext, IN AString& strNumber, Scheme eScheme)
 {
     return Translate(objContext, strNumber, eScheme);
 }
 
-PUBLIC GLOBAL
-AString& NormalDialingPlan::GetTranslatedUriForDialString(IN IMtcContext& objContext,
-        IN AString& strNumber)
+PUBLIC GLOBAL AString& NormalDialingPlan::GetTranslatedUriForDialString(
+        IN IMtcContext& objContext, IN AString& strNumber)
 {
     strNumber = ImsIdentity::CreateSIPUserIdWithDialString(strNumber, objContext.GetSlotId());
     return strNumber;
 }
 
-PRIVATE GLOBAL
-AString& NormalDialingPlan::Translate(IN IMtcContext& objContext, IN_OUT AString& strNumber,
-        IN Scheme eScheme)
+PRIVATE GLOBAL AString& NormalDialingPlan::Translate(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber, IN Scheme eScheme)
 {
     if (strNumber.GetLength() == 0)
     {
@@ -72,8 +69,8 @@ AString& NormalDialingPlan::Translate(IN IMtcContext& objContext, IN_OUT AString
     return strNumber;
 }
 
-PRIVATE GLOBAL
-void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext, IN_OUT AString& strNumber)
+PRIVATE GLOBAL void NormalDialingPlan::FormSipUri(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     IMS_TRACE_I("FormSipUri", 0, 0, 0);
 
@@ -89,16 +86,15 @@ void NormalDialingPlan::FormSipUri(IN IMtcContext& objContext, IN_OUT AString& s
     {
         // local
         AccessNetworkInfo objAni;
-        AString strPhoneContext = ImsIdentity::GetPhoneContext(
-                static_cast<IMS_SINT32>(ePolicy), objContext.GetSlotId(),
-                &GetAccessNetworkInfo(objContext, objAni));
-        strNumber = ImsIdentity::CreateSIPUserIdWithPhone(strNumber, objContext.GetSlotId(),
-                strPhoneContext);
+        AString strPhoneContext = ImsIdentity::GetPhoneContext(static_cast<IMS_SINT32>(ePolicy),
+                objContext.GetSlotId(), &GetAccessNetworkInfo(objContext, objAni));
+        strNumber = ImsIdentity::CreateSIPUserIdWithPhone(
+                strNumber, objContext.GetSlotId(), strPhoneContext);
     }
 }
 
-PRIVATE GLOBAL
-void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext, IN_OUT AString& strNumber)
+PRIVATE GLOBAL void NormalDialingPlan::FormTelUri(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     IMS_TRACE_I("FormTelUri", 0, 0, 0);
 
@@ -123,8 +119,8 @@ void NormalDialingPlan::FormTelUri(IN IMtcContext& objContext, IN_OUT AString& s
     AddAquotIfRequired(strNumber);
 }
 
-PRIVATE GLOBAL
-void NormalDialingPlan::FormTelUriAsGlobal(IN IMtcContext& objContext, IN_OUT AString& strNumber)
+PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsGlobal(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     AString strCountryCode;
     strCountryCode.SetNumber(objContext.GetConfigurationProxy().GetInt(Feature::COUNTRY_CODE));
@@ -147,8 +143,8 @@ void NormalDialingPlan::FormTelUriAsGlobal(IN IMtcContext& objContext, IN_OUT AS
     }
 }
 
-PRIVATE GLOBAL
-void NormalDialingPlan::FormTelUriAsLocal(IN IMtcContext& objContext, IN_OUT AString& strNumber)
+PRIVATE GLOBAL void NormalDialingPlan::FormTelUriAsLocal(
+        IN IMtcContext& objContext, IN_OUT AString& strNumber)
 {
     if (strNumber.StartsWith(TextParser::CHAR_PLUS))
     {
@@ -156,12 +152,11 @@ void NormalDialingPlan::FormTelUriAsLocal(IN IMtcContext& objContext, IN_OUT ASt
     }
 
     strNumber.Append(";phone-context=");
-    strNumber.Append(ImsIdentity::GetPhoneContext(static_cast<IMS_SINT32>(
-            GetLocalNumberPolicy(objContext)), objContext.GetSlotId()));
+    strNumber.Append(ImsIdentity::GetPhoneContext(
+            static_cast<IMS_SINT32>(GetLocalNumberPolicy(objContext)), objContext.GetSlotId()));
 }
 
-PRIVATE GLOBAL
-IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)
 {
     // "-", ".", "(", ")"
 
@@ -173,8 +168,7 @@ IMS_BOOL NormalDialingPlan::IsVisualSeparator(IN IMS_CHAR ch)
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL NormalDialingPlan::IsNameAddress(IN const AString& strNumber)
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsNameAddress(IN const AString& strNumber)
 {
     if (strNumber.Contains(TextParser::CHAR_LAQUOT) && strNumber.Contains(TextParser::CHAR_RAQUOT))
     {
@@ -184,8 +178,7 @@ IMS_BOOL NormalDialingPlan::IsNameAddress(IN const AString& strNumber)
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL NormalDialingPlan::IsAddressSpec(IN const AString& strNumber)
+PRIVATE GLOBAL IMS_BOOL NormalDialingPlan::IsAddressSpec(IN const AString& strNumber)
 {
     // addr-spec format
     AString strTmp = strNumber.MakeLower();
@@ -198,8 +191,7 @@ IMS_BOOL NormalDialingPlan::IsAddressSpec(IN const AString& strNumber)
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-void NormalDialingPlan::AddAquotIfRequired(IN_OUT AString& strNumber)
+PRIVATE GLOBAL void NormalDialingPlan::AddAquotIfRequired(IN_OUT AString& strNumber)
 {
     // TODO: can this be replaced by SipAddress apis?
     if (strNumber.Contains(TextParser::CHAR_SEMICOLON))
@@ -209,8 +201,7 @@ void NormalDialingPlan::AddAquotIfRequired(IN_OUT AString& strNumber)
     }
 }
 
-PRIVATE GLOBAL
-NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumberFormat(
+PRIVATE GLOBAL NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumberFormat(
         IN const AString& strNumber)
 {
     // Ref. RFC 3966
@@ -245,8 +236,8 @@ NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumberFormat(
         {
             const IMS_CHAR c = strNumber[i];
 
-            if (!IMS_ISDIGIT(c) && !IsVisualSeparator(c) &&
-                   (c != '*') && (c != TextParser::CHAR_SHARP) && !((c >= 'A') && (c <= 'F')))
+            if (!IMS_ISDIGIT(c) && !IsVisualSeparator(c) && (c != '*') &&
+                    (c != TextParser::CHAR_SHARP) && !((c >= 'A') && (c <= 'F')))
             {
                 return NumberFormat::NON_NUMBER;
             }
@@ -256,16 +247,16 @@ NormalDialingPlan::NumberFormat NormalDialingPlan::GetDialedNumberFormat(
     }
 }
 
-PRIVATE GLOBAL
-AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(IN IMtcContext& objContext,
-        OUT AccessNetworkInfo& objAni)
+PRIVATE GLOBAL AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(
+        IN IMtcContext& objContext, OUT AccessNetworkInfo& objAni)
 {
     // TODO: service type. normal or emergency.
     IMS_SINT32 nApnType = objContext.GetServiceByType(ServiceType::NORMAL)
-            ->GetAosConnector()->GetConnectionType();
+                                  ->GetAosConnector()
+                                  ->GetConnectionType();
 
-     INetworkConnection* piConnection = NetworkService::GetNetworkService()->FindConnection(
-            nApnType, objContext.GetSlotId());
+    INetworkConnection* piConnection =
+            NetworkService::GetNetworkService()->FindConnection(nApnType, objContext.GetSlotId());
 
     if (piConnection != IMS_NULL)
     {
@@ -275,8 +266,7 @@ AccessNetworkInfo& NormalDialingPlan::GetAccessNetworkInfo(IN IMtcContext& objCo
     return objAni;
 }
 
-PRIVATE GLOBAL
-NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcContext& objContext)
+PRIVATE GLOBAL NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcContext& objContext)
 {
     IMS_SINT32 nValue = objContext.GetConfigurationProxy().GetInt(Feature::REQUEST_URI_TYPE);
     IMS_TRACE_D("GetScheme config=[%d]", nValue, 0, 0);
@@ -290,8 +280,8 @@ NormalDialingPlan::Scheme NormalDialingPlan::GetScheme(IN IMtcContext& objContex
     }
 }
 
-PRIVATE GLOBAL
-NormalDialingPlan::NumberFormat NormalDialingPlan::GetNumberFormat(IN IMtcContext& /*objContext*/)
+PRIVATE GLOBAL NormalDialingPlan::NumberFormat NormalDialingPlan::GetNumberFormat(
+        IN IMtcContext& /*objContext*/)
 {
     // TODO: target number format doesn't exist in engine config.
     /*
@@ -302,11 +292,10 @@ NormalDialingPlan::NumberFormat NormalDialingPlan::GetNumberFormat(IN IMtcContex
     }
     */
 
-   return NumberFormat::LOCAL_FORMAT;
+    return NumberFormat::LOCAL_FORMAT;
 }
 
-PRIVATE GLOBAL
-NormalDialingPlan::LocalNumberPolicy NormalDialingPlan::GetLocalNumberPolicy(
+PRIVATE GLOBAL NormalDialingPlan::LocalNumberPolicy NormalDialingPlan::GetLocalNumberPolicy(
         IN IMtcContext& objContext)
 {
     // For policy to consist of phone-context URI parameter;

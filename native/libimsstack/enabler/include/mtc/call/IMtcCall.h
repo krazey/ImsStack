@@ -39,38 +39,28 @@ public:
         TERMINATING,
     };
 
-    virtual ~IMtcCall() {};
+    virtual ~IMtcCall(){};
 
     // Sets thread to interact with the Java layer. Nothing happens if the thread is null.
-    virtual void Attach(IN JniMtcCallThread* pJniMtcCallThread,
-            IN JniMediaSessionThread* pJniMediaThread) = 0;
+    virtual void Attach(
+            IN JniMtcCallThread* pJniMtcCallThread, IN JniMediaSessionThread* pJniMediaThread) = 0;
 
     // Unsets thread to interact with the Java layer.
     virtual void Detach() = 0;
 
     // Starts an outgoing call.
-    virtual void Start(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
+    virtual void Start(IN CallType eCallType, IN const AString& strTarget, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices) = 0;
 
-    virtual void StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
-            IN MediaInfo* pMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+    virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN const IMSList<ConfUser*> objUsers) = 0;
 
-    virtual void StartConference(
-            IN CallType eCallType,
-            IN const AString& strTarget,
+    virtual void StartConference(IN CallType eCallType, IN const AString& strTarget,
             IN const IMSList<ConfUser*> objUsers) = 0;
 
     // Handles an incoming call.
-    virtual void HandleIncoming(
-            IN ISession* piSession,
-            IN JniMtcServiceThread* pServiceThread) = 0;
+    virtual void HandleIncoming(IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) = 0;
 
     // Notifies that the user alerting for this call is started.
     virtual void HandleUserAlert() = 0;

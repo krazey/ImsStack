@@ -16,9 +16,9 @@ public:
     // no additional info is allowed.
     void PutCache(IN Feature eFeature, IN IMS_BOOL bValue);
     void PutCache(IN Feature eFeature, IN IMS_SINT32 nValue);
-    void PutCache(IN Feature eFeature, const IN AString &strValue);
+    void PutCache(IN Feature eFeature, const IN AString& strValue);
 
-    IMS_BOOL ResetCache(IN Feature eFeature); // necessary?
+    IMS_BOOL ResetCache(IN Feature eFeature);  // necessary?
 
     IMS_BOOL GetBooleanCache(IN Feature eFeature) const;
     IMS_SINT32 GetIntegerCache(IN Feature eFeature) const;
@@ -27,7 +27,7 @@ public:
     IMS_BOOL HasBooleanCache(IN Feature eFeature) const;
     IMS_BOOL HasIntegerCache(IN Feature eFeature) const;
     IMS_BOOL HasStringCache(IN Feature eFeature) const;
-    IMS_BOOL IsEmpty() const; // necessary?
+    IMS_BOOL IsEmpty() const;  // necessary?
 
 private:
     IMSMap<Feature, IMS_BOOL> m_objBooleanCache;

@@ -32,7 +32,7 @@ MtcDialingPlan::~MtcDialingPlan()
 
 PUBLIC
 AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo& objCallInfo,
-        IN Scheme eScheme/* = Scheme::Unknown*/)
+        IN Scheme eScheme /* = Scheme::Unknown*/)
 {
     AString strUri = strNumber;
 
@@ -72,8 +72,8 @@ AString MtcDialingPlan::GetToUri(IN const AString& strNumber, IN const CallInfo&
 }
 
 PUBLIC
-void MtcDialingPlan::OnCountrySpecificServiceUrnReceived(IN const AString& strNumber,
-        IN const AString& strServiceUrn)
+void MtcDialingPlan::OnCountrySpecificServiceUrnReceived(
+        IN const AString& strNumber, IN const AString& strServiceUrn)
 {
     // if already exists, overwrite.
     m_pTemporaryServiceUrn = std::make_unique<TemporaryServiceUrn>(strNumber, strServiceUrn);

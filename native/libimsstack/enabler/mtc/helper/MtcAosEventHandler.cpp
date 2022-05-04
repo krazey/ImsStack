@@ -12,8 +12,8 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-MtcAosEventHandler::MtcAosEventHandler(IN IMtcService& objService,
-        IN MtcConfigurationProxy& objConfiguration) :
+MtcAosEventHandler::MtcAosEventHandler(
+        IN IMtcService& objService, IN MtcConfigurationProxy& objConfiguration) :
         m_objService(objService),
         m_objConfiguration(objConfiguration)
 {
@@ -27,8 +27,8 @@ MtcAosEventHandler::~MtcAosEventHandler()
 }
 
 PUBLIC
-void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nIpcan*/,
-        IN JniMtcServiceThread* pServiceThread)
+void MtcAosEventHandler::OnConnected(
+        IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nIpcan*/, IN JniMtcServiceThread* pServiceThread)
 {
     IMS_TRACE_I("OnConnected emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
 
@@ -40,7 +40,7 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nI
     if (m_objService.IsEmergency())
     {
         // TODO: OnEServiceChanged / Jni for Emergnecy MtcService.
-        //pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+        // pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
     }
     else
     {
@@ -54,13 +54,13 @@ void MtcAosEventHandler::OnConnected(IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nI
 }
 
 PUBLIC
-void MtcAosEventHandler::OnDisconnecting(IN IMS_UINT32 nReason,
-        IN MtcCallController& objCallController)
+void MtcAosEventHandler::OnDisconnecting(
+        IN IMS_UINT32 nReason, IN MtcCallController& objCallController)
 {
     Key nKey;
     nKey.eServiceType = m_objService.GetServiceType();
     if (m_objConfiguration.Is(
-            Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nReason))
+                Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nReason))
     {
         objCallController.TerminateCalls(KeyType::SERVICE_TYPE, nKey, nReason);
     }
@@ -73,7 +73,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
     Key nKey;
     nKey.eServiceType = m_objService.GetServiceType();
     if (m_objConfiguration.Is(
-            Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nReason))
+                Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nReason))
     {
         objCallController.RemoveCalls(KeyType::SERVICE_TYPE, nKey);
     }
@@ -81,7 +81,7 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
     if (m_objService.IsEmergency())
     {
         // TODO: OnEServiceChanged / Jni for Emergnecy MtcService.
-        //pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
+        // pServiceThread->OnServiceChanged(nMmtelConnected + nVideoConnected, 0);
     }
     else
     {
@@ -93,15 +93,13 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
 }
 
 PUBLIC
-void MtcAosEventHandler::OnSuspended(IN IMS_UINT32 /*nReason*/,
-        IN MtcCallController& /*objCallController*/)
+void MtcAosEventHandler::OnSuspended(
+        IN IMS_UINT32 /*nReason*/, IN MtcCallController& /*objCallController*/)
 {
 }
 
 PUBLIC
-void MtcAosEventHandler::OnResumed()
-{
-}
+void MtcAosEventHandler::OnResumed() {}
 
 PUBLIC
 void MtcAosEventHandler::OnServiceConnected(IN IMS_UINT32 /*nServices*/, IN IMS_UINT32 /*nIpcan*/)
@@ -109,6 +107,4 @@ void MtcAosEventHandler::OnServiceConnected(IN IMS_UINT32 /*nServices*/, IN IMS_
 }
 
 PUBLIC
-void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 /*nType*/, IN IMS_UINT32 /*nState*/)
-{
-}
+void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 /*nType*/, IN IMS_UINT32 /*nState*/) {}

@@ -8,19 +8,20 @@
 
 typedef struct DialogLR
 {
-    DialogLR()
-        : aStrIdentity(AString::ConstNull())
-        , aStrIdentity_Display(AString::ConstNull())
-        , aStrTarget_Uri(AString::ConstNull())
-        , objTargetParam(IMSMap<AString, AString>())
-        {}
+    DialogLR() :
+            aStrIdentity(AString::ConstNull()),
+            aStrIdentity_Display(AString::ConstNull()),
+            aStrTarget_Uri(AString::ConstNull()),
+            objTargetParam(IMSMap<AString, AString>())
+    {
+    }
 
-    AString         aStrIdentity; //element
-    AString         aStrIdentity_Display; //optional / attribute
+    AString aStrIdentity;          // element
+    AString aStrIdentity_Display;  // optional / attribute
 
     // local_target element
-    AString         aStrTarget_Uri; //attribute
-    IMSMap<AString, AString>    objTargetParam; //attribute - pname pvalue
+    AString aStrTarget_Uri;                   // attribute
+    IMSMap<AString, AString> objTargetParam;  // attribute - pname pvalue
 
     // local_session-description element
     // TODO
@@ -34,8 +35,8 @@ public:
     virtual void DeInit();
 
 public:
-    virtual IMS_BOOL UpdateDialogInfo(IN IMS_UINT32 nVersion, IN IMS_UINT32 eState,
-            IN AString aStrEntity);
+    virtual IMS_BOOL UpdateDialogInfo(
+            IN IMS_UINT32 nVersion, IN IMS_UINT32 eState, IN AString aStrEntity);
     virtual IMS_BOOL Update(IN IElement* pDialogElement);
     virtual IMS_BOOL IsDialog(IN IElement* pDialogElement);
 
@@ -59,6 +60,5 @@ public:
     virtual AString GetRemoteIdentityDisplay();
     virtual AString GetRemotepVal(IN AString aStrpName);
     virtual IMS_BOOL EnablePulled();
-
 };
-#endif // INTERFACE_DIALOG_EVENT_H_
+#endif  // INTERFACE_DIALOG_EVENT_H_

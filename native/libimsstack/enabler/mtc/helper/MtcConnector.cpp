@@ -6,9 +6,8 @@
 #include "MtcConnector.h"
 #include "MtcContextRepository.h"
 
-
-PUBLIC GLOBAL
-void MtcConnector::AddCallStateListener(IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener)
+PUBLIC GLOBAL void MtcConnector::AddCallStateListener(
+        IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener)
 {
     //----------------------------------------------------------------------------------------------
 
@@ -19,9 +18,8 @@ void MtcConnector::AddCallStateListener(IN IMS_SINT32 nSlotId, IN IMtcCallStateL
     }
 }
 
-PUBLIC GLOBAL
-void MtcConnector::RemoveCallStateListener(IN IMS_SINT32 nSlotId,
-        IN IMtcCallStateListener* pListener)
+PUBLIC GLOBAL void MtcConnector::RemoveCallStateListener(
+        IN IMS_SINT32 nSlotId, IN IMtcCallStateListener* pListener)
 {
     //----------------------------------------------------------------------------------------------
 

@@ -24,16 +24,14 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
     m_objContext.GetMediaManager().SetQosListener(this);
 }
 
-PUBLIC VIRTUAL
-MtcPreconditionManager::~MtcPreconditionManager()
+PUBLIC VIRTUAL MtcPreconditionManager::~MtcPreconditionManager()
 {
     IMS_TRACE_D("~MtcPreconditionManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(IMS_NULL);
     DestroyAll();
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::CreateQos(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::CreateQos(IN ISession* piSession)
 {
     IMS_TRACE_D("CreateQos", 0, 0, 0);
     CreateQosData(piSession);
@@ -43,8 +41,7 @@ void MtcPreconditionManager::CreateQos(IN ISession* piSession)
     InitializeCapability(piSession);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::DestroyQos(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::DestroyQos(IN ISession* piSession)
 {
     IMS_TRACE_D("DestroyQos", 0, 0, 0);
     RemoveQosData(piSession);
@@ -54,14 +51,13 @@ void MtcPreconditionManager::DestroyQos(IN ISession* piSession)
     m_objCapabilities.Remove(piSession);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::SetListener(IN IMtcPreconditionListener* pListener)
+PUBLIC VIRTUAL void MtcPreconditionManager::SetListener(IN IMtcPreconditionListener* pListener)
 {
     m_pListener = pListener;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcPreconditionManager::IsResourceReserved(IN ISession* piSession, IN QosCheckType eType)
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsResourceReserved(
+        IN ISession* piSession, IN QosCheckType eType)
 {
     if (!IsPreconditionSupportedInLocal())
     {
@@ -111,33 +107,32 @@ IMS_BOOL MtcPreconditionManager::IsResourceReserved(IN ISession* piSession, IN Q
     {
         if (eMediaTypes & MEDIATYPE_AUDIO)
         {
-            bAudioEnabled = bAudioEnabled &&
-                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_AUDIO));
+            bAudioEnabled =
+                    bAudioEnabled && IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_AUDIO));
         }
 
         if (eMediaTypes & MEDIATYPE_VIDEO)
         {
-            bVideoEnabled = bVideoEnabled &&
-                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_VIDEO));
+            bVideoEnabled =
+                    bVideoEnabled && IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_VIDEO));
         }
 
         if (eMediaTypes & MEDIATYPE_TEXT)
         {
-            bTextEnabled = bTextEnabled &&
-                    IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_TEXT));
+            bTextEnabled =
+                    bTextEnabled && IsStatusAvailable(GetQosStatus(piSession, MEDIATYPE_TEXT));
         }
     }
 
     IMS_BOOL bResult = bAudioEnabled && bVideoEnabled && bTextEnabled;
-    IMS_TRACE_D("IsResourceReserved : CheckType[%s] Result[%s]",
-            PS_QosCheckType(eType), _TRACE_B_(bResult), 0);
+    IMS_TRACE_D("IsResourceReserved : CheckType[%s] Result[%s]", PS_QosCheckType(eType),
+            _TRACE_B_(bResult), 0);
 
     return bResult;
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::StartQosTimer(IN ISession* piSession,
-        IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
+PUBLIC VIRTUAL void MtcPreconditionManager::StartQosTimer(
+        IN ISession* piSession, IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
 {
     if (!IsPreconditionSupportedInLocal())
     {
@@ -175,9 +170,8 @@ void MtcPreconditionManager::StartQosTimer(IN ISession* piSession,
     pTimer->StartQosTimer(eType, nDuration);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::StopQosTimer(IN ISession* piSession,
-        IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
+PUBLIC VIRTUAL void MtcPreconditionManager::StopQosTimer(
+        IN ISession* piSession, IN QosTimerType eType /*= QosTimerType::WAIT_AVAILABLE*/)
 {
     QosTimer* pTimer = GetQosTimer(piSession);
     if (pTimer == IMS_NULL)
@@ -189,8 +183,7 @@ void MtcPreconditionManager::StopQosTimer(IN ISession* piSession,
     pTimer->StopQosTimer(eType);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession)
 {
     IMS_TRACE_D("StopAllQosTimer", 0, 0, 0);
     StopQosTimer(piSession, QosTimerType::WAIT_AVAILABLE);
@@ -198,19 +191,17 @@ void MtcPreconditionManager::StopAllQosTimer(IN ISession* piSession)
     StopQosTimer(piSession, QosTimerType::FORCE_AVAILABLE);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::UpdatePreconditionCapability(IN ISession* piSession,
-        IN IMS_BOOL bCapability)
+PUBLIC VIRTUAL void MtcPreconditionManager::UpdatePreconditionCapability(
+        IN ISession* piSession, IN IMS_BOOL bCapability)
 {
     IMS_BOOL bLocalCapa = IsPreconditionSupportedInLocal();
-    IMS_TRACE_D("UpdatePreconditionCapability : Local[%s] Remote[%s]",
-            _TRACE_B_(bLocalCapa), _TRACE_B_(bCapability), 0);
+    IMS_TRACE_D("UpdatePreconditionCapability : Local[%s] Remote[%s]", _TRACE_B_(bLocalCapa),
+            _TRACE_B_(bCapability), 0);
 
     m_objCapabilities.Add(piSession, (bLocalCapa && bCapability));
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcPreconditionManager::HasPreconditionCapability(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::HasPreconditionCapability(IN ISession* piSession)
 {
     IMS_SLONG nIndex = m_objCapabilities.GetIndexOfKey(piSession);
     if (nIndex < 0)
@@ -222,8 +213,7 @@ IMS_BOOL MtcPreconditionManager::HasPreconditionCapability(IN ISession* piSessio
     return m_objCapabilities.GetValueAt(nIndex);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
+PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
 {
     IMS_BOOL bSupport = IMS_FALSE;
 
@@ -250,13 +240,12 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
             break;
     }
 
-    IMS_TRACE_D("IsPreconditionSupportedInLocal : CallType[%d] Result[%s]",
-            eCallType, _TRACE_B_(bSupport), 0);
+    IMS_TRACE_D("IsPreconditionSupportedInLocal : CallType[%d] Result[%s]", eCallType,
+            _TRACE_B_(bSupport), 0);
     return bSupport;
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::UpdateQosAttributesFromSdp(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::UpdateQosAttributesFromSdp(IN ISession* piSession)
 {
     if (piSession == IMS_NULL)
     {
@@ -289,8 +278,8 @@ void MtcPreconditionManager::UpdateQosAttributesFromSdp(IN ISession* piSession)
     }
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::FormPreconditionSdp(IN ISession* piSession, IN IMS_BOOL bFailure)
+PUBLIC VIRTUAL void MtcPreconditionManager::FormPreconditionSdp(
+        IN ISession* piSession, IN IMS_BOOL bFailure)
 {
     if (!HasPreconditionCapability(piSession))
     {
@@ -332,19 +321,19 @@ void MtcPreconditionManager::FormPreconditionSdp(IN ISession* piSession, IN IMS_
 
         pStatusTable->CreateStatusRecords(eSdpMediaType);
 
-        IMS_UINT32 eMediaType =
-                SdpPreconditionHelper::GetMediaType(pLocalSdp, piMedia->GetState());
+        IMS_UINT32 eMediaType = SdpPreconditionHelper::GetMediaType(pLocalSdp, piMedia->GetState());
 
-        IMS_BOOL bCheckQosWhileCallUpgrade = (m_objContext.GetConfigurationProxy().GetInt(
-                Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) == 2);
+        IMS_BOOL bCheckQosWhileCallUpgrade =
+                (m_objContext.GetConfigurationProxy().GetInt(
+                         Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING) == 2);
 
         if (!bCheckQosWhileCallUpgrade && IsConfirmedDialog(piSession))
         {
             SetQosStatus(piSession, QosStatus::AVAILABLE, eMediaType);
         }
 
-        pStatusTable->UpdateLocalCurrentStatus(eSdpMediaType,
-                IsStatusAvailable(GetQosStatus(piSession, eMediaType)));
+        pStatusTable->UpdateLocalCurrentStatus(
+                eSdpMediaType, IsStatusAvailable(GetQosStatus(piSession, eMediaType)));
     }
 
     IMS_BOOL bUseConf = (m_objContext.GetCallInfo().ePeerType == PeerType::MT);
@@ -358,15 +347,13 @@ void MtcPreconditionManager::FormPreconditionSdp(IN ISession* piSession, IN IMS_
     SdpPreconditionHelper::FormPreconditionSdp(piSession, pStatusTable, bUseConf);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::RemovePreconditionSdp(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::RemovePreconditionSdp(IN ISession* piSession)
 {
     IMS_TRACE_D("RemovePreconditionSdp", 0, 0, 0);
     SdpPreconditionHelper::RemovePreconditionSdp(piSession);
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession)
+PUBLIC VIRTUAL IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSession)
 {
     IMS_TRACE_D("SetLocalResourceAvailable", 0, 0, 0);
 
@@ -411,8 +398,7 @@ IMS_UINT32 MtcPreconditionManager::SetLocalResourceAvailable(IN ISession* piSess
     return eEnabledMediaTypes;
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
 {
     QosStatusTable* pStatusTable = GetQosStatusTable(piSession);
     if (pStatusTable == IMS_NULL)
@@ -444,9 +430,8 @@ void MtcPreconditionManager::SetRemoteResourceAvailable(IN ISession* piSession)
     }
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::OnQosStatusChanged(IN ISession* piSession, IN QosStatus eStatus,
-        IN IMS_UINT32 eMediaType)
+PUBLIC VIRTUAL void MtcPreconditionManager::OnQosStatusChanged(
+        IN ISession* piSession, IN QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
     if (piSession == IMS_NULL)
     {
@@ -486,22 +471,19 @@ void MtcPreconditionManager::OnQosStatusChanged(IN ISession* piSession, IN QosSt
     }
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::OnWaitTimerExpired(IN QosTimer* pTimer)
+PUBLIC VIRTUAL void MtcPreconditionManager::OnWaitTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnWaitTimerExpired", 0, 0, 0);
     HandleReservationFailureByTimerExpiration(pTimer);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::OnGuardInactiveTimerExpired(IN QosTimer* pTimer)
+PUBLIC VIRTUAL void MtcPreconditionManager::OnGuardInactiveTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnGuardInactiveTimerExpired", 0, 0, 0);
     HandleReservationFailureByTimerExpiration(pTimer);
 }
 
-PUBLIC VIRTUAL
-void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
+PUBLIC VIRTUAL void MtcPreconditionManager::OnForceAvailableTimerExpired(IN QosTimer* pTimer)
 {
     IMS_TRACE_D("OnForceAvailableTimerExpired", 0, 0, 0);
 
@@ -866,8 +848,8 @@ void MtcPreconditionManager::UpdateStatusRecords(IN ISession* piSession)
 }
 
 PRIVATE
-void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus eCurrStatus,
-        IN QosStatus eNewStatus)
+void MtcPreconditionManager::HandleQosTimer(
+        IN ISession* piSession, IN QosStatus eCurrStatus, IN QosStatus eNewStatus)
 {
     IMS_TRACE_D("HandleQosTimer", 0, 0, 0);
 
@@ -887,8 +869,8 @@ void MtcPreconditionManager::HandleQosTimer(IN ISession* piSession, IN QosStatus
 }
 
 PRIVATE
-void MtcPreconditionManager::NotifyQosStatusToListener(IN ISession* piSession,
-        IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes)
+void MtcPreconditionManager::NotifyQosStatusToListener(
+        IN ISession* piSession, IN IMS_BOOL bReserved, IN IMS_UINT32 eMediaTypes)
 {
     if (bReserved)
     {
@@ -1015,8 +997,9 @@ IMS_BOOL MtcPreconditionManager::IsDefaultBearerUsed(IN IMS_UINT32 eMediaType)
     IMS_BOOL bUseDefaultBearer = IMS_FALSE;
     if (eMediaType == MEDIATYPE_AUDIO)
     {
-        bUseDefaultBearer = !m_objContext.GetConfigurationProxy().Is(
-                Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR) ||
+        bUseDefaultBearer =
+                !m_objContext.GetConfigurationProxy().Is(
+                        Feature::DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR) ||
                 m_objContext.GetConfigurationProxy().Is(Feature::VOICE_ON_DEFAULT_BEARER_SUPPORTED);
     }
     else if (eMediaType == MEDIATYPE_VIDEO)
@@ -1069,11 +1052,11 @@ QosLossPolicy MtcPreconditionManager::GetQosLossPolicy(IN IMS_UINT32 eMediaType)
 
     switch (nPolicy)
     {
-        case 0: // POLICY_TERMINATE_CALL
+        case 0:  // POLICY_TERMINATE_CALL
             return QosLossPolicy::RELEASE;
-        case 1: // POLICY_MAINTAIN_CALL
+        case 1:  // POLICY_MAINTAIN_CALL
             return QosLossPolicy::MAINTAIN;
-        case 2: // POLICY_MODIFY_CALL
+        case 2:  // POLICY_MODIFY_CALL
             return QosLossPolicy::MODIFY;
         default:
             break;
@@ -1110,8 +1093,8 @@ QosStatus MtcPreconditionManager::GetQosStatus(IN ISession* piSession, IN IMS_UI
 }
 
 PRIVATE
-void MtcPreconditionManager::SetQosStatus(IN ISession* piSession, QosStatus eStatus,
-        IN IMS_UINT32 eMediaType)
+void MtcPreconditionManager::SetQosStatus(
+        IN ISession* piSession, QosStatus eStatus, IN IMS_UINT32 eMediaType)
 {
     QosData* pData = GetQosData(piSession);
     if (pData == IMS_NULL)
@@ -1174,8 +1157,8 @@ IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal(IN IMS_UINT32 eM
                 m_objContext.GetConfigurationProxy().Is(Feature::TEXT_QOS_PRECONDITION_SUPPORTED);
     }
 
-    IMS_TRACE_D("IsPreconditionSupportedInLocal : MediaType[%d] Result[%s]",
-            eMediaType, _TRACE_B_(bSupport), 0);
+    IMS_TRACE_D("IsPreconditionSupportedInLocal : MediaType[%d] Result[%s]", eMediaType,
+            _TRACE_B_(bSupport), 0);
 
     return bSupport;
 }

@@ -15,8 +15,7 @@ UpdatingInfo::UpdatingInfo() :
     IMS_TRACE_D("+UpdatingInfo", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-UpdatingInfo::~UpdatingInfo()
+PUBLIC VIRTUAL UpdatingInfo::~UpdatingInfo()
 {
     IMS_TRACE_D("~UpdatingInfo", 0, 0, 0);
 }
@@ -178,14 +177,14 @@ IMS_BOOL UpdatingInfo::IsModified()
 {
     if (m_objNegotiatedInfo.eVDir != m_objModifiedInfo.eVDir &&
             (m_objNegotiatedInfo.eVDir == DIRECTION_INVALID ||
-            m_objModifiedInfo.eVDir == DIRECTION_INVALID))
+                    m_objModifiedInfo.eVDir == DIRECTION_INVALID))
     {
         return IMS_TRUE;
     }
 
     if (m_objNegotiatedInfo.eTDir != m_objModifiedInfo.eTDir &&
             (m_objNegotiatedInfo.eTDir == DIRECTION_INVALID ||
-            m_objModifiedInfo.eTDir == DIRECTION_INVALID))
+                    m_objModifiedInfo.eTDir == DIRECTION_INVALID))
     {
         return IMS_TRUE;
     }

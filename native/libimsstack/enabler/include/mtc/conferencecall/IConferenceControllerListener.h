@@ -6,7 +6,6 @@ class ConferenceController;
 class IConferenceControllerListener
 {
 public:
-
     virtual void OnClosed(IN ConferenceController* pController) = 0;
 };
 

@@ -7,7 +7,6 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-
 PUBLIC
 MtcSipInterfaceFactory::MtcSipInterfaceFactory() :
         m_piSessionHolder(IMS_NULL),
@@ -27,22 +26,19 @@ MtcSipInterfaceFactory::~MtcSipInterfaceFactory()
     delete m_piSubscriptionHolder;
 }
 
-PUBLIC VIRTUAL
-void MtcSipInterfaceFactory::OnSessionInterfaceCleared()
+PUBLIC VIRTUAL void MtcSipInterfaceFactory::OnSessionInterfaceCleared()
 {
     delete m_piSessionHolder;
     m_piSessionHolder = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void MtcSipInterfaceFactory::OnReferenceInterfaceCleared()
+PUBLIC VIRTUAL void MtcSipInterfaceFactory::OnReferenceInterfaceCleared()
 {
     delete m_piReferenceHolder;
     m_piReferenceHolder = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void MtcSipInterfaceFactory::OnSubscriptionInterfaceCleared()
+PUBLIC VIRTUAL void MtcSipInterfaceFactory::OnSubscriptionInterfaceCleared()
 {
     delete m_piSubscriptionHolder;
     m_piSubscriptionHolder = IMS_NULL;
