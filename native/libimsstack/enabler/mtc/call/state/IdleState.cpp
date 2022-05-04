@@ -144,7 +144,7 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 PUBLIC VIRTUAL CallStateName IdleState::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Terminate : reason[%s]", PS_FR(objReason), 0, 0);
-
+    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(
             FailReason(ConvertTerminateReasonToFailReason(objReason.nReason)));
 
@@ -161,6 +161,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
 
         case IMtcBlockChecker::Result::Status::BLOCKED:
             m_pBlockChecker.reset();
+            m_objContext.GetMediaManager().Terminate();
             if (m_objContext.GetCallInfo().ePeerType == PeerType::MT)
             {
                 m_objContext.GetSession()->GetMessageSender().Reject(objResult.objReason);
@@ -173,37 +174,13 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
     }
 }
 
-// PUBLIC VIRTUAL
-// CallStateName IdleState::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
-// {
-//     switch (eNextAction)
-//     {
-//         case QosLossPolicy::MAINTAIN:
-//             break;
-//         case QosLossPolicy::MODIFY:
-//             break;
-//         case QosLossPolicy::RELEASE:
-//             if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
-//             {
-//                 SetTerminatedReason(FailReason(FAIL_REASON_SESSION_PRECONDITION));
-//                 m_objContext
-//             }
-//             else
-//             {
-
-//             }
-//             break;
-//         default:
-//             break;
-//     }
-// }
-
 PRIVATE
 CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
     if (CreateISession() == IMS_FAILURE)
     {
+        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
@@ -214,6 +191,7 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 
     if (SendStartMessage() == IMS_FAILURE)
     {
+        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
@@ -228,6 +206,7 @@ CallStateName IdleState::ContinueConference(
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
     if (CreateISession() == IMS_FAILURE)
     {
+        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
@@ -241,6 +220,7 @@ CallStateName IdleState::ContinueConference(
 
     if (SendStartMessage() == IMS_FAILURE)
     {
+        m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
@@ -262,10 +242,7 @@ CallStateName IdleState::ContinueHandleIncoming()
     if (NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_START) ==
             IMS_FAILURE)
     {
-        FailReason objReason(REJECT_REASON_SESSION_NOTSUPPORT);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        m_objContext.GetUiNotifier().SendStartFailed(objReason);
-        return CallStateName::TERMINATING;
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
     }
 
     m_objContext.GetCallInfo().eCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE);
@@ -298,10 +275,7 @@ CallStateName IdleState::ContinueHandleIncoming()
     {
         if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
         {
-            FailReason objReason(REJECT_REASON_SESSION_FAIL);
-            m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-            m_objContext.GetUiNotifier().SendStartFailed(objReason);
-            return CallStateName::TERMINATING;
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
         }
 
         // m_objContext.GetTimer().Start(TIMER_MT_PRACK_WAIT,

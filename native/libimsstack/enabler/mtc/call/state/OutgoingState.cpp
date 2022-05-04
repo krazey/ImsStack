@@ -242,7 +242,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdated(IN ISession
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        HandleCancel(piSession, FailReason(FAIL_REASON_MEDIA_NEGOFAIL));
+        FailReason objReason(FAIL_REASON_MEDIA_NEGOFAIL);
+        HandleCancel(piSession, objReason);
+        OnStartFailed(piSession, objReason);
+
+        return CallStateName::TERMINATING;
     }
 
     // update remote qos status
@@ -577,16 +581,12 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& ob
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
     m_objContext.GetTimer().Stop(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
-    if (objReason.nReason != FAIL_REASON_SESSION_EARLYDIALOG)
-    {
-        m_objContext.GetMediaManager().Terminate();
-    }
-
     if (objReason.nReason == FAIL_REASON_SESSION_EARLYDIALOG)
     {
         return;
     }
 
+    m_objContext.GetMediaManager().Terminate();
     if (objReason.nReason == FAIL_REASON_SESSION_PRECONDITION)
     {
         m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);

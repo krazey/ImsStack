@@ -43,6 +43,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::OnTimerExpired(IN IMS_SINT32 nType)
     {
         case TIMER_MT_PRACK_WAIT:
             // TODO: reject w/ REJECT_REASON_TO_MT_PRACK
+            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
             return CallStateName::TERMINATING;
         default:
@@ -89,16 +90,13 @@ PUBLIC VIRTUAL CallStateName IncomingState::QosReserveFailed(
     IMS_TRACE_D("QosReserveFailed", 0, 0, 0);
     if (eNextAction == QosLossPolicy::RELEASE)
     {
-        FailReason objReason(REJECT_REASON_SESSION_FAIL_PRECONDITION);
-        m_objContext.GetPreconditionManager().FormPreconditionSdp(piSession, IMS_TRUE);
-        m_objContext.GetSession()->GetMessageSender().Reject(objReason);
-        m_objContext.GetUiNotifier().SendStartFailed(objReason);
-        return CallStateName::TERMINATING;
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL_PRECONDITION));
     }
 
     if (eNextAction == QosLossPolicy::MODIFY)
     {
         // TODO: downgrade to voip. send early update or send re-INVITE after call establishment.
+        UNUSED_PARAM(piSession);
     }
 
     return GetStateName();
@@ -108,6 +106,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionTerminated(IN ISession* piSes
 {
     IMS_TRACE_D("SessionTerminated", 0, 0, 0);
 
+    m_objContext.GetMediaManager().Terminate();
     m_objContext.GetUiNotifier().SendStartFailed(TerminationHandler().Handle(*piSession));
     return CallStateName::TERMINATING;
 }
@@ -151,12 +150,12 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateFailed(
         IN ISession* /* piSession */)
 {
     IMS_TRACE_D("SessionEarlyMediaUpdateFailed", 0, 0, 0);
+    m_objContext.GetMediaManager().Terminate();
     /*
     IMS_SINT32 nStatusCode = MessageUtil::GetResponseStatusCode(
             piSession, IMessage::SESSION_EARLY_UPDATE);
     TODO: failure handler
     */
-
     m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
     return CallStateName::TERMINATING;
 }
@@ -174,6 +173,7 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionEarlyMediaUpdateReceived(IN I
         if (m_objContext.GetSession()->GetMessageSender().RespondToEarlyUpdate(
                     SipStatusCode::SC_200) == IMS_FAILURE)
         {
+            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(FailReason(REJECT_REASON_SESSION_FAIL));
             return CallStateName::TERMINATING;
         }

@@ -40,7 +40,6 @@ public:
             IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
     CallStateName Terminate(IN const FailReason& objReason) override;
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
-    // CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
 
 private:
     enum class ConferenceType
