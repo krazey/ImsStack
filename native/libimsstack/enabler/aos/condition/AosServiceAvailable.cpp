@@ -36,6 +36,9 @@ AosServiceAvailable::AosServiceAvailable(AString strName) :
         m_piAppContext(IMS_NULL),
         m_nSlotId(IMS_SLOT_0),
         m_piBlock(IMS_NULL),
+        m_piRegistration(IMS_NULL),
+        m_piConnection(IMS_NULL),
+        m_piCallTracker(IMS_NULL),
         m_strName(strName),
         m_bAirplaneMode(IMS_FALSE),
         m_bRoamingState(IMS_FALSE),
@@ -63,6 +66,9 @@ void AosServiceAvailable::Init(IN IAosAppContext* piAppContext)
     m_piAppContext = piAppContext;
     m_nSlotId = m_piAppContext->GetSlotId();
     m_piBlock = m_piAppContext->GetBlock();
+    m_piRegistration = m_piAppContext->GetRegistration();
+    m_piConnection = m_piAppContext->GetConnection();
+    m_piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
 
     m_strTag.Sprintf("%d", m_nSlotId);
 

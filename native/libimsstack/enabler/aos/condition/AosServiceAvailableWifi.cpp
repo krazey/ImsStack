@@ -19,11 +19,8 @@
 #include "AoSReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
-#include "interface/IAosCallTracker.h"
-#include "interface/IAosConnection.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosNetTracker.h"
-#include "interface/IAosRegistration.h"
 #include "provider/AosProvider.h"
 #include "provider/AosUtil.h"
 #include "condition/AosCondition.h"
@@ -52,33 +49,27 @@ PUBLIC VIRTUAL AosServiceAvailableWifi::~AosServiceAvailableWifi()
             sizeof(AosServiceAvailableWifi), this, 0);
 }
 
-PUBLIC VIRTUAL void AosServiceAvailableWifi::StartToCheckNetworkConnection()
+PUBLIC VIRTUAL IMS_BOOL AosServiceAvailableWifi::StartToCheckNetworkConnection()
 {
-    IAosCallTracker* piCT = AosProvider::GetInstance()->GetCallTracker(m_piAppContext->GetSlotId());
-
-    if (piCT == IMS_NULL)
+    if (m_piCallTracker == IMS_NULL || m_piCallTracker->IsEmergencyCallActive())
     {
-        return;
+        return IMS_FALSE;
     }
 
-    if (piCT->IsEmergencyCallActive())
+    if (m_piRegistration == IMS_NULL || m_piRegistration->IsRegistered() == IMS_FALSE)
     {
-        return;
-    }
-
-    if (m_piAppContext->GetRegistration()->IsRegistered() == IMS_FALSE)
-    {
-        return;
+        return IMS_FALSE;
     }
 
     if (m_nBadNetworkState == STATE_BAD_NETWORK_CHECKING ||
             m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED)
     {
         A_IMS_TRACE_D(AOSTAG, "Checking ePDG connection is ongoing or detected as bad", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
-    if (piCT->IsNormalCallActive() && m_piAppContext->GetConnection()->IsEpdgEnabled())
+    if (m_piCallTracker->IsNormalCallActive() && m_piConnection != IMS_NULL &&
+            m_piConnection->IsEpdgEnabled())
     {
         A_IMS_TRACE_D(AOSTAG, "There is ongoing WiFi call. Checking ePDG connection", 0, 0, 0);
 
@@ -86,7 +77,11 @@ PUBLIC VIRTUAL void AosServiceAvailableWifi::StartToCheckNetworkConnection()
         {
             ProcessBadConnectionReported();
         }
+
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosServiceAvailableWifi::StopToCheckNetworkConnection(
@@ -353,8 +348,8 @@ IMS_BOOL AosServiceAvailableWifi::RequestNetPing()
 
     IMS_UINT32 nNA;
     AString strIPA;
-    m_piAppContext->GetRegistration()->GetProperty(
-            IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNA, strIPA);
+
+    m_piRegistration->GetProperty(IAosRegistration::PROPERTY_LOCAL_ADDRESS, nNA, strIPA);
 
     IPAddress objSrcIP(strIPA);
     INetworkConnection* piNetCon = NetworkService::GetNetworkService()->FindConnection(objSrcIP);

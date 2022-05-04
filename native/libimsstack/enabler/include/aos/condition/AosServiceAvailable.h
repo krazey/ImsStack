@@ -17,10 +17,13 @@
 #define AOS_SERVICE_AVAILABLE_H_
 
 #include "IMSList.h"
+#include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosBlockListener.h"
+#include "interface/IAosCallTracker.h"
+#include "interface/IAosConnection.h"
+#include "interface/IAosRegistration.h"
 
-class IAosAppContext;
 class IAosServiceAvailableListener;
 
 class AosServiceAvailable
@@ -38,7 +41,7 @@ public:
     IMS_BOOL IsAvailable();
     IMS_UINT32 HandleEvent(IN IMS_UINT32 eEvent, IN IMS_UINT32 nState, IN IMS_SINT32 nStateEx);
 
-    inline virtual void StartToCheckNetworkConnection(){};
+    inline virtual IMS_BOOL StartToCheckNetworkConnection() { return IMS_FALSE; };
     virtual IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE);
 
 protected:
@@ -84,6 +87,9 @@ protected:
     IAosAppContext* m_piAppContext;
     IMS_SINT32 m_nSlotId;
     IAosBlock* m_piBlock;
+    IAosRegistration* m_piRegistration;
+    IAosConnection* m_piConnection;
+    IAosCallTracker* m_piCallTracker;
     AString m_strTag;
     AString m_strName;
 
