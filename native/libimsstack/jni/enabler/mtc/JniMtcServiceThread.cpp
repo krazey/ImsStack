@@ -56,9 +56,10 @@ void JniMtcServiceThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallI
     JniMtcUtils::WriteMediaInfoToParcel(pMediaInfo, objParcel);
 
     /* Display Info  // TODO: ParticipantInfo to be included in CallInfo? */
+    // Need to set callee number when the "child number" is used.
     objParcel.writeInt32(static_cast<IMS_SINT32>(pParticipantInfo->GetOipType()));
-    objParcel.writeString16(android::String16(pParticipantInfo->GetLocalUri().GetStr()));
-    objParcel.writeString16(android::String16(pParticipantInfo->GetRemoteUri().GetStr()));
+    objParcel.writeString16(android::String16(AString::ConstNull().GetStr()));
+    objParcel.writeString16(android::String16(pParticipantInfo->GetRemoteNumber().GetStr()));
 
     /* Supp Info */
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);

@@ -53,11 +53,10 @@ public:
             IN const AString& strHeaderName = AString::ConstNull());
 
     // Changed :: GetUserPartsFromXXXX -> GetUserParts
-    static IMS_RESULT GetUserParts(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-            OUT IMSList<AString> lstUserParts,
+    static IMSList<AString> GetUserParts(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             IN const AString& strHeaderName = AString::ConstNull());
     // Changed :: GetUserPartFromXXXX -> GetUserPart
-    static IMS_RESULT GetUserPart(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+    static IMS_RESULT GetUserPart(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             OUT AString& strUserPart, IN const AString& strHeaderName = AString::ConstNull());
     // Changed :: GetUserIDsFromHdr -> GetUserIds(piMessage, ISipHeader::FROM)
     static IMS_RESULT GetUserIds(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
@@ -152,7 +151,7 @@ public:
 
 private:
     static ISipMessage* GetSipMessage(IN const IMessage* piMessage);
-    static IMS_RESULT GetAddresses(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
+    static IMS_RESULT GetAddresses(IN const IMessage* piMessage, IN IMS_SINT32 eHeaderType,
             OUT IMSList<SipAddress>& lstAddresses,
             IN const AString& strHeaderName = AString::ConstNull());
     static void GetParameterValueFromUnknownHeaderBody(

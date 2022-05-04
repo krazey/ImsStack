@@ -1,16 +1,19 @@
 #include "CallInfo.h"
 #include "ICoreService.h"
+#include "IMessage.h"
 #include "ImsIdentity.h"
 #include "ISipHeader.h"
 #include "ServicePhoneInfo.h"
 #include "SipAddress.h"
 #include "call/IMtcCallContext.h"
+#include "call/MtcSession.h"
 #include "call/ParticipantInfo.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -20,30 +23,27 @@ const AString ParticipantInfo::ANONYMOUS_DISPLAY_NAME = "Anonymous";
 
 PUBLIC
 ParticipantInfo::ParticipantInfo(IN IMtcCallContext& objContext) :
-        m_strRemoteUri(AString::ConstNull()),
-        m_strRemoteDisplayName(AString::ConstNull()),
-        m_objContext(objContext)
+        m_objContext(objContext),
+        m_strRemoteNumber(AString::ConstNull()),
+        m_strRemoteUri(AString::ConstNull())
 {
 }
 
 PUBLIC
 ParticipantInfo::~ParticipantInfo() {}
 
-/*
 PUBLIC
-AString ParticipantInfo::GetLocalNumber()
+AString ParticipantInfo::GetLocalNumber() const
 {
-    const ICoreService* piCoreService = m_objContext
-            .GetService()
-            .GetICoreService();
+    const ICoreService* piCoreService = m_objContext.GetService().GetICoreService();
     if (piCoreService == IMS_NULL)
     {
+        IMS_TRACE_E(0, "GetLocalNumber : CoreService is null", 0, 0, 0);
         return AString::ConstNull();
     }
 
     return piCoreService->GetAuthorizedUserId().GetUser();
 }
-*/
 
 PUBLIC
 AString ParticipantInfo::GetLocalUri() const
@@ -53,6 +53,12 @@ AString ParticipantInfo::GetLocalUri() const
         return GetLocalUriForEmergencyCall();
     }
     return URI_SET_BY_IMS_ENGINE;
+}
+
+PUBLIC
+AString ParticipantInfo::GetRemoteNumber() const
+{
+    return m_strRemoteNumber;
 }
 
 PUBLIC
@@ -97,7 +103,7 @@ AString ParticipantInfo::GetRemoteDisplayName() const
         return pSuppService->strValue;
     }
 
-    return m_strRemoteUri;
+    return m_strRemoteNumber;
 }
 
 PUBLIC
@@ -113,16 +119,44 @@ OipType ParticipantInfo::GetOipType() const
 }
 
 PUBLIC
-void ParticipantInfo::SetRemoteNumber(IN const AString& strRemoteNumber)
+void ParticipantInfo::UpdateFromRemoteNumber(IN const AString& strRemoteNumber)
 {
+    m_strRemoteNumber = strRemoteNumber;
     m_strRemoteUri =
             m_objContext.GetDialingPlan().GetToUri(strRemoteNumber, m_objContext.GetCallInfo());
 }
 
-PUBLIC
-void ParticipantInfo::SetRemoteUri(IN const AString& strRemoteUri)
+PUBLIC void ParticipantInfo::HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest)
 {
-    m_strRemoteUri = strRemoteUri;
+    if (eMethod != IMessage::SESSION_START)
+    {
+        return;
+    }
+
+    MessageUtil::GetRemoteUri(
+            &m_objContext.GetSession()->GetISession(), PeerType::MT, m_strRemoteUri);
+    m_strRemoteNumber = GetRemoteNumberFromMessage(objRequest);
+
+    IMS_TRACE_D("HandleRequest : Remote URI[%s] Number[%s]", m_strRemoteUri.GetStr(),
+            m_strRemoteNumber.GetStr(), 0);
+}
+
+PRIVATE AString ParticipantInfo::GetRemoteNumberFromMessage(IN const IMessage& objMessage) const
+{
+    AString strNumber;
+
+    if (!m_objContext.GetConfigurationProxy().Is(Feature::OIP_SOURCE_FROM_HEADER))
+    {
+        // Examine PAID first
+        MessageUtil::GetUserPart(&objMessage, ISipHeader::P_ASSERTED_IDENTITY, strNumber);
+    }
+
+    if (strNumber.GetLength() <= 0)
+    {
+        MessageUtil::GetUserPart(&objMessage, ISipHeader::FROM, strNumber);
+    }
+
+    return strNumber;
 }
 
 PRIVATE

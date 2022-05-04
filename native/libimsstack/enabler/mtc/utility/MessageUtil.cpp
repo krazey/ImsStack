@@ -390,16 +390,15 @@ PUBLIC GLOBAL IMS_RESULT MessageUtil::GetParameterValue(IN const IMessage* piMes
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserParts(IN IMessage* piMessage,
-        IN IMS_SINT32 eHeaderType, OUT IMSList<AString> lstUserParts,
-        IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMSList<AString> MessageUtil::GetUserParts(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
-    lstUserParts.Clear();
+    IMSList<AString> lstUserParts;
 
     IMSList<SipAddress> lstAddresses;
     if (GetAddresses(piMessage, eHeaderType, lstAddresses, strHeaderName) == IMS_FAILURE)
     {
-        return IMS_FAILURE;
+        return lstUserParts;
     }
 
     for (IMS_UINT32 i = 0; i < lstAddresses.GetSize(); i++)
@@ -424,26 +423,18 @@ PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserParts(IN IMessage* piMessage,
         lstUserParts.Append(strUserPart);
     }
 
-    if (lstUserParts.IsEmpty())
-    {
-        return IMS_FAILURE;
-    }
-
-    return IMS_SUCCESS;
+    return lstUserParts;
 }
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserPart(IN IMessage* piMessage, IN IMS_SINT32 eHeaderType,
-        OUT AString& strUserPart, IN const AString& strHeaderName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_RESULT MessageUtil::GetUserPart(IN const IMessage* piMessage,
+        IN IMS_SINT32 eHeaderType, OUT AString& strUserPart,
+        IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
     strUserPart = AString::ConstNull();
 
-    IMSList<AString> lstUserParts;
-    if (GetUserParts(piMessage, eHeaderType, lstUserParts, strHeaderName) == IMS_FAILURE)
-    {
-        return IMS_FAILURE;
-    }
+    IMSList<AString> lstUserParts = GetUserParts(piMessage, eHeaderType, strHeaderName);
 
     for (IMS_UINT32 i = 0; i < lstUserParts.GetSize(); i++)
     {
@@ -1388,7 +1379,7 @@ PRIVATE GLOBAL ISipMessage* MessageUtil::GetSipMessage(IN const IMessage* piMess
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL IMS_RESULT MessageUtil::GetAddresses(IN IMessage* piMessage,
+PRIVATE GLOBAL IMS_RESULT MessageUtil::GetAddresses(IN const IMessage* piMessage,
         IN IMS_SINT32 eHeaderType, OUT IMSList<SipAddress>& lstAddresses,
         IN const AString& strHeaderName /*= AString::ConstNull()*/)
 {
