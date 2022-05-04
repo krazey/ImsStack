@@ -1,5 +1,20 @@
-#ifndef _SIP_STATUS_CODE_H_
-#define _SIP_STATUS_CODE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_STATUS_CODE_H_
+#define SIP_STATUS_CODE_H_
 
 #include "AString.h"
 
@@ -10,41 +25,43 @@
 class SipStatusCode
 {
 public:
-    SipStatusCode(IN IMS_SINT32 nCode_ = SC_INVALID);
-    SipStatusCode(IN IMS_SINT32 nCode_, IN CONST IMS_CHAR *pszReasonPhrase_);
-    SipStatusCode(IN CONST SipStatusCode &objRHS);
+    SipStatusCode(IN IMS_SINT32 nCode = SC_INVALID);
+    SipStatusCode(IN IMS_SINT32 nCode, IN const IMS_CHAR* pszReasonPhrase);
+    SipStatusCode(IN const SipStatusCode& other);
     ~SipStatusCode();
 
 public:
-    SipStatusCode& operator=(IN CONST SipStatusCode &objRHS);
+    SipStatusCode& operator=(IN const SipStatusCode& other);
     SipStatusCode& operator=(IN IMS_SINT32 nCode);
-    SipStatusCode& operator=(IN CONST IMS_CHAR* pszReasonPhrase);
-    SipStatusCode& operator=(IN CONST AString &strReasonPhrase);
+    SipStatusCode& operator=(IN const IMS_CHAR* pszReasonPhrase);
+    SipStatusCode& operator=(IN const AString& strReasonPhrase);
 
 public:
     /**
      * @brief Compares the SIP status code.
      *
-     * @param nCode_ SIP status code
+     * @param nCode SIP status code
      * @return If this status code is greater than nCode_, returns the positive integer value.\n
      *         If this status code is less than nCode_, returns the negative integer value.\n
      *         If both is the same, returns 0.
      */
-    IMS_SINT32 Compare(IN IMS_SINT32 nCode_) const;
+    IMS_SINT32 Compare(IN IMS_SINT32 nCode) const;
+
     /**
      * @brief Gets a textual representation of the given SIP status code.
      *
      * @return SIP reason phrase.
      */
     inline const AString& GetReasonPhrase() const
-    { return strReasonPhrase; }
+    { return m_strReasonPhrase; }
+
     /**
      * @brief Gets a SIP status code as integer value.
      *
      * @return SIP status code.
      */
     inline IMS_SINT32 ToInt() const
-    { return nCode; }
+    { return m_nCode; }
 
     /**
      * @brief Converts the SIP status code to a SIP reason phrase.
@@ -53,6 +70,7 @@ public:
      * @return SIP reason phrase.
      */
     static const IMS_CHAR* GetReasonPhrase(IN IMS_SINT32 nCode);
+
     /**
      * @brief Checks if this SIP status code is 1XX response or not.
      *
@@ -62,6 +80,7 @@ public:
      */
     inline static IMS_BOOL Is1XX(IN IMS_SINT32 nCode)
     { return ((nCode >= SC_100) && (nCode < SC_200)); }
+
     /**
      * @brief Checks if this SIP status code is a provisional response (excluding 100) or not.
      *
@@ -72,6 +91,7 @@ public:
      */
     inline static IMS_BOOL IsProvisional(IN IMS_SINT32 nCode)
     { return ((nCode > SC_100) && (nCode < SC_200)); }
+
     /**
      * @brief Checks if this SIP status code is a final response or not.
      *
@@ -82,6 +102,7 @@ public:
      */
     inline static IMS_BOOL IsFinal(IN IMS_SINT32 nCode)
     { return (nCode >= SC_200); }
+
     /**
      * @brief Checks if this SIP status code is a final successful response or not.
      *
@@ -92,6 +113,7 @@ public:
      */
     inline static IMS_BOOL IsFinalSuccess(IN IMS_SINT32 nCode)
     { return ((nCode >= SC_200) && (nCode < SC_300)); }
+
     /**
      * @brief Checks if this SIP status code is a final failure response or not.
      *
@@ -226,40 +248,40 @@ private:
     static const CodeTable CODE_TABLE[];
 
     // SIP status code in status-line
-    IMS_SINT32 nCode;
+    IMS_SINT32 m_nCode;
 
     // SIP reason phrase in status-line
-    AString strReasonPhrase;
+    AString m_strReasonPhrase;
 };
 
-inline IMS_BOOL operator==(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return (objSC.Compare(nCode) == 0); }
-inline IMS_BOOL operator==(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return (objSC.Compare(nCode) == 0); }
+inline IMS_BOOL operator==(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return (objSc.Compare(nCode) == 0); }
+inline IMS_BOOL operator==(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return (objSc.Compare(nCode) == 0); }
 
-inline IMS_BOOL operator!=(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return !(objSC.Compare(nCode) == 0); }
-inline IMS_BOOL operator!=(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return !(objSC.Compare(nCode) == 0); }
+inline IMS_BOOL operator!=(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return !(objSc.Compare(nCode) == 0); }
+inline IMS_BOOL operator!=(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return !(objSc.Compare(nCode) == 0); }
 
-inline IMS_BOOL operator>=(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return (objSC.Compare(nCode) >= 0); }
-inline IMS_BOOL operator>=(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return (objSC.Compare(nCode) <= 0); }
+inline IMS_BOOL operator>=(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return (objSc.Compare(nCode) >= 0); }
+inline IMS_BOOL operator>=(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return (objSc.Compare(nCode) <= 0); }
 
-inline IMS_BOOL operator<=(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return (objSC.Compare(nCode) <= 0); }
-inline IMS_BOOL operator<=(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return (objSC.Compare(nCode) >= 0); }
+inline IMS_BOOL operator<=(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return (objSc.Compare(nCode) <= 0); }
+inline IMS_BOOL operator<=(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return (objSc.Compare(nCode) >= 0); }
 
-inline IMS_BOOL operator>(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return (objSC.Compare(nCode) > 0); }
-inline IMS_BOOL operator>(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return (objSC.Compare(nCode) < 0); }
+inline IMS_BOOL operator>(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return (objSc.Compare(nCode) > 0); }
+inline IMS_BOOL operator>(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return (objSc.Compare(nCode) < 0); }
 
-inline IMS_BOOL operator<(IN CONST SipStatusCode &objSC, IN IMS_SINT32 nCode)
-{ return (objSC.Compare(nCode) < 0); }
-inline IMS_BOOL operator<(IN IMS_SINT32 nCode, IN CONST SipStatusCode &objSC)
-{ return (objSC.Compare(nCode) > 0); }
+inline IMS_BOOL operator<(IN const SipStatusCode& objSc, IN IMS_SINT32 nCode)
+{ return (objSc.Compare(nCode) < 0); }
+inline IMS_BOOL operator<(IN IMS_SINT32 nCode, IN const SipStatusCode& objSc)
+{ return (objSc.Compare(nCode) > 0); }
 
-#endif // _SIP_STATUS_CODE_H_
+#endif

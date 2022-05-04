@@ -1,7 +1,24 @@
-#ifndef _SIP_ADDRESS_H_
-#define _SIP_ADDRESS_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_ADDRESS_H_
+#define SIP_ADDRESS_H_
 
 #include "AString.h"
+
+#include "Sip.h"
 
 class ISipHeader;
 class SipParameter;
@@ -28,11 +45,11 @@ public:
     {
     public:
         UserInfoPart();
-        UserInfoPart(IN CONST UserInfoPart &objRHS);
+        UserInfoPart(IN const UserInfoPart& other);
         ~UserInfoPart();
 
     public:
-        UserInfoPart& operator=(IN CONST UserInfoPart &objRHS);
+        UserInfoPart& operator=(IN const UserInfoPart& other);
 
     public:
         /**
@@ -42,21 +59,21 @@ public:
          * @return If the userinfo part is successfully parsed, returns IMS_TRUE.
          *         Otherwise, returns IMS_FALSE.
          */
-        IMS_BOOL Create(IN CONST AString &strUserInfo);
+        IMS_BOOL Create(IN const AString& strUserInfo);
         /**
          * @brief Gets the user field.
          *
          * @return User string.
          */
         inline const AString& GetUser() const
-        { return strUser; }
+        { return m_strUser; }
         /**
          * @brief Gets the password field.
          *
          * @return Password string.
          */
         inline const AString& GetPassword() const
-        { return strPassword; }
+        { return m_strPassword; }
         /**
          * @brief Returns the parameter of user-info part.
          *
@@ -64,34 +81,34 @@ public:
          *
          * @return Pointer to SipParameter.
          */
-        const SipParameter* GetParameter(IN CONST AString &strName) const;
+        const SipParameter* GetParameter(IN const AString& strName) const;
         /**
          * @brief Gets all the parameters.
          *
          * @return List of pointer to SipParameter.
          */
         inline const IMSList<SipParameter*>& GetParameters() const
-        { return objParameters; }
+        { return m_objParameters; }
 
     private:
         void RemoveAllParameters();
 
     private:
-        AString strUser;
-        AString strPassword;
-        IMSList<SipParameter*> objParameters;
+        AString m_strUser;
+        AString m_strPassword;
+        IMSList<SipParameter*> m_objParameters;
     };
 
 public:
     SipAddress();
-    explicit SipAddress(IN CONST AString &strAddress);
-    SipAddress(IN CONST AString &strDisplayName_, IN CONST AString &strURI);
+    explicit SipAddress(IN const AString& strAddress);
+    SipAddress(IN const AString& strDisplayName, IN const AString& strUri);
     // Reference count
-    SipAddress(IN CONST SipAddress &objRHS);
+    SipAddress(IN const SipAddress& other);
     ~SipAddress();
 
 public:
-    SipAddress& operator=(IN CONST SipAddress &objRHS);
+    SipAddress& operator=(IN const SipAddress& other);
 
 public:
     /**
@@ -106,7 +123,8 @@ public:
      *         If the name is null, invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT AddParameter(IN CONST AString &strName, IN CONST AString &strValue);
+    IMS_RESULT AddParameter(IN const AString& strName, IN const AString& strValue);
+
     /**
      * @brief Parses the SIP address format string.
      *
@@ -119,14 +137,16 @@ public:
      * @return If the address is successfully parsed, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL Create(IN CONST AString &strAddress);
+    IMS_BOOL Create(IN const AString& strAddress);
+
     /**
      * @brief Checks if the given SipAddress is the same.
      *
      * @param objAddress SIP address to be compared
      * @return If both SIP addresses matched, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL Equals(IN CONST SipAddress &objAddress) const;
+    IMS_BOOL Equals(IN const SipAddress& objAddress) const;
+
     /**
      * @brief Returns the display name of SIP addresss.
      *
@@ -134,6 +154,7 @@ public:
      *         The null string if it is not available or the address is a special ("*") value.
      */
     const AString& GetDisplayName() const;
+
     /**
      * @brief Returns a header of SIP address which matches with the specified header type.
      *
@@ -144,13 +165,16 @@ public:
      * @return Pointer to uri-header parameter.
      */
     const ISipHeader* GetHeader(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) const;
+            IN const AString& strName = AString::ConstNull()) const;
+
     /**
      * @brief Returns all the headers of SIP address.
      *
      * @return List of uri-header parameter.
      */
-    const IMSList<ISipHeader*>& GetHeaders() const;
+    inline const IMSList<ISipHeader*>& GetHeaders() const
+    { return m_objHeaders; }
+
     /**
      * @brief Returns the host part of SIP address.
      *
@@ -158,6 +182,7 @@ public:
      *         The null string if the address is the special ("*") value.
      */
     const AString& GetHost() const;
+
     /**
      * @brief Returns the value associated with the named URI parameter.
      *
@@ -165,13 +190,16 @@ public:
      * @return SipParameter to the named URI parameter,
      *         or null if the named URI parameter is not found.
      */
-    const SipParameter* GetParameter(IN CONST AString &strName) const;
+    const SipParameter* GetParameter(IN const AString& strName) const;
+
     /**
      * @brief Returns all the uri-parameters of SIP address.
      *
      * @return List of uri-parameter.
      */
-    const IMSList<SipParameter*>& GetParameters() const;
+    inline const IMSList<SipParameter*>& GetParameters() const
+    { return m_objParams; }
+
     /**
      * @brief Returns the port number of the SIP address.
      *
@@ -182,6 +210,7 @@ public:
      *         Zero if the schems is not SIP or SIPS or the address is the special ("*") value.
      */
     IMS_SINT32 GetPort() const;
+
     /**
      * @brief Returns the scheme of SIP address.
      *
@@ -189,6 +218,7 @@ public:
      *         The null string if the address is the special ("*") value.
      */
     const AString& GetScheme() const;
+
     /**
      * @brief Returns the URI part of SIP address (without parameters).
      *
@@ -198,6 +228,7 @@ public:
      *         "*" if the address is the special ("*") value.
      */
     AString GetUri() const;
+
     /**
      * @brief Returns the user part of SIP address.
      *
@@ -209,6 +240,7 @@ public:
      *         null string if the user part is missing or the address is the special ("*") value.
      */
     const AString& GetUser() const;
+
     /**
      * @brief Returns the pointer of UserInfoPart.
      *
@@ -218,6 +250,7 @@ public:
      *         Otherwise, returns null.
      */
     const UserInfoPart* GetUserInfoPart() const;
+
     /**
      * @brief Returns the user part of SIP address.
      *
@@ -230,13 +263,16 @@ public:
      *         null string if the user part is missing or the address is the special ("*") value.
      */
     const AString& GetUserPart() const;
+
     /**
      * @brief Checks if the port number is explicitly set or not.
      *
      * @return If the port number is not set explicitly, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsPortUnspecified() const;
+    inline IMS_BOOL IsPortUnspecified() const
+    { return (m_nPort == Sip::PORT_UNSPECIFIED); }
+
     /**
      * @brief Checks if the scheme is SIP URI scheme or not.
      *
@@ -244,6 +280,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     IMS_BOOL IsSchemeSip() const;
+
     /**
      * @brief Checks if the scheme is SIPS URI scheme or not.
      *
@@ -251,6 +288,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     IMS_BOOL IsSchemeSips() const;
+
     /**
      * @brief Checks if the scheme is TEL URI scheme or not.
      *
@@ -258,6 +296,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     IMS_BOOL IsSchemeTel() const;
+
     /**
      * @brief Checks if the SIP address is for a service URN or not.
      *
@@ -265,14 +304,17 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     IMS_BOOL IsServiceUrn() const;
+
     /**
      * @brief Removes all the header components.
      */
     void RemoveAllHeaderComponents();
+
     /**
      * @brief Removes all the uri parameters.
      */
     void RemoveAllParameters();
+
     /**
      * @brief Removes the named URI parameter.
      *
@@ -281,14 +323,17 @@ public:
      *
      * @param strName The name of the parameter to be removed
      */
-    void RemoveParameter(IN CONST AString &strName);
+    void RemoveParameter(IN const AString& strName);
+
     /**
      * @brief Sets the flag to indicate that AQUOT is required when forming URI
      *        even though any uri parameter doesn't exist.
      *
-     * @param bAQUOTRequired Flag for AQUOT requirement
+     * @param bAquotRequired Flag for AQUOT requirement
      */
-    void SetAquotRequired(IN IMS_BOOL bAQUOTRequired);
+    inline void SetAquotRequired(IN IMS_BOOL bAquotRequired)
+    { m_bAquotRequired = bAquotRequired; }
+
     /**
      * @brief Sets the display name.
      *
@@ -299,13 +344,16 @@ public:
      *         If the display name is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetDisplayName(IN CONST AString &strName);
+    IMS_RESULT SetDisplayName(IN const AString& strName);
+
     /**
      * @brief Sets the flag to indicate if DQUOT is required when forming display-name field.
      *
-     * @param bDQUOTRequired Flag to indicate if DQUOTE should be included in display-name field
+     * @param bDquotRequired Flag to indicate if DQUOTE should be included in display-name field
      */
-    void SetDquotRequiredForDisplayName(IN IMS_BOOL bDQUOTRequired);
+    inline void SetDquotRequiredForDisplayName(IN IMS_BOOL bDquotRequired)
+    { m_bDquotForDisplayName = bDquotRequired; }
+
     /**
      * @brief Sets the header field.
      *
@@ -316,8 +364,9 @@ public:
      *         If the headers is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-            IN CONST AString &strName = AString::ConstNull());
+    IMS_RESULT SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull());
+
     /**
      * @brief Sets the headers field.
      *
@@ -329,7 +378,8 @@ public:
      *         If the headers is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetHeaders(IN CONST AString &strHeaders, IN IMS_BOOL bRemoveAll = IMS_TRUE);
+    IMS_RESULT SetHeaders(IN const AString& strHeaders, IN IMS_BOOL bRemoveAll = IMS_TRUE);
+
     /**
      * @brief Sets the host part of the SIP address.
      *
@@ -338,7 +388,8 @@ public:
      *         If the host part is null, invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetHost(IN CONST AString &strHost);
+    IMS_RESULT SetHost(IN const AString& strHost);
+
     /**
      * @brief Sets the named URI parameter to the specified value.
      *
@@ -351,7 +402,8 @@ public:
      *         If the name is null, invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetParameter(IN CONST AString &strName, IN CONST AString &strValue);
+    IMS_RESULT SetParameter(IN const AString& strName, IN const AString& strValue);
+
     /**
      * @brief Sets the port number of the SIP address.
      *
@@ -365,6 +417,7 @@ public:
      *         returns IMS_FAILURE.
      */
     IMS_RESULT SetPort(IN IMS_SINT32 nPort);
+
     /**
      * @brief Sets the scheme of the SIP address.
      *
@@ -373,7 +426,8 @@ public:
      *         If the scheme is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetScheme(IN CONST AString &strScheme);
+    IMS_RESULT SetScheme(IN const AString& strScheme);
+
     /**
      * @brief Sets the URI part of the SIP address (without parameter).
      *
@@ -381,12 +435,13 @@ public:
      * If the parameter of the method contains URI parameters,
      * they don't overwrite existing URI parameters, they are simply ignored if present.
      *
-     * @param strURI The URI part of the address to be set
+     * @param strUri The URI part of the address to be set
      * @return If the URI part is successfully set, returns IMS_SUCCESS.\n
      *         If the URI part is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetUri(IN CONST AString &strURI);
+    IMS_RESULT SetUri(IN const AString& strUri);
+
     /**
      * @brief Sets the user part of the SIP address.
      *
@@ -397,7 +452,8 @@ public:
      *         If the user part is invalid or the address represents the immutable "*" value,
      *         returns IMS_FAILURE.
      */
-    IMS_RESULT SetUser(IN CONST AString &strUser);
+    IMS_RESULT SetUser(IN const AString& strUser);
+
     /**
      * @brief Returns a fully qualified SIP address, with display name, URI and URI parameters.
      *
@@ -416,12 +472,14 @@ public:
      * @return Reference to the list of SipAddresses (empty list).
      */
     static const IMSList<SipAddress*>& ConstEmptyList();
+
     /**
      * @brief Returns the default SipAddress (null).
      *
      * @return Reference to SipAddress (null).
      */
     static const SipAddress& ConstNull();
+
     /**
      * @brief Returns the tel URI format for the specified resource string.
      *
@@ -434,24 +492,24 @@ public:
      *         #TEL_FORMAT_GLOBAL\n
      *         #TEL_FORMAT_LOCAL
      */
-    static IMS_SINT32 GetTelUriFormat(IN CONST AString &strResource);
+    static IMS_SINT32 GetTelUriFormat(IN const AString& strResource);
 
 private:
-    IMS_BOOL CompareSipUris(IN CONST SipAddress &objAddress) const;
-    IMS_BOOL CompareTelUris(IN CONST SipAddress &objAddress) const;
-    IMS_BOOL CompareTransportParameters(IN CONST SipAddress &objAddress) const;
-    const UserInfoPart* CreateUserInfoPart(IN CONST AString &strUserPart) const;
-    IMS_BOOL Decode(IN CONST AString& strAddress, IN IMS_BOOL bParseParameter,
+    IMS_BOOL CompareSipUris(IN const SipAddress& objAddress) const;
+    IMS_BOOL CompareTelUris(IN const SipAddress& objAddress) const;
+    IMS_BOOL CompareTransportParameters(IN const SipAddress& objAddress) const;
+    const UserInfoPart* CreateUserInfoPart(IN const AString& strUserPart) const;
+    IMS_BOOL Decode(IN const AString& strAddress, IN IMS_BOOL bParseParameter,
             IN IMS_BOOL bParseDisplayName = IMS_TRUE, IN IMS_BOOL bParseHeader = IMS_TRUE);
-    IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders);
-    IMS_BOOL IsParameterPresent(IN CONST AString &strName) const;
+    IMS_BOOL DecodeHeaderComponent(IN const AString& strHeaders);
+    IMS_BOOL IsParameterPresent(IN const AString& strName) const;
 
-    static IMS_BOOL CompareNumberDigits(IN CONST AString &strDigits1,
-            IN CONST AString &strDigits2);
-    static AString EscapeDquotAndBackslash(IN CONST AString &strValue);
-    static IMS_BOOL IsDisplayNameToken(IN CONST AString &strDisplayName);
-    static IMS_BOOL IsToken(IN CONST IMS_CHAR ch);
-    static IMS_BOOL IsVisualSeparator(IN CONST IMS_CHAR ch);
+    static IMS_BOOL CompareNumberDigits(IN const AString& strDigits1,
+            IN const AString& strDigits2);
+    static AString EscapeDquotAndBackslash(IN const AString& strValue);
+    static IMS_BOOL IsDisplayNameToken(IN const AString& strDisplayName);
+    static IMS_BOOL IsToken(IN const IMS_CHAR ch);
+    static IMS_BOOL IsVisualSeparator(IN const IMS_CHAR ch);
 
 public:
     /// "maddr" URI parameter name
@@ -478,27 +536,27 @@ public:
     };
 
 private:
-    IMS_BOOL bIsWildcard;
+    IMS_BOOL m_bIsWildcard;
     // DQUOT for display name
-    IMS_BOOL bDQUOTForDisplayName;
+    IMS_BOOL m_bDquotForDisplayName;
     // Checks if AQUOT is a mandatory for URI forming
-    IMS_BOOL bAQUOTRequired;
-    AString strDisplayName;
+    IMS_BOOL m_bAquotRequired;
+    AString m_strDisplayName;
 
-    AString strScheme;
-    AString strUserInfo;
-    AString strHostInfo;
-    IMS_UINT32 nPort;
+    AString m_strScheme;
+    AString m_strUserInfo;
+    AString m_strHostInfo;
+    IMS_UINT32 m_nPort;
     // Optional field
     //        headers := header *("&" header)
     //        header := hname "=" hvalue
-    IMSList<ISipHeader*> objHeaders;
+    IMSList<ISipHeader*> m_objHeaders;
 
     // URI parameters
-    IMSList<SipParameter*> objParams;
+    IMSList<SipParameter*> m_objParams;
 
     // Parser of userinfo part
-    mutable UserInfoPart *pUserInfoPart;
+    mutable UserInfoPart* m_pUserInfoPart;
 };
 
-#endif // _SIP_ADDRESS_H_
+#endif

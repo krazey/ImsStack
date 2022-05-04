@@ -767,7 +767,7 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
         return;
     }
 
-    if (pIPQoS->objIP.Equals(IPAddress::NONE) || pIPQoS->objIP.Equals(IPAddress::IPv6NONE))
+    if (pIPQoS->objIpAddr.Equals(IPAddress::NONE) || pIPQoS->objIpAddr.Equals(IPAddress::IPv6NONE))
     {
         for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
         {
@@ -796,7 +796,7 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
 
         pSocket->GetSockName(objIP, nPort);
 
-        if (pIPQoS->objIP.Equals(objIP))
+        if (pIPQoS->objIpAddr.Equals(objIP))
         {
             bMatched = IMS_TRUE;
 

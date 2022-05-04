@@ -1,14 +1,29 @@
-#ifndef _INTERFACE_SIP_CLIENT_CONNECTION_H_
-#define _INTERFACE_SIP_CLIENT_CONNECTION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_CLIENT_CONNECTION_H_
+#define INTERFACE_SIP_CLIENT_CONNECTION_H_
 
 #include "IPAddress.h"
 #include "ISipConnection.h"
 
-class ISipConnectionNotifier;
-class ISipClientConnectionListener;
-class ISipGenericChallenge;
-class ISipAckPackage;
 class Credential;
+class ISipAckPackage;
+class ISipClientConnectionListener;
+class ISipConnectionNotifier;
+class ISipGenericChallenge;
 
 /**
  * @brief This class provides an interface to handle SIP client transaction.
@@ -17,8 +32,8 @@ class Credential;
  *
  * @see ISipConnection, ISipConnectionNotifier
  */
-class ISipClientConnection
-    : public ISipConnection
+class ISipClientConnection :
+        public ISipConnection
 {
 public:
     /**
@@ -89,13 +104,13 @@ public:
      *     - Max-Forwards
      *
      * @param strMethod Name of the SIP method
-     * @param piSCN Pointer to ISipConnectionNotifier to which the request will be associated.\n
-     *              If piSCN is NULL, the request will not be associated to any user defined
+     * @param piScn Pointer to ISipConnectionNotifier to which the request will be associated.\n
+     *              If piScn is NULL, the request will not be associated to any user defined
      *              listening port.
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT InitRequest(IN CONST AString& strMethod,
-            IN ISipConnectionNotifier *piSCN) = 0;
+    virtual IMS_RESULT InitRequest(IN const AString& strMethod,
+            IN ISipConnectionNotifier* piScn) = 0;
 
     /**
      * @brief Receives a SIP response message.
@@ -142,7 +157,7 @@ public:
      * @param objCredential Credential (username, password, realm) for digest authentication
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetCredentials(IN CONST Credential &objCredential) = 0;
+    virtual IMS_RESULT SetCredentials(IN const Credential& objCredential) = 0;
 
     /**
      * @brief Sets the listener for incoming responses.
@@ -153,7 +168,7 @@ public:
      * @param piListener Listener to be set\n
      *                   null value will remove the existing listener
      */
-    virtual void SetListener(IN ISipClientConnectionListener *piListener) = 0;
+    virtual void SetListener(IN ISipClientConnectionListener* piListener) = 0;
 
     /**
      * @brief Sets Request-URI explicitly.
@@ -163,12 +178,10 @@ public:
      * It is not mandated that this method be supported, so it may throw INVALID_OPERATION
      * in any state.
      *
-     * @param strURI String representation of Request-URI
+     * @param strUri String representation of Request-URI
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetRequestUri(IN CONST AString& strURI) = 0;
-
-    //// IMS extensions
+    virtual IMS_RESULT SetRequestUri(IN const AString& strUri) = 0;
 
     /**
      * @brief Returns the authentication challenge.
@@ -218,14 +231,14 @@ public:
      * @param piChallenge Authentication challenge to be set
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetAuthenticationChallenge(IN ISipGenericChallenge *piChallenge) = 0;
+    virtual IMS_RESULT SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge) = 0;
 
     /**
      * @brief Sets the extension token of the branch parameter in the Via header.
      *
      * @param strToken Extension token
      */
-    virtual void SetExtensionTokenForViaBranch(IN CONST AString &strToken) = 0;
+    virtual void SetExtensionTokenForViaBranch(IN const AString& strToken) = 0;
 
     /**
      * @brief Sets the implicit Route header (SIP or SIPS URI).
@@ -237,21 +250,21 @@ public:
      *
      * @param strRouteHeader Route header for implicit message routing
      */
-    virtual void SetImplicitRouteHeader(IN CONST AString &strRouteHeader) = 0;
+    virtual void SetImplicitRouteHeader(IN const AString& strRouteHeader) = 0;
 
     /**
      * @brief Sets the transport tuple for this client connection.
      *
-     * @param objIPA IP address of the device
+     * @param objIpAddr IP address of the device
      * @param nPortC Client port number of the device
      * @param nPortS Server port number of the device
-     * @param nPortFC Port number for the flow control (RFC5626)
+     * @param nPortFc Port number for the flow control (RFC5626)
      * @param nTransportExt Transport extension (Sip::TRANSPORT_EXT_XXX in Sip.h)
      * @note RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
      */
-    virtual void SetTransportTuple(IN CONST IPAddress &objIPA,
-            IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC = 0xFFFF,
-            IN IMS_SINT32 nTransportExt = 0 /* ANY */) = 0;
+    virtual void SetTransportTuple(IN const IPAddress& objIpAddr,
+            IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = 0xFFFF,
+            IN IMS_SINT32 nTransportExt = 0/*ANY*/) = 0;
 };
 
-#endif // _INTERFACE_SIP_CLIENT_CONNECTION_H_
+#endif

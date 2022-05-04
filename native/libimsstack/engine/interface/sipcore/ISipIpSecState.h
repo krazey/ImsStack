@@ -1,31 +1,46 @@
-#ifndef _INTERFACE_SIP_IPSEC_STATE_H_
-#define _INTERFACE_SIP_IPSEC_STATE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_IPSEC_STATE_H_
+#define INTERFACE_SIP_IPSEC_STATE_H_
 
 #include "IPAddress.h"
 
 class ISipIpSecStateListener;
 
 /**
- * @brief This class provides an interface to handle IPSec SA(Security Association) state.
+ * @brief This class provides an interface to handle IpSec SA(Security Association) state.
  */
 class ISipIpSecState
 {
 public:
     /**
-     * @brief Clears the existing IPSec security association.
+     * @brief Clears the existing IpSec security association.
      *
      * After de-registration, the application SHALL invoke this method and clear all the SAs.
      *
-     * @param nSAType SA type to be cleared\n
+     * @param nSaType A security association type to be cleared\n
      *                #SA_NEW\n
      *                #SA_OLD
      */
-    virtual void ClearIpSecSa(IN IMS_SINT32 nSAType) = 0;
+    virtual void ClearIpSecSa(IN IMS_SINT32 nSaType) = 0;
 
     /**
-     * @brief Returns the current state of the specified IPSec security association.
+     * @brief Returns the current state of the specified IpSec security association.
      *
-     * @param nSAType SA type to be returned\n
+     * @param nSaType A security association type to be returned\n
      *                #SA_NEW\n
      *                #SA_OLD
      * @return A current state of the specified IPSec type.\n
@@ -36,44 +51,44 @@ public:
      *         #STATE_TERMINATED\n
      *         #STATE_TERMINATED_PENDING
      */
-    virtual IMS_SINT32 GetState(IN IMS_SINT32 nSAType) const = 0;
+    virtual IMS_SINT32 GetState(IN IMS_SINT32 nSaType) const = 0;
 
     /**
      * @brief Checks if the pending transaction exists or not.
      *
-     * @param nSAType SA type to be checked\n
+     * @param nSaType A security association type to be checked\n
      *                #SA_NEW\n
      *                #SA_OLD
      * @return If the pending transaction exists, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL HasPendingTransaction(IN IMS_SINT32 nSAType) const = 0;
+    virtual IMS_BOOL HasPendingTransaction(IN IMS_SINT32 nSaType) const = 0;
 
     /**
-     * @brief Sets the IPSec SA table for the specified security association.
+     * @brief Sets the IpSec SA table for the specified security association.
      *
      * It internally makes the SA table for the composition of each direction/transport.\n
      * When setting the new SA, it will internally copy the existing new SA to the old SA.
      *
-     * @param nSAType SA type to be set\n
+     * @param nSaType A security association type to be set\n
      *                #SA_NEW\n
      *                #SA_OLD
-     * @param objIP_U UE's IP address
-     * @param nPort_UC UE's client port
-     * @param nPort_US UE's server port
-     * @param objIP_P P-CSCF's IP address
-     * @param nPort_PC P-CSCF's client port
-     * @param nPort_PS P-CSCF's server port
+     * @param objIpAddrU UE's IP address
+     * @param nPortUc UE's client port
+     * @param nPortUs UE's server port
+     * @param objIpAddrP P-CSCF's IP address
+     * @param nPortPc P-CSCF's client port
+     * @param nPortPs P-CSCF's server port
      */
-    virtual void SetIpSecSa(IN IMS_SINT32 nSAType,
-            IN CONST IPAddress &objIP_U, IN IMS_SINT32 nPort_UC, IN IMS_SINT32 nPort_US,
-            IN CONST IPAddress &objIP_P, IN IMS_SINT32 nPort_PC, IN IMS_SINT32 nPort_PS) = 0;
+    virtual void SetIpSecSa(IN IMS_SINT32 nSaType,
+            IN const IPAddress& objIpAddrU, IN IMS_SINT32 nPortUc, IN IMS_SINT32 nPortUs,
+            IN const IPAddress& objIpAddrP, IN IMS_SINT32 nPortPc, IN IMS_SINT32 nPortPs) = 0;
 
     /**
      * @brief Sets the listener to monitor the state of the IPSec security association.
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN ISipIpSecStateListener *piListener) = 0;
+    virtual void SetListener(IN ISipIpSecStateListener* piListener) = 0;
 
 public:
     /// Type of IPSec security association
@@ -112,4 +127,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SIP_IPSEC_STATE_H_
+#endif

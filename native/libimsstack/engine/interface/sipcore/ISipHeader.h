@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_SIP_HEADER_H_
-#define _INTERFACE_SIP_HEADER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_HEADER_H_
+#define INTERFACE_SIP_HEADER_H_
 
 #include "AString.h"
 #include "ISipObject.h"
@@ -10,24 +25,24 @@ class SipParameter;
 /**
  * @brief This class provides an interface to handle SIP headers.
  */
-class ISipHeader
-    : public ISipObject
+class ISipHeader :
+        public ISipObject
 {
 public:
     /**
      * @brief Clones a SIP header.
      *
-     * @return Pointer to new SIPHeader.
+     * @return Pointer to new SipHeader.
      */
     virtual ISipHeader* Clone() const = 0;
 
     /**
-     * @brief Checks if the given SIPHeader is the same.
+     * @brief Checks if the given SipHeader is the same.
      *
      * @param piHeader Pointer to ISipHeader which is compared
      * @return If both SIP headers matched, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL Equals(IN CONST ISipHeader *piHeader) const = 0;
+    virtual IMS_BOOL Equals(IN const ISipHeader* piHeader) const = 0;
 
     /**
      * @brief Returns the pointer to SipAddress if this header is a format of SIP address.
@@ -48,9 +63,9 @@ public:
     virtual AString GetHeaderValue() const = 0;
 
     /**
-     * @brief Returns the header name of this SIPHeader.
+     * @brief Returns the header name of this SipHeader.
      *
-     * @return The header name of this SIPHeader.
+     * @return The header name of this SipHeader.
      */
     virtual const AString& GetName() const = 0;
 
@@ -60,29 +75,29 @@ public:
      * @param strName The parameter name to be returned
      * @return Pointer to SipParameter; Parameter to the specified parameter name.
      */
-    virtual const SipParameter* GetParameter(IN CONST AString &strName) const = 0;
+    virtual const SipParameter* GetParameter(IN const AString& strName) const = 0;
 
     /**
      * @brief Returns the names of all the header parameters.
      *
      * If there are no header parameters, the method returns an empty list.
      *
-     * @param objPNames Names of the header parameters
+     * @param objParamNames Names of the header parameters
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT GetParameterNames(OUT IMSList<AString> &objPNames) const = 0;
+    virtual IMS_RESULT GetParameterNames(OUT IMSList<AString>& objParamNames) const = 0;
 
     /**
-     * @brief Returns the list of all the header parameters in this SIPHeader.
+     * @brief Returns the list of all the header parameters in this SipHeader.
      *
-     * @return The list of SipParameter for this SIPHeader.
+     * @return The list of SipParameter for this SipHeader.
      */
     virtual const IMSList<SipParameter*>& GetParameters() const = 0;
 
     /**
-     * @brief Returns the enumeration type of this SIPHeader which corresponds to the header name.
+     * @brief Returns the enumeration type of this SipHeader which corresponds to the header name.
      *
-     * @return Enumeration type of this SIPHeader.
+     * @return Enumeration type of this SipHeader.
      */
     virtual IMS_SINT32 GetType() const = 0;
 
@@ -112,11 +127,11 @@ public:
     virtual IMS_SINT32 GetValueInt() const = 0;
 
     /**
-     * @brief Removes the header parameter if it is found in this SIPHeader.
+     * @brief Removes the header parameter if it is found in this SipHeader.
      *
      * @param strName Name of the header parameter
      */
-    virtual void RemoveParameter(IN CONST AString &strName) = 0;
+    virtual void RemoveParameter(IN const AString& strName) = 0;
 
     /**
      * @brief Sets the header name, for example "Contact".
@@ -125,7 +140,7 @@ public:
      *
      * @param strName Name of the header
      */
-    virtual void SetName(IN CONST AString &strName) = 0;
+    virtual void SetName(IN const AString& strName) = 0;
 
     /**
      * @brief Sets the value of header parameter.
@@ -141,7 +156,7 @@ public:
      * @param strValue Value of the header parameter (null or empty string is allowed)
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetParameter(IN CONST AString &strName, IN CONST AString &strValue) = 0;
+    virtual IMS_RESULT SetParameter(IN const AString& strName, IN const AString& strValue) = 0;
 
     /**
      * @brief Sets the header value as string with any header parameters.
@@ -151,7 +166,7 @@ public:
      * @param strHeaderValue The full header value
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetHeaderValue(IN CONST AString &strHeaderValue) = 0;
+    virtual IMS_RESULT SetHeaderValue(IN const AString& strHeaderValue) = 0;
 
     /**
      * @brief Sets the header value as string without parameters.
@@ -167,7 +182,7 @@ public:
      * @param strValue The value of the header
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetValue(IN CONST AString &strValue) = 0;
+    virtual IMS_RESULT SetValue(IN const AString& strValue) = 0;
 
     /**
      * @brief Sets the header value as string without parameters.
@@ -192,7 +207,7 @@ public:
      * The value part of the header may be missing if the header was created with empty string
      * or null as strValue and has not been set using SetValue().
      *
-     * @return String representation of this SIPHeader.
+     * @return String representation of this SipHeader.
      */
     virtual AString ToString() const = 0;
 
@@ -211,7 +226,7 @@ public:
      * The value part of the header may be missing if the header was created with empty string
      * or null as strValue and has not been set using SetValue().
      *
-     * @return String representation of this SIPHeader without header name.
+     * @return String representation of this SipHeader without header name.
      */
     virtual AString ToStringWithoutName() const = 0;
 
@@ -294,4 +309,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SIP_HEADER_H_
+#endif

@@ -1,8 +1,23 @@
-#ifndef _INTERFACE_SIP_DIALOG_H_
-#define _INTERFACE_SIP_DIALOG_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_DIALOG_H_
+#define INTERFACE_SIP_DIALOG_H_
 
-#include "ISipObject.h"
 #include "ISipClientConnection.h"
+#include "ISipObject.h"
 
 class ISipHeader;
 
@@ -15,8 +30,8 @@ class ISipHeader;
  *
  * @see ISipConnection, ISipClientConnection
  */
-class ISipDialog
-    : public ISipObject
+class ISipDialog :
+        public ISipObject
 {
 public:
     /**
@@ -33,7 +48,7 @@ public:
      * @return If the specified SIP dialog equals to this dialog, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL Equals(IN CONST ISipDialog *piDialog) = 0;
+    virtual IMS_BOOL Equals(IN const ISipDialog* piDialog) = 0;
 
     /**
      * @brief Returns the ID (Call-ID + Local Tag + Remote Tag) of the SIP dialog.
@@ -63,7 +78,7 @@ public:
      * @param strMethod SIP method name to be created
      * @return Pointer to ISipClientConnection object with preset method and headers.
      */
-    virtual ISipClientConnection* GetNewClientConnection(IN CONST AString &strMethod) = 0;
+    virtual ISipClientConnection* GetNewClientConnection(IN const AString& strMethod) = 0;
 
     /**
      * @brief Returns the state of the SIP dialog.
@@ -79,11 +94,11 @@ public:
     /**
      * @brief Compares if the given ISipConnection belongs to this dialog or not.
      *
-     * @param piSC Pointer to ISipConnection object to be compared
+     * @param piSc Pointer to ISipConnection object to be compared
      * @return If the given SIP transaction belongs to the current dialog, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsSameDialog(IN CONST ISipConnection *piSC) = 0;
+    virtual IMS_BOOL IsSameDialog(IN const ISipConnection* piSc) = 0;
 
     /**
      * @brief Returns the component of SIP dialog (call-id, local-tag, remote-tag).
@@ -121,8 +136,8 @@ public:
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
-    virtual IMS_RESULT SetContactParameter(IN CONST AString &strParameter,
-            IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) = 0;
+    virtual IMS_RESULT SetContactParameter(IN const AString& strParameter,
+            IN IMS_SINT32 nOperation = 0/*(0: ADD, 1: REMOVE)*/) = 0;
 
     /**
      * @brief Terminates the SIP dialog usage explicitly.
@@ -157,4 +172,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SIP_DIALOG_H_
+#endif

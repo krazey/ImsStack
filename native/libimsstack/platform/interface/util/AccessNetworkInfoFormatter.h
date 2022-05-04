@@ -13,6 +13,7 @@
 #ifndef _ACCESS_NETWORK_INFO_FORMATTER_H_
 #define _ACCESS_NETWORK_INFO_FORMATTER_H_
 
+#include "AString.h"
 #include "ImsAccessNetworkInfoType.h"
 
 class AccessNetworkInfoFormatter

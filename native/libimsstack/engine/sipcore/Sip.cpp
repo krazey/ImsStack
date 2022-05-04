@@ -1,16 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-     This class is the class for a global enumerations, definitions and constant variables.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "SIPPrivate.h"
 
 
@@ -31,10 +35,6 @@ const IMS_CHAR Sip::STR_SIPS[] = "sips";
 PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_TEL[] = "tel";
 PUBLIC GLOBAL
-const IMS_CHAR Sip::STR_IM[] = "im";
-PUBLIC GLOBAL
-const IMS_CHAR Sip::STR_PRES[] = "pres";
-PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_UDP[] = "udp";
 PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_TCP[] = "tcp";
@@ -46,13 +46,9 @@ PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_TCP_CAPS[] = "TCP";
 PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_TLS_CAPS[] = "TLS";
+
 PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_BRANCH_MAGIC_COOKIE[] = "z9hG4bK";
-#if 0
-PUBLIC GLOBAL
-const IMS_CHAR Sip::STR_TAG_MAGIC_COOKIE[] = "gims";
-#endif
-
 PUBLIC GLOBAL
 const IMS_CHAR Sip::STR_100REL[] = "100rel";
 PUBLIC GLOBAL

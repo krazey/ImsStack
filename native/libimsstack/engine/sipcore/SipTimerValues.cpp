@@ -1,48 +1,49 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101120  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines the SIP transaction timer values which are set by the application.
-    The default timer values are set according to the 3GPP specification.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "SipTimerValues.h"
 
-
-
 PUBLIC
-SipTimerValues::SipTimerValues()
-    : nTV_Flags(0)
-    , nTV_T1(2000)
-    , nTV_T2(16000)
-    , nTV_TimerB(128000)
-    , nTV_TimerD(128000)
-    , nTV_TimerF(128000)
-    , nTV_TimerH(128000)
-    , nTV_TimerI(17000)
-    , nTV_TimerJ(128000)
-    , nTV_TimerK(17000)
+SipTimerValues::SipTimerValues() :
+        m_nFlags(0),
+        m_nT1(2000),
+        m_nT2(16000),
+        m_nTimerB(128000),
+        m_nTimerD(128000),
+        m_nTimerF(128000),
+        m_nTimerH(128000),
+        m_nTimerI(17000),
+        m_nTimerJ(128000),
+        m_nTimerK(17000)
 {
 }
 
 PUBLIC
-SipTimerValues::SipTimerValues(IN CONST SipTimerValues &objRHS)
-    : nTV_Flags(objRHS.nTV_Flags)
-    , nTV_T1(objRHS.nTV_T1)
-    , nTV_T2(objRHS.nTV_T2)
-    , nTV_TimerB(objRHS.nTV_TimerB)
-    , nTV_TimerD(objRHS.nTV_TimerD)
-    , nTV_TimerF(objRHS.nTV_TimerF)
-    , nTV_TimerH(objRHS.nTV_TimerH)
-    , nTV_TimerI(objRHS.nTV_TimerI)
-    , nTV_TimerJ(objRHS.nTV_TimerJ)
-    , nTV_TimerK(objRHS.nTV_TimerK)
+SipTimerValues::SipTimerValues(IN const SipTimerValues& other) :
+        m_nFlags(other.m_nFlags),
+        m_nT1(other.m_nT1),
+        m_nT2(other.m_nT2),
+        m_nTimerB(other.m_nTimerB),
+        m_nTimerD(other.m_nTimerD),
+        m_nTimerF(other.m_nTimerF),
+        m_nTimerH(other.m_nTimerH),
+        m_nTimerI(other.m_nTimerI),
+        m_nTimerJ(other.m_nTimerJ),
+        m_nTimerK(other.m_nTimerK)
 {
 }
 
@@ -52,22 +53,20 @@ SipTimerValues::~SipTimerValues()
 }
 
 PUBLIC
-SipTimerValues& SipTimerValues::operator=(IN CONST SipTimerValues &objRHS)
+SipTimerValues& SipTimerValues::operator=(IN const SipTimerValues& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nTV_Flags = objRHS.nTV_Flags;
-        nTV_T1 = objRHS.nTV_T1;
-        nTV_T2 = objRHS.nTV_T2;
-        nTV_TimerB = objRHS.nTV_TimerB;
-        nTV_TimerD = objRHS.nTV_TimerD;
-        nTV_TimerF = objRHS.nTV_TimerF;
-        nTV_TimerH = objRHS.nTV_TimerH;
-        nTV_TimerI = objRHS.nTV_TimerI;
-        nTV_TimerJ = objRHS.nTV_TimerJ;
-        nTV_TimerK = objRHS.nTV_TimerK;
+        m_nFlags = other.m_nFlags;
+        m_nT1 = other.m_nT1;
+        m_nT2 = other.m_nT2;
+        m_nTimerB = other.m_nTimerB;
+        m_nTimerD = other.m_nTimerD;
+        m_nTimerF = other.m_nTimerF;
+        m_nTimerH = other.m_nTimerH;
+        m_nTimerI = other.m_nTimerI;
+        m_nTimerJ = other.m_nTimerJ;
+        m_nTimerK = other.m_nTimerK;
     }
 
     return (*this);
@@ -76,8 +75,6 @@ SipTimerValues& SipTimerValues::operator=(IN CONST SipTimerValues &objRHS)
 PUBLIC
 IMS_SINT32 SipTimerValues::GetValue(IN IMS_SINT32 nType) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!IsSet(nType))
     {
         return 0;
@@ -85,117 +82,102 @@ IMS_SINT32 SipTimerValues::GetValue(IN IMS_SINT32 nType) const
 
     if (nType == TIMER_T1)
     {
-        return nTV_T1;
+        return m_nT1;
     }
     else if (nType == TIMER_T2)
     {
-        return nTV_T2;
+        return m_nT2;
     }
-    else if (nType == TV_TIMER_B)
+    else if (nType == TIMER_B)
     {
-        return nTV_TimerB;
+        return m_nTimerB;
     }
-    else if (nType == TV_TIMER_D)
+    else if (nType == TIMER_D)
     {
-        return nTV_TimerD;
+        return m_nTimerD;
     }
-    else if (nType == TV_TIMER_F)
+    else if (nType == TIMER_F)
     {
-        return nTV_TimerF;
+        return m_nTimerF;
     }
-    else if (nType == TV_TIMER_H)
+    else if (nType == TIMER_H)
     {
-        return nTV_TimerH;
+        return m_nTimerH;
     }
-    else if (nType == TV_TIMER_I)
+    else if (nType == TIMER_I)
     {
-        return nTV_TimerI;
+        return m_nTimerI;
     }
-    else if (nType == TV_TIMER_J)
+    else if (nType == TIMER_J)
     {
-        return nTV_TimerJ;
+        return m_nTimerJ;
     }
-    else if (nType == TV_TIMER_K)
+    else if (nType == TIMER_K)
     {
-        return nTV_TimerK;
+        return m_nTimerK;
     }
 
     return 0;
 }
 
 PUBLIC
-IMS_BOOL SipTimerValues::IsSet(IN IMS_SINT32 nType) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return ((this->nTV_Flags & nType) != 0);
-}
-
-PUBLIC
 void SipTimerValues::SetValue(IN IMS_SINT32 nType, IN IMS_UINT32 nValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->nTV_Flags |= nType;
+    m_nFlags |= nType;
 
     if (nType == TIMER_T1)
     {
-        nTV_T1 = nValue;
+        m_nT1 = nValue;
     }
     else if (nType == TIMER_T2)
     {
-        nTV_T2 = nValue;
+        m_nT2 = nValue;
     }
-    else if (nType == TV_TIMER_B)
+    else if (nType == TIMER_B)
     {
-        nTV_TimerB = nValue;
+        m_nTimerB = nValue;
     }
-    else if (nType == TV_TIMER_D)
+    else if (nType == TIMER_D)
     {
-        nTV_TimerD = nValue;
+        m_nTimerD = nValue;
     }
-    else if (nType == TV_TIMER_F)
+    else if (nType == TIMER_F)
     {
-        nTV_TimerF = nValue;
+        m_nTimerF = nValue;
     }
-    else if (nType == TV_TIMER_H)
+    else if (nType == TIMER_H)
     {
-        nTV_TimerH = nValue;
+        m_nTimerH = nValue;
     }
-    else if (nType == TV_TIMER_I)
+    else if (nType == TIMER_I)
     {
-        nTV_TimerI = nValue;
+        m_nTimerI = nValue;
     }
-    else if (nType == TV_TIMER_J)
+    else if (nType == TIMER_J)
     {
-        nTV_TimerJ = nValue;
+        m_nTimerJ = nValue;
     }
-    else if (nType == TV_TIMER_K)
+    else if (nType == TIMER_K)
     {
-        nTV_TimerK = nValue;
+        m_nTimerK = nValue;
     }
 }
 
 PUBLIC GLOBAL
 SipTimerValues SipTimerValues::CreateTimerValues(IN IMS_SINT32 nT1, IN IMS_SINT32 nT2)
 {
-    SipTimerValues objTVs;
+    SipTimerValues objTv;
 
-    //---------------------------------------------------------------------------------------------
+    objTv.m_nFlags = TIMER_ALL;
+    objTv.m_nT1 = nT1;
+    objTv.m_nT2 = nT2;
+    objTv.m_nTimerB = nT1 * 64;
+    objTv.m_nTimerD = nT1 * 64;
+    objTv.m_nTimerF = nT1 * 64;
+    objTv.m_nTimerH = nT1 * 64;
+    objTv.m_nTimerI = nT2 + 1000;
+    objTv.m_nTimerJ = nT1 * 64;
+    objTv.m_nTimerK = nT2 + 1000;
 
-    objTVs.nTV_Flags = TV_ALL;
-
-    objTVs.nTV_T1 = nT1;
-    objTVs.nTV_T2 = nT2;
-
-    objTVs.nTV_TimerB = nT1 * 64;
-    objTVs.nTV_TimerD = nT1 * 64;
-
-    objTVs.nTV_TimerF = nT1 * 64;
-    objTVs.nTV_TimerH = nT1 * 64;
-    objTVs.nTV_TimerI = nT2 + 1000;
-    objTVs.nTV_TimerJ = nT1 * 64;
-    objTVs.nTV_TimerK = nT2 + 1000;
-
-    return objTVs;
+    return objTv;
 }

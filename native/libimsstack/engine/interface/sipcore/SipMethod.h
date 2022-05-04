@@ -1,5 +1,20 @@
-#ifndef _SIP_METHOD_H_
-#define _SIP_METHOD_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_METHOD_H_
+#define SIP_METHOD_H_
 
 #include "AString.h"
 
@@ -9,17 +24,17 @@
 class SipMethod
 {
 public:
-    SipMethod(IN IMS_SINT32 nMethod_ = SipMethod::INVALID);
-    SipMethod(IN CONST IMS_CHAR *pszMethod_);
-    SipMethod(IN CONST AString &strMethod_);
-    SipMethod(IN CONST SipMethod &objRHS);
+    SipMethod(IN IMS_SINT32 nMethod = SipMethod::INVALID);
+    SipMethod(IN const IMS_CHAR* pszMethod);
+    SipMethod(IN const AString& strMethod);
+    SipMethod(IN const SipMethod& other);
     ~SipMethod();
 
 public:
-    SipMethod& operator=(IN CONST SipMethod &objRHS);
-    SipMethod& operator=(IN IMS_SINT32 nMethod_);
-    SipMethod& operator=(IN CONST IMS_CHAR *pszMethod_);
-    SipMethod& operator=(IN CONST AString &strMethod_);
+    SipMethod& operator=(IN const SipMethod& other);
+    SipMethod& operator=(IN IMS_SINT32 nMethod);
+    SipMethod& operator=(IN const IMS_CHAR* pszMethod);
+    SipMethod& operator=(IN const AString& strMethod);
 
 public:
     /**
@@ -44,33 +59,33 @@ public:
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL Equals(IN IMS_SINT32 nMethod) const
-    { return (this->nMethod == nMethod); }
+    { return m_nMethod == nMethod; }
     /**
      * @brief Checks if SIP method is the same or not.
      *
      * @param pszMethod SIP method as null-termianted string format
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL Equals(IN CONST IMS_CHAR *pszMethod) const
-    { return (this->strMethod.Equals(pszMethod)); }
+    inline IMS_BOOL Equals(IN const IMS_CHAR* pszMethod) const
+    { return m_strMethod.Equals(pszMethod); }
     /**
      * @brief Checks if SIP method is the same or not.
      *
      * @param strMethod SIP method as string format
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL Equals(IN CONST AString &strMethod) const
-    { return (this->strMethod.Equals(strMethod)); }
+    inline IMS_BOOL Equals(IN const AString& strMethod) const
+    { return m_strMethod.Equals(strMethod); }
     /**
      * @brief Checks if SIP method is the same or not.
      *
      * @param objMethod SIP method object
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL Equals(IN CONST SipMethod &objMethod) const
+    inline IMS_BOOL Equals(IN const SipMethod& objMethod) const
     {
-        return ((this->nMethod == objMethod.nMethod)
-                && (this->strMethod.Equals(objMethod.strMethod)));
+        return ((m_nMethod == objMethod.m_nMethod) &&
+                m_strMethod.Equals(objMethod.m_strMethod));
     }
 
     /**
@@ -93,13 +108,14 @@ public:
      *         #INFO\n
      *         #UNKNOWN
      */
-    inline IMS_SINT32 ToInt() const { return nMethod; }
+    inline IMS_SINT32 ToInt() const { return m_nMethod; }
+
     /**
      * @brief Gets SIP method as string format.
      *
      * @return SIP method as string ("INVITE" / "BYE" / ...).
      */
-    inline const AString& ToString() const { return strMethod; }
+    inline const AString& ToString() const { return m_strMethod; }
 
     /**
      * @brief Converts the enumeration type to string format of SIP method.
@@ -125,7 +141,7 @@ public:
     static const IMS_CHAR* ToName(IN IMS_SINT32 nMethod);
 
 private:
-    static IMS_SINT32 ConvertStringToMethod(IN CONST AString &strMethod);
+    static IMS_SINT32 ConvertStringToMethod(IN const AString& strMethod);
     static AString ConvertMethodToString(IN IMS_SINT32 nMethod);
 
 public:
@@ -172,8 +188,8 @@ public:
     static const SipMethod INVALID_METHOD;
 
 private:
-    IMS_SINT32 nMethod;
-    AString strMethod;
+    IMS_SINT32 m_nMethod;
+    AString m_strMethod;
 };
 
-#endif // _SIP_METHOD_H_
+#endif

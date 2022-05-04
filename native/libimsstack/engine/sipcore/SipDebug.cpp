@@ -1,23 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20121116  hwangoo.park@             Created
-    </table>
-
-    Description
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceEvent.h"
+#include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "ServiceUtil.h"
 #include "SystemConfig.h"
-#include "SIPStackHeaders.h"
+
 #include "SipDebug.h"
-
-
+#include "SIPStackHeaders.h"
 
 PRIVATE GLOBAL
 IMS_CHAR SipDebug::acIpAddr[SipDebug::MAX_LOG_IP + 1] = { '\0', };
@@ -42,14 +45,9 @@ AString SipDebug::strLog1_1 = AString::ConstNull();
 PRIVATE GLOBAL
 AString SipDebug::strLog2_1 = AString::ConstNull();
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
-        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode /* = 0 */)
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode/* = 0*/)
 {
     // EVENT_IMS_DEBUG
     // wParam
@@ -59,8 +57,6 @@ void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
     // lParam
     //    - HI : Method
     //    - LO : StatusCode
-
-    //---------------------------------------------------------------------------------------------
 
     if (!CheckIfDebugRequired(nSlotId, nMsgType, nDirection, nMethod, nStatusCode))
     {
@@ -74,11 +70,6 @@ void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
 }
 
 // Methods for logging based on release mode
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
 void SipDebug::InitLogging()
 {
@@ -98,14 +89,9 @@ void SipDebug::InitLogging()
     strLog2_1 = AString::ConstNull();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetCharA1(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 nCount,
-        IN CONST IMS_CHAR cDelimiter/* = 0 no delimiter */)
+const IMS_CHAR* SipDebug::GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
 {
     if (nCount > MAX_LOG_CHAR_ARRAY)
     {
@@ -117,14 +103,9 @@ const IMS_CHAR* SipDebug::GetCharA1(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 n
     return SIPStack::GetLogString(pszValue, pszLog, nCount + 3, cDelimiter);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetCharA2(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 nCount,
-        IN CONST IMS_CHAR cDelimiter/* = 0 no delimiter */)
+const IMS_CHAR* SipDebug::GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
 {
     if (nCount > MAX_LOG_CHAR_ARRAY)
     {
@@ -136,105 +117,58 @@ const IMS_CHAR* SipDebug::GetCharA2(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 n
     return SIPStack::GetLogString(pszValue, pszLog, nCount + 3, cDelimiter);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetIp(IN CONST IPAddress &objIPA)
+const IMS_CHAR* SipDebug::GetIp(IN const IPAddress& objIpAddr)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_CHAR* pszLog = (GetSimSlot() == IMS_SLOT_0) ? &acIpAddr[0] : &acIpAddr_1[0];
 
     // fe80:xxx or 192.1xxx
-    return SIPStack::GetLogString(objIPA.ToCharString(), pszLog, 8);
+    return SIPStack::GetLogString(objIpAddr.ToCharString(), pszLog, 8);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetIp(IN CONST AString &strIP)
+const IMS_CHAR* SipDebug::GetIp(IN const AString& strIpAddr)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_CHAR* pszLog = (GetSimSlot() == IMS_SLOT_0) ? &acIpAddr[0] : &acIpAddr_1[0];
 
     // fe80:xxx or 192.1xxx
-    return SIPStack::GetLogString(strIP.GetStr(), pszLog, 8);
+    return SIPStack::GetLogString(strIpAddr.GetStr(), pszLog, 8);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const AString& SipDebug::GetStr1(IN CONST AString &strValue, IN IMS_SINT32 nCount,
-        IN CONST IMS_CHAR cDelimiter/* = 0 no delimiter */)
+const AString& SipDebug::GetStr1(IN const AString& strValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog1 : strLog1_1;
 
     return UtilService::GetLogString(strValue, strLog, nCount, cDelimiter);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const AString& SipDebug::GetStr2(IN CONST AString &strValue, IN IMS_SINT32 nCount,
-        IN CONST IMS_CHAR cDelimiter/* = 0 no delimiter */)
+const AString& SipDebug::GetStr2(IN const AString& strValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog2 : strLog2_1;
 
     return UtilService::GetLogString(strValue, strLog, nCount, cDelimiter);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const AString& SipDebug::GetUri1(IN CONST AString &strValue)
+const AString& SipDebug::GetUri1(IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog1 : strLog1_1;
 
     return UtilService::GetLogString(strValue, strLog, 10);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL
-const AString& SipDebug::GetUri2(IN CONST AString &strValue)
+const AString& SipDebug::GetUri2(IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog2 : strLog2_1;
 
     return UtilService::GetLogString(strValue, strLog, 10);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL
 IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32/* nSlotId*/, IN IMS_SINT32 nMsgType,
         IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode)
@@ -252,8 +186,7 @@ IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32/* nSlotId*/, IN IMS_SINT32
                 return IMS_TRUE;
             }
         }
-        else if ((nMethod == SipMethod::INVITE)
-                || (nMethod == SipMethod::BYE))
+        else if ((nMethod == SipMethod::INVITE) || (nMethod == SipMethod::BYE))
         {
             if (nMsgType == MSG_REQ)
             {
@@ -277,11 +210,6 @@ IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32/* nSlotId*/, IN IMS_SINT32
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL
 IMS_SINT32 SipDebug::GetSimSlot()
 {

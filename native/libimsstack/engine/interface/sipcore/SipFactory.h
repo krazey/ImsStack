@@ -1,5 +1,20 @@
-#ifndef _SIP_FACTORY_H_
-#define _SIP_FACTORY_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_FACTORY_H_
+#define SIP_FACTORY_H_
 
 #include "AString.h"
 
@@ -17,8 +32,8 @@ class ISipTransportHelper;
  */
 class SipFactory
 {
-private:
-    SipFactory();
+public:
+    SipFactory() = delete;
 
 public:
     /**
@@ -35,7 +50,7 @@ public:
      * @param strHost Device's host name (IP address)
      * @param strCallId Call-ID header field value
      */
-    static void GenerateCallId(IN const AString &strHost, OUT AString &strCallId);
+    static void GenerateCallId(IN const AString& strHost, OUT AString& strCallId);
 
     /**
      * @brief Generates a string for Session-ID header field.
@@ -47,7 +62,7 @@ public:
      * @param strSessionId Session-ID header field value
      */
     static void GenerateSessionId(IN IMS_SINT32 nSlotId,
-            IN const AString &strCallId, OUT AString &strSessionId);
+            IN const AString& strCallId, OUT AString& strSessionId);
 
     /**
      * @brief Returns the instance of SIP IPSec state.
@@ -104,7 +119,7 @@ public:
      * @param piTokenGenerator Pointer to ISipTokenGenerator
      * @deprecated NOT_USED.
      */
-    static void SetTokenGenerator(IN IMS_SINT32 nSlotId, IN ISipTokenGenerator *piTokenGenerator);
+    static void SetTokenGenerator(IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator);
 };
 
-#endif // _SIP_FACTORY_H_
+#endif

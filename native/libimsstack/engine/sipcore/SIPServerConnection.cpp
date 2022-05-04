@@ -646,9 +646,9 @@ void SIPServerConnection::AdjustTimerHFor2XX()
             }
 
             IMS_TRACE_D("TimerH(2XX) is adjusted - %d >> %d",
-                    pTV->GetValue(SipTimerValues::TV_TIMER_H), (nT1 * 64), 0);
+                    pTV->GetValue(SipTimerValues::TIMER_H), (nT1 * 64), 0);
 
-            pTV->SetValue(SipTimerValues::TV_TIMER_H, (nT1 * 64));
+            pTV->SetValue(SipTimerValues::TIMER_H, (nT1 * 64));
         }
     }
 }

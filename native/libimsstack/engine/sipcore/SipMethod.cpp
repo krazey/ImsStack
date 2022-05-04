@@ -1,19 +1,21 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "SipMethod.h"
-
-
 
 PUBLIC GLOBAL
 const IMS_CHAR* SipMethod::NAME[] =
@@ -38,39 +40,31 @@ const IMS_CHAR* SipMethod::NAME[] =
 PUBLIC GLOBAL
 const SipMethod SipMethod::INVALID_METHOD;
 
-
-
 PUBLIC
-SipMethod::SipMethod(IN CONST IMS_SINT32 nMethod_ /* = SipMethod::INVALID */)
-    : nMethod(nMethod_)
+SipMethod::SipMethod(IN const IMS_SINT32 nMethod/* = SipMethod::INVALID*/) :
+        m_nMethod(nMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    strMethod = ConvertMethodToString(nMethod_);
+    m_strMethod = ConvertMethodToString(nMethod);
 }
 
 PUBLIC
-SipMethod::SipMethod(IN CONST IMS_CHAR *pszMethod_)
-    : strMethod(pszMethod_)
+SipMethod::SipMethod(IN const IMS_CHAR* pszMethod) :
+        m_strMethod(pszMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    nMethod = ConvertStringToMethod(strMethod);
+    m_nMethod = ConvertStringToMethod(m_strMethod);
 }
 
 PUBLIC
-SipMethod::SipMethod(IN CONST AString &strMethod_)
-    : strMethod(strMethod_)
+SipMethod::SipMethod(IN const AString& strMethod) :
+        m_strMethod(strMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    nMethod = ConvertStringToMethod(strMethod);
+    m_nMethod = ConvertStringToMethod(m_strMethod);
 }
 
 PUBLIC
-SipMethod::SipMethod(IN CONST SipMethod &objRHS)
-    : nMethod(objRHS.nMethod)
-    , strMethod(objRHS.strMethod)
+SipMethod::SipMethod(IN const SipMethod& other) :
+        m_nMethod(other.m_nMethod),
+        m_strMethod(other.m_strMethod)
 {
 }
 
@@ -80,57 +74,55 @@ SipMethod::~SipMethod()
 }
 
 PUBLIC
-SipMethod& SipMethod::operator=(IN CONST SipMethod &objRHS)
+SipMethod& SipMethod::operator=(IN const SipMethod& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nMethod = objRHS.nMethod;
-        strMethod = objRHS.strMethod;
+        m_nMethod = other.m_nMethod;
+        m_strMethod = other.m_strMethod;
     }
 
     return (*this);
 }
 
 PUBLIC
-SipMethod& SipMethod::operator=(IN IMS_SINT32 nMethod_)
+SipMethod& SipMethod::operator=(IN IMS_SINT32 nMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nMethod == nMethod_)
+    if (m_nMethod == nMethod)
+    {
         return (*this);
+    }
 
-    nMethod = nMethod_;
-    strMethod = ConvertMethodToString(nMethod);
+    m_nMethod = nMethod;
+    m_strMethod = ConvertMethodToString(m_nMethod);
 
     return (*this);
 }
 
 PUBLIC
-SipMethod& SipMethod::operator=(IN CONST IMS_CHAR *pszMethod_)
+SipMethod& SipMethod::operator=(IN const IMS_CHAR* pszMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strMethod.Equals(pszMethod_))
+    if (m_strMethod.Equals(pszMethod))
+    {
         return (*this);
+    }
 
-    strMethod = pszMethod_;
-    nMethod = ConvertStringToMethod(strMethod);
+    m_strMethod = pszMethod;
+    m_nMethod = ConvertStringToMethod(m_strMethod);
 
     return (*this);
 }
 
 PUBLIC
-SipMethod& SipMethod::operator=(IN CONST AString &strMethod_)
+SipMethod& SipMethod::operator=(IN const AString& strMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strMethod.Equals(strMethod_))
+    if (m_strMethod.Equals(strMethod))
+    {
         return (*this);
+    }
 
-    strMethod = strMethod_;
-    nMethod = ConvertStringToMethod(strMethod);
+    m_strMethod = strMethod;
+    m_nMethod = ConvertStringToMethod(m_strMethod);
 
     return (*this);
 }
@@ -138,18 +130,16 @@ SipMethod& SipMethod::operator=(IN CONST AString &strMethod_)
 PUBLIC GLOBAL
 const IMS_CHAR* SipMethod::ToName(IN IMS_SINT32 nMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     return ((nMethod > INVALID) && (nMethod < MAX)) ? NAME[nMethod] : "";
 }
 
 PRIVATE GLOBAL
-IMS_SINT32 SipMethod::ConvertStringToMethod(IN CONST AString &strMethod)
+IMS_SINT32 SipMethod::ConvertStringToMethod(IN const AString& strMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strMethod.IsNULL() || strMethod.IsEmpty())
+    {
         return SipMethod::INVALID;
+    }
     else
     {
         for (IMS_SINT32 i = (SipMethod::INVALID + 1); i < SipMethod::MAX; i++)
@@ -167,10 +157,10 @@ IMS_SINT32 SipMethod::ConvertStringToMethod(IN CONST AString &strMethod)
 PRIVATE GLOBAL
 AString SipMethod::ConvertMethodToString(IN IMS_SINT32 nMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((nMethod > SipMethod::INVALID) && (nMethod < SipMethod::MAX))
+    {
         return AString(NAME[nMethod]);
+    }
 
     return AString::ConstNull();
 }

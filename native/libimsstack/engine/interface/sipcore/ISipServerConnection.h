@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_SIP_SERVER_CONNECTION_H_
-#define _INTERFACE_SIP_SERVER_CONNECTION_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_SERVER_CONNECTION_H_
+#define INTERFACE_SIP_SERVER_CONNECTION_H_
 
 #include "ISipConnection.h"
 
@@ -10,8 +25,8 @@
  *
  * @see ISipConnection
  */
-class ISipServerConnection
-    : public ISipConnection
+class ISipServerConnection :
+        public ISipConnection
 {
 public:
     /**
@@ -46,7 +61,7 @@ public:
      * @param strReasonPhrase SIP reason phrase to be set
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetReasonPhrase(IN CONST AString &strReasonPhrase) = 0;
+    virtual IMS_RESULT SetReasonPhrase(IN const AString& strReasonPhrase) = 0;
 
     /**
      * @brief Checks if the specified SIP server connection is the same transaction.
@@ -55,12 +70,12 @@ public:
      * If the caller of this function is not a CANCEL SIP connection (transaction),
      * the function returns IMS_FALSE without any comparison.
      *
-     * @param piOngoingSSC Pointer to SIP server connection to be compared\n
+     * @param piOngoingSsc Pointer to SIP server connection to be compared\n
      *                     In this moment, INVITE server connection only supports.
      * @return If the specified server connection equals to this, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsSameTransaction(IN CONST ISipServerConnection *piOngoingSSC) const = 0;
+    virtual IMS_BOOL IsSameTransaction(IN const ISipServerConnection* piOngoingSsc) const = 0;
 };
 
-#endif // _INTERFACE_SIP_SERVER_CONNECTION_H_
+#endif

@@ -1,8 +1,23 @@
-#ifndef _SIP_SECURITY_HEADER_H_
-#define _SIP_SECURITY_HEADER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_SECURITY_HEADER_H_
+#define SIP_SECURITY_HEADER_H_
 
-#include "IMSMap.h"
 #include "AString.h"
+#include "IMSMap.h"
 
 class ISipHeader;
 
@@ -14,14 +29,14 @@ class ISipHeader;
 class SipSecurityHeader
 {
 public:
-    explicit SipSecurityHeader(IN IMS_SINT32 nMechanism_ = MECHANISM_IPSEC_3GPP,
-            IN CONST AString &strMechanism_ = AString::ConstNull(),
-            IN IMS_BOOL bParameterRequired_ = IMS_TRUE);
-    SipSecurityHeader(IN CONST SipSecurityHeader &objRHS);
+    explicit SipSecurityHeader(IN IMS_SINT32 nMechanism = MECHANISM_IPSEC_3GPP,
+            IN const AString& strMechanism = AString::ConstNull(),
+            IN IMS_BOOL bParameterRequired = IMS_TRUE);
+    SipSecurityHeader(IN const SipSecurityHeader& other);
     ~SipSecurityHeader();
 
 public:
-    SipSecurityHeader& operator=(IN CONST SipSecurityHeader &objRHS);
+    SipSecurityHeader& operator=(IN const SipSecurityHeader& other);
 
 public:
     /**
@@ -30,19 +45,22 @@ public:
      * @return A security mechanism.\n
      *         #MECHANISM_IPSEC_3GPP
      */
-    IMS_SINT32 GetMechanism() const;
+    inline IMS_SINT32 GetMechanism() const { return m_nMechanism; }
+
     /**
      * @brief Gets an unknown security mechanism.
      *
      * @return An unknown security mechanism.
      */
-    const AString& GetUnknownMechanism() const;
+    inline const AString& GetUnknownMechanism() const { return m_strMechanism; }
+
     /**
      * @brief Gets "q" parameter value.
      *
      * @return A preference value.
      */
-    const AString& GetPreference() const;
+    inline const AString& GetPreference() const { return m_strPreference; }
+
     // 3GPP
     /**
      * @brief Gets the integrity algorithm.
@@ -51,7 +69,8 @@ public:
      *         #ALG_HMAC_SHA_1_96\n
      *         #ALG_HMAC_MD5_96
      */
-    IMS_SINT32 GetAlgorithm() const;
+    inline IMS_SINT32 GetAlgorithm() const { return m_nAlgorithm; }
+
     /**
      * @brief Gets the encryption algorithm.
      *
@@ -60,7 +79,8 @@ public:
      *         #EALG_AES_CBC\n
      *         #EALG_NULL
      */
-    IMS_SINT32 GetEncryptionAlgorithm() const;
+    inline IMS_SINT32 GetEncryptionAlgorithm() const { return m_nEncryptionAlgorithm; }
+
     /**
      * @brief Gets the security mode.
      *
@@ -68,19 +88,22 @@ public:
      *         #MODE_TRANSPORT\n
      *         #MODE_TUNNEL
      */
-    IMS_SINT32 GetMode() const;
+    inline IMS_SINT32 GetMode() const { return m_nMode; }
+
     /**
      * @brief Gets the security client port number.
      *
      * @return A security client port number.
      */
-    IMS_SINT32 GetPortC() const;
+    inline IMS_SINT32 GetPortC() const { return m_nPortC; }
+
     /**
      * @brief Gets the security server port number.
      *
      * @return A security server port number.
      */
-    IMS_SINT32 GetPortS() const;
+    inline IMS_SINT32 GetPortS() const { return m_nPortS; }
+
     /**
      * @brief Gets the security protocol.
      *
@@ -88,25 +111,30 @@ public:
      *         #PROTOCOL_ESP\n
      *         #PROTOCOL_AH
      */
-    IMS_SINT32 GetProtocol() const;
+    inline IMS_SINT32 GetProtocol() const { return m_nProtocol; }
+
     /**
      * @brief Gets the security parameter index for client side.
      *
      * @return A security parameter index.
      */
-    IMS_UINT32 GetSpiC() const;
+    inline IMS_UINT32 GetSpiC() const { return m_nSpiC; }
+
     /**
      * @brief Gets the security parameter index for server side.
      *
      * @return A security parameter index.
      */
-    IMS_UINT32 GetSpiS() const;
+    inline IMS_UINT32 GetSpiS() const { return m_nSpiS; }
+
     /**
      * @brief Gets the extension parameters.
      *
      * @return Map of <key,value> pair.
      */
-    const IMSMap<AString,AString>& GetExtensionParameters() const;
+    inline const IMSMap<AString,AString>& GetExtensionParameters() const
+    { return m_objExtensions; }
+
     /**
      * @brief Gets the unknown parameter value.
      *
@@ -117,13 +145,16 @@ public:
      *              #SEC_P_EALG
      * @return Unknown parameter value.
      */
-    const AString& GetUnknownParameterValue(IN IMS_SINT32 nName /* SEC_P_XXX */) const;
+    const AString& GetUnknownParameterValue(IN IMS_SINT32 nName/*SEC_P_XXX*/) const;
+
     /**
      * @brief Gets the unknown parameter values.
      *
      * @return All the unknown parameter values.
      */
-    const IMSMap<IMS_SINT32, AString>& GetUnknownParameterValues() const;
+    inline const IMSMap<IMS_SINT32, AString>& GetUnknownParameterValues() const
+    { return m_objUnknownParamValues; }
+
     /**
      * @brief Checks if the spi / port are present or not.
      *
@@ -134,13 +165,17 @@ public:
      *               #SPI_S
      * @return If the given parameter is present, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsParameterPresent(IN IMS_SINT32 nParam) const;
+    inline IMS_BOOL IsParameterPresent(IN IMS_SINT32 nParam) const
+    { return ((m_nMechParams & nParam) != 0); }
+
     /**
      * @brief Sets "q" parameter value.
      *
      * @param strPreference "q" parameter value to be set
      */
-    void SetPreference(IN CONST AString &strPreference);
+    inline void SetPreference(IN const AString& strPreference)
+    { m_strPreference = strPreference; }
+
     /**
      * @brief Sets the integrity algorithm.
      *
@@ -148,7 +183,9 @@ public:
      *                   #ALG_HMAC_SHA_1_96\n
      *                   #ALG_HMAC_MD5_96
      */
-    void SetAlgorithm(IN IMS_SINT32 nAlgorithm);
+    inline void SetAlgorithm(IN IMS_SINT32 nAlgorithm)
+    { m_nAlgorithm = nAlgorithm; }
+
     /**
      * @brief Sets the encryption algorithm.
      *
@@ -157,7 +194,9 @@ public:
      *                             #EALG_AES_CBC\n
      *                             #EALG_NULL
      */
-    void SetEncryptionAlgorithm(IN IMS_SINT32 nEncryptionAlgorithm);
+    inline void SetEncryptionAlgorithm(IN IMS_SINT32 nEncryptionAlgorithm)
+    { m_nEncryptionAlgorithm = nEncryptionAlgorithm; }
+
     /**
      * @brief Sets the security mode.
      *
@@ -165,7 +204,9 @@ public:
      *              #MODE_TRANSPORT\n
      *              #MODE_TUNNEL
      */
-    void SetMode(IN IMS_SINT32 nMode);
+    inline void SetMode(IN IMS_SINT32 nMode)
+    { m_nMode = nMode; }
+
     /**
      * @brief Sets the client / server port number.
      *
@@ -173,6 +214,7 @@ public:
      * @param nPortS The server port number
      */
     void SetPort(IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortS);
+
     /**
      * @brief Sets the security protocol.
      *
@@ -180,23 +222,28 @@ public:
      *                  #PROTOCOL_ESP\n
      *                  #PROTOCOL_AH
      */
-    void SetProtocol (IN IMS_SINT32 nProtocol);
+    inline void SetProtocol (IN IMS_SINT32 nProtocol)
+    { m_nProtocol = nProtocol; }
+
     /**
      * @brief Sets the security parameter index.
      *
-     * @param nSPIC The security parameter index for client side
-     * @param nSPIS The security parameter index for server side
-     * @param bSPI_3GPP Flag to indicate that the SPI value is compliant with 3GPP or not
-     *                  If it's IMS_TRUE, it's compliant with 3GPP specification.
+     * @param nSpiC The security parameter index for client side
+     * @param nSpiS The security parameter index for server side
+     * @param b3gppCompliant Flag to indicate that the SPI value is compliant with 3GPP or not
+     *                       If it's IMS_TRUE, it's compliant with 3GPP specification.
      */
-    void SetSpi(IN IMS_UINT32 nSPIC, IN IMS_UINT32 nSPIS, IN IMS_BOOL bSPI_3GPP = IMS_TRUE);
+    void SetSpi(IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS, IN IMS_BOOL b3gppCompliant = IMS_TRUE);
+
     /**
      * @brief Sets the option of the security parameter index.
      *
-     * @param bSPI_3GPP Flag to indicate that the SPI value is compliant with 3GPP or not
-     *                  If it's IMS_TRUE, it's compliant with 3GPP specification.
+     * @param b3gppCompliant Flag to indicate that the SPI value is compliant with 3GPP or not
+     *                       If it's IMS_TRUE, it's compliant with 3GPP specification.
      */
-    void SetSpiOption(IN IMS_BOOL bSPI_3GPP);
+    inline void SetSpiOption(IN IMS_BOOL b3gppCompliant)
+    { m_bSpi3gppCompliant = b3gppCompliant; }
+
     /**
      * @brief Sets the extension parameter.
      *
@@ -205,8 +252,9 @@ public:
      * @return If the parameter is successfully set, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetExtensionParameter(IN CONST AString &strName,
-            IN CONST AString &strValue);
+    IMS_BOOL SetExtensionParameter(IN const AString& strName,
+            IN const AString& strValue);
+
     /**
      * @brief Sets the unknown parameter.
      *
@@ -219,8 +267,9 @@ public:
      * @return If the parameter is successfully set, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetUnknownParameterValue(IN IMS_SINT32 nName /* SEC_P_XXX */,
-            IN CONST AString &strValue);
+    IMS_BOOL SetUnknownParameterValue(IN IMS_SINT32 nName/*SEC_P_XXX*/,
+            IN const AString& strValue);
+
     /**
      * @brief Returns the string representation of SIP security header.
      *
@@ -233,7 +282,7 @@ public:
      *
      * @return The newly created SipSecurityHeader.
      */
-    static SipSecurityHeader* FromSipHeader(IN ISipHeader *piHeader);
+    static SipSecurityHeader* FromSipHeader(IN ISipHeader* piHeader);
 
 public:
     /// Pre-defined parameters\n
@@ -340,30 +389,30 @@ private:
     static const IMS_CHAR P_NAME_PORT_S[];
 
     // Flag to indicate if the additional parameter should be formed or not
-    IMS_BOOL bParameterRequired;
+    IMS_BOOL m_bParameterRequired;
 
-    IMS_SINT32 nMechanism;
-    AString strMechanism;
-    AString strPreference;
-    IMS_SINT32 nAlgorithm;                      // Mandatory field
-    IMS_SINT32 nProtocol;
-    IMS_SINT32 nMode;
-    IMS_SINT32 nEncryptionAlgorithm;
-    IMS_UINT32 nSPI_C;
-    IMS_UINT32 nSPI_S;
-    IMS_SINT32 nPort_C;
-    IMS_SINT32 nPort_S;
+    IMS_SINT32 m_nMechanism;
+    AString m_strMechanism;
+    AString m_strPreference;
+    IMS_SINT32 m_nAlgorithm; // Mandatory field
+    IMS_SINT32 m_nProtocol;
+    IMS_SINT32 m_nMode;
+    IMS_SINT32 m_nEncryptionAlgorithm;
+    IMS_UINT32 m_nSpiC;
+    IMS_UINT32 m_nSpiS;
+    IMS_SINT32 m_nPortC;
+    IMS_SINT32 m_nPortS;
     // <pre-defined parameter, value>
-    IMSMap<IMS_SINT32, AString> objUnknownParamValues;
-    IMSMap<AString, AString> objExtensions;
+    IMSMap<IMS_SINT32, AString> m_objUnknownParamValues;
+    IMSMap<AString, AString> m_objExtensions;
 
     // To check the parameter's presentity : spi, port
-    IMS_SINT32 nMechParams;
+    IMS_SINT32 m_nMechParams;
 
     // Optional informations
     // Flag to indicate how to form the SPI value
     //    IMS_TRUE : 10DIGIT (3GPP-based), IMS_FALSE : non-10DIGIT
-    IMS_BOOL bSPI_3GPP;
+    IMS_BOOL m_bSpi3gppCompliant;
 };
 
-#endif // _SIP_SECURITY_HEADER_H_
+#endif

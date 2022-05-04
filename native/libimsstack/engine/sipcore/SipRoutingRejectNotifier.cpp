@@ -1,16 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20130518  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "ISipRoutingRejectListener.h"
 #include "SipRoutingRejectNotifier.h"
 
@@ -24,73 +28,53 @@ SipRoutingRejectNotifier::~SipRoutingRejectNotifier()
 {
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipRoutingRejectNotifier::IsNotificationRequired() const
 {
-    return !objListeners.IsEmpty();
+    return !m_objListeners.IsEmpty();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipRoutingRejectNotifier::NotifyRequestReject(IN ISipMessage *piSIPMsg,
-        IN_OUT SipStatusCode &objStatusCode)
+void SipRoutingRejectNotifier::NotifyRequestReject(IN ISipMessage* piSipMsg,
+        IN_OUT SipStatusCode& objStatusCode)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener *piListener = objListeners.GetAt(i);
+        ISipRoutingRejectListener* piListener = m_objListeners.GetAt(i);
 
-        if (piListener->RoutingReject_NotifyRequest(piSIPMsg, objStatusCode))
+        if (piListener->RoutingReject_NotifyRequest(piSipMsg, objStatusCode))
         {
             return;
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipRoutingRejectNotifier::NotifyRequestReject(IN ISipServerConnection *piSSC,
-        IN_OUT SipStatusCode &objStatusCode)
+void SipRoutingRejectNotifier::NotifyRequestReject(IN ISipServerConnection* piSsc,
+        IN_OUT SipStatusCode& objStatusCode)
 {
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener *piListener = objListeners.GetAt(i);
+        ISipRoutingRejectListener* piListener = m_objListeners.GetAt(i);
 
-        if (piListener->RoutingReject_NotifyRequest(piSSC, objStatusCode))
+        if (piListener->RoutingReject_NotifyRequest(piSsc, objStatusCode))
         {
             return;
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL
-void SipRoutingRejectNotifier::AddListener(IN ISipRoutingRejectListener *piListener)
+void SipRoutingRejectNotifier::AddListener(IN ISipRoutingRejectListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener *piTmpListener = objListeners.GetAt(i);
+        ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -98,29 +82,24 @@ void SipRoutingRejectNotifier::AddListener(IN ISipRoutingRejectListener *piListe
         }
     }
 
-    objListeners.Append(piListener);
+    m_objListeners.Append(piListener);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL
-void SipRoutingRejectNotifier::RemoveListener(IN ISipRoutingRejectListener *piListener)
+void SipRoutingRejectNotifier::RemoveListener(IN ISipRoutingRejectListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipRoutingRejectListener *piTmpListener = objListeners.GetAt(i);
+        ISipRoutingRejectListener* piTmpListener = m_objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
-            objListeners.RemoveAt(i);
+            m_objListeners.RemoveAt(i);
             return;
         }
     }

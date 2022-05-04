@@ -1,17 +1,32 @@
-#ifndef _INTERFACE_SIP_MESSAGE_H_
-#define _INTERFACE_SIP_MESSAGE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_MESSAGE_H_
+#define INTERFACE_SIP_MESSAGE_H_
 
-#include "SipMethod.h"
-#include "ISipObject.h"
 #include "ISipMessageBodyPart.h"
+#include "ISipObject.h"
+#include "SipMethod.h"
 
 /**
  * @brief This class provides an interface to handle SIP message.
  *
  * @see ISipMessageBodyPart
  */
-class ISipMessage
-    : public ISipObject
+class ISipMessage :
+        public ISipObject
 {
 public:
     /**
@@ -33,8 +48,8 @@ public:
      * @param strName The header name, either in full or compact form
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-            IN CONST AString &strName = AString::ConstNull()) = 0;
+    virtual IMS_RESULT AddHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Gets the CSeq number.
@@ -56,7 +71,7 @@ public:
      *         It is null string value, if an error occurs.
      */
     virtual AString GetHeader(IN IMS_SINT32 nType, IN IMS_SINT32 nIndex = 0,
-            IN CONST AString &strName = AString::ConstNull()) const = 0;
+            IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Gets the number of the header field value of the specified header type.
@@ -68,7 +83,7 @@ public:
      * @return The number of header field will be returned.
      */
     virtual IMS_SINT32 GetHeaderCount(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) const = 0;
+            IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Gets the header field value(s) of the specified header type.
@@ -81,7 +96,7 @@ public:
      *         If an error occurs, it returns the empty list.
      */
     virtual IMSList<AString> GetHeaders(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) const = 0;
+            IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Gets the SIP method.
@@ -136,8 +151,8 @@ public:
      * @param strName The header name, either in full or compact form
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT PrependHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-            IN CONST AString &strName = AString::ConstNull()) = 0;
+    virtual IMS_RESULT PrependHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Removes the header from the SIP message.
@@ -151,7 +166,7 @@ public:
      * @param strName The header name, either in full or compact form
      */
     virtual void RemoveHeader(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) = 0;
+            IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets a header value in the SIP message.
@@ -167,8 +182,8 @@ public:
      * @param strName The header name, either in full or compact form
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-            IN CONST AString &strName = AString::ConstNull()) = 0;
+    virtual IMS_RESULT SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Creates a new SIP message body part and adds it to the SIP message.
@@ -216,10 +231,10 @@ public:
     /**
      * @brief Updates the SIP headers & message body parts with the specified SIP message.
      *
-     * @param piSIPMsg Pointer to the SIP message
+     * @param piSipMsg Pointer to the SIP message
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT CopyHeadersAndBodyParts(IN CONST ISipMessage *piSIPMsg) = 0;
+    virtual IMS_RESULT CopyHeadersAndBodyParts(IN const ISipMessage* piSipMsg) = 0;
 
     /**
      * @brief Checks if the specified header field is present.
@@ -230,7 +245,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     virtual IMS_BOOL IsHeaderPresent(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) const = 0;
+            IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Checks if the message is RPR (Reliable Provisional Response).
@@ -247,7 +262,7 @@ public:
      * @return If this message requires an option tag, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsOptionRequired(IN CONST AString &strOption) const = 0;
+    virtual IMS_BOOL IsOptionRequired(IN const AString& strOption) const = 0;
 
     /**
      * @brief Checks if the specified option tag is supported in the remote endpoint.
@@ -256,12 +271,10 @@ public:
      * @return If this message has an option tag, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsOptionSupported(IN CONST AString &strOption) const = 0;
+    virtual IMS_BOOL IsOptionSupported(IN const AString& strOption) const = 0;
 
     /**
      * @brief Removes all the message body parts if present.
-     *
-     * @param piSIPMsg Pointer to the SIP message
      */
     virtual void RemoveBodyParts() = 0;
 
@@ -298,4 +311,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SIP_MESSAGE_H_
+#endif

@@ -1,5 +1,20 @@
-#ifndef _P_ACCESS_NETWORK_INFO_HEADER_H_
-#define _P_ACCESS_NETWORK_INFO_HEADER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef P_ACCESS_NETWORK_INFO_HEADER_H_
+#define P_ACCESS_NETWORK_INFO_HEADER_H_
 
 #include "IPAddress.h"
 #include "ImsAccessNetworkInfoType.h"
@@ -21,65 +36,65 @@ public:
      * @brief Forms P-Access-Network-Info header field.
      *
      * @param nSlotId Slot id for this header
-     * @param objANInfo Current access network information which the device is attached
+     * @param objAnInfo Current access network information which the device is attached
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId,
-            IN const AccessNetworkInfo &objANInfo, OUT AString &strHeader);
+            IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader);
     /**
      * @brief Forms P-Access-Network-Info header field for a specific operator.
      *
      * @param nSlotId Slot id for this header
      * @param piConnection Current network connection which the device is attached
      * @param objMethod SIP method for this header
-     * @param pSIPProfile SIP profile for this header
+     * @param pSipProfile SIP profile for this header
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
             IN INetworkConnection* piConnection, IN const SipMethod& objMethod,
-            IN const SipProfile* pSIPProfile, OUT AString& strHeader);
+            IN const SipProfile* pSipProfile, OUT AString& strHeader);
     /**
      * @brief Forms P-Access-Network-Info header field for a specific operator.
      *
      * @param nSlotId Slot id for this header
-     * @param objIP Local IP address
+     * @param objIpAddr Local IP address
      * @param objMethod SIP method for this header
-     * @param pSIPProfile SIP profile for this header
+     * @param pSipProfile SIP profile for this header
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-            IN const IPAddress &objIP, IN const SipMethod& objMethod,
-            IN const SipProfile* pSIPProfile, OUT AString& strHeader);
+            IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
+            IN const SipProfile* pSipProfile, OUT AString& strHeader);
 
     /**
      * @brief Forms P-Access-Network-Info header and sets it to SIP message.
      *
      * @param nSlotId Slot id for this header
-     * @param objIP Local IP address
-     * @param pSIPProfile SIP profile for this header
-     * @param piSIPMsg SIP message object
+     * @param objIpAddr Local IP address
+     * @param pSipProfile SIP profile for this header
+     * @param piSipMsg SIP message object
      */
-    static void SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddress &objIP,
-            IN const SipProfile* pSIPProfile, IN_OUT ISipMessage *&piSIPMsg);
+    static void SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr,
+            IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
 
 private:
-    static void ReformPANIHeaderForATT(
-            IN CONST AccessNetworkInfo &objANInfo, IN_OUT AString &strPANIHeader);
-    static void ReformPANIHeaderForTEL(IN_OUT AString &strHeader);
-    static void ReformPANIHeaderForCountryCode(IN IMS_SINT32 nSlotId,
-            IN_OUT AString &strHeader, IN IMS_BOOL bUseUICC);
-    static void SetPrivateHeaderForTMUS(IN IMS_SINT32 nSlotId,
-            IN INetworkConnection *piConnection, IN_OUT ISipMessage *&piSIPMsg);
-    static void SetPrivateHeaderForMTS(IN IMS_SINT32 nSlotId,
-            IN INetworkConnection *piConnection, IN_OUT ISipMessage *&piSIPMsg);
-    static void SetCNIHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection *piConnection,
-            IN const SipProfile* pSIPProfile, IN_OUT ISipMessage *&piSIPMsg);
-    static IMS_BOOL IsAccessNetworkTypeWiFi(IN CONST AccessNetworkInfo &objANInfo);
+    static void ReformPaniHeaderForInvalidMacAddress(
+            IN const AccessNetworkInfo& objAnInfo, IN_OUT AString& strPaniHeader);
+    static void ReformPaniHeaderForLocalTimeZone(IN_OUT AString& strHeader);
+    static void ReformPaniHeaderForCountryCode(IN IMS_SINT32 nSlotId,
+            IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc);
+    static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId,
+            IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg);
+    static void SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId,
+            IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg);
+    static void SetCniHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
+            IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
+    static IMS_BOOL IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAnInfo);
     static IMS_BOOL IsCountryInfoRequiredForVoWiFi(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pSIPProfile);
+            IN const SipProfile* pSipProfile);
 };
 
-#endif // _P_ACCESS_NETWORK_INFO_HEADER_H_
+#endif

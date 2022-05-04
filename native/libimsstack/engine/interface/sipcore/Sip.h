@@ -1,8 +1,23 @@
-#ifndef _SIP_H_
-#define _SIP_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_H_
+#define SIP_H_
 
-#include "TextParser.h"
 #include "SipError.h"
+#include "TextParser.h"
 
 /**
  * @brief This class defines a constant values for SIP handling.
@@ -53,10 +68,8 @@ public:
         PORT_5060 = 5060,
         /// SIPS default port number, TLS
         PORT_5061 = 5061,
-
         /// Port number for IPSec ("UDP-enc-tun" mode)
         PORT_U_ENC = 4500,
-
         /// Implicit port number according to URI scheme
         PORT_UNSPECIFIED = 0xFFFF
     };
@@ -100,14 +113,11 @@ public:
 
     // Constant values - General tokens for parsing
     static const IMS_CHAR STR_SIP_VERSION[];
-
     static const IMS_CHAR STR_SIP_VERSION_ONLY[];
 
     static const IMS_CHAR STR_SIP[];
     static const IMS_CHAR STR_SIPS[];
     static const IMS_CHAR STR_TEL[];
-    static const IMS_CHAR STR_IM[];
-    static const IMS_CHAR STR_PRES[];
 
     static const IMS_CHAR STR_UDP[];
     static const IMS_CHAR STR_TCP[];
@@ -118,9 +128,6 @@ public:
     static const IMS_CHAR STR_TLS_CAPS[];
 
     static const IMS_CHAR STR_BRANCH_MAGIC_COOKIE[];
-#if 0
-    static const IMS_CHAR STR_TAG_MAGIC_COOKIE[];
-#endif
 
     // Constant values - Header tokens for parsing
     static const IMS_CHAR STR_100REL[];
@@ -155,8 +162,7 @@ public:
 
     static const IMS_CHAR STR_FROM_TAG[];
     static const IMS_CHAR STR_TO_TAG[];
-
     static const AString STR_TAG;
 };
 
-#endif // _SIP_H_
+#endif
