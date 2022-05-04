@@ -24,8 +24,7 @@
 
 using namespace android::telephony::imsmedia;
 
-class JniMediaSessionThread final :
-        public BaseServiceThread
+class JniMediaSessionThread final : public BaseServiceThread
 {
 public:
     JniMediaSessionThread();

@@ -17,8 +17,8 @@
 #include "System.h"
 
 PUBLIC
-JniSystem::JniSystem(IN JniSystem_SendDataToJava pSendDataToJava)
-    : m_pSendDataToJava(pSendDataToJava)
+JniSystem::JniSystem(IN JniSystem_SendDataToJava pSendDataToJava) :
+        m_pSendDataToJava(pSendDataToJava)
 {
     if (m_pSendDataToJava != IMS_NULL)
     {
@@ -27,32 +27,26 @@ JniSystem::JniSystem(IN JniSystem_SendDataToJava pSendDataToJava)
 }
 
 PUBLIC
-JniSystem::~JniSystem()
-{
-}
+JniSystem::~JniSystem() {}
 
-PUBLIC VIRTUAL
-int JniSystem::SendData(IN const android::Parcel& /*in*/)
+PUBLIC VIRTUAL int JniSystem::SendData(IN const android::Parcel& /*in*/)
 {
     // This method is not used for system interface.
     return 0;
 }
 
-PUBLIC VIRTUAL
-int JniSystem::SendData(IN const android::Parcel& in, OUT android::Parcel& out)
+PUBLIC VIRTUAL int JniSystem::SendData(IN const android::Parcel& in, OUT android::Parcel& out)
 {
     System::GetInstance()->NotifyData(in, out);
     return 1;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 JniSystem::SendDataToJava(IN const android::Parcel& in,
-        OUT android::Parcel& out, int fileDescriptor /*= -1*/)
+PUBLIC VIRTUAL IMS_SINT32 JniSystem::SendDataToJava(
+        IN const android::Parcel& in, OUT android::Parcel& out, int fileDescriptor /*= -1*/)
 {
     if (m_pSendDataToJava != IMS_NULL)
     {
-        return m_pSendDataToJava(reinterpret_cast<IMS_SINTP>(this),
-                in, out, fileDescriptor);
+        return m_pSendDataToJava(reinterpret_cast<IMS_SINTP>(this), in, out, fileDescriptor);
     }
 
     return 0;

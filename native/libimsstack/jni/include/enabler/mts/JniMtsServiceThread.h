@@ -4,8 +4,7 @@
 #include "BaseService.h"
 #include "IMSAppThread.h"
 
-class JniMtsServiceThread :
-        public IMSAppThread
+class JniMtsServiceThread : public IMSAppThread
 {
 private:
     JniMtsServiceThread();
@@ -27,9 +26,9 @@ protected:
     virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
 private:
-    IMS_UINTP       m_nNativeObj;
-    CBServiceNoti   m_pfnNotifier;
-    IMS_SINT32      m_nSlotId;
+    IMS_UINTP m_nNativeObj;
+    CBServiceNoti m_pfnNotifier;
+    IMS_SINT32 m_nSlotId;
 };
 
 #endif

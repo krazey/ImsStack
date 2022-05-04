@@ -35,8 +35,9 @@ JniMediaSession::JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSl
     IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%" PFLS_u "]", m_nSlotId, nCallKey, 0);
 
     Initialize(pfnNotifier, nNativeObject);
-    m_piMediaManager = JniConnectorFactory::GetInstance()->GetMediaSessionConnector(m_nSlotId)->
-            GetEnablerService();
+    m_piMediaManager = JniConnectorFactory::GetInstance()
+                               ->GetMediaSessionConnector(m_nSlotId)
+                               ->GetEnablerService();
 
     SetJniMediaSessionThread();
 }
@@ -53,8 +54,7 @@ JniMediaSession::~JniMediaSession()
     SetJniMediaSessionThread();
 }
 
-PUBLIC VIRTUAL
-int JniMediaSession::SendData(const android::Parcel& objParcel)
+PUBLIC VIRTUAL int JniMediaSession::SendData(const android::Parcel& objParcel)
 {
     int nMsg = objParcel.readInt32();
 
@@ -108,8 +108,7 @@ JniMediaSessionThread* JniMediaSession::GetThread()
     return m_pThread;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
+PUBLIC GLOBAL IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
 {
     if (nMsg >= IMMedia::MEDIA_MESSAGE_IND_IDX_START && nMsg <= IMMedia::MEDIA_MESSAGE_IND_IDX_END)
     {
@@ -118,8 +117,7 @@ IMS_BOOL JniMediaSession::IsMediaMessage(IN IMS_SINT32 nMsg)
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL JniMediaSession::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
+PROTECTED VIRTUAL IMS_BOOL JniMediaSession::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
 {
     switch (nMsg)
     {
@@ -129,15 +127,16 @@ IMS_BOOL JniMediaSession::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
     }
 }
 
-PROTECTED VIRTUAL
-void JniMediaSession::HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     IMS_TRACE_D("HandleCallMessage() MSG=[%d]", nMsg, 0, 0);
 
     if (m_piMediaManager == IMS_NULL)
     {
-        m_piMediaManager = JniConnectorFactory::GetInstance()->GetMediaSessionConnector(m_nSlotId)->
-            GetEnablerService();
+        m_piMediaManager = JniConnectorFactory::GetInstance()
+                                   ->GetMediaSessionConnector(m_nSlotId)
+                                   ->GetEnablerService();
     }
 
     if (m_piMediaManager == IMS_NULL)
@@ -147,7 +146,7 @@ void JniMediaSession::HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel
     }
 
     IMS_BOOL bNeedConfig = IMS_FALSE;
-    switch(nMsg)
+    switch (nMsg)
     {
         case IMMedia::RESPONSE_OPEN_SESSION:
             bNeedConfig = IMS_FALSE;
@@ -209,8 +208,8 @@ MEDIA_CONTENT_TYPE JniMediaSession::ConvertToMediaType(IN SessionType eSessionty
 }
 
 PRIVATE
-void JniMediaSession::OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig,
-        IN const android::Parcel& objParcel)
+void JniMediaSession::OnResponses(
+        IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel)
 {
     ImsMediaResponseConfigParam* pParam = new ImsMediaResponseConfigParam();
 
@@ -222,7 +221,7 @@ void JniMediaSession::OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig,
     {
         pParam->m_objAudioConfig.readFromParcel(&objParcel);
     }
-    if(nMsg != IMMedia::NOTIFY_FIRST_PACKET)
+    if (nMsg != IMMedia::NOTIFY_FIRST_PACKET)
     {
         pParam->m_eResult = (RtpError)(objParcel.readInt32());
     }
@@ -231,8 +230,8 @@ void JniMediaSession::OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig,
 }
 
 PRIVATE
-void JniMediaSession::OnNofityMediaInactitivy(IN IMS_SINT32 nMsg,
-        IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityMediaInactitivy(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     ImsMediaNotifyInactivityParam* pParam = new ImsMediaNotifyInactivityParam();
 
@@ -254,49 +253,49 @@ void JniMediaSession::OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android:
 }
 
 PRIVATE
-void JniMediaSession::OnNofityMediaQualityChange(IN IMS_SINT32 nMsg,
-        IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityMediaQualityChange(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     (void)nMsg;
     (void)objParcel;
-/*
-    ImsMediaNotifyQualityParam* pParam = new ImsMediaNotifyQualityParam();
+    /*
+        ImsMediaNotifyQualityParam* pParam = new ImsMediaNotifyQualityParam();
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-    // to do later :: CallQuality -> Param
+        pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
+        // to do later :: CallQuality -> Param
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-*/
+        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    */
 }
 
 PRIVATE
-void JniMediaSession::OnResponseSessionChanged(IN IMS_SINT32 nMsg,
-        IN const android::Parcel& objParcel)
+void JniMediaSession::OnResponseSessionChanged(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     (void)nMsg;
-    (void) objParcel;
-/*
-    ImsMediaSessionChangedParam* pParam = new ImsMediaSessionChangedParam();
+    (void)objParcel;
+    /*
+        ImsMediaSessionChangedParam* pParam = new ImsMediaSessionChangedParam();
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
+        pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-*/ // NEXT_ITEM :: OnSessionChanged
+        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    */ // NEXT_ITEM :: OnSessionChanged
 }
 
 PRIVATE
-void JniMediaSession::OnNofityHeaderExtension(IN IMS_SINT32 nMsg,
-        IN const android::Parcel& objParcel)
+void JniMediaSession::OnNofityHeaderExtension(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
     (void)nMsg;
-    (void) objParcel;
-/*
-    ImsMediaHeaderExtensionParam* pParam = new ImsMediaHeaderExtensionParam();
+    (void)objParcel;
+    /*
+        ImsMediaHeaderExtensionParam* pParam = new ImsMediaHeaderExtensionParam();
 
-    pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
+        pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
 
-    m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
-*/ // NEXT_ITEM :: OnNofityHeaderExtension
+        m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+    */ // NEXT_ITEM :: OnNofityHeaderExtension
 }
 
 PRIVATE

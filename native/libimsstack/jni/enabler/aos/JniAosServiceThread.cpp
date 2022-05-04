@@ -25,15 +25,14 @@ using namespace android;
 __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
 PUBLIC
-JniAosServiceThread::JniAosServiceThread()
-    : BaseServiceThread()
-    , m_nSlotId(0)
+JniAosServiceThread::JniAosServiceThread() :
+        BaseServiceThread(),
+        m_nSlotId(0)
 {
     IMS_TRACE_D("+JniAosServiceThread", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-JniAosServiceThread::~JniAosServiceThread()
+PUBLIC VIRTUAL JniAosServiceThread::~JniAosServiceThread()
 {
     IMS_TRACE_D("~JniAosServiceThread", 0, 0, 0);
 }
@@ -52,7 +51,7 @@ void JniAosServiceThread::NotifyRegistered(IN IMS_SINT32 nNetworkType,
     IMS_UINT32 nCount = objFeatureTags.GetSize();
     objParcel.writeInt32(nCount);
 
-    for (IMS_UINT32 i = 0 ; i < nCount; ++i)
+    for (IMS_UINT32 i = 0; i < nCount; ++i)
     {
         objParcel.writeString16(String16(objFeatureTags.GetAt(i).GetStr()));
     }
@@ -74,7 +73,7 @@ void JniAosServiceThread::NotifyRegistering(IN IMS_SINT32 nNetworkType,
     IMS_UINT32 nCount = objFeatureTags.GetSize();
     objParcel.writeInt32(nCount);
 
-    for (IMS_UINT32 i = 0 ; i < nCount; ++i)
+    for (IMS_UINT32 i = 0; i < nCount; ++i)
     {
         objParcel.writeString16(String16(objFeatureTags.GetAt(i).GetStr()));
     }
@@ -95,8 +94,8 @@ void JniAosServiceThread::NotifyDeregistered(IN IMS_SINT32 nReason)
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyTechnologyChangeFailed(IN IMS_SINT32 nNetworkType,
-        IN IMS_SINT32 nCauseCode)
+void JniAosServiceThread::NotifyTechnologyChangeFailed(
+        IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nCauseCode)
 {
     IMS_TRACE_D("NotifyTechnologyChangeFailed", 0, 0, 0);
 
@@ -119,7 +118,7 @@ void JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& 
     IMS_UINT32 nCount = objUris.GetSize();
     objParcel.writeInt32(nCount);
 
-    for (IMS_UINT32 i = 0 ; i < nCount; ++i)
+    for (IMS_UINT32 i = 0; i < nCount; ++i)
     {
         objParcel.writeString16(String16(objUris.GetAt(i).GetStr()));
     }
@@ -128,8 +127,8 @@ void JniAosServiceThread::NotifyAssociatedUriChanged(IN const IMSList<AString>& 
 }
 
 PUBLIC
-void JniAosServiceThread::NotifyCapabilitiesUpdateFailed(IN IMS_UINT32 nCapabilities,
-        IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
+void JniAosServiceThread::NotifyCapabilitiesUpdateFailed(
+        IN IMS_UINT32 nCapabilities, IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nReason)
 {
     IMS_TRACE_D("NotifyCapabilitiesUpdateFailed", 0, 0, 0);
 

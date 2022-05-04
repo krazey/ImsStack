@@ -19,9 +19,7 @@
 #include "BaseService.h"
 #include "SystemCallback.h"
 
-class JniSystem
-    : public BaseService
-    , public SystemCallback
+class JniSystem : public BaseService, public SystemCallback
 {
 public:
     JniSystem(IN JniSystem_SendDataToJava pSendDataToJava);
@@ -36,8 +34,8 @@ public:
     int SendData(IN const android::Parcel& in, OUT android::Parcel& out) override;
 
     // SystemCallback class
-    IMS_SINT32 SendDataToJava(IN const android::Parcel& in,
-            OUT android::Parcel& out, int fileDescriptor = -1) override;
+    IMS_SINT32 SendDataToJava(IN const android::Parcel& in, OUT android::Parcel& out,
+            int fileDescriptor = -1) override;
 
 private:
     JniSystem_SendDataToJava m_pSendDataToJava;

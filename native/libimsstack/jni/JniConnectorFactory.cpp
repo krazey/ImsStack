@@ -18,11 +18,11 @@ JniConnectorFactory* JniConnectorFactory::s_pFactory = IMS_NULL;
 struct Connectors
 {
 public:
-    inline Connectors()
-        : pAosServiceConnector(IMS_NULL)
-        , pMtcCallConnector(IMS_NULL)
-        , pMtcServiceConnector(IMS_NULL)
-        , pMediaSessionConnector(IMS_NULL)
+    inline Connectors() :
+            pAosServiceConnector(IMS_NULL),
+            pMtcCallConnector(IMS_NULL),
+            pMtcServiceConnector(IMS_NULL),
+            pMediaSessionConnector(IMS_NULL)
     {
         IMS_TRACE_D("+Connectors", 0, 0, 0);
     }
@@ -89,13 +89,12 @@ class JniConnectorHolder
 {
 public:
     inline JniConnectorHolder() :
-            m_objConnectorsMap(IMSMap<IMS_SINT32, Connectors*>())
-    {};
-    inline virtual ~JniConnectorHolder() {};
+            m_objConnectorsMap(IMSMap<IMS_SINT32, Connectors*>()){};
+    inline virtual ~JniConnectorHolder(){};
 
 private:
-    JniConnectorHolder(IN CONST JniConnectorHolder &objRHS);
-    JniConnectorHolder& operator=(IN CONST JniConnectorHolder &objRHS);
+    JniConnectorHolder(IN CONST JniConnectorHolder& objRHS);
+    JniConnectorHolder& operator=(IN CONST JniConnectorHolder& objRHS);
 
 public:
     inline Connectors* GetConnectors(IN IMS_SINT32 nSlotId)
@@ -137,7 +136,7 @@ JniConnectorFactory::~JniConnectorFactory()
 {
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
 
-    for (IMS_SINT32 i = 0; i < SystemConfig::GetMaxSimSlot(); i ++)
+    for (IMS_SINT32 i = 0; i < SystemConfig::GetMaxSimSlot(); i++)
     {
         ReleaseConnectors(i);
     }
@@ -145,8 +144,7 @@ JniConnectorFactory::~JniConnectorFactory()
     delete m_pConnectorHolder;
 }
 
-PUBLIC GLOBAL
-JniConnectorFactory* JniConnectorFactory::GetInstance()
+PUBLIC GLOBAL JniConnectorFactory* JniConnectorFactory::GetInstance()
 {
     if (s_pFactory == IMS_NULL)
     {

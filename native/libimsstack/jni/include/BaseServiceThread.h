@@ -18,8 +18,7 @@
 #include "BaseThread.h"
 #include <binder/Parcel.h>
 
-class BaseServiceThread
-    : public BaseThread
+class BaseServiceThread : public BaseThread
 {
 public:
     BaseServiceThread();
@@ -29,9 +28,9 @@ public:
     void SetCallback(IN IMS_SINTP nNativeObject, CBServiceNoti pfnNotifier);
 
 protected:
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG) override;
-    IMS_BOOL SendData2Java(IN const android::Parcel &objParcel,
-            IN IMS_BOOL bThreadSwitched = IMS_FALSE);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG) override;
+    IMS_BOOL SendData2Java(
+            IN const android::Parcel& objParcel, IN IMS_BOOL bThreadSwitched = IMS_FALSE);
     virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const;
 
 protected:
@@ -40,4 +39,4 @@ protected:
     static const IMS_UINT32 MESSAGE_THREAD_SWITCHING = 0;
 };
 
-#endif //_BASE_SERVICE_THREAD_H_
+#endif  //_BASE_SERVICE_THREAD_H_

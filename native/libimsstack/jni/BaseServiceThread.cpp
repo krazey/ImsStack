@@ -17,17 +17,14 @@
 __IMS_TRACE_TAG_USER_DECL__("BaseService");
 
 PUBLIC
-BaseServiceThread::BaseServiceThread()
-    : BaseThread()
-    , nNativeObject(0)
-    , pfnNotifier(IMS_NULL)
+BaseServiceThread::BaseServiceThread() :
+        BaseThread(),
+        nNativeObject(0),
+        pfnNotifier(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-BaseServiceThread::~BaseServiceThread()
-{
-}
+PUBLIC VIRTUAL BaseServiceThread::~BaseServiceThread() {}
 
 PUBLIC
 void BaseServiceThread::SetCallback(IN IMS_SINTP nNativeObject, CBServiceNoti pfnNotifier)
@@ -36,8 +33,7 @@ void BaseServiceThread::SetCallback(IN IMS_SINTP nNativeObject, CBServiceNoti pf
     this->pfnNotifier = pfnNotifier;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_D("OnMessage (%d)", objMSG.nMSG, 0, 0);
     switch (objMSG.nMSG)
@@ -48,7 +44,7 @@ IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG &objMSG)
             SendData2Java(*pParcel, IMS_TRUE);
             delete pParcel;
         }
-            break;
+        break;
         default:
             break;
     }
@@ -57,8 +53,8 @@ IMS_BOOL BaseServiceThread::OnMessage(IN IMSMSG &objMSG)
 }
 
 PROTECTED
-IMS_BOOL BaseServiceThread::SendData2Java(IN const android::Parcel &objParcel,
-        IN IMS_BOOL bThreadSwitched/* = IMS_FALSE*/)
+IMS_BOOL BaseServiceThread::SendData2Java(
+        IN const android::Parcel& objParcel, IN IMS_BOOL bThreadSwitched /* = IMS_FALSE*/)
 {
     if (nNativeObject == 0)
     {
@@ -88,15 +84,15 @@ IMS_BOOL BaseServiceThread::SendData2Java(IN const android::Parcel &objParcel,
     IThread* piThread = GetThread();
     if (piThread)
     {
-        piThread->PostMessageI(MESSAGE_THREAD_SWITCHING, 0,
-                reinterpret_cast<IMS_UINTP>(pParcelOut));
+        piThread->PostMessageI(
+                MESSAGE_THREAD_SWITCHING, 0, reinterpret_cast<IMS_UINTP>(pParcelOut));
     }
 
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL BaseServiceThread::IsThreadSwitchingRequired(IN IMS_SINT32 /*nMsg*/) const
+PROTECTED VIRTUAL IMS_BOOL BaseServiceThread::IsThreadSwitchingRequired(
+        IN IMS_SINT32 /*nMsg*/) const
 {
     return IMS_TRUE;
 }

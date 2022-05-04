@@ -22,8 +22,8 @@ private:
     ~CoreInterfaceFactory();
 
 public:
-    static BaseService* GetInterface(IN IMS_SINT32 nInterfaceType,
-            IN CBServiceNoti pNotifier, IN IMS_SINT32 nSlotId);
+    static BaseService* GetInterface(
+            IN IMS_SINT32 nInterfaceType, IN CBServiceNoti pNotifier, IN IMS_SINT32 nSlotId);
 };
 
-#endif // _CORE_INTERFACE_FACTORY_H_
+#endif  // _CORE_INTERFACE_FACTORY_H_

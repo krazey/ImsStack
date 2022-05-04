@@ -28,11 +28,11 @@ using namespace android;
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.AOS");
 
-JniAosService::JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId)
-    : m_nSlotId(nSlotId)
-    , m_strThreadName(AString::ConstNull())
-    , m_piAosService(IMS_NULL)
-    , m_pJniAosServiceThread(IMS_NULL)
+JniAosService::JniAosService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_strThreadName(AString::ConstNull()),
+        m_piAosService(IMS_NULL),
+        m_pJniAosServiceThread(IMS_NULL)
 {
     IMS_TRACE_D("+JniAosService SlotId[%d]", m_nSlotId, 0, 0);
 
@@ -89,8 +89,8 @@ void JniAosService::Initialize(IN CBServiceNoti pCbServiceNoti)
     };
 
     IMSProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
-    m_pJniAosServiceThread = (JniAosServiceThread*)(IMSProcess::GetInstance()->
-            GetThread(m_strThreadName));
+    m_pJniAosServiceThread =
+            (JniAosServiceThread*)(IMSProcess::GetInstance()->GetThread(m_strThreadName));
 
     if (m_pJniAosServiceThread == IMS_NULL)
     {
@@ -117,8 +117,7 @@ JniAosServiceThread* JniAosService::GetThread()
     return m_pJniAosServiceThread;
 }
 
-PRIVATE VIRTUAL
-void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+PRIVATE VIRTUAL void JniAosService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
 {
     IMS_TRACE_D("HandleMessage() MSG=[%d]", nMsg, 0, 0);
 
@@ -236,8 +235,9 @@ IMS_BOOL JniAosService::Attach()
         return IMS_TRUE;
     }
 
-    m_piAosService = JniConnectorFactory::GetInstance()->GetAosServiceConnector(m_nSlotId)->
-            GetEnablerService();
+    m_piAosService = JniConnectorFactory::GetInstance()
+                             ->GetAosServiceConnector(m_nSlotId)
+                             ->GetEnablerService();
     if (m_piAosService)
     {
         m_piAosService->SetJniAosService(this);
@@ -480,8 +480,7 @@ void JniAosService::NotifyPreciseCallState(IN const android::Parcel& objParcel)
     }
 }
 
-PRIVATE GLOBAL
-void JniAosService::ConvertString(IN const String16& strSource, OUT AString& strDest)
+PRIVATE GLOBAL void JniAosService::ConvertString(IN const String16& strSource, OUT AString& strDest)
 {
     String8 str8(strSource);
     strDest = str8.string();

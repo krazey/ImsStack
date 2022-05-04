@@ -22,15 +22,14 @@
 #include "JniMediaSessionThread.h"
 #include "IMediaManager.h"
 
-class JniMediaSession :
-        public BaseService
+class JniMediaSession : public BaseService
 {
 public:
     JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId, IN IMS_SINTP nCallKey,
             IN IMS_SINTP nNativeObject);
     virtual ~JniMediaSession();
 
-    virtual int SendData(const android::Parcel &objParcel) override;
+    virtual int SendData(const android::Parcel& objParcel) override;
     void Initialize(IN CBServiceNoti pfnNotifier, IN IMS_SINTP nNativeObject);
     void SetMtcCallId(IN IMS_SINTP nCallKey);
     JniMediaSessionThread* GetThread();
@@ -43,8 +42,8 @@ protected:
 private:
     void SetJniMediaSessionThread();
     MEDIA_CONTENT_TYPE ConvertToMediaType(IN SessionType eSessiontype);
-    void OnResponses(IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig,
-            IN const android::Parcel& objParcel);
+    void OnResponses(
+            IN IMS_SINT32 nMsg, IN IMS_BOOL bNeedConfig, IN const android::Parcel& objParcel);
     void OnNofityMediaInactitivy(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNofityPacketLosses(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNofityMediaQualityChange(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);

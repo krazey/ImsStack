@@ -35,8 +35,7 @@ JniMediaSessionThread::JniMediaSessionThread() :
     IMS_TRACE_D("+JniMediaSessionThread", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-JniMediaSessionThread::~JniMediaSessionThread()
+PUBLIC VIRTUAL JniMediaSessionThread::~JniMediaSessionThread()
 {
     IMS_TRACE_D("~JniMediaSessionThread", 0, 0, 0);
 }
@@ -58,7 +57,7 @@ IMS_BOOL JniMediaSessionThread::OnOpenSession(IN ImsMediaMsgOpenConfigParam* pPa
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     objParcel.writeString16(android::String16(pParam->m_objLocalAddress.ToString().GetStr()));
     objParcel.writeInt32(pParam->m_nLocalPort);
-    //pParam->m_objAudioConfig.writeToParcel(&objParcel);
+    // pParam->m_objAudioConfig.writeToParcel(&objParcel);
 
     delete pParam;
 
@@ -184,8 +183,8 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL JniMediaSessionThread::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
+PROTECTED VIRTUAL IMS_BOOL JniMediaSessionThread::IsThreadSwitchingRequired(
+        IN IMS_SINT32 nMsg) const
 {
     switch (nMsg)
     {
