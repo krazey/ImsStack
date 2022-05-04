@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
-
-    Description
-     This class contains constants representing SIP response codes as defined in RFC 3261
-    and extensions.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "SipStatusCode.h"
 
 
@@ -95,26 +98,24 @@ const SipStatusCode::CodeTable SipStatusCode::CODE_TABLE[] =
     { SipStatusCode::SC_MAX, IMS_NULL }
 };
 
-
-
 PUBLIC
-SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode_ /* = SC_INVALID */)
-    : nCode(nCode_)
-    , strReasonPhrase(AString::ConstNull())
+SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode/* = SC_INVALID*/) :
+        m_nCode(nCode),
+        m_strReasonPhrase(AString::ConstNull())
 {
 }
 
 PUBLIC
-SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode_, IN CONST IMS_CHAR *pszReasonPhrase_)
-    : nCode(nCode_)
-    , strReasonPhrase(pszReasonPhrase_)
+SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode, IN const IMS_CHAR* pszReasonPhrase) :
+        m_nCode(nCode),
+        m_strReasonPhrase(pszReasonPhrase)
 {
 }
 
 PUBLIC
-SipStatusCode::SipStatusCode(IN CONST SipStatusCode &objRHS)
-    : nCode(objRHS.nCode)
-    , strReasonPhrase(objRHS.strReasonPhrase)
+SipStatusCode::SipStatusCode(IN const SipStatusCode& other) :
+        m_nCode(other.m_nCode),
+        m_strReasonPhrase(other.m_strReasonPhrase)
 {
 }
 
@@ -124,90 +125,70 @@ SipStatusCode::~SipStatusCode()
 }
 
 PUBLIC
-SipStatusCode& SipStatusCode::operator=(IN CONST SipStatusCode &objRHS)
+SipStatusCode& SipStatusCode::operator=(IN const SipStatusCode& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        nCode = objRHS.nCode;
-        strReasonPhrase = objRHS.strReasonPhrase;
+        m_nCode = other.m_nCode;
+        m_strReasonPhrase = other.m_strReasonPhrase;
     }
 
     return (*this);
 }
 
-/*
-Gets a textual representation of the given SIP status code.
-
-Remarks
-*/
+/**
+ * @brief Gets a textual representation of the given SIP status code.
+ */
 PUBLIC
 SipStatusCode& SipStatusCode::operator=(IN IMS_SINT32 nCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->nCode = nCode;
+    m_nCode = nCode;
     return (*this);
 }
 
-/*
-Gets a textual representation of the given SIP status code.
-
-Remarks
-*/
+/**
+ * @brief Gets a textual representation of the given SIP status code.
+ */
 PUBLIC
-SipStatusCode& SipStatusCode::operator=(IN CONST IMS_CHAR* pszReasonPhrase)
+SipStatusCode& SipStatusCode::operator=(IN const IMS_CHAR* pszReasonPhrase)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->strReasonPhrase = pszReasonPhrase;
+    m_strReasonPhrase = pszReasonPhrase;
     return (*this);
 }
 
-/*
-Gets a textual representation of the given SIP status code.
-
-Remarks
-*/
+/**
+ * @brief Gets a textual representation of the given SIP status code.
+ */
 PUBLIC
-SipStatusCode& SipStatusCode::operator=(IN CONST AString &strReasonPhrase)
+SipStatusCode& SipStatusCode::operator=(IN const AString& strReasonPhrase)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->strReasonPhrase = strReasonPhrase;
+    m_strReasonPhrase = strReasonPhrase;
     return (*this);
 }
 
-/*
-Gets a textual representation of the given SIP status code.
-
-Remarks
-*/
+/**
+ * @brief Gets a textual representation of the given SIP status code.
+ */
 PUBLIC
-IMS_SINT32 SipStatusCode::Compare(IN IMS_SINT32 nCode_) const
+IMS_SINT32 SipStatusCode::Compare(IN IMS_SINT32 nCode) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nCode - nCode_;
+    return m_nCode - nCode;
 }
 
-/*
-Gets a textual representation of the given SIP status code.
-
-Remarks
-*/
+/**
+ * @brief Gets a textual representation of the given SIP status code.
+ */
 PUBLIC GLOBAL
 const IMS_CHAR* SipStatusCode::GetReasonPhrase(IN IMS_SINT32 nCode)
 {
     IMS_SINT32 nIndex = 0;
 
-    //---------------------------------------------------------------------------------------------
-
     while (CODE_TABLE[nIndex].nCode != SC_MAX)
     {
         if (CODE_TABLE[nIndex].nCode == nCode)
+        {
             return CODE_TABLE[nIndex].pszReasonPhrase;
+        }
 
         nIndex++;
     }

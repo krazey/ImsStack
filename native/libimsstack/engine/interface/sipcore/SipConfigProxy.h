@@ -1,5 +1,20 @@
-#ifndef _SIP_CONFIG_PROXY_H_
-#define _SIP_CONFIG_PROXY_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_CONFIG_PROXY_H_
+#define SIP_CONFIG_PROXY_H_
 
 #include "SipProfile.h"
 
@@ -9,8 +24,8 @@
  */
 class SipConfigProxy
 {
-private:
-    SipConfigProxy();
+public:
+    SipConfigProxy() = delete;
 
 public:
     // "common"
@@ -31,7 +46,7 @@ public:
      *         #ISipConfig#DEVICE_ID_PREDEFINED
      */
     static IMS_SINT32 GetDeviceId(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a pre-defined device id (+sip.instance).
      *
@@ -42,7 +57,7 @@ public:
      * @return The pre-defined device id.
      */
     static const AString& GetPredefinedDeviceId(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a SIP default port number.
      *
@@ -53,7 +68,7 @@ public:
      * @return The port number.
      */
     static IMS_SINT32 GetPort(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the SIP features.
      *
@@ -93,7 +108,7 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
     static IMS_UINT32 GetSipFeatureCaps(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a tag prefix string.
      *
@@ -104,7 +119,7 @@ public:
      * @return The tag prefix string.
      */
     static const AString& GetTagPrefix(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a criteria length to convert a transport protocol from UDP to TCP.
      *
@@ -115,7 +130,7 @@ public:
      * @return The TCP criteria length.
      */
     static IMS_SINT32 GetTcpCriterionLength(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a preferred transport protocol (udp/tcp/tls/...) type.
      *
@@ -141,7 +156,7 @@ public:
      * @return The UA string.
      */
     static AString GetUaString(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
 
     // "reg"
     /**
@@ -154,7 +169,7 @@ public:
      * @return The allowed SIP methods.
      */
     static const AStringArray& GetRegAllowMethods(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the expires value for IMS registration.
      *
@@ -165,7 +180,7 @@ public:
      * @return The expires value for IMS registration.
      */
     static IMS_SINT32 GetRegExpires(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the expires value for "reg" event package subscription.
      *
@@ -176,7 +191,7 @@ public:
      * @return The expires value for "reg" event package subscription.
      */
     static IMS_SINT32 GetRegSubExpires(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets an UA string for IMS registration.
      *
@@ -188,7 +203,7 @@ public:
      * @return The UA string for IMS registration.
      */
     static AString GetRegUaString(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile* pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the expires value of registration is configured or not.
      *
@@ -199,7 +214,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsRegExpiresConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the expires value of "reg" subscription is configured or not.
      *
@@ -210,7 +225,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsRegSubExpiresConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the "reg" subscription is enabled or not.
      *
@@ -221,7 +236,7 @@ public:
      * @return If it's enabled, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsRegSubscriptionConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
 
     // "service-specific"
     /**
@@ -243,7 +258,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsAuthenticationAlgorithmRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Cellular-Network-Info header is required or not.
      *
@@ -254,7 +269,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsCellularNetworkInfoHeaderRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the SIP header's compact form is configured or not.
      *
@@ -265,7 +280,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsCompactFormConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Contact header for all the 1xx responses should be added or not.
      *
@@ -276,7 +291,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsContactInAll1xxRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the country information in P-Access-Network-Info header
      *        should be added or not.
@@ -288,7 +303,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsCountryInfoRequiredInPaniHeader(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the display name of SIP address should contain double quotation or not.
      *
@@ -299,7 +314,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsDisplayNameDquotRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Expires header in REGISTER request should be added or not.
      *
@@ -310,7 +325,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsExpiresHeaderInRegRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if IPSec(IP Security) is configured or not.
      *
@@ -332,7 +347,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsGruuConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if "keep" parameter in Via header is configured or not.
      *
@@ -343,7 +358,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsKeepAliveConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
      *
@@ -354,7 +369,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsMultipleRegConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Accept-Contact header in BYE request should not be added or not.
      *
@@ -366,7 +381,7 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsNoAcceptContactHeaderInBye(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if P-Access-Network-Info header in the initial registration
      *        should be added or not.
@@ -378,7 +393,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsPanInfoInInitialRegRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if P-Preferred-Identity header in "reg" subscription
      *        should be added or not.
@@ -390,7 +405,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsPPreferredIdInRegSubRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if Route header in the registration should be added or not.
      *
@@ -401,7 +416,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsRouteHeaderInRegRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if "rport" parameter is configured or not.
      *
@@ -412,7 +427,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsRportConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the transport layer's error notification of SIP transaction
      *        is required or not.
@@ -424,7 +439,7 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsTransportErrorReportOnTxnRequired(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the device is in the trust domain or not.
      *
@@ -435,7 +450,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsTrustDomainConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the UDP fallback is configured or not
      *        when TCP connection can't be established.
@@ -447,7 +462,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsUdpFallbackConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the UA string in SIP message should be added or not.
      *
@@ -458,7 +473,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsUserAgentConfigured(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the SIP header for UA string should be determined
      *        by the SIP signalling context or not.
@@ -474,7 +489,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     static IMS_BOOL IsUserAgentSetByContext(IN IMS_SINT32 nSlotId,
-            IN CONST SipProfile *pProfile = IMS_NULL);
+            IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the SDP negotiation is required for non-RPR message.
@@ -606,8 +621,8 @@ public:
      * @param piSipConfigV The SIP configuration (static configuration)
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueT1(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV = IMS_NULL);
+    static IMS_SINT32 GetTimerValueT1(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV = IMS_NULL);
     /**
      * @brief Gets a timer value for SIP timer T2.
      *
@@ -618,8 +633,8 @@ public:
      * @param piSipConfigV The SIP configuration (static configuration)
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueT2(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV = IMS_NULL);
+    static IMS_SINT32 GetTimerValueT2(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV = IMS_NULL);
     /**
      * @brief Gets a timer value for SIP timer T4.
      *
@@ -632,8 +647,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueT4(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueT4(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer A.
      *
@@ -646,8 +661,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueA(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueA(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer B.
      *
@@ -660,8 +675,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueB(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueB(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer D.
      *
@@ -674,8 +689,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueD(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueD(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer E.
      *
@@ -688,8 +703,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueE(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueE(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer F.
      *
@@ -702,8 +717,8 @@ public:
      *                       if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueF(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueF(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer G.
      *
@@ -716,8 +731,8 @@ public:
      *                         if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueG(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueG(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer H.
      *
@@ -730,8 +745,8 @@ public:
      *                         if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueH(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueH(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer I.
      *
@@ -744,8 +759,8 @@ public:
      *                         if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueI(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueI(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer J.
      *
@@ -758,8 +773,8 @@ public:
      *                         if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueJ(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueJ(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
     /**
      * @brief Gets a timer value for SIP timer K.
      *
@@ -772,8 +787,8 @@ public:
      *                         if all the timers are not available
      * @return The timer value.
      */
-    static IMS_SINT32 GetTimerValueK(IN IMS_SINT32 nSlotId, IN CONST SipProfile *pProfile,
-            IN CONST ISipConfigV *piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
+    static IMS_SINT32 GetTimerValueK(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile,
+            IN const ISipConfigV* piSipConfigV, IN IMS_BOOL bDefaultRequired = IMS_TRUE);
 };
 
-#endif // _SIP_CONFIG_PROXY_H_
+#endif

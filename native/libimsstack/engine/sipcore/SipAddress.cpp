@@ -1,44 +1,35 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
-
-    Description
-     This class provides a generic SIP address parser.
-    It can be used to parse either full SIP name addresses like:
-        - IMSer <sip:user@ims.com>
-        - sip:+821075323421@ims.com;user=phone
-        - sips:user@ims.com;transport=tcp
-
-    Remarks
-    - It does not escape address strings.
-    - It ignores header part of SIP URI.
-    - Its valid scheme format is the same as defined in SIP BNF for absolute URI.
-    - It allows "*" as the valid address of Contact header.
-    In this case, ToString() & GetUri() return "*", all other accessor methods return NULL or 0.
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTrace.h"
-#include "ServiceThread.h"
-#include "SystemConfig.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "AStringBuffer.h"
 #include "IMSLib.h"
 #include "IPAddress.h"
-#include "AStringBuffer.h"
+#include "ServiceMemory.h"
+#include "ServiceThread.h"
+#include "ServiceTrace.h"
+#include "SystemConfig.h"
+
+#include "SipAddress.h"
+#include "SipConfigProxy.h"
+#include "SipDebug.h"
 #include "SIPHeader.h"
 #include "SIPPrivate.h"
-#include "SipDebug.h"
-#include "SipConfigProxy.h"
 #include "SIPStackHeaders.h"
 #include "SIPUtil.h"
-#include "SipAddress.h"
 
 __IMS_TRACE_TAG_SIP__;
-
-
 
 PUBLIC GLOBAL
 const IMS_CHAR SipAddress::PARAM_MADDR[] = "maddr";
@@ -53,132 +44,84 @@ const IMS_CHAR SipAddress::PARAM_TTL[] = "ttl";
 PUBLIC GLOBAL
 const IMS_CHAR SipAddress::PARAM_USER[] = "user";
 
-
-
-/*
- Constructs a new UserInfoPart.
-
-Remarks
-
-*/
 PUBLIC
 SipAddress::UserInfoPart::UserInfoPart()
-    : strUser(AString::ConstNull())
-    , strPassword(AString::ConstNull())
+    : m_strUser(AString::ConstNull())
+    , m_strPassword(AString::ConstNull())
 {
 }
 
-/*
- Constructs a new UserInfoPart.
-
-Remarks
-
-*/
 PUBLIC
-SipAddress::UserInfoPart::UserInfoPart(IN CONST SipAddress::UserInfoPart &objRHS)
-    : strUser(objRHS.strUser)
-    , strPassword(objRHS.strPassword)
+SipAddress::UserInfoPart::UserInfoPart(IN const SipAddress::UserInfoPart& other)
+    : m_strUser(other.m_strUser)
+    , m_strPassword(other.m_strPassword)
 {
-    for (IMS_UINT32 i = 0; i < objRHS.objParameters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < other.m_objParameters.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objRHS.objParameters.GetAt(i);
+        const SipParameter* pParameter = other.m_objParameters.GetAt(i);
 
-        if (pParameter == IMS_NULL)
-            continue;
-
-        objParameters.Append(new SipParameter(*pParameter));
+        if (pParameter != IMS_NULL)
+        {
+            m_objParameters.Append(new SipParameter(*pParameter));
+        }
     }
 }
 
-/*
- Destructs this UserInfoPart.
-
-Remarks
-
-*/
 PUBLIC
 SipAddress::UserInfoPart::~UserInfoPart()
 {
     RemoveAllParameters();
 }
 
-/*
- Override the default assignment operator.
-
-Remarks
-
-*/
 PUBLIC
 SipAddress::UserInfoPart& SipAddress::UserInfoPart::operator=(
-        IN CONST SipAddress::UserInfoPart &objRHS)
+        IN const SipAddress::UserInfoPart& other)
 {
-    if (this != &objRHS)
+    if (this != &other)
     {
         RemoveAllParameters();
 
-        strUser = objRHS.strUser;
-        strPassword = objRHS.strPassword;
+        m_strUser = other.m_strUser;
+        m_strPassword = other.m_strPassword;
 
-        for (IMS_UINT32 i = 0; i < objRHS.objParameters.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < other.m_objParameters.GetSize(); ++i)
         {
-            const SipParameter *pParameter = objRHS.objParameters.GetAt(i);
+            const SipParameter* pParameter = other.m_objParameters.GetAt(i);
 
-            if (pParameter == IMS_NULL)
-                continue;
-
-            objParameters.Append(new SipParameter(*pParameter));
+            if (pParameter != IMS_NULL)
+            {
+                m_objParameters.Append(new SipParameter(*pParameter));
+            }
         }
     }
 
     return (*this);
 }
 
-/*
- Parses the userinfo part of SIP/SIPS URI.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strUserInfo             Userinfo part string
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The userinfo part is successfully parsed
-IMS_FALSE               An error occurs during parsing
-</table>
-*/
 PUBLIC
-IMS_BOOL SipAddress::UserInfoPart::Create(IN CONST AString &strUserInfo)
+IMS_BOOL SipAddress::UserInfoPart::Create(IN const AString& strUserInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strUserInfo.GetLength() == 0)
     {
         // No user part
         return IMS_FALSE;
     }
 
-    strUser = AString::ConstNull();
-    strPassword = AString::ConstNull();
+    m_strUser = AString::ConstNull();
+    m_strPassword = AString::ConstNull();
     RemoveAllParameters();
 
-    strUserInfo.SplitB(TextParser::CHAR_COLON, strUser, strPassword);
+    strUserInfo.SplitB(TextParser::CHAR_COLON, m_strUser, m_strPassword);
 
-    if (strUser.Contains(TextParser::CHAR_SEMICOLON))
+    if (m_strUser.Contains(TextParser::CHAR_SEMICOLON))
     {
-        IMSList<AString> objTokens = strUser.Split(TextParser::CHAR_SEMICOLON);
+        IMSList<AString> objTokens = m_strUser.Split(TextParser::CHAR_SEMICOLON);
 
-        strUser = objTokens.GetAt(0);
+        m_strUser = objTokens.GetAt(0);
 
         for (IMS_UINT32 i = 1; i < objTokens.GetSize(); ++i)
         {
-            SipParameter *pParameter = new SipParameter();
+            SipParameter* pParameter = new SipParameter();
 
             if (pParameter == IMS_NULL)
             {
@@ -192,7 +135,7 @@ IMS_BOOL SipAddress::UserInfoPart::Create(IN CONST AString &strUserInfo)
                 continue;
             }
 
-            if (!objParameters.Append(pParameter))
+            if (!m_objParameters.Append(pParameter))
             {
                 delete pParameter;
             }
@@ -202,34 +145,12 @@ IMS_BOOL SipAddress::UserInfoPart::Create(IN CONST AString &strUserInfo)
     return IMS_TRUE;
 }
 
-/*
- Returns the parameter of user-info part.
-All the parameters are separated by the semi-colon.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-SipParameter*           SipParameter to the named userinfo parameter
-NULL pointer            The named userinfo parameter is not found
-</table>
-*/
 PUBLIC
-const SipParameter* SipAddress::UserInfoPart::GetParameter(IN CONST AString &strName) const
+const SipParameter* SipAddress::UserInfoPart::GetParameter(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParameters.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParameters.GetAt(i);
+        const SipParameter* pParameter = m_objParameters.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
@@ -240,329 +161,168 @@ const SipParameter* SipAddress::UserInfoPart::GetParameter(IN CONST AString &str
     return IMS_NULL;
 }
 
-/*
- Removes all the parameters.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PRIVATE
 void SipAddress::UserInfoPart::RemoveAllParameters()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objParameters.IsEmpty())
+    if (m_objParameters.IsEmpty())
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParameters.GetSize(); ++i)
     {
-        SipParameter *pParameter = objParameters.GetAt(i);
+        SipParameter* pParameter = m_objParameters.GetAt(i);
 
-        if (pParameter == IMS_NULL)
-            continue;
-
-        delete pParameter;
+        if (pParameter != IMS_NULL)
+        {
+            delete pParameter;
+        }
     }
 
-    objParameters.Clear();
+    m_objParameters.Clear();
 }
 
-
-
-/*
- Constructs a new SipAddress without any values.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-SipAddress::SipAddress()
-    : bIsWildcard(IMS_FALSE)
-    , bDQUOTForDisplayName(IMS_FALSE)
-    , bAQUOTRequired(IMS_FALSE)
-    , strDisplayName(AString::ConstNull())
-    , strScheme(AString::ConstNull())
-    , strUserInfo(AString::ConstNull())
-    , strHostInfo(AString::ConstNull())
-    , nPort(Sip::PORT_UNSPECIFIED)
-    , pUserInfoPart(IMS_NULL)
+SipAddress::SipAddress() :
+        m_bIsWildcard(IMS_FALSE),
+        m_bDquotForDisplayName(IMS_FALSE),
+        m_bAquotRequired(IMS_FALSE),
+        m_strDisplayName(AString::ConstNull()),
+        m_strScheme(AString::ConstNull()),
+        m_strUserInfo(AString::ConstNull()),
+        m_strHostInfo(AString::ConstNull()),
+        m_nPort(Sip::PORT_UNSPECIFIED),
+        m_pUserInfoPart(IMS_NULL)
 {
 }
 
-/*
- Constructs a new SipAddress from string.
-The string can be either following:
-    - Name address: DisplayName <sip:user:password@host:port;uri-parameters>
-    - Plain SIP URI: sip:user:password@host:port;uri-parameters
-    - Special address: "*"
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strAddress              SIP address format as string
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-SipAddress::SipAddress(IN CONST AString &strAddress)
-    : bIsWildcard(IMS_FALSE)
-    , bDQUOTForDisplayName(IMS_FALSE)
-    , bAQUOTRequired(IMS_FALSE)
-    , strDisplayName(AString::ConstNull())
-    , strScheme(AString::ConstNull())
-    , strUserInfo(AString::ConstNull())
-    , strHostInfo(AString::ConstNull())
-    , nPort(Sip::PORT_UNSPECIFIED)
-    , pUserInfoPart(IMS_NULL)
+SipAddress::SipAddress(IN const AString& strAddress) :
+        m_bIsWildcard(IMS_FALSE),
+        m_bDquotForDisplayName(IMS_FALSE),
+        m_bAquotRequired(IMS_FALSE),
+        m_strDisplayName(AString::ConstNull()),
+        m_strScheme(AString::ConstNull()),
+        m_strUserInfo(AString::ConstNull()),
+        m_strHostInfo(AString::ConstNull()),
+        m_nPort(Sip::PORT_UNSPECIFIED),
+        m_pUserInfoPart(IMS_NULL)
 {
-    //---------------------------------------------------------------------------------------------
-
     Decode(strAddress, IMS_TRUE);
 }
 
-/*
- Constructs a new SipAddress from the display name and URI string.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strDisplayName_         Display name
-strURI                  SIP address format string as addr-spec
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-SipAddress::SipAddress(IN CONST AString &strDisplayName_, IN CONST AString &strURI)
-    : bIsWildcard(IMS_FALSE)
-    , bDQUOTForDisplayName(IMS_FALSE)
-    , bAQUOTRequired(IMS_FALSE)
-    , strDisplayName(strDisplayName_)
-    , strScheme(AString::ConstNull())
-    , strUserInfo(AString::ConstNull())
-    , strHostInfo(AString::ConstNull())
-    , nPort(Sip::PORT_UNSPECIFIED)
-    , pUserInfoPart(IMS_NULL)
+SipAddress::SipAddress(IN const AString& strDisplayName, IN const AString& strUri) :
+        m_bIsWildcard(IMS_FALSE),
+        m_bDquotForDisplayName(IMS_FALSE),
+        m_bAquotRequired(IMS_FALSE),
+        m_strDisplayName(strDisplayName),
+        m_strScheme(AString::ConstNull()),
+        m_strUserInfo(AString::ConstNull()),
+        m_strHostInfo(AString::ConstNull()),
+        m_nPort(Sip::PORT_UNSPECIFIED),
+        m_pUserInfoPart(IMS_NULL)
 {
-    //---------------------------------------------------------------------------------------------
-
-    Decode(strURI, IMS_TRUE, IMS_FALSE);
+    Decode(strUri, IMS_TRUE, IMS_FALSE);
 }
 
-/*
- Constructs a new SipAddress from the SipAddress object.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objRHS                  Reference to SipAddress
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-SipAddress::SipAddress(IN CONST SipAddress &objRHS)
-    : bIsWildcard(objRHS.bIsWildcard)
-    , bDQUOTForDisplayName(objRHS.bDQUOTForDisplayName)
-    , bAQUOTRequired(objRHS.bAQUOTRequired)
-    , strDisplayName(objRHS.strDisplayName)
-    , strScheme(objRHS.strScheme)
-    , strUserInfo(objRHS.strUserInfo)
-    , strHostInfo(objRHS.strHostInfo)
-    , nPort(objRHS.nPort)
-    , pUserInfoPart(IMS_NULL)
+SipAddress::SipAddress(IN const SipAddress& other) :
+        m_bIsWildcard(other.m_bIsWildcard),
+        m_bDquotForDisplayName(other.m_bDquotForDisplayName),
+        m_bAquotRequired(other.m_bAquotRequired),
+        m_strDisplayName(other.m_strDisplayName),
+        m_strScheme(other.m_strScheme),
+        m_strUserInfo(other.m_strUserInfo),
+        m_strHostInfo(other.m_strHostInfo),
+        m_nPort(other.m_nPort),
+        m_pUserInfoPart(IMS_NULL)
 {
     IMS_UINT32 i;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+    for (i = 0; i < other.m_objHeaders.GetSize(); ++i)
     {
-        const ISipHeader *piHeader = objRHS.objHeaders.GetAt(i);
-        ISipHeader *piNewHeader = piHeader->Clone();
+        const ISipHeader* piHeader = other.m_objHeaders.GetAt(i);
+        ISipHeader* piNewHeader = piHeader->Clone();
 
         if (piNewHeader != IMS_NULL)
-            objHeaders.Append(piNewHeader);
+        {
+            m_objHeaders.Append(piNewHeader);
+        }
     }
 
-    for (i = 0; i < objRHS.objParams.GetSize(); ++i)
+    for (i = 0; i < other.m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objRHS.objParams.GetAt(i);
-        SipParameter *pNewParameter = new SipParameter(*pParameter);
+        const SipParameter* pParameter = other.m_objParams.GetAt(i);
+        SipParameter* pNewParameter = new SipParameter(*pParameter);
 
         if (pNewParameter != IMS_NULL)
-            objParams.Append(pNewParameter);
+        {
+            m_objParams.Append(pNewParameter);
+        }
     }
 }
 
-/*
- Destructs the SipAddress instance.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
 SipAddress::~SipAddress()
 {
-    //---------------------------------------------------------------------------------------------
-
     RemoveAllHeaderComponents();
     RemoveAllParameters();
 
-    if (pUserInfoPart != IMS_NULL)
+    if (m_pUserInfoPart != IMS_NULL)
     {
-        delete pUserInfoPart;
+        delete m_pUserInfoPart;
     }
 }
 
-/*
- Copys the given SipAddress's values to its own variables.
-It overrides a default assignment operation for SipAddress object.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objRHS                  Reference to SipAddress
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-SipAddress              Reference to own SipAddress
-</table>
-*/
 PUBLIC
-SipAddress& SipAddress::operator=(IN CONST SipAddress &objRHS)
+SipAddress& SipAddress::operator=(IN const SipAddress& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
         RemoveAllHeaderComponents();
         RemoveAllParameters();
 
-        bIsWildcard = objRHS.bIsWildcard;
-
-        bDQUOTForDisplayName = objRHS.bDQUOTForDisplayName;
-        bAQUOTRequired = objRHS.bAQUOTRequired;
-        strDisplayName = objRHS.strDisplayName;
-        strScheme = objRHS.strScheme;
-        strUserInfo = objRHS.strUserInfo;
-        strHostInfo = objRHS.strHostInfo;
-        nPort = objRHS.nPort;
+        m_bIsWildcard = other.m_bIsWildcard;
+        m_bDquotForDisplayName = other.m_bDquotForDisplayName;
+        m_bAquotRequired = other.m_bAquotRequired;
+        m_strDisplayName = other.m_strDisplayName;
+        m_strScheme = other.m_strScheme;
+        m_strUserInfo = other.m_strUserInfo;
+        m_strHostInfo = other.m_strHostInfo;
+        m_nPort = other.m_nPort;
 
         IMS_UINT32 i;
 
-        for (i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+        for (i = 0; i < other.m_objHeaders.GetSize(); ++i)
         {
-            const ISipHeader *piHeader = objRHS.objHeaders.GetAt(i);
-            ISipHeader *piNewHeader = piHeader->Clone();
+            const ISipHeader* piHeader = other.m_objHeaders.GetAt(i);
+            ISipHeader* piNewHeader = piHeader->Clone();
 
             if (piNewHeader != IMS_NULL)
-                objHeaders.Append(piNewHeader);
+            {
+                m_objHeaders.Append(piNewHeader);
+            }
         }
 
-        for (i = 0; i < objRHS.objParams.GetSize(); ++i)
+        for (i = 0; i < other.m_objParams.GetSize(); ++i)
         {
-            const SipParameter *pParameter = objRHS.objParams.GetAt(i);
-            SipParameter *pNewParameter = new SipParameter(*pParameter);
+            const SipParameter* pParameter = other.m_objParams.GetAt(i);
+            SipParameter* pNewParameter = new SipParameter(*pParameter);
 
             if (pNewParameter != IMS_NULL)
-                objParams.Append(pNewParameter);
+            {
+                m_objParams.Append(pNewParameter);
+            }
         }
     }
 
     return (*this);
 }
 
-/*
- Adds the named URI parameter to the specified value. If the value is NULL, the parameter
-is interpreted as a parameter without value. The parameter value will be added.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strName                 The named URI parameter
-strValue                The URI parameter value to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The URI parameter is successfully set
-IMS_FAILURE             The name is NULL, invalid or the address represents the immutable "*" value
-</table>
-*/
-IMS_RESULT SipAddress::AddParameter(IN CONST AString &strName, IN CONST AString &strValue)
+IMS_RESULT SipAddress::AddParameter(IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strName.IsNULL() || bIsWildcard)
+    if (strName.IsNULL() || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
@@ -570,9 +330,9 @@ IMS_RESULT SipAddress::AddParameter(IN CONST AString &strName, IN CONST AString 
 
     // Check the grammar validity
 
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objParams.GetAt(i);
+        SipParameter* pParameter = m_objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
@@ -584,12 +344,16 @@ IMS_RESULT SipAddress::AddParameter(IN CONST AString &strName, IN CONST AString 
     }
 
     // If the parameter with the specified name does not exist, then add new one.
-    SipParameter *pParameter = IMS_NULL;
+    SipParameter* pParameter = IMS_NULL;
 
     if (strValue.IsNULL())
+    {
         pParameter = new SipParameter(strName);
+    }
     else
+    {
         pParameter = new SipParameter(strName, strValue);
+    }
 
     if (pParameter == IMS_NULL)
     {
@@ -597,7 +361,7 @@ IMS_RESULT SipAddress::AddParameter(IN CONST AString &strName, IN CONST AString 
         return IMS_FAILURE;
     }
 
-    if (!objParams.Append(pParameter))
+    if (!m_objParams.Append(pParameter))
     {
         delete pParameter;
         SIPPrivate::SetLastError(SipError::LIST_OPERATION_FAILED);
@@ -608,95 +372,52 @@ IMS_RESULT SipAddress::AddParameter(IN CONST AString &strName, IN CONST AString 
     return IMS_SUCCESS;
 }
 
-/*
- Parses the SIP address format string.
-The string can be either following:
-    - Name address: DisplayName <sip:user:password@host:port;uri-parameters>
-    - Plain SIP URI: sip:user:password@host:port;uri-parameters
-    - Special address: "*"
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strAddress              SIP address format string
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The address is successfully parsed
-IMS_FALSE               An error occurs during parsing
-</table>
-*/
 PUBLIC
-IMS_BOOL SipAddress::Create(IN CONST AString &strAddress)
+IMS_BOOL SipAddress::Create(IN const AString& strAddress)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strAddress.GetLength() == 0)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
-    bIsWildcard = IMS_FALSE;
-    bDQUOTForDisplayName = IMS_FALSE;
-    strDisplayName = AString::ConstNull();
-    strScheme = AString::ConstNull();
-    strUserInfo = AString::ConstNull();
-    strHostInfo = AString::ConstNull();
-    nPort = Sip::PORT_UNSPECIFIED;
+    m_bIsWildcard = IMS_FALSE;
+    m_bDquotForDisplayName = IMS_FALSE;
+    m_strDisplayName = AString::ConstNull();
+    m_strScheme = AString::ConstNull();
+    m_strUserInfo = AString::ConstNull();
+    m_strHostInfo = AString::ConstNull();
+    m_nPort = Sip::PORT_UNSPECIFIED;
 
     RemoveAllParameters();
     RemoveAllHeaderComponents();
 
-    if (!Decode(strAddress, IMS_TRUE))
-        return IMS_FALSE;
-
-    return IMS_TRUE;
+    return Decode(strAddress, IMS_TRUE);
 }
 
-/*
- Checks if the given SipAddress is the same.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objAddress              Object for SipAddress which is compared
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                If both SIP addresses matched, this value returns
-IMS_FALSE               If both SIP addresses are not matched, this value returns
-</table>
-*/
 PUBLIC
-IMS_BOOL SipAddress::Equals(IN CONST SipAddress &objAddress) const
+IMS_BOOL SipAddress::Equals(IN const SipAddress& objAddress) const
 {
-    //---------------------------------------------------------------------------------------------
-
     // If both addresses are the special ("*") value, those values are the same.
-    if (bIsWildcard && objAddress.bIsWildcard)
+    if (m_bIsWildcard && objAddress.m_bIsWildcard)
+    {
         return IMS_TRUE;
+    }
 
-    if (!bIsWildcard && objAddress.bIsWildcard)
+    if (!m_bIsWildcard && objAddress.m_bIsWildcard)
+    {
         return IMS_FALSE;
+    }
 
-    if (bIsWildcard && !objAddress.bIsWildcard)
+    if (m_bIsWildcard && !objAddress.m_bIsWildcard)
+    {
         return IMS_FALSE;
+    }
 
-    if (!strScheme.EqualsIgnoreCase(objAddress.strScheme))
+    if (!m_strScheme.EqualsIgnoreCase(objAddress.m_strScheme))
+    {
         return IMS_FALSE;
+    }
 
     // "sip" or "sips" URI scheme
     if (IsSchemeSip() || IsSchemeSips())
@@ -711,71 +432,33 @@ IMS_BOOL SipAddress::Equals(IN CONST SipAddress &objAddress) const
     //4 comparison of an address format with the other URI scheme
     else
     {
-        return strHostInfo.EqualsIgnoreCase(objAddress.strHostInfo);
+        return m_strHostInfo.EqualsIgnoreCase(objAddress.m_strHostInfo);
     }
 }
 
-/*
- Returns the display name of SIP addresss.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The display name if it is available
-NULL string             NULL string if it is not available or the address is a special ("*") value
-</table>
-*/
 PUBLIC
 const AString& SipAddress::GetDisplayName() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
+    {
         return AString::ConstNull();
+    }
 
-    return strDisplayName;
+    return m_strDisplayName;
 }
 
-/*
- Returns a header of SIP address which matches with the specified header type.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-nType                   Header type
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-ISipHeader*             Pointer to uri-header parameter
-</table>
-*/
 PUBLIC
 const ISipHeader* SipAddress::GetHeader(IN IMS_SINT32 nType,
-        IN CONST AString &strName /* = AString::ConstNull() */) const
+        IN const AString& strName/* = AString::ConstNull()*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
-        const ISipHeader *piHeader = objHeaders.GetAt(i);
+        const ISipHeader* piHeader = m_objHeaders.GetAt(i);
 
         if (piHeader == IMS_NULL)
+        {
             continue;
+        }
 
         if (nType == piHeader->GetType())
         {
@@ -786,8 +469,8 @@ const ISipHeader* SipAddress::GetHeader(IN IMS_SINT32 nType,
             else
             {
                 const IMS_CHAR cCompactName = SIPStack::GetCompactHeaderName(nType, strName);
-                const IMS_CHAR *pszName = SIPStack::GetHeaderName(nType, strName);
-                const AString &strHeaderName = piHeader->GetName();
+                const IMS_CHAR* pszName = SIPStack::GetHeaderName(nType, strName);
+                const AString& strHeaderName = piHeader->GetName();
 
                 if (strHeaderName.EqualsIgnoreCase(cCompactName)
                         || strHeaderName.EqualsIgnoreCase(pszName))
@@ -801,90 +484,23 @@ const ISipHeader* SipAddress::GetHeader(IN IMS_SINT32 nType,
     return IMS_NULL;
 }
 
-/*
- Returns the headers of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMSList<ISipHeader*>    List of uri-header parameter
-</table>
-*/
-PUBLIC
-const IMSList<ISipHeader*>& SipAddress::GetHeaders() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objHeaders;
-}
-
-/*
- Returns the host part of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The host part of this address
-NULL string             NULL string if the address is the special ("*") value
-</table>
-*/
 PUBLIC
 const AString& SipAddress::GetHost() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
+    {
         return AString::ConstNull();
+    }
 
-    return strHostInfo;
+    return m_strHostInfo;
 }
 
-/*
- Returns the value associated with the named URI parameter.
-
-Remarks
-
-Parameters
-<table>
-parameter                   description
-----------                  ----------
-strName                     The name of URI parameter
-</table>
-
-Returns
-<table>
-return                      description
-----------                  ----------
-Pointer to SipParameter     SipParameter to the named URI parameter
-NULL pointer                The named URI parameter is not found
-</table>
-*/
 PUBLIC
-const SipParameter* SipAddress::GetParameter(IN CONST AString &strName) const
+const SipParameter* SipAddress::GetParameter(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = m_objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
@@ -895,260 +511,128 @@ const SipParameter* SipAddress::GetParameter(IN CONST AString &strName) const
     return IMS_NULL;
 }
 
-/*
- Returns all the uri-parameters of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter                   description
-----------                  ----------
-</table>
-
-Returns
-<table>
-return                      description
-----------                  ----------
-IMSList<SipParameter*>      List of uri-parameter
-</table>
-*/
-PUBLIC
-const IMSList<SipParameter*>& SipAddress::GetParameters() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objParams;
-}
-
-/*
- Returns the port number of the SIP address.
- If the port number is not set, the function returns 5060 for "sip" scheme and
- 5061 for "sips" scheme. If the address is wildcard ("*"), it returns 0.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Port number             The value which is explicitly set or default value (5060 or 5061)
-0                       Zero if the schems is not SIP or SIPS
-                        or the address is the special ("*") value
-</table>
-*/
 PUBLIC
 IMS_SINT32 SipAddress::GetPort() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nPort == Sip::PORT_UNSPECIFIED)
+    if (m_nPort == Sip::PORT_UNSPECIFIED)
     {
-        if (bIsWildcard)
+        if (m_bIsWildcard)
+        {
             return 0;
+        }
 
-        if (strScheme.Equals(Sip::STR_SIP))
+        if (m_strScheme.Equals(Sip::STR_SIP))
             return Sip::PORT_5060;
-        else if (strScheme.Equals(Sip::STR_SIPS))
+        else if (m_strScheme.Equals(Sip::STR_SIPS))
             return Sip::PORT_5061;
         else
             return 0;
     }
 
-    return nPort;
+    return m_nPort;
 }
 
-/*
- Returns the scheme of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The scheme of this SIP address (sip/sips/tel/pres/im/...)
-NULL string             NULL string if the address is the special ("*") value
-</table>
-*/
 PUBLIC
 const AString& SipAddress::GetScheme() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
+    {
         return AString::ConstNull();
+    }
 
-    return strScheme;
+    return m_strScheme;
 }
 
-/*
- Returns the URI part of SIP address (without parameters).
-The URI part of the address is of the form "scheme:user@host:port".
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The URI part of this SIP address
-"*"                     If the address is the special ("*") value
-</table>
-*/
 PUBLIC
 AString SipAddress::GetUri() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         return AString(&TextParser::CHAR_ASTERISK, 1);
     }
 
-    if (strHostInfo.GetLength() == 0)
+    if (m_strHostInfo.GetLength() == 0)
     {
         return AString::ConstNull();
     }
 
-    AString strURI = AString::ConstNull();
+    AStringBuffer objUri(256);
 
-    if (strScheme.GetLength() > 0)
+    if (m_strScheme.GetLength() > 0)
     {
-        strURI += strScheme;
-        strURI += TextParser::CHAR_COLON;
+        objUri.Append(m_strScheme);
+        objUri.Append(TextParser::CHAR_COLON);
     }
 
-    if (strUserInfo.GetLength() > 0)
+    if (m_strUserInfo.GetLength() > 0)
     {
-        strURI += strUserInfo;
-        strURI += TextParser::CHAR_AT;
+        objUri.Append(m_strUserInfo);
+        objUri.Append(TextParser::CHAR_AT);
     }
 
     IPAddress objHost;
 
-    if (objHost.Parse(strHostInfo))
+    if (objHost.Parse(m_strHostInfo))
     {
         if (objHost.IsIPv6Address())
         {
-            strURI += TextParser::CHAR_LSBRACKET;
-            strURI += strHostInfo;
-            strURI += TextParser::CHAR_RSBRACKET;
+            objUri.Append(TextParser::CHAR_LSBRACKET);
+            objUri.Append(m_strHostInfo);
+            objUri.Append(TextParser::CHAR_RSBRACKET);
         }
         else
         {
-            strURI += strHostInfo;
+            objUri.Append(m_strHostInfo);
         }
     }
     else
     {
-        strURI += strHostInfo;
+        objUri.Append(m_strHostInfo);
     }
 
-    if (nPort != Sip::PORT_UNSPECIFIED)
+    if (m_nPort != Sip::PORT_UNSPECIFIED)
     {
         AString strPort;
-        strPort.SetNumber(nPort);
+        strPort.SetNumber(m_nPort);
 
-        strURI += TextParser::CHAR_COLON;
-        strURI += strPort;
+        objUri.Append(TextParser::CHAR_COLON);
+        objUri.Append(strPort);
     }
 
-    return strURI;
+    return static_cast<const AStringBuffer&>(objUri).GetString();
 }
 
-/*
- Returns the user part of SIP address. There is no separate method for getting the password field
-so that if the password field is present in the address, then the function returns the value of
-"user:password" (instead of only "user").
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The user part of this SIP address
-NULL string             If the user part is missing or the address is the special ("*") value
-</table>
-*/
 PUBLIC
 const AString& SipAddress::GetUser() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
+    {
         return AString::ConstNull();
+    }
 
-    return strUserInfo;
+    return m_strUserInfo;
 }
 
-/*
- Returns the pointer of UserInfoPart.
-(userinfo := (user / telephon-number) [ ":" password ])
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-UserInfoPart*           If userinfo part is present, returns the pointer of UserInfoPart.
-                        Otherwise, returns IMS_NULL.
-</table>
-*/
 PUBLIC
 const SipAddress::UserInfoPart* SipAddress::GetUserInfoPart() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strUserInfo.GetLength() == 0)
+    if (m_strUserInfo.GetLength() == 0)
     {
         // No userinfo part
 
         // If SIP address is "tel" URI...
         if (IsSchemeTel())
         {
-            return CreateUserInfoPart(strHostInfo);
+            return CreateUserInfoPart(m_strHostInfo);
         }
         else if (IsServiceUrn())
         {
             // To remove "service:" prefix
-            IMS_SINT32 nIndex = strHostInfo.GetIndexOf(TextParser::CHAR_COLON);
+            IMS_SINT32 nIndex = m_strHostInfo.GetIndexOf(TextParser::CHAR_COLON);
 
             if (nIndex != AString::NPOS)
             {
-                AString strUserPart = strHostInfo.GetSubStr(nIndex + 1);
+                AString strUserPart = m_strHostInfo.GetSubStr(nIndex + 1);
 
                 return CreateUserInfoPart(strUserPart);
             }
@@ -1157,439 +641,153 @@ const SipAddress::UserInfoPart* SipAddress::GetUserInfoPart() const
         return IMS_NULL;
     }
 
-    return CreateUserInfoPart(strUserInfo);
+    return CreateUserInfoPart(m_strUserInfo);
 }
 
-/*
- Returns the user part of SIP address.
- For SIP or SIPS, there is no separate method for getting the password field
-so that if the password field is present in the address, then the function returns the value of
-"user:password" (instead of only "user").
- For the others, the funcation returns the host part of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Non-NULL string         The user part of this SIP address
-NULL string             If the user part is missing or the address is the special ("*") value
-</table>
-*/
 PUBLIC
 const AString& SipAddress::GetUserPart() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         return AString::ConstNull();
     }
 
     if (IsSchemeSip() || IsSchemeSips())
     {
-        return strUserInfo;
+        return m_strUserInfo;
     }
 
-    return strHostInfo;
+    return m_strHostInfo;
 }
 
-/*
- Checks if the port number is explicitly set or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The port number is not set explicitly
-IMS_FALSE               The port number is set explicitly
-</table>
-*/
-PUBLIC
-IMS_BOOL SipAddress::IsPortUnspecified() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (nPort == Sip::PORT_UNSPECIFIED);
-}
-
-/*
- Checks if the scheme is SIP URI scheme or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The scheme is SIP URI scheme
-IMS_FALSE               The scheme is not SIP URI scheme
-</table>
-*/
 PUBLIC
 IMS_BOOL SipAddress::IsSchemeSip() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
-        return IMS_FALSE;
-
-    return strScheme.EqualsIgnoreCase(Sip::STR_SIP);
-}
-
-/*
- Checks if the scheme is SIPS URI scheme or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The scheme is SIPS URI scheme
-IMS_FALSE               The scheme is not SIPS URI scheme
-</table>
-*/
-PUBLIC
-IMS_BOOL SipAddress::IsSchemeSips() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
-        return IMS_FALSE;
-
-    return strScheme.EqualsIgnoreCase(Sip::STR_SIPS);
-}
-
-/*
- Checks if the scheme is TEL URI scheme or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The scheme is TEL URI scheme
-IMS_FALSE               The scheme is not TEL URI scheme
-</table>
-*/
-PUBLIC
-IMS_BOOL SipAddress::IsSchemeTel() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
-        return IMS_FALSE;
-
-    return strScheme.EqualsIgnoreCase(Sip::STR_TEL);
-}
-
-/*
- Checks if the SIP address is for a service URN or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The SIP address is a service URN
-IMS_FALSE               The SIP address is not a service URN
-</table>
-*/
-PUBLIC
-IMS_BOOL SipAddress::IsServiceUrn() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         return IMS_FALSE;
     }
 
-    if (!strScheme.EqualsIgnoreCase("urn"))
+    return m_strScheme.EqualsIgnoreCase(Sip::STR_SIP);
+}
+
+PUBLIC
+IMS_BOOL SipAddress::IsSchemeSips() const
+{
+    if (m_bIsWildcard)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_strScheme.EqualsIgnoreCase(Sip::STR_SIPS);
+}
+
+PUBLIC
+IMS_BOOL SipAddress::IsSchemeTel() const
+{
+    if (m_bIsWildcard)
+    {
+        return IMS_FALSE;
+    }
+
+    return m_strScheme.EqualsIgnoreCase(Sip::STR_TEL);
+}
+
+PUBLIC
+IMS_BOOL SipAddress::IsServiceUrn() const
+{
+    if (m_bIsWildcard)
+    {
+        return IMS_FALSE;
+    }
+
+    if (!m_strScheme.EqualsIgnoreCase("urn"))
     {
         return IMS_FALSE;
     }
 
     // Check if "service:" is present in case-insensitively
-    return strHostInfo.StartsWith("service:");
+    return m_strHostInfo.StartsWith("service:");
 }
 
-/*
- Removes all the header components.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
 void SipAddress::RemoveAllHeaderComponents()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objHeaders.IsEmpty())
-        return;
-
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    if (m_objHeaders.IsEmpty())
     {
-        ISipHeader *piHeader = objHeaders.GetAt(i);
-
-        if (piHeader == IMS_NULL)
-            continue;
-
-        piHeader->Destroy();
+        return;
     }
 
-    objHeaders.Clear();
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
+    {
+        ISipHeader* piHeader = m_objHeaders.GetAt(i);
+
+        if (piHeader != IMS_NULL)
+        {
+            piHeader->Destroy();
+        }
+    }
+
+    m_objHeaders.Clear();
 }
 
-/*
- Removes all the uri parameters.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
 void SipAddress::RemoveAllParameters()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objParams.IsEmpty())
-        return;
-
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    if (m_objParams.IsEmpty())
     {
-        SipParameter *pParameter = objParams.GetAt(i);
-
-        if (pParameter == IMS_NULL)
-            continue;
-
-        delete pParameter;
+        return;
     }
 
-    objParams.Clear();
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
+    {
+        SipParameter* pParameter = m_objParams.GetAt(i);
+
+        if (pParameter != IMS_NULL)
+        {
+            delete pParameter;
+        }
+    }
+
+    m_objParams.Clear();
 }
 
-/*
- Removes the named URI parameter. The method returns without any action
-if the named parameter is not defined or if the address is the special ("*") value.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strName                 The name of the parameter to remove
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-void SipAddress::RemoveParameter(IN CONST AString &strName)
+void SipAddress::RemoveParameter(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = m_objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
-            objParams.RemoveAt(i);
+            m_objParams.RemoveAt(i);
             delete pParameter;
             return;
         }
     }
 }
 
-/*
- Sets the flag to indicate that AQUOT is required when forming URI
-even though any uri parameter doesn't exist.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-bAQUOTRequired          Flag for AQUOT requirement
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-void SipAddress::SetAquotRequired(IN IMS_BOOL bAQUOTRequired)
+IMS_RESULT SipAddress::SetDisplayName(IN const AString& strName)
 {
-    this->bAQUOTRequired = bAQUOTRequired;
-}
-
-/*
- Sets the display name. Empty string or NULL removes the display name.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strName                 The display name to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The display name is successfully set
-IMS_FAILURE             The display name is invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
-PUBLIC
-IMS_RESULT SipAddress::SetDisplayName(IN CONST AString &strName)
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Check the grammar validity
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    strDisplayName = strName;
+    m_strDisplayName = strName;
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
- Sets the flag to indicate if DQUOT is required when forming display-name field.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-bDQUOTRequired          Flag to indicate if DQUOTE should be included in display-name field
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-</table>
-*/
 PUBLIC
-void SipAddress::SetDquotRequiredForDisplayName(IN IMS_BOOL bDQUOTRequired)
+IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+        IN const AString& strName/* = AString::ConstNull()*/)
 {
-    bDQUOTForDisplayName = bDQUOTRequired;
-}
-
-/*
- Sets the header field.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-nType                   Header type as a enumeration
-strValue                Header value
-strName                 Header name; it is valid if nType is UNKNOWN
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The headers is successfully set
-IMS_FAILURE             The headers is invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
-PUBLIC
-IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-        IN CONST AString &strName /* = AString::ConstNull() */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Check the grammar validity
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
@@ -1601,7 +799,7 @@ IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue
         return IMS_FAILURE;
     }
 
-    SIPHeader *pHeader = new SIPHeader(nType);
+    SIPHeader* pHeader = new SIPHeader(nType);
 
     if (pHeader == IMS_NULL)
     {
@@ -1622,7 +820,7 @@ IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue
         return IMS_FAILURE;
     }
 
-    if (!objHeaders.Append(pHeader))
+    if (!m_objHeaders.Append(pHeader))
     {
         delete pHeader;
         return IMS_FAILURE;
@@ -1632,39 +830,11 @@ IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue
     return IMS_SUCCESS;
 }
 
-/*
- Sets the headers field.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strHeaders              The headers field to set
-                        If the multiple headers set, each header will be identified by '&'.
-bRemoveAll              Flag to indicate if the existing header parameters are removed
-                        or not before setting the header parameters
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The headers is successfully set
-IMS_FAILURE             The headers is invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetHeaders(IN CONST AString &strHeaders,
-        IN IMS_BOOL bRemoveAll /* = IMS_TRUE */)
+IMS_RESULT SipAddress::SetHeaders(IN const AString& strHeaders,
+        IN IMS_BOOL bRemoveAll/* = IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    // Check the grammar validity
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
@@ -1685,35 +855,10 @@ IMS_RESULT SipAddress::SetHeaders(IN CONST AString &strHeaders,
     return IMS_SUCCESS;
 }
 
-/*
- Sets the host part of the SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strHost                 The host part to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The host part is successfully set
-IMS_FAILURE             The host part is NULL, invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetHost(IN CONST AString &strHost)
+IMS_RESULT SipAddress::SetHost(IN const AString& strHost)
 {
-    //---------------------------------------------------------------------------------------------
-
-    // Check the grammar validity
-
-    if (strHost.IsNULL() || bIsWildcard)
+    if (strHost.IsNULL() || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE; // Throw exception
@@ -1723,57 +868,29 @@ IMS_RESULT SipAddress::SetHost(IN CONST AString &strHost)
 
     if (objHost.Parse(strHost))
     {
-        strHostInfo = objHost.ToString();
+        m_strHostInfo = objHost.ToString();
     }
     else
     {
-        strHostInfo = strHost;
+        m_strHostInfo = strHost;
     }
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
- Sets the named URI parameter to the specified value. If the value is NULL, the parameter
-is interpreted as a parameter without value. Existing parameter will be overwritten,
-otherwise the parameter is added.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strName                 The named URI parameter
-strValue                The URI parameter value to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The URI parameter is successfully set
-IMS_FAILURE             The name is NULL, invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetParameter(IN CONST AString &strName, IN CONST AString &strValue)
+IMS_RESULT SipAddress::SetParameter(IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strName.IsNULL() || bIsWildcard)
+    if (strName.IsNULL() || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    // Check the grammar validity
-
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objParams.GetAt(i);
+        SipParameter* pParameter = m_objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
@@ -1788,12 +905,16 @@ IMS_RESULT SipAddress::SetParameter(IN CONST AString &strName, IN CONST AString 
     }
 
     // If the parameter with the specified name does not exist, then add new one.
-    SipParameter *pParameter = IMS_NULL;
+    SipParameter* pParameter = IMS_NULL;
 
     if (strValue.IsNULL())
+    {
         pParameter = new SipParameter(strName);
+    }
     else
+    {
         pParameter = new SipParameter(strName, strValue);
+    }
 
     if (pParameter == IMS_NULL)
     {
@@ -1801,7 +922,7 @@ IMS_RESULT SipAddress::SetParameter(IN CONST AString &strName, IN CONST AString 
         return IMS_FAILURE;
     }
 
-    if (!objParams.Append(pParameter))
+    if (!m_objParams.Append(pParameter))
     {
         delete pParameter;
         SIPPrivate::SetLastError(SipError::LIST_OPERATION_FAILED);
@@ -1812,440 +933,264 @@ IMS_RESULT SipAddress::SetParameter(IN CONST AString &strName, IN CONST AString 
     return IMS_SUCCESS;
 }
 
-/*
- Sets the port number of the SIP address. The valid range is 0 ~ 65535.
-After setting the port to 0, the port number is removed from the address URI,
-GetPort() returns the default 5060 value for "sip" and 5061 for "sips" scheme.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-nPort                   Port number (0 ~ 65535) to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The port number is successfully set
-IMS_FAILURE             The port number is invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
 IMS_RESULT SipAddress::SetPort(IN IMS_SINT32 nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((nPort < 0) || (nPort > 65535) || bIsWildcard)
+    if ((nPort < 0) || (nPort > Sip::PORT_UNSPECIFIED) || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (nPort == 0)
-        this->nPort = Sip::PORT_UNSPECIFIED;
+    {
+        m_nPort = Sip::PORT_UNSPECIFIED;
+    }
     else
-        this->nPort = nPort;
+    {
+        m_nPort = nPort;
+    }
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
- Sets the scheme of the SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strScheme               The scheme format to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The scheme is successfully set
-IMS_FAILURE             The scheme is invalid
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetScheme(IN CONST AString &strScheme)
+IMS_RESULT SipAddress::SetScheme(IN const AString& strScheme)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strScheme.IsNULL() || bIsWildcard)
+    if (strScheme.IsNULL() || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    this->strScheme = strScheme;
+    m_strScheme = strScheme;
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
- Sets the URI part of the SIP address (without parameter). The URI part of the address is of the
-form "scheme:user@host:port". If the parameter of the method contains URI parameters,
-they don't overwrite existing URI parameters, they are simply ignored if present.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strURI                  The URI part of the address to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The URI part is successfully set
-IMS_FAILURE             The URI part is invalid, "*"
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetUri(IN CONST AString &strURI)
+IMS_RESULT SipAddress::SetUri(IN const AString& strURI)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strURI.IsNULL() || strURI.Equals(TextParser::CHAR_ASTERISK) || bIsWildcard)
+    if (strURI.IsNULL() || strURI.Equals(TextParser::CHAR_ASTERISK) || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     if (!Decode(strURI, IMS_FALSE, IMS_FALSE, IMS_FALSE))
+    {
         return IMS_FAILURE;
+    }
 
     return IMS_SUCCESS;
 }
 
-/*
- Sets the user part of the SIP address. Empty string or NULL removes the user part.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strUser                 The user part of the address to set
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SUCCESS             The user part is successfully set
-IMS_FAILURE             The user part is invalid, "*"
-                        or the address represents the immutable "*" value
-</table>
-*/
 PUBLIC
-IMS_RESULT SipAddress::SetUser(IN CONST AString &strUser)
+IMS_RESULT SipAddress::SetUser(IN const AString& strUser)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    // Check the grammar rules
-
-    this->strUserInfo = strUser;
+    m_strUserInfo = strUser;
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
- Returns a fully qualified SIP address, with display name, URI and URI parameters.
-If display name is not specified only a SIP URI is returned.
-If the port is not explicitly set (to 5060 or other value), it will be omitted from the address
-URI in returned string.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-Fully qualified SIP address    SIP/SIPS/TEL/... or "*" if the address is the special ("*") value
-</table>
-*/
 PUBLIC
 AString SipAddress::ToString() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bIsWildcard)
+    if (m_bIsWildcard)
     {
         return AString(&TextParser::CHAR_ASTERISK, 1);
     }
 
-    if (strHostInfo.GetLength() == 0)
+    if (m_strHostInfo.GetLength() == 0)
     {
         return AString::ConstNull();
     }
 
-    AStringBuffer objStringBuffer(512);
-    IMS_BOOL bFormAQUOT = IMS_FALSE;
+    AStringBuffer objSipAddr(512);
+    IMS_BOOL bFormAquot = IMS_FALSE;
 
-    if (bAQUOTRequired || (strDisplayName.GetLength() > 0)
-            || !objParams.IsEmpty() || !objHeaders.IsEmpty())
+    if (m_bAquotRequired || (m_strDisplayName.GetLength() > 0)
+            || !m_objParams.IsEmpty() || !m_objHeaders.IsEmpty())
     {
-        bFormAQUOT = IMS_TRUE;
+        bFormAquot = IMS_TRUE;
     }
 
-    if (strDisplayName.GetLength() > 0)
+    if (m_strDisplayName.GetLength() > 0)
     {
-        if (IsDisplayNameToken(strDisplayName))
+        if (IsDisplayNameToken(m_strDisplayName))
         {
             IMS_SINT32 nSlotId = IMS_SLOT_0;
 
-            if (!bDQUOTForDisplayName && SystemConfig::IsMultiSimEnabled())
+            if (!m_bDquotForDisplayName && SystemConfig::IsMultiSimEnabled())
             {
                 nSlotId = ThreadService::GetCurrentSlotId();
             }
 
-            if (bDQUOTForDisplayName
+            if (m_bDquotForDisplayName
                     || ((nSlotId != IMS_SLOT_ANY)
                         && SipConfigProxy::IsDisplayNameDquotRequired(nSlotId)))
             {
-                objStringBuffer.Append(TextParser::CHAR_DQUOT);
-                objStringBuffer.Append(strDisplayName);
-                objStringBuffer.Append(TextParser::CHAR_DQUOT);
+                objSipAddr.Append(TextParser::CHAR_DQUOT);
+                objSipAddr.Append(m_strDisplayName);
+                objSipAddr.Append(TextParser::CHAR_DQUOT);
             }
             else
             {
-                objStringBuffer.Append(strDisplayName);
+                objSipAddr.Append(m_strDisplayName);
             }
         }
         else
         {
-            objStringBuffer.Append(TextParser::CHAR_DQUOT);
+            objSipAddr.Append(TextParser::CHAR_DQUOT);
 
             // '"' / '\' -> need to be escaped
-            if (strDisplayName.Contains('"') || strDisplayName.Contains('\\'))
+            if (m_strDisplayName.Contains('"') || m_strDisplayName.Contains('\\'))
             {
-                objStringBuffer.Append(EscapeDquotAndBackslash(strDisplayName));
+                objSipAddr.Append(EscapeDquotAndBackslash(m_strDisplayName));
             }
             else
             {
-                objStringBuffer.Append(strDisplayName);
+                objSipAddr.Append(m_strDisplayName);
             }
 
-            objStringBuffer.Append(TextParser::CHAR_DQUOT);
+            objSipAddr.Append(TextParser::CHAR_DQUOT);
         }
 
-        objStringBuffer.Append(TextParser::CHAR_SP);
+        objSipAddr.Append(TextParser::CHAR_SP);
     }
 
-    if (bFormAQUOT)
-        objStringBuffer.Append(TextParser::CHAR_LAQUOT);
-
-    if (strScheme.GetLength() > 0)
+    if (bFormAquot)
     {
-        objStringBuffer.Append(strScheme);
-        objStringBuffer.Append(TextParser::CHAR_COLON);
+        objSipAddr.Append(TextParser::CHAR_LAQUOT);
     }
 
-    if (strUserInfo.GetLength() > 0)
+    if (m_strScheme.GetLength() > 0)
     {
-        objStringBuffer.Append(strUserInfo);
-        objStringBuffer.Append(TextParser::CHAR_AT);
+        objSipAddr.Append(m_strScheme);
+        objSipAddr.Append(TextParser::CHAR_COLON);
+    }
+
+    if (m_strUserInfo.GetLength() > 0)
+    {
+        objSipAddr.Append(m_strUserInfo);
+        objSipAddr.Append(TextParser::CHAR_AT);
     }
 
     IPAddress objHost;
 
-    if (objHost.Parse(strHostInfo))
+    if (objHost.Parse(m_strHostInfo))
     {
         if (objHost.IsIPv6Address())
         {
-            objStringBuffer.Append(TextParser::CHAR_LSBRACKET);
-            objStringBuffer.Append(strHostInfo);
-            objStringBuffer.Append(TextParser::CHAR_RSBRACKET);
+            objSipAddr.Append(TextParser::CHAR_LSBRACKET);
+            objSipAddr.Append(m_strHostInfo);
+            objSipAddr.Append(TextParser::CHAR_RSBRACKET);
         }
         else
         {
-            objStringBuffer.Append(strHostInfo);
+            objSipAddr.Append(m_strHostInfo);
         }
     }
     else
     {
-        objStringBuffer.Append(strHostInfo);
+        objSipAddr.Append(m_strHostInfo);
     }
 
-    if (nPort != Sip::PORT_UNSPECIFIED)
+    if (m_nPort != Sip::PORT_UNSPECIFIED)
     {
         AString strPort;
 
-        strPort.SetNumber(nPort);
+        strPort.SetNumber(m_nPort);
 
-        objStringBuffer.Append(TextParser::CHAR_COLON);
-        objStringBuffer.Append(strPort);
+        objSipAddr.Append(TextParser::CHAR_COLON);
+        objSipAddr.Append(strPort);
     }
 
-    if (!objParams.IsEmpty())
+    if (!m_objParams.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
         {
-            const SipParameter *pParameter = objParams.GetAt(i);
+            const SipParameter* pParameter = m_objParams.GetAt(i);
 
-            if (pParameter == IMS_NULL)
-                continue;
-
-            objStringBuffer.Append(TextParser::CHAR_SEMICOLON);
-            objStringBuffer.Append(pParameter->ToString());
+            if (pParameter != IMS_NULL)
+            {
+                objSipAddr.Append(TextParser::CHAR_SEMICOLON);
+                objSipAddr.Append(pParameter->ToString());
+            }
         }
     }
 
     // If uri-header parameter exists, then inserts those fields
-    if (!objHeaders.IsEmpty())
+    if (!m_objHeaders.IsEmpty())
     {
         // hnv-unreserved = "[" / "]" / "/" / "?" / ":" / "+" / "$"
         // unreserved (mark) = "-" / "_" / "." / "!" / "~" / "*" / "'" / "(" / ")"
         // non-reserved characters = "-" / "_" / "." / "~"
         //const AString strHNV("[]/?:+$!*'()");
         //const AString strEscaped("\"<>");
-        const AString strHNV("[]/?:+$-_.!~*'()");
-        const ISipHeader *piHeader = objHeaders.GetAt(0);
+        const AString strHnv("[]/?:+$-_.!~*'()");
+        const ISipHeader* piHeader = m_objHeaders.GetAt(0);
 
-        objStringBuffer.Append(TextParser::CHAR_QUESTIONMARK);
+        objSipAddr.Append(TextParser::CHAR_QUESTIONMARK);
 
-        objStringBuffer.Append(piHeader->GetName());
-        objStringBuffer.Append(TextParser::CHAR_EQUAL);
-        objStringBuffer.Append(
-                TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHNV));
+        objSipAddr.Append(piHeader->GetName());
+        objSipAddr.Append(TextParser::CHAR_EQUAL);
+        objSipAddr.Append(
+                TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHnv));
 
-        for (IMS_UINT32 i = 1; i < objHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 1; i < m_objHeaders.GetSize(); ++i)
         {
-            const ISipHeader *piHeader = objHeaders.GetAt(i);
+            const ISipHeader* piHeader = m_objHeaders.GetAt(i);
 
-            if (piHeader == IMS_NULL)
-                continue;
-
-            objStringBuffer.Append(TextParser::CHAR_AMPERSAND);
-            objStringBuffer.Append(piHeader->GetName());
-            objStringBuffer.Append(TextParser::CHAR_EQUAL);
-            objStringBuffer.Append(
-                    TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHNV));
+            if (piHeader != IMS_NULL)
+            {
+                objSipAddr.Append(TextParser::CHAR_AMPERSAND);
+                objSipAddr.Append(piHeader->GetName());
+                objSipAddr.Append(TextParser::CHAR_EQUAL);
+                objSipAddr.Append(
+                        TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHnv));
+            }
         }
     }
 
-    if (bFormAQUOT)
-        objStringBuffer.Append(TextParser::CHAR_RAQUOT);
+    if (bFormAquot)
+    {
+        objSipAddr.Append(TextParser::CHAR_RAQUOT);
+    }
 
-    return static_cast<const AStringBuffer&>(objStringBuffer).GetString();
+    return static_cast<const AStringBuffer&>(objSipAddr).GetString();
 }
 
-/*
- Returns the default list of SIPAddresses (empty list).
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMSList<SipAddress*>&   Reference to the list of SIPAddresses (empty list)
-</table>
-*/
 PUBLIC GLOBAL
 const IMSList<SipAddress*>& SipAddress::ConstEmptyList()
 {
     static const IMSList<SipAddress*> CONST_EMPTY_LIST = IMSList<SipAddress*>();
-
-    //---------------------------------------------------------------------------------------------
-
     return CONST_EMPTY_LIST;
 }
 
-/*
- Returns the default SipAddress (null).
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-const SipAddress&       Reference to SipAddress (null)
-</table>
-*/
 PUBLIC GLOBAL
 const SipAddress& SipAddress::ConstNull()
 {
     static const SipAddress CONST_NULL;
-
-    //---------------------------------------------------------------------------------------------
-
     return CONST_NULL;
 }
 
-/*
- Returns the tel URI format for the specified resource string.
-This method assumes that strResource does not contain any URI scheme and
-leading / trailing WSP.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strResource             Resource string to be checked
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_SINT32              TEL_FORMAT_XXX (XXX := NONE / GLOBAL / LOCAL)
-</table>
-*/
 PUBLIC GLOBAL
-IMS_SINT32 SipAddress::GetTelUriFormat(IN CONST AString &strResource)
+IMS_SINT32 SipAddress::GetTelUriFormat(IN const AString& strResource)
 {
     // global-number-digits := "+" *phonedigit DIGIT *phonedigit
     // local-number-digits := *phonedigit-hex (HEXDIG / "*" / "#") *phonedigit-hex
     // phonedigit := DIGIT / [visual-separator]
     // phonedigit-hex := HEXDIG / "*" / "#" / [visual-separator]
-
-    //---------------------------------------------------------------------------------------------
 
     if (strResource.Equals('+'))
     {
@@ -2286,28 +1231,8 @@ IMS_SINT32 SipAddress::GetTelUriFormat(IN CONST AString &strResource)
     }
 }
 
-/*
- Compares if the specified SIP address with SIP URI format is equal or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objAddress              Object for SipAddress which is compared
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                If both SIP addresses match, this value will be returned
-IMS_FALSE               If both SIP addresses do not match, this value will be returned
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::CompareSipUris(IN CONST SipAddress &objAddress) const
+IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 {
     static struct
     {
@@ -2325,27 +1250,30 @@ IMS_BOOL SipAddress::CompareSipUris(IN CONST SipAddress &objAddress) const
             */
         };
 
-    static const IMS_UINT32 MAX_SPECIAL_PARAMETER
-            = sizeof(SPECIAL_PARAMETER)/sizeof(SPECIAL_PARAMETER[0]);
+    static const IMS_UINT32 MAX_SPECIAL_PARAMETER =
+            sizeof(SPECIAL_PARAMETER)/sizeof(SPECIAL_PARAMETER[0]);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (nPort != objAddress.nPort)
+    if (m_nPort != objAddress.m_nPort)
+    {
         return IMS_FALSE;
+    }
 
-    AString strValue, strOtherValue;
+    AString strValue;
+    AString strOtherValue;
 
-    strValue = TextParser::DoPercentDecoding(strHostInfo);
-    strOtherValue = TextParser::DoPercentDecoding(objAddress.strHostInfo);
+    strValue = TextParser::DoPercentDecoding(m_strHostInfo);
+    strOtherValue = TextParser::DoPercentDecoding(objAddress.m_strHostInfo);
 
     if (!strValue.EqualsIgnoreCase(strOtherValue))
         return IMS_FALSE;
 
-    strValue = TextParser::DoPercentDecoding(strUserInfo);
-    strOtherValue = TextParser::DoPercentDecoding(objAddress.strUserInfo);
+    strValue = TextParser::DoPercentDecoding(m_strUserInfo);
+    strOtherValue = TextParser::DoPercentDecoding(objAddress.m_strUserInfo);
 
     if (!strValue.Equals(strOtherValue))
+    {
         return IMS_FALSE;
+    }
 
     // "transport" uri-parameter comparison
     if (!CompareTransportParameters(objAddress))
@@ -2376,15 +1304,15 @@ IMS_BOOL SipAddress::CompareSipUris(IN CONST SipAddress &objAddress) const
     }
 
     // Check if any uri-parameter components are equals if and only if it appears in both URIs.
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParam = objParams.GetAt(i);
-        const AString &strName = pParam->GetName();
+        const SipParameter* pParam = m_objParams.GetAt(i);
+        const AString& strName = pParam->GetName();
 
         // Check for each uri-parameter fields
-        for (IMS_UINT32 j = 0; j < objAddress.objParams.GetSize(); ++j)
+        for (IMS_UINT32 j = 0; j < objAddress.m_objParams.GetSize(); ++j)
         {
-            const SipParameter *pOtherParam = objAddress.objParams.GetAt(j);
+            const SipParameter* pOtherParam = objAddress.m_objParams.GetAt(j);
 
             if (strName.EqualsIgnoreCase(pOtherParam->GetName()))
             {
@@ -2402,14 +1330,14 @@ IMS_BOOL SipAddress::CompareSipUris(IN CONST SipAddress &objAddress) const
     }
 
     // Check if the header components are appearing in both URIs.
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
         IMS_BOOL bHeaderFound = IMS_FALSE;
-        const ISipHeader *piHeader = objHeaders.GetAt(i);
+        const ISipHeader* piHeader = m_objHeaders.GetAt(i);
 
-        for (IMS_UINT32 j = 0; j < objAddress.objHeaders.GetSize(); ++j)
+        for (IMS_UINT32 j = 0; j < objAddress.m_objHeaders.GetSize(); ++j)
         {
-            const ISipHeader *piOtherHeader = objAddress.objHeaders.GetAt(j);
+            const ISipHeader* piOtherHeader = objAddress.m_objHeaders.GetAt(j);
 
             if (piHeader->Equals(piOtherHeader))
             {
@@ -2429,90 +1357,74 @@ IMS_BOOL SipAddress::CompareSipUris(IN CONST SipAddress &objAddress) const
     return IMS_TRUE;
 }
 
-/*
- Compares if the specified SIP address with Tel URI format is equal or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objAddress              Object for SipAddress which is compared
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                If both TEL URIs match, this value will be returned
-IMS_FALSE               If both TEL URIs do not match, this value will be returned
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::CompareTelUris(IN CONST SipAddress &objAddress) const
+IMS_BOOL SipAddress::CompareTelUris(IN const SipAddress& objAddress) const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Checks if the local-number-digits or global-number-digits
-    if (strHostInfo.StartsWith(TextParser::CHAR_PLUS)
-            && !objAddress.strHostInfo.StartsWith(TextParser::CHAR_PLUS))
+    if (m_strHostInfo.StartsWith(TextParser::CHAR_PLUS) &&
+            !objAddress.m_strHostInfo.StartsWith(TextParser::CHAR_PLUS))
     {
         return IMS_FALSE;
     }
 
-    if (!strHostInfo.StartsWith(TextParser::CHAR_PLUS)
-            && objAddress.strHostInfo.StartsWith(TextParser::CHAR_PLUS))
+    if (!m_strHostInfo.StartsWith(TextParser::CHAR_PLUS) &&
+            objAddress.m_strHostInfo.StartsWith(TextParser::CHAR_PLUS))
     {
         return IMS_FALSE;
     }
 
     // Compares the number digits
-    if (!CompareNumberDigits(strHostInfo, objAddress.strHostInfo))
+    if (!CompareNumberDigits(m_strHostInfo, objAddress.m_strHostInfo))
+    {
         return IMS_FALSE;
+    }
 
     // Check the phone-context parameter
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParam = objParams.GetAt(i);
+        const SipParameter* pParam = m_objParams.GetAt(i);
 
         if (pParam->GetName().EqualsIgnoreCase(PARAM_PHONE_CONTEXT))
         {
             IMS_BOOL bFound = IMS_FALSE;
 
-            for (IMS_UINT32 j = 0; j < objAddress.objParams.GetSize(); ++j)
+            for (IMS_UINT32 j = 0; j < objAddress.m_objParams.GetSize(); ++j)
             {
-                const SipParameter *pOtherParam = objAddress.objParams.GetAt(i);
+                const SipParameter* pOtherParam = objAddress.m_objParams.GetAt(i);
 
                 if (pOtherParam->GetName().EqualsIgnoreCase(PARAM_PHONE_CONTEXT))
                 {
-                    const AString &strValue = pParam->GetValue();
-                    const AString &strOtherValue = pOtherParam->GetValue();
+                    const AString& strValue = pParam->GetValue();
+                    const AString& strOtherValue = pOtherParam->GetValue();
 
-                    if (strValue.StartsWith(TextParser::CHAR_PLUS)
-                            && !strOtherValue.StartsWith(TextParser::CHAR_PLUS))
+                    if (strValue.StartsWith(TextParser::CHAR_PLUS) &&
+                            !strOtherValue.StartsWith(TextParser::CHAR_PLUS))
                     {
                         return IMS_FALSE;
                     }
 
-                    if (!strValue.StartsWith(TextParser::CHAR_PLUS)
-                            && strOtherValue.StartsWith(TextParser::CHAR_PLUS))
+                    if (!strValue.StartsWith(TextParser::CHAR_PLUS) &&
+                            strOtherValue.StartsWith(TextParser::CHAR_PLUS))
                     {
                         return IMS_FALSE;
                     }
 
-                    if (strValue.StartsWith(TextParser::CHAR_PLUS)
-                            && strOtherValue.StartsWith(TextParser::CHAR_PLUS))
+                    if (strValue.StartsWith(TextParser::CHAR_PLUS) &&
+                            strOtherValue.StartsWith(TextParser::CHAR_PLUS))
                     {
                         // global-digit-number
                         if (!CompareNumberDigits(strValue, strOtherValue))
+                        {
                             return IMS_FALSE;
+                        }
                     }
                     else
                     {
                         // domainname
                         if (!strValue.EqualsIgnoreCase(strOtherValue))
+                        {
                             return IMS_FALSE;
+                        }
                     }
 
                     bFound = IMS_TRUE;
@@ -2530,14 +1442,14 @@ IMS_BOOL SipAddress::CompareTelUris(IN CONST SipAddress &objAddress) const
     }
 
     // Check for each uri-parameter fields
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
         IMS_BOOL bParamFound = IMS_FALSE;
-        const SipParameter *pParam = objParams.GetAt(i);
+        const SipParameter* pParam = m_objParams.GetAt(i);
 
-        for (IMS_UINT32 j = 0; j < objAddress.objParams.GetSize(); ++j)
+        for (IMS_UINT32 j = 0; j < objAddress.m_objParams.GetSize(); ++j)
         {
-            if (pParam->Equals(objAddress.objParams.GetAt(j)))
+            if (pParam->Equals(objAddress.m_objParams.GetAt(j)))
             {
                 bParamFound = IMS_TRUE;
                 break;
@@ -2554,39 +1466,12 @@ IMS_BOOL SipAddress::CompareTelUris(IN CONST SipAddress &objAddress) const
     return IMS_TRUE;
 }
 
-/*
- Compares if "transport" uri-parameter is equal or not.
- This logic is based on RFC 3261, 19.1.4 URI Comparison clause,
- but it doesn't cover the below example case.
-
-   sip:bob@biloxi.com     (can resolve to different port and transports)
-   sip:bob@biloxi.com:6000;transport=tcp
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-objAddress              Object for SipAddress which is compared
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                If both transport parameters match, this value will be returned
-IMS_FALSE               If both transport parameters do not match, this value will be returned
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::CompareTransportParameters(IN CONST SipAddress &objAddress) const
+IMS_BOOL SipAddress::CompareTransportParameters(IN const SipAddress& objAddress) const
 {
     const AString strParamName(PARAM_TRANSPORT);
-    const SipParameter *pParameter = GetParameter(strParamName);
-    const SipParameter *pOtherParameter = objAddress.GetParameter(strParamName);
-
-    //---------------------------------------------------------------------------------------------
+    const SipParameter* pParameter = GetParameter(strParamName);
+    const SipParameter* pOtherParameter = objAddress.GetParameter(strParamName);
 
     if ((pParameter == IMS_NULL) && (pOtherParameter == IMS_NULL))
     {
@@ -2594,9 +1479,9 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN CONST SipAddress &objAddress)
         return IMS_TRUE;
     }
 
-    const AString &strTransport = (pParameter != IMS_NULL) ?\
+    const AString& strTransport = (pParameter != IMS_NULL) ?\
             pParameter->GetValue() : AString::ConstNull();
-    const AString &strOtherTransport = (pOtherParameter != IMS_NULL) ?\
+    const AString& strOtherTransport = (pOtherParameter != IMS_NULL) ?\
             pOtherParameter->GetValue() : AString::ConstNull();
 
     if ((strTransport.GetLength() == 0) && (strOtherTransport.GetLength() == 0))
@@ -2617,7 +1502,7 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN CONST SipAddress &objAddress)
      * The same is true for the transport-parameter, ttl-parameter, user-parameter,
      * and method components.
      */
-    const AString &strValue = (strTransport.GetLength() == 0) ? strOtherTransport : strTransport;
+    const AString& strValue = (strTransport.GetLength() == 0) ? strOtherTransport : strTransport;
 
     if (IsSchemeSip() && strValue.EqualsIgnoreCase(Sip::STR_UDP))
     {
@@ -2633,168 +1518,125 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN CONST SipAddress &objAddress)
     return IMS_TRUE;
 }
 
-/*
- Creates a user info. part from the specified user part.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strUserPart             User part string
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-UserInfoPart*           If user part is successfully parsed, returns the pointer of UserInfoPart.
-                        Otherwise, returns IMS_NULL.
-</table>
-*/
 PRIVATE
-const SipAddress::UserInfoPart* SipAddress::CreateUserInfoPart(IN CONST AString &strUserPart) const
+const SipAddress::UserInfoPart* SipAddress::CreateUserInfoPart(IN const AString& strUserPart) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pUserInfoPart == IMS_NULL)
+    if (m_pUserInfoPart == IMS_NULL)
     {
-        pUserInfoPart = new UserInfoPart();
+        m_pUserInfoPart = new UserInfoPart();
     }
 
-    if (pUserInfoPart != IMS_NULL)
+    if (m_pUserInfoPart != IMS_NULL)
     {
-        if (!pUserInfoPart->Create(strUserPart))
+        if (!m_pUserInfoPart->Create(strUserPart))
         {
             return IMS_NULL;
         }
     }
 
-    return pUserInfoPart;
+    return m_pUserInfoPart;
 }
 
-/*
- Parses the fully qualified SIP address or the URI part of SIP address.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strAddress              Fully qualified SIP address or URI part
-bParseParameter         Flag to indicate if the URI parameter needs to be parsed
-bParseDisplayName       Flag to indicate if the display name needs to be parsed
-bParseHeader            Flag to indicate if the header parameter needs to be parsed
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The SIP address is successfully parsed
-IMS_FALSE               An error occurs during parsing
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParseParameter,
-        IN IMS_BOOL bParseDisplayName /* = IMS_TRUE */, IN IMS_BOOL bParseHeader /* = IMS_TRUE */)
+IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParseParameter,
+        IN IMS_BOOL bParseDisplayName/* = IMS_TRUE*/, IN IMS_BOOL bParseHeader/* = IMS_TRUE*/)
 {
-    AString strURI = strAddress.Trim();
-
-    //---------------------------------------------------------------------------------------------
+    AString strUri = strAddress.Trim();
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
 
     // Checks if the address is the special ("*") value
-    if (strURI.Equals(TextParser::CHAR_ASTERISK))
+    if (strUri.Equals(TextParser::CHAR_ASTERISK))
     {
-        bIsWildcard = IMS_TRUE;
-        strHostInfo = strURI;
+        m_bIsWildcard = IMS_TRUE;
+        m_strHostInfo = strUri;
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nLAQUOT = TextParser::GetIndexOfDelimiter(strURI, TextParser::CHAR_LAQUOT);
+    IMS_SINT32 nLaquot = TextParser::GetIndexOfDelimiter(strUri, TextParser::CHAR_LAQUOT);
 
-    if (nLAQUOT != AString::NPOS)
+    if (nLaquot != AString::NPOS)
     {
         // If LAQUOT is found, then find the display name if it is there
         if (bParseDisplayName == IMS_TRUE)
         {
-            strDisplayName = strURI.GetSubStr(0, nLAQUOT);
-            strDisplayName = strDisplayName.Trim();
+            m_strDisplayName = strUri.GetSubStr(0, nLaquot);
+            m_strDisplayName = m_strDisplayName.Trim();
 
             //4 Remove DQUOT and restore the escaped characters
-            if (strDisplayName.StartsWith(TextParser::CHAR_DQUOT)
-                    && strDisplayName.EndsWith(TextParser::CHAR_DQUOT))
+            if (m_strDisplayName.StartsWith(TextParser::CHAR_DQUOT)
+                    && m_strDisplayName.EndsWith(TextParser::CHAR_DQUOT))
             {
-                strDisplayName = TextParser::TrimDQUOT(strDisplayName);
+                m_strDisplayName = TextParser::TrimDQUOT(m_strDisplayName);
 
                 // Restore the original characters if it is escaped for DQUOT and backslash
-                strDisplayName.Replace("\\\"", "\"");
-                strDisplayName.Replace("\\\\", "\\");
+                m_strDisplayName.Replace("\\\"", "\"");
+                m_strDisplayName.Replace("\\\\", "\\");
 
-                bDQUOTForDisplayName = IMS_TRUE;
+                m_bDquotForDisplayName = IMS_TRUE;
             }
         }
 
-        strURI = strURI.GetSubStr(nLAQUOT + 1);
+        strUri = strUri.GetSubStr(nLaquot + 1);
 
-        IMS_SINT32 nRAQUOT = strURI.GetIndexOf(TextParser::CHAR_RAQUOT);
+        IMS_SINT32 nRaquot = strUri.GetIndexOf(TextParser::CHAR_RAQUOT);
 
-        if (nRAQUOT != AString::NPOS)
+        if (nRaquot != AString::NPOS)
         {
-            strURI.Truncate(nRAQUOT);
+            strUri.Truncate(nRaquot);
         }
     }
 
-    SipAddrSpec *pAddrSpec = SIPStack::DecodeAddrSpec(strURI);
+    SipAddrSpec* pAddrSpec = SIPStack::DecodeAddrSpec(strUri);
 
     if (pAddrSpec != IMS_NULL)
     {
         if (SIPStack::IsUriSchemeSIP(pAddrSpec) || SIPStack::IsUriSchemeSIPS(pAddrSpec))
         {
             if (SIPStack::IsUriSchemeSIP(pAddrSpec))
-                strScheme = Sip::STR_SIP;
+            {
+                m_strScheme = Sip::STR_SIP;
+            }
             else
-                strScheme = Sip::STR_SIPS;
+            {
+                m_strScheme = Sip::STR_SIPS;
+            }
 
             // user-info (user:password)
-            strUserInfo = SIPStack::AddrSpec_GetUser(pAddrSpec);
+            m_strUserInfo = SIPStack::AddrSpec_GetUser(pAddrSpec);
 
             const IMS_CHAR* pszPassword = SIPStack::AddrSpec_GetPassword(pAddrSpec);
 
             if (pszPassword != IMS_NULL)
             {
-                strUserInfo += TextParser::CHAR_COLON;
-                strUserInfo += pszPassword;
+                m_strUserInfo += TextParser::CHAR_COLON;
+                m_strUserInfo += pszPassword;
             }
 
-            strHostInfo = SIPStack::AddrSpec_GetHost(pAddrSpec);
+            m_strHostInfo = SIPStack::AddrSpec_GetHost(pAddrSpec);
 
             IPAddress objHost;
 
-            if (objHost.Parse(strHostInfo))
+            if (objHost.Parse(m_strHostInfo))
             {
                 if (objHost.IsIPv6Address())
                 {
-                    strHostInfo = objHost.ToString();
+                    m_strHostInfo = objHost.ToString();
                 }
             }
 
             IMS_SINT32 nTmpPort = SIPStack::AddrSpec_GetPort(pAddrSpec);
 
             if (nTmpPort != 0)
-                nPort = nTmpPort;
+                m_nPort = nTmpPort;
             else
-                nPort = Sip::PORT_UNSPECIFIED;
+                m_nPort = Sip::PORT_UNSPECIFIED;
 
             if (bParseHeader)
             {
                 RemoveAllHeaderComponents();
 
-                if (!SIPStack::DecodeHeaderComponent(pAddrSpec, objHeaders))
+                if (!SIPStack::DecodeHeaderComponent(pAddrSpec, m_objHeaders))
                 {
                     SIPPrivate::SetLastError(SipError::PARSING_ERROR);
                     SIPStack::FreeAddrSpec(pAddrSpec);
@@ -2805,13 +1647,13 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
             // Process URI parameters
             if (bParseParameter)
             {
-                objParams = SIPStack::ExtractParameters(pAddrSpec);
+                m_objParams = SIPStack::ExtractParameters(pAddrSpec);
             }
         }
         else
         {
             // Extract the URI scheme
-            IMS_SINT32 nIndex = strURI.GetIndexOf(TextParser::CHAR_COLON);
+            IMS_SINT32 nIndex = strUri.GetIndexOf(TextParser::CHAR_COLON);
 
             if (nIndex == AString::NPOS)
             {
@@ -2820,17 +1662,17 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
             }
             else
             {
-                strScheme = strURI.GetSubStr(0, nIndex);
+                m_strScheme = strUri.GetSubStr(0, nIndex);
             }
 
-            IMS_SINT32 nParamIndex = strURI.GetIndexOf(TextParser::CHAR_SEMICOLON, nIndex + 1);
-            IMS_SINT32 nHeaderIndex = strURI.GetIndexOf(TextParser::CHAR_QUESTIONMARK, nIndex + 1);
+            IMS_SINT32 nParamIndex = strUri.GetIndexOf(TextParser::CHAR_SEMICOLON, nIndex + 1);
+            IMS_SINT32 nHeaderIndex = strUri.GetIndexOf(TextParser::CHAR_QUESTIONMARK, nIndex + 1);
 
             if (nHeaderIndex != AString::NPOS)
             {
                 if (bParseHeader)
                 {
-                    AString strHeaders = strURI.GetSubStr(nHeaderIndex + 1);
+                    AString strHeaders = strUri.GetSubStr(nHeaderIndex + 1);
 
                     RemoveAllHeaderComponents();
 
@@ -2841,7 +1683,7 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
                     }
                 }
 
-                strURI = strURI.GetSubStr(0, nHeaderIndex);
+                strUri = strUri.GetSubStr(0, nHeaderIndex);
 
                 if (nParamIndex > nHeaderIndex)
                 {
@@ -2850,26 +1692,28 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
                 }
             }
 
-            strHostInfo = strURI.GetSubStr(nIndex + 1, nParamIndex - (nIndex + 1));
-            strHostInfo = strHostInfo.Trim();
+            m_strHostInfo = strUri.GetSubStr(nIndex + 1, nParamIndex - (nIndex + 1));
+            m_strHostInfo = m_strHostInfo.Trim();
 
             // Extract the uri-parameters if present
             // Process URI parameters
             if (bParseParameter && (nParamIndex != AString::NPOS))
             {
-                AString strParams = strURI.GetSubStr(nParamIndex + 1);
+                AString strParams = strUri.GetSubStr(nParamIndex + 1);
 
                 // Parsing the uri-parameters
                 IMSList<AString> objTokens = strParams.Split(TextParser::CHAR_SEMICOLON);
 
                 for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
                 {
-                    SipParameter *pParameter = new SipParameter();
+                    SipParameter* pParameter = new SipParameter();
 
                     if (pParameter == IMS_NULL)
+                    {
                         continue;
+                    }
 
-                    const AString &strToken = objTokens.GetAt(i);
+                    const AString& strToken = objTokens.GetAt(i);
 
                     if (!pParameter->Create(strToken))
                     {
@@ -2880,7 +1724,7 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
                         continue;
                     }
 
-                    if (!objParams.Append(pParameter))
+                    if (!m_objParams.Append(pParameter))
                     {
                         delete pParameter;
                         IMS_TRACE_E(0, "Adding SIP Parameter (%s) failed",
@@ -2901,113 +1745,46 @@ IMS_BOOL SipAddress::Decode(IN CONST AString& strAddress, IN IMS_BOOL bParsePara
     return IMS_TRUE;
 }
 
-/*
- Decodes the URI header components.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strHeaders              The header components
-                        headers := header *("&" header)
-                        header := hname "=" hvalue
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The header components is successfully parsed
-IMS_FALSE               An error occurs during parsing
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::DecodeHeaderComponent(IN CONST AString &strHeaders)
+IMS_BOOL SipAddress::DecodeHeaderComponent(IN const AString& strHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SIPStack::DecodeHeaderComponent(strHeaders, objHeaders);
+    return SIPStack::DecodeHeaderComponent(strHeaders, m_objHeaders);
 }
 
-/*
- Checks if the specified parameter exists or not among the parameters.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strName                 Parameter name to be checked
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                It returns this value if SIP address contains the parameter
-IMS_FALSE               It returns this value if SIP address does not contain the parameter
-</table>
-*/
 PRIVATE
-IMS_BOOL SipAddress::IsParameterPresent(IN CONST AString &strName) const
+IMS_BOOL SipAddress::IsParameterPresent(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = m_objParams.GetAt(i);
 
-        if (pParameter == IMS_NULL)
-            continue;
-
-        if (strName.EqualsIgnoreCase(pParameter->GetName()))
+        if (pParameter != IMS_NULL)
         {
-            return IMS_TRUE;
+            if (strName.EqualsIgnoreCase(pParameter->GetName()))
+            {
+                return IMS_TRUE;
+            }
         }
     }
 
     return IMS_FALSE;
 }
 
-/*
- Compares if the specified two number digits equals or not. It is only for TEL URI format.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strDigits1              Digits to be compared
-strDigits2              Digits to be compared
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The two digits are equal
-IMS_FALSE               The two digits are not equal
-</table>
-*/
 PRIVATE GLOBAL
-IMS_BOOL SipAddress::CompareNumberDigits(IN CONST AString &strDigits1,
-        IN CONST AString &strDigits2)
+IMS_BOOL SipAddress::CompareNumberDigits(IN const AString& strDigits1,
+        IN const AString& strDigits2)
 {
     AString strTmpDigits1;
     AString strTmpDigits2;
-
-    //---------------------------------------------------------------------------------------------
 
     for (IMS_SINT32 i = 0; i < strDigits1.GetLength(); ++i)
     {
         IMS_CHAR cDigit = strDigits1[i];
 
         if (IsVisualSeparator(cDigit))
+        {
             continue;
+        }
 
         strTmpDigits1.Append(cDigit);
     }
@@ -3016,8 +1793,10 @@ IMS_BOOL SipAddress::CompareNumberDigits(IN CONST AString &strDigits1,
     {
         IMS_CHAR cDigit = strDigits2[i];
 
-        if (IsVisualSeparator(cDigit))
+        if (IsVisualSeparator(cDigit))\
+        {
             continue;
+        }
 
         strTmpDigits2.Append(cDigit);
     }
@@ -3025,31 +1804,10 @@ IMS_BOOL SipAddress::CompareNumberDigits(IN CONST AString &strDigits1,
     return strTmpDigits1.EqualsIgnoreCase(strTmpDigits2);
 }
 
-/*
- Escape the special characters (DQUOT / Backslash) if it is required.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strValue                String to be escaped
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-AString                 Escaped string
-</table>
-*/
 PRIVATE GLOBAL
-AString SipAddress::EscapeDquotAndBackslash(IN CONST AString &strValue)
+AString SipAddress::EscapeDquotAndBackslash(IN const AString& strValue)
 {
     AString strEscapedValue = strValue;
-
-    //---------------------------------------------------------------------------------------------
 
     //strEscapedValue.Replace("\\\"", "\"");
     //strEscapedValue.Replace("\\\\", "\\");
@@ -3059,40 +1817,18 @@ AString SipAddress::EscapeDquotAndBackslash(IN CONST AString &strValue)
     return strEscapedValue;
 }
 
-/*
- Checks if the specified display name is composed of token (w/ LWS) or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-strDisplayName          String to be tested
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The display name is composed of the token characters
-IMS_FALSE               The display name is not composed of the token characters
-</table>
-*/
 PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsDisplayNameToken(IN CONST AString &strDisplayName)
+IMS_BOOL SipAddress::IsDisplayNameToken(IN const AString& strDisplayName)
 {
     IMS_SINT32 nIndex = 0;
-
-    //---------------------------------------------------------------------------------------------
 
     while (nIndex < strDisplayName.GetLength())
     {
         const IMS_CHAR ch = strDisplayName[nIndex];
 
         // token / HTAB / LF / CR / SP
-        if (!IsToken(ch)
-            && (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x20))
+        if (!IsToken(ch) &&
+                (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x20))
         {
             return IMS_FALSE;
         }
@@ -3103,36 +1839,14 @@ IMS_BOOL SipAddress::IsDisplayNameToken(IN CONST AString &strDisplayName)
     return IMS_TRUE;
 }
 
-/*
- Checks if the specified character is a token character or not.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-ch                      Character to be tested
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The character is a token character
-IMS_FALSE               The character is not a token character
-</table>
-*/
 PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsToken(IN CONST IMS_CHAR ch)
+IMS_BOOL SipAddress::IsToken(IN const IMS_CHAR ch)
 {
     // alphanum / "-" / "." / "!" / "%" / "*" / "_" / "+" / "'" / "`" / "~"
 
-    //---------------------------------------------------------------------------------------------
-
-    if (IMS_ISDIGIT(ch) || IMS_ISALPHA(ch)
-            || (ch == '-') || (ch == '.') || (ch == '!') || (ch == '%') || (ch == '*')
-            || (ch == '_') || (ch == '+') || (ch == '\'') || (ch == '`') || (ch == '~'))
+    if (IMS_ISDIGIT(ch) || IMS_ISALPHA(ch) ||
+            (ch == '-') || (ch == '.') || (ch == '!') || (ch == '%') || (ch == '*') ||
+            (ch == '_') || (ch == '+') || (ch == '\'') || (ch == '`') || (ch == '~'))
     {
         return IMS_TRUE;
     }
@@ -3140,35 +1854,10 @@ IMS_BOOL SipAddress::IsToken(IN CONST IMS_CHAR ch)
     return IMS_FALSE;
 }
 
-/*
- Checks if the specified character is a visual separator or not. It is only for TEL URI format.
-
-Remarks
-
-Parameters
-<table>
-parameter               description
-----------              ----------
-ch                      Character to be tested
-</table>
-
-Returns
-<table>
-return                  description
-----------              ----------
-IMS_TRUE                The character is a visual separator
-IMS_FALSE               The character is not a visual separator
-</table>
-*/
 PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsVisualSeparator(IN CONST IMS_CHAR ch)
+IMS_BOOL SipAddress::IsVisualSeparator(IN const IMS_CHAR ch)
 {
     // "-", ".", "(", ")"
 
-    //---------------------------------------------------------------------------------------------
-
-    if ((ch == '-') || (ch == '.') || (ch == '(') || (ch == ')'))
-        return IMS_TRUE;
-
-    return IMS_FALSE;
+    return (ch == '-') || (ch == '.') || (ch == '(') || (ch == ')');
 }

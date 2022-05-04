@@ -2221,7 +2221,7 @@ PROTECTED VIRTUAL void AosRegistration::SetStaticIpQos()
         A_IMS_TRACE_I(REGID, "SetStaticIpQos : Set DSCP to %d", nDscp, 0, 0);
 
         objIpQos.nValue = nDscp << 2;
-        objIpQos.objIP = m_objIpa;
+        objIpQos.objIpAddr = m_objIpa;
         objIpQos.nPort = 0;
 
         piRtConfigHelper->SetConfig(SipRtConfig::CONFIG_I_IP_QOS, &objIpQos);
@@ -2275,7 +2275,7 @@ PROTECTED VIRTUAL void AosRegistration::SetDynamicIpQos()
             objIpQos.nValue = 0;
         }
 
-        objIpQos.objIP = m_objIpa;
+        objIpQos.objIpAddr = m_objIpa;
         objIpQos.nPort = 0;
 
         piHelper->SetIpQos(&objIpQos);

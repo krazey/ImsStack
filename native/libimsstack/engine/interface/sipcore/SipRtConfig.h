@@ -1,5 +1,20 @@
-#ifndef _SIP_RT_CONFIG_H_
-#define _SIP_RT_CONFIG_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_RT_CONFIG_H_
+#define SIP_RT_CONFIG_H_
 
 #include "IPAddress.h"
 #include "SipAddress.h"
@@ -11,8 +26,8 @@
  */
 class SipRtConfig
 {
-private:
-    SipRtConfig();
+public:
+    SipRtConfig() = delete;
 
 public:
     /// Configuration items which are configured on the runtime
@@ -72,19 +87,18 @@ public:
     {
     public:
         inline Base()
-        { }
+        {}
         inline virtual ~Base()
-        { }
+        {}
 
     public:
-        inline virtual IMS_BOOL Equals(IN CONST Base & /* objOther */) const
+        inline virtual IMS_BOOL Equals(IN const Base& /*other*/) const
         { return IMS_TRUE; }
     };
 
     // LOG_EXCLUDING_SERVER_INFO
     /// LogMask class
-    class LogMask
-        : public Base
+    class LogMask : public Base
     {
     public:
         LogMask();
@@ -106,16 +120,15 @@ public:
     };
 
     /// SocketOption class
-    class SocketOption
-        : public Base
+    class SocketOption : public Base
     {
     public:
         SocketOption();
-        SocketOption(IN CONST SocketOption &objRHS);
+        SocketOption(IN const SocketOption& other);
         virtual ~SocketOption();
 
     public:
-        SocketOption& operator=(IN CONST SocketOption &objRHS);
+        SocketOption& operator=(IN const SocketOption& other);
 
     public:
         /**
@@ -123,7 +136,8 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
+
         /**
          * @brief Checks if this option is not dedicated to a specific IP or/and port.
          *
@@ -143,22 +157,21 @@ public:
         ///    CONFIG_I_TCP_KEEP_INTERVAL - N seconds
         IMS_SINT32 nValue;
         /// O (SET/REMOVE) : Local IP address which the option will be set.
-        IPAddress objIP;
+        IPAddress objIpAddr;
         /// O (SET/REMOVE) : If the port number is not used, fill this value to zero (0).
         IMS_SINT32 nPort;
     };
 
     /// IpQos class for IP-level QoS configuration
-    class IpQos
-        : public Base
+    class IpQos : public Base
     {
     public:
         IpQos();
-        IpQos(IN CONST IpQos &objRHS);
+        IpQos(IN const IpQos& other);
         virtual ~IpQos();
 
     public:
-        IpQos& operator=(IN CONST IpQos &objRHS);
+        IpQos& operator=(IN const IpQos& other);
 
     public:
         /**
@@ -166,28 +179,27 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
 
     public:
         /// M (SET) : 1 byte value (IPv4)
         IMS_SINT32 nValue;
         /// M (SET/REMOVE) : Local IP address which the option will be set.
-        IPAddress objIP;
+        IPAddress objIpAddr;
         /// O (SET/REMOVE) : If the port number is not used, fill this value to zero (0).
         IMS_SINT32 nPort;
     };
 
     /// Header class for an additional SIP header control
-    class Header
-        : public Base
+    class Header : public Base
     {
     public:
         Header();
-        Header(IN CONST Header &objRHS);
+        Header(IN const Header& other);
         virtual ~Header();
 
     public:
-        Header& operator=(IN CONST Header &objRHS);
+        Header& operator=(IN const Header& other);
 
     public:
         /**
@@ -195,7 +207,7 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
 
     public:
         /// M (SET/REMOVE) : header name
@@ -207,16 +219,15 @@ public:
     };
 
     /// IpSec SA (security association)
-    class IpSecSa
-        : public Base
+    class IpSecSa : public Base
     {
     public:
         IpSecSa();
-        IpSecSa(IN CONST IpSecSa &objRHS);
+        IpSecSa(IN const IpSecSa& other);
         virtual ~IpSecSa();
 
     public:
-        IpSecSa& operator=(IN CONST IpSecSa &objRHS);
+        IpSecSa& operator=(IN const IpSecSa& other);
 
     public:
         /**
@@ -224,49 +235,56 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
+
         /**
          * @brief Gets the port-c for P-CSCF.
          *
          * @return The port number.
          */
         inline IMS_SINT32 GetPortPc() const
-        { return nPortPC; }
+        { return nPortPc; }
+
         /**
          * @brief Gets the port-s for P-CSCF.
          *
          * @return The port number.
          */
         inline IMS_SINT32 GetPortPs() const
-        { return nPortPS; }
+        { return nPortPs; }
+
         /**
          * @brief Gets the IP address for P-CSCF.
          *
          * @return The IP address.
          */
         inline const IPAddress& GetIpAddrP() const
-        { return objIPP; }
+        { return objIpAddrP; }
+
         /**
          * @brief Gets the port-c for UE.
          *
          * @return The port number.
          */
         inline IMS_SINT32 GetPortUc() const
-        { return nPortUC; }
+        { return nPortUc; }
+
         /**
          * @brief Gets the port-s for UE.
          *
          * @return The port number.
          */
         inline IMS_SINT32 GetPortUs() const
-        { return nPortUS; }
+        { return nPortUs; }
+
         /**
          * @brief Gets the IP address for UE.
          *
          * @return The IP address.
          */
         inline const IPAddress& GetIpAddrU() const
-        { return objIPU; }
+        { return objIpAddrU; }
+
         /**
          * @brief Checks if it's empty IpSec SA or not.
          *
@@ -277,31 +295,30 @@ public:
 
     public:
         /// M (SET) : port_pc
-        IMS_SINT32 nPortPC;
+        IMS_SINT32 nPortPc;
         /// M (SET) : port_ps
-        IMS_SINT32 nPortPS;
+        IMS_SINT32 nPortPs;
         /// M (SET) : ip_p
-        IPAddress objIPP;
+        IPAddress objIpAddrP;
 
         /// M (SET) : port_uc
-        IMS_SINT32 nPortUC;
+        IMS_SINT32 nPortUc;
         /// M (SET) : port_us
-        IMS_SINT32 nPortUS;
+        IMS_SINT32 nPortUs;
         /// M (SET) : ip_u
-        IPAddress objIPU;
+        IPAddress objIpAddrU;
     };
 
     /// The configuration for port range of TCP client connection
-    class TcpPortRange
-        : public Base
+    class TcpPortRange : public Base
     {
     public:
         TcpPortRange();
-        TcpPortRange(IN CONST TcpPortRange &objRHS);
+        TcpPortRange(IN const TcpPortRange& other);
         virtual ~TcpPortRange();
 
     public:
-        TcpPortRange& operator=(IN CONST TcpPortRange &objRHS);
+        TcpPortRange& operator=(IN const TcpPortRange& other);
 
     public:
         /**
@@ -309,7 +326,8 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
+
         /**
          * @brief Gets the starting port number of the provisioned port range.
          *
@@ -317,6 +335,7 @@ public:
          */
         inline IMS_SINT32 GetPortStart() const
         { return nPortStart; }
+
         /**
          * @brief Gets the ending port number of the provisioned port range.
          *
@@ -333,16 +352,15 @@ public:
     };
 
     /// Class for the verification of Contact address in IMS registration
-    class RegContactAddress
-        : public Base
+    class RegContactAddress : public Base
     {
     public:
         RegContactAddress();
-        RegContactAddress(IN CONST RegContactAddress &objRHS);
+        RegContactAddress(IN const RegContactAddress& other);
         virtual ~RegContactAddress();
 
     public:
-        RegContactAddress& operator=(IN CONST RegContactAddress &objRHS);
+        RegContactAddress& operator=(IN const RegContactAddress& other);
 
     public:
         /**
@@ -350,7 +368,8 @@ public:
          *
          * @return If both are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
          */
-        virtual IMS_BOOL Equals(IN CONST Base &objOther) const;
+        virtual IMS_BOOL Equals(IN const Base& other) const;
+
         /**
          * @brief Gets the call-id string which is used for IMS registration.
          *
@@ -358,6 +377,7 @@ public:
          */
         inline const AString& GetCallId() const
         { return strCallId; }
+
         /**
          * @brief Gets the Contact address which is used for IMS registration.
          *
@@ -374,4 +394,4 @@ public:
     };
 };
 
-#endif // _SIP_RT_CONFIG_H_
+#endif

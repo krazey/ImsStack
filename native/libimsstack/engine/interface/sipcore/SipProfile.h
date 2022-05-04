@@ -1,16 +1,31 @@
-#ifndef _SIP_PROFILE_H_
-#define _SIP_PROFILE_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_PROFILE_H_
+#define SIP_PROFILE_H_
 
 #include "AStringArray.h"
-#include "RCObject.h"
 #include "ISipConfig.h"
+#include "RCObject.h"
 #include "SipTimerValues.h"
 
 /**
  * @brief This class defines SIP profile for the run-time configuration of SIP engine.
  */
-class SipProfile
-    : public RCObject
+class SipProfile :
+        public RCObject
 {
 public:
     /// Indicates that the value is not provisioned for configuration item of integer type
@@ -19,47 +34,47 @@ public:
     enum { TCP_CRITERION_LEN = 1300 };
 
 public:
-    inline SipProfile()
-        : nDefaultPort(NOT_PROVISIONED)
-        , nTcpCriterionLength(NOT_PROVISIONED)
-        , nSIPFeatures(NOT_PROVISIONED)
-        , nDeviceId(NOT_PROVISIONED)
-        , strDeviceId(AString::ConstNull())
-        , nTV_T1(NOT_PROVISIONED)
-        , nTV_T2(NOT_PROVISIONED)
-        , strTagPrefix(AString::ConstNull())
-        , strUAString(AString::ConstNull())
-        , nRegExpires(NOT_PROVISIONED)
-        , objRegAllowMethods(AStringArray::ConstNull())
-        , strRegUAString(AString::ConstNull())
-        , nRegSubscription(NOT_PROVISIONED)
-        , nRegSubExpires(NOT_PROVISIONED)
-        , nConfigValue(0)
+    inline SipProfile() :
+            m_nDefaultPort(NOT_PROVISIONED),
+            m_nTcpCriterionLength(NOT_PROVISIONED),
+            m_nSipFeatures(NOT_PROVISIONED),
+            m_nDeviceId(NOT_PROVISIONED),
+            m_strDeviceId(AString::ConstNull()),
+            m_nTimerValueT1(NOT_PROVISIONED),
+            m_nTimerValueT2(NOT_PROVISIONED),
+            m_strTagPrefix(AString::ConstNull()),
+            m_strUaString(AString::ConstNull()),
+            m_nRegExpires(NOT_PROVISIONED),
+            m_objRegAllowMethods(AStringArray::ConstNull()),
+            m_strRegUaString(AString::ConstNull()),
+            m_nRegSubscription(NOT_PROVISIONED),
+            m_nRegSubExpires(NOT_PROVISIONED),
+            m_nConfigValue(0)
     {}
-    inline SipProfile(IN CONST SipProfile &objRHS)
-        : RCObject(objRHS)
-        , nDefaultPort(objRHS.nDefaultPort)
-        , nTcpCriterionLength(objRHS.nTcpCriterionLength)
-        , nSIPFeatures(objRHS.nSIPFeatures)
-        , nDeviceId(objRHS.nDeviceId)
-        , strDeviceId(objRHS.strDeviceId)
-        , objTVs(objRHS.objTVs)
-        , nTV_T1(objRHS.nTV_T1)
-        , nTV_T2(objRHS.nTV_T2)
-        , strTagPrefix(objRHS.strTagPrefix)
-        , strUAString(objRHS.strUAString)
-        , nRegExpires(objRHS.nRegExpires)
-        , objRegAllowMethods(objRHS.objRegAllowMethods)
-        , strRegUAString(objRHS.strRegUAString)
-        , nRegSubscription(objRHS.nRegSubscription)
-        , nRegSubExpires(objRHS.nRegSubExpires)
-        , nConfigValue(objRHS.nConfigValue)
+    inline SipProfile(IN const SipProfile& other) :
+            RCObject(other),
+            m_nDefaultPort(other.m_nDefaultPort),
+            m_nTcpCriterionLength(other.m_nTcpCriterionLength),
+            m_nSipFeatures(other.m_nSipFeatures),
+            m_nDeviceId(other.m_nDeviceId),
+            m_strDeviceId(other.m_strDeviceId),
+            m_objTimerValues(other.m_objTimerValues),
+            m_nTimerValueT1(other.m_nTimerValueT1),
+            m_nTimerValueT2(other.m_nTimerValueT2),
+            m_strTagPrefix(other.m_strTagPrefix),
+            m_strUaString(other.m_strUaString),
+            m_nRegExpires(other.m_nRegExpires),
+            m_objRegAllowMethods(other.m_objRegAllowMethods),
+            m_strRegUaString(other.m_strRegUaString),
+            m_nRegSubscription(other.m_nRegSubscription),
+            m_nRegSubExpires(other.m_nRegSubExpires),
+            m_nConfigValue(other.m_nConfigValue)
     {}
     inline virtual ~SipProfile()
     {}
 
-private:
-    SipProfile& operator=(IN CONST SipProfile &objRHS);
+public:
+    SipProfile& operator=(IN const SipProfile&) = delete;
 
 public:
     /**
@@ -75,21 +90,24 @@ public:
      *         #ISipConfig#DEVICE_ID_PREDEFINED
      */
     inline IMS_SINT32 GetDeviceId() const
-    { return nDeviceId; }
+    { return m_nDeviceId; }
+
     /**
      * @brief Gets a pre-defined device id (+sip.instance).
      *
      * @return The pre-defined device id.
      */
     inline const AString& GetPredefinedDeviceId() const
-    { return strDeviceId; }
+    { return m_strDeviceId; }
+
     /**
      * @brief Gets a SIP default port number.
      *
      * @return The port number.
      */
     inline IMS_SINT32 GetPort() const
-    { return nDefaultPort; }
+    { return m_nDefaultPort; }
+
     /**
      * @brief Gets the SIP features.
      *
@@ -125,49 +143,55 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
     inline IMS_SINT32 GetSipFeatureCaps() const
-    { return nSIPFeatures; }
+    { return m_nSipFeatures; }
+
     /**
      * @brief Gets a default timer value for SIP timer T1.
      *
      * @return The timer value.
      */
     inline IMS_SINT32 GetTimerValueT1() const
-    { return nTV_T1; }
+    { return m_nTimerValueT1; }
+
     /**
      * @brief Gets a default timer value for SIP timer T2.
      *
      * @return The timer value.
      */
     inline IMS_SINT32 GetTimerValueT2() const
-    { return nTV_T2; }
+    { return m_nTimerValueT2; }
+
     /**
      * @brief Gets a tag prefix string.
      *
      * @return The tag prefix string.
      */
     inline const AString& GetTagPrefix() const
-    { return strTagPrefix; }
+    { return m_strTagPrefix; }
+
     /**
      * @brief Gets a criteria length to convert a transport protocol from UDP to TCP.
      *
      * @return The TCP criteria length.
      */
     inline IMS_SINT32 GetTcpCriterionLength() const
-    { return nTcpCriterionLength; }
+    { return m_nTcpCriterionLength; }
+
     /**
      * @brief Gets a SIP timer values.
      *
      * @return The SIP timer values.
      */
     inline const SipTimerValues& GetTimerValues() const
-    { return objTVs; }
+    { return m_objTimerValues; }
+
     /**
      * @brief Gets an UA string for User-Agent/Server header.
      *
      * @return The UA string.
      */
     inline const AString& GetUaString() const
-    { return strUAString; }
+    { return m_strUaString; }
 
     /**
      * @brief Gets the allowed methods for IMS registration.
@@ -175,35 +199,39 @@ public:
      * @return The allowed SIP methods.
      */
     inline const AStringArray& GetRegAllowMethods() const
-    { return objRegAllowMethods; }
+    { return m_objRegAllowMethods; }
+
     /**
      * @brief Gets the expires value for IMS registration.
      *
      * @return The expires value for IMS registration.
      */
     inline IMS_SINT32 GetRegExpires() const
-    { return nRegExpires; }
+    { return m_nRegExpires; }
+
     /**
      * @brief Gets the expires value for "reg" event package subscription.
      *
      * @return The expires value for "reg" event package subscription.
      */
     inline IMS_SINT32 GetRegSubExpires() const
-    { return nRegSubExpires; }
+    { return m_nRegSubExpires; }
+
     /**
      * @brief Gets the reg-subscription configuration value.
      *
      * @return 1 if reg-subscription is supported. Otherwise, returns 0.
      */
     inline IMS_SINT32 GetRegSubscription() const
-    { return nRegSubscription; }
+    { return m_nRegSubscription; }
+
     /**
      * @brief Gets an UA string for IMS registration.
      *
      * @return The UA string for IMS registration.
      */
     inline const AString& GetRegUaString() const
-    { return strRegUAString; }
+    { return m_strRegUaString; }
 
     /**
      * @brief Sets the type of device id (+sip.instance).
@@ -218,21 +246,24 @@ public:
      *                  #ISipConfig#DEVICE_ID_PREDEFINED
      */
     inline void SetDeviceId(IN IMS_SINT32 nDeviceId)
-    { this->nDeviceId = nDeviceId; }
+    { m_nDeviceId = nDeviceId; }
+
     /**
      * @brief Sets the pre-defined device id (+sip.instance).
      *
      * @param strDeviceId The pre-defined device id
      */
-    inline void SetPredefinedDeviceId(IN CONST AString &strDeviceId)
-    { this->strDeviceId = strDeviceId; }
+    inline void SetPredefinedDeviceId(IN const AString& strDeviceId)
+    { m_strDeviceId = strDeviceId; }
+
     /**
      * @brief Sets the SIP default port number.
      *
      * @param nPort The default port number
      */
     inline void SetPort(IN IMS_SINT32 nPort)
-    { this->nDefaultPort = nPort; }
+    { m_nDefaultPort = nPort; }
+
     /**
      * @brief Sets the SIP features.
      *
@@ -268,85 +299,95 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
     inline void SetSipFeatures(IN IMS_SINT32 nFeatures)
-    { this->nSIPFeatures = nFeatures; }
+    { m_nSipFeatures = nFeatures; }
+
     /**
      * @brief Sets the default SIP timer T1.
      *
-     * @param nTV The timer value
+     * @param nTimerValue The timer value
      */
-    inline void SetTimerValueT1(IN IMS_SINT32 nTV)
-    { this->nTV_T1 = nTV; }
+    inline void SetTimerValueT1(IN IMS_SINT32 nTimerValue)
+    { m_nTimerValueT1 = nTimerValue; }
+
     /**
      * @brief Sets the default SIP timer T2.
      *
-     * @param nTV The timer value
+     * @param nTimerValue The timer value
      */
-    inline void SetTimerValueT2(IN IMS_SINT32 nTV)
-    { this->nTV_T2 = nTV; }
+    inline void SetTimerValueT2(IN IMS_SINT32 nTimerValue)
+    { m_nTimerValueT2 = nTimerValue; }
+
     /**
      * @brief Sets the tag prefix string.
      *
      * @param strTagPrefix The tag prefix string
      */
-    inline void SetTagPrefix(IN CONST AString &strTagPrefix)
-    { this->strTagPrefix = strTagPrefix; }
+    inline void SetTagPrefix(IN const AString& strTagPrefix)
+    { m_strTagPrefix = strTagPrefix; }
+
     /**
      * @brief Sets a criteria length to convert a transport protocol from UDP to TCP.
      *
-     * @param nTCPCriterionLength The criteria length
+     * @param nTcpCriterionLength The criteria length
      */
     inline void SetTcpCriterionLength(IN IMS_SINT32 nTcpCriterionLength)
-    { this->nTcpCriterionLength = nTcpCriterionLength; }
+    { m_nTcpCriterionLength = nTcpCriterionLength; }
+
     /**
      * @brief Sets a SIP timer values.
      *
-     * @param objTVs The SIP timer values
+     * @param objTimerValues The SIP timer values
      */
-    inline void SetTimerValues(IN CONST SipTimerValues &objTVs)
-    { this->objTVs = objTVs; }
+    inline void SetTimerValues(IN const SipTimerValues& objTimerValues)
+    { m_objTimerValues = objTimerValues; }
+
     /**
      * @brief Sets an UA string for User-Agent/Server header.
      *
-     * @param strUAString The UA string
+     * @param strUaString The UA string
      */
-    inline void SetUaString(IN CONST AString &strUAString)
-    { this->strUAString = strUAString; }
+    inline void SetUaString(IN const AString& strUaString)
+    { m_strUaString = strUaString; }
 
     /**
      * @brief Sets the allowed methods for IMS registration.
      *
      * @param objAllowMethods The allowed SIP methods
      */
-    inline void SetRegAllowMethods(IN CONST AStringArray &objAllowMethods)
-    { this->objRegAllowMethods = objAllowMethods; }
+    inline void SetRegAllowMethods(IN const AStringArray& objAllowMethods)
+    { m_objRegAllowMethods = objAllowMethods; }
+
     /**
      * @brief Sets the expires value for IMS registration.
      *
      * @param nExpires The expires value for IMS registration
      */
     inline void SetRegExpires(IN IMS_SINT32 nExpires)
-    { this->nRegExpires = nExpires; }
+    { m_nRegExpires = nExpires; }
+
     /**
      * @brief Sets the reg-subscription configuration value.
      *
      * @param nRegSub 1 if reg-subscription is supported, 0 if not supported
      */
     inline void SetRegSubscription(IN IMS_SINT32 nRegSub)
-    { this->nRegSubscription = nRegSub; }
+    { m_nRegSubscription = nRegSub; }
+
     /**
      * @brief Sets the expires value for "reg" event package subscription.
      *
      * @param nExpires The expires value for "reg" event package subscription
      */
     inline void SetRegSubExpires(IN IMS_SINT32 nExpires)
-    { this->nRegSubExpires = nExpires; }
+    { m_nRegSubExpires = nExpires; }
+
     /**
      * @brief Sets an UA string for IMS registration.
      *
-     * @param strUAString The UA string for IMS registration
+     * @param strUaString The UA string for IMS registration
      */
-    inline void SetRegUaString(IN CONST AString &strUAString)
-    { this->strRegUAString = strUAString; }
+    inline void SetRegUaString(IN const AString& strUaString)
+    { m_strRegUaString = strUaString; }
 
     /**
      * @brief Checks if SIP features are provisioned or not.
@@ -354,29 +395,32 @@ public:
      * @return If it's provisioned, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsSipFeatureProvisioned() const
-    { return nSIPFeatures != NOT_PROVISIONED; }
+    { return m_nSipFeatures != NOT_PROVISIONED; }
+
     /**
      * @brief Checks if the authentication algorithm is required or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsAuthenticationAlgorithmRequired() const
-    { return (nSIPFeatures &
-            ISipConfig::SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER); }
+
     /**
      * @brief Checks if the Cellular-Network-Info header is required or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsCellularNetworkInfoHeaderRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER); }
+
     /**
      * @brief Checks if the Contact header for all the 1xx responses should be added or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsContactInAll1xxRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX); }
+
     /**
      * @brief Checks if the country information in P-Access-Network-Info header
      *        should be added or not.
@@ -384,56 +428,64 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsCountryInfoRequiredInPaniHeader() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER); }
+
     /**
      * @brief Checks if the display name of SIP address should contain double quotation or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsDisplayNameDquotRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT); }
+
     /**
      * @brief Checks if the Expires header in REGISTER request should be added or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsExpiresHeaderInRegRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG); }
+
     /**
      * @brief Checks if IPSec(IP Security) is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsIpSecConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_IPSEC) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_IPSEC); }
+
     /**
      * @brief Checks if GRUU (Globally Routable User-agent URI) is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsGruuConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_GRUU) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_GRUU); }
+
     /**
      * @brief Checks if "keep" parameter in Via header is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsKeepAliveConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_KEEP) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_KEEP); }
+
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsMultipleRegConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG); }
+
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsNoAcceptContactHeaderInBye() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE); }
+
     /**
      * @brief Checks if P-Access-Network-Info header in the initial registration
      *        should be added or not.
@@ -441,7 +493,8 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsPanInfoInInitialRegRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG); }
+
     /**
      * @brief Checks if P-Preferred-Identity header in "reg" subscription
      *        should be added or not.
@@ -449,21 +502,24 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsPPreferredIdInRegSubRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB); }
+
     /**
      * @brief Checks if Route header in the registration should be added or not.
      *
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsRouteHeaderInRegRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG); }
+
     /**
      * @brief Checks if "rport" parameter is configured or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsRportConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_RPORT) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_RPORT); }
+
     /**
      * @brief Checks if the transport layer's error notification of SIP transaction
      *        is required or not.
@@ -471,14 +527,16 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsTransportErrorReportOnTxnRequired() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN); }
+
     /**
      * @brief Checks if the device is in the trust domain or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsTrustDomainConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_TRUST_DOMAIN) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRUST_DOMAIN); }
+
     /**
      * @brief Checks if the UDP fallback is configured or not
      *        when TCP connection can't be established.
@@ -486,14 +544,16 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUdpFallbackConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_UDP_FALLBACK) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UDP_FALLBACK); }
+
     /**
      * @brief Checks if the UA string in SIP message should be added or not.
      *
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUserAgentConfigured() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_USER_AGENT) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_USER_AGENT); }
+
     /**
      * @brief Checks if the SIP header for UA string should be determined
      *        by the SIP signalling context or not.
@@ -505,7 +565,7 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUserAgentSetByContext() const
-    { return (nSIPFeatures & ISipConfig::SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT) != 0; }
+    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT); }
 
     /**
      * @brief Checks if the SDP negotiation is required for non-RPR message.
@@ -588,7 +648,8 @@ public:
      *         #CONFIG_IGNORE_RR_ON_IMPLICIT_ROUTE_REQUIRED
      */
     inline IMS_SINT32 GetConfiguration() const
-    { return nConfigValue; }
+    { return m_nConfigValue; }
+
     /**
      * @brief Checks if the additional configuration is set or not.
      *
@@ -597,7 +658,8 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
-    { return (nConfigValue & nValue) != 0; }
+    { return (m_nConfigValue & nValue) != 0; }
+
     /**
      * @brief Sets the additional runtime configuration.
      *
@@ -606,12 +668,12 @@ public:
      *               #CONFIG_IGNORE_RR_ON_IMPLICIT_ROUTE_REQUIRED
      */
     inline void SetConfiguration(IN IMS_SINT32 nValue)
-    { nConfigValue = nValue; }
+    { m_nConfigValue = nValue; }
     // }
 
 private:
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nSipFeature) const
-    { return (nSIPFeatures & nSipFeature) != 0; }
+    { return (m_nSipFeatures & nSipFeature) != 0; }
 
 public:
     /// Runtime configuration to control J180 layer
@@ -624,39 +686,39 @@ public:
 
 private:
     // SIP default port
-    IMS_SINT32 nDefaultPort;
+    IMS_SINT32 m_nDefaultPort;
     // TCP criterion length on run-time
     // A default threshold value when MTU size is unknown; The default MTU size will be 1500.
     // 200 bytes is a buffer for collecting the Record-Route.
-    IMS_SINT32 nTcpCriterionLength;
+    IMS_SINT32 m_nTcpCriterionLength;
     // Refer to ISipConfig::FLAG_XXX
-    IMS_SINT32 nSIPFeatures;
+    IMS_SINT32 m_nSipFeatures;
     // ISipConfig::DEVICE_ID_XXX
-    IMS_SINT32 nDeviceId;
+    IMS_SINT32 m_nDeviceId;
     // For pre-defined device identifier
-    AString strDeviceId;
+    AString m_strDeviceId;
     // SIP transaction timer value: T1, T2
-    SipTimerValues objTVs;
-    IMS_SINT32 nTV_T1;
-    IMS_SINT32 nTV_T2;
+    SipTimerValues m_objTimerValues;
+    IMS_SINT32 m_nTimerValueT1;
+    IMS_SINT32 m_nTimerValueT2;
     // Application specific tag prefix
-    AString strTagPrefix;
+    AString m_strTagPrefix;
     // UA string : sw_version + service_version
-    AString strUAString;
+    AString m_strUaString;
 
     // Expires for Registration
-    IMS_SINT32 nRegExpires;
+    IMS_SINT32 m_nRegExpires;
     // SIP methods which sets in Allow header in Registration
-    AStringArray objRegAllowMethods;
+    AStringArray m_objRegAllowMethods;
     // UA string for Registration
-    AString strRegUAString;
+    AString m_strRegUaString;
     // Flag to indicate if Reg-Subscription is required or not
-    IMS_SINT32 nRegSubscription;
+    IMS_SINT32 m_nRegSubscription;
     // Expires for Reg-Subscription
-    IMS_SINT32 nRegSubExpires;
+    IMS_SINT32 m_nRegSubExpires;
 
     // Runtime configuration
-    IMS_SINT32 nConfigValue;
+    IMS_SINT32 m_nConfigValue;
 };
 
-#endif // _SIP_PROFILE_H_
+#endif

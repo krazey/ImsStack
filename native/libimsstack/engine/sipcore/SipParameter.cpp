@@ -1,56 +1,58 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "Feature.h"
+#include "SipParameter.h"
 #include "SIPPrivate.h"
 #include "SIPUtil.h"
-#include "SipParameter.h"
-
-
 
 PUBLIC
-SipParameter::SipParameter()
-    : strName(AString::ConstNull())
+SipParameter::SipParameter() :
+        m_strName(AString::ConstNull())
 {
 }
 
 PUBLIC
-SipParameter::SipParameter(IN CONST AString &strName_)
-    : strName(strName_)
+SipParameter::SipParameter(IN const AString& strName) :
+        m_strName(strName)
 {
 }
 
 PUBLIC
-SipParameter::SipParameter(IN CONST AString &strName_, IN CONST AString &strValue_)
-    : strName(strName_)
+SipParameter::SipParameter(IN const AString& strName, IN const AString& strValue) :
+        m_strName(strName)
 {
-    if (!strValue_.IsNULL())
+    if (!strValue.IsNULL())
     {
-        objValues.AddElement(strValue_);
+        m_objValues.AddElement(strValue);
     }
 }
 
 PUBLIC
-SipParameter::SipParameter(IN CONST AString &strName_, IN CONST AStringArray &objValues_)
-    : strName(strName_)
-    , objValues(objValues_)
+SipParameter::SipParameter(IN const AString& strName, IN const AStringArray& objValues) :
+        m_strName(strName),
+        m_objValues(objValues)
 {
 }
 
 PUBLIC
-SipParameter::SipParameter(IN CONST SipParameter &objRHS)
-    : strName(objRHS.strName)
-    , objValues(objRHS.objValues)
+SipParameter::SipParameter(IN const SipParameter& other) :
+        m_strName(other.m_strName),
+        m_objValues(other.m_objValues)
 {
 }
 
@@ -59,63 +61,48 @@ SipParameter::~SipParameter()
 {
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SipParameter& SipParameter::operator=(IN CONST SipParameter &objRHS)
+SipParameter& SipParameter::operator=(IN const SipParameter& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        strName = objRHS.strName;
-        objValues = objRHS.objValues;
+        m_strName = other.m_strName;
+        m_objValues = other.m_objValues;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipParameter::AddValue(IN CONST AString &strValue)
+void SipParameter::AddValue(IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strValue.IsNULL())
+    {
         return;
+    }
 
     // To prevent the duplicated parameter value
-    if (objValues.Contains(strValue, IMS_FALSE))
+    if (m_objValues.Contains(strValue, IMS_FALSE))
+    {
         return;
+    }
 
-    objValues.AddElement(strValue);
+    m_objValues.AddElement(strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipParameter::AddValues(IN CONST AString &strValues)
+void SipParameter::AddValues(IN const AString& strValues)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strValues.IsNULL())
+    {
         return;
+    }
 
     // Check if DQUOTE is present
     if (strValues.StartsWith(TextParser::CHAR_DQUOT))
     {
-        IMS_SINT32 nLastDQUOTE = strValues.GetLastIndexOf(TextParser::CHAR_DQUOT);
-        AString strTmpVal = strValues.GetSubStr(1, nLastDQUOTE - 1);
+        IMS_SINT32 nLastDquote = strValues.GetLastIndexOf(TextParser::CHAR_DQUOT);
+        AString strTmpVal = strValues.GetSubStr(1, nLastDquote - 1);
 
         if (strTmpVal.Contains(TextParser::CHAR_COMMA))
         {
@@ -123,22 +110,26 @@ void SipParameter::AddValues(IN CONST AString &strValues)
 
             for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
             {
-                const AString &strValue = objTokens.GetAt(i);
+                const AString& strValue = objTokens.GetAt(i);
 
                 // To prevent the duplicated parameter value
-                if (objValues.Contains(strValue, IMS_FALSE))
+                if (m_objValues.Contains(strValue, IMS_FALSE))
+                {
                     continue;
+                }
 
-                objValues.AddElement(strValue);
+                m_objValues.AddElement(strValue);
             }
         }
         else
         {
             // To prevent the duplicated parameter value
-            if (objValues.Contains(strValues, IMS_FALSE))
+            if (m_objValues.Contains(strValues, IMS_FALSE))
+            {
                 return;
+            }
 
-            objValues.AddElement(strValues);
+            m_objValues.AddElement(strValues);
         }
     }
     else if (strValues.Contains(TextParser::CHAR_COMMA))
@@ -147,42 +138,39 @@ void SipParameter::AddValues(IN CONST AString &strValues)
 
         for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
         {
-            const AString &strValue = objTokens.GetAt(i);
+            const AString& strValue = objTokens.GetAt(i);
 
             // To prevent the duplicated parameter value
-            if (objValues.Contains(strValue, IMS_FALSE))
+            if (m_objValues.Contains(strValue, IMS_FALSE))
+            {
                 continue;
+            }
 
-            objValues.AddElement(strValue);
+            m_objValues.AddElement(strValue);
         }
     }
     else
     {
         // To prevent the duplicated parameter value
-        if (objValues.Contains(strValues, IMS_FALSE))
+        if (m_objValues.Contains(strValues, IMS_FALSE))
+        {
             return;
+        }
 
-        objValues.AddElement(strValues);
+        m_objValues.AddElement(strValues);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipParameter::Create(IN CONST AString &strParameter)
+IMS_BOOL SipParameter::Create(IN const AString& strParameter)
 {
     AString strValue;
-    IMS_SINT32 nCount = strParameter.SplitF(TextParser::CHAR_EQUAL, strName, strValue);
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nCount = strParameter.SplitF(TextParser::CHAR_EQUAL, m_strName, strValue);
 
     if (nCount == 1)
     {
         // Name only parameter
-        objValues.RemoveAllElements();
+        m_objValues.RemoveAllElements();
     }
     else if (nCount == 2)
     {
@@ -194,29 +182,24 @@ IMS_BOOL SipParameter::Create(IN CONST AString &strParameter)
     }
     else
     {
-        strName = AString::ConstNull();
-        objValues.RemoveAllElements();
+        m_strName = AString::ConstNull();
+        m_objValues.RemoveAllElements();
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipParameter::Equals(IN CONST SipParameter *pParameter) const
+IMS_BOOL SipParameter::Equals(IN const SipParameter* pParameter) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pParameter == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    AString strValue = TextParser::DoPercentDecoding(strName);
-    AString strOtherValue = TextParser::DoPercentDecoding(pParameter->strName);
+    AString strValue = TextParser::DoPercentDecoding(m_strName);
+    AString strOtherValue = TextParser::DoPercentDecoding(pParameter->m_strName);
 
     //4 Check boolean type parameter
 
@@ -227,11 +210,11 @@ IMS_BOOL SipParameter::Equals(IN CONST SipParameter *pParameter) const
 
     IMS_BOOL bFeatureTag = Feature::IsFeatureTag(strValue);
 
-    for (IMS_SINT32 i = 0; i < objValues.GetCount(); ++i)
+    for (IMS_SINT32 i = 0; i < m_objValues.GetCount(); ++i)
     {
         IMS_BOOL bFound = IMS_FALSE;
 
-        strValue = TextParser::DoPercentDecoding(objValues.GetElementAt(i));
+        strValue = TextParser::DoPercentDecoding(m_objValues.GetElementAt(i));
 
         IMS_BOOL bCaseSensitive = strValue.StartsWith(TextParser::CHAR_DQUOT);
 
@@ -240,9 +223,9 @@ IMS_BOOL SipParameter::Equals(IN CONST SipParameter *pParameter) const
             strValue = TextParser::TrimDQUOT(strValue);
         }
 
-        for (IMS_SINT32 j = 0; j < pParameter->objValues.GetCount(); ++j)
+        for (IMS_SINT32 j = 0; j < pParameter->m_objValues.GetCount(); ++j)
         {
-            strOtherValue = TextParser::DoPercentDecoding(pParameter->objValues.GetElementAt(j));
+            strOtherValue = TextParser::DoPercentDecoding(pParameter->m_objValues.GetElementAt(j));
 
             if (bFeatureTag)
             {
@@ -268,106 +251,50 @@ IMS_BOOL SipParameter::Equals(IN CONST SipParameter *pParameter) const
         }
 
         if (!bFound)
+        {
             return IMS_FALSE;
+        }
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SipParameter::GetName() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strName;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& SipParameter::GetValue() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objValues.IsEmpty())
-        return AString::ConstNull();
-
-    return objValues.GetFirstElement();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AStringArray& SipParameter::GetValues() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objValues;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipParameter::IsNameOnly() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (objValues.GetCount() == 0);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipParameter::RemoveValue(IN CONST AString &strValue)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_SINT32 i = 0; i < objValues.GetCount(); ++i)
+    if (m_objValues.IsEmpty())
     {
-        const AString &strExValue = objValues.GetElementAt(i);
+        return AString::ConstNull();
+    }
+
+    return m_objValues.GetFirstElement();
+}
+
+PUBLIC
+void SipParameter::RemoveValue(IN const AString& strValue)
+{
+    for (IMS_SINT32 i = 0; i < m_objValues.GetCount(); ++i)
+    {
+        const AString& strExValue = m_objValues.GetElementAt(i);
 
         if (strExValue.EqualsIgnoreCase(strValue))
         {
-            objValues.RemoveElementAt(i);
+            m_objValues.RemoveElementAt(i);
             return;
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipParameter::SetValue(IN CONST AString &strValue)
+IMS_RESULT SipParameter::SetValue(IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strValue.IsEmpty())
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    objValues.RemoveAllElements();
+    m_objValues.RemoveAllElements();
 
     if (strValue.IsNULL())
     {
@@ -375,29 +302,22 @@ IMS_RESULT SipParameter::SetValue(IN CONST AString &strValue)
         return IMS_SUCCESS;
     }
 
-    objValues.AddElement(strValue);
+    m_objValues.AddElement(strValue);
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipParameter::SetValues(IN CONST AString &strValues)
+IMS_RESULT SipParameter::SetValues(IN const AString& strValues)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (strValues.IsEmpty())
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
-    objValues.RemoveAllElements();
+    m_objValues.RemoveAllElements();
 
     if (strValues.IsNULL())
     {
@@ -408,67 +328,60 @@ IMS_RESULT SipParameter::SetValues(IN CONST AString &strValues)
     // Check if DQUOTE is present
     if (strValues.StartsWith(TextParser::CHAR_DQUOT))
     {
-        IMS_SINT32 nLastDQUOTE = strValues.GetLastIndexOf(TextParser::CHAR_DQUOT);
-        AString strTmpVal = strValues.GetSubStr(1, nLastDQUOTE - 1);
+        IMS_SINT32 nLastDquote = strValues.GetLastIndexOf(TextParser::CHAR_DQUOT);
+        AString strTmpVal = strValues.GetSubStr(1, nLastDquote - 1);
 
         if (strTmpVal.Contains(TextParser::CHAR_COMMA))
         {
-            objValues = strTmpVal.Split(TextParser::CHAR_COMMA);
+            m_objValues = strTmpVal.Split(TextParser::CHAR_COMMA);
         }
         else
         {
-            objValues.AddElement(strValues);
+            m_objValues.AddElement(strValues);
         }
     }
     else if (strValues.Contains(TextParser::CHAR_COMMA))
     {
-        objValues = strValues.Split(TextParser::CHAR_COMMA);
+        m_objValues = strValues.Split(TextParser::CHAR_COMMA);
     }
     else
     {
-        objValues.AddElement(strValues);
+        m_objValues.AddElement(strValues);
     }
 
     SIPPrivate::SetLastError(SipError::NO_ERROR);
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString SipParameter::ToString() const
 {
-    IMS_SINT32 nPValueCount = objValues.GetCount();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nPValueCount = m_objValues.GetCount();
 
     if (nPValueCount == 0)
     {
-        return strName;
+        return m_strName;
     }
     else if (nPValueCount == 1)
     {
-        return strName + TextParser::CHAR_EQUAL + objValues.GetFirstElement();
+        return m_strName + TextParser::CHAR_EQUAL + m_objValues.GetFirstElement();
     }
     else
     {
-        AString strParameter(strName);
+        AString strParameter(m_strName);
 
         strParameter += TextParser::CHAR_EQUAL;
         strParameter += TextParser::CHAR_DQUOT;
 
-        if (!objValues.IsEmpty())
+        if (!m_objValues.IsEmpty())
         {
-            strParameter += objValues.GetElementAt(0);
+            strParameter += m_objValues.GetElementAt(0);
         }
 
-        for (IMS_SINT32 i = 1; i < objValues.GetCount(); ++i)
+        for (IMS_SINT32 i = 1; i < m_objValues.GetCount(); ++i)
         {
             strParameter += TextParser::CHAR_COMMA;
-            strParameter += objValues.GetElementAt(i);
+            strParameter += m_objValues.GetElementAt(i);
         }
 
         strParameter += TextParser::CHAR_DQUOT;

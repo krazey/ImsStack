@@ -5807,7 +5807,7 @@ GLOBAL void SetTimerValues(IN SipTimerValues *pTV, IN_OUT SipTxnContext *&pstTxn
         return;
     }
 
-    if (!pTV->IsSet(SipTimerValues::TV_ALL))
+    if (!pTV->IsSet(SipTimerValues::TIMER_ALL))
     {
         return;
     }
@@ -5826,46 +5826,46 @@ GLOBAL void SetTimerValues(IN SipTimerValues *pTV, IN_OUT SipTxnContext *&pstTxn
         pTxnTimerValues->SetTimerValue(ETXN_TIMER2, pTV->GetValue(SipTimerValues::TIMER_T2));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_B))
+    if (pTV->IsSet(SipTimerValues::TIMER_B))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_B;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERB, pTV->GetValue(SipTimerValues::TV_TIMER_B));
+        nTxnTimerOptions |= SipTimerValues::TIMER_B;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERB, pTV->GetValue(SipTimerValues::TIMER_B));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_D))
+    if (pTV->IsSet(SipTimerValues::TIMER_D))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_D;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERD, pTV->GetValue(SipTimerValues::TV_TIMER_D));
+        nTxnTimerOptions |= SipTimerValues::TIMER_D;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERD, pTV->GetValue(SipTimerValues::TIMER_D));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_F))
+    if (pTV->IsSet(SipTimerValues::TIMER_F))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_F;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERF, pTV->GetValue(SipTimerValues::TV_TIMER_F));
+        nTxnTimerOptions |= SipTimerValues::TIMER_F;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERF, pTV->GetValue(SipTimerValues::TIMER_F));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_H))
+    if (pTV->IsSet(SipTimerValues::TIMER_H))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_H;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERH, pTV->GetValue(SipTimerValues::TV_TIMER_H));
+        nTxnTimerOptions |= SipTimerValues::TIMER_H;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERH, pTV->GetValue(SipTimerValues::TIMER_H));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_I))
+    if (pTV->IsSet(SipTimerValues::TIMER_I))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_I;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERI, pTV->GetValue(SipTimerValues::TV_TIMER_I));
+        nTxnTimerOptions |= SipTimerValues::TIMER_I;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERI, pTV->GetValue(SipTimerValues::TIMER_I));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_J))
+    if (pTV->IsSet(SipTimerValues::TIMER_J))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_J;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERJ, pTV->GetValue(SipTimerValues::TV_TIMER_J));
+        nTxnTimerOptions |= SipTimerValues::TIMER_J;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERJ, pTV->GetValue(SipTimerValues::TIMER_J));
     }
 
-    if (pTV->IsSet(SipTimerValues::TV_TIMER_K))
+    if (pTV->IsSet(SipTimerValues::TIMER_K))
     {
-        nTxnTimerOptions |= SipTimerValues::TV_TIMER_K;
-        pTxnTimerValues->SetTimerValue(ETXN_TIMERK, pTV->GetValue(SipTimerValues::TV_TIMER_K));
+        nTxnTimerOptions |= SipTimerValues::TIMER_K;
+        pTxnTimerValues->SetTimerValue(ETXN_TIMERK, pTV->GetValue(SipTimerValues::TIMER_K));
     }
 
     pstTxnContext->pSipTimerContext->nTimerOptions = nTxnTimerOptions;

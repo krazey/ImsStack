@@ -1,5 +1,20 @@
-#ifndef _INTERFACE_SIP_MESSAGE_BODY_PART_H_
-#define _INTERFACE_SIP_MESSAGE_BODY_PART_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef INTERFACE_SIP_MESSAGE_BODY_PART_H_
+#define INTERFACE_SIP_MESSAGE_BODY_PART_H_
 
 #include "ByteArray.h"
 #include "ISipObject.h"
@@ -9,8 +24,8 @@
  *
  * @see ISipMessage
  */
-class ISipMessageBodyPart
-    : public ISipObject
+class ISipMessageBodyPart :
+        public ISipObject
 {
 public:
     /**
@@ -25,7 +40,7 @@ public:
      *
      * @param piBodyPart SIP message body part to be copied
      */
-    virtual void CopyFrom(IN CONST ISipMessageBodyPart *piBodyPart) = 0;
+    virtual void CopyFrom(IN const ISipMessageBodyPart* piBodyPart) = 0;
 
     /**
      * @brief Gets the header field value of the specified header type.
@@ -44,7 +59,7 @@ public:
      *         It is null string value, if an error occurs.
      */
     virtual AString GetHeader(IN IMS_SINT32 nType,
-            IN CONST AString &strName = AString::ConstNull()) const = 0;
+            IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Sets a header value in the SIP message body part.
@@ -60,8 +75,8 @@ public:
      * @param strName The header name, either in full or compact form\n
      *                It's mandatory if nType is CONTENT_UNKNOWN
      */
-    virtual void SetHeader(IN IMS_SINT32 nType, IN CONST AString &strValue,
-            IN CONST AString &strName = AString::ConstNull()) = 0;
+    virtual void SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Gets the SIP message body part as a byte array.
@@ -75,7 +90,7 @@ public:
      *
      * @param objContent a content of SIP message body part.
      */
-    virtual void SetContent(IN CONST ByteArray &objContent) = 0;
+    virtual void SetContent(IN const ByteArray& objContent) = 0;
 
 public:
     /// SIP content related headers
@@ -90,4 +105,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SIP_MESSAGE_BODY_PART_H_
+#endif

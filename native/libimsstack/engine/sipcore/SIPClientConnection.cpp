@@ -1036,7 +1036,7 @@ ISipAckPackage* SIPClientConnection::GrabAck()
 
         if (pTVs != IMS_NULL)
         {
-            IMS_SINT32 nTempTV = pTVs->GetValue(SipTimerValues::TV_TIMER_H);
+            IMS_SINT32 nTempTV = pTVs->GetValue(SipTimerValues::TIMER_H);
 
             if (nTempTV > 0)
             {

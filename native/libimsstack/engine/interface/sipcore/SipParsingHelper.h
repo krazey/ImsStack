@@ -1,5 +1,20 @@
-#ifndef _SIP_PARSING_HELPER_H_
-#define _SIP_PARSING_HELPER_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_PARSING_HELPER_H_
+#define SIP_PARSING_HELPER_H_
 
 #include "ByteArray.h"
 
@@ -22,7 +37,7 @@ public:
      * @param strName SIP header name
      * @return Pointer to ISipHeader.
      */
-    static ISipHeader* CreateHeader(IN CONST AString &strName);
+    static ISipHeader* CreateHeader(IN const AString& strName);
 
     /**
      * @brief Ceates SIP header with the specified header name and value.
@@ -31,7 +46,7 @@ public:
      * @param strValue SIP header value
      * @return Pointer to ISipHeader.
      */
-    static ISipHeader* CreateHeader(IN CONST AString &strName, IN CONST AString &strValue);
+    static ISipHeader* CreateHeader(IN const AString& strName, IN const AString& strValue);
 
     /**
      * @brief Ceates SIP header with the specified header type and value.
@@ -40,7 +55,7 @@ public:
      * @param strValue SIP header value
      * @return Pointer to ISipHeader.
      */
-    static ISipHeader* CreateHeader(IN IMS_SINT32 nType, IN CONST AString &strValue);
+    static ISipHeader* CreateHeader(IN IMS_SINT32 nType, IN const AString& strValue);
 
     /**
      * @brief Ceates SIP message with the specified message type.
@@ -58,7 +73,7 @@ public:
      * @param objMessage The raw SIP message
      * @return Pointer to ISipMessage.
      */
-    static ISipMessage* CreateMessage(IN CONST ByteArray &objMessage);
+    static ISipMessage* CreateMessage(IN const ByteArray& objMessage);
 
     /**
      * @brief Ceates an empty SIP message body part.
@@ -70,10 +85,10 @@ public:
     /**
      * @brief Ceates the SIP message body parts from the specified SIP message.
      *
-     * @param piSIPMsg SIP message to be parsed
+     * @param piSipMsg SIP message to be parsed
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL CreateMessageBodyParts(IN_OUT ISipMessage *piSIPMsg);
+    static IMS_BOOL CreateMessageBodyParts(IN_OUT ISipMessage* piSipMsg);
 
     /**
      * @brief Returns Reason header which the protocol indicates "SIP" from Reason header list.
@@ -81,7 +96,7 @@ public:
      * @param objReasonHeaders Reason header list
      * @return Reason header which indicates "SIP" protocol.
      */
-    static const AString& GetSipReasonHeader(IN CONST IMSList<AString> &objReasonHeaders);
+    static const AString& GetSipReasonHeader(IN const IMSList<AString>& objReasonHeaders);
 
     /**
      * @brief Parses Reason header with "cause" / "text" parameters.
@@ -95,8 +110,8 @@ public:
      *                it is set to AString::ConstEmpty().
      * @return If there is no parsing errors, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL ParseReasonHeader(IN CONST AString &strHeaderValue,
-            OUT IMS_SINT32 &nCause, OUT AString &strText);
+    static IMS_BOOL ParseReasonHeader(IN const AString& strHeaderValue,
+            OUT IMS_SINT32& nCause, OUT AString& strText);
 
     /**
      * @brief Parses Reason header with "cause" / "text" parameters.
@@ -111,8 +126,8 @@ public:
      *                it is set to AString::ConstEmpty().
      * @return If there is no parsing errors, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL ParseReasonHeader(IN CONST AString &strHeaderValue,
-            OUT AString &strProtocol, OUT IMS_SINT32 &nCause, OUT AString &strText);
+    static IMS_BOOL ParseReasonHeader(IN const AString& strHeaderValue,
+            OUT AString& strProtocol, OUT IMS_SINT32& nCause, OUT AString& strText);
 };
 
-#endif // _SIP_PARSING_HELPER_H_
+#endif

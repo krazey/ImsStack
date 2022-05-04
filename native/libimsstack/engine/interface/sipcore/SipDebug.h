@@ -1,5 +1,20 @@
-#ifndef _SIP_DEBUG_H_
-#define _SIP_DEBUG_H_
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_DEBUG_H_
+#define SIP_DEBUG_H_
 
 #include "IPAddress.h"
 #include "SipMethod.h"
@@ -9,12 +24,8 @@
  */
 class SipDebug
 {
-private:
-    SipDebug();
-
-private:
-    SipDebug(IN CONST SipDebug &objRHS);
-    SipDebug& operator=(IN CONST SipDebug &objRHS);
+public:
+    SipDebug() = delete;
 
 public:
     /**
@@ -34,13 +45,14 @@ public:
      * @param nStatusCode SIP status code for SIP response
      */
     static void Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
-        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode = 0);
+            IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode = 0);
 
     // Methods for logging based on release mode
     /**
      * @brief Initializes the logging buffers.
      */
     static void InitLogging();
+
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
      *
@@ -50,8 +62,9 @@ public:
      * @param cDelimiter The delimiter character to be returned
      * @return The adjusted logging string.
      */
-    static const IMS_CHAR* GetCharA1(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 nCount,
-            IN CONST IMS_CHAR cDelimiter = 0 /* no delimiter */);
+    static const IMS_CHAR* GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
      *
@@ -61,26 +74,29 @@ public:
      * @param cDelimiter The delimiter character to be returned
      * @return The adjusted logging string.
      */
-    static const IMS_CHAR* GetCharA2(IN CONST IMS_CHAR *pszValue, IN IMS_SINT32 nCount,
-            IN CONST IMS_CHAR cDelimiter = 0 /* no delimiter */);
+    static const IMS_CHAR* GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+
     /**
      * @brief Gets a string representation of IP address.
      *
      * In release mode, the first 5 characters are returned as it is and others are set to 'x'.
      *
-     * @param objIPA IP address
+     * @param objIpAddr IP address
      * @return The adjusted logging string.
      */
-    static const IMS_CHAR* GetIp(IN CONST IPAddress &objIPA);
+    static const IMS_CHAR* GetIp(IN const IPAddress& objIpAddr);
+
     /**
      * @brief Gets a string representation of IP address.
      *
      * In release mode, the first 5 characters are returned as it is and others are set to 'x'.
      *
-     * @param strIP IP address
+     * @param strIpAddr IP address
      * @return The adjusted logging string.
      */
-    static const IMS_CHAR* GetIp(IN CONST AString &strIP);
+    static const IMS_CHAR* GetIp(IN const AString& strIpAddr);
+
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
      *
@@ -94,8 +110,9 @@ public:
      * @param cDelimiter The delimiter character to be returned
      * @return The adjusted logging string.
      */
-    static const AString& GetStr1(IN CONST AString &strValue, IN IMS_SINT32 nCount,
-            IN CONST IMS_CHAR cDelimiter = 0 /* no delimiter */);
+    static const AString& GetStr1(IN const AString& strValue, IN IMS_SINT32 nCount,
+            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
      *
@@ -109,8 +126,9 @@ public:
      * @param cDelimiter The delimiter character to be returned
      * @return The adjusted logging string.
      */
-    static const AString& GetStr2(IN CONST AString &strValue, IN IMS_SINT32 nCount,
-            IN CONST IMS_CHAR cDelimiter = 0 /* no delimiter */);
+    static const AString& GetStr2(IN const AString& strValue, IN IMS_SINT32 nCount,
+            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+
     /**
      * @brief Gets the adjusted logging string for the given URI string.
      *
@@ -121,7 +139,8 @@ public:
      * @param strValue The URI string
      * @return The adjusted logging string.
      */
-    static const AString& GetUri1(IN CONST AString &strValue);
+    static const AString& GetUri1(IN const AString& strValue);
+
     /**
      * @brief Gets the adjusted logging string for the given URI string.
      *
@@ -132,7 +151,7 @@ public:
      * @param strValue The URI string
      * @return The adjusted logging string.
      */
-    static const AString& GetUri2(IN CONST AString &strValue);
+    static const AString& GetUri2(IN const AString& strValue);
 
 private:
     static IMS_BOOL CheckIfDebugRequired(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
@@ -183,4 +202,4 @@ private:
     static AString strLog2_1;
 };
 
-#endif // _SIP_DEBUG_H_
+#endif

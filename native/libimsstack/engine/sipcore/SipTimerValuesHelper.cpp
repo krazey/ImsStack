@@ -1,134 +1,134 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20101120  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines the helper class to set the SIP transaction timer values.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
+
 #include "private/SipConfigV.h"
+
 #include "SipConfigProxy.h"
 #include "SipTimerValuesHelper.h"
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC GLOBAL
 SipTimerValues SipTimerValuesHelper::GetValues(IN IMS_SINT32 nSlotId,
-        IN CONST SipProfile *pSIPProfile/* = IMS_NULL*/,
+        IN const SipProfile* pSipProfile/* = IMS_NULL*/,
         IN IMS_SINT32 nTxnType/* = NON_INVITE_CLIENT*/)
 {
-    SipTimerValues objTV;
-    const SipConfigV *pSipConfigV = DYNAMIC_CAST(const SipConfigV*,
+    SipTimerValues objTv;
+    const SipConfigV* pSipConfigV = DYNAMIC_CAST(const SipConfigV*,
             SipConfigProxy::GetSipConfigV(nSlotId));
 
-    //---------------------------------------------------------------------------------------------
-
     // If the timer values are not changed on runtime, do not set the timer values.
-    if ((pSIPProfile == IMS_NULL)
-            && (pSipConfigV != IMS_NULL)
-            && !pSipConfigV->IsTimerValueConfiguredOnRuntime())
+    if ((pSipProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
+            !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
         IMS_TRACE_D("SIP timer values are not configured on runtime ...", 0, 0, 0);
-        return objTV;
+        return objTv;
     }
 
-    IMS_SINT32 nTV_T1 = 2000;
-    IMS_SINT32 nTV_T2 = 16000;
-    IMS_SINT32 nTV_Temp;
+    IMS_SINT32 nTvT1 = 2000;
+    IMS_SINT32 nTvT2 = 16000;
+    IMS_SINT32 nTvTemp;
 
     //// T1 (RTT estimate)
-    nTV_T1 = SipConfigProxy::GetTimerValueT1(nSlotId, pSIPProfile, pSipConfigV);
-    objTV.SetValue(SipTimerValues::TIMER_T1, nTV_T1);
+    nTvT1 = SipConfigProxy::GetTimerValueT1(nSlotId, pSipProfile, pSipConfigV);
+    objTv.SetValue(SipTimerValues::TIMER_T1, nTvT1);
 
     //// Overwrite the T1 according to the SIP transaction
     if (nTxnType == INVITE_CLIENT)
     {
-        nTV_Temp = SipConfigProxy::GetTimerValueA(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
+        nTvTemp = SipConfigProxy::GetTimerValueA(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
 
-        if (nTV_Temp > 0)
+        if (nTvTemp > 0)
         {
-            nTV_T1 = nTV_Temp;
-            objTV.SetValue(SipTimerValues::TIMER_T1, nTV_T1);
+            nTvT1 = nTvTemp;
+            objTv.SetValue(SipTimerValues::TIMER_T1, nTvT1);
         }
     }
     else if (nTxnType == INVITE_SERVER)
     {
-        nTV_Temp = SipConfigProxy::GetTimerValueG(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
+        nTvTemp = SipConfigProxy::GetTimerValueG(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
 
-        if (nTV_Temp > 0)
+        if (nTvTemp > 0)
         {
-            nTV_T1 = nTV_Temp;
-            objTV.SetValue(SipTimerValues::TIMER_T1, nTV_T1);
+            nTvT1 = nTvTemp;
+            objTv.SetValue(SipTimerValues::TIMER_T1, nTvT1);
         }
     }
     else
     {
-        nTV_Temp = SipConfigProxy::GetTimerValueE(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
+        nTvTemp = SipConfigProxy::GetTimerValueE(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
 
-        if (nTV_Temp > 0)
+        if (nTvTemp > 0)
         {
-            nTV_T1 = nTV_Temp;
-            objTV.SetValue(SipTimerValues::TIMER_T1, nTV_T1);
+            nTvT1 = nTvTemp;
+            objTv.SetValue(SipTimerValues::TIMER_T1, nTvT1);
         }
     }
 
     //// T2 (maximum retranmit interval for non-INVITE request & INVITE responses)
-    nTV_T2 = SipConfigProxy::GetTimerValueT2(nSlotId, pSIPProfile, pSipConfigV);
-    objTV.SetValue(SipTimerValues::TIMER_T2, nTV_T2);
+    nTvT2 = SipConfigProxy::GetTimerValueT2(nSlotId, pSipProfile, pSipConfigV);
+    objTv.SetValue(SipTimerValues::TIMER_T2, nTvT2);
 
     //// Timer B (INVITE transaction timeout timer)
-    nTV_Temp = SipConfigProxy::GetTimerValueB(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-    objTV.SetValue(SipTimerValues::TV_TIMER_B, (nTV_Temp > 0) ? nTV_Temp : (nTV_T1 * 64));
+    nTvTemp = SipConfigProxy::GetTimerValueB(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+    objTv.SetValue(SipTimerValues::TIMER_B, (nTvTemp > 0) ? nTvTemp : (nTvT1 * 64));
 
     //// Timer D (wait time for INVITE response retransmits)
-    nTV_Temp = SipConfigProxy::GetTimerValueD(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-    objTV.SetValue(SipTimerValues::TV_TIMER_D, (nTV_Temp > 0) ? nTV_Temp : (nTV_T1 * 64));
+    nTvTemp = SipConfigProxy::GetTimerValueD(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+    objTv.SetValue(SipTimerValues::TIMER_D, (nTvTemp > 0) ? nTvTemp : (nTvT1 * 64));
 
     //// Timer F (non-INVITE transaction timeout timer)
-    nTV_Temp = SipConfigProxy::GetTimerValueF(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-    objTV.SetValue(SipTimerValues::TV_TIMER_F, (nTV_Temp > 0) ? nTV_Temp : (nTV_T1 * 64));
+    nTvTemp = SipConfigProxy::GetTimerValueF(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+    objTv.SetValue(SipTimerValues::TIMER_F, (nTvTemp > 0) ? nTvTemp : (nTvT1 * 64));
 
     //// Timer H (wait time for ACK receipt)
-    nTV_Temp = SipConfigProxy::GetTimerValueH(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-    objTV.SetValue(SipTimerValues::TV_TIMER_H, (nTV_Temp > 0) ? nTV_Temp : (nTV_T1 * 64));
+    nTvTemp = SipConfigProxy::GetTimerValueH(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+    objTv.SetValue(SipTimerValues::TIMER_H, (nTvTemp > 0) ? nTvTemp : (nTvT1 * 64));
 
     //// Timer I (wait for ACK retransmits)
-    nTV_Temp = SipConfigProxy::GetTimerValueI(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
+    nTvTemp = SipConfigProxy::GetTimerValueI(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
 
-    if (nTV_Temp > 0)
+    if (nTvTemp > 0)
     {
-        objTV.SetValue(SipTimerValues::TV_TIMER_I, nTV_Temp);
+        objTv.SetValue(SipTimerValues::TIMER_I, nTvTemp);
     }
     else
     {
-        nTV_Temp = SipConfigProxy::GetTimerValueT4(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-        objTV.SetValue(SipTimerValues::TV_TIMER_I, (nTV_Temp > 0) ? nTV_Temp : (nTV_T2 + 1000));
+        nTvTemp = SipConfigProxy::GetTimerValueT4(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+        objTv.SetValue(SipTimerValues::TIMER_I, (nTvTemp > 0) ? nTvTemp : (nTvT2 + 1000));
     }
 
     //// Timer J (wait time for non-INVITE request retransmits)
-    nTV_Temp = SipConfigProxy::GetTimerValueJ(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-    objTV.SetValue(SipTimerValues::TV_TIMER_J, (nTV_Temp > 0) ? nTV_Temp : (nTV_T1 * 64));
+    nTvTemp = SipConfigProxy::GetTimerValueJ(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+    objTv.SetValue(SipTimerValues::TIMER_J, (nTvTemp > 0) ? nTvTemp : (nTvT1 * 64));
 
     //// Timer K (wait time for non-INVITE response retransmits)
-    nTV_Temp = SipConfigProxy::GetTimerValueK(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
+    nTvTemp = SipConfigProxy::GetTimerValueK(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
 
-    if (nTV_Temp > 0)
+    if (nTvTemp > 0)
     {
-        objTV.SetValue(SipTimerValues::TV_TIMER_K, nTV_Temp);
+        objTv.SetValue(SipTimerValues::TIMER_K, nTvTemp);
     }
     else
     {
-        nTV_Temp = SipConfigProxy::GetTimerValueT4(nSlotId, pSIPProfile, pSipConfigV, IMS_FALSE);
-        objTV.SetValue(SipTimerValues::TV_TIMER_K, (nTV_Temp > 0) ? nTV_Temp : (nTV_T2 + 1000));
+        nTvTemp = SipConfigProxy::GetTimerValueT4(nSlotId, pSipProfile, pSipConfigV, IMS_FALSE);
+        objTv.SetValue(SipTimerValues::TIMER_K, (nTvTemp > 0) ? nTvTemp : (nTvT2 + 1000));
     }
 
-    return objTV;
+    return objTv;
 }
