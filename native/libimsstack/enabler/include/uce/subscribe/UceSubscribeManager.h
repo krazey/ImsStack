@@ -18,41 +18,45 @@
 
 #include "IMSActivityEx.h"
 
+class ICoreService;
 class UceSubscribe;
 
-class UceSubscribeManager
-    : public IMSActivityEx
-{
-/* -------------------------------------------------------------------------------------------------
-    Constructor, Destructor, Operator Overloading
-------------------------------------------------------------------------------------------------- */
-public:
-    UceSubscribeManager(IN CONST AString &strName, ICoreService *_piCoreService,
-            IN CONST AString &strAppName, IN IMS_SINT32 nSimSlot);
-    virtual ~UceSubscribeManager();
-/* -------------------------------------------------------------------------------------------------
-    Methods
-------------------------------------------------------------------------------------------------- */
-public:
-    IMS_BOOL QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key);
-    IMS_BOOL QueryMultiCapability(IN IMSList<AString> objUsers, IN IMS_UINT32 key);
-    IMS_BOOL AosConnected(IMS_UINT32 conectedService);
-    IMS_BOOL AosDisConnected();
-    void ClosedService(); //core service closed
-protected:
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMsg);
-private:
-    IMS_BOOL RemoveSubscribe(IN UceSubscribe* subscribe);
-    IMS_BOOL ClearSubscribeList();
+class UceSubscribeManager : public IMSActivityEx {
+  /* ------------------------------------------------------------------------------------------
+      Constructor, Destructor, Operator Overloading
+  ---------------------------------------------------------------------------------------------
+*/
+ public:
+  UceSubscribeManager(IN CONST AString &strName, ICoreService *_piCoreService,
+                      IN CONST AString &strAppName, IN IMS_SINT32 nSimSlot);
+  virtual ~UceSubscribeManager();
+  /* ------------------------------------------------------------------------------------------
+      Methods
+  ---------------------------------------------------------------------------------------------
+*/
+ public:
+  IMS_BOOL QuerySingleCapability(IN AString strUser, IN IMS_UINT32 key);
+  IMS_BOOL QueryMultiCapability(IN IMSList<AString> objUsers,
+                                IN IMS_UINT32 key);
+  IMS_BOOL AosConnected(IMS_UINT32 conectedService);
+  IMS_BOOL AosDisConnected();
+  void ClosedService();  // core service closed
+ protected:
+  virtual IMS_BOOL OnMessage(IN IMSMSG &objMsg);
 
-/* -------------------------------------------------------------------------------------------------
-    Variable
-------------------------------------------------------------------------------------------------- */
-protected:
-    IMSList<UceSubscribe*>  m_objUceSubscribeList; //Subscription List
-    ICoreService*           m_piCoreService;
-    AString                 m_strAppName;
-    IMS_SINT32              m_nSimSlot;
-    IMS_UINT32              m_nConnectedServices;
+ private:
+  IMS_BOOL RemoveSubscribe(IN UceSubscribe *subscribe);
+  IMS_BOOL ClearSubscribeList();
+
+  /* ------------------------------------------------------------------------------------------
+      Variable
+  ---------------------------------------------------------------------------------------------
+*/
+ protected:
+  IMSList<UceSubscribe *> m_objUceSubscribeList;  // Subscription List
+  ICoreService *m_piCoreService;
+  AString m_strAppName;
+  IMS_SINT32 m_nSimSlot;
+  IMS_UINT32 m_nConnectedServices;
 };
-#endif // _UCE_SUBSCRIBE_MANAGER_H_
+#endif  // _UCE_SUBSCRIBE_MANAGER_H_

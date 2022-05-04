@@ -16,28 +16,27 @@
 #include "BaseService.h"
 #include "IMSAppThread.h"
 
-class JniUceServiceThread : public IMSAppThread
-{
-    private:
-        JniUceServiceThread();
+class JniUceServiceThread : public IMSAppThread {
+ private:
+  JniUceServiceThread();
 
-    public:
-        static IMSAppThread* GetInstance();
-        virtual ~JniUceServiceThread();
+ public:
+  static IMSAppThread *GetInstance();
+  virtual ~JniUceServiceThread();
 
-        int SetCallback(IN IMS_UINTP nNativeObj, IN CBServiceNoti pCBServiceNoti);
+  int SetCallback(IN IMS_UINTP nNativeObj, IN CBServiceNoti pCBServiceNoti);
 
-    protected:
-        virtual IMS_BOOL Initialize();
-        virtual void Uninitialize();
+ protected:
+  virtual IMS_BOOL Initialize();
+  virtual void Uninitialize();
 
-        virtual IMS_BOOL OnStart(IN IMSMSG &objMSG);
-        virtual IMS_BOOL OnTerminate(IN IMSMSG &objMSG);
-        virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+  virtual IMS_BOOL OnStart(IN IMSMSG &objMSG);
+  virtual IMS_BOOL OnTerminate(IN IMSMSG &objMSG);
+  virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
 
-    private:
-        IMS_UINTP m_nNativeObj;
-        CBServiceNoti m_pCBServiceNoti;
+ private:
+  IMS_UINTP m_nNativeObj;
+  CBServiceNoti m_pCBServiceNoti;
 };
 
-#endif    // _IMS_PEOPLE_SERVICE_THREAD_H_
+#endif  // _IMS_PEOPLE_SERVICE_THREAD_H_

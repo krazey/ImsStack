@@ -176,8 +176,7 @@ public class AcSConfigContainer {
                 mConfig = PersistableBundle.readFromStream(inputStream);
                 inputStream.close();
                 log("read config from file");
-            }
-            else {
+            } else {
                 mConfig = new PersistableBundle();
                 log("file is not exist");
             }

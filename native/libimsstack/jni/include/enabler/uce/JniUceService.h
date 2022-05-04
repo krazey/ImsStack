@@ -19,22 +19,21 @@ class JniUceServiceThread;
 
 using namespace android;
 
-class JniUceService : public BaseService
-{
-    public:
-        JniUceService(IN IMS_UINT32 nSimSlot = 0);
-        JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 nSimSlot = 0);
-        virtual ~JniUceService();
+class JniUceService : public BaseService {
+ public:
+  JniUceService(IN IMS_UINT32 nSimSlot = 0);
+  JniUceService(CBServiceNoti pCBServiceNoti, IN IMS_UINT32 nSimSlot = 0);
+  virtual ~JniUceService();
 
-        virtual int SendData(const Parcel& pParcel);
+  virtual int SendData(const Parcel& pParcel);
 
-    private:
-        void HandleMessage(int nMsg, const Parcel& pParcel);
+ private:
+  void HandleMessage(int nMsg, const Parcel& pParcel);
 
-    private:
-        JniUceServiceThread* m_pJniUceServiceThread;
-        IMS_UINT32 m_nSimSlot;
-        AString m_strTarget;
+ private:
+  JniUceServiceThread* m_pJniUceServiceThread;
+  IMS_UINT32 m_nSimSlot;
+  AString m_strTarget;
 };
 
-#endif //_IMS_PEOPLE_SERVICE_H_
+#endif  //_IMS_PEOPLE_SERVICE_H_
