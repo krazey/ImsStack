@@ -148,10 +148,12 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
         case CallStateName::OUTGOING:
         case CallStateName::INCOMING:
         case CallStateName::ALERTING:
+            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_SESSION_SRVCC));
             break;
         case CallStateName::ESTABLISHED:
         case CallStateName::UPDATING:
+            m_objContext.GetMediaManager().Terminate();
             m_objContext.GetUiNotifier().SendTerminated(FailReason(FAIL_REASON_SESSION_SRVCC));
             break;
         case CallStateName::TERMINATING:
@@ -579,6 +581,14 @@ IMS_RESULT MtcCallState::SendResponseToPrack(IN IMS_SINT32 eStatusCode)
 PROTECTED
 CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const FailReason& objFailReason)
 {
+    m_objContext.GetMediaManager().Terminate();
+
+    if (objFailReason.nReason == REJECT_REASON_SESSION_FAIL_PRECONDITION)
+    {
+        m_objContext.GetPreconditionManager().FormPreconditionSdp(
+                &m_objContext.GetSession()->GetISession(), IMS_TRUE);
+    }
+
     m_objContext.GetSession()->GetMessageSender().Reject(objFailReason);
     m_objContext.GetUiNotifier().SendStartFailed(objFailReason);
     return CallStateName::TERMINATING;

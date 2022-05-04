@@ -237,6 +237,11 @@ PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaSession()
         return;
     }
 
+    if (GetState() >= MediaState::TERMINATING)
+    {
+        return;
+    }
+
     IMS_TRACE_D("DestroyMediaSession", 0, 0, 0);
     pMediaManager->DestroySession((MediaSession*)m_piMediaSession);
 }
@@ -251,6 +256,11 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
 PUBLIC
 void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
 {
+    if (GetState() >= MediaState::TERMINATING)
+    {
+        return;
+    }
+
     IMS_TRACE_D("DestroyMediaProfile", 0, 0, 0);
     m_objProfileManager.DestroyMediaProfile(piSession, m_piMediaSession);
 }
@@ -465,8 +475,15 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* pi
 PUBLIC VIRTUAL void MtcMediaManager::Terminate()
 {
     IMS_TRACE_D("Terminate", 0, 0, 0);
-
     SetState(MediaState::TERMINATING);
+
+    if (!m_piMediaSession)
+    {
+        IMS_TRACE_D("Terminate : nothing to terminate for media.", 0, 0, 0);
+        return;
+
+    }
+
     m_piMediaSession->Terminate();
 }
 

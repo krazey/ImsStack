@@ -13,6 +13,16 @@ MtcMediaProfileManager::MtcMediaProfileManager() :
 PUBLIC VIRTUAL MtcMediaProfileManager::~MtcMediaProfileManager()
 {
     IMS_TRACE_D("~MtcMediaProfileManager", 0, 0, 0);
+
+    for (IMS_UINT32 index = 0; index < m_objMediaProfiles.GetSize(); index++)
+    {
+        MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(index);
+
+        if (pProfile)
+        {
+            delete pProfile;
+        }
+    }
 }
 
 PUBLIC
