@@ -1,28 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipRequestLine.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "SipTrace.h"
 #include "platform/sip_pf_memory.h"
@@ -402,71 +377,6 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
                 "SipRequestLine::DecodeRequestLine:Memory Allocation failed",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
-    }
-
-    return SIP_TRUE;
-}
-
-/******************************************************************************
- * Function name      : SipStatusLine::DecodeStatusLine
- *
- * Description     :
- *
- * Preconditions          SIP_CHAR   * pStartPt,
- *
- * Side Effects      : none
- *****************************************************************************/
-SIP_BOOL SipStatusLine::DecodeStatusLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
-{
-    SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempLoc = SIP_NULL;
-
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    m_pszSipVersion = sipCreateString(pStartPt, pTempLoc);
-    if (m_pszSipVersion == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    /*update the start point to the start of Status Code*/
-    pStartPt = pTempLoc + SIP_TWO;
-    pTempLoc = SIP_NULL;
-    /*Find the endpoint of status code*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    m_pszStatusCode = sipCreateString(pStartPt, pTempLoc);
-    if (m_pszStatusCode == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    /*Update the start point to the start of reason phrase*/
-    pStartPt =  pTempLoc + SIP_TWO;
-    m_pszRsnPhrase = sipCreateString(pStartPt, pEndPt);
-    if (m_pszRsnPhrase == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipStatusLine::DecodeStatusLine: No Reason phrase present in response line",
-                SIP_ZERO, SIP_ZERO);
     }
 
     return SIP_TRUE;
