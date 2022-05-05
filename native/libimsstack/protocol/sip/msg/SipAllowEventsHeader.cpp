@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipAllowEventsHeader.cpp
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     :
- * E-mail id.    : saurabh31.srivastava@
- * Creation date   : July. 27, 2010
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipAllowEventsHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -116,32 +90,6 @@ SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParam
 
     return (m_pEventTemplateList != SIP_NULL) ?
         m_pEventTemplateList->EncodeList(ppCurrPos,SIP_DOT) : SIP_TRUE;
-}
-
-
-SIP_BOOL SipAllowEventsHeader::AddEvtTemplate(const SIP_CHAR* pszEvntTmpl)
-{
-    if (m_pEventTemplateList == SIP_NULL)
-    {
-        m_pEventTemplateList = new SipParameterList();
-    }
-
-    if (m_pEventTemplateList == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Memory allocation fail", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    SIP_CHAR* pszTempEvTmpl = SIP_NULL;
-    if (SetCharVar(pszEvntTmpl, pszTempEvTmpl) == SIP_TRUE)
-    {
-        SIP_BOOL bResult = m_pEventTemplateList->Add(pszTempEvTmpl);
-        delete[] pszTempEvTmpl;
-        return bResult;
-    }
-
-    return SIP_FALSE;
-
 }
 
 /******************************************************************************

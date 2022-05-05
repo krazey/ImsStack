@@ -1,24 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipEventHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : Month. Date,10
- *
- * Edit History         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
 #ifndef __SIP_EVENT_HEADER_H__
 #define __SIP_EVENT_HEADER_H__
 
@@ -61,7 +40,5 @@ class SipEventHeader : public SipHeaderBase
 
         /*Function for decoding of headers*/
         SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
-
-        SIP_BOOL AddEventTemplate(const SIP_CHAR* pszEvntTemp);
 };
 #endif //__SIP_EVENT_HEADER_H__

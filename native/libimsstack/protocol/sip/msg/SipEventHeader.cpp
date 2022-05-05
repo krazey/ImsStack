@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipEventHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipEventHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -132,38 +106,6 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defa
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
-
-/******************************************************************************
- * Function name      : SipEventHeader::SetEventPkg
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-SIP_BOOL SipEventHeader::AddEventTemplate(const SIP_CHAR* pszEvntTmpl)
-{
-    if (pszEvntTmpl == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODACCESSOR, "Empty value", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    if (m_pEventTemplateList ==  SIP_NULL)
-    {
-        m_pEventTemplateList = new SipParameterList();
-    }
-
-    if (m_pEventTemplateList == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODACCESSOR, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    return m_pEventTemplateList->Add(pszEvntTmpl);
-}
-
 
 /******************************************************************************
  * Function name      : SipEventHeader::DecodeHdr

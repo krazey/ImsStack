@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipCSeqHeader.cpp
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     :
- * E-mail id.    : saurabh31.srivastava@
- * Creation date   : July. 27, 2010
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipCSeqHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -165,20 +139,14 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return SIP_FALSE;
     }
 
-    if (SipPf_Atoi_IsZero(pszSeq) == SIP_FALSE)
+    m_nSeq = SipPf_Atoi_Unsigned(pszSeq);
+    if ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO))
     {
-        m_nSeq = SipPf_Atoi_Unsigned(pszSeq);
-        if ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO))
-        {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
-            delete[] pszSeq;
-            return SIP_FALSE;
-        }
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid CSeq Value", SIP_ZERO, SIP_ZERO);
+        delete[] pszSeq;
+        return SIP_FALSE;
     }
-    else
-    {
-        m_nSeq = SIP_ZERO;
-    }
+
     delete[] pszSeq;
 
     pTempPre = pTempPre + SIP_ONE;
