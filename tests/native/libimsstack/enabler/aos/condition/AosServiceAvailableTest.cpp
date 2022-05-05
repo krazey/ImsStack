@@ -28,7 +28,6 @@
 #include "condition/AosServiceAvailable.h"
 
 using ::testing::_;
-using ::testing::Return;
 
 class AosServiceAvailableTest : public ::testing::Test {
 public:

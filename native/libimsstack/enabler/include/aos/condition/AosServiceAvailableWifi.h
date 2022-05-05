@@ -29,8 +29,15 @@ public:
     AosServiceAvailableWifi();
     virtual ~AosServiceAvailableWifi();
 
-    void StartToCheckNetworkConnection() final;
+    IMS_BOOL StartToCheckNetworkConnection() final;
     IMS_BOOL StopToCheckNetworkConnection(IN IMS_BOOL bNeedToCheckAvailable = IMS_TRUE) final;
+
+    enum
+    {
+        STATE_BAD_NETWORK_NONE = 0,
+        STATE_BAD_NETWORK_CHECKING,
+        STATE_BAD_NETWORK_DETECTED
+    };
 
 private:
     void RegisterListener() final;
@@ -57,13 +64,6 @@ private:
     IMS_BOOL RequestNetPing();
     static const IMS_CHAR* PingResultToString(IN IMS_SINT32 nResult);
 
-    enum
-    {
-        STATE_BAD_NETWORK_NONE = 0,
-        STATE_BAD_NETWORK_CHECKING,
-        STATE_BAD_NETWORK_DETECTED
-    };
-
 private:
     AString m_strCountry;
     IMS_UINT32 m_nVoWiFiSetting;
@@ -72,6 +72,9 @@ private:
     INetworkPing* m_piNetPing;
 
     static const IMS_UINT32 TIME_BAD_NETWORK_CHECK = 3000;
+
+private:
+    friend class AosServiceAvailableWifiTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_WIFI_H_
