@@ -140,10 +140,6 @@ TEST_F(AosConditionTest, Constructor) {
     EXPECT_EQ(GetListener(), AosCondition::LISTENER_ALL);
 }
 
-// Testing is not required.
-// TEST_F(AosConditionTest, Destructor) {
-// }
-
 TEST_F(AosConditionTest, Start) {
     EXPECT_EQ(GetServiceAvailable(SERVICE_CELLULAR), nullptr);
     EXPECT_EQ(GetServiceAvailable(SERVICE_WIFI), nullptr);

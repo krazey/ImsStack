@@ -25,17 +25,18 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-#define GET_MANAGER(SLOT) (AosProvider::GetInstance()->GetSubscriberManager(SLOT))
 #define APPPROFILE m_strTag.GetStr()
 
 PUBLIC
 AosSubscriber::AosSubscriber(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
+        m_piSubscriberManager(IMS_NULL),
         m_nSlotId(m_piAppContext->GetSlotId()),
         m_piListener(IMS_NULL),
         m_eRegType(AosRegistrationType::NORMAL)
 {
     m_strTag.Sprintf("%d:%s", m_nSlotId, m_piAppContext->GetProfileId().GetStr());
+    m_piSubscriberManager = AosProvider::GetInstance()->GetSubscriberManager(m_nSlotId);
 
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosSubscriber = %" PFLS_u "/%" PFLS_x, APPPROFILE,
             sizeof(AosSubscriber), this);
@@ -49,7 +50,9 @@ PUBLIC VIRTUAL AosSubscriber::~AosSubscriber()
 
 PUBLIC VIRTUAL IMS_BOOL AosSubscriber::IsReady() const
 {
-    return GET_MANAGER(m_nSlotId)->IsReady(m_eRegType == AosRegistrationType::FAKE);
+    return (m_piSubscriberManager != IMS_NULL)
+            ? m_piSubscriberManager->IsReady(m_eRegType == AosRegistrationType::FAKE)
+            : IMS_FALSE;
 }
 
 PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piListener)
@@ -69,18 +72,22 @@ PUBLIC VIRTUAL void AosSubscriber::SetListener(IN IAosSubscriberListener* piList
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetConfiguredImpus() const
 {
-    return GET_MANAGER(m_nSlotId)->GetConfiguredImpus(m_eRegType == AosRegistrationType::FAKE);
+    return (m_piSubscriberManager != IMS_NULL)
+            ? m_piSubscriberManager->GetConfiguredImpus(m_eRegType == AosRegistrationType::FAKE)
+            : AStringArray::ConstNull();
 }
 
 PUBLIC VIRTUAL const AStringArray& AosSubscriber::GetFakeImpus() const
 {
-    return GET_MANAGER(m_nSlotId)->GetFakeImpus();
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->GetFakeImpus()
+                                               : AStringArray::ConstNull();
 }
 
 PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
         IN IMS_SINT32 nType /*= NORMAL*/) const
 {
-    return GET_MANAGER(m_nSlotId)->GetSubscriberConfig(nType);
+    return (m_piSubscriberManager != IMS_NULL) ? m_piSubscriberManager->GetSubscriberConfig(nType)
+                                               : IMS_NULL;
 }
 
 PRIVATE
@@ -96,13 +103,18 @@ void AosSubscriber::Init()
         m_piAppContext->GetBlock()->SetBlockReason(BLOCK_IMS_DISABLED);
     }
 
+    if (m_piSubscriberManager == IMS_NULL)
+    {
+        return;
+    }
+
     if (m_eRegType == AosRegistrationType::FAKE)
     {
-        GET_MANAGER(m_nSlotId)->AddListenerForMonitor(this);
+        m_piSubscriberManager->AddListenerForMonitor(this);
     }
     else
     {
-        GET_MANAGER(m_nSlotId)->AddListener(this);
+        m_piSubscriberManager->AddListener(this);
     }
     A_IMS_TRACE_D(APPPROFILE, "Init - AddListener :: (%" PFLS_X ")", this, 0, 0);
 }
@@ -112,13 +124,18 @@ void AosSubscriber::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
+    if (m_piSubscriberManager == IMS_NULL)
+    {
+        return;
+    }
+
     if (m_eRegType == AosRegistrationType::FAKE)
     {
-        GET_MANAGER(m_nSlotId)->RemoveListenerForMonitor(this);
+        m_piSubscriberManager->RemoveListenerForMonitor(this);
     }
     else
     {
-        GET_MANAGER(m_nSlotId)->RemoveListener(this);
+        m_piSubscriberManager->RemoveListener(this);
     }
 }
 

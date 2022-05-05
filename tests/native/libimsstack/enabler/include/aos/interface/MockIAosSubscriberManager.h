@@ -1,0 +1,26 @@
+#ifndef MOCK_I_AOS_SUBSCRIBER_MANAGER_H_
+#define MOCK_I_AOS_SUBSCRIBER_MANAGER_H_
+
+#include <gmock/gmock.h>
+
+#include "IMSTypeDef.h"
+#include "interface/IAosSubscriber.h"
+#include "interface/IAosSubscriberManagerListener.h"
+#include "interface/IAosSubscriberManager.h"
+
+class MockIAosSubscriberManager : public IAosSubscriberManager {
+public:
+    MOCK_METHOD(IMS_BOOL, IsReady, (IN IMS_BOOL bIsFake), (const, override));
+    MOCK_METHOD(void, AddListener, (IN IAosSubscriberManagerListener* piListener), (override));
+    MOCK_METHOD(void, RemoveListener, (IN IAosSubscriberManagerListener* piListener), (override));
+    MOCK_METHOD(void, AddListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),
+            (override));
+    MOCK_METHOD(void, RemoveListenerForMonitor, (IN IAosSubscriberManagerListener* piListener),
+            (override));
+    MOCK_METHOD(const AStringArray&, GetConfiguredImpus, (IN IMS_BOOL bIsFake), (const, override));
+    MOCK_METHOD(const AStringArray&, GetFakeImpus, (), (const, override));
+    MOCK_METHOD(const ISubscriberConfig*, GetSubscriberConfig, (IN IMS_SINT32 nType),
+            (const, override));
+};
+
+#endif // MOCK_I_AOS_SUBSCRIBER_MANAGER_H_

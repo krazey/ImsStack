@@ -8,10 +8,7 @@
 
 class MockIAosBlockListener : public IAosBlockListener {
 public:
-    // MockIAosBlockListener() {}
-    // MockIAosBlockListener([[maybe_unused]] const MockIAosBlockListener& o) {}
-
     MOCK_METHOD(void, Block_Changed, (IN IMS_UINT32 nType, IN IMS_UINT32 nParam), (override));
 };
 
-#endif //MOCK_I_AOS_BLOCK_LISTENER_H_
+#endif // MOCK_I_AOS_BLOCK_LISTENER_H_
