@@ -19,9 +19,28 @@
     package="com.android.imsstack.tests">
 
     <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="30"/>
+    <uses-permission android:name="android.permission.BIND_IMS_SERVICE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application android:label="ImsStackJavaTests" android:debuggable="true">
         <uses-library android:name="android.test.runner" />
+        <service
+            android:name = ".imsservice.ImsService"
+            android:exported="true"
+            android:persistent="true"
+            android:singleUser="true"
+            android:permission="android.permission.BIND_IMS_SERVICE"
+            android:process="com.android.imsstack">
+            <meta-data android:name="android.telephony.ims.MMTEL_FEATURE"
+                       android:value="true"/>
+            <meta-data android:name="android.telephony.ims.EMERGENCY_MMTEL_FEATURE"
+                       android:value="true"/>
+            <meta-data android:name="android.telephony.ims.RCS_FEATURE"
+                       android:value="true"/>
+            <intent-filter>
+                <action android:name="android.telephony.ims.ImsService"/>
+            </intent-filter>
+        </service>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
