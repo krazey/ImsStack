@@ -7,8 +7,7 @@
 class Element;
 class INamedNodeMap;
 
-class ElementImpl
-        : public IElement
+class ElementImpl : public IElement
 {
 public:
     ElementImpl(IN xmlNodePtr pstNode);
@@ -57,30 +56,30 @@ public:
     // IElement
     const AString& GetAttribute(IN const AString& strName) const override;
     IAttr* GetAttributeNode(IN const AString& strName) const override;
-    IAttr* GetAttributeNodeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const override;
-    const AString& GetAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const override;
+    IAttr* GetAttributeNodeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const override;
+    const AString& GetAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const override;
     INodeList* GetElementsByTagName(IN const AString& strName) const override;
-    INodeList* GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const override;
+    INodeList* GetElementsByTagNameNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const override;
     const AString& GetTagName() const override;
     IMS_BOOL HasAttributeB(IN const AString& strName) const override;
-    IMS_BOOL HasAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const override;
+    IMS_BOOL HasAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const override;
     void RemoveAttribute(IN const AString& strName) override;
     IAttr* RemoveAttributeNode(IN IAttr* piAttr) override;
-    void RemoveAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) override;
+    void RemoveAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) override;
     void SetAttribute(IN const AString& strName, IN const AString& strValue) override;
     IAttr* SetAttributeNode(IN IAttr* piAttr) override;
     IAttr* SetAttributeNodeNs(IN IAttr* piAttr) override;
-    void SetAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strQualifiedName, IN const AString& strValue) override;
+    void SetAttributeNs(IN const AString& strNamespaceUri, IN const AString& strQualifiedName,
+            IN const AString& strValue) override;
     void SetIdAttribute(IN const AString& strName, IN IMS_BOOL bIsId) override;
     void SetIdAttributeNode(IN IAttr* piIdAttr, IN IMS_BOOL bIsId) override;
-    void SetIdAttributeNodeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName, IN IMS_BOOL bIsId) override;
+    void SetIdAttributeNodeNs(IN const AString& strNamespaceUri, IN const AString& strLocalName,
+            IN IMS_BOOL bIsId) override;
 
     // IElement: extensions
     const AString& GetAttribute(IN const IMS_CHAR* pszName) const override;

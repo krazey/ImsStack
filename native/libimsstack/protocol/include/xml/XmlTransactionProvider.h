@@ -7,9 +7,7 @@
 
 class XmlApp;
 
-class XmlTransactionProvider
-    : public IMSActivityEx
-    , public IXmlTransactionProvider
+class XmlTransactionProvider : public IMSActivityEx, public IXmlTransactionProvider
 {
 public:
     XmlTransactionProvider();
@@ -22,10 +20,11 @@ public:
     void DestroyTransaction(IN IXmlTransaction*& piTransaction) override;
     IMS_RESULT Push(IN IXmlTransaction* piTransaction) override;
     IXmlTransaction* Pop() override;
-    inline IMS_SINT32 GetState() const override
-    { return m_nState; }
+    inline IMS_SINT32 GetState() const override { return m_nState; }
     inline void SetStateListener(IN IXmlStateListener* piListener) override
-    { m_piListener = piListener; }
+    {
+        m_piListener = piListener;
+    }
 
 private:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) override;

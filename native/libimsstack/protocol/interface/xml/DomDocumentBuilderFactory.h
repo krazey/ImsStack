@@ -8,8 +8,7 @@
  * @brief This class provides a factory API that enables XML applications to obtain a parser
  *        that produces DOM object trees from XML documents.
  */
-class DomDocumentBuilderFactory
-        : public DocumentBuilderFactory
+class DomDocumentBuilderFactory : public DocumentBuilderFactory
 {
 private:
     DomDocumentBuilderFactory();

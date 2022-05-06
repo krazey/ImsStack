@@ -15,8 +15,7 @@ class IText;
  *
  * @see IAttr, IElement, INode, IText
  */
-class IDocument
-        : public INode
+class IDocument : public INode
 {
 public:
     /**
@@ -52,8 +51,8 @@ public:
      * @param strQualifiedName The qualified name of the attribute to instantiate
      * @return A new IAttr object.
      */
-    virtual IAttr* CreateAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strQualifiedName) = 0;
+    virtual IAttr* CreateAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strQualifiedName) = 0;
 
     /**
      * @brief Creates an element of the type specified.
@@ -85,8 +84,8 @@ public:
      * @param strQualifiedName The qualified name of the element to instantiate
      * @return A new IElement object.
      */
-    virtual IElement* CreateElementNs(IN const AString& strNamespaceUri,
-            IN const AString& strQualifiedName) = 0;
+    virtual IElement* CreateElementNs(
+            IN const AString& strNamespaceUri, IN const AString& strQualifiedName) = 0;
 
     /**
      * @brief Creates a text node given the specified string.
@@ -141,8 +140,8 @@ public:
      *                     The special value "*" matches all local names.
      * @return A new INodeList object containing all the matched elements.
      */
-    virtual INodeList* GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const = 0;
+    virtual INodeList* GetElementsByTagNameNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const = 0;
 
     /**
      * @brief Imports a node from another document to this document,

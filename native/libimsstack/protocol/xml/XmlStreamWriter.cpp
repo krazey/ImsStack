@@ -4,15 +4,14 @@
 __IMS_TRACE_TAG_XML__;
 
 PUBLIC
-XmlStreamWriter::XmlStreamWriter()
-        : m_strXml(AString::ConstNull())
-        , m_strDefaultNamespace(AString::ConstNull())
-        , m_pError(IMS_NULL)
+XmlStreamWriter::XmlStreamWriter() :
+        m_strXml(AString::ConstNull()),
+        m_strDefaultNamespace(AString::ConstNull()),
+        m_pError(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-XmlStreamWriter::~XmlStreamWriter()
+PUBLIC VIRTUAL XmlStreamWriter::~XmlStreamWriter()
 {
     if (m_pError != IMS_NULL)
     {
@@ -21,8 +20,7 @@ XmlStreamWriter::~XmlStreamWriter()
     }
 }
 
-PUBLIC VIRTUAL
-void XmlStreamWriter::Close()
+PUBLIC VIRTUAL void XmlStreamWriter::Close()
 {
     for (IMS_UINT32 i = 0; i < m_objPrefixes.GetSize(); i++)
     {
@@ -57,8 +55,7 @@ void XmlStreamWriter::Close()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_CHAR* XmlStreamWriter::Flush()
+PUBLIC VIRTUAL IMS_CHAR* XmlStreamWriter::Flush()
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -74,8 +71,7 @@ IMS_CHAR* XmlStreamWriter::Flush()
     return m_strXml.Duplicate();
 }
 
-PUBLIC VIRTUAL
-const AString& XmlStreamWriter::GetString() const
+PUBLIC VIRTUAL const AString& XmlStreamWriter::GetString() const
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -91,16 +87,15 @@ const AString& XmlStreamWriter::GetString() const
     return m_strXml;
 }
 
-PUBLIC VIRTUAL
-const AString& XmlStreamWriter::GetPrefix(IN const AString& strUri) const
+PUBLIC VIRTUAL const AString& XmlStreamWriter::GetPrefix(IN const AString& strUri) const
 {
     XmlPrefix* pPrefix = GetPrefixInternal(strUri);
 
     return (pPrefix != IMS_NULL) ? pPrefix->GetPrefix() : AString::ConstNull();
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::SetPrefix(IN const AString& strPrefix, IN const AString& strUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::SetPrefix(
+        IN const AString& strPrefix, IN const AString& strUri)
 {
     if (strUri.GetLength() == 0)
     {
@@ -111,8 +106,8 @@ IMS_RESULT XmlStreamWriter::SetPrefix(IN const AString& strPrefix, IN const AStr
 
     if (pPrefix != IMS_NULL)
     {
-        IMS_TRACE_D("Namespace(%s=%s) is already set",
-                pPrefix->GetPrefix().GetStr(), pPrefix->GetUri().GetStr(), 0);
+        IMS_TRACE_D("Namespace(%s=%s) is already set", pPrefix->GetPrefix().GetStr(),
+                pPrefix->GetUri().GetStr(), 0);
         return IMS_SUCCESS;
     }
 
@@ -132,8 +127,7 @@ IMS_RESULT XmlStreamWriter::SetPrefix(IN const AString& strPrefix, IN const AStr
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strNamespaceUri,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strNamespaceUri,
         IN const AString& strLocalName, IN const AString& strValue)
 {
     const AString& strPrefix = GetPrefix(strNamespaceUri);
@@ -141,8 +135,7 @@ IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strNamespaceUri,
     return WriteAttribute(strPrefix, strNamespaceUri, strLocalName, strValue);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strPrefix,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strPrefix,
         IN const AString& strNamespaceUri, IN const AString& strLocalName,
         IN const AString& strValue)
 {
@@ -176,9 +169,8 @@ IMS_RESULT XmlStreamWriter::WriteAttribute(IN const AString& strPrefix,
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteCharacters(IN const IMS_CHAR* pszText,
-        IN IMS_SINT32 nStart, IN IMS_SINT32 nLen)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteCharacters(
+        IN const IMS_CHAR* pszText, IN IMS_SINT32 nStart, IN IMS_SINT32 nLen)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -198,8 +190,7 @@ IMS_RESULT XmlStreamWriter::WriteCharacters(IN const IMS_CHAR* pszText,
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteCharacters(IN const AString& strText)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteCharacters(IN const AString& strText)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -211,8 +202,7 @@ IMS_RESULT XmlStreamWriter::WriteCharacters(IN const AString& strText)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteComment(IN const AString& strData)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteComment(IN const AString& strData)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -226,17 +216,15 @@ IMS_RESULT XmlStreamWriter::WriteComment(IN const AString& strData)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEmptyElement(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName)
 {
     const AString& strPrefix = GetPrefix(strNamespaceUri);
 
     return WriteEmptyElement(strPrefix, strLocalName, strNamespaceUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const AString& strPrefix,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const AString& strPrefix,
         IN const AString& strLocalName, IN const AString& strNamespaceUri)
 {
     (void)strNamespaceUri;
@@ -266,8 +254,7 @@ IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const AString& strPrefix,
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEndElement()
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEndElement()
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -299,9 +286,8 @@ IMS_RESULT XmlStreamWriter::WriteEndElement()
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteNamespace(IN const AString& strPrefix,
-        IN const AString& strNamespaceUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteNamespace(
+        IN const AString& strPrefix, IN const AString& strNamespaceUri)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -328,13 +314,12 @@ IMS_RESULT XmlStreamWriter::WriteNamespace(IN const AString& strPrefix,
 
     m_strXml += "=\"";
     m_strXml += strNamespaceUri;
-    m_strXml +="\">";
+    m_strXml += "\">";
 
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const AString& strVersion)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const AString& strVersion)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -348,9 +333,8 @@ IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const AString& strVersion)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const AString& strEncoding,
-        IN const AString& strVersion)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartDocument(
+        IN const AString& strEncoding, IN const AString& strVersion)
 {
     if (IsOperationFailedAtLeastOnce())
     {
@@ -366,17 +350,15 @@ IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const AString& strEncoding,
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartElement(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartElement(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName)
 {
     const AString& strPrefix = GetPrefix(strNamespaceUri);
 
     return WriteStartElement(strPrefix, strLocalName, strNamespaceUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartElement(IN const AString& strPrefix,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartElement(IN const AString& strPrefix,
         IN const AString& strLocalName, IN const AString& strNamespaceUri)
 {
     (void)strNamespaceUri;
@@ -410,16 +392,15 @@ IMS_RESULT XmlStreamWriter::WriteStartElement(IN const AString& strPrefix,
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void XmlStreamWriter::SetDefaultNamespace(IN const IMS_CHAR* pszUri)
+PUBLIC VIRTUAL void XmlStreamWriter::SetDefaultNamespace(IN const IMS_CHAR* pszUri)
 {
     AString strUri(pszUri);
 
     SetDefaultNamespace(strUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::SetPrefix(IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::SetPrefix(
+        IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszUri)
 {
     AString strPrefix(pszPrefix);
     AString strUri(pszUri);
@@ -427,9 +408,8 @@ IMS_RESULT XmlStreamWriter::SetPrefix(IN const IMS_CHAR* pszPrefix, IN const IMS
     return SetPrefix(strPrefix, strUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszLocalName,
-        IN const IMS_CHAR* pszValue)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteAttribute(
+        IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszValue)
 {
     AString strLocalName(pszLocalName);
     AString strValue(pszValue);
@@ -437,8 +417,7 @@ IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszLocalName,
     return WriteAttribute(strLocalName, strValue);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszNamespaceUri,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszNamespaceUri,
         IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszValue)
 {
     AString strNameSpaceUri(pszNamespaceUri);
@@ -448,8 +427,7 @@ IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszNamespaceUri,
     return WriteAttribute(strNameSpaceUri, strLocalName, strValue);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszPrefix,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszPrefix,
         IN const IMS_CHAR* pszNamespaceUri, IN const IMS_CHAR* pszLocalName,
         IN const IMS_CHAR* pszValue)
 {
@@ -461,41 +439,36 @@ IMS_RESULT XmlStreamWriter::WriteAttribute(IN const IMS_CHAR* pszPrefix,
     return WriteAttribute(strPrefix, strNameSpaceUri, strLocalName, strValue);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteCharacters(IN const IMS_CHAR* pszText)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteCharacters(IN const IMS_CHAR* pszText)
 {
     AString strText(pszText);
 
     return WriteCharacters(strText);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteComment(IN const IMS_CHAR* pszData)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteComment(IN const IMS_CHAR* pszData)
 {
     AString strData(pszData);
 
     return WriteComment(strData);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteDefaultNamespace(IN const IMS_CHAR* pszNamespaceUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteDefaultNamespace(IN const IMS_CHAR* pszNamespaceUri)
 {
     AString strNameSpaceUri(pszNamespaceUri);
 
     return WriteDefaultNamespace(strNameSpaceUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszLocalName)
 {
     AString strLocalName(pszLocalName);
 
     return WriteEmptyElement(strLocalName);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszNamespaceUri,
-        IN const IMS_CHAR* pszLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEmptyElement(
+        IN const IMS_CHAR* pszNamespaceUri, IN const IMS_CHAR* pszLocalName)
 {
     AString strNamespaceUri(pszNamespaceUri);
     AString strLocalName(pszLocalName);
@@ -503,8 +476,7 @@ IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszNamespaceUri
     return WriteEmptyElement(strNamespaceUri, strLocalName);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszPrefix,
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszPrefix,
         IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszNamespaceUri)
 {
     AString strPrefix(pszPrefix);
@@ -514,9 +486,8 @@ IMS_RESULT XmlStreamWriter::WriteEmptyElement(IN const IMS_CHAR* pszPrefix,
     return WriteEmptyElement(strPrefix, strLocalName, strNamespaceUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteNamespace(IN const IMS_CHAR* pszPrefix,
-        IN const IMS_CHAR* pszNamespaceUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteNamespace(
+        IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszNamespaceUri)
 {
     AString strPrefix(pszPrefix);
     AString strNamespaceUri(pszNamespaceUri);
@@ -524,17 +495,15 @@ IMS_RESULT XmlStreamWriter::WriteNamespace(IN const IMS_CHAR* pszPrefix,
     return WriteNamespace(strPrefix, strNamespaceUri);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const IMS_CHAR* pszVersion)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const IMS_CHAR* pszVersion)
 {
     AString strVersion(pszVersion);
 
     return WriteStartDocument(strVersion);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const IMS_CHAR* pszEncoding,
-        IN const IMS_CHAR* pszVersion)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartDocument(
+        IN const IMS_CHAR* pszEncoding, IN const IMS_CHAR* pszVersion)
 {
     AString strEncoding(pszEncoding);
     AString strVersion(pszVersion);
@@ -542,17 +511,15 @@ IMS_RESULT XmlStreamWriter::WriteStartDocument(IN const IMS_CHAR* pszEncoding,
     return WriteStartDocument(strEncoding, strVersion);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszLocalName)
 {
     AString strLocalName(pszLocalName);
 
     return WriteStartElement(strLocalName);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszNamespaceUri,
-        IN const IMS_CHAR* pszLocalName)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartElement(
+        IN const IMS_CHAR* pszNamespaceUri, IN const IMS_CHAR* pszLocalName)
 {
     AString strNamespaceUri(pszNamespaceUri);
     AString strLocalName(pszLocalName);
@@ -560,9 +527,8 @@ IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszNamespaceUri
     return WriteStartElement(strNamespaceUri, strLocalName);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszPrefix,
-        IN const IMS_CHAR* pszLocalName,  IN const IMS_CHAR* pszNamespaceUri)
+PUBLIC VIRTUAL IMS_RESULT XmlStreamWriter::WriteStartElement(IN const IMS_CHAR* pszPrefix,
+        IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszNamespaceUri)
 {
     AString strPrefix(pszPrefix);
     AString strNamespaceUri(pszNamespaceUri);

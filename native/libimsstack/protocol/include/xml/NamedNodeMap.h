@@ -4,8 +4,7 @@
 #include "IMSList.h"
 #include "INamedNodeMap.h"
 
-class NamedNodeMap
-        : public INamedNodeMap
+class NamedNodeMap : public INamedNodeMap
 {
 public:
     NamedNodeMap();
@@ -14,12 +13,12 @@ public:
     // INamedNodeMap
     IMS_SINT32 GetLength() const override;
     INode* GetNamedItem(IN const AString& strName) const override;
-    INode* GetNamedItemNs(IN const AString& strNamespaceUri,
-            IN const AString& strName) const override;
+    INode* GetNamedItemNs(
+            IN const AString& strNamespaceUri, IN const AString& strName) const override;
     INode* Item(IN IMS_SINT32 nIndex) const override;
     INode* RemoveNamedItem(IN const AString& strName) override;
-    INode* RemoveNamedItemNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) override;
+    INode* RemoveNamedItemNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) override;
     INode* SetNamedItem(IN INode* piNode) override;
     INode* SetNamedItemNs(IN INode* piNode) override;
 

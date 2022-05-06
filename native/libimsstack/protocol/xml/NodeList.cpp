@@ -2,23 +2,16 @@
 #include "NodeList.h"
 
 PUBLIC
-NodeList::NodeList()
-{
-}
+NodeList::NodeList() {}
 
-PUBLIC VIRTUAL
-NodeList::~NodeList()
-{
-}
+PUBLIC VIRTUAL NodeList::~NodeList() {}
 
-PUBLIC VIRTUAL
-IMS_SINT32 NodeList::GetLength() const
+PUBLIC VIRTUAL IMS_SINT32 NodeList::GetLength() const
 {
     return m_objNodes.GetSize();
 }
 
-PUBLIC VIRTUAL
-INode* NodeList::Item(IN IMS_SINT32 nIndex) const
+PUBLIC VIRTUAL INode* NodeList::Item(IN IMS_SINT32 nIndex) const
 {
     if ((nIndex < 0) || (nIndex >= GetLength()))
     {

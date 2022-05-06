@@ -43,8 +43,8 @@ public:
 
 private:
     IMS_RESULT Parse(IN const AString& strRawXml);
-    IMS_RESULT SendParseResponse(IN XmlResult eResult,
-            IN IDocument* piDocument, IN DocumentBuilder* pDocumentBuilder);
+    IMS_RESULT SendParseResponse(
+            IN XmlResult eResult, IN IDocument* piDocument, IN DocumentBuilder* pDocumentBuilder);
 
 public:
     enum

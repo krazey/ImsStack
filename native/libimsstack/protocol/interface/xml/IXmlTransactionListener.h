@@ -13,8 +13,7 @@ public:
      * @return If the notification is successfully processed, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(
-            IN IXmlTransaction* piTransaction) = 0;
+    virtual IMS_RESULT XmlTransaction_NotifyParsingCompleted(IN IXmlTransaction* piTransaction) = 0;
 };
 
 #endif

@@ -11,12 +11,9 @@
  *
  * @see ICharacterData, INode
  */
-class IComment
-        : public ICharacterData
-        , public INode
+class IComment : public ICharacterData, public INode
 {
 public:
-
 };
 
 #endif

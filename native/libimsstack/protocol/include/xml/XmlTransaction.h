@@ -8,8 +8,7 @@ class XmlApp;
 class XmlRequest;
 class XmlResponse;
 
-class XmlTransaction
-        : public IXmlTransaction
+class XmlTransaction : public IXmlTransaction
 {
 public:
     XmlTransaction(IN XmlApp* pXmlApp);

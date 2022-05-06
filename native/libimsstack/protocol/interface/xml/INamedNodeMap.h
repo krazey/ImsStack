@@ -35,8 +35,8 @@ public:
      * @param strName The node name to be retrieved
      * @return An instance of INode or null if not present.
      */
-    virtual INode* GetNamedItemNs(IN const AString& strNamespaceUri,
-            IN const AString& strName) const = 0;
+    virtual INode* GetNamedItemNs(
+            IN const AString& strNamespaceUri, IN const AString& strName) const = 0;
 
     /**
      * @brief Returns the indexth item in the map.
@@ -73,8 +73,8 @@ public:
      * @param strLocalName The local name of the node to remove
      * @return The node removed from this map or null if not present.
      */
-    virtual INode* RemoveNamedItemNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) = 0;
+    virtual INode* RemoveNamedItemNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) = 0;
 
     /**
      * @brief Sets a node using the specified node.

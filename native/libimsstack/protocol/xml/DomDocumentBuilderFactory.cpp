@@ -6,7 +6,7 @@
 PRIVATE
 DomDocumentBuilderFactory::DomDocumentBuilderFactory()
 {
-    ITrace *piTrace = TraceService::GetTraceService()->GetTrace();
+    ITrace* piTrace = TraceService::GetTraceService()->GetTrace();
 
     if (piTrace != IMS_NULL)
     {
@@ -14,21 +14,16 @@ DomDocumentBuilderFactory::DomDocumentBuilderFactory()
     }
 }
 
-PRIVATE VIRTUAL
-DomDocumentBuilderFactory::~DomDocumentBuilderFactory()
-{
-}
+PRIVATE VIRTUAL DomDocumentBuilderFactory::~DomDocumentBuilderFactory() {}
 
-PUBLIC VIRTUAL
-DocumentBuilder* DomDocumentBuilderFactory::NewDocumentBuilder()
+PUBLIC VIRTUAL DocumentBuilder* DomDocumentBuilderFactory::NewDocumentBuilder()
 {
     return new DomDocumentBuilder();
 }
 
-PUBLIC GLOBAL
-DomDocumentBuilderFactory* DomDocumentBuilderFactory::GetInstance()
+PUBLIC GLOBAL DomDocumentBuilderFactory* DomDocumentBuilderFactory::GetInstance()
 {
-    static DomDocumentBuilderFactory *pDomDocumentBuilderFactory = IMS_NULL;
+    static DomDocumentBuilderFactory* pDomDocumentBuilderFactory = IMS_NULL;
 
     if (pDomDocumentBuilderFactory == IMS_NULL)
     {
@@ -38,10 +33,10 @@ DomDocumentBuilderFactory* DomDocumentBuilderFactory::GetInstance()
     return pDomDocumentBuilderFactory;
 }
 
-PUBLIC VIRTUAL
-void DomDocumentBuilderFactory::DestroyDocumentBuilder(IN DocumentBuilder*& pDocumentBuilder)
+PUBLIC VIRTUAL void DomDocumentBuilderFactory::DestroyDocumentBuilder(
+        IN DocumentBuilder*& pDocumentBuilder)
 {
-    DomDocumentBuilder *pBuilder = DYNAMIC_CAST(DomDocumentBuilder*, pDocumentBuilder);
+    DomDocumentBuilder* pBuilder = DYNAMIC_CAST(DomDocumentBuilder*, pDocumentBuilder);
 
     if (pBuilder != IMS_NULL)
     {

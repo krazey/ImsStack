@@ -3,8 +3,7 @@
 
 #include "Node.h"
 
-class CharacterData
-        : public Node
+class CharacterData : public Node
 {
 public:
     CharacterData();
@@ -17,8 +16,8 @@ public:
     virtual const AString& GetData() const;
     virtual IMS_SINT32 GetLength() const;
     virtual void InsertData(IN IMS_SINT32 nOffset, IN const AString& strData);
-    virtual void ReplaceData(IN IMS_SINT32 nOffset,
-            IN IMS_SINT32 nCount, IN const AString& strData);
+    virtual void ReplaceData(
+            IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount, IN const AString& strData);
     virtual void SetData(IN const AString& strData);
     virtual AString SubstringData(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount);
 

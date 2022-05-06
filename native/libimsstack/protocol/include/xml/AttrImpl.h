@@ -8,8 +8,7 @@ class Attr;
 class IDocument;
 class IElement;
 
-class AttrImpl
-        : public IAttr
+class AttrImpl : public IAttr
 {
 public:
     AttrImpl(IN xmlAttrPtr pstAttr, IN IElement* piOwnerElement);

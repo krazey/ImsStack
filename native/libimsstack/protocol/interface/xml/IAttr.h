@@ -10,8 +10,7 @@ class IElement;
  *
  * @see IElement, INode
  */
-class IAttr
-        : public INode
+class IAttr : public INode
 {
 public:
     /**

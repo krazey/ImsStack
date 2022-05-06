@@ -8,17 +8,16 @@
 #include "XmlTransaction.h"
 
 PUBLIC
-XmlTransaction ::XmlTransaction(IN XmlApp* pXmlApp)
-        : m_pXmlApp(pXmlApp)
-        , m_pRequest(new XmlRequest())
-        , m_pResponse(IMS_NULL)
-        , m_piListener(IMS_NULL)
-        , m_pDocumentBuilder(IMS_NULL)
+XmlTransaction ::XmlTransaction(IN XmlApp* pXmlApp) :
+        m_pXmlApp(pXmlApp),
+        m_pRequest(new XmlRequest()),
+        m_pResponse(IMS_NULL),
+        m_piListener(IMS_NULL),
+        m_pDocumentBuilder(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-XmlTransaction::~XmlTransaction()
+PUBLIC VIRTUAL XmlTransaction::~XmlTransaction()
 {
     if (m_pRequest != IMS_NULL)
     {
@@ -29,7 +28,7 @@ XmlTransaction::~XmlTransaction()
     if (m_pResponse != IMS_NULL)
     {
         delete m_pResponse;
-        m_pResponse= IMS_NULL;
+        m_pResponse = IMS_NULL;
     }
 
     if (m_pDocumentBuilder != IMS_NULL)
@@ -39,20 +38,17 @@ XmlTransaction::~XmlTransaction()
     }
 }
 
-PUBLIC VIRTUAL
-IXmlResponse* XmlTransaction::GetResponse() const
+PUBLIC VIRTUAL IXmlResponse* XmlTransaction::GetResponse() const
 {
     return m_pResponse;
 }
 
-PUBLIC VIRTUAL
-IXmlRequest* XmlTransaction::GetRequest() const
+PUBLIC VIRTUAL IXmlRequest* XmlTransaction::GetRequest() const
 {
     return m_pRequest;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlTransaction::Send()
+PUBLIC VIRTUAL IMS_RESULT XmlTransaction::Send()
 {
     if (m_pRequest == IMS_NULL || m_pXmlApp == IMS_NULL || m_piListener == IMS_NULL)
     {
@@ -67,8 +63,7 @@ IMS_RESULT XmlTransaction::Send()
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void XmlTransaction::SetListener(IN IXmlTransactionListener* piListener)
+PUBLIC VIRTUAL void XmlTransaction::SetListener(IN IXmlTransactionListener* piListener)
 {
     m_piListener = piListener;
 }

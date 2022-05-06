@@ -3,8 +3,8 @@
 #include "IElement.h"
 
 PUBLIC
-Element::Element(IN xmlNodePtr pstNode, IN IElement* piElement)
-        : Node(pstNode)
+Element::Element(IN xmlNodePtr pstNode, IN IElement* piElement) :
+        Node(pstNode)
 {
     m_nNodeType = INode::ELEMENT_NODE;
 
@@ -30,8 +30,7 @@ Element::Element(IN xmlNodePtr pstNode, IN IElement* piElement)
     }
 }
 
-PUBLIC VIRTUAL
-Element::~Element()
+PUBLIC VIRTUAL Element::~Element()
 {
     if (m_pNamedNodeMap != IMS_NULL)
     {
@@ -51,16 +50,14 @@ Element::~Element()
     }
 }
 
-PUBLIC VIRTUAL
-const AString& Element::GetAttribute(IN const AString& strName) const
+PUBLIC VIRTUAL const AString& Element::GetAttribute(IN const AString& strName) const
 {
     IAttr* piAttr = GetAttributeNode(strName);
 
     return (piAttr != IMS_NULL) ? piAttr->GetNodeValue() : AString::ConstNull();
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::GetAttributeNode(IN const AString& strName) const
+PUBLIC VIRTUAL IAttr* Element::GetAttributeNode(IN const AString& strName) const
 {
     if (m_pNamedNodeMap == IMS_NULL)
     {
@@ -86,9 +83,8 @@ IAttr* Element::GetAttributeNode(IN const AString& strName) const
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::GetAttributeNodeNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName) const
+PUBLIC VIRTUAL IAttr* Element::GetAttributeNodeNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
     if (m_pNamedNodeMap == IMS_NULL)
     {
@@ -104,8 +100,8 @@ IAttr* Element::GetAttributeNodeNs(IN const AString& strNamespaceUri,
     {
         INode* piNode = m_pNamedNodeMap->Item(i);
 
-        if (strLocalName.EqualsIgnoreCase(piNode->GetLocalName())
-                && strNamespaceUri.EqualsIgnoreCase(piNode->GetNameSpaceUri()))
+        if (strLocalName.EqualsIgnoreCase(piNode->GetLocalName()) &&
+                strNamespaceUri.EqualsIgnoreCase(piNode->GetNameSpaceUri()))
         {
             AttrImpl* pAttrImpl = DYNAMIC_CAST(AttrImpl*, piNode);
             return pAttrImpl;
@@ -115,17 +111,15 @@ IAttr* Element::GetAttributeNodeNs(IN const AString& strNamespaceUri,
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-const AString& Element::GetAttributeNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName) const
+PUBLIC VIRTUAL const AString& Element::GetAttributeNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
     IAttr* piAttr = GetAttributeNodeNs(strNamespaceUri, strLocalName);
 
     return (piAttr != IMS_NULL) ? piAttr->GetNodeValue() : AString::ConstNull();
 }
 
-PUBLIC VIRTUAL
-INodeList* Element::GetElementsByTagName(IN const AString& strName) const
+PUBLIC VIRTUAL INodeList* Element::GetElementsByTagName(IN const AString& strName) const
 {
     if (strName.GetLength() == 0)
     {
@@ -143,8 +137,8 @@ INodeList* Element::GetElementsByTagName(IN const AString& strName) const
     {
         INode* piNode = m_pNodeList->Item(i);
 
-        if ((piNode->GetNodeType() == INode::ELEMENT_NODE)
-                && strName.Equals(piNode->GetLocalName()))
+        if ((piNode->GetNodeType() == INode::ELEMENT_NODE) &&
+                strName.Equals(piNode->GetLocalName()))
         {
             pNewNodeList->AddNode(piNode);
         }
@@ -159,23 +153,20 @@ INodeList* Element::GetElementsByTagName(IN const AString& strName) const
     return pNewNodeList;
 }
 
-PUBLIC VIRTUAL
-INodeList* Element::GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName) const
+PUBLIC VIRTUAL INodeList* Element::GetElementsByTagNameNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
     (void)strNamespaceUri;
     (void)strLocalName;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-const AString& Element::GetTagName() const
+PUBLIC VIRTUAL const AString& Element::GetTagName() const
 {
     return GetLocalName();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL Element::HasAttributeB(IN const AString& strName) const
+PUBLIC VIRTUAL IMS_BOOL Element::HasAttributeB(IN const AString& strName) const
 {
     if (m_pNamedNodeMap == IMS_NULL)
     {
@@ -200,9 +191,8 @@ IMS_BOOL Element::HasAttributeB(IN const AString& strName) const
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL Element::HasAttributeNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName) const
+PUBLIC VIRTUAL IMS_BOOL Element::HasAttributeNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
     if (m_pNamedNodeMap == IMS_NULL)
     {
@@ -218,8 +208,8 @@ IMS_BOOL Element::HasAttributeNs(IN const AString& strNamespaceUri,
     {
         INode* piNode = m_pNamedNodeMap->Item(i);
 
-        if (strLocalName.EqualsIgnoreCase(piNode->GetLocalName())
-                && strNamespaceUri.EqualsIgnoreCase(piNode->GetNameSpaceUri()))
+        if (strLocalName.EqualsIgnoreCase(piNode->GetLocalName()) &&
+                strNamespaceUri.EqualsIgnoreCase(piNode->GetNameSpaceUri()))
         {
             return IMS_TRUE;
         }
@@ -228,50 +218,43 @@ IMS_BOOL Element::HasAttributeNs(IN const AString& strNamespaceUri,
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-void Element::RemoveAttribute(IN const AString& strName)
+PUBLIC VIRTUAL void Element::RemoveAttribute(IN const AString& strName)
 {
     (void)strName;
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::RemoveAttributeNode(IN IAttr* piAttr)
+PUBLIC VIRTUAL IAttr* Element::RemoveAttributeNode(IN IAttr* piAttr)
 {
     (void)piAttr;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void Element::RemoveAttributeNs(IN const AString& strNamespaceUri,
-        IN const AString &strLocalName)
+PUBLIC VIRTUAL void Element::RemoveAttributeNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName)
 {
     (void)strNamespaceUri;
     (void)strLocalName;
 }
 
-PUBLIC VIRTUAL
-void Element::SetAttribute(IN const AString& strName, IN const AString& strValue)
+PUBLIC VIRTUAL void Element::SetAttribute(IN const AString& strName, IN const AString& strValue)
 {
     (void)strName;
     (void)strValue;
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::SetAttributeNode(IN IAttr* piAttr)
+PUBLIC VIRTUAL IAttr* Element::SetAttributeNode(IN IAttr* piAttr)
 {
     (void)piAttr;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::SetAttributeNodeNs(IN IAttr* piAttr)
+PUBLIC VIRTUAL IAttr* Element::SetAttributeNodeNs(IN IAttr* piAttr)
 {
     (void)piAttr;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void Element::SetAttributeNs(IN const AString& strNamespaceUri,
+PUBLIC VIRTUAL void Element::SetAttributeNs(IN const AString& strNamespaceUri,
         IN const AString& strQualifiedName, IN const AString& strValue)
 {
     (void)strNamespaceUri;
@@ -279,31 +262,27 @@ void Element::SetAttributeNs(IN const AString& strNamespaceUri,
     (void)strValue;
 }
 
-PUBLIC VIRTUAL
-void Element::SetIdAttribute(IN const AString& strName, IN IMS_BOOL bIsId)
+PUBLIC VIRTUAL void Element::SetIdAttribute(IN const AString& strName, IN IMS_BOOL bIsId)
 {
     (void)strName;
     (void)bIsId;
 }
 
-PUBLIC VIRTUAL
-void Element::SetIdAttributeNode(IN IAttr* piIdAttr, IN IMS_BOOL bIsId)
+PUBLIC VIRTUAL void Element::SetIdAttributeNode(IN IAttr* piIdAttr, IN IMS_BOOL bIsId)
 {
     (void)piIdAttr;
     (void)bIsId;
 }
 
-PUBLIC VIRTUAL
-void Element::SetIdAttributeNodeNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName, IN IMS_BOOL bIsId)
+PUBLIC VIRTUAL void Element::SetIdAttributeNodeNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName, IN IMS_BOOL bIsId)
 {
     (void)strNamespaceUri;
     (void)strLocalName;
     (void)bIsId;
 }
 
-PUBLIC VIRTUAL
-const AString& Element::GetAttribute(IN const IMS_CHAR* pszName) const
+PUBLIC VIRTUAL const AString& Element::GetAttribute(IN const IMS_CHAR* pszName) const
 {
     if (pszName == IMS_NULL)
     {
@@ -315,8 +294,7 @@ const AString& Element::GetAttribute(IN const IMS_CHAR* pszName) const
     return GetAttribute(strName);
 }
 
-PUBLIC VIRTUAL
-IAttr* Element::GetAttributeNode(IN const IMS_CHAR* pszName) const
+PUBLIC VIRTUAL IAttr* Element::GetAttributeNode(IN const IMS_CHAR* pszName) const
 {
     if (pszName == IMS_NULL)
     {
@@ -328,8 +306,7 @@ IAttr* Element::GetAttributeNode(IN const IMS_CHAR* pszName) const
     return GetAttributeNode(strName);
 }
 
-PUBLIC VIRTUAL
-INodeList* Element::GetElementsByTagName(IN const IMS_CHAR* pszName) const
+PUBLIC VIRTUAL INodeList* Element::GetElementsByTagName(IN const IMS_CHAR* pszName) const
 {
     if (pszName == IMS_NULL)
     {

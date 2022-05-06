@@ -14,8 +14,7 @@
  *
  * @see INode
  */
-class ICharacterData
-        : public INode
+class ICharacterData : public INode
 {
 public:
     /**
@@ -67,8 +66,8 @@ public:
      *               then all 16-bit units to the end of the data are replaced.
      * @param strData The string with which the range must be replaced
      */
-    virtual void ReplaceData(IN IMS_SINT32 nOffSet,
-            IN IMS_SINT32 nCount, IN const AString& strData) = 0;
+    virtual void ReplaceData(
+            IN IMS_SINT32 nOffSet, IN IMS_SINT32 nCount, IN const AString& strData) = 0;
 
     /**
      * @brief Sets the character data of this node.

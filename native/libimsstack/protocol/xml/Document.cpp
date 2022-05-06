@@ -4,18 +4,17 @@
 #include "IText.h"
 
 PUBLIC
-Document::Document(xmlDocPtr pstDoc, xmlXPathContextPtr pstXpathContext)
-        : Node(pstDoc)
-        , m_strVersion((const IMS_CHAR*)pstDoc->version)
-        , m_strEncoding((const IMS_CHAR*)pstDoc->encoding)
-        , m_strUrl((const IMS_CHAR*)pstDoc->URL)
-        , m_pstDoc(pstDoc)
-        , m_pstXpathContext(pstXpathContext)
+Document::Document(xmlDocPtr pstDoc, xmlXPathContextPtr pstXpathContext) :
+        Node(pstDoc),
+        m_strVersion((const IMS_CHAR*)pstDoc->version),
+        m_strEncoding((const IMS_CHAR*)pstDoc->encoding),
+        m_strUrl((const IMS_CHAR*)pstDoc->URL),
+        m_pstDoc(pstDoc),
+        m_pstXpathContext(pstXpathContext)
 {
 }
 
-PUBLIC VIRTUAL
-Document::~Document()
+PUBLIC VIRTUAL Document::~Document()
 {
     /* Free Libxml Object */
     if (m_pstXpathContext != IMS_NULL)
@@ -29,54 +28,47 @@ Document::~Document()
     }
 }
 
-PUBLIC VIRTUAL
-INode* Document::AdoptNode(IN INode* piNode)
+PUBLIC VIRTUAL INode* Document::AdoptNode(IN INode* piNode)
 {
     (void)piNode;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IAttr* Document::CreateAttribute(IN const AString& strName)
+PUBLIC VIRTUAL IAttr* Document::CreateAttribute(IN const AString& strName)
 {
     (void)strName;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IAttr* Document::CreateAttributeNs(IN const AString& strNamespaceUri,
-        IN const AString& strQualifiedName)
+PUBLIC VIRTUAL IAttr* Document::CreateAttributeNs(
+        IN const AString& strNamespaceUri, IN const AString& strQualifiedName)
 {
     (void)strNamespaceUri;
     (void)strQualifiedName;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IElement* Document::CreateElement(IN const AString& strTagName)
+PUBLIC VIRTUAL IElement* Document::CreateElement(IN const AString& strTagName)
 {
     (void)strTagName;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IElement* Document::CreateElementNs(IN const AString& strNamespaceUri,
-        IN const AString& strQualifiedName)
+PUBLIC VIRTUAL IElement* Document::CreateElementNs(
+        IN const AString& strNamespaceUri, IN const AString& strQualifiedName)
 {
     (void)strNamespaceUri;
     (void)strQualifiedName;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IText* Document::CreateTextNode(IN const AString& strData)
+PUBLIC VIRTUAL IText* Document::CreateTextNode(IN const AString& strData)
 {
     (void)strData;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IElement* Document::GetDocumentElement() const
+PUBLIC VIRTUAL IElement* Document::GetDocumentElement() const
 {
     INode* piNode = m_pNodeList->Item(0);
 
@@ -93,15 +85,13 @@ IElement* Document::GetDocumentElement() const
     return DYNAMIC_CAST(ElementImpl*, piNode);
 }
 
-PUBLIC VIRTUAL
-IElement* Document::GetElementById(IN const AString& strElementId) const
+PUBLIC VIRTUAL IElement* Document::GetElementById(IN const AString& strElementId) const
 {
     (void)strElementId;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-INodeList* Document::GetElementsByTagName(IN const AString& strTagName) const
+PUBLIC VIRTUAL INodeList* Document::GetElementsByTagName(IN const AString& strTagName) const
 {
     if (strTagName.GetLength() == 0)
     {
@@ -137,9 +127,8 @@ INodeList* Document::GetElementsByTagName(IN const AString& strTagName) const
     return pNewNodeList;
 }
 
-PUBLIC VIRTUAL
-INodeList* Document::GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-        IN const AString& strLocalName) const
+PUBLIC VIRTUAL INodeList* Document::GetElementsByTagNameNs(
+        IN const AString& strNamespaceUri, IN const AString& strLocalName) const
 {
     if (strLocalName.GetLength() == 0)
     {
@@ -159,8 +148,8 @@ INodeList* Document::GetElementsByTagNameNs(IN const AString& strNamespaceUri,
 
         if (piNode->GetNodeType() == INode::ELEMENT_NODE)
         {
-            if (strLocalName.Equals(piNode->GetLocalName())
-                    && strNamespaceUri.Equals(piNode->GetNameSpaceUri()))
+            if (strLocalName.Equals(piNode->GetLocalName()) &&
+                    strNamespaceUri.Equals(piNode->GetNameSpaceUri()))
             {
                 pNewNodeList->AddNode(piNode);
             }
@@ -176,28 +165,24 @@ INodeList* Document::GetElementsByTagNameNs(IN const AString& strNamespaceUri,
     return pNewNodeList;
 }
 
-PUBLIC VIRTUAL
-INode* Document::ImportNode(IN INode* piNode, IN  IMS_BOOL bDeep)
+PUBLIC VIRTUAL INode* Document::ImportNode(IN INode* piNode, IN IMS_BOOL bDeep)
 {
     (void)piNode;
     (void)bDeep;
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-const AString& Document::GetEncodingScheme() const
+PUBLIC VIRTUAL const AString& Document::GetEncodingScheme() const
 {
     return m_strEncoding;
 }
 
-PUBLIC VIRTUAL
-const AString& Document::GetUrl() const
+PUBLIC VIRTUAL const AString& Document::GetUrl() const
 {
     return m_strUrl;
 }
 
-PUBLIC VIRTUAL
-const AString& Document::GetVersion() const
+PUBLIC VIRTUAL const AString& Document::GetVersion() const
 {
     return m_strVersion;
 }

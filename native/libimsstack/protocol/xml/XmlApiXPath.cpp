@@ -10,7 +10,7 @@ void XmlApi_XPathFreeContext(xmlXPathContextPtr ctxt)
     xmlXPathFreeContext(ctxt);
 }
 
-xmlXPathObjectPtr XmlApi_XPathEvalExpression (const xmlChar* str, xmlXPathContextPtr ctxt)
+xmlXPathObjectPtr XmlApi_XPathEvalExpression(const xmlChar* str, xmlXPathContextPtr ctxt)
 {
     return xmlXPathEvalExpression(str, ctxt);
 }

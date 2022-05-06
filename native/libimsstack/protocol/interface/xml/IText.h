@@ -9,8 +9,7 @@
  *
  * @see ICharacterData
  */
-class IText
-        : public ICharacterData
+class IText : public ICharacterData
 {
 public:
     /**

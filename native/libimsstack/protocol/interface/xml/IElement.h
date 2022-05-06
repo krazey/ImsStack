@@ -11,8 +11,7 @@ class INodeList;
  *
  * @see IAttr, INode, INodeList
  */
-class IElement
-        : public INode
+class IElement : public INode
 {
 public:
     /**
@@ -44,8 +43,8 @@ public:
      * @return The IAttr node with the specified attribute local name
      *         and namespace URI or null if there is no such attribute.
      */
-    virtual IAttr* GetAttributeNodeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const = 0;
+    virtual IAttr* GetAttributeNodeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const = 0;
 
     /**
      * @brief Retrieves an attribute value by local name and namespace URI.
@@ -55,8 +54,8 @@ public:
      * @return The attribute value as a string, or the empty string
      *         if that attribute does not have a specified or default value.
      */
-    virtual const AString& GetAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const = 0;
+    virtual const AString& GetAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const = 0;
 
     /**
      * @brief Returns an INodeList of all descendant elements with a given tag name,
@@ -80,8 +79,8 @@ public:
      *                     The special value "*" matches all local names.
      * @return A new INodeList object containing all the matched elements.
      */
-    virtual INodeList* GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const = 0;
+    virtual INodeList* GetElementsByTagNameNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const = 0;
 
     /**
      * @brief Returns the name of the element.
@@ -109,8 +108,8 @@ public:
      * @return IMS_TRUE if an attribute with the given local name and namespace URI is specified
      *         or has a default value on this element, IMS_FALSE otherwise.
      */
-    virtual IMS_BOOL HasAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const = 0;
+    virtual IMS_BOOL HasAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const = 0;
 
     /**
      * @brief Removes an attribute by name.
@@ -146,8 +145,8 @@ public:
      * @param strNamespaceUri The namespace URI of the attribute to remove
      * @param strLocalName The local name of the attribute to remove
      */
-    virtual void RemoveAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) = 0;
+    virtual void RemoveAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) = 0;
 
     /**
      * @brief Sets a new attribute.
