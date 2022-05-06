@@ -10,12 +10,10 @@ class DocumentBuilder;
 class DocumentBuilderFactory
 {
 protected:
-    inline DocumentBuilderFactory()
-    {}
+    inline DocumentBuilderFactory() {}
 
 public:
-    inline virtual ~DocumentBuilderFactory()
-    {}
+    inline virtual ~DocumentBuilderFactory() {}
 
 public:
     /**

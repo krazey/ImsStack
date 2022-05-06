@@ -15,27 +15,27 @@ xmlChar* XmlApi_GetProp(xmlNodePtr node, const xmlChar* name)
     return xmlGetProp(node, name);
 }
 
-xmlChar * XmlApi_NodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine)
+xmlChar* XmlApi_NodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine)
 {
     return xmlNodeListGetString(doc, list, inLine);
 }
 
 xmlNodePtr XmlApi_DocGetRootElement(xmlDocPtr doc)
 {
-    return xmlDocGetRootElement (doc);
+    return xmlDocGetRootElement(doc);
 }
 
 void XmlApi_FreeDoc(xmlDocPtr cur)
 {
-    xmlFreeDoc (cur);
+    xmlFreeDoc(cur);
 }
 
-xmlChar *XmlApi_NodeGetContent(xmlNodePtr cur)
+xmlChar* XmlApi_NodeGetContent(xmlNodePtr cur)
 {
     return xmlNodeGetContent(cur);
 }
 
-xmlChar *XmlApi_GetNodePath(xmlNodePtr node)
+xmlChar* XmlApi_GetNodePath(xmlNodePtr node)
 {
     return xmlGetNodePath(node);
 }
@@ -60,8 +60,8 @@ void XmlApi_UnlinkNode(xmlNodePtr cur)
     xmlUnlinkNode(cur);
 }
 
-xmlNodePtr XmlApi_NewChild(xmlNodePtr parent, xmlNsPtr ns,
-        const xmlChar* name, const xmlChar* content)
+xmlNodePtr XmlApi_NewChild(
+        xmlNodePtr parent, xmlNsPtr ns, const xmlChar* name, const xmlChar* content)
 {
     return xmlNewChild(parent, ns, name, content);
 }

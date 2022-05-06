@@ -5,8 +5,7 @@
 
 class IElement;
 
-class Attr
-        : public Node
+class Attr : public Node
 {
 public:
     Attr(IN xmlAttrPtr pstAttr, IN IElement* piOwnerElement);

@@ -3,14 +3,10 @@
 #include "XmlTransactionProvider.h"
 
 PROTECTED
-XmlFactory::XmlFactory()
-{
-}
+XmlFactory::XmlFactory() {}
 
 PUBLIC
-XmlFactory::~XmlFactory()
-{
-}
+XmlFactory::~XmlFactory() {}
 
 PUBLIC
 IXmlStreamWriter* XmlFactory::CreateStreamWriter()
@@ -50,8 +46,7 @@ void XmlFactory::DestroyTransactionProvider(IN IXmlTransactionProvider*& piProvi
     piProvider = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-XmlFactory* XmlFactory::GetInstance()
+PUBLIC GLOBAL XmlFactory* XmlFactory::GetInstance()
 {
     static XmlFactory* pXmlFactory = IMS_NULL;
 

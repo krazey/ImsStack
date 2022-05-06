@@ -5,8 +5,7 @@
 
 class IText;
 
-class Text
-        : public CharacterData
+class Text : public CharacterData
 {
 public:
     Text();

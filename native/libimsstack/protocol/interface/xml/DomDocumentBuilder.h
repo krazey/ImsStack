@@ -6,15 +6,14 @@
 /**
  * @brief This class provides the APIs to obtain DOM Document instances from an XML document.
  */
-class DomDocumentBuilder
-        : public DocumentBuilder
+class DomDocumentBuilder : public DocumentBuilder
 {
 public:
-    inline DomDocumentBuilder()
-            : DocumentBuilder()
-    {}
-    inline virtual ~DomDocumentBuilder()
-    {}
+    inline DomDocumentBuilder() :
+            DocumentBuilder()
+    {
+    }
+    inline virtual ~DomDocumentBuilder() {}
 };
 
 #endif

@@ -10,8 +10,7 @@
 
 class IDocument;
 
-class Node
-        : public INode
+class Node : public INode
 {
 public:
     Node();

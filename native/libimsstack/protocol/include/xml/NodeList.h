@@ -4,8 +4,7 @@
 #include "IMSList.h"
 #include "INodeList.h"
 
-class NodeList
-        : public INodeList
+class NodeList : public INodeList
 {
 public:
     NodeList();

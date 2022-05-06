@@ -8,8 +8,7 @@ class IElement;
 class INode;
 class Text;
 
-class TextImpl
-        : public IText
+class TextImpl : public IText
 {
 public:
     TextImpl();
@@ -62,8 +61,8 @@ public:
     const AString& GetData() const override;
     IMS_SINT32 GetLength() const override;
     void InsertData(IN IMS_SINT32 nOffset, IN const AString& strData) override;
-    void ReplaceData(IN IMS_SINT32 nOffSet,
-            IN IMS_SINT32 nCount, IN const AString& strData) override;
+    void ReplaceData(
+            IN IMS_SINT32 nOffSet, IN IMS_SINT32 nCount, IN const AString& strData) override;
     void SetData(IN const AString& strData) override;
     AString SubstringData(IN IMS_SINT32 nOffSet, IN IMS_SINT32 nCount) override;
 

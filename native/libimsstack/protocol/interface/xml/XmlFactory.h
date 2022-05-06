@@ -10,6 +10,7 @@ class XmlFactory
 {
 protected:
     XmlFactory();
+
 public:
     ~XmlFactory();
 

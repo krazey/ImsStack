@@ -10,16 +10,14 @@
 __IMS_TRACE_TAG_XML__;
 
 PUBLIC
-XmlApp::XmlApp(IN IXmlTransactionProvider* piTransactionProvider)
-        : m_piTransactionProvider(piTransactionProvider)
-        , m_strTargetName(AString::ConstNull())
+XmlApp::XmlApp(IN IXmlTransactionProvider* piTransactionProvider) :
+        m_piTransactionProvider(piTransactionProvider),
+        m_strTargetName(AString::ConstNull())
 {
 }
 
 PUBLIC
-XmlApp::~XmlApp()
-{
-}
+XmlApp::~XmlApp() {}
 
 PUBLIC
 void XmlApp::Attach(IN const AString& strTargetName)
@@ -31,8 +29,7 @@ void XmlApp::Attach(IN const AString& strTargetName)
     AttachResponseParam* pParam = new AttachResponseParam();
     pParam->eResult = XmlResult::XML_RESULT_SUCCESS;
 
-    IMS_MSG_CreateNPostActivityMessageByName(strTargetName,
-            AMSG_XML_ATTACH_RESPONSE, 0, pParam);
+    IMS_MSG_CreateNPostActivityMessageByName(strTargetName, AMSG_XML_ATTACH_RESPONSE, 0, pParam);
 }
 
 PUBLIC
@@ -89,8 +86,8 @@ IMS_RESULT XmlApp::Parse(IN const AString& strRawXml)
         return IMS_FAILURE;
     }
 
-    if (SendParseResponse(XmlResult::XML_RESULT_SUCCESS,
-            piDocument, pDocumentBuilder) != IMS_SUCCESS)
+    if (SendParseResponse(XmlResult::XML_RESULT_SUCCESS, piDocument, pDocumentBuilder) !=
+            IMS_SUCCESS)
     {
         piDocument->DestroyDocument();
         pBuilderFactory->DestroyDocumentBuilder(pDocumentBuilder);
@@ -101,8 +98,8 @@ IMS_RESULT XmlApp::Parse(IN const AString& strRawXml)
 }
 
 PRIVATE
-IMS_RESULT XmlApp::SendParseResponse(IN XmlApp::XmlResult eResult,
-        IN IDocument* piDocument, IN DocumentBuilder* pDocumentBuilder)
+IMS_RESULT XmlApp::SendParseResponse(IN XmlApp::XmlResult eResult, IN IDocument* piDocument,
+        IN DocumentBuilder* pDocumentBuilder)
 {
     if (m_strTargetName.GetLength() == 0)
     {
@@ -115,8 +112,7 @@ IMS_RESULT XmlApp::SendParseResponse(IN XmlApp::XmlResult eResult,
     pParam->piDocument = piDocument;
     pParam->pDocumentBuilder = pDocumentBuilder;
 
-    IMS_MSG_CreateNPostActivityMessageByName(m_strTargetName,
-            AMSG_XML_PARSE_RESPONSE, 0, pParam);
+    IMS_MSG_CreateNPostActivityMessageByName(m_strTargetName, AMSG_XML_PARSE_RESPONSE, 0, pParam);
 
     return IMS_SUCCESS;
 }

@@ -7,8 +7,7 @@
 
 class Document;
 
-class DocumentImpl
-        : public IDocument
+class DocumentImpl : public IDocument
 {
 public:
     DocumentImpl(IN xmlDocPtr pstDoc, IN xmlXPathContextPtr pstXpathContext);
@@ -57,17 +56,17 @@ public:
     // IDocument
     INode* AdoptNode(IN INode* piNode) override;
     IAttr* CreateAttribute(IN const AString& strName) override;
-    IAttr* CreateAttributeNs(IN const AString& strNamespaceUri,
-            IN const AString& strQualifiedName) override;
+    IAttr* CreateAttributeNs(
+            IN const AString& strNamespaceUri, IN const AString& strQualifiedName) override;
     IElement* CreateElement(IN const AString& strTagName) override;
-    IElement* CreateElementNs(IN const AString& strNamespaceUri,
-            IN const AString& strQualifiedName) override;
+    IElement* CreateElementNs(
+            IN const AString& strNamespaceUri, IN const AString& strQualifiedName) override;
     IText* CreateTextNode(IN const AString& strData) override;
     IElement* GetDocumentElement() const override;
     IElement* GetElementById(IN const AString& strElementId) const override;
     INodeList* GetElementsByTagName(IN const AString& strTagName) const override;
-    INodeList* GetElementsByTagNameNs(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) const override;
+    INodeList* GetElementsByTagNameNs(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) const override;
     INode* ImportNode(IN INode* piNode, IN IMS_BOOL bDeep) override;
     void DestroyDocument() override;
     const AString& GetEncodingScheme() const override;

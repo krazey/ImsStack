@@ -15,6 +15,7 @@ class DocumentBuilder
 protected:
     DocumentBuilder();
     virtual ~DocumentBuilder();
+
 public:
     DocumentBuilder(IN const DocumentBuilder& objOther) = delete;
     DocumentBuilder& operator=(IN const DocumentBuilder& objOther) = delete;

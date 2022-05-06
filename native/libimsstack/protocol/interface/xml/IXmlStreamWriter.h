@@ -45,7 +45,7 @@ public:
      *
      * @param strUri the URI to bind to the default namespace, may be null
      */
-    virtual void SetDefaultNamespace(IN const AString& strUri)= 0;
+    virtual void SetDefaultNamespace(IN const AString& strUri) = 0;
 
     /**
      * @brief Sets the prefix the URI is bound to.
@@ -59,7 +59,7 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetPrefix(IN const AString& strPrefix, IN const AString& strUri)= 0;
+    virtual IMS_RESULT SetPrefix(IN const AString& strPrefix, IN const AString& strUri) = 0;
 
     /**
      * @brief Writes an attribute to the output stream without a prefix.
@@ -69,8 +69,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteAttribute(IN const AString& strLocalName,
-            IN const AString& strValue) = 0;
+    virtual IMS_RESULT WriteAttribute(
+            IN const AString& strLocalName, IN const AString& strValue) = 0;
 
     /**
      * @brief Writes an attribute to the output stream.
@@ -107,8 +107,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteCharacters(IN const IMS_CHAR* pszText,
-            IN IMS_SINT32 nStart, IN IMS_SINT32 nLen) = 0;
+    virtual IMS_RESULT WriteCharacters(
+            IN const IMS_CHAR* pszText, IN IMS_SINT32 nStart, IN IMS_SINT32 nLen) = 0;
 
     /**
      * @brief Writes a text to the output stream.
@@ -154,8 +154,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteEmptyElement(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) = 0;
+    virtual IMS_RESULT WriteEmptyElement(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) = 0;
 
     /**
      * @brief Writes an empty element tag with the prefix and namespace URI to the output stream.
@@ -194,8 +194,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteNamespace(IN const AString& strPrefix,
-            IN const AString& strNamespaceUri) = 0;
+    virtual IMS_RESULT WriteNamespace(
+            IN const AString& strPrefix, IN const AString& strNamespaceUri) = 0;
 
     /**
      * @brief Writes the XML Declaration. Defaults the XML version to 1.0,
@@ -227,8 +227,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteStartDocument(IN const AString& strEncoding,
-            IN const AString& strVersion) = 0;
+    virtual IMS_RESULT WriteStartDocument(
+            IN const AString& strEncoding, IN const AString& strVersion) = 0;
 
     /**
      * @brief Writes a start tag to the output stream.
@@ -250,8 +250,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteStartElement(IN const AString& strNamespaceUri,
-            IN const AString& strLocalName) = 0;
+    virtual IMS_RESULT WriteStartElement(
+            IN const AString& strNamespaceUri, IN const AString& strLocalName) = 0;
 
     /**
      * @brief Writes a start tag to the output stream.
@@ -298,8 +298,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteAttribute(IN const IMS_CHAR* pszLocalName,
-            IN const IMS_CHAR* pszValue) = 0;
+    virtual IMS_RESULT WriteAttribute(
+            IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszValue) = 0;
 
     /**
      * @brief Writes an attribute to the output stream.
@@ -371,8 +371,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteEmptyElement(IN const IMS_CHAR* pszNamespaceUri,
-            IN const IMS_CHAR* pszLocalName)  = 0;
+    virtual IMS_RESULT WriteEmptyElement(
+            IN const IMS_CHAR* pszNamespaceUri, IN const IMS_CHAR* pszLocalName) = 0;
 
     /**
      * @brief Writes an empty element tag with the prefix and namespace URI to the output stream.
@@ -384,7 +384,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT WriteEmptyElement(IN const IMS_CHAR* pszPrefix,
-            IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszNamespaceUri) = 0 ;
+            IN const IMS_CHAR* pszLocalName, IN const IMS_CHAR* pszNamespaceUri) = 0;
 
     /**
      * @brief Writes a namespace to the output stream.
@@ -397,8 +397,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteNamespace(IN const IMS_CHAR* pszPrefix,
-            IN const IMS_CHAR* pszNamespaceUri)  = 0;
+    virtual IMS_RESULT WriteNamespace(
+            IN const IMS_CHAR* pszPrefix, IN const IMS_CHAR* pszNamespaceUri) = 0;
 
     /**
      * @brief Writes the XML Declaration. Defaults the XML version to 1.0.
@@ -421,8 +421,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteStartDocument(IN const IMS_CHAR* pszEncoding,
-            IN const IMS_CHAR* pszVersion) = 0;
+    virtual IMS_RESULT WriteStartDocument(
+            IN const IMS_CHAR* pszEncoding, IN const IMS_CHAR* pszVersion) = 0;
 
     /**
      * @brief Writes a start tag to the output stream.
@@ -444,8 +444,8 @@ public:
      * @return If the operation is successfully done, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT WriteStartElement(IN const IMS_CHAR* pszNamespaceUri,
-            const IMS_CHAR* pszLocalName) = 0;
+    virtual IMS_RESULT WriteStartElement(
+            IN const IMS_CHAR* pszNamespaceUri, const IMS_CHAR* pszLocalName) = 0;
 
     /**
      * @brief Writes a start tag to the output stream.
@@ -469,25 +469,21 @@ public:
     class XmlError
     {
     public:
-        inline XmlError()
-                : m_nErrorType(TYPE_NONE)
-                , m_strReason(AString::ConstNull())
-        {}
-        inline ~XmlError()
-        {}
+        inline XmlError() :
+                m_nErrorType(TYPE_NONE),
+                m_strReason(AString::ConstNull())
+        {
+        }
+        inline ~XmlError() {}
         XmlError(IN const XmlError& objOther) = delete;
         XmlError& operator=(IN const XmlError& objOther) = delete;
 
     public:
-        inline IMS_SINT32 GetErrorType() const
-        { return m_nErrorType; }
-        inline const AString& GetReason() const
-        { return m_strReason; }
+        inline IMS_SINT32 GetErrorType() const { return m_nErrorType; }
+        inline const AString& GetReason() const { return m_strReason; }
 
-        inline void SetErrorType(IN IMS_SINT32 nErrorType)
-        { m_nErrorType = nErrorType; }
-        inline void SetReason(IN const AString& strReason)
-        { m_strReason = strReason; }
+        inline void SetErrorType(IN IMS_SINT32 nErrorType) { m_nErrorType = nErrorType; }
+        inline void SetReason(IN const AString& strReason) { m_strReason = strReason; }
 
     public:
         enum

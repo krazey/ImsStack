@@ -10,17 +10,16 @@
 __IMS_TRACE_TAG_XML__;
 
 PUBLIC
-XmlTransactionProvider:: XmlTransactionProvider()
-        : m_nState(STATE_IDLE)
-        , m_piListener(IMS_NULL)
-        , m_pXmlApp(IMS_NULL)
+XmlTransactionProvider::XmlTransactionProvider() :
+        m_nState(STATE_IDLE),
+        m_piListener(IMS_NULL),
+        m_pXmlApp(IMS_NULL)
 {
     m_pXmlApp = new XmlApp(this);
     Attach();
 }
 
-PUBLIC VIRTUAL
-XmlTransactionProvider::~XmlTransactionProvider()
+PUBLIC VIRTUAL XmlTransactionProvider::~XmlTransactionProvider()
 {
     Detach();
 
@@ -38,14 +37,12 @@ XmlTransactionProvider::~XmlTransactionProvider()
     m_pXmlApp = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IXmlTransaction* XmlTransactionProvider::CreateTransaction()
+PUBLIC VIRTUAL IXmlTransaction* XmlTransactionProvider::CreateTransaction()
 {
     return new XmlTransaction(m_pXmlApp);
 }
 
-PUBLIC VIRTUAL
-void XmlTransactionProvider::DestroyTransaction(IN IXmlTransaction*& piTransaction)
+PUBLIC VIRTUAL void XmlTransactionProvider::DestroyTransaction(IN IXmlTransaction*& piTransaction)
 {
     XmlTransaction* pTransaction = reinterpret_cast<XmlTransaction*>(piTransaction);
 
@@ -57,8 +54,7 @@ void XmlTransactionProvider::DestroyTransaction(IN IXmlTransaction*& piTransacti
     piTransaction = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT XmlTransactionProvider::Push(IN IXmlTransaction* piTransaction)
+PUBLIC VIRTUAL IMS_RESULT XmlTransactionProvider::Push(IN IXmlTransaction* piTransaction)
 {
     if (piTransaction == IMS_NULL)
     {
@@ -72,8 +68,7 @@ IMS_RESULT XmlTransactionProvider::Push(IN IXmlTransaction* piTransaction)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IXmlTransaction* XmlTransactionProvider::Pop()
+PUBLIC VIRTUAL IXmlTransaction* XmlTransactionProvider::Pop()
 {
     IXmlTransaction* piTransaction = m_objTransactions.GetFront();
 
@@ -84,8 +79,7 @@ IXmlTransaction* XmlTransactionProvider::Pop()
     return piTransaction;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG &objMsg)
+PRIVATE VIRTUAL IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG& objMsg)
 {
     IMS_TRACE_D("OnMessage :: msg=%d", objMsg.GetName(), 0, 0);
 
@@ -95,8 +89,8 @@ IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG &objMsg)
         {
             case XmlApp::AMSG_XML_ATTACH_RESPONSE:
             {
-                XmlApp::AttachResponseParam* pParam
-                        = reinterpret_cast<XmlApp::AttachResponseParam*>(objMsg.nLparam);
+                XmlApp::AttachResponseParam* pParam =
+                        reinterpret_cast<XmlApp::AttachResponseParam*>(objMsg.nLparam);
 
                 if (pParam != IMS_NULL)
                 {
@@ -107,8 +101,8 @@ IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG &objMsg)
             }
             case XmlApp::AMSG_XML_PARSE_RESPONSE:
             {
-                XmlApp::ParseResponseParam* pParam
-                        = reinterpret_cast<XmlApp::ParseResponseParam*>(objMsg.nLparam);
+                XmlApp::ParseResponseParam* pParam =
+                        reinterpret_cast<XmlApp::ParseResponseParam*>(objMsg.nLparam);
 
                 if (pParam != IMS_NULL)
                 {
@@ -129,8 +123,8 @@ IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG &objMsg)
     {
         case XmlApp::AMSG_XML_ATTACH_RESPONSE:
         {
-            XmlApp::AttachResponseParam* pParam
-                    = reinterpret_cast<XmlApp::AttachResponseParam*>(objMsg.nLparam);
+            XmlApp::AttachResponseParam* pParam =
+                    reinterpret_cast<XmlApp::AttachResponseParam*>(objMsg.nLparam);
             IXmlTransaction* piTransaction = Pop();
             XmlTransaction* pTransaction = reinterpret_cast<XmlTransaction*>(piTransaction);
 
@@ -156,8 +150,8 @@ IMS_BOOL XmlTransactionProvider::OnMessage(IN IMSMSG &objMsg)
         }
         case XmlApp::AMSG_XML_PARSE_RESPONSE:
         {
-            XmlApp::ParseResponseParam* pParam
-                    = reinterpret_cast<XmlApp::ParseResponseParam*>(objMsg.nLparam);
+            XmlApp::ParseResponseParam* pParam =
+                    reinterpret_cast<XmlApp::ParseResponseParam*>(objMsg.nLparam);
             IXmlTransaction* piTransaction = Pop();
             XmlTransaction* pTransaction = reinterpret_cast<XmlTransaction*>(piTransaction);
             XmlResponse* pResponse = pTransaction->CreateResponse();

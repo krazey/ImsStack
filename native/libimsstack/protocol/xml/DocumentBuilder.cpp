@@ -21,24 +21,17 @@ public:
 
 private:
     IDocument* CreateDocument(IN xmlDocPtr pstDoc);
-    IMS_RESULT CreateElement(IN DocumentImpl* pDocument,
-            IN xmlDocPtr pstDoc);
-    IMS_RESULT CreateChildNode(IN IDocument* pDocument,
-            IN INode* piParentNode, IN xmlNodePtr pstNode);
+    IMS_RESULT CreateElement(IN DocumentImpl* pDocument, IN xmlDocPtr pstDoc);
+    IMS_RESULT CreateChildNode(
+            IN IDocument* pDocument, IN INode* piParentNode, IN xmlNodePtr pstNode);
     INode* CreateNodeInstance(IN xmlNodePtr pstNode);
 };
 
-
+PUBLIC
+DocumentBuilderPrivate::DocumentBuilderPrivate() {}
 
 PUBLIC
-DocumentBuilderPrivate::DocumentBuilderPrivate()
-{
-}
-
-PUBLIC
-DocumentBuilderPrivate::~DocumentBuilderPrivate()
-{
-}
+DocumentBuilderPrivate::~DocumentBuilderPrivate() {}
 
 PUBLIC
 IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT32 nLength)
@@ -57,8 +50,8 @@ IDocument* DocumentBuilderPrivate::Parse(IN const IMS_CHAR* pszXml, IN IMS_SINT3
         return IMS_NULL;
     }
 
-    IMS_TRACE_D("DocumentBuilder :: Parse done (l=%d, standalone=%d, properties=0x%04x)",
-            nLength, pstDoc->standalone, pstDoc->properties);
+    IMS_TRACE_D("DocumentBuilder :: Parse done (l=%d, standalone=%d, properties=0x%04x)", nLength,
+            pstDoc->standalone, pstDoc->properties);
 
     return CreateDocument(pstDoc);
 }
@@ -75,7 +68,7 @@ IDocument* DocumentBuilderPrivate::CreateDocument(IN xmlDocPtr pstDoc)
         return IMS_NULL;
     }
 
-    DocumentImpl *pDocument = new DocumentImpl(pstDoc, pstXPathContext);
+    DocumentImpl* pDocument = new DocumentImpl(pstDoc, pstXPathContext);
 
     if (pDocument == IMS_NULL)
     {
@@ -105,8 +98,7 @@ IMS_RESULT DocumentBuilderPrivate::CreateElement(IN DocumentImpl* pDocument, IN 
         // Skip comment node if present
         while (pRootElement != IMS_NULL)
         {
-            if ((pRootElement->type == XML_ELEMENT_NODE)
-                    || (pRootElement->type == XML_TEXT_NODE))
+            if ((pRootElement->type == XML_ELEMENT_NODE) || (pRootElement->type == XML_TEXT_NODE))
             {
                 break;
             }
@@ -143,8 +135,8 @@ IMS_RESULT DocumentBuilderPrivate::CreateElement(IN DocumentImpl* pDocument, IN 
 }
 
 PRIVATE
-IMS_RESULT DocumentBuilderPrivate::CreateChildNode(IN IDocument* piDocument,
-        IN INode* piParentNode, IN xmlNodePtr pstNode)
+IMS_RESULT DocumentBuilderPrivate::CreateChildNode(
+        IN IDocument* piDocument, IN INode* piParentNode, IN xmlNodePtr pstNode)
 {
     INode* piPrevNode = IMS_NULL;
 
@@ -195,16 +187,13 @@ INode* DocumentBuilderPrivate::CreateNodeInstance(IN xmlNodePtr pstNode)
     return IMS_NULL;
 }
 
-
-
 PROTECTED
-DocumentBuilder::DocumentBuilder()
-        : pDocumentBuilderPrivate(new DocumentBuilderPrivate())
+DocumentBuilder::DocumentBuilder() :
+        pDocumentBuilderPrivate(new DocumentBuilderPrivate())
 {
 }
 
-PUBLIC VIRTUAL
-DocumentBuilder::~DocumentBuilder()
+PUBLIC VIRTUAL DocumentBuilder::~DocumentBuilder()
 {
     if (pDocumentBuilderPrivate != IMS_NULL)
     {
