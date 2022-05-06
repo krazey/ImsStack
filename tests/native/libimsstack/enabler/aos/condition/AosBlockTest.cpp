@@ -62,14 +62,6 @@ protected:
     }
 };
 
-// Testing is not required.
-// TEST_F(AosBlockTest, Constructor) {
-// }
-
-// Testing is not required.
-// TEST_F(AosBlockTest, Destructor) {
-// }
-
 TEST_F(AosBlockTest, SetListener) {
     IAosBlockListener* piAosBlockListener1 = new MockIAosBlockListener();
     IAosBlockListener* piAosBlockListener2 = new MockIAosBlockListener();

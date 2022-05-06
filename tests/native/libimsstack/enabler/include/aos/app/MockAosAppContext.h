@@ -8,13 +8,9 @@
 
 class MockAosAppContext : public AosAppContext {
 public:
-    // MockAosAppContext() {}
-    // MockAosAppContext([[maybe_unused]] const MockAosAppContext& o) {}
-
     MockAosAppContext(IN AosStaticProfile * pProfile) : AosAppContext(pProfile) { }
     ~MockAosAppContext() { }
-    // MockAosAppContext(IN CONST MockAosAppContext & objRHS)
-    //     : AosAppContext(objRHS) { } // private constructor/destructor
+
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(const AString&, GetProfileId, (), (const, override));
     MOCK_METHOD(IAosHandle*, GetHandle, (IN CONST AString& strSrvId), (const, override));

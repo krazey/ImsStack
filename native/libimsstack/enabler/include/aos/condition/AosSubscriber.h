@@ -20,6 +20,7 @@
 #include "interface/IAosSubscriber.h"
 
 class IAosAppContext;
+class IAosSubscriberManager;
 class AosStaticProfile;
 class AosUtil;
 class AosServicePhoneListener;
@@ -48,12 +49,16 @@ private:
 
 private:
     IAosAppContext* m_piAppContext;
+    IAosSubscriberManager* m_piSubscriberManager;
     IMS_SINT32 m_nSlotId;
     IAosSubscriberListener* m_piListener;
 
     AosRegistrationType m_eRegType;
 
     AString m_strTag;
+
+private:
+    friend class AosSubscriberTest;
 };
 
 #endif  // AOS_SUBSCRIBER_H_

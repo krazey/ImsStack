@@ -74,14 +74,6 @@ protected:
     }
 };
 
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, Constructor) {
-// }
-
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, Destructor) {
-// }
-
 TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull) {
     SetAppContext(IMS_NULL);
 
