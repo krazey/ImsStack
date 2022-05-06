@@ -7,6 +7,7 @@
 #include "SipUtil.h"
 #include "platform/sip_pf_string.h"
 #include "txn/SipTimeoutData.h"
+#include "msg/sip_msgutil.h"
 
 #ifdef SIP_TRACE_ENABLE
 static SIP_CHAR szInvClientTxnFsmSt[SipTxn::INV_CLI_INVALID_ST + 1][SIP_15] = {
@@ -466,6 +467,11 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
 
     /* Set MaxForward Header */
     SipIntegerHeader* pMaxForward = new SipIntegerHeader(SipHeaderBase::MAX_FORWARDS);
+    SIP_CHAR szMaxFwdValue[SIP_CONTLEN_LEN] = {
+            0,
+    };
+    SipPf_Sprintf(szMaxFwdValue, (SIP_CHAR*)"%d", SIP_MAX_HOP);
+    pMaxForward->SetValue(szMaxFwdValue);
     bStatus = pSipAckMsg->SetHeader(pMaxForward);
     pMaxForward->SipDelete();
     if (bStatus == SIP_FALSE)

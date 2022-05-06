@@ -230,11 +230,12 @@ SipHeaderBase* SipHeaders::getHdrObj(SIP_INT32 eHdrType, SIP_UINT16 eIndex)
 
     if (m_HeaderArray[eHdrType] != SIP_NULL)
     {
+        if (IsListHdr(eHdrType) == SIP_TRUE)
+        {
+            return ((SipHeaderList*)m_HeaderArray[eHdrType])->GetObj(eIndex);
+        }
         m_HeaderArray[eHdrType]->increment();
-
-        return (IsListHdr(eHdrType) == SIP_TRUE)
-                ? ((SipHeaderList*)m_HeaderArray[eHdrType])->GetObj(eIndex)
-                : m_HeaderArray[eHdrType];
+        return m_HeaderArray[eHdrType];
     }
 
     return SIP_NULL;

@@ -360,7 +360,7 @@ SIP_BOOL SipTxnHandler::OnSendTranspError(SipTxnKey* pTxnKey)
 {
     if (pTxnKey == SIP_NULL)
     {
-        return SIP_TRUE;
+        return SIP_FALSE;
     }
 
     if (TerminateTxn(pTxnKey) == SIP_FALSE)
