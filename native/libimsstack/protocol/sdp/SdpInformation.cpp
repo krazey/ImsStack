@@ -19,23 +19,20 @@
 #include "SdpInformation.h"
 
 PUBLIC
-SdpInformation::SdpInformation()
-    : SdpLine()
-    , m_strInformation(AString::ConstNull())
+SdpInformation::SdpInformation() :
+        SdpLine(),
+        m_strInformation(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpInformation::SdpInformation(IN const SdpInformation& other)
-    : SdpLine(other)
-    , m_strInformation(other.m_strInformation)
+SdpInformation::SdpInformation(IN const SdpInformation& other) :
+        SdpLine(other),
+        m_strInformation(other.m_strInformation)
 {
 }
 
-PUBLIC VIRTUAL
-SdpInformation::~SdpInformation()
-{
-}
+PUBLIC VIRTUAL SdpInformation::~SdpInformation() {}
 
 PUBLIC
 SdpInformation& SdpInformation::operator=(IN const SdpInformation& other)
@@ -50,8 +47,7 @@ SdpInformation& SdpInformation::operator=(IN const SdpInformation& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpInformation::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpInformation::Decode(IN const AString& strValue)
 {
     // i=<session description>
 
@@ -66,8 +62,7 @@ IMS_BOOL SdpInformation::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpInformation::Encode() const
+PUBLIC VIRTUAL AString SdpInformation::Encode() const
 {
     // i=<session description>
     AString strLine(1, Sdp::LINE_I);

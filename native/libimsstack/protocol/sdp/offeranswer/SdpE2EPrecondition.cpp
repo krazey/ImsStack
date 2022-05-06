@@ -20,22 +20,19 @@
 #include "offeranswer/SdpE2EPrecondition.h"
 
 PUBLIC
-SdpE2EPrecondition::SdpE2EPrecondition(IN IMS_SINT32 nType /*= TYPE_QOS*/)
-    : SdpPrecondition(nType, SUBTYPE_E2E)
+SdpE2EPrecondition::SdpE2EPrecondition(IN IMS_SINT32 nType /*= TYPE_QOS*/) :
+        SdpPrecondition(nType, SUBTYPE_E2E)
 {
 }
 
 PUBLIC
-SdpE2EPrecondition::SdpE2EPrecondition(IN const SdpE2EPrecondition& other)
-    : SdpPrecondition(other)
-    , m_objE2EDetails(other.m_objE2EDetails)
+SdpE2EPrecondition::SdpE2EPrecondition(IN const SdpE2EPrecondition& other) :
+        SdpPrecondition(other),
+        m_objE2EDetails(other.m_objE2EDetails)
 {
 }
 
-PUBLIC VIRTUAL
-SdpE2EPrecondition::~SdpE2EPrecondition()
-{
-}
+PUBLIC VIRTUAL SdpE2EPrecondition::~SdpE2EPrecondition() {}
 
 PUBLIC
 SdpE2EPrecondition& SdpE2EPrecondition::operator=(IN const SdpE2EPrecondition& other)
@@ -50,9 +47,8 @@ SdpE2EPrecondition& SdpE2EPrecondition::operator=(IN const SdpE2EPrecondition& o
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpE2EPrecondition::AddStatus(IN IMS_SINT32 nStatus, IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nStrength /* = STRENGTH_NOTUSED */)
+PUBLIC VIRTUAL IMS_BOOL SdpE2EPrecondition::AddStatus(IN IMS_SINT32 nStatus,
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nStrength /* = STRENGTH_NOTUSED */)
 {
     if (nStatus == STATUS_E2E)
     {
@@ -68,8 +64,7 @@ IMS_BOOL SdpE2EPrecondition::AddStatus(IN IMS_SINT32 nStatus, IN IMS_SINT32 nDir
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpE2EPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
+PUBLIC VIRTUAL AString SdpE2EPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
 {
     // a=<attribute>:<value>
     AString strPrefix = SdpPrecondition::ToSdp(nAttribute);

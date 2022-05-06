@@ -42,13 +42,17 @@ public:
      * @brief Returns the session-level description.
      */
     inline const SdpSessionDescription& GetSessionDescription() const
-    { return m_objSessionDescription; }
+    {
+        return m_objSessionDescription;
+    }
 
     /**
      * @brief Returns the count of media-level description.
      */
     inline IMS_SINT32 GetMediaCount() const
-    { return static_cast<IMS_SINT32>(m_objMediaDescriptions.GetSize()); }
+    {
+        return static_cast<IMS_SINT32>(m_objMediaDescriptions.GetSize());
+    }
 
     /**
      * @brief Returns the media-level description at the specified index.
@@ -59,7 +63,9 @@ public:
      * @brief Returns all the media-level descriptions.
      */
     inline const IMSList<SdpMediaDescription>& GetMediaDescriptions() const
-    { return m_objMediaDescriptions; }
+    {
+        return m_objMediaDescriptions;
+    }
 
     /**
      * @brief Validates the SDP after parsing the message.

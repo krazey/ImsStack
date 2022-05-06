@@ -18,8 +18,7 @@
 
 #include "offeranswer/SdpMediaFormat.h"
 
-class SdpAvCodec
-    : public SdpMediaFormat
+class SdpAvCodec : public SdpMediaFormat
 {
 public:
     SdpAvCodec();
@@ -33,8 +32,7 @@ public:
     // SdpMediaFormat class
     IMS_BOOL Equals(IN const SdpMediaFormat* pFormat) const override;
     IMS_BOOL HasAttribute() const override;
-    IMS_BOOL SetParameters(IN const AString& strAttrAnyMap,
-            IN const AString& strAttrFmtp) override;
+    IMS_BOOL SetParameters(IN const AString& strAttrAnyMap, IN const AString& strAttrFmtp) override;
     IMS_BOOL SetValue(IN const AString& strFormat) override;
     AString ToSdp() const override;
 
@@ -43,8 +41,7 @@ public:
      *
      * @return The payload type of this codec.
      */
-    inline IMS_SINT32 GetPayloadType() const
-    { return m_nPayloadType; }
+    inline IMS_SINT32 GetPayloadType() const { return m_nPayloadType; }
 
     /**
      * @brief Returns the codec name.
@@ -52,24 +49,21 @@ public:
      *
      * @return The codec name of this codec.
      */
-    inline const AString& GetName() const
-    { return m_strCodecName; }
+    inline const AString& GetName() const { return m_strCodecName; }
 
     /**
      * @brief Returns the encoding rate for this media format.
      *
      * @return The clock rate of this codec.
      */
-    inline IMS_UINT32 GetClockRate() const
-    { return m_nClockRate; }
+    inline IMS_UINT32 GetClockRate() const { return m_nClockRate; }
 
     /**
      * @brief Returns the encoding parameters for this media format.
      *
      * @return The encoding parameters of this codec.
      */
-    inline const AString& GetEncodingParameters() const
-    { return m_strEncodingParameters; }
+    inline const AString& GetEncodingParameters() const { return m_strEncodingParameters; }
 
     /**
      * @brief Returns the format specific parameter for this media format.
@@ -77,8 +71,7 @@ public:
      *
      * @return The format specific parameters of this codec.
      */
-    inline const AString& GetFormatSpecificParameter() const
-    { return m_strFmtp; }
+    inline const AString& GetFormatSpecificParameter() const { return m_strFmtp; }
 
     /**
      * @brief Returns the default RTPMAP of the static payload type.
@@ -99,41 +92,41 @@ public:
     enum
     {
         PT_INVALID = (-1),
-        PCMU = 0,                             // Audio, PCMU/8000/1
-        RESERVED_1,                           // Audio
-        RESERVED_2,                           // Audio
-        GSM,                                  // Audio, GSM/8000/1
-        G723,                                 // Audio, G723/8000/1
-        DVI4,                                 // Audio, DVI4/8000/1
-        DVI4_16,                              // Audio, DVI4/16000/1
-        LPC,                                  // Audio, LPC/8000/1
-        PCMA,                                 // Audio, PCMA/8000/1
-        G722,                                 // Audio, G722/8000/1
-        L16_2,                                // Audio, L16/44100/2
-        L16,                                  // Audio, L16/44100/1
-        QCELP,                                // Audio, QCELP/8000/1
-        CN,                                   // Audio, CN/8000/1
-        MPA,                                  // Audio, MPA/90000
-        G728,                                 // Audio, G728/8000/1
-        DVI4_11,                              // Audio, DVI4/11025/1
-        DVI4_22,                              // Audio, DVI4/22050/1
-        G729,                                 // Audio, G729/8000/1
-        RESERVED_19,                          // Audio
-        UNASSIGNED_20,                        // Audio
-        UNASSIGNED_21,                        // Audio
-        UNASSIGNED_22,                        // Audio
-        UNASSIGNED_23,                        // Audio
-        UNASSIGNED_24,                        // Video
-        CELB,                                 // Video, CELB/90000
-        JPEG,                                 // Video, JPEG/90000
-        UNASSIGNED_27,                        // Video
-        NV,                                   // Video, NV/90000
-        UNASSIGNED_29,                        // Video
-        UNASSIGNED_30,                        // Video
-        H261,                                 // Video, H261/90000
-        MPV,                                  // Video, MPV/90000
-        MP2T,                                 // Audieo/Video, MP2T/90000
-        H263,                                 // Video, H263/90000
+        PCMU = 0,       // Audio, PCMU/8000/1
+        RESERVED_1,     // Audio
+        RESERVED_2,     // Audio
+        GSM,            // Audio, GSM/8000/1
+        G723,           // Audio, G723/8000/1
+        DVI4,           // Audio, DVI4/8000/1
+        DVI4_16,        // Audio, DVI4/16000/1
+        LPC,            // Audio, LPC/8000/1
+        PCMA,           // Audio, PCMA/8000/1
+        G722,           // Audio, G722/8000/1
+        L16_2,          // Audio, L16/44100/2
+        L16,            // Audio, L16/44100/1
+        QCELP,          // Audio, QCELP/8000/1
+        CN,             // Audio, CN/8000/1
+        MPA,            // Audio, MPA/90000
+        G728,           // Audio, G728/8000/1
+        DVI4_11,        // Audio, DVI4/11025/1
+        DVI4_22,        // Audio, DVI4/22050/1
+        G729,           // Audio, G729/8000/1
+        RESERVED_19,    // Audio
+        UNASSIGNED_20,  // Audio
+        UNASSIGNED_21,  // Audio
+        UNASSIGNED_22,  // Audio
+        UNASSIGNED_23,  // Audio
+        UNASSIGNED_24,  // Video
+        CELB,           // Video, CELB/90000
+        JPEG,           // Video, JPEG/90000
+        UNASSIGNED_27,  // Video
+        NV,             // Video, NV/90000
+        UNASSIGNED_29,  // Video
+        UNASSIGNED_30,  // Video
+        H261,           // Video, H261/90000
+        MPV,            // Video, MPV/90000
+        MP2T,           // Audieo/Video, MP2T/90000
+        H263,           // Video, H263/90000
         PT_DYNAMIC_35 = 35,
         PT_DYNAMIC_71 = 71,
         PT_DYNAMIC_72 = 72,
@@ -180,14 +173,14 @@ private:
     static const AvCodecTable CODEC_TABLE[];
 
     // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
-    IMS_SINT32 m_nPayloadType; // Payload type number
-    AString m_strCodecName; // Codec name (e.g. AMR, EVRC, H263-2000, MP4, ...)
+    IMS_SINT32 m_nPayloadType;  // Payload type number
+    AString m_strCodecName;     // Codec name (e.g. AMR, EVRC, H263-2000, MP4, ...)
     IMS_UINT32 m_nClockRate;
     AString m_strEncodingParameters;
 
     // a=fmtp:<format> <format specific parameter>
     //  ---> a=fmtp:<PT> <codec specific information>
-    AString m_strFmtp; // Value only (except for attribute & PT)
+    AString m_strFmtp;  // Value only (except for attribute & PT)
     // For AMR/AMR-WB codec (0: bandwidth-efficient, 1: octet-aligned)
     IMS_SINT32 m_nAmrOperationMode;
 };

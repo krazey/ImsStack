@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpInformation
-    : public SdpLine
+class SdpInformation : public SdpLine
 {
 public:
     SdpInformation();
@@ -46,8 +45,7 @@ public:
     /**
      * @brief Returns the full information line without "i=".
      */
-    inline AString GetValue() const override
-    { return m_strInformation; }
+    inline AString GetValue() const override { return m_strInformation; }
 
 private:
     AString m_strInformation;

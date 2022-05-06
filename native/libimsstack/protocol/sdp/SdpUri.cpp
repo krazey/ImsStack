@@ -19,23 +19,20 @@
 #include "SdpUri.h"
 
 PUBLIC
-SdpUri::SdpUri()
-    : SdpLine()
-    , m_strUri(AString::ConstNull())
+SdpUri::SdpUri() :
+        SdpLine(),
+        m_strUri(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpUri::SdpUri(IN const SdpUri& other)
-    : SdpLine(other)
-    , m_strUri(other.m_strUri)
+SdpUri::SdpUri(IN const SdpUri& other) :
+        SdpLine(other),
+        m_strUri(other.m_strUri)
 {
 }
 
-PUBLIC VIRTUAL
-SdpUri::~SdpUri()
-{
-}
+PUBLIC VIRTUAL SdpUri::~SdpUri() {}
 
 /*
 
@@ -55,8 +52,7 @@ SdpUri& SdpUri::operator=(IN const SdpUri& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpUri::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpUri::Decode(IN const AString& strValue)
 {
     // u=<uri>
 
@@ -70,8 +66,7 @@ IMS_BOOL SdpUri::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpUri::Encode() const
+PUBLIC VIRTUAL AString SdpUri::Encode() const
 {
     // u=<uri>
     AString strLine(1, Sdp::LINE_U);

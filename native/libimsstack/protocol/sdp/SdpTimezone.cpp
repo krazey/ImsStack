@@ -19,20 +19,19 @@
 #include "SdpTimezone.h"
 
 PUBLIC
-SdpTimezone::SdpTimezone()
-    : SdpLine()
+SdpTimezone::SdpTimezone() :
+        SdpLine()
 {
 }
 
 PUBLIC
-SdpTimezone::SdpTimezone(IN const SdpTimezone& other)
-    : SdpLine(other)
-    , m_objZoneAdjustments(other.m_objZoneAdjustments)
+SdpTimezone::SdpTimezone(IN const SdpTimezone& other) :
+        SdpLine(other),
+        m_objZoneAdjustments(other.m_objZoneAdjustments)
 {
 }
 
-PUBLIC VIRTUAL
-SdpTimezone::~SdpTimezone()
+PUBLIC VIRTUAL SdpTimezone::~SdpTimezone()
 {
     m_objZoneAdjustments.Clear();
 }
@@ -51,8 +50,7 @@ SdpTimezone& SdpTimezone::operator=(IN const SdpTimezone& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
 {
     // z=<adjustment time> <offset> <adjustment time> <offset> ...
     IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
@@ -72,10 +70,9 @@ IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); i += 2)
     {
         const AString& strAdjustment = objTokens.GetAt(i);
-        const AString& strOffset = objTokens.GetAt(i+1);
+        const AString& strOffset = objTokens.GetAt(i + 1);
 
-        if ((strAdjustment.GetLength() != 10)
-                || !Sdp::IsDigitString(strAdjustment))
+        if ((strAdjustment.GetLength() != 10) || !Sdp::IsDigitString(strAdjustment))
         {
             // Invalid adjustment field
             return IMS_FALSE;
@@ -99,8 +96,7 @@ IMS_BOOL SdpTimezone::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpTimezone::Encode() const
+PUBLIC VIRTUAL AString SdpTimezone::Encode() const
 {
     // z=<adjustment time> <offset> <adjustment time> <offset> ...
     AString strLine(1, Sdp::LINE_Z);
@@ -113,16 +109,14 @@ AString SdpTimezone::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpTimezone::GetValue() const
+PUBLIC VIRTUAL AString SdpTimezone::GetValue() const
 {
     AString strValue;
     AString strAdjustment;
 
     for (IMS_UINT32 i = 0; i < m_objZoneAdjustments.GetSize(); ++i)
     {
-        strAdjustment.Sprintf("%u %u ",
-                m_objZoneAdjustments.GetAt(i).GetAdjustmentTime(),
+        strAdjustment.Sprintf("%u %u ", m_objZoneAdjustments.GetAt(i).GetAdjustmentTime(),
                 m_objZoneAdjustments.GetAt(i).GetOffset());
 
         strValue.Append(strAdjustment);

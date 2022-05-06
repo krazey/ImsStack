@@ -19,25 +19,22 @@
 #include "SdpTime.h"
 
 PUBLIC
-SdpTime::SdpTime()
-    : SdpLine()
-    , m_nStartTime(0)
-    , m_nStopTime(0)
+SdpTime::SdpTime() :
+        SdpLine(),
+        m_nStartTime(0),
+        m_nStopTime(0)
 {
 }
 
 PUBLIC
-SdpTime::SdpTime(IN const SdpTime& other)
-    : SdpLine(other)
-    , m_nStartTime(other.m_nStartTime)
-    , m_nStopTime(other.m_nStopTime)
+SdpTime::SdpTime(IN const SdpTime& other) :
+        SdpLine(other),
+        m_nStartTime(other.m_nStartTime),
+        m_nStopTime(other.m_nStopTime)
 {
 }
 
-PUBLIC VIRTUAL
-SdpTime::~SdpTime()
-{
-}
+PUBLIC VIRTUAL SdpTime::~SdpTime() {}
 
 PUBLIC
 SdpTime& SdpTime::operator=(IN const SdpTime& other)
@@ -53,8 +50,7 @@ SdpTime& SdpTime::operator=(IN const SdpTime& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpTime::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpTime::Decode(IN const AString& strValue)
 {
     // t=<start-time> <stop-time>
     AStringArray objTokens;
@@ -85,8 +81,7 @@ IMS_BOOL SdpTime::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpTime::Encode() const
+PUBLIC VIRTUAL AString SdpTime::Encode() const
 {
     // t=<start-time> <stop-time>
     AString strLine(1, Sdp::LINE_T);
@@ -99,8 +94,7 @@ AString SdpTime::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpTime::GetValue() const
+PUBLIC VIRTUAL AString SdpTime::GetValue() const
 {
     AString strValue;
 

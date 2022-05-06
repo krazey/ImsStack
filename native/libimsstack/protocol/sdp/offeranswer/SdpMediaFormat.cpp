@@ -20,16 +20,16 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 
 PUBLIC
-SdpMediaFormat::SdpMediaFormat(IN IMS_SINT32 nType /*= TYPE_OTHER*/)
-    : m_nType(nType)
-    , m_strValue(AString::ConstNull())
+SdpMediaFormat::SdpMediaFormat(IN IMS_SINT32 nType /*= TYPE_OTHER*/) :
+        m_nType(nType),
+        m_strValue(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpMediaFormat::SdpMediaFormat(IN const SdpMediaFormat& other)
-    : m_nType(other.m_nType)
-    , m_strValue(other.m_strValue)
+SdpMediaFormat::SdpMediaFormat(IN const SdpMediaFormat& other) :
+        m_nType(other.m_nType),
+        m_strValue(other.m_strValue)
 {
     for (IMS_UINT32 i = 0; i < other.m_objExtraParameters.GetSize(); ++i)
     {
@@ -42,8 +42,7 @@ SdpMediaFormat::SdpMediaFormat(IN const SdpMediaFormat& other)
     }
 }
 
-PUBLIC VIRTUAL
-SdpMediaFormat::~SdpMediaFormat()
+PUBLIC VIRTUAL SdpMediaFormat::~SdpMediaFormat()
 {
     for (IMS_UINT32 i = 0; i < m_objExtraParameters.GetSize(); ++i)
     {
@@ -92,8 +91,7 @@ SdpMediaFormat& SdpMediaFormat::operator=(IN const SdpMediaFormat& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMediaFormat::Equals(IN const SdpMediaFormat* pFormat) const
+PUBLIC VIRTUAL IMS_BOOL SdpMediaFormat::Equals(IN const SdpMediaFormat* pFormat) const
 {
     if (pFormat == IMS_NULL)
     {
@@ -113,8 +111,7 @@ IMS_BOOL SdpMediaFormat::Equals(IN const SdpMediaFormat* pFormat) const
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMediaFormat::SetValue(IN const AString& strFormat)
+PUBLIC VIRTUAL IMS_BOOL SdpMediaFormat::SetValue(IN const AString& strFormat)
 {
     if (!Sdp::IsTokenString(strFormat))
     {

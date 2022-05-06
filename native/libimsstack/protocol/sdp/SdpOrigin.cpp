@@ -23,41 +23,37 @@
 
 __IMS_TRACE_TAG_SDP__;
 
-PRIVATE GLOBAL
-IMS_UINT32 SdpOrigin::s_nLastTime = 0;
+PRIVATE GLOBAL IMS_UINT32 SdpOrigin::s_nLastTime = 0;
 
 PUBLIC
-SdpOrigin::SdpOrigin()
-    : SdpLine()
-    , m_strUsername(AString::ConstNull())
-    , m_strSessionId(AString::ConstNull())
-    , m_strSessionVersion(AString::ConstNull())
-    , m_nNetType(Sdp::NET_TYPE_IN)
-    , m_strNetType(Sdp::STR_NET_TYPE_IN)
-    , m_nAddrType(Sdp::ADDR_TYPE_IP4)
-    , m_strAddrType(Sdp::STR_ADDR_TYPE_IP4)
-    , m_strUnicastAddress(AString::ConstNull())
+SdpOrigin::SdpOrigin() :
+        SdpLine(),
+        m_strUsername(AString::ConstNull()),
+        m_strSessionId(AString::ConstNull()),
+        m_strSessionVersion(AString::ConstNull()),
+        m_nNetType(Sdp::NET_TYPE_IN),
+        m_strNetType(Sdp::STR_NET_TYPE_IN),
+        m_nAddrType(Sdp::ADDR_TYPE_IP4),
+        m_strAddrType(Sdp::STR_ADDR_TYPE_IP4),
+        m_strUnicastAddress(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpOrigin::SdpOrigin(IN const SdpOrigin& other)
-    : SdpLine(other)
-    , m_strUsername(other.m_strUsername)
-    , m_strSessionId(other.m_strSessionId)
-    , m_strSessionVersion(other.m_strSessionVersion)
-    , m_nNetType(other.m_nNetType)
-    , m_strNetType(other.m_strNetType)
-    , m_nAddrType(other.m_nAddrType)
-    , m_strAddrType(other.m_strAddrType)
-    , m_strUnicastAddress(other.m_strUnicastAddress)
+SdpOrigin::SdpOrigin(IN const SdpOrigin& other) :
+        SdpLine(other),
+        m_strUsername(other.m_strUsername),
+        m_strSessionId(other.m_strSessionId),
+        m_strSessionVersion(other.m_strSessionVersion),
+        m_nNetType(other.m_nNetType),
+        m_strNetType(other.m_strNetType),
+        m_nAddrType(other.m_nAddrType),
+        m_strAddrType(other.m_strAddrType),
+        m_strUnicastAddress(other.m_strUnicastAddress)
 {
 }
 
-PUBLIC VIRTUAL
-SdpOrigin::~SdpOrigin()
-{
-}
+PUBLIC VIRTUAL SdpOrigin::~SdpOrigin() {}
 
 PUBLIC
 SdpOrigin& SdpOrigin::operator=(IN const SdpOrigin& other)
@@ -79,8 +75,7 @@ SdpOrigin& SdpOrigin::operator=(IN const SdpOrigin& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
 {
     // o=<username> <sess-id> <sess-version> <nettype> <addrtype> <unicast-address>
     AStringArray objTokens;
@@ -165,16 +160,14 @@ IMS_BOOL SdpOrigin::Decode(IN const AString& strValue)
     // Check if the address format is valid
     if (!CheckValidityForAddress(m_strUnicastAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s",
-                strValue.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strValue.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpOrigin::Encode() const
+PUBLIC VIRTUAL AString SdpOrigin::Encode() const
 {
     // o=<username> <sess-id> <sess-version> <nettype> <addrtype> <unicast-address>
     AString strLine(1, Sdp::LINE_O);
@@ -187,8 +180,7 @@ AString SdpOrigin::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpOrigin::GetValue() const
+PUBLIC VIRTUAL AString SdpOrigin::GetValue() const
 {
     AString strValue;
 
@@ -231,8 +223,7 @@ IMS_BOOL SdpOrigin::SetAddress(IN const AString& strAddress)
 
     if (!objAddress.Parse(strAddress))
     {
-        if (!Sdp::IsFqdnString(strAddress)
-                && !Sdp::IsNonWsString(strAddress))
+        if (!Sdp::IsFqdnString(strAddress) && !Sdp::IsNonWsString(strAddress))
         {
             IMS_TRACE_E(0, "Invalid connection-address: %s", strAddress.GetStr(), 0, 0);
             return IMS_FALSE;
@@ -280,8 +271,7 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
 
     if (!objAddress.Parse(strAddress))
     {
-        if (!Sdp::IsFqdnString(strAddress)
-                && !Sdp::IsNonWsString(strAddress))
+        if (!Sdp::IsFqdnString(strAddress) && !Sdp::IsNonWsString(strAddress))
         {
             IMS_TRACE_E(0, "Invalid connection-address: %s", strAddress.GetStr(), 0, 0);
             return IMS_FALSE;
@@ -370,33 +360,32 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
 
     switch (m_nAddrType)
     {
-    case Sdp::ADDR_TYPE_IP4:
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
-        break;
+        case Sdp::ADDR_TYPE_IP4:
+            m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
+            break;
 
-    case Sdp::ADDR_TYPE_IP6:
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
-        break;
+        case Sdp::ADDR_TYPE_IP6:
+            m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
+            break;
 
-    case Sdp::ADDR_TYPE_OTHER:
-        if (!Sdp::IsTokenString(strOtherAddrType))
-        {
-            IMS_TRACE_E(0, "Invalid addrtype: %s", strOtherAddrType.GetStr(), 0, 0);
+        case Sdp::ADDR_TYPE_OTHER:
+            if (!Sdp::IsTokenString(strOtherAddrType))
+            {
+                IMS_TRACE_E(0, "Invalid addrtype: %s", strOtherAddrType.GetStr(), 0, 0);
+                return IMS_FALSE;
+            }
+
+            m_strAddrType = strOtherAddrType;
+            break;
+
+        default:
             return IMS_FALSE;
-        }
-
-        m_strAddrType = strOtherAddrType;
-        break;
-
-    default:
-        return IMS_FALSE;
     }
 
     // Check if the address format is valid
     if (!CheckValidityForAddress(strAddress, m_nAddrType))
     {
-        IMS_TRACE_E(0, "o-line :: Address validity failed : %s",
-                strAddress.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "o-line :: Address validity failed : %s", strAddress.GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -406,8 +395,7 @@ IMS_BOOL SdpOrigin::SetValue(IN const AString& strUsername, IN const AString& st
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_UINT32 SdpOrigin::GetNtpTime()
+PRIVATE GLOBAL IMS_UINT32 SdpOrigin::GetNtpTime()
 {
     IMS_UINT32 nCurrTime = IMS_SYS_GetTimeInSeconds();
 

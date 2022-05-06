@@ -22,9 +22,9 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpDescription::SdpDescription()
-    : m_pInformation(IMS_NULL)
-    , m_pEncryptionKey(IMS_NULL)
+SdpDescription::SdpDescription() :
+        m_pInformation(IMS_NULL),
+        m_pEncryptionKey(IMS_NULL)
 {
     for (IMS_SINT32 i = 0; i < Sdp::TYPE_MAX; ++i)
     {
@@ -33,9 +33,9 @@ SdpDescription::SdpDescription()
 }
 
 PUBLIC
-SdpDescription::SdpDescription(IN const SdpDescription& other)
-    : m_pInformation(IMS_NULL)
-    , m_pEncryptionKey(IMS_NULL)
+SdpDescription::SdpDescription(IN const SdpDescription& other) :
+        m_pInformation(IMS_NULL),
+        m_pEncryptionKey(IMS_NULL)
 {
     for (IMS_SINT32 i = 0; i < Sdp::TYPE_MAX; ++i)
     {
@@ -56,8 +56,7 @@ SdpDescription::SdpDescription(IN const SdpDescription& other)
     m_objAttributes = other.m_objAttributes;
 }
 
-PUBLIC VIRTUAL
-SdpDescription::~SdpDescription()
+PUBLIC VIRTUAL SdpDescription::~SdpDescription()
 {
     if (m_pInformation != IMS_NULL)
     {
@@ -115,8 +114,7 @@ SdpDescription& SdpDescription::operator=(IN const SdpDescription& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpDescription::Decode(IN const AStringArray& objLines,
+PUBLIC VIRTUAL IMS_BOOL SdpDescription::Decode(IN const AStringArray& objLines,
         IN IMS_SINT32 nStartLine /*= 0*/, IN IMS_SINT32 nEndLine /*= -1*/)
 {
     if (nStartLine < 0)
@@ -135,10 +133,8 @@ IMS_BOOL SdpDescription::Decode(IN const AStringArray& objLines,
     {
         const AString& strLine = objLines.GetElementAt(i);
 
-        if ((strLine[0] != Sdp::LINE_I)
-                && (strLine[0] != Sdp::LINE_B)
-                && (strLine[0] != Sdp::LINE_K)
-                && (strLine[0] != Sdp::LINE_A))
+        if ((strLine[0] != Sdp::LINE_I) && (strLine[0] != Sdp::LINE_B) &&
+                (strLine[0] != Sdp::LINE_K) && (strLine[0] != Sdp::LINE_A))
         {
             continue;
         }
@@ -147,104 +143,104 @@ IMS_BOOL SdpDescription::Decode(IN const AStringArray& objLines,
 
         switch (strLine[0])
         {
-        case Sdp::LINE_I:
-            if (!m_abLineContains[Sdp::TYPE_I])
-            {
-                m_pInformation = new SdpInformation();
-
-                if (!m_pInformation->Decode(strLineBody))
+            case Sdp::LINE_I:
+                if (!m_abLineContains[Sdp::TYPE_I])
                 {
-                    delete m_pInformation;
-                    m_pInformation = IMS_NULL;
+                    m_pInformation = new SdpInformation();
 
-                    IMS_TRACE_E(0, "SDP decoding failed: i-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
+                    if (!m_pInformation->Decode(strLineBody))
+                    {
+                        delete m_pInformation;
+                        m_pInformation = IMS_NULL;
+
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: i-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_I] = IMS_TRUE;
                 }
-
-                m_abLineContains[Sdp::TYPE_I] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_B:
-        {
-            SdpBandwidth objBandwidth;
-
-            if (!objBandwidth.Decode(strLineBody))
-            {
-                IMS_TRACE_E(0, "SDP decoding failed: b-line (%s)", strLineBody.GetStr(), 0, 0);
-                return IMS_FALSE;
-            }
-
-            if (!m_objBandwidths.Append(objBandwidth))
-            {
-                return IMS_FALSE;
-            }
-
-            m_abLineContains[Sdp::TYPE_B] = IMS_TRUE;
-        }
-        break;
-
-        case Sdp::LINE_K:
-            if (!m_abLineContains[Sdp::TYPE_K])
-            {
-                m_pEncryptionKey = new SdpEncryptionKey();
-
-                if (!m_pEncryptionKey->Decode(strLineBody))
+                else
                 {
-                    delete m_pEncryptionKey;
-                    m_pEncryptionKey = IMS_NULL;
-
-                    IMS_TRACE_E(0, "SDP decoding failed: k-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
-                }
-
-                m_abLineContains[Sdp::TYPE_K] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_A:
-        {
-            SdpAttribute objAttribute;
-
-            if (!objAttribute.Decode(strLineBody))
-            {
-                IMS_TRACE_E(0, "SDP decoding failed: a-line (%s)", strLineBody.GetStr(), 0, 0);
-
-                // If the attribute is not parsed, then ignore it and continue the parsing.
-                if (strLineBody.StartsWith("rtpmap")
-                        || strLineBody.StartsWith("fmtp"))
-                {
+                    // Invalid SDP
                     return IMS_FALSE;
                 }
                 break;
-            }
 
-            if (!m_objAttributes.Append(objAttribute))
+            case Sdp::LINE_B:
             {
-                return IMS_FALSE;
-            }
+                SdpBandwidth objBandwidth;
 
-            m_abLineContains[Sdp::TYPE_A] = IMS_TRUE;
-        }
-        break;
+                if (!objBandwidth.Decode(strLineBody))
+                {
+                    IMS_TRACE_E(0, "SDP decoding failed: b-line (%s)", strLineBody.GetStr(), 0, 0);
+                    return IMS_FALSE;
+                }
+
+                if (!m_objBandwidths.Append(objBandwidth))
+                {
+                    return IMS_FALSE;
+                }
+
+                m_abLineContains[Sdp::TYPE_B] = IMS_TRUE;
+            }
+            break;
+
+            case Sdp::LINE_K:
+                if (!m_abLineContains[Sdp::TYPE_K])
+                {
+                    m_pEncryptionKey = new SdpEncryptionKey();
+
+                    if (!m_pEncryptionKey->Decode(strLineBody))
+                    {
+                        delete m_pEncryptionKey;
+                        m_pEncryptionKey = IMS_NULL;
+
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: k-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_K] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_A:
+            {
+                SdpAttribute objAttribute;
+
+                if (!objAttribute.Decode(strLineBody))
+                {
+                    IMS_TRACE_E(0, "SDP decoding failed: a-line (%s)", strLineBody.GetStr(), 0, 0);
+
+                    // If the attribute is not parsed, then ignore it and continue the parsing.
+                    if (strLineBody.StartsWith("rtpmap") || strLineBody.StartsWith("fmtp"))
+                    {
+                        return IMS_FALSE;
+                    }
+                    break;
+                }
+
+                if (!m_objAttributes.Append(objAttribute))
+                {
+                    return IMS_FALSE;
+                }
+
+                m_abLineContains[Sdp::TYPE_A] = IMS_TRUE;
+            }
+            break;
         }
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpDescription::Encode() const
+PUBLIC VIRTUAL AString SdpDescription::Encode() const
 {
     return AString::ConstNull();
 }

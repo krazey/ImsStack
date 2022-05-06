@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpVersion
-    : public SdpLine
+class SdpVersion : public SdpLine
 {
 public:
     SdpVersion();
@@ -48,12 +47,14 @@ public:
      */
     AString GetValue() const override;
 
-    inline IMS_SINT32 GetVersion() const
-    { return m_nVersion; }
+    inline IMS_SINT32 GetVersion() const { return m_nVersion; }
     IMS_BOOL SetVersion(IN IMS_SINT32 nVersion = SDP_VERSION);
 
 private:
-    enum { SDP_VERSION = 0 };
+    enum
+    {
+        SDP_VERSION = 0
+    };
 
     // v=<version>
     IMS_SINT32 m_nVersion;

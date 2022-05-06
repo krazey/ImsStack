@@ -33,13 +33,13 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpMediaParameter::SdpMediaParameter(IN IMS_SINT32 nMid)
-    : SdpParameter()
-    , m_nMid(nMid)
-    , m_strAttrMid(AString::ConstNull())
-    , m_pCurrentStatus(IMS_NULL)
-    , m_pDesiredStatus(IMS_NULL)
-    , m_pConfirmedStatus(IMS_NULL)
+SdpMediaParameter::SdpMediaParameter(IN IMS_SINT32 nMid) :
+        SdpParameter(),
+        m_nMid(nMid),
+        m_strAttrMid(AString::ConstNull()),
+        m_pCurrentStatus(IMS_NULL),
+        m_pDesiredStatus(IMS_NULL),
+        m_pConfirmedStatus(IMS_NULL)
 {
     for (IMS_SINT32 i = 0; i < ATTR_MAX; ++i)
     {
@@ -48,16 +48,16 @@ SdpMediaParameter::SdpMediaParameter(IN IMS_SINT32 nMid)
 }
 
 PUBLIC
-SdpMediaParameter::SdpMediaParameter(IN const SdpMediaParameter& other)
-    : SdpParameter(other)
-    , m_nMid(other.m_nMid)
-    , m_objMedia(other.m_objMedia)
-    , m_objConnections(other.m_objConnections)
-    , m_objPrevConnections(other.m_objPrevConnections)
-    , m_strAttrMid(other.m_strAttrMid)
-    , m_pCurrentStatus(IMS_NULL)
-    , m_pDesiredStatus(IMS_NULL)
-    , m_pConfirmedStatus(IMS_NULL)
+SdpMediaParameter::SdpMediaParameter(IN const SdpMediaParameter& other) :
+        SdpParameter(other),
+        m_nMid(other.m_nMid),
+        m_objMedia(other.m_objMedia),
+        m_objConnections(other.m_objConnections),
+        m_objPrevConnections(other.m_objPrevConnections),
+        m_strAttrMid(other.m_strAttrMid),
+        m_pCurrentStatus(IMS_NULL),
+        m_pDesiredStatus(IMS_NULL),
+        m_pConfirmedStatus(IMS_NULL)
 {
     CopyMediaFormat(other.m_objMediaFormats, m_objMediaFormats);
 
@@ -120,8 +120,7 @@ SdpMediaParameter& SdpMediaParameter::operator=(IN const SdpMediaParameter& othe
     return (*this);
 }
 
-PUBLIC VIRTUAL
-const AString& SdpMediaParameter::GetConnectionAddress() const
+PUBLIC VIRTUAL const AString& SdpMediaParameter::GetConnectionAddress() const
 {
     if (m_objConnections.IsEmpty())
     {
@@ -169,17 +168,18 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 IMS_SINT32 nLocalTransportProtocol = m_objMedia.GetTransportProtocol();
                 IMS_SINT32 nPeerTransportProtocol = pPeerParam->m_objMedia.GetTransportProtocol();
 
-                if (((nLocalTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP)
-                        || (nLocalTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP))
-                    && ((nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF)
-                        || (nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP)
-                        || (nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF)
-                        || (nPeerTransportProtocol == SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP)))
+                if (((nLocalTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP) ||
+                            (nLocalTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP)) &&
+                        ((nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF) ||
+                                (nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||
+                                (nPeerTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF) ||
+                                (nPeerTransportProtocol == SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP)))
                 {
                     // Overwrite the transport protocol according to the SDP answer
                     // Add if "tcap" attribute is provided in the previous SDP offer
-                    IMS_TRACE_D("SDPCapNego :: Media transport protocol will be changed" \
-                            "(%d >> %d)", nLocalTransportProtocol, nPeerTransportProtocol, 0);
+                    IMS_TRACE_D("SDPCapNego :: Media transport protocol will be changed"
+                                "(%d >> %d)",
+                            nLocalTransportProtocol, nPeerTransportProtocol, 0);
 
                     m_objMedia.SetTransportProtocol(nPeerTransportProtocol);
                 }
@@ -187,8 +187,9 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 {
                     // Overwrite the transport protocol according to the SDP answer
                     // Add if "tcap" attribute is provided in the previous SDP offer
-                    IMS_TRACE_D("SDPCapNego(2) :: Media transport protocol will be changed" \
-                            "(%d >> %d)", nLocalTransportProtocol, nPeerTransportProtocol, 0);
+                    IMS_TRACE_D("SDPCapNego(2) :: Media transport protocol will be changed"
+                                "(%d >> %d)",
+                            nLocalTransportProtocol, nPeerTransportProtocol, 0);
 
                     m_objMedia.SetTransportProtocol(nPeerTransportProtocol);
                 }
@@ -280,10 +281,10 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                         // Payload type should be retained during the session ...
                         if (!strOfferedPayloadType.Equals(strAnsweredPayloadType))
                         {
-                            IMS_TRACE_D("Payload type (O:%s, A:%s) is not matched " \
-                                    "during the session; skipped...",
-                                    strOfferedPayloadType.GetStr(),
-                                    strAnsweredPayloadType.GetStr(), 0);
+                            IMS_TRACE_D("Payload type (O:%s, A:%s) is not matched "
+                                        "during the session; skipped...",
+                                    strOfferedPayloadType.GetStr(), strAnsweredPayloadType.GetStr(),
+                                    0);
 
                             // Check the payload type and if it is duplicate format,
                             // then skip the media format
@@ -295,8 +296,8 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                                 objTempMediaFormats.Append(pPeerMediaFormat);
                                 CopyMediaFormat(objTempMediaFormats, objPeerMediaFormats);
 
-                                IMS_TRACE_D("Payload type (%s) is added during an active call " \
-                                        "as preferred codec...",
+                                IMS_TRACE_D("Payload type (%s) is added during an active call "
+                                            "as preferred codec...",
                                         pPeerMediaFormat->GetValue().GetStr(), 0, 0);
                             }
 
@@ -324,9 +325,9 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             // If the re-offer has a preferred new media formats
             // before the previous negotiated media formats,
             // then add a new media format with the preference order.
-            if (bIsOffer && !bInitialOffer && !bMediaFormatFound
-                    && !IsSameAvCodecPresent(objPeerMediaFormats, pOfferedMediaFormat)
-                    && !IsSameNonAvCodecPresent(objPeerMediaFormats, pOfferedMediaFormat))
+            if (bIsOffer && !bInitialOffer && !bMediaFormatFound &&
+                    !IsSameAvCodecPresent(objPeerMediaFormats, pOfferedMediaFormat) &&
+                    !IsSameNonAvCodecPresent(objPeerMediaFormats, pOfferedMediaFormat))
             {
                 if (!bAtLeastOneCodecMatched)
                 {
@@ -344,8 +345,8 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 CopyMediaFormat(objTempMediaFormats, objAcceptedMediaFormats);
 
                 IMS_TRACE_D("1:Media format(%s, %d) is added during an active call",
-                        pOfferedMediaFormat->GetValue().GetStr(),
-                        objAcceptedMediaFormats.GetSize(), 0);
+                        pOfferedMediaFormat->GetValue().GetStr(), objAcceptedMediaFormats.GetSize(),
+                        0);
             }
         }
 
@@ -355,7 +356,7 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             // so if new media format is present, then add it to the accepted media formats.
             for (IMS_UINT32 j = 0; j < pPeerParam->m_objMediaFormats.GetSize(); ++j)
             {
-                SdpMediaFormat *pPeerMediaFormat = pPeerParam->m_objMediaFormats.GetAt(j);
+                SdpMediaFormat* pPeerMediaFormat = pPeerParam->m_objMediaFormats.GetAt(j);
 
                 // Check the payload type and if it is duplicate format,
                 // then skip the media format
@@ -385,13 +386,15 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
                 CopyMediaFormat(objTempMediaFormats, objAcceptedMediaFormats);
 
                 IMS_TRACE_D("2:Media format(%s, %d) is added during an active call",
-                    pPeerMediaFormat->GetValue().GetStr(), objAcceptedMediaFormats.GetSize(), 0);
+                        pPeerMediaFormat->GetValue().GetStr(), objAcceptedMediaFormats.GetSize(),
+                        0);
             }
 
             if (!bInitialOffer && !bAtLeastOneCodecMatched)
             {
-                IMS_TRACE_D("All media formats are not matched during the session;" \
-                        " it accepts all the peer media formats", 0, 0, 0);
+                IMS_TRACE_D("All media formats are not matched during the session;"
+                            " it accepts all the peer media formats",
+                        0, 0, 0);
 
                 CopyMediaFormat(objPeerMediaFormats, objAcceptedMediaFormats);
 
@@ -436,8 +439,8 @@ IMS_SINT32 SdpMediaParameter::Compare(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIs
             }
             else
             {
-                CopyMediaFormat(pPeerParam->m_objMediaFormats,
-                        pNegotiatedPeerParam->m_objMediaFormats);
+                CopyMediaFormat(
+                        pPeerParam->m_objMediaFormats, pNegotiatedPeerParam->m_objMediaFormats);
             }
         }
 
@@ -584,8 +587,8 @@ IMS_BOOL SdpMediaParameter::Create(IN const SdpMediaDescription& objMediaDescrip
 }
 
 PUBLIC
-const SdpMediaFormat* SdpMediaParameter::GetMediaFormat(IN IMS_SINT32 nType,
-        IN const AString& strValue) const
+const SdpMediaFormat* SdpMediaParameter::GetMediaFormat(
+        IN IMS_SINT32 nType, IN const AString& strValue) const
 {
     for (IMS_UINT32 i = 0; i < m_objMediaFormats.GetSize(); ++i)
     {
@@ -629,16 +632,14 @@ SdpMediaFormat* SdpMediaParameter::GetMediaFormat(IN IMS_SINT32 nType, IN const 
 PUBLIC
 IMS_BOOL SdpMediaParameter::IsQosPreconditionPresent() const
 {
-    return ((m_abAttributeContains[ATTR_QOS_CONF])
-            || (m_abAttributeContains[ATTR_QOS_CURR])
-            || (m_abAttributeContains[ATTR_QOS_DES]));
+    return ((m_abAttributeContains[ATTR_QOS_CONF]) || (m_abAttributeContains[ATTR_QOS_CURR]) ||
+            (m_abAttributeContains[ATTR_QOS_DES]));
 }
 
 PUBLIC
 void SdpMediaParameter::MarkRejectedOrRemoved()
 {
-    IMS_TRACE_I("SdpMediaParameter - Rejected / Removed (%s)",
-            m_objMedia.Encode().GetStr(), 0, 0);
+    IMS_TRACE_I("SdpMediaParameter - Rejected / Removed (%s)", m_objMedia.Encode().GetStr(), 0, 0);
 
     m_objMedia.SetPort(0);
     m_objMedia.SetNumOfPort(0);
@@ -648,7 +649,7 @@ PUBLIC
 void SdpMediaParameter::RemoveConnections()
 {
     m_objConnections.Clear();
-    //objPrevConnections.Clear();
+    // objPrevConnections.Clear();
 }
 
 PUBLIC
@@ -747,10 +748,10 @@ IMS_BOOL SdpMediaParameter::SetMedia(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
 
     // If the media type is not an audio/video,
     // then set the media formats automatically using the format list...
-    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
+    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
     {
         for (IMS_SINT32 i = 0; i < objFormats.GetCount(); ++i)
         {
@@ -775,8 +776,8 @@ IMS_BOOL SdpMediaParameter::SetMedia(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
         // Set the media format
         IMS_SINT32 nFormatType;
 
-        if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP)
-                || (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
+        if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP) ||
+                (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
         {
             nFormatType = SdpMediaFormat::TYPE_MSRP;
         }
@@ -846,7 +847,7 @@ AString SdpMediaParameter::ToSdp() const
         // So, if the m-line is not supported by the endpoint, m-line only will be set.
 
         // BRUCE :: because of 'file-transfer-id', all SDP will be formed.
-        //return strSDP;
+        // return strSDP;
     }
 
     if (m_abLineContains[Sdp::TYPE_I])
@@ -899,8 +900,8 @@ AString SdpMediaParameter::ToSdp() const
 
         if (pMediaFormat->HasAttribute())
         {
-            const IMSList<SdpMediaFormatParameter*>& objExtraParameters
-                    = pMediaFormat->GetExtraParameters();
+            const IMSList<SdpMediaFormatParameter*>& objExtraParameters =
+                    pMediaFormat->GetExtraParameters();
 
             for (IMS_UINT32 j = 0; j < objExtraParameters.GetSize(); ++j)
             {
@@ -913,8 +914,8 @@ AString SdpMediaParameter::ToSdp() const
 
                 IMS_SINT32 nPayloadType = pParameter->GetPayloadTypeNumber();
 
-                if ((nPayloadType == SdpMediaFormatParameter::PT_WILDCARD)
-                        || (nPayloadType == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
+                if ((nPayloadType == SdpMediaFormatParameter::PT_WILDCARD) ||
+                        (nPayloadType == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
                 {
                     objSdp.Append(pParameter->ToSdp());
                 }
@@ -979,16 +980,13 @@ void SdpMediaParameter::UpdateProperties(IN const SdpMediaParameter& objMediaPar
             objFormats.AddElement(pMediaFormat->GetValue());
         }
 
-        m_objMedia.SetValue(
-                objMediaParam.m_objMedia.GetType(),
-                objMediaParam.m_objMedia.GetPort(),
-                objMediaParam.m_objMedia.GetTransportProtocol(),
-                objFormats,
+        m_objMedia.SetValue(objMediaParam.m_objMedia.GetType(), objMediaParam.m_objMedia.GetPort(),
+                objMediaParam.m_objMedia.GetTransportProtocol(), objFormats,
                 objMediaParam.m_objMedia.GetTypeEx());
     }
 
     // Set the packet time attribute
-    //nPacketTime = objMediaStream.nPacketTime;
+    // nPacketTime = objMediaStream.nPacketTime;
 
     // Set the connecton
     m_objConnections.Clear();
@@ -1029,13 +1027,13 @@ void SdpMediaParameter::UpdateProperties(IN const SdpMediaParameter& objMediaPar
 }
 
 PUBLIC
-SdpPrecondition* SdpMediaParameter::GetPrecondition(IN IMS_SINT32 nAttribute,
-        IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */) const
+SdpPrecondition* SdpMediaParameter::GetPrecondition(
+        IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */) const
 {
     if (nType != SdpPrecondition::TYPE_QOS)
     {
-        IMS_TRACE_E(0, "Type (%d) is not supported; It only supports 'qos' precondition",
-                nType, 0, 0);
+        IMS_TRACE_E(
+                0, "Type (%d) is not supported; It only supports 'qos' precondition", nType, 0, 0);
         return IMS_NULL;
     }
 
@@ -1056,13 +1054,13 @@ SdpPrecondition* SdpMediaParameter::GetPrecondition(IN IMS_SINT32 nAttribute,
 }
 
 PUBLIC
-void SdpMediaParameter::RemovePrecondition(IN IMS_SINT32 nAttribute,
-        IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */)
+void SdpMediaParameter::RemovePrecondition(
+        IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */)
 {
     if (nType != SdpPrecondition::TYPE_QOS)
     {
-        IMS_TRACE_E(0, "Type (%d) is not supported; It only supports 'qos' precondition",
-                nType, 0, 0);
+        IMS_TRACE_E(
+                0, "Type (%d) is not supported; It only supports 'qos' precondition", nType, 0, 0);
         return;
     }
 
@@ -1104,12 +1102,11 @@ void SdpMediaParameter::RemovePrecondition(IN IMS_SINT32 nAttribute,
 }
 
 PUBLIC
-IMS_BOOL SdpMediaParameter::SetPrecondition(IN IMS_SINT32 nAttribute,
-        IN SdpPrecondition* pPrecondition)
+IMS_BOOL SdpMediaParameter::SetPrecondition(
+        IN IMS_SINT32 nAttribute, IN SdpPrecondition* pPrecondition)
 {
-    if ((nAttribute != SdpAttribute::CURR)
-            && (nAttribute != SdpAttribute::DES)
-            && (nAttribute != SdpAttribute::CONF))
+    if ((nAttribute != SdpAttribute::CURR) && (nAttribute != SdpAttribute::DES) &&
+            (nAttribute != SdpAttribute::CONF))
     {
         IMS_TRACE_D("Illegal argument :: attribute (%d)", nAttribute, 0, 0);
         return IMS_FALSE;
@@ -1122,8 +1119,7 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(IN IMS_SINT32 nAttribute,
 
     if (pPrecondition->GetType() != SdpPrecondition::TYPE_QOS)
     {
-        IMS_TRACE_D("Non-qos precondition (%d) is not allowed",
-                pPrecondition->GetType(), 0, 0);
+        IMS_TRACE_D("Non-qos precondition (%d) is not allowed", pPrecondition->GetType(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -1142,8 +1138,8 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(IN IMS_SINT32 nAttribute,
     }
     else if (pPrecondition->GetSubType() == SdpPrecondition::SUBTYPE_SEGMENTED)
     {
-        SdpSegmentedPrecondition* pSegmented
-                = DYNAMIC_CAST(SdpSegmentedPrecondition*, pPrecondition);
+        SdpSegmentedPrecondition* pSegmented =
+                DYNAMIC_CAST(SdpSegmentedPrecondition*, pPrecondition);
 
         if (pSegmented == IMS_NULL)
         {
@@ -1165,48 +1161,47 @@ IMS_BOOL SdpMediaParameter::SetPrecondition(IN IMS_SINT32 nAttribute,
 
     switch (nAttribute)
     {
-    case SdpAttribute::CURR:
-        if (m_pCurrentStatus != IMS_NULL)
-        {
-            delete m_pCurrentStatus;
-        }
+        case SdpAttribute::CURR:
+            if (m_pCurrentStatus != IMS_NULL)
+            {
+                delete m_pCurrentStatus;
+            }
 
-        m_pCurrentStatus = pNewPrecondition;
+            m_pCurrentStatus = pNewPrecondition;
 
-        m_abAttributeContains[ATTR_QOS_CURR] = IMS_TRUE;
-        break;
+            m_abAttributeContains[ATTR_QOS_CURR] = IMS_TRUE;
+            break;
 
-    case SdpAttribute::DES:
-        if (m_pDesiredStatus != IMS_NULL)
-        {
-            delete m_pDesiredStatus;
-        }
+        case SdpAttribute::DES:
+            if (m_pDesiredStatus != IMS_NULL)
+            {
+                delete m_pDesiredStatus;
+            }
 
-        m_pDesiredStatus = pNewPrecondition;
+            m_pDesiredStatus = pNewPrecondition;
 
-        m_abAttributeContains[ATTR_QOS_DES] = IMS_TRUE;
-        break;
+            m_abAttributeContains[ATTR_QOS_DES] = IMS_TRUE;
+            break;
 
-    case SdpAttribute::CONF:
-        if (m_pConfirmedStatus != IMS_NULL)
-        {
-            delete m_pConfirmedStatus;
-        }
+        case SdpAttribute::CONF:
+            if (m_pConfirmedStatus != IMS_NULL)
+            {
+                delete m_pConfirmedStatus;
+            }
 
-        m_pConfirmedStatus = pNewPrecondition;
+            m_pConfirmedStatus = pNewPrecondition;
 
-        m_abAttributeContains[ATTR_QOS_CONF] = IMS_TRUE;
-        break;
+            m_abAttributeContains[ATTR_QOS_CONF] = IMS_TRUE;
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-void SdpMediaParameter::Clear()
+PRIVATE VIRTUAL void SdpMediaParameter::Clear()
 {
     SdpParameter::Clear();
 
@@ -1227,8 +1222,7 @@ void SdpMediaParameter::Clear()
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
+PRIVATE VIRTUAL IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
 {
     if (SdpProfile::GetInstance()->IsAttributeDirectionRequiredForRemovedMedia())
     {
@@ -1237,16 +1231,16 @@ IMS_BOOL SdpMediaParameter::IsDirectionAttributeRequired() const
 
     if (m_objMedia.GetPort() == 0)
     {
-        IMS_TRACE_D("Direction attribute will not be formed; m-line is removed or rejected",
-                0, 0, 0);
+        IMS_TRACE_D(
+                "Direction attribute will not be formed; m-line is removed or rejected", 0, 0, 0);
         return IMS_FALSE;
     }
 
     return SdpParameter::IsDirectionAttributeRequired();
 }
 
-PRIVATE GLOBAL
-void SdpMediaParameter::ClearMediaFormat(IN_OUT IMSList<SdpMediaFormat*>& objMediaFormats)
+PRIVATE GLOBAL void SdpMediaParameter::ClearMediaFormat(
+        IN_OUT IMSList<SdpMediaFormat*>& objMediaFormats)
 {
     for (IMS_UINT32 i = 0; i < objMediaFormats.GetSize(); ++i)
     {
@@ -1258,8 +1252,8 @@ void SdpMediaParameter::ClearMediaFormat(IN_OUT IMSList<SdpMediaFormat*>& objMed
     objMediaFormats.Clear();
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SdpMediaParameter::CopyMediaFormat(IN const IMSList<SdpMediaFormat*>& objInFormats,
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyMediaFormat(
+        IN const IMSList<SdpMediaFormat*>& objInFormats,
         OUT IMSList<SdpMediaFormat*>& objOutFormats)
 {
     if (objInFormats.IsEmpty())
@@ -1309,18 +1303,17 @@ IMS_BOOL SdpMediaParameter::CopyMediaFormat(IN const IMSList<SdpMediaFormat*>& o
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& objMediaDesc,
-        OUT IMSList<SdpMediaFormat*>& objOutFormats)
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::ExtractMediaFormat(
+        IN const SdpMediaDescription& objMediaDesc, OUT IMSList<SdpMediaFormat*>& objOutFormats)
 {
     const SdpMedia& objMedia = objMediaDesc.GetMedia();
     const AStringArray& objFormats = objMedia.GetFormats();
     IMS_SINT32 nTransportProtocol = objMedia.GetTransportProtocol();
 
-    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
+    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
     {
         IMSList<SdpAttribute> objRtpmaps = objMediaDesc.GetAttributes(SdpAttribute::RTPMAP);
         IMSList<SdpAttribute> objFmtps = objMediaDesc.GetAttributes(SdpAttribute::FMTP);
@@ -1350,16 +1343,15 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
         {
             const SdpAttribute& objAttribute = objRtpmaps.GetAt(nRtpmap);
 
-            objPts4Rtpmap.Append(Sdp::GetPayloadTypeFromAttribute(
-                    objAttribute.GetAttributeValue()));
+            objPts4Rtpmap.Append(
+                    Sdp::GetPayloadTypeFromAttribute(objAttribute.GetAttributeValue()));
         }
 
         for (nFmtp = 0; nFmtp < objFmtps.GetSize(); ++nFmtp)
         {
             const SdpAttribute& objAttribute = objFmtps.GetAt(nFmtp);
 
-            objPts4Fmtp.Append(Sdp::GetPayloadTypeFromAttribute(
-                    objAttribute.GetAttributeValue()));
+            objPts4Fmtp.Append(Sdp::GetPayloadTypeFromAttribute(objAttribute.GetAttributeValue()));
         }
 
         // rtcp-fb attribute
@@ -1374,14 +1366,14 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
             }
             else
             {
-                objPts4RtcpFb.Append(Sdp::GetPayloadTypeFromAttribute(
-                        objAttribute.GetAttributeValue()));
+                objPts4RtcpFb.Append(
+                        Sdp::GetPayloadTypeFromAttribute(objAttribute.GetAttributeValue()));
             }
         }
 
-        //4 workaround solution for the multiple fmtp attributes -
-        // if it is required for test purpose, please enable below line.
-        //CorrectFMTPs(objPTs4FMTP, objFMTPs);
+        // 4 workaround solution for the multiple fmtp attributes -
+        //  if it is required for test purpose, please enable below line.
+        // CorrectFMTPs(objPTs4FMTP, objFMTPs);
 
         // Check the payload type and collect the attribute according to the payload type
         for (IMS_UINT32 j = 0; j < objPts.GetSize(); ++j)
@@ -1444,8 +1436,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                     {
                         delete pCodec;
 
-                        IMS_TRACE_E(0, "Setting parameters (%s, %s) failed",
-                            strRtpmap.GetStr(), objFmtp.GetAttributeValue().GetStr(), 0);
+                        IMS_TRACE_E(0, "Setting parameters (%s, %s) failed", strRtpmap.GetStr(),
+                                objFmtp.GetAttributeValue().GetStr(), 0);
                         return IMS_FALSE;
                     }
                 }
@@ -1465,8 +1457,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                 {
                     for (IMS_UINT32 kk = 0; kk < objRtcpFbIndices.GetSize(); ++kk)
                     {
-                        const SdpAttribute& objRtcpFb
-                                = objRtcpFbs.GetAt(objRtcpFbIndices.GetAt(kk));
+                        const SdpAttribute& objRtcpFb =
+                                objRtcpFbs.GetAt(objRtcpFbIndices.GetAt(kk));
                         pCodec->AddExtraParameter(
                                 SdpRtcpFeedback::Decode(objRtcpFb.GetAttributeValue()));
                     }
@@ -1476,8 +1468,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                 {
                     for (IMS_UINT32 kk = 0; kk < objWildcardRtcpFbIndices.GetSize(); ++kk)
                     {
-                        const SdpAttribute& objRtcpFb
-                                = objRtcpFbs.GetAt(objWildcardRtcpFbIndices.GetAt(kk));
+                        const SdpAttribute& objRtcpFb =
+                                objRtcpFbs.GetAt(objWildcardRtcpFbIndices.GetAt(kk));
                         pCodec->AddExtraParameter(
                                 SdpRtcpFeedback::Decode(objRtcpFb.GetAttributeValue()));
                     }
@@ -1492,7 +1484,7 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                 continue;
             }
 
-            SdpAvCodec *pCodec = new SdpAvCodec();
+            SdpAvCodec* pCodec = new SdpAvCodec();
 
             if (pCodec == IMS_NULL)
             {
@@ -1506,7 +1498,7 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                 const SdpAttribute& objFmtp = objFmtps.GetAt(nFmtp);
 
                 if (!pCodec->SetParameters(
-                        objRtpmap.GetAttributeValue(), objFmtp.GetAttributeValue()))
+                            objRtpmap.GetAttributeValue(), objFmtp.GetAttributeValue()))
                 {
                     delete pCodec;
 
@@ -1523,7 +1515,7 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
                     delete pCodec;
 
                     IMS_TRACE_E(0, "Setting parameters (%s) failed",
-                        objRtpmap.GetAttributeValue().GetStr(), 0, 0);
+                            objRtpmap.GetAttributeValue().GetStr(), 0, 0);
                     return IMS_FALSE;
                 }
             }
@@ -1533,8 +1525,7 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
             {
                 for (IMS_UINT32 kk = 0; kk < objRtcpFbIndices.GetSize(); ++kk)
                 {
-                    const SdpAttribute& objRtcpFb
-                            = objRtcpFbs.GetAt(objRtcpFbIndices.GetAt(kk));
+                    const SdpAttribute& objRtcpFb = objRtcpFbs.GetAt(objRtcpFbIndices.GetAt(kk));
                     pCodec->AddExtraParameter(
                             SdpRtcpFeedback::Decode(objRtcpFb.GetAttributeValue()));
                 }
@@ -1544,8 +1535,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
             {
                 for (IMS_UINT32 kk = 0; kk < objWildcardRtcpFbIndices.GetSize(); ++kk)
                 {
-                    const SdpAttribute& objRtcpFb
-                            = objRtcpFbs.GetAt(objWildcardRtcpFbIndices.GetAt(kk));
+                    const SdpAttribute& objRtcpFb =
+                            objRtcpFbs.GetAt(objWildcardRtcpFbIndices.GetAt(kk));
                     pCodec->AddExtraParameter(
                             SdpRtcpFeedback::Decode(objRtcpFb.GetAttributeValue()));
                 }
@@ -1562,8 +1553,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
     {
         IMS_SINT32 nFormatType;
 
-        if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP)
-                || (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
+        if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP) ||
+                (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
         {
             nFormatType = SdpMediaFormat::TYPE_MSRP;
         }
@@ -1602,9 +1593,8 @@ IMS_BOOL SdpMediaParameter::ExtractMediaFormat(IN const SdpMediaDescription& obj
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(IN const IMSList<SdpMediaFormat*>& objFormats,
-        IN const SdpMediaFormat* pMediaFormat)
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(
+        IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
 {
     if (pMediaFormat == IMS_NULL)
     {
@@ -1655,9 +1645,8 @@ IMS_BOOL SdpMediaParameter::IsSameAvCodecPresent(IN const IMSList<SdpMediaFormat
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SdpMediaParameter::IsSameNonAvCodecPresent(IN const IMSList<SdpMediaFormat*>& objFormats,
-        IN const SdpMediaFormat* pMediaFormat)
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::IsSameNonAvCodecPresent(
+        IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat)
 {
     if (pMediaFormat == IMS_NULL)
     {
@@ -1692,8 +1681,7 @@ IMS_BOOL SdpMediaParameter::IsSameNonAvCodecPresent(IN const IMSList<SdpMediaFor
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-void SdpMediaParameter::ClearPrecondition(IN_OUT SdpMediaParameter* pMediaParam)
+PRIVATE GLOBAL void SdpMediaParameter::ClearPrecondition(IN_OUT SdpMediaParameter* pMediaParam)
 {
     if (pMediaParam == IMS_NULL)
     {
@@ -1719,13 +1707,12 @@ void SdpMediaParameter::ClearPrecondition(IN_OUT SdpMediaParameter* pMediaParam)
     }
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SdpMediaParameter::CopyPrecondition(IN const SdpMediaParameter& objMediaParam,
-        IN_OUT SdpMediaParameter& objOutMediaParam)
+PRIVATE GLOBAL IMS_BOOL SdpMediaParameter::CopyPrecondition(
+        IN const SdpMediaParameter& objMediaParam, IN_OUT SdpMediaParameter& objOutMediaParam)
 {
-    if ((objMediaParam.m_pCurrentStatus == IMS_NULL)
-            && (objMediaParam.m_pDesiredStatus == IMS_NULL)
-            && (objMediaParam.m_pConfirmedStatus == IMS_NULL))
+    if ((objMediaParam.m_pCurrentStatus == IMS_NULL) &&
+            (objMediaParam.m_pDesiredStatus == IMS_NULL) &&
+            (objMediaParam.m_pConfirmedStatus == IMS_NULL))
     {
         return IMS_TRUE;
     }
@@ -1802,8 +1789,7 @@ IMS_BOOL SdpMediaParameter::CopyPrecondition(IN const SdpMediaParameter& objMedi
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-SdpPrecondition* SdpMediaParameter::CreatePrecondition(
+PRIVATE GLOBAL SdpPrecondition* SdpMediaParameter::CreatePrecondition(
         IN const IMSList<SdpAttribute>& objAttributes, OUT IMSList<SdpAttribute>& objQosAttrs)
 {
     if (objAttributes.IsEmpty())
@@ -1823,7 +1809,7 @@ SdpPrecondition* SdpMediaParameter::CreatePrecondition(
         IMS_TRACE_D("'qos' attribute :: %s", objAttr.GetAttributeValue().GetStr(), 0, 0);
 
         if (!SdpPrecondition::ExtractProperties(
-                objAttr.GetAttributeValue(), nType, nSubType, objInfo))
+                    objAttr.GetAttributeValue(), nType, nSubType, objInfo))
         {
             continue;
         }
@@ -1833,8 +1819,8 @@ SdpPrecondition* SdpMediaParameter::CreatePrecondition(
             continue;
         }
 
-        if ((nSubType != SdpPrecondition::SUBTYPE_E2E)
-                && (nSubType != SdpPrecondition::SUBTYPE_SEGMENTED))
+        if ((nSubType != SdpPrecondition::SUBTYPE_E2E) &&
+                (nSubType != SdpPrecondition::SUBTYPE_SEGMENTED))
         {
             continue;
         }
@@ -1857,10 +1843,9 @@ SdpPrecondition* SdpMediaParameter::CreatePrecondition(
         }
 
         if (!pPrecondition->AddStatus(
-                objInfo.GetStatus(), objInfo.GetDirection(), objInfo.GetStrength()))
+                    objInfo.GetStatus(), objInfo.GetDirection(), objInfo.GetStrength()))
         {
-            IMS_TRACE_E(0, "Adding status (%s) failed",
-                    objAttr.GetAttributeValue().GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Adding status (%s) failed", objAttr.GetAttributeValue().GetStr(), 0, 0);
             continue;
         }
 
@@ -1881,11 +1866,10 @@ SdpPrecondition* SdpMediaParameter::CreatePrecondition(
     return pPrecondition;
 }
 
-PUBLIC GLOBAL
-void SdpMediaParameter::CorrectFmtps(IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp,
-        IN_OUT IMSList<SdpAttribute>& objFmtps)
+PUBLIC GLOBAL void SdpMediaParameter::CorrectFmtps(
+        IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT IMSList<SdpAttribute>& objFmtps)
 {
-    IMSMap< IMS_SINT32, IMSList<IMS_SINT32> > objDuplicatedFmtps;
+    IMSMap<IMS_SINT32, IMSList<IMS_SINT32>> objDuplicatedFmtps;
     IMS_BOOL bHasDuplicatedFmtp = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < objPayloadTypes4Fmtp.GetSize(); ++i)

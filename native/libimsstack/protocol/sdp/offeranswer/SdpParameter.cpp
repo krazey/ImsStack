@@ -19,18 +19,18 @@
 #include "Sdp.h"
 #include "offeranswer/SdpSessionParameter.h"
 
-//4 Check this attribute fields
+// 4 Check this attribute fields
 #define __IMS_SETUP_CONNECTION__
 
 PUBLIC
-SdpParameter::SdpParameter()
-    : m_bDirectionPresent(IMS_FALSE)
-    , m_nDirection(Sdp::DIRECTION_NONE)
-    , m_nPreviousDirection(Sdp::DIRECTION_NONE)
-    , m_nAttrSetup(Sdp::SETUP_NONE)
-    , m_nAttrConnection(Sdp::CONNECTION_NONE)
-    , m_pInformation(IMS_NULL)
-    , m_pKey(IMS_NULL)
+SdpParameter::SdpParameter() :
+        m_bDirectionPresent(IMS_FALSE),
+        m_nDirection(Sdp::DIRECTION_NONE),
+        m_nPreviousDirection(Sdp::DIRECTION_NONE),
+        m_nAttrSetup(Sdp::SETUP_NONE),
+        m_nAttrConnection(Sdp::CONNECTION_NONE),
+        m_pInformation(IMS_NULL),
+        m_pKey(IMS_NULL)
 {
     for (IMS_SINT32 i = 0; i < Sdp::TYPE_MAX; ++i)
     {
@@ -44,14 +44,14 @@ SdpParameter::SdpParameter()
 }
 
 PUBLIC
-SdpParameter::SdpParameter(IN const SdpParameter& other)
-    : m_bDirectionPresent(other.m_bDirectionPresent)
-    , m_nDirection(other.m_nDirection)
-    , m_nPreviousDirection(other.m_nPreviousDirection)
-    , m_nAttrSetup(other.m_nAttrSetup)
-    , m_nAttrConnection(other.m_nAttrConnection)
-    , m_pInformation(IMS_NULL)
-    , m_pKey(IMS_NULL)
+SdpParameter::SdpParameter(IN const SdpParameter& other) :
+        m_bDirectionPresent(other.m_bDirectionPresent),
+        m_nDirection(other.m_nDirection),
+        m_nPreviousDirection(other.m_nPreviousDirection),
+        m_nAttrSetup(other.m_nAttrSetup),
+        m_nAttrConnection(other.m_nAttrConnection),
+        m_pInformation(IMS_NULL),
+        m_pKey(IMS_NULL)
 {
     for (IMS_SINT32 i = 0; i < Sdp::TYPE_MAX; ++i)
     {
@@ -77,8 +77,7 @@ SdpParameter::SdpParameter(IN const SdpParameter& other)
     m_objBandwidths = other.m_objBandwidths;
 }
 
-PUBLIC VIRTUAL
-SdpParameter::~SdpParameter()
+PUBLIC VIRTUAL SdpParameter::~SdpParameter()
 {
     SdpParameter::Clear();
 }
@@ -317,7 +316,7 @@ IMS_BOOL SdpParameter::Create(IN const SdpDescription& objDescription)
 
         RemoveAttribute(SdpAttribute::CONNECTION);
     }
-#endif // __IMS_SETUP_CONNECTION__
+#endif  // __IMS_SETUP_CONNECTION__
 
     if (m_objAttributes.IsEmpty())
     {
@@ -452,8 +451,7 @@ void SdpParameter::NegotiateDirection(IN IMS_SINT32 nCurrentDirection)
 
     // In the case of "inactive", in either side (from the peer or local the resultant negotiated
     // as well as the peer's view shall be "inactive".
-    if ((m_nDirection == Sdp::DIRECTION_SENDRECV)
-            || (m_nDirection == Sdp::DIRECTION_NONE))
+    if ((m_nDirection == Sdp::DIRECTION_SENDRECV) || (m_nDirection == Sdp::DIRECTION_NONE))
     {
         if (nCurrentDirection == Sdp::DIRECTION_SENDONLY)
         {
@@ -517,7 +515,7 @@ void SdpParameter::RemoveAttribute(IN const SdpAttribute& objAttribute)
 PUBLIC
 void SdpParameter::RemoveAttributes(IN IMS_SINT32 nAttribute)
 {
-    for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize(); )
+    for (IMS_UINT32 i = 0; i < m_objAttributes.GetSize();)
     {
         const SdpAttribute& objExAttribute = m_objAttributes.GetAt(i);
 
@@ -588,8 +586,7 @@ void SdpParameter::SetBandwidths(IN const IMSList<SdpBandwidth>& objBandwidths)
 PUBLIC
 void SdpParameter::SetDirection(IN IMS_SINT32 nDirection)
 {
-    if ((nDirection < Sdp::DIRECTION_NONE)
-            || (nDirection > Sdp::DIRECTION_SENDRECV))
+    if ((nDirection < Sdp::DIRECTION_NONE) || (nDirection > Sdp::DIRECTION_SENDRECV))
     {
         return;
     }
@@ -650,8 +647,7 @@ void SdpParameter::SetInformation(IN const SdpInformation& objInformation)
 PUBLIC
 void SdpParameter::SetAttributeConnection(IN IMS_SINT32 nAttrConnection)
 {
-    if ((nAttrConnection < Sdp::CONNECTION_NONE)
-            || (nAttrConnection >= Sdp::CONNECTION_MAX))
+    if ((nAttrConnection < Sdp::CONNECTION_NONE) || (nAttrConnection >= Sdp::CONNECTION_MAX))
     {
         return;
     }
@@ -671,8 +667,7 @@ void SdpParameter::SetAttributeConnection(IN IMS_SINT32 nAttrConnection)
 PUBLIC
 void SdpParameter::SetAttributeSetup(IN IMS_SINT32 nAttrSetup)
 {
-    if ((nAttrSetup < Sdp::SETUP_NONE)
-            || (nAttrSetup >= Sdp::SETUP_MAX))
+    if ((nAttrSetup < Sdp::SETUP_NONE) || (nAttrSetup >= Sdp::SETUP_MAX))
     {
         return;
     }
@@ -698,8 +693,8 @@ AString SdpParameter::ToSdp() const
     {
         SdpAttribute objAttr;
 
-        objAttr.SetValue(SdpAttribute::ConvertDirectionToAttribute(
-                GetDirection()), AString::ConstNull());
+        objAttr.SetValue(
+                SdpAttribute::ConvertDirectionToAttribute(GetDirection()), AString::ConstNull());
         objSdp.Append(objAttr.Encode());
     }
 
@@ -721,7 +716,7 @@ AString SdpParameter::ToSdp() const
         objAttr.SetValue(SdpAttribute::CONNECTION, strAttrValue);
         objSdp.Append(objAttr.Encode());
     }
-#endif // __IMS_SETUP_CONNECTION__
+#endif  // __IMS_SETUP_CONNECTION__
 
     if (m_abLineContains[Sdp::TYPE_A])
     {
@@ -774,8 +769,8 @@ void SdpParameter::UpdateDirection(IN const SdpParameter& objPeer, OUT SdpParame
     // In the case of "inactive", in either side (from the peer or local the resultant negotiated
     // as well as the peer's view shall be "inactive".
 
-    if ((objPeer.m_nDirection == Sdp::DIRECTION_SENDRECV)
-            || (objPeer.m_nDirection == Sdp::DIRECTION_NONE))
+    if ((objPeer.m_nDirection == Sdp::DIRECTION_SENDRECV) ||
+            (objPeer.m_nDirection == Sdp::DIRECTION_NONE))
     {
         if (m_nDirection == Sdp::DIRECTION_SENDONLY)
         {
@@ -842,8 +837,7 @@ IMS_BOOL SdpParameter::ValidateDirection(IN const SdpParameter* pPeer) const
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void SdpParameter::Clear()
+PROTECTED VIRTUAL void SdpParameter::Clear()
 {
     if (m_pInformation != IMS_NULL)
     {
@@ -948,9 +942,8 @@ void SdpParameter::UpdateProperties(IN const SdpParameter& objParam)
     }
 }
 
-PROTECTED GLOBAL
-IMS_BOOL SdpParameter::ValidateDirection(IN IMS_SINT32 nCurrentDirection,
-        IN IMS_SINT32 nOfferDirection)
+PROTECTED GLOBAL IMS_BOOL SdpParameter::ValidateDirection(
+        IN IMS_SINT32 nCurrentDirection, IN IMS_SINT32 nOfferDirection)
 {
     // sendonly - sendonly or recvonly - recvonly ---> failure
     // sendonly - recvonly or recvonly - sendonly ---> success

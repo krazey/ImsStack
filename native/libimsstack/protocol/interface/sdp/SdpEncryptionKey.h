@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpEncryptionKey
-    : public SdpLine
+class SdpEncryptionKey : public SdpLine
 {
 public:
     SdpEncryptionKey();
@@ -49,14 +48,12 @@ public:
     /**
      * @brief Returns the method which uses in the encryption.
      */
-    inline IMS_SINT32 GetMethod() const
-    { return m_nMethod; }
+    inline IMS_SINT32 GetMethod() const { return m_nMethod; }
 
     /**
      * @brief Returns the key which uses in the encryption.
      */
-    inline const AString& GetKey() const
-    { return m_strKey; }
+    inline const AString& GetKey() const { return m_strKey; }
 
     /**
      * @brief Sets the parameters for the encryption key.
@@ -67,10 +64,10 @@ public:
     enum
     {
         METHOD_INVALID = (-1),
-        METHOD_PROMPT, // no value
-        METHOD_CLEAR, // text
-        METHOD_BASE64, // base64
-        METHOD_URI, // uri format
+        METHOD_PROMPT,  // no value
+        METHOD_CLEAR,   // text
+        METHOD_BASE64,  // base64
+        METHOD_URI,     // uri format
         METHOD_MAX
     };
 

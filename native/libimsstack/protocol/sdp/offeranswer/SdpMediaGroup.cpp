@@ -17,24 +17,22 @@
 #include "offeranswer/SdpMediaGroup.h"
 
 PUBLIC
-SdpMediaGroup::SdpMediaGroup()
-    : m_nType(GROUP_OTHER)
-    , m_strType(AString::ConstNull())
+SdpMediaGroup::SdpMediaGroup() :
+        m_nType(GROUP_OTHER),
+        m_strType(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpMediaGroup::SdpMediaGroup(IN const SdpMediaGroup& other)
-    : m_nType(other.m_nType)
-    , m_strType(other.m_strType)
-    , m_objMediaStreamIndexes(other.m_objMediaStreamIndexes)
+SdpMediaGroup::SdpMediaGroup(IN const SdpMediaGroup& other) :
+        m_nType(other.m_nType),
+        m_strType(other.m_strType),
+        m_objMediaStreamIndexes(other.m_objMediaStreamIndexes)
 {
 }
 
 PUBLIC
-SdpMediaGroup::~SdpMediaGroup()
-{
-}
+SdpMediaGroup::~SdpMediaGroup() {}
 
 PUBLIC
 SdpMediaGroup& SdpMediaGroup::operator=(IN const SdpMediaGroup& other)
@@ -50,8 +48,8 @@ SdpMediaGroup& SdpMediaGroup::operator=(IN const SdpMediaGroup& other)
 }
 
 PUBLIC
-IMS_BOOL SdpMediaGroup::Create(IN const AString& strGroupAttribute,
-        IN const IMSList<SdpMediaParameter*>& objMediaParams)
+IMS_BOOL SdpMediaGroup::Create(
+        IN const AString& strGroupAttribute, IN const IMSList<SdpMediaParameter*>& objMediaParams)
 {
     IMSList<AString> objTokens = strGroupAttribute.Split(TextParser::CHAR_SP);
 

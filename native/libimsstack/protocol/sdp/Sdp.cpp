@@ -17,30 +17,22 @@
 
 #include "Sdp.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR Sdp::STR_ADDR_TYPE_IP4[] = "IP4";
-PUBLIC GLOBAL
-const IMS_CHAR Sdp::STR_ADDR_TYPE_IP6[] = "IP6";
-PUBLIC GLOBAL
-const IMS_CHAR Sdp::STR_NET_TYPE_IN[] = "IN";
-PUBLIC GLOBAL
-const IMS_CHAR* Sdp::STR_A_SETUP[Sdp::SETUP_MAX] =
-{
-    "active",
-    "passive",
-    "actpass",
-    "holdconn"
+PUBLIC GLOBAL const IMS_CHAR Sdp::STR_ADDR_TYPE_IP4[] = "IP4";
+PUBLIC GLOBAL const IMS_CHAR Sdp::STR_ADDR_TYPE_IP6[] = "IP6";
+PUBLIC GLOBAL const IMS_CHAR Sdp::STR_NET_TYPE_IN[] = "IN";
+PUBLIC GLOBAL const IMS_CHAR* Sdp::STR_A_SETUP[Sdp::SETUP_MAX] = {
+        "active",
+        "passive",
+        "actpass",
+        "holdconn",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* Sdp::STR_A_CONNECTION[Sdp::CONNECTION_MAX] =
-{
-    "new",
-    "existing"
+PUBLIC GLOBAL const IMS_CHAR* Sdp::STR_A_CONNECTION[Sdp::CONNECTION_MAX] = {
+        "new",
+        "existing",
 };
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsDigitString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsDigitString(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -58,8 +50,7 @@ IMS_BOOL Sdp::IsDigitString(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsFqdnString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsFqdnString(IN const AString& strValue)
 {
     // FQDN = 4 *(alpha-numeric / "-" / ".")
 
@@ -70,10 +61,8 @@ IMS_BOOL Sdp::IsFqdnString(IN const AString& strValue)
 
     for (IMS_SINT32 i = 0; i < strValue.GetLength(); ++i)
     {
-        if (!IMS_ISALPHA(strValue[i])
-                && !IMS_ISDIGIT(strValue[i])
-                && (strValue[i] != TextParser::CHAR_HYPHEN)
-                && (strValue[i] != TextParser::CHAR_DOT))
+        if (!IMS_ISALPHA(strValue[i]) && !IMS_ISDIGIT(strValue[i]) &&
+                (strValue[i] != TextParser::CHAR_HYPHEN) && (strValue[i] != TextParser::CHAR_DOT))
         {
             return IMS_FALSE;
         }
@@ -82,8 +71,7 @@ IMS_BOOL Sdp::IsFqdnString(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsTextString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsTextString(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -101,8 +89,8 @@ IMS_BOOL Sdp::IsTextString(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsTokenString(IN const AString& strValue, IN IMS_BOOL bAllowSP /*= IMS_FALSE*/)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsTokenString(
+        IN const AString& strValue, IN IMS_BOOL bAllowSP /*= IMS_FALSE*/)
 {
     if (strValue.GetLength() == 0)
     {
@@ -125,8 +113,7 @@ IMS_BOOL Sdp::IsTokenString(IN const AString& strValue, IN IMS_BOOL bAllowSP /*=
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsTypedTimeString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsTypedTimeString(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -136,11 +123,8 @@ IMS_BOOL Sdp::IsTypedTimeString(IN const AString& strValue)
     for (IMS_SINT32 i = 0; i < strValue.GetLength(); ++i)
     {
         // d, h, m, s
-        if (!IMS_ISDIGIT(strValue[i])
-                && (strValue[i] != 0x64)
-                && (strValue[i] != 0x68)
-                && (strValue[i] != 0x6D)
-                && (strValue[i] != 0x73))
+        if (!IMS_ISDIGIT(strValue[i]) && (strValue[i] != 0x64) && (strValue[i] != 0x68) &&
+                (strValue[i] != 0x6D) && (strValue[i] != 0x73))
         {
             return IMS_FALSE;
         }
@@ -149,8 +133,7 @@ IMS_BOOL Sdp::IsTypedTimeString(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsNonWsString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsNonWsString(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -168,19 +151,17 @@ IMS_BOOL Sdp::IsNonWsString(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::IsUriString(IN const AString& strValue)
+PUBLIC GLOBAL IMS_BOOL Sdp::IsUriString(IN const AString& strValue)
 {
     // FIXME:
 
-    (void) strValue;
+    (void)strValue;
 
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::SplitLine(IN const AString& strValue, IN IMS_SINT32 nNumOfParts,
-        OUT AStringArray& objTokens)
+PUBLIC GLOBAL IMS_BOOL Sdp::SplitLine(
+        IN const AString& strValue, IN IMS_SINT32 nNumOfParts, OUT AStringArray& objTokens)
 {
     IMS_SINT32 nStartOffset = 0;
     IMS_SINT32 nEndOffset = 0;
@@ -205,8 +186,7 @@ IMS_BOOL Sdp::SplitLine(IN const AString& strValue, IN IMS_SINT32 nNumOfParts,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 Sdp::ConvertTypedTimeToSeconds(IN const AString& strValue)
+PUBLIC GLOBAL IMS_UINT32 Sdp::ConvertTypedTimeToSeconds(IN const AString& strValue)
 {
     IMS_UINT32 nMultiplier = 1;
     AString strDigit;
@@ -245,8 +225,7 @@ IMS_UINT32 Sdp::ConvertTypedTimeToSeconds(IN const AString& strValue)
     return IMS_UINT32(strDigit.ToUInt32() * nMultiplier);
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 Sdp::GetPayloadTypeFromAttribute(IN const AString& strValue)
+PUBLIC GLOBAL IMS_SINT32 Sdp::GetPayloadTypeFromAttribute(IN const AString& strValue)
 {
     IMS_SINT32 nSPIndex = strValue.GetIndexOf(TextParser::CHAR_SP);
 
@@ -267,8 +246,7 @@ IMS_SINT32 Sdp::GetPayloadTypeFromAttribute(IN const AString& strValue)
     return nPayloadType;
 }
 
-PUBLIC GLOBAL
-AString Sdp::IncreaseSessionVersion(IN const AString& strValue)
+PUBLIC GLOBAL AString Sdp::IncreaseSessionVersion(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -301,9 +279,8 @@ AString Sdp::IncreaseSessionVersion(IN const AString& strValue)
     return strNewVersion;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue, OUT IMS_SINT32& nPayloadType,
-        OUT AString& strEncodingName, OUT IMS_UINT32& nClockRate,
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue,
+        OUT IMS_SINT32& nPayloadType, OUT AString& strEncodingName, OUT IMS_UINT32& nClockRate,
         OUT AString& strEncodingParameters)
 {
     IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
@@ -338,9 +315,8 @@ IMS_BOOL Sdp::ParseAttributeRtpmap(IN const AString& strValue, OUT IMS_SINT32& n
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeFmtp(IN const AString& strValue, OUT IMS_SINT32& nPayloadType,
-        OUT AString& strParameters)
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFmtp(
+        IN const AString& strValue, OUT IMS_SINT32& nPayloadType, OUT AString& strParameters)
 {
     IMS_SINT32 nIndexOfSP = strValue.GetIndexOf(TextParser::CHAR_SP);
     AString strPayloadType = strValue.GetSubStr(0, nIndexOfSP);
@@ -365,8 +341,7 @@ IMS_BOOL Sdp::ParseAttributeFmtp(IN const AString& strValue, OUT IMS_SINT32& nPa
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPort)
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPort)
 {
     // a=rtcp:<port>SP<nettype>SP<addrtype>SP<connection-address>
     IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_SP);
@@ -384,8 +359,8 @@ IMS_BOOL Sdp::ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPo
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeSetup(IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup)
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeSetup(
+        IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup)
 {
     // a=setup:<type>
 
@@ -403,9 +378,8 @@ IMS_BOOL Sdp::ParseAttributeSetup(IN const AString& strValue, OUT IMS_SINT32& nT
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeConnection(IN const AString& strValue,
-        OUT IMS_SINT32& nTypeOfConnection)
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeConnection(
+        IN const AString& strValue, OUT IMS_SINT32& nTypeOfConnection)
 {
     // a=connection:<type>
 
@@ -423,9 +397,8 @@ IMS_BOOL Sdp::ParseAttributeConnection(IN const AString& strValue,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue, OUT IMS_SINT32& nPayloadType,
-        OUT IMS_SINT32& nWidth, OUT IMS_SINT32& nHeight)
+PUBLIC GLOBAL IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue,
+        OUT IMS_SINT32& nPayloadType, OUT IMS_SINT32& nWidth, OUT IMS_SINT32& nHeight)
 {
     // a=framesize:<payload type>SP<width>-<height>
 
@@ -451,7 +424,7 @@ IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue, OUT IMS_SINT32
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nHyphenIndex = strValue.GetIndexOf(TextParser::CHAR_HYPHEN, nSPIndex+1);
+    IMS_SINT32 nHyphenIndex = strValue.GetIndexOf(TextParser::CHAR_HYPHEN, nSPIndex + 1);
 
     if (nHyphenIndex == AString::NPOS)
     {
@@ -482,8 +455,7 @@ IMS_BOOL Sdp::ParseAttributeFramesize(IN const AString& strValue, OUT IMS_SINT32
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR ch)
 {
     // Any byte except NUL, CR or LF
 
@@ -495,8 +467,7 @@ IMS_BOOL Sdp::IsByteCharacter(IN const IMS_CHAR ch)
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL Sdp::IsVisibleCharacter(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL Sdp::IsVisibleCharacter(IN const IMS_CHAR ch)
 {
     // 0x21 ~ 0x7E, 0x80 ~ 0xFF
     IMS_SINT32 nValue = ch;

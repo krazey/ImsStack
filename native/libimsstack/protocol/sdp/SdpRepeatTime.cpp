@@ -22,28 +22,25 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpRepeatTime::SdpRepeatTime()
-    : SdpLine()
-    , m_nRepeatInterval(0)
-    , m_nActiveDuration(0)
-    , m_nFirstOffset(0)
+SdpRepeatTime::SdpRepeatTime() :
+        SdpLine(),
+        m_nRepeatInterval(0),
+        m_nActiveDuration(0),
+        m_nFirstOffset(0)
 {
 }
 
 PUBLIC
-SdpRepeatTime::SdpRepeatTime(IN const SdpRepeatTime& other)
-    : SdpLine(other)
-    , m_nRepeatInterval(other.m_nRepeatInterval)
-    , m_nActiveDuration(other.m_nActiveDuration)
-    , m_nFirstOffset(other.m_nFirstOffset)
-    , m_objAdditionalOffsets(other.m_objAdditionalOffsets)
+SdpRepeatTime::SdpRepeatTime(IN const SdpRepeatTime& other) :
+        SdpLine(other),
+        m_nRepeatInterval(other.m_nRepeatInterval),
+        m_nActiveDuration(other.m_nActiveDuration),
+        m_nFirstOffset(other.m_nFirstOffset),
+        m_objAdditionalOffsets(other.m_objAdditionalOffsets)
 {
 }
 
-PUBLIC VIRTUAL
-SdpRepeatTime::~SdpRepeatTime()
-{
-}
+PUBLIC VIRTUAL SdpRepeatTime::~SdpRepeatTime() {}
 
 PUBLIC
 SdpRepeatTime& SdpRepeatTime::operator=(IN const SdpRepeatTime& other)
@@ -63,8 +60,7 @@ SdpRepeatTime& SdpRepeatTime::operator=(IN const SdpRepeatTime& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpRepeatTime::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpRepeatTime::Decode(IN const AString& strValue)
 {
     // r=<repeat interval> <active duration> <offsets from start-time>
     AStringArray objTokens;
@@ -118,8 +114,7 @@ IMS_BOOL SdpRepeatTime::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpRepeatTime::Encode() const
+PUBLIC VIRTUAL AString SdpRepeatTime::Encode() const
 {
     // r=<repeat interval> <active duration> <offsets from start-time>
     AString strLine(1, Sdp::LINE_R);
@@ -132,8 +127,7 @@ AString SdpRepeatTime::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpRepeatTime::GetValue() const
+PUBLIC VIRTUAL AString SdpRepeatTime::GetValue() const
 {
     AString strValue;
     AString strOffset;

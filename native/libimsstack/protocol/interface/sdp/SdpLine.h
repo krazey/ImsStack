@@ -50,8 +50,7 @@ protected:
     /**
      * @brief Check if the specified address format is valid.
      */
-    static IMS_BOOL CheckValidityForAddress(
-            IN const AString& strAddress, IN IMS_SINT32 nAddrType);
+    static IMS_BOOL CheckValidityForAddress(IN const AString& strAddress, IN IMS_SINT32 nAddrType);
 };
 
 #endif

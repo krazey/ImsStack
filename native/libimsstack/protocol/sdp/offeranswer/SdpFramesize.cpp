@@ -25,36 +25,33 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpFramesize::SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber)
-    : SdpMediaFormatParameter(SdpAttribute::FRAMESIZE, nPayloadTypeNumber)
-    , m_nWidth(-1)
-    , m_nHeight(-1)
-    , m_strOtherFormat(AString::ConstNull())
+SdpFramesize::SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber) :
+        SdpMediaFormatParameter(SdpAttribute::FRAMESIZE, nPayloadTypeNumber),
+        m_nWidth(-1),
+        m_nHeight(-1),
+        m_strOtherFormat(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpFramesize::SdpFramesize(IN const AString& strOtherFormat)
-    : SdpMediaFormatParameter(SdpAttribute::FRAMESIZE, SdpMediaFormatParameter::PT_NOT_SPECIFIED)
-    , m_nWidth(-1)
-    , m_nHeight(-1)
-    , m_strOtherFormat(strOtherFormat)
+SdpFramesize::SdpFramesize(IN const AString& strOtherFormat) :
+        SdpMediaFormatParameter(SdpAttribute::FRAMESIZE, SdpMediaFormatParameter::PT_NOT_SPECIFIED),
+        m_nWidth(-1),
+        m_nHeight(-1),
+        m_strOtherFormat(strOtherFormat)
 {
 }
 
 PUBLIC
-SdpFramesize::SdpFramesize(IN const SdpFramesize& other)
-    : SdpMediaFormatParameter(other)
-    , m_nWidth(other.m_nWidth)
-    , m_nHeight(other.m_nHeight)
-    , m_strOtherFormat(other.m_strOtherFormat)
+SdpFramesize::SdpFramesize(IN const SdpFramesize& other) :
+        SdpMediaFormatParameter(other),
+        m_nWidth(other.m_nWidth),
+        m_nHeight(other.m_nHeight),
+        m_strOtherFormat(other.m_strOtherFormat)
 {
 }
 
-PUBLIC VIRTUAL
-SdpFramesize::~SdpFramesize()
-{
-}
+PUBLIC VIRTUAL SdpFramesize::~SdpFramesize() {}
 
 PUBLIC
 SdpFramesize& SdpFramesize::operator=(IN const SdpFramesize& other)
@@ -71,14 +68,12 @@ SdpFramesize& SdpFramesize::operator=(IN const SdpFramesize& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-SdpMediaFormatParameter* SdpFramesize::Clone() const
+PUBLIC VIRTUAL SdpMediaFormatParameter* SdpFramesize::Clone() const
 {
     return new SdpFramesize(*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpFramesize::Equals(IN const SdpMediaFormatParameter* pParameter) const
+PUBLIC VIRTUAL IMS_BOOL SdpFramesize::Equals(IN const SdpMediaFormatParameter* pParameter) const
 {
     const SdpFramesize* pFramesize = DYNAMIC_CAST(const SdpFramesize*, pParameter);
 
@@ -110,8 +105,7 @@ IMS_BOOL SdpFramesize::Equals(IN const SdpMediaFormatParameter* pParameter) cons
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpFramesize::SetValue(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpFramesize::SetValue(IN const AString& strValue)
 {
     // The specified value will be the attribute line without the payload type number
     // a=framesize:98 480-640 -> value: 480-640
@@ -161,8 +155,7 @@ IMS_BOOL SdpFramesize::SetValue(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpFramesize::ToSdp() const
+PUBLIC VIRTUAL AString SdpFramesize::ToSdp() const
 {
     // a=framesize:98 480-640
     AStringBuffer objBuffer(64);
@@ -200,8 +193,7 @@ void SdpFramesize::SetParameter(IN IMS_SINT32 nWidth, IN IMS_SINT32 nHeight)
     m_nHeight = nHeight;
 }
 
-PUBLIC GLOBAL
-SdpFramesize* SdpFramesize::Decode(IN const AString& strFramesize)
+PUBLIC GLOBAL SdpFramesize* SdpFramesize::Decode(IN const AString& strFramesize)
 {
     // The specified value will be the attribute line without the attribute name
     // a=framesize:98 480-640 -> value: 98 480-640
@@ -240,8 +232,7 @@ SdpFramesize* SdpFramesize::Decode(IN const AString& strFramesize)
     return pFramesize;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SdpFramesize::IsStandardCompatible(IN const AString& strFramesize)
+PUBLIC GLOBAL IMS_BOOL SdpFramesize::IsStandardCompatible(IN const AString& strFramesize)
 {
     if (strFramesize.GetLength() == 0)
     {

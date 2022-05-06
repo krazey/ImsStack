@@ -23,39 +23,31 @@
 
 __IMS_TRACE_TAG_SDP__;
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpPrecondition::STR_DIRECTION_TAG[SdpPrecondition::DIRECTION_MAX] =
-{
-    "none",
-    "send",
-    "recv",
-    "sendrecv"
+PUBLIC GLOBAL const IMS_CHAR* SdpPrecondition::STR_DIRECTION_TAG[SdpPrecondition::DIRECTION_MAX] = {
+        "none",
+        "send",
+        "recv",
+        "sendrecv",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpPrecondition::STR_STATUS_TYPE[SdpPrecondition::STATUS_MAX] =
-{
-    "e2e",
-    "local",
-    "remote"
+PUBLIC GLOBAL const IMS_CHAR* SdpPrecondition::STR_STATUS_TYPE[SdpPrecondition::STATUS_MAX] = {
+        "e2e",
+        "local",
+        "remote",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpPrecondition::STR_STRENGTH_TAG[SdpPrecondition::STRENGTH_MAX] =
-{
-    "mandatory",
-    "optional",
-    "none",
-    "failure",
-    "unknown",
-    ""
+PUBLIC GLOBAL const IMS_CHAR* SdpPrecondition::STR_STRENGTH_TAG[SdpPrecondition::STRENGTH_MAX] = {
+        "mandatory",
+        "optional",
+        "none",
+        "failure",
+        "unknown",
+        "",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpPrecondition::STR_TYPE[SdpPrecondition::TYPE_MAX] =
-{
-    "qos",
-    ""
+PUBLIC GLOBAL const IMS_CHAR* SdpPrecondition::STR_TYPE[SdpPrecondition::TYPE_MAX] = {
+        "qos",
+        "",
 };
 
 PUBLIC
@@ -89,27 +81,22 @@ AString SdpPrecondition::DetailInfo::ToString() const
     return static_cast<const AStringBuffer&>(objBuffer).GetString();
 }
 
-
-
 PUBLIC
-SdpPrecondition::SdpPrecondition(IN IMS_SINT32 nType /*= TYPE_QOS*/,
-        IN IMS_SINT32 nSubType /*= SUBTYPE_E2E*/)
-    : m_nType(nType)
-    , m_nSubType(nSubType)
+SdpPrecondition::SdpPrecondition(
+        IN IMS_SINT32 nType /*= TYPE_QOS*/, IN IMS_SINT32 nSubType /*= SUBTYPE_E2E*/) :
+        m_nType(nType),
+        m_nSubType(nSubType)
 {
 }
 
 PUBLIC
-SdpPrecondition::SdpPrecondition(IN const SdpPrecondition& other)
-    : m_nType(other.m_nType)
-    , m_nSubType(other.m_nSubType)
+SdpPrecondition::SdpPrecondition(IN const SdpPrecondition& other) :
+        m_nType(other.m_nType),
+        m_nSubType(other.m_nSubType)
 {
 }
 
-PUBLIC VIRTUAL
-SdpPrecondition::~SdpPrecondition()
-{
-}
+PUBLIC VIRTUAL SdpPrecondition::~SdpPrecondition() {}
 
 PUBLIC
 SdpPrecondition& SdpPrecondition::operator=(IN const SdpPrecondition& other)
@@ -123,14 +110,12 @@ SdpPrecondition& SdpPrecondition::operator=(IN const SdpPrecondition& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-AString SdpPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
+PUBLIC VIRTUAL AString SdpPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
 {
     // a=<attribute>:<value>
 
-    if ((nAttribute != SdpAttribute::CURR)
-            && (nAttribute != SdpAttribute::DES)
-            && (nAttribute != SdpAttribute::CONF))
+    if ((nAttribute != SdpAttribute::CURR) && (nAttribute != SdpAttribute::DES) &&
+            (nAttribute != SdpAttribute::CONF))
     {
         return AString::ConstNull();
     }

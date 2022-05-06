@@ -18,39 +18,31 @@
 #include "Sdp.h"
 #include "SdpBandwidth.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR SdpBandwidth::TOKEN_AS[] = "AS";
-PUBLIC GLOBAL
-const IMS_CHAR SdpBandwidth::TOKEN_CT[] = "CT";
-PUBLIC GLOBAL
-const IMS_CHAR SdpBandwidth::TOKEN_RR[] = "RR";
-PUBLIC GLOBAL
-const IMS_CHAR SdpBandwidth::TOKEN_RS[] = "RS";
-PUBLIC GLOBAL
-const IMS_CHAR SdpBandwidth::TOKEN_TIAS[] = "TIAS";
+PUBLIC GLOBAL const IMS_CHAR SdpBandwidth::TOKEN_AS[] = "AS";
+PUBLIC GLOBAL const IMS_CHAR SdpBandwidth::TOKEN_CT[] = "CT";
+PUBLIC GLOBAL const IMS_CHAR SdpBandwidth::TOKEN_RR[] = "RR";
+PUBLIC GLOBAL const IMS_CHAR SdpBandwidth::TOKEN_RS[] = "RS";
+PUBLIC GLOBAL const IMS_CHAR SdpBandwidth::TOKEN_TIAS[] = "TIAS";
 
 PUBLIC
-SdpBandwidth::SdpBandwidth()
-    : SdpLine()
-    , m_nType(TYPE_OTHER)
-    , m_strType(AString::ConstNull())
-    , m_nBandwidth(0)
+SdpBandwidth::SdpBandwidth() :
+        SdpLine(),
+        m_nType(TYPE_OTHER),
+        m_strType(AString::ConstNull()),
+        m_nBandwidth(0)
 {
 }
 
 PUBLIC
-SdpBandwidth::SdpBandwidth(IN const SdpBandwidth& other)
-    : SdpLine(other)
-    , m_nType(other.m_nType)
-    , m_strType(other.m_strType)
-    , m_nBandwidth(other.m_nBandwidth)
+SdpBandwidth::SdpBandwidth(IN const SdpBandwidth& other) :
+        SdpLine(other),
+        m_nType(other.m_nType),
+        m_strType(other.m_strType),
+        m_nBandwidth(other.m_nBandwidth)
 {
 }
 
-PUBLIC VIRTUAL
-SdpBandwidth::~SdpBandwidth()
-{
-}
+PUBLIC VIRTUAL SdpBandwidth::~SdpBandwidth() {}
 
 PUBLIC
 SdpBandwidth& SdpBandwidth::operator=(IN const SdpBandwidth& other)
@@ -67,8 +59,7 @@ SdpBandwidth& SdpBandwidth::operator=(IN const SdpBandwidth& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
 {
     // b=<bwtype>:<bandwidth>
     IMSList<AString> objTokens = strValue.Split(TextParser::CHAR_COLON);
@@ -86,8 +77,7 @@ IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
         return IMS_FALSE;
     }
 
-    if ((objTokens.GetAt(1).GetLength() == 0)
-            || !Sdp::IsDigitString(objTokens.GetAt(1)))
+    if ((objTokens.GetAt(1).GetLength() == 0) || !Sdp::IsDigitString(objTokens.GetAt(1)))
     {
         // Invalid bandwidth field
         return IMS_FALSE;
@@ -127,8 +117,7 @@ IMS_BOOL SdpBandwidth::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpBandwidth::Encode() const
+PUBLIC VIRTUAL AString SdpBandwidth::Encode() const
 {
     // b=<bwtype>:<bandwidth>
     AString strLine(1, Sdp::LINE_B);
@@ -141,8 +130,7 @@ AString SdpBandwidth::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpBandwidth::GetValue() const
+PUBLIC VIRTUAL AString SdpBandwidth::GetValue() const
 {
     AString strValue;
 
@@ -172,8 +160,7 @@ IMS_BOOL SdpBandwidth::Equals(IN const SdpBandwidth* pBandwidth) const
         return IMS_FALSE;
     }
 
-    if ((m_nType == TYPE_OTHER)
-            && !m_strType.Equals(pBandwidth->m_strType))
+    if ((m_nType == TYPE_OTHER) && !m_strType.Equals(pBandwidth->m_strType))
     {
         return IMS_FALSE;
     }
@@ -189,32 +176,32 @@ IMS_BOOL SdpBandwidth::SetValue(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
 
     switch (m_nType)
     {
-    case TYPE_AS:
-        m_strType = TOKEN_AS;
-        break;
-    case TYPE_CT:
-        m_strType = TOKEN_CT;
-        break;
-    case TYPE_RR:
-        m_strType = TOKEN_RR;
-        break;
-    case TYPE_RS:
-        m_strType = TOKEN_RS;
-        break;
-    case TYPE_TIAS:
-        m_strType = TOKEN_TIAS;
-        break;
-    case TYPE_OTHER:
-        if (!Sdp::IsTokenString(strType))
-        {
-            // Invalid bwtype field
-            return IMS_FALSE;
-        }
+        case TYPE_AS:
+            m_strType = TOKEN_AS;
+            break;
+        case TYPE_CT:
+            m_strType = TOKEN_CT;
+            break;
+        case TYPE_RR:
+            m_strType = TOKEN_RR;
+            break;
+        case TYPE_RS:
+            m_strType = TOKEN_RS;
+            break;
+        case TYPE_TIAS:
+            m_strType = TOKEN_TIAS;
+            break;
+        case TYPE_OTHER:
+            if (!Sdp::IsTokenString(strType))
+            {
+                // Invalid bwtype field
+                return IMS_FALSE;
+            }
 
-        m_strType = strType;
-        break;
-    default:
-        return IMS_FALSE;
+            m_strType = strType;
+            break;
+        default:
+            return IMS_FALSE;
     }
 
     // bandwidth field

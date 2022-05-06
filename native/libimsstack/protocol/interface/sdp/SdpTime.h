@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpTime
-    : public SdpLine
+class SdpTime : public SdpLine
 {
 public:
     SdpTime();
@@ -51,14 +50,12 @@ public:
     /**
      * @brief Returns the start-time from the time line.
      */
-    inline IMS_UINT32 GetStartTime() const
-    { return m_nStartTime; }
+    inline IMS_UINT32 GetStartTime() const { return m_nStartTime; }
 
     /**
      * @brief Returns the stop-time from the time line.
      */
-    inline IMS_UINT32 GetStopTime() const
-    { return m_nStopTime; }
+    inline IMS_UINT32 GetStopTime() const { return m_nStopTime; }
 
     /**
      * @brief Sets all the parameters for the time line.

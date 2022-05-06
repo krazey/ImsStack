@@ -38,14 +38,15 @@ public:
     /**
      * @brief Checks if the media format has any attribute field.
      */
-    inline virtual IMS_BOOL HasAttribute() const
-    { return IMS_FALSE; }
+    inline virtual IMS_BOOL HasAttribute() const { return IMS_FALSE; }
     /**
      * @brief Sets the media-dedicated parameters for this media format.
      */
-    inline virtual IMS_BOOL SetParameters(IN const AString& /*strAttrAnyMap*/,
-            IN const AString& /*strAttrFmtp*/)
-    { return IMS_FALSE; }
+    inline virtual IMS_BOOL SetParameters(
+            IN const AString& /*strAttrAnyMap*/, IN const AString& /*strAttrFmtp*/)
+    {
+        return IMS_FALSE;
+    }
     /**
      * @brief Sets the value for this media format.
      */
@@ -53,8 +54,7 @@ public:
     /**
      * @brief Returns all the SDP lines for this media format according to the SDP format.
      */
-    inline virtual AString ToSdp() const
-    { return AString::ConstNull(); }
+    inline virtual AString ToSdp() const { return AString::ConstNull(); }
 
     /**
      * @brief Returns the type for this media format.
@@ -65,8 +65,7 @@ public:
      *         #TYPE_UDP\n
      *         #TYPE_TCP
      */
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
 
     /**
      * @brief Returns the value for this media format.
@@ -78,8 +77,7 @@ public:
      *
      * @return The value of this media format.
      */
-    inline const AString& GetValue() const
-    { return m_strValue; }
+    inline const AString& GetValue() const { return m_strValue; }
 
     // Additional payload specific parameters
     /**
@@ -90,13 +88,15 @@ public:
      * @brief Returns all the additional payload specific parameters for this media format.
      */
     inline const IMSList<SdpMediaFormatParameter*>& GetExtraParameters() const
-    { return m_objExtraParameters; }
+    {
+        return m_objExtraParameters;
+    }
 
 public:
     // Type of a media format
     enum
     {
-        TYPE_RTP, // audio / video
+        TYPE_RTP,  // audio / video
         TYPE_MSRP,
         TYPE_UDP,
         TYPE_TCP,

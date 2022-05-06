@@ -34,10 +34,8 @@ public:
     virtual IMS_BOOL SetValue(IN const AString& strValue);
     virtual AString ToSdp() const;
 
-    inline IMS_SINT32 GetAttribute() const
-    { return m_nAttribute; }
-    inline IMS_SINT32 GetPayloadTypeNumber() const
-    { return m_nPayloadTypeNumber; }
+    inline IMS_SINT32 GetAttribute() const { return m_nAttribute; }
+    inline IMS_SINT32 GetPayloadTypeNumber() const { return m_nPayloadTypeNumber; }
 
 public:
     enum

@@ -19,8 +19,7 @@
 #include "SdpSessionDescription.h"
 #include "offeranswer/SdpParameter.h"
 
-class SdpSessionParameter
-    : public SdpParameter
+class SdpSessionParameter : public SdpParameter
 {
 public:
     SdpSessionParameter();
@@ -40,8 +39,8 @@ public:
     /**
      * @brief Negotiates the session-level parameters through the SDP offer/answer exchange.
      */
-    IMS_SINT32 Compare(IN const SdpSessionParameter& objPeerParam,
-            OUT SdpSessionParameter& objProposalParam);
+    IMS_SINT32 Compare(
+            IN const SdpSessionParameter& objPeerParam, OUT SdpSessionParameter& objProposalParam);
 
     /**
      * @brief Creates the session-level parameter from the SDP session description.
@@ -51,32 +50,27 @@ public:
     /**
      * @brief Returns the SdpOrigin object from the session-level parameter.
      */
-    inline const SdpOrigin& GetOrigin() const
-    { return m_objOrigin; }
+    inline const SdpOrigin& GetOrigin() const { return m_objOrigin; }
 
     /**
      * @brief Returns the SdpSessionName object from the session-level parameter.
      */
-    inline const SdpSessionName& GetSessionName() const
-    { return m_objSessionName; }
+    inline const SdpSessionName& GetSessionName() const { return m_objSessionName; }
 
     /**
      * @brief Returns the SdpSessionName object from the session-level parameter.
      */
-    inline SdpSessionName& GetSessionName()
-    { return m_objSessionName; }
+    inline SdpSessionName& GetSessionName() { return m_objSessionName; }
 
     /**
      * @brief Returns the SdpVersion object from the session-level parameter.
      */
-    inline const SdpVersion& GetVersion() const
-    { return m_objVersion; }
+    inline const SdpVersion& GetVersion() const { return m_objVersion; }
 
     /**
      * @brief Increases the session version in the session-level parameter.
      */
-    inline void IncreaseSessionVersion()
-    { m_objOrigin.IncreaseSessionVersion(); }
+    inline void IncreaseSessionVersion() { m_objOrigin.IncreaseSessionVersion(); }
 
     /**
      * @brief Checks if the version of the specified session parameter equals to this version.

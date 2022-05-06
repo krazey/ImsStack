@@ -82,8 +82,8 @@ IMS_SINT32 SdpProfilePrivate::GetFeatures(IN IMS_SINT32 nSlotId)
 }
 
 PRIVATE
-SdpProfile::SdpProfile()
-    : m_pPrivate(new SdpProfilePrivate())
+SdpProfile::SdpProfile() :
+        m_pPrivate(new SdpProfilePrivate())
 {
 }
 
@@ -126,8 +126,7 @@ IMS_BOOL SdpProfile::IsAttributePreconditionSupported(IN IMS_SINT32 nSlotId) con
     return (GetFeatures(nSlotId) & FEATURE_A_PRECONDITION_SUPPORTED) != 0;
 }
 
-PUBLIC GLOBAL
-SdpProfile* SdpProfile::GetInstance()
+PUBLIC GLOBAL SdpProfile* SdpProfile::GetInstance()
 {
     static SdpProfile* s_pProfile = IMS_NULL;
 

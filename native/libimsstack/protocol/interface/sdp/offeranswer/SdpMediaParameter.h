@@ -24,8 +24,7 @@
 
 #define __IMS_SDP_PRECONDITION__
 
-class SdpMediaParameter
-    : public SdpParameter
+class SdpMediaParameter : public SdpParameter
 {
 public:
     explicit SdpMediaParameter(IN IMS_SINT32 nMid);
@@ -58,20 +57,17 @@ public:
     /**
      * @brief Returns the attribute value which appears in the attribute, "a=mid:".
      */
-    inline const AString& GetAttributeMid() const
-    { return m_strAttrMid; }
+    inline const AString& GetAttributeMid() const { return m_strAttrMid; }
 
     /**
      * @brief Returns the list of SdpConnection object from the media-level parameter.
      */
-    inline const IMSList<SdpConnection>& GetConnections() const
-    { return m_objConnections;}
+    inline const IMSList<SdpConnection>& GetConnections() const { return m_objConnections; }
 
     /**
      * @brief Returns the SdpMedia object from the media-level parameter.
      */
-    inline const SdpMedia& GetMedia() const
-    { return m_objMedia; }
+    inline const SdpMedia& GetMedia() const { return m_objMedia; }
 
     /**
      * @brief Returns the media format which the specified media type & value matches.
@@ -86,32 +82,27 @@ public:
     /**
      * @brief Returns all the media formats which the media-level parameter has.
      */
-    inline const IMSList<SdpMediaFormat*>& GetMediaFormats() const
-    { return m_objMediaFormats; }
+    inline const IMSList<SdpMediaFormat*>& GetMediaFormats() const { return m_objMediaFormats; }
 
     /**
      * @brief Returns the media identifier for this media-level parameter.
      */
-    inline IMS_SINT32 GetMid() const
-    { return m_nMid; }
+    inline IMS_SINT32 GetMid() const { return m_nMid; }
 
     /**
      * @brief Checks if the connection line contains or not.
      */
-    inline IMS_BOOL IsConnectionPresent() const
-    { return (m_objConnections.GetSize() > 0); }
+    inline IMS_BOOL IsConnectionPresent() const { return (m_objConnections.GetSize() > 0); }
 
     /**
      * @brief Checks if the media can be acceptable.
      */
-    inline IMS_BOOL IsMediaAccepted() const
-    { return (m_objMedia.GetPort() != 0); }
+    inline IMS_BOOL IsMediaAccepted() const { return (m_objMedia.GetPort() != 0); }
 
     /**
      * @brief Checks if the mid attribute contains.
      */
-    inline IMS_BOOL IsMidPresent() const
-    { return m_abAttributeContains[ATTR_MID]; }
+    inline IMS_BOOL IsMidPresent() const { return m_abAttributeContains[ATTR_MID]; }
 
     /**
      * @brief Checks if the qos precondition contains.
@@ -146,8 +137,8 @@ public:
     /**
      * @brief Sets the media (m-line) to the media-level parameter.
      */
-    IMS_BOOL SetMedia(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-            IN IMS_SINT32 nTransportProtocol, IN const AStringArray& objFormats);
+    IMS_BOOL SetMedia(IN IMS_SINT32 nType, IN IMS_SINT32 nPort, IN IMS_SINT32 nTransportProtocol,
+            IN const AStringArray& objFormats);
 
     /**
      * @brief Sets mid if it's changed.
@@ -168,14 +159,14 @@ public:
     /**
      * @brief Returns the 'qos' precondition of this media-level parameter.
      */
-    SdpPrecondition* GetPrecondition(IN IMS_SINT32 nAttribute,
-            IN IMS_SINT32 nType = SdpPrecondition::TYPE_QOS) const;
+    SdpPrecondition* GetPrecondition(
+            IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType = SdpPrecondition::TYPE_QOS) const;
 
     /**
      * @brief Removes the 'qos' precondition of the media-level parameter.
      */
-    void RemovePrecondition(IN IMS_SINT32 nAttribute,
-            IN IMS_SINT32 nType = SdpPrecondition::TYPE_QOS);
+    void RemovePrecondition(
+            IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType = SdpPrecondition::TYPE_QOS);
 
     /**
      * @brief Sets the 'qos' precondition attribute to the media-level parameter.
@@ -214,15 +205,15 @@ private:
      * @brief Checks if the same AVCodec is present or not.
      *        It will just check the payload type for each media format.
      */
-    static IMS_BOOL IsSameAvCodecPresent(IN const IMSList<SdpMediaFormat*>& objFormats,
-            IN const SdpMediaFormat* pMediaFormat);
+    static IMS_BOOL IsSameAvCodecPresent(
+            IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
 
     /**
      * @brief Checks if the same non-AVCodec is present or not.
      *        It will just check the payload type for each media format.
      */
-    static IMS_BOOL IsSameNonAvCodecPresent(IN const IMSList<SdpMediaFormat*>& objFormats,
-            IN const SdpMediaFormat* pMediaFormat);
+    static IMS_BOOL IsSameNonAvCodecPresent(
+            IN const IMSList<SdpMediaFormat*>& objFormats, IN const SdpMediaFormat* pMediaFormat);
 
     /**
      * @brief Clears the 'qos' precondition from the SDP media parameter.
@@ -232,18 +223,18 @@ private:
     /**
      * @brief Copies the 'qos' precondition from the SDP media parameter.
      */
-    static IMS_BOOL CopyPrecondition(IN const SdpMediaParameter& objMediaParam,
-            IN_OUT SdpMediaParameter& objOutMediaParam);
+    static IMS_BOOL CopyPrecondition(
+            IN const SdpMediaParameter& objMediaParam, IN_OUT SdpMediaParameter& objOutMediaParam);
 
     /**
      * @brief Creates the 'qos' precondition from the SDP attributes.
      */
-    static SdpPrecondition* CreatePrecondition(IN const IMSList<SdpAttribute>& objAttributes,
-            OUT IMSList<SdpAttribute>& objQosAttrs);
+    static SdpPrecondition* CreatePrecondition(
+            IN const IMSList<SdpAttribute>& objAttributes, OUT IMSList<SdpAttribute>& objQosAttrs);
 
-    //4 workaround solution for multiple fmtp
-    static void CorrectFmtps(IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp,
-            IN_OUT IMSList<SdpAttribute>& objFmtps);
+    // 4 workaround solution for multiple fmtp
+    static void CorrectFmtps(
+            IN IMSList<IMS_SINT32>& objPayloadTypes4Fmtp, IN_OUT IMSList<SdpAttribute>& objFmtps);
 
 private:
     // Attribute flags

@@ -20,111 +20,82 @@
 #include "offeranswer/SdpAvCodec.h"
 #include "offeranswer/SdpMediaFormatParameter.h"
 
-GLOBAL PRIVATE
-const SdpAvCodec::AvCodecTable SdpAvCodec::CODEC_TABLE[] =
-{
-    {                                              // Audio, PCMU/8000/1
-        SdpAvCodec::PCMU, "PCMU/8000/1"
-    },
-    {                                              // Audio, GSM/8000/1
-        SdpAvCodec::GSM, "GSM/8000/1"
-    },
-    {                                              // Audio, G723/8000/1
-        SdpAvCodec::G723, "G723/8000/1"
-    },
-    {                                              // Audio, DVI4/8000/1
-        SdpAvCodec::DVI4, "DVI4/8000/1"
-    },
-    {                                              // Audio, DVI4/16000/1
-        SdpAvCodec::DVI4_16, "DVI4/16000/1"
-    },
-    {                                              // Audio, LPC/8000/1
-        SdpAvCodec::LPC, "LPC/8000/1"
-    },
-    {                                              // Audio, PCMA/8000/1
-        SdpAvCodec::PCMA, "PCMA/8000/1"
-    },
-    {                                              // Audio, G722/8000/1
-        SdpAvCodec::G722, "G722/8000/1"
-    },
-    {                                              // Audio, L16/44100/2
-        SdpAvCodec::L16_2, "L16/44100/2"
-    },
-    {                                              // Audio, L16/44100/1
-        SdpAvCodec::L16, "L16/44100/1"
-    },
-    {                                              // Audio, QCELP/8000/1
-        SdpAvCodec::QCELP, "QCELP/8000/1"
-    },
-    {                                              // Audio, CN/8000/1
-        SdpAvCodec::CN, "CN/8000/1"
-    },
-    {                                              // Audio, MPA/90000
-        SdpAvCodec::MPA, "MPA/90000"
-    },
-    {                                              // Audio, G728/8000/1
-        SdpAvCodec::G728, "G728/8000/1"
-    },
-    {                                              // Audio, DVI4/11025/1
-        SdpAvCodec::DVI4_11, "DVI4/11025/1"
-    },
-    {                                              // Audio, DVI4/22050/1
-        SdpAvCodec::DVI4_22, "DVI4/22050/1"
-    },
-    {                                              // Audio, G729/8000/1
-        SdpAvCodec::G729, "G729/8000/1"
-    },
-    {                                              // Video, CELB/90000
-        SdpAvCodec::CELB, "CELB/90000"
-    },
-    {                                              // Video, JPEG/90000
-        SdpAvCodec::JPEG, "JPEG/90000"
-    },
-    {                                              // Video, NV/90000
-        SdpAvCodec::NV, "NV/90000"
-    },
-    {                                              // Video, H261/90000
-        SdpAvCodec::H261, "H261/90000"
-    },
-    {                                              // Video, MPV/90000
-        SdpAvCodec::MPV, "MPV/90000"
-    },
-    {                                              // Audieo/Video, MP2T/90000
-        SdpAvCodec::MP2T, "MP2T/90000"
-    },
-    {                                              // Video, H263/90000
-        SdpAvCodec::H263, "H263/90000"
-    },
+GLOBAL PRIVATE const SdpAvCodec::AvCodecTable SdpAvCodec::CODEC_TABLE[] = {
+        {// Audio, PCMU/8000/1
+                SdpAvCodec::PCMU,    "PCMU/8000/1" },
+        {// Audio, GSM/8000/1
+                SdpAvCodec::GSM,     "GSM/8000/1"  },
+        {// Audio, G723/8000/1
+                SdpAvCodec::G723,    "G723/8000/1" },
+        {// Audio, DVI4/8000/1
+                SdpAvCodec::DVI4,    "DVI4/8000/1" },
+        {// Audio, DVI4/16000/1
+                SdpAvCodec::DVI4_16, "DVI4/16000/1"},
+        {// Audio, LPC/8000/1
+                SdpAvCodec::LPC,     "LPC/8000/1"  },
+        {// Audio, PCMA/8000/1
+                SdpAvCodec::PCMA,    "PCMA/8000/1" },
+        {// Audio, G722/8000/1
+                SdpAvCodec::G722,    "G722/8000/1" },
+        {// Audio, L16/44100/2
+                SdpAvCodec::L16_2,   "L16/44100/2" },
+        {// Audio, L16/44100/1
+                SdpAvCodec::L16,     "L16/44100/1" },
+        {// Audio, QCELP/8000/1
+                SdpAvCodec::QCELP,   "QCELP/8000/1"},
+        {// Audio, CN/8000/1
+                SdpAvCodec::CN,      "CN/8000/1"   },
+        {// Audio, MPA/90000
+                SdpAvCodec::MPA,     "MPA/90000"   },
+        {// Audio, G728/8000/1
+                SdpAvCodec::G728,    "G728/8000/1" },
+        {// Audio, DVI4/11025/1
+                SdpAvCodec::DVI4_11, "DVI4/11025/1"},
+        {// Audio, DVI4/22050/1
+                SdpAvCodec::DVI4_22, "DVI4/22050/1"},
+        {// Audio, G729/8000/1
+                SdpAvCodec::G729,    "G729/8000/1" },
+        {// Video, CELB/90000
+                SdpAvCodec::CELB,    "CELB/90000"  },
+        {// Video, JPEG/90000
+                SdpAvCodec::JPEG,    "JPEG/90000"  },
+        {// Video, NV/90000
+                SdpAvCodec::NV,      "NV/90000"    },
+        {// Video, H261/90000
+                SdpAvCodec::H261,    "H261/90000"  },
+        {// Video, MPV/90000
+                SdpAvCodec::MPV,     "MPV/90000"   },
+        {// Audieo/Video, MP2T/90000
+                SdpAvCodec::MP2T,    "MP2T/90000"  },
+        {// Video, H263/90000
+                SdpAvCodec::H263,    "H263/90000"  },
 };
 
 PUBLIC
-SdpAvCodec::SdpAvCodec()
-    : SdpMediaFormat(SdpMediaFormat::TYPE_RTP)
-    , m_nPayloadType(PT_INVALID)
-    , m_strCodecName(AString::ConstNull())
-    , m_nClockRate(0)
-    , m_strEncodingParameters(AString::ConstNull())
-    , m_strFmtp(AString::ConstNull())
-    , m_nAmrOperationMode(0)
+SdpAvCodec::SdpAvCodec() :
+        SdpMediaFormat(SdpMediaFormat::TYPE_RTP),
+        m_nPayloadType(PT_INVALID),
+        m_strCodecName(AString::ConstNull()),
+        m_nClockRate(0),
+        m_strEncodingParameters(AString::ConstNull()),
+        m_strFmtp(AString::ConstNull()),
+        m_nAmrOperationMode(0)
 {
 }
 
 PUBLIC
-SdpAvCodec::SdpAvCodec(IN const SdpAvCodec& other)
-    : SdpMediaFormat(other)
-    , m_nPayloadType(other.m_nPayloadType)
-    , m_strCodecName(other.m_strCodecName)
-    , m_nClockRate(other.m_nClockRate)
-    , m_strEncodingParameters(other.m_strEncodingParameters)
-    , m_strFmtp(other.m_strFmtp)
-    , m_nAmrOperationMode(other.m_nAmrOperationMode)
+SdpAvCodec::SdpAvCodec(IN const SdpAvCodec& other) :
+        SdpMediaFormat(other),
+        m_nPayloadType(other.m_nPayloadType),
+        m_strCodecName(other.m_strCodecName),
+        m_nClockRate(other.m_nClockRate),
+        m_strEncodingParameters(other.m_strEncodingParameters),
+        m_strFmtp(other.m_strFmtp),
+        m_nAmrOperationMode(other.m_nAmrOperationMode)
 {
 }
 
-PUBLIC VIRTUAL
-SdpAvCodec::~SdpAvCodec()
-{
-}
+PUBLIC VIRTUAL SdpAvCodec::~SdpAvCodec() {}
 
 PUBLIC
 SdpAvCodec& SdpAvCodec::operator=(IN const SdpAvCodec& other)
@@ -144,8 +115,7 @@ SdpAvCodec& SdpAvCodec::operator=(IN const SdpAvCodec& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpAvCodec::Equals(IN const SdpMediaFormat* pFormat) const
+PUBLIC VIRTUAL IMS_BOOL SdpAvCodec::Equals(IN const SdpMediaFormat* pFormat) const
 {
     if (pFormat == IMS_NULL)
     {
@@ -165,14 +135,13 @@ IMS_BOOL SdpAvCodec::Equals(IN const SdpMediaFormat* pFormat) const
     }
 
     // Check the codec name
-    if (!IsDynamicPayloadType(m_nPayloadType)
-            && (m_nPayloadType != pCodec->m_nPayloadType))
+    if (!IsDynamicPayloadType(m_nPayloadType) && (m_nPayloadType != pCodec->m_nPayloadType))
     {
         return IMS_FALSE;
     }
 
-    if (IsDynamicPayloadType(m_nPayloadType)
-            && (!m_strCodecName.EqualsIgnoreCase(pCodec->m_strCodecName)))
+    if (IsDynamicPayloadType(m_nPayloadType) &&
+            (!m_strCodecName.EqualsIgnoreCase(pCodec->m_strCodecName)))
     {
         return IMS_FALSE;
     }
@@ -184,8 +153,8 @@ IMS_BOOL SdpAvCodec::Equals(IN const SdpMediaFormat* pFormat) const
     }
 
     // For AMR/AMR-WB
-    if (m_strCodecName.StartsWith('A')
-            && (m_strCodecName.Equals("AMR") || m_strCodecName.Equals("AMR-WB")))
+    if (m_strCodecName.StartsWith('A') &&
+            (m_strCodecName.Equals("AMR") || m_strCodecName.Equals("AMR-WB")))
     {
         if (m_nAmrOperationMode != pCodec->m_nAmrOperationMode)
         {
@@ -196,8 +165,7 @@ IMS_BOOL SdpAvCodec::Equals(IN const SdpMediaFormat* pFormat) const
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpAvCodec::HasAttribute() const
+PUBLIC VIRTUAL IMS_BOOL SdpAvCodec::HasAttribute() const
 {
     if (m_nPayloadType == PT_INVALID)
     {
@@ -212,11 +180,11 @@ IMS_BOOL SdpAvCodec::HasAttribute() const
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpAvCodec::SetParameters(IN const AString& strAttrAnyMap, IN const AString& strAttrFmtp)
+PUBLIC VIRTUAL IMS_BOOL SdpAvCodec::SetParameters(
+        IN const AString& strAttrAnyMap, IN const AString& strAttrFmtp)
 {
-    IMS_BOOL bOk = Sdp::ParseAttributeRtpmap(strAttrAnyMap,
-            m_nPayloadType, m_strCodecName, m_nClockRate, m_strEncodingParameters);
+    IMS_BOOL bOk = Sdp::ParseAttributeRtpmap(
+            strAttrAnyMap, m_nPayloadType, m_strCodecName, m_nClockRate, m_strEncodingParameters);
 
     if (!bOk)
     {
@@ -242,8 +210,8 @@ IMS_BOOL SdpAvCodec::SetParameters(IN const AString& strAttrAnyMap, IN const ASt
         }
 
         // For AMR/AMR-WB
-        if (m_strCodecName.StartsWith('A')
-                && (m_strCodecName.Equals("AMR") || m_strCodecName.Equals("AMR-WB")))
+        if (m_strCodecName.StartsWith('A') &&
+                (m_strCodecName.Equals("AMR") || m_strCodecName.Equals("AMR-WB")))
         {
             m_nAmrOperationMode = GetAmrOperationMode(m_strFmtp);
         }
@@ -261,8 +229,7 @@ IMS_BOOL SdpAvCodec::SetParameters(IN const AString& strAttrAnyMap, IN const ASt
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpAvCodec::SetValue(IN const AString& strFormat)
+PUBLIC VIRTUAL IMS_BOOL SdpAvCodec::SetValue(IN const AString& strFormat)
 {
     if (!SdpMediaFormat::SetValue(strFormat))
     {
@@ -280,8 +247,7 @@ IMS_BOOL SdpAvCodec::SetValue(IN const AString& strFormat)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpAvCodec::ToSdp() const
+PUBLIC VIRTUAL AString SdpAvCodec::ToSdp() const
 {
     AStringBuffer objBuffer(256);
     const IMS_CHAR cLineA = Sdp::LINE_A;
@@ -335,8 +301,8 @@ AString SdpAvCodec::ToSdp() const
 
         IMS_SINT32 nPayloadTypeNumber = pParameter->GetPayloadTypeNumber();
 
-        if ((nPayloadTypeNumber == SdpMediaFormatParameter::PT_WILDCARD)
-                || (nPayloadTypeNumber == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
+        if ((nPayloadTypeNumber == SdpMediaFormatParameter::PT_WILDCARD) ||
+                (nPayloadTypeNumber == SdpMediaFormatParameter::PT_NOT_SPECIFIED))
         {
             // Wildcard or not-specified payload parameter will be added later
             continue;
@@ -348,8 +314,7 @@ AString SdpAvCodec::ToSdp() const
     return static_cast<const AStringBuffer&>(objBuffer).GetString();
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SdpAvCodec::GetDefaultRtpmap(IN IMS_SINT32 nType, IN_OUT AString& strRtpmap)
+PUBLIC GLOBAL IMS_BOOL SdpAvCodec::GetDefaultRtpmap(IN IMS_SINT32 nType, IN_OUT AString& strRtpmap)
 {
     IMS_UINT32 nCount = sizeof(CODEC_TABLE) / sizeof(CODEC_TABLE[0]);
 
@@ -372,8 +337,7 @@ IMS_BOOL SdpAvCodec::GetDefaultRtpmap(IN IMS_SINT32 nType, IN_OUT AString& strRt
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SdpAvCodec::GetAmrOperationMode(IN const AString& strFmtp)
+PUBLIC GLOBAL IMS_SINT32 SdpAvCodec::GetAmrOperationMode(IN const AString& strFmtp)
 {
     IMSList<AString> objTokens = strFmtp.Split(TextParser::CHAR_SEMICOLON);
 
@@ -405,8 +369,7 @@ IMS_SINT32 SdpAvCodec::GetAmrOperationMode(IN const AString& strFmtp)
     return 0;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SdpAvCodec::IsDynamicPayloadType(IN IMS_SINT32 nType)
+PUBLIC GLOBAL IMS_BOOL SdpAvCodec::IsDynamicPayloadType(IN IMS_SINT32 nType)
 {
     if ((nType >= PT_DYNAMIC_96) && (nType <= PT_DYNAMIC_127))
     {

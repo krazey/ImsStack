@@ -22,21 +22,21 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpTimeDescription::SdpTimeDescription()
-    : m_pTime(IMS_NULL)
+SdpTimeDescription::SdpTimeDescription() :
+        m_pTime(IMS_NULL)
 {
 }
 
 PUBLIC
-SdpTimeDescription::SdpTimeDescription(IN SdpTime* pTime)
-    : m_pTime(pTime)
+SdpTimeDescription::SdpTimeDescription(IN SdpTime* pTime) :
+        m_pTime(pTime)
 {
 }
 
 PUBLIC
-SdpTimeDescription::SdpTimeDescription(IN const SdpTimeDescription& other)
-    : m_pTime(IMS_NULL)
-    , m_objRepeatTimes(other.m_objRepeatTimes)
+SdpTimeDescription::SdpTimeDescription(IN const SdpTimeDescription& other) :
+        m_pTime(IMS_NULL),
+        m_objRepeatTimes(other.m_objRepeatTimes)
 {
     if (other.m_pTime != IMS_NULL)
     {

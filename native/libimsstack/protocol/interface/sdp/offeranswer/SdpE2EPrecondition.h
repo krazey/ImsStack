@@ -18,8 +18,7 @@
 
 #include "offeranswer/SdpPrecondition.h"
 
-class SdpE2EPrecondition
-    : public SdpPrecondition
+class SdpE2EPrecondition : public SdpPrecondition
 {
 public:
     explicit SdpE2EPrecondition(IN IMS_SINT32 nType = TYPE_QOS);
@@ -33,12 +32,10 @@ public:
     // SdpPrecondition class
     IMS_BOOL AddStatus(IN IMS_SINT32 nStatus, IN IMS_SINT32 nDirection,
             IN IMS_SINT32 nStrength = STRENGTH_NOTUSED) override;
-    inline IMS_BOOL IsPreconditionPresent() const override
-    { return !m_objE2EDetails.IsEmpty(); }
+    inline IMS_BOOL IsPreconditionPresent() const override { return !m_objE2EDetails.IsEmpty(); }
     AString ToSdp(IN IMS_SINT32 nAttribute) const override;
 
-    inline const IMSList<DetailInfo>& GetE2EDetails() const
-    { return m_objE2EDetails; }
+    inline const IMSList<DetailInfo>& GetE2EDetails() const { return m_objE2EDetails; }
 
 private:
     IMSList<DetailInfo> m_objE2EDetails;

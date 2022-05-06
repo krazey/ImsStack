@@ -19,28 +19,24 @@
 #include "offeranswer/SdpMediaFormatParameter.h"
 
 PUBLIC
-SdpMediaFormatParameter::SdpMediaFormatParameter(IN IMS_SINT32 nAttribute,
-        IN IMS_SINT32 nPayloadTypeNumber)
-    : m_nAttribute(nAttribute)
-    , m_nPayloadTypeNumber(nPayloadTypeNumber)
+SdpMediaFormatParameter::SdpMediaFormatParameter(
+        IN IMS_SINT32 nAttribute, IN IMS_SINT32 nPayloadTypeNumber) :
+        m_nAttribute(nAttribute),
+        m_nPayloadTypeNumber(nPayloadTypeNumber)
 {
 }
 
 PUBLIC
-SdpMediaFormatParameter::SdpMediaFormatParameter(IN const SdpMediaFormatParameter& other)
-    : m_nAttribute(other.m_nAttribute)
-    , m_nPayloadTypeNumber(other.m_nPayloadTypeNumber)
+SdpMediaFormatParameter::SdpMediaFormatParameter(IN const SdpMediaFormatParameter& other) :
+        m_nAttribute(other.m_nAttribute),
+        m_nPayloadTypeNumber(other.m_nPayloadTypeNumber)
 {
 }
 
-PUBLIC VIRTUAL
-SdpMediaFormatParameter::~SdpMediaFormatParameter()
-{
-}
+PUBLIC VIRTUAL SdpMediaFormatParameter::~SdpMediaFormatParameter() {}
 
 PUBLIC
-SdpMediaFormatParameter& SdpMediaFormatParameter::operator=(
-        IN const SdpMediaFormatParameter& other)
+SdpMediaFormatParameter& SdpMediaFormatParameter::operator=(IN const SdpMediaFormatParameter& other)
 {
     if (this != &other)
     {
@@ -51,14 +47,13 @@ SdpMediaFormatParameter& SdpMediaFormatParameter::operator=(
     return (*this);
 }
 
-PUBLIC VIRTUAL
-SdpMediaFormatParameter* SdpMediaFormatParameter::Clone() const
+PUBLIC VIRTUAL SdpMediaFormatParameter* SdpMediaFormatParameter::Clone() const
 {
     return new SdpMediaFormatParameter(*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMediaFormatParameter::Equals(IN const SdpMediaFormatParameter* pParameter) const
+PUBLIC VIRTUAL IMS_BOOL SdpMediaFormatParameter::Equals(
+        IN const SdpMediaFormatParameter* pParameter) const
 {
     if (pParameter == IMS_NULL)
     {
@@ -72,21 +67,19 @@ IMS_BOOL SdpMediaFormatParameter::Equals(IN const SdpMediaFormatParameter* pPara
 
     if (m_nPayloadTypeNumber != pParameter->m_nPayloadTypeNumber)
     {
-        //4 Check if the existing payload type number is wildcard or not...
+        // 4 Check if the existing payload type number is wildcard or not...
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMediaFormatParameter::SetValue(IN const AString& /*strValue*/)
+PUBLIC VIRTUAL IMS_BOOL SdpMediaFormatParameter::SetValue(IN const AString& /*strValue*/)
 {
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpMediaFormatParameter::ToSdp() const
+PUBLIC VIRTUAL AString SdpMediaFormatParameter::ToSdp() const
 {
     const IMS_CHAR* pszAttributeName = SdpAttribute::GetAttributeName(m_nAttribute);
 

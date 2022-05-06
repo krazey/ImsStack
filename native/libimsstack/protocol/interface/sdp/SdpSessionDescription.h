@@ -27,8 +27,7 @@
 class SdpTimezone;
 class SdpUri;
 
-class SdpSessionDescription
-    : public SdpDescription
+class SdpSessionDescription : public SdpDescription
 {
 public:
     SdpSessionDescription();
@@ -43,8 +42,8 @@ public:
     /**
      * @brief Decodes the SDP lines in the session-level session description.
      */
-    IMS_BOOL Decode(IN const AStringArray& objLines,
-            IN IMS_SINT32 nStartLine = 0, IN IMS_SINT32 nEndLine = -1) override;
+    IMS_BOOL Decode(IN const AStringArray& objLines, IN IMS_SINT32 nStartLine = 0,
+            IN IMS_SINT32 nEndLine = -1) override;
 
     /**
      * @brief Encodes the SDP lines in the sessions-level session description.
@@ -54,50 +53,45 @@ public:
     /**
      * @brief Creates the mandatory SDP lines for the session-level description.
      */
-    IMS_BOOL CreateMandatoryLines(IN const AString& strUserId,
-            IN const IPAddress& objLocalAddress);
+    IMS_BOOL CreateMandatoryLines(IN const AString& strUserId, IN const IPAddress& objLocalAddress);
 
     /**
      * @brief Returns the SdpVersion object from the session-level description.
      */
-    inline const SdpVersion& GetVersion() const
-    { return m_objVersion; }
+    inline const SdpVersion& GetVersion() const { return m_objVersion; }
 
     /**
      * @brief Returns the SdpOrigin object from the session-level description.
      */
-    inline const SdpOrigin& GetOrigin() const
-    { return m_objOrigin; }
+    inline const SdpOrigin& GetOrigin() const { return m_objOrigin; }
 
     /**
      * @brief Returns the SdpSessionName object from the session-level description.
      */
-    inline const SdpSessionName& GetSessionName() const
-    { return m_objSessionName; }
+    inline const SdpSessionName& GetSessionName() const { return m_objSessionName; }
 
     /**
      * @brief Returns the SdpConnection object from the session-level description.
      */
-    inline const SdpConnection* GetConnection() const
-    { return m_pConnection; }
+    inline const SdpConnection* GetConnection() const { return m_pConnection; }
 
     /**
      * @brief Returns the SdpUri object from the session-level description.
      */
-    inline const SdpUri* GetUri() const
-    { return m_pUri; }
+    inline const SdpUri* GetUri() const { return m_pUri; }
 
     /**
      * @brief Returns the SdpTimeDescription objects from the session-level description.
      */
     inline const IMSList<SdpTimeDescription>& GetTimeDescriptions() const
-    { return m_objTimeDescriptions; }
+    {
+        return m_objTimeDescriptions;
+    }
 
     /**
      * @brief Returns the SdpTimezone object from the session-level description.
      */
-    inline const SdpTimezone* GetTimezone() const
-    { return m_pTimezone; }
+    inline const SdpTimezone* GetTimezone() const { return m_pTimezone; }
 
     /**
      * @brief Sets the session name in the session-level description.

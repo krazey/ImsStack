@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpConnection
-    : public SdpLine
+class SdpConnection : public SdpLine
 {
 public:
     SdpConnection();
@@ -53,14 +52,12 @@ public:
      *
      * @return The address type. "IP4" or "IP6".
      */
-    inline const AString& GetAddressType() const
-    { return m_strAddrType; }
+    inline const AString& GetAddressType() const { return m_strAddrType; }
 
     /**
      * @brief Returns the address in the connection line.
      */
-    inline const AString& GetAddress() const
-    { return m_strAddress; }
+    inline const AString& GetAddress() const { return m_strAddress; }
 
     // In case of multicase address, only IPv4
     /**
@@ -72,13 +69,13 @@ public:
      * @brief Sets the connection parameters.
      */
     IMS_BOOL SetValue(IN IMS_SINT32 nAddrType, IN const AString& strAddress,
-            IN const AString& strOtherAddrType = AString::ConstNull(),
-            IN IMS_SINT32 nTtl = 0, IN IMS_SINT32 nNumOfAddress = 0);
+            IN const AString& strOtherAddrType = AString::ConstNull(), IN IMS_SINT32 nTtl = 0,
+            IN IMS_SINT32 nNumOfAddress = 0);
 
 private:
     // c=<nettype> <addrtype> <connection-address>
     IMS_SINT32 m_nNetType;
-    AString m_strNetType; // For IMS service, "IN" only
+    AString m_strNetType;  // For IMS service, "IN" only
     IMS_SINT32 m_nAddrType;
     AString m_strAddrType;
     AString m_strAddress;

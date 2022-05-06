@@ -20,8 +20,7 @@
 
 #include "SdpLine.h"
 
-class SdpMedia
-    : public SdpLine
+class SdpMedia : public SdpLine
 {
 public:
     SdpMedia();
@@ -61,8 +60,7 @@ public:
      *         #TYPE_MESSAGE\n
      *         #TYPE_OTHER
      */
-    inline IMS_SINT32 GetType() const
-    { return m_nMediaType; }
+    inline IMS_SINT32 GetType() const { return m_nMediaType; }
 
     /**
      * @brief Returns the media type as a string value.
@@ -74,20 +72,17 @@ public:
      *         "application"\n
      *         "message"
      */
-    inline const AString& GetTypeEx() const
-    { return m_strMediaType; }
+    inline const AString& GetTypeEx() const { return m_strMediaType; }
 
     /**
      * @brief Returns the transport port to which the media stream is sent.
      */
-    inline IMS_SINT32 GetPort() const
-    { return m_nPort; }
+    inline IMS_SINT32 GetPort() const { return m_nPort; }
 
     /**
      * @brief Returns the number of transport port.
      */
-    inline IMS_SINT32 GetNumOfPort() const
-    { return m_nNumOfPort; }
+    inline IMS_SINT32 GetNumOfPort() const { return m_nNumOfPort; }
 
     /**
      * @brief Returns the transport protocol.
@@ -104,8 +99,7 @@ public:
      *         #TRANSPORT_TCP_TLS_MSRP\n
      *         #TRANSPORT_OTHER
      */
-    inline IMS_SINT32 GetTransportProtocol() const
-    { return m_nTransportProtocol; }
+    inline IMS_SINT32 GetTransportProtocol() const { return m_nTransportProtocol; }
 
     /**
      * @brief Returns the transport protocol as a string value.
@@ -121,14 +115,12 @@ public:
      *         "TCP/MSRP"\n
      *         "TCP/TLS/MSRP"
      */
-    inline const AString& GetTransportProtocolEx() const
-    { return m_strTransportProtocol; }
+    inline const AString& GetTransportProtocolEx() const { return m_strTransportProtocol; }
 
     /**
      * @brief Returns the supported media formats.
      */
-    inline const AStringArray& GetFormats() const
-    { return m_objFormats; }
+    inline const AStringArray& GetFormats() const { return m_objFormats; }
 
     /**
      * @brief Sets the media type to the current media description.
@@ -138,14 +130,12 @@ public:
     /**
      * @brief Sets the transport port to the current media description.
      */
-    inline void SetPort(IN IMS_SINT32 nPort)
-    { m_nPort = nPort; }
+    inline void SetPort(IN IMS_SINT32 nPort) { m_nPort = nPort; }
 
     /**
      * @brief Sets the number of transport port to the current media description.
      */
-    inline void SetNumOfPort(IN IMS_SINT32 nNumOfPort)
-    { m_nNumOfPort = nNumOfPort; }
+    inline void SetNumOfPort(IN IMS_SINT32 nNumOfPort) { m_nNumOfPort = nNumOfPort; }
 
     /**
      * @brief Sets the transport protocol to the current media description.
@@ -161,8 +151,8 @@ public:
     /**
      * @brief Sets all the parameters to the current media description.
      */
-    IMS_BOOL SetValue(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-            IN IMS_SINT32 nTransportProtocol, IN const AStringArray& objFormats,
+    IMS_BOOL SetValue(IN IMS_SINT32 nType, IN IMS_SINT32 nPort, IN IMS_SINT32 nTransportProtocol,
+            IN const AStringArray& objFormats,
             IN const AString& strOtherType = AString::ConstNull(),
             IN const AString& strOtherTransportProtocol = AString::ConstNull(),
             IN IMS_SINT32 nNumOfPort = 0);

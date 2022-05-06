@@ -40,8 +40,8 @@ public:
      * @brief Decodes the SDP lines in the session description.
      *        It can be used in the session-level or media-level description.
      */
-    virtual IMS_BOOL Decode(IN const AStringArray& objLines,
-            IN IMS_SINT32 nStartLine = 0, IN IMS_SINT32 nEndLine = -1);
+    virtual IMS_BOOL Decode(IN const AStringArray& objLines, IN IMS_SINT32 nStartLine = 0,
+            IN IMS_SINT32 nEndLine = -1);
 
     /**
      * @brief Encodes the SDP lines in the session description.
@@ -88,8 +88,7 @@ public:
     /**
      * @brief Returns all the SdpAttribute objects.
      */
-    inline const IMSList<SdpAttribute>& GetAttributes() const
-    { return m_objAttributes; }
+    inline const IMSList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
 
     /**
      * @brief Returns the list of SdpAttribute object from the specified attribute type
@@ -106,8 +105,7 @@ public:
     /**
      * @brief Returns all the SdpBandwidth objects.
      */
-    inline const IMSList<SdpBandwidth>& GetBandwidths() const
-    { return m_objBandwidths; }
+    inline const IMSList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
 
     /**
      * @brief Returns the direction value in this description.
@@ -117,14 +115,12 @@ public:
     /**
      * @brief Returns the encryption key object from the current description.
      */
-    inline const SdpEncryptionKey* GetEncryptionKey() const
-    { return m_pEncryptionKey; }
+    inline const SdpEncryptionKey* GetEncryptionKey() const { return m_pEncryptionKey; }
 
     /**
      * @brief Returns the information object from the current description.
      */
-    inline const SdpInformation* GetInformation() const
-    { return m_pInformation; }
+    inline const SdpInformation* GetInformation() const { return m_pInformation; }
 
     /**
      * @brief Removes the attribute that it matches with the specified attribute.

@@ -18,88 +18,83 @@
 #include "Sdp.h"
 #include "SdpAttribute.h"
 
-PRIVATE GLOBAL
-const IMS_CHAR* SdpAttribute::ATTRIBUTE[SdpAttribute::ATTRIBUTE_MAX] =
-{
-    "cat",
-    "keywds",
-    "tool",
-    "ptime",
-    "maxptime",
-    "rtpmap",
-    "recvonly",
-    "sendrecv",
-    "sendonly",
-    "inactive",
-    "orient",
-    "type",
-    "charset",
-    "sdplang",
-    "lang",
-    "framerate",
-    "quality",
-    "fmtp",
-    "curr",
-    "des",
-    "conf",
-    "mid",
-    "group",
-    "rtcp",
-    "rtcp-xr",
-    "maxprate",
-    "setup",
-    "connection",
-    "label",
-    "rtcp-fb",
-    "content",
-    "accept-types",
-    "accept-wrapped-types",
-    "max-size",
-    "path",
-    "candidate",
-    "file-selector",
-    "file-transfer-id",
-    "file-disposition",
-    "file-date",
-    "file-icon",
-    "file-range",
-    "csup",
-    "creq",
-    "acap",
-    "tcap",
-    "pcfg",
-    "acfg",
-    "framesize",
-    "imageattr",
-    "crypto",
-    "3ge2ae",
-    IMS_NULL
+PRIVATE GLOBAL const IMS_CHAR* SdpAttribute::ATTRIBUTE[SdpAttribute::ATTRIBUTE_MAX] = {
+        "cat",
+        "keywds",
+        "tool",
+        "ptime",
+        "maxptime",
+        "rtpmap",
+        "recvonly",
+        "sendrecv",
+        "sendonly",
+        "inactive",
+        "orient",
+        "type",
+        "charset",
+        "sdplang",
+        "lang",
+        "framerate",
+        "quality",
+        "fmtp",
+        "curr",
+        "des",
+        "conf",
+        "mid",
+        "group",
+        "rtcp",
+        "rtcp-xr",
+        "maxprate",
+        "setup",
+        "connection",
+        "label",
+        "rtcp-fb",
+        "content",
+        "accept-types",
+        "accept-wrapped-types",
+        "max-size",
+        "path",
+        "candidate",
+        "file-selector",
+        "file-transfer-id",
+        "file-disposition",
+        "file-date",
+        "file-icon",
+        "file-range",
+        "csup",
+        "creq",
+        "acap",
+        "tcap",
+        "pcfg",
+        "acfg",
+        "framesize",
+        "imageattr",
+        "crypto",
+        "3ge2ae",
+        IMS_NULL,
 };
 
 PUBLIC
-SdpAttribute::SdpAttribute()
-    : SdpLine()
-    , m_nFormat(FORMAT_VALUE_ATTRIBUTE)
-    , m_nAttribute(ATTRIBUTE_INVALID)
-    , m_strAttribute(AString::ConstNull())
-    , m_strAttrValue(AString::ConstEmpty())
+SdpAttribute::SdpAttribute() :
+        SdpLine(),
+        m_nFormat(FORMAT_VALUE_ATTRIBUTE),
+        m_nAttribute(ATTRIBUTE_INVALID),
+        m_strAttribute(AString::ConstNull()),
+        m_strAttrValue(AString::ConstEmpty())
 {
 }
 
 PUBLIC
-SdpAttribute::SdpAttribute(IN const SdpAttribute& other)
-    : SdpLine(other)
-    , m_nFormat(other.m_nFormat)
-    , m_nAttribute(other.m_nAttribute)
-    , m_strAttribute(other.m_strAttribute)
-    , m_strAttrValue(other.m_strAttrValue)
+SdpAttribute::SdpAttribute(IN const SdpAttribute& other) :
+        SdpLine(other),
+        m_nFormat(other.m_nFormat),
+        m_nAttribute(other.m_nAttribute),
+        m_strAttribute(other.m_strAttribute),
+        m_strAttrValue(other.m_strAttrValue)
 {
 }
 
-PUBLIC VIRTUAL
-SdpAttribute::~SdpAttribute()
-{
-}
+PUBLIC VIRTUAL SdpAttribute::~SdpAttribute() {}
 
 PUBLIC
 SdpAttribute& SdpAttribute::operator=(IN const SdpAttribute& other)
@@ -117,8 +112,7 @@ SdpAttribute& SdpAttribute::operator=(IN const SdpAttribute& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
 {
     // a=<attribute>
     // a=<attribute>:<value>
@@ -148,266 +142,266 @@ IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
     // attribute field
     switch (m_strAttribute[0])
     {
-    case '3':
-        if (m_strAttribute.Equals(ATTRIBUTE[A_3GE2AE]))
-        {
-            m_nAttribute = A_3GE2AE;
-        }
-        break;
+        case '3':
+            if (m_strAttribute.Equals(ATTRIBUTE[A_3GE2AE]))
+            {
+                m_nAttribute = A_3GE2AE;
+            }
+            break;
 
-    case 'a':
-        if (m_strAttribute.Equals(ATTRIBUTE[ACCEPT_TYPES]))
-        {
-            m_nAttribute = ACCEPT_TYPES;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[ACCEPT_WRAPPED_TYPES]))
-        {
-            m_nAttribute = ACCEPT_WRAPPED_TYPES;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[ACAP]))
-        {
-            m_nAttribute = ACAP;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[ACFG]))
-        {
-            m_nAttribute = ACFG;
-        }
-        break;
+        case 'a':
+            if (m_strAttribute.Equals(ATTRIBUTE[ACCEPT_TYPES]))
+            {
+                m_nAttribute = ACCEPT_TYPES;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[ACCEPT_WRAPPED_TYPES]))
+            {
+                m_nAttribute = ACCEPT_WRAPPED_TYPES;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[ACAP]))
+            {
+                m_nAttribute = ACAP;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[ACFG]))
+            {
+                m_nAttribute = ACFG;
+            }
+            break;
 
-    case 'c':
-        if (m_strAttribute.Equals(ATTRIBUTE[CAT]))
-        {
-            m_nAttribute = CAT;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CHARSET]))
-        {
-            m_nAttribute = CHARSET;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CONF]))
-        {
-            m_nAttribute = CONF;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CONTENT]))
-        {
-            m_nAttribute = CONTENT;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CURR]))
-        {
-            m_nAttribute = CURR;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CONNECTION]))
-        {
-            m_nAttribute = CONNECTION;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CANDIDATE]))
-        {
-            m_nAttribute = CANDIDATE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CSUP]))
-        {
-            m_nAttribute = CSUP;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CREQ]))
-        {
-            m_nAttribute = CREQ;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[CRYPTO]))
-        {
-            m_nAttribute = CRYPTO;
-        }
-        break;
+        case 'c':
+            if (m_strAttribute.Equals(ATTRIBUTE[CAT]))
+            {
+                m_nAttribute = CAT;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CHARSET]))
+            {
+                m_nAttribute = CHARSET;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CONF]))
+            {
+                m_nAttribute = CONF;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CONTENT]))
+            {
+                m_nAttribute = CONTENT;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CURR]))
+            {
+                m_nAttribute = CURR;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CONNECTION]))
+            {
+                m_nAttribute = CONNECTION;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CANDIDATE]))
+            {
+                m_nAttribute = CANDIDATE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CSUP]))
+            {
+                m_nAttribute = CSUP;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CREQ]))
+            {
+                m_nAttribute = CREQ;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[CRYPTO]))
+            {
+                m_nAttribute = CRYPTO;
+            }
+            break;
 
-    case 'd':
-        if (m_strAttribute.Equals(ATTRIBUTE[DES]))
-        {
-            m_nAttribute = DES;
-        }
-        break;
+        case 'd':
+            if (m_strAttribute.Equals(ATTRIBUTE[DES]))
+            {
+                m_nAttribute = DES;
+            }
+            break;
 
-    case 'f':
-        if (m_strAttribute.Equals(ATTRIBUTE[FMTP]))
-        {
-            m_nAttribute = FMTP;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FRAMERATE]))
-        {
-            // <integer>.<fraction>
-            m_nAttribute = FRAMERATE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_SELECTOR]))
-        {
-            m_nAttribute = FILE_SELECTOR;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_TRANSFER_ID]))
-        {
-            m_nAttribute = FILE_TRANSFER_ID;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_DISPOSITION]))
-        {
-            m_nAttribute = FILE_DISPOSITION;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_DATE]))
-        {
-            m_nAttribute = FILE_DATE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_ICON]))
-        {
-            m_nAttribute = FILE_ICON;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FILE_RANGE]))
-        {
-            m_nAttribute = FILE_RANGE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[FRAMESIZE]))
-        {
-            m_nAttribute = FRAMESIZE;
-        }
-        break;
+        case 'f':
+            if (m_strAttribute.Equals(ATTRIBUTE[FMTP]))
+            {
+                m_nAttribute = FMTP;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FRAMERATE]))
+            {
+                // <integer>.<fraction>
+                m_nAttribute = FRAMERATE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_SELECTOR]))
+            {
+                m_nAttribute = FILE_SELECTOR;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_TRANSFER_ID]))
+            {
+                m_nAttribute = FILE_TRANSFER_ID;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_DISPOSITION]))
+            {
+                m_nAttribute = FILE_DISPOSITION;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_DATE]))
+            {
+                m_nAttribute = FILE_DATE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_ICON]))
+            {
+                m_nAttribute = FILE_ICON;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FILE_RANGE]))
+            {
+                m_nAttribute = FILE_RANGE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[FRAMESIZE]))
+            {
+                m_nAttribute = FRAMESIZE;
+            }
+            break;
 
-    case 'g':
-        if (m_strAttribute.Equals(ATTRIBUTE[GROUP]))
-        {
-            m_nAttribute = GROUP;
-        }
-        break;
+        case 'g':
+            if (m_strAttribute.Equals(ATTRIBUTE[GROUP]))
+            {
+                m_nAttribute = GROUP;
+            }
+            break;
 
-    case 'i':
-        if (m_strAttribute.Equals(ATTRIBUTE[INACTIVE]))
-        {
-            m_nAttribute = INACTIVE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[IMAGEATTR]))
-        {
-            m_nAttribute = IMAGEATTR;
-        }
-        break;
+        case 'i':
+            if (m_strAttribute.Equals(ATTRIBUTE[INACTIVE]))
+            {
+                m_nAttribute = INACTIVE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[IMAGEATTR]))
+            {
+                m_nAttribute = IMAGEATTR;
+            }
+            break;
 
-    case 'k':
-        if (m_strAttribute.Equals(ATTRIBUTE[KEYWDS]))
-        {
-            m_nAttribute = KEYWDS;
-        }
-        break;
+        case 'k':
+            if (m_strAttribute.Equals(ATTRIBUTE[KEYWDS]))
+            {
+                m_nAttribute = KEYWDS;
+            }
+            break;
 
-    case 'l':
-        if (m_strAttribute.Equals(ATTRIBUTE[LABEL]))
-        {
-            m_nAttribute = LABEL;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[LANG]))
-        {
-            m_nAttribute = LANG;
-        }
-        break;
+        case 'l':
+            if (m_strAttribute.Equals(ATTRIBUTE[LABEL]))
+            {
+                m_nAttribute = LABEL;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[LANG]))
+            {
+                m_nAttribute = LANG;
+            }
+            break;
 
-    case 'm':
-        if (m_strAttribute.Equals(ATTRIBUTE[MAX_PRATE]))
-        {
-            m_nAttribute = MAX_PRATE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[MAXPTIME]))
-        {
-            m_nAttribute = MAXPTIME;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[MID]))
-        {
-            m_nAttribute = MID;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[MAX_SIZE]))
-        {
-            m_nAttribute = MAX_SIZE;
-        }
-        break;
+        case 'm':
+            if (m_strAttribute.Equals(ATTRIBUTE[MAX_PRATE]))
+            {
+                m_nAttribute = MAX_PRATE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[MAXPTIME]))
+            {
+                m_nAttribute = MAXPTIME;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[MID]))
+            {
+                m_nAttribute = MID;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[MAX_SIZE]))
+            {
+                m_nAttribute = MAX_SIZE;
+            }
+            break;
 
-    case 'o':
-        if (m_strAttribute.Equals(ATTRIBUTE[ORIENT]))
-        {
-            m_nAttribute = ORIENT;
-        }
-        break;
+        case 'o':
+            if (m_strAttribute.Equals(ATTRIBUTE[ORIENT]))
+            {
+                m_nAttribute = ORIENT;
+            }
+            break;
 
-    case 'p':
-        if (m_strAttribute.Equals(ATTRIBUTE[PTIME]))
-        {
-            m_nAttribute = PTIME;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[PATH]))
-        {
-            m_nAttribute = PATH;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[PCFG]))
-        {
-            m_nAttribute = PCFG;
-        }
-        break;
+        case 'p':
+            if (m_strAttribute.Equals(ATTRIBUTE[PTIME]))
+            {
+                m_nAttribute = PTIME;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[PATH]))
+            {
+                m_nAttribute = PATH;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[PCFG]))
+            {
+                m_nAttribute = PCFG;
+            }
+            break;
 
-    case 'q':
-        if (m_strAttribute.Equals(ATTRIBUTE[QUALITY]))
-        {
-            m_nAttribute = QUALITY;
-        }
-        break;
+        case 'q':
+            if (m_strAttribute.Equals(ATTRIBUTE[QUALITY]))
+            {
+                m_nAttribute = QUALITY;
+            }
+            break;
 
-    case 'r':
-        if (m_strAttribute.Equals(ATTRIBUTE[RECVONLY]))
-        {
-            m_nAttribute = RECVONLY;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[RTCP]))
-        {
-            m_nAttribute = RTCP;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[RTPMAP]))
-        {
-            m_nAttribute = RTPMAP;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[RTCP_FB]))
-        {
-            m_nAttribute = RTCP_FB;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[RTCP_XR]))
-        {
-            m_nAttribute = RTCP_XR;
-        }
-        break;
+        case 'r':
+            if (m_strAttribute.Equals(ATTRIBUTE[RECVONLY]))
+            {
+                m_nAttribute = RECVONLY;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[RTCP]))
+            {
+                m_nAttribute = RTCP;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[RTPMAP]))
+            {
+                m_nAttribute = RTPMAP;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[RTCP_FB]))
+            {
+                m_nAttribute = RTCP_FB;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[RTCP_XR]))
+            {
+                m_nAttribute = RTCP_XR;
+            }
+            break;
 
-    case 's':
-        if (m_strAttribute.Equals(ATTRIBUTE[SDPLANG]))
-        {
-            m_nAttribute = SDPLANG;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[SENDONLY]))
-        {
-            m_nAttribute = SENDONLY;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[SENDRECV]))
-        {
-            m_nAttribute = SENDRECV;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[SETUP]))
-        {
-            m_nAttribute = SETUP;
-        }
-        break;
+        case 's':
+            if (m_strAttribute.Equals(ATTRIBUTE[SDPLANG]))
+            {
+                m_nAttribute = SDPLANG;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[SENDONLY]))
+            {
+                m_nAttribute = SENDONLY;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[SENDRECV]))
+            {
+                m_nAttribute = SENDRECV;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[SETUP]))
+            {
+                m_nAttribute = SETUP;
+            }
+            break;
 
-    case 't':
-        if (m_strAttribute.Equals(ATTRIBUTE[TOOL]))
-        {
-            m_nAttribute = TOOL;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[TYPE]))
-        {
-            m_nAttribute = TYPE;
-        }
-        else if (m_strAttribute.Equals(ATTRIBUTE[TCAP]))
-        {
-            m_nAttribute = TCAP;
-        }
-        break;
+        case 't':
+            if (m_strAttribute.Equals(ATTRIBUTE[TOOL]))
+            {
+                m_nAttribute = TOOL;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[TYPE]))
+            {
+                m_nAttribute = TYPE;
+            }
+            else if (m_strAttribute.Equals(ATTRIBUTE[TCAP]))
+            {
+                m_nAttribute = TCAP;
+            }
+            break;
 
-    default:
-        m_nAttribute = ATTRIBUTE_OTHER;
-        break;
+        default:
+            m_nAttribute = ATTRIBUTE_OTHER;
+            break;
     }
 
     // value field
@@ -415,46 +409,45 @@ IMS_BOOL SdpAttribute::Decode(IN const AString& strValue)
     {
         switch (IsValueToken(m_nAttribute, m_strAttribute))
         {
-        case VALUE_TOKEN:
-            if (!Sdp::IsTokenString(m_strAttrValue))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
-
-        case VALUE_TOKEN_SP:
-            if (!Sdp::IsTokenString(m_strAttrValue, IMS_TRUE))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
-
-        default:
-            // Check if the empty string is allowed
-            if ((m_nAttribute == ACCEPT_TYPES) || (m_nAttribute == ACCEPT_WRAPPED_TYPES))
-            {
-                if (m_strAttrValue.GetLength() == 0)
+            case VALUE_TOKEN:
+                if (!Sdp::IsTokenString(m_strAttrValue))
                 {
-                    break;
+                    // Invalid value field
+                    return IMS_FALSE;
                 }
-            }
+                break;
 
-            if (!Sdp::IsTextString(m_strAttrValue))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
+            case VALUE_TOKEN_SP:
+                if (!Sdp::IsTokenString(m_strAttrValue, IMS_TRUE))
+                {
+                    // Invalid value field
+                    return IMS_FALSE;
+                }
+                break;
+
+            default:
+                // Check if the empty string is allowed
+                if ((m_nAttribute == ACCEPT_TYPES) || (m_nAttribute == ACCEPT_WRAPPED_TYPES))
+                {
+                    if (m_strAttrValue.GetLength() == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (!Sdp::IsTextString(m_strAttrValue))
+                {
+                    // Invalid value field
+                    return IMS_FALSE;
+                }
+                break;
         }
     }
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpAttribute::Encode() const
+PUBLIC VIRTUAL AString SdpAttribute::Encode() const
 {
     // a=<attribute>
     // a=<attribute>:<value>
@@ -468,8 +461,7 @@ AString SdpAttribute::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpAttribute::GetValue() const
+PUBLIC VIRTUAL AString SdpAttribute::GetValue() const
 {
     // a=<attribute>
     // a=<attribute>:<value>
@@ -505,13 +497,12 @@ IMS_BOOL SdpAttribute::Equals(IN const SdpAttribute* pAttribute) const
         return IMS_FALSE;
     }
 
-    if ((m_nAttribute == ATTRIBUTE_OTHER)
-            && !m_strAttribute.Equals(pAttribute->m_strAttribute))
+    if ((m_nAttribute == ATTRIBUTE_OTHER) && !m_strAttribute.Equals(pAttribute->m_strAttribute))
     {
         return IMS_FALSE;
     }
 
-    //4 case-sensitive ???
+    // 4 case-sensitive ???
     if (!m_strAttrValue.Equals(pAttribute->m_strAttrValue))
     {
         return IMS_FALSE;
@@ -569,38 +560,38 @@ IMS_BOOL SdpAttribute::SetValue(IN IMS_SINT32 nAttribute, IN const AString& strA
     {
         switch (IsValueToken(m_nAttribute, m_strAttribute))
         {
-        case VALUE_TOKEN:
-            if (!Sdp::IsTokenString(strAttrValue))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
-
-        case VALUE_TOKEN_SP:
-            if (!Sdp::IsTokenString(strAttrValue, IMS_TRUE))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
-
-        default:
-            // Check if the empty string is allowed
-            if ((nAttribute == ACCEPT_TYPES) || (nAttribute == ACCEPT_WRAPPED_TYPES))
-            {
-                if (strAttrValue.GetLength() == 0)
+            case VALUE_TOKEN:
+                if (!Sdp::IsTokenString(strAttrValue))
                 {
-                    break;
+                    // Invalid value field
+                    return IMS_FALSE;
                 }
-            }
+                break;
 
-            if (!Sdp::IsTextString(strAttrValue))
-            {
-                // Invalid value field
-                return IMS_FALSE;
-            }
-            break;
+            case VALUE_TOKEN_SP:
+                if (!Sdp::IsTokenString(strAttrValue, IMS_TRUE))
+                {
+                    // Invalid value field
+                    return IMS_FALSE;
+                }
+                break;
+
+            default:
+                // Check if the empty string is allowed
+                if ((nAttribute == ACCEPT_TYPES) || (nAttribute == ACCEPT_WRAPPED_TYPES))
+                {
+                    if (strAttrValue.GetLength() == 0)
+                    {
+                        break;
+                    }
+                }
+
+                if (!Sdp::IsTextString(strAttrValue))
+                {
+                    // Invalid value field
+                    return IMS_FALSE;
+                }
+                break;
         }
 
         m_strAttrValue = strAttrValue;
@@ -609,8 +600,7 @@ IMS_BOOL SdpAttribute::SetValue(IN IMS_SINT32 nAttribute, IN const AString& strA
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SdpAttribute::ConvertDirectionToAttribute(IN IMS_SINT32 nDirection)
+PUBLIC GLOBAL IMS_SINT32 SdpAttribute::ConvertDirectionToAttribute(IN IMS_SINT32 nDirection)
 {
     if (nDirection == Sdp::DIRECTION_INACTIVE)
     {
@@ -630,12 +620,11 @@ IMS_SINT32 SdpAttribute::ConvertDirectionToAttribute(IN IMS_SINT32 nDirection)
     }
     else
     {
-        return 0; // DIRECTION_NONE
+        return 0;  // DIRECTION_NONE
     }
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SdpAttribute::ConvertAttributeToDirection(IN IMS_SINT32 nAttribute)
+PUBLIC GLOBAL IMS_SINT32 SdpAttribute::ConvertAttributeToDirection(IN IMS_SINT32 nAttribute)
 {
     if (nAttribute == INACTIVE)
     {
@@ -659,8 +648,7 @@ IMS_SINT32 SdpAttribute::ConvertAttributeToDirection(IN IMS_SINT32 nAttribute)
     }
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpAttribute::GetAttributeName(IN IMS_SINT32 nAttribute)
+PUBLIC GLOBAL const IMS_CHAR* SdpAttribute::GetAttributeName(IN IMS_SINT32 nAttribute)
 {
     if ((nAttribute > ATTRIBUTE_INVALID) && (nAttribute < ATTRIBUTE_ALL))
     {
@@ -670,49 +658,47 @@ const IMS_CHAR* SdpAttribute::GetAttributeName(IN IMS_SINT32 nAttribute)
     return IMS_NULL;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SdpAttribute::IsValueToken(IN IMS_SINT32 nAttribute,
-        IN const AString& strAttribute /*= AString::ConstNull()*/)
+PRIVATE GLOBAL IMS_SINT32 SdpAttribute::IsValueToken(
+        IN IMS_SINT32 nAttribute, IN const AString& strAttribute /*= AString::ConstNull()*/)
 {
-    (void) strAttribute;
+    (void)strAttribute;
 
     switch (nAttribute)
     {
-    case CONTENT:
-    case LABEL:
-    case MID:
-    case A_3GE2AE:
-        return VALUE_TOKEN;
+        case CONTENT:
+        case LABEL:
+        case MID:
+        case A_3GE2AE:
+            return VALUE_TOKEN;
 
-    case CONF:
-    case CURR:
-    case DES:
-    case GROUP:
-        return VALUE_TOKEN_SP;
+        case CONF:
+        case CURR:
+        case DES:
+        case GROUP:
+            return VALUE_TOKEN_SP;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return VALUE_NO_TOKEN;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SdpAttribute::GetFormat(IN IMS_SINT32 nFormat, IN IMS_SINT32 nAttribute,
+PRIVATE GLOBAL IMS_SINT32 SdpAttribute::GetFormat(IN IMS_SINT32 nFormat, IN IMS_SINT32 nAttribute,
         IN const AString& strAttribute /*= AString::ConstNull()*/)
 {
-    (void) strAttribute;
+    (void)strAttribute;
 
     switch (nAttribute)
     {
-    case INACTIVE:
-    case RECVONLY:
-    case SENDONLY:
-    case SENDRECV:
-        return FORMAT_PROPERTY_ATTRIBUTE;
+        case INACTIVE:
+        case RECVONLY:
+        case SENDONLY:
+        case SENDRECV:
+            return FORMAT_PROPERTY_ATTRIBUTE;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return nFormat;

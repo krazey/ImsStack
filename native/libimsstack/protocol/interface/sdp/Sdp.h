@@ -29,20 +29,20 @@ public:
     static IMS_BOOL IsTypedTimeString(IN const AString& strValue);
     static IMS_BOOL IsNonWsString(IN const AString& strValue);
     static IMS_BOOL IsUriString(IN const AString& strValue);
-    static IMS_BOOL SplitLine(IN const AString& strValue, IN IMS_SINT32 nNumOfParts,
-            OUT AStringArray& objTokens);
+    static IMS_BOOL SplitLine(
+            IN const AString& strValue, IN IMS_SINT32 nNumOfParts, OUT AStringArray& objTokens);
     static IMS_UINT32 ConvertTypedTimeToSeconds(IN const AString& strValue);
     static IMS_SINT32 GetPayloadTypeFromAttribute(IN const AString& strValue);
     static AString IncreaseSessionVersion(IN const AString& strValue);
     static IMS_BOOL ParseAttributeRtpmap(IN const AString& strValue, OUT IMS_SINT32& nPT,
             OUT AString& strEncodingName, OUT IMS_UINT32& nClockRate,
             OUT AString& strEncodingParameters);
-    static IMS_BOOL ParseAttributeFmtp(IN const AString& strValue, OUT IMS_SINT32& nPT,
-            OUT AString& strParameters);
+    static IMS_BOOL ParseAttributeFmtp(
+            IN const AString& strValue, OUT IMS_SINT32& nPT, OUT AString& strParameters);
     static IMS_BOOL ParseAttributeRtcp(IN const AString& strValue, OUT IMS_SINT32& nPort);
     static IMS_BOOL ParseAttributeSetup(IN const AString& strValue, OUT IMS_SINT32& nTypeOfSetup);
-    static IMS_BOOL ParseAttributeConnection(IN const AString& strValue,
-            OUT IMS_SINT32& nTypeOfConnection);
+    static IMS_BOOL ParseAttributeConnection(
+            IN const AString& strValue, OUT IMS_SINT32& nTypeOfConnection);
     static IMS_BOOL ParseAttributeFramesize(IN const AString& strValue, OUT IMS_SINT32& nPT,
             OUT IMS_SINT32& nWidth, OUT IMS_SINT32& nHeight);
 
@@ -76,21 +76,21 @@ public:
     // Character for each SDP lines
     enum
     {
-        LINE_V = 0x76, // 'v'
-        LINE_O = 0x6F, // 'o'
-        LINE_S = 0x73, // 's'
-        LINE_I = 0x69, // 'i'
-        LINE_U = 0x75, // 'u'
-        LINE_E = 0x65, // 'e'
-        LINE_P = 0x70, // 'p'
-        LINE_C = 0x63, // 'c'
-        LINE_B = 0x62, // 'b'
-        LINE_T = 0x74, // 't'
-        LINE_R = 0x72, // 'r'
-        LINE_Z = 0x7A, // 'z'
-        LINE_K = 0x6B, // 'k'
-        LINE_A = 0x61, // 'a'
-        LINE_M = 0x6D // 'm'
+        LINE_V = 0x76,  // 'v'
+        LINE_O = 0x6F,  // 'o'
+        LINE_S = 0x73,  // 's'
+        LINE_I = 0x69,  // 'i'
+        LINE_U = 0x75,  // 'u'
+        LINE_E = 0x65,  // 'e'
+        LINE_P = 0x70,  // 'p'
+        LINE_C = 0x63,  // 'c'
+        LINE_B = 0x62,  // 'b'
+        LINE_T = 0x74,  // 't'
+        LINE_R = 0x72,  // 'r'
+        LINE_Z = 0x7A,  // 'z'
+        LINE_K = 0x6B,  // 'k'
+        LINE_A = 0x61,  // 'a'
+        LINE_M = 0x6D   // 'm'
     };
 
     // Type of network

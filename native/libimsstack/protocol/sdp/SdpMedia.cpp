@@ -18,61 +18,54 @@
 #include "Sdp.h"
 #include "SdpMedia.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpMedia::MEDIA[SdpMedia::TYPE_MAX] =
-{
-    "audio",
-    "video",
-    "text",
-    "application",
-    "message",
-    IMS_NULL
+PUBLIC GLOBAL const IMS_CHAR* SdpMedia::MEDIA[SdpMedia::TYPE_MAX] = {
+        "audio",
+        "video",
+        "text",
+        "application",
+        "message",
+        IMS_NULL,
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* SdpMedia::TRANSPORT[SdpMedia::TRANSPORT_MAX] =
-{
-    "udp",
-    "RTP/AVP",
-    "RTP/AVPF",
-    "RTP/SAVP",
-    "RTP/SAVPF",
-    "UDP/TLS/RTP/SAVP",
-    "tcp",
-    "TCP/MSRP",
-    "TCP/TLS/MSRP",
-    IMS_NULL
+PUBLIC GLOBAL const IMS_CHAR* SdpMedia::TRANSPORT[SdpMedia::TRANSPORT_MAX] = {
+        "udp",
+        "RTP/AVP",
+        "RTP/AVPF",
+        "RTP/SAVP",
+        "RTP/SAVPF",
+        "UDP/TLS/RTP/SAVP",
+        "tcp",
+        "TCP/MSRP",
+        "TCP/TLS/MSRP",
+        IMS_NULL,
 };
 
 PUBLIC
-SdpMedia::SdpMedia()
-    : SdpLine()
-    , m_nMediaType(TYPE_INVALID)
-    , m_strMediaType(AString::ConstNull())
-    , m_nPort(0)
-    , m_nNumOfPort(0)
-    , m_nTransportProtocol(TRANSPORT_INVALID)
-    , m_strTransportProtocol(AString::ConstNull())
+SdpMedia::SdpMedia() :
+        SdpLine(),
+        m_nMediaType(TYPE_INVALID),
+        m_strMediaType(AString::ConstNull()),
+        m_nPort(0),
+        m_nNumOfPort(0),
+        m_nTransportProtocol(TRANSPORT_INVALID),
+        m_strTransportProtocol(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpMedia::SdpMedia(IN const SdpMedia& other)
-    : SdpLine(other)
-    , m_nMediaType(other.m_nMediaType)
-    , m_strMediaType(other.m_strMediaType)
-    , m_nPort(other.m_nPort)
-    , m_nNumOfPort(other.m_nNumOfPort)
-    , m_nTransportProtocol(other.m_nTransportProtocol)
-    , m_strTransportProtocol(other.m_strTransportProtocol)
-    , m_objFormats(other.m_objFormats)
+SdpMedia::SdpMedia(IN const SdpMedia& other) :
+        SdpLine(other),
+        m_nMediaType(other.m_nMediaType),
+        m_strMediaType(other.m_strMediaType),
+        m_nPort(other.m_nPort),
+        m_nNumOfPort(other.m_nNumOfPort),
+        m_nTransportProtocol(other.m_nTransportProtocol),
+        m_strTransportProtocol(other.m_strTransportProtocol),
+        m_objFormats(other.m_objFormats)
 {
 }
 
-PUBLIC VIRTUAL
-SdpMedia::~SdpMedia()
-{
-}
+PUBLIC VIRTUAL SdpMedia::~SdpMedia() {}
 
 PUBLIC
 SdpMedia& SdpMedia::operator=(IN const SdpMedia& other)
@@ -93,8 +86,7 @@ SdpMedia& SdpMedia::operator=(IN const SdpMedia& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
 {
     // m=<media> <port> <protocol> <fmt> ...
     AStringArray objTokens;
@@ -229,8 +221,7 @@ IMS_BOOL SdpMedia::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpMedia::Encode() const
+PUBLIC VIRTUAL AString SdpMedia::Encode() const
 {
     // m=<media> <port> <protocol> <fmt> ...
     AString strLine(1, Sdp::LINE_M);
@@ -243,8 +234,7 @@ AString SdpMedia::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpMedia::GetValue() const
+PUBLIC VIRTUAL AString SdpMedia::GetValue() const
 {
     // m=<media> <port> <protocol> <fmt> ...
     AString strValue;
@@ -285,8 +275,8 @@ AString SdpMedia::GetValue() const
 }
 
 PUBLIC
-IMS_BOOL SdpMedia::SetType(IN IMS_SINT32 nType,
-        IN const AString& strOtherType /*= AString::ConstNull()*/)
+IMS_BOOL SdpMedia::SetType(
+        IN IMS_SINT32 nType, IN const AString& strOtherType /*= AString::ConstNull()*/)
 {
     if ((nType <= TYPE_INVALID) || (nType >= TYPE_MAX))
     {

@@ -20,19 +20,12 @@
 #include "SdpLine.h"
 
 PUBLIC
-SdpLine::SdpLine()
-{
-}
+SdpLine::SdpLine() {}
 
 PUBLIC
-SdpLine::SdpLine(IN const SdpLine& /*other*/)
-{
-}
+SdpLine::SdpLine(IN const SdpLine& /*other*/) {}
 
-PUBLIC VIRTUAL
-SdpLine::~SdpLine()
-{
-}
+PUBLIC VIRTUAL SdpLine::~SdpLine() {}
 
 PUBLIC
 SdpLine& SdpLine::operator=(IN const SdpLine& /*other*/)
@@ -40,40 +33,34 @@ SdpLine& SdpLine::operator=(IN const SdpLine& /*other*/)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpLine::Decode(IN const AString& /*strValue*/)
+PUBLIC VIRTUAL IMS_BOOL SdpLine::Decode(IN const AString& /*strValue*/)
 {
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-AString SdpLine::Encode() const
+PUBLIC VIRTUAL AString SdpLine::Encode() const
 {
     return AString::ConstNull();
 }
 
-PUBLIC VIRTUAL
-AString SdpLine::GetValue() const
+PUBLIC VIRTUAL AString SdpLine::GetValue() const
 {
     return AString::ConstNull();
 }
 
-PROTECTED GLOBAL
-IMS_BOOL SdpLine::CheckValidityForAddress(
+PROTECTED GLOBAL IMS_BOOL SdpLine::CheckValidityForAddress(
         IN const AString& strAddress, IN IMS_SINT32 nAddrType)
 {
     IPAddress objIpAddr;
 
     if (objIpAddr.Parse(strAddress))
     {
-        if (objIpAddr.IsIPv4Address()
-                && (nAddrType != Sdp::ADDR_TYPE_IP4))
+        if (objIpAddr.IsIPv4Address() && (nAddrType != Sdp::ADDR_TYPE_IP4))
         {
             return IMS_FALSE;
         }
 
-        if (objIpAddr.IsIPv6Address()
-                && (nAddrType != Sdp::ADDR_TYPE_IP6))
+        if (objIpAddr.IsIPv6Address() && (nAddrType != Sdp::ADDR_TYPE_IP6))
         {
             return IMS_FALSE;
         }
@@ -82,8 +69,7 @@ IMS_BOOL SdpLine::CheckValidityForAddress(
     }
 
     // Check if the address format is FQDN / extn-addr
-    if (!Sdp::IsFqdnString(strAddress)
-            && !Sdp::IsNonWsString(strAddress))
+    if (!Sdp::IsFqdnString(strAddress) && !Sdp::IsNonWsString(strAddress))
     {
         return IMS_FALSE;
     }

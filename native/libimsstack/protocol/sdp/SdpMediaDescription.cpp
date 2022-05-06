@@ -23,21 +23,20 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpMediaDescription::SdpMediaDescription()
-    : SdpDescription()
+SdpMediaDescription::SdpMediaDescription() :
+        SdpDescription()
 {
 }
 
 PUBLIC
-SdpMediaDescription::SdpMediaDescription(IN const SdpMediaDescription& other)
-    : SdpDescription(other)
-    , m_objMedia(other.m_objMedia)
-    , m_objConnections(other.m_objConnections)
+SdpMediaDescription::SdpMediaDescription(IN const SdpMediaDescription& other) :
+        SdpDescription(other),
+        m_objMedia(other.m_objMedia),
+        m_objConnections(other.m_objConnections)
 {
 }
 
-PUBLIC VIRTUAL
-SdpMediaDescription::~SdpMediaDescription()
+PUBLIC VIRTUAL SdpMediaDescription::~SdpMediaDescription()
 {
     m_objConnections.Clear();
 }
@@ -58,8 +57,7 @@ SdpMediaDescription& SdpMediaDescription::operator=(IN const SdpMediaDescription
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpMediaDescription::Decode(IN const AStringArray& objLines,
+PUBLIC VIRTUAL IMS_BOOL SdpMediaDescription::Decode(IN const AStringArray& objLines,
         IN IMS_SINT32 nStartLine /*= 0*/, IN IMS_SINT32 nEndLine /*= -1*/)
 {
     if (nStartLine < 0)
@@ -79,8 +77,7 @@ IMS_BOOL SdpMediaDescription::Decode(IN const AStringArray& objLines,
     {
         const AString& strLine = objLines.GetElementAt(i);
 
-        if ((strLine[0] != Sdp::LINE_M)
-                && (strLine[0] != Sdp::LINE_C))
+        if ((strLine[0] != Sdp::LINE_M) && (strLine[0] != Sdp::LINE_C))
         {
             continue;
         }
@@ -89,48 +86,48 @@ IMS_BOOL SdpMediaDescription::Decode(IN const AStringArray& objLines,
 
         switch (strLine[0])
         {
-        case Sdp::LINE_M:
-            if (!m_abLineContains[Sdp::TYPE_M])
-            {
-                if (!m_objMedia.Decode(strLineBody))
+            case Sdp::LINE_M:
+                if (!m_abLineContains[Sdp::TYPE_M])
                 {
-                    IMS_TRACE_E(0, "SDP decoding failed: m-line (%s)", strLineBody.GetStr(), 0, 0);
+                    if (!m_objMedia.Decode(strLineBody))
+                    {
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: m-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_M] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_C:
+            {
+                SdpConnection objConnection;
+
+                if (!objConnection.Decode(strLineBody))
+                {
+                    IMS_TRACE_E(0, "SDP decoding failed: c-line (%s)", strLineBody.GetStr(), 0, 0);
                     return IMS_FALSE;
                 }
 
-                m_abLineContains[Sdp::TYPE_M] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
+                if (!m_objConnections.Append(objConnection))
+                    return IMS_FALSE;
+
+                m_abLineContains[Sdp::TYPE_C] = IMS_TRUE;
             }
             break;
-
-        case Sdp::LINE_C:
-        {
-            SdpConnection objConnection;
-
-            if (!objConnection.Decode(strLineBody))
-            {
-                IMS_TRACE_E(0, "SDP decoding failed: c-line (%s)", strLineBody.GetStr(), 0, 0);
-                return IMS_FALSE;
-            }
-
-            if (!m_objConnections.Append(objConnection))
-                return IMS_FALSE;
-
-            m_abLineContains[Sdp::TYPE_C] = IMS_TRUE;
-        }
-        break;
         }
     }
 
     return SdpDescription::Decode(objLines, nStartLine, nEndLine);
 }
 
-PUBLIC VIRTUAL
-AString SdpMediaDescription::Encode() const
+PUBLIC VIRTUAL AString SdpMediaDescription::Encode() const
 {
     // SDP order: m, i, c, b, k, *(a)
     if (!m_abLineContains[Sdp::TYPE_M])

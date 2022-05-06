@@ -18,8 +18,7 @@
 
 #include "offeranswer/SdpMediaFormatParameter.h"
 
-class SdpRtcpFeedback
-    : public SdpMediaFormatParameter
+class SdpRtcpFeedback : public SdpMediaFormatParameter
 {
 public:
     SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber);
@@ -38,17 +37,12 @@ public:
     IMS_BOOL SetValue(IN const AString& strValue) override;
     AString ToSdp() const override;
 
-    inline const AString& GetType() const
-    { return m_strType; }
-    inline const AString& GetParamName() const
-    { return m_strParamName; }
-    inline const AString& GetParamValue() const
-    { return m_strParamValue; }
+    inline const AString& GetType() const { return m_strType; }
+    inline const AString& GetParamName() const { return m_strParamName; }
+    inline const AString& GetParamValue() const { return m_strParamValue; }
 
-    inline void SetType(IN const AString& strType)
-    { m_strType = strType; }
-    void SetParameter(IN const AString& strName,
-            IN const AString& strValue = AString::ConstNull());
+    inline void SetType(IN const AString& strType) { m_strType = strType; }
+    void SetParameter(IN const AString& strName, IN const AString& strValue = AString::ConstNull());
 
     static SdpRtcpFeedback* Decode(IN const AString& strRtcpFb);
 

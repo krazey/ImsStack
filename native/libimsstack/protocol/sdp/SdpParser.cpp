@@ -22,14 +22,10 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpParser::SdpParser()
-{
-}
+SdpParser::SdpParser() {}
 
 PUBLIC
-SdpParser::~SdpParser()
-{
-}
+SdpParser::~SdpParser() {}
 
 PUBLIC
 IMS_BOOL SdpParser::Decode(IN const AString& strSdp)
@@ -174,8 +170,7 @@ IMS_BOOL SdpParser::ValidateSdp() const
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMSList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringArray& objSdpLines)
+PRIVATE GLOBAL IMSList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringArray& objSdpLines)
 {
     IMSList<IMS_SINT32> objMLines;
 
@@ -192,8 +187,7 @@ IMSList<IMS_SINT32> SdpParser::GetMediaIndexes(IN const AStringArray& objSdpLine
     return objMLines;
 }
 
-PRIVATE GLOBAL
-void SdpParser::SplitLines(IN const AString& strSdp, OUT AStringArray& objSdpLines)
+PRIVATE GLOBAL void SdpParser::SplitLines(IN const AString& strSdp, OUT AStringArray& objSdpLines)
 {
     IMS_SINT32 nLineStart = 0;
     IMS_SINT32 nEndOfLine = 0;

@@ -20,23 +20,20 @@
 #include "offeranswer/SdpSegmentedPrecondition.h"
 
 PUBLIC
-SdpSegmentedPrecondition::SdpSegmentedPrecondition(IN IMS_SINT32 nType /*= TYPE_QOS*/)
-    : SdpPrecondition(nType, SUBTYPE_SEGMENTED)
+SdpSegmentedPrecondition::SdpSegmentedPrecondition(IN IMS_SINT32 nType /*= TYPE_QOS*/) :
+        SdpPrecondition(nType, SUBTYPE_SEGMENTED)
 {
 }
 
 PUBLIC
-SdpSegmentedPrecondition::SdpSegmentedPrecondition(IN const SdpSegmentedPrecondition& other)
-    : SdpPrecondition(other)
-    , m_objLocalDetails(other.m_objLocalDetails)
-    , m_objRemoteDetails(other.m_objRemoteDetails)
+SdpSegmentedPrecondition::SdpSegmentedPrecondition(IN const SdpSegmentedPrecondition& other) :
+        SdpPrecondition(other),
+        m_objLocalDetails(other.m_objLocalDetails),
+        m_objRemoteDetails(other.m_objRemoteDetails)
 {
 }
 
-PUBLIC VIRTUAL
-SdpSegmentedPrecondition::~SdpSegmentedPrecondition()
-{
-}
+PUBLIC VIRTUAL SdpSegmentedPrecondition::~SdpSegmentedPrecondition() {}
 
 PUBLIC
 SdpSegmentedPrecondition& SdpSegmentedPrecondition::operator=(
@@ -53,9 +50,8 @@ SdpSegmentedPrecondition& SdpSegmentedPrecondition::operator=(
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpSegmentedPrecondition::AddStatus(IN IMS_SINT32 nStatus, IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nStrength /*= STRENGTH_NOTUSED*/)
+PUBLIC VIRTUAL IMS_BOOL SdpSegmentedPrecondition::AddStatus(IN IMS_SINT32 nStatus,
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nStrength /*= STRENGTH_NOTUSED*/)
 {
     if (nStatus == STATUS_LOCAL)
     {
@@ -77,8 +73,7 @@ IMS_BOOL SdpSegmentedPrecondition::AddStatus(IN IMS_SINT32 nStatus, IN IMS_SINT3
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpSegmentedPrecondition::IsPreconditionPresent() const
+PUBLIC VIRTUAL IMS_BOOL SdpSegmentedPrecondition::IsPreconditionPresent() const
 {
     if (!m_objLocalDetails.IsEmpty() || !m_objRemoteDetails.IsEmpty())
     {
@@ -88,8 +83,7 @@ IMS_BOOL SdpSegmentedPrecondition::IsPreconditionPresent() const
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-AString SdpSegmentedPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
+PUBLIC VIRTUAL AString SdpSegmentedPrecondition::ToSdp(IN IMS_SINT32 nAttribute) const
 {
     // a=<attribute>:<value>
     AString strPrefix = SdpPrecondition::ToSdp(nAttribute);

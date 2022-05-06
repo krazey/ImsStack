@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpAttribute
-    : public SdpLine
+class SdpAttribute : public SdpLine
 {
 public:
     SdpAttribute();
@@ -56,20 +55,17 @@ public:
     /**
      * @brief Returns the type of the current attribute as an enumeration.
      */
-    inline IMS_SINT32 GetAttribute() const
-    { return m_nAttribute; }
+    inline IMS_SINT32 GetAttribute() const { return m_nAttribute; }
 
     /**
      * @brief Returns the type of the current attribute as a string.
      */
-    inline const AString& GetAttributeEx() const
-    { return m_strAttribute; }
+    inline const AString& GetAttributeEx() const { return m_strAttribute; }
 
     /**
      * @brief Returns the value of the current attribute.
      */
-    const AString& GetAttributeValue() const
-    { return m_strAttrValue; }
+    const AString& GetAttributeValue() const { return m_strAttrValue; }
 
     /**
      * @brief Sets the type & value of the attribute.
@@ -108,8 +104,8 @@ private:
     /**
      * @brief Checks if the specified attribute is a value token.
      */
-    static IMS_SINT32 IsValueToken(IN IMS_SINT32 nAttribute,
-            IN const AString& strAttribute = AString::ConstNull());
+    static IMS_SINT32 IsValueToken(
+            IN IMS_SINT32 nAttribute, IN const AString& strAttribute = AString::ConstNull());
 
     /**
      * @brief Returns the format of the attribute (name only or name & value pair).
@@ -141,43 +137,43 @@ public:
         QUALITY,
         FMTP,
         // Extensions
-        CURR,                       //RFC 3312, Integration of Resource Management and SIP
-        DES,                        //RFC 3312, Integration of Resource Management and SIP
-        CONF,                       //RFC 3312, Integration of Resource Management and SIP
-        MID,                        // RFC 3388, Grouping of Media Lines in SDP
-        GROUP,                      // RFC 3388, Grouping of Media Lines in SDP
-        RTCP,                       // RFC 3605, RTCP attribute in SDP
-        RTCP_XR,                    // RFC 3611, RTP Control Protocol Extended Reports (RTCP XR)
-        MAX_PRATE,                  // RFC 3890, Bandwidth Modifier for SDP
-        SETUP,                      // RFC 4145, TCP-Based Media Transport in the SDP
-        CONNECTION,                 // RFC 4145, TCP-Based Media Transport in the SDP
-        LABEL,                      // RFC 4574, SDP Label Attribute
-        RTCP_FB,                    // RFC 4585, RCTP - Based Feedback (RTP/AVPF)
-        CONTENT,                    // RFC 4796, SDP Content Attribute
-        ACCEPT_TYPES,               // RFC 4975, The Message Session Relay Protocol (MSRP)
-        ACCEPT_WRAPPED_TYPES,       // RFC 4975, The Message Session Relay Protocol (MSRP)
-        MAX_SIZE,                   // RFC 4975, The Message Session Relay Protocol (MSRP)
-        PATH,                       // RFC 4975, The Message Session Relay Protocol (MSRP)
+        CURR,                  // RFC 3312, Integration of Resource Management and SIP
+        DES,                   // RFC 3312, Integration of Resource Management and SIP
+        CONF,                  // RFC 3312, Integration of Resource Management and SIP
+        MID,                   // RFC 3388, Grouping of Media Lines in SDP
+        GROUP,                 // RFC 3388, Grouping of Media Lines in SDP
+        RTCP,                  // RFC 3605, RTCP attribute in SDP
+        RTCP_XR,               // RFC 3611, RTP Control Protocol Extended Reports (RTCP XR)
+        MAX_PRATE,             // RFC 3890, Bandwidth Modifier for SDP
+        SETUP,                 // RFC 4145, TCP-Based Media Transport in the SDP
+        CONNECTION,            // RFC 4145, TCP-Based Media Transport in the SDP
+        LABEL,                 // RFC 4574, SDP Label Attribute
+        RTCP_FB,               // RFC 4585, RCTP - Based Feedback (RTP/AVPF)
+        CONTENT,               // RFC 4796, SDP Content Attribute
+        ACCEPT_TYPES,          // RFC 4975, The Message Session Relay Protocol (MSRP)
+        ACCEPT_WRAPPED_TYPES,  // RFC 4975, The Message Session Relay Protocol (MSRP)
+        MAX_SIZE,              // RFC 4975, The Message Session Relay Protocol (MSRP)
+        PATH,                  // RFC 4975, The Message Session Relay Protocol (MSRP)
         CANDIDATE,      // RFC 5245, ICE : A Protocol for NAT Traversal for Offer/Answer Protocols
-        FILE_SELECTOR,              // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        FILE_TRANSFER_ID,           // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        FILE_DISPOSITION,           // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        FILE_DATE,                  // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        FILE_ICON,                  // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        FILE_RANGE,                 // RFC 5547, SDP Offer/Answer to Enable File Transfer
-        CSUP,                       // RFC 5939, SDP Capability Negotiation
-        CREQ,                       // RFC 5939, SDP Capability Negotiation
-        ACAP,                       // RFC 5939, SDP Capability Negotiation
-        TCAP,                       // RFC 5939, SDP Capability Negotiation
-        PCFG,                       // RFC 5939, SDP Capability Negotiation
-        ACFG,                       // RFC 5939, SDP Capability Negotiation
+        FILE_SELECTOR,  // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        FILE_TRANSFER_ID,  // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        FILE_DISPOSITION,  // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        FILE_DATE,         // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        FILE_ICON,         // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        FILE_RANGE,        // RFC 5547, SDP Offer/Answer to Enable File Transfer
+        CSUP,              // RFC 5939, SDP Capability Negotiation
+        CREQ,              // RFC 5939, SDP Capability Negotiation
+        ACAP,              // RFC 5939, SDP Capability Negotiation
+        TCAP,              // RFC 5939, SDP Capability Negotiation
+        PCFG,              // RFC 5939, SDP Capability Negotiation
+        ACFG,              // RFC 5939, SDP Capability Negotiation
         // <payload type number> <width>-<height>
-        FRAMESIZE,              // RFC 6064, SDP and RTSP Extensions Defined for 3GPP PSS and MBMS
-        IMAGEATTR,                  // RFC 6236, Negotiation of Generic Image Attributes in the SDP
-        CRYPTO,                     // RFC 4568, SDP Security Descriptions for Media Streams
-        A_3GE2AE,                   // TS 24.229, 3GPP End-To-Access-Edge security-indicator
+        FRAMESIZE,  // RFC 6064, SDP and RTSP Extensions Defined for 3GPP PSS and MBMS
+        IMAGEATTR,  // RFC 6236, Negotiation of Generic Image Attributes in the SDP
+        CRYPTO,     // RFC 4568, SDP Security Descriptions for Media Streams
+        A_3GE2AE,   // TS 24.229, 3GPP End-To-Access-Edge security-indicator
         ATTRIBUTE_OTHER,
-        ATTRIBUTE_ALL,              // Special attribute type for RemoveAll operation
+        ATTRIBUTE_ALL,  // Special attribute type for RemoveAll operation
         ATTRIBUTE_MAX
     };
 

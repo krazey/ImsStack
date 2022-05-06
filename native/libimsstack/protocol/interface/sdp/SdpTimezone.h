@@ -18,25 +18,27 @@
 
 #include "SdpLine.h"
 
-class SdpTimezone
-    : public SdpLine
+class SdpTimezone : public SdpLine
 {
 public:
     class ZoneAdjustment
     {
     public:
-        inline ZoneAdjustment()
-            : m_nAdjustmentTime(0)
-            , m_nOffset(0)
-        {}
-        inline ZoneAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_UINT32& nOffset)
-            : m_nAdjustmentTime(nAdjustmentTime)
-            , m_nOffset(nOffset)
-        {}
-        inline ZoneAdjustment(IN const ZoneAdjustment& other)
-            : m_nAdjustmentTime(other.m_nAdjustmentTime)
-            , m_nOffset(other.m_nOffset)
-        {}
+        inline ZoneAdjustment() :
+                m_nAdjustmentTime(0),
+                m_nOffset(0)
+        {
+        }
+        inline ZoneAdjustment(IN IMS_UINT32 nAdjustmentTime, IN IMS_UINT32& nOffset) :
+                m_nAdjustmentTime(nAdjustmentTime),
+                m_nOffset(nOffset)
+        {
+        }
+        inline ZoneAdjustment(IN const ZoneAdjustment& other) :
+                m_nAdjustmentTime(other.m_nAdjustmentTime),
+                m_nOffset(other.m_nOffset)
+        {
+        }
 
     public:
         inline ZoneAdjustment& operator=(IN const ZoneAdjustment& other)
@@ -51,10 +53,8 @@ public:
         }
 
     public:
-        inline IMS_UINT32 GetAdjustmentTime() const
-        { return m_nAdjustmentTime; }
-        inline IMS_UINT32 GetOffset() const
-        { return m_nOffset; }
+        inline IMS_UINT32 GetAdjustmentTime() const { return m_nAdjustmentTime; }
+        inline IMS_UINT32 GetOffset() const { return m_nOffset; }
 
     private:
         IMS_UINT32 m_nAdjustmentTime;
@@ -97,7 +97,9 @@ public:
      * @brief Returns the ZoneAdjustment objects from the timezone line.
      */
     inline const IMSList<SdpTimezone::ZoneAdjustment>& GetAdjustments() const
-    { return m_objZoneAdjustments; }
+    {
+        return m_objZoneAdjustments;
+    }
 
 private:
     // z=<adjustment time> <offset> <adjustment time> <offset> ...

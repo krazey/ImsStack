@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpBandwidth
-    : public SdpLine
+class SdpBandwidth : public SdpLine
 {
 public:
     SdpBandwidth();
@@ -56,20 +55,17 @@ public:
     /**
      * @brief Returns the bandwidth type as an integer value.
      */
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
 
     /**
      * @brief Returns the bandwidth type as a string value.
      */
-    inline const AString& GetTypeEx() const
-    { return m_strType; }
+    inline const AString& GetTypeEx() const { return m_strType; }
 
     /**
      * @brief Returns the bandwidth value (in integer value).
      */
-    inline IMS_SINT32 GetBandwidth() const
-    { return m_nBandwidth; }
+    inline IMS_SINT32 GetBandwidth() const { return m_nBandwidth; }
 
     /**
      * @brief Sets the bandwidth type & value.
@@ -82,9 +78,9 @@ public:
     {
         TYPE_AS,
         TYPE_CT,
-        TYPE_RR, // RFC 3556, SDP Bandwidth Modifiers for RTCP Bandwidth
-        TYPE_RS, // RFC 3556, SDP Bandwidth Modifiers for RTCP Bandwidth
-        TYPE_TIAS, // RFC 3890, Bandwidth Modifier for SDP
+        TYPE_RR,    // RFC 3556, SDP Bandwidth Modifiers for RTCP Bandwidth
+        TYPE_RS,    // RFC 3556, SDP Bandwidth Modifiers for RTCP Bandwidth
+        TYPE_TIAS,  // RFC 3890, Bandwidth Modifier for SDP
         TYPE_OTHER
     };
 

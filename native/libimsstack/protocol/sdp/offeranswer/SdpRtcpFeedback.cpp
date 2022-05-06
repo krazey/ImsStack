@@ -24,38 +24,36 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpRtcpFeedback::SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber)
-    : SdpMediaFormatParameter(SdpAttribute::RTCP_FB, nPayloadTypeNumber)
-    , m_strType(AString::ConstNull())
-    , m_strParamName(AString::ConstNull())
-    , m_strParamValue(AString::ConstNull())
+SdpRtcpFeedback::SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber) :
+        SdpMediaFormatParameter(SdpAttribute::RTCP_FB, nPayloadTypeNumber),
+        m_strType(AString::ConstNull()),
+        m_strParamName(AString::ConstNull()),
+        m_strParamValue(AString::ConstNull())
 {
 }
 
 PUBLIC
 SdpRtcpFeedback::SdpRtcpFeedback(IN IMS_SINT32 nPayloadTypeNumber, IN const AString& strType,
         IN const AString& strParamName /*= AString::ConstNull()*/,
-        IN const AString& strParamValue /*= AString::ConstNull()*/)
-    : SdpMediaFormatParameter(SdpAttribute::RTCP_FB, nPayloadTypeNumber)
-    , m_strType(strType)
-    , m_strParamName(strParamName)
-    , m_strParamValue(strParamValue)
+        IN const AString& strParamValue /*= AString::ConstNull()*/) :
+        SdpMediaFormatParameter(SdpAttribute::RTCP_FB, nPayloadTypeNumber),
+        m_strType(strType),
+        m_strParamName(strParamName),
+        m_strParamValue(strParamValue)
 {
 }
 
 PUBLIC
-SdpRtcpFeedback::SdpRtcpFeedback(IN const SdpRtcpFeedback& other)
-    : SdpMediaFormatParameter(other)
-    , m_strType(other.m_strType)
-    , m_strParamName(other.m_strParamName)
-    , m_strParamValue(other.m_strParamValue)
+SdpRtcpFeedback::SdpRtcpFeedback(IN const SdpRtcpFeedback& other) :
+        SdpMediaFormatParameter(other),
+        m_strType(other.m_strType),
+        m_strParamName(other.m_strParamName),
+        m_strParamValue(other.m_strParamValue)
 {
 }
 
 PUBLIC
-SdpRtcpFeedback::~SdpRtcpFeedback()
-{
-}
+SdpRtcpFeedback::~SdpRtcpFeedback() {}
 
 PUBLIC
 SdpRtcpFeedback& SdpRtcpFeedback::operator=(IN const SdpRtcpFeedback& other)
@@ -72,14 +70,12 @@ SdpRtcpFeedback& SdpRtcpFeedback::operator=(IN const SdpRtcpFeedback& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-SdpMediaFormatParameter* SdpRtcpFeedback::Clone() const
+PUBLIC VIRTUAL SdpMediaFormatParameter* SdpRtcpFeedback::Clone() const
 {
     return new SdpRtcpFeedback(*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpRtcpFeedback::Equals(IN const SdpMediaFormatParameter* pParameter) const
+PUBLIC VIRTUAL IMS_BOOL SdpRtcpFeedback::Equals(IN const SdpMediaFormatParameter* pParameter) const
 {
     const SdpRtcpFeedback* pRtcpFb = DYNAMIC_CAST(const SdpRtcpFeedback*, pParameter);
 
@@ -111,8 +107,7 @@ IMS_BOOL SdpRtcpFeedback::Equals(IN const SdpMediaFormatParameter* pParameter) c
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpRtcpFeedback::SetValue(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpRtcpFeedback::SetValue(IN const AString& strValue)
 {
     // The specified value will be the attribute line without the payload type number
     // a=rtcp-fb:98 nack sli -> value: nack sli
@@ -155,8 +150,7 @@ IMS_BOOL SdpRtcpFeedback::SetValue(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpRtcpFeedback::ToSdp() const
+PUBLIC VIRTUAL AString SdpRtcpFeedback::ToSdp() const
 {
     // a=rtcp-fb:98 nack pli
     AStringBuffer objBuffer(64);
@@ -193,15 +187,14 @@ AString SdpRtcpFeedback::ToSdp() const
 }
 
 PUBLIC
-void SdpRtcpFeedback::SetParameter(IN const AString& strName,
-        IN const AString& strValue /*= AString::ConstNull()*/)
+void SdpRtcpFeedback::SetParameter(
+        IN const AString& strName, IN const AString& strValue /*= AString::ConstNull()*/)
 {
     m_strParamName = strName;
     m_strParamValue = strValue;
 }
 
-PUBLIC GLOBAL
-SdpRtcpFeedback* SdpRtcpFeedback::Decode(IN const AString& strRtcpFb)
+PUBLIC GLOBAL SdpRtcpFeedback* SdpRtcpFeedback::Decode(IN const AString& strRtcpFb)
 {
     // The specified value will be the attribute line without the attribute name
     // a=rtcp-fb:98 nack sli -> value: 98 nack sli

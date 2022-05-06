@@ -19,8 +19,7 @@
 #include "SdpDescription.h"
 #include "SdpMedia.h"
 
-class SdpMediaDescription
-    : public SdpDescription
+class SdpMediaDescription : public SdpDescription
 {
 public:
     SdpMediaDescription();
@@ -35,8 +34,8 @@ public:
     /**
      * @brief Decodes the SDP lines in the media-level session description.
      */
-    IMS_BOOL Decode(IN const AStringArray& objLines,
-            IN IMS_SINT32 nStartLine = 0, IN IMS_SINT32 nEndLine = -1) override;
+    IMS_BOOL Decode(IN const AStringArray& objLines, IN IMS_SINT32 nStartLine = 0,
+            IN IMS_SINT32 nEndLine = -1) override;
 
     /**
      * @brief Encodes the SDP lines in the media-level session description.
@@ -46,8 +45,7 @@ public:
     /**
      * @brief Returns the SdpMedia object in the media-level description.
      */
-    inline const SdpMedia& GetMedia() const
-    { return m_objMedia; }
+    inline const SdpMedia& GetMedia() const { return m_objMedia; }
 
     /**
      * @brief Returns the SdpConnection object in the media-level description.
@@ -57,8 +55,7 @@ public:
     /**
      * @brief Returns the list of SdpConnection object in the media-level description.
      */
-    inline const IMSList<SdpConnection>& GetConnections() const
-    { return m_objConnections; }
+    inline const IMSList<SdpConnection>& GetConnections() const { return m_objConnections; }
 
     /**
      * @brief Removes all the SdpConnection objects from the media-level description.
@@ -73,8 +70,7 @@ public:
     /**
      * @brief Sets the SdpMedia object to the media-level description.
      */
-    inline void SetMedia(IN const SdpMedia& objMedia)
-    { m_objMedia = objMedia; }
+    inline void SetMedia(IN const SdpMedia& objMedia) { m_objMedia = objMedia; }
 
 private:
     SdpMedia m_objMedia;

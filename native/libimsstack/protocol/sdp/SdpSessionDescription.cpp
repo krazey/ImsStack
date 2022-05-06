@@ -26,23 +26,23 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpSessionDescription::SdpSessionDescription()
-    : SdpDescription()
-    , m_pUri(IMS_NULL)
-    , m_pConnection(IMS_NULL)
-    , m_pTimezone(IMS_NULL)
+SdpSessionDescription::SdpSessionDescription() :
+        SdpDescription(),
+        m_pUri(IMS_NULL),
+        m_pConnection(IMS_NULL),
+        m_pTimezone(IMS_NULL)
 {
 }
 
 PUBLIC
-SdpSessionDescription::SdpSessionDescription(IN const SdpSessionDescription& other)
-    : SdpDescription(other)
-    , m_objVersion(other.m_objVersion)
-    , m_objOrigin(other.m_objOrigin)
-    , m_objSessionName(other.m_objSessionName)
-    , m_pUri(IMS_NULL)
-    , m_pConnection(IMS_NULL)
-    , m_pTimezone(IMS_NULL)
+SdpSessionDescription::SdpSessionDescription(IN const SdpSessionDescription& other) :
+        SdpDescription(other),
+        m_objVersion(other.m_objVersion),
+        m_objOrigin(other.m_objOrigin),
+        m_objSessionName(other.m_objSessionName),
+        m_pUri(IMS_NULL),
+        m_pConnection(IMS_NULL),
+        m_pTimezone(IMS_NULL)
 {
     if (other.m_pConnection != IMS_NULL)
     {
@@ -62,8 +62,7 @@ SdpSessionDescription::SdpSessionDescription(IN const SdpSessionDescription& oth
     m_objTimeDescriptions = other.m_objTimeDescriptions;
 }
 
-PUBLIC VIRTUAL
-SdpSessionDescription::~SdpSessionDescription()
+PUBLIC VIRTUAL SdpSessionDescription::~SdpSessionDescription()
 {
     if (m_pConnection != IMS_NULL)
     {
@@ -134,8 +133,7 @@ SdpSessionDescription& SdpSessionDescription::operator=(IN const SdpSessionDescr
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpSessionDescription::Decode(IN const AStringArray& objLines,
+PUBLIC VIRTUAL IMS_BOOL SdpSessionDescription::Decode(IN const AStringArray& objLines,
         IN IMS_SINT32 nStartLine /*= 0*/, IN IMS_SINT32 nEndLine /*= -1*/)
 {
     if (nStartLine < 0)
@@ -159,185 +157,189 @@ IMS_BOOL SdpSessionDescription::Decode(IN const AStringArray& objLines,
 
         switch (strLine[0])
         {
-        case Sdp::LINE_V:
-            if (!m_abLineContains[Sdp::TYPE_V])
-            {
-                if (!m_objVersion.Decode(strLineBody))
+            case Sdp::LINE_V:
+                if (!m_abLineContains[Sdp::TYPE_V])
                 {
-                    IMS_TRACE_E(0, "SDP decoding failed: v-line (%s)", strLineBody.GetStr(), 0, 0);
+                    if (!m_objVersion.Decode(strLineBody))
+                    {
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: v-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_V] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_O:
+                if (!m_abLineContains[Sdp::TYPE_O])
+                {
+                    if (!m_objOrigin.Decode(strLineBody))
+                    {
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: o-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_O] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_S:
+                if (!m_abLineContains[Sdp::TYPE_S])
+                {
+                    if (!m_objSessionName.Decode(strLineBody))
+                    {
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: s-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_S] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_C:
+                if (!m_abLineContains[Sdp::TYPE_C])
+                {
+                    m_pConnection = new SdpConnection();
+
+                    if (!m_pConnection->Decode(strLineBody))
+                    {
+                        delete m_pConnection;
+                        m_pConnection = IMS_NULL;
+
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: c-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_C] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_U:
+                if (!m_abLineContains[Sdp::TYPE_U])
+                {
+                    m_pUri = new SdpUri();
+
+                    if (!m_pUri->Decode(strLineBody))
+                    {
+                        delete m_pUri;
+                        m_pUri = IMS_NULL;
+
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: u-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_U] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
+                    return IMS_FALSE;
+                }
+                break;
+
+            case Sdp::LINE_T:
+            {
+                SdpTime* pTime = new SdpTime();
+
+                if (!pTime->Decode(strLineBody))
+                {
+                    delete pTime;
+                    IMS_TRACE_E(0, "SDP decoding failed: t-line (%s)", strLineBody.GetStr(), 0, 0);
                     return IMS_FALSE;
                 }
 
-                m_abLineContains[Sdp::TYPE_V] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
+                // Find 'r' lines
+                IMS_SINT32 nTimeEndLine = i + 1;
+
+                for (IMS_SINT32 j = i + 1; j < nEndLine; ++j)
+                {
+                    const AString& strRLine = objLines.GetElementAt(j);
+
+                    if (strRLine[0] != Sdp::LINE_R)
+                    {
+                        break;
+                    }
+
+                    ++nTimeEndLine;
+                }
+
+                SdpTimeDescription objTimeDescription(pTime);
+
+                if (nTimeEndLine > (i + 1))
+                {
+                    if (!objTimeDescription.Decode(objLines, i + 1, nTimeEndLine))
+                    {
+                        return IMS_FALSE;
+                    }
+                }
+
+                if (!m_objTimeDescriptions.Append(objTimeDescription))
+                {
+                    return IMS_FALSE;
+                }
+
+                m_abLineContains[Sdp::TYPE_T] = IMS_TRUE;
+
+                if (nTimeEndLine > (i + 1))
+                {
+                    m_abLineContains[Sdp::TYPE_R] = IMS_TRUE;
+                }
             }
             break;
 
-        case Sdp::LINE_O:
-            if (!m_abLineContains[Sdp::TYPE_O])
-            {
-                if (!m_objOrigin.Decode(strLineBody))
+            case Sdp::LINE_Z:
+                if (!m_abLineContains[Sdp::TYPE_Z])
                 {
-                    IMS_TRACE_E(0, "SDP decoding failed: o-line (%s)", strLineBody.GetStr(), 0, 0);
+                    m_pTimezone = new SdpTimezone();
+
+                    if (!m_pTimezone->Decode(strLineBody))
+                    {
+                        delete m_pTimezone;
+                        m_pTimezone = IMS_NULL;
+
+                        IMS_TRACE_E(
+                                0, "SDP decoding failed: z-line (%s)", strLineBody.GetStr(), 0, 0);
+                        return IMS_FALSE;
+                    }
+
+                    m_abLineContains[Sdp::TYPE_Z] = IMS_TRUE;
+                }
+                else
+                {
+                    // Invalid SDP
                     return IMS_FALSE;
                 }
-
-                m_abLineContains[Sdp::TYPE_O] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_S:
-            if (!m_abLineContains[Sdp::TYPE_S])
-            {
-                if (!m_objSessionName.Decode(strLineBody))
-                {
-                    IMS_TRACE_E(0, "SDP decoding failed: s-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
-                }
-
-                m_abLineContains[Sdp::TYPE_S] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_C:
-            if (!m_abLineContains[Sdp::TYPE_C])
-            {
-                m_pConnection = new SdpConnection();
-
-                if (!m_pConnection->Decode(strLineBody))
-                {
-                    delete m_pConnection;
-                    m_pConnection = IMS_NULL;
-
-                    IMS_TRACE_E(0, "SDP decoding failed: c-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
-                }
-
-                m_abLineContains[Sdp::TYPE_C] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_U:
-            if (!m_abLineContains[Sdp::TYPE_U])
-            {
-                m_pUri = new SdpUri();
-
-                if (!m_pUri->Decode(strLineBody))
-                {
-                    delete m_pUri;
-                    m_pUri = IMS_NULL;
-
-                    IMS_TRACE_E(0, "SDP decoding failed: u-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
-                }
-
-                m_abLineContains[Sdp::TYPE_U] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
-
-        case Sdp::LINE_T:
-        {
-            SdpTime* pTime = new SdpTime();
-
-            if (!pTime->Decode(strLineBody))
-            {
-                delete pTime;
-                IMS_TRACE_E(0, "SDP decoding failed: t-line (%s)", strLineBody.GetStr(), 0, 0);
-                return IMS_FALSE;
-            }
-
-            // Find 'r' lines
-            IMS_SINT32 nTimeEndLine = i + 1;
-
-            for (IMS_SINT32 j = i + 1; j < nEndLine; ++j)
-            {
-                const AString& strRLine = objLines.GetElementAt(j);
-
-                if (strRLine[0] != Sdp::LINE_R)
-                {
-                    break;
-                }
-
-                ++nTimeEndLine;
-            }
-
-            SdpTimeDescription objTimeDescription(pTime);
-
-            if (nTimeEndLine > (i + 1))
-            {
-                if (!objTimeDescription.Decode(objLines, i + 1, nTimeEndLine))
-                {
-                    return IMS_FALSE;
-                }
-            }
-
-            if (!m_objTimeDescriptions.Append(objTimeDescription))
-            {
-                return IMS_FALSE;
-            }
-
-            m_abLineContains[Sdp::TYPE_T] = IMS_TRUE;
-
-            if (nTimeEndLine > (i + 1))
-            {
-                m_abLineContains[Sdp::TYPE_R] = IMS_TRUE;
-            }
-        }
-        break;
-
-        case Sdp::LINE_Z:
-            if (!m_abLineContains[Sdp::TYPE_Z])
-            {
-                m_pTimezone = new SdpTimezone();
-
-                if (!m_pTimezone->Decode(strLineBody))
-                {
-                    delete m_pTimezone;
-                    m_pTimezone = IMS_NULL;
-
-                    IMS_TRACE_E(0, "SDP decoding failed: z-line (%s)", strLineBody.GetStr(), 0, 0);
-                    return IMS_FALSE;
-                }
-
-                m_abLineContains[Sdp::TYPE_Z] = IMS_TRUE;
-            }
-            else
-            {
-                // Invalid SDP
-                return IMS_FALSE;
-            }
-            break;
+                break;
         }
     }
 
-    if (!m_abLineContains[Sdp::TYPE_V]
-            || !m_abLineContains[Sdp::TYPE_O]
-            || !m_abLineContains[Sdp::TYPE_S]
-            || !m_abLineContains[Sdp::TYPE_T])
+    if (!m_abLineContains[Sdp::TYPE_V] || !m_abLineContains[Sdp::TYPE_O] ||
+            !m_abLineContains[Sdp::TYPE_S] || !m_abLineContains[Sdp::TYPE_T])
     {
         // mandatory SDP line is missing
         IMS_TRACE_E(0, "Check the validity: mandatory lines (v,o,s,t) are missing", 0, 0, 0);
@@ -347,8 +349,7 @@ IMS_BOOL SdpSessionDescription::Decode(IN const AStringArray& objLines,
     return SdpDescription::Decode(objLines, nStartLine, nEndLine);
 }
 
-PUBLIC VIRTUAL
-AString SdpSessionDescription::Encode() const
+PUBLIC VIRTUAL AString SdpSessionDescription::Encode() const
 {
     // SDP line order: v, o, s, i, u, e, p, c, b, t, r, z, k, a, m
     AStringBuffer objSdp(512);
@@ -433,8 +434,8 @@ AString SdpSessionDescription::Encode() const
 }
 
 PUBLIC
-IMS_BOOL SdpSessionDescription::CreateMandatoryLines(IN const AString& strUserId,
-        IN const IPAddress& objLocalAddress)
+IMS_BOOL SdpSessionDescription::CreateMandatoryLines(
+        IN const AString& strUserId, IN const IPAddress& objLocalAddress)
 {
     // Mandatory SDP lines: v, o, s, t
     AString strAddress = objLocalAddress.ToString();
@@ -471,8 +472,8 @@ IMS_BOOL SdpSessionDescription::CreateMandatoryLines(IN const AString& strUserId
         return IMS_FALSE;
     }
 
-    IMS_SINT32 nAddrType = (objLocalAddress.IsIPv6Address()) ? \
-            Sdp::ADDR_TYPE_IP6 : Sdp::ADDR_TYPE_IP4;
+    IMS_SINT32 nAddrType =
+            (objLocalAddress.IsIPv6Address()) ? Sdp::ADDR_TYPE_IP6 : Sdp::ADDR_TYPE_IP4;
 
     if (!m_pConnection->SetValue(nAddrType, strAddress))
     {

@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpOrigin
-    : public SdpLine
+class SdpOrigin : public SdpLine
 {
 public:
     SdpOrigin();
@@ -51,20 +50,17 @@ public:
     /**
      * @brief Returns the user name from the origin field.
      */
-    inline const AString& GetUsername() const
-    { return m_strUsername; }
+    inline const AString& GetUsername() const { return m_strUsername; }
 
     /**
      * @brief Returns the session id from the origin field.
      */
-    inline const AString& GetSessionId() const
-    { return m_strSessionId; }
+    inline const AString& GetSessionId() const { return m_strSessionId; }
 
     /**
      * @brief Returns the session version from the origin field.
      */
-    inline const AString& GetSessionVersion() const
-    { return m_strSessionVersion; }
+    inline const AString& GetSessionVersion() const { return m_strSessionVersion; }
 
     /**
      * @brief Returns the address type from the origin field.
@@ -73,8 +69,7 @@ public:
      *         #Sdp#ADDR_TYPE_IP4\n
      *         #Sdp#ADDR_TYPE_IP6
      */
-    inline IMS_SINT32 GetAddressType() const
-    { return m_nAddrType; }
+    inline IMS_SINT32 GetAddressType() const { return m_nAddrType; }
 
     /**
      * @brief Returns the address type as a string value from the origin field.
@@ -83,14 +78,12 @@ public:
      *         "IP4"\n
      *         "IP6"
      */
-    inline const AString& GetAddressTypeToString() const
-    { return m_strAddrType; }
+    inline const AString& GetAddressTypeToString() const { return m_strAddrType; }
 
     /**
      * @brief Returns the address as a string value from the origin field.
      */
-    inline const AString& GetAddress() const
-    { return m_strUnicastAddress; }
+    inline const AString& GetAddress() const { return m_strUnicastAddress; }
 
     /**
      * @brief Increases the session version.
@@ -123,7 +116,10 @@ private:
 
 private:
     // 1900/01/01 ~ before 1970/01/01, 2208988800
-    enum { NTP_OFFSET = 2208988800UL };
+    enum
+    {
+        NTP_OFFSET = 2208988800UL
+    };
 
     static IMS_UINT32 s_nLastTime;
 
@@ -132,7 +128,7 @@ private:
     AString m_strSessionId;
     AString m_strSessionVersion;
     IMS_SINT32 m_nNetType;
-    AString m_strNetType; // For IMS service, "IN" only
+    AString m_strNetType;  // For IMS service, "IN" only
     IMS_SINT32 m_nAddrType;
     AString m_strAddrType;
     AString m_strUnicastAddress;

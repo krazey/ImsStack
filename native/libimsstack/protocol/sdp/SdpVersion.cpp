@@ -18,23 +18,20 @@
 #include "SdpVersion.h"
 
 PUBLIC
-SdpVersion::SdpVersion()
-    : SdpLine()
-    , m_nVersion(SDP_VERSION)
+SdpVersion::SdpVersion() :
+        SdpLine(),
+        m_nVersion(SDP_VERSION)
 {
 }
 
 PUBLIC
-SdpVersion::SdpVersion(IN const SdpVersion& other)
-    : SdpLine(other)
-    , m_nVersion(other.m_nVersion)
+SdpVersion::SdpVersion(IN const SdpVersion& other) :
+        SdpLine(other),
+        m_nVersion(other.m_nVersion)
 {
 }
 
-PUBLIC VIRTUAL
-SdpVersion::~SdpVersion()
-{
-}
+PUBLIC VIRTUAL SdpVersion::~SdpVersion() {}
 
 PUBLIC
 SdpVersion& SdpVersion::operator=(IN const SdpVersion& other)
@@ -49,8 +46,7 @@ SdpVersion& SdpVersion::operator=(IN const SdpVersion& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpVersion::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpVersion::Decode(IN const AString& strValue)
 {
     // v=<version>
     IMS_BOOL bOk = IMS_FALSE;
@@ -66,8 +62,7 @@ IMS_BOOL SdpVersion::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpVersion::Encode() const
+PUBLIC VIRTUAL AString SdpVersion::Encode() const
 {
     // v=<version>
     AString strLine;
@@ -77,8 +72,7 @@ AString SdpVersion::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpVersion::GetValue() const
+PUBLIC VIRTUAL AString SdpVersion::GetValue() const
 {
     AString strValue;
 

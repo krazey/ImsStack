@@ -18,8 +18,7 @@
 
 #include "offeranswer/SdpPrecondition.h"
 
-class SdpSegmentedPrecondition
-    : public SdpPrecondition
+class SdpSegmentedPrecondition : public SdpPrecondition
 {
 public:
     explicit SdpSegmentedPrecondition(IN IMS_SINT32 nType = TYPE_QOS);
@@ -36,10 +35,8 @@ public:
     IMS_BOOL IsPreconditionPresent() const override;
     AString ToSdp(IN IMS_SINT32 nAttribute) const override;
 
-    inline const IMSList<DetailInfo>& GetLocalDetails() const
-    { return m_objLocalDetails; }
-    inline const IMSList<DetailInfo>& GetRemoteDetails() const
-    { return m_objRemoteDetails; }
+    inline const IMSList<DetailInfo>& GetLocalDetails() const { return m_objLocalDetails; }
+    inline const IMSList<DetailInfo>& GetRemoteDetails() const { return m_objRemoteDetails; }
 
 private:
     IMSList<DetailInfo> m_objLocalDetails;

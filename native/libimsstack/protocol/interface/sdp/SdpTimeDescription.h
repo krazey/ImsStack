@@ -37,7 +37,7 @@ public:
      * @brief Decodes the SDP lines in the time description.
      */
     IMS_BOOL Decode(IN const AStringArray& objLines, IN IMS_SINT32 nStartLine = 0,
-        IN IMS_SINT32 nEndLine = -1);
+            IN IMS_SINT32 nEndLine = -1);
 
     /**
      * @brief Encodes the SDP lines in the time description.
@@ -47,14 +47,12 @@ public:
     /**
      * @brief Returns the SdpTime object from the time description.
      */
-    inline const SdpTime* GetTime() const
-    { return m_pTime; }
+    inline const SdpTime* GetTime() const { return m_pTime; }
 
     /**
      * @brief Returns the SdpTime object from the time description.
      */
-    inline SdpTime* GetTime()
-    { return m_pTime; }
+    inline SdpTime* GetTime() { return m_pTime; }
 
     /**
      * @brief Adds the repeat-time line into the time description.
@@ -64,8 +62,7 @@ public:
     /**
      * @brief Returns the SdpRepeatTime objects from the time description.
      */
-    inline const IMSList<SdpRepeatTime>& GetRepeatTimes() const
-    { return m_objRepeatTimes; }
+    inline const IMSList<SdpRepeatTime>& GetRepeatTimes() const { return m_objRepeatTimes; }
 
 private:
     // SDP order: t, *(r)

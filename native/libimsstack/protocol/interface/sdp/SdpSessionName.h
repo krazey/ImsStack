@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpSessionName
-    : public SdpLine
+class SdpSessionName : public SdpLine
 {
 public:
     SdpSessionName();
@@ -46,8 +45,7 @@ public:
     /**
      * @brief Returns the full session-name line without "s=".
      */
-    inline AString GetValue() const override
-    { return m_strName; }
+    inline AString GetValue() const override { return m_strName; }
 
 private:
     AString m_strName;

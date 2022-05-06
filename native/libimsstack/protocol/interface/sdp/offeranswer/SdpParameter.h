@@ -33,8 +33,7 @@ public:
      * @brief Returns the connection address which resides on the first line
      *        in the current SDP order.
      */
-    inline virtual const AString& GetConnectionAddress() const
-    { return AString::ConstNull(); }
+    inline virtual const AString& GetConnectionAddress() const { return AString::ConstNull(); }
 
     /**
      * @brief Adds the attribute line to the SDP parameter.
@@ -74,8 +73,7 @@ public:
     /**
      * @brief Returns all the SdpAttribute objects.
      */
-    inline const IMSList<SdpAttribute>& GetAttributes() const
-    { return m_objAttributes; }
+    inline const IMSList<SdpAttribute>& GetAttributes() const { return m_objAttributes; }
 
     /**
      * @brief Returns all the SdpAttribute objects which the specified type matches.
@@ -100,26 +98,22 @@ public:
     /**
      * @brief Returns all the SdpBandwidth objects.
      */
-    inline const IMSList<SdpBandwidth>& GetBandwidths() const
-    { return m_objBandwidths; }
+    inline const IMSList<SdpBandwidth>& GetBandwidths() const { return m_objBandwidths; }
 
     /**
      * @brief Returns the direction value of the SDP parameter.
      */
-    inline IMS_SINT32 GetDirection() const
-    { return m_nDirection; }
+    inline IMS_SINT32 GetDirection() const { return m_nDirection; }
 
     /**
      * @brief Returns the SdpEncryptionKey object.
      */
-    inline const SdpEncryptionKey* GetEncryptionKey() const
-    { return m_pKey; }
+    inline const SdpEncryptionKey* GetEncryptionKey() const { return m_pKey; }
 
     /**
      * @brief Returns the SdpInformation object.
      */
-    inline const SdpInformation* GetInformation() const
-    { return m_pInformation; }
+    inline const SdpInformation* GetInformation() const { return m_pInformation; }
 
     /**
      * @brief Returns the value of "connection" attribute field.
@@ -128,8 +122,7 @@ public:
      *         #Sdp#CONNECTION_NEW\n
      *         #Sdp#CONNECTION_EXISTING
      */
-    inline IMS_SINT32 GetAttributeConnection() const
-    { return m_nAttrConnection; }
+    inline IMS_SINT32 GetAttributeConnection() const { return m_nAttrConnection; }
 
     /**
      * @brief Returns the value of "setup" attribute field.
@@ -140,8 +133,7 @@ public:
      *         #Sdp#SETUP_ACTPASS\n
      *         #Sdp#SETUP_HOLDCONN
      */
-    inline IMS_SINT32 GetAttributeSetup() const
-    { return m_nAttrSetup; }
+    inline IMS_SINT32 GetAttributeSetup() const { return m_nAttrSetup; }
 
     /**
      * @brief Negotiates the direction value of the SDP parameter.
@@ -253,8 +245,7 @@ protected:
     /**
      * @brief Checks if the direction attribute is required or not when forming a-line(direction).
      */
-    inline virtual IMS_BOOL IsDirectionAttributeRequired() const
-    { return IMS_TRUE; }
+    inline virtual IMS_BOOL IsDirectionAttributeRequired() const { return IMS_TRUE; }
 
     /**
      * @brief Checks if the specified type contains or not.
@@ -269,8 +260,8 @@ protected:
     /**
      * @brief Validates the direction according to the current & offered direction.
      */
-    static IMS_BOOL ValidateDirection(IN IMS_SINT32 nCurrentDirection,
-            IN IMS_SINT32 nOfferDirection);
+    static IMS_BOOL ValidateDirection(
+            IN IMS_SINT32 nCurrentDirection, IN IMS_SINT32 nOfferDirection);
 
 protected:
     IMS_BOOL m_abLineContains[Sdp::TYPE_MAX];

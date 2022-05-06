@@ -24,24 +24,26 @@ public:
     class DetailInfo
     {
     public:
-        inline DetailInfo()
-            : m_nStatus(STATUS_E2E)
-            , m_nDirection(DIRECTION_NONE)
-            , m_nStrength(STRENGTH_NOTUSED)
-            {}
-        inline DetailInfo(IN IMS_SINT32 nStatus, IN IMS_SINT32 nDirection,
-                IN IMS_SINT32 nStrength)
-            : m_nStatus(nStatus)
-            , m_nDirection(nDirection)
-            , m_nStrength(nStrength)
-            {}
-        inline DetailInfo(IN const DetailInfo& other)
-            : m_nStatus(other.m_nStatus)
-            , m_nDirection(other.m_nDirection)
-            , m_nStrength(other.m_nStrength)
-            {}
-        inline ~DetailInfo()
-            {}
+        inline DetailInfo() :
+                m_nStatus(STATUS_E2E),
+                m_nDirection(DIRECTION_NONE),
+                m_nStrength(STRENGTH_NOTUSED)
+        {
+        }
+        inline DetailInfo(
+                IN IMS_SINT32 nStatus, IN IMS_SINT32 nDirection, IN IMS_SINT32 nStrength) :
+                m_nStatus(nStatus),
+                m_nDirection(nDirection),
+                m_nStrength(nStrength)
+        {
+        }
+        inline DetailInfo(IN const DetailInfo& other) :
+                m_nStatus(other.m_nStatus),
+                m_nDirection(other.m_nDirection),
+                m_nStrength(other.m_nStrength)
+        {
+        }
+        inline ~DetailInfo() {}
 
     public:
         DetailInfo& operator=(IN const DetailInfo& other)
@@ -57,19 +59,13 @@ public:
         }
 
     public:
-        inline IMS_SINT32 GetDirection() const
-        { return m_nDirection; }
-        inline IMS_SINT32 GetStatus() const
-        { return m_nStatus; }
-        inline IMS_SINT32 GetStrength() const
-        { return m_nStrength; }
+        inline IMS_SINT32 GetDirection() const { return m_nDirection; }
+        inline IMS_SINT32 GetStatus() const { return m_nStatus; }
+        inline IMS_SINT32 GetStrength() const { return m_nStrength; }
 
-        inline void SetDirection(IN IMS_SINT32 nDirection)
-        { m_nDirection = nDirection; }
-        inline void SetStatus(IN IMS_SINT32 nStatus)
-        { m_nStatus = nStatus; }
-        inline void SetStrength(IN IMS_SINT32 nStrength)
-        { m_nStrength = nStrength; }
+        inline void SetDirection(IN IMS_SINT32 nDirection) { m_nDirection = nDirection; }
+        inline void SetStatus(IN IMS_SINT32 nStatus) { m_nStatus = nStatus; }
+        inline void SetStrength(IN IMS_SINT32 nStrength) { m_nStrength = nStrength; }
 
         AString ToString() const;
 
@@ -90,16 +86,15 @@ public:
 public:
     inline virtual IMS_BOOL AddStatus(IN IMS_SINT32 /*nStatus*/, IN IMS_SINT32 /*nDirection*/,
             IN IMS_SINT32 /*nStrength = STRENGTH_NOTUSED*/)
-    { return IMS_FALSE; }
-    inline virtual IMS_BOOL IsPreconditionPresent() const
-    { return IMS_FALSE; }
+    {
+        return IMS_FALSE;
+    }
+    inline virtual IMS_BOOL IsPreconditionPresent() const { return IMS_FALSE; }
     virtual AString ToSdp(IN IMS_SINT32 nAttribute) const;
 
     IMS_BOOL AddStatus(IN const AString& strStatusLine);
-    inline IMS_SINT32 GetSubType() const
-    { return m_nSubType; }
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline IMS_SINT32 GetSubType() const { return m_nSubType; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
 
     static IMS_BOOL ExtractProperties(IN const AString& strStatusLine, OUT IMS_SINT32& nType,
             OUT IMS_SINT32& nSubType, OUT DetailInfo& objDetailInfo);

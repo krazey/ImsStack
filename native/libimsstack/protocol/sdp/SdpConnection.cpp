@@ -22,35 +22,32 @@
 __IMS_TRACE_TAG_SDP__;
 
 PUBLIC
-SdpConnection::SdpConnection()
-    : SdpLine()
-    , m_nNetType(Sdp::NET_TYPE_IN)
-    , m_strNetType(Sdp::STR_NET_TYPE_IN)
-    , m_nAddrType(Sdp::ADDR_TYPE_IP4)
-    , m_strAddrType(Sdp::STR_ADDR_TYPE_IP4)
-    , m_strAddress(AString::ConstNull())
-    , m_nTtl(0)
-    , m_nNumOfAddress(0)
+SdpConnection::SdpConnection() :
+        SdpLine(),
+        m_nNetType(Sdp::NET_TYPE_IN),
+        m_strNetType(Sdp::STR_NET_TYPE_IN),
+        m_nAddrType(Sdp::ADDR_TYPE_IP4),
+        m_strAddrType(Sdp::STR_ADDR_TYPE_IP4),
+        m_strAddress(AString::ConstNull()),
+        m_nTtl(0),
+        m_nNumOfAddress(0)
 {
 }
 
 PUBLIC
-SdpConnection::SdpConnection(IN const SdpConnection& other)
-    : SdpLine(other)
-    , m_nNetType(other.m_nNetType)
-    , m_strNetType(other.m_strNetType)
-    , m_nAddrType(other.m_nAddrType)
-    , m_strAddrType(other.m_strAddrType)
-    , m_strAddress(other.m_strAddress)
-    , m_nTtl(other.m_nTtl)
-    , m_nNumOfAddress(other.m_nNumOfAddress)
+SdpConnection::SdpConnection(IN const SdpConnection& other) :
+        SdpLine(other),
+        m_nNetType(other.m_nNetType),
+        m_strNetType(other.m_strNetType),
+        m_nAddrType(other.m_nAddrType),
+        m_strAddrType(other.m_strAddrType),
+        m_strAddress(other.m_strAddress),
+        m_nTtl(other.m_nTtl),
+        m_nNumOfAddress(other.m_nNumOfAddress)
 {
 }
 
-PUBLIC VIRTUAL
-SdpConnection::~SdpConnection()
-{
-}
+PUBLIC VIRTUAL SdpConnection::~SdpConnection() {}
 
 PUBLIC
 SdpConnection& SdpConnection::operator=(IN const SdpConnection& other)
@@ -71,8 +68,7 @@ SdpConnection& SdpConnection::operator=(IN const SdpConnection& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
 {
     // c=<nettype> <addrtype> <connection-address>
     AStringArray objTokens;
@@ -126,8 +122,7 @@ IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
     // TODO:: allow FQDN, so needs to be parsed using URI parser
     // TODO:: multicast ???
     // connection-address field
-    IMSList<AString> objConnectionAddress =
-            objTokens.GetElementAt(2).Split(TextParser::CHAR_SLASH);
+    IMSList<AString> objConnectionAddress = objTokens.GetElementAt(2).Split(TextParser::CHAR_SLASH);
 
     if (objConnectionAddress.IsEmpty())
     {
@@ -172,8 +167,7 @@ IMS_BOOL SdpConnection::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpConnection::Encode() const
+PUBLIC VIRTUAL AString SdpConnection::Encode() const
 {
     // c=<nettype> <addrtype> <connection-address>
     AString strLine(1, Sdp::LINE_C);
@@ -186,8 +180,7 @@ AString SdpConnection::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpConnection::GetValue() const
+PUBLIC VIRTUAL AString SdpConnection::GetValue() const
 {
     AString strValue;
 
@@ -227,24 +220,24 @@ IMS_BOOL SdpConnection::SetValue(IN IMS_SINT32 nAddrType, IN const AString& strA
 
     switch (m_nAddrType)
     {
-    case Sdp::ADDR_TYPE_IP4:
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
-        break;
-    case Sdp::ADDR_TYPE_IP6:
-        m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
-        break;
-    case Sdp::ADDR_TYPE_OTHER:
-        if (!Sdp::IsTokenString(strOtherAddrType))
-        {
-            // Invalid addrtype field
+        case Sdp::ADDR_TYPE_IP4:
+            m_strAddrType = Sdp::STR_ADDR_TYPE_IP4;
+            break;
+        case Sdp::ADDR_TYPE_IP6:
+            m_strAddrType = Sdp::STR_ADDR_TYPE_IP6;
+            break;
+        case Sdp::ADDR_TYPE_OTHER:
+            if (!Sdp::IsTokenString(strOtherAddrType))
+            {
+                // Invalid addrtype field
+                return IMS_FALSE;
+            }
+
+            m_strAddrType = strOtherAddrType;
+            break;
+
+        default:
             return IMS_FALSE;
-        }
-
-        m_strAddrType = strOtherAddrType;
-        break;
-
-    default:
-        return IMS_FALSE;
     }
 
     m_nTtl = nTtl;

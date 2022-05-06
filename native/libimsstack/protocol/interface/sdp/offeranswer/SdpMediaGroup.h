@@ -44,8 +44,7 @@ public:
      *         #SRF\n
      *         #GROUP_OTHER
      */
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
 
     /**
      * @brief Returns the type of group as a string value.
@@ -55,8 +54,7 @@ public:
      *         "FID"\n
      *         "SRF"
      */
-    inline const AString& GetTypeEx() const
-    { return m_strType; }
+    inline const AString& GetTypeEx() const { return m_strType; }
 
     /**
      * @brief Returns all the mids which are included in the current media group.
@@ -67,14 +65,12 @@ public:
      *         #SRF\n
      *         #GROUP_OTHER
      */
-    inline const AStringArray& GetMids() const
-    { return m_objMids; }
+    inline const AStringArray& GetMids() const { return m_objMids; }
 
     /**
      * @brief Returns all the list of media stream index in the current media group.
      */
-    inline const IMSList<IMS_SINT32>& GetMediaStreams() const
-    { return m_objMediaStreamIndexes; }
+    inline const IMSList<IMS_SINT32>& GetMediaStreams() const { return m_objMediaStreamIndexes; }
 
     /**
      * @brief Removes the media stream which matches with the specified mid value.
@@ -90,9 +86,9 @@ public:
     // "group" type
     enum
     {
-        LS, // Lip Synchronization
-        FID, // Flow Identification
-        SRF, // Single Reservation Flow
+        LS,   // Lip Synchronization
+        FID,  // Flow Identification
+        SRF,  // Single Reservation Flow
         GROUP_OTHER
     };
 

@@ -18,35 +18,30 @@
 #include "Sdp.h"
 #include "SdpEncryptionKey.h"
 
-PRIVATE GLOBAL
-const IMS_CHAR* SdpEncryptionKey::METHOD[SdpEncryptionKey::METHOD_MAX] =
-{
-    "prompt",
-    "clear",
-    "base64",
-    "uri"
+PRIVATE GLOBAL const IMS_CHAR* SdpEncryptionKey::METHOD[SdpEncryptionKey::METHOD_MAX] = {
+        "prompt",
+        "clear",
+        "base64",
+        "uri",
 };
 
 PUBLIC
-SdpEncryptionKey::SdpEncryptionKey()
-    : SdpLine()
-    , m_nMethod(METHOD_INVALID)
-    , m_strKey(AString::ConstNull())
+SdpEncryptionKey::SdpEncryptionKey() :
+        SdpLine(),
+        m_nMethod(METHOD_INVALID),
+        m_strKey(AString::ConstNull())
 {
 }
 
 PUBLIC
-SdpEncryptionKey::SdpEncryptionKey(IN const SdpEncryptionKey& other)
-    : SdpLine(other)
-    , m_nMethod(other.m_nMethod)
-    , m_strKey(other.m_strKey)
+SdpEncryptionKey::SdpEncryptionKey(IN const SdpEncryptionKey& other) :
+        SdpLine(other),
+        m_nMethod(other.m_nMethod),
+        m_strKey(other.m_strKey)
 {
 }
 
-PUBLIC VIRTUAL
-SdpEncryptionKey::~SdpEncryptionKey()
-{
-}
+PUBLIC VIRTUAL SdpEncryptionKey::~SdpEncryptionKey() {}
 
 PUBLIC
 SdpEncryptionKey& SdpEncryptionKey::operator=(IN const SdpEncryptionKey& other)
@@ -62,8 +57,7 @@ SdpEncryptionKey& SdpEncryptionKey::operator=(IN const SdpEncryptionKey& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
 {
     // k=<method>
     // k=<method>:<encryption key>
@@ -94,15 +88,13 @@ IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
         return IMS_FALSE;
     }
 
-    if ((m_nMethod == METHOD_PROMPT)
-            && (objTokens.GetSize() != 1))
+    if ((m_nMethod == METHOD_PROMPT) && (objTokens.GetSize() != 1))
     {
         // Invalid encryption line
         return IMS_FALSE;
     }
 
-    if ((m_nMethod != METHOD_PROMPT)
-            && (objTokens.GetSize() != 2))
+    if ((m_nMethod != METHOD_PROMPT) && (objTokens.GetSize() != 2))
     {
         // Invalid encryption line
         return IMS_FALSE;
@@ -114,8 +106,7 @@ IMS_BOOL SdpEncryptionKey::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpEncryptionKey::Encode() const
+PUBLIC VIRTUAL AString SdpEncryptionKey::Encode() const
 {
     // k=<method>
     // k=<method>:<encryption key>
@@ -129,8 +120,7 @@ AString SdpEncryptionKey::Encode() const
     return strLine;
 }
 
-PUBLIC VIRTUAL
-AString SdpEncryptionKey::GetValue() const
+PUBLIC VIRTUAL AString SdpEncryptionKey::GetValue() const
 {
     AString strValue;
 
@@ -146,8 +136,8 @@ AString SdpEncryptionKey::GetValue() const
 }
 
 PUBLIC
-IMS_BOOL SdpEncryptionKey::SetValue(IN IMS_SINT32 nMethod,
-        IN const AString& strKey /*= AString::ConstNull()*/)
+IMS_BOOL SdpEncryptionKey::SetValue(
+        IN IMS_SINT32 nMethod, IN const AString& strKey /*= AString::ConstNull()*/)
 {
     if ((nMethod <= METHOD_INVALID) || (nMethod >= METHOD_MAX))
     {

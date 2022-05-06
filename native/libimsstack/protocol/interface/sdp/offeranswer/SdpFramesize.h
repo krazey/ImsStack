@@ -18,8 +18,7 @@
 
 #include "offeranswer/SdpMediaFormatParameter.h"
 
-class SdpFramesize
-    : public SdpMediaFormatParameter
+class SdpFramesize : public SdpMediaFormatParameter
 {
 public:
     SdpFramesize(IN IMS_SINT32 nPayloadTypeNumber);
@@ -36,16 +35,15 @@ public:
     IMS_BOOL SetValue(IN const AString& strValue) override;
     AString ToSdp() const override;
 
-    inline IMS_SINT32 GetHeight() const
-    { return m_nHeight; }
-    inline IMS_SINT32 GetWidth() const
-    { return m_nWidth; }
-    inline const AString& GetOtherFormat() const
-    { return m_strOtherFormat; }
+    inline IMS_SINT32 GetHeight() const { return m_nHeight; }
+    inline IMS_SINT32 GetWidth() const { return m_nWidth; }
+    inline const AString& GetOtherFormat() const { return m_strOtherFormat; }
 
     void SetParameter(IN IMS_SINT32 nWidth, IN IMS_SINT32 nHeight);
     inline void SetParameter(IN const AString& strOtherFormat)
-    { m_strOtherFormat = strOtherFormat; }
+    {
+        m_strOtherFormat = strOtherFormat;
+    }
 
     static SdpFramesize* Decode(IN const AString& strFramesize);
     static IMS_BOOL IsStandardCompatible(IN const AString& strFramesize);

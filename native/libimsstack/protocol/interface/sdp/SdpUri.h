@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpUri
-    : public SdpLine
+class SdpUri : public SdpLine
 {
 public:
     SdpUri();
@@ -46,8 +45,7 @@ public:
     /**
      * @brief Returns the full uri line without "u=".
      */
-    inline AString GetValue() const override
-    { return m_strUri; }
+    inline AString GetValue() const override { return m_strUri; }
 
 private:
     // u=<uri>

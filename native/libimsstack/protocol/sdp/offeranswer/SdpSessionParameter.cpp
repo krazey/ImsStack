@@ -24,26 +24,26 @@
 #include "offeranswer/SdpSessionParameter.h"
 
 PUBLIC
-SdpSessionParameter::SdpSessionParameter()
-    : SdpParameter()
-    , m_pUri(IMS_NULL)
-    , m_pConnection(IMS_NULL)
-    , m_pPreviousConnection(IMS_NULL)
-    , m_pTimezone(IMS_NULL)
+SdpSessionParameter::SdpSessionParameter() :
+        SdpParameter(),
+        m_pUri(IMS_NULL),
+        m_pConnection(IMS_NULL),
+        m_pPreviousConnection(IMS_NULL),
+        m_pTimezone(IMS_NULL)
 {
 }
 
 PUBLIC
-SdpSessionParameter::SdpSessionParameter(IN const SdpSessionParameter& other)
-    : SdpParameter(other)
-    , m_objVersion(other.m_objVersion)
-    , m_objOrigin(other.m_objOrigin)
-    , m_objSessionName(other.m_objSessionName)
-    , m_pUri(IMS_NULL)
-    , m_pConnection(IMS_NULL)
-    , m_pPreviousConnection(IMS_NULL)
-    , m_objTimeDescriptions(other.m_objTimeDescriptions)
-    , m_pTimezone(IMS_NULL)
+SdpSessionParameter::SdpSessionParameter(IN const SdpSessionParameter& other) :
+        SdpParameter(other),
+        m_objVersion(other.m_objVersion),
+        m_objOrigin(other.m_objOrigin),
+        m_objSessionName(other.m_objSessionName),
+        m_pUri(IMS_NULL),
+        m_pConnection(IMS_NULL),
+        m_pPreviousConnection(IMS_NULL),
+        m_objTimeDescriptions(other.m_objTimeDescriptions),
+        m_pTimezone(IMS_NULL)
 {
     if (other.m_pUri != IMS_NULL)
     {
@@ -111,8 +111,7 @@ SdpSessionParameter& SdpSessionParameter::operator=(IN const SdpSessionParameter
     return (*this);
 }
 
-PUBLIC VIRTUAL
-const AString& SdpSessionParameter::GetConnectionAddress() const
+PUBLIC VIRTUAL const AString& SdpSessionParameter::GetConnectionAddress() const
 {
     if (m_pConnection == IMS_NULL)
     {
@@ -123,8 +122,8 @@ const AString& SdpSessionParameter::GetConnectionAddress() const
 }
 
 PUBLIC
-IMS_SINT32 SdpSessionParameter::Compare(IN const SdpSessionParameter& objPeerParam,
-        OUT SdpSessionParameter& objProposalParam)
+IMS_SINT32 SdpSessionParameter::Compare(
+        IN const SdpSessionParameter& objPeerParam, OUT SdpSessionParameter& objProposalParam)
 {
     if (!ValidateDirection(&objPeerParam))
     {
@@ -399,8 +398,7 @@ void SdpSessionParameter::UpdateProperties(IN const SdpSessionParameter& objSess
     SdpParameter::UpdateProperties(objSessionParam);
 }
 
-PRIVATE VIRTUAL
-void SdpSessionParameter::Clear()
+PRIVATE VIRTUAL void SdpSessionParameter::Clear()
 {
     SdpParameter::Clear();
 

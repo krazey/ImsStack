@@ -19,23 +19,20 @@
 #include "SdpSessionName.h"
 
 PUBLIC
-SdpSessionName::SdpSessionName()
-    : SdpLine()
-    , m_strName(&TextParser::CHAR_HYPHEN, 1)
+SdpSessionName::SdpSessionName() :
+        SdpLine(),
+        m_strName(&TextParser::CHAR_HYPHEN, 1)
 {
 }
 
 PUBLIC
-SdpSessionName::SdpSessionName(IN const SdpSessionName& other)
-    : SdpLine(other)
-    , m_strName(other.m_strName)
+SdpSessionName::SdpSessionName(IN const SdpSessionName& other) :
+        SdpLine(other),
+        m_strName(other.m_strName)
 {
 }
 
-PUBLIC VIRTUAL
-SdpSessionName::~SdpSessionName()
-{
-}
+PUBLIC VIRTUAL SdpSessionName::~SdpSessionName() {}
 
 PUBLIC
 SdpSessionName& SdpSessionName::operator=(IN const SdpSessionName& other)
@@ -50,8 +47,7 @@ SdpSessionName& SdpSessionName::operator=(IN const SdpSessionName& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SdpSessionName::Decode(IN const AString& strValue)
+PUBLIC VIRTUAL IMS_BOOL SdpSessionName::Decode(IN const AString& strValue)
 {
     // s=<session name>
 
@@ -66,8 +62,7 @@ IMS_BOOL SdpSessionName::Decode(IN const AString& strValue)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-AString SdpSessionName::Encode() const
+PUBLIC VIRTUAL AString SdpSessionName::Encode() const
 {
     // s=<session name>
     AString strLine(1, Sdp::LINE_S);

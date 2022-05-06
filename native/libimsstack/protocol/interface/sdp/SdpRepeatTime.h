@@ -18,8 +18,7 @@
 
 #include "SdpLine.h"
 
-class SdpRepeatTime
-    : public SdpLine
+class SdpRepeatTime : public SdpLine
 {
 public:
     SdpRepeatTime();
@@ -51,32 +50,31 @@ public:
     /**
      * @brief Returns the repeat interval from the repeat-time line.
      */
-    inline IMS_UINT32 GetRepeatInterval() const
-    { return m_nRepeatInterval; }
+    inline IMS_UINT32 GetRepeatInterval() const { return m_nRepeatInterval; }
 
     /**
      * @brief Returns the active duration from the repeat-time line.
      */
-    inline IMS_UINT32 GetActiveDuration() const
-    { return m_nActiveDuration; }
+    inline IMS_UINT32 GetActiveDuration() const { return m_nActiveDuration; }
 
     /**
      * @brief Returns the first offset value from the repeat-time line.
      */
-    inline IMS_UINT32 GetFirstOffset() const
-    { return m_nFirstOffset; }
+    inline IMS_UINT32 GetFirstOffset() const { return m_nFirstOffset; }
 
     /**
      * @brief Returns the additional offsets from the repeat-time line.
      */
     inline const IMSList<IMS_UINT32>& GetAdditionalOffsets() const
-    { return m_objAdditionalOffsets; }
+    {
+        return m_objAdditionalOffsets;
+    }
 
     /**
      * @brief Sets all the parameters for the repeat-time line.
      */
     IMS_BOOL SetValue(IN IMS_UINT32 nInterval, IN IMS_UINT32 nActiveDuration,
-        IN IMS_UINT32 nFirstOffset, IN IMSList<IMS_UINT32>& objAdditionalOffsets);
+            IN IMS_UINT32 nFirstOffset, IN IMSList<IMS_UINT32>& objAdditionalOffsets);
 
 private:
     // r=<repeat interval> <active duration> <offsets from start-time>
