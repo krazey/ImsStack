@@ -4,6 +4,7 @@ BasedOnStyle: Google
 AccessModifierOffset: -4
 AlignAfterOpenBracket: DontAlign
 AlignArrayOfStructures: Left
+AlignConsecutiveMacros: AcrossEmptyLinesAndComments
 AlignOperands: false
 AllowAllArgumentsOnNextLine: true
 AllowShortBlocksOnASingleLine: Never
