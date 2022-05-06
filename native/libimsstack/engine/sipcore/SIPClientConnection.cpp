@@ -1310,6 +1310,44 @@ IMS_RESULT SIPClientConnection::SendWithCredentials()
     return IMS_SUCCESS;
 }
 
+PROTECTED VIRTUAL IMS_BOOL SIPClientConnection::DispatchMessage(IN ImsMessage& objMsg)
+{
+    switch (objMsg.GetName())
+    {
+        case AMSG_SIP_RESPONSE_RECEIVED:
+        {
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnClientConnection_NotifyResponse(this);
+            }
+            return IMS_TRUE;
+        }
+        case AMSG_SIP_FORKED_RESPONSE_RECEIVED:
+        {
+            SIPClientConnection* pScc = reinterpret_cast<SIPClientConnection*>(objMsg.nLparam);
+
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnClientConnection_NotifyForkedResponse(this, pScc);
+            }
+            else
+            {
+                if (pScc != IMS_NULL)
+                {
+                    pScc->Close();
+                }
+            }
+            return IMS_TRUE;
+        }
+        default:
+        {
+            break;
+        }
+    }
+
+    return EngineActivity::DispatchMessage(objMsg);
+}
+
 /*
 
 Remarks
@@ -1390,7 +1428,7 @@ PRIVATE VIRTUAL void SIPClientConnection::ClientTransactionState_ForkedResponseR
     }
 
     // Notify the forked response to the application
-    piListener->OnClientConnection_NotifyForkedResponse(this, pSCC);
+    PostMessage(AMSG_SIP_FORKED_RESPONSE_RECEIVED, 0, reinterpret_cast<IMS_UINTP>(pSCC));
 }
 
 /*
@@ -1461,10 +1499,7 @@ PRIVATE VIRTUAL void SIPClientConnection::ClientTransactionState_ResponseReceive
     }
 
     // Notify the response to the application
-    if (piListener != IMS_NULL)
-    {
-        piListener->OnClientConnection_NotifyResponse(this);
-    }
+    PostMessage(AMSG_SIP_RESPONSE_RECEIVED, 0, 0);
 }
 
 /*

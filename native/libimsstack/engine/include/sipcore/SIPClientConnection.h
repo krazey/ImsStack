@@ -87,6 +87,9 @@ public:
     IMS_RESULT InitDialogRequest(IN CONST SipMethod& objMethod, IN SIPDialogEx* pDialogEx);
     IMS_RESULT SendWithCredentials();
 
+protected:
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
+
 private:
     // ISIPClientTransactionStateListener interface
     virtual void ClientTransactionState_ForkedResponseReceived(
@@ -118,6 +121,12 @@ public:
     };
 
 private:
+    enum
+    {
+        AMSG_SIP_RESPONSE_RECEIVED = AMSG_USER,
+        AMSG_SIP_FORKED_RESPONSE_RECEIVED
+    };
+
     static const AString ANONYMOUS_URI;
 
     IMS_SINT32 nState;
