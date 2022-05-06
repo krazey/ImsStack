@@ -24,8 +24,7 @@ Example
 See Also
 
 */
-class QosProperty
-    : public ImsProperty
+class QosProperty : public ImsProperty
 {
 public:
     struct QualityOfService
@@ -41,24 +40,24 @@ public:
 
 public:
     QosProperty();
-    explicit QosProperty(IN const AString &strContentType_);
-    QosProperty(IN const QosProperty &objRHS);
+    explicit QosProperty(IN const AString& strContentType_);
+    QosProperty(IN const QosProperty& objRHS);
     virtual ~QosProperty();
 
 public:
-    QosProperty& operator=(IN const QosProperty &objRHS);
+    QosProperty& operator=(IN const QosProperty& objRHS);
 
 public:
-    virtual IMS_BOOL Equals(IN const AString &strValue) const;
+    virtual IMS_BOOL Equals(IN const AString& strValue) const;
 
     const AString& GetContentType() const;
     QualityOfService GetQos() const;
     AString GetQosString() const;
-    IMS_BOOL SetQos(IN const AString &strValue);
+    IMS_BOOL SetQos(IN const AString& strValue);
 
 private:
     AString strContentType;
     QualityOfService stQos;
 };
 
-#endif // _QOS_PROPERTY_H_
+#endif  // _QOS_PROPERTY_H_

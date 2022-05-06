@@ -14,16 +14,13 @@
 #include "ConfigBuffer.h"
 
 PUBLIC
-ConfigBuffer::ConfigBuffer(IN const AString &strLocator_, IN const AString &strName_)
-    : strLocator(strLocator_)
-    , strName(strName_)
+ConfigBuffer::ConfigBuffer(IN const AString& strLocator_, IN const AString& strName_) :
+        strLocator(strLocator_),
+        strName(strName_)
 {
 }
 
-PUBLIC VIRTUAL
-ConfigBuffer::~ConfigBuffer()
-{
-}
+PUBLIC VIRTUAL ConfigBuffer::~ConfigBuffer() {}
 
 PROTECTED
 const AString& ConfigBuffer::GetLocator() const

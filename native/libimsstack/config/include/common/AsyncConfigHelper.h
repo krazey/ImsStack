@@ -18,24 +18,23 @@
 
 class IAsyncConfig;
 
-class AsyncConfigHelper
-    : public IMSActivityEx
+class AsyncConfigHelper : public IMSActivityEx
 {
 public:
     AsyncConfigHelper();
     virtual ~AsyncConfigHelper();
 
 public:
-    void Register(IN IAsyncConfig *piConfig);
-    IMS_BOOL SendTo(IN IAsyncConfig *piConfig, IN IMS_SINT32 nMSG,
-            IN IMS_SINTP nParam1, IN IMS_SINTP nParam2);
-    void Unregister(IN IAsyncConfig *piConfig);
+    void Register(IN IAsyncConfig* piConfig);
+    IMS_BOOL SendTo(IN IAsyncConfig* piConfig, IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1,
+            IN IMS_SINTP nParam2);
+    void Unregister(IN IAsyncConfig* piConfig);
 
 private:
     // IMSActivityEx class
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
-    IMS_BOOL IsRegisteredConfig(IN IAsyncConfig *piConfig);
+    IMS_BOOL IsRegisteredConfig(IN IAsyncConfig* piConfig);
 
 private:
     // This message will be used in the first argument in SendTo(...) method
@@ -49,4 +48,4 @@ private:
     IMSList<IAsyncConfig*> objAsyncConfigs;
 };
 
-#endif // _ASYNC_CONFIG_HELPER_H_
+#endif  // _ASYNC_CONFIG_HELPER_H_

@@ -24,23 +24,22 @@ Example
 See Also
 
 */
-class RegProperty
-    : public ImsProperty
+class RegProperty : public ImsProperty
 {
 public:
-    explicit RegProperty(IN const AString &strServiceId_);
-    RegProperty(IN const RegProperty &objRHS);
+    explicit RegProperty(IN const AString& strServiceId_);
+    RegProperty(IN const RegProperty& objRHS);
     virtual ~RegProperty();
 
 public:
-    RegProperty& operator=(IN const RegProperty &objRHS);
+    RegProperty& operator=(IN const RegProperty& objRHS);
 
 public:
-    IMS_BOOL AddValue(IN const AString &strValue);
+    IMS_BOOL AddValue(IN const AString& strValue);
     const IMSList<AString>& GetValues() const;
 
 protected:
-    virtual IMS_BOOL Equals(IN const ImsProperty &objOther) const;
+    virtual IMS_BOOL Equals(IN const ImsProperty& objOther) const;
 
 private:
     AString strServiceId;
@@ -48,4 +47,4 @@ private:
     IMSList<AString> objHeaders;
 };
 
-#endif // _REG_PROPERTY_H_
+#endif  // _REG_PROPERTY_H_

@@ -21,9 +21,7 @@
 #include "ISipConfigV.h"
 #include "private/ConfigBase.h"
 
-class SipConfigV
-    : public ConfigBase
-    , public ISipConfigV
+class SipConfigV : public ConfigBase, public ISipConfigV
 {
 private:
     // Session parameters
@@ -41,18 +39,19 @@ private:
         IMS_BOOL bSDPVersionCheckSupported;
         IMS_BOOL bSDPNonRPRAllowed;
 
-        inline Session()
-            : bSessionTimerSupported(IMS_TRUE)
-            , nRefresher(SESSION_REFRESHER_LOCAL)
-            , nRefreshMethod(SESSION_REFRESH_UPDATE)
-            , nMinSE(90)
-            , nSessionExpires(3600)
-            , nHeaders(SESSION_HEADER_ALL)
-            , bNoRefreshByReINVITE(IMS_FALSE)
-            , b100TryingNotification(IMS_FALSE)
-            , bSDPVersionCheckSupported(IMS_TRUE)
-            , bSDPNonRPRAllowed(IMS_FALSE)
-        {}
+        inline Session() :
+                bSessionTimerSupported(IMS_TRUE),
+                nRefresher(SESSION_REFRESHER_LOCAL),
+                nRefreshMethod(SESSION_REFRESH_UPDATE),
+                nMinSE(90),
+                nSessionExpires(3600),
+                nHeaders(SESSION_HEADER_ALL),
+                bNoRefreshByReINVITE(IMS_FALSE),
+                b100TryingNotification(IMS_FALSE),
+                bSDPVersionCheckSupported(IMS_TRUE),
+                bSDPNonRPRAllowed(IMS_FALSE)
+        {
+        }
     };
 
 public:
@@ -65,100 +64,73 @@ public:
 public:
     // ConfigBase class
     IMS_BOOL Init() override;
-    inline IMS_UINT32 GetFeatureTagOptions() const override
-    { return m_nFeatureTagOptions; }
-    inline IMS_SINT32 GetTargetNumberFormat() const override
-    { return m_nTargetNumberFormat; }
-    inline IMS_SINT32 GetTargetScheme() const override
-    { return m_nTargetScheme; }
+    inline IMS_UINT32 GetFeatureTagOptions() const override { return m_nFeatureTagOptions; }
+    inline IMS_SINT32 GetTargetNumberFormat() const override { return m_nTargetNumberFormat; }
+    inline IMS_SINT32 GetTargetScheme() const override { return m_nTargetScheme; }
     inline IMS_SINT32 GetTimerValue(IN IMS_SINT32 nType) const override;
 
-    inline IMS_SINT32 GetPreferredId() const
-    { return m_nPreferredId; }
-    inline const AStringArray& GetAllowMethods() const
-    { return m_objAllowMethods; }
-    inline const AString& GetServiceVersion() const
-    { return m_strServiceVersion; }
+    inline IMS_SINT32 GetPreferredId() const { return m_nPreferredId; }
+    inline const AStringArray& GetAllowMethods() const { return m_objAllowMethods; }
+    inline const AString& GetServiceVersion() const { return m_strServiceVersion; }
 
     inline const AString& GetPredefinedPaniForEutran() const
-    { return m_strPredefinedPaniForEutran; }
-    inline const AString& GetPredefinedPaniForWlan() const
-    { return m_strPredefinedPaniForWlan; }
-    inline const AString& GetPredefinedPaniForUtran() const
-    { return m_strPredefinedPaniForUtran; }
+    {
+        return m_strPredefinedPaniForEutran;
+    }
+    inline const AString& GetPredefinedPaniForWlan() const { return m_strPredefinedPaniForWlan; }
+    inline const AString& GetPredefinedPaniForUtran() const { return m_strPredefinedPaniForUtran; }
 
-    inline IMS_SINT32 GetTimerValueT1() const
-    { return m_nTimerValueT1; }
-    inline IMS_SINT32 GetTimerValueT2() const
-    { return m_nTimerValueT2; }
-    inline IMS_SINT32 GetTimerValueT4() const
-    { return m_nTimerValueT4; }
-    inline IMS_SINT32 GetTimerValueTA() const
-    { return m_nTimerValueA; }
-    inline IMS_SINT32 GetTimerValueTB() const
-    { return m_nTimerValueB; }
-    inline IMS_SINT32 GetTimerValueTC() const
-    { return m_nTimerValueC; }
-    inline IMS_SINT32 GetTimerValueTD() const
-    { return m_nTimerValueD; }
-    inline IMS_SINT32 GetTimerValueTE() const
-    { return m_nTimerValueE; }
-    inline IMS_SINT32 GetTimerValueTF() const
-    { return m_nTimerValueF; }
-    inline IMS_SINT32 GetTimerValueTG() const
-    { return m_nTimerValueG; }
-    inline IMS_SINT32 GetTimerValueTH() const
-    { return m_nTimerValueH; }
-    inline IMS_SINT32 GetTimerValueTI() const
-    { return m_nTimerValueI; }
-    inline IMS_SINT32 GetTimerValueTJ() const
-    { return m_nTimerValueJ; }
-    inline IMS_SINT32 GetTimerValueTK() const
-    { return m_nTimerValueK; }
-    inline IMS_BOOL IsTimerValueConfiguredOnRuntime() const
-    { return m_bIsTVConfiguredOnRuntime; }
+    inline IMS_SINT32 GetTimerValueT1() const { return m_nTimerValueT1; }
+    inline IMS_SINT32 GetTimerValueT2() const { return m_nTimerValueT2; }
+    inline IMS_SINT32 GetTimerValueT4() const { return m_nTimerValueT4; }
+    inline IMS_SINT32 GetTimerValueTA() const { return m_nTimerValueA; }
+    inline IMS_SINT32 GetTimerValueTB() const { return m_nTimerValueB; }
+    inline IMS_SINT32 GetTimerValueTC() const { return m_nTimerValueC; }
+    inline IMS_SINT32 GetTimerValueTD() const { return m_nTimerValueD; }
+    inline IMS_SINT32 GetTimerValueTE() const { return m_nTimerValueE; }
+    inline IMS_SINT32 GetTimerValueTF() const { return m_nTimerValueF; }
+    inline IMS_SINT32 GetTimerValueTG() const { return m_nTimerValueG; }
+    inline IMS_SINT32 GetTimerValueTH() const { return m_nTimerValueH; }
+    inline IMS_SINT32 GetTimerValueTI() const { return m_nTimerValueI; }
+    inline IMS_SINT32 GetTimerValueTJ() const { return m_nTimerValueJ; }
+    inline IMS_SINT32 GetTimerValueTK() const { return m_nTimerValueK; }
+    inline IMS_BOOL IsTimerValueConfiguredOnRuntime() const { return m_bIsTVConfiguredOnRuntime; }
 
     // "session"
-    inline IMS_SINT32 GetSessionExpires() const
-    { return m_stSession.nSessionExpires; }
-    inline IMS_SINT32 GetSessionHeaders() const
-    { return m_stSession.nHeaders; }
-    inline IMS_SINT32 GetSessionRefresher() const
-    { return m_stSession.nRefresher; }
-    inline IMS_SINT32 GetSessionMethod() const
-    { return m_stSession.nRefreshMethod; }
-    inline IMS_SINT32 GetSessionMinSE() const
-    { return m_stSession.nMinSE; }
+    inline IMS_SINT32 GetSessionExpires() const { return m_stSession.nSessionExpires; }
+    inline IMS_SINT32 GetSessionHeaders() const { return m_stSession.nHeaders; }
+    inline IMS_SINT32 GetSessionRefresher() const { return m_stSession.nRefresher; }
+    inline IMS_SINT32 GetSessionMethod() const { return m_stSession.nRefreshMethod; }
+    inline IMS_SINT32 GetSessionMinSE() const { return m_stSession.nMinSE; }
     inline IMS_BOOL Is100TryingNotificationRequired() const
-    { return m_stSession.b100TryingNotification; }
+    {
+        return m_stSession.b100TryingNotification;
+    }
     inline IMS_BOOL IsSessionNoRefreshByReINVITE() const
-    { return m_stSession.bNoRefreshByReINVITE; }
-    inline IMS_BOOL IsSessionTimerSupported() const
-    { return m_stSession.bSessionTimerSupported; }
-    inline IMS_BOOL IsSessionSDPNonRPRAllowed() const
-    { return m_stSession.bSDPNonRPRAllowed; }
+    {
+        return m_stSession.bNoRefreshByReINVITE;
+    }
+    inline IMS_BOOL IsSessionTimerSupported() const { return m_stSession.bSessionTimerSupported; }
+    inline IMS_BOOL IsSessionSDPNonRPRAllowed() const { return m_stSession.bSDPNonRPRAllowed; }
     inline IMS_BOOL IsSessionSDPVersionCheckSupported() const
-    { return m_stSession.bSDPVersionCheckSupported; }
+    {
+        return m_stSession.bSDPVersionCheckSupported;
+    }
 
     // "capabilities"
-    inline IMS_BOOL IsCapabilitiesRespByApp() const
-    { return m_bRespByAppForCapabilities; }
+    inline IMS_BOOL IsCapabilitiesRespByApp() const { return m_bRespByAppForCapabilities; }
     // "pagemessage"
-    inline IMS_BOOL IsPageMessageRespByApp() const
-    { return m_bRespByAppForPageMessage; }
+    inline IMS_BOOL IsPageMessageRespByApp() const { return m_bRespByAppForPageMessage; }
     // "reference"
-    inline IMS_BOOL IsReferenceRespByApp() const
-    { return m_bRespByAppForReference; }
+    inline IMS_BOOL IsReferenceRespByApp() const { return m_bRespByAppForReference; }
 
 protected:
     // ISipConfigV class
-    inline IConfigurable* GetConfigurable() const override
-    { return m_pConfigurable; }
+    inline IConfigurable* GetConfigurable() const override { return m_pConfigurable; }
 
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
-    IMS_BOOL Update(IN IMS_SINT32 nCPI,
-            IN const AString& strValue = AString::ConstNull()) override;
+    IMS_BOOL Update(IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) override;
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
@@ -166,8 +138,8 @@ private:
             IN const AString& strUpdateTimerValue, OUT IMS_SINT32& nTimerValue);
     void UpdateAllConfigs();
 
-    static IMS_SINT32 GetTimerValue(IN ICarrierConfig* piCc,
-            IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
+    static IMS_SINT32 GetTimerValue(
+            IN ICarrierConfig* piCc, IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue);
 
 public:
     enum

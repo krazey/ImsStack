@@ -15,17 +15,13 @@
 #include "conf/ConfigComment.h"
 
 PUBLIC
-ConfigComment::ConfigComment()
-{
-}
+ConfigComment::ConfigComment() {}
 
 PUBLIC
-ConfigComment::~ConfigComment()
-{
-}
+ConfigComment::~ConfigComment() {}
 
 PUBLIC
-void ConfigComment::Add(IN const AString &strComment)
+void ConfigComment::Add(IN const AString& strComment)
 {
     objComments.AddElement(strComment);
 }

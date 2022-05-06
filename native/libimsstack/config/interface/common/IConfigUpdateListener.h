@@ -37,8 +37,8 @@ public:
     </table>
     */
     virtual void ConfigUpdate_NotifyUpdate(IN IMS_SINT32 nCPI,
-            IN const AString &strConfName = AString::ConstNull(),
-            IN const AString &strExtraParam = AString::ConstNull()) = 0;
+            IN const AString& strConfName = AString::ConstNull(),
+            IN const AString& strExtraParam = AString::ConstNull()) = 0;
 };
 
-#endif // _INTERFACE_CONFIG_UPDATE_LISTENER_H_
+#endif  // _INTERFACE_CONFIG_UPDATE_LISTENER_H_

@@ -22,15 +22,15 @@ public:
     ~ConfigComment();
 
 private:
-    ConfigComment(IN const ConfigComment &objRHS);
-    ConfigComment& operator=(IN const ConfigComment &objRHS);
+    ConfigComment(IN const ConfigComment& objRHS);
+    ConfigComment& operator=(IN const ConfigComment& objRHS);
 
 public:
-    void Add(IN const AString &strComment);
+    void Add(IN const AString& strComment);
     AString ToString() const;
 
 private:
     AStringArray objComments;
 };
 
-#endif // _CONFIG_COMMENT_H_
+#endif  // _CONFIG_COMMENT_H_

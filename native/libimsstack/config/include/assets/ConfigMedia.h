@@ -12,7 +12,7 @@ public:
     ConfigMedia() = delete;
 
 public:
-    #define CONFIG_MEDIA_MTC "ims.media.mtc"
+#define CONFIG_MEDIA_MTC "ims.media.mtc"
 
     static const IMS_CHAR MEDIA_NAME[];
     static const IMS_CHAR MEDIA_CAPABILITIES_NAME[];

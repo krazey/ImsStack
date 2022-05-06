@@ -15,24 +15,22 @@
 #include "ImsRegistry.h"
 
 PUBLIC
-ImsRegistry::ImsRegistry()
-    : objProperties(IMSList<AStringArray>())
+ImsRegistry::ImsRegistry() :
+        objProperties(IMSList<AStringArray>())
 {
 }
 
 PUBLIC
-ImsRegistry::ImsRegistry(IN const ImsRegistry &objRHS)
-    : objProperties(objRHS.objProperties)
+ImsRegistry::ImsRegistry(IN const ImsRegistry& objRHS) :
+        objProperties(objRHS.objProperties)
 {
 }
 
 PUBLIC
-ImsRegistry::~ImsRegistry()
-{
-}
+ImsRegistry::~ImsRegistry() {}
 
 PUBLIC
-ImsRegistry& ImsRegistry::operator=(IN const ImsRegistry &objRHS)
+ImsRegistry& ImsRegistry::operator=(IN const ImsRegistry& objRHS)
 {
     if (this != &objRHS)
     {
@@ -43,7 +41,7 @@ ImsRegistry& ImsRegistry::operator=(IN const ImsRegistry &objRHS)
 }
 
 PUBLIC
-IMS_BOOL ImsRegistry::Add(IN const AStringArray &objProperty)
+IMS_BOOL ImsRegistry::Add(IN const AStringArray& objProperty)
 {
     return objProperties.Append(objProperty);
 }

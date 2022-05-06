@@ -21,20 +21,20 @@
 __IMS_TRACE_TAG_CONF__;
 
 PUBLIC
-ImsSubscriberInfo::ImsSubscriberInfo()
-    : m_strHomeDomainName(AString::ConstNull())
-    , m_strPrivateUserId(AString::ConstNull())
-    , m_nRefIndexOfPrimaryImpu(0) // First one as a primary IMPU
-    , m_strPrimaryImpuSipUri(AString::ConstNull())
-    , m_strPrimaryImpuTelUri(AString::ConstNull())
-    , m_strPhoneContext(AString::ConstNull())
-    , m_bIsAuthRealmLenient(IMS_FALSE)
-    , m_strScscfAddress(AString::ConstNull())
+ImsSubscriberInfo::ImsSubscriberInfo() :
+        m_strHomeDomainName(AString::ConstNull()),
+        m_strPrivateUserId(AString::ConstNull()),
+        m_nRefIndexOfPrimaryImpu(0)  // First one as a primary IMPU
+        ,
+        m_strPrimaryImpuSipUri(AString::ConstNull()),
+        m_strPrimaryImpuTelUri(AString::ConstNull()),
+        m_strPhoneContext(AString::ConstNull()),
+        m_bIsAuthRealmLenient(IMS_FALSE),
+        m_strScscfAddress(AString::ConstNull())
 {
 }
 
-PUBLIC VIRTUAL
-const AString& ImsSubscriberInfo::GetPublicUserId(
+PUBLIC VIRTUAL const AString& ImsSubscriberInfo::GetPublicUserId(
         IN IMS_SINT32 nImpuType /*= IImsSubscriberInfo::IMPU_REF_INDEX*/) const
 {
     if (nImpuType == IImsSubscriberInfo::IMPU_SIP)
@@ -47,8 +47,8 @@ const AString& ImsSubscriberInfo::GetPublicUserId(
     }
     else
     {
-        if ((m_nRefIndexOfPrimaryImpu >= 0)
-                && (m_nRefIndexOfPrimaryImpu < m_objPublicUserIds.GetCount()))
+        if ((m_nRefIndexOfPrimaryImpu >= 0) &&
+                (m_nRefIndexOfPrimaryImpu < m_objPublicUserIds.GetCount()))
         {
             return m_objPublicUserIds.GetElementAt(m_nRefIndexOfPrimaryImpu);
         }

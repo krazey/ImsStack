@@ -21,20 +21,20 @@ __IMS_TRACE_TAG_CONF__;
 class CoreServiceConfigPrivate
 {
 public:
-    CoreServiceConfigPrivate(IN const AString &strServiceId_);
+    CoreServiceConfigPrivate(IN const AString& strServiceId_);
     ~CoreServiceConfigPrivate();
 
 public:
     static IMS_BOOL AddCoreServiceProperty(
-            IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP);
+            IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP);
     static IMS_BOOL AddQosProperty(
-            IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP);
+            IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP);
     static IMS_BOOL AddRegistrationHeaderProperty(
-            IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP);
+            IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP);
     static IMS_BOOL AddMediaProfileProperty(
-            IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP);
+            IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP);
     static IMS_BOOL AddConnectionModelProperty(
-            IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP);
+            IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP);
 
 private:
     friend class CoreServiceConfig;
@@ -68,10 +68,10 @@ private:
 };
 
 PUBLIC
-CoreServiceConfigPrivate::CoreServiceConfigPrivate(IN const AString &strServiceId_)
-    : strServiceId(strServiceId_)
-    , strMediaProfile(AString::ConstNull())
-    , bConnectionModelSupported(IMS_FALSE)
+CoreServiceConfigPrivate::CoreServiceConfigPrivate(IN const AString& strServiceId_) :
+        strServiceId(strServiceId_),
+        strMediaProfile(AString::ConstNull()),
+        bConnectionModelSupported(IMS_FALSE)
 {
 }
 
@@ -80,7 +80,7 @@ CoreServiceConfigPrivate::~CoreServiceConfigPrivate()
 {
     for (IMS_UINT32 i = 0; i < objFeatureSets.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objFeatureSets.GetAt(i);
+        FeatureSet* pFeatureSet = objFeatureSets.GetAt(i);
 
         if (pFeatureSet != IMS_NULL)
         {
@@ -89,9 +89,8 @@ CoreServiceConfigPrivate::~CoreServiceConfigPrivate()
     }
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
-        IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP)
+PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
+        IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP)
 {
     // { "CoreService", "ServiceId", "zero or one IARI", "zero or more ICSIs", "Feature Tags" }
 
@@ -101,7 +100,7 @@ IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
     // which would add considerable complexity for little gain.
 
     // IARI : zero or one
-    const AString &strIARI = objProperty.GetElementAt(2);
+    const AString& strIARI = objProperty.GetElementAt(2);
 
     if (strIARI.GetLength() != 0)
     {
@@ -145,8 +144,8 @@ IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
     // Create a feature sets from feature tags
     for (IMS_UINT32 i = 0; i < pConfigP->objFeatureTags.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet
-                = FeatureSet::FromServiceIdentifier(pConfigP->objFeatureTags.GetAt(i));
+        FeatureSet* pFeatureSet =
+                FeatureSet::FromServiceIdentifier(pConfigP->objFeatureTags.GetAt(i));
 
         if (pFeatureSet != IMS_NULL)
         {
@@ -157,9 +156,8 @@ IMS_BOOL CoreServiceConfigPrivate::AddCoreServiceProperty(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CoreServiceConfigPrivate::AddQosProperty(
-        IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP)
+PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddQosProperty(
+        IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP)
 {
     // { "Qos", "ServiceId", "MIME Content Type", "Flowspec_Send", "Flowspec_Receive" }
 
@@ -190,15 +188,15 @@ IMS_BOOL CoreServiceConfigPrivate::AddQosProperty(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CoreServiceConfigPrivate::AddRegistrationHeaderProperty(
-        IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP)
+PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddRegistrationHeaderProperty(
+        IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP)
 {
     // { "Reg", "ServiceId", "Header1", "Header2", ... }
 
     if (pConfigP->objRegHeaders.GetCount() > 0)
     {
-        IMS_TRACE_E(0, "Property contains a Reg entry for a core service that already has " \
+        IMS_TRACE_E(0,
+                "Property contains a Reg entry for a core service that already has "
                 "a Reg entry defined: %s, %s",
                 ImsProperty::ToString(pConfigP->objRegHeaders).GetStr(),
                 ImsProperty::ToString(objProperty).GetStr(), 0);
@@ -214,7 +212,7 @@ IMS_BOOL CoreServiceConfigPrivate::AddRegistrationHeaderProperty(
 
     for (IMS_SINT32 i = 2; i < objProperty.GetCount(); ++i)
     {
-        const AString &strValue = objProperty.GetElementAt(i);
+        const AString& strValue = objProperty.GetElementAt(i);
 
         if (!strValue.Contains(':'))
         {
@@ -229,9 +227,8 @@ IMS_BOOL CoreServiceConfigPrivate::AddRegistrationHeaderProperty(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CoreServiceConfigPrivate::AddMediaProfileProperty(
-        IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP)
+PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddMediaProfileProperty(
+        IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP)
 {
     // { "Mprof", "ServiceId", "Media profile short name" }
 
@@ -247,9 +244,8 @@ IMS_BOOL CoreServiceConfigPrivate::AddMediaProfileProperty(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CoreServiceConfigPrivate::AddConnectionModelProperty(
-        IN const AStringArray &objProperty, IN_OUT CoreServiceConfigPrivate *pConfigP)
+PUBLIC GLOBAL IMS_BOOL CoreServiceConfigPrivate::AddConnectionModelProperty(
+        IN const AStringArray& objProperty, IN_OUT CoreServiceConfigPrivate* pConfigP)
 {
     // { "Connection", "ServiceId" }
 
@@ -266,13 +262,12 @@ IMS_BOOL CoreServiceConfigPrivate::AddConnectionModelProperty(
 }
 
 PUBLIC
-CoreServiceConfig::CoreServiceConfig(IN const AString &strServiceId_)
-    : pConfigP(new CoreServiceConfigPrivate(strServiceId_))
+CoreServiceConfig::CoreServiceConfig(IN const AString& strServiceId_) :
+        pConfigP(new CoreServiceConfigPrivate(strServiceId_))
 {
 }
 
-PUBLIC VIRTUAL
-CoreServiceConfig::~CoreServiceConfig()
+PUBLIC VIRTUAL CoreServiceConfig::~CoreServiceConfig()
 {
     if (pConfigP != IMS_NULL)
     {
@@ -280,14 +275,12 @@ CoreServiceConfig::~CoreServiceConfig()
     }
 }
 
-PUBLIC VIRTUAL
-const AString& CoreServiceConfig::GetServiceId() const
+PUBLIC VIRTUAL const AString& CoreServiceConfig::GetServiceId() const
 {
     return pConfigP->strServiceId;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CoreServiceConfig::IsIARISupported() const
+PUBLIC VIRTUAL IMS_BOOL CoreServiceConfig::IsIARISupported() const
 {
     if (pConfigP->objIARI.GetName().GetLength() == 0)
     {
@@ -297,32 +290,28 @@ IMS_BOOL CoreServiceConfig::IsIARISupported() const
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-const ServiceIdentifier& CoreServiceConfig::GetIARI() const
+PUBLIC VIRTUAL const ServiceIdentifier& CoreServiceConfig::GetIARI() const
 {
     return pConfigP->objIARI;
 }
 
-PUBLIC VIRTUAL
-const IMSList<ServiceIdentifier>& CoreServiceConfig::GetICSIs() const
+PUBLIC VIRTUAL const IMSList<ServiceIdentifier>& CoreServiceConfig::GetICSIs() const
 {
     return pConfigP->objICSIs;
 }
 
-PUBLIC VIRTUAL
-const IMSList<ServiceIdentifier>& CoreServiceConfig::GetFeatureTags() const
+PUBLIC VIRTUAL const IMSList<ServiceIdentifier>& CoreServiceConfig::GetFeatureTags() const
 {
     return pConfigP->objFeatureTags;
 }
 
-PUBLIC VIRTUAL
-const AString& CoreServiceConfig::GetMediaProfile() const
+PUBLIC VIRTUAL const AString& CoreServiceConfig::GetMediaProfile() const
 {
     return pConfigP->strMediaProfile;
 }
 
 PUBLIC
-IMS_BOOL CoreServiceConfig::Create(IN const AStringArray &objCoreServiceProperty)
+IMS_BOOL CoreServiceConfig::Create(IN const AStringArray& objCoreServiceProperty)
 {
     if (!CoreServiceConfigPrivate::AddCoreServiceProperty(objCoreServiceProperty, pConfigP))
     {
@@ -334,26 +323,26 @@ IMS_BOOL CoreServiceConfig::Create(IN const AStringArray &objCoreServiceProperty
 }
 
 PUBLIC
-IMS_BOOL CoreServiceConfig::AddProperty(IN const AStringArray &objProperty)
+IMS_BOOL CoreServiceConfig::AddProperty(IN const AStringArray& objProperty)
 {
     IMS_SINT32 nKey = ImsProperty::StringToKey(objProperty.GetElementAt(0));
 
     switch (nKey)
     {
-    case ImsProperty::PKEY_QOS:
-        return CoreServiceConfigPrivate::AddQosProperty(objProperty, pConfigP);
+        case ImsProperty::PKEY_QOS:
+            return CoreServiceConfigPrivate::AddQosProperty(objProperty, pConfigP);
 
-    case ImsProperty::PKEY_REG:
-        return CoreServiceConfigPrivate::AddRegistrationHeaderProperty(objProperty, pConfigP);
+        case ImsProperty::PKEY_REG:
+            return CoreServiceConfigPrivate::AddRegistrationHeaderProperty(objProperty, pConfigP);
 
-    case ImsProperty::PKEY_MPROF:
-        return CoreServiceConfigPrivate::AddMediaProfileProperty(objProperty, pConfigP);
+        case ImsProperty::PKEY_MPROF:
+            return CoreServiceConfigPrivate::AddMediaProfileProperty(objProperty, pConfigP);
 
-    case ImsProperty::PKEY_CONNECTION:
-        return CoreServiceConfigPrivate::AddConnectionModelProperty(objProperty, pConfigP);
+        case ImsProperty::PKEY_CONNECTION:
+            return CoreServiceConfigPrivate::AddConnectionModelProperty(objProperty, pConfigP);
 
-    default:
-        return IMS_FALSE;
+        default:
+            return IMS_FALSE;
     }
 }
 
@@ -370,7 +359,7 @@ AStringArray CoreServiceConfig::GetQosContentTypes() const
 
     for (IMS_UINT32 i = 0; i < pConfigP->objFlowSpecSends.GetSize(); ++i)
     {
-        const QosProperty &objQos = pConfigP->objFlowSpecSends.GetAt(i);
+        const QosProperty& objQos = pConfigP->objFlowSpecSends.GetAt(i);
 
         objContentTypes.AddElement(objQos.GetContentType());
     }
@@ -379,11 +368,11 @@ AStringArray CoreServiceConfig::GetQosContentTypes() const
 }
 
 PUBLIC
-const QosProperty* CoreServiceConfig::GetFlowSpecSend(IN const AString &strContentType) const
+const QosProperty* CoreServiceConfig::GetFlowSpecSend(IN const AString& strContentType) const
 {
     for (IMS_UINT32 i = 0; i < pConfigP->objFlowSpecSends.GetSize(); ++i)
     {
-        const QosProperty &objQos = pConfigP->objFlowSpecSends.GetAt(i);
+        const QosProperty& objQos = pConfigP->objFlowSpecSends.GetAt(i);
 
         if (objQos.Equals(strContentType))
         {
@@ -395,11 +384,11 @@ const QosProperty* CoreServiceConfig::GetFlowSpecSend(IN const AString &strConte
 }
 
 PUBLIC
-const QosProperty* CoreServiceConfig::GetFlowSpecReceive(IN const AString &strContentType) const
+const QosProperty* CoreServiceConfig::GetFlowSpecReceive(IN const AString& strContentType) const
 {
     for (IMS_UINT32 i = 0; i < pConfigP->objFlowSpecReceives.GetSize(); ++i)
     {
-        const QosProperty &objQos = pConfigP->objFlowSpecReceives.GetAt(i);
+        const QosProperty& objQos = pConfigP->objFlowSpecReceives.GetAt(i);
 
         if (objQos.Equals(strContentType))
         {
@@ -423,7 +412,7 @@ IMS_BOOL CoreServiceConfig::IsConnectionModelSupported() const
 }
 
 PUBLIC
-void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry *&pRegistry) const
+void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry*& pRegistry) const
 {
     AStringArray objProperty;
     AStringArray objValues;
@@ -434,7 +423,7 @@ void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry *&pRegistry) const
 
     if (IsIARISupported())
     {
-        const ServiceIdentifier &objIARI = GetIARI();
+        const ServiceIdentifier& objIARI = GetIARI();
 
         objProperty.AddElement(objIARI.ToString());
     }
@@ -447,7 +436,7 @@ void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry *&pRegistry) const
 
     for (i = 0; i < pConfigP->objICSIs.GetSize(); ++i)
     {
-        const ServiceIdentifier &objSI = pConfigP->objICSIs.GetAt(i);
+        const ServiceIdentifier& objSI = pConfigP->objICSIs.GetAt(i);
 
         objValues.AddElement(objSI.ToString());
     }
@@ -463,7 +452,7 @@ void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry *&pRegistry) const
 
     for (i = 0; i < pConfigP->objFeatureTags.GetSize(); ++i)
     {
-        const ServiceIdentifier &objSI = pConfigP->objFeatureTags.GetAt(i);
+        const ServiceIdentifier& objSI = pConfigP->objFeatureTags.GetAt(i);
 
         objValues.AddElement(objSI.ToString());
     }
@@ -488,9 +477,9 @@ void CoreServiceConfig::ToRegistry(IN_OUT ImsRegistry *&pRegistry) const
 
     for (j = 0; j < objValues.GetCount(); ++j)
     {
-        const AString &strContentType = objValues.GetElementAt(j);
-        const QosProperty *pFlowspecSend = GetFlowSpecSend(strContentType);
-        const QosProperty *pFlowspecReceive = GetFlowSpecReceive(strContentType);
+        const AString& strContentType = objValues.GetElementAt(j);
+        const QosProperty* pFlowspecSend = GetFlowSpecSend(strContentType);
+        const QosProperty* pFlowspecReceive = GetFlowSpecReceive(strContentType);
 
         if ((pFlowspecSend != IMS_NULL) && (pFlowspecReceive != IMS_NULL))
         {

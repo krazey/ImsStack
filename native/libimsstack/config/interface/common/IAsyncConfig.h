@@ -34,8 +34,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void HandleMessage(IN IMS_SINT32 nMSG,
-            IN IMS_SINTP nParam1, IN IMS_SINTP nParam2) = 0;
+    virtual void HandleMessage(IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2) = 0;
 
 public:
     enum
@@ -50,4 +49,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_ASYNC_CONFIG_H_
+#endif  // _INTERFACE_ASYNC_CONFIG_H_

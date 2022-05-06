@@ -14,27 +14,24 @@
 #include "RegProperty.h"
 
 PUBLIC
-RegProperty::RegProperty(IN const AString &strServiceId_)
-    : ImsProperty(ImsProperty::PKEY_REG)
-    , strServiceId(strServiceId_)
+RegProperty::RegProperty(IN const AString& strServiceId_) :
+        ImsProperty(ImsProperty::PKEY_REG),
+        strServiceId(strServiceId_)
 {
 }
 
 PUBLIC
-RegProperty::RegProperty(IN const RegProperty &objRHS)
-    : ImsProperty(objRHS)
-    , strServiceId(objRHS.strServiceId)
-    , objHeaders(objRHS.objHeaders)
+RegProperty::RegProperty(IN const RegProperty& objRHS) :
+        ImsProperty(objRHS),
+        strServiceId(objRHS.strServiceId),
+        objHeaders(objRHS.objHeaders)
 {
 }
 
-PUBLIC VIRTUAL
-RegProperty::~RegProperty()
-{
-}
+PUBLIC VIRTUAL RegProperty::~RegProperty() {}
 
 PUBLIC
-RegProperty& RegProperty::operator=(IN const RegProperty &objRHS)
+RegProperty& RegProperty::operator=(IN const RegProperty& objRHS)
 {
     if (this != &objRHS)
     {
@@ -48,7 +45,7 @@ RegProperty& RegProperty::operator=(IN const RegProperty &objRHS)
 }
 
 PUBLIC
-IMS_BOOL RegProperty::AddValue(IN const AString &strValue)
+IMS_BOOL RegProperty::AddValue(IN const AString& strValue)
 {
     return objHeaders.Append(strValue);
 }
@@ -59,10 +56,9 @@ const IMSList<AString>& RegProperty::GetValues() const
     return objHeaders;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL RegProperty::Equals(IN const ImsProperty &objOther) const
+PROTECTED VIRTUAL IMS_BOOL RegProperty::Equals(IN const ImsProperty& objOther) const
 {
-    const RegProperty &objRegOther = DYNAMIC_CAST(const RegProperty&, objOther);
+    const RegProperty& objRegOther = DYNAMIC_CAST(const RegProperty&, objOther);
 
     if (nKey != objRegOther.nKey)
     {

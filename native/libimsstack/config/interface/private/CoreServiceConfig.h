@@ -21,16 +21,15 @@ class ImsRegistry;
 class QosProperty;
 class CoreServiceConfigPrivate;
 
-class CoreServiceConfig
-    : public ICoreServiceConfig
+class CoreServiceConfig : public ICoreServiceConfig
 {
 public:
-    explicit CoreServiceConfig(IN const AString &strServiceId_);
+    explicit CoreServiceConfig(IN const AString& strServiceId_);
     virtual ~CoreServiceConfig();
 
 private:
-    CoreServiceConfig(IN const CoreServiceConfig &objRHS);
-    CoreServiceConfig& operator=(IN const CoreServiceConfig &objRHS);
+    CoreServiceConfig(IN const CoreServiceConfig& objRHS);
+    CoreServiceConfig& operator=(IN const CoreServiceConfig& objRHS);
 
 public:
     // ICoreServiceConfig interface
@@ -41,19 +40,19 @@ public:
     virtual const IMSList<ServiceIdentifier>& GetFeatureTags() const;
     virtual const AString& GetMediaProfile() const;
 
-    IMS_BOOL Create(IN const AStringArray &objCoreServiceProperty);
-    IMS_BOOL AddProperty(IN const AStringArray &objProperty);
+    IMS_BOOL Create(IN const AStringArray& objCoreServiceProperty);
+    IMS_BOOL AddProperty(IN const AStringArray& objProperty);
     const IMSList<FeatureSet*>& GetFeatureSets() const;
     AStringArray GetQosContentTypes() const;
-    const QosProperty* GetFlowSpecSend(IN const AString &strContentType) const;
-    const QosProperty* GetFlowSpecReceive(IN const AString &strContentType) const;
+    const QosProperty* GetFlowSpecSend(IN const AString& strContentType) const;
+    const QosProperty* GetFlowSpecReceive(IN const AString& strContentType) const;
     const AStringArray& GetRegistrationHeaders() const;
     IMS_BOOL IsConnectionModelSupported() const;
 
-    void ToRegistry(IN_OUT ImsRegistry *&pRegistry) const;
+    void ToRegistry(IN_OUT ImsRegistry*& pRegistry) const;
 
 private:
-    CoreServiceConfigPrivate *pConfigP;
+    CoreServiceConfigPrivate* pConfigP;
 };
 
-#endif // _CORE_SERVICE_CONFIG_H_
+#endif  // _CORE_SERVICE_CONFIG_H_

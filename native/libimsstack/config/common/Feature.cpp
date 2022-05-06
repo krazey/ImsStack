@@ -19,66 +19,56 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PUBLIC GLOBAL
-const IMS_CHAR* Feature::BASE_TAG[Feature::BASE_MAX] =
-{
-    "audio",
-    "application",
-    "data",
-    "control",
-    "video",
-    "text",
-    "automata",
-    "class",
-    "duplex",
-    "mobility",
-    "description",
-    "events",
-    "priority",
-    "methods",
-    "extensions",
-    "schemes",
-    "actor",
-    "isfocus",
-    "language",
-    "type"
+PUBLIC GLOBAL const IMS_CHAR* Feature::BASE_TAG[Feature::BASE_MAX] = {
+        "audio",
+        "application",
+        "data",
+        "control",
+        "video",
+        "text",
+        "automata",
+        "class",
+        "duplex",
+        "mobility",
+        "description",
+        "events",
+        "priority",
+        "methods",
+        "extensions",
+        "schemes",
+        "actor",
+        "isfocus",
+        "language",
+        "type",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR Feature::OTHER_APP_SUBTYPE[] = "app_subtype";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::OTHER_MESSAGE[] = "message";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::OTHER_G_3GPP_IARI_REF[] = "+g.3gpp.iari-ref";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::OTHER_G_3GPP_ICSI_REF[] = "+g.3gpp.icsi-ref";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::FLAG_EXPLICIT[] = "explicit";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::FLAG_REQUIRE[] = "require";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::PREFIX_3GPP_IARI[] = "urn:urn-7:3gpp-application.ims.iari";
-PUBLIC GLOBAL
-const IMS_CHAR Feature::PREFIX_3GPP_ICSI[] = "urn:urn-7:3gpp-service.ims.icsi";
+PUBLIC GLOBAL const IMS_CHAR Feature::OTHER_APP_SUBTYPE[] = "app_subtype";
+PUBLIC GLOBAL const IMS_CHAR Feature::OTHER_MESSAGE[] = "message";
+PUBLIC GLOBAL const IMS_CHAR Feature::OTHER_G_3GPP_IARI_REF[] = "+g.3gpp.iari-ref";
+PUBLIC GLOBAL const IMS_CHAR Feature::OTHER_G_3GPP_ICSI_REF[] = "+g.3gpp.icsi-ref";
+PUBLIC GLOBAL const IMS_CHAR Feature::FLAG_EXPLICIT[] = "explicit";
+PUBLIC GLOBAL const IMS_CHAR Feature::FLAG_REQUIRE[] = "require";
+PUBLIC GLOBAL const IMS_CHAR Feature::PREFIX_3GPP_IARI[] = "urn:urn-7:3gpp-application.ims.iari";
+PUBLIC GLOBAL const IMS_CHAR Feature::PREFIX_3GPP_ICSI[] = "urn:urn-7:3gpp-service.ims.icsi";
 
 PUBLIC
-Feature::Feature(IN const AString &strFeature_)
-    : RCObject()
-    , nType(NONE)
-    , bCaseSensitivity(IMS_FALSE)
-    , strTag(AString::ConstNull())
-    , strValue(AString::ConstNull())
+Feature::Feature(IN const AString& strFeature_) :
+        RCObject(),
+        nType(NONE),
+        bCaseSensitivity(IMS_FALSE),
+        strTag(AString::ConstNull()),
+        strValue(AString::ConstNull())
 {
     ExtractProperties(strFeature_);
 }
 
 PUBLIC
-Feature::Feature(IN const AString &strTag_, IN const AString &strValue_)
-    : RCObject()
-    , nType(NONE)
-    , bCaseSensitivity(IMS_FALSE)
-    , strTag(AString::ConstNull())
-    , strValue(AString::ConstNull())
+Feature::Feature(IN const AString& strTag_, IN const AString& strValue_) :
+        RCObject(),
+        nType(NONE),
+        bCaseSensitivity(IMS_FALSE),
+        strTag(AString::ConstNull()),
+        strValue(AString::ConstNull())
 {
     if (strValue_.GetLength() == 0)
     {
@@ -91,22 +81,19 @@ Feature::Feature(IN const AString &strTag_, IN const AString &strValue_)
 }
 
 PUBLIC
-Feature::Feature(IN const Feature &objRHS)
-    : RCObject(objRHS)
-    , nType(objRHS.nType)
-    , bCaseSensitivity(objRHS.bCaseSensitivity)
-    , strTag(objRHS.strTag)
-    , strValue(objRHS.strValue)
+Feature::Feature(IN const Feature& objRHS) :
+        RCObject(objRHS),
+        nType(objRHS.nType),
+        bCaseSensitivity(objRHS.bCaseSensitivity),
+        strTag(objRHS.strTag),
+        strValue(objRHS.strValue)
 {
 }
 
-PUBLIC VIRTUAL
-Feature::~Feature()
-{
-}
+PUBLIC VIRTUAL Feature::~Feature() {}
 
 PUBLIC
-Feature& Feature::operator=(IN const Feature &objRHS)
+Feature& Feature::operator=(IN const Feature& objRHS)
 {
     if (this != &objRHS)
     {
@@ -121,7 +108,7 @@ Feature& Feature::operator=(IN const Feature &objRHS)
 }
 
 PUBLIC
-IMS_BOOL Feature::Equals(IN const Feature *pOther) const
+IMS_BOOL Feature::Equals(IN const Feature* pOther) const
 {
     if (pOther == IMS_NULL)
     {
@@ -164,14 +151,14 @@ IMS_BOOL Feature::Equals(IN const Feature *pOther) const
         }
         else
         {
-            if ((strValue.GetLength() == 0)
-                    && pOther->strValue.EqualsIgnoreCase(TextParser::STR_TRUE))
+            if ((strValue.GetLength() == 0) &&
+                    pOther->strValue.EqualsIgnoreCase(TextParser::STR_TRUE))
             {
                 return IMS_TRUE;
             }
 
-            if ((pOther->strValue.GetLength() == 0)
-                    && strValue.EqualsIgnoreCase(TextParser::STR_TRUE))
+            if ((pOther->strValue.GetLength() == 0) &&
+                    strValue.EqualsIgnoreCase(TextParser::STR_TRUE))
             {
                 return IMS_TRUE;
             }
@@ -216,7 +203,7 @@ const AString& Feature::GetValue() const
 }
 
 PUBLIC
-IMS_BOOL Feature::IsSameTag(IN const Feature *pOther) const
+IMS_BOOL Feature::IsSameTag(IN const Feature* pOther) const
 {
     return strTag.EqualsIgnoreCase(pOther->strTag);
 }
@@ -281,8 +268,7 @@ AString Feature::ToStringValueOnly() const
     return strValue;
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* Feature::GetFeatureTag(IN IMS_SINT32 nBaseTag)
+PUBLIC GLOBAL const IMS_CHAR* Feature::GetFeatureTag(IN IMS_SINT32 nBaseTag)
 {
     if ((nBaseTag >= BASE_AUDIO) && (nBaseTag < BASE_MAX))
     {
@@ -292,8 +278,7 @@ const IMS_CHAR* Feature::GetFeatureTag(IN IMS_SINT32 nBaseTag)
     return IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Feature::IsFeatureTag(IN const AString &strName)
+PUBLIC GLOBAL IMS_BOOL Feature::IsFeatureTag(IN const AString& strName)
 {
     if (IsBaseTag(strName))
     {
@@ -321,13 +306,9 @@ IMS_BOOL Feature::IsFeatureTag(IN const AString &strName)
 
     for (IMS_SINT32 i = 2; i < nLen; ++i)
     {
-        if (IMS_ISALPHA(strName[i])
-                || IMS_ISDIGIT(strName[i])
-                || (strName[i] == 0x21)
-                || (strName[i] == 0x27)
-                || (strName[i] == 0x2E)
-                || (strName[i] == 0x2D)
-                || (strName[i] == 0x25))
+        if (IMS_ISALPHA(strName[i]) || IMS_ISDIGIT(strName[i]) || (strName[i] == 0x21) ||
+                (strName[i] == 0x27) || (strName[i] == 0x2E) || (strName[i] == 0x2D) ||
+                (strName[i] == 0x25))
         {
             continue;
         }
@@ -341,7 +322,7 @@ IMS_BOOL Feature::IsFeatureTag(IN const AString &strName)
 }
 
 PRIVATE
-void Feature::ExtractProperties(IN const AString &strFeature)
+void Feature::ExtractProperties(IN const AString& strFeature)
 {
     IMS_SINT32 nCount = strFeature.SplitF(TextParser::CHAR_EQUAL, strTag, strValue);
 
@@ -369,8 +350,8 @@ void Feature::ExtractProperties(IN const AString &strFeature)
         nType = TOKEN_NOBANG;
 
         // string-value := '<value>'
-        if (strValue.StartsWith(TextParser::CHAR_LAQUOT)
-                && strValue.EndsWith(TextParser::CHAR_RAQUOT))
+        if (strValue.StartsWith(TextParser::CHAR_LAQUOT) &&
+                strValue.EndsWith(TextParser::CHAR_RAQUOT))
         {
             nType = STRING_VALUE;
 
@@ -378,16 +359,15 @@ void Feature::ExtractProperties(IN const AString &strFeature)
             bCaseSensitivity = IMS_TRUE;
         }
         // numeric := "#" numeric-relation number
-        else if (strValue.StartsWith("!#")
-                || strValue.StartsWith(TextParser::CHAR_SHARP))
+        else if (strValue.StartsWith("!#") || strValue.StartsWith(TextParser::CHAR_SHARP))
         {
             nType = NUMERIC;
         }
 
         // "boolean" value can be treated as tokens.
         // So, case-insensitive string comparison will be done.
-        if (strValue.EqualsIgnoreCase(TextParser::STR_TRUE)
-                || strValue.EqualsIgnoreCase(TextParser::STR_FALSE))
+        if (strValue.EqualsIgnoreCase(TextParser::STR_TRUE) ||
+                strValue.EqualsIgnoreCase(TextParser::STR_FALSE))
         {
             nType = BOOLEAN;
         }
@@ -408,9 +388,9 @@ void Feature::ExtractProperties(IN const AString &strFeature)
             {
                 nType = IARI;
 
-                //IMS_TRACE_D(".... IARI (before decoding) : %s", strValue.GetStr(), 0, 0);
+                // IMS_TRACE_D(".... IARI (before decoding) : %s", strValue.GetStr(), 0, 0);
                 strValue = DoPercentDecoding(strValue);
-                //IMS_TRACE_D(".... IARI (after decoding) : %s", strValue.GetStr(), 0, 0);
+                // IMS_TRACE_D(".... IARI (after decoding) : %s", strValue.GetStr(), 0, 0);
             }
             else if (strTag.EqualsIgnoreCase(OTHER_G_3GPP_ICSI_REF))
             {
@@ -427,8 +407,7 @@ void Feature::ExtractProperties(IN const AString &strFeature)
     }
 }
 
-PUBLIC GLOBAL
-AString Feature::DoPercentDecoding(IN const AString &strValue)
+PUBLIC GLOBAL AString Feature::DoPercentDecoding(IN const AString& strValue)
 {
     AString strNewValue;
     const IMS_SINT32 nLen = strValue.GetLength();
@@ -441,7 +420,7 @@ AString Feature::DoPercentDecoding(IN const AString &strValue)
         }
         else
         {
-            AString strHexDigs = strValue.GetSubStr(i+1, 2);
+            AString strHexDigs = strValue.GetSubStr(i + 1, 2);
             IMS_SINT32 ch = TextParser::HexStringToChar(strHexDigs);
 
             if ((ch < 0x00) || (ch > 0xFF))
@@ -461,8 +440,7 @@ AString Feature::DoPercentDecoding(IN const AString &strValue)
     return strNewValue;
 }
 
-PUBLIC GLOBAL
-AString Feature::DoPercentEncoding(IN const AString &strValue)
+PUBLIC GLOBAL AString Feature::DoPercentEncoding(IN const AString& strValue)
 {
     // tag-value = ["!"] (token-nobang / boolean / numeric)
     // token-nobang = 1*(alphanum / "-" / "." / "%" / "*" / "_" / "+" / "`" / "'" / "~")
@@ -472,18 +450,10 @@ AString Feature::DoPercentEncoding(IN const AString &strValue)
 
     for (IMS_SINT32 i = 0; i < nLen; ++i)
     {
-        if (IMS_ISALPHA(strValue[i])
-                || IMS_ISDIGIT(strValue[i])
-                || (strValue[i] == 0x21)
-                || (strValue[i] == 0x2D)
-                || (strValue[i] == 0x2E)
-                || (strValue[i] == 0x45)
-                || (strValue[i] == 0x2A)
-                || (strValue[i] == 0x5F)
-                || (strValue[i] == 0x2B)
-                || (strValue[i] == 0x60)
-                || (strValue[i] == 0x47)
-                || (strValue[i] == 0x7E))
+        if (IMS_ISALPHA(strValue[i]) || IMS_ISDIGIT(strValue[i]) || (strValue[i] == 0x21) ||
+                (strValue[i] == 0x2D) || (strValue[i] == 0x2E) || (strValue[i] == 0x45) ||
+                (strValue[i] == 0x2A) || (strValue[i] == 0x5F) || (strValue[i] == 0x2B) ||
+                (strValue[i] == 0x60) || (strValue[i] == 0x47) || (strValue[i] == 0x7E))
         {
             strNewValue.Append(strValue[i]);
         }
@@ -497,8 +467,7 @@ AString Feature::DoPercentEncoding(IN const AString &strValue)
     return strNewValue;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL Feature::IsBaseTag(IN const AString &strName)
+PUBLIC GLOBAL IMS_BOOL Feature::IsBaseTag(IN const AString& strName)
 {
     AString strTemp = strName.MakeLower();
 
@@ -531,8 +500,7 @@ IMS_BOOL Feature::IsBaseTag(IN const AString &strName)
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-AString Feature::StripPrefixInSIPTree(IN const AString &strName)
+PUBLIC GLOBAL AString Feature::StripPrefixInSIPTree(IN const AString& strName)
 {
     IMS_SINT32 nStartIndex = strName.GetIndexOf(TextParser::CHAR_DOT);
 
@@ -544,19 +512,17 @@ AString Feature::StripPrefixInSIPTree(IN const AString &strName)
     return strName.GetSubStr(nStartIndex + 1);
 }
 
-
-
 PUBLIC
-FeatureSet::FeatureSet(IN const AString &strTag_)
-    : strTag(strTag_)
-    , objFeatures(IMSList<Feature*>())
+FeatureSet::FeatureSet(IN const AString& strTag_) :
+        strTag(strTag_),
+        objFeatures(IMSList<Feature*>())
 {
 }
 
 PUBLIC
-FeatureSet::FeatureSet(IN const AString &strTag_, IN const AString &strValues_)
-    : strTag(strTag_)
-    , objFeatures(IMSList<Feature*>())
+FeatureSet::FeatureSet(IN const AString& strTag_, IN const AString& strValues_) :
+        strTag(strTag_),
+        objFeatures(IMSList<Feature*>())
 {
     AddFeatures(strValues_);
 }
@@ -568,7 +534,7 @@ FeatureSet::~FeatureSet()
     {
         for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
         {
-            Feature *pFeature = objFeatures.GetAt(i);
+            Feature* pFeature = objFeatures.GetAt(i);
 
             if (pFeature != IMS_NULL)
             {
@@ -579,7 +545,7 @@ FeatureSet::~FeatureSet()
 }
 
 PUBLIC
-IMS_SINT32 FeatureSet::Add(IN const AString &strTag)
+IMS_SINT32 FeatureSet::Add(IN const AString& strTag)
 {
     RCPtr<Feature> rcpFeature = new Feature(strTag);
 
@@ -587,7 +553,7 @@ IMS_SINT32 FeatureSet::Add(IN const AString &strTag)
 }
 
 PUBLIC
-IMS_SINT32 FeatureSet::Add(IN const AString &strTag, IN const AString &strValue)
+IMS_SINT32 FeatureSet::Add(IN const AString& strTag, IN const AString& strValue)
 {
     RCPtr<Feature> rcpFeature = new Feature(strTag, strValue);
 
@@ -595,11 +561,11 @@ IMS_SINT32 FeatureSet::Add(IN const AString &strTag, IN const AString &strValue)
 }
 
 PUBLIC
-IMS_BOOL FeatureSet::Contains(IN const Feature *pFeature) const
+IMS_BOOL FeatureSet::Contains(IN const Feature* pFeature) const
 {
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
-        const Feature *pExFeature = objFeatures.GetAt(i);
+        const Feature* pExFeature = objFeatures.GetAt(i);
 
         if (pExFeature->Equals(pFeature))
         {
@@ -611,7 +577,7 @@ IMS_BOOL FeatureSet::Contains(IN const Feature *pFeature) const
 }
 
 PUBLIC
-IMS_BOOL FeatureSet::Contains(IN const AString &strValue) const
+IMS_BOOL FeatureSet::Contains(IN const AString& strValue) const
 {
     if (IsEmpty())
     {
@@ -622,7 +588,7 @@ IMS_BOOL FeatureSet::Contains(IN const AString &strValue) const
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
-        const Feature *pExFeature = objFeatures.GetAt(i);
+        const Feature* pExFeature = objFeatures.GetAt(i);
 
         if (pExFeature->Equals(&objFeature))
         {
@@ -652,11 +618,11 @@ IMS_BOOL FeatureSet::IsEmpty() const
 }
 
 PUBLIC
-Feature* FeatureSet::Lookup(IN const Feature *pFeature, IN IMS_BOOL bDetach /* = IMS_FALSE */)
+Feature* FeatureSet::Lookup(IN const Feature* pFeature, IN IMS_BOOL bDetach /* = IMS_FALSE */)
 {
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
-        const Feature *pExFeature = objFeatures.GetAt(i);
+        const Feature* pExFeature = objFeatures.GetAt(i);
 
         if (pExFeature->Equals(pFeature))
         {
@@ -674,7 +640,7 @@ Feature* FeatureSet::Lookup(IN const Feature *pFeature, IN IMS_BOOL bDetach /* =
 }
 
 PUBLIC
-IMS_SINT32 FeatureSet::Remove(IN const AString &strTag)
+IMS_SINT32 FeatureSet::Remove(IN const AString& strTag)
 {
     RCPtr<Feature> rcpFeature = new Feature(strTag);
 
@@ -682,7 +648,7 @@ IMS_SINT32 FeatureSet::Remove(IN const AString &strTag)
 }
 
 PUBLIC
-IMS_SINT32 FeatureSet::Remove(IN const AString &strTag, IN const AString &strValue)
+IMS_SINT32 FeatureSet::Remove(IN const AString& strTag, IN const AString& strValue)
 {
     RCPtr<Feature> rcpFeature = new Feature(strTag, strValue);
 
@@ -697,7 +663,7 @@ AString FeatureSet::ToString() const
         return AString::ConstNull();
     }
 
-    const Feature *pFeature = objFeatures.GetAt(0);
+    const Feature* pFeature = objFeatures.GetAt(0);
 
     if (objFeatures.GetSize() == 1)
     {
@@ -733,11 +699,11 @@ AString FeatureSet::ToString() const
     }
 }
 
-PUBLIC GLOBAL
-FeatureSet* FeatureSet::FromServiceIdentifier(IN const ServiceIdentifier &objServiceId)
+PUBLIC GLOBAL FeatureSet* FeatureSet::FromServiceIdentifier(
+        IN const ServiceIdentifier& objServiceId)
 {
-    FeatureSet *pFeatureSet = IMS_NULL;
-    const AString &strName = objServiceId.GetName();
+    FeatureSet* pFeatureSet = IMS_NULL;
+    const AString& strName = objServiceId.GetName();
     IMS_SINT32 nEqualIndex = strName.GetIndexOf(TextParser::CHAR_EQUAL);
 
     if (nEqualIndex == AString::NPOS)
@@ -774,7 +740,7 @@ FeatureSet* FeatureSet::FromServiceIdentifier(IN const ServiceIdentifier &objSer
 }
 
 PRIVATE
-IMS_SINT32 FeatureSet::Add(IN Feature *pFeature)
+IMS_SINT32 FeatureSet::Add(IN Feature* pFeature)
 {
     if (pFeature == IMS_NULL)
     {
@@ -786,7 +752,7 @@ IMS_SINT32 FeatureSet::Add(IN Feature *pFeature)
         return OP_FAIL;
     }
 
-    Feature *pExFeature = Lookup(pFeature);
+    Feature* pExFeature = Lookup(pFeature);
 
     if (pExFeature != IMS_NULL)
     {
@@ -801,12 +767,11 @@ IMS_SINT32 FeatureSet::Add(IN Feature *pFeature)
 }
 
 PRIVATE
-void FeatureSet::AddFeatures(IN const AString &strValues)
+void FeatureSet::AddFeatures(IN const AString& strValues)
 {
     IMSList<AString> objTokens;
 
-    if (strValues.StartsWith(TextParser::CHAR_DQUOT)
-            && strValues.EndsWith(TextParser::CHAR_DQUOT))
+    if (strValues.StartsWith(TextParser::CHAR_DQUOT) && strValues.EndsWith(TextParser::CHAR_DQUOT))
     {
         AString strUnquotedValues = TextParser::TrimDQUOT(strValues);
 
@@ -819,7 +784,7 @@ void FeatureSet::AddFeatures(IN const AString &strValues)
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {
-        Feature *pFeature = new Feature(strTag, objTokens.GetAt(i));
+        Feature* pFeature = new Feature(strTag, objTokens.GetAt(i));
 
         if (pFeature != IMS_NULL)
         {
@@ -830,7 +795,7 @@ void FeatureSet::AddFeatures(IN const AString &strValues)
 }
 
 PRIVATE
-IMS_SINT32 FeatureSet::Remove(IN const Feature *pFeature)
+IMS_SINT32 FeatureSet::Remove(IN const Feature* pFeature)
 {
     if (pFeature == IMS_NULL)
     {
@@ -842,7 +807,7 @@ IMS_SINT32 FeatureSet::Remove(IN const Feature *pFeature)
         return OP_FAIL;
     }
 
-    Feature *pExFeature = Lookup(pFeature, IMS_TRUE);
+    Feature* pExFeature = Lookup(pFeature, IMS_TRUE);
 
     if (pExFeature == IMS_NULL)
     {

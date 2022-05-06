@@ -18,12 +18,12 @@
 class ServerAddress
 {
 public:
-    ServerAddress(IN const AString &strAddress_, IN IMS_SINT32 nPort_ = PORT_UNSPECIFIED);
+    ServerAddress(IN const AString& strAddress_, IN IMS_SINT32 nPort_ = PORT_UNSPECIFIED);
     ~ServerAddress();
 
 private:
-    ServerAddress(IN const ServerAddress &objRHS);
-    ServerAddress& operator=(IN const ServerAddress &objRHS);
+    ServerAddress(IN const ServerAddress& objRHS);
+    ServerAddress& operator=(IN const ServerAddress& objRHS);
 
 public:
     /*
@@ -79,7 +79,7 @@ private:
     ----------              ----------
     </table>
     */
-    void SetAddress(IN const AString &strAddress);
+    void SetAddress(IN const AString& strAddress);
 
     /*
      Sets the port number of the IMS server.
@@ -100,7 +100,10 @@ private:
     void SetPort(IN IMS_SINT32 nPort);
 
 public:
-    enum { PORT_UNSPECIFIED = (-1) };
+    enum
+    {
+        PORT_UNSPECIFIED = (-1)
+    };
 
 private:
     friend class SubscriberConfig;
@@ -109,4 +112,4 @@ private:
     IMS_SINT32 nPort;
 };
 
-#endif // _SERVER_ADDRESS_H_
+#endif  // _SERVER_ADDRESS_H_

@@ -55,7 +55,7 @@ public:
     </table>
     */
     virtual const ICoreServiceConfig* GetCoreServiceConfig(
-            IN const AString &strServiceId) const = 0;
+            IN const AString& strServiceId) const = 0;
 
     /*
      Returns the IMS registry format from the AppConfig.
@@ -76,4 +76,4 @@ public:
     virtual ImsRegistry* ToRegistry() const = 0;
 };
 
-#endif // _INTERFACE_APP_CONFIG_H_
+#endif  // _INTERFACE_APP_CONFIG_H_

@@ -15,16 +15,15 @@
 
 #include "IConfigBuffer.h"
 
-class ConfigBuffer
-    : public IConfigBuffer
+class ConfigBuffer : public IConfigBuffer
 {
 public:
-    ConfigBuffer(IN const AString &strLocator_, IN const AString &strName_);
+    ConfigBuffer(IN const AString& strLocator_, IN const AString& strName_);
     virtual ~ConfigBuffer();
 
 private:
-    ConfigBuffer(IN const ConfigBuffer &objRHS);
-    ConfigBuffer& operator=(IN const ConfigBuffer &objRHS);
+    ConfigBuffer(IN const ConfigBuffer& objRHS);
+    ConfigBuffer& operator=(IN const ConfigBuffer& objRHS);
 
 public:
     virtual IMS_BOOL Create(IN IMS_SINT32 nId) = 0;
@@ -38,4 +37,4 @@ private:
     AString strName;
 };
 
-#endif // _CONFIG_BUFFER_H_
+#endif  // _CONFIG_BUFFER_H_

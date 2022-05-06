@@ -18,27 +18,24 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PRIVATE GLOBAL
-const IMS_CHAR ConfigFileBuffer::FILE_EXTENSION[] = "conf";
+PRIVATE GLOBAL const IMS_CHAR ConfigFileBuffer::FILE_EXTENSION[] = "conf";
 
 PUBLIC
-ConfigFileBuffer::ConfigFileBuffer(IN const AString &strLocator_, IN const AString &strName_)
-    : ConfigBuffer(strLocator_, strName_)
-    , nIndexOfWorkSection(0)
-    , pWorkSection(IMS_NULL)
-    , objSections(IMSList<ConfigSection*>())
+ConfigFileBuffer::ConfigFileBuffer(IN const AString& strLocator_, IN const AString& strName_) :
+        ConfigBuffer(strLocator_, strName_),
+        nIndexOfWorkSection(0),
+        pWorkSection(IMS_NULL),
+        objSections(IMSList<ConfigSection*>())
 {
 }
 
-
-PUBLIC VIRTUAL
-ConfigFileBuffer::~ConfigFileBuffer()
+PUBLIC VIRTUAL ConfigFileBuffer::~ConfigFileBuffer()
 {
     if (!objSections.IsEmpty())
     {
         for (IMS_UINT32 i = 0; i < objSections.GetSize(); ++i)
         {
-            ConfigSection *pSection = objSections.GetAt(i);
+            ConfigSection* pSection = objSections.GetAt(i);
 
             if (pSection != IMS_NULL)
             {
@@ -48,20 +45,18 @@ ConfigFileBuffer::~ConfigFileBuffer()
     }
 }
 
-
 PRIVATE
-ConfigFileBuffer::ConfigFileBuffer()
-    : ConfigBuffer(AString::ConstNull(), AString::ConstNull())
-    , nIndexOfWorkSection(0)
-    , pWorkSection(IMS_NULL)
-    , objSections(IMSList<ConfigSection*>())
+ConfigFileBuffer::ConfigFileBuffer() :
+        ConfigBuffer(AString::ConstNull(), AString::ConstNull()),
+        nIndexOfWorkSection(0),
+        pWorkSection(IMS_NULL),
+        objSections(IMSList<ConfigSection*>())
 {
 }
 
-PUBLIC GLOBAL
-IConfigBuffer* ConfigFileBuffer::CreateFileBuffer(IN const AString &strConfigData)
+PUBLIC GLOBAL IConfigBuffer* ConfigFileBuffer::CreateFileBuffer(IN const AString& strConfigData)
 {
-    ConfigFileBuffer *pConfigBuffer = new ConfigFileBuffer();
+    ConfigFileBuffer* pConfigBuffer = new ConfigFileBuffer();
 
     if (pConfigBuffer == IMS_NULL)
     {
@@ -79,14 +74,12 @@ IConfigBuffer* ConfigFileBuffer::CreateFileBuffer(IN const AString &strConfigDat
     return pConfigBuffer;
 }
 
-PRIVATE VIRTUAL
-void ConfigFileBuffer::Destroy()
+PRIVATE VIRTUAL void ConfigFileBuffer::Destroy()
 {
     delete this;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR* pszSectName)
 {
     if (nIndexOfWorkSection > objSections.GetSize())
     {
@@ -95,7 +88,7 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName)
 
     for (IMS_UINT32 i = nIndexOfWorkSection; i < objSections.GetSize(); ++i)
     {
-        ConfigSection *pSection = objSections.GetAt(i);
+        ConfigSection* pSection = objSections.GetAt(i);
 
         if (pSection->GetName().EqualsIgnoreCase(pszSectName))
         {
@@ -109,7 +102,7 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName)
     {
         for (IMS_UINT32 i = 0; i < nIndexOfWorkSection; ++i)
         {
-            ConfigSection *pSection = objSections.GetAt(i);
+            ConfigSection* pSection = objSections.GetAt(i);
 
             if (pSection->GetName().EqualsIgnoreCase(pszSectName))
             {
@@ -127,8 +120,8 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName)
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName, IN IMS_SINT32 nIndex)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::CaptureSection(
+        IN const IMS_CHAR* pszSectName, IN IMS_SINT32 nIndex)
 {
     AString strSectName;
 
@@ -141,7 +134,7 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName, IN IMS
 
     for (IMS_UINT32 i = nIndexOfWorkSection; i < objSections.GetSize(); ++i)
     {
-        ConfigSection *pSection = objSections.GetAt(i);
+        ConfigSection* pSection = objSections.GetAt(i);
 
         if (pSection->GetName().EqualsIgnoreCase(strSectName))
         {
@@ -155,7 +148,7 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName, IN IMS
     {
         for (IMS_UINT32 i = 0; i < nIndexOfWorkSection; ++i)
         {
-            ConfigSection *pSection = objSections.GetAt(i);
+            ConfigSection* pSection = objSections.GetAt(i);
 
             if (pSection->GetName().EqualsIgnoreCase(strSectName))
             {
@@ -173,14 +166,12 @@ IMS_BOOL ConfigFileBuffer::CaptureSection(IN const IMS_CHAR *pszSectName, IN IMS
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-void ConfigFileBuffer::ReleaseSection()
+PRIVATE VIRTUAL void ConfigFileBuffer::ReleaseSection()
 {
     pWorkSection = IMS_NULL;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR *pszKey) const
+PRIVATE VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR* pszKey) const
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -190,7 +181,7 @@ IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR *pszKey) const
     AString strKey(pszKey);
     strKey.Append("_count");
 
-    const AString &strKeyCount = pWorkSection->GetValue(strKey.GetStr());
+    const AString& strKeyCount = pWorkSection->GetValue(strKey.GetStr());
 
     IMS_BOOL bOK = IMS_FALSE;
     IMS_SINT32 nKeyCount = strKeyCount.ToInt32(&bOK);
@@ -204,8 +195,7 @@ IMS_SINT32 ConfigFileBuffer::ReadKeyCount(IN const IMS_CHAR *pszKey) const
     return nKeyCount;
 }
 
-PRIVATE VIRTUAL
-const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR *pszKey) const
+PRIVATE VIRTUAL const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR* pszKey) const
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -216,8 +206,8 @@ const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR *pszKey) const
     return pWorkSection->GetValue(pszKey);
 }
 
-PRIVATE VIRTUAL
-const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nIndex) const
+PRIVATE VIRTUAL const AString& ConfigFileBuffer::ReadValue(
+        IN const IMS_CHAR* pszKey, IN IMS_SINT32 nIndex) const
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -231,8 +221,7 @@ const AString& ConfigFileBuffer::ReadValue(IN const IMS_CHAR *pszKey, IN IMS_SIN
     return pWorkSection->GetValue(strKey.GetStr());
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::ReadValueBoolean(IN const IMS_CHAR *pszKey) const
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::ReadValueBoolean(IN const IMS_CHAR* pszKey) const
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -240,7 +229,7 @@ IMS_BOOL ConfigFileBuffer::ReadValueBoolean(IN const IMS_CHAR *pszKey) const
         return IMS_FALSE;
     }
 
-    const AString &strValue = pWorkSection->GetValue(pszKey);
+    const AString& strValue = pWorkSection->GetValue(pszKey);
 
     // If the value is not "true" in case-insensitively, it returns IMS_FALSE.
     if (strValue.EqualsIgnoreCase(TextParser::STR_SMALL_TRUE))
@@ -251,8 +240,7 @@ IMS_BOOL ConfigFileBuffer::ReadValueBoolean(IN const IMS_CHAR *pszKey) const
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR *pszKey) const
+PRIVATE VIRTUAL IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR* pszKey) const
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -260,7 +248,7 @@ IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR *pszKey) const
         return (-1);
     }
 
-    const AString &strValue = pWorkSection->GetValue(pszKey);
+    const AString& strValue = pWorkSection->GetValue(pszKey);
     IMS_BOOL bOK = IMS_FALSE;
     IMS_SINT32 nValue = strValue.ToInt32(&bOK);
 
@@ -273,13 +261,13 @@ IMS_SINT32 ConfigFileBuffer::ReadValueInt(IN const IMS_CHAR *pszKey) const
     return nValue;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteKeyCount(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nCount)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteKeyCount(
+        IN const IMS_CHAR* pszKey, IN IMS_SINT32 nCount)
 {
     if (pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s_count), value (%d)",
-                pszKey, nCount, 0);
+        IMS_TRACE_E(
+                0, "There is no captured section : key (%s_count), value (%d)", pszKey, nCount, 0);
         return IMS_FALSE;
     }
 
@@ -292,27 +280,26 @@ IMS_BOOL ConfigFileBuffer::WriteKeyCount(IN const IMS_CHAR *pszKey, IN IMS_SINT3
     return pWorkSection->SetValue(strKey.GetStr(), strValue);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteValue(IN const IMS_CHAR *pszKey, IN const AString &strValue)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValue(
+        IN const IMS_CHAR* pszKey, IN const AString& strValue)
 {
     if (pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%d)",
-                pszKey, strValue.GetStr(), 0);
+        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%d)", pszKey,
+                strValue.GetStr(), 0);
         return IMS_FALSE;
     }
 
     return pWorkSection->SetValue(pszKey, strValue);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteValue(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nIndex,
-        IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValue(
+        IN const IMS_CHAR* pszKey, IN IMS_SINT32 nIndex, IN CONST AString& strValue)
 {
     if (pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s_%d), value (%d)",
-                pszKey, nIndex, strValue.GetStr());
+        IMS_TRACE_E(0, "There is no captured section : key (%s_%d), value (%d)", pszKey, nIndex,
+                strValue.GetStr());
         return IMS_FALSE;
     }
 
@@ -322,21 +309,21 @@ IMS_BOOL ConfigFileBuffer::WriteValue(IN const IMS_CHAR *pszKey, IN IMS_SINT32 n
     return pWorkSection->SetValue(strKey.GetStr(), strValue);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteValueBoolean(IN const IMS_CHAR *pszKey, IN IMS_BOOL bValue)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValueBoolean(
+        IN const IMS_CHAR* pszKey, IN IMS_BOOL bValue)
 {
     if (pWorkSection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%s)",
-                pszKey, TextParser::BooleanToString(bValue), 0);
+        IMS_TRACE_E(0, "There is no captured section : key (%s), value (%s)", pszKey,
+                TextParser::BooleanToString(bValue), 0);
         return IMS_FALSE;
     }
 
     return pWorkSection->SetValue(pszKey, TextParser::BooleanToString(bValue));
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteValueInt(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nValue)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteValueInt(
+        IN const IMS_CHAR* pszKey, IN IMS_SINT32 nValue)
 {
     if (pWorkSection == IMS_NULL)
     {
@@ -355,8 +342,7 @@ IMS_BOOL ConfigFileBuffer::WriteValueInt(IN const IMS_CHAR *pszKey, IN IMS_SINT3
     return pWorkSection->SetValue(pszKey, strValue);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::WriteToMedium() const
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::WriteToMedium() const
 {
     AString strConfigData;
     AString strConfName = GetLocator();
@@ -374,7 +360,7 @@ IMS_BOOL ConfigFileBuffer::WriteToMedium() const
         IMS_FILE_Rename(strConfName, strNewConfName);
     }
 
-    IFile *piFile = IMS_FILE_Create();
+    IFile* piFile = IMS_FILE_Create();
 
     if (piFile == IMS_NULL)
     {
@@ -393,8 +379,8 @@ IMS_BOOL ConfigFileBuffer::WriteToMedium() const
 
     FormConfig(strConfigData);
 
-    if (piFile->Write(reinterpret_cast<void*>(strConfigData.GetStr()),
-            strConfigData.GetLength()) == 0)
+    if (piFile->Write(reinterpret_cast<void*>(strConfigData.GetStr()), strConfigData.GetLength()) ==
+            0)
     {
         IMS_TRACE_E(0, "Writing the configuration (%s) failed", strConfName.GetStr(), 0, 0);
 
@@ -409,14 +395,13 @@ IMS_BOOL ConfigFileBuffer::WriteToMedium() const
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
+PRIVATE VIRTUAL IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 {
     // FIXME: if file configuration is required, please use this input argument.
-    (void) nId;
+    (void)nId;
     AString strConfName = ResolveLocator();
 
-    IFile *piFile = IMS_FILE_Create();
+    IFile* piFile = IMS_FILE_Create();
 
     if (piFile == IMS_NULL)
     {
@@ -436,15 +421,15 @@ IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     if (nBuffSize == 0)
     {
-        IMS_TRACE_E(0, "Configuration (%s) does not exist; Size is zero",
-                strConfName.GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Configuration (%s) does not exist; Size is zero", strConfName.GetStr(), 0, 0);
 
         piFile->Close();
         IMS_FILE_Destroy(piFile);
         return IMS_FALSE;
     }
 
-    IMS_CHAR *pcBuffer = new IMS_CHAR[nBuffSize + 1];
+    IMS_CHAR* pcBuffer = new IMS_CHAR[nBuffSize + 1];
 
     if (pcBuffer == IMS_NULL)
     {
@@ -458,7 +443,7 @@ IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 
     IMS_UINT32 nReadSize = 0;
 
-    if (( nReadSize = piFile->Read(reinterpret_cast<void*>(pcBuffer), nBuffSize) ) <= 0)
+    if ((nReadSize = piFile->Read(reinterpret_cast<void*>(pcBuffer), nBuffSize)) <= 0)
     {
         IMS_TRACE_E(0, "Reading the configuration (%s) failed", strConfName.GetStr(), 0, 0);
 
@@ -491,14 +476,14 @@ IMS_BOOL ConfigFileBuffer::Create(IN IMS_SINT32 nId)
 }
 
 PRIVATE
-void ConfigFileBuffer::FormConfig(OUT AString &strConfigData) const
+void ConfigFileBuffer::FormConfig(OUT AString& strConfigData) const
 {
     strConfigData.Append(objStartComment.ToString());
 
     // Inserts CRLF between the main comment & the start section
     for (IMS_UINT32 i = 0; i < objSections.GetSize(); ++i)
     {
-        const ConfigSection *pSection = objSections.GetAt(i);
+        const ConfigSection* pSection = objSections.GetAt(i);
 
         strConfigData.Append(TextParser::STR_CRLF);
         strConfigData.Append(pSection->ToString());
@@ -508,7 +493,7 @@ void ConfigFileBuffer::FormConfig(OUT AString &strConfigData) const
 }
 
 PRIVATE
-IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString &strConfigData)
+IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString& strConfigData)
 {
     IMSList<AString> objLines = strConfigData.Split(TextParser::CHAR_LF);
     IMS_UINT32 i;
@@ -517,7 +502,7 @@ IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString &strConfigData)
     // Find the start line to parse the configuration
     for (i = 0; i < objLines.GetSize(); ++i)
     {
-        const AString &strLine = objLines.GetAt(i);
+        const AString& strLine = objLines.GetAt(i);
 
         // If the line is a comment, skip it.
         if (strLine.StartsWith(TextParser::CHAR_SEMICOLON))
@@ -529,27 +514,27 @@ IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString &strConfigData)
         // Find the first empty line from the file
         if (strLine.IsEmpty())
         {
-            nConfigStart = i+1;
+            nConfigStart = i + 1;
             break;
         }
 
         // I got the section data.
-        if (strLine.StartsWith(TextParser::CHAR_LSBRACKET)
-            && strLine.EndsWith(TextParser::CHAR_RSBRACKET))
+        if (strLine.StartsWith(TextParser::CHAR_LSBRACKET) &&
+                strLine.EndsWith(TextParser::CHAR_RSBRACKET))
         {
             nConfigStart = i;
             break;
         }
     }
 
-    ConfigSection *pSection = IMS_NULL;
+    ConfigSection* pSection = IMS_NULL;
     IMS_UINT32 nCommentStart = 0;
     IMS_BOOL bCommentPresent = IMS_FALSE;
     IMS_BOOL bSectionStarted = IMS_FALSE;
 
     for (i = nConfigStart; i < objLines.GetSize(); ++i)
     {
-        const AString &strLine = objLines.GetAt(i);
+        const AString& strLine = objLines.GetAt(i);
 
         // If the line starts with SEMI-COLON, it is a comment.
         if (strLine.StartsWith(TextParser::CHAR_SEMICOLON))
@@ -566,8 +551,8 @@ IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString &strConfigData)
 
         // If the line starts with the LSBRACKET and ends with the RSBRACKET,
         // I got the section data.
-        if (strLine.StartsWith(TextParser::CHAR_LSBRACKET)
-            && strLine.EndsWith(TextParser::CHAR_RSBRACKET))
+        if (strLine.StartsWith(TextParser::CHAR_LSBRACKET) &&
+                strLine.EndsWith(TextParser::CHAR_RSBRACKET))
         {
             if (pSection != IMS_NULL)
             {
@@ -632,7 +617,7 @@ IMS_BOOL ConfigFileBuffer::ParseConfig(IN const AString &strConfigData)
 
                 if (bCommentPresent)
                 {
-                    ConfigSectionData *pData = pSection->GetLastElement();
+                    ConfigSectionData* pData = pSection->GetLastElement();
 
                     for (IMS_UINT32 j = nCommentStart; j < i; ++j)
                     {
@@ -672,11 +657,11 @@ AString ConfigFileBuffer::ResolveLocator() const
 {
     AString strLocator(GetLocator());
 
-    const AString &strConfName = GetName();
+    const AString& strConfName = GetName();
     IMSList<AString> objTokens = strConfName.Split(TextParser::CHAR_DOT);
-    const IMS_CHAR *pszFileSeparator = IMS_FILE_GetSeparator();
+    const IMS_CHAR* pszFileSeparator = IMS_FILE_GetSeparator();
 
-    //4 if the last dir. is not matched with "gims", then add this dir. name.
+    // 4 if the last dir. is not matched with "gims", then add this dir. name.
 
     // root directory name for configuration files
     strLocator.Append(pszFileSeparator);

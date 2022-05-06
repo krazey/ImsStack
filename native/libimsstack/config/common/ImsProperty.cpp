@@ -18,34 +18,30 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PUBLIC GLOBAL
-const IMS_CHAR ImsProperty::STREAM_MEDIA_TYPE_AUDIO[] = "Audio";
-PUBLIC GLOBAL
-const IMS_CHAR ImsProperty::STREAM_MEDIA_TYPE_VIDEO[] = "Video";
+PUBLIC GLOBAL const IMS_CHAR ImsProperty::STREAM_MEDIA_TYPE_AUDIO[] = "Audio";
+PUBLIC GLOBAL const IMS_CHAR ImsProperty::STREAM_MEDIA_TYPE_VIDEO[] = "Video";
 
-PUBLIC GLOBAL
-const IMS_CHAR* ImsProperty::PKEY_STRING[ImsProperty::PKEY_MAX] =
-{
-    "",
-    "Stream",
-    "Framed",
-    "Basic",
-    "Event",
-    "CoreService",
-    "Qos",
-    "Reg",
-    "Write",
-    "Read",
-    "Cap",
-    "Mprof",
-    "Connection",
+PUBLIC GLOBAL const IMS_CHAR* ImsProperty::PKEY_STRING[ImsProperty::PKEY_MAX] = {
+        "",
+        "Stream",
+        "Framed",
+        "Basic",
+        "Event",
+        "CoreService",
+        "Qos",
+        "Reg",
+        "Write",
+        "Read",
+        "Cap",
+        "Mprof",
+        "Connection",
 };
 
 PUBLIC
-ImsProperty::ImsProperty(IN IMS_SINT32 nKey_,
-        IN const AString &strKey_ /* = AString::ConstNull() */)
-    : nKey(nKey_)
-    , strKey(strKey_)
+ImsProperty::ImsProperty(
+        IN IMS_SINT32 nKey_, IN const AString& strKey_ /* = AString::ConstNull() */) :
+        nKey(nKey_),
+        strKey(strKey_)
 {
     if ((nKey > PKEY_CUSTOM) && (nKey < PKEY_MAX))
     {
@@ -54,19 +50,16 @@ ImsProperty::ImsProperty(IN IMS_SINT32 nKey_,
 }
 
 PUBLIC
-ImsProperty::ImsProperty(IN const ImsProperty &objRHS)
-    : nKey(objRHS.nKey)
-    , strKey(objRHS.strKey)
+ImsProperty::ImsProperty(IN const ImsProperty& objRHS) :
+        nKey(objRHS.nKey),
+        strKey(objRHS.strKey)
 {
 }
 
-PUBLIC VIRTUAL
-ImsProperty::~ImsProperty()
-{
-}
+PUBLIC VIRTUAL ImsProperty::~ImsProperty() {}
 
 PUBLIC
-ImsProperty& ImsProperty::operator=(IN const ImsProperty &objRHS)
+ImsProperty& ImsProperty::operator=(IN const ImsProperty& objRHS)
 {
     if (this != &objRHS)
     {
@@ -77,20 +70,17 @@ ImsProperty& ImsProperty::operator=(IN const ImsProperty &objRHS)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL ImsProperty::Equals(IN const AString &strValue) const
+PUBLIC VIRTUAL IMS_BOOL ImsProperty::Equals(IN const AString& strValue) const
 {
     return strKey.Equals(strValue);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL ImsProperty::Equals(IN const ImsProperty &objOther) const
+PUBLIC VIRTUAL IMS_BOOL ImsProperty::Equals(IN const ImsProperty& objOther) const
 {
     return Equals(objOther.strKey);
 }
 
-PUBLIC GLOBAL
-AStringArray ImsProperty::Decode(IN const AString &strValue)
+PUBLIC GLOBAL AStringArray ImsProperty::Decode(IN const AString& strValue)
 {
     if (strValue.GetLength() == 0)
     {
@@ -126,8 +116,7 @@ AStringArray ImsProperty::Decode(IN const AString &strValue)
     return objTokens;
 }
 
-PUBLIC GLOBAL
-AString ImsProperty::Encode(IN const AStringArray &objValues)
+PUBLIC GLOBAL AString ImsProperty::Encode(IN const AStringArray& objValues)
 {
     if (objValues.IsEmpty())
     {
@@ -145,8 +134,8 @@ AString ImsProperty::Encode(IN const AStringArray &objValues)
     return strValue;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL ImsProperty::CheckDuplicate(IN const AStringArray &objValues, IN IMS_BOOL bCaseSensitive)
+PUBLIC GLOBAL IMS_BOOL ImsProperty::CheckDuplicate(
+        IN const AStringArray& objValues, IN IMS_BOOL bCaseSensitive)
 {
     IMS_SINT32 nValueCount = objValues.GetCount();
 
@@ -154,17 +143,18 @@ IMS_BOOL ImsProperty::CheckDuplicate(IN const AStringArray &objValues, IN IMS_BO
     {
         for (IMS_SINT32 i = 0; i < nValueCount; ++i)
         {
-            const AString &strValue = objValues.GetElementAt(i);
+            const AString& strValue = objValues.GetElementAt(i);
 
             for (IMS_SINT32 j = i + 1; j < nValueCount; ++j)
             {
                 // Check if the two values equals or not
                 if (strValue.Equals(objValues.GetElementAt(j)))
                 {
-                    IMS_TRACE_E(0, "Set value (%s) contains duplicates, " \
+                    IMS_TRACE_E(0,
+                            "Set value (%s) contains duplicates, "
                             "item (%s) is equal to item (%s)",
-                            ToString(objValues).GetStr(),
-                            strValue.GetStr(), objValues.GetElementAt(j).GetStr());
+                            ToString(objValues).GetStr(), strValue.GetStr(),
+                            objValues.GetElementAt(j).GetStr());
                     return IMS_FALSE;
                 }
             }
@@ -174,17 +164,18 @@ IMS_BOOL ImsProperty::CheckDuplicate(IN const AStringArray &objValues, IN IMS_BO
     {
         for (IMS_SINT32 i = 0; i < nValueCount; ++i)
         {
-            const AString &strValue = objValues.GetElementAt(i);
+            const AString& strValue = objValues.GetElementAt(i);
 
             for (IMS_SINT32 j = i + 1; j < nValueCount; ++j)
             {
                 // Check if the two values equals or not
                 if (strValue.EqualsIgnoreCase(objValues.GetElementAt(j)))
                 {
-                    IMS_TRACE_E(0, "Set value (%s) contains duplicates, " \
+                    IMS_TRACE_E(0,
+                            "Set value (%s) contains duplicates, "
                             "item (%s) is equal to item (%s)",
-                            ToString(objValues).GetStr(),
-                            strValue.GetStr(), objValues.GetElementAt(j).GetStr());
+                            ToString(objValues).GetStr(), strValue.GetStr(),
+                            objValues.GetElementAt(j).GetStr());
                     return IMS_FALSE;
                 }
             }
@@ -194,8 +185,7 @@ IMS_BOOL ImsProperty::CheckDuplicate(IN const AStringArray &objValues, IN IMS_BO
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-AString ImsProperty::KeyToString(IN IMS_SINT32 nKey)
+PUBLIC GLOBAL AString ImsProperty::KeyToString(IN IMS_SINT32 nKey)
 {
     if ((nKey > PKEY_CUSTOM) && (nKey < PKEY_MAX))
     {
@@ -205,8 +195,7 @@ AString ImsProperty::KeyToString(IN IMS_SINT32 nKey)
     return AString();
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 ImsProperty::StringToKey(IN const AString &strKey)
+PUBLIC GLOBAL IMS_SINT32 ImsProperty::StringToKey(IN const AString& strKey)
 {
     if (strKey.GetLength() == 0)
     {
@@ -224,16 +213,15 @@ IMS_SINT32 ImsProperty::StringToKey(IN const AString &strKey)
     return PKEY_CUSTOM;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL ImsProperty::TrimAndCheckProperties(IN const ImsRegistry &objRegistry,
-        OUT ImsRegistry &objNewRegistry)
+PUBLIC GLOBAL IMS_BOOL ImsProperty::TrimAndCheckProperties(
+        IN const ImsRegistry& objRegistry, OUT ImsRegistry& objNewRegistry)
 {
     AStringArray objKeys;
     AStringArray objNewProperty;
 
     for (IMS_SINT32 i = 0; i < objRegistry.GetCount(); ++i)
     {
-        const AStringArray &objProperty = objRegistry.GetAt(i);
+        const AStringArray& objProperty = objRegistry.GetAt(i);
 
         if (objProperty.GetCount() < 1)
         {
@@ -241,7 +229,7 @@ IMS_BOOL ImsProperty::TrimAndCheckProperties(IN const ImsRegistry &objRegistry,
             return IMS_FALSE;
         }
 
-        const AString &strKey = objProperty.GetElementAt(0);
+        const AString& strKey = objProperty.GetElementAt(0);
         IMS_SINT32 nKeyEnum = StringToKey(strKey);
 
         if (nKeyEnum == PKEY_CUSTOM)
@@ -250,16 +238,12 @@ IMS_BOOL ImsProperty::TrimAndCheckProperties(IN const ImsRegistry &objRegistry,
             return IMS_FALSE;
         }
 
-        if ((nKeyEnum != PKEY_CORE_SERVICE)
-                && (nKeyEnum != PKEY_QOS)
-                && (nKeyEnum != PKEY_REG)
-                && (nKeyEnum != PKEY_CAP)
-                && (nKeyEnum != PKEY_MPROF)
-                && (nKeyEnum != PKEY_CONNECTION)
-                && objKeys.Contains(strKey))
+        if ((nKeyEnum != PKEY_CORE_SERVICE) && (nKeyEnum != PKEY_QOS) && (nKeyEnum != PKEY_REG) &&
+                (nKeyEnum != PKEY_CAP) && (nKeyEnum != PKEY_MPROF) &&
+                (nKeyEnum != PKEY_CONNECTION) && objKeys.Contains(strKey))
         {
-            IMS_TRACE_E(0, "Property (%d) is malformed, key (%s) appears multiple times.",
-                    i, strKey.GetStr(), 0);
+            IMS_TRACE_E(0, "Property (%d) is malformed, key (%s) appears multiple times.", i,
+                    strKey.GetStr(), 0);
             return IMS_FALSE;
         }
 
@@ -286,8 +270,7 @@ IMS_BOOL ImsProperty::TrimAndCheckProperties(IN const ImsRegistry &objRegistry,
 }
 
 // DEBUG
-PUBLIC GLOBAL
-AString ImsProperty::ToString(IN const AStringArray &objProperty)
+PUBLIC GLOBAL AString ImsProperty::ToString(IN const AStringArray& objProperty)
 {
     if (objProperty.IsEmpty())
     {

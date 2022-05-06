@@ -15,26 +15,24 @@
 #include "conf/ConfigSectionData.h"
 
 PUBLIC
-ConfigSectionData::ConfigSectionData(IN const AString &strKey_)
-    : strKey(strKey_)
-    , strValue(AString::ConstEmpty())
+ConfigSectionData::ConfigSectionData(IN const AString& strKey_) :
+        strKey(strKey_),
+        strValue(AString::ConstEmpty())
 {
 }
 
 PUBLIC
-ConfigSectionData::ConfigSectionData(IN const AString &strKey_, IN const AString &strValue_)
-    : strKey(strKey_)
-    , strValue(strValue_)
+ConfigSectionData::ConfigSectionData(IN const AString& strKey_, IN const AString& strValue_) :
+        strKey(strKey_),
+        strValue(strValue_)
 {
 }
 
 PUBLIC
-ConfigSectionData::~ConfigSectionData()
-{
-}
+ConfigSectionData::~ConfigSectionData() {}
 
 PUBLIC
-void ConfigSectionData::AddComment(IN const AString &strComment)
+void ConfigSectionData::AddComment(IN const AString& strComment)
 {
     objComment.Add(strComment);
 }
@@ -52,7 +50,7 @@ const AString& ConfigSectionData::GetValue() const
 }
 
 PUBLIC
-void ConfigSectionData::SetValue(IN const AString &strValue)
+void ConfigSectionData::SetValue(IN const AString& strValue)
 {
     this->strValue = strValue;
 }

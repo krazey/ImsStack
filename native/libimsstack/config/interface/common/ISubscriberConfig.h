@@ -26,8 +26,7 @@ class IConfigurable;
 class ISubscriberConfigListener;
 class ServerAddress;
 
-class ISubscriberConfig
-        : public IAsyncConfig
+class ISubscriberConfig : public IAsyncConfig
 {
 public:
     /**

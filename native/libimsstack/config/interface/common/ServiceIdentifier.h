@@ -30,26 +30,26 @@ class ServiceIdentifier
 {
 public:
     ServiceIdentifier();
-    ServiceIdentifier(IN const ServiceIdentifier &objRHS);
+    ServiceIdentifier(IN const ServiceIdentifier& objRHS);
     virtual ~ServiceIdentifier();
 
 private:
-    ServiceIdentifier(IN const AString &strName, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire);
+    ServiceIdentifier(IN const AString& strName, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire);
 
 public:
-    ServiceIdentifier& operator=(IN const ServiceIdentifier &objRHS);
+    ServiceIdentifier& operator=(IN const ServiceIdentifier& objRHS);
 
 public:
     const AString& GetName() const;
     IMS_BOOL IsExplicitPresent() const;
     IMS_BOOL IsRequirePresent() const;
     AString ToString() const;
-    static ServiceIdentifier Create(IN const AString &strValue);
-    static IMS_BOOL CheckFeatureFlags(IN const AString &strValue,
-            IN IMS_BOOL bAllowExplicitRequire);
+    static ServiceIdentifier Create(IN const AString& strValue);
+    static IMS_BOOL CheckFeatureFlags(
+            IN const AString& strValue, IN IMS_BOOL bAllowExplicitRequire);
 
 private:
-    ServiceIdentifierPrivate *pServiceIdentifierP;
+    ServiceIdentifierPrivate* pServiceIdentifierP;
 };
 
-#endif // _SERVICE_IDENTIFIER_H_
+#endif  // _SERVICE_IDENTIFIER_H_
