@@ -102,7 +102,7 @@ public:
         PST_I_SILENT_REDIAL_ENABLE = 28,
         PST_I_TLTE_911FAIL = 29,
 
-        //RCS
+        // RCS
         PST_I_EAB = 31,
         PST_I_PUBLISH_TIMER = 32,
         PST_I_PUBLISH_TIMER_EXTENDED = 33,
@@ -116,7 +116,7 @@ public:
         PST_I_GZIP_ENABLE = 41,
         PST_I_PUBLISH_ERROR_RETRY_TIMER = 42,
 
-        //Subscriber
+        // Subscriber
         PST_I_HOME_DOMAIN_NAME = 51,
         PST_I_IMPU = 52,
         PST_I_IMPI = 53,
@@ -126,4 +126,4 @@ public:
     };
 };
 
-#endif // _IMS_CONFIG_H_
+#endif  // _IMS_CONFIG_H_

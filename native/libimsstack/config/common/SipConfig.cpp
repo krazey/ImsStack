@@ -21,29 +21,26 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PRIVATE GLOBAL
-const IMS_CHAR SipConfig::TAG_PREFIX[] = "9009";
+PRIVATE GLOBAL const IMS_CHAR SipConfig::TAG_PREFIX[] = "9009";
 
 PUBLIC
-SipConfig::TcpTimerValues::TcpTimerValues()
-    : m_nTvConnectionWaiting(-1)
-    , m_nTvKeepAlive(-1)
-    , m_nTvWouldblockWaiting(-1)
+SipConfig::TcpTimerValues::TcpTimerValues() :
+        m_nTvConnectionWaiting(-1),
+        m_nTvKeepAlive(-1),
+        m_nTvWouldblockWaiting(-1)
 {
 }
 
 PUBLIC
-SipConfig::TcpTimerValues::TcpTimerValues(IN const SipConfig::TcpTimerValues& other)
-    : m_nTvConnectionWaiting(other.m_nTvConnectionWaiting)
-    , m_nTvKeepAlive(other.m_nTvKeepAlive)
-    , m_nTvWouldblockWaiting(other.m_nTvWouldblockWaiting)
+SipConfig::TcpTimerValues::TcpTimerValues(IN const SipConfig::TcpTimerValues& other) :
+        m_nTvConnectionWaiting(other.m_nTvConnectionWaiting),
+        m_nTvKeepAlive(other.m_nTvKeepAlive),
+        m_nTvWouldblockWaiting(other.m_nTvWouldblockWaiting)
 {
 }
 
 PUBLIC
-SipConfig::TcpTimerValues::~TcpTimerValues()
-{
-}
+SipConfig::TcpTimerValues::~TcpTimerValues() {}
 
 PUBLIC
 SipConfig::TcpTimerValues& SipConfig::TcpTimerValues::operator=(
@@ -60,31 +57,30 @@ SipConfig::TcpTimerValues& SipConfig::TcpTimerValues::operator=(
 }
 
 PUBLIC
-SipConfig::SipConfig(IN IMS_SINT32 nSlotId)
-    : ConfigBase(nSlotId)
-    , m_bCompactFormConfigured(IMS_TRUE)
-    , m_nSipFeatureCaps(SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT)
-    , m_nDeviceId(DEVICE_ID_UUID_IMEI_SHA1)
-    , m_strDeviceId(AString::ConstNull())
-    , m_strScheme("sip")
-    , m_strTagPrefix(TAG_PREFIX)
-    , m_nListenChannel(DEFAULT_CHANNEL)
-    , m_nTransportType(TRANSPORT_TYPE_UDP)
-    , m_nTimerValue100Trying(200)
-    , m_nTcpCriterionLength(TCP_CRITERION_LEN)
-    , m_objTcpTimerValues(SipConfig::TcpTimerValues())
-    , m_nRegExpiresMask(EXPIRES_NONE)
-    , m_nRegExpiration(DEFAULT_EXPIRATION)
-    , m_bRegSubscription(IMS_TRUE)
-    , m_nRegSubExpiration(DEFAULT_EXPIRATION)
-    , m_pSipConfigV(IMS_NULL)
-    , m_pConfigurable(IMS_NULL)
+SipConfig::SipConfig(IN IMS_SINT32 nSlotId) :
+        ConfigBase(nSlotId),
+        m_bCompactFormConfigured(IMS_TRUE),
+        m_nSipFeatureCaps(SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT),
+        m_nDeviceId(DEVICE_ID_UUID_IMEI_SHA1),
+        m_strDeviceId(AString::ConstNull()),
+        m_strScheme("sip"),
+        m_strTagPrefix(TAG_PREFIX),
+        m_nListenChannel(DEFAULT_CHANNEL),
+        m_nTransportType(TRANSPORT_TYPE_UDP),
+        m_nTimerValue100Trying(200),
+        m_nTcpCriterionLength(TCP_CRITERION_LEN),
+        m_objTcpTimerValues(SipConfig::TcpTimerValues()),
+        m_nRegExpiresMask(EXPIRES_NONE),
+        m_nRegExpiration(DEFAULT_EXPIRATION),
+        m_bRegSubscription(IMS_TRUE),
+        m_nRegSubExpiration(DEFAULT_EXPIRATION),
+        m_pSipConfigV(IMS_NULL),
+        m_pConfigurable(IMS_NULL)
 {
     m_pConfigurable = new Configurable(this);
 }
 
-PUBLIC VIRTUAL
-SipConfig::~SipConfig()
+PUBLIC VIRTUAL SipConfig::~SipConfig()
 {
     ICarrierConfig* piCc = GetCarrierConfig();
     piCc->RemoveListener(this);
@@ -98,8 +94,7 @@ SipConfig::~SipConfig()
     }
 }
 
-PUBLIC VIRTUAL
-const AString& SipConfig::GetUaVersion() const
+PUBLIC VIRTUAL const AString& SipConfig::GetUaVersion() const
 {
     if (!IsUserAgentConfigured())
     {
@@ -114,8 +109,7 @@ const AString& SipConfig::GetUaVersion() const
     return m_pSipConfigV->GetServiceVersion();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SipConfig::Init()
+PUBLIC VIRTUAL IMS_BOOL SipConfig::Init()
 {
     ICarrierConfig* piCc = GetCarrierConfig();
     piCc->AddListener(this);
@@ -123,8 +117,7 @@ IMS_BOOL SipConfig::Init()
     return ConfigBase::Init();
 }
 
-PUBLIC VIRTUAL
-void SipConfig::Refresh()
+PUBLIC VIRTUAL void SipConfig::Refresh()
 {
     Clear();
 
@@ -136,9 +129,8 @@ IMS_SINT32 SipConfig::GetTimerValueT1() const
 {
     const SipConfigV* pSipConfigV = GetServiceConfig();
 
-    return (pSipConfigV != IMS_NULL)
-            ? pSipConfigV->GetTimerValueT1()
-            : SipConfigV::DEFAULT_TIMER_T1;
+    return (pSipConfigV != IMS_NULL) ? pSipConfigV->GetTimerValueT1()
+                                     : SipConfigV::DEFAULT_TIMER_T1;
 }
 
 PUBLIC
@@ -146,9 +138,8 @@ IMS_SINT32 SipConfig::GetTimerValueT2() const
 {
     const SipConfigV* pSipConfigV = GetServiceConfig();
 
-    return (pSipConfigV != IMS_NULL)
-            ? pSipConfigV->GetTimerValueT2()
-            : SipConfigV::DEFAULT_TIMER_T2;
+    return (pSipConfigV != IMS_NULL) ? pSipConfigV->GetTimerValueT2()
+                                     : SipConfigV::DEFAULT_TIMER_T2;
 }
 
 PUBLIC
@@ -184,28 +175,26 @@ IMS_BOOL SipConfig::CreateDefaultServiceConfig()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL SipConfig::ReadFrom()
+PROTECTED VIRTUAL IMS_BOOL SipConfig::ReadFrom()
 {
     ICarrierConfig* piCc = GetCarrierConfig();
 
-    m_bCompactFormConfigured = piCc->GetBoolean(
-            CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL);
+    m_bCompactFormConfigured =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL);
 
     m_nSipFeatureCaps = ReadSipFeatureCaps(piCc);
 
     m_nDeviceId = DEVICE_ID_GSMA_IMEI;
 
-    m_nTimerValue100Trying = piCc->GetInt(
-            CarrierConfig::Assets::KEY_SIP_TIMER_100_TRYING_MILLIS_INT);
+    m_nTimerValue100Trying =
+            piCc->GetInt(CarrierConfig::Assets::KEY_SIP_TIMER_100_TRYING_MILLIS_INT);
 
     IImsPrivateProperty* piProperty = UtilService::GetUtilService()->GetPrivateProperty();
 
     m_strDeviceId = piProperty->GetPersistent(
             ImsPrivateProperties::Persistent::KEY_SIP_DEVICE_ID, GetSlotId());
 
-    m_nTcpCriterionLength = piCc->GetInt(
-            CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
+    m_nTcpCriterionLength = piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
 
     m_nTransportType = piCc->GetInt(CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT);
 
@@ -232,11 +221,11 @@ IMS_BOOL SipConfig::ReadFrom()
     m_objAllowMethods.AddElement("MESSAGE");
     m_objAllowMethods.AddElement("OPTIONS");
 
-    m_bRegSubscription = piCc->GetBoolean(
-            CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
+    m_bRegSubscription =
+            piCc->GetBoolean(CarrierConfig::Ims::KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL);
 
-    m_nRegSubExpiration = piCc->GetInt(
-            CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT);
+    m_nRegSubExpiration =
+            piCc->GetInt(CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT);
 
     if (m_nRegSubExpiration > 0)
     {
@@ -252,13 +241,12 @@ IMS_BOOL SipConfig::ReadFrom()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
-        IN const AString &strValue /* = AString::ConstNull() */)
+PROTECTED VIRTUAL IMS_BOOL SipConfig::Update(
+        IN IMS_SINT32 nCPI, IN const AString& strValue /* = AString::ConstNull() */)
 {
     IMS_BOOL bUpdateResult = IMS_TRUE;
 
-    (void) strValue;
+    (void)strValue;
 
     switch (nCPI)
     {
@@ -267,8 +255,9 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             // Control messages MUST be notified to the application...
             break;
 
-        case IConfigurable::CP_I_TV_T1: // FALL-THROUGH
-        case IConfigurable::CP_I_TV_T2: {
+        case IConfigurable::CP_I_TV_T1:  // FALL-THROUGH
+        case IConfigurable::CP_I_TV_T2:
+        {
             const ISipConfigV* piSipConfigV = GetSipConfigV();
 
             if (piSipConfigV != IMS_NULL)
@@ -277,7 +266,8 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             }
             break;
         }
-        case IConfigurable::CP_I_TV_100_TRYING: {
+        case IConfigurable::CP_I_TV_100_TRYING:
+        {
             if (strValue.GetLength() > 0)
             {
                 m_nTimerValue100Trying = strValue.ToInt32();
@@ -286,7 +276,8 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             IMS_TRACE_D("Timer value for 100 TRYING :: %d", m_nTimerValue100Trying, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_SIP_FEATURES: {
+        case IConfigurable::CP_I_SIP_FEATURES:
+        {
             if (strValue.GetLength() > 0)
             {
                 m_nSipFeatureCaps = static_cast<IMS_SINT32>(strValue.ToUInt32(IMS_NULL, 16));
@@ -299,7 +290,8 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             IMS_TRACE_D("SIP_FEATURES :: %08X", m_nSipFeatureCaps, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_TCP_CRITERION_LENGTH: {
+        case IConfigurable::CP_I_TCP_CRITERION_LENGTH:
+        {
             if (strValue.GetLength() > 0)
             {
                 m_nTcpCriterionLength = strValue.ToInt32();
@@ -307,16 +299,17 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             else
             {
                 ICarrierConfig* piCc = GetCarrierConfig();
-                m_nTcpCriterionLength = piCc->GetInt(
-                        CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
+                m_nTcpCriterionLength =
+                        piCc->GetInt(CarrierConfig::Ims::KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT);
             }
 
             IMS_TRACE_D("TCP_CRITERION_LENGTH :: %d", m_nTcpCriterionLength, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_REG_EXPIRES: {
+        case IConfigurable::CP_I_REG_EXPIRES:
+        {
             if (!GetTimerValueForUpdate(CarrierConfig::Ims::KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT,
-                    DEFAULT_EXPIRATION, strValue, m_nRegExpiration))
+                        DEFAULT_EXPIRATION, strValue, m_nRegExpiration))
             {
                 return IMS_FALSE;
             }
@@ -324,7 +317,8 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             IMS_TRACE_D("REG_EXPIRES :: %d", m_nRegExpiration, 0, 0);
             break;
         }
-        case IConfigurable::CP_I_REG_SUB: {
+        case IConfigurable::CP_I_REG_SUB:
+        {
             if (strValue.GetLength() > 0)
             {
                 m_bRegSubscription = strValue.EqualsIgnoreCase("true");
@@ -339,10 +333,11 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             IMS_TRACE_D("REG_SUB :: %s", _TRACE_B_(m_bRegSubscription), 0, 0);
             break;
         }
-        case IConfigurable::CP_I_REG_SUB_EXPIRES: {
+        case IConfigurable::CP_I_REG_SUB_EXPIRES:
+        {
             if (!GetTimerValueForUpdate(
-                    CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT,
-                    DEFAULT_EXPIRATION, strValue, m_nRegSubExpiration))
+                        CarrierConfig::Ims::KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT,
+                        DEFAULT_EXPIRATION, strValue, m_nRegSubExpiration))
             {
                 return IMS_FALSE;
             }
@@ -350,7 +345,8 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
             IMS_TRACE_D("REG_SUB_EXPIRES :: %d", m_nRegSubExpiration, 0, 0);
             break;
         }
-        default: {
+        default:
+        {
             bUpdateResult = IMS_FALSE;
             IMS_TRACE_D("No configurable parameter item (%d)", nCPI, 0, 0);
             break;
@@ -365,8 +361,7 @@ IMS_BOOL SipConfig::Update(IN IMS_SINT32 nCPI,
     return bUpdateResult;
 }
 
-PROTECTED VIRTUAL
-void SipConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL void SipConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (nSlotId != GetSlotId())
     {
@@ -396,8 +391,8 @@ IMS_BOOL SipConfig::GetTimerValueForUpdate(IN const IMS_CHAR* pszKey, IN IMS_SIN
 
         if (nUpdateTimerValue <= 0)
         {
-            IMS_TRACE_D("SIP timer(%s) is invalid; value=%s",
-                    pszKey, strUpdateTimerValue.GetStr(), 0);
+            IMS_TRACE_D(
+                    "SIP timer(%s) is invalid; value=%s", pszKey, strUpdateTimerValue.GetStr(), 0);
             return IMS_FALSE;
         }
 
@@ -418,8 +413,8 @@ void SipConfig::UpdateTcpTimerValues()
     IMS_SINT32 nTimerValueT1 = GetTimerValueT1();
 
     // Re-compute the TCP related timer values based on SIP transaction timer value
-    if ((m_objTcpTimerValues.m_nTvKeepAlive < 0)
-            && (m_objTcpTimerValues.m_nTvKeepAlive != TcpTimerValues::PERMANENT))
+    if ((m_objTcpTimerValues.m_nTvKeepAlive < 0) &&
+            (m_objTcpTimerValues.m_nTvKeepAlive != TcpTimerValues::PERMANENT))
     {
         m_objTcpTimerValues.m_nTvKeepAlive = nTimerValueT1 * 64;
     }
@@ -434,14 +429,11 @@ void SipConfig::UpdateTcpTimerValues()
         m_objTcpTimerValues.m_nTvWouldblockWaiting = nTimerValueT1 * 32;
     }
 
-    IMS_TRACE_D("TcpTimerValues :: ka=%d, cw=%d, ww=%d",
-            m_objTcpTimerValues.m_nTvKeepAlive,
-            m_objTcpTimerValues.m_nTvConnectionWaiting,
-            m_objTcpTimerValues.m_nTvWouldblockWaiting);
+    IMS_TRACE_D("TcpTimerValues :: ka=%d, cw=%d, ww=%d", m_objTcpTimerValues.m_nTvKeepAlive,
+            m_objTcpTimerValues.m_nTvConnectionWaiting, m_objTcpTimerValues.m_nTvWouldblockWaiting);
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
+PRIVATE GLOBAL IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
 {
     IMS_SINT32 nSipFeatureCaps = SIP_FEATURE_CAPS_RPORT;
 
@@ -465,8 +457,8 @@ IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
         nSipFeatureCaps |= SIP_FEATURE_CAPS_IPSEC;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Ims::KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL))
+    if (piCc->GetBoolean(
+                CarrierConfig::Ims::KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_UDP_FALLBACK;
     }
@@ -476,20 +468,20 @@ IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
         nSipFeatureCaps |= SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Assets::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL))
+    if (piCc->GetBoolean(
+                CarrierConfig::Assets::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Assets::KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Assets::
+                        KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Assets::KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Assets::
+                        KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL))
     {
         nSipFeatureCaps |=
                 SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST;
@@ -500,20 +492,20 @@ IMS_SINT32 SipConfig::ReadSipFeatureCaps(IN ICarrierConfig* piCc)
         nSipFeatureCaps |= SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL))
+    if (piCc->GetBoolean(CarrierConfig::Ims::
+                        KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG;
     }
 
-    if (piCc->GetBoolean(CarrierConfig::
-            Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL))
+    if (piCc->GetBoolean(
+                CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER;
     }
 
-    if (!piCc->GetBoolean(CarrierConfig::
-            Ims::KEY_USE_SIP_USER_AGENT_HEADER_ONLY_FOR_UA_STRING_BOOL))
+    if (!piCc->GetBoolean(
+                CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_ONLY_FOR_UA_STRING_BOOL))
     {
         nSipFeatureCaps |= SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT;
     }

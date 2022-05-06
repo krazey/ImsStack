@@ -17,8 +17,6 @@
 
 class AccessNetworkInfo;
 
-
-
 // Static class for identities of IMS services
 class ImsIdentity
 {
@@ -44,8 +42,8 @@ public:
     AString                 Public user identity (SIP URI)
     </table>
     */
-    static AString CreateSIPUserId(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN IMS_BOOL bUserPhoneParam = IMS_FALSE);
+    static AString CreateSIPUserId(
+            IN IMS_SINT32 nSlotId = IMS_SLOT_0, IN IMS_BOOL bUserPhoneParam = IMS_FALSE);
 
     /*
      Returns the SIP URI from the specified phone number and phone-context parameter.
@@ -69,10 +67,9 @@ public:
     AString                 Public user identity (SIP URI)
     </table>
     */
-    static AString CreateSIPUserId(IN const AString &strDialString,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN IMS_BOOL bUserPhoneParam = IMS_FALSE,
-            IN const AString &strPhoneContext = AString::ConstNull());
+    static AString CreateSIPUserId(IN const AString& strDialString,
+            IN IMS_SINT32 nSlotId = IMS_SLOT_0, IN IMS_BOOL bUserPhoneParam = IMS_FALSE,
+            IN const AString& strPhoneContext = AString::ConstNull());
 
     /*
      Returns the SIP URI from the specified dial string and phone-context parameter.
@@ -94,9 +91,9 @@ public:
     AString                 Public user identity (SIP URI)
     </table>
     */
-    static AString CreateSIPUserIdWithDialString(IN const AString &strDialString,
+    static AString CreateSIPUserIdWithDialString(IN const AString& strDialString,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN const AString &strPhoneContext = AString::ConstNull());
+            IN const AString& strPhoneContext = AString::ConstNull());
 
     /*
      Returns the SIP URI from the specified dial string and phone-context parameter.
@@ -118,9 +115,9 @@ public:
     AString                 Public user identity (SIP URI)
     </table>
     */
-    static AString CreateSIPUserIdWithPhone(IN const AString &strDialString,
+    static AString CreateSIPUserIdWithPhone(IN const AString& strDialString,
             IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN const AString &strPhoneContext = AString::ConstNull());
+            IN const AString& strPhoneContext = AString::ConstNull());
 
     /*
      Returns the public user identity with TEL URI from MSISDN or MDN of this device.
@@ -140,8 +137,8 @@ public:
     AString                 Public user identity (TEL URI)
     </table>
     */
-    static AString CreateTelUserId(IN const AString &strPhoneContext,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static AString CreateTelUserId(
+            IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /*
      Returns the TEL URI from the specified phone number and phone-context parameter.
@@ -164,8 +161,8 @@ public:
     AString                 Public user identity (TEL URI)
     </table>
     */
-    static AString CreateTelUserId(IN const AString &strDialString,
-            IN const AString &strPhoneContext, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static AString CreateTelUserId(IN const AString& strDialString,
+            IN const AString& strPhoneContext, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /*
      Returns the temporary home domain name.
@@ -260,9 +257,8 @@ public:
     AString                 Home domain name
     </table>
     */
-    static const AString& GetHomeDomainName(
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN const AString &strSubscriberId = AString::ConstNull());
+    static const AString& GetHomeDomainName(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
+            IN const AString& strSubscriberId = AString::ConstNull());
 
     /*
      Returns the MCC / MNC from the specified PLMN.
@@ -288,8 +284,8 @@ public:
     IMS_FALSE               When MCC or MNC is not valid
     </table>
     */
-    static IMS_BOOL GetMccMnc(IN const AString &strPLMN, IN IMS_SINT32 nMncDigits,
-            OUT AString &strMcc, OUT AString &strMnc, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    static IMS_BOOL GetMccMnc(IN const AString& strPLMN, IN IMS_SINT32 nMncDigits,
+            OUT AString& strMcc, OUT AString& strMnc, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /*
      Returns the phone-context string for tel URI.
@@ -313,9 +309,8 @@ public:
     </table>
     */
     static const AString GetPhoneContext(IN IMS_SINT32 nDialingPolicy,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN AccessNetworkInfo *pANI = IMS_NULL,
-            IN const AString &strSubscriberId = AString::ConstNull());
+            IN IMS_SINT32 nSlotId = IMS_SLOT_0, IN AccessNetworkInfo* pANI = IMS_NULL,
+            IN const AString& strSubscriberId = AString::ConstNull());
 
     /*
      Returns the unavailable SIP URI according to 3GPP TS 23.003.
@@ -347,4 +342,4 @@ public:
     };
 };
 
-#endif // _IMS_IDENTITY_H_
+#endif  // _IMS_IDENTITY_H_

@@ -21,8 +21,7 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PUBLIC GLOBAL
-IConfigBuffer* ConfigLoader::GetConfig(IN const AString& strContent)
+PUBLIC GLOBAL IConfigBuffer* ConfigLoader::GetConfig(IN const AString& strContent)
 {
     if (strContent.GetLength() == 0)
     {

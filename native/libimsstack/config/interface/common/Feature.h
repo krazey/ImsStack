@@ -17,36 +17,35 @@
 #include "AStringArray.h"
 #include "ServiceIdentifier.h"
 
-class Feature
-    : public RCObject
+class Feature : public RCObject
 {
 public:
-    explicit Feature(IN const AString &strFeature_);
-    Feature(IN const AString &strTag_, IN const AString &strValue_);
-    Feature(IN const Feature &objRHS);
+    explicit Feature(IN const AString& strFeature_);
+    Feature(IN const AString& strTag_, IN const AString& strValue_);
+    Feature(IN const Feature& objRHS);
     virtual ~Feature();
 
 public:
-    Feature& operator=(IN const Feature &objRHS);
+    Feature& operator=(IN const Feature& objRHS);
 
 public:
-    IMS_BOOL Equals(IN const Feature *pOther) const;
+    IMS_BOOL Equals(IN const Feature* pOther) const;
     const AString& GetTag() const;
     const AString& GetValue() const;
-    IMS_BOOL IsSameTag(IN const Feature *pOther) const;
+    IMS_BOOL IsSameTag(IN const Feature* pOther) const;
     IMS_BOOL IsTagOnly() const;
     AString ToString() const;
     AString ToStringValueOnly() const;
 
     static const IMS_CHAR* GetFeatureTag(IN IMS_SINT32 nBaseTag);
-    static IMS_BOOL IsFeatureTag(IN const AString &strName);
+    static IMS_BOOL IsFeatureTag(IN const AString& strName);
 
 private:
-    void ExtractProperties(IN const AString &strFeature);
-    static AString DoPercentDecoding(IN const AString &strValue);
-    static AString DoPercentEncoding(IN const AString &strValue);
-    static IMS_BOOL IsBaseTag(IN const AString &strName);
-    static AString StripPrefixInSIPTree(IN const AString &strName);
+    void ExtractProperties(IN const AString& strFeature);
+    static AString DoPercentDecoding(IN const AString& strValue);
+    static AString DoPercentEncoding(IN const AString& strValue);
+    static IMS_BOOL IsBaseTag(IN const AString& strName);
+    static AString StripPrefixInSIPTree(IN const AString& strName);
 
 public:
     // Base Tags
@@ -101,8 +100,8 @@ private:
         TOKEN_NOBANG = 0x04,
         // String-Value: starts with LAQUOT & ends with RAQUOT
         STRING_VALUE = 0x08,
-        //QUOTED_STRING = 0x10,
-        // IARI
+        // QUOTED_STRING = 0x10,
+        //  IARI
         IARI = 0x20,
         // ICSI
         ICSI = 0x40
@@ -117,33 +116,33 @@ private:
 class FeatureSet
 {
 public:
-    explicit FeatureSet(IN const AString &strTag_);
-    FeatureSet(IN const AString &strTag_, IN const AString &strValues_);
+    explicit FeatureSet(IN const AString& strTag_);
+    FeatureSet(IN const AString& strTag_, IN const AString& strValues_);
     ~FeatureSet();
 
 private:
-    FeatureSet(IN const FeatureSet &objRHS);
-    FeatureSet& operator=(IN const FeatureSet &objRHS);
+    FeatureSet(IN const FeatureSet& objRHS);
+    FeatureSet& operator=(IN const FeatureSet& objRHS);
 
 public:
-    IMS_SINT32 Add(IN const AString &strTag);
-    IMS_SINT32 Add(IN const AString &strTag, IN const AString &strValue);
-    IMS_BOOL Contains(IN const Feature *pFeature) const;
-    IMS_BOOL Contains(IN const AString &strValue) const;
+    IMS_SINT32 Add(IN const AString& strTag);
+    IMS_SINT32 Add(IN const AString& strTag, IN const AString& strValue);
+    IMS_BOOL Contains(IN const Feature* pFeature) const;
+    IMS_BOOL Contains(IN const AString& strValue) const;
     const AString& GetTag() const;
     const IMSList<Feature*>& GetFeatures() const;
     IMS_BOOL IsEmpty() const;
-    Feature* Lookup(IN const Feature *pFeature, IN IMS_BOOL bDetach = IMS_FALSE);
-    IMS_SINT32 Remove(IN const AString &strTag);
-    IMS_SINT32 Remove(IN const AString &strTag, IN const AString &strValue);
+    Feature* Lookup(IN const Feature* pFeature, IN IMS_BOOL bDetach = IMS_FALSE);
+    IMS_SINT32 Remove(IN const AString& strTag);
+    IMS_SINT32 Remove(IN const AString& strTag, IN const AString& strValue);
     AString ToString() const;
 
-    static FeatureSet* FromServiceIdentifier(IN const ServiceIdentifier &objServiceId);
+    static FeatureSet* FromServiceIdentifier(IN const ServiceIdentifier& objServiceId);
 
 private:
-    IMS_SINT32 Add(IN Feature *pFeature);
-    void AddFeatures(IN const AString &strValues);
-    IMS_SINT32 Remove(IN const Feature *pFeature);
+    IMS_SINT32 Add(IN Feature* pFeature);
+    void AddFeatures(IN const AString& strValues);
+    IMS_SINT32 Remove(IN const Feature* pFeature);
 
 public:
     enum
@@ -160,4 +159,4 @@ private:
     IMSList<Feature*> objFeatures;
 };
 
-#endif // _FEATURE_H_
+#endif  // _FEATURE_H_

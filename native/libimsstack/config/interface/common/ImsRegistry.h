@@ -20,14 +20,14 @@ class ImsRegistry
 {
 public:
     ImsRegistry();
-    ImsRegistry(IN const ImsRegistry &objRHS);
+    ImsRegistry(IN const ImsRegistry& objRHS);
     ~ImsRegistry();
 
 public:
-    ImsRegistry& operator=(IN const ImsRegistry &objRHS);
+    ImsRegistry& operator=(IN const ImsRegistry& objRHS);
 
 public:
-    IMS_BOOL Add(IN const AStringArray &objProperty);
+    IMS_BOOL Add(IN const AStringArray& objProperty);
     const AStringArray& GetAt(IN IMS_SINT32 i) const;
     IMS_SINT32 GetCount() const;
 
@@ -35,4 +35,4 @@ private:
     IMSList<AStringArray> objProperties;
 };
 
-#endif // _IMS_REGISTRY_H_
+#endif  // _IMS_REGISTRY_H_

@@ -115,4 +115,4 @@ public:
     virtual const AString& GetMediaProfile() const = 0;
 };
 
-#endif // _INTERFACE_CORE_SERVICE_CONFIG_H_
+#endif  // _INTERFACE_CORE_SERVICE_CONFIG_H_

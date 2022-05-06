@@ -18,38 +18,37 @@
 
 #include "IImsSubscriberInfo.h"
 
-class ImsSubscriberInfo
-        : public IImsSubscriberInfo
+class ImsSubscriberInfo : public IImsSubscriberInfo
 {
 public:
     ImsSubscriberInfo();
-    inline virtual ~ImsSubscriberInfo()
-    {}
+    inline virtual ~ImsSubscriberInfo() {}
 
     ImsSubscriberInfo(IN const ImsSubscriberInfo& other) = delete;
     ImsSubscriberInfo& operator=(IN const ImsSubscriberInfo& other) = delete;
 
 public:
     // IImsSubscriberInfo interface
-    inline const Credential& GetCredential() const override
-    { return m_objCredential; }
-    inline const AString& GetHomeDomainName() const override
-    { return m_strHomeDomainName; }
+    inline const Credential& GetCredential() const override { return m_objCredential; }
+    inline const AString& GetHomeDomainName() const override { return m_strHomeDomainName; }
     inline IMS_SINT32 GetIndexOfPrimaryPublicUserId() const override
-    { return m_nRefIndexOfPrimaryImpu; }
+    {
+        return m_nRefIndexOfPrimaryImpu;
+    }
     inline const AString& GetPhoneContext() const override
-    { return (m_strPhoneContext.GetLength() == 0) ? m_strHomeDomainName : m_strPhoneContext; }
-    inline const AString& GetPrivateUserId() const override
-    { return m_strPrivateUserId; }
+    {
+        return (m_strPhoneContext.GetLength() == 0) ? m_strHomeDomainName : m_strPhoneContext;
+    }
+    inline const AString& GetPrivateUserId() const override { return m_strPrivateUserId; }
     const AString& GetPublicUserId(
             IN IMS_SINT32 nType = IImsSubscriberInfo::IMPU_REF_INDEX) const override;
-    inline const AStringArray& GetPublicUserIds() const override
-    { return m_objPublicUserIds; }
+    inline const AStringArray& GetPublicUserIds() const override { return m_objPublicUserIds; }
 
     inline const AString& GetScscfAddress() const
-    { return (m_strScscfAddress.GetLength() == 0) ? m_strHomeDomainName : m_strScscfAddress; }
-    inline IMS_BOOL IsAuthRealmLenient() const
-    { return m_bIsAuthRealmLenient; }
+    {
+        return (m_strScscfAddress.GetLength() == 0) ? m_strHomeDomainName : m_strScscfAddress;
+    }
+    inline IMS_BOOL IsAuthRealmLenient() const { return m_bIsAuthRealmLenient; }
 
 private:
     friend class SubscriberConfig;

@@ -48,8 +48,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual const AStringArray& GetMediaProfile(IN CONST AString &strName,
-            IN IMS_SINT32 nMediaType) const = 0;
+    virtual const AStringArray& GetMediaProfile(
+            IN CONST AString& strName, IN IMS_SINT32 nMediaType) const = 0;
 
 public:
     enum
@@ -63,4 +63,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_MEDIA_CONFIG_H_
+#endif  // _INTERFACE_MEDIA_CONFIG_H_

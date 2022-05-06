@@ -26,31 +26,30 @@ Example
 See Also
 
 */
-class CapProperty
-    : public ImsProperty
+class CapProperty : public ImsProperty
 {
 public:
     CapProperty();
     CapProperty(IN IMS_SINT32 nSectorId_, IN IMS_SINT32 nMessageType_);
-    CapProperty(IN const CapProperty &objRHS);
+    CapProperty(IN const CapProperty& objRHS);
     virtual ~CapProperty();
 
 public:
-    CapProperty& operator=(IN const CapProperty &objRHS);
+    CapProperty& operator=(IN const CapProperty& objRHS);
 
 public:
     // ImsProperty class
-    virtual IMS_BOOL Equals(IN const AString &strValue) const;
+    virtual IMS_BOOL Equals(IN const AString& strValue) const;
 
-    void AddValue(IN const AString &strValue);
+    void AddValue(IN const AString& strValue);
     const AStringArray& GetValues() const;
     void SetKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType);
 
     static AString CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType);
     static AString MessageTypeToString(IN IMS_SINT32 nMessageType);
     static AString SectorIdToString(IN IMS_SINT32 nSectorId);
-    static IMS_SINT32 StringToMessageType(IN const AString &strMessageType);
-    static IMS_SINT32 StringToSectorId(IN const AString &strSectorId);
+    static IMS_SINT32 StringToMessageType(IN const AString& strMessageType);
+    static IMS_SINT32 StringToSectorId(IN const AString& strSectorId);
 
 public:
     // Sector Id
@@ -78,7 +77,7 @@ public:
     static const IMS_CHAR* MESSAGE_TYPE_STRING[MESSAGE_TYPE_MAX];
 
 private:
-    CapPropertyPrivate *pCapPP;
+    CapPropertyPrivate* pCapPP;
 };
 
-#endif // _CAP_PROPERTY_H_
+#endif  // _CAP_PROPERTY_H_

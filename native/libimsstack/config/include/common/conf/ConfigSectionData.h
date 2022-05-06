@@ -18,20 +18,20 @@
 class ConfigSectionData
 {
 public:
-    explicit ConfigSectionData(IN const AString &strKey_);
-    ConfigSectionData(IN const AString &strKey_, IN const AString &strValue_);
+    explicit ConfigSectionData(IN const AString& strKey_);
+    ConfigSectionData(IN const AString& strKey_, IN const AString& strValue_);
     ~ConfigSectionData();
 
 private:
     ConfigSectionData();
-    ConfigSectionData(IN const ConfigSectionData &objRHS);
-    ConfigSectionData& operator=(IN const ConfigSectionData &objRHS);
+    ConfigSectionData(IN const ConfigSectionData& objRHS);
+    ConfigSectionData& operator=(IN const ConfigSectionData& objRHS);
 
 public:
-    void AddComment(IN const AString &strComment);
+    void AddComment(IN const AString& strComment);
     const AString& GetKey() const;
     const AString& GetValue() const;
-    void SetValue(IN const AString &strValue);
+    void SetValue(IN const AString& strValue);
     AString ToString() const;
 
 private:
@@ -41,4 +41,4 @@ private:
     AString strValue;
 };
 
-#endif // _CONFIG_SECTION_DATA_H_
+#endif  // _CONFIG_SECTION_DATA_H_

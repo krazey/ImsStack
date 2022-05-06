@@ -19,20 +19,16 @@
 #include "private/EngineConfig.h"
 
 PUBLIC
-EngineConfig::EngineConfig(IN IMS_SINT32 nSlotId)
-    : ConfigBase(nSlotId)
-    , m_nTraceOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL)
-    , m_nTraceModule(0xFFFFFFFF)
+EngineConfig::EngineConfig(IN IMS_SINT32 nSlotId) :
+        ConfigBase(nSlotId),
+        m_nTraceOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL),
+        m_nTraceModule(0xFFFFFFFF)
 {
 }
 
-PUBLIC VIRTUAL
-EngineConfig::~EngineConfig()
-{
-}
+PUBLIC VIRTUAL EngineConfig::~EngineConfig() {}
 
-PUBLIC VIRTUAL
-void EngineConfig::Refresh()
+PUBLIC VIRTUAL void EngineConfig::Refresh()
 {
     TraceService::GetTraceService()->SetOption(GetTraceOption(), GetTraceModule());
 }

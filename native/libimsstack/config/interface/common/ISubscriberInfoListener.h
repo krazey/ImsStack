@@ -38,9 +38,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void SubscriberInfo_UpdateIMPU(
-            IN IMS_SINT32 nSlotId, IN const AString &strId,
-            IN const AString &strOld, IN const AString &strNew) = 0;
+    virtual void SubscriberInfo_UpdateIMPU(IN IMS_SINT32 nSlotId, IN const AString& strId,
+            IN const AString& strOld, IN const AString& strNew) = 0;
 };
 
-#endif // _INTERFACE_SUBSCRIBER_INFO_LISTENER_H_
+#endif  // _INTERFACE_SUBSCRIBER_INFO_LISTENER_H_

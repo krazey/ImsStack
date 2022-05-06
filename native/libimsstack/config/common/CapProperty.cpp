@@ -16,10 +16,11 @@
 class CapPropertyPrivate
 {
 public:
-    inline CapPropertyPrivate()
-        : nSectorId(CapProperty::SECTOR_INVALID)
-        , nMessageType(CapProperty::MESSAGE_TYPE_INVALID)
-    {}
+    inline CapPropertyPrivate() :
+            nSectorId(CapProperty::SECTOR_INVALID),
+            nMessageType(CapProperty::MESSAGE_TYPE_INVALID)
+    {
+    }
 
 private:
     friend class CapProperty;
@@ -29,53 +30,48 @@ private:
     AStringArray objSDPFields;
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* CapProperty::SECTOR_STRING[CapProperty::SECTOR_MAX] =
-{
-    "",
-    "Session",
-    "Framed",
-    "StreamAudio",
-    "StreamVideo"
+PUBLIC GLOBAL const IMS_CHAR* CapProperty::SECTOR_STRING[CapProperty::SECTOR_MAX] = {
+        "",
+        "Session",
+        "Framed",
+        "StreamAudio",
+        "StreamVideo",
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR* CapProperty::MESSAGE_TYPE_STRING[CapProperty::MESSAGE_TYPE_MAX] =
-{
-    "",
-    "Req",
-    "Resp",
-    "Req_Resp"
+PUBLIC GLOBAL const IMS_CHAR* CapProperty::MESSAGE_TYPE_STRING[CapProperty::MESSAGE_TYPE_MAX] = {
+        "",
+        "Req",
+        "Resp",
+        "Req_Resp",
 };
 
 PUBLIC
-CapProperty::CapProperty()
-    : ImsProperty(ImsProperty::PKEY_CAP)
-    , pCapPP(new CapPropertyPrivate())
+CapProperty::CapProperty() :
+        ImsProperty(ImsProperty::PKEY_CAP),
+        pCapPP(new CapPropertyPrivate())
 {
 }
 
 PUBLIC
-CapProperty::CapProperty(IN IMS_SINT32 nSectorId_, IN IMS_SINT32 nMessageType_)
-    : ImsProperty(ImsProperty::PKEY_CAP)
-    , pCapPP(new CapPropertyPrivate())
+CapProperty::CapProperty(IN IMS_SINT32 nSectorId_, IN IMS_SINT32 nMessageType_) :
+        ImsProperty(ImsProperty::PKEY_CAP),
+        pCapPP(new CapPropertyPrivate())
 {
     pCapPP->nSectorId = nSectorId_;
     pCapPP->nMessageType = nMessageType_;
 }
 
 PUBLIC
-CapProperty::CapProperty(IN const CapProperty &objRHS)
-    : ImsProperty(objRHS)
-    , pCapPP(new CapPropertyPrivate())
+CapProperty::CapProperty(IN const CapProperty& objRHS) :
+        ImsProperty(objRHS),
+        pCapPP(new CapPropertyPrivate())
 {
     pCapPP->nSectorId = objRHS.pCapPP->nSectorId;
     pCapPP->nMessageType = objRHS.pCapPP->nMessageType;
     pCapPP->objSDPFields = objRHS.pCapPP->objSDPFields;
 }
 
-PUBLIC VIRTUAL
-CapProperty::~CapProperty()
+PUBLIC VIRTUAL CapProperty::~CapProperty()
 {
     if (pCapPP != IMS_NULL)
     {
@@ -84,7 +80,7 @@ CapProperty::~CapProperty()
 }
 
 PUBLIC
-CapProperty& CapProperty::operator=(IN const CapProperty &objRHS)
+CapProperty& CapProperty::operator=(IN const CapProperty& objRHS)
 {
     if (this != &objRHS)
     {
@@ -96,8 +92,7 @@ CapProperty& CapProperty::operator=(IN const CapProperty &objRHS)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CapProperty::Equals(IN const AString &strValue) const
+PUBLIC VIRTUAL IMS_BOOL CapProperty::Equals(IN const AString& strValue) const
 {
     AString strCapKey = CreateCapKey(pCapPP->nSectorId, pCapPP->nMessageType);
 
@@ -105,7 +100,7 @@ IMS_BOOL CapProperty::Equals(IN const AString &strValue) const
 }
 
 PUBLIC
-void CapProperty::AddValue(IN const AString &strValue)
+void CapProperty::AddValue(IN const AString& strValue)
 {
     pCapPP->objSDPFields.AddElement(strValue);
 }
@@ -123,12 +118,10 @@ void CapProperty::SetKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType)
     pCapPP->nMessageType = nMessageType;
 }
 
-PUBLIC GLOBAL
-AString CapProperty::CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType)
+PUBLIC GLOBAL AString CapProperty::CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessageType)
 {
-    if ((nSectorId == SECTOR_INVALID)
-            || (nMessageType == MESSAGE_TYPE_INVALID)
-            || (nMessageType == MESSAGE_TYPE_REQUEST_RESPONSE))
+    if ((nSectorId == SECTOR_INVALID) || (nMessageType == MESSAGE_TYPE_INVALID) ||
+            (nMessageType == MESSAGE_TYPE_REQUEST_RESPONSE))
     {
         return AString();
     }
@@ -139,8 +132,7 @@ AString CapProperty::CreateCapKey(IN IMS_SINT32 nSectorId, IN IMS_SINT32 nMessag
     return strCapKey.SetNumber(nCapKey, 16);
 }
 
-PUBLIC GLOBAL
-AString CapProperty::MessageTypeToString(IN IMS_SINT32 nMessageType)
+PUBLIC GLOBAL AString CapProperty::MessageTypeToString(IN IMS_SINT32 nMessageType)
 {
     if ((nMessageType > MESSAGE_TYPE_INVALID) && (nMessageType < MESSAGE_TYPE_MAX))
     {
@@ -150,8 +142,7 @@ AString CapProperty::MessageTypeToString(IN IMS_SINT32 nMessageType)
     return AString();
 }
 
-PUBLIC GLOBAL
-AString CapProperty::SectorIdToString(IN IMS_SINT32 nSectorId)
+PUBLIC GLOBAL AString CapProperty::SectorIdToString(IN IMS_SINT32 nSectorId)
 {
     if ((nSectorId > SECTOR_INVALID) && (nSectorId < SECTOR_MAX))
     {
@@ -161,8 +152,7 @@ AString CapProperty::SectorIdToString(IN IMS_SINT32 nSectorId)
     return AString();
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 CapProperty::StringToMessageType(IN const AString &strMessageType)
+PUBLIC GLOBAL IMS_SINT32 CapProperty::StringToMessageType(IN const AString& strMessageType)
 {
     for (IMS_SINT32 i = (MESSAGE_TYPE_INVALID + 1); i < MESSAGE_TYPE_MAX; ++i)
     {
@@ -175,8 +165,7 @@ IMS_SINT32 CapProperty::StringToMessageType(IN const AString &strMessageType)
     return MESSAGE_TYPE_INVALID;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 CapProperty::StringToSectorId(IN const AString &strSectorId)
+PUBLIC GLOBAL IMS_SINT32 CapProperty::StringToSectorId(IN const AString& strSectorId)
 {
     for (IMS_SINT32 i = (SECTOR_INVALID + 1); i < SECTOR_MAX; ++i)
     {

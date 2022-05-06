@@ -26,30 +26,26 @@ private:
     RegistryLoader();
 
 public:
-    static IMS_BOOL AddStreamProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddFramedProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddBasicProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddEventProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddCoreServiceProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddQosProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddRegProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddWriteProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddReadProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddCapProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddMprofProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
-    static IMS_BOOL AddConnectionProperty(IN CONST IConfigBuffer *piBuffer,
-            OUT ImsRegistry &objRegistry);
+    static IMS_BOOL AddStreamProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddFramedProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddBasicProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddEventProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddCoreServiceProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddQosProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddRegProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddWriteProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddReadProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddCapProperty(IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddMprofProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
+    static IMS_BOOL AddConnectionProperty(
+            IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry);
     static IMS_BOOL ValidateUniqueness(IN IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX]);
 
 public:
@@ -76,42 +72,25 @@ public:
     static const IMS_CHAR PARAM_PROFILE[];
 };
 
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::SECTION_IMS_REGISTRY[] = "IMSRegistry";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_MEDIA_TYPES[] = "media_types";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_MAX_SIZE[] = "max_size";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_PACKAGE_NAMES[] = "package_names";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_SERVICE_ID[] = "service_id";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_IARI[] = "iari";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_ICSI[] = "icsi";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_FEATURE_TAG[] = "feature_tag";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_SEND_FLOW_SPEC[] = "send_flow_spec";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_RECEIVE_FLOW_SPEC[] = "receive_flow_spec";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_HEADER[] = "header";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_HEADER_NAMES[] = "header_names";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_SECTOR_ID[] = "sector_id";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_MESSAGE_TYPE[] = "message_type";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_SDP[] = "sdp";
-PUBLIC GLOBAL
-const IMS_CHAR RegistryLoader::PARAM_PROFILE[] = "profile";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::SECTION_IMS_REGISTRY[] = "IMSRegistry";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_MEDIA_TYPES[] = "media_types";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_MAX_SIZE[] = "max_size";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_PACKAGE_NAMES[] = "package_names";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SERVICE_ID[] = "service_id";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_IARI[] = "iari";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_ICSI[] = "icsi";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_FEATURE_TAG[] = "feature_tag";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SEND_FLOW_SPEC[] = "send_flow_spec";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_RECEIVE_FLOW_SPEC[] = "receive_flow_spec";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_HEADER[] = "header";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_HEADER_NAMES[] = "header_names";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SECTOR_ID[] = "sector_id";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_MESSAGE_TYPE[] = "message_type";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_SDP[] = "sdp";
+PUBLIC GLOBAL const IMS_CHAR RegistryLoader::PARAM_PROFILE[] = "profile";
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddStreamProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddStreamProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -125,9 +104,8 @@ IMS_BOOL RegistryLoader::AddStreamProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddFramedProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddFramedProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -137,7 +115,7 @@ IMS_BOOL RegistryLoader::AddFramedProperty(IN CONST IConfigBuffer *piBuffer,
     objProperty.AddElement(piBuffer->ReadValue(PARAM_MEDIA_TYPES));
 
     // "max-size" parameter if present
-    const AString &strMaxSize = piBuffer->ReadValue(PARAM_MAX_SIZE);
+    const AString& strMaxSize = piBuffer->ReadValue(PARAM_MAX_SIZE);
 
     if (strMaxSize.IsNULL())
     {
@@ -153,9 +131,8 @@ IMS_BOOL RegistryLoader::AddFramedProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddBasicProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddBasicProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -169,9 +146,8 @@ IMS_BOOL RegistryLoader::AddBasicProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddEventProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddEventProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -185,9 +161,8 @@ IMS_BOOL RegistryLoader::AddEventProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddCoreServiceProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCoreServiceProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -207,9 +182,8 @@ IMS_BOOL RegistryLoader::AddCoreServiceProperty(IN CONST IConfigBuffer *piBuffer
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddQosProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddQosProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -229,9 +203,8 @@ IMS_BOOL RegistryLoader::AddQosProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddRegProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddRegProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -254,9 +227,8 @@ IMS_BOOL RegistryLoader::AddRegProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddWriteProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddWriteProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -270,9 +242,8 @@ IMS_BOOL RegistryLoader::AddWriteProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddReadProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddReadProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -286,9 +257,8 @@ IMS_BOOL RegistryLoader::AddReadProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddCapProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddCapProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -312,9 +282,8 @@ IMS_BOOL RegistryLoader::AddCapProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddMprofProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddMprofProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -331,9 +300,8 @@ IMS_BOOL RegistryLoader::AddMprofProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::AddConnectionProperty(IN CONST IConfigBuffer *piBuffer,
-        OUT ImsRegistry &objRegistry)
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::AddConnectionProperty(
+        IN CONST IConfigBuffer* piBuffer, OUT ImsRegistry& objRegistry)
 {
     AStringArray objProperty;
 
@@ -348,8 +316,7 @@ IMS_BOOL RegistryLoader::AddConnectionProperty(IN CONST IConfigBuffer *piBuffer,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL RegistryLoader::ValidateUniqueness(
+PUBLIC GLOBAL IMS_BOOL RegistryLoader::ValidateUniqueness(
         IN IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX])
 {
     if (nPropertyCount[ImsProperty::PKEY_STREAM] > 1)
@@ -396,8 +363,8 @@ IMS_BOOL RegistryLoader::ValidateUniqueness(
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString& strAppId, OUT ImsRegistry& objRegistry)
+PUBLIC GLOBAL IMS_BOOL ImsRegistryLoader::GetRegistry(
+        IN const AString& strAppId, OUT ImsRegistry& objRegistry)
 {
     IConfigBuffer* piBuffer = IMS_NULL;
     const AString strContent = StaticConfig::GetConfig(strAppId);
@@ -417,7 +384,9 @@ IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString& strAppId, OUT ImsRegis
     }
 
     //// Uniqueness property -- starts
-    IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX] = {0, };
+    IMS_SINT32 nPropertyCount[ImsProperty::PKEY_MAX] = {
+            0,
+    };
 
     if (!piBuffer->CaptureSection(ConfigBase::SECTION_UNIQUENESS))
     {
@@ -427,7 +396,7 @@ IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString& strAppId, OUT ImsRegis
 
     for (IMS_SINT32 i = ImsProperty::PKEY_STREAM; i < ImsProperty::PKEY_MAX; ++i)
     {
-        const AString &strTmpVal = piBuffer->ReadValue(ImsProperty::PKEY_STRING[i]);
+        const AString& strTmpVal = piBuffer->ReadValue(ImsProperty::PKEY_STRING[i]);
         nPropertyCount[i] = strTmpVal.ToInt32();
     }
 
@@ -441,7 +410,7 @@ IMS_BOOL ImsRegistryLoader::GetRegistry(IN const AString& strAppId, OUT ImsRegis
         return IMS_FALSE;
     }
 
-    const AString &strIMSRegistry = piBuffer->ReadValue(RegistryLoader::SECTION_IMS_REGISTRY);
+    const AString& strIMSRegistry = piBuffer->ReadValue(RegistryLoader::SECTION_IMS_REGISTRY);
 
     if (!strIMSRegistry.Equals(strAppId))
     {

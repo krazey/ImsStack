@@ -99,4 +99,4 @@ public:
     virtual void SubscriberConfig_NotifyError(IN IMS_SINT32 nErrorCode) = 0;
 };
 
-#endif // _INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_
+#endif  // _INTERFACE_SUBSCRIBER_CONFIG_LISTENER_H_

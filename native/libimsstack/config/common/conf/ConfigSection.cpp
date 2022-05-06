@@ -15,8 +15,8 @@
 #include "conf/ConfigSection.h"
 
 PUBLIC
-ConfigSection::ConfigSection()
-    : strSectionName(AString::ConstNull())
+ConfigSection::ConfigSection() :
+        strSectionName(AString::ConstNull())
 {
 }
 
@@ -27,7 +27,7 @@ ConfigSection::~ConfigSection()
     {
         for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
         {
-            ConfigSectionData *pData = objSectionData.GetAt(i);
+            ConfigSectionData* pData = objSectionData.GetAt(i);
 
             if (pData != IMS_NULL)
             {
@@ -38,7 +38,7 @@ ConfigSection::~ConfigSection()
 }
 
 PUBLIC
-void ConfigSection::AddComment(IN const AString &strComment)
+void ConfigSection::AddComment(IN const AString& strComment)
 {
     objComment.Add(strComment);
 }
@@ -50,18 +50,18 @@ const AString& ConfigSection::GetName() const
 }
 
 PUBLIC
-void ConfigSection::GetKeys(OUT AStringArray &objKeys) const
+void ConfigSection::GetKeys(OUT AStringArray& objKeys) const
 {
     for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData *pSectionData = objSectionData.GetAt(i);
+        const ConfigSectionData* pSectionData = objSectionData.GetAt(i);
 
         objKeys.AddElement(pSectionData->GetKey());
     }
 }
 
 PUBLIC
-const AString& ConfigSection::GetValue(IN const IMS_CHAR *pszKey) const
+const AString& ConfigSection::GetValue(IN const IMS_CHAR* pszKey) const
 {
     if (objSectionData.IsEmpty())
     {
@@ -70,7 +70,7 @@ const AString& ConfigSection::GetValue(IN const IMS_CHAR *pszKey) const
 
     for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData *pData = objSectionData.GetAt(i);
+        const ConfigSectionData* pData = objSectionData.GetAt(i);
 
         if (pData->GetKey().EqualsIgnoreCase(pszKey))
         {
@@ -82,7 +82,7 @@ const AString& ConfigSection::GetValue(IN const IMS_CHAR *pszKey) const
 }
 
 PUBLIC
-IMS_BOOL ConfigSection::SetValue(IN const IMS_CHAR *pszKey, IN const AString &strValue)
+IMS_BOOL ConfigSection::SetValue(IN const IMS_CHAR* pszKey, IN const AString& strValue)
 {
     if (strValue.IsNULL())
     {
@@ -96,7 +96,7 @@ IMS_BOOL ConfigSection::SetValue(IN const IMS_CHAR *pszKey, IN const AString &st
 
     for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
     {
-        ConfigSectionData *pData = objSectionData.GetAt(i);
+        ConfigSectionData* pData = objSectionData.GetAt(i);
 
         if (pData->GetKey().EqualsIgnoreCase(pszKey))
         {
@@ -125,7 +125,7 @@ AString ConfigSection::ToString() const
     // Section parameters
     for (IMS_UINT32 i = 0; i < objSectionData.GetSize(); ++i)
     {
-        const ConfigSectionData *pData = objSectionData.GetAt(i);
+        const ConfigSectionData* pData = objSectionData.GetAt(i);
 
         strTmpVal.Append(pData->ToString());
         strTmpVal.Append(TextParser::STR_CRLF);
@@ -135,7 +135,7 @@ AString ConfigSection::ToString() const
 }
 
 PRIVATE
-IMS_BOOL ConfigSection::AddSectionData(IN const AString &strKeyValue)
+IMS_BOOL ConfigSection::AddSectionData(IN const AString& strKeyValue)
 {
     IMS_SINT32 nStartIndex = strKeyValue.GetIndexOf(TextParser::CHAR_EQUAL);
 
@@ -147,7 +147,7 @@ IMS_BOOL ConfigSection::AddSectionData(IN const AString &strKeyValue)
     AString strKey = strKeyValue.GetSubStr(0, nStartIndex).Trim();
     AString strValue = strKeyValue.GetSubStr(nStartIndex + 1).Trim();
 
-    ConfigSectionData *pData = new ConfigSectionData(strKey, strValue);
+    ConfigSectionData* pData = new ConfigSectionData(strKey, strValue);
 
     if (pData == IMS_NULL)
     {
@@ -176,7 +176,7 @@ ConfigSectionData* ConfigSection::GetLastElement() const
 }
 
 PRIVATE
-void ConfigSection::SetName(IN const AString &strSectName)
+void ConfigSection::SetName(IN const AString& strSectName)
 {
     this->strSectionName = strSectName;
 }

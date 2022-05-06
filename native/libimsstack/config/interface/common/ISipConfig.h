@@ -149,7 +149,7 @@ public:
     /// For GRUU, type of device id (+sip.instance, URN)
     enum
     {
-        DEVICE_ID_NONE = (-1), /// if device id is not used
+        DEVICE_ID_NONE = (-1),  /// if device id is not used
         DEVICE_ID_GSMA_IMEI = 0,
         DEVICE_ID_UUID_IMEI_MD5,
         DEVICE_ID_UUID_IMEI_SHA1,

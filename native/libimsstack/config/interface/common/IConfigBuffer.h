@@ -54,7 +54,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL CaptureSection(IN const IMS_CHAR *pszSectName) = 0;
+    virtual IMS_BOOL CaptureSection(IN const IMS_CHAR* pszSectName) = 0;
 
     /*
      Captures the current work section which has a property of list section
@@ -76,7 +76,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL CaptureSection(IN const IMS_CHAR *pszSectName, IN IMS_SINT32 nIndex) = 0;
+    virtual IMS_BOOL CaptureSection(IN const IMS_CHAR* pszSectName, IN IMS_SINT32 nIndex) = 0;
 
     /*
      Releases the current work section.
@@ -117,7 +117,7 @@ public:
     IMS_SINT32              Count value of the specified key
     </table>
     */
-    virtual IMS_SINT32 ReadKeyCount(IN const IMS_CHAR *pszKey) const = 0;
+    virtual IMS_SINT32 ReadKeyCount(IN const IMS_CHAR* pszKey) const = 0;
 
     /*
      Reads the string value of the specified key with 'string' property.
@@ -136,7 +136,7 @@ public:
     AString                 Value of the specified key
     </table>
     */
-    virtual const AString& ReadValue(IN const IMS_CHAR *pszKey) const = 0;
+    virtual const AString& ReadValue(IN const IMS_CHAR* pszKey) const = 0;
 
     /*
      Reads the string value of the specified key with 'string' property & 'list' property.
@@ -156,7 +156,7 @@ public:
     AString                 Value of the specified key
     </table>
     */
-    virtual const AString& ReadValue(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nIndex) const = 0;
+    virtual const AString& ReadValue(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nIndex) const = 0;
 
     /*
      Reads the boolean value of the specified key with 'boolean' property.
@@ -175,7 +175,7 @@ public:
     IMS_BOOL                IMS_TRUE / IMS_FALSE
     </table>
     */
-    virtual IMS_BOOL ReadValueBoolean(IN const IMS_CHAR *pszKey) const = 0;
+    virtual IMS_BOOL ReadValueBoolean(IN const IMS_CHAR* pszKey) const = 0;
 
     /*
      Reads the integer value of the specified key with 'integer' property.
@@ -194,7 +194,7 @@ public:
     IMS_SINT32              Value of the specified key
     </table>
     */
-    virtual IMS_SINT32 ReadValueInt(IN const IMS_CHAR *pszKey) const = 0;
+    virtual IMS_SINT32 ReadValueInt(IN const IMS_CHAR* pszKey) const = 0;
 
     /*
      Writes the count of the specified key with 'count' property.
@@ -217,7 +217,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL WriteKeyCount(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nCount) = 0;
+    virtual IMS_BOOL WriteKeyCount(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nCount) = 0;
 
     /*
      Writes the string value of the specified key with 'string' property.
@@ -238,7 +238,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL WriteValue(IN const IMS_CHAR *pszKey, IN const AString &strValue) = 0;
+    virtual IMS_BOOL WriteValue(IN const IMS_CHAR* pszKey, IN const AString& strValue) = 0;
 
     /*
      Writes the string value of the specified key with 'string' property & 'list' property.
@@ -260,8 +260,8 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL WriteValue(IN const IMS_CHAR *pszKey,
-            IN IMS_SINT32 nIndex, IN const AString &strValue) = 0;
+    virtual IMS_BOOL WriteValue(
+            IN const IMS_CHAR* pszKey, IN IMS_SINT32 nIndex, IN const AString& strValue) = 0;
 
     /*
      Reads the boolean value of the specified key with 'boolean' property.
@@ -282,7 +282,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL WriteValueBoolean(IN const IMS_CHAR *pszKey, IN IMS_BOOL bValue) = 0;
+    virtual IMS_BOOL WriteValueBoolean(IN const IMS_CHAR* pszKey, IN IMS_BOOL bValue) = 0;
 
     /*
      Writes the integer value of the specified key with 'integer' property.
@@ -303,7 +303,7 @@ public:
     IMS_FALSE               The operation is failed
     </table>
     */
-    virtual IMS_BOOL WriteValueInt(IN const IMS_CHAR *pszKey, IN IMS_SINT32 nValue) = 0;
+    virtual IMS_BOOL WriteValueInt(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nValue) = 0;
 
     /*
      Writes the all configuration values to the specified medium.
@@ -325,4 +325,4 @@ public:
     virtual IMS_BOOL WriteToMedium() const = 0;
 };
 
-#endif // _INTERFACE_CONFIG_BUFFER_H_
+#endif  // _INTERFACE_CONFIG_BUFFER_H_

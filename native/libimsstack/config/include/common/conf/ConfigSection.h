@@ -23,21 +23,21 @@ public:
     ~ConfigSection();
 
 private:
-    ConfigSection(IN const ConfigSection &objRHS);
-    ConfigSection& operator=(IN const ConfigSection &objRHS);
+    ConfigSection(IN const ConfigSection& objRHS);
+    ConfigSection& operator=(IN const ConfigSection& objRHS);
 
 public:
-    void AddComment(IN const AString &strComment);
+    void AddComment(IN const AString& strComment);
     const AString& GetName() const;
-    void GetKeys(OUT AStringArray &objKeys) const;
-    const AString& GetValue(IN const IMS_CHAR *pszKey) const;
-    IMS_BOOL SetValue(IN const IMS_CHAR *pszKey, IN const AString &strValue);
+    void GetKeys(OUT AStringArray& objKeys) const;
+    const AString& GetValue(IN const IMS_CHAR* pszKey) const;
+    IMS_BOOL SetValue(IN const IMS_CHAR* pszKey, IN const AString& strValue);
     AString ToString() const;
 
 private:
-    IMS_BOOL AddSectionData(IN const AString &strKeyValue);
+    IMS_BOOL AddSectionData(IN const AString& strKeyValue);
     ConfigSectionData* GetLastElement() const;
-    void SetName(IN const AString &strSectName);
+    void SetName(IN const AString& strSectName);
 
 private:
     friend class ConfigFileBuffer;
@@ -48,4 +48,4 @@ private:
     IMSList<ConfigSectionData*> objSectionData;
 };
 
-#endif // _CONFIG_SECTION_H_
+#endif  // _CONFIG_SECTION_H_

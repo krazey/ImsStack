@@ -17,9 +17,9 @@
 __IMS_TRACE_TAG_CONF__;
 
 PUBLIC
-QosProperty::QosProperty()
-    : ImsProperty(ImsProperty::PKEY_QOS)
-    , strContentType(AString::ConstNull())
+QosProperty::QosProperty() :
+        ImsProperty(ImsProperty::PKEY_QOS),
+        strContentType(AString::ConstNull())
 {
     stQos.nAverageRate = 0;
     stQos.nBufferSize = 0;
@@ -31,9 +31,9 @@ QosProperty::QosProperty()
 }
 
 PUBLIC
-QosProperty::QosProperty(IN const AString &strContentType_)
-    : ImsProperty(ImsProperty::PKEY_QOS)
-    , strContentType(strContentType_)
+QosProperty::QosProperty(IN const AString& strContentType_) :
+        ImsProperty(ImsProperty::PKEY_QOS),
+        strContentType(strContentType_)
 {
     stQos.nAverageRate = 0;
     stQos.nBufferSize = 0;
@@ -45,20 +45,17 @@ QosProperty::QosProperty(IN const AString &strContentType_)
 }
 
 PUBLIC
-QosProperty::QosProperty(IN const QosProperty &objRHS)
-    : ImsProperty(ImsProperty::PKEY_QOS)
-    , strContentType(objRHS.strContentType)
-    , stQos(objRHS.stQos)
+QosProperty::QosProperty(IN const QosProperty& objRHS) :
+        ImsProperty(ImsProperty::PKEY_QOS),
+        strContentType(objRHS.strContentType),
+        stQos(objRHS.stQos)
 {
 }
 
-PUBLIC VIRTUAL
-QosProperty::~QosProperty()
-{
-}
+PUBLIC VIRTUAL QosProperty::~QosProperty() {}
 
 PUBLIC
-QosProperty& QosProperty::operator=(IN const QosProperty &objRHS)
+QosProperty& QosProperty::operator=(IN const QosProperty& objRHS)
 {
     if (this != &objRHS)
     {
@@ -71,8 +68,7 @@ QosProperty& QosProperty::operator=(IN const QosProperty &objRHS)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL QosProperty::Equals(IN const AString &strValue) const
+PUBLIC VIRTUAL IMS_BOOL QosProperty::Equals(IN const AString& strValue) const
 {
     return strContentType.Equals(strValue);
 }
@@ -94,21 +90,14 @@ AString QosProperty::GetQosString() const
 {
     AString strQos;
 
-    strQos.Sprintf(
-        "%u %u %u %u %u %u %u",
-        stQos.nAverageRate,
-        stQos.nBufferSize,
-        stQos.nPeakRate,
-        stQos.nDelay,
-        stQos.nDelayVariance,
-        stQos.nMaxChunkSize,
-        stQos.nMinimalPolicedSize);
+    strQos.Sprintf("%u %u %u %u %u %u %u", stQos.nAverageRate, stQos.nBufferSize, stQos.nPeakRate,
+            stQos.nDelay, stQos.nDelayVariance, stQos.nMaxChunkSize, stQos.nMinimalPolicedSize);
 
     return strQos;
 }
 
 PUBLIC
-IMS_BOOL QosProperty::SetQos(IN const AString &strValue)
+IMS_BOOL QosProperty::SetQos(IN const AString& strValue)
 {
     AStringArray objValues = ImsProperty::Decode(strValue);
 
@@ -118,7 +107,9 @@ IMS_BOOL QosProperty::SetQos(IN const AString &strValue)
     }
 
     IMS_BOOL bOK;
-    IMS_SINT32 anValue[7] = { 0, };
+    IMS_SINT32 anValue[7] = {
+            0,
+    };
 
     // <average rate>SP<buffer size>SP<peak rate>SP<delay>
     // SP<delayVariance>SP<max chunk size>SP<minimal policed size>
@@ -130,8 +121,8 @@ IMS_BOOL QosProperty::SetQos(IN const AString &strValue)
 
         if (!bOK)
         {
-            IMS_TRACE_D("Unable to parse QoS string (%s) element: %s",
-                    strValue.GetStr(), objValues.GetElementAt(i).GetStr(), 0);
+            IMS_TRACE_D("Unable to parse QoS string (%s) element: %s", strValue.GetStr(),
+                    objValues.GetElementAt(i).GetStr(), 0);
             return IMS_FALSE;
         }
     }

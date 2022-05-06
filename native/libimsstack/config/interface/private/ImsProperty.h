@@ -27,27 +27,27 @@ See Also
 class ImsProperty
 {
 public:
-    explicit ImsProperty(IN IMS_SINT32 nKey_, IN const AString &strKey_ = AString::ConstNull());
-    ImsProperty(IN const ImsProperty &objRHS);
+    explicit ImsProperty(IN IMS_SINT32 nKey_, IN const AString& strKey_ = AString::ConstNull());
+    ImsProperty(IN const ImsProperty& objRHS);
     virtual ~ImsProperty();
 
 public:
-    ImsProperty& operator=(IN const ImsProperty &objRHS);
+    ImsProperty& operator=(IN const ImsProperty& objRHS);
 
 public:
-    virtual IMS_BOOL Equals(IN const AString &strValue) const;
-    virtual IMS_BOOL Equals(IN const ImsProperty &objOther) const;
+    virtual IMS_BOOL Equals(IN const AString& strValue) const;
+    virtual IMS_BOOL Equals(IN const ImsProperty& objOther) const;
 
-    static AStringArray Decode(IN const AString &strValue);
-    static AString Encode(IN const AStringArray &objValues);
-    static IMS_BOOL CheckDuplicate(IN const AStringArray &objValues, IN IMS_BOOL bCaseSensitive);
+    static AStringArray Decode(IN const AString& strValue);
+    static AString Encode(IN const AStringArray& objValues);
+    static IMS_BOOL CheckDuplicate(IN const AStringArray& objValues, IN IMS_BOOL bCaseSensitive);
     static AString KeyToString(IN IMS_SINT32 nKey);
-    static IMS_SINT32 StringToKey(IN const AString &strKey);
-    static IMS_BOOL TrimAndCheckProperties(IN const ImsRegistry &objRegistry,
-            OUT ImsRegistry &objNewRegistry);
+    static IMS_SINT32 StringToKey(IN const AString& strKey);
+    static IMS_BOOL TrimAndCheckProperties(
+            IN const ImsRegistry& objRegistry, OUT ImsRegistry& objNewRegistry);
 
     // DEBUG
-    static AString ToString(IN const AStringArray &objProperty);
+    static AString ToString(IN const AStringArray& objProperty);
 
 public:
     // Type of property key
@@ -105,4 +105,4 @@ protected:
     AString strKey;
 };
 
-#endif // _IMS_PROPERTY_H_
+#endif  // _IMS_PROPERTY_H_

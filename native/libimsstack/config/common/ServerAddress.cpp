@@ -14,17 +14,15 @@
 #include "ServerAddress.h"
 
 PUBLIC
-ServerAddress::ServerAddress(IN const AString &strAddress_,
-        IN IMS_SINT32 nPort_ /* = PORT_UNSPECIFIED */)
-    : strAddress(strAddress_)
-    , nPort(nPort_)
+ServerAddress::ServerAddress(
+        IN const AString& strAddress_, IN IMS_SINT32 nPort_ /* = PORT_UNSPECIFIED */) :
+        strAddress(strAddress_),
+        nPort(nPort_)
 {
 }
 
 PUBLIC
-ServerAddress::~ServerAddress()
-{
-}
+ServerAddress::~ServerAddress() {}
 
 PUBLIC
 const AString& ServerAddress::GetAddress() const
@@ -39,7 +37,7 @@ IMS_SINT32 ServerAddress::GetPort() const
 }
 
 PRIVATE
-void ServerAddress::SetAddress(IN const AString &strAddress)
+void ServerAddress::SetAddress(IN const AString& strAddress)
 {
     this->strAddress = strAddress;
 }

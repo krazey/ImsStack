@@ -25,9 +25,7 @@
 #include "private/ConfigBase.h"
 #include "private/SipConfigV.h"
 
-class SipConfig
-    : public ConfigBase
-    , public ISipConfig
+class SipConfig : public ConfigBase, public ISipConfig
 {
 public:
     class TcpTimerValues
@@ -41,7 +39,10 @@ public:
         TcpTimerValues& operator=(IN const TcpTimerValues& other);
 
     public:
-        enum { PERMANENT = -2 };
+        enum
+        {
+            PERMANENT = -2
+        };
 
         // Unit is milli-seconds
         // It MUST be greater than 0
@@ -65,126 +66,156 @@ public:
 public:
     // ISipConfig interface
     inline IMS_SINT32 GetPort() const override
-    { return (m_nListenChannel == INVALID_CHANNEL) ? DEFAULT_CHANNEL : m_nListenChannel; }
-    inline const ISipConfigV* GetSipConfigV() const override
-    { return GetServiceConfig(); }
-    inline IMS_UINT32 GetSipFeatureCaps() const override
-    { return m_nSipFeatureCaps; }
+    {
+        return (m_nListenChannel == INVALID_CHANNEL) ? DEFAULT_CHANNEL : m_nListenChannel;
+    }
+    inline const ISipConfigV* GetSipConfigV() const override { return GetServiceConfig(); }
+    inline IMS_UINT32 GetSipFeatureCaps() const override { return m_nSipFeatureCaps; }
     const AString& GetUaVersion() const override;
-    inline IMS_BOOL IsGruuConfigured() const override
-    { return HasFeature(SIP_FEATURE_CAPS_GRUU); }
+    inline IMS_BOOL IsGruuConfigured() const override { return HasFeature(SIP_FEATURE_CAPS_GRUU); }
 
     // ConfigBase class
     IMS_BOOL Init() override;
     void Refresh() override;
 
-    inline const AString& GetDefaultScheme() const
-    { return m_strScheme; }
-    inline IMS_SINT32 GetDeviceId() const
-    { return m_nDeviceId; }
-    inline const AString& GetPredefinedDeviceId() const
-    { return m_strDeviceId; }
-    inline const AString& GetTagPrefix() const
-    { return m_strTagPrefix; }
-    inline IMS_SINT32 GetTcpCriterionLength() const
-    { return m_nTcpCriterionLength; }
-    inline IMS_SINT32 GetTransportType() const
-    { return m_nTransportType; }
+    inline const AString& GetDefaultScheme() const { return m_strScheme; }
+    inline IMS_SINT32 GetDeviceId() const { return m_nDeviceId; }
+    inline const AString& GetPredefinedDeviceId() const { return m_strDeviceId; }
+    inline const AString& GetTagPrefix() const { return m_strTagPrefix; }
+    inline IMS_SINT32 GetTcpCriterionLength() const { return m_nTcpCriterionLength; }
+    inline IMS_SINT32 GetTransportType() const { return m_nTransportType; }
     IMS_SINT32 GetTimerValueT1() const;
     IMS_SINT32 GetTimerValueT2() const;
-    inline IMS_SINT32 GetTimerValue100Trying() const
-    { return m_nTimerValue100Trying; }
-    inline const TcpTimerValues& GetTimerValueTCP() const
-    { return m_objTcpTimerValues; }
+    inline IMS_SINT32 GetTimerValue100Trying() const { return m_nTimerValue100Trying; }
+    inline const TcpTimerValues& GetTimerValueTCP() const { return m_objTcpTimerValues; }
 
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nFeature) const
-    { return ((m_nSipFeatureCaps & nFeature) == nFeature); }
+    {
+        return ((m_nSipFeatureCaps & nFeature) == nFeature);
+    }
     inline IMS_BOOL IsAuthenticationAlgorithmRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER); }
-    inline IMS_BOOL IsCompactFormConfigured() const
-    { return m_bCompactFormConfigured; }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER);
+    }
+    inline IMS_BOOL IsCompactFormConfigured() const { return m_bCompactFormConfigured; }
     inline IMS_BOOL IsContactInAll1xxRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX);
+    }
     inline IMS_BOOL IsDisplayNameDQUOTRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT);
+    }
     inline IMS_BOOL IsExpiresHeaderInRegRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG); }
-    inline IMS_BOOL IsIpSecConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_IPSEC); }
-    inline IMS_BOOL IsKeepAliveConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_KEEP); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG);
+    }
+    inline IMS_BOOL IsIpSecConfigured() const { return HasFeature(SIP_FEATURE_CAPS_IPSEC); }
+    inline IMS_BOOL IsKeepAliveConfigured() const { return HasFeature(SIP_FEATURE_CAPS_KEEP); }
     inline IMS_BOOL IsMultipleRegConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_MULTIPLE_REG); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_MULTIPLE_REG);
+    }
     inline IMS_BOOL IsNoAcceptContactHeaderInBYE() const
-    { return HasFeature(SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE);
+    }
     inline IMS_BOOL IsPANInfoInInitialRegRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG); }
-    inline IMS_BOOL IsPermissionSIPConfigured() const
-    { return IMS_TRUE; }
-    inline IMS_BOOL IsPermissionSIPSConfigured() const
-    { return IMS_FALSE; }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG);
+    }
+    inline IMS_BOOL IsPermissionSIPConfigured() const { return IMS_TRUE; }
+    inline IMS_BOOL IsPermissionSIPSConfigured() const { return IMS_FALSE; }
     inline IMS_BOOL IsPPreferredIdInRegSubRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB);
+    }
     inline IMS_BOOL IsRouteHeaderInRegRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG); }
-    inline IMS_BOOL IsRportConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_RPORT); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG);
+    }
+    inline IMS_BOOL IsRportConfigured() const { return HasFeature(SIP_FEATURE_CAPS_RPORT); }
     inline IMS_BOOL IsTransportErrorReportOnTxnRequired() const
-    { return HasFeature(SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN);
+    }
     inline IMS_BOOL IsTrustDomainConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_TRUST_DOMAIN); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_TRUST_DOMAIN);
+    }
     inline IMS_BOOL IsUdpFallbackConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_UDP_FALLBACK); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_UDP_FALLBACK);
+    }
     inline IMS_BOOL IsUserAgentConfigured() const
-    { return HasFeature(SIP_FEATURE_CAPS_USER_AGENT); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_USER_AGENT);
+    }
     inline IMS_BOOL IsUserAgentSetByContext() const
-    { return HasFeature(SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT);
+    }
 
     inline IMS_BOOL IsSdpNegotiationRequiredForNonRpr() const
-    { return HasFeature(SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR);
+    }
     inline IMS_BOOL IsRequestUriValidationRequiredInMidDialog() const
-    { return HasFeature(SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG);
+    }
     inline IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const
-    { return HasFeature(SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE);
+    }
     inline IMS_BOOL IsSipInstanceParamRequiredInContactForNonRegisterRequest() const
-    { return HasFeature(
-            SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST); }
+    {
+        return HasFeature(
+                SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST);
+    }
     inline IMS_BOOL IsSessionIdHeaderSupported() const
-    { return HasFeature(SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);
+    }
     inline IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader() const
-    { return HasFeature(SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER);
+    }
     inline IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader() const
-    { return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER); }
+    {
+        return HasFeature(SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER);
+    }
 
     inline IMS_SINT32 GetRegExpiration() const
-    { return !IsRegExpirationConfigured() ? INVALID_EXPIRATION : m_nRegExpiration; }
-    inline const AStringArray& GetRegAllowMethods() const
-    { return m_objAllowMethods; }
+    {
+        return !IsRegExpirationConfigured() ? INVALID_EXPIRATION : m_nRegExpiration;
+    }
+    inline const AStringArray& GetRegAllowMethods() const { return m_objAllowMethods; }
     inline IMS_BOOL IsRegExpirationConfigured() const
-    { return ((m_nRegExpiresMask & EXPIRES_REG) == EXPIRES_REG); }
-    inline IMS_BOOL IsRegSubscriptionConfigured() const
-    { return m_bRegSubscription; }
+    {
+        return ((m_nRegExpiresMask & EXPIRES_REG) == EXPIRES_REG);
+    }
+    inline IMS_BOOL IsRegSubscriptionConfigured() const { return m_bRegSubscription; }
     inline IMS_BOOL IsRegSubExpirationConfigured() const
-    { return ((m_nRegExpiresMask & EXPIRES_REG_SUB) == EXPIRES_REG_SUB); }
+    {
+        return ((m_nRegExpiresMask & EXPIRES_REG_SUB) == EXPIRES_REG_SUB);
+    }
     inline IMS_SINT32 GetRegSubExpiration() const
     {
-        return ((m_nRegExpiresMask & EXPIRES_REG_SUB) != EXPIRES_REG_SUB)
-                ? INVALID_EXPIRATION : m_nRegSubExpiration;
+        return ((m_nRegExpiresMask & EXPIRES_REG_SUB) != EXPIRES_REG_SUB) ? INVALID_EXPIRATION
+                                                                          : m_nRegSubExpiration;
     }
 
     IMS_BOOL CreateDefaultServiceConfig();
-    inline const SipConfigV* GetServiceConfig() const
-    { return m_pSipConfigV; }
+    inline const SipConfigV* GetServiceConfig() const { return m_pSipConfigV; }
 
 protected:
     // ISipConfig class
-    inline IConfigurable* GetConfigurable() const override
-    { return m_pConfigurable; }
+    inline IConfigurable* GetConfigurable() const override { return m_pConfigurable; }
 
     // ConfigBase class
     IMS_BOOL ReadFrom() override;
-    IMS_BOOL Update(IN IMS_SINT32 nCPI,
-            IN const AString& strValue = AString::ConstNull()) override;
+    IMS_BOOL Update(IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) override;
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
 private:
@@ -246,7 +277,10 @@ private:
     // TCP criterion length on run-time
     //     A default threshold value when MTU size is unknown; The default MTU size will be 1500.
     //     200 bytes is a buffer for collecting the Record-Route.
-    enum { TCP_CRITERION_LEN = 1300 };
+    enum
+    {
+        TCP_CRITERION_LEN = 1300
+    };
     IMS_SINT32 m_nTcpCriterionLength;
     TcpTimerValues m_objTcpTimerValues;
 

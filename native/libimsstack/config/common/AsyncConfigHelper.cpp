@@ -20,41 +20,38 @@ __IMS_TRACE_TAG_CONF__;
 class AsyncAction
 {
 public:
-    inline AsyncAction(IN IAsyncConfig *piConfig_, IN IMS_SINT32 nMSG_,
-            IN IMS_SINTP nParam1_, IN IMS_SINTP nParam2_)
-        : piConfig(piConfig_)
-        , nMSG(nMSG_)
-        , nParam1(nParam1_)
-        , nParam2(nParam2_)
-    { }
+    inline AsyncAction(IN IAsyncConfig* piConfig_, IN IMS_SINT32 nMSG_, IN IMS_SINTP nParam1_,
+            IN IMS_SINTP nParam2_) :
+            piConfig(piConfig_),
+            nMSG(nMSG_),
+            nParam1(nParam1_),
+            nParam2(nParam2_)
+    {
+    }
 
-    inline ~AsyncAction()
-    { }
+    inline ~AsyncAction() {}
 
 public:
-    IAsyncConfig *piConfig;
+    IAsyncConfig* piConfig;
     IMS_SINT32 nMSG;
     IMS_SINTP nParam1;
     IMS_SINTP nParam2;
 };
 
-
-
 PUBLIC
-AsyncConfigHelper::AsyncConfigHelper()
-    : IMSActivityEx()
-    , objAsyncConfigs(IMSList<IAsyncConfig*>())
+AsyncConfigHelper::AsyncConfigHelper() :
+        IMSActivityEx(),
+        objAsyncConfigs(IMSList<IAsyncConfig*>())
 {
 }
 
-PUBLIC VIRTUAL
-AsyncConfigHelper::~AsyncConfigHelper()
+PUBLIC VIRTUAL AsyncConfigHelper::~AsyncConfigHelper()
 {
     objAsyncConfigs.Clear();
 }
 
 PUBLIC
-void AsyncConfigHelper::Register(IN IAsyncConfig *piConfig)
+void AsyncConfigHelper::Register(IN IAsyncConfig* piConfig)
 {
     if (IsRegisteredConfig(piConfig))
     {
@@ -65,8 +62,8 @@ void AsyncConfigHelper::Register(IN IAsyncConfig *piConfig)
 }
 
 PUBLIC
-IMS_BOOL AsyncConfigHelper::SendTo(IN IAsyncConfig *piConfig, IN IMS_SINT32 nMSG,
-        IN IMS_SINTP nParam1, IN IMS_SINTP nParam2)
+IMS_BOOL AsyncConfigHelper::SendTo(
+        IN IAsyncConfig* piConfig, IN IMS_SINT32 nMSG, IN IMS_SINTP nParam1, IN IMS_SINTP nParam2)
 {
     if (!IsRegisteredConfig(piConfig))
     {
@@ -74,7 +71,7 @@ IMS_BOOL AsyncConfigHelper::SendTo(IN IAsyncConfig *piConfig, IN IMS_SINT32 nMSG
         return IMS_FALSE;
     }
 
-    AsyncAction *pAction = new AsyncAction(piConfig, nMSG, nParam1, nParam2);
+    AsyncAction* pAction = new AsyncAction(piConfig, nMSG, nParam1, nParam2);
 
     if (pAction == IMS_NULL)
     {
@@ -90,11 +87,11 @@ IMS_BOOL AsyncConfigHelper::SendTo(IN IAsyncConfig *piConfig, IN IMS_SINT32 nMSG
 }
 
 PUBLIC
-void AsyncConfigHelper::Unregister(IN IAsyncConfig *piConfig)
+void AsyncConfigHelper::Unregister(IN IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig *piTmpConfig = objAsyncConfigs.GetAt(i);
+        IAsyncConfig* piTmpConfig = objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {
@@ -104,14 +101,13 @@ void AsyncConfigHelper::Unregister(IN IAsyncConfig *piConfig)
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG& objMSG)
 {
     switch (objMSG.GetName())
     {
         case AMSG_SEND_TO:
         {
-            AsyncAction *pAction = reinterpret_cast<AsyncAction*>(objMSG.nLparam);
+            AsyncAction* pAction = reinterpret_cast<AsyncAction*>(objMSG.nLparam);
 
             if (pAction == IMS_NULL)
             {
@@ -143,11 +139,11 @@ IMS_BOOL AsyncConfigHelper::OnMessage(IN IMSMSG &objMSG)
 }
 
 PRIVATE
-IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN IAsyncConfig *piConfig)
+IMS_BOOL AsyncConfigHelper::IsRegisteredConfig(IN IAsyncConfig* piConfig)
 {
     for (IMS_UINT32 i = 0; i < objAsyncConfigs.GetSize(); ++i)
     {
-        IAsyncConfig *piTmpConfig = objAsyncConfigs.GetAt(i);
+        IAsyncConfig* piTmpConfig = objAsyncConfigs.GetAt(i);
 
         if (piTmpConfig == piConfig)
         {

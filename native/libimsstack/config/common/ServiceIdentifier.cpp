@@ -19,17 +19,16 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-class ServiceIdentifierPrivate
-    : public RCObject
+class ServiceIdentifierPrivate : public RCObject
 {
 public:
-    inline ServiceIdentifierPrivate()
-        : strName(AString::ConstNull())
-        , bExplicit(IMS_FALSE)
-        , bRequire(IMS_FALSE)
-    {}
-    inline virtual ~ServiceIdentifierPrivate()
-    {}
+    inline ServiceIdentifierPrivate() :
+            strName(AString::ConstNull()),
+            bExplicit(IMS_FALSE),
+            bRequire(IMS_FALSE)
+    {
+    }
+    inline virtual ~ServiceIdentifierPrivate() {}
 
 private:
     friend class ServiceIdentifier;
@@ -40,8 +39,8 @@ private:
 };
 
 PUBLIC
-ServiceIdentifier::ServiceIdentifier()
-    : pServiceIdentifierP(new ServiceIdentifierPrivate())
+ServiceIdentifier::ServiceIdentifier() :
+        pServiceIdentifierP(new ServiceIdentifierPrivate())
 {
     if (pServiceIdentifierP != IMS_NULL)
     {
@@ -50,8 +49,8 @@ ServiceIdentifier::ServiceIdentifier()
 }
 
 PUBLIC
-ServiceIdentifier::ServiceIdentifier(IN const ServiceIdentifier &objRHS)
-    : pServiceIdentifierP(objRHS.pServiceIdentifierP)
+ServiceIdentifier::ServiceIdentifier(IN const ServiceIdentifier& objRHS) :
+        pServiceIdentifierP(objRHS.pServiceIdentifierP)
 {
     if (pServiceIdentifierP != IMS_NULL)
     {
@@ -59,8 +58,7 @@ ServiceIdentifier::ServiceIdentifier(IN const ServiceIdentifier &objRHS)
     }
 }
 
-PUBLIC VIRTUAL
-ServiceIdentifier::~ServiceIdentifier()
+PUBLIC VIRTUAL ServiceIdentifier::~ServiceIdentifier()
 {
     if (pServiceIdentifierP != IMS_NULL)
     {
@@ -69,9 +67,9 @@ ServiceIdentifier::~ServiceIdentifier()
 }
 
 PRIVATE
-ServiceIdentifier::ServiceIdentifier(IN const AString &strName,
-        IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire)
-    : pServiceIdentifierP(new ServiceIdentifierPrivate())
+ServiceIdentifier::ServiceIdentifier(
+        IN const AString& strName, IN IMS_BOOL bExplicit, IN IMS_BOOL bRequire) :
+        pServiceIdentifierP(new ServiceIdentifierPrivate())
 {
     if (pServiceIdentifierP != IMS_NULL)
     {
@@ -84,11 +82,11 @@ ServiceIdentifier::ServiceIdentifier(IN const AString &strName,
 }
 
 PUBLIC
-ServiceIdentifier& ServiceIdentifier::operator=(IN const ServiceIdentifier &objRHS)
+ServiceIdentifier& ServiceIdentifier::operator=(IN const ServiceIdentifier& objRHS)
 {
     if (this != &objRHS)
     {
-        ServiceIdentifierPrivate *pOldServiceIdP = pServiceIdentifierP;
+        ServiceIdentifierPrivate* pOldServiceIdP = pServiceIdentifierP;
 
         pServiceIdentifierP = objRHS.pServiceIdentifierP;
 
@@ -144,17 +142,16 @@ AString ServiceIdentifier::ToString() const
     return strServiceIdentifier;
 }
 
-PUBLIC GLOBAL
-ServiceIdentifier ServiceIdentifier::Create(IN const AString &strValue)
+PUBLIC GLOBAL ServiceIdentifier ServiceIdentifier::Create(IN const AString& strValue)
 {
     IMS_BOOL bExplicit = IMS_FALSE;
     IMS_BOOL bRequire = IMS_FALSE;
     AStringArray objTokens = strValue.Split(TextParser::CHAR_SEMICOLON);
 
     // Check validity of feature flags
-    for (IMS_SINT32 i = 1; i < objTokens.GetCount();++i)
+    for (IMS_SINT32 i = 1; i < objTokens.GetCount(); ++i)
     {
-        const AString &strToken = objTokens.GetElementAt(i);
+        const AString& strToken = objTokens.GetElementAt(i);
 
         if (strToken.Equals(Feature::FLAG_EXPLICIT))
         {
@@ -169,17 +166,16 @@ ServiceIdentifier ServiceIdentifier::Create(IN const AString &strValue)
     return ServiceIdentifier(objTokens.GetElementAt(0), bExplicit, bRequire);
 }
 
-PUBLIC GLOBAL
-IMS_BOOL ServiceIdentifier::CheckFeatureFlags(IN const AString &strValue,
-        IN IMS_BOOL bAllowExplicitRequire)
+PUBLIC GLOBAL IMS_BOOL ServiceIdentifier::CheckFeatureFlags(
+        IN const AString& strValue, IN IMS_BOOL bAllowExplicitRequire)
 {
     AStringArray objTokens = strValue.Split(TextParser::CHAR_SEMICOLON);
 
     // Check validity of feature flags
-    for (IMS_SINT32 i = 1; i < objTokens.GetCount();++i)
+    for (IMS_SINT32 i = 1; i < objTokens.GetCount(); ++i)
     {
         IMS_BOOL bValid = IMS_TRUE;
-        const AString &strToken = objTokens.GetElementAt(i);
+        const AString& strToken = objTokens.GetElementAt(i);
 
         if (strToken.Equals(Feature::FLAG_EXPLICIT))
         {

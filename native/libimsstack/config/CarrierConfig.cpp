@@ -17,24 +17,19 @@
 #include "ServiceConfig.h"
 
 // Public carrier-config - starts
-const IMS_CHAR CarrierConfig::KEY_CARRIER_VOLTE_AVAILABLE_BOOL[] =
-        "carrier_volte_available_bool";
-const IMS_CHAR CarrierConfig::KEY_CARRIER_VT_AVAILABLE_BOOL[] =
-        "carrier_vt_available_bool";
+const IMS_CHAR CarrierConfig::KEY_CARRIER_VOLTE_AVAILABLE_BOOL[] = "carrier_volte_available_bool";
+const IMS_CHAR CarrierConfig::KEY_CARRIER_VT_AVAILABLE_BOOL[] = "carrier_vt_available_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL[] =
         "carrier_wfc_ims_available_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_CROSS_SIM_IMS_AVAILABLE_BOOL[] =
         "carrier_cross_sim_ims_available_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_EMERGENCY_SMS_OVER_IMS_BOOL[] =
         "support_emergency_sms_over_ims_bool";
-const IMS_CHAR CarrierConfig::KEY_CARRIER_USSD_METHOD_INT[] =
-        "carrier_ussd_method_int";
-const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_BOOL[] =
-        "rtt_supported_bool";
+const IMS_CHAR CarrierConfig::KEY_CARRIER_USSD_METHOD_INT[] = "carrier_ussd_method_int";
+const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_BOOL[] = "rtt_supported_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL[] =
         "carrier_volte_tty_supported_bool";
-const IMS_CHAR CarrierConfig::KEY_USE_RCS_SIP_OPTIONS_BOOL[] =
-        "use_rcs_sip_options_bool";
+const IMS_CHAR CarrierConfig::KEY_USE_RCS_SIP_OPTIONS_BOOL[] = "use_rcs_sip_options_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_PAUSE_IMS_VIDEO_CALLS_BOOL[] =
         "support_pause_ims_video_calls_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_ADHOC_CONFERENCE_CALLS_BOOL[] =
@@ -43,8 +38,7 @@ const IMS_CHAR CarrierConfig::KEY_SUPPORT_ADD_CONFERENCE_PARTICIPANTS_BOOL[] =
         "support_add_conference_participants_bool";
 const IMS_CHAR CarrierConfig::KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL[] =
         "is_ims_conference_size_enforced_bool";
-const IMS_CHAR CarrierConfig::KEY_IMS_CONFERENCE_SIZE_LIMIT_INT[] =
-        "ims_conference_size_limit_int";
+const IMS_CHAR CarrierConfig::KEY_IMS_CONFERENCE_SIZE_LIMIT_INT[] = "ims_conference_size_limit_int";
 const IMS_CHAR CarrierConfig::KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL[] =
         "supports_device_to_device_communication_using_rtp_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL[] =
@@ -53,14 +47,10 @@ const IMS_CHAR CarrierConfig::KEY_SUPPORTS_SDP_NEGOTIATION_OF_D2D_RTP_HEADER_EXT
         "supports_sdp_negotiation_of_d2d_rtp_header_extensions_bool";
 const IMS_CHAR CarrierConfig::KEY_CARRIER_NR_AVAILABILITIES_INT_ARRAY[] =
         "carrier_nr_availabilities_int_array";
-const IMS_CHAR CarrierConfig::KEY_RTT_AUTO_UPGRADE_BOOL[] =
-        "rtt_auto_upgrade_bool";
-const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_FOR_VT_BOOL[] =
-        "rtt_supported_for_vt_bool";
-const IMS_CHAR CarrierConfig::KEY_RTT_UPGRADE_SUPPORTED_BOOL[] =
-        "rtt_upgrade_supported_bool";
-const IMS_CHAR CarrierConfig::KEY_RTT_DOWNGRADE_SUPPORTED_BOOL[] =
-        "rtt_downgrade_supported_bool";
+const IMS_CHAR CarrierConfig::KEY_RTT_AUTO_UPGRADE_BOOL[] = "rtt_auto_upgrade_bool";
+const IMS_CHAR CarrierConfig::KEY_RTT_SUPPORTED_FOR_VT_BOOL[] = "rtt_supported_for_vt_bool";
+const IMS_CHAR CarrierConfig::KEY_RTT_UPGRADE_SUPPORTED_BOOL[] = "rtt_upgrade_supported_bool";
+const IMS_CHAR CarrierConfig::KEY_RTT_DOWNGRADE_SUPPORTED_BOOL[] = "rtt_downgrade_supported_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_BOOL[] =
         "support_ims_conference_event_package_bool";
 const IMS_CHAR CarrierConfig::KEY_SUPPORT_IMS_CONFERENCE_EVENT_PACKAGE_ON_PEER_BOOL[] =
@@ -104,14 +94,13 @@ const IMS_CHAR CarrierConfig::Ims::KEY_SIP_TIMER_H_MILLIS_INT[] =
         KEY_IMS_PREFIX "sip_timer_h_millis_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_TIMER_J_MILLIS_INT[] =
         KEY_IMS_PREFIX "sip_timer_j_millis_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT [] =
+const IMS_CHAR CarrierConfig::Ims::KEY_SIP_SERVER_PORT_NUMBER_INT[] =
         KEY_IMS_PREFIX "sip_server_port_number_int";
 const IMS_CHAR CarrierConfig::Ims::KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING[] =
         KEY_IMS_PREFIX "phone_context_domain_name_string";
 const IMS_CHAR CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT[] =
         KEY_IMS_PREFIX "request_uri_type_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_GRUU_ENABLED_BOOL[] =
-        KEY_IMS_PREFIX "gruu_enabled_bool";
+const IMS_CHAR CarrierConfig::Ims::KEY_GRUU_ENABLED_BOOL[] = KEY_IMS_PREFIX "gruu_enabled_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL[] =
         KEY_IMS_PREFIX "keep_pdn_up_in_no_vops_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_PREFERRED_TRANSPORT_INT[] =
@@ -172,14 +161,17 @@ const IMS_CHAR CarrierConfig::Ims::KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY[] 
 
 const IMS_CHAR CarrierConfig::Ims::KEY_SIP_COMPACT_FORM_ENABLED_BOOL[] =
         KEY_IMS_PREFIX "sip_compact_form_enabled_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL[] =
-        KEY_IMS_PREFIX "allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL[] =
-        KEY_IMS_PREFIX "allow_algorithm_parameter_in_sip_authorization_header_bool";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_ALLOW_SIP_UDP_FALLBACK_ON_TCP_CONNECTION_SETUP_FAILED_BOOL[] =
+                KEY_IMS_PREFIX "allow_sip_udp_fallback_on_tcp_connection_setup_failed_bool";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_ALLOW_ALGORITHM_PARAMETER_IN_SIP_AUTHORIZATION_HEADER_BOOL[] =
+                KEY_IMS_PREFIX "allow_algorithm_parameter_in_sip_authorization_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_USE_SIP_USER_AGENT_HEADER_ONLY_FOR_UA_STRING_BOOL[] =
         KEY_IMS_PREFIX "use_sip_user_agent_header_only_for_ua_string_bool";
-const IMS_CHAR CarrierConfig::Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[] =
-        KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_ALLOW_SIP_P_ACCESS_NETWORK_INFO_HEADER_IN_INITIAL_REGISTER_BOOL[] =
+                KEY_IMS_PREFIX "allow_sip_p_access_network_info_header_in_initial_register_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL[] =
         KEY_IMS_PREFIX "support_sip_session_id_header_bool";
 const IMS_CHAR CarrierConfig::Ims::KEY_PCSCF_DISCOVERY_METHOD_INT_ARRAY[] =
@@ -209,14 +201,21 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PREFERRED_ACCESSTYPE_FEATURE
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_ACTUAL_WAIT_TIME_POLICY_INT[] =
         KEY_IMS_PREFIX "registration_actual_wait_time_policy_int";
 // Bundle {
-const IMS_CHAR CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
-        KEY_IMS_PREFIX "notify_terminated_for_reg_event_with_initial_registration_bundle";
-const IMS_CHAR CarrierConfig::Ims::KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT[] =
-        KEY_IMS_PREFIX "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
-const IMS_CHAR CarrierConfig::Ims::KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
-        KEY_IMS_PREFIX "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
-        KEY_IMS_PREFIX "event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
+                KEY_IMS_PREFIX "notify_terminated_for_reg_event_with_initial_registration_bundle";
+const IMS_CHAR CarrierConfig::Ims::
+        KEY_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT[] =
+                KEY_IMS_PREFIX
+        "wait_time_for_initial_registration_on_terminated_state_of_reg_event_int";
+const IMS_CHAR CarrierConfig::Ims::
+        KEY_EVENT_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY[] =
+                KEY_IMS_PREFIX
+        "event_for_initial_registration_on_terminated_state_of_reg_event_int_array";
+const IMS_CHAR CarrierConfig::Ims::
+        KEY_EVENT_TO_FOLLOW_WAIT_TIME_FOR_INITIAL_REGISTRATION_ON_TERMINATED_STATE_OF_REG_EVENT_INT_ARRAY
+                [] = KEY_IMS_PREFIX "event_to_follow_wait_time_for_initial_registration_on_"
+                                    "terminated_state_of_reg_event_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_BUNDLE[] =
@@ -225,8 +224,9 @@ const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_RANDOM_UPPER_VALUE_SEC
         KEY_IMS_PREFIX "registration_retry_random_upper_value_sec_int_array";
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_RETRY_INTERVAL_SEC_INT_ARRAY[] =
         KEY_IMS_PREFIX "registration_retry_interval_sec_int_array";
-const IMS_CHAR CarrierConfig::Ims::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL[] =
-        KEY_IMS_PREFIX "use_registration_retry_interval_for_subscription_retry_bool";
+const IMS_CHAR
+        CarrierConfig::Ims::KEY_USE_REGISTRATION_RETRY_INTERVAL_FOR_SUBSCRIPTION_RETRY_BOOL[] =
+                KEY_IMS_PREFIX "use_registration_retry_interval_for_subscription_retry_bool";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Ims::KEY_REGISTRATION_PERMANENT_ERROR_CODE_BUNDLE[] =
@@ -257,11 +257,13 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_CELLULAR_SCAN_TIMER_MI
         KEY_IMS_EMERGENCY_PREFIX "emergency_cellular_scan_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_INVITE_18X_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_invite_18x_timer_millis_int";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT[] =
-        KEY_IMS_EMERGENCY_PREFIX "emergency_provisional_to_final_response_timer_millis_int";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_EMERGENCY_PROVISIONAL_TO_FINAL_RESPONSE_TIMER_MILLIS_INT[] =
+                KEY_IMS_EMERGENCY_PREFIX "emergency_provisional_to_final_response_timer_millis_int";
 // Aos
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_end_bool";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_RELEASE_EMERGENCY_PDN_WITH_EMERGENCY_CALL_END_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "release_emergency_pdn_with_emergency_call_end_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_DISABLE_T3482_FOR_EMERGENCY_BOOL[] =
         KEY_IMS_EMERGENCY_PREFIX "disable_t3482_for_emergency_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REGISTRATION_TIMER_FOR_EMERGENCY_CALL_MILLIS_INT[] =
@@ -269,10 +271,13 @@ const IMS_CHAR CarrierConfig::ImsEmergency::KEY_REGISTRATION_TIMER_FOR_EMERGENCY
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_PREFERRED_EMERGENCY_REGISTRATION_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "preferred_emergency_registration_int";
 // Mtc
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "emergency_call_over_emergency_pdn_on_cellular_bool";
-const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL[] =
-        KEY_IMS_EMERGENCY_PREFIX "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
+const IMS_CHAR
+        CarrierConfig::ImsEmergency::KEY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_ON_CELLULAR_BOOL[] =
+                KEY_IMS_EMERGENCY_PREFIX "emergency_call_over_emergency_pdn_on_cellular_bool";
+const IMS_CHAR CarrierConfig::ImsEmergency::
+        KEY_EMERGENCY_RETRY_WITHOUT_CHECKING_380_CONTENT_FOR_NON_UE_DETECTABLE_EMERGENCY_CALL_BOOL
+                [] = KEY_IMS_EMERGENCY_PREFIX
+        "emergency_retry_without_checking_380_content_for_non_ue_detectable_emergency_call_bool";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT[] =
         KEY_IMS_EMERGENCY_PREFIX "emergency_tcall_timer_millis_int";
 const IMS_CHAR CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT[] =
@@ -336,8 +341,7 @@ const IMS_CHAR CarrierConfig::ImsUce::KEY_PUBLISH_REFRESH_RATIO_INT[] =
         KEY_IMS_UCE_PREFIX "publish_refresh_ratio_int";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_EXPIRE_VALUE_LIST_SUBSCRIBE_SEC_INT[] =
         KEY_IMS_UCE_PREFIX "expire_value_list_subscribe_sec_int";
-const IMS_CHAR CarrierConfig::ImsUce::KEY_RLS_URI_STRING[] =
-        KEY_IMS_UCE_PREFIX "rls_uri_string";
+const IMS_CHAR CarrierConfig::ImsUce::KEY_RLS_URI_STRING[] = KEY_IMS_UCE_PREFIX "rls_uri_string";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_SUBSCRIBE_INDEPENDENT_OF_PUBLISH_BOOL[] =
         KEY_IMS_UCE_PREFIX "subscribe_independent_of_publish_bool";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_ANONYMOUS_FETCH_METHOD_INT[] =
@@ -368,8 +372,9 @@ const IMS_CHAR CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_I
         KEY_IMS_UCE_PREFIX "variable_time_retry_publish_response_int_array";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT[] =
         KEY_IMS_UCE_PREFIX "variable_time_retry_publish_response_max_count_int";
-const IMS_CHAR CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT_ARRAY[] =
-        KEY_IMS_UCE_PREFIX "variable_time_retry_publish_response_time_sec_int_array";
+const IMS_CHAR
+        CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT_ARRAY[] =
+                KEY_IMS_UCE_PREFIX "variable_time_retry_publish_response_time_sec_int_array";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_PUBLISH_RESPONSE_INT_ARRAY[] =
         KEY_IMS_UCE_PREFIX "reattempt_registration_publish_response_int_array";
 const IMS_CHAR CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_SUBSCRIBE_RESPONSE_INT_ARRAY[] =
@@ -494,8 +499,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_SIP_FLOW_ORDER_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_sip_flow_order_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CONFERENCE_INVITING_REFER_TYPE_INT[] =
         KEY_IMS_VOICE_PREFIX "conference_inviting_refer_type_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION_INT[] =
-        KEY_IMS_VOICE_PREFIX "policy_qos_precondition_mechanism_while_call_modification_int";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_POLICY_QOS_PRECONDITION_MECHANISM_WHILE_CALL_MODIFICATION_INT[] = KEY_IMS_VOICE_PREFIX
+        "policy_qos_precondition_mechanism_while_call_modification_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_USER_DECLINE_INT[] =
         KEY_IMS_VOICE_PREFIX "incoming_call_reject_code_for_user_decline_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_INCOMING_CALL_REJECT_CODE_FOR_NO_ANSWER_INT[] =
@@ -512,20 +518,24 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_ENABLE_SEND_REINVITE_ON_RAT_CHANGE_B
         KEY_IMS_VOICE_PREFIX "enable_send_reinvite_on_rat_change_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_for_media_type_restriction_on_cellular_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT[] =
-        KEY_IMS_VOICE_PREFIX "policy_for_media_type_restriction_on_cellular_in_roaming_int";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_POLICY_FOR_MEDIA_TYPE_RESTRICTION_ON_CELLULAR_IN_ROAMING_INT[] =
+                KEY_IMS_VOICE_PREFIX "policy_for_media_type_restriction_on_cellular_in_roaming_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_OF_LOCAL_NUMBERS_INT[] =
         KEY_IMS_VOICE_PREFIX "policy_of_local_numbers_int";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "default_eps_bearer_context_usage_restriction_on_cellular_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_DEFAULT_EPS_BEARER_CONTEXT_USAGE_RESTRICTION_ON_CELLULAR_BOOL[] = KEY_IMS_VOICE_PREFIX
+        "default_eps_bearer_context_usage_restriction_on_cellular_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SILENT_REDIAL_INTERVAL_INT[] =
         KEY_IMS_VOICE_PREFIX "silent_redial_interval_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TYPE_AFTER_AUDIO_AND_VIDEO_CALL_MERGED_INT[] =
         KEY_IMS_VOICE_PREFIX "call_type_after_audio_and_video_call_merged_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_SHORT_CALL_CODE_INT_ARRAY[] =
         KEY_IMS_VOICE_PREFIX "short_call_code_int_array";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL[] =
-        KEY_IMS_VOICE_PREFIX "validate_verstat_feature_in_registration_to_check_network_capability_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_VALIDATE_VERSTAT_FEATURE_IN_REGISTRATION_TO_CHECK_NETWORK_CAPABILITY_BOOL[] =
+                KEY_IMS_VOICE_PREFIX
+        "validate_verstat_feature_in_registration_to_check_network_capability_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_ALLOW_MULTIPLE_CALL_INCLUDING_VIDEO_CALL_BOOL[] =
         KEY_IMS_VOICE_PREFIX "allow_multiple_call_including_video_call_bool";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_CODE_FOR_CSFB_INT_ARRAY[] =
@@ -542,28 +552,38 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_EN
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_user_ends_call_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_RTP_TIMEOUT_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_rtp_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_RTP_TIMEOUT_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_user_ends_and_rtp_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_LOSS_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_media_bearer_loss_string";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_RTP_TIMEOUT_STRING[] = KEY_IMS_VOICE_PREFIX
+        "call_terminate_reason_header_user_ends_and_rtp_timeout_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_MEDIA_BEARER_LOSS_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_media_bearer_loss_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SIP_TIMEOUT_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_sip_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SIP_RESPONSE_TIMEOUT_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_sip_response_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_call_setup_timeout_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_redirection_failure_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_terminating_earlydialog_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SIP_RESPONSE_TIMEOUT_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_sip_response_timeout_string";
+const IMS_CHAR CarrierConfig::ImsVoice::
+        KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_AND_SIP_RESPONSE_TIMEOUT_STRING[] =
+                KEY_IMS_VOICE_PREFIX
+        "call_terminate_reason_header_user_ends_and_sip_response_timeout_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CALL_SETUP_TIMEOUT_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_call_setup_timeout_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_REDIRECTION_FAILURE_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_redirection_failure_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_TERMINATING_EARLYDIALOG_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_terminating_earlydialog_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_VOPS_OFF_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_vops_off_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_session_refresh_failure_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_conference_call_joined_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_SESSION_REFRESH_FAILURE_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_session_refresh_failure_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_CONFERENCE_CALL_JOINED_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_conference_call_joined_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_INTERNAL_ERROR_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_internal_error_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CSCALL_STRING[] =
@@ -572,8 +592,9 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_VILTE_A
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_on_vilte_and_no_lte_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CONNECTING_CALL_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_on_connecting_call_string";
-const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_EXCEEDS_MAX_CALL_COUNT_STRING[] =
-        KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_exceeds_max_call_count_string";
+const IMS_CHAR
+        CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_EXCEEDS_MAX_CALL_COUNT_STRING[] =
+                KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_exceeds_max_call_count_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_ON_CONVERTING_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_on_converting_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_NEGOTIATION_FAILURE_STRING[] =
@@ -662,8 +683,9 @@ const IMS_CHAR CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[] =
         KEY_IMS_VT_PREFIX "allow_text_with_video_bool";
 const IMS_CHAR CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[] =
         KEY_IMS_VT_PREFIX "minimum_battery_level_for_limit_video_call_int";
-const IMS_CHAR CarrierConfig::ImsVt::KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL[] =
-        KEY_IMS_VT_PREFIX "support_video_text_feature_in_contact_header_simultaneously_bool";
+const IMS_CHAR CarrierConfig::ImsVt::
+        KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL[] = KEY_IMS_VT_PREFIX
+        "support_video_text_feature_in_contact_header_simultaneously_bool";
 // Media
 const IMS_CHAR CarrierConfig::ImsVt::KEY_HEVC_SUPPORT_BOOL[] =
         KEY_IMS_VT_PREFIX "hevc_support_bool";
@@ -739,41 +761,48 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR_B
         "sdp_negotiation_required_for_non_rpr_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG_BOOL[] =
         "request_uri_validation_required_in_mid_dialog_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL[] =
-        "session_timer_update_required_in_session_update_by_reinvite_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
-        "allow_sip_instance_parameter_in_contact_for_non_register_request_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SESSION_TIMER_UPDATE_REQUIRED_IN_SESSION_UPDATE_BY_REINVITE_BOOL[] =
+                "session_timer_update_required_in_session_update_by_reinvite_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_ALLOW_SIP_INSTANCE_PARAMETER_IN_CONTACT_FOR_NON_REGISTER_REQUEST_BOOL[] =
+                "allow_sip_instance_parameter_in_contact_for_non_register_request_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_TIMER_100_TRYING_MILLIS_INT[] =
         "sip_timer_100_trying_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_RESET_WHEN_CLOSING_SIP_TCP_CONNECTION_BOOL[] =
         "use_reset_when_closing_sip_tcp_connection_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_TUPLE_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL[] =
         "use_tuple_element_for_geolocation_pidf_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL[] =
-        "allow_unknown_country_element_for_geolocation_pidf_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_ALLOW_UNKNOWN_COUNTRY_ELEMENT_FOR_GEOLOCATION_PIDF_BOOL[] =
+                "allow_unknown_country_element_for_geolocation_pidf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SET_SDP_DIRECTION_ATTRIBUTE_FOR_REMOVED_MEDIA_BOOL[] =
         "set_sdp_direction_attribute_for_removed_media_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_SDP_PRECONDITION_BOOL[] =
         "support_sdp_precondition_bool";
 // Aos
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL[] =
-        "use_security_server_port_in_reg_contact_of_initial_registration_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_USE_SECURITY_SERVER_PORT_IN_REG_CONTACT_OF_INITIAL_REGISTRATION_BOOL[] =
+                "use_security_server_port_in_reg_contact_of_initial_registration_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_SECURITY_SERVER_PORT_IN_INITIAL_REGISTRATION_BOOL[] =
         "use_security_server_port_in_initial_registration_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REMOVE_OLD_SA_ON_ESTABLISHING_SA_BOOL[] =
         "remove_old_sa_on_establishing_sa_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
-        "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_USE_G_GSMA_RCS_TELEPHONY_FEATURE_TAG_AS_AVAILABLE_VOICE_CALL_TYPE_BOOL[] =
+                "use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PCSCF_DISCOVERY_METHOD_ROAMING_INT_ARRAY[] =
         "pcscf_discovery_method_roaming_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL[] =
-        "hold_registration_when_ipcan_changed_with_ims_active_call_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_HOLD_REGISTRATION_WHEN_IPCAN_CHANGED_WITH_IMS_ACTIVE_CALL_BOOL[] =
+                "hold_registration_when_ipcan_changed_with_ims_active_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VERSTAT_FOR_REGISTRATION_BOOL[] =
         "support_verstat_for_registration_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_NO_INITIAL_REGISTRATION_ON_PCSCF_CHANGE_BOOL[] =
         "no_initial_registration_on_pcscf_change_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REGISTRATION_BOOL[] =
-        "emergency_call_based_on_p_associated_uri_of_normal_registration_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_EMERGENCY_CALL_BASED_ON_P_ASSOCIATED_URI_OF_NORMAL_REGISTRATION_BOOL[] =
+                "emergency_call_based_on_p_associated_uri_of_normal_registration_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SIP_OVER_IPSEC_ENABLED_IN_ROAMING_BOOL[] =
         "sip_over_ipsec_enabled_in_roaming_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_CONTACT_VALIDATION_BOOL[] =
@@ -795,22 +824,25 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MAX_COUNT_
         "specific_registration_error_max_count_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_MIN_COUNT_INT[] =
         "specific_registration_error_min_count_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_RETRY_COUNT_SHARED_FOR_REGISTRATION_AND_REG_EVENT_BOOL[] =
-        "specific_registration_error_retry_count_shared_for_registration_and_reg_event_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_NUMBER_MULTIPLIED_BY_PCSCF_NUMBER_INT_ARRAY[] =
-        "specific_registration_error_number_multiplied_by_pcscf_number_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SPECIFIC_REGISTRATION_ERROR_RETRY_COUNT_SHARED_FOR_REGISTRATION_AND_REG_EVENT_BOOL[] =
+                "specific_registration_error_retry_count_shared_for_registration_and_reg_event_"
+                "bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SPECIFIC_REGISTRATION_ERROR_NUMBER_MULTIPLIED_BY_PCSCF_NUMBER_INT_ARRAY[] =
+                "specific_registration_error_number_multiplied_by_pcscf_number_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_CODE_INT_ARRAY[] =
         "specific_registration_error_code_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REREGISTRATION_ERROR_CODE_INT_ARRAY[] =
         "specific_reregistration_error_code_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REGISTRATION_ERROR_WAIT_TIME_SEC_INT_ARRAY[] =
         "specific_registration_error_wait_time_sec_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL[] =
-        "specific_reregistration_failure_with_error_code_in_roaming_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SPECIFIC_REREGISTRATION_FAILURE_WITH_ERROR_CODE_IN_ROAMING_BOOL[] =
+                "specific_reregistration_failure_with_error_code_in_roaming_bool";
 // }
 // Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_BUNDLE[] =
-        "registration_retry_bundle";
+const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_BUNDLE[] = "registration_retry_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_MIN_COUNT_INT[] =
         "registration_retry_min_count_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_305_CODE_POLICY_INT[] =
@@ -819,8 +851,9 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITHOUT_
         "registration_retry_error_code_without_ipsec_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_TIMER_F_POLICY_INT[] =
         "registration_retry_timer_f_policy_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY[] =
-        "registration_retry_error_code_with_different_pcscf_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REGISTRATION_RETRY_ERROR_CODE_WITH_DIFFERENT_PCSCF_INT_ARRAY[] =
+                "registration_retry_error_code_with_different_pcscf_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_WITH_IP_VERSION_FALLBACK_BOOL[] =
         "registration_retry_with_ip_version_fallback_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_DEFAULT_POLICY_INT[] =
@@ -831,14 +864,17 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_RETRY_SIP_503_CODE_POLICY
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_BUNDLE[] =
         "reregistration_retry_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-        "reregistration_retry_error_code_with_initial_registration_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
+                "reregistration_retry_error_code_with_initial_registration_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_EXPIRE_TIME_CHECKED_BOOL[] =
         "reregistration_retry_expire_time_checked_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_MAX_COUNT_KEPT_REGISTRATION_INT[] =
         "reregistration_retry_max_count_kept_registration_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY[] =
-        "reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_REREGISTRATION_RETRY_ERROR_CODE_WITH_INITIAL_REGISTRATION_WITH_SAME_PCSCF_INT_ARRAY[] =
+                "reregistration_retry_error_code_with_initial_registration_with_same_pcscf_int_"
+                "array";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_RETRY_SIP_305_CODE_POLICY_INT[] =
         "reregistration_retry_sip_305_code_policy_int";
 // }
@@ -847,48 +883,63 @@ const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_POLICY_DURING_CAL
         "reregistration_error_policy_during_call_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_CALL_END_INT_ARRAY[] =
         "reregistration_error_code_with_call_end_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
-        "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_REREGISTRATION_ERROR_CAUSE_WITH_PDN_REACTIVATION_AFTER_CALL_END_INT_ARRAY[] =
+                "reregistration_error_cause_with_pdn_reactivation_after_call_end_int_array";
 // }
-const IMS_CHAR CarrierConfig::Assets::KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-        "vowifi_subscription_error_code_with_initial_registration_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_VOWIFI_SUBSCRIPTION_ERROR_CODE_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
+                "vowifi_subscription_error_code_with_initial_registration_int_array";
 // Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
-        "subscription_error_code_for_reg_event_with_initial_registration_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_ERROR_RETRY_MAX_COUNT_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT[] =
-        "subscription_error_retry_max_count_for_reg_event_with_initial_registration_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
-        "subscription_error_code_for_reg_event_with_initial_registration_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE[] =
+                "subscription_error_code_for_reg_event_with_initial_registration_bundle";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_RETRY_MAX_COUNT_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT[] =
+                "subscription_error_retry_max_count_for_reg_event_with_initial_registration_int";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_INT_ARRAY[] =
+                "subscription_error_code_for_reg_event_with_initial_registration_int_array";
 // }
 // Bundle {
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE[] =
-        "subscription_terminated_error_code_for_reg_event_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_RETRY_MAX_COUNT_INT[] =
-        "subscription_terminated_error_code_for_reg_event_retry_max_count_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY[] =
-        "subscription_terminated_error_code_for_reg_event_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE[] =
+                "subscription_terminated_error_code_for_reg_event_bundle";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_RETRY_MAX_COUNT_INT[] =
+                "subscription_terminated_error_code_for_reg_event_retry_max_count_int";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_INT_ARRAY[] =
+                "subscription_terminated_error_code_for_reg_event_int_array";
 // }
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[] =
-        "subscription_error_code_for_stopping_by_expiration_time_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY[] =
-        "subscription_error_code_for_reg_event_with_initial_registration_with_next_pcscf_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_CODE_FOR_STOPPING_BY_EXPIRATION_TIME_INT_ARRAY[] =
+                "subscription_error_code_for_stopping_by_expiration_time_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY
+                [] = "subscription_error_code_for_reg_event_with_initial_registration_with_next_"
+                     "pcscf_int_array";
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_BUNDLE[] =
         "registration_error_code_with_retry_after_time_bundle";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL[] =
-        "registration_error_code_with_retry_after_time_only_defined_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[] =
-        "registration_error_code_with_retry_after_time_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[] =
-        "reregistration_error_code_with_retry_after_time_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_ONLY_DEFINED_BOOL[] =
+                "registration_error_code_with_retry_after_time_only_defined_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[] =
+                "registration_error_code_with_retry_after_time_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY[] =
+                "reregistration_error_code_with_retry_after_time_int_array";
 // }
 // Bundle {
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE[] =
         "registration_with_feature_tag_unavailable_bundle";
 const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY[] =
         "registration_with_feature_tag_unavailable_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY[] =
-        "registration_with_feature_tag_unavailable_policy_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY[] =
+                "registration_with_feature_tag_unavailable_policy_int_array";
 // }
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL[] =
         "ignore_vops_for_volte_enable_bool";
@@ -927,76 +978,91 @@ const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_FAKE_QOS_CALL_FLOW_ON_WIFI_BOOL
         "enable_fake_qos_call_flow_on_wifi_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_MEDIA_TYPE_FOR_OFFERLESS_REINVITE_INT[] =
         "media_type_for_offerless_reinvite_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[] =
-        "support_video_call_upgrade_regardless_of_feature_tags_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_UPGRADE_REGARDLESS_OF_FEATURE_TAGS_BOOL[] =
+                "support_video_call_upgrade_regardless_of_feature_tags_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_OIP_TYPE_FOR_UNAVAILABLE_INT[] =
         "oip_type_for_unavailable_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_RTT_GUARD_TIMER_MILLIS_INT[] =
         "emergency_rtt_guard_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
-        "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_RETRY_EMERGENCY_CALL_OVER_EMERGENCY_PDN_WITH_NEXT_PCSCF_BOOL[] =
+                "retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_PREALERTING_TIMER_MILLIS_INT[] =
         "prealerting_timer_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT[] =
         "policy_for_tcall_timer_expiry_of_volte_call_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[] =
-        "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT[] =
+                "policy_for_tcall_timer_expiry_of_volte_emergency_call_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT[] =
         "policy_for_tcall_timer_expiry_of_vowifi_call_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY[] =
         "carrier_specific_sip_headers_string_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[] =
-        "check_avchange_feature_for_call_converting_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[] =
-        "support_registration_recovery_for_failure_of_session_refresh_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[] =
-        "policy_for_call_maintaining_on_registration_suspended_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY[] =
-        "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_CHECK_AVCHANGE_FEATURE_FOR_CALL_CONVERTING_CAPABILITY_BOOL[] =
+                "check_avchange_feature_for_call_converting_capability_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL[] =
+                "support_registration_recovery_for_failure_of_session_refresh_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY[] =
+                "policy_for_call_maintaining_on_registration_suspended_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_POLICY_FOR_REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED_INT_ARRAY[] =
+                "policy_for_requiring_emergency_call_when_video_emergency_call_failed_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_MCID_SUPPLEMENTARY_SERVICE_BOOL[] =
         "use_mcid_supplementary_service_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_MMC_SUPPLEMENTARY_SERVICE_BOOL[] =
         "use_mmc_supplementary_service_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_USE_LTE_PREFERRED_STATUS_FOR_SERVICE_CAPABILITY_BOOL[] =
         "use_lte_preferred_status_for_service_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[] =
-        "allow_incoming_hold_request_during_conference_call_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_ALLOW_INCOMING_HOLD_REQUEST_DURING_CONFERENCE_CALL_BOOL[] =
+                "allow_incoming_hold_request_during_conference_call_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_180_AFTER_183_RESPONSE_BOOL[] =
         "ignore_180_after_183_response_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_REPLACE_HEADER_FOR_CONFERENCE_BOOL[] =
         "add_replace_header_for_conference_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_VILTE_TO_VOLTE_RETRY_FAILURE_RESPONSE_CODE_INT_ARRAY[] =
         "vilte_to_volte_retry_failure_response_code_int_array";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
-        "use_emergency_number_translation_in_roaming_status_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_USE_EMERGENCY_NUMBER_TRANSLATION_IN_ROAMING_STATUS_BOOL[] =
+                "use_emergency_number_translation_in_roaming_status_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_PRACK_DELIVERY_FAILURE_BOOL[] =
         "ignore_prack_delivery_failure_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_VIDEO_CALL_ONLY_IN_VOPS_OFF_STATUS_BOOL[] =
         "support_video_call_only_in_vops_off_status_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_BLOCK_WIFI_EMERGENCY_CALL_IF_NOT_PROVISIONED_BOOL[] =
         "block_wifi_emergency_call_if_not_provisioned_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY[] =
-        "registration_disconnect_reason_to_terminate_ongoing_call_int_array";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL_INT_ARRAY[] =
+                "registration_disconnect_reason_to_terminate_ongoing_call_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_WIFI_EMERGENCY_18X_TIMER_MILLIS_INT[] =
         "wifi_emergency_18x_timer_millis_int";
-const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL[] =
-        "support_canid_info_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[] =
-        "use_carrier_specific_contact_header_for_options_response_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL[] =
-        "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[] =
-        "enable_registration_recovery_when_call_rejected_by_server_error_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] =
-        "enable_registration_recovery_when_call_retry_unavailable_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_CANID_INFO_BOOL[] = "support_canid_info_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_USE_CARRIER_SPECIFIC_CONTACT_HEADER_FOR_OPTIONS_RESPONSE_BOOL[] =
+                "use_carrier_specific_contact_header_for_options_response_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_USE_CARRIER_SPECIFIC_REJECT_PHRASE_FOR_INCOMING_CALL_DURING_NO_REGISTRATION_BOOL[] =
+                "use_carrier_specific_reject_phrase_for_incoming_call_during_no_registration_bool";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_REJECTED_BY_SERVER_ERROR_BOOL[] =
+                "enable_registration_recovery_when_call_rejected_by_server_error_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_ENABLE_REGISTRATION_RECOVERY_WHEN_CALL_RETRY_UNAVAILABLE_BOOL[] =
+                "enable_registration_recovery_when_call_retry_unavailable_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_REJECT_VOWIFI_VOICE_CALL_WHEN_VOWIFI_SETTING_OFF_BOOL[] =
         "reject_vowifi_voice_call_when_vowifi_setting_off_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_SERVER_OUTAGE_REASON_FOR_VXLTE_CALL_BOOL[] =
         "check_server_outage_reason_for_vxlte_call_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
-        "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT[] =
-        "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
+const IMS_CHAR CarrierConfig::Assets::
+        KEY_SET_VIDEO_TEXT_FEATURE_EXCLUSIVELY_IN_CONTACT_HEADER_BY_SESSION_TYPE_BOOL[] =
+                "set_video_text_feature_exclusively_in_contact_header_by_session_type_bool";
+const IMS_CHAR
+        CarrierConfig::Assets::KEY_MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO_MILLIS_INT[] =
+                "maximum_wait_timer_for_geolocation_pidf_info_millis_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING_BOOL[] =
         "maintain_multiple_early_sessions_by_forking_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY_BOOL[] =
@@ -1008,14 +1074,11 @@ const IMS_CHAR CarrierConfig::Assets::KEY_IGNORE_P_EARLY_MEDIA_HEADER_BOOL[] =
 const IMS_CHAR CarrierConfig::Assets::KEY_INFORMATION_LEVEL_OF_GEOLOCATION_PIDF_INT_ARRAY[] =
         "information_level_of_geolocation_pidf_int_array";
 // Media
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] =
-        "audio_bw_nego_option_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL[] =
-        "video_drop_p_frame_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_BW_NEGO_OPTION_BOOL[] = "audio_bw_nego_option_bool";
+const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL[] = "video_drop_p_frame_bool";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_SDP_ANSWER_FULL_CAPABILITY_BOOL[] =
         "audio_sdp_answer_full_capability_bool";
-const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] =
-        "audio_rtp_dscp_int";
+const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_RTP_DSCP_INT[] = "audio_rtp_dscp_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_AUDIO_TELEPHONE_EVENT_DURATION_INT_ARRAY[] =
         "audio_telephone_event_duration_int_array";
 const IMS_CHAR CarrierConfig::Assets::KEY_VIDEO_CODEC_H264_SPROP_PARAMETER_SETS_BOOL[] =
@@ -1050,31 +1113,20 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_
 const IMS_CHAR CarrierConfig::Assets::KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL[] =
         "add_video_tag_contact_header_in_publish_bool";
 
-
-
-PUBLIC GLOBAL
-IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVoLteEnabled(IN IMS_SINT32 nSlotId)
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
-    return (piCc != IMS_NULL)
-            ? piCc->GetBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL)
-            : IMS_FALSE;
+    return (piCc != IMS_NULL) ? piCc->GetBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL) : IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CarrierConfig::IsVtEnabled(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsVtEnabled(IN IMS_SINT32 nSlotId)
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
-    return (piCc != IMS_NULL)
-            ? piCc->GetBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL)
-            : IMS_FALSE;
+    return (piCc != IMS_NULL) ? piCc->GetBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL) : IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL CarrierConfig::IsWfcEnabled(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IMS_BOOL CarrierConfig::IsWfcEnabled(IN IMS_SINT32 nSlotId)
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
-    return (piCc != IMS_NULL)
-            ? piCc->GetBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL)
-            : IMS_FALSE;
+    return (piCc != IMS_NULL) ? piCc->GetBoolean(KEY_CARRIER_WFC_IMS_AVAILABLE_BOOL) : IMS_FALSE;
 }

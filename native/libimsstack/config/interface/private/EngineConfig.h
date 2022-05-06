@@ -18,8 +18,7 @@
 
 #include "private/ConfigBase.h"
 
-class EngineConfig
-    : public ConfigBase
+class EngineConfig : public ConfigBase
 {
 public:
     explicit EngineConfig(IN IMS_SINT32 nSlotId);
@@ -32,14 +31,11 @@ public:
     // ConfigBase class
     void Refresh() override;
 
-    inline IMS_UINT32 GetTraceOption() const
-    { return m_nTraceOption; }
-    inline IMS_UINT32 GetTraceModule() const
-    { return m_nTraceModule; }
+    inline IMS_UINT32 GetTraceOption() const { return m_nTraceOption; }
+    inline IMS_UINT32 GetTraceModule() const { return m_nTraceModule; }
 
 protected:
-    inline IMS_BOOL ReadFrom() override
-    { return IMS_TRUE; }
+    inline IMS_BOOL ReadFrom() override { return IMS_TRUE; }
 
 private:
     IMS_UINT32 m_nTraceOption;

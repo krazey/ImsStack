@@ -57,16 +57,17 @@ struct ImsServiceProfile
 class ImsServiceName
 {
 public:
-    inline ImsServiceName(IN const AString& strAppId, IN const AString& strServiceId)
-            : m_strAppId(strAppId)
-            , m_strServiceId(strServiceId)
-    {}
-    inline ImsServiceName(IN const ImsServiceName& objOther)
-            : m_strAppId(objOther.m_strAppId)
-            , m_strServiceId(objOther.m_strServiceId)
-    {}
-    inline ~ImsServiceName()
-    {}
+    inline ImsServiceName(IN const AString& strAppId, IN const AString& strServiceId) :
+            m_strAppId(strAppId),
+            m_strServiceId(strServiceId)
+    {
+    }
+    inline ImsServiceName(IN const ImsServiceName& objOther) :
+            m_strAppId(objOther.m_strAppId),
+            m_strServiceId(objOther.m_strServiceId)
+    {
+    }
+    inline ~ImsServiceName() {}
 
     inline ImsServiceName& operator=(IN const ImsServiceName& objOther)
     {
@@ -79,10 +80,8 @@ public:
         return (*this);
     }
 
-    inline const AString& GetAppId() const
-    { return m_strAppId; }
-    inline const AString& GetServiceId() const
-    { return m_strServiceId; }
+    inline const AString& GetAppId() const { return m_strAppId; }
+    inline const AString& GetServiceId() const { return m_strServiceId; }
 
 private:
     AString m_strAppId;

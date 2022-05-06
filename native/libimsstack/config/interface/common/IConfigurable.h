@@ -39,7 +39,7 @@ public:
     IMS_FALSE               The configuration update listener is not added
     </table>
     */
-    virtual IMS_BOOL AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener *piListener) = 0;
+    virtual IMS_BOOL AddListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener) = 0;
 
     /*
      Removes the registered configuration update listener.
@@ -58,7 +58,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void RemoveListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener *piListener) = 0;
+    virtual void RemoveListener(IN IMS_SINT32 nCPI, IN IConfigUpdateListener* piListener) = 0;
 
     /*
      Updates the specified configurable item.
@@ -79,8 +79,8 @@ public:
     IMS_FALSE               The configurable item is not updated
     </table>
     */
-    virtual IMS_BOOL Update(IN IMS_SINT32 nCPI,
-            IN const AString &strValue = AString::ConstNull()) = 0;
+    virtual IMS_BOOL Update(
+            IN IMS_SINT32 nCPI, IN const AString& strValue = AString::ConstNull()) = 0;
 
 public:
     // Configurable Parameter Item for configuration engine
@@ -174,7 +174,7 @@ public:
         CP_I_TV_TI,
         CP_I_TV_TJ,
         CP_I_TV_TK,
-        CP_I_UA_VERSION, // For service level, not Generic config.
+        CP_I_UA_VERSION,  // For service level, not Generic config.
         CP_I_FEATURE_TAG_OPTIONS,
         CP_I_SESSION_MINSE,
         CP_I_SESSION_EXPIRES,
@@ -196,4 +196,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_CONFIGURABLE_H_
+#endif  // _INTERFACE_CONFIGURABLE_H_
