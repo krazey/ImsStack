@@ -22,8 +22,8 @@ private:
     AccessNetworkInfoFormatter();
 
 public:
-    static IMS_BOOL Encode(IN CONST AccessNetworkInfo &objANInfo,
-            OUT AString &strHeader, IN CONST AString &strCellInfo = AString::ConstNull());
+    static IMS_BOOL Encode(IN CONST AccessNetworkInfo& objANInfo, OUT AString& strHeader,
+            IN CONST AString& strCellInfo = AString::ConstNull());
 };
 
-#endif // _ACCESS_NETWORK_INFO_FORMATTER_H_
+#endif  // _ACCESS_NETWORK_INFO_FORMATTER_H_

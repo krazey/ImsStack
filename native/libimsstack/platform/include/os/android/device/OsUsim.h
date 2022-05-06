@@ -23,8 +23,7 @@
 class IThread;
 class IDigestAkaListener;
 
-class OsUsimDigestAka
-    : public IDigestAka
+class OsUsimDigestAka : public IDigestAka
 {
 public:
     explicit OsUsimDigestAka(IN ImsUsim* pUsim);
@@ -48,9 +47,7 @@ private:
     IDigestAkaListener* m_piListener;
 };
 
-class OsUsim
-    : public ImsUsim
-    , public ISystemListener
+class OsUsim : public ImsUsim, public ISystemListener
 {
 public:
     OsUsim(IN IMS_SINT32 nSlotId);
@@ -70,8 +67,8 @@ protected:
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 
     // ISystemListener class
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 public:
     // Digest AKA

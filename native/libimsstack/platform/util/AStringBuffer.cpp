@@ -14,36 +14,34 @@
 #include "AStringBuffer.h"
 
 PUBLIC
-AStringBuffer::AStringBuffer()
-    : strValue(AString::ConstNull())
+AStringBuffer::AStringBuffer() :
+        strValue(AString::ConstNull())
 {
 }
 
 PUBLIC
-AStringBuffer::AStringBuffer(IN IMS_SINT32 nSize)
-    : strValue(AString(nSize))
+AStringBuffer::AStringBuffer(IN IMS_SINT32 nSize) :
+        strValue(AString(nSize))
 {
 }
 
 PUBLIC
-AStringBuffer::AStringBuffer(IN CONST AString &strValue_)
-    : strValue(strValue_)
+AStringBuffer::AStringBuffer(IN CONST AString& strValue_) :
+        strValue(strValue_)
 {
 }
 
 PUBLIC
-AStringBuffer::AStringBuffer(IN CONST AStringBuffer &objRHS)
-    : strValue(objRHS.strValue)
+AStringBuffer::AStringBuffer(IN CONST AStringBuffer& objRHS) :
+        strValue(objRHS.strValue)
 {
 }
 
 PUBLIC
-AStringBuffer::~AStringBuffer()
-{
-}
+AStringBuffer::~AStringBuffer() {}
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST AStringBuffer &objRHS)
+AStringBuffer& AStringBuffer::operator=(IN CONST AStringBuffer& objRHS)
 {
     if (this != &objRHS)
     {
@@ -62,7 +60,7 @@ AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR ch)
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR *pszValue)
+AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR* pszValue)
 {
     strValue = pszValue;
 
@@ -70,7 +68,7 @@ AStringBuffer& AStringBuffer::operator=(IN CONST IMS_CHAR *pszValue)
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator=(IN CONST AString &strValue)
+AStringBuffer& AStringBuffer::operator=(IN CONST AString& strValue)
 {
     this->strValue = strValue;
 
@@ -78,7 +76,7 @@ AStringBuffer& AStringBuffer::operator=(IN CONST AString &strValue)
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::operator+=(IN CONST AStringBuffer &objRHS)
+AStringBuffer& AStringBuffer::operator+=(IN CONST AStringBuffer& objRHS)
 {
     strValue += objRHS.strValue;
 
@@ -92,7 +90,7 @@ void AStringBuffer::SetCapacity(IN IMS_SINT32 nSize)
 }
 
 PUBLIC
-AStringBuffer& AStringBuffer::Sprintf(IN CONST IMS_CHAR *pszFormat, ...)
+AStringBuffer& AStringBuffer::Sprintf(IN CONST IMS_CHAR* pszFormat, ...)
 {
     va_list ap;
 

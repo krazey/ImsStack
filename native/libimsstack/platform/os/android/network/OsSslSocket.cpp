@@ -49,8 +49,6 @@ extern "C"
 
 __IMS_TRACE_TAG_ADAPT__;
 
-
-
 /**
  * @brief Display all the ciphers available for a specific SSL structure.
  */
@@ -62,7 +60,8 @@ LOCAL void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
     IMS_SINT32 nIndex = 0;
     const IMS_CHAR* pszCipher = IMS_NULL;
 
-    do {
+    do
+    {
         pszCipher = SSL_get_cipher_list(pstSsl, nIndex);
 
         if (pszCipher != IMS_NULL)
@@ -76,8 +75,6 @@ LOCAL void osSslSocket_DisplayCiphers(IN SSL* pstSsl)
     IMS_TRACE_D("SSL ciphers :: %d [%s]", nIndex, strBuffer.GetStr(), 0);
 }
 #endif
-
-
 
 class OsSsl
 {
@@ -123,22 +120,16 @@ private:
 // CA_FILE : "/data/local/root.pem"
 // CERTIFICATE : "/system/etc/msrpcert.pem"
 // PASSWORD : "password"
-PRIVATE GLOBAL
-const IMS_CHAR OsSsl::DEFAULT_CA_FILE[] = "";
-PRIVATE GLOBAL
-const IMS_CHAR OsSsl::DEFAULT_CERTIFICATE[] = "";
-PRIVATE GLOBAL
-const IMS_CHAR OsSsl::DEFAULT_PASSWORD[] = "";
-PRIVATE GLOBAL
-IMS_BOOL OsSsl::s_bSslLibInitialized = IMS_FALSE;
-
-
+PRIVATE GLOBAL const IMS_CHAR OsSsl::DEFAULT_CA_FILE[] = "";
+PRIVATE GLOBAL const IMS_CHAR OsSsl::DEFAULT_CERTIFICATE[] = "";
+PRIVATE GLOBAL const IMS_CHAR OsSsl::DEFAULT_PASSWORD[] = "";
+PRIVATE GLOBAL IMS_BOOL OsSsl::s_bSslLibInitialized = IMS_FALSE;
 
 PUBLIC
-OsSsl::OsSsl(IN SSLCertificate* pCertificate)
-    : m_pstCtx(IMS_NULL)
-    , m_pstSsl(IMS_NULL)
-    , m_pstSocket(IMS_NULL)
+OsSsl::OsSsl(IN SSLCertificate* pCertificate) :
+        m_pstCtx(IMS_NULL),
+        m_pstSsl(IMS_NULL),
+        m_pstSocket(IMS_NULL)
 {
     if (pCertificate != IMS_NULL)
     {
@@ -168,8 +159,7 @@ OsSsl::~OsSsl()
     }
 }
 
-PUBLIC GLOBAL
-void OsSsl::StartUp()
+PUBLIC GLOBAL void OsSsl::StartUp()
 {
     // Global system initialization
     if (!s_bSslLibInitialized)
@@ -182,8 +172,7 @@ void OsSsl::StartUp()
     }
 }
 
-PUBLIC GLOBAL
-SSLCertificate OsSsl::CreateDefaultCertificate()
+PUBLIC GLOBAL SSLCertificate OsSsl::CreateDefaultCertificate()
 {
     SSLCertificate objCertificate(DEFAULT_CERTIFICATE);
 
@@ -204,15 +193,15 @@ IMS_BOOL OsSsl::Initialize()
 
     if (m_pstCtx == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Instantiating a SSL_CTX failed", 0 ,0, 0);
+        IMS_TRACE_E(0, "Instantiating a SSL_CTX failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Load our keys and certificates
     if (m_objCertificate.GetKeyFile().GetLength() > 0)
     {
-        if (SSL_CTX_use_certificate_chain_file(m_pstCtx,
-                m_objCertificate.GetKeyFile().GetStr()) != 1)
+        if (SSL_CTX_use_certificate_chain_file(m_pstCtx, m_objCertificate.GetKeyFile().GetStr()) !=
+                1)
         {
             IMS_TRACE_E(0, "Setting a certificate chain file (%s) failed",
                     m_objCertificate.GetKeyFile().GetStr(), 0, 0);
@@ -226,8 +215,8 @@ IMS_BOOL OsSsl::Initialize()
             nFileType = SSL_FILETYPE_ASN1;
         }
 
-        if (SSL_CTX_use_PrivateKey_file(m_pstCtx,
-                m_objCertificate.GetKeyFile().GetStr(), nFileType) != 1)
+        if (SSL_CTX_use_PrivateKey_file(
+                    m_pstCtx, m_objCertificate.GetKeyFile().GetStr(), nFileType) != 1)
         {
             IMS_TRACE_E(0, "Setting a private key file (%s) failed",
                     m_objCertificate.GetKeyFile().GetStr(), 0, 0);
@@ -259,8 +248,8 @@ IMS_BOOL OsSsl::Initialize()
     {
         if (SSL_CTX_load_verify_locations(m_pstCtx, pszCaFile, pszCaPath) != 1)
         {
-            IMS_TRACE_E(0, "Setting the default locations for trusted CA certificates failed",
-                    0 ,0, 0);
+            IMS_TRACE_E(
+                    0, "Setting the default locations for trusted CA certificates failed", 0, 0, 0);
             return IMS_FALSE;
         }
     }
@@ -344,13 +333,13 @@ IMS_BOOL OsSsl::Connect()
 
         if ((nSslErr == SSL_ERROR_WANT_READ) || (nSslErr == SSL_ERROR_WANT_WRITE))
         {
-            IMS_TRACE_D("SSL::Connect - try again; error(ssl=%d, err=%d(%s))",
-                    nSslErr, ERR_get_error(), ERR_reason_error_string(ERR_get_error()));
+            IMS_TRACE_D("SSL::Connect - try again; error(ssl=%d, err=%d(%s))", nSslErr,
+                    ERR_get_error(), ERR_reason_error_string(ERR_get_error()));
         }
         else
         {
-            IMS_TRACE_E(0, "SSL::Connect - error(ssl=%d, err=%d(%s))",
-                    nSslErr, ERR_get_error(), ERR_reason_error_string(ERR_get_error()));
+            IMS_TRACE_E(0, "SSL::Connect - error(ssl=%d, err=%d(%s))", nSslErr, ERR_get_error(),
+                    ERR_reason_error_string(ERR_get_error()));
         }
 
         return IMS_FALSE;
@@ -396,23 +385,27 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     switch (nErrorCode)
     {
         // read complete. there are NO MORE bytes.
-        case SSL_ERROR_NONE: {
+        case SSL_ERROR_NONE:
+        {
             return nReadBytes;
         }
-            //read success, and there are more bytes to read. WOULD BLOCK
-        case SSL_ERROR_WANT_READ: {
+            // read success, and there are more bytes to read. WOULD BLOCK
+        case SSL_ERROR_WANT_READ:
+        {
             IMS_TRACE_D("SSL::Receive - Operation is not completed (%d)", nReadBytes, 0, 0);
             return ISocket::RESULT_WOULDBLOCK;
         }
-        case SSL_ERROR_ZERO_RETURN: {
+        case SSL_ERROR_ZERO_RETURN:
+        {
             IMS_TRACE_D("SSL::Receive - SSL connection has been closed", 0, 0, 0);
             return ISocket::RESULT_ERROR;
         }
-        case SSL_ERROR_SYSCALL: {
+        case SSL_ERROR_SYSCALL:
+        {
             IMS_SINT32 nError = errno;
 
-            IMS_TRACE_E(0, "Receive - SSL_ERROR_SYSCALL(%d, %d, %s)",
-                    ERR_get_error(), nError, strerror(nError));
+            IMS_TRACE_E(0, "Receive - SSL_ERROR_SYSCALL(%d, %d, %s)", ERR_get_error(), nError,
+                    strerror(nError));
 
             if ((nError == EINTR) || (nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
@@ -421,11 +414,12 @@ IMS_SINT32 OsSsl::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 
             return ISocket::RESULT_ERROR;
         }
-        default: {
+        default:
+        {
             IMS_SINT32 nError = errno;
 
-            IMS_TRACE_E(0, "Receive - SSL error(%d, %s, errno=%d)",
-                    nErrorCode, ERR_error_string(nErrorCode, IMS_NULL), nError);
+            IMS_TRACE_E(0, "Receive - SSL error(%d, %s, errno=%d)", nErrorCode,
+                    ERR_error_string(nErrorCode, IMS_NULL), nError);
 
             if ((nError == EINTR) || (nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
@@ -476,12 +470,12 @@ IMS_SINT32 OsSsl::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
             return ISocket::RESULT_ERROR;
 
         case SSL_ERROR_SYSCALL:
-            IMS_TRACE_E(0, "SSL::Send - SSL_ERROR_SYSCALL", 0 , 0, 0);
+            IMS_TRACE_E(0, "SSL::Send - SSL_ERROR_SYSCALL", 0, 0, 0);
             return ISocket::RESULT_ERROR;
 
         default:
-            IMS_TRACE_E(0, "SSL::Send - SSL error(%d, %s)",
-                    nErrorCode, ERR_error_string(nErrorCode, IMS_NULL), 0);
+            IMS_TRACE_E(0, "SSL::Send - SSL error(%d, %s)", nErrorCode,
+                    ERR_error_string(nErrorCode, IMS_NULL), 0);
             return ISocket::RESULT_ERROR;
     }
 
@@ -497,12 +491,11 @@ void OsSsl::ShutDown()
     }
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 OsSsl::GetPemPassword(IN IMS_CHAR* pszBuffer, IN IMS_SINT32 nBuffSize,
+PRIVATE GLOBAL IMS_SINT32 OsSsl::GetPemPassword(IN IMS_CHAR* pszBuffer, IN IMS_SINT32 nBuffSize,
         IN IMS_SINT32 nRwFlag, IN IMS_PVOID pvUserData)
 {
     // nRwFlag : 0 - reading/decryption, 1 - writing/encryption
-    (void) nRwFlag;
+    (void)nRwFlag;
 
     if (nBuffSize == 0)
     {
@@ -539,15 +532,13 @@ IMS_SINT32 OsSsl::GetPemPassword(IN IMS_CHAR* pszBuffer, IN IMS_SINT32 nBuffSize
     }
 }
 
-
-
 PUBLIC
-OsSslSocket::OsSslSocket(IN SSLCertificate* pCertificate)
-    : OsSocket()
-    , m_nSslState(SSL_STATE_IDLE)
-    , m_nSslConnectRetryCount(0)
-    , m_piSslConnectRetryTimer(IMS_NULL)
-    , m_pSsl(new OsSsl(pCertificate))
+OsSslSocket::OsSslSocket(IN SSLCertificate* pCertificate) :
+        OsSocket(),
+        m_nSslState(SSL_STATE_IDLE),
+        m_nSslConnectRetryCount(0),
+        m_piSslConnectRetryTimer(IMS_NULL),
+        m_pSsl(new OsSsl(pCertificate))
 {
     LoadLibrary();
 
@@ -557,8 +548,7 @@ OsSslSocket::OsSslSocket(IN SSLCertificate* pCertificate)
     }
 }
 
-PUBLIC VIRTUAL
-OsSslSocket::~OsSslSocket()
+PUBLIC VIRTUAL OsSslSocket::~OsSslSocket()
 {
     IMS_TRACE_D("Destructor :: OsSslSocket", 0, 0, 0);
 
@@ -575,14 +565,12 @@ OsSslSocket::~OsSslSocket()
     }
 }
 
-PUBLIC GLOBAL
-void OsSslSocket::LoadLibrary()
+PUBLIC GLOBAL void OsSslSocket::LoadLibrary()
 {
     OsSsl::StartUp();
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
         IN ISocketListener* piListener,
         IN ADDRESS_FAMILY_ENTYPE eAddrFamily /*= ADDRESS_FAMILY_INET*/)
 {
@@ -606,9 +594,8 @@ ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
-        IN ADDRESS_FAMILY_ENTYPE eAddrFamily /*= ADDRESS_FAMILY_INET*/)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSslSocket::Open(
+        IN SOCKET_ENTYPE eType, IN ADDRESS_FAMILY_ENTYPE eAddrFamily /*= ADDRESS_FAMILY_INET*/)
 {
     if (m_pSsl == IMS_NULL)
     {
@@ -630,8 +617,7 @@ ISocket::SOCKET_RESULT OsSslSocket::Open(IN SOCKET_ENTYPE eType,
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSslSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+PROTECTED VIRTUAL IMS_SINT32 OsSslSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
     if (GetSocket() == INVALID_SOCKET)
     {
@@ -671,8 +657,7 @@ IMS_SINT32 OsSslSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     }
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSslSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+PROTECTED VIRTUAL IMS_SINT32 OsSslSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
     if (GetSocket() == INVALID_SOCKET)
     {
@@ -707,8 +692,8 @@ IMS_SINT32 OsSslSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     return nWrittenBytes;
 }
 
-PROTECTED VIRTUAL
-void OsSslSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+PROTECTED VIRTUAL void OsSslSocket::DispatchServiceMessage(
+        IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     switch (nWparam)
     {
@@ -722,22 +707,17 @@ void OsSslSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLpa
     }
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSslSocket::GetSocketState() const
+PROTECTED VIRTUAL IMS_SINT32 OsSslSocket::GetSocketState() const
 {
     // If there is a problem in the TCP socket level, just return the state of TCP socket level.
     return OsSocket::GetSocketState();
 }
 
-PROTECTED VIRTUAL
-void OsSslSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSslSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
 {
-    IMS_TRACE_D("SSL::NotifyConnnected() - socket=%d, error=%d",
-            GetSocket(), nErrorCode, 0);
+    IMS_TRACE_D("SSL::NotifyConnnected() - socket=%d, error=%d", GetSocket(), nErrorCode, 0);
 
-    if ((nErrorCode == 0)
-            && (GetCloseReason() == CLOSE_REASON_UNKNOWN)
-            && !IsSslConnected())
+    if ((nErrorCode == 0) && (GetCloseReason() == CLOSE_REASON_UNKNOWN) && !IsSslConnected())
     {
         DeselectEventEx(FD_CONNECT);
 
@@ -749,8 +729,7 @@ void OsSslSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
     OsSocket::NotifyConnected(nErrorCode);
 }
 
-PROTECTED VIRTUAL
-void OsSslSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSslSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
 {
     if (nErrorCode == 0)
     {
@@ -770,8 +749,7 @@ void OsSslSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
     }
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL OsSslSocket::ShutDown( IN IMS_SINT32 nHow /*= SHUTDOWN_BOTH*/)
+PROTECTED VIRTUAL IMS_BOOL OsSslSocket::ShutDown(IN IMS_SINT32 nHow /*= SHUTDOWN_BOTH*/)
 {
     OsSocket::ShutDown(nHow);
 
@@ -792,8 +770,7 @@ IMS_BOOL OsSslSocket::ShutDown( IN IMS_SINT32 nHow /*= SHUTDOWN_BOTH*/)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void OsSslSocket::Timer_TimerExpired(IN ITimer* piTimer)
+PROTECTED VIRTUAL void OsSslSocket::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -815,7 +792,7 @@ void OsSslSocket::Timer_TimerExpired(IN ITimer* piTimer)
 
         if (m_nSslConnectRetryCount >= SSL_CONNECT_RETRY_COUNT)
         {
-            IMS_TRACE_E(0, "TLS Connection fail",0,0,0);
+            IMS_TRACE_E(0, "TLS Connection fail", 0, 0, 0);
             NotifyMessage(IMS_SOCKET_CLOSED);
         }
         else
@@ -870,15 +847,14 @@ void OsSslSocket::SetSslState(IN IMS_SINT32 nState)
 {
     if (m_nSslState != nState)
     {
-        IMS_TRACE_I("SSL state :: %s >> %s",
-                SslStateToString(m_nSslState), SslStateToString(nState), 0);
+        IMS_TRACE_I("SSL state :: %s >> %s", SslStateToString(m_nSslState),
+                SslStateToString(nState), 0);
 
         m_nSslState = nState;
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsSslSocket::SslStateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* OsSslSocket::SslStateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {

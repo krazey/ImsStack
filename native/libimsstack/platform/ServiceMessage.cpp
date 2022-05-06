@@ -21,8 +21,7 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-PRIVATE GLOBAL
-AString MessageService::GetThreadName(IN const AString& strTargetName)
+PRIVATE GLOBAL AString MessageService::GetThreadName(IN const AString& strTargetName)
 {
     // threadname.activitiname
     IMS_SINT32 nIndex = strTargetName.GetIndexOf('.');
@@ -30,8 +29,8 @@ AString MessageService::GetThreadName(IN const AString& strTargetName)
     return strTargetName.GetSubStr(0, nIndex);
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MessageService::PostMessage(IN const AString& strTarget, IN ImsMessage& objMsg)
+PUBLIC GLOBAL IMS_BOOL MessageService::PostMessage(
+        IN const AString& strTarget, IN ImsMessage& objMsg)
 {
     AString strThreadName = GetThreadName(strTarget);
     ThreadService* pThreadService = ThreadService::GetThreadService();
@@ -49,8 +48,8 @@ IMS_BOOL MessageService::PostMessage(IN const AString& strTarget, IN ImsMessage&
 
         if (!bResult)
         {
-            IMS_TRACE_D("PostMessage(failed) :: target=%s, msg=%d",
-                    strTarget.GetStr(), objMsg.GetName(), 0);
+            IMS_TRACE_D("PostMessage(failed) :: target=%s, msg=%d", strTarget.GetStr(),
+                    objMsg.GetName(), 0);
         }
     }
 
@@ -59,8 +58,8 @@ IMS_BOOL MessageService::PostMessage(IN const AString& strTarget, IN ImsMessage&
     return bResult;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MessageService::PostMessageThread(IN IThread* piTargetThread, IN ImsMessage& objMsg)
+PUBLIC GLOBAL IMS_BOOL MessageService::PostMessageThread(
+        IN IThread* piTargetThread, IN ImsMessage& objMsg)
 {
     if (piTargetThread == IMS_NULL)
     {
@@ -87,9 +86,8 @@ IMS_BOOL MessageService::PostMessageThread(IN IThread* piTargetThread, IN ImsMes
     return bResult;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL MessageService::PostMessageActivity(IN IMSActivity* pTargetActivity,
-        IN ImsMessage& objMsg)
+PUBLIC GLOBAL IMS_BOOL MessageService::PostMessageActivity(
+        IN IMSActivity* pTargetActivity, IN ImsMessage& objMsg)
 {
     if (pTargetActivity == IMS_NULL)
     {

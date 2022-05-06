@@ -50,14 +50,14 @@ private:
 };
 
 PUBLIC
-PhoneInfoHolder::PhoneInfoHolder()
-    : m_piSubscriberInfo(IMS_NULL)
-    , m_piNetworkWatcher(IMS_NULL)
-    , m_piSrvcc(IMS_NULL)
-    , m_piCallInfo(IMS_NULL)
-    , m_piIsim(IMS_NULL)
-    , m_piUsim(IMS_NULL)
-    , m_piLocationInfo(IMS_NULL)
+PhoneInfoHolder::PhoneInfoHolder() :
+        m_piSubscriberInfo(IMS_NULL),
+        m_piNetworkWatcher(IMS_NULL),
+        m_piSrvcc(IMS_NULL),
+        m_piCallInfo(IMS_NULL),
+        m_piIsim(IMS_NULL),
+        m_piUsim(IMS_NULL),
+        m_piLocationInfo(IMS_NULL)
 {
 }
 
@@ -150,8 +150,6 @@ ILocationInfo* PhoneInfoHolder::GetLocationInfo(IN IMS_SINT32 nSlotId)
     return m_piLocationInfo;
 }
 
-
-
 class PhoneInfoServicePrivate
 {
 public:
@@ -187,12 +185,12 @@ private:
 };
 
 PUBLIC
-PhoneInfoServicePrivate::PhoneInfoServicePrivate()
-    : m_piDeviceInfo(IMS_NULL)
-    , m_piPowerInfo(IMS_NULL)
-    , m_piWifiWatcher(IMS_NULL)
-    , m_piTrm(IMS_NULL)
-    , m_ppHolder(IMS_NULL)
+PhoneInfoServicePrivate::PhoneInfoServicePrivate() :
+        m_piDeviceInfo(IMS_NULL),
+        m_piPowerInfo(IMS_NULL),
+        m_piWifiWatcher(IMS_NULL),
+        m_piTrm(IMS_NULL),
+        m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -273,8 +271,8 @@ ITrm* PhoneInfoServicePrivate::GetTrm()
 }
 
 PRIVATE
-PhoneInfoService::PhoneInfoService()
-    : m_pPrivate(new PhoneInfoServicePrivate())
+PhoneInfoService::PhoneInfoService() :
+        m_pPrivate(new PhoneInfoServicePrivate())
 {
 }
 
@@ -376,8 +374,6 @@ ISubscriberInfo* PhoneInfoService::GetSubscriberInfo(IN IMS_SINT32 nSlotId)
     return pHolder->GetSubscriberInfo(nSlotId);
 }
 
-
-
 PUBLIC
 IIsim* PhoneInfoService::GetIsim(IN IMS_SINT32 nSlotId)
 {
@@ -418,8 +414,7 @@ ITrm* PhoneInfoService::GetTrm()
     return m_pPrivate->GetTrm();
 }
 
-PUBLIC GLOBAL
-PhoneInfoService* PhoneInfoService::GetPhoneInfoService()
+PUBLIC GLOBAL PhoneInfoService* PhoneInfoService::GetPhoneInfoService()
 {
     static PhoneInfoService* s_pPhoneInfoService = IMS_NULL;
 

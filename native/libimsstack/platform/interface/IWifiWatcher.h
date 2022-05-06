@@ -105,7 +105,7 @@ public:
         }
     }
 
-    inline void PostMsgRegisteredThread( )
+    inline void PostMsgRegisteredThread()
     {
         for (IMS_UINT32 i = 0; i < m_objObserverLists.GetSize(); ++i)
         {
@@ -116,8 +116,8 @@ public:
                 continue;
             }
 
-            IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
-                    IMS_MSG_WIFI_STATUS, 0, 0);
+            IMS_MSG_CreateNPostThreadMessage(
+                    pObserverList->m_piOwnerThread, IMS_MSG_WIFI_STATUS, 0, 0);
         }
     }
 
@@ -154,21 +154,18 @@ public:
 private:
     class ObserverList
     {
-        public:
-            inline ObserverList(IN IWifiWatcherListener* piListener)
-            {
-                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-                m_objListeners.Append(piListener);
-            }
+    public:
+        inline ObserverList(IN IWifiWatcherListener* piListener)
+        {
+            m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+            m_objListeners.Append(piListener);
+        }
 
-            inline IMS_BOOL operator==(IN IThread* piThread)
-            {
-                return piThread == m_piOwnerThread;
-            }
+        inline IMS_BOOL operator==(IN IThread* piThread) { return piThread == m_piOwnerThread; }
 
-        public:
-            IThread* m_piOwnerThread;
-            IMSList<IWifiWatcherListener*> m_objListeners;
+    public:
+        IThread* m_piOwnerThread;
+        IMSList<IWifiWatcherListener*> m_objListeners;
     };
 
 private:

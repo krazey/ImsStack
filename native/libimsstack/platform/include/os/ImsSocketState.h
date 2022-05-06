@@ -45,7 +45,9 @@ public:
     void DetachAll(IN IMS_CONNECTION hConnection);
     void DetachHandle(IN IMS_SOCKET hSocket);
     inline const IMSMap<IMS_SOCKET, ImsSocket*>& GetHandle2ObjectMap() const
-    { return m_objHandle2Object; }
+    {
+        return m_objHandle2Object;
+    }
     ImsSocket* LookupHandle(IN IMS_SOCKET hSocket);
     IMS_BOOL IsEmpty() const;
 

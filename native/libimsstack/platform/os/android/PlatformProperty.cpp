@@ -21,8 +21,7 @@
 #include "ServiceMemory.h"
 #include "network/OsSocket.h"
 
-PUBLIC GLOBAL
-IMS_BOOL PlatformProperty::Initialize()
+PUBLIC GLOBAL IMS_BOOL PlatformProperty::Initialize()
 {
     // Initialize IMS heap
 
@@ -36,14 +35,12 @@ IMS_BOOL PlatformProperty::Initialize()
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-void PlatformProperty::InitializeOnImsThread()
+PUBLIC GLOBAL void PlatformProperty::InitializeOnImsThread()
 {
     OsUtil::GetInstance()->InitializeOnImsThread();
 }
 
-PUBLIC GLOBAL
-void PlatformProperty::Start()
+PUBLIC GLOBAL void PlatformProperty::Start()
 {
     // Start up the timer thread
     OsTimerService::StartUp();
@@ -52,8 +49,7 @@ void PlatformProperty::Start()
     OsSocket::StartUp();
 }
 
-PUBLIC GLOBAL
-void PlatformProperty::Stop()
+PUBLIC GLOBAL void PlatformProperty::Stop()
 {
     // Clean up the socket thread
     OsSocket::CleanUp();
@@ -62,8 +58,7 @@ void PlatformProperty::Stop()
     OsTimerService::CleanUp();
 }
 
-PUBLIC GLOBAL
-void PlatformProperty::Uninitialize()
+PUBLIC GLOBAL void PlatformProperty::Uninitialize()
 {
     // Uninitialize IMS heap ???
 
@@ -72,8 +67,7 @@ void PlatformProperty::Uninitialize()
     ImsNetworkConnectionState_ExitInstance();
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 PlatformProperty::GetPlatform()
+PUBLIC GLOBAL IMS_SINT32 PlatformProperty::GetPlatform()
 {
     return PLATFORM_ANDROID;
 }

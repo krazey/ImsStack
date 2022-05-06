@@ -18,8 +18,7 @@
 
 #include "ImsTimer.h"
 
-class OsTimer
-    : public ImsTimer
+class OsTimer : public ImsTimer
 {
 public:
     OsTimer();
@@ -36,13 +35,11 @@ public:
 
     // ImsTimer class
     void Destroy() override;
-    inline IMS_UINTP GetTimerId() const override
-    { return m_nTimerId; }
+    inline IMS_UINTP GetTimerId() const override { return m_nTimerId; }
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 
     // For internal uses
-    inline IMS_UINT32 GetInternalTimerId() const
-    { return m_nInternalTimerId; }
+    inline IMS_UINT32 GetInternalTimerId() const { return m_nInternalTimerId; }
 
 private:
     IMS_UINTP CreateTimerId();

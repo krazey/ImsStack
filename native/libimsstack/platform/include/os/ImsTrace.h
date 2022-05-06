@@ -19,8 +19,7 @@
 #include "ITrace.h"
 #include "ITraceOption.h"
 
-class ImsTrace
-    : public ITrace
+class ImsTrace : public ITrace
 {
 public:
     ImsTrace();
@@ -31,11 +30,10 @@ public:
 
 public:
     virtual const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName);
-    virtual const IMS_CHAR* GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
-            IN const IMS_CHAR* pszFileName);
+    virtual const IMS_CHAR* GetFileName(
+            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName);
 
-    inline IMS_UINT32 GetOption() const
-    { return m_nOption; }
+    inline IMS_UINT32 GetOption() const { return m_nOption; }
 
     void SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule);
     virtual IMS_BOOL IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule);
@@ -47,8 +45,8 @@ public:
 
 protected:
     virtual const IMS_CHAR* GetDirName() const = 0;
-    virtual void OutputString(IN IMS_SINT32 nCategory,
-            IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength);
+    virtual void OutputString(
+            IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength);
 
     IMS_BOOL IsModuleEnabled(IN IMS_UINT32 nModule);
     IMS_BOOL IsOptionEnabled(IN IMS_SINT32 nCategory);
@@ -57,17 +55,15 @@ private:
     void Out(IN const IMS_CHAR* pszFormat, ...) override;
     void Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
             IN const IMS_CHAR* pszFormat, ...) override;
-    void OutE(IN IMS_SINT32 nErrorCode,
-            IN const IMS_CHAR* pszFunction, IN IMS_UINT16 nLine,
-            IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-            IN const IMS_CHAR* pszFormat, ...) override;
+    void OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction, IN IMS_UINT16 nLine,
+            IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat,
+            ...) override;
     //// For a large TEXT message (HTTP, MSRP, SDP, SIP, XML, ...)
-    void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
-            IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText,
-            IN IMS_UINT32 nTextSize, IN IMS_BOOL bBinaryBody = IMS_FALSE) override;
+    void OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType, IN const IMS_CHAR* pszDescription,
+            IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
+            IN IMS_BOOL bBinaryBody = IMS_FALSE) override;
 
-    void HideArgs(IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer,
-            IN IMS_SINT32 nIgnore = 2);
+    void HideArgs(IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore = 2);
     IMS_WCHAR RotateLeft(IN IMS_WCHAR bits, IN IMS_UINT32 shift);
 
 private:

@@ -34,17 +34,17 @@ enum
     DATA_IPCHANGED,
     DATA_PCSCF_CHANGED,
     DATA_MAX
-} ;
+};
 
 enum
 {
-    WIFI_NET_STATE_CONNECTING    = 0,
+    WIFI_NET_STATE_CONNECTING = 0,
     WIFI_NET_STATE_CONNECTED,
     WIFI_NET_STATE_SUSPENDED,
     WIFI_NET_STATE_DISCONNECTING,
     WIFI_NET_STATE_DISCONNECTED,
     WIFI_NET_STATE_UNKNOWN
-} ;
+};
 
 enum
 {
@@ -61,64 +61,64 @@ enum
     WIFI_NET_DETAILED_STATE_BLOCKED,
     WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK,
     WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK
-} ;
+};
 
 // This emum is synced with TelephonyManager.java
 enum
 {
-    RADIOTECH_TYPE_INVALID         = -1,
-    RADIOTECH_TYPE_UNKNOWN         = 0,
-    RADIOTECH_TYPE_GPRS            = 1,
-    RADIOTECH_TYPE_EDGE            = 2,
-    RADIOTECH_TYPE_UMTS            = 3,
-    RADIOTECH_TYPE_CDMA            = 4, // Not used
-    RADIOTECH_TYPE_EVDO_0          = 5, // Not used
-    RADIOTECH_TYPE_EVDO_A          = 6, // Not used
-    RADIOTECH_TYPE_1xRTT           = 7, // Not used
-    RADIOTECH_TYPE_HSDPA           = 8,
-    RADIOTECH_TYPE_HSUPA           = 9,
-    RADIOTECH_TYPE_HSPA            = 10,
-    RADIOTECH_TYPE_IDEN            = 11,
-    RADIOTECH_TYPE_EVDO_B          = 12, // Not used
-    RADIOTECH_TYPE_LTE             = 13,
-    RADIOTECH_TYPE_EHRPD           = 14,
-    RADIOTECH_TYPE_HSPAP           = 15,
-    RADIOTECH_TYPE_GSM             = 16,
-    RADIOTECH_TYPE_TD_SCDMA        = 17,
-    RADIOTECH_TYPE_IWLAN           = 18,
-    RADIOTECH_TYPE_LTE_CA          = 19,
-    RADIOTECH_TYPE_NR              = 20,
+    RADIOTECH_TYPE_INVALID = -1,
+    RADIOTECH_TYPE_UNKNOWN = 0,
+    RADIOTECH_TYPE_GPRS = 1,
+    RADIOTECH_TYPE_EDGE = 2,
+    RADIOTECH_TYPE_UMTS = 3,
+    RADIOTECH_TYPE_CDMA = 4,    // Not used
+    RADIOTECH_TYPE_EVDO_0 = 5,  // Not used
+    RADIOTECH_TYPE_EVDO_A = 6,  // Not used
+    RADIOTECH_TYPE_1xRTT = 7,   // Not used
+    RADIOTECH_TYPE_HSDPA = 8,
+    RADIOTECH_TYPE_HSUPA = 9,
+    RADIOTECH_TYPE_HSPA = 10,
+    RADIOTECH_TYPE_IDEN = 11,
+    RADIOTECH_TYPE_EVDO_B = 12,  // Not used
+    RADIOTECH_TYPE_LTE = 13,
+    RADIOTECH_TYPE_EHRPD = 14,
+    RADIOTECH_TYPE_HSPAP = 15,
+    RADIOTECH_TYPE_GSM = 16,
+    RADIOTECH_TYPE_TD_SCDMA = 17,
+    RADIOTECH_TYPE_IWLAN = 18,
+    RADIOTECH_TYPE_LTE_CA = 19,
+    RADIOTECH_TYPE_NR = 20,
     RADIOTECH_TYPE_MAX,
 };
 
 enum
 {
-    STATE_INVALID             = -1,
-    STATE_IN_SERVICE          = 0,
-    STATE_OUT_OF_SERVICE      = 1,
-    STATE_EMERGENCY_ONLY      = 2,
-    STATE_POWER_OFF           = 3,
+    STATE_INVALID = -1,
+    STATE_IN_SERVICE = 0,
+    STATE_OUT_OF_SERVICE = 1,
+    STATE_EMERGENCY_ONLY = 2,
+    STATE_POWER_OFF = 3,
     STATE_MAX,
-} ;
+};
 
 enum
 {
-    WIFI_STATE_DISABLING     = 0,
-    WIFI_STATE_DISABLED      = 1,
-    WIFI_STATE_ENABLING      = 2,
-    WIFI_STATE_ENABLED       = 3,
-    WIFI_STATE_UNKNOWN       = 4
-} ;
+    WIFI_STATE_DISABLING = 0,
+    WIFI_STATE_DISABLED = 1,
+    WIFI_STATE_ENABLING = 2,
+    WIFI_STATE_ENABLED = 3,
+    WIFI_STATE_UNKNOWN = 4
+};
 
 // Synced with DCNetWatcher.java
 enum
 {
-    RADIO_TECH_UNKNOWN       = 0,
-    RADIO_TECH_EHRPD         = 1,
-    RADIO_TECH_GSM           = 2,
-    RADIO_TECH_WCDMA         = 3,
-    RADIO_TECH_LTE           = 4,
-    RADIO_TECH_NR            = 5
-} ;
+    RADIO_TECH_UNKNOWN = 0,
+    RADIO_TECH_EHRPD = 1,
+    RADIO_TECH_GSM = 2,
+    RADIO_TECH_WCDMA = 3,
+    RADIO_TECH_LTE = 4,
+    RADIO_TECH_NR = 5
+};
 
 #endif

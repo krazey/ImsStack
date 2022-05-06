@@ -22,8 +22,8 @@
 class SystemCallback
 {
 public:
-    virtual IMS_SINT32 SendDataToJava(IN const android::Parcel& in,
-            IN_OUT android::Parcel& out, int fileDescriptor = -1) = 0;
+    virtual IMS_SINT32 SendDataToJava(
+            IN const android::Parcel& in, IN_OUT android::Parcel& out, int fileDescriptor = -1) = 0;
 };
 
 #endif

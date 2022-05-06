@@ -20,18 +20,17 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsTrmTimer::OsTrmTimer(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nDuration)
-    : m_nSlotId(nSlotId)
-    , m_nType(nType)
-    , m_nDuration(nDuration)
-    , m_piTrmTimer(IMS_NULL)
-    , m_piListener(IMS_NULL)
+OsTrmTimer::OsTrmTimer(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nDuration) :
+        m_nSlotId(nSlotId),
+        m_nType(nType),
+        m_nDuration(nDuration),
+        m_piTrmTimer(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
     IMS_TRACE_D("OsTrmTimer :: [%d] duration = %d", nSlotId, nDuration, 0);
 }
 
-PUBLIC VIRTUAL
-OsTrmTimer::~OsTrmTimer()
+PUBLIC VIRTUAL OsTrmTimer::~OsTrmTimer()
 {
     if (m_piTrmTimer == IMS_NULL)
     {
@@ -43,14 +42,12 @@ OsTrmTimer::~OsTrmTimer()
     m_piTrmTimer = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void OsTrmTimer::SetListener(IN ITrmTimerListener* piListener)
+PUBLIC VIRTUAL void OsTrmTimer::SetListener(IN ITrmTimerListener* piListener)
 {
     m_piListener = piListener;
 }
 
-PUBLIC VIRTUAL
-void OsTrmTimer::Start()
+PUBLIC VIRTUAL void OsTrmTimer::Start()
 {
     if (m_piTrmTimer != IMS_NULL)
     {
@@ -63,8 +60,7 @@ void OsTrmTimer::Start()
     IMS_TRACE_D("Start :: id (%p) , duration (%d)", nTid, m_nDuration, 0);
 }
 
-PUBLIC VIRTUAL
-void OsTrmTimer::Stop()
+PUBLIC VIRTUAL void OsTrmTimer::Stop()
 {
     if (m_piTrmTimer == IMS_NULL)
     {
@@ -78,8 +74,7 @@ void OsTrmTimer::Stop()
     IMS_TRACE_I("Stop", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-void OsTrmTimer::Timer_TimerExpired(IN ITimer* piTimer)
+PUBLIC VIRTUAL void OsTrmTimer::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL || m_piTrmTimer != piTimer)
     {

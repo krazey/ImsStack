@@ -60,8 +60,8 @@ public:
      * @param strValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void Set(IN const AString& strKey, IN const AString& strValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void Set(
+            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Sets an ephemeral IMS private property as boolean.
@@ -70,8 +70,8 @@ public:
      * @param bValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void SetBoolean(IN const AString& strKey, IN IMS_BOOL bValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetBoolean(
+            IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Sets an ephemeral IMS private property as integer.
@@ -80,8 +80,7 @@ public:
      * @param nValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void SetInt(IN const AString& strKey, IN IMS_SINT32 nValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetInt(IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Gets a persistent IMS private property.
@@ -90,8 +89,7 @@ public:
      * @param nSlotId The slot-id
      * @return A string value of the specified key.
      */
-    virtual AString GetPersistent(IN const AString& strKey,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual AString GetPersistent(IN const AString& strKey, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Gets a persistent IMS private property as boolean.
@@ -100,8 +98,7 @@ public:
      * @param nSlotId The slot-id
      * @return A boolean value of the specified key.
      */
-    virtual IMS_BOOL GetPersistentBoolean(IN const AString& strKey,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_BOOL GetPersistentBoolean(IN const AString& strKey, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Gets a persistent IMS private property as integer.
@@ -110,8 +107,7 @@ public:
      * @param nSlotId The slot-id
      * @return An integer value of the specified key.
      */
-    virtual IMS_SINT32 GetPersistentInt(IN const AString& strKey,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual IMS_SINT32 GetPersistentInt(IN const AString& strKey, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Sets a persistent IMS private property.
@@ -120,8 +116,8 @@ public:
      * @param strValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void SetPersistent(IN const AString& strKey, IN const AString& strValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetPersistent(
+            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Sets a persistent IMS private property as boolean.
@@ -130,8 +126,8 @@ public:
      * @param bValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void SetPersistentBoolean(IN const AString& strKey, IN IMS_BOOL bValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetPersistentBoolean(
+            IN const AString& strKey, IN IMS_BOOL bValue, IN IMS_SINT32 nSlotId) = 0;
 
     /**
      * @brief Sets a persistent IMS private property as integer.
@@ -140,8 +136,8 @@ public:
      * @param nValue The value of the property
      * @param nSlotId The slot-id
      */
-    virtual void SetPersistentInt(IN const AString& strKey, IN IMS_SINT32 nValue,
-            IN IMS_SINT32 nSlotId) = 0;
+    virtual void SetPersistentInt(
+            IN const AString& strKey, IN IMS_SINT32 nValue, IN IMS_SINT32 nSlotId) = 0;
 };
 
 #endif

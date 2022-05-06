@@ -20,14 +20,10 @@
 #include "ServiceUtil.h"
 
 PRIVATE
-UtilService::UtilService()
-{
-}
+UtilService::UtilService() {}
 
 PRIVATE
-UtilService::~UtilService()
-{
-}
+UtilService::~UtilService() {}
 
 PUBLIC
 IImsPrivateProperty* UtilService::GetPrivateProperty()
@@ -75,8 +71,7 @@ void UtilService::SetDebugOn(IN IMS_BOOL bDebugOn)
     PlatformApi::SetDebugOn(bDebugOn);
 }
 
-PUBLIC GLOBAL
-UtilService* UtilService::GetUtilService()
+PUBLIC GLOBAL UtilService* UtilService::GetUtilService()
 {
     static UtilService* s_pUtilService = IMS_NULL;
 
@@ -91,10 +86,8 @@ UtilService* UtilService::GetUtilService()
 /**
  * Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
  */
-PUBLIC GLOBAL
-const AString& UtilService::GetLogString(IN const AString& strInput,
-        IN_OUT AString& strOutput, IN IMS_SINT32 nOutSize,
-        IN IMS_CHAR cDelimiter /* = 0 */)
+PUBLIC GLOBAL const AString& UtilService::GetLogString(IN const AString& strInput,
+        IN_OUT AString& strOutput, IN IMS_SINT32 nOutSize, IN IMS_CHAR cDelimiter /* = 0 */)
 {
     if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
     {

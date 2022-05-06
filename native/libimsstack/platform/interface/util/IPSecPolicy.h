@@ -25,7 +25,6 @@ class PolicyInfoP;
 
 class IPSecPolicy
 {
-
 public:
     IPSecPolicy();
     ~IPSecPolicy();
@@ -45,25 +44,13 @@ public:
     void DestroySA(IN IPSecSA* pSA);
     void DestroyAllSAs();
 
-    void SetTransportAddress(IN CONST IPAddress &objUeIPA, IN CONST IPAddress &objServerIPA);
-    void SetSAParameter
-        (
-        IN IMS_UINT32 nSecuProto,
-        IN IMS_UINT32 nMode,
-        IN IMS_UINT32 nAuthAlgo,
-        IN IMS_UINT32 nEncrAlgo,
-        IN CONST ByteArray &objAuthKey,
-        IN CONST ByteArray &objEncrKey
-        );
+    void SetTransportAddress(IN CONST IPAddress& objUeIPA, IN CONST IPAddress& objServerIPA);
+    void SetSAParameter(IN IMS_UINT32 nSecuProto, IN IMS_UINT32 nMode, IN IMS_UINT32 nAuthAlgo,
+            IN IMS_UINT32 nEncrAlgo, IN CONST ByteArray& objAuthKey,
+            IN CONST ByteArray& objEncrKey);
 
-    void GetSAParameter
-        (
-        OUT IMS_UINT32 &nIPvType,
-        OUT IMS_UINT32 &nSecuProto,
-        OUT IMS_UINT32 &nMode,
-        OUT IMS_UINT32 &nAuthAlgo,
-        OUT IMS_UINT32 &nEncrAlgo
-        );
+    void GetSAParameter(OUT IMS_UINT32& nIPvType, OUT IMS_UINT32& nSecuProto, OUT IMS_UINT32& nMode,
+            OUT IMS_UINT32& nAuthAlgo, OUT IMS_UINT32& nEncrAlgo);
 
     // Get IP Address
     IMS_UINT32 GetUeIPv4Address() const;
@@ -89,4 +76,4 @@ private:
     IMSList<IPSecSA*> objIPSecSA;
 };
 
-#endif // IPSEC_POLICY_H_
+#endif  // IPSEC_POLICY_H_

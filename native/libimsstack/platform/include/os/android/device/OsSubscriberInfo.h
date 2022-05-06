@@ -20,9 +20,7 @@
 #include "ImsSlot.h"
 #include "IPhoneInfoSubscriber.h"
 
-class OsSubscriberInfo
-    : public ImsSlot
-    , public ISubscriberInfo
+class OsSubscriberInfo : public ImsSlot, public ISubscriberInfo
 {
 public:
     OsSubscriberInfo(IN IMS_SINT32 nSlotId);
@@ -47,11 +45,11 @@ public:
     IMS_SINT32 GetEmergencyPriorityFromModem() override;
     IMS_BOOL IsUiccGbaSupported() override;
 
-    IMS_BOOL GetPreference(IN const AString& strFileName,
-            IN const AString& strKey, OUT AString& strValue,
+    IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
+            OUT AString& strValue,
             IN PREFERENCE_VALUE_ENTYPE eValueType = PREFERENCE_VALUE_STRING) override;
-    IMS_BOOL SetPreference(IN const AString& strFileName,
-            IN const AString& strKey, IN const AString& strValue,
+    IMS_BOOL SetPreference(IN const AString& strFileName, IN const AString& strKey,
+            IN const AString& strValue,
             IN PREFERENCE_VALUE_ENTYPE eValueType = PREFERENCE_VALUE_STRING) override;
 };
 

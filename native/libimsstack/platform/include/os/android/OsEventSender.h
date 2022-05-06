@@ -18,16 +18,14 @@
 
 #include "IEventSender.h"
 
-class OsEventSender
-    : public IEventSender
+class OsEventSender : public IEventSender
 {
 public:
     OsEventSender();
     virtual ~OsEventSender();
 
 public:
-    void SendEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
+    void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
             IN IMS_SINT32 nSlotId) override;
 };
 

@@ -37,8 +37,8 @@ public:
 
     virtual IMS_BOOL PostMessageI(IN ImsMessage& objMsg) = 0;
 
-    virtual IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg,
-            IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
+    virtual IMS_BOOL PostMessageI(
+            IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
 
     virtual void SetRunnable(IN IRunnable* piRunnable) = 0;
 };

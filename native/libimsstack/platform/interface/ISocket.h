@@ -45,7 +45,10 @@ public:
         ADDRESS_FAMILY_INET6 = 2
     };
 
-    enum { MAX_BACKLOG = 3 };
+    enum
+    {
+        MAX_BACKLOG = 3
+    };
 
     /// Type of socket option
     enum
@@ -118,8 +121,7 @@ public:
      */
     virtual SOCKET_ENTYPE GetSocketType() const = 0;
 
-    virtual SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN ISocketListener* piListener,
+    virtual SOCKET_RESULT Open(IN SOCKET_ENTYPE eType, IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) = 0;
 
     virtual SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
@@ -131,11 +133,9 @@ public:
 
     virtual ISocket* Accept() = 0;
 
-    virtual SOCKET_RESULT Bind(IN const IPAddress& objSocketAddress,
-            IN IMS_UINT32 nSocketPort) = 0;
+    virtual SOCKET_RESULT Bind(IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort) = 0;
 
-    virtual SOCKET_RESULT Connect(IN const IPAddress& objHostAddress,
-            IN IMS_UINT32 nHostPort) = 0;
+    virtual SOCKET_RESULT Connect(IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) = 0;
 
     virtual SOCKET_RESULT Listen(IN IMS_SINT32 nBackLog = MAX_BACKLOG) = 0;
 
@@ -149,11 +149,10 @@ public:
     virtual IMS_SINT32 SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
             IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) = 0;
 
-    virtual SOCKET_RESULT GetPeerName(OUT IPAddress& objPeerAddress,
-            OUT IMS_UINT32& nPeerPort) = 0;
+    virtual SOCKET_RESULT GetPeerName(OUT IPAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort) = 0;
 
-    virtual SOCKET_RESULT GetSockName(OUT IPAddress& objSocketAddress,
-            OUT IMS_UINT32& nSocketPort) = 0;
+    virtual SOCKET_RESULT GetSockName(
+            OUT IPAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort) = 0;
 
     virtual IMS_BOOL Equals(IN const ISocket* piSocket) = 0;
 
@@ -161,8 +160,6 @@ public:
 
     virtual IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) = 0;
 };
-
-
 
 class ISocketListener
 {
@@ -175,8 +172,8 @@ public:
 
     virtual void Socket_OnConnected(IN ISocket* piSocket) = 0;
 
-    virtual void Socket_OnClosed(IN ISocket* piSocket,
-            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) = 0;
+    virtual void Socket_OnClosed(
+            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) = 0;
 };
 
 #endif

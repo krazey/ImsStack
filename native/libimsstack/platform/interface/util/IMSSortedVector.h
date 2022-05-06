@@ -27,33 +27,36 @@ class IMSSortedVector
 {
 public:
     IMSSortedVector();
-    IMSSortedVector(IN CONST IMSSortedVector<T> &objRHS);
+    IMSSortedVector(IN CONST IMSSortedVector<T>& objRHS);
     virtual ~IMSSortedVector();
 
 public:
-    IMSSortedVector<T>& operator=(IN CONST IMSSortedVector<T> &objRHS);
+    IMSSortedVector<T>& operator=(IN CONST IMSSortedVector<T>& objRHS);
 
 public:
     // Empty the vector
     inline void Clear()
-    { mVector.clear(); Shrink(); }
+    {
+        mVector.clear();
+        Shrink();
+    }
 
     //
     // Vector stats
     //
 
     // Returns the number of elements in the vector
-    inline IMS_UINT32 GetSize() const
-    { return static_cast<IMS_UINT32>(mVector.size()); }
+    inline IMS_UINT32 GetSize() const { return static_cast<IMS_UINT32>(mVector.size()); }
     // Returns whether or not the vector is empty
-    inline IMS_BOOL IsEmpty() const
-    { return mVector.empty() ? IMS_TRUE : IMS_FALSE; }
+    inline IMS_BOOL IsEmpty() const { return mVector.empty() ? IMS_TRUE : IMS_FALSE; }
     // Returns how many elements can be stored without reallocating the backing store
-    inline IMS_UINT32 GetCapacity() const
-    { return static_cast<IMS_UINT32>(mVector.capacity()); }
+    inline IMS_UINT32 GetCapacity() const { return static_cast<IMS_UINT32>(mVector.capacity()); }
     // Sets the capacity. The capacity can never be reduced less than GetSize().
     inline IMS_SLONG SetCapacity(IN IMS_UINT32 nNewCapacity)
-    { return mVector.reserve(nNewCapacity); return GetCapacity(); }
+    {
+        return mVector.reserve(nNewCapacity);
+        return GetCapacity();
+    }
 
     //
     // C-style array access
@@ -90,31 +93,30 @@ public:
     inline T& Top();
 
     // Checks if the same element is present
-    inline IMS_BOOL Contains(IN CONST T &element) const;
+    inline IMS_BOOL Contains(IN CONST T& element) const;
     // Finds the index of an element
-    inline IMS_SLONG GetIndexOf(IN CONST T &element) const;
+    inline IMS_SLONG GetIndexOf(IN CONST T& element) const;
     // Finds where this element should be inserted
-    inline IMS_UINT32 GetOrderOf(IN CONST T &element) const;
+    inline IMS_UINT32 GetOrderOf(IN CONST T& element) const;
 
     // Merges a vector into this one
-    inline IMS_BOOL Merge(IN CONST IMSVector<T> &objVector);
-    inline IMS_BOOL Merge(IN CONST IMSSortedVector<T> &objVector);
+    inline IMS_BOOL Merge(IN CONST IMSVector<T>& objVector);
+    inline IMS_BOOL Merge(IN CONST IMSSortedVector<T>& objVector);
 
     //
     // Add an element in the right place (or replaces it if there is one)
     //
-    inline IMS_BOOL Add(IN CONST T &element);
+    inline IMS_BOOL Add(IN CONST T& element);
 
     //
     // Remove an element
     //
-    inline IMS_BOOL Remove(IN CONST T &element);
+    inline IMS_BOOL Remove(IN CONST T& element);
 
     // Remove several elements
     inline IMS_BOOL RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ = 1);
     // Remove one element
-    inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex)
-    { return RemoveElementsAt(nIndex); }
+    inline IMS_BOOL RemoveAt(IN IMS_UINT32 nIndex) { return RemoveElementsAt(nIndex); }
 
     inline void Shrink();
 
@@ -125,29 +127,29 @@ private:
 //-------------------------------------------------------------------------------------------------
 
 PUBLIC
-template <class T> inline
-IMSSortedVector<T>::IMSSortedVector()
-    : mVector(std::vector<T>())
+template <class T>
+inline IMSSortedVector<T>::IMSSortedVector() :
+        mVector(std::vector<T>())
 {
 }
 
 PUBLIC
-template <class T> inline
-IMSSortedVector<T>::IMSSortedVector(IN CONST IMSSortedVector<T> &objRHS)
-    : mVector(objRHS.mVector)
+template <class T>
+inline IMSSortedVector<T>::IMSSortedVector(IN CONST IMSSortedVector<T>& objRHS) :
+        mVector(objRHS.mVector)
 {
 }
 
 PUBLIC
-template <class T> inline
-IMSSortedVector<T>::~IMSSortedVector()
+template <class T>
+inline IMSSortedVector<T>::~IMSSortedVector()
 {
     Clear();
 }
 
 PUBLIC
-template <class T> inline
-IMSSortedVector<T>& IMSSortedVector<T>::operator=(IN CONST IMSSortedVector<T> &objRHS)
+template <class T>
+inline IMSSortedVector<T>& IMSSortedVector<T>::operator=(IN CONST IMSSortedVector<T>& objRHS)
 {
     if (this != &objRHS)
     {
@@ -158,75 +160,75 @@ IMSSortedVector<T>& IMSSortedVector<T>::operator=(IN CONST IMSSortedVector<T> &o
 }
 
 PUBLIC
-template <class T> inline
-const T* IMSSortedVector<T>::GetArrayConst() const
+template <class T>
+inline const T* IMSSortedVector<T>::GetArrayConst() const
 {
     return mVector.data();
 }
 
 PUBLIC
-template <class T> inline
-T* IMSSortedVector<T>::GetArray()
+template <class T>
+inline T* IMSSortedVector<T>::GetArray()
 {
     return mVector.data();
 }
 
 PUBLIC
-template <class T> inline
-const T& IMSSortedVector<T>::operator[](IN IMS_UINT32 nIndex) const
+template <class T>
+inline const T& IMSSortedVector<T>::operator[](IN IMS_UINT32 nIndex) const
 {
     IMS_ASSERT(nIndex < GetSize());
     return mVector.operator[](nIndex);
 }
 
 PUBLIC
-template <class T> inline
-const T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex) const
+template <class T>
+inline const T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex) const
 {
     return mVector.at(nIndex);
 }
 
 PUBLIC
-template <class T> inline
-const T& IMSSortedVector<T>::Top() const
+template <class T>
+inline const T& IMSSortedVector<T>::Top() const
 {
     IMS_ASSERT(!mVector.empty());
     return mVector.back();
 }
 
 PUBLIC
-template <class T> inline
-const T& IMSSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
+template <class T>
+inline const T& IMSSortedVector<T>::GetAtMirror(IN IMS_SLONG nIndex) const
 {
     IMS_ASSERT(((nIndex > 0) ? nIndex : -nIndex) < GetSize());
     return GetAt((nIndex < 0) ? (GetSize() + nIndex) : nIndex);
 }
 
 PUBLIC
-template <class T> inline
-T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex)
+template <class T>
+inline T& IMSSortedVector<T>::GetAt(IN IMS_UINT32 nIndex)
 {
     return mVector.at(nIndex);
 }
 
 PUBLIC
-template <class T> inline
-T& IMSSortedVector<T>::Top()
+template <class T>
+inline T& IMSSortedVector<T>::Top()
 {
     IMS_ASSERT(!mVector.empty());
     return mVector.back();
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::Contains(IN CONST T &element) const
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::Contains(IN CONST T& element) const
 {
     return (GetIndexOf(element) >= 0) ? IMS_TRUE : IMS_FALSE;
 }
 
 PUBLIC
-template <class T> inline
-IMS_SLONG IMSSortedVector<T>::GetIndexOf(IN CONST T &element) const
+template <class T>
+inline IMS_SLONG IMSSortedVector<T>::GetIndexOf(IN CONST T& element) const
 {
     const auto& it = std::find(mVector.begin(), mVector.end(), element);
 
@@ -239,8 +241,8 @@ IMS_SLONG IMSSortedVector<T>::GetIndexOf(IN CONST T &element) const
 }
 
 PUBLIC
-template <class T> inline
-IMS_UINT32 IMSSortedVector<T>::GetOrderOf(IN CONST T &element) const
+template <class T>
+inline IMS_UINT32 IMSSortedVector<T>::GetOrderOf(IN CONST T& element) const
 {
     if (mVector.empty())
     {
@@ -252,8 +254,8 @@ IMS_UINT32 IMSSortedVector<T>::GetOrderOf(IN CONST T &element) const
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSVector<T> &objVector)
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSVector<T>& objVector)
 {
     for (IMS_UINT32 i = 0; i < objVector.GetSize(); i++)
     {
@@ -262,8 +264,8 @@ IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSVector<T> &objVector)
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSSortedVector<T> &objVector)
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSSortedVector<T>& objVector)
 {
     if (objVector.IsEmpty())
     {
@@ -296,8 +298,8 @@ IMS_BOOL IMSSortedVector<T>::Merge(IN CONST IMSSortedVector<T> &objVector)
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::Add(IN CONST T &element)
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::Add(IN CONST T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
@@ -315,8 +317,8 @@ IMS_BOOL IMSSortedVector<T>::Add(IN CONST T &element)
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::Remove(IN CONST T &element)
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::Remove(IN CONST T& element)
 {
     IMS_SLONG nIndex = GetIndexOf(element);
 
@@ -329,8 +331,9 @@ IMS_BOOL IMSSortedVector<T>::Remove(IN CONST T &element)
 }
 
 PUBLIC
-template <class T> inline
-IMS_BOOL IMSSortedVector<T>::RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ /*= 1*/)
+template <class T>
+inline IMS_BOOL IMSSortedVector<T>::RemoveElementsAt(
+        IN IMS_UINT32 nIndex, IN IMS_UINT32 nCount_ /*= 1*/)
 {
     if (nIndex == 0 && nCount_ == GetSize())
     {
@@ -351,8 +354,8 @@ IMS_BOOL IMSSortedVector<T>::RemoveElementsAt(IN IMS_UINT32 nIndex, IN IMS_UINT3
 }
 
 PUBLIC
-template <class T> inline
-void IMSSortedVector<T>::Shrink()
+template <class T>
+inline void IMSSortedVector<T>::Shrink()
 {
     if (mVector.empty())
     {
@@ -364,4 +367,4 @@ void IMSSortedVector<T>::Shrink()
     }
 }
 
-#endif // _IMS_SORTED_VECTOR_H_
+#endif  // _IMS_SORTED_VECTOR_H_

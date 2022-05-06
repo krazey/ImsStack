@@ -14,24 +14,22 @@
 
 #include "IMSActivityMngr.h"
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSActivityMngr::IMSActivityMngr()
-    : nMajorId(0)
-    , nMinorId(0)
-    , objIMSActivities(IMSList<IMSActivity*>())
+IMSActivityMngr::IMSActivityMngr() :
+        nMajorId(0),
+        nMinorId(0),
+        objIMSActivities(IMSList<IMSActivity*>())
 {
 }
 
 PUBLIC
-IMSActivityMngr::~IMSActivityMngr()
-{
-}
+IMSActivityMngr::~IMSActivityMngr() {}
 
 PUBLIC
-IMS_BOOL IMSActivityMngr::Attach(IN IMSActivity *pIMSActivity)
+IMS_BOOL IMSActivityMngr::Attach(IN IMSActivity* pIMSActivity)
 {
     if (pIMSActivity == IMS_NULL)
     {
@@ -42,11 +40,11 @@ IMS_BOOL IMSActivityMngr::Attach(IN IMSActivity *pIMSActivity)
 }
 
 PUBLIC
-void IMSActivityMngr::Detach(IN IMSActivity *pIMSActivity)
+void IMSActivityMngr::Detach(IN IMSActivity* pIMSActivity)
 {
     for (IMS_UINT32 i = 0; i < objIMSActivities.GetSize(); ++i)
     {
-        IMSActivity *pActivity = objIMSActivities.GetAt(i);
+        IMSActivity* pActivity = objIMSActivities.GetAt(i);
 
         if (pActivity == pIMSActivity)
         {
@@ -63,11 +61,11 @@ void IMSActivityMngr::Detach(IN IMSActivity *pIMSActivity)
 }
 
 PUBLIC
-IMSActivity* IMSActivityMngr::Get(IN CONST AString &strActivityName)
+IMSActivity* IMSActivityMngr::Get(IN CONST AString& strActivityName)
 {
     for (IMS_UINT32 i = 0; i < objIMSActivities.GetSize(); ++i)
     {
-        IMSActivity *pActivity = objIMSActivities.GetAt(i);
+        IMSActivity* pActivity = objIMSActivities.GetAt(i);
 
         if (pActivity->GetName().Equals(strActivityName))
         {
@@ -79,7 +77,7 @@ IMSActivity* IMSActivityMngr::Get(IN CONST AString &strActivityName)
 }
 
 PUBLIC
-AString IMSActivityMngr::GenerateName(IN CONST AString &strThreadName, IN CONST AString &strName)
+AString IMSActivityMngr::GenerateName(IN CONST AString& strThreadName, IN CONST AString& strName)
 {
     AString strNewName;
 
@@ -102,12 +100,12 @@ AString IMSActivityMngr::GenerateName(IN CONST AString &strThreadName, IN CONST 
 }
 
 PUBLIC
-IMS_BOOL IMSActivityMngr::HandleMessage(IN IMSMSG &objMSG)
+IMS_BOOL IMSActivityMngr::HandleMessage(IN IMSMSG& objMSG)
 {
     AString strTartgetName = objMSG.GetTargetName();
     AString strTartgetActivityName = GetActivityNameFromMsg(strTartgetName);
 
-    IMSActivity *pIMSActivity = Get(strTartgetActivityName);
+    IMSActivity* pIMSActivity = Get(strTartgetActivityName);
 
     if (pIMSActivity != IMS_NULL)
     {
@@ -118,7 +116,7 @@ IMS_BOOL IMSActivityMngr::HandleMessage(IN IMSMSG &objMSG)
 }
 
 PUBLIC
-IIMSActivityControl* IMSActivityMngr::GetController(IN CONST AString &strControllerName)
+IIMSActivityControl* IMSActivityMngr::GetController(IN CONST AString& strControllerName)
 {
     IMSActivity* pIMSActivity = Get(strControllerName);
 
@@ -130,10 +128,10 @@ IIMSActivityControl* IMSActivityMngr::GetController(IN CONST AString &strControl
     return IMS_NULL;
 }
 
-#if 0 // protected
+#if 0  // protected
 #endif
 
-#if 0 // private
+#if 0  // private
 #endif
 
 PRIVATE

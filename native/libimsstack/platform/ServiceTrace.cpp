@@ -18,26 +18,25 @@
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 
-#define __IMS_TRACE_TAG_DEF__(ENUM,NAME,MODULE)           { NAME, IMS_TRACE_MODULE_##MODULE },
+#define __IMS_TRACE_TAG_DEF__(ENUM, NAME, MODULE) {NAME, IMS_TRACE_MODULE_##MODULE},
 
-LOCAL const ImsTraceTag s_objImsTraceTag[IMS_TRACE_TAG_MAX + 1] =
-{
-    { __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT },
+LOCAL const ImsTraceTag s_objImsTraceTag[IMS_TRACE_TAG_MAX + 1] = {
+        {__IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT},
 
 #include "ITraceTagDef.h"
 
-    { __IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT }
+        {__IMS_TRACE_DEFAULT_NAME__, IMS_TRACE_MODULE_DEFAULT}
 };
 
 #undef __IMS_TRACE_TAG_DEF__
 
-
 class TraceServicePrivate
 {
 public:
-    inline TraceServicePrivate()
-        : m_pTrace(IMS_NULL)
-    {}
+    inline TraceServicePrivate() :
+            m_pTrace(IMS_NULL)
+    {
+    }
     inline ~TraceServicePrivate()
     {
         if (m_pTrace != IMS_NULL)
@@ -64,14 +63,11 @@ private:
     ImsTrace* m_pTrace;
 };
 
-
-
-PRIVATE GLOBAL
-IMS_SINT32 TraceService::s_nLoggableForDebug = -1;
+PRIVATE GLOBAL IMS_SINT32 TraceService::s_nLoggableForDebug = -1;
 
 PRIVATE
-TraceService::TraceService()
-    : m_pPrivate(new TraceServicePrivate())
+TraceService::TraceService() :
+        m_pPrivate(new TraceServicePrivate())
 {
     for (IMS_SINT32 i = 0; i < IMS_TRACE_TAG_MAX + 1; ++i)
     {
@@ -104,8 +100,8 @@ const IMS_CHAR* TraceService::GetFileName(IN const IMS_CHAR* pszFileName) const
 }
 
 PUBLIC
-const IMS_CHAR* TraceService::GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
-        IN const IMS_CHAR* pszFileName) const
+const IMS_CHAR* TraceService::GetFileName(
+        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) const
 {
     ImsTrace* pTrace = m_pPrivate->GetTrace();
 
@@ -149,9 +145,9 @@ void TraceService::SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule)
 
 PUBLIC
 void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
-        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat,
-        IN const IMS_CHAR* pszFileName,IN IMS_UINT32 nLine,
-        IN const IMS_CHAR* pszArg1, IN const IMS_CHAR* pszArg2, IN const IMS_CHAR* pszArg3)
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, IN const IMS_CHAR* pszFileName,
+        IN IMS_UINT32 nLine, IN const IMS_CHAR* pszArg1, IN const IMS_CHAR* pszArg2,
+        IN const IMS_CHAR* pszArg3)
 {
     ImsTrace* pTrace = m_pPrivate->GetTrace();
 
@@ -160,17 +156,22 @@ void TraceService::PrintPrivacyLog(IN IMS_SINT32 nCategory, IN const IMS_CHAR* p
         return;
     }
 
-    IMS_CHAR _buffer_A1[512 + 7] = {0,};
-    IMS_CHAR _buffer_A2[512 + 7] = {0,};
-    IMS_CHAR _buffer_A3[512 + 7] = {0,};
-    pTrace->OutP(nCategory, pszTag, nModule, pszFormat, pszFileName, nLine
-                   , pTrace->EncryptPrivacyLog(_buffer_A1, pszArg1)
-                   , pTrace->EncryptPrivacyLog(_buffer_A2, pszArg2)
-                   , pTrace->EncryptPrivacyLog(_buffer_A3, pszArg3));
+    IMS_CHAR _buffer_A1[512 + 7] = {
+            0,
+    };
+    IMS_CHAR _buffer_A2[512 + 7] = {
+            0,
+    };
+    IMS_CHAR _buffer_A3[512 + 7] = {
+            0,
+    };
+    pTrace->OutP(nCategory, pszTag, nModule, pszFormat, pszFileName, nLine,
+            pTrace->EncryptPrivacyLog(_buffer_A1, pszArg1),
+            pTrace->EncryptPrivacyLog(_buffer_A2, pszArg2),
+            pTrace->EncryptPrivacyLog(_buffer_A3, pszArg3));
 }
 
-PUBLIC GLOBAL
-TraceService* TraceService::GetTraceService()
+PUBLIC GLOBAL TraceService* TraceService::GetTraceService()
 {
     static TraceService* s_pTraceService = IMS_NULL;
 
@@ -183,11 +184,11 @@ TraceService* TraceService::GetTraceService()
 }
 
 GLOBAL
-void TraceService_Assert(IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule,
-        IN IMS_UINT16 nLine)
+void TraceService_Assert(
+        IN const IMS_CHAR* pszCondition, IN const IMS_CHAR* pszModule, IN IMS_UINT16 nLine)
 {
     TraceService::GetTraceService()->GetTrace()->Out(ITrace::CAT_E, "ASSERT",
-            IMS_TRACE_MODULE_DEFAULT,  "(%s) FAILED AT (%s, %d)", pszCondition, pszModule, nLine);
+            IMS_TRACE_MODULE_DEFAULT, "(%s) FAILED AT (%s, %d)", pszCondition, pszModule, nLine);
 }
 
 GLOBAL

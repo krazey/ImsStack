@@ -31,15 +31,13 @@
 #include "ServiceUtil.h"
 #include "ServiceVoNr.h"
 
-#define WAIT_TIMEOUT_FOR_IPC        1              // ms
-#define WAIT_TIMEOUT_FOR_RUN        10000          // us
+#define WAIT_TIMEOUT_FOR_IPC 1      // ms
+#define WAIT_TIMEOUT_FOR_RUN 10000  // us
 
 extern void JNI_AttachNativeThread(const char* threadName);
 extern void JNI_DetachNativeThread(void);
 
 __IMS_TRACE_TAG_ADAPT__;
-
-
 
 LOCAL
 IMS_PVOID osThread_Run(IN OsThread* pThread)
@@ -66,8 +64,6 @@ IMS_PVOID osThread_ThreadProc(void* lpParam)
     return osThread_Run(reinterpret_cast<OsThread*>(lpParam));
 }
 
-
-
 class OsThreadPrivate
 {
 public:
@@ -81,12 +77,9 @@ public:
     void CleanUp();
 
     // Internal signal flag to avoid timing issue
-    inline void SetSignal()
-    { m_bSignalFlag = IMS_TRUE; }
-    inline void ClearSignal()
-    { m_bSignalFlag = IMS_FALSE; }
-    inline IMS_BOOL IsSignaled() const
-    { return m_bSignalFlag; }
+    inline void SetSignal() { m_bSignalFlag = IMS_TRUE; }
+    inline void ClearSignal() { m_bSignalFlag = IMS_FALSE; }
+    inline IMS_BOOL IsSignaled() const { return m_bSignalFlag; }
 
 public:
     IMS_BOOL m_bIsRunning;
@@ -103,14 +96,12 @@ public:
     IMSQueue<ImsMessage> m_objMsgQ;
 };
 
-
-
 PUBLIC
-OsThreadPrivate::OsThreadPrivate()
-    : m_bIsRunning(IMS_FALSE)
-    , m_nThreadId(0)
-    , m_bSignalFlag(IMS_FALSE)
-    , m_strName(AString::ConstNull())
+OsThreadPrivate::OsThreadPrivate() :
+        m_bIsRunning(IMS_FALSE),
+        m_nThreadId(0),
+        m_bSignalFlag(IMS_FALSE),
+        m_strName(AString::ConstNull())
 {
     if (pthread_cond_init(&m_stIpcThreadCond, NULL) == 0)
     {
@@ -174,23 +165,20 @@ void OsThreadPrivate::CleanUp()
     m_bIsRunning = IMS_FALSE;
 }
 
-
-
 PUBLIC
-OsThread::OsThread()
-    : ImsThread()
-    , m_piListener(IMS_NULL)
-    , m_pThreadP(new OsThreadPrivate())
+OsThread::OsThread() :
+        ImsThread(),
+        m_piListener(IMS_NULL),
+        m_pThreadP(new OsThreadPrivate())
 {
 }
 
-PUBLIC VIRTUAL
-OsThread::~OsThread()
+PUBLIC VIRTUAL OsThread::~OsThread()
 {
     if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
     {
-        IMS_TRACE_D("Thread(%s, %x) is destroyed",
-                m_pThreadP->m_strName.GetStr(), m_pThreadP->m_nThreadId, 0);
+        IMS_TRACE_D("Thread(%s, %x) is destroyed", m_pThreadP->m_strName.GetStr(),
+                m_pThreadP->m_nThreadId, 0);
     }
 
     CleanUp();
@@ -202,8 +190,7 @@ OsThread::~OsThread()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::Activate()
+PUBLIC VIRTUAL IMS_BOOL OsThread::Activate()
 {
     if (m_pThreadP->m_bIsRunning)
     {
@@ -211,10 +198,7 @@ IMS_BOOL OsThread::Activate()
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nResult = pthread_create(
-            &(m_pThreadP->m_nThreadId),
-            IMS_NULL,
-            osThread_ThreadProc,
+    IMS_SINT32 nResult = pthread_create(&(m_pThreadP->m_nThreadId), IMS_NULL, osThread_ThreadProc,
             reinterpret_cast<void*>(this));
 
     // Check the result
@@ -256,8 +240,7 @@ IMS_BOOL OsThread::Activate()
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsThread::Deactivate()
+PUBLIC VIRTUAL void OsThread::Deactivate()
 {
     if (!m_pThreadP->m_bIsRunning)
     {
@@ -296,8 +279,7 @@ void OsThread::Deactivate()
     m_pThreadP->m_objIpcMutex.Unlock();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::Equals(IN const IThread* piThread) const
+PUBLIC VIRTUAL IMS_BOOL OsThread::Equals(IN const IThread* piThread) const
 {
     const OsThread* pThread = DYNAMIC_CAST(const OsThread*, piThread);
 
@@ -309,35 +291,30 @@ IMS_BOOL OsThread::Equals(IN const IThread* piThread) const
     return GetName().Equals(pThread->GetName());
 }
 
-PUBLIC VIRTUAL
-const AString& OsThread::GetName() const
+PUBLIC VIRTUAL const AString& OsThread::GetName() const
 {
     return m_pThreadP->m_strName;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::IsRunning() const
+PUBLIC VIRTUAL IMS_BOOL OsThread::IsRunning() const
 {
     return m_pThreadP->m_bIsRunning;
 }
 
-PUBLIC VIRTUAL
-void OsThread::SetRunnable(IN IRunnable* piListener)
+PUBLIC VIRTUAL void OsThread::SetRunnable(IN IRunnable* piListener)
 {
     m_piListener = piListener;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::PostMessageI(IN IMS_UINT32 nMsg,
-        IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(
+        IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     ImsMessage objMsg(nMsg, nWparam, nLparam);
 
     return PostMessageI(objMsg);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
+PUBLIC VIRTUAL IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
 {
     if (!m_pThreadP->m_bIsRunning)
     {
@@ -351,7 +328,7 @@ IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
 
     m_pThreadP->SetSignal();
 
-    IMS_SINT32 nResult = pthread_cond_signal( &(m_pThreadP->m_stIpcThreadCond) );
+    IMS_SINT32 nResult = pthread_cond_signal(&(m_pThreadP->m_stIpcThreadCond));
 
     if (nResult != 0)
     {
@@ -369,36 +346,31 @@ IMS_BOOL OsThread::PostMessageI(IN ImsMessage& objMsg)
     return bResult;
 }
 
-PUBLIC VIRTUAL
-void OsThread::PostMessage(IN IMS_UINT32 nMessage)
+PUBLIC VIRTUAL void OsThread::PostMessage(IN IMS_UINT32 nMessage)
 {
     ImsMessage objMsg(nMessage, 0, 0);
 
     PostMessageI(objMsg);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsThread::Create(IN const AString& strName)
+PUBLIC VIRTUAL IMS_BOOL OsThread::Create(IN const AString& strName)
 {
     m_pThreadP->m_strName = strName;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_ULONG OsThread::GetThreadId() const
+PUBLIC VIRTUAL IMS_ULONG OsThread::GetThreadId() const
 {
     return static_cast<IMS_ULONG>(m_pThreadP->m_nThreadId);
 }
 
-PUBLIC GLOBAL
-IMS_ULONG OsThread::GetCurrentThreadId()
+PUBLIC GLOBAL IMS_ULONG OsThread::GetCurrentThreadId()
 {
     return pthread_self();
 }
 
-PROTECTED VIRTUAL
-IMS_ULONG OsThread::Run()
+PROTECTED VIRTUAL IMS_ULONG OsThread::Run()
 {
     ImsMessage objMsg;
     IMS_BOOL bLoop = IMS_TRUE;
@@ -416,13 +388,12 @@ IMS_ULONG OsThread::Run()
 
         if (nMsgCount == 0 && !m_pThreadP->IsSignaled())
         {
-            nWaitResult = pthread_cond_wait(
-                    &(m_pThreadP->m_stIpcThreadCond),
+            nWaitResult = pthread_cond_wait(&(m_pThreadP->m_stIpcThreadCond),
                     reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()));
         }
         else
         {
-#if 1 // FOR_O_OS : defined(__IMS_LP64__)
+#if 1  // FOR_O_OS : defined(__IMS_LP64__)
             struct timeval now;
             struct timespec ts;
 
@@ -436,13 +407,11 @@ IMS_ULONG OsThread::Run()
             ts.tv_sec = now.tv_sec + (nsec / 1000000000L);
             ts.tv_nsec = (nsec % 1000000000L);
 
-            nWaitResult = pthread_cond_timedwait(
-                    &(m_pThreadP->m_stIpcThreadCond),
+            nWaitResult = pthread_cond_timedwait(&(m_pThreadP->m_stIpcThreadCond),
                     reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()),
                     &ts);
 #else
-            nWaitResult = pthread_cond_timeout_np(
-                    &(m_pThreadP->m_stIpcThreadCond),
+            nWaitResult = pthread_cond_timeout_np(&(m_pThreadP->m_stIpcThreadCond),
                     reinterpret_cast<pthread_mutex_t*>(m_pThreadP->m_objIpcMutex.GetMutexObj()),
                     WAIT_TIMEOUT_FOR_IPC);
 #endif
@@ -500,8 +469,7 @@ IMS_ULONG OsThread::Run()
     return m_pThreadP->m_nThreadId;
 }
 
-PROTECTED VIRTUAL
-void OsThread::OnStart(IN ImsMessage &objMsg)
+PROTECTED VIRTUAL void OsThread::OnStart(IN ImsMessage& objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
@@ -512,8 +480,7 @@ void OsThread::OnStart(IN ImsMessage &objMsg)
     m_piListener->Runnable_Run(objMsg);
 }
 
-PROTECTED VIRTUAL
-void OsThread::OnTerminate(IN ImsMessage& objMsg)
+PROTECTED VIRTUAL void OsThread::OnTerminate(IN ImsMessage& objMsg)
 {
     if (m_piListener == IMS_NULL)
     {
@@ -524,8 +491,7 @@ void OsThread::OnTerminate(IN ImsMessage& objMsg)
     m_piListener->Runnable_Run(objMsg);
 }
 
-PROTECTED VIRTUAL
-void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
+PROTECTED VIRTUAL void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
@@ -555,8 +521,7 @@ void OsThread::OnSystemMessage(IN ImsMessage& objMsg)
     }
 }
 
-PROTECTED VIRTUAL
-void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
+PROTECTED VIRTUAL void OsThread::OnThreadMessage(IN ImsMessage& objMsg)
 {
     if (objMsg.HasCallback())
     {
@@ -579,18 +544,11 @@ void OsThread::CleanUp()
     m_pThreadP->CleanUp();
 }
 
-PROTECTED GLOBAL
-IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
+PROTECTED GLOBAL IMS_BOOL OsThread::IsSystemMessage(IN IMS_SINT32 nMsg)
 {
-    return ((nMsg == IMS_MSG_NETWORK)
-            || (nMsg == IMS_MSG_SOCKET)
-            || (nMsg == IMS_MSG_BATTERY)
-            || (nMsg == IMS_MSG_NETWORK_STATUS)
-            || (nMsg == IMS_MSG_TIMER)
-            || (nMsg == IMS_MSG_CONFIGURATION)
-            || (nMsg == IMS_MSG_WIFI_STATUS)
-            || (nMsg == IMS_MSG_ISIM)
-            || (nMsg == IMS_MSG_USIM)
-            || (nMsg == IMS_MSG_TRM_PRIORITY_STATUS)
-            || (nMsg == IMS_MSG_VONR));
+    return ((nMsg == IMS_MSG_NETWORK) || (nMsg == IMS_MSG_SOCKET) || (nMsg == IMS_MSG_BATTERY) ||
+            (nMsg == IMS_MSG_NETWORK_STATUS) || (nMsg == IMS_MSG_TIMER) ||
+            (nMsg == IMS_MSG_CONFIGURATION) || (nMsg == IMS_MSG_WIFI_STATUS) ||
+            (nMsg == IMS_MSG_ISIM) || (nMsg == IMS_MSG_USIM) ||
+            (nMsg == IMS_MSG_TRM_PRIORITY_STATUS) || (nMsg == IMS_MSG_VONR));
 }

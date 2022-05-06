@@ -16,8 +16,8 @@
 class IIMSActivityControl
 {
 public:
-    virtual IMS_BOOL Control(IN IMS_UINT32 nCmdType,
-            IN IMS_UINTP nInParam, OUT IMS_UINTP *pnOutParam) = 0;
+    virtual IMS_BOOL Control(
+            IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam) = 0;
 };
 
-#endif // _IIMS_ACTIVITYCONTROL_H_
+#endif  // _IIMS_ACTIVITYCONTROL_H_

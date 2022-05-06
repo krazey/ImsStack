@@ -22,16 +22,13 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-
-
-PRIVATE GLOBAL
-IMS_UINT32 OsTimer::s_nInternalTimerId = 1;
+PRIVATE GLOBAL IMS_UINT32 OsTimer::s_nInternalTimerId = 1;
 
 PUBLIC
-OsTimer::OsTimer()
-    : m_nState(STATE_INACTIVE)
-    , m_nTimerId(0)
-    , m_nInternalTimerId(0)
+OsTimer::OsTimer() :
+        m_nState(STATE_INACTIVE),
+        m_nTimerId(0),
+        m_nInternalTimerId(0)
 {
     m_piOwner = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -43,8 +40,7 @@ OsTimer::OsTimer()
     }
 }
 
-PUBLIC VIRTUAL
-OsTimer::~OsTimer()
+PUBLIC VIRTUAL OsTimer::~OsTimer()
 {
     if (m_nState == STATE_ACTIVE)
     {
@@ -52,8 +48,7 @@ OsTimer::~OsTimer()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsTimer::Equals(IN const ITimer* piTimer) const
+PUBLIC VIRTUAL IMS_BOOL OsTimer::Equals(IN const ITimer* piTimer) const
 {
     const OsTimer* pTimer = DYNAMIC_CAST(const OsTimer*, piTimer);
 
@@ -70,13 +65,12 @@ IMS_BOOL OsTimer::Equals(IN const ITimer* piTimer) const
  *
  * If successful; otherwise, an error(0) is returned.
  */
-PUBLIC VIRTUAL
-IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener)
+PUBLIC VIRTUAL IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener)
 {
     if (m_nState == STATE_ACTIVE)
     {
-        IMS_TRACE_D("Timer (id=%" PFLS_u ",%d) is already active",
-                m_nTimerId, m_nInternalTimerId, 0);
+        IMS_TRACE_D(
+                "Timer (id=%" PFLS_u ",%d) is already active", m_nTimerId, m_nInternalTimerId, 0);
         return 0;
     }
 
@@ -86,14 +80,13 @@ IMS_UINTP OsTimer::SetTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListen
 
     OsTimerService::GetTimerService()->SetTimer(nDuration, this);
 
-    IMS_TRACE_I("Timer :: Set (id=%" PFLS_u ",%d; duration=%d)",
-            m_nTimerId, m_nInternalTimerId, nDuration);
+    IMS_TRACE_I("Timer :: Set (id=%" PFLS_u ",%d; duration=%d)", m_nTimerId, m_nInternalTimerId,
+            nDuration);
 
     return m_nTimerId;
 }
 
-PUBLIC VIRTUAL
-void OsTimer::KillTimer()
+PUBLIC VIRTUAL void OsTimer::KillTimer()
 {
     m_piListener = IMS_NULL;
 
@@ -105,13 +98,12 @@ void OsTimer::KillTimer()
     }
 }
 
-PUBLIC VIRTUAL
-void OsTimer::Destroy()
+PUBLIC VIRTUAL void OsTimer::Destroy()
 {
     if (m_piOwner != IMS_NULL)
     {
-        m_piOwner->PostMessageI(IMS_MSG_TIMER,
-                reinterpret_cast<IMS_UINTP>(this), MSG_PARAM_DESTROY);
+        m_piOwner->PostMessageI(
+                IMS_MSG_TIMER, reinterpret_cast<IMS_UINTP>(this), MSG_PARAM_DESTROY);
     }
     else
     {
@@ -119,16 +111,16 @@ void OsTimer::Destroy()
     }
 }
 
-PUBLIC VIRTUAL
-void OsTimer::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+PUBLIC VIRTUAL void OsTimer::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     (void)nWparam;
     (void)nLparam;
 
     if (m_nInternalTimerId != LONG_TO_INT(nLparam))
     {
-        IMS_TRACE_D("Timer :: Timer id(%" PFLS_u ") is matched, but internal timer id(%d)" \
-                " is not matched; ignored", m_nTimerId, m_nInternalTimerId, 0);
+        IMS_TRACE_D("Timer :: Timer id(%" PFLS_u ") is matched, but internal timer id(%d)"
+                    " is not matched; ignored",
+                m_nTimerId, m_nInternalTimerId, 0);
         return;
     }
 

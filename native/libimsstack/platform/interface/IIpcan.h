@@ -19,8 +19,6 @@
 #include "ByteArray.h"
 #include "ImsAccessNetworkInfoType.h"
 
-
-
 class IIpcan
 {
 public:
@@ -59,8 +57,8 @@ public:
      * @param strTimestamp The timestamp(UTC) of last known access network information
      * @param strCellInfoAge The cell-info age as seconds
      */
-    virtual void GetLastAccessInfoForWiFi(OUT AccessNetworkInfo& objAni,
-            OUT AString& strTimestamp, OUT AString& strCellInfoAge) = 0;
+    virtual void GetLastAccessInfoForWiFi(OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp,
+            OUT AString& strCellInfoAge) = 0;
 
     /**
      * @brief Returns the current network type.

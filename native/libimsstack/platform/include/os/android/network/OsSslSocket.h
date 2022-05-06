@@ -22,9 +22,7 @@
 class SSLCertificate;
 class OsSsl;
 
-class OsSslSocket
-    : public OsSocket
-    , public ITimerListener
+class OsSslSocket : public OsSocket, public ITimerListener
 {
 public:
     explicit OsSslSocket(IN SSLCertificate* pCertificate);
@@ -38,8 +36,7 @@ public:
 
 protected:
     // ISocket class
-    SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN ISocketListener* piListener,
+    SOCKET_RESULT Open(IN SOCKET_ENTYPE eType, IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAddrFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
             IN ADDRESS_FAMILY_ENTYPE eAddrFamily = ADDRESS_FAMILY_INET) override;

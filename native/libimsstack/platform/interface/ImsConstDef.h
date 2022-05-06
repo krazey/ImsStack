@@ -19,10 +19,10 @@
 #define IMS_SOLUTION_STORAGE_ROOT_DIR "/data/user_de/0/com.android.imsstack"
 #define IMS_SOLUTION_IMS_CONFIG_DB (IMS_SOLUTION_STORAGE_ROOT_DIR "/databases/gims.db")
 
-#define IMS_SOLUTION_URI_LEN                        128
+#define IMS_SOLUTION_URI_LEN 128
 
 // This definition will be provided regardless of IP version.
 /* 128bit -> 21DA:00D3:0000:2F3B:02AA:00FF:FE28:9C5A = 39byte+1(null)byte */
-#define IMS_SOLUTION_IP_LEN                         39
+#define IMS_SOLUTION_IP_LEN 39
 
 #endif

@@ -18,23 +18,21 @@
 
 #include "ImsSocket.h"
 
-class OsSocketBase
-    : public ImsSocket
+class OsSocketBase : public ImsSocket
 {
 public:
-    inline OsSocketBase()
-        : ImsSocket()
-        , m_eType(TYPE_DGRAM)
-        , m_bServerSocket(IMS_FALSE)
-        , m_bSocketConnected(IMS_FALSE)
-    {}
-    inline virtual ~OsSocketBase()
-    {}
+    inline OsSocketBase() :
+            ImsSocket(),
+            m_eType(TYPE_DGRAM),
+            m_bServerSocket(IMS_FALSE),
+            m_bSocketConnected(IMS_FALSE)
+    {
+    }
+    inline virtual ~OsSocketBase() {}
 
 public:
     // ISocket class
-    inline SOCKET_ENTYPE GetSocketType() const override
-    { return m_eType; }
+    inline SOCKET_ENTYPE GetSocketType() const override { return m_eType; }
 
     virtual void NotifyDataReceived(IN IMS_SINT32 nErrorCode) = 0;
     virtual void NotifySendEnabled(IN IMS_SINT32 nErrorCode) = 0;
@@ -43,23 +41,16 @@ public:
     virtual void NotifyClosed(IN IMS_SINT32 nErrorCode) = 0;
     virtual void NotifyAcceptCompleted(IN IMS_SOCKET hSocket) = 0;
 
-    inline virtual IMS_SINT32 GetLastError() const
-    { return 0; }
-    inline virtual IMS_SINT32 GetSocketState() const
-    { return OsSocketBase::SOCKET_STATE_CLOSED; }
+    inline virtual IMS_SINT32 GetLastError() const { return 0; }
+    inline virtual IMS_SINT32 GetSocketState() const { return OsSocketBase::SOCKET_STATE_CLOSED; }
 
-    inline IMS_BOOL IsServerSocket() const
-    { return m_bServerSocket; }
-    inline IMS_BOOL IsSocketConnected() const
-    { return m_bSocketConnected; }
+    inline IMS_BOOL IsServerSocket() const { return m_bServerSocket; }
+    inline IMS_BOOL IsSocketConnected() const { return m_bSocketConnected; }
 
 protected:
-    inline void SetServerSocket(IN IMS_BOOL bServerSocket)
-    { m_bServerSocket = bServerSocket; }
-    inline void SetSocketType(IN SOCKET_ENTYPE eType)
-    { m_eType = eType; }
-    inline void SetSocketConnected(IN IMS_BOOL bConnected)
-    { m_bSocketConnected = bConnected; }
+    inline void SetServerSocket(IN IMS_BOOL bServerSocket) { m_bServerSocket = bServerSocket; }
+    inline void SetSocketType(IN SOCKET_ENTYPE eType) { m_eType = eType; }
+    inline void SetSocketConnected(IN IMS_BOOL bConnected) { m_bSocketConnected = bConnected; }
 
 public:
     // Socket state when the data received; only for TCP socket

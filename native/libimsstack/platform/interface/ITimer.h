@@ -50,8 +50,6 @@ public:
     virtual void KillTimer() = 0;
 };
 
-
-
 class ITimerListener
 {
 public:

@@ -24,9 +24,9 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsTrm::OsTrm()
-    : m_piLock(IMS_NULL)
-    , m_objTrms(IMSMap<IMS_UINT32, TrmInfo*>())
+OsTrm::OsTrm() :
+        m_piLock(IMS_NULL),
+        m_objTrms(IMSMap<IMS_UINT32, TrmInfo*>())
 {
     IMS_TRACE_I("OsTrm", 0, 0, 0);
 
@@ -37,8 +37,7 @@ OsTrm::OsTrm()
 
     IMS_TRACE_D("TRM supported", 0, 0, 0);
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_TRM, this, IMS_SLOT_0);
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_TRM, this, IMS_SLOT_0);
 
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
@@ -48,8 +47,7 @@ OsTrm::OsTrm()
     }
 }
 
-PUBLIC VIRTUAL
-OsTrm::~OsTrm()
+PUBLIC VIRTUAL OsTrm::~OsTrm()
 {
     for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); ++i)
     {
@@ -65,12 +63,10 @@ OsTrm::~OsTrm()
 
     MutexService::GetMutexService()->DestroyMutex(m_piLock);
 
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_TRM, this, IMS_SLOT_0);
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_TRM, this, IMS_SLOT_0);
 }
 
-PUBLIC VIRTUAL
-void OsTrm::Enable(IN IMS_UINT32 nSlotId)
+PUBLIC VIRTUAL void OsTrm::Enable(IN IMS_UINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);
 
@@ -85,8 +81,7 @@ void OsTrm::Enable(IN IMS_UINT32 nSlotId)
     }
 }
 
-PUBLIC VIRTUAL
-void OsTrm::Disable(IN IMS_UINT32 nSlotId)
+PUBLIC VIRTUAL void OsTrm::Disable(IN IMS_UINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);
 
@@ -102,8 +97,7 @@ void OsTrm::Disable(IN IMS_UINT32 nSlotId)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsTrm::IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
+PUBLIC VIRTUAL IMS_BOOL OsTrm::IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 {
     if (!IsEnabled(nSlotId))
     {
@@ -142,18 +136,16 @@ IMS_BOOL OsTrm::IsServiceAvailable(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsTrm::IsTrmSupported()
+PUBLIC VIRTUAL IMS_BOOL OsTrm::IsTrmSupported()
 {
     return SystemConfig::IsMultiLteEnabled();
 }
 
-PUBLIC VIRTUAL
-void OsTrm::SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
-        IN IMS_UINT32 nMode)
+PUBLIC VIRTUAL void OsTrm::SetEmergencyService(
+        IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode)
 {
     IMS_TRACE_I("SetEmergencyService :: send TRM [%d][%s][mode=%d]", nSlotId,
-        ServiceToString(nType), nMode);
+            ServiceToString(nType), nMode);
 
     LockGuard objLock(m_piLock);
 
@@ -178,8 +170,7 @@ void OsTrm::SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
     }
 }
 
-PUBLIC VIRTUAL
-void OsTrm::SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
+PUBLIC VIRTUAL void OsTrm::SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
 {
     LockGuard objLock(m_piLock);
 
@@ -206,24 +197,23 @@ void OsTrm::SetIpcan(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nCategory)
     {
         SetIpcan_Wlan(nSlotId);
     }
-    else // IIpcan::CATEGORY_MOBILE
+    else  // IIpcan::CATEGORY_MOBILE
     {
         SetIpcan_Mobile(pTrmInfo, nSlotId);
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsTrm::SetService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode)
+PUBLIC VIRTUAL IMS_BOOL OsTrm::SetService(
+        IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode)
 {
-    IMS_TRACE_I("SetService :: send TRM [%d][%s][mode=%d]", nSlotId, ServiceToString(nType)
-        , nMode);
+    IMS_TRACE_I("SetService :: send TRM [%d][%s][mode=%d]", nSlotId, ServiceToString(nType), nMode);
 
     if (nMode == MODE_START)
     {
-        if(!IsServiceAvailable(nSlotId, nType))
+        if (!IsServiceAvailable(nSlotId, nType))
         {
-            IMS_TRACE_I("SetService :: not ready [%d][%s][START]", nSlotId,
-                ServiceToString(nType), 0);
+            IMS_TRACE_I(
+                    "SetService :: not ready [%d][%s][START]", nSlotId, ServiceToString(nType), 0);
             return IMS_FALSE;
         }
     }
@@ -258,22 +248,20 @@ IMS_BOOL OsTrm::SetService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UI
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsTrm::TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
+PUBLIC VIRTUAL void OsTrm::TrmTimer_TimerExpired(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 {
     IMS_TRACE_D("TrmTimer_TimerExpired :: [%d] type=%s", nSlotId, ServiceToString(nType), 0);
 
     SetService(nSlotId, nType, MODE_END);
 }
 
-PUBLIC VIRTUAL
-void OsTrm::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsTrm::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     (void)nLParam;
 
-    IMS_TRACE_D("System_NotifyEvent :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d,
-            nEvent, nWParam, nLParam);
+    IMS_TRACE_D("System_NotifyEvent :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam,
+            nLParam);
 
     switch (nEvent)
     {
@@ -351,7 +339,8 @@ IMS_UINT32 OsTrm::GetUpdatedTopPrioritySlot()
             continue;
         }
 
-        if (pTopSlotTrmInfo->m_nUpdatedService < pCurrentTrmInfo->m_nUpdatedService) {
+        if (pTopSlotTrmInfo->m_nUpdatedService < pCurrentTrmInfo->m_nUpdatedService)
+        {
             nTopSlot = i;
         }
     }
@@ -412,7 +401,8 @@ IMS_BOOL OsTrm::IsEnabled(IN IMS_UINT32 nSlotId)
 PRIVATE
 IMS_BOOL OsTrm::IsEmergency()
 {
-    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++) {
+    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++)
+    {
         TrmInfo* pTrmInfo = m_objTrms.GetValue(i);
         if (pTrmInfo == IMS_NULL)
         {
@@ -447,7 +437,8 @@ IMS_BOOL OsTrm::IsEmergencyInOtherSlot(IN IMS_UINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++) {
+    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++)
+    {
         if (i == nSlotId)
         {
             continue;
@@ -459,7 +450,8 @@ IMS_BOOL OsTrm::IsEmergencyInOtherSlot(IN IMS_UINT32 nSlotId)
             continue;
         }
 
-        if (pTrmInfo->m_nUpdatedEmergencyService != SERVICE_NONE) {
+        if (pTrmInfo->m_nUpdatedEmergencyService != SERVICE_NONE)
+        {
             return IMS_TRUE;
         }
     }
@@ -472,14 +464,16 @@ IMS_BOOL OsTrm::IsHighPriortyExistInOtherSlot(IN IMS_UINT32 nSlotId, IN IMS_UINT
 {
     LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++) {
+    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++)
+    {
         TrmInfo* pTrmInfo = m_objTrms.GetValue(i);
         if (pTrmInfo == IMS_NULL || i == nSlotId)
         {
             continue;
         }
 
-        if (pTrmInfo->m_nUpdatedService >= nType) {
+        if (pTrmInfo->m_nUpdatedService >= nType)
+        {
             return IMS_TRUE;
         }
     }
@@ -492,14 +486,16 @@ IMS_BOOL OsTrm::IsIdle()
 {
     LockGuard objLock(m_piLock);
 
-    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++) {
+    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++)
+    {
         TrmInfo* pTrmInfo = m_objTrms.GetValue(i);
         if (pTrmInfo == IMS_NULL)
         {
             continue;
         }
 
-        if (pTrmInfo->m_nUpdatedService != SERVICE_NONE) {
+        if (pTrmInfo->m_nUpdatedService != SERVICE_NONE)
+        {
             return IMS_FALSE;
         }
     }
@@ -601,7 +597,8 @@ IMS_BOOL OsTrm::ResetService(IN IMS_UINT32 nSlotId)
         return IMS_FALSE;
     }
 
-    if (pTrmInfo->m_nUpdatedService > SERVICE_NONE) {
+    if (pTrmInfo->m_nUpdatedService > SERVICE_NONE)
+    {
         pTrmInfo->SetUpdatedService(SERVICE_NONE);
         SetTrmInfo(pTrmInfo, SERVICE_NONE, nSlotId);
         return IMS_TRUE;
@@ -631,14 +628,14 @@ void OsTrm::ResetServiceInOtherSlot(IN IMS_UINT32 nSlotId)
 }
 
 PRIVATE
-void OsTrm::SetEmergencyService_Start(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
-    IN IMS_UINT32 nSlotId)
+void OsTrm::SetEmergencyService_Start(
+        IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType, IN IMS_UINT32 nSlotId)
 {
     pTrmInfo->StartEmergency(nType);
     if (pTrmInfo->m_nUpdatedEmergencyService < nType)
     {
         IMS_TRACE_I("SetEmergencyService_START :: send TRM [%d][%s]", nSlotId,
-            ServiceToString(nType), 0);
+                ServiceToString(nType), 0);
         pTrmInfo->SetUpdatedEmergencyService(nType);
 
         ResetServiceInOtherSlot(nSlotId);
@@ -649,8 +646,8 @@ void OsTrm::SetEmergencyService_Start(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
 }
 
 PRIVATE
-void OsTrm::SetEmergencyService_Stop(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
-    IN IMS_UINT32 nSlotId)
+void OsTrm::SetEmergencyService_Stop(
+        IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType, IN IMS_UINT32 nSlotId)
 {
     pTrmInfo->StopEmergency(nType);
     if (pTrmInfo->m_nUpdatedEmergencyService == SERVICE_NONE)
@@ -661,7 +658,7 @@ void OsTrm::SetEmergencyService_Stop(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
     if (pTrmInfo->m_nUpdatedEmergencyService < nType)
     {
         IMS_TRACE_D("SetEmergencyService_STOP :: invalid call type [%d][%s]", nSlotId,
-            ServiceToString(nType), 0);
+                ServiceToString(nType), 0);
         return;
     }
 
@@ -684,8 +681,8 @@ void OsTrm::SetEmergencyService_Stop(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
                     if (pTrmInfo->IsWlan())
                     {
                         SetTrmInfo(pTrmInfo, SERVICE_NONE, nSlotId);
-                        IMS_TRACE_I("SetEmergencyService_STOP :: WLAN reset [%d][%s]",
-                            nSlotId, ServiceToString(nUpdateService), 0);
+                        IMS_TRACE_I("SetEmergencyService_STOP :: WLAN reset [%d][%s]", nSlotId,
+                                ServiceToString(nUpdateService), 0);
                         PostMsgRegisteredThread();
                         return;
                     }
@@ -744,11 +741,10 @@ void OsTrm::SetEmergencyService_Stop(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType,
         }
 
         IMS_TRACE_I("SetEmergencyService_STOP :: send TRM [%d][%s]", nSlotId,
-            ServiceToString(nUpdateService), 0);
+                ServiceToString(nUpdateService), 0);
 
         PostMsgRegisteredThread();
     }
-
 }
 
 PRIVATE
@@ -830,14 +826,14 @@ void OsTrm::SetService_Stop(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType, IN IMS_UI
     if (pTrmInfo->m_nUpdatedService == SERVICE_NONE)
     {
         IMS_TRACE_D("SetService_STOP :: no service is updated [%d][%s]", nSlotId,
-            ServiceToString(nType), 0);
+                ServiceToString(nType), 0);
         return;
     }
 
     if (pTrmInfo->m_nUpdatedService < nType)
     {
-        IMS_TRACE_D("SetService_STOP , invalid call type [%d][%s]", nSlotId,
-            ServiceToString(nType), 0);
+        IMS_TRACE_D(
+                "SetService_STOP , invalid call type [%d][%s]", nSlotId, ServiceToString(nType), 0);
         return;
     }
 
@@ -891,19 +887,19 @@ void OsTrm::SetTrmInfo(IN TrmInfo* pTrmInfo, IN IMS_UINT32 nType, IN IMS_UINT32 
     }
 
     IMS_TRACE_D("SetTRM :: send TRM [%d][trm type = %d][%s]", nSlotId, GetTrmType(nType),
-        ServiceToString(nType));
+            ServiceToString(nType));
 
     System::GetInstance()->SetTrm(GetTrmType(nType), nSlotId);
 }
 
 PRIVATE
-IMS_BOOL OsTrm::UpdateHighPrioritySlotAndResetOtherSlot(IN IMS_UINT32 nSlotId,
-    IN IMS_UINT32 nType)
+IMS_BOOL OsTrm::UpdateHighPrioritySlotAndResetOtherSlot(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType)
 {
     IMS_UINT32 nTopSlot = 0;
     TrmInfo* pTopSlotTrmInfo = IMS_NULL;
 
-    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++) {
+    for (IMS_UINT32 i = 0; i < m_objTrms.GetSize(); i++)
+    {
         TrmInfo* pTrmInfo = m_objTrms.GetValue(i);
         if (pTrmInfo == IMS_NULL || i == nSlotId)
         {
@@ -931,11 +927,11 @@ IMS_BOOL OsTrm::UpdateHighPrioritySlotAndResetOtherSlot(IN IMS_UINT32 nSlotId,
 }
 
 PRIVATE
-void OsTrm::UpdateServiceStateChanged(IN IMS_UINT32 nServiceType, IN IMS_UINT32 nMode,
-        IN IMS_UINT32 nSlotId)
+void OsTrm::UpdateServiceStateChanged(
+        IN IMS_UINT32 nServiceType, IN IMS_UINT32 nMode, IN IMS_UINT32 nSlotId)
 {
     IMS_TRACE_D("UpdateServiceStateChanged :: type=%s, mode=%d, slot=%d",
-        ServiceToString(nServiceType), nMode, nSlotId);
+            ServiceToString(nServiceType), nMode, nSlotId);
 
     TrmStateParam* pParam = new TrmStateParam();
     pParam->nSlotId = nSlotId;
@@ -944,8 +940,7 @@ void OsTrm::UpdateServiceStateChanged(IN IMS_UINT32 nServiceType, IN IMS_UINT32 
     PostMsgEnablerThread(pParam);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* OsTrm::ServiceToString(IN IMS_SINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* OsTrm::ServiceToString(IN IMS_SINT32 nType)
 {
     switch (nType)
     {

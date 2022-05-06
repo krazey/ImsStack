@@ -46,10 +46,10 @@ public:
     void NotifyData(IN const android::Parcel& in, OUT android::Parcel& out);
 
     // Add & remove the listener to receive the system events
-    void AddListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-            IN IMS_SINT32 nSlotId);
-    void RemoveListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-            IN IMS_SINT32 nSlotId);
+    void AddListener(
+            IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
+    void RemoveListener(
+            IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
 
     ////
     // Power-related information
@@ -69,29 +69,25 @@ public:
     IMS_SINT32 GetOperator(OUT AString& strOperator, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetNetworkCountry(OUT AString& strCountry, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 GetEmergencyNumberListFromSim(
-            OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetEmergencyPriorityFromModem(IN IMS_SINT32 nSlotId);
     IMS_BOOL IsUiccGbaSupported(IN IMS_SINT32 nSlotId);
 
     // For UICC (ISIM)
     AString GetIsimState(IN IMS_SINT32 nSlotId);
-    IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId,
-            IN IMS_SINT32 nSlotId);
-    IMS_SINT32 ReadIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex,
-            IN IMS_SINT32 nSlotId);
-    IMS_RESULT RequestIsimAuthentication(IN const AString& strNonce, IN IMS_SINTP nOwner,
-            IN IMS_SINT32 nSlotId);
+    IMS_SINT32 ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 ReadIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId);
+    IMS_RESULT RequestIsimAuthentication(
+            IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId);
     // For UICC (USIM)
-    IMS_RESULT RequestUsimAuthentication(IN const AString& strNonce, IN IMS_SINTP nOwner,
-            IN IMS_SINT32 nSlotId);
+    IMS_RESULT RequestUsimAuthentication(
+            IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId);
 
     ////
     // Call-related information
     ////
     IMS_SINT32 GetCallState(IN IMS_SINT32 nSlotId);
-    IMS_SINT32 IsEmergencyNumber(IN const AString& strNumber,
-            IN IMS_SINT32 nSlotId);
+    IMS_SINT32 IsEmergencyNumber(IN const AString& strNumber, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetTtyMode(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetRttMode(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetCallStateInOtherSlot(IN IMS_SINT32 nSlotId);
@@ -109,28 +105,26 @@ public:
     IMS_SINT32 GetDataRoamingType(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetServiceState(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetVoiceServiceState(IN IMS_SINT32 nSlotId);
-    IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
-            OUT IMS_SINT32& nNetworkType, OUT AStringArray& objAccessNetInfo,
-            IN IMS_SINT32 nSlotId);
+    IMS_SINT32 GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType, OUT IMS_SINT32& nNetworkType,
+            OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId);
     AStringArray GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 ActivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory,
-            IN IMS_SINT32 nSlotId);
-    IMS_SINT32 DeactivateDataConnection(IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory,
-            IN IMS_SINT32 nSlotId);
+    IMS_SINT32 ActivateDataConnection(
+            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 DeactivateDataConnection(
+            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId);
     AString GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 GetDataConnectionState(IN IMS_SINT32 nApnType,
-            IN IMS_SINT32 nSlotId);
-    AStringArray GetHostByName(IN const AString& strHost,
-            IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 GetDataConnectionState(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
+    AStringArray GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpVersion,
+            IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetIfaceId(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     AString GetIfaceName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetIpcanCategory(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId);
-    AString GetLocalAddress(IN IMS_SINT32 nApnType,
-            IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
-    AStringArray GetPcscfAddresses(IN IMS_SINT32 nApnType,
-            IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
-    IMS_BOOL SendPingToHostAddress(IN IMS_SINT32 nApnType,
-            IN const AString& strHostAddress, IN IMS_SINT32 nSlotId);
+    AString GetLocalAddress(
+            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
+    AStringArray GetPcscfAddresses(
+            IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId);
+    IMS_BOOL SendPingToHostAddress(
+            IN IMS_SINT32 nApnType, IN const AString& strHostAddress, IN IMS_SINT32 nSlotId);
     IMS_BOOL IsImsEmergencyCallSupported(IN IMS_SINT32 nSlotId);
     IMS_BOOL IsImsVoiceCallSupported(IN IMS_SINT32 nSlotId);
     IMS_SINT32 GetLteRsrpStrength(IN IMS_SINT32 nSlotId);
@@ -162,10 +156,10 @@ public:
             IN IMS_UINT32 nValueType, IN IMS_SINT32 nSlotId, OUT AString& strValue);
     IMS_SINT32 SetPreference(IN const AString& strFileName, IN const AString& strKey,
             IN IMS_UINT32 nValueType, IN const AString& strValue, IN IMS_SINT32 nSlotId);
-    AString GetPrivateProperty(IN IMS_BOOL bPersistent,
-            IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 SetPrivateProperty(IN IMS_BOOL bPersistent,
-            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId);
+    AString GetPrivateProperty(
+            IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 SetPrivateProperty(IN IMS_BOOL bPersistent, IN const AString& strKey,
+            IN const AString& strValue, IN IMS_SINT32 nSlotId);
     IMS_BOOL GetCarrierConfig(IN IMS_SINT32 nSlotId, OUT android::Parcel& objConfig);
 
     ////
@@ -193,11 +187,10 @@ public:
     ////
     // Location information
     ////
-    IMS_BOOL StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec,
-            IN IMS_SINT32 nSlotId);
+    IMS_BOOL StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId);
     void StopLocationInfo(IN IMS_SINT32 nSlotId);
-    IMS_SINT32 GetLocationInformation(OUT AStringArray& objLocationInfo,
-            IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId);
+    IMS_SINT32 GetLocationInformation(
+            OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId);
     IMS_BOOL MakeInstantLocationInfo(IN IMS_SINT32 nSlotId);
 
     ////
@@ -210,8 +203,8 @@ public:
     ////
     IMS_SINT32 NotifyCallState(IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode,
             IN IMS_UINT32 nDirection, IN IMS_SINT32 nSlotId);
-    IMS_SINT32 RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType,
-            IN IMS_SINT32 nSlotId);
+    IMS_SINT32 RequestCallPreference(
+            IN IMS_UINT32 nRat, IN IMS_UINT32 nType, IN IMS_SINT32 nSlotId);
     IMS_SINT32 SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_SINT32 nSlotId);
     IMS_SINT32 SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode, IN IMS_SINT32 nSlotId);
     IMS_SINT32 SetImsSignaling(IN IMS_UINT32 nType, IN IMS_SINT32 nSlotId);
@@ -233,38 +226,35 @@ private:
             IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     IMS_SINT32 GetInt2(IN IMS_SINT32 nOperation, IN IMS_SINT32 nParam,
             IN IMS_SINT32 nDefaultValue = 0, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_SINT32 GetString(IN IMS_SINT32 nOperation, OUT AString& strValue,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    IMS_SINT32 RequestSimAuthentication(IN IMS_SINT32 nOperation,
-            IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IMS_SINT32 GetString(
+            IN IMS_SINT32 nOperation, OUT AString& strValue, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IMS_SINT32 RequestSimAuthentication(IN IMS_SINT32 nOperation, IN const AString& strNonce,
+            IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
-    void AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
-            IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-            IN IMS_SINT32 nSlotId);
-    void RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
-            IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-            IN IMS_SINT32 nSlotId);
+    void AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
+            IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
+    void RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
+            IN ISystemListener* piListener, IN IMS_SINT32 nSlotId);
 
-    void NotifyNetworkCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyWifiCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyCallCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyPowerCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyAlarmCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyConfigCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyEventCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifySimCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN IMS_UINT32 nCategory, IN const android::Parcel& in);
-    void NotifyTrmCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
-    void NotifyVoNrCategory(IN IMS_SINT32 nSlotId,
-            IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyNetworkCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyWifiCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyCallCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyPowerCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyAlarmCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyConfigCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyEventCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN IMS_UINT32 nCategory,
+            IN const android::Parcel& in);
+    void NotifyTrmCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
+    void NotifyVoNrCategory(
+            IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in);
 
 private:
     SystemPrivate* m_pSystemP;

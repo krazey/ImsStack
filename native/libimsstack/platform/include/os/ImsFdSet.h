@@ -31,8 +31,7 @@ public:
 public:
     virtual IMS_SINT32 ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent);
     virtual void CopyFrom(IN const ImsFdSet* pFdSet);
-    virtual IMS_SINT32 GetSignaledEvents(IN IMS_SINT32 nFd,
-            IN_OUT IMS_SINT32& nSignaledCount);
+    virtual IMS_SINT32 GetSignaledEvents(IN IMS_SINT32 nFd, IN_OUT IMS_SINT32& nSignaledCount);
     virtual IMS_BOOL IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent);
     virtual IMS_BOOL IsHighestFdRequired() const;
     virtual IMS_SINT32 SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent);
@@ -40,11 +39,17 @@ public:
     virtual IMS_SINT32 WaitForEvents(IN IMS_SINT32 nMilliseconds = NO_TIMEOUT);
 
     inline static IMS_BOOL IsExceptEventSignaled(IN IMS_SINT32 nEvents)
-    { return ((nEvents & EVENT_EXCEPT) != 0); }
+    {
+        return ((nEvents & EVENT_EXCEPT) != 0);
+    }
     inline static IMS_BOOL IsReadEventSignaled(IN IMS_SINT32 nEvents)
-    { return ((nEvents & EVENT_READ) != 0); }
+    {
+        return ((nEvents & EVENT_READ) != 0);
+    }
     inline static IMS_BOOL IsWriteEventSignaled(IN IMS_SINT32 nEvents)
-    { return ((nEvents & EVENT_WRITE) != 0); }
+    {
+        return ((nEvents & EVENT_WRITE) != 0);
+    }
 
 public:
     /// Method for the descriptor management
@@ -54,12 +59,15 @@ public:
         TYPE_POLL = 1
     };
 
-    enum { NO_TIMEOUT = (-1) };
+    enum
+    {
+        NO_TIMEOUT = (-1)
+    };
 
     /// Events
     enum
     {
-        EVENT_READ  = 0x01,
+        EVENT_READ = 0x01,
         EVENT_WRITE = 0x02,
         EVENT_EXCEPT = 0x04,
         EVENT_ALL = 0x0F,

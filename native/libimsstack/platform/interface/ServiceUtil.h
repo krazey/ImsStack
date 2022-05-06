@@ -44,27 +44,25 @@ public:
     static UtilService* GetUtilService();
 
     // Return value: strOutput (user mode & config-debug-off), strInput (non-user mode)
-    static const AString& GetLogString(IN const AString& strInput,
-            IN_OUT AString& strOutput, IN IMS_SINT32 nOutSize,
-            IN IMS_CHAR cDelimiter = 0 /* no delimiter */);
+    static const AString& GetLogString(IN const AString& strInput, IN_OUT AString& strOutput,
+            IN IMS_SINT32 nOutSize, IN IMS_CHAR cDelimiter = 0 /* no delimiter */);
 };
 
 #define IMS_UTIL_SYS_PROP_IS_SERVER_INFO_HIDDEN_IN_LOG() \
-        UtilService::GetUtilService()->GetSystemProperty()->IsServerInfoHiddenInLog()
+    UtilService::GetUtilService()->GetSystemProperty()->IsServerInfoHiddenInLog()
 
 #define IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() \
-        UtilService::GetUtilService()->GetSystemProperty()->IsDebugMode()
+    UtilService::GetUtilService()->GetSystemProperty()->IsDebugMode()
 
 #define IMS_UTIL_SYS_PROP_IS_USER_MODE() \
-        UtilService::GetUtilService()->GetSystemProperty()->IsUserMode()
+    UtilService::GetUtilService()->GetSystemProperty()->IsUserMode()
 
-#define IMS_UTIL_SYS_PROP_SET_DEBUG_ON(bDebugOn) \
-        UtilService::GetUtilService()->SetDebugOn(bDebugOn)
+#define IMS_UTIL_SYS_PROP_SET_DEBUG_ON(bDebugOn) UtilService::GetUtilService()->SetDebugOn(bDebugOn)
 
 #define IMS_UTIL_ZLIB_Compress(DATA, COMP_DATA) \
-        UtilService::GetUtilService()->GetZLib()->Compress(DATA, COMP_DATA)
+    UtilService::GetUtilService()->GetZLib()->Compress(DATA, COMP_DATA)
 
 #define IMS_UTIL_ZLIB_Uncompress(COMP_DATA, DATA) \
-        UtilService::GetUtilService()->GetZLib()->Uncompress(COMP_DATA, DATA)
+    UtilService::GetUtilService()->GetZLib()->Uncompress(COMP_DATA, DATA)
 
 #endif

@@ -30,7 +30,7 @@
 
 // C++17
 #if (__cplusplus >= 201703L)
-#define __IMS_FALLTHROUGH__    [[fallthrough]];
+#define __IMS_FALLTHROUGH__ [[fallthrough]];
 #else
 #define __IMS_FALLTHROUGH__
 #endif
@@ -44,27 +44,27 @@
 #endif
 
 #ifndef IMS_NULL
-#define IMS_NULL                (0)
+#define IMS_NULL (0)
 #endif
 
 #ifndef IMS_TRUE
-#define IMS_TRUE                ((1) == (1))
+#define IMS_TRUE ((1) == (1))
 #endif
 
 #ifndef IMS_FALSE
-#define IMS_FALSE               ((1) == (0))
+#define IMS_FALSE ((1) == (0))
 #endif
 
 #ifndef IMS_SUCCESS
-#define IMS_SUCCESS             (0)
+#define IMS_SUCCESS (0)
 #endif
 
 #ifndef IMS_FAILURE
-#define IMS_FAILURE             (-1)
+#define IMS_FAILURE (-1)
 #endif
 
 #ifndef null
-#define null                    (0)
+#define null (0)
 #endif
 
 #ifndef GLOBAL
@@ -72,7 +72,7 @@
 #endif
 
 #ifndef LOCAL
-#define LOCAL                   static
+#define LOCAL static
 #endif
 
 #ifndef PROTECTED
@@ -112,194 +112,192 @@
 
 /* Constant argument in function declaration */
 #ifndef CONST
-#define CONST                   const
+#define CONST const
 #endif
 
 #ifndef IMS_UINT8
-typedef unsigned char           IMS_UINT8;
+typedef unsigned char IMS_UINT8;
 #endif
 
 #ifndef IMS_UINT16
-typedef unsigned short          IMS_UINT16;
+typedef unsigned short IMS_UINT16;
 #endif
 
 #ifndef IMS_UINT32
-typedef unsigned int            IMS_UINT32;
+typedef unsigned int IMS_UINT32;
 #endif
 
 #ifndef IMS_ULONG
-typedef unsigned long           IMS_ULONG;
+typedef unsigned long IMS_ULONG;
 #endif
 
 #ifndef IMS_SINT8
-typedef signed char             IMS_SINT8;
+typedef signed char IMS_SINT8;
 #endif
 
 #ifndef IMS_SINT16
-typedef signed short            IMS_SINT16;
+typedef signed short IMS_SINT16;
 #endif
 
 #ifndef IMS_SINT32
-typedef signed int              IMS_SINT32;
+typedef signed int IMS_SINT32;
 #endif
 
 #ifndef IMS_SLONG
-typedef signed long             IMS_SLONG;
+typedef signed long IMS_SLONG;
 #endif
 
 #ifndef IMS_PVOID
-typedef void*                   IMS_PVOID;
+typedef void* IMS_PVOID;
 #endif
 
 #ifndef IMS_BOOL
 #ifdef __cplusplus
-typedef bool                    IMS_BOOL;
+typedef bool IMS_BOOL;
 #else
-typedef int                     IMS_BOOL;
-#endif // __cplusplus
+typedef int IMS_BOOL;
+#endif  // __cplusplus
 #endif
 
 #ifndef IMS_CHAR
-typedef char                    IMS_CHAR;
+typedef char IMS_CHAR;
 #endif
 
 #ifndef IMS_UCHAR
-typedef unsigned char           IMS_UCHAR;
+typedef unsigned char IMS_UCHAR;
 #endif
 
 #ifndef IMS_WCHAR
-typedef unsigned short          IMS_WCHAR;
+typedef unsigned short IMS_WCHAR;
 #endif
 
 #ifndef IMS_BYTE
-typedef unsigned char           IMS_BYTE;
+typedef unsigned char IMS_BYTE;
 #endif
 
 #ifndef IMS_SINT64
-typedef signed long             IMS_SINT64;
+typedef signed long IMS_SINT64;
 #endif
 
 #ifndef IMS_UINT64
-typedef unsigned long           IMS_UINT64;
+typedef unsigned long IMS_UINT64;
 #endif
 
 #ifndef IMS_FLOAT
-typedef float                   IMS_FLOAT;
+typedef float IMS_FLOAT;
 #endif
 
 #ifndef IMS_DOUBLE
-typedef double                  IMS_DOUBLE;
+typedef double IMS_DOUBLE;
 #endif
 
 #ifndef IMS_RESULT
-typedef IMS_SINT32              IMS_RESULT;
+typedef IMS_SINT32 IMS_RESULT;
 #endif
 
 // START :: definitions for 64-bit platform
 #ifdef __IMS_LP64__
 
 #ifndef IMS_SIZE_T
-typedef unsigned long           IMS_SIZE_T;
+typedef unsigned long IMS_SIZE_T;
 #endif
 
 #ifndef IMS_SINTP
-typedef signed long             IMS_SINTP;
+typedef signed long IMS_SINTP;
 #endif
 
 #ifndef IMS_UINTP
-typedef unsigned long           IMS_UINTP;
+typedef unsigned long IMS_UINTP;
 #endif
 
-#define LONG_TO_INT(l)          ((l) & 0xFFFFFFFF)
+#define LONG_TO_INT(l) ((l)&0xFFFFFFFF)
 
-#define INT64_TO_SINTP(i64)     (i64)
-#define INT64_TO_UINTP(i64)     (static_cast<IMS_UINTP>(i64))
+#define INT64_TO_SINTP(i64) (i64)
+#define INT64_TO_UINTP(i64) (static_cast<IMS_UINTP>(i64))
 
 // Printf Format : Length-Specifier
-#define PFLS_d                  "ld"
-#define PFLS_u                  "lu"
-#define PFLS_o                  "lo"
-#define PFLS_x                  "lx"
-#define PFLS_X                  "lX"
+#define PFLS_d "ld"
+#define PFLS_u "lu"
+#define PFLS_o "lo"
+#define PFLS_x "lx"
+#define PFLS_X "lX"
 
-#else // __IMS_LP64__
+#else  // __IMS_LP64__
 
 #ifndef IMS_SIZE_T
-typedef unsigned int            IMS_SIZE_T;
+typedef unsigned int IMS_SIZE_T;
 #endif
 
 #ifndef IMS_SINTP
-typedef signed int              IMS_SINTP;
+typedef signed int IMS_SINTP;
 #endif
 
 #ifndef IMS_UINTP
-typedef unsigned int            IMS_UINTP;
+typedef unsigned int IMS_UINTP;
 #endif
 
-#define LONG_TO_INT(l)          (l)
+#define LONG_TO_INT(l) (l)
 
-#define INT64_TO_SINTP(i64)     ((i64) & 0xFFFFFFFF)
-#define INT64_TO_UINTP(i64)     (static_cast<IMS_UINTP>((i64) & 0xFFFFFFFF))
+#define INT64_TO_SINTP(i64) ((i64)&0xFFFFFFFF)
+#define INT64_TO_UINTP(i64) (static_cast<IMS_UINTP>((i64)&0xFFFFFFFF))
 
 // Printf Format : Length-Specifier
-#define PFLS_d                  "d"
-#define PFLS_u                  "u"
-#define PFLS_o                  "o"
-#define PFLS_x                  "x"
-#define PFLS_X                  "X"
+#define PFLS_d "d"
+#define PFLS_u "u"
+#define PFLS_o "o"
+#define PFLS_x "x"
+#define PFLS_X "X"
 
-#endif // __IMS_LP64__
+#endif  // __IMS_LP64__
 
-#define LONG_TO_SINT(l)         (static_cast<IMS_SINT32>(LONG_TO_INT(l)))
-#define LONG_TO_UINT(l)         (static_cast<IMS_UINT32>(LONG_TO_INT(l)))
+#define LONG_TO_SINT(l) (static_cast<IMS_SINT32>(LONG_TO_INT(l)))
+#define LONG_TO_UINT(l) (static_cast<IMS_UINT32>(LONG_TO_INT(l)))
 
-#define PTR_TO_UINTP(p)         (reinterpret_cast<IMS_UINTP>(p))
-#define PTR_TO_SINTP(p)         (reinterpret_cast<IMS_SINTP>(p))
+#define PTR_TO_UINTP(p) (reinterpret_cast<IMS_UINTP>(p))
+#define PTR_TO_SINTP(p) (reinterpret_cast<IMS_SINTP>(p))
 // END :: definitions for 64-bit platform
 
 // Slot definition for Multi-IMS architecture
 // Slot 0 is a default if not specified
-#define IMS_SLOT_ANY            (-1)
-#define IMS_SLOT_0              0
-#define IMS_SLOT_1              1
+#define IMS_SLOT_ANY (-1)
+#define IMS_SLOT_0 0
+#define IMS_SLOT_1 1
 // FIXME: for dual SIM only
-#define IMS_SLOT_MAX            2
+#define IMS_SLOT_MAX 2
 
 #ifndef NULL
-#define NULL                    (0)
+#define NULL (0)
 #endif
 
 #ifndef true
-#define true                    (1==1)
+#define true (1 == 1)
 #endif
 
 #ifndef false
-#define false                   (1==0)
+#define false (1 == 0)
 #endif
-
-
 
 #if defined(__arm)
 
 #if defined(__clang__)
-#define        __IMS_FILE__            __FILE__
+#define __IMS_FILE__ __FILE__
 #else
-#define        __IMS_FILE__            __MODULE__
+#define __IMS_FILE__ __MODULE__
 #endif
-#define        __IMS_LINE__            __LINE__
-#define        __IMS_FUNC__            __func__
+#define __IMS_LINE__ __LINE__
+#define __IMS_FUNC__ __func__
 
 #elif defined(__LINUX__)
 
-#define        __IMS_FILE__            __FILE__
-#define        __IMS_LINE__            __LINE__
-#define        __IMS_FUNC__            __func__
+#define __IMS_FILE__ __FILE__
+#define __IMS_LINE__ __LINE__
+#define __IMS_FUNC__ __func__
 
 #else
 
-#define        __IMS_FILE__            "N/A"
-#define        __IMS_LINE__            0
-#define        __IMS_FUNC__            "N/A"
+#define __IMS_FILE__ "N/A"
+#define __IMS_LINE__ 0
+#define __IMS_FUNC__ "N/A"
 
 #endif
 
@@ -310,11 +308,11 @@ typedef unsigned int            IMS_UINTP;
 // IMS ASSERT (ServiceTrace.cpp implements this function)
 extern void TraceService_Assert(IN const IMS_CHAR*, IN const IMS_CHAR*, IN IMS_UINT16);
 
-#define IMS_ASSERT(CONDITION) \
-do \
-{ \
-    if ( !(CONDITION) ) \
-    TraceService_Assert(#CONDITION,__IMS_FUNC__,__IMS_LINE__); \
-} while (0)
+#define IMS_ASSERT(CONDITION)                                            \
+    do                                                                   \
+    {                                                                    \
+        if (!(CONDITION))                                                \
+            TraceService_Assert(#CONDITION, __IMS_FUNC__, __IMS_LINE__); \
+    } while (0)
 
 #endif

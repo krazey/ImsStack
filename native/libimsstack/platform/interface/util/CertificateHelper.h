@@ -33,9 +33,9 @@ private:
     void CreateCertificate();
 
 private:
-    static const IMS_CHAR * const CERTIFICATE;
+    static const IMS_CHAR* const CERTIFICATE;
     AString strCertificateName;
     AString strFingerPrint;
 };
 
-#endif // _CERTIFICATE_HELPER_H_
+#endif  // _CERTIFICATE_HELPER_H_

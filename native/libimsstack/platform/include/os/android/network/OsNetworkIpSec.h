@@ -23,8 +23,7 @@
 
 class OsIpSecPolicy;
 
-class OsNetworkIpSec
-    : public INetworkIpSec
+class OsNetworkIpSec : public INetworkIpSec
 {
 public:
     OsNetworkIpSec();
@@ -43,11 +42,9 @@ public:
     void FlushPolicies() override;
     void DumpPolicy(IN IIpSecPolicy* piPolicy) override;
     IIpSecPolicy* GetPolicy(IN IMS_SINT32 nId) const override;
-    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
-            IN const SocketAddress& objLocal,
+    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN const SocketAddress& objLocal,
             IN const SocketAddress* pRemote = IMS_NULL) override;
-    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
-            IN ISocket* piServerSocket) override;
+    IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket) override;
     void RemoveIpSecTransforms(IN IMS_SINT32 nSocketId) override;
     void SetSdbFlushCapability(IN IMS_BOOL bCapability) override;
 

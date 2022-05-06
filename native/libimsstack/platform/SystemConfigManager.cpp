@@ -24,10 +24,10 @@
 __IMS_TRACE_TAG_BASE__;
 
 PRIVATE
-SystemConfigManager::SystemConfigManager()
-    : m_piLockForConfigs(IMS_NULL)
-    , m_piLockForListeners(IMS_NULL)
-    , m_piProxyThread(IMS_NULL)
+SystemConfigManager::SystemConfigManager() :
+        m_piLockForConfigs(IMS_NULL),
+        m_piLockForListeners(IMS_NULL),
+        m_piProxyThread(IMS_NULL)
 {
     m_piLockForConfigs = MutexService::GetMutexService()->CreateMutex();
     m_piLockForListeners = MutexService::GetMutexService()->CreateMutex();
@@ -173,8 +173,7 @@ void SystemConfigManager::RemoveListener(IN ISystemConfigListener* piListener)
     }
 }
 
-PUBLIC GLOBAL
-SystemConfigManager* SystemConfigManager::GetInstance()
+PUBLIC GLOBAL SystemConfigManager* SystemConfigManager::GetInstance()
 {
     static SystemConfigManager* s_pSystemConfigManager = IMS_NULL;
 
@@ -186,21 +185,20 @@ SystemConfigManager* SystemConfigManager::GetInstance()
     return s_pSystemConfigManager;
 }
 
-PUBLIC GLOBAL
-void SystemConfigManager::CacheSystemFeatures()
+PUBLIC GLOBAL void SystemConfigManager::CacheSystemFeatures()
 {
     PlatformProperty::InitializeOnImsThread();
     SystemConfig::UpdateGlobalConfigsOnFeatureChanged();
 }
 
-PRIVATE VIRTUAL
-void SystemConfigManager::MessageCallback_OnMessage(IN ImsMessage& objMsg)
+PRIVATE VIRTUAL void SystemConfigManager::MessageCallback_OnMessage(IN ImsMessage& objMsg)
 {
     IMS_TRACE_D("MessageCallback_OnMessage :: msg=%d", objMsg.GetName(), 0, 0);
 
     switch (objMsg.GetName())
     {
-        case TMSG_CONFIG_CHANGED: {
+        case TMSG_CONFIG_CHANGED:
+        {
             IMS_SINT32 nEvent = LONG_TO_INT(objMsg.nWparam);
             IMSList<IMS_SINT32>* pSlots = reinterpret_cast<IMSList<IMS_SINT32>*>(objMsg.nLparam);
 
@@ -215,7 +213,8 @@ void SystemConfigManager::MessageCallback_OnMessage(IN ImsMessage& objMsg)
             }
             break;
         }
-        case TMSG_FEATURE_PERMISSIONS_CHANGED: {
+        case TMSG_FEATURE_PERMISSIONS_CHANGED:
+        {
             IMS_TRACE_I("Cache system features", 0, 0, 0);
             CacheSystemFeatures();
             break;
@@ -284,8 +283,8 @@ void SystemConfigManager::NotifyConfigChanged(IN IMS_SINT32 nEvent, IN IMS_SINT3
 }
 
 PRIVATE
-void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
-        IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
+void SystemConfigManager::PostConfigChanged(
+        IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
 {
     IMS_BOOL bNotificationSuccess = IMS_FALSE;
 
@@ -300,8 +299,7 @@ void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
             pSlots->Append(pConfig->nSlotId);
         }
 
-        ImsMessage objMsg(TMSG_CONFIG_CHANGED,
-                nEvent, reinterpret_cast<IMS_UINTP>(pSlots), this);
+        ImsMessage objMsg(TMSG_CONFIG_CHANGED, nEvent, reinterpret_cast<IMS_UINTP>(pSlots), this);
 
         bNotificationSuccess = m_piProxyThread->PostMessageI(objMsg);
 
@@ -323,8 +321,7 @@ void SystemConfigManager::PostConfigChanged(IN IMS_SINT32 nEvent,
 }
 
 PRIVATE
-void SystemConfigManager::StoreConfig(IN IMS_SINT32 nCount,
-        IN const __SystemConfig* pSysConfig)
+void SystemConfigManager::StoreConfig(IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
 {
     LockGuard objLock(m_piLockForConfigs);
 
@@ -376,8 +373,8 @@ void SystemConfigManager::SetProxyThread(IN IThread* piThread)
 }
 
 PRIVATE
-void SystemConfigManager::UpdateSystemConfig(IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount,
-        IN const __SystemConfig* pSysConfig)
+void SystemConfigManager::UpdateSystemConfig(
+        IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
 {
     if (nEvent == SystemConfig::EVENT_FEATURE_PERMISSIONS_CHANGED)
     {

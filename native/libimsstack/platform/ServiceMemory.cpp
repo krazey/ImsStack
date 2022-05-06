@@ -17,14 +17,10 @@
 #include "ServiceMemory.h"
 
 PRIVATE
-MemService::MemService()
-{
-}
+MemService::MemService() {}
 
 PRIVATE
-MemService::~MemService()
-{
-}
+MemService::~MemService() {}
 
 PUBLIC
 IMemHeap* MemService::GetMemHeap()
@@ -36,8 +32,7 @@ IMemHeap* MemService::GetMemHeap()
     return piHeap;
 }
 
-PUBLIC GLOBAL
-MemService* MemService::GetMemService()
+PUBLIC GLOBAL MemService* MemService::GetMemService()
 {
     static MemService* s_pMemService = IMS_NULL;
 
@@ -46,7 +41,7 @@ MemService* MemService::GetMemService()
         IMemHeap* piHeap = PlatformFactory::GetHeap();
         void* pvMemService = piHeap->Alloc(sizeof(MemService));
 
-        s_pMemService = new(pvMemService) MemService();
+        s_pMemService = new (pvMemService) MemService();
     }
 
     return s_pMemService;

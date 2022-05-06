@@ -13,21 +13,18 @@
 #include "ServiceMemory.h"
 #include "IMSApp.h"
 
-
-
 PUBLIC
-IMSApp::IMSApp(IN CONST AString &strName)
-    : IMSActivity(strName)
-    , objIMSServices(IMSList<IMSService*>())
+IMSApp::IMSApp(IN CONST AString& strName) :
+        IMSActivity(strName),
+        objIMSServices(IMSList<IMSService*>())
 {
 }
 
-PUBLIC VIRTUAL
-IMSApp::~IMSApp()
+PUBLIC VIRTUAL IMSApp::~IMSApp()
 {
     while (!objIMSServices.IsEmpty())
     {
-        IMSService *pService = objIMSServices.GetAt(0);
+        IMSService* pService = objIMSServices.GetAt(0);
         if (pService != IMS_NULL)
         {
             delete pService;
@@ -37,7 +34,7 @@ IMSApp::~IMSApp()
 }
 
 PUBLIC
-IMS_BOOL IMSApp::AttachService(IN IMSService *pIMSService)
+IMS_BOOL IMSApp::AttachService(IN IMSService* pIMSService)
 {
     if (pIMSService == IMS_NULL)
     {
@@ -48,7 +45,7 @@ IMS_BOOL IMSApp::AttachService(IN IMSService *pIMSService)
 }
 
 PUBLIC
-void IMSApp::DetachService(IN IMSService *pIMSService)
+void IMSApp::DetachService(IN IMSService* pIMSService)
 {
     if (pIMSService == IMS_NULL)
     {
@@ -57,7 +54,7 @@ void IMSApp::DetachService(IN IMSService *pIMSService)
 
     for (IMS_UINT32 i = 0; i < objIMSServices.GetSize(); i++)
     {
-        IMSService *pService = objIMSServices.GetAt(i);
+        IMSService* pService = objIMSServices.GetAt(i);
 
         if (pService == pIMSService)
         {
@@ -68,16 +65,16 @@ void IMSApp::DetachService(IN IMSService *pIMSService)
 }
 
 PUBLIC
-IMSService* IMSApp::GetService(IN CONST AString &strServiceName)
+IMSService* IMSApp::GetService(IN CONST AString& strServiceName)
 {
     if (strServiceName.IsNULL())
     {
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i=0; i<objIMSServices.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < objIMSServices.GetSize(); i++)
     {
-        IMSService *pService = objIMSServices.GetAt(i);
+        IMSService* pService = objIMSServices.GetAt(i);
 
         if (pService->GetName().Equals(strServiceName))
         {
@@ -88,32 +85,27 @@ IMSService* IMSApp::GetService(IN CONST AString &strServiceName)
     return IMS_NULL;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSApp::OnPreprocess(IN IMSMSG & /* objMSG */)
+PROTECTED VIRTUAL IMS_BOOL IMSApp::OnPreprocess(IN IMSMSG& /* objMSG */)
 {
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSApp::OnMessage(IN IMSMSG & /* objMSG */)
+PROTECTED VIRTUAL IMS_BOOL IMSApp::OnMessage(IN IMSMSG& /* objMSG */)
 {
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSApp::OnPostprocess(IN IMSMSG & /* objMSG */)
+PROTECTED VIRTUAL IMS_BOOL IMSApp::OnPostprocess(IN IMSMSG& /* objMSG */)
 {
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IIMSActivityControl* IMSApp::GetController()
+PROTECTED VIRTUAL IIMSActivityControl* IMSApp::GetController()
 {
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL IMSApp::DispatchMessage(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL IMSApp::DispatchMessage(IN IMSMSG& objMSG)
 {
     IMS_BOOL bRetValue = IMS_FALSE;
 

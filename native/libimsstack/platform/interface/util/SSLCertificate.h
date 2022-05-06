@@ -28,13 +28,12 @@ public:
 
 public:
     SSLCertificate();
-    explicit SSLCertificate(IN CONST AString &strKeyFile_,
-            IN IMS_SINT32 nFileType_ = FILETYPE_PEM);
-    SSLCertificate(IN CONST SSLCertificate &objRHS);
+    explicit SSLCertificate(IN CONST AString& strKeyFile_, IN IMS_SINT32 nFileType_ = FILETYPE_PEM);
+    SSLCertificate(IN CONST SSLCertificate& objRHS);
     ~SSLCertificate();
 
 public:
-    SSLCertificate &operator=(IN CONST SSLCertificate &objRHS);
+    SSLCertificate& operator=(IN CONST SSLCertificate& objRHS);
 
 public:
     const AString& GetCAFile() const;
@@ -44,12 +43,12 @@ public:
     IMS_SINT32 GetKeyFileType() const;
     const AString& GetPassword() const;
 
-    void SetCAFile(IN CONST AString &strCAFile);
-    void SetCAPath(IN CONST AString &strCAPath);
-    void SetCiphers(IN CONST AString &strCiphers);
-    void SetKeyFile(IN CONST AString &strKeyFile);
+    void SetCAFile(IN CONST AString& strCAFile);
+    void SetCAPath(IN CONST AString& strCAPath);
+    void SetCiphers(IN CONST AString& strCiphers);
+    void SetKeyFile(IN CONST AString& strKeyFile);
     void SetKeyFileType(IN IMS_SINT32 nKeyFileType);
-    void SetPassword(IN CONST AString &strPassword);
+    void SetPassword(IN CONST AString& strPassword);
 
 private:
     // Key file info.
@@ -67,4 +66,4 @@ private:
     AString strCiphers;
 };
 
-#endif // _SSL_CERTIFICATE_H_
+#endif  // _SSL_CERTIFICATE_H_

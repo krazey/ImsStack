@@ -21,10 +21,7 @@
 #include "ImsSlot.h"
 #include "ISrvcc.h"
 
-class OsSrvcc
-    : public ImsSlot
-    , public ISrvcc
-    , public IEventListener
+class OsSrvcc : public ImsSlot, public ISrvcc, public IEventListener
 {
 public:
     OsSrvcc(IN IMS_SINT32 nSlotId);
@@ -39,8 +36,8 @@ public:
 
 protected:
     // IEventListener class
-    void Event_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
 private:
     void ListenSrvccEvent();

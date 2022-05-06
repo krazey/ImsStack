@@ -31,8 +31,8 @@ public:
      * @param bDefaultValue The default value if not present
      * @return A boolean value if present. Otherwise, returns a default value.
      */
-    virtual IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey,
-            IN IMS_BOOL bDefaultValue = IMS_FALSE) const = 0;
+    virtual IMS_BOOL GetBoolean(
+            IN const IMS_CHAR* pszKey, IN IMS_BOOL bDefaultValue = IMS_FALSE) const = 0;
 
     /**
      * @brief Returns the integer value for a specified key.
@@ -41,8 +41,8 @@ public:
      * @param nDefaultValue The default value if not present
      * @return An integer value if present. Otherwise, returns a default value.
      */
-    virtual IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey,
-            IN IMS_SINT32 nDefaultValue = -1) const = 0;
+    virtual IMS_SINT32 GetInt(
+            IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue = -1) const = 0;
 
     /**
      * @brief Returns the long value for a specified key.
@@ -51,8 +51,8 @@ public:
      * @param nDefaultValue The default value if not present
      * @return A long value if present. Otherwise, returns a default value.
      */
-    virtual IMS_SLONG GetLong(IN const IMS_CHAR* pszKey,
-            IN IMS_SLONG nDefaultValue = -1L) const = 0;
+    virtual IMS_SLONG GetLong(
+            IN const IMS_CHAR* pszKey, IN IMS_SLONG nDefaultValue = -1L) const = 0;
 
     /**
      * @brief Returns the string value for a specified key.

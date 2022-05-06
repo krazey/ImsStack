@@ -14,11 +14,9 @@
 #include "SystemConfig.h"
 #include "NATHelper.h"
 
-
-
 PRIVATE
-NATHelper::NATHelper()
-    : ppBindings(IMS_NULL)
+NATHelper::NATHelper() :
+        ppBindings(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -71,8 +69,7 @@ Remarks
 
 */
 PUBLIC
-IPAddress NATHelper::GetPrivateAddress(IN IMS_SINT32 nSlotId,
-        IN const IPAddress &objPublicIP) const
+IPAddress NATHelper::GetPrivateAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPublicIP) const
 {
     IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -83,7 +80,7 @@ IPAddress NATHelper::GetPrivateAddress(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
+        const IPBinding& objIPB = pBindings->GetAt(i);
 
         if (objPublicIP.Equals(objIPB.GetPublicIP()))
         {
@@ -100,8 +97,7 @@ Remarks
 
 */
 PUBLIC
-IPAddress NATHelper::GetPublicAddress(IN IMS_SINT32 nSlotId,
-        IN const IPAddress &objPrivateIP) const
+IPAddress NATHelper::GetPublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP) const
 {
     IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -112,7 +108,7 @@ IPAddress NATHelper::GetPublicAddress(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
+        const IPBinding& objIPB = pBindings->GetAt(i);
 
         if (objPrivateIP.Equals(objIPB.GetPrivateIP()))
         {
@@ -129,8 +125,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL NATHelper::IsBehindNAT(IN IMS_SINT32 nSlotId,
-        IN const IPAddress &objPrivateIP /* = IPAddress::NONE */) const
+IMS_BOOL NATHelper::IsBehindNAT(
+        IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP /* = IPAddress::NONE */) const
 {
     IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -141,17 +137,15 @@ IMS_BOOL NATHelper::IsBehindNAT(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
-        const IPAddress &objPublicIP = objIPB.GetPublicIP();
+        const IPBinding& objIPB = pBindings->GetAt(i);
+        const IPAddress& objPublicIP = objIPB.GetPublicIP();
 
-        if (!objPrivateIP.Equals(IPAddress::NONE)
-                && !objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if (!objPrivateIP.Equals(IPAddress::NONE) && !objPrivateIP.Equals(objIPB.GetPrivateIP()))
         {
             continue;
         }
 
-        if (!objPublicIP.Equals(IPAddress::NONE)
-                && !objPublicIP.Equals(IPAddress::IPv6NONE))
+        if (!objPublicIP.Equals(IPAddress::NONE) && !objPublicIP.Equals(IPAddress::IPv6NONE))
         {
             return IMS_TRUE;
         }
@@ -175,9 +169,9 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId)
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < pBindings->GetSize(); )
+    for (IMS_UINT32 i = 0; i < pBindings->GetSize();)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
+        const IPBinding& objIPB = pBindings->GetAt(i);
 
         if (nId == objIPB.GetId())
         {
@@ -196,7 +190,7 @@ Remarks
 
 */
 PUBLIC
-void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress &objPrivateIP)
+void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress& objPrivateIP)
 {
     IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -207,7 +201,7 @@ void NATHelper::RemovePublicAddress(IN IMS_SINT32 nSlotId, IN const IPAddress &o
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
+        const IPBinding& objIPB = pBindings->GetAt(i);
 
         if (objPrivateIP.Equals(objIPB.GetPrivateIP()))
         {
@@ -223,15 +217,12 @@ Remarks
 
 */
 PUBLIC
-void NATHelper::SetPublicAddress(IN IMS_SINT32 nSlotId,
-        IN IMS_SINT32 nId,
-        IN CONST IPAddress &objPrivateIP,
-        IN CONST IPAddress &objPublicIP)
+void NATHelper::SetPublicAddress(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId,
+        IN CONST IPAddress& objPrivateIP, IN CONST IPAddress& objPublicIP)
 {
     RemoveIPBinding(nSlotId, nId, objPrivateIP);
 
-    if (!objPublicIP.Equals(IPAddress::NONE)
-            && !objPublicIP.Equals(IPAddress::IPv6NONE))
+    if (!objPublicIP.Equals(IPAddress::NONE) && !objPublicIP.Equals(IPAddress::IPv6NONE))
     {
         IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -247,10 +238,9 @@ void NATHelper::SetPublicAddress(IN IMS_SINT32 nSlotId,
 Remarks
 
 */
-PUBLIC GLOBAL
-NATHelper* NATHelper::GetInstance()
+PUBLIC GLOBAL NATHelper* NATHelper::GetInstance()
 {
-    static NATHelper *pNATHelper = IMS_NULL;
+    static NATHelper* pNATHelper = IMS_NULL;
 
     if (pNATHelper == IMS_NULL)
     {
@@ -265,8 +255,7 @@ NATHelper* NATHelper::GetInstance()
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_BOOL NATHelper::IsNATResolverRequired()
+PUBLIC GLOBAL IMS_BOOL NATHelper::IsNATResolverRequired()
 {
     // FIXME: SKT only requires, but it's not used in the moment.
     return IMS_FALSE;
@@ -278,8 +267,8 @@ Remarks
 
 */
 PRIVATE
-void NATHelper::RemoveIPBinding(IN IMS_SINT32 nSlotId,
-        IN IMS_SINT32 nId, IN const IPAddress &objPrivateIP)
+void NATHelper::RemoveIPBinding(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nId, IN const IPAddress& objPrivateIP)
 {
     IMSList<IPBinding>* pBindings = GetIPBindings(nSlotId);
 
@@ -290,10 +279,9 @@ void NATHelper::RemoveIPBinding(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pBindings->GetSize(); ++i)
     {
-        const IPBinding &objIPB = pBindings->GetAt(i);
+        const IPBinding& objIPB = pBindings->GetAt(i);
 
-        if ((nId == objIPB.GetId())
-                && objPrivateIP.Equals(objIPB.GetPrivateIP()))
+        if ((nId == objIPB.GetId()) && objPrivateIP.Equals(objIPB.GetPrivateIP()))
         {
             pBindings->RemoveAt(i);
             break;

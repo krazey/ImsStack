@@ -28,11 +28,11 @@ public:
     virtual void VoNrTimer_TimerExpired(IN IMS_UINT32 nType) = 0;
 };
 
-class OsVoNr
-    : public ImsVoNr
-    , public ISystemListener
-    , public IVoNrTimerListener
-    , public ISystemConfigListener
+class OsVoNr :
+        public ImsVoNr,
+        public ISystemListener,
+        public IVoNrTimerListener,
+        public ISystemConfigListener
 {
 public:
     OsVoNr(IN IMS_SINT32 nSlotId);
@@ -47,8 +47,8 @@ public:
     IMS_BOOL IsUacCheckRequired(IN IMS_UINT32 nType) override;
     IMS_BOOL IsUeCapabilityVoNrEnabled() const override;
 
-    IMS_BOOL NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
-            IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nDirection) override;
+    IMS_BOOL NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState,
+            IN IMS_UINT32 nSysMode, IN IMS_UINT32 nDirection) override;
     IMS_SINT32 RequestCallPreference(IN IMS_UINT32 nRAT, IN IMS_UINT32 nType) override;
     IMS_BOOL SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
     IMS_BOOL SetImsSignaling(IN IMS_UINT32 nType) override;
@@ -70,8 +70,8 @@ protected:
     void DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     // ISystemListener
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     // IVoNrTimerListener
     void VoNrTimer_TimerExpired(IN IMS_UINT32 nType) override;
@@ -106,18 +106,18 @@ private:
     IMS_BOOL IsTypeValidForCallPreference(IN IMS_UINT32 nType) const;
     IMS_BOOL IsCallTypeForUac(IN IMS_UINT32 nType) const;
 
-    void NotifyCallState_Emergency(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
-        IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode);
+    void NotifyCallState_Emergency(IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState,
+            IN IMS_UINT32 nSysMode);
     void NotifyCallState_Mo(IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState,
-        IN IMS_UINT32 nSysMode);
+            IN IMS_UINT32 nSysMode);
     void NotifyCallState_Mt(IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState,
-        IN IMS_UINT32 nSysMode);
+            IN IMS_UINT32 nSysMode);
 
     void NotifyCallReady(IN IMS_UINT32 nSysMode);
     void NotifyHandoffInformation(IN IMS_UINT32 nInformation, IN IMS_UINT32 nSourceRat,
-        IN IMS_UINT32 nTargetRat, IN IMS_UINT32 nReasonType, IN IMS_SINT32 nReason);
-    void NotifyUacResponse(IN IMS_UINT32 nCallType, IN IMS_UINT32 nResult,
-        IN IMS_SINT32 nSysMode, IN IMS_UINT32 nBarringTime);
+            IN IMS_UINT32 nTargetRat, IN IMS_UINT32 nReasonType, IN IMS_SINT32 nReason);
+    void NotifyUacResponse(IN IMS_UINT32 nCallType, IN IMS_UINT32 nResult, IN IMS_SINT32 nSysMode,
+            IN IMS_UINT32 nBarringTime);
 
     void SetVoNrSupported();
 
@@ -125,22 +125,19 @@ private:
     class CallState
     {
     public:
-        inline CallState()
-            : m_nState(STATE_IDLE)
-            , m_nSysMode(SYS_MODE_UNKNOWN)
-        {}
-        inline virtual ~CallState()
-        {}
+        inline CallState() :
+                m_nState(STATE_IDLE),
+                m_nSysMode(SYS_MODE_UNKNOWN)
+        {
+        }
+        inline virtual ~CallState() {}
 
     public:
         void Clear();
 
-        inline IMS_UINT32 GetState() const
-        { return m_nState; }
-        inline IMS_UINT32 GetSysMode() const
-        { return m_nSysMode; }
-        inline IMS_BOOL IsIdle(IN IMS_UINT32 nState) const
-        { return nState == STATE_IDLE; }
+        inline IMS_UINT32 GetState() const { return m_nState; }
+        inline IMS_UINT32 GetSysMode() const { return m_nSysMode; }
+        inline IMS_BOOL IsIdle(IN IMS_UINT32 nState) const { return nState == STATE_IDLE; }
 
         IMS_BOOL IsNotificationRequired(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode) const;
         void Set(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode);
@@ -153,14 +150,14 @@ private:
     class CallStateList
     {
     public:
-        inline CallStateList()
-            : m_objCallState(IMSMap<IMS_UINT32, CallState*>())
-            , m_nNotifiedCallState(STATE_IDLE)
-            , m_nNotifiedSysMode(SYS_MODE_UNKNOWN)
-            , m_nUacResult(UAC_RESULT_IDLE)
-        {}
-        inline virtual ~CallStateList()
-        { m_objCallState.Clear(); }
+        inline CallStateList() :
+                m_objCallState(IMSMap<IMS_UINT32, CallState*>()),
+                m_nNotifiedCallState(STATE_IDLE),
+                m_nNotifiedSysMode(SYS_MODE_UNKNOWN),
+                m_nUacResult(UAC_RESULT_IDLE)
+        {
+        }
+        inline virtual ~CallStateList() { m_objCallState.Clear(); }
 
         CallStateList(IN const CallStateList&) = delete;
         CallStateList& operator=(IN const CallStateList&) = delete;
@@ -169,8 +166,7 @@ private:
         IMS_BOOL Add(IN IMS_UINT32 nModule, IN CallState* pState);
         void Remove(IN IMS_UINT32 nModule);
 
-        inline IMSMap<IMS_UINT32, CallState*>& GetCallState()
-        { return m_objCallState; }
+        inline IMSMap<IMS_UINT32, CallState*>& GetCallState() { return m_objCallState; }
 
         inline CallState* GetCallState(IN IMS_UINT32 nModule)
         {
@@ -179,8 +175,8 @@ private:
         }
 
         IMS_BOOL IsStateStopInOtherModule(IN IMS_UINT32 nModule);
-        IMS_BOOL IsNotificationRequired(IN IMS_UINT32 nModule, IN IMS_UINT32 nState,
-            IN IMS_UINT32 nSysMode);
+        IMS_BOOL IsNotificationRequired(
+                IN IMS_UINT32 nModule, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode);
         IMS_BOOL IsUacCheckNeeded() const;
         void SetForReport(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode);
         void SetUacResult(IN IMS_RESULT nResult);
@@ -203,12 +199,12 @@ private:
     class CallPreference
     {
     public:
-        inline CallPreference()
-            : m_nRat(RAT_INVALID)
-            , m_nState(IDLE)
-        {}
-        inline virtual ~CallPreference()
-        {}
+        inline CallPreference() :
+                m_nRat(RAT_INVALID),
+                m_nState(IDLE)
+        {
+        }
+        inline virtual ~CallPreference() {}
 
     public:
         inline void Clear()
@@ -216,20 +212,15 @@ private:
             m_nState = IDLE;
             m_nRat = RAT_INVALID;
         }
-        inline void SetRat(IN IMS_UINT32 nRat)
-        { m_nRat = nRat; }
+        inline void SetRat(IN IMS_UINT32 nRat) { m_nRat = nRat; }
 
-        inline void SetState(IN IMS_UINT32 nState)
-        { m_nState = nState; }
+        inline void SetState(IN IMS_UINT32 nState) { m_nState = nState; }
 
-        inline IMS_UINT32 GetState() const
-        { return m_nState; }
+        inline IMS_UINT32 GetState() const { return m_nState; }
 
-        inline IMS_UINT32 GetRat() const
-        { return m_nRat; }
+        inline IMS_UINT32 GetRat() const { return m_nRat; }
 
-        inline IMS_BOOL IsIdle() const
-        { return (m_nState == IDLE); }
+        inline IMS_BOOL IsIdle() const { return (m_nState == IDLE); }
 
     public:
         enum
@@ -246,13 +237,13 @@ private:
     class CallPreferenceList
     {
     public:
-        inline CallPreferenceList()
-            : m_objCallPreference(IMSMap<IMS_UINT32, CallPreference*>())
-            , m_nRequestedRat(RAT_INVALID)
-            , m_nState(CallPreference::IDLE)
-        {}
-        inline virtual ~CallPreferenceList()
-        {}
+        inline CallPreferenceList() :
+                m_objCallPreference(IMSMap<IMS_UINT32, CallPreference*>()),
+                m_nRequestedRat(RAT_INVALID),
+                m_nState(CallPreference::IDLE)
+        {
+        }
+        inline virtual ~CallPreferenceList() {}
 
     public:
         IMS_BOOL Add(IN IMS_UINT32 nType, IN CallPreference* pPreference);
@@ -265,11 +256,9 @@ private:
             return ((nIndex >= 0) ? m_objCallPreference.GetValueAt(nIndex) : IMS_NULL);
         }
 
-        inline IMS_UINT32 GetRat() const
-        { return m_nRequestedRat; }
+        inline IMS_UINT32 GetRat() const { return m_nRequestedRat; }
 
-        inline IMS_BOOL IsIdle() const
-        { return (m_nState == CallPreference::IDLE); }
+        inline IMS_BOOL IsIdle() const { return (m_nState == CallPreference::IDLE); }
 
         void Set(IN IMS_UINT32 nType, IN IMS_UINT32 nRat, IN IMS_UINT32 nState);
         void SetForReport(IN IMS_UINT32 nRat, IN IMS_UINT32 nState);
@@ -280,16 +269,15 @@ private:
         IMS_UINT32 m_nState;
     };
 
-    class VoNrTimer
-        : public ITimerListener
+    class VoNrTimer : public ITimerListener
     {
     public:
-        inline VoNrTimer()
-            : m_piCallReadyTimer(IMS_NULL)
-            , m_piListener(IMS_NULL)
-        {}
-        inline virtual ~VoNrTimer()
-        { Stop(TIMER_CALL_READY); }
+        inline VoNrTimer() :
+                m_piCallReadyTimer(IMS_NULL),
+                m_piListener(IMS_NULL)
+        {
+        }
+        inline virtual ~VoNrTimer() { Stop(TIMER_CALL_READY); }
 
         VoNrTimer(IN const VoNrTimer&) = delete;
         VoNrTimer& operator=(IN const VoNrTimer&) = delete;
@@ -314,7 +302,7 @@ private:
         ITimer* m_piCallReadyTimer;
         IVoNrTimerListener* m_piListener;
 
-        static const IMS_UINT32 TIMER_CALL_READY_DURATION = 5000; // 5s
+        static const IMS_UINT32 TIMER_CALL_READY_DURATION = 5000;  // 5s
     };
 
 private:

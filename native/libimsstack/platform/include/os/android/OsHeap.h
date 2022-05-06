@@ -18,8 +18,7 @@
 
 #include "IMemHeap.h"
 
-class OsHeap
-    : public IMemHeap
+class OsHeap : public IMemHeap
 {
 private:
     OsHeap();
@@ -32,14 +31,12 @@ public:
 
     void Free(IN void* pMem) override;
 
-    void* AllocDebug(IN IMS_SIZE_T nSize,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) override;
+    void* AllocDebug(IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) override;
 
-    void* ReallocDebug(IN void* pMem, IN IMS_SIZE_T nSize,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) override;
+    void* ReallocDebug(IN void* pMem, IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine,
+            IN const IMS_CHAR* pszFile) override;
 
-    void FreeDebug(IN void* pMem,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) override;
+    void FreeDebug(IN void* pMem, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) override;
 
     void EnableHeapDebug(IN IMS_BOOL bEnable) override;
 

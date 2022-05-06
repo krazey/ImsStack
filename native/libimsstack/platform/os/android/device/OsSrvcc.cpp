@@ -21,20 +21,16 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsSrvcc::OsSrvcc(IN IMS_SINT32 nSlotId)
-    : ImsSlot(nSlotId)
-    , m_bSrvccEventRegistered(IMS_FALSE)
-    , m_objSrvccListeners(IMSList<ISrvccListener*>())
+OsSrvcc::OsSrvcc(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_bSrvccEventRegistered(IMS_FALSE),
+        m_objSrvccListeners(IMSList<ISrvccListener*>())
 {
 }
 
-PUBLIC VIRTUAL
-OsSrvcc::~OsSrvcc()
-{
-}
+PUBLIC VIRTUAL OsSrvcc::~OsSrvcc() {}
 
-PUBLIC VIRTUAL
-void OsSrvcc::SubscribeSrvccListener(IN ISrvccListener* piListener)
+PUBLIC VIRTUAL void OsSrvcc::SubscribeSrvccListener(IN ISrvccListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -65,8 +61,7 @@ void OsSrvcc::SubscribeSrvccListener(IN ISrvccListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-void OsSrvcc::UnsubscribeSrvccListener(IN ISrvccListener* piListener)
+PUBLIC VIRTUAL void OsSrvcc::UnsubscribeSrvccListener(IN ISrvccListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -95,9 +90,8 @@ void OsSrvcc::UnsubscribeSrvccListener(IN ISrvccListener* piListener)
     }
 }
 
-PROTECTED VIRTUAL
-void OsSrvcc::Event_NotifyEvent(IN IMS_SINT32 nEvent,
-        IN IMS_UINT32 nWParam, IN IMS_UINT32 /*nLParam*/)
+PROTECTED VIRTUAL void OsSrvcc::Event_NotifyEvent(
+        IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 /*nLParam*/)
 {
     switch (nEvent)
     {

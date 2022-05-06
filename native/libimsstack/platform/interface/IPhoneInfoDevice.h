@@ -24,8 +24,7 @@ public:
     // CDMA : MEID, WCDMA : IMEI
     virtual IMS_BOOL GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strDeviceId) const = 0;
     // CDMA : N/A, WCDMA : Software version
-    virtual IMS_BOOL GetDeviceSoftwareVersion(
-            IN IMS_SINT32 nSlotId, OUT AString& strSv) const = 0;
+    virtual IMS_BOOL GetDeviceSoftwareVersion(IN IMS_SINT32 nSlotId, OUT AString& strSv) const = 0;
     virtual IMS_BOOL GetDeviceName(OUT AString& strDeviceName) const = 0;
 };
 

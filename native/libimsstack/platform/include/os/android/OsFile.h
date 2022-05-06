@@ -20,8 +20,7 @@
 
 class OsFilePrivate;
 
-class OsFile
-    : public ImsFile
+class OsFile : public ImsFile
 {
 public:
     OsFile();
@@ -43,10 +42,7 @@ private:
     OsFilePrivate* m_pFileP;
 };
 
-
-
-class OsFileUtil
-    : public IFileUtil
+class OsFileUtil : public IFileUtil
 {
 public:
     OsFileUtil() {}
@@ -54,8 +50,8 @@ public:
 
 public:
     IMS_BOOL ChangeMode(IN const AString& strFileName, IN IMS_SINT32 nMode) const override;
-    IMS_BOOL ChangeOwner(IN const AString& strFileName,
-            IN IMS_SINT32 nUid, IN IMS_SINT32 nGid) const override;
+    IMS_BOOL ChangeOwner(
+            IN const AString& strFileName, IN IMS_SINT32 nUid, IN IMS_SINT32 nGid) const override;
 
     IMS_BOOL Exist(IN const AString& strFileName) const override;
 

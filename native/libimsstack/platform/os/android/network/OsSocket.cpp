@@ -45,7 +45,7 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 #if defined(_DEBUG)
-#define IMSSOCKET_DEBUG(ec)     OsSocket::OutputDebugString(ec,__IMS_FUNC__, __IMS_LINE__)
+#define IMSSOCKET_DEBUG(ec) OsSocket::OutputDebugString(ec, __IMS_FUNC__, __IMS_LINE__)
 #else
 #define IMSSOCKET_DEBUG(ec)
 #endif
@@ -53,20 +53,18 @@ __IMS_TRACE_TAG_ADAPT__;
 #define IMS_MAX_RETRY_COUNT_ON_BIND_FAILED 3
 #define IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED 5
 
-
-
 LOCAL
 IMS_BOOL osSocket_IsConnectRetryRequired(IN IMS_SINT32 nSlotId)
 {
     // TODO: This is required for VoNR and VoWiFi to retry
     // when the connection establishment is failed.
-    (void) nSlotId;
+    (void)nSlotId;
     return IMS_FALSE;
 }
 
 LOCAL
-void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr,
-        IN IMS_UINT32 nAddrLen, OUT IPAddress& objIpAddr, OUT IMS_UINT32& nPort)
+void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr, IN IMS_UINT32 nAddrLen,
+        OUT IPAddress& objIpAddr, OUT IMS_UINT32& nPort)
 {
     if (pstSockAddr == IMS_NULL)
     {
@@ -76,11 +74,13 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr,
     // IPv4
     if (pstSockAddr->sa_family == AF_INET)
     {
-        const struct sockaddr_in* pstAddr4
-                = reinterpret_cast<const struct sockaddr_in*>(pstSockAddr);
-        IMS_CHAR acIpv4[32] = { 0, };
-        const IMS_CHAR* pszIpv4 = inet_ntop(AF_INET,
-                (const void*)&(pstAddr4->sin_addr.s_addr), acIpv4, sizeof(acIpv4));
+        const struct sockaddr_in* pstAddr4 =
+                reinterpret_cast<const struct sockaddr_in*>(pstSockAddr);
+        IMS_CHAR acIpv4[32] = {
+                0,
+        };
+        const IMS_CHAR* pszIpv4 = inet_ntop(
+                AF_INET, (const void*)&(pstAddr4->sin_addr.s_addr), acIpv4, sizeof(acIpv4));
 
         nPort = ntohs(pstAddr4->sin_port);
         objIpAddr.Parse(pszIpv4);
@@ -91,11 +91,13 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr,
     // IPv6
     else if (pstSockAddr->sa_family == AF_INET6)
     {
-        const struct sockaddr_in6* pstAddr6
-                = reinterpret_cast<const struct sockaddr_in6*>(pstSockAddr);
-        IMS_CHAR acIpv6[64] = { 0, };
-        const IMS_CHAR* pszIpv6 = inet_ntop(AF_INET6,
-                (const void*)&(pstAddr6->sin6_addr.s6_addr), acIpv6, sizeof(acIpv6));
+        const struct sockaddr_in6* pstAddr6 =
+                reinterpret_cast<const struct sockaddr_in6*>(pstSockAddr);
+        IMS_CHAR acIpv6[64] = {
+                0,
+        };
+        const IMS_CHAR* pszIpv6 = inet_ntop(
+                AF_INET6, (const void*)&(pstAddr6->sin6_addr.s6_addr), acIpv6, sizeof(acIpv6));
 
         nPort = ntohs(pstAddr6->sin6_port);
         objIpAddr.Parse(pszIpv6);
@@ -106,15 +108,15 @@ void osSocket_GetAddressNPort(IN const struct sockaddr* pstSockAddr,
     else
     {
         // Invalid IP address size
-        IMS_TRACE_E(0, "Invalid IP address size (%d)", nAddrLen, 0, 0 );
+        IMS_TRACE_E(0, "Invalid IP address size (%d)", nAddrLen, 0, 0);
         return;
     }
 }
 
 // NETWORK_INTERFACE_FOR_SOCKET
 LOCAL
-void osSocket_SetNetworkForSocket(IN IMS_SINT32 nSlotId,
-        IN IMS_SOCKET hSocket, IN IMS_CONNECTION hConnection)
+void osSocket_SetNetworkForSocket(
+        IN IMS_SINT32 nSlotId, IN IMS_SOCKET hSocket, IN IMS_CONNECTION hConnection)
 {
     if ((hSocket == INVALID_SOCKET) || (hConnection == 0))
     {
@@ -131,30 +133,25 @@ void osSocket_SetNetworkForSocket(IN IMS_SINT32 nSlotId,
 
     if (System::GetInstance()->BindSocket(pNc->GetApnType(), hSocket, nSlotId) != 1)
     {
-        IMS_TRACE_D("BindSocket is failed - slotId=%d, apnType=%d, sockFd=%d.",
-                nSlotId, pNc->GetApnType(), hSocket);
+        IMS_TRACE_D("BindSocket is failed - slotId=%d, apnType=%d, sockFd=%d.", nSlotId,
+                pNc->GetApnType(), hSocket);
     }
 }
 
-
-
-PRIVATE GLOBAL
-IMS_UINT16 OsSocket::s_nInternalSocketId = 1;
-
-
+PRIVATE GLOBAL IMS_UINT16 OsSocket::s_nInternalSocketId = 1;
 
 PUBLIC
-OsSocket::OsSocket()
-    : OsSocketBase()
-    , m_hSocket(INVALID_SOCKET)
-    , m_eAddressFamily(ADDRESS_FAMILY_INET)
-    , m_nSocketEvent(0)
-    , m_piListener(IMS_NULL)
-    , m_nCloseReason(CLOSE_REASON_UNKNOWN)
-    , m_nOptionForShutdown(-1)
-    , m_objSocketAddress(IPAddress::NONE)
-    , m_nSocketPort(0)
-    , m_nInternalSocketId(0)
+OsSocket::OsSocket() :
+        OsSocketBase(),
+        m_hSocket(INVALID_SOCKET),
+        m_eAddressFamily(ADDRESS_FAMILY_INET),
+        m_nSocketEvent(0),
+        m_piListener(IMS_NULL),
+        m_nCloseReason(CLOSE_REASON_UNKNOWN),
+        m_nOptionForShutdown(-1),
+        m_objSocketAddress(IPAddress::NONE),
+        m_nSocketPort(0),
+        m_nInternalSocketId(0)
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
@@ -167,8 +164,7 @@ OsSocket::OsSocket()
     }
 }
 
-PUBLIC VIRTUAL
-OsSocket::~OsSocket()
+PUBLIC VIRTUAL OsSocket::~OsSocket()
 {
     IMS_TRACE_D("Destructor :: OsSocket (%d)", m_nInternalSocketId, 0, 0);
 
@@ -181,8 +177,7 @@ OsSocket::~OsSocket()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSocket::GetLastError() const
+PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetLastError() const
 {
     IMS_SINT32 nErrorCode = 0;
     socklen_t nSize = sizeof(nErrorCode);
@@ -196,18 +191,17 @@ IMS_SINT32 OsSocket::GetLastError() const
     {
         if (nErrorCode != 0)
         {
-            IMS_TRACE_D("SocketLastError - socket=%d, error=%d(%s)",
-                    m_hSocket, nErrorCode, strerror(nErrorCode));
+            IMS_TRACE_D("SocketLastError - socket=%d, error=%d(%s)", m_hSocket, nErrorCode,
+                    strerror(nErrorCode));
         }
     }
 
     return nErrorCode;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSocket::GetSocketState() const
+PUBLIC VIRTUAL IMS_SINT32 OsSocket::GetSocketState() const
 {
-#define MAX_PEEK_BUF_SIZE    5
+#define MAX_PEEK_BUF_SIZE 5
 
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -220,57 +214,56 @@ IMS_SINT32 OsSocket::GetSocketState() const
         return SOCKET_STATE_DATA_AVAILABLE;
     }
 
-    IMS_CHAR acBuffer[MAX_PEEK_BUF_SIZE] = {0, };
+    IMS_CHAR acBuffer[MAX_PEEK_BUF_SIZE] = {
+            0,
+    };
     IMS_SINT32 nReadSize = recv(m_hSocket, acBuffer, MAX_PEEK_BUF_SIZE, MSG_PEEK);
 
     if (nReadSize == 0)
     {
         // Socket is closed by the peer
-        IMS_TRACE_D("TCP client socket (%d-%d) is closed by the peer",
-                m_hSocket, m_nInternalSocketId, 0);
+        IMS_TRACE_D("TCP client socket (%d-%d) is closed by the peer", m_hSocket,
+                m_nInternalSocketId, 0);
         return SOCKET_STATE_CLOSED;
     }
     else if (nReadSize < 0)
     {
         switch (errno)
         {
-        case EINTR:
-        case EWOULDBLOCK:
-        case EINPROGRESS:
-            IMS_TRACE_D("TCP client socket (%d-%d) is connecting ... (%d)",
-                    m_hSocket, m_nInternalSocketId, errno);
-            return SOCKET_STATE_NOT_READY;
+            case EINTR:
+            case EWOULDBLOCK:
+            case EINPROGRESS:
+                IMS_TRACE_D("TCP client socket (%d-%d) is connecting ... (%d)", m_hSocket,
+                        m_nInternalSocketId, errno);
+                return SOCKET_STATE_NOT_READY;
 
-        case ENOTCONN:
-            IMS_TRACE_D("TCP client socket (%d-%d) is not connected ... (%d)",
-                    m_hSocket, m_nInternalSocketId, errno);
-            return SOCKET_STATE_NOT_READY;
+            case ENOTCONN:
+                IMS_TRACE_D("TCP client socket (%d-%d) is not connected ... (%d)", m_hSocket,
+                        m_nInternalSocketId, errno);
+                return SOCKET_STATE_NOT_READY;
 
-        default:
-            IMS_TRACE_D("TCP client socket (%d-%d) is abnormally closed ... (%d)",
-                    m_hSocket, m_nInternalSocketId, errno);
-            return SOCKET_STATE_CLOSED;
+            default:
+                IMS_TRACE_D("TCP client socket (%d-%d) is abnormally closed ... (%d)", m_hSocket,
+                        m_nInternalSocketId, errno);
+                return SOCKET_STATE_CLOSED;
         }
     }
 
     return SOCKET_STATE_DATA_AVAILABLE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL OsSocket::StartUp()
+PUBLIC GLOBAL IMS_BOOL OsSocket::StartUp()
 {
     return OsSocketService::GetInstance()->StartUp();
 }
 
-PUBLIC GLOBAL
-void OsSocket::CleanUp()
+PUBLIC GLOBAL void OsSocket::CleanUp()
 {
     OsSocketService::GetInstance()->CleanUp();
 }
 
-PUBLIC GLOBAL
-IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
-        IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
+PUBLIC GLOBAL IMS_BOOL OsSocket::CheckIpAndPortAvailability(
+        IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType)
 {
     IMS_SINT32 nSockType = SOCK_DGRAM;
     IMS_SINT32 nAf = PF_INET;
@@ -330,8 +323,8 @@ IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
 
         if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)",
-                    errno, strerror(errno), 0);
+            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
+                    strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
         }
@@ -346,8 +339,8 @@ IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
         stSockAddr.sin6_family = AF_INET6;
         stSockAddr.sin6_port = htons((u_short)nPort);
 
-        if (inet_pton(AF_INET6,
-                objIpAddr.ToString().GetStr(), (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+        if (inet_pton(AF_INET6, objIpAddr.ToString().GetStr(),
+                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
         {
             IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objIpAddr.ToCharString(), nPort, 0);
             close(hSocket);
@@ -356,8 +349,8 @@ IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
 
         if (bind(hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)) < 0)
         {
-            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)",
-                    errno, strerror(errno), 0);
+            IMS_TRACE_D("CheckIpAndPortAvailability :: bind failed - %d(%s)", errno,
+                    strerror(errno), 0);
             close(hSocket);
             return IMS_FALSE;
         }
@@ -368,8 +361,7 @@ IMS_BOOL OsSocket::CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
         IN ISocketListener* piListener,
         IN ADDRESS_FAMILY_ENTYPE eAddressFamily /*= ADDRESS_FAMILY_INET*/)
 {
@@ -378,11 +370,13 @@ ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
     return Open(eType, eAddressFamily);
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
-        IN ADDRESS_FAMILY_ENTYPE eAddressFamily /*= ADDRESS_FAMILY_INET*/)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Open(
+        IN SOCKET_ENTYPE eType, IN ADDRESS_FAMILY_ENTYPE eAddressFamily /*= ADDRESS_FAMILY_INET*/)
 {
-    enum { PROTOCOL_TYPE = IPPROTO_IP };
+    enum
+    {
+        PROTOCOL_TYPE = IPPROTO_IP
+    };
 
     IMS_SINT32 nAf;
     IMS_SINT32 nSockType;
@@ -409,26 +403,26 @@ ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
 
     switch (eType)
     {
-    case TYPE_STREAM:
-        nSockType = SOCK_STREAM;
-        break;
-    case TYPE_DGRAM:
-        nSockType = SOCK_DGRAM;
-        break;
-    default:
-        return RESULT_ERROR;
+        case TYPE_STREAM:
+            nSockType = SOCK_STREAM;
+            break;
+        case TYPE_DGRAM:
+            nSockType = SOCK_DGRAM;
+            break;
+        default:
+            return RESULT_ERROR;
     }
 
     switch (eAddressFamily)
     {
-    case ADDRESS_FAMILY_INET:
-        nAf = PF_INET;
-        break;
-    case ADDRESS_FAMILY_INET6:
-        nAf = PF_INET6;
-        break;
-    default:
-        return RESULT_ERROR;
+        case ADDRESS_FAMILY_INET:
+            nAf = PF_INET;
+            break;
+        case ADDRESS_FAMILY_INET6:
+            nAf = PF_INET6;
+            break;
+        default:
+            return RESULT_ERROR;
     }
 
     SetSocketType(eType);
@@ -473,14 +467,12 @@ ISocket::SOCKET_RESULT OsSocket::Open(IN SOCKET_ENTYPE eType,
     return RESULT_ERROR;
 }
 
-PROTECTED VIRTUAL
-void OsSocket::SetListener(IN ISocketListener* piListener)
+PROTECTED VIRTUAL void OsSocket::SetListener(IN ISocketListener* piListener)
 {
     m_piListener = piListener;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Close()
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
 {
     SetCloseReason(CLOSE_REASON_USER_ACTION);
     SetSocketConnected(IMS_FALSE);
@@ -513,17 +505,17 @@ ISocket::SOCKET_RESULT OsSocket::Close()
 
             switch (nError)
             {
-            case EINPROGRESS:
-            case EWOULDBLOCK:
-                IMSSOCKET_DEBUG(nError);
-                return RESULT_WOULDBLOCK;
+                case EINPROGRESS:
+                case EWOULDBLOCK:
+                    IMSSOCKET_DEBUG(nError);
+                    return RESULT_WOULDBLOCK;
 
-            case ENETDOWN:
-            case ENOTSOCK:
-            case EINTR:
-            default:
-                IMSSOCKET_DEBUG(nError);
-                break;
+                case ENETDOWN:
+                case ENOTSOCK:
+                case EINTR:
+                default:
+                    IMSSOCKET_DEBUG(nError);
+                    break;
             }
 
             // What to do : returns SUCCESS or ERROR ?????
@@ -537,8 +529,7 @@ ISocket::SOCKET_RESULT OsSocket::Close()
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-ISocket* OsSocket::Accept()
+PROTECTED VIRTUAL ISocket* OsSocket::Accept()
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -645,9 +636,8 @@ ISocket* OsSocket::Accept()
     return pNewSocket;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
-        IN IMS_UINT32 nSocketPort)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Bind(
+        IN const IPAddress& objSocketAddress, IN IMS_UINT32 nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -689,8 +679,8 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
 
             do
             {
-                nBindResult = bind(m_hSocket,
-                        (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                nBindResult =
+                        bind(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
                 if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
                 {
@@ -698,13 +688,11 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
                 }
 
                 // "Cannot assign requested address"
-                if ((nBindResult == SOCKET_ERROR)
-                        && (errno == EADDRNOTAVAIL))
+                if ((nBindResult == SOCKET_ERROR) && (errno == EADDRNOTAVAIL))
                 {
                     ++nRetryCount;
-                    IMS_TRACE_D("Waiting for linux network interface (%d) ...",
-                            nRetryCount, 0, 0);
-                    usleep(1000000); // 1 seconds
+                    IMS_TRACE_D("Waiting for linux network interface (%d) ...", nRetryCount, 0, 0);
+                    usleep(1000000);  // 1 seconds
                 }
                 else
                 {
@@ -728,12 +716,12 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
         stSockAddr.sin6_family = AF_INET6;
         stSockAddr.sin6_port = htons((u_short)nSocketPort);
 
-        //4 Why the specified IPv6 address can't bind the socket ??
+        // 4 Why the specified IPv6 address can't bind the socket ??
         if (inet_pton(AF_INET6, objSocketAddress.ToString().GetStr(),
-                (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
         {
-            IMS_TRACE_E(0, "inet_pton(%s, %d) failed",
-                    objSocketAddress.ToCharString(), nSocketPort, 0);
+            IMS_TRACE_E(
+                    0, "inet_pton(%s, %d) failed", objSocketAddress.ToCharString(), nSocketPort, 0);
             return RESULT_ERROR;
         }
 
@@ -745,8 +733,8 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
 
             do
             {
-                nBindResult = bind(m_hSocket,
-                        (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                nBindResult =
+                        bind(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
                 if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_BIND_FAILED)
                 {
@@ -754,13 +742,11 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
                 }
 
                 // "Cannot assign requested address"
-                if ((nBindResult == SOCKET_ERROR)
-                        && (errno == EADDRNOTAVAIL))
+                if ((nBindResult == SOCKET_ERROR) && (errno == EADDRNOTAVAIL))
                 {
                     ++nRetryCount;
-                    IMS_TRACE_D("Waiting for linux network interface (%d) ...",
-                            nRetryCount, 0, 0);
-                    usleep(1000000); // 1 seconds
+                    IMS_TRACE_D("Waiting for linux network interface (%d) ...", nRetryCount, 0, 0);
+                    usleep(1000000);  // 1 seconds
                 }
                 else
                 {
@@ -776,27 +762,27 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
 
         switch (nError)
         {
-        // Socket is already bound to an address
-        case EINVAL:
-            return RESULT_SUCCESS;
+            // Socket is already bound to an address
+            case EINVAL:
+                return RESULT_SUCCESS;
 
-        case EINPROGRESS:
-            // NETWORK_INTERFACE_FOR_SOCKET
-            osSocket_SetNetworkForSocket(m_piOwnerThread->GetSlotId(),
-                    m_hSocket, GetNetworkConnection());
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case EINPROGRESS:
+                // NETWORK_INTERFACE_FOR_SOCKET
+                osSocket_SetNetworkForSocket(
+                        m_piOwnerThread->GetSlotId(), m_hSocket, GetNetworkConnection());
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EACCES:
-        case EADDRINUSE:
-        case EADDRNOTAVAIL:
-        case EFAULT:
-        case ENOBUFS:
-        case ENOTSOCK:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EACCES:
+            case EADDRINUSE:
+            case EADDRNOTAVAIL:
+            case EFAULT:
+            case ENOBUFS:
+            case ENOTSOCK:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         return RESULT_ERROR;
@@ -807,15 +793,13 @@ ISocket::SOCKET_RESULT OsSocket::Bind(IN const IPAddress& objSocketAddress,
     m_nSocketPort = nSocketPort;
 
     // NETWORK_INTERFACE_FOR_SOCKET
-    osSocket_SetNetworkForSocket(m_piOwnerThread->GetSlotId(),
-            m_hSocket, GetNetworkConnection());
+    osSocket_SetNetworkForSocket(m_piOwnerThread->GetSlotId(), m_hSocket, GetNetworkConnection());
 
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
-        IN IMS_UINT32 nHostPort)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Connect(
+        IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -862,20 +846,18 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
 
         stSockAddr.sin_port = htons((u_short)nHostPort);
 
-        nConnectResult = connect(m_hSocket,
-                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+        nConnectResult =
+                connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
         if (nConnectResult == SOCKET_ERROR)
         {
             IMS_SINT32 nError = errno;
 
             // Retry TCP connection in the below error cases
-            if ((nError == ECONNREFUSED)
-                    || (nError == ENETUNREACH)
-                    || (nError == ETIMEDOUT))
+            if ((nError == ECONNREFUSED) || (nError == ENETUNREACH) || (nError == ETIMEDOUT))
             {
-                if (SOCKET_ERROR != connect(m_hSocket,
-                        (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
+                if (SOCKET_ERROR !=
+                        connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
                 {
                     SetSocketConnected(IMS_TRUE);
                     // __LINUX_SOCKET_EVENT__ {
@@ -884,15 +866,15 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
                     return RESULT_SUCCESS;
                 }
 
-                if ((errno == ENETUNREACH)
-                        && osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
+                if ((errno == ENETUNREACH) &&
+                        osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
                 {
                     IMS_SINT32 nRetryCount = 0;
 
                     do
                     {
-                        nConnectResult = connect(m_hSocket,
-                                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                        nConnectResult = connect(
+                                m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
                         if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
                         {
@@ -905,9 +887,9 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
                             if (errno == ENETUNREACH)
                             {
                                 ++nRetryCount;
-                                IMS_TRACE_D("Waiting for network reachable (%d) ...",
-                                        nRetryCount, 0, 0);
-                                usleep(200000); // 200 milli-seconds
+                                IMS_TRACE_D("Waiting for network reachable (%d) ...", nRetryCount,
+                                        0, 0);
+                                usleep(200000);  // 200 milli-seconds
                             }
                             else
                             {
@@ -927,7 +909,7 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
             }
             else if ((nError == EINPROGRESS) || (nError == EWOULDBLOCK))
             {
-                //4 Set Event Writable
+                // 4 Set Event Writable
             }
 
             SetSocketConnected(IMS_FALSE);
@@ -945,8 +927,7 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
             return RESULT_ERROR;
         }
 
-        if (objHostAddress.Equals(IPAddress::IPv6ANY)
-                || objHostAddress.Equals(IPAddress::IPv6NONE))
+        if (objHostAddress.Equals(IPAddress::IPv6ANY) || objHostAddress.Equals(IPAddress::IPv6NONE))
         {
             return RESULT_ERROR;
         }
@@ -959,27 +940,24 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
         stSockAddr.sin6_port = htons((u_short)nHostPort);
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
-                (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
         {
-            IMS_TRACE_E(0, "inet_pton(%s, %d) failed",
-                    objHostAddress.ToCharString(), nHostPort, 0);
+            IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objHostAddress.ToCharString(), nHostPort, 0);
             return RESULT_ERROR;
         }
 
-        nConnectResult = connect(m_hSocket,
-                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+        nConnectResult =
+                connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
         if (nConnectResult == SOCKET_ERROR)
         {
             int nError = errno;
 
             // Retry TCP connection in the below error cases
-            if ((nError == ECONNREFUSED)
-                    || (nError == ENETUNREACH)
-                    || (nError == ETIMEDOUT))
+            if ((nError == ECONNREFUSED) || (nError == ENETUNREACH) || (nError == ETIMEDOUT))
             {
-                if (SOCKET_ERROR != connect(m_hSocket,
-                        (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
+                if (SOCKET_ERROR !=
+                        connect(m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr)))
                 {
                     SetSocketConnected(IMS_TRUE);
                     // __LINUX_SOCKET_EVENT__ {
@@ -988,15 +966,15 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
                     return RESULT_SUCCESS;
                 }
 
-                if ((errno == ENETUNREACH)
-                        && osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
+                if ((errno == ENETUNREACH) &&
+                        osSocket_IsConnectRetryRequired(m_piOwnerThread->GetSlotId()))
                 {
                     IMS_SINT32 nRetryCount = 0;
 
                     do
                     {
-                        nConnectResult = connect(m_hSocket,
-                                (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
+                        nConnectResult = connect(
+                                m_hSocket, (const struct sockaddr*)&stSockAddr, sizeof(stSockAddr));
 
                         if (nRetryCount >= IMS_MAX_RETRY_COUNT_ON_CONNECT_FAILED)
                         {
@@ -1009,9 +987,9 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
                             if (errno == ENETUNREACH)
                             {
                                 ++nRetryCount;
-                                IMS_TRACE_D("Waiting for network reachable (%d) ...",
-                                        nRetryCount, 0, 0);
-                                usleep(200000); // 200 milli-seconds
+                                IMS_TRACE_D("Waiting for network reachable (%d) ...", nRetryCount,
+                                        0, 0);
+                                usleep(200000);  // 200 milli-seconds
                             }
                             else
                             {
@@ -1044,35 +1022,35 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
 
         switch (nError)
         {
-        case EISCONN:
-            return RESULT_SUCCESS;
+            case EISCONN:
+                return RESULT_SUCCESS;
 
-        case ETIMEDOUT:
-        case EALREADY:
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-            // SelectEventEx(FD_CONNECT);
-            // __LINUX_SOCKET_EVENT__ {
-            SelectEventEx(FD_CONNECT | FD_READ | FD_TCP_C);
-            // }
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case ETIMEDOUT:
+            case EALREADY:
+            case EINPROGRESS:
+            case EWOULDBLOCK:
+                // SelectEventEx(FD_CONNECT);
+                // __LINUX_SOCKET_EVENT__ {
+                SelectEventEx(FD_CONNECT | FD_READ | FD_TCP_C);
+                // }
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EADDRINUSE:
-        case EINTR:
-        case EADDRNOTAVAIL:
-        case EAFNOSUPPORT:
-        case ECONNREFUSED:
-        case EFAULT:
-        case EINVAL:
-        case ENETUNREACH:
-        case ENOBUFS:
-        case ENOTSOCK:
-        case EACCES:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EADDRINUSE:
+            case EINTR:
+            case EADDRNOTAVAIL:
+            case EAFNOSUPPORT:
+            case ECONNREFUSED:
+            case EFAULT:
+            case EINVAL:
+            case ENETUNREACH:
+            case ENOBUFS:
+            case ENOTSOCK:
+            case EACCES:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         return RESULT_ERROR;
@@ -1085,8 +1063,7 @@ ISocket::SOCKET_RESULT OsSocket::Connect(IN const IPAddress& objHostAddress,
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1102,22 +1079,22 @@ ISocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/
 
         switch (nError)
         {
-        case EINPROGRESS:
-            SelectEventEx(FD_ACCEPT);
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case EINPROGRESS:
+                SelectEventEx(FD_ACCEPT);
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EADDRINUSE:
-        case EINVAL:
-        case EISCONN:
-        case EMFILE:
-        case ENOBUFS:
-        case ENOTSOCK:
-        case EOPNOTSUPP:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EADDRINUSE:
+            case EINVAL:
+            case EISCONN:
+            case EMFILE:
+            case ENOBUFS:
+            case ENOTSOCK:
+            case EOPNOTSUPP:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         return RESULT_ERROR;
@@ -1132,8 +1109,7 @@ ISocket::SOCKET_RESULT OsSocket::Listen(IN IMS_SINT32 nBackLog /*= MAX_BACKLOG*/
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+PROTECTED VIRTUAL IMS_SINT32 OsSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1149,31 +1125,31 @@ IMS_SINT32 OsSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 
         switch (nError)
         {
-        case EMSGSIZE:
-            //????
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case EMSGSIZE:
+                //????
+                IMSSOCKET_DEBUG(nError);
+                break;
 
-        case EINTR:
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-            SelectEventEx(FD_READ);
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case EINTR:
+            case EINPROGRESS:
+            case EWOULDBLOCK:
+                SelectEventEx(FD_READ);
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EFAULT:
-        case ENOTCONN:
-        case ENETRESET:
-        case ENOTSOCK:
-        case ESHUTDOWN:
-        case EINVAL:
-        case ECONNABORTED:
-        case ETIMEDOUT:
-        case ECONNRESET:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EFAULT:
+            case ENOTCONN:
+            case ENETRESET:
+            case ENOTSOCK:
+            case ESHUTDOWN:
+            case EINVAL:
+            case ECONNABORTED:
+            case ETIMEDOUT:
+            case ECONNRESET:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         // PATCH_FOR_NON_SOCKET
@@ -1203,8 +1179,7 @@ IMS_SINT32 OsSocket::Receive(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     return nReadBytes;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+PROTECTED VIRTUAL IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1220,36 +1195,36 @@ IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 
         switch (nError)
         {
-        case EMSGSIZE:
-            SelectEventEx(FD_WRITE);
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case EMSGSIZE:
+                SelectEventEx(FD_WRITE);
+                IMSSOCKET_DEBUG(nError);
+                break;
 
-        case EINTR:
-        case EHOSTUNREACH:
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-            SelectEventEx(FD_WRITE);
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case EINTR:
+            case EHOSTUNREACH:
+            case EINPROGRESS:
+            case EWOULDBLOCK:
+                SelectEventEx(FD_WRITE);
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EACCES:
-        case EFAULT:
-        case ENETRESET:
-        case ENOBUFS:
-        case ENOTCONN:
-        case ENOTSOCK:
-        case EOPNOTSUPP:
-        case ESHUTDOWN:
-        case EINVAL:
-        case ECONNABORTED:
-        case ECONNRESET:
-        case ETIMEDOUT:
-        case EPROTONOSUPPORT:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EACCES:
+            case EFAULT:
+            case ENETRESET:
+            case ENOBUFS:
+            case ENOTCONN:
+            case ENOTSOCK:
+            case EOPNOTSUPP:
+            case ESHUTDOWN:
+            case EINVAL:
+            case ECONNABORTED:
+            case ECONNRESET:
+            case ETIMEDOUT:
+            case EPROTONOSUPPORT:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         // PATCH_FOR_NON_SOCKET
@@ -1265,8 +1240,7 @@ IMS_SINT32 OsSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
     return nWrittenBytes;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
+PROTECTED VIRTUAL IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
         OUT IPAddress& objHostAddress, OUT IMS_UINT32& nHostPort)
 {
     if (m_hSocket == INVALID_SOCKET)
@@ -1295,8 +1269,8 @@ IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
         pstSockAddr = (struct sockaddr*)&stAddr6;
     }
 
-    IMS_SINT32 nReadBytes = recvfrom(m_hSocket, (void*)pBuffer,
-            nBuffLen, 0, pstSockAddr, &nSockAddrLen);
+    IMS_SINT32 nReadBytes =
+            recvfrom(m_hSocket, (void*)pBuffer, nBuffLen, 0, pstSockAddr, &nSockAddrLen);
 
     if (nReadBytes != SOCKET_ERROR)
     {
@@ -1311,30 +1285,30 @@ IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
 
         switch (nError)
         {
-        case EMSGSIZE:
-            //????
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case EMSGSIZE:
+                //????
+                IMSSOCKET_DEBUG(nError);
+                break;
 
-        case EINTR:
-        case EISCONN:
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-            SelectEventEx(FD_READ);
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+            case EINTR:
+            case EISCONN:
+            case EINPROGRESS:
+            case EWOULDBLOCK:
+                SelectEventEx(FD_READ);
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EFAULT:
-        case EINVAL:
-        case ENETRESET:
-        case ENOTSOCK:
-        case ESHUTDOWN:
-        case ETIMEDOUT:
-        case ECONNRESET:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EFAULT:
+            case EINVAL:
+            case ENETRESET:
+            case ENOTSOCK:
+            case ESHUTDOWN:
+            case ETIMEDOUT:
+            case ECONNRESET:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         // PATCH_FOR_NON_SOCKET
@@ -1348,8 +1322,7 @@ IMS_SINT32 OsSocket::ReceiveFrom(OUT IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
     return RESULT_ERROR;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSocket::SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
+PROTECTED VIRTUAL IMS_SINT32 OsSocket::SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
         IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort)
 {
     // PATCH_FOR_NON_SOCKET
@@ -1424,10 +1397,9 @@ RETRY_SENDTO:
         stSockAddr.sin6_port = htons((u_short)nHostPort);
 
         if (inet_pton(AF_INET6, objHostAddress.ToString().GetStr(),
-                (void*)stSockAddr.sin6_addr.s6_addr) != 1)
+                    (void*)stSockAddr.sin6_addr.s6_addr) != 1)
         {
-            IMS_TRACE_E(0, "inet_pton(%s, %d) failed",
-                    objHostAddress.ToCharString(), nHostPort, 0);
+            IMS_TRACE_E(0, "inet_pton(%s, %d) failed", objHostAddress.ToCharString(), nHostPort, 0);
             return RESULT_ERROR;
         }
 
@@ -1441,48 +1413,48 @@ RETRY_SENDTO:
 
         switch (nError)
         {
-        case EMSGSIZE:
-            //????
-            SelectEventEx(FD_WRITE);
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case EMSGSIZE:
+                //????
+                SelectEventEx(FD_WRITE);
+                IMSSOCKET_DEBUG(nError);
+                break;
 
-            //case EHOSTUNREACH:
-            //case ENETUNREACH:
-        case EINTR:
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-            SelectEventEx(FD_WRITE);
-            IMSSOCKET_DEBUG(nError);
-            return RESULT_WOULDBLOCK;
+                // case EHOSTUNREACH:
+                // case ENETUNREACH:
+            case EINTR:
+            case EINPROGRESS:
+            case EWOULDBLOCK:
+                SelectEventEx(FD_WRITE);
+                IMSSOCKET_DEBUG(nError);
+                return RESULT_WOULDBLOCK;
 
-        case ENETDOWN:
-        case EACCES:
-        case EINVAL:
-        case EFAULT:
-        case ENETRESET:
-        case ENOBUFS:
-        case ENOTCONN:
-        case ENOTSOCK:
-        case EOPNOTSUPP:
-        case ESHUTDOWN:
-        case ECONNABORTED:
-        case ECONNRESET:
-        case EADDRNOTAVAIL:
-        case EAFNOSUPPORT:
-        case EDESTADDRREQ:
-        case ETIMEDOUT:
-        case EPROTONOSUPPORT:
-        default:
-            IMSSOCKET_DEBUG(nError);
-            break;
+            case ENETDOWN:
+            case EACCES:
+            case EINVAL:
+            case EFAULT:
+            case ENETRESET:
+            case ENOBUFS:
+            case ENOTCONN:
+            case ENOTSOCK:
+            case EOPNOTSUPP:
+            case ESHUTDOWN:
+            case ECONNABORTED:
+            case ECONNRESET:
+            case EADDRNOTAVAIL:
+            case EAFNOSUPPORT:
+            case EDESTADDRREQ:
+            case ETIMEDOUT:
+            case EPROTONOSUPPORT:
+            default:
+                IMSSOCKET_DEBUG(nError);
+                break;
         }
 
         // PATCH_FOR_NON_SOCKET
         if (nError == ENOTSOCK)
         {
-            IMS_TRACE_D("Socket operation on non-socket (%d); try to recover the socket",
-                    m_hSocket, 0, 0);
+            IMS_TRACE_D("Socket operation on non-socket (%d); try to recover the socket", m_hSocket,
+                    0, 0);
 
             if (DoSocketRecovery() == RESULT_SUCCESS)
             {
@@ -1505,9 +1477,8 @@ RETRY_SENDTO:
     return nWrittenBytes;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::GetPeerName(OUT IPAddress& objPeerAddress,
-        OUT IMS_UINT32& nPeerPort)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetPeerName(
+        OUT IPAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1557,9 +1528,8 @@ ISocket::SOCKET_RESULT OsSocket::GetPeerName(OUT IPAddress& objPeerAddress,
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::GetSockName(OUT IPAddress& objSocketAddress,
-        OUT IMS_UINT32& nSocketPort)
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::GetSockName(
+        OUT IPAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1609,8 +1579,7 @@ ISocket::SOCKET_RESULT OsSocket::GetSockName(OUT IPAddress& objSocketAddress,
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL OsSocket::Equals(IN const ISocket* piNetSocket)
+PROTECTED VIRTUAL IMS_BOOL OsSocket::Equals(IN const ISocket* piNetSocket)
 {
     const OsSocket* pSocket = DYNAMIC_CAST(const OsSocket*, piNetSocket);
 
@@ -1627,8 +1596,7 @@ IMS_BOOL OsSocket::Equals(IN const ISocket* piNetSocket)
     return (m_hSocket == pSocket->m_hSocket);
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
+PROTECTED VIRTUAL IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1644,16 +1612,14 @@ IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
         case OPT_IP_QOS:
             if (m_eAddressFamily == ADDRESS_FAMILY_INET)
             {
-                if (getsockopt(m_hSocket, SOL_IP, IP_TOS,
-                        (void*)&nOptVal, &nOptSize) < 0)
+                if (getsockopt(m_hSocket, SOL_IP, IP_TOS, (void*)&nOptVal, &nOptSize) < 0)
                 {
                     return (-1);
                 }
             }
             else
             {
-                if (getsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS,
-                        (void*)&nOptVal, &nOptSize) < 0)
+                if (getsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS, (void*)&nOptVal, &nOptSize) < 0)
                 {
                     return (-1);
                 }
@@ -1664,8 +1630,7 @@ IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    The number of unacknowledged probes to send before considering
             //    the connection dead and notifying the application layer
         case OPT_TCP_KEEPCNT:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1676,8 +1641,7 @@ IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    considered data) and the first keepalive probe; after the connection
             //    is marked to need keepalive, this counter is not used any further
         case OPT_TCP_KEEPIDLE:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1687,40 +1651,35 @@ IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
             //    The interval between subsequential keepalive probes, regardless of
             //    what the connection has exchanged in the meantime
         case OPT_TCP_KEEPINTVL:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_TCP_MAXSEG:
-            if (getsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_KEEPALIVE:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_RCVBUF:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
             break;
 
         case OPT_SNDBUF:
-            if (getsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF,
-                    (void*)&nOptVal, &nOptSize) < 0)
+            if (getsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF, (void*)&nOptVal, &nOptSize) < 0)
             {
                 return (-1);
             }
@@ -1734,8 +1693,7 @@ IMS_SINT32 OsSocket::GetOption(IN IMS_SINT32 nOption)
     return nOptVal;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
+PROTECTED VIRTUAL IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
@@ -1748,31 +1706,30 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
         case OPT_IP_QOS:
             if (m_eAddressFamily == ADDRESS_FAMILY_INET)
             {
-                if (setsockopt(m_hSocket, SOL_IP, IP_TOS,
-                        (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+                if (setsockopt(m_hSocket, SOL_IP, IP_TOS, (const void*)&nOptionValue,
+                            sizeof(nOptionValue)) < 0)
                 {
                     return IMS_FALSE;
                 }
             }
             else
             {
-                if (setsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS,
-                        (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+                if (setsockopt(m_hSocket, SOL_IPV6, IPV6_TCLASS, (const void*)&nOptionValue,
+                            sizeof(nOptionValue)) < 0)
                 {
                     return IMS_FALSE;
                 }
             }
 
-            IMS_TRACE_D("SetOption (%d) - IP_QOS (TOS or TCLASS), %d",
-                    m_hSocket, nOptionValue, 0);
+            IMS_TRACE_D("SetOption (%d) - IP_QOS (TOS or TCLASS), %d", m_hSocket, nOptionValue, 0);
             break;
 
             // tcp_keepalive_probes (count)
             //    The number of unacknowledged probes to send before considering
             //    the connection dead and notifying the application layer
         case OPT_TCP_KEEPCNT:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPCNT, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1785,8 +1742,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             //    considered data) and the first keepalive probe; after the connection
             //    is marked to need keepalive, this counter is not used any further
         case OPT_TCP_KEEPIDLE:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPIDLE, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1798,8 +1755,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             //    The interval between subsequential keepalive probes, regardless of
             //    what the connection has exchanged in the meantime
         case OPT_TCP_KEEPINTVL:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_KEEPINTVL, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1808,8 +1765,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_TCP_MAXSEG:
-            if (setsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_TCP, TCP_MAXSEG, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1818,8 +1775,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_RCVBUF:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_RCVBUF, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1828,8 +1785,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_SNDBUF:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_SNDBUF, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1838,8 +1795,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_REUSEADDR:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_REUSEADDR, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1848,26 +1805,26 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_LINGER:
+        {
+            linger stLinger;
+
+            stLinger.l_onoff = (nOptionValue >= 0) ? 1 : 0;
+            stLinger.l_linger = (nOptionValue < 0) ? 0 : nOptionValue;  // seconds
+
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_LINGER, (const void*)&stLinger,
+                        sizeof(stLinger)) < 0)
             {
-                linger stLinger;
-
-                stLinger.l_onoff = (nOptionValue >= 0) ? 1 : 0;
-                stLinger.l_linger = (nOptionValue < 0) ? 0 : nOptionValue; // seconds
-
-                if (setsockopt(m_hSocket, SOL_SOCKET, SO_LINGER,
-                        (const void*)&stLinger, sizeof(stLinger)) < 0)
-                {
-                    return IMS_FALSE;
-                }
-
-                IMS_TRACE_D("SetOption (%d) - SO_LINGER, %d, %d",
-                        m_hSocket, stLinger.l_onoff, nOptionValue);
+                return IMS_FALSE;
             }
-            break;
+
+            IMS_TRACE_D("SetOption (%d) - SO_LINGER, %d, %d", m_hSocket, stLinger.l_onoff,
+                    nOptionValue);
+        }
+        break;
 
         case OPT_KEEPALIVE:
-            if (setsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_SOCKET, SO_KEEPALIVE, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1876,8 +1833,8 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
             break;
 
         case OPT_UDP_ENCAP:
-            if (setsockopt(m_hSocket, SOL_UDP, UDP_ENCAP,
-                    (const void*)&nOptionValue, sizeof(nOptionValue)) < 0)
+            if (setsockopt(m_hSocket, SOL_UDP, UDP_ENCAP, (const void*)&nOptionValue,
+                        sizeof(nOptionValue)) < 0)
             {
                 return IMS_FALSE;
             }
@@ -1902,8 +1859,7 @@ IMS_BOOL OsSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-ISocket::SOCKET_RESULT OsSocket::Abort()
+PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Abort()
 {
     SetCloseReason(CLOSE_REASON_USER_ACTION);
 
@@ -1922,17 +1878,17 @@ ISocket::SOCKET_RESULT OsSocket::Abort()
 
             switch (nError)
             {
-            case EINPROGRESS:
-            case EWOULDBLOCK:
-                IMSSOCKET_DEBUG(nError);
-                break;
+                case EINPROGRESS:
+                case EWOULDBLOCK:
+                    IMSSOCKET_DEBUG(nError);
+                    break;
 
-            case ENETDOWN:
-            case ENOTSOCK:
-            case EINTR:
-            default:
-                IMSSOCKET_DEBUG(nError);
-                break;
+                case ENETDOWN:
+                case ENOTSOCK:
+                case EINTR:
+                default:
+                    IMSSOCKET_DEBUG(nError);
+                    break;
             }
         }
 
@@ -1946,8 +1902,7 @@ ISocket::SOCKET_RESULT OsSocket::Abort()
     return RESULT_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-void OsSocket::ClosedByDataConnection()
+PROTECTED VIRTUAL void OsSocket::ClosedByDataConnection()
 {
     SetCloseReason(CLOSE_REASON_DATA_CONNECTION_LOST);
 
@@ -1955,8 +1910,7 @@ void OsSocket::ClosedByDataConnection()
     NotifyClosed(0);
 }
 
-PROTECTED VIRTUAL
-void OsSocket::Destroy()
+PROTECTED VIRTUAL void OsSocket::Destroy()
 {
     OsSocketService* pSocketService = OsSocketService::GetInstance();
 
@@ -1977,8 +1931,7 @@ void OsSocket::Destroy()
     pSocketService->SendControlEvent();
 }
 
-PROTECTED VIRTUAL
-void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+PROTECTED VIRTUAL void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     (void)nLparam;
 
@@ -1991,8 +1944,9 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
     // FIX_TIMING_ISSUE
     if (GetInternalSocketId() != IMS_SOCKET_HIWORD(nLparam))
     {
-        IMS_TRACE_D("Socket(%d) is matched, but internal socket id(%d) is not matched;" \
-                " ignored", m_hSocket, GetInternalSocketId(), 0);
+        IMS_TRACE_D("Socket(%d) is matched, but internal socket id(%d) is not matched;"
+                    " ignored",
+                m_hSocket, GetInternalSocketId(), 0);
         return;
     }
 
@@ -2002,7 +1956,8 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
             m_piListener->Socket_OnDataReceived(this);
             break;
 
-        case IMS_SOCKET_CLOSED: {
+        case IMS_SOCKET_CLOSED:
+        {
             // Checks if the owner thread is same or not...
 
             // FIX_SOCKET_SYNC_ISSUE
@@ -2010,8 +1965,7 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
 
             if (piThread != m_piOwnerThread)
             {
-                IMS_TRACE_D("Socket :: socket(%d) owner is different; ignored...",
-                        m_hSocket, 0, 0);
+                IMS_TRACE_D("Socket :: socket(%d) owner is different; ignored...", m_hSocket, 0, 0);
                 break;
             }
 
@@ -2035,8 +1989,7 @@ void OsSocket::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
 {
     if (nErrorCode == 0)
     {
@@ -2045,13 +1998,11 @@ void OsSocket::NotifyDataReceived(IN IMS_SINT32 nErrorCode)
     }
     else
     {
-        IMS_TRACE_D("NotifyDataReceived - socket=%d, error=%d",
-                m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifyDataReceived - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifySendEnabled(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSocket::NotifySendEnabled(IN IMS_SINT32 nErrorCode)
 {
     if (nErrorCode == 0)
     {
@@ -2060,13 +2011,11 @@ void OsSocket::NotifySendEnabled(IN IMS_SINT32 nErrorCode)
     }
     else
     {
-        IMS_TRACE_D("NotifySendEnabled - socket=%d, error=%d",
-                m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifySendEnabled - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifyConnectionReceived(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSocket::NotifyConnectionReceived(IN IMS_SINT32 nErrorCode)
 {
     if (nErrorCode == 0)
     {
@@ -2075,13 +2024,10 @@ void OsSocket::NotifyConnectionReceived(IN IMS_SINT32 nErrorCode)
     }
     else
     {
-        IMS_TRACE_D("NotifyConnectionReceived - socket=%d, error=%d",
-                m_hSocket, nErrorCode, 0);
+        IMS_TRACE_D("NotifyConnectionReceived - socket=%d, error=%d", m_hSocket, nErrorCode, 0);
 
         // Send a CLOSED event when socket is aborted by the local system.
-        if ((nErrorCode == ENETDOWN)
-                || (nErrorCode == ENETRESET)
-                || (nErrorCode == ECONNABORTED))
+        if ((nErrorCode == ENETDOWN) || (nErrorCode == ENETRESET) || (nErrorCode == ECONNABORTED))
         {
             // Aborted by local system
             NotifyClosed(nErrorCode);
@@ -2089,12 +2035,12 @@ void OsSocket::NotifyConnectionReceived(IN IMS_SINT32 nErrorCode)
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
 {
     switch (nErrorCode)
     {
-        case 0: {
+        case 0:
+        {
             if (GetCloseReason() != CLOSE_REASON_UNKNOWN)
             {
                 DeselectEventEx(FD_CONNECT);
@@ -2106,33 +2052,33 @@ void OsSocket::NotifyConnected(IN IMS_SINT32 nErrorCode)
             SetSocketConnected(IMS_TRUE);
             DeselectEventEx(FD_CONNECT);
 
-            OsSocket::NotifyMessage( IMS_SOCKET_CONNECTED );
+            OsSocket::NotifyMessage(IMS_SOCKET_CONNECTED);
             break;
         }
-        case EAFNOSUPPORT: // FALL-THROUGH
-        case ECONNREFUSED: // FALL-THROUGH
-        case ENETUNREACH: // FALL-THROUGH
-        case ENOBUFS: // FALL-THROUGH
-        case ETIMEDOUT: {
+        case EAFNOSUPPORT:  // FALL-THROUGH
+        case ECONNREFUSED:  // FALL-THROUGH
+        case ENETUNREACH:   // FALL-THROUGH
+        case ENOBUFS:       // FALL-THROUGH
+        case ETIMEDOUT:
+        {
             SetSocketConnected(IMS_FALSE);
-            //3 SOCKET_CONNECTION_FAILED ??? : new event ???
+            // 3 SOCKET_CONNECTION_FAILED ??? : new event ???
             DeselectEventEx(FD_READ);
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
-        default: {
+        default:
+        {
             SetSocketConnected(IMS_FALSE);
             DeselectEventEx(FD_READ);
-            IMS_TRACE_E(0, "Unknown socket (%d) error (%d) on Connected",
-                    m_hSocket, nErrorCode, 0);
+            IMS_TRACE_E(0, "Unknown socket (%d) error (%d) on Connected", m_hSocket, nErrorCode, 0);
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
+PROTECTED VIRTUAL void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
 {
     SetCloseReason(CLOSE_REASON_REMOTE_ACTION);
     SetSocketConnected(IMS_FALSE);
@@ -2145,55 +2091,52 @@ void OsSocket::NotifyClosed(IN IMS_SINT32 nErrorCode)
     // FIX_SOCKET_SYNC_ISSUE
     if (m_nCloseReason == CLOSE_REASON_USER_ACTION)
     {
-        IMS_TRACE_D("Socket(%d) is already closed by the user; ignored...",
-                m_hSocket, 0, 0);
+        IMS_TRACE_D("Socket(%d) is already closed by the user; ignored...", m_hSocket, 0, 0);
         return;
     }
 
     switch (nErrorCode)
     {
-        case 0: {
+        case 0:
+        {
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
-        case ENETDOWN: // FALL-THROUGH
-        case ECONNRESET: // FALL-THROUGH
-        case ECONNABORTED: {
+        case ENETDOWN:    // FALL-THROUGH
+        case ECONNRESET:  // FALL-THROUGH
+        case ECONNABORTED:
+        {
             // closed by network
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
-        default: {
+        default:
+        {
             OsSocket::NotifyMessage(IMS_SOCKET_CLOSED);
             break;
         }
     }
 }
 
-PROTECTED VIRTUAL
-void OsSocket::NotifyAcceptCompleted(IN IMS_SOCKET hSocket)
+PROTECTED VIRTUAL void OsSocket::NotifyAcceptCompleted(IN IMS_SOCKET hSocket)
 {
     m_hSocket = hSocket;
     DeselectEventEx(FD_ACCEPT);
 }
 
-PROTECTED VIRTUAL
-OsSocket* OsSocket::CreateSocket()
+PROTECTED VIRTUAL OsSocket* OsSocket::CreateSocket()
 {
     return new OsSocket();
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL OsSocket::ShutDown(IN IMS_SINT32 nHow /*= SHUTDOWN_BOTH*/)
+PROTECTED VIRTUAL IMS_BOOL OsSocket::ShutDown(IN IMS_SINT32 nHow /*= SHUTDOWN_BOTH*/)
 {
     if (m_hSocket == INVALID_SOCKET)
     {
         return IMS_FALSE;
     }
 
-    if ((nHow != SHUTDOWN_RX)
-            && (nHow != SHUTDOWN_TX)
-            && (nHow != SHUTDOWN_BOTH))
+    if ((nHow != SHUTDOWN_RX) && (nHow != SHUTDOWN_TX) && (nHow != SHUTDOWN_BOTH))
     {
         return IMS_FALSE;
     }
@@ -2263,8 +2206,8 @@ void OsSocket::NotifyMessage(IN IMS_SINT32 nMsgParam)
 {
     if (m_piOwnerThread == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Owner thread is not set; Ignore message (%d-%d : %d)",
-                m_hSocket, GetInternalSocketId(), nMsgParam);
+        IMS_TRACE_E(0, "Owner thread is not set; Ignore message (%d-%d : %d)", m_hSocket,
+                GetInternalSocketId(), nMsgParam);
         return;
     }
 
@@ -2345,14 +2288,14 @@ void OsSocket::UnbindSocketFromIpSecTransform(IN IMS_SOCKET hSocket)
 
 #ifdef _DEBUG
 PROTECTED
-void OsSocket::OutputDebugString( IN IMS_SINT32 nErrorCode,
-        IN const IMS_CHAR* pszModule, IN IMS_SINT32 nLine)
+void OsSocket::OutputDebugString(
+        IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszModule, IN IMS_SINT32 nLine)
 {
     AString strLog;
 
-    strLog.Sprintf("socket=%d, error=%d(%s), code-line=%s:%d",
-            m_hSocket, nErrorCode, strerror(nErrorCode), pszModule, nLine);
+    strLog.Sprintf("socket=%d, error=%d(%s), code-line=%s:%d", m_hSocket, nErrorCode,
+            strerror(nErrorCode), pszModule, nLine);
 
     IMS_TRACE_E(nErrorCode, "SocketError - %s", strLog.GetStr(), 0, 0);
 }
-#endif // _DEBUG
+#endif  // _DEBUG

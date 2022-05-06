@@ -24,32 +24,28 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-ImsNetworkPing::ImsNetworkPing()
-    : m_piListener(IMS_NULL)
-    , m_nState(STATE_IDLE)
-    , m_piTimer(IMS_NULL)
-    , m_piSocket(IMS_NULL)
+ImsNetworkPing::ImsNetworkPing() :
+        m_piListener(IMS_NULL),
+        m_nState(STATE_IDLE),
+        m_piTimer(IMS_NULL),
+        m_piSocket(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-ImsNetworkPing::~ImsNetworkPing()
+PUBLIC VIRTUAL ImsNetworkPing::~ImsNetworkPing()
 {
     ClearResources();
 }
 
-PUBLIC VIRTUAL
-void ImsNetworkPing::Destroy()
+PUBLIC VIRTUAL void ImsNetworkPing::Destroy()
 {
     ClearResources();
 
     delete this;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
-        IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort,
-        IN IMS_SINT32 nWaitTime)
+PUBLIC VIRTUAL IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
+        IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime)
 {
     if (GetState() != STATE_IDLE)
     {
@@ -89,14 +85,12 @@ IMS_SINT32 ImsNetworkPing::Ping(IN const IPAddress& objSrcIp,
     return PING_STATUS_PENDING;
 }
 
-PUBLIC VIRTUAL
-void ImsNetworkPing::SetListener(IN INetworkPingListener* piListener)
+PUBLIC VIRTUAL void ImsNetworkPing::SetListener(IN INetworkPingListener* piListener)
 {
     m_piListener = piListener;
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Timer_TimerExpired(IN ITimer* piTimer)
+PROTECTED VIRTUAL void ImsNetworkPing::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -120,14 +114,12 @@ void ImsNetworkPing::Timer_TimerExpired(IN ITimer* piTimer)
     }
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_OnDataReceived(IN ISocket* /*piSocket*/)
+PROTECTED VIRTUAL void ImsNetworkPing::Socket_OnDataReceived(IN ISocket* /*piSocket*/)
 {
     // no-op
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_OnSendEnabled(IN ISocket* piSocket)
+PROTECTED VIRTUAL void ImsNetworkPing::Socket_OnSendEnabled(IN ISocket* piSocket)
 {
     if (m_piSocket != piSocket)
     {
@@ -142,14 +134,12 @@ void ImsNetworkPing::Socket_OnSendEnabled(IN ISocket* piSocket)
     ClearAndNotifyResult(PING_STATUS_OK);
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_OnConnectionReceived(IN ISocket* /*piSocket*/)
+PROTECTED VIRTUAL void ImsNetworkPing::Socket_OnConnectionReceived(IN ISocket* /*piSocket*/)
 {
     // no-op
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_OnConnected(IN ISocket* piSocket)
+PROTECTED VIRTUAL void ImsNetworkPing::Socket_OnConnected(IN ISocket* piSocket)
 {
     if (m_piSocket != piSocket)
     {
@@ -164,9 +154,8 @@ void ImsNetworkPing::Socket_OnConnected(IN ISocket* piSocket)
     ClearAndNotifyResult(PING_STATUS_OK);
 }
 
-PROTECTED VIRTUAL
-void ImsNetworkPing::Socket_OnClosed(IN ISocket* piSocket,
-        IN IMS_SINT32 /*nReason = ISocket::CLOSE_REASON_UNKNOWN*/)
+PROTECTED VIRTUAL void ImsNetworkPing::Socket_OnClosed(
+        IN ISocket* piSocket, IN IMS_SINT32 /*nReason = ISocket::CLOSE_REASON_UNKNOWN*/)
 {
     if (m_piSocket != piSocket)
     {
@@ -200,8 +189,7 @@ void ImsNetworkPing::ClearResources()
 }
 
 PROTECTED
-IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp,
-        IN IMS_BOOL bTimerRequired)
+IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp, IN IMS_BOOL bTimerRequired)
 {
     ClearResources();
 
@@ -238,8 +226,7 @@ IMS_BOOL ImsNetworkPing::PrepareResources(IN const IPAddress& objIp,
         enAddressFamily = ISocket::ADDRESS_FAMILY_INET6;
     }
 
-    ISocket::SOCKET_RESULT enResult = m_piSocket->Open(
-            ISocket::TYPE_STREAM, enAddressFamily);
+    ISocket::SOCKET_RESULT enResult = m_piSocket->Open(ISocket::TYPE_STREAM, enAddressFamily);
 
     if (enResult != ISocket::RESULT_SUCCESS)
     {
@@ -297,8 +284,7 @@ void ImsNetworkPing::SetState(IN IMS_SINT32 nState)
     }
 }
 
-PROTECTED GLOBAL
-IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IPAddress& objIp)
+PROTECTED GLOBAL IMS_SINT32 ImsNetworkPing::GetRandomPort(IN const IPAddress& objIp)
 {
     const IMS_SINT32 MAX_COUNT = 50;
     NetworkService* pNetworkService = NetworkService::GetNetworkService();

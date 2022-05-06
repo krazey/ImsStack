@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#define LOG_NIDEBUG        0
-#define LOG_NDDEBUG        0
+#define LOG_NIDEBUG 0
+#define LOG_NDDEBUG 0
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,8 +28,7 @@
 #include "ImsTraceNode.h"
 #include "OsTrace.h"
 
-class OsTraceNode
-    : public ImsTraceNode
+class OsTraceNode : public ImsTraceNode
 {
 public:
     OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag);
@@ -41,28 +40,25 @@ public:
 protected:
     inline virtual IMS_SINT32 Vsnprintf(OUT IMS_CHAR* pszBuffer, IN IMS_UINT32 nBuffSize,
             IN const IMS_CHAR* pszFormat, IN va_list args)
-    { return vsnprintf(pszBuffer, nBuffSize, pszFormat, args); }
+    {
+        return vsnprintf(pszBuffer, nBuffSize, pszFormat, args);
+    }
 
 public:
-    //250 in android
+    // 250 in android
     enum
     {
         MAX_TRACE_SIZE = 1024
     };
 };
 
-
-
 PUBLIC
-OsTraceNode::OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag)
-    : ImsTraceNode(nCategory, pszTag)
+OsTraceNode::OsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag) :
+        ImsTraceNode(nCategory, pszTag)
 {
 }
 
-PUBLIC VIRTUAL
-OsTraceNode::~OsTraceNode()
-{
-}
+PUBLIC VIRTUAL OsTraceNode::~OsTraceNode() {}
 
 PUBLIC
 IMS_BOOL OsTraceNode::IsWritable() const
@@ -70,20 +66,17 @@ IMS_BOOL OsTraceNode::IsWritable() const
     return (GetLength() <= MAX_TRACE_SIZE);
 }
 
-
-
 PUBLIC
-OsTrace::OsTrace()
-    : ImsTrace()
-    , m_piMutex(IMS_NULL)
-    , m_bLogging(IMS_FALSE)
-    , m_objTraceNodes(IMSList<OsTraceNode*>())
+OsTrace::OsTrace() :
+        ImsTrace(),
+        m_piMutex(IMS_NULL),
+        m_bLogging(IMS_FALSE),
+        m_objTraceNodes(IMSList<OsTraceNode*>())
 {
     m_piMutex = MutexService::GetMutexService()->CreateMutex();
 }
 
-PUBLIC VIRTUAL
-OsTrace::~OsTrace()
+PUBLIC VIRTUAL OsTrace::~OsTrace()
 {
     if (m_piMutex != IMS_NULL)
     {
@@ -91,9 +84,8 @@ OsTrace::~OsTrace()
     }
 }
 
-PUBLIC VIRTUAL
-void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-        IN const IMS_CHAR* pszFormat, IN va_list args)
+PUBLIC VIRTUAL void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, IN va_list args)
 {
     (void)nModule;
 
@@ -177,8 +169,7 @@ void OsTrace::OutV(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UI
     SetLogging(IMS_FALSE);
 }
 
-PRIVATE VIRTUAL
-const IMS_CHAR* OsTrace::GetFileName(IN const IMS_CHAR* pszFileName)
+PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(IN const IMS_CHAR* pszFileName)
 {
     if (pszFileName == IMS_NULL)
     {
@@ -190,9 +181,8 @@ const IMS_CHAR* OsTrace::GetFileName(IN const IMS_CHAR* pszFileName)
     return (pszFn != IMS_NULL) ? (pszFn + 1) : pszFileName;
 }
 
-PRIVATE VIRTUAL
-const IMS_CHAR* OsTrace::GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
-        IN const IMS_CHAR* pszFileName)
+PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetFileName(
+        IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName)
 {
     if (pszFileName == IMS_NULL)
     {
@@ -215,15 +205,13 @@ const IMS_CHAR* OsTrace::GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
     return pszOutFileName;
 }
 
-PRIVATE VIRTUAL
-const IMS_CHAR* OsTrace::GetDirName() const
+PRIVATE VIRTUAL const IMS_CHAR* OsTrace::GetDirName() const
 {
     return IMS_SOLUTION_STORAGE_ROOT_DIR "/";
 }
 
-PRIVATE VIRTUAL
-void OsTrace::OutputString(IN IMS_SINT32 nCategory,
-        IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength)
+PRIVATE VIRTUAL void OsTrace::OutputString(
+        IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength)
 {
     IMS_UINT32 nOption = GetOption();
 
@@ -278,7 +266,6 @@ void OsTrace::OutputString(IN IMS_SINT32 nCategory,
             }
         }
     }
-
 }
 
 PRIVATE

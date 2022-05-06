@@ -21,9 +21,7 @@
 
 class System;
 
-class OsWifiWatcher
-    : public IWifiWatcher
-    , public ISystemListener
+class OsWifiWatcher : public IWifiWatcher, public ISystemListener
 {
 public:
     OsWifiWatcher();
@@ -37,8 +35,8 @@ public:
     IMS_SINT32 GetState() override;
 
     // ISystemListener
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 private:
     void UpdateWifiStateChanged(IN IMS_UINT32 nState);

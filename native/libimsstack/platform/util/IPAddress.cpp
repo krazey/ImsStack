@@ -20,7 +20,7 @@
 #include "IPAddress.h"
 
 LOCAL
-IMS_BOOL ipAddress_ParseIP4(IN CONST AString &strIP4, OUT IMS_UINT32 *pnIP4)
+IMS_BOOL ipAddress_ParseIP4(IN CONST AString& strIP4, OUT IMS_UINT32* pnIP4)
 {
     IMSList<AString> objIPv4 = strIP4.Split('.');
 
@@ -38,7 +38,7 @@ IMS_BOOL ipAddress_ParseIP4(IN CONST AString &strIP4, OUT IMS_UINT32 *pnIP4)
     {
         bOK = IMS_FALSE;
 
-        const AString &strValue = objIPv4.GetAt(i);
+        const AString& strValue = objIPv4.GetAt(i);
 
         nByteValue = strValue.ToUInt32(&bOK);
 
@@ -58,7 +58,7 @@ IMS_BOOL ipAddress_ParseIP4(IN CONST AString &strIP4, OUT IMS_UINT32 *pnIP4)
 }
 
 LOCAL
-IMS_BOOL ipAddress_ParseIP6(IN CONST AString &strIP6, OUT IMS_BYTE *pIP6)
+IMS_BOOL ipAddress_ParseIP6(IN CONST AString& strIP6, OUT IMS_BYTE* pIP6)
 {
     AStringArray objIPv6 = strIP6.Split(':');
     IMS_SINT32 nCount = objIPv6.GetCount();
@@ -79,14 +79,14 @@ IMS_BOOL ipAddress_ParseIP6(IN CONST AString &strIP6, OUT IMS_BYTE *pIP6)
             return IMS_FALSE;
         }
 
-        const AString &strValue = objIPv6.GetElementAt(i);
+        const AString& strValue = objIPv6.GetElementAt(i);
 
         if (strValue.IsEmpty())
         {
             if (i == nCount - 1)
             {
                 // Special case: ":" is last character
-                const AString &strTmp = objIPv6.GetElementAt(i-1);
+                const AString& strTmp = objIPv6.GetElementAt(i - 1);
 
                 if (!strTmp.IsEmpty())
                 {
@@ -99,7 +99,7 @@ IMS_BOOL ipAddress_ParseIP6(IN CONST AString &strIP6, OUT IMS_BYTE *pIP6)
             else if (i == 0)
             {
                 // Special case: ":" is first character
-                const AString &strTmp = objIPv6.GetElementAt(i+1);
+                const AString& strTmp = objIPv6.GetElementAt(i + 1);
 
                 if (!strTmp.IsEmpty())
                 {
@@ -165,21 +165,22 @@ IMS_BOOL ipAddress_ParseIP6(IN CONST AString &strIP6, OUT IMS_BYTE *pIP6)
 class GroupOfZeroes
 {
 public:
-    inline GroupOfZeroes()
-        : nStart(-1)
-        , nEnd(-1)
-    {}
+    inline GroupOfZeroes() :
+            nStart(-1),
+            nEnd(-1)
+    {
+    }
 
-    inline GroupOfZeroes(IN CONST GroupOfZeroes &objRHS)
-        : nStart(objRHS.nStart)
-        , nEnd(objRHS.nEnd)
-    {}
+    inline GroupOfZeroes(IN CONST GroupOfZeroes& objRHS) :
+            nStart(objRHS.nStart),
+            nEnd(objRHS.nEnd)
+    {
+    }
 
-    inline ~GroupOfZeroes()
-    {}
+    inline ~GroupOfZeroes() {}
 
 public:
-    inline GroupOfZeroes& operator=(IN CONST GroupOfZeroes &objRHS)
+    inline GroupOfZeroes& operator=(IN CONST GroupOfZeroes& objRHS)
     {
         if (this != &objRHS)
         {
@@ -191,34 +192,30 @@ public:
     }
 
     // Gets the start / end index of group of zeroes
-    inline IMS_SINT32 GetIndexS() const
-    { return nStart; }
-    inline IMS_SINT32 GetIndexE() const
-    { return nEnd; }
+    inline IMS_SINT32 GetIndexS() const { return nStart; }
+    inline IMS_SINT32 GetIndexE() const { return nEnd; }
 
     // Sets the start / end index of group of zeroes
-    inline void SetIndexS(IN IMS_SINT32 nIndex)
-    { nStart = nIndex; }
-    inline void SetIndexE(IN IMS_SINT32 nIndex)
-    { nEnd = nIndex; }
+    inline void SetIndexS(IN IMS_SINT32 nIndex) { nStart = nIndex; }
+    inline void SetIndexE(IN IMS_SINT32 nIndex) { nEnd = nIndex; }
 
 private:
     IMS_SINT32 nStart;
     IMS_SINT32 nEnd;
 };
 
-#endif // __IMS_IPV6_SHORT_FORM__
+#endif  // __IMS_IPV6_SHORT_FORM__
 
 class IPAddressPrivate
 {
 public:
     IPAddressPrivate();
-    IPAddressPrivate(IN CONST IPAddressPrivate &objRHS);
+    IPAddressPrivate(IN CONST IPAddressPrivate& objRHS);
 
 public:
     void SetAddress(IN IMS_UINT32 nA_ = 0);
-    void SetAddress(IN CONST IMS_BYTE *pA_);
-    void SetAddress(IN CONST IPv6Address &objA_);
+    void SetAddress(IN CONST IMS_BYTE* pA_);
+    void SetAddress(IN CONST IPv6Address& objA_);
 
 private:
     friend class IPAddress;
@@ -239,18 +236,18 @@ private:
 };
 
 PUBLIC
-IPAddressPrivate::IPAddressPrivate()
-    : nType(TYPE_UNKNOWN)
-    , nA(0)
+IPAddressPrivate::IPAddressPrivate() :
+        nType(TYPE_UNKNOWN),
+        nA(0)
 {
     IMS_MEM_Memset(&objA6, 0x00, sizeof(IPv6Address));
 }
 
 PUBLIC
-IPAddressPrivate::IPAddressPrivate(IN CONST IPAddressPrivate &objRHS)
-    : nType(objRHS.nType)
-    , nA(objRHS.nA)
-    , objA6(objRHS.objA6)
+IPAddressPrivate::IPAddressPrivate(IN CONST IPAddressPrivate& objRHS) :
+        nType(objRHS.nType),
+        nA(objRHS.nA),
+        objA6(objRHS.objA6)
 {
 }
 
@@ -262,7 +259,7 @@ void IPAddressPrivate::SetAddress(IN IMS_UINT32 nA_ /* = 0 */)
 }
 
 PUBLIC
-void IPAddressPrivate::SetAddress(IN CONST IMS_BYTE *pA_)
+void IPAddressPrivate::SetAddress(IN CONST IMS_BYTE* pA_)
 {
     nType = TYPE_IPv6;
 
@@ -273,21 +270,21 @@ void IPAddressPrivate::SetAddress(IN CONST IMS_BYTE *pA_)
 }
 
 PUBLIC
-void IPAddressPrivate::SetAddress(IN CONST IPv6Address &objA_)
+void IPAddressPrivate::SetAddress(IN CONST IPv6Address& objA_)
 {
     nType = TYPE_IPv6;
     objA6 = objA_;
 }
 
 PUBLIC
-IMS_BYTE& IPv6Address::operator [](IN IMS_SINT32 i)
+IMS_BYTE& IPv6Address::operator[](IN IMS_SINT32 i)
 {
     IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
     return aIP6[i];
 }
 
 PUBLIC
-IMS_BYTE IPv6Address::operator [](IN IMS_SINT32 i) const
+IMS_BYTE IPv6Address::operator[](IN IMS_SINT32 i) const
 {
     IMS_ASSERT((i >= 0) && (i < MAX_SIZE));
     return aIP6[i];
@@ -306,7 +303,7 @@ ByteArray IPv6Address::ToNetworkByteOrder() const
 
     for (IMS_SINT32 i = 0; i < MAX_SIZE; i += 2)
     {
-        objIP6.Append(aIP6[i+1]);
+        objIP6.Append(aIP6[i + 1]);
         objIP6.Append(aIP6[i]);
     }
 
@@ -322,42 +319,42 @@ const IPAddress IPAddress::IPv6LOOPBACK = IPAddress(AString("::1"));
 const IPAddress IPAddress::IPv6NONE = IPAddress(AString("::"));
 
 PUBLIC
-IPAddress::IPAddress()
-    : pIPA(new IPAddressPrivate())
+IPAddress::IPAddress() :
+        pIPA(new IPAddressPrivate())
 {
 }
 
 PUBLIC
-IPAddress::IPAddress(IN IMS_UINT32 nIP_)
-    : pIPA(new IPAddressPrivate())
+IPAddress::IPAddress(IN IMS_UINT32 nIP_) :
+        pIPA(new IPAddressPrivate())
 {
     pIPA->SetAddress(nIP_);
 }
 
 PUBLIC
-IPAddress::IPAddress(IN CONST IMS_BYTE *pIP_)
-    : pIPA(new IPAddressPrivate())
+IPAddress::IPAddress(IN CONST IMS_BYTE* pIP_) :
+        pIPA(new IPAddressPrivate())
 {
     pIPA->SetAddress(pIP_);
 }
 
 PUBLIC
-IPAddress::IPAddress(IN CONST IPv6Address &objIP_)
-    : pIPA(new IPAddressPrivate())
+IPAddress::IPAddress(IN CONST IPv6Address& objIP_) :
+        pIPA(new IPAddressPrivate())
 {
     pIPA->SetAddress(objIP_);
 }
 
 PUBLIC
-IPAddress::IPAddress(IN CONST AString &strIP_)
-    : pIPA(new IPAddressPrivate())
+IPAddress::IPAddress(IN CONST AString& strIP_) :
+        pIPA(new IPAddressPrivate())
 {
     Parse(strIP_);
 }
 
 PUBLIC
-IPAddress::IPAddress(IN CONST IPAddress &objRHS)
-    : pIPA(new IPAddressPrivate(*(objRHS.pIPA)))
+IPAddress::IPAddress(IN CONST IPAddress& objRHS) :
+        pIPA(new IPAddressPrivate(*(objRHS.pIPA)))
 {
 }
 
@@ -368,7 +365,7 @@ IPAddress::~IPAddress()
 }
 
 PUBLIC
-IPAddress& IPAddress::operator=(IN CONST IPAddress &objRHS)
+IPAddress& IPAddress::operator=(IN CONST IPAddress& objRHS)
 {
     if (this != &objRHS)
     {
@@ -379,7 +376,7 @@ IPAddress& IPAddress::operator=(IN CONST IPAddress &objRHS)
 }
 
 PUBLIC
-IMS_BOOL IPAddress::Equals(IN CONST IPAddress &objIPA) const
+IMS_BOOL IPAddress::Equals(IN CONST IPAddress& objIPA) const
 {
     if (pIPA->nType != objIPA.pIPA->nType)
     {
@@ -486,7 +483,7 @@ IMS_BOOL IPAddress::IsNoneAddress() const
 }
 
 PUBLIC
-IMS_BOOL IPAddress::Parse(IN CONST AString &strIP_)
+IMS_BOOL IPAddress::Parse(IN CONST AString& strIP_)
 {
     pIPA->nType = IPAddressPrivate::TYPE_UNKNOWN;
 
@@ -549,7 +546,8 @@ AString IPAddress::ToString() const
         IMS_UINT32 nA = ToIPv4Address();
         AString strIP;
 
-        strIP.Sprintf("%d.%d.%d.%d", (nA >> 24) & 0xff, (nA >> 16) & 0xff, (nA >> 8) & 0xff, nA & 0xff);
+        strIP.Sprintf(
+                "%d.%d.%d.%d", (nA >> 24) & 0xff, (nA >> 16) & 0xff, (nA >> 8) & 0xff, nA & 0xff);
 
         return strIP;
     }
@@ -560,7 +558,7 @@ AString IPAddress::ToString() const
 
         for (IMS_SINT32 i = 0; i < 8; ++i)
         {
-            aTmp[i] = (IMS_UINT16(pIPA->objA6[2*i] << 8)) | (IMS_UINT16(pIPA->objA6[2*i + 1]));
+            aTmp[i] = (IMS_UINT16(pIPA->objA6[2 * i] << 8)) | (IMS_UINT16(pIPA->objA6[2 * i + 1]));
         }
 
 #ifndef __IMS_IPV6_SHORT_FORM__
@@ -595,8 +593,8 @@ AString IPAddress::ToString() const
         if (objGoZs.IsEmpty())
         {
             AString strIP;
-            strIP.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x",
-                    aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
+            strIP.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x", aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4],
+                    aTmp[5], aTmp[6], aTmp[7]);
 
             return strIP;
         }
@@ -613,10 +611,10 @@ AString IPAddress::ToString() const
             // Find the largest group of zeroes
             for (IMS_UINT32 i = 0; i < objGoZs.GetSize(); ++i)
             {
-                const GroupOfZeroes &objTmpGoZ = objGoZs.GetAt(i);
+                const GroupOfZeroes& objTmpGoZ = objGoZs.GetAt(i);
 
-                if ((objGoZ.GetIndexE() - objGoZ.GetIndexS())
-                        < (objTmpGoZ.GetIndexE() - objTmpGoZ.GetIndexS()))
+                if ((objGoZ.GetIndexE() - objGoZ.GetIndexS()) <
+                        (objTmpGoZ.GetIndexE() - objTmpGoZ.GetIndexS()))
                 {
                     objGoZ = objTmpGoZ;
                 }
@@ -642,8 +640,8 @@ AString IPAddress::ToString() const
             // The symbol "::" MUST NOT be used to shorten just one 16-bit 0 field.
             // For example, the representation 2001:db8:0:1:1:1:1:1 is correct, but
             // 2001:db8::1:1:1:1:1 is not correct.
-            if ((objGoZ.GetIndexS() == objGoZ.GetIndexE())
-                    && (objGoZ.GetIndexS() != 0) && (objGoZ.GetIndexS() != 7))
+            if ((objGoZ.GetIndexS() == objGoZ.GetIndexE()) && (objGoZ.GetIndexS() != 0) &&
+                    (objGoZ.GetIndexS() != 7))
             {
                 objIP.Append('0');
             }
@@ -666,11 +664,11 @@ AString IPAddress::ToString() const
         }
 #else
         AString strIP;
-        strIP.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x",
-                aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
+        strIP.Sprintf("%x:%x:%x:%x:%x:%x:%x:%x", aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4],
+                aTmp[5], aTmp[6], aTmp[7]);
 
         return strIP;
-#endif // __IMS_IPV6_SHORT_FORM__
+#endif  // __IMS_IPV6_SHORT_FORM__
     }
 
     return AString::ConstNull();
@@ -680,11 +678,16 @@ PUBLIC
 const IMS_CHAR* IPAddress::ToCharString() const
 {
     const IMS_UINT32 MAX_SIZE = 50;
-    static IMS_CHAR acIP_0[MAX_SIZE + 1] = { 0, };
-    static IMS_CHAR acIP_1[MAX_SIZE + 1] = { 0, };
+    static IMS_CHAR acIP_0[MAX_SIZE + 1] = {
+            0,
+    };
+    static IMS_CHAR acIP_1[MAX_SIZE + 1] = {
+            0,
+    };
 
-    IMS_SINT32 nSlotId = SystemConfig::IsMultiSimEnabled() ?\
-            ThreadService::GetCurrentSlotId(IMS_SLOT_0) : IMS_SLOT_0;
+    IMS_SINT32 nSlotId = SystemConfig::IsMultiSimEnabled()
+            ? ThreadService::GetCurrentSlotId(IMS_SLOT_0)
+            : IMS_SLOT_0;
     IMS_CHAR* acIP = (nSlotId == IMS_SLOT_0) ? acIP_0 : acIP_1;
 
     acIP[0] = '\0';
@@ -693,8 +696,8 @@ const IMS_CHAR* IPAddress::ToCharString() const
     {
         IMS_UINT32 nA = ToIPv4Address();
 
-        IMS_Sprintf(acIP, MAX_SIZE, "%d.%d.%d.%d",
-                (nA >> 24) & 0xff, (nA >> 16) & 0xff, (nA >> 8) & 0xff, nA & 0xff);
+        IMS_Sprintf(acIP, MAX_SIZE, "%d.%d.%d.%d", (nA >> 24) & 0xff, (nA >> 16) & 0xff,
+                (nA >> 8) & 0xff, nA & 0xff);
 
         return acIP;
     }
@@ -705,7 +708,7 @@ const IMS_CHAR* IPAddress::ToCharString() const
 
         for (IMS_SINT32 i = 0; i < 8; ++i)
         {
-            aTmp[i] = (IMS_UINT16(pIPA->objA6[2*i] << 8)) | (IMS_UINT16(pIPA->objA6[2*i + 1]));
+            aTmp[i] = (IMS_UINT16(pIPA->objA6[2 * i] << 8)) | (IMS_UINT16(pIPA->objA6[2 * i + 1]));
         }
 
 #ifndef __IMS_IPV6_SHORT_FORM__
@@ -739,8 +742,8 @@ const IMS_CHAR* IPAddress::ToCharString() const
 
         if (objGoZs.IsEmpty())
         {
-            IMS_Sprintf(acIP, MAX_SIZE, "%x:%x:%x:%x:%x:%x:%x:%x",
-                    aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
+            IMS_Sprintf(acIP, MAX_SIZE, "%x:%x:%x:%x:%x:%x:%x:%x", aTmp[0], aTmp[1], aTmp[2],
+                    aTmp[3], aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
 
             return acIP;
         }
@@ -751,16 +754,16 @@ const IMS_CHAR* IPAddress::ToCharString() const
             // Find the largest group of zeroes
             for (IMS_UINT32 i = 0; i < objGoZs.GetSize(); ++i)
             {
-                const GroupOfZeroes &objTmpGoZ = objGoZs.GetAt(i);
+                const GroupOfZeroes& objTmpGoZ = objGoZs.GetAt(i);
 
-                if ((objGoZ.GetIndexE() - objGoZ.GetIndexS())
-                        < (objTmpGoZ.GetIndexE() - objTmpGoZ.GetIndexS()))
+                if ((objGoZ.GetIndexE() - objGoZ.GetIndexS()) <
+                        (objTmpGoZ.GetIndexE() - objTmpGoZ.GetIndexS()))
                 {
                     objGoZ = objTmpGoZ;
                 }
             }
 
-            IMS_CHAR *pIP = &acIP[0];
+            IMS_CHAR* pIP = &acIP[0];
             IMS_UINT32 nMaxSize = MAX_SIZE;
 
             if (objGoZ.GetIndexS() == 0)
@@ -801,42 +804,34 @@ const IMS_CHAR* IPAddress::ToCharString() const
             return acIP;
         }
 #else
-        IMS_Sprintf(acIP, MAX_SIZE, "%x:%x:%x:%x:%x:%x:%x:%x",
-                aTmp[0], aTmp[1], aTmp[2], aTmp[3], aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
+        IMS_Sprintf(acIP, MAX_SIZE, "%x:%x:%x:%x:%x:%x:%x:%x", aTmp[0], aTmp[1], aTmp[2], aTmp[3],
+                aTmp[4], aTmp[5], aTmp[6], aTmp[7]);
 
         return acIP;
-#endif // __IMS_IPV6_SHORT_FORM__
+#endif  // __IMS_IPV6_SHORT_FORM__
     }
 
     return acIP;
 }
 
-PUBLIC GLOBAL
-IMS_UINT16 IPAddress::HToNS(IN IMS_UINT16 nHost)
+PUBLIC GLOBAL IMS_UINT16 IPAddress::HToNS(IN IMS_UINT16 nHost)
 {
     return (((nHost & 0x00FF) << 8) | ((nHost & 0xFF00) >> 8));
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 IPAddress::HToNL(IN IMS_UINT32 nHost)
+PUBLIC GLOBAL IMS_UINT32 IPAddress::HToNL(IN IMS_UINT32 nHost)
 {
-    return (((nHost & 0x000000FFU) << 24)
-            | ((nHost & 0x0000FF00U) << 8)
-            | ((nHost & 0x00FF0000U) >> 8)
-            | ((nHost & 0xFF000000U) >> 24));
+    return (((nHost & 0x000000FFU) << 24) | ((nHost & 0x0000FF00U) << 8) |
+            ((nHost & 0x00FF0000U) >> 8) | ((nHost & 0xFF000000U) >> 24));
 }
 
-PUBLIC GLOBAL
-IMS_UINT16 IPAddress::NToHS(IN IMS_UINT16 nNetwork)
+PUBLIC GLOBAL IMS_UINT16 IPAddress::NToHS(IN IMS_UINT16 nNetwork)
 {
     return (((nNetwork & 0x00FF) << 8) | ((nNetwork & 0xFF00) >> 8));
 }
 
-PUBLIC GLOBAL
-IMS_UINT32 IPAddress::NToHL(IN IMS_UINT32 nNetwork)
+PUBLIC GLOBAL IMS_UINT32 IPAddress::NToHL(IN IMS_UINT32 nNetwork)
 {
-    return (((nNetwork & 0x000000FFU) << 24)
-            | ((nNetwork & 0x0000FF00U) << 8)
-            | ((nNetwork & 0x00FF0000U) >> 8)
-            | ((nNetwork & 0xFF000000U) >> 24));
+    return (((nNetwork & 0x000000FFU) << 24) | ((nNetwork & 0x0000FF00U) << 8) |
+            ((nNetwork & 0x00FF0000U) >> 8) | ((nNetwork & 0xFF000000U) >> 24));
 }

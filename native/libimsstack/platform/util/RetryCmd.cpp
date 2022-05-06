@@ -18,14 +18,13 @@
 __IMS_TRACE_TAG_BASE__;
 
 PUBLIC
-RetryCmd::RetryCmd(IN IMS_UINT32 nIDCmd_ /* = 0 */)
-    : nIDCmd(nIDCmd_)
-    , piListener(IMS_NULL)
+RetryCmd::RetryCmd(IN IMS_UINT32 nIDCmd_ /* = 0 */) :
+        nIDCmd(nIDCmd_),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-RetryCmd::~RetryCmd()
+PUBLIC VIRTUAL RetryCmd::~RetryCmd()
 {
     IMS_TRACE_D("Destructor :: RetryCmd (%d)", nIDCmd, 0, 0);
 }

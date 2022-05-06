@@ -16,27 +16,26 @@
 #include "IFrameworkThreadListener.h"
 #include "IMSFramework.h"
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSFramework::IMSFramework()
-    : IMSAppThread()
-    , piThisMutex(IMS_NULL)
-    , objListeners(IMSList<IFrameworkThreadListener*>())
+IMSFramework::IMSFramework() :
+        IMSAppThread(),
+        piThisMutex(IMS_NULL),
+        objListeners(IMSList<IFrameworkThreadListener*>())
 {
     piThisMutex = MutexService::GetMutexService()->CreateMutex();
 }
 
-PUBLIC VIRTUAL
-IMSFramework::~IMSFramework()
+PUBLIC VIRTUAL IMSFramework::~IMSFramework()
 {
     MutexService::GetMutexService()->DestroyMutex(piThisMutex);
     SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
 }
 
 PUBLIC
-void IMSFramework::AddListener(IN IFrameworkThreadListener *piListener)
+void IMSFramework::AddListener(IN IFrameworkThreadListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -47,7 +46,7 @@ void IMSFramework::AddListener(IN IFrameworkThreadListener *piListener)
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener *piThreadListener = objListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
@@ -60,7 +59,7 @@ void IMSFramework::AddListener(IN IFrameworkThreadListener *piListener)
 }
 
 PUBLIC
-void IMSFramework::RemoveListener(IN IFrameworkThreadListener *piListener)
+void IMSFramework::RemoveListener(IN IFrameworkThreadListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -71,7 +70,7 @@ void IMSFramework::RemoveListener(IN IFrameworkThreadListener *piListener)
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener *piThreadListener = objListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = objListeners.GetAt(i);
 
         if (piThreadListener == piListener)
         {
@@ -81,11 +80,10 @@ void IMSFramework::RemoveListener(IN IFrameworkThreadListener *piListener)
     }
 }
 
-#if 0 // pretected
+#if 0  // pretected
 #endif
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSFramework::Initialize()
+PROTECTED VIRTUAL IMS_BOOL IMSFramework::Initialize()
 {
     SystemConfigManager::CacheSystemFeatures();
     SystemConfigManager::GetInstance()->SetProxyThread(GetThread());
@@ -93,14 +91,12 @@ IMS_BOOL IMSFramework::Initialize()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void IMSFramework::Uninitialize()
+PROTECTED VIRTUAL void IMSFramework::Uninitialize()
 {
     SystemConfigManager::GetInstance()->SetProxyThread(IMS_NULL);
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSFramework::OnStart(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnStart(IN IMSMSG& objMSG)
 {
     IMSAppThread::OnStart(objMSG);
 
@@ -109,8 +105,7 @@ IMS_BOOL IMSFramework::OnStart(IN IMSMSG &objMSG)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSFramework::OnTerminate(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnTerminate(IN IMSMSG& objMSG)
 {
     IMSAppThread::OnTerminate(objMSG);
 
@@ -119,8 +114,7 @@ IMS_BOOL IMSFramework::OnTerminate(IN IMSMSG &objMSG)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSFramework::OnMessage(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL IMSFramework::OnMessage(IN IMSMSG& objMSG)
 {
     IMSAppThread::OnMessage(objMSG);
 
@@ -139,7 +133,7 @@ void IMSFramework::NotifyThreadStarted()
 
     for (IMS_UINT32 i = 0; i < objThreadListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener *piThreadListener = objThreadListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = objThreadListeners.GetAt(i);
 
         if (piThreadListener != IMS_NULL)
         {
@@ -160,7 +154,7 @@ void IMSFramework::NotifyThreadTerminated()
 
     for (IMS_UINT32 i = 0; i < objThreadListeners.GetSize(); ++i)
     {
-        IFrameworkThreadListener *piThreadListener = objThreadListeners.GetAt(i);
+        IFrameworkThreadListener* piThreadListener = objThreadListeners.GetAt(i);
 
         if (piThreadListener != IMS_NULL)
         {

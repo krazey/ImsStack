@@ -17,52 +17,46 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-
-
-static const IMS_CHAR* ACCESS_CLASS[] =
-{
-    "",
-    "3GPP-GERAN",
-    "3GPP-UTRAN",
-    "3GPP-E-UTRAN",
-    "3GPP-NR",
-    "3GPP-WLAN",
-    "3GPP-GAN",
-    "3GPP-HSPA"
+static const IMS_CHAR* ACCESS_CLASS[] = {
+        "",
+        "3GPP-GERAN",
+        "3GPP-UTRAN",
+        "3GPP-E-UTRAN",
+        "3GPP-NR",
+        "3GPP-WLAN",
+        "3GPP-GAN",
+        "3GPP-HSPA",
 };
 
-static const IMS_CHAR* ACCESS_TYPE[] =
-{
-    "",
-    // 3GPP
-    "3GPP-GERAN",
-    "3GPP-UTRAN-FDD",
-    "3GPP-UTRAN-TDD",
-    "3GPP-E-UTRAN-FDD",
-    "3GPP-E-UTRAN-TDD",
-    "3GPP-NR-FDD",
-    "3GPP-NR-TDD",
+static const IMS_CHAR* ACCESS_TYPE[] = {
+        "",
+        // 3GPP
+        "3GPP-GERAN",
+        "3GPP-UTRAN-FDD",
+        "3GPP-UTRAN-TDD",
+        "3GPP-E-UTRAN-FDD",
+        "3GPP-E-UTRAN-TDD",
+        "3GPP-NR-FDD",
+        "3GPP-NR-TDD",
 
-    // 3GPP2
-    "3GPP2-1X",
-    "3GPP2-1X-HRPD",
-    "3GPP2-UMB",
+        // 3GPP2
+        "3GPP2-1X",
+        "3GPP2-1X-HRPD",
+        "3GPP2-UMB",
 
-    // WIFI
-    "IEEE-802.11",
-    "IEEE-802.11a",
-    "IEEE-802.11b",
-    "IEEE-802.11g",
-    "IEEE-802.11n",
+        // WIFI
+        "IEEE-802.11",
+        "IEEE-802.11a",
+        "IEEE-802.11b",
+        "IEEE-802.11g",
+        "IEEE-802.11n",
 
-    "DOCSIS"
+        "DOCSIS",
 };
-
-
 
 LOCAL
-void GetAccessInfo(IN CONST CGI_3GPP &stAI,
-        IN CONST AString &strCellInfo, OUT AStringBuffer &objBuffer)
+void GetAccessInfo(
+        IN CONST CGI_3GPP& stAI, IN CONST AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
     {
@@ -79,28 +73,25 @@ void GetAccessInfo(IN CONST CGI_3GPP &stAI,
         if ((stAI.aPLMNId[2] & 0x0F) == 0x0F)
         {
             // mnc is 2digits
-            objBuffer.Sprintf("cgi-3gpp=%x%x%x%x%x%02x%02x%02x%02x",
-                    (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
-                    (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F,
-                    stAI.aLAC[0], stAI.aLAC[1],
-                    stAI.aCI[0], stAI.aCI[1]);
+            objBuffer.Sprintf("cgi-3gpp=%x%x%x%x%x%02x%02x%02x%02x", (stAI.aPLMNId[0] >> 4) & 0x0F,
+                    stAI.aPLMNId[0] & 0x0F, (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aLAC[0], stAI.aLAC[1], stAI.aCI[0],
+                    stAI.aCI[1]);
         }
         else
         {
             objBuffer.Sprintf("cgi-3gpp=%x%x%x%x%x%x%02x%02x%02x%02x",
                     (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
                     (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F,
-                    stAI.aLAC[0], stAI.aLAC[1],
-                    stAI.aCI[0], stAI.aCI[1]);
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F, stAI.aLAC[0],
+                    stAI.aLAC[1], stAI.aCI[0], stAI.aCI[1]);
         }
     }
 }
 
 LOCAL
-void GetAccessInfo(IN CONST UTRAN_CELL_ID_3GPP &stAI,
-        IN CONST AString &strCellInfo, OUT AStringBuffer &objBuffer)
+void GetAccessInfo(IN CONST UTRAN_CELL_ID_3GPP& stAI, IN CONST AString& strCellInfo,
+        OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
     {
@@ -120,8 +111,7 @@ void GetAccessInfo(IN CONST UTRAN_CELL_ID_3GPP &stAI,
             objBuffer.Sprintf("utran-cell-id-3gpp=%x%x%x%x%x%02x%02x%02x%02x%02x%x",
                     (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
                     (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F,
-                    stAI.aLACorTAC[0], stAI.aLACorTAC[1],
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aLACorTAC[0], stAI.aLACorTAC[1],
                     stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2], (stAI.aCellId[3] & 0x0F));
         }
         else
@@ -129,16 +119,16 @@ void GetAccessInfo(IN CONST UTRAN_CELL_ID_3GPP &stAI,
             objBuffer.Sprintf("utran-cell-id-3gpp=%x%x%x%x%x%x%02x%02x%02x%02x%02x%x",
                     (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
                     (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F,
-                    stAI.aLACorTAC[0], stAI.aLACorTAC[1],
-                    stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2], (stAI.aCellId[3] & 0x0F));
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F, stAI.aLACorTAC[0],
+                    stAI.aLACorTAC[1], stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2],
+                    (stAI.aCellId[3] & 0x0F));
         }
     }
 }
 
 LOCAL
-void GetAccessInfo(IN CONST NR_UTRAN_CELL_ID_3GPP &stAI,
-        IN CONST AString &strCellInfo, OUT AStringBuffer &objBuffer)
+void GetAccessInfo(IN CONST NR_UTRAN_CELL_ID_3GPP& stAI, IN CONST AString& strCellInfo,
+        OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
     {
@@ -158,8 +148,7 @@ void GetAccessInfo(IN CONST NR_UTRAN_CELL_ID_3GPP &stAI,
             objBuffer.Sprintf("utran-cell-id-3gpp=%x%x%x%x%x%02x%02x%02x%02x%02x%02x%02x%x",
                     (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
                     (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F,
-                    stAI.aTAC[0], stAI.aTAC[1], stAI.aTAC[2],
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aTAC[0], stAI.aTAC[1], stAI.aTAC[2],
                     stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2], stAI.aCellId[3],
                     (stAI.aCellId[4] & 0x0F));
         }
@@ -168,17 +157,16 @@ void GetAccessInfo(IN CONST NR_UTRAN_CELL_ID_3GPP &stAI,
             objBuffer.Sprintf("utran-cell-id-3gpp=%x%x%x%x%x%x%02x%02x%02x%02x%02x%02x%02x%x",
                     (stAI.aPLMNId[0] >> 4) & 0x0F, stAI.aPLMNId[0] & 0x0F,
                     (stAI.aPLMNId[1] >> 4) & 0x0F, stAI.aPLMNId[1] & 0x0F,
-                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F,
-                    stAI.aTAC[0], stAI.aTAC[1], stAI.aTAC[2],
-                    stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2], stAI.aCellId[3],
-                    (stAI.aCellId[4] & 0x0F));
+                    (stAI.aPLMNId[2] >> 4) & 0x0F, stAI.aPLMNId[2] & 0x0F, stAI.aTAC[0],
+                    stAI.aTAC[1], stAI.aTAC[2], stAI.aCellId[0], stAI.aCellId[1], stAI.aCellId[2],
+                    stAI.aCellId[3], (stAI.aCellId[4] & 0x0F));
         }
     }
 }
 
 LOCAL
-void GetAccessInfo(IN CONST CI_3GPP2 &stAI,
-        IN CONST AString &strCellInfo, OUT AStringBuffer &objBuffer)
+void GetAccessInfo(
+        IN CONST CI_3GPP2& stAI, IN CONST AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
     {
@@ -208,20 +196,19 @@ void GetAccessInfo(IN CONST CI_3GPP2 &stAI,
         objBuffer.Append(strHEX);
 
         // carrier id - plmn id (mcc + mnc)
-        if ((stAI.aCarrierId[0] != 0x00)
-                || (stAI.aCarrierId[1] != 0x00)
-                || (stAI.aCarrierId[2] != 0x00))
+        if ((stAI.aCarrierId[0] != 0x00) || (stAI.aCarrierId[1] != 0x00) ||
+                (stAI.aCarrierId[2] != 0x00))
         {
-            strHEX.Sprintf("%02X%02X%02X",
-                    stAI.aCarrierId[0], stAI.aCarrierId[1], stAI.aCarrierId[2]);
+            strHEX.Sprintf(
+                    "%02X%02X%02X", stAI.aCarrierId[0], stAI.aCarrierId[1], stAI.aCarrierId[2]);
             objBuffer.Append(strHEX);
         }
     }
 }
 
 LOCAL
-void GetAccessInfo(IN CONST I_WLAN_NODE_ID &stAI,
-        IN CONST AString &strCellInfo, OUT AStringBuffer &objBuffer)
+void GetAccessInfo(
+        IN CONST I_WLAN_NODE_ID& stAI, IN CONST AString& strCellInfo, OUT AStringBuffer& objBuffer)
 {
     if (strCellInfo.GetLength() > 0)
     {
@@ -235,15 +222,14 @@ void GetAccessInfo(IN CONST I_WLAN_NODE_ID &stAI,
     }
     else
     {
-        objBuffer.Sprintf("i-wlan-node-id=%02x%02x%02x%02x%02x%02x",
-                stAI.aMAC[0], stAI.aMAC[1], stAI.aMAC[2],
-                stAI.aMAC[3], stAI.aMAC[4], stAI.aMAC[5]);
+        objBuffer.Sprintf("i-wlan-node-id=%02x%02x%02x%02x%02x%02x", stAI.aMAC[0], stAI.aMAC[1],
+                stAI.aMAC[2], stAI.aMAC[3], stAI.aMAC[4], stAI.aMAC[5]);
     }
 }
 
 LOCAL
-IMS_BOOL GetHeaderFromAccessClass(IN CONST AccessNetworkInfo &objANInfo,
-        IN CONST AString &strCellInfo, OUT AString &strHeader)
+IMS_BOOL GetHeaderFromAccessClass(IN CONST AccessNetworkInfo& objANInfo,
+        IN CONST AString& strCellInfo, OUT AString& strHeader)
 {
     if (!objANInfo.bIsAccessInfoRequired)
     {
@@ -255,27 +241,27 @@ IMS_BOOL GetHeaderFromAccessClass(IN CONST AccessNetworkInfo &objANInfo,
 
     switch (objANInfo.nClass)
     {
-    case AccessNetworkInfo::CLASS_3GPP_GERAN: // FALL-THROUGH
-    case AccessNetworkInfo::CLASS_3GPP_GAN:
-        GetAccessInfo(objANInfo.uniAI.cgi_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::CLASS_3GPP_GERAN:  // FALL-THROUGH
+        case AccessNetworkInfo::CLASS_3GPP_GAN:
+            GetAccessInfo(objANInfo.uniAI.cgi_3gpp, strCellInfo, objBuffer);
+            break;
 
-    case AccessNetworkInfo::CLASS_3GPP_HSPA: // FALL-THROUGH
-    case AccessNetworkInfo::CLASS_3GPP_UTRAN: // FALL-THROUGH
-    case AccessNetworkInfo::CLASS_3GPP_E_UTRAN:
-        GetAccessInfo(objANInfo.uniAI.utran_cell_id_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::CLASS_3GPP_HSPA:   // FALL-THROUGH
+        case AccessNetworkInfo::CLASS_3GPP_UTRAN:  // FALL-THROUGH
+        case AccessNetworkInfo::CLASS_3GPP_E_UTRAN:
+            GetAccessInfo(objANInfo.uniAI.utran_cell_id_3gpp, strCellInfo, objBuffer);
+            break;
 
-    case AccessNetworkInfo::CLASS_3GPP_NR:
-        GetAccessInfo(objANInfo.uniAI.nr_utran_cell_id_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::CLASS_3GPP_NR:
+            GetAccessInfo(objANInfo.uniAI.nr_utran_cell_id_3gpp, strCellInfo, objBuffer);
+            break;
 
-    case AccessNetworkInfo::CLASS_3GPP_WLAN:
-        GetAccessInfo(objANInfo.uniAI.i_wlan_node_id, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::CLASS_3GPP_WLAN:
+            GetAccessInfo(objANInfo.uniAI.i_wlan_node_id, strCellInfo, objBuffer);
+            break;
 
-    default:
-        return IMS_FALSE;
+        default:
+            return IMS_FALSE;
     }
 
     strHeader.Sprintf("%s;%s", ACCESS_CLASS[objANInfo.nClass],
@@ -285,8 +271,8 @@ IMS_BOOL GetHeaderFromAccessClass(IN CONST AccessNetworkInfo &objANInfo,
 }
 
 LOCAL
-IMS_BOOL GetHeaderFromAccessType(IN CONST AccessNetworkInfo &objANInfo,
-        IN CONST AString &strCellInfo, OUT AString &strHeader)
+IMS_BOOL GetHeaderFromAccessType(IN CONST AccessNetworkInfo& objANInfo,
+        IN CONST AString& strCellInfo, OUT AString& strHeader)
 {
     if (!objANInfo.bIsAccessInfoRequired)
     {
@@ -298,40 +284,40 @@ IMS_BOOL GetHeaderFromAccessType(IN CONST AccessNetworkInfo &objANInfo,
 
     switch (objANInfo.nType)
     {
-    case AccessNetworkInfo::TYPE_3GPP_GERAN:
-        GetAccessInfo(objANInfo.uniAI.cgi_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::TYPE_3GPP_GERAN:
+            GetAccessInfo(objANInfo.uniAI.cgi_3gpp, strCellInfo, objBuffer);
+            break;
 
-    case AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD:
-        GetAccessInfo(objANInfo.uniAI.utran_cell_id_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD:    // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD:    // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD:
+            GetAccessInfo(objANInfo.uniAI.utran_cell_id_3gpp, strCellInfo, objBuffer);
+            break;
 
-    case AccessNetworkInfo::TYPE_3GPP_NR_FDD: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP_NR_TDD:
-        GetAccessInfo(objANInfo.uniAI.nr_utran_cell_id_3gpp, strCellInfo, objBuffer);
-        break;
+        case AccessNetworkInfo::TYPE_3GPP_NR_FDD:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP_NR_TDD:
+            GetAccessInfo(objANInfo.uniAI.nr_utran_cell_id_3gpp, strCellInfo, objBuffer);
+            break;
 
-        // 3GPP2
-    case AccessNetworkInfo::TYPE_3GPP2_1X: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP2_1X_HRPD: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_3GPP2_UMB:
-        GetAccessInfo(objANInfo.uniAI.ci_3gpp2, strCellInfo, objBuffer);
-        break;
+            // 3GPP2
+        case AccessNetworkInfo::TYPE_3GPP2_1X:       // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP2_1X_HRPD:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_3GPP2_UMB:
+            GetAccessInfo(objANInfo.uniAI.ci_3gpp2, strCellInfo, objBuffer);
+            break;
 
-        // WIFI
-    case AccessNetworkInfo::TYPE_IEEE_802_11: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11A: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11B: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11G: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11N:
-        GetAccessInfo(objANInfo.uniAI.i_wlan_node_id, strCellInfo, objBuffer);
-        break;
+            // WIFI
+        case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11N:
+            GetAccessInfo(objANInfo.uniAI.i_wlan_node_id, strCellInfo, objBuffer);
+            break;
 
-    default:
-        return IMS_FALSE;
+        default:
+            return IMS_FALSE;
     }
 
     strHeader.Sprintf("%s;%s", ACCESS_TYPE[objANInfo.nType],
@@ -340,26 +326,25 @@ IMS_BOOL GetHeaderFromAccessType(IN CONST AccessNetworkInfo &objANInfo,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL AccessNetworkInfoFormatter::Encode(IN CONST AccessNetworkInfo &objANInfo,
-        OUT AString &strHeader, IN CONST AString &strCellInfo/* = AString::ConstNull()*/)
+PUBLIC GLOBAL IMS_BOOL AccessNetworkInfoFormatter::Encode(IN CONST AccessNetworkInfo& objANInfo,
+        OUT AString& strHeader, IN CONST AString& strCellInfo /* = AString::ConstNull()*/)
 {
-    if ((objANInfo.nType < AccessNetworkInfo::TYPE_NONE)
-            || (objANInfo.nType >= AccessNetworkInfo::TYPE_MAX))
+    if ((objANInfo.nType < AccessNetworkInfo::TYPE_NONE) ||
+            (objANInfo.nType >= AccessNetworkInfo::TYPE_MAX))
     {
         IMS_TRACE_D("ANInfo - invalid type", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if ((objANInfo.nClass < AccessNetworkInfo::CLASS_NONE)
-            || (objANInfo.nClass >= AccessNetworkInfo::CLASS_MAX))
+    if ((objANInfo.nClass < AccessNetworkInfo::CLASS_NONE) ||
+            (objANInfo.nClass >= AccessNetworkInfo::CLASS_MAX))
     {
         IMS_TRACE_D("ANInfo - invalid class", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if ((objANInfo.nType == AccessNetworkInfo::TYPE_NONE)
-            && (objANInfo.nClass == AccessNetworkInfo::CLASS_NONE))
+    if ((objANInfo.nType == AccessNetworkInfo::TYPE_NONE) &&
+            (objANInfo.nClass == AccessNetworkInfo::CLASS_NONE))
     {
         IMS_TRACE_D("ANInfo - no network type & class", 0, 0, 0);
         return IMS_FALSE;

@@ -29,14 +29,15 @@ struct __DeviceConfig
     IMS_SINT32 nVtEnabled;
     IMS_SINT32 nWfcEnabled;
 
-    __DeviceConfig()
-        : nActiveModemCount(1)
-        // VoLte always enables because Ims emergency call should be supported.
-        , nImsEmergencyEnabled(1)
-        , nVoLteEnabled(0)
-        , nVtEnabled(0)
-        , nWfcEnabled(0)
-    {}
+    __DeviceConfig() :
+            nActiveModemCount(1),
+            // VoLte always enables because Ims emergency call should be supported.
+            nImsEmergencyEnabled(1),
+            nVoLteEnabled(0),
+            nVtEnabled(0),
+            nWfcEnabled(0)
+    {
+    }
 };
 
 class DeviceConfig
@@ -45,16 +46,14 @@ public:
     DeviceConfig() = delete;
 
 public:
-    inline static IMS_SINT32 GetActiveModemCount()
-    { return s_objConfig.nActiveModemCount; }
-    inline static IMS_BOOL IsImsEmergencyEnabled()
-    { return s_objConfig.nImsEmergencyEnabled == 1; }
+    inline static IMS_SINT32 GetActiveModemCount() { return s_objConfig.nActiveModemCount; }
+    inline static IMS_BOOL IsImsEmergencyEnabled() { return s_objConfig.nImsEmergencyEnabled == 1; }
     inline static IMS_BOOL IsVoLteEnabled()
-    { return (s_objConfig.nVoLteEnabled == 1) || IsImsEmergencyEnabled(); }
-    inline static IMS_BOOL IsVtEnabled()
-    { return s_objConfig.nVtEnabled == 1; }
-    inline static IMS_BOOL IsWfcEnabled()
-    { return s_objConfig.nWfcEnabled == 1; }
+    {
+        return (s_objConfig.nVoLteEnabled == 1) || IsImsEmergencyEnabled();
+    }
+    inline static IMS_BOOL IsVtEnabled() { return s_objConfig.nVtEnabled == 1; }
+    inline static IMS_BOOL IsWfcEnabled() { return s_objConfig.nWfcEnabled == 1; }
 
     static AString ToString();
 

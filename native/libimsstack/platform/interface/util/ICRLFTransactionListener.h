@@ -38,4 +38,4 @@ public:
     virtual void SIPTransaction_Notify() = 0;
 };
 
-#endif // _INTERFACE_CRLF_TRANSACTION_H_
+#endif  // _INTERFACE_CRLF_TRANSACTION_H_

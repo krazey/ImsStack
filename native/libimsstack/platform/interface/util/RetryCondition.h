@@ -36,4 +36,4 @@ private:
     IMSList<RetryCode*> objRetryCodes;
 };
 
-#endif // _RETRY_CONDITION_H_
+#endif  // _RETRY_CONDITION_H_

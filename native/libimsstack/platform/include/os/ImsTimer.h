@@ -19,30 +19,30 @@
 #include "IThread.h"
 #include "ITimer.h"
 
-class ImsTimer
-    : public ITimer
+class ImsTimer : public ITimer
 {
 public:
-    inline ImsTimer()
-        : m_piOwner(IMS_NULL)
-        , m_piListener(IMS_NULL)
-    {}
-    inline virtual ~ImsTimer()
-    {}
+    inline ImsTimer() :
+            m_piOwner(IMS_NULL),
+            m_piListener(IMS_NULL)
+    {
+    }
+    inline virtual ~ImsTimer() {}
 
 public:
-    inline IThread* GetOwner() const
-    { return m_piOwner; }
+    inline IThread* GetOwner() const { return m_piOwner; }
 
-    inline virtual void Destroy()
-    { delete this; }
+    inline virtual void Destroy() { delete this; }
 
     virtual IMS_UINTP GetTimerId() const = 0;
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;
 
 public:
     // To destroy a timer object on owner thread
-    enum { MSG_PARAM_DESTROY = 0};
+    enum
+    {
+        MSG_PARAM_DESTROY = 0
+    };
 
 protected:
     IThread* m_piOwner;

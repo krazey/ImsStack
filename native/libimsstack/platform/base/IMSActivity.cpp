@@ -16,16 +16,16 @@
 #include "IMSProcess.h"
 #include "IMSActivity.h"
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSActivity::IMSActivity(IN CONST AString &strName_ /*= AString::ConstNull() */)
+IMSActivity::IMSActivity(IN CONST AString& strName_ /*= AString::ConstNull() */)
 {
     pIThread = ThreadService::GetThreadService()->GetCurrentThread();
-    const AString &strThreadName
-            = (pIThread != IMS_NULL) ? pIThread->GetName() : AString::ConstEmpty();
-    IMSAppThread *pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
+    const AString& strThreadName =
+            (pIThread != IMS_NULL) ? pIThread->GetName() : AString::ConstEmpty();
+    IMSAppThread* pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
 
     if (pIMSAppThread != IMS_NULL)
     {
@@ -36,11 +36,10 @@ IMSActivity::IMSActivity(IN CONST AString &strName_ /*= AString::ConstNull() */)
     }
 }
 
-PUBLIC VIRTUAL
-IMSActivity::~IMSActivity()
+PUBLIC VIRTUAL IMSActivity::~IMSActivity()
 {
     AString strThreadName = GetOwnerThreadName(strName);
-    IMSAppThread *pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
+    IMSAppThread* pIMSAppThread = IMSProcess::GetInstance()->GetApplicationThread(strThreadName);
 
     if (pIMSAppThread != IMS_NULL)
     {
@@ -49,7 +48,7 @@ IMSActivity::~IMSActivity()
 }
 
 PUBLIC
-IMS_BOOL IMSActivity::PostMessage(IN IMSMSG &objMSG)
+IMS_BOOL IMSActivity::PostMessage(IN IMSMSG& objMSG)
 {
     if (pIThread == IMS_NULL)
     {
@@ -69,10 +68,10 @@ IMS_BOOL IMSActivity::PostMessage(IN IMS_UINT32 nMSG, IN IMS_UINTP nWparam, IN I
     return PostMessage(objMSG);
 }
 
-#if 0 // protected
+#if 0  // protected
 #endif
 
-#if 0 // private
+#if 0  // private
 #endif
 
 PRIVATE

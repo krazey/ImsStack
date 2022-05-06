@@ -26,9 +26,7 @@ class OsIpSecSp;
 class OsIpSecSa;
 class IIPSecPolicyListener;
 
-class OsIpSecPolicy
-    : public IIpSecPolicy
-    , public ITimerListener
+class OsIpSecPolicy : public IIpSecPolicy, public ITimerListener
 {
 public:
     OsIpSecPolicy(IN IMS_SINT32 nId);

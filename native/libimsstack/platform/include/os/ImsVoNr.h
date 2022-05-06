@@ -19,16 +19,14 @@
 #include "ImsSlot.h"
 #include "IVoNr.h"
 
-class ImsVoNr
-    : public ImsSlot
-    , public IVoNr
+class ImsVoNr : public ImsSlot, public IVoNr
 {
 public:
-    inline ImsVoNr(IN IMS_SINT32 nSlotId)
-        : ImsSlot(nSlotId)
-    {}
-    inline virtual ~ImsVoNr()
-    {}
+    inline ImsVoNr(IN IMS_SINT32 nSlotId) :
+            ImsSlot(nSlotId)
+    {
+    }
+    inline virtual ~ImsVoNr() {}
 
 public:
     virtual void DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) = 0;

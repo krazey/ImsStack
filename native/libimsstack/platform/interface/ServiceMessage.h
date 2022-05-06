@@ -42,87 +42,87 @@ private:
 };
 
 #define IMS_MSG_PostThreadMessage(THREAD, MESSAGE) \
-        MessageService::PostMessageThread(THREAD, MESSAGE)
+    MessageService::PostMessageThread(THREAD, MESSAGE)
 
 #define IMS_MSG_PostThreadMessageByName(TARGET, MESSAGE) \
-        MessageService::PostMessage(TARGET, MESSAGE)
+    MessageService::PostMessage(TARGET, MESSAGE)
 
 #ifdef __IMS_MSG_TRACE__
 
-#define IMS_MSG_CreateNPostThreadMessage(THREAD, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessageThread(THREAD, objMsg);\
-    IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0);\
-} while (0)
+#define IMS_MSG_CreateNPostThreadMessage(THREAD, MSG, WPARAM, LPARAM)                              \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessageThread(THREAD, objMsg);                                         \
+        IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0);               \
+    } while (0)
 
-#define IMS_MSG_CreateNPostThreadMessageByName(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessage(TARGET, objMsg);\
-    IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0);\
-} while (0)
+#define IMS_MSG_CreateNPostThreadMessageByName(TARGET, MSG, WPARAM, LPARAM)                        \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessage(TARGET, objMsg);                                               \
+        IMS_TRACE_I("MessageService::PostThreadMessage >> [%s] [%d]", #MSG, MSG, 0);               \
+    } while (0)
 
 #else
 
-#define IMS_MSG_CreateNPostThreadMessage(THREAD, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessageThread(THREAD, objMsg);\
-} while (0)
+#define IMS_MSG_CreateNPostThreadMessage(THREAD, MSG, WPARAM, LPARAM)                              \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessageThread(THREAD, objMsg);                                         \
+    } while (0)
 
-#define IMS_MSG_CreateNPostThreadMessageByName(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessage(TARGET, objMsg);\
-} while (0)
+#define IMS_MSG_CreateNPostThreadMessageByName(TARGET, MSG, WPARAM, LPARAM)                        \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessage(TARGET, objMsg);                                               \
+    } while (0)
 
-#endif // __IMS_MSG_TRACE__
+#endif  // __IMS_MSG_TRACE__
 
 #define IMS_MSG_PostActivityMessage(TARGET, MESSAGE) \
-        MessageService::PostMessageActivity(TARGET, MESSAGE)
+    MessageService::PostMessageActivity(TARGET, MESSAGE)
 
 #define IMS_MSG_PostActivityMessageByName(TARGET, MESSAGE) \
-        MessageService::PostMessage(TARGET, MESSAGE)
+    MessageService::PostMessage(TARGET, MESSAGE)
 
 #ifdef __IMS_MSG_TRACE__
 
-#define IMS_MSG_CreateNPostActivityMessage(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostActivityMessage(TARGET, objMsg);\
-    IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0);\
-} while (0)
+#define IMS_MSG_CreateNPostActivityMessage(TARGET, MSG, WPARAM, LPARAM)                            \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostActivityMessage(TARGET, objMsg);                                       \
+        IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0);             \
+    } while (0)
 
-#define IMS_MSG_CreateNPostActivityMessageByName(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessage(TARGET, objMsg);\
-    IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0);\
-} while (0)
+#define IMS_MSG_CreateNPostActivityMessageByName(TARGET, MSG, WPARAM, LPARAM)                      \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessage(TARGET, objMsg);                                               \
+        IMS_TRACE_I("MessageService::PostActivityMessage >> [%s] [%d]", #MSG, MSG, 0);             \
+    } while (0)
 
 #else
 
-#define IMS_MSG_CreateNPostActivityMessage(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessageActivity(TARGET, objMsg);\
-} while (0)
+#define IMS_MSG_CreateNPostActivityMessage(TARGET, MSG, WPARAM, LPARAM)                            \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessageActivity(TARGET, objMsg);                                       \
+    } while (0)
 
-#define IMS_MSG_CreateNPostActivityMessageByName(TARGET, MSG, WPARAM, LPARAM) \
-do\
-{\
-    ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM));\
-    MessageService::PostMessage(TARGET, objMsg);\
-} while (0)
+#define IMS_MSG_CreateNPostActivityMessageByName(TARGET, MSG, WPARAM, LPARAM)                      \
+    do                                                                                             \
+    {                                                                                              \
+        ImsMessage objMsg(static_cast<IMS_SINT32>(MSG), (IMS_UINTP)(WPARAM), (IMS_UINTP)(LPARAM)); \
+        MessageService::PostMessage(TARGET, objMsg);                                               \
+    } while (0)
 
-#endif // __IMS_MSG_TRACE__
+#endif  // __IMS_MSG_TRACE__
 
 #endif

@@ -21,23 +21,21 @@
 class SelectFds
 {
 public:
-    inline SelectFds()
-        : m_nHighestFd(0)
+    inline SelectFds() :
+            m_nHighestFd(0)
     {
         FD_ZERO(&m_stReadFds);
         FD_ZERO(&m_stWriteFds);
         FD_ZERO(&m_stExceptFds);
     }
-    inline SelectFds(IN const SelectFds& other)
-        : m_nHighestFd(other.m_nHighestFd)
+    inline SelectFds(IN const SelectFds& other) :
+            m_nHighestFd(other.m_nHighestFd)
     {
         IMS_MEM_Memcpy(&m_stReadFds, &(other.m_stReadFds), sizeof(fd_set));
         IMS_MEM_Memcpy(&m_stWriteFds, &(other.m_stWriteFds), sizeof(fd_set));
         IMS_MEM_Memcpy(&m_stExceptFds, &(other.m_stExceptFds), sizeof(fd_set));
     }
-    inline ~SelectFds()
-    {
-    }
+    inline ~SelectFds() {}
 
 public:
     inline SelectFds& operator=(IN const SelectFds& other)
@@ -53,8 +51,7 @@ public:
         return (*this);
     }
 
-    inline void SetHighestFd(IN IMS_SINT32 nFd)
-    { m_nHighestFd = nFd; }
+    inline void SetHighestFd(IN IMS_SINT32 nFd) { m_nHighestFd = nFd; }
 
 public:
     IMS_SINT32 m_nHighestFd;
@@ -63,19 +60,17 @@ public:
     fd_set m_stExceptFds;
 };
 
-
-
 PUBLIC
-OsSelectFdSet::OsSelectFdSet()
-    : ImsFdSet()
-    , m_pFds(new SelectFds())
+OsSelectFdSet::OsSelectFdSet() :
+        ImsFdSet(),
+        m_pFds(new SelectFds())
 {
 }
 
 PUBLIC
-OsSelectFdSet::OsSelectFdSet(IN const OsSelectFdSet& other)
-    : ImsFdSet(other)
-    , m_pFds(IMS_NULL)
+OsSelectFdSet::OsSelectFdSet(IN const OsSelectFdSet& other) :
+        ImsFdSet(other),
+        m_pFds(IMS_NULL)
 {
     if (other.m_pFds != IMS_NULL)
     {
@@ -83,8 +78,7 @@ OsSelectFdSet::OsSelectFdSet(IN const OsSelectFdSet& other)
     }
 }
 
-PUBLIC VIRTUAL
-OsSelectFdSet::~OsSelectFdSet()
+PUBLIC VIRTUAL OsSelectFdSet::~OsSelectFdSet()
 {
     if (m_pFds != IMS_NULL)
     {
@@ -123,8 +117,7 @@ OsSelectFdSet& OsSelectFdSet::operator=(IN const OsSelectFdSet& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSelectFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_SINT32 OsSelectFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     if (nFd < 0)
     {
@@ -168,8 +161,7 @@ IMS_SINT32 OsSelectFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return nClearEvent;
 }
 
-PUBLIC VIRTUAL
-void OsSelectFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
+PUBLIC VIRTUAL void OsSelectFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
 {
     const OsSelectFdSet* pSelectFdSet = DYNAMIC_CAST(const OsSelectFdSet*, pFdSet);
 
@@ -179,9 +171,8 @@ void OsSelectFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSelectFdSet::GetSignaledEvents(IN IMS_SINT32 nFd,
-        IN_OUT IMS_SINT32& nSignaledCount)
+PUBLIC VIRTUAL IMS_SINT32 OsSelectFdSet::GetSignaledEvents(
+        IN IMS_SINT32 nFd, IN_OUT IMS_SINT32& nSignaledCount)
 {
     IMS_SINT32 nSignaledEvents = 0;
 
@@ -208,8 +199,7 @@ IMS_SINT32 OsSelectFdSet::GetSignaledEvents(IN IMS_SINT32 nFd,
     return nSignaledEvents;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsSelectFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_BOOL OsSelectFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     if (nFd < 0)
     {
@@ -239,14 +229,12 @@ IMS_BOOL OsSelectFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsSelectFdSet::IsHighestFdRequired() const
+PUBLIC VIRTUAL IMS_BOOL OsSelectFdSet::IsHighestFdRequired() const
 {
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSelectFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_SINT32 OsSelectFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     if (nFd < 0)
     {
@@ -290,8 +278,7 @@ IMS_SINT32 OsSelectFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return nSetEvent;
 }
 
-PUBLIC VIRTUAL
-void OsSelectFdSet::SetHighestFd(IN IMS_SINT32 nFd)
+PUBLIC VIRTUAL void OsSelectFdSet::SetHighestFd(IN IMS_SINT32 nFd)
 {
     if (m_pFds != IMS_NULL)
     {
@@ -299,8 +286,7 @@ void OsSelectFdSet::SetHighestFd(IN IMS_SINT32 nFd)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsSelectFdSet::WaitForEvents(IN IMS_SINT32 nMilliseconds /*= NO_TIMEOUT*/)
+PUBLIC VIRTUAL IMS_SINT32 OsSelectFdSet::WaitForEvents(IN IMS_SINT32 nMilliseconds /*= NO_TIMEOUT*/)
 {
     if (m_pFds == IMS_NULL)
     {
@@ -311,11 +297,10 @@ IMS_SINT32 OsSelectFdSet::WaitForEvents(IN IMS_SINT32 nMilliseconds /*= NO_TIMEO
 
     if (nMilliseconds > NO_TIMEOUT)
     {
-        stTv.tv_sec = nMilliseconds / 1000; // seconds
-        stTv.tv_usec = (nMilliseconds % 1000) * 1000; // micro-seconds
+        stTv.tv_sec = nMilliseconds / 1000;            // seconds
+        stTv.tv_usec = (nMilliseconds % 1000) * 1000;  // micro-seconds
     }
 
-    return select(m_pFds->m_nHighestFd + 1,
-            &(m_pFds->m_stReadFds), &(m_pFds->m_stWriteFds), &(m_pFds->m_stExceptFds),
-            (nMilliseconds > NO_TIMEOUT) ? &stTv : IMS_NULL);
+    return select(m_pFds->m_nHighestFd + 1, &(m_pFds->m_stReadFds), &(m_pFds->m_stWriteFds),
+            &(m_pFds->m_stExceptFds), (nMilliseconds > NO_TIMEOUT) ? &stTv : IMS_NULL);
 }

@@ -14,34 +14,29 @@
 
 #include "IMSActivityEx.h"
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSActivityEx::IMSActivityEx(IN CONST AString &strName)
-    : IMSActivity(strName)
+IMSActivityEx::IMSActivityEx(IN CONST AString& strName) :
+        IMSActivity(strName)
 {
 }
 
-PUBLIC VIRTUAL
-IMSActivityEx::~IMSActivityEx()
-{
-}
+PUBLIC VIRTUAL IMSActivityEx::~IMSActivityEx() {}
 
-#if 0 // protected
+#if 0  // protected
 #endif
 
-PROTECTED VIRTUAL
-IMS_BOOL IMSActivityEx::OnMessage(IN IMSMSG & /* objMSG */)
+PROTECTED VIRTUAL IMS_BOOL IMSActivityEx::OnMessage(IN IMSMSG& /* objMSG */)
 {
     return IMS_FALSE;
 }
 
-#if 0 // private
+#if 0  // private
 #endif
 
-PRIVATE VIRTUAL
-IMS_BOOL IMSActivityEx::DispatchMessage(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL IMSActivityEx::DispatchMessage(IN IMSMSG& objMSG)
 {
     return OnMessage(objMSG);
 }

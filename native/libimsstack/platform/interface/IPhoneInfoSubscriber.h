@@ -41,11 +41,11 @@ public:
     virtual IMS_BOOL GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim) const = 0;
     virtual IMS_SINT32 GetEmergencyPriorityFromModem() = 0;
     virtual IMS_BOOL IsUiccGbaSupported() = 0;
-    virtual IMS_BOOL GetPreference(IN const AString& strFileName,
-            IN const AString& strKey, OUT AString& strValue,
+    virtual IMS_BOOL GetPreference(IN const AString& strFileName, IN const AString& strKey,
+            OUT AString& strValue,
             IN PREFERENCE_VALUE_ENTYPE enValueType = PREFERENCE_VALUE_STRING) = 0;
-    virtual IMS_BOOL SetPreference(IN const AString& strFileName,
-            IN const AString& strKey, IN const AString& strValue,
+    virtual IMS_BOOL SetPreference(IN const AString& strFileName, IN const AString& strKey,
+            IN const AString& strValue,
             IN PREFERENCE_VALUE_ENTYPE enValueType = PREFERENCE_VALUE_STRING) = 0;
 };
 

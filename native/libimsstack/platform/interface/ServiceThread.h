@@ -33,7 +33,9 @@ public:
 public:
     inline IThread* Create(IN const AString& strName)
             __IMS_DEPRECATED__("Use Create(AString,IMS_SINT32) instead")
-    { return Create(strName, IMS_SLOT_0); }
+    {
+        return Create(strName, IMS_SLOT_0);
+    }
     IThread* Create(IN const AString& strName, IN IMS_SINT32 nSlotId);
     // Creates a thread which needs to communicate with the external module (IN & OUT)
     IThread* CreateEx(IN const AString& strName, IN IMS_SINT32 nSlotId);

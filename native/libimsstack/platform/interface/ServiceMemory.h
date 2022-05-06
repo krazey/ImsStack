@@ -22,26 +22,23 @@
 #ifdef IMS_DEBUG_MEM
 
 #define IMS_MEM_Malloc(SIZE) \
-        MemService::GetMemService()->GetMemHeap()->AllocDebug(SIZE,__IMS_LINE__,__IMS_FILE__)
+    MemService::GetMemService()->GetMemHeap()->AllocDebug(SIZE, __IMS_LINE__, __IMS_FILE__)
 
 #define IMS_MEM_Realloc(MEM, SIZE) \
-        MemService::GetMemService()->GetMemHeap()->ReallocDebug(MEM,SIZE,__IMS_LINE__,__IMS_FILE__)
+    MemService::GetMemService()->GetMemHeap()->ReallocDebug(MEM, SIZE, __IMS_LINE__, __IMS_FILE__)
 
 #define IMS_MEM_Free(MEM) \
-        MemService::GetMemService()->GetMemHeap()->FreeDebug(MEM,__IMS_LINE__,__IMS_FILE__)
+    MemService::GetMemService()->GetMemHeap()->FreeDebug(MEM, __IMS_LINE__, __IMS_FILE__)
 
-#else // IMS_DEBUG_MEM
+#else  // IMS_DEBUG_MEM
 
-#define IMS_MEM_Malloc(SIZE) \
-        MemService::GetMemService()->GetMemHeap()->Alloc(SIZE)
+#define IMS_MEM_Malloc(SIZE) MemService::GetMemService()->GetMemHeap()->Alloc(SIZE)
 
-#define IMS_MEM_Realloc(MEM, SIZE) \
-        MemService::GetMemService()->GetMemHeap()->Realloc(MEM, SIZE)
+#define IMS_MEM_Realloc(MEM, SIZE) MemService::GetMemService()->GetMemHeap()->Realloc(MEM, SIZE)
 
-#define IMS_MEM_Free(MEM) \
-        MemService::GetMemService()->GetMemHeap()->Free(MEM)
+#define IMS_MEM_Free(MEM) MemService::GetMemService()->GetMemHeap()->Free(MEM)
 
-#endif // IMS_DEBUG_MEM
+#endif  // IMS_DEBUG_MEM
 
 class MemService
 {

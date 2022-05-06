@@ -52,7 +52,7 @@ ITimer* TimerService::CreateTimer(IN IMS_BOOL /* bAlarmTimer = IMS_FALSE */)
 }
 
 PUBLIC
-void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread/* = IMS_TRUE*/)
+void TimerService::DestroyTimer(IN ITimer*& piTimer, IN IMS_BOOL bOnOwnerThread /* = IMS_TRUE*/)
 {
     ImsTimer* pTimer = DYNAMIC_CAST(ImsTimer*, piTimer);
 
@@ -135,8 +135,7 @@ void TimerService::DispatchServiceMessage(IN ImsMessage& objMsg)
 }
 
 // Creates the singleton class and return it
-PUBLIC GLOBAL
-TimerService* TimerService::GetTimerService()
+PUBLIC GLOBAL TimerService* TimerService::GetTimerService()
 {
     static TimerService* s_pTimerService = IMS_NULL;
 

@@ -42,21 +42,17 @@ GLOBAL IMS_BOOL ImsNetworkConnectionState_InitInstance()
     return IMS_TRUE;
 }
 
-
-
 PRIVATE
-ImsNetworkConnectionState::ImsNetworkConnectionState()
-    : m_piLock(IMS_NULL)
-    , m_objNetConnectionList(IMSList<ImsNetworkConnection*>())
-    , m_nHandleForMobile(HANDLE_MOBILE_MIN)
-    , m_nHandleForWiFi(HANDLE_WIFI_MIN)
+ImsNetworkConnectionState::ImsNetworkConnectionState() :
+        m_piLock(IMS_NULL),
+        m_objNetConnectionList(IMSList<ImsNetworkConnection*>()),
+        m_nHandleForMobile(HANDLE_MOBILE_MIN),
+        m_nHandleForWiFi(HANDLE_WIFI_MIN)
 {
 }
 
 PUBLIC
-ImsNetworkConnectionState::~ImsNetworkConnectionState()
-{
-}
+ImsNetworkConnectionState::~ImsNetworkConnectionState() {}
 
 PUBLIC
 void ImsNetworkConnectionState::AttachHandle(IN ImsNetworkConnection* pConnection)
@@ -97,8 +93,7 @@ void ImsNetworkConnectionState::DetachAll()
 }
 
 PUBLIC
-void ImsNetworkConnectionState::DetachHandle(IN const AString& strNetProfile,
-        IN IMS_SINT32 nSlotId)
+void ImsNetworkConnectionState::DetachHandle(IN const AString& strNetProfile, IN IMS_SINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);
 
@@ -108,8 +103,8 @@ void ImsNetworkConnectionState::DetachHandle(IN const AString& strNetProfile,
 
         if (pConnection != IMS_NULL)
         {
-            if ((nSlotId == pConnection->GetSlotId())
-                    && strNetProfile.EqualsIgnoreCase(pConnection->GetProfileName()))
+            if ((nSlotId == pConnection->GetSlotId()) &&
+                    strNetProfile.EqualsIgnoreCase(pConnection->GetProfileName()))
             {
                 m_objNetConnectionList.RemoveAt(i);
                 return;
@@ -161,8 +156,8 @@ ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const IPAddress
 }
 
 PUBLIC
-ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const AString& strNetProfile,
-        IN IMS_SINT32 nSlotId)
+ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(
+        IN const AString& strNetProfile, IN IMS_SINT32 nSlotId)
 {
     if (strNetProfile.GetLength() == 0)
     {
@@ -177,8 +172,8 @@ ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const AString& 
 
         if (pConnection != IMS_NULL)
         {
-            if ((nSlotId == pConnection->GetSlotId())
-                    && strNetProfile.EqualsIgnoreCase(pConnection->GetProfileName()))
+            if ((nSlotId == pConnection->GetSlotId()) &&
+                    strNetProfile.EqualsIgnoreCase(pConnection->GetProfileName()))
             {
                 return pConnection;
             }
@@ -188,8 +183,8 @@ ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN const AString& 
     return IMS_NULL;
 }
 
-ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nSlotId)
+ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     LockGuard objLock(m_piLock);
 
@@ -199,8 +194,7 @@ ImsNetworkConnection* ImsNetworkConnectionState::LookupHandle(IN IMS_SINT32 nApn
 
         if (pConnection != IMS_NULL)
         {
-            if ((nSlotId == pConnection->GetSlotId())
-                    && (nApnType == pConnection->GetApnType()))
+            if ((nSlotId == pConnection->GetSlotId()) && (nApnType == pConnection->GetApnType()))
             {
                 return pConnection;
             }
@@ -238,8 +232,7 @@ IMS_BOOL ImsNetworkConnectionState::IsEmpty() const
     return m_objNetConnectionList.IsEmpty();
 }
 
-IMS_CONNECTION ImsNetworkConnectionState::GetAndIncrementHandle(
-        IN IMS_BOOL bMobile /*= IMS_TRUE*/)
+IMS_CONNECTION ImsNetworkConnectionState::GetAndIncrementHandle(IN IMS_BOOL bMobile /*= IMS_TRUE*/)
 {
     IMS_UINT32 nMinHandle = bMobile ? HANDLE_MOBILE_MIN : HANDLE_WIFI_MIN;
     IMS_UINT32 nMaxHandle = bMobile ? HANDLE_MOBILE_MAX : HANDLE_WIFI_MAX;
@@ -274,8 +267,7 @@ IMS_CONNECTION ImsNetworkConnectionState::GetAndIncrementHandle(
     return static_cast<IMS_CONNECTION>(0);
 }
 
-PUBLIC GLOBAL
-ImsNetworkConnectionState* ImsNetworkConnectionState::GetInstance()
+PUBLIC GLOBAL ImsNetworkConnectionState* ImsNetworkConnectionState::GetInstance()
 {
     static ImsNetworkConnectionState* s_pState = IMS_NULL;
 
@@ -296,8 +288,8 @@ IMS_UINT32 ImsNetworkConnectionState::GetNextHandle(IN IMS_BOOL bMobile /*= IMS_
 }
 
 PUBLIC
-void ImsNetworkConnectionState::SetNextHandle(IN IMS_UINT32 nHandle,
-        IN IMS_BOOL bMobile /*= IMS_TRUE*/)
+void ImsNetworkConnectionState::SetNextHandle(
+        IN IMS_UINT32 nHandle, IN IMS_BOOL bMobile /*= IMS_TRUE*/)
 {
     LockGuard objLock(m_piLock);
 

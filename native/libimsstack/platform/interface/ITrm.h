@@ -43,11 +43,11 @@ class ITrm
 public:
     enum
     {
-        SERVICE_NONE            = 0,
-        SERVICE_UT              = (0x0001),
-        SERVICE_REG             = (0x0002),
-        SERVICE_SMS             = (0x0004),
-        SERVICE_VOLTE           = (0x0008)
+        SERVICE_NONE = 0,
+        SERVICE_UT = (0x0001),
+        SERVICE_REG = (0x0002),
+        SERVICE_SMS = (0x0004),
+        SERVICE_VOLTE = (0x0008)
     };
 
     enum
@@ -84,8 +84,8 @@ public:
     /**
      * @brief Set the emergency service start or end state.
      */
-    virtual void SetEmergencyService(IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType,
-        IN IMS_UINT32 nMode) = 0;
+    virtual void SetEmergencyService(
+            IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode) = 0;
 
     /**
      * @brief Set the IPCAN category (CATEGORY_MOBILE, CATEGORY_WLAN).
@@ -95,8 +95,8 @@ public:
     /**
      * @brief Set the service start or end state.
      */
-    virtual IMS_BOOL SetService(IN IMS_UINT32 nSlotId,
-            IN IMS_UINT32 nType, IN IMS_UINT32 nMode) = 0;
+    virtual IMS_BOOL SetService(
+            IN IMS_UINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nMode) = 0;
 
 public:
     /**
@@ -220,8 +220,8 @@ protected:
                 continue;
             }
 
-            IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
-                    IMS_MSG_TRM_PRIORITY_STATUS, 0, 0);
+            IMS_MSG_CreateNPostThreadMessage(
+                    pObserverList->m_piOwnerThread, IMS_MSG_TRM_PRIORITY_STATUS, 0, 0);
         }
     }
 
@@ -241,10 +241,9 @@ protected:
                 if (pObserverList->m_piOwnerThread->GetSlotId() == pParam->nSlotId)
                 {
                     IMS_MSG_CreateNPostThreadMessage(pObserverList->m_piOwnerThread,
-                        IMS_MSG_TRM_PRIORITY_STATUS, SERVICE_CHANGED, pParam);
+                            IMS_MSG_TRM_PRIORITY_STATUS, SERVICE_CHANGED, pParam);
                     return;
                 }
-
             }
         }
 
@@ -257,21 +256,18 @@ protected:
 private:
     class ObserverList
     {
-        public:
-            inline ObserverList(IN ITrmListener* piListener)
-            {
-                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-                m_objListeners.Append(piListener);
-            }
+    public:
+        inline ObserverList(IN ITrmListener* piListener)
+        {
+            m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+            m_objListeners.Append(piListener);
+        }
 
-            inline IMS_BOOL operator==(IN IThread *piThread)
-            {
-                return piThread == m_piOwnerThread;
-            }
+        inline IMS_BOOL operator==(IN IThread* piThread) { return piThread == m_piOwnerThread; }
 
-        public:
-            IThread* m_piOwnerThread;
-            IMSList<ITrmListener*> m_objListeners;
+    public:
+        IThread* m_piOwnerThread;
+        IMSList<ITrmListener*> m_objListeners;
     };
 
 private:

@@ -28,8 +28,8 @@ public:
 class LockGuard
 {
 public:
-    inline explicit LockGuard(IN IMutex* piLock)
-        : m_piLock(piLock)
+    inline explicit LockGuard(IN IMutex* piLock) :
+            m_piLock(piLock)
     {
         if (m_piLock != IMS_NULL)
         {

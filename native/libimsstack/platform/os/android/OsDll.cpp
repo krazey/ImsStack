@@ -24,8 +24,7 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-PUBLIC GLOBAL
-void* OsDll::LoadLibrary(IN const IMS_CHAR* pszName)
+PUBLIC GLOBAL void* OsDll::LoadLibrary(IN const IMS_CHAR* pszName)
 {
     if (pszName == IMS_NULL)
     {
@@ -44,8 +43,7 @@ void* OsDll::LoadLibrary(IN const IMS_CHAR* pszName)
     return pvHandle;
 }
 
-PUBLIC GLOBAL
-void OsDll::FreeLibrary(IN void* pvHandle)
+PUBLIC GLOBAL void OsDll::FreeLibrary(IN void* pvHandle)
 {
     if (pvHandle == IMS_NULL)
     {
@@ -60,8 +58,7 @@ void OsDll::FreeLibrary(IN void* pvHandle)
     }
 }
 
-PUBLIC GLOBAL
-void* OsDll::GetProcAddress(IN void* pvHandle, IN const IMS_CHAR* pszName)
+PUBLIC GLOBAL void* OsDll::GetProcAddress(IN void* pvHandle, IN const IMS_CHAR* pszName)
 {
     IMS_CHAR acProcName[512];
 
@@ -72,7 +69,7 @@ void* OsDll::GetProcAddress(IN void* pvHandle, IN const IMS_CHAR* pszName)
     }
 
     // Some platforms might need a leading underscore for the function symbol
-    (void) snprintf(acProcName, sizeof(acProcName), "_%s", pszName);
+    (void)snprintf(acProcName, sizeof(acProcName), "_%s", pszName);
 
     void* pvProcAddress = dlsym(pvHandle, acProcName);
 

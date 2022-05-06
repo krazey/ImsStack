@@ -26,62 +26,55 @@ __IMS_TRACE_TAG_BASE__;
  */
 
 PUBLIC
-IpSecSaParameter::Policy::Policy()
-    : m_nSpi(0)
-    , m_nDirection(DIRECTION_OUT)
-    , m_nMode(MODE_TRANSPORT)
-    , m_nTransportProtocol(TRANSPORT_PROTOCOL_UDP)
-    , m_objLocalAddress(SocketAddress())
-    , m_objRemoteAddress(SocketAddress())
-    , m_nSocketId(SOCKET_NOT_SET)
+IpSecSaParameter::Policy::Policy() :
+        m_nSpi(0),
+        m_nDirection(DIRECTION_OUT),
+        m_nMode(MODE_TRANSPORT),
+        m_nTransportProtocol(TRANSPORT_PROTOCOL_UDP),
+        m_objLocalAddress(SocketAddress()),
+        m_objRemoteAddress(SocketAddress()),
+        m_nSocketId(SOCKET_NOT_SET)
 {
 }
 
 PUBLIC
-IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi,
-        IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nMode,
-        IN IMS_SINT32 nTransportProtocol,
-        IN const SocketAddress& objLocalAddress,
-        IN const SocketAddress& objRemoteAddress)
-    : m_nSpi(nSpi)
-    , m_nDirection(nDirection)
-    , m_nMode(nMode)
-    , m_nTransportProtocol(nTransportProtocol)
-    , m_objLocalAddress(objLocalAddress)
-    , m_objRemoteAddress(objRemoteAddress)
-    , m_nSocketId(SOCKET_NOT_SET)
+IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMode,
+        IN IMS_SINT32 nTransportProtocol, IN const SocketAddress& objLocalAddress,
+        IN const SocketAddress& objRemoteAddress) :
+        m_nSpi(nSpi),
+        m_nDirection(nDirection),
+        m_nMode(nMode),
+        m_nTransportProtocol(nTransportProtocol),
+        m_objLocalAddress(objLocalAddress),
+        m_objRemoteAddress(objRemoteAddress),
+        m_nSocketId(SOCKET_NOT_SET)
 {
 }
 
 PUBLIC
-IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi,
-        IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nMode,
-        IN IMS_SINT32 nTransportProtocol,
-        IN const IPAddress& objLocalIpAddress,
-        IN IMS_SINT32 nLocalPort,
-        IN const IPAddress& objRemoteIpAddress,
-        IN IMS_SINT32 nRemotePort)
-    : m_nSpi(nSpi)
-    , m_nDirection(nDirection)
-    , m_nMode(nMode)
-    , m_nTransportProtocol(nTransportProtocol)
-    , m_objLocalAddress(SocketAddress(objLocalIpAddress, nLocalPort))
-    , m_objRemoteAddress(SocketAddress(objRemoteIpAddress, nRemotePort))
-    , m_nSocketId(SOCKET_NOT_SET)
+IpSecSaParameter::Policy::Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMode,
+        IN IMS_SINT32 nTransportProtocol, IN const IPAddress& objLocalIpAddress,
+        IN IMS_SINT32 nLocalPort, IN const IPAddress& objRemoteIpAddress,
+        IN IMS_SINT32 nRemotePort) :
+        m_nSpi(nSpi),
+        m_nDirection(nDirection),
+        m_nMode(nMode),
+        m_nTransportProtocol(nTransportProtocol),
+        m_objLocalAddress(SocketAddress(objLocalIpAddress, nLocalPort)),
+        m_objRemoteAddress(SocketAddress(objRemoteIpAddress, nRemotePort)),
+        m_nSocketId(SOCKET_NOT_SET)
 {
 }
 
 PUBLIC
-IpSecSaParameter::Policy::Policy(IN const IpSecSaParameter::Policy& other)
-    : m_nSpi(other.m_nSpi)
-    , m_nDirection(other.m_nDirection)
-    , m_nMode(other.m_nMode)
-    , m_nTransportProtocol(other.m_nTransportProtocol)
-    , m_objLocalAddress(other.m_objLocalAddress)
-    , m_objRemoteAddress(other.m_objRemoteAddress)
-    , m_nSocketId(other.m_nSocketId)
+IpSecSaParameter::Policy::Policy(IN const IpSecSaParameter::Policy& other) :
+        m_nSpi(other.m_nSpi),
+        m_nDirection(other.m_nDirection),
+        m_nMode(other.m_nMode),
+        m_nTransportProtocol(other.m_nTransportProtocol),
+        m_objLocalAddress(other.m_objLocalAddress),
+        m_objRemoteAddress(other.m_objRemoteAddress),
+        m_nSocketId(other.m_nSocketId)
 {
 }
 
@@ -168,8 +161,7 @@ AString IpSecSaParameter::Policy::ToString() const
     return static_cast<const AStringBuffer&>(objSb).GetString();
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::Policy::DirectionToString(IN IMS_SINT32 nDirection)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::Policy::DirectionToString(IN IMS_SINT32 nDirection)
 {
     if (nDirection == DIRECTION_IN)
     {
@@ -183,8 +175,7 @@ const IMS_CHAR* IpSecSaParameter::Policy::DirectionToString(IN IMS_SINT32 nDirec
     return "INVALID";
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::Policy::ModeToString(IN IMS_SINT32 nMode)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::Policy::ModeToString(IN IMS_SINT32 nMode)
 {
     if (nMode == MODE_TRANSPORT)
     {
@@ -198,8 +189,8 @@ const IMS_CHAR* IpSecSaParameter::Policy::ModeToString(IN IMS_SINT32 nMode)
     return "UNKNOWN";
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::Policy::TransportProtocolToString(IN IMS_SINT32 nProtocol)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::Policy::TransportProtocolToString(
+        IN IMS_SINT32 nProtocol)
 {
     if (nProtocol == TRANSPORT_PROTOCOL_UDP)
     {
@@ -213,41 +204,39 @@ const IMS_CHAR* IpSecSaParameter::Policy::TransportProtocolToString(IN IMS_SINT3
     return "UNKNOWN";
 }
 
-
-
 PUBLIC
-IpSecSaParameter::IpSecSaParameter()
-    : m_nIpSecId(-1)
-    , m_nSecurityProtocol(SECURITY_PROTOCOL_ESP)
-    , m_nIntegrityAlgorithm(INTEGRITY_ALG_HMAC_SHA_1_96)
-    , m_nEncryptionAlgorithm(ENCRYPTION_ALG_AES_CBC)
-    , m_objIk(ByteArray::ConstNull())
-    , m_objCk(ByteArray::ConstNull())
+IpSecSaParameter::IpSecSaParameter() :
+        m_nIpSecId(-1),
+        m_nSecurityProtocol(SECURITY_PROTOCOL_ESP),
+        m_nIntegrityAlgorithm(INTEGRITY_ALG_HMAC_SHA_1_96),
+        m_nEncryptionAlgorithm(ENCRYPTION_ALG_AES_CBC),
+        m_objIk(ByteArray::ConstNull()),
+        m_objCk(ByteArray::ConstNull())
 {
 }
 
 PUBLIC
 IpSecSaParameter::IpSecSaParameter(IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSecurityProtocol,
         IN IMS_SINT32 nIntegrityAlgorithm, IN IMS_SINT32 nEncryptionAlgorithm,
-        IN const ByteArray& objIk, IN const ByteArray& objCk)
-    : m_nIpSecId(nIpSecId)
-    , m_nSecurityProtocol(nSecurityProtocol)
-    , m_nIntegrityAlgorithm(nIntegrityAlgorithm)
-    , m_nEncryptionAlgorithm(nEncryptionAlgorithm)
-    , m_objIk(objIk)
-    , m_objCk(objCk)
+        IN const ByteArray& objIk, IN const ByteArray& objCk) :
+        m_nIpSecId(nIpSecId),
+        m_nSecurityProtocol(nSecurityProtocol),
+        m_nIntegrityAlgorithm(nIntegrityAlgorithm),
+        m_nEncryptionAlgorithm(nEncryptionAlgorithm),
+        m_objIk(objIk),
+        m_objCk(objCk)
 {
 }
 
 PUBLIC
-IpSecSaParameter::IpSecSaParameter(IN const IpSecSaParameter& other)
-    : m_nIpSecId(other.m_nIpSecId)
-    , m_nSecurityProtocol(other.m_nSecurityProtocol)
-    , m_nIntegrityAlgorithm(other.m_nIntegrityAlgorithm)
-    , m_nEncryptionAlgorithm(other.m_nEncryptionAlgorithm)
-    , m_objIk(other.m_objIk)
-    , m_objCk(other.m_objCk)
-    , m_objPolicys(other.m_objPolicys)
+IpSecSaParameter::IpSecSaParameter(IN const IpSecSaParameter& other) :
+        m_nIpSecId(other.m_nIpSecId),
+        m_nSecurityProtocol(other.m_nSecurityProtocol),
+        m_nIntegrityAlgorithm(other.m_nIntegrityAlgorithm),
+        m_nEncryptionAlgorithm(other.m_nEncryptionAlgorithm),
+        m_objIk(other.m_objIk),
+        m_objCk(other.m_objCk),
+        m_objPolicys(other.m_objPolicys)
 {
 }
 
@@ -278,8 +267,7 @@ void IpSecSaParameter::AddPolicy(IN const IpSecSaParameter::Policy& objPolicy)
 PUBLIC
 void IpSecSaParameter::AddPolicys(IN const IMSList<IpSecSaParameter::Policy>& objPolicys)
 {
-    IMS_TRACE_D("AddPolicys: old=%d, new=%d",
-            m_objPolicys.GetSize(), objPolicys.GetSize(), 0);
+    IMS_TRACE_D("AddPolicys: old=%d, new=%d", m_objPolicys.GetSize(), objPolicys.GetSize(), 0);
     m_objPolicys = objPolicys;
 }
 
@@ -320,8 +308,8 @@ AString IpSecSaParameter::ToString() const
     return static_cast<const AStringBuffer&>(objSb).GetString();
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::SecurityProtocolToString(IN IMS_SINT32 nSecurityProtocol)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::SecurityProtocolToString(
+        IN IMS_SINT32 nSecurityProtocol)
 {
     if (nSecurityProtocol == SECURITY_PROTOCOL_ESP)
     {
@@ -335,8 +323,7 @@ const IMS_CHAR* IpSecSaParameter::SecurityProtocolToString(IN IMS_SINT32 nSecuri
     return "UNKNOWN";
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::IntegrityAlgToString(IN IMS_SINT32 nIntegrityAlg)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::IntegrityAlgToString(IN IMS_SINT32 nIntegrityAlg)
 {
     if (nIntegrityAlg == INTEGRITY_ALG_HMAC_SHA_1_96)
     {
@@ -350,8 +337,7 @@ const IMS_CHAR* IpSecSaParameter::IntegrityAlgToString(IN IMS_SINT32 nIntegrityA
     return "UNKNOWN";
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* IpSecSaParameter::EncryptionAlgToString(IN IMS_SINT32 nEncryptionAlg)
+PUBLIC GLOBAL const IMS_CHAR* IpSecSaParameter::EncryptionAlgToString(IN IMS_SINT32 nEncryptionAlg)
 {
     if (nEncryptionAlg == ENCRYPTION_ALG_AES_CBC)
     {

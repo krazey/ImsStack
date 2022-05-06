@@ -70,50 +70,43 @@ AString osCarrierConfig_GetStringFromStringVector(IN const IMSVector<AString>& o
 }
 #endif
 
-
-
 PUBLIC
-OsCarrierConfig::OsCarrierConfig(IN IMS_SINT32 nSlotId)
-        : ImsCarrierConfig(nSlotId)
-        , m_piOwnerThread(IMS_NULL)
-        , m_bIsBundle(IMS_FALSE)
+OsCarrierConfig::OsCarrierConfig(IN IMS_SINT32 nSlotId) :
+        ImsCarrierConfig(nSlotId),
+        m_piOwnerThread(IMS_NULL),
+        m_bIsBundle(IMS_FALSE)
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-OsCarrierConfig::~OsCarrierConfig()
+PUBLIC VIRTUAL OsCarrierConfig::~OsCarrierConfig()
 {
     if (!m_bIsBundle)
     {
-        System::GetInstance()->RemoveListener(
-                SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+        System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
     }
 }
 
 PRIVATE
-OsCarrierConfig::OsCarrierConfig(IN IMS_SINT32 nSlotId, IN IMS_BOOL bIsBundle,
-        IN const PersistableBundle& objConfig)
-        : ImsCarrierConfig(nSlotId)
-        , m_bIsBundle(bIsBundle)
-        , m_objConfig(objConfig)
+OsCarrierConfig::OsCarrierConfig(
+        IN IMS_SINT32 nSlotId, IN IMS_BOOL bIsBundle, IN const PersistableBundle& objConfig) :
+        ImsCarrierConfig(nSlotId),
+        m_bIsBundle(bIsBundle),
+        m_objConfig(objConfig)
 {
     if (!m_bIsBundle)
     {
-        System::GetInstance()->AddListener(
-                SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
+        System::GetInstance()->AddListener(SystemConstants::CATEGORY_CONFIG, this, GetSlotId());
     }
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsCarrierConfig::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("OsCarrierConfig :: event=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
-            nEvent, nWParam, nLParam);
+    IMS_TRACE_D(
+            "OsCarrierConfig :: event=%d, wp=%" PFLS_u ", lp=%" PFLS_u, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
@@ -129,8 +122,8 @@ void OsCarrierConfig::System_NotifyEvent(IN IMS_UINT32 nEvent,
     }
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/)
+PUBLIC VIRTUAL void OsCarrierConfig::DispatchServiceMessage(
+        IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/)
 {
     Parcel objConfigParcel;
 
@@ -160,8 +153,7 @@ void OsCarrierConfig::DispatchServiceMessage(IN IMS_UINTP /*nWparam*/, IN IMS_UI
     }
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::LoadConfig()
+PUBLIC VIRTUAL void OsCarrierConfig::LoadConfig()
 {
     IMS_TRACE_D("LoadConfig: slotId=%d", GetSlotId(), 0, 0);
 
@@ -190,9 +182,8 @@ void OsCarrierConfig::LoadConfig()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsCarrierConfig::GetBoolean(IN const IMS_CHAR* pszKey,
-        IN IMS_BOOL bDefaultValue /*= IMS_FALSE*/) const
+PUBLIC VIRTUAL IMS_BOOL OsCarrierConfig::GetBoolean(
+        IN const IMS_CHAR* pszKey, IN IMS_BOOL bDefaultValue /*= IMS_FALSE*/) const
 {
     const String16 strKey(pszKey);
     bool out = false;
@@ -205,9 +196,8 @@ IMS_BOOL OsCarrierConfig::GetBoolean(IN const IMS_CHAR* pszKey,
     return out ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsCarrierConfig::GetInt(IN const IMS_CHAR* pszKey,
-        IN IMS_SINT32 nDefaultValue /*= -1*/) const
+PUBLIC VIRTUAL IMS_SINT32 OsCarrierConfig::GetInt(
+        IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue /*= -1*/) const
 {
     const String16 strKey(pszKey);
     int32_t out = -1;
@@ -220,9 +210,8 @@ IMS_SINT32 OsCarrierConfig::GetInt(IN const IMS_CHAR* pszKey,
     return out;
 }
 
-PUBLIC VIRTUAL
-IMS_SLONG OsCarrierConfig::GetLong(IN const IMS_CHAR* pszKey,
-        IN IMS_SLONG nDefaultValue /*= -1L*/) const
+PUBLIC VIRTUAL IMS_SLONG OsCarrierConfig::GetLong(
+        IN const IMS_CHAR* pszKey, IN IMS_SLONG nDefaultValue /*= -1L*/) const
 {
     const String16 strKey(pszKey);
     int64_t out = -1L;
@@ -235,8 +224,7 @@ IMS_SLONG OsCarrierConfig::GetLong(IN const IMS_CHAR* pszKey,
     return out;
 }
 
-PUBLIC VIRTUAL
-AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
+PUBLIC VIRTUAL AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
         IN const AString& strDefaultValue /*= AString::ConstNull()*/) const
 {
     const String16 strKey(pszKey);
@@ -252,8 +240,7 @@ AString OsCarrierConfig::GetString(IN const IMS_CHAR* pszKey,
     return AString(str8.string());
 }
 
-PUBLIC VIRTUAL
-IMSVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL IMSVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<bool> out;
@@ -273,8 +260,7 @@ IMSVector<IMS_BOOL> OsCarrierConfig::GetBooleanArray(IN const IMS_CHAR* pszKey) 
     return objBooleanArray;
 }
 
-PUBLIC VIRTUAL
-IMSVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL IMSVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<int32_t> out;
@@ -294,8 +280,7 @@ IMSVector<IMS_SINT32> OsCarrierConfig::GetIntArray(IN const IMS_CHAR* pszKey) co
     return objIntArray;
 }
 
-PUBLIC VIRTUAL
-IMSVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL IMSVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<int64_t> out;
@@ -315,8 +300,7 @@ IMSVector<IMS_SLONG> OsCarrierConfig::GetLongArray(IN const IMS_CHAR* pszKey) co
     return objLongArray;
 }
 
-PUBLIC VIRTUAL
-IMSVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL IMSVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     std::vector<String16> out;
@@ -338,8 +322,7 @@ IMSVector<AString> OsCarrierConfig::GetStringArray(IN const IMS_CHAR* pszKey) co
     return objStrArray;
 }
 
-PUBLIC VIRTUAL
-ICarrierConfig* OsCarrierConfig::GetBundle(IN const IMS_CHAR* pszKey) const
+PUBLIC VIRTUAL ICarrierConfig* OsCarrierConfig::GetBundle(IN const IMS_CHAR* pszKey) const
 {
     const String16 strKey(pszKey);
     PersistableBundle out;
@@ -352,8 +335,7 @@ ICarrierConfig* OsCarrierConfig::GetBundle(IN const IMS_CHAR* pszKey) const
     return new OsCarrierConfig(GetSlotId(), IMS_TRUE, out);
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::ReleaseBundle()
+PUBLIC VIRTUAL void OsCarrierConfig::ReleaseBundle()
 {
     if (m_bIsBundle)
     {
@@ -361,8 +343,7 @@ void OsCarrierConfig::ReleaseBundle()
     }
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::AddListener(IN ICarrierConfigListener* piListener)
+PUBLIC VIRTUAL void OsCarrierConfig::AddListener(IN ICarrierConfigListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -382,8 +363,7 @@ void OsCarrierConfig::AddListener(IN ICarrierConfigListener* piListener)
     m_objListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void OsCarrierConfig::RemoveListener(IN ICarrierConfigListener* piListener)
+PUBLIC VIRTUAL void OsCarrierConfig::RemoveListener(IN ICarrierConfigListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
@@ -547,14 +527,13 @@ void OsCarrierConfig::DisplaySpecificConfigs()
     IMSVector<IMS_SINT32> objIntArray = GetIntArray("ims.ipsec_encryption_algorithms_int_array");
     AString strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
 
-    IMS_TRACE_D("carrier-config: ipsec_encryption_algorithms_int_array=%s",
-            strValue.GetStr(), 0, 0);
+    IMS_TRACE_D(
+            "carrier-config: ipsec_encryption_algorithms_int_array=%s", strValue.GetStr(), 0, 0);
 
     IMSVector<AString> objStrArray = GetStringArray("imsvt.video_codec_image_attr_string_array");
     strValue = osCarrierConfig_GetStringFromStringVector(objStrArray);
 
-    IMS_TRACE_D("carrier-config: video_codec_image_attr_string_array=%s",
-            strValue.GetStr(), 0, 0);
+    IMS_TRACE_D("carrier-config: video_codec_image_attr_string_array=%s", strValue.GetStr(), 0, 0);
 
     ICarrierConfig* piCc = GetBundle("imsvoice.audio_codec_capability_payload_types_bundle");
 
@@ -562,13 +541,11 @@ void OsCarrierConfig::DisplaySpecificConfigs()
     {
         objIntArray = piCc->GetIntArray("imsvoice.evs_payload_type_int_array");
         strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
-        IMS_TRACE_D("carrier-config: evs_payload_type_int_array=%s",
-            strValue.GetStr(), 0, 0);
+        IMS_TRACE_D("carrier-config: evs_payload_type_int_array=%s", strValue.GetStr(), 0, 0);
 
         objIntArray = piCc->GetIntArray("imsvoice.amrwb_payload_type_int_array");
         strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
-        IMS_TRACE_D("carrier-config: amrwb_payload_type_int_array=%s",
-            strValue.GetStr(), 0, 0);
+        IMS_TRACE_D("carrier-config: amrwb_payload_type_int_array=%s", strValue.GetStr(), 0, 0);
 
         ICarrierConfig* piAmrWbDesc = GetBundle("imsvoice.amrwb_payload_description_bundle");
 
@@ -585,8 +562,8 @@ void OsCarrierConfig::DisplaySpecificConfigs()
                 {
                     IMS_SINT32 nFormat = piCodecAttr->GetInt(
                             "imsvoice.amr_codec_attribute_payload_format_int", 0);
-                    IMS_TRACE_D("carrier-config: AMR(%d) - format=%d",
-                            objIntArray.GetAt(i), nFormat, 0);
+                    IMS_TRACE_D("carrier-config: AMR(%d) - format=%d", objIntArray.GetAt(i),
+                            nFormat, 0);
 
                     IMS_SINT32 nPeriod = piCodecAttr->GetInt(
                             "imsvoice.codec_attribute_mode_change_period_int", 1);
@@ -594,8 +571,8 @@ void OsCarrierConfig::DisplaySpecificConfigs()
                             "imsvoice.codec_attribute_mode_change_capability_int", 1);
                     IMS_SINT32 nNeighbor = piCodecAttr->GetInt(
                             "imsvoice.codec_attribute_mode_change_neighbor_int", 0);
-                    IMS_TRACE_D("carrier-config: period=%d, capability=%d, neighbor=%d",
-                            nPeriod, nCapability, nNeighbor);
+                    IMS_TRACE_D("carrier-config: period=%d, capability=%d, neighbor=%d", nPeriod,
+                            nCapability, nNeighbor);
 
                     piCodecAttr->ReleaseBundle();
                 }
@@ -606,18 +583,15 @@ void OsCarrierConfig::DisplaySpecificConfigs()
 
         objIntArray = piCc->GetIntArray("imsvoice.amrnb_payload_type_int_array");
         strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
-        IMS_TRACE_D("carrier-config: amrnb_payload_type_int_array=%s",
-            strValue.GetStr(), 0, 0);
+        IMS_TRACE_D("carrier-config: amrnb_payload_type_int_array=%s", strValue.GetStr(), 0, 0);
 
         objIntArray = piCc->GetIntArray("imsvoice.dtmfwb_payload_type_int_array");
         strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
-        IMS_TRACE_D("carrier-config: dtmfwb_payload_type_int_array=%s",
-            strValue.GetStr(), 0, 0);
+        IMS_TRACE_D("carrier-config: dtmfwb_payload_type_int_array=%s", strValue.GetStr(), 0, 0);
 
         objIntArray = piCc->GetIntArray("imsvoice.dtmfnb_payload_type_int_array");
         strValue = osCarrierConfig_GetStringFromIntVector(objIntArray);
-        IMS_TRACE_D("carrier-config: dtmfnb_payload_type_int_array=%s",
-            strValue.GetStr(), 0, 0);
+        IMS_TRACE_D("carrier-config: dtmfnb_payload_type_int_array=%s", strValue.GetStr(), 0, 0);
 
         piCc->ReleaseBundle();
     }

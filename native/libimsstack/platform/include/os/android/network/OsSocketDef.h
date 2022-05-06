@@ -19,60 +19,60 @@
 #include <sys/socket.h>
 
 #ifndef SHUT_RD
-#define SHUT_RD         0
+#define SHUT_RD 0
 #endif
 
 #ifndef SHUT_WR
-#define SHUT_WR         1
+#define SHUT_WR 1
 #endif
 
 #ifndef SHUT_RDWR
-#define SHUT_RDWR       2
+#define SHUT_RDWR 2
 #endif
 
 #ifndef FD_READ
-#define FD_READ         0x01
+#define FD_READ 0x01
 #endif
 
 #ifndef FD_WRITE
-#define FD_WRITE        0x02
+#define FD_WRITE 0x02
 #endif
 
 #ifndef FD_ACCEPT
-#define FD_ACCEPT       0x08
+#define FD_ACCEPT 0x08
 #endif
 
 #ifndef FD_CONNECT
-#define FD_CONNECT      0x10
+#define FD_CONNECT 0x10
 #endif
 
 #ifndef FD_CLOSE
-#define FD_CLOSE        0x20
+#define FD_CLOSE 0x20
 #endif
 
 // IMS extensions
 #ifndef FD_TCP_C
-#define FD_TCP_C        0x10000
+#define FD_TCP_C 0x10000
 #endif
 
 #ifndef FD_TCP
-#define FD_TCP          0x20000
+#define FD_TCP 0x20000
 #endif
 
 #ifndef FD_RDWR
-#define FD_RDWR         (FD_READ | FD_WRITE)
+#define FD_RDWR (FD_READ | FD_WRITE)
 #endif
 
 #ifndef SOCKET
-#define SOCKET          IMS_SINT32
+#define SOCKET IMS_SINT32
 #endif
 
 #ifndef SOCKET_ERROR
-#define SOCKET_ERROR    (-1)
+#define SOCKET_ERROR (-1)
 #endif
 
 #ifndef INVALID_SOCKET
-#define INVALID_SOCKET  (-1)
+#define INVALID_SOCKET (-1)
 #endif
 
 enum
@@ -82,6 +82,9 @@ enum
     SHUTDOWN_BOTH = SHUT_RDWR
 };
 
-enum { EVENT_FD_ALL = (FD_ACCEPT | FD_CLOSE | FD_CONNECT | FD_READ | FD_WRITE) };
+enum
+{
+    EVENT_FD_ALL = (FD_ACCEPT | FD_CLOSE | FD_CONNECT | FD_READ | FD_WRITE)
+};
 
 #endif

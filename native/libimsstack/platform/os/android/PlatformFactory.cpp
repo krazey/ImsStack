@@ -51,39 +51,34 @@
 #include "network/OsWifiConnection.h"
 
 // Platform: common
-PUBLIC GLOBAL
-IMemHeap* PlatformFactory::GetHeap()
+PUBLIC GLOBAL IMemHeap* PlatformFactory::GetHeap()
 {
     return OsHeap::GetHeap();
 }
 
-PUBLIC GLOBAL
-ImsTrace* PlatformFactory::CreateTrace()
+PUBLIC GLOBAL ImsTrace* PlatformFactory::CreateTrace()
 {
     return new OsTrace();
 }
 
-PUBLIC GLOBAL
-ImsMutex* PlatformFactory::CreateMutex(IN const AString& strName /*= AString::ConstNull()*/)
+PUBLIC GLOBAL ImsMutex* PlatformFactory::CreateMutex(
+        IN const AString& strName /*= AString::ConstNull()*/)
 {
     (void)strName;
     return new OsMutex();
 }
 
-PUBLIC GLOBAL
-ImsFile* PlatformFactory::CreateFile()
+PUBLIC GLOBAL ImsFile* PlatformFactory::CreateFile()
 {
     return new OsFile();
 }
 
-PUBLIC GLOBAL
-IFileUtil* PlatformFactory::CreateFileUtil()
+PUBLIC GLOBAL IFileUtil* PlatformFactory::CreateFileUtil()
 {
     return new OsFileUtil();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyFileUtil(IN IFileUtil*& piFileUtil)
+PUBLIC GLOBAL void PlatformFactory::DestroyFileUtil(IN IFileUtil*& piFileUtil)
 {
     OsFileUtil* pFileUtil = DYNAMIC_CAST(OsFileUtil*, piFileUtil);
 
@@ -95,38 +90,32 @@ void PlatformFactory::DestroyFileUtil(IN IFileUtil*& piFileUtil)
     piFileUtil = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ImsThread* PlatformFactory::CreateThread()
+PUBLIC GLOBAL ImsThread* PlatformFactory::CreateThread()
 {
     return new OsThread();
 }
 
-PUBLIC GLOBAL
-ImsThread* PlatformFactory::CreateThreadEx()
+PUBLIC GLOBAL ImsThread* PlatformFactory::CreateThreadEx()
 {
     return new OsThread();
 }
 
-PUBLIC GLOBAL
-IMS_ULONG PlatformFactory::GetCurrentThreadId()
+PUBLIC GLOBAL IMS_ULONG PlatformFactory::GetCurrentThreadId()
 {
     return OsThread::GetCurrentThreadId();
 }
 
-PUBLIC GLOBAL
-ImsTimer* PlatformFactory::CreateTimer()
+PUBLIC GLOBAL ImsTimer* PlatformFactory::CreateTimer()
 {
     return new OsTimer();
 }
 
-PUBLIC GLOBAL
-ISystemTime* PlatformFactory::CreateSystemTime()
+PUBLIC GLOBAL ISystemTime* PlatformFactory::CreateSystemTime()
 {
     return new OsSystemTime();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroySystemTime(IN ISystemTime*& piSysTime)
+PUBLIC GLOBAL void PlatformFactory::DestroySystemTime(IN ISystemTime*& piSysTime)
 {
     OsSystemTime* pSysTime = DYNAMIC_CAST(OsSystemTime*, piSysTime);
 
@@ -138,14 +127,12 @@ void PlatformFactory::DestroySystemTime(IN ISystemTime*& piSysTime)
     piSysTime = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IEventReceiver* PlatformFactory::CreateEventReceiver(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IEventReceiver* PlatformFactory::CreateEventReceiver(IN IMS_SINT32 nSlotId)
 {
     return new OsEventReceiver(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyEventReceiver(IN IEventReceiver*& piEventReceiver)
+PUBLIC GLOBAL void PlatformFactory::DestroyEventReceiver(IN IEventReceiver*& piEventReceiver)
 {
     OsEventReceiver* pEventReceiver = DYNAMIC_CAST(OsEventReceiver*, piEventReceiver);
 
@@ -157,14 +144,12 @@ void PlatformFactory::DestroyEventReceiver(IN IEventReceiver*& piEventReceiver)
     piEventReceiver = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IEventSender* PlatformFactory::CreateEventSender()
+PUBLIC GLOBAL IEventSender* PlatformFactory::CreateEventSender()
 {
     return new OsEventSender();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyEventSender(IN IEventSender*& piEventSender)
+PUBLIC GLOBAL void PlatformFactory::DestroyEventSender(IN IEventSender*& piEventSender)
 {
     OsEventSender* pEventSender = DYNAMIC_CAST(OsEventSender*, piEventSender);
 
@@ -177,8 +162,7 @@ void PlatformFactory::DestroyEventSender(IN IEventSender*& piEventSender)
 }
 
 // Platform: network
-PUBLIC GLOBAL
-ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
+PUBLIC GLOBAL ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
         IN const AString& strProfile, IN IMS_SINT32 nSlotId)
 {
     if (NetworkPolicy::IsMobilePolicy(strProfile))
@@ -194,8 +178,7 @@ ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
     return IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
+PUBLIC GLOBAL ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
         IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (NetworkPolicy::IsMobilePolicy(nApnType))
@@ -211,14 +194,12 @@ ImsNetworkConnection* PlatformFactory::CreateNetworkConnection(
     return IMS_NULL;
 }
 
-PUBLIC GLOBAL
-INetworkIpSec* PlatformFactory::CreateNetworkIpSec()
+PUBLIC GLOBAL INetworkIpSec* PlatformFactory::CreateNetworkIpSec()
 {
     return new OsNetworkIpSec();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec)
+PUBLIC GLOBAL void PlatformFactory::DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec)
 {
     OsNetworkIpSec* pIpSec = DYNAMIC_CAST(OsNetworkIpSec*, piIpSec);
 
@@ -230,14 +211,12 @@ void PlatformFactory::DestroyNetworkIpSec(IN INetworkIpSec*& piIpSec)
     piIpSec = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IIpcan* PlatformFactory::CreateIpcan()
+PUBLIC GLOBAL IIpcan* PlatformFactory::CreateIpcan()
 {
     return new OsIpcan();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyIpcan(IN IIpcan*& piIpcan)
+PUBLIC GLOBAL void PlatformFactory::DestroyIpcan(IN IIpcan*& piIpcan)
 {
     OsIpcan* pIpcan = DYNAMIC_CAST(OsIpcan*, piIpcan);
 
@@ -249,8 +228,8 @@ void PlatformFactory::DestroyIpcan(IN IIpcan*& piIpcan)
     piIpcan = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ImsFdSet* PlatformFactory::CreateFdSet(IN IMS_SINT32 nType /*= ImsFdSet::TYPE_SELECT*/)
+PUBLIC GLOBAL ImsFdSet* PlatformFactory::CreateFdSet(
+        IN IMS_SINT32 nType /*= ImsFdSet::TYPE_SELECT*/)
 {
     if (nType == ImsFdSet::TYPE_POLL)
     {
@@ -260,46 +239,39 @@ ImsFdSet* PlatformFactory::CreateFdSet(IN IMS_SINT32 nType /*= ImsFdSet::TYPE_SE
     return new OsSelectFdSet();
 }
 
-PUBLIC GLOBAL
-ImsSocket* PlatformFactory::CreateSocket()
+PUBLIC GLOBAL ImsSocket* PlatformFactory::CreateSocket()
 {
     return new OsSocket();
 }
 
-PUBLIC GLOBAL
-ImsSocket* PlatformFactory::CreateSslSocket(IN SSLCertificate* pCertificate)
+PUBLIC GLOBAL ImsSocket* PlatformFactory::CreateSslSocket(IN SSLCertificate* pCertificate)
 {
     return new OsSslSocket(pCertificate);
 }
 
 // Platform: utilities
-PUBLIC GLOBAL
-ISystemUtil* PlatformFactory::GetSystemUtil()
+PUBLIC GLOBAL ISystemUtil* PlatformFactory::GetSystemUtil()
 {
     return OsUtil::GetInstance();
 }
 
-PUBLIC GLOBAL
-ISystemProperty* PlatformFactory::GetSystemProperty()
+PUBLIC GLOBAL ISystemProperty* PlatformFactory::GetSystemProperty()
 {
     return OsUtil::GetInstance();
 }
 
-PUBLIC GLOBAL
-IZLib* PlatformFactory::GetZLib()
+PUBLIC GLOBAL IZLib* PlatformFactory::GetZLib()
 {
     return OsUtil::GetInstance();
 }
 
 // Platform: device
-PUBLIC GLOBAL
-IPowerInfo* PlatformFactory::CreatePowerInfo()
+PUBLIC GLOBAL IPowerInfo* PlatformFactory::CreatePowerInfo()
 {
     return new OsPowerInfo();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyPowerInfo(IN IPowerInfo*& piPowerInfo)
+PUBLIC GLOBAL void PlatformFactory::DestroyPowerInfo(IN IPowerInfo*& piPowerInfo)
 {
     OsPowerInfo* pPowerInfo = DYNAMIC_CAST(OsPowerInfo*, piPowerInfo);
 
@@ -311,14 +283,12 @@ void PlatformFactory::DestroyPowerInfo(IN IPowerInfo*& piPowerInfo)
     piPowerInfo = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IDeviceInfo* PlatformFactory::CreateDeviceInfo()
+PUBLIC GLOBAL IDeviceInfo* PlatformFactory::CreateDeviceInfo()
 {
     return new OsDeviceInfo();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyDeviceInfo(IN IDeviceInfo*& piDeviceInfo)
+PUBLIC GLOBAL void PlatformFactory::DestroyDeviceInfo(IN IDeviceInfo*& piDeviceInfo)
 {
     OsDeviceInfo* pDeviceInfo = DYNAMIC_CAST(OsDeviceInfo*, piDeviceInfo);
 
@@ -330,14 +300,12 @@ void PlatformFactory::DestroyDeviceInfo(IN IDeviceInfo*& piDeviceInfo)
     piDeviceInfo = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ISubscriberInfo* PlatformFactory::CreateSubscriberInfo(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISubscriberInfo* PlatformFactory::CreateSubscriberInfo(IN IMS_SINT32 nSlotId)
 {
     return new OsSubscriberInfo(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroySubscriberInfo(IN ISubscriberInfo*& piSubscriberInfo)
+PUBLIC GLOBAL void PlatformFactory::DestroySubscriberInfo(IN ISubscriberInfo*& piSubscriberInfo)
 {
     OsSubscriberInfo* pSubscriberInfo = DYNAMIC_CAST(OsSubscriberInfo*, piSubscriberInfo);
 
@@ -349,14 +317,12 @@ void PlatformFactory::DestroySubscriberInfo(IN ISubscriberInfo*& piSubscriberInf
     piSubscriberInfo = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-INetworkWatcher* PlatformFactory::CreateNetworkWatcher(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL INetworkWatcher* PlatformFactory::CreateNetworkWatcher(IN IMS_SINT32 nSlotId)
 {
     return new OsNetworkWatcher(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyNetworkWatcher(IN INetworkWatcher*& piNetworkWatcher)
+PUBLIC GLOBAL void PlatformFactory::DestroyNetworkWatcher(IN INetworkWatcher*& piNetworkWatcher)
 {
     OsNetworkWatcher* pNetworkWatcher = DYNAMIC_CAST(OsNetworkWatcher*, piNetworkWatcher);
 
@@ -368,14 +334,12 @@ void PlatformFactory::DestroyNetworkWatcher(IN INetworkWatcher*& piNetworkWatche
     piNetworkWatcher = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IWifiWatcher* PlatformFactory::CreateWifiWatcher()
+PUBLIC GLOBAL IWifiWatcher* PlatformFactory::CreateWifiWatcher()
 {
     return new OsWifiWatcher();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher)
+PUBLIC GLOBAL void PlatformFactory::DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher)
 {
     OsWifiWatcher* pWifiWatcher = DYNAMIC_CAST(OsWifiWatcher*, piWifiWatcher);
 
@@ -387,14 +351,12 @@ void PlatformFactory::DestroyWifiWatcher(IN IWifiWatcher*& piWifiWatcher)
     piWifiWatcher = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ICallInfo* PlatformFactory::CreateCallInfo(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ICallInfo* PlatformFactory::CreateCallInfo(IN IMS_SINT32 nSlotId)
 {
     return new OsPhoneInfoCall(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCall)
+PUBLIC GLOBAL void PlatformFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCall)
 {
     OsPhoneInfoCall* pPhoneInfoCall = DYNAMIC_CAST(OsPhoneInfoCall*, piPhoneInfoCall);
 
@@ -406,14 +368,12 @@ void PlatformFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCall)
     piPhoneInfoCall = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ISrvcc* PlatformFactory::CreateSrvcc(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISrvcc* PlatformFactory::CreateSrvcc(IN IMS_SINT32 nSlotId)
 {
     return new OsSrvcc(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroySrvcc(IN ISrvcc*& piSrvcc)
+PUBLIC GLOBAL void PlatformFactory::DestroySrvcc(IN ISrvcc*& piSrvcc)
 {
     OsSrvcc* pSrvcc = DYNAMIC_CAST(OsSrvcc*, piSrvcc);
 
@@ -425,14 +385,12 @@ void PlatformFactory::DestroySrvcc(IN ISrvcc*& piSrvcc)
     piSrvcc = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ILocationInfo* PlatformFactory::CreateLocationInfo(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ILocationInfo* PlatformFactory::CreateLocationInfo(IN IMS_SINT32 nSlotId)
 {
     return new OsLocationInfo(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyLocationInfo(IN ILocationInfo*& piLocationInfo)
+PUBLIC GLOBAL void PlatformFactory::DestroyLocationInfo(IN ILocationInfo*& piLocationInfo)
 {
     OsLocationInfo* pLocationInfo = DYNAMIC_CAST(OsLocationInfo*, piLocationInfo);
 
@@ -444,14 +402,12 @@ void PlatformFactory::DestroyLocationInfo(IN ILocationInfo*& piLocationInfo)
     piLocationInfo = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IIsim* PlatformFactory::CreateIsim(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IIsim* PlatformFactory::CreateIsim(IN IMS_SINT32 nSlotId)
 {
     return new OsIsim(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyIsim(IN IIsim*& piIsim)
+PUBLIC GLOBAL void PlatformFactory::DestroyIsim(IN IIsim*& piIsim)
 {
     OsIsim* pIsim = DYNAMIC_CAST(OsIsim*, piIsim);
 
@@ -463,14 +419,12 @@ void PlatformFactory::DestroyIsim(IN IIsim*& piIsim)
     piIsim = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IUsim* PlatformFactory::CreateUsim(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IUsim* PlatformFactory::CreateUsim(IN IMS_SINT32 nSlotId)
 {
     return new OsUsim(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyUsim(IN IUsim*& piUsim)
+PUBLIC GLOBAL void PlatformFactory::DestroyUsim(IN IUsim*& piUsim)
 {
     OsUsim* pUsim = DYNAMIC_CAST(OsUsim*, piUsim);
 
@@ -482,14 +436,12 @@ void PlatformFactory::DestroyUsim(IN IUsim*& piUsim)
     piUsim = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ITrm* PlatformFactory::CreateTrm()
+PUBLIC GLOBAL ITrm* PlatformFactory::CreateTrm()
 {
     return new OsTrm();
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyTrm(IN ITrm*& piTrm)
+PUBLIC GLOBAL void PlatformFactory::DestroyTrm(IN ITrm*& piTrm)
 {
     OsTrm* pTrm = DYNAMIC_CAST(OsTrm*, piTrm);
 
@@ -501,14 +453,12 @@ void PlatformFactory::DestroyTrm(IN ITrm*& piTrm)
     piTrm = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-IVoNr* PlatformFactory::CreateVoNr(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IVoNr* PlatformFactory::CreateVoNr(IN IMS_SINT32 nSlotId)
 {
     return new OsVoNr(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyVoNr(IN IVoNr*& piVoNr)
+PUBLIC GLOBAL void PlatformFactory::DestroyVoNr(IN IVoNr*& piVoNr)
 {
     OsVoNr* pVoNr = DYNAMIC_CAST(OsVoNr*, piVoNr);
 
@@ -520,14 +470,12 @@ void PlatformFactory::DestroyVoNr(IN IVoNr*& piVoNr)
     piVoNr = IMS_NULL;
 }
 
-PUBLIC GLOBAL
-ImsCarrierConfig* PlatformFactory::CreateCarrierConfig(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ImsCarrierConfig* PlatformFactory::CreateCarrierConfig(IN IMS_SINT32 nSlotId)
 {
     return new OsCarrierConfig(nSlotId);
 }
 
-PUBLIC GLOBAL
-void PlatformFactory::DestroyCarrierConfig(IN ImsCarrierConfig*& pCarrierConfig)
+PUBLIC GLOBAL void PlatformFactory::DestroyCarrierConfig(IN ImsCarrierConfig*& pCarrierConfig)
 {
     if (pCarrierConfig != IMS_NULL)
     {

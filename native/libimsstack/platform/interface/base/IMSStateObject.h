@@ -20,4 +20,4 @@ public:
     inline virtual ~IMSStateObject() {}
 };
 
-#endif // _IMS_STATEOBJECT_H_
+#endif  // _IMS_STATEOBJECT_H_

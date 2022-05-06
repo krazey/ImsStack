@@ -23,20 +23,16 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-
-
 LOCAL
 void osTimerService_AddListener(IN ISystemListener* piListener)
 {
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
 }
 
 LOCAL
 void osTimerService_RemoveListener(IN ISystemListener* piListener)
 {
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_ALARM, piListener, IMS_SLOT_0);
 }
 
 LOCAL
@@ -55,29 +51,28 @@ IMS_BOOL osTimerService_SetAlarm(IN IMS_UINTP nTimerId, IN IMS_UINT32 nDuration)
     return (nResult == 0) ? IMS_FALSE : IMS_TRUE;
 }
 
-
-
 class OsTimerWrapper
 {
 public:
-    inline OsTimerWrapper(IN OsTimer* pTimer)
-        : m_bTimerExpired(IMS_FALSE)
-        , m_pTimer(pTimer)
-    {}
-    inline ~OsTimerWrapper()
-    {}
+    inline OsTimerWrapper(IN OsTimer* pTimer) :
+            m_bTimerExpired(IMS_FALSE),
+            m_pTimer(pTimer)
+    {
+    }
+    inline ~OsTimerWrapper() {}
 
 public:
     inline IMS_UINTP GetTimerId() const
-    { return (m_pTimer != IMS_NULL) ? m_pTimer->GetTimerId() : 0; }
+    {
+        return (m_pTimer != IMS_NULL) ? m_pTimer->GetTimerId() : 0;
+    }
 
 public:
     IMS_BOOL m_bTimerExpired;
     OsTimer* m_pTimer;
 };
 
-PUBLIC GLOBAL
-OsTimerService* OsTimerService::s_pTimerService = IMS_NULL;
+PUBLIC GLOBAL OsTimerService* OsTimerService::s_pTimerService = IMS_NULL;
 
 PUBLIC
 OsTimerService::OsTimerService()
@@ -85,8 +80,7 @@ OsTimerService::OsTimerService()
     osTimerService_AddListener(this);
 }
 
-PUBLIC VIRTUAL
-OsTimerService::~OsTimerService()
+PUBLIC VIRTUAL OsTimerService::~OsTimerService()
 {
     for (IMS_UINT32 i = 0; i < m_objTimers.GetSize(); ++i)
     {
@@ -186,8 +180,7 @@ IMS_BOOL OsTimerService::SetTimer(IN IMS_UINT32 nDuration, IN OsTimer* pTimer)
     return bResult;
 }
 
-PUBLIC GLOBAL
-OsTimerService* OsTimerService::GetTimerService()
+PUBLIC GLOBAL OsTimerService* OsTimerService::GetTimerService()
 {
     if (s_pTimerService == IMS_NULL)
     {
@@ -197,8 +190,7 @@ OsTimerService* OsTimerService::GetTimerService()
     return s_pTimerService;
 }
 
-PUBLIC GLOBAL
-void OsTimerService::CleanUp()
+PUBLIC GLOBAL void OsTimerService::CleanUp()
 {
     if (s_pTimerService != IMS_NULL)
     {
@@ -207,15 +199,13 @@ void OsTimerService::CleanUp()
     }
 }
 
-PUBLIC GLOBAL
-void OsTimerService::StartUp()
+PUBLIC GLOBAL void OsTimerService::StartUp()
 {
     OsTimerService::GetTimerService();
 }
 
-PRIVATE VIRTUAL
-void OsTimerService::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PRIVATE VIRTUAL void OsTimerService::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     (void)nLParam;
 
@@ -263,18 +253,15 @@ void OsTimerService::NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper)
 
     if (piOwnerThread == IMS_NULL)
     {
-        IMS_TRACE_D("Timer (%" PFLS_u ") is already stopped",
-                pTimerWrapper->GetTimerId(), 0, 0);
+        IMS_TRACE_D("Timer (%" PFLS_u ") is already stopped", pTimerWrapper->GetTimerId(), 0, 0);
         return;
     }
 
-    ImsMessage objMsg(IMS_MSG_TIMER,
-            pTimerWrapper->m_pTimer->GetTimerId(),
+    ImsMessage objMsg(IMS_MSG_TIMER, pTimerWrapper->m_pTimer->GetTimerId(),
             pTimerWrapper->m_pTimer->GetInternalTimerId());
 
     IMS_TRACE_D("Timer (%" PFLS_u ", %d) is expired; size=%d",
-            pTimerWrapper->m_pTimer->GetTimerId(),
-            pTimerWrapper->m_pTimer->GetInternalTimerId(),
+            pTimerWrapper->m_pTimer->GetTimerId(), pTimerWrapper->m_pTimer->GetInternalTimerId(),
             m_objTimers.GetSize());
 
     MessageService::PostMessageThread(piOwnerThread, objMsg);

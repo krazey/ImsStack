@@ -19,9 +19,7 @@
 #include "ITimer.h"
 #include "ITrmTimer.h"
 
-class OsTrmTimer
-    : public ITrmTimer
-    , public ITimerListener
+class OsTrmTimer : public ITrmTimer, public ITimerListener
 {
 public:
     OsTrmTimer(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);

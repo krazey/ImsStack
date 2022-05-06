@@ -26,24 +26,24 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsIpSecSpPrivate
 {
 public:
-    inline OsIpSecSpPrivate()
-        : m_objSrcIp(IPAddress::IPv6NONE)
-        , m_nSrcPort(0)
-        , m_objDstIp(IPAddress::IPv6NONE)
-        , m_nDstPort(0)
-        , m_nTransportProtocol(IpSecType::TRANS_PROTOCOL_ANY)
-        , m_nAction(IpSecType::ACTION_APPLY)
-        , m_nDirection(IpSecType::DIRECTION_ANY)
-        , m_nMode(IpSecType::MODE_TRANSPORT)
-        , m_nSpi(0)
-        , m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP)
-        , m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO)
-        , m_objTunnelSrcIp(IPAddress::IPv6NONE)
-        , m_objTunnelDstIp(IPAddress::IPv6NONE)
-    {}
-    inline ~OsIpSecSpPrivate()
-    {}
+    inline OsIpSecSpPrivate() :
+            m_objSrcIp(IPAddress::IPv6NONE),
+            m_nSrcPort(0),
+            m_objDstIp(IPAddress::IPv6NONE),
+            m_nDstPort(0),
+            m_nTransportProtocol(IpSecType::TRANS_PROTOCOL_ANY),
+            m_nAction(IpSecType::ACTION_APPLY),
+            m_nDirection(IpSecType::DIRECTION_ANY),
+            m_nMode(IpSecType::MODE_TRANSPORT),
+            m_nSpi(0),
+            m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP),
+            m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
+            m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO),
+            m_objTunnelSrcIp(IPAddress::IPv6NONE),
+            m_objTunnelDstIp(IPAddress::IPv6NONE)
+    {
+    }
+    inline ~OsIpSecSpPrivate() {}
 
 public:
     IPAddress m_objSrcIp;
@@ -62,16 +62,13 @@ public:
     IPAddress m_objTunnelDstIp;
 };
 
-
-
 PUBLIC
-OsIpSecSp::OsIpSecSp()
-    : m_pIpSecSpP(new OsIpSecSpPrivate())
+OsIpSecSp::OsIpSecSp() :
+        m_pIpSecSpP(new OsIpSecSpPrivate())
 {
 }
 
-PUBLIC VIRTUAL
-OsIpSecSp::~OsIpSecSp()
+PUBLIC VIRTUAL OsIpSecSp::~OsIpSecSp()
 {
     if (m_pIpSecSpP != IMS_NULL)
     {
@@ -80,11 +77,10 @@ OsIpSecSp::~OsIpSecSp()
     }
 }
 
-PUBLIC VIRTUAL
-void OsIpSecSp::SetTransportInfo(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-        IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
-        IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction,
-        IN IMS_UINT32 nDirection, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode)
+PUBLIC VIRTUAL void OsIpSecSp::SetTransportInfo(IN const IPAddress& objSrcIp,
+        IN IMS_UINT32 nSrcPort, IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+        IN IMS_UINT32 nTransportProtocol, IN IMS_UINT32 nAction, IN IMS_UINT32 nDirection,
+        IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode)
 {
     m_pIpSecSpP->m_objSrcIp = objSrcIp;
     m_pIpSecSpP->m_nSrcPort = nSrcPort;
@@ -97,8 +93,7 @@ void OsIpSecSp::SetTransportInfo(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSr
     m_pIpSecSpP->m_nSpi = nSpi;
 }
 
-PUBLIC VIRTUAL
-void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
+PUBLIC VIRTUAL void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
         IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm)
 {
     m_pIpSecSpP->m_nSecurityProtocol = nSecurityProtocol;
@@ -106,8 +101,7 @@ void OsIpSecSp::SetSecurityAlgorithmInfo(IN IMS_UINT32 nSecurityProtocol,
     m_pIpSecSpP->m_nEncryptionAlgorithm = nEncryptionAlgorithm;
 }
 
-PUBLIC VIRTUAL
-void OsIpSecSp::DoneSp()
+PUBLIC VIRTUAL void OsIpSecSp::DoneSp()
 {
     SetTransportInfo();
     SetSecurityAlgorithmInfo();
@@ -139,9 +133,8 @@ void OsIpSecSp::DisplayInfo()
 
     strLog.Sprintf("IMS_SP=0x%x|%s|%s|%d|%d|%d|%d|%d|%d", m_pIpSecSpP->m_nSpi,
             m_pIpSecSpP->m_objSrcIp.ToString().GetStr(),
-            m_pIpSecSpP->m_objDstIp.ToString().GetStr(),
-            m_pIpSecSpP->m_nSrcPort, m_pIpSecSpP->m_nDstPort,
-            m_pIpSecSpP->m_nDirection, m_pIpSecSpP->m_nTransportProtocol,
+            m_pIpSecSpP->m_objDstIp.ToString().GetStr(), m_pIpSecSpP->m_nSrcPort,
+            m_pIpSecSpP->m_nDstPort, m_pIpSecSpP->m_nDirection, m_pIpSecSpP->m_nTransportProtocol,
             m_pIpSecSpP->m_nMode, m_pIpSecSpP->m_nAction);
 
     IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
@@ -150,10 +143,9 @@ void OsIpSecSp::DisplayInfo()
 PUBLIC
 IpSecSaParameter::Policy OsIpSecSp::CreateSaPolicy() const
 {
-    IpSecSaParameter::Policy objPolicy(m_pIpSecSpP->m_nSpi,
-            m_pIpSecSpP->m_nDirection, m_pIpSecSpP->m_nMode, m_pIpSecSpP->m_nTransportProtocol,
-            m_pIpSecSpP->m_objSrcIp, m_pIpSecSpP->m_nSrcPort,
-            m_pIpSecSpP->m_objDstIp, m_pIpSecSpP->m_nDstPort);
+    IpSecSaParameter::Policy objPolicy(m_pIpSecSpP->m_nSpi, m_pIpSecSpP->m_nDirection,
+            m_pIpSecSpP->m_nMode, m_pIpSecSpP->m_nTransportProtocol, m_pIpSecSpP->m_objSrcIp,
+            m_pIpSecSpP->m_nSrcPort, m_pIpSecSpP->m_objDstIp, m_pIpSecSpP->m_nDstPort);
     return objPolicy;
 }
 
@@ -182,6 +174,4 @@ void OsIpSecSp::SetTransportInfo()
 }
 
 PRIVATE
-void OsIpSecSp::SetSecurityAlgorithmInfo()
-{
-}
+void OsIpSecSp::SetSecurityAlgorithmInfo() {}

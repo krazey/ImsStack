@@ -21,17 +21,19 @@
 class ImsSlot
 {
 public:
-    inline ImsSlot() __IMS_DEPRECATED__("Use ImsSlot(IMS_SINT32) instead")
-        : m_nSlotId(IMS_SLOT_0)
-    {}
-    inline ImsSlot(IN IMS_SINT32 nSlotId)
-        : m_nSlotId(nSlotId)
-    {}
-    inline ImsSlot(IN const ImsSlot& other)
-        : m_nSlotId(other.m_nSlotId)
-    {}
-    inline virtual ~ImsSlot()
-    {}
+    inline ImsSlot() __IMS_DEPRECATED__("Use ImsSlot(IMS_SINT32) instead") :
+            m_nSlotId(IMS_SLOT_0)
+    {
+    }
+    inline ImsSlot(IN IMS_SINT32 nSlotId) :
+            m_nSlotId(nSlotId)
+    {
+    }
+    inline ImsSlot(IN const ImsSlot& other) :
+            m_nSlotId(other.m_nSlotId)
+    {
+    }
+    inline virtual ~ImsSlot() {}
 
 public:
     inline ImsSlot& operator=(IN const ImsSlot& other)
@@ -45,8 +47,7 @@ public:
     }
 
 public:
-    inline IMS_SINT32 GetSlotId() const
-    { return m_nSlotId; }
+    inline IMS_SINT32 GetSlotId() const { return m_nSlotId; }
 
 private:
     IMS_SINT32 m_nSlotId;

@@ -80,11 +80,9 @@ ImsCarrierConfig* ConfigServicePrivate::GetCarrierConfig(IN IMS_SINT32 nSlotId)
     return pCc;
 }
 
-
-
 PRIVATE
-ConfigService::ConfigService()
-    : m_pPrivate(new ConfigServicePrivate())
+ConfigService::ConfigService() :
+        m_pPrivate(new ConfigServicePrivate())
 {
 }
 
@@ -108,7 +106,7 @@ void ConfigService::DispatchServiceMessage(IN ImsMessage& objMsg)
 
     switch (objMsg.GetName())
     {
-    case IMS_MSG_CONFIGURATION:
+        case IMS_MSG_CONFIGURATION:
         {
             IMS_SINT32 nSlotId = LONG_TO_INT(objMsg.nWparam);
             ImsCarrierConfig* pCc = m_pPrivate->GetCarrierConfig(nSlotId);
@@ -119,9 +117,9 @@ void ConfigService::DispatchServiceMessage(IN ImsMessage& objMsg)
             }
         }
         break;
-    default:
-        // no-op
-        break;
+        default:
+            // no-op
+            break;
     }
 }
 
@@ -136,8 +134,7 @@ void ConfigService::LoadCarrierConfig(IN IMS_SINT32 nSlotId)
     }
 }
 
-PUBLIC GLOBAL
-ConfigService* ConfigService::GetConfigService()
+PUBLIC GLOBAL ConfigService* ConfigService::GetConfigService()
 {
     static ConfigService* s_pConfigService = IMS_NULL;
 

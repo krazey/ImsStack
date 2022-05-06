@@ -18,14 +18,11 @@
 
 #include "IFile.h"
 
-class ImsFile
-    : public IFile
+class ImsFile : public IFile
 {
 public:
-    inline ImsFile()
-    {}
-    inline virtual ~ImsFile()
-    {}
+    inline ImsFile() {}
+    inline virtual ~ImsFile() {}
 };
 
 #endif

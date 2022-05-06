@@ -14,43 +14,41 @@
 #include "SSLCertificate.h"
 
 PUBLIC
-SSLCertificate::SSLCertificate()
-    : nKeyFileType(FILETYPE_PEM)
-    , strKeyFile(AString::ConstNull())
-    , strPassword(AString::ConstNull())
-    , strCAFile(AString::ConstNull())
-    , strCAPath(AString::ConstNull())
-    , strCiphers(AString::ConstNull())
+SSLCertificate::SSLCertificate() :
+        nKeyFileType(FILETYPE_PEM),
+        strKeyFile(AString::ConstNull()),
+        strPassword(AString::ConstNull()),
+        strCAFile(AString::ConstNull()),
+        strCAPath(AString::ConstNull()),
+        strCiphers(AString::ConstNull())
 {
 }
 
 PUBLIC
-SSLCertificate::SSLCertificate(IN CONST AString &strKeyFile_,
-        IN IMS_SINT32 nKeyFileType_ /* = FILETYPE_PEM */)
-    : nKeyFileType(nKeyFileType_)
-    , strKeyFile(strKeyFile_)
-    , strPassword(AString::ConstNull())
-    , strCAFile(AString::ConstNull())
-    , strCAPath(AString::ConstNull())
-    , strCiphers(AString::ConstNull())
+SSLCertificate::SSLCertificate(
+        IN CONST AString& strKeyFile_, IN IMS_SINT32 nKeyFileType_ /* = FILETYPE_PEM */) :
+        nKeyFileType(nKeyFileType_),
+        strKeyFile(strKeyFile_),
+        strPassword(AString::ConstNull()),
+        strCAFile(AString::ConstNull()),
+        strCAPath(AString::ConstNull()),
+        strCiphers(AString::ConstNull())
 {
 }
 
 PUBLIC
-SSLCertificate::SSLCertificate(IN CONST SSLCertificate &objRHS)
-    : nKeyFileType(objRHS.nKeyFileType)
-    , strKeyFile(objRHS.strKeyFile)
-    , strPassword(objRHS.strPassword)
-    , strCAFile(objRHS.strCAFile)
-    , strCAPath(objRHS.strCAPath)
-    , strCiphers(objRHS.strCiphers)
+SSLCertificate::SSLCertificate(IN CONST SSLCertificate& objRHS) :
+        nKeyFileType(objRHS.nKeyFileType),
+        strKeyFile(objRHS.strKeyFile),
+        strPassword(objRHS.strPassword),
+        strCAFile(objRHS.strCAFile),
+        strCAPath(objRHS.strCAPath),
+        strCiphers(objRHS.strCiphers)
 {
 }
 
 PUBLIC
-SSLCertificate::~SSLCertificate()
-{
-}
+SSLCertificate::~SSLCertificate() {}
 
 /*
 
@@ -58,7 +56,7 @@ Remarks
 
 */
 PUBLIC
-SSLCertificate& SSLCertificate::operator=(IN CONST SSLCertificate &objRHS)
+SSLCertificate& SSLCertificate::operator=(IN CONST SSLCertificate& objRHS)
 {
     if (this != &objRHS)
     {
@@ -148,7 +146,7 @@ Remarks
 
 */
 PUBLIC
-void SSLCertificate::SetCAFile(IN CONST AString &strCAFile)
+void SSLCertificate::SetCAFile(IN CONST AString& strCAFile)
 {
     this->strCAFile = strCAFile;
 }
@@ -159,7 +157,7 @@ Remarks
 
 */
 PUBLIC
-void SSLCertificate::SetCAPath(IN CONST AString &strCAPath)
+void SSLCertificate::SetCAPath(IN CONST AString& strCAPath)
 {
     this->strCAPath = strCAPath;
 }
@@ -170,7 +168,7 @@ Remarks
 
 */
 PUBLIC
-void SSLCertificate::SetCiphers(IN CONST AString &strCiphers)
+void SSLCertificate::SetCiphers(IN CONST AString& strCiphers)
 {
     this->strCiphers = strCiphers;
 }
@@ -181,7 +179,7 @@ Remarks
 
 */
 PUBLIC
-void SSLCertificate::SetKeyFile(IN CONST AString &strKeyFile)
+void SSLCertificate::SetKeyFile(IN CONST AString& strKeyFile)
 {
     this->strKeyFile = strKeyFile;
 }
@@ -203,7 +201,7 @@ Remarks
 
 */
 PUBLIC
-void SSLCertificate::SetPassword(IN CONST AString &strPassword)
+void SSLCertificate::SetPassword(IN CONST AString& strPassword)
 {
     this->strPassword = strPassword;
 }

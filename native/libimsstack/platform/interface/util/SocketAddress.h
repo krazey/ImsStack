@@ -24,24 +24,27 @@
 class SocketAddress
 {
 public:
-    inline SocketAddress()
-        : m_nPort(0)
-        , m_objIpAddress(IPAddress::IPv6NONE)
-    {}
-    inline SocketAddress(IN const IPAddress& objIpAddress, IN IMS_SINT32 nPort)
-        : m_nPort(nPort)
-        , m_objIpAddress(objIpAddress)
-    {}
-    inline SocketAddress(IN const AString& strIpAddress, IN IMS_SINT32 nPort)
-        : m_nPort(nPort)
-        , m_objIpAddress(IPAddress(strIpAddress))
-    {}
-    inline SocketAddress(IN const SocketAddress& other)
-        : m_nPort(other.m_nPort)
-        , m_objIpAddress(other.m_objIpAddress)
-    {}
-    inline ~SocketAddress()
-    {}
+    inline SocketAddress() :
+            m_nPort(0),
+            m_objIpAddress(IPAddress::IPv6NONE)
+    {
+    }
+    inline SocketAddress(IN const IPAddress& objIpAddress, IN IMS_SINT32 nPort) :
+            m_nPort(nPort),
+            m_objIpAddress(objIpAddress)
+    {
+    }
+    inline SocketAddress(IN const AString& strIpAddress, IN IMS_SINT32 nPort) :
+            m_nPort(nPort),
+            m_objIpAddress(IPAddress(strIpAddress))
+    {
+    }
+    inline SocketAddress(IN const SocketAddress& other) :
+            m_nPort(other.m_nPort),
+            m_objIpAddress(other.m_objIpAddress)
+    {
+    }
+    inline ~SocketAddress() {}
 
 public:
     SocketAddress& operator=(IN const SocketAddress& other)
@@ -63,39 +66,37 @@ public:
      *        Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL Equals(IN const SocketAddress& other) const
-    { return (m_nPort == other.m_nPort) && m_objIpAddress.Equals(other.m_objIpAddress); }
+    {
+        return (m_nPort == other.m_nPort) && m_objIpAddress.Equals(other.m_objIpAddress);
+    }
 
     /**
      * @brief Returns an IP address of this SocketAddress.
      *
      * @return IPAddress object
      */
-    inline const IPAddress& GetAddress() const
-    { return m_objIpAddress; }
+    inline const IPAddress& GetAddress() const { return m_objIpAddress; }
 
     /**
      * @brief Returns a port number of this SocketAddress.
      *
      * @return a port number
      */
-    inline IMS_SINT32 GetPort() const
-    { return m_nPort; }
+    inline IMS_SINT32 GetPort() const { return m_nPort; }
 
     /**
      * @brief Sets an IP address of this SocketAddress.
      *
      * @param objIpAddress an IP address to be set
      */
-    inline void SetAddress(IN const IPAddress& objIpAddress)
-    { m_objIpAddress = objIpAddress; }
+    inline void SetAddress(IN const IPAddress& objIpAddress) { m_objIpAddress = objIpAddress; }
 
     /**
      * @brief Sets a port number of this SocketAddress.
      *
      * @param nPort a port number to be set
      */
-    inline void SetPort(IN IMS_SINT32 nPort)
-    { m_nPort = nPort; }
+    inline void SetPort(IN IMS_SINT32 nPort) { m_nPort = nPort; }
 
     /**
      * @brief Returns the string representation of this object.

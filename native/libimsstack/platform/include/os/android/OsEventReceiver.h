@@ -22,10 +22,7 @@
 
 class System;
 
-class OsEventReceiver
-    : public ImsSlot
-    , public IEventReceiver
-    , public ISystemListener
+class OsEventReceiver : public ImsSlot, public IEventReceiver, public ISystemListener
 {
 public:
     OsEventReceiver(IN IMS_SINT32 nSlotId);
@@ -38,8 +35,8 @@ private:
     void SetListener(IN IEventReceiverListener* piListener) override;
 
     // ISystemListener class
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 private:
     IEventReceiverListener* m_piListener;

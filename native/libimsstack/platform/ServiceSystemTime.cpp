@@ -20,13 +20,11 @@
 class SystemTimeServicePrivate
 {
 public:
-    inline SystemTimeServicePrivate()
-        : m_piSysTime(IMS_NULL)
-    {}
-    inline ~SystemTimeServicePrivate()
+    inline SystemTimeServicePrivate() :
+            m_piSysTime(IMS_NULL)
     {
-        PlatformFactory::DestroySystemTime(m_piSysTime);
     }
+    inline ~SystemTimeServicePrivate() { PlatformFactory::DestroySystemTime(m_piSysTime); }
 
     SystemTimeServicePrivate(IN const SystemTimeServicePrivate&) = delete;
     SystemTimeServicePrivate& operator=(IN const SystemTimeServicePrivate&) = delete;
@@ -46,11 +44,9 @@ private:
     ISystemTime* m_piSysTime;
 };
 
-
-
 PRIVATE
-SystemTimeService::SystemTimeService()
-    : m_pPrivate(new SystemTimeServicePrivate())
+SystemTimeService::SystemTimeService() :
+        m_pPrivate(new SystemTimeServicePrivate())
 {
 }
 
@@ -66,8 +62,7 @@ ISystemTime* SystemTimeService::GetSystemTime()
     return m_pPrivate->GetSystemTime();
 }
 
-PUBLIC GLOBAL
-SystemTimeService* SystemTimeService::GetSystemTimeService()
+PUBLIC GLOBAL SystemTimeService* SystemTimeService::GetSystemTimeService()
 {
     static SystemTimeService* s_pSystemService = IMS_NULL;
 

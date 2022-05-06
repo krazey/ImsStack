@@ -20,8 +20,7 @@
 
 class OsMutexPrivate;
 
-class OsMutex
-    : public ImsMutex
+class OsMutex : public ImsMutex
 {
 public:
     OsMutex(IN IMS_SINT32 nType = ATTRIBUTE_RECURSIVE);

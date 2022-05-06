@@ -24,11 +24,11 @@
 #ifdef __cplusplus
 extern "C"
 {
-GLOBAL IMS_SINT32 IMSBase64_Encode(IN IMS_BYTE *pSrcData, IN IMS_SIZE_T nSrcLen,
-        IN_OUT IMS_CHAR *pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCRLF = IMS_TRUE);
+    GLOBAL IMS_SINT32 IMSBase64_Encode(IN IMS_BYTE* pSrcData, IN IMS_SIZE_T nSrcLen,
+            IN_OUT IMS_CHAR* pszDest, IN IMS_SIZE_T nDestLen, IN IMS_BOOL bAddCRLF = IMS_TRUE);
 
-GLOBAL IMS_SINT32 IMSBase64_Decode(IN IMS_CHAR *pszSrcData, IN IMS_SIZE_T nSrcLen,
-        IN_OUT IMS_BYTE *pDest, IN IMS_SIZE_T nDestLen);
+    GLOBAL IMS_SINT32 IMSBase64_Decode(IN IMS_CHAR* pszSrcData, IN IMS_SIZE_T nSrcLen,
+            IN_OUT IMS_BYTE* pDest, IN IMS_SIZE_T nDestLen);
 }
 #endif
-#endif // _IMS_BASE64_H_
+#endif  // _IMS_BASE64_H_

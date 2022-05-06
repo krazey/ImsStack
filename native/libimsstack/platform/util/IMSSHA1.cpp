@@ -14,47 +14,46 @@
 
 // Fxx are a basic SHA1 functions
 // 0 <= t <= 19
-#define    F00(b,c,d)            (((b) & (c)) | ((~b) & (d)))
-#define    K00                   (0x5a827999)
+#define F00(b, c, d) (((b) & (c)) | ((~b) & (d)))
+#define K00          (0x5a827999)
 // 20 <= t <= 39
-#define    F20(b,c,d)            ((b) ^ (c) ^ (d))
-#define    K20                   (0x6ed9eba1)
+#define F20(b, c, d) ((b) ^ (c) ^ (d))
+#define K20          (0x6ed9eba1)
 // 40 <= t <= 59
-#define    F40(b,c,d)            (((b) & (c)) | ((b) & (d)) | ((c) & (d)))
-#define    K40                   (0x8f1bbcdc)
+#define F40(b, c, d) (((b) & (c)) | ((b) & (d)) | ((c) & (d)))
+#define K40          (0x8f1bbcdc)
 // 60 <= t <= 79
-#define    F60(b,c,d)            ((b) ^ (c) ^ (d))
-#define    K60                   (0xca62c1d6)
+#define F60(b, c, d) ((b) ^ (c) ^ (d))
+#define K60          (0xca62c1d6)
 
 // ROTATE_LEFT rotates x left n bits.
-#define    ROTATE_LEFT(x, n)    ((((x) << (n)) & 0xFFFFFFFF) | ((x) >> (32 - (n))))
+#define ROTATE_LEFT(x, n) ((((x) << (n)) & 0xFFFFFFFF) | ((x) >> (32 - (n))))
 
 // Calculate A,B,C,D,E
-#define    FF(a, b, c, d, e, bcd, w, k, temp) \
-{ \
-    (temp) = ROTATE_LEFT((a),5) + (bcd) + (e) + (w) + (static_cast<IMS_UINT32>(k)); \
-    (e) = (d); \
-    (d) = (c); \
-    (c) = ROTATE_LEFT((b),30); \
-    (b) = (a); \
-    (a) = (temp) & 0xFFFFFFFF; \
-}
+#define FF(a, b, c, d, e, bcd, w, k, temp)                                               \
+    {                                                                                    \
+        (temp) = ROTATE_LEFT((a), 5) + (bcd) + (e) + (w) + (static_cast<IMS_UINT32>(k)); \
+        (e) = (d);                                                                       \
+        (d) = (c);                                                                       \
+        (c) = ROTATE_LEFT((b), 30);                                                      \
+        (b) = (a);                                                                       \
+        (a) = (temp)&0xFFFFFFFF;                                                         \
+    }
 
-LOCAL const IMS_UCHAR SHA1_PADDING[64] =
-{
-    0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+LOCAL const IMS_UCHAR SHA1_PADDING[64] = {
+        0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-LOCAL void imsSHA1_CopyMemory(OUT IMS_UCHAR *pucDest,
-        IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen);
-LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
-        OUT IMS_UINT32 *pnDest);
-LOCAL void imsSHA1_Encode(IN CONST IMS_UINT32 *pnSrc,
-        IN IMS_UINT32 nDestLen, OUT IMS_UCHAR *pucDest);
-LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR *pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
+LOCAL void imsSHA1_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen);
+LOCAL void imsSHA1_Decode(
+        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest);
+LOCAL void imsSHA1_Encode(
+        IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest);
+LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount);
 LOCAL void imsSHA1_Transform(IN IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBlock[64]);
 
 /*
@@ -76,7 +75,7 @@ return                  description
 ----------              ----------
 </table>
 */
-GLOBAL void IMSSHA1_Initialize(OUT SHA1Context *pstContext)
+GLOBAL void IMSSHA1_Initialize(OUT SHA1Context* pstContext)
 {
     if (pstContext != IMS_NULL)
     {
@@ -113,8 +112,8 @@ return                  description
 ----------              ----------
 </table>
 */
-GLOBAL void IMSSHA1_Update(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
-        IN_OUT SHA1Context *pstContext)
+GLOBAL void IMSSHA1_Update(
+        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT SHA1Context* pstContext)
 {
     IMS_UINT32 nProcIndex;
     IMS_UINT32 nIndex;
@@ -124,8 +123,8 @@ GLOBAL void IMSSHA1_Update(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
     nIndex = static_cast<IMS_UINT32>((pstContext->nLengthLow >> 3) & 0x3F);
 
     // Updates the number of bits
-    if ((pstContext->nLengthLow += static_cast<IMS_UINT32>(nSrcLen << 3))
-            < (static_cast<IMS_UINT32>(nSrcLen << 3)))
+    if ((pstContext->nLengthLow += static_cast<IMS_UINT32>(nSrcLen << 3)) <
+            (static_cast<IMS_UINT32>(nSrcLen << 3)))
     {
         (pstContext->nLengthHigh)++;
     }
@@ -153,8 +152,8 @@ GLOBAL void IMSSHA1_Update(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
     }
 
     // Process the remaining input buffer
-    imsSHA1_CopyMemory(&(pstContext->aucMessageBlock[nIndex]),
-            &pucSrc[nProcIndex], nSrcLen - nProcIndex);
+    imsSHA1_CopyMemory(
+            &(pstContext->aucMessageBlock[nIndex]), &pucSrc[nProcIndex], nSrcLen - nProcIndex);
 }
 
 /*
@@ -177,7 +176,7 @@ return                  description
 ----------              ----------
 </table>
 */
-GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context *pstContext, OUT IMS_UCHAR aucHash[20])
+GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context* pstContext, OUT IMS_UCHAR aucHash[20])
 {
     IMS_UCHAR aucBits[8];
     IMS_UINT32 nIndex;
@@ -203,9 +202,8 @@ GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context *pstContext, OUT IMS_UCHAR aucHa
     imsSHA1_SetMemory(reinterpret_cast<IMS_UCHAR*>(pstContext), 0, sizeof(SHA1Context));
 }
 
-
-LOCAL void imsSHA1_CopyMemory(OUT IMS_UCHAR *pucDest,
-        IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen)
+LOCAL void imsSHA1_CopyMemory(
+        OUT IMS_UCHAR* pucDest, IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen)
 {
     for (IMS_UINT32 i = 0; i < nSrcLen; i++)
     {
@@ -214,8 +212,7 @@ LOCAL void imsSHA1_CopyMemory(OUT IMS_UCHAR *pucDest,
 }
 
 // Decodes the input (IMS_UCHAR) into output (IMS_UINT32). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
-        OUT IMS_UINT32 *pnDest)
+LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, OUT IMS_UINT32* pnDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nSrcLen; i++, j += 4)
     {
@@ -227,19 +224,19 @@ LOCAL void imsSHA1_Decode(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
 }
 
 // Encodes input (IMS_UINT32) into output (IMS_UCHAR). Assumes nSrcLen is a multiple of 4.
-LOCAL void imsSHA1_Encode(IN CONST IMS_UINT32 *pnSrc,
-        IN IMS_UINT32 nDestLen, OUT IMS_UCHAR *pucDest)
+LOCAL void imsSHA1_Encode(
+        IN CONST IMS_UINT32* pnSrc, IN IMS_UINT32 nDestLen, OUT IMS_UCHAR* pucDest)
 {
     for (IMS_UINT32 i = 0, j = 0; j < nDestLen; i++, j += 4)
     {
         pucDest[j] = static_cast<IMS_UCHAR>((pnSrc[i] >> 24) & 0xFF);
-        pucDest[j+1] = static_cast<IMS_UCHAR>((pnSrc[i] >> 16) & 0xFF);
-        pucDest[j+2] = static_cast<IMS_UCHAR>((pnSrc[i] >> 8) & 0xFF);
-        pucDest[j+3] = static_cast<IMS_UCHAR>((pnSrc[i]) & 0xFF);
+        pucDest[j + 1] = static_cast<IMS_UCHAR>((pnSrc[i] >> 16) & 0xFF);
+        pucDest[j + 2] = static_cast<IMS_UCHAR>((pnSrc[i] >> 8) & 0xFF);
+        pucDest[j + 3] = static_cast<IMS_UCHAR>((pnSrc[i]) & 0xFF);
     }
 }
 
-LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR *pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
+LOCAL void imsSHA1_SetMemory(OUT IMS_UCHAR* pucDest, IN IMS_SINT32 nValue, IN IMS_SIZE_T nCount)
 {
     for (IMS_SIZE_T i = 0; i < nCount; i++)
     {
@@ -262,31 +259,31 @@ LOCAL void imsSHA1_Transform(IN_OUT IMS_UINT32 anH[5], IN IMS_UCHAR aucMessageBl
 
     for (t = 16; t < 80; ++t)
     {
-        W[t] = ROTATE_LEFT((W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]), 1);
+        W[t] = ROTATE_LEFT((W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16]), 1);
     }
 
     // 0 <= t <= 19
     for (t = 0; t < 20; ++t)
     {
-        FF(A, B, C, D, E, F00(B,C,D), W[t], K00, TEMP);
+        FF(A, B, C, D, E, F00(B, C, D), W[t], K00, TEMP);
     }
 
     // 20 <= t <= 39
     for (t = 20; t < 40; ++t)
     {
-        FF(A, B, C, D, E, F20(B,C,D), W[t], K20, TEMP);
+        FF(A, B, C, D, E, F20(B, C, D), W[t], K20, TEMP);
     }
 
     // 40 <= t <= 59
     for (t = 40; t < 60; ++t)
     {
-        FF(A, B, C, D, E, F40(B,C,D), W[t], K40, TEMP);
+        FF(A, B, C, D, E, F40(B, C, D), W[t], K40, TEMP);
     }
 
     // 60 <= t <= 79
     for (t = 60; t < 80; ++t)
     {
-        FF(A, B, C, D, E, F60(B,C,D), W[t], K60, TEMP);
+        FF(A, B, C, D, E, F60(B, C, D), W[t], K60, TEMP);
     }
 
     anH[0] = (anH[0] + A) & 0xFFFFFFFF;

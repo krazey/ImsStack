@@ -39,46 +39,44 @@ private:
     SystemTimeServicePrivate* m_pPrivate;
 };
 
-#define IMS_SYS_GetDate() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDate()
+#define IMS_SYS_GetDate() SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDate()
 
 #define IMS_SYS_GetLocalTime() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetLocalTime()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetLocalTime()
 
 #define IMS_SYS_GetRandom0() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE)
 
 #define IMS_SYS_GetRandom(R) \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE, R)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_FALSE, R)
 
 #define IMS_SYS_GetSRandom0() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE)
 
 #define IMS_SYS_GetSRandom(R) \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE, R)
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetRandom(IMS_TRUE, R)
 
 #define IMS_SYS_GetTickCount() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTickCount()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTickCount()
 
 #define IMS_SYS_GetTimeInSeconds() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInSeconds()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInSeconds()
 
 #define IMS_SYS_GetTimeInMicroSeconds() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInMicroSeconds()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInMicroSeconds()
 
 #define IMS_SYS_GetTimeInMilliSeconds() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInMilliSeconds()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeInMilliSeconds()
 
 #define IMS_SYS_GetTimeString() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeString()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeString()
 
 #define IMS_SYS_GetTimeStringEx() \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeStringEx()
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetTimeStringEx()
 
-#define IMS_SYS_Sleep(MS) \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->Sleep(MS)
+#define IMS_SYS_Sleep(MS) SystemTimeService::GetSystemTimeService()->GetSystemTime()->Sleep(MS)
 
-#define IMS_SYS_GetDiffGmTime(BEGIN,END) \
-        SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDiffGmTime(BEGIN,END);
+#define IMS_SYS_GetDiffGmTime(BEGIN, END) \
+    SystemTimeService::GetSystemTimeService()->GetSystemTime()->GetDiffGmTime(BEGIN, END);
 
 #endif

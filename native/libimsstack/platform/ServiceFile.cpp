@@ -21,13 +21,11 @@
 class FileServicePrivate
 {
 public:
-    inline FileServicePrivate()
-        : m_piFileUtil(IMS_NULL)
-    {}
-    inline ~FileServicePrivate()
+    inline FileServicePrivate() :
+            m_piFileUtil(IMS_NULL)
     {
-        PlatformFactory::DestroyFileUtil(m_piFileUtil);
     }
+    inline ~FileServicePrivate() { PlatformFactory::DestroyFileUtil(m_piFileUtil); }
 
     FileServicePrivate(IN const FileServicePrivate&) = delete;
     FileServicePrivate& operator=(IN const FileServicePrivate&) = delete;
@@ -47,11 +45,9 @@ private:
     IFileUtil* m_piFileUtil;
 };
 
-
-
 PRIVATE
-FileService::FileService()
-    : m_pPrivate(new FileServicePrivate())
+FileService::FileService() :
+        m_pPrivate(new FileServicePrivate())
 {
 }
 
@@ -92,8 +88,7 @@ IFileUtil* FileService::GetFileUtil()
     return m_pPrivate->GetFileUtil();
 }
 
-PUBLIC GLOBAL
-FileService* FileService::GetFileService()
+PUBLIC GLOBAL FileService* FileService::GetFileService()
 {
     static FileService* s_pFileService = IMS_NULL;
 

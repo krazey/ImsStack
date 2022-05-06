@@ -47,20 +47,16 @@ GLOBAL IMS_BOOL ImsSocketState_InitInstance()
     return IMS_TRUE;
 }
 
-
-
 PRIVATE
-ImsSocketState::ImsSocketState()
-    : m_piLock(IMS_NULL)
-    , m_objHandle2Object(IMSMap<IMS_SOCKET, ImsSocket*>())
-    , m_objDeadSockets(IMSList<ImsSocket*>())
+ImsSocketState::ImsSocketState() :
+        m_piLock(IMS_NULL),
+        m_objHandle2Object(IMSMap<IMS_SOCKET, ImsSocket*>()),
+        m_objDeadSockets(IMSList<ImsSocket*>())
 {
 }
 
 PUBLIC
-ImsSocketState::~ImsSocketState()
-{
-}
+ImsSocketState::~ImsSocketState() {}
 
 PUBLIC
 void ImsSocketState::AddDeadSocket(IN ImsSocket* pSocket)
@@ -109,8 +105,8 @@ void ImsSocketState::AttachHandle(IN IMS_SOCKET hSocket, IN ImsSocket* pSocket)
 
     m_objHandle2Object.Add(hSocket, pSocket);
 
-    IMS_TRACE_I("SOCKET (%u, %p) IS ATTACHED (size=%d)",
-            hSocket, pSocket, m_objHandle2Object.GetSize());
+    IMS_TRACE_I("SOCKET (%u, %p) IS ATTACHED (size=%d)", hSocket, pSocket,
+            m_objHandle2Object.GetSize());
 }
 
 PUBLIC
@@ -158,8 +154,7 @@ void ImsSocketState::DetachAll(IN IMS_CONNECTION hConnection)
             {
                 ImsSocket* pSocket = m_objHandle2Object.GetValueAt(i);
 
-                if ((pSocket != IMS_NULL)
-                        && (pSocket->GetNetworkConnection() == hConnection))
+                if ((pSocket != IMS_NULL) && (pSocket->GetNetworkConnection() == hConnection))
                 {
                     objSockets.Append(pSocket);
                 }
@@ -212,8 +207,7 @@ IMS_BOOL ImsSocketState::IsEmpty() const
     return m_objHandle2Object.IsEmpty();
 }
 
-PUBLIC GLOBAL
-ImsSocketState* ImsSocketState::GetInstance()
+PUBLIC GLOBAL ImsSocketState* ImsSocketState::GetInstance()
 {
     static ImsSocketState* s_pSocketState = IMS_NULL;
 

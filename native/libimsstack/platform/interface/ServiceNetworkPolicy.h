@@ -32,14 +32,10 @@ public:
     NetworkPolicy& operator=(IN const NetworkPolicy& other);
 
 public:
-    inline IMS_SINT32 GetApnType() const
-    { return m_nApnType; }
-    inline const AString& GetName() const
-    { return m_strName; }
-    inline IMS_BOOL IsMobilePolicy() const
-    { return IsMobilePolicy(m_nApnType); }
-    inline IMS_BOOL IsPrimary() const
-    { return m_bPrimary; }
+    inline IMS_SINT32 GetApnType() const { return m_nApnType; }
+    inline const AString& GetName() const { return m_strName; }
+    inline IMS_BOOL IsMobilePolicy() const { return IsMobilePolicy(m_nApnType); }
+    inline IMS_BOOL IsPrimary() const { return m_bPrimary; }
 
     static IMS_BOOL IsMobilePolicy(IN const AString& strName);
     static IMS_BOOL IsMobilePolicy(IN IMS_SINT32 nApnType);
@@ -83,17 +79,16 @@ public:
     NetworkServicePolicy& operator=(IN const NetworkServicePolicy&) = delete;
 
 public:
-    IMS_BOOL AddPolicy(IN const AString& strName,
-            IN const NetworkPolicy& objPolicy, IN IMS_SINT32 nSlotId);
-    const NetworkPolicy* GetPolicy(IN const AString& strName,
-            IN IMS_SINT32 nSlotId) const;
+    IMS_BOOL AddPolicy(
+            IN const AString& strName, IN const NetworkPolicy& objPolicy, IN IMS_SINT32 nSlotId);
+    const NetworkPolicy* GetPolicy(IN const AString& strName, IN IMS_SINT32 nSlotId) const;
     inline const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType)
             __IMS_DEPRECATED__("Use GetPolicy(IMS_SINT32,IMS_SINT32) instead")
-    { return GetPolicy(nApnType, IMS_SLOT_0); }
-    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType,
-            IN IMS_SINT32 nSlotId) const;
-    void RemovePolicy(IN const AString& strName,
-            IN IMS_SINT32 nSlotId);
+    {
+        return GetPolicy(nApnType, IMS_SLOT_0);
+    }
+    const NetworkPolicy* GetPolicy(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId) const;
+    void RemovePolicy(IN const AString& strName, IN IMS_SINT32 nSlotId);
     void RemoveAllPolicies(IN IMS_SINT32 nSlotId);
 
     static NetworkServicePolicy* GetInstance();

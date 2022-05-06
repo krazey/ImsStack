@@ -20,8 +20,8 @@
 class ISystemListener
 {
 public:
-    virtual void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) = 0;
+    virtual void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) = 0;
 };
 
 #endif
