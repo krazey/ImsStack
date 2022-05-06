@@ -21,64 +21,60 @@ class IOnPublicationListener;
 class PubState;
 class PublicationRefreshHelper;
 
-
-
-class Publication
-    : public ServiceMethod
-    , public IRefreshable
+class Publication : public ServiceMethod, public IRefreshable
 {
 public:
-    Publication(IN Service *pService, IN CONST AString &strEvent_);
+    Publication(IN Service* pService, IN CONST AString& strEvent_);
     virtual ~Publication();
 
 private:
-    Publication(IN CONST Publication &objRHS);
-    Publication& operator=(IN CONST Publication &objRHS);
+    Publication(IN CONST Publication& objRHS);
+    Publication& operator=(IN CONST Publication& objRHS);
 
 public:
     // Method class
     virtual void Destroy();
     // SIP_MESSAGE_MEDIATOR
-    virtual void SetMessageMediator(IN IMessageMediator *piMediator);
+    virtual void SetMessageMediator(IN IMessageMediator* piMediator);
 
     // IPublication interface
     const AString& GetEvent() const;
     IMS_SINT32 GetState() const;
-    IMS_RESULT Publish(IN CONST ByteArray &objState, IN CONST AString &strContentType);
-    void SetListener(IN IOnPublicationListener *piListener);
+    IMS_RESULT Publish(IN CONST ByteArray& objState, IN CONST AString& strContentType);
+    void SetListener(IN IOnPublicationListener* piListener);
     IMS_RESULT Unpublish();
 
     //// IMS extensions
-    void SetRefreshListener(IN IRefreshListener *piListener);
-    void SetRefreshPolicy(IN IMS_SINT32 nPolicy,
-            IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    void SetRefreshListener(IN IRefreshListener* piListener);
+    void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     // Method class
     // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection *piSCC);
+    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
 
     // Handle the exceptions
     virtual void Exception_NotifyError(IN IMS_SINT32 nErrorCode);
     virtual IMS_BOOL InitInstance();
 
     // Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection *piSCC);
-    virtual void NotifySIPError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-            IN CONST AString &strMessage);
+    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
+    virtual void NotifySIPError(
+            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
 
     // IRefreshable interface
-    virtual void Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
-            IN IMS_SINT32 nCode = 0);
+    virtual void Refreshable_RefreshCompleted(
+            IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
     virtual IMS_BOOL Refreshable_RefreshStarted();
     virtual void Refreshable_RefreshTerminated();
 
 private:
     void CloseConnection();
-    void ReceiveResponse(IN ISipClientConnection *piSCC);
+    void ReceiveResponse(IN ISipClientConnection* piSCC);
     void SetState(IN IMS_SINT32 nState);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
@@ -144,13 +140,13 @@ private:
     // Event package name
     AString strEvent;
     // Listener for this publication
-    IOnPublicationListener *piListener;
+    IOnPublicationListener* piListener;
 
     // Publication state information
-    PubState *pPubState;
+    PubState* pPubState;
     // Publication refresh timer
-    IRefreshListener *piRefreshListener;
-    PublicationRefreshHelper *pRefreshHelper;
+    IRefreshListener* piRefreshListener;
+    PublicationRefreshHelper* pRefreshHelper;
 };
 
-#endif // _PUBLICATION_H_
+#endif  // _PUBLICATION_H_

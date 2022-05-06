@@ -21,30 +21,27 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-//3  100503
-//3 To support the connection in the media object,
-//3 it needs to be modified using any active class to send/receive MSG.
-
-
+// 3  100503
+// 3 To support the connection in the media object,
+// 3 it needs to be modified using any active class to send/receive MSG.
 
 PUBLIC
-Media::Media(IN Service *pService_, IN ISDPOAState *piOAState_)
-    : pService(pService_)
-    , piOAState(piOAState_)
-    , nState(STATE_INACTIVE)
-    , nUpdateState(UPDATE_UNCHANGED)
-    , nDirection(DIRECTION_NONE)
-    , objDescriptors(IMSList<MediaDescriptor*>())
-    , piListener(IMS_NULL)
-    , bFlag_DirectionOnlyUpdated(IMS_FALSE)
-    , bFlag_InitializationDone(IMS_FALSE)
-    , bFlag_InitialOfferReceived(IMS_FALSE)
-    , pMediaProposal(IMS_NULL)
+Media::Media(IN Service* pService_, IN ISDPOAState* piOAState_) :
+        pService(pService_),
+        piOAState(piOAState_),
+        nState(STATE_INACTIVE),
+        nUpdateState(UPDATE_UNCHANGED),
+        nDirection(DIRECTION_NONE),
+        objDescriptors(IMSList<MediaDescriptor*>()),
+        piListener(IMS_NULL),
+        bFlag_DirectionOnlyUpdated(IMS_FALSE),
+        bFlag_InitializationDone(IMS_FALSE),
+        bFlag_InitialOfferReceived(IMS_FALSE),
+        pMediaProposal(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-Media::~Media()
+PUBLIC VIRTUAL Media::~Media()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -52,7 +49,7 @@ Media::~Media()
     {
         for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
         {
-            MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+            MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
             if (pDescriptor != IMS_NULL)
                 delete pDescriptor;
@@ -135,15 +132,13 @@ IMS_RESULT Media::SetDirection(IN IMS_SINT32 nDirection)
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_INACTIVE)
-            && (nState != STATE_ACTIVE))
+    if ((nState != STATE_INACTIVE) && (nState != STATE_ACTIVE))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
         return IMS_FAILURE;
     }
 
-    if ((nDirection < DIRECTION_INACTIVE)
-            || (nDirection > DIRECTION_SEND_RECEIVE))
+    if ((nDirection < DIRECTION_INACTIVE) || (nDirection > DIRECTION_SEND_RECEIVE))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
@@ -155,8 +150,8 @@ IMS_RESULT Media::SetDirection(IN IMS_SINT32 nDirection)
 
     for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
     {
-        const MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
-        SdpMediaParameter *pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
+        const MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
+        SdpMediaParameter* pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParam != IMS_NULL)
         {
@@ -168,7 +163,7 @@ IMS_RESULT Media::SetDirection(IN IMS_SINT32 nDirection)
 }
 
 PUBLIC
-void Media::SetMediaListener(IN IOnMediaListener *piListener)
+void Media::SetMediaListener(IN IOnMediaListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -213,13 +208,13 @@ void Media::SetMid(IN IMS_SINT32 nMid)
 
     for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
     {
-        MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+        MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
         pDescriptor->SetMid(nMid);
     }
 }
 
 PUBLIC
-IMS_BOOL Media::Equals(IN Media *pMedia) const
+IMS_BOOL Media::Equals(IN Media* pMedia) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -286,12 +281,11 @@ void Media::RemoveMedia()
 
         if (pMediaProposal != IMS_NULL)
         {
-            const IMSList<MediaDescriptor*>& objDescriptors
-                    = pMediaProposal->GetMediaDescriptors();
+            const IMSList<MediaDescriptor*>& objDescriptors = pMediaProposal->GetMediaDescriptors();
 
             for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
             {
-                MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+                MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
                 if (pDescriptor == IMS_NULL)
                     continue;
@@ -308,7 +302,7 @@ void Media::RemoveMedia()
         {
             for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
             {
-                MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+                MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
                 if (pDescriptor == IMS_NULL)
                     continue;
@@ -325,7 +319,7 @@ void Media::RemoveMedia()
     {
         for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
         {
-            const MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+            const MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
             if (pDescriptor == IMS_NULL)
                 continue;
@@ -380,20 +374,17 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
     //---------------------------------------------------------------------------------------------
 
     // Update the MediaDescriptors
-    if ((nOAStatus == OFFER_SENT)
-            || (nOAStatus == OFFER_RECEIVED)
-            || (nOAStatus == ANSWER_SENT)
-            || (nOAStatus == ANSWER_RECEIVED))
+    if ((nOAStatus == OFFER_SENT) || (nOAStatus == OFFER_RECEIVED) || (nOAStatus == ANSWER_SENT) ||
+            (nOAStatus == ANSWER_RECEIVED))
     {
         // Store the session-level connection address
         // This field can be overwritten by the media descriptor
         // if the specific media has its own connection line.
-        if ((nOAStatus == OFFER_RECEIVED)
-                || (nOAStatus == ANSWER_RECEIVED))
+        if ((nOAStatus == OFFER_RECEIVED) || (nOAStatus == ANSWER_RECEIVED))
         {
         }
 
-        //UpdateMediaDescriptors();
+        // UpdateMediaDescriptors();
     }
 
     IMS_SINT32 nState = GetState();
@@ -411,14 +402,14 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
         {
             bFlag_InitialOfferReceived = IMS_FALSE;
 
-            if ((nSessionTransition == SESSION_START_FAILED)
-                    || (nSessionTransition == SESSION_UPDATE_FAILED))
+            if ((nSessionTransition == SESSION_START_FAILED) ||
+                    (nSessionTransition == SESSION_UPDATE_FAILED))
             {
                 SetState(STATE_DELETED);
             }
-            else if ((nSessionTransition == SESSION_STARTED)
-                    || (nSessionTransition == SESSION_UPDATED)
-                    || (nSessionTransition == SESSION_EARLY_UPDATE))
+            else if ((nSessionTransition == SESSION_STARTED) ||
+                    (nSessionTransition == SESSION_UPDATED) ||
+                    (nSessionTransition == SESSION_EARLY_UPDATE))
             {
                 if (IsMediaAccepted())
                 {
@@ -442,8 +433,7 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
             }
         }
 
-        if ((nSessionTransition == SESSION_START)
-                || (nSessionTransition == SESSION_UPDATE))
+        if ((nSessionTransition == SESSION_START) || (nSessionTransition == SESSION_UPDATE))
         {
             SetState(STATE_PENDING);
         }
@@ -461,9 +451,8 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
             SetState(STATE_ACTIVE);
         }
 
-        if ((nSessionTransition == SESSION_STARTED)
-                || (nSessionTransition == SESSION_UPDATED)
-                || (nSessionTransition == SESSION_EARLY_UPDATE))
+        if ((nSessionTransition == SESSION_STARTED) || (nSessionTransition == SESSION_UPDATED) ||
+                (nSessionTransition == SESSION_EARLY_UPDATE))
         {
             if (bIsMediaAccepted)
             {
@@ -474,8 +463,8 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
                 SetState(STATE_DELETED);
             }
         }
-        else if ((nSessionTransition == SESSION_START_FAILED)
-                || (nSessionTransition == SESSION_UPDATE_FAILED))
+        else if ((nSessionTransition == SESSION_START_FAILED) ||
+                (nSessionTransition == SESSION_UPDATE_FAILED))
         {
             SetState(STATE_DELETED);
         }
@@ -488,21 +477,19 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
         }
 
         // Set the update state
-        if ((nOAStatus == ANSWER_SENT)
-                || (nOAStatus == ANSWER_RECEIVED))
+        if ((nOAStatus == ANSWER_SENT) || (nOAStatus == ANSWER_RECEIVED))
         {
             IMS_SINT32 nUpdateState = GetUpdateState();
 
             // If the session received non-2xx response to re-INVITE or UPDATE request,
             // then aborts the proposal media after completing the transaction.
-            if ((nUpdateState == UPDATE_MODIFIED)
-                    && (nSessionTransition == SESSION_UPDATE_FAILED))
+            if ((nUpdateState == UPDATE_MODIFIED) && (nSessionTransition == SESSION_UPDATE_FAILED))
             {
                 piOAState->AbortProposal();
             }
 
-            //4 Check if the proposal media is accepted or not...
-            //4 for state change (ACTIVE to DELETED)
+            // 4 Check if the proposal media is accepted or not...
+            // 4 for state change (ACTIVE to DELETED)
 
             SetUpdateState(UPDATE_UNCHANGED);
 
@@ -556,8 +543,8 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
         }
         else if (nOAStatus == OFFER_SENT)
         {
-            if ((nSessionTransition == SESSION_UPDATE)
-                    || (nSessionTransition == SESSION_EARLY_UPDATE))
+            if ((nSessionTransition == SESSION_UPDATE) ||
+                    (nSessionTransition == SESSION_EARLY_UPDATE))
             {
                 if (!IsMediaAccepted() && (GetUpdateState() == UPDATE_MODIFIED))
                 {
@@ -567,11 +554,11 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
             }
         }
     }
-    // Reuse the "slot" used by an old media stream which had been disabled by setting its port to zero.
+    // Reuse the "slot" used by an old media stream which had been disabled by setting its port to
+    // zero.
     else if (nState == STATE_DELETED)
     {
-        if ((nSessionTransition == SESSION_UPDATE)
-                || (nSessionTransition == SESSION_EARLY_UPDATE))
+        if ((nSessionTransition == SESSION_UPDATE) || (nSessionTransition == SESSION_EARLY_UPDATE))
         {
             if ((nOAStatus == OFFER_RECEIVED) && IsMediaProposed())
             {
@@ -605,10 +592,9 @@ void Media::TransitMedia(IN IMS_SINT32 nSessionTransition, IN IMS_SINT32 nOAStat
     }
 }
 
-PROTECTED VIRTUAL
-const AString& Media::GetConnectionAddress() const
+PROTECTED VIRTUAL const AString& Media::GetConnectionAddress() const
 {
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -631,8 +617,7 @@ const AString& Media::GetConnectionAddress() const
     return AString::ConstNull();
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 Media::GetMediaState() const
+PROTECTED VIRTUAL IMS_SINT32 Media::GetMediaState() const
 {
     IMS_SINT32 nState = GetState();
 
@@ -659,11 +644,10 @@ IMS_SINT32 Media::GetMediaState() const
     }
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid) const
+PROTECTED VIRTUAL SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid) const
 {
     IMS_SINT32 nState = GetState();
-    SdpMediaParameter *pMediaParam = IMS_NULL;
+    SdpMediaParameter* pMediaParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -680,7 +664,8 @@ SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid) const
         }
         else
         {
-            // Read-only; Using this media parameter, the application MUST NOT modify any parameters.
+            // Read-only; Using this media parameter, the application MUST NOT modify any
+            // parameters.
             if (piOAState->GetMediaCurrentView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
             {
                 return IMS_NULL;
@@ -698,10 +683,9 @@ SdpMediaParameter* Media::GetMediaParameter(IN IMS_SINT32 nMid) const
     return pMediaParam;
 }
 
-PROTECTED VIRTUAL
-const AString& Media::GetPeerConnectionAddress() const
+PROTECTED VIRTUAL const AString& Media::GetPeerConnectionAddress() const
 {
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -715,10 +699,9 @@ const AString& Media::GetPeerConnectionAddress() const
     return AString::ConstNull();
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* Media::GetPeerMediaParameter(IN IMS_SINT32 nMid) const
+PROTECTED VIRTUAL SdpMediaParameter* Media::GetPeerMediaParameter(IN IMS_SINT32 nMid) const
 {
-    SdpMediaParameter *pMediaParam = IMS_NULL;
+    SdpMediaParameter* pMediaParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -730,8 +713,7 @@ SdpMediaParameter* Media::GetPeerMediaParameter(IN IMS_SINT32 nMid) const
     return pMediaParam;
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
+PROTECTED VIRTUAL SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
 {
     IMS_SINT32 nState = GetState();
     IMS_SINT32 nUpdateState = GetUpdateState();
@@ -774,7 +756,7 @@ SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
 
         if ((nUpdateState == UPDATE_MODIFIED) || (nUpdateState == UPDATE_REMOVED))
         {
-            SdpMediaParameter *pMediaParam = IMS_NULL;
+            SdpMediaParameter* pMediaParam = IMS_NULL;
 
             if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
             {
@@ -787,7 +769,7 @@ SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
     }
     else if (nState == STATE_INACTIVE)
     {
-        SdpMediaParameter *pMediaParam = IMS_NULL;
+        SdpMediaParameter* pMediaParam = IMS_NULL;
 
         if (piOAState->GetMediaProposalView(nMid, pMediaParam) != ISDPOAState::RESULT_SUCCESS)
         {
@@ -801,40 +783,34 @@ SdpMediaParameter* Media::GetProposalMediaParameter(IN IMS_SINT32 nMid)
     return IMS_NULL;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL Media::PreviewInitInstance()
+PROTECTED VIRTUAL IMS_BOOL Media::PreviewInitInstance()
 {
     // no-op
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL Media::PostInitInstance()
+PROTECTED VIRTUAL IMS_BOOL Media::PostInitInstance()
 {
     // no-op
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void Media::PreviewCleanupMedia()
+PROTECTED VIRTUAL void Media::PreviewCleanupMedia()
 {
     // no-op
 }
 
-PROTECTED VIRTUAL
-void Media::PostCleanupMedia()
+PROTECTED VIRTUAL void Media::PostCleanupMedia()
 {
     // no-op
 }
 
-PROTECTED VIRTUAL
-void Media::PreviewRemoveMedia()
+PROTECTED VIRTUAL void Media::PreviewRemoveMedia()
 {
     // no-op
 }
 
-PROTECTED VIRTUAL
-void Media::PostRemoveMedia()
+PROTECTED VIRTUAL void Media::PostRemoveMedia()
 {
     // no-op
 }
@@ -846,8 +822,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nResult != ISDPOAState::RESULT_SUCCESS)
-            && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+    if ((nResult != ISDPOAState::RESULT_SUCCESS) && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
     {
         IMS_TRACE_E(0, "Creating a proposal view failed", 0, 0, 0);
         return IMS_FALSE;
@@ -859,7 +834,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
     // with full capabilities.
 
     IMSList<IMS_SINT32> objMids;
-    SdpMediaParameter *pMediaParam;
+    SdpMediaParameter* pMediaParam;
     IMS_SINT32 nSDPDirection = ConvertDirectionMediaToSDP(nDirection);
 
     if (nCountOfDescriptor == 0)
@@ -887,7 +862,7 @@ IMS_BOOL Media::InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDi
 }
 
 PROTECTED
-IMS_BOOL Media::InitInstance(IN CONST IMSList<IMS_SINT32> &objMids)
+IMS_BOOL Media::InitInstance(IN CONST IMSList<IMS_SINT32>& objMids)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -899,7 +874,7 @@ IMS_BOOL Media::InitInstance(IN CONST IMSList<IMS_SINT32> &objMids)
 
     for (IMS_UINT32 i = 0; i < objMids.GetSize(); ++i)
     {
-        MediaDescriptor *pDescriptor = new MediaDescriptor(this, objMids.GetAt(i));
+        MediaDescriptor* pDescriptor = new MediaDescriptor(this, objMids.GetAt(i));
 
         if (pDescriptor == IMS_NULL)
         {
@@ -907,7 +882,7 @@ IMS_BOOL Media::InitInstance(IN CONST IMSList<IMS_SINT32> &objMids)
             return IMS_FALSE;
         }
 
-        SdpMediaParameter *pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
+        SdpMediaParameter* pMediaParam = GetProposalMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParam != IMS_NULL)
         {
@@ -933,13 +908,13 @@ IMS_BOOL Media::InitInstance(IN CONST IMSList<IMS_SINT32> &objMids)
 PROTECTED
 IMS_BOOL Media::IsMediaAccepted() const
 {
-    MediaDescriptor *pDescriptor = GetMediaDescriptor();
+    MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     //---------------------------------------------------------------------------------------------
 
     if (pDescriptor != IMS_NULL)
     {
-        SdpMediaParameter *pMediaParameter = GetMediaParameter(pDescriptor->GetMid());
+        SdpMediaParameter* pMediaParameter = GetMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParameter != IMS_NULL)
         {
@@ -953,13 +928,13 @@ IMS_BOOL Media::IsMediaAccepted() const
 PROTECTED
 IMS_BOOL Media::IsMediaProposed() const
 {
-    MediaDescriptor *pDescriptor = GetMediaDescriptor();
+    MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     //---------------------------------------------------------------------------------------------
 
     if (pDescriptor != IMS_NULL)
     {
-        SdpMediaParameter *pMediaParameter = GetPeerMediaParameter(pDescriptor->GetMid());
+        SdpMediaParameter* pMediaParameter = GetPeerMediaParameter(pDescriptor->GetMid());
 
         if (pMediaParameter != IMS_NULL)
         {
@@ -1003,8 +978,8 @@ void Media::SetUpdateState(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("Media :: %s to %s",
-            UpdateStateToString(nUpdateState), UpdateStateToString(nState), 0);
+    IMS_TRACE_I(
+            "Media :: %s to %s", UpdateStateToString(nUpdateState), UpdateStateToString(nState), 0);
 
     this->nUpdateState = nState;
 }
@@ -1035,8 +1010,7 @@ void Media::UpdateMediaDescriptors()
     */
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 Media::ConvertDirectionSDPToMedia(IN IMS_SINT32 nDirection)
+PRIVATE GLOBAL IMS_SINT32 Media::ConvertDirectionSDPToMedia(IN IMS_SINT32 nDirection)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1052,8 +1026,7 @@ IMS_SINT32 Media::ConvertDirectionSDPToMedia(IN IMS_SINT32 nDirection)
         return DIRECTION_NONE;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 Media::ConvertDirectionMediaToSDP(IN IMS_SINT32 nDirection)
+PRIVATE GLOBAL IMS_SINT32 Media::ConvertDirectionMediaToSDP(IN IMS_SINT32 nDirection)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1071,44 +1044,42 @@ IMS_SINT32 Media::ConvertDirectionMediaToSDP(IN IMS_SINT32 nDirection)
         return Sdp::DIRECTION_NONE;
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* Media::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* Media::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_INACTIVE:
-        return "STATE_INACTIVE";
-    case STATE_PENDING:
-        return "STATE_PENDING";
-    case STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    case STATE_DELETED:
-        return "STATE_DELETED";
-    case STATE_PROPOSAL:
-        return "STATE_PROPOSAL";
-    default:
-        return "__INVALID__";
+        case STATE_INACTIVE:
+            return "STATE_INACTIVE";
+        case STATE_PENDING:
+            return "STATE_PENDING";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case STATE_DELETED:
+            return "STATE_DELETED";
+        case STATE_PROPOSAL:
+            return "STATE_PROPOSAL";
+        default:
+            return "__INVALID__";
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* Media::UpdateStateToString(IN IMS_SINT32 nUpdateState)
+PRIVATE GLOBAL const IMS_CHAR* Media::UpdateStateToString(IN IMS_SINT32 nUpdateState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nUpdateState)
     {
-    case UPDATE_INVALID:
-        return "UPDATE_INVALID";
-    case UPDATE_UNCHANGED:
-        return "UPDATE_UNCHANGED";
-    case UPDATE_MODIFIED:
-        return "UPDATE_MODIFIED";
-    case UPDATE_REMOVED:
-        return "UPDATE_REMOVED";
-    default:
-        return "__INVALID__";
+        case UPDATE_INVALID:
+            return "UPDATE_INVALID";
+        case UPDATE_UNCHANGED:
+            return "UPDATE_UNCHANGED";
+        case UPDATE_MODIFIED:
+            return "UPDATE_MODIFIED";
+        case UPDATE_REMOVED:
+            return "UPDATE_REMOVED";
+        default:
+            return "__INVALID__";
     }
 }

@@ -36,8 +36,8 @@ public:
      * @param piScn Pointer to ISipConnectionNotifier object carrying ISipServerConnection
      * @param bIsForked Flag to indicate that an incoming request is forked or not
      */
-    virtual void ServerConnection_NotifyRequest(IN ISipConnectionNotifier* piScn,
-            IN IMS_BOOL bIsForked = IMS_FALSE) = 0;
+    virtual void ServerConnection_NotifyRequest(
+            IN ISipConnectionNotifier* piScn, IN IMS_BOOL bIsForked = IMS_FALSE) = 0;
 };
 
 #endif

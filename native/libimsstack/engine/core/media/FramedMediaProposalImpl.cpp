@@ -18,31 +18,24 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-FramedMediaProposalImpl::FramedMediaProposalImpl(IN FramedMediaProposal *pMediaProposal_)
-    : pMediaProposal(pMediaProposal_)
+FramedMediaProposalImpl::FramedMediaProposalImpl(IN FramedMediaProposal* pMediaProposal_) :
+        pMediaProposal(pMediaProposal_)
 {
 }
 
-PUBLIC VIRTUAL
-FramedMediaProposalImpl::~FramedMediaProposalImpl()
-{
-}
+PUBLIC VIRTUAL FramedMediaProposalImpl::~FramedMediaProposalImpl() {}
 
-PRIVATE VIRTUAL
-IMS_SINT32 FramedMediaProposalImpl::GetDirection() const
+PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetDirection() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pMediaProposal->GetDirection();
 }
 
-PRIVATE VIRTUAL
-IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDescriptors() const
+PRIVATE VIRTUAL IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*> &objMediaDescriptors = pMediaProposal->GetMediaDescriptors();
+    const IMSList<MediaDescriptor*>& objMediaDescriptors = pMediaProposal->GetMediaDescriptors();
 
     //---------------------------------------------------------------------------------------------
     /*
@@ -69,8 +62,8 @@ IMSList<IMediaDescriptor*> FramedMediaProposalImpl::GetMediaDescriptors() const
     return objIMediaDescriptors;
 }
 
-PRIVATE VIRTUAL
-IMedia* FramedMediaProposalImpl::GetProposal(IN IMS_BOOL /* bIMSExtension = IMS_TRUE */) const
+PRIVATE VIRTUAL IMedia* FramedMediaProposalImpl::GetProposal(
+        IN IMS_BOOL /* bIMSExtension = IMS_TRUE */) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -81,16 +74,14 @@ IMedia* FramedMediaProposalImpl::GetProposal(IN IMS_BOOL /* bIMSExtension = IMS_
     return IMS_NULL;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 FramedMediaProposalImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return STATE_PROPOSAL;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
+PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -101,12 +92,11 @@ IMS_SINT32 FramedMediaProposalImpl::GetUpdateState() const
     return UPDATE_INVALID;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
+PRIVATE VIRTUAL IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) nDirection;
+    (void)nDirection;
 
     IMS_TRACE_E(0, "Operation not allowed in media proposal", 0, 0, 0);
 
@@ -115,26 +105,23 @@ IMS_RESULT FramedMediaProposalImpl::SetDirection(IN IMS_SINT32 nDirection)
     return IMS_FAILURE;
 }
 
-PRIVATE VIRTUAL
-IMediaDescriptor* FramedMediaProposalImpl::GetMediaDescriptor() const
+PRIVATE VIRTUAL IMediaDescriptor* FramedMediaProposalImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pMediaProposal->GetMediaDescriptor();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 FramedMediaProposalImpl::GetType() const
+PRIVATE VIRTUAL IMS_SINT32 FramedMediaProposalImpl::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pMediaProposal->GetType();
 }
 
-PRIVATE VIRTUAL
-void FramedMediaProposalImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
+PRIVATE VIRTUAL void FramedMediaProposalImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) nPosition;
+    (void)nPosition;
 }

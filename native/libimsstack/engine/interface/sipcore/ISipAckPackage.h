@@ -21,8 +21,7 @@
 /**
  * @brief This class provides an interface to handle the stray ACK requests.
  */
-class ISipAckPackage :
-        public ISipObject
+class ISipAckPackage : public ISipObject
 {
 public:
     /**

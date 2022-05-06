@@ -16,8 +16,6 @@
 
 class Media;
 
-
-
 class IOnMediaListener
 {
 public:
@@ -44,7 +42,7 @@ public:
     </table>
 
     */
-    virtual void OnMedia_FictitiousMediaCreated(IN Media *pMedia) = 0;
+    virtual void OnMedia_FictitiousMediaCreated(IN Media* pMedia) = 0;
 
     /*
      The method is called when the fictitious media is destroyed.
@@ -69,7 +67,7 @@ public:
     </table>
 
     */
-    virtual void OnMedia_FictitiousMediaDestroyed(IN Media *pMedia) = 0;
+    virtual void OnMedia_FictitiousMediaDestroyed(IN Media* pMedia) = 0;
 };
 
-#endif // _INTERFACE_ON_MEDIA_LISTENER_H_
+#endif  // _INTERFACE_ON_MEDIA_LISTENER_H_

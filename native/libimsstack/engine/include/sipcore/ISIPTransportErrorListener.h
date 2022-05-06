@@ -15,8 +15,6 @@
 
 class AString;
 
-
-
 /*
 SIP transport error listener interface
 
@@ -43,7 +41,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void TransportError_NotifyError(IN IMS_SINT32 nCode, IN CONST AString &strMessage) = 0;
+    virtual void TransportError_NotifyError(IN IMS_SINT32 nCode, IN CONST AString& strMessage) = 0;
 };
 
-#endif // _INTERFACE_SIP_TRANSPORT_ERROR_LISTENER_H_
+#endif  // _INTERFACE_SIP_TRANSPORT_ERROR_LISTENER_H_

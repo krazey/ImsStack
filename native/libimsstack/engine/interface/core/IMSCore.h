@@ -9,7 +9,6 @@
 class IMSCore
 {
 public:
-
     //// Connection related constants
     /// "imscore"
     static const IMS_CHAR CONNECTION_SCHEME[];
@@ -38,4 +37,4 @@ public:
     };
 };
 
-#endif // _IMS_CORE_H_
+#endif  // _IMS_CORE_H_

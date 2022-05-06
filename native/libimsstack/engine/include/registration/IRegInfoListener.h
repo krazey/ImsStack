@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_REG_INFO_LISTENER_H_
 #define _INTERFACE_REG_INFO_LISTENER_H_
 
-
-
 class IRegInfoListener
 {
 public:
@@ -53,4 +51,4 @@ public:
     virtual void RegInfo_UpdateFailed() = 0;
 };
 
-#endif // _INTERFACE_REG_INFO_LISTENER_H_
+#endif  // _INTERFACE_REG_INFO_LISTENER_H_

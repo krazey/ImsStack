@@ -30,7 +30,7 @@
 #include "RegStateTracker.h"
 
 class IDigestAka;
-class ISipGenericChallenge; // IMS_AUTH_NONCE_REUSE
+class ISipGenericChallenge;  // IMS_AUTH_NONCE_REUSE
 class SubscriberConfig;
 class IRegistrationListener;
 class RegFlow;
@@ -39,29 +39,27 @@ class RegParameter;
 class RegRefreshHelper;
 class RegSubscription;
 
-
-
-class Registration
-    : public EngineActivity
-    , public ISipClientConnectionListener
-    , public ISipErrorListener
-    , public IRegistrationEx
-    , public IRefreshable
-    , public IRegCapabilityChangeListener
-    , public IRegInfoListener
-    , public IDigestAkaListener
+class Registration :
+        public EngineActivity,
+        public ISipClientConnectionListener,
+        public ISipErrorListener,
+        public IRegistrationEx,
+        public IRefreshable,
+        public IRegCapabilityChangeListener,
+        public IRegInfoListener,
+        public IDigestAkaListener
 {
 public:
     Registration();
     virtual ~Registration();
 
 private:
-    Registration(IN CONST Registration &objRHS);
-    Registration& operator=(IN CONST Registration &objRHS);
+    Registration(IN CONST Registration& objRHS);
+    Registration& operator=(IN CONST Registration& objRHS);
 
 public:
     // IRegistration interface
-    virtual IMS_BOOL Equals(IN CONST IRegistration *piReg) const;
+    virtual IMS_BOOL Equals(IN CONST IRegistration* piReg) const;
     virtual IMS_BOOL IsBehindNAT() const;
     virtual IMS_BOOL IsWithinTrustDomain() const;
 
@@ -71,9 +69,9 @@ public:
 
     // MULTI_SUBS
     // MULTI_REG_SIP_PROFILE
-    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN CONST SipAddress &objAOR,
-            IN CONST AString &strSubsId = AString::ConstNull(),
-            IN SipProfile *pSIPProfile = IMS_NULL);
+    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
+            IN CONST AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pSIPProfile = IMS_NULL);
     void Destroy();
     const IMSList<RegContact*>& GetAllContactsEx() const;
     IMS_BOOL HasActiveBindings() const;
@@ -81,38 +79,38 @@ public:
 
 private:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     // ISipClientConnectionListener interface
-    virtual void ClientConnection_NotifyResponse(IN ISipClientConnection *piSCC,
-            IN ISipClientConnection *piForkedSCC = IMS_NULL);
+    virtual void ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piSCC, IN ISipClientConnection* piForkedSCC = IMS_NULL);
 
     // ISipErrorListener interface
-    virtual void Error_NotifyError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-            IN CONST AString &strMessage);
+    virtual void Error_NotifyError(
+            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
 
     // IRegBase interface
     virtual ISipMessage* GetNextRequest();
     virtual ISipMessage* GetPreviousRequest() const;
     virtual ISipMessage* GetPreviousResponse() const;
     // SIP_MESSAGE_MEDIATOR
-    virtual void SetSipMessageMediator(IN IMessageMediator *piMediator);
+    virtual void SetSipMessageMediator(IN IMessageMediator* piMediator);
 
     // IRegistration interface
-    virtual IMS_BOOL CreateBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId);
-    virtual void DestroyBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId);
-    virtual IRegContact* CreateContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort,
+    virtual IMS_BOOL CreateBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual void DestroyBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual IRegContact* CreateContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES);
     virtual void DestroyAllContacts();
-    virtual void DestroyContact(IN IRegContact *piContact);
-    virtual void DestroyContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort);
+    virtual void DestroyContact(IN IRegContact* piContact);
+    virtual void DestroyContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort);
     virtual const Credential* GetCredential() const;
     virtual const SipAddress& GetAOR() const;
     virtual const AStringArray& GetAssociatedURIs() const;
     virtual const SipAddress& GetAuthorizedAOR() const;
     virtual IMSList<IRegContact*> GetAllContacts() const;
-    virtual IRegContact* GetContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort) const;
+    virtual IRegContact* GetContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) const;
     virtual IRegContact* GetPreferredContact() const;
     virtual IRegParameter* GetParameter() const;
     virtual const IPAddress& GetPublicIPAddress() const;
@@ -132,103 +130,102 @@ private:
     virtual IMS_RESULT RestoreActiveBindings();
     virtual void SetActiveBindingsRestorationUsage(IN IMS_BOOL bEnabled);
     // MULTI_SUBS
-    virtual void SetAOR(IN CONST SipAddress &objAOR,
-            IN CONST AString &strSubsId = AString::ConstNull());
-    virtual void SetListener(IN IRegistrationListener *piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy,
-            IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    virtual void SetAOR(
+            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull());
+    virtual void SetListener(IN IRegistrationListener* piListener);
+    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
     // MULTI_REG_SIP_PROFILE
-    virtual void SetSIPProfile(IN SipProfile *pProfile);
-    virtual void SetBindingStateListener(IN IRegBindingStateListener *piListener);
+    virtual void SetSIPProfile(IN SipProfile* pProfile);
+    virtual void SetBindingStateListener(IN IRegBindingStateListener* piListener);
     virtual void SetFlagForWithinTrustDomain(IN IMS_BOOL bWithinTrustDomain);
-    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier *piUserIdNotifier);
-    virtual void SetUserInfoForContactHeader(IN CONST AString &strUserInfo);
-    virtual IRegSubscription* CreateSubscription(IN SipAddress *pResourceUri = IMS_NULL);
+    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier* piUserIdNotifier);
+    virtual void SetUserInfoForContactHeader(IN CONST AString& strUserInfo);
+    virtual IRegSubscription* CreateSubscription(IN SipAddress* pResourceUri = IMS_NULL);
 
     // ISipConnectionNotifierErrorListener class
-    virtual void ConnectionNotifierError_NotifyError(IN ISipConnectionNotifier *piSCN,
-            IN IMS_SINT32 nCode, IN CONST AString &strMessage);
+    virtual void ConnectionNotifierError_NotifyError(
+            IN ISipConnectionNotifier* piSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
 
     // IRegistrationEx interface
-    virtual void AddObserver(IN RegObserver *pObserver);
-    virtual void RemoveObserver(IN RegObserver *pObserver);
+    virtual void AddObserver(IN RegObserver* pObserver);
+    virtual void RemoveObserver(IN RegObserver* pObserver);
     virtual IMS_SINT32 AddReferenceForSCNEL();
     virtual IMS_SINT32 RemoveReferenceForSCNEL();
     virtual void NotifyCallerCapabilityChanged();
 
     // IRefreshable interface
-    virtual void Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
-            IN IMS_SINT32 nCode = 0);
+    virtual void Refreshable_RefreshCompleted(
+            IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
     virtual IMS_BOOL Refreshable_RefreshStarted();
     virtual void Refreshable_RefreshTerminated();
 
     // IRegCapabilityChangeListener interface
-    virtual void RegCapabilityChange_ServiceAdded(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId);
-    virtual void RegCapabilityChange_ServiceRemoved(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId);
+    virtual void RegCapabilityChange_ServiceAdded(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual void RegCapabilityChange_ServiceRemoved(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId);
 
     // IRegInfoListener interface
     virtual void RegInfo_Updated(IN IMS_BOOL bStale = IMS_FALSE);
     virtual void RegInfo_UpdateFailed();
 
     // IDigestAkaListener interface
-    virtual void DigestAka_OnResponse(IN const ByteArray &objRES,
-            IN const ByteArray &objIK = ByteArray::ConstNull(),
-            IN const ByteArray &objCK = ByteArray::ConstNull());
-    virtual void DigestAka_OnAutsFailed(IN const ByteArray &objAUTS);
+    virtual void DigestAka_OnResponse(IN const ByteArray& objRES,
+            IN const ByteArray& objIK = ByteArray::ConstNull(),
+            IN const ByteArray& objCK = ByteArray::ConstNull());
+    virtual void DigestAka_OnAutsFailed(IN const ByteArray& objAUTS);
     virtual void DigestAka_OnMacFailed();
 
     // SIP_MESSAGE_MEDIATOR
-    IMS_RESULT AdjustMessage(IN_OUT ISipMessage *piSIPMsg,
+    IMS_RESULT AdjustMessage(IN_OUT ISipMessage* piSIPMsg,
             IN IMS_SINT32 nMessage = IMessageMediator::MESSAGE_NORMAL);
-    void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState,
-            IN IMS_SINT32 nReason);
-    void CheckUALocation(IN ISipMessage *piSIPMsg);
+    void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState, IN IMS_SINT32 nReason);
+    void CheckUALocation(IN ISipMessage* piSIPMsg);
     void ChoosePreferredContact();
     void ClearNextRequest();
-    IDigestAka* CreateDigestAKA(IN CONST SubscriberConfig *pSubsConfig);
-    IMS_BOOL CreateSA(IN CONST Credential &objCredential, IN CONST IMS_SA_KEY &objSAKey);
+    IDigestAka* CreateDigestAKA(IN CONST SubscriberConfig* pSubsConfig);
+    IMS_BOOL CreateSA(IN CONST Credential& objCredential, IN CONST IMS_SA_KEY& objSAKey);
     IMS_SINT32 GetPortUC() const;
     IMS_SINT32 GetPortUS() const;
     const SubscriberConfig* GetSubsConfig() const;
     IMS_SINT32 GetSubState() const;
-    IMS_BOOL IsAkaSupported(IN CONST SubscriberConfig *pSubsConfig) const;
+    IMS_BOOL IsAkaSupported(IN CONST SubscriberConfig* pSubsConfig) const;
     IMS_BOOL IsFlowControlRequired() const;
-    IMS_RESULT ReformContactHeader(IN_OUT ISipMessage *piSIPMsg);
+    IMS_RESULT ReformContactHeader(IN_OUT ISipMessage* piSIPMsg);
     IMS_BOOL RegisterOnImplicitRefresh();
-    IMS_BOOL RespondToChallenge(IN ISipClientConnection *piSCC);
-    IMS_BOOL RespondToPendingChallenge(IN CONST Credential &objCredential);
+    IMS_BOOL RespondToChallenge(IN ISipClientConnection* piSCC);
+    IMS_BOOL RespondToPendingChallenge(IN CONST Credential& objCredential);
     void RestoreSecurityHeaders();
     // IMS_AUTH_NONCE_REUSE {
-    void SetAuthenticationChallenge(IN ISipGenericChallenge *piChallenge);
+    void SetAuthenticationChallenge(IN ISipGenericChallenge* piChallenge);
     // }
-    IMS_RESULT SetContactNExpiresHeader(IN_OUT ISipMessage *piSIPMsg,
-            IN IMS_SINT32 nExpires = (-1));
-    IMS_RESULT SetExpiresHeader(IN_OUT ISipMessage *piSIPMsg, IN IMS_SINT32 nExpires = (-1));
-    IMS_RESULT SetHeaders(IN ISipClientConnection *piSCC);
+    IMS_RESULT SetContactNExpiresHeader(
+            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nExpires = (-1));
+    IMS_RESULT SetExpiresHeader(IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nExpires = (-1));
+    IMS_RESULT SetHeaders(IN ISipClientConnection* piSCC);
     // IMS_AUTH_NONCE_REUSE {
-    void SetNextAuthenticationInfo(IN_OUT ISipClientConnection *&piSCC);
+    void SetNextAuthenticationInfo(IN_OUT ISipClientConnection*& piSCC);
     // SIP_DIGEST_AUTH_NONCE_REUSE
-    void SetNextNonce(IN ISipMessage *piSIPMsg);
+    void SetNextNonce(IN ISipMessage* piSIPMsg);
     // }
-    void SetOngoingConnection(IN ISipClientConnection *piSCC);
-    void SetPreviousRequest(IN ISipMessage *piSIPMsg);
-    void SetPreviousResponse(IN ISipMessage *piSIPMsg);
+    void SetOngoingConnection(IN ISipClientConnection* piSCC);
+    void SetPreviousRequest(IN ISipMessage* piSIPMsg);
+    void SetPreviousResponse(IN ISipMessage* piSIPMsg);
     void SetState(IN IMS_SINT32 nState);
     void SetSubState(IN IMS_SINT32 nSubState);
-    void StorePersistentHeaders(IN CONST ISipMessage *piSIPMsg);
-    IMS_RESULT UpdateBindings(IN CONST ISipMessage *piSIPMsg);
+    void StorePersistentHeaders(IN CONST ISipMessage* piSIPMsg);
+    IMS_RESULT UpdateBindings(IN CONST ISipMessage* piSIPMsg);
     void UpdateBindingState(IN IMS_SINT32 nState);
     // IMS_IPSEC_UDP_ENC
     void UpdateHostInfoInAllContacts();
-    void UpdateCSeqNumber(IN CONST ISipMessage *piSIPMsg);
-    void UpdateProtectedServerPortForContact(IN_OUT ISipMessage *piSIPMsg);
+    void UpdateCSeqNumber(IN CONST ISipMessage* piSIPMsg);
+    void UpdateProtectedServerPortForContact(IN_OUT ISipMessage* piSIPMsg);
     void UpdateRefreshTimer();
 
     // Utility methods
-    static ISipClientConnection* CreateConnection(IN Registration *pReg);
-    static void DestroyAllHeaders(IN_OUT IMSList<ISipHeader*> &objHeaders);
+    static ISipClientConnection* CreateConnection(IN Registration* pReg);
+    static void DestroyAllHeaders(IN_OUT IMSList<ISipHeader*>& objHeaders);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
     static const IMS_CHAR* SubStateToString(IN IMS_SINT32 nSubState);
@@ -287,9 +284,9 @@ private:
 
     // Reference to the registration flow (Call-ID, Command sequence number, ...)
     // Don't delete this pointer explicitly.
-    RegFlow *pRegFlow;
+    RegFlow* pRegFlow;
     // Parameters for registration
-    RegParameter *pRegParam;
+    RegParameter* pRegParam;
     // Registration contact list
     IMSList<RegContact*> objContacts;
     // Registration State Tracker
@@ -298,33 +295,33 @@ private:
     // while the registration is active
     RCPtr<RegStateTracker> pStateTracker;
     // Listener to notify the registration state
-    IRegistrationListener *piListener;
+    IRegistrationListener* piListener;
     // Listener to monitor the changes of the service's state
-    IRegBindingStateListener *piBindingStateListener;
+    IRegBindingStateListener* piBindingStateListener;
     // Notifier to reorder the network provisioned user identities
-    IRegUserIdentityNotifier *piUserIdNotifier;
+    IRegUserIdentityNotifier* piUserIdNotifier;
 
     // Refresh helper
-    RegRefreshHelper *pRefreshHelper;
+    RegRefreshHelper* pRefreshHelper;
 
     // Digest AKA interface
-    IDigestAka *piDigestAKA;
+    IDigestAka* piDigestAKA;
     IMS_SA_KEY objActiveSAKey;
     Credential objActiveCredential;
     // IMS_AUTH_NONCE_REUSE {
-    ISipGenericChallenge *piGenericChallenge;
+    ISipGenericChallenge* piGenericChallenge;
     // }
 
     // Current SIP connection for abnormal cases
-    ISipClientConnection *piOngoingSCC;
+    ISipClientConnection* piOngoingSCC;
     // Message for the next REGISTER request
-    ISipMessage *piNextRequest;
+    ISipMessage* piNextRequest;
     // Message for the previous REGISTER request
-    ISipMessage *piPreviousRequest;
+    ISipMessage* piPreviousRequest;
     // Message for the previous REGISTER response
-    ISipMessage *piPreviousResponse;
+    ISipMessage* piPreviousResponse;
     // SIP_MESSAGE_MEDIATOR
-    IMessageMediator *piMessageMediator;
+    IMessageMediator* piMessageMediator;
 
     // Observers of reg. state
     IMSList<RegObserver*> objObservers;
@@ -340,4 +337,4 @@ private:
     IMS_SINT32 nRefCountForSCNEL;
 };
 
-#endif // _REGISTRATION_H_
+#endif  // _REGISTRATION_H_

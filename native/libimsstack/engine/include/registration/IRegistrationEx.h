@@ -20,8 +20,6 @@ class RegInfo;
 class RegObserver;
 class RegStateTracker;
 
-
-
 /*
 
 Registration extension interface
@@ -31,9 +29,7 @@ Example
 See Also
 
 */
-class IRegistrationEx
-    : public IRegistration
-    , public ISipConnectionNotifierErrorListener
+class IRegistrationEx : public IRegistration, public ISipConnectionNotifierErrorListener
 {
 public:
     /*
@@ -55,7 +51,7 @@ public:
     </table>
 
     */
-    virtual void AddObserver(IN RegObserver *pObserver) = 0;
+    virtual void AddObserver(IN RegObserver* pObserver) = 0;
 
     /*
      Removes the observer to get the registration state transition.
@@ -76,7 +72,7 @@ public:
     </table>
 
     */
-    virtual void RemoveObserver(IN RegObserver *pObserver) = 0;
+    virtual void RemoveObserver(IN RegObserver* pObserver) = 0;
 
     /*
      Adds the reference for SIP connection notifier's error listener.
@@ -199,4 +195,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REGISTRATION_EX_H_
+#endif  // _INTERFACE_REGISTRATION_EX_H_

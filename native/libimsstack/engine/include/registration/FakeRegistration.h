@@ -23,24 +23,22 @@ class IRegistrationListener;
 class RegFlow;
 class RegParameter;
 
-
-
-class FakeRegistration
-    : public EngineActivity
-    , public IRegistrationEx
-    , public IRegCapabilityChangeListener
+class FakeRegistration :
+        public EngineActivity,
+        public IRegistrationEx,
+        public IRegCapabilityChangeListener
 {
 public:
     FakeRegistration();
     virtual ~FakeRegistration();
 
 private:
-    FakeRegistration(IN CONST FakeRegistration &objRHS);
-    FakeRegistration& operator=(IN CONST FakeRegistration &objRHS);
+    FakeRegistration(IN CONST FakeRegistration& objRHS);
+    FakeRegistration& operator=(IN CONST FakeRegistration& objRHS);
 
 public:
     // IRegistration interface
-    virtual IMS_BOOL Equals(IN CONST IRegistration *piReg) const;
+    virtual IMS_BOOL Equals(IN CONST IRegistration* piReg) const;
     virtual IMS_BOOL IsBehindNAT() const;
     virtual IMS_BOOL IsWithinTrustDomain() const;
 
@@ -50,9 +48,9 @@ public:
 
     // MULTI_SUBS
     // MULTI_REG_SIP_PROFILE
-    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN CONST SipAddress &objAOR,
-            IN CONST AString &strSubsId = AString::ConstNull(),
-            IN SipProfile *pSIPProfile = IMS_NULL);
+    IMS_BOOL Create(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
+            IN CONST AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pSIPProfile = IMS_NULL);
     void Destroy();
     const IMSList<RegContact*>& GetAllContactsEx() const;
     IMS_BOOL HasActiveBindings() const;
@@ -60,30 +58,30 @@ public:
 
 private:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     // IRegBase interface
     virtual ISipMessage* GetNextRequest();
     virtual ISipMessage* GetPreviousRequest() const;
     virtual ISipMessage* GetPreviousResponse() const;
     // SIP_MESSAGE_MEDIATOR
-    virtual void SetSipMessageMediator(IN IMessageMediator *piMediator);
+    virtual void SetSipMessageMediator(IN IMessageMediator* piMediator);
 
     // IRegistration interface
-    virtual IMS_BOOL CreateBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId);
-    virtual void DestroyBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId);
-    virtual IRegContact* CreateContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort,
+    virtual IMS_BOOL CreateBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual void DestroyBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual IRegContact* CreateContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES);
     virtual void DestroyAllContacts();
-    virtual void DestroyContact(IN IRegContact *piContact);
-    virtual void DestroyContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort);
+    virtual void DestroyContact(IN IRegContact* piContact);
+    virtual void DestroyContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort);
     virtual const Credential* GetCredential() const;
     virtual const SipAddress& GetAOR() const;
     virtual const AStringArray& GetAssociatedURIs() const;
     virtual const SipAddress& GetAuthorizedAOR() const;
     virtual IMSList<IRegContact*> GetAllContacts() const;
-    virtual IRegContact* GetContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort) const;
+    virtual IRegContact* GetContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) const;
     virtual IRegContact* GetPreferredContact() const;
     virtual IRegParameter* GetParameter() const;
     virtual const IPAddress& GetPublicIPAddress() const;
@@ -103,38 +101,37 @@ private:
     virtual IMS_RESULT RestoreActiveBindings();
     virtual void SetActiveBindingsRestorationUsage(IN IMS_BOOL bEnabled);
     // MULTI_SUBS
-    virtual void SetAOR(IN CONST SipAddress &objAOR,
-            IN CONST AString &strSubsId = AString::ConstNull());
-    virtual void SetListener(IN IRegistrationListener *piListener);
-    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy,
-            IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    virtual void SetAOR(
+            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull());
+    virtual void SetListener(IN IRegistrationListener* piListener);
+    virtual void SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
     // MULTI_REG_SIP_PROFILE
-    virtual void SetSIPProfile(IN SipProfile *pProfile);
-    virtual void SetBindingStateListener(IN IRegBindingStateListener *piListener);
+    virtual void SetSIPProfile(IN SipProfile* pProfile);
+    virtual void SetBindingStateListener(IN IRegBindingStateListener* piListener);
     virtual void SetFlagForWithinTrustDomain(IN IMS_BOOL bWithinTrustDomain);
-    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier *piUserIdNotifier);
-    virtual void SetUserInfoForContactHeader(IN CONST AString &strUserInfo);
-    virtual IRegSubscription* CreateSubscription(IN SipAddress *pResourceUri = IMS_NULL);
+    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier* piUserIdNotifier);
+    virtual void SetUserInfoForContactHeader(IN CONST AString& strUserInfo);
+    virtual IRegSubscription* CreateSubscription(IN SipAddress* pResourceUri = IMS_NULL);
 
     // ISipConnectionNotifierErrorListener class
-    virtual void ConnectionNotifierError_NotifyError(IN ISipConnectionNotifier *piSCN,
-            IN IMS_SINT32 nCode, IN CONST AString &strMessage);
+    virtual void ConnectionNotifierError_NotifyError(
+            IN ISipConnectionNotifier* piSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
 
     // IRegistrationEx interface
-    virtual void AddObserver(IN RegObserver *pObserver);
-    virtual void RemoveObserver(IN RegObserver *pObserver);
+    virtual void AddObserver(IN RegObserver* pObserver);
+    virtual void RemoveObserver(IN RegObserver* pObserver);
     virtual IMS_SINT32 AddReferenceForSCNEL();
     virtual IMS_SINT32 RemoveReferenceForSCNEL();
     virtual void NotifyCallerCapabilityChanged();
 
     // IRegCapabilityChangeListener interface
-    virtual void RegCapabilityChange_ServiceAdded(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId);
-    virtual void RegCapabilityChange_ServiceRemoved(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId);
+    virtual void RegCapabilityChange_ServiceAdded(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId);
+    virtual void RegCapabilityChange_ServiceRemoved(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId);
 
-    void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState,
-            IN IMS_SINT32 nReason);
+    void CallListener(IN IMS_SINT32 nPrevState, IN IMS_SINT32 nPrevSubState, IN IMS_SINT32 nReason);
     void ChoosePreferredContact();
     IMS_SINT32 GetPortUC() const;
     IMS_SINT32 GetPortUS() const;
@@ -195,9 +192,9 @@ private:
 
     // Reference to the registration flow (Call-ID, Command sequence number, ...)
     // Don't delete this pointer explicitly.
-    RegFlow *pRegFlow;
+    RegFlow* pRegFlow;
     // Parameters for registration
-    RegParameter *pRegParam;
+    RegParameter* pRegParam;
     // Registration contact list
     IMSList<RegContact*> objContacts;
     // Registration State Tracker
@@ -206,9 +203,9 @@ private:
     // while the registration is active
     RCPtr<RegStateTracker> pStateTracker;
     // Listener to notify the registration state
-    IRegistrationListener *piListener;
+    IRegistrationListener* piListener;
     // Notifier to reorder the network provisioned user identities
-    IRegUserIdentityNotifier *piUserIdNotifier;
+    IRegUserIdentityNotifier* piUserIdNotifier;
 
     // Observers of reg. state
     IMSList<RegObserver*> objObservers;
@@ -220,4 +217,4 @@ private:
     IMS_SINT32 nRefCountForSCNEL;
 };
 
-#endif // _FAKE_REGISTRATION_H_
+#endif  // _FAKE_REGISTRATION_H_

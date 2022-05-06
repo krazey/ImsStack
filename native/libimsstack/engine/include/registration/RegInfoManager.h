@@ -27,10 +27,7 @@ class IRegInfoListener;
 class RegInfo;
 class RegInfoParser;
 
-
-
-class RegInfoManager
-    : public IRegInfoParserListener
+class RegInfoManager : public IRegInfoParserListener
 {
 private:
     RegInfoManager();
@@ -45,7 +42,7 @@ public:
     RegInfo* GetRegInfo(IN const RegKey& objRegKey);
     const RegInfo* GetRegInfo(IN const RegKey& objRegKey) const;
     IMS_BOOL Initialize();
-    IMS_BOOL Update(IN const RegKey& objRegKey, IN const AString &strRegInfo);
+    IMS_BOOL Update(IN const RegKey& objRegKey, IN const AString& strRegInfo);
 
     // Debugging ...
     void DisplayRegInfo();
@@ -54,9 +51,9 @@ public:
 
 private:
     // IRegInfoParserListener interface
-    virtual void RegInfoParser_ParsingCompleted(IN RegInfoParser *pParser,
-            IN IDocument *piDocument);
-    virtual void RegInfoParser_ParsingFailed(IN RegInfoParser *pParser);
+    virtual void RegInfoParser_ParsingCompleted(
+            IN RegInfoParser* pParser, IN IDocument* piDocument);
+    virtual void RegInfoParser_ParsingFailed(IN RegInfoParser* pParser);
 
     IMS_BOOL AddRegInfoParser(IN RegInfoParser* pParser);
     void RemoveRegInfoParser(IN RegInfoParser*& pParser);
@@ -74,4 +71,4 @@ private:
 #endif
 };
 
-#endif // _REG_INFO_MANAGER_H_
+#endif  // _REG_INFO_MANAGER_H_

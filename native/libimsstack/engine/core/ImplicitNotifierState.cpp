@@ -20,10 +20,8 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-IMS_SINT32 ImplicitNotifierState::STATE[SubState::STATE_MAX][ImplicitNotifierState::MESSAGE_MAX] =
+PUBLIC GLOBAL IMS_SINT32
+ImplicitNotifierState::STATE[SubState::STATE_MAX][ImplicitNotifierState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -43,22 +41,16 @@ IMS_SINT32 ImplicitNotifierState::STATE[SubState::STATE_MAX][ImplicitNotifierSta
     },
 };
 
-
-
 PUBLIC
-ImplicitNotifierState::ImplicitNotifierState()
-    : SubState()
+ImplicitNotifierState::ImplicitNotifierState() :
+        SubState()
 {
     InitializeStateTable();
 }
 
-PUBLIC VIRTUAL
-ImplicitNotifierState::~ImplicitNotifierState()
-{
-}
+PUBLIC VIRTUAL ImplicitNotifierState::~ImplicitNotifierState() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage *piSIPMsg)
+PUBLIC VIRTUAL IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -67,7 +59,7 @@ IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage *piSIPMsg)
         return IMS_FALSE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     // Update the subscription state information...
     if (objMethod.Equals(SipMethod::REFER))
@@ -123,8 +115,8 @@ IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 
     if (nSIPMsg == MESSAGE_INVALID)
     {
-        IMS_TRACE_I("SUBS_STATE - NO TRANSITION (%s)",
-                piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+        IMS_TRACE_I(
+                "SUBS_STATE - NO TRANSITION (%s)", piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -141,10 +133,10 @@ IMS_BOOL ImplicitNotifierState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
+IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nMsgType = piSIPMsg->GetType();
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -223,11 +215,11 @@ IMS_SINT32 ImplicitNotifierState::TranslateMessage(IN CONST ISipMessage *piSIPMs
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg)
 {
     AString strHeader;
-    ISipHeader *piHeader;
-    EventPackage *pEventPackage = GetEventPackage();
+    ISipHeader* piHeader;
+    EventPackage* pEventPackage = GetEventPackage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -258,8 +250,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSI
 
     IMS_SINT32 nSubStateValue = ExtractSubStateValue(piHeader);
 
-    if ((nSubStateValue == SUB_STATE_ACTIVE)
-        || (nSubStateValue == SUB_STATE_PENDING))
+    if ((nSubStateValue == SUB_STATE_ACTIVE) || (nSubStateValue == SUB_STATE_PENDING))
     {
         if (GetState() != STATE_TERMINATED)
         {
@@ -327,7 +318,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSI
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
 
@@ -341,8 +332,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piS
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-        || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // Do nothing ...
         return IMS_TRUE;
@@ -386,7 +376,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piS
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -405,7 +395,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage *piSIP
             strHeader = piSIPMsg->GetHeader(ISipHeader::EVENT);
         }
 
-        ISipHeader *piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
+        ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
 
         GetEventPackage()->SetEventHeader(piHeader);
     }
@@ -414,7 +404,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERRequest(IN CONST ISipMessage *piSIP
 }
 
 PRIVATE
-IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -434,8 +424,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage *piSI
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-        || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         if (GetOperation() == OPERATION_REMOVE)
         {
@@ -465,8 +454,7 @@ IMS_BOOL ImplicitNotifierState::UpdateOnREFERResponse(IN CONST ISipMessage *piSI
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void ImplicitNotifierState::InitializeStateTable()
+PRIVATE GLOBAL void ImplicitNotifierState::InitializeStateTable()
 {
     static IMS_BOOL bInitialized = IMS_FALSE;
     IMS_SINT32 i;

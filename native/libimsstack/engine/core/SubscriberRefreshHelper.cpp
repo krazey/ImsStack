@@ -19,36 +19,32 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-SubscriberRefreshHelper::SubscriberRefreshHelper(IN IRefreshable *piRefreshable_,
-        IN CONST SubState *pSubState_)
-    : RefreshHelper(piRefreshable_, IMS_FALSE)
-    , pSubState(pSubState_)
+SubscriberRefreshHelper::SubscriberRefreshHelper(
+        IN IRefreshable* piRefreshable_, IN CONST SubState* pSubState_) :
+        RefreshHelper(piRefreshable_, IMS_FALSE),
+        pSubState(pSubState_)
 {
 }
 
-PUBLIC VIRTUAL
-SubscriberRefreshHelper::~SubscriberRefreshHelper()
+PUBLIC VIRTUAL SubscriberRefreshHelper::~SubscriberRefreshHelper()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: SubscriberRefreshHelper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SubscriberRefreshHelper::AddSpecificHeader(IN ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_BOOL SubscriberRefreshHelper::AddSpecificHeader(IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
+PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(
+        IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -59,8 +55,8 @@ IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(IN ISipClientConnection *
 
     if (!AddSpecificHeader(piSCC))
     {
-        IMS_TRACE_E(0, "Adding the specific headers for a subscription refresh request failed",
-                0, 0, 0);
+        IMS_TRACE_E(0, "Adding the specific headers for a subscription refresh request failed", 0,
+                0, 0);
         return IMS_FAILURE;
     }
 
@@ -73,10 +69,10 @@ IMS_RESULT SubscriberRefreshHelper::SendRefreshRequest(IN ISipClientConnection *
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(
+        IN CONST ISipConnection* piSC)
 {
-    ISipMessage *piSIPMsg = piSC->GetMessage();
+    ISipMessage* piSIPMsg = piSC->GetMessage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -85,7 +81,7 @@ IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnect
         return IMS_FAILURE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     // Case 1) SUBSCRIBE response received ...
     if (objMethod.Equals(SipMethod::SUBSCRIBE))
@@ -135,10 +131,10 @@ IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnect
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(
+        IN CONST ISipConnection* piSC)
 {
-    ISipMessage *piSIPMsg = piSC->GetMessage();
+    ISipMessage* piSIPMsg = piSC->GetMessage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -183,8 +179,7 @@ IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection 
                 }
             }
         }
-        else if ((nStatusCode == SipStatusCode::SC_401)
-            || (nStatusCode == SipStatusCode::SC_407))
+        else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
         {
         }
         else
@@ -197,9 +192,8 @@ IMS_RESULT SubscriberRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection 
     return IMS_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-void SubscriberRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
-        IN IMS_SINT32 nCode /* = 0 */)
+PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshCompleted(
+        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -224,8 +218,7 @@ void SubscriberRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
     }
 }
 
-PROTECTED VIRTUAL
-void SubscriberRefreshHelper::RefreshStarted()
+PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshStarted()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -237,8 +230,7 @@ void SubscriberRefreshHelper::RefreshStarted()
     }
 }
 
-PROTECTED VIRTUAL
-void SubscriberRefreshHelper::RefreshTerminated()
+PROTECTED VIRTUAL void SubscriberRefreshHelper::RefreshTerminated()
 {
     //---------------------------------------------------------------------------------------------
 

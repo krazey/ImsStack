@@ -16,13 +16,10 @@
 #include "media/IMedia.h"
 #include "media/StreamMediaProposal.h"
 
-
-
-class StreamMediaProposalImpl
-    : public IMedia
+class StreamMediaProposalImpl : public IMedia
 {
 public:
-    StreamMediaProposalImpl(IN StreamMediaProposal *pMediaProposal_);
+    StreamMediaProposalImpl(IN StreamMediaProposal* pMediaProposal_);
     virtual ~StreamMediaProposalImpl();
 
 private:
@@ -40,7 +37,7 @@ private:
     virtual void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
 
 private:
-    StreamMediaProposal *pMediaProposal;
+    StreamMediaProposal* pMediaProposal;
 };
 
-#endif // _STREAM_MEDIA_PROPOSAL_IMPL_H_
+#endif  // _STREAM_MEDIA_PROPOSAL_IMPL_H_

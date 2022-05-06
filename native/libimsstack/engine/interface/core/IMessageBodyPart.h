@@ -38,7 +38,7 @@ public:
      * @return If the content is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetContent(IN CONST ByteArray &objContent) = 0;
+    virtual IMS_RESULT SetContent(IN CONST ByteArray& objContent) = 0;
 
     /**
      * @brief Sets a header to this IMessageBodyPart.
@@ -54,4 +54,4 @@ public:
     virtual IMS_RESULT SetHeader(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 };
 
-#endif // _INTERFACE_MESSAGE_BODY_PART_H_
+#endif  // _INTERFACE_MESSAGE_BODY_PART_H_

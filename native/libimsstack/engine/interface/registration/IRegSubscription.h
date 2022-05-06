@@ -9,8 +9,7 @@ class IRegSubscriptionListener;
 /**
  * @brief This class provides an interface to access and control "reg" event package subscription.
  */
-class IRegSubscription
-    : public IRegBase
+class IRegSubscription : public IRegBase
 {
 public:
     /**
@@ -66,7 +65,7 @@ public:
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
-    virtual IMS_RESULT SetContactParameter(IN CONST AString &strParameter,
+    virtual IMS_RESULT SetContactParameter(IN CONST AString& strParameter,
             IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) = 0;
 
     /**
@@ -85,7 +84,7 @@ public:
      *
      * @param piListener Listener interface to be set
      */
-    virtual void SetListener(IN IRegSubscriptionListener *piListener) = 0;
+    virtual void SetListener(IN IRegSubscriptionListener* piListener) = 0;
 
     /**
      * @brief Sets the refresh policy for the subscription refresh.
@@ -239,4 +238,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REG_SUBSCRIPTION_H_
+#endif  // _INTERFACE_REG_SUBSCRIPTION_H_

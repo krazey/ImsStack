@@ -20,20 +20,17 @@
 
 __IMS_TRACE_TAG_IMS__;
 
-
-
 PUBLIC
-FeatureCaps::FeatureCaps()
-    : pExcludedFeaturesForRegCaps(IMS_NULL)
-    , pFeaturesForAllMessage(IMS_NULL)
-    , pFeaturesForRequest(IMS_NULL)
-    , pFeaturesForResponse(IMS_NULL)
-    , pRegCaps(new CallerCapability(0))
+FeatureCaps::FeatureCaps() :
+        pExcludedFeaturesForRegCaps(IMS_NULL),
+        pFeaturesForAllMessage(IMS_NULL),
+        pFeaturesForRequest(IMS_NULL),
+        pFeaturesForResponse(IMS_NULL),
+        pRegCaps(new CallerCapability(0))
 {
 }
 
-PUBLIC VIRTUAL
-FeatureCaps::~FeatureCaps()
+PUBLIC VIRTUAL FeatureCaps::~FeatureCaps()
 {
     if (pExcludedFeaturesForRegCaps != IMS_NULL)
     {
@@ -54,7 +51,7 @@ FeatureCaps::~FeatureCaps()
     {
         for (IMS_UINT32 i = 0; i < pFeaturesForRequest->GetSize(); ++i)
         {
-            CallerCapability *pCC = pFeaturesForRequest->GetValueAt(i);
+            CallerCapability* pCC = pFeaturesForRequest->GetValueAt(i);
 
             if (pCC != IMS_NULL)
             {
@@ -69,7 +66,7 @@ FeatureCaps::~FeatureCaps()
     {
         for (IMS_UINT32 i = 0; i < pFeaturesForResponse->GetSize(); ++i)
         {
-            CallerCapability *pCC = pFeaturesForResponse->GetValueAt(i);
+            CallerCapability* pCC = pFeaturesForResponse->GetValueAt(i);
 
             if (pCC != IMS_NULL)
             {
@@ -86,10 +83,9 @@ FeatureCaps::~FeatureCaps()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::AddFeature(IN CONST AString &strName, IN CONST AString &strValue)
+PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN CONST AString& strName, IN CONST AString& strValue)
 {
-    CallerCapability *pFeatures = GetFeaturesForAllMessage(IMS_TRUE);
+    CallerCapability* pFeatures = GetFeaturesForAllMessage(IMS_TRUE);
 
     //---------------------------------------------------------------------------------------------
 
@@ -106,18 +102,14 @@ void FeatureCaps::AddFeature(IN CONST AString &strName, IN CONST AString &strVal
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::AddFeature(IN CONST AString &strName, IN CONST AString &strValue,
+PUBLIC VIRTUAL void FeatureCaps::AddFeature(IN CONST AString& strName, IN CONST AString& strValue,
         IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType /* = 2 (ANY) */)
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nSIPMethod != SipMethod::INVITE)
-            && (nSIPMethod != SipMethod::SUBSCRIBE)
-            && (nSIPMethod != SipMethod::REFER)
-            && (nSIPMethod != SipMethod::NOTIFY)
-            && (nSIPMethod != SipMethod::OPTIONS)
-            && (nSIPMethod != SipMethod::PUBLISH))
+    if ((nSIPMethod != SipMethod::INVITE) && (nSIPMethod != SipMethod::SUBSCRIBE) &&
+            (nSIPMethod != SipMethod::REFER) && (nSIPMethod != SipMethod::NOTIFY) &&
+            (nSIPMethod != SipMethod::OPTIONS) && (nSIPMethod != SipMethod::PUBLISH))
     {
         IMS_TRACE_E(0, "FeatureCaps :: Method(%d) is not allowed", nSIPMethod, 0, 0);
         return;
@@ -129,7 +121,7 @@ void FeatureCaps::AddFeature(IN CONST AString &strName, IN CONST AString &strVal
         return;
     }
 
-    CallerCapability *pFeatures = IMS_NULL;
+    CallerCapability* pFeatures = IMS_NULL;
     Feature objFeature(strName, strValue);
 
     if (nMessageType == ISipMessage::TYPE_ANY)
@@ -175,10 +167,10 @@ void FeatureCaps::AddFeature(IN CONST AString &strName, IN CONST AString &strVal
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::RemoveFeature(IN CONST AString &strName, IN CONST AString &strValue)
+PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
-    CallerCapability *pFeatures = GetFeaturesForAllMessage();
+    CallerCapability* pFeatures = GetFeaturesForAllMessage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -195,18 +187,15 @@ void FeatureCaps::RemoveFeature(IN CONST AString &strName, IN CONST AString &str
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::RemoveFeature(IN CONST AString &strName, IN CONST AString &strValue,
-        IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType /* = 2 (ANY) */)
+PUBLIC VIRTUAL void FeatureCaps::RemoveFeature(IN CONST AString& strName,
+        IN CONST AString& strValue, IN IMS_SINT32 nSIPMethod,
+        IN IMS_SINT32 nMessageType /* = 2 (ANY) */)
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nSIPMethod != SipMethod::INVITE)
-            && (nSIPMethod != SipMethod::SUBSCRIBE)
-            && (nSIPMethod != SipMethod::REFER)
-            && (nSIPMethod != SipMethod::NOTIFY)
-            && (nSIPMethod != SipMethod::OPTIONS)
-            && (nSIPMethod != SipMethod::PUBLISH))
+    if ((nSIPMethod != SipMethod::INVITE) && (nSIPMethod != SipMethod::SUBSCRIBE) &&
+            (nSIPMethod != SipMethod::REFER) && (nSIPMethod != SipMethod::NOTIFY) &&
+            (nSIPMethod != SipMethod::OPTIONS) && (nSIPMethod != SipMethod::PUBLISH))
     {
         IMS_TRACE_E(0, "FeatureCaps :: Method(%d) is not allowed", nSIPMethod, 0, 0);
         return;
@@ -218,7 +207,7 @@ void FeatureCaps::RemoveFeature(IN CONST AString &strName, IN CONST AString &str
         return;
     }
 
-    CallerCapability *pFeatures = IMS_NULL;
+    CallerCapability* pFeatures = IMS_NULL;
     Feature objFeature(strName, strValue);
 
     if (nMessageType == ISipMessage::TYPE_ANY)
@@ -264,8 +253,7 @@ void FeatureCaps::RemoveFeature(IN CONST AString &strName, IN CONST AString &str
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::RemoveAllFeatures()
+PUBLIC VIRTUAL void FeatureCaps::RemoveAllFeatures()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -278,7 +266,7 @@ void FeatureCaps::RemoveAllFeatures()
     {
         for (IMS_UINT32 i = 0; i < pFeaturesForRequest->GetSize(); ++i)
         {
-            CallerCapability *pCC = pFeaturesForRequest->GetValueAt(i);
+            CallerCapability* pCC = pFeaturesForRequest->GetValueAt(i);
 
             if (pCC != IMS_NULL)
             {
@@ -291,7 +279,7 @@ void FeatureCaps::RemoveAllFeatures()
     {
         for (IMS_UINT32 i = 0; i < pFeaturesForResponse->GetSize(); ++i)
         {
-            CallerCapability *pCC = pFeaturesForResponse->GetValueAt(i);
+            CallerCapability* pCC = pFeaturesForResponse->GetValueAt(i);
 
             if (pCC != IMS_NULL)
             {
@@ -306,11 +294,10 @@ void FeatureCaps::RemoveAllFeatures()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::AddExcludedFeatureForRegCaps(IN CONST AString &strName,
-        IN CONST AString &strValue)
+PUBLIC VIRTUAL void FeatureCaps::AddExcludedFeatureForRegCaps(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
-    CallerCapability *pFeatures = GetExcludedFeaturesForRegCaps(IMS_TRUE);
+    CallerCapability* pFeatures = GetExcludedFeaturesForRegCaps(IMS_TRUE);
 
     //---------------------------------------------------------------------------------------------
 
@@ -327,11 +314,10 @@ void FeatureCaps::AddExcludedFeatureForRegCaps(IN CONST AString &strName,
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::RemoveExcludedFeatureForRegCaps(IN CONST AString &strName,
-        IN CONST AString &strValue)
+PUBLIC VIRTUAL void FeatureCaps::RemoveExcludedFeatureForRegCaps(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
-    CallerCapability *pFeatures = GetExcludedFeaturesForRegCaps();
+    CallerCapability* pFeatures = GetExcludedFeaturesForRegCaps();
 
     //---------------------------------------------------------------------------------------------
 
@@ -348,8 +334,7 @@ void FeatureCaps::RemoveExcludedFeatureForRegCaps(IN CONST AString &strName,
 Remarks
 
 */
-PUBLIC VIRTUAL
-void FeatureCaps::RemoveAllExcludedFeaturesForRegCaps()
+PUBLIC VIRTUAL void FeatureCaps::RemoveAllExcludedFeaturesForRegCaps()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -365,8 +350,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL FeatureCaps::FormContactFeatures(IN IMS_SINT32 nSIPMethod, IN IMS_BOOL bRequest,
-        OUT AString &strContactFeatures)
+IMS_BOOL FeatureCaps::FormContactFeatures(
+        IN IMS_SINT32 nSIPMethod, IN IMS_BOOL bRequest, OUT AString& strContactFeatures)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -380,7 +365,7 @@ IMS_BOOL FeatureCaps::FormContactFeatures(IN IMS_SINT32 nSIPMethod, IN IMS_BOOL 
         return (strContactFeatures.GetLength() > 0) ? IMS_TRUE : IMS_FALSE;
     }
 
-    CallerCapability *pCC = new CallerCapability(0);
+    CallerCapability* pCC = new CallerCapability(0);
 
     // REG-CAPS
     if ((pRegCaps != IMS_NULL) && !pRegCaps->IsEmpty())
@@ -389,20 +374,18 @@ IMS_BOOL FeatureCaps::FormContactFeatures(IN IMS_SINT32 nSIPMethod, IN IMS_BOOL 
     }
 
     // REG-EXCLUDED-CAPS
-    if ((pExcludedFeaturesForRegCaps != IMS_NULL)
-            && !pExcludedFeaturesForRegCaps->IsEmpty())
+    if ((pExcludedFeaturesForRegCaps != IMS_NULL) && !pExcludedFeaturesForRegCaps->IsEmpty())
     {
         pCC->RemoveFeatures(pExcludedFeaturesForRegCaps, IMS_FALSE);
     }
 
     // ALL-MESSAGE-CAPS
-    if ((pFeaturesForAllMessage != IMS_NULL)
-            && !pFeaturesForAllMessage->IsEmpty())
+    if ((pFeaturesForAllMessage != IMS_NULL) && !pFeaturesForAllMessage->IsEmpty())
     {
         pCC->AddFeatures(pFeaturesForAllMessage);
     }
 
-    CallerCapability *pFeatures = IMS_NULL;
+    CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)
@@ -436,7 +419,7 @@ Remarks
 
 */
 PUBLIC
-void FeatureCaps::UpdateRegCaps(IN CallerCapability *pRegCaps)
+void FeatureCaps::UpdateRegCaps(IN CallerCapability* pRegCaps)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -450,8 +433,7 @@ Remarks
 
 */
 PRIVATE
-CallerCapability* FeatureCaps::GetExcludedFeaturesForRegCaps(
-        IN IMS_BOOL bCreate /* = IMS_FALSE */)
+CallerCapability* FeatureCaps::GetExcludedFeaturesForRegCaps(IN IMS_BOOL bCreate /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -472,8 +454,7 @@ Remarks
 
 */
 PRIVATE
-CallerCapability* FeatureCaps::GetFeaturesForAllMessage(
-        IN IMS_BOOL bCreate /* = IMS_FALSE */)
+CallerCapability* FeatureCaps::GetFeaturesForAllMessage(IN IMS_BOOL bCreate /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -494,8 +475,8 @@ Remarks
 
 */
 PRIVATE
-CallerCapability* FeatureCaps::GetFeaturesForRequest(IN IMS_SINT32 nSIPMethod,
-        IN IMS_BOOL bCreate /* = IMS_FALSE */)
+CallerCapability* FeatureCaps::GetFeaturesForRequest(
+        IN IMS_SINT32 nSIPMethod, IN IMS_BOOL bCreate /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -518,7 +499,7 @@ CallerCapability* FeatureCaps::GetFeaturesForRequest(IN IMS_SINT32 nSIPMethod,
     {
         if (bCreate)
         {
-            CallerCapability *pCC = new CallerCapability(0);
+            CallerCapability* pCC = new CallerCapability(0);
 
             if (!pFeaturesForRequest->Add(nSIPMethod, pCC))
             {
@@ -545,8 +526,8 @@ Remarks
 
 */
 PRIVATE
-CallerCapability* FeatureCaps::GetFeaturesForResponse(IN IMS_SINT32 nSIPMethod,
-        IN IMS_BOOL bCreate /* = IMS_FALSE */)
+CallerCapability* FeatureCaps::GetFeaturesForResponse(
+        IN IMS_SINT32 nSIPMethod, IN IMS_BOOL bCreate /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -569,7 +550,7 @@ CallerCapability* FeatureCaps::GetFeaturesForResponse(IN IMS_SINT32 nSIPMethod,
     {
         if (bCreate)
         {
-            CallerCapability *pCC = new CallerCapability(0);
+            CallerCapability* pCC = new CallerCapability(0);
 
             if (!pFeaturesForResponse->Add(nSIPMethod, pCC))
             {
@@ -601,20 +582,18 @@ IMS_BOOL FeatureCaps::HasAdditionalFeatures(IN IMS_SINT32 nSIPMethod, IN IMS_BOO
     //---------------------------------------------------------------------------------------------
 
     // REG-EXCLUDED-CAPS
-    if ((pExcludedFeaturesForRegCaps != IMS_NULL)
-            && !pExcludedFeaturesForRegCaps->IsEmpty())
+    if ((pExcludedFeaturesForRegCaps != IMS_NULL) && !pExcludedFeaturesForRegCaps->IsEmpty())
     {
         return IMS_TRUE;
     }
 
     // ALL-MESSAGE-CAPS
-    if ((pFeaturesForAllMessage != IMS_NULL)
-            && !pFeaturesForAllMessage->IsEmpty())
+    if ((pFeaturesForAllMessage != IMS_NULL) && !pFeaturesForAllMessage->IsEmpty())
     {
         return IMS_TRUE;
     }
 
-    CallerCapability *pFeatures = IMS_NULL;
+    CallerCapability* pFeatures = IMS_NULL;
 
     // REQUEST-CAPS
     if (bRequest)

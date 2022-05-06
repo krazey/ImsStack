@@ -17,8 +17,6 @@
 
 class ISipMessage;
 
-
-
 /*
 
 IReferredMessageListener interface
@@ -49,7 +47,7 @@ public:
     </table>
 
     */
-    virtual void ReferredMessage_NotifyOnActive(IN ISipMessage *piSIPMsg) = 0;
+    virtual void ReferredMessage_NotifyOnActive(IN ISipMessage* piSIPMsg) = 0;
 
     /*
      Notifies the SIP response message to the remote endpoint with the substate, "terminated".
@@ -73,7 +71,7 @@ public:
     */
     virtual void ReferredMessage_NotifyOnTerminated(
             IN IMS_SINT32 nReasonCode = SubState::REASON_NONE,
-            IN ISipMessage *piSIPMsg = IMS_NULL) = 0;
+            IN ISipMessage* piSIPMsg = IMS_NULL) = 0;
 };
 
-#endif // _INTERFACE_REFERRED_MESSAGE_LISTENER_H_
+#endif  // _INTERFACE_REFERRED_MESSAGE_LISTENER_H_

@@ -47,7 +47,7 @@ public:
     </table>
 
     */
-    virtual void OnNotification_Delivered(IN ServiceMethod *pMethod) = 0;
+    virtual void OnNotification_Delivered(IN ServiceMethod* pMethod) = 0;
 
     /*
      Notifies the application that the notification was not successfully delivered.
@@ -69,8 +69,8 @@ public:
     </table>
 
     */
-    virtual void OnNotification_DeliveryFailed(IN ServiceMethod *pMethod,
-            IN IMS_SINT32 nStatusCode) = 0;
+    virtual void OnNotification_DeliveryFailed(
+            IN ServiceMethod* pMethod, IN IMS_SINT32 nStatusCode) = 0;
 };
 
-#endif // _INTERFACE_ON_NOTIFICATION_LISTENER_H_
+#endif  // _INTERFACE_ON_NOTIFICATION_LISTENER_H_

@@ -18,17 +18,15 @@
 class ISipMessage;
 class SipProfile;
 
-
-
 class UserAgentHeader
 {
 private:
     UserAgentHeader();
 
 public:
-    static void SetHeader(IN CONST AString &strName, IN CONST SipProfile *pSIPProfile,
-            IN CONST AString &strServiceId, IN CONST IPAddress& objIP, IN IMS_SINT32 nSlotId,
-            IN_OUT ISipMessage *&piSIPMsg);
+    static void SetHeader(IN CONST AString& strName, IN CONST SipProfile* pSIPProfile,
+            IN CONST AString& strServiceId, IN CONST IPAddress& objIP, IN IMS_SINT32 nSlotId,
+            IN_OUT ISipMessage*& piSIPMsg);
 };
 
-#endif // _USER_AGENT_HEADER_H_
+#endif  // _USER_AGENT_HEADER_H_

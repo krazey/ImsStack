@@ -21,10 +21,7 @@ class IDocument;
 class INode;
 class IRegInfoListener;
 
-
-
-class RegInfo
-    : public IRegInfo
+class RegInfo : public IRegInfo
 {
 public:
     RegInfo();
@@ -32,19 +29,19 @@ public:
 
 public:
     // IRegInfo interface
-    virtual IRegInfoRegistration* GetRegistration(IN CONST AString &strAOR) const;
-    virtual IRegInfoRegistration* GetRegistration(IN CONST SipAddress &objAOR) const;
+    virtual IRegInfoRegistration* GetRegistration(IN CONST AString& strAOR) const;
+    virtual IRegInfoRegistration* GetRegistration(IN CONST SipAddress& objAOR) const;
     virtual IMSList<IRegInfoRegistration*> GetRegistrations() const;
 
-    void AddListener(IN IRegInfoListener *piListener);
-    void RemoveListener(IN IRegInfoListener *piListener);
-    IMS_BOOL Update(IN IDocument *piDocument);
+    void AddListener(IN IRegInfoListener* piListener);
+    void RemoveListener(IN IRegInfoListener* piListener);
+    IMS_BOOL Update(IN IDocument* piDocument);
 
     void DisplayRegInfo();
 
 private:
     void CallListener(IN IMS_SINT32 nStatus);
-    RegInfoRegistration* CheckNCreateRegistration(IN INode *piNode);
+    RegInfoRegistration* CheckNCreateRegistration(IN INode* piNode);
     void RemoveAllRegistrations();
 
 private:
@@ -61,4 +58,4 @@ private:
     IMSList<RegInfoRegistration*> objRegistrations;
 };
 
-#endif // _REG_INFO_H_
+#endif  // _REG_INFO_H_

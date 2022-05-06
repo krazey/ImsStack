@@ -16,32 +16,29 @@
 #include "ITimer.h"
 #include "SIPClientTransactionState.h"
 
-
-
-class SIPAck
-    : public ITimerListener
+class SIPAck : public ITimerListener
 {
 public:
-    SIPAck(IN SIPClientTransactionState *pCTState_, IN IMS_SINT32 nAliveInterval);
+    SIPAck(IN SIPClientTransactionState* pCTState_, IN IMS_SINT32 nAliveInterval);
     virtual ~SIPAck();
 
 private:
     SIPAck();
-    SIPAck(IN CONST SIPAck &objRHS);
-    SIPAck& operator=(IN CONST SIPAck &objRHS);
+    SIPAck(IN CONST SIPAck& objRHS);
+    SIPAck& operator=(IN CONST SIPAck& objRHS);
 
 public:
-    IMS_BOOL IsSameTransaction(IN SipTxnKey *pstTxnKey) const;
+    IMS_BOOL IsSameTransaction(IN SipTxnKey* pstTxnKey) const;
     IMS_BOOL IsStrayAck() const;
     void RetransmitMessage();
 
 private:
     // ITimerListener class
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
     RCPtr<SIPClientTransactionState> pCTState;
-    ITimer *piTimer;
+    ITimer* piTimer;
 };
 
-#endif // _SIP_ACK_H_
+#endif  // _SIP_ACK_H_

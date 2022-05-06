@@ -23,10 +23,9 @@ class SIPSocketAddress
 public:
     SIPSocketAddress();
     SIPSocketAddress(IN const SIPSocketAddress& other);
-    SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-            IN const AString& strAddress);
-    SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-            IN const AString& strAddress, IN IMS_BOOL bSecure);
+    SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort, IN const AString& strAddress);
+    SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort, IN const AString& strAddress,
+            IN IMS_BOOL bSecure);
     ~SIPSocketAddress();
 
 public:
@@ -35,26 +34,22 @@ public:
 public:
     IMS_BOOL Equals(IN const SIPSocketAddress& other) const;
 
-    inline const IPAddress& GetIPAddress() const
-    { return m_objSockAddr.GetAddress(); }
-    inline IMS_SINT32 GetPort() const
-    { return m_objSockAddr.GetPort(); }
-    inline IMS_BOOL GetSecure() const
-    { return m_bSecure; }
-    inline const SocketAddress& GetSocketAddress() const
-    { return m_objSockAddr; }
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline const IPAddress& GetIPAddress() const { return m_objSockAddr.GetAddress(); }
+    inline IMS_SINT32 GetPort() const { return m_objSockAddr.GetPort(); }
+    inline IMS_BOOL GetSecure() const { return m_bSecure; }
+    inline const SocketAddress& GetSocketAddress() const { return m_objSockAddr; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
     inline void SetIPAddress(IN const IPAddress& objIPAddress)
-    { m_objSockAddr.SetAddress(objIPAddress); }
-    inline void SetPort(IN IMS_UINT32 nPort)
-    { m_objSockAddr.SetPort(nPort); }
-    inline void SetSecure(IN IMS_BOOL bSecure)
-    { m_bSecure = bSecure; }
+    {
+        m_objSockAddr.SetAddress(objIPAddress);
+    }
+    inline void SetPort(IN IMS_UINT32 nPort) { m_objSockAddr.SetPort(nPort); }
+    inline void SetSecure(IN IMS_BOOL bSecure) { m_bSecure = bSecure; }
     inline void SetSocketAddress(IN const SocketAddress& objSockAddr)
-    { m_objSockAddr = objSockAddr; }
-    inline void SetType(IN IMS_SINT32 nType)
-    { m_nType = nType; }
+    {
+        m_objSockAddr = objSockAddr;
+    }
+    inline void SetType(IN IMS_SINT32 nType) { m_nType = nType; }
 
 public:
     // Types of SIPSocket

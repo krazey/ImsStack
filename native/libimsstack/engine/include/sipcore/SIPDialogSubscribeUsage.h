@@ -25,40 +25,37 @@
 
 #include "SIPDialogUsage.h"
 
-
-
 ////
 // ONLY OUTGOING SUBSCRIPTION WILL BE HANDLED IN THIS MOMENT... 2010/03/17
 ////
 
-class SIPDialogSubscribeUsage
-    : public SIPDialogUsage
+class SIPDialogSubscribeUsage : public SIPDialogUsage
 {
 public:
-    SIPDialogSubscribeUsage(IN SIPDialogBase *pDialog_);
-    SIPDialogSubscribeUsage(IN CONST SIPDialogSubscribeUsage &objRHS);
+    SIPDialogSubscribeUsage(IN SIPDialogBase* pDialog_);
+    SIPDialogSubscribeUsage(IN CONST SIPDialogSubscribeUsage& objRHS);
     virtual ~SIPDialogSubscribeUsage();
 
 private:
     SIPDialogSubscribeUsage();
-    SIPDialogSubscribeUsage& operator=(IN CONST SIPDialogSubscribeUsage &objRHS);
+    SIPDialogSubscribeUsage& operator=(IN CONST SIPDialogSubscribeUsage& objRHS);
 
 public:
     // SIPDialogUsage class
-    virtual IMS_BOOL InitDialogUsage(IN CONST SIPMessageInfo &objMInfo);
+    virtual IMS_BOOL InitDialogUsage(IN CONST SIPMessageInfo& objMInfo);
     virtual SIPDialogUsage* Clone() const;
-    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo &objMInfo) const;
-    virtual IMS_BOOL Equals(IN SIPDialogUsage *pDUsage) const;
+    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo& objMInfo) const;
+    virtual IMS_BOOL Equals(IN SIPDialogUsage* pDUsage) const;
     virtual AString ToString() const;
-    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo &objMInfo);
+    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo& objMInfo);
 
-    IMS_BOOL InitDialogUsage(IN CONST SipMethod &objMethod);
+    IMS_BOOL InitDialogUsage(IN CONST SipMethod& objMethod);
 
     static IMS_SINT32 GetNextState(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger);
 
 protected:
-    virtual IMS_SINT32 GetActionNTrigger(IN CONST SIPMessageInfo &objMInfo,
-            OUT IMS_SINT32 &nTrigger);
+    virtual IMS_SINT32 GetActionNTrigger(
+            IN CONST SIPMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger);
     virtual IMS_BOOL IsUsageTerminated(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const;
 
     virtual const IMS_CHAR* TriggerToString(IN IMS_SINT32 nTrigger) const;
@@ -98,9 +95,9 @@ private:
 
     static const IMS_SINT32 STATE_TABLE[SIPDState::STATE_MAX][TRIGGER_MAX];
 
-    //4 Shall we need to check Expires header in SUBSCRIBE request or expires parameter
-    //4 in NOTIFY request
-    // For Subscription-State header info. of NOTIFY request
+    // 4 Shall we need to check Expires header in SUBSCRIBE request or expires parameter
+    // 4 in NOTIFY request
+    //  For Subscription-State header info. of NOTIFY request
     IMS_SINT32 nSubState;
 
     // Method type: SUBSCRIBE or REFER
@@ -116,4 +113,4 @@ private:
     IMS_UINT32 nCSeqForNOTIFYWithTerminated;
 };
 
-#endif // _SIP_DIALOG_SUBSCRIBE_USAGE_H_
+#endif  // _SIP_DIALOG_SUBSCRIBE_USAGE_H_

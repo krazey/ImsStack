@@ -22,15 +22,13 @@
 
 class IRefreshable;
 
-
-
-class RefreshHelper
-    : public ITimerListener
-    , public ISipClientConnectionListener
-    , public ISipErrorListener
+class RefreshHelper :
+        public ITimerListener,
+        public ISipClientConnectionListener,
+        public ISipErrorListener
 {
 public:
-    RefreshHelper(IN IRefreshable *piRefreshable_, IN IMS_BOOL bRepeatable_);
+    RefreshHelper(IN IRefreshable* piRefreshable_, IN IMS_BOOL bRepeatable_);
     virtual ~RefreshHelper();
 
 public:
@@ -40,25 +38,24 @@ public:
     IMS_BOOL IsRequestPending() const;
     IMS_BOOL IsTimerActive() const;
     // SIP_MESSAGE_MEDIATOR
-    void SetMessageMediator(IN IMessageMediator *piMediator);
-    void SetPolicy(IN IMS_SINT32 nPolicy,
-            IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
+    void SetMessageMediator(IN IMessageMediator* piMediator);
+    void SetPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+            IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT);
 
 protected:
-    virtual IMS_BOOL AddSpecificHeader(IN ISipConnection *piSC) = 0;
-    virtual IMS_RESULT SendRefreshRequest(IN ISipClientConnection *piSCC);
-    virtual IMS_RESULT UpdateOnMessageReceived(IN CONST ISipConnection *piSC) = 0;
-    virtual IMS_RESULT UpdateOnMessageSent(IN CONST ISipConnection *piSC) = 0;
+    virtual IMS_BOOL AddSpecificHeader(IN ISipConnection* piSC) = 0;
+    virtual IMS_RESULT SendRefreshRequest(IN ISipClientConnection* piSCC);
+    virtual IMS_RESULT UpdateOnMessageReceived(IN CONST ISipConnection* piSC) = 0;
+    virtual IMS_RESULT UpdateOnMessageSent(IN CONST ISipConnection* piSC) = 0;
 
     virtual IMS_SINT32 GetTimerInterval() const;
-    virtual void RefreshCompleted(IN ISipClientConnection *piSCC, IN IMS_SINT32 nCode = 0) = 0;
+    virtual void RefreshCompleted(IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0) = 0;
     virtual void RefreshStarted() = 0;
     virtual void RefreshTerminated() = 0;
 
-    inline virtual IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const
-    { return IMS_TRUE; }
+    inline virtual IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const { return IMS_TRUE; }
 
-    void Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC, IN IMS_SINT32 nCode = 0);
+    void Refreshable_RefreshCompleted(IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0);
     IMS_BOOL Refreshable_RefreshStarted();
     void Refreshable_RefreshTerminated();
 
@@ -70,13 +67,13 @@ protected:
 
 private:
     // ITimerListener interface
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
     // ISipClientConnectionListener interface
-    virtual void ClientConnection_NotifyResponse(IN ISipClientConnection * piSCC,
-            IN ISipClientConnection *piForkedSCC = IMS_NULL);
+    virtual void ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piSCC, IN ISipClientConnection* piForkedSCC = IMS_NULL);
     // ISipErrorListener interface
-    virtual void Error_NotifyError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-            IN CONST AString &strMessage);
+    virtual void Error_NotifyError(
+            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
     IMS_BOOL SetTimer(IN IMS_SINT32 nTimerDuration);
 
 public:
@@ -119,10 +116,16 @@ public:
     };
 
 private:
-    enum { CRITERIA_INTERVAL = 1200 };
-    enum { MINIMUM_REMAIN_INTERVAL = 600 };
+    enum
+    {
+        CRITERIA_INTERVAL = 1200
+    };
+    enum
+    {
+        MINIMUM_REMAIN_INTERVAL = 600
+    };
 
-    IRefreshable *piRefreshable;
+    IRefreshable* piRefreshable;
 
     // Refresh policy
     IMS_SINT32 nPolicy;
@@ -137,12 +140,12 @@ private:
     IMS_BOOL bRepeatable;
     IMS_SINT32 nDuration;
     IMS_SINT32 nRemainDuration;
-    ITimer *piTimer;
+    ITimer* piTimer;
 
-    ISipClientConnection *piRefreshSC;
+    ISipClientConnection* piRefreshSC;
 
     // SIP_MESSAGE_MEDIATOR
-    IMessageMediator *piMessageMediator;
+    IMessageMediator* piMessageMediator;
 };
 
-#endif // _REFRESH_HELPER_H_
+#endif  // _REFRESH_HELPER_H_

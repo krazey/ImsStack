@@ -19,24 +19,19 @@
 
 class StreamMediaProposalImpl;
 
-
-
-class StreamMediaImpl
-    : public MediaImpl
-    , public IMedia
-    , public IOnMediaListener
+class StreamMediaImpl : public MediaImpl, public IMedia, public IOnMediaListener
 {
 public:
-    StreamMediaImpl(IN StreamMedia *pStreamMedia_);
+    StreamMediaImpl(IN StreamMedia* pStreamMedia_);
     virtual ~StreamMediaImpl();
 
 private:
-    StreamMediaImpl(IN CONST StreamMediaImpl &objRHS);
-    StreamMediaImpl& operator=(IN CONST StreamMediaImpl &objRHS);
+    StreamMediaImpl(IN CONST StreamMediaImpl& objRHS);
+    StreamMediaImpl& operator=(IN CONST StreamMediaImpl& objRHS);
 
 private:
     // MediaImpl class
-    virtual IMS_BOOL Equals(IN CONST IMedia *piMedia) const;
+    virtual IMS_BOOL Equals(IN CONST IMedia* piMedia) const;
     virtual IMedia* GetInterface();
     virtual Media* GetMedia() const;
 
@@ -53,13 +48,13 @@ private:
     virtual IMS_SINT32 GetType() const;
     virtual void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
 
-    virtual void OnMedia_FictitiousMediaCreated(IN Media *pMedia);
-    virtual void OnMedia_FictitiousMediaDestroyed(IN Media *pMedia);
+    virtual void OnMedia_FictitiousMediaCreated(IN Media* pMedia);
+    virtual void OnMedia_FictitiousMediaDestroyed(IN Media* pMedia);
 
 private:
-    StreamMediaProposalImpl *pStreamMediaProposal;
+    StreamMediaProposalImpl* pStreamMediaProposal;
 
-    StreamMedia *pStreamMedia;
+    StreamMedia* pStreamMedia;
 };
 
-#endif // _STREAM_MEDIA_IMPL_H_
+#endif  // _STREAM_MEDIA_IMPL_H_

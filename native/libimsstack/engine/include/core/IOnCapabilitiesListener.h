@@ -15,8 +15,6 @@
 
 class Capabilities;
 
-
-
 /*
 
 This listener type is used to notify the application about responses to capability queries.
@@ -50,7 +48,7 @@ public:
     </table>
 
     */
-    virtual void OnCapabilities_QueryDelivered(IN Capabilities *pCapabilities) = 0;
+    virtual void OnCapabilities_QueryDelivered(IN Capabilities* pCapabilities) = 0;
 
     /*
 
@@ -72,7 +70,7 @@ public:
     </table>
 
     */
-    virtual void OnCapabilities_QueryDeliveryFailed(IN Capabilities *pCapabilities) = 0;
+    virtual void OnCapabilities_QueryDeliveryFailed(IN Capabilities* pCapabilities) = 0;
 };
 
-#endif // _INTERFACE_ON_CAPABILITIES_LISTENER_H_
+#endif  // _INTERFACE_ON_CAPABILITIES_LISTENER_H_

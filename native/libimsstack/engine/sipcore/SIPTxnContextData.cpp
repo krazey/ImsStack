@@ -16,11 +16,9 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPTxnContextData::SIPTxnContextData()
-    : pTxnState(IMS_NULL)
+SIPTxnContextData::SIPTxnContextData() :
+        pTxnState(IMS_NULL)
 {
 }
 
@@ -52,7 +50,7 @@ SIPTransactionState* SIPTxnContextData::GetTxnState() const
 }
 
 PUBLIC
-void SIPTxnContextData::SetMethod(IN CONST SipMethod &objMethod)
+void SIPTxnContextData::SetMethod(IN CONST SipMethod& objMethod)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -60,7 +58,7 @@ void SIPTxnContextData::SetMethod(IN CONST SipMethod &objMethod)
 }
 
 PUBLIC
-void SIPTxnContextData::SetTxnState(IN SIPTransactionState *pTxnState)
+void SIPTxnContextData::SetTxnState(IN SIPTransactionState* pTxnState)
 {
     //---------------------------------------------------------------------------------------------
 

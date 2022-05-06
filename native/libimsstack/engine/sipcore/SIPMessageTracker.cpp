@@ -14,18 +14,13 @@
 #include "ISipMessageTrackerListener.h"
 #include "SIPMessageTracker.h"
 
-
-
 PRIVATE
-SIPMessageTracker::SIPMessageTracker()
-    : piListener(IMS_NULL)
+SIPMessageTracker::SIPMessageTracker() :
+        piListener(IMS_NULL)
 {
 }
 
-PRIVATE VIRTUAL
-SIPMessageTracker::~SIPMessageTracker()
-{
-}
+PRIVATE VIRTUAL SIPMessageTracker::~SIPMessageTracker() {}
 
 /*
 
@@ -44,8 +39,8 @@ Remarks
 
 */
 PUBLIC
-void SIPMessageTracker::NotifyMessageReceived(IN CONST SipMethod &objMethod,
-        IN IMS_SINT32 nStatusCode, IN CONST AString &strCallId)
+void SIPMessageTracker::NotifyMessageReceived(
+        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN CONST AString& strCallId)
 {
     if (piListener == IMS_NULL)
     {
@@ -60,7 +55,7 @@ void SIPMessageTracker::NotifyMessageReceived(IN CONST SipMethod &objMethod,
     {
         for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); ++i)
         {
-            MessageFilter *pFilter = objIncomingFilters.GetAt(i);
+            MessageFilter* pFilter = objIncomingFilters.GetAt(i);
 
             if (pFilter != IMS_NULL)
             {
@@ -81,8 +76,8 @@ Remarks
 
 */
 PUBLIC
-void SIPMessageTracker::NotifyMessageSent(IN CONST SipMethod &objMethod, IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strCallId, IN IMS_SINT32 nErrorCode /* = 0 */)
+void SIPMessageTracker::NotifyMessageSent(IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
+        IN CONST AString& strCallId, IN IMS_SINT32 nErrorCode /* = 0 */)
 {
     if (piListener == IMS_NULL)
     {
@@ -104,7 +99,7 @@ void SIPMessageTracker::NotifyMessageSent(IN CONST SipMethod &objMethod, IN IMS_
     {
         for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); ++i)
         {
-            MessageFilter *pFilter = objOutgoingFilters.GetAt(i);
+            MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
 
             if (pFilter != IMS_NULL)
             {
@@ -132,11 +127,10 @@ void SIPMessageTracker::NotifyMessageSent(IN CONST SipMethod &objMethod, IN IMS_
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL SIPMessageTracker::AddFilter(IN CONST SipMethod &objMethod, IN IMS_SINT32 nStatusCode,
-        IN IMS_BOOL bOutgoing)
+PRIVATE VIRTUAL IMS_BOOL SIPMessageTracker::AddFilter(
+        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
 {
-    MessageFilter *pFilter = new MessageFilter(objMethod, nStatusCode);
+    MessageFilter* pFilter = new MessageFilter(objMethod, nStatusCode);
 
     if (pFilter == IMS_NULL)
     {
@@ -168,12 +162,11 @@ IMS_BOOL SIPMessageTracker::AddFilter(IN CONST SipMethod &objMethod, IN IMS_SINT
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod)
+PRIVATE VIRTUAL void SIPMessageTracker::RemoveFilter(IN CONST SipMethod& objMethod)
 {
-    for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); )
+    for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize();)
     {
-        MessageFilter *pFilter = objOutgoingFilters.GetAt(i);
+        MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
 
         if (pFilter == IMS_NULL)
         {
@@ -192,9 +185,9 @@ void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod)
         ++i;
     }
 
-    for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); )
+    for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize();)
     {
-        MessageFilter *pFilter = objIncomingFilters.GetAt(i);
+        MessageFilter* pFilter = objIncomingFilters.GetAt(i);
 
         if (pFilter == IMS_NULL)
         {
@@ -219,15 +212,14 @@ void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod, IN IMS_SINT32 nStatusCode,
-        IN IMS_BOOL bOutgoing)
+PRIVATE VIRTUAL void SIPMessageTracker::RemoveFilter(
+        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
 {
     if (bOutgoing)
     {
-        for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); )
+        for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize();)
         {
-            MessageFilter *pFilter = objOutgoingFilters.GetAt(i);
+            MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
 
             if (pFilter == IMS_NULL)
             {
@@ -248,9 +240,9 @@ void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod, IN IMS_SINT3
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); )
+        for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize();)
         {
-            MessageFilter *pFilter = objIncomingFilters.GetAt(i);
+            MessageFilter* pFilter = objIncomingFilters.GetAt(i);
 
             if (pFilter == IMS_NULL)
             {
@@ -276,12 +268,11 @@ void SIPMessageTracker::RemoveFilter(IN CONST SipMethod &objMethod, IN IMS_SINT3
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPMessageTracker::RemoveAllFilters()
+PRIVATE VIRTUAL void SIPMessageTracker::RemoveAllFilters()
 {
     for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); ++i)
     {
-        MessageFilter *pFilter = objIncomingFilters.GetAt(i);
+        MessageFilter* pFilter = objIncomingFilters.GetAt(i);
 
         if (pFilter != IMS_NULL)
         {
@@ -293,7 +284,7 @@ void SIPMessageTracker::RemoveAllFilters()
 
     for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); ++i)
     {
-        MessageFilter *pFilter = objOutgoingFilters.GetAt(i);
+        MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
 
         if (pFilter != IMS_NULL)
         {
@@ -309,8 +300,7 @@ void SIPMessageTracker::RemoveAllFilters()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPMessageTracker::SetListener(IN ISipMessageTrackerListener *piListener)
+PRIVATE VIRTUAL void SIPMessageTracker::SetListener(IN ISipMessageTrackerListener* piListener)
 {
     this->piListener = piListener;
 }

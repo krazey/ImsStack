@@ -13,8 +13,6 @@
 #ifndef _ENGINE_STATE_H_
 #define _ENGINE_STATE_H_
 
-
-
 // Initialization / Uninitialization for Engine
 class EngineState
 {
@@ -23,4 +21,4 @@ public:
     static void Uninitialize();
 };
 
-#endif // _ENGINE_STATE_H_
+#endif  // _ENGINE_STATE_H_

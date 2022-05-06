@@ -22,32 +22,33 @@
 #include "SipDebug.h"
 #include "SIPStackHeaders.h"
 
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acIpAddr[SipDebug::MAX_LOG_IP + 1] = { '\0', };
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acLog1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = { '\0', };
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acLog2[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = { '\0', };
-PRIVATE GLOBAL
-AString SipDebug::strLog1 = AString::ConstNull();
-PRIVATE GLOBAL
-AString SipDebug::strLog2 = AString::ConstNull();
+PRIVATE GLOBAL IMS_CHAR SipDebug::acIpAddr[SipDebug::MAX_LOG_IP + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL IMS_CHAR SipDebug::acLog1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL IMS_CHAR SipDebug::acLog2[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL AString SipDebug::strLog1 = AString::ConstNull();
+PRIVATE GLOBAL AString SipDebug::strLog2 = AString::ConstNull();
 
 // For SIM2 for multi-SIM device
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acIpAddr_1[SipDebug::MAX_LOG_IP + 1] = { '\0', };
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acLog1_1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = { '\0', };
-PRIVATE GLOBAL
-IMS_CHAR SipDebug::acLog2_1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = { '\0', };
-PRIVATE GLOBAL
-AString SipDebug::strLog1_1 = AString::ConstNull();
-PRIVATE GLOBAL
-AString SipDebug::strLog2_1 = AString::ConstNull();
+PRIVATE GLOBAL IMS_CHAR SipDebug::acIpAddr_1[SipDebug::MAX_LOG_IP + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL IMS_CHAR SipDebug::acLog1_1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL IMS_CHAR SipDebug::acLog2_1[SipDebug::MAX_LOG_CHAR_ARRAY + 3 + 1] = {
+        '\0',
+};
+PRIVATE GLOBAL AString SipDebug::strLog1_1 = AString::ConstNull();
+PRIVATE GLOBAL AString SipDebug::strLog2_1 = AString::ConstNull();
 
-PUBLIC GLOBAL
-void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
-        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode/* = 0*/)
+PUBLIC GLOBAL void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode /* = 0*/)
 {
     // EVENT_IMS_DEBUG
     // wParam
@@ -63,15 +64,12 @@ void SipDebug::Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
         return;
     }
 
-    IMS_EVENT_SendEventForSlotId(IMS_EVENT_DEBUG,
-            ((nMsgType | nDirection) & 0xFFFFFFFF),
-            IMS_MAKEPARAM(nMethod, nStatusCode),
-            nSlotId);
+    IMS_EVENT_SendEventForSlotId(IMS_EVENT_DEBUG, ((nMsgType | nDirection) & 0xFFFFFFFF),
+            IMS_MAKEPARAM(nMethod, nStatusCode), nSlotId);
 }
 
 // Methods for logging based on release mode
-PUBLIC GLOBAL
-void SipDebug::InitLogging()
+PUBLIC GLOBAL void SipDebug::InitLogging()
 {
     IMS_MEM_Memset(acIpAddr, 0x00, sizeof(acIpAddr));
     IMS_MEM_Memset(acLog1, 0x00, sizeof(acLog1));
@@ -89,9 +87,8 @@ void SipDebug::InitLogging()
     strLog2_1 = AString::ConstNull();
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
-        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
+PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter /* = 0 no delimiter*/)
 {
     if (nCount > MAX_LOG_CHAR_ARRAY)
     {
@@ -103,9 +100,8 @@ const IMS_CHAR* SipDebug::GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 n
     return SIPStack::GetLogString(pszValue, pszLog, nCount + 3, cDelimiter);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
-        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
+PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter /* = 0 no delimiter*/)
 {
     if (nCount > MAX_LOG_CHAR_ARRAY)
     {
@@ -117,8 +113,7 @@ const IMS_CHAR* SipDebug::GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 n
     return SIPStack::GetLogString(pszValue, pszLog, nCount + 3, cDelimiter);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetIp(IN const IPAddress& objIpAddr)
+PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetIp(IN const IPAddress& objIpAddr)
 {
     IMS_CHAR* pszLog = (GetSimSlot() == IMS_SLOT_0) ? &acIpAddr[0] : &acIpAddr_1[0];
 
@@ -126,8 +121,7 @@ const IMS_CHAR* SipDebug::GetIp(IN const IPAddress& objIpAddr)
     return SIPStack::GetLogString(objIpAddr.ToCharString(), pszLog, 8);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipDebug::GetIp(IN const AString& strIpAddr)
+PUBLIC GLOBAL const IMS_CHAR* SipDebug::GetIp(IN const AString& strIpAddr)
 {
     IMS_CHAR* pszLog = (GetSimSlot() == IMS_SLOT_0) ? &acIpAddr[0] : &acIpAddr_1[0];
 
@@ -135,49 +129,45 @@ const IMS_CHAR* SipDebug::GetIp(IN const AString& strIpAddr)
     return SIPStack::GetLogString(strIpAddr.GetStr(), pszLog, 8);
 }
 
-PUBLIC GLOBAL
-const AString& SipDebug::GetStr1(IN const AString& strValue, IN IMS_SINT32 nCount,
-        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
+PUBLIC GLOBAL const AString& SipDebug::GetStr1(IN const AString& strValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter /* = 0 no delimiter*/)
 {
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog1 : strLog1_1;
 
     return UtilService::GetLogString(strValue, strLog, nCount, cDelimiter);
 }
 
-PUBLIC GLOBAL
-const AString& SipDebug::GetStr2(IN const AString& strValue, IN IMS_SINT32 nCount,
-        IN const IMS_CHAR cDelimiter/* = 0 no delimiter*/)
+PUBLIC GLOBAL const AString& SipDebug::GetStr2(IN const AString& strValue, IN IMS_SINT32 nCount,
+        IN const IMS_CHAR cDelimiter /* = 0 no delimiter*/)
 {
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog2 : strLog2_1;
 
     return UtilService::GetLogString(strValue, strLog, nCount, cDelimiter);
 }
 
-PUBLIC GLOBAL
-const AString& SipDebug::GetUri1(IN const AString& strValue)
+PUBLIC GLOBAL const AString& SipDebug::GetUri1(IN const AString& strValue)
 {
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog1 : strLog1_1;
 
     return UtilService::GetLogString(strValue, strLog, 10);
 }
 
-PUBLIC GLOBAL
-const AString& SipDebug::GetUri2(IN const AString& strValue)
+PUBLIC GLOBAL const AString& SipDebug::GetUri2(IN const AString& strValue)
 {
     AString& strLog = (GetSimSlot() == IMS_SLOT_0) ? strLog2 : strLog2_1;
 
     return UtilService::GetLogString(strValue, strLog, 10);
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32/* nSlotId*/, IN IMS_SINT32 nMsgType,
-        IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode)
+PRIVATE GLOBAL IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32 /* nSlotId*/,
+        IN IMS_SINT32 nMsgType, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod,
+        IN IMS_SINT32 nStatusCode)
 {
     IMS_BOOL bCheckDebugRequired = IMS_FALSE;
 
     if (bCheckDebugRequired)
     {
-        (void) nStatusCode;
+        (void)nStatusCode;
 
         if (nMethod == SipMethod::REGISTER)
         {
@@ -201,17 +191,16 @@ IMS_BOOL SipDebug::CheckIfDebugRequired(IN IMS_SINT32/* nSlotId*/, IN IMS_SINT32
     }
     else
     {
-        (void) nMsgType;
-        (void) nDirection;
-        (void) nMethod;
-        (void) nStatusCode;
+        (void)nMsgType;
+        (void)nDirection;
+        (void)nMethod;
+        (void)nStatusCode;
     }
 
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SipDebug::GetSimSlot()
+PRIVATE GLOBAL IMS_SINT32 SipDebug::GetSimSlot()
 {
     if (SystemConfig::IsMultiSimEnabled())
     {

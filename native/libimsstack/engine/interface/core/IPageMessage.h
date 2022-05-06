@@ -12,8 +12,7 @@ class IPageMessageListener;
  *
  * @see IServiceMethod, IPageMessageListener
  */
-class IPageMessage
-    : public IServiceMethod
+class IPageMessage : public IServiceMethod
 {
 public:
     /**
@@ -59,14 +58,14 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Send(IN CONST ByteArray &objContent, IN CONST AString &strContentType) = 0;
+    virtual IMS_RESULT Send(IN CONST ByteArray& objContent, IN CONST AString& strContentType) = 0;
 
     /**
      * @brief Sets a listener for this IPageMessage, replacing any previous IPageMessageListener.
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN IPageMessageListener *piListener) = 0;
+    virtual void SetListener(IN IPageMessageListener* piListener) = 0;
 
     //// IMS extensions
 
@@ -99,4 +98,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_PAGE_MESSAGE_H_
+#endif  // _INTERFACE_PAGE_MESSAGE_H_

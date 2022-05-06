@@ -35,8 +35,7 @@ class SipProfile;
  *
  * @see IConnection, ISipDialog, ISipErrorListener
  */
-class ISipConnection :
-        public IConnection
+class ISipConnection : public IConnection
 {
 public:
     /**
@@ -91,7 +90,7 @@ public:
      * @param nIndex Position of the header field
      * @return Header field value at an index.
      */
-    virtual AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex/* = 0*/) = 0;
+    virtual AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex /* = 0*/) = 0;
 
     /**
      * @brief Gets the header field value(s) of the specified header type.
@@ -262,7 +261,7 @@ public:
      * @param pProfile SIP profile for this SIP connection
      * @note MULTI_REG_SIP_PROFILE
      */
-    virtual void SetSipProfile(IN SipProfile *pProfile) = 0;
+    virtual void SetSipProfile(IN SipProfile* pProfile) = 0;
 
     /**
      * @brief Sets the SIP transaction timer values.

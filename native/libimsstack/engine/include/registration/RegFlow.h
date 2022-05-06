@@ -20,11 +20,11 @@ class RegFlow
 {
 public:
     explicit RegFlow(IN const RegKey& objRegKey_);
-    RegFlow(IN const RegFlow &objRHS);
+    RegFlow(IN const RegFlow& objRHS);
     ~RegFlow();
 
 public:
-    RegFlow& operator=(IN const RegFlow &objRHS);
+    RegFlow& operator=(IN const RegFlow& objRHS);
 
 public:
     IMS_BOOL Capture(IN IMS_UINT32 nSubscriber_ = DEFAULT_SUBSCRIBER);
@@ -33,11 +33,11 @@ public:
     // HEADER_REQ_SESSION-ID
     const AString& GetSessionId() const;
     IMS_SINT32 IncreaseNGetCSeqValue(IN IMS_SINT32 nIncrement = 1);
-    IMS_BOOL IsReserved(OUT IMS_UINT32 *pnSubscriber_ = IMS_NULL) const;
+    IMS_BOOL IsReserved(OUT IMS_UINT32* pnSubscriber_ = IMS_NULL) const;
     void Release();
     void Restore();
     void SetCSeqValue(IN IMS_SINT32 nValue);
-    void UpdateCallId(IN const IPAddress &objIP);
+    void UpdateCallId(IN const IPAddress& objIP);
 
 public:
     enum
@@ -63,4 +63,4 @@ private:
     AString strSessionId;
 };
 
-#endif // _REG_FLOW_H_
+#endif  // _REG_FLOW_H_

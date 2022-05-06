@@ -20,8 +20,8 @@ public:
      * @param strServiceId an IMS service identifier
      * @return Pointer to IRegBinding
      */
-    static IRegBinding* GetRegBinding(IN IMS_SINT32 nSlotId,
-            IN const AString &strAppId, IN const AString &strServiceId);
+    static IRegBinding* GetRegBinding(
+            IN IMS_SINT32 nSlotId, IN const AString& strAppId, IN const AString& strServiceId);
 
     /**
      * @brief Returns all the registered IRegBinding.
@@ -41,9 +41,8 @@ public:
      * @param strServiceId an IMS service identifier
      * @param piRegBinding Pointer to IRegBinding to be set
      */
-    static void SetRegBinding(IN IMS_SINT32 nSlotId,
-            IN const AString &strAppId, IN const AString &strServiceId,
-            IN IRegBinding *piRegBinding);
+    static void SetRegBinding(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
+            IN const AString& strServiceId, IN IRegBinding* piRegBinding);
 };
 
-#endif // _SERVICE_RESOLVER_H_
+#endif  // _SERVICE_RESOLVER_H_

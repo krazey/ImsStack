@@ -15,22 +15,19 @@
 
 #include "media/MediaProposal.h"
 
-
-
-class FramedMediaProposal
-    : public MediaProposal
+class FramedMediaProposal : public MediaProposal
 {
 public:
-    FramedMediaProposal(IN ISDPOAState *piOAState_);
+    FramedMediaProposal(IN ISDPOAState* piOAState_);
     virtual ~FramedMediaProposal();
 
 private:
-    FramedMediaProposal(IN CONST FramedMediaProposal &objRHS);
-    FramedMediaProposal& operator=(IN CONST FramedMediaProposal &objRHS);
+    FramedMediaProposal(IN CONST FramedMediaProposal& objRHS);
+    FramedMediaProposal& operator=(IN CONST FramedMediaProposal& objRHS);
 
 public:
     // MediaProposal class
     virtual IMS_SINT32 GetType() const;
 };
 
-#endif // _FRAMED_MEDIA_PROPOSAL_H_
+#endif  // _FRAMED_MEDIA_PROPOSAL_H_

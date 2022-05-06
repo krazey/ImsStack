@@ -199,4 +199,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_MEDIA_H_
+#endif  // _INTERFACE_MEDIA_H_

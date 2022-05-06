@@ -14,26 +14,20 @@
 #include "ISipPacketTrackerListener.h"
 #include "SIPPacketTracker.h"
 
-
-
 PUBLIC
-SIPPacketTracker::SIPPacketTracker()
-    : piListener(IMS_NULL)
+SIPPacketTracker::SIPPacketTracker() :
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPPacketTracker::~SIPPacketTracker()
-{
-}
+PUBLIC VIRTUAL SIPPacketTracker::~SIPPacketTracker() {}
 
 /*
 
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPPacketTracker::SetListener(IN ISipPacketTrackerListener* piListener)
+PRIVATE VIRTUAL void SIPPacketTracker::SetListener(IN ISipPacketTrackerListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -59,8 +53,8 @@ Remarks
 
 */
 PUBLIC
-void SIPPacketTracker::NotifyMessageSent(IN ISipMessage *piSIPMsg,
-        IN CONST ByteArray &objMsg, IN IMS_BOOL bIsRetransmission)
+void SIPPacketTracker::NotifyMessageSent(
+        IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -76,8 +70,8 @@ Remarks
 
 */
 PUBLIC
-void SIPPacketTracker::NotifyMessageReceived(IN ISipMessage *piSIPMsg,
-        IN CONST ByteArray &objMsg, IN IMS_BOOL bIsRetransmission)
+void SIPPacketTracker::NotifyMessageReceived(
+        IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission)
 {
     //---------------------------------------------------------------------------------------------
 

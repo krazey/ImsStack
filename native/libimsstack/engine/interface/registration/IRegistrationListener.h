@@ -25,8 +25,8 @@ public:
      *                             (w/ Authorization header) should be sent or not;
      *                             The default value is IMS_TRUE
      */
-    virtual void Registration_AuthenticationChallenged(IN IMS_SINT32 nAlgorithm,
-            OUT IMS_BOOL &bResponseToChallenge) = 0;
+    virtual void Registration_AuthenticationChallenged(
+            IN IMS_SINT32 nAlgorithm, OUT IMS_BOOL& bResponseToChallenge) = 0;
 
     /**
      * @brief Notifies the application when the AKA response is received from ISIM application.
@@ -38,8 +38,8 @@ public:
      * @param objCK Ciphering key value; it is valid if nResult is only RESULT_OK
      * @param bResultOfSA Result of security association
      */
-    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult,
-            IN CONST ByteArray &objIK, IN CONST ByteArray &objCK, OUT IMS_BOOL &bResultOfSA) = 0;
+    virtual void Registration_NotifyAKAResponse(IN IMS_SINT32 nResult, IN CONST ByteArray& objIK,
+            IN CONST ByteArray& objCK, OUT IMS_BOOL& bResultOfSA) = 0;
 
     /**
      * @brief Notifies the application when the registration's refresh timer is expired.
@@ -48,7 +48,7 @@ public:
      *
      * @param bDoImplicitRefresh flag to indicate that refresh request is sent from engine or not
      */
-    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL &bDoImplicitRefresh) = 0;
+    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) = 0;
 
     /**
      * @brief Notifies the application when the initial registration is done successfully.
@@ -87,4 +87,4 @@ public:
     virtual void Registration_Terminated(IN IMS_SINT32 nReason) = 0;
 };
 
-#endif // _INTERFACE_REGISTRATION_LISTENER_H_
+#endif  // _INTERFACE_REGISTRATION_LISTENER_H_

@@ -21,11 +21,7 @@
 #include "SIPTransportHelper.h"
 #include "SIPFactoryProxy.h"
 
-PRIVATE GLOBAL
-SIPFactoryProxy* SIPFactoryProxy::pFactoryProxy = IMS_NULL;
-
-
-
+PRIVATE GLOBAL SIPFactoryProxy* SIPFactoryProxy::pFactoryProxy = IMS_NULL;
 
 class SIPFactoryHolder
 {
@@ -99,18 +95,26 @@ public:
     }
 
     inline void SetTokenGenerator(IN ISipTokenGenerator* piTokenGenerator)
-    { this->piTokenGenerator = piTokenGenerator; }
+    {
+        this->piTokenGenerator = piTokenGenerator;
+    }
 
     inline IMS_BOOL IsIPSecStateEnabled() const
-    { return (pIPSecState != IMS_NULL) && pIPSecState->IsIPSecEnabled(); }
+    {
+        return (pIPSecState != IMS_NULL) && pIPSecState->IsIPSecEnabled();
+    }
     inline IMS_BOOL IsMessageTrackerEnabled() const
-    { return (pMessageTracker != IMS_NULL) && pMessageTracker->IsMessageTrackerEnabled(); }
+    {
+        return (pMessageTracker != IMS_NULL) && pMessageTracker->IsMessageTrackerEnabled();
+    }
     inline IMS_BOOL IsPacketTrackerEnabled() const
-    { return (pPacketTracker != IMS_NULL) && pPacketTracker->IsPacketTrackerEnabled(); }
+    {
+        return (pPacketTracker != IMS_NULL) && pPacketTracker->IsPacketTrackerEnabled();
+    }
     inline IMS_BOOL IsRoutingRejectNotifierEnabled() const
     {
-        return (pRoutingRejectNotifier != IMS_NULL)
-                && pRoutingRejectNotifier->IsNotificationRequired();
+        return (pRoutingRejectNotifier != IMS_NULL) &&
+                pRoutingRejectNotifier->IsNotificationRequired();
     }
 
 private:
@@ -127,14 +131,14 @@ private:
 };
 
 PUBLIC
-SIPFactoryHolder::SIPFactoryHolder()
-    : pIPSecState(IMS_NULL)
-    , pMessageTracker(IMS_NULL)
-    , pPacketTracker(IMS_NULL)
-    , pRoutingRejectNotifier(IMS_NULL)
-    , pRTConfigHelper(IMS_NULL)
-    , pTransportHelper(IMS_NULL)
-    , piTokenGenerator(IMS_NULL)
+SIPFactoryHolder::SIPFactoryHolder() :
+        pIPSecState(IMS_NULL),
+        pMessageTracker(IMS_NULL),
+        pPacketTracker(IMS_NULL),
+        pRoutingRejectNotifier(IMS_NULL),
+        pRTConfigHelper(IMS_NULL),
+        pTransportHelper(IMS_NULL),
+        piTokenGenerator(IMS_NULL)
 {
 }
 
@@ -186,8 +190,6 @@ void SIPFactoryHolder::Clear()
     piTokenGenerator = IMS_NULL;
 }
 
-
-
 class SIPFactoryProxyPrivate
 {
 public:
@@ -210,12 +212,12 @@ public:
     }
 
 private:
-    SIPFactoryHolder **ppHolder;
+    SIPFactoryHolder** ppHolder;
 };
 
 PUBLIC
-SIPFactoryProxyPrivate::SIPFactoryProxyPrivate()
-    : ppHolder(IMS_NULL)
+SIPFactoryProxyPrivate::SIPFactoryProxyPrivate() :
+        ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -246,11 +248,9 @@ SIPFactoryProxyPrivate::~SIPFactoryProxyPrivate()
     }
 }
 
-
-
 PRIVATE
-SIPFactoryProxy::SIPFactoryProxy()
-    : pPrivate(new SIPFactoryProxyPrivate())
+SIPFactoryProxy::SIPFactoryProxy() :
+        pPrivate(new SIPFactoryProxyPrivate())
 {
 }
 
@@ -341,8 +341,8 @@ Remarks
 
 */
 PUBLIC
-void SIPFactoryProxy::SetTokenGenerator(IN IMS_SINT32 nSlotId,
-        IN ISipTokenGenerator* piTokenGenerator)
+void SIPFactoryProxy::SetTokenGenerator(
+        IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator)
 {
     SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
     pHolder->SetTokenGenerator(piTokenGenerator);
@@ -396,8 +396,7 @@ IMS_BOOL SIPFactoryProxy::IsRoutingRejectNotifierEnabled(IN IMS_SINT32 nSlotId) 
     return pHolder->IsRoutingRejectNotifierEnabled();
 }
 
-PUBLIC GLOBAL
-void SIPFactoryProxy::CreateInstance()
+PUBLIC GLOBAL void SIPFactoryProxy::CreateInstance()
 {
     if (pFactoryProxy == IMS_NULL)
     {
@@ -405,8 +404,7 @@ void SIPFactoryProxy::CreateInstance()
     }
 }
 
-PUBLIC GLOBAL
-void SIPFactoryProxy::DestroyInstance()
+PUBLIC GLOBAL void SIPFactoryProxy::DestroyInstance()
 {
     if (pFactoryProxy != IMS_NULL)
     {
@@ -415,8 +413,7 @@ void SIPFactoryProxy::DestroyInstance()
     }
 }
 
-PUBLIC GLOBAL
-SIPFactoryProxy* SIPFactoryProxy::GetInstance()
+PUBLIC GLOBAL SIPFactoryProxy* SIPFactoryProxy::GetInstance()
 {
     if (pFactoryProxy == IMS_NULL)
     {

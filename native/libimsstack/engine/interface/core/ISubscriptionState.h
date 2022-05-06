@@ -60,4 +60,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SUBSCRIPTION_STATE_H_
+#endif  // _INTERFACE_SUBSCRIPTION_STATE_H_

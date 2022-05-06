@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_CANCELLABLE_METHOD_H_
 #define _INTERFACE_CANCELLABLE_METHOD_H_
 
-
-
 class ICancellableMethod
 {
 public:
@@ -33,7 +31,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection *piSSC_CANCEL) const = 0;
+    virtual IMS_BOOL Cancellable_Compare(IN ISipServerConnection* piSSC_CANCEL) const = 0;
 
     /*
 
@@ -50,7 +48,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection *piSSC_CANCEL) = 0;
+    virtual IMS_BOOL Cancellable_NotifyRequest(IN ISipServerConnection* piSSC_CANCEL) = 0;
 };
 
-#endif // _INTERFACE_CANCELLABLE_METHOD_H_
+#endif  // _INTERFACE_CANCELLABLE_METHOD_H_

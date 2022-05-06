@@ -13,8 +13,7 @@ class ICapabilitiesListener;
  *
  * @see ICoreService, ICapabilitiesListener
  */
-class ICapabilities
-    : public IServiceMethod
+class ICapabilities : public IServiceMethod
 {
 public:
     /**
@@ -45,7 +44,7 @@ public:
      * @return If this ICapabilities has the given capabilities, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL HasCapabilities(IN CONST AString &strConnection) const = 0;
+    virtual IMS_BOOL HasCapabilities(IN CONST AString& strConnection) const = 0;
 
     /**
      * @brief Sends a capability request to a remote endpoint.
@@ -73,7 +72,7 @@ public:
      *
      * @param piListener Pointer to the listener for receiving the result of capability query
      */
-    virtual void SetListener(IN ICapabilitiesListener *piListener) = 0;
+    virtual void SetListener(IN ICapabilitiesListener* piListener) = 0;
 
     //// IMS extensions
 
@@ -90,8 +89,8 @@ public:
      *                      Its default value sets to TRUE according to the specification maybe.
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Accept(IN IMS_BOOL bFeatureInContact = IMS_TRUE,
-            IN IMS_BOOL bCheckSupport = IMS_TRUE) = 0;
+    virtual IMS_RESULT Accept(
+            IN IMS_BOOL bFeatureInContact = IMS_TRUE, IN IMS_BOOL bCheckSupport = IMS_TRUE) = 0;
 
     /**
      * @brief Sends a successful final response to an incoming capability query
@@ -124,4 +123,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_CAPABILITIES_H_
+#endif  // _INTERFACE_CAPABILITIES_H_

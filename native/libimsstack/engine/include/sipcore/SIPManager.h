@@ -16,27 +16,25 @@
 #include "SIPDialogState.h"
 #include "SIPConnectionNotifier.h"
 
-
-
 class SIPManager
 {
 private:
     SIPManager();
-    SIPManager(IN CONST SIPManager &objRHS);
+    SIPManager(IN CONST SIPManager& objRHS);
+
 public:
     ~SIPManager();
 
 public:
-    IMS_BOOL AttachDialogState(IN SIPDialogState *pDState);
-    void DetachDialogState(IN SIPDialogState *pDState);
-    RCPtr<SIPDialogState> LookupDialogState(IN SIPDialogState *pDState,
-            IN SipMessage *pstMessage, IN IMS_BOOL bCheckForked = IMS_FALSE,
-            OUT IMS_BOOL *pbIsForked = IMS_NULL);
+    IMS_BOOL AttachDialogState(IN SIPDialogState* pDState);
+    void DetachDialogState(IN SIPDialogState* pDState);
+    RCPtr<SIPDialogState> LookupDialogState(IN SIPDialogState* pDState, IN SipMessage* pstMessage,
+            IN IMS_BOOL bCheckForked = IMS_FALSE, OUT IMS_BOOL* pbIsForked = IMS_NULL);
 
-    IMS_BOOL AttachConnectionNotifier(IN SIPConnectionNotifier *pSCN);
-    void DetachConnectionNotifier(IN SIPConnectionNotifier *pSCN);
-    SIPConnectionNotifier* LookupConnectionNotifier(IN CONST SIPTransportAddress &objTA,
-            IN CONST AString &strFilter = AString::ConstNull());
+    IMS_BOOL AttachConnectionNotifier(IN SIPConnectionNotifier* pSCN);
+    void DetachConnectionNotifier(IN SIPConnectionNotifier* pSCN);
+    SIPConnectionNotifier* LookupConnectionNotifier(IN CONST SIPTransportAddress& objTA,
+            IN CONST AString& strFilter = AString::ConstNull());
 
     static SIPManager* GetInstance();
 
@@ -58,10 +56,10 @@ private:
     IMSList<SIPDialogState*> objDialogStates;
     IMSList<SIPConnectionNotifier*> objSCNs;
 
-    //IMSList<SIPSLSubscription*> objSubscriptions;
-    //IMSList<SIPConnection*> objTransactions;
-    //IMSList<SIPDialogImpl*> objDialogs;
-    //IMSList<SIPRefresher*> objRefreshers;
+    // IMSList<SIPSLSubscription*> objSubscriptions;
+    // IMSList<SIPConnection*> objTransactions;
+    // IMSList<SIPDialogImpl*> objDialogs;
+    // IMSList<SIPRefresher*> objRefreshers;
 };
 
-#endif // _SIP_MANAGER_H_
+#endif  // _SIP_MANAGER_H_

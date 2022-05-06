@@ -17,34 +17,29 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegRefreshHelper::RegRefreshHelper(IN IRefreshable *piRefreshable_)
-    : RefreshHelper(piRefreshable_, IMS_TRUE)
+RegRefreshHelper::RegRefreshHelper(IN IRefreshable* piRefreshable_) :
+        RefreshHelper(piRefreshable_, IMS_TRUE)
 {
 }
 
-PUBLIC VIRTUAL
-RegRefreshHelper::~RegRefreshHelper()
+PUBLIC VIRTUAL RegRefreshHelper::~RegRefreshHelper()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: RegRefreshHelper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL RegRefreshHelper::AddSpecificHeader(IN ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_BOOL RegRefreshHelper::AddSpecificHeader(IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
+PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -55,8 +50,7 @@ IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
 
     if (!AddSpecificHeader(piSCC))
     {
-        IMS_TRACE_E(0, "Adding the specific headers for a re-registration request failed",
-                0, 0, 0);
+        IMS_TRACE_E(0, "Adding the specific headers for a re-registration request failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -70,22 +64,20 @@ IMS_RESULT RegRefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT RegRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT RegRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT RegRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_SUCCESS;
 }
@@ -99,7 +91,7 @@ const SipAddress& RegRefreshHelper::GetContactAddress() const
 }
 
 PUBLIC
-void RegRefreshHelper::SetContactAddress(IN CONST SipAddress &objContactAddress)
+void RegRefreshHelper::SetContactAddress(IN CONST SipAddress& objContactAddress)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -134,9 +126,8 @@ IMS_BOOL RegRefreshHelper::UpdateRefreshTimer(IN IMS_SINT32 nDuration)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void RegRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
-        IN IMS_SINT32 nCode /* = 0 */)
+PROTECTED VIRTUAL void RegRefreshHelper::RefreshCompleted(
+        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -145,8 +136,7 @@ void RegRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
     {
         IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
 
-        if ((nStatusCode >= SipStatusCode::SC_200)
-                && (nStatusCode < SipStatusCode::SC_300))
+        if ((nStatusCode >= SipStatusCode::SC_200) && (nStatusCode < SipStatusCode::SC_300))
         {
             // Update the refresh timer
             if (UpdateOnMessageReceived(piSCC) != IMS_SUCCESS)
@@ -170,8 +160,7 @@ void RegRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
     Refreshable_RefreshCompleted(piSCC, nCode);
 }
 
-PROTECTED VIRTUAL
-void RegRefreshHelper::RefreshStarted()
+PROTECTED VIRTUAL void RegRefreshHelper::RefreshStarted()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -183,8 +172,7 @@ void RegRefreshHelper::RefreshStarted()
     }
 }
 
-PROTECTED VIRTUAL
-void RegRefreshHelper::RefreshTerminated()
+PROTECTED VIRTUAL void RegRefreshHelper::RefreshTerminated()
 {
     //---------------------------------------------------------------------------------------------
 

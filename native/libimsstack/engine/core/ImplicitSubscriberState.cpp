@@ -20,10 +20,8 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-IMS_SINT32 ImplicitSubscriberState::STATE[SubState::STATE_MAX][ImplicitSubscriberState::MESSAGE_MAX] =
+PUBLIC GLOBAL IMS_SINT32
+ImplicitSubscriberState::STATE[SubState::STATE_MAX][ImplicitSubscriberState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -43,22 +41,16 @@ IMS_SINT32 ImplicitSubscriberState::STATE[SubState::STATE_MAX][ImplicitSubscribe
     },
 };
 
-
-
 PUBLIC
-ImplicitSubscriberState::ImplicitSubscriberState()
-    : SubState()
+ImplicitSubscriberState::ImplicitSubscriberState() :
+        SubState()
 {
     InitializeStateTable();
 }
 
-PUBLIC VIRTUAL
-ImplicitSubscriberState::~ImplicitSubscriberState()
-{
-}
+PUBLIC VIRTUAL ImplicitSubscriberState::~ImplicitSubscriberState() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL ImplicitSubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
+PUBLIC VIRTUAL IMS_BOOL ImplicitSubscriberState::UpdateState(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -67,7 +59,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
         return IMS_FALSE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     // Update the subscription state information...
     if (objMethod.Equals(SipMethod::REFER))
@@ -123,8 +115,8 @@ IMS_BOOL ImplicitSubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 
     if (nSIPMsg == MESSAGE_INVALID)
     {
-        IMS_TRACE_I("SUBS_STATE - NO TRANSITION (%s)",
-                piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+        IMS_TRACE_I(
+                "SUBS_STATE - NO TRANSITION (%s)", piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -141,10 +133,10 @@ IMS_BOOL ImplicitSubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_SINT32 ImplicitSubscriberState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
+IMS_SINT32 ImplicitSubscriberState::TranslateMessage(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nMsgType = piSIPMsg->GetType();
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -223,11 +215,11 @@ IMS_SINT32 ImplicitSubscriberState::TranslateMessage(IN CONST ISipMessage *piSIP
 }
 
 PRIVATE
-IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg)
 {
     AString strHeader;
-    ISipHeader *piHeader;
-    EventPackage *pEventPackage = GetEventPackage();
+    ISipHeader* piHeader;
+    EventPackage* pEventPackage = GetEventPackage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -260,8 +252,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *pi
 
     IMS_SINT32 nSubStateValue = ExtractSubStateValue(piHeader);
 
-    if ((nSubStateValue == SUB_STATE_ACTIVE)
-        || (nSubStateValue == SUB_STATE_PENDING))
+    if ((nSubStateValue == SUB_STATE_ACTIVE) || (nSubStateValue == SUB_STATE_PENDING))
     {
         if (GetState() != STATE_TERMINATED)
         {
@@ -336,7 +327,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *pi
 }
 
 PRIVATE
-IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
 
@@ -350,8 +341,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *p
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-        || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // Do nothing ...
         return IMS_TRUE;
@@ -395,7 +385,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *p
 }
 
 PRIVATE
-IMS_BOOL ImplicitSubscriberState::UpdateOnREFERRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitSubscriberState::UpdateOnREFERRequest(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -414,7 +404,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnREFERRequest(IN CONST ISipMessage *piS
             strHeader = piSIPMsg->GetHeader(ISipHeader::EVENT);
         }
 
-        ISipHeader *piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
+        ISipHeader* piHeader = SipParsingHelper::CreateHeader(ISipHeader::EVENT, strHeader);
 
         GetEventPackage()->SetEventHeader(piHeader);
     }
@@ -423,7 +413,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnREFERRequest(IN CONST ISipMessage *piS
 }
 
 PRIVATE
-IMS_BOOL ImplicitSubscriberState::UpdateOnREFERResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL ImplicitSubscriberState::UpdateOnREFERResponse(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -443,8 +433,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnREFERResponse(IN CONST ISipMessage *pi
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-        || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         if (GetOperation() == OPERATION_REMOVE)
         {
@@ -474,8 +463,7 @@ IMS_BOOL ImplicitSubscriberState::UpdateOnREFERResponse(IN CONST ISipMessage *pi
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void ImplicitSubscriberState::InitializeStateTable()
+PRIVATE GLOBAL void ImplicitSubscriberState::InitializeStateTable()
 {
     static IMS_BOOL bInitialized = IMS_FALSE;
     IMS_SINT32 i;

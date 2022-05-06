@@ -21,35 +21,30 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-StreamMedia::StreamMedia(IN Service *pService_, IN ISDPOAState *piOAState_)
-    : Media(pService_, piOAState_)
+StreamMedia::StreamMedia(IN Service* pService_, IN ISDPOAState* piOAState_) :
+        Media(pService_, piOAState_)
 {
     SetInitializationDone(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-StreamMedia::~StreamMedia()
+PUBLIC VIRTUAL StreamMedia::~StreamMedia()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: StreamMedia", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 StreamMedia::GetType() const
+PUBLIC VIRTUAL IMS_SINT32 StreamMedia::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
     return IMSCore::MEDIA_TYPE_STREAM;
 }
 
-PROTECTED VIRTUAL
-MediaProposal* StreamMedia::CreateMediaProposal(IN ISDPOAState *piOAState)
+PROTECTED VIRTUAL MediaProposal* StreamMedia::CreateMediaProposal(IN ISDPOAState* piOAState)
 {
-    StreamMediaProposal *pMediaProposal = new StreamMediaProposal(piOAState);
+    StreamMediaProposal* pMediaProposal = new StreamMediaProposal(piOAState);
 
     //---------------------------------------------------------------------------------------------
 

@@ -22,18 +22,13 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PRIVATE
-IMSCoreProtocol::IMSCoreProtocol()
-    : ServiceProtocol()
+IMSCoreProtocol::IMSCoreProtocol() :
+        ServiceProtocol()
 {
 }
 
-PUBLIC VIRTUAL
-IMSCoreProtocol::~IMSCoreProtocol()
-{
-}
+PUBLIC VIRTUAL IMSCoreProtocol::~IMSCoreProtocol() {}
 
 /*
  Returns a singleton object of IMS Core Protocol.
@@ -43,10 +38,9 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PUBLIC GLOBAL
-IMSCoreProtocol* IMSCoreProtocol::GetInstance()
+PUBLIC GLOBAL IMSCoreProtocol* IMSCoreProtocol::GetInstance()
 {
-    static IMSCoreProtocol *pIMSCore = IMS_NULL;
+    static IMSCoreProtocol* pIMSCore = IMS_NULL;
 
     if (pIMSCore == IMS_NULL)
     {
@@ -64,15 +58,14 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PRIVATE VIRTUAL
-IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
-        IN const AString &strServiceId, IN const AString &strUserId)
+PRIVATE VIRTUAL IService* IMSCoreProtocol::CreateService(
+        IN const AString& strAppId, IN const AString& strServiceId, IN const AString& strUserId)
 {
     IThread* piThread = ThreadService::GetThreadService()->GetCurrentThread();
     IMS_SINT32 nSlotId = (piThread == IMS_NULL) ? IMS_SLOT_0 : piThread->GetSlotId();
 
-    IMS_TRACE_D("CoreService - appId=%s, serviceId=%s, slotId=%d",
-            strAppId.GetStr(), strServiceId.GetStr(), nSlotId);
+    IMS_TRACE_D("CoreService - appId=%s, serviceId=%s, slotId=%d", strAppId.GetStr(),
+            strServiceId.GetStr(), nSlotId);
 
     if (strUserId.GetLength() > 0)
     {
@@ -84,12 +77,11 @@ IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
     if (!pConfigMngr->IsAppConfigured(strAppId, nSlotId))
     {
         // Throw exception: Connection Not Found
-        IMS_TRACE_E(0, "Application (%s) configuration is not registered",
-                strAppId.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Application (%s) configuration is not registered", strAppId.GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    const AppConfig *pAppConfig = pConfigMngr->GetAppConfig(strAppId, nSlotId);
+    const AppConfig* pAppConfig = pConfigMngr->GetAppConfig(strAppId, nSlotId);
 
     if (pAppConfig == IMS_NULL)
     {
@@ -97,7 +89,7 @@ IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
         return IMS_NULL;
     }
 
-    const CoreServiceConfig *pServiceConfig = pAppConfig->GetCoreServiceConfigEx(strServiceId);
+    const CoreServiceConfig* pServiceConfig = pAppConfig->GetCoreServiceConfigEx(strServiceId);
 
     if (pServiceConfig == IMS_NULL)
     {
@@ -124,7 +116,7 @@ IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
     }
 
     // Check the validity of user identity
-    CoreService *pCoreService = IMS_NULL;
+    CoreService* pCoreService = IMS_NULL;
 
     if (!strUserId.IsNULL() && !strUserId.IsEmpty())
     {
@@ -152,7 +144,7 @@ IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
         return IMS_NULL;
     }
 
-    ICoreService *piCoreService = new CoreServiceImpl(pCoreService);
+    ICoreService* piCoreService = new CoreServiceImpl(pCoreService);
 
     if (piCoreService == IMS_NULL)
     {
@@ -187,9 +179,8 @@ IService* IMSCoreProtocol::CreateService(IN const AString &strAppId,
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_BOOL IMSCoreProtocol::IsRegistryConsistent(IN const AppConfig *pAppConfig,
-        IN const CoreServiceConfig *pServiceConfig)
+PRIVATE GLOBAL IMS_BOOL IMSCoreProtocol::IsRegistryConsistent(
+        IN const AppConfig* pAppConfig, IN const CoreServiceConfig* pServiceConfig)
 {
     if (pAppConfig->IsStreamMediaAudioSupported() || pAppConfig->IsStreamMediaVideoSupported())
     {

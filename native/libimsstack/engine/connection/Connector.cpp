@@ -19,15 +19,13 @@
 
 __IMS_TRACE_TAG_IMS__;
 
-
-
 /*
 
 Remarks
 
 */
 PUBLIC
-IConnection* Connector::Open(IN const AString &strName)
+IConnection* Connector::Open(IN const AString& strName)
 {
     IMS_SINT32 nIndexOfColon = strName.GetIndexOf(TextParser::CHAR_COLON);
 
@@ -61,13 +59,13 @@ IConnection* Connector::Open(IN const AString &strName)
     AString strScheme = strURI.Left(nIndexOfColon).Trim();
 
     // Look up the protocol to determine if this URI scheme supports or not
-    Protocol *pProtocol = ProtocolPermission::GetInstance()->Lookup(strScheme);
+    Protocol* pProtocol = ProtocolPermission::GetInstance()->Lookup(strScheme);
 
     if (pProtocol == IMS_NULL)
     {
         // ConnectionNotFoundException
-        IMS_TRACE_E(0, "Protocol permissioni is not allowed: %s, uri: %s",
-                strName.GetStr(), strURI.GetStr(), 0);
+        IMS_TRACE_E(0, "Protocol permissioni is not allowed: %s, uri: %s", strName.GetStr(),
+                strURI.GetStr(), 0);
         return IMS_NULL;
     }
 
@@ -80,13 +78,13 @@ Remarks
 
 */
 PUBLIC
-IConnection* Connector::Open(IN const AString &strScheme, IN const AString &strTarget,
-        IN const AString &strParams)
+IConnection* Connector::Open(
+        IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams)
 {
     AString strTmpScheme = strScheme.Trim();
 
     // Look up the protocol to determine if this URI scheme supports or not
-    Protocol *pProtocol = ProtocolPermission::GetInstance()->Lookup(strTmpScheme);
+    Protocol* pProtocol = ProtocolPermission::GetInstance()->Lookup(strTmpScheme);
 
     if (pProtocol == IMS_NULL)
     {

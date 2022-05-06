@@ -17,14 +17,14 @@ public:
      *
      * @param piPageMessage Pointer to IPageMessage
      */
-    virtual void PageMessageDelivered(IN IPageMessage *piPageMessage) = 0;
+    virtual void PageMessageDelivered(IN IPageMessage* piPageMessage) = 0;
 
     /**
      * @brief Notifies the application that the page message was not successfully delivered.
      *
      * @param piPageMessage Pointer to IPageMessage
      */
-    virtual void PageMessageDeliveryFailed(IN IPageMessage *piPageMessage) = 0;
+    virtual void PageMessageDeliveryFailed(IN IPageMessage* piPageMessage) = 0;
 };
 
-#endif // _INTERFACE_PAGE_MESSAGE_LISTENER_H_
+#endif  // _INTERFACE_PAGE_MESSAGE_LISTENER_H_

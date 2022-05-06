@@ -18,43 +18,41 @@
 #include "SIPSocketAddress.h"
 
 PUBLIC
-SIPSocketAddress::SIPSocketAddress()
-    : m_bSecure(IMS_FALSE)
-    , m_nType(SOCKET_UDP)
-    , m_objSockAddr(SocketAddress(IPAddress::NONE, Sip::PORT_UNSPECIFIED))
+SIPSocketAddress::SIPSocketAddress() :
+        m_bSecure(IMS_FALSE),
+        m_nType(SOCKET_UDP),
+        m_objSockAddr(SocketAddress(IPAddress::NONE, Sip::PORT_UNSPECIFIED))
 {
 }
 
 PUBLIC
-SIPSocketAddress::SIPSocketAddress(IN const SIPSocketAddress& other)
-    : m_bSecure(other.m_bSecure)
-    , m_nType(other.m_nType)
-    , m_objSockAddr(other.m_objSockAddr)
+SIPSocketAddress::SIPSocketAddress(IN const SIPSocketAddress& other) :
+        m_bSecure(other.m_bSecure),
+        m_nType(other.m_nType),
+        m_objSockAddr(other.m_objSockAddr)
+{
+}
+
+PUBLIC
+SIPSocketAddress::SIPSocketAddress(
+        IN IMS_SINT32 nType, IN IMS_SINT32 nPort, IN const AString& strAddress) :
+        m_bSecure(IMS_FALSE),
+        m_nType(nType),
+        m_objSockAddr(SocketAddress(strAddress, nPort))
 {
 }
 
 PUBLIC
 SIPSocketAddress::SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-        IN const AString& strAddress)
-    : m_bSecure(IMS_FALSE)
-    , m_nType(nType)
-    , m_objSockAddr(SocketAddress(strAddress, nPort))
+        IN const AString& strAddress, IN IMS_BOOL bSecure) :
+        m_bSecure(bSecure),
+        m_nType(nType),
+        m_objSockAddr(SocketAddress(strAddress, nPort))
 {
 }
 
 PUBLIC
-SIPSocketAddress::SIPSocketAddress(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-        IN const AString& strAddress, IN IMS_BOOL bSecure)
-    : m_bSecure(bSecure)
-    , m_nType(nType)
-    , m_objSockAddr(SocketAddress(strAddress, nPort))
-{
-}
-
-PUBLIC
-SIPSocketAddress::~SIPSocketAddress()
-{
-}
+SIPSocketAddress::~SIPSocketAddress() {}
 
 PUBLIC
 SIPSocketAddress& SIPSocketAddress::operator=(IN const SIPSocketAddress& other)

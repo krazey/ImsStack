@@ -10,13 +10,13 @@ class Replaces
 {
 public:
     Replaces();
-    Replaces(IN CONST AString &strCallId_, IN CONST AString &strLocalTag_,
-            IN CONST AString &strRemoteTag_, IN IMS_BOOL bIsEarlyOnly_ = IMS_FALSE);
-    Replaces(IN CONST Replaces &objRHS);
+    Replaces(IN CONST AString& strCallId_, IN CONST AString& strLocalTag_,
+            IN CONST AString& strRemoteTag_, IN IMS_BOOL bIsEarlyOnly_ = IMS_FALSE);
+    Replaces(IN CONST Replaces& objRHS);
     ~Replaces();
 
 public:
-    Replaces& operator=(IN CONST Replaces &objRHS);
+    Replaces& operator=(IN CONST Replaces& objRHS);
 
 public:
     /**
@@ -26,14 +26,14 @@ public:
      * @param bUAS Flag to indicate that UA mode of this Replaces header is UAS
      * @return If it's successfully parsed, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL Create(IN CONST AString &strReplacesHeader, IN IMS_BOOL bUAS = IMS_TRUE);
+    IMS_BOOL Create(IN CONST AString& strReplacesHeader, IN IMS_BOOL bUAS = IMS_TRUE);
     /**
      * @brief Checks if the given Replaces object is the same or not.
      *
      * @param pOther Pointer to Replaces object to be compared
      * @return If both Replaces are the same, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL Equals(IN CONST Replaces *pOther) const;
+    IMS_BOOL Equals(IN CONST Replaces* pOther) const;
     /**
      * @brief Gets call-id value.
      *
@@ -65,7 +65,7 @@ public:
      *
      * @return If it's the same dialog, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsSameDialog(IN CONST Replaces *pOther) const;
+    IMS_BOOL IsSameDialog(IN CONST Replaces* pOther) const;
     /**
      * @brief Returns SIP header string representation of this Repaces object.
      *
@@ -77,25 +77,25 @@ public:
     class Dialog
     {
     public:
-        inline Dialog(IN CONST AString &strCallId_, IN CONST AString &strLocalTag_,
-            IN CONST AString &strRemoteTag_)
-            : strCallId(strCallId_)
-            , strLocalTag(strLocalTag_)
-            , strRemoteTag(strRemoteTag_)
-            {}
+        inline Dialog(IN CONST AString& strCallId_, IN CONST AString& strLocalTag_,
+                IN CONST AString& strRemoteTag_) :
+                strCallId(strCallId_),
+                strLocalTag(strLocalTag_),
+                strRemoteTag(strRemoteTag_)
+        {
+        }
 
-        inline ~Dialog()
-            {}
+        inline ~Dialog() {}
 
     private:
         Dialog();
-        Dialog(IN CONST Dialog &objRHS);
+        Dialog(IN CONST Dialog& objRHS);
 
     private:
-        Dialog& operator=(IN CONST Dialog &objRHS);
+        Dialog& operator=(IN CONST Dialog& objRHS);
 
     public:
-        inline IMS_BOOL Equals(IN CONST Dialog *pCallLeg) const
+        inline IMS_BOOL Equals(IN CONST Dialog* pCallLeg) const
         {
             if (pCallLeg == IMS_NULL)
                 return IMS_FALSE;
@@ -112,17 +112,14 @@ public:
             return IMS_TRUE;
         }
 
-        inline const AString& GetCallId() const
-            { return strCallId; }
-        inline const AString& GetLocalTag() const
-            { return strLocalTag; }
-        inline const AString& GetRemoteTag() const
-            { return strRemoteTag; }
+        inline const AString& GetCallId() const { return strCallId; }
+        inline const AString& GetLocalTag() const { return strLocalTag; }
+        inline const AString& GetRemoteTag() const { return strRemoteTag; }
 
     private:
-        const AString &strCallId;
-        const AString &strLocalTag;
-        const AString &strRemoteTag;
+        const AString& strCallId;
+        const AString& strLocalTag;
+        const AString& strRemoteTag;
     };
 
 private:
@@ -131,7 +128,7 @@ private:
     AString strToTag;
     IMS_BOOL bIsEarlyOnly;
 
-    Dialog *pDialog;
+    Dialog* pDialog;
 };
 
-#endif // _REPLACES_H_
+#endif  // _REPLACES_H_

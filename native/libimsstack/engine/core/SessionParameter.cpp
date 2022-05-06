@@ -18,27 +18,25 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-SessionParameter::SessionParameter()
-    : strRemoteVersion(AString::ConstNull())
-    , nMid(0)
+SessionParameter::SessionParameter() :
+        strRemoteVersion(AString::ConstNull()),
+        nMid(0)
 {
 }
 
 PUBLIC
-SessionParameter::SessionParameter(IN CONST SessionParameter &objRHS)
-    : strRemoteVersion(objRHS.strRemoteVersion)
-    , objSessionParam(objRHS.objSessionParam)
-    , objMediaGroups(objRHS.objMediaGroups)
-    , nMid(objRHS.nMid)
+SessionParameter::SessionParameter(IN CONST SessionParameter& objRHS) :
+        strRemoteVersion(objRHS.strRemoteVersion),
+        objSessionParam(objRHS.objSessionParam),
+        objMediaGroups(objRHS.objMediaGroups),
+        nMid(objRHS.nMid)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objRHS.objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter *pMediaParam = objRHS.objMediaParams.GetAt(i);
+        SdpMediaParameter* pMediaParam = objRHS.objMediaParams.GetAt(i);
 
         objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
     }
@@ -51,7 +49,7 @@ SessionParameter::~SessionParameter()
 }
 
 PUBLIC
-SessionParameter& SessionParameter::operator=(IN CONST SessionParameter &objRHS)
+SessionParameter& SessionParameter::operator=(IN CONST SessionParameter& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -69,7 +67,7 @@ SessionParameter& SessionParameter::operator=(IN CONST SessionParameter &objRHS)
 
         for (IMS_UINT32 i = 0; i < objRHS.objMediaParams.GetSize(); ++i)
         {
-            SdpMediaParameter *pMediaParam = objRHS.objMediaParams.GetAt(i);
+            SdpMediaParameter* pMediaParam = objRHS.objMediaParams.GetAt(i);
 
             objMediaParams.Append(new SdpMediaParameter(*pMediaParam));
         }
@@ -78,20 +76,17 @@ SessionParameter& SessionParameter::operator=(IN CONST SessionParameter &objRHS)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-const SdpSessionParameter& SessionParameter::GetSessionParameter() const
+PUBLIC VIRTUAL const SdpSessionParameter& SessionParameter::GetSessionParameter() const
 {
     return objSessionParam;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 SessionParameter::GetMediaCount() const
+PUBLIC VIRTUAL IMS_SINT32 SessionParameter::GetMediaCount() const
 {
     return static_cast<IMS_SINT32>(objMediaParams.GetSize());
 }
 
-PUBLIC VIRTUAL
-SdpMediaParameter* SessionParameter::GetMediaParameter(IN IMS_UINT32 nMid) const
+PUBLIC VIRTUAL SdpMediaParameter* SessionParameter::GetMediaParameter(IN IMS_UINT32 nMid) const
 {
 #if 1
     if (nMid >= objMediaParams.GetSize())
@@ -103,7 +98,7 @@ SdpMediaParameter* SessionParameter::GetMediaParameter(IN IMS_UINT32 nMid) const
 #else
     for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
+        SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
 
         if (pMediaParam->GetMid() == nMid)
             return pMediaParam;
@@ -114,8 +109,8 @@ SdpMediaParameter* SessionParameter::GetMediaParameter(IN IMS_UINT32 nMid) const
 }
 
 PUBLIC
-IMS_BOOL SessionParameter::Create(IN CONST SdpSessionDescription &objSessionDescription,
-        IN CONST IMSList<SdpMediaDescription> &objMediaDescriptions)
+IMS_BOOL SessionParameter::Create(IN CONST SdpSessionDescription& objSessionDescription,
+        IN CONST IMSList<SdpMediaDescription>& objMediaDescriptions)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -140,9 +135,9 @@ IMS_BOOL SessionParameter::Create(IN CONST SdpSessionDescription &objSessionDesc
 
     for (nIndex = 0; nIndex < objMediaDescriptions.GetSize(); ++nIndex)
     {
-        const SdpMediaDescription &objMediaDescription = objMediaDescriptions.GetAt(nIndex);
+        const SdpMediaDescription& objMediaDescription = objMediaDescriptions.GetAt(nIndex);
 
-        SdpMediaParameter *pMediaParam = new SdpMediaParameter(CreateMid());
+        SdpMediaParameter* pMediaParam = new SdpMediaParameter(CreateMid());
 
         if (pMediaParam == IMS_NULL)
         {
@@ -173,7 +168,7 @@ IMS_BOOL SessionParameter::Create(IN CONST SdpSessionDescription &objSessionDesc
 
         for (nIndex = 0; nIndex < objGroups.GetSize(); ++nIndex)
         {
-            const SdpAttribute &objGroup = objGroups.GetAt(nIndex);
+            const SdpAttribute& objGroup = objGroups.GetAt(nIndex);
             SdpMediaGroup objMediaGroup;
 
             if (!objMediaGroup.Create(objGroup.GetAttributeValue(), objMediaParams))
@@ -201,7 +196,7 @@ SdpSessionParameter& SessionParameter::GetSessionParameterNC()
 PUBLIC
 SdpMediaParameter* SessionParameter::CreateMediaParameter()
 {
-    SdpMediaParameter *pMediaParam = new SdpMediaParameter(CreateMid());
+    SdpMediaParameter* pMediaParam = new SdpMediaParameter(CreateMid());
 
     //---------------------------------------------------------------------------------------------
 
@@ -218,14 +213,14 @@ SdpMediaParameter* SessionParameter::CreateMediaParameter()
 }
 
 PUBLIC
-const SdpMediaGroup* SessionParameter::GetMediaGroup(IN CONST AString &strMid) const
+const SdpMediaGroup* SessionParameter::GetMediaGroup(IN CONST AString& strMid) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objMediaGroups.GetSize(); ++i)
     {
-        const SdpMediaGroup &objGroup = objMediaGroups.GetAt(i);
-        const AStringArray &objMids = objGroup.GetMids();
+        const SdpMediaGroup& objGroup = objMediaGroups.GetAt(i);
+        const AStringArray& objMids = objGroup.GetMids();
 
         if (objMids.Contains(strMid))
         {
@@ -253,7 +248,7 @@ const AString& SessionParameter::GetRemoteVersion() const
 }
 
 PUBLIC
-IMS_BOOL SessionParameter::IsSameVersion(IN CONST SessionParameter *pSessionParam) const
+IMS_BOOL SessionParameter::IsSameVersion(IN CONST SessionParameter* pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -284,7 +279,7 @@ void SessionParameter::RemoveMediaParameter(IN IMS_UINT32 nMid, IN IMS_BOOL bRej
     if (nMid >= objMediaParams.GetSize())
         return;
 
-    SdpMediaParameter *pMediaParam = objMediaParams.GetAt(nMid);
+    SdpMediaParameter* pMediaParam = objMediaParams.GetAt(nMid);
 
     if (pMediaParam != IMS_NULL)
     {
@@ -296,7 +291,7 @@ void SessionParameter::RemoveMediaParameter(IN IMS_UINT32 nMid, IN IMS_BOOL bRej
         {
             for (IMS_UINT32 i = nMid + 1; i < objMediaParams.GetSize(); ++i)
             {
-                SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
+                SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
 
                 pMediaParam->SetMid(i - 1);
             }
@@ -310,10 +305,10 @@ void SessionParameter::RemoveMediaParameter(IN IMS_UINT32 nMid, IN IMS_BOOL bRej
 }
 
 PUBLIC
-IMS_BOOL SessionParameter::FindGroupStartingWithMediaParameter(IN IMS_SINT32 nIndex,
-        OUT IMSList<SdpMediaParameter*> &objGroupMediaParams) const
+IMS_BOOL SessionParameter::FindGroupStartingWithMediaParameter(
+        IN IMS_SINT32 nIndex, OUT IMSList<SdpMediaParameter*>& objGroupMediaParams) const
 {
-    SdpMediaParameter *pMediaParam = objMediaParams.GetAt(nIndex);
+    SdpMediaParameter* pMediaParam = objMediaParams.GetAt(nIndex);
 
     //---------------------------------------------------------------------------------------------
 
@@ -323,12 +318,12 @@ IMS_BOOL SessionParameter::FindGroupStartingWithMediaParameter(IN IMS_SINT32 nIn
         return IMS_TRUE;
     }
 
-    const AString &strMid = pMediaParam->GetAttributeMid();
+    const AString& strMid = pMediaParam->GetAttributeMid();
 
     for (IMS_UINT32 i = 0; i < objMediaGroups.GetSize(); ++i)
     {
-        const SdpMediaGroup &objGroup = objMediaGroups.GetAt(i);
-        const AStringArray &objMids = objGroup.GetMids();
+        const SdpMediaGroup& objGroup = objMediaGroups.GetAt(i);
+        const AStringArray& objMids = objGroup.GetMids();
 
         if (!objMids.IsEmpty() && strMid.Equals(objMids.GetElementAt(0)))
         {
@@ -358,8 +353,8 @@ IMS_BOOL SessionParameter::FindGroupStartingWithMediaParameter(IN IMS_SINT32 nIn
 }
 
 PUBLIC
-IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
-        OUT SessionParameter *&pProposalView, OUT SessionParameter *&pPeerView)
+IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter* pOffer,
+        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -387,7 +382,7 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
 
     for (IMS_UINT32 i = 0; i < pOffer->objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter *pMediaParam = pOffer->objMediaParams.GetAt(i);
+        SdpMediaParameter* pMediaParam = pOffer->objMediaParams.GetAt(i);
 
         if (pMediaParam == IMS_NULL)
         {
@@ -395,7 +390,7 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
             continue;
         }
 
-        SdpMediaParameter *pNewMediaParam = new SdpMediaParameter(*pMediaParam);
+        SdpMediaParameter* pNewMediaParam = new SdpMediaParameter(*pMediaParam);
 
         if (pNewMediaParam == IMS_NULL)
         {
@@ -413,15 +408,14 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
 }
 
 PUBLIC
-IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
-        OUT SessionParameter *&pProposalView, OUT SessionParameter *&pPeerView,
+IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter* pOffer,
+        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView,
         IN IMS_SINT32 nOptions, IN IMS_BOOL bInitialOffer /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create()
-            || !pPeerView->Create())
+    if (!pProposalView->Create() || !pPeerView->Create())
     {
         return SdpOfferAnswer::RESULT_FAILURE;
     }
@@ -465,15 +459,14 @@ IMS_SINT32 SessionParameter::GenerateAnswer(IN CONST SessionParameter *pOffer,
 }
 
 PUBLIC
-IMS_SINT32 SessionParameter::ProcessAnswer(IN CONST SessionParameter *pAnswer,
-        OUT SessionParameter *&pProposalView, OUT SessionParameter *&pPeerView,
+IMS_SINT32 SessionParameter::ProcessAnswer(IN CONST SessionParameter* pAnswer,
+        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView,
         IN IMS_SINT32 nOptions)
 {
     //---------------------------------------------------------------------------------------------
 
     // Initialize the local & remote SDP views
-    if (!pProposalView->Create()
-            || !pPeerView->Create())
+    if (!pProposalView->Create() || !pPeerView->Create())
     {
         return SdpOfferAnswer::RESULT_FAILURE;
     }
@@ -524,7 +517,7 @@ AString SessionParameter::ToSDP() const
     {
         for (IMS_UINT32 i = 0; i < objMediaGroups.GetSize(); ++i)
         {
-            const SdpMediaGroup &objMediaGroup = objMediaGroups.GetAt(i);
+            const SdpMediaGroup& objMediaGroup = objMediaGroups.GetAt(i);
 
             strSDP.Append(objMediaGroup.ToSdp());
         }
@@ -535,7 +528,7 @@ AString SessionParameter::ToSDP() const
     {
         for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); ++i)
         {
-            const SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
+            const SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
 
             strSDP.Append(pMediaParam->ToSdp());
         }
@@ -545,7 +538,7 @@ AString SessionParameter::ToSDP() const
 }
 
 PUBLIC
-void SessionParameter::UpdateDirection(IN CONST SessionParameter *pOther)
+void SessionParameter::UpdateDirection(IN CONST SessionParameter* pOther)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -568,13 +561,13 @@ void SessionParameter::UpdateDirection(IN CONST SessionParameter *pOther)
 
     for (IMS_UINT32 i = 0; i < nMediaCount; ++i)
     {
-        SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
-        SdpMediaParameter *pOtherMediaParam = pOther->objMediaParams.GetAt(i);
+        SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
+        SdpMediaParameter* pOtherMediaParam = pOther->objMediaParams.GetAt(i);
 
         if ((pMediaParam == IMS_NULL) || (pOtherMediaParam == IMS_NULL))
         {
-            IMS_TRACE_E(0, "UpdateDirection :: Media parameter is null (%p, %p)",
-                    pMediaParam, pOtherMediaParam, 0);
+            IMS_TRACE_E(0, "UpdateDirection :: Media parameter is null (%p, %p)", pMediaParam,
+                    pOtherMediaParam, 0);
             continue;
         }
 
@@ -583,7 +576,7 @@ void SessionParameter::UpdateDirection(IN CONST SessionParameter *pOther)
 }
 
 PUBLIC
-void SessionParameter::UpdateRemoteVersion(IN CONST AString &strRemoteVersion)
+void SessionParameter::UpdateRemoteVersion(IN CONST AString& strRemoteVersion)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -599,7 +592,7 @@ void SessionParameter::Clear()
 
     for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
+        SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
         delete pMediaParam;
     }
 
@@ -631,15 +624,13 @@ IMS_SINT32 SessionParameter::CreateMid()
 }
 
 PRIVATE
-IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeerParam,
-        OUT SessionParameter *&pProposalView, IN IMS_SINT32 nOptions)
+IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter* pPeerParam,
+        OUT SessionParameter*& pProposalView, IN IMS_SINT32 nOptions)
 {
-
     //---------------------------------------------------------------------------------------------
 
     // If both media groups are not present, just return TRUE
-    if ((objMediaGroups.GetSize() == 0)
-            && (pPeerParam->objMediaGroups.GetSize() == 0))
+    if ((objMediaGroups.GetSize() == 0) && (pPeerParam->objMediaGroups.GetSize() == 0))
     {
         return SdpOfferAnswer::RESULT_SUCCESS;
     }
@@ -664,8 +655,8 @@ IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeer
         // The mid values should be same as the one for all the media streams sent in INVITE.
         for (IMS_UINT32 i = 0; i < pPeerParam->objMediaParams.GetSize(); ++i)
         {
-            const AString &strMid = objMediaParams.GetAt(i)->GetAttributeMid();
-            const AString &strOfferMid = pPeerParam->objMediaParams.GetAt(i)->GetAttributeMid();
+            const AString& strMid = objMediaParams.GetAt(i)->GetAttributeMid();
+            const AString& strOfferMid = pPeerParam->objMediaParams.GetAt(i)->GetAttributeMid();
 
             // Compare the media stream id of each media streams
             if (!strOfferMid.EqualsIgnoreCase(strMid))
@@ -680,7 +671,7 @@ IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeer
     for (IMS_UINT32 nNewGr = 0; nNewGr < pPeerParam->objMediaGroups.GetSize(); ++nNewGr)
     {
         IMS_BOOL bGroupMatched = IMS_TRUE;
-        const SdpMediaGroup &objOfferGroup = pPeerParam->objMediaGroups.GetAt(nNewGr);
+        const SdpMediaGroup& objOfferGroup = pPeerParam->objMediaGroups.GetAt(nNewGr);
 
         // If the group type is unknown, ignore the group
         if (objOfferGroup.GetType() == SdpMediaGroup::GROUP_OTHER)
@@ -697,25 +688,25 @@ IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeer
             for (IMS_UINT32 nOldGr = 0; nOldGr < objMediaGroups.GetSize(); ++nOldGr)
             {
                 IMS_BOOL bMidMatched = IMS_FALSE;
-                const SdpMediaGroup &objGroup = objMediaGroups.GetAt(nOldGr);
+                const SdpMediaGroup& objGroup = objMediaGroups.GetAt(nOldGr);
 
                 if (objOfferGroup.GetType() != objGroup.GetType())
                     continue;
 
-                const IMSList<IMS_SINT32> &objMid = objGroup.GetMediaStreams();
-                const IMSList<IMS_SINT32> &objOfferMid = objOfferGroup.GetMediaStreams();
+                const IMSList<IMS_SINT32>& objMid = objGroup.GetMediaStreams();
+                const IMSList<IMS_SINT32>& objOfferMid = objOfferGroup.GetMediaStreams();
 
                 for (IMS_UINT32 nOfferMid = 0; nOfferMid < objOfferMid.GetSize(); ++nOfferMid)
                 {
                     IMS_SINT32 nOfferIndex = objOfferMid.GetAt(nOfferMid);
-                    const SdpMediaParameter *pOfferMedia
-                            = pPeerParam->objMediaParams.GetAt(nOfferIndex);
-                    const AString &strMid = pOfferMedia->GetAttributeMid();
+                    const SdpMediaParameter* pOfferMedia =
+                            pPeerParam->objMediaParams.GetAt(nOfferIndex);
+                    const AString& strMid = pOfferMedia->GetAttributeMid();
 
                     for (IMS_UINT32 nMid = 0; nMid < objMid.GetSize(); ++nMid)
                     {
                         IMS_SINT32 nIndex = objMid.GetAt(nMid);
-                        const SdpMediaParameter *pMedia = objMediaParams.GetAt(nIndex);
+                        const SdpMediaParameter* pMedia = objMediaParams.GetAt(nIndex);
 
                         if (strMid.EqualsIgnoreCase(pMedia->GetAttributeMid()))
                         {
@@ -750,7 +741,7 @@ IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeer
         }
     }
 
-    //if (!objNegotiatedGroups.IsEmpty())
+    // if (!objNegotiatedGroups.IsEmpty())
     {
         pProposalView->objMediaGroups.Clear();
         pProposalView->objMediaGroups = objNegotiatedGroups;
@@ -760,9 +751,9 @@ IMS_SINT32 SessionParameter::CompareMediaGroups(IN CONST SessionParameter *pPeer
 }
 
 PRIVATE
-IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
-        IN IMS_BOOL bIsOffer, IN CONST SessionParameter *pPeerParam,
-        OUT SessionParameter *&pProposalView, OUT SessionParameter *&pPeerView)
+IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer, IN IMS_BOOL bIsOffer,
+        IN CONST SessionParameter* pPeerParam, OUT SessionParameter*& pProposalView,
+        OUT SessionParameter*& pPeerView)
 {
     IMS_SINT32 nMatchResult = SdpOfferAnswer::RESULT_NOT_DONE;
     IMS_BOOL bAtLeastOneMatched = IMS_FALSE;
@@ -772,8 +763,8 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
 
     for (IMS_UINT32 i = 0; i < pPeerParam->objMediaParams.GetSize(); ++i)
     {
-        const SdpMediaParameter *pPeerMedia = pPeerParam->objMediaParams.GetAt(i);
-        SdpMediaParameter *pProposalMedia = pProposalView->CreateMediaParameter();
+        const SdpMediaParameter* pPeerMedia = pPeerParam->objMediaParams.GetAt(i);
+        SdpMediaParameter* pProposalMedia = pProposalView->CreateMediaParameter();
 
         if (pProposalMedia == IMS_NULL)
         {
@@ -786,15 +777,14 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
 
         if (i < objMediaParams.GetSize())
         {
-            SdpMediaParameter *pMedia = objMediaParams.GetAt(i);
+            SdpMediaParameter* pMedia = objMediaParams.GetAt(i);
 
             // Check if the media stream is reused the "slot" used by an old media stream
             // which had been disabled by setting its port to zero
-            if (bIsOffer
-                    &&(pMedia->GetMedia().GetPort() == 0)
-                    && (pPeerMedia->GetMedia().GetPort() != 0))
+            if (bIsOffer && (pMedia->GetMedia().GetPort() == 0) &&
+                    (pPeerMedia->GetMedia().GetPort() != 0))
             {
-                //4 Does it need to check media_type?
+                // 4 Does it need to check media_type?
                 bAtLeastOneMatched = IMS_TRUE;
                 nMatchResult = SdpOfferAnswer::RESULT_SUCCESS;
 
@@ -802,7 +792,7 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
                 (*pProposalMedia) = (*pPeerMedia);
 
                 // Add the newly added media stream to the peer view
-                SdpMediaParameter *pNegotiatedPeerMedia = new SdpMediaParameter(*pPeerMedia);
+                SdpMediaParameter* pNegotiatedPeerMedia = new SdpMediaParameter(*pPeerMedia);
 
                 if (pNegotiatedPeerMedia != IMS_NULL)
                 {
@@ -814,10 +804,10 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
             }
             else
             {
-                SdpMediaParameter *pNegotiatedPeerParam = IMS_NULL;
+                SdpMediaParameter* pNegotiatedPeerParam = IMS_NULL;
 
-                nMatchResult = pMedia->Compare(bInitialOffer, bIsOffer,
-                        pPeerMedia, pNegotiatedPeerParam, pProposalMedia);
+                nMatchResult = pMedia->Compare(
+                        bInitialOffer, bIsOffer, pPeerMedia, pNegotiatedPeerParam, pProposalMedia);
 
                 if (nMatchResult != SdpOfferAnswer::RESULT_SUCCESS)
                 {
@@ -856,7 +846,7 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
                 // In the accepted media streams, we shall be giving the peer's view of the stream
                 // (i.e. peer's port / address and etc.) so before updating with
                 // the local information in the media stream, it needs to be newly created.
-                //objNegotiatedMedias.Append(objOfferMedia);
+                // objNegotiatedMedias.Append(objOfferMedia);
                 if (pNegotiatedPeerParam != IMS_NULL)
                 {
                     // Update the negotiated media formats
@@ -885,7 +875,7 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
             (*pProposalMedia) = (*pPeerMedia);
 
             // Add the newly added media stream to the peer view
-            SdpMediaParameter *pNegotiatedPeerMedia = new SdpMediaParameter(*pPeerMedia);
+            SdpMediaParameter* pNegotiatedPeerMedia = new SdpMediaParameter(*pPeerMedia);
 
             if (pNegotiatedPeerMedia != IMS_NULL)
             {
@@ -926,8 +916,8 @@ IMS_SINT32 SessionParameter::CompareMediaParameters(IN IMS_BOOL bInitialOffer,
 
 PRIVATE
 IMS_SINT32 SessionParameter::CompareSessionParameters(IN IMS_BOOL bIsOffer,
-        IN CONST SessionParameter *pPeerParam,
-        OUT SessionParameter *&pProposalView, OUT SessionParameter *&pPeerView)
+        IN CONST SessionParameter* pPeerParam, OUT SessionParameter*& pProposalView,
+        OUT SessionParameter*& pPeerView)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -935,8 +925,8 @@ IMS_SINT32 SessionParameter::CompareSessionParameters(IN IMS_BOOL bIsOffer,
     pProposalView->strRemoteVersion = pPeerParam->objSessionParam.GetOrigin().GetSessionVersion();
 
     // Session-Level : Compare & Create a local SDP view
-    IMS_SINT32 nOAResult = objSessionParam.Compare(pPeerParam->objSessionParam,
-                                pProposalView->objSessionParam);
+    IMS_SINT32 nOAResult =
+            objSessionParam.Compare(pPeerParam->objSessionParam, pProposalView->objSessionParam);
 
     if (nOAResult != SdpOfferAnswer::RESULT_SUCCESS)
     {
@@ -946,8 +936,8 @@ IMS_SINT32 SessionParameter::CompareSessionParameters(IN IMS_BOOL bIsOffer,
     // Determine the direction in special case
     if (!bIsOffer)
     {
-        objSessionParam.UpdateDirection(pPeerParam->objSessionParam,
-                pProposalView->objSessionParam);
+        objSessionParam.UpdateDirection(
+                pPeerParam->objSessionParam, pProposalView->objSessionParam);
     }
 
     // Copy all the information from the session parameter
@@ -969,7 +959,7 @@ void SessionParameter::RemoveMediaFromGroup(IN IMS_SINT32 nMid)
 
     for (IMS_UINT32 i = 0; i < objMediaGroups.GetSize(); ++i)
     {
-        SdpMediaGroup &objMediaGroup = objMediaGroups.GetAt(i);
+        SdpMediaGroup& objMediaGroup = objMediaGroups.GetAt(i);
 
         if (objMediaGroup.RemoveMediaStream(nMid))
             return;
@@ -977,26 +967,24 @@ void SessionParameter::RemoveMediaFromGroup(IN IMS_SINT32 nMid)
 }
 
 PRIVATE
-void SessionParameter::RemovePreconditionsIfNotSupport(OUT SessionParameter *&pProposalView,
-        OUT SessionParameter *&pPeerView)
+void SessionParameter::RemovePreconditionsIfNotSupport(
+        OUT SessionParameter*& pProposalView, OUT SessionParameter*& pPeerView)
 {
 #if defined(__IMS_SDP_PRECONDITION__)
-    const IMSList<SdpMediaParameter*> &objPeerMediaParams
-            = pPeerView->GetMediaParameters();
-    const IMSList<SdpMediaParameter*> &objLocalMediaParams
-            = pProposalView->GetMediaParameters();
+    const IMSList<SdpMediaParameter*>& objPeerMediaParams = pPeerView->GetMediaParameters();
+    const IMSList<SdpMediaParameter*>& objLocalMediaParams = pProposalView->GetMediaParameters();
 
     for (IMS_UINT32 i = 0; i < objPeerMediaParams.GetSize(); ++i)
     {
-        SdpMediaParameter *pPeerMediaParam = objPeerMediaParams.GetAt(i);
+        SdpMediaParameter* pPeerMediaParam = objPeerMediaParams.GetAt(i);
 
         if (pPeerMediaParam == IMS_NULL)
         {
             continue;
         }
 
-        SdpPrecondition *pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
-        SdpPrecondition *pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
+        SdpPrecondition* pCurrent = pPeerMediaParam->GetPrecondition(SdpAttribute::CURR);
+        SdpPrecondition* pDesired = pPeerMediaParam->GetPrecondition(SdpAttribute::DES);
 
         if ((pCurrent != IMS_NULL) || (pDesired != IMS_NULL))
         {
@@ -1008,14 +996,15 @@ void SessionParameter::RemovePreconditionsIfNotSupport(OUT SessionParameter *&pP
             continue;
         }
 
-        SdpMediaParameter *pLocalMediaParam = objLocalMediaParams.GetAt(i);
+        SdpMediaParameter* pLocalMediaParam = objLocalMediaParams.GetAt(i);
 
         pLocalMediaParam->RemovePrecondition(SdpAttribute::CURR);
         pLocalMediaParam->RemovePrecondition(SdpAttribute::DES);
         pLocalMediaParam->RemovePrecondition(SdpAttribute::CONF);
 
-        IMS_TRACE_I("SDP offer/answer :: The precondition is not supported by the peer;" \
-                " remove the precondition attributes...", 0, 0, 0);
+        IMS_TRACE_I("SDP offer/answer :: The precondition is not supported by the peer;"
+                    " remove the precondition attributes...",
+                0, 0, 0);
     }
 #endif
 }

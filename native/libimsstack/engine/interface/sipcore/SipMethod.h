@@ -58,8 +58,7 @@ public:
      *                #UNKNOWN
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL Equals(IN IMS_SINT32 nMethod) const
-    { return m_nMethod == nMethod; }
+    inline IMS_BOOL Equals(IN IMS_SINT32 nMethod) const { return m_nMethod == nMethod; }
     /**
      * @brief Checks if SIP method is the same or not.
      *
@@ -67,7 +66,9 @@ public:
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL Equals(IN const IMS_CHAR* pszMethod) const
-    { return m_strMethod.Equals(pszMethod); }
+    {
+        return m_strMethod.Equals(pszMethod);
+    }
     /**
      * @brief Checks if SIP method is the same or not.
      *
@@ -75,7 +76,9 @@ public:
      * @return If it matches, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL Equals(IN const AString& strMethod) const
-    { return m_strMethod.Equals(strMethod); }
+    {
+        return m_strMethod.Equals(strMethod);
+    }
     /**
      * @brief Checks if SIP method is the same or not.
      *
@@ -84,8 +87,7 @@ public:
      */
     inline IMS_BOOL Equals(IN const SipMethod& objMethod) const
     {
-        return ((m_nMethod == objMethod.m_nMethod) &&
-                m_strMethod.Equals(objMethod.m_strMethod));
+        return ((m_nMethod == objMethod.m_nMethod) && m_strMethod.Equals(objMethod.m_strMethod));
     }
 
     /**
@@ -151,18 +153,18 @@ public:
 
         /// Defined in RFC 3261
         ACK = 0,
-        BYE, ///< Defined in RFC 3261
-        CANCEL, ///< Defined in RFC 3261
-        INVITE, ///< Defined in RFC 3261
-        OPTIONS, ///< Defined in RFC 3261
-        REGISTER, ///< Defined in RFC 3261
+        BYE,       ///< Defined in RFC 3261
+        CANCEL,    ///< Defined in RFC 3261
+        INVITE,    ///< Defined in RFC 3261
+        OPTIONS,   ///< Defined in RFC 3261
+        REGISTER,  ///< Defined in RFC 3261
 
         /// Defined in RFC 3262
         PRACK,
 
         /// Defined in RFC 3265
         SUBSCRIBE,
-        NOTIFY, ///< Defined in RFC 3265
+        NOTIFY,  ///< Defined in RFC 3265
 
         /// Defined in RFC 3311
         UPDATE,

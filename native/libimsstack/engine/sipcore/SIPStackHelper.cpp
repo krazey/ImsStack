@@ -27,8 +27,8 @@ namespace SIPStack
 Remarks
 
 */
-GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
-        OUT IMSList<ISipHeader*> &objHeaders)
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN CONST SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -37,14 +37,14 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
         return IMS_FALSE;
     }
 
-    SipUri *pSipUri = const_cast<SipAddrSpec*>(pAddrSpec)->GetSipUri();
+    SipUri* pSipUri = const_cast<SipAddrSpec*>(pAddrSpec)->GetSipUri();
 
     if (pSipUri == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    SipParameterList *pHdrParamList = pSipUri->GetHdrParamList();
+    SipParameterList* pHdrParamList = pSipUri->GetHdrParamList();
 
     if (pHdrParamList == IMS_NULL)
     {
@@ -56,27 +56,27 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
 
     for (IMS_UINT32 i = 0; i < nListCount; ++i)
     {
-        SipNameValue *pNmVl = pHdrParamList->GetNameValNode(i);
+        SipNameValue* pNmVl = pHdrParamList->GetNameValNode(i);
 
         if (pNmVl == IMS_NULL)
         {
             continue;
         }
 
-        if(pNmVl->m_valueList.IsEmpty())
+        if (pNmVl->m_valueList.IsEmpty())
         {
             pHdrParamList->SipDelete();
             pSipUri->SipDelete();
             return IMS_FALSE;
         }
 
-        SIPHeader *pHeader = new SIPHeader();
+        SIPHeader* pHeader = new SIPHeader();
 
         if (pHeader != IMS_NULL)
         {
             pHeader->SetName(pNmVl->m_pszName);
 
-            IMS_CHAR *pszHdrVal = pNmVl->m_valueList.GetAt(0);
+            IMS_CHAR* pszHdrVal = pNmVl->m_valueList.GetAt(0);
 
             AString strHdrValue(pszHdrVal);
 
@@ -103,8 +103,8 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
 Remarks
 
 */
-GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
-        OUT IMSList<ISipHeader*> &objHeaders)
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN CONST AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders)
 {
     IMSList<AString> objTokens = strHeaders.Split(TextParser::CHAR_AMPERSAND);
 
@@ -117,7 +117,7 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {
-        const AString &strHeader = objTokens.GetAt(i);
+        const AString& strHeader = objTokens.GetAt(i);
         IMS_SINT32 nPosOfEqual = strHeader.GetIndexOf(TextParser::CHAR_EQUAL);
 
         // Invalid header format
@@ -132,7 +132,7 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
             return IMS_FALSE;
         }
 
-        SIPHeader *pHeader = new SIPHeader();
+        SIPHeader* pHeader = new SIPHeader();
 
         if (pHeader != IMS_NULL)
         {
@@ -151,4 +151,4 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
     return IMS_TRUE;
 }
 
-}
+}  // namespace SIPStack

@@ -16,8 +16,6 @@
 #include "IMSList.h"
 #include "RegObserver.h"
 
-
-
 class RegSubject
 {
 public:
@@ -25,8 +23,8 @@ public:
     virtual ~RegSubject();
 
 public:
-    virtual void RegisterObserver(IN RegObserver *pObserver);
-    virtual void RemoveObserver(IN RegObserver *pObserver);
+    virtual void RegisterObserver(IN RegObserver* pObserver);
+    virtual void RemoveObserver(IN RegObserver* pObserver);
 
 protected:
     virtual void NotifyObservers(IN IMS_SINT32 nWhat);
@@ -35,4 +33,4 @@ private:
     IMSList<RegObserver*> objObservers;
 };
 
-#endif // _REG_SUBJECT_H_
+#endif  // _REG_SUBJECT_H_

@@ -15,8 +15,6 @@
 
 #include "base/IMSError.h"
 
-
-
 class IMS
 {
 public:
@@ -31,7 +29,7 @@ private:
     static IMS_SINT32 GetLastError(IN IMS_SINT32 nSlotId);
 
 private:
-    static IMS_SINT32* ERROR_CODE; // 0 means there is no error
+    static IMS_SINT32* ERROR_CODE;  // 0 means there is no error
 };
 
-#endif // _IMS_H_
+#endif  // _IMS_H_

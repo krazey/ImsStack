@@ -45,8 +45,7 @@ public:
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_V4\n
      *         #ISipConfig#DEVICE_ID_PREDEFINED
      */
-    static IMS_SINT32 GetDeviceId(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetDeviceId(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a pre-defined device id (+sip.instance).
      *
@@ -56,8 +55,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The pre-defined device id.
      */
-    static const AString& GetPredefinedDeviceId(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static const AString& GetPredefinedDeviceId(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a SIP default port number.
      *
@@ -67,8 +66,7 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The port number.
      */
-    static IMS_SINT32 GetPort(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetPort(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the SIP features.
      *
@@ -107,8 +105,8 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
-    static IMS_UINT32 GetSipFeatureCaps(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_UINT32 GetSipFeatureCaps(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a tag prefix string.
      *
@@ -118,8 +116,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The tag prefix string.
      */
-    static const AString& GetTagPrefix(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static const AString& GetTagPrefix(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a criteria length to convert a transport protocol from UDP to TCP.
      *
@@ -129,8 +127,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The TCP criteria length.
      */
-    static IMS_SINT32 GetTcpCriterionLength(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetTcpCriterionLength(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets a preferred transport protocol (udp/tcp/tls/...) type.
      *
@@ -144,8 +142,8 @@ public:
      *         #SipConfig#TRANSPORT_TYPE_DYNAMIC_UDP_TCP\n
      *         #SipConfig#TRANSPORT_TYPE_TLS
      */
-    static IMS_SINT32 GetTransportType(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetTransportType(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets an UA string for User-Agent/Server header.
      *
@@ -155,8 +153,7 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The UA string.
      */
-    static AString GetUaString(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static AString GetUaString(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     // "reg"
     /**
@@ -168,8 +165,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The allowed SIP methods.
      */
-    static const AStringArray& GetRegAllowMethods(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static const AStringArray& GetRegAllowMethods(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the expires value for IMS registration.
      *
@@ -179,8 +176,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The expires value for IMS registration.
      */
-    static IMS_SINT32 GetRegExpires(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetRegExpires(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets the expires value for "reg" event package subscription.
      *
@@ -190,8 +187,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The expires value for "reg" event package subscription.
      */
-    static IMS_SINT32 GetRegSubExpires(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_SINT32 GetRegSubExpires(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Gets an UA string for IMS registration.
      *
@@ -202,8 +199,7 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return The UA string for IMS registration.
      */
-    static AString GetRegUaString(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static AString GetRegUaString(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the expires value of registration is configured or not.
      *
@@ -213,8 +209,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsRegExpiresConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRegExpiresConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the expires value of "reg" subscription is configured or not.
      *
@@ -224,8 +220,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsRegSubExpiresConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRegSubExpiresConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the "reg" subscription is enabled or not.
      *
@@ -235,8 +231,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's enabled, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsRegSubscriptionConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRegSubscriptionConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     // "service-specific"
     /**
@@ -257,8 +253,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsAuthenticationAlgorithmRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsAuthenticationAlgorithmRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Cellular-Network-Info header is required or not.
      *
@@ -268,8 +264,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsCellularNetworkInfoHeaderRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsCellularNetworkInfoHeaderRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the SIP header's compact form is configured or not.
      *
@@ -279,8 +275,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsCompactFormConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsCompactFormConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Contact header for all the 1xx responses should be added or not.
      *
@@ -290,8 +286,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsContactInAll1xxRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsContactInAll1xxRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the country information in P-Access-Network-Info header
      *        should be added or not.
@@ -302,8 +298,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsCountryInfoRequiredInPaniHeader(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsCountryInfoRequiredInPaniHeader(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the display name of SIP address should contain double quotation or not.
      *
@@ -313,8 +309,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsDisplayNameDquotRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsDisplayNameDquotRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Expires header in REGISTER request should be added or not.
      *
@@ -324,8 +320,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsExpiresHeaderInRegRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsExpiresHeaderInRegRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if IPSec(IP Security) is configured or not.
      *
@@ -335,8 +331,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsIpSecConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsIpSecConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if GRUU (Globally Routable User-agent URI) is configured or not.
      *
@@ -346,8 +342,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsGruuConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsGruuConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if "keep" parameter in Via header is configured or not.
      *
@@ -357,8 +353,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsKeepAliveConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsKeepAliveConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
      *
@@ -368,8 +364,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsMultipleRegConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsMultipleRegConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the Accept-Contact header in BYE request should not be added or not.
      *
@@ -380,8 +376,8 @@ public:
      * @return If the Accept-Contact header is not required, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsNoAcceptContactHeaderInBye(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsNoAcceptContactHeaderInBye(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if P-Access-Network-Info header in the initial registration
      *        should be added or not.
@@ -392,8 +388,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsPanInfoInInitialRegRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsPanInfoInInitialRegRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if P-Preferred-Identity header in "reg" subscription
      *        should be added or not.
@@ -404,8 +400,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsPPreferredIdInRegSubRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsPPreferredIdInRegSubRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if Route header in the registration should be added or not.
      *
@@ -415,8 +411,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsRouteHeaderInRegRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRouteHeaderInRegRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if "rport" parameter is configured or not.
      *
@@ -426,8 +422,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsRportConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRportConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the transport layer's error notification of SIP transaction
      *        is required or not.
@@ -438,8 +434,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsTransportErrorReportOnTxnRequired(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsTransportErrorReportOnTxnRequired(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the device is in the trust domain or not.
      *
@@ -449,8 +445,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsTrustDomainConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsTrustDomainConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the UDP fallback is configured or not
      *        when TCP connection can't be established.
@@ -461,8 +457,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsUdpFallbackConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsUdpFallbackConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the UA string in SIP message should be added or not.
      *
@@ -472,8 +468,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsUserAgentConfigured(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsUserAgentConfigured(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
     /**
      * @brief Checks if the SIP header for UA string should be determined
      *        by the SIP signalling context or not.
@@ -488,8 +484,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL IsUserAgentSetByContext(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsUserAgentSetByContext(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the SDP negotiation is required for non-RPR message.
@@ -503,8 +499,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsSdpNegotiationRequiredForNonRpr(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsSdpNegotiationRequiredForNonRpr(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the validation of Request-URI of the mid-dialog request is required.
@@ -517,8 +513,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsRequestUriValidationRequiredInMidDialog(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsRequestUriValidationRequiredInMidDialog(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the session timer update is required when the session update is
@@ -533,8 +529,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsSessionTimerUpdateRequiredByReInvite(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsSessionTimerUpdateRequiredByReInvite(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the "+sip.instance" parameter should be included in the Contact header
@@ -549,8 +545,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsSipInstanceParamRequiredInContactForNonRegisterRequest(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsSipInstanceParamRequiredInContactForNonRegisterRequest(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the Session-Id header is supported or not.
@@ -561,8 +557,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsSessionIdHeaderSupported(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsSessionIdHeaderSupported(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if the invalid MAC address is required in PANI header on Wi-Fi.
@@ -573,8 +569,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     /**
      * @brief Checks if Checks if the "local-time-zone" parameter is required in PANI header.
@@ -585,8 +581,8 @@ public:
      * @param pProfile The dynamic SIP profile
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
-    static IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pProfile = IMS_NULL);
+    static IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL);
 
     // "sip-timers"
     /**

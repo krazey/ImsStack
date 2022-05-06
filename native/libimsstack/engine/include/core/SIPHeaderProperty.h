@@ -18,8 +18,8 @@
 struct SIPHeaderProperty
 {
     IMS_SINT32 nType;
-    const IMS_CHAR *pszName;
+    const IMS_CHAR* pszName;
     IMS_BOOL bSingleHeader;
 };
 
-#endif // _SIP_HEADER_PROPERTY_H_
+#endif  // _SIP_HEADER_PROPERTY_H_

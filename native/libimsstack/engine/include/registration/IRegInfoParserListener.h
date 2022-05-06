@@ -16,8 +16,6 @@
 class IDocument;
 class RegInfoParser;
 
-
-
 class IRegInfoParserListener
 {
 public:
@@ -36,8 +34,8 @@ public:
     </table>
 
     */
-    virtual void RegInfoParser_ParsingCompleted(IN RegInfoParser *pParser,
-            IN IDocument *piDocument) = 0;
+    virtual void RegInfoParser_ParsingCompleted(
+            IN RegInfoParser* pParser, IN IDocument* piDocument) = 0;
 
     /*
 
@@ -54,7 +52,7 @@ public:
     </table>
 
     */
-    virtual void RegInfoParser_ParsingFailed(IN RegInfoParser *pParser) = 0;
+    virtual void RegInfoParser_ParsingFailed(IN RegInfoParser* pParser) = 0;
 };
 
-#endif // _INTERFACE_REG_INFO_PARSER_LISTENER_H_
+#endif  // _INTERFACE_REG_INFO_PARSER_LISTENER_H_

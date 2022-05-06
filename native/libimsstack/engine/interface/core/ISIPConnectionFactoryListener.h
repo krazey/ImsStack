@@ -18,8 +18,8 @@ public:
      * @param piSCFactory Pointer to ISIPConnectionFactory
      * @param piSSC Pointer to ISipServerConnection; for incoming SIP request
      */
-    virtual void ConnectionFactory_NotifyRequest(IN ISIPConnectionFactory *piSCFactory,
-            IN ISipServerConnection *piSSC) = 0;
+    virtual void ConnectionFactory_NotifyRequest(
+            IN ISIPConnectionFactory* piSCFactory, IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_SIP_CONNECTION_FACTORY_LISTENER_H_
+#endif  // _INTERFACE_SIP_CONNECTION_FACTORY_LISTENER_H_

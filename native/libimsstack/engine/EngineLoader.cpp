@@ -17,8 +17,7 @@
 
 // It will be called by EnablerThread to load a proper component for each slot.
 
-PUBLIC GLOBAL
-void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
 {
     // Service
     SubscriberTracker::GetInstance()->InitForSlot(nSlotId);
@@ -31,8 +30,7 @@ void EngineLoader::Initialize(IN IMS_SINT32 nSlotId)
     SIPConnectionNotifierManager::Init(nSlotId);
 }
 
-PUBLIC GLOBAL
-void EngineLoader::Uninitialize(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL void EngineLoader::Uninitialize(IN IMS_SINT32 nSlotId)
 {
     // J180
     StaticSIP::UninitializeForSlot(nSlotId);

@@ -86,14 +86,11 @@ public:
     class Base
     {
     public:
-        inline Base()
-        {}
-        inline virtual ~Base()
-        {}
+        inline Base() {}
+        inline virtual ~Base() {}
 
     public:
-        inline virtual IMS_BOOL Equals(IN const Base& /*other*/) const
-        { return IMS_TRUE; }
+        inline virtual IMS_BOOL Equals(IN const Base& /*other*/) const { return IMS_TRUE; }
     };
 
     // LOG_EXCLUDING_SERVER_INFO
@@ -242,48 +239,42 @@ public:
          *
          * @return The port number.
          */
-        inline IMS_SINT32 GetPortPc() const
-        { return nPortPc; }
+        inline IMS_SINT32 GetPortPc() const { return nPortPc; }
 
         /**
          * @brief Gets the port-s for P-CSCF.
          *
          * @return The port number.
          */
-        inline IMS_SINT32 GetPortPs() const
-        { return nPortPs; }
+        inline IMS_SINT32 GetPortPs() const { return nPortPs; }
 
         /**
          * @brief Gets the IP address for P-CSCF.
          *
          * @return The IP address.
          */
-        inline const IPAddress& GetIpAddrP() const
-        { return objIpAddrP; }
+        inline const IPAddress& GetIpAddrP() const { return objIpAddrP; }
 
         /**
          * @brief Gets the port-c for UE.
          *
          * @return The port number.
          */
-        inline IMS_SINT32 GetPortUc() const
-        { return nPortUc; }
+        inline IMS_SINT32 GetPortUc() const { return nPortUc; }
 
         /**
          * @brief Gets the port-s for UE.
          *
          * @return The port number.
          */
-        inline IMS_SINT32 GetPortUs() const
-        { return nPortUs; }
+        inline IMS_SINT32 GetPortUs() const { return nPortUs; }
 
         /**
          * @brief Gets the IP address for UE.
          *
          * @return The IP address.
          */
-        inline const IPAddress& GetIpAddrU() const
-        { return objIpAddrU; }
+        inline const IPAddress& GetIpAddrU() const { return objIpAddrU; }
 
         /**
          * @brief Checks if it's empty IpSec SA or not.
@@ -333,16 +324,14 @@ public:
          *
          * @return The starting port number.
          */
-        inline IMS_SINT32 GetPortStart() const
-        { return nPortStart; }
+        inline IMS_SINT32 GetPortStart() const { return nPortStart; }
 
         /**
          * @brief Gets the ending port number of the provisioned port range.
          *
          * @return The endng port number.
          */
-        inline IMS_SINT32 GetPortEnd() const
-        { return nPortEnd; }
+        inline IMS_SINT32 GetPortEnd() const { return nPortEnd; }
 
     public:
         /// M (SET) : start of port range (not-inclusive)
@@ -375,16 +364,14 @@ public:
          *
          * @return The call-id string.
          */
-        inline const AString& GetCallId() const
-        { return strCallId; }
+        inline const AString& GetCallId() const { return strCallId; }
 
         /**
          * @brief Gets the Contact address which is used for IMS registration.
          *
          * @return The Contact address.
          */
-        inline const SipAddress& GetUri() const
-        { return objUri; }
+        inline const SipAddress& GetUri() const { return objUri; }
 
     public:
         /// M (SET/REMOVE) : Call-ID to identify the current IMS registration

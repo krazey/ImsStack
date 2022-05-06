@@ -28,25 +28,22 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPTransportHelper::SIPTransportHelper()
-    : EngineActivity()
-    , piListener(IMS_NULL)
-    , objClientInitiatedConnections(IMSMap<IMS_UINTP, IMS_SINT32>())
-    , piDnsQueryListener(IMS_NULL)
+SIPTransportHelper::SIPTransportHelper() :
+        EngineActivity(),
+        piListener(IMS_NULL),
+        objClientInitiatedConnections(IMSMap<IMS_UINTP, IMS_SINT32>()),
+        piDnsQueryListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPTransportHelper::~SIPTransportHelper()
+PUBLIC VIRTUAL SIPTransportHelper::~SIPTransportHelper()
 {
     if (!objSockets.IsEmpty())
     {
         for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
         {
-            SIPSocket *pSocket = objSockets.GetAt(i);
+            SIPSocket* pSocket = objSockets.GetAt(i);
 
             if (pSocket != IMS_NULL)
                 delete pSocket;
@@ -57,7 +54,7 @@ SIPTransportHelper::~SIPTransportHelper()
     {
         for (IMS_UINT32 i = 0; i < objBuffers.GetSize(); ++i)
         {
-            TransportBuffer *pBuffer = objBuffers.GetAt(i);
+            TransportBuffer* pBuffer = objBuffers.GetAt(i);
 
             if (pBuffer != IMS_NULL)
                 delete pBuffer;
@@ -70,16 +67,15 @@ SIPTransportHelper::~SIPTransportHelper()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPTransportHelper::DispatchMessage(IN IMSMSG &objMSG)
+PUBLIC VIRTUAL IMS_BOOL SIPTransportHelper::DispatchMessage(IN IMSMSG& objMSG)
 {
     switch (objMSG.GetName())
     {
-    case AMSG_PROCESS_MESSAGE:
+        case AMSG_PROCESS_MESSAGE:
         {
             while (objBuffers.GetSize() > 0)
             {
-                TransportBuffer *pBuffer = objBuffers.GetAt(0);
+                TransportBuffer* pBuffer = objBuffers.GetAt(0);
 
                 if (pBuffer != IMS_NULL)
                 {
@@ -98,25 +94,26 @@ IMS_BOOL SIPTransportHelper::DispatchMessage(IN IMSMSG &objMSG)
                 }
             }
         }
-        return IMS_TRUE;
+            return IMS_TRUE;
 
-    case AMSG_DESTROY_ALL_SOCKETS: {
-        IPAddress *pLocalIP = reinterpret_cast<IPAddress*>(objMSG.nLparam);
-
-        if (pLocalIP != IMS_NULL)
+        case AMSG_DESTROY_ALL_SOCKETS:
         {
-            DestroyAllSockets(0, *pLocalIP);
-            delete pLocalIP;
-        }
-        else
-        {
-            DestroyAllSockets();
-        }
-        return IMS_TRUE;
-    }
+            IPAddress* pLocalIP = reinterpret_cast<IPAddress*>(objMSG.nLparam);
 
-    default:
-        break;
+            if (pLocalIP != IMS_NULL)
+            {
+                DestroyAllSockets(0, *pLocalIP);
+                delete pLocalIP;
+            }
+            else
+            {
+                DestroyAllSockets();
+            }
+            return IMS_TRUE;
+        }
+
+        default:
+            break;
     }
 
     return EngineActivity::DispatchMessage(objMSG);
@@ -134,7 +131,7 @@ void SIPTransportHelper::Clear()
 
     while (objSockets.GetSize() > 0)
     {
-        SIPSocket *pSocket = objSockets.GetAt(0);
+        SIPSocket* pSocket = objSockets.GetAt(0);
 
         if (pSocket != IMS_NULL)
             delete pSocket;
@@ -151,9 +148,9 @@ Remarks
 
 */
 PUBLIC
-SIPSocket* SIPTransportHelper::Create(IN CONST SIPSocketAddress &objSA)
+SIPSocket* SIPTransportHelper::Create(IN CONST SIPSocketAddress& objSA)
 {
-    SIPSocket *pSocket = Open(objSA);
+    SIPSocket* pSocket = Open(objSA);
 
     //---------------------------------------------------------------------------------------------
 
@@ -169,14 +166,14 @@ SIPSocket* SIPTransportHelper::Create(IN CONST SIPSocketAddress &objSA)
 
     if (objSA.GetType() == SIPSocketAddress::SOCKET_UDP)
     {
-        SIPDatagramSocket *pDatagramSocket = new SIPDatagramSocket(GetSlotId());
+        SIPDatagramSocket* pDatagramSocket = new SIPDatagramSocket(GetSlotId());
 
         pDatagramSocket->SetListener(this);
         pSocket = pDatagramSocket;
     }
     else if (objSA.GetType() == SIPSocketAddress::SOCKET_TCP)
     {
-        SIPStreamSocketNotifier *pStreamSocketNotifier = new SIPStreamSocketNotifier(GetSlotId());
+        SIPStreamSocketNotifier* pStreamSocketNotifier = new SIPStreamSocketNotifier(GetSlotId());
 
         pStreamSocketNotifier->SetListener(this);
         pSocket = pStreamSocketNotifier;
@@ -214,10 +211,10 @@ Remarks
 
 */
 PUBLIC
-SIPSocket* SIPTransportHelper::CreateStreamSocket(IN CONST SIPSocketAddress &objSA,
-        IN CONST SIPSocketAddress &objSA_FarEnd)
+SIPSocket* SIPTransportHelper::CreateStreamSocket(
+        IN CONST SIPSocketAddress& objSA, IN CONST SIPSocketAddress& objSA_FarEnd)
 {
-    SIPSocket *pSocket = OpenStreamSocket(objSA, objSA_FarEnd);
+    SIPSocket* pSocket = OpenStreamSocket(objSA, objSA_FarEnd);
 
     //---------------------------------------------------------------------------------------------
 
@@ -233,7 +230,7 @@ SIPSocket* SIPTransportHelper::CreateStreamSocket(IN CONST SIPSocketAddress &obj
         return IMS_NULL;
     }
 
-    SIPStreamSocket *pStreamSocket = new SIPStreamSocket(GetSlotId());
+    SIPStreamSocket* pStreamSocket = new SIPStreamSocket(GetSlotId());
 
     if (pStreamSocket == IMS_NULL)
     {
@@ -271,7 +268,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTransportHelper::Destroy(IN SIPSocket *&pSocket, IN ISIPSocketListener *piListener)
+void SIPTransportHelper::Destroy(IN SIPSocket*& pSocket, IN ISIPSocketListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -292,13 +289,13 @@ void SIPTransportHelper::Destroy(IN SIPSocket *&pSocket, IN ISIPSocketListener *
     {
         IMS_SINT32 nType = pSocket->GetType();
 
-        if ((nType == SIPSocket::TYPE_TCP_CLIENT)
-                || (nType == SIPSocket::TYPE_TCP_CLIENT_OTHER))
+        if ((nType == SIPSocket::TYPE_TCP_CLIENT) || (nType == SIPSocket::TYPE_TCP_CLIENT_OTHER))
         {
-            SIPStreamSocket *pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
+            SIPStreamSocket* pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
 
-            if ((pStreamSocket->IsKeepAliveTimerActive() || pStreamSocket->IsKeepAlivePermanent())
-                    && (pStreamSocket->GetState() == SIPSocket::STATE_CONNECTED))
+            if ((pStreamSocket->IsKeepAliveTimerActive() ||
+                        pStreamSocket->IsKeepAlivePermanent()) &&
+                    (pStreamSocket->GetState() == SIPSocket::STATE_CONNECTED))
             {
                 // The stream socket will be destroyed when the keep-alive timer is expired...
                 pSocket = IMS_NULL;
@@ -316,13 +313,12 @@ void SIPTransportHelper::Destroy(IN SIPSocket *&pSocket, IN ISIPSocketListener *
         {
             if (pSocket->IsSocketForcinlyClosed())
             {
-                IMS_TRACE_D("TransportHelper :: Socket(%p) is not found; ignored",
-                        pSocket, 0, 0);
+                IMS_TRACE_D("TransportHelper :: Socket(%p) is not found; ignored", pSocket, 0, 0);
             }
             else
             {
-                IMS_TRACE_D("TransportHelper :: Socket(%p) is not found; destroy it",
-                        pSocket, 0, 0);
+                IMS_TRACE_D(
+                        "TransportHelper :: Socket(%p) is not found; destroy it", pSocket, 0, 0);
 
                 delete pSocket;
             }
@@ -350,10 +346,10 @@ Remarks
 
 */
 PUBLIC
-void SIPTransportHelper::DestroyStreamSocket(IN CONST SIPSocketAddress &objSA,
-        IN CONST SIPSocketAddress &objSA_FarEnd)
+void SIPTransportHelper::DestroyStreamSocket(
+        IN CONST SIPSocketAddress& objSA, IN CONST SIPSocketAddress& objSA_FarEnd)
 {
-    SIPSocket *pSocket = IMS_NULL;
+    SIPSocket* pSocket = IMS_NULL;
     IMS_UINT32 nIndexOfSocket = 0xFFFF;
 
     //---------------------------------------------------------------------------------------------
@@ -369,8 +365,8 @@ void SIPTransportHelper::DestroyStreamSocket(IN CONST SIPSocketAddress &objSA,
 
             pSocket->GetSockName(objIP, nPort);
 
-            if (!objIP.Equals(objSA.GetIPAddress())
-                    || (nPort != static_cast<IMS_UINT32>(objSA.GetPort())))
+            if (!objIP.Equals(objSA.GetIPAddress()) ||
+                    (nPort != static_cast<IMS_UINT32>(objSA.GetPort())))
             {
                 pSocket = IMS_NULL;
                 continue;
@@ -388,7 +384,7 @@ void SIPTransportHelper::DestroyStreamSocket(IN CONST SIPSocketAddress &objSA,
         return;
     }
 
-    SIPStreamSocket *pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
+    SIPStreamSocket* pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
 
     if (pStreamSocket == IMS_NULL)
     {
@@ -420,8 +416,9 @@ void SIPTransportHelper::DestroyStreamSocket(IN CONST SIPSocketAddress &objSA,
         }
     }
 
-    IMS_TRACE_D("TransportHelper :: DestroyStreamSocket - Sockets (%d), RefCount (%d, 0x%"
-            PFLS_x ")", objSockets.GetSize(), nRefCount, nSocket);
+    IMS_TRACE_D("TransportHelper :: DestroyStreamSocket - Sockets (%d), RefCount (%d, 0x%" PFLS_x
+                ")",
+            objSockets.GetSize(), nRefCount, nSocket);
 
     if (objSockets.IsEmpty())
     {
@@ -435,7 +432,7 @@ Remarks
 
 */
 PUBLIC
-SIPSocket* SIPTransportHelper::Open(IN CONST SIPSocketAddress &objSA)
+SIPSocket* SIPTransportHelper::Open(IN CONST SIPSocketAddress& objSA)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -448,10 +445,10 @@ Remarks
 
 */
 PUBLIC
-SIPSocket* SIPTransportHelper::OpenStreamSocket(IN CONST SIPSocketAddress &objSA,
-        IN CONST SIPSocketAddress &objSA_FarEnd)
+SIPSocket* SIPTransportHelper::OpenStreamSocket(
+        IN CONST SIPSocketAddress& objSA, IN CONST SIPSocketAddress& objSA_FarEnd)
 {
-    SIPSocket *pSocket = IMS_NULL;
+    SIPSocket* pSocket = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -467,7 +464,7 @@ SIPSocket* SIPTransportHelper::OpenStreamSocket(IN CONST SIPSocketAddress &objSA
 
     if (pSocket != IMS_NULL)
     {
-        SIPStreamSocket *pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
+        SIPStreamSocket* pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
 
         if (pStreamSocket != IMS_NULL)
         {
@@ -485,7 +482,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTransportHelper::SetListener(IN ISIPTransportListener *piListener)
+void SIPTransportHelper::SetListener(IN ISIPTransportListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -498,7 +495,7 @@ Remarks
  MULTI_REG_TRANSPORT
 */
 PUBLIC
-IMS_SINT32 SIPTransportHelper::AttachClientInitiatedConnection(IN SIPSocket *pSocket)
+IMS_SINT32 SIPTransportHelper::AttachClientInitiatedConnection(IN SIPSocket* pSocket)
 {
     IMS_UINTP nSocketHandle = reinterpret_cast<IMS_UINTP>(pSocket);
     IMS_SLONG nIndex = objClientInitiatedConnections.GetIndexOfKey(nSocketHandle);
@@ -513,7 +510,7 @@ IMS_SINT32 SIPTransportHelper::AttachClientInitiatedConnection(IN SIPSocket *pSo
         return 1;
     }
 
-    IMS_SINT32 &nCount = objClientInitiatedConnections.GetValueAt(nIndex);
+    IMS_SINT32& nCount = objClientInitiatedConnections.GetValueAt(nIndex);
 
     nCount++;
 
@@ -526,7 +523,7 @@ Remarks
  MULTI_REG_TRANSPORT
 */
 PUBLIC
-void SIPTransportHelper::DetachClientInitiatedConnection(IN SIPSocket *pSocket)
+void SIPTransportHelper::DetachClientInitiatedConnection(IN SIPSocket* pSocket)
 {
     IMS_UINTP nSocketHandle = reinterpret_cast<IMS_UINTP>(pSocket);
     IMS_SLONG nIndex = objClientInitiatedConnections.GetIndexOfKey(nSocketHandle);
@@ -538,7 +535,7 @@ void SIPTransportHelper::DetachClientInitiatedConnection(IN SIPSocket *pSocket)
         return;
     }
 
-    IMS_SINT32 &nCount = objClientInitiatedConnections.GetValueAt(nIndex);
+    IMS_SINT32& nCount = objClientInitiatedConnections.GetValueAt(nIndex);
 
     nCount--;
 
@@ -547,8 +544,7 @@ void SIPTransportHelper::DetachClientInitiatedConnection(IN SIPSocket *pSocket)
         objClientInitiatedConnections.RemoveAt(nIndex);
     }
 
-    IMS_TRACE_D("TransportHelper :: Detach - TCP socket=%" PFLS_x "(%d)",
-            nSocketHandle, nCount, 0);
+    IMS_TRACE_D("TransportHelper :: Detach - TCP socket=%" PFLS_x "(%d)", nSocketHandle, nCount, 0);
 }
 
 /*
@@ -557,7 +553,7 @@ Remarks
  MULTI_REG_TRANSPORT
 */
 PUBLIC
-IMS_BOOL SIPTransportHelper::IsClientInitiatedConnection(IN SIPSocket *pSocket) const
+IMS_BOOL SIPTransportHelper::IsClientInitiatedConnection(IN SIPSocket* pSocket) const
 {
     IMS_SLONG nIndex =
             objClientInitiatedConnections.GetIndexOfKey(reinterpret_cast<IMS_UINTP>(pSocket));
@@ -573,8 +569,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPTransportHelper::GetHostByName(IN CONST IPAddress &objLocalIP,
-        IN CONST AString &strHostname, OUT IPAddress &objHostIP)
+IMS_BOOL SIPTransportHelper::GetHostByName(
+        IN CONST IPAddress& objLocalIP, IN CONST AString& strHostname, OUT IPAddress& objHostIP)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -586,16 +582,14 @@ IMS_BOOL SIPTransportHelper::GetHostByName(IN CONST IPAddress &objLocalIP,
     return piDnsQueryListener->LocalDnsQuery_GetHostByName(objLocalIP, strHostname, objHostIP);
 }
 
-PRIVATE VIRTUAL
-void SIPTransportHelper::ApplyIpSecForServerSockets()
+PRIVATE VIRTUAL void SIPTransportHelper::ApplyIpSecForServerSockets()
 {
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); i++)
     {
         SIPSocket* pSocket = objSockets.GetAt(i);
         IMS_SINT32 nSocketType = pSocket->GetType();
 
-        if (nSocketType == SIPSocket::TYPE_TCP
-                || nSocketType == SIPSocket::TYPE_UDP)
+        if (nSocketType == SIPSocket::TYPE_TCP || nSocketType == SIPSocket::TYPE_UDP)
         {
             pSocket->ApplyIpSec();
         }
@@ -607,9 +601,8 @@ void SIPTransportHelper::ApplyIpSecForServerSockets()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::DestroyAllSockets(IN IMS_SINT32 nMethod /* = 0 */,
-        IN CONST IPAddress &objLocalIP/* = IPAddress::NONE*/)
+PRIVATE VIRTUAL void SIPTransportHelper::DestroyAllSockets(
+        IN IMS_SINT32 nMethod /* = 0 */, IN CONST IPAddress& objLocalIP /* = IPAddress::NONE*/)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -621,7 +614,7 @@ void SIPTransportHelper::DestroyAllSockets(IN IMS_SINT32 nMethod /* = 0 */,
 
         for (IMS_UINT32 i = 0; i < objTmpSockets.GetSize(); ++i)
         {
-            SIPSocket *pSocket = objTmpSockets.GetAt(i);
+            SIPSocket* pSocket = objTmpSockets.GetAt(i);
 
             if (pSocket != IMS_NULL)
             {
@@ -654,7 +647,7 @@ void SIPTransportHelper::DestroyAllSockets(IN IMS_SINT32 nMethod /* = 0 */,
     }
     else
     {
-        IPAddress *pLocalIP = new IPAddress(objLocalIP);
+        IPAddress* pLocalIP = new IPAddress(objLocalIP);
         PostMessage(AMSG_DESTROY_ALL_SOCKETS, 0, reinterpret_cast<IMS_UINTP>(pLocalIP));
     }
 }
@@ -664,9 +657,8 @@ void SIPTransportHelper::DestroyAllSockets(IN IMS_SINT32 nMethod /* = 0 */,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::DestroyTcpSocket(IN CONST IPAddress &objSrcIP, IN IMS_UINT32 nSrcPort,
-        IN CONST IPAddress &objDestIP, IN IMS_UINT32 nDestPort,
+PRIVATE VIRTUAL void SIPTransportHelper::DestroyTcpSocket(IN CONST IPAddress& objSrcIP,
+        IN IMS_UINT32 nSrcPort, IN CONST IPAddress& objDestIP, IN IMS_UINT32 nDestPort,
         IN IMS_BOOL bIsConnectionByPeer /* = IMS_FALSE */)
 {
     IMSList<SIPSocket*> objRemovedSockets;
@@ -688,9 +680,9 @@ void SIPTransportHelper::DestroyTcpSocket(IN CONST IPAddress &objSrcIP, IN IMS_U
     objSA.SetPort(nDestPort);
     objSA.SetIPAddress(objDestIP);
 
-    for (IMS_UINT32 i = 0; i < objSockets.GetSize(); )
+    for (IMS_UINT32 i = 0; i < objSockets.GetSize();)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if ((pSocket != IMS_NULL) && pSocket->Equals(objSA))
         {
@@ -736,7 +728,7 @@ void SIPTransportHelper::DestroyTcpSocket(IN CONST IPAddress &objSrcIP, IN IMS_U
 
     for (IMS_UINT32 i = 0; i < objRemovedSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objRemovedSockets.GetAt(i);
+        SIPSocket* pSocket = objRemovedSockets.GetAt(i);
 
         if (pSocket != IMS_NULL)
         {
@@ -757,8 +749,7 @@ void SIPTransportHelper::DestroyTcpSocket(IN CONST IPAddress &objSrcIP, IN IMS_U
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
+PRIVATE VIRTUAL void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos* pIPQoS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -771,7 +762,7 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
     {
         for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
         {
-            SIPSocket *pSocket = objSockets.GetAt(i);
+            SIPSocket* pSocket = objSockets.GetAt(i);
 
             if (pSocket != IMS_NULL)
             {
@@ -783,7 +774,7 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
 
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if (pSocket == IMS_NULL)
         {
@@ -800,8 +791,7 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
         {
             bMatched = IMS_TRUE;
 
-            if ((pIPQoS->nPort != 0)
-                    && (pIPQoS->nPort != static_cast<IMS_SINT32>(nPort)))
+            if ((pIPQoS->nPort != 0) && (pIPQoS->nPort != static_cast<IMS_SINT32>(nPort)))
             {
                 bMatched = IMS_FALSE;
             }
@@ -819,9 +809,8 @@ void SIPTransportHelper::SetIpQos(IN SipRtConfig::IpQos *pIPQoS)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::SetKeepAlivePolicy(IN CONST IPAddress &objSrcIP, IN IMS_UINT32 nSrcPort,
-        IN CONST IPAddress &objDestIP, IN IMS_UINT32 nDestPort,
+PRIVATE VIRTUAL void SIPTransportHelper::SetKeepAlivePolicy(IN CONST IPAddress& objSrcIP,
+        IN IMS_UINT32 nSrcPort, IN CONST IPAddress& objDestIP, IN IMS_UINT32 nDestPort,
         IN IMS_SINT32 nPolicy /* = (-1) default */)
 {
     SIPSocketAddress objSA;
@@ -834,7 +823,7 @@ void SIPTransportHelper::SetKeepAlivePolicy(IN CONST IPAddress &objSrcIP, IN IMS
 
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if ((pSocket != IMS_NULL) && pSocket->Equals(objSA))
         {
@@ -862,7 +851,7 @@ void SIPTransportHelper::SetKeepAlivePolicy(IN CONST IPAddress &objSrcIP, IN IMS
 
             if (bFound)
             {
-                SIPStreamSocket *pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
+                SIPStreamSocket* pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
 
                 if (pStreamSocket != IMS_NULL)
                 {
@@ -879,8 +868,8 @@ void SIPTransportHelper::SetKeepAlivePolicy(IN CONST IPAddress &objSrcIP, IN IMS
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::SetLocalDnsQueryListener(IN ISipLocalDnsQueryListener *piListener)
+PRIVATE VIRTUAL void SIPTransportHelper::SetLocalDnsQueryListener(
+        IN ISipLocalDnsQueryListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -892,16 +881,15 @@ void SIPTransportHelper::SetLocalDnsQueryListener(IN ISipLocalDnsQueryListener *
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::DatagramSocket_DataReceived(IN SIPSocket *pSocket,
-        IN CONST ByteArray &objBuffer, IN CONST IPAddress &objIPAddress, IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL void SIPTransportHelper::DatagramSocket_DataReceived(IN SIPSocket* pSocket,
+        IN CONST ByteArray& objBuffer, IN CONST IPAddress& objIPAddress, IN IMS_SINT32 nPort)
 {
     //---------------------------------------------------------------------------------------------
 
     if (objBuffer.GetLength() == 0)
         return;
 
-    TransportBuffer *pBuffer = new TransportBuffer();
+    TransportBuffer* pBuffer = new TransportBuffer();
 
     if (pBuffer == IMS_NULL)
         return;
@@ -940,10 +928,9 @@ void SIPTransportHelper::DatagramSocket_DataReceived(IN SIPSocket *pSocket,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::StreamSocket_ConnectionReceived(IN SIPSocket *pSocket)
+PRIVATE VIRTUAL void SIPTransportHelper::StreamSocket_ConnectionReceived(IN SIPSocket* pSocket)
 {
-    SIPSocket *pNewSocket = pSocket->Accept();
+    SIPSocket* pNewSocket = pSocket->Accept();
 
     //---------------------------------------------------------------------------------------------
 
@@ -961,9 +948,8 @@ void SIPTransportHelper::StreamSocket_ConnectionReceived(IN SIPSocket *pSocket)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::StreamSocket_DataReceived(IN SIPSocket *pSocket,
-        IN_OUT ByteArray &objBuffer)
+PRIVATE VIRTUAL void SIPTransportHelper::StreamSocket_DataReceived(
+        IN SIPSocket* pSocket, IN_OUT ByteArray& objBuffer)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -977,14 +963,14 @@ void SIPTransportHelper::StreamSocket_DataReceived(IN SIPSocket *pSocket,
         return;
     }
 
-    TransportBuffer *pBuffer = new TransportBuffer();
+    TransportBuffer* pBuffer = new TransportBuffer();
 
     if (pBuffer != IMS_NULL)
     {
         IPAddress objTmpIPA;
         IMS_UINT32 nTmpPort;
         IMS_SINT32 nTransportProtocol = SIPTransportAddress::PROTOCOL_TCP;
-        SIPStreamSocket *pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
+        SIPStreamSocket* pStreamSocket = DYNAMIC_CAST(SIPStreamSocket*, pSocket);
 
         if ((pStreamSocket != IMS_NULL) && pStreamSocket->IsSecureSocket())
         {
@@ -1026,8 +1012,7 @@ void SIPTransportHelper::StreamSocket_DataReceived(IN SIPSocket *pSocket,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::StreamSocket_KeepAliveExpired(IN SIPSocket *pSocket)
+PRIVATE VIRTUAL void SIPTransportHelper::StreamSocket_KeepAliveExpired(IN SIPSocket* pSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1051,8 +1036,7 @@ void SIPTransportHelper::StreamSocket_KeepAliveExpired(IN SIPSocket *pSocket)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPTransportHelper::StreamSocket_PassiveClosed(IN SIPSocket *pSocket)
+PRIVATE VIRTUAL void SIPTransportHelper::StreamSocket_PassiveClosed(IN SIPSocket* pSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1061,14 +1045,14 @@ void SIPTransportHelper::StreamSocket_PassiveClosed(IN SIPSocket *pSocket)
 
     if (IsClientInitiatedConnection(pSocket))
     {
-        IMS_TRACE_D("SIPTransportHelper :: Managed client initiated connection is required...",
-                0, 0, 0);
+        IMS_TRACE_D("SIPTransportHelper :: Managed client initiated connection is required...", 0,
+                0, 0);
         return;
     }
 
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pTmpSocket = objSockets.GetAt(i);
+        SIPSocket* pTmpSocket = objSockets.GetAt(i);
 
         if (pSocket == pTmpSocket)
         {
@@ -1090,7 +1074,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL SIPTransportHelper::AttachSocket(IN SIPSocket *pSocket)
+IMS_BOOL SIPTransportHelper::AttachSocket(IN SIPSocket* pSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1103,7 +1087,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL SIPTransportHelper::IsSocketPresent(IN SIPSocket *pSocket) const
+IMS_BOOL SIPTransportHelper::IsSocketPresent(IN SIPSocket* pSocket) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1111,7 +1095,7 @@ IMS_BOOL SIPTransportHelper::IsSocketPresent(IN SIPSocket *pSocket) const
     {
         for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
         {
-            SIPSocket *pTmpSocket = objSockets.GetAt(i);
+            SIPSocket* pTmpSocket = objSockets.GetAt(i);
 
             if (pSocket == pTmpSocket)
             {
@@ -1129,14 +1113,14 @@ Remarks
 
 */
 PRIVATE
-SIPSocket* SIPTransportHelper::LookupSocket(IN CONST SIPSocketAddress &objSA,
-        IN IMS_BOOL bDetach /* = IMS_FALSE */)
+SIPSocket* SIPTransportHelper::LookupSocket(
+        IN CONST SIPSocketAddress& objSA, IN IMS_BOOL bDetach /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if (pSocket->Equals(objSA))
         {
@@ -1158,27 +1142,27 @@ Remarks
 
 */
 PRIVATE
-SIPSocket* SIPTransportHelper::LookupSocket(IN CONST SIPSocket &objSocket,
-        IN IMS_BOOL bDetach /* = IMS_FALSE */)
+SIPSocket* SIPTransportHelper::LookupSocket(
+        IN CONST SIPSocket& objSocket, IN IMS_BOOL bDetach /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if (pSocket->Equals(objSocket))
         {
             IMS_SINT32 nType = pSocket->GetType();
 
-            if ((nType == SIPSocketAddress::SOCKET_TCP_CLIENT)
-                    || (nType == SIPSocketAddress::SOCKET_TCP_CLIENT_BY_PEER))
+            if ((nType == SIPSocketAddress::SOCKET_TCP_CLIENT) ||
+                    (nType == SIPSocketAddress::SOCKET_TCP_CLIENT_BY_PEER))
             {
                 IPAddress objIP;
                 IPAddress objOtherIP;
                 IMS_UINT32 nPort = 0;
                 IMS_UINT32 nOtherPort = 0;
-                SIPSocket *pOtherSocket = const_cast<SIPSocket*>(&objSocket);
+                SIPSocket* pOtherSocket = const_cast<SIPSocket*>(&objSocket);
 
                 pSocket->GetSockName(objIP, nPort);
                 pOtherSocket->GetSockName(objOtherIP, nOtherPort);
@@ -1190,8 +1174,7 @@ SIPSocket* SIPTransportHelper::LookupSocket(IN CONST SIPSocket &objSocket,
 
                 // CASE :: system socket is already closed (no socket handle)
                 // To avoid the crash, it just checks the address of socket object.
-                if ((pSocket != pOtherSocket)
-                        && (nPort == 0) && (nOtherPort == 0))
+                if ((pSocket != pOtherSocket) && (nPort == 0) && (nOtherPort == 0))
                 {
                     // It's different socket...
                     continue;
@@ -1216,22 +1199,21 @@ Remarks
 
 */
 PRIVATE
-SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &objSA)
+SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress& objSA)
 {
     IPAddress objIP;
     IMS_UINT32 nPort = 0;
-    SIPSocket *pStreamSocket = IMS_NULL;
+    SIPSocket* pStreamSocket = IMS_NULL;
     AString strNearEnd;
 
     //---------------------------------------------------------------------------------------------
 
-    strNearEnd.Sprintf("Near End (%s, %d)",
-            SipDebug::GetIp(objSA.GetIPAddress()), objSA.GetPort());
+    strNearEnd.Sprintf("Near End (%s, %d)", SipDebug::GetIp(objSA.GetIPAddress()), objSA.GetPort());
 
     // Find a socket using the source address & port again
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if (pSocket->GetType() != objSA.GetType())
             continue;
@@ -1240,11 +1222,11 @@ SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &obj
 
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIP), nPort, i);
 
-        if (objIP.Equals(objSA.GetIPAddress())
-                && (nPort == static_cast<IMS_UINT32>(objSA.GetPort())))
+        if (objIP.Equals(objSA.GetIPAddress()) &&
+                (nPort == static_cast<IMS_UINT32>(objSA.GetPort())))
         {
-            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s",
-                    SipDebug::GetIp(objIP), nPort, strNearEnd.GetStr());
+            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIP), nPort,
+                    strNearEnd.GetStr());
             return pSocket;
         }
     }
@@ -1264,8 +1246,8 @@ Remarks
 
 */
 PRIVATE
-SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &objSA,
-        IN CONST SIPSocketAddress &objSA_FarEnd)
+SIPSocket* SIPTransportHelper::LookupStreamSocket(
+        IN CONST SIPSocketAddress& objSA, IN CONST SIPSocketAddress& objSA_FarEnd)
 {
     IMSList<SIPSocket*> objCandidates;
     AString strFarEnd;
@@ -1274,14 +1256,15 @@ SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &obj
 
     // LOG_EXCLUDING_SERVER_INFO
     strFarEnd.Sprintf("Far End (%s, %d)",
-            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? \
-                "xxx" : SipDebug::GetIp(objSA_FarEnd.GetIPAddress()),
+            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
+                    ? "xxx"
+                    : SipDebug::GetIp(objSA_FarEnd.GetIPAddress()),
             objSA_FarEnd.GetPort());
 
     // Find a socket using the destination address & port
     for (IMS_UINT32 i = 0; i < objSockets.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objSockets.GetAt(i);
+        SIPSocket* pSocket = objSockets.GetAt(i);
 
         if (pSocket->Equals(objSA_FarEnd))
         {
@@ -1297,22 +1280,22 @@ SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &obj
 
     IPAddress objIP;
     IMS_UINT32 nPort = 0;
-    SIPSocket *pStreamSocket = IMS_NULL;
+    SIPSocket* pStreamSocket = IMS_NULL;
 
     // Find a socket using the source address & port again
     for (IMS_UINT32 i = 0; i < objCandidates.GetSize(); ++i)
     {
-        SIPSocket *pSocket = objCandidates.GetAt(i);
+        SIPSocket* pSocket = objCandidates.GetAt(i);
 
         pSocket->GetSockName(objIP, nPort);
 
         IMS_TRACE_D("Lookup :: TCP client (%s, %d) at (%d)", SipDebug::GetIp(objIP), nPort, i);
 
-        if (objIP.Equals(objSA.GetIPAddress())
-                && (nPort == static_cast<IMS_UINT32>(objSA.GetPort())))
+        if (objIP.Equals(objSA.GetIPAddress()) &&
+                (nPort == static_cast<IMS_UINT32>(objSA.GetPort())))
         {
-            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s",
-                    SipDebug::GetIp(objIP), nPort, strFarEnd.GetStr());
+            IMS_TRACE_D("Lookup :: TCP client (%s, %d), %s", SipDebug::GetIp(objIP), nPort,
+                    strFarEnd.GetStr());
             return pSocket;
         }
 
@@ -1322,8 +1305,8 @@ SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &obj
             if (objIP.Equals(objSA.GetIPAddress()))
             {
                 pStreamSocket = pSocket;
-                IMS_TRACE_D("Lookup :: TCP client (%s, %d) w/o port, %s",
-                        SipDebug::GetIp(objIP), nPort, strFarEnd.GetStr());
+                IMS_TRACE_D("Lookup :: TCP client (%s, %d) w/o port, %s", SipDebug::GetIp(objIP),
+                        nPort, strFarEnd.GetStr());
             }
         }
     }
@@ -1336,8 +1319,8 @@ SIPSocket* SIPTransportHelper::LookupStreamSocket(IN CONST SIPSocketAddress &obj
 
     if (objCandidates.GetSize() > 1)
     {
-        IMS_TRACE_D("Lookup :: TCP client socket is ambiguous ... (%d)",
-                objCandidates.GetSize(), 0, 0);
+        IMS_TRACE_D(
+                "Lookup :: TCP client socket is ambiguous ... (%d)", objCandidates.GetSize(), 0, 0);
     }
 
     return pStreamSocket;

@@ -57,9 +57,7 @@ SipParameter::SipParameter(IN const SipParameter& other) :
 }
 
 PUBLIC
-SipParameter::~SipParameter()
-{
-}
+SipParameter::~SipParameter() {}
 
 PUBLIC
 SipParameter& SipParameter::operator=(IN const SipParameter& other)
@@ -201,7 +199,7 @@ IMS_BOOL SipParameter::Equals(IN const SipParameter* pParameter) const
     AString strValue = TextParser::DoPercentDecoding(m_strName);
     AString strOtherValue = TextParser::DoPercentDecoding(pParameter->m_strName);
 
-    //4 Check boolean type parameter
+    // 4 Check boolean type parameter
 
     if (!strValue.EqualsIgnoreCase(strOtherValue))
     {

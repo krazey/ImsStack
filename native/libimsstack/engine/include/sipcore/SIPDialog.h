@@ -33,38 +33,36 @@
 class ISipHeader;
 class SIPClientConnection;
 
-
-
 class SIPDialog
 {
 public:
-    explicit SIPDialog(IN SIPDialogEx *pDialogEx_);
-    SIPDialog(IN CONST SIPDialog &objRHS);
+    explicit SIPDialog(IN SIPDialogEx* pDialogEx_);
+    SIPDialog(IN CONST SIPDialog& objRHS);
     virtual ~SIPDialog();
 
 private:
     SIPDialog();
 
 public:
-    SIPDialog& operator=(IN CONST SIPDialog &objRHS);
+    SIPDialog& operator=(IN CONST SIPDialog& objRHS);
 
 public:
-    SIPClientConnection* CreateClientConnection(IN CONST AString &strMethod);
+    SIPClientConnection* CreateClientConnection(IN CONST AString& strMethod);
     const AString& GetCallId() const;
     const ISipHeader* GetContactHeader() const;
     AString GetLocalTag() const;
     AString GetRemoteTag() const;
     IMS_SINT32 GetState() const;
-    IMS_BOOL IsSameDialog(IN CONST SIPDialog *pDialog);
+    IMS_BOOL IsSameDialog(IN CONST SIPDialog* pDialog);
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-    IMS_RESULT SetContactParameter(IN CONST AString &strParameter,
-            IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
+    IMS_RESULT SetContactParameter(
+            IN CONST AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
     void TerminateDialogUsage();
-    void UpdateDialog(IN SIPDialogEx *pDialogEx);
+    void UpdateDialog(IN SIPDialogEx* pDialogEx);
 
 private:
-    IMS_BOOL CheckMethodValidity(IN CONST SipMethod &objMethod) const;
-    SIPDialogEx* GetOptimumDialog(IN CONST SipMethod &objMethod) const;
+    IMS_BOOL CheckMethodValidity(IN CONST SipMethod& objMethod) const;
+    SIPDialogEx* GetOptimumDialog(IN CONST SipMethod& objMethod) const;
 
 public:
     // State of SIP dialog
@@ -80,4 +78,4 @@ private:
     RCPtr<SIPDialogEx> pDialogEx;
 };
 
-#endif // _SIP_DIALOG_H_
+#endif  // _SIP_DIALOG_H_

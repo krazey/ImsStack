@@ -20,11 +20,7 @@ class IRegistrationEx;
 class IRegContact;
 class ISipConnectionNotifier;
 
-
-
-class RegBinding
-    : public RegObserver
-    , public IRegBinding
+class RegBinding : public RegObserver, public IRegBinding
 {
 public:
     RegBinding();
@@ -33,13 +29,13 @@ protected:
     virtual ~RegBinding();
 
 public:
-    IMS_BOOL Create(IN IRegistrationEx *piRegEx);
+    IMS_BOOL Create(IN IRegistrationEx* piRegEx);
     void Destroy();
-    IMS_BOOL IsSameContact(IN IRegContact *piContact) const;
-    IMS_BOOL IsSameRegistration(IN IRegistrationEx *piRegEx) const;
-    void QueryCapability(OUT CallerCapability *&pCapability) const;
-    void QueryRegistrationHeaders(OUT AStringArray &objHeaders) const;
-    void UpdateContact(IN IRegContact *piContact);
+    IMS_BOOL IsSameContact(IN IRegContact* piContact) const;
+    IMS_BOOL IsSameRegistration(IN IRegistrationEx* piRegEx) const;
+    void QueryCapability(OUT CallerCapability*& pCapability) const;
+    void QueryRegistrationHeaders(OUT AStringArray& objHeaders) const;
+    void UpdateContact(IN IRegContact* piContact);
 
 protected:
     // RegObserver class
@@ -75,7 +71,7 @@ protected:
     virtual IMS_BOOL IsBehindNAT() const;
     virtual IMS_BOOL IsWithinTrustDomain() const;
     virtual void NotifyCallerCapabilityChanged();
-    virtual void SetListener(IN IRegBindingListener *piListener);
+    virtual void SetListener(IN IRegBindingListener* piListener);
 
 private:
     void CreateSIPConnectionNotifier();
@@ -89,17 +85,17 @@ private:
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:
-    IRegistrationEx *piRegEx;
-    IRegContact *piContact;
+    IRegistrationEx* piRegEx;
+    IRegContact* piContact;
 
     IMS_SINT32 nState;
-    ISipConnectionNotifier *piSCN;
+    ISipConnectionNotifier* piSCN;
 
-    IRegBindingListener *piListener;
+    IRegBindingListener* piListener;
 
     // Flag to indicate that the reg-state is transited from ACTIVE to TERMINATED
     // since the registration procedure is failed by the txn timeout or failure response.
     IMS_BOOL bDeregistrationNOK;
 };
 
-#endif // _REG_BINDING_H_
+#endif  // _REG_BINDING_H_

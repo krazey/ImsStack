@@ -22,20 +22,17 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPStreamSocketNotifier::SIPStreamSocketNotifier(IN IMS_SINT32 nSlotId)
-    : SIPSocket(nSlotId, SIPSocketAddress::SOCKET_TCP)
-    , piListener(IMS_NULL)
+SIPStreamSocketNotifier::SIPStreamSocketNotifier(IN IMS_SINT32 nSlotId) :
+        SIPSocket(nSlotId, SIPSocketAddress::SOCKET_TCP),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPStreamSocketNotifier::~SIPStreamSocketNotifier()
+PUBLIC VIRTUAL SIPStreamSocketNotifier::~SIPStreamSocketNotifier()
 {
-    IMS_TRACE_D("StreamSocketNotifier(D) :: (%s, %d)",
-            SipDebug::GetIp(objSA.GetIPAddress()), objSA.GetPort(), 0);
+    IMS_TRACE_D("StreamSocketNotifier(D) :: (%s, %d)", SipDebug::GetIp(objSA.GetIPAddress()),
+            objSA.GetPort(), 0);
 }
 
 /*
@@ -43,8 +40,7 @@ SIPStreamSocketNotifier::~SIPStreamSocketNotifier()
 Remarks
 
 */
-PUBLIC VIRTUAL
-SIPSocket* SIPStreamSocketNotifier::Accept()
+PUBLIC VIRTUAL SIPSocket* SIPStreamSocketNotifier::Accept()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -53,13 +49,13 @@ SIPSocket* SIPStreamSocketNotifier::Accept()
         return IMS_NULL;
     }
 
-    ISocket *piNewSocket = piSocket->Accept();
+    ISocket* piNewSocket = piSocket->Accept();
 
     if (piNewSocket != IMS_NULL)
     {
         IMS_TRACE_I("StreamSocket will be created by remote end", 0, 0, 0);
 
-        SIPStreamSocket *pStreamSocket = new SIPStreamSocket(GetSlotId(), piNewSocket);
+        SIPStreamSocket* pStreamSocket = new SIPStreamSocket(GetSlotId(), piNewSocket);
 
         if (pStreamSocket == IMS_NULL)
         {
@@ -85,9 +81,8 @@ SIPSocket* SIPStreamSocketNotifier::Accept()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPStreamSocketNotifier::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPort /* = 0 */,
-        IN IMS_BOOL bSecure /* = IMS_FALSE */)
+PUBLIC VIRTUAL IMS_BOOL SIPStreamSocketNotifier::Create(IN CONST IPAddress& objIPA,
+        IN IMS_UINT32 nPort /* = 0 */, IN IMS_BOOL bSecure /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -117,8 +112,9 @@ IMS_BOOL SIPStreamSocketNotifier::Create(IN CONST IPAddress &objIPA, IN IMS_UINT
     SetState(STATE_CONNECTED);
 
     IMS_TRACE_I("StreamSocketNotifier(C) :: (%s, %d)",
-            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ?\
-            "xxx" : SipDebug::GetIp(objIPA), nPort, 0);
+            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
+                                                                    : SipDebug::GetIp(objIPA),
+            nPort, 0);
 
     ApplyIpSec();
 
@@ -131,7 +127,7 @@ Remarks
 
 */
 PUBLIC
-void SIPStreamSocketNotifier::SetListener(IN ISIPStreamSocketListener *piListener)
+void SIPStreamSocketNotifier::SetListener(IN ISIPStreamSocketListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -143,8 +139,7 @@ void SIPStreamSocketNotifier::SetListener(IN ISIPStreamSocketListener *piListene
 Remarks
 
 */
-PROTECTED VIRTUAL
-void SIPStreamSocketNotifier::Socket_OnConnectionReceived(IN ISocket *piSocket)
+PROTECTED VIRTUAL void SIPStreamSocketNotifier::Socket_OnConnectionReceived(IN ISocket* piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -163,9 +158,8 @@ void SIPStreamSocketNotifier::Socket_OnConnectionReceived(IN ISocket *piSocket)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void SIPStreamSocketNotifier::Socket_OnClosed(IN ISocket *piSocket,
-        IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
+PROTECTED VIRTUAL void SIPStreamSocketNotifier::Socket_OnClosed(
+        IN ISocket* piSocket, IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------
 

@@ -44,8 +44,8 @@ public:
      *                #M_REINVITE
      * @param nStatusCode SIP status code for SIP response
      */
-    static void Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType,
-            IN IMS_SINT32 nDirection, IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode = 0);
+    static void Send(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nMsgType, IN IMS_SINT32 nDirection,
+            IN IMS_SINT32 nMethod, IN IMS_SINT32 nStatusCode = 0);
 
     // Methods for logging based on release mode
     /**
@@ -63,7 +63,7 @@ public:
      * @return The adjusted logging string.
      */
     static const IMS_CHAR* GetCharA1(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
-            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+            IN const IMS_CHAR cDelimiter = 0 /* no delimiter */);
 
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
@@ -75,7 +75,7 @@ public:
      * @return The adjusted logging string.
      */
     static const IMS_CHAR* GetCharA2(IN const IMS_CHAR* pszValue, IN IMS_SINT32 nCount,
-            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+            IN const IMS_CHAR cDelimiter = 0 /* no delimiter */);
 
     /**
      * @brief Gets a string representation of IP address.
@@ -111,7 +111,7 @@ public:
      * @return The adjusted logging string.
      */
     static const AString& GetStr1(IN const AString& strValue, IN IMS_SINT32 nCount,
-            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+            IN const IMS_CHAR cDelimiter = 0 /* no delimiter */);
 
     /**
      * @brief Gets the adjusted logging string with the count and the delimiter.
@@ -127,7 +127,7 @@ public:
      * @return The adjusted logging string.
      */
     static const AString& GetStr2(IN const AString& strValue, IN IMS_SINT32 nCount,
-            IN const IMS_CHAR cDelimiter = 0/* no delimiter */);
+            IN const IMS_CHAR cDelimiter = 0 /* no delimiter */);
 
     /**
      * @brief Gets the adjusted logging string for the given URI string.

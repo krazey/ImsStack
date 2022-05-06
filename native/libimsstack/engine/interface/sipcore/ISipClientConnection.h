@@ -32,8 +32,7 @@ class ISipGenericChallenge;
  *
  * @see ISipConnection, ISipConnectionNotifier
  */
-class ISipClientConnection :
-        public ISipConnection
+class ISipClientConnection : public ISipConnection
 {
 public:
     /**
@@ -109,8 +108,8 @@ public:
      *              listening port.
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT InitRequest(IN const AString& strMethod,
-            IN ISipConnectionNotifier* piScn) = 0;
+    virtual IMS_RESULT InitRequest(
+            IN const AString& strMethod, IN ISipConnectionNotifier* piScn) = 0;
 
     /**
      * @brief Receives a SIP response message.
@@ -262,9 +261,9 @@ public:
      * @param nTransportExt Transport extension (Sip::TRANSPORT_EXT_XXX in Sip.h)
      * @note RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
      */
-    virtual void SetTransportTuple(IN const IPAddress& objIpAddr,
-            IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = 0xFFFF,
-            IN IMS_SINT32 nTransportExt = 0/*ANY*/) = 0;
+    virtual void SetTransportTuple(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = 0xFFFF,
+            IN IMS_SINT32 nTransportExt = 0 /*ANY*/) = 0;
 };
 
 #endif

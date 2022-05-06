@@ -16,17 +16,16 @@
 #include "ImsMessageDef.h"
 #include "IMSActivity.h"
 
-class EngineActivity
-    : public IMSActivity
+class EngineActivity : public IMSActivity
 {
 public:
-    explicit EngineActivity(IN CONST AString &strName_ = AString::ConstNull());
+    explicit EngineActivity(IN CONST AString& strName_ = AString::ConstNull());
     virtual ~EngineActivity();
 
 protected:
     // IMSActivity class
     virtual IIMSActivityControl* GetController();
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     virtual void OnDestroy();
 
@@ -42,4 +41,4 @@ protected:
     };
 };
 
-#endif // _ENGINE_ACTIVITY_H_
+#endif  // _ENGINE_ACTIVITY_H_

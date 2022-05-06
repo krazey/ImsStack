@@ -26,4 +26,4 @@ public:
     static void UninitializeForSlot(IN IMS_SINT32 nSlotId);
 };
 
-#endif // _STATIC_SIP_H_
+#endif  // _STATIC_SIP_H_

@@ -24,9 +24,9 @@
 __IMS_TRACE_TAG_SIP__;
 
 PRIVATE
-SIPStackState::SIPStackState()
-    : piLock(IMS_NULL)
-    , objTxnAggregate(IMSMap< IMS_UINT32, IMSList<SIPStackTransaction*> >())
+SIPStackState::SIPStackState() :
+        piLock(IMS_NULL),
+        objTxnAggregate(IMSMap<IMS_UINT32, IMSList<SIPStackTransaction*>>())
 {
     piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -54,11 +54,11 @@ void SIPStackState::CleanUp()
     {
         for (IMS_UINT32 i = 0; i < objTxnAggregate.GetSize(); ++i)
         {
-            IMSList<SIPStackTransaction*> &objTransactions = objTxnAggregate.GetValueAt(i);
+            IMSList<SIPStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(i);
 
             for (IMS_UINT32 j = 0; j < objTransactions.GetSize(); ++j)
             {
-                SIPStackTransaction *pTransaction = objTransactions.GetAt(j);
+                SIPStackTransaction* pTransaction = objTransactions.GetAt(j);
 
                 if (pTransaction == IMS_NULL)
                 {
@@ -103,15 +103,14 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPStackState::AbortTransaction(IN SipTxnKey *pKey,
-        IN SIPTransactionState *pTxnState)
+IMS_BOOL SIPStackState::AbortTransaction(IN SipTxnKey* pKey, IN SIPTransactionState* pTxnState)
 {
     if (pKey == IMS_NULL || pTxnState == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    SipTxnContext *pTxnContext = SIPStack::CreateTxnContext();
+    SipTxnContext* pTxnContext = SIPStack::CreateTxnContext();
 
     if (pTxnContext != IMS_NULL)
     {
@@ -143,11 +142,11 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPStackState::FetchTransaction(IN SipTxnKey *pKey, IN IMS_SINT32 nOption,
-        OUT SipTxnKey *&pOutKey, OUT SipTxn *&pTxn)
+IMS_BOOL SIPStackState::FetchTransaction(
+        IN SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
     LockGuard objLock(piLock);
-    SIPStackTransaction *pTransaction = FindTransaction(pKey);
+    SIPStackTransaction* pTransaction = FindTransaction(pKey);
 
     if (pTransaction == IMS_NULL)
     {
@@ -175,11 +174,11 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPStackState::ReleaseTransaction(IN SipTxnKey *pKey, IN IMS_SINT32 nOption,
-        OUT SipTxnKey *&pOutKey, OUT SipTxn *&pTxn)
+IMS_BOOL SIPStackState::ReleaseTransaction(
+        IN SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
     LockGuard objLock(piLock);
-    SIPStackTransaction *pTransaction = RemoveTransaction(pKey, nOption);
+    SIPStackTransaction* pTransaction = RemoveTransaction(pKey, nOption);
 
     if (pTransaction == IMS_NULL)
     {
@@ -206,17 +205,16 @@ Remarks
 
 */
 PUBLIC
-void SIPStackState::SetTransactionTimerValues(IN IMS_SINT32 nSlotId,
-        IN CONST SipProfile *pSIPProfile)
+void SIPStackState::SetTransactionTimerValues(
+        IN IMS_SINT32 nSlotId, IN CONST SipProfile* pSIPProfile)
 {
-    const SipConfigV *pSipConfigV
-            = DYNAMIC_CAST(const SipConfigV*, SipConfigProxy::GetSipConfigV(nSlotId));
+    const SipConfigV* pSipConfigV =
+            DYNAMIC_CAST(const SipConfigV*, SipConfigProxy::GetSipConfigV(nSlotId));
 
     //---------------------------------------------------------------------------------------------
 
-    if ((pSIPProfile == IMS_NULL)
-            && (pSipConfigV != IMS_NULL)
-            && !pSipConfigV->IsTimerValueConfiguredOnRuntime())
+    if ((pSIPProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
+            !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
         // Do not update the transaction timer values in runtime...
         IMS_TRACE_D("SIP timer values are not configured on runtime ...", 0, 0, 0);
@@ -234,10 +232,9 @@ void SIPStackState::SetTransactionTimerValues(IN IMS_SINT32 nSlotId,
 Remarks
 
 */
-PUBLIC GLOBAL
-SIPStackState* SIPStackState::GetInstance()
+PUBLIC GLOBAL SIPStackState* SIPStackState::GetInstance()
 {
-    static SIPStackState *pStackState = IMS_NULL;
+    static SIPStackState* pStackState = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -255,9 +252,9 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL SIPStackState::AddTransaction(IN SipTxnKey *pKey, IN SipTxn *pTxn)
+IMS_BOOL SIPStackState::AddTransaction(IN SipTxnKey* pKey, IN SipTxn* pTxn)
 {
-    SIPStackTransaction *pTransaction = new SIPStackTransaction(pKey, pTxn);
+    SIPStackTransaction* pTransaction = new SIPStackTransaction(pKey, pTxn);
 
     if (pTransaction == IMS_NULL)
     {
@@ -269,7 +266,7 @@ IMS_BOOL SIPStackState::AddTransaction(IN SipTxnKey *pKey, IN SipTxn *pTxn)
 
     if (nKeyIndex >= 0)
     {
-        IMSList<SIPStackTransaction*> &objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+        IMSList<SIPStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
 
         if (!objTransactions.Append(pTransaction))
         {
@@ -303,7 +300,7 @@ Remarks
 
 */
 PRIVATE
-SIPStackTransaction* SIPStackState::FindTransaction(IN SipTxnKey *pKey)
+SIPStackTransaction* SIPStackState::FindTransaction(IN SipTxnKey* pKey)
 {
     IMS_UINT32 nKey = AString::GetHashCode(SIPStack::TxnKey_GetCallId(pKey));
     IMS_SLONG nKeyIndex = objTxnAggregate.GetIndexOfKey(nKey);
@@ -314,11 +311,11 @@ SIPStackTransaction* SIPStackState::FindTransaction(IN SipTxnKey *pKey)
         return IMS_NULL;
     }
 
-    IMSList<SIPStackTransaction*> &objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+    IMSList<SIPStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
-        SIPStackTransaction *pTransaction = objTransactions.GetAt(i);
+        SIPStackTransaction* pTransaction = objTransactions.GetAt(i);
 
         // Check if the transaction is matched or not
         if (pTransaction->CompareKey(pKey))
@@ -337,7 +334,7 @@ Remarks
 
 */
 PRIVATE
-SIPStackTransaction* SIPStackState::RemoveTransaction(IN SipTxnKey *pKey, IN IMS_SINT32 nOption)
+SIPStackTransaction* SIPStackState::RemoveTransaction(IN SipTxnKey* pKey, IN IMS_SINT32 nOption)
 {
     IMS_UINT32 nKey = AString::GetHashCode(SIPStack::TxnKey_GetCallId(pKey));
     IMS_SLONG nKeyIndex = objTxnAggregate.GetIndexOfKey(nKey);
@@ -345,16 +342,16 @@ SIPStackTransaction* SIPStackState::RemoveTransaction(IN SipTxnKey *pKey, IN IMS
     if (nKeyIndex < 0)
     {
         // Transaction not found
-        IMS_TRACE_D("REMOVE :: TXN (%s) NOT FOUND, BUT OK!!!",
-                SIPStack::TxnKey_GetViaBranch(pKey), 0, 0);
+        IMS_TRACE_D("REMOVE :: TXN (%s) NOT FOUND, BUT OK!!!", SIPStack::TxnKey_GetViaBranch(pKey),
+                0, 0);
         return IMS_NULL;
     }
 
-    IMSList<SIPStackTransaction*> &objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+    IMSList<SIPStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
-        SIPStackTransaction *pTransaction = objTransactions.GetAt(i);
+        SIPStackTransaction* pTransaction = objTransactions.GetAt(i);
 
         // Check if the transaction is matched or not
         if (pTransaction->CompareKey(pKey))
@@ -399,7 +396,7 @@ IMS_UINT32 SIPStackState::GetTransactionCount() const
 
     for (IMS_UINT32 i = 0; i < objTxnAggregate.GetSize(); ++i)
     {
-        const IMSList<SIPStackTransaction*> &objTransactions = objTxnAggregate.GetValueAt(i);
+        const IMSList<SIPStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(i);
 
         nCount += objTransactions.GetSize();
     }

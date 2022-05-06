@@ -15,8 +15,6 @@
 
 #include "SubState.h"
 
-
-
 /*
 This class defines a state & behavior for subscriber (outgoing subscription).
 
@@ -25,32 +23,31 @@ Example
 See Also
 
 */
-class SubscriberState
-    : public SubState
+class SubscriberState : public SubState
 {
 public:
     SubscriberState();
     virtual ~SubscriberState();
 
 private:
-    SubscriberState(IN CONST SubscriberState &objRHS);
-    SubscriberState& operator=(IN CONST SubscriberState &objRHS);
+    SubscriberState(IN CONST SubscriberState& objRHS);
+    SubscriberState& operator=(IN CONST SubscriberState& objRHS);
 
 public:
     // SubState class
-    virtual IMS_BOOL UpdateState(IN CONST ISipMessage *piSIPMsg);
+    virtual IMS_BOOL UpdateState(IN CONST ISipMessage* piSIPMsg);
 
 protected:
     // SubState class
-    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32 &nCount) const;
+    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
 
 private:
-    IMS_SINT32 TranslateMessage(IN CONST ISipMessage *piSIPMsg);
+    IMS_SINT32 TranslateMessage(IN CONST ISipMessage* piSIPMsg);
 
-    IMS_BOOL UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnSUBSCRIBERequest(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage *piSIPMsg);
+    IMS_BOOL UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnSUBSCRIBERequest(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage* piSIPMsg);
 
     static void InitializeStateTable();
 
@@ -66,7 +63,7 @@ private:
         MESSAGE_SUBSCRIBE_200,
         MESSAGE_SUBSCRIBE_202,
         MESSAGE_SUBSCRIBE_481,
-        MESSAGE_SUBSCRIBE_NON2XX, // Except for 481
+        MESSAGE_SUBSCRIBE_NON2XX,  // Except for 481
 
         // re-SUBSCRIBE
         MESSAGE_RESUBSCRIBE,
@@ -74,7 +71,7 @@ private:
         MESSAGE_RESUBSCRIBE_200,
         MESSAGE_RESUBSCRIBE_202,
         MESSAGE_RESUBSCRIBE_481,
-        MESSAGE_RESUBSCRIBE_NON2XX, // Except for 481
+        MESSAGE_RESUBSCRIBE_NON2XX,  // Except for 481
 
         // NOTIFY
         MESSAGE_NOTIFY_ACTIVE,
@@ -94,4 +91,4 @@ private:
     static const SIPHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
 };
 
-#endif // _SUBSCRIBER_STATE_H_
+#endif  // _SUBSCRIBER_STATE_H_

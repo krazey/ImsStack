@@ -24,8 +24,7 @@
  *
  * @see ISipMessage
  */
-class ISipMessageBodyPart :
-        public ISipObject
+class ISipMessageBodyPart : public ISipObject
 {
 public:
     /**
@@ -58,8 +57,8 @@ public:
      *         It is an empty string if the value was set to be null or empty string.\n
      *         It is null string value, if an error occurs.
      */
-    virtual AString GetHeader(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) const = 0;
+    virtual AString GetHeader(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Sets a header value in the SIP message body part.

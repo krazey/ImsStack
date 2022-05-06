@@ -22,12 +22,10 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-CallerCapability::CallerCapability(IN IMS_UINT32 nID_)
-    : nID(nID_)
-    , objContactFeatures(IMSList<FeatureSet*>())
+CallerCapability::CallerCapability(IN IMS_UINT32 nID_) :
+        nID(nID_),
+        objContactFeatures(IMSList<FeatureSet*>())
 {
 }
 
@@ -86,7 +84,7 @@ CallerCapability& CallerCapability::operator=(IN CONST CallerCapability &objRHS)
 }*/
 
 PUBLIC
-IMS_BOOL CallerCapability::AddFeature(IN CONST Feature *pFeature)
+IMS_BOOL CallerCapability::AddFeature(IN CONST Feature* pFeature)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -106,7 +104,7 @@ IMS_BOOL CallerCapability::AddFeature(IN CONST Feature *pFeature)
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::AddFeature(IN CONST FeatureSet *pFeatureSet)
+IMS_BOOL CallerCapability::AddFeature(IN CONST FeatureSet* pFeatureSet)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -116,11 +114,11 @@ IMS_BOOL CallerCapability::AddFeature(IN CONST FeatureSet *pFeatureSet)
     }
 
     IMS_SINT32 nUpdateFlag = FEATURE_UNCHANGED;
-    const IMSList<Feature*> &objFeatures = pFeatureSet->GetFeatures();
+    const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
-        const Feature *pFeature = objFeatures.GetAt(i);
+        const Feature* pFeature = objFeatures.GetAt(i);
 
         if (pFeature->IsTagOnly())
             nUpdateFlag |= AddFeature(pFeature->GetTag());
@@ -132,7 +130,7 @@ IMS_BOOL CallerCapability::AddFeature(IN CONST FeatureSet *pFeatureSet)
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::AddFeatures(IN CONST CallerCapability *pCC)
+IMS_BOOL CallerCapability::AddFeatures(IN CONST CallerCapability* pCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -145,13 +143,13 @@ IMS_BOOL CallerCapability::AddFeatures(IN CONST CallerCapability *pCC)
 
     for (IMS_UINT32 i = 0; i < pCC->objContactFeatures.GetSize(); ++i)
     {
-        const FeatureSet *pFeatureSet = pCC->objContactFeatures.GetAt(i);
+        const FeatureSet* pFeatureSet = pCC->objContactFeatures.GetAt(i);
 
-        const IMSList<Feature*> &objFeatures = pFeatureSet->GetFeatures();
+        const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
         for (IMS_UINT32 j = 0; j < objFeatures.GetSize(); ++j)
         {
-            const Feature *pFeature = objFeatures.GetAt(j);
+            const Feature* pFeature = objFeatures.GetAt(j);
 
             if (pFeature->IsTagOnly())
                 nUpdateFlag |= AddFeature(pFeature->GetTag());
@@ -173,7 +171,7 @@ void CallerCapability::Clear()
     {
         for (IMS_UINT32 i = 0; i < objContactFeatures.GetSize(); ++i)
         {
-            FeatureSet *pFeatureSet = objContactFeatures.GetAt(i);
+            FeatureSet* pFeatureSet = objContactFeatures.GetAt(i);
 
             if (pFeatureSet != IMS_NULL)
                 delete pFeatureSet;
@@ -184,9 +182,8 @@ void CallerCapability::Clear()
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
-        IN CONST CoreServiceConfig *pServiceConfig,
-        IN CONST ISipConfigV* piSipConfigV)
+IMS_BOOL CallerCapability::Create(IN CONST AppConfig* pAppConfig,
+        IN CONST CoreServiceConfig* pServiceConfig, IN CONST ISipConfigV* piSipConfigV)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -215,7 +212,7 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
 
         // ICSIs : "+g.3gpp.icsi-ref"
         IMS_UINT32 j = 0;
-        const IMSList<ServiceIdentifier> &objICSIs = pServiceConfig->GetICSIs();
+        const IMSList<ServiceIdentifier>& objICSIs = pServiceConfig->GetICSIs();
 
         if (!objICSIs.IsEmpty())
         {
@@ -228,7 +225,7 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
         }
 
         // Feature tags
-        const IMSList<ServiceIdentifier> &objFeatureTags = pServiceConfig->GetFeatureTags();
+        const IMSList<ServiceIdentifier>& objFeatureTags = pServiceConfig->GetFeatureTags();
 
         if (!objFeatureTags.IsEmpty())
         {
@@ -237,7 +234,7 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
 
             for (j = 0; j < objFeatureTags.GetSize(); ++j)
             {
-                const AString &strFTag = objFeatureTags.GetAt(j).GetName();
+                const AString& strFTag = objFeatureTags.GetAt(j).GetName();
                 IMS_SINT32 nCount = strFTag.SplitF(TextParser::CHAR_EQUAL, strTag, strValue);
 
                 if (nCount == 1)
@@ -255,10 +252,10 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
     // StreamMedia property
     if (pAppConfig->IsStreamMediaSupported())
     {
-        if ((!pAppConfig->IsStreamMediaVideoSupported()
-                    && !pAppConfig->IsStreamMediaAudioSupported())
-                || (pAppConfig->IsStreamMediaVideoSupported()
-                    && pAppConfig->IsStreamMediaAudioSupported()))
+        if ((!pAppConfig->IsStreamMediaVideoSupported() &&
+                    !pAppConfig->IsStreamMediaAudioSupported()) ||
+                (pAppConfig->IsStreamMediaVideoSupported() &&
+                        pAppConfig->IsStreamMediaAudioSupported()))
         {
             if ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO) != 0)
             {
@@ -270,37 +267,37 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
                 AddFeature(Feature::BASE_TAG[Feature::BASE_VIDEO]);
             }
         }
-        else if (pAppConfig->IsStreamMediaVideoSupported()
-                && ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO) != 0))
+        else if (pAppConfig->IsStreamMediaVideoSupported() &&
+                ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO) != 0))
         {
             AddFeature(Feature::BASE_TAG[Feature::BASE_VIDEO]);
         }
-        else if (pAppConfig->IsStreamMediaAudioSupported()
-                && ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO) != 0))
+        else if (pAppConfig->IsStreamMediaAudioSupported() &&
+                ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_STREAM_AUDIO) != 0))
         {
             AddFeature(Feature::BASE_TAG[Feature::BASE_AUDIO]);
         }
     }
 
     // FramedMedia property
-    if (pAppConfig->IsFramedMediaSupported()
-            && ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_FRAMED) != 0))
+    if (pAppConfig->IsFramedMediaSupported() &&
+            ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_FRAMED) != 0))
     {
         AddFeature(Feature::OTHER_MESSAGE);
     }
 
     // BasicMedia property
-    if (pAppConfig->IsBasicMediaSupported()
-            && ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_BASIC) != 0))
+    if (pAppConfig->IsBasicMediaSupported() &&
+            ((nFeatureTags & ISipConfigV::FEATURE_TAG_MEDIA_BASIC) != 0))
     {
         IMSList<AString> objTokens;
-        const AStringArray &objBasicMediaMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
+        const AStringArray& objBasicMediaMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
 
         for (IMS_SINT32 j = 0; j < objBasicMediaMimeTypes.GetCount(); ++j)
         {
             objTokens = objBasicMediaMimeTypes.GetElementAt(j).Split(TextParser::CHAR_SLASH);
 
-            const AString &strTopLevelType = objTokens.GetAt(0);
+            const AString& strTopLevelType = objTokens.GetAt(0);
 
             if (strTopLevelType.EqualsIgnoreCase(Feature::BASE_TAG[Feature::BASE_APPLICATION]))
             {
@@ -321,7 +318,7 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
     // Event property
     if ((nFeatureTags & ISipConfigV::FEATURE_TAG_EVENT) != 0)
     {
-        const AStringArray &objEventPackages = pAppConfig->GetSupportedEventPackages();
+        const AStringArray& objEventPackages = pAppConfig->GetSupportedEventPackages();
 
         for (IMS_SINT32 i = 0; i < objEventPackages.GetCount(); ++i)
         {
@@ -333,7 +330,7 @@ IMS_BOOL CallerCapability::Create(IN CONST AppConfig *pAppConfig,
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::Equals(IN CONST CallerCapability *pCC) const
+IMS_BOOL CallerCapability::Equals(IN CONST CallerCapability* pCC) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -355,7 +352,7 @@ const IMSList<FeatureSet*>& CallerCapability::GetFeatures() const
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::HasFeature(IN CONST Feature *pFeature) const
+IMS_BOOL CallerCapability::HasFeature(IN CONST Feature* pFeature) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -364,7 +361,7 @@ IMS_BOOL CallerCapability::HasFeature(IN CONST Feature *pFeature) const
         return IMS_FALSE;
     }
 
-    FeatureSet *pFeatureSet = Lookup(pFeature->GetTag());
+    FeatureSet* pFeatureSet = Lookup(pFeature->GetTag());
 
     if (pFeatureSet == IMS_NULL)
     {
@@ -383,7 +380,7 @@ IMS_BOOL CallerCapability::IsEmpty() const
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::RemoveFeature(IN CONST Feature *pFeature)
+IMS_BOOL CallerCapability::RemoveFeature(IN CONST Feature* pFeature)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -403,7 +400,7 @@ IMS_BOOL CallerCapability::RemoveFeature(IN CONST Feature *pFeature)
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::RemoveFeature(IN CONST FeatureSet *pFeatureSet)
+IMS_BOOL CallerCapability::RemoveFeature(IN CONST FeatureSet* pFeatureSet)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -413,11 +410,11 @@ IMS_BOOL CallerCapability::RemoveFeature(IN CONST FeatureSet *pFeatureSet)
     }
 
     IMS_SINT32 nUpdateFlag = FEATURE_UNCHANGED;
-    const IMSList<Feature*> &objFeatures = pFeatureSet->GetFeatures();
+    const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
     for (IMS_UINT32 i = 0; i < objFeatures.GetSize(); ++i)
     {
-        const Feature *pFeature = objFeatures.GetAt(i);
+        const Feature* pFeature = objFeatures.GetAt(i);
 
         if (pFeature->IsTagOnly())
             nUpdateFlag |= RemoveFeature(pFeature->GetTag());
@@ -429,8 +426,8 @@ IMS_BOOL CallerCapability::RemoveFeature(IN CONST FeatureSet *pFeatureSet)
 }
 
 PUBLIC
-IMS_BOOL CallerCapability::RemoveFeatures(IN CONST CallerCapability *pCC,
-        IN IMS_BOOL bRemoveRef /* = IMS_TRUE */)
+IMS_BOOL CallerCapability::RemoveFeatures(
+        IN CONST CallerCapability* pCC, IN IMS_BOOL bRemoveRef /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -443,13 +440,13 @@ IMS_BOOL CallerCapability::RemoveFeatures(IN CONST CallerCapability *pCC,
 
     for (IMS_UINT32 i = 0; i < pCC->objContactFeatures.GetSize(); ++i)
     {
-        const FeatureSet *pFeatureSet = pCC->objContactFeatures.GetAt(i);
+        const FeatureSet* pFeatureSet = pCC->objContactFeatures.GetAt(i);
 
-        const IMSList<Feature*> &objFeatures = pFeatureSet->GetFeatures();
+        const IMSList<Feature*>& objFeatures = pFeatureSet->GetFeatures();
 
         for (IMS_UINT32 j = 0; j < objFeatures.GetSize(); ++j)
         {
-            const Feature *pFeature = objFeatures.GetAt(j);
+            const Feature* pFeature = objFeatures.GetAt(j);
 
             if (bRemoveRef)
             {
@@ -485,7 +482,7 @@ AString CallerCapability::ToString() const
 
         for (IMS_UINT32 i = 1; i < objContactFeatures.GetSize(); ++i)
         {
-            const FeatureSet *pFeatureSet = objContactFeatures.GetAt(i);
+            const FeatureSet* pFeatureSet = objContactFeatures.GetAt(i);
 
             strContactFeatures.Append(TextParser::CHAR_SEMICOLON);
             strContactFeatures.Append(pFeatureSet->ToString());
@@ -498,10 +495,10 @@ AString CallerCapability::ToString() const
 }
 
 PRIVATE
-IMS_BOOL CallerCapability::Attach(IN CONST AString &strTag,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+IMS_BOOL CallerCapability::Attach(
+        IN CONST AString& strTag, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
-    FeatureSet *pFeatureSet = new FeatureSet(strTag);
+    FeatureSet* pFeatureSet = new FeatureSet(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -520,13 +517,13 @@ IMS_BOOL CallerCapability::Attach(IN CONST AString &strTag,
 }
 
 PRIVATE
-void CallerCapability::Detach(IN CONST AString &strTag)
+void CallerCapability::Detach(IN CONST AString& strTag)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objContactFeatures.GetSize(); ++i)
     {
-        const FeatureSet *pFeatureSet = objContactFeatures.GetAt(i);
+        const FeatureSet* pFeatureSet = objContactFeatures.GetAt(i);
 
         if (pFeatureSet->GetTag().EqualsIgnoreCase(strTag))
         {
@@ -537,13 +534,13 @@ void CallerCapability::Detach(IN CONST AString &strTag)
 }
 
 PRIVATE
-FeatureSet* CallerCapability::Lookup(IN CONST AString &strTag) const
+FeatureSet* CallerCapability::Lookup(IN CONST AString& strTag) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objContactFeatures.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objContactFeatures.GetAt(i);
+        FeatureSet* pFeatureSet = objContactFeatures.GetAt(i);
 
         if (pFeatureSet->GetTag().EqualsIgnoreCase(strTag))
         {
@@ -556,9 +553,9 @@ FeatureSet* CallerCapability::Lookup(IN CONST AString &strTag) const
 }
 
 PRIVATE
-IMS_SINT32 CallerCapability::AddFeature(IN CONST AString &strTag)
+IMS_SINT32 CallerCapability::AddFeature(IN CONST AString& strTag)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -578,9 +575,9 @@ IMS_SINT32 CallerCapability::AddFeature(IN CONST AString &strTag)
 }
 
 PRIVATE
-IMS_SINT32 CallerCapability::AddFeature(IN CONST AString &strTag, IN CONST AString &strValue)
+IMS_SINT32 CallerCapability::AddFeature(IN CONST AString& strTag, IN CONST AString& strValue)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -600,9 +597,9 @@ IMS_SINT32 CallerCapability::AddFeature(IN CONST AString &strTag, IN CONST AStri
 }
 
 PRIVATE
-IMS_SINT32 CallerCapability::RemoveFeature(IN CONST AString &strTag)
+IMS_SINT32 CallerCapability::RemoveFeature(IN CONST AString& strTag)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -624,9 +621,9 @@ IMS_SINT32 CallerCapability::RemoveFeature(IN CONST AString &strTag)
 }
 
 PRIVATE
-IMS_SINT32 CallerCapability::RemoveFeature(IN CONST AString &strTag, IN CONST AString &strValue)
+IMS_SINT32 CallerCapability::RemoveFeature(IN CONST AString& strTag, IN CONST AString& strValue)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 

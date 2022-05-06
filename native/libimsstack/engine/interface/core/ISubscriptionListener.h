@@ -23,8 +23,8 @@ public:
      * @param piSubscription The concerned ISubscription
      * @param piForkedSubscription The forked ISubscription
      */
-    virtual void SubscriptionForkedNotify(IN ISubscription *piSubscription,
-            IN ISubscription *piForkedSubscription) = 0;
+    virtual void SubscriptionForkedNotify(
+            IN ISubscription* piSubscription, IN ISubscription* piForkedSubscription) = 0;
 
     /**
      * @brief Notifies the application that the event notification received.
@@ -36,7 +36,7 @@ public:
      * @param piNotify Pointer to IMessage which has an event state
      *                 of the subscribed event package
      */
-    virtual void SubscriptionNotify(IN ISubscription *piSubscription, IN IMessage *piNotify) = 0;
+    virtual void SubscriptionNotify(IN ISubscription* piSubscription, IN IMessage* piNotify) = 0;
 
     /**
      * @brief Notifies the application that the durative subscription was successfully
@@ -44,21 +44,21 @@ public:
      *
      * @param piSubscription The concerned ISubscription
      */
-    virtual void SubscriptionStarted(IN ISubscription *piSubscription) = 0;
+    virtual void SubscriptionStarted(IN ISubscription* piSubscription) = 0;
 
     /**
      * @brief Notifies the application that the durative subscription failed to start or update.
      *
      * @param piSubscription The concerned ISubscription
      */
-    virtual void SubscriptionStartFailed(IN ISubscription *piSubscription) = 0;
+    virtual void SubscriptionStartFailed(IN ISubscription* piSubscription) = 0;
 
     /**
      * @brief Notifies the application that the subscription was terminated.
      *
      * @param piSubscription The concerned ISubscription
      */
-    virtual void SubscriptionTerminated(IN ISubscription *piSubscription) = 0;
+    virtual void SubscriptionTerminated(IN ISubscription* piSubscription) = 0;
 };
 
-#endif // _INTERFACE_SUBSCRIPTION_LISTENER_H_
+#endif  // _INTERFACE_SUBSCRIPTION_LISTENER_H_

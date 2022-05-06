@@ -40,8 +40,8 @@ public:
      * @param strHeader Formed header string
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL FormHeader(IN IMS_SINT32 nSlotId,
-            IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader);
+    static IMS_BOOL FormHeader(
+            IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader);
     /**
      * @brief Forms P-Access-Network-Info header field for a specific operator.
      *
@@ -84,17 +84,17 @@ private:
     static void ReformPaniHeaderForInvalidMacAddress(
             IN const AccessNetworkInfo& objAnInfo, IN_OUT AString& strPaniHeader);
     static void ReformPaniHeaderForLocalTimeZone(IN_OUT AString& strHeader);
-    static void ReformPaniHeaderForCountryCode(IN IMS_SINT32 nSlotId,
-            IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc);
-    static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId,
-            IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg);
-    static void SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId,
-            IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg);
+    static void ReformPaniHeaderForCountryCode(
+            IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc);
+    static void SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
+            IN_OUT ISipMessage*& piSipMsg);
+    static void SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
+            IN_OUT ISipMessage*& piSipMsg);
     static void SetCniHeader(IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
             IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg);
     static IMS_BOOL IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAnInfo);
-    static IMS_BOOL IsCountryInfoRequiredForVoWiFi(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pSipProfile);
+    static IMS_BOOL IsCountryInfoRequiredForVoWiFi(
+            IN IMS_SINT32 nSlotId, IN const SipProfile* pSipProfile);
 };
 
 #endif

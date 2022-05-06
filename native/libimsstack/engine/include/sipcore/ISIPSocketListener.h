@@ -15,8 +15,6 @@
 
 class SIPSocket;
 
-
-
 /*
 SIP socket listener interface
 
@@ -44,7 +42,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_NotifyError(IN SIPSocket *pSocket, IN IMS_SINT32 nErrorCode) = 0;
+    virtual void Socket_NotifyError(IN SIPSocket* pSocket, IN IMS_SINT32 nErrorCode) = 0;
 
     /*
 
@@ -62,7 +60,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Socket_SendEnabled(IN SIPSocket *pSocket) = 0;
+    virtual void Socket_SendEnabled(IN SIPSocket* pSocket) = 0;
 };
 
-#endif // _INTERFACE_SIP_SOCKET_LISTENER_H_
+#endif  // _INTERFACE_SIP_SOCKET_LISTENER_H_

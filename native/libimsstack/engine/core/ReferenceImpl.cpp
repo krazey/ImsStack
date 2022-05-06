@@ -20,19 +20,16 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-ReferenceImpl::ReferenceImpl(IN Reference *pReference_)
-    : piListener(IMS_NULL)
-    , piNotificationListener(IMS_NULL)
-    , pReference(pReference_)
+ReferenceImpl::ReferenceImpl(IN Reference* pReference_) :
+        piListener(IMS_NULL),
+        piNotificationListener(IMS_NULL),
+        pReference(pReference_)
 {
     pReference->SetListener(this);
 }
 
-PUBLIC VIRTUAL
-ReferenceImpl::~ReferenceImpl()
+PUBLIC VIRTUAL ReferenceImpl::~ReferenceImpl()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -43,8 +40,7 @@ ReferenceImpl::~ReferenceImpl()
     }
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::Destroy()
+PRIVATE VIRTUAL void ReferenceImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -61,48 +57,43 @@ void ReferenceImpl::Destroy()
 }
 
 // SIP_MESSAGE_MEDIATOR
-PRIVATE VIRTUAL
-void ReferenceImpl::SetMessageMediator(IN IMessageMediator *piMediator)
+PRIVATE VIRTUAL void ReferenceImpl::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
     pReference->SetMessageMediator(piMediator);
 }
 
-PRIVATE VIRTUAL
-IMessage* ReferenceImpl::GetNextRequest()
+PRIVATE VIRTUAL IMessage* ReferenceImpl::GetNextRequest()
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetNextRequest();
 }
 
-PRIVATE VIRTUAL
-IMessage* ReferenceImpl::GetNextResponse()
+PRIVATE VIRTUAL IMessage* ReferenceImpl::GetNextResponse()
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetNextResponse();
 }
 
-PRIVATE VIRTUAL
-IMessage* ReferenceImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* ReferenceImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetPreviousRequest(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMessage* ReferenceImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* ReferenceImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetPreviousResponse(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMSList<IMessage*> ReferenceImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMSList<IMessage*> ReferenceImpl::GetPreviousResponses(
+        IN IMS_SINT32 nServiceMethod) const
 {
     IMSList<IMessage*> objIMessages;
     IMSList<Message*> objResponses = pReference->GetPreviousResponses(nServiceMethod);
@@ -117,24 +108,21 @@ IMSList<IMessage*> ReferenceImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMet
     return objIMessages;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> ReferenceImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL IMSList<AString> ReferenceImpl::GetRemoteUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetRemoteUserId();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::Accept()
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::Accept()
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->Accept();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod *piServiceMethod)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod* piServiceMethod)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -144,13 +132,12 @@ IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod *piServiceMethod)
         return IMS_FAILURE;
     }
 
-    const SipMethod &objMethod = pReference->GetReferMethod();
-    Method *pMethod = IMS_NULL;
+    const SipMethod& objMethod = pReference->GetReferMethod();
+    Method* pMethod = IMS_NULL;
 
-    if (objMethod.Equals(SipMethod::INVITE)
-        || objMethod.Equals(SipMethod::BYE))
+    if (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::BYE))
     {
-        SessionImpl *pSessionImpl = DYNAMIC_CAST(SessionImpl*, piServiceMethod);
+        SessionImpl* pSessionImpl = DYNAMIC_CAST(SessionImpl*, piServiceMethod);
 
         pMethod = pSessionImpl->GetSession();
     }
@@ -160,98 +147,87 @@ IMS_RESULT ReferenceImpl::ConnectReferMethod(IN IServiceMethod *piServiceMethod)
     return pReference->ConnectReferMethod(pMethod);
 }
 
-PRIVATE VIRTUAL
-const AString& ReferenceImpl::GetReferMethod() const
+PRIVATE VIRTUAL const AString& ReferenceImpl::GetReferMethod() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetReferMethod().ToString();
 }
 
-PRIVATE VIRTUAL
-const AString& ReferenceImpl::GetReferToUserId() const
+PRIVATE VIRTUAL const AString& ReferenceImpl::GetReferToUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetReferToUserId();
 }
 
-PRIVATE VIRTUAL
-const AString& ReferenceImpl::GetReplaces() const
+PRIVATE VIRTUAL const AString& ReferenceImpl::GetReplaces() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetReplaces();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 ReferenceImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 ReferenceImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::Refer(IN IMS_BOOL bImplicitSubscription)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::Refer(IN IMS_BOOL bImplicitSubscription)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->Refer(bImplicitSubscription);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::Reject()
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::Reject()
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->Reject();
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::SetListener(IN IReferenceListener *piListener)
+PRIVATE VIRTUAL void ReferenceImpl::SetListener(IN IReferenceListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::SetReplaces(IN CONST AString &strSessionId)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::SetReplaces(IN CONST AString& strSessionId)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->SetReplaces(strSessionId);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::AcceptEx(IN IMS_SINT32 nStatusCode /* = 202 */,
-        IN IMS_BOOL b100Trying /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::AcceptEx(
+        IN IMS_SINT32 nStatusCode /* = 202 */, IN IMS_BOOL b100Trying /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->AcceptEx(nStatusCode, b100Trying);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::ReferEx(IN IMS_BOOL bImplicitSubscription,
-        IN CONST AString &strHeadersForReferTo /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::ReferEx(IN IMS_BOOL bImplicitSubscription,
+        IN CONST AString& strHeadersForReferTo /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->ReferEx(bImplicitSubscription, strHeadersForReferTo);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::RejectEx(IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::RejectEx(IN IMS_SINT32 nStatusCode)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->RejectEx(nStatusCode);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT ReferenceImpl::SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray &objContent,
+PRIVATE VIRTUAL IMS_RESULT ReferenceImpl::SendNotification(IN IMS_SINT32 nSubState,
+        IN CONST ByteArray& objContent,
         IN IMS_SINT32 nReason /* = ISubscriptionState::REASON_NONE */,
         IN IMS_SINT32 nExpires /* = (-1) */)
 {
@@ -260,8 +236,7 @@ IMS_RESULT ReferenceImpl::SendNotification(IN IMS_SINT32 nSubState, IN CONST Byt
     return pReference->SendNotification(nSubState, objContent, nReason, nExpires);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::SetNotificationListener(IN INotificationListener *piListener)
+PRIVATE VIRTUAL void ReferenceImpl::SetNotificationListener(IN INotificationListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -277,16 +252,14 @@ void ReferenceImpl::SetNotificationListener(IN INotificationListener *piListener
     }
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
+PRIVATE VIRTUAL void ReferenceImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     //---------------------------------------------------------------------------------------------
 
     return pReference->SetImplicitRoutingRequired(bFlag);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnReference_Delivered(IN Reference *pReference)
+PRIVATE VIRTUAL void ReferenceImpl::OnReference_Delivered(IN Reference* pReference)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -305,8 +278,7 @@ void ReferenceImpl::OnReference_Delivered(IN Reference *pReference)
     piListener->ReferenceDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnReference_DeliveryFailed(IN Reference *pReference)
+PRIVATE VIRTUAL void ReferenceImpl::OnReference_DeliveryFailed(IN Reference* pReference)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -325,8 +297,8 @@ void ReferenceImpl::OnReference_DeliveryFailed(IN Reference *pReference)
     piListener->ReferenceDeliveryFailed(this);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnReference_NotifyReceived(IN Reference *pReference, IN Message *pNotify)
+PRIVATE VIRTUAL void ReferenceImpl::OnReference_NotifyReceived(
+        IN Reference* pReference, IN Message* pNotify)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -345,8 +317,7 @@ void ReferenceImpl::OnReference_NotifyReceived(IN Reference *pReference, IN Mess
     piListener->ReferenceNotify(this, pNotify);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnReference_Terminated(IN Reference *pReference)
+PRIVATE VIRTUAL void ReferenceImpl::OnReference_Terminated(IN Reference* pReference)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -365,10 +336,9 @@ void ReferenceImpl::OnReference_Terminated(IN Reference *pReference)
     piListener->ReferenceTerminated(this);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnNotification_Delivered(IN ServiceMethod *pMethod)
+PRIVATE VIRTUAL void ReferenceImpl::OnNotification_Delivered(IN ServiceMethod* pMethod)
 {
-    Reference *pReference = DYNAMIC_CAST(Reference*, pMethod);
+    Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
 
     //---------------------------------------------------------------------------------------------
 
@@ -387,11 +357,10 @@ void ReferenceImpl::OnNotification_Delivered(IN ServiceMethod *pMethod)
     piNotificationListener->NotificationDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void ReferenceImpl::OnNotification_DeliveryFailed(IN ServiceMethod *pMethod,
-        IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL void ReferenceImpl::OnNotification_DeliveryFailed(
+        IN ServiceMethod* pMethod, IN IMS_SINT32 nStatusCode)
 {
-    Reference *pReference = DYNAMIC_CAST(Reference*, pMethod);
+    Reference* pReference = DYNAMIC_CAST(Reference*, pMethod);
 
     //---------------------------------------------------------------------------------------------
 

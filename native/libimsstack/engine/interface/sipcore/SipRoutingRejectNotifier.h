@@ -23,8 +23,7 @@
 class ISipMessage;
 class ISipServerConnection;
 
-class SipRoutingRejectNotifier :
-        public ISipRoutingRejectNotifier
+class SipRoutingRejectNotifier : public ISipRoutingRejectNotifier
 {
 public:
     SipRoutingRejectNotifier();
@@ -47,8 +46,7 @@ public:
      * @param piSipMsg SIP message to be rejected
      * @param objStatusCode Status code which will be used for request reject
      */
-    void NotifyRequestReject(IN ISipMessage* piSipMsg,
-            IN_OUT SipStatusCode& objStatusCode);
+    void NotifyRequestReject(IN ISipMessage* piSipMsg, IN_OUT SipStatusCode& objStatusCode);
 
     /**
      * Notifies the applications that the incoming SIP request will be rejected by the engine.
@@ -56,8 +54,8 @@ public:
      * @param piSsc SIP server connection to be rejected
      * @param objStatusCode Status code which will be used for request reject
      */
-    void NotifyRequestReject(IN ISipServerConnection* piSsc,
-            IN_OUT SipStatusCode& objStatusCode);
+    void NotifyRequestReject(IN ISipServerConnection* piSsc, IN_OUT SipStatusCode& objStatusCode);
+
 private:
     // ISipRoutingRejectNotifier class
     virtual void AddListener(IN ISipRoutingRejectListener* piListener);

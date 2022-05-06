@@ -17,31 +17,28 @@
 
 #include "SipMethod.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipMethod::NAME[] =
-{
-    "ACK",
-    "BYE",
-    "CANCEL",
-    "INVITE",
-    "OPTIONS",
-    "REGISTER",
-    "PRACK",
-    "SUBSCRIBE",
-    "NOTIFY",
-    "UPDATE",
-    "MESSAGE",
-    "REFER",
-    "PUBLISH",
-    "INFO",
-    "UNKNOWN"
+PUBLIC GLOBAL const IMS_CHAR* SipMethod::NAME[] = {
+        "ACK",
+        "BYE",
+        "CANCEL",
+        "INVITE",
+        "OPTIONS",
+        "REGISTER",
+        "PRACK",
+        "SUBSCRIBE",
+        "NOTIFY",
+        "UPDATE",
+        "MESSAGE",
+        "REFER",
+        "PUBLISH",
+        "INFO",
+        "UNKNOWN",
 };
 
-PUBLIC GLOBAL
-const SipMethod SipMethod::INVALID_METHOD;
+PUBLIC GLOBAL const SipMethod SipMethod::INVALID_METHOD;
 
 PUBLIC
-SipMethod::SipMethod(IN const IMS_SINT32 nMethod/* = SipMethod::INVALID*/) :
+SipMethod::SipMethod(IN const IMS_SINT32 nMethod /* = SipMethod::INVALID*/) :
         m_nMethod(nMethod)
 {
     m_strMethod = ConvertMethodToString(nMethod);
@@ -69,9 +66,7 @@ SipMethod::SipMethod(IN const SipMethod& other) :
 }
 
 PUBLIC
-SipMethod::~SipMethod()
-{
-}
+SipMethod::~SipMethod() {}
 
 PUBLIC
 SipMethod& SipMethod::operator=(IN const SipMethod& other)
@@ -127,14 +122,12 @@ SipMethod& SipMethod::operator=(IN const AString& strMethod)
     return (*this);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* SipMethod::ToName(IN IMS_SINT32 nMethod)
+PUBLIC GLOBAL const IMS_CHAR* SipMethod::ToName(IN IMS_SINT32 nMethod)
 {
     return ((nMethod > INVALID) && (nMethod < MAX)) ? NAME[nMethod] : "";
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SipMethod::ConvertStringToMethod(IN const AString& strMethod)
+PRIVATE GLOBAL IMS_SINT32 SipMethod::ConvertStringToMethod(IN const AString& strMethod)
 {
     if (strMethod.IsNULL() || strMethod.IsEmpty())
     {
@@ -154,8 +147,7 @@ IMS_SINT32 SipMethod::ConvertStringToMethod(IN const AString& strMethod)
     return SipMethod::INVALID;
 }
 
-PRIVATE GLOBAL
-AString SipMethod::ConvertMethodToString(IN IMS_SINT32 nMethod)
+PRIVATE GLOBAL AString SipMethod::ConvertMethodToString(IN IMS_SINT32 nMethod)
 {
     if ((nMethod > SipMethod::INVALID) && (nMethod < SipMethod::MAX))
     {

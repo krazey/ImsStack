@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_RETRANSMISSION_HELPER_LISTENER_H_
 #define _INTERFACE_RETRANSMISSION_HELPER_LISTENER_H_
 
-
-
 /*
 
 RetransmissionHelperListener interface
@@ -46,4 +44,4 @@ public:
     virtual IMS_RESULT RetransmissionHelper_NotifyStatus(IN IMS_SINT32 nStatus) = 0;
 };
 
-#endif // _INTERFACE_RETRANSMISSION_HELPER_LISTENER_H_
+#endif  // _INTERFACE_RETRANSMISSION_HELPER_LISTENER_H_

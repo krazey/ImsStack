@@ -15,8 +15,6 @@
 
 #include "IMSTypeDef.h"
 
-
-
 /*
 
 Parameters
@@ -34,4 +32,4 @@ void
 */
 GLOBAL void SIPStackTxnLayer_Initialize();
 
-#endif // _SIP_STACK_TXN_LAYER_H_
+#endif  // _SIP_STACK_TXN_LAYER_H_

@@ -16,33 +16,29 @@
 #include "SIPHeader.h"
 #include "SIPUnknownHeaders.h"
 
-
-
 PUBLIC
-SIPUnknownHeaders::Header::Header(IN CONST AString &strName_)
-    : strCompactName(AString::ConstNull())
-    , strName(AString::ConstNull())
+SIPUnknownHeaders::Header::Header(IN CONST AString& strName_) :
+        strCompactName(AString::ConstNull()),
+        strName(AString::ConstNull())
 {
     // Headers with a compact form : Subject (s), Identity (y), Identity-Info (n)
     SetName(strName_);
 }
 
 PUBLIC
-SIPUnknownHeaders::Header::Header(IN CONST SIPUnknownHeaders::Header &objRHS)
-    : strCompactName(objRHS.strCompactName)
-    , strName(objRHS.strName)
-    , objBodys(objRHS.objBodys)
+SIPUnknownHeaders::Header::Header(IN CONST SIPUnknownHeaders::Header& objRHS) :
+        strCompactName(objRHS.strCompactName),
+        strName(objRHS.strName),
+        objBodys(objRHS.objBodys)
 {
 }
 
 PUBLIC
-SIPUnknownHeaders::Header::~Header()
-{
-}
+SIPUnknownHeaders::Header::~Header() {}
 
 PUBLIC
 SIPUnknownHeaders::Header& SIPUnknownHeaders::Header::operator=(
-        IN CONST SIPUnknownHeaders::Header &objRHS)
+        IN CONST SIPUnknownHeaders::Header& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -65,7 +61,7 @@ void SIPUnknownHeaders::Header::Clear()
 }
 
 PUBLIC
-IMS_BOOL SIPUnknownHeaders::Header::Equals(IN CONST AString &strName) const
+IMS_BOOL SIPUnknownHeaders::Header::Equals(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -79,7 +75,7 @@ IMS_BOOL SIPUnknownHeaders::Header::Equals(IN CONST AString &strName) const
 }
 
 PRIVATE
-void SIPUnknownHeaders::Header::SetName(IN CONST AString &strName)
+void SIPUnknownHeaders::Header::SetName(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -104,52 +100,50 @@ void SIPUnknownHeaders::Header::SetName(IN CONST AString &strName)
     {
         switch (strName[0])
         {
-        case 's':
-        case 'S':
-            if (strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
-            {
-                this->strCompactName = SipHeaderName::CF_SUBJECT;
-            }
+            case 's':
+            case 'S':
+                if (strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
+                {
+                    this->strCompactName = SipHeaderName::CF_SUBJECT;
+                }
 
-            this->strName = strName;
-            break;
+                this->strName = strName;
+                break;
 
-        case 'i':
-        case 'I':
-            if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY))
-            {
-                this->strCompactName = SipHeaderName::CF_IDENTITY;
-            }
-            else if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY_INFO))
-            {
-                this->strCompactName = SipHeaderName::CF_IDENTITY_INFO;
-            }
+            case 'i':
+            case 'I':
+                if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY))
+                {
+                    this->strCompactName = SipHeaderName::CF_IDENTITY;
+                }
+                else if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY_INFO))
+                {
+                    this->strCompactName = SipHeaderName::CF_IDENTITY_INFO;
+                }
 
-            this->strName = strName;
-            break;
+                this->strName = strName;
+                break;
 
-        default:
-            this->strName = strName;
-            break;
+            default:
+                this->strName = strName;
+                break;
         }
     }
 }
 
 PUBLIC
-SIPUnknownHeaders::SIPUnknownHeaders()
-{
-}
+SIPUnknownHeaders::SIPUnknownHeaders() {}
 
 PUBLIC
-SIPUnknownHeaders::SIPUnknownHeaders(IN CONST SIPUnknownHeaders &objRHS)
+SIPUnknownHeaders::SIPUnknownHeaders(IN CONST SIPUnknownHeaders& objRHS)
 {
-    Header *pNewHeader;
+    Header* pNewHeader;
 
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
     {
-        const Header *pHeader = objRHS.objHeaders.GetAt(i);
+        const Header* pHeader = objRHS.objHeaders.GetAt(i);
 
         pNewHeader = new Header(*pHeader);
 
@@ -172,19 +166,19 @@ Remarks
 
 */
 PUBLIC
-SIPUnknownHeaders& SIPUnknownHeaders::operator=(IN CONST SIPUnknownHeaders &objRHS)
+SIPUnknownHeaders& SIPUnknownHeaders::operator=(IN CONST SIPUnknownHeaders& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
     if (this != &objRHS)
     {
-        Header *pNewHeader;
+        Header* pNewHeader;
 
         Clear();
 
         for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
         {
-            const Header *pHeader = objRHS.objHeaders.GetAt(i);
+            const Header* pHeader = objRHS.objHeaders.GetAt(i);
 
             pNewHeader = new Header(*pHeader);
 
@@ -204,9 +198,9 @@ Remarks
 
 */
 PUBLIC
-IMS_RESULT SIPUnknownHeaders::AddHeader(IN CONST AString &strName, IN CONST AString &strBody)
+IMS_RESULT SIPUnknownHeaders::AddHeader(IN CONST AString& strName, IN CONST AString& strBody)
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -260,7 +254,7 @@ void SIPUnknownHeaders::Clear()
 
     while (!objHeaders.IsEmpty())
     {
-        Header *pHeader = objHeaders.GetAt(0);
+        Header* pHeader = objHeaders.GetAt(0);
 
         if (pHeader != IMS_NULL)
             delete pHeader;
@@ -288,10 +282,10 @@ Remarks
 
 */
 PUBLIC
-AString SIPUnknownHeaders::GetHeader(IN CONST AString &strName,
-        IN IMS_SINT32 nIndex /* = 0 */) const
+AString SIPUnknownHeaders::GetHeader(
+        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */) const
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -309,7 +303,7 @@ Remarks
 PUBLIC
 AString SIPUnknownHeaders::GetHeaderBodys(IN IMS_SINT32 nPos) const
 {
-    Header *pHeader = objHeaders.GetAt(nPos);
+    Header* pHeader = objHeaders.GetAt(nPos);
 
     //---------------------------------------------------------------------------------------------
 
@@ -341,9 +335,9 @@ Remarks
 
 */
 PUBLIC
-AString SIPUnknownHeaders::GetHeaderBodys(IN CONST AString &strName) const
+AString SIPUnknownHeaders::GetHeaderBodys(IN CONST AString& strName) const
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -373,9 +367,9 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SIPUnknownHeaders::GetHeaderCount(IN CONST AString &strName) const
+IMS_SINT32 SIPUnknownHeaders::GetHeaderCount(IN CONST AString& strName) const
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -391,18 +385,18 @@ Remarks
 
 */
 PUBLIC
-const AString& SIPUnknownHeaders::GetHeaderName(IN IMS_SINT32 nPos,
-        IN IMS_BOOL bCompactForm /* = IMS_FALSE */) const
+const AString& SIPUnknownHeaders::GetHeaderName(
+        IN IMS_SINT32 nPos, IN IMS_BOOL bCompactForm /* = IMS_FALSE */) const
 {
-    Header *pHeader = objHeaders.GetAt(nPos);
+    Header* pHeader = objHeaders.GetAt(nPos);
 
     //---------------------------------------------------------------------------------------------
 
     if (pHeader != IMS_NULL)
     {
         if (bCompactForm)
-            return (pHeader->strCompactName.GetLength() > 0) ? \
-                    pHeader->strCompactName : pHeader->strName;
+            return (pHeader->strCompactName.GetLength() > 0) ? pHeader->strCompactName
+                                                             : pHeader->strName;
         else
             return pHeader->strName;
     }
@@ -416,14 +410,14 @@ Remarks
 
 */
 PUBLIC
-IMSList<AString> SIPUnknownHeaders::GetHeaders(IN CONST AString &strName) const
+IMSList<AString> SIPUnknownHeaders::GetHeaders(IN CONST AString& strName) const
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
     if (pHeader == IMS_NULL)
-        return IMSList<AString>(); // ???, Throw exception
+        return IMSList<AString>();  // ???, Throw exception
 
     return pHeader->objBodys;
 }
@@ -434,7 +428,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPUnknownHeaders::IsHeaderPresent(IN CONST AString &strName) const
+IMS_BOOL SIPUnknownHeaders::IsHeaderPresent(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -447,13 +441,13 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPUnknownHeaders::OverwriteHeaders(IN CONST SIPUnknownHeaders &objOther)
+IMS_BOOL SIPUnknownHeaders::OverwriteHeaders(IN CONST SIPUnknownHeaders& objOther)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objOther.objHeaders.GetSize(); ++i)
     {
-        Header *pHeader = objOther.objHeaders.GetAt(i);
+        Header* pHeader = objOther.objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {
@@ -461,7 +455,7 @@ IMS_BOOL SIPUnknownHeaders::OverwriteHeaders(IN CONST SIPUnknownHeaders &objOthe
 
             for (IMS_UINT32 j = 0; j < pHeader->objBodys.GetSize(); ++j)
             {
-                const AString &strBody = pHeader->objBodys.GetAt(j);
+                const AString& strBody = pHeader->objBodys.GetAt(j);
 
                 if (AddHeader(pHeader->strName, strBody) != IMS_SUCCESS)
                 {
@@ -480,9 +474,9 @@ Remarks
 
 */
 PUBLIC
-IMS_RESULT SIPUnknownHeaders::PrependHeader(IN CONST AString &strName, IN CONST AString &strBody)
+IMS_RESULT SIPUnknownHeaders::PrependHeader(IN CONST AString& strName, IN CONST AString& strBody)
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -530,9 +524,9 @@ Remarks
 
 */
 PUBLIC
-void SIPUnknownHeaders::RemoveHeader(IN CONST AString &strName)
+void SIPUnknownHeaders::RemoveHeader(IN CONST AString& strName)
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -551,9 +545,9 @@ Remarks
 
 */
 PUBLIC
-IMS_RESULT SIPUnknownHeaders::SetHeader(IN CONST AString &strName, IN CONST AString &strBody)
+IMS_RESULT SIPUnknownHeaders::SetHeader(IN CONST AString& strName, IN CONST AString& strBody)
 {
-    Header *pHeader = FindHeader(strName);
+    Header* pHeader = FindHeader(strName);
 
     //---------------------------------------------------------------------------------------------
 
@@ -625,13 +619,13 @@ Remarks
 
 */
 PRIVATE
-void SIPUnknownHeaders::DeleteHeader(IN CONST AString &strName)
+void SIPUnknownHeaders::DeleteHeader(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
     {
-        Header *pHeader = objHeaders.GetAt(i);
+        Header* pHeader = objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {
@@ -651,13 +645,13 @@ Remarks
 
 */
 PRIVATE
-SIPUnknownHeaders::Header* SIPUnknownHeaders::FindHeader(IN CONST AString &strName) const
+SIPUnknownHeaders::Header* SIPUnknownHeaders::FindHeader(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
     {
-        Header *pHeader = objHeaders.GetAt(i);
+        Header* pHeader = objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {

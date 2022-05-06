@@ -14,18 +14,15 @@
 #include "ISipHeader.h"
 #include "util/EventPackage.h"
 
-
-
 PUBLIC
-EventPackage::EventPackage()
-    : strEvent(AString::ConstNull())
-    , piEventHeader(IMS_NULL)
-    , nInitialDuration(-1)
+EventPackage::EventPackage() :
+        strEvent(AString::ConstNull()),
+        piEventHeader(IMS_NULL),
+        nInitialDuration(-1)
 {
 }
 
-PUBLIC VIRTUAL
-EventPackage::~EventPackage()
+PUBLIC VIRTUAL EventPackage::~EventPackage()
 {
     if (piEventHeader != IMS_NULL)
         piEventHeader->Destroy();
@@ -81,7 +78,7 @@ void EventPackage::SetDuration(IN IMS_SINT32 nDuration)
 }
 
 PUBLIC
-void EventPackage::SetEvent(IN CONST AString &strEvent)
+void EventPackage::SetEvent(IN CONST AString& strEvent)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -89,7 +86,7 @@ void EventPackage::SetEvent(IN CONST AString &strEvent)
 }
 
 PUBLIC
-void EventPackage::SetEventHeader(IN ISipHeader *piHeader)
+void EventPackage::SetEventHeader(IN ISipHeader* piHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -102,7 +99,7 @@ void EventPackage::SetEventHeader(IN ISipHeader *piHeader)
 }
 
 PUBLIC
-void EventPackage::SetMIMETypes(IN CONST AStringArray &objMIMETypes)
+void EventPackage::SetMIMETypes(IN CONST AStringArray& objMIMETypes)
 {
     //---------------------------------------------------------------------------------------------
 

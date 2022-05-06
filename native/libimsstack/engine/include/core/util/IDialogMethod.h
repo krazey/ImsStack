@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_DIALOG_METHOD_H_
 #define _INTERFACE_DIALOG_METHOD_H_
 
-
-
 class IDialogMethod
 {
 public:
@@ -33,7 +31,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection *piSSC) const = 0;
+    virtual IMS_BOOL Dialog_Compare(IN ISipServerConnection* piSSC) const = 0;
 
     /*
 
@@ -50,7 +48,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection *piSSC) = 0;
+    virtual IMS_BOOL Dialog_NotifyRequest(IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_DIALOG_METHOD_H_
+#endif  // _INTERFACE_DIALOG_METHOD_H_

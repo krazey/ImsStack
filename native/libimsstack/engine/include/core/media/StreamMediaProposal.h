@@ -15,22 +15,19 @@
 
 #include "media/MediaProposal.h"
 
-
-
-class StreamMediaProposal
-    : public MediaProposal
+class StreamMediaProposal : public MediaProposal
 {
 public:
-    StreamMediaProposal(IN ISDPOAState *piOAState_);
+    StreamMediaProposal(IN ISDPOAState* piOAState_);
     virtual ~StreamMediaProposal();
 
 private:
-    StreamMediaProposal(IN CONST StreamMediaProposal &objRHS);
-    StreamMediaProposal& operator=(IN CONST StreamMediaProposal &objRHS);
+    StreamMediaProposal(IN CONST StreamMediaProposal& objRHS);
+    StreamMediaProposal& operator=(IN CONST StreamMediaProposal& objRHS);
 
 public:
     // MediaProposal class
     virtual IMS_SINT32 GetType() const;
 };
 
-#endif // _STREAM_MEDIA_PROPOSAL_H_
+#endif  // _STREAM_MEDIA_PROPOSAL_H_

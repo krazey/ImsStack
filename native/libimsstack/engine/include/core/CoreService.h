@@ -20,19 +20,16 @@ class IOnDirectCoreServiceListener;
 class Publication;
 class Subscription;
 
-
-
-class CoreService
-    : public Service
+class CoreService : public Service
 {
 public:
-    CoreService(IN CONST AString& strAppId_, IN CONST AString &strServiceId_,
-            IN CONST SipAddress *pIMPU_ = IMS_NULL);
+    CoreService(IN CONST AString& strAppId_, IN CONST AString& strServiceId_,
+            IN CONST SipAddress* pIMPU_ = IMS_NULL);
     virtual ~CoreService();
 
 private:
-    CoreService(IN CONST CoreService &objRHS);
-    CoreService& operator=(IN CONST CoreService &objRHS);
+    CoreService(IN CONST CoreService& objRHS);
+    CoreService& operator=(IN CONST CoreService& objRHS);
 
 public:
     // IConnection interface
@@ -40,32 +37,32 @@ public:
 
     // Service class
     virtual void Abort();
-    virtual void HandleSessionInvitationReceived(IN Session *pSession);
-    virtual void HandlePageMessageReceived(IN PageMessage *pPageMessage);
-    virtual void HandleReferenceReceived(IN Reference *pReference);
-    virtual void HandleCapabilityQueryReceived(IN Capabilities *pCapabilities);
+    virtual void HandleSessionInvitationReceived(IN Session* pSession);
+    virtual void HandlePageMessageReceived(IN PageMessage* pPageMessage);
+    virtual void HandleReferenceReceived(IN Reference* pReference);
+    virtual void HandleCapabilityQueryReceived(IN Capabilities* pCapabilities);
 
     // ICoreService interface
-    Capabilities* CreateCapabilities(IN CONST AString &strFrom, IN CONST AString &strTo);
-    PageMessage* CreatePageMessage(IN CONST AString &strFrom, IN CONST AString &strTo);
-    Publication* CreatePublication(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent);
-    Reference* CreateReference(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strReferTo, IN CONST AString &strReferMethod);
-    Session* CreateSession(IN CONST AString &strFrom, IN CONST AString &strTo);
-    SessionEx* CreateSessionEx(IN CONST AString &strFrom, IN CONST AString &strTo);
-    Subscription* CreateSubscription(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent);
+    Capabilities* CreateCapabilities(IN CONST AString& strFrom, IN CONST AString& strTo);
+    PageMessage* CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo);
+    Publication* CreatePublication(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
+    Reference* CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
+            IN CONST AString& strReferTo, IN CONST AString& strReferMethod);
+    Session* CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo);
+    SessionEx* CreateSessionEx(IN CONST AString& strFrom, IN CONST AString& strTo);
+    Subscription* CreateSubscription(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
     AString GetLocalUserId() const;
-    void SetListener(IN IOnCoreServiceListener *piListener);
+    void SetListener(IN IOnCoreServiceListener* piListener);
     ISIPConnectionFactory* CreateSIPConnectionFactory();
-    void SetDirectListener(IN IOnDirectCoreServiceListener *piListener);
+    void SetDirectListener(IN IOnDirectCoreServiceListener* piListener);
 
 private:
     virtual void Exception_NotifyError(IN IMS_SINT32 nErrorCode);
-    virtual IMS_BOOL ServerConnection_NotifyRequest(IN ISipServerConnection *piSSC);
+    virtual IMS_BOOL ServerConnection_NotifyRequest(IN ISipServerConnection* piSSC);
 
-    IMS_SINT32 CheckAndHandleDirectSIPRequest(IN ISipServerConnection *piSSC);
+    IMS_SINT32 CheckAndHandleDirectSIPRequest(IN ISipServerConnection* piSSC);
 
 private:
     // Refer to ICoreService class
@@ -84,8 +81,8 @@ private:
     };
 
     ReasonInfo objReasonInfo;
-    IOnCoreServiceListener *piCoreServiceListener;
-    IOnDirectCoreServiceListener *piDirectCoreServiceListener;
+    IOnCoreServiceListener* piCoreServiceListener;
+    IOnDirectCoreServiceListener* piDirectCoreServiceListener;
 };
 
-#endif // _CORE_SERVICE_H_
+#endif  // _CORE_SERVICE_H_

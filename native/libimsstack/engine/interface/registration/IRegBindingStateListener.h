@@ -17,4 +17,4 @@ public:
     virtual void RegBindingState_CallerCapabilityChanged() = 0;
 };
 
-#endif // _INTERFACE_REG_BINDING_STATE_LISTENER_H_
+#endif  // _INTERFACE_REG_BINDING_STATE_LISTENER_H_

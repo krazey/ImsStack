@@ -19,30 +19,27 @@
 
 class IMessage;
 
-
-
-class MessageBodyPart
-    : public IMessageBodyPart
+class MessageBodyPart : public IMessageBodyPart
 {
 public:
-    MessageBodyPart(IN IMessage *piMessage_, IN ISipMessageBodyPart *piBodyPart_);
+    MessageBodyPart(IN IMessage* piMessage_, IN ISipMessageBodyPart* piBodyPart_);
     virtual ~MessageBodyPart();
 
 public:
     ISipMessageBodyPart* GetBodyPart() const;
-    void SetBodyPart(IN ISipMessageBodyPart *piNewBodyPart);
+    void SetBodyPart(IN ISipMessageBodyPart* piNewBodyPart);
 
 private:
     // IMessageBodyPart interface implementation
     virtual const ByteArray& GetContent() const;
-    virtual AString GetHeader(IN CONST AString &strName) const;
-    virtual IMS_RESULT SetContent(IN CONST ByteArray &objContent);
-    virtual IMS_RESULT SetHeader(IN CONST AString &strName, IN CONST AString &strValue);
-    static IMS_SINT32 GetHeaderType(IN CONST AString &strName);
+    virtual AString GetHeader(IN CONST AString& strName) const;
+    virtual IMS_RESULT SetContent(IN CONST ByteArray& objContent);
+    virtual IMS_RESULT SetHeader(IN CONST AString& strName, IN CONST AString& strValue);
+    static IMS_SINT32 GetHeaderType(IN CONST AString& strName);
 
 private:
-    IMessage *piMessage;
-    ISipMessageBodyPart *piBodyPart;
+    IMessage* piMessage;
+    ISipMessageBodyPart* piBodyPart;
 };
 
-#endif // _MESSAGE_BODY_PART_H_
+#endif  // _MESSAGE_BODY_PART_H_

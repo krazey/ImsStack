@@ -110,8 +110,8 @@ public:
      *                it is set to AString::ConstEmpty().
      * @return If there is no parsing errors, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL ParseReasonHeader(IN const AString& strHeaderValue,
-            OUT IMS_SINT32& nCause, OUT AString& strText);
+    static IMS_BOOL ParseReasonHeader(
+            IN const AString& strHeaderValue, OUT IMS_SINT32& nCause, OUT AString& strText);
 
     /**
      * @brief Parses Reason header with "cause" / "text" parameters.
@@ -126,8 +126,8 @@ public:
      *                it is set to AString::ConstEmpty().
      * @return If there is no parsing errors, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    static IMS_BOOL ParseReasonHeader(IN const AString& strHeaderValue,
-            OUT AString& strProtocol, OUT IMS_SINT32& nCause, OUT AString& strText);
+    static IMS_BOOL ParseReasonHeader(IN const AString& strHeaderValue, OUT AString& strProtocol,
+            OUT IMS_SINT32& nCause, OUT AString& strText);
 };
 
 #endif

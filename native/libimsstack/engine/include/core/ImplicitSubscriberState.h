@@ -15,8 +15,6 @@
 
 #include "SubState.h"
 
-
-
 /*
 This class defines a state & behavior for subscriber (implicit subscription).
 
@@ -25,28 +23,27 @@ Example
 See Also
 
 */
-class ImplicitSubscriberState
-    : public SubState
+class ImplicitSubscriberState : public SubState
 {
 public:
     ImplicitSubscriberState();
     virtual ~ImplicitSubscriberState();
 
 private:
-    ImplicitSubscriberState(IN CONST ImplicitSubscriberState &objRHS);
-    ImplicitSubscriberState& operator=(IN CONST ImplicitSubscriberState &objRHS);
+    ImplicitSubscriberState(IN CONST ImplicitSubscriberState& objRHS);
+    ImplicitSubscriberState& operator=(IN CONST ImplicitSubscriberState& objRHS);
 
 public:
     // SubState class
-    virtual IMS_BOOL UpdateState(IN CONST ISipMessage *piSIPMsg);
+    virtual IMS_BOOL UpdateState(IN CONST ISipMessage* piSIPMsg);
 
 private:
-    IMS_SINT32 TranslateMessage(IN CONST ISipMessage *piSIPMsg);
+    IMS_SINT32 TranslateMessage(IN CONST ISipMessage* piSIPMsg);
 
-    IMS_BOOL UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnREFERRequest(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnREFERResponse(IN CONST ISipMessage *piSIPMsg);
+    IMS_BOOL UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnREFERRequest(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnREFERResponse(IN CONST ISipMessage* piSIPMsg);
 
     static void InitializeStateTable();
 
@@ -62,7 +59,7 @@ private:
         MESSAGE_REFER_200,
         MESSAGE_REFER_202,
         MESSAGE_REFER_481,
-        MESSAGE_REFER_NON2XX,                  // Except for 481
+        MESSAGE_REFER_NON2XX,  // Except for 481
 
         // NOTIFY
         MESSAGE_NOTIFY_ACTIVE,
@@ -80,4 +77,4 @@ private:
     static IMS_SINT32 STATE[STATE_MAX][MESSAGE_MAX];
 };
 
-#endif // _IMPLICIT_SUBSCRIBER_STATE_H_
+#endif  // _IMPLICIT_SUBSCRIBER_STATE_H_

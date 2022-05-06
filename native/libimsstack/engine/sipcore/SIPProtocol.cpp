@@ -23,18 +23,13 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PRIVATE
-SIPProtocol::SIPProtocol()
-    : Protocol()
+SIPProtocol::SIPProtocol() :
+        Protocol()
 {
 }
 
-PUBLIC VIRTUAL
-SIPProtocol::~SIPProtocol()
-{
-}
+PUBLIC VIRTUAL SIPProtocol::~SIPProtocol() {}
 
 /*
  Returns a singleton object of SIP protocol.
@@ -42,10 +37,9 @@ SIPProtocol::~SIPProtocol()
 Remarks
 
 */
-PUBLIC GLOBAL
-SIPProtocol* SIPProtocol::GetInstance()
+PUBLIC GLOBAL SIPProtocol* SIPProtocol::GetInstance()
 {
-    static SIPProtocol *pSIP = IMS_NULL;
+    static SIPProtocol* pSIP = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -65,8 +59,7 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PRIVATE VIRTUAL
-IConnection* SIPProtocol::OpenPrim(IN CONST AString &strName)
+PRIVATE VIRTUAL IConnection* SIPProtocol::OpenPrim(IN CONST AString& strName)
 {
     AString strScheme;
     AString strTarget;
@@ -87,9 +80,8 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PRIVATE VIRTUAL
-IConnection* SIPProtocol::OpenPrim(IN CONST AString &strScheme, IN CONST AString &strTarget,
-        IN CONST AString &strParams)
+PRIVATE VIRTUAL IConnection* SIPProtocol::OpenPrim(
+        IN CONST AString& strScheme, IN CONST AString& strTarget, IN CONST AString& strParams)
 {
     IMS_SINT32 nScheme;
 
@@ -137,7 +129,7 @@ IConnection* SIPProtocol::OpenPrim(IN CONST AString &strScheme, IN CONST AString
             }
 
             // SIP client transaction
-            SIPClientConnection *pSCC = new SIPClientConnection(strURI);
+            SIPClientConnection* pSCC = new SIPClientConnection(strURI);
 
             if (pSCC == IMS_NULL)
             {
@@ -147,7 +139,7 @@ IConnection* SIPProtocol::OpenPrim(IN CONST AString &strScheme, IN CONST AString
                 return IMS_NULL;
             }
 
-            SIPClientConnectionImpl *pSCCImpl = new SIPClientConnectionImpl(pSCC);
+            SIPClientConnectionImpl* pSCCImpl = new SIPClientConnectionImpl(pSCC);
 
             if (pSCCImpl == IMS_NULL)
             {
@@ -165,10 +157,9 @@ IConnection* SIPProtocol::OpenPrim(IN CONST AString &strScheme, IN CONST AString
 
 PRIVATE
 IConnection* SIPProtocol::CreateConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort,
-        IN CONST AString &strParams, IN IMS_BOOL bSharedMode /* = IMS_FALSE */)
+        IN CONST AString& strParams, IN IMS_BOOL bSharedMode /* = IMS_FALSE */)
 {
-    SIPConnectionNotifier *pSCN
-            = new SIPConnectionNotifier(nScheme, nPort, strParams, bSharedMode);
+    SIPConnectionNotifier* pSCN = new SIPConnectionNotifier(nScheme, nPort, strParams, bSharedMode);
 
     //---------------------------------------------------------------------------------------------
 
@@ -188,7 +179,7 @@ IConnection* SIPProtocol::CreateConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS
         return IMS_NULL;
     }
 
-    SIPConnectionNotifierImpl *pSCNImpl = new SIPConnectionNotifierImpl(pSCN);
+    SIPConnectionNotifierImpl* pSCNImpl = new SIPConnectionNotifierImpl(pSCN);
 
     if (pSCNImpl == IMS_NULL)
     {

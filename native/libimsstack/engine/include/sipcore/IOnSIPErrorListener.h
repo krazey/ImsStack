@@ -17,8 +17,6 @@
 
 #include "SIPConnection.h"
 
-
-
 /*
 SIP error listener interface
 
@@ -53,8 +51,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnError_NotifyError(IN SIPConnection *pSC, IN IMS_SINT32 nCode,
-            IN CONST AString &strMessage) = 0;
+    virtual void OnError_NotifyError(
+            IN SIPConnection* pSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage) = 0;
 };
 
-#endif // _INTERFACE_ON_SIP_ERROR_LISTENER_H_
+#endif  // _INTERFACE_ON_SIP_ERROR_LISTENER_H_

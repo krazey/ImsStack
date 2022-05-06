@@ -20,46 +20,41 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-const SIPHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
+PUBLIC GLOBAL const SIPHeaderProperty PubState::RESTRICTED_HEADER_PROPERTIES[] =
 {
     // Header type, Header name, Is single header ?
-    { ISipHeader::ACCEPT_CONTACT, IMS_NULL, IMS_FALSE },
-    { ISipHeader::AUTHORIZATION, IMS_NULL, IMS_FALSE },
-    { ISipHeader::ALLOW, IMS_NULL, IMS_FALSE },
-    { ISipHeader::CALL_ID, IMS_NULL, IMS_TRUE },
-    { ISipHeader::CONTACT_ANY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::CONTENT_LENGTH, IMS_NULL, IMS_TRUE },
-    { ISipHeader::CONTENT_TYPE, IMS_NULL, IMS_TRUE },
-    { ISipHeader::CSEQ, IMS_NULL, IMS_TRUE },
-    { ISipHeader::FROM, IMS_NULL, IMS_TRUE },
-    { ISipHeader::MAX_FORWARDS, IMS_NULL, IMS_TRUE },
-    { ISipHeader::MIN_EXPIRES, IMS_NULL, IMS_TRUE },
-    { ISipHeader::P_ACCESS_NETWORK_INFO, IMS_NULL, IMS_TRUE },
-    { ISipHeader::P_ASSERTED_IDENTITY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::P_PREFERRED_IDENTITY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::PROXY_AUTHORIZATION, IMS_NULL, IMS_FALSE },
-    { ISipHeader::ROUTE, IMS_NULL, IMS_FALSE },
-    { ISipHeader::TO, IMS_NULL, IMS_TRUE },
-    { ISipHeader::SECURITY_CLIENT, IMS_NULL, IMS_FALSE },
-    { ISipHeader::SECURITY_VERIFY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::VIA, IMS_NULL, IMS_FALSE },
+    {ISipHeader::ACCEPT_CONTACT,        IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::AUTHORIZATION,         IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::ALLOW,                 IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::CALL_ID,               IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::CONTACT_ANY,           IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::CONTENT_LENGTH,        IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::CONTENT_TYPE,          IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::CSEQ,                  IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::FROM,                  IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::MAX_FORWARDS,          IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::MIN_EXPIRES,           IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::P_ACCESS_NETWORK_INFO, IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::P_ASSERTED_IDENTITY,   IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::P_PREFERRED_IDENTITY,  IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::PROXY_AUTHORIZATION,   IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::ROUTE,                 IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::TO,                    IMS_NULL,                      IMS_TRUE },
+    {ISipHeader::SECURITY_CLIENT,       IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::SECURITY_VERIFY,       IMS_NULL,                      IMS_FALSE},
+    {ISipHeader::VIA,                   IMS_NULL,                      IMS_FALSE},
     // SIP: Content-Length header is handled as unknown header
-    { ISipHeader::UNKNOWN, SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
-    { ISipHeader::UNKNOWN, "l", IMS_TRUE }
+    {ISipHeader::UNKNOWN,               SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
+    {ISipHeader::UNKNOWN,               "l",                           IMS_TRUE }
 };
 
-
-
 PUBLIC
-PubState::PubState()
-    : nState(STATE_INIT)
-    , nOperation(NO_OPERATION)
-    , nPublicationDuration(NO_EXPIRES)
-    , strEntityTag(AString::ConstNull())
-    , piSIPMsg(IMS_NULL)
+PubState::PubState() :
+        nState(STATE_INIT),
+        nOperation(NO_OPERATION),
+        nPublicationDuration(NO_EXPIRES),
+        strEntityTag(AString::ConstNull()),
+        piSIPMsg(IMS_NULL)
 {
 }
 
@@ -94,11 +89,11 @@ void PubState::Clear()
 }
 
 PUBLIC
-IMS_BOOL PubState::CreateEventPackage(IN CONST AString &strEvent)
+IMS_BOOL PubState::CreateEventPackage(IN CONST AString& strEvent)
 {
     //---------------------------------------------------------------------------------------------
 
-    //1 : Load an event package from configuration
+    // 1 : Load an event package from configuration
 
     objEventPackage.SetEvent(strEvent);
 
@@ -154,7 +149,7 @@ IMS_BOOL PubState::IsTerminated() const
 }
 
 PUBLIC
-IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage *&piSIPMsg)
+IMS_BOOL PubState::SetHeaders(IN_OUT ISipMessage*& piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -190,7 +185,7 @@ void PubState::SetOperation(IN IMS_SINT32 nOperation)
 }
 
 PUBLIC
-IMS_BOOL PubState::UpdateState(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL PubState::UpdateState(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -250,7 +245,7 @@ void PubState::SetState(IN IMS_SINT32 nState)
 }
 
 PRIVATE
-void PubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
+void PubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -264,13 +259,13 @@ void PubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
     if (this->piSIPMsg != IMS_NULL)
     {
         // Remove an inaccessible headers if present
-        IMS_UINT32 nCount
-                = sizeof(RESTRICTED_HEADER_PROPERTIES) / sizeof(RESTRICTED_HEADER_PROPERTIES[0]);
+        IMS_UINT32 nCount =
+                sizeof(RESTRICTED_HEADER_PROPERTIES) / sizeof(RESTRICTED_HEADER_PROPERTIES[0]);
         const SIPHeaderProperty* pHeaderProperties = &(RESTRICTED_HEADER_PROPERTIES[0]);
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            const SIPHeaderProperty *pProperty = &(pHeaderProperties[i]);
+            const SIPHeaderProperty* pProperty = &(pHeaderProperties[i]);
 
             if (pProperty->bSingleHeader)
             {
@@ -294,8 +289,8 @@ void PubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
                 }
                 else
                 {
-                    nHeaderCount = this->piSIPMsg->GetHeaderCount(pProperty->nType,
-                                        pProperty->pszName);
+                    nHeaderCount =
+                            this->piSIPMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
@@ -311,11 +306,11 @@ void PubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg)
 {
     AString strHeader;
-    ISipHeader *piHeader;
-    EventPackage *pEventPackage = GetEventPackage();
+    ISipHeader* piHeader;
+    EventPackage* pEventPackage = GetEventPackage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -366,7 +361,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHRequest(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
 
@@ -385,8 +380,8 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage *piSIPMsg)
         if (piSIPMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
         {
             AString strHeader = piSIPMsg->GetHeader(ISipHeader::EXPIRES_ANY);
-            ISipHeader *piHeader = SipParsingHelper::CreateHeader(
-                                        ISipHeader::EXPIRES_ANY, strHeader);
+            ISipHeader* piHeader =
+                    SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
 
             if (piHeader != IMS_NULL)
             {
@@ -410,8 +405,7 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage *piSIPMsg)
         // Updates the entity-tag
         strEntityTag = piSIPMsg->GetHeader(ISipHeader::SIP_ETAG);
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-        || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         if (GetOperation() == OPERATION_REMOVE)
         {
@@ -439,22 +433,21 @@ IMS_BOOL PubState::UpdateOnPUBLISHResponse(IN CONST ISipMessage *piSIPMsg)
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* PubState::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* PubState::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_INIT:
-        return "STATE_INIT";
-    case STATE_PENDING:
-        return "STATE_PENDING";
-    case STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    case STATE_TERMINATED:
-        return "STATE_TERMINATED";
-    default:
-        return "__INVALID__";
+        case STATE_INIT:
+            return "STATE_INIT";
+        case STATE_PENDING:
+            return "STATE_PENDING";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case STATE_TERMINATED:
+            return "STATE_TERMINATED";
+        default:
+            return "__INVALID__";
     }
 }

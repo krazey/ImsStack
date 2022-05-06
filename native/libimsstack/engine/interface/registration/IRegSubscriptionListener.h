@@ -16,19 +16,19 @@ public:
      * @param nReasonParam "reason" parameter which is in the Subscription-State header
      * @param bHasBody Flag to indicate that the NOTIFY request has message body or not
      */
-    virtual void RegSubscription_NotifyReceived(IN IMS_SINT32 nSubState,
-            IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody) = 0;
+    virtual void RegSubscription_NotifyReceived(
+            IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody) = 0;
 
     /**
      * @brief Notifies the application when the subscription's refresh timer is expired.
      *
      * The refresh of subscription will be handled by the application.
      */
-    virtual void RegSubscription_RefreshTimerExpired(OUT IMS_BOOL &bDoImplicitRefresh) = 0;
+    virtual void RegSubscription_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) = 0;
 
-     /**
-      * @brief Notifies the application that the initial subscription is successfully started.
-      */
+    /**
+     * @brief Notifies the application that the initial subscription is successfully started.
+     */
     virtual void RegSubscription_Started() = 0;
 
     /**
@@ -64,4 +64,4 @@ public:
     virtual void RegSubscription_Terminated(IN IMS_SINT32 nReason) = 0;
 };
 
-#endif // _INTERFACE_REG_SUBSCRIPTION_LISTENER_H_
+#endif  // _INTERFACE_REG_SUBSCRIPTION_LISTENER_H_

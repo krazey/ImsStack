@@ -27,4 +27,4 @@ public:
     static IMS_BOOL IsMessageForEarlySessionModel(IN const ISipMessage* piSIPMsg);
 };
 
-#endif // _OPERATOR_FEATURE_RESOLVER_H_
+#endif  // _OPERATOR_FEATURE_RESOLVER_H_

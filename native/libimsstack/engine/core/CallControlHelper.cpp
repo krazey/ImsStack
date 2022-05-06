@@ -16,12 +16,10 @@
 #include "Replaces.h"
 #include "CallControlHelper.h"
 
-
-
 PRIVATE
-CallControlHelper::CallControlHelper()
-    : nGlobalSessionId(0)
-    , objSessions(IMSMap<AString, Replaces*>())
+CallControlHelper::CallControlHelper() :
+        nGlobalSessionId(0),
+        objSessions(IMSMap<AString, Replaces*>())
 {
 }
 
@@ -32,7 +30,7 @@ CallControlHelper::~CallControlHelper()
     {
         for (IMS_UINT32 i = 0; i < objSessions.GetSize(); ++i)
         {
-            Replaces *pReplaces = objSessions.GetValueAt(i);
+            Replaces* pReplaces = objSessions.GetValueAt(i);
 
             if (pReplaces != IMS_NULL)
                 delete pReplaces;
@@ -48,7 +46,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL CallControlHelper::AddSession(IN CONST AString &strSessionId, IN Replaces *pReplaces)
+IMS_BOOL CallControlHelper::AddSession(IN CONST AString& strSessionId, IN Replaces* pReplaces)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -59,7 +57,7 @@ IMS_BOOL CallControlHelper::AddSession(IN CONST AString &strSessionId, IN Replac
 
     if (nIndex >= 0)
     {
-        Replaces *pOldReplaces = objSessions.GetValueAt(nIndex);
+        Replaces* pOldReplaces = objSessions.GetValueAt(nIndex);
 
         if (pOldReplaces != IMS_NULL)
         {
@@ -91,7 +89,7 @@ Remarks
 
 */
 PUBLIC
-void CallControlHelper::RemoveSession(IN CONST AString &strSessionId)
+void CallControlHelper::RemoveSession(IN CONST AString& strSessionId)
 {
     IMS_SLONG nIndex = objSessions.GetIndexOfKey(strSessionId);
 
@@ -102,7 +100,7 @@ void CallControlHelper::RemoveSession(IN CONST AString &strSessionId)
         return;
     }
 
-    Replaces *pReplaces = objSessions.GetValueAt(nIndex);
+    Replaces* pReplaces = objSessions.GetValueAt(nIndex);
 
     if (pReplaces != IMS_NULL)
     {
@@ -118,7 +116,7 @@ Remarks
 
 */
 PUBLIC
-Replaces* CallControlHelper::GetReplacesFromSessionId(IN CONST AString &strSessionId)
+Replaces* CallControlHelper::GetReplacesFromSessionId(IN CONST AString& strSessionId)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -143,7 +141,7 @@ Remarks
 
 */
 PUBLIC
-const AString& CallControlHelper::GetSessionIdFromReplaces(IN CONST Replaces *pReplaces)
+const AString& CallControlHelper::GetSessionIdFromReplaces(IN CONST Replaces* pReplaces)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -154,7 +152,7 @@ const AString& CallControlHelper::GetSessionIdFromReplaces(IN CONST Replaces *pR
 
     for (IMS_UINT32 i = 0; i < objSessions.GetSize(); ++i)
     {
-        const Replaces *pTmpReplaces = objSessions.GetValueAt(i);
+        const Replaces* pTmpReplaces = objSessions.GetValueAt(i);
 
         if (pTmpReplaces == IMS_NULL)
             continue;
@@ -173,18 +171,16 @@ const AString& CallControlHelper::GetSessionIdFromReplaces(IN CONST Replaces *pR
 Remarks
 
 */
-PUBLIC GLOBAL
-Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMO, IN ISipDialog *piDialog)
+PUBLIC GLOBAL Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMO, IN ISipDialog* piDialog)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) bMO;
+    (void)bMO;
 
     if (piDialog == IMS_NULL)
         return IMS_NULL;
 
-    Replaces *pReplaces = new Replaces(
-            piDialog->GetComponent(ISipDialog::COMPONENT_CALL_ID),
+    Replaces* pReplaces = new Replaces(piDialog->GetComponent(ISipDialog::COMPONENT_CALL_ID),
             piDialog->GetComponent(ISipDialog::COMPONENT_LOCAL_TAG),
             piDialog->GetComponent(ISipDialog::COMPONENT_REMOTE_TAG));
 
@@ -201,10 +197,9 @@ Replaces* CallControlHelper::CreateReplaces(IN IMS_BOOL bMO, IN ISipDialog *piDi
 Remarks
 
 */
-PUBLIC GLOBAL
-const AString CallControlHelper::CreateSessionId()
+PUBLIC GLOBAL const AString CallControlHelper::CreateSessionId()
 {
-    CallControlHelper *pCCH = CallControlHelper::GetInstance();
+    CallControlHelper* pCCH = CallControlHelper::GetInstance();
 
     //---------------------------------------------------------------------------------------------
 
@@ -216,7 +211,7 @@ const AString CallControlHelper::CreateSessionId()
 
     if (pCCH->nGlobalSessionId == 0xFFFFFFFE)
     {
-       pCCH->nGlobalSessionId = 0;
+        pCCH->nGlobalSessionId = 0;
     }
 
     return strSessionId;
@@ -227,10 +222,9 @@ const AString CallControlHelper::CreateSessionId()
 Remarks
 
 */
-PUBLIC GLOBAL
-CallControlHelper* CallControlHelper::GetInstance()
+PUBLIC GLOBAL CallControlHelper* CallControlHelper::GetInstance()
 {
-    static CallControlHelper *pCCHelper = IMS_NULL;
+    static CallControlHelper* pCCHelper = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 

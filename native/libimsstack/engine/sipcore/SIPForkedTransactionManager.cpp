@@ -20,27 +20,22 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPForkedTransactionManager::SIPForkedTransactionManager()
-    : RCObject()
-    , nStatusCode(SipStatusCode::SC_INVALID)
+SIPForkedTransactionManager::SIPForkedTransactionManager() :
+        RCObject(),
+        nStatusCode(SipStatusCode::SC_INVALID)
 {
 }
 
 PUBLIC
 SIPForkedTransactionManager::SIPForkedTransactionManager(
-        IN const SIPForkedTransactionManager& objRHS)
-    : RCObject(objRHS)
-    , nStatusCode(objRHS.nStatusCode)
+        IN const SIPForkedTransactionManager& objRHS) :
+        RCObject(objRHS),
+        nStatusCode(objRHS.nStatusCode)
 {
 }
 
-PUBLIC VIRTUAL
-SIPForkedTransactionManager::~SIPForkedTransactionManager()
-{
-}
+PUBLIC VIRTUAL SIPForkedTransactionManager::~SIPForkedTransactionManager() {}
 
 /*
 
@@ -48,13 +43,13 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPForkedTransactionManager::Add(IN SIPClientTransactionState *pCTState)
+IMS_BOOL SIPForkedTransactionManager::Add(IN SIPClientTransactionState* pCTState)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SIPClientTransactionState> &pTmpCTState = objTxnStates.GetAt(i);
+        const RCPtr<SIPClientTransactionState>& pTmpCTState = objTxnStates.GetAt(i);
 
         if (pTmpCTState.Get() == pCTState)
         {
@@ -103,7 +98,7 @@ Remarks
 
 */
 PUBLIC
-SIPClientTransactionState* SIPForkedTransactionManager::Lookup(IN SipMessage *pstMessage) const
+SIPClientTransactionState* SIPForkedTransactionManager::Lookup(IN SipMessage* pstMessage) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -120,12 +115,12 @@ SIPClientTransactionState* SIPForkedTransactionManager::Lookup(IN SipMessage *ps
     // Not forked case
     if (objTxnStates.GetSize() == 1)
     {
-        const RCPtr<SIPClientTransactionState> &pCTState = objTxnStates.GetAt(0);
+        const RCPtr<SIPClientTransactionState>& pCTState = objTxnStates.GetAt(0);
 
         return pCTState.Get();
     }
 
-    SipHeaderBase *pstHeader;
+    SipHeaderBase* pstHeader;
     AString strNewLocalTag;
     AString strNewRemoteTag;
     AString strCallId;
@@ -166,26 +161,25 @@ SIPClientTransactionState* SIPForkedTransactionManager::Lookup(IN SipMessage *ps
 
     for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SIPClientTransactionState> &pCTState = objTxnStates.GetAt(i);
-        SIPDialogState *pDState = pCTState->GetDialog()->GetDialogState();
+        const RCPtr<SIPClientTransactionState>& pCTState = objTxnStates.GetAt(i);
+        SIPDialogState* pDState = pCTState->GetDialog()->GetDialogState();
 
         AString strLocalTag = pDState->GetLocalTag();
         AString strRemoteTag = pDState->GetRemoteTag();
 
-        if (strCallId.Equals(pDState->GetCallId())
-                && strLocalTag.Equals(strNewLocalTag)
-                && strRemoteTag.Equals(strNewRemoteTag))
+        if (strCallId.Equals(pDState->GetCallId()) && strLocalTag.Equals(strNewLocalTag) &&
+                strRemoteTag.Equals(strNewRemoteTag))
         {
-            IMS_TRACE_D("ForkedTransactionManager :: Dialog " \
-                    "(call-id=%s, local-tag=%s, remote-tag=%s)",
-                    SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
-                    strLocalTag.GetStr(), strRemoteTag.GetStr());
+            IMS_TRACE_D("ForkedTransactionManager :: Dialog "
+                        "(call-id=%s, local-tag=%s, remote-tag=%s)",
+                    SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), strLocalTag.GetStr(),
+                    strRemoteTag.GetStr());
             return pCTState.Get();
         }
     }
 
-    const RCPtr<SIPClientTransactionState> &pCTState
-            = objTxnStates.GetAt(objTxnStates.GetSize() - 1);
+    const RCPtr<SIPClientTransactionState>& pCTState =
+            objTxnStates.GetAt(objTxnStates.GetSize() - 1);
 
     return pCTState.Get();
 }
@@ -196,13 +190,13 @@ Remarks
 
 */
 PUBLIC
-void SIPForkedTransactionManager::Remove(IN SIPClientTransactionState *pCTState)
+void SIPForkedTransactionManager::Remove(IN SIPClientTransactionState* pCTState)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SIPClientTransactionState> &pTmpCTState = objTxnStates.GetAt(i);
+        const RCPtr<SIPClientTransactionState>& pTmpCTState = objTxnStates.GetAt(i);
 
         if (pTmpCTState.Get() == pCTState)
         {

@@ -19,7 +19,7 @@ public:
      *
      * @param piMethod Service method to be notified
      */
-    virtual void NotificationDelivered(IN IServiceMethod *piMethod) = 0;
+    virtual void NotificationDelivered(IN IServiceMethod* piMethod) = 0;
 
     /**
      * @brief Notifies the application that the notification was not successfully delivered.
@@ -30,8 +30,8 @@ public:
      * @param nStatusCode SIP status code\n
      *                    0(zero) indicates that SIP transaction timeout is occurred
      */
-    virtual void NotificationDeliveryFailed(IN IServiceMethod *piMethod,
-            IN IMS_SINT32 nStatusCode) = 0;
+    virtual void NotificationDeliveryFailed(
+            IN IServiceMethod* piMethod, IN IMS_SINT32 nStatusCode) = 0;
 };
 
-#endif // _INTERFACE_NOTIFICATION_LISTENER_H_
+#endif  // _INTERFACE_NOTIFICATION_LISTENER_H_

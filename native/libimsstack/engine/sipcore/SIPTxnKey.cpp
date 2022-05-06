@@ -13,49 +13,45 @@
 #include "ServiceMemory.h"
 #include "SIPTxnKey.h"
 
-
-
 PUBLIC
-SIPTxnKey::SIPTxnKey()
-    : objMethod(SipMethod::INVALID)
-    , nStatusCode(0)
-    , strViaBranch(AString::ConstNull())
-    , nCSeq(0)
-    , nExtraInt(0)
-    , strExtraString(AString::ConstNull())
+SIPTxnKey::SIPTxnKey() :
+        objMethod(SipMethod::INVALID),
+        nStatusCode(0),
+        strViaBranch(AString::ConstNull()),
+        nCSeq(0),
+        nExtraInt(0),
+        strExtraString(AString::ConstNull())
 {
 }
 
 PUBLIC
-SIPTxnKey::SIPTxnKey(IN CONST SipMethod &objMethod_, IN IMS_SINT32 nStatusCode_,
-        IN CONST AString &strViaBranch_, IN IMS_UINT32 nCSeq_)
-    : objMethod(objMethod_)
-    , nStatusCode(nStatusCode_)
-    , strViaBranch(strViaBranch_)
-    , nCSeq(nCSeq_)
-    , nExtraInt(0)
-    , strExtraString(AString::ConstNull())
+SIPTxnKey::SIPTxnKey(IN CONST SipMethod& objMethod_, IN IMS_SINT32 nStatusCode_,
+        IN CONST AString& strViaBranch_, IN IMS_UINT32 nCSeq_) :
+        objMethod(objMethod_),
+        nStatusCode(nStatusCode_),
+        strViaBranch(strViaBranch_),
+        nCSeq(nCSeq_),
+        nExtraInt(0),
+        strExtraString(AString::ConstNull())
 {
 }
 
 PUBLIC
-SIPTxnKey::SIPTxnKey(IN CONST SIPTxnKey &objRHS)
-    : objMethod(objRHS.objMethod)
-    , nStatusCode(objRHS.nStatusCode)
-    , strViaBranch(objRHS.strViaBranch)
-    , nCSeq(objRHS.nCSeq)
-    , nExtraInt(objRHS.nExtraInt)
-    , strExtraString(objRHS.strExtraString)
+SIPTxnKey::SIPTxnKey(IN CONST SIPTxnKey& objRHS) :
+        objMethod(objRHS.objMethod),
+        nStatusCode(objRHS.nStatusCode),
+        strViaBranch(objRHS.strViaBranch),
+        nCSeq(objRHS.nCSeq),
+        nExtraInt(objRHS.nExtraInt),
+        strExtraString(objRHS.strExtraString)
 {
 }
 
 PUBLIC
-SIPTxnKey::~SIPTxnKey()
-{
-}
+SIPTxnKey::~SIPTxnKey() {}
 
 PUBLIC
-SIPTxnKey& SIPTxnKey::operator=(IN CONST SIPTxnKey &objRHS)
+SIPTxnKey& SIPTxnKey::operator=(IN CONST SIPTxnKey& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -79,7 +75,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPTxnKey::Equals(IN CONST SIPTxnKey *pKey) const
+IMS_BOOL SIPTxnKey::Equals(IN CONST SIPTxnKey* pKey) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -88,9 +84,8 @@ IMS_BOOL SIPTxnKey::Equals(IN CONST SIPTxnKey *pKey) const
         return IMS_FALSE;
     }
 
-    if (!objMethod.Equals(pKey->objMethod)
-            || (nCSeq != pKey->nCSeq)
-            || !strViaBranch.Equals(pKey->strViaBranch))
+    if (!objMethod.Equals(pKey->objMethod) || (nCSeq != pKey->nCSeq) ||
+            !strViaBranch.Equals(pKey->strViaBranch))
     {
         return IMS_FALSE;
     }
@@ -195,7 +190,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTxnKey::SetExtraString(IN CONST AString &strExtraString)
+void SIPTxnKey::SetExtraString(IN CONST AString& strExtraString)
 {
     //---------------------------------------------------------------------------------------------
 

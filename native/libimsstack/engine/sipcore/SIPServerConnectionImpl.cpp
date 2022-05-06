@@ -19,17 +19,15 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPServerConnectionImpl::SIPServerConnectionImpl(IN SIPServerConnection *pSSC_)
-    : piErrorListener(IMS_NULL)
-    , pDialogImpl(IMS_NULL)
-    , pSSC(pSSC_)
+SIPServerConnectionImpl::SIPServerConnectionImpl(IN SIPServerConnection* pSSC_) :
+        piErrorListener(IMS_NULL),
+        pDialogImpl(IMS_NULL),
+        pSSC(pSSC_)
 {
     pSSC->SetErrorListener(this);
 
-    SIPDialog *pDialog = pSSC->GetDialog();
+    SIPDialog* pDialog = pSSC->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
@@ -42,8 +40,7 @@ SIPServerConnectionImpl::SIPServerConnectionImpl(IN SIPServerConnection *pSSC_)
     }
 }
 
-PUBLIC VIRTUAL
-SIPServerConnectionImpl::~SIPServerConnectionImpl()
+PUBLIC VIRTUAL SIPServerConnectionImpl::~SIPServerConnectionImpl()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -64,8 +61,7 @@ SIPServerConnectionImpl::~SIPServerConnectionImpl()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPServerConnectionImpl::Close()
+PRIVATE VIRTUAL void SIPServerConnectionImpl::Close()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -87,8 +83,8 @@ void SIPServerConnectionImpl::Close()
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::AddHeader(IN CONST AString &strName, IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::AddHeader(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -100,8 +96,7 @@ IMS_RESULT SIPServerConnectionImpl::AddHeader(IN CONST AString &strName, IN CONS
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISipDialog* SIPServerConnectionImpl::GetDialog() const
+PRIVATE VIRTUAL ISipDialog* SIPServerConnectionImpl::GetDialog() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -113,8 +108,8 @@ ISipDialog* SIPServerConnectionImpl::GetDialog() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-AString SIPServerConnectionImpl::GetHeader(IN CONST AString &strName, IN IMS_SINT32 nIndex /* = 0 */)
+PRIVATE VIRTUAL AString SIPServerConnectionImpl::GetHeader(
+        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -126,8 +121,7 @@ AString SIPServerConnectionImpl::GetHeader(IN CONST AString &strName, IN IMS_SIN
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMSList<AString> SIPServerConnectionImpl::GetHeaders(IN CONST AString &strName)
+PRIVATE VIRTUAL IMSList<AString> SIPServerConnectionImpl::GetHeaders(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -139,8 +133,7 @@ IMSList<AString> SIPServerConnectionImpl::GetHeaders(IN CONST AString &strName)
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipMethod& SIPServerConnectionImpl::GetMethod() const
+PRIVATE VIRTUAL const SipMethod& SIPServerConnectionImpl::GetMethod() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -152,8 +145,7 @@ const SipMethod& SIPServerConnectionImpl::GetMethod() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AString& SIPServerConnectionImpl::GetReasonPhrase() const
+PRIVATE VIRTUAL const AString& SIPServerConnectionImpl::GetReasonPhrase() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -165,8 +157,7 @@ const AString& SIPServerConnectionImpl::GetReasonPhrase() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AString& SIPServerConnectionImpl::GetRequestUri() const
+PRIVATE VIRTUAL const AString& SIPServerConnectionImpl::GetRequestUri() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -178,8 +169,7 @@ const AString& SIPServerConnectionImpl::GetRequestUri() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPServerConnectionImpl::GetStatusCode() const
+PRIVATE VIRTUAL IMS_SINT32 SIPServerConnectionImpl::GetStatusCode() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -191,8 +181,7 @@ IMS_SINT32 SIPServerConnectionImpl::GetStatusCode() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::RemoveHeader(IN CONST AString &strName)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::RemoveHeader(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -204,8 +193,7 @@ IMS_RESULT SIPServerConnectionImpl::RemoveHeader(IN CONST AString &strName)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::Send()
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::Send()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -217,8 +205,7 @@ IMS_RESULT SIPServerConnectionImpl::Send()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPServerConnectionImpl::SetErrorListener(IN ISipErrorListener *piListener)
+PRIVATE VIRTUAL void SIPServerConnectionImpl::SetErrorListener(IN ISipErrorListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -230,8 +217,8 @@ void SIPServerConnectionImpl::SetErrorListener(IN ISipErrorListener *piListener)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::SetHeader(IN CONST AString &strName, IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::SetHeader(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -243,8 +230,7 @@ IMS_RESULT SIPServerConnectionImpl::SetHeader(IN CONST AString &strName, IN CONS
 Remarks
 
 */
-PRIVATE VIRTUAL
-const ByteArray& SIPServerConnectionImpl::GetContent() const
+PRIVATE VIRTUAL const ByteArray& SIPServerConnectionImpl::GetContent() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -256,8 +242,7 @@ const ByteArray& SIPServerConnectionImpl::GetContent() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::SetContent(IN CONST ByteArray &objContent)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::SetContent(IN CONST ByteArray& objContent)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -269,8 +254,7 @@ IMS_RESULT SIPServerConnectionImpl::SetContent(IN CONST ByteArray &objContent)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPServerConnectionImpl::GetHeaderCount(IN CONST AString &strName) const
+PRIVATE VIRTUAL IMS_SINT32 SIPServerConnectionImpl::GetHeaderCount(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -282,8 +266,7 @@ IMS_SINT32 SIPServerConnectionImpl::GetHeaderCount(IN CONST AString &strName) co
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISipMessage* SIPServerConnectionImpl::GetMessage() const
+PRIVATE VIRTUAL ISipMessage* SIPServerConnectionImpl::GetMessage() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -295,8 +278,7 @@ ISipMessage* SIPServerConnectionImpl::GetMessage() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPServerConnectionImpl::GetSlotId() const
+PRIVATE VIRTUAL IMS_SINT32 SIPServerConnectionImpl::GetSlotId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -308,8 +290,7 @@ IMS_SINT32 SIPServerConnectionImpl::GetSlotId() const
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL
-void SIPServerConnectionImpl::SetSipProfile(IN SipProfile *pProfile)
+PRIVATE VIRTUAL void SIPServerConnectionImpl::SetSipProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -321,8 +302,8 @@ void SIPServerConnectionImpl::SetSipProfile(IN SipProfile *pProfile)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPServerConnectionImpl::SetTransactionTimerValues(IN CONST SipTimerValues &objTV)
+PRIVATE VIRTUAL void SIPServerConnectionImpl::SetTransactionTimerValues(
+        IN CONST SipTimerValues& objTV)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -334,8 +315,7 @@ void SIPServerConnectionImpl::SetTransactionTimerValues(IN CONST SipTimerValues 
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::InitResponse(IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::InitResponse(IN IMS_SINT32 nStatusCode)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -347,8 +327,8 @@ IMS_RESULT SIPServerConnectionImpl::InitResponse(IN IMS_SINT32 nStatusCode)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPServerConnectionImpl::SetReasonPhrase(IN CONST AString &strReasonPhrase)
+PRIVATE VIRTUAL IMS_RESULT SIPServerConnectionImpl::SetReasonPhrase(
+        IN CONST AString& strReasonPhrase)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -360,12 +340,11 @@ IMS_RESULT SIPServerConnectionImpl::SetReasonPhrase(IN CONST AString &strReasonP
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL SIPServerConnectionImpl::IsSameTransaction(
-        IN CONST ISipServerConnection *piOngoingSSC) const
+PRIVATE VIRTUAL IMS_BOOL SIPServerConnectionImpl::IsSameTransaction(
+        IN CONST ISipServerConnection* piOngoingSSC) const
 {
-    const SIPServerConnectionImpl *pSSCImpl
-            = DYNAMIC_CAST(const SIPServerConnectionImpl*, piOngoingSSC);
+    const SIPServerConnectionImpl* pSSCImpl =
+            DYNAMIC_CAST(const SIPServerConnectionImpl*, piOngoingSSC);
 
     //---------------------------------------------------------------------------------------------
 
@@ -390,9 +369,8 @@ IMS_BOOL SIPServerConnectionImpl::IsSameTransaction(
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPServerConnectionImpl::OnError_NotifyError(IN SIPConnection *pSC, IN IMS_SINT32 nCode,
-        IN CONST AString &strMessage)
+PRIVATE VIRTUAL void SIPServerConnectionImpl::OnError_NotifyError(
+        IN SIPConnection* pSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
 {
     //---------------------------------------------------------------------------------------------
 

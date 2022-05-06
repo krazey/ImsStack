@@ -20,8 +20,6 @@ class IMutex;
 class ISipServerConnection;
 class IDialogMethod;
 
-
-
 class DialogMethodManager
 {
 private:
@@ -32,24 +30,23 @@ private:
     DialogMethodManager& operator=(IN const DialogMethodManager& objRHS);
 
 public:
-    IMS_BOOL AddMethod(IN CONST AString &strName, IN IDialogMethod *piMethod);
-    void RemoveMethod(IN CONST AString &strName);
+    IMS_BOOL AddMethod(IN CONST AString& strName, IN IDialogMethod* piMethod);
+    void RemoveMethod(IN CONST AString& strName);
     IMS_BOOL IsEmpty() const;
 
     static DialogMethodManager* GetInstance();
 
 private:
-    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection *piSSC);
+    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection* piSSC);
     // In case of receiving a forked request ...
-    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection *piSSC,
-            IN ISipDialog *piOrigDialog);
+    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection* piSSC, IN ISipDialog* piOrigDialog);
 
 private:
     friend class SIPConnectionNotifierManagerPrivate;
 
-    IMutex *piLock;
+    IMutex* piLock;
     // Name (identifier), Pointer of IDialogMethod
     IMSMap<AString, IDialogMethod*> objDialogMethods;
 };
 
-#endif // _DIALOG_METHOD_MANAGER_H_
+#endif  // _DIALOG_METHOD_MANAGER_H_

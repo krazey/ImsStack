@@ -15,7 +15,7 @@ public:
      * @param strAOR the public user identity to be retrieved
      * @return Pointer to IRegInfoRegistration or null
      */
-    virtual IRegInfoRegistration* GetRegistration(IN CONST AString &strAOR) const = 0;
+    virtual IRegInfoRegistration* GetRegistration(IN CONST AString& strAOR) const = 0;
 
     /**
      * @brief Returns the registration element information of reginfo.
@@ -23,7 +23,7 @@ public:
      * @param strAOR the public user identity to be retrieved
      * @return Pointer to IRegInfoRegistration or null
      */
-    virtual IRegInfoRegistration* GetRegistration(IN CONST SipAddress &objAOR) const = 0;
+    virtual IRegInfoRegistration* GetRegistration(IN CONST SipAddress& objAOR) const = 0;
 
     /**
      * @brief Returns all the registration elements of reginfo.
@@ -33,4 +33,4 @@ public:
     virtual IMSList<IRegInfoRegistration*> GetRegistrations() const = 0;
 };
 
-#endif // _INTERFACE_REG_INFO_H_
+#endif  // _INTERFACE_REG_INFO_H_

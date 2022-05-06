@@ -15,40 +15,30 @@
 
 #include "SIPStackHeaders.h"
 
-
-
 class SIPMessageInfo
 {
 public:
-    inline SIPMessageInfo(IN IMS_SINT32 nSlotId_,
-        IN CONST SipMethod &objMethod_, IN SipMessage *pstMessage_,
-        IN IMS_SINT32 nDirection_)
-        : nSlotId(nSlotId_)
-        , objMethod(objMethod_)
-        , nDirection(nDirection_)
-        , pstMessage(pstMessage_)
+    inline SIPMessageInfo(IN IMS_SINT32 nSlotId_, IN CONST SipMethod& objMethod_,
+            IN SipMessage* pstMessage_, IN IMS_SINT32 nDirection_) :
+            nSlotId(nSlotId_),
+            objMethod(objMethod_),
+            nDirection(nDirection_),
+            pstMessage(pstMessage_)
     {
     }
 
-    inline ~SIPMessageInfo()
-    {
-    }
+    inline ~SIPMessageInfo() {}
 
 public:
-    inline IMS_SINT32 GetDirection() const
-    { return nDirection; }
+    inline IMS_SINT32 GetDirection() const { return nDirection; }
 
-    inline SipMessage* GetMessage() const
-    { return pstMessage; }
+    inline SipMessage* GetMessage() const { return pstMessage; }
 
-    inline const SipMethod& GetMethod() const
-    { return objMethod; }
+    inline const SipMethod& GetMethod() const { return objMethod; }
 
-    inline IMS_SINT32 GetSlotId() const
-    { return nSlotId; }
+    inline IMS_SINT32 GetSlotId() const { return nSlotId; }
 
-    inline IMS_BOOL IsOutgoingMessage() const
-    { return (nDirection == DIRECTION_OUTGOING); }
+    inline IMS_BOOL IsOutgoingMessage() const { return (nDirection == DIRECTION_OUTGOING); }
 
 public:
     enum
@@ -60,10 +50,10 @@ public:
 private:
     IMS_SINT32 nSlotId;
 
-    const SipMethod &objMethod;
+    const SipMethod& objMethod;
     IMS_SINT32 nDirection;
 
-    SipMessage *pstMessage;
+    SipMessage* pstMessage;
 };
 
-#endif // _SIP_MESSAGE_INFO_H_
+#endif  // _SIP_MESSAGE_INFO_H_

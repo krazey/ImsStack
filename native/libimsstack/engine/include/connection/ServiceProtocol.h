@@ -17,23 +17,20 @@
 
 class IService;
 
-
-
-class ServiceProtocol
-    : public Protocol
+class ServiceProtocol : public Protocol
 {
 public:
     ServiceProtocol();
     virtual ~ServiceProtocol();
 
 public:
-    virtual IConnection* OpenPrim(IN const AString &strName);
-    virtual IConnection* OpenPrim(IN const AString &strScheme, IN const AString &strTarget,
-            IN const AString &strParams);
+    virtual IConnection* OpenPrim(IN const AString& strName);
+    virtual IConnection* OpenPrim(
+            IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams);
 
 protected:
-    virtual IService* CreateService(IN const AString &strAppId,
-            IN const AString &strServiceId, IN const AString &strUserId);
+    virtual IService* CreateService(IN const AString& strAppId, IN const AString& strServiceId,
+            IN const AString& strUserId);
     virtual const IMS_CHAR* GetConnectionScheme() const;
 
 public:
@@ -43,4 +40,4 @@ public:
     static const IMS_CHAR CONNECTION_PARAM_SERVICE_ID[];
 };
 
-#endif // _SERVICE_PROTOCOL_H_
+#endif  // _SERVICE_PROTOCOL_H_

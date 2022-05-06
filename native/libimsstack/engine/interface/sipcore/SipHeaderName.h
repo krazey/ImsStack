@@ -95,48 +95,48 @@ public:
     static const IMS_CHAR ACCEPT_ENCODING[];
     static const IMS_CHAR ACCEPT_LANGUAGE[];
     static const IMS_CHAR ALERT_INFO[];
-    static const IMS_CHAR ANSWER_MODE[]; // RFC 5373
+    static const IMS_CHAR ANSWER_MODE[];  // RFC 5373
     static const IMS_CHAR AUTHENTICATION_INFO[];
     static const IMS_CHAR CALL_INFO[];
     static const IMS_CHAR CONTENT_DESCRIPTION[];
     static const IMS_CHAR CONTENT_ID[];
     static const IMS_CHAR CONTENT_LANGUAGE[];
     static const IMS_CHAR CONTENT_TRANSFER_ENCODING[];
-    static const IMS_CHAR DIVERSION[]; // RFC 7544 (Mapping of Diversion and History-Info)
+    static const IMS_CHAR DIVERSION[];  // RFC 7544 (Mapping of Diversion and History-Info)
     static const IMS_CHAR ERROR_INFO[];
-    static const IMS_CHAR FEATURE_CAPS[]; // RFC 6809 (for Proxy, Registrar, B2BUA)
-    static const IMS_CHAR FLOW_TIMER[]; // RFC 5626
-    static const IMS_CHAR GEOLOCATION[]; // RFC 6442
-    static const IMS_CHAR GEOLOCATION_ROUTING[]; // RFC 6442
-    static const IMS_CHAR IDENTITY[]; // RFC 4474, Compact Form : y
-    static const IMS_CHAR IDENTITY_INFO[]; // RFC 4474, Compact Form : n
+    static const IMS_CHAR FEATURE_CAPS[];         // RFC 6809 (for Proxy, Registrar, B2BUA)
+    static const IMS_CHAR FLOW_TIMER[];           // RFC 5626
+    static const IMS_CHAR GEOLOCATION[];          // RFC 6442
+    static const IMS_CHAR GEOLOCATION_ROUTING[];  // RFC 6442
+    static const IMS_CHAR IDENTITY[];             // RFC 4474, Compact Form : y
+    static const IMS_CHAR IDENTITY_INFO[];        // RFC 4474, Compact Form : n
     static const IMS_CHAR IN_REPLY_TO[];
     static const IMS_CHAR INFO_PACKAGE[];
     static const IMS_CHAR ORGANIZATION[];
-    static const IMS_CHAR P_ANSWER_STATE[]; // RFC 4964
-    static const IMS_CHAR P_MEDIA_AUTHORIZATION[]; // RFC 3313
-    static const IMS_CHAR P_PREFERRED_SERVICE[]; // RFC 6050
-    static const IMS_CHAR P_PROFILE_KEY[]; // RFC 5002
-    static const IMS_CHAR P_REFUSED_URI_LIST[]; // RFC 5318
+    static const IMS_CHAR P_ANSWER_STATE[];         // RFC 4964
+    static const IMS_CHAR P_MEDIA_AUTHORIZATION[];  // RFC 3313
+    static const IMS_CHAR P_PREFERRED_SERVICE[];    // RFC 6050
+    static const IMS_CHAR P_PROFILE_KEY[];          // RFC 5002
+    static const IMS_CHAR P_REFUSED_URI_LIST[];     // RFC 5318
     static const IMS_CHAR P_USER_DATABASE[];
-    static const IMS_CHAR P_SERVED_USER[]; // RFC 5502 (for S-CSCF/AS)
-    static const IMS_CHAR PERMISSION_MISSING[]; // RFC 5360
-    static const IMS_CHAR POLICY_CONTACT[]; // RFC 6794 (Session Policy Framework)
-    static const IMS_CHAR POLICY_ID[]; // RFC 6794 (Session Policy Framework)
-    static const IMS_CHAR PRIORITY[]; // RFC 4412
-    static const IMS_CHAR PRIV_ANSWER_MODE[]; // RFC 5373
+    static const IMS_CHAR P_SERVED_USER[];       // RFC 5502 (for S-CSCF/AS)
+    static const IMS_CHAR PERMISSION_MISSING[];  // RFC 5360
+    static const IMS_CHAR POLICY_CONTACT[];      // RFC 6794 (Session Policy Framework)
+    static const IMS_CHAR POLICY_ID[];           // RFC 6794 (Session Policy Framework)
+    static const IMS_CHAR PRIORITY[];            // RFC 4412
+    static const IMS_CHAR PRIV_ANSWER_MODE[];    // RFC 5373
     static const IMS_CHAR PROXY_REQUIRE[];
     static const IMS_CHAR REASON[];
     static const IMS_CHAR RECV_INFO[];
-    static const IMS_CHAR REFER_SUB[]; // RFC 4488
+    static const IMS_CHAR REFER_SUB[];  // RFC 4488
     static const IMS_CHAR REPLY_TO[];
     static const IMS_CHAR RESPONSE_KEY[];
     static const IMS_CHAR SERVER[];
-    static const IMS_CHAR SESSION_ID[]; // draft-kaplan-insipid-session-id-04 (expires: 140910)
-    static const IMS_CHAR SUBJECT[]; // Compact Form : s
-    static const IMS_CHAR SUPPRESS_IF_MATCH[]; // RFC 5839
-    static const IMS_CHAR TARGET_DIALOG[]; // RFC 4538, "tdialog" option-tag
-    static const IMS_CHAR TRIGGER_CONSENT[]; // RFC 5360
+    static const IMS_CHAR SESSION_ID[];  // draft-kaplan-insipid-session-id-04 (expires: 140910)
+    static const IMS_CHAR SUBJECT[];     // Compact Form : s
+    static const IMS_CHAR SUPPRESS_IF_MATCH[];  // RFC 5839
+    static const IMS_CHAR TARGET_DIALOG[];      // RFC 4538, "tdialog" option-tag
+    static const IMS_CHAR TRIGGER_CONSENT[];    // RFC 5360
     static const IMS_CHAR USER_AGENT[];
 
     // Compact form: u, i, m, e, l, c, e, f, d, a, j, b, r, x, k, t, v, y, n, s

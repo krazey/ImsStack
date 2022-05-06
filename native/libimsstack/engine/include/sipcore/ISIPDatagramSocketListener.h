@@ -17,8 +17,6 @@
 
 class SIPSocket;
 
-
-
 /*
 SIP datagram socket listener interface
 
@@ -46,8 +44,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void DatagramSocket_DataReceived(IN SIPSocket *pSocket, IN CONST ByteArray &objBuffer,
-            IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort) = 0;
+    virtual void DatagramSocket_DataReceived(IN SIPSocket* pSocket, IN CONST ByteArray& objBuffer,
+            IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) = 0;
 };
 
-#endif // _INTERFACE_SIP_DATAGRAM_SOCKET_LISTENER_H_
+#endif  // _INTERFACE_SIP_DATAGRAM_SOCKET_LISTENER_H_

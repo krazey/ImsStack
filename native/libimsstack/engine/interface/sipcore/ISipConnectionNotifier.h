@@ -33,8 +33,7 @@ class SipProfile;
  *
  * @see IConnection, ISipServerConnection, ISipServerConnectionListener
  */
-class ISipConnectionNotifier :
-        public IConnection
+class ISipConnectionNotifier : public IConnection
 {
 public:
     /**
@@ -114,8 +113,7 @@ public:
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      * @note REG_RESTORATION_FOR_ACTIVE_BINDING
      */
-    virtual IMS_BOOL IsTransportResourceReserved(
-            IN IMS_SINT32 nType = TRANSPORT_ALL) const = 0;
+    virtual IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const = 0;
 
     /**
      * @brief Reserves the transport resource to receive an incoming SIP request message.
@@ -126,8 +124,8 @@ public:
      * @param nPortFlowControl Port number for flow control
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT ReserveTransportResource(IN const IPAddress& objIpAddr,
-            IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl) = 0;
+    virtual IMS_RESULT ReserveTransportResource(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
+            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl) = 0;
 
     /**
      * @brief Restores the transport resource for the specified resource type.
@@ -141,8 +139,8 @@ public:
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      * @note REG_RESTORATION_FOR_ACTIVE_BINDING
      */
-    virtual IMS_RESULT RestoreTransportResource(IN IMS_SINT32 nType,
-            IN const IPAddress& objPeerIpAddr, IN IMS_SINT32 nPeerPort) = 0;
+    virtual IMS_RESULT RestoreTransportResource(
+            IN IMS_SINT32 nType, IN const IPAddress& objPeerIpAddr, IN IMS_SINT32 nPeerPort) = 0;
 
     /**
      * @brief Sets a default SIP settings (a default From informantion & user-info in Contact).

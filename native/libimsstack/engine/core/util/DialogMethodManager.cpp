@@ -20,12 +20,10 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PRIVATE
-DialogMethodManager::DialogMethodManager()
-    : piLock(IMS_NULL)
-    , objDialogMethods(IMSMap<AString, IDialogMethod*>())
+DialogMethodManager::DialogMethodManager() :
+        piLock(IMS_NULL),
+        objDialogMethods(IMSMap<AString, IDialogMethod*>())
 {
     piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -42,7 +40,7 @@ DialogMethodManager::~DialogMethodManager()
 }
 
 PUBLIC
-IMS_BOOL DialogMethodManager::AddMethod(IN CONST AString &strName, IN IDialogMethod *piMethod)
+IMS_BOOL DialogMethodManager::AddMethod(IN CONST AString& strName, IN IDialogMethod* piMethod)
 {
     LockGuard objLock(piLock);
 
@@ -52,7 +50,7 @@ IMS_BOOL DialogMethodManager::AddMethod(IN CONST AString &strName, IN IDialogMet
 }
 
 PUBLIC
-void DialogMethodManager::RemoveMethod(IN CONST AString &strName)
+void DialogMethodManager::RemoveMethod(IN CONST AString& strName)
 {
     LockGuard objLock(piLock);
 
@@ -71,10 +69,9 @@ IMS_BOOL DialogMethodManager::IsEmpty() const
     return objDialogMethods.IsEmpty();
 }
 
-PUBLIC GLOBAL
-DialogMethodManager* DialogMethodManager::GetInstance()
+PUBLIC GLOBAL DialogMethodManager* DialogMethodManager::GetInstance()
 {
-    static DialogMethodManager *pDialogMethodMngr = IMS_NULL;
+    static DialogMethodManager* pDialogMethodMngr = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -87,7 +84,7 @@ DialogMethodManager* DialogMethodManager::GetInstance()
 }
 
 PRIVATE
-IMS_BOOL DialogMethodManager::HandleRequestWithinDialog(IN ISipServerConnection *piSSC)
+IMS_BOOL DialogMethodManager::HandleRequestWithinDialog(IN ISipServerConnection* piSSC)
 {
     LockGuard objLock(piLock);
 
@@ -99,7 +96,7 @@ IMS_BOOL DialogMethodManager::HandleRequestWithinDialog(IN ISipServerConnection 
         return IMS_FALSE;
     }
 
-    IDialogMethod *piMethod = IMS_NULL;
+    IDialogMethod* piMethod = IMS_NULL;
 
     for (IMS_UINT32 i = 0; i < objDialogMethods.GetSize(); ++i)
     {

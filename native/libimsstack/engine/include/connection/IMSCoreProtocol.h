@@ -19,14 +19,12 @@
 class AppConfig;
 class CoreServiceConfig;
 
-
-
-class IMSCoreProtocol
-    : public ServiceProtocol
+class IMSCoreProtocol : public ServiceProtocol
 {
 private:
     IMSCoreProtocol();
-    IMSCoreProtocol(IN const IMSCoreProtocol &objRHS);
+    IMSCoreProtocol(IN const IMSCoreProtocol& objRHS);
+
 public:
     virtual ~IMSCoreProtocol();
 
@@ -35,13 +33,15 @@ public:
 
 private:
     // ServiceProtocol class
-    virtual IService* CreateService(IN const AString &strAppId,
-            IN const AString &strServiceId, IN const AString &strUserId);
+    virtual IService* CreateService(IN const AString& strAppId, IN const AString& strServiceId,
+            IN const AString& strUserId);
     inline virtual const IMS_CHAR* GetConnectionScheme() const
-    { return IMSCore::CONNECTION_SCHEME; }
+    {
+        return IMSCore::CONNECTION_SCHEME;
+    }
 
-    static IMS_BOOL IsRegistryConsistent(IN const AppConfig *pAppConfig,
-            IN const CoreServiceConfig *pServiceConfig);
+    static IMS_BOOL IsRegistryConsistent(
+            IN const AppConfig* pAppConfig, IN const CoreServiceConfig* pServiceConfig);
 };
 
-#endif // _IMS_CORE_PROTOCOL_H_
+#endif  // _IMS_CORE_PROTOCOL_H_

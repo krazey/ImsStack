@@ -18,10 +18,7 @@
 class INamedNodeMap;
 class INode;
 
-
-
-class RegInfoContact
-    : public IRegInfoContact
+class RegInfoContact : public IRegInfoContact
 {
 public:
     RegInfoContact();
@@ -39,51 +36,52 @@ public:
     virtual const AString& GetQValue() const;
     virtual IMS_UINT32 GetRetryAfterValue() const;
     virtual IMS_SINT32 GetState() const;
-    virtual const AString& GetUnknownParameter(IN CONST AString &strName) const;
+    virtual const AString& GetUnknownParameter(IN CONST AString& strName) const;
     virtual const IMSMap<AString, AString>& GetUnknownParameters() const;
     virtual const SipAddress& GetURI() const;
 
-    IMS_BOOL Equals(IN INode *piNode) const;
-    IMS_BOOL Update(IN INode *piNode);
+    IMS_BOOL Equals(IN INode* piNode) const;
+    IMS_BOOL Update(IN INode* piNode);
 
     void DisplayRegInfo(IN const AString& strTag = AString::ConstNull());
 
 private:
     // Attributes
-    void SetCallId(IN INamedNodeMap *piNodeMap);
-    void SetCSeq(IN INamedNodeMap *piNodeMap);
-    void SetDurationRegistered(IN INamedNodeMap *piNodeMap);
-    IMS_BOOL SetEvent(IN INamedNodeMap *piNodeMap);
-    void SetExpiresValue(IN INamedNodeMap *piNodeMap);
-    IMS_BOOL SetId(IN INamedNodeMap *piNodeMap);
-    void SetQValue(IN INamedNodeMap *piNodeMap);
-    void SetRetryAfterValue(IN INamedNodeMap *piNodeMap);
-    IMS_BOOL SetState(IN INamedNodeMap *piNodeMap);
+    void SetCallId(IN INamedNodeMap* piNodeMap);
+    void SetCSeq(IN INamedNodeMap* piNodeMap);
+    void SetDurationRegistered(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetEvent(IN INamedNodeMap* piNodeMap);
+    void SetExpiresValue(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetId(IN INamedNodeMap* piNodeMap);
+    void SetQValue(IN INamedNodeMap* piNodeMap);
+    void SetRetryAfterValue(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetState(IN INamedNodeMap* piNodeMap);
 
     // Elements
-    void SetDisplayName(IN INode *piNode);
-    void SetPublicGRUU(IN INode *piNode);
-    void SetTemporaryGRUU(IN INode *piNode);
-    void SetUnknownParameter(IN INode *piNode);
-    IMS_BOOL SetURI(IN INode *piNode);
+    void SetDisplayName(IN INode* piNode);
+    void SetPublicGRUU(IN INode* piNode);
+    void SetTemporaryGRUU(IN INode* piNode);
+    void SetUnknownParameter(IN INode* piNode);
+    IMS_BOOL SetURI(IN INode* piNode);
 
 private:
     class TempGRUU
     {
     public:
-        inline TempGRUU()
-            : strGRUU(AString::ConstNull())
-            , nFirstCSeq(0)
-        {}
-        inline TempGRUU(IN CONST TempGRUU &objRHS)
-            : strGRUU(objRHS.strGRUU)
-            , nFirstCSeq(objRHS.nFirstCSeq)
-        {}
-        inline ~TempGRUU()
-        {}
+        inline TempGRUU() :
+                strGRUU(AString::ConstNull()),
+                nFirstCSeq(0)
+        {
+        }
+        inline TempGRUU(IN CONST TempGRUU& objRHS) :
+                strGRUU(objRHS.strGRUU),
+                nFirstCSeq(objRHS.nFirstCSeq)
+        {
+        }
+        inline ~TempGRUU() {}
 
     public:
-        inline TempGRUU& operator=(IN CONST TempGRUU &objRHS)
+        inline TempGRUU& operator=(IN CONST TempGRUU& objRHS)
         {
             if (this != &objRHS)
             {
@@ -134,4 +132,4 @@ private:
     IMSMap<AString, AString> objUnknownParameters;
 };
 
-#endif // _REG_INFO_CONTACT_H_
+#endif  // _REG_INFO_CONTACT_H_

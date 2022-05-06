@@ -20,12 +20,10 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PRIVATE
-ForkedDialogMethodManager::ForkedDialogMethodManager()
-    : piLock(IMS_NULL)
-    , objDialogMethods(IMSMap<AString, IForkedDialogMethod*>())
+ForkedDialogMethodManager::ForkedDialogMethodManager() :
+        piLock(IMS_NULL),
+        objDialogMethods(IMSMap<AString, IForkedDialogMethod*>())
 {
     piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -42,8 +40,8 @@ ForkedDialogMethodManager::~ForkedDialogMethodManager()
 }
 
 PUBLIC
-IMS_BOOL ForkedDialogMethodManager::AddMethod(IN CONST AString &strName,
-        IN IForkedDialogMethod *piMethod)
+IMS_BOOL ForkedDialogMethodManager::AddMethod(
+        IN CONST AString& strName, IN IForkedDialogMethod* piMethod)
 {
     LockGuard objLock(piLock);
 
@@ -53,7 +51,7 @@ IMS_BOOL ForkedDialogMethodManager::AddMethod(IN CONST AString &strName,
 }
 
 PUBLIC
-void ForkedDialogMethodManager::RemoveMethod(IN CONST AString &strName)
+void ForkedDialogMethodManager::RemoveMethod(IN CONST AString& strName)
 {
     LockGuard objLock(piLock);
 
@@ -62,10 +60,9 @@ void ForkedDialogMethodManager::RemoveMethod(IN CONST AString &strName)
     objDialogMethods.Remove(strName);
 }
 
-PUBLIC GLOBAL
-ForkedDialogMethodManager* ForkedDialogMethodManager::GetInstance()
+PUBLIC GLOBAL ForkedDialogMethodManager* ForkedDialogMethodManager::GetInstance()
 {
-    static ForkedDialogMethodManager *pForkedDialogMethodMngr = IMS_NULL;
+    static ForkedDialogMethodManager* pForkedDialogMethodMngr = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -78,8 +75,8 @@ ForkedDialogMethodManager* ForkedDialogMethodManager::GetInstance()
 }
 
 PRIVATE
-IMS_BOOL ForkedDialogMethodManager::HandleRequestWithinDialog(IN ISipServerConnection *piSSC,
-        IN ISipDialog *piOrigDialog)
+IMS_BOOL ForkedDialogMethodManager::HandleRequestWithinDialog(
+        IN ISipServerConnection* piSSC, IN ISipDialog* piOrigDialog)
 {
     LockGuard objLock(piLock);
 
@@ -91,7 +88,7 @@ IMS_BOOL ForkedDialogMethodManager::HandleRequestWithinDialog(IN ISipServerConne
         return IMS_FALSE;
     }
 
-    IForkedDialogMethod *piMethod = IMS_NULL;
+    IForkedDialogMethod* piMethod = IMS_NULL;
 
     for (IMS_UINT32 i = 0; i < objDialogMethods.GetSize(); ++i)
     {

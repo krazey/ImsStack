@@ -18,21 +18,19 @@
 class Service;
 class ISDPOAState;
 
-
-
 class MediaFactory
 {
 private:
     MediaFactory();
 
 public:
-    static Media* CreateOutgoingMedia(IN CONST AString &strMType, IN IMS_SINT32 nDirection,
-            IN Service *pService, IN ISDPOAState *piOAState, IN IMS_SINT32 nCountOfDescriptor);
+    static Media* CreateOutgoingMedia(IN CONST AString& strMType, IN IMS_SINT32 nDirection,
+            IN Service* pService, IN ISDPOAState* piOAState, IN IMS_SINT32 nCountOfDescriptor);
 
-    static Media* CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol, IN Service *pService,
-            IN ISDPOAState *piOAState, IN CONST IMSList<IMS_SINT32> &objMids);
+    static Media* CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol, IN Service* pService,
+            IN ISDPOAState* piOAState, IN CONST IMSList<IMS_SINT32>& objMids);
 
-    static void DestroyMedia(IN Media *&pMedia);
+    static void DestroyMedia(IN Media*& pMedia);
 };
 
-#endif // _MEDIA_FACTORY_H_
+#endif  // _MEDIA_FACTORY_H_

@@ -30,65 +30,65 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPTransactionState::SIPTransactionState()
-    : RCObject()
-    , nType(0)
-    , nClass(CLASS_NONE)
-    , nCSeqNumber(1)
-    // MULTI_REG_SIP_PROFILE
-    , pSIPProfile(IMS_NULL)
-    , piListener(IMS_NULL)
-    , pDialogEx(IMS_NULL)
-    , pTransport(IMS_NULL)
-    , pstMessage(IMS_NULL)
-    , pstLastMessage(IMS_NULL)
-    , pstTxnKey(IMS_NULL)
-    , pstRPRTxnKey(IMS_NULL)
+SIPTransactionState::SIPTransactionState() :
+        RCObject(),
+        nType(0),
+        nClass(CLASS_NONE),
+        nCSeqNumber(1)
+        // MULTI_REG_SIP_PROFILE
+        ,
+        pSIPProfile(IMS_NULL),
+        piListener(IMS_NULL),
+        pDialogEx(IMS_NULL),
+        pTransport(IMS_NULL),
+        pstMessage(IMS_NULL),
+        pstLastMessage(IMS_NULL),
+        pstTxnKey(IMS_NULL),
+        pstRPRTxnKey(IMS_NULL)
 {
 }
 
 PUBLIC
-SIPTransactionState::SIPTransactionState(IN SIPDialogEx *pDialogEx_)
-    : RCObject()
-    , nType(0)
-    , nClass(CLASS_NONE)
-    , nCSeqNumber(1)
-    // MULTI_REG_SIP_PROFILE
-    , pSIPProfile(IMS_NULL)
-    , piListener(IMS_NULL)
-    , pDialogEx(pDialogEx_)
-    , pTransport(IMS_NULL)
-    , pstMessage(IMS_NULL)
-    , pstLastMessage(IMS_NULL)
-    , pstTxnKey(IMS_NULL)
-    , pstRPRTxnKey(IMS_NULL)
+SIPTransactionState::SIPTransactionState(IN SIPDialogEx* pDialogEx_) :
+        RCObject(),
+        nType(0),
+        nClass(CLASS_NONE),
+        nCSeqNumber(1)
+        // MULTI_REG_SIP_PROFILE
+        ,
+        pSIPProfile(IMS_NULL),
+        piListener(IMS_NULL),
+        pDialogEx(pDialogEx_),
+        pTransport(IMS_NULL),
+        pstMessage(IMS_NULL),
+        pstLastMessage(IMS_NULL),
+        pstTxnKey(IMS_NULL),
+        pstRPRTxnKey(IMS_NULL)
 {
 }
 
 PUBLIC
-SIPTransactionState::SIPTransactionState(IN const SIPTransactionState& objRHS)
-    : RCObject(objRHS)
-    , nType(objRHS.nType)
-    , nClass(objRHS.nClass)
-    , nCSeqNumber(objRHS.nCSeqNumber)
-    // MULTI_REG_SIP_PROFILE
-    , pSIPProfile(objRHS.pSIPProfile)
-    , piListener(objRHS.piListener)
-    , pDialogEx(objRHS.pDialogEx)
-    , pTransport(IMS_NULL)
-    , pstMessage(IMS_NULL)
-    , pstLastMessage(IMS_NULL)
-    , pstTxnKey(IMS_NULL)
-    , pstRPRTxnKey(IMS_NULL)
+SIPTransactionState::SIPTransactionState(IN const SIPTransactionState& objRHS) :
+        RCObject(objRHS),
+        nType(objRHS.nType),
+        nClass(objRHS.nClass),
+        nCSeqNumber(objRHS.nCSeqNumber)
+        // MULTI_REG_SIP_PROFILE
+        ,
+        pSIPProfile(objRHS.pSIPProfile),
+        piListener(objRHS.piListener),
+        pDialogEx(objRHS.pDialogEx),
+        pTransport(IMS_NULL),
+        pstMessage(IMS_NULL),
+        pstLastMessage(IMS_NULL),
+        pstTxnKey(IMS_NULL),
+        pstRPRTxnKey(IMS_NULL)
 {
     // NOTE: If reference count is not used, you MUST implement this copy constructor
 }
 
-PUBLIC VIRTUAL
-SIPTransactionState::~SIPTransactionState()
+PUBLIC VIRTUAL SIPTransactionState::~SIPTransactionState()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -108,16 +108,13 @@ SIPTransactionState::~SIPTransactionState()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPTransactionState::Abort()
+PUBLIC VIRTUAL void SIPTransactionState::Abort()
 {
-    SipTxnKey *pstAbortTxnKey = pstTxnKey;
+    SipTxnKey* pstAbortTxnKey = pstTxnKey;
 
     //---------------------------------------------------------------------------------------------
 
-    if ((pstAbortTxnKey == IMS_NULL)
-            && (nType == TYPE_CLIENT)
-            && (pstLastMessage != IMS_NULL))
+    if ((pstAbortTxnKey == IMS_NULL) && (nType == TYPE_CLIENT) && (pstLastMessage != IMS_NULL))
     {
         pstAbortTxnKey = SIPStack::CreateTxnKey(pstLastMessage, SIPStack::SIP_TXN_MSG_SENT);
         pstTxnKey = pstAbortTxnKey;
@@ -133,11 +130,11 @@ void SIPTransactionState::Abort()
     }
 
     // Invoke the stack API to abort the transaction.
-    (void) SIPStackState::GetInstance()->AbortTransaction(pstAbortTxnKey, this);
+    (void)SIPStackState::GetInstance()->AbortTransaction(pstAbortTxnKey, this);
 
     if (pstRPRTxnKey != IMS_NULL)
     {
-        (void) SIPStackState::GetInstance()->AbortTransaction(pstRPRTxnKey, this);
+        (void)SIPStackState::GetInstance()->AbortTransaction(pstRPRTxnKey, this);
         SIPStack::FreeTxnKey(pstRPRTxnKey);
     }
 
@@ -150,13 +147,12 @@ void SIPTransactionState::Abort()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPTransactionState::Terminate()
+PUBLIC VIRTUAL void SIPTransactionState::Terminate()
 {
     IMS_TRACE_D("STS::Terminate", 0, 0, 0);
 
     // If there is ongoing transaction, it will be terminated promptly.
-    (void) SIPStackState::GetInstance()->AbortTransaction(pstTxnKey, this);
+    (void)SIPStackState::GetInstance()->AbortTransaction(pstTxnKey, this);
 }
 
 /*
@@ -164,8 +160,7 @@ void SIPTransactionState::Terminate()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SIPTransactionState::CheckMessageValidity()
+PUBLIC VIRTUAL IMS_SINT32 SIPTransactionState::CheckMessageValidity()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -177,8 +172,7 @@ IMS_SINT32 SIPTransactionState::CheckMessageValidity()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPTransactionState::FormMessage()
+PUBLIC VIRTUAL IMS_BOOL SIPTransactionState::FormMessage()
 {
     // no-op
     return IMS_TRUE;
@@ -189,8 +183,7 @@ IMS_BOOL SIPTransactionState::FormMessage()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPTransactionState::InitTxnDetails(IN CONST SIPTransactionState *pTState)
+PUBLIC VIRTUAL IMS_BOOL SIPTransactionState::InitTxnDetails(IN CONST SIPTransactionState* pTState)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -236,8 +229,7 @@ IMS_BOOL SIPTransactionState::InitTxnDetails(IN CONST SIPTransactionState *pTSta
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPTransactionState::NotifyTimerExpired()
+PUBLIC VIRTUAL void SIPTransactionState::NotifyTimerExpired()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -251,16 +243,15 @@ void SIPTransactionState::NotifyTimerExpired()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPTransactionState::PostProcessMessageSentByStack(IN SipMessage* pstSipMsg,
-        IN const ByteArray& objBuffer)
+PUBLIC VIRTUAL void SIPTransactionState::PostProcessMessageSentByStack(
+        IN SipMessage* pstSipMsg, IN const ByteArray& objBuffer)
 {
     SIPFactoryProxy* pFactoryProxy = SIPFactoryProxy::GetInstance();
 
     // SIP_PACKET_TRACKER
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
-        SIPPacketTracker *pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
+        SIPPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
         SIPMessage objSIPMsg(pstSipMsg);
 
         pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_FALSE);
@@ -270,8 +261,8 @@ void SIPTransactionState::PostProcessMessageSentByStack(IN SipMessage* pstSipMsg
     if (pFactoryProxy->IsIPSecStateEnabled(GetSlotId()))
     {
         SIPIPSecState* pIPSecState = pFactoryProxy->GetIPSecState(GetSlotId());
-        const SIPTransportAddress &objNearEnd = pTransport->GetAddress(SIPTransport::TA_NEAR);
-        const SIPTransportAddress &objFarEnd = pTransport->GetAddress(SIPTransport::TA_FAR);
+        const SIPTransportAddress& objNearEnd = pTransport->GetAddress(SIPTransport::TA_NEAR);
+        const SIPTransportAddress& objFarEnd = pTransport->GetAddress(SIPTransport::TA_FAR);
 
         pIPSecState->NotifyMessageSent(objNearEnd, objFarEnd, pstSipMsg);
     }
@@ -283,33 +274,31 @@ void SIPTransactionState::PostProcessMessageSentByStack(IN SipMessage* pstSipMsg
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPTransactionState::PreProcessMessageSentByStack(IN SipMessage* pstSipMsg)
+PUBLIC VIRTUAL void SIPTransactionState::PreProcessMessageSentByStack(IN SipMessage* pstSipMsg)
 {
     SIPFactoryProxy* pFactoryProxy = SIPFactoryProxy::GetInstance();
 
     // SIP_MESSAGE_TRACKER
     if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
     {
-        SIPMessageTracker *pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
+        SIPMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
         const SipMethod objMethod = SIPStack::GetMethod(pstSipMsg);
 
         if (SIPStack::IsRequestMessage(pstSipMsg))
         {
-            pMessageTracker->NotifyMessageSent(objMethod,
-                    0, pDialogEx->GetDialogState()->GetCallId());
+            pMessageTracker->NotifyMessageSent(
+                    objMethod, 0, pDialogEx->GetDialogState()->GetCallId());
         }
         else
         {
-            pMessageTracker->NotifyMessageSent(objMethod,
-                    SIPStack::GetStatusCode(pstSipMsg),
+            pMessageTracker->NotifyMessageSent(objMethod, SIPStack::GetStatusCode(pstSipMsg),
                     pDialogEx->GetDialogState()->GetCallId());
         }
     }
 
     // LOG_EXCLUDING_SERVER_INFO
-    if (SIPStack::IsRequestMessage(pstSipMsg)
-            && SIPRTConfigUtils::IsMessageHiddenInLog(GetSlotId()))
+    if (SIPStack::IsRequestMessage(pstSipMsg) &&
+            SIPRTConfigUtils::IsMessageHiddenInLog(GetSlotId()))
     {
         SIPStack::DisplayUnknownHeaders(pstSipMsg);
     }
@@ -326,8 +315,7 @@ void SIPTransactionState::PreProcessMessageSentByStack(IN SipMessage* pstSipMsg)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPTransactionState::Send(IN SipTimerValues *pTV /* = IMS_NULL */)
+PUBLIC VIRTUAL IMS_BOOL SIPTransactionState::Send(IN SipTimerValues* pTV /* = IMS_NULL */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -339,8 +327,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipTimerValues *pTV /* = IMS_NULL */)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPTransactionState::RetransmitMessage()
+PUBLIC VIRTUAL IMS_RESULT SIPTransactionState::RetransmitMessage()
 {
     ByteArray objBuffer;
 
@@ -369,7 +356,7 @@ IMS_RESULT SIPTransactionState::RetransmitMessage()
 
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
-        SIPPacketTracker *pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
+        SIPPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
         SIPMessage objSIPMsg(pstMessage);
 
         pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_TRUE);
@@ -383,8 +370,7 @@ IMS_RESULT SIPTransactionState::RetransmitMessage()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPTransactionState::UpdateTransportDetails()
+PUBLIC VIRTUAL IMS_BOOL SIPTransactionState::UpdateTransportDetails()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -424,7 +410,7 @@ Remarks
  MULTI_REG_SIP_PROFILE
 */
 PUBLIC
-void SIPTransactionState::SetSIPProfile(IN SipProfile *pProfile)
+void SIPTransactionState::SetSIPProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -437,7 +423,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTransactionState::SetTransactionListener(IN ISIPTransactionStateListener *piListener)
+void SIPTransactionState::SetTransactionListener(IN ISIPTransactionStateListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -450,7 +436,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTransactionState::SetTransportListener(IN ISIPTransportErrorListener *piListener)
+void SIPTransactionState::SetTransportListener(IN ISIPTransportErrorListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -463,8 +449,8 @@ Remarks
  RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
 */
 PUBLIC
-void SIPTransactionState::SetTransportTuple(IN CONST IPAddress &objIPA,
-        IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC /* = 0xFFFF */,
+void SIPTransactionState::SetTransportTuple(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
+        IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC /* = 0xFFFF */,
         IN IMS_SINT32 nTransportExt /* = 0 (ANY) */)
 {
     //---------------------------------------------------------------------------------------------
@@ -478,7 +464,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPTransactionState::SendToNetwork(IN CONST IMS_BYTE *pBuffer, IN IMS_SINT32 nBuffLen)
+IMS_BOOL SIPTransactionState::SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -494,7 +480,7 @@ Remarks
 
 */
 PUBLIC
-void SIPTransactionState::UpdateMessage(IN SipMessage *pstMessage)
+void SIPTransactionState::UpdateMessage(IN SipMessage* pstMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -509,8 +495,7 @@ void SIPTransactionState::UpdateMessage(IN SipMessage *pstMessage)
 Remarks
 
 */
-PROTECTED VIRTUAL
-SIPTransactionState* SIPTransactionState::Clone()
+PROTECTED VIRTUAL SIPTransactionState* SIPTransactionState::Clone()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -525,7 +510,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pTV)
+IMS_BOOL SIPTransactionState::Send(IN SipMessage* pSipMsg, IN SipTimerValues* pTV)
 {
     SipTransportParameter objTranspParam;
 
@@ -556,7 +541,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
     }
 
     // Prepare User Data
-    SipTxnContext *pstTxnContext = SIPStack::CreateTxnContext();
+    SipTxnContext* pstTxnContext = SIPStack::CreateTxnContext();
 
     if (pstTxnContext == IMS_NULL)
     {
@@ -576,15 +561,15 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
         {
             IMS_SINT32 nStatusCode = SIPStack::GetStatusCode(pSipMsg);
 
-            if ((nStatusCode == SipStatusCode::SC_401)
-                    || (nStatusCode == SipStatusCode::SC_407))
+            if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
             {
                 const SipMethod objMethod = SIPStack::GetMethod(pSipMsg);
 
                 if (objMethod.Equals(SipMethod::ACK))
                 {
-                    IMS_TRACE_D("AUTH_CHALLENGE_TO_INVITE :: ACK (%d) " \
-                            "& transaction state is cloned", nStatusCode, 0, 0);
+                    IMS_TRACE_D("AUTH_CHALLENGE_TO_INVITE :: ACK (%d) "
+                                "& transaction state is cloned",
+                            nStatusCode, 0, 0);
 
                     bIsTxnStateSet = IMS_TRUE;
                     pTxnContextData->SetTxnState(this->Clone());
@@ -610,7 +595,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
     {
         SIPStack::DestroyTxnContext(pstTxnContext);
         IMS_TRACE_E(0, "Encoding SIP message failed", 0, 0, 0);
-        return IMS_FALSE; // throw exception : syntax error
+        return IMS_FALSE;  // throw exception : syntax error
     }
 
     /* Reserver transport resources */
@@ -618,7 +603,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
     {
         SIPStack::DestroyTxnContext(pstTxnContext);
         IMS_TRACE_E(0, "Reserving the transport resource failed", 0, 0, 0);
-        return IMS_FALSE; // throw exception : network not available
+        return IMS_FALSE;  // throw exception : network not available
     }
 
     // SIP_MESSAGE_TRACKER
@@ -626,25 +611,23 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
 
     if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
     {
-        SIPMessageTracker *pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
+        SIPMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
         const SipMethod objMethod = SIPStack::GetMethod(pSipMsg);
 
         if (SIPStack::IsRequestMessage(pSipMsg))
         {
-            pMessageTracker->NotifyMessageSent(objMethod,
-                    0, pDialogEx->GetDialogState()->GetCallId());
+            pMessageTracker->NotifyMessageSent(
+                    objMethod, 0, pDialogEx->GetDialogState()->GetCallId());
         }
         else
         {
-            pMessageTracker->NotifyMessageSent(objMethod,
-                    SIPStack::GetStatusCode(pSipMsg),
+            pMessageTracker->NotifyMessageSent(objMethod, SIPStack::GetStatusCode(pSipMsg),
                     pDialogEx->GetDialogState()->GetCallId());
         }
     }
 
     // LOG_EXCLUDING_SERVER_INFO
-    if (SIPStack::IsRequestMessage(pSipMsg)
-            && SIPRTConfigUtils::IsMessageHiddenInLog(GetSlotId()))
+    if (SIPStack::IsRequestMessage(pSipMsg) && SIPRTConfigUtils::IsMessageHiddenInLog(GetSlotId()))
     {
         SIPStack::DisplayUnknownHeaders(pSipMsg);
     }
@@ -657,14 +640,9 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
 
     SipTxnKey* pTxnKey = IMS_NULL;
     IMS_UINT16 nError = 0;
-    SIP_BOOL  bStatus = SipStackManager::GetInstance()->SendMsg(
-                        pSipMsg,
-                        &objTranspParam,
-                        &objUserData,
-                        reinterpret_cast<SIP_CHAR*>(objBuffer.GetData()),
-                        objBuffer.GetLength(),
-                        &pTxnKey,
-                        &nError);
+    SIP_BOOL bStatus = SipStackManager::GetInstance()->SendMsg(pSipMsg, &objTranspParam,
+            &objUserData, reinterpret_cast<SIP_CHAR*>(objBuffer.GetData()), objBuffer.GetLength(),
+            &pTxnKey, &nError);
 
     if (objUserData.GetUserData() != IMS_NULL)
     {
@@ -691,7 +669,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
     // SIP_PACKET_TRACKER
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
-        SIPPacketTracker *pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
+        SIPPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
         SIPMessage objSIPMsg(pSipMsg);
 
         pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_FALSE);
@@ -701,8 +679,8 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage *pSipMsg, IN SipTimerValues *pT
     if (pFactoryProxy->IsIPSecStateEnabled(GetSlotId()))
     {
         SIPIPSecState* pIPSecState = pFactoryProxy->GetIPSecState(GetSlotId());
-        const SIPTransportAddress &objNearEnd = pTransport->GetAddress(SIPTransport::TA_NEAR);
-        const SIPTransportAddress &objFarEnd = pTransport->GetAddress(SIPTransport::TA_FAR);
+        const SIPTransportAddress& objNearEnd = pTransport->GetAddress(SIPTransport::TA_NEAR);
+        const SIPTransportAddress& objFarEnd = pTransport->GetAddress(SIPTransport::TA_FAR);
 
         pIPSecState->NotifyMessageSent(objNearEnd, objFarEnd, pSipMsg);
     }
@@ -741,8 +719,8 @@ Remarks
 
 */
 PROTECTED
-void SIPTransactionState::SetTimerValues(IN SipTimerValues *pTV,
-        IN_OUT SipTxnContext *&pstTxnContext)
+void SIPTransactionState::SetTimerValues(
+        IN SipTimerValues* pTV, IN_OUT SipTxnContext*& pstTxnContext)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -755,7 +733,7 @@ Remarks
 
 */
 PROTECTED
-void SIPTransactionState::SetFlowControlOption(IN CONST SipMethod &objMethod)
+void SIPTransactionState::SetFlowControlOption(IN CONST SipMethod& objMethod)
 {
     if (objMethod.Equals(SipMethod::REGISTER))
     {

@@ -15,8 +15,6 @@
 
 #include "IPAddress.h"
 
-
-
 class SIPPortManager
 {
 private:
@@ -25,7 +23,7 @@ private:
 
 public:
     void Clear();
-    IMS_SINT32 GetPortC(IN CONST IPAddress &objIP)  const;
+    IMS_SINT32 GetPortC(IN CONST IPAddress& objIP) const;
     IMS_BOOL IsPortCProvisioned() const;
     void SetPortC(IN IMS_SINT32 nPortStart, IN IMS_SINT32 nPortEnd);
 
@@ -33,9 +31,9 @@ public:
 
 private:
     IMS_SINT32 GetNextPortC() const;
-    IMS_BOOL IsPortAvailable(IN CONST IPAddress &objIP, IN IMS_SINT32 nPort)  const;
-    IMS_SINT32 SelectNextPortC(IN CONST IPAddress &objIP)  const;
-    void SetNextPortC(IN IMS_SINT32 nPort)  const;
+    IMS_BOOL IsPortAvailable(IN CONST IPAddress& objIP, IN IMS_SINT32 nPort) const;
+    IMS_SINT32 SelectNextPortC(IN CONST IPAddress& objIP) const;
+    void SetNextPortC(IN IMS_SINT32 nPort) const;
 
 private:
     // Port range as a default (not-inclusive).
@@ -50,7 +48,10 @@ private:
 
     // Minimum Round-Robin Gap
     // Do not re-use a source port that has been used in any of the previous 32 TCP sockets.
-    enum { MIN_RR_GAP = 32 };
+    enum
+    {
+        MIN_RR_GAP = 32
+    };
 
     // Port range (not-inclusive)
     IMS_SINT32 nPortC_Start;
@@ -60,4 +61,4 @@ private:
     mutable IMS_SINT32 nNextPortC;
 };
 
-#endif // _SIP_PORT_MANAGER_H_
+#endif  // _SIP_PORT_MANAGER_H_

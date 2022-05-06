@@ -31,30 +31,24 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_MADDR[] = "maddr";
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_METHOD[] = "method";
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_PHONE_CONTEXT[] = "phone-context";
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_TRANSPORT[] = "transport";
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_TTL[] = "ttl";
-PUBLIC GLOBAL
-const IMS_CHAR SipAddress::PARAM_USER[] = "user";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_MADDR[] = "maddr";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_METHOD[] = "method";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_PHONE_CONTEXT[] = "phone-context";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_TRANSPORT[] = "transport";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_TTL[] = "ttl";
+PUBLIC GLOBAL const IMS_CHAR SipAddress::PARAM_USER[] = "user";
 
 PUBLIC
-SipAddress::UserInfoPart::UserInfoPart()
-    : m_strUser(AString::ConstNull())
-    , m_strPassword(AString::ConstNull())
+SipAddress::UserInfoPart::UserInfoPart() :
+        m_strUser(AString::ConstNull()),
+        m_strPassword(AString::ConstNull())
 {
 }
 
 PUBLIC
-SipAddress::UserInfoPart::UserInfoPart(IN const SipAddress::UserInfoPart& other)
-    : m_strUser(other.m_strUser)
-    , m_strPassword(other.m_strPassword)
+SipAddress::UserInfoPart::UserInfoPart(IN const SipAddress::UserInfoPart& other) :
+        m_strUser(other.m_strUser),
+        m_strPassword(other.m_strPassword)
 {
     for (IMS_UINT32 i = 0; i < other.m_objParameters.GetSize(); ++i)
     {
@@ -422,14 +416,14 @@ IMS_BOOL SipAddress::Equals(IN const SipAddress& objAddress) const
     // "sip" or "sips" URI scheme
     if (IsSchemeSip() || IsSchemeSips())
     {
-        //4 needs to be updated
+        // 4 needs to be updated
         return CompareSipUris(objAddress);
     }
     else if (IsSchemeTel())
     {
         return CompareTelUris(objAddress);
     }
-    //4 comparison of an address format with the other URI scheme
+    // 4 comparison of an address format with the other URI scheme
     else
     {
         return m_strHostInfo.EqualsIgnoreCase(objAddress.m_strHostInfo);
@@ -448,8 +442,8 @@ const AString& SipAddress::GetDisplayName() const
 }
 
 PUBLIC
-const ISipHeader* SipAddress::GetHeader(IN IMS_SINT32 nType,
-        IN const AString& strName/* = AString::ConstNull()*/) const
+const ISipHeader* SipAddress::GetHeader(
+        IN IMS_SINT32 nType, IN const AString& strName /* = AString::ConstNull()*/) const
 {
     for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
@@ -472,8 +466,8 @@ const ISipHeader* SipAddress::GetHeader(IN IMS_SINT32 nType,
                 const IMS_CHAR* pszName = SIPStack::GetHeaderName(nType, strName);
                 const AString& strHeaderName = piHeader->GetName();
 
-                if (strHeaderName.EqualsIgnoreCase(cCompactName)
-                        || strHeaderName.EqualsIgnoreCase(pszName))
+                if (strHeaderName.EqualsIgnoreCase(cCompactName) ||
+                        strHeaderName.EqualsIgnoreCase(pszName))
                 {
                     return piHeader;
                 }
@@ -785,7 +779,7 @@ IMS_RESULT SipAddress::SetDisplayName(IN const AString& strName)
 
 PUBLIC
 IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
-        IN const AString& strName/* = AString::ConstNull()*/)
+        IN const AString& strName /* = AString::ConstNull()*/)
 {
     if (m_bIsWildcard)
     {
@@ -831,8 +825,8 @@ IMS_RESULT SipAddress::SetHeader(IN IMS_SINT32 nType, IN const AString& strValue
 }
 
 PUBLIC
-IMS_RESULT SipAddress::SetHeaders(IN const AString& strHeaders,
-        IN IMS_BOOL bRemoveAll/* = IMS_TRUE*/)
+IMS_RESULT SipAddress::SetHeaders(
+        IN const AString& strHeaders, IN IMS_BOOL bRemoveAll /* = IMS_TRUE*/)
 {
     if (m_bIsWildcard)
     {
@@ -861,7 +855,7 @@ IMS_RESULT SipAddress::SetHost(IN const AString& strHost)
     if (strHost.IsNULL() || m_bIsWildcard)
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
-        return IMS_FAILURE; // Throw exception
+        return IMS_FAILURE;  // Throw exception
     }
 
     IPAddress objHost;
@@ -1018,8 +1012,8 @@ AString SipAddress::ToString() const
     AStringBuffer objSipAddr(512);
     IMS_BOOL bFormAquot = IMS_FALSE;
 
-    if (m_bAquotRequired || (m_strDisplayName.GetLength() > 0)
-            || !m_objParams.IsEmpty() || !m_objHeaders.IsEmpty())
+    if (m_bAquotRequired || (m_strDisplayName.GetLength() > 0) || !m_objParams.IsEmpty() ||
+            !m_objHeaders.IsEmpty())
     {
         bFormAquot = IMS_TRUE;
     }
@@ -1035,9 +1029,9 @@ AString SipAddress::ToString() const
                 nSlotId = ThreadService::GetCurrentSlotId();
             }
 
-            if (m_bDquotForDisplayName
-                    || ((nSlotId != IMS_SLOT_ANY)
-                        && SipConfigProxy::IsDisplayNameDquotRequired(nSlotId)))
+            if (m_bDquotForDisplayName ||
+                    ((nSlotId != IMS_SLOT_ANY) &&
+                            SipConfigProxy::IsDisplayNameDquotRequired(nSlotId)))
             {
                 objSipAddr.Append(TextParser::CHAR_DQUOT);
                 objSipAddr.Append(m_strDisplayName);
@@ -1135,8 +1129,8 @@ AString SipAddress::ToString() const
         // hnv-unreserved = "[" / "]" / "/" / "?" / ":" / "+" / "$"
         // unreserved (mark) = "-" / "_" / "." / "!" / "~" / "*" / "'" / "(" / ")"
         // non-reserved characters = "-" / "_" / "." / "~"
-        //const AString strHNV("[]/?:+$!*'()");
-        //const AString strEscaped("\"<>");
+        // const AString strHNV("[]/?:+$!*'()");
+        // const AString strEscaped("\"<>");
         const AString strHnv("[]/?:+$-_.!~*'()");
         const ISipHeader* piHeader = m_objHeaders.GetAt(0);
 
@@ -1144,8 +1138,7 @@ AString SipAddress::ToString() const
 
         objSipAddr.Append(piHeader->GetName());
         objSipAddr.Append(TextParser::CHAR_EQUAL);
-        objSipAddr.Append(
-                TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHnv));
+        objSipAddr.Append(TextParser::DoPercentEncodingEx(piHeader->GetHeaderValue(), strHnv));
 
         for (IMS_UINT32 i = 1; i < m_objHeaders.GetSize(); ++i)
         {
@@ -1170,22 +1163,19 @@ AString SipAddress::ToString() const
     return static_cast<const AStringBuffer&>(objSipAddr).GetString();
 }
 
-PUBLIC GLOBAL
-const IMSList<SipAddress*>& SipAddress::ConstEmptyList()
+PUBLIC GLOBAL const IMSList<SipAddress*>& SipAddress::ConstEmptyList()
 {
     static const IMSList<SipAddress*> CONST_EMPTY_LIST = IMSList<SipAddress*>();
     return CONST_EMPTY_LIST;
 }
 
-PUBLIC GLOBAL
-const SipAddress& SipAddress::ConstNull()
+PUBLIC GLOBAL const SipAddress& SipAddress::ConstNull()
 {
     static const SipAddress CONST_NULL;
     return CONST_NULL;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SipAddress::GetTelUriFormat(IN const AString& strResource)
+PUBLIC GLOBAL IMS_SINT32 SipAddress::GetTelUriFormat(IN const AString& strResource)
 {
     // global-number-digits := "+" *phonedigit DIGIT *phonedigit
     // local-number-digits := *phonedigit-hex (HEXDIG / "*" / "#") *phonedigit-hex
@@ -1217,11 +1207,8 @@ IMS_SINT32 SipAddress::GetTelUriFormat(IN const AString& strResource)
         {
             const IMS_CHAR c = strResource[i];
 
-            if (!IMS_ISDIGIT(c)
-                    && !IsVisualSeparator(c)
-                    && (c != '*')
-                    && (c != '#')
-                    && !((c >= 'A') && (c <= 'F')))
+            if (!IMS_ISDIGIT(c) && !IsVisualSeparator(c) && (c != '*') && (c != '#') &&
+                    !((c >= 'A') && (c <= 'F')))
             {
                 return TEL_FORMAT_NONE;
             }
@@ -1236,22 +1223,21 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 {
     static struct
     {
-        const IMS_CHAR *pszName;
+        const IMS_CHAR* pszName;
         IMS_SINT32 nSize;
-    } SPECIAL_PARAMETER[] =
-        {
-            { PARAM_USER, 4 },
-            { PARAM_TTL, 3 },
-            { PARAM_METHOD, 6 },
-            { PARAM_MADDR, 5 }
-            /*
-            Do not include "transport" uri-parameter as a special one.
-            { PARAM_TRANSPORT, 9 }
-            */
-        };
+    } SPECIAL_PARAMETER[] = {
+            {PARAM_USER,   4},
+            {PARAM_TTL,    3},
+            {PARAM_METHOD, 6},
+            {PARAM_MADDR,  5}
+  /*
+  Do not include "transport" uri-parameter as a special one.
+  { PARAM_TRANSPORT, 9 }
+  */
+    };
 
     static const IMS_UINT32 MAX_SPECIAL_PARAMETER =
-            sizeof(SPECIAL_PARAMETER)/sizeof(SPECIAL_PARAMETER[0]);
+            sizeof(SPECIAL_PARAMETER) / sizeof(SPECIAL_PARAMETER[0]);
 
     if (m_nPort != objAddress.m_nPort)
     {
@@ -1296,7 +1282,8 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 
         if (bParamPresent != bOtherParamPresent)
         {
-            IMS_TRACE_E(0, "Parameter (%s) is not matched; " \
+            IMS_TRACE_E(0,
+                    "Parameter (%s) is not matched; "
                     "One of them does not contain the parameter",
                     SPECIAL_PARAMETER[i].pszName, 0, 0);
             return IMS_FALSE;
@@ -1318,9 +1305,8 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
             {
                 if (!pParam->Equals(pOtherParam))
                 {
-                    IMS_TRACE_E(0, "Parameter (%s) is not matched - %s : %s",
-                            strName.GetStr(), pParam->GetValue().GetStr(),
-                            pOtherParam->GetValue().GetStr());
+                    IMS_TRACE_E(0, "Parameter (%s) is not matched - %s : %s", strName.GetStr(),
+                            pParam->GetValue().GetStr(), pOtherParam->GetValue().GetStr());
                     return IMS_FALSE;
                 }
 
@@ -1348,8 +1334,8 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 
         if (!bHeaderFound)
         {
-            IMS_TRACE_E(0, "Header (%s, %s) is not found",
-                    piHeader->GetName().GetStr(), piHeader->GetValue().GetStr(), 0);
+            IMS_TRACE_E(0, "Header (%s, %s) is not found", piHeader->GetName().GetStr(),
+                    piHeader->GetValue().GetStr(), 0);
             return IMS_FALSE;
         }
     }
@@ -1479,10 +1465,10 @@ IMS_BOOL SipAddress::CompareTransportParameters(IN const SipAddress& objAddress)
         return IMS_TRUE;
     }
 
-    const AString& strTransport = (pParameter != IMS_NULL) ?\
-            pParameter->GetValue() : AString::ConstNull();
-    const AString& strOtherTransport = (pOtherParameter != IMS_NULL) ?\
-            pOtherParameter->GetValue() : AString::ConstNull();
+    const AString& strTransport =
+            (pParameter != IMS_NULL) ? pParameter->GetValue() : AString::ConstNull();
+    const AString& strOtherTransport =
+            (pOtherParameter != IMS_NULL) ? pOtherParameter->GetValue() : AString::ConstNull();
 
     if ((strTransport.GetLength() == 0) && (strOtherTransport.GetLength() == 0))
     {
@@ -1539,7 +1525,7 @@ const SipAddress::UserInfoPart* SipAddress::CreateUserInfoPart(IN const AString&
 
 PRIVATE
 IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParseParameter,
-        IN IMS_BOOL bParseDisplayName/* = IMS_TRUE*/, IN IMS_BOOL bParseHeader/* = IMS_TRUE*/)
+        IN IMS_BOOL bParseDisplayName /* = IMS_TRUE*/, IN IMS_BOOL bParseHeader /* = IMS_TRUE*/)
 {
     AString strUri = strAddress.Trim();
 
@@ -1563,9 +1549,9 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
             m_strDisplayName = strUri.GetSubStr(0, nLaquot);
             m_strDisplayName = m_strDisplayName.Trim();
 
-            //4 Remove DQUOT and restore the escaped characters
-            if (m_strDisplayName.StartsWith(TextParser::CHAR_DQUOT)
-                    && m_strDisplayName.EndsWith(TextParser::CHAR_DQUOT))
+            // 4 Remove DQUOT and restore the escaped characters
+            if (m_strDisplayName.StartsWith(TextParser::CHAR_DQUOT) &&
+                    m_strDisplayName.EndsWith(TextParser::CHAR_DQUOT))
             {
                 m_strDisplayName = TextParser::TrimDQUOT(m_strDisplayName);
 
@@ -1719,16 +1705,15 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
                     {
                         delete pParameter;
 
-                        IMS_TRACE_E(0, "Parsing SIP Parameter (%s) failed",
-                                strToken.GetStr(), 0, 0);
+                        IMS_TRACE_E(
+                                0, "Parsing SIP Parameter (%s) failed", strToken.GetStr(), 0, 0);
                         continue;
                     }
 
                     if (!m_objParams.Append(pParameter))
                     {
                         delete pParameter;
-                        IMS_TRACE_E(0, "Adding SIP Parameter (%s) failed",
-                                strToken.GetStr(), 0, 0);
+                        IMS_TRACE_E(0, "Adding SIP Parameter (%s) failed", strToken.GetStr(), 0, 0);
                     }
                 }
             }
@@ -1770,9 +1755,8 @@ IMS_BOOL SipAddress::IsParameterPresent(IN const AString& strName) const
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SipAddress::CompareNumberDigits(IN const AString& strDigits1,
-        IN const AString& strDigits2)
+PRIVATE GLOBAL IMS_BOOL SipAddress::CompareNumberDigits(
+        IN const AString& strDigits1, IN const AString& strDigits2)
 {
     AString strTmpDigits1;
     AString strTmpDigits2;
@@ -1793,7 +1777,7 @@ IMS_BOOL SipAddress::CompareNumberDigits(IN const AString& strDigits1,
     {
         IMS_CHAR cDigit = strDigits2[i];
 
-        if (IsVisualSeparator(cDigit))\
+        if (IsVisualSeparator(cDigit))
         {
             continue;
         }
@@ -1804,21 +1788,19 @@ IMS_BOOL SipAddress::CompareNumberDigits(IN const AString& strDigits1,
     return strTmpDigits1.EqualsIgnoreCase(strTmpDigits2);
 }
 
-PRIVATE GLOBAL
-AString SipAddress::EscapeDquotAndBackslash(IN const AString& strValue)
+PRIVATE GLOBAL AString SipAddress::EscapeDquotAndBackslash(IN const AString& strValue)
 {
     AString strEscapedValue = strValue;
 
-    //strEscapedValue.Replace("\\\"", "\"");
-    //strEscapedValue.Replace("\\\\", "\\");
+    // strEscapedValue.Replace("\\\"", "\"");
+    // strEscapedValue.Replace("\\\\", "\\");
     strEscapedValue.Replace("\\", "\\\\");
     strEscapedValue.Replace("\"", "\\\"");
 
     return strEscapedValue;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsDisplayNameToken(IN const AString& strDisplayName)
+PRIVATE GLOBAL IMS_BOOL SipAddress::IsDisplayNameToken(IN const AString& strDisplayName)
 {
     IMS_SINT32 nIndex = 0;
 
@@ -1827,8 +1809,7 @@ IMS_BOOL SipAddress::IsDisplayNameToken(IN const AString& strDisplayName)
         const IMS_CHAR ch = strDisplayName[nIndex];
 
         // token / HTAB / LF / CR / SP
-        if (!IsToken(ch) &&
-                (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x20))
+        if (!IsToken(ch) && (ch != 0x09) && (ch != 0x0A) && (ch != 0x0D) && (ch != 0x20))
         {
             return IMS_FALSE;
         }
@@ -1839,14 +1820,13 @@ IMS_BOOL SipAddress::IsDisplayNameToken(IN const AString& strDisplayName)
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsToken(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL SipAddress::IsToken(IN const IMS_CHAR ch)
 {
     // alphanum / "-" / "." / "!" / "%" / "*" / "_" / "+" / "'" / "`" / "~"
 
-    if (IMS_ISDIGIT(ch) || IMS_ISALPHA(ch) ||
-            (ch == '-') || (ch == '.') || (ch == '!') || (ch == '%') || (ch == '*') ||
-            (ch == '_') || (ch == '+') || (ch == '\'') || (ch == '`') || (ch == '~'))
+    if (IMS_ISDIGIT(ch) || IMS_ISALPHA(ch) || (ch == '-') || (ch == '.') || (ch == '!') ||
+            (ch == '%') || (ch == '*') || (ch == '_') || (ch == '+') || (ch == '\'') ||
+            (ch == '`') || (ch == '~'))
     {
         return IMS_TRUE;
     }
@@ -1854,8 +1834,7 @@ IMS_BOOL SipAddress::IsToken(IN const IMS_CHAR ch)
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL SipAddress::IsVisualSeparator(IN const IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL SipAddress::IsVisualSeparator(IN const IMS_CHAR ch)
 {
     // "-", ".", "(", ")"
 

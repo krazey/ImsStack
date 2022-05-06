@@ -17,8 +17,7 @@ class IServiceFilterCriteria;
  *
  * @see IConnection, ICoreService
  */
-class IService
-    : public IConnection
+class IService : public IConnection
 {
 public:
     /**
@@ -77,8 +76,8 @@ public:
      * @return Contact header for this service.
      * @note IMS EXTENSION METHOD
      */
-    virtual ISipHeader* GetContactHeader(
-            IN IMS_BOOL bPrivacy = IMS_FALSE, IN IMS_BOOL bRequest = IMS_TRUE,
+    virtual ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE,
+            IN IMS_BOOL bRequest = IMS_TRUE,
             IN IMS_SINT32 nSIPMethod = (-1) /* SipMethod::INVALID */) const = 0;
 
     /**
@@ -228,8 +227,8 @@ public:
      *         Otherwise, returns IMS_FALSE.
      * @note IMS EXTENSION METHOD
      */
-    virtual IMS_BOOL AddFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-            IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+    virtual IMS_BOOL AddFeatureTags(
+            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Removes the specified feature tags from this service.
@@ -242,8 +241,8 @@ public:
      *         Otherwise, returns IMS_FALSE.
      * @note IMS EXTENSION METHOD
      */
-    virtual IMS_BOOL RemoveFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-            IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
+    virtual IMS_BOOL RemoveFeatureTags(
+            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE) = 0;
 
     /**
      * @brief Sets the SIP profile for specific configuration of SIP connections
@@ -256,7 +255,7 @@ public:
      * @param pProfile SIP profile to be set
      * @note IMS EXTENSION METHOD, MULTI_REG_SIP_PROFILE
      */
-    virtual void SetSIPProfile(IN SipProfile *pProfile) = 0;
+    virtual void SetSIPProfile(IN SipProfile* pProfile) = 0;
 };
 
-#endif // _INTERFACE_SERVICE_H_
+#endif  // _INTERFACE_SERVICE_H_

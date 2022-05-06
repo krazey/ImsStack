@@ -16,13 +16,10 @@
 #include "media/IMedia.h"
 #include "media/FramedMediaProposal.h"
 
-
-
-class FramedMediaProposalImpl
-    : public IMedia
+class FramedMediaProposalImpl : public IMedia
 {
 public:
-    FramedMediaProposalImpl(IN FramedMediaProposal *pMediaProposal_);
+    FramedMediaProposalImpl(IN FramedMediaProposal* pMediaProposal_);
     virtual ~FramedMediaProposalImpl();
 
 private:
@@ -39,7 +36,7 @@ private:
     virtual void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
 
 private:
-    FramedMediaProposal *pMediaProposal;
+    FramedMediaProposal* pMediaProposal;
 };
 
-#endif // _FRAMED_MEDIA_PROPOSAL_IMPL_H_
+#endif  // _FRAMED_MEDIA_PROPOSAL_IMPL_H_

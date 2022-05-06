@@ -18,7 +18,7 @@ public:
      *
      * @param piCapabilities Pointer to ICapabilities to be notified
      */
-    virtual void CapabilityQueryDelivered(IN ICapabilities *piCapabilities) = 0;
+    virtual void CapabilityQueryDelivered(IN ICapabilities* piCapabilities) = 0;
 
     /**
      * @brief Notifies the application that the capability query response
@@ -26,7 +26,7 @@ public:
      *
      * @param piCapabilities Pointer to ICapabilities to be notified
      */
-    virtual void CapabilityQueryDeliveryFailed(IN ICapabilities *piCapabilities) = 0;
+    virtual void CapabilityQueryDeliveryFailed(IN ICapabilities* piCapabilities) = 0;
 };
 
-#endif // _INTERFACE_CAPABILITIES_LISTENER_H_
+#endif  // _INTERFACE_CAPABILITIES_LISTENER_H_

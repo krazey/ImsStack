@@ -17,8 +17,7 @@ class IReferenceListener;
  *
  * @see IServiceMethod, IReferenceListener
  */
-class IReference
-    : public IServiceMethod
+class IReference : public IServiceMethod
 {
 public:
     /**
@@ -37,7 +36,7 @@ public:
      * @return If the method is successfully connected, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT ConnectReferMethod(IN IServiceMethod *piServiceMethod) = 0;
+    virtual IMS_RESULT ConnectReferMethod(IN IServiceMethod* piServiceMethod) = 0;
 
     /**
      * @brief Returns the reference method to be used.
@@ -102,7 +101,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN IReferenceListener *piListener) = 0;
+    virtual void SetListener(IN IReferenceListener* piListener) = 0;
 
     /**
      * @brief Sets the replaces parameter of the Refer-To header to the given identity.
@@ -112,7 +111,7 @@ public:
      * @param strSessionId The identity of the ISession to be replaced
      * @return If it is successfully set, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetReplaces(IN CONST AString &strSessionId) = 0;
+    virtual IMS_RESULT SetReplaces(IN CONST AString& strSessionId) = 0;
 
     //// IMS extensions
 
@@ -127,8 +126,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AcceptEx(IN IMS_SINT32 nStatusCode = 202,
-            IN IMS_BOOL b100Trying = IMS_TRUE) = 0;
+    virtual IMS_RESULT AcceptEx(
+            IN IMS_SINT32 nStatusCode = 202, IN IMS_BOOL b100Trying = IMS_TRUE) = 0;
 
     /**
      * @brief Sends the reference request to the remote endpoint.
@@ -147,7 +146,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT ReferEx(IN IMS_BOOL bImplicitSubscription,
-            IN CONST AString &strHeadersForReferTo = AString::ConstNull()) = 0;
+            IN CONST AString& strHeadersForReferTo = AString::ConstNull()) = 0;
 
     /**
      * @brief Sends a failure final response to an incoming reference from a remote endpoint.
@@ -179,7 +178,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray &objContent,
+    virtual IMS_RESULT SendNotification(IN IMS_SINT32 nSubState, IN CONST ByteArray& objContent,
             IN IMS_SINT32 nReason = ISubscriptionState::REASON_NONE,
             IN IMS_SINT32 nExpires = (-1)) = 0;
 
@@ -188,7 +187,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetNotificationListener(IN INotificationListener *piListener) = 0;
+    virtual void SetNotificationListener(IN INotificationListener* piListener) = 0;
 
     /**
      * @brief Sets the flag if the mid-dialog request needs to be implicitly routed
@@ -214,4 +213,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REFERENCE_H_
+#endif  // _INTERFACE_REFERENCE_H_

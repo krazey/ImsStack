@@ -20,8 +20,7 @@ class ISubscriptionListener;
  *
  * @see IServiceMethod, ISubscriptionListener
  */
-class ISubscription
-    : public IServiceMethod
+class ISubscription : public IServiceMethod
 {
 public:
     /**
@@ -54,7 +53,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN ISubscriptionListener *piListener) = 0;
+    virtual void SetListener(IN ISubscriptionListener* piListener) = 0;
 
     /**
      * @brief Starts or updates a durative subscription.
@@ -95,7 +94,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetRefreshListener(IN IRefreshListener *piListener) = 0;
+    virtual void SetRefreshListener(IN IRefreshListener* piListener) = 0;
 
     /**
      * @brief Sets the refresh policy for the subscription refresh.
@@ -162,4 +161,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SUBSCRIPTION_H_
+#endif  // _INTERFACE_SUBSCRIPTION_H_

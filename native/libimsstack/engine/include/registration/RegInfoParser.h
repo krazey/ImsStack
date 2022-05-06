@@ -22,10 +22,7 @@
 
 class IRegInfoParserListener;
 
-
-
-class RegInfoParser
-    : public IXmlTransactionListener
+class RegInfoParser : public IXmlTransactionListener
 {
 public:
     RegInfoParser(IN const RegKey& objRegKey_, IN IXmlTransactionProvider*& piXmlTxnProvider);
@@ -33,8 +30,8 @@ public:
 
 public:
     const RegKey& GetRegKey() const;
-    IMS_BOOL Parse(IN const AString &strRegInfo);
-    void SetListener(IN IRegInfoParserListener *piListener);
+    IMS_BOOL Parse(IN const AString& strRegInfo);
+    void SetListener(IN IRegInfoParserListener* piListener);
 
 private:
     // IXmlTransactionListener interface
@@ -42,10 +39,10 @@ private:
 
 private:
     RegKey objRegKey;
-    IXmlTransactionProvider *&piXmlTxnProvider;
+    IXmlTransactionProvider*& piXmlTxnProvider;
 
-    IXmlTransaction *piXMLTxn;
-    IRegInfoParserListener *piListener;
+    IXmlTransaction* piXMLTxn;
+    IRegInfoParserListener* piListener;
 };
 
 #else
@@ -55,8 +52,6 @@ private:
 
 class IRegInfoParserListener;
 
-
-
 class RegInfoParser
 {
 public:
@@ -65,15 +60,15 @@ public:
 
 public:
     const RegKey& GetRegKey() const;
-    IMS_BOOL Parse(IN const AString &strRegInfo);
-    void SetListener(IN IRegInfoParserListener *piListener);
+    IMS_BOOL Parse(IN const AString& strRegInfo);
+    void SetListener(IN IRegInfoParserListener* piListener);
 
 private:
     RegKey objRegKey;
 
-    IRegInfoParserListener *piListener;
+    IRegInfoParserListener* piListener;
 };
 
-#endif // __IMS_ASYNC_XML_PARSER__
+#endif  // __IMS_ASYNC_XML_PARSER__
 
-#endif // _REG_INFO_PARSER_H_
+#endif  // _REG_INFO_PARSER_H_

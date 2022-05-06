@@ -17,8 +17,6 @@
 
 class SIPDialogState;
 
-
-
 /*
 SIP server transaction state listener interface
 
@@ -47,7 +45,7 @@ public:
     </table>
     */
     virtual void ServerTransactionState_ForkedRequestReceived(
-            IN SIPServerTransactionState *pSTState, IN SIPDialogEx *pOrigDialogEx) = 0;
+            IN SIPServerTransactionState* pSTState, IN SIPDialogEx* pOrigDialogEx) = 0;
 
     /*
 
@@ -65,8 +63,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void ServerTransactionState_RequestCreated(
-            IN SIPServerTransactionState *pSTState) = 0;
+    virtual void ServerTransactionState_RequestCreated(IN SIPServerTransactionState* pSTState) = 0;
 
     /*
 
@@ -84,8 +81,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void ServerTransactionState_RequestReceived(
-            IN SIPServerTransactionState *pSTState) = 0;
+    virtual void ServerTransactionState_RequestReceived(IN SIPServerTransactionState* pSTState) = 0;
 };
 
-#endif // _INTERFACE_SIP_SERVER_TRANSACTION_STATE_LISTENER_H_
+#endif  // _INTERFACE_SIP_SERVER_TRANSACTION_STATE_LISTENER_H_

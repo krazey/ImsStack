@@ -18,29 +18,27 @@
 class Protocol;
 class ProtocolPermissionPrivate;
 
-
-
 class ProtocolPermission
 {
 private:
     ProtocolPermission();
-    ProtocolPermission(IN const ProtocolPermission &objRHS);
+    ProtocolPermission(IN const ProtocolPermission& objRHS);
 
 public:
     ~ProtocolPermission();
 
 private:
-    ProtocolPermission& operator=(IN const ProtocolPermission &objRHS);
+    ProtocolPermission& operator=(IN const ProtocolPermission& objRHS);
 
 public:
-    Protocol* Lookup(IN const AString &strName);
-    IMS_BOOL Register(IN const AString &strName, IN Protocol *pProtocol);
-    IMS_BOOL Deregister(IN const AString &strName);
+    Protocol* Lookup(IN const AString& strName);
+    IMS_BOOL Register(IN const AString& strName, IN Protocol* pProtocol);
+    IMS_BOOL Deregister(IN const AString& strName);
 
     static ProtocolPermission* GetInstance();
 
 private:
-    ProtocolPermissionPrivate *pProtocolPermissionP;
+    ProtocolPermissionPrivate* pProtocolPermissionP;
 };
 
-#endif // _PROTOCOL_PERMISSION_H_
+#endif  // _PROTOCOL_PERMISSION_H_

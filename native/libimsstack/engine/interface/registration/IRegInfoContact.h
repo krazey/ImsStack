@@ -101,7 +101,7 @@ public:
      *         - AString#ConstNull : parameter does not exist
      *         - AString#ConstEmepty : parameter exists, but empty value (ex. feature-tag, ...)
      */
-    virtual const AString& GetUnknownParameter(IN CONST AString &strName) const = 0;
+    virtual const AString& GetUnknownParameter(IN CONST AString& strName) const = 0;
 
     /**
      * @brief Returns the unknown parameters of contact.
@@ -152,4 +152,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REG_INFO_CONTACT_H_
+#endif  // _INTERFACE_REG_INFO_CONTACT_H_

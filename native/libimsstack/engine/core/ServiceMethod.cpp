@@ -26,12 +26,10 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 class PreviousMessage
 {
 public:
-    PreviousMessage(IN Message *pRequest_);
+    PreviousMessage(IN Message* pRequest_);
     ~PreviousMessage();
 
 private:
@@ -41,18 +39,16 @@ private:
 private:
     friend class ServiceMethod;
 
-    ISipConnection *piSC;
-    Message *pRequest;
+    ISipConnection* piSC;
+    Message* pRequest;
     IMSList<Message*> objResponses;
 };
 
-
-
 PUBLIC
-PreviousMessage::PreviousMessage(IN Message *pRequest_)
-    : piSC(IMS_NULL)
-    , pRequest(pRequest_)
-    , objResponses(IMSList<Message*>())
+PreviousMessage::PreviousMessage(IN Message* pRequest_) :
+        piSC(IMS_NULL),
+        pRequest(pRequest_),
+        objResponses(IMSList<Message*>())
 {
 }
 
@@ -77,7 +73,7 @@ PreviousMessage::~PreviousMessage()
     {
         for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
         {
-            Message *pResponse = objResponses.GetAt(i);
+            Message* pResponse = objResponses.GetAt(i);
 
             if (pResponse != IMS_NULL)
             {
@@ -90,20 +86,17 @@ PreviousMessage::~PreviousMessage()
     }
 }
 
-
-
 PUBLIC
-ServiceMethod::ServiceMethod(IN Service *pService_)
-    : Method()
-    , pService(pService_)
-    , pNextRequest(IMS_NULL)
-    , pNextResponse(IMS_NULL)
-    , objPreviousMessages(IMSMap<IMS_SINT32, PreviousMessage*>())
+ServiceMethod::ServiceMethod(IN Service* pService_) :
+        Method(),
+        pService(pService_),
+        pNextRequest(IMS_NULL),
+        pNextResponse(IMS_NULL),
+        objPreviousMessages(IMSMap<IMS_SINT32, PreviousMessage*>())
 {
 }
 
-PUBLIC VIRTUAL
-ServiceMethod::~ServiceMethod()
+PUBLIC VIRTUAL ServiceMethod::~ServiceMethod()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -111,7 +104,7 @@ ServiceMethod::~ServiceMethod()
     {
         for (IMS_UINT32 i = 0; i < objPreviousMessages.GetSize(); ++i)
         {
-            PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(i);
+            PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(i);
 
             if (pPreviousMessage != IMS_NULL)
                 delete pPreviousMessage;
@@ -138,8 +131,7 @@ ServiceMethod::~ServiceMethod()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void ServiceMethod::Destroy()
+PUBLIC VIRTUAL void ServiceMethod::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -150,7 +142,7 @@ void ServiceMethod::Destroy()
     {
         for (IMS_UINT32 i = 0; i < objPreviousMessages.GetSize(); ++i)
         {
-            PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(i);
+            PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(i);
 
             if (pPreviousMessage != IMS_NULL)
             {
@@ -220,7 +212,7 @@ Message* ServiceMethod::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     IMS::SetLastError(IMSError::NO_ERROR);
 
@@ -245,7 +237,7 @@ Message* ServiceMethod::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->objResponses.IsEmpty())
     {
@@ -276,7 +268,7 @@ IMSList<Message*> ServiceMethod::GetPreviousResponses(IN IMS_SINT32 nServiceMeth
         return IMSList<Message*>();
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     IMS::SetLastError(IMSError::NO_ERROR);
 
@@ -301,8 +293,7 @@ IMSList<AString> ServiceMethod::GetRemoteUserId() const
 Remarks
  MULTI_SUBS
 */
-PROTECTED VIRTUAL
-const AString& ServiceMethod::GetSubscriberId() const
+PROTECTED VIRTUAL const AString& ServiceMethod::GetSubscriberId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -326,7 +317,7 @@ void ServiceMethod::ClearConnection(IN IMS_SINT32 nServiceMethod)
         return;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->piSC == IMS_NULL)
     {
@@ -355,7 +346,7 @@ void ServiceMethod::CloseConnection(IN IMS_SINT32 nServiceMethod)
         return;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->piSC == IMS_NULL)
     {
@@ -374,8 +365,8 @@ Remarks
 
 */
 PROTECTED
-void ServiceMethod::CopyPreviousMessage(IN IMS_SINT32 nServiceMethod_From,
-        IN IMS_SINT32 nServiceMethod_To)
+void ServiceMethod::CopyPreviousMessage(
+        IN IMS_SINT32 nServiceMethod_From, IN IMS_SINT32 nServiceMethod_To)
 {
     IMS_SLONG nIndex = objPreviousMessages.GetIndexOfKey(nServiceMethod_From);
 
@@ -386,7 +377,7 @@ void ServiceMethod::CopyPreviousMessage(IN IMS_SINT32 nServiceMethod_From,
         return;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage == IMS_NULL)
     {
@@ -394,7 +385,7 @@ void ServiceMethod::CopyPreviousMessage(IN IMS_SINT32 nServiceMethod_From,
         return;
     }
 
-    PreviousMessage *pNewPreviousMessage = new PreviousMessage(IMS_NULL);
+    PreviousMessage* pNewPreviousMessage = new PreviousMessage(IMS_NULL);
 
     if (pNewPreviousMessage == IMS_NULL)
     {
@@ -428,9 +419,9 @@ Remarks
 
 */
 PROTECTED
-ISipClientConnection* ServiceMethod::CreateCancelConnection(IN ISipClientConnection *piSCC)
+ISipClientConnection* ServiceMethod::CreateCancelConnection(IN ISipClientConnection* piSCC)
 {
-    ISipClientConnection *piCancelSCC = pService->CreateCancelConnection(piSCC);
+    ISipClientConnection* piCancelSCC = pService->CreateCancelConnection(piSCC);
 
     if (piCancelSCC == IMS_NULL)
     {
@@ -440,7 +431,7 @@ ISipClientConnection* ServiceMethod::CreateCancelConnection(IN ISipClientConnect
 
     if (pNextRequest != IMS_NULL)
     {
-        ISipMessage *piSIPMsg = piCancelSCC->GetMessage();
+        ISipMessage* piSIPMsg = piCancelSCC->GetMessage();
 
         // Set the headers and body parts if application already sets
         if (piSIPMsg->CopyHeadersAndBodyParts(pNextRequest->GetMessage()) != IMS_SUCCESS)
@@ -467,10 +458,10 @@ Remarks
 
 */
 PROTECTED
-ISipClientConnection* ServiceMethod::CreateConnection(IN CONST SipMethod &objMethod)
+ISipClientConnection* ServiceMethod::CreateConnection(IN CONST SipMethod& objMethod)
 {
-    ISipClientConnection *piSCC = pService->CreateConnection(GetUserAOR(),
-            GetRemoteUserAOR(), objMethod, IsPrivacyRequested());
+    ISipClientConnection* piSCC = pService->CreateConnection(
+            GetUserAOR(), GetRemoteUserAOR(), objMethod, IsPrivacyRequested());
 
     //---------------------------------------------------------------------------------------------
 
@@ -483,7 +474,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(IN CONST SipMethod &objMet
 
     if (pNextRequest != IMS_NULL)
     {
-        ISipMessage *piSIPMsg = piSCC->GetMessage();
+        ISipMessage* piSIPMsg = piSCC->GetMessage();
         const AString strSecAgree(Sip::STR_SEC_AGREE);
         IMS_BOOL bSecAgreeRequired = piSIPMsg->IsOptionRequired(strSecAgree);
         const AString strGRUU(Sip::STR_GRUU);
@@ -524,11 +515,11 @@ Remarks
 
 */
 PROTECTED
-ISipClientConnection* ServiceMethod::CreateConnection(IN ISipDialog *piDialog,
-        IN CONST SipMethod &objMethod)
+ISipClientConnection* ServiceMethod::CreateConnection(
+        IN ISipDialog* piDialog, IN CONST SipMethod& objMethod)
 {
-    ISipClientConnection *piSCC = pService->CreateConnection(piDialog,
-                                    objMethod, IsPrivacyRequested());
+    ISipClientConnection* piSCC =
+            pService->CreateConnection(piDialog, objMethod, IsPrivacyRequested());
 
     //---------------------------------------------------------------------------------------------
 
@@ -541,7 +532,7 @@ ISipClientConnection* ServiceMethod::CreateConnection(IN ISipDialog *piDialog,
 
     if (pNextRequest != IMS_NULL)
     {
-        ISipMessage *piSIPMsg = piSCC->GetMessage();
+        ISipMessage* piSIPMsg = piSCC->GetMessage();
         const AString strSecAgree(Sip::STR_SEC_AGREE);
         IMS_BOOL bSecAgreeRequired = piSIPMsg->IsOptionRequired(strSecAgree);
         const AString strGRUU(Sip::STR_GRUU);
@@ -582,8 +573,8 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::CreateResponse(IN_OUT ISipServerConnection *piSSC,
-        IN IMS_SINT32 nStatusCode, IN CONST AString &strPhrase /* = AString::ConstNull() */)
+IMS_BOOL ServiceMethod::CreateResponse(IN_OUT ISipServerConnection* piSSC,
+        IN IMS_SINT32 nStatusCode, IN CONST AString& strPhrase /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -596,7 +587,7 @@ IMS_BOOL ServiceMethod::CreateResponse(IN_OUT ISipServerConnection *piSSC,
 
     if (pNextResponse != IMS_NULL)
     {
-        ISipMessage *piSIPMsg = piSSC->GetMessage();
+        ISipMessage* piSIPMsg = piSSC->GetMessage();
 
         const AString strGRUU(Sip::STR_GRUU);
         IMS_BOOL bGRUUSupported = piSIPMsg->IsOptionSupported(strGRUU);
@@ -668,7 +659,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /* = IMS_TRUE */
 {
     if (SipConfigProxy::IsGruuConfigured(GetSlotId(), pService->GetSIPProfile()))
     {
-        ISipMessage *piSIPMsg = IMS_NULL;
+        ISipMessage* piSIPMsg = IMS_NULL;
 
         // Outgoing request message
         if (bRequest)
@@ -705,13 +696,13 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /* = IMS_TRUE */
 
         for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
         {
-            ISipHeader *piHeader = SipParsingHelper::CreateHeader(ISipHeader::PRIVACY,
-                                        objHeaders.GetAt(i));
+            ISipHeader* piHeader =
+                    SipParsingHelper::CreateHeader(ISipHeader::PRIVACY, objHeaders.GetAt(i));
 
             if (piHeader == IMS_NULL)
                 continue;
 
-            const SipParameter *pParameter = piHeader->GetParameter("id");
+            const SipParameter* pParameter = piHeader->GetParameter("id");
 
             if (pParameter != IMS_NULL)
             {
@@ -726,7 +717,7 @@ IMS_BOOL ServiceMethod::IsPrivacyRequested(IN IMS_BOOL bRequest /* = IMS_TRUE */
     }
     else
     {
-        (void) bRequest;
+        (void)bRequest;
     }
 
     return IMS_FALSE;
@@ -762,7 +753,7 @@ IMS_BOOL ServiceMethod::RemovePreviousMessage(IN IMS_SINT32 nServiceMethod)
         return IMS_TRUE;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage == IMS_NULL)
     {
@@ -770,9 +761,8 @@ IMS_BOOL ServiceMethod::RemovePreviousMessage(IN IMS_SINT32 nServiceMethod)
         return IMS_TRUE;
     }
 
-    if ((pPreviousMessage->pRequest != IMS_NULL)
-            && (pPreviousMessage->objResponses.IsEmpty())
-            && (pPreviousMessage->piSC != IMS_NULL))
+    if ((pPreviousMessage->pRequest != IMS_NULL) && (pPreviousMessage->objResponses.IsEmpty()) &&
+            (pPreviousMessage->piSC != IMS_NULL))
     {
         // Do not update the previous message; The transaction is not completed.
         IMS_TRACE_D("The transaction of the service method (%s) is not completed",
@@ -793,8 +783,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::SendNUpdateRequest(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::SendNUpdateRequest(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -807,8 +796,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::SendNUpdateResponse(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::SendNUpdateResponse(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -821,11 +809,11 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::SendNUpdateRequestEx(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC, IN IMS_SINT32 nMessageClass /* = MESSAGE_CLASS_NORMAL */)
+IMS_BOOL ServiceMethod::SendNUpdateRequestEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC,
+        IN IMS_SINT32 nMessageClass /* = MESSAGE_CLASS_NORMAL */)
 {
     // SIP_MESSAGE_MEDIATOR
-    (void) AdjustMessage(piSC->GetMessage(), nMessageClass);
+    (void)AdjustMessage(piSC->GetMessage(), nMessageClass);
 
     if (piSC->Send() != IMS_SUCCESS)
     {
@@ -843,18 +831,18 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::SendNUpdateResponseEx(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC, IN IMS_SINT32 nMessageClass /* = MESSAGE_CLASS_NORMAL */)
+IMS_BOOL ServiceMethod::SendNUpdateResponseEx(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC,
+        IN IMS_SINT32 nMessageClass /* = MESSAGE_CLASS_NORMAL */)
 {
     //---------------------------------------------------------------------------------------------
 
     // SIP_MESSAGE_MEDIATOR
-    (void) AdjustMessage(piSC->GetMessage(), nMessageClass);
+    (void)AdjustMessage(piSC->GetMessage(), nMessageClass);
 
     if (piSC->Send() != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "Sending a response message failed - Error (%d)",
-                SipError::GetLastError(), 0, 0);
+        IMS_TRACE_E(0, "Sending a response message failed - Error (%d)", SipError::GetLastError(),
+                0, 0);
         return IMS_FALSE;
     }
 
@@ -867,7 +855,7 @@ Remarks
 
 */
 PROTECTED
-void ServiceMethod::UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnection *piSC)
+void ServiceMethod::UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
     IMS_SLONG nIndex = objPreviousMessages.GetIndexOfKey(nServiceMethod);
 
@@ -878,7 +866,7 @@ void ServiceMethod::UpdateConnection(IN IMS_SINT32 nServiceMethod, IN ISipConnec
         return;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->piSC != IMS_NULL)
     {
@@ -900,11 +888,11 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateRequestOnReceived(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::UpdateRequestOnReceived(
+        IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
-    Message *pMessage = Message::CreateReceivedMessage(pService->GetAppConfig(),
-                                piSC->GetMessage());
+    Message* pMessage =
+            Message::CreateReceivedMessage(pService->GetAppConfig(), piSC->GetMessage());
 
     //---------------------------------------------------------------------------------------------
 
@@ -931,8 +919,8 @@ IMS_BOOL ServiceMethod::UpdateRequestOnReceived(IN IMS_SINT32 nServiceMethod,
         delete pMessage;
         IMS::SetLastError(IMSError::ALREADY_EXISTS);
 
-        IMS_TRACE_E(0, "MESSAGE (%s) ALREADY EXISTS",
-                Message::GetMessageType(nServiceMethod), 0, 0);
+        IMS_TRACE_E(
+                0, "MESSAGE (%s) ALREADY EXISTS", Message::GetMessageType(nServiceMethod), 0, 0);
         return IMS_FALSE;
     }
 
@@ -947,8 +935,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -982,12 +969,11 @@ IMS_BOOL ServiceMethod::UpdateRequestOnSent(IN IMS_SINT32 nServiceMethod,
         // When the SIP request is sent by the engine,
         // it will not be handled by the normal service method.
         // So, the listener of SCC will be set to SCCListener object.
-        ISipClientConnection *piSCC = DYNAMIC_CAST(ISipClientConnection*, piSC);
+        ISipClientConnection* piSCC = DYNAMIC_CAST(ISipClientConnection*, piSC);
 
-        if ((piSCC != IMS_NULL)
-            && (!piSCC->GetMethod().Equals(SipMethod::ACK)))
+        if ((piSCC != IMS_NULL) && (!piSCC->GetMethod().Equals(SipMethod::ACK)))
         {
-            SCCListener *pListener = new SCCListener();
+            SCCListener* pListener = new SCCListener();
 
             piSCC->SetErrorListener(pListener);
             piSCC->SetListener(pListener);
@@ -1007,11 +993,11 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::UpdateResponseOnReceived(
+        IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
-    Message *pMessage = Message::CreateReceivedMessage(pService->GetAppConfig(),
-                                piSC->GetMessage());
+    Message* pMessage =
+            Message::CreateReceivedMessage(pService->GetAppConfig(), piSC->GetMessage());
 
     //---------------------------------------------------------------------------------------------
 
@@ -1025,8 +1011,8 @@ IMS_BOOL ServiceMethod::UpdateResponseOnReceived(IN IMS_SINT32 nServiceMethod,
 
     if (!AddPreviousResponse(nServiceMethod, pMessage))
     {
-        IMS_TRACE_E(0, "Setting the response (%s) failed",
-                Message::GetMessageType(nServiceMethod), 0, 0);
+        IMS_TRACE_E(0, "Setting the response (%s) failed", Message::GetMessageType(nServiceMethod),
+                0, 0);
 
         delete pMessage;
         return IMS_FALSE;
@@ -1043,8 +1029,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL ServiceMethod::UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::UpdateResponseOnSent(IN IMS_SINT32 nServiceMethod, IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1074,7 +1059,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL ServiceMethod::AddPreviousResponse(IN IMS_SINT32 nServiceMethod, IN Message *pMessage)
+IMS_BOOL ServiceMethod::AddPreviousResponse(IN IMS_SINT32 nServiceMethod, IN Message* pMessage)
 {
     IMS_SLONG nIndex = objPreviousMessages.GetIndexOfKey(nServiceMethod);
 
@@ -1087,7 +1072,7 @@ IMS_BOOL ServiceMethod::AddPreviousResponse(IN IMS_SINT32 nServiceMethod, IN Mes
         return IMS_FALSE;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (!pPreviousMessage->objResponses.Append(pMessage))
     {
@@ -1103,8 +1088,8 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL ServiceMethod::SetPreviousRequest(IN IMS_SINT32 nServiceMethod, IN Message *pMessage,
-        IN ISipConnection *piSC)
+IMS_BOOL ServiceMethod::SetPreviousRequest(
+        IN IMS_SINT32 nServiceMethod, IN Message* pMessage, IN ISipConnection* piSC)
 {
     IMS_SLONG nIndex = objPreviousMessages.GetIndexOfKey(nServiceMethod);
 
@@ -1117,7 +1102,7 @@ IMS_BOOL ServiceMethod::SetPreviousRequest(IN IMS_SINT32 nServiceMethod, IN Mess
         return IMS_FALSE;
     }
 
-    PreviousMessage *pPreviousMessage = new PreviousMessage(pMessage);
+    PreviousMessage* pPreviousMessage = new PreviousMessage(pMessage);
 
     if (pPreviousMessage == IMS_NULL)
     {
@@ -1160,7 +1145,7 @@ ISipConnection* ServiceMethod::GetConnection(IN IMS_SINT32 nServiceMethod) const
         return IMS_NULL;
     }
 
-    PreviousMessage *pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
+    PreviousMessage* pPreviousMessage = objPreviousMessages.GetValueAt(nIndex);
 
     if (pPreviousMessage->piSC == IMS_NULL)
     {

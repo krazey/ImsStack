@@ -16,8 +16,7 @@ class ISIPConnectionFactoryListener;
  *
  * @see ISipClientConnection, ISipServerConnection, ISipDialog
  */
-class ISIPConnectionFactory
-    : public IMethod
+class ISIPConnectionFactory : public IMethod
 {
 public:
     /**
@@ -30,8 +29,8 @@ public:
                   If null, the anonymous SIP address will be set
      * @return Pointer to ISipClientConnection.
      */
-    virtual ISipClientConnection* CreateClientConnection(IN CONST SipMethod &objMethod,
-            IN CONST SipAddress *pFrom, IN CONST SipAddress *pTo) = 0;
+    virtual ISipClientConnection* CreateClientConnection(IN CONST SipMethod& objMethod,
+            IN CONST SipAddress* pFrom, IN CONST SipAddress* pTo) = 0;
 
     /**
      * @brief Creates a new SIP client connection inside of an SIP dialog.
@@ -40,8 +39,8 @@ public:
      * @param objMethod SIP method
      * @return Pointer to ISipClientConnection.
      */
-    virtual ISipClientConnection* CreateClientConnection(IN ISipDialog *piDialog,
-            IN CONST SipMethod &objMethod) = 0;
+    virtual ISipClientConnection* CreateClientConnection(
+            IN ISipDialog* piDialog, IN CONST SipMethod& objMethod) = 0;
 
     /**
      * @brief Creates a SIP response message for SIP server connection.
@@ -51,8 +50,8 @@ public:
      * @param strPhrase SIP reason phrase
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL CreateResponse(IN ISipServerConnection *piSSC,
-            IN IMS_SINT32 nStatusCode, IN CONST AString &strPhrase = AString::ConstNull()) = 0;
+    virtual IMS_BOOL CreateResponse(IN ISipServerConnection* piSSC, IN IMS_SINT32 nStatusCode,
+            IN CONST AString& strPhrase = AString::ConstNull()) = 0;
 
     /**
      * @brief Gets the initial incoming SIP server connection.
@@ -67,21 +66,21 @@ public:
      *
      * @param piDialog Pointer to ISipDialog
      */
-    virtual void SetDialog(IN ISipDialog *piDialog) = 0;
+    virtual void SetDialog(IN ISipDialog* piDialog) = 0;
 
     /**
      * @brief Sets the listener to receive a new SIP server connection inside of SIP dialog.
      *
      * @param piListener Pointer to ISIPConnectionFactoryListener
      */
-    virtual void SetListener(IN ISIPConnectionFactoryListener *piListener) = 0;
+    virtual void SetListener(IN ISIPConnectionFactoryListener* piListener) = 0;
 
     /**
      * @brief Sets the INVITE server transaction to handle an incoming CANCEL request.
      *
      * @param piSSC Pointer to ISipServerConnection (INVITE transaction)
      */
-    virtual void SetSSCForCANCEL(IN ISipServerConnection *piSSC) = 0;
+    virtual void SetSSCForCANCEL(IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_SIP_CONNECTION_FACTORY_H_
+#endif  // _INTERFACE_SIP_CONNECTION_FACTORY_H_

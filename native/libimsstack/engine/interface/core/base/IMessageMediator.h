@@ -58,7 +58,7 @@ public:
      * @see ISipMessage
      */
     virtual IMS_RESULT MessageMediator_AdjustMessage(
-            IN_OUT ISipMessage *piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) = 0;
+            IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage = MESSAGE_NORMAL) = 0;
 };
 
-#endif // _INTERFACE_MESSAGE_MEDIATOR_H_
+#endif  // _INTERFACE_MESSAGE_MEDIATOR_H_

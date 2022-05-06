@@ -37,8 +37,8 @@ public:
      * @param piScc Pointer to ISipClientConnection object carrying the response
      * @param piForkedSCC Pointer to ISipClientConnection object carrying the forked response
      */
-    virtual void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
-            IN ISipClientConnection* piForkedScc = IMS_NULL) = 0;
+    virtual void ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc = IMS_NULL) = 0;
 };
 
 #endif

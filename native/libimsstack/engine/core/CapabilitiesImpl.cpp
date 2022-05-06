@@ -16,18 +16,15 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-CapabilitiesImpl::CapabilitiesImpl(IN Capabilities *pCapabilities_)
-    : piListener(IMS_NULL)
-    , pCapabilities(pCapabilities_)
+CapabilitiesImpl::CapabilitiesImpl(IN Capabilities* pCapabilities_) :
+        piListener(IMS_NULL),
+        pCapabilities(pCapabilities_)
 {
     pCapabilities->SetListener(this);
 }
 
-PUBLIC VIRTUAL
-CapabilitiesImpl::~CapabilitiesImpl()
+PUBLIC VIRTUAL CapabilitiesImpl::~CapabilitiesImpl()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -38,8 +35,7 @@ CapabilitiesImpl::~CapabilitiesImpl()
     }
 }
 
-PRIVATE VIRTUAL
-void CapabilitiesImpl::Destroy()
+PRIVATE VIRTUAL void CapabilitiesImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -55,48 +51,43 @@ void CapabilitiesImpl::Destroy()
 }
 
 // SIP_MESSAGE_MEDIATOR
-PRIVATE VIRTUAL
-void CapabilitiesImpl::SetMessageMediator(IN IMessageMediator *piMediator)
+PRIVATE VIRTUAL void CapabilitiesImpl::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
     pCapabilities->SetMessageMediator(piMediator);
 }
 
-PRIVATE VIRTUAL
-IMessage* CapabilitiesImpl::GetNextRequest()
+PRIVATE VIRTUAL IMessage* CapabilitiesImpl::GetNextRequest()
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetNextRequest();
 }
 
-PRIVATE VIRTUAL
-IMessage* CapabilitiesImpl::GetNextResponse()
+PRIVATE VIRTUAL IMessage* CapabilitiesImpl::GetNextResponse()
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetNextResponse();
 }
 
-PRIVATE VIRTUAL
-IMessage* CapabilitiesImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* CapabilitiesImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetPreviousRequest(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMessage* CapabilitiesImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* CapabilitiesImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetPreviousResponse(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMSList<IMessage*> CapabilitiesImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMSList<IMessage*> CapabilitiesImpl::GetPreviousResponses(
+        IN IMS_SINT32 nServiceMethod) const
 {
     IMSList<IMessage*> objIMessages;
     IMSList<Message*> objResponses = pCapabilities->GetPreviousResponses(nServiceMethod);
@@ -111,40 +102,35 @@ IMSList<IMessage*> CapabilitiesImpl::GetPreviousResponses(IN IMS_SINT32 nService
     return objIMessages;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> CapabilitiesImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL IMSList<AString> CapabilitiesImpl::GetRemoteUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetRemoteUserId();
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> CapabilitiesImpl::GetRemoteUserIdentities() const
+PRIVATE VIRTUAL IMSList<AString> CapabilitiesImpl::GetRemoteUserIdentities() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetRemoteUserIdentities();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 CapabilitiesImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 CapabilitiesImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL CapabilitiesImpl::HasCapabilities(IN CONST AString &strConnection) const
+PRIVATE VIRTUAL IMS_BOOL CapabilitiesImpl::HasCapabilities(IN CONST AString& strConnection) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->HasCapabilities(strConnection);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT CapabilitiesImpl::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
+PRIVATE VIRTUAL IMS_RESULT CapabilitiesImpl::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
         IN IMS_BOOL bContactInRequest /* = IMS_TRUE */, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
@@ -152,49 +138,44 @@ IMS_RESULT CapabilitiesImpl::QueryCapabilities(IN IMS_BOOL bSDPInRequest,
     return pCapabilities->QueryCapabilities(bSDPInRequest, bContactInRequest, bCheckSupport);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT CapabilitiesImpl::QueryCapabilitiesEx()
+PRIVATE VIRTUAL IMS_RESULT CapabilitiesImpl::QueryCapabilitiesEx()
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->QueryCapabilitiesEx();
 }
 
-PRIVATE VIRTUAL
-void CapabilitiesImpl::SetListener(IN ICapabilitiesListener *piListener)
+PRIVATE VIRTUAL void CapabilitiesImpl::SetListener(IN ICapabilitiesListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT CapabilitiesImpl::Accept(IN IMS_BOOL bFeatureInContact /* = IMS_TRUE */,
-        IN IMS_BOOL bCheckSupport /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMS_RESULT CapabilitiesImpl::Accept(
+        IN IMS_BOOL bFeatureInContact /* = IMS_TRUE */, IN IMS_BOOL bCheckSupport /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->Accept(bFeatureInContact, bCheckSupport);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT CapabilitiesImpl::AcceptEx()
+PRIVATE VIRTUAL IMS_RESULT CapabilitiesImpl::AcceptEx()
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->AcceptEx();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT CapabilitiesImpl::Reject(IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter /* = 0 */)
+PRIVATE VIRTUAL IMS_RESULT CapabilitiesImpl::Reject(
+        IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nRetryAfter /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pCapabilities->Reject(nStatusCode, nRetryAfter);
 }
 
-PRIVATE VIRTUAL
-void CapabilitiesImpl::OnCapabilities_QueryDelivered(IN Capabilities *pCapabilities)
+PRIVATE VIRTUAL void CapabilitiesImpl::OnCapabilities_QueryDelivered(IN Capabilities* pCapabilities)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -213,8 +194,8 @@ void CapabilitiesImpl::OnCapabilities_QueryDelivered(IN Capabilities *pCapabilit
     piListener->CapabilityQueryDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void CapabilitiesImpl::OnCapabilities_QueryDeliveryFailed(IN Capabilities *pCapabilities)
+PRIVATE VIRTUAL void CapabilitiesImpl::OnCapabilities_QueryDeliveryFailed(
+        IN Capabilities* pCapabilities)
 {
     //---------------------------------------------------------------------------------------------
 

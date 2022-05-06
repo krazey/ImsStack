@@ -19,42 +19,33 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 // 3GPP 23.003 13.8 clause / draft-allen-dispatch-imei-urn-as-instanceid
 #define __IMS_SIP_IMEI_URN_AS_INSTANCE_ID__
 
 #if defined(__IMS_SIP_IMEI_URN_AS_INSTANCE_ID__)
-PRIVATE GLOBAL
-const IMS_CHAR SIPURNHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0";
-PRIVATE GLOBAL
-const IMS_CHAR SIPURNHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0";
+PRIVATE GLOBAL const IMS_CHAR SIPURNHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0";
+PRIVATE GLOBAL const IMS_CHAR SIPURNHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0";
 #else
-PRIVATE GLOBAL
-const IMS_CHAR SIPURNHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0;vers=0";
-PRIVATE GLOBAL
-const IMS_CHAR SIPURNHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0;svn=00";
+PRIVATE GLOBAL const IMS_CHAR SIPURNHelper::IMEI[] = "urn:gsma:imei:00000000-000000-0;vers=0";
+PRIVATE GLOBAL const IMS_CHAR SIPURNHelper::IMEI_SV[] = "urn:gsma:imei:00000000-000000-0;svn=00";
 #endif
 
 LOCAL
-IMS_BOOL sipURNHelper_IsUuidFallbackRequiredWhenNoImei(IN IMS_SINT32/* nSlotId*/)
+IMS_BOOL sipURNHelper_IsUuidFallbackRequiredWhenNoImei(IN IMS_SINT32 /* nSlotId*/)
 {
     return IMS_FALSE;
 }
-
-
 
 /*
 
 Remarks
 
 */
-PUBLIC GLOBAL
-AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
-        IN IMS_SINT32 nType, IN IMS_BOOL bSV /* = IMS_TRUE */)
+PUBLIC GLOBAL AString SIPURNHelper::GetURN(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType, IN IMS_BOOL bSV /* = IMS_TRUE */)
 {
     AStringBuffer objURN(64);
-    IDeviceInfo *piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
+    IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
 
     //---------------------------------------------------------------------------------------------
 
@@ -78,13 +69,11 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
     {
         // 3GPP - If no IMEI is available, so take the form of a string representation
         // of a UUID as a URN in RFC 4122.
-        //4 Name selection should be changed lator
+        // 4 Name selection should be changed lator
         strIMEI = "00000000000000";
 
-        if (sipURNHelper_IsUuidFallbackRequiredWhenNoImei(nSlotId)
-                && ((nType == GSMA_IMEI)
-                    || (nType == UUID_IMEI_MD5)
-                    || (nType == UUID_IMEI_SHA1)))
+        if (sipURNHelper_IsUuidFallbackRequiredWhenNoImei(nSlotId) &&
+                ((nType == GSMA_IMEI) || (nType == UUID_IMEI_MD5) || (nType == UUID_IMEI_SHA1)))
         {
             nType = UUID_IMEI_NAMED_V5;
         }
@@ -92,7 +81,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
 
     switch (nType)
     {
-    case GSMA_IMEI:
+        case GSMA_IMEI:
         {
             objURN.Append("urn:gsma:imei:");
 
@@ -140,11 +129,11 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
             {
                 objURN.Append("vers=0");
             }
-#endif // #if !defined(__IMS_SIP_IMEI_URN_AS_INSTANCE_ID__)
+#endif  // #if !defined(__IMS_SIP_IMEI_URN_AS_INSTANCE_ID__)
         }
         break;
 
-    case UUID_IMEI_MD5:
+        case UUID_IMEI_MD5:
         {
             MD5Context stMD5;
             IMS_UCHAR uacHashedIMEI[16];
@@ -153,8 +142,8 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
             strIMEI = strIMEI.GetSubStr(0, 14);
 
             IMSMD5_Initialize(&stMD5);
-            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strIMEI.GetStr()),
-                    strIMEI.GetLength(), &stMD5);
+            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strIMEI.GetStr()), strIMEI.GetLength(),
+                    &stMD5);
             IMSMD5_Finalize(&stMD5, uacHashedIMEI);
 
             AString strHex;
@@ -174,7 +163,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
         }
         break;
 
-    case UUID_IMEI_SHA1:
+        case UUID_IMEI_SHA1:
         {
             SHA1Context stSHA1;
             IMS_UCHAR uacHashedIMEI[20];
@@ -204,7 +193,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
         }
         break;
 
-    case UUID_IMEI_NAMED_V3:
+        case UUID_IMEI_NAMED_V3:
         {
             // tac (8) + snr (6)
             strIMEI = strIMEI.GetSubStr(0, 14);
@@ -214,7 +203,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
         }
         break;
 
-    case UUID_IMEI_NAMED_V5:
+        case UUID_IMEI_NAMED_V5:
         {
             // tac (8) + snr (6)
             strIMEI = strIMEI.GetSubStr(0, 14);
@@ -224,7 +213,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
         }
         break;
 
-    case UUID_IMEI_V4:
+        case UUID_IMEI_V4:
         {
             // tac (8) + snr (6)
             strIMEI = strIMEI.GetSubStr(0, 14);
@@ -234,8 +223,8 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
         }
         break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return static_cast<const AStringBuffer&>(objURN).GetString();
@@ -246,8 +235,7 @@ AString SIPURNHelper::GetURN(IN IMS_SINT32 nSlotId,
 Remarks
 
 */
-PUBLIC GLOBAL
-AString SIPURNHelper::GetURN(IN IMS_SINT32 nVersion, IN CONST AString &strName)
+PUBLIC GLOBAL AString SIPURNHelper::GetURN(IN IMS_SINT32 nVersion, IN CONST AString& strName)
 {
     AStringBuffer objURN(64);
 

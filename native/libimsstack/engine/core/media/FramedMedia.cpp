@@ -21,33 +21,28 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-FramedMedia::FramedMedia(IN Service *pService_, IN ISDPOAState *piOAState_)
-    : Media(pService_, piOAState_)
+FramedMedia::FramedMedia(IN Service* pService_, IN ISDPOAState* piOAState_) :
+        Media(pService_, piOAState_)
 {
     SetInitializationDone(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-FramedMedia::~FramedMedia()
+PUBLIC VIRTUAL FramedMedia::~FramedMedia()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: FramedMedia", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 FramedMedia::GetType() const
+PUBLIC VIRTUAL IMS_SINT32 FramedMedia::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
     return IMSCore::MEDIA_TYPE_FRAMED;
 }
 
-PROTECTED VIRTUAL
-MediaProposal* FramedMedia::CreateMediaProposal(IN ISDPOAState *piOAState)
+PROTECTED VIRTUAL MediaProposal* FramedMedia::CreateMediaProposal(IN ISDPOAState* piOAState)
 {
     FramedMediaProposal* pMediaProposal = new FramedMediaProposal(piOAState);
 

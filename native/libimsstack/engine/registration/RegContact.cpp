@@ -28,32 +28,29 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegContact::RegContact(IN IMS_SINT32 nSlotId,
-        IN CONST IPAddress &objIPA_, IN IMS_SINT32 nPort_,
-        IN IRegCapabilityChangeListener *piListener_, IN IMS_SINT32 nRegId_ /* = (-1) */,
-        IN CONST SipProfile *pSIPProfile/* = IMS_NULL*/)
-    : ImsSlot(nSlotId)
-    , nState(STATE_CREATED)
-    , pAOR(IMS_NULL)
-    , objIPA(objIPA_)
-    , nPolicyUserInfo(POLICY_USER_INFO_IMPU)
-    , pInstanceParameter(IMS_NULL)
-    , pRegIdParameter(IMS_NULL)
-    , pPubGRUU(IMS_NULL)
-    , pTempGRUU(IMS_NULL)
-    , objTempGRUUs(IMSList<SipAddress*>())
-    , bFlag_BindingsUpdateTracker(IMS_TRUE)
-    , bFlag_AllCapabilitiesByConfig(IMS_TRUE)
-    , pAllCapabilities(new CallerCapability(0xFFFFFFFF))
-    , pExtraCapabilities(new CallerCapability(0xFFFFFFFF))
-    , objCallerCapabilities(IMSList<CallerCapability*>())
-    , piCapabilityChangeListener(piListener_)
-    , pRegisteredCapabilities(IMS_NULL)
-    , nInitialExpires(EXPIRES_NOT_SPECIFIED)
-    , nNetworkProvisionedExpires(EXPIRES_NOT_SPECIFIED)
+RegContact::RegContact(IN IMS_SINT32 nSlotId, IN CONST IPAddress& objIPA_, IN IMS_SINT32 nPort_,
+        IN IRegCapabilityChangeListener* piListener_, IN IMS_SINT32 nRegId_ /* = (-1) */,
+        IN CONST SipProfile* pSIPProfile /* = IMS_NULL*/) :
+        ImsSlot(nSlotId),
+        nState(STATE_CREATED),
+        pAOR(IMS_NULL),
+        objIPA(objIPA_),
+        nPolicyUserInfo(POLICY_USER_INFO_IMPU),
+        pInstanceParameter(IMS_NULL),
+        pRegIdParameter(IMS_NULL),
+        pPubGRUU(IMS_NULL),
+        pTempGRUU(IMS_NULL),
+        objTempGRUUs(IMSList<SipAddress*>()),
+        bFlag_BindingsUpdateTracker(IMS_TRUE),
+        bFlag_AllCapabilitiesByConfig(IMS_TRUE),
+        pAllCapabilities(new CallerCapability(0xFFFFFFFF)),
+        pExtraCapabilities(new CallerCapability(0xFFFFFFFF)),
+        objCallerCapabilities(IMSList<CallerCapability*>()),
+        piCapabilityChangeListener(piListener_),
+        pRegisteredCapabilities(IMS_NULL),
+        nInitialExpires(EXPIRES_NOT_SPECIFIED),
+        nNetworkProvisionedExpires(EXPIRES_NOT_SPECIFIED)
 {
     objContactAddress.SetScheme(Sip::STR_SIP);
     objContactAddress.SetHost(objIPA_.ToString());
@@ -75,8 +72,7 @@ RegContact::RegContact(IN IMS_SINT32 nSlotId,
     }
 }
 
-PUBLIC VIRTUAL
-RegContact::~RegContact()
+PUBLIC VIRTUAL RegContact::~RegContact()
 {
     RegBindingProxy::UnbindContact(GetSlotId(), this);
 
@@ -118,8 +114,8 @@ RegContact::~RegContact()
 
     RemoveAllHeaderParameters();
 
-    IMS_TRACE_D("Destructor :: RegContact (%s, %d)",
-            SipDebug::GetIp(objIPA), objContactAddress.GetPort(), 0);
+    IMS_TRACE_D("Destructor :: RegContact (%s, %d)", SipDebug::GetIp(objIPA),
+            objContactAddress.GetPort(), 0);
 }
 
 /*
@@ -127,8 +123,7 @@ RegContact::~RegContact()
 Remarks
 
 */
-PUBLIC VIRTUAL
-const SipAddress& RegContact::GetContactAddress() const
+PUBLIC VIRTUAL const SipAddress& RegContact::GetContactAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -140,8 +135,7 @@ const SipAddress& RegContact::GetContactAddress() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 RegContact::GetExpires() const
+PUBLIC VIRTUAL IMS_UINT32 RegContact::GetExpires() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -158,8 +152,7 @@ IMS_UINT32 RegContact::GetExpires() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const IPAddress& RegContact::GetIPAddress() const
+PUBLIC VIRTUAL const IPAddress& RegContact::GetIPAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -171,8 +164,7 @@ const IPAddress& RegContact::GetIPAddress() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 RegContact::GetPort() const
+PUBLIC VIRTUAL IMS_SINT32 RegContact::GetPort() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -184,8 +176,7 @@ IMS_SINT32 RegContact::GetPort() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const IMSList<SipParameter*>& RegContact::GetHeaderParameters() const
+PUBLIC VIRTUAL const IMSList<SipParameter*>& RegContact::GetHeaderParameters() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -197,8 +188,7 @@ const IMSList<SipParameter*>& RegContact::GetHeaderParameters() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const SipParameter* RegContact::GetInstanceParameter() const
+PUBLIC VIRTUAL const SipParameter* RegContact::GetInstanceParameter() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -210,8 +200,7 @@ const SipParameter* RegContact::GetInstanceParameter() const
 Remarks
  MULTIPLE_REGISTRATION
 */
-PUBLIC VIRTUAL
-const SipParameter* RegContact::GetRegIdParameter() const
+PUBLIC VIRTUAL const SipParameter* RegContact::GetRegIdParameter() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -223,8 +212,7 @@ const SipParameter* RegContact::GetRegIdParameter() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const SipAddress* RegContact::GetPublicGRUU() const
+PUBLIC VIRTUAL const SipAddress* RegContact::GetPublicGRUU() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -236,8 +224,7 @@ const SipAddress* RegContact::GetPublicGRUU() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const SipAddress* RegContact::GetTemporaryGRUU() const
+PUBLIC VIRTUAL const SipAddress* RegContact::GetTemporaryGRUU() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -249,8 +236,7 @@ const SipAddress* RegContact::GetTemporaryGRUU() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-const IMSList<SipAddress*>& RegContact::GetTemporaryGRUUs() const
+PUBLIC VIRTUAL const IMSList<SipAddress*>& RegContact::GetTemporaryGRUUs() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -262,8 +248,7 @@ const IMSList<SipAddress*>& RegContact::GetTemporaryGRUUs() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL RegContact::IsActiveBinding() const
+PUBLIC VIRTUAL IMS_BOOL RegContact::IsActiveBinding() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -278,8 +263,7 @@ IMS_BOOL RegContact::IsActiveBinding() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL RegContact::IsEmpty() const
+PUBLIC VIRTUAL IMS_BOOL RegContact::IsEmpty() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -312,7 +296,7 @@ void RegContact::DestroyGRUU()
     {
         for (IMS_UINT32 i = 0; i < objTempGRUUs.GetSize(); ++i)
         {
-            SipAddress *pAddress = objTempGRUUs.GetAt(i);
+            SipAddress* pAddress = objTempGRUUs.GetAt(i);
 
             if (pAddress != IMS_NULL)
             {
@@ -349,7 +333,7 @@ const AString& RegContact::GetPreference() const
 
     for (IMS_UINT32 i = 0; i < objHeaderParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objHeaderParams.GetAt(i);
+        const SipParameter* pParameter = objHeaderParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase('q'))
         {
@@ -422,7 +406,7 @@ Remarks
 
 */
 PUBLIC
-void RegContact::SetAOR(IN CONST SipAddress &objAOR)
+void RegContact::SetAOR(IN CONST SipAddress& objAOR)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -436,7 +420,7 @@ void RegContact::SetAOR(IN CONST SipAddress &objAOR)
 
     if ((nPolicyUserInfo == POLICY_USER_INFO_IMPU) && (pAOR != IMS_NULL))
     {
-        const SipAddress::UserInfoPart *pUIPart = pAOR->GetUserInfoPart();
+        const SipAddress::UserInfoPart* pUIPart = pAOR->GetUserInfoPart();
 
         if (pUIPart == IMS_NULL)
         {
@@ -468,7 +452,7 @@ Remarks
  IMS_IPSEC_UDP_ENC
 */
 PUBLIC
-void RegContact::SetHostInfo(IN CONST IPAddress &objIP)
+void RegContact::SetHostInfo(IN CONST IPAddress& objIP)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -557,8 +541,8 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContactHeaders,
-        IN IMS_SINT32 nExpiresValue)
+IMS_SINT32 RegContact::UpdateParameter(
+        IN CONST IMSList<ISipHeader*>& objContactHeaders, IN IMS_SINT32 nExpiresValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -566,8 +550,8 @@ IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContact
 
     for (IMS_UINT32 i = 0; i < objContactHeaders.GetSize(); ++i)
     {
-        const ISipHeader *piHeader = objContactHeaders.GetAt(i);
-        const SipAddress *pAddress = piHeader->GetSipAddress();
+        const ISipHeader* piHeader = objContactHeaders.GetAt(i);
+        const SipAddress* pAddress = piHeader->GetSipAddress();
 
         if (pAddress == IMS_NULL)
             continue;
@@ -582,8 +566,8 @@ IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContact
         {
             const AString strTransport("transport");
 
-            if ((pAddress->GetParameter(strTransport) != IMS_NULL)
-                    && (objContactAddress.GetParameter(strTransport) == IMS_NULL))
+            if ((pAddress->GetParameter(strTransport) != IMS_NULL) &&
+                    (objContactAddress.GetParameter(strTransport) == IMS_NULL))
             {
                 SipAddress objAddress(*pAddress);
                 objAddress.RemoveParameter(strTransport);
@@ -603,7 +587,7 @@ IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContact
             UpdateGRUU(piHeader);
 
             // Extract 'expires' parameter
-            const SipParameter *pParameter = piHeader->GetParameter(Sip::STR_EXPIRES);
+            const SipParameter* pParameter = piHeader->GetParameter(Sip::STR_EXPIRES);
 
             if (pParameter != IMS_NULL)
             {
@@ -655,7 +639,7 @@ IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContact
                 }
             }
 
-            //4 break ??
+            // 4 break ??
             break;
         }
         else
@@ -677,9 +661,8 @@ IMS_SINT32 RegContact::UpdateParameter(IN CONST IMSList<ISipHeader*> &objContact
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::AddHeaderParameter(IN CONST AString &strName,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_BOOL RegContact::AddHeaderParameter(
+        IN CONST AString& strName, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -723,7 +706,7 @@ IMS_BOOL RegContact::AddHeaderParameter(IN CONST AString &strName,
 
     for (IMS_UINT32 i = 0; i < objHeaderParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objHeaderParams.GetAt(i);
+        SipParameter* pParameter = objHeaderParams.GetAt(i);
 
         if (strName.EqualsIgnoreCase(pParameter->GetName()))
         {
@@ -736,7 +719,7 @@ IMS_BOOL RegContact::AddHeaderParameter(IN CONST AString &strName,
         }
     }
 
-    SipParameter *pParameter = new SipParameter(strName, strValue);
+    SipParameter* pParameter = new SipParameter(strName, strValue);
 
     if (pParameter == IMS_NULL)
     {
@@ -757,9 +740,8 @@ IMS_BOOL RegContact::AddHeaderParameter(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::AddUriParameter(IN CONST AString &strName,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_BOOL RegContact::AddUriParameter(
+        IN CONST AString& strName, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -778,8 +760,7 @@ IMS_BOOL RegContact::AddUriParameter(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RemoveAllHeaderParameters()
+PRIVATE VIRTUAL void RegContact::RemoveAllHeaderParameters()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -787,7 +768,7 @@ void RegContact::RemoveAllHeaderParameters()
     {
         for (IMS_UINT32 i = 0; i < objHeaderParams.GetSize(); ++i)
         {
-            SipParameter *pParameter = objHeaderParams.GetAt(i);
+            SipParameter* pParameter = objHeaderParams.GetAt(i);
 
             if (pParameter != IMS_NULL)
             {
@@ -804,9 +785,8 @@ void RegContact::RemoveAllHeaderParameters()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RemoveHeaderParameter(IN CONST AString &strName,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+PRIVATE VIRTUAL void RegContact::RemoveHeaderParameter(
+        IN CONST AString& strName, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -834,7 +814,7 @@ void RegContact::RemoveHeaderParameter(IN CONST AString &strName,
 
     for (IMS_UINT32 i = 0; i < objHeaderParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objHeaderParams.GetAt(i);
+        SipParameter* pParameter = objHeaderParams.GetAt(i);
 
         if (strName.EqualsIgnoreCase(pParameter->GetName()))
         {
@@ -864,13 +844,12 @@ void RegContact::RemoveHeaderParameter(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RemoveUriParameter(IN CONST AString &strName,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+PRIVATE VIRTUAL void RegContact::RemoveUriParameter(
+        IN CONST AString& strName, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) strValue;
+    (void)strValue;
 
     objContactAddress.RemoveParameter(strName);
 }
@@ -880,8 +859,7 @@ void RegContact::RemoveUriParameter(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::SetDisplayName(IN CONST AString &strDisplayName)
+PRIVATE VIRTUAL void RegContact::SetDisplayName(IN CONST AString& strDisplayName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -893,12 +871,11 @@ void RegContact::SetDisplayName(IN CONST AString &strDisplayName)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::SetListener(IN IRegContactListener *piListener)
+PRIVATE VIRTUAL void RegContact::SetListener(IN IRegContactListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piListener;
+    (void)piListener;
 }
 
 /*
@@ -906,8 +883,7 @@ void RegContact::SetListener(IN IRegContactListener *piListener)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::SetPolicyForCallerCapability(IN IMS_BOOL bCapsByApp)
+PRIVATE VIRTUAL void RegContact::SetPolicyForCallerCapability(IN IMS_BOOL bCapsByApp)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -919,8 +895,7 @@ void RegContact::SetPolicyForCallerCapability(IN IMS_BOOL bCapsByApp)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::SetPort(IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL void RegContact::SetPort(IN IMS_SINT32 nPort)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -932,9 +907,8 @@ void RegContact::SetPort(IN IMS_SINT32 nPort)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::SetUserInfo(IN IMS_SINT32 nPolicy /* = POLICY_USER_INFO_IMPU */,
-        IN CONST AString &strUserInfo /* = AString::ConstNull() */)
+PRIVATE VIRTUAL void RegContact::SetUserInfo(IN IMS_SINT32 nPolicy /* = POLICY_USER_INFO_IMPU */,
+        IN CONST AString& strUserInfo /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -962,9 +936,8 @@ void RegContact::SetUserInfo(IN IMS_SINT32 nPolicy /* = POLICY_USER_INFO_IMPU */
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::AddExtraCapability(IN CONST AString &strName,
-        IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_BOOL RegContact::AddExtraCapability(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -990,9 +963,8 @@ IMS_BOOL RegContact::AddExtraCapability(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RemoveExtraCapability(IN CONST AString &strName,
-        IN CONST AString &strValue)
+PRIVATE VIRTUAL void RegContact::RemoveExtraCapability(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1022,10 +994,10 @@ void RegContact::RemoveExtraCapability(IN CONST AString &strName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::AddService(IN CONST AString &strAppId, IN CONST AString &strServiceId)
+PRIVATE VIRTUAL IMS_BOOL RegContact::AddService(
+        IN CONST AString& strAppId, IN CONST AString& strServiceId)
 {
-    CallerCapability *pCC = IMS_NULL;
+    CallerCapability* pCC = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -1033,15 +1005,13 @@ IMS_BOOL RegContact::AddService(IN CONST AString &strAppId, IN CONST AString &st
 
     if (pCC == IMS_NULL)
     {
-        IMS_TRACE_D("No caller capabilities (%s, %s)",
-                strAppId.GetStr(), strServiceId.GetStr(), 0);
+        IMS_TRACE_D("No caller capabilities (%s, %s)", strAppId.GetStr(), strServiceId.GetStr(), 0);
         return IMS_FALSE;
     }
 
     if (!RegBindingProxy::BindContact(GetSlotId(), strAppId, strServiceId, this))
     {
-        IMS_TRACE_D("Binding Contact failed (%s, %s)",
-                strAppId.GetStr(), strServiceId.GetStr(), 0);
+        IMS_TRACE_D("Binding Contact failed (%s, %s)", strAppId.GetStr(), strServiceId.GetStr(), 0);
         return IMS_FALSE;
     }
 
@@ -1060,10 +1030,10 @@ IMS_BOOL RegContact::AddService(IN CONST AString &strAppId, IN CONST AString &st
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RemoveService(IN CONST AString &strAppId, IN CONST AString &strServiceId)
+PRIVATE VIRTUAL void RegContact::RemoveService(
+        IN CONST AString& strAppId, IN CONST AString& strServiceId)
 {
-    CallerCapability *pCC = IMS_NULL;
+    CallerCapability* pCC = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -1071,8 +1041,7 @@ void RegContact::RemoveService(IN CONST AString &strAppId, IN CONST AString &str
 
     if (pCC == IMS_NULL)
     {
-        IMS_TRACE_D("No caller capabilities (%s, %s)",
-                strAppId.GetStr(), strServiceId.GetStr(), 0);
+        IMS_TRACE_D("No caller capabilities (%s, %s)", strAppId.GetStr(), strServiceId.GetStr(), 0);
     }
 
     RegBindingProxy::UnbindContact(GetSlotId(), strAppId, strServiceId);
@@ -1090,11 +1059,10 @@ void RegContact::RemoveService(IN CONST AString &strAppId, IN CONST AString &str
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::IsServiceRegistered(IN const AString &strAppId,
-        IN const AString &strServiceId) const
+PRIVATE VIRTUAL IMS_BOOL RegContact::IsServiceRegistered(
+        IN const AString& strAppId, IN const AString& strServiceId) const
 {
-    CallerCapability *pCC = IMS_NULL;
+    CallerCapability* pCC = IMS_NULL;
 
     RegBindingProxy::QueryCapability(GetSlotId(), strAppId, strServiceId, pCC);
 
@@ -1118,10 +1086,10 @@ IMS_BOOL RegContact::IsServiceRegistered(IN const AString &strAppId,
         return IMS_TRUE;
     }
 
-    const IAppConfig* piAppConfig = Configuration::GetInstance()->GetAppConfig(
-            strAppId, GetSlotId());
-    const ICoreServiceConfig* piServiceConfig = (piAppConfig != IMS_NULL) ?\
-            piAppConfig->GetCoreServiceConfig(strServiceId) : IMS_NULL;
+    const IAppConfig* piAppConfig =
+            Configuration::GetInstance()->GetAppConfig(strAppId, GetSlotId());
+    const ICoreServiceConfig* piServiceConfig =
+            (piAppConfig != IMS_NULL) ? piAppConfig->GetCoreServiceConfig(strServiceId) : IMS_NULL;
 
     if (piServiceConfig == IMS_NULL)
     {
@@ -1178,15 +1146,13 @@ IMS_BOOL RegContact::IsServiceRegistered(IN const AString &strAppId,
     return IMS_TRUE;
 }
 
-
 /*
 
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RegContact::IsFeatureRegistered(IN const AString &strFTName,
-        IN const AString &strFTValue/* = AString::ConstNull()*/) const
+PRIVATE VIRTUAL IMS_BOOL RegContact::IsFeatureRegistered(
+        IN const AString& strFTName, IN const AString& strFTValue /* = AString::ConstNull()*/) const
 {
     if (!IsActiveBinding())
     {
@@ -1232,8 +1198,7 @@ IMS_BOOL RegContact::IsFeatureRegistered(IN const AString &strFTName,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RegContact::RecalculateCallerCapabilities()
+PRIVATE VIRTUAL void RegContact::RecalculateCallerCapabilities()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1251,7 +1216,7 @@ Remarks
 
 */
 PRIVATE
-void RegContact::FormContact(IN IMS_BOOL bExpiresRequired, OUT AStringBuffer &objSB) const
+void RegContact::FormContact(IN IMS_BOOL bExpiresRequired, OUT AStringBuffer& objSB) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1271,7 +1236,7 @@ void RegContact::FormContact(IN IMS_BOOL bExpiresRequired, OUT AStringBuffer &ob
         }
         else if (!pAllCapabilities->IsEmpty() && !pExtraCapabilities->IsEmpty())
         {
-            CallerCapability *pCC = new CallerCapability(0);
+            CallerCapability* pCC = new CallerCapability(0);
 
             pCC->AddFeatures(pAllCapabilities);
             pCC->AddFeatures(pExtraCapabilities);
@@ -1310,7 +1275,7 @@ void RegContact::FormContact(IN IMS_BOOL bExpiresRequired, OUT AStringBuffer &ob
     {
         for (IMS_UINT32 i = 0; i < objHeaderParams.GetSize(); ++i)
         {
-            const SipParameter *pParameter = objHeaderParams.GetAt(i);
+            const SipParameter* pParameter = objHeaderParams.GetAt(i);
 
             if (pParameter == IMS_NULL)
                 continue;
@@ -1339,7 +1304,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL RegContact::AddCallerCapability(IN CONST CallerCapability *pCC)
+IMS_BOOL RegContact::AddCallerCapability(IN CONST CallerCapability* pCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1369,7 +1334,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL RegContact::RemoveCallerCapability(IN CONST CallerCapability *pCC)
+IMS_BOOL RegContact::RemoveCallerCapability(IN CONST CallerCapability* pCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1396,14 +1361,14 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL RegContact::RegisterServiceCapability(IN CONST CallerCapability *pCC)
+IMS_BOOL RegContact::RegisterServiceCapability(IN CONST CallerCapability* pCC)
 {
     //---------------------------------------------------------------------------------------------
 
     // First, checks if the service is already bound or not
     for (IMS_UINT32 i = 0; i < objCallerCapabilities.GetSize(); ++i)
     {
-        const CallerCapability *pExCC = objCallerCapabilities.GetAt(i);
+        const CallerCapability* pExCC = objCallerCapabilities.GetAt(i);
 
         if (pExCC->Equals(pCC))
         {
@@ -1421,14 +1386,14 @@ Remarks
 
 */
 PRIVATE
-void RegContact::UnregisterServiceCapability(IN CONST CallerCapability *pCC)
+void RegContact::UnregisterServiceCapability(IN CONST CallerCapability* pCC)
 {
     //---------------------------------------------------------------------------------------------
 
     // First, checks if the service is already bound or not
     for (IMS_UINT32 i = 0; i < objCallerCapabilities.GetSize(); ++i)
     {
-        const CallerCapability *pExCC = objCallerCapabilities.GetAt(i);
+        const CallerCapability* pExCC = objCallerCapabilities.GetAt(i);
 
         if (pExCC->Equals(pCC))
         {
@@ -1448,8 +1413,8 @@ void RegContact::SetState(IN IMS_SINT32 nState)
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_I("RegContact (%s) :: %s to %s",
-            SipDebug::GetUri1(objContactAddress.GetUri()).GetStr(),
-            StateToString(this->nState), StateToString(nState));
+            SipDebug::GetUri1(objContactAddress.GetUri()).GetStr(), StateToString(this->nState),
+            StateToString(nState));
 
     this->nState = nState;
 }
@@ -1460,7 +1425,7 @@ Remarks
 
 */
 PRIVATE
-void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
+void RegContact::UpdateGRUU(IN CONST ISipHeader* piHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1473,7 +1438,7 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
     // DestroyGRUU();
 
     // 'pub-gruu' parameter
-    const SipParameter *pParameter = piHeader->GetParameter("pub-gruu");
+    const SipParameter* pParameter = piHeader->GetParameter("pub-gruu");
 
     if (pParameter != IMS_NULL)
     {
@@ -1484,7 +1449,7 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
             pPubGRUU = IMS_NULL;
         }
 
-        const AString &strValue = pParameter->GetValue();
+        const AString& strValue = pParameter->GetValue();
 
         IMS_TRACE_D("pub-gruu (%s)", SipDebug::GetUri1(strValue).GetStr(), 0, 0);
 
@@ -1499,8 +1464,8 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
 
         if (pPubGRUU == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating a pub-gruu (%s) failed",
-                    SipDebug::GetUri1(strValue).GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Creating a pub-gruu (%s) failed", SipDebug::GetUri1(strValue).GetStr(),
+                    0, 0);
         }
     }
 
@@ -1520,7 +1485,7 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
         {
             for (IMS_UINT32 i = 0; i < objTempGRUUs.GetSize(); ++i)
             {
-                SipAddress *pAddress = objTempGRUUs.GetAt(i);
+                SipAddress* pAddress = objTempGRUUs.GetAt(i);
 
                 if (pAddress != IMS_NULL)
                 {
@@ -1531,7 +1496,7 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
             objTempGRUUs.Clear();
         }
 
-        const AString &strValue = pParameter->GetValue();
+        const AString& strValue = pParameter->GetValue();
 
         IMS_TRACE_D("temp-gruu (%s)", SipDebug::GetUri1(strValue).GetStr(), 0, 0);
 
@@ -1546,8 +1511,8 @@ void RegContact::UpdateGRUU(IN CONST ISipHeader *piHeader)
 
         if (pTempGRUU == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating a temp-gruu (%s) failed",
-                    SipDebug::GetUri1(strValue).GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Creating a temp-gruu (%s) failed", SipDebug::GetUri1(strValue).GetStr(),
+                    0, 0);
         }
         else
         {
@@ -1590,8 +1555,7 @@ void RegContact::UpdateRegisteredCapabilities(IN const ISipHeader* piHeader)
 
         const AString& strName = pParameter->GetName();
 
-        if (!Feature::IsFeatureTag(strName)
-                || strName.EqualsIgnoreCase(Sip::STR_SIP_INSTANCE))
+        if (!Feature::IsFeatureTag(strName) || strName.EqualsIgnoreCase(Sip::STR_SIP_INSTANCE))
         {
             continue;
         }
@@ -1630,20 +1594,19 @@ void RegContact::UpdateRegisteredCapabilities(IN const ISipHeader* piHeader)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* RegContact::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* RegContact::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_CREATED:
-        return "STATE_CREATED";
-    case STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    case STATE_TERMINATED:
-        return "STATE_TERMINATED";
-    default:
-        return "__INVALID__";
+        case STATE_CREATED:
+            return "STATE_CREATED";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case STATE_TERMINATED:
+            return "STATE_TERMINATED";
+        default:
+            return "__INVALID__";
     }
 }

@@ -121,13 +121,13 @@ private:
     IMS_UINT32 m_nFlags;
     IMS_UINT32 m_nT1;
     IMS_UINT32 m_nT2;
-    IMS_UINT32 m_nTimerB; // UAC, INVITE
-    IMS_UINT32 m_nTimerD; // UAC, INVITE response retransmit received
-    IMS_UINT32 m_nTimerF; // UAC, non-INVITE
-    IMS_UINT32 m_nTimerH; // ACK receipt
-    IMS_UINT32 m_nTimerI; // ACK retransmit received
-    IMS_UINT32 m_nTimerJ; // UAS, non-INVITE
-    IMS_UINT32 m_nTimerK; // UAC, non-INVITE
+    IMS_UINT32 m_nTimerB;  // UAC, INVITE
+    IMS_UINT32 m_nTimerD;  // UAC, INVITE response retransmit received
+    IMS_UINT32 m_nTimerF;  // UAC, non-INVITE
+    IMS_UINT32 m_nTimerH;  // ACK receipt
+    IMS_UINT32 m_nTimerI;  // ACK retransmit received
+    IMS_UINT32 m_nTimerJ;  // UAS, non-INVITE
+    IMS_UINT32 m_nTimerK;  // UAC, non-INVITE
 };
 
 #endif

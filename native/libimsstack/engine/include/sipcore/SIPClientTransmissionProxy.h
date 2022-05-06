@@ -20,35 +20,31 @@
 class ISIPClientTransmissionListener;
 class SipTimerValues;
 
-
-
-class SIPClientTransmissionProxy
-    : public EngineActivity
-    , public ISIPSocketListener
+class SIPClientTransmissionProxy : public EngineActivity, public ISIPSocketListener
 {
 public:
     SIPClientTransmissionProxy();
     virtual ~SIPClientTransmissionProxy();
 
 private:
-    SIPClientTransmissionProxy(IN CONST SIPClientTransmissionProxy &objRHS);
-    SIPClientTransmissionProxy& operator=(IN CONST SIPClientTransmissionProxy &objRHS);
+    SIPClientTransmissionProxy(IN CONST SIPClientTransmissionProxy& objRHS);
+    SIPClientTransmissionProxy& operator=(IN CONST SIPClientTransmissionProxy& objRHS);
 
 public:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     void Abort();
     IMS_RESULT Send();
     IMS_RESULT SendWithCredentials();
-    void SetListener(IN ISIPClientTransmissionListener *piListener);
-    void SetTimerValues(IN SipTimerValues *pTV);
-    void SetTransactionState(IN SIPClientTransactionState *pCTState);
+    void SetListener(IN ISIPClientTransmissionListener* piListener);
+    void SetTimerValues(IN SipTimerValues* pTV);
+    void SetTransactionState(IN SIPClientTransactionState* pCTState);
 
 private:
     // ISIPSocketListener class
-    virtual void Socket_NotifyError(IN SIPSocket *pSocket, IN IMS_SINT32 nErrorCode);
-    virtual void Socket_SendEnabled(IN SIPSocket *pSocket);
+    virtual void Socket_NotifyError(IN SIPSocket* pSocket, IN IMS_SINT32 nErrorCode);
+    virtual void Socket_SendEnabled(IN SIPSocket* pSocket);
 
     void DestroyStreamSocket();
     IMS_BOOL IsUDPFallbackRequired() const;
@@ -73,13 +69,13 @@ private:
         AMSG_NOTIFY_TRANSPORT_ERROR
     };
 
-    SipTimerValues *pTV;
-    SIPClientTransactionState *pCTState;
-    ISIPClientTransmissionListener *piListener;
+    SipTimerValues* pTV;
+    SIPClientTransactionState* pCTState;
+    ISIPClientTransmissionListener* piListener;
 
     IMS_BOOL bIsResubmittedRequest;
     // TCP socket
-    SIPSocket *pSocket;
+    SIPSocket* pSocket;
 };
 
-#endif // _SIP_CLIENT_TRANSMISSION_PROXY_H_
+#endif  // _SIP_CLIENT_TRANSMISSION_PROXY_H_

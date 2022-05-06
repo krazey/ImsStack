@@ -23,10 +23,8 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-const IMS_CHAR* MediaDescriptor::RESERVED_ATTRIBUTE[MediaDescriptor::MAX_RESERVED_ATTRIBUTE] =
+PUBLIC GLOBAL const IMS_CHAR*
+MediaDescriptor::RESERVED_ATTRIBUTE[MediaDescriptor::MAX_RESERVED_ATTRIBUTE] =
 {
     "des",
     "curr",
@@ -67,22 +65,17 @@ const IMS_CHAR* MediaDescriptor::RESERVED_ATTRIBUTE[MediaDescriptor::MAX_RESERVE
     "path",
     // BasicReliableMedia
     "setup",
-    "connection"
+    "connection",
 };
 
-
-
 PUBLIC
-MediaDescriptor::MediaDescriptor(IN IMediaState *piMediaState_, IN IMS_SINT32 nMid_)
-    : piMediaState(piMediaState_)
-    , nMid(nMid_)
+MediaDescriptor::MediaDescriptor(IN IMediaState* piMediaState_, IN IMS_SINT32 nMid_) :
+        piMediaState(piMediaState_),
+        nMid(nMid_)
 {
 }
 
-PUBLIC VIRTUAL
-MediaDescriptor::~MediaDescriptor()
-{
-}
+PUBLIC VIRTUAL MediaDescriptor::~MediaDescriptor() {}
 
 PUBLIC
 IMS_SINT32 MediaDescriptor::GetMid() const
@@ -104,27 +97,26 @@ void MediaDescriptor::SetMid(IN IMS_SINT32 nMid)
     }
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString &strAttribute)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString& strAttribute)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to add an attribute (%s) in the state (%d)",
-                strAttribute.GetStr(), nState, 0);
+        IMS_TRACE_E(0, "Trying to add an attribute (%s) in the state (%d)", strAttribute.GetStr(),
+                nState, 0);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -176,10 +168,9 @@ IMS_RESULT MediaDescriptor::AddAttribute(IN CONST AString &strAttribute)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> MediaDescriptor::GetAttributes() const
+PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -191,12 +182,12 @@ IMSList<AString> MediaDescriptor::GetAttributes() const
         return IMSList<AString>();
     }
 
-    const IMSList<SdpAttribute> &objSDPAttributes = pMediaParam->GetAttributes();
+    const IMSList<SdpAttribute>& objSDPAttributes = pMediaParam->GetAttributes();
     IMSList<AString> objAttributes;
 
     for (IMS_UINT32 i = 0; i < objSDPAttributes.GetSize(); ++i)
     {
-        const SdpAttribute &objAttribute = objSDPAttributes.GetAt(i);
+        const SdpAttribute& objAttribute = objSDPAttributes.GetAt(i);
 
         objAttributes.Append(objAttribute.GetValue());
     }
@@ -204,10 +195,9 @@ IMSList<AString> MediaDescriptor::GetAttributes() const
     return objAttributes;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
+PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -219,12 +209,12 @@ IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
         return IMSList<AString>();
     }
 
-    const IMSList<SdpBandwidth> &objSDPBandwidths = pMediaParam->GetBandwidths();
+    const IMSList<SdpBandwidth>& objSDPBandwidths = pMediaParam->GetBandwidths();
     IMSList<AString> objBandwidths;
 
-    for (IMS_UINT32 i = 0; i< objSDPBandwidths.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objSDPBandwidths.GetSize(); ++i)
     {
-        const SdpBandwidth &objBandwidth = objSDPBandwidths.GetAt(i);
+        const SdpBandwidth& objBandwidth = objSDPBandwidths.GetAt(i);
 
         objBandwidths.Append(objBandwidth.GetValue());
     }
@@ -232,10 +222,9 @@ IMSList<AString> MediaDescriptor::GetBandwidthInfo() const
     return objBandwidths;
 }
 
-PRIVATE VIRTUAL
-AString MediaDescriptor::GetMediaDescription() const
+PRIVATE VIRTUAL AString MediaDescriptor::GetMediaDescription() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -257,10 +246,9 @@ AString MediaDescriptor::GetMediaDescription() const
     return pMediaParam->GetMedia().GetValue();
 }
 
-PRIVATE VIRTUAL
-AString MediaDescriptor::GetMediaTitle() const
+PRIVATE VIRTUAL AString MediaDescriptor::GetMediaTitle() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -272,7 +260,7 @@ AString MediaDescriptor::GetMediaTitle() const
         return AString::ConstNull();
     }
 
-    const SdpInformation *pInformation = pMediaParam->GetInformation();
+    const SdpInformation* pInformation = pMediaParam->GetInformation();
 
     if (pInformation == IMS_NULL)
     {
@@ -282,18 +270,17 @@ AString MediaDescriptor::GetMediaTitle() const
     return pInformation->GetValue();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString &strAttribute)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString& strAttribute)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -302,7 +289,7 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString &strAttribute)
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -328,8 +315,8 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString &strAttribute)
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Trying to set a reserved attribute (%s) failed",
-                strAttribute.GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Trying to set a reserved attribute (%s) failed", strAttribute.GetStr(), 0, 0);
         return IMS_FAILURE;
     }
 
@@ -349,18 +336,18 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST AString &strAttribute)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetBandwidthInfo(IN CONST IMSList<AString> &strBandwidthInfos)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetBandwidthInfo(
+        IN CONST IMSList<AString>& strBandwidthInfos)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -368,7 +355,7 @@ IMS_RESULT MediaDescriptor::SetBandwidthInfo(IN CONST IMSList<AString> &strBandw
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -383,7 +370,7 @@ IMS_RESULT MediaDescriptor::SetBandwidthInfo(IN CONST IMSList<AString> &strBandw
 
     for (IMS_UINT32 i = 0; i < strBandwidthInfos.GetSize(); ++i)
     {
-        const AString &strBandwidth = strBandwidthInfos.GetAt(i);
+        const AString& strBandwidth = strBandwidthInfos.GetAt(i);
 
         if (!objBandwidth.Decode(strBandwidth))
         {
@@ -403,8 +390,7 @@ IMS_RESULT MediaDescriptor::SetBandwidthInfo(IN CONST IMSList<AString> &strBandw
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString &strTitle)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString& strTitle)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
@@ -416,12 +402,12 @@ IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString &strTitle)
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set a title (%s) in the state (%d)",
-                strTitle.GetStr(), nState, 0);
+        IMS_TRACE_E(
+                0, "Trying to set a title (%s) in the state (%d)", strTitle.GetStr(), nState, 0);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -448,34 +434,31 @@ IMS_RESULT MediaDescriptor::SetMediaTitle(IN CONST AString &strTitle)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType, IN CONST AString &strAttrValue,
-        IN CONST AString &strType /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType,
+        IN CONST AString& strAttrValue, IN CONST AString& strType /* = AString::ConstNull() */)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)",
-                nType, strAttrValue.GetStr(), nState);
+        IMS_TRACE_E(0, "Trying to set an attribute (%d, %s) in the state (%d)", nType,
+                strAttrValue.GetStr(), nState);
         return IMS_FAILURE;
     }
 
     // Special attributes for SDP negotiation
     //    recvonly, sendrecv, sendonly, setup, connection, mid
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY)
-            || (nType == SdpAttribute::SETUP)
-            || (nType == SdpAttribute::CONNECTION))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
+            (nType == SdpAttribute::CONNECTION))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
@@ -483,7 +466,7 @@ IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType, IN CONST AString &
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -534,42 +517,39 @@ IMS_RESULT MediaDescriptor::AddAttribute(IN IMS_SINT32 nType, IN CONST AString &
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType, IN IMS_SINT32 nAttrValue,
-        IN CONST AString &strType /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType,
+        IN IMS_SINT32 nAttrValue, IN CONST AString& strType /* = AString::ConstNull() */)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set an attribute (%d, %d) in the state (%d)",
-                nType, nAttrValue, nState);
+        IMS_TRACE_E(0, "Trying to set an attribute (%d, %d) in the state (%d)", nType, nAttrValue,
+                nState);
         return IMS_FAILURE;
     }
 
     // Special attributes for SDP negotiation
     //    recvonly, sendrecv, sendonly, setup, connection, mid
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
         IMS_TRACE_E(0, "Not allowed attribute (%d, %d)", nType, nAttrValue, 0);
         return IMS_FAILURE;
     }
-    else if((nType == SdpAttribute::SETUP)
-        || (nType == SdpAttribute::CONNECTION))
+    else if ((nType == SdpAttribute::SETUP) || (nType == SdpAttribute::CONNECTION))
     {
-        SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+        SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
         if (pMediaParam == IMS_NULL)
         {
@@ -598,28 +578,27 @@ IMS_RESULT MediaDescriptor::AddAttributeInt(IN IMS_SINT32 nType, IN IMS_SINT32 n
     return AddAttribute(nType, strAttrValue, strType);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
-        IN CONST AString &strType /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType,
+        IN IMS_SINT32 nBandwidth, IN CONST AString& strType /* = AString::ConstNull() */)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to add a bandwidth (%d, %d) in the state (%d)",
-                nType, nBandwidth, nState);
+        IMS_TRACE_E(0, "Trying to add a bandwidth (%d, %d) in the state (%d)", nType, nBandwidth,
+                nState);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -636,8 +615,8 @@ IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBan
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed",
-                nType, nBandwidth, strType.GetStr());
+        IMS_TRACE_E(0, "Decoding an bandwidth (%d, %d, %s) failed", nType, nBandwidth,
+                strType.GetStr());
         return IMS_FAILURE;
     }
 
@@ -654,11 +633,10 @@ IMS_RESULT MediaDescriptor::AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBan
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-const AString& MediaDescriptor::GetAttribute(IN IMS_SINT32 nType,
-        IN CONST AString &strType /* = AString::ConstNull() */) const
+PRIVATE VIRTUAL const AString& MediaDescriptor::GetAttribute(
+        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -672,11 +650,9 @@ const AString& MediaDescriptor::GetAttribute(IN IMS_SINT32 nType,
 
     // Special attributes for SDP negotiation
     //    mid, recvonly, sendrecv, sendonly, setup, connection, mid
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY)
-            || (nType == SdpAttribute::SETUP)
-            || (nType == SdpAttribute::CONNECTION))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
+            (nType == SdpAttribute::CONNECTION))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
@@ -688,7 +664,7 @@ const AString& MediaDescriptor::GetAttribute(IN IMS_SINT32 nType,
         return pMediaParam->GetAttributeMid();
     }
 
-    const SdpAttribute *pAttribute = IMS_NULL;
+    const SdpAttribute* pAttribute = IMS_NULL;
 
     if (nType != SdpAttribute::ATTRIBUTE_OTHER)
         pAttribute = pMediaParam->GetAttribute(nType);
@@ -706,11 +682,10 @@ const AString& MediaDescriptor::GetAttribute(IN IMS_SINT32 nType,
     return pAttribute->GetAttributeValue();
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> MediaDescriptor::GetAttributes(IN IMS_SINT32 nType,
-        IN CONST AString &strType /* = AString::ConstNull() */) const
+PRIVATE VIRTUAL IMSList<AString> MediaDescriptor::GetAttributes(
+        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -724,11 +699,9 @@ IMSList<AString> MediaDescriptor::GetAttributes(IN IMS_SINT32 nType,
 
     // Special attributes for SDP negotiation
     //    mid, recvonly, sendrecv, sendonly, setup, connection, mid
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY)
-            || (nType == SdpAttribute::SETUP)
-            || (nType == SdpAttribute::CONNECTION))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY) || (nType == SdpAttribute::SETUP) ||
+            (nType == SdpAttribute::CONNECTION))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
@@ -751,7 +724,7 @@ IMSList<AString> MediaDescriptor::GetAttributes(IN IMS_SINT32 nType,
     {
         for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
         {
-            const SdpAttribute &objAttribute = objAttributes.GetAt(i);
+            const SdpAttribute& objAttribute = objAttributes.GetAt(i);
 
             if (objAttribute.GetAttribute() == nType)
             {
@@ -763,7 +736,7 @@ IMSList<AString> MediaDescriptor::GetAttributes(IN IMS_SINT32 nType,
     {
         for (IMS_UINT32 i = 0; i < objAttributes.GetSize(); ++i)
         {
-            const SdpAttribute &objAttribute = objAttributes.GetAt(i);
+            const SdpAttribute& objAttribute = objAttributes.GetAt(i);
 
             if (objAttribute.GetAttributeEx().Equals(strType))
             {
@@ -777,11 +750,10 @@ IMSList<AString> MediaDescriptor::GetAttributes(IN IMS_SINT32 nType,
     return objAttributeValues;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
-        IN CONST AString &strType /* = AString::ConstNull() */) const
+PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetAttributeInt(
+        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -795,9 +767,8 @@ IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
 
     // Special attributes for SDP negotiation
     //    recvonly, sendrecv, sendonly, setup, connection
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
@@ -813,7 +784,7 @@ IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
         return pMediaParam->GetAttributeConnection();
     }
 
-    const SdpAttribute *pAttribute = IMS_NULL;
+    const SdpAttribute* pAttribute = IMS_NULL;
 
     if (nType != SdpAttribute::ATTRIBUTE_OTHER)
         pAttribute = pMediaParam->GetAttribute(nType);
@@ -826,7 +797,7 @@ IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
         return INVALID_VALUE;
     }
 
-    const AString &strAttrValue = pAttribute->GetAttributeValue();
+    const AString& strAttrValue = pAttribute->GetAttributeValue();
 
     if (strAttrValue.IsNULL())
     {
@@ -860,8 +831,8 @@ IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
             }
         }
 
-        IMS_TRACE_E(0, "Converting the attribute (integer format: %d, %s) failed",
-                nType, strType.GetStr(), 0);
+        IMS_TRACE_E(0, "Converting the attribute (integer format: %d, %s) failed", nType,
+                strType.GetStr(), 0);
 
         IMS::SetLastError(IMSError::INVALID_OPERATION);
         return INVALID_VALUE;
@@ -872,11 +843,10 @@ IMS_SINT32 MediaDescriptor::GetAttributeInt(IN IMS_SINT32 nType,
     return nAttrValue;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 MediaDescriptor::GetBandwidth(IN IMS_SINT32 nType,
-        IN CONST AString &strType /* = AString::ConstNull() */) const
+PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetBandwidth(
+        IN IMS_SINT32 nType, IN CONST AString& strType /* = AString::ConstNull() */) const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -888,7 +858,7 @@ IMS_SINT32 MediaDescriptor::GetBandwidth(IN IMS_SINT32 nType,
         return INVALID_VALUE;
     }
 
-    const SdpBandwidth *pBandwidth = IMS_NULL;
+    const SdpBandwidth* pBandwidth = IMS_NULL;
 
     if (nType != SdpBandwidth::TYPE_OTHER)
         pBandwidth = pMediaParam->GetBandwidth(nType);
@@ -906,10 +876,9 @@ IMS_SINT32 MediaDescriptor::GetBandwidth(IN IMS_SINT32 nType,
     return pBandwidth->GetBandwidth();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 MediaDescriptor::GetDirection() const
+PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetDirection() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -924,10 +893,9 @@ IMS_SINT32 MediaDescriptor::GetDirection() const
     return pMediaParam->GetDirection();
 }
 
-PRIVATE VIRTUAL
-const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
+PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -944,10 +912,9 @@ const SdpMedia* MediaDescriptor::GetMediaDescriptionEx() const
     return &(pMediaParam->GetMedia());
 }
 
-PRIVATE VIRTUAL
-const IMSList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
+PRIVATE VIRTUAL const IMSList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -964,18 +931,17 @@ const IMSList<SdpMediaFormat*>& MediaDescriptor::GetMediaFormats() const
     return pMediaParam->GetMediaFormats();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribute &objAttribute)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribute& objAttribute)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -984,7 +950,7 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribute &objAttribute)
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -998,9 +964,8 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribute &objAttribute)
     //    mid, recvonly, sendrecv, sendonly, setup, connection, mid
     IMS_SINT32 nType = objAttribute.GetAttribute();
 
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
@@ -1039,29 +1004,28 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN CONST SdpAttribute &objAttribute)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
-        IN CONST AString &strAttrValue /* = AString::ConstNull() */,
-        IN CONST AString &strType /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
+        IN CONST AString& strAttrValue /* = AString::ConstNull() */,
+        IN CONST AString& strType /* = AString::ConstNull() */)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to remove an attribute (%d, %s) in the state (%d)",
-                nType, strAttrValue.GetStr(), nState);
+        IMS_TRACE_E(0, "Trying to remove an attribute (%d, %s) in the state (%d)", nType,
+                strAttrValue.GetStr(), nState);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1082,9 +1046,8 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
 
     // Special attributes for SDP negotiation
     //    mid, recvonly, sendrecv, sendonly, setup, connection, mid
-    if ((nType == SdpAttribute::RECVONLY)
-            || (nType == SdpAttribute::SENDRECV)
-            || (nType == SdpAttribute::SENDONLY))
+    if ((nType == SdpAttribute::RECVONLY) || (nType == SdpAttribute::SENDRECV) ||
+            (nType == SdpAttribute::SENDONLY))
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
         IMS_TRACE_E(0, "Not allowed attribute (%d)", nType, 0, 0);
@@ -1119,8 +1082,7 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
         {
             IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
-            IMS_TRACE_E(0, "Attribute (%s) does not exist",
-                    objAttribute.GetValue().GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Attribute (%s) does not exist", objAttribute.GetValue().GetStr(), 0, 0);
             return IMS_FAILURE;
         }
 
@@ -1135,27 +1097,27 @@ IMS_RESULT MediaDescriptor::RemoveAttribute(IN IMS_SINT32 nType,
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::RemoveMediaFormat(IN IMS_SINT32 nType, IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemoveMediaFormat(
+        IN IMS_SINT32 nType, IN CONST AString& strValue)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to remove a media format (%d, %s) in the state (%d)",
-                nType, strValue.GetStr(), nState);
+        IMS_TRACE_E(0, "Trying to remove a media format (%d, %s) in the state (%d)", nType,
+                strValue.GetStr(), nState);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1170,18 +1132,17 @@ IMS_RESULT MediaDescriptor::RemoveMediaFormat(IN IMS_SINT32 nType, IN CONST AStr
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AString &strAddress)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AString& strAddress)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -1190,7 +1151,7 @@ IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AString &strAddress)
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1214,27 +1175,26 @@ IMS_RESULT MediaDescriptor::SetConnectionAddress(IN CONST AString &strAddress)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetDirection(IN IMS_SINT32 nDirection)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetDirection(IN IMS_SINT32 nDirection)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set a media direction (%d) in the state (%d)",
-                nDirection, nState, 0);
+        IMS_TRACE_E(
+                0, "Trying to set a media direction (%d) in the state (%d)", nDirection, nState, 0);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1251,28 +1211,27 @@ IMS_RESULT MediaDescriptor::SetDirection(IN IMS_SINT32 nDirection)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetMediaDescription(IN IMS_SINT32 nType, IN IMS_SINT32 nPort,
-        IN IMS_SINT32 nTransportProtocol, IN CONST AStringArray &objFormats)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaDescription(IN IMS_SINT32 nType,
+        IN IMS_SINT32 nPort, IN IMS_SINT32 nTransportProtocol, IN CONST AStringArray& objFormats)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set a media description (%d) in the state (%d)",
-                nType, nState, 0);
+        IMS_TRACE_E(
+                0, "Trying to set a media description (%d) in the state (%d)", nType, nState, 0);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1290,8 +1249,7 @@ IMS_RESULT MediaDescriptor::SetMediaDescription(IN IMS_SINT32 nType, IN IMS_SINT
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat* pMediaFormat)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
@@ -1303,10 +1261,10 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
         return IMS_FAILURE;
     }
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -1315,7 +1273,7 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1325,22 +1283,22 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
         return IMS_FAILURE;
     }
 
-    SdpMediaFormat *pTmpMediaFormat = pMediaParam->GetMediaFormat(
-        pMediaFormat->GetType(), pMediaFormat->GetValue());
+    SdpMediaFormat* pTmpMediaFormat =
+            pMediaParam->GetMediaFormat(pMediaFormat->GetType(), pMediaFormat->GetValue());
 
     if (pTmpMediaFormat == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Format (%d, %s) does not exist",
-                pMediaFormat->GetType(), pMediaFormat->GetValue().GetStr(), 0);
+        IMS_TRACE_E(0, "Format (%d, %s) does not exist", pMediaFormat->GetType(),
+                pMediaFormat->GetValue().GetStr(), 0);
         return IMS_FAILURE;
     }
 
     switch (pTmpMediaFormat->GetType())
     {
-    case SdpMediaFormat::TYPE_RTP:
+        case SdpMediaFormat::TYPE_RTP:
         {
-            SdpAvCodec *pAVCodec = DYNAMIC_CAST(SdpAvCodec*, pMediaFormat);
-            SdpAvCodec *pTmpAVCodec = DYNAMIC_CAST(SdpAvCodec*, pTmpMediaFormat);
+            SdpAvCodec* pAVCodec = DYNAMIC_CAST(SdpAvCodec*, pMediaFormat);
+            SdpAvCodec* pTmpAVCodec = DYNAMIC_CAST(SdpAvCodec*, pTmpMediaFormat);
 
             if ((pAVCodec == IMS_NULL) || (pTmpAVCodec == IMS_NULL))
             {
@@ -1352,10 +1310,8 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
             AString strFMTP = AString::ConstNull();
 
             // rtpmap
-            strRTPMAP.Sprintf("%s %s/%d",
-                pAVCodec->GetValue().GetStr(),
-                pAVCodec->GetName().GetStr(),
-                pAVCodec->GetClockRate());
+            strRTPMAP.Sprintf("%s %s/%d", pAVCodec->GetValue().GetStr(),
+                    pAVCodec->GetName().GetStr(), pAVCodec->GetClockRate());
 
             if (pAVCodec->GetEncodingParameters().GetLength() > 0)
             {
@@ -1366,25 +1322,24 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
             // fmtp
             if (!pAVCodec->GetFormatSpecificParameter().IsNULL())
             {
-                strFMTP.Sprintf("%s %s",
-                    pAVCodec->GetValue().GetStr(),
-                    pAVCodec->GetFormatSpecificParameter().GetStr());
+                strFMTP.Sprintf("%s %s", pAVCodec->GetValue().GetStr(),
+                        pAVCodec->GetFormatSpecificParameter().GetStr());
             }
 
             if (!pTmpAVCodec->SetParameters(strRTPMAP, strFMTP))
             {
-                IMS_TRACE_E(0, "Setting RTPMAP (%s) & FMTP (%s) failed",
-                        strRTPMAP.GetStr(), strFMTP.GetStr(), 0);
+                IMS_TRACE_E(0, "Setting RTPMAP (%s) & FMTP (%s) failed", strRTPMAP.GetStr(),
+                        strFMTP.GetStr(), 0);
                 return IMS_FAILURE;
             }
 
             // Media format parameter :: rtcp-fb / framesize / ...
-            const IMSList<SdpMediaFormatParameter*> &objExtraParameters
-                    = pMediaFormat->GetExtraParameters();
+            const IMSList<SdpMediaFormatParameter*>& objExtraParameters =
+                    pMediaFormat->GetExtraParameters();
 
             for (IMS_UINT32 i = 0; i < objExtraParameters.GetSize(); ++i)
             {
-                const SdpMediaFormatParameter *pParameter = objExtraParameters.GetAt(i);
+                const SdpMediaFormatParameter* pParameter = objExtraParameters.GetAt(i);
 
                 if (pParameter == IMS_NULL)
                     continue;
@@ -1394,36 +1349,35 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN CONST SdpMediaFormat *pMediaFormat
         }
         break;
 
-    default:
-        IMS_TRACE_E(0, "RTP format only supports", 0, 0, 0);
-        return IMS_FAILURE;
+        default:
+            IMS_TRACE_E(0, "RTP format only supports", 0, 0, 0);
+            return IMS_FAILURE;
     }
 
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType, IN CONST AString &strValue,
-        IN CONST AString &strAnyMAP, IN CONST AString &strFMTP)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType,
+        IN CONST AString& strValue, IN CONST AString& strAnyMAP, IN CONST AString& strFMTP)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set a media format (%d, %s) in the state (%d)",
-                nType, strValue.GetStr(), nState);
+        IMS_TRACE_E(0, "Trying to set a media format (%d, %s) in the state (%d)", nType,
+                strValue.GetStr(), nState);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1433,7 +1387,7 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType, IN CONST AString
         return IMS_FAILURE;
     }
 
-    SdpMediaFormat *pMediaFormat = pMediaParam->GetMediaFormat(nType, strValue);
+    SdpMediaFormat* pMediaFormat = pMediaParam->GetMediaFormat(nType, strValue);
 
     if (pMediaFormat == IMS_NULL)
     {
@@ -1456,26 +1410,25 @@ IMS_RESULT MediaDescriptor::SetMediaFormat(IN IMS_SINT32 nType, IN CONST AString
 
     if (!pMediaFormat->SetParameters(strAttrAnyMAP, strAttrFMTP))
     {
-        IMS_TRACE_E(0, "Setting AnyMAP (%s) & FMTP (%s) failed",
-                strAnyMAP.GetStr(), strFMTP.GetStr(), 0);
+        IMS_TRACE_E(0, "Setting AnyMAP (%s) & FMTP (%s) failed", strAnyMAP.GetStr(),
+                strFMTP.GetStr(), 0);
         return IMS_FAILURE;
     }
 
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
@@ -1483,7 +1436,7 @@ IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1493,17 +1446,16 @@ IMS_RESULT MediaDescriptor::SetPort(IN IMS_SINT32 nPort)
         return IMS_FAILURE;
     }
 
-    SdpMedia &objMedia = const_cast<SdpMedia&>(pMediaParam->GetMedia());
+    SdpMedia& objMedia = const_cast<SdpMedia&>(pMediaParam->GetMedia());
 
     objMedia.SetPort(nPort);
 
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() const
+PRIVATE VIRTUAL const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1520,10 +1472,9 @@ const SdpMedia* MediaDescriptor::GetMediaDescriptionExAsLocal() const
     return &(pMediaParam->GetMedia());
 }
 
-PRIVATE VIRTUAL
-IPAddress MediaDescriptor::GetLocalAddress() const
+PRIVATE VIRTUAL IPAddress MediaDescriptor::GetLocalAddress() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1556,10 +1507,9 @@ IPAddress MediaDescriptor::GetLocalAddress() const
     return objAddress;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 MediaDescriptor::GetLocalPort() const
+PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetLocalPort() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1572,8 +1522,7 @@ IMS_SINT32 MediaDescriptor::GetLocalPort() const
     return pMediaParam->GetMedia().GetPort();
 }
 
-PRIVATE VIRTUAL
-IPAddress MediaDescriptor::GetRemoteAddress() const
+PRIVATE VIRTUAL IPAddress MediaDescriptor::GetRemoteAddress() const
 {
     IPAddress objAddress;
 
@@ -1588,10 +1537,9 @@ IPAddress MediaDescriptor::GetRemoteAddress() const
     return objAddress;
 }
 
-PRIVATE VIRTUAL
-const AString& MediaDescriptor::GetRemoteAddressAsString() const
+PRIVATE VIRTUAL const AString& MediaDescriptor::GetRemoteAddressAsString() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1610,10 +1558,9 @@ const AString& MediaDescriptor::GetRemoteAddressAsString() const
     return piMediaState->GetPeerConnectionAddress();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 MediaDescriptor::GetRemotePort() const
+PRIVATE VIRTUAL IMS_SINT32 MediaDescriptor::GetRemotePort() const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1627,11 +1574,10 @@ IMS_SINT32 MediaDescriptor::GetRemotePort() const
 }
 
 // IMS_SDP_PRECONDITION
-PRIVATE VIRTUAL
-const SdpPrecondition* MediaDescriptor::GetPrecondition(IN IMS_SINT32 nAttribute,
-        IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */) const
+PRIVATE VIRTUAL const SdpPrecondition* MediaDescriptor::GetPrecondition(
+        IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */) const
 {
-    SdpMediaParameter *pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetPeerMediaParameter(nMid);
 
     //---------------------------------------------------------------------------------------------
 
@@ -1646,28 +1592,27 @@ const SdpPrecondition* MediaDescriptor::GetPrecondition(IN IMS_SINT32 nAttribute
     return pMediaParam->GetPrecondition(nAttribute, nType);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::RemovePrecondition(IN IMS_SINT32 nAttribute,
-        IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::RemovePrecondition(
+        IN IMS_SINT32 nAttribute, IN IMS_SINT32 nType /* = SdpPrecondition::TYPE_QOS */)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to remove a precondition (%d, %d) in the state (%d)",
-                nAttribute, nType, nState);
+        IMS_TRACE_E(0, "Trying to remove a precondition (%d, %d) in the state (%d)", nAttribute,
+                nType, nState);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1682,28 +1627,27 @@ IMS_RESULT MediaDescriptor::RemovePrecondition(IN IMS_SINT32 nAttribute,
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MediaDescriptor::SetPrecondition(IN IMS_SINT32 nAttribute,
-        IN CONST SdpPrecondition *pPrecondition)
+PRIVATE VIRTUAL IMS_RESULT MediaDescriptor::SetPrecondition(
+        IN IMS_SINT32 nAttribute, IN CONST SdpPrecondition* pPrecondition)
 {
     // Check a media state
     IMS_SINT32 nState = piMediaState->GetMediaState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != IMediaState::MEDIA_STATE_INACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL)
-            && (nState != IMediaState::MEDIA_STATE_ACTIVE)
-            && (nState != IMediaState::MEDIA_STATE_PROPOSAL))
+    if ((nState != IMediaState::MEDIA_STATE_INACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_INACTIVE_PROPOSAL) &&
+            (nState != IMediaState::MEDIA_STATE_ACTIVE) &&
+            (nState != IMediaState::MEDIA_STATE_PROPOSAL))
     {
         IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-        IMS_TRACE_E(0, "Trying to set a precondition (%d) in the state (%d)",
-                nAttribute, nState, 0);
+        IMS_TRACE_E(
+                0, "Trying to set a precondition (%d) in the state (%d)", nAttribute, nState, 0);
         return IMS_FAILURE;
     }
 
-    SdpMediaParameter *pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
+    SdpMediaParameter* pMediaParam = piMediaState->GetProposalMediaParameter(nMid);
 
     if (pMediaParam == IMS_NULL)
     {
@@ -1724,9 +1668,8 @@ IMS_RESULT MediaDescriptor::SetPrecondition(IN IMS_SINT32 nAttribute,
     return IMS_SUCCESS;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL MediaDescriptor::IsAttributeReserved(IN CONST SdpMediaParameter *pMediaParam,
-        IN CONST AString &strAttribute)
+PRIVATE GLOBAL IMS_BOOL MediaDescriptor::IsAttributeReserved(
+        IN CONST SdpMediaParameter* pMediaParam, IN CONST AString& strAttribute)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1751,10 +1694,10 @@ IMS_BOOL MediaDescriptor::IsAttributeReserved(IN CONST SdpMediaParameter *pMedia
     IMS_SINT32 nTransportProtocol = pMediaParam->GetMedia().GetTransportProtocol();
 
     // StreamMedia attributes
-    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
+    if ((nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_AVPF) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_RTP_SAVPF))
     {
         for (i = START_STREAM_MEDIA; i <= END_STREAM_MEDIA; ++i)
         {
@@ -1763,8 +1706,8 @@ IMS_BOOL MediaDescriptor::IsAttributeReserved(IN CONST SdpMediaParameter *pMedia
         }
     }
     // FramedMedia attributes
-    else if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP)
-            || (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
+    else if ((nTransportProtocol == SdpMedia::TRANSPORT_TCP_MSRP) ||
+            (nTransportProtocol == SdpMedia::TRANSPORT_TCP_TLS_MSRP))
     {
         for (i = START_FRAMED_MEDIA; i <= END_FRAMED_MEDIA; ++i)
         {

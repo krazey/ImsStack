@@ -23,37 +23,34 @@
 
 #include "SIPDialogBase.h"
 
-
-
 class SIPDialogUsage
 {
 public:
-    SIPDialogUsage(IN SIPDialogBase *pDialogBase_);
-    SIPDialogUsage(IN IMS_SINT32 nType_, IN SIPDialogBase *pDialogBase_);
-    SIPDialogUsage(IN CONST SIPDialogUsage &objRHS);
+    SIPDialogUsage(IN SIPDialogBase* pDialogBase_);
+    SIPDialogUsage(IN IMS_SINT32 nType_, IN SIPDialogBase* pDialogBase_);
+    SIPDialogUsage(IN CONST SIPDialogUsage& objRHS);
     virtual ~SIPDialogUsage();
 
 private:
     SIPDialogUsage();
-    SIPDialogUsage& operator=(IN CONST SIPDialogUsage &objRHS);
+    SIPDialogUsage& operator=(IN CONST SIPDialogUsage& objRHS);
 
 public:
-    virtual IMS_BOOL InitDialogUsage(IN CONST SIPMessageInfo &objMInfo);
+    virtual IMS_BOOL InitDialogUsage(IN CONST SIPMessageInfo& objMInfo);
     virtual SIPDialogUsage* Clone() const;
-    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo &objMInfo) const;
-    virtual IMS_BOOL Equals(IN SIPDialogUsage *pDUsage) const;
+    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo& objMInfo) const;
+    virtual IMS_BOOL Equals(IN SIPDialogUsage* pDUsage) const;
     virtual AString ToString() const;
-    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo &objMInfo);
+    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo& objMInfo);
 
-    inline IMS_SINT32 GetType() const
-    { return nType; }
+    inline IMS_SINT32 GetType() const { return nType; }
 
 protected:
-    virtual IMS_SINT32 GetActionNTrigger(IN CONST SIPMessageInfo &objMInfo,
-            OUT IMS_SINT32 &nTrigger);
+    virtual IMS_SINT32 GetActionNTrigger(
+            IN CONST SIPMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger);
     virtual IMS_BOOL IsUsageTerminated(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const;
 
-    IMS_SINT32 GetActionForResponse(IN CONST SIPMessageInfo &objMInfo);
+    IMS_SINT32 GetActionForResponse(IN CONST SIPMessageInfo& objMInfo);
     IMS_SINT32 GetState() const;
 
     virtual const IMS_CHAR* TriggerToString(IN IMS_SINT32 nTrigger) const;
@@ -71,7 +68,7 @@ private:
     // Usage type: invite / subscribe / register(pseudo)
     IMS_SINT32 nType;
 
-    SIPDialogBase *pDialogBase;
+    SIPDialogBase* pDialogBase;
 };
 
-#endif // _SIP_DIALOG_USAGE_H_
+#endif  // _SIP_DIALOG_USAGE_H_

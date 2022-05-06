@@ -42,7 +42,7 @@ public:
     </table>
     */
     virtual void ClientTransmission_NotifyError(
-            IN IMS_SINT32 nCode, IN CONST AString &strMessage) = 0;
+            IN IMS_SINT32 nCode, IN CONST AString& strMessage) = 0;
 
     /*
 
@@ -63,4 +63,4 @@ public:
     virtual void ClientTransmission_TransmissionCompleted() = 0;
 };
 
-#endif // _INTERFACE_SIP_CLIENT_TRANSMISSION_LISTENER_H_
+#endif  // _INTERFACE_SIP_CLIENT_TRANSMISSION_LISTENER_H_

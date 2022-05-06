@@ -65,15 +65,13 @@ public:
          *
          * @return User string.
          */
-        inline const AString& GetUser() const
-        { return m_strUser; }
+        inline const AString& GetUser() const { return m_strUser; }
         /**
          * @brief Gets the password field.
          *
          * @return Password string.
          */
-        inline const AString& GetPassword() const
-        { return m_strPassword; }
+        inline const AString& GetPassword() const { return m_strPassword; }
         /**
          * @brief Returns the parameter of user-info part.
          *
@@ -87,8 +85,7 @@ public:
          *
          * @return List of pointer to SipParameter.
          */
-        inline const IMSList<SipParameter*>& GetParameters() const
-        { return m_objParameters; }
+        inline const IMSList<SipParameter*>& GetParameters() const { return m_objParameters; }
 
     private:
         void RemoveAllParameters();
@@ -164,16 +161,15 @@ public:
      * @param strName The header name, either in full or compact form
      * @return Pointer to uri-header parameter.
      */
-    const ISipHeader* GetHeader(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) const;
+    const ISipHeader* GetHeader(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const;
 
     /**
      * @brief Returns all the headers of SIP address.
      *
      * @return List of uri-header parameter.
      */
-    inline const IMSList<ISipHeader*>& GetHeaders() const
-    { return m_objHeaders; }
+    inline const IMSList<ISipHeader*>& GetHeaders() const { return m_objHeaders; }
 
     /**
      * @brief Returns the host part of SIP address.
@@ -197,8 +193,7 @@ public:
      *
      * @return List of uri-parameter.
      */
-    inline const IMSList<SipParameter*>& GetParameters() const
-    { return m_objParams; }
+    inline const IMSList<SipParameter*>& GetParameters() const { return m_objParams; }
 
     /**
      * @brief Returns the port number of the SIP address.
@@ -270,8 +265,7 @@ public:
      * @return If the port number is not set explicitly, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL IsPortUnspecified() const
-    { return (m_nPort == Sip::PORT_UNSPECIFIED); }
+    inline IMS_BOOL IsPortUnspecified() const { return (m_nPort == Sip::PORT_UNSPECIFIED); }
 
     /**
      * @brief Checks if the scheme is SIP URI scheme or not.
@@ -331,8 +325,7 @@ public:
      *
      * @param bAquotRequired Flag for AQUOT requirement
      */
-    inline void SetAquotRequired(IN IMS_BOOL bAquotRequired)
-    { m_bAquotRequired = bAquotRequired; }
+    inline void SetAquotRequired(IN IMS_BOOL bAquotRequired) { m_bAquotRequired = bAquotRequired; }
 
     /**
      * @brief Sets the display name.
@@ -352,7 +345,9 @@ public:
      * @param bDquotRequired Flag to indicate if DQUOTE should be included in display-name field
      */
     inline void SetDquotRequiredForDisplayName(IN IMS_BOOL bDquotRequired)
-    { m_bDquotForDisplayName = bDquotRequired; }
+    {
+        m_bDquotForDisplayName = bDquotRequired;
+    }
 
     /**
      * @brief Sets the header field.
@@ -504,8 +499,7 @@ private:
     IMS_BOOL DecodeHeaderComponent(IN const AString& strHeaders);
     IMS_BOOL IsParameterPresent(IN const AString& strName) const;
 
-    static IMS_BOOL CompareNumberDigits(IN const AString& strDigits1,
-            IN const AString& strDigits2);
+    static IMS_BOOL CompareNumberDigits(IN const AString& strDigits1, IN const AString& strDigits2);
     static AString EscapeDquotAndBackslash(IN const AString& strValue);
     static IMS_BOOL IsDisplayNameToken(IN const AString& strDisplayName);
     static IMS_BOOL IsToken(IN const IMS_CHAR ch);

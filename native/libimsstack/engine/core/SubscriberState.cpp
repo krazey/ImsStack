@@ -21,10 +21,8 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-IMS_SINT32 SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_MAX] =
+PUBLIC GLOBAL IMS_SINT32
+SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -50,51 +48,44 @@ IMS_SINT32 SubscriberState::STATE[SubState::STATE_MAX][SubscriberState::MESSAGE_
     },
 };
 
-//4 send it to "Util" directory ?
-PUBLIC GLOBAL
-const SIPHeaderProperty SubscriberState::RESTRICTED_HEADER_PROPERTIES[] =
+// 4 send it to "Util" directory ?
+PUBLIC GLOBAL const SIPHeaderProperty SubscriberState::RESTRICTED_HEADER_PROPERTIES[] =
 {
-    // Header type, Header name, Is single header ?
-    { ISipHeader::ACCEPT_CONTACT, IMS_NULL, IMS_FALSE },
-    { ISipHeader::AUTHORIZATION, IMS_NULL, IMS_FALSE },
-    { ISipHeader::ALLOW, IMS_NULL, IMS_FALSE },
-    { ISipHeader::CALL_ID, IMS_NULL, IMS_TRUE },
-    { ISipHeader::CONTACT_ANY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::CONTENT_LENGTH, IMS_NULL, IMS_TRUE },
-    { ISipHeader::CSEQ, IMS_NULL, IMS_TRUE },
-    { ISipHeader::FROM, IMS_NULL, IMS_TRUE },
-    { ISipHeader::MAX_FORWARDS, IMS_NULL, IMS_TRUE },
-    { ISipHeader::MIN_EXPIRES, IMS_NULL, IMS_TRUE },
-    { ISipHeader::P_ACCESS_NETWORK_INFO, IMS_NULL, IMS_TRUE },
-    { ISipHeader::P_ASSERTED_IDENTITY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::P_PREFERRED_IDENTITY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::PROXY_AUTHORIZATION, IMS_NULL, IMS_FALSE },
-    { ISipHeader::ROUTE, IMS_NULL, IMS_FALSE },
-    { ISipHeader::TO, IMS_NULL, IMS_TRUE },
-    { ISipHeader::SECURITY_CLIENT, IMS_NULL, IMS_FALSE },
-    { ISipHeader::SECURITY_VERIFY, IMS_NULL, IMS_FALSE },
-    { ISipHeader::VIA, IMS_NULL, IMS_FALSE },
-    // SIP: Content-Length header is handled as unknown header
-    { ISipHeader::UNKNOWN, SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
-    { ISipHeader::UNKNOWN, "l", IMS_TRUE }
+        // Header type, Header name, Is single header ?
+        {ISipHeader::ACCEPT_CONTACT,        IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::AUTHORIZATION,         IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::ALLOW,                 IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::CALL_ID,               IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::CONTACT_ANY,           IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::CONTENT_LENGTH,        IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::CSEQ,                  IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::FROM,                  IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::MAX_FORWARDS,          IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::MIN_EXPIRES,           IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::P_ACCESS_NETWORK_INFO, IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::P_ASSERTED_IDENTITY,   IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::P_PREFERRED_IDENTITY,  IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::PROXY_AUTHORIZATION,   IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::ROUTE,                 IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::TO,                    IMS_NULL,                      IMS_TRUE },
+        {ISipHeader::SECURITY_CLIENT,       IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::SECURITY_VERIFY,       IMS_NULL,                      IMS_FALSE},
+        {ISipHeader::VIA,                   IMS_NULL,                      IMS_FALSE},
+        // SIP: Content-Length header is handled as unknown header
+        {ISipHeader::UNKNOWN,               SipHeaderName::CONTENT_LENGTH, IMS_TRUE },
+        {ISipHeader::UNKNOWN,               "l",                           IMS_TRUE }
 };
 
-
-
 PUBLIC
-SubscriberState::SubscriberState()
-    : SubState()
+SubscriberState::SubscriberState() :
+        SubState()
 {
     InitializeStateTable();
 }
 
-PUBLIC VIRTUAL
-SubscriberState::~SubscriberState()
-{
-}
+PUBLIC VIRTUAL SubscriberState::~SubscriberState() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
+PUBLIC VIRTUAL IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -103,7 +94,7 @@ IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
         return IMS_FALSE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     // Update the subscription state information...
     if (objMethod.Equals(SipMethod::SUBSCRIBE))
@@ -113,8 +104,8 @@ IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
         {
             if (!UpdateOnSUBSCRIBERequest(piSIPMsg))
             {
-                IMS_TRACE_E(0, "Updating the subscriber state on SUBSCRIBE request failed",
-                        0, 0, 0);
+                IMS_TRACE_E(
+                        0, "Updating the subscriber state on SUBSCRIBE request failed", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -126,8 +117,8 @@ IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 
             if (!UpdateOnSUBSCRIBEResponse(piSIPMsg))
             {
-                IMS_TRACE_E(0, "Updating the subscriber state on SUBSCRIBE response failed",
-                        0, 0, 0);
+                IMS_TRACE_E(
+                        0, "Updating the subscriber state on SUBSCRIBE response failed", 0, 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -161,8 +152,8 @@ IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
 
     if (nSIPMsg == MESSAGE_INVALID)
     {
-        IMS_TRACE_I("SUBS_STATE - NO TRANSITION (%s)",
-                piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+        IMS_TRACE_I(
+                "SUBS_STATE - NO TRANSITION (%s)", piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -178,8 +169,8 @@ IMS_BOOL SubscriberState::UpdateState(IN CONST ISipMessage *piSIPMsg)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-const SIPHeaderProperty* SubscriberState::GetRestrictedHeaders(OUT IMS_UINT32 &nCount) const
+PROTECTED VIRTUAL const SIPHeaderProperty* SubscriberState::GetRestrictedHeaders(
+        OUT IMS_UINT32& nCount) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -189,10 +180,10 @@ const SIPHeaderProperty* SubscriberState::GetRestrictedHeaders(OUT IMS_UINT32 &n
 }
 
 PRIVATE
-IMS_SINT32 SubscriberState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
+IMS_SINT32 SubscriberState::TranslateMessage(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nMsgType = piSIPMsg->GetType();
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -291,11 +282,11 @@ IMS_SINT32 SubscriberState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL SubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage* piSIPMsg)
 {
     AString strHeader;
-    ISipHeader *piHeader;
-    EventPackage *pEventPackage = GetEventPackage();
+    ISipHeader* piHeader;
+    EventPackage* pEventPackage = GetEventPackage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -328,8 +319,7 @@ IMS_BOOL SubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg)
 
     IMS_SINT32 nSubStateValue = ExtractSubStateValue(piHeader);
 
-    if ((nSubStateValue == SUB_STATE_ACTIVE)
-            || (nSubStateValue == SUB_STATE_PENDING))
+    if ((nSubStateValue == SUB_STATE_ACTIVE) || (nSubStateValue == SUB_STATE_PENDING))
     {
         if (GetState() != STATE_TERMINATED)
         {
@@ -404,7 +394,7 @@ IMS_BOOL SubscriberState::UpdateOnNOTIFYRequest(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL SubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
 
@@ -418,8 +408,7 @@ IMS_BOOL SubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg)
     else if (SipStatusCode::IsFinalSuccess(nStatusCode))
     {
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-            || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // Do nothing ...
         return IMS_TRUE;
@@ -463,11 +452,11 @@ IMS_BOOL SubscriberState::UpdateOnNOTIFYResponse(IN CONST ISipMessage *piSIPMsg)
 }
 
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnSUBSCRIBERequest(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL SubscriberState::UpdateOnSUBSCRIBERequest(IN CONST ISipMessage* piSIPMsg)
 {
     AString strHeader;
-    ISipHeader *piHeader;
-    EventPackage *pEventPackage = GetEventPackage();
+    ISipHeader* piHeader;
+    EventPackage* pEventPackage = GetEventPackage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -515,8 +504,7 @@ IMS_BOOL SubscriberState::UpdateOnSUBSCRIBERequest(IN CONST ISipMessage *piSIPMs
     }
 
     // Stores an initial/refresh SUBSCRIBE request for refresh/removal operation
-    if ((GetOperation() == OPERATION_CREATE)
-            || (GetOperation() == OPERATION_REFRESH))
+    if ((GetOperation() == OPERATION_CREATE) || (GetOperation() == OPERATION_REFRESH))
     {
         StoreMessage(piSIPMsg);
     }
@@ -524,9 +512,8 @@ IMS_BOOL SubscriberState::UpdateOnSUBSCRIBERequest(IN CONST ISipMessage *piSIPMs
     return IMS_TRUE;
 }
 
-
 PRIVATE
-IMS_BOOL SubscriberState::UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage *piSIPMsg)
+IMS_BOOL SubscriberState::UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -549,8 +536,8 @@ IMS_BOOL SubscriberState::UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage *piSIPM
         if (piSIPMsg->IsHeaderPresent(ISipHeader::EXPIRES_ANY))
         {
             AString strHeader = piSIPMsg->GetHeader(ISipHeader::EXPIRES_ANY);
-            ISipHeader *piHeader
-                    = SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
+            ISipHeader* piHeader =
+                    SipParsingHelper::CreateHeader(ISipHeader::EXPIRES_ANY, strHeader);
 
             if (piHeader != IMS_NULL)
             {
@@ -609,8 +596,7 @@ IMS_BOOL SubscriberState::UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage *piSIPM
             SetState(piSIPMsg, STATE_TERMINATED);
         }
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-            || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         if (GetOperation() == OPERATION_REMOVE)
         {
@@ -640,8 +626,7 @@ IMS_BOOL SubscriberState::UpdateOnSUBSCRIBEResponse(IN CONST ISipMessage *piSIPM
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void SubscriberState::InitializeStateTable()
+PRIVATE GLOBAL void SubscriberState::InitializeStateTable()
 {
     static IMS_BOOL bInitialized = IMS_FALSE;
     IMS_SINT32 i;

@@ -17,8 +17,6 @@
 
 class SdpSessionParameter;
 
-
-
 class ISessionState
 {
 public:
@@ -45,4 +43,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SESSION_STATE_H_
+#endif  // _INTERFACE_SESSION_STATE_H_

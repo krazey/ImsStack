@@ -25,20 +25,17 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-SessionImpl::SessionImpl(IN SessionEx *pSession_)
-    : piListener(IMS_NULL)
-    , pSession(pSession_)
-    , pVirtualSessionImpl(IMS_NULL)
+SessionImpl::SessionImpl(IN SessionEx* pSession_) :
+        piListener(IMS_NULL),
+        pSession(pSession_),
+        pVirtualSessionImpl(IMS_NULL)
 {
     pSession->SetListener(this);
     pSession->SetExListener(this);
 }
 
-PUBLIC VIRTUAL
-SessionImpl::~SessionImpl()
+PUBLIC VIRTUAL SessionImpl::~SessionImpl()
 {
     UpdateVirtualSession(IMS_NULL);
 
@@ -53,7 +50,7 @@ SessionImpl::~SessionImpl()
     {
         for (IMS_UINT32 i = 0; i < objMediaImpls.GetSize(); ++i)
         {
-            MediaImpl *pMediaImpl = objMediaImpls.GetAt(i);
+            MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
 
             if (pMediaImpl != IMS_NULL)
             {
@@ -65,8 +62,7 @@ SessionImpl::~SessionImpl()
     }
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::Destroy()
+PRIVATE VIRTUAL void SessionImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -84,7 +80,7 @@ void SessionImpl::Destroy()
     {
         for (IMS_UINT32 i = 0; i < objMediaImpls.GetSize(); ++i)
         {
-            MediaImpl *pMediaImpl = objMediaImpls.GetAt(i);
+            MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
 
             if (pMediaImpl != IMS_NULL)
             {
@@ -99,46 +95,41 @@ void SessionImpl::Destroy()
 }
 
 // SIP_MESSAGE_MEDIATOR
-PRIVATE VIRTUAL
-void SessionImpl::SetMessageMediator(IN IMessageMediator *piMediator)
+PRIVATE VIRTUAL void SessionImpl::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
     pSession->SetMessageMediator(piMediator);
 }
 
-PRIVATE VIRTUAL
-IMessage* SessionImpl::GetNextRequest()
+PRIVATE VIRTUAL IMessage* SessionImpl::GetNextRequest()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetNextRequest();
 }
 
-PRIVATE VIRTUAL
-IMessage* SessionImpl::GetNextResponse()
+PRIVATE VIRTUAL IMessage* SessionImpl::GetNextResponse()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetNextResponse();
 }
 
-PRIVATE VIRTUAL
-IMessage* SessionImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* SessionImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetPreviousRequest(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMessage* SessionImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* SessionImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 {
     return pSession->GetPreviousResponse(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMSList<IMessage*> SessionImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMSList<IMessage*> SessionImpl::GetPreviousResponses(
+        IN IMS_SINT32 nServiceMethod) const
 {
     IMSList<IMessage*> objIMessages;
     IMSList<Message*> objResponses = pSession->GetPreviousResponses(nServiceMethod);
@@ -153,26 +144,23 @@ IMSList<IMessage*> SessionImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMetho
     return objIMessages;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> SessionImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL IMSList<AString> SessionImpl::GetRemoteUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetRemoteUserId();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Accept()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Accept()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->Accept();
 }
 
-PRIVATE VIRTUAL
-ICapabilities* SessionImpl::CreateCapabilities()
+PRIVATE VIRTUAL ICapabilities* SessionImpl::CreateCapabilities()
 {
-    Capabilities *pCapabilities = pSession->CreateCapabilities();
+    Capabilities* pCapabilities = pSession->CreateCapabilities();
 
     //---------------------------------------------------------------------------------------------
 
@@ -181,7 +169,7 @@ ICapabilities* SessionImpl::CreateCapabilities()
         return IMS_NULL;
     }
 
-    CapabilitiesImpl *pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
+    CapabilitiesImpl* pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
 
     if (pCapabilitiesImpl == IMS_NULL)
     {
@@ -195,11 +183,11 @@ ICapabilities* SessionImpl::CreateCapabilities()
     return pCapabilitiesImpl;
 }
 
-PRIVATE VIRTUAL
-IMedia* SessionImpl::CreateMedia(IN CONST AString &strType, IN IMS_SINT32 nDirection,
-        IN IMS_SINT32 nCountOfDescriptor /* = 0 */, IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMedia* SessionImpl::CreateMedia(IN CONST AString& strType,
+        IN IMS_SINT32 nDirection, IN IMS_SINT32 nCountOfDescriptor /* = 0 */,
+        IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
 {
-    Media *pMedia = pSession->CreateMedia(strType, nDirection, nCountOfDescriptor, bIMSExtension);
+    Media* pMedia = pSession->CreateMedia(strType, nDirection, nCountOfDescriptor, bIMSExtension);
 
     //---------------------------------------------------------------------------------------------
 
@@ -208,26 +196,26 @@ IMedia* SessionImpl::CreateMedia(IN CONST AString &strType, IN IMS_SINT32 nDirec
         return IMS_NULL;
     }
 
-    MediaImpl *pMediaImpl = IMS_NULL;
+    MediaImpl* pMediaImpl = IMS_NULL;
 
     switch (pMedia->GetType())
     {
-    case IMSCore::MEDIA_TYPE_STREAM:
-        pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
-        break;
+        case IMSCore::MEDIA_TYPE_STREAM:
+            pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
+            break;
 
-    case IMSCore::MEDIA_TYPE_FRAMED:
-        pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
-        break;
+        case IMSCore::MEDIA_TYPE_FRAMED:
+            pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
+            break;
 
-    case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
-        break;
+        case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+            break;
 
-    case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
-        break;
+        case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     if (pMediaImpl == IMS_NULL)
@@ -252,11 +240,10 @@ IMedia* SessionImpl::CreateMedia(IN CONST AString &strType, IN IMS_SINT32 nDirec
     return pMediaImpl->GetInterface();
 }
 
-PRIVATE VIRTUAL
-IReference* SessionImpl::CreateReference(IN CONST AString &strReferTo,
-        IN CONST AString &strReferMethod)
+PRIVATE VIRTUAL IReference* SessionImpl::CreateReference(
+        IN CONST AString& strReferTo, IN CONST AString& strReferMethod)
 {
-    Reference *pReference = pSession->CreateReference(strReferTo, strReferMethod);
+    Reference* pReference = pSession->CreateReference(strReferTo, strReferMethod);
 
     //---------------------------------------------------------------------------------------------
 
@@ -265,7 +252,7 @@ IReference* SessionImpl::CreateReference(IN CONST AString &strReferTo,
         return IMS_NULL;
     }
 
-    ReferenceImpl *pReferenceImpl = new ReferenceImpl(pReference);
+    ReferenceImpl* pReferenceImpl = new ReferenceImpl(pReference);
 
     if (pReferenceImpl == IMS_NULL)
     {
@@ -279,41 +266,40 @@ IReference* SessionImpl::CreateReference(IN CONST AString &strReferTo,
     return pReferenceImpl;
 }
 
-PRIVATE VIRTUAL
-IMSList<IMedia*> SessionImpl::GetMedia()
+PRIVATE VIRTUAL IMSList<IMedia*> SessionImpl::GetMedia()
 {
     // TODO:: later change the below code
-    const IMSList<Media*> &objMedias = pSession->GetMedia();
+    const IMSList<Media*>& objMedias = pSession->GetMedia();
 
     //---------------------------------------------------------------------------------------------
 
     if (objMedias.GetSize() > objMediaImpls.GetSize())
     {
-        MediaImpl *pMediaImpl;
+        MediaImpl* pMediaImpl;
 
         // Newly added media
         for (IMS_UINT32 i = objMediaImpls.GetSize(); i < objMedias.GetSize(); ++i)
         {
-            Media *pMedia = objMedias.GetAt(i);
+            Media* pMedia = objMedias.GetAt(i);
 
             switch (pMedia->GetType())
             {
-            case IMSCore::MEDIA_TYPE_STREAM:
-                pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
-                break;
+                case IMSCore::MEDIA_TYPE_STREAM:
+                    pMediaImpl = new StreamMediaImpl(DYNAMIC_CAST(StreamMedia*, pMedia));
+                    break;
 
-            case IMSCore::MEDIA_TYPE_FRAMED:
-                pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
-                break;
+                case IMSCore::MEDIA_TYPE_FRAMED:
+                    pMediaImpl = new FramedMediaImpl(DYNAMIC_CAST(FramedMedia*, pMedia));
+                    break;
 
-            case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
-                break;
+                case IMSCore::MEDIA_TYPE_BASIC_RELIABLE:
+                    break;
 
-            case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
-                break;
+                case IMSCore::MEDIA_TYPE_BASIC_UNRELIABLE:
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
 
             objMediaImpls.Append(pMediaImpl);
@@ -332,7 +318,7 @@ IMSList<IMedia*> SessionImpl::GetMedia()
 
     for (IMS_UINT32 i = 0; i < objMediaImpls.GetSize(); ++i)
     {
-        MediaImpl *pMediaImpl = objMediaImpls.GetAt(i);
+        MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
 
         objIMedias.Append(pMediaImpl->GetInterface());
     }
@@ -340,56 +326,50 @@ IMSList<IMedia*> SessionImpl::GetMedia()
     return objIMedias;
 }
 
-PRIVATE VIRTUAL
-ISessionDescriptor* SessionImpl::GetSessionDescriptor()
+PRIVATE VIRTUAL ISessionDescriptor* SessionImpl::GetSessionDescriptor()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetSessionDescriptor();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 SessionImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 SessionImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::HasPendingUpdate() const
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::HasPendingUpdate() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->HasPendingUpdate();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Reject()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Reject()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->Reject();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Reject(IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Reject(IN IMS_SINT32 nStatusCode)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->Reject(nStatusCode);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::RejectWithDiversion(IN CONST AString &strAlternativeUserAddress)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::RejectWithDiversion(
+        IN CONST AString& strAlternativeUserAddress)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->RejectWithDiversion(strAlternativeUserAddress);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::RemoveMedia(IN IMedia *piMedia)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::RemoveMedia(IN IMedia* piMedia)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -403,7 +383,7 @@ IMS_RESULT SessionImpl::RemoveMedia(IN IMedia *piMedia)
 
     for (i = 0; i < objMediaImpls.GetSize(); ++i)
     {
-        const MediaImpl *pMediaImpl = objMediaImpls.GetAt(i);
+        const MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
 
         if (pMediaImpl->Equals(piMedia))
         {
@@ -417,7 +397,7 @@ IMS_RESULT SessionImpl::RemoveMedia(IN IMedia *piMedia)
         return IMS_FAILURE;
     }
 
-    MediaImpl *pMediaImpl = objMediaImpls.GetAt(i);
+    MediaImpl* pMediaImpl = objMediaImpls.GetAt(i);
 
     if (pSession->RemoveMedia(pMediaImpl->GetMedia()) != IMS_SUCCESS)
     {
@@ -427,8 +407,7 @@ IMS_RESULT SessionImpl::RemoveMedia(IN IMedia *piMedia)
 
     IMS_SINT32 nState = piMedia->GetState();
 
-    if ((nState == IMedia::STATE_INACTIVE)
-        || (nState == IMedia::STATE_DELETED))
+    if ((nState == IMedia::STATE_INACTIVE) || (nState == IMedia::STATE_DELETED))
     {
         delete pMediaImpl;
 
@@ -440,41 +419,35 @@ IMS_RESULT SessionImpl::RemoveMedia(IN IMedia *piMedia)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Restore()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Restore()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->Restore();
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetListener(IN ISessionListener *piListener)
+PRIVATE VIRTUAL void SessionImpl::SetListener(IN ISessionListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Start()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Start()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->Start();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Terminate()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Terminate()
 {
-
     //---------------------------------------------------------------------------------------------
 
     return pSession->Terminate();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::Update()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::Update()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -483,19 +456,18 @@ IMS_RESULT SessionImpl::Update()
 
 //// IMS extensions
 
-PRIVATE VIRTUAL
-ISubscription* SessionImpl::CreateSubscription(IN CONST AString &strEvent)
+PRIVATE VIRTUAL ISubscription* SessionImpl::CreateSubscription(IN CONST AString& strEvent)
 {
     //---------------------------------------------------------------------------------------------
 
-    Subscription *pSubscription = pSession->CreateSubscription(strEvent);
+    Subscription* pSubscription = pSession->CreateSubscription(strEvent);
 
     if (pSubscription == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SubscriptionImpl *pSubscriptionImpl = new SubscriptionImpl(pSubscription);
+    SubscriptionImpl* pSubscriptionImpl = new SubscriptionImpl(pSubscription);
 
     if (pSubscriptionImpl == IMS_NULL)
     {
@@ -509,191 +481,169 @@ ISubscription* SessionImpl::CreateSubscription(IN CONST AString &strEvent)
     return pSubscriptionImpl;
 }
 
-PRIVATE VIRTUAL
-ISipClientConnection* SessionImpl::CreateTransaction(IN CONST SipMethod &objMethod)
+PRIVATE VIRTUAL ISipClientConnection* SessionImpl::CreateTransaction(IN CONST SipMethod& objMethod)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->CreateTransaction(objMethod);
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 SessionImpl::GetConfiguration() const
+PRIVATE VIRTUAL IMS_SINT32 SessionImpl::GetConfiguration() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetConfiguration();
 }
 
-PRIVATE VIRTUAL
-const ISipHeader* SessionImpl::GetContactHeader() const
+PRIVATE VIRTUAL const ISipHeader* SessionImpl::GetContactHeader() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetContactHeader();
 }
 
-PRIVATE VIRTUAL
-const Replaces* SessionImpl::GetReplaces() const
+PRIVATE VIRTUAL const Replaces* SessionImpl::GetReplaces() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetReplaces();
 }
 
-PRIVATE VIRTUAL
-const AString& SessionImpl::GetSessionId() const
+PRIVATE VIRTUAL const AString& SessionImpl::GetSessionId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetSessionId();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 SessionImpl::GetTerminationReason() const
+PRIVATE VIRTUAL IMS_SINT32 SessionImpl::GetTerminationReason() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->GetTerminationReason();
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::IsFinalResponseReceivedForInitialInviteRequest() const
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::IsFinalResponseReceivedForInitialInviteRequest() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->IsFinalResponseReceivedForInitialInviteRequest();
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::IsReliableProvResponseSupported() const
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::IsReliableProvResponseSupported() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->IsReliableProvResponseSupported();
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::IsSDPNegotiationAllowedForNonRPR() const
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::IsSDPNegotiationAllowedForNonRPR() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->IsSDPNegotiationAllowedForNonRPR();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::RejectEx(IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReasonPhrase /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::RejectEx(
+        IN IMS_SINT32 nStatusCode, IN CONST AString& strReasonPhrase /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->RejectEx(nStatusCode, strReasonPhrase);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::RespondToEarlyUpdate(IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReason /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::RespondToEarlyUpdate(
+        IN IMS_SINT32 nStatusCode, IN CONST AString& strReason /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->RespondToEarlyUpdate(nStatusCode, strReason);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::RespondToPRAck(IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReason /* = AString::ConstNull() */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::RespondToPRAck(
+        IN IMS_SINT32 nStatusCode, IN CONST AString& strReason /* = AString::ConstNull() */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->RespondToPRAck(nStatusCode, strReason);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SendAck()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SendAck()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SendAck();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SendPRAck()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SendPRAck()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SendPRAck();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReason /* = AString::ConstNull() */, IN IMS_SINT32 nFlags /* = 0 */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
+        IN CONST AString& strReason /* = AString::ConstNull() */, IN IMS_SINT32 nFlags /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SendProvisionalResponse(nStatusCode, strReason, nFlags);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SendRPR(IN IMS_SINT32 nStatusCode,
-        IN CONST AString &strReason /* = AString::ConstNull() */,
-        IN IMS_BOOL bSDP /* = IMS_TRUE */, IN IMS_SINT32 nFlags /* = 0 */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SendRPR(IN IMS_SINT32 nStatusCode,
+        IN CONST AString& strReason /* = AString::ConstNull() */, IN IMS_BOOL bSDP /* = IMS_TRUE */,
+        IN IMS_SINT32 nFlags /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SendRPR(nStatusCode, strReason, bSDP, nFlags);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SetCallerPreference(IN CONST IMSList<AString> &objCallerPreference)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SetCallerPreference(
+        IN CONST IMSList<AString>& objCallerPreference)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SetCallerPreference(objCallerPreference);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetConfiguration(IN IMS_SINT32 nConfigValue)
+PRIVATE VIRTUAL void SessionImpl::SetConfiguration(IN IMS_SINT32 nConfigValue)
 {
     //---------------------------------------------------------------------------------------------
 
     pSession->SetConfiguration(nConfigValue);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::SetContactParameter(IN CONST AString &strParameter,
-        IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::SetContactParameter(
+        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SetContactParameter(strParameter, nOperation);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
+PRIVATE VIRTUAL void SessionImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SetImplicitRoutingRequired(bFlag);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetReasonForCallTermination(IN IMS_SINT32 nReason)
+PRIVATE VIRTUAL void SessionImpl::SetReasonForCallTermination(IN IMS_SINT32 nReason)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->SetReasonForCallTermination(nReason);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetRefreshListener(IN IRefreshListener *piListener)
+PRIVATE VIRTUAL void SessionImpl::SetRefreshListener(IN IRefreshListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     pSession->SetRefreshListener(piListener);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
+PRIVATE VIRTUAL void SessionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
         IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
 {
     //---------------------------------------------------------------------------------------------
@@ -701,24 +651,22 @@ void SessionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
     pSession->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLT, nValueGT);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::TerminateEx(IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE */)
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::TerminateEx(
+        IN IMS_BOOL bTerminateMethodBYE /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->TerminateEx(bTerminateMethodBYE);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::UpdateEarlyMedia()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::UpdateEarlyMedia()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSession->UpdateEarlyMedia();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID */,
         IN IMS_BOOL bSessionRefresh /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
@@ -727,27 +675,23 @@ IMS_RESULT SessionImpl::UpdateEx(IN IMS_SINT32 nMethod /* = SipMethod::INVALID *
 }
 
 // REFUSE_SDP_OFFER_ANSWER_EXCHANGE {
-PRIVATE VIRTUAL
-IMS_RESULT SessionImpl::CreateFailureSdp()
+PRIVATE VIRTUAL IMS_RESULT SessionImpl::CreateFailureSdp()
 {
     return pSession->CreateFailureSdp();
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::DestroyFailureSdp()
+PRIVATE VIRTUAL void SessionImpl::DestroyFailureSdp()
 {
     pSession->DestroyFailureSdp();
 }
 
-PRIVATE VIRTUAL
-ISessionParameter* SessionImpl::GetFailureSdp() const
+PRIVATE VIRTUAL ISessionParameter* SessionImpl::GetFailureSdp() const
 {
     return pSession->GetFailureSdp();
 }
 // }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_Alerting(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_Alerting(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -766,8 +710,8 @@ void SessionImpl::OnSession_Alerting(IN Session *pSession)
     piListener->SessionAlerting(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_ReferenceReceived(IN Session *pSession, IN Reference *pReference)
+PRIVATE VIRTUAL void SessionImpl::OnSession_ReferenceReceived(
+        IN Session* pSession, IN Reference* pReference)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -783,7 +727,7 @@ void SessionImpl::OnSession_ReferenceReceived(IN Session *pSession, IN Reference
         return;
     }
 
-    ReferenceImpl *pReferenceImpl = new ReferenceImpl(pReference);
+    ReferenceImpl* pReferenceImpl = new ReferenceImpl(pReference);
 
     if (pReferenceImpl == IMS_NULL)
     {
@@ -794,8 +738,7 @@ void SessionImpl::OnSession_ReferenceReceived(IN Session *pSession, IN Reference
     piListener->SessionReferenceReceived(this, pReferenceImpl);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_Started(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_Started(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -817,8 +760,7 @@ void SessionImpl::OnSession_Started(IN Session *pSession)
     UpdateVirtualSession(IMS_NULL);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_StartFailed(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_StartFailed(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -837,8 +779,7 @@ void SessionImpl::OnSession_StartFailed(IN Session *pSession)
     piListener->SessionStartFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_Terminated(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_Terminated(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -857,8 +798,7 @@ void SessionImpl::OnSession_Terminated(IN Session *pSession)
     piListener->SessionTerminated(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_Updated(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_Updated(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -877,8 +817,7 @@ void SessionImpl::OnSession_Updated(IN Session *pSession)
     piListener->SessionUpdated(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_UpdateFailed(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_UpdateFailed(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -897,8 +836,7 @@ void SessionImpl::OnSession_UpdateFailed(IN Session *pSession)
     piListener->SessionUpdateFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_UpdateReceived(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_UpdateReceived(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -917,8 +855,7 @@ void SessionImpl::OnSession_UpdateReceived(IN Session *pSession)
     piListener->SessionUpdateReceived(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl:: OnSession_CancelDelivered(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_CancelDelivered(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -937,8 +874,7 @@ void SessionImpl:: OnSession_CancelDelivered(IN Session *pSession)
     piListener->SessionCancelDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_CancelDeliveryFailed(IN Session *pSession)
+PRIVATE VIRTUAL void SessionImpl::OnSession_CancelDeliveryFailed(IN Session* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -957,9 +893,8 @@ void SessionImpl::OnSession_CancelDeliveryFailed(IN Session *pSession)
     piListener->SessionCancelDeliveryFailed(this);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::OnSession_ForkedResponseReceived(IN Session *pSession,
-        IN Session *pForkedSession)
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::OnSession_ForkedResponseReceived(
+        IN Session* pSession, IN Session* pForkedSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -975,7 +910,7 @@ IMS_BOOL SessionImpl::OnSession_ForkedResponseReceived(IN Session *pSession,
         return IMS_FALSE;
     }
 
-    SessionEx *pSessionEx = DYNAMIC_CAST(SessionEx*, pForkedSession);
+    SessionEx* pSessionEx = DYNAMIC_CAST(SessionEx*, pForkedSession);
 
     if (pSessionEx == IMS_NULL)
     {
@@ -983,7 +918,7 @@ IMS_BOOL SessionImpl::OnSession_ForkedResponseReceived(IN Session *pSession,
         return IMS_FALSE;
     }
 
-    SessionImpl *pForkedSessionImpl = new SessionImpl(pSessionEx);
+    SessionImpl* pForkedSessionImpl = new SessionImpl(pSessionEx);
 
     if (pForkedSessionImpl == IMS_NULL)
     {
@@ -996,9 +931,8 @@ IMS_BOOL SessionImpl::OnSession_ForkedResponseReceived(IN Session *pSession,
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSession_ProvisionalResponseReceived(IN Session *pSession,
-        IN IMS_UINT32 nIndex /* = 0xFFFFFFFF */)
+PRIVATE VIRTUAL void SessionImpl::OnSession_ProvisionalResponseReceived(
+        IN Session* pSession, IN IMS_UINT32 nIndex /* = 0xFFFFFFFF */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1019,9 +953,8 @@ void SessionImpl::OnSession_ProvisionalResponseReceived(IN Session *pSession,
     piListener->SessionProvisionalResponseReceived(this, nIndex);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SessionImpl::OnSession_TransactionReceived(IN Session *pSession,
-        IN ISipServerConnection *piSSC)
+PRIVATE VIRTUAL IMS_BOOL SessionImpl::OnSession_TransactionReceived(
+        IN Session* pSession, IN ISipServerConnection* piSSC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1042,8 +975,7 @@ IMS_BOOL SessionImpl::OnSession_TransactionReceived(IN Session *pSession,
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_EarlyMediaUpdated(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_EarlyMediaUpdated(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1062,8 +994,7 @@ void SessionImpl::OnSessionEx_EarlyMediaUpdated(IN SessionEx *pSessionEx)
     piListener->SessionEarlyMediaUpdated(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1082,8 +1013,7 @@ void SessionImpl::OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx *pSessionEx)
     piListener->SessionEarlyMediaUpdateFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1102,8 +1032,7 @@ void SessionImpl::OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx *pSessionEx)
     piListener->SessionEarlyMediaUpdateReceived(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_PRAckDelivered(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_PRAckDelivered(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1122,8 +1051,7 @@ void SessionImpl::OnSessionEx_PRAckDelivered(IN SessionEx *pSessionEx)
     piListener->SessionPRAckDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_PRAckDeliveryFailed(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_PRAckDeliveryFailed(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1142,8 +1070,7 @@ void SessionImpl::OnSessionEx_PRAckDeliveryFailed(IN SessionEx *pSessionEx)
     piListener->SessionPRAckDeliveryFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_PRAckReceived(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_PRAckReceived(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1162,8 +1089,7 @@ void SessionImpl::OnSessionEx_PRAckReceived(IN SessionEx *pSessionEx)
     piListener->SessionPRAckReceived(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_RPRDeliveryFailed(IN SessionEx *pSessionEx)
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_RPRDeliveryFailed(IN SessionEx* pSessionEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1182,8 +1108,7 @@ void SessionImpl::OnSessionEx_RPRDeliveryFailed(IN SessionEx *pSessionEx)
     piListener->SessionRPRDeliveryFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SessionImpl::OnSessionEx_RPRReceived(IN SessionEx *pSessionEx,
+PRIVATE VIRTUAL void SessionImpl::OnSessionEx_RPRReceived(IN SessionEx* pSessionEx,
         IN VirtualSession* pVirtualSession, IN IMS_UINT32 nIndex /* = 0xFFFFFFFF */)
 {
     //---------------------------------------------------------------------------------------------

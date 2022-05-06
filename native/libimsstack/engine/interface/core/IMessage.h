@@ -23,7 +23,7 @@ public:
      * @param strValue The header value
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT AddHeader(IN CONST AString &strName, IN CONST AString &strValue) = 0;
+    virtual IMS_RESULT AddHeader(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Creates a new IMessageBodyPart and adds it to the message.
@@ -45,7 +45,7 @@ public:
      * @param strName The header name, in full or compact form
      * @return List of SIP header field(s).
      */
-    virtual IMSList<AString> GetHeaders(IN CONST AString &strName) const = 0;
+    virtual IMSList<AString> GetHeaders(IN CONST AString& strName) const = 0;
 
     /**
      * @brief Returns the SIP message for this IMessage.
@@ -90,27 +90,27 @@ public:
     enum
     {
         SERVICEMETHOD_INVALID = 0,
-        CAPABILITIES_QUERY = 1, ///< ICapabilities, OPTIONS
-        PAGEMESSAGE_SEND = 2, ///< IPageMessage, MESSAGE
-        PUBLICATION_PUBLISH = 3, ///< IPublication, PUBLISH
-        PUBLICATION_UNPUBLISH = 4, ///< IPublication, PUBLISH
-        REFERENCE_REFER = 5, ///< IReference, REFER
-        SESSION_START = 6, ///< ISession, INVITE
-        SESSION_UPDATE = 7, ///< ISession, INVITE or UPDATE
-        SESSION_TERMINATE = 8, ///< ISession, BYE
-        SUBSCRIPTION_SUBSCRIBE = 9, ///< ISubscription, SUBSCRIBE
-        SUBSCRIPTION_UNSUBSCRIBE = 10, ///< ISubscription, SUBSCRIBE
-        SUBSCRIPTION_POLL = 11, ///< ISubscription, SUBSCRIBE
+        CAPABILITIES_QUERY = 1,         ///< ICapabilities, OPTIONS
+        PAGEMESSAGE_SEND = 2,           ///< IPageMessage, MESSAGE
+        PUBLICATION_PUBLISH = 3,        ///< IPublication, PUBLISH
+        PUBLICATION_UNPUBLISH = 4,      ///< IPublication, PUBLISH
+        REFERENCE_REFER = 5,            ///< IReference, REFER
+        SESSION_START = 6,              ///< ISession, INVITE
+        SESSION_UPDATE = 7,             ///< ISession, INVITE or UPDATE
+        SESSION_TERMINATE = 8,          ///< ISession, BYE
+        SUBSCRIPTION_SUBSCRIBE = 9,     ///< ISubscription, SUBSCRIBE
+        SUBSCRIPTION_UNSUBSCRIBE = 10,  ///< ISubscription, SUBSCRIBE
+        SUBSCRIPTION_POLL = 11,         ///< ISubscription, SUBSCRIBE
 
         // IMS extension
-        SESSION_ACK = 12, ///< ISession, ACK
-        SESSION_PRACK, ///< ISession, PRACK
-        SESSION_EARLY_UPDATE, ///< ISession, early UPDATE
+        SESSION_ACK = 12,      ///< ISession, ACK
+        SESSION_PRACK,         ///< ISession, PRACK
+        SESSION_EARLY_UPDATE,  ///< ISession, early UPDATE
         /// CANCEL (re-INVITE only) operation during an active call
-        SESSION_CANCEL, ///< ISession, CANCEL
+        SESSION_CANCEL,  ///< ISession, CANCEL
         /// RACE_CONDITION : SESSION_UPDATE (200 OK to re-INVITE & incoming re-INVITE request)
         /// To store the previous SESSION_UPDATE message before setting a new request
-        SESSION_STALE_UPDATE, ///< ISession, stale UPDATE
+        SESSION_STALE_UPDATE,  ///< ISession, stale UPDATE
 
         SERVICEMETHOD_MAX
     };
@@ -127,4 +127,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_MESSAGE_H_
+#endif  // _INTERFACE_MESSAGE_H_

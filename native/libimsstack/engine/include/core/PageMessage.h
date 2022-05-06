@@ -16,18 +16,15 @@
 
 class IOnPageMessageListener;
 
-
-
-class PageMessage
-    : public ServiceMethod
+class PageMessage : public ServiceMethod
 {
 public:
-    explicit PageMessage(IN Service *pService);
+    explicit PageMessage(IN Service* pService);
     virtual ~PageMessage();
 
 private:
-    PageMessage(IN CONST PageMessage &objRHS);
-    PageMessage& operator=(IN CONST PageMessage &objRHS);
+    PageMessage(IN CONST PageMessage& objRHS);
+    PageMessage& operator=(IN CONST PageMessage& objRHS);
 
 public:
     // Method class
@@ -37,8 +34,8 @@ public:
     const ByteArray& GetContent() const;
     AString GetContentType() const;
     IMS_SINT32 GetState() const;
-    IMS_RESULT Send(IN CONST ByteArray &objContent, IN CONST AString &strContentType);
-    void SetListener(IN IOnPageMessageListener *piListener);
+    IMS_RESULT Send(IN CONST ByteArray& objContent, IN CONST AString& strContentType);
+    void SetListener(IN IOnPageMessageListener* piListener);
 
     //// IMS extensions
     IMS_RESULT Accept(IN IMS_SINT32 nStatusCode = 200);
@@ -46,19 +43,19 @@ public:
 
 protected:
     // Activity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 
     // Method class
     // IMS_AUTH_SIP_DIGEST
-    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection *piSCC);
+    virtual IMS_BOOL SendRequestToChallenge(IN ISipClientConnection* piSCC);
 
     // Handlie the incoming request / outgoing response message
-    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection *piSSC);
+    virtual IMS_BOOL NotifySIPRequest(IN ISipServerConnection* piSSC);
 
     // Handle to the outgoing request / incoming response message
-    virtual void NotifySIPResponse(IN ISipClientConnection *piSCC);
-    virtual void NotifySIPError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-            IN CONST AString &strMessage);
+    virtual void NotifySIPResponse(IN ISipClientConnection* piSCC);
+    virtual void NotifySIPError(
+            IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
 
 private:
     void SetState(IN IMS_SINT32 nState);
@@ -85,7 +82,7 @@ protected:
 
 private:
     IMS_SINT32 nState;
-    IOnPageMessageListener *piListener;
+    IOnPageMessageListener* piListener;
 };
 
-#endif // _PAGE_MESSAGE_H_
+#endif  // _PAGE_MESSAGE_H_

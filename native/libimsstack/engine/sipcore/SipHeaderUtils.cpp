@@ -17,8 +17,7 @@
 
 #include "SipHeaderUtils.h"
 
-PUBLIC GLOBAL
-IMS_SINT32 SipHeaderUtils::GenerateRetryAfterSeconds(IN IMS_SINT32 nExtent/* = 0*/)
+PUBLIC GLOBAL IMS_SINT32 SipHeaderUtils::GenerateRetryAfterSeconds(IN IMS_SINT32 nExtent /* = 0*/)
 {
     IMS_SINT32 nMilliSeconds = IMS_SYS_GetTimeInMicroSeconds();
 

@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_SIP_KEEP_ALIVE_LISTENER_H_
 #define _INTERFACE_SIP_KEEP_ALIVE_LISTENER_H_
 
-
-
 /*
 SIP keep-alive listener interface
 
@@ -45,4 +43,4 @@ public:
     virtual void KeepAlive_PongReceived() = 0;
 };
 
-#endif // _INTERFACE_SIP_KEEP_ALIVE_LISTENER_H_
+#endif  // _INTERFACE_SIP_KEEP_ALIVE_LISTENER_H_

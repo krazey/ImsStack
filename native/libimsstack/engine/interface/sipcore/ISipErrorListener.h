@@ -38,8 +38,8 @@ public:
      * @param strMessage Reason phrase of error\n
      *                   Implementation dependent non-localized information about the error
      */
-    virtual void Error_NotifyError(IN ISipConnection* piSc, IN IMS_SINT32 nCode,
-            IN const AString& strMessage) = 0;
+    virtual void Error_NotifyError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) = 0;
 };
 
 #endif

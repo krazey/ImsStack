@@ -37,8 +37,8 @@ public:
      * @param bOutgoing Direction of SIP message (true : outgoing, false : incoming)
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddFilter(IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
-            IN IMS_BOOL bOutgoing) = 0;
+    virtual IMS_BOOL AddFilter(
+            IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing) = 0;
 
     /**
      * @brief Removes all filters which match with the specified SIP method.
@@ -54,8 +54,8 @@ public:
      * @param nStatusCode SIP status code
      * @param bOutgoing Direction of SIP message (true : outgoing, false : incoming)
      */
-    virtual void RemoveFilter(IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
-            IN IMS_BOOL bOutgoing) = 0;
+    virtual void RemoveFilter(
+            IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing) = 0;
 
     /**
      * @brief Removes all filters.

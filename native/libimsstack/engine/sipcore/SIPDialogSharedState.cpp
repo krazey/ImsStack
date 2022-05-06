@@ -20,11 +20,9 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPDialogSharedState::SIPDialogSharedState()
-    : nSharedState(SHARED_STATE_INIT)
+SIPDialogSharedState::SIPDialogSharedState() :
+        nSharedState(SHARED_STATE_INIT)
 {
 }
 
@@ -37,7 +35,7 @@ SIPDialogSharedState::~SIPDialogSharedState()
 }
 
 PRIVATE
-IMS_BOOL SIPDialogSharedState::AddDialog(IN SIPDialogEx *pDialogEx)
+IMS_BOOL SIPDialogSharedState::AddDialog(IN SIPDialogEx* pDialogEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -49,16 +47,16 @@ IMS_BOOL SIPDialogSharedState::AddDialog(IN SIPDialogEx *pDialogEx)
     if (nSharedState == SHARED_STATE_TERMINATED)
     {
         IMS_TRACE_D("INVALID STATE : adding a dialog usage for dialog (%s)",
-                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'),
-                0, 0);
+                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
+                0);
         return IMS_FALSE;
     }
 
     if (!objDialogExs.Append(pDialogEx))
     {
         IMS_TRACE_E(0, "Adding a dialog usage for dialog (%s) failed",
-                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'),
-                0, 0);
+                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
+                0);
         return IMS_FALSE;
     }
 
@@ -74,7 +72,7 @@ IMS_BOOL SIPDialogSharedState::AddDialog(IN SIPDialogEx *pDialogEx)
 }
 
 PRIVATE
-void SIPDialogSharedState::RemoveDialog(IN SIPDialogEx *pDialogEx)
+void SIPDialogSharedState::RemoveDialog(IN SIPDialogEx* pDialogEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -86,14 +84,14 @@ void SIPDialogSharedState::RemoveDialog(IN SIPDialogEx *pDialogEx)
     if (nSharedState != SHARED_STATE_ACTIVE)
     {
         IMS_TRACE_D("INVALID STATE : removing a dialog usage for dialog (%s)",
-                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'),
-                0, 0);
+                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
+                0);
         return;
     }
 
     for (IMS_UINT32 i = 0; i < objDialogExs.GetSize(); ++i)
     {
-        SIPDialogEx *pTempDialogEx = objDialogExs.GetAt(i);
+        SIPDialogEx* pTempDialogEx = objDialogExs.GetAt(i);
 
         if (pTempDialogEx->Equals(pDialogEx))
         {
@@ -113,7 +111,7 @@ void SIPDialogSharedState::RemoveDialog(IN SIPDialogEx *pDialogEx)
 }
 
 PRIVATE
-SIPDialogEx* SIPDialogSharedState::GetDialog(IN CONST SIPMessageInfo &objMInfo)
+SIPDialogEx* SIPDialogSharedState::GetDialog(IN CONST SIPMessageInfo& objMInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -122,7 +120,7 @@ SIPDialogEx* SIPDialogSharedState::GetDialog(IN CONST SIPMessageInfo &objMInfo)
 
     for (IMS_UINT32 i = 0; i < objDialogExs.GetSize(); ++i)
     {
-        SIPDialogEx *pDialogEx = objDialogExs.GetAt(i);
+        SIPDialogEx* pDialogEx = objDialogExs.GetAt(i);
 
         if (pDialogEx->CompareTo(objMInfo))
         {
@@ -153,7 +151,7 @@ IMS_BOOL SIPDialogSharedState::HasMultipleDialogUsages() const
 
     for (IMS_UINT32 i = 0; i < objDialogExs.GetSize(); ++i)
     {
-        SIPDialogEx *pDialogEx = objDialogExs.GetAt(i);
+        SIPDialogEx* pDialogEx = objDialogExs.GetAt(i);
 
         if (pDialogEx == IMS_NULL)
         {

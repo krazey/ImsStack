@@ -17,13 +17,11 @@
 #include "SipParameter.h"
 #include "util/PreferenceHeader.h"
 
-
-
 PUBLIC
-PreferenceHeader::PreferenceHeader(IN CONST AString &strHeader)
-    : objPreferenceFeatures(IMSList<FeatureSet*>())
-    , bExplicit(IMS_FALSE)
-    , bRequire(IMS_FALSE)
+PreferenceHeader::PreferenceHeader(IN CONST AString& strHeader) :
+        objPreferenceFeatures(IMSList<FeatureSet*>()),
+        bExplicit(IMS_FALSE),
+        bRequire(IMS_FALSE)
 {
     IMSList<AString> objTokens = strHeader.Split(TextParser::CHAR_SEMICOLON);
 
@@ -31,7 +29,7 @@ PreferenceHeader::PreferenceHeader(IN CONST AString &strHeader)
 
     for (IMS_UINT32 i = 0; i < objTokens.GetSize(); ++i)
     {
-        const AString &strToken = objTokens.GetAt(i);
+        const AString& strToken = objTokens.GetAt(i);
 
         if (strToken.Equals(TextParser::CHAR_ASTERISK))
         {
@@ -49,10 +47,10 @@ PreferenceHeader::PreferenceHeader(IN CONST AString &strHeader)
 }
 
 PUBLIC
-PreferenceHeader::PreferenceHeader(IN CONST ISipHeader *piHeader)
-    : objPreferenceFeatures(IMSList<FeatureSet*>())
-    , bExplicit(IMS_FALSE)
-    , bRequire(IMS_FALSE)
+PreferenceHeader::PreferenceHeader(IN CONST ISipHeader* piHeader) :
+        objPreferenceFeatures(IMSList<FeatureSet*>()),
+        bExplicit(IMS_FALSE),
+        bRequire(IMS_FALSE)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -61,16 +59,16 @@ PreferenceHeader::PreferenceHeader(IN CONST ISipHeader *piHeader)
         return;
     }
 
-    const IMSList<SipParameter*> &objParameters = piHeader->GetParameters();
+    const IMSList<SipParameter*>& objParameters = piHeader->GetParameters();
 
     for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParameters.GetAt(i);
+        const SipParameter* pParameter = objParameters.GetAt(i);
 
         if (pParameter == IMS_NULL)
             continue;
 
-        const AString &strTag = pParameter->GetName();
+        const AString& strTag = pParameter->GetName();
 
         if (strTag.EqualsIgnoreCase(Feature::FLAG_EXPLICIT))
             bExplicit = IMS_TRUE;
@@ -84,7 +82,7 @@ PreferenceHeader::PreferenceHeader(IN CONST ISipHeader *piHeader)
             }
             else
             {
-                const AStringArray &objValues = pParameter->GetValues();
+                const AStringArray& objValues = pParameter->GetValues();
 
                 for (IMS_SINT32 j = 0; j < objValues.GetCount(); ++j)
                 {
@@ -96,10 +94,10 @@ PreferenceHeader::PreferenceHeader(IN CONST ISipHeader *piHeader)
 }
 
 PUBLIC
-PreferenceHeader::PreferenceHeader(IN IMS_BOOL bExplicit_, IN IMS_BOOL bRequire_)
-    : objPreferenceFeatures(IMSList<FeatureSet*>())
-    , bExplicit(bExplicit_)
-    , bRequire(bRequire_)
+PreferenceHeader::PreferenceHeader(IN IMS_BOOL bExplicit_, IN IMS_BOOL bRequire_) :
+        objPreferenceFeatures(IMSList<FeatureSet*>()),
+        bExplicit(bExplicit_),
+        bRequire(bRequire_)
 {
 }
 
@@ -110,7 +108,7 @@ PreferenceHeader::~PreferenceHeader()
 
     for (IMS_UINT32 i = 0; i < objPreferenceFeatures.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objPreferenceFeatures.GetAt(i);
+        FeatureSet* pFeatureSet = objPreferenceFeatures.GetAt(i);
 
         if (pFeatureSet != IMS_NULL)
             delete pFeatureSet;
@@ -118,9 +116,9 @@ PreferenceHeader::~PreferenceHeader()
 }
 
 PUBLIC
-IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString &strTag)
+IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString& strTag)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -139,9 +137,9 @@ IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString &strTag)
 }
 
 PUBLIC
-IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString &strTag, IN CONST AString &strValue)
+IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString& strTag, IN CONST AString& strValue)
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -160,9 +158,9 @@ IMS_BOOL PreferenceHeader::AddFeature(IN CONST AString &strTag, IN CONST AString
 }
 
 PUBLIC
-IMS_BOOL PreferenceHeader::Contains(IN CONST AString &strTag) const
+IMS_BOOL PreferenceHeader::Contains(IN CONST AString& strTag) const
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -173,9 +171,9 @@ IMS_BOOL PreferenceHeader::Contains(IN CONST AString &strTag) const
 }
 
 PUBLIC
-IMS_BOOL PreferenceHeader::Contains(IN CONST AString &strTag, IN CONST AString &strValue) const
+IMS_BOOL PreferenceHeader::Contains(IN CONST AString& strTag, IN CONST AString& strValue) const
 {
-    FeatureSet *pFeatureSet = Lookup(strTag);
+    FeatureSet* pFeatureSet = Lookup(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -221,7 +219,7 @@ AString PreferenceHeader::ToString() const
 
     for (IMS_UINT32 i = 0; i < objPreferenceFeatures.GetSize(); ++i)
     {
-        const FeatureSet *pFeatureSet = objPreferenceFeatures.GetAt(i);
+        const FeatureSet* pFeatureSet = objPreferenceFeatures.GetAt(i);
 
         strHeader.Append(TextParser::CHAR_SEMICOLON);
         strHeader.Append(pFeatureSet->ToString());
@@ -243,10 +241,10 @@ AString PreferenceHeader::ToString() const
 }
 
 PRIVATE
-IMS_BOOL PreferenceHeader::Attach(IN CONST AString &strTag,
-        IN CONST AString &strValue /* = AString::ConstNull() */)
+IMS_BOOL PreferenceHeader::Attach(
+        IN CONST AString& strTag, IN CONST AString& strValue /* = AString::ConstNull() */)
 {
-    FeatureSet *pFeatureSet = new FeatureSet(strTag);
+    FeatureSet* pFeatureSet = new FeatureSet(strTag);
 
     //---------------------------------------------------------------------------------------------
 
@@ -270,13 +268,13 @@ IMS_BOOL PreferenceHeader::Attach(IN CONST AString &strTag,
 }
 
 PRIVATE
-void PreferenceHeader::Detach(IN CONST AString &strTag)
+void PreferenceHeader::Detach(IN CONST AString& strTag)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objPreferenceFeatures.GetSize(); ++i)
     {
-        const FeatureSet *pFeatureSet = objPreferenceFeatures.GetAt(i);
+        const FeatureSet* pFeatureSet = objPreferenceFeatures.GetAt(i);
 
         if (pFeatureSet->GetTag().EqualsIgnoreCase(strTag))
         {
@@ -287,13 +285,13 @@ void PreferenceHeader::Detach(IN CONST AString &strTag)
 }
 
 PRIVATE
-FeatureSet* PreferenceHeader::Lookup(IN CONST AString &strTag) const
+FeatureSet* PreferenceHeader::Lookup(IN CONST AString& strTag) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objPreferenceFeatures.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objPreferenceFeatures.GetAt(i);
+        FeatureSet* pFeatureSet = objPreferenceFeatures.GetAt(i);
 
         if (pFeatureSet->GetTag().EqualsIgnoreCase(strTag))
         {
@@ -306,7 +304,7 @@ FeatureSet* PreferenceHeader::Lookup(IN CONST AString &strTag) const
 }
 
 PRIVATE
-void PreferenceHeader::ExtractProperties(IN CONST AString &strFeatureSet)
+void PreferenceHeader::ExtractProperties(IN CONST AString& strFeatureSet)
 {
     AString strTag;
     AString strValue;

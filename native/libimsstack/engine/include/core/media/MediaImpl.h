@@ -17,23 +17,17 @@
 
 class Media;
 
-
-
 class MediaImpl
 {
 public:
-    inline MediaImpl()
-    {
-    }
+    inline MediaImpl() {}
 
-    inline virtual ~MediaImpl()
-    {
-    }
+    inline virtual ~MediaImpl() {}
 
 public:
-    virtual IMS_BOOL Equals(IN CONST IMedia *piMedia) const = 0;
+    virtual IMS_BOOL Equals(IN CONST IMedia* piMedia) const = 0;
     virtual IMedia* GetInterface() = 0;
     virtual Media* GetMedia() const = 0;
 };
 
-#endif // _MEDIA_IMPL_H_
+#endif  // _MEDIA_IMPL_H_

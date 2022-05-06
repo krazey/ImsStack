@@ -17,8 +17,6 @@
 #include "util/EventPackage.h"
 #include "SIPHeaderProperty.h"
 
-
-
 /*
 This class defines a state & behavior for a published event state.
 
@@ -34,28 +32,28 @@ public:
     virtual ~PubState();
 
 private:
-    PubState(IN CONST PubState &objRHS);
-    PubState& operator=(IN CONST PubState &objRHS);
+    PubState(IN CONST PubState& objRHS);
+    PubState& operator=(IN CONST PubState& objRHS);
 
 public:
     void Clear();
-    IMS_BOOL CreateEventPackage(IN CONST AString &strEvent);
+    IMS_BOOL CreateEventPackage(IN CONST AString& strEvent);
     IMS_SINT32 GetDuration() const;
     const AString& GetEntityTag() const;
     EventPackage* GetEventPackage();
     IMS_SINT32 GetOperation() const;
     IMS_SINT32 GetState() const;
     IMS_BOOL IsTerminated() const;
-    IMS_BOOL SetHeaders(IN_OUT ISipMessage *&piSIPMsg);
+    IMS_BOOL SetHeaders(IN_OUT ISipMessage*& piSIPMsg);
     void SetOperation(IN IMS_SINT32 nOperation);
-    IMS_BOOL UpdateState(IN CONST ISipMessage *piSIPMsg);
+    IMS_BOOL UpdateState(IN CONST ISipMessage* piSIPMsg);
     IMS_BOOL UpdateStateOnTxnTimerExpired();
 
 private:
     void SetState(IN IMS_SINT32 nState);
-    void StoreMessage(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnPUBLISHRequest(IN CONST ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnPUBLISHResponse(IN CONST ISipMessage *piSIPMsg);
+    void StoreMessage(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnPUBLISHRequest(IN CONST ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnPUBLISHResponse(IN CONST ISipMessage* piSIPMsg);
 
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
@@ -81,7 +79,10 @@ public:
         OPERATION_REMOVE
     };
 
-    enum { NO_EXPIRES = (-1) };
+    enum
+    {
+        NO_EXPIRES = (-1)
+    };
 
     static const SIPHeaderProperty RESTRICTED_HEADER_PROPERTIES[];
 
@@ -108,7 +109,7 @@ private:
     AString strEntityTag;
 
     // Manages an initial SIP message for refresh/removal operation
-    ISipMessage *piSIPMsg;
+    ISipMessage* piSIPMsg;
 };
 
-#endif // _PUB_STATE_H_
+#endif  // _PUB_STATE_H_

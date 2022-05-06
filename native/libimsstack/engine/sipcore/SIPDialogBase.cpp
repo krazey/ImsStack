@@ -12,26 +12,21 @@
 
 #include "SIPDialogBase.h"
 
-
-
 PUBLIC
-SIPDialogBase::SIPDialogBase(IN SIPDialogState *pDState_)
-    : RCObject()
-    , pDState(pDState_)
+SIPDialogBase::SIPDialogBase(IN SIPDialogState* pDState_) :
+        RCObject(),
+        pDState(pDState_)
 {
 }
 
 PUBLIC
-SIPDialogBase::SIPDialogBase(IN CONST SIPDialogBase &objRHS)
-    : RCObject(objRHS)
-    , pDState(objRHS.pDState)
+SIPDialogBase::SIPDialogBase(IN CONST SIPDialogBase& objRHS) :
+        RCObject(objRHS),
+        pDState(objRHS.pDState)
 {
 }
 
-PUBLIC VIRTUAL
-SIPDialogBase::~SIPDialogBase()
-{
-}
+PUBLIC VIRTUAL SIPDialogBase::~SIPDialogBase() {}
 
 /*
 
@@ -39,7 +34,7 @@ Remarks
 
 */
 PUBLIC
-SIPDialogBase& SIPDialogBase::operator=(IN CONST SIPDialogBase &objRHS)
+SIPDialogBase& SIPDialogBase::operator=(IN CONST SIPDialogBase& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -79,8 +74,7 @@ IMS_SINT32 SIPDialogBase::GetState() const
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_BOOL SIPDialogBase::IsDialogCreatable(IN CONST SipMethod &objMethod)
+PUBLIC GLOBAL IMS_BOOL SIPDialogBase::IsDialogCreatable(IN CONST SipMethod& objMethod)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -88,9 +82,8 @@ IMS_BOOL SIPDialogBase::IsDialogCreatable(IN CONST SipMethod &objMethod)
         return IMS_FALSE;
 
     // Check if the current method can create a dialog or not
-    if (!objMethod.Equals(SipMethod::INVITE)
-            && !objMethod.Equals(SipMethod::SUBSCRIBE)
-            && !objMethod.Equals(SipMethod::REFER)
+    if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
+            !objMethod.Equals(SipMethod::REFER)
             /* && !objMethod.Equals(SipMethod::NOTIFY) */)
     {
         return IMS_FALSE;

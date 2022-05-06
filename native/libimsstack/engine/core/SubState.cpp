@@ -22,40 +22,28 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON[] = "reason";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_DEACTIVATED[] = "deactivated";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_PROBATION[] = "probation";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_REJECTED[] = "rejected";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_TIMEOUT[] = "timeout";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_GIVEUP[] = "giveup";
-PUBLIC GLOBAL
-const IMS_CHAR SubState::STR_REASON_NORESOURCE[] = "noresource";
-
-
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON[] = "reason";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_DEACTIVATED[] = "deactivated";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_PROBATION[] = "probation";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_REJECTED[] = "rejected";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_TIMEOUT[] = "timeout";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_GIVEUP[] = "giveup";
+PUBLIC GLOBAL const IMS_CHAR SubState::STR_REASON_NORESOURCE[] = "noresource";
 
 PUBLIC
-SubState::SubState()
-    : nState(STATE_INIT)
-    , nOperation(NO_OPERATION)
-    , nConfigValue(CONFIG_NONE)
-    , nSubscriptionDuration(NO_EXPIRES)
-    , nSubStateValue(SUB_STATE_INIT)
-    , bFlag_SubscriptionDurationUpdated(IMS_FALSE)
-    , bFlag_InstantSubscription(IMS_FALSE)
-    , piSIPMsg(IMS_NULL)
+SubState::SubState() :
+        nState(STATE_INIT),
+        nOperation(NO_OPERATION),
+        nConfigValue(CONFIG_NONE),
+        nSubscriptionDuration(NO_EXPIRES),
+        nSubStateValue(SUB_STATE_INIT),
+        bFlag_SubscriptionDurationUpdated(IMS_FALSE),
+        bFlag_InstantSubscription(IMS_FALSE),
+        piSIPMsg(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SubState::~SubState()
+PUBLIC VIRTUAL SubState::~SubState()
 {
     if (piSIPMsg != IMS_NULL)
     {
@@ -63,8 +51,7 @@ SubState::~SubState()
     }
 }
 
-PUBLIC VIRTUAL
-void SubState::Clear()
+PUBLIC VIRTUAL void SubState::Clear()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -88,11 +75,11 @@ void SubState::Clear()
 }
 
 PUBLIC
-IMS_BOOL SubState::CreateEventPackage(IN CONST AString &strEvent)
+IMS_BOOL SubState::CreateEventPackage(IN CONST AString& strEvent)
 {
     //---------------------------------------------------------------------------------------------
 
-    //1 : Load an event package from configuration
+    // 1 : Load an event package from configuration
 
     objEventPackage.SetEvent(strEvent);
 
@@ -213,14 +200,13 @@ void SubState::SetOperation(IN IMS_SINT32 nOperation)
 {
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("SubState :: %s to %s",
-            OperationToString(this->nOperation), OperationToString(nOperation), 0);
+    IMS_TRACE_I("SubState :: %s to %s", OperationToString(this->nOperation),
+            OperationToString(nOperation), 0);
 
     this->nOperation = nOperation;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader *piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader* piHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -234,7 +220,7 @@ IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader *piHeader)
         return NO_EXPIRES;
     }
 
-    const SipParameter *pParameter = piHeader->GetParameter(Sip::STR_EXPIRES);
+    const SipParameter* pParameter = piHeader->GetParameter(Sip::STR_EXPIRES);
 
     if (pParameter == IMS_NULL)
     {
@@ -244,7 +230,7 @@ IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader *piHeader)
     IMS_BOOL bOK = IMS_FALSE;
     IMS_SINT32 nExpires = NO_EXPIRES;
 
-    //4 Make up for test equipment's fault (e.g. Anite)
+    // 4 Make up for test equipment's fault (e.g. Anite)
     if (pParameter->GetValue().Contains(TextParser::CHAR_DQUOT))
     {
         AString strValue = TextParser::TrimDQUOT(pParameter->GetValue());
@@ -263,8 +249,7 @@ IMS_SINT32 SubState::ExtractExpiresParameter(IN CONST ISipHeader *piHeader)
     return nExpires;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader *piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader* piHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -278,14 +263,14 @@ IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader *piHeader)
         return REASON_NONE;
     }
 
-    const SipParameter *pParameter = piHeader->GetParameter(STR_REASON);
+    const SipParameter* pParameter = piHeader->GetParameter(STR_REASON);
 
     if (pParameter == IMS_NULL)
     {
         return REASON_NONE;
     }
 
-    const AString &strReason = pParameter->GetValue();
+    const AString& strReason = pParameter->GetValue();
 
     if (strReason.EqualsIgnoreCase(STR_REASON_NORESOURCE))
         return REASON_NORESOURCE;
@@ -303,8 +288,7 @@ IMS_SINT32 SubState::ExtractReasonParameter(IN CONST ISipHeader *piHeader)
     return REASON_NONE;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader *piHeader)
+PUBLIC GLOBAL IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader* piHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -318,7 +302,7 @@ IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader *piHeader)
         return SUB_STATE_INIT;
     }
 
-    const AString &strSubState = piHeader->GetValue();
+    const AString& strSubState = piHeader->GetValue();
 
     if (strSubState.EqualsIgnoreCase(Sip::STR_ACTIVE))
     {
@@ -336,50 +320,48 @@ IMS_SINT32 SubState::ExtractSubStateValue(IN CONST ISipHeader *piHeader)
     return SUB_STATE_INIT;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SubState::GetSubStateFromSubscriptionState(IN IMS_SINT32 nSubState)
+PUBLIC GLOBAL IMS_SINT32 SubState::GetSubStateFromSubscriptionState(IN IMS_SINT32 nSubState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nSubState)
     {
-    case ISubscriptionState::STATE_ACTIVE:
-        return SUB_STATE_ACTIVE;
-    case ISubscriptionState::STATE_PENDING:
-        return SUB_STATE_PENDING;
-    case ISubscriptionState::STATE_TERMINATED:
-        return SUB_STATE_TERMINATED;
-    default:
-        return SUB_STATE_INIT;
+        case ISubscriptionState::STATE_ACTIVE:
+            return SUB_STATE_ACTIVE;
+        case ISubscriptionState::STATE_PENDING:
+            return SUB_STATE_PENDING;
+        case ISubscriptionState::STATE_TERMINATED:
+            return SUB_STATE_TERMINATED;
+        default:
+            return SUB_STATE_INIT;
     }
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SubState::GetReasonFromSubscriptionState(IN IMS_SINT32 nReason)
+PUBLIC GLOBAL IMS_SINT32 SubState::GetReasonFromSubscriptionState(IN IMS_SINT32 nReason)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nReason)
     {
-    case ISubscriptionState::REASON_DEACTIVATED:
-        return REASON_DEACTIVATED;
-    case ISubscriptionState::REASON_PROBATION:
-        return REASON_PROBATION;
-    case ISubscriptionState::REASON_REJECTED:
-        return REASON_REJECTED;
-    case ISubscriptionState::REASON_TIMEOUT:
-        return REASON_TIMEOUT;
-    case ISubscriptionState::REASON_GIVEUP:
-        return REASON_GIVEUP;
-    case ISubscriptionState::REASON_NORESOURCE:
-        return REASON_NORESOURCE;
-    default:
-        return REASON_NONE;
+        case ISubscriptionState::REASON_DEACTIVATED:
+            return REASON_DEACTIVATED;
+        case ISubscriptionState::REASON_PROBATION:
+            return REASON_PROBATION;
+        case ISubscriptionState::REASON_REJECTED:
+            return REASON_REJECTED;
+        case ISubscriptionState::REASON_TIMEOUT:
+            return REASON_TIMEOUT;
+        case ISubscriptionState::REASON_GIVEUP:
+            return REASON_GIVEUP;
+        case ISubscriptionState::REASON_NORESOURCE:
+            return REASON_NORESOURCE;
+        default:
+            return REASON_NONE;
     }
 }
 
-PROTECTED VIRTUAL
-const SIPHeaderProperty* SubState::GetRestrictedHeaders(OUT IMS_UINT32 &nCount) const
+PROTECTED VIRTUAL const SIPHeaderProperty* SubState::GetRestrictedHeaders(
+        OUT IMS_UINT32& nCount) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -413,16 +395,15 @@ void SubState::SetInstantSubscription(IN IMS_BOOL bInstantSubscription)
 }
 
 PROTECTED
-void SubState::SetState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nState)
+void SubState::SetState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nState)
 {
     AString strCallId = piSIPMsg->GetHeader(ISipHeader::CALL_ID);
 
     //-----------------------------------------------------------------------------------------
 
-    (void) strCallId;
+    (void)strCallId;
 
-    IMS_TRACE_I("SUB_STATE : %s - %s >> %s",
-            SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+    IMS_TRACE_I("SUB_STATE : %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
             StateToString(this->nState), StateToString(nState));
 
     this->nState = nState;
@@ -437,7 +418,7 @@ void SubState::SetSubState(IN IMS_SINT32 nSubState)
 }
 
 PROTECTED
-void SubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
+void SubState::StoreMessage(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -457,7 +438,7 @@ void SubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
 
         for (IMS_UINT32 i = 0; i < nCount; ++i)
         {
-            const SIPHeaderProperty *pProperty = &(pHeaderProperties[i]);
+            const SIPHeaderProperty* pProperty = &(pHeaderProperties[i]);
 
             if (pProperty->bSingleHeader)
             {
@@ -481,8 +462,8 @@ void SubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
                 }
                 else
                 {
-                    nHeaderCount = this->piSIPMsg->GetHeaderCount(pProperty->nType,
-                                        pProperty->pszName);
+                    nHeaderCount =
+                            this->piSIPMsg->GetHeaderCount(pProperty->nType, pProperty->pszName);
 
                     for (IMS_SINT32 j = 0; j < nHeaderCount; ++j)
                     {
@@ -494,48 +475,46 @@ void SubState::StoreMessage(IN CONST ISipMessage *piSIPMsg)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* SubState::OperationToString(IN IMS_SINT32 nOperation)
+PRIVATE GLOBAL const IMS_CHAR* SubState::OperationToString(IN IMS_SINT32 nOperation)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nOperation)
     {
-    case NO_OPERATION:
-        return "NO_OPERATION";
-    case OPERATION_CREATE:
-        return "OPERATION_CREATE";
-    case OPERATION_REFRESH:
-        return "OPERATION_REFRESH";
-    case OPERATION_FETCH:
-        return "OPERATION_FETCH";
-    case OPERATION_REMOVE:
-        return "OPERATION_REMOVE";
-    case OPERATION_IMPLICIT_REFRESH:
-        return "OPERATION_IMPLICIT_REFRESH";
-    default:
-        return "__INVALID__";
+        case NO_OPERATION:
+            return "NO_OPERATION";
+        case OPERATION_CREATE:
+            return "OPERATION_CREATE";
+        case OPERATION_REFRESH:
+            return "OPERATION_REFRESH";
+        case OPERATION_FETCH:
+            return "OPERATION_FETCH";
+        case OPERATION_REMOVE:
+            return "OPERATION_REMOVE";
+        case OPERATION_IMPLICIT_REFRESH:
+            return "OPERATION_IMPLICIT_REFRESH";
+        default:
+            return "__INVALID__";
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* SubState::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* SubState::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_INIT:
-        return "STATE_INIT";
-    case STATE_SUBSCRIBING:
-        return "STATE_SUBSCRIBING";
-    case STATE_PENDING:
-        return "STATE_PENDING";
-    case STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    case STATE_TERMINATED:
-        return "STATE_TERMINATED";
-    default:
-        return "__INVALID__";
+        case STATE_INIT:
+            return "STATE_INIT";
+        case STATE_SUBSCRIBING:
+            return "STATE_SUBSCRIBING";
+        case STATE_PENDING:
+            return "STATE_PENDING";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case STATE_TERMINATED:
+            return "STATE_TERMINATED";
+        default:
+            return "__INVALID__";
     }
 }

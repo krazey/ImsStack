@@ -25,8 +25,7 @@
  *
  * @see ISipConnection
  */
-class ISipServerConnection :
-        public ISipConnection
+class ISipServerConnection : public ISipConnection
 {
 public:
     /**

@@ -16,12 +16,10 @@
 #include "SIPStackHeaders.h"
 #include "SIPAck.h"
 
-
-
 PUBLIC
-SIPAck::SIPAck(IN SIPClientTransactionState *pCTState_, IN IMS_SINT32 nAliveInterval)
-    : pCTState(pCTState_)
-    , piTimer(IMS_NULL)
+SIPAck::SIPAck(IN SIPClientTransactionState* pCTState_, IN IMS_SINT32 nAliveInterval) :
+        pCTState(pCTState_),
+        piTimer(IMS_NULL)
 {
     if (nAliveInterval > 0)
     {
@@ -34,8 +32,7 @@ SIPAck::SIPAck(IN SIPClientTransactionState *pCTState_, IN IMS_SINT32 nAliveInte
     }
 }
 
-PUBLIC VIRTUAL
-SIPAck::~SIPAck()
+PUBLIC VIRTUAL SIPAck::~SIPAck()
 {
     if (piTimer != IMS_NULL)
     {
@@ -53,7 +50,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPAck::IsSameTransaction(IN SipTxnKey *pstTxnKey) const
+IMS_BOOL SIPAck::IsSameTransaction(IN SipTxnKey* pstTxnKey) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -93,7 +90,7 @@ void SIPAck::RetransmitMessage()
         return;
     }
 
-    (void) pCTState->RetransmitMessage();
+    (void)pCTState->RetransmitMessage();
 }
 
 /*
@@ -101,8 +98,7 @@ void SIPAck::RetransmitMessage()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPAck::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void SIPAck::Timer_TimerExpired(IN ITimer* piTimer)
 {
     //---------------------------------------------------------------------------------------------
 

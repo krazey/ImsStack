@@ -19,7 +19,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionAlerting(IN ISession *piSession) = 0;
+    virtual void SessionAlerting(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that a reference request has been received
@@ -30,7 +30,7 @@ public:
      * @param piSession The concerned ISession
      * @param piReference The IReference representing the request
      */
-    virtual void SessionReferenceReceived(IN ISession *piSession, IN IReference *piReference) = 0;
+    virtual void SessionReferenceReceived(IN ISession* piSession, IN IReference* piReference) = 0;
 
     /**
      * @brief Notifies the application that the session has been established.
@@ -39,7 +39,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionStarted(IN ISession *piSession) = 0;
+    virtual void SessionStarted(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the session could not be established.
@@ -48,7 +48,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionStartFailed(IN ISession *piSession) = 0;
+    virtual void SessionStartFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the session has been terminated or that the session
@@ -56,7 +56,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionTerminated(IN ISession *piSession) = 0;
+    virtual void SessionTerminated(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the session has been updated.
@@ -65,7 +65,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionUpdated(IN ISession *piSession) = 0;
+    virtual void SessionUpdated(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the session update has been rejected.
@@ -74,7 +74,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionUpdateFailed(IN ISession *piSession) = 0;
+    virtual void SessionUpdateFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the remote endpoint adds more media components to
@@ -86,7 +86,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionUpdateReceived(IN ISession *piSession) = 0;
+    virtual void SessionUpdateReceived(IN ISession* piSession) = 0;
 
     //// IMS extensions
 
@@ -96,14 +96,14 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionCancelDelivered(IN ISession *piSession) = 0;
+    virtual void SessionCancelDelivered(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the CANCEL operation is failed during an active call.
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionCancelDeliveryFailed(IN ISession *piSession) = 0;
+    virtual void SessionCancelDeliveryFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the UPDATE was successfully delivered
@@ -111,7 +111,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionEarlyMediaUpdated(IN ISession *piSession) = 0;
+    virtual void SessionEarlyMediaUpdated(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the UPDATE was not successfully delivered
@@ -119,7 +119,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionEarlyMediaUpdateFailed(IN ISession *piSession) = 0;
+    virtual void SessionEarlyMediaUpdateFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -127,7 +127,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionEarlyMediaUpdateReceived(IN ISession *piSession) = 0;
+    virtual void SessionEarlyMediaUpdateReceived(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the forked response is received.
@@ -135,8 +135,8 @@ public:
      * @param piSession The concerned ISession
      * @param piForkedSession The new ISession which contains a forked response
      */
-    virtual void SessionForkedResponseReceived(IN ISession *piSession,
-            IN ISession *piForkedSession) = 0;
+    virtual void SessionForkedResponseReceived(
+            IN ISession* piSession, IN ISession* piForkedSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -144,7 +144,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckDelivered(IN ISession *piSession) = 0;
+    virtual void SessionPRAckDelivered(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -152,7 +152,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckDeliveryFailed(IN ISession *piSession) = 0;
+    virtual void SessionPRAckDeliveryFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the acknowledgement of the provisional response
@@ -160,7 +160,7 @@ public:
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionPRAckReceived(IN ISession *piSession) = 0;
+    virtual void SessionPRAckReceived(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the provisional response is received.
@@ -169,15 +169,15 @@ public:
      * @param nIndex Index of the current response message\n
      *               (0xFFFFFFFF : most recent message)
      */
-    virtual void SessionProvisionalResponseReceived(IN ISession *piSession,
-            IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+    virtual void SessionProvisionalResponseReceived(
+            IN ISession* piSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
 
     /**
      * @brief Notifies the application that the reliable provisional response delivery is failed.
      *
      * @param piSession The concerned ISession
      */
-    virtual void SessionRPRDeliveryFailed(IN ISession *piSession) = 0;
+    virtual void SessionRPRDeliveryFailed(IN ISession* piSession) = 0;
 
     /**
      * @brief Notifies the application that the reliable provisional response is received.
@@ -186,7 +186,7 @@ public:
      * @param nIndex Index of the current response message\n
      *               (0xFFFFFFFF : most recent message)
      */
-    virtual void SessionRPRReceived(IN ISession *piSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+    virtual void SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
 
     /**
      * @brief Notifies the application that the new SIP transaction
@@ -195,8 +195,8 @@ public:
      * @param piSession The concerned ISession
      * @param piSSC New ISipServerConnection which contains an incoming SIP request
      */
-    virtual void SessionTransactionReceived(IN ISession *piSession,
-            IN ISipServerConnection *piSSC) = 0;
+    virtual void SessionTransactionReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_SESSION_LISTENER_H_
+#endif  // _INTERFACE_SESSION_LISTENER_H_

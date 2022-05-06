@@ -23,22 +23,20 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PRIVATE
-RegInfoManager::RegInfoManager()
-    : piLock(IMS_NULL)
-    , objParsers(IMSList<RegInfoParser*>())
-    , objRegInfos(IMSMap<RegKey, RegInfo*>())
+RegInfoManager::RegInfoManager() :
+        piLock(IMS_NULL),
+        objParsers(IMSList<RegInfoParser*>()),
+        objRegInfos(IMSMap<RegKey, RegInfo*>())
 #ifdef __IMS_ASYNC_XML_PARSER__
-    , piXmlTxnProvider(IMS_NULL)
+        ,
+        piXmlTxnProvider(IMS_NULL)
 #endif
 {
     piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
-PRIVATE VIRTUAL
-RegInfoManager::~RegInfoManager()
+PRIVATE VIRTUAL RegInfoManager::~RegInfoManager()
 {
     LockGuard objLock(piLock);
 
@@ -46,7 +44,7 @@ RegInfoManager::~RegInfoManager()
     {
         for (IMS_UINT32 i = 0; i < objRegInfos.GetSize(); ++i)
         {
-            RegInfo *pRegInfo = objRegInfos.GetValueAt(i);
+            RegInfo* pRegInfo = objRegInfos.GetValueAt(i);
 
             if (pRegInfo != IMS_NULL)
             {
@@ -61,7 +59,7 @@ RegInfoManager::~RegInfoManager()
     {
         for (IMS_UINT32 i = 0; i < objParsers.GetSize(); ++i)
         {
-            RegInfoParser *pParser = objParsers.GetAt(i);
+            RegInfoParser* pParser = objParsers.GetAt(i);
 
             if (pParser != IMS_NULL)
             {
@@ -86,7 +84,7 @@ RegInfoManager::~RegInfoManager()
 PUBLIC
 IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
 {
-    RegInfo *pRegInfo = const_cast<RegInfo*>(GetRegInfo(objRegKey));
+    RegInfo* pRegInfo = const_cast<RegInfo*>(GetRegInfo(objRegKey));
 
     if (pRegInfo == IMS_NULL)
     {
@@ -94,8 +92,8 @@ IMS_BOOL RegInfoManager::CreateRegInfo(IN const RegKey& objRegKey)
 
         if (pRegInfo == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating a RegInfo(%d:%d) failed",
-                    objRegKey.GetSlotId(), objRegKey.GetFlowId(), 0);
+            IMS_TRACE_E(0, "Creating a RegInfo(%d:%d) failed", objRegKey.GetSlotId(),
+                    objRegKey.GetFlowId(), 0);
             return IMS_FALSE;
         }
 
@@ -123,7 +121,7 @@ void RegInfoManager::DestroyRegInfo(IN const RegKey& objRegKey)
         return;
     }
 
-    RegInfo *pRegInfo = objRegInfos.GetValueAt(nIndex);
+    RegInfo* pRegInfo = objRegInfos.GetValueAt(nIndex);
 
     if (pRegInfo != IMS_NULL)
     {
@@ -184,19 +182,19 @@ IMS_BOOL RegInfoManager::Initialize()
 }
 
 PUBLIC
-IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString &strRegInfo)
+IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString& strRegInfo)
 {
     if (strRegInfo.IsNULL())
     {
         return IMS_TRUE;
     }
 
-    const RegInfo *pRegInfo = GetRegInfo(objRegKey);
+    const RegInfo* pRegInfo = GetRegInfo(objRegKey);
 
     if (pRegInfo == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No matched RegInfo(%d:%d)",
-                objRegKey.GetSlotId(), objRegKey.GetFlowId(), 0);
+        IMS_TRACE_E(
+                0, "No matched RegInfo(%d:%d)", objRegKey.GetSlotId(), objRegKey.GetFlowId(), 0);
         return IMS_FALSE;
     }
 
@@ -207,13 +205,13 @@ IMS_BOOL RegInfoManager::Update(IN const RegKey& objRegKey, IN const AString &st
         return IMS_FALSE;
     }
 
-    RegInfoParser *pParser = new RegInfoParser(objRegKey, piXmlTxnProvider);
+    RegInfoParser* pParser = new RegInfoParser(objRegKey, piXmlTxnProvider);
 
 #else
 
-    RegInfoParser *pParser = new RegInfoParser(objRegKey);
+    RegInfoParser* pParser = new RegInfoParser(objRegKey);
 
-#endif // __IMS_ASYNC_XML_PARSER__
+#endif  // __IMS_ASYNC_XML_PARSER__
 
     if (pParser == IMS_NULL)
     {
@@ -246,7 +244,7 @@ void RegInfoManager::DisplayRegInfo()
 {
     for (IMS_UINT32 i = 0; i < objRegInfos.GetSize(); ++i)
     {
-        RegInfo *pRegInfo = objRegInfos.GetValueAt(i);
+        RegInfo* pRegInfo = objRegInfos.GetValueAt(i);
 
         IMS_TRACE_D("___ REG INFO (%d) -- START ___", i, 0, 0);
         pRegInfo->DisplayRegInfo();
@@ -254,10 +252,9 @@ void RegInfoManager::DisplayRegInfo()
     }
 }
 
-PUBLIC GLOBAL
-RegInfoManager* RegInfoManager::GetInstance()
+PUBLIC GLOBAL RegInfoManager* RegInfoManager::GetInstance()
 {
-    static RegInfoManager *pRegInfoMngr = IMS_NULL;
+    static RegInfoManager* pRegInfoMngr = IMS_NULL;
 
     if (pRegInfoMngr == IMS_NULL)
     {
@@ -267,11 +264,10 @@ RegInfoManager* RegInfoManager::GetInstance()
     return pRegInfoMngr;
 }
 
-PRIVATE VIRTUAL
-void RegInfoManager::RegInfoParser_ParsingCompleted(IN RegInfoParser *pParser,
-        IN IDocument *piDocument)
+PRIVATE VIRTUAL void RegInfoManager::RegInfoParser_ParsingCompleted(
+        IN RegInfoParser* pParser, IN IDocument* piDocument)
 {
-    RegInfo *pRegInfo = GetRegInfo(pParser->GetRegKey());
+    RegInfo* pRegInfo = GetRegInfo(pParser->GetRegKey());
 
     if (pRegInfo != IMS_NULL)
     {
@@ -279,18 +275,16 @@ void RegInfoManager::RegInfoParser_ParsingCompleted(IN RegInfoParser *pParser,
     }
     else
     {
-        IMS_TRACE_D("No matching RegInfo(%d:%d)",
-                pParser->GetRegKey().GetSlotId(),
+        IMS_TRACE_D("No matching RegInfo(%d:%d)", pParser->GetRegKey().GetSlotId(),
                 pParser->GetRegKey().GetFlowId(), 0);
     }
 
     RemoveRegInfoParser(pParser);
 }
 
-PRIVATE VIRTUAL
-void RegInfoManager::RegInfoParser_ParsingFailed(IN RegInfoParser *pParser)
+PRIVATE VIRTUAL void RegInfoManager::RegInfoParser_ParsingFailed(IN RegInfoParser* pParser)
 {
-    RegInfo *pRegInfo = GetRegInfo(pParser->GetRegKey());
+    RegInfo* pRegInfo = GetRegInfo(pParser->GetRegKey());
 
     IMS_TRACE_D("Parsing 'reginfo' failed", 0, 0, 0);
 
@@ -310,13 +304,13 @@ IMS_BOOL RegInfoManager::AddRegInfoParser(IN RegInfoParser* pParser)
 }
 
 PRIVATE
-void RegInfoManager::RemoveRegInfoParser(IN RegInfoParser *&pParser)
+void RegInfoManager::RemoveRegInfoParser(IN RegInfoParser*& pParser)
 {
     LockGuard objLock(piLock);
 
     for (IMS_UINT32 i = 0; i < objParsers.GetSize(); ++i)
     {
-        RegInfoParser *pTmpParser = objParsers.GetAt(i);
+        RegInfoParser* pTmpParser = objParsers.GetAt(i);
 
         if (pParser == pTmpParser)
         {

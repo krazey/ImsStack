@@ -17,18 +17,15 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-SubscriptionImpl::SubscriptionImpl(IN Subscription *pSubscription_)
-    : piListener(IMS_NULL)
-    , pSubscription(pSubscription_)
+SubscriptionImpl::SubscriptionImpl(IN Subscription* pSubscription_) :
+        piListener(IMS_NULL),
+        pSubscription(pSubscription_)
 {
     pSubscription->SetListener(this);
 }
 
-PUBLIC VIRTUAL
-SubscriptionImpl::~SubscriptionImpl()
+PUBLIC VIRTUAL SubscriptionImpl::~SubscriptionImpl()
 {
     if (pSubscription != IMS_NULL)
     {
@@ -37,8 +34,7 @@ SubscriptionImpl::~SubscriptionImpl()
     }
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::Destroy()
+PRIVATE VIRTUAL void SubscriptionImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -55,48 +51,43 @@ void SubscriptionImpl::Destroy()
 }
 
 // SIP_MESSAGE_MEDIATOR
-PRIVATE VIRTUAL
-void SubscriptionImpl::SetMessageMediator(IN IMessageMediator *piMediator)
+PRIVATE VIRTUAL void SubscriptionImpl::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
     pSubscription->SetMessageMediator(piMediator);
 }
 
-PRIVATE VIRTUAL
-IMessage* SubscriptionImpl::GetNextRequest()
+PRIVATE VIRTUAL IMessage* SubscriptionImpl::GetNextRequest()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetNextRequest();
 }
 
-PRIVATE VIRTUAL
-IMessage* SubscriptionImpl::GetNextResponse()
+PRIVATE VIRTUAL IMessage* SubscriptionImpl::GetNextResponse()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetNextResponse();
 }
 
-PRIVATE VIRTUAL
-IMessage* SubscriptionImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* SubscriptionImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetPreviousRequest(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMessage* SubscriptionImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* SubscriptionImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetPreviousResponse(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMSList<IMessage*> SubscriptionImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMSList<IMessage*> SubscriptionImpl::GetPreviousResponses(
+        IN IMS_SINT32 nServiceMethod) const
 {
     IMSList<IMessage*> objIMessages;
     IMSList<Message*> objResponses = pSubscription->GetPreviousResponses(nServiceMethod);
@@ -111,80 +102,70 @@ IMSList<IMessage*> SubscriptionImpl::GetPreviousResponses(IN IMS_SINT32 nService
     return objIMessages;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> SubscriptionImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL IMSList<AString> SubscriptionImpl::GetRemoteUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetRemoteUserId();
 }
 
-PRIVATE VIRTUAL
-const AString& SubscriptionImpl::GetEvent() const
+PRIVATE VIRTUAL const AString& SubscriptionImpl::GetEvent() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetEvent();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 SubscriptionImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 SubscriptionImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SubscriptionImpl::Poll()
+PRIVATE VIRTUAL IMS_RESULT SubscriptionImpl::Poll()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->Poll();
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::SetListener(IN ISubscriptionListener *piListener)
+PRIVATE VIRTUAL void SubscriptionImpl::SetListener(IN ISubscriptionListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SubscriptionImpl::Subscribe()
+PRIVATE VIRTUAL IMS_RESULT SubscriptionImpl::Subscribe()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->Subscribe();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT SubscriptionImpl::Unsubscribe()
+PRIVATE VIRTUAL IMS_RESULT SubscriptionImpl::Unsubscribe()
 {
     //---------------------------------------------------------------------------------------------
 
     return pSubscription->Unsubscribe();
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
+PRIVATE VIRTUAL void SubscriptionImpl::SetImplicitRoutingRequired(IN IMS_BOOL bFlag)
 {
     //---------------------------------------------------------------------------------------------
 
     pSubscription->SetImplicitRoutingRequired(bFlag);
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::SetRefreshListener(IN IRefreshListener *piListener)
+PRIVATE VIRTUAL void SubscriptionImpl::SetRefreshListener(IN IRefreshListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     pSubscription->SetRefreshListener(piListener);
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
+PRIVATE VIRTUAL void SubscriptionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
         IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
 {
     //---------------------------------------------------------------------------------------------
@@ -192,9 +173,8 @@ void SubscriptionImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
     pSubscription->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLT, nValueGT);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL SubscriptionImpl::OnSubscription_ForkedNotifyReceived(IN Subscription *pSubscription,
-        IN Subscription *pForkedSubscription)
+PRIVATE VIRTUAL IMS_BOOL SubscriptionImpl::OnSubscription_ForkedNotifyReceived(
+        IN Subscription* pSubscription, IN Subscription* pForkedSubscription)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -216,7 +196,7 @@ IMS_BOOL SubscriptionImpl::OnSubscription_ForkedNotifyReceived(IN Subscription *
         return IMS_FALSE;
     }
 
-    SubscriptionImpl *pSubscriptionImpl = new SubscriptionImpl(pForkedSubscription);
+    SubscriptionImpl* pSubscriptionImpl = new SubscriptionImpl(pForkedSubscription);
 
     if (pSubscriptionImpl == IMS_NULL)
     {
@@ -229,9 +209,8 @@ IMS_BOOL SubscriptionImpl::OnSubscription_ForkedNotifyReceived(IN Subscription *
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::OnSubscription_NotifyReceived(IN Subscription *pSubscription,
-        IN Message *pNotify, OUT IMS_BOOL & /* bDestroyNotify */)
+PRIVATE VIRTUAL void SubscriptionImpl::OnSubscription_NotifyReceived(
+        IN Subscription* pSubscription, IN Message* pNotify, OUT IMS_BOOL& /* bDestroyNotify */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -250,8 +229,7 @@ void SubscriptionImpl::OnSubscription_NotifyReceived(IN Subscription *pSubscript
     piListener->SubscriptionNotify(this, pNotify);
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::OnSubscription_Started(IN Subscription *pSubscription)
+PRIVATE VIRTUAL void SubscriptionImpl::OnSubscription_Started(IN Subscription* pSubscription)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -270,8 +248,7 @@ void SubscriptionImpl::OnSubscription_Started(IN Subscription *pSubscription)
     piListener->SubscriptionStarted(this);
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::OnSubscription_StartFailed(IN Subscription *pSubscription)
+PRIVATE VIRTUAL void SubscriptionImpl::OnSubscription_StartFailed(IN Subscription* pSubscription)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -290,8 +267,7 @@ void SubscriptionImpl::OnSubscription_StartFailed(IN Subscription *pSubscription
     piListener->SubscriptionStartFailed(this);
 }
 
-PRIVATE VIRTUAL
-void SubscriptionImpl::OnSubscription_Terminated(IN Subscription *pSubscription)
+PRIVATE VIRTUAL void SubscriptionImpl::OnSubscription_Terminated(IN Subscription* pSubscription)
 {
     //---------------------------------------------------------------------------------------------
 

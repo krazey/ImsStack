@@ -17,19 +17,14 @@
 #include "IMessage.h"
 #include "MessageBodyPart.h"
 
-
-
 PUBLIC
-MessageBodyPart::MessageBodyPart(IN IMessage *piMessage_, IN ISipMessageBodyPart *piBodyPart_)
-    : piMessage(piMessage_)
-    , piBodyPart(piBodyPart_)
+MessageBodyPart::MessageBodyPart(IN IMessage* piMessage_, IN ISipMessageBodyPart* piBodyPart_) :
+        piMessage(piMessage_),
+        piBodyPart(piBodyPart_)
 {
 }
 
-PUBLIC VIRTUAL
-MessageBodyPart::~MessageBodyPart()
-{
-}
+PUBLIC VIRTUAL MessageBodyPart::~MessageBodyPart() {}
 
 PUBLIC
 ISipMessageBodyPart* MessageBodyPart::GetBodyPart() const
@@ -40,23 +35,21 @@ ISipMessageBodyPart* MessageBodyPart::GetBodyPart() const
 }
 
 PUBLIC
-void MessageBodyPart::SetBodyPart(IN ISipMessageBodyPart *piNewBodyPart)
+void MessageBodyPart::SetBodyPart(IN ISipMessageBodyPart* piNewBodyPart)
 {
     //---------------------------------------------------------------------------------------------
 
     piBodyPart = piNewBodyPart;
 }
 
-PRIVATE VIRTUAL
-const ByteArray& MessageBodyPart::GetContent() const
+PRIVATE VIRTUAL const ByteArray& MessageBodyPart::GetContent() const
 {
     //---------------------------------------------------------------------------------------------
 
     return piBodyPart->GetContent();
 }
 
-PRIVATE VIRTUAL
-AString MessageBodyPart::GetHeader(IN CONST AString &strName) const
+PRIVATE VIRTUAL AString MessageBodyPart::GetHeader(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -79,8 +72,7 @@ AString MessageBodyPart::GetHeader(IN CONST AString &strName) const
     return piBodyPart->GetHeader(GetHeaderType(strTmp), strName);
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray &objContent)
+PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray& objContent)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -97,8 +89,8 @@ IMS_RESULT MessageBodyPart::SetContent(IN CONST ByteArray &objContent)
     return IMS_SUCCESS;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT MessageBodyPart::SetHeader(IN CONST AString &strName, IN CONST AString &strValue)
+PRIVATE VIRTUAL IMS_RESULT MessageBodyPart::SetHeader(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -123,8 +115,7 @@ IMS_RESULT MessageBodyPart::SetHeader(IN CONST AString &strName, IN CONST AStrin
     return IMS_SUCCESS;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 MessageBodyPart::GetHeaderType(IN CONST AString &strName)
+PRIVATE GLOBAL IMS_SINT32 MessageBodyPart::GetHeaderType(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 

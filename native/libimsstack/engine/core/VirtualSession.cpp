@@ -32,15 +32,13 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-VirtualSession::VirtualSession(IN Service *pService_, IN const SipAddress* pUserAoR)
-    : RCObject()
-    , pService(pService_)
-    , nState(STATE_CREATED)
-    , pOAState(IMS_NULL)
-    , pSessionDescriptor(IMS_NULL)
+VirtualSession::VirtualSession(IN Service* pService_, IN const SipAddress* pUserAoR) :
+        RCObject(),
+        pService(pService_),
+        nState(STATE_CREATED),
+        pOAState(IMS_NULL),
+        pSessionDescriptor(IMS_NULL)
 {
     IMS_TRACE_I("VirtualSession - C", 0, 0, 0);
 
@@ -48,13 +46,12 @@ VirtualSession::VirtualSession(IN Service *pService_, IN const SipAddress* pUser
 }
 
 PUBLIC
-VirtualSession::VirtualSession(IN const VirtualSession &objRHS)
-    : RCObject(objRHS)
+VirtualSession::VirtualSession(IN const VirtualSession& objRHS) :
+        RCObject(objRHS)
 {
 }
 
-PUBLIC VIRTUAL
-VirtualSession::~VirtualSession()
+PUBLIC VIRTUAL VirtualSession::~VirtualSession()
 {
     IMS_TRACE_I("VirtualSession - D", 0, 0, 0);
 
@@ -68,7 +65,7 @@ VirtualSession::~VirtualSession()
     {
         for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
         {
-            Media *pMedia = objMedias.GetAt(i);
+            Media* pMedia = objMedias.GetAt(i);
 
             MediaFactory::DestroyMedia(pMedia);
         }
@@ -93,8 +90,8 @@ IMS_BOOL VirtualSession::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
 {
     IMS_SINT32 nOAState = GetOfferAnswerState();
 
-    if ((nOAState != SDPOAState::STATE_OFFER_RECEIVED)
-            && (nOAState != SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
+    if ((nOAState != SDPOAState::STATE_OFFER_RECEIVED) &&
+            (nOAState != SDPOAState::STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_I("No SDP offer in VritualSession", 0, 0, 0);
         return IMS_FALSE;
@@ -117,7 +114,7 @@ IMS_BOOL VirtualSession::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
         return IMS_FALSE;
     }
 
-    ISipMessageBodyPart *piBodyPart = piSIPMsg->CreateSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSIPMsg->CreateSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -137,8 +134,8 @@ IMS_BOOL VirtualSession::CheckNSetSDPBodyPart(IN_OUT ISipMessage*& piSIPMsg)
     AString strCLEN;
     strCLEN.SetNumber(objSDP.GetLength());
 
-    piBodyPart->SetHeader(ISipMessageBodyPart::CONTENT_UNKNOWN,
-            strCLEN, SipHeaderName::CONTENT_LENGTH);
+    piBodyPart->SetHeader(
+            ISipMessageBodyPart::CONTENT_UNKNOWN, strCLEN, SipHeaderName::CONTENT_LENGTH);
 
     IMS_TRACE_D("SDP is formed by SDP offer/answer context", 0, 0, 0);
 
@@ -159,8 +156,8 @@ IMS_RESULT VirtualSession::Notify18xResponse(IN const ISipMessage* piSIPMsg)
         return IMS_FAILURE;
     }
 
-    IMS_TRACE_I("___ %d response received on %s",
-            piSIPMsg->GetStatusCode(), StateToString(GetState()), 0);
+    IMS_TRACE_I("___ %d response received on %s", piSIPMsg->GetStatusCode(),
+            StateToString(GetState()), 0);
 
     if (!UpdateOfferAnswerStateOnMessageReceived(piSIPMsg))
     {
@@ -177,8 +174,8 @@ IMS_RESULT VirtualSession::Notify18xResponse(IN const ISipMessage* piSIPMsg)
 
     IMS_SINT32 nOAResult = HandleSDPOfferAnswer(piSIPMsg);
 
-    if ((nOAResult == SdpOfferAnswer::RESULT_FAILURE)
-            || (nOAResult == SdpOfferAnswer::RESULT_NOT_DONE))
+    if ((nOAResult == SdpOfferAnswer::RESULT_FAILURE) ||
+            (nOAResult == SdpOfferAnswer::RESULT_NOT_DONE))
     {
         SetState(STATE_TERMINATED);
         return IMS_FAILURE;
@@ -211,7 +208,7 @@ Remarks
 
 */
 PUBLIC
-Media* VirtualSession::CreateMedia(IN const AString &strType, IN IMS_SINT32 nDirection,
+Media* VirtualSession::CreateMedia(IN const AString& strType, IN IMS_SINT32 nDirection,
         IN IMS_SINT32 nCountOfDescriptor /* = 0 */, IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
 {
     if (pOAState == IMS_NULL)
@@ -223,25 +220,24 @@ Media* VirtualSession::CreateMedia(IN const AString &strType, IN IMS_SINT32 nDir
 
     IMS_SINT32 nState = GetState();
 
-    if ((nState != STATE_INITIATED)
-            && (nState != STATE_ESTABLISHED))
+    if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE)
-                && (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
+                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
         {
-            IMS_TRACE_E(0, "To create a media, the state MUST be an INITIALIZED or ESTABLISHED; " \
-                    "(%s, %d)", StateToString(nState), nSDPOAState, 0);
+            IMS_TRACE_E(0,
+                    "To create a media, the state MUST be an INITIALIZED or ESTABLISHED; "
+                    "(%s, %d)",
+                    StateToString(nState), nSDPOAState, 0);
             IMS::SetLastError(IMSError::ILLEGAL_STATE);
             return IMS_NULL;
         }
     }
 
-    if ((nDirection != Media::DIRECTION_INACTIVE)
-            && (nDirection != Media::DIRECTION_RECEIVE)
-            && (nDirection != Media::DIRECTION_SEND)
-            && (nDirection != Media::DIRECTION_SEND_RECEIVE))
+    if ((nDirection != Media::DIRECTION_INACTIVE) && (nDirection != Media::DIRECTION_RECEIVE) &&
+            (nDirection != Media::DIRECTION_SEND) && (nDirection != Media::DIRECTION_SEND_RECEIVE))
     {
         if (bIMSExtension && (nDirection == Media::DIRECTION_NONE))
         {
@@ -269,7 +265,7 @@ Media* VirtualSession::CreateMedia(IN const AString &strType, IN IMS_SINT32 nDir
 
     // Create a new SDP media parameter
 
-    Media *pMedia = MediaFactory::CreateOutgoingMedia(
+    Media* pMedia = MediaFactory::CreateOutgoingMedia(
             strType, nDirection, pService, pOAState, nCountOfDescriptor);
 
     if (pMedia == IMS_NULL)
@@ -346,22 +342,23 @@ Remarks
 
 */
 PUBLIC
-IMS_RESULT VirtualSession::RemoveMedia(IN Media *pMedia)
+IMS_RESULT VirtualSession::RemoveMedia(IN Media* pMedia)
 {
     IMS_SINT32 nState = GetState();
 
-    if ((nState != STATE_INITIATED)
-            && (nState != STATE_ESTABLISHED))
+    if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE)
-                && (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
+                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
         {
             IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-            IMS_TRACE_E(0, "To remove a media, the state MUST be a INITIATED or ESTABLISHED; " \
-                    "(%s, %d)", StateToString(nState), nSDPOAState, 0);
+            IMS_TRACE_E(0,
+                    "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
+                    "(%s, %d)",
+                    StateToString(nState), nSDPOAState, 0);
             return IMS_FAILURE;
         }
     }
@@ -376,7 +373,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media *pMedia)
 
     for (i = 0; i < objMedias.GetSize(); ++i)
     {
-        const Media *pExistingMedia = objMedias.GetAt(i);
+        const Media* pExistingMedia = objMedias.GetAt(i);
 
         if (pExistingMedia->Equals(pMedia))
         {
@@ -393,12 +390,12 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media *pMedia)
     }
 
     IMS_BOOL bMidSyncRequired = (i < (objMedias.GetSize() - 1));
-    Media *pMatchedMedia = objMedias.GetAt(i);
+    Media* pMatchedMedia = objMedias.GetAt(i);
 
     pMatchedMedia->RemoveMedia();
 
-    if ((pMatchedMedia->GetState() == Media::STATE_INACTIVE)
-            || (pMatchedMedia->GetState() == Media::STATE_DELETED))
+    if ((pMatchedMedia->GetState() == Media::STATE_INACTIVE) ||
+            (pMatchedMedia->GetState() == Media::STATE_DELETED))
     {
         objMedias.RemoveAt(i);
     }
@@ -407,7 +404,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN Media *pMedia)
     {
         for (IMS_UINT32 j = i; j < objMedias.GetSize(); j++)
         {
-            Media *pMedia = objMedias.GetAt(j);
+            Media* pMedia = objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -427,18 +424,19 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 {
     IMS_SINT32 nState = GetState();
 
-    if ((nState != STATE_INITIATED)
-            && (nState != STATE_ESTABLISHED))
+    if ((nState != STATE_INITIATED) && (nState != STATE_ESTABLISHED))
     {
         IMS_SINT32 nSDPOAState = GetOfferAnswerState();
 
-        if ((nSDPOAState != SDPOAState::STATE_IDLE)
-                && (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
+        if ((nSDPOAState != SDPOAState::STATE_IDLE) &&
+                (nSDPOAState != SDPOAState::STATE_ESTABLISHED))
         {
             IMS::SetLastError(IMSError::ILLEGAL_STATE);
 
-            IMS_TRACE_E(0, "To remove a media, the state MUST be a INITIATED or ESTABLISHED; " \
-                    "(%s, %d)", StateToString(nState), nSDPOAState, 0);
+            IMS_TRACE_E(0,
+                    "To remove a media, the state MUST be a INITIATED or ESTABLISHED; "
+                    "(%s, %d)",
+                    StateToString(nState), nSDPOAState, 0);
             return IMS_FAILURE;
         }
     }
@@ -447,13 +445,12 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
     {
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
 
-        IMS_TRACE_E(0, "Invalid index (%d) in the total size (%d)",
-                nIndex, objMedias.GetSize(), 0);
+        IMS_TRACE_E(0, "Invalid index (%d) in the total size (%d)", nIndex, objMedias.GetSize(), 0);
         return IMS_FAILURE;
     }
 
     IMS_BOOL bMidSyncRequired = (nIndex < (objMedias.GetSize() - 1));
-    Media *pMedia = objMedias.GetAt(nIndex);
+    Media* pMedia = objMedias.GetAt(nIndex);
 
     if (pMedia == IMS_NULL)
     {
@@ -463,8 +460,8 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 
     pMedia->RemoveMedia();
 
-    if ((pMedia->GetState() == Media::STATE_INACTIVE)
-        || (pMedia->GetState() == Media::STATE_DELETED))
+    if ((pMedia->GetState() == Media::STATE_INACTIVE) ||
+            (pMedia->GetState() == Media::STATE_DELETED))
     {
         objMedias.RemoveAt(nIndex);
     }
@@ -473,7 +470,7 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
     {
         for (IMS_UINT32 j = nIndex; j < objMedias.GetSize(); j++)
         {
-            Media *pMedia = objMedias.GetAt(j);
+            Media* pMedia = objMedias.GetAt(j);
             pMedia->SetMid(j);
         }
     }
@@ -488,15 +485,14 @@ IMS_RESULT VirtualSession::RemoveMedia(IN IMS_UINT32 nIndex)
 Remarks
 
 */
-PROTECTED VIRTUAL
-const AString& VirtualSession::GetConnectionAddress() const
+PROTECTED VIRTUAL const AString& VirtualSession::GetConnectionAddress() const
 {
     if (pOAState == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     pOAState->GetSessionCurrentView(pSessionParam);
 
@@ -519,8 +515,7 @@ const AString& VirtualSession::GetConnectionAddress() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_SINT32 VirtualSession::GetSessionState() const
+PROTECTED VIRTUAL IMS_SINT32 VirtualSession::GetSessionState() const
 {
     if (nState == STATE_CREATED)
         return SESSION_STATE_CREATED;
@@ -549,15 +544,14 @@ IMS_SINT32 VirtualSession::GetSessionState() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-SdpSessionParameter* VirtualSession::GetSessionParameter() const
+PROTECTED VIRTUAL SdpSessionParameter* VirtualSession::GetSessionParameter() const
 {
     if (pOAState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     if (nState == STATE_ESTABLISHED)
     {
@@ -582,15 +576,14 @@ SdpSessionParameter* VirtualSession::GetSessionParameter() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-const AString& VirtualSession::GetPeerConnectionAddress() const
+PROTECTED VIRTUAL const AString& VirtualSession::GetPeerConnectionAddress() const
 {
     if (pOAState == IMS_NULL)
     {
         return AString::ConstNull();
     }
 
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     pOAState->GetSessionPeerView(pSessionParam);
 
@@ -608,15 +601,14 @@ const AString& VirtualSession::GetPeerConnectionAddress() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-SdpSessionParameter* VirtualSession::GetPeerSessionParameter() const
+PROTECTED VIRTUAL SdpSessionParameter* VirtualSession::GetPeerSessionParameter() const
 {
     if (pOAState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     pOAState->GetSessionPeerView(pSessionParam);
 
@@ -628,15 +620,14 @@ SdpSessionParameter* VirtualSession::GetPeerSessionParameter() const
 Remarks
 
 */
-PROTECTED VIRTUAL
-SdpSessionParameter* VirtualSession::GetProposalSessionParameter()
+PROTECTED VIRTUAL SdpSessionParameter* VirtualSession::GetProposalSessionParameter()
 {
     if (pOAState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     pOAState->GetSessionProposalView(pSessionParam);
 
@@ -647,8 +638,8 @@ SdpSessionParameter* VirtualSession::GetProposalSessionParameter()
         {
             IMS_SINT32 nResult = pOAState->CreateProposalView();
 
-            if ((nResult != ISDPOAState::RESULT_SUCCESS)
-                    && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+            if ((nResult != ISDPOAState::RESULT_SUCCESS) &&
+                    (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
             {
                 return IMS_NULL;
             }
@@ -678,8 +669,7 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     // IDLE :: 183 response w/o SDP
     // OFFER_RECEIVED :: 183 response w/ SDP
-    if ((nOAState != SDPOAState::STATE_IDLE)
-            && (nOAState != SDPOAState::STATE_OFFER_RECEIVED))
+    if ((nOAState != SDPOAState::STATE_IDLE) && (nOAState != SDPOAState::STATE_OFFER_RECEIVED))
     {
         IMS_TRACE_E(0, "__ SessionDescriptor can't be created in offer/answer state (%d) __",
                 nOAState, 0, 0);
@@ -688,9 +678,9 @@ IMS_BOOL VirtualSession::CheckNCreateSessionDescriptor()
 
     // Create a media capabilities for this service & session
     const SipAddress::UserInfoPart* pUserInfo = objUserAoR.GetUserInfoPart();
-    const AString& strUserId = (pUserInfo != IMS_NULL)
-            ? pUserInfo->GetUser()
-            : objUserAoR.IsSchemeTel() ? objUserAoR.GetHost() : objUserAoR.GetUser();
+    const AString& strUserId = (pUserInfo != IMS_NULL) ? pUserInfo->GetUser()
+            : objUserAoR.IsSchemeTel()                 ? objUserAoR.GetHost()
+                                                       : objUserAoR.GetUser();
 
     if (!pOAState->CreateCapabilities(pService, strUserId))
     {
@@ -751,7 +741,7 @@ Remarks
 
 */
 PROTECTED
-IMS_SINT32 VirtualSession::HandleSDPOfferAnswer(IN const ISipMessage *piSIPMsg)
+IMS_SINT32 VirtualSession::HandleSDPOfferAnswer(IN const ISipMessage* piSIPMsg)
 {
     if (pOAState == IMS_NULL)
     {
@@ -766,21 +756,21 @@ IMS_SINT32 VirtualSession::HandleSDPOfferAnswer(IN const ISipMessage *piSIPMsg)
     {
         IMS_SINT32 nOAState = pOAState->GetState();
 
-        if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS)
-                || (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
-             && ((nOAState == SDPOAState::STATE_OFFER_RECEIVED)
-                || (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)))
+        if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                    (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
+                ((nOAState == SDPOAState::STATE_OFFER_RECEIVED) ||
+                        (nOAState == SDPOAState::STATE_OFFER_CHANGE_RECEIVED)))
         {
-            SessionParameter *pSessionParam = pOAState->GetProposalView();
+            SessionParameter* pSessionParam = pOAState->GetProposalView();
 
             if (pSessionParam != IMS_NULL)
             {
-                const IMSList<SdpMediaParameter*> &objMediaParams
-                        = pSessionParam->GetMediaParameters();
+                const IMSList<SdpMediaParameter*>& objMediaParams =
+                        pSessionParam->GetMediaParameters();
 
                 for (IMS_UINT32 i = 0; i < objMediaParams.GetSize(); i++)
                 {
-                    SdpMediaParameter *pMediaParam = objMediaParams.GetAt(i);
+                    SdpMediaParameter* pMediaParam = objMediaParams.GetAt(i);
 
                     if (pMediaParam != IMS_NULL)
                     {
@@ -809,14 +799,14 @@ void VirtualSession::RestoreEx()
 {
     for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
     {
-        Media *pMedia = objMedias.GetAt(i);
+        Media* pMedia = objMedias.GetAt(i);
 
         if (pMedia->GetState() == Media::STATE_INACTIVE)
         {
             // Delete the media from the list ?????
         }
 
-        //4 Add the code to restore the medias
+        // 4 Add the code to restore the medias
         pMedia->RestoreMedia();
     }
 }
@@ -839,38 +829,38 @@ IMS_BOOL VirtualSession::UpdateMedia(IN IMS_SINT32 nTrigger)
 
     switch (GetOfferAnswerState())
     {
-    case SDPOAState::STATE_OFFER_SENT:
-    case SDPOAState::STATE_OFFER_CHANGE_SENT:
-        bResult = UpdateMediaOnOfferSent(nTrigger);
-        break;
+        case SDPOAState::STATE_OFFER_SENT:
+        case SDPOAState::STATE_OFFER_CHANGE_SENT:
+            bResult = UpdateMediaOnOfferSent(nTrigger);
+            break;
 
-    case SDPOAState::STATE_ESTABLISHED:
-        if (pOAState->GetMode() != SDPOAState::MODE_IDLE)
-        {
-            if (pOAState->GetMode() == SDPOAState::MODE_OFFERER)
-                bResult = UpdateMediaOnAnswerReceived(nTrigger);
+        case SDPOAState::STATE_ESTABLISHED:
+            if (pOAState->GetMode() != SDPOAState::MODE_IDLE)
+            {
+                if (pOAState->GetMode() == SDPOAState::MODE_OFFERER)
+                    bResult = UpdateMediaOnAnswerReceived(nTrigger);
+                else
+                    bResult = UpdateMediaOnAnswerSent(nTrigger);
+            }
             else
-                bResult = UpdateMediaOnAnswerSent(nTrigger);
-        }
-        else
-        {
-            IMS_TRACE_D("UpdateMedia :: SDP Offer/Answer is IDLE", 0, 0, 0);
-        }
-        break;
+            {
+                IMS_TRACE_D("UpdateMedia :: SDP Offer/Answer is IDLE", 0, 0, 0);
+            }
+            break;
 
-    case SDPOAState::STATE_OFFER_RECEIVED:
-    case SDPOAState::STATE_OFFER_CHANGE_RECEIVED:
-        bResult = UpdateMediaOnOfferReceived(nTrigger);
-        break;
+        case SDPOAState::STATE_OFFER_RECEIVED:
+        case SDPOAState::STATE_OFFER_CHANGE_RECEIVED:
+            bResult = UpdateMediaOnOfferReceived(nTrigger);
+            break;
 
-    default:
-        IMS_TRACE_D("UpdateMedia :: NOT HANDLED", 0, 0, 0);
-        return IMS_FALSE;
+        default:
+            IMS_TRACE_D("UpdateMedia :: NOT HANDLED", 0, 0, 0);
+            return IMS_FALSE;
     }
 
     // Move the proposed view to the current view
-    if ((GetOfferAnswerState() == SDPOAState::STATE_IDLE)
-            || (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+    if ((GetOfferAnswerState() == SDPOAState::STATE_IDLE) ||
+            (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
     {
         pOAState->CompleteExchange();
     }
@@ -900,7 +890,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMessage *piSIPMsg)
+IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMessage* piSIPMsg)
 {
     if (pOAState == IMS_NULL)
     {
@@ -910,35 +900,34 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageReceived(IN const ISipMe
     IMS_SINT32 nState = GetState();
     IMS_BOOL bIsCallEstablished = IMS_FALSE;
 
-    //RFC 6337: Section 3.1.1
-    //After the UAC has received the answer in a reliable provisional response to the INVITE,
+    // RFC 6337: Section 3.1.1
+    // After the UAC has received the answer in a reliable provisional response to the INVITE,
     //[RFC3261] requires that any SDP in subsequent responses be ignored.
     {
-       if ((piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
-                && piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
-       {
-           if ((nState == STATE_NEGOTIATING)
-                    && (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
-           {
-               IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived() :: "
-                        "Ignore the SDP in subsequent RPR as offer-answer is completed", 0, 0, 0);
+        if ((piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE) &&
+                piSIPMsg->GetMethod().Equals(SipMethod::INVITE))
+        {
+            if ((nState == STATE_NEGOTIATING) &&
+                    (GetOfferAnswerState() == SDPOAState::STATE_ESTABLISHED))
+            {
+                IMS_TRACE_D("UpdateOfferAnswerStateOnMessageReceived() :: "
+                            "Ignore the SDP in subsequent RPR as offer-answer is completed",
+                        0, 0, 0);
 
-               pOAState->UpdateStateOnTransactionCompleted(
-                        piSIPMsg, SDPOAState::MESSAGE_RECEIVED);
-               return IMS_TRUE;
-           }
-       }
+                pOAState->UpdateStateOnTransactionCompleted(piSIPMsg, SDPOAState::MESSAGE_RECEIVED);
+                return IMS_TRUE;
+            }
+        }
     }
 
-    if ((nState == STATE_ESTABLISHED)
-            || (nState == STATE_RENEGOTIATING)
-            || (nState == STATE_REESTABLISHING))
+    if ((nState == STATE_ESTABLISHED) || (nState == STATE_RENEGOTIATING) ||
+            (nState == STATE_REESTABLISHING))
     {
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg,
-            SDPOAState::MESSAGE_RECEIVED, bIsCallEstablished, IMS_FALSE);
+    return pOAState->UpdateState(
+            piSIPMsg, SDPOAState::MESSAGE_RECEIVED, bIsCallEstablished, IMS_FALSE);
 }
 
 /*
@@ -947,7 +936,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageSent(IN const ISipMessage *piSIPMsg)
+IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageSent(IN const ISipMessage* piSIPMsg)
 {
     if (pOAState == IMS_NULL)
     {
@@ -957,15 +946,13 @@ IMS_BOOL VirtualSession::UpdateOfferAnswerStateOnMessageSent(IN const ISipMessag
     IMS_SINT32 nState = GetState();
     IMS_BOOL bIsCallEstablished = IMS_FALSE;
 
-    if ((nState == STATE_ESTABLISHED)
-            || (nState == STATE_RENEGOTIATING)
-            || (nState == STATE_REESTABLISHING))
+    if ((nState == STATE_ESTABLISHED) || (nState == STATE_RENEGOTIATING) ||
+            (nState == STATE_REESTABLISHING))
     {
         bIsCallEstablished = IMS_TRUE;
     }
 
-    return pOAState->UpdateState(piSIPMsg,
-            SDPOAState::MESSAGE_SENT, bIsCallEstablished, IMS_FALSE);
+    return pOAState->UpdateState(piSIPMsg, SDPOAState::MESSAGE_SENT, bIsCallEstablished, IMS_FALSE);
 }
 
 /*
@@ -993,7 +980,7 @@ void VirtualSession::Init(IN const SipAddress* pUserAoR)
 
     // Instantiate SDP offer/answer object
     IMS_BOOL bSDPVersionCheck = IMS_TRUE;
-    const SipConfigV *pSipConfigV = pService->GetSipConfigV();
+    const SipConfigV* pSipConfigV = pService->GetSipConfigV();
 
     if (pSipConfigV != IMS_NULL)
     {
@@ -1024,7 +1011,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL VirtualSession::AddMedia(IN Media *pMedia)
+IMS_BOOL VirtualSession::AddMedia(IN Media* pMedia)
 {
     if (!objMedias.Append(pMedia))
     {
@@ -1045,7 +1032,7 @@ void VirtualSession::CleanupMedia()
 {
     for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
     {
-        Media *pMedia = objMedias.GetAt(i);
+        Media* pMedia = objMedias.GetAt(i);
 
         if (pMedia != IMS_NULL)
             pMedia->CleanupMedia();
@@ -1060,7 +1047,7 @@ Remarks
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnAnswerReceived(IN IMS_SINT32 nTrigger)
 {
-    Media *pMedia;
+    Media* pMedia;
 
     for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
     {
@@ -1086,7 +1073,7 @@ Remarks
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnAnswerSent(IN IMS_SINT32 nTrigger)
 {
-    Media *pMedia;
+    Media* pMedia;
 
     for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
     {
@@ -1112,7 +1099,7 @@ Remarks
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 {
-    SessionParameter *pSessionParam = pOAState->GetProposalView();
+    SessionParameter* pSessionParam = pOAState->GetProposalView();
     IMS_SINT32 nMediaCount = pSessionParam->GetMediaCount();
 
     if (nMediaCount != 0)
@@ -1129,28 +1116,29 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
             // make up one media object.
             if (pSessionParam->FindGroupStartingWithMediaParameter(i, objGroupMediaParams))
             {
-                SdpMediaParameter *pMediaParam = objGroupMediaParams.GetAt(0);
+                SdpMediaParameter* pMediaParam = objGroupMediaParams.GetAt(0);
 
                 switch (pMediaParam->GetMedia().GetTransportProtocol())
                 {
-                case SdpMedia::TRANSPORT_RTP_AVP:
-                case SdpMedia::TRANSPORT_RTP_AVPF:
-                case SdpMedia::TRANSPORT_RTP_SAVP:
-                case SdpMedia::TRANSPORT_RTP_SAVPF:
-                case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
-                case SdpMedia::TRANSPORT_TCP_MSRP:
-                case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
-                case SdpMedia::TRANSPORT_UDP:
-                case SdpMedia::TRANSPORT_TCP:
-                    break;
+                    case SdpMedia::TRANSPORT_RTP_AVP:
+                    case SdpMedia::TRANSPORT_RTP_AVPF:
+                    case SdpMedia::TRANSPORT_RTP_SAVP:
+                    case SdpMedia::TRANSPORT_RTP_SAVPF:
+                    case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
+                    case SdpMedia::TRANSPORT_TCP_MSRP:
+                    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
+                    case SdpMedia::TRANSPORT_UDP:
+                    case SdpMedia::TRANSPORT_TCP:
+                        break;
 
-                default:
-                    IMS_TRACE_I("Unsupported media type(%s, %s) received; So, it will be ignored",
-                            pMediaParam->GetMedia().GetTypeEx().GetStr(),
-                            pMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
+                    default:
+                        IMS_TRACE_I(
+                                "Unsupported media type(%s, %s) received; So, it will be ignored",
+                                pMediaParam->GetMedia().GetTypeEx().GetStr(),
+                                pMediaParam->GetMedia().GetTransportProtocolEx().GetStr(), 0);
 
-                    pMediaParam->MarkRejectedOrRemoved();
-                    continue;
+                        pMediaParam->MarkRejectedOrRemoved();
+                        continue;
                 }
 
                 if (nMediaIndex >= objMedias.GetSize())
@@ -1159,7 +1147,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
 
                     for (IMS_UINT32 j = 0; j < objGroupMediaParams.GetSize(); ++j)
                     {
-                        const SdpMediaParameter *pMediaParam = objGroupMediaParams.GetAt(j);
+                        const SdpMediaParameter* pMediaParam = objGroupMediaParams.GetAt(j);
 
                         IMS_TRACE_I("New media type(%s, %s) added",
                                 pMediaParam->GetMedia().GetTypeEx().GetStr(),
@@ -1169,9 +1157,9 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
                     }
 
                     // New media; Create and add to the current session.
-                    Media *pMedia = MediaFactory::CreateIncomingMedia(
-                                        pMediaParam->GetMedia().GetTransportProtocol(),
-                                        pService, pOAState, objMids);
+                    Media* pMedia = MediaFactory::CreateIncomingMedia(
+                            pMediaParam->GetMedia().GetTransportProtocol(), pService, pOAState,
+                            objMids);
 
                     if (pMedia == IMS_NULL)
                         continue;
@@ -1187,7 +1175,7 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferReceived(IN IMS_SINT32 nTrigger)
                 else
                 {
                     // Existing media; check if the SDP has been changed
-                    Media *pMedia = objMedias.GetAt(nMediaIndex);
+                    Media* pMedia = objMedias.GetAt(nMediaIndex);
 
                     pMedia->TransitMedia(nTrigger, Media::OFFER_RECEIVED);
                 }
@@ -1208,7 +1196,7 @@ Remarks
 PRIVATE
 IMS_BOOL VirtualSession::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
 {
-    Media *pMedia;
+    Media* pMedia;
 
     for (IMS_UINT32 i = 0; i < objMedias.GetSize(); ++i)
     {
@@ -1231,30 +1219,29 @@ IMS_BOOL VirtualSession::UpdateMediaOnOfferSent(IN IMS_SINT32 nTrigger)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* VirtualSession::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* VirtualSession::StateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {
-    case STATE_CREATED:
-        return "STATE_CREATED";
-    case STATE_INITIATED:
-        return "STATE_INITIATED";
-    case STATE_NEGOTIATING:
-        return "STATE_NEGOTIATING";
-    case STATE_ESTABLISHING:
-        return "STATE_ESTABLISHING";
-    case STATE_ESTABLISHED:
-        return "STATE_ESTABLISHED";
-    case STATE_RENEGOTIATING:
-        return "STATE_RENEGOTIATING";
-    case STATE_REESTABLISHING:
-        return "STATE_REESTABLISHING";
-    case STATE_TERMINATING:
-        return "STATE_TERMINATING";
-    case STATE_TERMINATED:
-        return "STATE_TERMINATED";
-    default:
-        return "__INVALID__";
+        case STATE_CREATED:
+            return "STATE_CREATED";
+        case STATE_INITIATED:
+            return "STATE_INITIATED";
+        case STATE_NEGOTIATING:
+            return "STATE_NEGOTIATING";
+        case STATE_ESTABLISHING:
+            return "STATE_ESTABLISHING";
+        case STATE_ESTABLISHED:
+            return "STATE_ESTABLISHED";
+        case STATE_RENEGOTIATING:
+            return "STATE_RENEGOTIATING";
+        case STATE_REESTABLISHING:
+            return "STATE_REESTABLISHING";
+        case STATE_TERMINATING:
+            return "STATE_TERMINATING";
+        case STATE_TERMINATED:
+            return "STATE_TERMINATED";
+        default:
+            return "__INVALID__";
     }
 }

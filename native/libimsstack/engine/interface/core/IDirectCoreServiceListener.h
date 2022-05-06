@@ -25,8 +25,8 @@ public:
      *         #ICoreService#RESULT_DIRECT_TXN_NOT_HANDLED\n
      *         #ICoreService#RESULT_DIRECT_TXN_BYPASS
      */
-    virtual IMS_SINT32 DirectCoreService_TransactionReceived(IN ICoreService *piService,
-            IN ISIPConnectionFactory *piSCF) = 0;
+    virtual IMS_SINT32 DirectCoreService_TransactionReceived(
+            IN ICoreService* piService, IN ISIPConnectionFactory* piSCF) = 0;
 };
 
-#endif // _INTERFACE_DIRECT_CORE_SERVICE_LISTENER_H_
+#endif  // _INTERFACE_DIRECT_CORE_SERVICE_LISTENER_H_

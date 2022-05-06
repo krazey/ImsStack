@@ -23,83 +23,79 @@
 #include "SipParameter.h"
 #include "SIPHeader.h"
 
-
-
 // Constant Header Names
-PUBLIC GLOBAL
-const IMS_CHAR* SIPHeader::NAME[] =
-{
-    SipHeaderName::ALLOW,
-    SipHeaderName::ALLOW_EVENTS,
-    SipHeaderName::AUTHORIZATION,
-    SipHeaderName::CALL_ID,
-    SipHeaderName::CONTACT,
-    SipHeaderName::CONTACT,
-    SipHeaderName::CONTACT,
-    SipHeaderName::CONTENT_DISPOSITION,
-    SipHeaderName::CONTENT_ENCODING,
-    SipHeaderName::CONTENT_LENGTH,
-    SipHeaderName::CONTENT_TYPE,
-    SipHeaderName::CSEQ,
-    SipHeaderName::EVENT,
-    SipHeaderName::EXPIRES,
-    SipHeaderName::EXPIRES,
-    SipHeaderName::EXPIRES,
-    SipHeaderName::ACCEPT,
-    SipHeaderName::MIN_EXPIRES,
-    SipHeaderName::FROM,
-    SipHeaderName::MAX_FORWARDS,
-    SipHeaderName::MIME_VERSION,
-    SipHeaderName::PRIVACY,
-    SipHeaderName::P_PREFERRED_IDENTITY,
-    SipHeaderName::P_ASSERTED_IDENTITY,
-    SipHeaderName::MIN_SE,
-    SipHeaderName::PATH,
-    SipHeaderName::P_ASSOCIATED_URI,
-    SipHeaderName::P_CALLED_PARTY_ID,
-    SipHeaderName::P_VISITED_NETWORK_ID,
-    SipHeaderName::P_CHARGING_FUNCTION_ADDRESSES,
-    SipHeaderName::P_ACCESS_NETWORK_INFO,
-    SipHeaderName::P_CHARGING_VECTOR,
-    SipHeaderName::SERVICE_ROUTE,
-    SipHeaderName::HISTORY_INFO,
-    SipHeaderName::REQUEST_DISPOSITION,
-    SipHeaderName::ACCEPT_CONTACT,
-    SipHeaderName::REJECT_CONTACT,
-    SipHeaderName::JOIN,
-    SipHeaderName::SIP_IF_MATCH,
-    SipHeaderName::SIP_ETAG,
-    SipHeaderName::PROXY_AUTHENTICATE,
-    SipHeaderName::PROXY_AUTHORIZATION,
-    SipHeaderName::RACK,
-    SipHeaderName::RECORD_ROUTE,
-    SipHeaderName::REFERRED_BY,
-    SipHeaderName::REFER_TO,
-    SipHeaderName::REPLACES,
-    SipHeaderName::REQUIRE,
-    SipHeaderName::ROUTE,
-    SipHeaderName::RSEQ,
-    SipHeaderName::SECURITY_CLIENT,
-    SipHeaderName::SECURITY_VERIFY,
-    SipHeaderName::SECURITY_SERVER,
-    SipHeaderName::SESSION_EXPIRES,
-    SipHeaderName::SUBSCRIPTION_STATE,
-    SipHeaderName::SUPPORTED,
-    SipHeaderName::TIMESTAMP,
-    SipHeaderName::TO,
-    SipHeaderName::UNSUPPORTED,
-    SipHeaderName::VIA,
-    SipHeaderName::WARNING,
-    SipHeaderName::WWW_AUTHENTICATE,
-    IMS_NULL,
-    SipHeaderName::RETRY_AFTER,
-    SipHeaderName::RETRY_AFTER,
-    SipHeaderName::RETRY_AFTER,
-    SipHeaderName::P_EARLY_MEDIA,
-    SipHeaderName::RESOURCE_PRIORITY,
-    SipHeaderName::ACCEPT_RESOURCE_PRIORITY,
-    SipHeaderName::DATE,
-    IMS_NULL
+PUBLIC GLOBAL const IMS_CHAR* SIPHeader::NAME[] = {
+        SipHeaderName::ALLOW,
+        SipHeaderName::ALLOW_EVENTS,
+        SipHeaderName::AUTHORIZATION,
+        SipHeaderName::CALL_ID,
+        SipHeaderName::CONTACT,
+        SipHeaderName::CONTACT,
+        SipHeaderName::CONTACT,
+        SipHeaderName::CONTENT_DISPOSITION,
+        SipHeaderName::CONTENT_ENCODING,
+        SipHeaderName::CONTENT_LENGTH,
+        SipHeaderName::CONTENT_TYPE,
+        SipHeaderName::CSEQ,
+        SipHeaderName::EVENT,
+        SipHeaderName::EXPIRES,
+        SipHeaderName::EXPIRES,
+        SipHeaderName::EXPIRES,
+        SipHeaderName::ACCEPT,
+        SipHeaderName::MIN_EXPIRES,
+        SipHeaderName::FROM,
+        SipHeaderName::MAX_FORWARDS,
+        SipHeaderName::MIME_VERSION,
+        SipHeaderName::PRIVACY,
+        SipHeaderName::P_PREFERRED_IDENTITY,
+        SipHeaderName::P_ASSERTED_IDENTITY,
+        SipHeaderName::MIN_SE,
+        SipHeaderName::PATH,
+        SipHeaderName::P_ASSOCIATED_URI,
+        SipHeaderName::P_CALLED_PARTY_ID,
+        SipHeaderName::P_VISITED_NETWORK_ID,
+        SipHeaderName::P_CHARGING_FUNCTION_ADDRESSES,
+        SipHeaderName::P_ACCESS_NETWORK_INFO,
+        SipHeaderName::P_CHARGING_VECTOR,
+        SipHeaderName::SERVICE_ROUTE,
+        SipHeaderName::HISTORY_INFO,
+        SipHeaderName::REQUEST_DISPOSITION,
+        SipHeaderName::ACCEPT_CONTACT,
+        SipHeaderName::REJECT_CONTACT,
+        SipHeaderName::JOIN,
+        SipHeaderName::SIP_IF_MATCH,
+        SipHeaderName::SIP_ETAG,
+        SipHeaderName::PROXY_AUTHENTICATE,
+        SipHeaderName::PROXY_AUTHORIZATION,
+        SipHeaderName::RACK,
+        SipHeaderName::RECORD_ROUTE,
+        SipHeaderName::REFERRED_BY,
+        SipHeaderName::REFER_TO,
+        SipHeaderName::REPLACES,
+        SipHeaderName::REQUIRE,
+        SipHeaderName::ROUTE,
+        SipHeaderName::RSEQ,
+        SipHeaderName::SECURITY_CLIENT,
+        SipHeaderName::SECURITY_VERIFY,
+        SipHeaderName::SECURITY_SERVER,
+        SipHeaderName::SESSION_EXPIRES,
+        SipHeaderName::SUBSCRIPTION_STATE,
+        SipHeaderName::SUPPORTED,
+        SipHeaderName::TIMESTAMP,
+        SipHeaderName::TO,
+        SipHeaderName::UNSUPPORTED,
+        SipHeaderName::VIA,
+        SipHeaderName::WARNING,
+        SipHeaderName::WWW_AUTHENTICATE,
+        IMS_NULL,
+        SipHeaderName::RETRY_AFTER,
+        SipHeaderName::RETRY_AFTER,
+        SipHeaderName::RETRY_AFTER,
+        SipHeaderName::P_EARLY_MEDIA,
+        SipHeaderName::RESOURCE_PRIORITY,
+        SipHeaderName::ACCEPT_RESOURCE_PRIORITY,
+        SipHeaderName::DATE,
+        IMS_NULL,
 };
 
 /*
@@ -120,11 +116,11 @@ return                  description
 </table>
 */
 PUBLIC
-SIPHeader::SIPHeader()
-    : nType(ISipHeader::ANY)
-    , strName(AString::ConstNull())
-    , strBody(AString::ConstNull())
-    , pAddress(IMS_NULL)
+SIPHeader::SIPHeader() :
+        nType(ISipHeader::ANY),
+        strName(AString::ConstNull()),
+        strBody(AString::ConstNull()),
+        pAddress(IMS_NULL)
 {
 }
 
@@ -147,11 +143,11 @@ return                  description
 </table>
 */
 PUBLIC
-SIPHeader::SIPHeader(IN IMS_SINT32 nType_)
-    : nType(nType_)
-    , strName(SIPStack::GetHeaderNameFromType(nType_))
-    , strBody(AString::ConstNull())
-    , pAddress(IMS_NULL)
+SIPHeader::SIPHeader(IN IMS_SINT32 nType_) :
+        nType(nType_),
+        strName(SIPStack::GetHeaderNameFromType(nType_)),
+        strBody(AString::ConstNull()),
+        pAddress(IMS_NULL)
 {
 }
 
@@ -174,11 +170,11 @@ return                  description
 </table>
 */
 PUBLIC
-SIPHeader::SIPHeader(IN CONST AString &strName_)
-    : nType(ISipHeader::ANY)
-    , strName(strName_)
-    , strBody(AString::ConstNull())
-    , pAddress(IMS_NULL)
+SIPHeader::SIPHeader(IN CONST AString& strName_) :
+        nType(ISipHeader::ANY),
+        strName(strName_),
+        strBody(AString::ConstNull()),
+        pAddress(IMS_NULL)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -204,11 +200,11 @@ return                  description
 </table>
 */
 PUBLIC
-SIPHeader::SIPHeader(IN CONST SipHeaderBase *pstHeader)
-    : nType(ISipHeader::ANY)
-    , strName(AString::ConstNull())
-    , strBody(AString::ConstNull())
-    , pAddress(IMS_NULL)
+SIPHeader::SIPHeader(IN CONST SipHeaderBase* pstHeader) :
+        nType(ISipHeader::ANY),
+        strName(AString::ConstNull()),
+        strBody(AString::ConstNull()),
+        pAddress(IMS_NULL)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -238,9 +234,8 @@ SIPHeader::SIPHeader(IN CONST SipHeaderBase *pstHeader)
 
     // P-Preferred-Identity & P-Asserted-Identity
     //    : name-addr / addr-spec -> no header parameters
-    if ((nType != ISipHeader::P_PREFERRED_IDENTITY)
-            && (nType != ISipHeader::P_ASSERTED_IDENTITY)
-            && (nType != ISipHeader::UNKNOWN))
+    if ((nType != ISipHeader::P_PREFERRED_IDENTITY) && (nType != ISipHeader::P_ASSERTED_IDENTITY) &&
+            (nType != ISipHeader::UNKNOWN))
     {
         objParams = SIPStack::ExtractParameters(const_cast<SipHeaderBase*>(pstHeader));
     }
@@ -263,8 +258,7 @@ return                  description
 ----------              ----------
 </table>
 */
-PUBLIC VIRTUAL
-SIPHeader::~SIPHeader()
+PUBLIC VIRTUAL SIPHeader::~SIPHeader()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -275,7 +269,7 @@ SIPHeader::~SIPHeader()
     {
         for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
         {
-            SipParameter *pParameter = objParams.GetAt(i);
+            SipParameter* pParameter = objParams.GetAt(i);
 
             if (pParameter != IMS_NULL)
                 delete pParameter;
@@ -302,8 +296,7 @@ return                  description
 ----------              ----------
 </table>
 */
-PUBLIC VIRTUAL
-void SIPHeader::Destroy()
+PUBLIC VIRTUAL void SIPHeader::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -328,10 +321,9 @@ return                  description
 new SIPHeader           Pointer to a new SIPHeader
 </table>
 */
-PUBLIC VIRTUAL
-ISipHeader* SIPHeader::Clone() const
+PUBLIC VIRTUAL ISipHeader* SIPHeader::Clone() const
 {
-    SIPHeader *pHeader = new SIPHeader(nType);
+    SIPHeader* pHeader = new SIPHeader(nType);
 
     //---------------------------------------------------------------------------------------------
 
@@ -350,8 +342,8 @@ ISipHeader* SIPHeader::Clone() const
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
-        SipParameter *pNewParameter = new SipParameter(*pParameter);
+        const SipParameter* pParameter = objParams.GetAt(i);
+        SipParameter* pNewParameter = new SipParameter(*pParameter);
 
         if (pNewParameter != IMS_NULL)
             pHeader->objParams.Append(pNewParameter);
@@ -380,10 +372,9 @@ IMS_TRUE                If both SIP headers matched, this value returns
 IMS_FALSE               If both SIP headers are not matched, this value returns
 </table>
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPHeader::Equals(IN CONST ISipHeader *piHeader) const
+PUBLIC VIRTUAL IMS_BOOL SIPHeader::Equals(IN CONST ISipHeader* piHeader) const
 {
-    const SIPHeader *pHeader = DYNAMIC_CAST(const SIPHeader*, piHeader);
+    const SIPHeader* pHeader = DYNAMIC_CAST(const SIPHeader*, piHeader);
 
     //---------------------------------------------------------------------------------------------
 
@@ -393,11 +384,10 @@ IMS_BOOL SIPHeader::Equals(IN CONST ISipHeader *piHeader) const
     if (nType != pHeader->nType)
         return IMS_FALSE;
 
-    if ((nType == ISipHeader::UNKNOWN)
-            && (pHeader->nType == ISipHeader::UNKNOWN))
+    if ((nType == ISipHeader::UNKNOWN) && (pHeader->nType == ISipHeader::UNKNOWN))
     {
-        const IMS_CHAR *pszFName = SIPStack::GetHeaderName(nType, strName);
-        const IMS_CHAR *pszOtherFName = SIPStack::GetHeaderName(pHeader->nType, pHeader->strName);
+        const IMS_CHAR* pszFName = SIPStack::GetHeaderName(nType, strName);
+        const IMS_CHAR* pszOtherFName = SIPStack::GetHeaderName(pHeader->nType, pHeader->strName);
 
         if (AString::CompareIgnoreCase(pszFName, pszOtherFName) != 0)
             return IMS_FALSE;
@@ -446,8 +436,7 @@ SipAddress*             If the header is a format of SIP address, it returns thi
 NULL pointer            If the header is not a format of SIP address, it returns NULL pointer
 </table>
 */
-PUBLIC VIRTUAL
-const SipAddress* SIPHeader::GetSipAddress() const
+PUBLIC VIRTUAL const SipAddress* SIPHeader::GetSipAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -475,8 +464,7 @@ Non-NULL                The full header value including the header parameters
 Empty or NULL           If the header has only a header name
 </table>
 */
-PUBLIC VIRTUAL
-AString SIPHeader::GetHeaderValue() const
+PUBLIC VIRTUAL AString SIPHeader::GetHeaderValue() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -487,7 +475,7 @@ AString SIPHeader::GetHeaderValue() const
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = objParams.GetAt(i);
 
         if (pParameter != IMS_NULL)
         {
@@ -516,8 +504,7 @@ return                  description
 String                  The header name of this SIPHeader
 </table>
 */
-PUBLIC VIRTUAL
-const AString& SIPHeader::GetName() const
+PUBLIC VIRTUAL const AString& SIPHeader::GetName() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -543,14 +530,13 @@ return                  description
 SipParameter*           Parameter to the specified parameter name
 </table>
 */
-PUBLIC VIRTUAL
-const SipParameter* SIPHeader::GetParameter(IN CONST AString &strName) const
+PUBLIC VIRTUAL const SipParameter* SIPHeader::GetParameter(IN CONST AString& strName) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
             return pParameter;
@@ -580,14 +566,13 @@ IMS_SUCCESS             The operation is successfully done
 IMS_FAILURE             An error occurs
 </table>
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPHeader::GetParameterNames(OUT IMSList<AString> &objPNames) const
+PUBLIC VIRTUAL IMS_RESULT SIPHeader::GetParameterNames(OUT IMSList<AString>& objPNames) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = objParams.GetAt(i);
 
         if (!objPNames.Append(pParameter->GetName()))
         {
@@ -618,8 +603,7 @@ return                  description
 List of SipParameter    The list of SipParameter for this SIPHeader
 </table>
 */
-PUBLIC VIRTUAL
-const IMSList<SipParameter*>& SIPHeader::GetParameters() const
+PUBLIC VIRTUAL const IMSList<SipParameter*>& SIPHeader::GetParameters() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -644,8 +628,7 @@ return                  description
 Type of header          Enumeration type of this SIPHeader
 </table>
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SIPHeader::GetType() const
+PUBLIC VIRTUAL IMS_SINT32 SIPHeader::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -675,8 +658,7 @@ Header body             The header value without header parameters
                         It is an empty string if the value was set to be NULL or empty string
 </table>
 */
-PUBLIC VIRTUAL
-const AString& SIPHeader::GetValue() const
+PUBLIC VIRTUAL const AString& SIPHeader::GetValue() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -703,36 +685,35 @@ Header body             The header value without header parameters
                         It is -1 if the value cannot have an integer value
 </table>
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SIPHeader::GetValueInt() const
+PUBLIC VIRTUAL IMS_SINT32 SIPHeader::GetValueInt() const
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nType)
     {
-    case ISipHeader::CONTENT_LENGTH:
-    case ISipHeader::EXPIRES_SEC:
-    case ISipHeader::EXPIRES_ANY:
-    case ISipHeader::MIN_EXPIRES:
-    case ISipHeader::MAX_FORWARDS:
-    case ISipHeader::MIN_SE:
-    case ISipHeader::RETRY_AFTER_SEC:
-    case ISipHeader::RETRY_AFTER_ANY:
-    case ISipHeader::RSEQ:
-    case ISipHeader::SESSION_EXPIRES:
-    {
-        IMS_BOOL bOK = IMS_FALSE;
-        IMS_SINT32 nValue = strBody.ToInt32(&bOK);
-
-        if (!bOK)
+        case ISipHeader::CONTENT_LENGTH:
+        case ISipHeader::EXPIRES_SEC:
+        case ISipHeader::EXPIRES_ANY:
+        case ISipHeader::MIN_EXPIRES:
+        case ISipHeader::MAX_FORWARDS:
+        case ISipHeader::MIN_SE:
+        case ISipHeader::RETRY_AFTER_SEC:
+        case ISipHeader::RETRY_AFTER_ANY:
+        case ISipHeader::RSEQ:
+        case ISipHeader::SESSION_EXPIRES:
         {
-            break;
-        }
+            IMS_BOOL bOK = IMS_FALSE;
+            IMS_SINT32 nValue = strBody.ToInt32(&bOK);
 
-        return nValue;
-    }
-    default:
-        break;
+            if (!bOK)
+            {
+                break;
+            }
+
+            return nValue;
+        }
+        default:
+            break;
     }
 
     return (-1);
@@ -756,14 +737,13 @@ return                  description
 ----------              ----------
 </table>
 */
-PUBLIC VIRTUAL
-void SIPHeader::RemoveParameter(IN CONST AString &strName)
+PUBLIC VIRTUAL void SIPHeader::RemoveParameter(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objParams.GetAt(i);
+        SipParameter* pParameter = objParams.GetAt(i);
 
         if (pParameter != IMS_NULL)
         {
@@ -796,8 +776,7 @@ return                  description
 ----------              ----------
 </table>
 */
-PUBLIC VIRTUAL
-void SIPHeader::SetName(IN CONST AString &strName)
+PUBLIC VIRTUAL void SIPHeader::SetName(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -832,14 +811,14 @@ IMS_SUCCESS             The header parameter is successfully set
 IMS_FAILURE             An error occurs
 </table>
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPHeader::SetParameter(IN CONST AString &strName, IN CONST AString &strValue)
+PUBLIC VIRTUAL IMS_RESULT SIPHeader::SetParameter(
+        IN CONST AString& strName, IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        SipParameter *pParameter = objParams.GetAt(i);
+        SipParameter* pParameter = objParams.GetAt(i);
 
         if (pParameter->GetName().EqualsIgnoreCase(strName))
         {
@@ -849,7 +828,7 @@ IMS_RESULT SIPHeader::SetParameter(IN CONST AString &strName, IN CONST AString &
 
     // Now, no existing parameter in the parameter list
 
-    SipParameter *pParameter = new SipParameter(strName, strValue);
+    SipParameter* pParameter = new SipParameter(strName, strValue);
 
     if (pParameter == IMS_NULL)
     {
@@ -890,8 +869,7 @@ IMS_SUCCESS             The full header value is successfully set
 IMS_FAILURE             An error occurs
 </table>
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPHeader::SetHeaderValue(IN CONST AString &strHeaderValue)
+PUBLIC VIRTUAL IMS_RESULT SIPHeader::SetHeaderValue(IN CONST AString& strHeaderValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -927,8 +905,7 @@ IMS_SUCCESS             The header value is successfully set
 IMS_FAILURE             An error occurs
 </table>
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPHeader::SetValue(IN CONST AString &strValue)
+PUBLIC VIRTUAL IMS_RESULT SIPHeader::SetValue(IN CONST AString& strValue)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -960,29 +937,28 @@ IMS_SUCCESS             The header value is successfully set
 IMS_FAILURE             An error occurs
 </table>
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPHeader::SetValueInt(IN IMS_SINT32 nValue)
+PUBLIC VIRTUAL IMS_RESULT SIPHeader::SetValueInt(IN IMS_SINT32 nValue)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nType)
     {
-    case ISipHeader::CONTENT_LENGTH:
-    case ISipHeader::EXPIRES_SEC:
-    case ISipHeader::EXPIRES_ANY:
-    case ISipHeader::MIN_EXPIRES:
-    case ISipHeader::MAX_FORWARDS:
-    case ISipHeader::MIN_SE:
-    case ISipHeader::RSEQ:
-    case ISipHeader::SESSION_EXPIRES:
-    {
-        if (nValue >= 0)
-            strBody.SetNumber(nValue);
+        case ISipHeader::CONTENT_LENGTH:
+        case ISipHeader::EXPIRES_SEC:
+        case ISipHeader::EXPIRES_ANY:
+        case ISipHeader::MIN_EXPIRES:
+        case ISipHeader::MAX_FORWARDS:
+        case ISipHeader::MIN_SE:
+        case ISipHeader::RSEQ:
+        case ISipHeader::SESSION_EXPIRES:
+        {
+            if (nValue >= 0)
+                strBody.SetNumber(nValue);
 
-        return IMS_SUCCESS;
-    }
-    default:
-        break;
+            return IMS_SUCCESS;
+        }
+        default:
+            break;
     }
 
     return IMS_FAILURE;
@@ -1013,8 +989,7 @@ return                  description
 String                  String representation of this SIPHeader
 </table>
 */
-PUBLIC VIRTUAL
-AString SIPHeader::ToString() const
+PUBLIC VIRTUAL AString SIPHeader::ToString() const
 {
     AString strHeader;
 
@@ -1056,8 +1031,7 @@ return                  description
 String                  String representation of this SIPHeader without header name
 </table>
 */
-PUBLIC VIRTUAL
-AString SIPHeader::ToStringWithoutName() const
+PUBLIC VIRTUAL AString SIPHeader::ToStringWithoutName() const
 {
     AStringBuffer objHeaderValue(512);
 
@@ -1069,8 +1043,7 @@ AString SIPHeader::ToStringWithoutName() const
 
         if (!objParams.IsEmpty())
         {
-            const AString &strTemp
-                    = static_cast<const AStringBuffer&>(objHeaderValue).GetString();
+            const AString& strTemp = static_cast<const AStringBuffer&>(objHeaderValue).GetString();
 
             if (strTemp.Contains('<') && strTemp.Contains('>'))
             {
@@ -1090,13 +1063,13 @@ AString SIPHeader::ToStringWithoutName() const
 
     for (IMS_UINT32 i = 0; i < objParams.GetSize(); ++i)
     {
-        const SipParameter *pParameter = objParams.GetAt(i);
+        const SipParameter* pParameter = objParams.GetAt(i);
 
         if (pParameter != IMS_NULL)
         {
             objHeaderValue.Append(TextParser::CHAR_SEMICOLON);
             // Do not add the white space...
-            //strHeader.Append(TextParser::CHAR_SP);
+            // strHeader.Append(TextParser::CHAR_SP);
             objHeaderValue.Append(pParameter->ToString());
         }
     }
@@ -1130,8 +1103,7 @@ IMS_TRUE                The header type is valid
 IMS_FALSE               The header type is not valid
 </table>
 */
-PUBLIC GLOBAL
-IMS_BOOL SIPHeader::IsValidType(IN IMS_SINT32 nType)
+PUBLIC GLOBAL IMS_BOOL SIPHeader::IsValidType(IN IMS_SINT32 nType)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1163,8 +1135,7 @@ IMS_FALSE               An error occurs during parsing
 </table>
 */
 PRIVATE
-IMS_BOOL SIPHeader::Decode(IN CONST AString &strBody_,
-        IN IMS_BOOL bParseParameter /* = IMS_TRUE */)
+IMS_BOOL SIPHeader::Decode(IN CONST AString& strBody_, IN IMS_BOOL bParseParameter /* = IMS_TRUE */)
 {
     AString strTrimmedBody = strBody_.Trim();
 
@@ -1178,7 +1149,7 @@ IMS_BOOL SIPHeader::Decode(IN CONST AString &strBody_,
         return IMS_TRUE;
     }
 
-    SipHeaderBase *pstHeader = SIPStack::DecodeHeader(nType, strName, strTrimmedBody);
+    SipHeaderBase* pstHeader = SIPStack::DecodeHeader(nType, strName, strTrimmedBody);
 
     if (pstHeader == IMS_NULL)
     {
@@ -1215,10 +1186,8 @@ IMS_BOOL SIPHeader::Decode(IN CONST AString &strBody_,
 
     // P-Preferred-Identity & P-Asserted-Identity
     //    : name-addr / addr-spec -> no header parameters
-    if ((bParseParameter == IMS_TRUE)
-            && (nType != ISipHeader::P_PREFERRED_IDENTITY)
-            && (nType != ISipHeader::P_ASSERTED_IDENTITY)
-            && (nType != ISipHeader::UNKNOWN))
+    if ((bParseParameter == IMS_TRUE) && (nType != ISipHeader::P_PREFERRED_IDENTITY) &&
+            (nType != ISipHeader::P_ASSERTED_IDENTITY) && (nType != ISipHeader::UNKNOWN))
     {
         objParams = SIPStack::ExtractParameters(pstHeader);
     }
@@ -1250,7 +1219,7 @@ IMS_FALSE               An error occurs during parsing
 </table>
 */
 PRIVATE
-IMS_BOOL SIPHeader::ParseUnknownBody(IN CONST AString &strBody_)
+IMS_BOOL SIPHeader::ParseUnknownBody(IN CONST AString& strBody_)
 {
     // Find ';'
     IMS_SINT32 nSemiColon = TextParser::GetIndexOfDelimiter(strBody_, TextParser::CHAR_SEMICOLON);
@@ -1265,7 +1234,7 @@ IMS_BOOL SIPHeader::ParseUnknownBody(IN CONST AString &strBody_)
     }
 
     objParams = SIPStack::ExtractParameters(
-                    strBody_.GetSubStr(nSemiColon+1), TextParser::CHAR_SEMICOLON);
+            strBody_.GetSubStr(nSemiColon + 1), TextParser::CHAR_SEMICOLON);
 
     strBody = strBody_.GetSubStr(0, nSemiColon).Trim();
 

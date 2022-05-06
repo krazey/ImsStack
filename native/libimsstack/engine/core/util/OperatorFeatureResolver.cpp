@@ -17,8 +17,8 @@
 #include "SipParsingHelper.h"
 #include "util/OperatorFeatureResolver.h"
 
-PUBLIC GLOBAL
-IMS_BOOL OperatorFeatureResolver::IsMessageForEarlySessionModel(IN const ISipMessage* piSIPMsg)
+PUBLIC GLOBAL IMS_BOOL OperatorFeatureResolver::IsMessageForEarlySessionModel(
+        IN const ISipMessage* piSIPMsg)
 {
     if (piSIPMsg == IMS_NULL)
     {
@@ -39,8 +39,8 @@ IMS_BOOL OperatorFeatureResolver::IsMessageForEarlySessionModel(IN const ISipMes
         return IMS_FALSE;
     }
 
-    ISipHeader* piHeader = SipParsingHelper::CreateHeader(
-            ISipHeader::CONTENT_DISPOSITION, strHeaderBody);
+    ISipHeader* piHeader =
+            SipParsingHelper::CreateHeader(ISipHeader::CONTENT_DISPOSITION, strHeaderBody);
 
     if (piHeader == IMS_NULL)
     {
