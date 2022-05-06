@@ -24,23 +24,23 @@ __IMS_TRACE_TAG_ADAPT__;
 class PolicyInfoP
 {
 public:
-    inline PolicyInfoP()
-        : nIPvType(IPSecPolicy::IP_TYPE_V6)
-        , objUeIPA(IPAddress::IPv6NONE)
-        , objUeIPv6(ByteArray::ConstNull())
-        , objServerIPA(IPAddress::IPv6NONE)
-        , objServerIPv6(ByteArray::ConstNull())
-        , nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP)
-        , nMode(IpSecType::MODE_TRANSPORT)
-        , nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO)
-        , objAuthKey(ByteArray::ConstNull())
-        , objEncrKey(ByteArray::ConstNull())
-        , strAuthHexKey(AString::ConstNull())
-        , strEncrHexKey(AString::ConstNull())
-    {}
-    inline ~PolicyInfoP()
-    {}
+    inline PolicyInfoP() :
+            nIPvType(IPSecPolicy::IP_TYPE_V6),
+            objUeIPA(IPAddress::IPv6NONE),
+            objUeIPv6(ByteArray::ConstNull()),
+            objServerIPA(IPAddress::IPv6NONE),
+            objServerIPv6(ByteArray::ConstNull()),
+            nSecuProto(IpSecType::SECURITY_PROTOCOL_ESP),
+            nMode(IpSecType::MODE_TRANSPORT),
+            nAuthAlgo(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
+            nEncrAlgo(IpSecType::ENCRYPTION_ALGORITHM_NO),
+            objAuthKey(ByteArray::ConstNull()),
+            objEncrKey(ByteArray::ConstNull()),
+            strAuthHexKey(AString::ConstNull()),
+            strEncrHexKey(AString::ConstNull())
+    {
+    }
+    inline ~PolicyInfoP() {}
 
 public:
     IMS_UINT32 nIPvType;
@@ -59,9 +59,9 @@ public:
 };
 
 PUBLIC
-IPSecPolicy::IPSecPolicy()
-    : pPolicyInfoP(new PolicyInfoP())
-    , objIPSecSA(IMSList<IPSecSA*>())
+IPSecPolicy::IPSecPolicy() :
+        pPolicyInfoP(new PolicyInfoP()),
+        objIPSecSA(IMSList<IPSecSA*>())
 {
 }
 
@@ -142,8 +142,8 @@ Remarks
 
 */
 PUBLIC
-void IPSecPolicy::SetTransportAddress(IN CONST IPAddress &objUeIPA,
-        IN CONST IPAddress &objServerIPA)
+void IPSecPolicy::SetTransportAddress(
+        IN CONST IPAddress& objUeIPA, IN CONST IPAddress& objServerIPA)
 {
     pPolicyInfoP->objUeIPA = objUeIPA;
     pPolicyInfoP->objServerIPA = objServerIPA;
@@ -156,10 +156,10 @@ void IPSecPolicy::SetTransportAddress(IN CONST IPAddress &objUeIPA,
     {
         pPolicyInfoP->nIPvType = IP_TYPE_V6;
         // Network Byte Order - VZW Mocana Library
-        pPolicyInfoP->objUeIPv6.Append(pPolicyInfoP->objUeIPA.ToIPv6Address().GetAddress(),
-                IPv6Address::MAX_SIZE);
-        pPolicyInfoP->objServerIPv6.Append(pPolicyInfoP->objServerIPA.ToIPv6Address().GetAddress(),
-                IPv6Address::MAX_SIZE);
+        pPolicyInfoP->objUeIPv6.Append(
+                pPolicyInfoP->objUeIPA.ToIPv6Address().GetAddress(), IPv6Address::MAX_SIZE);
+        pPolicyInfoP->objServerIPv6.Append(
+                pPolicyInfoP->objServerIPA.ToIPv6Address().GetAddress(), IPv6Address::MAX_SIZE);
     }
 }
 
@@ -169,15 +169,9 @@ Remarks
 
 */
 PUBLIC
-void IPSecPolicy::SetSAParameter
-(
-IN IMS_UINT32 nSecuProto,
-IN IMS_UINT32 nMode,
-IN IMS_UINT32 nAuthAlgo,
-IN IMS_UINT32 nEncrAlgo,
-IN CONST ByteArray &objAuthKey,
-IN CONST ByteArray &objEncrKey
-)
+void IPSecPolicy::SetSAParameter(IN IMS_UINT32 nSecuProto, IN IMS_UINT32 nMode,
+        IN IMS_UINT32 nAuthAlgo, IN IMS_UINT32 nEncrAlgo, IN CONST ByteArray& objAuthKey,
+        IN CONST ByteArray& objEncrKey)
 {
     pPolicyInfoP->nSecuProto = nSecuProto;
     pPolicyInfoP->nMode = nMode;
@@ -196,14 +190,8 @@ Remarks
 
 */
 PUBLIC
-void IPSecPolicy::GetSAParameter
-(
-OUT IMS_UINT32 &nIPvType,
-OUT IMS_UINT32 &nSecuProto,
-OUT IMS_UINT32 &nMode,
-OUT IMS_UINT32 &nAuthAlgo,
-OUT IMS_UINT32 &nEncrAlgo
-)
+void IPSecPolicy::GetSAParameter(OUT IMS_UINT32& nIPvType, OUT IMS_UINT32& nSecuProto,
+        OUT IMS_UINT32& nMode, OUT IMS_UINT32& nAuthAlgo, OUT IMS_UINT32& nEncrAlgo)
 {
     nIPvType = pPolicyInfoP->nIPvType;
     nSecuProto = pPolicyInfoP->nSecuProto;
@@ -323,7 +311,7 @@ IPSecSA* IPSecPolicy::FindSA(IN IMS_UINT32 nSPI)
     {
         IPSecSA* pSA = objIPSecSA.GetAt(i);
 
-        if (pSA->GetSPI() == nSPI )
+        if (pSA->GetSPI() == nSPI)
         {
             return pSA;
         }
@@ -347,7 +335,7 @@ void IPSecPolicy::SetAuthenticationKey()
     for (IMS_SINT32 i = 0; i < pPolicyInfoP->objAuthKey.GetLength(); ++i)
     {
         IMS_BYTE pbyte = pPolicyInfoP->objAuthKey[i];
-        strHEX.Sprintf("%02x", pbyte );
+        strHEX.Sprintf("%02x", pbyte);
         pPolicyInfoP->strAuthHexKey.Append(strHEX);
     }
 }

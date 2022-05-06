@@ -18,8 +18,7 @@
 
 class IRetryTimerListener;
 
-class RetryTimer
-    : public ITimerListener
+class RetryTimer : public ITimerListener
 {
 public:
     explicit RetryTimer(IN IMS_BOOL bRepeatable_ = IMS_FALSE);
@@ -29,14 +28,14 @@ public:
     // Add a time interval; in milli-seconds
     IMS_BOOL AddValue(IN IMS_UINT32 nInterval);
     // Adds the set of time intervals; in milli-seconds
-    IMS_BOOL AddValues(IN IMSList<IMS_UINT32> &objIntervals);
+    IMS_BOOL AddValues(IN IMSList<IMS_UINT32>& objIntervals);
     // Returns the next time interval; in milli-seconds
     IMS_UINT32 GetNextInterval() const;
     IMS_SINT32 GetState() const;
     // Resume the timer in PENDING state
     IMS_BOOL Resume();
     // Sets a listener when the timer expired
-    void SetListener(IN IRetryTimerListener *piListener);
+    void SetListener(IN IRetryTimerListener* piListener);
     // Apply the retry rule according to the timer
     IMS_BOOL Start();
     // Terminates the retry operation
@@ -44,7 +43,7 @@ public:
 
 private:
     // ITimerListener interface
-    virtual void Timer_TimerExpired(IN ITimer *piTimer);
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     IMS_BOOL StartTimer();
 
@@ -77,7 +76,7 @@ private:
     IMS_SINT32 nState;
 
     // Pointer to the timer interface
-    ITimer *piTimer;
+    ITimer* piTimer;
     // To track the count of retry operation
     IMS_UINT32 nTracker;
     // List of time intervals
@@ -87,7 +86,7 @@ private:
     // The last interval value will be used for the repeatable(infinite) timer
     IMS_BOOL bFlag_Repeatable;
 
-    IRetryTimerListener *piListener;
+    IRetryTimerListener* piListener;
 };
 
-#endif // _RETRY_TIMER_H_
+#endif  // _RETRY_TIMER_H_

@@ -27,9 +27,9 @@ struct SHA1Context
     IMS_UCHAR aucMessageBlock[64];
 };
 
-GLOBAL void IMSSHA1_Initialize(OUT SHA1Context *pstContext);
-GLOBAL void IMSSHA1_Update(IN CONST IMS_UCHAR *pucSrc, IN IMS_UINT32 nSrcLen,
-        IN_OUT SHA1Context *pstContext);
-GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context *pstContext, OUT IMS_UCHAR aucHash[20]);
+GLOBAL void IMSSHA1_Initialize(OUT SHA1Context* pstContext);
+GLOBAL void IMSSHA1_Update(
+        IN CONST IMS_UCHAR* pucSrc, IN IMS_UINT32 nSrcLen, IN_OUT SHA1Context* pstContext);
+GLOBAL void IMSSHA1_Finalize(IN_OUT SHA1Context* pstContext, OUT IMS_UCHAR aucHash[20]);
 
-#endif // _IMS_SHA1_H_
+#endif  // _IMS_SHA1_H_

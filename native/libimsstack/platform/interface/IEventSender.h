@@ -29,8 +29,7 @@ public:
      * @param nLParam The second parameter for this event
      * @param nSlotId The slot-id
      */
-    virtual void SendEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
+    virtual void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
             IN IMS_SINT32 nSlotId) = 0;
 };
 

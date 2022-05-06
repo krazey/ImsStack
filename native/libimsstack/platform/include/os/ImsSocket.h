@@ -19,27 +19,23 @@
 #include "ImsNetworkConnection.h"
 #include "ISocket.h"
 
-typedef IMS_SINT32    IMS_SOCKET;
+typedef IMS_SINT32 IMS_SOCKET;
 
 // Macro definition for socket handle
-#define IMS_SOCKET_MAKEPARAM(HIWORD, LOWORD) \
-        (IMS_UINT32) (((HIWORD) << 16) | (LOWORD))
+#define IMS_SOCKET_MAKEPARAM(HIWORD, LOWORD) (IMS_UINT32)(((HIWORD) << 16) | (LOWORD))
 
-#define IMS_SOCKET_HIWORD(LPARAM) \
-        (IMS_UINT16) (((LPARAM) >> 16) & (0xFFFF))
+#define IMS_SOCKET_HIWORD(LPARAM) (IMS_UINT16)(((LPARAM) >> 16) & (0xFFFF))
 
-#define IMS_SOCKET_LOWORD(LPARAM) \
-        (IMS_UINT16) ((LPARAM) & 0xFFFF)
+#define IMS_SOCKET_LOWORD(LPARAM) (IMS_UINT16)((LPARAM)&0xFFFF)
 
-class ImsSocket
-    : public ISocket
+class ImsSocket : public ISocket
 {
 public:
-    inline ImsSocket()
-        : m_hConnection(0)
-    {}
-    inline virtual ~ImsSocket()
-    {}
+    inline ImsSocket() :
+            m_hConnection(0)
+    {
+    }
+    inline virtual ~ImsSocket() {}
 
 public:
     virtual void Destroy() = 0;
@@ -48,9 +44,10 @@ public:
     virtual void ClosedByDataConnection() = 0;
 
     inline void BindNetworkConnection(IN IMS_CONNECTION hConnection)
-    { m_hConnection = hConnection; }
-    inline IMS_CONNECTION GetNetworkConnection() const
-    { return m_hConnection; }
+    {
+        m_hConnection = hConnection;
+    }
+    inline IMS_CONNECTION GetNetworkConnection() const { return m_hConnection; }
 
 private:
     IMS_CONNECTION m_hConnection;

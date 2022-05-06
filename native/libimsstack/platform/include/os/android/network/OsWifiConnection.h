@@ -23,9 +23,7 @@
 class IThread;
 class NetworkPolicy;
 
-class OsWifiConnection
-    : public ImsNetworkConnection
-    , public ISystemListener
+class OsWifiConnection : public ImsNetworkConnection, public ISystemListener
 {
 public:
     OsWifiConnection();
@@ -58,7 +56,7 @@ public:
 
 public:
     const IPAddress& GetLocalAddress(
-            IN IMS_SINT32 nIpVersion = 0/*configuration-based*/) const override;
+            IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) const override;
 
 private:
     // INetworkConnection class
@@ -70,13 +68,12 @@ private:
     void GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
             OUT AString& strTimeStamp, OUT AString& strCellInfoAge) override;
     IMS_BOOL GetExtraInfo(IN const AString& strType, OUT AString& strInfo) override;
-    IMS_SINT32 GetHostByName(IN const AString& strHostName,
-            OUT IMSList<IPAddress>& objIpAddrs,
-            IN IMS_SINT32 nIpVersion = 0/*default-local-address-based*/) override;
+    IMS_SINT32 GetHostByName(IN const AString& strHostName, OUT IMSList<IPAddress>& objIpAddrs,
+            IN IMS_SINT32 nIpVersion = 0 /*default-local-address-based*/) override;
     IMS_SINT32 GetIfaceId() const override;
     const AString& GetIfaceName() const override;
     const AStringArray& GetPcscfAddress(
-            IN IMS_SINT32 nIpVersion = 0/*configuration-based*/) override;
+            IN IMS_SINT32 nIpVersion = 0 /*configuration-based*/) override;
     STATE_ENTYPE GetState() const override;
     IMS_BOOL IsConnected(IN IMS_SINT32 nCategory = IIpcan::CATEGORY_ANY) const override;
     IMS_BOOL SendPingToHostAddress(IN const IPAddress& objHostAddress) override;
@@ -85,7 +82,7 @@ private:
     IMS_SINT32 GetMtu() const override;
     void SetListener(IN INetworkConnectionListener* piListener) override;
     void SetPreferredIpVersion(
-            IN IMS_SINT32 nPreferredIpVersion = 0/*default-aos-connection-profile*/) override;
+            IN IMS_SINT32 nPreferredIpVersion = 0 /*default-aos-connection-profile*/) override;
     void AddReferenceListener(IN INetworkConnectionListener* piListener) override;
     void RemoveReferenceListener(IN INetworkConnectionListener* piListener) override;
 
@@ -99,8 +96,8 @@ private:
     IMS_SINT32 GetApnType() const override;
 
     // ISystemListener interface
-    void System_NotifyEvent(IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam,
-            IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     IMS_BOOL AdjustPreferredLocalAddress();
     IMS_CONNECTION AttachNetworkConnection();

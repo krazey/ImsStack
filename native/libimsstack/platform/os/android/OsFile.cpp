@@ -30,9 +30,10 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsFilePrivate
 {
 public:
-    inline OsFilePrivate()
-        : m_pFile(IMS_NULL)
-    {}
+    inline OsFilePrivate() :
+            m_pFile(IMS_NULL)
+    {
+    }
 
     inline ~OsFilePrivate()
     {
@@ -47,16 +48,13 @@ public:
     FILE* m_pFile;
 };
 
-
-
 PUBLIC
-OsFile::OsFile()
-    : m_pFileP(new OsFilePrivate())
+OsFile::OsFile() :
+        m_pFileP(new OsFilePrivate())
 {
 }
 
-PUBLIC VIRTUAL
-OsFile::~OsFile()
+PUBLIC VIRTUAL OsFile::~OsFile()
 {
     Close();
 
@@ -67,8 +65,7 @@ OsFile::~OsFile()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFile::Open(IN const AString& strName, IN FILE_OPEN_ENTYPE eMode)
+PUBLIC VIRTUAL IMS_BOOL OsFile::Open(IN const AString& strName, IN FILE_OPEN_ENTYPE eMode)
 {
     if (strName.GetLength() == 0)
     {
@@ -98,8 +95,7 @@ IMS_BOOL OsFile::Open(IN const AString& strName, IN FILE_OPEN_ENTYPE eMode)
     return (m_pFileP->m_pFile == IMS_NULL) ? IMS_FALSE : IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsFile::Close()
+PUBLIC VIRTUAL void OsFile::Close()
 {
     if (m_pFileP->m_pFile != IMS_NULL)
     {
@@ -108,8 +104,7 @@ void OsFile::Close()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsFile::Seek(IN IMS_UINT32 nOffset, IN FILE_SEEK_ENTYPE eFrom) const
+PUBLIC VIRTUAL IMS_UINT32 OsFile::Seek(IN IMS_UINT32 nOffset, IN FILE_SEEK_ENTYPE eFrom) const
 {
     if (m_pFileP->m_pFile == IMS_NULL)
     {
@@ -141,8 +136,7 @@ IMS_UINT32 OsFile::Seek(IN IMS_UINT32 nOffset, IN FILE_SEEK_ENTYPE eFrom) const
     return INVALID_VALUE;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsFile::Read(OUT void* pBuffer, IN IMS_UINT32 nNumberOfBytesToRead)
+PUBLIC VIRTUAL IMS_UINT32 OsFile::Read(OUT void* pBuffer, IN IMS_UINT32 nNumberOfBytesToRead)
 {
     IMS_SINT32 nReadBytes = 0;
 
@@ -154,8 +148,7 @@ IMS_UINT32 OsFile::Read(OUT void* pBuffer, IN IMS_UINT32 nNumberOfBytesToRead)
     return (nReadBytes > 0) ? nReadBytes : 0;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsFile::Write(IN void* pBuffer, IN IMS_UINT32 nNumberOfBytesToWrite)
+PUBLIC VIRTUAL IMS_UINT32 OsFile::Write(IN void* pBuffer, IN IMS_UINT32 nNumberOfBytesToWrite)
 {
     IMS_SINT32 nWrittenBytes = 0;
 
@@ -167,8 +160,7 @@ IMS_UINT32 OsFile::Write(IN void* pBuffer, IN IMS_UINT32 nNumberOfBytesToWrite)
     return (nWrittenBytes > 0) ? nWrittenBytes : 0;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsFile::GetSize() const
+PUBLIC VIRTUAL IMS_UINT32 OsFile::GetSize() const
 {
     IMS_UINT32 nSize = 0;
     fpos_t nCurPos;
@@ -188,8 +180,7 @@ IMS_UINT32 OsFile::GetSize() const
     return nSize;
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsFile::GetPos() const
+PUBLIC VIRTUAL IMS_UINT32 OsFile::GetPos() const
 {
     if (Seek(0, FILE_SEEK_CURRENT) == INVALID_VALUE)
     {
@@ -207,13 +198,10 @@ IMS_UINT32 OsFile::GetPos() const
     return LONG_TO_INT(nPos);
 }
 
+PRIVATE GLOBAL const IMS_CHAR OsFileUtil::FILE_SEPARATOR[] = "/";
 
-
-PRIVATE GLOBAL
-const IMS_CHAR OsFileUtil::FILE_SEPARATOR[] = "/";
-
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::ChangeMode(IN const AString& strFileName, IN IMS_SINT32 nMode) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::ChangeMode(
+        IN const AString& strFileName, IN IMS_SINT32 nMode) const
 {
     mode_t nNewMode = 0;
 
@@ -271,9 +259,8 @@ IMS_BOOL OsFileUtil::ChangeMode(IN const AString& strFileName, IN IMS_SINT32 nMo
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::ChangeOwner(IN const AString& strFileName,
-        IN IMS_SINT32 nUID, IN IMS_SINT32 nGID) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::ChangeOwner(
+        IN const AString& strFileName, IN IMS_SINT32 nUID, IN IMS_SINT32 nGID) const
 {
     // (-1) : no changes
     uid_t nOwner = -1;
@@ -308,33 +295,30 @@ IMS_BOOL OsFileUtil::ChangeOwner(IN const AString& strFileName,
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::Exist(IN const AString& strFileName) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::Exist(IN const AString& strFileName) const
 {
     return (access(strFileName.GetStr(), F_OK) == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::Rename(IN const AString& strOldName, IN const AString& strNewName) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::Rename(
+        IN const AString& strOldName, IN const AString& strNewName) const
 {
     return (rename(strOldName.GetStr(), strNewName.GetStr()) == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::Delete(IN const AString& strFileName) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::Delete(IN const AString& strFileName) const
 {
     return (remove(strFileName.GetStr()) == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-AString OsFileUtil::GetName(IN const AString& strFilePath) const
+PUBLIC VIRTUAL AString OsFileUtil::GetName(IN const AString& strFilePath) const
 {
     AString strFileName = strFilePath.Trim();
     IMS_SINT32 nIndex = strFileName.GetLastIndexOf(FILE_SEPARATOR[0]);
 
     if (nIndex != AString::NPOS)
     {
-        strFileName = strFileName.GetSubStr(nIndex+1);
+        strFileName = strFileName.GetSubStr(nIndex + 1);
     }
 
     nIndex = strFileName.GetLastIndexOf('.');
@@ -342,22 +326,20 @@ AString OsFileUtil::GetName(IN const AString& strFilePath) const
     return (nIndex == AString::NPOS) ? strFileName : strFileName.GetSubStr(0, nIndex);
 }
 
-PUBLIC VIRTUAL
-AString OsFileUtil::GetExtension(IN const AString& strFileName) const
+PUBLIC VIRTUAL AString OsFileUtil::GetExtension(IN const AString& strFileName) const
 {
     IMS_SINT32 nIndex = strFileName.GetLastIndexOf('.');
 
     return (nIndex == AString::NPOS) ? AString::ConstNull() : strFileName.GetSubStr(nIndex + 1);
 }
 
-PUBLIC VIRTUAL
-const IMS_CHAR* OsFileUtil::GetFileSeparator() const
+PUBLIC VIRTUAL const IMS_CHAR* OsFileUtil::GetFileSeparator() const
 {
     return FILE_SEPARATOR;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::MakeDir(IN const AString& strPathName, IN IMS_SINT32 nMode) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::MakeDir(
+        IN const AString& strPathName, IN IMS_SINT32 nMode) const
 {
     mode_t nNewMode = 0;
 
@@ -409,8 +391,8 @@ IMS_BOOL OsFileUtil::MakeDir(IN const AString& strPathName, IN IMS_SINT32 nMode)
     return (mkdir(strPathName.GetStr(), nNewMode) == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::MakeDirs(IN const AString& strPathName, IN IMS_SINT32 nMode) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::MakeDirs(
+        IN const AString& strPathName, IN IMS_SINT32 nMode) const
 {
     if (strPathName.GetLength() <= 0)
     {
@@ -436,20 +418,17 @@ IMS_BOOL OsFileUtil::MakeDirs(IN const AString& strPathName, IN IMS_SINT32 nMode
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsFileUtil::RemoveDir(IN const AString& strPathName)
+PUBLIC VIRTUAL void OsFileUtil::RemoveDir(IN const AString& strPathName)
 {
     rmdir(strPathName.GetStr());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::ExistDir(IN const AString& strPathName) const
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::ExistDir(IN const AString& strPathName) const
 {
     return (access(strPathName.GetStr(), F_OK) == 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-AString OsFileUtil::GetExternalStoragePath() const
+PUBLIC VIRTUAL AString OsFileUtil::GetExternalStoragePath() const
 {
     AString strExternalStoragePath = AString::ConstNull();
 
@@ -460,9 +439,8 @@ AString OsFileUtil::GetExternalStoragePath() const
     return strExternalStoragePath;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
-        IN const AString& strFileType /*= AString::ConstNull()*/)
+PUBLIC VIRTUAL IMS_BOOL OsFileUtil::DeleteAllFiles(
+        IN const AString& strPathName, IN const AString& strFileType /*= AString::ConstNull()*/)
 {
     IMS_TRACE_D("DeleteAllFiles [%s] [%s]", strPathName.GetStr(), strFileType.GetStr(), 0);
 
@@ -493,7 +471,7 @@ IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
 
         if (pSubDir != NULL)
         {
-            //If it is the sub-directory
+            // If it is the sub-directory
             strSubPathName.Append("/");
 
             IMS_TRACE_D("DeleteAllFiles :: sub-dir=%s", strSubPathName.GetStr(), 0, 0);
@@ -502,7 +480,7 @@ IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
 
             DeleteAllFiles(strSubPathName, strFileType);
 
-            //delete the sub-directory if it is empty and all file should be deleted
+            // delete the sub-directory if it is empty and all file should be deleted
             if (strFileType.GetLength() == 0)
             {
                 RemoveDir(strSubPathName);
@@ -510,7 +488,7 @@ IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
         }
         else
         {
-            //If it is the file
+            // If it is the file
             IMS_TRACE_D("DeleteAllFiles :: file=%s", strSubPathName.GetStr(), 0, 0);
 
             AString strFileExtension;
@@ -519,13 +497,13 @@ IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
 
             if (nIndex > 0 && nIndex < strFileName.GetLength())
             {
-                strFileExtension = strFileName.GetSubStr(nIndex+1);
+                strFileExtension = strFileName.GetSubStr(nIndex + 1);
             }
 
             // Delete the file only if its file type is same with given strFileType
-            if ((strFileType.GetLength() == 0)
-                    || ((strFileType.GetLength() > 0)
-                        && strFileType.EqualsIgnoreCase(strFileExtension)))
+            if ((strFileType.GetLength() == 0) ||
+                    ((strFileType.GetLength() > 0) &&
+                            strFileType.EqualsIgnoreCase(strFileExtension)))
             {
                 Delete(strSubPathName);
             }
@@ -537,11 +515,10 @@ IMS_BOOL OsFileUtil::DeleteAllFiles(IN const AString& strPathName,
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMSList<AString> OsFileUtil::GetAllFiles(IN const AString& strPathName,
-        IN const AString& strFileType /*= AString::ConstNull()*/)
+PUBLIC VIRTUAL IMSList<AString> OsFileUtil::GetAllFiles(
+        IN const AString& strPathName, IN const AString& strFileType /*= AString::ConstNull()*/)
 {
-    IMS_TRACE_D("GetAllFiles [%s] [%s]",strPathName.GetStr(), strFileType.GetStr(), 0);
+    IMS_TRACE_D("GetAllFiles [%s] [%s]", strPathName.GetStr(), strFileType.GetStr(), 0);
 
     IMSList<AString> objFileNameList;
     DIR* pDir = opendir(strPathName.GetStr());
@@ -570,12 +547,11 @@ IMSList<AString> OsFileUtil::GetAllFiles(IN const AString& strPathName,
 
         if (nIndex > 0 && nIndex < strFileName.GetLength())
         {
-            strFileExtension = strFileName.GetSubStr(nIndex+1);
+            strFileExtension = strFileName.GetSubStr(nIndex + 1);
         }
 
-        if ((strFileType.GetLength() == 0)
-                || ((strFileType.GetLength() > 0)
-                        && strFileType.EqualsIgnoreCase(strFileExtension)))
+        if ((strFileType.GetLength() == 0) ||
+                ((strFileType.GetLength() > 0) && strFileType.EqualsIgnoreCase(strFileExtension)))
         {
             objFileNameList.Append(strFileName);
         }
@@ -586,8 +562,7 @@ IMSList<AString> OsFileUtil::GetAllFiles(IN const AString& strPathName,
     return objFileNameList;
 }
 
-PUBLIC VIRTUAL
-IMS_SLONG OsFileUtil::GetLastModifiedTime(IN const AString& strPathName)
+PUBLIC VIRTUAL IMS_SLONG OsFileUtil::GetLastModifiedTime(IN const AString& strPathName)
 {
     struct stat info;
 

@@ -25,9 +25,9 @@
 #define ANI_3GPP_MAX_PLMN 3
 #define ANI_3GPP_MAX_LAC_TAC 2
 #define ANI_3GPP_CGI_MAX_CI 2
-#define ANI_3GPP_CGI_MAX_TOTAL_LEN 14 // hexadecimal digits excluding null character
+#define ANI_3GPP_CGI_MAX_TOTAL_LEN 14  // hexadecimal digits excluding null character
 #define ANI_3GPP_UTRAN_CELL_ID_MAX_CELL_ID 4
-#define ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN 17 // hexadecimal digits excluding null character
+#define ANI_3GPP_UTRAN_CELL_ID_MAX_TOTAL_LEN 17  // hexadecimal digits excluding null character
 
 // hexadecimal digits representations
 #define ANI_3GPP_MCC_MAX_LEN 3
@@ -74,7 +74,7 @@ struct UTRAN_CELL_ID_3GPP
 
 #define ANI_3GPP_NR_MAX_TAC 3
 #define ANI_3GPP_NR_MAX_CELL_ID 5
-#define ANI_3GPP_NR_UTRAN_CELL_ID_MAX_TOTAL_LEN 21 // hexadecimal digits excluding null character
+#define ANI_3GPP_NR_UTRAN_CELL_ID_MAX_TOTAL_LEN 21  // hexadecimal digits excluding null character
 
 // hexadecimal digits representations
 #define ANI_3GPP_NR_TAC_MAX_LEN 6
@@ -101,7 +101,7 @@ struct NR_UTRAN_CELL_ID_3GPP
 #define ANI_3GPP2_MAX_SECTOR_ID 16
 #define ANI_3GPP2_MAX_SUBNET_LENGTH 1
 #define ANI_3GPP2_MAX_CARRIER_ID 3
-#define ANI_3GPP2_CI_MAX_TOTAL_LEN 40 // hexadecimal digits excluding null character
+#define ANI_3GPP2_CI_MAX_TOTAL_LEN 40  // hexadecimal digits excluding null character
 
 // hexadecimal digits representations
 #define ANI_3GPP2_SECTOR_ID_MAX_LEN 32
@@ -129,8 +129,8 @@ struct CI_3GPP2
 
 // WLAN {
 #define ANI_WLAN_MAX_MAC 6
-#define ANI_WLAN_MAC_MAX_LEN 12 // hexadecimal digits excluding null character
-#define ANI_WLAN_SSID_MAX_LEN 32 // string token excluding null character
+#define ANI_WLAN_MAC_MAX_LEN 12   // hexadecimal digits excluding null character
+#define ANI_WLAN_SSID_MAX_LEN 32  // string token excluding null character
 
 struct I_WLAN_NODE_ID
 {
@@ -151,10 +151,10 @@ struct I_WLAN_NODE_ID
 class AccessNetworkInfo
 {
 public:
-    inline AccessNetworkInfo()
-        : nType(TYPE_NONE)
-        , nClass(CLASS_NONE)
-        , bIsAccessInfoRequired(IMS_TRUE)
+    inline AccessNetworkInfo() :
+            nType(TYPE_NONE),
+            nClass(CLASS_NONE),
+            bIsAccessInfoRequired(IMS_TRUE)
     {
         IMS_MEM_Memset(&uniAI, 0, sizeof(uniAI));
     }

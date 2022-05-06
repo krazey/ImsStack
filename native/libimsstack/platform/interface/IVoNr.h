@@ -72,8 +72,8 @@ public:
      * @param nTargetRat RAT_LTE, RAT_NR5G (Two types are only valid)
      * @param nReason if need, parameters will be defined
      */
-    virtual void VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus,
-            IN IMS_UINT32 nSourceRat, IN IMS_UINT32 nTargetRat, IN IMS_SINT32 nReason) = 0;
+    virtual void VoNrHandoff_NotifyInformation(IN IMS_UINT32 nStatus, IN IMS_UINT32 nSourceRat,
+            IN IMS_UINT32 nTargetRat, IN IMS_SINT32 nReason) = 0;
 
     enum
     {
@@ -82,7 +82,6 @@ public:
         STATUS_HANDOFF_FAILURE
     };
 };
-
 
 class IVoNr
 {
@@ -123,7 +122,7 @@ public:
      * @param nRat RAT_LTE, RAT_NR5G
      * @param nType TYPE_VOICE, TYPE_VIDEO (Two types are only allowed)
      * @return CALL_PREF_REQUEST_XXX (CALL_PREF_REQUEST_SUCCESS, ...)
-    */
+     */
     virtual IMS_SINT32 RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType) = 0;
 
     /**
@@ -178,14 +177,12 @@ public:
     /**
      * @brief Adds the listener for call preference.
      */
-    virtual void AddListenerForCallPreference(
-            IN IVoNrCallPreferenceListener* piListener) = 0;
+    virtual void AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener) = 0;
 
     /**
      * @brief Removes the listener for call preference.
      */
-    virtual void RemoveListenerForCallPreference(
-            IN IVoNrCallPreferenceListener* piListener) = 0;
+    virtual void RemoveListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener) = 0;
 
     /**
      * @brief Adds the listener for handoff.

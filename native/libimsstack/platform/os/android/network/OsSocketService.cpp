@@ -37,11 +37,7 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-
-
-#define IMS_FD_SET     ImsFdSet::TYPE_SELECT
-
-
+#define IMS_FD_SET ImsFdSet::TYPE_SELECT
 
 class SocketFdManager
 {
@@ -87,8 +83,6 @@ private:
     // }
 };
 
-
-
 //// class SocketFdManager
 PUBLIC
 SocketFdManager::SocketFdManager()
@@ -102,8 +96,7 @@ SocketFdManager::SocketFdManager()
     // }
 }
 
-PUBLIC VIRTUAL
-SocketFdManager::~SocketFdManager()
+PUBLIC VIRTUAL SocketFdManager::~SocketFdManager()
 {
     // __IMS_SOCKET_EVENT__ {
     DestroyControlPipe();
@@ -365,15 +358,15 @@ PUBLIC
 IMS_SINT32 SocketFdManager::ResetControlEvent()
 {
     // RECOVER_CONTROL_PIPE
-    IMS_SINT32 nError = 0; // No error
-    IMS_CHAR acBuffer[2] = { '\0', '\0' };
+    IMS_SINT32 nError = 0;  // No error
+    IMS_CHAR acBuffer[2] = {'\0', '\0'};
 
     m_objLockCtrlEvent.Lock();
 
     if (m_nCtrlPipe[0] == -1)
     {
-        IMS_TRACE_E(0, "[SocketCtrlEvent] Can't reset the control event (PIPE is invalid)",
-                0, 0, 0);
+        IMS_TRACE_E(
+                0, "[SocketCtrlEvent] Can't reset the control event (PIPE is invalid)", 0, 0, 0);
         goto EXIT_ResetControlEvent;
     }
 
@@ -400,8 +393,8 @@ IMS_SINT32 SocketFdManager::ResetControlEvent()
 
     if (acBuffer[0] != 1)
     {
-        IMS_TRACE_E(0, "[SocketCtrlEvent] Control event is not matched (%d, %d)",
-                acBuffer[0], acBuffer[1], 0);
+        IMS_TRACE_E(0, "[SocketCtrlEvent] Control event is not matched (%d, %d)", acBuffer[0],
+                acBuffer[1], 0);
         goto EXIT_ResetControlEvent;
     }
 
@@ -422,7 +415,7 @@ IMS_SINT32 SocketFdManager::SetControlEvent()
 {
     static const IMS_CHAR c = 1;
     // RECOVER_CONTROL_PIPE
-    IMS_SINT32 nError = 0; // No error
+    IMS_SINT32 nError = 0;  // No error
 
     m_objLockCtrlEvent.Lock();
 
@@ -435,8 +428,7 @@ IMS_SINT32 SocketFdManager::SetControlEvent()
 
     if (m_nCtrlPipe[1] == -1)
     {
-        IMS_TRACE_E(0, "[SocketCtrlEvent] Can't set the control event (PIPE is invalid)",
-                0, 0, 0);
+        IMS_TRACE_E(0, "[SocketCtrlEvent] Can't set the control event (PIPE is invalid)", 0, 0, 0);
         goto EXIT_SetControlEvent;
     }
 
@@ -465,8 +457,7 @@ EXIT_SetControlEvent:
 }
 // __IMS_SOCKET_EVENT__ }
 
-PUBLIC GLOBAL
-IMS_SINT32 SocketFdManager::ConvertEvent(IN IMS_SLONG nEvent)
+PUBLIC GLOBAL IMS_SINT32 SocketFdManager::ConvertEvent(IN IMS_SLONG nEvent)
 {
     IMS_SINT32 nConvertedEvent = 0;
 
@@ -508,10 +499,7 @@ IMS_SINT32 SocketFdManager::ConvertEvent(IN IMS_SLONG nEvent)
     return nConvertedEvent;
 }
 
-
-
-class OsSocketThread
-    : public IThreadImpListener
+class OsSocketThread : public IThreadImpListener
 {
 public:
     OsSocketThread(IN OsSocketService* pService);
@@ -533,24 +521,20 @@ private:
     SocketFdManager m_objFdMngr;
 };
 
-
-
 //// class OsSocketThread
 PUBLIC
-OsSocketThread::OsSocketThread(IN OsSocketService* pService)
-    : m_pSocketService(pService)
-    , m_pThread(IMS_NULL)
+OsSocketThread::OsSocketThread(IN OsSocketService* pService) :
+        m_pSocketService(pService),
+        m_pThread(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsSocketThread::~OsSocketThread()
+PUBLIC VIRTUAL OsSocketThread::~OsSocketThread()
 {
     CleanUp();
 }
 
-PUBLIC VIRTUAL
-void OsSocketThread::RunImp()
+PUBLIC VIRTUAL void OsSocketThread::RunImp()
 {
     IMS_BOOL bLoop = IMS_TRUE;
     IMS_SINT32 nMaxEvent;
@@ -573,7 +557,7 @@ void OsSocketThread::RunImp()
         // Updates FD sets
         m_objFdMngr.CopyFdSet(pFdSet);
 
-        //4 NOTICE : we can use FD_SETSIZE constant, instead of nMaxSockFD
+        // 4 NOTICE : we can use FD_SETSIZE constant, instead of nMaxSockFD
         nMaxEvent = pFdSet->WaitForEvents();
         // }
 
@@ -592,8 +576,8 @@ void OsSocketThread::RunImp()
             }
 
             // __IMS_SOCKET_EVENT__ {
-            nSignaledEvents = pFdSet->GetSignaledEvents(
-                    m_objFdMngr.GetControlEventFd(), nSignaledCount);
+            nSignaledEvents =
+                    pFdSet->GetSignaledEvents(m_objFdMngr.GetControlEventFd(), nSignaledCount);
             nMaxEvent -= nSignaledCount;
 
             if (ImsFdSet::IsReadEventSignaled(nSignaledEvents))
@@ -702,19 +686,16 @@ void OsSocketThread::CleanUp()
     // }
 }
 
-
-
 //// class OsSocketService
 PUBLIC
-OsSocketService::OsSocketService()
-    : m_bServiceStarted(IMS_FALSE)
-    , m_pWorkerThread(IMS_NULL)
+OsSocketService::OsSocketService() :
+        m_bServiceStarted(IMS_FALSE),
+        m_pWorkerThread(IMS_NULL)
 {
     m_pWorkerThread = new OsSocketThread(this);
 }
 
-PUBLIC VIRTUAL
-OsSocketService::~OsSocketService()
+PUBLIC VIRTUAL OsSocketService::~OsSocketService()
 {
     ExitInstance();
 
@@ -791,8 +772,7 @@ OsSocketBase* OsSocketService::LookupHandle(IN SOCKET hSocket)
 {
     ImsSocketState* pState = ImsSocketState::GetInstance();
 
-    return DYNAMIC_CAST(OsSocketBase*,
-            pState->LookupHandle(static_cast<IMS_SOCKET>(hSocket)));
+    return DYNAMIC_CAST(OsSocketBase*, pState->LookupHandle(static_cast<IMS_SOCKET>(hSocket)));
 }
 
 PUBLIC
@@ -826,7 +806,7 @@ IMS_BOOL OsSocketService::InitInstance()
     // Start socket worker thread
     if (!StartService())
     {
-        IMS_TRACE_E( 0, "Initializing a socket service failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Initializing a socket service failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -918,7 +898,8 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
 
     switch (nEvent)
     {
-        case IMS_SOCKET_DATA_RECEIVED: {
+        case IMS_SOCKET_DATA_RECEIVED:
+        {
             if (pSocket->GetSocketType() == ISocket::TYPE_DGRAM)
             {
                 pSocket->NotifyDataReceived(nErrorCode);
@@ -927,7 +908,7 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
             {
                 if (pSocket->IsServerSocket())
                 {
-                    //2 Clarify the below logic
+                    // 2 Clarify the below logic
                     pSocket->NotifyConnectionReceived(nErrorCode);
                 }
                 else
@@ -940,8 +921,10 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
 
                         if (pTmpSocket == IMS_NULL)
                         {
-                            IMS_TRACE_E(0, "TCP socket (%d) is already dead " \
-                                    "on IMS_SOCKET_DATA_RECEIVED", hSocket, 0, 0);
+                            IMS_TRACE_E(0,
+                                    "TCP socket (%d) is already dead "
+                                    "on IMS_SOCKET_DATA_RECEIVED",
+                                    hSocket, 0, 0);
                         }
                         else
                         {
@@ -954,8 +937,9 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
                         {
                             // hwangoo park
                             pSocket->NotifyDataReceived(0);
-                            IMS_TRACE_D("Notify data available (PSH, FIN) " \
-                                    "even though error occurred (%d)", nErrorCode, 0, 0);
+                            IMS_TRACE_D("Notify data available (PSH, FIN) "
+                                        "even though error occurred (%d)",
+                                    nErrorCode, 0, 0);
 
                             pSocket->NotifyClosed(nErrorCode);
                         }
@@ -972,7 +956,8 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
             }
             break;
         }
-        case IMS_SOCKET_SEND_ENABLED: {
+        case IMS_SOCKET_SEND_ENABLED:
+        {
             if (pSocket->GetSocketType() == ISocket::TYPE_DGRAM)
             {
                 pSocket->NotifySendEnabled(nErrorCode);
@@ -997,20 +982,22 @@ void OsSocketService::DoNotificationCallback(IN SOCKET hSocket, IN IMS_SLONG nEv
             }
             break;
         }
-        case IMS_SOCKET_CLOSED: {
+        case IMS_SOCKET_CLOSED:
+        {
             OsSocketBase* pTmpSocket = LookupHandle(hSocket);
 
             if (pTmpSocket == IMS_NULL)
             {
-                IMS_TRACE_E(0, "TCP socket (%d) is already dead on IMS_SOCKET_CLOSED",
-                        hSocket, 0, 0);
+                IMS_TRACE_E(
+                        0, "TCP socket (%d) is already dead on IMS_SOCKET_CLOSED", hSocket, 0, 0);
                 break;
             }
 
             pTmpSocket->NotifyClosed(nErrorCode);
             break;
         }
-        default: {
+        default:
+        {
             break;
         }
     }

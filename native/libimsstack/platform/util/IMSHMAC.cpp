@@ -22,13 +22,11 @@
 #include "IMSHMAC.h"
 
 // The byte-length of data blocks
-#define HMAC_B              64
+#define HMAC_B 64
 // The byte-length of hash outputs for MD5
-#define HMAC_L_MD5          16
+#define HMAC_L_MD5 16
 // The byte-length of hash outputs for SHA-1
-#define HMAC_L_SHA1         20
-
-
+#define HMAC_L_SHA1 20
 
 /*
 This function generates HMAC-MD5.
@@ -52,8 +50,8 @@ return                  description
 ----------              ----------
 </table>
 */
-GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR *pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR *pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucDigest[16])
+GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucDigest[16])
 {
     MD5Context stContext;
     // Inner padding - key XORd with ipad
@@ -142,8 +140,8 @@ return                  description
 ----------              ----------
 </table>
 */
-GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR *pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR *pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucHash[20])
+GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucHash[20])
 {
     SHA1Context stContext;
     // Inner padding - key XORd with ipad

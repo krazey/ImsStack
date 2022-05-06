@@ -34,21 +34,21 @@ public:
     };
 
 public:
-    inline ImsMessage()
-        : nMSG(0)
-        , nWparam(0)
-        , nLparam(0)
-        , piCallback(IMS_NULL)
+    inline ImsMessage() :
+            nMSG(0),
+            nWparam(0),
+            nLparam(0),
+            piCallback(IMS_NULL)
     {
         acActivityName[0] = '\0';
     }
 
     inline ImsMessage(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
-            IN const AString &strTarget = AString::ConstEmpty())
-        : nMSG(nMSG_)
-        , nWparam(nWparam_)
-        , nLparam(nLparam_)
-        , piCallback(IMS_NULL)
+            IN const AString& strTarget = AString::ConstEmpty()) :
+            nMSG(nMSG_),
+            nWparam(nWparam_),
+            nLparam(nLparam_),
+            piCallback(IMS_NULL)
     {
         if (strTarget.GetLength() == 0)
         {
@@ -61,32 +61,32 @@ public:
     }
 
     inline ImsMessage(IN IMS_SINT32 nMSG_, IN IMS_UINTP nWparam_, IN IMS_UINTP nLparam_,
-            IN IMessageCallback* piCallback_)
-        : nMSG(nMSG_)
-        , nWparam(nWparam_)
-        , nLparam(nLparam_)
-        , piCallback(piCallback_)
+            IN IMessageCallback* piCallback_) :
+            nMSG(nMSG_),
+            nWparam(nWparam_),
+            nLparam(nLparam_),
+            piCallback(piCallback_)
     {
         acActivityName[0] = '\0';
     }
 
-    inline ~ImsMessage()
-    {}
+    inline ~ImsMessage() {}
 
     inline const IMS_CHAR* GetTargetName() const
-    { return (acActivityName[0] == '\0') ? IMS_NULL : &acActivityName[0]; }
+    {
+        return (acActivityName[0] == '\0') ? IMS_NULL : &acActivityName[0];
+    }
 
-    inline IMS_SINT32 GetName() const
-    { return nMSG; }
+    inline IMS_SINT32 GetName() const { return nMSG; }
 
-    inline IMS_BOOL HasCallback() const
-    { return piCallback != IMS_NULL; }
+    inline IMS_BOOL HasCallback() const { return piCallback != IMS_NULL; }
 
-    inline void SetTarget(IN const IMS_CHAR *pszName)
-    { IMS_StrCpy(acActivityName, MAX_ACTIVITY_NAME + 1, pszName); }
+    inline void SetTarget(IN const IMS_CHAR* pszName)
+    {
+        IMS_StrCpy(acActivityName, MAX_ACTIVITY_NAME + 1, pszName);
+    }
 
-    inline void SetCallback(IN IMessageCallback* piCallback)
-    { this->piCallback = piCallback; }
+    inline void SetCallback(IN IMessageCallback* piCallback) { this->piCallback = piCallback; }
 
 protected:
     inline void InvokeCallback()

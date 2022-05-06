@@ -174,7 +174,6 @@ public:
         STATE_REFRESHED
     };
 
-
     /**
      * ERROR_INIT_FAILED means
      *      that it failed to register a client and its event callback. it's a total failure.

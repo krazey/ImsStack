@@ -40,9 +40,8 @@ public:
      *         #PING_STATUS_PENDING\n
      *         #PING_STATUS_NOK
      */
-    virtual IMS_SINT32 Ping(IN const IPAddress& objSrcIp,
-            IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort,
-            IN IMS_SINT32 nWaitTime) = 0;
+    virtual IMS_SINT32 Ping(IN const IPAddress& objSrcIp, IN const IPAddress& objDstIp,
+            IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime) = 0;
 
     /**
      * @brief Sets the listener to receive the connection status.

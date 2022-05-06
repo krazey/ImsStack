@@ -19,17 +19,16 @@
 __IMS_TRACE_TAG_BASE__;
 
 PUBLIC
-RetryTimer::RetryTimer(IN IMS_BOOL bRepeatable_ /* = IMS_FALSE */)
-    : nState(STATE_INACTIVE)
-    , piTimer(IMS_NULL)
-    , nTracker(0)
-    , bFlag_Repeatable(bRepeatable_)
-    , piListener(IMS_NULL)
+RetryTimer::RetryTimer(IN IMS_BOOL bRepeatable_ /* = IMS_FALSE */) :
+        nState(STATE_INACTIVE),
+        piTimer(IMS_NULL),
+        nTracker(0),
+        bFlag_Repeatable(bRepeatable_),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-RetryTimer::~RetryTimer()
+PUBLIC VIRTUAL RetryTimer::~RetryTimer()
 {
     if (piTimer != IMS_NULL)
     {
@@ -64,7 +63,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL RetryTimer::AddValues(IN IMSList<IMS_UINT32> &objIntervals)
+IMS_BOOL RetryTimer::AddValues(IN IMSList<IMS_UINT32>& objIntervals)
 {
     if (nState == STATE_ACTIVE)
     {
@@ -154,7 +153,7 @@ Remarks
 
 */
 PUBLIC
-void RetryTimer::SetListener(IN IRetryTimerListener *piListener)
+void RetryTimer::SetListener(IN IRetryTimerListener* piListener)
 {
     this->piListener = piListener;
 }
@@ -223,8 +222,7 @@ void RetryTimer::Terminate()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void RetryTimer::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void RetryTimer::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (this->piTimer == IMS_NULL)
     {
@@ -296,8 +294,7 @@ void RetryTimer::Timer_TimerExpired(IN ITimer *piTimer)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL RetryTimer::StartTimer()
+PRIVATE VIRTUAL IMS_BOOL RetryTimer::StartTimer()
 {
     piTimer = TimerService::GetTimerService()->CreateTimer();
 
@@ -306,7 +303,7 @@ IMS_BOOL RetryTimer::StartTimer()
         return IMS_FALSE;
     }
 
-    const IMS_UINT32 &nInterval = objIntervals.GetAt(nTracker);
+    const IMS_UINT32& nInterval = objIntervals.GetAt(nTracker);
 
     piTimer->SetTimer(nInterval, this);
 

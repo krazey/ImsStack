@@ -26,8 +26,7 @@ class IMutex;
 class ISystemConfigListener;
 class IThread;
 
-class SystemConfigManager
-    : public ImsMessage::IMessageCallback
+class SystemConfigManager : public ImsMessage::IMessageCallback
 {
 private:
     SystemConfigManager();
@@ -57,8 +56,8 @@ private:
     void ClearAllConfigs();
     IMS_BOOL HasListener(IN ISystemConfigListener* piListener) const;
     void NotifyConfigChanged(IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId);
-    void PostConfigChanged(IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount,
-            IN const __SystemConfig* pSysConfig);
+    void PostConfigChanged(
+            IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig);
     void StoreConfig(IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig);
 
     // Invoked by ImsFramework
@@ -67,8 +66,8 @@ private:
 
     // Invoked by __SystemConfigWrapper
     // It's used to update the system configuration after detecting operator.
-    void UpdateSystemConfig(IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount,
-            IN const __SystemConfig* pSysConfig);
+    void UpdateSystemConfig(
+            IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig);
 
 private:
     friend class ImsMain;

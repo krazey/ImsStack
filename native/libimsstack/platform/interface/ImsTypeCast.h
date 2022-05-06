@@ -18,19 +18,19 @@
 
 #ifdef IMS_RTTI_ENABLED
 
-#define    CONST_CAST(TYPE,VALUE)                (const_cast<TYPE>(VALUE))
-#define    DYNAMIC_CAST(TYPE,VALUE)              (dynamic_cast<TYPE>(VALUE))
-#define    REINTERPRET_CAST(TYPE,VALUE)          (reinterpret_cast<TYPE>(VALUE))
-#define    STATIC_CAST(TYPE,VALUE)               (static_cast<TYPE>(VALUE))
+#define CONST_CAST(TYPE, VALUE) (const_cast<TYPE>(VALUE))
+#define DYNAMIC_CAST(TYPE, VALUE) (dynamic_cast<TYPE>(VALUE))
+#define REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
+#define STATIC_CAST(TYPE, VALUE) (static_cast<TYPE>(VALUE))
 
 #else
 
 // C-style type casting
-#define    CONST_CAST(TYPE,VALUE)                (const_cast<TYPE>(VALUE))
-#define    DYNAMIC_CAST(TYPE,VALUE)              ((TYPE)(VALUE))
-#define    REINTERPRET_CAST(TYPE,VALUE)          (reinterpret_cast<TYPE>(VALUE))
-#define    STATIC_CAST(TYPE,VALUE)               (static_cast<TYPE>(VALUE))
+#define CONST_CAST(TYPE, VALUE) (const_cast<TYPE>(VALUE))
+#define DYNAMIC_CAST(TYPE, VALUE) ((TYPE)(VALUE))
+#define REINTERPRET_CAST(TYPE, VALUE) (reinterpret_cast<TYPE>(VALUE))
+#define STATIC_CAST(TYPE, VALUE) (static_cast<TYPE>(VALUE))
 
-#endif // IMS_RTTI_ENABLED
+#endif  // IMS_RTTI_ENABLED
 
 #endif

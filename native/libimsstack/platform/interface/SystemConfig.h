@@ -150,14 +150,14 @@ public:
     static IMS_BOOL IsMultiLteEnabled();
     static IMS_BOOL IsMultiSimEnabled();
 
-    static IMS_BOOL IsOperatorChanged(IN const SystemConfig* pOldConfig,
-            IN const SystemConfig* pNewConfig);
-    static IMS_BOOL IsServiceFeatureChanged(IN const SystemConfig* pOldConfig,
-            IN const SystemConfig* pNewConfig);
-    static IMS_BOOL IsDdsChanged(IN const SystemConfig* pOldConfig,
-            IN const SystemConfig* pNewConfig);
-    static IMS_BOOL IsSimMobilityChanged(IN const SystemConfig* pOldConfig,
-            IN const SystemConfig* pNewConfig);
+    static IMS_BOOL IsOperatorChanged(
+            IN const SystemConfig* pOldConfig, IN const SystemConfig* pNewConfig);
+    static IMS_BOOL IsServiceFeatureChanged(
+            IN const SystemConfig* pOldConfig, IN const SystemConfig* pNewConfig);
+    static IMS_BOOL IsDdsChanged(
+            IN const SystemConfig* pOldConfig, IN const SystemConfig* pNewConfig);
+    static IMS_BOOL IsSimMobilityChanged(
+            IN const SystemConfig* pOldConfig, IN const SystemConfig* pNewConfig);
 
 private:
     IMS_BOOL IsExtraInfoSet(IN IMS_SINT32 nExtraInfo) const;
@@ -197,33 +197,59 @@ private:
 };
 
 inline IMS_SINT32 SystemConfig::GetSlotId() const
-{ return m_nSlotId; }
+{
+    return m_nSlotId;
+}
 
 inline const AString& SystemConfig::GetOperator() const
-{ return m_strOperator; }
+{
+    return m_strOperator;
+}
 inline const AString& SystemConfig::GetCountry() const
-{ return m_strCountry; }
+{
+    return m_strCountry;
+}
 
 inline const AString& SystemConfig::GetEnablerType() const
-{ return m_strEnablerType; }
+{
+    return m_strEnablerType;
+}
 inline IMS_SINT32 SystemConfig::GetExtraInfo() const
-{ return m_nExtraInfo; }
+{
+    return m_nExtraInfo;
+}
 inline IMS_BOOL SystemConfig::IsSimMobilityEnabled() const
-{ return IsExtraInfoSet(EXTRA_INFO_SIM_MOBILITY); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_SIM_MOBILITY);
+}
 inline IMS_BOOL SystemConfig::IsKREnablerEnabled() const
-{ return IsExtraInfoSet(EXTRA_INFO_KR_ENABLER); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_KR_ENABLER);
+}
 inline IMS_BOOL SystemConfig::IsDds() const
-{ return IsExtraInfoSet(EXTRA_INFO_DDS); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_DDS);
+}
 inline IMS_BOOL SystemConfig::IsNoUicc() const
-{ return IsExtraInfoSet(EXTRA_INFO_NO_UICC); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_NO_UICC);
+}
 inline IMS_BOOL SystemConfig::IsNrNsaModeEnabled() const
-{ return IsExtraInfoSet(EXTRA_INFO_NR_NSA_MODE); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_NR_NSA_MODE);
+}
 inline IMS_BOOL SystemConfig::IsUeCapabilityVoNrEnabled() const
-{ return IsExtraInfoSet(EXTRA_INFO_NR_UE_CAPABILITY_VONR); }
+{
+    return IsExtraInfoSet(EXTRA_INFO_NR_UE_CAPABILITY_VONR);
+}
 
 inline IMS_SINT32 SystemConfig::GetFeatures() const
-{ return m_nFeatures; }
+{
+    return m_nFeatures;
+}
 inline IMS_SINT32 SystemConfig::GetServiceFeatures() const
-{ return m_nServiceFeatures; }
+{
+    return m_nServiceFeatures;
+}
 
 #endif

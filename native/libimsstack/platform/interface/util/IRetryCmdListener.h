@@ -40,8 +40,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void RetryCmd_OnCompleted(IN RetryCmd *pCmd, IN IMS_SINT32 nResultCode,
-            IN IMS_SINT32 nRetryAfter = 0) = 0;
+    virtual void RetryCmd_OnCompleted(
+            IN RetryCmd* pCmd, IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter = 0) = 0;
 };
 
-#endif // _INTERFACE_RETRY_CMD_LISTENER_H_
+#endif  // _INTERFACE_RETRY_CMD_LISTENER_H_

@@ -20,23 +20,23 @@ class TextParser
 public:
     static const IMS_CHAR* BooleanToString(IN IMS_BOOL bValue, IN IMS_BOOL bLowerCase = IMS_TRUE);
     static AString CharToHexString(IN CONST IMS_CHAR cChar);
-    static IMS_SINT32 HexStringToChar(IN CONST AString &strHex);
+    static IMS_SINT32 HexStringToChar(IN CONST AString& strHex);
     static IMS_BOOL IsTokenCharacter(IN CONST IMS_CHAR ch);
-    static IMS_BOOL IsValidMediaType(IN CONST AString &strMediaType);
+    static IMS_BOOL IsValidMediaType(IN CONST AString& strMediaType);
 
     // For percent-encoded data octet
-    static AString DoPercentDecoding(IN CONST AString &strPEData);
-    static AString DoPercentEncoding(IN CONST AString &strData,
-            IN CONST AString &strPEExtraChar = AString::ConstNull(),
-            IN CONST AString &strPEExcludingChar = AString::ConstNull());
-    static AString DoPercentEncodingEx(IN CONST AString &strData,
-            IN CONST AString &strPEExcludingChar /* alpha/num is included as default */);
+    static AString DoPercentDecoding(IN CONST AString& strPEData);
+    static AString DoPercentEncoding(IN CONST AString& strData,
+            IN CONST AString& strPEExtraChar = AString::ConstNull(),
+            IN CONST AString& strPEExcludingChar = AString::ConstNull());
+    static AString DoPercentEncodingEx(IN CONST AString& strData,
+            IN CONST AString& strPEExcludingChar /* alpha/num is included as default */);
 
-    static IMS_SINT32 GetIndexOfDelimiter(IN CONST AString &strValue,
-            IN CONST IMS_CHAR cDelimiter, IN IMS_BOOL bCheckDQUOT = IMS_TRUE);
-    static IMS_BOOL ParseMediaType(IN CONST AString &strMediaType, OUT AString &strType,
-            OUT AString &strSubType);
-    static AString TrimDQUOT(IN CONST AString &strValue);
+    static IMS_SINT32 GetIndexOfDelimiter(IN CONST AString& strValue, IN CONST IMS_CHAR cDelimiter,
+            IN IMS_BOOL bCheckDQUOT = IMS_TRUE);
+    static IMS_BOOL ParseMediaType(
+            IN CONST AString& strMediaType, OUT AString& strType, OUT AString& strSubType);
+    static AString TrimDQUOT(IN CONST AString& strValue);
 
 public:
     // Constant values - General tokens (character values) for parsing
@@ -102,13 +102,13 @@ public:
 private:
     static IMS_SINT32 GetExpectedCountOfUTF8Cont(IN CONST IMS_CHAR ch);
     static IMS_BOOL IsHexCharacter(IN CONST IMS_CHAR ch);
-    static IMS_BOOL IsParameterString(IN CONST AString &strParameter);
-    static IMS_BOOL IsParameterValueString(IN CONST AString &strParameterValue);
+    static IMS_BOOL IsParameterString(IN CONST AString& strParameter);
+    static IMS_BOOL IsParameterValueString(IN CONST AString& strParameterValue);
     static IMS_BOOL IsQdText(IN CONST IMS_CHAR ch);
-    static IMS_BOOL IsQuotedString(IN CONST AString &strQuotedString);
+    static IMS_BOOL IsQuotedString(IN CONST AString& strQuotedString);
     static IMS_BOOL IsReservedCharacter(IN CONST IMS_CHAR ch);
-    static IMS_BOOL IsTokenString(IN CONST AString &strToken);
+    static IMS_BOOL IsTokenString(IN CONST AString& strToken);
     static IMS_BOOL IsUTF8Cont(IN CONST IMS_CHAR ch);
 };
 
-#endif // _TEXT_PARSER_H_
+#endif  // _TEXT_PARSER_H_

@@ -20,10 +20,7 @@
 #include "INetworkWatcher.h"
 #include "system-intf/ISystemListener.h"
 
-class OsNetworkWatcher
-    : public ImsSlot
-    , public INetworkWatcher
-    , public ISystemListener
+class OsNetworkWatcher : public ImsSlot, public INetworkWatcher, public ISystemListener
 {
 public:
     OsNetworkWatcher(IN IMS_SINT32 nSlotId);
@@ -64,8 +61,8 @@ public:
     IMS_SINT32 GetMocnPlmnInfo() override;
 
     // ISystemListener
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     void UpdateServiceState(IN IMS_SINT32 nState);
     void UpdateRadioTechChanged(IN IMS_SINT32 nState);

@@ -22,36 +22,32 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsWifiWatcher::OsWifiWatcher()
-    : m_nWifiState(IWifiWatcher::STATE_DISCONNECTED)
+OsWifiWatcher::OsWifiWatcher() :
+        m_nWifiState(IWifiWatcher::STATE_DISCONNECTED)
 {
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
 }
 
-PUBLIC VIRTUAL
-OsWifiWatcher::~OsWifiWatcher()
+PUBLIC VIRTUAL OsWifiWatcher::~OsWifiWatcher()
 {
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_WIFI, this, IMS_SLOT_0);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsWifiWatcher::GetState()
+PUBLIC VIRTUAL IMS_SINT32 OsWifiWatcher::GetState()
 {
     IMS_SINT32 nWifiDetailedState = System::GetInstance()->GetWifiDetailedState();
 
-    if ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK)
-            || (nWifiDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
+    if ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK) ||
+            (nWifiDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
     {
         m_nWifiState = IWifiWatcher::STATE_CONNECTED;
     }
     else
     {
         // While connected, the detailed state goes to obtain IP to renew ip resources.
-        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED)
-                && ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR)
-                    || (nWifiDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK)))
+        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED) &&
+                ((nWifiDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
+                        (nWifiDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK)))
         {
             m_nWifiState = IWifiWatcher::STATE_CONNECTED;
         }
@@ -66,14 +62,12 @@ IMS_SINT32 OsWifiWatcher::GetState()
     return m_nWifiState;
 }
 
-PUBLIC VIRTUAL
-void OsWifiWatcher::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsWifiWatcher::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     (void)nLParam;
 
-    IMS_TRACE_D("WifiWatcher :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d,
-            nEvent, nWParam, nLParam);
+    IMS_TRACE_D("WifiWatcher :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
@@ -104,16 +98,17 @@ void OsWifiWatcher::System_NotifyEvent(IN IMS_UINT32 nEvent,
 PRIVATE
 void OsWifiWatcher::UpdateWifiNetworkStateChanged(IN IMS_UINT32 nDetailedState)
 {
-    if ((nDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK)
-            || (nDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
+    if ((nDetailedState == WIFI_NET_DETAILED_STATE_CAPTIVE_PORTAL_CHECK) ||
+            (nDetailedState == WIFI_NET_DETAILED_STATE_CONNECTED))
     {
         m_nWifiState = IWifiWatcher::STATE_CONNECTED;
     }
     else
     {
-        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED)
-                && ((nDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR)
-                    || (nDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK))) {
+        if ((m_nWifiState == IWifiWatcher::STATE_CONNECTED) &&
+                ((nDetailedState == WIFI_NET_DETAILED_STATE_OBTAINING_IPADDR) ||
+                        (nDetailedState == WIFI_NET_DETAILED_STATE_VERIFYING_POOR_LINK)))
+        {
             m_nWifiState = IWifiWatcher::STATE_CONNECTED;
         }
         else
@@ -135,7 +130,7 @@ void OsWifiWatcher::UpdateWifiStateChanged(IN IMS_UINT32 nState)
             m_nWifiState = IWifiWatcher::STATE_DISCONNECTED;
             break;
 
-        default :
+        default:
             break;
     }
 

@@ -28,10 +28,8 @@ public:
     ImsTraceNode& operator=(IN const ImsTraceNode&) = delete;
 
 public:
-    inline IMS_CHAR* GetBuffer()
-    { return m_pBuffer; }
-    inline IMS_UINT32 GetLength() const
-    { return m_nLength; }
+    inline IMS_CHAR* GetBuffer() { return m_pBuffer; }
+    inline IMS_UINT32 GetLength() const { return m_nLength; }
 
     void Format(IN const IMS_CHAR* pszFormat, IN va_list args);
 
@@ -40,9 +38,15 @@ protected:
             IN const IMS_CHAR* pszFormat, IN va_list args) = 0;
 
 public:
-    enum { MAX_BUFF_SIZE = 512 };
+    enum
+    {
+        MAX_BUFF_SIZE = 512
+    };
     // Prefix -> hh:mm:ss xxxxx\r\n -> 9 + 2
-    enum { CRLF_SIZE = 2 };
+    enum
+    {
+        CRLF_SIZE = 2
+    };
 
 private:
     IMS_BOOL m_bAlloc;

@@ -23,9 +23,7 @@
 class OsPowerInfoPrivate;
 class System;
 
-class OsPowerInfo
-    : public IPowerInfo
-    , public ISystemListener
+class OsPowerInfo : public IPowerInfo, public ISystemListener
 {
 public:
     OsPowerInfo();
@@ -40,8 +38,8 @@ public:
     IMS_UINT32 GetPowerValue() override;
 
     // ISystemListener
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 private:
     OsPowerInfoPrivate* m_pPowerInfoP;

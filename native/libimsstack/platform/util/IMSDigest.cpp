@@ -51,27 +51,22 @@ Nonzero                 Length in characters of the encoded data
 Zero                    Encoding failed
 </table>
 */
-GLOBAL void IMSDigest_CalculateHA1(
-        IN CONST IMS_CHAR *pszAlgorithm,
-        IN CONST IMS_CHAR *pszUsername,
-        IN CONST IMS_CHAR *pszRealm,
-        IN CONST IMS_CHAR *pszPassword,
-        IN CONST IMS_CHAR *pszNonce,
-        IN CONST IMS_CHAR *pszCNonce,
-        OUT HASHHEX HA1)
+GLOBAL void IMSDigest_CalculateHA1(IN CONST IMS_CHAR* pszAlgorithm, IN CONST IMS_CHAR* pszUsername,
+        IN CONST IMS_CHAR* pszRealm, IN CONST IMS_CHAR* pszPassword, IN CONST IMS_CHAR* pszNonce,
+        IN CONST IMS_CHAR* pszCNonce, OUT HASHHEX HA1)
 {
-    const IMS_UCHAR COLON[2] = { ':', '\0' };
+    const IMS_UCHAR COLON[2] = {':', '\0'};
     MD5Context stMD5Ctx;
     HASH HA1Local;
 
     IMSMD5_Initialize(&stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszUsername),
-            IMS_StrLen(pszUsername), &stMD5Ctx);
+    IMSMD5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(pszUsername), IMS_StrLen(pszUsername), &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
     IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszRealm), IMS_StrLen(pszRealm), &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszPassword),
-            IMS_StrLen(pszPassword), &stMD5Ctx);
+    IMSMD5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(pszPassword), IMS_StrLen(pszPassword), &stMD5Ctx);
     IMSMD5_Finalize(&stMD5Ctx, reinterpret_cast<IMS_UCHAR*>(HA1Local));
 
     if (IMS_StrICmp(pszAlgorithm, MD5_SESS) == 0)
@@ -82,15 +77,15 @@ GLOBAL void IMSDigest_CalculateHA1(
         if (pszNonce != IMS_NULL)
         {
             IMSMD5_Update(COLON, 1, &stMD5Ctx);
-            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszNonce),
-                    IMS_StrLen(pszNonce), &stMD5Ctx);
+            IMSMD5_Update(
+                    reinterpret_cast<const IMS_UCHAR*>(pszNonce), IMS_StrLen(pszNonce), &stMD5Ctx);
         }
 
         if (pszCNonce != IMS_NULL)
         {
             IMSMD5_Update(COLON, 1, &stMD5Ctx);
-            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCNonce),
-                    IMS_StrLen(pszCNonce), &stMD5Ctx);
+            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCNonce), IMS_StrLen(pszCNonce),
+                    &stMD5Ctx);
         }
 
         IMSMD5_Finalize(&stMD5Ctx, reinterpret_cast<IMS_UCHAR*>(HA1Local));
@@ -100,9 +95,7 @@ GLOBAL void IMSDigest_CalculateHA1(
 }
 
 GLOBAL void IMSDigest_CalculateHEntity(
-        IN CONST IMS_CHAR *pszEntityBody,
-        IN IMS_SINT32 nLength,
-        OUT HASHHEX HEntity)
+        IN CONST IMS_CHAR* pszEntityBody, IN IMS_SINT32 nLength, OUT HASHHEX HEntity)
 {
     MD5Context stMD5Ctx;
     HASH HEntityLocal;
@@ -114,18 +107,17 @@ GLOBAL void IMSDigest_CalculateHEntity(
     imsDigest_ConvertBinToHex(HEntityLocal, HEntity);
 }
 
-GLOBAL void IMSDigest_CalculateResponse(
-        IN CONST HASHHEX HA1,                   // H(A1)
-        IN CONST IMS_CHAR *pszNonce,            // nonce from the server
-        IN CONST IMS_CHAR *pszNonceCount,       // 8 HEX digits
-        IN CONST IMS_CHAR *pszCNonce,           // Client nonce
-        IN CONST IMS_CHAR *pszQoP,              // qop-value : "", "auth", "auth-int"
-        IN CONST IMS_CHAR *pszMethod,           // Method from the Request-Line
-        IN CONST IMS_CHAR *pszDigestURI,        // Requested URL
-        IN CONST HASHHEX HEntity,               // H(entity-body) if qop = "auth-int"
-        OUT HASHHEX HResponse)                  // Request-digest or response-digest
+GLOBAL void IMSDigest_CalculateResponse(IN CONST HASHHEX HA1,  // H(A1)
+        IN CONST IMS_CHAR* pszNonce,                           // nonce from the server
+        IN CONST IMS_CHAR* pszNonceCount,                      // 8 HEX digits
+        IN CONST IMS_CHAR* pszCNonce,                          // Client nonce
+        IN CONST IMS_CHAR* pszQoP,                             // qop-value : "", "auth", "auth-int"
+        IN CONST IMS_CHAR* pszMethod,                          // Method from the Request-Line
+        IN CONST IMS_CHAR* pszDigestURI,                       // Requested URL
+        IN CONST HASHHEX HEntity,                              // H(entity-body) if qop = "auth-int"
+        OUT HASHHEX HResponse)                                 // Request-digest or response-digest
 {
-    const IMS_UCHAR COLON[2] = { ':', '\0' };
+    const IMS_UCHAR COLON[2] = {':', '\0'};
     MD5Context stMD5Ctx;
     HASH HA2;
     HASH HResponseLocal;
@@ -133,19 +125,17 @@ GLOBAL void IMSDigest_CalculateResponse(
 
     // Calculate H(A2)
     IMSMD5_Initialize(&stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszMethod),
-            IMS_StrLen(pszMethod), &stMD5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszMethod), IMS_StrLen(pszMethod), &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszDigestURI),
-            IMS_StrLen(pszDigestURI), &stMD5Ctx);
+    IMSMD5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(pszDigestURI), IMS_StrLen(pszDigestURI), &stMD5Ctx);
 
     if (pszQoP != IMS_NULL)
     {
         if (IMS_StrICmp(pszQoP, QOP_AUTH_INT) == 0)
         {
             IMSMD5_Update(COLON, 1, &stMD5Ctx);
-            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(HEntity),
-                    HASHHEX_SIZE, &stMD5Ctx);
+            IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(HEntity), HASHHEX_SIZE, &stMD5Ctx);
         }
     }
 
@@ -159,18 +149,18 @@ GLOBAL void IMSDigest_CalculateResponse(
 
     if (pszNonce != IMS_NULL)
     {
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszNonce),
-                IMS_StrLen(pszNonce), &stMD5Ctx);
+        IMSMD5_Update(
+                reinterpret_cast<const IMS_UCHAR*>(pszNonce), IMS_StrLen(pszNonce), &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
     }
 
     if ((pszQoP != IMS_NULL) && (IMS_StrCmp(pszQoP, "") != 0))
     {
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszNonceCount),
-                IMS_StrLen(pszNonceCount), &stMD5Ctx);
+        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszNonceCount), IMS_StrLen(pszNonceCount),
+                &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCNonce),
-                IMS_StrLen(pszCNonce), &stMD5Ctx);
+        IMSMD5_Update(
+                reinterpret_cast<const IMS_UCHAR*>(pszCNonce), IMS_StrLen(pszCNonce), &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
         IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszQoP), IMS_StrLen(pszQoP), &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
@@ -182,28 +172,23 @@ GLOBAL void IMSDigest_CalculateResponse(
     imsDigest_ConvertBinToHex(HResponseLocal, HResponse);
 }
 
-GLOBAL void IMSDigestEx_CalculateHA1(
-        IN CONST AString &strAlgorithm,
-        IN CONST AString &strUsername,
-        IN CONST AString &strRealm,
-        IN CONST AString &strPassword,
-        IN CONST AString &strNonce,
-        IN CONST AString &strCNonce,
-        OUT HASHHEX HA1)
+GLOBAL void IMSDigestEx_CalculateHA1(IN CONST AString& strAlgorithm, IN CONST AString& strUsername,
+        IN CONST AString& strRealm, IN CONST AString& strPassword, IN CONST AString& strNonce,
+        IN CONST AString& strCNonce, OUT HASHHEX HA1)
 {
-    const IMS_UCHAR COLON[2] = { ':', '\0' };
+    const IMS_UCHAR COLON[2] = {':', '\0'};
     MD5Context stMD5Ctx;
     HASH HA1Local;
 
     IMSMD5_Initialize(&stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strUsername.GetStr()),
-            strUsername.GetLength(), &stMD5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strUsername.GetStr()), strUsername.GetLength(),
+            &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strRealm.GetStr()),
-            strRealm.GetLength(), &stMD5Ctx);
+    IMSMD5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strRealm.GetStr()), strRealm.GetLength(), &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strPassword.GetStr()),
-            strPassword.GetLength(), &stMD5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strPassword.GetStr()), strPassword.GetLength(),
+            &stMD5Ctx);
     IMSMD5_Finalize(&stMD5Ctx, reinterpret_cast<IMS_UCHAR*>(HA1Local));
 
     if (strAlgorithm.EqualsIgnoreCase(MD5_SESS))
@@ -231,9 +216,7 @@ GLOBAL void IMSDigestEx_CalculateHA1(
     imsDigest_ConvertBinToHex(HA1Local, HA1);
 }
 
-GLOBAL void IMSDigestEx_CalculateHEntity(
-        IN CONST AString &strEntityBody,
-        OUT HASHHEX HEntity)
+GLOBAL void IMSDigestEx_CalculateHEntity(IN CONST AString& strEntityBody, OUT HASHHEX HEntity)
 {
     MD5Context stMD5Ctx;
     HASH HEntityLocal;
@@ -246,19 +229,17 @@ GLOBAL void IMSDigestEx_CalculateHEntity(
     imsDigest_ConvertBinToHex(HEntityLocal, HEntity);
 }
 
-
-GLOBAL void IMSDigestEx_CalculateResponse(
-        IN CONST HASHHEX HA1,                // H(A1)
-        IN CONST AString &strNonce,          // nonce from the server
-        IN CONST AString &strNonceCount,     // 8 HEX digits
-        IN CONST AString &strCNonce,         // Client nonce
-        IN CONST AString &strQoP,            // qop-value : "", "auth", "auth-int"
-        IN CONST AString &strMethod,         // Method from the Request-Line
-        IN CONST AString &strDigestURI,      // Requested URL
-        IN CONST HASHHEX HEntity,            // H(entity-body) if qop = "auth-int"
-        OUT HASHHEX HResponse)               // Request-digest or response-digest
+GLOBAL void IMSDigestEx_CalculateResponse(IN CONST HASHHEX HA1,  // H(A1)
+        IN CONST AString& strNonce,                              // nonce from the server
+        IN CONST AString& strNonceCount,                         // 8 HEX digits
+        IN CONST AString& strCNonce,                             // Client nonce
+        IN CONST AString& strQoP,        // qop-value : "", "auth", "auth-int"
+        IN CONST AString& strMethod,     // Method from the Request-Line
+        IN CONST AString& strDigestURI,  // Requested URL
+        IN CONST HASHHEX HEntity,        // H(entity-body) if qop = "auth-int"
+        OUT HASHHEX HResponse)           // Request-digest or response-digest
 {
-    const IMS_UCHAR COLON[2] = { ':', '\0' };
+    const IMS_UCHAR COLON[2] = {':', '\0'};
     MD5Context stMD5Ctx;
     HASH HA2;
     HASH HResponseLocal;
@@ -266,8 +247,8 @@ GLOBAL void IMSDigestEx_CalculateResponse(
 
     // Calculate H(A2)
     IMSMD5_Initialize(&stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strMethod.GetStr()),
-            strMethod.GetLength(), &stMD5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strMethod.GetStr()), strMethod.GetLength(),
+            &stMD5Ctx);
     IMSMD5_Update(COLON, 1, &stMD5Ctx);
     IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strDigestURI.GetStr()),
             strDigestURI.GetLength(), &stMD5Ctx);
@@ -288,8 +269,8 @@ GLOBAL void IMSDigestEx_CalculateResponse(
 
     if (strNonce.GetLength() > 0)
     {
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strNonce.GetStr()),
-                strNonce.GetLength(), &stMD5Ctx);
+        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strNonce.GetStr()), strNonce.GetLength(),
+                &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
     }
 
@@ -298,11 +279,11 @@ GLOBAL void IMSDigestEx_CalculateResponse(
         IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strNonceCount.GetStr()),
                 strNonceCount.GetLength(), &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strCNonce.GetStr()),
-                strCNonce.GetLength(), &stMD5Ctx);
+        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strCNonce.GetStr()), strCNonce.GetLength(),
+                &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
-        IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strQoP.GetStr()),
-                strQoP.GetLength(), &stMD5Ctx);
+        IMSMD5_Update(
+                reinterpret_cast<const IMS_UCHAR*>(strQoP.GetStr()), strQoP.GetLength(), &stMD5Ctx);
         IMSMD5_Update(COLON, 1, &stMD5Ctx);
     }
 
@@ -322,22 +303,22 @@ LOCAL void imsDigest_ConvertBinToHex(IN CONST HASH HBin, OUT HASHHEX HHex)
 
         if (ucTemp <= 9)
         {
-            HHex[i*2] = (ucTemp + '0');
+            HHex[i * 2] = (ucTemp + '0');
         }
         else
         {
-            HHex[i*2] = (ucTemp + 'a' - 10);
+            HHex[i * 2] = (ucTemp + 'a' - 10);
         }
 
         ucTemp = HBin[i] & 0x0F;
 
         if (ucTemp <= 9)
         {
-            HHex[i*2 + 1] = (ucTemp + '0');
+            HHex[i * 2 + 1] = (ucTemp + '0');
         }
         else
         {
-            HHex[i*2 + 1] = (ucTemp + 'a' - 10);
+            HHex[i * 2 + 1] = (ucTemp + 'a' - 10);
         }
     }
 

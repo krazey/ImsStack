@@ -18,14 +18,11 @@
 
 #include "IMutex.h"
 
-class ImsMutex
-    : public IMutex
+class ImsMutex : public IMutex
 {
 public:
-    inline ImsMutex()
-    {}
-    inline virtual ~ImsMutex()
-    {}
+    inline ImsMutex() {}
+    inline virtual ~ImsMutex() {}
 };
 
 #endif

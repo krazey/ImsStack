@@ -21,7 +21,7 @@
 /// Open mode
 enum FILE_OPEN_ENTYPE
 {
-    FILE_OPEN_READWRITE =    0,
+    FILE_OPEN_READWRITE = 0,
     FILE_OPEN_READONLY = 1,
     FILE_OPEN_WRITEONLY = 2
 };
@@ -97,10 +97,11 @@ public:
 
 public:
     // Invalid value: Seek(), GetPos()
-    enum { INVALID_VALUE = 0xFFFFFFFF };
+    enum
+    {
+        INVALID_VALUE = 0xFFFFFFFF
+    };
 };
-
-
 
 class IFileUtil
 {
@@ -122,8 +123,8 @@ public:
      * @param nGid The group id of this file
      * @return IMS_TRUE if the operation succeeds, IMS_FALSE otherwise.
      */
-    virtual IMS_BOOL ChangeOwner(IN const AString& strFileName,
-            IN IMS_SINT32 nUid, IN IMS_SINT32 nGid) const = 0;
+    virtual IMS_BOOL ChangeOwner(
+            IN const AString& strFileName, IN IMS_SINT32 nUid, IN IMS_SINT32 nGid) const = 0;
 
     /**
      * @brief Checks if the specified file exists.
@@ -237,14 +238,14 @@ public:
     /// In this time, only supports: root/system for user/group id
     enum
     {
-        UID_NONE = (-1), // no change
+        UID_NONE = (-1),  // no change
         UID_ROOT = 1,
         UID_SYSTEM = 2
     };
 
     enum
     {
-        GID_NONE = (-1), // no change
+        GID_NONE = (-1),  // no change
         GID_ROOT = 1,
         GID_SYSTEM = 2
     };

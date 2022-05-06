@@ -43,7 +43,7 @@ public:
     RESULT_STOP
     </table>
     */
-    virtual IMS_SINT32 RetryTimer_OnInterimExpired(IN RetryTimer *pTimer) = 0;
+    virtual IMS_SINT32 RetryTimer_OnInterimExpired(IN RetryTimer* pTimer) = 0;
 
     /*
      Notify to the user that the final retry timer is expired.
@@ -64,7 +64,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void RetryTimer_OnFinalExpired(IN RetryTimer *pTimer) = 0;
+    virtual void RetryTimer_OnFinalExpired(IN RetryTimer* pTimer) = 0;
 };
 
-#endif // _INTERFACE_RETRY_TIMER_LISTENER_H_
+#endif  // _INTERFACE_RETRY_TIMER_LISTENER_H_

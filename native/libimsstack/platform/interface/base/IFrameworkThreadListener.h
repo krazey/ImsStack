@@ -56,4 +56,4 @@ public:
     virtual void FrameworkThread_OnTerminated() = 0;
 };
 
-#endif // _INTERFACE_FRAMEWORK_THREAD_LISTENER_H_
+#endif  // _INTERFACE_FRAMEWORK_THREAD_LISTENER_H_

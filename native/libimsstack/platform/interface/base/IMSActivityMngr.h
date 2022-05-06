@@ -22,12 +22,12 @@ public:
     IMSActivityMngr();
     ~IMSActivityMngr();
 
-    IMS_BOOL Attach(IN IMSActivity *pIMSActivity);
-    void Detach(IN IMSActivity *pIMSActivity);
-    IMSActivity* Get(IN CONST AString &strActivityName);
-    AString GenerateName(IN CONST AString &strThreadName, IN CONST AString &strName);
-    IMS_BOOL HandleMessage(IN IMSMSG &objMSG);
-    IIMSActivityControl* GetController(IN CONST AString &strControllerName);
+    IMS_BOOL Attach(IN IMSActivity* pIMSActivity);
+    void Detach(IN IMSActivity* pIMSActivity);
+    IMSActivity* Get(IN CONST AString& strActivityName);
+    AString GenerateName(IN CONST AString& strThreadName, IN CONST AString& strName);
+    IMS_BOOL HandleMessage(IN IMSMSG& objMSG);
+    IIMSActivityControl* GetController(IN CONST AString& strControllerName);
 
 private:
     AString GetActivityNameFromMsg(IN CONST AString& strTargetName);
@@ -38,4 +38,4 @@ private:
     IMSList<IMSActivity*> objIMSActivities;
 };
 
-#endif // _IMS_ACTIVITYMNGR_H_
+#endif  // _IMS_ACTIVITYMNGR_H_

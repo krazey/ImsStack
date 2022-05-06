@@ -33,11 +33,9 @@ public:
     EventService& operator=(IN const EventService&) = delete;
 
 public:
-    void AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
-            IN IMS_SINT32 nSlotId);
+    void AddListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
 
-    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener,
-            IN IMS_SINT32 nSlotId);
+    void RemoveListener(IN IMS_SINT32 nEvent, IN IEventListener* piListener, IN IMS_SINT32 nSlotId);
 
     void SendEvent(IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
             IN IMS_SINT32 nSlotId);
@@ -51,12 +49,12 @@ private:
 };
 
 #define IMS_EVENT_AddListenerForSlotId(nEvent, piListener, nSlotId) \
-        EventService::GetEventService()->AddListener(nEvent, piListener, nSlotId)
+    EventService::GetEventService()->AddListener(nEvent, piListener, nSlotId)
 
 #define IMS_EVENT_RemoveListenerForSlotId(nEvent, piListener, nSlotId) \
-        EventService::GetEventService()->RemoveListener(nEvent, piListener, nSlotId)
+    EventService::GetEventService()->RemoveListener(nEvent, piListener, nSlotId)
 
 #define IMS_EVENT_SendEventForSlotId(nEvent, nWParam, nLParam, nSlotId) \
-        EventService::GetEventService()->SendEvent(nEvent, nWParam, nLParam, nSlotId)
+    EventService::GetEventService()->SendEvent(nEvent, nWParam, nLParam, nSlotId)
 
 #endif

@@ -22,16 +22,16 @@ class PlatformApi
 {
 public:
     // Checks if socket bind information is used or not.
-    static IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIp,
-            IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
+    static IMS_BOOL CheckIpAndPortAvailability(
+            IN const IPAddress& objIp, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
     // Sets IMS debug flag
     static void SetDebugOn(IN IMS_BOOL bDebugOn);
 
     // Methods for IMS private property
-    static AString GetPrivateProperty(IN IMS_BOOL bPersistent,
-            IN const AString& strKey, IN IMS_SINT32 nSlotId);
-    static void SetPrivateProperty(IN IMS_BOOL bPersistent,
-            IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId);
+    static AString GetPrivateProperty(
+            IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId);
+    static void SetPrivateProperty(IN IMS_BOOL bPersistent, IN const AString& strKey,
+            IN const AString& strValue, IN IMS_SINT32 nSlotId);
 };
 
 #endif

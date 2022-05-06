@@ -26,15 +26,15 @@ void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE eP
 class OsPowerInfoPrivate
 {
 public:
-    inline OsPowerInfoPrivate()
-        : m_nPowerValue(0)
-        , m_nOldPowerValue(0)
-        , m_ePowerLevel(POWERLEVEL_OFF)
-        , m_eOldPowerLevel(POWERLEVEL_OFF)
-        , m_pPowerInfo(IMS_NULL)
-    {}
-    inline ~OsPowerInfoPrivate()
-    {}
+    inline OsPowerInfoPrivate() :
+            m_nPowerValue(0),
+            m_nOldPowerValue(0),
+            m_ePowerLevel(POWERLEVEL_OFF),
+            m_eOldPowerLevel(POWERLEVEL_OFF),
+            m_pPowerInfo(IMS_NULL)
+    {
+    }
+    inline ~OsPowerInfoPrivate() {}
 
     POWERLEVEL_ENTYPE GetPowerLevel();
     IMS_SINT32 GetPowerValue();
@@ -61,8 +61,6 @@ private:
     OsPowerInfo* m_pPowerInfo;
 };
 
-
-
 LOCAL
 void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE ePowerEvent)
 {
@@ -72,14 +70,12 @@ void osPowerInfo_NotifyEvent(IN OsPowerInfo* pPowerInfo, IN POWERLEVEL_ENTYPE eP
     }
 }
 
-PUBLIC VIRTUAL
-POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel()
+PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfoPrivate::GetPowerLevel()
 {
     return m_ePowerLevel;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPowerInfoPrivate::GetPowerValue()
+PUBLIC VIRTUAL IMS_SINT32 OsPowerInfoPrivate::GetPowerValue()
 {
     return m_nPowerValue;
 }
@@ -111,7 +107,7 @@ void OsPowerInfoPrivate::SetPowerValue(IN IMS_SINT32 nValue)
 PUBLIC
 void OsPowerInfoPrivate::UpdatePowerLevel()
 {
-    const IMS_SINT32 BATTERY_THRESHOLDS[] = { 20, 15, 4, -1 };
+    const IMS_SINT32 BATTERY_THRESHOLDS[] = {20, 15, 4, -1};
 
     if (m_nPowerValue < BATTERY_THRESHOLDS[2])
     {
@@ -142,26 +138,21 @@ void OsPowerInfoPrivate::UpdatePowerValue()
     }
 }
 
-
-
 PUBLIC
-OsPowerInfo::OsPowerInfo()
-    : m_pPowerInfoP(new OsPowerInfoPrivate())
+OsPowerInfo::OsPowerInfo() :
+        m_pPowerInfoP(new OsPowerInfoPrivate())
 {
     if (m_pPowerInfoP != IMS_NULL)
     {
         m_pPowerInfoP->SetPowerInfo(this);
     }
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
 }
 
-PUBLIC VIRTUAL
-OsPowerInfo::~OsPowerInfo()
+PUBLIC VIRTUAL OsPowerInfo::~OsPowerInfo()
 {
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_POWER, this, IMS_SLOT_0);
 
     if (m_pPowerInfoP != IMS_NULL)
     {
@@ -169,8 +160,7 @@ OsPowerInfo::~OsPowerInfo()
     }
 }
 
-PUBLIC VIRTUAL
-POWERLEVEL_ENTYPE OsPowerInfo::GetPowerLevel()
+PUBLIC VIRTUAL POWERLEVEL_ENTYPE OsPowerInfo::GetPowerLevel()
 {
     if (m_pPowerInfoP == IMS_NULL)
     {
@@ -180,15 +170,13 @@ POWERLEVEL_ENTYPE OsPowerInfo::GetPowerLevel()
     return m_pPowerInfoP->GetPowerLevel();
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsPowerInfo::GetPowerValue()
+PUBLIC VIRTUAL IMS_UINT32 OsPowerInfo::GetPowerValue()
 {
     return System::GetInstance()->GetPowerLevel();
 }
 
-PUBLIC VIRTUAL
-void OsPowerInfo::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsPowerInfo::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     (void)nLParam;
 
@@ -207,7 +195,6 @@ void OsPowerInfo::System_NotifyEvent(IN IMS_UINT32 nEvent,
                 m_pPowerInfoP->UpdatePowerValue();
 
                 m_pPowerInfoP->UpdatePowerLevel();
-
             }
             break;
         }

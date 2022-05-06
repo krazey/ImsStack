@@ -23,34 +23,31 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
+PRIVATE LOCAL const IMS_CHAR CODE_CYPHER[] =
+        "CUVEFGHLMKeQRPo78pTXYWZcd5aOnSNb26fgjkhiwxmlq34rstuvyz0IABJ1D9";
 
-PRIVATE LOCAL
-const IMS_CHAR CODE_CYPHER[]
-        = "CUVEFGHLMKeQRPo78pTXYWZcd5aOnSNb26fgjkhiwxmlq34rstuvyz0IABJ1D9";
-
-PRIVATE LOCAL
-const IMS_CHAR CODE_CYPHER_SPECIAL[] = {20,21,22,23,24,25,26};
+PRIVATE LOCAL const IMS_CHAR CODE_CYPHER_SPECIAL[] = {20, 21, 22, 23, 24, 25, 26};
 
 class OsIpSecSaPrivate
 {
 public:
-    inline OsIpSecSaPrivate()
-        : m_objSrcIp(IPAddress::IPv6NONE)
-        , m_nSrcPort(0)
-        , m_objDstIp(IPAddress::IPv6NONE)
-        , m_nDstPort(0)
-        , m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP)
-        , m_nSpi(0)
-        , m_nMode(IpSecType::MODE_TRANSPORT)
-        , m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
-        , m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO)
-        , m_objAuthKey(ByteArray::ConstNull())
-        , m_objEncryptionKey(ByteArray::ConstNull())
-        , m_strAuthHexKey(AString::ConstNull())
-        , m_strEncryptionHexKey(AString::ConstNull())
-    {}
-    inline ~OsIpSecSaPrivate()
-    {}
+    inline OsIpSecSaPrivate() :
+            m_objSrcIp(IPAddress::IPv6NONE),
+            m_nSrcPort(0),
+            m_objDstIp(IPAddress::IPv6NONE),
+            m_nDstPort(0),
+            m_nSecurityProtocol(IpSecType::SECURITY_PROTOCOL_ESP),
+            m_nSpi(0),
+            m_nMode(IpSecType::MODE_TRANSPORT),
+            m_nAuthAlgorithm(IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96),
+            m_nEncryptionAlgorithm(IpSecType::ENCRYPTION_ALGORITHM_NO),
+            m_objAuthKey(ByteArray::ConstNull()),
+            m_objEncryptionKey(ByteArray::ConstNull()),
+            m_strAuthHexKey(AString::ConstNull()),
+            m_strEncryptionHexKey(AString::ConstNull())
+    {
+    }
+    inline ~OsIpSecSaPrivate() {}
 
 public:
     IPAddress m_objSrcIp;
@@ -68,16 +65,13 @@ public:
     AString m_strEncryptionHexKey;
 };
 
-
-
 PUBLIC
-OsIpSecSa::OsIpSecSa()
-    : m_pIpSecSaP(new OsIpSecSaPrivate())
+OsIpSecSa::OsIpSecSa() :
+        m_pIpSecSaP(new OsIpSecSaPrivate())
 {
 }
 
-PUBLIC VIRTUAL
-OsIpSecSa::~OsIpSecSa()
+PUBLIC VIRTUAL OsIpSecSa::~OsIpSecSa()
 {
     if (m_pIpSecSaP != IMS_NULL)
     {
@@ -86,12 +80,11 @@ OsIpSecSa::~OsIpSecSa()
     }
 }
 
-PUBLIC VIRTUAL
-void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
-        IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
-        IN IMS_UINT32 nSecurityProtocol, IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode,
-        IN IMS_UINT32 nAuthAlgorithm, IN IMS_UINT32 nEncryptionAlgorithm,
-        IN const ByteArray& objAuthKey, IN const ByteArray& objEncryptionKey)
+PUBLIC VIRTUAL void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+        IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort, IN IMS_UINT32 nSecurityProtocol,
+        IN IMS_UINT32 nSpi, IN IMS_UINT32 nMode, IN IMS_UINT32 nAuthAlgorithm,
+        IN IMS_UINT32 nEncryptionAlgorithm, IN const ByteArray& objAuthKey,
+        IN const ByteArray& objEncryptionKey)
 {
     m_pIpSecSaP->m_objSrcIp = objSrcIp;
     m_pIpSecSaP->m_nSrcPort = nSrcPort;
@@ -106,8 +99,7 @@ void OsIpSecSa::SetSa(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
     m_pIpSecSaP->m_objEncryptionKey = objEncryptionKey;
 }
 
-PUBLIC VIRTUAL
-void OsIpSecSa::DoneSa()
+PUBLIC VIRTUAL void OsIpSecSa::DoneSa()
 {
     MakeSa();
 }
@@ -145,8 +137,7 @@ void OsIpSecSa::DisplayInfo()
 
     strLog.Sprintf("IMS_SA=0x%x|%s|%s|%d|%d|%d|na|na", m_pIpSecSaP->m_nSpi,
             m_pIpSecSaP->m_objSrcIp.ToString().GetStr(),
-            m_pIpSecSaP->m_objDstIp.ToString().GetStr(),
-            m_pIpSecSaP->m_nSecurityProtocol,
+            m_pIpSecSaP->m_objDstIp.ToString().GetStr(), m_pIpSecSaP->m_nSecurityProtocol,
             m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm);
 
     IMS_TRACE_D("%s", strLog.GetStr(), 0, 0);
@@ -159,13 +150,13 @@ IpSecSaParameter OsIpSecSa::CreateSaParameter(IN IMS_SINT32 nId) const
 
     if (m_pIpSecSaP->m_nAuthAlgorithm == IpSecType::INTEGRITY_ALGORITHM_HMAC_SHA_1_96)
     {
-        const IMS_BYTE byExtra[4] = { 0, 0, 0, 0 };
+        const IMS_BYTE byExtra[4] = {0, 0, 0, 0};
         objAuthKey.Append(byExtra, 4);
     }
 
     IpSecSaParameter objSaParam(nId, m_pIpSecSaP->m_nSecurityProtocol,
-            m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm,
-            objAuthKey, m_pIpSecSaP->m_objEncryptionKey);
+            m_pIpSecSaP->m_nAuthAlgorithm, m_pIpSecSaP->m_nEncryptionAlgorithm, objAuthKey,
+            m_pIpSecSaP->m_objEncryptionKey);
 
     return objSaParam;
 }
@@ -206,28 +197,24 @@ void OsIpSecSa::MakeSa()
 }
 
 PRIVATE
-void OsIpSecSa::SetAuthenticationKey()
-{
-}
+void OsIpSecSa::SetAuthenticationKey() {}
 
 PRIVATE
-void OsIpSecSa::SetEncryptionKey()
-{
-}
+void OsIpSecSa::SetEncryptionKey() {}
 
 PRIVATE
 AString OsIpSecSa::DecryptPrintKey(IN const AString& strInKey)
 {
     AString strDecodedKey = AString::ConstNull();
     IMS_CHAR CODE_DECYPHER[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    IMS_CHAR CODE_DECYPHER_SPECIAL[] = {10,11,12,13,14,15,16};
+    IMS_CHAR CODE_DECYPHER_SPECIAL[] = {10, 11, 12, 13, 14, 15, 16};
 
     for (IMS_SINT32 i = 0; i < strInKey.GetLength(); ++i)
     {
         // Find a character's position from codeCypher
-        if ((strInKey[i] >= 'A' && strInKey[i] <= 'Z')
-                || (strInKey[i] >= 'a' && strInKey[i] <= 'z')
-                || (strInKey[i] >= '0' && strInKey[i] <= '9'))
+        if ((strInKey[i] >= 'A' && strInKey[i] <= 'Z') ||
+                (strInKey[i] >= 'a' && strInKey[i] <= 'z') ||
+                (strInKey[i] >= '0' && strInKey[i] <= '9'))
         {
             IMS_SINT32 nPos = 0;
 
@@ -265,7 +252,6 @@ AString OsIpSecSa::EncryptPrintKey(IN const AString& strInKey)
     AString strEncodedKey = AString::ConstNull();
     for (IMS_SINT32 i = 0; i < strInKey.GetLength(); i++)
     {
-
         if (strInKey[i] >= 'A' && strInKey[i] <= 'Z')
         {
             strEncodedKey += CODE_CYPHER[strInKey[i] - 'A'];

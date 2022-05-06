@@ -19,14 +19,10 @@
 #include "ServiceMutex.h"
 
 PUBLIC
-MutexService::MutexService()
-{
-}
+MutexService::MutexService() {}
 
 PUBLIC
-MutexService::~MutexService()
-{
-}
+MutexService::~MutexService() {}
 
 PUBLIC
 IMutex* MutexService::CreateMutex(IN const AString& strName /*= AString::ConstNull()*/)
@@ -50,8 +46,7 @@ void MutexService::DestroyMutex(IN IMutex*& piMutex)
     }
 }
 
-PUBLIC GLOBAL
-MutexService* MutexService::GetMutexService()
+PUBLIC GLOBAL MutexService* MutexService::GetMutexService()
 {
     static MutexService* s_pMutexService = IMS_NULL;
 

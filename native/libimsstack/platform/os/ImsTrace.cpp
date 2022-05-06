@@ -22,45 +22,38 @@
 #include "ServiceMemory.h"
 #include "ServiceSystemTime.h"
 
-PRIVATE GLOBAL
-const IMS_CHAR* ImsTrace::START[ITrace::TEXT_MAX] =
-{
-    "\r\nTEXT_TEXT_START\r\n\r\n",
-    " \r\nTEXT_SDP_START\r\n\r\n", // SP is added before first CRLF to align a size of start string
-    " \r\nTEXT_SIP_START\r\n\r\n", // SP is added before first CRLF to align a size of start string
-    " \r\nTEXT_XML_START\r\n\r\n" // SP is added before first CRLF to align a size of start string
+// SDP/SIP/XML: SP is added before first CRLF to align a size of start string
+PRIVATE GLOBAL const IMS_CHAR* ImsTrace::START[ITrace::TEXT_MAX] = {
+        "\r\nTEXT_TEXT_START\r\n\r\n",
+        " \r\nTEXT_SDP_START\r\n\r\n",
+        " \r\nTEXT_SIP_START\r\n\r\n",
+        " \r\nTEXT_XML_START\r\n\r\n",
 };
 
-PRIVATE GLOBAL
-const IMS_CHAR* ImsTrace::END[ITrace::TEXT_MAX] =
-{
-    "\r\nTEXT_TEXT_END\r\n\r\n",
-    "\r\nTEXT_SDP_END\r\n \r\n", // SP is added before last CRLF to align a size of end string
-    "\r\nTEXT_SIP_END\r\n \r\n", // SP is added before last CRLF to align a size of end string
-    "\r\nTEXT_XML_END\r\n \r\n" // SP is added before last CRLF to align a size of end string
+// SDP/SIP/XML: SP is added before last CRLF to align a size of end string
+PRIVATE GLOBAL const IMS_CHAR* ImsTrace::END[ITrace::TEXT_MAX] = {
+        "\r\nTEXT_TEXT_END\r\n\r\n",
+        "\r\nTEXT_SDP_END\r\n \r\n",
+        "\r\nTEXT_SIP_END\r\n \r\n",
+        "\r\nTEXT_XML_END\r\n \r\n",
 };
 
 PUBLIC
-ImsTrace::ImsTrace()
-    : m_nOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL)
-    , m_nTracedModules(IMS_TRACE_MODULE_ALL)
+ImsTrace::ImsTrace() :
+        m_nOption(ITraceOption::OPT_CAT_ALL | ITraceOption::OPT_MEDIUM_SERIAL),
+        m_nTracedModules(IMS_TRACE_MODULE_ALL)
 {
 }
 
-PUBLIC VIRTUAL
-ImsTrace::~ImsTrace()
-{
-}
+PUBLIC VIRTUAL ImsTrace::~ImsTrace() {}
 
-PUBLIC VIRTUAL
-const IMS_CHAR* ImsTrace::GetFileName(IN const IMS_CHAR* /*pszFileName*/)
+PUBLIC VIRTUAL const IMS_CHAR* ImsTrace::GetFileName(IN const IMS_CHAR* /*pszFileName*/)
 {
     return "__NULL__";
 }
 
-PUBLIC VIRTUAL
-const IMS_CHAR* ImsTrace::GetFileName(IN_OUT IMS_CHAR* /*pszOutFileName*/,
-        IN const IMS_CHAR* /*pszFileName*/)
+PUBLIC VIRTUAL const IMS_CHAR* ImsTrace::GetFileName(
+        IN_OUT IMS_CHAR* /*pszOutFileName*/, IN const IMS_CHAR* /*pszFileName*/)
 {
     return "__NULL__";
 }
@@ -72,8 +65,7 @@ void ImsTrace::SetOption(IN IMS_UINT32 nOption, IN IMS_UINT32 nModule)
     m_nTracedModules = nModule;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL ImsTrace::IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule)
+PUBLIC VIRTUAL IMS_BOOL ImsTrace::IsTraceEnabled(IN IMS_SINT32 nCategory, IN IMS_UINT32 nModule)
 {
     // Check the trace category
     if ((m_nOption & ITraceOption::OPT_CAT_ALL) == ITraceOption::OPT_CAT_NONE)
@@ -131,8 +123,7 @@ void ImsTrace::OutP(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_U
     va_end(args);
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 ImsTrace::IsLoggable(IN IMS_SINT32 nCategory)
+PUBLIC GLOBAL IMS_SINT32 ImsTrace::IsLoggable(IN IMS_SINT32 nCategory)
 {
     IMS_SINT32 nPriority = ANDROID_LOG_VERBOSE;
 
@@ -152,9 +143,8 @@ IMS_SINT32 ImsTrace::IsLoggable(IN IMS_SINT32 nCategory)
     return __android_log_is_loggable(nPriority, IMS_LOG_TAG, ANDROID_LOG_INFO);
 }
 
-PROTECTED VIRTUAL
-void ImsTrace::OutputString(IN IMS_SINT32 /*nCategory*/,
-        IN IMS_CHAR* /*pszTrace*/, IN IMS_UINT32 /*nLength*/)
+PROTECTED VIRTUAL void ImsTrace::OutputString(
+        IN IMS_SINT32 /*nCategory*/, IN IMS_CHAR* /*pszTrace*/, IN IMS_UINT32 /*nLength*/)
 {
 }
 
@@ -184,35 +174,33 @@ IMS_BOOL ImsTrace::IsOptionEnabled(IN IMS_SINT32 nCategory)
 
     switch (nCategory)
     {
-        case ITrace::CAT_D :
+        case ITrace::CAT_D:
             if ((m_nOption & ITraceOption::OPT_CAT_D) == ITraceOption::OPT_CAT_D)
             {
                 return IMS_TRUE;
             }
             break;
-        case ITrace::CAT_I :
+        case ITrace::CAT_I:
             if ((m_nOption & ITraceOption::OPT_CAT_I) == ITraceOption::OPT_CAT_I)
             {
                 return IMS_TRUE;
             }
             break;
-        case ITrace::CAT_E :
+        case ITrace::CAT_E:
             if ((m_nOption & ITraceOption::OPT_CAT_E) == ITraceOption::OPT_CAT_E)
             {
                 return IMS_TRUE;
             }
             break;
-        default :
+        default:
             break;
-
     }
 
     // Trace Disabed...
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
+PRIVATE VIRTUAL void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
 {
     va_list args;
 
@@ -232,9 +220,8 @@ void ImsTrace::Out(IN const IMS_CHAR* pszFormat, ...)
     va_end(args);
 }
 
-PRIVATE VIRTUAL
-void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
-        IN const IMS_CHAR* pszFormat, ...)
+PRIVATE VIRTUAL void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag,
+        IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, ...)
 {
     va_list args;
 
@@ -254,9 +241,9 @@ void ImsTrace::Out(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag, IN IMS_UI
     va_end(args);
 }
 
-PRIVATE VIRTUAL
-void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction, IN IMS_UINT16 nLine,
-        IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule, IN const IMS_CHAR* pszFormat, ...)
+PRIVATE VIRTUAL void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction,
+        IN IMS_UINT16 nLine, IN const IMS_CHAR* pszTag, IN IMS_UINT32 nModule,
+        IN const IMS_CHAR* pszFormat, ...)
 {
 #if 0
     if ((m_nOption & ITraceOption::OPT_CAT_E) != ITraceOption::OPT_CAT_E)
@@ -275,8 +262,7 @@ void ImsTrace::OutE(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszFunction, IN
     Out(ITrace::CAT_E, pszTag, nModule, "E_CODE (%d) AT (%s, %d)", nErrorCode, pszFunction, nLine);
 }
 
-PRIVATE VIRTUAL
-void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
+PRIVATE VIRTUAL void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
         IN const IMS_CHAR* pszDescription, IN const IMS_CHAR* pszText, IN IMS_UINT32 nTextSize,
         IN IMS_BOOL bBinaryBody /*= IMS_FALSE*/)
 {
@@ -313,8 +299,7 @@ void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
         nLength = IMS_Sprintf(acBuffer, MAX_TEXT_SIZE,
                 "%s"
                 "TIME: %s\r\n",
-                START[nType],
-                strTime.GetStr());
+                START[nType], strTime.GetStr());
     }
     else
     {
@@ -324,8 +309,8 @@ void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
 
     if ((pszDescription != IMS_NULL) && (nLength != -1))
     {
-        nLength += IMS_Sprintf(&acBuffer[nLength],
-                MAX_TEXT_SIZE - nLength, "%s\r\n\r\n", pszDescription);
+        nLength += IMS_Sprintf(
+                &acBuffer[nLength], MAX_TEXT_SIZE - nLength, "%s\r\n\r\n", pszDescription);
     }
 
     if (nTextEnd <= (MAX_TEXT_SIZE - MAX_SPARE_SIZE))
@@ -383,8 +368,8 @@ void ImsTrace::OutText(IN IMS_UINT32 nModule, IN IMS_SINT32 nType,
 }
 
 PRIVATE
-void ImsTrace::HideArgs(IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer,
-        IN IMS_SINT32 nIgnore /* = 2 */)
+void ImsTrace::HideArgs(
+        IN const IMS_CHAR* pszFormat, OUT IMS_CHAR* pszBuffer, IN IMS_SINT32 nIgnore /* = 2 */)
 {
     const IMS_CHAR SECRET = '*';
     const IMS_CHAR SKIP_CHAR[] = "lL-+ #0123456789*.";

@@ -20,22 +20,19 @@
 #include "ImsSlot.h"
 #include "INetworkConnection.h"
 
-typedef IMS_UINT32    IMS_CONNECTION;
+typedef IMS_UINT32 IMS_CONNECTION;
 
-class ImsNetworkConnection
-    : public ImsSlot
-    , public INetworkConnection
+class ImsNetworkConnection : public ImsSlot, public INetworkConnection
 {
 public:
-    inline ImsNetworkConnection(IN IMS_SINT32 nSlotId)
-        : ImsSlot(nSlotId)
-    {}
-    inline virtual ~ImsNetworkConnection()
-    {}
+    inline ImsNetworkConnection(IN IMS_SINT32 nSlotId) :
+            ImsSlot(nSlotId)
+    {
+    }
+    inline virtual ~ImsNetworkConnection() {}
 
 public:
-    inline INetworkPing* CreatePing() override
-    { return new ImsNetworkPing(); }
+    inline INetworkPing* CreatePing() override { return new ImsNetworkPing(); }
     virtual IMS_BOOL Create(IN const AString& strNetProfile) = 0;
     virtual IMS_BOOL Create(IN IMS_SINT32 nApnType) = 0;
     virtual void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) = 0;

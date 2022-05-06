@@ -18,20 +18,12 @@
 #include "system-intf/System.h"
 
 PUBLIC
-OsEventSender::OsEventSender()
-{
-}
+OsEventSender::OsEventSender() {}
 
-PUBLIC VIRTUAL
-OsEventSender::~OsEventSender()
-{
-}
+PUBLIC VIRTUAL OsEventSender::~OsEventSender() {}
 
-
-PUBLIC VIRTUAL
-void OsEventSender::SendEvent(IN IMS_SINT32 nEvent,
-        IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam,
-        IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void OsEventSender::SendEvent(
+        IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam, IN IMS_SINT32 nSlotId)
 {
     System* pSystem = System::GetInstance();
 

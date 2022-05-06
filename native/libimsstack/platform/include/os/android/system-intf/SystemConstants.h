@@ -209,7 +209,7 @@ public:
     static const IMS_UINT32 RESET_EVENT = CATEGORY_BASE + 803;
 
     ////
-    //SRVCC information
+    // SRVCC information
     ////
     static const IMS_UINT32 LISTEN_SRVCC_EVENT = CATEGORY_BASE + 1001;
     static const IMS_UINT32 UNLISTEN_SRVCC_EVENT = CATEGORY_BASE + 1002;

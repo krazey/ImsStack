@@ -17,20 +17,17 @@
 
 __IMS_TRACE_TAG_BASE__;
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSAppThread::IMSAppThread()
-    : BaseThread()
-    , objIMSApps(IMSList<IMSApp*>())
+IMSAppThread::IMSAppThread() :
+        BaseThread(),
+        objIMSApps(IMSList<IMSApp*>())
 {
 }
 
-PUBLIC VIRTUAL
-IMSAppThread::~IMSAppThread()
-{
-}
+PUBLIC VIRTUAL IMSAppThread::~IMSAppThread() {}
 
 PUBLIC
 IMSActivityMngr* IMSAppThread::GetActivityMngr()
@@ -39,28 +36,27 @@ IMSActivityMngr* IMSAppThread::GetActivityMngr()
 }
 
 PUBLIC
-void IMSAppThread::AddApp(IN IMSApp_Creator pfnCreator, IN const AString &strName)
+void IMSAppThread::AddApp(IN IMSApp_Creator pfnCreator, IN const AString& strName)
 {
     ControlAppAsync(PARAM_APP_CONTROL_ADD, strName, pfnCreator);
 }
 
 PUBLIC
-void IMSAppThread::RemoveApp(IN const AString &strName)
+void IMSAppThread::RemoveApp(IN const AString& strName)
 {
     ControlAppAsync(PARAM_APP_CONTROL_REMOVE, strName);
 }
 
 PUBLIC
-void IMSAppThread::RemoveAndDestroyApp(IN const AString &strName)
+void IMSAppThread::RemoveAndDestroyApp(IN const AString& strName)
 {
     ControlAppAsync(PARAM_APP_CONTROL_REMOVE_N_DESTROY, strName);
 }
 
-#if 0 // protected
+#if 0  // protected
 #endif
 
-PROTECTED VIRTUAL
-void IMSAppThread::OnAppControl(IN IMS_SINT32 nParam, IN const AppInfo *pAppInfo)
+PROTECTED VIRTUAL void IMSAppThread::OnAppControl(IN IMS_SINT32 nParam, IN const AppInfo* pAppInfo)
 {
     if (pAppInfo == IMS_NULL)
     {
@@ -71,30 +67,31 @@ void IMSAppThread::OnAppControl(IN IMS_SINT32 nParam, IN const AppInfo *pAppInfo
 
     switch (nParam)
     {
-    case PARAM_APP_CONTROL_ADD: {
-        IMSApp *pApp = pAppInfo->pfnCreator(pAppInfo->strName);
-        AttachApp(pApp);
-        break;
-    }
+        case PARAM_APP_CONTROL_ADD:
+        {
+            IMSApp* pApp = pAppInfo->pfnCreator(pAppInfo->strName);
+            AttachApp(pApp);
+            break;
+        }
 
-    case PARAM_APP_CONTROL_REMOVE:
-        DetachApp(pAppInfo->strName);
-        break;
+        case PARAM_APP_CONTROL_REMOVE:
+            DetachApp(pAppInfo->strName);
+            break;
 
-    case PARAM_APP_CONTROL_REMOVE_N_DESTROY:
-        DetachApp(pAppInfo->strName, IMS_TRUE);
-        break;
+        case PARAM_APP_CONTROL_REMOVE_N_DESTROY:
+            DetachApp(pAppInfo->strName, IMS_TRUE);
+            break;
 
-    default:
-        // no-op
-        break;
+        default:
+            // no-op
+            break;
     }
 
     delete pAppInfo;
 }
 
 PROTECTED
-IMS_BOOL IMSAppThread::AttachApp(IN IMSApp *pApp)
+IMS_BOOL IMSAppThread::AttachApp(IN IMSApp* pApp)
 {
     if (pApp == IMS_NULL)
     {
@@ -107,11 +104,11 @@ IMS_BOOL IMSAppThread::AttachApp(IN IMSApp *pApp)
 }
 
 PROTECTED
-void IMSAppThread::DetachApp(IN const AString &strName, IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
+void IMSAppThread::DetachApp(IN const AString& strName, IN IMS_BOOL bDestroy /*= IMS_FALSE*/)
 {
     for (IMS_UINT32 i = 0; i < objIMSApps.GetSize(); ++i)
     {
-        IMSApp *pApp = objIMSApps.GetAt(i);
+        IMSApp* pApp = objIMSApps.GetAt(i);
 
         if (strName.Equals(pApp->GetName()))
         {
@@ -127,8 +124,8 @@ void IMSAppThread::DetachApp(IN const AString &strName, IN IMS_BOOL bDestroy /*=
 }
 
 PROTECTED
-void IMSAppThread::ControlAppAsync(IN IMS_SINT32 nParam,
-        IN const AString &strName, IN IMSApp_Creator pfnCreator /*= IMS_NULL*/)
+void IMSAppThread::ControlAppAsync(IN IMS_SINT32 nParam, IN const AString& strName,
+        IN IMSApp_Creator pfnCreator /*= IMS_NULL*/)
 {
     IThread* piThread = GetThread();
 
@@ -138,13 +135,12 @@ void IMSAppThread::ControlAppAsync(IN IMS_SINT32 nParam,
         return;
     }
 
-    AppInfo *pAppInfo = new AppInfo(strName, pfnCreator);
+    AppInfo* pAppInfo = new AppInfo(strName, pfnCreator);
 
-    piThread->PostMessageI(IMS_MSG_APP_CONTROL,
-            nParam, reinterpret_cast<IMS_UINTP>(pAppInfo));
+    piThread->PostMessageI(IMS_MSG_APP_CONTROL, nParam, reinterpret_cast<IMS_UINTP>(pAppInfo));
 }
 
-#if 0 // private
+#if 0  // private
 #endif
 
 PRIVATE
@@ -167,34 +163,32 @@ void IMSAppThread::UnloadAllApp()
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL IMSAppThread::Runnable_Run(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL IMSAppThread::Runnable_Run(IN IMSMSG& objMSG)
 {
     switch (objMSG.GetName())
     {
-    case IMS_MSG_START:
-        if (!Initialize())
-        {
-            return IMS_FALSE;
-        }
+        case IMS_MSG_START:
+            if (!Initialize())
+            {
+                return IMS_FALSE;
+            }
 
-        return OnStart(objMSG);
+            return OnStart(objMSG);
 
-    case IMS_MSG_TERMINATE:
-        OnTerminate(objMSG);
+        case IMS_MSG_TERMINATE:
+            OnTerminate(objMSG);
 
-        UnloadAllApp();
-        Uninitialize();
+            UnloadAllApp();
+            Uninitialize();
 
-        return IMS_TRUE;
+            return IMS_TRUE;
 
-    case IMS_MSG_APP_CONTROL:
-        OnAppControl(LONG_TO_INT(objMSG.nWparam),
-                reinterpret_cast<AppInfo*>(objMSG.nLparam));
-        return IMS_TRUE;
+        case IMS_MSG_APP_CONTROL:
+            OnAppControl(LONG_TO_INT(objMSG.nWparam), reinterpret_cast<AppInfo*>(objMSG.nLparam));
+            return IMS_TRUE;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     if (!IsThreadMessage(objMSG))

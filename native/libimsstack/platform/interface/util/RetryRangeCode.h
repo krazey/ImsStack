@@ -15,30 +15,31 @@
 
 #include "RetryCode.h"
 
-class RetryRangeCode
-    : public RetryCode
+class RetryRangeCode : public RetryCode
 {
 public:
-    inline RetryRangeCode()
-        : RetryCode()
-        , nMin(0)
-        , nMax(0)
-    { }
-    inline RetryRangeCode(IN IMS_SINT32 nMin_, IN IMS_SINT32 nMax_)
-        : RetryCode()
-        , nMin(nMin_)
-        , nMax(nMax_)
-    { }
-    inline RetryRangeCode(IN CONST RetryRangeCode &objRHS)
-        : RetryCode(objRHS)
-        , nMin(objRHS.nMin)
-        , nMax(objRHS.nMax)
-    { }
-    inline virtual ~RetryRangeCode()
-    { }
+    inline RetryRangeCode() :
+            RetryCode(),
+            nMin(0),
+            nMax(0)
+    {
+    }
+    inline RetryRangeCode(IN IMS_SINT32 nMin_, IN IMS_SINT32 nMax_) :
+            RetryCode(),
+            nMin(nMin_),
+            nMax(nMax_)
+    {
+    }
+    inline RetryRangeCode(IN CONST RetryRangeCode& objRHS) :
+            RetryCode(objRHS),
+            nMin(objRHS.nMin),
+            nMax(objRHS.nMax)
+    {
+    }
+    inline virtual ~RetryRangeCode() {}
 
 public:
-    inline RetryRangeCode& operator=(IN CONST RetryRangeCode &objRHS)
+    inline RetryRangeCode& operator=(IN CONST RetryRangeCode& objRHS)
     {
         if (this != &objRHS)
         {
@@ -51,7 +52,9 @@ public:
 
 public:
     inline virtual IMS_BOOL IsIn(IN IMS_SINT32 nCode) const
-        { return ((nCode > nMin) && (nCode < nMax)); }
+    {
+        return ((nCode > nMin) && (nCode < nMax));
+    }
 
 private:
     // Its value is exclusive
@@ -59,4 +62,4 @@ private:
     IMS_SINT32 nMax;
 };
 
-#endif // _RETRY_RANGE_CODE_H_
+#endif  // _RETRY_RANGE_CODE_H_

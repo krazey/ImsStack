@@ -23,9 +23,7 @@
 
 class IThread;
 
-class OsCarrierConfig
-        : public ImsCarrierConfig
-        , public ISystemListener
+class OsCarrierConfig : public ImsCarrierConfig, public ISystemListener
 {
 public:
     explicit OsCarrierConfig(IN IMS_SINT32 nSlotId);
@@ -39,18 +37,16 @@ private:
             IN const android::os::PersistableBundle& objConfig);
 
 public:
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
     void DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) final;
     void LoadConfig() final;
 
-    IMS_BOOL GetBoolean(IN const IMS_CHAR* pszKey,
-            IN IMS_BOOL bDefaultValue = IMS_FALSE) const final;
-    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey,
-            IN IMS_SINT32 nDefaultValue = -1) const final;
-    IMS_SLONG GetLong(IN const IMS_CHAR* pszKey,
-            IN IMS_SLONG nDefaultValue = -1L) const final;
+    IMS_BOOL GetBoolean(
+            IN const IMS_CHAR* pszKey, IN IMS_BOOL bDefaultValue = IMS_FALSE) const final;
+    IMS_SINT32 GetInt(IN const IMS_CHAR* pszKey, IN IMS_SINT32 nDefaultValue = -1) const final;
+    IMS_SLONG GetLong(IN const IMS_CHAR* pszKey, IN IMS_SLONG nDefaultValue = -1L) const final;
     AString GetString(IN const IMS_CHAR* pszKey,
             IN const AString& strDefaultValue = AString::ConstNull()) const final;
     IMSVector<IMS_BOOL> GetBooleanArray(IN const IMS_CHAR* pszKey) const final;

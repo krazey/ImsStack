@@ -19,11 +19,11 @@ class RCObject
 {
 public:
     RCObject();
-    RCObject(IN CONST RCObject &objRHS);
+    RCObject(IN CONST RCObject& objRHS);
     virtual ~RCObject() = 0;
 
 public:
-    RCObject& operator=(IN CONST RCObject &objRHS);
+    RCObject& operator=(IN CONST RCObject& objRHS);
 
 public:
     void AddReference();
@@ -37,16 +37,16 @@ private:
     IMS_BOOL bShareable;
 };
 
-template<class T>
+template <class T>
 class RCPtr
 {
 public:
     RCPtr(T* pRealPtr = IMS_NULL);
-    RCPtr(IN CONST RCPtr &objRhs);
+    RCPtr(IN CONST RCPtr& objRhs);
     ~RCPtr();
 
 public:
-    RCPtr& operator=(IN CONST RCPtr &objRhs);
+    RCPtr& operator=(IN CONST RCPtr& objRhs);
 
     T* operator->() const;
     T& operator*() const;
@@ -59,28 +59,28 @@ private:
     void Init();
 
 private:
-    T *pPointee;
+    T* pPointee;
 };
 
 PUBLIC
-template<class T> inline
-RCPtr<T>::RCPtr(T* pRealPtr /* = IMS_NULL */)
-    : pPointee(pRealPtr)
+template <class T>
+inline RCPtr<T>::RCPtr(T* pRealPtr /* = IMS_NULL */) :
+        pPointee(pRealPtr)
 {
     Init();
 }
 
 PUBLIC
-template<class T> inline
-RCPtr<T>::RCPtr(IN CONST RCPtr<T> &objRhs)
-    : pPointee(objRhs.pPointee)
+template <class T>
+inline RCPtr<T>::RCPtr(IN CONST RCPtr<T>& objRhs) :
+        pPointee(objRhs.pPointee)
 {
     Init();
 }
 
 PUBLIC
-template<class T> inline
-RCPtr<T>::~RCPtr()
+template <class T>
+inline RCPtr<T>::~RCPtr()
 {
     if (pPointee != IMS_NULL)
     {
@@ -90,12 +90,12 @@ RCPtr<T>::~RCPtr()
 }
 
 PUBLIC
-template<class T> inline
-RCPtr<T>& RCPtr<T>::operator=(IN CONST RCPtr<T> &objRhs)
+template <class T>
+inline RCPtr<T>& RCPtr<T>::operator=(IN CONST RCPtr<T>& objRhs)
 {
     if (pPointee != objRhs.pPointee)
     {
-        T *pOldPointee = pPointee;
+        T* pOldPointee = pPointee;
 
         pPointee = objRhs.pPointee;
         Init();
@@ -110,36 +110,36 @@ RCPtr<T>& RCPtr<T>::operator=(IN CONST RCPtr<T> &objRhs)
 }
 
 PUBLIC
-template<class T> inline
-T* RCPtr<T>::operator->() const
+template <class T>
+inline T* RCPtr<T>::operator->() const
 {
     return pPointee;
 }
 
 PUBLIC
-template<class T> inline
-T& RCPtr<T>::operator*() const
+template <class T>
+inline T& RCPtr<T>::operator*() const
 {
     return (*pPointee);
 }
 
 PUBLIC
-template<class T> inline
-T* RCPtr<T>::Get() const
+template <class T>
+inline T* RCPtr<T>::Get() const
 {
     return pPointee;
 }
 
 PUBLIC
-template<class T> inline
-IMS_BOOL RCPtr<T>::IsNull() const
+template <class T>
+inline IMS_BOOL RCPtr<T>::IsNull() const
 {
     return (pPointee == IMS_NULL);
 }
 
 PRIVATE
-template<class T> inline
-void RCPtr<T>::Init()
+template <class T>
+inline void RCPtr<T>::Init()
 {
     if (pPointee == IMS_NULL)
     {
@@ -154,4 +154,4 @@ void RCPtr<T>::Init()
     pPointee->AddReference();
 }
 
-#endif // _RC_OBJECT_H_
+#endif  // _RC_OBJECT_H_

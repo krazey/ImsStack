@@ -50,8 +50,6 @@ IMS_PVOID osPthread_ThreadProc(void* lpParam)
     return osPthread_Run(reinterpret_cast<OsPthread*>(lpParam));
 }
 
-
-
 class OsPthreadPrivate
 {
 public:
@@ -69,20 +67,16 @@ public:
     AString m_strName;
 };
 
-
-
 PUBLIC
-OsPthreadPrivate::OsPthreadPrivate()
-    : m_bIsRunning(IMS_FALSE)
+OsPthreadPrivate::OsPthreadPrivate() :
+        m_bIsRunning(IMS_FALSE)
 {
     m_strName = AString::ConstNull();
     m_nThreadId = 0;
 }
 
 PUBLIC
-OsPthreadPrivate::~OsPthreadPrivate()
-{
-}
+OsPthreadPrivate::~OsPthreadPrivate() {}
 
 PUBLIC
 void OsPthreadPrivate::CleanUp()
@@ -91,18 +85,15 @@ void OsPthreadPrivate::CleanUp()
     m_bIsRunning = IMS_FALSE;
 }
 
-
-
 PUBLIC
-OsPthread::OsPthread()
-    : ImsThread()
-    , m_pThreadP(new OsPthreadPrivate())
-    , m_piImpListener(IMS_NULL)
+OsPthread::OsPthread() :
+        ImsThread(),
+        m_pThreadP(new OsPthreadPrivate()),
+        m_piImpListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsPthread::~OsPthread()
+PUBLIC VIRTUAL OsPthread::~OsPthread()
 {
     CleanUp();
 
@@ -115,8 +106,7 @@ OsPthread::~OsPthread()
     m_pThreadP = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::Activate()
+PUBLIC VIRTUAL IMS_BOOL OsPthread::Activate()
 {
     if (m_pThreadP->m_bIsRunning)
     {
@@ -124,10 +114,7 @@ IMS_BOOL OsPthread::Activate()
     }
 
     IMS_SINT32 nResult = pthread_create(
-            &(m_pThreadP->m_nThreadId),
-            NULL,
-            osPthread_ThreadProc,
-            reinterpret_cast<void*>(this));
+            &(m_pThreadP->m_nThreadId), NULL, osPthread_ThreadProc, reinterpret_cast<void*>(this));
 
     if (nResult != 0)
     {
@@ -165,8 +152,8 @@ IMS_BOOL OsPthread::Activate()
         {
             if (nResult == EINVAL)
             {
-                IMS_TRACE_E(0, "pthread_detach - Failed (does not refer to a joinable thread)",
-                        0, 0, 0);
+                IMS_TRACE_E(0, "pthread_detach - Failed (does not refer to a joinable thread)", 0,
+                        0, 0);
             }
             else if (nResult == ESRCH)
             {
@@ -183,8 +170,7 @@ IMS_BOOL OsPthread::Activate()
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsPthread::Deactivate()
+PUBLIC VIRTUAL void OsPthread::Deactivate()
 {
     if (!(m_pThreadP->m_bIsRunning))
     {
@@ -193,8 +179,7 @@ void OsPthread::Deactivate()
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::Equals(IN const IThread* piThread) const
+PUBLIC VIRTUAL IMS_BOOL OsPthread::Equals(IN const IThread* piThread) const
 {
     const OsPthread* pThread = DYNAMIC_CAST(OsPthread*, piThread);
 
@@ -206,68 +191,58 @@ IMS_BOOL OsPthread::Equals(IN const IThread* piThread) const
     return GetName().Equals(pThread->GetName());
 }
 
-PUBLIC VIRTUAL
-const AString& OsPthread::GetName() const
+PUBLIC VIRTUAL const AString& OsPthread::GetName() const
 {
     return m_pThreadP->m_strName;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::IsRunning() const
+PUBLIC VIRTUAL IMS_BOOL OsPthread::IsRunning() const
 {
     return m_pThreadP->m_bIsRunning;
 }
 
-PUBLIC VIRTUAL
-void OsPthread::SetImpListener(IN IThreadImpListener* piListener)
+PUBLIC VIRTUAL void OsPthread::SetImpListener(IN IThreadImpListener* piListener)
 {
     m_piImpListener = piListener;
 }
 
-PUBLIC VIRTUAL
-void OsPthread::SetRunnable(IN IRunnable* /*piListener*/)
+PUBLIC VIRTUAL void OsPthread::SetRunnable(IN IRunnable* /*piListener*/)
 {
     // no-op (PThread doesn't require IRunnable interface)
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::PostMessageI(IN ImsMessage& /*objMsg*/)
+PUBLIC VIRTUAL IMS_BOOL OsPthread::PostMessageI(IN ImsMessage& /*objMsg*/)
 {
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::PostMessageI(IN IMS_UINT32 /*nMsg*/,
-        IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/)
+PUBLIC VIRTUAL IMS_BOOL OsPthread::PostMessageI(
+        IN IMS_UINT32 /*nMsg*/, IN IMS_UINTP /*nWparam*/, IN IMS_UINTP /*nLparam*/)
 {
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPthread::Create(IN const AString& strName)
+PUBLIC VIRTUAL IMS_BOOL OsPthread::Create(IN const AString& strName)
 {
     m_pThreadP->m_strName = strName;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_ULONG OsPthread::GetThreadId() const
+PUBLIC VIRTUAL IMS_ULONG OsPthread::GetThreadId() const
 {
     return static_cast<IMS_ULONG>(m_pThreadP->m_nThreadId);
 }
 
-PUBLIC GLOBAL
-IMS_ULONG OsPthread::GetCurrentThreadId()
+PUBLIC GLOBAL IMS_ULONG OsPthread::GetCurrentThreadId()
 {
     return static_cast<IMS_ULONG>(pthread_self());
 }
 
-PROTECTED VIRTUAL
-IMS_ULONG OsPthread::Run()
+PROTECTED VIRTUAL IMS_ULONG OsPthread::Run()
 {
-    IMS_TRACE_I("PThread :: Started (%s, %x, %p)",
-            GetName().GetStr(), m_pThreadP->m_nThreadId, m_piImpListener);
+    IMS_TRACE_I("PThread :: Started (%s, %x, %p)", GetName().GetStr(), m_pThreadP->m_nThreadId,
+            m_piImpListener);
 
     if (m_piImpListener != IMS_NULL)
     {

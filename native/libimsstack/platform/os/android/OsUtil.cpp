@@ -25,28 +25,26 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsUtil::OsUtil()
-    : m_bIsUserMode(IMS_FALSE)
-    , m_bImsDebugOn(IMS_FALSE)
-    , m_bHidePrivacyLog(IMS_FALSE)
-    , m_strChipsetVendor(AString::ConstNull())
+OsUtil::OsUtil() :
+        m_bIsUserMode(IMS_FALSE),
+        m_bImsDebugOn(IMS_FALSE),
+        m_bHidePrivacyLog(IMS_FALSE),
+        m_strChipsetVendor(AString::ConstNull())
 {
 }
 
 PUBLIC
-OsUtil::~OsUtil()
-{
-}
+OsUtil::~OsUtil() {}
 
 PUBLIC
-void OsUtil::InitializeOnImsThread()
-{
-}
+void OsUtil::InitializeOnImsThread() {}
 
 PUBLIC
 void OsUtil::InitializeReadOnlyProperties()
 {
-    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {0, };
+    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
+            0,
+    };
 
     // Debug on
     m_bImsDebugOn = IMS_FALSE;
@@ -63,8 +61,7 @@ void OsUtil::InitializeReadOnlyProperties()
         m_bIsUserMode = IMS_FALSE;
     }
 
-    IMS_TRACE_D("SystemProperties (1) :: build_type=%s",
-            m_bIsUserMode ? "user" : "non-user", 0, 0);
+    IMS_TRACE_D("SystemProperties (1) :: build_type=%s", m_bIsUserMode ? "user" : "non-user", 0, 0);
 }
 
 PUBLIC
@@ -72,21 +69,19 @@ void OsUtil::SetDebugOn(IN IMS_BOOL bDebugOn)
 {
     if (bDebugOn != m_bImsDebugOn)
     {
-        IMS_TRACE_D("System :: ImsDebugOn (%s >> %s)",
-            _TRACE_B_(m_bImsDebugOn), _TRACE_B_(bDebugOn), 0);
+        IMS_TRACE_D("System :: ImsDebugOn (%s >> %s)", _TRACE_B_(m_bImsDebugOn),
+                _TRACE_B_(bDebugOn), 0);
 
         m_bImsDebugOn = bDebugOn;
     }
 }
 
-PUBLIC VIRTUAL
-const AString& OsUtil::GetChipsetVendor() const
+PUBLIC VIRTUAL const AString& OsUtil::GetChipsetVendor() const
 {
     return m_strChipsetVendor;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsUtil::IsDebugMode() const
+PUBLIC VIRTUAL IMS_BOOL OsUtil::IsDebugMode() const
 {
     if (m_bImsDebugOn)
     {
@@ -96,8 +91,7 @@ IMS_BOOL OsUtil::IsDebugMode() const
     return !IsUserMode();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
+PUBLIC VIRTUAL IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
 {
     if (m_bImsDebugOn)
     {
@@ -112,14 +106,12 @@ IMS_BOOL OsUtil::IsServerInfoHiddenInLog() const
     return IsUserMode();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsUtil::IsUserMode() const
+PUBLIC VIRTUAL IMS_BOOL OsUtil::IsUserMode() const
 {
     return m_bIsUserMode;
 }
 
-PUBLIC GLOBAL
-OsUtil* OsUtil::GetInstance()
+PUBLIC GLOBAL OsUtil* OsUtil::GetInstance()
 {
     static OsUtil* s_pUtil = IMS_NULL;
 
@@ -131,14 +123,12 @@ OsUtil* OsUtil::GetInstance()
     return s_pUtil;
 }
 
-PRIVATE VIRTUAL
-void OsUtil::DigestSha1(IN const AString& strIn, OUT AString &strOut)
+PRIVATE VIRTUAL void OsUtil::DigestSha1(IN const AString& strIn, OUT AString& strOut)
 {
     System::GetInstance()->GetDigestSha1(strIn, strOut);
 }
 
-PRIVATE VIRTUAL
-AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
+PRIVATE VIRTUAL AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
 {
     // This function will be re-written or reviewed whether it's really needed or not.
     /*
@@ -168,29 +158,28 @@ AString OsUtil::GetUuid(IN IMS_SINT32 /*nOption = 0*/)
     return AString("00000000-0000-0000-0000-000000000000");
 }
 
-PRIVATE VIRTUAL
-AString OsUtil::Get(IN const AString& strName)
+PRIVATE VIRTUAL AString OsUtil::Get(IN const AString& strName)
 {
-    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {0, };
+    IMS_CHAR acValue[PROPERTY_VALUE_MAX] = {
+            0,
+    };
 
     property_get(strName.GetStr(), acValue, "");
 
     return AString(acValue);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsUtil::Set(IN const AString& strName, IN const AString& strValue)
+PRIVATE VIRTUAL IMS_BOOL OsUtil::Set(IN const AString& strName, IN const AString& strValue)
 {
     property_set(strName.GetStr(), strValue.GetStr());
 
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompData)
+PRIVATE VIRTUAL IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompData)
 {
-#define MAX_COMPRESS_SIZE         32767
-#define GZIP_MAX_WBITS            (16 + MAX_WBITS)
+#define MAX_COMPRESS_SIZE 32767
+#define GZIP_MAX_WBITS (16 + MAX_WBITS)
 
     z_stream stream;
     IMS_SINT32 nError;
@@ -206,11 +195,11 @@ IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompDat
     stream.opaque = 0;
 
     // level : Z_BEST_SPEED, Z_BEST_COMPRESSION, Z_DEFAULT_COMPRESSION
-    if ((nError = deflateInit2(&stream, Z_DEFAULT_COMPRESSION,
-            Z_DEFLATED, GZIP_MAX_WBITS, MAX_MEM_LEVEL, Z_FILTERED)) != Z_OK)
+    if ((nError = deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, GZIP_MAX_WBITS,
+                 MAX_MEM_LEVEL, Z_FILTERED)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: deflateInit (%d, %s)",
-                nError, (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
+        IMS_TRACE_E(0, "ZLib :: deflateInit (%d, %s)", nError,
+                (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
         return IMS_FALSE;
     }
 
@@ -236,8 +225,8 @@ IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompDat
         }
         else
         {
-            IMS_TRACE_E(0, "ZLib :: intermediate compressed data (index=%d) >> error (%d)",
-                    nIndex, nError, 0);
+            IMS_TRACE_E(0, "ZLib :: intermediate compressed data (index=%d) >> error (%d)", nIndex,
+                    nError, 0);
             break;
         }
     }
@@ -252,21 +241,20 @@ IMS_BOOL OsUtil::Compress(IN const ByteArray& objData, OUT ByteArray& objCompDat
 
     if ((nError = deflateEnd(&stream)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: deflateEnd (%d, %s)",
-                nError, (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
+        IMS_TRACE_E(0, "ZLib :: deflateEnd (%d, %s)", nError,
+                (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
     }
 
-    IMS_TRACE_D("ZLib :: compressed data (%d >> %d)",
-            objData.GetLength(), objCompData.GetLength(), 0);
+    IMS_TRACE_D(
+            "ZLib :: compressed data (%d >> %d)", objData.GetLength(), objCompData.GetLength(), 0);
 
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objData)
+PRIVATE VIRTUAL IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objData)
 {
-#define MAX_UNCOMPRESS_SIZE        32767
-#define GZIP_MAX_WBITS             (16 + MAX_WBITS)
+#define MAX_UNCOMPRESS_SIZE 32767
+#define GZIP_MAX_WBITS (16 + MAX_WBITS)
 
     z_stream stream;
     IMS_SINT32 nError;
@@ -287,7 +275,7 @@ IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objD
     if (objCompData.GetLength() >= 2)
     {
         // ID1 (0x1f) & ID2 (0x8b) -> gzip
-        const IMS_BYTE *pbyData = objCompData.GetData();
+        const IMS_BYTE* pbyData = objCompData.GetData();
 
         if ((pbyData[0] == 0x1f) && (pbyData[1] == 0x8b))
         {
@@ -306,8 +294,8 @@ IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objD
 
     if (nError != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: inflateInit (gzip:%d, %d, %s)",
-                bGZIP, nError, (stream.msg != IMS_NULL) ? stream.msg : "-");
+        IMS_TRACE_E(0, "ZLib :: inflateInit (gzip:%d, %d, %s)", bGZIP, nError,
+                (stream.msg != IMS_NULL) ? stream.msg : "-");
         return IMS_FALSE;
     }
 
@@ -327,8 +315,8 @@ IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objD
         if (nError == Z_OK)
         {
             ++nIndex;
-            IMS_TRACE_D("ZLib :: intermediate uncompressed data "\
-                    "(index=%d, total=%d, avail_out=%d)",
+            IMS_TRACE_D("ZLib :: intermediate uncompressed data "
+                        "(index=%d, total=%d, avail_out=%d)",
                     nIndex, stream.total_out, stream.avail_out);
 
             objData.Append(abyUncompData, MAX_UNCOMPRESS_SIZE - stream.avail_out);
@@ -341,7 +329,8 @@ IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objD
         }
         else
         {
-            IMS_TRACE_E(0, "ZLib :: intermediate uncompressed data (index=%d) >> "\
+            IMS_TRACE_E(0,
+                    "ZLib :: intermediate uncompressed data (index=%d) >> "
                     "error (%d, %s)",
                     nIndex, nError, (stream.msg != IMS_NULL) ? stream.msg : "-");
             break;
@@ -358,12 +347,12 @@ IMS_BOOL OsUtil::Uncompress(IN const ByteArray& objCompData, OUT ByteArray& objD
 
     if ((nError = inflateEnd(&stream)) != Z_OK)
     {
-        IMS_TRACE_E(0, "ZLib :: inflateEnd (%d, %s)",
-                nError, (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
+        IMS_TRACE_E(0, "ZLib :: inflateEnd (%d, %s)", nError,
+                (stream.msg != IMS_NULL) ? stream.msg : "-", 0);
     }
 
-    IMS_TRACE_D("ZLib :: uncompressed data (%d >> %d)",
-            objCompData.GetLength(), objData.GetLength(), 0);
+    IMS_TRACE_D("ZLib :: uncompressed data (%d >> %d)", objCompData.GetLength(),
+            objData.GetLength(), 0);
 
     return IMS_TRUE;
 }

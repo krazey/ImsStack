@@ -35,13 +35,13 @@ private:
     IMSUUID();
 
 public:
-    static AString GetUUID(IN IMS_SINT32 nVersion = VERSION_4,
-            IN CONST AString &strName = AString::ConstNull());
+    static AString GetUUID(
+            IN IMS_SINT32 nVersion = VERSION_4, IN CONST AString& strName = AString::ConstNull());
 
 private:
-    static void GetUUIDv3(IN CONST AString &strName, OUT AStringBuffer &objUUID);
-    static void GetUUIDv4(IN CONST AString &strRandom, OUT AStringBuffer &objUUID);
-    static void GetUUIDv5(IN CONST AString &strName, OUT AStringBuffer &objUUID);
+    static void GetUUIDv3(IN CONST AString& strName, OUT AStringBuffer& objUUID);
+    static void GetUUIDv4(IN CONST AString& strRandom, OUT AStringBuffer& objUUID);
+    static void GetUUIDv5(IN CONST AString& strName, OUT AStringBuffer& objUUID);
 };
 
-#endif // _IMS_UUID_H_
+#endif  // _IMS_UUID_H_

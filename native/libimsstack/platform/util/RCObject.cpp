@@ -13,26 +13,23 @@
 #include "RCObject.h"
 
 PUBLIC
-RCObject::RCObject()
-    : nRefCount(0)
-    , bShareable(IMS_TRUE)
+RCObject::RCObject() :
+        nRefCount(0),
+        bShareable(IMS_TRUE)
 {
 }
 
 PUBLIC
-RCObject::RCObject(IN CONST RCObject & /* objRHS */)
-    : nRefCount(0)
-    , bShareable(IMS_TRUE)
+RCObject::RCObject(IN CONST RCObject& /* objRHS */) :
+        nRefCount(0),
+        bShareable(IMS_TRUE)
 {
 }
 
-PUBLIC VIRTUAL
-RCObject::~RCObject()
-{
-}
+PUBLIC VIRTUAL RCObject::~RCObject() {}
 
 PUBLIC
-RCObject& RCObject::operator=(IN CONST RCObject & /* objRHS */)
+RCObject& RCObject::operator=(IN CONST RCObject& /* objRHS */)
 {
     return (*this);
 }

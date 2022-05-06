@@ -18,8 +18,7 @@
 
 #include "ISystemTime.h"
 
-class OsSystemTime
-    : public ISystemTime
+class OsSystemTime : public ISystemTime
 {
 public:
     OsSystemTime();
@@ -27,17 +26,16 @@ public:
 
 public:
     ImsDate GetDate() const override;
-    void GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
-            OUT IMS_SINT32& nDay, OUT IMS_SINT32& nDayOfWeek) const override;
+    void GetDate(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth, OUT IMS_SINT32& nDay,
+            OUT IMS_SINT32& nDayOfWeek) const override;
 
     ImsTime GetLocalTime() const override;
-    void GetLocalTime(OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute,
-            OUT IMS_UINT32& nSecond) const override;
+    void GetLocalTime(
+            OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const override;
 
     ImsGmTime GetGmTime() const override;
-    void GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth,
-            OUT IMS_SINT32& nDay, OUT IMS_UINT32& nHour,
-            OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const override;
+    void GetGmTime(OUT IMS_SINT32& nYear, OUT IMS_SINT32& nMonth, OUT IMS_SINT32& nDay,
+            OUT IMS_UINT32& nHour, OUT IMS_UINT32& nMinute, OUT IMS_UINT32& nSecond) const override;
 
     IMS_UINT32 GetRandom(IN IMS_BOOL bSeed = IMS_TRUE, IN IMS_UINT32 nRange = 0) const override;
     IMS_UINT32 GetTickCount() const override;
@@ -52,8 +50,8 @@ public:
 
     void Sleep(IN IMS_UINT32 nMilliSeconds) override;
 
-    IMS_SLONG GetDiffGmTime(IN const AString& strBegin,
-            IN const AString& strEnd, IN IMS_BOOL bSummerTime = IMS_FALSE) override;
+    IMS_SLONG GetDiffGmTime(IN const AString& strBegin, IN const AString& strEnd,
+            IN IMS_BOOL bSummerTime = IMS_FALSE) override;
 
 public:
     static const IMS_CHAR* MONTH[];

@@ -20,16 +20,16 @@
 class SAInfoP
 {
 public:
-    inline SAInfoP()
-        : nTransProtocol(0)
-        , nUEPort(0)
-        , nServerPort(0)
-        , nSPI(0)
-        , nDirection(0)
-        , pContext(IMS_NULL)
-    {}
-    inline ~SAInfoP()
-    {}
+    inline SAInfoP() :
+            nTransProtocol(0),
+            nUEPort(0),
+            nServerPort(0),
+            nSPI(0),
+            nDirection(0),
+            pContext(IMS_NULL)
+    {
+    }
+    inline ~SAInfoP() {}
 
 public:
     IMS_UINT32 nTransProtocol;
@@ -41,8 +41,8 @@ public:
 };
 
 PUBLIC
-IPSecSA::IPSecSA()
-    : pSAInfoP(new SAInfoP())
+IPSecSA::IPSecSA() :
+        pSAInfoP(new SAInfoP())
 {
 }
 
@@ -62,14 +62,8 @@ Remarks
 
 */
 PUBLIC
-void IPSecSA::SetSA
-(
-IN IMS_UINT32 nTransProtocol,
-IN IMS_UINT32 nUEPort,
-IN IMS_UINT32 nServerPort,
-IN IMS_UINT32 nSPI,
-IN IMS_UINT32 nDirection
-)
+void IPSecSA::SetSA(IN IMS_UINT32 nTransProtocol, IN IMS_UINT32 nUEPort, IN IMS_UINT32 nServerPort,
+        IN IMS_UINT32 nSPI, IN IMS_UINT32 nDirection)
 {
     pSAInfoP->nTransProtocol = nTransProtocol;
     pSAInfoP->nUEPort = nUEPort;
@@ -150,14 +144,8 @@ Remarks
 
 */
 PUBLIC
-void IPSecSA::GetSAInfo
-(
-OUT IMS_UINT32 &nTransProtocol,
-OUT IMS_UINT32 &nUEPort,
-OUT IMS_UINT32 &nServerPort,
-OUT IMS_UINT32 &nSPI,
-OUT IMS_UINT32 &nDirection
-)
+void IPSecSA::GetSAInfo(OUT IMS_UINT32& nTransProtocol, OUT IMS_UINT32& nUEPort,
+        OUT IMS_UINT32& nServerPort, OUT IMS_UINT32& nSPI, OUT IMS_UINT32& nDirection)
 {
     nTransProtocol = pSAInfoP->nTransProtocol;
     nUEPort = pSAInfoP->nUEPort;

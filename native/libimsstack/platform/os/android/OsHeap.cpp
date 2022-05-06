@@ -15,9 +15,9 @@
  */
 
 #ifdef __IMS_DEBUG_MEM__
-#define LOG_TAG            "ImsStackN"
-#define LOG_NDDEBUG        0
-#define MALLOC_DEBUG    1
+#define LOG_TAG "ImsStackN"
+#define LOG_NDDEBUG 0
+#define MALLOC_DEBUG 1
 #endif
 
 #include <stdio.h>
@@ -28,23 +28,23 @@
 #include <cutils/log.h>
 #include <private/android_filesystem_config.h>
 
-extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
-        size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
+extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize, size_t* infoSize,
+        size_t* totalMemory, size_t* backtraceSize);
 extern "C" void free_malloc_leak_info(uint8_t* info);
 
 typedef struct
 {
     size_t nSize;
     size_t nCount;
-    intptr_t *pBacktrace;
+    intptr_t* pBacktrace;
 } AllocEntry;
 
 size_t gnBacktraceSize = 0;
 
 extern "C" int CBHeapInfoCmp(const void* a, const void* b)
 {
-    AllocEntry *pEntry1 = (AllocEntry*)a;
-    AllocEntry *pEntry2 = (AllocEntry*)b;
+    AllocEntry* pEntry1 = (AllocEntry*)a;
+    AllocEntry* pEntry2 = (AllocEntry*)b;
 
     if (pEntry1->nSize < pEntry2->nSize)
     {
@@ -54,7 +54,7 @@ extern "C" int CBHeapInfoCmp(const void* a, const void* b)
     {
         return -1;
     }
-    else // if (pEntry1->nSize == pEntry2->nSize)
+    else  // if (pEntry1->nSize == pEntry2->nSize)
     {
         for (size_t j = 0; j < gnBacktraceSize; ++j)
         {
@@ -72,37 +72,29 @@ extern "C" int CBHeapInfoCmp(const void* a, const void* b)
 
     return 0;
 }
-#endif // __IMS_DEBUG_MEM__
+#endif  // __IMS_DEBUG_MEM__
 
 #include "OsHeap.h"
 
-
-
 PRIVATE
-OsHeap::OsHeap()
-    : m_bDebugEnabled(IMS_FALSE)
+OsHeap::OsHeap() :
+        m_bDebugEnabled(IMS_FALSE)
 {
 }
 
-PRIVATE VIRTUAL
-OsHeap::~OsHeap()
-{
-}
+PRIVATE VIRTUAL OsHeap::~OsHeap() {}
 
-PUBLIC VIRTUAL
-void* OsHeap::Alloc(IN IMS_SIZE_T nSize)
+PUBLIC VIRTUAL void* OsHeap::Alloc(IN IMS_SIZE_T nSize)
 {
     return malloc(nSize);
 }
 
-PUBLIC VIRTUAL
-void* OsHeap::Realloc(IN void* pMem, IN IMS_SIZE_T nSize)
+PUBLIC VIRTUAL void* OsHeap::Realloc(IN void* pMem, IN IMS_SIZE_T nSize)
 {
     return realloc(pMem, nSize);
 }
 
-PUBLIC VIRTUAL
-void OsHeap::Free(IN void* pMem)
+PUBLIC VIRTUAL void OsHeap::Free(IN void* pMem)
 {
     if (pMem == IMS_NULL)
     {
@@ -113,53 +105,50 @@ void OsHeap::Free(IN void* pMem)
     pMem = IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-void* OsHeap::AllocDebug(IN IMS_SIZE_T nSize,
-        IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+PUBLIC VIRTUAL void* OsHeap::AllocDebug(
+        IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
 {
-    (void) nLine;
-    (void) pszFile;
+    (void)nLine;
+    (void)pszFile;
 
     return Alloc(nSize);
 }
 
-PUBLIC VIRTUAL
-void* OsHeap::ReallocDebug(IN void* pMem, IN IMS_SIZE_T nSize,
-        IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+PUBLIC VIRTUAL void* OsHeap::ReallocDebug(
+        IN void* pMem, IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
 {
-    (void) nLine;
-    (void) pszFile;
+    (void)nLine;
+    (void)pszFile;
 
     return Realloc(pMem, nSize);
 }
 
-PUBLIC VIRTUAL
-void OsHeap::FreeDebug(IN void* pMem,
-        IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
+PUBLIC VIRTUAL void OsHeap::FreeDebug(
+        IN void* pMem, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile)
 {
-    (void) nLine;
-    (void) pszFile;
+    (void)nLine;
+    (void)pszFile;
 
     Free(pMem);
 }
 
-PUBLIC VIRTUAL
-void OsHeap::EnableHeapDebug(IN IMS_BOOL bEnable)
+PUBLIC VIRTUAL void OsHeap::EnableHeapDebug(IN IMS_BOOL bEnable)
 {
     m_bDebugEnabled = bEnable;
 }
 
-PUBLIC VIRTUAL
-void OsHeap::PrintHeapLeakage()
+PUBLIC VIRTUAL void OsHeap::PrintHeapLeakage()
 {
 #ifdef __IMS_DEBUG_MEM__
-#define MAX_BUFF_SIZE            (1024)
-#define TOTAL_MAX_BUFF_SIZE      (512*1024)
+#define MAX_BUFF_SIZE (1024)
+#define TOTAL_MAX_BUFF_SIZE (512 * 1024)
 
     IMS_CHAR acBuffer[MAX_BUFF_SIZE];
-    IMS_CHAR acTotalBuffer[TOTAL_MAX_BUFF_SIZE] = {0, };
+    IMS_CHAR acTotalBuffer[TOTAL_MAX_BUFF_SIZE] = {
+            0,
+    };
 
-    uint8_t *pInfo = NULL;
+    uint8_t* pInfo = NULL;
     size_t nOverallSize = 0;
     size_t nInfoSize = 0;
     size_t nTotalMemory = 0;
@@ -179,29 +168,29 @@ void OsHeap::PrintHeapLeakage()
 
     if (pInfo != NULL)
     {
-        uint8_t *pTmpInfo = pInfo;
+        uint8_t* pTmpInfo = pInfo;
 
         LOGD(">>>>> MEM STAT -- STARTS <<<<<");
 
-        //snprintf(buffer, SIZE, " Allocation count %i\n", count);
-        //strcat(result, buffer);
-        //snprintf(buffer, SIZE, " Total memory %i\n", totalMemory);
-        //strcat(result, buffer);
+        // snprintf(buffer, SIZE, " Allocation count %i\n", count);
+        // strcat(result, buffer);
+        // snprintf(buffer, SIZE, " Total memory %i\n", totalMemory);
+        // strcat(result, buffer);
 
-        AllocEntry *pEntries = new AllocEntry[nAllocCount];
+        AllocEntry* pEntries = new AllocEntry[nAllocCount];
 
         for (size_t i = 0; i < nAllocCount; ++i)
         {
             // Each entry should be size_t, size_t, intptr_t[backtraceSize]
-            AllocEntry *pEntry = &pEntries[i];
+            AllocEntry* pEntry = &pEntries[i];
 
-            pEntry->nSize = *reinterpret_cast<size_t *>(pTmpInfo);
+            pEntry->nSize = *reinterpret_cast<size_t*>(pTmpInfo);
             pTmpInfo += sizeof(size_t);
 
-            pEntry->nCount = *reinterpret_cast<size_t *>(pTmpInfo);
+            pEntry->nCount = *reinterpret_cast<size_t*>(pTmpInfo);
             pTmpInfo += sizeof(size_t);
 
-            pEntry->pBacktrace = reinterpret_cast<intptr_t *>(pTmpInfo);
+            pEntry->pBacktrace = reinterpret_cast<intptr_t*>(pTmpInfo);
             pTmpInfo += sizeof(intptr_t) * gnBacktraceSize;
         }
 
@@ -214,8 +203,8 @@ void OsHeap::PrintHeapLeakage()
             bMoved = false;
             for (size_t i = 0; i < (nAllocCount - 1); ++i)
             {
-                AllocEntry *pEntry1 = &pEntries[i];
-                AllocEntry *pEntry2 = &pEntries[i+1];
+                AllocEntry* pEntry1 = &pEntries[i];
+                AllocEntry* pEntry2 = &pEntries[i + 1];
 
                 bool bSwap = pEntry1->nSize < pEntry2->nSize;
 
@@ -235,25 +224,22 @@ void OsHeap::PrintHeapLeakage()
                 if (bSwap)
                 {
                     AllocEntry objTmp = pEntries[i];
-                    pEntries[i] = pEntries[i+1];
-                    pEntries[i+1] = objTmp;
+                    pEntries[i] = pEntries[i + 1];
+                    pEntries[i + 1] = objTmp;
                     bMoved = true;
                 }
             }
         } while (bMoved);
 #else
-        qsort(
-            pEntries,
-            nAllocCount,
-            sizeof(AllocEntry),
-            CBHeapInfoCmp
-            );
+        qsort(pEntries, nAllocCount, sizeof(AllocEntry), CBHeapInfoCmp);
 #endif
 
-        char acFile[MAX_BUFF_SIZE] = {0, };
-        snprintf(acFile, MAX_BUFF_SIZE, IMS_SOLUTION_STORAGE_ROOT_DIR "/memleak_%d_%d",
-                nAllocCount, nTotalMemory);
-        FILE *pFile = fopen(acFile, "w+");
+        char acFile[MAX_BUFF_SIZE] = {
+                0,
+        };
+        snprintf(acFile, MAX_BUFF_SIZE, IMS_SOLUTION_STORAGE_ROOT_DIR "/memleak_%d_%d", nAllocCount,
+                nTotalMemory);
+        FILE* pFile = fopen(acFile, "w+");
 
         if (pFile == IMS_NULL)
         {
@@ -263,11 +249,11 @@ void OsHeap::PrintHeapLeakage()
 
         for (size_t i = 0; i < nAllocCount; ++i)
         {
-            //acTotalBuffer[0] = '\0';
-            AllocEntry *pEntry = &pEntries[i];
+            // acTotalBuffer[0] = '\0';
+            AllocEntry* pEntry = &pEntries[i];
 
-            snprintf(acBuffer, MAX_BUFF_SIZE, "size %8lld, allocations %4i, ",
-                    pEntry->nSize, pEntry->nCount);
+            snprintf(acBuffer, MAX_BUFF_SIZE, "size %8lld, allocations %4i, ", pEntry->nSize,
+                    pEntry->nCount);
             strcpy(acTotalBuffer, acBuffer);
             for (size_t j = 0; (j < gnBacktraceSize) && pEntry->pBacktrace[j]; ++j)
             {
@@ -280,7 +266,7 @@ void OsHeap::PrintHeapLeakage()
                 strcat(acTotalBuffer, acBuffer);
             }
 
-            //LOGD("%s", acTotalBuffer);
+            // LOGD("%s", acTotalBuffer);
             strcat(acTotalBuffer, "\n");
             fwrite(acTotalBuffer, 1, strlen(acTotalBuffer), pFile);
         }
@@ -292,13 +278,11 @@ void OsHeap::PrintHeapLeakage()
 
         LOGD(">>>>> MEM STAT -- ENDS <<<<<");
     }
-#endif // __IMS_DEBUG_MEM__
+#endif  // __IMS_DEBUG_MEM__
 }
 
-PUBLIC VIRTUAL
-void OsHeap::GetHeapUsage(OUT IMS_SIZE_T& nTotalBlock, OUT IMS_SIZE_T& nTotalBytes,
-        OUT IMS_SIZE_T& nUsedBytes, OUT IMS_SIZE_T& nMaxUsedBytes,
-        OUT IMS_SIZE_T& nMaxRequested)
+PUBLIC VIRTUAL void OsHeap::GetHeapUsage(OUT IMS_SIZE_T& nTotalBlock, OUT IMS_SIZE_T& nTotalBytes,
+        OUT IMS_SIZE_T& nUsedBytes, OUT IMS_SIZE_T& nMaxUsedBytes, OUT IMS_SIZE_T& nMaxRequested)
 {
     nTotalBlock = 0;
     nTotalBytes = 0;
@@ -307,15 +291,11 @@ void OsHeap::GetHeapUsage(OUT IMS_SIZE_T& nTotalBlock, OUT IMS_SIZE_T& nTotalByt
     nMaxRequested = 0;
 }
 
-PUBLIC GLOBAL
-OsHeap* OsHeap::GetHeap()
+PUBLIC GLOBAL OsHeap* OsHeap::GetHeap()
 {
     static OsHeap s_objHeap;
 
     return &s_objHeap;
 }
 
-PUBLIC GLOBAL
-void OsHeap::Initialize()
-{
-}
+PUBLIC GLOBAL void OsHeap::Initialize() {}

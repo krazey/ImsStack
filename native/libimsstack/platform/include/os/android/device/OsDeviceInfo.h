@@ -19,8 +19,7 @@
 
 #include "IPhoneInfoDevice.h"
 
-class OsDeviceInfo
-    : public IDeviceInfo
+class OsDeviceInfo : public IDeviceInfo
 {
 public:
     OsDeviceInfo();
@@ -31,8 +30,7 @@ public:
 
 public:
     IMS_BOOL GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strDeviceId) const override;
-    IMS_BOOL GetDeviceSoftwareVersion(
-            IN IMS_SINT32 nSlotId, OUT AString& strSv) const override;
+    IMS_BOOL GetDeviceSoftwareVersion(IN IMS_SINT32 nSlotId, OUT AString& strSv) const override;
     IMS_BOOL GetDeviceName(OUT AString& strDeviceName) const override;
 };
 

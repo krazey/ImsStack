@@ -15,22 +15,20 @@
 
 #include "IMSActivity.h"
 
-class IMSActivityEx
-    : public IMSActivity
+class IMSActivityEx : public IMSActivity
 {
 public:
     // When giving the activity name, the name MUST not contain the dot ('.').
-    IMSActivityEx(IN CONST AString &strName = AString::ConstNull());
+    IMSActivityEx(IN CONST AString& strName = AString::ConstNull());
     virtual ~IMSActivityEx();
 
 protected:
-    inline virtual IIMSActivityControl* GetController()
-    { return IMS_NULL; }
+    inline virtual IIMSActivityControl* GetController() { return IMS_NULL; }
 
-    virtual IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
 private:
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG &objMSG);
+    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
 };
 
-#endif // _IMS_ACTIVITY_EX_H_
+#endif  // _IMS_ACTIVITY_EX_H_

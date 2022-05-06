@@ -85,8 +85,8 @@ public:
      * @return Returns IMS_TRUE if the operation is successfully done.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
-            IN const SocketAddress& objLocal, IN const SocketAddress* pRemote = IMS_NULL) = 0;
+    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN const SocketAddress& objLocal,
+            IN const SocketAddress* pRemote = IMS_NULL) = 0;
 
     /**
      * @brief Applies an IPSec SA to the specified socket information.
@@ -96,8 +96,7 @@ public:
      * @return Returns IMS_TRUE if the operation is successfully done.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket,
-            IN ISocket* piServerSocket) = 0;
+    virtual IMS_BOOL ApplyIpSecTransform(IN ISocket* piSocket, IN ISocket* piServerSocket) = 0;
 
     /**
      * @brief Removes IPSec SA from the specified socket information.

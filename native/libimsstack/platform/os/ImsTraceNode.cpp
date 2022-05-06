@@ -18,11 +18,11 @@
 #include "ServiceTrace.h"
 
 PUBLIC
-ImsTraceNode::ImsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag)
-    : m_bAlloc(IMS_FALSE)
-    , m_nHeaderLength(0)
-    , m_nLength(0)
-    , m_pBuffer(&m_acBuffer[0])
+ImsTraceNode::ImsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag) :
+        m_bAlloc(IMS_FALSE),
+        m_nHeaderLength(0),
+        m_nLength(0),
+        m_pBuffer(&m_acBuffer[0])
 {
     // IMS prefix
     m_pBuffer[0] = 'I';
@@ -54,8 +54,7 @@ ImsTraceNode::ImsTraceNode(IN IMS_SINT32 nCategory, IN const IMS_CHAR* pszTag)
     m_pBuffer[m_nHeaderLength] = '\0';
 }
 
-PUBLIC VIRTUAL
-ImsTraceNode::~ImsTraceNode()
+PUBLIC VIRTUAL ImsTraceNode::~ImsTraceNode()
 {
     if (m_bAlloc && (m_pBuffer != IMS_NULL))
     {

@@ -15,8 +15,7 @@
 #include "IMSStrLib.h"
 #include "ByteArray.h"
 
-PRIVATE GLOBAL
-ByteArray::Data ByteArray::SHARED_NULL =
+PRIVATE GLOBAL ByteArray::Data ByteArray::SHARED_NULL =
 {
     0, 0, ByteArray::SHARED_NULL.byValue,
     {
@@ -27,18 +26,18 @@ ByteArray::Data ByteArray::SHARED_NULL =
 LOCAL
 IMS_SINT32 ByteArray_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
 {
-    const IMS_SIZE_T nPage = 1 << 12; // 4096 bytes
+    const IMS_SIZE_T nPage = 1 << 12;  // 4096 bytes
     IMS_SIZE_T nNumAlloc;
 
     nAlloc += nExtra;
 
-    if (nAlloc < (1<<5)) // 32 bytes
+    if (nAlloc < (1 << 5))  // 32 bytes
     {
-        nNumAlloc = (1<<3) + ((nAlloc >> 3) << 3);
+        nNumAlloc = (1 << 3) + ((nAlloc >> 3) << 3);
     }
     else
     {
-        nNumAlloc = (nAlloc < nPage) ? (1<<3) : nPage;
+        nNumAlloc = (nAlloc < nPage) ? (1 << 3) : nPage;
 
         while (nNumAlloc < nAlloc)
         {
@@ -49,16 +48,15 @@ IMS_SINT32 ByteArray_AllocateMore(IN IMS_SIZE_T nAlloc, IN IMS_SIZE_T nExtra)
     return LONG_TO_INT(nNumAlloc - nExtra);
 }
 
-
 PUBLIC
-ByteArray::ByteRef::ByteRef(IN ByteArray &objBA_, IN IMS_SINT32 nIndex_)
-    : objBA(objBA_)
-    , nIndex(nIndex_)
+ByteArray::ByteRef::ByteRef(IN ByteArray& objBA_, IN IMS_SINT32 nIndex_) :
+        objBA(objBA_),
+        nIndex(nIndex_)
 {
 }
 
 PUBLIC
-ByteArray::ByteRef& ByteArray::ByteRef::operator=(IN CONST ByteRef &objRHS)
+ByteArray::ByteRef& ByteArray::ByteRef::operator=(IN CONST ByteRef& objRHS)
 {
     if (this != &objRHS)
     {
@@ -76,8 +74,8 @@ ByteArray::ByteRef& ByteArray::ByteRef::operator=(IN IMS_BYTE byte)
 }
 
 PUBLIC
-ByteArray::ByteArray()
-    : pData(&SHARED_NULL)
+ByteArray::ByteArray() :
+        pData(&SHARED_NULL)
 {
 }
 
@@ -100,7 +98,7 @@ ByteArray::ByteArray(IN IMS_BYTE byte)
 }
 
 PUBLIC
-ByteArray::ByteArray(IN CONST IMS_CHAR *pValue_)
+ByteArray::ByteArray(IN CONST IMS_CHAR* pValue_)
 {
     IMS_UINT32 nSize = IMS_StrLen(pValue_);
 
@@ -127,7 +125,7 @@ ByteArray::ByteArray(IN CONST IMS_CHAR *pValue_)
 }
 
 PUBLIC
-ByteArray::ByteArray(IN CONST AString &strValue)
+ByteArray::ByteArray(IN CONST AString& strValue)
 {
     IMS_SINT32 nSize = strValue.GetLength();
 
@@ -154,7 +152,7 @@ ByteArray::ByteArray(IN CONST AString &strValue)
 }
 
 PUBLIC
-ByteArray::ByteArray(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
+ByteArray::ByteArray(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_)
 {
     if ((pValue_ == IMS_NULL) || (nSize_ <= 0))
     {
@@ -179,7 +177,7 @@ ByteArray::ByteArray(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
 }
 
 PUBLIC
-ByteArray::ByteArray(IN CONST ByteArray &objRHS)
+ByteArray::ByteArray(IN CONST ByteArray& objRHS)
 {
     if (objRHS.pData == &SHARED_NULL)
     {
@@ -211,7 +209,7 @@ ByteArray::~ByteArray()
 }
 
 PUBLIC
-ByteArray& ByteArray::operator=(IN CONST ByteArray &objRHS)
+ByteArray& ByteArray::operator=(IN CONST ByteArray& objRHS)
 {
     if (this != &objRHS)
     {
@@ -253,7 +251,7 @@ ByteArray& ByteArray::operator=(IN IMS_BYTE byte)
 }
 
 PUBLIC
-ByteArray& ByteArray::operator+=(IN CONST ByteArray &objBA)
+ByteArray& ByteArray::operator+=(IN CONST ByteArray& objBA)
 {
     return Append(objBA);
 }
@@ -311,7 +309,7 @@ ByteArray& ByteArray::Append(IN IMS_BYTE byte)
 }
 
 PUBLIC
-ByteArray& ByteArray::Append(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
+ByteArray& ByteArray::Append(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_)
 {
     if ((nSize_ <= 0) || (pValue_ == IMS_NULL))
     {
@@ -331,7 +329,7 @@ ByteArray& ByteArray::Append(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
 }
 
 PUBLIC
-ByteArray& ByteArray::Append(IN CONST ByteArray &objBA)
+ByteArray& ByteArray::Append(IN CONST ByteArray& objBA)
 {
     if (pData == &SHARED_NULL)
     {
@@ -366,8 +364,8 @@ ByteArray& ByteArray::Erase(IN IMS_SINT32 nOffset, IN IMS_SINT32 nCount)
     }
     else
     {
-        IMS_MEM_Memmove(pData->pValue + nOffset,
-                pData->pValue + nOffset + nCount, pData->nSize - nOffset - nCount);
+        IMS_MEM_Memmove(pData->pValue + nOffset, pData->pValue + nOffset + nCount,
+                pData->nSize - nOffset - nCount);
         Resize(pData->nSize - nCount);
     }
 
@@ -391,7 +389,7 @@ ByteArray& ByteArray::Prepend(IN IMS_BYTE byte)
 }
 
 PUBLIC
-ByteArray& ByteArray::Prepend(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
+ByteArray& ByteArray::Prepend(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_)
 {
     if ((nSize_ <= 0) || (pValue_ == IMS_NULL))
     {
@@ -412,7 +410,7 @@ ByteArray& ByteArray::Prepend(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
 }
 
 PUBLIC
-ByteArray& ByteArray::Prepend(IN CONST ByteArray &objBA)
+ByteArray& ByteArray::Prepend(IN CONST ByteArray& objBA)
 {
     if (pData == &SHARED_NULL)
     {
@@ -430,9 +428,9 @@ ByteArray& ByteArray::Prepend(IN CONST ByteArray &objBA)
 }
 
 PUBLIC
-void ByteArray::Attach(IN CONST IMS_BYTE *pValue_, IN IMS_SINT32 nSize_)
+void ByteArray::Attach(IN CONST IMS_BYTE* pValue_, IN IMS_SINT32 nSize_)
 {
-    Data *pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data)));
+    Data* pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data)));
 
     if (pValue_)
     {
@@ -552,8 +550,7 @@ AString ByteArray::ToHexString() const
     return strHexString;
 }
 
-PUBLIC GLOBAL
-const ByteArray& ByteArray::ConstNull()
+PUBLIC GLOBAL const ByteArray& ByteArray::ConstNull()
 {
     static const ByteArray CONST_NULL;
 
@@ -575,10 +572,9 @@ void ByteArray::Clear()
 PRIVATE
 void ByteArray::Realloc(IN IMS_SINT32 nAlloc)
 {
-    Data *pNewData;
+    Data* pNewData;
 
-    if ((pData == &SHARED_NULL)
-            || (pData->pValue != pData->byValue))
+    if ((pData == &SHARED_NULL) || (pData->pValue != pData->byValue))
     {
         pNewData = static_cast<Data*>(IMS_MEM_Malloc(sizeof(Data) + nAlloc));
 

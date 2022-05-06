@@ -32,77 +32,70 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 // NR / LTE
-#define UTRAN_ANI_ITEM_SIZE            4
+#define UTRAN_ANI_ITEM_SIZE 4
 
-#define UTRAN_ANI_MCC_INDEX            0
-#define UTRAN_ANI_MNC_INDEX            1
-#define UTRAN_ANI_CELLID_INDEX         2
-#define UTRAN_ANI_TAC_INDEX            3
-#define UTRAN_ANI_MODE_INDEX           4
+#define UTRAN_ANI_MCC_INDEX 0
+#define UTRAN_ANI_MNC_INDEX 1
+#define UTRAN_ANI_CELLID_INDEX 2
+#define UTRAN_ANI_TAC_INDEX 3
+#define UTRAN_ANI_MODE_INDEX 4
 
 // eHRPD
-#define EHRPD_ANI_ITEM_SIZE            2
+#define EHRPD_ANI_ITEM_SIZE 2
 
-#define EHRPD_ANI_SECTOR_ID_INDEX      0
-#define EHRPD_ANI_SUBNET_LEN_INDEX     1
+#define EHRPD_ANI_SECTOR_ID_INDEX 0
+#define EHRPD_ANI_SUBNET_LEN_INDEX 1
 
 // GERAN
-#define GERAN_ANI_ITEM_SIZE            4
+#define GERAN_ANI_ITEM_SIZE 4
 
-#define GERAN_ANI_MCC_INDEX            0
-#define GERAN_ANI_MNC_INDEX            1
-#define GERAN_ANI_CELLID_INDEX         2
-#define GERAN_ANI_LAC_INDEX            3
-
-
+#define GERAN_ANI_MCC_INDEX 0
+#define GERAN_ANI_MNC_INDEX 1
+#define GERAN_ANI_CELLID_INDEX 2
+#define GERAN_ANI_LAC_INDEX 3
 
 PUBLIC
-OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId)
-    : ImsNetworkConnection(nSlotId)
-    , m_nIpcanCategory(IIpcan::CATEGORY_MOBILE)
-    , m_nState(STATE_IDLE)
-    , m_nDataState(DATA_DISCONNECTED)
-    , m_pPolicy(IMS_NULL)
-    , m_strApn(AString::ConstNull())
-    , m_nIfaceId(IMS_NET_IFACE_INVALID_ID)
-    , m_strIfaceName(AString::ConstNull())
-    , m_nPreferredIpVersion(IPAddress::UNKNOWN)
-    , m_objLocalAddress(IPAddress::NONE)
-    , m_objLocalAddressIpv4(IPAddress::NONE)
-    , m_objLocalAddressIpv6(IPAddress::IPv6NONE)
-    , m_objPcscfsAddress(AStringArray::ConstNull())
-    , m_nConnectionHandle(0)
-    , m_piOwnerThread(IMS_NULL)
-    , m_piConnectionListener(IMS_NULL)
-    , m_objReferenceListeners(IMSList<INetworkConnectionListener*>())
+OsNetworkConnection::OsNetworkConnection(IN IMS_SINT32 nSlotId) :
+        ImsNetworkConnection(nSlotId),
+        m_nIpcanCategory(IIpcan::CATEGORY_MOBILE),
+        m_nState(STATE_IDLE),
+        m_nDataState(DATA_DISCONNECTED),
+        m_pPolicy(IMS_NULL),
+        m_strApn(AString::ConstNull()),
+        m_nIfaceId(IMS_NET_IFACE_INVALID_ID),
+        m_strIfaceName(AString::ConstNull()),
+        m_nPreferredIpVersion(IPAddress::UNKNOWN),
+        m_objLocalAddress(IPAddress::NONE),
+        m_objLocalAddressIpv4(IPAddress::NONE),
+        m_objLocalAddressIpv6(IPAddress::IPv6NONE),
+        m_objPcscfsAddress(AStringArray::ConstNull()),
+        m_nConnectionHandle(0),
+        m_piOwnerThread(IMS_NULL),
+        m_piConnectionListener(IMS_NULL),
+        m_objReferenceListeners(IMSList<INetworkConnectionListener*>())
 {
     IMS_TRACE_D("Constructor :: Mobile network connection", 0, 0, 0);
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-OsNetworkConnection::~OsNetworkConnection()
+PUBLIC VIRTUAL OsNetworkConnection::~OsNetworkConnection()
 {
     IMS_TRACE_D("Destructor :: Mobile network connection", 0, 0, 0);
 
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 
     if (m_pPolicy != IMS_NULL)
     {
-        ImsNetworkConnectionState::GetInstance()->DetachHandle(
-                m_pPolicy->GetName(), GetSlotId());
+        ImsNetworkConnectionState::GetInstance()->DetachHandle(m_pPolicy->GetName(), GetSlotId());
 
         delete m_pPolicy;
     }
 }
 
-PUBLIC VIRTUAL
-const IPAddress& OsNetworkConnection::GetLocalAddress(
+PUBLIC VIRTUAL const IPAddress& OsNetworkConnection::GetLocalAddress(
         IN IMS_SINT32 nIpVersion /*= 0 configuration-based*/) const
 {
     if (nIpVersion == 0)
@@ -121,8 +114,7 @@ const IPAddress& OsNetworkConnection::GetLocalAddress(
     return IPAddress::NONE;
 }
 
-PRIVATE VIRTUAL
-INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
+PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
         IN IMS_BOOL bEnableApn /*= IMS_FALSE*/,
         IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
 {
@@ -144,15 +136,15 @@ INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
 
     IMS_TRACE_D("Mobile :: Activate() - apnType=%d, state=%d", nApnType, m_nDataState, 0);
 
-    if ((nApnType == NetworkPolicy::APN_EMERGENCY)
-            || (bEnableApn && (nApnType == NetworkPolicy::APN_IMS))
-            || (bEnableApn && (nApnType == NetworkPolicy::APN_INTERNET)))
+    if ((nApnType == NetworkPolicy::APN_EMERGENCY) ||
+            (bEnableApn && (nApnType == NetworkPolicy::APN_IMS)) ||
+            (bEnableApn && (nApnType == NetworkPolicy::APN_INTERNET)))
     {
-        if (System::GetInstance()->ActivateDataConnection(
-                nApnType, nIpcanCategory, GetSlotId()) == 0)
+        if (System::GetInstance()->ActivateDataConnection(nApnType, nIpcanCategory, GetSlotId()) ==
+                0)
         {
-            IMS_TRACE_E( 0, "Enabling data connectivity(%s) failed",
-                    GetProfileName().GetStr(), 0, 0);
+            IMS_TRACE_E(
+                    0, "Enabling data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
 
             SetState(STATE_IDLE);
 
@@ -165,8 +157,7 @@ INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Activate(
     return RESULT_DOING;
 }
 
-PRIVATE VIRTUAL
-INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
+PRIVATE VIRTUAL INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
         IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
         IN IMS_SINT32 nIpcanCategory /*= IIpcan::CATEGORY_MOBILE*/)
 {
@@ -199,8 +190,8 @@ INetworkConnection::RESULT_ENTYPE OsNetworkConnection::Deactivate(
  * l byte : 2nd data
  * ...
  */
-PRIVATE VIRTUAL
-void OsNetworkConnection::GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo)
+PRIVATE VIRTUAL void OsNetworkConnection::GetAccessNetworkInfo(
+        OUT AccessNetworkInfo& objAccessNetInfo)
 {
     if (m_nIpcanCategory == IIpcan::CATEGORY_WLAN)
     {
@@ -230,12 +221,12 @@ void OsNetworkConnection::GetAccessNetworkInfo(OUT AccessNetworkInfo& objAccessN
     objAccessNetInfo = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAccessNetInfo,
-        OUT AString& strTimestamp, OUT AString& strCellInfoAge)
+PRIVATE VIRTUAL void OsNetworkConnection::GetLastAccessNetworkInfo(
+        OUT AccessNetworkInfo& objAccessNetInfo, OUT AString& strTimestamp,
+        OUT AString& strCellInfoAge)
 {
-    AStringArray objCellIdentities = System::GetInstance()->GetLastAccessNetworkInfo(
-            RADIOTECH_TYPE_INVALID, GetSlotId());
+    AStringArray objCellIdentities =
+            System::GetInstance()->GetLastAccessNetworkInfo(RADIOTECH_TYPE_INVALID, GetSlotId());
 
     // 0 : network type
     // 1 : timestamp as UTC format
@@ -263,8 +254,8 @@ void OsNetworkConnection::GetLastAccessNetworkInfo(OUT AccessNetworkInfo& objAcc
     objAccessNetInfo = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::GetExtraInfo(IN const AString& strType, OUT AString& strInfo)
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::GetExtraInfo(
+        IN const AString& strType, OUT AString& strInfo)
 {
     if (strType.Equals("rat"))
     {
@@ -278,12 +269,9 @@ IMS_BOOL OsNetworkConnection::GetExtraInfo(IN const AString& strType, OUT AStrin
         {
             strInfo = "NR";
         }
-        else if ((nRadioType == RADIOTECH_TYPE_UMTS)
-                || (nRadioType == RADIOTECH_TYPE_HSDPA)
-                || (nRadioType == RADIOTECH_TYPE_HSUPA)
-                || (nRadioType == RADIOTECH_TYPE_HSPA)
-                || (nRadioType == RADIOTECH_TYPE_EHRPD)
-                || (nRadioType == RADIOTECH_TYPE_HSPAP))
+        else if ((nRadioType == RADIOTECH_TYPE_UMTS) || (nRadioType == RADIOTECH_TYPE_HSDPA) ||
+                (nRadioType == RADIOTECH_TYPE_HSUPA) || (nRadioType == RADIOTECH_TYPE_HSPA) ||
+                (nRadioType == RADIOTECH_TYPE_EHRPD) || (nRadioType == RADIOTECH_TYPE_HSPAP))
         {
             strInfo = "3G";
         }
@@ -315,8 +303,7 @@ IMS_BOOL OsNetworkConnection::GetExtraInfo(IN const AString& strType, OUT AStrin
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& strHostName,
+PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& strHostName,
         OUT IMSList<IPAddress>& objIpAddrs,
         IN IMS_SINT32 nIpVersion /*= 0 default-local-address-based*/)
 {
@@ -376,50 +363,44 @@ IMS_SINT32 OsNetworkConnection::GetHostByName(IN const AString& strHostName,
     return 1;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 OsNetworkConnection::GetIfaceId() const
+PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetIfaceId() const
 {
     return m_nIfaceId;
 }
 
-PRIVATE VIRTUAL
-const AString& OsNetworkConnection::GetIfaceName() const
+PRIVATE VIRTUAL const AString& OsNetworkConnection::GetIfaceName() const
 {
     return m_strIfaceName;
 }
 
-PRIVATE VIRTUAL
-const AStringArray& OsNetworkConnection::GetPcscfAddress(
+PRIVATE VIRTUAL const AStringArray& OsNetworkConnection::GetPcscfAddress(
         IN IMS_SINT32 nIpVersion /*= 0 (configuration-based)*/)
 {
     m_objPcscfsAddress.RemoveAllElements();
-    m_objPcscfsAddress = System::GetInstance()->GetPcscfAddresses(
-            GetApnType(), nIpVersion, GetSlotId());
+    m_objPcscfsAddress =
+            System::GetInstance()->GetPcscfAddresses(GetApnType(), nIpVersion, GetSlotId());
 
     return m_objPcscfsAddress;
 }
 
-PRIVATE VIRTUAL
-INetworkConnection::STATE_ENTYPE OsNetworkConnection::GetState() const
+PRIVATE VIRTUAL INetworkConnection::STATE_ENTYPE OsNetworkConnection::GetState() const
 {
     return (m_nState == STATE_ACTIVE) ? STATE_CONNECTED : STATE_DISCONNECTED;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::IsConnected(
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsConnected(
         IN IMS_SINT32 nCategory /*= IIpcan::CATEGORY_ANY*/) const
 {
     if (nCategory == IIpcan::CATEGORY_ANY)
     {
         return (m_nState == STATE_ACTIVE);
     }
-    else if ((nCategory == IIpcan::CATEGORY_MOBILE)
-            && (m_nIpcanCategory == IIpcan::CATEGORY_MOBILE))
+    else if ((nCategory == IIpcan::CATEGORY_MOBILE) &&
+            (m_nIpcanCategory == IIpcan::CATEGORY_MOBILE))
     {
         return (m_nState == STATE_ACTIVE);
     }
-    else if ((nCategory == IIpcan::CATEGORY_WLAN)
-            && (m_nIpcanCategory == IIpcan::CATEGORY_WLAN))
+    else if ((nCategory == IIpcan::CATEGORY_WLAN) && (m_nIpcanCategory == IIpcan::CATEGORY_WLAN))
     {
         return (m_nState == STATE_ACTIVE);
     }
@@ -427,8 +408,8 @@ IMS_BOOL OsNetworkConnection::IsConnected(
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::SendPingToHostAddress(IN const IPAddress& objHostAddress)
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::SendPingToHostAddress(
+        IN const IPAddress& objHostAddress)
 {
     IMS_BOOL bResult = System::GetInstance()->SendPingToHostAddress(
             GetApnType(), objHostAddress.ToString(), GetSlotId());
@@ -438,36 +419,30 @@ IMS_BOOL OsNetworkConnection::SendPingToHostAddress(IN const IPAddress& objHostA
     return bResult;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsePDGEnabled() const
 {
     return IsConnected(IIpcan::CATEGORY_WLAN);
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::IsMobileDataEnabled() const
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::IsMobileDataEnabled() const
 {
-   return System::GetInstance()->IsMobileDataEnabled(GetSlotId());
+    return System::GetInstance()->IsMobileDataEnabled(GetSlotId());
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 OsNetworkConnection::GetMtu() const
+PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetMtu() const
 {
     return System::GetInstance()->GetMtu(GetApnType(), GetSlotId());
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::SetListener(IN INetworkConnectionListener* piListener)
+PRIVATE VIRTUAL void OsNetworkConnection::SetListener(IN INetworkConnectionListener* piListener)
 {
     m_piConnectionListener = piListener;
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::SetPreferredIpVersion(
+PRIVATE VIRTUAL void OsNetworkConnection::SetPreferredIpVersion(
         IN IMS_SINT32 nPreferredIpVersion /*= 0 default-aos-connection-profile*/)
 {
-    IMS_TRACE_D("Preferred IP version: %d >> %d",
-            m_nPreferredIpVersion, nPreferredIpVersion, 0);
+    IMS_TRACE_D("Preferred IP version: %d >> %d", m_nPreferredIpVersion, nPreferredIpVersion, 0);
 
     if (m_nPreferredIpVersion != nPreferredIpVersion)
     {
@@ -480,8 +455,8 @@ void OsNetworkConnection::SetPreferredIpVersion(
     }
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::AddReferenceListener(IN INetworkConnectionListener* piListener)
+PRIVATE VIRTUAL void OsNetworkConnection::AddReferenceListener(
+        IN INetworkConnectionListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -501,8 +476,8 @@ void OsNetworkConnection::AddReferenceListener(IN INetworkConnectionListener* pi
     m_objReferenceListeners.Append(piListener);
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::RemoveReferenceListener(IN INetworkConnectionListener* piListener)
+PRIVATE VIRTUAL void OsNetworkConnection::RemoveReferenceListener(
+        IN INetworkConnectionListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -521,11 +496,10 @@ void OsNetworkConnection::RemoveReferenceListener(IN INetworkConnectionListener*
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::Create(IN const AString& strNetProfile)
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::Create(IN const AString& strNetProfile)
 {
-    const NetworkPolicy* pTmpPolicy = NetworkServicePolicy::GetInstance()->GetPolicy(
-            strNetProfile, GetSlotId());
+    const NetworkPolicy* pTmpPolicy =
+            NetworkServicePolicy::GetInstance()->GetPolicy(strNetProfile, GetSlotId());
 
     if (pTmpPolicy == IMS_NULL)
     {
@@ -549,16 +523,15 @@ IMS_BOOL OsNetworkConnection::Create(IN const AString& strNetProfile)
     return (m_nConnectionHandle != 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::Create(IN IMS_SINT32 nApnType)
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::Create(IN IMS_SINT32 nApnType)
 {
-    const NetworkPolicy* pTmpPolicy = NetworkServicePolicy::GetInstance()->GetPolicy(
-            nApnType, GetSlotId());
+    const NetworkPolicy* pTmpPolicy =
+            NetworkServicePolicy::GetInstance()->GetPolicy(nApnType, GetSlotId());
 
     if (pTmpPolicy == IMS_NULL)
     {
-        IMS_TRACE_D("NetworkPolicy (%d) is not present; so, fallback to default APN",
-                nApnType, 0, 0);
+        IMS_TRACE_D(
+                "NetworkPolicy (%d) is not present; so, fallback to default APN", nApnType, 0, 0);
 
         pTmpPolicy = NetworkServicePolicy::GetInstance()->GetPolicy(
                 NetworkPolicy::APN_NONE, GetSlotId());
@@ -577,8 +550,8 @@ IMS_BOOL OsNetworkConnection::Create(IN IMS_SINT32 nApnType)
     return (m_nConnectionHandle != 0) ? IMS_TRUE : IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
+PRIVATE VIRTUAL void OsNetworkConnection::DispatchServiceMessage(
+        IN IMS_UINTP nWparam, IN IMS_UINTP nLparam)
 {
     (void)nLparam;
 
@@ -613,8 +586,7 @@ void OsNetworkConnection::DispatchServiceMessage(IN IMS_UINTP nWparam, IN IMS_UI
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL OsNetworkConnection::Equals(IN const IPAddress& objIpAddr) const
+PRIVATE VIRTUAL IMS_BOOL OsNetworkConnection::Equals(IN const IPAddress& objIpAddr) const
 {
     if (objIpAddr.IsIPv4Address())
     {
@@ -628,48 +600,46 @@ IMS_BOOL OsNetworkConnection::Equals(IN const IPAddress& objIpAddr) const
     return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL
-IMS_CONNECTION OsNetworkConnection::GetHandle() const
+PRIVATE VIRTUAL IMS_CONNECTION OsNetworkConnection::GetHandle() const
 {
     return m_nConnectionHandle;
 }
 
-PRIVATE VIRTUAL
-const AString& OsNetworkConnection::GetProfileName() const
+PRIVATE VIRTUAL const AString& OsNetworkConnection::GetProfileName() const
 {
     return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetName() : AString::ConstNull();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 OsNetworkConnection::GetApnType() const
+PRIVATE VIRTUAL IMS_SINT32 OsNetworkConnection::GetApnType() const
 {
     return (m_pPolicy != IMS_NULL) ? m_pPolicy->GetApnType() : NetworkPolicy::APN_IMS;
 }
 
-PRIVATE VIRTUAL
-void OsNetworkConnection::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PRIVATE VIRTUAL void OsNetworkConnection::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     IMS_TRACE_D("Mobile :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
-    //APN Type
+    // APN Type
     if (GetApnType() != LONG_TO_SINT(nWParam))
     {
-        IMS_TRACE_D("APN is different - apnType(%d), received apnType(%" PFLS_d ")",
-                GetApnType(), nWParam, 0);
+        IMS_TRACE_D("APN is different - apnType(%d), received apnType(%" PFLS_d ")", GetApnType(),
+                nWParam, 0);
         return;
     }
 
     switch (nEvent)
     {
-        case IMS_SYSTEM_DATACONNECTION_FAILED: {
+        case IMS_SYSTEM_DATACONNECTION_FAILED:
+        {
             IMS_TRACE_I("Mobile :: data connection state changed in %s - connection failed",
                     StateToString(m_nState), 0, 0);
 
             PostEvent(NET_CONNECT_FAILED);
             break;
         }
-        case IMS_SYSTEM_DATACONNECTION_STATE_CHANGED: {
+        case IMS_SYSTEM_DATACONNECTION_STATE_CHANGED:
+        {
             IMS_TRACE_I("Mobile :: data connection state changed in %s - %" PFLS_d,
                     StateToString(m_nState), nLParam, 0);
 
@@ -699,7 +669,8 @@ void OsNetworkConnection::System_NotifyEvent(IN IMS_UINT32 nEvent,
             }
             break;
         }
-        case IMS_SYSTEM_DATACONNECTION_IPCAN_CHANGED: {
+        case IMS_SYSTEM_DATACONNECTION_IPCAN_CHANGED:
+        {
             if (nLParam == IIpcan::CATEGORY_WLAN)
             {
                 SetIpcanCategory(IIpcan::CATEGORY_WLAN);
@@ -710,7 +681,8 @@ void OsNetworkConnection::System_NotifyEvent(IN IMS_UINT32 nEvent,
             }
             break;
         }
-        default: {
+        default:
+        {
             IMS_TRACE_D("___ Event (%d) :: Ignored ___", nEvent, 0, 0);
             break;
         }
@@ -722,8 +694,8 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
 {
     if (m_nPreferredIpVersion == IPAddress::IPV4)
     {
-        if (!m_objLocalAddressIpv4.Equals(IPAddress::NONE)
-                && !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
+        if (!m_objLocalAddressIpv4.Equals(IPAddress::NONE) &&
+                !m_objLocalAddressIpv4.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("Preferred local address :: %s >> %s",
                     m_objLocalAddress.ToString().GetStr(),
@@ -734,8 +706,8 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
     }
     else if (m_nPreferredIpVersion == IPAddress::IPV6)
     {
-        if (!m_objLocalAddressIpv6.Equals(IPAddress::IPv6NONE)
-                && !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
+        if (!m_objLocalAddressIpv6.Equals(IPAddress::IPv6NONE) &&
+                !m_objLocalAddressIpv6.Equals(m_objLocalAddress))
         {
             IMS_TRACE_D("Preferred local address :: %s >> %s",
                     m_objLocalAddress.ToString().GetStr(),
@@ -745,8 +717,7 @@ IMS_BOOL OsNetworkConnection::AdjustPreferredLocalAddress()
         }
     }
 
-    if (m_objLocalAddress.Equals(IPAddress::NONE)
-            || m_objLocalAddress.Equals(IPAddress::IPv6NONE))
+    if (m_objLocalAddress.Equals(IPAddress::NONE) || m_objLocalAddress.Equals(IPAddress::IPv6NONE))
     {
         IMS_TRACE_D("Local address is null", 0, 0, 0);
         return IMS_FALSE;
@@ -781,8 +752,7 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
         nIPVersion with -1 is for caching ip address
         and selecting ip version based on configuration in java side
     */
-    AString strIpAddr = System::GetInstance()->GetLocalAddress(
-            GetApnType(), -1, GetSlotId());
+    AString strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), -1, GetSlotId());
 
     if (!m_objLocalAddress.Parse(strIpAddr))
     {
@@ -796,13 +766,12 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
     else
     {
-        IMS_TRACE_D("Local IP address :: APN (%s), IP (%s)",
-                GetProfileName().GetStr(), m_objLocalAddress.ToCharString(), 0);
+        IMS_TRACE_D("Local IP address :: APN (%s), IP (%s)", GetProfileName().GetStr(),
+                m_objLocalAddress.ToCharString(), 0);
     }
 
     // IPv4 address
-    strIpAddr = System::GetInstance()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV4, GetSlotId());
+    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV4, GetSlotId());
 
     if (!m_objLocalAddressIpv4.Parse(strIpAddr))
     {
@@ -810,8 +779,7 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     }
 
     // IPv6 address
-    strIpAddr = System::GetInstance()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV6, GetSlotId());
+    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV6, GetSlotId());
 
     if (!m_objLocalAddressIpv6.Parse(strIpAddr))
     {
@@ -828,8 +796,7 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     m_strApn = System::GetInstance()->GetApnName(GetApnType(), GetSlotId());
 
     IMS_TRACE_D("Mobile :: LOCAL - IPv4 (%s), IPv6 (%s), APN (%s)",
-            m_objLocalAddressIpv4.ToString().GetStr(),
-            m_objLocalAddressIpv6.ToString().GetStr(),
+            m_objLocalAddressIpv4.ToString().GetStr(), m_objLocalAddressIpv6.ToString().GetStr(),
             m_strApn.GetStr());
 
     // Network interface identifier
@@ -838,19 +805,20 @@ IMS_BOOL OsNetworkConnection::CacheLocalAddress()
     // Network interface name
     m_strIfaceName = System::GetInstance()->GetIfaceName(GetApnType(), GetSlotId());
 
-    IMS_TRACE_D("Mobile :: IfaceId=%d, IpcanCategory=%d, IfaceName=%s",
-            m_nIfaceId, m_nIpcanCategory, m_strIfaceName.GetStr());
+    IMS_TRACE_D("Mobile :: IfaceId=%d, IpcanCategory=%d, IfaceName=%s", m_nIfaceId,
+            m_nIpcanCategory, m_strIfaceName.GetStr());
 
     return IMS_TRUE;
 }
 
 PRIVATE
-void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
-        IN IMS_SINT32 nErrorCode /*= 0*/)
+void OsNetworkConnection::CallReferenceListeners(
+        IN IMS_SINT32 nEvent, IN IMS_SINT32 nErrorCode /*= 0*/)
 {
     switch (nEvent)
     {
-        case NET_CONNECTED: {
+        case NET_CONNECTED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -862,7 +830,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        case NET_DISCONNECTED: {
+        case NET_DISCONNECTED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -874,7 +843,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        case NET_CONNECT_FAILED: {
+        case NET_CONNECT_FAILED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -886,7 +856,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        case NET_IP_CHANGED: {
+        case NET_IP_CHANGED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -898,7 +869,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        case NET_IPCAN_CAT_CHANGED: {
+        case NET_IPCAN_CAT_CHANGED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -910,7 +882,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        case NET_PCSCF_CHANGED: {
+        case NET_PCSCF_CHANGED:
+        {
             for (IMS_UINT32 i = 0; i < m_objReferenceListeners.GetSize(); ++i)
             {
                 INetworkConnectionListener* piListener = m_objReferenceListeners.GetAt(i);
@@ -922,7 +895,8 @@ void OsNetworkConnection::CallReferenceListeners(IN IMS_SINT32 nEvent,
             }
             break;
         }
-        default: {
+        default:
+        {
             break;
         }
     }
@@ -932,7 +906,7 @@ PRIVATE
 void OsNetworkConnection::ClearOnDataDisconnected()
 {
     // Clear Local addresses
-    m_objLocalAddress =IPAddress::NONE;
+    m_objLocalAddress = IPAddress::NONE;
     m_objLocalAddressIpv4 = IPAddress::NONE;
     m_objLocalAddressIpv6 = IPAddress::IPv6NONE;
 
@@ -952,8 +926,7 @@ void OsNetworkConnection::ClearOnDataDisconnected()
 PRIVATE
 IMS_SINT32 OsNetworkConnection::GetDataState()
 {
-    m_nDataState = System::GetInstance()->GetDataConnectionState(
-            GetApnType(), GetSlotId());
+    m_nDataState = System::GetInstance()->GetDataConnectionState(GetApnType(), GetSlotId());
 
     return m_nDataState;
 }
@@ -974,8 +947,8 @@ void OsNetworkConnection::GetAccessNetworkInfoForWiFi(OUT AccessNetworkInfo& obj
 
             if (bOk)
             {
-                objAccessNetInfo.uniAI.i_wlan_node_id.aMAC[i]
-                        = static_cast<IMS_UINT8>(0xFF & nByte);
+                objAccessNetInfo.uniAI.i_wlan_node_id.aMAC[i] =
+                        static_cast<IMS_UINT8>(0xFF & nByte);
             }
             else
             {
@@ -1057,10 +1030,9 @@ void OsNetworkConnection::NotifyDataDisconnected(IN IMS_SINT32 nErrorCode)
 
     CallReferenceListeners(NET_DISCONNECTED, nErrorCode);
 
-    if ((nOldState == STATE_ACTIVATING)
-            || (nOldState == STATE_ACTIVE))
+    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
     {
-        //4 FIXME : is it required in here?
+        // 4 FIXME : is it required in here?
         Release();
     }
 }
@@ -1088,10 +1060,9 @@ void OsNetworkConnection::NotifyDataConnectionFailed(IN IMS_SINT32 nErrorCode)
 
     CallReferenceListeners(NET_CONNECT_FAILED, nErrorCode);
 
-    if ((nOldState == STATE_ACTIVATING)
-            || (nOldState == STATE_ACTIVE))
+    if ((nOldState == STATE_ACTIVATING) || (nOldState == STATE_ACTIVE))
     {
-        //4 FIXME : is it required in here?
+        // 4 FIXME : is it required in here?
         Release();
     }
 }
@@ -1178,8 +1149,8 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     // IPv4 address
     IPAddress objIpv4;
-    AString strIpAddr = System::GetInstance()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV4, GetSlotId());
+    AString strIpAddr =
+            System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV4, GetSlotId());
 
     if (!objIpv4.Parse(strIpAddr))
     {
@@ -1188,8 +1159,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
 
     // IPv6 address
     IPAddress objIpv6;
-    strIpAddr = System::GetInstance()->GetLocalAddress(
-            GetApnType(), IPAddress::IPV6, GetSlotId());
+    strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), IPAddress::IPV6, GetSlotId());
 
     if (!objIpv6.Parse(strIpAddr))
     {
@@ -1213,8 +1183,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
     if (bIpUpdated)
     {
         // Default IP address based on configuration
-        strIpAddr = System::GetInstance()->GetLocalAddress(
-                GetApnType(), -1, GetSlotId());
+        strIpAddr = System::GetInstance()->GetLocalAddress(GetApnType(), -1, GetSlotId());
 
         if (!m_objLocalAddress.Parse(strIpAddr))
         {
@@ -1224,8 +1193,7 @@ IMS_BOOL OsNetworkConnection::HandleEmergencyPdnOnIpChanged(IN IMS_SINT32 nError
         AdjustPreferredLocalAddress();
 
         IMS_TRACE_D("EmergencyPdnOnIpChanged :: preferred=%s, ipv4=%s, ipv6=%s",
-                m_objLocalAddress.ToString().GetStr(),
-                m_objLocalAddressIpv4.ToString().GetStr(),
+                m_objLocalAddress.ToString().GetStr(), m_objLocalAddressIpv4.ToString().GetStr(),
                 m_objLocalAddressIpv6.ToString().GetStr());
     }
 
@@ -1250,18 +1218,20 @@ void OsNetworkConnection::PostEvent(IN IMS_UINT32 nEvent)
 
     switch (nEvent)
     {
-        case NET_CONNECTED: // FALL-THROUGH
-        case NET_IP_CHANGED: // FALL-THROUGH
-        case NET_DISCONNECTED: // FALL-THROUGH
-        case NET_CONNECT_FAILED: // FALL-THROUGH
-        case NET_IPCAN_CAT_CHANGED: // FALL-THROUGH
-        case NET_PCSCF_CHANGED: {
-            ImsMessage objMsg(IMS_MSG_NETWORK, nEvent,
-                    static_cast<IMS_UINT32>(m_nConnectionHandle));
+        case NET_CONNECTED:          // FALL-THROUGH
+        case NET_IP_CHANGED:         // FALL-THROUGH
+        case NET_DISCONNECTED:       // FALL-THROUGH
+        case NET_CONNECT_FAILED:     // FALL-THROUGH
+        case NET_IPCAN_CAT_CHANGED:  // FALL-THROUGH
+        case NET_PCSCF_CHANGED:
+        {
+            ImsMessage objMsg(
+                    IMS_MSG_NETWORK, nEvent, static_cast<IMS_UINT32>(m_nConnectionHandle));
             m_piOwnerThread->PostMessageI(objMsg);
             break;
         }
-        default: {
+        default:
+        {
             break;
         }
     }
@@ -1274,10 +1244,9 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
     if (GetApnType() == NetworkPolicy::APN_EMERGENCY)
     {
         if (System::GetInstance()->DeactivateDataConnection(
-                GetApnType(), nIpcanCategory, GetSlotId()) == 0)
+                    GetApnType(), nIpcanCategory, GetSlotId()) == 0)
         {
-            IMS_TRACE_E(0, "Disable data connectivity(%s) failed",
-                    GetProfileName().GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
             return IMS_FALSE;
         }
     }
@@ -1289,10 +1258,10 @@ IMS_BOOL OsNetworkConnection::Release(IN IMS_BOOL bDisableApn /*= IMS_FALSE*/,
                     GetProfileName().GetStr(), 0, 0);
 
             if (System::GetInstance()->DeactivateDataConnection(
-                    GetApnType(), nIpcanCategory, GetSlotId()) == 0)
+                        GetApnType(), nIpcanCategory, GetSlotId()) == 0)
             {
-                IMS_TRACE_E(0, "Disable data connectivity(%s) failed",
-                        GetProfileName().GetStr(), 0, 0);
+                IMS_TRACE_E(
+                        0, "Disable data connectivity(%s) failed", GetProfileName().GetStr(), 0, 0);
                 return IMS_FALSE;
             }
         }
@@ -1310,8 +1279,8 @@ void OsNetworkConnection::SetIpcanCategory(IN IMS_SINT32 nCategory)
 {
     if (m_nIpcanCategory != nCategory)
     {
-        IMS_TRACE_I("Mobile :: IPCAN-category - %d >> %d in %s",
-                m_nIpcanCategory, nCategory, StateToString(m_nState));
+        IMS_TRACE_I("Mobile :: IPCAN-category - %d >> %d in %s", m_nIpcanCategory, nCategory,
+                StateToString(m_nState));
 
         m_nIpcanCategory = nCategory;
 
@@ -1324,27 +1293,23 @@ void OsNetworkConnection::SetState(IN IMS_UINT32 nState)
 {
     if (m_nState != nState)
     {
-        IMS_TRACE_I("Mobile :: connection(%s) - %s >> %s",
-                GetProfileName().GetStr(), StateToString(m_nState), StateToString(nState));
+        IMS_TRACE_I("Mobile :: connection(%s) - %s >> %s", GetProfileName().GetStr(),
+                StateToString(m_nState), StateToString(nState));
 
         m_nState = nState;
     }
 }
 
-PRIVATE GLOBAL
-AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
-        IN const AStringArray& objCellIdentities)
+PRIVATE GLOBAL AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(
+        IN IMS_SINT32 nNetworkType, IN const AStringArray& objCellIdentities)
 {
     AccessNetworkInfo objAni;
-    IMS_BOOL bIsNetworkTypeLte = ((nNetworkType == RADIOTECH_TYPE_LTE)
-            || (nNetworkType == RADIOTECH_TYPE_LTE_CA));
+    IMS_BOOL bIsNetworkTypeLte =
+            ((nNetworkType == RADIOTECH_TYPE_LTE) || (nNetworkType == RADIOTECH_TYPE_LTE_CA));
 
-    if (bIsNetworkTypeLte
-            || (nNetworkType == RADIOTECH_TYPE_UMTS)
-            || (nNetworkType == RADIOTECH_TYPE_HSDPA)
-            || (nNetworkType == RADIOTECH_TYPE_HSUPA)
-            || (nNetworkType == RADIOTECH_TYPE_HSPA)
-            || (nNetworkType == RADIOTECH_TYPE_HSPAP))
+    if (bIsNetworkTypeLte || (nNetworkType == RADIOTECH_TYPE_UMTS) ||
+            (nNetworkType == RADIOTECH_TYPE_HSDPA) || (nNetworkType == RADIOTECH_TYPE_HSUPA) ||
+            (nNetworkType == RADIOTECH_TYPE_HSPA) || (nNetworkType == RADIOTECH_TYPE_HSPAP))
     {
         if (bIsNetworkTypeLte)
         {
@@ -1385,21 +1350,21 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
             }
         }
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strTac.GetLength() > ANI_3GPP_TAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
+        if ((strTac.GetLength() > ANI_3GPP_TAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)",
-                    strTac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -1474,8 +1439,10 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         }
 
         IMS_TRACE_I("PANI :: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
-                OsUtil::GetInstance()->IsDebugMode() ?\
-                    objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID : "xxx", nIndex);
+                OsUtil::GetInstance()->IsDebugMode()
+                        ? objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID
+                        : "xxx",
+                nIndex);
     }
     else if (nNetworkType == RADIOTECH_TYPE_NR)
     {
@@ -1507,21 +1474,21 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
             }
         }
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strTac.GetLength() > ANI_3GPP_NR_TAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
+        if ((strTac.GetLength() > ANI_3GPP_NR_TAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)",
-                    strTac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -1596,8 +1563,10 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         }
 
         IMS_TRACE_I("PANI :: NR (%s, %d)",
-                OsUtil::GetInstance()->IsDebugMode() ?\
-                    objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID : "xxx", nIndex, 0);
+                OsUtil::GetInstance()->IsDebugMode()
+                        ? objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID
+                        : "xxx",
+                nIndex, 0);
     }
     else if ((nNetworkType == RADIOTECH_TYPE_GPRS) || (nNetworkType == RADIOTECH_TYPE_EDGE))
     {
@@ -1616,21 +1585,21 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         const AString& strLac = objCellIdentities.GetElementAt(GERAN_ANI_LAC_INDEX);
         const AString& strCellId = objCellIdentities.GetElementAt(GERAN_ANI_CELLID_INDEX);
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strLac.GetLength() > ANI_3GPP_LAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
+        if ((strLac.GetLength() > ANI_3GPP_LAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)",
-                    strLac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -1702,8 +1671,8 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         }
 
         IMS_TRACE_I("PANI :: GERAN (%s, %d)",
-                OsUtil::GetInstance()->IsDebugMode() ?\
-                    objAni.uniAI.cgi_3gpp.acCGI : "xxx", nIndex, 0);
+                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.cgi_3gpp.acCGI : "xxx", nIndex,
+                0);
     }
     else if (nNetworkType == RADIOTECH_TYPE_EHRPD)
     {
@@ -1722,8 +1691,8 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         const AString& strSector = objCellIdentities.GetElementAt(EHRPD_ANI_SECTOR_ID_INDEX);
         const AString& strSubnet = objCellIdentities.GetElementAt(EHRPD_ANI_SUBNET_LEN_INDEX);
 
-        if ((strSector.GetLength() > ANI_3GPP2_SECTOR_ID_MAX_LEN)
-                || (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
+        if ((strSector.GetLength() > ANI_3GPP2_SECTOR_ID_MAX_LEN) ||
+                (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
             IMS_TRACE_D("PANI :: Invalid length (sectorId=%d, subnetLength=%d)",
@@ -1764,8 +1733,8 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
         }
 
         IMS_TRACE_I("PANI :: eHRPD (%s, %d)",
-                OsUtil::GetInstance()->IsDebugMode() ?\
-                    objAni.uniAI.ci_3gpp2.acCI : "xxx", nIndex, 0);
+                OsUtil::GetInstance()->IsDebugMode() ? objAni.uniAI.ci_3gpp2.acCI : "xxx", nIndex,
+                0);
     }
     else
     {
@@ -1775,8 +1744,7 @@ AccessNetworkInfo OsNetworkConnection::CreateAccessNetworkInfo(IN IMS_SINT32 nNe
     return objAni;
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsNetworkConnection::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* OsNetworkConnection::StateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {

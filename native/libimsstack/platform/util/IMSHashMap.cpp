@@ -14,10 +14,10 @@
 #include "IMSHashMap.h"
 
 PUBLIC
-IMSHashMap::IMSHashMap(IN IMS_UINT32 nHashTableSize_ /* = DEFAULT_SIZE */)
-    : nHashTableSize(nHashTableSize_)
-    , ppHashTable(IMS_NULL)
-    , nCount(0)
+IMSHashMap::IMSHashMap(IN IMS_UINT32 nHashTableSize_ /* = DEFAULT_SIZE */) :
+        nHashTableSize(nHashTableSize_),
+        ppHashTable(IMS_NULL),
+        nCount(0)
 {
 }
 
@@ -40,7 +40,7 @@ void IMSHashMap::InitHashTable(IN IMS_UINT32 nHashTableSize, IN IMS_BOOL bAlloc 
 
     if (bAlloc == IMS_TRUE)
     {
-        ppHashTable = (Element**) new Element*[this->nHashTableSize];
+        ppHashTable = (Element**)new Element*[this->nHashTableSize];
 
         if (ppHashTable != IMS_NULL)
         {
@@ -54,10 +54,10 @@ void IMSHashMap::InitHashTable(IN IMS_UINT32 nHashTableSize, IN IMS_BOOL bAlloc 
 
 // Add new (key, value) pair or modify value
 PUBLIC
-void IMSHashMap::SetAt(IN void *pvKey, IN void *pvNewValue)
+void IMSHashMap::SetAt(IN void* pvKey, IN void* pvNewValue)
 {
     IMS_UINT32 nBucket;
-    Element *pElement = GetElementAt(pvKey, nBucket);
+    Element* pElement = GetElementAt(pvKey, nBucket);
 
     // add new pair
     if (pElement == IMS_NULL)
@@ -86,10 +86,10 @@ void IMSHashMap::SetAt(IN void *pvKey, IN void *pvNewValue)
 
 // Get a value which has the same key
 PUBLIC
-void* IMSHashMap::GetValueAt(IN void *pvKey)
+void* IMSHashMap::GetValueAt(IN void* pvKey)
 {
     IMS_UINT32 nBucket;
-    Element *pElement = GetElementAt(pvKey, nBucket);
+    Element* pElement = GetElementAt(pvKey, nBucket);
 
     if (pElement == IMS_NULL)
     {
@@ -101,10 +101,10 @@ void* IMSHashMap::GetValueAt(IN void *pvKey)
 
 // Search key and return value
 PUBLIC
-IMS_BOOL IMSHashMap::Lookup(IN void *pvKey, OUT void*& pvValue)
+IMS_BOOL IMSHashMap::Lookup(IN void* pvKey, OUT void*& pvValue)
 {
     IMS_UINT32 nBucket;
-    Element *pElement = GetElementAt(pvKey, nBucket);
+    Element* pElement = GetElementAt(pvKey, nBucket);
 
     if (pElement == IMS_NULL)
     {
@@ -117,10 +117,10 @@ IMS_BOOL IMSHashMap::Lookup(IN void *pvKey, OUT void*& pvValue)
 }
 
 PUBLIC
-IMS_BOOL IMSHashMap::Lookup(IN void *pvKey, OUT void*& pvOrigKey, OUT void*& pvValue)
+IMS_BOOL IMSHashMap::Lookup(IN void* pvKey, OUT void*& pvOrigKey, OUT void*& pvValue)
 {
     IMS_UINT32 nBucket;
-    Element *pElement = GetElementAt(pvKey, nBucket);
+    Element* pElement = GetElementAt(pvKey, nBucket);
 
     if (pElement == IMS_NULL)
     {
@@ -135,12 +135,12 @@ IMS_BOOL IMSHashMap::Lookup(IN void *pvKey, OUT void*& pvOrigKey, OUT void*& pvV
 
 // Remove existing (key, ?) pair
 PUBLIC
-IMS_BOOL IMSHashMap::RemoveKey(IN void *pvKey)
+IMS_BOOL IMSHashMap::RemoveKey(IN void* pvKey)
 {
     IMS_UINTP nHashKey;
     IMS_UINT32 nBucket;
-    Element *pElement;
-    Element **ppPrevElement;
+    Element* pElement;
+    Element** ppPrevElement;
 
     if (ppHashTable == IMS_NULL)
     {
@@ -178,14 +178,14 @@ void IMSHashMap::RemoveAll()
     if (ppHashTable != IMS_NULL)
     {
         IMSIterator stIterator;
-        Element *pElement;
-        void *pvKey;
-        void *pvValue;
+        Element* pElement;
+        void* pvKey;
+        void* pvValue;
 
         stIterator = GetStartPosition();
         while (stIterator != IMS_NULL)
         {
-            pElement = reinterpret_cast<Element *>(stIterator);
+            pElement = reinterpret_cast<Element*>(stIterator);
 
             GetNext(stIterator, pvKey, pvValue);
 
@@ -204,7 +204,7 @@ PUBLIC
 IMSIterator IMSHashMap::GetStartPosition()
 {
     IMS_UINT32 nBucket;
-    Element *pElement = IMS_NULL;
+    Element* pElement = IMS_NULL;
 
     if (nCount == 0)
     {
@@ -231,10 +231,10 @@ IMSIterator IMSHashMap::GetStartPosition()
 
 // Get a next position and return pair(key, value)
 PUBLIC
-void IMSHashMap::GetNext(IN_OUT IMSIterator &stIterator, OUT void*& pvKey, OUT void*& pvValue)
+void IMSHashMap::GetNext(IN_OUT IMSIterator& stIterator, OUT void*& pvKey, OUT void*& pvValue)
 {
-    Element *pElement = reinterpret_cast<Element *>(stIterator);
-    Element *pNextElement;
+    Element* pElement = reinterpret_cast<Element*>(stIterator);
+    Element* pNextElement;
 
     if (pElement == IMS_NULL)
     {
@@ -247,7 +247,7 @@ void IMSHashMap::GetNext(IN_OUT IMSIterator &stIterator, OUT void*& pvKey, OUT v
         IMS_UINTP nHashKey = GetHashKey(pElement->pvKey);
         IMS_UINT32 nBucket = static_cast<IMS_UINT32>(nHashKey % nHashTableSize) + 1;
 
-        for ( ; nBucket < nHashTableSize; ++nBucket)
+        for (; nBucket < nHashTableSize; ++nBucket)
         {
             if ((pNextElement = ppHashTable[nBucket]) != IMS_NULL)
             {
@@ -263,8 +263,7 @@ void IMSHashMap::GetNext(IN_OUT IMSIterator &stIterator, OUT void*& pvKey, OUT v
 }
 
 // Get a hash key
-PROTECTED VIRTUAL
-IMS_UINTP IMSHashMap::GetHashKey(IN void *pvKey)
+PROTECTED VIRTUAL IMS_UINTP IMSHashMap::GetHashKey(IN void* pvKey)
 {
     IMS_UINTP nTemp = reinterpret_cast<IMS_UINTP>(pvKey);
 
@@ -272,8 +271,8 @@ IMS_UINTP IMSHashMap::GetHashKey(IN void *pvKey)
 }
 
 // Find an element using the key
-PROTECTED VIRTUAL
-IMSHashMap::Element* IMSHashMap::GetElementAt(IN void *pvKey, OUT IMS_UINT32 &nBucket)
+PROTECTED VIRTUAL IMSHashMap::Element* IMSHashMap::GetElementAt(
+        IN void* pvKey, OUT IMS_UINT32& nBucket)
 {
     IMS_UINTP nHashKey = GetHashKey(pvKey);
 
@@ -284,7 +283,7 @@ IMSHashMap::Element* IMSHashMap::GetElementAt(IN void *pvKey, OUT IMS_UINT32 &nB
         return IMS_NULL;
     }
 
-    Element *pElement;
+    Element* pElement;
 
     // Find if the key exists
 

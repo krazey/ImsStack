@@ -25,12 +25,11 @@ public:
     virtual void* Realloc(IN void* pMem, IN IMS_SIZE_T nSize) = 0;
     virtual void Free(IN void* pMem) = 0;
 
-    virtual void* AllocDebug(IN IMS_SIZE_T nSize,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) = 0;
-    virtual void* ReallocDebug(IN void* pMem, IN IMS_SIZE_T nSize,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) = 0;
-    virtual void FreeDebug(IN void* pMem,
-            IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) = 0;
+    virtual void* AllocDebug(
+            IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) = 0;
+    virtual void* ReallocDebug(IN void* pMem, IN IMS_SIZE_T nSize, IN IMS_UINT16 nLine,
+            IN const IMS_CHAR* pszFile) = 0;
+    virtual void FreeDebug(IN void* pMem, IN IMS_UINT16 nLine, IN const IMS_CHAR* pszFile) = 0;
 
     virtual void EnableHeapDebug(IN IMS_BOOL bEnable) = 0;
     virtual void PrintHeapLeakage() = 0;

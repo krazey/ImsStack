@@ -18,20 +18,18 @@
 
 #include "IThread.h"
 
-class ImsThread
-    : public IThread
+class ImsThread : public IThread
 {
 public:
-    inline ImsThread()
-        : m_nSlotId(IMS_SLOT_ANY)
-    {}
-    inline virtual ~ImsThread()
-    {}
+    inline ImsThread() :
+            m_nSlotId(IMS_SLOT_ANY)
+    {
+    }
+    inline virtual ~ImsThread() {}
 
 public:
     // IThread class
-    inline IMS_SINT32 GetSlotId() const override
-    { return m_nSlotId; }
+    inline IMS_SINT32 GetSlotId() const override { return m_nSlotId; }
 
     virtual IMS_BOOL Create(IN const AString& strName) = 0;
     virtual IMS_ULONG GetThreadId() const = 0;
@@ -43,8 +41,7 @@ public:
     }
 
 protected:
-    inline static void InvokeMessageCallback(IN ImsMessage& objMsg)
-    { objMsg.InvokeCallback(); }
+    inline static void InvokeMessageCallback(IN ImsMessage& objMsg) { objMsg.InvokeCallback(); }
 
 private:
     IMS_SINT32 m_nSlotId;

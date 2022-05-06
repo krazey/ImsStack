@@ -21,10 +21,10 @@
 
 #include "IMSTypeDef.h"
 
-GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR *pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR *pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucDigest[16]);
+GLOBAL void IMSHMAC_MD5(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucDigest[16]);
 
-GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR *pucText, IN IMS_SINT32 nTextLen,
-        IN CONST IMS_UCHAR *pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucHash[20]);
+GLOBAL void IMSHMAC_SHA1(IN CONST IMS_UCHAR* pucText, IN IMS_SINT32 nTextLen,
+        IN CONST IMS_UCHAR* pucKey, IN IMS_SINT32 nKeyLen, OUT IMS_UCHAR aucHash[20]);
 
-#endif // _IMS_HMAC_H_
+#endif  // _IMS_HMAC_H_

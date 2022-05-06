@@ -23,41 +23,35 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId)
-    : ImsSlot(nSlotId)
-    , m_eNetStatusType(NW_REPORT_RADIO_NOSRV)
-    , m_eNetServiceType(NW_REPORT_SRV_NOSRV)
-    , m_eNetDomainType(NW_REPORT_DOMAIN_NOSRV)
+OsNetworkWatcher::OsNetworkWatcher(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_eNetStatusType(NW_REPORT_RADIO_NOSRV),
+        m_eNetServiceType(NW_REPORT_SRV_NOSRV),
+        m_eNetDomainType(NW_REPORT_DOMAIN_NOSRV)
 {
     m_eNetDomainType = NW_REPORT_DOMAIN_CSPS;
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 
     PostMsgRegisteredThread(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-OsNetworkWatcher::~OsNetworkWatcher()
+PUBLIC VIRTUAL OsNetworkWatcher::~OsNetworkWatcher()
 {
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_NETWORK, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsNetworkWatcher::GetNetworkStatus(IN const AString& strProfile)
+PUBLIC VIRTUAL IMS_UINT32 OsNetworkWatcher::GetNetworkStatus(IN const AString& strProfile)
 {
-    return ((IMS_UINT32) GetNetRadioTechType(strProfile) |
-            (IMS_UINT32) GetNetServiceType() |
-            (IMS_UINT32) GetNetDomainType());
+    return ((IMS_UINT32)GetNetRadioTechType(strProfile) | (IMS_UINT32)GetNetServiceType() |
+            (IMS_UINT32)GetNetDomainType());
 }
 
-PUBLIC VIRTUAL
-NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(IN const AString& strProfile,
-        IN IMS_SINT32 nApnType /*= NetworkPolicy::APN_NONE*/)
+PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(
+        IN const AString& strProfile, IN IMS_SINT32 nApnType /*= NetworkPolicy::APN_NONE*/)
 {
-    const NetworkPolicy* pNetworkPolicy = (nApnType != NetworkPolicy::APN_NONE) ?
-            NetworkServicePolicy::GetInstance()->GetPolicy(nApnType, GetSlotId()) :
-            NetworkServicePolicy::GetInstance()->GetPolicy(strProfile, GetSlotId());
+    const NetworkPolicy* pNetworkPolicy = (nApnType != NetworkPolicy::APN_NONE)
+            ? NetworkServicePolicy::GetInstance()->GetPolicy(nApnType, GetSlotId())
+            : NetworkServicePolicy::GetInstance()->GetPolicy(strProfile, GetSlotId());
 
     if (pNetworkPolicy == IMS_NULL)
     {
@@ -78,7 +72,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(IN const AString& strProfi
                 m_eNetStatusType = NW_REPORT_RADIO_EHRPD;
                 break;
 
-            case RADIOTECH_TYPE_LTE: // FALL-THROUGH
+            case RADIOTECH_TYPE_LTE:  // FALL-THROUGH
             case RADIOTECH_TYPE_LTE_CA:
                 m_eNetStatusType = NW_REPORT_RADIO_LTE;
                 break;
@@ -87,19 +81,19 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(IN const AString& strProfi
                 m_eNetStatusType = NW_REPORT_RADIO_NR;
                 break;
 
-            case RADIOTECH_TYPE_UMTS: // FALL-THROUGH
+            case RADIOTECH_TYPE_UMTS:  // FALL-THROUGH
             case RADIOTECH_TYPE_TD_SCDMA:
                 m_eNetStatusType = NW_REPORT_RADIO_WCDMA;
                 break;
 
-            case RADIOTECH_TYPE_HSDPA: // FALL-THROUGH
-            case RADIOTECH_TYPE_HSPA: // FALL-THROUGH
-            case RADIOTECH_TYPE_HSUPA: // FALL-THROUGH
+            case RADIOTECH_TYPE_HSDPA:  // FALL-THROUGH
+            case RADIOTECH_TYPE_HSPA:   // FALL-THROUGH
+            case RADIOTECH_TYPE_HSUPA:  // FALL-THROUGH
             case RADIOTECH_TYPE_HSPAP:
                 m_eNetStatusType = NW_REPORT_RADIO_HSPA;
                 break;
 
-            case RADIOTECH_TYPE_GPRS: // FALL-THROUGH
+            case RADIOTECH_TYPE_GPRS:  // FALL-THROUGH
             case RADIOTECH_TYPE_GSM:
                 m_eNetStatusType = NW_REPORT_RADIO_GSM;
                 break;
@@ -134,8 +128,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType(IN const AString& strProfi
     return NW_REPORT_RADIO_NOSRV;
 }
 
-PUBLIC VIRTUAL
-NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
+PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
 {
     switch (GetNetworkType())
     {
@@ -143,7 +136,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
             m_eNetStatusType = NW_REPORT_RADIO_NOSRV;
             break;
 
-        case RADIOTECH_TYPE_GSM: // FALL-THROUGH
+        case RADIOTECH_TYPE_GSM:  // FALL-THROUGH
         case RADIOTECH_TYPE_GPRS:
             m_eNetStatusType = NW_REPORT_RADIO_GSM;
             break;
@@ -152,14 +145,14 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
             m_eNetStatusType = NW_REPORT_RADIO_EDGE;
             break;
 
-        case RADIOTECH_TYPE_UMTS: // FALL-THROUGH
+        case RADIOTECH_TYPE_UMTS:  // FALL-THROUGH
         case RADIOTECH_TYPE_TD_SCDMA:
             m_eNetStatusType = NW_REPORT_RADIO_WCDMA;
             break;
 
-        case RADIOTECH_TYPE_HSDPA: // FALL-THROUGH
-        case RADIOTECH_TYPE_HSUPA: // FALL-THROUGH
-        case RADIOTECH_TYPE_HSPA: // FALL-THROUGH
+        case RADIOTECH_TYPE_HSDPA:  // FALL-THROUGH
+        case RADIOTECH_TYPE_HSUPA:  // FALL-THROUGH
+        case RADIOTECH_TYPE_HSPA:   // FALL-THROUGH
         case RADIOTECH_TYPE_HSPAP:
             m_eNetStatusType = NW_REPORT_RADIO_HSPA;
             break;
@@ -168,7 +161,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
             m_eNetStatusType = NW_REPORT_RADIO_EHRPD;
             break;
 
-        case RADIOTECH_TYPE_LTE: // FALL-THROUGH
+        case RADIOTECH_TYPE_LTE:  // FALL-THROUGH
         case RADIOTECH_TYPE_LTE_CA:
             m_eNetStatusType = NW_REPORT_RADIO_LTE;
             break;
@@ -184,8 +177,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetRadioTechType()
     return m_eNetStatusType;
 }
 
-PUBLIC VIRTUAL
-NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
+PUBLIC VIRTUAL NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
 {
     IMS_SINT32 nType = System::GetInstance()->GetVoiceNetworkType(GetSlotId());
 
@@ -206,14 +198,14 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
             eVoiceNetType = NW_REPORT_RADIO_EDGE;
             break;
 
-        case RADIOTECH_TYPE_UMTS: // FALL-THROUGH
+        case RADIOTECH_TYPE_UMTS:  // FALL-THROUGH
         case RADIOTECH_TYPE_TD_SCDMA:
             eVoiceNetType = NW_REPORT_RADIO_WCDMA;
             break;
 
-        case RADIOTECH_TYPE_HSDPA: // FALL-THROUGH
-        case RADIOTECH_TYPE_HSUPA: // FALL-THROUGH
-        case RADIOTECH_TYPE_HSPA: // FALL-THROUGH
+        case RADIOTECH_TYPE_HSDPA:  // FALL-THROUGH
+        case RADIOTECH_TYPE_HSUPA:  // FALL-THROUGH
+        case RADIOTECH_TYPE_HSPA:   // FALL-THROUGH
         case RADIOTECH_TYPE_HSPAP:
             eVoiceNetType = NW_REPORT_RADIO_HSPA;
             break;
@@ -222,7 +214,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
             eVoiceNetType = NW_REPORT_RADIO_EHRPD;
             break;
 
-        case RADIOTECH_TYPE_LTE: // FALL-THROUGH
+        case RADIOTECH_TYPE_LTE:  // FALL-THROUGH
         case RADIOTECH_TYPE_LTE_CA:
             eVoiceNetType = NW_REPORT_RADIO_LTE;
             break;
@@ -231,7 +223,7 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
             eVoiceNetType = NW_REPORT_RADIO_NR;
             break;
 
-        default :
+        default:
             eVoiceNetType = NW_REPORT_RADIO_NOSRV;
             break;
     }
@@ -239,13 +231,12 @@ NETRADIO_ENTYPE OsNetworkWatcher::GetNetVoiceRadioTechType()
     return eVoiceNetType;
 }
 
-PUBLIC VIRTUAL
-NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType(IN const AString& strProfile,
-        IN IMS_SINT32 nApnType /*= NetworkPolicy::APN_NONE*/)
+PUBLIC VIRTUAL NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType(
+        IN const AString& strProfile, IN IMS_SINT32 nApnType /*= NetworkPolicy::APN_NONE*/)
 {
-    const NetworkPolicy* pNetworkPolicy = (nApnType != NetworkPolicy::APN_NONE) ?
-            NetworkServicePolicy::GetInstance()->GetPolicy(nApnType, GetSlotId()) :
-            NetworkServicePolicy::GetInstance()->GetPolicy(strProfile, GetSlotId());
+    const NetworkPolicy* pNetworkPolicy = (nApnType != NetworkPolicy::APN_NONE)
+            ? NetworkServicePolicy::GetInstance()->GetPolicy(nApnType, GetSlotId())
+            : NetworkServicePolicy::GetInstance()->GetPolicy(strProfile, GetSlotId());
 
     if (pNetworkPolicy != IMS_NULL)
     {
@@ -264,8 +255,7 @@ NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType(IN const AString& strProfi
     return NW_REPORT_SRV_NOSRV;
 }
 
-PUBLIC VIRTUAL
-NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType()
+PUBLIC VIRTUAL NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType()
 {
     switch (GetServiceStateType())
     {
@@ -292,8 +282,7 @@ NETSERVICE_ENTYPE OsNetworkWatcher::GetNetServiceType()
     return m_eNetServiceType;
 }
 
-PUBLIC VIRTUAL
-NETSERVICE_ENTYPE OsNetworkWatcher::GetNetVoiceServiceType()
+PUBLIC VIRTUAL NETSERVICE_ENTYPE OsNetworkWatcher::GetNetVoiceServiceType()
 {
     switch (GetVoiceServiceStateType())
     {
@@ -320,18 +309,16 @@ NETSERVICE_ENTYPE OsNetworkWatcher::GetNetVoiceServiceType()
     return m_eNetServiceType;
 }
 
-PUBLIC VIRTUAL
-NETDOMAIN_ENTYPE OsNetworkWatcher::GetNetDomainType()
+PUBLIC VIRTUAL NETDOMAIN_ENTYPE OsNetworkWatcher::GetNetDomainType()
 {
     return m_eNetDomainType;
 }
 
-PUBLIC VIRTUAL
-void OsNetworkWatcher::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsNetworkWatcher::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    IMS_TRACE_D("NetWatcherInfo :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d,
-            nEvent, nWParam, nLParam);
+    IMS_TRACE_D(
+            "NetWatcherInfo :: event=%d, wp=%" PFLS_d ", lp=%" PFLS_d, nEvent, nWParam, nLParam);
 
     switch (nEvent)
     {
@@ -388,7 +375,7 @@ void OsNetworkWatcher::UpdateServiceState(IN IMS_SINT32 nState)
             m_eNetServiceType = NW_REPORT_SRV_PWRSAVE;
             break;
 
-        default :
+        default:
             break;
     }
 
@@ -405,7 +392,7 @@ void OsNetworkWatcher::UpdateRadioTechChanged(IN IMS_SINT32 nState)
             m_eNetStatusType = NW_REPORT_RADIO_EHRPD;
             break;
 
-        case RADIO_TECH_LTE:    // DCNetWatcher.RAT_4G
+        case RADIO_TECH_LTE:  // DCNetWatcher.RAT_4G
             m_eNetStatusType = NW_REPORT_RADIO_LTE;
             break;
 
@@ -413,11 +400,11 @@ void OsNetworkWatcher::UpdateRadioTechChanged(IN IMS_SINT32 nState)
             m_eNetStatusType = NW_REPORT_RADIO_WCDMA;
             break;
 
-        case RADIO_TECH_GSM:    // DCNetWatcher.RAT_2G
+        case RADIO_TECH_GSM:  // DCNetWatcher.RAT_2G
             m_eNetStatusType = NW_REPORT_RADIO_GSM;
             break;
 
-        case RADIO_TECH_NR:     // DCNetWatcher.RAT_5G
+        case RADIO_TECH_NR:  // DCNetWatcher.RAT_5G
             m_eNetStatusType = NW_REPORT_RADIO_NR;
             break;
 
@@ -469,63 +456,54 @@ void OsNetworkWatcher::UpdateDataConnectionStateChanged(IN IMS_SINT32 nState)
             m_eNetServiceType = NW_REPORT_SRV_SRV;
             m_eNetDomainType = NW_REPORT_DOMAIN_CSPS;
             break;
-        default :
+        default:
             return;
     }
 
     PostMsgRegisteredThread(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetNetworkType()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetNetworkType()
 {
     return System::GetInstance()->GetNetworkType(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetRoamingState()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetRoamingState()
 {
     return System::GetInstance()->GetRoamingState(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetVoiceRoamingType()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetVoiceRoamingType()
 {
     return System::GetInstance()->GetVoiceRoamingType(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetDataRoamingType()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetDataRoamingType()
 {
     return System::GetInstance()->GetDataRoamingType(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsNetworkWatcher::IsImsEmergencyCallSupported()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsEmergencyCallSupported()
 {
     return System::GetInstance()->IsImsEmergencyCallSupported(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsImsVoiceCallSupported()
 {
     return System::GetInstance()->IsImsVoiceCallSupported(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetLteRsrpStrength()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetLteRsrpStrength()
 {
     return System::GetInstance()->GetLteRsrpStrength(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsLteEmergencyOnly()
 {
     return System::GetInstance()->IsLteEmergencyOnly(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
+PUBLIC VIRTUAL IMS_BOOL OsNetworkWatcher::IsEmergencyAttachSupported()
 {
     return System::GetInstance()->IsEmergencyAttachSupported(GetSlotId());
 }
@@ -554,14 +532,12 @@ IMS_SINT32 OsNetworkWatcher::GetVoiceServiceStateType()
     return System::GetInstance()->GetVoiceServiceState(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
+PUBLIC VIRTUAL IMS_SINT32 OsNetworkWatcher::GetMocnPlmnInfo()
 {
     return System::GetInstance()->GetMocnPlmnInfo(GetSlotId());
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)
+PRIVATE GLOBAL const IMS_CHAR* OsNetworkWatcher::RadioTechToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {

@@ -33,11 +33,11 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsIsimParam
 {
 public:
-    inline OsIsimParam(IN IMS_SINT32 nType = 0)
-        : m_nType(nType)
-    {}
-    inline virtual ~OsIsimParam()
-    {}
+    inline OsIsimParam(IN IMS_SINT32 nType = 0) :
+            m_nType(nType)
+    {
+    }
+    inline virtual ~OsIsimParam() {}
 
 public:
     enum
@@ -51,34 +51,32 @@ public:
     IMS_SINT32 m_nType;
 };
 
-class OsIsimFileAttributesParam
-    : public OsIsimParam
+class OsIsimFileAttributesParam : public OsIsimParam
 {
 public:
-    inline OsIsimFileAttributesParam()
-        : OsIsimParam(TYPE_FILE_ATTRIBUTES)
-        , m_nFileId(0)
-        , m_nRecordCount(1)
-    {}
-    inline virtual ~OsIsimFileAttributesParam()
-    {}
+    inline OsIsimFileAttributesParam() :
+            OsIsimParam(TYPE_FILE_ATTRIBUTES),
+            m_nFileId(0),
+            m_nRecordCount(1)
+    {
+    }
+    inline virtual ~OsIsimFileAttributesParam() {}
 
 public:
     IMS_SINT32 m_nFileId;
     IMS_SINT32 m_nRecordCount;
 };
 
-class OsIsimRecordParam
-    : public OsIsimParam
+class OsIsimRecordParam : public OsIsimParam
 {
 public:
-    inline OsIsimRecordParam()
-        : OsIsimParam(TYPE_RECORD)
-        , m_nFileId(0)
-        , m_nIndex(0)
-    {}
-    inline virtual ~OsIsimRecordParam()
-    {}
+    inline OsIsimRecordParam() :
+            OsIsimParam(TYPE_RECORD),
+            m_nFileId(0),
+            m_nIndex(0)
+    {
+    }
+    inline virtual ~OsIsimRecordParam() {}
 
 public:
     IMS_SINT32 m_nFileId;
@@ -86,32 +84,30 @@ public:
     ByteArray m_objRecord;
 };
 
-class OsIsimAuthResponseParam
-    : public OsIsimParam
+class OsIsimAuthResponseParam : public OsIsimParam
 {
 public:
-    inline OsIsimAuthResponseParam()
-        : OsIsimParam(TYPE_AUTHENTICATION)
-        , m_nOwner(0)
-    {}
-    inline virtual ~OsIsimAuthResponseParam()
-    {}
+    inline OsIsimAuthResponseParam() :
+            OsIsimParam(TYPE_AUTHENTICATION),
+            m_nOwner(0)
+    {
+    }
+    inline virtual ~OsIsimAuthResponseParam() {}
 
 public:
     IMS_SINTP m_nOwner;
     ByteArray m_objResponse;
 };
 
-class OsIsimStateParam
-    : public OsIsimParam
+class OsIsimStateParam : public OsIsimParam
 {
 public:
-    inline OsIsimStateParam()
-        : OsIsimParam(TYPE_STATE)
-        , m_nState(0)
-    {}
-    inline virtual ~OsIsimStateParam()
-    {}
+    inline OsIsimStateParam() :
+            OsIsimParam(TYPE_STATE),
+            m_nState(0)
+    {
+    }
+    inline virtual ~OsIsimStateParam() {}
 
 public:
     enum
@@ -137,18 +133,15 @@ public:
     const IMS_CHAR* pszState;
 };
 
-LOCAL const OsIsimStateMap SIM_STATE_MAP[] =
-{
-    { OsIsimStateParam::STATE_NOT_PRESENT, "NOT_PRESENT" },
-    { OsIsimStateParam::STATE_NOT_READY, "NOT_READY" },
-    { OsIsimStateParam::STATE_LOADED, "LOADED" },
-    { OsIsimStateParam::STATE_REFRESH_STARTED, "REFRESH_STARTED" },
-    { OsIsimStateParam::STATE_REFRESH_COMPLETED, "REFRESH_COMPLETED" },
-    { OsIsimStateParam::STATE_SIM_REMOVED, "SIM_REMOVED" },
-    { (-1), IMS_NULL }
+LOCAL const OsIsimStateMap SIM_STATE_MAP[] = {
+        {OsIsimStateParam::STATE_NOT_PRESENT,       "NOT_PRESENT"      },
+        {OsIsimStateParam::STATE_NOT_READY,         "NOT_READY"        },
+        {OsIsimStateParam::STATE_LOADED,            "LOADED"           },
+        {OsIsimStateParam::STATE_REFRESH_STARTED,   "REFRESH_STARTED"  },
+        {OsIsimStateParam::STATE_REFRESH_COMPLETED, "REFRESH_COMPLETED"},
+        {OsIsimStateParam::STATE_SIM_REMOVED,       "SIM_REMOVED"      },
+        {(-1),                                      IMS_NULL           }
 };
-
-
 
 LOCAL
 OsIsim* osIsim_GetInstance(IN IMS_SINT32 nSlotId)
@@ -179,11 +172,11 @@ const IMS_CHAR* osIsim_ConvertFileIdToString(IN IMS_SINT32 nFileId)
 LOCAL
 void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam* pParam)
 {
-    OsIsim* pIsim= osIsim_GetInstance(nSlotId);
-    OsIsimDigestAka* pDigestAka= reinterpret_cast<OsIsimDigestAka*>(pParam->m_nOwner);
+    OsIsim* pIsim = osIsim_GetInstance(nSlotId);
+    OsIsimDigestAka* pDigestAka = reinterpret_cast<OsIsimDigestAka*>(pParam->m_nOwner);
 
-    IMS_TRACE_I("ISIM :: AuthResponse - owner=%" PFLS_x ", res_len=%d",
-            pParam->m_nOwner, pParam->m_objResponse.GetLength(), 0);
+    IMS_TRACE_I("ISIM :: AuthResponse - owner=%" PFLS_x ", res_len=%d", pParam->m_nOwner,
+            pParam->m_objResponse.GetLength(), 0);
 
     if (!pIsim->IsDigestAkaPresent(pDigestAka))
     {
@@ -261,7 +254,7 @@ void osIsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsIsimAuthResponseParam
         ByteArray objAuts;
 
         ++nPos;
-        objAuts.Append(&pbyData[nPos+1], pbyData[nPos]);
+        objAuts.Append(&pbyData[nPos + 1], pbyData[nPos]);
 
         nPos += pbyData[nPos];
 
@@ -284,8 +277,8 @@ void osIsim_HandleFileAttributes(IN IMS_SINT32 nSlotId, IN OsIsimFileAttributesP
 {
     OsIsim* pIsim = osIsim_GetInstance(nSlotId);
 
-    IMS_TRACE_I("ISIM :: FileAttributes - fileId=%X, recordCount=%d",
-            pParam->m_nFileId, pParam->m_nRecordCount, 0);
+    IMS_TRACE_I("ISIM :: FileAttributes - fileId=%X, recordCount=%d", pParam->m_nFileId,
+            pParam->m_nRecordCount, 0);
 
     if (pParam->m_nRecordCount > 0)
     {
@@ -302,14 +295,14 @@ void osIsim_HandleRecord(IN IMS_SINT32 nSlotId, IN OsIsimRecordParam* pParam)
 {
     OsIsim* pIsim = osIsim_GetInstance(nSlotId);
 
-    IMS_TRACE_I("ISIM :: Record - fileId=%X, record=%s",
-            pParam->m_nFileId, OsUtil::GetInstance()->IsDebugMode() ?\
-            pParam->m_objRecord.ToString().GetStr() :\
-            ((pParam->m_objRecord.GetLength() != 0) ? "xxx" : ""), 0);
+    IMS_TRACE_I("ISIM :: Record - fileId=%X, record=%s", pParam->m_nFileId,
+            OsUtil::GetInstance()->IsDebugMode()
+                    ? pParam->m_objRecord.ToString().GetStr()
+                    : ((pParam->m_objRecord.GetLength() != 0) ? "xxx" : ""),
+            0);
 
-    pIsim->SetRecord(pParam->m_nFileId,
-            pParam->m_objRecord.GetData(),
-            pParam->m_objRecord.GetLength());
+    pIsim->SetRecord(
+            pParam->m_nFileId, pParam->m_objRecord.GetData(), pParam->m_objRecord.GetLength());
 }
 
 LOCAL
@@ -322,12 +315,14 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
 
     switch (pParam->m_nState)
     {
-        case OsIsimStateParam::STATE_NOT_PRESENT: {
+        case OsIsimStateParam::STATE_NOT_PRESENT:
+        {
             pIsim->SetState(IIsim::STATE_IDLE);
             pIsim->NotifyError(IIsim::ERROR_NO_ISIM_APPLICATION);
             break;
         }
-        case OsIsimStateParam::STATE_NOT_READY: {
+        case OsIsimStateParam::STATE_NOT_READY:
+        {
             // Case 1) Abnormal ISIM state notification (system crash, ...)
             if (nState == IIsim::STATE_READY)
             {
@@ -345,7 +340,8 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
             }
             break;
         }
-        case OsIsimStateParam::STATE_LOADED: {
+        case OsIsimStateParam::STATE_LOADED:
+        {
             if (nState == IIsim::STATE_IDLE)
             {
                 pIsim->SetState(IIsim::STATE_INIT);
@@ -357,7 +353,8 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
             }
             break;
         }
-        case OsIsimStateParam::STATE_REFRESH_STARTED: {
+        case OsIsimStateParam::STATE_REFRESH_STARTED:
+        {
             // Case 1) Normal ISIM refresh state notification
             if (nState == IIsim::STATE_READY)
             {
@@ -375,18 +372,21 @@ void osIsim_HandleIsimState(IN IMS_SINT32 nSlotId, IN OsIsimStateParam* pParam)
             }
             break;
         }
-        case OsIsimStateParam::STATE_REFRESH_COMPLETED: {
+        case OsIsimStateParam::STATE_REFRESH_COMPLETED:
+        {
             if (nState == IIsim::STATE_REFRESHING)
             {
                 pIsim->SetState(IIsim::STATE_REFRESHED);
             }
             break;
         }
-        case OsIsimStateParam::STATE_SIM_REMOVED: {
+        case OsIsimStateParam::STATE_SIM_REMOVED:
+        {
             pIsim->SetState(IIsim::STATE_IDLE);
             break;
         }
-        default: {
+        default:
+        {
             // no-op
             break;
         }
@@ -406,20 +406,16 @@ void osIsim_HandleIsimEvent(IN IMS_SINT32 nSlotId, IN OsIsimParam* pParam)
     switch (pParam->m_nType)
     {
         case OsIsimParam::TYPE_AUTHENTICATION:
-            osIsim_HandleAuthResponse(nSlotId,
-                    DYNAMIC_CAST(OsIsimAuthResponseParam*, pParam));
+            osIsim_HandleAuthResponse(nSlotId, DYNAMIC_CAST(OsIsimAuthResponseParam*, pParam));
             break;
         case OsIsimParam::TYPE_FILE_ATTRIBUTES:
-            osIsim_HandleFileAttributes(nSlotId,
-                    DYNAMIC_CAST(OsIsimFileAttributesParam*, pParam));
+            osIsim_HandleFileAttributes(nSlotId, DYNAMIC_CAST(OsIsimFileAttributesParam*, pParam));
             break;
         case OsIsimParam::TYPE_RECORD:
-            osIsim_HandleRecord(nSlotId,
-                    DYNAMIC_CAST(OsIsimRecordParam*, pParam));
+            osIsim_HandleRecord(nSlotId, DYNAMIC_CAST(OsIsimRecordParam*, pParam));
             break;
         case OsIsimParam::TYPE_STATE:
-            osIsim_HandleIsimState(nSlotId,
-                    DYNAMIC_CAST(OsIsimStateParam*, pParam));
+            osIsim_HandleIsimState(nSlotId, DYNAMIC_CAST(OsIsimStateParam*, pParam));
             break;
         default:
             break;
@@ -437,36 +433,28 @@ void osIsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsIsimPa
         return;
     }
 
-    if (!piThread->PostMessageI(IMS_MSG_ISIM,
-            nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
+    if (!piThread->PostMessageI(IMS_MSG_ISIM, nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
     {
         delete pParam;
     }
 }
 
-
-
 PUBLIC
-OsIsimDigestAka::OsIsimDigestAka(IN ImsIsim* pIsim)
-    : m_pIsim(pIsim)
-    , m_pDigestAkaListener(IMS_NULL)
+OsIsimDigestAka::OsIsimDigestAka(IN ImsIsim* pIsim) :
+        m_pIsim(pIsim),
+        m_pDigestAkaListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsIsimDigestAka::~OsIsimDigestAka()
-{
-}
+PUBLIC VIRTUAL OsIsimDigestAka::~OsIsimDigestAka() {}
 
-PUBLIC VIRTUAL
-void OsIsimDigestAka::Destroy()
+PUBLIC VIRTUAL void OsIsimDigestAka::Destroy()
 {
     m_pDigestAkaListener = IMS_NULL;
     osIsim_GetInstance(m_pIsim->GetSlotId())->DestroyDigestAka(this);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
+PUBLIC VIRTUAL IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 {
     OsIsim* pIsim = osIsim_GetInstance(m_pIsim->GetSlotId());
 
@@ -501,12 +489,12 @@ IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
     }
 
     AString strNonce;
-    strNonce.Attach(reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()),
-            objChallenge.GetLength());
+    strNonce.Attach(
+            reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()), objChallenge.GetLength());
     strNonce = strNonce.ToBase64();
 
     if (System::GetInstance()->RequestIsimAuthentication(
-            strNonce, reinterpret_cast<IMS_SINTP>(this), m_pIsim->GetSlotId()) != IMS_SUCCESS)
+                strNonce, reinterpret_cast<IMS_SINTP>(this), m_pIsim->GetSlotId()) != IMS_SUCCESS)
     {
         pIsim->NotifyAuthResult(IMS_FAILURE);
         return IMS_FAILURE;
@@ -517,8 +505,7 @@ IMS_RESULT OsIsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void OsIsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
+PUBLIC VIRTUAL void OsIsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
 {
     m_pDigestAkaListener = piListener;
 }
@@ -548,8 +535,8 @@ void OsIsimDigestAka::NotifyMacFailed()
 }
 
 PUBLIC
-void OsIsimDigestAka::NotifyResponse(IN const ByteArray& objRes,
-        IN const ByteArray& objIk, IN const ByteArray& objCk)
+void OsIsimDigestAka::NotifyResponse(
+        IN const ByteArray& objRes, IN const ByteArray& objIk, IN const ByteArray& objCk)
 {
     if (m_pDigestAkaListener == IMS_NULL)
     {
@@ -560,44 +547,38 @@ void OsIsimDigestAka::NotifyResponse(IN const ByteArray& objRes,
     m_pDigestAkaListener->DigestAka_OnResponse(objRes, objIk, objCk);
 }
 
-
-
 PUBLIC
-OsIsim::OsIsim(IN IMS_SINT32 nSlotId)
-    : ImsIsim(nSlotId)
-    , m_objIsimListeners(IMSList<IIsimListener*>())
-    , m_objDigestAkas(IMSList<OsIsimDigestAka*>())
-    , m_bInitialized(IMS_FALSE)
-    , m_piOwnerThread(IMS_NULL)
-    , m_nState(STATE_IDLE)
-    , m_objEfContents(IMSMap<IMS_SINT32, IsimEfContent>())
-    , m_nCountForAuthFailed(0)
+OsIsim::OsIsim(IN IMS_SINT32 nSlotId) :
+        ImsIsim(nSlotId),
+        m_objIsimListeners(IMSList<IIsimListener*>()),
+        m_objDigestAkas(IMSList<OsIsimDigestAka*>()),
+        m_bInitialized(IMS_FALSE),
+        m_piOwnerThread(IMS_NULL),
+        m_nState(STATE_IDLE),
+        m_objEfContents(IMSMap<IMS_SINT32, IsimEfContent>()),
+        m_nCountForAuthFailed(0)
 {
     IMS_TRACE_D("Constructor :: ISIM%02d", nSlotId, 0, 0);
 
     m_objEfContents.Add(EF_ID_IMPI, IsimEfContent());
     m_objEfContents.Add(EF_ID_DOMAIN, IsimEfContent());
     m_objEfContents.Add(EF_ID_IMPU, IsimEfContent(IsimEfContent::EF_LINEAR_FIXED));
-    //m_objEfContents.Add(EF_ID_IST, IsimEfContent());
-    //m_objEfContents.Add(EF_ID_PCSCF, IsimEfContent(IsimEfContent::EF_LINEAR_FIXED));
+    // m_objEfContents.Add(EF_ID_IST, IsimEfContent());
+    // m_objEfContents.Add(EF_ID_PCSCF, IsimEfContent(IsimEfContent::EF_LINEAR_FIXED));
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_ISIM, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_ISIM, this, GetSlotId());
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 }
 
-PUBLIC VIRTUAL
-OsIsim::~OsIsim()
+PUBLIC VIRTUAL OsIsim::~OsIsim()
 {
     IMS_TRACE_D("Destructor :: ISIM%02d", GetSlotId(), 0, 0);
 
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_ISIM, this, GetSlotId());
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_ISIM, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     IMS_TRACE_I("ISIM :: DispatchServiceMessage - slotId=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
             GetSlotId(), nWParam, nLParam);
@@ -605,8 +586,7 @@ void OsIsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
     osIsim_HandleIsimEvent(GetSlotId(), reinterpret_cast<OsIsimParam*>(nLParam));
 }
 
-PUBLIC VIRTUAL
-void OsIsim::ClearRecords()
+PUBLIC VIRTUAL void OsIsim::ClearRecords()
 {
     // Clear all the EF records
     for (IMS_UINT32 i = 0; i < m_objEfContents.GetSize(); ++i)
@@ -619,8 +599,7 @@ void OsIsim::ClearRecords()
     }
 }
 
-PUBLIC VIRTUAL
-IDigestAka* OsIsim::CreateDigestAka()
+PUBLIC VIRTUAL IDigestAka* OsIsim::CreateDigestAka()
 {
     OsIsimDigestAka* pDigestAka = new OsIsimDigestAka(this);
 
@@ -640,8 +619,7 @@ IDigestAka* OsIsim::CreateDigestAka()
     return pDigestAka;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetField(IN IMS_SINT32 nField)
+PUBLIC VIRTUAL IMS_RESULT OsIsim::GetField(IN IMS_SINT32 nField)
 {
     IMS_TRACE_D("ISIM :: GetField - fieldId=%d", nField, 0, 0);
 
@@ -659,38 +637,32 @@ IMS_RESULT OsIsim::GetField(IN IMS_SINT32 nField)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetHomeDomainName()
+PUBLIC VIRTUAL IMS_RESULT OsIsim::GetHomeDomainName()
 {
     return GetRecord(EF_ID_DOMAIN);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetImpi()
+PUBLIC VIRTUAL IMS_RESULT OsIsim::GetImpi()
 {
     return GetRecord(EF_ID_IMPI);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::GetImpu()
+PUBLIC VIRTUAL IMS_RESULT OsIsim::GetImpu()
 {
     return GetRecord(EF_ID_IMPU);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsIsim::GetState() const
+PUBLIC VIRTUAL IMS_SINT32 OsIsim::GetState() const
 {
     return m_nState;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsIsim::IsReady()
+PUBLIC VIRTUAL IMS_BOOL OsIsim::IsReady()
 {
     return (m_nState == STATE_READY) ? IMS_TRUE : IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-void OsIsim::AddListener(IN IIsimListener* piListener)
+PUBLIC VIRTUAL void OsIsim::AddListener(IN IIsimListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -710,8 +682,7 @@ void OsIsim::AddListener(IN IIsimListener* piListener)
     m_objIsimListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void OsIsim::RemoveListener(IN IIsimListener* piListener)
+PUBLIC VIRTUAL void OsIsim::RemoveListener(IN IIsimListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -730,8 +701,7 @@ void OsIsim::RemoveListener(IN IIsimListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::Init()
+PUBLIC VIRTUAL IMS_RESULT OsIsim::Init()
 {
     if (m_bInitialized)
     {
@@ -754,11 +724,10 @@ IMS_RESULT OsIsim::Init()
     m_nCountForAuthFailed = 0;
 
     // In case that ISIM STATUS is LOADED or NOT_PRESENT
-    IMS_SINT32 nIsimState = ConvertSimStateToEnum(
-            System::GetInstance()->GetIsimState(GetSlotId()));
+    IMS_SINT32 nIsimState = ConvertSimStateToEnum(System::GetInstance()->GetIsimState(GetSlotId()));
 
-    if (nIsimState == OsIsimStateParam::STATE_LOADED
-            || nIsimState == OsIsimStateParam::STATE_NOT_PRESENT)
+    if (nIsimState == OsIsimStateParam::STATE_LOADED ||
+            nIsimState == OsIsimStateParam::STATE_NOT_PRESENT)
     {
         OsIsimStateParam* pParam = new OsIsimStateParam();
         pParam->m_nState = nIsimState;
@@ -768,21 +737,19 @@ IMS_RESULT OsIsim::Init()
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void OsIsim::Release()
+PUBLIC VIRTUAL void OsIsim::Release()
 {
     ReleaseUimClient(IMS_TRUE);
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
+PUBLIC VIRTUAL IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
 {
     IMS_SINT32 nState = GetState();
 
     if ((nState != STATE_INIT) && (nState != STATE_REFRESHED))
     {
-        IMS_TRACE_E(0, "Start() can be only invoked in INIT or REFRESHED state; state(%d)",
-                nState, 0, 0);
+        IMS_TRACE_E(0, "Start() can be only invoked in INIT or REFRESHED state; state(%d)", nState,
+                0, 0);
         return IMS_FAILURE;
     }
 
@@ -808,14 +775,14 @@ IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_IST, EF_ID_IST,
-            IMS_TRUE, IsimEfContent::EF_TRANSPARENT) != IMS_SUCCESS)
+    if (GetFileAttributes(nEFs, EF_IST, EF_ID_IST, IMS_TRUE, IsimEfContent::EF_TRANSPARENT) !=
+            IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    if (GetFileAttributes(nEFs, EF_PCSCF, EF_ID_PCSCF,
-            IMS_TRUE, IsimEfContent::EF_LINEAR_FIXED) != IMS_SUCCESS)
+    if (GetFileAttributes(nEFs, EF_PCSCF, EF_ID_PCSCF, IMS_TRUE, IsimEfContent::EF_LINEAR_FIXED) !=
+            IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
@@ -823,11 +790,10 @@ IMS_RESULT OsIsim::Start(IN IMS_SINT32 nEFs /*= EF_ALL*/)
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PUBLIC VIRTUAL void OsIsim::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    (void) nWParam;
+    (void)nWParam;
 
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(nLParam);
 
@@ -838,7 +804,8 @@ void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
 
     switch (nEvent)
     {
-        case NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE: {
+        case NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE:
+        {
             OsIsimFileAttributesParam* pParam = new OsIsimFileAttributesParam();
 
             pParam->m_nType = OsIsimParam::TYPE_FILE_ATTRIBUTES;
@@ -848,7 +815,8 @@ void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        case NOTIFICATION_ISIM_READ_RECORD: {
+        case NOTIFICATION_ISIM_READ_RECORD:
+        {
             OsIsimRecordParam* pParam = new OsIsimRecordParam();
 
             pParam->m_nType = OsIsimParam::TYPE_RECORD;
@@ -862,7 +830,8 @@ void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        case NOTIFICATION_ISIM_AUTH: {
+        case NOTIFICATION_ISIM_AUTH:
+        {
             android::String8 strResponse(pParcel->readString16());
             AString strAuth(strResponse.string());
             strAuth = AString::FromBase64(strAuth);
@@ -874,13 +843,14 @@ void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             pParam->m_objResponse.Append(reinterpret_cast<const IMS_BYTE*>(strAuth.GetStr()),
                     static_cast<IMS_SINT32>(strAuth.GetLength()));
 
-            IMS_TRACE_D("ISIM :: Auth - owner=%" PFLS_x ", res=%s",
-                    pParam->m_nOwner, strResponse.string(), 0);
+            IMS_TRACE_D("ISIM :: Auth - owner=%" PFLS_x ", res=%s", pParam->m_nOwner,
+                    strResponse.string(), 0);
 
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        case NOTIFICATION_ISIM_STATE_CHANGED: {
+        case NOTIFICATION_ISIM_STATE_CHANGED:
+        {
             // SIM state is notified when receiving the intent
             android::String8 strTmpState(pParcel->readString16());
             AString strState(strTmpState.string(), strTmpState.length());
@@ -895,7 +865,8 @@ void OsIsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osIsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        default: {
+        default:
+        {
             IMS_TRACE_D("ISIM :: Invalid event (%d)", nEvent, 0, 0);
             break;
         }
@@ -914,8 +885,7 @@ IMS_RESULT OsIsim::GetFileAttributes(IN IMS_SINT32 nRequiredEFs, IN IMS_SINT32 n
             m_objEfContents.SetValue(nFileId, IsimEfContent(nEFContentType));
         }
 
-        if (System::GetInstance()->ReadIsimFileAttributes(
-                nFileId, GetSlotId()) != IMS_SUCCESS)
+        if (System::GetInstance()->ReadIsimFileAttributes(nFileId, GetSlotId()) != IMS_SUCCESS)
         {
             return IMS_FAILURE;
         }
@@ -962,8 +932,8 @@ IMS_RESULT OsIsim::GetRecord(IN IMS_SINT32 nFileId)
 
     objContent.SetReadRequested(IMS_TRUE);
 
-    if (System::GetInstance()->ReadIsimRecord(
-            nFileId, objContent.GetIndexToRead(), GetSlotId()) != IMS_SUCCESS)
+    if (System::GetInstance()->ReadIsimRecord(nFileId, objContent.GetIndexToRead(), GetSlotId()) !=
+            IMS_SUCCESS)
     {
         objContent.SetReadRequested(IMS_FALSE);
 
@@ -1011,8 +981,7 @@ void OsIsim::NotifyAuthResult(IN IMS_RESULT nResult)
 
     if (m_nCountForAuthFailed == MAX_AUTH_FAILURE_COUNT_FOR_RECOVERY)
     {
-        IMS_TRACE_D("ISIM :: auth-request is failed for 3 times continuously...",
-                0, 0, 0);
+        IMS_TRACE_D("ISIM :: auth-request is failed for 3 times continuously...", 0, 0, 0);
 
         m_nCountForAuthFailed = 0;
         ReleaseUimClient();
@@ -1104,8 +1073,7 @@ void OsIsim::NotifyError(IN IMS_SINT32 nFileId, IN IMS_SINT32 nOperation)
 }
 
 PUBLIC
-void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId,
-        IN const IsimEfContent& objContent)
+void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId, IN const IsimEfContent& objContent)
 {
     for (IMS_UINT32 i = 0; i < m_objIsimListeners.GetSize(); ++i)
     {
@@ -1118,23 +1086,23 @@ void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId,
 
         switch (nFileId)
         {
-        case EF_ID_IMPI:
-            piListener->Isim_OnImpi(objContent.GetRecords().GetAt(0));
-            break;
-        case EF_ID_DOMAIN:
-            piListener->Isim_OnHomeDomainName(objContent.GetRecords().GetAt(0));
-            break;
-        case EF_ID_IMPU:
-            piListener->Isim_OnImpu(objContent.GetRecords());
-            break;
-        case EF_ID_IST:
-            piListener->Isim_OnField(FIELD_IST, objContent.GetRecords());
-            break;
-        case EF_ID_PCSCF:
-            piListener->Isim_OnField(FIELD_PCSCF_ADDRESS, objContent.GetRecords());
-            break;
-        default:
-            break;
+            case EF_ID_IMPI:
+                piListener->Isim_OnImpi(objContent.GetRecords().GetAt(0));
+                break;
+            case EF_ID_DOMAIN:
+                piListener->Isim_OnHomeDomainName(objContent.GetRecords().GetAt(0));
+                break;
+            case EF_ID_IMPU:
+                piListener->Isim_OnImpu(objContent.GetRecords());
+                break;
+            case EF_ID_IST:
+                piListener->Isim_OnField(FIELD_IST, objContent.GetRecords());
+                break;
+            case EF_ID_PCSCF:
+                piListener->Isim_OnField(FIELD_PCSCF_ADDRESS, objContent.GetRecords());
+                break;
+            default:
+                break;
         }
     }
 }
@@ -1142,8 +1110,8 @@ void OsIsim::NotifyRecordReadCompleted(IN IMS_SINT32 nFileId,
 PUBLIC
 void OsIsim::ReleaseUimClient(IN IMS_BOOL bFromApp /*= IMS_FALSE*/)
 {
-    IMS_TRACE_I("ReleaseUIMClient - initialized=%s, fromApp=%s",
-            _TRACE_B_(m_bInitialized), _TRACE_B_(bFromApp), 0);
+    IMS_TRACE_I("ReleaseUIMClient - initialized=%s, fromApp=%s", _TRACE_B_(m_bInitialized),
+            _TRACE_B_(bFromApp), 0);
 
     m_nState = IIsim::STATE_IDLE;
     m_nCountForAuthFailed = 0;
@@ -1165,15 +1133,15 @@ void OsIsim::SetRecord(IN IMS_SINT32 nFileId, IN const IMS_BYTE* pbyData, IN IMS
 
     if (nFileId == EF_ID_IST)
     {
-        IMS_TRACE_D("SetRecord :: %s=0x%02X, %d",
-                osIsim_ConvertFileIdToString(nFileId), pbyData[0], nSize);
+        IMS_TRACE_D("SetRecord :: %s=0x%02X, %d", osIsim_ConvertFileIdToString(nFileId), pbyData[0],
+                nSize);
     }
     else
     {
-        IMS_TRACE_D("SetRecord :: %s=%s, %d",
-                osIsim_ConvertFileIdToString(nFileId),
-                OsUtil::GetInstance()->IsDebugMode() ?\
-                    reinterpret_cast<const IMS_CHAR*>(pbyData) : "xxx", nSize);
+        IMS_TRACE_D("SetRecord :: %s=%s, %d", osIsim_ConvertFileIdToString(nFileId),
+                OsUtil::GetInstance()->IsDebugMode() ? reinterpret_cast<const IMS_CHAR*>(pbyData)
+                                                     : "xxx",
+                nSize);
     }
 
     IsimEfContent& objContent = m_objEfContents.GetValueAt(nIndex);
@@ -1196,14 +1164,15 @@ void OsIsim::SetRecord(IN IMS_SINT32 nFileId, IN const IMS_BYTE* pbyData, IN IMS
         if ((GetState() == STATE_REFRESHING) || (GetState() == STATE_REFRESHED))
         {
             IMS_TRACE_D("Do not request the linear fixed records any more in this state,"
-                    " REFRESHING or REFRESHED", 0, 0, 0);
+                        " REFRESHING or REFRESHED",
+                    0, 0, 0);
             return;
         }
 
         if (objContent.GetType() == IsimEfContent::EF_LINEAR_FIXED)
         {
             if (System::GetInstance()->ReadIsimRecord(
-                    nFileId, objContent.GetIndexToRead(), GetSlotId()) != IMS_SUCCESS)
+                        nFileId, objContent.GetIndexToRead(), GetSlotId()) != IMS_SUCCESS)
             {
                 IMS_TRACE_E(0, "Reading EF(%X) failed", nFileId, 0, 0);
                 NotifyError(nFileId, OPERATION_READ_RECORD);
@@ -1216,8 +1185,8 @@ void OsIsim::SetRecord(IN IMS_SINT32 nFileId, IN const IMS_BYTE* pbyData, IN IMS
 }
 
 PUBLIC
-void OsIsim::SetRecordAttributes(IN IMS_SINT32 nFileId,
-        IN IMS_BOOL bReady, IN IMS_SINT32 nRecordCount /*= 0*/)
+void OsIsim::SetRecordAttributes(
+        IN IMS_SINT32 nFileId, IN IMS_BOOL bReady, IN IMS_SINT32 nRecordCount /*= 0*/)
 {
     IMS_SINT32 nState = GetState();
 
@@ -1227,10 +1196,8 @@ void OsIsim::SetRecordAttributes(IN IMS_SINT32 nFileId,
         return;
     }
 
-    if (!bReady
-            && ((nFileId == EF_ID_IMPI)
-                || (nFileId == EF_ID_DOMAIN)
-                || (nFileId == EF_ID_IMPU)))
+    if (!bReady &&
+            ((nFileId == EF_ID_IMPI) || (nFileId == EF_ID_DOMAIN) || (nFileId == EF_ID_IMPU)))
     {
         IMS_TRACE_E(0, "EF(%X) is not ready", nFileId, 0, 0);
         NotifyError(ERROR_START_FAILED);
@@ -1376,8 +1343,7 @@ IMS_BOOL OsIsim::IsDigestAkaPresent(IN OsIsimDigestAka* pDigestAka)
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 OsIsim::ConvertSimStateToEnum(IN const AString& strState)
+PRIVATE GLOBAL IMS_SINT32 OsIsim::ConvertSimStateToEnum(IN const AString& strState)
 {
     const IMS_SINT32 nCount = (sizeof(SIM_STATE_MAP) / sizeof(SIM_STATE_MAP[0])) - 1;
 

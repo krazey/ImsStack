@@ -36,7 +36,6 @@ class IPowerInfoListener
 {
 public:
     virtual void PowerInfo_NotifyPowerLevel(IN IPowerInfo* piPowerInfo) = 0;
-
 };
 
 class IPowerInfo
@@ -164,21 +163,18 @@ public:
 private:
     class ObserverList
     {
-        public:
-            inline ObserverList(IN IPowerInfoListener* piListener)
-            {
-                m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-                m_objListeners.Append(piListener);
-            }
+    public:
+        inline ObserverList(IN IPowerInfoListener* piListener)
+        {
+            m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
+            m_objListeners.Append(piListener);
+        }
 
-            inline IMS_BOOL operator==(IN IThread* piThread)
-            {
-                return piThread == m_piOwnerThread;
-            }
+        inline IMS_BOOL operator==(IN IThread* piThread) { return piThread == m_piOwnerThread; }
 
-        public:
-            IThread* m_piOwnerThread;
-            IMSList<IPowerInfoListener*> m_objListeners;
+    public:
+        IThread* m_piOwnerThread;
+        IMSList<IPowerInfoListener*> m_objListeners;
     };
 
 private:

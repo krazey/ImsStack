@@ -15,125 +15,70 @@
 #include "AStringBuffer.h"
 #include "TextParser.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_AMPERSAND = '&';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_ASTERISK = '*';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_AT = '@';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_BACKSLASH = '\\';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_CR = '\r';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_COLON = ':';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_COMMA = ',';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_DOT = '.';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_DQUOT = '\"';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_EQUAL = '=';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_HYPHEN = '-';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_HTAB = '\t';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_LAQUOT = '<';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_LF = '\n';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_LSBRACKET = '[';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_PERCENT = '%';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_PLUS = '+';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_RAQUOT = '>';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_RSBRACKET = ']';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_QUESTIONMARK = '?';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_SEMICOLON = ';';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_SHARP = '#';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_SLASH = '/';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_SP = ' ';
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::CHAR_UNDERSCORE = '_';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_AMPERSAND = '&';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_ASTERISK = '*';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_AT = '@';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_BACKSLASH = '\\';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_CR = '\r';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_COLON = ':';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_COMMA = ',';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_DOT = '.';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_DQUOT = '\"';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_EQUAL = '=';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_HYPHEN = '-';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_HTAB = '\t';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_LAQUOT = '<';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_LF = '\n';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_LSBRACKET = '[';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_PERCENT = '%';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_PLUS = '+';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_RAQUOT = '>';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_RSBRACKET = ']';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_QUESTIONMARK = '?';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_SEMICOLON = ';';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_SHARP = '#';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_SLASH = '/';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_SP = ' ';
+PUBLIC GLOBAL const IMS_CHAR TextParser::CHAR_UNDERSCORE = '_';
 
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_ASTERISK[] = "*";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_AT[] = "@";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_BACKSLASH[] = "\\";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_CR[] = "\r";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_COLON[] = ":";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_COMMA[] = ",";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_DOT[] = ".";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_DQUOTE[] = "\"";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_EQUAL[] = "=";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_HYPHEN[] = "-";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_HTAB[] = "\t";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_LAQUOT[] = "<";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_LF[] = "\n";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_LSBRACKET[] = "[";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_PERCENT[] = "%";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_RAQUOT[] = ">";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_RSBRACKET[] = "]";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_QUESTIONMARK[] = "?";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SEMICOLON[] = ";";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SHARP[] = "#";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SLASH[] = "/";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SP[] = " ";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_UNDERSCORE[] = "_";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_CRLF[] = "\r\n";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_CRLFCRLF[] = "\r\n\r\n";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_ASTERISK[] = "*";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_AT[] = "@";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_BACKSLASH[] = "\\";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_CR[] = "\r";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_COLON[] = ":";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_COMMA[] = ",";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_DOT[] = ".";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_DQUOTE[] = "\"";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_EQUAL[] = "=";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_HYPHEN[] = "-";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_HTAB[] = "\t";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_LAQUOT[] = "<";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_LF[] = "\n";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_LSBRACKET[] = "[";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_PERCENT[] = "%";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_RAQUOT[] = ">";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_RSBRACKET[] = "]";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_QUESTIONMARK[] = "?";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SEMICOLON[] = ";";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SHARP[] = "#";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SLASH[] = "/";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SP[] = " ";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_UNDERSCORE[] = "_";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_CRLF[] = "\r\n";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_CRLFCRLF[] = "\r\n\r\n";
 
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_TRUE[] = "TRUE";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_FALSE[] = "FALSE";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SMALL_TRUE[] = "true";
-PUBLIC GLOBAL
-const IMS_CHAR TextParser::STR_SMALL_FALSE[] = "false";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_TRUE[] = "TRUE";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_FALSE[] = "FALSE";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SMALL_TRUE[] = "true";
+PUBLIC GLOBAL const IMS_CHAR TextParser::STR_SMALL_FALSE[] = "false";
 
 /*
 
 Remarks
 
 */
-PUBLIC GLOBAL
-const IMS_CHAR* TextParser::BooleanToString(IN IMS_BOOL bValue,
-        IN IMS_BOOL bLowerCase /* = IMS_TRUE */)
+PUBLIC GLOBAL const IMS_CHAR* TextParser::BooleanToString(
+        IN IMS_BOOL bValue, IN IMS_BOOL bLowerCase /* = IMS_TRUE */)
 {
     if (bLowerCase)
     {
@@ -150,8 +95,7 @@ const IMS_CHAR* TextParser::BooleanToString(IN IMS_BOOL bValue,
 Remarks
 
 */
-PUBLIC GLOBAL
-AString TextParser::CharToHexString(IN CONST IMS_CHAR cChar)
+PUBLIC GLOBAL AString TextParser::CharToHexString(IN CONST IMS_CHAR cChar)
 {
     AString strHex;
 
@@ -163,8 +107,7 @@ AString TextParser::CharToHexString(IN CONST IMS_CHAR cChar)
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_SINT32 TextParser::HexStringToChar(IN CONST AString &strHex)
+PUBLIC GLOBAL IMS_SINT32 TextParser::HexStringToChar(IN CONST AString& strHex)
 {
     AString strTmpHex;
 
@@ -237,8 +180,7 @@ Remarks
  Compliant to RFC 2045
 
 */
-PUBLIC GLOBAL
-IMS_BOOL TextParser::IsTokenCharacter(IN CONST IMS_CHAR ch)
+PUBLIC GLOBAL IMS_BOOL TextParser::IsTokenCharacter(IN CONST IMS_CHAR ch)
 {
     if (ch == 0x21)
     {
@@ -285,8 +227,7 @@ according to RFC 2045 "MIME Part One: Format of Internet Message Bodies"
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_BOOL TextParser::IsValidMediaType(IN CONST AString &strMediaType)
+PUBLIC GLOBAL IMS_BOOL TextParser::IsValidMediaType(IN CONST AString& strMediaType)
 {
     // content := "Content-Type" ":" type "/" subtype *(";" parameter)
     // parameter := attribute "=" value
@@ -321,8 +262,8 @@ IMS_BOOL TextParser::IsValidMediaType(IN CONST AString &strMediaType)
     }
 
     // Check the subtype
-    AString strSubType
-            = strMediaType.GetSubStr(nSlashIndex + 1, nSemicolonIndex - (nSlashIndex + 1));
+    AString strSubType =
+            strMediaType.GetSubStr(nSlashIndex + 1, nSemicolonIndex - (nSlashIndex + 1));
 
     if (!IsTokenString(strSubType))
     {
@@ -330,8 +271,8 @@ IMS_BOOL TextParser::IsValidMediaType(IN CONST AString &strMediaType)
     }
 
     // Check the parameters
-    IMSList<AString> objParameters
-            = strMediaType.GetSubStr(nSemicolonIndex + 1).Split(CHAR_SEMICOLON);
+    IMSList<AString> objParameters =
+            strMediaType.GetSubStr(nSemicolonIndex + 1).Split(CHAR_SEMICOLON);
 
     for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
     {
@@ -350,8 +291,7 @@ IMS_BOOL TextParser::IsValidMediaType(IN CONST AString &strMediaType)
 Remarks
 
 */
-PUBLIC GLOBAL
-AString TextParser::DoPercentDecoding(IN CONST AString &strPEData)
+PUBLIC GLOBAL AString TextParser::DoPercentDecoding(IN CONST AString& strPEData)
 {
     if (!strPEData.Contains(CHAR_PERCENT))
     {
@@ -369,7 +309,7 @@ AString TextParser::DoPercentDecoding(IN CONST AString &strPEData)
         }
         else
         {
-            AString strHexDigs = strPEData.GetSubStr(i+1, 2);
+            AString strHexDigs = strPEData.GetSubStr(i + 1, 2);
             IMS_SINT32 ch = HexStringToChar(strHexDigs);
 
             if ((ch < 0x00) || (ch > 0xFF))
@@ -397,10 +337,9 @@ Remarks
     strPEExcludingChar - excluding characters from the reserved characters
 
 */
-PUBLIC GLOBAL
-AString TextParser::DoPercentEncoding(IN CONST AString &strData,
-        IN CONST AString &strPEExtraChar /* = AString::ConstNull() */,
-        IN CONST AString &strPEExcludingChar /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString TextParser::DoPercentEncoding(IN CONST AString& strData,
+        IN CONST AString& strPEExtraChar /* = AString::ConstNull() */,
+        IN CONST AString& strPEExcludingChar /* = AString::ConstNull() */)
 {
     const IMS_SINT32 nLength = strData.GetLength();
     AStringBuffer objPEData(nLength * 2);
@@ -410,8 +349,7 @@ AString TextParser::DoPercentEncoding(IN CONST AString &strData,
     {
         if (!IsReservedCharacter(strData[i]))
         {
-            if (!strPEExtraChar.IsNULL()
-                && strPEExtraChar.Contains(strData[i]))
+            if (!strPEExtraChar.IsNULL() && strPEExtraChar.Contains(strData[i]))
             {
                 objHEX.Sprintf("%02X", strData[i]);
 
@@ -426,8 +364,7 @@ AString TextParser::DoPercentEncoding(IN CONST AString &strData,
         }
         else
         {
-            if (!strPEExcludingChar.IsNULL()
-                && strPEExcludingChar.Contains(strData[i]))
+            if (!strPEExcludingChar.IsNULL() && strPEExcludingChar.Contains(strData[i]))
             {
                 objPEData.Append(strData[i]);
             }
@@ -453,9 +390,8 @@ Remarks
     (alpha/num is included as default)
 
 */
-PUBLIC GLOBAL
-AString TextParser::DoPercentEncodingEx(IN CONST AString &strData,
-        IN CONST AString &strPEExcludingChar /* alpha/num is included as default */)
+PUBLIC GLOBAL AString TextParser::DoPercentEncodingEx(IN CONST AString& strData,
+        IN CONST AString& strPEExcludingChar /* alpha/num is included as default */)
 {
     const IMS_SINT32 nLength = strData.GetLength();
     AStringBuffer objPEData(nLength * 2);
@@ -495,8 +431,7 @@ AString TextParser::DoPercentEncodingEx(IN CONST AString &strData,
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_SINT32 TextParser::GetIndexOfDelimiter(IN CONST AString &strValue,
+PUBLIC GLOBAL IMS_SINT32 TextParser::GetIndexOfDelimiter(IN CONST AString& strValue,
         IN CONST IMS_CHAR cDelimiter, IN IMS_BOOL bCheckDQUOT /*= IMS_TRUE */)
 {
     if (!bCheckDQUOT)
@@ -555,9 +490,8 @@ IMS_SINT32 TextParser::GetIndexOfDelimiter(IN CONST AString &strValue,
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_BOOL TextParser::ParseMediaType(IN CONST AString &strMediaType, OUT AString &strType,
-        OUT AString &strSubType)
+PUBLIC GLOBAL IMS_BOOL TextParser::ParseMediaType(
+        IN CONST AString& strMediaType, OUT AString& strType, OUT AString& strSubType)
 {
     // Find a slash character ('/')
     IMS_SINT32 nSlashIndex = strMediaType.GetIndexOf(CHAR_SLASH);
@@ -596,8 +530,7 @@ IMS_BOOL TextParser::ParseMediaType(IN CONST AString &strMediaType, OUT AString 
 Remarks
 
 */
-PUBLIC GLOBAL
-AString TextParser::TrimDQUOT(IN CONST AString &strValue)
+PUBLIC GLOBAL AString TextParser::TrimDQUOT(IN CONST AString& strValue)
 {
     if (strValue.StartsWith(CHAR_DQUOT) && strValue.EndsWith(CHAR_DQUOT))
     {
@@ -612,8 +545,7 @@ AString TextParser::TrimDQUOT(IN CONST AString &strValue)
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_SINT32 TextParser::GetExpectedCountOfUTF8Cont(IN CONST IMS_CHAR ch)
+PRIVATE GLOBAL IMS_SINT32 TextParser::GetExpectedCountOfUTF8Cont(IN CONST IMS_CHAR ch)
 {
     if (ch < 0xC0)
     {
@@ -648,8 +580,7 @@ IMS_SINT32 TextParser::GetExpectedCountOfUTF8Cont(IN CONST IMS_CHAR ch)
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsHexCharacter(IN CONST IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsHexCharacter(IN CONST IMS_CHAR ch)
 {
     if ((IMS_ISDIGIT(ch)) || ((ch >= 'A') && (ch <= 'F')) || ((ch >= 'a') && (ch <= 'f')))
     {
@@ -664,8 +595,7 @@ IMS_BOOL TextParser::IsHexCharacter(IN CONST IMS_CHAR ch)
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsParameterString(IN CONST AString &strParameter)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsParameterString(IN CONST AString& strParameter)
 {
     IMS_SINT32 nIndex = strParameter.GetIndexOf(CHAR_EQUAL);
 
@@ -676,8 +606,8 @@ IMS_BOOL TextParser::IsParameterString(IN CONST AString &strParameter)
     }
     else
     {
-        return (IsTokenString(strParameter.GetSubStr(0, nIndex))
-            && IsParameterValueString(strParameter.GetSubStr(nIndex + 1)));
+        return (IsTokenString(strParameter.GetSubStr(0, nIndex)) &&
+                IsParameterValueString(strParameter.GetSubStr(nIndex + 1)));
     }
 }
 
@@ -686,8 +616,7 @@ IMS_BOOL TextParser::IsParameterString(IN CONST AString &strParameter)
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsParameterValueString(IN CONST AString &strParameterValue)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsParameterValueString(IN CONST AString& strParameterValue)
 {
     return (IsTokenString(strParameterValue) || IsQuotedString(strParameterValue));
 }
@@ -698,14 +627,12 @@ Remarks
  From RFC 3261
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsQdText(IN CONST IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsQdText(IN CONST IMS_CHAR ch)
 {
     // HTAB, SP, %x21, %x23-5B, %x5D-7E,
     // UTF8-NONASCII <- It will be handled another method...
-    if ((ch == 0x09) || (ch == 0x20) || (ch == 0x21)
-            || ((ch >= 0x23) && (ch <= 0x5B))
-            || ((ch >= 0x5D) && (ch <= 0x7E)))
+    if ((ch == 0x09) || (ch == 0x20) || (ch == 0x21) || ((ch >= 0x23) && (ch <= 0x5B)) ||
+            ((ch >= 0x5D) && (ch <= 0x7E)))
     {
         return IMS_TRUE;
     }
@@ -719,8 +646,7 @@ Remarks
  Compliant to RFC 2045
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsQuotedString(IN CONST AString &strQuotedString)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsQuotedString(IN CONST AString& strQuotedString)
 {
     // ""
     if (strQuotedString.GetLength() < 2)
@@ -728,8 +654,8 @@ IMS_BOOL TextParser::IsQuotedString(IN CONST AString &strQuotedString)
         return IMS_FALSE;
     }
 
-    if ((strQuotedString[0] != CHAR_DQUOT)
-            || (strQuotedString[strQuotedString.GetLength() - 1] != CHAR_DQUOT))
+    if ((strQuotedString[0] != CHAR_DQUOT) ||
+            (strQuotedString[strQuotedString.GetLength() - 1] != CHAR_DQUOT))
     {
         return IMS_FALSE;
     }
@@ -776,8 +702,8 @@ IMS_BOOL TextParser::IsQuotedString(IN CONST AString &strQuotedString)
             }
 
             // TODO::????
-            if ((strQuotedString[nTrackPos] != CHAR_BACKSLASH)
-                && (strQuotedString[nTrackPos] != CHAR_DQUOT))
+            if ((strQuotedString[nTrackPos] != CHAR_BACKSLASH) &&
+                    (strQuotedString[nTrackPos] != CHAR_DQUOT))
             {
                 return IMS_FALSE;
             }
@@ -795,8 +721,7 @@ Remarks
  Compliant to RFC 3986
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsReservedCharacter(IN CONST IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsReservedCharacter(IN CONST IMS_CHAR ch)
 {
     // "!" / "*" / "'" / "(" / ")" / ";" / ":" / "@" / "&" / "=" / "+" / "$" /
     // "," / "/" / "?" / "%" / "#" / "[" / "]"
@@ -819,8 +744,7 @@ IMS_BOOL TextParser::IsReservedCharacter(IN CONST IMS_CHAR ch)
 Remarks
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsTokenString(IN CONST AString &strToken)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsTokenString(IN CONST AString& strToken)
 {
     if (strToken.GetLength() == 0)
     {
@@ -844,8 +768,7 @@ Remarks
  From RFC 3261
 
 */
-PRIVATE GLOBAL
-IMS_BOOL TextParser::IsUTF8Cont(IN CONST IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL TextParser::IsUTF8Cont(IN CONST IMS_CHAR ch)
 {
     return ((ch >= 0x80) && (ch <= 0xBF));
 }

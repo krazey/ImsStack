@@ -21,9 +21,7 @@
 
 class LocationProperties;
 
-class OsLocationInfo
-    : public ImsSlot
-    , public ILocationInfo
+class OsLocationInfo : public ImsSlot, public ILocationInfo
 {
 public:
     OsLocationInfo(IN IMS_SINT32 nSlotId);

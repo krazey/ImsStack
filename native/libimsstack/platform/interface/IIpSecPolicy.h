@@ -73,7 +73,6 @@ public:
      * @param piListener The listener to be set
      */
     virtual void SetListener(IN IIpSecPolicyListener* piListener) = 0;
-
 };
 
 #endif

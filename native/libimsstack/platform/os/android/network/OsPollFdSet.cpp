@@ -25,19 +25,17 @@ __IMS_TRACE_TAG_ADAPT__;
 class PollFds
 {
 public:
-    inline PollFds()
-        : m_nCount(0)
+    inline PollFds() :
+            m_nCount(0)
     {
         Init(IMS_NULL);
     }
-    inline PollFds(IN const PollFds& other)
-        : m_nCount(other.m_nCount)
+    inline PollFds(IN const PollFds& other) :
+            m_nCount(other.m_nCount)
     {
         Init(other.m_astFd);
     }
-    inline ~PollFds()
-    {
-    }
+    inline ~PollFds() {}
 
 public:
     inline PollFds& operator=(IN const PollFds& other)
@@ -58,13 +56,18 @@ public:
     pollfd* ToArray(IN_OUT IMS_SINT32& nFds);
 
     inline static void ClearEvent(IN pollfd* pstFd, IN IMS_SINT32 nEvent)
-    { pstFd->events &= ~nEvent; }
+    {
+        pstFd->events &= ~nEvent;
+    }
     inline static IMS_BOOL IsEventSet(IN pollfd* pstFd, IN IMS_SINT32 nEvent)
-    { return ((pstFd->events & nEvent) != 0); }
+    {
+        return ((pstFd->events & nEvent) != 0);
+    }
     inline static IMS_BOOL IsEventSignaled(IN pollfd* pstFd, IN IMS_SINT32 nEvent)
-    { return ((pstFd->revents & nEvent) != 0); }
-    inline static void SetEvent(IN pollfd* pstFd, IN IMS_SINT32 nEvent)
-    { pstFd->events |= nEvent; }
+    {
+        return ((pstFd->revents & nEvent) != 0);
+    }
+    inline static void SetEvent(IN pollfd* pstFd, IN IMS_SINT32 nEvent) { pstFd->events |= nEvent; }
 
 private:
     void Init(IN const pollfd* pstFds, IN IMS_SINT32 nFds = (MAX_POLL_SIZE + 1));
@@ -84,13 +87,14 @@ public:
         EVENT_EXCEPT_TCP_C = POLLRDHUP
     };
 
-    enum { MAX_POLL_SIZE = 512 };
+    enum
+    {
+        MAX_POLL_SIZE = 512
+    };
 
     IMS_SINT16 m_nCount;
     pollfd m_astFd[MAX_POLL_SIZE + 1];
 };
-
-
 
 PUBLIC
 pollfd* PollFds::AddFd(IN IMS_SINT32 nFd)
@@ -193,19 +197,17 @@ void PollFds::Init(IN const pollfd* pstFds, IN IMS_SINT32 nFds /*= (MAX_POLL_SIZ
     }
 }
 
-
-
 PUBLIC
-OsPollFdSet::OsPollFdSet()
-    : ImsFdSet()
-    , m_pFds(new PollFds())
+OsPollFdSet::OsPollFdSet() :
+        ImsFdSet(),
+        m_pFds(new PollFds())
 {
 }
 
 PUBLIC
-OsPollFdSet::OsPollFdSet(IN const OsPollFdSet& other)
-    : ImsFdSet(other)
-    , m_pFds(IMS_NULL)
+OsPollFdSet::OsPollFdSet(IN const OsPollFdSet& other) :
+        ImsFdSet(other),
+        m_pFds(IMS_NULL)
 {
     if (other.m_pFds != IMS_NULL)
     {
@@ -213,8 +215,7 @@ OsPollFdSet::OsPollFdSet(IN const OsPollFdSet& other)
     }
 }
 
-PUBLIC VIRTUAL
-OsPollFdSet::~OsPollFdSet()
+PUBLIC VIRTUAL OsPollFdSet::~OsPollFdSet()
 {
     if (m_pFds != IMS_NULL)
     {
@@ -253,8 +254,7 @@ OsPollFdSet& OsPollFdSet::operator=(IN const OsPollFdSet& other)
     return (*this);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPollFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     pollfd* pstFd = (m_pFds != IMS_NULL) ? m_pFds->GetFd(nFd) : IMS_NULL;
 
@@ -313,8 +313,7 @@ IMS_SINT32 OsPollFdSet::ClearEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return nClearEvent;
 }
 
-PUBLIC VIRTUAL
-void OsPollFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
+PUBLIC VIRTUAL void OsPollFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
 {
     const OsPollFdSet* pPollFdSet = DYNAMIC_CAST(const OsPollFdSet*, pFdSet);
 
@@ -324,9 +323,8 @@ void OsPollFdSet::CopyFrom(IN const ImsFdSet* pFdSet)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPollFdSet::GetSignaledEvents(IN IMS_SINT32 nFd,
-        IN_OUT IMS_SINT32& nSignaledCount)
+PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::GetSignaledEvents(
+        IN IMS_SINT32 nFd, IN_OUT IMS_SINT32& nSignaledCount)
 {
     IMS_SINT32 nSignaledEvents = 0;
 
@@ -365,8 +363,7 @@ IMS_SINT32 OsPollFdSet::GetSignaledEvents(IN IMS_SINT32 nFd,
     return nSignaledEvents;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPollFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_BOOL OsPollFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     pollfd* pstFd = (m_pFds != IMS_NULL) ? m_pFds->GetFd(nFd) : IMS_NULL;
 
@@ -393,8 +390,7 @@ IMS_BOOL OsPollFdSet::IsEventSet(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
+PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
 {
     if (nFd < 0)
     {
@@ -407,8 +403,7 @@ IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     if (pstFd == IMS_NULL)
     {
         // Ignores the initial CLOSE event for TCP sockets
-        if (((nEvent & EVENT_TCP) != 0)
-                && ((nEvent & EVENT_ALL) == EVENT_EXCEPT))
+        if (((nEvent & EVENT_TCP) != 0) && ((nEvent & EVENT_ALL) == EVENT_EXCEPT))
         {
             IMS_TRACE_D("PollFdSet :: TCP CLOSE event will be set later; fd=%d", nFd, 0, 0);
             return 0;
@@ -470,8 +465,7 @@ IMS_SINT32 OsPollFdSet::SetEvent(IN IMS_SINT32 nFd, IN IMS_SINT32 nEvent)
     return nSetEvent;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPollFdSet::WaitForEvents(IN IMS_SINT32 nMilliseconds /*= NO_TIMEOUT*/)
+PUBLIC VIRTUAL IMS_SINT32 OsPollFdSet::WaitForEvents(IN IMS_SINT32 nMilliseconds /*= NO_TIMEOUT*/)
 {
     if (m_pFds == IMS_NULL)
     {

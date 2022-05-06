@@ -30,13 +30,8 @@ struct UUID
 };
 
 // 6ba7b817-9dad-11d1-80b4-00c04fd430c8
-static const UUID NAMESPACE_IMS =
-{
-    0x6ba7b817,
-    0x9dad,
-    0x11d1,
-    0x80, 0xb4,
-    { 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8 }
+static const UUID NAMESPACE_IMS = {
+        0x6ba7b817, 0x9dad, 0x11d1, 0x80, 0xb4, {0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8}
 };
 
 /*
@@ -44,9 +39,8 @@ static const UUID NAMESPACE_IMS =
 Remarks
 
 */
-PUBLIC GLOBAL
-AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
-        IN CONST AString &strName /* = AString::ConstNull() */)
+PUBLIC GLOBAL AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
+        IN CONST AString& strName /* = AString::ConstNull() */)
 {
     // UUID = time-low "-" time-mid "-" time-hi-and-version "-"
     // clock-seq-hi-and-reserved clock-seq-low "-" node
@@ -55,29 +49,30 @@ AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
 
     switch (nVersion)
     {
-    case IMSUUID::VERSION_1: {
-        // TODO: need to be adapted.
-        // objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
-        IMS_UINT32 nMicroSecs = IMS_SYS_GetTimeInMicroSeconds();
-        AString strRandom;
-        strRandom.SetNumber(nMicroSecs);
-        GetUUIDv4(strRandom, objUUID);
-        break;
-    }
-    case IMSUUID::VERSION_3:
-        GetUUIDv3(strName, objUUID);
-        break;
+        case IMSUUID::VERSION_1:
+        {
+            // TODO: need to be adapted.
+            // objUUID = UtilService::GetUtilService()->GetSystemUtil()->GetUuid();
+            IMS_UINT32 nMicroSecs = IMS_SYS_GetTimeInMicroSeconds();
+            AString strRandom;
+            strRandom.SetNumber(nMicroSecs);
+            GetUUIDv4(strRandom, objUUID);
+            break;
+        }
+        case IMSUUID::VERSION_3:
+            GetUUIDv3(strName, objUUID);
+            break;
 
-    case IMSUUID::VERSION_4:
-        GetUUIDv4(strName, objUUID);
-        break;
+        case IMSUUID::VERSION_4:
+            GetUUIDv4(strName, objUUID);
+            break;
 
-    case IMSUUID::VERSION_5:
-        GetUUIDv5(strName, objUUID);
-        break;
+        case IMSUUID::VERSION_5:
+            GetUUIDv5(strName, objUUID);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return static_cast<const AStringBuffer&>(objUUID).GetString();
@@ -88,8 +83,7 @@ AString IMSUUID::GetUUID(IN IMS_SINT32 nVersion /* = VERSION_4 */,
 Remarks
 
 */
-PRIVATE GLOBAL
-void IMSUUID::GetUUIDv3(IN CONST AString &strName, OUT AStringBuffer &objUUID)
+PRIVATE GLOBAL void IMSUUID::GetUUIDv3(IN CONST AString& strName, OUT AStringBuffer& objUUID)
 {
     UUID stNSID = NAMESPACE_IMS;
 
@@ -104,8 +98,8 @@ void IMSUUID::GetUUIDv3(IN CONST AString &strName, OUT AStringBuffer &objUUID)
 
     IMSMD5_Initialize(&stMD5);
     IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stMD5);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()),
-            strName.GetLength(), &stMD5);
+    IMSMD5_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &stMD5);
     IMSMD5_Finalize(&stMD5, uacHash);
 
     // Convert UUID to the host byte order
@@ -123,10 +117,9 @@ void IMSUUID::GetUUIDv3(IN CONST AString &strName, OUT AStringBuffer &objUUID)
     stUUID.nClockSeqHiAndReserved &= 0x3F;
     stUUID.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-            stUUID.nTimeLow, stUUID.nTimeMid, stUUID.nTimeHiAndVersion,
-            stUUID.nClockSeqHiAndReserved, stUUID.nClockSeqLow,
-            stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
+    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
+            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
+            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
             stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
 }
 
@@ -135,8 +128,7 @@ void IMSUUID::GetUUIDv3(IN CONST AString &strName, OUT AStringBuffer &objUUID)
 Remarks
 
 */
-PRIVATE GLOBAL
-void IMSUUID::GetUUIDv4(IN CONST AString &strRandom, OUT AStringBuffer &objUUID)
+PRIVATE GLOBAL void IMSUUID::GetUUIDv4(IN CONST AString& strRandom, OUT AStringBuffer& objUUID)
 {
     UUID stNSID = NAMESPACE_IMS;
 
@@ -151,8 +143,8 @@ void IMSUUID::GetUUIDv4(IN CONST AString &strRandom, OUT AStringBuffer &objUUID)
 
     IMSSHA1_Initialize(&stSHA1);
     IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stSHA1);
-    IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(strRandom.GetStr()),
-            strRandom.GetLength(), &stSHA1);
+    IMSSHA1_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strRandom.GetStr()), strRandom.GetLength(), &stSHA1);
     IMSSHA1_Finalize(&stSHA1, uacHash);
 
     // Convert UUID to the host byte order
@@ -170,10 +162,9 @@ void IMSUUID::GetUUIDv4(IN CONST AString &strRandom, OUT AStringBuffer &objUUID)
     stUUID.nClockSeqHiAndReserved &= 0x3F;
     stUUID.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-            stUUID.nTimeLow, stUUID.nTimeMid, stUUID.nTimeHiAndVersion,
-            stUUID.nClockSeqHiAndReserved, stUUID.nClockSeqLow,
-            stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
+    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
+            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
+            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
             stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
 }
 
@@ -182,8 +173,7 @@ void IMSUUID::GetUUIDv4(IN CONST AString &strRandom, OUT AStringBuffer &objUUID)
 Remarks
 
 */
-PRIVATE GLOBAL
-void IMSUUID::GetUUIDv5(IN CONST AString &strName, OUT AStringBuffer &objUUID)
+PRIVATE GLOBAL void IMSUUID::GetUUIDv5(IN CONST AString& strName, OUT AStringBuffer& objUUID)
 {
     UUID stNSID = NAMESPACE_IMS;
 
@@ -198,8 +188,8 @@ void IMSUUID::GetUUIDv5(IN CONST AString &strName, OUT AStringBuffer &objUUID)
 
     IMSSHA1_Initialize(&stSHA1);
     IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(&stNSID), sizeof(UUID), &stSHA1);
-    IMSSHA1_Update(reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()),
-            strName.GetLength(), &stSHA1);
+    IMSSHA1_Update(
+            reinterpret_cast<const IMS_UCHAR*>(strName.GetStr()), strName.GetLength(), &stSHA1);
     IMSSHA1_Finalize(&stSHA1, uacHash);
 
     // Convert UUID to the host byte order
@@ -217,9 +207,8 @@ void IMSUUID::GetUUIDv5(IN CONST AString &strName, OUT AStringBuffer &objUUID)
     stUUID.nClockSeqHiAndReserved &= 0x3F;
     stUUID.nClockSeqHiAndReserved |= 0x80;
 
-    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-            stUUID.nTimeLow, stUUID.nTimeMid, stUUID.nTimeHiAndVersion,
-            stUUID.nClockSeqHiAndReserved, stUUID.nClockSeqLow,
-            stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
+    objUUID.Sprintf("%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x", stUUID.nTimeLow,
+            stUUID.nTimeMid, stUUID.nTimeHiAndVersion, stUUID.nClockSeqHiAndReserved,
+            stUUID.nClockSeqLow, stUUID.abyNode[0], stUUID.abyNode[1], stUUID.abyNode[2],
             stUUID.abyNode[3], stUUID.abyNode[4], stUUID.abyNode[5]);
 }

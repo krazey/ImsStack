@@ -28,8 +28,8 @@ public:
      * @param nWParam The first parameter for this event
      * @param nLParam The second parameter for this event
      */
-    virtual void Event_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) = 0;
+    virtual void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) = 0;
 };
 
 #endif

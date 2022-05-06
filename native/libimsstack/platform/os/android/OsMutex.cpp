@@ -27,24 +27,23 @@ LOCAL void osMutex_TraceError(IN const IMS_CHAR* pszTag, IN IMS_SINT32 nError)
     switch (nError)
     {
         case EINVAL:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG,
-                    "IMS.ADAPT.E>> mutex_%s :: invalid parameter", _TRACE_S_(pszTag));
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: invalid parameter",
+                    _TRACE_S_(pszTag));
             break;
         case EDEADLK:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG,
-                    "IMS.ADAPT.E>> mutex_%s :: deadlock", _TRACE_S_(pszTag));
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: deadlock",
+                    _TRACE_S_(pszTag));
             break;
         case EPERM:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG,
-                    "IMS.ADAPT.E>> mutex_%s :: invalid permission", _TRACE_S_(pszTag));
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: invalid permission",
+                    _TRACE_S_(pszTag));
             break;
         case EBUSY:
-            (void)ALOG(LOG_DEBUG, IMS_LOG_TAG,
-                    "IMS.ADAPT.E>> mutex_%s :: busy", _TRACE_S_(pszTag));
+            (void)ALOG(LOG_DEBUG, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: busy", _TRACE_S_(pszTag));
             break;
         default:
-            (void)ALOG(LOG_ERROR, IMS_LOG_TAG,
-                    "IMS.ADAPT.E>> mutex_%s :: error=%d", _TRACE_S_(pszTag), nError);
+            (void)ALOG(LOG_ERROR, IMS_LOG_TAG, "IMS.ADAPT.E>> mutex_%s :: error=%d",
+                    _TRACE_S_(pszTag), nError);
             break;
     }
 }
@@ -58,7 +57,7 @@ public:
 
         memset(&m_stMutexAttr, 0, sizeof(pthread_mutexattr_t));
 
-        pthread_mutexattr_settype(&m_stMutexAttr , PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutexattr_settype(&m_stMutexAttr, PTHREAD_MUTEX_RECURSIVE);
     }
     inline ~OsMutexPrivate()
     {
@@ -77,11 +76,9 @@ public:
     pthread_mutex_t* m_pstMutex;
 };
 
-
-
 PUBLIC
-OsMutex::OsMutex(IN IMS_SINT32 nType /*= ATTRIBUTE_RECURSIVE*/)
-    : m_pMutexP(new OsMutexPrivate())
+OsMutex::OsMutex(IN IMS_SINT32 nType /*= ATTRIBUTE_RECURSIVE*/) :
+        m_pMutexP(new OsMutexPrivate())
 {
     SetMutexType(nType);
 
@@ -97,8 +94,7 @@ OsMutex::OsMutex(IN IMS_SINT32 nType /*= ATTRIBUTE_RECURSIVE*/)
     }
 }
 
-PUBLIC VIRTUAL
-OsMutex::~OsMutex()
+PUBLIC VIRTUAL OsMutex::~OsMutex()
 {
     if (m_pMutexP != IMS_NULL)
     {
@@ -118,8 +114,7 @@ OsMutex::~OsMutex()
     }
 }
 
-PUBLIC VIRTUAL
-void OsMutex::Lock()
+PUBLIC VIRTUAL void OsMutex::Lock()
 {
     IMS_SINT32 nRc = pthread_mutex_lock(m_pMutexP->m_pstMutex);
 
@@ -133,8 +128,7 @@ void OsMutex::Lock()
     }
 }
 
-PUBLIC VIRTUAL
-void OsMutex::Unlock()
+PUBLIC VIRTUAL void OsMutex::Unlock()
 {
     IMS_SINT32 nRc = pthread_mutex_unlock(m_pMutexP->m_pstMutex);
 
@@ -196,17 +190,17 @@ IMS_SINT32 OsMutex::SetMutexType(IN IMS_SINT32 nType)
 
     switch (nType)
     {
-    case ATTRIBUTE_NORMAL:
-        nMutexType = PTHREAD_MUTEX_NORMAL;
-        break;
-    case ATTRIBUTE_RECURSIVE:
-        nMutexType = PTHREAD_MUTEX_RECURSIVE;
-        break;
-    case ATTRIBUTE_ERRORCHECK:
-        nMutexType = PTHREAD_MUTEX_ERRORCHECK;
-        break;
-    default:
-        break;
+        case ATTRIBUTE_NORMAL:
+            nMutexType = PTHREAD_MUTEX_NORMAL;
+            break;
+        case ATTRIBUTE_RECURSIVE:
+            nMutexType = PTHREAD_MUTEX_RECURSIVE;
+            break;
+        case ATTRIBUTE_ERRORCHECK:
+            nMutexType = PTHREAD_MUTEX_ERRORCHECK;
+            break;
+        default:
+            break;
     }
 
     if (nMutexType < 0)

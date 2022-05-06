@@ -29,8 +29,8 @@ public:
      * @param nLParam The second parameter for this event
      * @return IMS_TRUE if the specified event is successfully handled, IMS_FALSE otherwise.
      */
-    virtual IMS_BOOL EventReceiver_NotifyEvent(IN IMS_SINT32 nEvent,
-            IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) = 0;
+    virtual IMS_BOOL EventReceiver_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) = 0;
 };
 
 #endif

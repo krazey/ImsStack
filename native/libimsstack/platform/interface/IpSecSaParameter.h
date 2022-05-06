@@ -30,44 +30,28 @@ public:
     {
     public:
         Policy();
-        Policy(IN IMS_SINT32 nSpi,
-                IN IMS_SINT32 nDirection,
-                IN IMS_SINT32 nMode,
-                IN IMS_SINT32 nTransportProtocol,
-                IN const SocketAddress& objLocalAddress,
+        Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMode,
+                IN IMS_SINT32 nTransportProtocol, IN const SocketAddress& objLocalAddress,
                 IN const SocketAddress& objRemoteAddress);
-        Policy(IN IMS_SINT32 nSpi,
-                IN IMS_SINT32 nDirection,
-                IN IMS_SINT32 nMode,
-                IN IMS_SINT32 nTransportProtocol,
-                IN const IPAddress& objLocalIpAddress,
-                IN IMS_SINT32 nLocalPort,
-                IN const IPAddress& objRemoteIpAddress,
+        Policy(IN IMS_SINT32 nSpi, IN IMS_SINT32 nDirection, IN IMS_SINT32 nMode,
+                IN IMS_SINT32 nTransportProtocol, IN const IPAddress& objLocalIpAddress,
+                IN IMS_SINT32 nLocalPort, IN const IPAddress& objRemoteIpAddress,
                 IN IMS_SINT32 nRemotePort);
         Policy(IN const Policy& other);
-        inline ~Policy()
-        {}
+        inline ~Policy() {}
 
     public:
         Policy& operator=(IN const Policy& other);
 
     public:
-        inline IMS_SINT32 GetSpi() const
-        { return m_nSpi; }
-        inline IMS_SINT32 GetDirection() const
-        { return m_nDirection; }
-        inline IMS_SINT32 GetMode() const
-        { return m_nMode; }
-        inline IMS_SINT32 GetTransportProtocol() const
-        { return m_nTransportProtocol; }
-        inline const SocketAddress& GetLocalAddress() const
-        { return m_objLocalAddress; }
-        inline const SocketAddress& GetRemoteAddress() const
-        { return m_objRemoteAddress; }
-        inline IMS_SINT32 GetSocketId() const
-        { return m_nSocketId; }
-        inline void SetSocketId(IN IMS_SINT32 nSocketId)
-        { m_nSocketId = nSocketId; }
+        inline IMS_SINT32 GetSpi() const { return m_nSpi; }
+        inline IMS_SINT32 GetDirection() const { return m_nDirection; }
+        inline IMS_SINT32 GetMode() const { return m_nMode; }
+        inline IMS_SINT32 GetTransportProtocol() const { return m_nTransportProtocol; }
+        inline const SocketAddress& GetLocalAddress() const { return m_objLocalAddress; }
+        inline const SocketAddress& GetRemoteAddress() const { return m_objRemoteAddress; }
+        inline IMS_SINT32 GetSocketId() const { return m_nSocketId; }
+        inline void SetSocketId(IN IMS_SINT32 nSocketId) { m_nSocketId = nSocketId; }
 
         IMS_BOOL HasAcceptedSocketId(IN IMS_SINT32 nSocketId);
         void AddAcceptedSocketId(IN IMS_SINT32 nSocketId);
@@ -119,30 +103,22 @@ public:
             IN IMS_SINT32 nIntegrityAlgorithm, IN IMS_SINT32 nEncryptionAlgorithm,
             IN const ByteArray& objIk, IN const ByteArray& objCk);
     IpSecSaParameter(IN const IpSecSaParameter& other);
-    inline ~IpSecSaParameter()
-    {}
+    inline ~IpSecSaParameter() {}
 
 public:
     IpSecSaParameter& operator=(IN const IpSecSaParameter& other);
 
 public:
-    inline IMS_SINT32 GetIpSecId() const
-    { return m_nIpSecId; }
-    inline IMS_SINT32 GetSecurityProtocol() const
-    { return m_nSecurityProtocol; }
-    inline IMS_SINT32 GetIntegrityAlgorithm() const
-    { return m_nIntegrityAlgorithm; }
-    inline IMS_SINT32 GetEncryptionAlgorithm() const
-    { return m_nEncryptionAlgorithm; }
-    inline const ByteArray& GetIk() const
-    { return m_objIk; }
-    inline const ByteArray& GetCk() const
-    { return m_objCk; }
+    inline IMS_SINT32 GetIpSecId() const { return m_nIpSecId; }
+    inline IMS_SINT32 GetSecurityProtocol() const { return m_nSecurityProtocol; }
+    inline IMS_SINT32 GetIntegrityAlgorithm() const { return m_nIntegrityAlgorithm; }
+    inline IMS_SINT32 GetEncryptionAlgorithm() const { return m_nEncryptionAlgorithm; }
+    inline const ByteArray& GetIk() const { return m_objIk; }
+    inline const ByteArray& GetCk() const { return m_objCk; }
 
     void AddPolicy(IN const Policy& objPolicy);
     void AddPolicys(IN const IMSList<Policy>& objPolicys);
-    inline const IMSList<Policy>& GetPolicys() const
-    { return m_objPolicys; }
+    inline const IMSList<Policy>& GetPolicys() const { return m_objPolicys; }
     void RemoveAllPolicys();
     AString ToString() const;
 
@@ -159,7 +135,7 @@ public:
 
     enum
     {
-        INTEGRITY_ALG_HMAC_MD5_96 = 0, // Deprecated
+        INTEGRITY_ALG_HMAC_MD5_96 = 0,  // Deprecated
         INTEGRITY_ALG_HMAC_SHA_1_96 = 1,
         INTEGRITY_ALG_AES_GMAC = 2,
         INTEGRITY_ALG_NULL = 3
@@ -167,7 +143,7 @@ public:
 
     enum
     {
-        ENCRYPTION_ALG_DES_EDE3_CBC = 0, // Deprecated
+        ENCRYPTION_ALG_DES_EDE3_CBC = 0,  // Deprecated
         ENCRYPTION_ALG_AES_CBC = 1,
         ENCRYPTION_ALG_NULL = 2,
         ENCRYPTION_ALG_AES_GCM = 3

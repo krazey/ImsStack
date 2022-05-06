@@ -36,24 +36,25 @@ public:
     };
 
 public:
-    inline IsimEfContent(IN IMS_SINT32 nType = EF_TRANSPARENT)
-        : m_nType(nType)
-        , m_bReadRequested(IMS_FALSE)
-        , m_bReady(IMS_FALSE)
-        , m_nCount(0)
-        , m_nIndexToRead(1)
-        , m_objRecords(IMSList<ByteArray>())
-    {}
-    inline IsimEfContent(IN const IsimEfContent& other)
-        : m_nType(other.m_nType)
-        , m_bReadRequested(other.m_bReadRequested)
-        , m_bReady(other.m_bReady)
-        , m_nCount(other.m_nCount)
-        , m_nIndexToRead(other.m_nIndexToRead)
-        , m_objRecords(other.m_objRecords)
-    {}
-    inline virtual ~IsimEfContent()
-    {}
+    inline IsimEfContent(IN IMS_SINT32 nType = EF_TRANSPARENT) :
+            m_nType(nType),
+            m_bReadRequested(IMS_FALSE),
+            m_bReady(IMS_FALSE),
+            m_nCount(0),
+            m_nIndexToRead(1),
+            m_objRecords(IMSList<ByteArray>())
+    {
+    }
+    inline IsimEfContent(IN const IsimEfContent& other) :
+            m_nType(other.m_nType),
+            m_bReadRequested(other.m_bReadRequested),
+            m_bReady(other.m_bReady),
+            m_nCount(other.m_nCount),
+            m_nIndexToRead(other.m_nIndexToRead),
+            m_objRecords(other.m_objRecords)
+    {
+    }
+    inline virtual ~IsimEfContent() {}
 
 public:
     inline IsimEfContent& operator=(IN const IsimEfContent& other)
@@ -93,26 +94,20 @@ public:
         m_objRecords.Clear();
     }
 
-    inline IMS_SINT32 GetCount() const
-    { return m_nCount; }
-    inline IMS_SINT32 GetIndexToRead() const
-    { return m_nIndexToRead; }
-    inline const IMSList<ByteArray>& GetRecords() const
-    { return m_objRecords; }
+    inline IMS_SINT32 GetCount() const { return m_nCount; }
+    inline IMS_SINT32 GetIndexToRead() const { return m_nIndexToRead; }
+    inline const IMSList<ByteArray>& GetRecords() const { return m_objRecords; }
 
-    inline IMS_SINT32 GetType() const
-    { return m_nType; }
+    inline IMS_SINT32 GetType() const { return m_nType; }
     inline IMS_BOOL IsAllRecordsReadCompleted() const
-    { return (m_nCount == static_cast<IMS_SINT32>(m_objRecords.GetSize())); }
-    inline IMS_BOOL IsReadRequested() const
-    { return m_bReadRequested; }
-    inline IMS_BOOL IsReady() const
-    { return m_bReady; }
+    {
+        return (m_nCount == static_cast<IMS_SINT32>(m_objRecords.GetSize()));
+    }
+    inline IMS_BOOL IsReadRequested() const { return m_bReadRequested; }
+    inline IMS_BOOL IsReady() const { return m_bReady; }
 
-    inline void SetCount(IN IMS_SINT32 nCount)
-    { m_nCount = nCount; }
-    inline void SetIndexToRead(IN IMS_SINT32 nIndex)
-    { m_nIndexToRead = nIndex; }
+    inline void SetCount(IN IMS_SINT32 nCount) { m_nCount = nCount; }
+    inline void SetIndexToRead(IN IMS_SINT32 nIndex) { m_nIndexToRead = nIndex; }
     inline void SetRecord(IN const IMS_BYTE* pbyData, IN IMS_SINT32 nSize)
     {
         ByteArray objRecord(pbyData, nSize);
@@ -120,10 +115,8 @@ public:
         m_objRecords.Clear();
         m_objRecords.Append(objRecord);
     }
-    inline void SetReadRequested(IN IMS_BOOL bReadRequested)
-    { m_bReadRequested = bReadRequested; }
-    inline void SetReady(IN IMS_BOOL bReady)
-    { m_bReady = bReady; }
+    inline void SetReadRequested(IN IMS_BOOL bReadRequested) { m_bReadRequested = bReadRequested; }
+    inline void SetReady(IN IMS_BOOL bReady) { m_bReady = bReady; }
 
 private:
     // Type of EF - transparent / linear_fixed
@@ -141,10 +134,7 @@ private:
     IMSList<ByteArray> m_objRecords;
 };
 
-
-
-class OsIsimDigestAka
-    : public IDigestAka
+class OsIsimDigestAka : public IDigestAka
 {
 public:
     explicit OsIsimDigestAka(IN ImsIsim* pIsim);
@@ -160,19 +150,15 @@ public:
 
     void NotifyAutsFailed(IN const ByteArray& objAuts);
     void NotifyMacFailed();
-    void NotifyResponse(IN const ByteArray& objRes,
-            IN const ByteArray& objIk, IN const ByteArray& objCk);
+    void NotifyResponse(
+            IN const ByteArray& objRes, IN const ByteArray& objIk, IN const ByteArray& objCk);
 
 private:
     ImsIsim* m_pIsim;
     IDigestAkaListener* m_pDigestAkaListener;
 };
 
-
-
-class OsIsim
-    : public ImsIsim
-    , public ISystemListener
+class OsIsim : public ImsIsim, public ISystemListener
 {
 public:
     OsIsim(IN IMS_SINT32 nSlotId);
@@ -201,8 +187,8 @@ public:
     IMS_RESULT Start(IN IMS_SINT32 nEfs = EF_ALL) override;
 
     // ISystemListener class
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
 
 public:
     IMS_RESULT GetFileAttributes(IN IMS_SINT32 nRequiredEfs, IN IMS_SINT32 nEf,
@@ -216,8 +202,8 @@ public:
     void NotifyRecordReadCompleted(IN IMS_SINT32 nFileId, IN const IsimEfContent& objContent);
     void ReleaseUimClient(IN IMS_BOOL bFromApp = IMS_FALSE);
     void SetRecord(IN IMS_SINT32 nFileId, IN const IMS_BYTE* pbyData, IN IMS_SINT32 nSize);
-    void SetRecordAttributes(IN IMS_SINT32 nFileId,
-            IN IMS_BOOL bReady, IN IMS_SINT32 nRecordCount = 0);
+    void SetRecordAttributes(
+            IN IMS_SINT32 nFileId, IN IMS_BOOL bReady, IN IMS_SINT32 nRecordCount = 0);
     void SetState(IN IMS_SINT32 nState);
 
     // Digest AKA
@@ -234,7 +220,7 @@ public:
         EF_ID_IMPI = 0x6F02,
         EF_ID_DOMAIN = 0x6F03,
         EF_ID_IMPU = 0x6F04,
-        EF_ID_IST = 0x6F07, // ISIM service table
+        EF_ID_IST = 0x6F07,  // ISIM service table
         EF_ID_PCSCF = 0x6F09
     };
 
@@ -263,7 +249,10 @@ private:
     IMSMap<IMS_SINT32, IsimEfContent> m_objEfContents;
 
     // Count of authentication failure
-    enum { MAX_AUTH_FAILURE_COUNT_FOR_RECOVERY = 2 };
+    enum
+    {
+        MAX_AUTH_FAILURE_COUNT_FOR_RECOVERY = 2
+    };
     IMS_SINT32 m_nCountForAuthFailed;
 };
 

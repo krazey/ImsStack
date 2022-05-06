@@ -21,60 +21,49 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsPhoneInfoCall::OsPhoneInfoCall(IN IMS_SINT32 nSlotId)
-    : ImsSlot(nSlotId)
+OsPhoneInfoCall::OsPhoneInfoCall(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId)
 {
 }
 
-PUBLIC VIRTUAL
-OsPhoneInfoCall::~OsPhoneInfoCall()
-{
-}
+PUBLIC VIRTUAL OsPhoneInfoCall::~OsPhoneInfoCall() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPhoneInfoCall::IsEmergencyNumber(IN const AString& strNumber) const
+PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsEmergencyNumber(IN const AString& strNumber) const
 {
     return System::GetInstance()->IsEmergencyNumber(strNumber, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsPhoneInfoCall::GetTtyMode() const
+PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetTtyMode() const
 {
     return System::GetInstance()->GetTtyMode(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsPhoneInfoCall::GetRttMode() const
+PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetRttMode() const
 {
     return System::GetInstance()->GetRttMode(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPhoneInfoCall::IsWifiCallingEnabled()
+PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsWifiCallingEnabled()
 {
     return System::GetInstance()->IsWifiCallingEnabled(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_UINT32 OsPhoneInfoCall::GetWifiCallingPreferences()
+PUBLIC VIRTUAL IMS_UINT32 OsPhoneInfoCall::GetWifiCallingPreferences()
 {
     return System::GetInstance()->GetWifiCallingPreferences(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsPhoneInfoCall::IsWifiCallingProvisioned()
+PUBLIC VIRTUAL IMS_BOOL OsPhoneInfoCall::IsWifiCallingProvisioned()
 {
     return System::GetInstance()->IsWifiCallingProvisioned(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-AString OsPhoneInfoCall::GetWifiCallingAddressId()
+PUBLIC VIRTUAL AString OsPhoneInfoCall::GetWifiCallingAddressId()
 {
     return System::GetInstance()->GetWifiCallingAddressId(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
+PUBLIC VIRTUAL IMS_SINT32 OsPhoneInfoCall::GetCsCallStateInOtherSlot() const
 {
     return System::GetInstance()->GetCallStateInOtherSlot(GetSlotId());
 }

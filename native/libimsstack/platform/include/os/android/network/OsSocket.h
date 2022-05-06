@@ -21,8 +21,7 @@
 
 class IThread;
 
-class OsSocket
-    : public OsSocketBase
+class OsSocket : public OsSocketBase
 {
 public:
     OsSocket();
@@ -36,20 +35,17 @@ public:
     IMS_SINT32 GetSocketState() const override;
 
     // FIX_TIMING_ISSUE
-    inline IMS_UINT16 GetInternalSocketId() const
-    { return m_nInternalSocketId; }
+    inline IMS_UINT16 GetInternalSocketId() const { return m_nInternalSocketId; }
 
     static IMS_BOOL StartUp();
     static void CleanUp();
-    static IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
-            IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType);
+    static IMS_BOOL CheckIpAndPortAvailability(
+            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN SOCKET_ENTYPE enType);
 
 protected:
     // ISocket class
-    inline IMS_SINT32 GetSocketId() const override
-    { return m_hSocket; }
-    SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
-            IN ISocketListener* piListener,
+    inline IMS_SINT32 GetSocketId() const override { return m_hSocket; }
+    SOCKET_RESULT Open(IN SOCKET_ENTYPE eType, IN ISocketListener* piListener,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
     SOCKET_RESULT Open(IN SOCKET_ENTYPE eType,
             IN ADDRESS_FAMILY_ENTYPE eAddressFamily = ADDRESS_FAMILY_INET) override;
@@ -66,10 +62,9 @@ protected:
             OUT IPAddress& objHostAddress, OUT IMS_UINT32& nHostPort) override;
     IMS_SINT32 SendTo(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
             IN const IPAddress& objHostAddress, IN IMS_UINT32 nHostPort) override;
-    SOCKET_RESULT GetPeerName(OUT IPAddress& objPeerAddress,
-            OUT IMS_UINT32& nPeerPort) override;
-    SOCKET_RESULT GetSockName(OUT IPAddress& objSocketAddress,
-            OUT IMS_UINT32& nSocketPort) override;
+    SOCKET_RESULT GetPeerName(OUT IPAddress& objPeerAddress, OUT IMS_UINT32& nPeerPort) override;
+    SOCKET_RESULT GetSockName(
+            OUT IPAddress& objSocketAddress, OUT IMS_UINT32& nSocketPort) override;
     IMS_BOOL Equals(IN const ISocket* piSocket) override;
     IMS_SINT32 GetOption(IN IMS_SINT32 nOption) override;
     IMS_BOOL SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue) override;
@@ -102,8 +97,8 @@ protected:
     void UnbindSocketFromIpSecTransform(IN IMS_SOCKET hSocket);
 
 #ifdef _DEBUG
-    void OutputDebugString(IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszModule,
-            IN IMS_SINT32 nLine);
+    void OutputDebugString(
+            IN IMS_SINT32 nErrorCode, IN const IMS_CHAR* pszModule, IN IMS_SINT32 nLine);
 #endif
 
 private:

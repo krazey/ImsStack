@@ -48,33 +48,27 @@ public:
 private:
     IMutex* m_piLock;
     // <category, listener>
-    IMSMap<IMS_UINT32, IMSList<ISystemListener*> > m_objListenerMap;
+    IMSMap<IMS_UINT32, IMSList<ISystemListener*>> m_objListenerMap;
 };
 
 PUBLIC
-SystemListenerHolder::SystemListenerHolder()
-    : m_piLock(IMS_NULL)
-    , m_objListenerMap(IMSMap<IMS_UINT32, IMSList<ISystemListener*> >())
+SystemListenerHolder::SystemListenerHolder() :
+        m_piLock(IMS_NULL),
+        m_objListenerMap(IMSMap<IMS_UINT32, IMSList<ISystemListener*>>())
 {
     m_piLock = MutexService::GetMutexService()->CreateMutex();
 
     // Initialize the listener map to avoid memory re-allocation
     IMSList<ISystemListener*> objListeners;
-    IMS_UINT32 nCategories[] =
-        {
-            SystemConstants::CATEGORY_NETWORK,
-            SystemConstants::CATEGORY_WIFI,
-            SystemConstants::CATEGORY_CALL,
-            SystemConstants::CATEGORY_POWER,
-            SystemConstants::CATEGORY_ALARM,
-            SystemConstants::CATEGORY_CONFIG,
-            SystemConstants::CATEGORY_EVENT,
-            SystemConstants::CATEGORY_ISIM,
-            SystemConstants::CATEGORY_USIM,
-            SystemConstants::CATEGORY_TRM,
-            SystemConstants::CATEGORY_VONR
-        };
-    IMS_UINT32 nCategoryCount = sizeof(nCategories)/sizeof(nCategories[0]);
+    IMS_UINT32 nCategories[] = {
+            SystemConstants::CATEGORY_NETWORK, SystemConstants::CATEGORY_WIFI,
+            SystemConstants::CATEGORY_CALL, SystemConstants::CATEGORY_POWER,
+            SystemConstants::CATEGORY_ALARM, SystemConstants::CATEGORY_CONFIG,
+            SystemConstants::CATEGORY_EVENT, SystemConstants::CATEGORY_ISIM,
+            SystemConstants::CATEGORY_USIM, SystemConstants::CATEGORY_TRM,
+            SystemConstants::CATEGORY_VONR,
+    };
+    IMS_UINT32 nCategoryCount = sizeof(nCategories) / sizeof(nCategories[0]);
 
     for (IMS_UINT32 i = 0; i < nCategoryCount; ++i)
     {
@@ -190,14 +184,13 @@ void SystemListenerHolder::RemoveListener(IN IMS_UINT32 nCategory, IN ISystemLis
 
     // Do not remove the item from the map;
     // Keep the list of listeners as an empty list.
-    //if (objListeners.IsEmpty())
+    // if (objListeners.IsEmpty())
     //{
     //     objListenerMap.RemoveAt(nIndex);
     //}
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UINT32 nCategory)
+PRIVATE GLOBAL const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UINT32 nCategory)
 {
     switch (nCategory)
     {
@@ -227,8 +220,6 @@ const IMS_CHAR* SystemListenerHolder::CategoryToString(IN IMS_UINT32 nCategory)
             return "__UNKNOWN__";
     }
 }
-
-
 
 class SystemPrivate
 {
@@ -286,12 +277,10 @@ SystemPrivate::~SystemPrivate()
     }
 }
 
-
-
 PRIVATE
-System::System()
-    : m_pSystemP(new SystemPrivate())
-    , m_pCallback(IMS_NULL)
+System::System() :
+        m_pSystemP(new SystemPrivate()),
+        m_pCallback(IMS_NULL)
 {
 }
 
@@ -304,8 +293,7 @@ System::~System()
     }
 }
 
-PUBLIC GLOBAL
-System* System::GetInstance()
+PUBLIC GLOBAL System* System::GetInstance()
 {
     static System* s_pSystem = IMS_NULL;
 
@@ -337,8 +325,8 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     IMS_SINT32 nCmd = in.readInt32();
     AString strLog;
 
-    strLog.Sprintf("slotId=%d, cmd=%08X, category=%08X, sub-category=%d",
-            nSlotId, nCmd, (nCmd & 0xFFFF0000), (nCmd & 0xFFFF));
+    strLog.Sprintf("slotId=%d, cmd=%08X, category=%08X, sub-category=%d", nSlotId, nCmd,
+            (nCmd & 0xFFFF0000), (nCmd & 0xFFFF));
 
     IMS_TRACE_I("NotifyData :: %s", strLog.GetStr(), 0, 0);
 
@@ -366,17 +354,17 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
     {
         NotifyConfigCategory(nSlotId, nCmd, in);
     }
-    else if ((nCmd & SystemConstants::CATEGORY_EVENT)== SystemConstants::CATEGORY_EVENT)
+    else if ((nCmd & SystemConstants::CATEGORY_EVENT) == SystemConstants::CATEGORY_EVENT)
     {
         NotifyEventCategory(nSlotId, nCmd, in);
     }
     else if ((nCmd & SystemConstants::CATEGORY_ISIM) == SystemConstants::CATEGORY_ISIM)
     {
-         NotifySimCategory(nSlotId, nCmd, SystemConstants::CATEGORY_ISIM, in);
+        NotifySimCategory(nSlotId, nCmd, SystemConstants::CATEGORY_ISIM, in);
     }
     else if ((nCmd & SystemConstants::CATEGORY_USIM) == SystemConstants::CATEGORY_USIM)
     {
-         NotifySimCategory(nSlotId, nCmd, SystemConstants::CATEGORY_USIM, in);
+        NotifySimCategory(nSlotId, nCmd, SystemConstants::CATEGORY_USIM, in);
     }
     else if ((nCmd & SystemConstants::CATEGORY_TRM) == SystemConstants::CATEGORY_TRM)
     {
@@ -396,75 +384,58 @@ void System::NotifyData(IN const android::Parcel& in, OUT android::Parcel& out)
 }
 
 PUBLIC
-void System::AddListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-        IN IMS_SINT32 nSlotId)
+void System::AddListener(
+        IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("AddListener :: category=0x%08x, listener=%p, slotId=%d",
-            nCategory, piListener, nSlotId);
+    IMS_TRACE_D("AddListener :: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener,
+            nSlotId);
 
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_CALL, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_POWER, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_USIM, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_TRM, piListener, nSlotId);
-    AddListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_VONR, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CALL, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_USIM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_TRM, piListener, nSlotId);
+    AddListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_VONR, piListener, nSlotId);
 }
 
 PUBLIC
-void System::RemoveListener(IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-        IN IMS_SINT32 nSlotId)
+void System::RemoveListener(
+        IN IMS_UINT32 nCategory, IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_D("RemoveListener :: category=0x%08x, listener=%p, slotId=%d",
-            nCategory, piListener, nSlotId);
+    IMS_TRACE_D("RemoveListener :: category=0x%08x, listener=%p, slotId=%d", nCategory, piListener,
+            nSlotId);
 
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_CALL, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_POWER, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_USIM, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_TRM, piListener, nSlotId);
-    RemoveListenerIfCategoryMatched(nCategory,
-            SystemConstants::CATEGORY_VONR, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_NETWORK, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_WIFI, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_CALL, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_POWER, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_ALARM, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_CONFIG, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(
+            nCategory, SystemConstants::CATEGORY_EVENT, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_ISIM, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_USIM, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_TRM, piListener, nSlotId);
+    RemoveListenerIfCategoryMatched(nCategory, SystemConstants::CATEGORY_VONR, piListener, nSlotId);
 }
 
 PUBLIC
@@ -488,8 +459,7 @@ IMS_SINT32 System::GetDeviceSoftwareVersion(OUT AString& strSv, IN IMS_SINT32 nS
 PUBLIC
 IMS_SINT32 System::GetExternalStoragePath(OUT AString& strExternalStoragePath)
 {
-    return GetString(SystemConstants::GET_EXTERNAL_STORAGE_PATH,
-            strExternalStoragePath);
+    return GetString(SystemConstants::GET_EXTERNAL_STORAGE_PATH, strExternalStoragePath);
 }
 
 PUBLIC
@@ -535,16 +505,13 @@ IMS_SINT32 System::GetNetworkCountry(OUT AString& strCountry, IN IMS_SINT32 nSlo
 }
 
 PUBLIC
-IMS_SINT32 System::GetEmergencyNumberListFromSim(
-        OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetEmergencyNumberListFromSim(OUT AString& strEnlFromSim, IN IMS_SINT32 nSlotId)
 {
-    return GetString(SystemConstants::GET_EMERGENCY_NUM_LIST_FROM_SIM,
-            strEnlFromSim, nSlotId);
+    return GetString(SystemConstants::GET_EMERGENCY_NUM_LIST_FROM_SIM, strEnlFromSim, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetEmergencyPriorityFromModem(
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetEmergencyPriorityFromModem(IN IMS_SINT32 nSlotId)
 {
     return GetInt(SystemConstants::GET_EMERGENCY_PRIORITY_FROM_MODEM, 1, nSlotId);
 }
@@ -566,8 +533,7 @@ AString System::GetIsimState(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ReadIsimFileAttributes(IN IMS_SINT32 nFileId,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ReadIsimFileAttributes(IN IMS_SINT32 nFileId, IN IMS_SINT32 nSlotId)
 {
     IMS_SINT32 nResult = IMS_FAILURE;
 
@@ -592,8 +558,8 @@ IMS_SINT32 System::ReadIsimFileAttributes(IN IMS_SINT32 nFileId,
 }
 
 PUBLIC
-IMS_SINT32 System::ReadIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ReadIsimRecord(
+        IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex, IN IMS_SINT32 nSlotId)
 {
     IMS_SINT32 nResult = IMS_FAILURE;
 
@@ -619,19 +585,17 @@ IMS_SINT32 System::ReadIsimRecord(IN IMS_SINT32 nFileId, IN IMS_SINT32 nIndex,
 }
 
 PUBLIC
-IMS_SINT32 System::RequestIsimAuthentication(IN const AString& strNonce,
-        IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::RequestIsimAuthentication(
+        IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
 {
-    return RequestSimAuthentication(SystemConstants::REQUEST_ISIM_AUTH,
-            strNonce, nOwner, nSlotId);
+    return RequestSimAuthentication(SystemConstants::REQUEST_ISIM_AUTH, strNonce, nOwner, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::RequestUsimAuthentication(IN const AString& strNonce,
-        IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::RequestUsimAuthentication(
+        IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
 {
-    return RequestSimAuthentication(SystemConstants::REQUEST_USIM_AUTH,
-            strNonce, nOwner, nSlotId);
+    return RequestSimAuthentication(SystemConstants::REQUEST_USIM_AUTH, strNonce, nOwner, nSlotId);
 }
 
 PUBLIC
@@ -641,8 +605,7 @@ IMS_SINT32 System::GetCallState(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::IsEmergencyNumber(IN const AString& strNumber,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::IsEmergencyNumber(IN const AString& strNumber, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -717,7 +680,7 @@ IMS_SINT32 System::GetDigestSha1(IN const AString& strIn, OUT AString& strOut)
         return 1;
     }
 
-       return 0;
+    return 0;
 }
 
 PUBLIC
@@ -764,8 +727,7 @@ IMS_SINT32 System::GetVoiceServiceState(IN IMS_SINT32 nSlotId)
 
 PUBLIC
 IMS_SINT32 System::GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
-        OUT IMS_SINT32& nNetworkType, OUT AStringArray& objAccessNetInfo,
-        IN IMS_SINT32 nSlotId)
+        OUT IMS_SINT32& nNetworkType, OUT AStringArray& objAccessNetInfo, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -803,8 +765,7 @@ IMS_SINT32 System::GetAccessNetworkInfo(IN IMS_SINT32 nDefaultNetworkType,
 }
 
 PUBLIC
-AStringArray System::GetLastAccessNetworkInfo(
-        IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId)
+AStringArray System::GetLastAccessNetworkInfo(IN IMS_SINT32 nNetworkType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -850,8 +811,7 @@ IMS_SINT32 System::GetMtu(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::BindSocket(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::BindSocket(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSockFd, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -891,7 +851,6 @@ IMS_BOOL System::IsEmergencyAttachSupported(IN IMS_SINT32 nSlotId)
     return (GetInt(SystemConstants::IS_EMERGENCY_ATTACH_SUPPORTED, 0, nSlotId) == 1);
 }
 
-
 PUBLIC
 IMS_BOOL System::IsMobileDataEnabled(IN IMS_SINT32 nSlotId)
 {
@@ -911,8 +870,8 @@ IMS_SINT32 System::GetLteRsrpStrength(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ActivateDataConnection(
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -936,8 +895,8 @@ IMS_SINT32 System::ActivateDataConnection(IN IMS_SINT32 nApnType,
 }
 
 PUBLIC
-IMS_SINT32 System::DeactivateDataConnection(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::DeactivateDataConnection(
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpcanCategory, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -987,15 +946,14 @@ AString System::GetApnName(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::GetDataConnectionState(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetDataConnectionState(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     return GetInt2(SystemConstants::GET_DATA_CONNECTION_STATE, nApnType, 0, nSlotId);
 }
 
 PUBLIC
-AStringArray System::GetHostByName(IN const AString& strHost,
-        IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
+AStringArray System::GetHostByName(IN const AString& strHost, IN IMS_SINT32 nIpVersion,
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1071,8 +1029,8 @@ IMS_SINT32 System::GetIpcanCategory(IN IMS_SINT32 nApnType, IN IMS_SINT32 nSlotI
 }
 
 PUBLIC
-AString System::GetLocalAddress(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId)
+AString System::GetLocalAddress(
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1100,8 +1058,8 @@ AString System::GetLocalAddress(IN IMS_SINT32 nApnType,
 }
 
 PUBLIC
-AStringArray System::GetPcscfAddresses(IN IMS_SINT32 nApnType,
-        IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId)
+AStringArray System::GetPcscfAddresses(
+        IN IMS_SINT32 nApnType, IN IMS_SINT32 nIpVersion, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1136,8 +1094,8 @@ AStringArray System::GetPcscfAddresses(IN IMS_SINT32 nApnType,
 }
 
 PUBLIC
-IMS_BOOL System::SendPingToHostAddress(IN IMS_SINT32 nApnType,
-        IN const AString& strHostAddress, IN IMS_SINT32 nSlotId)
+IMS_BOOL System::SendPingToHostAddress(
+        IN IMS_SINT32 nApnType, IN const AString& strHostAddress, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1245,9 +1203,8 @@ IMS_SINT32 System::KillAlarm(IN IMS_UINTP nAlarmId)
 }
 
 PUBLIC
-IMS_SINT32 System::GetPreference(IN const AString& strFileName,
-        IN const AString& strKey, IN IMS_UINT32 nValueType,
-        IN IMS_SINT32 nSlotId, OUT AString& strValue)
+IMS_SINT32 System::GetPreference(IN const AString& strFileName, IN const AString& strKey,
+        IN IMS_UINT32 nValueType, IN IMS_SINT32 nSlotId, OUT AString& strValue)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1282,9 +1239,8 @@ IMS_SINT32 System::GetPreference(IN const AString& strFileName,
 }
 
 PUBLIC
-IMS_SINT32 System::SetPreference(IN const AString& strFileName,
-        IN const AString& strKey, IN IMS_UINT32 nValueType,
-        IN const AString& strValue, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetPreference(IN const AString& strFileName, IN const AString& strKey,
+        IN IMS_UINT32 nValueType, IN const AString& strValue, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1316,8 +1272,8 @@ IMS_SINT32 System::SetPreference(IN const AString& strFileName,
 }
 
 PUBLIC
-AString System::GetPrivateProperty(IN IMS_BOOL bPersistent,
-        IN const AString& strKey, IN IMS_SINT32 nSlotId)
+AString System::GetPrivateProperty(
+        IN IMS_BOOL bPersistent, IN const AString& strKey, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1346,8 +1302,8 @@ AString System::GetPrivateProperty(IN IMS_BOOL bPersistent,
 }
 
 PUBLIC
-IMS_SINT32 System::SetPrivateProperty(IN IMS_BOOL bPersistent,
-        IN const AString& strKey, IN const AString& strValue, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetPrivateProperty(IN IMS_BOOL bPersistent, IN const AString& strKey,
+        IN const AString& strValue, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1396,10 +1352,9 @@ IMS_BOOL System::GetCarrierConfig(IN IMS_SINT32 nSlotId, OUT android::Parcel& ob
     return IMS_FALSE;
 }
 
-
 PUBLIC
-IMS_SINT32 System::SendEvent(IN IMS_SINT32 nEvent,
-        IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SendEvent(
+        IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1477,22 +1432,20 @@ AString System::GetWifiCallingAddressId(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_BOOL System::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec,
-        IN IMS_SINT32 nSlotId)
+IMS_BOOL System::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec, IN IMS_SINT32 nSlotId)
 {
-    return (GetInt2(SystemConstants::START_LOCATION_INFO,
-            nUpdateIntervalInSec, 0, nSlotId) == 1);
+    return (GetInt2(SystemConstants::START_LOCATION_INFO, nUpdateIntervalInSec, 0, nSlotId) == 1);
 }
 
 PUBLIC
 void System::StopLocationInfo(IN IMS_SINT32 nSlotId)
 {
-    (void) GetInt(SystemConstants::STOP_LOCATION_INFO, 0, nSlotId);
+    (void)GetInt(SystemConstants::STOP_LOCATION_INFO, 0, nSlotId);
 }
 
 PUBLIC
-IMS_SINT32 System::GetLocationInformation(OUT AStringArray& objLocationInfo,
-        IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::GetLocationInformation(
+        OUT AStringArray& objLocationInfo, IN IMS_SINT32 nType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1582,8 +1535,8 @@ IMS_SINT32 System::GetInt2(IN IMS_SINT32 nOperation, IN IMS_SINT32 nParam,
 }
 
 PRIVATE
-IMS_SINT32 System::GetString(IN IMS_SINT32 nOperation, OUT AString& strValue,
-        IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/)
+IMS_SINT32 System::GetString(
+        IN IMS_SINT32 nOperation, OUT AString& strValue, IN IMS_SINT32 nSlotId /*= IMS_SLOT_0*/)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1608,8 +1561,8 @@ IMS_SINT32 System::GetString(IN IMS_SINT32 nOperation, OUT AString& strValue,
 }
 
 PRIVATE
-IMS_SINT32 System::RequestSimAuthentication(IN IMS_SINT32 nOperation,
-        IN const AString& strNonce, IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::RequestSimAuthentication(IN IMS_SINT32 nOperation, IN const AString& strNonce,
+        IN IMS_SINTP nOwner, IN IMS_SINT32 nSlotId)
 {
     IMS_SINT32 nResult = IMS_FAILURE;
 
@@ -1688,8 +1641,8 @@ IMS_SINT32 System::NotifyCallState(IN IMS_UINT32 nType, IN IMS_UINT32 nState,
 }
 
 PUBLIC
-IMS_SINT32 System::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::RequestCallPreference(
+        IN IMS_UINT32 nRat, IN IMS_UINT32 nType, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1714,8 +1667,7 @@ IMS_SINT32 System::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType
 }
 
 PUBLIC
-IMS_SINT32 System::SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1740,8 +1692,7 @@ IMS_SINT32 System::SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState,
 }
 
 PUBLIC
-IMS_SINT32 System::SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1790,8 +1741,7 @@ IMS_SINT32 System::SetImsSignaling(IN IMS_UINT32 nType, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1816,8 +1766,7 @@ IMS_SINT32 System::SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState,
 }
 
 PUBLIC
-IMS_SINT32 System::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1842,8 +1791,7 @@ IMS_SINT32 System::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency,
 }
 
 PUBLIC
-IMS_SINT32 System::AddIpSecSaParameter(IN const IpSecSaParameter& objSaParam,
-        IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::AddIpSecSaParameter(IN const IpSecSaParameter& objSaParam, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1884,12 +1832,12 @@ IMS_SINT32 System::AddIpSecSaParameter(IN const IpSecSaParameter& objSaParam,
         const SocketAddress& objLocalAddr = objPolicy.GetLocalAddress();
         String16 strLocalIpAddress(objLocalAddr.GetAddress().ToString().GetStr());
         in.writeString16(strLocalIpAddress);
-        //in.writeInt32(objLocalAddr.GetPort());
+        // in.writeInt32(objLocalAddr.GetPort());
 
         const SocketAddress& objRemoteAddr = objPolicy.GetRemoteAddress();
         String16 strRemoteIpAddress(objRemoteAddr.GetAddress().ToString().GetStr());
         in.writeString16(strRemoteIpAddress);
-        //in.writeInt32(objRemoteAddr.GetPort());
+        // in.writeInt32(objRemoteAddr.GetPort());
     }
 
     if (m_pCallback->SendDataToJava(in, out) != 0)
@@ -1923,8 +1871,8 @@ void System::RemoveIpSecSaParameter(IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSlotI
 }
 
 PUBLIC
-IMS_SINT32 System::ApplyIpSecSa(IN IMS_SINT32 nIpSecId,
-        IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd, IN IMS_SINT32 nSlotId)
+IMS_SINT32 System::ApplyIpSecSa(
+        IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1950,8 +1898,8 @@ IMS_SINT32 System::ApplyIpSecSa(IN IMS_SINT32 nIpSecId,
 }
 
 PUBLIC
-void System::RemoveIpSecSa(IN IMS_SINT32 nIpSecId,
-        IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd, IN IMS_SINT32 nSlotId)
+void System::RemoveIpSecSa(
+        IN IMS_SINT32 nIpSecId, IN IMS_SINT32 nSpi, IN IMS_SINT32 nSocketFd, IN IMS_SINT32 nSlotId)
 {
     if (m_pCallback == IMS_NULL)
     {
@@ -1975,9 +1923,8 @@ void System::RemoveIpSecSa(IN IMS_SINT32 nIpSecId,
 }
 
 PRIVATE
-void System::AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
-        IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-        IN IMS_SINT32 nSlotId)
+void System::AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
+        IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
     if ((nCategories & nCategory) == nCategory)
     {
@@ -1987,9 +1934,8 @@ void System::AddListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
 }
 
 PRIVATE
-void System::RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
-        IN IMS_UINT32 nCategory, IN ISystemListener* piListener,
-        IN IMS_SINT32 nSlotId)
+void System::RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories, IN IMS_UINT32 nCategory,
+        IN ISystemListener* piListener, IN IMS_SINT32 nSlotId)
 {
     if ((nCategories & nCategory) == nCategory)
     {
@@ -1999,8 +1945,8 @@ void System::RemoveListenerIfCategoryMatched(IN IMS_UINT32 nCategories,
 }
 
 PRIVATE
-void System::NotifyNetworkCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyNetworkCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
     IMSList<ISystemListener*>* pListeners =
@@ -2070,14 +2016,13 @@ void System::NotifyNetworkCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyWifiCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyWifiCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
-    (void) nSlotId;
+    (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_WIFI);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_WIFI);
 
     if (pListeners == IMS_NULL)
     {
@@ -2093,7 +2038,7 @@ void System::NotifyWifiCategory(IN IMS_SINT32 nSlotId,
         nEvent = IMS_SYSTEM_WIFI_STATE_CHANGED;
         nWParam = in.readInt32();
     }
-    else if(nCmd == SystemConstants::NOTIFY_WIFI_DETAILED_STATE_CHANGED)
+    else if (nCmd == SystemConstants::NOTIFY_WIFI_DETAILED_STATE_CHANGED)
     {
         nEvent = IMS_SYSTEM_WIFINETWORK_STATE_CHANGED;
         nWParam = in.readInt32();
@@ -2116,12 +2061,11 @@ void System::NotifyWifiCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyCallCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyCallCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
-    SystemListenerHolder *pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*> *pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_CALL);
+    SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CALL);
 
     if (pListeners == IMS_NULL)
     {
@@ -2131,7 +2075,9 @@ void System::NotifyCallCategory(IN IMS_SINT32 nSlotId,
     IMS_SINT32 nEvent = IMS_SYSTEM_INVALID;
     IMS_UINTP nWParam = 0;
     IMS_UINTP nLParam = 0;
-    IMS_CHAR szNumber[20 + 1] = {0, };
+    IMS_CHAR szNumber[20 + 1] = {
+            0,
+    };
 
     if (nCmd == SystemConstants::NOTIFY_VOICE_CALL_STATE_CHANGED)
     {
@@ -2152,7 +2098,7 @@ void System::NotifyCallCategory(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pListeners->GetSize(); ++i)
     {
-        ISystemListener *piListener = pListeners->GetAt(i);
+        ISystemListener* piListener = pListeners->GetAt(i);
 
         if (piListener != IMS_NULL)
         {
@@ -2162,14 +2108,13 @@ void System::NotifyCallCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyPowerCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyPowerCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
-    (void) nSlotId;
+    (void)nSlotId;
 
-    SystemListenerHolder *pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*> *pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_POWER);
+    SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_POWER);
 
     if (pListeners == IMS_NULL)
     {
@@ -2193,7 +2138,7 @@ void System::NotifyPowerCategory(IN IMS_SINT32 nSlotId,
 
     for (IMS_UINT32 i = 0; i < pListeners->GetSize(); ++i)
     {
-        ISystemListener *piListener = pListeners->GetAt(i);
+        ISystemListener* piListener = pListeners->GetAt(i);
 
         if (piListener != IMS_NULL)
         {
@@ -2203,14 +2148,13 @@ void System::NotifyPowerCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyAlarmCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyAlarmCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
-    (void) nSlotId;
+    (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_ALARM);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_ALARM);
 
     if (pListeners == IMS_NULL)
     {
@@ -2244,12 +2188,11 @@ void System::NotifyAlarmCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyConfigCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyConfigCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_CONFIG);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_CONFIG);
 
     if (pListeners == IMS_NULL)
     {
@@ -2283,12 +2226,11 @@ void System::NotifyConfigCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyEventCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyEventCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_EVENT);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_EVENT);
 
     if (pListeners == IMS_NULL)
     {
@@ -2323,9 +2265,8 @@ void System::NotifyEventCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifySimCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 /*nCmd*/, IN IMS_UINT32 nCategory,
-        IN const android::Parcel& in)
+void System::NotifySimCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/,
+        IN IMS_UINT32 nCategory, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
     IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(nCategory);
@@ -2360,14 +2301,13 @@ void System::NotifySimCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyTrmCategory(IN IMS_SINT32 nSlotId,
-        IN IMS_UINT32 nCmd, IN const android::Parcel& in)
+void System::NotifyTrmCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 nCmd, IN const android::Parcel& in)
 {
-    (void) nSlotId;
+    (void)nSlotId;
 
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(IMS_SLOT_0);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_TRM);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_TRM);
 
     if (pListeners == IMS_NULL)
     {
@@ -2384,7 +2324,7 @@ void System::NotifyTrmCategory(IN IMS_SINT32 nSlotId,
         IMS_UINT32 nServiceType = in.readInt32();
         IMS_UINT32 nMode = in.readInt32();
         nWParam = (nServiceType << 16) | nMode;
-        nLParam = in.readInt32(); // slot
+        nLParam = in.readInt32();  // slot
     }
     else
     {
@@ -2404,12 +2344,11 @@ void System::NotifyTrmCategory(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void System::NotifyVoNrCategory(IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/,
-    IN const android::Parcel& in)
+void System::NotifyVoNrCategory(
+        IN IMS_SINT32 nSlotId, IN IMS_UINT32 /*nCmd*/, IN const android::Parcel& in)
 {
     SystemListenerHolder* pHolder = m_pSystemP->GetListenerHolder(nSlotId);
-    IMSList<ISystemListener*>* pListeners =
-            pHolder->GetListeners(SystemConstants::CATEGORY_VONR);
+    IMSList<ISystemListener*>* pListeners = pHolder->GetListeners(SystemConstants::CATEGORY_VONR);
 
     if (pListeners == IMS_NULL)
     {

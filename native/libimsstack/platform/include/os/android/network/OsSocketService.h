@@ -37,8 +37,7 @@ public:
 public:
     IMS_BOOL StartUp();
     void CleanUp();
-    inline IMS_BOOL IsStarted() const
-    { return m_bServiceStarted; }
+    inline IMS_BOOL IsStarted() const { return m_bServiceStarted; }
 
     void AddDeadSocket(IN OsSocketBase* pSocket);
     void AttachHandle(IN SOCKET hSocket, IN OsSocketBase* pSocket);

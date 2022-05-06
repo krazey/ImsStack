@@ -22,8 +22,7 @@
 class IMutex;
 class OsTraceNode;
 
-class OsTrace
-    : public ImsTrace
+class OsTrace : public ImsTrace
 {
 public:
     OsTrace();
@@ -37,13 +36,13 @@ public:
             IN const IMS_CHAR* pszFormat, IN va_list args);
 
     const IMS_CHAR* GetFileName(IN const IMS_CHAR* pszFileName) override;
-    const IMS_CHAR* GetFileName(IN_OUT IMS_CHAR* pszOutFileName,
-            IN const IMS_CHAR* pszFileName) override;
+    const IMS_CHAR* GetFileName(
+            IN_OUT IMS_CHAR* pszOutFileName, IN const IMS_CHAR* pszFileName) override;
 
 protected:
     const IMS_CHAR* GetDirName() const override;
-    void OutputString(IN IMS_SINT32 nCategory,
-            IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength) override;
+    void OutputString(
+            IN IMS_SINT32 nCategory, IN IMS_CHAR* pszTrace, IN IMS_UINT32 nLength) override;
 
     void AddTraceNode(IN OsTraceNode* pNode);
     IMS_SINT32 GetTraceNodeCount();

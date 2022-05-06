@@ -240,8 +240,7 @@ IThread* ThreadService::GetThreadLocked(IN const AString& strName) const
     return piThread;
 }
 
-PUBLIC GLOBAL
-ThreadService* ThreadService::GetThreadService()
+PUBLIC GLOBAL ThreadService* ThreadService::GetThreadService()
 {
     static ThreadService* s_pThreadService = IMS_NULL;
 
@@ -253,8 +252,8 @@ ThreadService* ThreadService::GetThreadService()
     return s_pThreadService;
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 ThreadService::GetCurrentSlotId(IN IMS_SINT32 nDefaultSlotId/* = IMS_SLOT_ANY*/)
+PUBLIC GLOBAL IMS_SINT32 ThreadService::GetCurrentSlotId(
+        IN IMS_SINT32 nDefaultSlotId /* = IMS_SLOT_ANY*/)
 {
     IThread* piThread = GetThreadService()->GetCurrentThread();
     return (piThread != IMS_NULL) ? piThread->GetSlotId() : nDefaultSlotId;

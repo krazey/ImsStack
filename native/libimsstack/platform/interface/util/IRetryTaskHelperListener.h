@@ -40,8 +40,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void RetryTaskHelper_OnCompleted(IN RetryTaskHelper *pTaskHelper,
-            IN RetryCmd *pCmd, IN IMS_SINT32 nCode = 0) = 0;
+    virtual void RetryTaskHelper_OnCompleted(
+            IN RetryTaskHelper* pTaskHelper, IN RetryCmd* pCmd, IN IMS_SINT32 nCode = 0) = 0;
 };
 
-#endif // _INTERFACE_RETRY_TASK_HELPER_LISTENER_H_
+#endif  // _INTERFACE_RETRY_TASK_HELPER_LISTENER_H_

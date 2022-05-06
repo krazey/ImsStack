@@ -22,13 +22,11 @@
 class VoNrHolder
 {
 public:
-    inline VoNrHolder()
-        : m_piVoNr(IMS_NULL)
-    {}
-    inline ~VoNrHolder()
+    inline VoNrHolder() :
+            m_piVoNr(IMS_NULL)
     {
-        PlatformFactory::DestroyVoNr(m_piVoNr);
     }
+    inline ~VoNrHolder() { PlatformFactory::DestroyVoNr(m_piVoNr); }
 
     VoNrHolder(IN const VoNrHolder&) = delete;
     VoNrHolder& operator=(IN const VoNrHolder&) = delete;
@@ -65,8 +63,8 @@ private:
 };
 
 PUBLIC
-VoNrServicePrivate::VoNrServicePrivate()
-    : m_ppHolder(IMS_NULL)
+VoNrServicePrivate::VoNrServicePrivate() :
+        m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -109,8 +107,8 @@ VoNrHolder* VoNrServicePrivate::GetHolder(IN IMS_SINT32 nSlotId)
 }
 
 PRIVATE
-VoNrService::VoNrService()
-    : m_pPrivate(new VoNrServicePrivate())
+VoNrService::VoNrService() :
+        m_pPrivate(new VoNrServicePrivate())
 {
 }
 
@@ -135,7 +133,8 @@ void VoNrService::DispatchServiceMessage(IN ImsMessage& objMsg)
 {
     switch (objMsg.GetName())
     {
-        case IMS_MSG_VONR: {
+        case IMS_MSG_VONR:
+        {
             IMS_SINT32 nSlotId = LONG_TO_SINT(objMsg.nWparam);
             ImsVoNr* pVoNr = DYNAMIC_CAST(ImsVoNr*, GetVoNr(nSlotId));
 
@@ -152,8 +151,7 @@ void VoNrService::DispatchServiceMessage(IN ImsMessage& objMsg)
     }
 }
 
-PUBLIC GLOBAL
-VoNrService* VoNrService::GetVoNrService()
+PUBLIC GLOBAL VoNrService* VoNrService::GetVoNrService()
 {
     static VoNrService* s_pVoNrService = IMS_NULL;
 

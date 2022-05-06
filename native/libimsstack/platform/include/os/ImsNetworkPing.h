@@ -20,10 +20,7 @@
 #include "ISocket.h"
 #include "ITimer.h"
 
-class ImsNetworkPing
-    : public INetworkPing
-    , public ITimerListener
-    , public ISocketListener
+class ImsNetworkPing : public INetworkPing, public ITimerListener, public ISocketListener
 {
 public:
     ImsNetworkPing();
@@ -34,9 +31,8 @@ public:
 
 public:
     void Destroy() override;
-    IMS_SINT32 Ping(IN const IPAddress& objSrcIp,
-            IN const IPAddress& objDstIp, IN IMS_SINT32 nDstPort,
-            IN IMS_SINT32 nWaitTime) override;
+    IMS_SINT32 Ping(IN const IPAddress& objSrcIp, IN const IPAddress& objDstIp,
+            IN IMS_SINT32 nDstPort, IN IMS_SINT32 nWaitTime) override;
     void SetListener(IN INetworkPingListener* piListener) override;
 
 protected:
@@ -48,8 +44,8 @@ protected:
     void Socket_OnSendEnabled(IN ISocket* piSocket) override;
     void Socket_OnConnectionReceived(IN ISocket* piSocket) override;
     void Socket_OnConnected(IN ISocket* piSocket) override;
-    void Socket_OnClosed(IN ISocket* piSocket,
-            IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
+    void Socket_OnClosed(
+            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ClearResources();
     IMS_BOOL PrepareResources(IN const IPAddress& objIp, IN IMS_BOOL bTimerRequired);

@@ -16,14 +16,10 @@
 #include "RetryCondition.h"
 
 PUBLIC
-RetryCondition::RetryCondition()
-{
-}
+RetryCondition::RetryCondition() {}
 
 PUBLIC
-RetryCondition::~RetryCondition()
-{
-}
+RetryCondition::~RetryCondition() {}
 
 /*
  Adds the single code value to this condition.
@@ -34,7 +30,7 @@ Remarks
 PUBLIC
 IMS_BOOL RetryCondition::Add(IN IMS_SINT32 nCode)
 {
-    RetrySingleCode *pCode = new RetrySingleCode(nCode);
+    RetrySingleCode* pCode = new RetrySingleCode(nCode);
 
     if (pCode == IMS_NULL)
     {
@@ -59,7 +55,7 @@ Remarks
 PUBLIC
 IMS_BOOL RetryCondition::Add(IN IMS_SINT32 nMinCode, IN IMS_SINT32 nMaxCode)
 {
-    RetryRangeCode *pCode = new RetryRangeCode(nMinCode, nMaxCode);
+    RetryRangeCode* pCode = new RetryRangeCode(nMinCode, nMaxCode);
 
     if (pCode == IMS_NULL)
     {
@@ -86,7 +82,7 @@ IMS_BOOL RetryCondition::Verify(IN IMS_SINT32 nCode) const
 {
     for (IMS_UINT32 i = 0; i < objRetryCodes.GetSize(); ++i)
     {
-        RetryCode *pCode = objRetryCodes.GetAt(i);
+        RetryCode* pCode = objRetryCodes.GetAt(i);
 
         if (pCode->IsIn(nCode))
         {

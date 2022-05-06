@@ -20,10 +20,7 @@
 #include "ISystemProperty.h"
 #include "IZLib.h"
 
-class OsUtil
-    : public ISystemUtil
-    , public ISystemProperty
-    , public IZLib
+class OsUtil : public ISystemUtil, public ISystemProperty, public IZLib
 {
 public:
     OsUtil();

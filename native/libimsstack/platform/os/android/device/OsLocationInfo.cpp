@@ -20,69 +20,47 @@
 
 __IMS_TRACE_TAG_ADAPT__;
 
-PRIVATE GLOBAL
-const IMS_CHAR OsLocationInfo::COUNTRY_ISO_UNKNOWN[] = "ZZ";
+PRIVATE GLOBAL const IMS_CHAR OsLocationInfo::COUNTRY_ISO_UNKNOWN[] = "ZZ";
 
-class LocationProperties
-    : public ILocationProperties
+class LocationProperties : public ILocationProperties
 {
 public:
     LocationProperties();
     virtual ~LocationProperties();
 
-    inline virtual const AString& GetLatitude() const
-    { return m_strLatitude; }
-    inline virtual const AString& GetLongitude() const
-    { return m_strLongitude; }
-    inline virtual const AString& GetRadius() const
-    { return m_strRadius; }
-    inline virtual const AString& GetShape() const
-    { return m_strShape; }
-    inline virtual const AString& GetConfidence() const
-    { return m_strConfidence; }
-    inline virtual const AString& GetCurrentTime() const
-    { return m_strCurrentTime; }
-    inline virtual const AString& GetMethod() const
-    { return m_strMethod; }
-    inline virtual const AString& GetCountry() const
-    { return m_strCountry; }
-    inline virtual const AString& GetState() const
-    { return m_strState; }
-    inline virtual const AString& GetCity() const
-    { return m_strCity; }
-    inline virtual const AString& GetPostal() const
-    { return m_strPostal; }
-    inline virtual const AString& GetAltitude() const
-    { return m_strAltitude; }
-    inline virtual const AString& GetVerticalAccuracy() const
-    { return m_strVerticalAccuracy; }
+    inline virtual const AString& GetLatitude() const { return m_strLatitude; }
+    inline virtual const AString& GetLongitude() const { return m_strLongitude; }
+    inline virtual const AString& GetRadius() const { return m_strRadius; }
+    inline virtual const AString& GetShape() const { return m_strShape; }
+    inline virtual const AString& GetConfidence() const { return m_strConfidence; }
+    inline virtual const AString& GetCurrentTime() const { return m_strCurrentTime; }
+    inline virtual const AString& GetMethod() const { return m_strMethod; }
+    inline virtual const AString& GetCountry() const { return m_strCountry; }
+    inline virtual const AString& GetState() const { return m_strState; }
+    inline virtual const AString& GetCity() const { return m_strCity; }
+    inline virtual const AString& GetPostal() const { return m_strPostal; }
+    inline virtual const AString& GetAltitude() const { return m_strAltitude; }
+    inline virtual const AString& GetVerticalAccuracy() const { return m_strVerticalAccuracy; }
 
-    inline void SetLatitude(IN const AString& strLatitude)
-    { m_strLatitude = strLatitude; }
-    inline void SetLongitude(IN const AString& strLongitude)
-    { m_strLongitude = strLongitude; }
-    inline void SetRadius(IN const AString& strRadius)
-    { m_strRadius = strRadius; }
-    inline void SetShape(IN const AString& strShape)
-    { m_strShape = strShape; }
-    inline void SetConfidence(IN const AString& strConfidence)
-    { m_strConfidence = strConfidence; }
+    inline void SetLatitude(IN const AString& strLatitude) { m_strLatitude = strLatitude; }
+    inline void SetLongitude(IN const AString& strLongitude) { m_strLongitude = strLongitude; }
+    inline void SetRadius(IN const AString& strRadius) { m_strRadius = strRadius; }
+    inline void SetShape(IN const AString& strShape) { m_strShape = strShape; }
+    inline void SetConfidence(IN const AString& strConfidence) { m_strConfidence = strConfidence; }
     inline void SetCurrentTime(IN const AString& strCurrentTime)
-    { m_strCurrentTime = strCurrentTime; }
-    inline void SetMethod(IN const AString& strMethod)
-    { m_strMethod = strMethod; }
-    inline void SetCountry(IN const AString& strCountry)
-    { m_strCountry = strCountry; }
-    inline void SetState(IN const AString& strState)
-    { m_strState = strState; }
-    inline void SetCity(IN const AString& strCity)
-    { m_strCity = strCity; }
-    inline void SetPostal(IN const AString& strPostal)
-    { m_strPostal = strPostal; }
-    inline void SetAltitude(IN const AString& strAltitude)
-    { m_strAltitude = strAltitude; }
+    {
+        m_strCurrentTime = strCurrentTime;
+    }
+    inline void SetMethod(IN const AString& strMethod) { m_strMethod = strMethod; }
+    inline void SetCountry(IN const AString& strCountry) { m_strCountry = strCountry; }
+    inline void SetState(IN const AString& strState) { m_strState = strState; }
+    inline void SetCity(IN const AString& strCity) { m_strCity = strCity; }
+    inline void SetPostal(IN const AString& strPostal) { m_strPostal = strPostal; }
+    inline void SetAltitude(IN const AString& strAltitude) { m_strAltitude = strAltitude; }
     inline void SetVerticalAccuracy(IN const AString& strVerticalAccuracy)
-    { m_strVerticalAccuracy = strVerticalAccuracy; }
+    {
+        m_strVerticalAccuracy = strVerticalAccuracy;
+    }
 
 private:
     AString m_strLatitude;
@@ -101,46 +79,37 @@ private:
 };
 
 PUBLIC
-LocationProperties::LocationProperties()
-    : m_strLatitude(AString::ConstEmpty())
-    , m_strLongitude(AString::ConstEmpty())
-    , m_strRadius(AString::ConstEmpty())
-    , m_strShape(AString::ConstEmpty())
-    , m_strConfidence(AString::ConstEmpty())
-    , m_strCurrentTime(AString::ConstEmpty())
-    , m_strMethod(AString::ConstEmpty())
-    , m_strCountry(AString::ConstEmpty())
-    , m_strState(AString::ConstEmpty())
-    , m_strCity(AString::ConstEmpty())
-    , m_strPostal(AString::ConstEmpty())
-    , m_strAltitude(AString::ConstEmpty())
-    , m_strVerticalAccuracy(AString::ConstEmpty())
+LocationProperties::LocationProperties() :
+        m_strLatitude(AString::ConstEmpty()),
+        m_strLongitude(AString::ConstEmpty()),
+        m_strRadius(AString::ConstEmpty()),
+        m_strShape(AString::ConstEmpty()),
+        m_strConfidence(AString::ConstEmpty()),
+        m_strCurrentTime(AString::ConstEmpty()),
+        m_strMethod(AString::ConstEmpty()),
+        m_strCountry(AString::ConstEmpty()),
+        m_strState(AString::ConstEmpty()),
+        m_strCity(AString::ConstEmpty()),
+        m_strPostal(AString::ConstEmpty()),
+        m_strAltitude(AString::ConstEmpty()),
+        m_strVerticalAccuracy(AString::ConstEmpty())
 {
 }
 
-PUBLIC VIRTUAL
-LocationProperties::~LocationProperties()
-{
-}
-
-
+PUBLIC VIRTUAL LocationProperties::~LocationProperties() {}
 
 PUBLIC
-OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId)
-    : ImsSlot(nSlotId)
-    , m_bIsStarted(IMS_FALSE)
-    , m_strLastKnownCountry(COUNTRY_ISO_UNKNOWN)
-    , m_pLocationProperties(IMS_NULL)
+OsLocationInfo::OsLocationInfo(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_bIsStarted(IMS_FALSE),
+        m_strLastKnownCountry(COUNTRY_ISO_UNKNOWN),
+        m_pLocationProperties(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsLocationInfo::~OsLocationInfo()
-{
-}
+PUBLIC VIRTUAL OsLocationInfo::~OsLocationInfo() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec)
+PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec)
 {
     if (m_bIsStarted)
     {
@@ -159,8 +128,7 @@ IMS_BOOL OsLocationInfo::StartLocationInfo(IN IMS_UINT32 nUpdateIntervalInSec)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsLocationInfo::StopLocationInfo()
+PUBLIC VIRTUAL void OsLocationInfo::StopLocationInfo()
 {
     if (!m_bIsStarted)
     {
@@ -171,8 +139,7 @@ void OsLocationInfo::StopLocationInfo()
     m_bIsStarted = IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS_SINT32 nType)
+PUBLIC VIRTUAL ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS_SINT32 nType)
 {
     AStringArray objLocationInfo;
 
@@ -182,8 +149,7 @@ ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS_SINT32 nType)
         m_pLocationProperties = IMS_NULL;
     }
 
-    if (System::GetInstance()->GetLocationInformation(
-            objLocationInfo, nType, GetSlotId()) == 1)
+    if (System::GetInstance()->GetLocationInformation(objLocationInfo, nType, GetSlotId()) == 1)
     {
         m_pLocationProperties = new LocationProperties();
 
@@ -227,14 +193,13 @@ ILocationProperties* OsLocationInfo::GetLocationProperties(IN IMS_SINT32 nType)
     return m_pLocationProperties;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsLocationInfo::MakeInstantLocationInfo()
+PUBLIC VIRTUAL IMS_BOOL OsLocationInfo::MakeInstantLocationInfo()
 {
     return System::GetInstance()->MakeInstantLocationInfo(GetSlotId());
 }
 
-PUBLIC VIRTUAL
-void OsLocationInfo::SetDefaultLocationProperties(IN IMS_BOOL bFromUicc /*= IMS_TRUE*/)
+PUBLIC VIRTUAL void OsLocationInfo::SetDefaultLocationProperties(
+        IN IMS_BOOL bFromUicc /*= IMS_TRUE*/)
 {
     IMS_TRACE_D("SetDefaultLocationProperties", 0, 0, 0);
 
@@ -260,8 +225,7 @@ void OsLocationInfo::SetDefaultLocationProperties(IN IMS_BOOL bFromUicc /*= IMS_
     }
 }
 
-PUBLIC VIRTUAL
-const AString& OsLocationInfo::GetLastKnownCountry() const
+PUBLIC VIRTUAL const AString& OsLocationInfo::GetLastKnownCountry() const
 {
     return m_strLastKnownCountry;
 }
@@ -269,8 +233,8 @@ const AString& OsLocationInfo::GetLastKnownCountry() const
 PRIVATE
 AString OsLocationInfo::GetCountryIso(IN IMS_BOOL bFromUicc /*= IMS_FALSE*/)
 {
-    ISubscriberInfo* piSubsInfo
-            = PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId());
+    ISubscriberInfo* piSubsInfo =
+            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(GetSlotId());
     AString strCountry;
 
     piSubsInfo->GetNetworkCountry(strCountry);
@@ -289,8 +253,8 @@ void OsLocationInfo::SetLastKnownCountry(IN const AString& strCountry)
 {
     if (!m_strLastKnownCountry.Equals(strCountry))
     {
-        IMS_TRACE_D("SetLastKnownCountry :: %s >> %s",
-                m_strLastKnownCountry.GetStr(), strCountry.GetStr(), 0);
+        IMS_TRACE_D("SetLastKnownCountry :: %s >> %s", m_strLastKnownCountry.GetStr(),
+                strCountry.GetStr(), 0);
 
         m_strLastKnownCountry = strCountry;
     }

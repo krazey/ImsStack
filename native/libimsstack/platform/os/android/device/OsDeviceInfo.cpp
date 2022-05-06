@@ -22,17 +22,11 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsDeviceInfo::OsDeviceInfo()
-{
-}
+OsDeviceInfo::OsDeviceInfo() {}
 
-PUBLIC VIRTUAL
-OsDeviceInfo::~OsDeviceInfo()
-{
-}
+PUBLIC VIRTUAL OsDeviceInfo::~OsDeviceInfo() {}
 
-PUBLIC VIRTUAL
-IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strId) const
+PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strId) const
 {
     IMS_SINT32 nResult = System::GetInstance()->GetDeviceId(strId, nSlotId);
 
@@ -47,15 +41,13 @@ IMS_BOOL OsDeviceInfo::GetDeviceId(IN IMS_SINT32 nSlotId, OUT AString& strId) co
     return (nResult == 1);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsDeviceInfo::GetDeviceSoftwareVersion(
+PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceSoftwareVersion(
         IN IMS_SINT32 nSlotId, OUT AString& strSv) const
 {
     return System::GetInstance()->GetDeviceSoftwareVersion(strSv, nSlotId) == 1;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsDeviceInfo::GetDeviceName(OUT AString& strDeviceName) const
+PUBLIC VIRTUAL IMS_BOOL OsDeviceInfo::GetDeviceName(OUT AString& strDeviceName) const
 {
     return System::GetInstance()->GetDeviceName(strDeviceName) == 1;
 }

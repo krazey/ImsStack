@@ -25,9 +25,9 @@ class INetworkConnectionListener;
 class AccessNetworkInfo;
 
 // Default network id - system default id
-#define IMS_NET_IFACE_DEFAULT_ID        0
+#define IMS_NET_IFACE_DEFAULT_ID 0
 // Default network id - invalid id
-#define IMS_NET_IFACE_INVALID_ID        (-1)
+#define IMS_NET_IFACE_INVALID_ID (-1)
 
 // All the listener methods will be invoked in the caller's thread execution flow.
 // Let's share the network connection using the profile name such as ...
@@ -43,9 +43,9 @@ public:
 
     enum RESULT_ENTYPE
     {
-        RESULT_DONE = 0,    // ACTIVE, TERMINATED
-        RESULT_DOING,       // Activating, Terminating
-        RESULT_FAILED       // Error - IDLE
+        RESULT_DONE = 0,  // ACTIVE, TERMINATED
+        RESULT_DOING,     // Activating, Terminating
+        RESULT_FAILED     // Error - IDLE
     };
 
 public:
@@ -109,10 +109,10 @@ class INetworkConnectionListener
 {
 public:
     virtual void NetworkConnection_OnConnected(IN INetworkConnection* piConnection) = 0;
-    virtual void NetworkConnection_OnDisconnected(IN INetworkConnection* piConnection,
-            IN IMS_SINT32 nErrorCode) = 0;
-    virtual void NetworkConnection_OnConnectionFailed(IN INetworkConnection* piConnection,
-            IN IMS_SINT32 nErrorCode) = 0;
+    virtual void NetworkConnection_OnDisconnected(
+            IN INetworkConnection* piConnection, IN IMS_SINT32 nErrorCode) = 0;
+    virtual void NetworkConnection_OnConnectionFailed(
+            IN INetworkConnection* piConnection, IN IMS_SINT32 nErrorCode) = 0;
     virtual void NetworkConnection_OnIpChanged(IN INetworkConnection* piConnection) = 0;
     virtual void NetworkConnection_OnIpcanChanged(IN INetworkConnection* piConnection) = 0;
     virtual void NetworkConnection_OnPcscfChanged(IN INetworkConnection* piConnection) = 0;

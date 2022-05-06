@@ -20,7 +20,7 @@ struct __IMSIterator
     IMS_UINT32 nDummy;
 };
 
-typedef struct __IMSIterator*            IMSIterator;
+typedef struct __IMSIterator* IMSIterator;
 
 class IMSHashMap
 {
@@ -28,15 +28,18 @@ protected:
     class Element
     {
     public:
-        Element(IN void *pvKey_, IN void *pvValue_)
-            : pvKey(pvKey_), pvValue(pvValue_), pNext(IMS_NULL)
-        {}
+        Element(IN void* pvKey_, IN void* pvValue_) :
+                pvKey(pvKey_),
+                pvValue(pvValue_),
+                pNext(IMS_NULL)
+        {
+        }
         ~Element() {}
 
     public:
-        void *pvKey;
-        void *pvValue;
-        Element *pNext;
+        void* pvKey;
+        void* pvValue;
+        Element* pNext;
     };
 
 public:
@@ -48,35 +51,38 @@ public:
     inline IMS_UINT32 GetHashTableSize() const { return nHashTableSize; }
 
     // Add new (key, value) pair or modify value
-    void SetAt(IN void *pvKey, IN void *pvNewValue);
-    void* GetValueAt(IN void *pvKey);
+    void SetAt(IN void* pvKey, IN void* pvNewValue);
+    void* GetValueAt(IN void* pvKey);
 
     // Search key and return value
-    IMS_BOOL Lookup(IN void *pvKey, OUT void*& pvValue);
-    IMS_BOOL Lookup(IN void *pvKey, OUT void*& pvOrigKey, OUT void*& pvValue);
+    IMS_BOOL Lookup(IN void* pvKey, OUT void*& pvValue);
+    IMS_BOOL Lookup(IN void* pvKey, OUT void*& pvOrigKey, OUT void*& pvValue);
 
     // Remove existing (key, ?) pair
-    IMS_BOOL RemoveKey(IN void *pvKey);
+    IMS_BOOL RemoveKey(IN void* pvKey);
     void RemoveAll();
 
     inline IMS_BOOL IsEmpty() const { return (nCount == 0); }
     inline IMS_UINT32 GetSize() const { return nCount; }
 
     IMSIterator GetStartPosition();
-    void GetNext(IN_OUT IMSIterator &stIterator, OUT void*& pvKey, OUT void*& pvValue);
+    void GetNext(IN_OUT IMSIterator& stIterator, OUT void*& pvKey, OUT void*& pvValue);
 
 protected:
-    virtual IMS_UINTP GetHashKey(IN void *pvKey);
-    virtual Element* GetElementAt(IN void *pvKey, OUT IMS_UINT32 &nBucket);
+    virtual IMS_UINTP GetHashKey(IN void* pvKey);
+    virtual Element* GetElementAt(IN void* pvKey, OUT IMS_UINT32& nBucket);
 
 protected:
     IMS_UINT32 nHashTableSize;
     Element** ppHashTable;
 
 private:
-    enum { DEFAULT_SIZE = 5 };
+    enum
+    {
+        DEFAULT_SIZE = 5
+    };
 
     IMS_UINT32 nCount;
 };
 
-#endif // _IMS_HASH_MAP_H_
+#endif  // _IMS_HASH_MAP_H_

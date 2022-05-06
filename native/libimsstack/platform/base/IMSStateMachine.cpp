@@ -13,26 +13,24 @@
 #include "ServiceMemory.h"
 #include "IMSStateMachine.h"
 
-#if 0 // public
+#if 0  // public
 #endif
 
 PUBLIC
-IMSStateMachine::IMSStateMachine(IN IMS_UINT32 nState_)
-    : nState(nState_)
-    , nOldState(IMS_INVALID_STATE)
+IMSStateMachine::IMSStateMachine(IN IMS_UINT32 nState_) :
+        nState(nState_),
+        nOldState(IMS_INVALID_STATE)
 {
 }
 
-PUBLIC VIRTUAL
-IMSStateMachine::~IMSStateMachine()
+PUBLIC VIRTUAL IMSStateMachine::~IMSStateMachine()
 {
     // remove all of primitives
-
 }
 
-IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG &objMSG)
+IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG& objMSG)
 {
-    const StateMap *pstStateMap = GetStateMap();
+    const StateMap* pstStateMap = GetStateMap();
     IMS_UINT32 nStateIndex = 0;
     IMS_UINT32 nMsgIndex = 0;
     IMS_BOOL bStateFound = IMS_FALSE;
@@ -49,7 +47,7 @@ IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG &objMSG)
 
     if (bStateFound == IMS_TRUE)
     {
-        const StateMsgMap *pstStateMsgMap = (pstStateMap[nStateIndex].pfnGetStateMsgMap)();
+        const StateMsgMap* pstStateMsgMap = (pstStateMap[nStateIndex].pfnGetStateMsgMap)();
         if (pstStateMsgMap != IMS_NULL)
         {
             while (pstStateMsgMap[nMsgIndex].nMsg != IMS_INVALID_MSG)
@@ -69,7 +67,7 @@ IMS_BOOL IMSStateMachine::OnStateMessage(IN IMSMSG &objMSG)
     return IMS_FALSE;
 }
 
-#if 0 // protected
+#if 0  // protected
 #endif
 
 EMPTY_STATE_MAP(IMSStateMachine)

@@ -19,9 +19,7 @@
 #include "ImsSlot.h"
 #include "IPhoneInfoCall.h"
 
-class OsPhoneInfoCall
-    : public ImsSlot
-    , public ICallInfo
+class OsPhoneInfoCall : public ImsSlot, public ICallInfo
 {
 public:
     OsPhoneInfoCall(IN IMS_SINT32 nSlotId);

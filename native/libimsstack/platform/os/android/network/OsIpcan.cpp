@@ -24,27 +24,22 @@
 __IMS_TRACE_TAG_ADAPT__;
 
 PUBLIC
-OsIpcan::OsIpcan()
-{
-}
+OsIpcan::OsIpcan() {}
 
-PUBLIC VIRTUAL
-OsIpcan::~OsIpcan()
-{
-}
+PUBLIC VIRTUAL OsIpcan::~OsIpcan() {}
 
-PROTECTED VIRTUAL
-void OsIpcan::GetAccessInfo(IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni)
+PROTECTED VIRTUAL void OsIpcan::GetAccessInfo(
+        IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& objAni)
 {
     IMS_SINT32 nDefaultNetworkType = TYPE_UNKNOWN;
 
-    if ((objAni.nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD)
-            || (objAni.nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD))
+    if ((objAni.nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD) ||
+            (objAni.nType == AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD))
     {
         nDefaultNetworkType = TYPE_LTE;
     }
-    else if ((objAni.nType == AccessNetworkInfo::TYPE_3GPP_NR_FDD)
-            || (objAni.nType == AccessNetworkInfo::TYPE_3GPP_NR_TDD))
+    else if ((objAni.nType == AccessNetworkInfo::TYPE_3GPP_NR_FDD) ||
+            (objAni.nType == AccessNetworkInfo::TYPE_3GPP_NR_TDD))
     {
         nDefaultNetworkType = TYPE_NR;
     }
@@ -57,8 +52,7 @@ void OsIpcan::GetAccessInfo(IN IMS_SINT32 nSlotId, IN_OUT AccessNetworkInfo& obj
     objAni = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
 }
 
-PROTECTED VIRTUAL
-void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
+PROTECTED VIRTUAL void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
 {
     AString strMacAddress = System::GetInstance()->GetWifiBssId();
     IMSList<AString> objTokens = strMacAddress.Split(':');
@@ -93,12 +87,11 @@ void OsIpcan::GetAccessInfoForWiFi(OUT AccessNetworkInfo& objAni)
     }
 }
 
-PROTECTED VIRTUAL
-void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId, OUT AccessNetworkInfo& objAni,
-        OUT AString& strTimestamp, OUT AString& strCellInfoAge)
+PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId,
+        OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp, OUT AString& strCellInfoAge)
 {
-    AStringArray objCellIdentities = System::GetInstance()->GetLastAccessNetworkInfo(
-            RADIOTECH_TYPE_INVALID, nSlotId);
+    AStringArray objCellIdentities =
+            System::GetInstance()->GetLastAccessNetworkInfo(RADIOTECH_TYPE_INVALID, nSlotId);
 
     // 0 : network type
     // 1 : timestamp as UTC format
@@ -126,9 +119,8 @@ void OsIpcan::GetLastAccessInfo(IN IMS_SINT32 nSlotId, OUT AccessNetworkInfo& ob
     objAni = CreateAccessNetworkInfo(nNetworkType, objCellIdentities);
 }
 
-PROTECTED VIRTUAL
-void OsIpcan::GetLastAccessInfoForWiFi(OUT AccessNetworkInfo& objAni,
-        OUT AString& strTimestamp, OUT AString& strCellInfoAge)
+PROTECTED VIRTUAL void OsIpcan::GetLastAccessInfoForWiFi(
+        OUT AccessNetworkInfo& objAni, OUT AString& strTimestamp, OUT AString& strCellInfoAge)
 {
     // FIXME: consider to implement the below logic later
     strTimestamp = AString::ConstNull();
@@ -138,39 +130,33 @@ void OsIpcan::GetLastAccessInfoForWiFi(OUT AccessNetworkInfo& objAni,
     objAni.nClass = AccessNetworkInfo::CLASS_NONE;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 OsIpcan::GetNetworkType(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL IMS_SINT32 OsIpcan::GetNetworkType(IN IMS_SINT32 nSlotId)
 {
     return System::GetInstance()->GetNetworkType(nSlotId);
 }
 
-PRIVATE GLOBAL
-AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
-        IN const AStringArray& objCellIdentities)
+PRIVATE GLOBAL AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(
+        IN IMS_SINT32 nNetworkType, IN const AStringArray& objCellIdentities)
 {
-#define ANI_ITEM_COUNT                  4
+#define ANI_ITEM_COUNT 4
 
-#define ANI_ITEM_MCC_I                  0
-#define ANI_ITEM_MNC_I                  1
-#define ANI_ITEM_CELL_ID_I              2
-#define ANI_ITEM_LAC_I                  3
-#define ANI_ITEM_TAC_I                  3
-#define ANI_ITEM_MODE_I                 4
+#define ANI_ITEM_MCC_I 0
+#define ANI_ITEM_MNC_I 1
+#define ANI_ITEM_CELL_ID_I 2
+#define ANI_ITEM_LAC_I 3
+#define ANI_ITEM_TAC_I 3
+#define ANI_ITEM_MODE_I 4
 
-#define ANI_ITEM_COUNT_EHRPD            2
-#define ANI_ITEM_SECTOR_ID_I            0
-#define ANI_ITEM_SUBNET_LEN_I           1
+#define ANI_ITEM_COUNT_EHRPD 2
+#define ANI_ITEM_SECTOR_ID_I 0
+#define ANI_ITEM_SUBNET_LEN_I 1
 
     AccessNetworkInfo objAni;
-    IMS_BOOL bIsNetworkTypeLte = ((nNetworkType == TYPE_LTE)
-            || (nNetworkType == TYPE_LTE_CA));
+    IMS_BOOL bIsNetworkTypeLte = ((nNetworkType == TYPE_LTE) || (nNetworkType == TYPE_LTE_CA));
 
-    if (bIsNetworkTypeLte
-            || (nNetworkType == TYPE_UMTS)
-            || (nNetworkType == TYPE_HSDPA)
-            || (nNetworkType == TYPE_HSUPA)
-            || (nNetworkType == TYPE_HSPA)
-            || (nNetworkType == TYPE_HSPAP))
+    if (bIsNetworkTypeLte || (nNetworkType == TYPE_UMTS) || (nNetworkType == TYPE_HSDPA) ||
+            (nNetworkType == TYPE_HSUPA) || (nNetworkType == TYPE_HSPA) ||
+            (nNetworkType == TYPE_HSPAP))
     {
         if (bIsNetworkTypeLte)
         {
@@ -207,21 +193,21 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
             }
         }
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strTac.GetLength() > ANI_3GPP_TAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
+        if ((strTac.GetLength() > ANI_3GPP_TAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_UTRAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)",
-                    strTac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -266,7 +252,7 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         IMS_SINT32 nZeroPadding;
 
         // TAC (Tracking Area Code, 16bits, 4hex)
-         nZeroPadding = ANI_3GPP_TAC_MAX_LEN - strTac.GetLength();
+        nZeroPadding = ANI_3GPP_TAC_MAX_LEN - strTac.GetLength();
 
         for (IMS_SINT32 i = 0; i < nZeroPadding; i++)
         {
@@ -296,8 +282,8 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         }
 
         IMS_TRACE_I("PANI :: %s (%s, %d)", bIsNetworkTypeLte ? "LTE" : "3G",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ?\
-                    objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID : "xxx",
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.utran_cell_id_3gpp.acUTRAN_CELL_ID
+                                                  : "xxx",
                 nIndex);
     }
     else if (nNetworkType == TYPE_NR)
@@ -330,21 +316,21 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
             }
         }
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strTac.GetLength() > ANI_3GPP_NR_TAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
+        if ((strTac.GetLength() > ANI_3GPP_NR_TAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_NR_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)",
-                    strTac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (TAC=%d, CellIdentity=%d)", strTac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -419,8 +405,10 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         }
 
         IMS_TRACE_I("PANI :: NR (%s, %d)",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ?\
-                    objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID : "xxx", nIndex, 0);
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE()
+                        ? objAni.uniAI.nr_utran_cell_id_3gpp.acUTRAN_CELL_ID
+                        : "xxx",
+                nIndex, 0);
     }
     else if ((nNetworkType == TYPE_GPRS) || (nNetworkType == TYPE_EDGE))
     {
@@ -439,21 +427,21 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         const AString& strLac = objCellIdentities.GetElementAt(ANI_ITEM_LAC_I);
         const AString& strCellId = objCellIdentities.GetElementAt(ANI_ITEM_CELL_ID_I);
 
-        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN)
-                || (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
+        if ((strMcc.GetLength() > ANI_3GPP_MCC_MAX_LEN) ||
+                (strMnc.GetLength() > ANI_3GPP_MNC_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)",
-                    strMcc.GetLength(), strMnc.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (MCC=%d, MNC=%d)", strMcc.GetLength(),
+                    strMnc.GetLength(), 0);
             return objAni;
         }
 
-        if ((strLac.GetLength() > ANI_3GPP_LAC_MAX_LEN)
-                || (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
+        if ((strLac.GetLength() > ANI_3GPP_LAC_MAX_LEN) ||
+                (strCellId.GetLength() > ANI_3GPP_GERAN_CELL_ID_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
-            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)",
-                    strLac.GetLength(), strCellId.GetLength(), 0);
+            IMS_TRACE_D("PANI :: Invalid length (LAC=%d, CellIdentity=%d)", strLac.GetLength(),
+                    strCellId.GetLength(), 0);
             return objAni;
         }
 
@@ -525,9 +513,7 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         }
 
         IMS_TRACE_I("PANI :: GERAN (%s, %d)",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ?\
-                    objAni.uniAI.cgi_3gpp.acCGI : "xxx",
-                nIndex, 0);
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.cgi_3gpp.acCGI : "xxx", nIndex, 0);
     }
     else if (nNetworkType == TYPE_EHRPD)
     {
@@ -546,8 +532,8 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         const AString& strSector = objCellIdentities.GetElementAt(ANI_ITEM_SECTOR_ID_I);
         const AString& strSubnet = objCellIdentities.GetElementAt(ANI_ITEM_SUBNET_LEN_I);
 
-        if ((strSector.GetLength() > ANI_3GPP2_SECTOR_ID_MAX_LEN)
-                || (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
+        if ((strSector.GetLength() > ANI_3GPP2_SECTOR_ID_MAX_LEN) ||
+                (strSubnet.GetLength() > ANI_3GPP2_SUBNET_LENGTH_MAX_LEN))
         {
             objAni.bIsAccessInfoRequired = IMS_FALSE;
             IMS_TRACE_D("PANI :: Invalid length (sectorId=%d, subnetLength=%d)",
@@ -588,9 +574,7 @@ AccessNetworkInfo OsIpcan::CreateAccessNetworkInfo(IN IMS_SINT32 nNetworkType,
         }
 
         IMS_TRACE_I("PANI :: eHRPD (%s, %d)",
-                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ?\
-                    objAni.uniAI.ci_3gpp2.acCI : "xxx",
-                nIndex, 0);
+                IMS_UTIL_SYS_PROP_IS_DEBUG_MODE() ? objAni.uniAI.ci_3gpp2.acCI : "xxx", nIndex, 0);
     }
     else
     {

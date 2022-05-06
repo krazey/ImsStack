@@ -23,10 +23,9 @@
 class OsTimer;
 class OsTimerWrapper;
 
-class OsTimerService
-    : public ISystemListener
+class OsTimerService : public ISystemListener
 {
-public :
+public:
     OsTimerService();
     virtual ~OsTimerService();
 
@@ -43,8 +42,8 @@ public:
 
 private:
     // ISystemListener class
-    void System_NotifyEvent(IN IMS_UINT32 nEvent,
-            IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
+    void System_NotifyEvent(
+            IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam) override;
     void NotifyTimerExpired(IN OsTimerWrapper* pTimerWrapper);
 
 private:

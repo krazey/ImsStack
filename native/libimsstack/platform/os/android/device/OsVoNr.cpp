@@ -28,11 +28,11 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsVoNrParam
 {
 public:
-    inline OsVoNrParam(IN IMS_UINT32 nEvent)
-        : m_nEvent(nEvent)
-    {}
-    inline virtual ~OsVoNrParam()
-    {}
+    inline OsVoNrParam(IN IMS_UINT32 nEvent) :
+            m_nEvent(nEvent)
+    {
+    }
+    inline virtual ~OsVoNrParam() {}
 
 public:
     // VoNRAgent sets this notification type
@@ -46,20 +46,18 @@ public:
     IMS_UINT32 m_nEvent;
 };
 
-
-class UacResponseParam
-    : public OsVoNrParam
+class UacResponseParam : public OsVoNrParam
 {
 public:
-    inline UacResponseParam()
-        : OsVoNrParam(EVENT_UAC_RESPONSE)
-        , m_nSysMode(-1)
-        , m_nCallType(0)
-        , m_nResult(0)
-        , m_nBarringTime(0)
-    {}
-    inline virtual ~UacResponseParam()
-    {}
+    inline UacResponseParam() :
+            OsVoNrParam(EVENT_UAC_RESPONSE),
+            m_nSysMode(-1),
+            m_nCallType(0),
+            m_nResult(0),
+            m_nBarringTime(0)
+    {
+    }
+    inline virtual ~UacResponseParam() {}
 
 public:
     IMS_SINT32 m_nSysMode;
@@ -68,35 +66,33 @@ public:
     IMS_UINT32 m_nBarringTime;
 };
 
-class CallReadyParam
-    : public OsVoNrParam
+class CallReadyParam : public OsVoNrParam
 {
 public:
-    inline CallReadyParam()
-        : OsVoNrParam(EVENT_CALL_READY)
-        , m_nSysMode(-1)
-    {}
-    inline virtual ~CallReadyParam()
-    {}
+    inline CallReadyParam() :
+            OsVoNrParam(EVENT_CALL_READY),
+            m_nSysMode(-1)
+    {
+    }
+    inline virtual ~CallReadyParam() {}
 
 public:
     IMS_SINT32 m_nSysMode;
 };
 
-class HandoffInformationParam
-    : public OsVoNrParam
+class HandoffInformationParam : public OsVoNrParam
 {
 public:
-    inline HandoffInformationParam()
-        : OsVoNrParam(EVENT_HANDOFF_INFORMATION)
-        , m_nStatus(0)
-        , m_nSourceRat(0)
-        , m_nTargetRat(0)
-        , m_nReasonType(0)
-        , m_nReason(-1)
-    {}
-    inline virtual ~HandoffInformationParam()
-    {}
+    inline HandoffInformationParam() :
+            OsVoNrParam(EVENT_HANDOFF_INFORMATION),
+            m_nStatus(0),
+            m_nSourceRat(0),
+            m_nTargetRat(0),
+            m_nReasonType(0),
+            m_nReason(-1)
+    {
+    }
+    inline virtual ~HandoffInformationParam() {}
 
 public:
     IMS_UINT32 m_nStatus;
@@ -107,8 +103,7 @@ public:
 };
 
 LOCAL
-void osVoNr_SendMessage(IN IThread* piThread,
-        IN IMS_SINT32 nSlotId, IN OsVoNrParam* pParam)
+void osVoNr_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsVoNrParam* pParam)
 {
     if (piThread == IMS_NULL)
     {
@@ -116,50 +111,42 @@ void osVoNr_SendMessage(IN IThread* piThread,
         return;
     }
 
-    if (!piThread->PostMessageI(IMS_MSG_VONR,
-            nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
+    if (!piThread->PostMessageI(IMS_MSG_VONR, nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
     {
         delete pParam;
     }
 }
 
-
-
 PUBLIC
-OsVoNr::OsVoNr(IN IMS_SINT32 nSlotId)
-    : ImsVoNr(nSlotId)
-    , m_piOwnerThread(IMS_NULL)
-    , m_bVoNrSupported(IMS_FALSE)
-    , m_bIsMtkChipset(IMS_FALSE)
-    , m_objUacListeners(IMSList<IVoNrUacListener*>())
-    , m_objCallPreferenceListeners(IMSList<IVoNrCallPreferenceListener*>())
-    , m_objHandoffListeners(IMSList<IVoNrHandoffListener*>())
-    , m_objMoCallStates(IMSMap<IMS_UINT32, CallStateList*>())
+OsVoNr::OsVoNr(IN IMS_SINT32 nSlotId) :
+        ImsVoNr(nSlotId),
+        m_piOwnerThread(IMS_NULL),
+        m_bVoNrSupported(IMS_FALSE),
+        m_bIsMtkChipset(IMS_FALSE),
+        m_objUacListeners(IMSList<IVoNrUacListener*>()),
+        m_objCallPreferenceListeners(IMSList<IVoNrCallPreferenceListener*>()),
+        m_objHandoffListeners(IMSList<IVoNrHandoffListener*>()),
+        m_objMoCallStates(IMSMap<IMS_UINT32, CallStateList*>())
 {
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_VONR, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_VONR, this, GetSlotId());
 
     Initialize();
 }
 
-PUBLIC VIRTUAL
-OsVoNr::~OsVoNr()
+PUBLIC VIRTUAL OsVoNr::~OsVoNr()
 {
     CleanUp();
 
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_VONR, this, GetSlotId());
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_VONR, this, GetSlotId());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::IsVoNrSupported() const
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::IsVoNrSupported() const
 {
     return m_bVoNrSupported;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::IsUacCheckRequired(IN IMS_UINT32 nType)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::IsUacCheckRequired(IN IMS_UINT32 nType)
 {
     if (!IsNrRat() || !IsCallTypeForUac(nType))
     {
@@ -177,21 +164,19 @@ IMS_BOOL OsVoNr::IsUacCheckRequired(IN IMS_UINT32 nType)
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::IsUeCapabilityVoNrEnabled() const
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::IsUeCapabilityVoNrEnabled() const
 {
     const SystemConfig* pSysConfig = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
     return (pSysConfig != IMS_NULL && pSysConfig->IsUeCapabilityVoNrEnabled());
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
         IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode, IN IMS_UINT32 nDirection)
 {
     if ((nState != STATE_IDLE) && (!IsSysModeValidForCallState(nSysMode)))
     {
-        IMS_TRACE_I("[%d] NotifyCallState :: sys mode is invalid(type=%d, mode=%d)",
-                GetSlotId(), nType, nSysMode);
+        IMS_TRACE_I("[%d] NotifyCallState :: sys mode is invalid(type=%d, mode=%d)", GetSlotId(),
+                nType, nSysMode);
         return IMS_FALSE;
     }
 
@@ -214,8 +199,7 @@ IMS_BOOL OsVoNr::NotifyCallState(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 OsVoNr::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType)
+PUBLIC VIRTUAL IMS_SINT32 OsVoNr::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType)
 {
     if (!IsRatValidForCallPreference(nRat) || !IsTypeValidForCallPreference(nType))
     {
@@ -231,7 +215,7 @@ IMS_SINT32 OsVoNr::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType
         m_objTimer.Start(VoNrTimer::TIMER_CALL_READY);
         return CALL_PREF_REQUEST_SUCCESS;
     }
-    else // REQUEST
+    else  // REQUEST
     {
         if (m_objCallPreferenceList.GetRat() == nRat)
         {
@@ -245,50 +229,44 @@ IMS_SINT32 OsVoNr::RequestCallPreference(IN IMS_UINT32 nRat, IN IMS_UINT32 nType
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::SetImsSession(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    IMS_TRACE_I("[%d] SetImsSession :: type(%s) , state(%d)",
-            GetSlotId(), CallTypeToString(nType), nState);
+    IMS_TRACE_I("[%d] SetImsSession :: type(%s) , state(%d)", GetSlotId(), CallTypeToString(nType),
+            nState);
     System::GetInstance()->SetImsSession(GetTypeForMtk(nType), nState, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::SetImsSignaling(IN IMS_UINT32 nType)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::SetImsSignaling(IN IMS_UINT32 nType)
 {
     IMS_TRACE_I("[%d] SetImsSignaling :: type(%d)", GetSlotId(), nType, 0);
     System::GetInstance()->SetImsSignaling(GetWdsLteCallType(nType), GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::SetImsVoice(IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
 {
     IMS_TRACE_I("[%d] SetImsVoice :: state(%d), rat(%d)", GetSlotId(), nState, nSysMode);
     System::GetInstance()->SetImsVoice(nState, GetSysModeForMtk(nSysMode), GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::SetUacCheck(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    IMS_TRACE_I("[%d] SetUacCheck :: type(%s) , state(%d)",
-            GetSlotId(), CallTypeToString(nType), nState);
+    IMS_TRACE_I("[%d] SetUacCheck :: type(%s) , state(%d)", GetSlotId(), CallTypeToString(nType),
+            nState);
     System::GetInstance()->SetUacCheck(GetTypeForMtk(nType), nState, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL OsVoNr::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency)
+PUBLIC VIRTUAL IMS_BOOL OsVoNr::SetVoice(IN IMS_UINT32 nState, IN IMS_BOOL bIsEmergency)
 {
     IMS_TRACE_I("[%d] SetVoice :: state(%d) , emergency(%d)", GetSlotId(), nState, bIsEmergency);
     System::GetInstance()->SetVoice(nState, bIsEmergency, GetSlotId());
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::AddListenerForUac(IN IVoNrUacListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::AddListenerForUac(IN IVoNrUacListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -308,8 +286,7 @@ void OsVoNr::AddListenerForUac(IN IVoNrUacListener* piListener)
     m_objUacListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForUac(IN IVoNrUacListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::RemoveListenerForUac(IN IVoNrUacListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -328,8 +305,7 @@ void OsVoNr::RemoveListenerForUac(IN IVoNrUacListener* piListener)
     }
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -349,8 +325,8 @@ void OsVoNr::AddListenerForCallPreference(IN IVoNrCallPreferenceListener* piList
     m_objCallPreferenceListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForCallPreference(IN IVoNrCallPreferenceListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::RemoveListenerForCallPreference(
+        IN IVoNrCallPreferenceListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -369,8 +345,7 @@ void OsVoNr::RemoveListenerForCallPreference(IN IVoNrCallPreferenceListener* piL
     }
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::AddListenerForHandoff(IN IVoNrHandoffListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::AddListenerForHandoff(IN IVoNrHandoffListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -390,8 +365,7 @@ void OsVoNr::AddListenerForHandoff(IN IVoNrHandoffListener* piListener)
     m_objHandoffListeners.Append(piListener);
 }
 
-PUBLIC VIRTUAL
-void OsVoNr::RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener)
+PUBLIC VIRTUAL void OsVoNr::RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener)
 {
     if (piListener == IMS_NULL)
     {
@@ -410,10 +384,9 @@ void OsVoNr::RemoveListenerForHandoff(IN IVoNrHandoffListener* piListener)
     }
 }
 
-PROTECTED VIRTUAL
-void OsVoNr::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PROTECTED VIRTUAL void OsVoNr::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    (void) nWParam;
+    (void)nWParam;
 
     OsVoNrParam* pVoNrParam = reinterpret_cast<OsVoNrParam*>(nLParam);
 
@@ -437,19 +410,18 @@ void OsVoNr::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
         {
             HandoffInformationParam* pParam =
                     reinterpret_cast<HandoffInformationParam*>(pVoNrParam);
-            NotifyHandoffInformation(pParam->m_nStatus, pParam->m_nSourceRat,
-                    pParam->m_nTargetRat, pParam->m_nReasonType, pParam->m_nReason);
+            NotifyHandoffInformation(pParam->m_nStatus, pParam->m_nSourceRat, pParam->m_nTargetRat,
+                    pParam->m_nReasonType, pParam->m_nReason);
         }
 
         delete pVoNrParam;
     }
 }
 
-PROTECTED VIRTUAL
-void OsVoNr::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PROTECTED VIRTUAL void OsVoNr::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    (void) nWParam;
+    (void)nWParam;
 
     IMS_TRACE_D("System_NotifyEvent :: event=%s", EventToString(nEvent), 0, 0);
 
@@ -460,10 +432,10 @@ void OsVoNr::System_NotifyEvent(IN IMS_UINT32 nEvent,
         return;
     }
 
-
     switch (nEvent)
     {
-        case OsVoNrParam::EVENT_UAC_RESPONSE: {
+        case OsVoNrParam::EVENT_UAC_RESPONSE:
+        {
             UacResponseParam* pParam = new UacResponseParam();
             pParam->m_nCallType = pParcel->readInt32();
             pParam->m_nSysMode = pParcel->readInt32();
@@ -473,14 +445,16 @@ void OsVoNr::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osVoNr_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        case OsVoNrParam::EVENT_CALL_READY: {
+        case OsVoNrParam::EVENT_CALL_READY:
+        {
             CallReadyParam* pParam = new CallReadyParam();
             pParam->m_nSysMode = pParcel->readInt32();
 
             osVoNr_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        case OsVoNrParam::EVENT_HANDOFF_INFORMATION: {
+        case OsVoNrParam::EVENT_HANDOFF_INFORMATION:
+        {
             HandoffInformationParam* pParam = new HandoffInformationParam();
             pParam->m_nStatus = pParcel->readInt32();
             pParam->m_nSourceRat = pParcel->readInt32();
@@ -491,15 +465,15 @@ void OsVoNr::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osVoNr_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        default: {
+        default:
+        {
             // no-op
             break;
         }
     }
 }
 
-PROTECTED VIRTUAL
-void OsVoNr::VoNrTimer_TimerExpired(IN IMS_UINT32 nType)
+PROTECTED VIRTUAL void OsVoNr::VoNrTimer_TimerExpired(IN IMS_UINT32 nType)
 {
     if (nType == VoNrTimer::TIMER_CALL_READY)
     {
@@ -507,11 +481,10 @@ void OsVoNr::VoNrTimer_TimerExpired(IN IMS_UINT32 nType)
     }
 }
 
-PROTECTED VIRTUAL
-void OsVoNr::SystemConfig_ConfigurationChanged(
+PROTECTED VIRTUAL void OsVoNr::SystemConfig_ConfigurationChanged(
         IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId /*= IMS_SLOT_ANY*/)
 {
-    (void) nEvent;
+    (void)nEvent;
 
     if ((nSlotId == IMS_SLOT_ANY) || (nSlotId == GetSlotId()))
     {
@@ -524,8 +497,9 @@ void OsVoNr::Initialize()
 {
     SetVoNrSupported();
 
-    m_bIsMtkChipset = UtilService::GetUtilService()->GetSystemProperty(
-            )->GetChipsetVendor().EqualsIgnoreCase("MediaTek");
+    m_bIsMtkChipset =
+            UtilService::GetUtilService()->GetSystemProperty()->GetChipsetVendor().EqualsIgnoreCase(
+                    "MediaTek");
 
     // objMoCallState
     CallStateList* objVoiceList = new CallStateList();
@@ -706,7 +680,7 @@ IMS_SINT32 OsVoNr::GetReasonForUac(IN IMS_UINT32 nResponse, OUT IMS_RESULT& nRes
 
         switch (nResponse)
         {
-            case MTK_UAC_CHECK_NONE: //FALL-THROUGH
+            case MTK_UAC_CHECK_NONE:  // FALL-THROUGH
             case MTK_UAC_CHECK_OK:
                 return IVoNrUacListener::REASON_NO;
 
@@ -853,8 +827,8 @@ IMS_BOOL OsVoNr::IsNrRat()
 PRIVATE
 IMS_BOOL OsVoNr::IsStatusValidForHandoff(IN IMS_UINT32 nStatus) const
 {
-    return (nStatus == RIL_HANDOFF_STATUS_INIT || nStatus == RIL_HANDOFF_STATUS_SUCCESS
-        || nStatus == RIL_HANDOFF_STATUS_FAILURE);
+    return (nStatus == RIL_HANDOFF_STATUS_INIT || nStatus == RIL_HANDOFF_STATUS_SUCCESS ||
+            nStatus == RIL_HANDOFF_STATUS_FAILURE);
 }
 
 PRIVATE
@@ -882,21 +856,21 @@ IMS_BOOL OsVoNr::IsCallTypeForUac(IN IMS_UINT32 nType) const
 }
 
 PRIVATE
-void OsVoNr::NotifyCallState_Emergency(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
-        IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
+void OsVoNr::NotifyCallState_Emergency(
+        IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
 {
-    (void) nModule;
+    (void)nModule;
 
     IMS_TRACE_I("NotifyCallState_EMERGENCY :: %s, %s, %s", ModuleToString(nModule),
-        CallTypeToString(nType), StateToString(nState));
+            CallTypeToString(nType), StateToString(nState));
 
     System::GetInstance()->NotifyCallState(nType, GetNasStatusForCallState(nState),
             GetSysModeForNas(nSysMode), DIRECTION_MO, GetSlotId());
 }
 
 PRIVATE
-void OsVoNr::NotifyCallState_Mo(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
-    IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
+void OsVoNr::NotifyCallState_Mo(
+        IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
 {
     IMS_TRACE_I("NotifyCallState_MO :: %s, %s, %s", ModuleToString(nModule),
             CallTypeToString(nType), StateToString(nState));
@@ -931,10 +905,10 @@ void OsVoNr::NotifyCallState_Mo(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
 }
 
 PRIVATE
-void OsVoNr::NotifyCallState_Mt(IN IMS_UINT32 nModule, IN IMS_UINT32 nType,
-        IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
+void OsVoNr::NotifyCallState_Mt(
+        IN IMS_UINT32 nModule, IN IMS_UINT32 nType, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
 {
-    (void) nModule;
+    (void)nModule;
 
     IMS_TRACE_I("NotifyCallState_MO :: %s, %s, %s", ModuleToString(nModule),
             CallTypeToString(nType), StateToString(nState));
@@ -978,11 +952,10 @@ void OsVoNr::NotifyCallReady(IN IMS_UINT32 nSysMode)
 }
 
 PRIVATE
-void OsVoNr::NotifyHandoffInformation(IN IMS_UINT32 nStatus,
-        IN IMS_UINT32 nSourceRat, IN IMS_UINT32 nTargetRat, IN IMS_UINT32 nReasonType,
-        IN IMS_SINT32 nReason)
+void OsVoNr::NotifyHandoffInformation(IN IMS_UINT32 nStatus, IN IMS_UINT32 nSourceRat,
+        IN IMS_UINT32 nTargetRat, IN IMS_UINT32 nReasonType, IN IMS_SINT32 nReason)
 {
-    (void) nReasonType;
+    (void)nReasonType;
 
     if (!IsStatusValidForHandoff(nStatus))
     {
@@ -1045,8 +1018,8 @@ void OsVoNr::NotifyUacResponse(IN IMS_UINT32 nCallType, IN IMS_UINT32 nResult,
         IVoNrUacListener* piListener = m_objUacListeners.GetAt(i);
         if (piListener != IMS_NULL)
         {
-            piListener->VoNrUac_NotifyResponse(nImsCallType,
-                    nReportResult, nReason, nConvertSysMode, nBarringTime);
+            piListener->VoNrUac_NotifyResponse(
+                    nImsCallType, nReportResult, nReason, nConvertSysMode, nBarringTime);
         }
     }
 }
@@ -1060,8 +1033,7 @@ void OsVoNr::SetVoNrSupported()
 
     if (bFeatureSupported)
     {
-        const SystemConfig* pSysConfig
-                = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
+        const SystemConfig* pSysConfig = SystemConfigManager::GetInstance()->GetConfig(GetSlotId());
 
         if (pSysConfig != IMS_NULL && pSysConfig->IsNrNsaModeEnabled())
         {
@@ -1075,8 +1047,8 @@ void OsVoNr::SetVoNrSupported()
 
     m_bVoNrSupported = bFeatureSupported && !bNsaModeEnabled;
 
-    IMS_TRACE_I("[%d] SetVoNRSupported :: (%s), mode=%s", GetSlotId(),
-            _TRACE_B_(m_bVoNrSupported), bNsaModeEnabled ? "NSA" : "SA");
+    IMS_TRACE_I("[%d] SetVoNRSupported :: (%s), mode=%s", GetSlotId(), _TRACE_B_(m_bVoNrSupported),
+            bNsaModeEnabled ? "NSA" : "SA");
 }
 
 PUBLIC
@@ -1087,8 +1059,8 @@ void OsVoNr::CallState::Clear()
 }
 
 PUBLIC
-IMS_BOOL OsVoNr::CallState::IsNotificationRequired(IN IMS_UINT32 nState,
-        IN IMS_UINT32 nSysMode) const
+IMS_BOOL OsVoNr::CallState::IsNotificationRequired(
+        IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode) const
 {
     if (IsIdle(m_nState) && IsIdle(nState))
     {
@@ -1176,7 +1148,7 @@ IMS_BOOL OsVoNr::CallStateList::IsStateStopInOtherModule(IN IMS_UINT32 nModule)
         }
 
         CallState* pState = m_objCallState.GetValueAt(i);
-        if (pState != IMS_NULL )
+        if (pState != IMS_NULL)
         {
             if (pState->GetState() != STATE_IDLE)
             {
@@ -1189,8 +1161,8 @@ IMS_BOOL OsVoNr::CallStateList::IsStateStopInOtherModule(IN IMS_UINT32 nModule)
 }
 
 PUBLIC
-IMS_BOOL OsVoNr::CallStateList::IsNotificationRequired(IN IMS_UINT32 nModule,
-        IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
+IMS_BOOL OsVoNr::CallStateList::IsNotificationRequired(
+        IN IMS_UINT32 nModule, IN IMS_UINT32 nState, IN IMS_UINT32 nSysMode)
 {
     switch (nState)
     {
@@ -1337,8 +1309,7 @@ void OsVoNr::CallPreferenceList::ClearAll()
 }
 
 PUBLIC
-void OsVoNr::CallPreferenceList::Set(IN IMS_UINT32 nType, IN IMS_UINT32 nRat,
-        IN IMS_UINT32 nState)
+void OsVoNr::CallPreferenceList::Set(IN IMS_UINT32 nType, IN IMS_UINT32 nRat, IN IMS_UINT32 nState)
 {
     CallPreference* pPreference = GetCallPreference(nType);
     if (pPreference != IMS_NULL)
@@ -1346,7 +1317,6 @@ void OsVoNr::CallPreferenceList::Set(IN IMS_UINT32 nType, IN IMS_UINT32 nRat,
         pPreference->SetRat(nRat);
         pPreference->SetState(nState);
     }
-
 }
 
 PUBLIC
@@ -1395,8 +1365,7 @@ void OsVoNr::VoNrTimer::Stop(IN IMS_UINT32 nType)
     }
 }
 
-PRIVATE VIRTUAL
-void OsVoNr::VoNrTimer::Timer_TimerExpired(IN ITimer* piTimer)
+PRIVATE VIRTUAL void OsVoNr::VoNrTimer::Timer_TimerExpired(IN ITimer* piTimer)
 {
     if (piTimer == IMS_NULL)
     {
@@ -1421,8 +1390,7 @@ OsVoNr::CallStateList* OsVoNr::GetCallStateList(IN IMS_UINT32 nType)
     return (nIndex >= 0) ? m_objMoCallStates.GetValueAt(nIndex) : IMS_NULL;
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::CallTypeToString(IN IMS_UINT32 nType)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::CallTypeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -1446,8 +1414,7 @@ const IMS_CHAR* OsVoNr::CallTypeToString(IN IMS_UINT32 nType)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::EventToString(IN IMS_UINT32 nEvent)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::EventToString(IN IMS_UINT32 nEvent)
 {
     switch (nEvent)
     {
@@ -1465,8 +1432,7 @@ const IMS_CHAR* OsVoNr::EventToString(IN IMS_UINT32 nEvent)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::HandoffStatusToString(IN IMS_UINT32 nStatus)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::HandoffStatusToString(IN IMS_UINT32 nStatus)
 {
     switch (nStatus)
     {
@@ -1484,8 +1450,7 @@ const IMS_CHAR* OsVoNr::HandoffStatusToString(IN IMS_UINT32 nStatus)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::ModuleToString(IN IMS_UINT32 nModule)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::ModuleToString(IN IMS_UINT32 nModule)
 {
     switch (nModule)
     {
@@ -1503,8 +1468,7 @@ const IMS_CHAR* OsVoNr::ModuleToString(IN IMS_UINT32 nModule)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::RatToString(IN IMS_UINT32 nRat)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::RatToString(IN IMS_UINT32 nRat)
 {
     switch (nRat)
     {
@@ -1519,8 +1483,7 @@ const IMS_CHAR* OsVoNr::RatToString(IN IMS_UINT32 nRat)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::StateToString(IN IMS_UINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::StateToString(IN IMS_UINT32 nState)
 {
     switch (nState)
     {
@@ -1538,8 +1501,7 @@ const IMS_CHAR* OsVoNr::StateToString(IN IMS_UINT32 nState)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::SysModeToString(IN IMS_UINT32 nSysMode)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::SysModeToString(IN IMS_UINT32 nSysMode)
 {
     switch (nSysMode)
     {
@@ -1554,8 +1516,7 @@ const IMS_CHAR* OsVoNr::SysModeToString(IN IMS_UINT32 nSysMode)
     }
 }
 
-PRIVATE GLOBAL
-const IMS_CHAR* OsVoNr::UacReasonToString(IN IMS_UINT32 nReason)
+PRIVATE GLOBAL const IMS_CHAR* OsVoNr::UacReasonToString(IN IMS_UINT32 nReason)
 {
     switch (nReason)
     {

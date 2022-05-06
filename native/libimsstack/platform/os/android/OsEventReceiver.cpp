@@ -19,19 +19,15 @@
 #include "system-intf/SystemConstants.h"
 
 PUBLIC
-OsEventReceiver::OsEventReceiver(IN IMS_SINT32 nSlotId)
-    : ImsSlot(nSlotId)
-    , m_piListener(IMS_NULL)
+OsEventReceiver::OsEventReceiver(IN IMS_SINT32 nSlotId) :
+        ImsSlot(nSlotId),
+        m_piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsEventReceiver::~OsEventReceiver()
-{
-}
+PUBLIC VIRTUAL OsEventReceiver::~OsEventReceiver() {}
 
-PRIVATE VIRTUAL
-void OsEventReceiver::ResetEvent(IN IMS_SINT32 nEvent)
+PRIVATE VIRTUAL void OsEventReceiver::ResetEvent(IN IMS_SINT32 nEvent)
 {
     System* pSystem = System::GetInstance();
 
@@ -41,9 +37,7 @@ void OsEventReceiver::ResetEvent(IN IMS_SINT32 nEvent)
     }
 }
 
-
-PRIVATE VIRTUAL
-void OsEventReceiver::SetEvent(IN IMS_SINT32 nEvent)
+PRIVATE VIRTUAL void OsEventReceiver::SetEvent(IN IMS_SINT32 nEvent)
 {
     System* pSystem = System::GetInstance();
 
@@ -53,26 +47,24 @@ void OsEventReceiver::SetEvent(IN IMS_SINT32 nEvent)
     }
 }
 
-PRIVATE VIRTUAL
-void OsEventReceiver::SetListener(IN IEventReceiverListener* piListener)
+PRIVATE VIRTUAL void OsEventReceiver::SetListener(IN IEventReceiverListener* piListener)
 {
     m_piListener = piListener;
 
     System* pSystem = System::GetInstance();
 
-    if (m_piListener != IMS_NULL && pSystem != IMS_NULL )
+    if (m_piListener != IMS_NULL && pSystem != IMS_NULL)
     {
         pSystem->AddListener(SystemConstants::CATEGORY_EVENT, this, GetSlotId());
     }
 }
 
-PRIVATE VIRTUAL
-void OsEventReceiver::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PRIVATE VIRTUAL void OsEventReceiver::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     if (m_piListener != IMS_NULL)
     {
-        m_piListener->EventReceiver_NotifyEvent(static_cast<IMS_SINT32>(nEvent),
-                LONG_TO_INT(nWParam), LONG_TO_INT(nLParam));
+        m_piListener->EventReceiver_NotifyEvent(
+                static_cast<IMS_SINT32>(nEvent), LONG_TO_INT(nWParam), LONG_TO_INT(nLParam));
     }
 }

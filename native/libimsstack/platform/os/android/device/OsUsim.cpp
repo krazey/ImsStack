@@ -31,11 +31,11 @@ __IMS_TRACE_TAG_ADAPT__;
 class OsUsimParam
 {
 public:
-    inline OsUsimParam(IN IMS_SINT32 nType = 0)
-        : m_nType(nType)
-    {}
-    inline virtual ~OsUsimParam()
-    {}
+    inline OsUsimParam(IN IMS_SINT32 nType = 0) :
+            m_nType(nType)
+    {
+    }
+    inline virtual ~OsUsimParam() {}
 
 public:
     enum
@@ -46,24 +46,21 @@ public:
     IMS_SINT32 m_nType;
 };
 
-class OsUsimAuthResponseParam
-    : public OsUsimParam
+class OsUsimAuthResponseParam : public OsUsimParam
 {
 public:
-    inline OsUsimAuthResponseParam()
-        : OsUsimParam(TYPE_AUTHENTICATION)
-        , m_nOwner(0)
-        , m_objResponse(ByteArray::ConstNull())
-    {}
-    inline virtual ~OsUsimAuthResponseParam()
-    {}
+    inline OsUsimAuthResponseParam() :
+            OsUsimParam(TYPE_AUTHENTICATION),
+            m_nOwner(0),
+            m_objResponse(ByteArray::ConstNull())
+    {
+    }
+    inline virtual ~OsUsimAuthResponseParam() {}
 
 public:
     IMS_SINTP m_nOwner;
     ByteArray m_objResponse;
 };
-
-
 
 LOCAL
 OsUsim* osUsim_GetInstance(IN IMS_SINT32 nSlotId)
@@ -77,8 +74,8 @@ void osUsim_HandleAuthResponse(IN IMS_SINT32 nSlotId, IN OsUsimAuthResponseParam
     OsUsim* pUsim = osUsim_GetInstance(nSlotId);
     OsUsimDigestAka* pDigestAka = reinterpret_cast<OsUsimDigestAka*>(pParam->m_nOwner);
 
-    IMS_TRACE_I("USIM :: AuthResponse - owner=%" PFLS_x ", res_len=%d",
-            pParam->m_nOwner, pParam->m_objResponse.GetLength(), 0);
+    IMS_TRACE_I("USIM :: AuthResponse - owner=%" PFLS_x ", res_len=%d", pParam->m_nOwner,
+            pParam->m_objResponse.GetLength(), 0);
 
     if (!pUsim->IsDigestAkaPresent(pDigestAka))
     {
@@ -102,8 +99,7 @@ void osUsim_HandleUsimEvent(IN IMS_SINT32 nSlotId, IN OsUsimParam* pParam)
     switch (pParam->m_nType)
     {
         case OsUsimParam::TYPE_AUTHENTICATION:
-            osUsim_HandleAuthResponse(nSlotId,
-                    DYNAMIC_CAST(OsUsimAuthResponseParam*, pParam));
+            osUsim_HandleAuthResponse(nSlotId, DYNAMIC_CAST(OsUsimAuthResponseParam*, pParam));
             break;
         default:
             break;
@@ -121,27 +117,21 @@ void osUsim_SendMessage(IN IThread* piThread, IN IMS_SINT32 nSlotId, IN OsUsimPa
         return;
     }
 
-    if (!piThread->PostMessageI(IMS_MSG_USIM,
-            nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
+    if (!piThread->PostMessageI(IMS_MSG_USIM, nSlotId, reinterpret_cast<IMS_UINTP>(pParam)))
     {
         delete pParam;
     }
 }
 
-
-
 PUBLIC
-OsUsimDigestAka::OsUsimDigestAka(IN ImsUsim* pUsim)
-    : m_pUsim(pUsim)
-    , m_objAuthResponse(ByteArray::ConstNull())
-    , m_piListener(IMS_NULL)
+OsUsimDigestAka::OsUsimDigestAka(IN ImsUsim* pUsim) :
+        m_pUsim(pUsim),
+        m_objAuthResponse(ByteArray::ConstNull()),
+        m_piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-OsUsimDigestAka::~OsUsimDigestAka()
-{
-}
+PUBLIC VIRTUAL OsUsimDigestAka::~OsUsimDigestAka() {}
 
 PUBLIC
 void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
@@ -227,7 +217,7 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
         ByteArray objAuts;
 
         ++nPos;
-        objAuts.Append(&pbyAuthRes[nPos+1], pbyAuthRes[nPos]);
+        objAuts.Append(&pbyAuthRes[nPos + 1], pbyAuthRes[nPos]);
 
         m_piListener->DigestAka_OnAutsFailed(objAuts);
     }
@@ -237,16 +227,14 @@ void OsUsimDigestAka::OnAuthResponseReceived(IN const ByteArray& objAuthRes)
     }
 }
 
-PROTECTED VIRTUAL
-void OsUsimDigestAka::Destroy()
+PROTECTED VIRTUAL void OsUsimDigestAka::Destroy()
 {
     m_piListener = IMS_NULL;
 
     osUsim_GetInstance(m_pUsim->GetSlotId())->DestroyDigestAka(this);
 }
 
-PROTECTED VIRTUAL
-IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
+PROTECTED VIRTUAL IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
 {
     if (OsUtil::GetInstance()->IsDebugMode())
     {
@@ -269,12 +257,12 @@ IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
     }
 
     AString strNonce = AString::ConstNull();
-    strNonce.Attach(reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()),
-            objChallenge.GetLength());
+    strNonce.Attach(
+            reinterpret_cast<const IMS_CHAR*>(objChallenge.GetData()), objChallenge.GetLength());
     strNonce = strNonce.ToBase64();
 
     if (System::GetInstance()->RequestUsimAuthentication(
-            strNonce, reinterpret_cast<IMS_SINTP>(this), m_pUsim->GetSlotId()) != IMS_SUCCESS)
+                strNonce, reinterpret_cast<IMS_SINTP>(this), m_pUsim->GetSlotId()) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
@@ -282,35 +270,29 @@ IMS_RESULT OsUsimDigestAka::GetAuthResponse(IN const ByteArray& objChallenge)
     return IMS_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-void OsUsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
+PROTECTED VIRTUAL void OsUsimDigestAka::SetListener(IN IDigestAkaListener* piListener)
 {
     m_piListener = piListener;
 }
 
-
-
 PUBLIC
-OsUsim::OsUsim(IN IMS_SINT32 nSlotId)
-    : ImsUsim(nSlotId)
-    , m_objDigestAkas(IMSList<OsUsimDigestAka*>())
-    , m_piOwnerThread(IMS_NULL)
+OsUsim::OsUsim(IN IMS_SINT32 nSlotId) :
+        ImsUsim(nSlotId),
+        m_objDigestAkas(IMSList<OsUsimDigestAka*>()),
+        m_piOwnerThread(IMS_NULL)
 {
     IMS_TRACE_D("Constructor :: USIM%02d", nSlotId, 0, 0);
 
-    System::GetInstance()->AddListener(
-            SystemConstants::CATEGORY_USIM, this, GetSlotId());
+    System::GetInstance()->AddListener(SystemConstants::CATEGORY_USIM, this, GetSlotId());
 
     m_piOwnerThread = ThreadService::GetThreadService()->GetCurrentThread();
 }
 
-PUBLIC VIRTUAL
-OsUsim::~OsUsim()
+PUBLIC VIRTUAL OsUsim::~OsUsim()
 {
     IMS_TRACE_D("Destructor :: USIM%02d", GetSlotId(), 0, 0);
 
-    System::GetInstance()->RemoveListener(
-            SystemConstants::CATEGORY_USIM, this, GetSlotId());
+    System::GetInstance()->RemoveListener(SystemConstants::CATEGORY_USIM, this, GetSlotId());
 }
 
 PUBLIC
@@ -337,8 +319,7 @@ void OsUsim::DestroyDigestAka(IN OsUsimDigestAka* pDigestAka)
     delete pDigestAka;
 }
 
-PROTECTED VIRTUAL
-IDigestAka* OsUsim::CreateDigestAka()
+PROTECTED VIRTUAL IDigestAka* OsUsim::CreateDigestAka()
 {
     OsUsimDigestAka* pDigestAka = new OsUsimDigestAka(this);
 
@@ -358,8 +339,7 @@ IDigestAka* OsUsim::CreateDigestAka()
     return pDigestAka;
 }
 
-PROTECTED VIRTUAL
-void OsUsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PROTECTED VIRTUAL void OsUsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
     IMS_TRACE_I("USIM :: DispatchServiceMessage - slotId=%d, wp=%" PFLS_u ", lp=%" PFLS_u,
             GetSlotId(), nWParam, nLParam);
@@ -367,11 +347,10 @@ void OsUsim::DispatchServiceMessage(IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
     osUsim_HandleUsimEvent(GetSlotId(), reinterpret_cast<OsUsimParam*>(nLParam));
 }
 
-PROTECTED VIRTUAL
-void OsUsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
-        IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
+PROTECTED VIRTUAL void OsUsim::System_NotifyEvent(
+        IN IMS_UINT32 nEvent, IN IMS_UINTP nWParam, IN IMS_UINTP nLParam)
 {
-    (void) nWParam;
+    (void)nWParam;
 
     android::Parcel* pParcel = reinterpret_cast<android::Parcel*>(nLParam);
 
@@ -382,7 +361,8 @@ void OsUsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
 
     switch (nEvent)
     {
-        case NOTIFICATION_USIM_AUTH: {
+        case NOTIFICATION_USIM_AUTH:
+        {
             android::String8 strResponse(pParcel->readString16());
             AString strAuth(strResponse.string());
 
@@ -391,13 +371,11 @@ void OsUsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             pParam->m_nType = OsUsimParam::TYPE_AUTHENTICATION;
             pParam->m_nOwner = INT64_TO_SINTP(pParcel->readInt64());
 
-            IMS_TRACE_D("USIM :: Auth(B) - res(%d)=%s",
-                    strAuth.GetLength(), strAuth.GetStr(), 0);
+            IMS_TRACE_D("USIM :: Auth(B) - res(%d)=%s", strAuth.GetLength(), strAuth.GetStr(), 0);
 
             strAuth = AString::FromBase64(strAuth);
 
-            IMS_TRACE_I("USIM :: Auth(A) - owner=%" PFLS_x ", res=%s",
-                    pParam->m_nOwner,
+            IMS_TRACE_I("USIM :: Auth(A) - owner=%" PFLS_x ", res=%s", pParam->m_nOwner,
                     OsUtil::GetInstance()->IsDebugMode() ? strAuth.GetStr() : "xxx", 0);
 
             pParam->m_objResponse.Append(reinterpret_cast<const IMS_BYTE*>(strAuth.GetStr()),
@@ -406,7 +384,8 @@ void OsUsim::System_NotifyEvent(IN IMS_UINT32 nEvent,
             osUsim_SendMessage(m_piOwnerThread, GetSlotId(), pParam);
             break;
         }
-        default: {
+        default:
+        {
             break;
         }
     }

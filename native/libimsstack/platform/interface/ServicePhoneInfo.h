@@ -55,7 +55,9 @@ public:
 
     inline INetworkWatcher* GetNetworkWatcher()
             __IMS_DEPRECATED__("Use GetNetworkWatcher(IMS_SINT32) instead")
-    { return GetNetworkWatcher(IMS_SLOT_0); }
+    {
+        return GetNetworkWatcher(IMS_SLOT_0);
+    }
     INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId);
     IWifiWatcher* GetWifiWatcher();
 

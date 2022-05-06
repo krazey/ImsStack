@@ -27,17 +27,15 @@ public:
     // Executes the command
     virtual IMS_RESULT ExecuteCmd() = 0;
 
-    inline IMS_UINT32 GetIDCmd() const
-    { return nIDCmd; }
-    inline void SetCmdListener(IN IRetryCmdListener *piListener)
-    { this->piListener = piListener; }
+    inline IMS_UINT32 GetIDCmd() const { return nIDCmd; }
+    inline void SetCmdListener(IN IRetryCmdListener* piListener) { this->piListener = piListener; }
 
 protected:
     void OnCmdCompleted(IN IMS_SINT32 nResultCode, IN IMS_SINT32 nRetryAfter = 0);
 
 private:
     IMS_UINT32 nIDCmd;
-    IRetryCmdListener *piListener;
+    IRetryCmdListener* piListener;
 };
 
-#endif // _RETRY_CMD_H_
+#endif  // _RETRY_CMD_H_

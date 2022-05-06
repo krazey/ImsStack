@@ -21,8 +21,7 @@
 
 class OsPthreadPrivate;
 
-class OsPthread
-    : public ImsThread
+class OsPthread : public ImsThread
 {
 public:
     OsPthread();
@@ -41,8 +40,7 @@ public:
     // Only for IThreadListener
     void SetRunnable(IN IRunnable* piListener) override;
     IMS_BOOL PostMessageI(IN ImsMessage& objMsg) override;
-    IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg,
-            IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
+    IMS_BOOL PostMessageI(IN IMS_UINT32 nMsg, IN IMS_UINTP nWparam, IN IMS_UINTP nLparam) override;
 
     // ImsThread class
     IMS_BOOL Create(IN const AString& strName) override;

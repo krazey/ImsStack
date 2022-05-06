@@ -36,8 +36,7 @@ public:
     NetworkService& operator=(IN const NetworkService&) = delete;
 
 public:
-    INetworkConnection* CreateConnection(IN const AString& strProfileName,
-            IN IMS_SINT32 nSlotId);
+    INetworkConnection* CreateConnection(IN const AString& strProfileName, IN IMS_SINT32 nSlotId);
     /**
      * @brief Creates a data connection with the specified APN type.
      *
@@ -53,7 +52,9 @@ public:
     void DestroyConnection(IN INetworkConnection*& piConnection);
     inline INetworkConnection* FindConnection(IN const AString& strProfileName)
             __IMS_DEPRECATED__("Use FindConnection(IMS_SINT32,IMS_SINT32) instead")
-    { return FindConnection(strProfileName, IMS_SLOT_0); }
+    {
+        return FindConnection(strProfileName, IMS_SLOT_0);
+    }
     INetworkConnection* FindConnection(IN const AString& strProfileName, IN IMS_SINT32 nSlotId)
             __IMS_DEPRECATED__("Use FindConnection(IMS_SINT32,IMS_SINT32) instead");
 
@@ -72,18 +73,16 @@ public:
     INetworkConnection* FindConnection(IN const IPAddress& objIpAddr);
 
     ISocket* CreateSocket(IN INetworkConnection* piConnection);
-    ISocket* CreateSocket(IN const IMS_CHAR* pszProfileName,
-            IN IMS_SINT32 nSlotId);
+    ISocket* CreateSocket(IN const IMS_CHAR* pszProfileName, IN IMS_SINT32 nSlotId);
 
-    ISocket* CreateSslSocket(IN INetworkConnection* piConnection,
-            IN SSLCertificate* pCertificate);
-    ISocket* CreateSslSocket(IN const IMS_CHAR* pszProfileName,
-            IN SSLCertificate* pCertificate, IN IMS_SINT32 nSlotId);
+    ISocket* CreateSslSocket(IN INetworkConnection* piConnection, IN SSLCertificate* pCertificate);
+    ISocket* CreateSslSocket(IN const IMS_CHAR* pszProfileName, IN SSLCertificate* pCertificate,
+            IN IMS_SINT32 nSlotId);
     void DestroySocket(IN ISocket*& piSocket);
 
     // To check if the specified IP address & port number can be used to create a socket
-    IMS_BOOL CheckIpAndPortAvailability(IN const IPAddress& objIpAddr,
-            IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
+    IMS_BOOL CheckIpAndPortAvailability(
+            IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort, IN ISocket::SOCKET_ENTYPE enType);
 
     IIpcan* GetIpcan();
     INetworkIpSec* GetIpSec();
