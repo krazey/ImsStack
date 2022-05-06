@@ -17,13 +17,12 @@
 
 __IMS_TRACE_TAG_CONF__;
 
-PUBLIC GLOBAL
-IMS_BOOL ImsProvisioning::Initialize()
+PUBLIC GLOBAL IMS_BOOL ImsProvisioning::Initialize()
 {
     //---------------------------------------------------------------------------------------------
 
     if (!ConfigurationManager::GetInstance()->Initialize(
-            IMS_SOLUTION_IMS_CONFIG_DB, ConfigurationManager::MODE_DB))
+                IMS_SOLUTION_IMS_CONFIG_DB, ConfigurationManager::MODE_DB))
     {
         IMS_TRACE_E(0, "Initializing a Configuration Manager failed", 0, 0, 0);
         return IMS_FALSE;

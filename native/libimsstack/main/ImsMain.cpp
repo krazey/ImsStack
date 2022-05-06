@@ -25,40 +25,35 @@
 
 __IMS_TRACE_TAG_USER_DECL__("ImsMain")
 
-PUBLIC GLOBAL
-void ImsMain::SetConfiguration(IN IMS_SINT32 nEvent,
-        IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
+PUBLIC GLOBAL void ImsMain::SetConfiguration(
+        IN IMS_SINT32 nEvent, IN IMS_SINT32 nCount, IN const __SystemConfig* pSysConfig)
 {
     SystemConfigManager* pScm = SystemConfigManager::GetInstance();
     pScm->UpdateSystemConfig(nEvent, nCount, pSysConfig);
 
-    if ((nEvent == SystemConfig::EVENT_FEATURE_CHANGED)
-            || (nEvent == SystemConfig::EVENT_ALL_CONFIGURATION_CHANGED))
+    if ((nEvent == SystemConfig::EVENT_FEATURE_CHANGED) ||
+            (nEvent == SystemConfig::EVENT_ALL_CONFIGURATION_CHANGED))
     {
         // no-op
     }
 }
 
-PUBLIC GLOBAL
-void ImsMain::SetDeviceConfig(IN const __DeviceConfig& objConfig)
+PUBLIC GLOBAL void ImsMain::SetDeviceConfig(IN const __DeviceConfig& objConfig)
 {
     DeviceConfig::SetConfig(objConfig);
 }
 
-PUBLIC GLOBAL
-void ImsMain::Initialize()
+PUBLIC GLOBAL void ImsMain::Initialize()
 {
     PlatformProperty::Initialize();
 }
 
-PUBLIC GLOBAL
-void ImsMain::Uninitialize()
+PUBLIC GLOBAL void ImsMain::Uninitialize()
 {
     PlatformProperty::Uninitialize();
 }
 
-PUBLIC GLOBAL
-void ImsMain::Start()
+PUBLIC GLOBAL void ImsMain::Start()
 {
     ImsProvisioning::Initialize();
 
@@ -79,8 +74,7 @@ void ImsMain::Start()
     IMS_TRACE_I("ImsMain: start - %s", DeviceConfig::ToString().GetStr(), 0, 0);
 }
 
-PUBLIC GLOBAL
-void ImsMain::Stop()
+PUBLIC GLOBAL void ImsMain::Stop()
 {
     IMS_TRACE_I("ImsMain: stop", 0, 0, 0);
 

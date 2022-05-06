@@ -24,4 +24,4 @@ public:
     static IMS_BOOL Initialize();
 };
 
-#endif // _IMS_PROVISIONING_H_
+#endif  // _IMS_PROVISIONING_H_
