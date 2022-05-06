@@ -33,4 +33,4 @@ public:
     virtual SdpMediaParameter* GetMediaParameter(IN IMS_UINT32 nMid) const = 0;
 };
 
-#endif // _INTERFACE_SESSION_PARAMETER_H_
+#endif  // _INTERFACE_SESSION_PARAMETER_H_

@@ -48,7 +48,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_Alerting(IN Session *pSession) = 0;
+    virtual void OnSession_Alerting(IN Session* pSession) = 0;
 
     /*
      Notifies the application that a reference request has been received from a remote endpoint.
@@ -70,7 +70,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_ReferenceReceived(IN Session *pSession, IN Reference *pReference) = 0;
+    virtual void OnSession_ReferenceReceived(IN Session* pSession, IN Reference* pReference) = 0;
 
     /*
      Notifies the application that the session has been established.
@@ -91,7 +91,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_Started(IN Session *pSession) = 0;
+    virtual void OnSession_Started(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the session could not be established.
@@ -112,7 +112,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_StartFailed(IN Session *pSession) = 0;
+    virtual void OnSession_StartFailed(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the session has been terminated or that the session could
@@ -133,7 +133,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_Terminated(IN Session *pSession) = 0;
+    virtual void OnSession_Terminated(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the session has been updated.
@@ -154,7 +154,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_Updated(IN Session *pSession) = 0;
+    virtual void OnSession_Updated(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the session update has been rejected.
@@ -175,7 +175,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_UpdateFailed(IN Session *pSession) = 0;
+    virtual void OnSession_UpdateFailed(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the remote endpoint adds more media components to
@@ -198,7 +198,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_UpdateReceived(IN Session *pSession) = 0;
+    virtual void OnSession_UpdateReceived(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the CANCEL operation is successfully done
@@ -218,7 +218,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_CancelDelivered(IN Session *pSession) = 0;
+    virtual void OnSession_CancelDelivered(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the CANCEL operation is failed during an active call.
@@ -237,7 +237,7 @@ public:
     </table>
 
     */
-    virtual void OnSession_CancelDeliveryFailed(IN Session *pSession) = 0;
+    virtual void OnSession_CancelDeliveryFailed(IN Session* pSession) = 0;
 
     /*
      Notifies the application that the session has been received the forked response
@@ -260,8 +260,8 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL OnSession_ForkedResponseReceived(IN Session *pSession,
-            IN Session *pForkedSession) = 0;
+    virtual IMS_BOOL OnSession_ForkedResponseReceived(
+            IN Session* pSession, IN Session* pForkedSession) = 0;
 
     /*
      Notifies the application that the session has been received the provisional response
@@ -284,8 +284,8 @@ public:
     </table>
 
     */
-    virtual void OnSession_ProvisionalResponseReceived(IN Session *pSession,
-            IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
+    virtual void OnSession_ProvisionalResponseReceived(
+            IN Session* pSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
 
     /*
      Notifies the application that the remote endpoint starts a new SIP transaction
@@ -308,8 +308,8 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL OnSession_TransactionReceived(IN Session *pSession,
-            IN ISipServerConnection *piSSC) = 0;
+    virtual IMS_BOOL OnSession_TransactionReceived(
+            IN Session* pSession, IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_ON_SESSION_LISTENER_H_
+#endif  // _INTERFACE_ON_SESSION_LISTENER_H_

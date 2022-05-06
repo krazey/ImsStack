@@ -16,8 +16,7 @@
 #include "EngineState.h"
 
 // Initialization / Uninitialization for Engine
-PUBLIC GLOBAL
-IMS_BOOL EngineState::Initialize()
+PUBLIC GLOBAL IMS_BOOL EngineState::Initialize()
 {
     // Initialize a SIPManager
     IMS_BOOL bResult = StaticSIP::Initialize();
@@ -28,8 +27,7 @@ IMS_BOOL EngineState::Initialize()
     return bResult;
 }
 
-PUBLIC GLOBAL
-void EngineState::Uninitialize()
+PUBLIC GLOBAL void EngineState::Uninitialize()
 {
     // Releases all the resources in the reverse order of initialization ...
 

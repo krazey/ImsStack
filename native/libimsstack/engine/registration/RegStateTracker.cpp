@@ -18,39 +18,37 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegStateTracker::RegStateTracker()
-    : RCObject()
-    , strSubsId(AString::ConstNull())
-    , pAuthorizedAOR(IMS_NULL)
-    , objIPAddress(IPAddress::NONE)
-    , objPublicIPAddress(IPAddress::IPv6NONE)
-    , pContactAddressForOutgoingMessage(IMS_NULL)
-    , pPreferredContact(IMS_NULL)
-    , nTransportExt(0)
-    , nPortFlowControl(0)
-    , nPortUC(0)
-    , nPortUS(0)
-    , pSIPProfile(IMS_NULL)
+RegStateTracker::RegStateTracker() :
+        RCObject(),
+        strSubsId(AString::ConstNull()),
+        pAuthorizedAOR(IMS_NULL),
+        objIPAddress(IPAddress::NONE),
+        objPublicIPAddress(IPAddress::IPv6NONE),
+        pContactAddressForOutgoingMessage(IMS_NULL),
+        pPreferredContact(IMS_NULL),
+        nTransportExt(0),
+        nPortFlowControl(0),
+        nPortUC(0),
+        nPortUS(0),
+        pSIPProfile(IMS_NULL)
 {
 }
 
 PUBLIC
-RegStateTracker::RegStateTracker(IN const RegStateTracker& objRHS)
-    : RCObject(objRHS)
-    , strSubsId(objRHS.strSubsId)
-    , pAuthorizedAOR(IMS_NULL)
-    , objIPAddress(objRHS.objIPAddress)
-    , objPublicIPAddress(objRHS.objPublicIPAddress)
-    , pContactAddressForOutgoingMessage(IMS_NULL)
-    , pPreferredContact(objRHS.pPreferredContact)
-    , nTransportExt(objRHS.nTransportExt)
-    , nPortFlowControl(objRHS.nPortFlowControl)
-    , nPortUC(objRHS.nPortUC)
-    , nPortUS(objRHS.nPortUS)
-    , pSIPProfile(objRHS.pSIPProfile)
+RegStateTracker::RegStateTracker(IN const RegStateTracker& objRHS) :
+        RCObject(objRHS),
+        strSubsId(objRHS.strSubsId),
+        pAuthorizedAOR(IMS_NULL),
+        objIPAddress(objRHS.objIPAddress),
+        objPublicIPAddress(objRHS.objPublicIPAddress),
+        pContactAddressForOutgoingMessage(IMS_NULL),
+        pPreferredContact(objRHS.pPreferredContact),
+        nTransportExt(objRHS.nTransportExt),
+        nPortFlowControl(objRHS.nPortFlowControl),
+        nPortUC(objRHS.nPortUC),
+        nPortUS(objRHS.nPortUS),
+        pSIPProfile(objRHS.pSIPProfile)
 {
     if (objRHS.pAuthorizedAOR != IMS_NULL)
     {
@@ -59,13 +57,12 @@ RegStateTracker::RegStateTracker(IN const RegStateTracker& objRHS)
 
     if (objRHS.pContactAddressForOutgoingMessage != IMS_NULL)
     {
-        pContactAddressForOutgoingMessage = new SipAddress(
-                *(objRHS.pContactAddressForOutgoingMessage));
+        pContactAddressForOutgoingMessage =
+                new SipAddress(*(objRHS.pContactAddressForOutgoingMessage));
     }
 }
 
-PUBLIC VIRTUAL
-RegStateTracker::~RegStateTracker()
+PUBLIC VIRTUAL RegStateTracker::~RegStateTracker()
 {
     if (pAuthorizedAOR != IMS_NULL)
     {
@@ -239,7 +236,7 @@ IMS_BOOL RegStateTracker::IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const
 }
 
 PRIVATE
-void RegStateTracker::SetAOR(IN CONST SipAddress &objAOR)
+void RegStateTracker::SetAOR(IN CONST SipAddress& objAOR)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -247,7 +244,7 @@ void RegStateTracker::SetAOR(IN CONST SipAddress &objAOR)
 }
 
 PRIVATE
-void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray &objAssociatedURIs)
+void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -264,7 +261,7 @@ void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray &objAssociatedURIs
     }
     else
     {
-        const AString &strIMPU = this->objAssociatedURIs.GetFirstElement();
+        const AString& strIMPU = this->objAssociatedURIs.GetFirstElement();
 
         if (pAuthorizedAOR != IMS_NULL)
         {
@@ -289,7 +286,7 @@ void RegStateTracker::SetAssociatedURIs(IN CONST AStringArray &objAssociatedURIs
 }
 
 PRIVATE
-void RegStateTracker::SetPathHeaders(IN CONST AStringArray &objPaths)
+void RegStateTracker::SetPathHeaders(IN CONST AStringArray& objPaths)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -321,7 +318,7 @@ void RegStateTracker::SetPortUS(IN IMS_SINT32 nPort)
 }
 
 PRIVATE
-void RegStateTracker::SetPreferredContact(IN RegContact *pContact)
+void RegStateTracker::SetPreferredContact(IN RegContact* pContact)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -335,7 +332,7 @@ void RegStateTracker::SetPreferredContact(IN RegContact *pContact)
 }
 
 PRIVATE
-void RegStateTracker::SetPublicIPAddress(IN CONST IPAddress &objIP)
+void RegStateTracker::SetPublicIPAddress(IN CONST IPAddress& objIP)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -343,7 +340,7 @@ void RegStateTracker::SetPublicIPAddress(IN CONST IPAddress &objIP)
 }
 
 PRIVATE
-void RegStateTracker::SetSecurityClients(IN CONST IMSList<SipSecurityHeader> &objClients)
+void RegStateTracker::SetSecurityClients(IN CONST IMSList<SipSecurityHeader>& objClients)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -351,14 +348,14 @@ void RegStateTracker::SetSecurityClients(IN CONST IMSList<SipSecurityHeader> &ob
 
     for (IMS_UINT32 i = 0; i < objClients.GetSize(); ++i)
     {
-        const SipSecurityHeader &objHeader = objClients.GetAt(i);
+        const SipSecurityHeader& objHeader = objClients.GetAt(i);
 
         objSecurityClients.AddElement(objHeader.ToString());
     }
 }
 
 PRIVATE
-void RegStateTracker::SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader> &objVerifys)
+void RegStateTracker::SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objVerifys)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -366,14 +363,14 @@ void RegStateTracker::SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader> &ob
 
     for (IMS_UINT32 i = 0; i < objVerifys.GetSize(); ++i)
     {
-        const SipSecurityHeader &objHeader = objVerifys.GetAt(i);
+        const SipSecurityHeader& objHeader = objVerifys.GetAt(i);
 
         objSecurityVerifys.AddElement(objHeader.ToString());
     }
 }
 
 PRIVATE
-void RegStateTracker::SetServiceRoutes(IN CONST AStringArray &objServiceRoutes)
+void RegStateTracker::SetServiceRoutes(IN CONST AStringArray& objServiceRoutes)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -381,7 +378,7 @@ void RegStateTracker::SetServiceRoutes(IN CONST AStringArray &objServiceRoutes)
 }
 
 PRIVATE
-void RegStateTracker::SetSIPProfile(IN SipProfile *pProfile)
+void RegStateTracker::SetSIPProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -389,7 +386,7 @@ void RegStateTracker::SetSIPProfile(IN SipProfile *pProfile)
 }
 
 PRIVATE
-void RegStateTracker::SetSubscriberId(IN CONST AString &strSubsId)
+void RegStateTracker::SetSubscriberId(IN CONST AString& strSubsId)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -405,7 +402,7 @@ void RegStateTracker::SetTransportExt(IN IMS_SINT32 nTransportExt)
 }
 
 PRIVATE
-void RegStateTracker::SetUserInfoForContactHeader(IN CONST AString &strUserInfo)
+void RegStateTracker::SetUserInfoForContactHeader(IN CONST AString& strUserInfo)
 {
     //---------------------------------------------------------------------------------------------
 

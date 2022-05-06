@@ -15,8 +15,6 @@
 class Message;
 class Reference;
 
-
-
 /*
 
 This listener type is used to notify an application about events regarding a Reference.
@@ -50,7 +48,7 @@ public:
     </table>
 
     */
-    virtual void OnReference_Delivered(IN Reference *pReference) = 0;
+    virtual void OnReference_Delivered(IN Reference* pReference) = 0;
 
     /*
 
@@ -73,7 +71,7 @@ public:
     </table>
 
     */
-    virtual void OnReference_DeliveryFailed(IN Reference *pReference) = 0;
+    virtual void OnReference_DeliveryFailed(IN Reference* pReference) = 0;
 
     /*
 
@@ -97,7 +95,7 @@ public:
     </table>
 
     */
-    virtual void OnReference_NotifyReceived(IN Reference *pReference, IN Message *pNotify) = 0;
+    virtual void OnReference_NotifyReceived(IN Reference* pReference, IN Message* pNotify) = 0;
 
     /*
 
@@ -120,7 +118,7 @@ public:
     </table>
 
     */
-    virtual void OnReference_Terminated(IN Reference *pReference) = 0;
+    virtual void OnReference_Terminated(IN Reference* pReference) = 0;
 };
 
-#endif // _INTERFACE_ON_REFERENCE_LISTENER_H_
+#endif  // _INTERFACE_ON_REFERENCE_LISTENER_H_

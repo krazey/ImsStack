@@ -16,8 +16,6 @@
 #include "Sip.h"
 #include "ServiceTrace.h"
 
-
-
 class SIPPrivate
 {
 public:
@@ -143,10 +141,10 @@ public:
 
 private:
     // Variable for global error code of J180
-    static IMS_SINT32* ERROR_CODE; // 0 means there is no error
+    static IMS_SINT32* ERROR_CODE;  // 0 means there is no error
 
     // SIP encoding options
     static IMS_SINT32* ENCODING_OPTIONS;
 };
 
-#endif // _SIP_PRIVATE_H_
+#endif  // _SIP_PRIVATE_H_

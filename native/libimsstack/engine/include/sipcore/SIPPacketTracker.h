@@ -16,10 +16,7 @@
 #include "ISipMessage.h"
 #include "ISipPacketTracker.h"
 
-
-
-class SIPPacketTracker
-    : public ISipPacketTracker
+class SIPPacketTracker : public ISipPacketTracker
 {
 public:
     SIPPacketTracker();
@@ -31,13 +28,13 @@ private:
 
 public:
     IMS_BOOL IsPacketTrackerEnabled() const;
-    void NotifyMessageSent(IN ISipMessage *piSIPMsg,
-            IN CONST ByteArray &objMsg, IN IMS_BOOL bIsRetransmission);
-    void NotifyMessageReceived(IN ISipMessage *piSIPMsg,
-            IN CONST ByteArray &objMsg, IN IMS_BOOL bIsRetransmission);
+    void NotifyMessageSent(
+            IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
+    void NotifyMessageReceived(
+            IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
 
 public:
-    ISipPacketTrackerListener *piListener;
+    ISipPacketTrackerListener* piListener;
 };
 
-#endif // _SIP_PACKET_TRACKER_H_
+#endif  // _SIP_PACKET_TRACKER_H_

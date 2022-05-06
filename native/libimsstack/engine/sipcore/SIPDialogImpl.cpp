@@ -34,16 +34,13 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPDialogImpl::SIPDialogImpl(IN SIPDialog *pDialog_)
-    : pDialog(pDialog_)
+SIPDialogImpl::SIPDialogImpl(IN SIPDialog* pDialog_) :
+        pDialog(pDialog_)
 {
 }
 
-PUBLIC VIRTUAL
-SIPDialogImpl::~SIPDialogImpl()
+PUBLIC VIRTUAL SIPDialogImpl::~SIPDialogImpl()
 {
     if (pDialog != IMS_NULL)
     {
@@ -61,8 +58,7 @@ SIPDialogImpl::~SIPDialogImpl()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SIPDialogImpl::Destroy()
+PUBLIC VIRTUAL void SIPDialogImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -75,8 +71,7 @@ void SIPDialogImpl::Destroy()
 Remarks
 
 */
-PUBLIC VIRTUAL
-ISipDialog* SIPDialogImpl::Clone() const
+PUBLIC VIRTUAL ISipDialog* SIPDialogImpl::Clone() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -86,7 +81,7 @@ ISipDialog* SIPDialogImpl::Clone() const
         return IMS_NULL;
     }
 
-    SIPDialog *pNewDialog = new SIPDialog(*pDialog);
+    SIPDialog* pNewDialog = new SIPDialog(*pDialog);
 
     if (pNewDialog == IMS_NULL)
     {
@@ -94,7 +89,7 @@ ISipDialog* SIPDialogImpl::Clone() const
         return IMS_NULL;
     }
 
-    SIPDialogImpl *pDialogImpl = new SIPDialogImpl(pNewDialog);
+    SIPDialogImpl* pDialogImpl = new SIPDialogImpl(pNewDialog);
 
     if (pDialogImpl == IMS_NULL)
     {
@@ -113,10 +108,9 @@ ISipDialog* SIPDialogImpl::Clone() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPDialogImpl::Equals(IN CONST ISipDialog *piDialog)
+PUBLIC VIRTUAL IMS_BOOL SIPDialogImpl::Equals(IN CONST ISipDialog* piDialog)
 {
-    const SIPDialogImpl *pDialogImpl = DYNAMIC_CAST(const SIPDialogImpl*, piDialog);
+    const SIPDialogImpl* pDialogImpl = DYNAMIC_CAST(const SIPDialogImpl*, piDialog);
 
     //---------------------------------------------------------------------------------------------
 
@@ -132,8 +126,7 @@ IMS_BOOL SIPDialogImpl::Equals(IN CONST ISipDialog *piDialog)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AString SIPDialogImpl::GetDialogId()
+PUBLIC VIRTUAL AString SIPDialogImpl::GetDialogId()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -159,21 +152,21 @@ Remarks
     Contact
     Max-Forwards
 */
-PUBLIC VIRTUAL
-ISipClientConnection* SIPDialogImpl::GetNewClientConnection(IN CONST AString &strMethod)
+PUBLIC VIRTUAL ISipClientConnection* SIPDialogImpl::GetNewClientConnection(
+        IN CONST AString& strMethod)
 {
-    SIPClientConnection *pSCC = pDialog->CreateClientConnection(strMethod);
+    SIPClientConnection* pSCC = pDialog->CreateClientConnection(strMethod);
 
     //---------------------------------------------------------------------------------------------
 
     if (pSCC == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Creating a new SIP client connection (%s) failed",
-                strMethod.GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Creating a new SIP client connection (%s) failed", strMethod.GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    SIPClientConnectionImpl *pSCCImpl = new SIPClientConnectionImpl(pSCC);
+    SIPClientConnectionImpl* pSCCImpl = new SIPClientConnectionImpl(pSCC);
 
     if (pSCCImpl == IMS_NULL)
     {
@@ -215,24 +208,23 @@ Remarks
         can't be called in this state.
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SIPDialogImpl::GetState() const
+PUBLIC VIRTUAL IMS_SINT32 SIPDialogImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     switch (pDialog->GetState())
     {
-    case SIPDialog::STATE_TERMINATED:
-        return ISipDialog::STATE_TERMINATED;
+        case SIPDialog::STATE_TERMINATED:
+            return ISipDialog::STATE_TERMINATED;
 
-    case SIPDialog::STATE_EARLY:
-        return ISipDialog::STATE_EARLY;
+        case SIPDialog::STATE_EARLY:
+            return ISipDialog::STATE_EARLY;
 
-    case SIPDialog::STATE_CONFIRMED:
-        return ISipDialog::STATE_CONFIRMED;
+        case SIPDialog::STATE_CONFIRMED:
+            return ISipDialog::STATE_CONFIRMED;
 
-    default:
-        return ISipDialog::STATE_INIT;
+        default:
+            return ISipDialog::STATE_INIT;
     }
 }
 
@@ -242,15 +234,14 @@ IMS_SINT32 SIPDialogImpl::GetState() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPDialogImpl::IsSameDialog(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_BOOL SIPDialogImpl::IsSameDialog(IN CONST ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
     if (piSC == IMS_NULL)
         return IMS_FALSE;
 
-    SIPDialogImpl *pDialogImpl = DYNAMIC_CAST(SIPDialogImpl*, piSC->GetDialog());
+    SIPDialogImpl* pDialogImpl = DYNAMIC_CAST(SIPDialogImpl*, piSC->GetDialog());
 
     if (pDialogImpl == IMS_NULL)
         return IMS_FALSE;
@@ -264,24 +255,23 @@ IMS_BOOL SIPDialogImpl::IsSameDialog(IN CONST ISipConnection *piSC)
 Remarks
 
 */
-PUBLIC VIRTUAL
-AString SIPDialogImpl::GetComponent(IN IMS_SINT32 nType) const
+PUBLIC VIRTUAL AString SIPDialogImpl::GetComponent(IN IMS_SINT32 nType) const
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nType)
     {
-    case COMPONENT_CALL_ID:
-        return pDialog->GetCallId();
+        case COMPONENT_CALL_ID:
+            return pDialog->GetCallId();
 
-    case COMPONENT_LOCAL_TAG:
-        return pDialog->GetLocalTag();
+        case COMPONENT_LOCAL_TAG:
+            return pDialog->GetLocalTag();
 
-    case COMPONENT_REMOTE_TAG:
-        return pDialog->GetRemoteTag();
+        case COMPONENT_REMOTE_TAG:
+            return pDialog->GetRemoteTag();
 
-    default:
-        return AString::ConstNull();
+        default:
+            return AString::ConstNull();
     }
 }
 
@@ -291,8 +281,7 @@ AString SIPDialogImpl::GetComponent(IN IMS_SINT32 nType) const
 Remarks
  BYE_REQUEST_ON_DIALOG_TERMINATED
 */
-PUBLIC VIRTUAL
-AString SIPDialogImpl::GetDialogIdEx()
+PUBLIC VIRTUAL AString SIPDialogImpl::GetDialogIdEx()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -306,8 +295,7 @@ AString SIPDialogImpl::GetDialogIdEx()
 Remarks
 
 */
-PUBLIC VIRTUAL
-const ISipHeader* SIPDialogImpl::GetContactHeader() const
+PUBLIC VIRTUAL const ISipHeader* SIPDialogImpl::GetContactHeader() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -321,9 +309,8 @@ Remarks
  CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
 
 */
-PUBLIC VIRTUAL
-IMS_RESULT SIPDialogImpl::SetContactParameter(IN CONST AString &strParameter,
-        IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
+PUBLIC VIRTUAL IMS_RESULT SIPDialogImpl::SetContactParameter(
+        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -337,8 +324,7 @@ Remarks
  Use case) remove the dialog usage for "refer" event package subscription.
 
 */
-PUBLIC VIRTUAL
-void SIPDialogImpl::TerminateDialogUsage()
+PUBLIC VIRTUAL void SIPDialogImpl::TerminateDialogUsage()
 {
     pDialog->TerminateDialogUsage();
 }

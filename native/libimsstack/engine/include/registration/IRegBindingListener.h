@@ -16,8 +16,6 @@
 class SipAddress;
 class CallerCapability;
 
-
-
 class IRegBindingListener
 {
 public:
@@ -76,7 +74,7 @@ public:
     </table>
 
     */
-    virtual void RegBinding_OnInit(IN CONST SipAddress *pAOR) = 0;
+    virtual void RegBinding_OnInit(IN CONST SipAddress* pAOR) = 0;
 
     /*
      Queries the service capability to the application. It is for the caller capabilities.
@@ -95,7 +93,7 @@ public:
     </table>
 
     */
-    virtual void RegBinding_OnQueryCapability(OUT CallerCapability *&pCapability) = 0;
+    virtual void RegBinding_OnQueryCapability(OUT CallerCapability*& pCapability) = 0;
 
     /*
      Queries the registration headers to the application.
@@ -114,7 +112,7 @@ public:
     </table>
 
     */
-    virtual void RegBinding_OnQueryRegistrationHeaders(OUT AStringArray &objHeaders) = 0;
+    virtual void RegBinding_OnQueryRegistrationHeaders(OUT AStringArray& objHeaders) = 0;
 
     /*
      Notifies the application that the registration binding (AOR - Contact) is
@@ -136,4 +134,4 @@ public:
     virtual void RegBinding_OnTerminated() = 0;
 };
 
-#endif // _INTERFACE_REG_BINDING_LISTENER_H_
+#endif  // _INTERFACE_REG_BINDING_LISTENER_H_

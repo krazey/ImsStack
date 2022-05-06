@@ -14,36 +14,34 @@
 #include "TextParser.h"
 #include "Replaces.h"
 
-
-
 PUBLIC
-Replaces::Replaces()
-    : strCallId(AString::ConstNull())
-    , strFromTag(AString::ConstNull())
-    , strToTag(AString::ConstNull())
-    , bIsEarlyOnly(IMS_FALSE)
-    , pDialog(IMS_NULL)
+Replaces::Replaces() :
+        strCallId(AString::ConstNull()),
+        strFromTag(AString::ConstNull()),
+        strToTag(AString::ConstNull()),
+        bIsEarlyOnly(IMS_FALSE),
+        pDialog(IMS_NULL)
 {
 }
 
 PUBLIC
-Replaces::Replaces(IN CONST AString &strCallId_, IN CONST AString &strLocalTag_,
-        IN CONST AString &strRemoteTag_, IN IMS_BOOL bIsEarlyOnly_ /* = IMS_FALSE */)
-    : strCallId(strCallId_)
-    , strFromTag(strLocalTag_)
-    , strToTag(strRemoteTag_)
-    , bIsEarlyOnly(bIsEarlyOnly_)
+Replaces::Replaces(IN CONST AString& strCallId_, IN CONST AString& strLocalTag_,
+        IN CONST AString& strRemoteTag_, IN IMS_BOOL bIsEarlyOnly_ /* = IMS_FALSE */) :
+        strCallId(strCallId_),
+        strFromTag(strLocalTag_),
+        strToTag(strRemoteTag_),
+        bIsEarlyOnly(bIsEarlyOnly_)
 {
     pDialog = new Dialog(strCallId, strFromTag, strToTag);
 }
 
 PUBLIC
-Replaces::Replaces(IN CONST Replaces &objRHS)
-    : strCallId(objRHS.strCallId)
-    , strFromTag(objRHS.strFromTag)
-    , strToTag(objRHS.strToTag)
-    , bIsEarlyOnly(objRHS.bIsEarlyOnly)
-    , pDialog(IMS_NULL)
+Replaces::Replaces(IN CONST Replaces& objRHS) :
+        strCallId(objRHS.strCallId),
+        strFromTag(objRHS.strFromTag),
+        strToTag(objRHS.strToTag),
+        bIsEarlyOnly(objRHS.bIsEarlyOnly),
+        pDialog(IMS_NULL)
 {
     if (objRHS.pDialog != IMS_NULL)
     {
@@ -65,7 +63,7 @@ Replaces::~Replaces()
 }
 
 PUBLIC
-Replaces& Replaces::operator=(IN CONST Replaces &objRHS)
+Replaces& Replaces::operator=(IN CONST Replaces& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -100,7 +98,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL Replaces::Create(IN CONST AString &strReplacesHeader, IN IMS_BOOL bUAS /* = IMS_TRUE */)
+IMS_BOOL Replaces::Create(IN CONST AString& strReplacesHeader, IN IMS_BOOL bUAS /* = IMS_TRUE */)
 {
     AString strReplaces = TextParser::DoPercentDecoding(strReplacesHeader);
     IMSList<AString> objTokens = strReplaces.Split(TextParser::CHAR_SEMICOLON);
@@ -118,7 +116,7 @@ IMS_BOOL Replaces::Create(IN CONST AString &strReplacesHeader, IN IMS_BOOL bUAS 
     // to-tag & from-tag
     for (IMS_UINT32 i = 1; i < objTokens.GetSize(); ++i)
     {
-        const AString &strTemp = objTokens.GetAt(i);
+        const AString& strTemp = objTokens.GetAt(i);
         IMS_SINT32 nIndex = strTemp.GetIndexOf(TextParser::CHAR_EQUAL);
         AString strName = strTemp.GetSubStr(0, nIndex);
 
@@ -161,7 +159,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL Replaces::Equals(IN CONST Replaces *pOther) const
+IMS_BOOL Replaces::Equals(IN CONST Replaces* pOther) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -238,7 +236,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL Replaces::IsSameDialog(IN CONST Replaces *pOther) const
+IMS_BOOL Replaces::IsSameDialog(IN CONST Replaces* pOther) const
 {
     //---------------------------------------------------------------------------------------------
 

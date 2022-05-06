@@ -48,7 +48,7 @@ public:
      * @see IMessageMediator
      * @note SIP_MESSAGE_MEDIATOR
      */
-    virtual void SetSipMessageMediator(IN IMessageMediator *piMediator) = 0;
+    virtual void SetSipMessageMediator(IN IMessageMediator* piMediator) = 0;
 };
 
-#endif // _INTERFACE_REG_BASE_H_
+#endif  // _INTERFACE_REG_BASE_H_

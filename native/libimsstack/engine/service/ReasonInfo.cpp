@@ -13,58 +13,51 @@
 #include "ServiceMemory.h"
 #include "ReasonInfo.h"
 
-
-
 PUBLIC
-ReasonInfo::ReasonInfo()
-    : nType(REASON_TYPE_NONE)
+ReasonInfo::ReasonInfo() :
+        nType(REASON_TYPE_NONE)
 {
 }
 
 PUBLIC
-ReasonInfo::ReasonInfo(IN IMS_SINT32 nType_)
-    : nType(nType_)
+ReasonInfo::ReasonInfo(IN IMS_SINT32 nType_) :
+        nType(nType_)
 {
 }
 
 PUBLIC
-ReasonInfo::ReasonInfo(IN IMS_SINT32 nType_, IN CONST SipStatusCode &objStatusCode_)
-    : nType(nType_)
-    , objStatusCode(objStatusCode_)
+ReasonInfo::ReasonInfo(IN IMS_SINT32 nType_, IN CONST SipStatusCode& objStatusCode_) :
+        nType(nType_),
+        objStatusCode(objStatusCode_)
 {
 }
 
 PUBLIC
-ReasonInfo::~ReasonInfo()
-{
-}
+ReasonInfo::~ReasonInfo() {}
 
-PUBLIC VIRTUAL
-const AString& ReasonInfo::GetReasonPhrase() const
+PUBLIC VIRTUAL const AString& ReasonInfo::GetReasonPhrase() const
 {
     //---------------------------------------------------------------------------------------------
 
     if (nType != REASON_TYPE_RESPONSE)
-        return AString::ConstNull(); // Throw exception
+        return AString::ConstNull();  // Throw exception
 
     return objStatusCode.GetReasonPhrase();
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 ReasonInfo::GetReasonType() const
+PUBLIC VIRTUAL IMS_SINT32 ReasonInfo::GetReasonType() const
 {
     //---------------------------------------------------------------------------------------------
 
     return nType;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 ReasonInfo::GetStatusCode() const
+PUBLIC VIRTUAL IMS_SINT32 ReasonInfo::GetStatusCode() const
 {
     //---------------------------------------------------------------------------------------------
 
     if (nType != REASON_TYPE_RESPONSE)
-        return (-1); // Throw exception
+        return (-1);  // Throw exception
 
     return objStatusCode.ToInt();
 }

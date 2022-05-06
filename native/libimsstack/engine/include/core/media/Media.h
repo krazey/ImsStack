@@ -22,19 +22,17 @@ class ISDPOAState;
 class MediaProposal;
 class IOnMediaListener;
 
-
-
-class Media
-    : public IMediaState
+class Media : public IMediaState
 {
 public:
-    Media(IN Service *pService_, IN ISDPOAState *piOAState_);
+    Media(IN Service* pService_, IN ISDPOAState* piOAState_);
+
 protected:
     virtual ~Media();
 
 private:
-    Media(IN CONST Media &objRHS);
-    Media& operator=(IN CONST Media &objRHS);
+    Media(IN CONST Media& objRHS);
+    Media& operator=(IN CONST Media& objRHS);
 
 public:
     // IMedia interface
@@ -46,13 +44,13 @@ public:
     IMS_SINT32 GetState() const;
     IMS_SINT32 GetUpdateState() const;
     IMS_RESULT SetDirection(IN IMS_SINT32 nDirection);
-    void SetMediaListener(IN IOnMediaListener *piListener);
+    void SetMediaListener(IN IOnMediaListener* piListener);
     //// IMS extensions
     MediaDescriptor* GetMediaDescriptor() const;
     void RemoveMediaDescriptor(IN IMS_UINT32 nPosition);
     void SetMid(IN IMS_SINT32 nMid);
 
-    IMS_BOOL Equals(IN Media *pMedia) const;
+    IMS_BOOL Equals(IN Media* pMedia) const;
     IMS_BOOL IsDirectionOnlyUpdated() const;
     IMS_BOOL IsInitializationDone() const;
 
@@ -77,7 +75,7 @@ protected:
     virtual SdpMediaParameter* GetPeerMediaParameter(IN IMS_SINT32 nMid) const;
     virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
 
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState *piOAState) = 0;
+    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState) = 0;
     virtual IMS_BOOL PreviewInitInstance();
     virtual IMS_BOOL PostInitInstance();
     virtual void PreviewCleanupMedia();
@@ -86,7 +84,7 @@ protected:
     virtual void PostRemoveMedia();
 
     IMS_BOOL InitInstance(IN IMS_SINT32 nCountOfDescriptor, IN IMS_SINT32 nDirection);
-    IMS_BOOL InitInstance(IN CONST IMSList<IMS_SINT32> &objMids);
+    IMS_BOOL InitInstance(IN CONST IMSList<IMS_SINT32>& objMids);
     IMS_BOOL IsMediaAccepted() const;
     IMS_BOOL IsMediaProposed() const;
     Service* GetService() const;
@@ -177,19 +175,19 @@ public:
 private:
     friend class MediaFactory;
 
-    Service *pService;
-    ISDPOAState *piOAState;
+    Service* pService;
+    ISDPOAState* piOAState;
 
     IMS_SINT32 nState;
     IMS_SINT32 nUpdateState;
     IMS_SINT32 nDirection;
     IMSList<MediaDescriptor*> objDescriptors;
-    IOnMediaListener *piListener;
+    IOnMediaListener* piListener;
 
     IMS_BOOL bFlag_DirectionOnlyUpdated;
     IMS_BOOL bFlag_InitializationDone;
     IMS_BOOL bFlag_InitialOfferReceived;
-    MediaProposal *pMediaProposal;
+    MediaProposal* pMediaProposal;
 };
 
-#endif // _MEDIA_H_
+#endif  // _MEDIA_H_

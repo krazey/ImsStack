@@ -16,20 +16,17 @@
 #include "SipStatusCode.h"
 #include "IReasonInfo.h"
 
-
-
-class ReasonInfo
-    : public IReasonInfo
+class ReasonInfo : public IReasonInfo
 {
 public:
     ReasonInfo();
     explicit ReasonInfo(IN IMS_SINT32 nType_);
-    ReasonInfo(IN IMS_SINT32 nType_, IN CONST SipStatusCode &objStatusCode_);
+    ReasonInfo(IN IMS_SINT32 nType_, IN CONST SipStatusCode& objStatusCode_);
     ~ReasonInfo();
 
 private:
-    ReasonInfo(IN CONST ReasonInfo &objRHS);
-    ReasonInfo& operator=(IN CONST ReasonInfo &objRHS);
+    ReasonInfo(IN CONST ReasonInfo& objRHS);
+    ReasonInfo& operator=(IN CONST ReasonInfo& objRHS);
 
 public:
     // IReasonInfo interface implementations
@@ -45,4 +42,4 @@ private:
     SipStatusCode objStatusCode;
 };
 
-#endif // _REASON_INFO_H_
+#endif  // _REASON_INFO_H_

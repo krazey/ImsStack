@@ -19,8 +19,6 @@
 class ISipConnectionNotifier;
 class SIPConnectionNotifierManagerPrivate;
 
-
-
 class SIPConnectionNotifierManager
 {
 private:
@@ -31,19 +29,18 @@ private:
     SIPConnectionNotifierManager& operator=(IN const SIPConnectionNotifierManager& objRHS);
 
 public:
-    ISipConnectionNotifier* CreateConnectionNotifier(
-            IN CONST AString &strScheme, IN CONST IPAddress &objIPA, IN IMS_SINT32 nPortS,
-            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl,
-            IN CONST AString &strParams, IN CONST SipAddress &objUserId);
-    ISipConnectionNotifier* GetConnectionNotifier(IN CONST IPAddress &objIP,
-            IN IMS_SINT32 nPort);
-    void ReleaseConnectionNotifier(IN ISipConnectionNotifier *&piSCN);
+    ISipConnectionNotifier* CreateConnectionNotifier(IN CONST AString& strScheme,
+            IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+            IN IMS_SINT32 nPortFlowControl, IN CONST AString& strParams,
+            IN CONST SipAddress& objUserId);
+    ISipConnectionNotifier* GetConnectionNotifier(IN CONST IPAddress& objIP, IN IMS_SINT32 nPort);
+    void ReleaseConnectionNotifier(IN ISipConnectionNotifier*& piSCN);
 
     static SIPConnectionNotifierManager* GetInstance();
     static void Init(IN IMS_SINT32 nSlotId);
 
 private:
-    SIPConnectionNotifierManagerPrivate *pSCNMngrP;
+    SIPConnectionNotifierManagerPrivate* pSCNMngrP;
 };
 
-#endif // _SIP_CONNECTION_NOTIFIER_MANAGER_H_
+#endif  // _SIP_CONNECTION_NOTIFIER_MANAGER_H_

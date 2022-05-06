@@ -19,32 +19,31 @@
 #include "SIPStackTransaction.h"
 
 PUBLIC
-SIPStackTransaction::SIPStackTransaction()
-    : m_pKey(IMS_NULL)
-    , m_pTxn(IMS_NULL)
+SIPStackTransaction::SIPStackTransaction() :
+        m_pKey(IMS_NULL),
+        m_pTxn(IMS_NULL)
 {
 }
 
 PUBLIC
-SIPStackTransaction::SIPStackTransaction(IN SipTxnKey* pKey, IN SipTxn* pTxn)
-    : m_pKey(pKey)
-    , m_pTxn(pTxn)
+SIPStackTransaction::SIPStackTransaction(IN SipTxnKey* pKey, IN SipTxn* pTxn) :
+        m_pKey(pKey),
+        m_pTxn(pTxn)
 {
     SIPStack::AddReference(m_pKey);
     SIPStack::AddReference(m_pTxn);
 }
 
 PUBLIC
-SIPStackTransaction::SIPStackTransaction(IN const SIPStackTransaction& other)
-    : m_pKey(other.m_pKey)
-    , m_pTxn(other.m_pTxn)
+SIPStackTransaction::SIPStackTransaction(IN const SIPStackTransaction& other) :
+        m_pKey(other.m_pKey),
+        m_pTxn(other.m_pTxn)
 {
     SIPStack::AddReference(m_pKey);
     SIPStack::AddReference(m_pTxn);
 }
 
-PUBLIC VIRTUAL
-SIPStackTransaction::~SIPStackTransaction()
+PUBLIC VIRTUAL SIPStackTransaction::~SIPStackTransaction()
 {
     SIPStack::FreeTxnKey(m_pKey);
     SIPStack::FreeTxn(m_pTxn);

@@ -21,27 +21,23 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegInfo::RegInfo()
-    : bIsCreated(IMS_FALSE)
-    , nVersion(0)
-    , objListeners(IMSList<IRegInfoListener*>())
-    , objRegistrations(IMSList<RegInfoRegistration*>())
+RegInfo::RegInfo() :
+        bIsCreated(IMS_FALSE),
+        nVersion(0),
+        objListeners(IMSList<IRegInfoListener*>()),
+        objRegistrations(IMSList<RegInfoRegistration*>())
 {
 }
 
-PUBLIC VIRTUAL
-RegInfo::~RegInfo()
+PUBLIC VIRTUAL RegInfo::~RegInfo()
 {
     //---------------------------------------------------------------------------------------------
 
     RemoveAllRegistrations();
 }
 
-PUBLIC VIRTUAL
-IRegInfoRegistration* RegInfo::GetRegistration(IN CONST AString &strAOR) const
+PUBLIC VIRTUAL IRegInfoRegistration* RegInfo::GetRegistration(IN CONST AString& strAOR) const
 {
     SipAddress objAOR;
 
@@ -55,14 +51,13 @@ IRegInfoRegistration* RegInfo::GetRegistration(IN CONST AString &strAOR) const
     return GetRegistration(objAOR);
 }
 
-PUBLIC VIRTUAL
-IRegInfoRegistration* RegInfo::GetRegistration(IN CONST SipAddress &objAOR) const
+PUBLIC VIRTUAL IRegInfoRegistration* RegInfo::GetRegistration(IN CONST SipAddress& objAOR) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objRegistrations.GetSize(); ++i)
     {
-        RegInfoRegistration *pRegistration = objRegistrations.GetAt(i);
+        RegInfoRegistration* pRegistration = objRegistrations.GetAt(i);
 
         if (objAOR.Equals(pRegistration->GetAOR()))
         {
@@ -73,8 +68,7 @@ IRegInfoRegistration* RegInfo::GetRegistration(IN CONST SipAddress &objAOR) cons
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IMSList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
+PUBLIC VIRTUAL IMSList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
 {
     IMSList<IRegInfoRegistration*> objIRegInfoRegistrations;
 
@@ -82,7 +76,7 @@ IMSList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
 
     for (IMS_UINT32 i = 0; i < objRegistrations.GetSize(); ++i)
     {
-        RegInfoRegistration *pRegistration = objRegistrations.GetAt(i);
+        RegInfoRegistration* pRegistration = objRegistrations.GetAt(i);
 
         if (pRegistration != IMS_NULL)
         {
@@ -94,13 +88,13 @@ IMSList<IRegInfoRegistration*> RegInfo::GetRegistrations() const
 }
 
 PUBLIC
-void RegInfo::AddListener(IN IRegInfoListener *piListener)
+void RegInfo::AddListener(IN IRegInfoListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IRegInfoListener *piTmpListener = objListeners.GetAt(i);
+        IRegInfoListener* piTmpListener = objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -112,13 +106,13 @@ void RegInfo::AddListener(IN IRegInfoListener *piListener)
 }
 
 PUBLIC
-void RegInfo::RemoveListener(IN IRegInfoListener *piListener)
+void RegInfo::RemoveListener(IN IRegInfoListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
     {
-        IRegInfoListener *piTmpListener = objListeners.GetAt(i);
+        IRegInfoListener* piTmpListener = objListeners.GetAt(i);
 
         if (piTmpListener == piListener)
         {
@@ -129,7 +123,7 @@ void RegInfo::RemoveListener(IN IRegInfoListener *piListener)
 }
 
 PUBLIC
-IMS_BOOL RegInfo::Update(IN IDocument *piDocument)
+IMS_BOOL RegInfo::Update(IN IDocument* piDocument)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -141,7 +135,7 @@ IMS_BOOL RegInfo::Update(IN IDocument *piDocument)
         return IMS_FALSE;
     }
 
-    IElement *piElement = piDocument->GetDocumentElement();
+    IElement* piElement = piDocument->GetDocumentElement();
 
     if (piElement == IMS_NULL)
     {
@@ -190,8 +184,9 @@ IMS_BOOL RegInfo::Update(IN IDocument *piDocument)
         // refreshed SUBSCRIBE needs to be sent
         bSubscriptionRefreshRequired = IMS_TRUE;
 
-        IMS_TRACE_I("RegInfo :: Subscription refresh is required - " \
-                "New version (%d), Old version (%d)", nNewVersion, nVersion, 0);
+        IMS_TRACE_I("RegInfo :: Subscription refresh is required - "
+                    "New version (%d), Old version (%d)",
+                nNewVersion, nVersion, 0);
     }
 
     if (!bIsCreated)
@@ -213,14 +208,14 @@ IMS_BOOL RegInfo::Update(IN IDocument *piDocument)
     }
 
     // "registration" element
-    INodeList *piNodeList = piElement->GetElementsByTagName(RegInfoConst::ELEMENT_REGISTRATION);
+    INodeList* piNodeList = piElement->GetElementsByTagName(RegInfoConst::ELEMENT_REGISTRATION);
 
     if (piNodeList != IMS_NULL)
     {
         for (IMS_SINT32 i = 0; i < piNodeList->GetLength(); ++i)
         {
-            INode *piNode = piNodeList->Item(i);
-            RegInfoRegistration *pRegistration = CheckNCreateRegistration(piNode);
+            INode* piNode = piNodeList->Item(i);
+            RegInfoRegistration* pRegistration = CheckNCreateRegistration(piNode);
 
             if (pRegistration != IMS_NULL)
             {
@@ -251,7 +246,7 @@ void RegInfo::DisplayRegInfo()
     {
         IMS_TRACE_D("", 0, 0, 0);
 
-        RegInfoRegistration *pRegistration = objRegistrations.GetAt(i);
+        RegInfoRegistration* pRegistration = objRegistrations.GetAt(i);
 
         pRegistration->DisplayRegInfo();
     }
@@ -269,55 +264,55 @@ void RegInfo::CallListener(IN IMS_SINT32 nStatus)
 
     switch (nStatus)
     {
-    case STATUS_REFRESH_REQUIRED:
-        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
-        {
-            IRegInfoListener *piListener = objListeners.GetAt(i);
-
-            if (piListener != IMS_NULL)
+        case STATUS_REFRESH_REQUIRED:
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
             {
-                piListener->RegInfo_Updated(IMS_TRUE);
+                IRegInfoListener* piListener = objListeners.GetAt(i);
+
+                if (piListener != IMS_NULL)
+                {
+                    piListener->RegInfo_Updated(IMS_TRUE);
+                }
             }
-        }
-        break;
+            break;
 
-    case STATUS_UPDATED:
-        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
-        {
-            IRegInfoListener *piListener = objListeners.GetAt(i);
-
-            if (piListener != IMS_NULL)
+        case STATUS_UPDATED:
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
             {
-                piListener->RegInfo_Updated();
+                IRegInfoListener* piListener = objListeners.GetAt(i);
+
+                if (piListener != IMS_NULL)
+                {
+                    piListener->RegInfo_Updated();
+                }
             }
-        }
-        break;
+            break;
 
-    case STATUS_UPDATE_FAILED:
-        for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
-        {
-            IRegInfoListener *piListener = objListeners.GetAt(i);
-
-            if (piListener != IMS_NULL)
+        case STATUS_UPDATE_FAILED:
+            for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
             {
-                piListener->RegInfo_UpdateFailed();
-            }
-        }
-        break;
+                IRegInfoListener* piListener = objListeners.GetAt(i);
 
-    default:
-        break;
+                if (piListener != IMS_NULL)
+                {
+                    piListener->RegInfo_UpdateFailed();
+                }
+            }
+            break;
+
+        default:
+            break;
     }
 }
 
 PRIVATE
-RegInfoRegistration* RegInfo::CheckNCreateRegistration(IN INode *piNode)
+RegInfoRegistration* RegInfo::CheckNCreateRegistration(IN INode* piNode)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 j = 0; j < objRegistrations.GetSize(); ++j)
     {
-        RegInfoRegistration *pRegistration = objRegistrations.GetAt(j);
+        RegInfoRegistration* pRegistration = objRegistrations.GetAt(j);
 
         if (pRegistration->Equals(piNode))
         {
@@ -326,7 +321,7 @@ RegInfoRegistration* RegInfo::CheckNCreateRegistration(IN INode *piNode)
     }
 
     // New registration updated...
-    RegInfoRegistration *pRegistration = new RegInfoRegistration();
+    RegInfoRegistration* pRegistration = new RegInfoRegistration();
 
     if (pRegistration == IMS_NULL)
     {
@@ -356,7 +351,7 @@ void RegInfo::RemoveAllRegistrations()
 
     for (IMS_UINT32 i = 0; i < objRegistrations.GetSize(); ++i)
     {
-        RegInfoRegistration *pRegistration = objRegistrations.GetAt(i);
+        RegInfoRegistration* pRegistration = objRegistrations.GetAt(i);
 
         if (pRegistration != IMS_NULL)
         {

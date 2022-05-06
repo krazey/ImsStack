@@ -32,10 +32,9 @@ private:
 
 public:
     // MULTI_SUBS
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId,
-            IN CONST SipAddress &objAOR, IN IMS_BOOL bFake, IN CONST AString &strSubsId,
-            IN SipProfile *pSIPProfile);
-    void DestroyRegistration(IN IRegistration *piReg, IN IMS_BOOL bByForce = IMS_FALSE);
+    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
+            IN IMS_BOOL bFake, IN CONST AString& strSubsId, IN SipProfile* pSIPProfile);
+    void DestroyRegistration(IN IRegistration* piReg, IN IMS_BOOL bByForce = IMS_FALSE);
     IRegistration* GetRegistration(IN IMS_SINT32 nSlotId, IN IMS_UINT32 nFlowId) const;
 
 private:
@@ -46,8 +45,6 @@ private:
     // List of registration (bindings): < AOR (IMPU) + Contacts >
     IMSMap<RegKey, IRegistration*> objRegistrations;
 };
-
-
 
 PUBLIC
 RegistrationManagerPrivate::RegistrationManagerPrivate()
@@ -66,14 +63,14 @@ RegistrationManagerPrivate::~RegistrationManagerPrivate()
 
 PUBLIC
 IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
-        IN CONST SipAddress &objAOR, IN IMS_BOOL bFake, IN CONST AString &strSubsId,
-        IN SipProfile *pSIPProfile)
+        IN CONST SipAddress& objAOR, IN IMS_BOOL bFake, IN CONST AString& strSubsId,
+        IN SipProfile* pSIPProfile)
 {
     // Fine a proper registration flow, but in this time, it uses a default registration flow.
 
     if (bFake)
     {
-        FakeRegistration *pFakeReg = new FakeRegistration();
+        FakeRegistration* pFakeReg = new FakeRegistration();
 
         if (pFakeReg == IMS_NULL)
         {
@@ -98,7 +95,7 @@ IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
     }
     else
     {
-        Registration *pReg = new Registration();
+        Registration* pReg = new Registration();
 
         if (pReg == IMS_NULL)
         {
@@ -126,8 +123,8 @@ IMS_BOOL RegistrationManagerPrivate::CreateRegistration(IN IMS_UINT32 nFlowId,
 }
 
 PUBLIC
-void RegistrationManagerPrivate::DestroyRegistration(IN IRegistration *piReg,
-        IN IMS_BOOL bByForce /* = IMS_FALSE */)
+void RegistrationManagerPrivate::DestroyRegistration(
+        IN IRegistration* piReg, IN IMS_BOOL bByForce /* = IMS_FALSE */)
 {
     if (piReg == IMS_NULL)
     {
@@ -143,7 +140,7 @@ void RegistrationManagerPrivate::DestroyRegistration(IN IRegistration *piReg,
 
     for (IMS_UINT32 i = 0; i < objRegistrations.GetSize(); ++i)
     {
-        IRegistration *piTmpReg = objRegistrations.GetValueAt(i);
+        IRegistration* piTmpReg = objRegistrations.GetValueAt(i);
 
         if (piTmpReg->IsNetworkInterworkingRequired() != piReg->IsNetworkInterworkingRequired())
         {
@@ -154,7 +151,7 @@ void RegistrationManagerPrivate::DestroyRegistration(IN IRegistration *piReg,
         {
             if (piReg->IsNetworkInterworkingRequired())
             {
-                Registration *pReg = DYNAMIC_CAST(Registration*, piReg);
+                Registration* pReg = DYNAMIC_CAST(Registration*, piReg);
 
                 if (bByForce || pReg->GetAllContactsEx().IsEmpty())
                 {
@@ -168,7 +165,7 @@ void RegistrationManagerPrivate::DestroyRegistration(IN IRegistration *piReg,
             }
             else
             {
-                FakeRegistration *pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
+                FakeRegistration* pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
 
                 if (bByForce || pFakeReg->GetAllContactsEx().IsEmpty())
                 {
@@ -217,13 +214,13 @@ void RegistrationManagerPrivate::ClearRegistrations()
 
     for (IMS_UINT32 i = 0; i < objRegistrations.GetSize(); ++i)
     {
-        IRegistration *piReg = objRegistrations.GetValueAt(i);
+        IRegistration* piReg = objRegistrations.GetValueAt(i);
 
         if (piReg != IMS_NULL)
         {
             if (piReg->IsNetworkInterworkingRequired())
             {
-                Registration *pReg = DYNAMIC_CAST(Registration*, piReg);
+                Registration* pReg = DYNAMIC_CAST(Registration*, piReg);
 
                 if (pReg != IMS_NULL)
                 {
@@ -232,7 +229,7 @@ void RegistrationManagerPrivate::ClearRegistrations()
             }
             else
             {
-                FakeRegistration *pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
+                FakeRegistration* pFakeReg = DYNAMIC_CAST(FakeRegistration*, piReg);
 
                 if (pFakeReg != IMS_NULL)
                 {
@@ -245,11 +242,9 @@ void RegistrationManagerPrivate::ClearRegistrations()
     objRegistrations.Clear();
 }
 
-
-
 PRIVATE
-RegistrationManager::RegistrationManager()
-    : pRegMngrP(new RegistrationManagerPrivate())
+RegistrationManager::RegistrationManager() :
+        pRegMngrP(new RegistrationManagerPrivate())
 {
 }
 
@@ -269,10 +264,10 @@ Remarks
  MULTI_REG_SIP_PROFILE
 */
 PUBLIC
-IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId,
-        IN CONST AString &strAOR, IN IMS_BOOL bFake /* = IMS_FALSE */,
-        IN CONST AString &strSubsId /* = AString::ConstNull() */,
-        IN SipProfile *pSIPProfile/* = IMS_NULL*/)
+IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST AString& strAOR,
+        IN IMS_BOOL bFake /* = IMS_FALSE */,
+        IN CONST AString& strSubsId /* = AString::ConstNull() */,
+        IN SipProfile* pSIPProfile /* = IMS_NULL*/)
 {
     SipAddress objAOR;
 
@@ -291,10 +286,10 @@ Remarks
  MULTI_REG_SIP_PROFILE
 */
 PUBLIC
-IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId,
-        IN CONST SipAddress &objAOR, IN IMS_BOOL bFake /* = IMS_FALSE */,
-        IN CONST AString &strSubsId /* = AString::ConstNull() */,
-        IN SipProfile *pSIPProfile/* = IMS_NULL*/)
+IMS_BOOL RegistrationManager::CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
+        IN IMS_BOOL bFake /* = IMS_FALSE */,
+        IN CONST AString& strSubsId /* = AString::ConstNull() */,
+        IN SipProfile* pSIPProfile /* = IMS_NULL*/)
 {
     IMS_SINT32 nSlotId = ThreadService::GetCurrentSlotId();
 
@@ -312,8 +307,8 @@ Remarks
 
 */
 PUBLIC
-void RegistrationManager::DestroyRegistration(IN IRegistration *piReg,
-        IN IMS_BOOL bByForce /* = IMS_FALSE */)
+void RegistrationManager::DestroyRegistration(
+        IN IRegistration* piReg, IN IMS_BOOL bByForce /* = IMS_FALSE */)
 {
     pRegMngrP->DestroyRegistration(piReg, bByForce);
 }
@@ -324,8 +319,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL RegistrationManager::IsRegSubscriptionSupported(IN IMS_SINT32 nSlotId/* = IMS_SLOT_0*/,
-        IN SipProfile *pSIPProfile/* = IMS_NULL*/) const
+IMS_BOOL RegistrationManager::IsRegSubscriptionSupported(
+        IN IMS_SINT32 nSlotId /* = IMS_SLOT_0*/, IN SipProfile* pSIPProfile /* = IMS_NULL*/) const
 {
     return SipConfigProxy::IsRegSubscriptionConfigured(nSlotId, pSIPProfile);
 }
@@ -347,10 +342,9 @@ IRegistration* RegistrationManager::GetRegistration(
 Remarks
 
 */
-PUBLIC GLOBAL
-RegistrationManager* RegistrationManager::GetInstance()
+PUBLIC GLOBAL RegistrationManager* RegistrationManager::GetInstance()
 {
-    static RegistrationManager *pRegMngr = IMS_NULL;
+    static RegistrationManager* pRegMngr = IMS_NULL;
 
     if (pRegMngr == IMS_NULL)
     {

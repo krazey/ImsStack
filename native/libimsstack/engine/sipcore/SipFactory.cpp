@@ -27,14 +27,12 @@
 #include "SIPTransportHelper.h"
 #include "SIPUtil.h"
 
-PUBLIC GLOBAL
-ISipKeepAliveHelper* SipFactory::CreateKeepAliveHelper(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipKeepAliveHelper* SipFactory::CreateKeepAliveHelper(IN IMS_SINT32 nSlotId)
 {
     return new SIPKeepAliveHelper(nSlotId);
 }
 
-PUBLIC GLOBAL
-void SipFactory::GenerateCallId(IN const AString& strHost, OUT AString& strCallId)
+PUBLIC GLOBAL void SipFactory::GenerateCallId(IN const AString& strHost, OUT AString& strCallId)
 {
     strCallId = SIPUtil::GenerateCallId(strHost);
 }
@@ -42,9 +40,8 @@ void SipFactory::GenerateCallId(IN const AString& strHost, OUT AString& strCallI
 /**
  * HEADER_REQ_SESSION-ID
  */
-PUBLIC GLOBAL
-void SipFactory::GenerateSessionId(IN IMS_SINT32 nSlotId,
-        IN const AString& strCallId, OUT AString& strSessionId)
+PUBLIC GLOBAL void SipFactory::GenerateSessionId(
+        IN IMS_SINT32 nSlotId, IN const AString& strCallId, OUT AString& strSessionId)
 {
     if (SipFeatures::IsHeaderSessionIdRequired(nSlotId))
     {
@@ -55,45 +52,38 @@ void SipFactory::GenerateSessionId(IN IMS_SINT32 nSlotId,
     strSessionId = AString::ConstNull();
 }
 
-PUBLIC GLOBAL
-ISipIpSecState* SipFactory::GetIpSecState(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipIpSecState* SipFactory::GetIpSecState(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetIPSecState(nSlotId);
 }
 
-PUBLIC GLOBAL
-ISipMessageTracker* SipFactory::GetMessageTracker(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipMessageTracker* SipFactory::GetMessageTracker(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetMessageTracker(nSlotId);
 }
 
-PUBLIC GLOBAL
-ISipRoutingRejectNotifier* SipFactory::GetRoutingRejectNotifier(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipRoutingRejectNotifier* SipFactory::GetRoutingRejectNotifier(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetRoutingRejectNotifier(nSlotId);
 }
 
-PUBLIC GLOBAL
-ISipRtConfigHelper* SipFactory::GetRtConfigHelper(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipRtConfigHelper* SipFactory::GetRtConfigHelper(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetRtConfigHelper(nSlotId);
 }
 
-PUBLIC GLOBAL
-ISipTransportHelper* SipFactory::GetTransportHelper(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipTransportHelper* SipFactory::GetTransportHelper(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetTransportHelper(nSlotId);
 }
 
-PUBLIC GLOBAL
-ISipPacketTracker* SipFactory::GetPacketTracker(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL ISipPacketTracker* SipFactory::GetPacketTracker(IN IMS_SINT32 nSlotId)
 {
     return SIPFactoryProxy::GetInstance()->GetPacketTracker(nSlotId);
 }
 
-PUBLIC GLOBAL
-void SipFactory::SetTokenGenerator(IN IMS_SINT32 nSlotId,
-        IN ISipTokenGenerator* piTokenGenerator)
+PUBLIC GLOBAL void SipFactory::SetTokenGenerator(
+        IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator)
 {
     SIPFactoryProxy::GetInstance()->SetTokenGenerator(nSlotId, piTokenGenerator);
 }

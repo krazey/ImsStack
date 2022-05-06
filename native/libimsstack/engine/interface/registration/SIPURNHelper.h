@@ -58,11 +58,11 @@ public:
      * @param strName Any string to be hashed
      * @return An UUID URN string.
      */
-    static AString GetURN(IN IMS_SINT32 nVersion, IN CONST AString &strName);
+    static AString GetURN(IN IMS_SINT32 nVersion, IN CONST AString& strName);
 
 private:
     static const IMS_CHAR IMEI[];
     static const IMS_CHAR IMEI_SV[];
 };
 
-#endif // _SIP_URN_HELPER_H_
+#endif  // _SIP_URN_HELPER_H_

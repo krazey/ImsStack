@@ -19,8 +19,6 @@
 
 class SIPDialogEx;
 
-
-
 class SIPDialogSharedState
 {
 public:
@@ -28,16 +26,15 @@ public:
     ~SIPDialogSharedState();
 
 private:
-    SIPDialogSharedState(IN CONST SIPDialogSharedState &objRHS);
-    SIPDialogSharedState& operator=(IN CONST SIPDialogSharedState &objRHS);
+    SIPDialogSharedState(IN CONST SIPDialogSharedState& objRHS);
+    SIPDialogSharedState& operator=(IN CONST SIPDialogSharedState& objRHS);
 
 private:
-    IMS_BOOL AddDialog(IN SIPDialogEx *pDialogEx);
-    void RemoveDialog(IN SIPDialogEx *pDialogEx);
-    SIPDialogEx* GetDialog(IN CONST SIPMessageInfo &objMInfo);
+    IMS_BOOL AddDialog(IN SIPDialogEx* pDialogEx);
+    void RemoveDialog(IN SIPDialogEx* pDialogEx);
+    SIPDialogEx* GetDialog(IN CONST SIPMessageInfo& objMInfo);
     IMS_BOOL HasMultipleDialogUsages() const;
-    inline IMS_BOOL IsShared() const
-    { return (nSharedState == SHARED_STATE_ACTIVE); }
+    inline IMS_BOOL IsShared() const { return (nSharedState == SHARED_STATE_ACTIVE); }
 
 private:
     friend class SIPDialogState;
@@ -55,4 +52,4 @@ private:
     IMSList<SIPDialogEx*> objDialogExs;
 };
 
-#endif // _SIP_DIALOG_SHARED_STATE_H_
+#endif  // _SIP_DIALOG_SHARED_STATE_H_

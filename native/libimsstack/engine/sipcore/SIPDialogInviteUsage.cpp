@@ -23,10 +23,7 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
-PRIVATE GLOBAL
-const IMS_SINT32 \
+PRIVATE GLOBAL const IMS_SINT32
 SIPDialogInviteUsage::STATE_TABLE[SIPDState::STATE_MAX][SIPDialogInviteUsage::TRIGGER_MAX] =
 {
     // STATE_INIT
@@ -67,45 +64,36 @@ SIPDialogInviteUsage::STATE_TABLE[SIPDState::STATE_MAX][SIPDialogInviteUsage::TR
     }
 };
 
-
-
 PUBLIC
-SIPDialogInviteUsage::SIPDialogInviteUsage(IN SIPDialogBase *pDialog_)
-    : SIPDialogUsage(SIPDialogUsage::TYPE_INVITE, pDialog_)
+SIPDialogInviteUsage::SIPDialogInviteUsage(IN SIPDialogBase* pDialog_) :
+        SIPDialogUsage(SIPDialogUsage::TYPE_INVITE, pDialog_)
 {
 }
 
 PUBLIC
-SIPDialogInviteUsage::SIPDialogInviteUsage(IN CONST SIPDialogInviteUsage &objRHS)
-    : SIPDialogUsage(objRHS)
+SIPDialogInviteUsage::SIPDialogInviteUsage(IN CONST SIPDialogInviteUsage& objRHS) :
+        SIPDialogUsage(objRHS)
 {
 }
 
-PUBLIC VIRTUAL
-SIPDialogInviteUsage::~SIPDialogInviteUsage()
-{
-}
+PUBLIC VIRTUAL SIPDialogInviteUsage::~SIPDialogInviteUsage() {}
 
-PUBLIC VIRTUAL
-SIPDialogUsage* SIPDialogInviteUsage::Clone() const
+PUBLIC VIRTUAL SIPDialogUsage* SIPDialogInviteUsage::Clone() const
 {
     //---------------------------------------------------------------------------------------------
 
     return new SIPDialogInviteUsage(*this);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL SIPDialogInviteUsage::CompareTo(IN CONST SIPMessageInfo &objMInfo) const
+PUBLIC VIRTUAL IMS_BOOL SIPDialogInviteUsage::CompareTo(IN CONST SIPMessageInfo& objMInfo) const
 {
-    const SipMethod &objMethod = objMInfo.GetMethod();
+    const SipMethod& objMethod = objMInfo.GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
     // CASE : subscribe usage & register usage
-    if (objMethod.Equals(SipMethod::SUBSCRIBE)
-            || objMethod.Equals(SipMethod::REFER)
-            || objMethod.Equals(SipMethod::NOTIFY)
-            || objMethod.Equals(SipMethod::REGISTER))
+    if (objMethod.Equals(SipMethod::SUBSCRIBE) || objMethod.Equals(SipMethod::REFER) ||
+            objMethod.Equals(SipMethod::NOTIFY) || objMethod.Equals(SipMethod::REGISTER))
     {
         return IMS_FALSE;
     }
@@ -113,8 +101,8 @@ IMS_BOOL SIPDialogInviteUsage::CompareTo(IN CONST SIPMessageInfo &objMInfo) cons
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 SIPDialogInviteUsage::UpdateUsageDetails(IN CONST SIPMessageInfo &objMInfo)
+PUBLIC VIRTUAL IMS_SINT32 SIPDialogInviteUsage::UpdateUsageDetails(
+        IN CONST SIPMessageInfo& objMInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -122,8 +110,8 @@ IMS_SINT32 SIPDialogInviteUsage::UpdateUsageDetails(IN CONST SIPMessageInfo &obj
     return SIPDialogUsage::UpdateUsageDetails(objMInfo);
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SIPDialogInviteUsage::GetNextState(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger)
+PUBLIC GLOBAL IMS_SINT32 SIPDialogInviteUsage::GetNextState(
+        IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -133,11 +121,10 @@ IMS_SINT32 SIPDialogInviteUsage::GetNextState(IN IMS_SINT32 nState, IN IMS_SINT3
     return STATE_TABLE[nState][nTrigger];
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 SIPDialogInviteUsage::GetActionNTrigger(IN CONST SIPMessageInfo &objMInfo,
-        OUT IMS_SINT32 &nTrigger)
+PROTECTED VIRTUAL IMS_SINT32 SIPDialogInviteUsage::GetActionNTrigger(
+        IN CONST SIPMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger)
 {
-    SipMessage *pstMessage = objMInfo.GetMessage();
+    SipMessage* pstMessage = objMInfo.GetMessage();
 
     IMS_SINT32 nAction = SIPDState::ACTION_TRANSIT_STATE;
 
@@ -152,7 +139,7 @@ IMS_SINT32 SIPDialogInviteUsage::GetActionNTrigger(IN CONST SIPMessageInfo &objM
     }
     else
     {
-        const SipMethod &objMethod = objMInfo.GetMethod();
+        const SipMethod& objMethod = objMInfo.GetMethod();
 
         nAction = GetActionForResponse(objMInfo);
 
@@ -190,9 +177,8 @@ IMS_SINT32 SIPDialogInviteUsage::GetActionNTrigger(IN CONST SIPMessageInfo &objM
             }
             else
             {
-                //4 How to handle in case of BYE ???
-                if (!objMethod.Equals(SipMethod::INVITE)
-                        && !objMethod.Equals(SipMethod::BYE))
+                // 4 How to handle in case of BYE ???
+                if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::BYE))
                 {
                     nAction = SIPDState::ACTION_IGNORE;
                 }
@@ -205,9 +191,8 @@ IMS_SINT32 SIPDialogInviteUsage::GetActionNTrigger(IN CONST SIPMessageInfo &objM
     return nAction;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL SIPDialogInviteUsage::IsUsageTerminated(IN IMS_SINT32 nState,
-        IN IMS_SINT32 nTrigger) const
+PROTECTED VIRTUAL IMS_BOOL SIPDialogInviteUsage::IsUsageTerminated(
+        IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -217,24 +202,24 @@ IMS_BOOL SIPDialogInviteUsage::IsUsageTerminated(IN IMS_SINT32 nState,
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-const IMS_CHAR* SIPDialogInviteUsage::TriggerToString(IN IMS_SINT32 nTrigger) const
+PROTECTED VIRTUAL const IMS_CHAR* SIPDialogInviteUsage::TriggerToString(
+        IN IMS_SINT32 nTrigger) const
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nTrigger)
     {
-    case TRIGGER_1XX:
-        return "TRIGGER_1XX";
-    case TRIGGER_2XX:
-        return "TRIGGER_2XX";
-    case TRIGGER_NON_2XX:
-        return "TRIGGER_NON_2XX";
-    case TRIGGER_2XX_BYE:
-        return "TRIGGER_2XX_BYE";
-    case TRIGGER_BYE:
-        return "TRIGGER_BYE";
-    default:
-        return SIPDialogUsage::TriggerToString(nTrigger);
+        case TRIGGER_1XX:
+            return "TRIGGER_1XX";
+        case TRIGGER_2XX:
+            return "TRIGGER_2XX";
+        case TRIGGER_NON_2XX:
+            return "TRIGGER_NON_2XX";
+        case TRIGGER_2XX_BYE:
+            return "TRIGGER_2XX_BYE";
+        case TRIGGER_BYE:
+            return "TRIGGER_BYE";
+        default:
+            return SIPDialogUsage::TriggerToString(nTrigger);
     }
 }

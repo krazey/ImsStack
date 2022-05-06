@@ -61,8 +61,8 @@ public:
      * @param strCallId Call-ID for this Session-ID
      * @param strSessionId Session-ID header field value
      */
-    static void GenerateSessionId(IN IMS_SINT32 nSlotId,
-            IN const AString& strCallId, OUT AString& strSessionId);
+    static void GenerateSessionId(
+            IN IMS_SINT32 nSlotId, IN const AString& strCallId, OUT AString& strSessionId);
 
     /**
      * @brief Returns the instance of SIP IPSec state.

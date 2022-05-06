@@ -17,8 +17,6 @@
 #include "util/EventPackage.h"
 #include "SIPHeaderProperty.h"
 
-
-
 /*
 This class defines a state & behavior for a subscription state.
 
@@ -34,14 +32,14 @@ public:
     virtual ~SubState();
 
 private:
-    SubState(IN CONST SubState &objRHS);
-    SubState& operator=(IN CONST SubState &objRHS);
+    SubState(IN CONST SubState& objRHS);
+    SubState& operator=(IN CONST SubState& objRHS);
 
 public:
     virtual void Clear();
-    virtual IMS_BOOL UpdateState(IN CONST ISipMessage *piSIPMsg) = 0;
+    virtual IMS_BOOL UpdateState(IN CONST ISipMessage* piSIPMsg) = 0;
 
-    IMS_BOOL CreateEventPackage(IN CONST AString &strEvent);
+    IMS_BOOL CreateEventPackage(IN CONST AString& strEvent);
     IMS_SINT32 GetConfiguration() const;
     IMS_SINT32 GetDuration() const;
     EventPackage* GetEventPackage();
@@ -59,25 +57,27 @@ public:
     void SetConfiguration(IN IMS_SINT32 nConfigValue);
     void SetOperation(IN IMS_SINT32 nOperation);
 
-    static IMS_SINT32 ExtractExpiresParameter(IN CONST ISipHeader *piHeader);
-    static IMS_SINT32 ExtractReasonParameter(IN CONST ISipHeader *piHeader);
-    static IMS_SINT32 ExtractSubStateValue(IN CONST ISipHeader *piHeader);
+    static IMS_SINT32 ExtractExpiresParameter(IN CONST ISipHeader* piHeader);
+    static IMS_SINT32 ExtractReasonParameter(IN CONST ISipHeader* piHeader);
+    static IMS_SINT32 ExtractSubStateValue(IN CONST ISipHeader* piHeader);
 
     // Gets the constant values from ISubscriptionState
     static IMS_SINT32 GetSubStateFromSubscriptionState(IN IMS_SINT32 nSubState);
     static IMS_SINT32 GetReasonFromSubscriptionState(IN IMS_SINT32 nReason);
 
 protected:
-    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32 &nCount) const;
+    virtual const SIPHeaderProperty* GetRestrictedHeaders(OUT IMS_UINT32& nCount) const;
 
     inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
-    { return (nConfigValue & nValue) != 0; }
+    {
+        return (nConfigValue & nValue) != 0;
+    }
     void SetDuration(IN IMS_SINT32 nDuration);
     void SetDurationUpdated(IN IMS_BOOL bDurationUpdated);
     void SetInstantSubscription(IN IMS_BOOL bInstantSubscription);
-    void SetState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nState);
+    void SetState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nState);
     void SetSubState(IN IMS_SINT32 nSubState);
-    void StoreMessage(IN CONST ISipMessage *piSIPMsg);
+    void StoreMessage(IN CONST ISipMessage* piSIPMsg);
 
 private:
     static const IMS_CHAR* OperationToString(IN IMS_SINT32 nOperation);
@@ -142,7 +142,10 @@ public:
         REASON_MAX
     };
 
-    enum { NO_EXPIRES = (-1) };
+    enum
+    {
+        NO_EXPIRES = (-1)
+    };
 
     // Runtime configuration for sub-state
     enum
@@ -186,7 +189,7 @@ private:
     IMS_BOOL bFlag_InstantSubscription;
 
     // Manages an initial SIP message for refresh/removal operation
-    ISipMessage *piSIPMsg;
+    ISipMessage* piSIPMsg;
 };
 
-#endif // _SUB_STATE_H_
+#endif  // _SUB_STATE_H_

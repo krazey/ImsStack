@@ -22,10 +22,7 @@
 
 class RegContact;
 
-
-
-class RegStateTracker
-    : public RCObject
+class RegStateTracker : public RCObject
 {
 public:
     RegStateTracker();
@@ -62,25 +59,25 @@ public:
     IMS_BOOL IsWithinTrustDomain(IN IMS_SINT32 nSlotId) const;
 
 private:
-    void SetAOR(IN CONST SipAddress &objAOR);
-    void SetAssociatedURIs(IN CONST AStringArray &objAssociatedURIs);
-    void SetPathHeaders(IN CONST AStringArray &objPaths);
+    void SetAOR(IN CONST SipAddress& objAOR);
+    void SetAssociatedURIs(IN CONST AStringArray& objAssociatedURIs);
+    void SetPathHeaders(IN CONST AStringArray& objPaths);
     void SetPortFlowControl(IN IMS_SINT32 nPort);
     void SetPortUC(IN IMS_SINT32 nPort);
     void SetPortUS(IN IMS_SINT32 nPort);
-    void SetPreferredContact(IN RegContact *pContact);
+    void SetPreferredContact(IN RegContact* pContact);
     // NAT_REQ_UE_PUBLIC_IP
-    void SetPublicIPAddress(IN CONST IPAddress &objIP);
-    void SetSecurityClients(IN CONST IMSList<SipSecurityHeader> &objClients);
-    void SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader> &objVerifys);
-    void SetServiceRoutes(IN CONST AStringArray &objServiceRoutes);
+    void SetPublicIPAddress(IN CONST IPAddress& objIP);
+    void SetSecurityClients(IN CONST IMSList<SipSecurityHeader>& objClients);
+    void SetSecurityVerifys(IN CONST IMSList<SipSecurityHeader>& objVerifys);
+    void SetServiceRoutes(IN CONST AStringArray& objServiceRoutes);
     // MULTI_REG_SIP_PROFILE
-    void SetSIPProfile(IN SipProfile *pProfile);
+    void SetSIPProfile(IN SipProfile* pProfile);
     // MULTI_SUBS
-    void SetSubscriberId(IN CONST AString &strSubsId);
+    void SetSubscriberId(IN CONST AString& strSubsId);
     // MULTI_REG_TRANSPORT
     void SetTransportExt(IN IMS_SINT32 nTransportExt);
-    void SetUserInfoForContactHeader(IN CONST AString &strUserInfo);
+    void SetUserInfoForContactHeader(IN CONST AString& strUserInfo);
 
 private:
     friend class Registration;
@@ -91,15 +88,15 @@ private:
     // IMPU : Public User Identity
     SipAddress objAOR;
     // IMPU : Network authorized Public User Identity (Topmost one in P-Associated-URI)
-    SipAddress *pAuthorizedAOR;
+    SipAddress* pAuthorizedAOR;
 
     // Preferred Contact address
     IPAddress objIPAddress;
     // NAT_REQ_UE_PUBLIC_IP
     IPAddress objPublicIPAddress;
     SipAddress objPreferredContactAddress;
-    SipAddress *pContactAddressForOutgoingMessage;
-    RegContact *pPreferredContact;
+    SipAddress* pContactAddressForOutgoingMessage;
+    RegContact* pPreferredContact;
 
     // MULTI_REG_TRANSPORT
     IMS_SINT32 nTransportExt;
@@ -122,4 +119,4 @@ private:
     RCPtr<SipProfile> pSIPProfile;
 };
 
-#endif // _REG_STATE_TRACKER_H_
+#endif  // _REG_STATE_TRACKER_H_

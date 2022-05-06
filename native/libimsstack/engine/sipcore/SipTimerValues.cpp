@@ -48,9 +48,7 @@ SipTimerValues::SipTimerValues(IN const SipTimerValues& other) :
 }
 
 PUBLIC
-SipTimerValues::~SipTimerValues()
-{
-}
+SipTimerValues::~SipTimerValues() {}
 
 PUBLIC
 SipTimerValues& SipTimerValues::operator=(IN const SipTimerValues& other)
@@ -163,8 +161,7 @@ void SipTimerValues::SetValue(IN IMS_SINT32 nType, IN IMS_UINT32 nValue)
     }
 }
 
-PUBLIC GLOBAL
-SipTimerValues SipTimerValues::CreateTimerValues(IN IMS_SINT32 nT1, IN IMS_SINT32 nT2)
+PUBLIC GLOBAL SipTimerValues SipTimerValues::CreateTimerValues(IN IMS_SINT32 nT1, IN IMS_SINT32 nT2)
 {
     SipTimerValues objTv;
 

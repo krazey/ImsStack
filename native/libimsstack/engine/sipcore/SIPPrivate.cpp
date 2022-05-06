@@ -15,14 +15,11 @@
 #include "SystemConfig.h"
 #include "SIPPrivate.h"
 
-PRIVATE GLOBAL
-IMS_SINT32* SIPPrivate::ERROR_CODE = IMS_NULL;
+PRIVATE GLOBAL IMS_SINT32* SIPPrivate::ERROR_CODE = IMS_NULL;
 
-PRIVATE GLOBAL
-IMS_SINT32* SIPPrivate::ENCODING_OPTIONS = IMS_NULL;
+PRIVATE GLOBAL IMS_SINT32* SIPPrivate::ENCODING_OPTIONS = IMS_NULL;
 
-PUBLIC GLOBAL
-void SIPPrivate::Init()
+PUBLIC GLOBAL void SIPPrivate::Init()
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
@@ -35,8 +32,7 @@ void SIPPrivate::Init()
     }
 }
 
-PUBLIC GLOBAL
-void SIPPrivate::Init(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nEncodingOptions)
+PUBLIC GLOBAL void SIPPrivate::Init(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nEncodingOptions)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
@@ -54,8 +50,7 @@ void SIPPrivate::Init(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nEncodingOptions)
     }
 }
 
-PUBLIC GLOBAL
-void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode)
+PUBLIC GLOBAL void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode)
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
@@ -67,8 +62,7 @@ void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode)
     SetLastError(nErrorCode, nSlotId);
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SIPPrivate::GetLastError()
+PUBLIC GLOBAL IMS_SINT32 SIPPrivate::GetLastError()
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
@@ -80,8 +74,7 @@ IMS_SINT32 SIPPrivate::GetLastError()
     return GetLastError(nSlotId);
 }
 
-PUBLIC GLOBAL
-IMS_SINT32 SIPPrivate::GetEncodingOptions()
+PUBLIC GLOBAL IMS_SINT32 SIPPrivate::GetEncodingOptions()
 {
     IMS_SINT32 nSlotId = IMS_SLOT_0;
 
@@ -93,9 +86,7 @@ IMS_SINT32 SIPPrivate::GetEncodingOptions()
     return GetEncodingOptions(nSlotId);
 }
 
-
-PRIVATE GLOBAL
-void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSlotId)
+PRIVATE GLOBAL void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
@@ -108,8 +99,7 @@ void SIPPrivate::SetLastError(IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSlotId)
     }
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SIPPrivate::GetLastError(IN IMS_SINT32 nSlotId)
+PRIVATE GLOBAL IMS_SINT32 SIPPrivate::GetLastError(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
@@ -119,14 +109,13 @@ IMS_SINT32 SIPPrivate::GetLastError(IN IMS_SINT32 nSlotId)
     return (ERROR_CODE != IMS_NULL) ? ERROR_CODE[nSlotId] : 0;
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 SIPPrivate::GetEncodingOptions(IN IMS_SINT32 nSlotId)
+PRIVATE GLOBAL IMS_SINT32 SIPPrivate::GetEncodingOptions(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
         return (OPTIONS_E | OPT_E_FULLFORM);
     }
 
-    return (ENCODING_OPTIONS != IMS_NULL) ?\
-            ENCODING_OPTIONS[nSlotId] : (OPTIONS_E | OPT_E_FULLFORM);
+    return (ENCODING_OPTIONS != IMS_NULL) ? ENCODING_OPTIONS[nSlotId]
+                                          : (OPTIONS_E | OPT_E_FULLFORM);
 }

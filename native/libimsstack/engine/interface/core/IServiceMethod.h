@@ -15,8 +15,7 @@ class IMessage;
  *
  * @see IMessage
  */
-class IServiceMethod
-    : public IMethod
+class IServiceMethod : public IMethod
 {
 public:
     /**
@@ -138,4 +137,4 @@ public:
     virtual IMSList<AString> GetRemoteUserId() const = 0;
 };
 
-#endif // _INTERFACE_SERVICE_METHOD_H_
+#endif  // _INTERFACE_SERVICE_METHOD_H_

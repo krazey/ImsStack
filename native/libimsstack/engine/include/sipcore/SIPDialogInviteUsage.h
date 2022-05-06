@@ -22,31 +22,28 @@
 
 #include "SIPDialogUsage.h"
 
-
-
-class SIPDialogInviteUsage
-    : public SIPDialogUsage
+class SIPDialogInviteUsage : public SIPDialogUsage
 {
 public:
-    SIPDialogInviteUsage(IN SIPDialogBase *pDialog_);
-    SIPDialogInviteUsage(IN CONST SIPDialogInviteUsage &objRHS);
+    SIPDialogInviteUsage(IN SIPDialogBase* pDialog_);
+    SIPDialogInviteUsage(IN CONST SIPDialogInviteUsage& objRHS);
     virtual ~SIPDialogInviteUsage();
 
 private:
     SIPDialogInviteUsage();
-    SIPDialogInviteUsage& operator=(IN CONST SIPDialogInviteUsage &objRHS);
+    SIPDialogInviteUsage& operator=(IN CONST SIPDialogInviteUsage& objRHS);
 
 public:
     // SIPDialogUsage class
     virtual SIPDialogUsage* Clone() const;
-    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo &objMInfo) const;
-    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo &objMInfo);
+    virtual IMS_BOOL CompareTo(IN CONST SIPMessageInfo& objMInfo) const;
+    virtual IMS_SINT32 UpdateUsageDetails(IN CONST SIPMessageInfo& objMInfo);
 
     static IMS_SINT32 GetNextState(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger);
 
 protected:
-    virtual IMS_SINT32 GetActionNTrigger(IN CONST SIPMessageInfo &objMInfo,
-            OUT IMS_SINT32 &nTrigger);
+    virtual IMS_SINT32 GetActionNTrigger(
+            IN CONST SIPMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger);
     virtual IMS_BOOL IsUsageTerminated(IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const;
 
     virtual const IMS_CHAR* TriggerToString(IN IMS_SINT32 nTrigger) const;
@@ -70,4 +67,4 @@ private:
     static const IMS_SINT32 STATE_TABLE[SIPDState::STATE_MAX][TRIGGER_MAX];
 };
 
-#endif // _SIP_DIALOG_INVITE_USAGE_H_
+#endif  // _SIP_DIALOG_INVITE_USAGE_H_

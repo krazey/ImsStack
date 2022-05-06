@@ -25,8 +25,7 @@ class SipParameter;
 /**
  * @brief This class provides an interface to handle SIP headers.
  */
-class ISipHeader :
-        public ISipObject
+class ISipHeader : public ISipObject
 {
 public:
     /**

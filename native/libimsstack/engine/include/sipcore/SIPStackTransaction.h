@@ -31,10 +31,8 @@ public:
 
 public:
     IMS_BOOL CompareKey(IN SipTxnKey* pKey);
-    inline SipTxn* GetTxn() const
-    { return m_pTxn; }
-    inline SipTxnKey* GetKey() const
-    { return m_pKey; }
+    inline SipTxn* GetTxn() const { return m_pTxn; }
+    inline SipTxnKey* GetKey() const { return m_pKey; }
 
 private:
     SipTxnKey* m_pKey;

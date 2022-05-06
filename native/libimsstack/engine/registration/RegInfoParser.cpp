@@ -22,20 +22,17 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegInfoParser::RegInfoParser(IN const RegKey& objRegKey_,
-        IN IXmlTransactionProvider *&piXmlTxnProvider_)
-    : objRegKey(objRegKey_)
-    , piXmlTxnProvider(piXmlTxnProvider_)
-    , piXMLTxn(IMS_NULL)
-    , piListener(IMS_NULL)
+RegInfoParser::RegInfoParser(
+        IN const RegKey& objRegKey_, IN IXmlTransactionProvider*& piXmlTxnProvider_) :
+        objRegKey(objRegKey_),
+        piXmlTxnProvider(piXmlTxnProvider_),
+        piXMLTxn(IMS_NULL),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-RegInfoParser::~RegInfoParser()
+PUBLIC VIRTUAL RegInfoParser::~RegInfoParser()
 {
     if (piXMLTxn != IMS_NULL)
     {
@@ -51,7 +48,7 @@ const RegKey& RegInfoParser::GetRegKey() const
 }
 
 PUBLIC
-IMS_BOOL RegInfoParser::Parse(IN const AString &strRegInfo)
+IMS_BOOL RegInfoParser::Parse(IN const AString& strRegInfo)
 {
     piXMLTxn = piXmlTxnProvider->CreateTransaction();
 
@@ -62,7 +59,7 @@ IMS_BOOL RegInfoParser::Parse(IN const AString &strRegInfo)
 
     piXMLTxn->SetListener(this);
 
-    IXmlRequest *piRequest = piXMLTxn->GetRequest();
+    IXmlRequest* piRequest = piXMLTxn->GetRequest();
 
     if (piRequest->SetRawXml(strRegInfo) != IMS_SUCCESS)
     {
@@ -84,13 +81,13 @@ IMS_BOOL RegInfoParser::Parse(IN const AString &strRegInfo)
 }
 
 PUBLIC
-void RegInfoParser::SetListener(IN IRegInfoParserListener *piListener)
+void RegInfoParser::SetListener(IN IRegInfoParserListener* piListener)
 {
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT RegInfoParser::XmlTransaction_NotifyParsingCompleted(IN IXmlTransaction* piTransaction)
+PRIVATE VIRTUAL IMS_RESULT RegInfoParser::XmlTransaction_NotifyParsingCompleted(
+        IN IXmlTransaction* piTransaction)
 {
     if (piXMLTxn != piTransaction)
     {
@@ -103,13 +100,13 @@ IMS_RESULT RegInfoParser::XmlTransaction_NotifyParsingCompleted(IN IXmlTransacti
         return IMS_SUCCESS;
     }
 
-    IXmlResponse *piResponse = piXMLTxn->GetResponse();
+    IXmlResponse* piResponse = piXMLTxn->GetResponse();
 
     if (piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "No 'reginfo' parser listener", 0, 0, 0);
 
-        IDocument *piDocument = piResponse->GetDocument();
+        IDocument* piDocument = piResponse->GetDocument();
 
         if (piDocument != IMS_NULL)
         {
@@ -124,7 +121,7 @@ IMS_RESULT RegInfoParser::XmlTransaction_NotifyParsingCompleted(IN IXmlTransacti
 
     if (piResponse->GetResponseCode() == IXmlResponse::RESPONSE_CODE_SUCCESS)
     {
-        IDocument *piDocument = piResponse->GetDocument();
+        IDocument* piDocument = piResponse->GetDocument();
 
         // Notify the XML parsing result for "reginfo"
         piListener->RegInfoParser_ParsingCompleted(this, piDocument);
@@ -158,19 +155,14 @@ IMS_RESULT RegInfoParser::XmlTransaction_NotifyParsingCompleted(IN IXmlTransacti
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegInfoParser::RegInfoParser(IN const RegKey& objRegKey_)
-    : objRegKey(objRegKey_)
-    , piListener(IMS_NULL)
+RegInfoParser::RegInfoParser(IN const RegKey& objRegKey_) :
+        objRegKey(objRegKey_),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-RegInfoParser::~RegInfoParser()
-{
-}
+PUBLIC VIRTUAL RegInfoParser::~RegInfoParser() {}
 
 PUBLIC
 const RegKey& RegInfoParser::GetRegKey() const
@@ -179,17 +171,17 @@ const RegKey& RegInfoParser::GetRegKey() const
 }
 
 PUBLIC
-IMS_BOOL RegInfoParser::Parse(IN const AString &strRegInfo)
+IMS_BOOL RegInfoParser::Parse(IN const AString& strRegInfo)
 {
     DomDocumentBuilderFactory* pBuilderFactory = DomDocumentBuilderFactory::GetInstance();
-    DocumentBuilder *pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
+    DocumentBuilder* pDocumentBuilder = pBuilderFactory->NewDocumentBuilder();
 
     if (pDocumentBuilder == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IDocument *piDocument = pDocumentBuilder->Parse(strRegInfo);
+    IDocument* piDocument = pDocumentBuilder->Parse(strRegInfo);
 
     if (piDocument == IMS_NULL)
     {
@@ -212,9 +204,9 @@ IMS_BOOL RegInfoParser::Parse(IN const AString &strRegInfo)
 }
 
 PUBLIC
-void RegInfoParser::SetListener(IN IRegInfoParserListener *piListener)
+void RegInfoParser::SetListener(IN IRegInfoParserListener* piListener)
 {
     this->piListener = piListener;
 }
 
-#endif // __IMS_ASYNC_XML_PARSER__
+#endif  // __IMS_ASYNC_XML_PARSER__

@@ -22,8 +22,6 @@ class Reference;
 class SessionEx;
 class Capabilities;
 
-
-
 /*
 
 IOnCoreServiceListener interface
@@ -56,8 +54,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_PageMessageReceived(IN CoreService *pService,
-            IN PageMessage *pMessage) = 0;
+    virtual void OnCoreService_PageMessageReceived(
+            IN CoreService* pService, IN PageMessage* pMessage) = 0;
 
     /*
 
@@ -79,8 +77,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_ReferenceReceived(IN CoreService *pService,
-            IN Reference *pReference) = 0;
+    virtual void OnCoreService_ReferenceReceived(
+            IN CoreService* pService, IN Reference* pReference) = 0;
 
     /*
 
@@ -100,8 +98,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_ServiceClosed(IN CoreService *pService,
-            IN ReasonInfo *pReasonInfo) = 0;
+    virtual void OnCoreService_ServiceClosed(
+            IN CoreService* pService, IN ReasonInfo* pReasonInfo) = 0;
 
     /*
 
@@ -122,8 +120,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_SessionInvitationReceived(IN CoreService *pService,
-            IN SessionEx *pSession) = 0;
+    virtual void OnCoreService_SessionInvitationReceived(
+            IN CoreService* pService, IN SessionEx* pSession) = 0;
 
     /*
 
@@ -144,8 +142,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_UnsolicitedNotifyReceived(IN CoreService *pService,
-            IN Message *pNotify) = 0;
+    virtual void OnCoreService_UnsolicitedNotifyReceived(
+            IN CoreService* pService, IN Message* pNotify) = 0;
 
     //// IMS extensions
     /*
@@ -167,8 +165,8 @@ public:
     </table>
 
     */
-    virtual void OnCoreService_CapabilityQueryReceived(IN CoreService *pService,
-            IN Capabilities *pCapabilities) = 0;
+    virtual void OnCoreService_CapabilityQueryReceived(
+            IN CoreService* pService, IN Capabilities* pCapabilities) = 0;
 };
 
-#endif // _INTERFACE_ON_CORE_SERVICE_LISTENER_H_
+#endif  // _INTERFACE_ON_CORE_SERVICE_LISTENER_H_

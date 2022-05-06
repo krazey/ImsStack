@@ -17,10 +17,7 @@
 
 class IConnection;
 
-
-
-class Connection
-    : public EngineActivity
+class Connection : public EngineActivity
 {
 public:
     Connection();
@@ -32,10 +29,10 @@ public:
 
     // Extensions
     IConnection* GetOwner() const;
-    void SetOwner(IN IConnection *piOwner);
+    void SetOwner(IN IConnection* piOwner);
 
 private:
-    IConnection *piOwner;
+    IConnection* piOwner;
 };
 
-#endif // _CONNECTION_H_
+#endif  // _CONNECTION_H_

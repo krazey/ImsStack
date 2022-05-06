@@ -48,4 +48,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REASON_INFO_H_
+#endif  // _INTERFACE_REASON_INFO_H_

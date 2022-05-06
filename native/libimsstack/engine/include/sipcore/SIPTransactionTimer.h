@@ -18,8 +18,7 @@
 
 #include "ITimer.h"
 
-class SIPTransactionTimer
-    : public ITimerListener
+class SIPTransactionTimer : public ITimerListener
 {
 public:
     SIPTransactionTimer(IN SipTimeoutData* pData, IN SipTimerCallback pfnTimerCallback);

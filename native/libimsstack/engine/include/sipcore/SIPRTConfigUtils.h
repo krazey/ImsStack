@@ -35,4 +35,4 @@ public:
     static IMS_BOOL IsTcpPortRangeConfigured(IN IMS_SINT32 nSlotId);
 };
 
-#endif // _SIP_RT_CONFIG_UTILS_H_
+#endif  // _SIP_RT_CONFIG_UTILS_H_

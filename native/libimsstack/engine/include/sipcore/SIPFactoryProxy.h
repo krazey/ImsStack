@@ -40,8 +40,7 @@ public:
     SipRoutingRejectNotifier* GetRoutingRejectNotifier(IN IMS_SINT32 nSlotId);
     SIPRTConfigHelper* GetRtConfigHelper(IN IMS_SINT32 nSlotId);
     SIPTransportHelper* GetTransportHelper(IN IMS_SINT32 nSlotId);
-    void SetTokenGenerator(IN IMS_SINT32 nSlotId,
-            IN ISipTokenGenerator* piTokenGenerator);
+    void SetTokenGenerator(IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator);
 
     IMS_BOOL IsIPSecStateEnabled(IN IMS_SINT32 nSlotId) const;
     IMS_BOOL IsMessageTrackerEnabled(IN IMS_SINT32 nSlotId) const;
@@ -59,4 +58,4 @@ private:
     SIPFactoryProxyPrivate* pPrivate;
 };
 
-#endif // _SIP_FACTORY_PROXY_H_
+#endif  // _SIP_FACTORY_PROXY_H_

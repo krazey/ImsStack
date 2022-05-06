@@ -18,25 +18,22 @@
 class ISDPOAState;
 class MediaDescriptor;
 
-
-
-class MediaProposal
-    : public IMediaState
+class MediaProposal : public IMediaState
 {
 public:
-    MediaProposal(IN ISDPOAState *piOAState_);
+    MediaProposal(IN ISDPOAState* piOAState_);
     virtual ~MediaProposal();
 
 private:
-    MediaProposal(IN CONST MediaProposal &objRHS);
-    MediaProposal& operator=(IN CONST MediaProposal &objRHS);
+    MediaProposal(IN CONST MediaProposal& objRHS);
+    MediaProposal& operator=(IN CONST MediaProposal& objRHS);
 
 public:
     // IMedia interface
     virtual const IMSList<MediaDescriptor*>& GetMediaDescriptors() const;
     virtual IMS_SINT32 GetType() const = 0;
 
-    IMS_BOOL CreateDescriptor(IN CONST IMSList<MediaDescriptor*> &objDescriptors);
+    IMS_BOOL CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& objDescriptors);
     IMS_SINT32 GetDirection() const;
     MediaDescriptor* GetMediaDescriptor() const;
     MediaDescriptor* GetMediaDescriptor(IN IMS_SINT32 nMid) const;
@@ -51,8 +48,8 @@ protected:
     virtual SdpMediaParameter* GetProposalMediaParameter(IN IMS_SINT32 nMid);
 
 private:
-    ISDPOAState *piOAState;
+    ISDPOAState* piOAState;
     IMSList<MediaDescriptor*> objDescriptors;
 };
 
-#endif // _MEDIA_PROPOSAL_H_
+#endif  // _MEDIA_PROPOSAL_H_

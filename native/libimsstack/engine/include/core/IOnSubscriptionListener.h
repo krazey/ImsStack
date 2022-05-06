@@ -52,8 +52,8 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL OnSubscription_ForkedNotifyReceived(IN Subscription *pSubscription,
-            IN Subscription *pForkedSubscription) = 0;
+    virtual IMS_BOOL OnSubscription_ForkedNotifyReceived(
+            IN Subscription* pSubscription, IN Subscription* pForkedSubscription) = 0;
 
     /*
 
@@ -77,8 +77,8 @@ public:
     </table>
 
     */
-    virtual void OnSubscription_NotifyReceived(IN Subscription *pSubscription,
-            IN Message *pNotify, OUT IMS_BOOL &bDestroyNotify) = 0;
+    virtual void OnSubscription_NotifyReceived(
+            IN Subscription* pSubscription, IN Message* pNotify, OUT IMS_BOOL& bDestroyNotify) = 0;
 
     /*
 
@@ -98,7 +98,7 @@ public:
     </table>
 
     */
-    virtual void OnSubscription_Started(IN Subscription *pSubscription) = 0;
+    virtual void OnSubscription_Started(IN Subscription* pSubscription) = 0;
 
     /*
 
@@ -118,7 +118,7 @@ public:
     </table>
 
     */
-    virtual void OnSubscription_StartFailed(IN Subscription *pSubscription) = 0;
+    virtual void OnSubscription_StartFailed(IN Subscription* pSubscription) = 0;
 
     /*
 
@@ -138,7 +138,7 @@ public:
     </table>
 
     */
-    virtual void OnSubscription_Terminated(IN Subscription *pSubscription) = 0;
+    virtual void OnSubscription_Terminated(IN Subscription* pSubscription) = 0;
 };
 
-#endif // _INTERFACE_ON_SUBSCRIPTION_LISTENER_H_
+#endif  // _INTERFACE_ON_SUBSCRIPTION_LISTENER_H_

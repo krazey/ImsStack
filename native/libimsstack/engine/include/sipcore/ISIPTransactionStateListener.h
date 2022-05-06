@@ -15,8 +15,6 @@
 
 class SIPClientTransactionState;
 
-
-
 /*
 SIP transaction state listener interface
 
@@ -47,4 +45,4 @@ public:
     virtual void TransactionState_TimerExpired() = 0;
 };
 
-#endif // _INTERFACE_SIP_TRANSACTION_STATE_LISTENER_H_
+#endif  // _INTERFACE_SIP_TRANSACTION_STATE_LISTENER_H_

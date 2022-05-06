@@ -13,8 +13,6 @@
 #ifndef _RELIABLE_PROV_RESPONSE_HELPER_H_
 #define _RELIABLE_PROV_RESPONSE_HELPER_H_
 
-
-
 class ReliableProvResponseHelper
 {
 public:
@@ -22,16 +20,16 @@ public:
     ~ReliableProvResponseHelper();
 
 private:
-    ReliableProvResponseHelper(IN CONST ReliableProvResponseHelper &objRHS);
-    ReliableProvResponseHelper& operator=(IN CONST ReliableProvResponseHelper &objRHS);
+    ReliableProvResponseHelper(IN CONST ReliableProvResponseHelper& objRHS);
+    ReliableProvResponseHelper& operator=(IN CONST ReliableProvResponseHelper& objRHS);
 
 public:
     IMS_SINT32 GetState() const;
-    void Initialize(IN ISipMessage *piSIPMsg);
-    IMS_BOOL SetRAckHeader(IN_OUT ISipMessage *&piSIPMsg) const;
-    IMS_BOOL SetRSeqHeader(IN_OUT ISipMessage *&piSIPMsg) const;
-    IMS_BOOL UpdateOnMessageReceived(IN ISipMessage *piSIPMsg);
-    IMS_BOOL UpdateOnMessageSent(IN ISipMessage *piSIPMsg);
+    void Initialize(IN ISipMessage* piSIPMsg);
+    IMS_BOOL SetRAckHeader(IN_OUT ISipMessage*& piSIPMsg) const;
+    IMS_BOOL SetRSeqHeader(IN_OUT ISipMessage*& piSIPMsg) const;
+    IMS_BOOL UpdateOnMessageReceived(IN ISipMessage* piSIPMsg);
+    IMS_BOOL UpdateOnMessageSent(IN ISipMessage* piSIPMsg);
     IMS_BOOL UpdateOnOperationFailed();
 
 private:
@@ -67,4 +65,4 @@ private:
     SipMethod objMethod;
 };
 
-#endif // _RELIABLE_PROV_RESPONSE_HELPER_H_
+#endif  // _RELIABLE_PROV_RESPONSE_HELPER_H_

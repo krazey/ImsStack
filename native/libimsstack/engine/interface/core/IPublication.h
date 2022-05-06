@@ -12,8 +12,7 @@ class IPublicationListener;
  *
  * @see IServiceMethod, IPublicationListener
  */
-class IPublication
-    : public IServiceMethod
+class IPublication : public IServiceMethod
 {
 public:
     /**
@@ -41,14 +40,14 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT Publish(IN CONST ByteArray &objState, IN CONST AString &strContentType) = 0;
+    virtual IMS_RESULT Publish(IN CONST ByteArray& objState, IN CONST AString& strContentType) = 0;
 
     /**
      * @brief Sets a listener for this IPublication, replacing any previous IPublicationListener.
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN IPublicationListener *piListener) = 0;
+    virtual void SetListener(IN IPublicationListener* piListener) = 0;
 
     /**
      * @brief Terminates this publication.
@@ -68,7 +67,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetRefreshListener(IN IRefreshListener *piListener) = 0;
+    virtual void SetRefreshListener(IN IRefreshListener* piListener) = 0;
 
     /**
      * @brief Sets the refresh policy for the publication refresh.
@@ -135,4 +134,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_PUBLICATION_H_
+#endif  // _INTERFACE_PUBLICATION_H_

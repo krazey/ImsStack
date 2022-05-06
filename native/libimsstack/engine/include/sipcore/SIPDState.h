@@ -15,8 +15,6 @@
 
 #include "IMSTypeDef.h"
 
-
-
 /*
 
 Example
@@ -102,4 +100,4 @@ public:
     };
 };
 
-#endif // _SIP_D_STATE_H_
+#endif  // _SIP_D_STATE_H_

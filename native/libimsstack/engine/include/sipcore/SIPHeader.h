@@ -23,20 +23,17 @@
 
 class SipParameter;
 
-
-
-class SIPHeader
-    : public ISipHeader
+class SIPHeader : public ISipHeader
 {
 public:
     SIPHeader();
     explicit SIPHeader(IN IMS_SINT32 nType_);
-    explicit SIPHeader(IN CONST AString &strName_);
-    explicit SIPHeader(IN CONST SipHeaderBase *pstHeader);
+    explicit SIPHeader(IN CONST AString& strName_);
+    explicit SIPHeader(IN CONST SipHeaderBase* pstHeader);
     virtual ~SIPHeader();
 
 private:
-    SIPHeader(IN CONST SIPHeader &objRHS);
+    SIPHeader(IN CONST SIPHeader& objRHS);
     // To ignore an assignment operator of object
     SIPHeader& operator=(IN CONST SIPHeader& objRHS);
 
@@ -45,29 +42,30 @@ public:
     virtual void Destroy();
     // ISipHeader interface
     virtual ISipHeader* Clone() const;
-    virtual IMS_BOOL Equals(IN CONST ISipHeader *piHeader) const;
+    virtual IMS_BOOL Equals(IN CONST ISipHeader* piHeader) const;
     virtual const SipAddress* GetSipAddress() const;
     virtual AString GetHeaderValue() const;
     virtual const AString& GetName() const;
-    virtual const SipParameter* GetParameter(IN CONST AString &strName) const;
-    virtual IMS_RESULT GetParameterNames(OUT IMSList<AString> &objPNames) const;
+    virtual const SipParameter* GetParameter(IN CONST AString& strName) const;
+    virtual IMS_RESULT GetParameterNames(OUT IMSList<AString>& objPNames) const;
     virtual const IMSList<SipParameter*>& GetParameters() const;
     virtual IMS_SINT32 GetType() const;
     virtual const AString& GetValue() const;
     virtual IMS_SINT32 GetValueInt() const;
-    virtual void RemoveParameter(IN CONST AString &strName);
-    virtual void SetName(IN CONST AString &strName_);
-    virtual IMS_RESULT SetParameter(IN CONST AString &strName, IN CONST AString &strValue);
-    virtual IMS_RESULT SetHeaderValue(IN CONST AString &strHeaderValue);
-    virtual IMS_RESULT SetValue(IN CONST AString &strValue);
+    virtual void RemoveParameter(IN CONST AString& strName);
+    virtual void SetName(IN CONST AString& strName_);
+    virtual IMS_RESULT SetParameter(IN CONST AString& strName, IN CONST AString& strValue);
+    virtual IMS_RESULT SetHeaderValue(IN CONST AString& strHeaderValue);
+    virtual IMS_RESULT SetValue(IN CONST AString& strValue);
     virtual IMS_RESULT SetValueInt(IN IMS_SINT32 nValue);
     virtual AString ToString() const;
     virtual AString ToStringWithoutName() const;
 
     static IMS_BOOL IsValidType(IN IMS_SINT32 nType);
+
 private:
-    IMS_BOOL Decode(IN CONST AString &strBody_, IN IMS_BOOL bParseParameter = IMS_TRUE);
-    IMS_BOOL ParseUnknownBody(IN CONST AString &strBody_);
+    IMS_BOOL Decode(IN CONST AString& strBody_, IN IMS_BOOL bParseParameter = IMS_TRUE);
+    IMS_BOOL ParseUnknownBody(IN CONST AString& strBody_);
 
 public:
     static const IMS_CHAR* NAME[];
@@ -77,8 +75,8 @@ private:
     AString strName;
     AString strBody;
     // This field is not NULL if the header type can have an URI format body
-    SipAddress *pAddress;
+    SipAddress* pAddress;
     IMSList<SipParameter*> objParams;
 };
 
-#endif // _SIP_HEADER_H_
+#endif  // _SIP_HEADER_H_

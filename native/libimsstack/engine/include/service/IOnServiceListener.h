@@ -15,8 +15,6 @@
 
 class Service;
 
-
-
 /*
 
 IOnServiceListener interface
@@ -47,8 +45,8 @@ public:
     </table>
 
     */
-    virtual void OnService_RegistrationStarted(IN Service *pService, IN IMS_SINT32 nStatusCode,
-            IN IMS_SINT32 nReason) = 0;
+    virtual void OnService_RegistrationStarted(
+            IN Service* pService, IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nReason) = 0;
 
     /*
 
@@ -68,8 +66,8 @@ public:
     </table>
 
     */
-    virtual void OnService_RegistrationUpdated(IN Service *pService, IN IMS_SINT32 nStatusCode,
-            IN IMS_SINT32 nReason) = 0;
+    virtual void OnService_RegistrationUpdated(
+            IN Service* pService, IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nReason) = 0;
 
     /*
 
@@ -89,8 +87,8 @@ public:
     </table>
 
     */
-    virtual void OnService_RegistrationRemoved(IN Service *pService, IN IMS_SINT32 nStatusCode,
-            IN IMS_SINT32 nReason) = 0;
+    virtual void OnService_RegistrationRemoved(
+            IN Service* pService, IN IMS_SINT32 nStatusCode, IN IMS_SINT32 nReason) = 0;
 
     /*
 
@@ -110,8 +108,7 @@ public:
     </table>
 
     */
-    virtual void OnService_RegistrationTerminated(IN Service *pService,
-            IN IMS_SINT32 nReason) = 0;
+    virtual void OnService_RegistrationTerminated(IN Service* pService, IN IMS_SINT32 nReason) = 0;
 };
 
-#endif // _INTERFACE_ON_SERVICE_LISTENER_H_
+#endif  // _INTERFACE_ON_SERVICE_LISTENER_H_

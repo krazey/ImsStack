@@ -18,44 +18,42 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PRIVATE
-SIPIPSecState::SA::SA()
-    : objIP_U(IPAddress::NONE)
-    , nPort_UC(0)
-    , nPort_US(0)
-    , objIP_P(IPAddress::NONE)
-    , nPort_PC(0)
-    , nPort_PS(0)
-    , nState(STATE_INACTIVE)
+SIPIPSecState::SA::SA() :
+        objIP_U(IPAddress::NONE),
+        nPort_UC(0),
+        nPort_US(0),
+        objIP_P(IPAddress::NONE),
+        nPort_PC(0),
+        nPort_PS(0),
+        nState(STATE_INACTIVE)
 {
 }
 
 PRIVATE
-SIPIPSecState::SA::SA(
-        IN CONST IPAddress &objIP_U_, IN IMS_SINT32 nPort_UC_, IN IMS_SINT32 nPort_US_,
-        IN CONST IPAddress &objIP_P_, IN IMS_SINT32 nPort_PC_, IN IMS_SINT32 nPort_PS_)
-    : objIP_U(objIP_U_)
-    , nPort_UC(nPort_UC_)
-    , nPort_US(nPort_US_)
-    , objIP_P(objIP_P_)
-    , nPort_PC(nPort_PC_)
-    , nPort_PS(nPort_PS_)
-    , nState(STATE_INACTIVE)
+SIPIPSecState::SA::SA(IN CONST IPAddress& objIP_U_, IN IMS_SINT32 nPort_UC_,
+        IN IMS_SINT32 nPort_US_, IN CONST IPAddress& objIP_P_, IN IMS_SINT32 nPort_PC_,
+        IN IMS_SINT32 nPort_PS_) :
+        objIP_U(objIP_U_),
+        nPort_UC(nPort_UC_),
+        nPort_US(nPort_US_),
+        objIP_P(objIP_P_),
+        nPort_PC(nPort_PC_),
+        nPort_PS(nPort_PS_),
+        nState(STATE_INACTIVE)
 {
 }
 
 PRIVATE
-SIPIPSecState::SA::SA(IN CONST SIPIPSecState::SA &objRHS)
-    : objIP_U(objRHS.objIP_U)
-    , nPort_UC(objRHS.nPort_UC)
-    , nPort_US(objRHS.nPort_US)
-    , objIP_P(objRHS.objIP_P)
-    , nPort_PC(objRHS.nPort_PC)
-    , nPort_PS(objRHS.nPort_PS)
-    , nState(objRHS.nState)
-    , objSAStat(objRHS.objSAStat)
+SIPIPSecState::SA::SA(IN CONST SIPIPSecState::SA& objRHS) :
+        objIP_U(objRHS.objIP_U),
+        nPort_UC(objRHS.nPort_UC),
+        nPort_US(objRHS.nPort_US),
+        objIP_P(objRHS.objIP_P),
+        nPort_PC(objRHS.nPort_PC),
+        nPort_PS(objRHS.nPort_PS),
+        nState(objRHS.nState),
+        objSAStat(objRHS.objSAStat)
 {
 }
 
@@ -71,24 +69,24 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPIPSecState::SA::AddTransaction(IN CONST SIPTxnKey *pTxnKey)
+IMS_BOOL SIPIPSecState::SA::AddTransaction(IN CONST SIPTxnKey* pTxnKey)
 {
     for (IMS_UINT32 i = 0; i < objSAStat.GetSize(); ++i)
     {
-        const SIPTxnKey &objTxnKey = objSAStat.GetAt(i);
+        const SIPTxnKey& objTxnKey = objSAStat.GetAt(i);
 
         if (objTxnKey.Equals(pTxnKey))
         {
-            IMS_TRACE_D("SA :: Txn (%d:%s) already exists",
-                    objTxnKey.GetCSeq(), objTxnKey.GetViaBranch().GetStr(), 0);
+            IMS_TRACE_D("SA :: Txn (%d:%s) already exists", objTxnKey.GetCSeq(),
+                    objTxnKey.GetViaBranch().GetStr(), 0);
             return IMS_FALSE;
         }
     }
 
     objSAStat.Append(*pTxnKey);
 
-    IMS_TRACE_D("SA :: Txn (%d:%s) is added - size=%d",
-            pTxnKey->GetCSeq(), pTxnKey->GetViaBranch().GetStr(), objSAStat.GetSize());
+    IMS_TRACE_D("SA :: Txn (%d:%s) is added - size=%d", pTxnKey->GetCSeq(),
+            pTxnKey->GetViaBranch().GetStr(), objSAStat.GetSize());
 
     return IMS_TRUE;
 }
@@ -100,11 +98,9 @@ Remarks
 */
 PUBLIC
 IMS_BOOL SIPIPSecState::SA::CheckIPAddress(
-        IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd) const
+        IN CONST SIPTransportAddress& objNearEnd, IN CONST SIPTransportAddress& objFarEnd) const
 {
-    if (!objIP_P.Equals(objFarEnd.GetIPAddress())
-            || !objIP_U.Equals(objNearEnd.GetIPAddress()))
+    if (!objIP_P.Equals(objFarEnd.GetIPAddress()) || !objIP_U.Equals(objNearEnd.GetIPAddress()))
     {
         return IMS_FALSE;
     }
@@ -118,9 +114,8 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SIPIPSecState::SA::GetSA(
-        IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd, IN IMS_SINT32 nDirection) const
+IMS_SINT32 SIPIPSecState::SA::GetSA(IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd, IN IMS_SINT32 nDirection) const
 {
     if (nDirection == SA_IN)
     {
@@ -129,21 +124,18 @@ IMS_SINT32 SIPIPSecState::SA::GetSA(
         // SA_PPS_PUC_T_IN
         if (objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_UDP)
         {
-            if ((nPort_PC == objFarEnd.GetPort())
-                    && (nPort_US == objNearEnd.GetPort()))
+            if ((nPort_PC == objFarEnd.GetPort()) && (nPort_US == objNearEnd.GetPort()))
             {
                 return SA_PPC_PUS_U_IN;
             }
         }
         else
         {
-            if ((nPort_PC == objFarEnd.GetPort())
-                    && (nPort_US == objNearEnd.GetPort()))
+            if ((nPort_PC == objFarEnd.GetPort()) && (nPort_US == objNearEnd.GetPort()))
             {
                 return SA_PPC_PUS_T_IN;
             }
-            else if ((nPort_PS == objFarEnd.GetPort())
-                    && (nPort_UC == objNearEnd.GetPort()))
+            else if ((nPort_PS == objFarEnd.GetPort()) && (nPort_UC == objNearEnd.GetPort()))
             {
                 return SA_PPS_PUC_T_IN;
             }
@@ -156,21 +148,18 @@ IMS_SINT32 SIPIPSecState::SA::GetSA(
         // SA_PUS_PPC_T_OUT
         if (objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_UDP)
         {
-            if ((nPort_UC == objNearEnd.GetPort())
-                    && (nPort_PS == objFarEnd.GetPort()))
+            if ((nPort_UC == objNearEnd.GetPort()) && (nPort_PS == objFarEnd.GetPort()))
             {
                 return SA_PUC_PPS_U_OUT;
             }
         }
         else
         {
-            if ((nPort_UC == objNearEnd.GetPort())
-                    && (nPort_PS == objFarEnd.GetPort()))
+            if ((nPort_UC == objNearEnd.GetPort()) && (nPort_PS == objFarEnd.GetPort()))
             {
                 return SA_PUC_PPS_T_OUT;
             }
-            else if ((nPort_US == objNearEnd.GetPort())
-                    && (nPort_PC == objFarEnd.GetPort()))
+            else if ((nPort_US == objNearEnd.GetPort()) && (nPort_PC == objFarEnd.GetPort()))
             {
                 return SA_PUS_PPC_T_OUT;
             }
@@ -208,13 +197,13 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPIPSecState::SA::RemoveTransaction(IN CONST SIPTxnKey *pTxnKey)
+IMS_BOOL SIPIPSecState::SA::RemoveTransaction(IN CONST SIPTxnKey* pTxnKey)
 {
     IMS_BOOL bRemoved = IMS_FALSE;
 
     for (IMS_UINT32 i = 0; i < objSAStat.GetSize(); ++i)
     {
-        const SIPTxnKey &objTxnKey = objSAStat.GetAt(i);
+        const SIPTxnKey& objTxnKey = objSAStat.GetAt(i);
 
         if (objTxnKey.Equals(pTxnKey))
         {
@@ -226,8 +215,8 @@ IMS_BOOL SIPIPSecState::SA::RemoveTransaction(IN CONST SIPTxnKey *pTxnKey)
 
     if (bRemoved)
     {
-        IMS_TRACE_D("SA :: Txn (%d:%s) is removed - size=%d",
-                pTxnKey->GetCSeq(), pTxnKey->GetViaBranch().GetStr(), objSAStat.GetSize());
+        IMS_TRACE_D("SA :: Txn (%d:%s) is removed - size=%d", pTxnKey->GetCSeq(),
+                pTxnKey->GetViaBranch().GetStr(), objSAStat.GetSize());
     }
 
     return bRemoved;
@@ -254,43 +243,37 @@ void SIPIPSecState::SA::SetState(IN IMS_SINT32 nState)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* SIPIPSecState::SA::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* SIPIPSecState::SA::StateToString(IN IMS_SINT32 nState)
 {
     switch (nState)
     {
-    case SIPIPSecState::STATE_INACTIVE:
-        return "STATE_INACTIVE";
-    case SIPIPSecState::STATE_CREATED:
-        return "STATE_CREATED";
-    case SIPIPSecState::STATE_PENDING:
-        return "STATE_PENDING";
-    case SIPIPSecState::STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    case SIPIPSecState::STATE_TERMINATED:
-        return "STATE_TERMINATED";
-    case SIPIPSecState::STATE_TERMINATED_PENDING:
-        return "STATE_TERMINATED_PENDING";
-    default:
-        return "__INVALID_STATE__";
+        case SIPIPSecState::STATE_INACTIVE:
+            return "STATE_INACTIVE";
+        case SIPIPSecState::STATE_CREATED:
+            return "STATE_CREATED";
+        case SIPIPSecState::STATE_PENDING:
+            return "STATE_PENDING";
+        case SIPIPSecState::STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        case SIPIPSecState::STATE_TERMINATED:
+            return "STATE_TERMINATED";
+        case SIPIPSecState::STATE_TERMINATED_PENDING:
+            return "STATE_TERMINATED_PENDING";
+        default:
+            return "__INVALID_STATE__";
     }
 }
 
-
-
 PUBLIC
-SIPIPSecState::SIPIPSecState()
-    : EngineActivity()
-    , pNewSA(IMS_NULL)
-    , pOldSA(IMS_NULL)
-    , piListener(IMS_NULL)
+SIPIPSecState::SIPIPSecState() :
+        EngineActivity(),
+        pNewSA(IMS_NULL),
+        pOldSA(IMS_NULL),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPIPSecState::~SIPIPSecState()
-{
-}
+PUBLIC VIRTUAL SIPIPSecState::~SIPIPSecState() {}
 
 /*
 
@@ -309,10 +292,10 @@ Remarks
 
 */
 PUBLIC
-void SIPIPSecState::NotifyMessageReceived(IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd, IN SipMessage *pstMessage)
+void SIPIPSecState::NotifyMessageReceived(IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd, IN SipMessage* pstMessage)
 {
-    SIPTxnKey *pTxnKey = SIPStack::CreateTxnKey(pstMessage);
+    SIPTxnKey* pTxnKey = SIPStack::CreateTxnKey(pstMessage);
 
     if (pTxnKey != IMS_NULL)
     {
@@ -328,10 +311,10 @@ Remarks
 
 */
 PUBLIC
-void SIPIPSecState::NotifyMessageSent(IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd, IN SipMessage *pstMessage)
+void SIPIPSecState::NotifyMessageSent(IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd, IN SipMessage* pstMessage)
 {
-    SIPTxnKey *pTxnKey = SIPStack::CreateTxnKey(pstMessage);
+    SIPTxnKey* pTxnKey = SIPStack::CreateTxnKey(pstMessage);
 
     if (pTxnKey != IMS_NULL)
     {
@@ -347,9 +330,9 @@ Remarks
 
 */
 PUBLIC
-void SIPIPSecState::NotifyMessageSentFailed(IN SipMessage *pstMessage)
+void SIPIPSecState::NotifyMessageSentFailed(IN SipMessage* pstMessage)
 {
-    SIPTxnKey *pTxnKey = SIPStack::CreateTxnKey(pstMessage);
+    SIPTxnKey* pTxnKey = SIPStack::CreateTxnKey(pstMessage);
 
     if (pTxnKey != IMS_NULL)
     {
@@ -365,9 +348,9 @@ Remarks
 
 */
 PUBLIC
-void SIPIPSecState::NotifyTransactionAborted(IN SipTxnKey *pstTxnKey)
+void SIPIPSecState::NotifyTransactionAborted(IN SipTxnKey* pstTxnKey)
 {
-    SIPTxnKey *pTxnKey = SIPStack::CreateTxnKeyFromKey(pstTxnKey);
+    SIPTxnKey* pTxnKey = SIPStack::CreateTxnKeyFromKey(pstTxnKey);
 
     if (pTxnKey != IMS_NULL)
     {
@@ -382,23 +365,22 @@ void SIPIPSecState::NotifyTransactionAborted(IN SipTxnKey *pstTxnKey)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL SIPIPSecState::DispatchMessage(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL SIPIPSecState::DispatchMessage(IN IMSMSG& objMSG)
 {
     switch (objMSG.GetName())
     {
-    case AMSG_NOTIFY_STATE_CHANGED:
-        if (piListener == IMS_NULL)
-        {
-            IMS_TRACE_D("Listener is null", 0, 0, 0);
-            return IMS_FALSE;
-        }
+        case AMSG_NOTIFY_STATE_CHANGED:
+            if (piListener == IMS_NULL)
+            {
+                IMS_TRACE_D("Listener is null", 0, 0, 0);
+                return IMS_FALSE;
+            }
 
-        piListener->IpSecState_StateChanged(LONG_TO_SINT(objMSG.nWparam));
-        return IMS_TRUE;
+            piListener->IpSecState_StateChanged(LONG_TO_SINT(objMSG.nWparam));
+            return IMS_TRUE;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return EngineActivity::DispatchMessage(objMSG);
@@ -409,8 +391,7 @@ IMS_BOOL SIPIPSecState::DispatchMessage(IN IMSMSG &objMSG)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPIPSecState::ClearIpSecSa(IN IMS_SINT32 nSAType)
+PRIVATE VIRTUAL void SIPIPSecState::ClearIpSecSa(IN IMS_SINT32 nSAType)
 {
     if ((nSAType == SA_NEW) && (pNewSA != IMS_NULL))
     {
@@ -429,8 +410,7 @@ void SIPIPSecState::ClearIpSecSa(IN IMS_SINT32 nSAType)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPIPSecState::GetState(IN IMS_SINT32 nSAType) const
+PRIVATE VIRTUAL IMS_SINT32 SIPIPSecState::GetState(IN IMS_SINT32 nSAType) const
 {
     if ((nSAType == SA_NEW) && (pNewSA != IMS_NULL))
     {
@@ -449,8 +429,7 @@ IMS_SINT32 SIPIPSecState::GetState(IN IMS_SINT32 nSAType) const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL SIPIPSecState::HasPendingTransaction(IN IMS_SINT32 nSAType) const
+PRIVATE VIRTUAL IMS_BOOL SIPIPSecState::HasPendingTransaction(IN IMS_SINT32 nSAType) const
 {
     if ((nSAType == SA_NEW) && (pNewSA != IMS_NULL))
     {
@@ -469,10 +448,9 @@ IMS_BOOL SIPIPSecState::HasPendingTransaction(IN IMS_SINT32 nSAType) const
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPIPSecState::SetIpSecSa(IN IMS_SINT32 nSAType,
-        IN CONST IPAddress &objIP_U, IN IMS_SINT32 nPort_UC, IN IMS_SINT32 nPort_US,
-        IN CONST IPAddress &objIP_P, IN IMS_SINT32 nPort_PC, IN IMS_SINT32 nPort_PS)
+PRIVATE VIRTUAL void SIPIPSecState::SetIpSecSa(IN IMS_SINT32 nSAType, IN CONST IPAddress& objIP_U,
+        IN IMS_SINT32 nPort_UC, IN IMS_SINT32 nPort_US, IN CONST IPAddress& objIP_P,
+        IN IMS_SINT32 nPort_PC, IN IMS_SINT32 nPort_PS)
 {
     if (nSAType == SA_NEW)
     {
@@ -515,8 +493,7 @@ void SIPIPSecState::SetIpSecSa(IN IMS_SINT32 nSAType,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPIPSecState::SetListener(IN ISipIpSecStateListener *piListener)
+PRIVATE VIRTUAL void SIPIPSecState::SetListener(IN ISipIpSecStateListener* piListener)
 {
     this->piListener = piListener;
 }
@@ -527,8 +504,8 @@ Remarks
 
 */
 PRIVATE
-void SIPIPSecState::NotifyMessageReceivedInternal(IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd, IN SIPTxnKey *pTxnKey)
+void SIPIPSecState::NotifyMessageReceivedInternal(IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd, IN SIPTxnKey* pTxnKey)
 {
     IMS_BOOL bStrayResponseOnNewSA = IMS_FALSE;
     IMS_BOOL bStrayResponseOnOldSA = IMS_FALSE;
@@ -595,8 +572,8 @@ void SIPIPSecState::NotifyMessageReceivedInternal(IN CONST SIPTransportAddress &
                 // Incoming SIP response
                 if (pOldSA->RemoveTransaction(pTxnKey))
                 {
-                    if (!pOldSA->HasPendingTransaction()
-                            && (pOldSA->GetState() == STATE_TERMINATED_PENDING))
+                    if (!pOldSA->HasPendingTransaction() &&
+                            (pOldSA->GetState() == STATE_TERMINATED_PENDING))
                     {
                         pOldSA->SetState(STATE_TERMINATED);
                         PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -609,10 +586,8 @@ void SIPIPSecState::NotifyMessageReceivedInternal(IN CONST SIPTransportAddress &
             }
         }
 
-        if ((pNewSA != IMS_NULL)
-                && (pNewSA->GetState() == STATE_ACTIVE)
-                && (pOldSA->GetState() != STATE_TERMINATED)
-                && !pOldSA->HasPendingTransaction())
+        if ((pNewSA != IMS_NULL) && (pNewSA->GetState() == STATE_ACTIVE) &&
+                (pOldSA->GetState() != STATE_TERMINATED) && !pOldSA->HasPendingTransaction())
         {
             pOldSA->SetState(STATE_TERMINATED);
             PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -632,9 +607,8 @@ void SIPIPSecState::NotifyMessageReceivedInternal(IN CONST SIPTransportAddress &
                     pOldSA->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
                 }
-                else if ((pNewSA != IMS_NULL)
-                        && (pNewSA->GetState() == STATE_ACTIVE)
-                        && (pOldSA->GetState() != STATE_TERMINATED))
+                else if ((pNewSA != IMS_NULL) && (pNewSA->GetState() == STATE_ACTIVE) &&
+                        (pOldSA->GetState() != STATE_TERMINATED))
                 {
                     pOldSA->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -657,8 +631,8 @@ Remarks
 
 */
 PRIVATE
-void SIPIPSecState::NotifyMessageSentInternal(IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd, IN SIPTxnKey *pTxnKey)
+void SIPIPSecState::NotifyMessageSentInternal(IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd, IN SIPTxnKey* pTxnKey)
 {
     IMS_BOOL bStrayResponseOnNewSA = IMS_FALSE;
     IMS_BOOL bStrayResponseOnOldSA = IMS_FALSE;
@@ -719,8 +693,8 @@ void SIPIPSecState::NotifyMessageSentInternal(IN CONST SIPTransportAddress &objN
                 // Outgoing SIP response
                 if (pOldSA->RemoveTransaction(pTxnKey))
                 {
-                    if (!pOldSA->HasPendingTransaction()
-                            && (pOldSA->GetState() == STATE_TERMINATED_PENDING))
+                    if (!pOldSA->HasPendingTransaction() &&
+                            (pOldSA->GetState() == STATE_TERMINATED_PENDING))
                     {
                         pOldSA->SetState(STATE_TERMINATED);
                         PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -733,10 +707,8 @@ void SIPIPSecState::NotifyMessageSentInternal(IN CONST SIPTransportAddress &objN
             }
         }
 
-        if ((pNewSA != IMS_NULL)
-                && (pNewSA->GetState() == STATE_ACTIVE)
-                && (pOldSA->GetState() != STATE_TERMINATED)
-                && !pOldSA->HasPendingTransaction())
+        if ((pNewSA != IMS_NULL) && (pNewSA->GetState() == STATE_ACTIVE) &&
+                (pOldSA->GetState() != STATE_TERMINATED) && !pOldSA->HasPendingTransaction())
         {
             pOldSA->SetState(STATE_TERMINATED);
             PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -756,9 +728,8 @@ void SIPIPSecState::NotifyMessageSentInternal(IN CONST SIPTransportAddress &objN
                     pOldSA->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
                 }
-                else if ((pNewSA != IMS_NULL)
-                        && (pNewSA->GetState() == STATE_ACTIVE)
-                        && (pOldSA->GetState() != STATE_TERMINATED))
+                else if ((pNewSA != IMS_NULL) && (pNewSA->GetState() == STATE_ACTIVE) &&
+                        (pOldSA->GetState() != STATE_TERMINATED))
                 {
                     pOldSA->SetState(STATE_TERMINATED);
                     PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);
@@ -781,14 +752,13 @@ Remarks
 
 */
 PRIVATE
-void SIPIPSecState::NotifyTransactionAbortedInternal(IN SIPTxnKey *pTxnKey)
+void SIPIPSecState::NotifyTransactionAbortedInternal(IN SIPTxnKey* pTxnKey)
 {
     if (pNewSA != IMS_NULL)
     {
         if (pNewSA->RemoveTransaction(pTxnKey))
         {
-            if (!pNewSA->HasPendingTransaction()
-                    && (pNewSA->GetState() == STATE_PENDING))
+            if (!pNewSA->HasPendingTransaction() && (pNewSA->GetState() == STATE_PENDING))
             {
                 pNewSA->SetState(STATE_CREATED);
                 PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_NEW, 0);
@@ -802,8 +772,8 @@ void SIPIPSecState::NotifyTransactionAbortedInternal(IN SIPTxnKey *pTxnKey)
     {
         if (pOldSA->RemoveTransaction(pTxnKey))
         {
-            if (!pOldSA->HasPendingTransaction()
-                    && (pOldSA->GetState() == STATE_TERMINATED_PENDING))
+            if (!pOldSA->HasPendingTransaction() &&
+                    (pOldSA->GetState() == STATE_TERMINATED_PENDING))
             {
                 pOldSA->SetState(STATE_TERMINATED);
                 PostMessage(AMSG_NOTIFY_STATE_CHANGED, SA_OLD, 0);

@@ -13,8 +13,8 @@ class RegistrationManager
 {
 private:
     RegistrationManager();
-    RegistrationManager(IN CONST RegistrationManager &objRHS);
-    RegistrationManager& operator=(IN CONST RegistrationManager &objRHS);
+    RegistrationManager(IN CONST RegistrationManager& objRHS);
+    RegistrationManager& operator=(IN CONST RegistrationManager& objRHS);
 
 public:
     ~RegistrationManager();
@@ -31,10 +31,9 @@ public:
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId,
-            IN CONST AString &strAOR, IN IMS_BOOL bFake = IMS_FALSE,
-            IN CONST AString &strSubsId = AString::ConstNull(),
-            IN SipProfile *pSIPProfile = IMS_NULL);
+    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST AString& strAOR,
+            IN IMS_BOOL bFake = IMS_FALSE, IN CONST AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pSIPProfile = IMS_NULL);
 
     /**
      * @brief Creates Registration object for IMS registration.
@@ -47,10 +46,9 @@ public:
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId,
-            IN CONST SipAddress &objAOR, IN IMS_BOOL bFake = IMS_FALSE,
-            IN CONST AString &strSubsId = AString::ConstNull(),
-            IN SipProfile *pSIPProfile = IMS_NULL);
+    IMS_BOOL CreateRegistration(IN IMS_UINT32 nFlowId, IN CONST SipAddress& objAOR,
+            IN IMS_BOOL bFake = IMS_FALSE, IN CONST AString& strSubsId = AString::ConstNull(),
+            IN SipProfile* pSIPProfile = IMS_NULL);
 
     /**
      * @brief Destroys the specified Registration object.
@@ -61,7 +59,7 @@ public:
      *                 if possible
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    void DestroyRegistration(IN IRegistration *piReg, IN IMS_BOOL bByForce = IMS_FALSE);
+    void DestroyRegistration(IN IRegistration* piReg, IN IMS_BOOL bByForce = IMS_FALSE);
 
     /**
      * @brief Checks if "reg" event package subscription is supported or not.
@@ -70,8 +68,8 @@ public:
      * @param pSIPProfile SIP profile to be checked
      * @note MULTI_SUBS, MULTI_REG_SIP_PROFILE
      */
-    IMS_BOOL IsRegSubscriptionSupported(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
-            IN SipProfile *pSIPProfile = IMS_NULL) const;
+    IMS_BOOL IsRegSubscriptionSupported(
+            IN IMS_SINT32 nSlotId = IMS_SLOT_0, IN SipProfile* pSIPProfile = IMS_NULL) const;
 
     /**
      * @brief Gets the Registration object with the specified slot-id and flow id.
@@ -87,7 +85,7 @@ public:
     static RegistrationManager* GetInstance();
 
 private:
-    RegistrationManagerPrivate *pRegMngrP;
+    RegistrationManagerPrivate* pRegMngrP;
 };
 
-#endif // _REGISTRATION_MANAGER_H_
+#endif  // _REGISTRATION_MANAGER_H_

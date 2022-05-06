@@ -17,25 +17,22 @@
 
 class StreamMediaImpl;
 
-
-
-class StreamMedia
-    : public Media
+class StreamMedia : public Media
 {
 public:
-    StreamMedia(IN Service *pService_, IN ISDPOAState *piOAState_);
+    StreamMedia(IN Service* pService_, IN ISDPOAState* piOAState_);
     virtual ~StreamMedia();
 
 private:
-    StreamMedia(IN CONST StreamMedia &objRHS);
-    StreamMedia& operator=(IN CONST StreamMedia &objRHS);
+    StreamMedia(IN CONST StreamMedia& objRHS);
+    StreamMedia& operator=(IN CONST StreamMedia& objRHS);
 
 public:
     // IMedia interface
     virtual IMS_SINT32 GetType() const;
 
 protected:
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState *piOAState);
+    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState);
 };
 
-#endif // _STREAM_MEDIA_H_
+#endif  // _STREAM_MEDIA_H_

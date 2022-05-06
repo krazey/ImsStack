@@ -21,13 +21,11 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-Media* MediaFactory::CreateOutgoingMedia(IN CONST AString &strMType, IN IMS_SINT32 nDirection,
-        IN Service *pService, IN ISDPOAState *piOAState, IN IMS_SINT32 nCountOfDescriptor)
+PUBLIC GLOBAL Media* MediaFactory::CreateOutgoingMedia(IN CONST AString& strMType,
+        IN IMS_SINT32 nDirection, IN Service* pService, IN ISDPOAState* piOAState,
+        IN IMS_SINT32 nCountOfDescriptor)
 {
-    Media *pMedia = IMS_NULL;
+    Media* pMedia = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -70,43 +68,42 @@ Media* MediaFactory::CreateOutgoingMedia(IN CONST AString &strMType, IN IMS_SINT
     return pMedia;
 }
 
-PUBLIC GLOBAL
-Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol,
-        IN Service *pService, IN ISDPOAState *piOAState, IN CONST IMSList<IMS_SINT32> &objMids)
+PUBLIC GLOBAL Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol,
+        IN Service* pService, IN ISDPOAState* piOAState, IN CONST IMSList<IMS_SINT32>& objMids)
 {
-    const IMS_CHAR *pszMType = IMS_NULL;
-    Media *pMedia = IMS_NULL;
+    const IMS_CHAR* pszMType = IMS_NULL;
+    Media* pMedia = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
     switch (nTransportProtocol)
     {
-    case SdpMedia::TRANSPORT_RTP_AVP:
-    case SdpMedia::TRANSPORT_RTP_AVPF:
-    case SdpMedia::TRANSPORT_RTP_SAVP:
-    case SdpMedia::TRANSPORT_RTP_SAVPF:
-    case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
-        pszMType = IMSCore::MEDIA_STREAM;
-        pMedia = new StreamMedia(pService, piOAState);
-        break;
+        case SdpMedia::TRANSPORT_RTP_AVP:
+        case SdpMedia::TRANSPORT_RTP_AVPF:
+        case SdpMedia::TRANSPORT_RTP_SAVP:
+        case SdpMedia::TRANSPORT_RTP_SAVPF:
+        case SdpMedia::TRANSPORT_UDP_TLS_RTP_SAVP:
+            pszMType = IMSCore::MEDIA_STREAM;
+            pMedia = new StreamMedia(pService, piOAState);
+            break;
 
-    case SdpMedia::TRANSPORT_TCP_MSRP:
-    case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
-        pszMType = IMSCore::MEDIA_FRAMED;
-        pMedia = new FramedMedia(pService, piOAState);
-        break;
+        case SdpMedia::TRANSPORT_TCP_MSRP:
+        case SdpMedia::TRANSPORT_TCP_TLS_MSRP:
+            pszMType = IMSCore::MEDIA_FRAMED;
+            pMedia = new FramedMedia(pService, piOAState);
+            break;
 
-    case SdpMedia::TRANSPORT_UDP:
-        pszMType = IMSCore::MEDIA_BASIC_UNRELIABLE;
-        break;
+        case SdpMedia::TRANSPORT_UDP:
+            pszMType = IMSCore::MEDIA_BASIC_UNRELIABLE;
+            break;
 
-    case SdpMedia::TRANSPORT_TCP:
-        pszMType = IMSCore::MEDIA_BASIC_RELIABLE;
-        break;
+        case SdpMedia::TRANSPORT_TCP:
+            pszMType = IMSCore::MEDIA_BASIC_RELIABLE;
+            break;
 
-    default:
-        IMS_TRACE_E(0, "Trying to create an unsupported media (%d)", nTransportProtocol, 0, 0);
-        return IMS_NULL;
+        default:
+            IMS_TRACE_E(0, "Trying to create an unsupported media (%d)", nTransportProtocol, 0, 0);
+            return IMS_NULL;
     }
 
     if (pMedia == IMS_NULL)
@@ -126,8 +123,7 @@ Media* MediaFactory::CreateIncomingMedia(IN IMS_SINT32 nTransportProtocol,
     return pMedia;
 }
 
-PUBLIC GLOBAL
-void MediaFactory::DestroyMedia(IN Media *&pMedia)
+PUBLIC GLOBAL void MediaFactory::DestroyMedia(IN Media*& pMedia)
 {
     //---------------------------------------------------------------------------------------------
 

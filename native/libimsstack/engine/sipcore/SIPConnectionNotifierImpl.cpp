@@ -19,19 +19,16 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPConnectionNotifierImpl::SIPConnectionNotifierImpl(IN SIPConnectionNotifier *pSCN_)
-    : piListener(IMS_NULL)
-    , pSCN(pSCN_)
+SIPConnectionNotifierImpl::SIPConnectionNotifierImpl(IN SIPConnectionNotifier* pSCN_) :
+        piListener(IMS_NULL),
+        pSCN(pSCN_)
 {
     pSCN->SetListener(this);
     pSCN->SetErrorListener(this);
 }
 
-PUBLIC VIRTUAL
-SIPConnectionNotifierImpl::~SIPConnectionNotifierImpl()
+PUBLIC VIRTUAL SIPConnectionNotifierImpl::~SIPConnectionNotifierImpl()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -61,8 +58,7 @@ SIPConnectionNotifier* SIPConnectionNotifierImpl::GetConnectionNotifier() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::Close()
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::Close()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -84,8 +80,7 @@ void SIPConnectionNotifierImpl::Close()
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen()
+PRIVATE VIRTUAL ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -97,8 +92,7 @@ ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen()
 Remarks
 
 */
-PRIVATE VIRTUAL
-const IPAddress& SIPConnectionNotifierImpl::GetLocalAddress() const
+PRIVATE VIRTUAL const IPAddress& SIPConnectionNotifierImpl::GetLocalAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -110,8 +104,7 @@ const IPAddress& SIPConnectionNotifierImpl::GetLocalAddress() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPConnectionNotifierImpl::GetLocalPort() const
+PRIVATE VIRTUAL IMS_SINT32 SIPConnectionNotifierImpl::GetLocalPort() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -123,8 +116,8 @@ IMS_SINT32 SIPConnectionNotifierImpl::GetLocalPort() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::SetListener(IN ISipServerConnectionListener *piListener)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::SetListener(
+        IN ISipServerConnectionListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -136,8 +129,8 @@ void SIPConnectionNotifierImpl::SetListener(IN ISipServerConnectionListener *piL
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen(OUT ISipDialog *&piOrigDialog)
+PRIVATE VIRTUAL ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen(
+        OUT ISipDialog*& piOrigDialog)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -149,8 +142,7 @@ ISipServerConnection* SIPConnectionNotifierImpl::AcceptAndOpen(OUT ISipDialog *&
 Remarks
 
 */
-PRIVATE VIRTUAL
-AString SIPConnectionNotifierImpl::GetContactAddress() const
+PRIVATE VIRTUAL AString SIPConnectionNotifierImpl::GetContactAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -162,8 +154,7 @@ AString SIPConnectionNotifierImpl::GetContactAddress() const
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL
-SipProfile* SIPConnectionNotifierImpl::GetSipProfile() const
+PRIVATE VIRTUAL SipProfile* SIPConnectionNotifierImpl::GetSipProfile() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -175,8 +166,7 @@ SipProfile* SIPConnectionNotifierImpl::GetSipProfile() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 SIPConnectionNotifierImpl::GetSlotId() const
+PRIVATE VIRTUAL IMS_SINT32 SIPConnectionNotifierImpl::GetSlotId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -188,9 +178,8 @@ IMS_SINT32 SIPConnectionNotifierImpl::GetSlotId() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL SIPConnectionNotifierImpl::IsTransportResourceReserved(
-        IN IMS_SINT32 nType/* = TRANSPORT_ALL*/) const
+PRIVATE VIRTUAL IMS_BOOL SIPConnectionNotifierImpl::IsTransportResourceReserved(
+        IN IMS_SINT32 nType /* = TRANSPORT_ALL*/) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -202,9 +191,9 @@ IMS_BOOL SIPConnectionNotifierImpl::IsTransportResourceReserved(
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPConnectionNotifierImpl::ReserveTransportResource(IN CONST IPAddress &objIPA,
-        IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl)
+PRIVATE VIRTUAL IMS_RESULT SIPConnectionNotifierImpl::ReserveTransportResource(
+        IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+        IN IMS_SINT32 nPortFlowControl)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -216,9 +205,8 @@ IMS_RESULT SIPConnectionNotifierImpl::ReserveTransportResource(IN CONST IPAddres
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_RESULT SIPConnectionNotifierImpl::RestoreTransportResource(IN IMS_SINT32 nType,
-        IN CONST IPAddress &objPeerIP, IN IMS_SINT32 nPeerPort)
+PRIVATE VIRTUAL IMS_RESULT SIPConnectionNotifierImpl::RestoreTransportResource(
+        IN IMS_SINT32 nType, IN CONST IPAddress& objPeerIP, IN IMS_SINT32 nPeerPort)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -230,8 +218,7 @@ IMS_RESULT SIPConnectionNotifierImpl::RestoreTransportResource(IN IMS_SINT32 nTy
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::SetFilter(IN CONST AString &strFilter)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::SetFilter(IN CONST AString& strFilter)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -243,9 +230,8 @@ void SIPConnectionNotifierImpl::SetFilter(IN CONST AString &strFilter)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::SetFromAndContact(IN CONST AString &strFrom,
-        IN CONST AString &strDisplayName, IN CONST AString &strUserInfo)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::SetFromAndContact(
+        IN CONST AString& strFrom, IN CONST AString& strDisplayName, IN CONST AString& strUserInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -257,8 +243,7 @@ void SIPConnectionNotifierImpl::SetFromAndContact(IN CONST AString &strFrom,
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::SetSipProfile(IN SipProfile *pProfile)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::SetSipProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -270,8 +255,7 @@ void SIPConnectionNotifierImpl::SetSipProfile(IN SipProfile *pProfile)
 Remarks
  RFC5626_FLOW_CONTROL
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::UpdatePortFlowControl(IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::UpdatePortFlowControl(IN IMS_SINT32 nPort)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -283,8 +267,7 @@ void SIPConnectionNotifierImpl::UpdatePortFlowControl(IN IMS_SINT32 nPort)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::UpdatePortUc(IN IMS_SINT32 nPort)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::UpdatePortUc(IN IMS_SINT32 nPort)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -296,8 +279,8 @@ void SIPConnectionNotifierImpl::UpdatePortUc(IN IMS_SINT32 nPort)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::AddErrorListener(IN ISipConnectionNotifierErrorListener *piListener)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::AddErrorListener(
+        IN ISipConnectionNotifierErrorListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -308,7 +291,7 @@ void SIPConnectionNotifierImpl::AddErrorListener(IN ISipConnectionNotifierErrorL
 
     for (IMS_UINT32 i = 0; i < objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener *piErrorListener = objErrorListeners.GetAt(i);
+        ISipConnectionNotifierErrorListener* piErrorListener = objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {
@@ -325,9 +308,8 @@ void SIPConnectionNotifierImpl::AddErrorListener(IN ISipConnectionNotifierErrorL
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::RemoveErrorListener(
-        IN ISipConnectionNotifierErrorListener *piListener)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::RemoveErrorListener(
+        IN ISipConnectionNotifierErrorListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -338,7 +320,7 @@ void SIPConnectionNotifierImpl::RemoveErrorListener(
 
     for (IMS_UINT32 i = 0; i < objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener *piErrorListener = objErrorListeners.GetAt(i);
+        ISipConnectionNotifierErrorListener* piErrorListener = objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {
@@ -358,8 +340,8 @@ void SIPConnectionNotifierImpl::RemoveErrorListener(
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::OnServerConnection_NotifyRequest(IN SIPConnectionNotifier *pSCN)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::OnServerConnection_NotifyRequest(
+        IN SIPConnectionNotifier* pSCN)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -383,9 +365,8 @@ void SIPConnectionNotifierImpl::OnServerConnection_NotifyRequest(IN SIPConnectio
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::OnServerConnection_NotifyForkedRequest(
-        IN SIPConnectionNotifier *pSCN)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::OnServerConnection_NotifyForkedRequest(
+        IN SIPConnectionNotifier* pSCN)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -409,9 +390,8 @@ void SIPConnectionNotifierImpl::OnServerConnection_NotifyForkedRequest(
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPConnectionNotifierImpl::OnConnectionNotifierError_NotifyError(
-        IN SIPConnectionNotifier *pSCN, IN IMS_SINT32 nCode, IN CONST AString &strMessage)
+PRIVATE VIRTUAL void SIPConnectionNotifierImpl::OnConnectionNotifierError_NotifyError(
+        IN SIPConnectionNotifier* pSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -431,7 +411,7 @@ void SIPConnectionNotifierImpl::OnConnectionNotifierError_NotifyError(
 
     for (IMS_UINT32 i = 0; i < objTempListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener *piErrorListener = objTempListeners.GetAt(i);
+        ISipConnectionNotifierErrorListener* piErrorListener = objTempListeners.GetAt(i);
 
         if (piErrorListener != IMS_NULL)
         {

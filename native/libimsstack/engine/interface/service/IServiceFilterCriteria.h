@@ -19,7 +19,7 @@ public:
      *         trigger point.\n
      *         Otherwise, the trigger point is not added.
      */
-    virtual IMS_UINT32 AddTriggerPoint(IN CONST TriggerPoint &objTP) = 0;
+    virtual IMS_UINT32 AddTriggerPoint(IN CONST TriggerPoint& objTP) = 0;
 
     /**
      * @brief Removes the trigger point with the specified identifier
@@ -41,8 +41,8 @@ public:
      *                  - INVITE, OPTIONS, MESSAGE, REFER
      * @param bCalleePreference flag to indicate that the callee preference is supported or not
      */
-    virtual void SetCalleePreference(IN CONST SipMethod &objMethod,
-            IN IMS_BOOL bCalleePreference = IMS_TRUE) = 0;
+    virtual void SetCalleePreference(
+            IN CONST SipMethod& objMethod, IN IMS_BOOL bCalleePreference = IMS_TRUE) = 0;
 };
 
-#endif // _INTERFACE_SERVICE_FILTER_CRITERIA_H_
+#endif  // _INTERFACE_SERVICE_FILTER_CRITERIA_H_

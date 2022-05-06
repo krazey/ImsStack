@@ -14,35 +14,31 @@
 #include "base/Method.h"
 #include "util/MethodManager.h"
 
-
-
 PUBLIC
-MethodManager::MethodManager()
-    : RCObject()
-    , objMethods(IMSList<Method*>())
+MethodManager::MethodManager() :
+        RCObject(),
+        objMethods(IMSList<Method*>())
 {
 }
 
 PUBLIC
-MethodManager::MethodManager(IN CONST MethodManager& objRHS)
-    : RCObject(objRHS)
-    , objMethods(objRHS.objMethods)
+MethodManager::MethodManager(IN CONST MethodManager& objRHS) :
+        RCObject(objRHS),
+        objMethods(objRHS.objMethods)
 {
 }
 
 PUBLIC
-MethodManager::~MethodManager()
-{
-}
+MethodManager::~MethodManager() {}
 
 PUBLIC
-IMS_BOOL MethodManager::AddMethod(IN Method *pMethod)
+IMS_BOOL MethodManager::AddMethod(IN Method* pMethod)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objMethods.GetSize(); ++i)
     {
-        const Method *pTempMethod = objMethods.GetAt(i);
+        const Method* pTempMethod = objMethods.GetAt(i);
 
         if (pTempMethod->Equals(pMethod))
         {
@@ -64,13 +60,13 @@ const IMSList<Method*>& MethodManager::GetMethods() const
 }
 
 PUBLIC
-void MethodManager::RemoveMethod(IN Method *pMethod)
+void MethodManager::RemoveMethod(IN Method* pMethod)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objMethods.GetSize(); ++i)
     {
-        const Method *pTempMethod = objMethods.GetAt(i);
+        const Method* pTempMethod = objMethods.GetAt(i);
 
         if (pTempMethod->Equals(pMethod))
         {

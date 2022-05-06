@@ -21,15 +21,11 @@
 #include "SipConfigProxy.h"
 #include "util/UserAgentHeader.h"
 
-
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-void UserAgentHeader::SetHeader(IN CONST AString &strName, IN CONST SipProfile *pSIPProfile,
-        IN CONST AString& /*strServiceId*/, IN CONST IPAddress& /*objIP*/, IN IMS_SINT32 nSlotId,
-        IN_OUT ISipMessage *&piSIPMsg)
+PUBLIC GLOBAL void UserAgentHeader::SetHeader(IN CONST AString& strName,
+        IN CONST SipProfile* pSIPProfile, IN CONST AString& /*strServiceId*/,
+        IN CONST IPAddress& /*objIP*/, IN IMS_SINT32 nSlotId, IN_OUT ISipMessage*& piSIPMsg)
 {
     if (strName.GetLength() == 0)
     {

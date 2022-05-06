@@ -31,8 +31,7 @@ class Replaces;
  *
  * @see IServiceMethod, ISessionListener, ISessionDescriptor, IMedia
  */
-class ISession
-    : public IServiceMethod
+class ISession : public IServiceMethod
 {
 public:
     /**
@@ -84,7 +83,7 @@ public:
      * @param bIMSExtension Flag to indicate that IMS extension is supported or not
      * @return Pointer to new IMedia.
      */
-    virtual IMedia* CreateMedia(IN CONST AString &strType, IN IMS_SINT32 nDirection,
+    virtual IMedia* CreateMedia(IN CONST AString& strType, IN IMS_SINT32 nDirection,
             IN IMS_SINT32 nCountOfDescriptor = 0, IN IMS_BOOL bIMSExtension = IMS_TRUE) = 0;
 
     /**
@@ -96,8 +95,8 @@ public:
      *                       "INVITE", "BYE", ...
      * @return Pointer to new IReference.
      */
-    virtual IReference* CreateReference(IN CONST AString &strReferTo,
-            IN CONST AString &strReferMethod) = 0;
+    virtual IReference* CreateReference(
+            IN CONST AString& strReferTo, IN CONST AString& strReferMethod) = 0;
 
     /**
      * @brief Returns the IMedia that are part of this ISession.
@@ -189,7 +188,7 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RejectWithDiversion(IN CONST AString &strAlternativeUserAddress) = 0;
+    virtual IMS_RESULT RejectWithDiversion(IN CONST AString& strAlternativeUserAddress) = 0;
 
     /**
      * @brief Removes a IMedia from the ISession.
@@ -200,7 +199,7 @@ public:
      * @param piMedia IMedia instance to be removed from the ISession
      * @return If it succeeds, returns IMS_SUCCESS. Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RemoveMedia(IN IMedia *piMedia) = 0;
+    virtual IMS_RESULT RemoveMedia(IN IMedia* piMedia) = 0;
 
     /**
      * @brief This method removes all updates that have been made to this ISession and to medias
@@ -217,7 +216,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetListener(IN ISessionListener *piListener) = 0;
+    virtual void SetListener(IN ISessionListener* piListener) = 0;
 
     /**
      * @brief Starts a session. When this method is called the remote endpoint is invited
@@ -269,7 +268,7 @@ public:
      * @param strEvent Event package name
      * @return Pointer to new ISubscription.
      */
-    virtual ISubscription* CreateSubscription(IN CONST AString &strEvent) = 0;
+    virtual ISubscription* CreateSubscription(IN CONST AString& strEvent) = 0;
 
     /**
      * @brief Creates a new mid-call or in-dialog transaction using this ISession.
@@ -277,7 +276,7 @@ public:
      * @param objMethod SIP method for this transaction
      * @return Pointer to new ISipClientConnection.
      */
-    virtual ISipClientConnection* CreateTransaction(IN CONST SipMethod &objMethod) = 0;
+    virtual ISipClientConnection* CreateTransaction(IN CONST SipMethod& objMethod) = 0;
 
     /**
      * @brief Returns the configurations for session control.
@@ -373,7 +372,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT RejectEx(IN IMS_SINT32 nStatusCode,
-            IN CONST AString &strReasonPhrase = AString::ConstNull()) = 0;
+            IN CONST AString& strReasonPhrase = AString::ConstNull()) = 0;
 
     /**
      * @brief Responds to the incoming UPDATE request with the specified status code
@@ -385,8 +384,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RespondToEarlyUpdate(IN IMS_SINT32 nStatusCode,
-            IN CONST AString &strReason = AString::ConstNull()) = 0;
+    virtual IMS_RESULT RespondToEarlyUpdate(
+            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull()) = 0;
 
     /**
      * @brief Responds to the incoming PRACK request with the specified status code
@@ -398,8 +397,8 @@ public:
      * @return If the message is successfully sent, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT RespondToPRAck(IN IMS_SINT32 nStatusCode,
-            IN CONST AString &strReason = AString::ConstNull()) = 0;
+    virtual IMS_RESULT RespondToPRAck(
+            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull()) = 0;
 
     /**
      * @brief Sends an ACK request for the successful final response
@@ -430,7 +429,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT SendProvisionalResponse(IN IMS_SINT32 nStatusCode,
-            IN CONST AString &strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) = 0;
+            IN CONST AString& strReason = AString::ConstNull(), IN IMS_SINT32 nFlags = 0) = 0;
 
     /**
      * @brief Sends a reliable provisional response (not provisional response) to
@@ -450,7 +449,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      */
     virtual IMS_RESULT SendRPR(IN IMS_SINT32 nStatusCode,
-            IN CONST AString &strReason = AString::ConstNull(), IN IMS_BOOL bSDP = IMS_TRUE,
+            IN CONST AString& strReason = AString::ConstNull(), IN IMS_BOOL bSDP = IMS_TRUE,
             IN IMS_SINT32 nFlags = 0) = 0;
 
     /**
@@ -462,7 +461,7 @@ public:
      * @return If the caller preference is successfully set, returns IMS_SUCCESS.
      *         Otherwise, returns IMS_FAILURE.
      */
-    virtual IMS_RESULT SetCallerPreference(IN CONST IMSList<AString> &objCallerPreference) = 0;
+    virtual IMS_RESULT SetCallerPreference(IN CONST IMSList<AString>& objCallerPreference) = 0;
 
     /**
      * @brief Sets the configurations for session control.
@@ -480,7 +479,7 @@ public:
      *         Otherwise, returns IMS_FAILURE.
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
-    virtual IMS_RESULT SetContactParameter(IN CONST AString &strParameter,
+    virtual IMS_RESULT SetContactParameter(IN CONST AString& strParameter,
             IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */) = 0;
 
     /**
@@ -511,7 +510,7 @@ public:
      *
      * @param piListener Listener to be set
      */
-    virtual void SetRefreshListener(IN IRefreshListener *piListener) = 0;
+    virtual void SetRefreshListener(IN IRefreshListener* piListener) = 0;
 
     /**
      * @brief Sets the refresh policy for the session refresh (it's only for 'uas' behavior).
@@ -753,4 +752,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SESSION_H_
+#endif  // _INTERFACE_SESSION_H_

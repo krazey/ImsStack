@@ -20,67 +20,31 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
-class SIPGenericChallenge
-    : public ISipGenericChallenge
+class SIPGenericChallenge : public ISipGenericChallenge
 {
 public:
     SIPGenericChallenge(IN IMS_SINT32 nType_ = ISipHeader::WWW_AUTHENTICATE);
-    SIPGenericChallenge(IN CONST SIPGenericChallenge &objRHS);
+    SIPGenericChallenge(IN CONST SIPGenericChallenge& objRHS);
     virtual ~SIPGenericChallenge();
 
 public:
-    SIPGenericChallenge& operator=(IN CONST SIPGenericChallenge &objRHS);
+    SIPGenericChallenge& operator=(IN CONST SIPGenericChallenge& objRHS);
 
 public:
     // ISipGenericChallenge class
-    inline virtual ISipGenericChallenge* Clone() const
-    {
-        return new SIPGenericChallenge(*this);
-    }
+    inline virtual ISipGenericChallenge* Clone() const { return new SIPGenericChallenge(*this); }
 
-    inline virtual void Destroy()
-    {
-        delete this;
-    }
+    inline virtual void Destroy() { delete this; }
 
-    inline virtual const AString& GetAlgorithm() const
-    {
-        return strAlgorithm;
-    }
-    inline virtual const AString& GetNonce() const
-    {
-        return strNonce;
-    }
-    inline virtual IMS_UINT32 GetNonceCount() const
-    {
-        return nNonceCount;
-    }
-    inline virtual const AString& GetQop() const
-    {
-        return strQop;
-    }
-    inline virtual const AString& GetRealm() const
-    {
-        return strRealm;
-    }
-    inline virtual const AString& GetScheme() const
-    {
-        return strScheme;
-    }
-    inline virtual IMS_SINT32 GetType() const
-    {
-        return nType;
-    }
-    inline virtual void IncreaseNonceCount()
-    {
-        nNonceCount++;
-    }
-    inline virtual void SetNonce(IN CONST AString &strNonce)
-    {
-        this->strNonce = strNonce;
-    }
+    inline virtual const AString& GetAlgorithm() const { return strAlgorithm; }
+    inline virtual const AString& GetNonce() const { return strNonce; }
+    inline virtual IMS_UINT32 GetNonceCount() const { return nNonceCount; }
+    inline virtual const AString& GetQop() const { return strQop; }
+    inline virtual const AString& GetRealm() const { return strRealm; }
+    inline virtual const AString& GetScheme() const { return strScheme; }
+    inline virtual IMS_SINT32 GetType() const { return nType; }
+    inline virtual void IncreaseNonceCount() { nNonceCount++; }
+    inline virtual void SetNonce(IN CONST AString& strNonce) { this->strNonce = strNonce; }
     inline virtual void SetNonceCount(IN IMS_UINT32 nNonceCount)
     {
         if (this->nNonceCount >= nNonceCount)
@@ -89,51 +53,18 @@ public:
         this->nNonceCount = nNonceCount;
     }
 
-    inline const AString& GetDomain() const
-    {
-        return strDomain;
-    }
-    inline const AString& GetOpaque() const
-    {
-        return strOpaque;
-    }
-    inline const AString& GetStale() const
-    {
-        return strStale;
-    }
+    inline const AString& GetDomain() const { return strDomain; }
+    inline const AString& GetOpaque() const { return strOpaque; }
+    inline const AString& GetStale() const { return strStale; }
 
-    inline void SetAlgorithm(IN CONST AString &strAlgorithm)
-    {
-        this->strAlgorithm = strAlgorithm;
-    }
-    inline void SetRealm(IN CONST AString &strRealm)
-    {
-        this->strRealm = strRealm;
-    }
-    inline void SetScheme(IN CONST AString &strScheme)
-    {
-        this->strScheme = strScheme;
-    }
-    inline void SetType(IN IMS_SINT32 nType)
-    {
-        this->nType = nType;
-    }
-    inline void SetDomain(IN CONST AString &strDomain)
-    {
-        this->strDomain = strDomain;
-    }
-    inline void SetOpaque(IN CONST AString &strOpaque)
-    {
-        this->strOpaque = strOpaque;
-    }
-    inline void SetQop(IN CONST AString &strQop)
-    {
-        this->strQop = strQop;
-    }
-    inline void SetStale(IN CONST AString &strStale)
-    {
-        this->strStale = strStale;
-    }
+    inline void SetAlgorithm(IN CONST AString& strAlgorithm) { this->strAlgorithm = strAlgorithm; }
+    inline void SetRealm(IN CONST AString& strRealm) { this->strRealm = strRealm; }
+    inline void SetScheme(IN CONST AString& strScheme) { this->strScheme = strScheme; }
+    inline void SetType(IN IMS_SINT32 nType) { this->nType = nType; }
+    inline void SetDomain(IN CONST AString& strDomain) { this->strDomain = strDomain; }
+    inline void SetOpaque(IN CONST AString& strOpaque) { this->strOpaque = strOpaque; }
+    inline void SetQop(IN CONST AString& strQop) { this->strQop = strQop; }
+    inline void SetStale(IN CONST AString& strStale) { this->strStale = strStale; }
 
 private:
     // Type of header (WWW-Authenticate/Proxy-Authenticate)
@@ -170,45 +101,42 @@ private:
     IMS_UINT32 nNonceCount;
 };
 
-
-
 PUBLIC
-SIPGenericChallenge::SIPGenericChallenge(IN IMS_SINT32 nType_ /* = ISipHeader::WWW_AUTHENTICATE */)
-    : nType(nType_)
-    , strScheme(AString::ConstNull())
-    , strRealm(AString::ConstNull())
-    , strDomain(AString::ConstNull())
-    , strOpaque(AString::ConstNull())
-    , strQop(AString::ConstNull())
-    , strAlgorithm(AString::ConstNull())
-    , strNonce(AString::ConstNull())
-    , strStale(AString::ConstNull())
-    , nNonceCount(1)
+SIPGenericChallenge::SIPGenericChallenge(
+        IN IMS_SINT32 nType_ /* = ISipHeader::WWW_AUTHENTICATE */) :
+        nType(nType_),
+        strScheme(AString::ConstNull()),
+        strRealm(AString::ConstNull()),
+        strDomain(AString::ConstNull()),
+        strOpaque(AString::ConstNull()),
+        strQop(AString::ConstNull()),
+        strAlgorithm(AString::ConstNull()),
+        strNonce(AString::ConstNull()),
+        strStale(AString::ConstNull()),
+        nNonceCount(1)
 {
 }
 
 PUBLIC
-SIPGenericChallenge::SIPGenericChallenge(IN CONST SIPGenericChallenge &objRHS)
-    : nType(objRHS.nType)
-    , strScheme(objRHS.strScheme)
-    , strRealm(objRHS.strRealm)
-    , strDomain(objRHS.strDomain)
-    , strOpaque(objRHS.strOpaque)
-    , strQop(objRHS.strQop)
-    , strAlgorithm(objRHS.strAlgorithm)
-    , strNonce(objRHS.strNonce)
-    , strStale(objRHS.strStale)
-    , nNonceCount(objRHS.nNonceCount)
+SIPGenericChallenge::SIPGenericChallenge(IN CONST SIPGenericChallenge& objRHS) :
+        nType(objRHS.nType),
+        strScheme(objRHS.strScheme),
+        strRealm(objRHS.strRealm),
+        strDomain(objRHS.strDomain),
+        strOpaque(objRHS.strOpaque),
+        strQop(objRHS.strQop),
+        strAlgorithm(objRHS.strAlgorithm),
+        strNonce(objRHS.strNonce),
+        strStale(objRHS.strStale),
+        nNonceCount(objRHS.nNonceCount)
 {
 }
 
 PUBLIC
-SIPGenericChallenge::~SIPGenericChallenge()
-{
-}
+SIPGenericChallenge::~SIPGenericChallenge() {}
 
 PUBLIC
-SIPGenericChallenge& SIPGenericChallenge::operator=(IN CONST SIPGenericChallenge &objRHS)
+SIPGenericChallenge& SIPGenericChallenge::operator=(IN CONST SIPGenericChallenge& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -229,17 +157,15 @@ SIPGenericChallenge& SIPGenericChallenge::operator=(IN CONST SIPGenericChallenge
     return (*this);
 }
 
-
-
 class SIPGenericResponse
 {
 public:
     SIPGenericResponse();
-    SIPGenericResponse(IN CONST SIPGenericResponse &objRHS);
+    SIPGenericResponse(IN CONST SIPGenericResponse& objRHS);
     ~SIPGenericResponse();
 
 public:
-    SIPGenericResponse& operator=(IN CONST SIPGenericResponse &objRHS);
+    SIPGenericResponse& operator=(IN CONST SIPGenericResponse& objRHS);
 
 private:
     friend class SIPAuHelperPrivate;
@@ -280,48 +206,44 @@ private:
     IMS_AKA stAKAParam;
 };
 
-
-
 PUBLIC
-SIPGenericResponse::SIPGenericResponse()
-    : nType(ISipHeader::AUTHORIZATION)
-    , strScheme(AString::ConstNull())
-    , strNonce(AString::ConstNull())
-    , strAlgorithm(AString::ConstNull())
-    , strOpaque(AString::ConstNull())
-    , strRealm(AString::ConstNull())
-    , strUserName(AString::ConstNull())
-    , strPassword(AString::ConstNull())
-    , strQop(AString::ConstNull())
-    , strCNonce(AString::ConstNull())
-    , strNonceCount(AString::ConstNull())
+SIPGenericResponse::SIPGenericResponse() :
+        nType(ISipHeader::AUTHORIZATION),
+        strScheme(AString::ConstNull()),
+        strNonce(AString::ConstNull()),
+        strAlgorithm(AString::ConstNull()),
+        strOpaque(AString::ConstNull()),
+        strRealm(AString::ConstNull()),
+        strUserName(AString::ConstNull()),
+        strPassword(AString::ConstNull()),
+        strQop(AString::ConstNull()),
+        strCNonce(AString::ConstNull()),
+        strNonceCount(AString::ConstNull())
 {
 }
 
 PUBLIC
-SIPGenericResponse::SIPGenericResponse(IN CONST SIPGenericResponse &objRHS)
-    : nType(objRHS.nType)
-    , strScheme(objRHS.strScheme)
-    , strNonce(objRHS.strNonce)
-    , strAlgorithm(objRHS.strAlgorithm)
-    , strOpaque(objRHS.strOpaque)
-    , strRealm(objRHS.strRealm)
-    , strUserName(objRHS.strUserName)
-    , strPassword(objRHS.strPassword)
-    , strQop(objRHS.strQop)
-    , strCNonce(objRHS.strCNonce)
-    , strNonceCount(objRHS.strNonceCount)
-    , stAKAParam(objRHS.stAKAParam)
+SIPGenericResponse::SIPGenericResponse(IN CONST SIPGenericResponse& objRHS) :
+        nType(objRHS.nType),
+        strScheme(objRHS.strScheme),
+        strNonce(objRHS.strNonce),
+        strAlgorithm(objRHS.strAlgorithm),
+        strOpaque(objRHS.strOpaque),
+        strRealm(objRHS.strRealm),
+        strUserName(objRHS.strUserName),
+        strPassword(objRHS.strPassword),
+        strQop(objRHS.strQop),
+        strCNonce(objRHS.strCNonce),
+        strNonceCount(objRHS.strNonceCount),
+        stAKAParam(objRHS.stAKAParam)
 {
 }
 
 PUBLIC
-SIPGenericResponse::~SIPGenericResponse()
-{
-}
+SIPGenericResponse::~SIPGenericResponse() {}
 
 PUBLIC
-SIPGenericResponse& SIPGenericResponse::operator=(IN CONST SIPGenericResponse &objRHS)
+SIPGenericResponse& SIPGenericResponse::operator=(IN CONST SIPGenericResponse& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -344,8 +266,6 @@ SIPGenericResponse& SIPGenericResponse::operator=(IN CONST SIPGenericResponse &o
     return (*this);
 }
 
-
-
 class SIPAuHelperPrivate
 {
 public:
@@ -353,19 +273,19 @@ public:
     ~SIPAuHelperPrivate();
 
 public:
-    IMS_BOOL AddChallenge(IN ISipGenericChallenge *piChallenge);
-    IMS_BOOL AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase *pstHeader);
-    IMS_BOOL AddCredential(IN CONST Credential &objCredential);
-    IMS_BOOL AddHeader(IN_OUT SipMessage *&pstMessage);
+    IMS_BOOL AddChallenge(IN ISipGenericChallenge* piChallenge);
+    IMS_BOOL AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase* pstHeader);
+    IMS_BOOL AddCredential(IN CONST Credential& objCredential);
+    IMS_BOOL AddHeader(IN_OUT SipMessage*& pstMessage);
     IMS_BOOL CalculateResponse();
     void Clear();
-    IMS_BOOL FormCredentials(IN CONST SipMethod &objMethod, IN CONST AString &strURI,
-            IN CONST AString &strEntityBody, IN_OUT SIPGenericResponse &objResponse,
-            OUT SipHeaderBase *&pstHeader);
+    IMS_BOOL FormCredentials(IN CONST SipMethod& objMethod, IN CONST AString& strURI,
+            IN CONST AString& strEntityBody, IN_OUT SIPGenericResponse& objResponse,
+            OUT SipHeaderBase*& pstHeader);
     ISipGenericChallenge* GetChallenge(IN IMS_SINT32 nIndex) const;
     IMS_BOOL IsChallengePresent() const;
     IMS_BOOL IsCredentialPresent() const;
-    const Credential* LookupCredential(IN CONST AString &strRealm) const;
+    const Credential* LookupCredential(IN CONST AString& strRealm) const;
     void RemoveAllCredentials();
 
 private:
@@ -393,51 +313,27 @@ private:
     IMSList<SIPGenericResponse*> objResponses;
 };
 
-
-
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_ALGORITHM[] = "algorithm";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_AUTS[] = "auts";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_BASIC[] = "Basic";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_CNONCE[] = "cnonce";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_DIGEST[] = "Digest";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_DOMAIN[] = "domain";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_MD5_SESS[] = "MD5-sess";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_NONCE[] = "nonce";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_NONCECOUNT[] = "nc";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_OPAQUE[] = "opaque";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_QOP[] = "qop";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_QOP_AUTH[] = "auth";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_QOP_AUTH_INT[] = "auth-int";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_REALM[] = "realm";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_RESPONSE[] = "response";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_STALE[] = "stale";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_URI[] = "uri";
-PRIVATE GLOBAL
-const IMS_CHAR SIPAuHelperPrivate::STR_USERNAME[] = "username";
-
-
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_ALGORITHM[] = "algorithm";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_AUTS[] = "auts";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_BASIC[] = "Basic";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_CNONCE[] = "cnonce";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_DIGEST[] = "Digest";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_DOMAIN[] = "domain";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_MD5_SESS[] = "MD5-sess";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_NONCE[] = "nonce";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_NONCECOUNT[] = "nc";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_OPAQUE[] = "opaque";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_QOP[] = "qop";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_QOP_AUTH[] = "auth";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_QOP_AUTH_INT[] = "auth-int";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_REALM[] = "realm";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_RESPONSE[] = "response";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_STALE[] = "stale";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_URI[] = "uri";
+PRIVATE GLOBAL const IMS_CHAR SIPAuHelperPrivate::STR_USERNAME[] = "username";
 
 PUBLIC
-SIPAuHelperPrivate::SIPAuHelperPrivate()
-{
-}
+SIPAuHelperPrivate::SIPAuHelperPrivate() {}
 
 PUBLIC
 SIPAuHelperPrivate::~SIPAuHelperPrivate()
@@ -447,9 +343,9 @@ SIPAuHelperPrivate::~SIPAuHelperPrivate()
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN ISipGenericChallenge *piChallenge)
+IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN ISipGenericChallenge* piChallenge)
 {
-    SIPGenericChallenge *pChallenge = DYNAMIC_CAST(SIPGenericChallenge*, piChallenge);
+    SIPGenericChallenge* pChallenge = DYNAMIC_CAST(SIPGenericChallenge*, piChallenge);
 
     //---------------------------------------------------------------------------------------------
 
@@ -458,7 +354,7 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN ISipGenericChallenge *piChallenge)
         return IMS_FALSE;
     }
 
-    SIPGenericChallenge *pNewChallenge = new SIPGenericChallenge(*pChallenge);
+    SIPGenericChallenge* pNewChallenge = new SIPGenericChallenge(*pChallenge);
 
     if (pNewChallenge == IMS_NULL)
     {
@@ -472,17 +368,16 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN ISipGenericChallenge *piChallenge)
     }
 
     IMS_TRACE_D("AuHelper :: AddChallenge - nonce (%s), nonce_count (%d), algorithm (%s)",
-            pChallenge->GetNonce().GetStr(),
-            pChallenge->GetNonceCount(),
+            pChallenge->GetNonce().GetStr(), pChallenge->GetNonceCount(),
             pChallenge->GetAlgorithm().GetStr());
 
     return IMS_TRUE;
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase *pstHeader)
+IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase* pstHeader)
 {
-    SIPGenericChallenge *pChallenge = new SIPGenericChallenge(nType);
+    SIPGenericChallenge* pChallenge = new SIPGenericChallenge(nType);
 
     //---------------------------------------------------------------------------------------------
 
@@ -494,7 +389,7 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase 
     pChallenge->SetScheme(SIPStack::GetChallengeScheme(pstHeader));
     pChallenge->SetRealm(SIPStack::GetParameter(pstHeader, STR_REALM));
 
-    const AString &strRealm = pChallenge->GetRealm();
+    const AString& strRealm = pChallenge->GetRealm();
 
     if (strRealm.StartsWith(TextParser::CHAR_DQUOT))
     {
@@ -506,7 +401,7 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase 
     pChallenge->SetOpaque(SIPStack::GetParameter(pstHeader, STR_OPAQUE));
     pChallenge->SetQop(SIPStack::GetParameter(pstHeader, STR_QOP));
 
-    const AString &strQop = pChallenge->GetQop();
+    const AString& strQop = pChallenge->GetQop();
 
     if (strQop.StartsWith(TextParser::CHAR_DQUOT))
     {
@@ -517,7 +412,7 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase 
     pChallenge->SetAlgorithm(SIPStack::GetParameter(pstHeader, STR_ALGORITHM));
     pChallenge->SetNonce(SIPStack::GetParameter(pstHeader, STR_NONCE));
 
-    const AString &strNonce = pChallenge->GetNonce();
+    const AString& strNonce = pChallenge->GetNonce();
 
     if (strNonce.StartsWith(TextParser::CHAR_DQUOT))
     {
@@ -543,9 +438,9 @@ IMS_BOOL SIPAuHelperPrivate::AddChallenge(IN IMS_SINT32 nType, IN SipHeaderBase 
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::AddCredential(IN CONST Credential &objCredential)
+IMS_BOOL SIPAuHelperPrivate::AddCredential(IN CONST Credential& objCredential)
 {
-    const Credential *pExCredential = LookupCredential(objCredential.GetRealm());
+    const Credential* pExCredential = LookupCredential(objCredential.GetRealm());
 
     //---------------------------------------------------------------------------------------------
 
@@ -553,8 +448,7 @@ IMS_BOOL SIPAuHelperPrivate::AddCredential(IN CONST Credential &objCredential)
     {
         IMS_TRACE_D("The credential already exists - Realm (%s), UserName (%s), Password (xxx)",
                 SipDebug::GetCharA1(pExCredential->GetRealm().GetStr(), 4),
-                SipDebug::GetCharA2(pExCredential->GetUsername().GetStr(), 6),
-                0);
+                SipDebug::GetCharA2(pExCredential->GetUsername().GetStr(), 6), 0);
         return IMS_TRUE;
     }
 
@@ -567,7 +461,7 @@ IMS_BOOL SIPAuHelperPrivate::AddCredential(IN CONST Credential &objCredential)
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage *&pstMessage)
+IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage*& pstMessage)
 {
     // Get the URI from the Request-Line to be used in the uri parameter of the response
     // in case of Digest scheme.
@@ -578,7 +472,7 @@ IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage *&pstMessage)
 
     //---------------------------------------------------------------------------------------------
 
-    SipAddrSpec *pstAddrSpec = SIPStack::GetRequestUri(pstMessage);
+    SipAddrSpec* pstAddrSpec = SIPStack::GetRequestUri(pstMessage);
 
     SIPStack::EncodeAddrSpec(pstAddrSpec, IMS_FALSE, strURI);
     SIPStack::FreeAddrSpec(pstAddrSpec);
@@ -586,7 +480,7 @@ IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage *&pstMessage)
     // Checks if the integrity of the authentication required
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {
-        const SIPGenericResponse *pResponse = objResponses.GetAt(i);
+        const SIPGenericResponse* pResponse = objResponses.GetAt(i);
 
         if (pResponse == IMS_NULL)
             continue;
@@ -609,14 +503,14 @@ IMS_BOOL SIPAuHelperPrivate::AddHeader(IN_OUT SipMessage *&pstMessage)
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {
-        SIPGenericResponse *pResponse = objResponses.GetAt(i);
+        SIPGenericResponse* pResponse = objResponses.GetAt(i);
 
         if (pResponse == IMS_NULL)
         {
             return IMS_FALSE;
         }
 
-        SipHeaderBase *pstHeader = SIPStack::CreateHeader(pResponse->nType);
+        SipHeaderBase* pstHeader = SIPStack::CreateHeader(pResponse->nType);
 
         if (pstHeader == IMS_NULL)
         {
@@ -648,22 +542,22 @@ IMS_BOOL SIPAuHelperPrivate::CalculateResponse()
 
     for (IMS_UINT32 i = 0; i < objChallenges.GetSize(); ++i)
     {
-        const SIPGenericChallenge *pChallenge = objChallenges.GetAt(i);
+        const SIPGenericChallenge* pChallenge = objChallenges.GetAt(i);
 
         if (pChallenge == IMS_NULL)
         {
             return IMS_FALSE;
         }
 
-        if (pChallenge->GetScheme().EqualsIgnoreCase(STR_BASIC)
-                || pChallenge->GetScheme().EqualsIgnoreCase(STR_DIGEST))
+        if (pChallenge->GetScheme().EqualsIgnoreCase(STR_BASIC) ||
+                pChallenge->GetScheme().EqualsIgnoreCase(STR_DIGEST))
         {
-            const Credential *pCredential = LookupCredential(pChallenge->GetRealm());
+            const Credential* pCredential = LookupCredential(pChallenge->GetRealm());
 
             if (pCredential == IMS_NULL)
                 continue;
 
-            SIPGenericResponse *pResponse = new SIPGenericResponse();
+            SIPGenericResponse* pResponse = new SIPGenericResponse();
 
             if (pResponse == IMS_NULL)
             {
@@ -693,7 +587,7 @@ IMS_BOOL SIPAuHelperPrivate::CalculateResponse()
                 pResponse->stAKAParam = pCredential->GetAKAResponse();
 
                 // Sets the auts field
-                //if (pResponse->stAKAParam.nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
+                // if (pResponse->stAKAParam.nStatus == IMS_AKA::RESULT_NOK_SQN_SYNC_FAILED)
                 //    pResponse->stAKAParam.strAUTS = pResponse->stAKAParam.strAUTS.ToBase64();
             }
 
@@ -704,7 +598,7 @@ IMS_BOOL SIPAuHelperPrivate::CalculateResponse()
 
                 for (IMS_SINT32 i = 0; i < objTokens.GetCount(); ++i)
                 {
-                    const AString &strToken = objTokens.GetElementAt(i);
+                    const AString& strToken = objTokens.GetElementAt(i);
 
                     // Digest (QoP) : auth
                     if (strToken.EqualsIgnoreCase(STR_QOP_AUTH))
@@ -750,7 +644,7 @@ void SIPAuHelperPrivate::Clear()
 {
     for (IMS_UINT32 i = 0; i < objChallenges.GetSize(); ++i)
     {
-        SIPGenericChallenge *pChallenge = objChallenges.GetAt(i);
+        SIPGenericChallenge* pChallenge = objChallenges.GetAt(i);
 
         if (pChallenge != IMS_NULL)
             delete pChallenge;
@@ -760,7 +654,7 @@ void SIPAuHelperPrivate::Clear()
 
     for (IMS_UINT32 i = 0; i < objResponses.GetSize(); ++i)
     {
-        SIPGenericResponse *pResponse = objResponses.GetAt(i);
+        SIPGenericResponse* pResponse = objResponses.GetAt(i);
 
         if (pResponse != IMS_NULL)
             delete pResponse;
@@ -770,9 +664,9 @@ void SIPAuHelperPrivate::Clear()
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SipMethod &objMethod,
-        IN CONST AString &strURI, IN CONST AString &strEntityBody,
-        IN_OUT SIPGenericResponse &objResponse, OUT SipHeaderBase *&pstHeader)
+IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SipMethod& objMethod,
+        IN CONST AString& strURI, IN CONST AString& strEntityBody,
+        IN_OUT SIPGenericResponse& objResponse, OUT SipHeaderBase*& pstHeader)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -785,8 +679,8 @@ IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SipMethod &objMethod,
         // Server has requested Basic Authentication Scheme.
         AString strBasicRES;
 
-        if ((objResponse.strUserName.GetLength() != 0)
-                && (objResponse.strPassword.GetLength() != 0))
+        if ((objResponse.strUserName.GetLength() != 0) &&
+                (objResponse.strPassword.GetLength() != 0))
         {
             strBasicRES += objResponse.strUserName;
             strBasicRES += TextParser::CHAR_COLON;
@@ -819,9 +713,15 @@ IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SipMethod &objMethod,
             // IMS_AKA::AUTH_SQN_SYNCHRONIZATION_FAILURE
 
             // Server has requested Digest Authentication Scheme.
-            HASHHEX HEntity = { 0, };
-            HASHHEX HA1 = { 0, };
-            IMS_CHAR acResponse[HASHHEX_SIZE + 1] = { 0, };
+            HASHHEX HEntity = {
+                    0,
+            };
+            HASHHEX HA1 = {
+                    0,
+            };
+            IMS_CHAR acResponse[HASHHEX_SIZE + 1] = {
+                    0,
+            };
 
             // Calculate H(Entity-Body) required for the response
             if (objResponse.strQop.EqualsIgnoreCase(STR_QOP_AUTH_INT))
@@ -831,14 +731,13 @@ IMS_BOOL SIPAuHelperPrivate::FormCredentials(IN CONST SipMethod &objMethod,
 
             // Calculate the H(A1)
             IMSDigestEx_CalculateHA1(objResponse.strAlgorithm, objResponse.strUserName,
-                    objResponse.strRealm, objResponse.strPassword,
-                    objResponse.strNonce, objResponse.strCNonce, HA1);
+                    objResponse.strRealm, objResponse.strPassword, objResponse.strNonce,
+                    objResponse.strCNonce, HA1);
 
             // Calculate the response digest
-            IMSDigestEx_CalculateResponse(HA1, objResponse.strNonce,
-                    objResponse.strNonceCount, objResponse.strCNonce,
-                    objResponse.strQop, objMethod.ToString(),
-                    strURI, HEntity, acResponse);
+            IMSDigestEx_CalculateResponse(HA1, objResponse.strNonce, objResponse.strNonceCount,
+                    objResponse.strCNonce, objResponse.strQop, objMethod.ToString(), strURI,
+                    HEntity, acResponse);
 
             strDigestRES.Append(TextParser::CHAR_DQUOT);
             strDigestRES.Append(acResponse);
@@ -1037,13 +936,13 @@ IMS_BOOL SIPAuHelperPrivate::IsCredentialPresent() const
 }
 
 PUBLIC
-const Credential* SIPAuHelperPrivate::LookupCredential(IN CONST AString &strRealm) const
+const Credential* SIPAuHelperPrivate::LookupCredential(IN CONST AString& strRealm) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objCredentials.GetSize(); ++i)
     {
-        const Credential &objCredential = objCredentials.GetAt(i);
+        const Credential& objCredential = objCredentials.GetAt(i);
 
         if (objCredential.IsSameRealm(strRealm))
             return &objCredential;
@@ -1060,11 +959,9 @@ void SIPAuHelperPrivate::RemoveAllCredentials()
     objCredentials.Clear();
 }
 
-
-
 PUBLIC
-SIPAuHelper::SIPAuHelper()
-    : pSAHelper(new SIPAuHelperPrivate())
+SIPAuHelper::SIPAuHelper() :
+        pSAHelper(new SIPAuHelperPrivate())
 {
 }
 
@@ -1076,7 +973,7 @@ SIPAuHelper::~SIPAuHelper()
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelper::AddChallenge(IN ISipGenericChallenge *piChallenge)
+IMS_BOOL SIPAuHelper::AddChallenge(IN ISipGenericChallenge* piChallenge)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1084,7 +981,7 @@ IMS_BOOL SIPAuHelper::AddChallenge(IN ISipGenericChallenge *piChallenge)
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelper::AddCredential(IN CONST Credential &objCredential)
+IMS_BOOL SIPAuHelper::AddCredential(IN CONST Credential& objCredential)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1092,7 +989,7 @@ IMS_BOOL SIPAuHelper::AddCredential(IN CONST Credential &objCredential)
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelper::FormCredentials(IN_OUT SipMessage *&pstMessage)
+IMS_BOOL SIPAuHelper::FormCredentials(IN_OUT SipMessage*& pstMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1175,7 +1072,7 @@ void SIPAuHelper::RemoveAllCredentials()
 }
 
 PUBLIC
-IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage *pstMessage)
+IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage* pstMessage)
 {
     IMS_SINT32 nHCount = 0;
 
@@ -1190,8 +1087,8 @@ IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage *pstMessage)
     {
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeaderBase *pstHeader = SIPStack::GetHeader(
-                    pstMessage, ISipHeader::WWW_AUTHENTICATE, i);
+            SipHeaderBase* pstHeader =
+                    SIPStack::GetHeader(pstMessage, ISipHeader::WWW_AUTHENTICATE, i);
 
             if (SIPStack::IsValidHeader(pstHeader))
             {
@@ -1213,8 +1110,8 @@ IMS_BOOL SIPAuHelper::SetChallenges(IN SipMessage *pstMessage)
     {
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeaderBase *pstHeader = SIPStack::GetHeader(
-                    pstMessage, ISipHeader::PROXY_AUTHENTICATE, i);
+            SipHeaderBase* pstHeader =
+                    SIPStack::GetHeader(pstMessage, ISipHeader::PROXY_AUTHENTICATE, i);
 
             if (SIPStack::IsValidHeader(pstHeader))
             {

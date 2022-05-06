@@ -20,8 +20,6 @@ class IMutex;
 class ISipServerConnection;
 class ICancellableMethod;
 
-
-
 class CancellableMethodManager
 {
 private:
@@ -33,20 +31,20 @@ private:
     CancellableMethodManager& operator=(IN const CancellableMethodManager& objRHS);
 
 public:
-    IMS_BOOL AddMethod(IN CONST AString &strName, IN ICancellableMethod *piMethod);
-    void RemoveMethod(IN CONST AString &strName);
+    IMS_BOOL AddMethod(IN CONST AString& strName, IN ICancellableMethod* piMethod);
+    void RemoveMethod(IN CONST AString& strName);
 
     static CancellableMethodManager* GetInstance();
 
 private:
-    IMS_BOOL HandleCancelRequest(IN ISipServerConnection *piSSC);
+    IMS_BOOL HandleCancelRequest(IN ISipServerConnection* piSSC);
 
 private:
     friend class SIPConnectionNotifierManagerPrivate;
 
-    IMutex *piLock;
+    IMutex* piLock;
     // Name (identifier), Pointer of ICancellableMethod
     IMSMap<AString, ICancellableMethod*> objCancellableMethods;
 };
 
-#endif // _CANCELLABLE_METHOD_MANAGER_H_
+#endif  // _CANCELLABLE_METHOD_MANAGER_H_

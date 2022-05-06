@@ -17,18 +17,15 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-PublicationImpl::PublicationImpl(IN Publication *pPublication_)
-    : piListener(IMS_NULL)
-    , pPublication(pPublication_)
+PublicationImpl::PublicationImpl(IN Publication* pPublication_) :
+        piListener(IMS_NULL),
+        pPublication(pPublication_)
 {
     pPublication->SetListener(this);
 }
 
-PUBLIC VIRTUAL
-PublicationImpl::~PublicationImpl()
+PUBLIC VIRTUAL PublicationImpl::~PublicationImpl()
 {
     if (pPublication != IMS_NULL)
     {
@@ -37,8 +34,7 @@ PublicationImpl::~PublicationImpl()
     }
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::Destroy()
+PRIVATE VIRTUAL void PublicationImpl::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -55,48 +51,43 @@ void PublicationImpl::Destroy()
 }
 
 // SIP_MESSAGE_MEDIATOR
-PRIVATE VIRTUAL
-void PublicationImpl::SetMessageMediator(IN IMessageMediator *piMediator)
+PRIVATE VIRTUAL void PublicationImpl::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
     pPublication->SetMessageMediator(piMediator);
 }
 
-PRIVATE VIRTUAL
-IMessage* PublicationImpl::GetNextRequest()
+PRIVATE VIRTUAL IMessage* PublicationImpl::GetNextRequest()
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetNextRequest();
 }
 
-PRIVATE VIRTUAL
-IMessage* PublicationImpl::GetNextResponse()
+PRIVATE VIRTUAL IMessage* PublicationImpl::GetNextResponse()
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetNextResponse();
 }
 
-PRIVATE VIRTUAL
-IMessage* PublicationImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* PublicationImpl::GetPreviousRequest(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetPreviousRequest(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMessage* PublicationImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMessage* PublicationImpl::GetPreviousResponse(IN IMS_SINT32 nServiceMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetPreviousResponse(nServiceMethod);
 }
 
-PRIVATE VIRTUAL
-IMSList<IMessage*> PublicationImpl::GetPreviousResponses(IN IMS_SINT32 nServiceMethod) const
+PRIVATE VIRTUAL IMSList<IMessage*> PublicationImpl::GetPreviousResponses(
+        IN IMS_SINT32 nServiceMethod) const
 {
     IMSList<IMessage*> objIMessages;
     IMSList<Message*> objResponses = pPublication->GetPreviousResponses(nServiceMethod);
@@ -111,64 +102,57 @@ IMSList<IMessage*> PublicationImpl::GetPreviousResponses(IN IMS_SINT32 nServiceM
     return objIMessages;
 }
 
-PRIVATE VIRTUAL
-IMSList<AString> PublicationImpl::GetRemoteUserId() const
+PRIVATE VIRTUAL IMSList<AString> PublicationImpl::GetRemoteUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetRemoteUserId();
 }
 
-PRIVATE VIRTUAL
-const AString& PublicationImpl::GetEvent() const
+PRIVATE VIRTUAL const AString& PublicationImpl::GetEvent() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetEvent();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 PublicationImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 PublicationImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT PublicationImpl::Publish(IN CONST ByteArray &objState, IN CONST AString &strContentType)
+PRIVATE VIRTUAL IMS_RESULT PublicationImpl::Publish(
+        IN CONST ByteArray& objState, IN CONST AString& strContentType)
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->Publish(objState, strContentType);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::SetListener(IN IPublicationListener *piListener)
+PRIVATE VIRTUAL void PublicationImpl::SetListener(IN IPublicationListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     this->piListener = piListener;
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT PublicationImpl::Unpublish()
+PRIVATE VIRTUAL IMS_RESULT PublicationImpl::Unpublish()
 {
     //---------------------------------------------------------------------------------------------
 
     return pPublication->Unpublish();
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::SetRefreshListener(IN IRefreshListener *piListener)
+PRIVATE VIRTUAL void PublicationImpl::SetRefreshListener(IN IRefreshListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
     pPublication->SetRefreshListener(piListener);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
+PRIVATE VIRTUAL void PublicationImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
         IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
 {
     //---------------------------------------------------------------------------------------------
@@ -176,8 +160,7 @@ void PublicationImpl::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
     pPublication->SetRefreshPolicy(nPolicy, nCriteriaInterval, nValueEorLT, nValueGT);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::OnPublication_Delivered(IN Publication *pPublication)
+PRIVATE VIRTUAL void PublicationImpl::OnPublication_Delivered(IN Publication* pPublication)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -196,8 +179,7 @@ void PublicationImpl::OnPublication_Delivered(IN Publication *pPublication)
     piListener->PublicationDelivered(this);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::OnPublication_DeliveryFailed(IN Publication *pPublication)
+PRIVATE VIRTUAL void PublicationImpl::OnPublication_DeliveryFailed(IN Publication* pPublication)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -216,8 +198,7 @@ void PublicationImpl::OnPublication_DeliveryFailed(IN Publication *pPublication)
     piListener->PublicationDeliveryFailed(this);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::OnPublication_Terminated(IN Publication *pPublication)
+PRIVATE VIRTUAL void PublicationImpl::OnPublication_Terminated(IN Publication* pPublication)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -236,8 +217,7 @@ void PublicationImpl::OnPublication_Terminated(IN Publication *pPublication)
     piListener->PublicationTerminated(this);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::OnPublication_RefreshStarted(IN Publication *pPublication)
+PRIVATE VIRTUAL void PublicationImpl::OnPublication_RefreshStarted(IN Publication* pPublication)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -256,8 +236,7 @@ void PublicationImpl::OnPublication_RefreshStarted(IN Publication *pPublication)
     piListener->PublicationRefreshStarted(this);
 }
 
-PRIVATE VIRTUAL
-void PublicationImpl::OnPublication_RefreshCompleted(IN Publication *pPublication)
+PRIVATE VIRTUAL void PublicationImpl::OnPublication_RefreshCompleted(IN Publication* pPublication)
 {
     //---------------------------------------------------------------------------------------------
 

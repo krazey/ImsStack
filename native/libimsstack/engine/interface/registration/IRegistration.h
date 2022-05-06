@@ -16,8 +16,7 @@ class IRegSubscription;
 /**
  * @brief This class provides an interface to access/control IMS registration.
  */
-class IRegistration
-    : public IRegBase
+class IRegistration : public IRegBase
 {
 public:
     /**
@@ -28,7 +27,7 @@ public:
      * @return If the registration binding is successfully created, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL CreateBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId) = 0;
+    virtual IMS_BOOL CreateBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Destroys a registration binding information with the specified service.
@@ -36,7 +35,7 @@ public:
      * @param strAppId an IMS application identifier
      * @param strServiceId an IMS service identifier
      */
-    virtual void DestroyBinding(IN CONST AString &strAppId, IN CONST AString &strServiceId) = 0;
+    virtual void DestroyBinding(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Creates a Contact information with a registration duration.
@@ -50,7 +49,7 @@ public:
      * @param nExpiresValue expiration value (duration of this binding)
      * @return Pointer to IRegContact or null.
      */
-    virtual IRegContact* CreateContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort,
+    virtual IRegContact* CreateContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nExpiresPolicy = POLICY_EXPIRES_CONFIG,
             IN IMS_UINT32 nExpiresValue = DEFAULT_EXPIRES) = 0;
 
@@ -59,7 +58,7 @@ public:
      *
      * @param piContact Contact to be destroyed
      */
-    virtual void DestroyContact(IN IRegContact *piContact) = 0;
+    virtual void DestroyContact(IN IRegContact* piContact) = 0;
 
     /**
      * @brief Destroys the Contact with the specified IP & Port.
@@ -67,7 +66,7 @@ public:
      * @param objIPA IP address of Contact
      * @param nPort port number of Contact
      */
-    virtual void DestroyContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort) = 0;
+    virtual void DestroyContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) = 0;
 
     /**
      * @brief Checks if the specified registration equals or not.
@@ -76,7 +75,7 @@ public:
      * @return If the specified registration equals, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL Equals(IN CONST IRegistration *piReg) const = 0;
+    virtual IMS_BOOL Equals(IN CONST IRegistration* piReg) const = 0;
 
     /**
      * @brief Returns the current credential.
@@ -128,7 +127,7 @@ public:
      * @param nPort port number to be compared
      * @return Pointer to IRegContact.
      */
-    virtual IRegContact* GetContact(IN CONST IPAddress &objIPA, IN IMS_SINT32 nPort) const = 0;
+    virtual IRegContact* GetContact(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort) const = 0;
 
     /**
      * @brief Returns the preferred contact (highest 'q' value) among the contacts.
@@ -297,15 +296,15 @@ public:
      * @param strSubsId an identifier for SubscriberConfig
      * @note MULTI_SUBS
      */
-    virtual void SetAOR(IN CONST SipAddress &objAOR,
-            IN CONST AString &strSubsId = AString::ConstNull()) = 0;
+    virtual void SetAOR(
+            IN CONST SipAddress& objAOR, IN CONST AString& strSubsId = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets the listener for this registration.
      *
      * @param piListener Listener interface to be set
      */
-    virtual void SetListener(IN IRegistrationListener *piListener) = 0;
+    virtual void SetListener(IN IRegistrationListener* piListener) = 0;
 
     /**
      * @brief Sets the refresh policy for the registration refresh.
@@ -337,14 +336,14 @@ public:
      * @param pProfile Pointer to SipProfile
      * @note MULTI_REG_SIP_PROFILE
      */
-    virtual void SetSIPProfile(IN SipProfile *pProfile) = 0;
+    virtual void SetSIPProfile(IN SipProfile* pProfile) = 0;
 
     /**
      * @brief Sets the listener to monitor the changes of the service's state.
      *
      * @param piListener Pointer to IRegBindingStateListener
      */
-    virtual void SetBindingStateListener(IN IRegBindingStateListener *piListener) = 0;
+    virtual void SetBindingStateListener(IN IRegBindingStateListener* piListener) = 0;
 
     /**
      * @brief Sets the configuration option for which UE is registered within the trust domain.
@@ -360,7 +359,7 @@ public:
      *
      * @param piUserIdNotifier Notifier interface to be set
      */
-    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier *piUserIdNotifier) = 0;
+    virtual void SetUserIdentityNotifier(IN IRegUserIdentityNotifier* piUserIdNotifier) = 0;
 
     /**
      * @brief Sets the user-info field for Contact header in this registration.
@@ -374,7 +373,7 @@ public:
      *
      * @param strUserInfo User-info field value to be set
      */
-    virtual void SetUserInfoForContactHeader(IN CONST AString &strUserInfo) = 0;
+    virtual void SetUserInfoForContactHeader(IN CONST AString& strUserInfo) = 0;
 
     /**
      * @brief Creates the subscription with 'reg' event package for this registration.
@@ -382,11 +381,14 @@ public:
      * @param pResourceUri Pointer to the resource uri to subscribe
      * @return Pointer to IRegSubscription.
      */
-    virtual IRegSubscription* CreateSubscription(IN SipAddress *pResourceUri = IMS_NULL) = 0;
+    virtual IRegSubscription* CreateSubscription(IN SipAddress* pResourceUri = IMS_NULL) = 0;
 
 public:
     /// Default expiration time value
-    enum { DEFAULT_EXPIRES = 3600 };
+    enum
+    {
+        DEFAULT_EXPIRES = 3600
+    };
 
     /// Policy for expiration value
     enum
@@ -466,4 +468,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REGISTRATION_H_
+#endif  // _INTERFACE_REGISTRATION_H_

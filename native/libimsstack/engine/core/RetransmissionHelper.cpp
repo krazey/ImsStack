@@ -22,17 +22,15 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-RetransmissionHelper::RetransmissionHelper(IN Service *pService_,
-        IN IMS_BOOL bIntervalCap /* = IMS_TRUE */)
-    : nDuration(TIMER_T1)
-    , nCumulativeDuration(TIMER_T1)
-    , nMaxDuration(TIMER_MAX)
-    , nIntervalCap(TIMER_MAX)
-    , piTimer(IMS_NULL)
-    , piListener(IMS_NULL)
+RetransmissionHelper::RetransmissionHelper(
+        IN Service* pService_, IN IMS_BOOL bIntervalCap /* = IMS_TRUE */) :
+        nDuration(TIMER_T1),
+        nCumulativeDuration(TIMER_T1),
+        nMaxDuration(TIMER_MAX),
+        nIntervalCap(TIMER_MAX),
+        piTimer(IMS_NULL),
+        piListener(IMS_NULL)
 {
     const ISipConfigV* piSipConfigV = pService_->GetISipConfigV();
 
@@ -54,8 +52,7 @@ RetransmissionHelper::RetransmissionHelper(IN Service *pService_,
     }
 }
 
-PUBLIC VIRTUAL
-RetransmissionHelper::~RetransmissionHelper()
+PUBLIC VIRTUAL RetransmissionHelper::~RetransmissionHelper()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -70,7 +67,7 @@ RetransmissionHelper::~RetransmissionHelper()
 }
 
 PUBLIC
-void RetransmissionHelper::SetListener(IN IRetransmissionHelperListener *piListener)
+void RetransmissionHelper::SetListener(IN IRetransmissionHelperListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -137,8 +134,7 @@ void RetransmissionHelper::Stop()
     piTimer = IMS_NULL;
 }
 
-PROTECTED VIRTUAL
-void RetransmissionHelper::Timer_TimerExpired(IN ITimer *piTimer)
+PROTECTED VIRTUAL void RetransmissionHelper::Timer_TimerExpired(IN ITimer* piTimer)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -156,8 +152,8 @@ void RetransmissionHelper::Timer_TimerExpired(IN ITimer *piTimer)
     {
         if (piListener != IMS_NULL)
         {
-            if (piListener->RetransmissionHelper_NotifyStatus(
-                    NOTIFICATION_TIMER_EXPIRED) != IMS_SUCCESS)
+            if (piListener->RetransmissionHelper_NotifyStatus(NOTIFICATION_TIMER_EXPIRED) !=
+                    IMS_SUCCESS)
             {
                 return;
             }

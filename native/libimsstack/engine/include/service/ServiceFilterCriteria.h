@@ -16,29 +16,26 @@
 #include "IMSMap.h"
 #include "IServiceFilterCriteria.h"
 
-
-
-class ServiceFilterCriteria
-    : public IServiceFilterCriteria
+class ServiceFilterCriteria : public IServiceFilterCriteria
 {
 public:
     ServiceFilterCriteria();
     virtual ~ServiceFilterCriteria();
 
 private:
-    ServiceFilterCriteria(IN CONST ServiceFilterCriteria &objRHS);
-    ServiceFilterCriteria& operator=(IN CONST ServiceFilterCriteria &objRHS);
+    ServiceFilterCriteria(IN CONST ServiceFilterCriteria& objRHS);
+    ServiceFilterCriteria& operator=(IN CONST ServiceFilterCriteria& objRHS);
 
 public:
     // IServiceFilterCriteria class
-    virtual IMS_UINT32 AddTriggerPoint(IN CONST TriggerPoint &objTP);
+    virtual IMS_UINT32 AddTriggerPoint(IN CONST TriggerPoint& objTP);
     virtual void RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId);
     virtual void RemoveAllTriggerPoints();
-    virtual void SetCalleePreference(IN CONST SipMethod &objMethod,
-            IN IMS_BOOL bCalleePreference = IMS_TRUE);
+    virtual void SetCalleePreference(
+            IN CONST SipMethod& objMethod, IN IMS_BOOL bCalleePreference = IMS_TRUE);
 
-    IMS_UINT32 Evaluate(IN CONST ISipMessage *piSIPMsg) const;
-    IMS_BOOL IsCalleePreferenceSupported(IN CONST SipMethod &objMethod) const;
+    IMS_UINT32 Evaluate(IN CONST ISipMessage* piSIPMsg) const;
+    IMS_BOOL IsCalleePreferenceSupported(IN CONST SipMethod& objMethod) const;
     IMS_BOOL IsEmpty() const;
 
 private:
@@ -49,4 +46,4 @@ private:
     IMSMap<IMS_UINT32, TriggerPoint*> objTPs;
 };
 
-#endif // _SERVICE_FILTER_CRITERIA_H_
+#endif  // _SERVICE_FILTER_CRITERIA_H_

@@ -20,8 +20,8 @@ public:
      * @param strValue the header parameter value
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddHeaderParameter(IN CONST AString &strName,
-            IN CONST AString &strValue = AString::ConstNull()) = 0;
+    virtual IMS_BOOL AddHeaderParameter(
+            IN CONST AString& strName, IN CONST AString& strValue = AString::ConstNull()) = 0;
 
     /**
      * @brief Adds the uri parameter for this contact.
@@ -30,8 +30,8 @@ public:
      * @param strValue the URI parameter value
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddUriParameter(IN CONST AString &strName,
-            IN CONST AString &strValue = AString::ConstNull()) = 0;
+    virtual IMS_BOOL AddUriParameter(
+            IN CONST AString& strName, IN CONST AString& strValue = AString::ConstNull()) = 0;
 
     /**
      * @brief Returns the contact address (SIP URI format).
@@ -137,8 +137,8 @@ public:
      * @param strName the header parameter name
      * @param strValue the header parameter value
      */
-    virtual void RemoveHeaderParameter(IN CONST AString &strName,
-            IN CONST AString &strValue = AString::ConstNull()) = 0;
+    virtual void RemoveHeaderParameter(
+            IN CONST AString& strName, IN CONST AString& strValue = AString::ConstNull()) = 0;
 
     /**
      * @brief Removes the uri parameter from this contact.
@@ -148,22 +148,22 @@ public:
      * @param strName the URI parameter name
      * @param strValue the URI parameter value
      */
-    virtual void RemoveUriParameter(IN CONST AString &strName,
-            IN CONST AString &strValue = AString::ConstNull()) = 0;
+    virtual void RemoveUriParameter(
+            IN CONST AString& strName, IN CONST AString& strValue = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets the display name for this contact.
      *
      * @param strDisplayName display name
      */
-    virtual void SetDisplayName(IN CONST AString &strDisplayName) = 0;
+    virtual void SetDisplayName(IN CONST AString& strDisplayName) = 0;
 
     /**
      * @brief Sets the listener for this contact.
      *
      * @param piListener listener to be set
      */
-    virtual void SetListener(IN IRegContactListener *piListener) = 0;
+    virtual void SetListener(IN IRegContactListener* piListener) = 0;
 
     /**
      * @brief Sets the policy for the caller capability. The default is based on the configuration.
@@ -196,7 +196,7 @@ public:
      * @param strUserInfo the user-info field string
      */
     virtual void SetUserInfo(IN IMS_SINT32 nPolicy = POLICY_USER_INFO_IMPU,
-            IN CONST AString &strUserInfo = AString::ConstNull()) = 0;
+            IN CONST AString& strUserInfo = AString::ConstNull()) = 0;
 
     /**
      * @brief Adds the extra capability(feature) parameter for this contact.
@@ -207,8 +207,7 @@ public:
      * @param strValue the feature parameter value
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddExtraCapability(IN CONST AString &strName,
-            IN CONST AString &strValue) = 0;
+    virtual IMS_BOOL AddExtraCapability(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Removes the extra capability(feature) parameter from this contact.
@@ -218,8 +217,7 @@ public:
      * @param strName the feature parameter name
      * @param strValue the feature parameter value
      */
-    virtual void RemoveExtraCapability(IN CONST AString &strName,
-            IN CONST AString &strValue) = 0;
+    virtual void RemoveExtraCapability(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Adds the specified service to the current registration contact.
@@ -228,7 +226,7 @@ public:
      * @param strServiceId an IMS service identifier
      * @return If it succeeds, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL AddService(IN CONST AString &strAppId, IN CONST AString &strServiceId) = 0;
+    virtual IMS_BOOL AddService(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Removes the specified service from the current registration contact.
@@ -236,7 +234,7 @@ public:
      * @param strAppId an IMS application identifier
      * @param strServiceId an IMS service identifier
      */
-    virtual void RemoveService(IN CONST AString &strAppId, IN CONST AString &strServiceId) = 0;
+    virtual void RemoveService(IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Checks if the specified service is registered or not.
@@ -246,8 +244,8 @@ public:
      * @return If the service is registered via IMS network, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsServiceRegistered(IN const AString &strAppId,
-            IN const AString &strServiceId) const = 0;
+    virtual IMS_BOOL IsServiceRegistered(
+            IN const AString& strAppId, IN const AString& strServiceId) const = 0;
 
     /**
      * @brief Checks if the specified service is registered or not.
@@ -257,8 +255,8 @@ public:
      * @return If the feature is registered via IMS network, returns IMS_TRUE.\n
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsFeatureRegistered(IN const AString &strFTName,
-            IN const AString &strFTValue = AString::ConstNull()) const = 0;
+    virtual IMS_BOOL IsFeatureRegistered(IN const AString& strFTName,
+            IN const AString& strFTValue = AString::ConstNull()) const = 0;
 
     /**
      * @brief Recalculates the caller capabilities after adding or removing the services.
@@ -278,4 +276,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REG_CONTACT_H_
+#endif  // _INTERFACE_REG_CONTACT_H_

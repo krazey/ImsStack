@@ -20,20 +20,18 @@
 class ISipConnectionNotifier;
 class ISipServerConnection;
 
-
-
-class CoreServiceImpl
-    : public ICoreService
-    , public IOnCoreServiceListener
-    , public IOnDirectCoreServiceListener
+class CoreServiceImpl :
+        public ICoreService,
+        public IOnCoreServiceListener,
+        public IOnDirectCoreServiceListener
 {
 public:
-    CoreServiceImpl(IN CoreService *pCoreService_);
+    CoreServiceImpl(IN CoreService* pCoreService_);
     virtual ~CoreServiceImpl();
 
 private:
-    CoreServiceImpl(IN CONST CoreServiceImpl &objRHS);
-    CoreServiceImpl& operator=(IN CONST CoreServiceImpl &objRHS);
+    CoreServiceImpl(IN CONST CoreServiceImpl& objRHS);
+    CoreServiceImpl& operator=(IN CONST CoreServiceImpl& objRHS);
 
 private:
     // IConnection interface
@@ -45,8 +43,8 @@ private:
     virtual const SipAddress& GetAuthorizedUserId() const;
     virtual const SipAddress& GetContactAddress() const;
     virtual const SipAddress* GetContactAddressForOutgoingMessage() const;
-    virtual ISipHeader* GetContactHeader(
-            IN IMS_BOOL bPrivacy = IMS_FALSE, IN IMS_BOOL bRequest = IMS_TRUE,
+    virtual ISipHeader* GetContactHeader(IN IMS_BOOL bPrivacy = IMS_FALSE,
+            IN IMS_BOOL bRequest = IMS_TRUE,
             IN IMS_SINT32 nSIPMethod = (-1) /* SipMethod::INVALID */) const;
     virtual IFeatureCaps* GetFeatureCaps() const;
     virtual IServiceFilterCriteria* GetFilterCriteria() const;
@@ -67,51 +65,50 @@ private:
     virtual IMS_BOOL IsImsConnected() const;
     virtual IMS_BOOL IsWithinTrustDomain() const;
 
-    virtual IMS_BOOL AddFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-            IN IMS_BOOL bRegRequired = IMS_TRUE);
-    virtual IMS_BOOL RemoveFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-            IN IMS_BOOL bRegRequired = IMS_TRUE);
+    virtual IMS_BOOL AddFeatureTags(
+            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
+    virtual IMS_BOOL RemoveFeatureTags(
+            IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired = IMS_TRUE);
     // MULTI_REG_SIP_PROFILE
-    virtual void SetSIPProfile(IN SipProfile *pProfile);
+    virtual void SetSIPProfile(IN SipProfile* pProfile);
 
     // ICoreService interface
-    virtual ICapabilities* CreateCapabilities(IN CONST AString &strFrom, IN CONST AString &strTo);
-    virtual IPageMessage* CreatePageMessage(IN CONST AString &strFrom, IN CONST AString &strTo);
-    virtual IPublication* CreatePublication(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent);
-    virtual IReference* CreateReference(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strReferTo, IN CONST AString &strReferMethod);
-    virtual ISession* CreateSession(IN CONST AString &strFrom, IN CONST AString &strTo);
-    virtual ISubscription* CreateSubscription(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent);
+    virtual ICapabilities* CreateCapabilities(IN CONST AString& strFrom, IN CONST AString& strTo);
+    virtual IPageMessage* CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo);
+    virtual IPublication* CreatePublication(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
+    virtual IReference* CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
+            IN CONST AString& strReferTo, IN CONST AString& strReferMethod);
+    virtual ISession* CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo);
+    virtual ISubscription* CreateSubscription(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent);
     virtual AString GetLocalUserId() const;
-    virtual void SetListener(IN ICoreServiceListener *piListener);
+    virtual void SetListener(IN ICoreServiceListener* piListener);
     virtual ISIPConnectionFactory* CreateSIPConnectionFactory();
-    virtual void SetDirectListener(IN IDirectCoreServiceListener *piListener);
+    virtual void SetDirectListener(IN IDirectCoreServiceListener* piListener);
 
     // IOnCoreServiceListener interface
-    virtual void OnCoreService_PageMessageReceived(IN CoreService *pService,
-            IN PageMessage *pMessage);
-    virtual void OnCoreService_ReferenceReceived(IN CoreService *pService,
-            IN Reference *pReference);
-    virtual void OnCoreService_ServiceClosed(IN CoreService *pService,
-            IN ReasonInfo *pReasonInfo);
-    virtual void OnCoreService_SessionInvitationReceived(IN CoreService *pService,
-            IN SessionEx *pSession);
-    virtual void OnCoreService_UnsolicitedNotifyReceived(IN CoreService *pService,
-            IN Message *pNotify);
-    virtual void OnCoreService_CapabilityQueryReceived(IN CoreService *pService,
-            IN Capabilities *pCapabilities);
+    virtual void OnCoreService_PageMessageReceived(
+            IN CoreService* pService, IN PageMessage* pMessage);
+    virtual void OnCoreService_ReferenceReceived(
+            IN CoreService* pService, IN Reference* pReference);
+    virtual void OnCoreService_ServiceClosed(IN CoreService* pService, IN ReasonInfo* pReasonInfo);
+    virtual void OnCoreService_SessionInvitationReceived(
+            IN CoreService* pService, IN SessionEx* pSession);
+    virtual void OnCoreService_UnsolicitedNotifyReceived(
+            IN CoreService* pService, IN Message* pNotify);
+    virtual void OnCoreService_CapabilityQueryReceived(
+            IN CoreService* pService, IN Capabilities* pCapabilities);
 
     // IOnDirectCoreServiceListener interface
-    virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(IN CoreService *pService,
-            IN ISIPConnectionFactory *piSCF);
+    virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(
+            IN CoreService* pService, IN ISIPConnectionFactory* piSCF);
 
 private:
-    ICoreServiceListener *piCoreServiceListener;
-    IDirectCoreServiceListener *piDirectCoreServiceListener;
+    ICoreServiceListener* piCoreServiceListener;
+    IDirectCoreServiceListener* piDirectCoreServiceListener;
 
-    CoreService *pService;
+    CoreService* pService;
 };
 
-#endif // _CORE_SERVICE_IMPL_H_
+#endif  // _CORE_SERVICE_IMPL_H_

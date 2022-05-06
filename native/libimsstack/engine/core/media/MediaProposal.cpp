@@ -19,23 +19,20 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-MediaProposal::MediaProposal(IN ISDPOAState *piOAState_)
-    : piOAState(piOAState_)
-    , objDescriptors(IMSList<MediaDescriptor*>())
+MediaProposal::MediaProposal(IN ISDPOAState* piOAState_) :
+        piOAState(piOAState_),
+        objDescriptors(IMSList<MediaDescriptor*>())
 {
 }
 
-PUBLIC VIRTUAL
-MediaProposal::~MediaProposal()
+PUBLIC VIRTUAL MediaProposal::~MediaProposal()
 {
     if (!objDescriptors.IsEmpty())
     {
         for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
         {
-            MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+            MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
             if (pDescriptor != IMS_NULL)
                 delete pDescriptor;
@@ -45,8 +42,7 @@ MediaProposal::~MediaProposal()
     }
 }
 
-PUBLIC VIRTUAL
-const IMSList<MediaDescriptor*>& MediaProposal::GetMediaDescriptors() const
+PUBLIC VIRTUAL const IMSList<MediaDescriptor*>& MediaProposal::GetMediaDescriptors() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -54,14 +50,13 @@ const IMSList<MediaDescriptor*>& MediaProposal::GetMediaDescriptors() const
 }
 
 PUBLIC
-IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*> &objDescriptors)
+IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*>& objDescriptors)
 {
     IMS_SINT32 nResult = piOAState->CreateProposalView();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nResult != ISDPOAState::RESULT_SUCCESS)
-            && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
+    if ((nResult != ISDPOAState::RESULT_SUCCESS) && (nResult != ISDPOAState::RESULT_ALREADY_EXIST))
     {
         IMS_TRACE_E(0, "Creating a proposed view failed", 0, 0, 0);
         return IMS_FALSE;
@@ -69,9 +64,9 @@ IMS_BOOL MediaProposal::CreateDescriptor(IN CONST IMSList<MediaDescriptor*> &obj
 
     for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
     {
-        const MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+        const MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
-        MediaDescriptor *pNewDescriptor = new MediaDescriptor(this, pDescriptor->GetMid());
+        MediaDescriptor* pNewDescriptor = new MediaDescriptor(this, pDescriptor->GetMid());
 
         if (pNewDescriptor == IMS_NULL)
         {
@@ -99,14 +94,14 @@ IMS_SINT32 MediaProposal::GetDirection() const
         return Media::DIRECTION_NONE;
     }
 
-    MediaDescriptor *pDescriptor = GetMediaDescriptor();
+    MediaDescriptor* pDescriptor = GetMediaDescriptor();
 
     if (pDescriptor == IMS_NULL)
     {
         return Media::DIRECTION_NONE;
     }
 
-    SdpMediaParameter *pMediaParam = GetPeerMediaParameter(pDescriptor->GetMid());
+    SdpMediaParameter* pMediaParam = GetPeerMediaParameter(pDescriptor->GetMid());
 
     if (pMediaParam == IMS_NULL)
     {
@@ -147,7 +142,7 @@ MediaDescriptor* MediaProposal::GetMediaDescriptor(IN IMS_SINT32 nMid) const
 
     for (IMS_UINT32 i = 0; i < objDescriptors.GetSize(); ++i)
     {
-        MediaDescriptor *pDescriptor = objDescriptors.GetAt(i);
+        MediaDescriptor* pDescriptor = objDescriptors.GetAt(i);
 
         if (nMid == pDescriptor->GetMid())
         {
@@ -158,10 +153,9 @@ MediaDescriptor* MediaProposal::GetMediaDescriptor(IN IMS_SINT32 nMid) const
     return IMS_NULL;
 }
 
-PROTECTED VIRTUAL
-const AString& MediaProposal::GetConnectionAddress() const
+PROTECTED VIRTUAL const AString& MediaProposal::GetConnectionAddress() const
 {
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -184,18 +178,16 @@ const AString& MediaProposal::GetConnectionAddress() const
     return AString::ConstNull();
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 MediaProposal::GetMediaState() const
+PROTECTED VIRTUAL IMS_SINT32 MediaProposal::GetMediaState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return MEDIA_STATE_PROPOSAL;
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* MediaProposal::GetMediaParameter(IN IMS_SINT32 nMid) const
+PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetMediaParameter(IN IMS_SINT32 nMid) const
 {
-    SdpMediaParameter *pMediaParam = IMS_NULL;
+    SdpMediaParameter* pMediaParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -207,10 +199,9 @@ SdpMediaParameter* MediaProposal::GetMediaParameter(IN IMS_SINT32 nMid) const
     return pMediaParam;
 }
 
-PROTECTED VIRTUAL
-const AString& MediaProposal::GetPeerConnectionAddress() const
+PROTECTED VIRTUAL const AString& MediaProposal::GetPeerConnectionAddress() const
 {
-    SdpSessionParameter *pSessionParam = IMS_NULL;
+    SdpSessionParameter* pSessionParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -224,10 +215,9 @@ const AString& MediaProposal::GetPeerConnectionAddress() const
     return AString::ConstNull();
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* MediaProposal::GetPeerMediaParameter(IN IMS_SINT32 nMid) const
+PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetPeerMediaParameter(IN IMS_SINT32 nMid) const
 {
-    SdpMediaParameter *pMediaParam = IMS_NULL;
+    SdpMediaParameter* pMediaParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -239,10 +229,9 @@ SdpMediaParameter* MediaProposal::GetPeerMediaParameter(IN IMS_SINT32 nMid) cons
     return pMediaParam;
 }
 
-PROTECTED VIRTUAL
-SdpMediaParameter* MediaProposal::GetProposalMediaParameter(IN IMS_SINT32 nMid)
+PROTECTED VIRTUAL SdpMediaParameter* MediaProposal::GetProposalMediaParameter(IN IMS_SINT32 nMid)
 {
-    SdpMediaParameter *pMediaParam = IMS_NULL;
+    SdpMediaParameter* pMediaParam = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 

@@ -15,7 +15,8 @@ class Configuration
 {
 private:
     Configuration();
-    Configuration(IN const Configuration &objRHS);
+    Configuration(IN const Configuration& objRHS);
+
 public:
     ~Configuration();
 
@@ -40,8 +41,8 @@ public:
      * @remark It replaces the below method:\n
      *           ImsRegistry* GetRegistry(IN const AString &strAppId) const;
      */
-    const IAppConfig* GetAppConfig(IN const AString &strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    const IAppConfig* GetAppConfig(
+            IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
 
     /**
      * @brief Returns IMS_TRUE if there is a registry for the IMS application
@@ -53,8 +54,7 @@ public:
      * @remark It replaces the below method:\n
      *           IMS_BOOL HasRegistry(IN const AString &strAppId) const;
      */
-    IMS_BOOL HasAppConfig(IN const AString &strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
+    IMS_BOOL HasAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
 
     /**
      * @brief Removes the registry for the IMS application and deletes the binding to the owning
@@ -69,8 +69,7 @@ public:
      *         It replaces the below method:\n
      *             void RemoveRegistry(IN const AString &strAppId);
      */
-    void RemoveAppConfig(IN const AString &strAppId,
-            IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    void RemoveAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /**
      * @brief Sets the registry for an IMS application and binds it to a parent UI(JAVA)
@@ -86,8 +85,7 @@ public:
      *           void SetRegistry(IN const AString &strAppId, IN const AString &strClassName,
      *               IN const ImsRegistry &objRegistry);
      */
-    IMS_RESULT SetAppConfig(IN const AString &strAppId,
-            IN IMS_SINT32 nSlotId);
+    IMS_RESULT SetAppConfig(IN const AString& strAppId, IN IMS_SINT32 nSlotId);
 
     /**
      * @brief Sets the registry for an IMS application and binds it to a parent UI(JAVA)
@@ -130,8 +128,8 @@ public:
      *           void SetRegistry(IN const AString &strAppId, IN const AString &strClassName,
      *               IN const ImsRegistry &objRegistry);
      */
-    IMS_RESULT SetAppConfig(IN const AString &strAppId, IN const AString &strClassName,
-            IN const ImsRegistry &objRegistry, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
+    IMS_RESULT SetAppConfig(IN const AString& strAppId, IN const AString& strClassName,
+            IN const ImsRegistry& objRegistry, IN IMS_SINT32 nSlotId = IMS_SLOT_0);
 
     /**
      * @brief Returns a Configuration that enables dynamic installation of IMS applications.
@@ -170,8 +168,7 @@ public:
      * @note IMS EXTENSION METHOD
      */
     const ISubscriberConfig* GetSubscriberConfig(
-            IN IMS_SINT32 nSlotId,
-            IN const AString& strId = AString::ConstNull()) const;
+            IN IMS_SINT32 nSlotId, IN const AString& strId = AString::ConstNull()) const;
 
     /**
      * @brief Returns a configuration information of an IMS subscriber which has a public user
@@ -186,8 +183,7 @@ public:
      * @note IMS EXTENSION METHOD
      * @deprecated for backward compatibility; use #GetSubscriberConfig(IMS_SINT32, const AString).
      */
-    const ISubscriberConfig* GetSubscriberConfig(
-            IN const AString& strId = AString::ConstNull(),
+    const ISubscriberConfig* GetSubscriberConfig(IN const AString& strId = AString::ConstNull(),
             IN IMS_SINT32 nSlotId = IMS_SLOT_0) const;
 
     /**
@@ -240,4 +236,4 @@ public:
     void RefreshConfigs(IN IMS_SINT32 nSlotId);
 };
 
-#endif // _CONFIGURATION_H_
+#endif  // _CONFIGURATION_H_

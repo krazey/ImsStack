@@ -16,13 +16,11 @@
 
 __IMS_TRACE_TAG_IMS__;
 
-
-
 PUBLIC
-ServiceFilterCriteria::ServiceFilterCriteria()
-    : objCalleePreferences(IMSMap<IMS_SINT32, IMS_BOOL>())
-    , nNextTriggerPointId(1)
-    , objTPs(IMSMap<IMS_UINT32, TriggerPoint*>())
+ServiceFilterCriteria::ServiceFilterCriteria() :
+        objCalleePreferences(IMSMap<IMS_SINT32, IMS_BOOL>()),
+        nNextTriggerPointId(1),
+        objTPs(IMSMap<IMS_UINT32, TriggerPoint*>())
 {
     objCalleePreferences.Add(SipMethod::INVITE, IMS_FALSE);
     objCalleePreferences.Add(SipMethod::OPTIONS, IMS_FALSE);
@@ -30,8 +28,7 @@ ServiceFilterCriteria::ServiceFilterCriteria()
     objCalleePreferences.Add(SipMethod::REFER, IMS_FALSE);
 }
 
-PUBLIC VIRTUAL
-ServiceFilterCriteria::~ServiceFilterCriteria()
+PUBLIC VIRTUAL ServiceFilterCriteria::~ServiceFilterCriteria()
 {
     RemoveAllTriggerPoints();
 }
@@ -41,10 +38,9 @@ ServiceFilterCriteria::~ServiceFilterCriteria()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(IN CONST TriggerPoint &objTP)
+PUBLIC VIRTUAL IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(IN CONST TriggerPoint& objTP)
 {
-    TriggerPoint *pTP = new TriggerPoint(objTP);
+    TriggerPoint* pTP = new TriggerPoint(objTP);
 
     //---------------------------------------------------------------------------------------------
 
@@ -70,8 +66,7 @@ IMS_UINT32 ServiceFilterCriteria::AddTriggerPoint(IN CONST TriggerPoint &objTP)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId)
+PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId)
 {
     IMS_SLONG nIndex = objTPs.GetIndexOfKey(nTriggerPointId);
 
@@ -83,7 +78,7 @@ void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId)
         return;
     }
 
-    TriggerPoint *pTP = objTPs.GetValueAt(nIndex);
+    TriggerPoint* pTP = objTPs.GetValueAt(nIndex);
 
     if (pTP != IMS_NULL)
     {
@@ -103,14 +98,13 @@ void ServiceFilterCriteria::RemoveTriggerPoint(IN IMS_SINT32 nTriggerPointId)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void ServiceFilterCriteria::RemoveAllTriggerPoints()
+PUBLIC VIRTUAL void ServiceFilterCriteria::RemoveAllTriggerPoints()
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objTPs.GetSize(); ++i)
     {
-        TriggerPoint *pTP = objTPs.GetValueAt(i);
+        TriggerPoint* pTP = objTPs.GetValueAt(i);
 
         if (pTP == IMS_NULL)
             continue;
@@ -128,16 +122,13 @@ void ServiceFilterCriteria::RemoveAllTriggerPoints()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void ServiceFilterCriteria::SetCalleePreference(IN CONST SipMethod &objMethod,
-        IN IMS_BOOL bCalleePreference /* = IMS_TRUE */)
+PUBLIC VIRTUAL void ServiceFilterCriteria::SetCalleePreference(
+        IN CONST SipMethod& objMethod, IN IMS_BOOL bCalleePreference /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
-    if (!objMethod.Equals(SipMethod::INVITE)
-            && !objMethod.Equals(SipMethod::OPTIONS)
-            && !objMethod.Equals(SipMethod::MESSAGE)
-            && !objMethod.Equals(SipMethod::REFER))
+    if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::OPTIONS) &&
+            !objMethod.Equals(SipMethod::MESSAGE) && !objMethod.Equals(SipMethod::REFER))
     {
         return;
     }
@@ -151,13 +142,13 @@ Remarks
 
 */
 PUBLIC
-IMS_UINT32 ServiceFilterCriteria::Evaluate(IN CONST ISipMessage *piSIPMsg) const
+IMS_UINT32 ServiceFilterCriteria::Evaluate(IN CONST ISipMessage* piSIPMsg) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objTPs.GetSize(); ++i)
     {
-        TriggerPoint *pTP = objTPs.GetValueAt(i);
+        TriggerPoint* pTP = objTPs.GetValueAt(i);
 
         if (pTP == IMS_NULL)
             continue;
@@ -177,14 +168,12 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL ServiceFilterCriteria::IsCalleePreferenceSupported(IN CONST SipMethod &objMethod) const
+IMS_BOOL ServiceFilterCriteria::IsCalleePreferenceSupported(IN CONST SipMethod& objMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
-    if (!objMethod.Equals(SipMethod::INVITE)
-            && !objMethod.Equals(SipMethod::OPTIONS)
-            && !objMethod.Equals(SipMethod::MESSAGE)
-            && !objMethod.Equals(SipMethod::REFER))
+    if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::OPTIONS) &&
+            !objMethod.Equals(SipMethod::MESSAGE) && !objMethod.Equals(SipMethod::REFER))
     {
         return IMS_FALSE;
     }

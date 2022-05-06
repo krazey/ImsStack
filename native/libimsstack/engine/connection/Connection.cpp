@@ -13,27 +13,21 @@
 #include "ServiceMemory.h"
 #include "Connection.h"
 
-
-
 PUBLIC
-Connection::Connection()
-    : EngineActivity()
-    , piOwner(IMS_NULL)
+Connection::Connection() :
+        EngineActivity(),
+        piOwner(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-Connection::~Connection()
-{
-}
+PUBLIC VIRTUAL Connection::~Connection() {}
 
 /*
 
 Remarks
 
 */
-PUBLIC VIRTUAL
-void Connection::Close()
+PUBLIC VIRTUAL void Connection::Close()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -60,7 +54,7 @@ Remarks
 
 */
 PUBLIC
-void Connection::SetOwner(IN IConnection *piOwner)
+void Connection::SetOwner(IN IConnection* piOwner)
 {
     //---------------------------------------------------------------------------------------------
 

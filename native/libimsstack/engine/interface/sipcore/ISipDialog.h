@@ -30,8 +30,7 @@ class ISipHeader;
  *
  * @see ISipConnection, ISipClientConnection
  */
-class ISipDialog :
-        public ISipObject
+class ISipDialog : public ISipObject
 {
 public:
     /**
@@ -137,7 +136,7 @@ public:
      * @note CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
      */
     virtual IMS_RESULT SetContactParameter(IN const AString& strParameter,
-            IN IMS_SINT32 nOperation = 0/*(0: ADD, 1: REMOVE)*/) = 0;
+            IN IMS_SINT32 nOperation = 0 /*(0: ADD, 1: REMOVE)*/) = 0;
 
     /**
      * @brief Terminates the SIP dialog usage explicitly.

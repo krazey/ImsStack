@@ -18,16 +18,15 @@
 #include "ByteArray.h"
 #include "media/Media.h"
 
-class FramedMedia
-    : public Media
+class FramedMedia : public Media
 {
 public:
-    FramedMedia(IN Service *pService_, IN ISDPOAState *piOAState_);
+    FramedMedia(IN Service* pService_, IN ISDPOAState* piOAState_);
     virtual ~FramedMedia();
 
 private:
-    FramedMedia(IN CONST FramedMedia &objRHS);
-    FramedMedia& operator=(IN CONST FramedMedia &objRHS);
+    FramedMedia(IN CONST FramedMedia& objRHS);
+    FramedMedia& operator=(IN CONST FramedMedia& objRHS);
 
 public:
     // Media class
@@ -35,7 +34,7 @@ public:
 
 protected:
     // Media class
-    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState *piOAState);
+    virtual MediaProposal* CreateMediaProposal(IN ISDPOAState* piOAState);
 };
 
-#endif // _FRAMED_MEDIA_H_
+#endif  // _FRAMED_MEDIA_H_

@@ -23,27 +23,26 @@
 
 __IMS_TRACE_TAG_IMS__;
 
-
-
 PUBLIC
-RefreshHelper::RefreshHelper(IN IRefreshable *piRefreshable_, IN IMS_BOOL bRepeatable_)
-    : piRefreshable(piRefreshable_)
-    , nPolicy(POLICY_SPEC)
-    , nCriteriaInterval(CRITERIA_INTERVAL)
-    , nValueEorLT(50) // half of expiration time
-    , nValueGT(MINIMUM_REMAIN_INTERVAL)
-    , bRepeatable(bRepeatable_)
-    , nDuration(0)
-    , nRemainDuration(0)
-    , piTimer(IMS_NULL)
-    , piRefreshSC(IMS_NULL)
-    // SIP_MESSAGE_MEDIATOR
-    , piMessageMediator(IMS_NULL)
+RefreshHelper::RefreshHelper(IN IRefreshable* piRefreshable_, IN IMS_BOOL bRepeatable_) :
+        piRefreshable(piRefreshable_),
+        nPolicy(POLICY_SPEC),
+        nCriteriaInterval(CRITERIA_INTERVAL),
+        nValueEorLT(50)  // half of expiration time
+        ,
+        nValueGT(MINIMUM_REMAIN_INTERVAL),
+        bRepeatable(bRepeatable_),
+        nDuration(0),
+        nRemainDuration(0),
+        piTimer(IMS_NULL),
+        piRefreshSC(IMS_NULL)
+        // SIP_MESSAGE_MEDIATOR
+        ,
+        piMessageMediator(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-RefreshHelper::~RefreshHelper()
+PUBLIC VIRTUAL RefreshHelper::~RefreshHelper()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -106,7 +105,7 @@ IMS_BOOL RefreshHelper::IsTimerActive() const
 
 // SIP_MESSAGE_MEDIATOR
 PUBLIC
-void RefreshHelper::SetMessageMediator(IN IMessageMediator *piMediator)
+void RefreshHelper::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -114,8 +113,8 @@ void RefreshHelper::SetMessageMediator(IN IMessageMediator *piMediator)
 }
 
 PUBLIC
-void RefreshHelper::SetPolicy(IN IMS_SINT32 nPolicy,
-        IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
+void RefreshHelper::SetPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+        IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -125,8 +124,7 @@ void RefreshHelper::SetPolicy(IN IMS_SINT32 nPolicy,
     this->nValueGT = nValueGT;
 }
 
-PROTECTED VIRTUAL
-IMS_RESULT RefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
+PROTECTED VIRTUAL IMS_RESULT RefreshHelper::SendRefreshRequest(IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -158,8 +156,7 @@ IMS_RESULT RefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
     return IMS_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 RefreshHelper::GetTimerInterval() const
+PROTECTED VIRTUAL IMS_SINT32 RefreshHelper::GetTimerInterval() const
 {
     IMS_SINT32 nExpirationTime = GetDuration();
     IMS_SINT32 nTimerInterval;
@@ -168,38 +165,38 @@ IMS_SINT32 RefreshHelper::GetTimerInterval() const
 
     switch (nPolicy)
     {
-    case POLICY_SPEC:
-        if (nExpirationTime > nCriteriaInterval)
-            nTimerInterval = nExpirationTime - nValueGT;
-        else
-            nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueEorLT) / 100);
-        break;
+        case POLICY_SPEC:
+            if (nExpirationTime > nCriteriaInterval)
+                nTimerInterval = nExpirationTime - nValueGT;
+            else
+                nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueEorLT) / 100);
+            break;
 
-    case POLICY_REMAIN_TIME:
-        if (nExpirationTime > nCriteriaInterval)
-            nTimerInterval = nExpirationTime - nValueGT;
-        else
-            nTimerInterval = nExpirationTime - nValueEorLT;
-        break;
+        case POLICY_REMAIN_TIME:
+            if (nExpirationTime > nCriteriaInterval)
+                nTimerInterval = nExpirationTime - nValueGT;
+            else
+                nTimerInterval = nExpirationTime - nValueEorLT;
+            break;
 
-    case POLICY_RATIO:
-        if (nExpirationTime > nCriteriaInterval)
-            nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueGT) / 100);
-        else
-            nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueEorLT) / 100);
-        break;
+        case POLICY_RATIO:
+            if (nExpirationTime > nCriteriaInterval)
+                nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueGT) / 100);
+            else
+                nTimerInterval = static_cast<IMS_SINT32>((nExpirationTime * nValueEorLT) / 100);
+            break;
 
-    default:
-        nTimerInterval = static_cast<IMS_SINT32>(nExpirationTime / 2);
-        break;
+        default:
+            nTimerInterval = static_cast<IMS_SINT32>(nExpirationTime / 2);
+            break;
     }
 
     return nTimerInterval;
 }
 
 PROTECTED
-void RefreshHelper::Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
-        IN IMS_SINT32 nCode /* = 0 */)
+void RefreshHelper::Refreshable_RefreshCompleted(
+        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -324,8 +321,7 @@ void RefreshHelper::StopRefresh()
     piTimer = IMS_NULL;
 }
 
-PRIVATE VIRTUAL
-void RefreshHelper::Timer_TimerExpired(IN ITimer *piTimer)
+PRIVATE VIRTUAL void RefreshHelper::Timer_TimerExpired(IN ITimer* piTimer)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -366,9 +362,8 @@ void RefreshHelper::Timer_TimerExpired(IN ITimer *piTimer)
     }
 }
 
-PRIVATE VIRTUAL
-void RefreshHelper::ClientConnection_NotifyResponse(IN ISipClientConnection * piSCC,
-        IN ISipClientConnection * /* piForkedSCC = IMS_NULL */)
+PRIVATE VIRTUAL void RefreshHelper::ClientConnection_NotifyResponse(
+        IN ISipClientConnection* piSCC, IN ISipClientConnection* /* piForkedSCC = IMS_NULL */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -383,8 +378,8 @@ void RefreshHelper::ClientConnection_NotifyResponse(IN ISipClientConnection * pi
     {
         IMS_TRACE_E(0, "Parsing a message body part failed", 0, 0, 0);
 
-        Error_NotifyError(piSCC,
-                SipError::PARSING_ERROR, AString("Parsing Error :: message body part"));
+        Error_NotifyError(
+                piSCC, SipError::PARSING_ERROR, AString("Parsing Error :: message body part"));
         return;
     }
 
@@ -392,9 +387,8 @@ void RefreshHelper::ClientConnection_NotifyResponse(IN ISipClientConnection * pi
 
     RefreshCompleted(piSCC);
 
-    if ((nStatusCode >= SipStatusCode::SC_200)
-            && (nStatusCode != SipStatusCode::SC_401)
-            && (nStatusCode != SipStatusCode::SC_407))
+    if ((nStatusCode >= SipStatusCode::SC_200) && (nStatusCode != SipStatusCode::SC_401) &&
+            (nStatusCode != SipStatusCode::SC_407))
     {
         IMS_SINT32 nMethod = piSCC->GetMethod().ToInt();
 
@@ -420,20 +414,18 @@ void RefreshHelper::ClientConnection_NotifyResponse(IN ISipClientConnection * pi
             }
         }
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-            || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // Do something when responding to the challenge is failed
     }
 }
 
-PRIVATE VIRTUAL
-void RefreshHelper::Error_NotifyError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-        IN CONST AString &strMessage)
+PRIVATE VIRTUAL void RefreshHelper::Error_NotifyError(
+        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) strMessage;
+    (void)strMessage;
 
     if (nCode == SipError::TRANSACTION_TIMER_EXPIRED)
     {

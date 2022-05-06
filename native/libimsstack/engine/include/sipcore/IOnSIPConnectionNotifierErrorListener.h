@@ -16,8 +16,6 @@
 
 class ISipConnectionNotifier;
 
-
-
 /*
 SIP connection notifier error listener interface
 
@@ -50,8 +48,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnConnectionNotifierError_NotifyError(IN SIPConnectionNotifier *pSCN,
-            IN IMS_SINT32 nCode, IN CONST AString &strMessage) = 0;
+    virtual void OnConnectionNotifierError_NotifyError(
+            IN SIPConnectionNotifier* pSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage) = 0;
 };
 
-#endif // _INTERFACE_ON_SIP_CONNECTION_NOTIFIER_ERROR_LISTENER_H_
+#endif  // _INTERFACE_ON_SIP_CONNECTION_NOTIFIER_ERROR_LISTENER_H_

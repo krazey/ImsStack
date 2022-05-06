@@ -25,12 +25,12 @@ class ISipHeader;
 namespace SIPStack
 {
 
-GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST SipAddrSpec *pAddrSpec,
-        OUT IMSList<ISipHeader*> &objHeaders);
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN CONST SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders);
 
-GLOBAL IMS_BOOL DecodeHeaderComponent(IN CONST AString &strHeaders,
-        OUT IMSList<ISipHeader*> &objHeaders);
+GLOBAL IMS_BOOL DecodeHeaderComponent(
+        IN CONST AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders);
 
-}
+}  // namespace SIPStack
 
 #endif

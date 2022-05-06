@@ -17,24 +17,20 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-FramedMediaProposal::FramedMediaProposal(IN ISDPOAState *piOAState_)
-    : MediaProposal(piOAState_)
+FramedMediaProposal::FramedMediaProposal(IN ISDPOAState* piOAState_) :
+        MediaProposal(piOAState_)
 {
 }
 
-PUBLIC VIRTUAL
-FramedMediaProposal::~FramedMediaProposal()
+PUBLIC VIRTUAL FramedMediaProposal::~FramedMediaProposal()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: FramedMediaProposal", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 FramedMediaProposal::GetType() const
+PUBLIC VIRTUAL IMS_SINT32 FramedMediaProposal::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 

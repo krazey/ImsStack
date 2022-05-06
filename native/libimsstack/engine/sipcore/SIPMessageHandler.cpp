@@ -32,22 +32,15 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PRIVATE
-SIPMessageHandler::SIPMessageHandler()
-{
-}
+SIPMessageHandler::SIPMessageHandler() {}
 
 PUBLIC
-SIPMessageHandler::~SIPMessageHandler()
-{
-}
+SIPMessageHandler::~SIPMessageHandler() {}
 
-PUBLIC GLOBAL
-SIPMessageHandler* SIPMessageHandler::GetInstance()
+PUBLIC GLOBAL SIPMessageHandler* SIPMessageHandler::GetInstance()
 {
-    static SIPMessageHandler *pSIPMsgHandler = IMS_NULL;
+    static SIPMessageHandler* pSIPMsgHandler = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -59,25 +52,23 @@ SIPMessageHandler* SIPMessageHandler::GetInstance()
     return pSIPMsgHandler;
 }
 
-PRIVATE VIRTUAL
-void SIPMessageHandler::Transport_PacketReceived(IN IMS_SINT32 nSlotId,
-        IN CONST ByteArray &objBuffer,
-        IN CONST SIPTransportAddress &objNearEnd,
-        IN CONST SIPTransportAddress &objFarEnd)
+PRIVATE VIRTUAL void SIPMessageHandler::Transport_PacketReceived(IN IMS_SINT32 nSlotId,
+        IN CONST ByteArray& objBuffer, IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd)
 {
-    SipMessage *pstMessage = IMS_NULL;
+    SipMessage* pstMessage = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
-    //3 Updates the operations in case of an exceptional operation
+    // 3 Updates the operations in case of an exceptional operation
 
     // No need to call DecodeMessage() repeatedly till the entire buffer is parsed.
     // We do not take care of the situation where the multiple messages arrive
     // on a single buffer (as in the case of TCP).
     // Because, the checking of message completion will be evaluated in the SIP socket layer.
 
-    if (!SIPStack::DecodeMessage(objBuffer.GetData(), objBuffer.GetLength(),
-            SIPPrivate::OPTIONS_D, pstMessage))
+    if (!SIPStack::DecodeMessage(
+                objBuffer.GetData(), objBuffer.GetLength(), SIPPrivate::OPTIONS_D, pstMessage))
     {
         SIPStack::FreeMessage(pstMessage);
 
@@ -145,42 +136,39 @@ void SIPMessageHandler::Transport_PacketReceived(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-void SIPMessageHandler::NotifyPacketReceived(IN IMS_SINT32 nSlotId,
-        IN CONST ByteArray &objBuffer, IN SipMessage *pstMessage,
-        IN IMS_SINT32 nProcessingResult)
+void SIPMessageHandler::NotifyPacketReceived(IN IMS_SINT32 nSlotId, IN CONST ByteArray& objBuffer,
+        IN SipMessage* pstMessage, IN IMS_SINT32 nProcessingResult)
 {
     SIPFactoryProxy* pFactoryProxy = SIPFactoryProxy::GetInstance();
 
     if (pFactoryProxy->IsPacketTrackerEnabled(nSlotId))
     {
-        SIPPacketTracker *pPacketTracker = pFactoryProxy->GetPacketTracker(nSlotId);
+        SIPPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(nSlotId);
         SIPMessage objSIPMsg(pstMessage);
 
-        pPacketTracker->NotifyMessageReceived(
-                &objSIPMsg,
-                objBuffer,
+        pPacketTracker->NotifyMessageReceived(&objSIPMsg, objBuffer,
                 ((nProcessingResult == SIPPrivate::MESSAGE_DISCARDED) ? IMS_TRUE : IMS_FALSE));
     }
 }
 
 PRIVATE
-IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage *pstMessage,
-        IN CONST SIPTransportAddress &objNearEnd, IN CONST SIPTransportAddress &objFarEnd)
+IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage* pstMessage,
+        IN CONST SIPTransportAddress& objNearEnd, IN CONST SIPTransportAddress& objFarEnd)
 {
-    ISIPServerTransactionStateListener *piListener
-            = SIPManager::GetInstance()->LookupConnectionNotifier(objNearEnd);
+    ISIPServerTransactionStateListener* piListener =
+            SIPManager::GetInstance()->LookupConnectionNotifier(objNearEnd);
 
     //---------------------------------------------------------------------------------------------
 
     // UE_TCP_CONNECTION_REUSED -- starts
     // When the transport protocol is TCP and the transaction re-use the TCP connection
     // which is created by UE, check the Request-URI again for port number.
-    if ((piListener == IMS_NULL)
-            && ((objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_TCP)
-                || (objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_TLS)))
+    if ((piListener == IMS_NULL) &&
+            ((objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_TCP) ||
+                    (objNearEnd.GetProtocol() == SIPTransportAddress::PROTOCOL_TLS)))
     {
         // Gets the port number from the Request-URI
-        SipAddrSpec *pstAddrSpec = SIPStack::GetRequestUri(pstMessage);
+        SipAddrSpec* pstAddrSpec = SIPStack::GetRequestUri(pstMessage);
 
         if (pstAddrSpec != IMS_NULL)
         {
@@ -231,8 +219,8 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
         IMS_TRACE_D("Incoming SIP request on SIM%d ...", nSlotId, 0, 0);
     }
 
-    RCPtr<SIPServerTransactionState> pSTState
-            = new SIPServerTransactionState(nSlotId, objNearEnd, objFarEnd);
+    RCPtr<SIPServerTransactionState> pSTState =
+            new SIPServerTransactionState(nSlotId, objNearEnd, objFarEnd);
 
     if (pSTState.IsNull())
     {
@@ -258,9 +246,9 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
         IMS_SINT32 nResult = SIPPrivate::MESSAGE_DISCARDED;
 
         // Send failure response if needs
-        if ((nValidity == SIPPrivate::MESSAGE_INVALID_400)
-                || (nValidity == SIPPrivate::MESSAGE_INVALID_405)
-                || (nValidity == SIPPrivate::MESSAGE_INVALID_481))
+        if ((nValidity == SIPPrivate::MESSAGE_INVALID_400) ||
+                (nValidity == SIPPrivate::MESSAGE_INVALID_405) ||
+                (nValidity == SIPPrivate::MESSAGE_INVALID_481))
         {
             // Update the transport information
             if (piListener != IMS_NULL)
@@ -269,8 +257,8 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
             }
             else
             {
-                pSTState->SetTransportTuple(objNearEnd.GetIPAddress(),
-                        objNearEnd.GetPort(), objNearEnd.GetPort());
+                pSTState->SetTransportTuple(
+                        objNearEnd.GetIPAddress(), objNearEnd.GetPort(), objNearEnd.GetPort());
             }
 
             // To send failure response
@@ -280,8 +268,7 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
             nResult = pSTState->HandleRequest(pOrigDialogEx);
         }
 
-        if ((nResult == SIPPrivate::MESSAGE_VALID)
-                || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
+        if ((nResult == SIPPrivate::MESSAGE_VALID) || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
         {
             if (nValidity == SIPPrivate::MESSAGE_INVALID_481)
             {
@@ -306,8 +293,8 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
         IMS_TRACE_D("NO LISTENER :: REQUEST MESSAGE IS DISCARDED", 0, 0, 0);
 
         // Update the transport information
-        pSTState->SetTransportTuple(objNearEnd.GetIPAddress(),
-                objNearEnd.GetPort(), objNearEnd.GetPort());
+        pSTState->SetTransportTuple(
+                objNearEnd.GetIPAddress(), objNearEnd.GetPort(), objNearEnd.GetPort());
 
         // Send failure response
         pSTState->CheckMessageValidity();
@@ -315,16 +302,15 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
         RCPtr<SIPDialogEx> pOrigDialogEx;
         IMS_SINT32 nResult = pSTState->HandleRequest(pOrigDialogEx);
 
-        if ((nResult == SIPPrivate::MESSAGE_VALID)
-                || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
+        if ((nResult == SIPPrivate::MESSAGE_VALID) || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
         {
             SipStatusCode objStatusCode(SipStatusCode::SC_404);
             SIPFactoryProxy* pFactoryProxy = SIPFactoryProxy::GetInstance();
 
             if (pFactoryProxy->IsRoutingRejectNotifierEnabled(nSlotId))
             {
-                SipRoutingRejectNotifier* pRoutingRejectNotifier
-                        = pFactoryProxy->GetRoutingRejectNotifier(nSlotId);
+                SipRoutingRejectNotifier* pRoutingRejectNotifier =
+                        pFactoryProxy->GetRoutingRejectNotifier(nSlotId);
                 SIPMessage objSIPMsg(pstMessage);
 
                 pRoutingRejectNotifier->NotifyRequestReject(&objSIPMsg, objStatusCode);
@@ -355,16 +341,15 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
         RCPtr<SIPDialogEx> pOrigDialogEx;
         IMS_SINT32 nResult = pSTState->HandleRequest(pOrigDialogEx);
 
-        if ((nResult == SIPPrivate::MESSAGE_VALID)
-                || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
+        if ((nResult == SIPPrivate::MESSAGE_VALID) || (nResult == SIPPrivate::MESSAGE_VALID_FORKED))
         {
             SipStatusCode objStatusCode(SipStatusCode::SC_400);
             SIPFactoryProxy* pFactoryProxy = SIPFactoryProxy::GetInstance();
 
             if (pFactoryProxy->IsRoutingRejectNotifierEnabled(nSlotId))
             {
-                SipRoutingRejectNotifier* pRoutingRejectNotifier
-                        = pFactoryProxy->GetRoutingRejectNotifier(nSlotId);
+                SipRoutingRejectNotifier* pRoutingRejectNotifier =
+                        pFactoryProxy->GetRoutingRejectNotifier(nSlotId);
                 SIPMessage objSIPMsg(pstMessage);
 
                 pRoutingRejectNotifier->NotifyRequestReject(&objSIPMsg, objStatusCode);
@@ -416,8 +401,8 @@ IMS_SINT32 SIPMessageHandler::NotifyRequest(IN IMS_SINT32 nSlotId, IN SipMessage
 }
 
 PRIVATE
-IMS_SINT32 SIPMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN SipMessage *pstMessage,
-        IN CONST SIPTransportAddress &objNearEnd, IN CONST SIPTransportAddress &objFarEnd)
+IMS_SINT32 SIPMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN SipMessage* pstMessage,
+        IN CONST SIPTransportAddress& objNearEnd, IN CONST SIPTransportAddress& objFarEnd)
 {
     RCPtr<SIPClientTransactionState> pCTState;
 
@@ -431,8 +416,8 @@ IMS_SINT32 SIPMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN SipMessag
         return SIPPrivate::MESSAGE_DISCARDED;
     }
 
-    IMS_SINT32 nValidity = SIPClientTransactionState::MatchTransaction(
-            pstMessage, objFarEnd, pCTState);
+    IMS_SINT32 nValidity =
+            SIPClientTransactionState::MatchTransaction(pstMessage, objFarEnd, pCTState);
 
     if (nValidity != SIPPrivate::MESSAGE_VALID)
     {
@@ -450,9 +435,9 @@ IMS_SINT32 SIPMessageHandler::NotifyResponse(IN IMS_SINT32 nSlotId, IN SipMessag
 }
 
 PRIVATE
-IMS_BOOL SIPMessageHandler::CheckIPSecValidityForRequest(
-        IN IMS_SINT32 nSlotId, IN SIPTransactionState *pTState,
-        IN CONST SIPTransportAddress &objNearEnd, IN CONST SIPTransportAddress &objFarEnd)
+IMS_BOOL SIPMessageHandler::CheckIPSecValidityForRequest(IN IMS_SINT32 nSlotId,
+        IN SIPTransactionState* pTState, IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd)
 {
     if (pTState->IsIPSecRequired() && SIPRTConfigUtils::IsIPSecSAConfigured(nSlotId))
     {
@@ -467,9 +452,9 @@ IMS_BOOL SIPMessageHandler::CheckIPSecValidityForRequest(
 }
 
 PRIVATE
-IMS_BOOL SIPMessageHandler::CheckIPSecValidityForResponse(
-        IN IMS_SINT32 nSlotId, IN SipMessage *pstMessage,
-        IN CONST SIPTransportAddress &objNearEnd, IN CONST SIPTransportAddress &objFarEnd)
+IMS_BOOL SIPMessageHandler::CheckIPSecValidityForResponse(IN IMS_SINT32 nSlotId,
+        IN SipMessage* pstMessage, IN CONST SIPTransportAddress& objNearEnd,
+        IN CONST SIPTransportAddress& objFarEnd)
 {
     if (SIPRTConfigUtils::IsIPSecSAConfigured(nSlotId) && IsSecuredMessage(nSlotId, pstMessage))
     {
@@ -485,23 +470,23 @@ IMS_BOOL SIPMessageHandler::CheckIPSecValidityForResponse(
 
 PRIVATE
 IMS_BOOL SIPMessageHandler::IsIPSecSAMatched(IN IMS_SINT32 nSlotId,
-        IN CONST SIPTransportAddress &objNearEnd, IN CONST SIPTransportAddress &objFarEnd)
+        IN CONST SIPTransportAddress& objNearEnd, IN CONST SIPTransportAddress& objFarEnd)
 {
-    SIPRTConfigHelper *pConfigHelper = SIPRTConfigUtils::GetConfigHelper(nSlotId);
+    SIPRTConfigHelper* pConfigHelper = SIPRTConfigUtils::GetConfigHelper(nSlotId);
     IMS_BOOL bAtLeastOneSAMatched = IMS_FALSE;
     const IMSList<SipRtConfig::IpSecSa>& objIPSecSAs = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIPSecSAs.GetSize(); ++i)
     {
-        const SipRtConfig::IpSecSa &objIPSecSA = objIPSecSAs.GetAt(i);
+        const SipRtConfig::IpSecSa& objIPSecSA = objIPSecSAs.GetAt(i);
 
         if (objIPSecSA.IsEmpty())
         {
             continue;
         }
 
-        if ((objIPSecSA.GetPortPc() != objFarEnd.GetPort())
-                && (objIPSecSA.GetPortPs() != objFarEnd.GetPort()))
+        if ((objIPSecSA.GetPortPc() != objFarEnd.GetPort()) &&
+                (objIPSecSA.GetPortPs() != objFarEnd.GetPort()))
         {
             IMS_TRACE_I("IPSec :: PortP is mismatched; pc(%d), ps(%d), far(%d)",
                     objIPSecSA.GetPortPc(), objIPSecSA.GetPortPs(), objFarEnd.GetPort());
@@ -523,8 +508,8 @@ IMS_BOOL SIPMessageHandler::IsIPSecSAMatched(IN IMS_SINT32 nSlotId,
             continue;
         }
 
-        if ((objIPSecSA.GetPortUc() != objNearEnd.GetPort())
-                && (objIPSecSA.GetPortUs() != objNearEnd.GetPort()))
+        if ((objIPSecSA.GetPortUc() != objNearEnd.GetPort()) &&
+                (objIPSecSA.GetPortUs() != objNearEnd.GetPort()))
         {
             IMS_TRACE_I("IPSec :: PortU is mismatched; uc(%d), us(%d), near(%d)",
                     objIPSecSA.GetPortPc(), objIPSecSA.GetPortPs(), objNearEnd.GetPort());
@@ -542,15 +527,15 @@ IMS_BOOL SIPMessageHandler::IsIPSecSAMatched(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-IMS_BOOL SIPMessageHandler::IsIPSecSAMatchedForUS(IN IMS_SINT32 nSlotId,
-        IN CONST IPAddress &objIP, IN IMS_SINT32 nPort)
+IMS_BOOL SIPMessageHandler::IsIPSecSAMatchedForUS(
+        IN IMS_SINT32 nSlotId, IN CONST IPAddress& objIP, IN IMS_SINT32 nPort)
 {
-    SIPRTConfigHelper *pConfigHelper = SIPRTConfigUtils::GetConfigHelper(nSlotId);
+    SIPRTConfigHelper* pConfigHelper = SIPRTConfigUtils::GetConfigHelper(nSlotId);
     const IMSList<SipRtConfig::IpSecSa>& objIPSecSAs = pConfigHelper->GetIpSecSas();
 
     for (IMS_UINT32 i = 0; i < objIPSecSAs.GetSize(); ++i)
     {
-        const SipRtConfig::IpSecSa &objIPSecSA = objIPSecSAs.GetAt(i);
+        const SipRtConfig::IpSecSa& objIPSecSA = objIPSecSAs.GetAt(i);
 
         if (objIPSecSA.IsEmpty())
         {
@@ -567,7 +552,7 @@ IMS_BOOL SIPMessageHandler::IsIPSecSAMatchedForUS(IN IMS_SINT32 nSlotId,
 }
 
 PRIVATE
-IMS_BOOL SIPMessageHandler::IsSecuredMessage(IN IMS_SINT32 nSlotId, IN SipMessage *pstMessage)
+IMS_BOOL SIPMessageHandler::IsSecuredMessage(IN IMS_SINT32 nSlotId, IN SipMessage* pstMessage)
 {
     IMS_SINT32 nPort = Sip::PORT_UNSPECIFIED;
     AString strHost;
@@ -596,7 +581,7 @@ IMS_BOOL SIPMessageHandler::IsSecuredMessage(IN IMS_SINT32 nSlotId, IN SipMessag
 
 PRIVATE
 IMS_BOOL SIPMessageHandler::CheckRegContactValidity(
-        IN IMS_SINT32 nSlotId, IN SipMessage *pstMessage)
+        IN IMS_SINT32 nSlotId, IN SipMessage* pstMessage)
 {
     SipMethod objMethod = SIPStack::GetMethod(pstMessage);
 
@@ -616,7 +601,7 @@ IMS_BOOL SIPMessageHandler::CheckRegContactValidity(
 
     AString strCallId = SIPStack::GetHeaderAsString(pstMessage, ISipHeader::CALL_ID);
     SIPRTConfigHelper* pConfigHelper = SIPRTConfigUtils::GetConfigHelper(nSlotId);
-    const SipAddress *pContact = pConfigHelper->GetRegContactUri(strCallId);
+    const SipAddress* pContact = pConfigHelper->GetRegContactUri(strCallId);
 
     if (pContact == IMS_NULL)
     {
@@ -637,8 +622,7 @@ IMS_BOOL SIPMessageHandler::CheckRegContactValidity(
 
     for (IMS_SINT32 i = 0; i < nHeaderCount; ++i)
     {
-        strContact = SIPStack::GetHeaderAsString(pstMessage,
-                ISipHeader::CONTACT_ANY, IMS_FALSE, i);
+        strContact = SIPStack::GetHeaderAsString(pstMessage, ISipHeader::CONTACT_ANY, IMS_FALSE, i);
 
         objContact.Create(strContact);
 
@@ -649,8 +633,8 @@ IMS_BOOL SIPMessageHandler::CheckRegContactValidity(
         }
     }
 
-    IMS_TRACE_D("Reg-Contact(%s) is not matched",
-            SipDebug::GetUri1(pContact->ToString()).GetStr(), 0, 0);
+    IMS_TRACE_D("Reg-Contact(%s) is not matched", SipDebug::GetUri1(pContact->ToString()).GetStr(),
+            0, 0);
 
     // Drop REGISTER response.
     return IMS_FALSE;

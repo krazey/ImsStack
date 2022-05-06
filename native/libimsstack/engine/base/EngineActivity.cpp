@@ -13,26 +13,20 @@
 #include "ServiceMemory.h"
 #include "EngineActivity.h"
 
-
-
 PUBLIC
-EngineActivity::EngineActivity(IN CONST AString &strName_ /* = AString::ConstNull() */)
-    : IMSActivity(strName_)
+EngineActivity::EngineActivity(IN CONST AString& strName_ /* = AString::ConstNull() */) :
+        IMSActivity(strName_)
 {
 }
 
-PUBLIC VIRTUAL
-EngineActivity::~EngineActivity()
-{
-}
+PUBLIC VIRTUAL EngineActivity::~EngineActivity() {}
 
 /*
 
 Remarks
 
 */
-PROTECTED VIRTUAL
-IIMSActivityControl* EngineActivity::GetController()
+PROTECTED VIRTUAL IIMSActivityControl* EngineActivity::GetController()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -44,19 +38,18 @@ IIMSActivityControl* EngineActivity::GetController()
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL EngineActivity::DispatchMessage(IN IMSMSG &objMSG)
+PROTECTED VIRTUAL IMS_BOOL EngineActivity::DispatchMessage(IN IMSMSG& objMSG)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (objMSG.GetName())
     {
-    case AMSG_DESTROY:
-        OnDestroy();
-        return IMS_TRUE;
+        case AMSG_DESTROY:
+            OnDestroy();
+            return IMS_TRUE;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return IMS_FALSE;
@@ -67,8 +60,7 @@ IMS_BOOL EngineActivity::DispatchMessage(IN IMSMSG &objMSG)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void EngineActivity::OnDestroy()
+PROTECTED VIRTUAL void EngineActivity::OnDestroy()
 {
     //---------------------------------------------------------------------------------------------
 

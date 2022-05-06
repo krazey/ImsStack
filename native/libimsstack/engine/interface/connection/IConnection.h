@@ -21,4 +21,4 @@ public:
     virtual void Close() = 0;
 };
 
-#endif // _INTERFACE_CONNECTION_H_
+#endif  // _INTERFACE_CONNECTION_H_

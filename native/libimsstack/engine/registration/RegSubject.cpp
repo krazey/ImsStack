@@ -13,26 +13,18 @@
 #include "ServiceMemory.h"
 #include "RegSubject.h"
 
-
-
 PUBLIC
-RegSubject::RegSubject()
-{
-}
+RegSubject::RegSubject() {}
 
-PUBLIC VIRTUAL
-RegSubject::~RegSubject()
-{
-}
+PUBLIC VIRTUAL RegSubject::~RegSubject() {}
 
-PUBLIC VIRTUAL
-void RegSubject::RegisterObserver(IN RegObserver *pObserver)
+PUBLIC VIRTUAL void RegSubject::RegisterObserver(IN RegObserver* pObserver)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
     {
-        RegObserver *pTmpObserver = objObservers.GetAt(i);
+        RegObserver* pTmpObserver = objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
             return;
@@ -41,14 +33,13 @@ void RegSubject::RegisterObserver(IN RegObserver *pObserver)
     objObservers.Append(pObserver);
 }
 
-PUBLIC VIRTUAL
-void RegSubject::RemoveObserver(IN RegObserver *pObserver)
+PUBLIC VIRTUAL void RegSubject::RemoveObserver(IN RegObserver* pObserver)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
     {
-        RegObserver *pTmpObserver = objObservers.GetAt(i);
+        RegObserver* pTmpObserver = objObservers.GetAt(i);
 
         if (pObserver == pTmpObserver)
         {
@@ -58,14 +49,13 @@ void RegSubject::RemoveObserver(IN RegObserver *pObserver)
     }
 }
 
-PROTECTED VIRTUAL
-void RegSubject::NotifyObservers(IN IMS_SINT32 nWhat)
+PROTECTED VIRTUAL void RegSubject::NotifyObservers(IN IMS_SINT32 nWhat)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objObservers.GetSize(); ++i)
     {
-        RegObserver *pObserver = objObservers.GetAt(i);
+        RegObserver* pObserver = objObservers.GetAt(i);
 
         if (pObserver == IMS_NULL)
             continue;

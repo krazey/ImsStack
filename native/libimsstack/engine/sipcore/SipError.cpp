@@ -21,8 +21,7 @@
 /**
  * Returns an SIP last error code
  */
-PUBLIC GLOBAL
-IMS_SINT32 SipError::GetLastError()
+PUBLIC GLOBAL IMS_SINT32 SipError::GetLastError()
 {
     return SIPPrivate::GetLastError();
 }

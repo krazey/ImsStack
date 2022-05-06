@@ -18,36 +18,32 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-PublicationRefreshHelper::PublicationRefreshHelper(IN IRefreshable *piRefreshable_,
-        IN CONST PubState *pPubState_)
-    : RefreshHelper(piRefreshable_, IMS_FALSE)
-    , pPubState(pPubState_)
+PublicationRefreshHelper::PublicationRefreshHelper(
+        IN IRefreshable* piRefreshable_, IN CONST PubState* pPubState_) :
+        RefreshHelper(piRefreshable_, IMS_FALSE),
+        pPubState(pPubState_)
 {
 }
 
-PUBLIC VIRTUAL
-PublicationRefreshHelper::~PublicationRefreshHelper()
+PUBLIC VIRTUAL PublicationRefreshHelper::~PublicationRefreshHelper()
 {
     //---------------------------------------------------------------------------------------------
 
     IMS_TRACE_D("Destructor :: PublicationRefreshHelper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL PublicationRefreshHelper::AddSpecificHeader(IN ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_BOOL PublicationRefreshHelper::AddSpecificHeader(IN ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(IN ISipClientConnection *piSCC)
+PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(
+        IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -58,8 +54,8 @@ IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(IN ISipClientConnection 
 
     if (!AddSpecificHeader(piSCC))
     {
-        IMS_TRACE_E(0, "Adding the specific headers for a publication refresh request failed",
-                0, 0, 0);
+        IMS_TRACE_E(
+                0, "Adding the specific headers for a publication refresh request failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
@@ -72,10 +68,10 @@ IMS_RESULT PublicationRefreshHelper::SendRefreshRequest(IN ISipClientConnection 
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(
+        IN CONST ISipConnection* piSC)
 {
-    ISipMessage *piSIPMsg = piSC->GetMessage();
+    ISipMessage* piSIPMsg = piSC->GetMessage();
 
     //---------------------------------------------------------------------------------------------
 
@@ -124,19 +120,18 @@ IMS_RESULT PublicationRefreshHelper::UpdateOnMessageReceived(IN CONST ISipConnec
     return IMS_SUCCESS;
 }
 
-PUBLIC VIRTUAL
-IMS_RESULT PublicationRefreshHelper::UpdateOnMessageSent(IN CONST ISipConnection *piSC)
+PUBLIC VIRTUAL IMS_RESULT PublicationRefreshHelper::UpdateOnMessageSent(
+        IN CONST ISipConnection* piSC)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) piSC;
+    (void)piSC;
 
     return IMS_SUCCESS;
 }
 
-PROTECTED VIRTUAL
-void PublicationRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
-        IN IMS_SINT32 nCode /* = 0 */)
+PROTECTED VIRTUAL void PublicationRefreshHelper::RefreshCompleted(
+        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -161,8 +156,7 @@ void PublicationRefreshHelper::RefreshCompleted(IN ISipClientConnection *piSCC,
     }
 }
 
-PROTECTED VIRTUAL
-void PublicationRefreshHelper::RefreshStarted()
+PROTECTED VIRTUAL void PublicationRefreshHelper::RefreshStarted()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -174,8 +168,7 @@ void PublicationRefreshHelper::RefreshStarted()
     }
 }
 
-PROTECTED VIRTUAL
-void PublicationRefreshHelper::RefreshTerminated()
+PROTECTED VIRTUAL void PublicationRefreshHelper::RefreshTerminated()
 {
     //---------------------------------------------------------------------------------------------
 

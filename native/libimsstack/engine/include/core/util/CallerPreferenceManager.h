@@ -16,8 +16,6 @@
 #include "AString.h"
 #include "IMSMap.h"
 
-
-
 class CallerPreferenceManager
 {
 private:
@@ -25,13 +23,13 @@ private:
     ~CallerPreferenceManager();
 
 public:
-    IMS_BOOL CreatePreferenceWrapper(IN CONST AString &strName, IN CONST AString &strDialogId);
-    void DestroyPreferenceWrapper(IN CONST AString &strName);
-    const IMSList<AString>& GetAcceptContacts(IN CONST AString &strDialogId) const;
-    const IMSList<AString>& GetAcceptContactsByName(IN CONST AString &strName) const;
-    void UpdateAcceptContacts(IN CONST AString &strName,
-            IN CONST IMSList<AString> &objAcceptContacts);
-    void UpdateDialogId(IN CONST AString &strName, IN CONST AString &strDialogId);
+    IMS_BOOL CreatePreferenceWrapper(IN CONST AString& strName, IN CONST AString& strDialogId);
+    void DestroyPreferenceWrapper(IN CONST AString& strName);
+    const IMSList<AString>& GetAcceptContacts(IN CONST AString& strDialogId) const;
+    const IMSList<AString>& GetAcceptContactsByName(IN CONST AString& strName) const;
+    void UpdateAcceptContacts(
+            IN CONST AString& strName, IN CONST IMSList<AString>& objAcceptContacts);
+    void UpdateDialogId(IN CONST AString& strName, IN CONST AString& strDialogId);
 
     static CallerPreferenceManager* GetInstance();
 
@@ -39,21 +37,22 @@ private:
     class PreferenceWrapper
     {
     public:
-        inline PreferenceWrapper()
-            : strDialogId(AString::ConstNull())
-            , objAcceptContacts(IMSList<AString>())
-            {}
+        inline PreferenceWrapper() :
+                strDialogId(AString::ConstNull()),
+                objAcceptContacts(IMSList<AString>())
+        {
+        }
 
-        inline PreferenceWrapper(IN CONST PreferenceWrapper &objRHS)
-            : strDialogId(objRHS.strDialogId)
-            , objAcceptContacts(objRHS.objAcceptContacts)
-            {}
+        inline PreferenceWrapper(IN CONST PreferenceWrapper& objRHS) :
+                strDialogId(objRHS.strDialogId),
+                objAcceptContacts(objRHS.objAcceptContacts)
+        {
+        }
 
-        inline ~PreferenceWrapper()
-            {}
+        inline ~PreferenceWrapper() {}
 
     public:
-        inline PreferenceWrapper& operator=(IN CONST PreferenceWrapper &objRHS)
+        inline PreferenceWrapper& operator=(IN CONST PreferenceWrapper& objRHS)
         {
             if (this != &objRHS)
             {
@@ -65,14 +64,13 @@ private:
         }
 
     public:
-        inline const IMSList<AString>& GetAcceptContacts() const
-            { return objAcceptContacts; }
-        inline const AString& GetDialogId() const
-            { return strDialogId; }
-        inline void SetAcceptContacts(IN CONST IMSList<AString> &objAcceptContacts)
-            { this->objAcceptContacts = objAcceptContacts; }
-        inline void SetDialogId(IN CONST AString &strDialogId)
-            { this->strDialogId = strDialogId; }
+        inline const IMSList<AString>& GetAcceptContacts() const { return objAcceptContacts; }
+        inline const AString& GetDialogId() const { return strDialogId; }
+        inline void SetAcceptContacts(IN CONST IMSList<AString>& objAcceptContacts)
+        {
+            this->objAcceptContacts = objAcceptContacts;
+        }
+        inline void SetDialogId(IN CONST AString& strDialogId) { this->strDialogId = strDialogId; }
 
     public:
         AString strDialogId;
@@ -86,4 +84,4 @@ private:
     IMSMap<AString, PreferenceWrapper> objPreferenceWrappers;
 };
 
-#endif // _CALLER_PREFERENCE_MANAGER_H_
+#endif  // _CALLER_PREFERENCE_MANAGER_H_

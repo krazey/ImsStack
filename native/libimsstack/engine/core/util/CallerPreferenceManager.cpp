@@ -13,19 +13,15 @@
 #include "ServiceMemory.h"
 #include "util/CallerPreferenceManager.h"
 
-
-
 PRIVATE
-CallerPreferenceManager::CallerPreferenceManager()
-    : objEmptyPreferenceWrapper(PreferenceWrapper())
-    , objPreferenceWrappers(IMSMap<AString, PreferenceWrapper>())
+CallerPreferenceManager::CallerPreferenceManager() :
+        objEmptyPreferenceWrapper(PreferenceWrapper()),
+        objPreferenceWrappers(IMSMap<AString, PreferenceWrapper>())
 {
 }
 
 PRIVATE
-CallerPreferenceManager::~CallerPreferenceManager()
-{
-}
+CallerPreferenceManager::~CallerPreferenceManager() {}
 
 /*
 
@@ -33,8 +29,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(IN CONST AString &strName,
-        IN CONST AString &strDialogId)
+IMS_BOOL CallerPreferenceManager::CreatePreferenceWrapper(
+        IN CONST AString& strName, IN CONST AString& strDialogId)
 {
     IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
 
@@ -58,7 +54,7 @@ Remarks
 
 */
 PUBLIC
-void CallerPreferenceManager::DestroyPreferenceWrapper(IN CONST AString &strName)
+void CallerPreferenceManager::DestroyPreferenceWrapper(IN CONST AString& strName)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -72,13 +68,13 @@ Remarks
 */
 PUBLIC
 const IMSList<AString>& CallerPreferenceManager::GetAcceptContacts(
-        IN CONST AString &strDialogId) const
+        IN CONST AString& strDialogId) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objPreferenceWrappers.GetSize(); ++i)
     {
-        const PreferenceWrapper &objPreferenceWrapper = objPreferenceWrappers.GetValueAt(i);
+        const PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(i);
 
         if (strDialogId.Equals(objPreferenceWrapper.GetDialogId()))
         {
@@ -96,7 +92,7 @@ Remarks
 */
 PUBLIC
 const IMSList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
-        IN CONST AString &strName) const
+        IN CONST AString& strName) const
 {
     IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
 
@@ -107,7 +103,7 @@ const IMSList<AString>& CallerPreferenceManager::GetAcceptContactsByName(
         return objEmptyPreferenceWrapper.GetAcceptContacts();
     }
 
-    const PreferenceWrapper &objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    const PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
 
     return objPreferenceWrapper.GetAcceptContacts();
 }
@@ -118,8 +114,8 @@ Remarks
 
 */
 PUBLIC
-void CallerPreferenceManager::UpdateAcceptContacts(IN CONST AString &strName,
-        IN CONST IMSList<AString> &objAcceptContacts)
+void CallerPreferenceManager::UpdateAcceptContacts(
+        IN CONST AString& strName, IN CONST IMSList<AString>& objAcceptContacts)
 {
     IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
 
@@ -130,7 +126,7 @@ void CallerPreferenceManager::UpdateAcceptContacts(IN CONST AString &strName,
         return;
     }
 
-    PreferenceWrapper &objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetAcceptContacts(objAcceptContacts);
 }
@@ -141,8 +137,8 @@ Remarks
 
 */
 PUBLIC
-void CallerPreferenceManager::UpdateDialogId(IN CONST AString &strName,
-        IN CONST AString &strDialogId)
+void CallerPreferenceManager::UpdateDialogId(
+        IN CONST AString& strName, IN CONST AString& strDialogId)
 {
     IMS_SLONG nIndex = objPreferenceWrappers.GetIndexOfKey(strName);
 
@@ -153,7 +149,7 @@ void CallerPreferenceManager::UpdateDialogId(IN CONST AString &strName,
         return;
     }
 
-    PreferenceWrapper &objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
+    PreferenceWrapper& objPreferenceWrapper = objPreferenceWrappers.GetValueAt(nIndex);
 
     objPreferenceWrapper.SetDialogId(strDialogId);
 }
@@ -163,10 +159,9 @@ void CallerPreferenceManager::UpdateDialogId(IN CONST AString &strName,
 Remarks
 
 */
-PUBLIC GLOBAL
-CallerPreferenceManager* CallerPreferenceManager::GetInstance()
+PUBLIC GLOBAL CallerPreferenceManager* CallerPreferenceManager::GetInstance()
 {
-    static CallerPreferenceManager *pCallerPreferenceMngr = IMS_NULL;
+    static CallerPreferenceManager* pCallerPreferenceMngr = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 

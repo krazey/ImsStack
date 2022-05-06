@@ -19,14 +19,13 @@
 #include "SipParsingHelper.h"
 #include "SIPPrivate.h"
 
-PUBLIC GLOBAL
-ISipHeader* SipParsingHelper::CreateHeader(IN const AString& strName)
+PUBLIC GLOBAL ISipHeader* SipParsingHelper::CreateHeader(IN const AString& strName)
 {
     return new SIPHeader(strName);
 }
 
-PUBLIC GLOBAL
-ISipHeader* SipParsingHelper::CreateHeader(IN const AString& strName, IN const AString& strValue)
+PUBLIC GLOBAL ISipHeader* SipParsingHelper::CreateHeader(
+        IN const AString& strName, IN const AString& strValue)
 {
     SIPHeader* pHeader = new SIPHeader(strName);
 
@@ -46,8 +45,8 @@ ISipHeader* SipParsingHelper::CreateHeader(IN const AString& strName, IN const A
     return pHeader;
 }
 
-PUBLIC GLOBAL
-ISipHeader* SipParsingHelper::CreateHeader(IN IMS_SINT32 nType, IN const AString& strValue)
+PUBLIC GLOBAL ISipHeader* SipParsingHelper::CreateHeader(
+        IN IMS_SINT32 nType, IN const AString& strValue)
 {
     if (!SIPHeader::IsValidType(nType))
     {
@@ -73,11 +72,9 @@ ISipHeader* SipParsingHelper::CreateHeader(IN IMS_SINT32 nType, IN const AString
     return pHeader;
 }
 
-PUBLIC GLOBAL
-ISipMessage* SipParsingHelper::CreateMessage(IN IMS_SINT32 nType)
+PUBLIC GLOBAL ISipMessage* SipParsingHelper::CreateMessage(IN IMS_SINT32 nType)
 {
-    if ((nType != ISipMessage::TYPE_REQUEST) &&
-            (nType != ISipMessage::TYPE_RESPONSE))
+    if ((nType != ISipMessage::TYPE_REQUEST) && (nType != ISipMessage::TYPE_RESPONSE))
     {
         SIPPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
@@ -86,20 +83,17 @@ ISipMessage* SipParsingHelper::CreateMessage(IN IMS_SINT32 nType)
     return new SIPMessage(nType);
 }
 
-PUBLIC GLOBAL
-ISipMessage* SipParsingHelper::CreateMessage(IN const ByteArray& objMessage)
+PUBLIC GLOBAL ISipMessage* SipParsingHelper::CreateMessage(IN const ByteArray& objMessage)
 {
     return SIPMessage::CreateMessage(objMessage);
 }
 
-PUBLIC GLOBAL
-ISipMessageBodyPart* SipParsingHelper::CreateMessageBodyPart()
+PUBLIC GLOBAL ISipMessageBodyPart* SipParsingHelper::CreateMessageBodyPart()
 {
     return new SIPMessageBodyPart();
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SipParsingHelper::CreateMessageBodyParts(IN_OUT ISipMessage* piSipMsg)
+PUBLIC GLOBAL IMS_BOOL SipParsingHelper::CreateMessageBodyParts(IN_OUT ISipMessage* piSipMsg)
 {
     SIPMessage* pSipMsg = DYNAMIC_CAST(SIPMessage*, piSipMsg);
 
@@ -112,8 +106,8 @@ IMS_BOOL SipParsingHelper::CreateMessageBodyParts(IN_OUT ISipMessage* piSipMsg)
     return pSipMsg->CreateBodyParts();
 }
 
-PUBLIC GLOBAL
-const AString& SipParsingHelper::GetSipReasonHeader(IN const IMSList<AString>& objReasonHeaders)
+PUBLIC GLOBAL const AString& SipParsingHelper::GetSipReasonHeader(
+        IN const IMSList<AString>& objReasonHeaders)
 {
     if (objReasonHeaders.IsEmpty())
     {
@@ -145,9 +139,8 @@ const AString& SipParsingHelper::GetSipReasonHeader(IN const IMSList<AString>& o
     return AString::ConstNull();
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SipParsingHelper::ParseReasonHeader(IN const AString& strHeaderValue,
-        OUT IMS_SINT32& nCause, OUT AString& strText)
+PUBLIC GLOBAL IMS_BOOL SipParsingHelper::ParseReasonHeader(
+        IN const AString& strHeaderValue, OUT IMS_SINT32& nCause, OUT AString& strText)
 {
     if (strHeaderValue.GetLength() == 0)
     {
@@ -160,8 +153,7 @@ IMS_BOOL SipParsingHelper::ParseReasonHeader(IN const AString& strHeaderValue,
     return ParseReasonHeader(strHeaderValue, strProtocol, nCause, strText);
 }
 
-PUBLIC GLOBAL
-IMS_BOOL SipParsingHelper::ParseReasonHeader(IN const AString& strHeaderValue,
+PUBLIC GLOBAL IMS_BOOL SipParsingHelper::ParseReasonHeader(IN const AString& strHeaderValue,
         OUT AString& strProtocol, OUT IMS_SINT32& nCause, OUT AString& strText)
 {
     if (strHeaderValue.GetLength() == 0)

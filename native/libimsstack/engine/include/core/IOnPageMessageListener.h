@@ -15,8 +15,6 @@
 
 class PageMessage;
 
-
-
 /*
 
 This listener type is used to notify the application about the status of sent page messages.
@@ -49,7 +47,7 @@ public:
     </table>
 
     */
-    virtual void OnPageMessage_Delivered(IN PageMessage *pPageMessage) = 0;
+    virtual void OnPageMessage_Delivered(IN PageMessage* pPageMessage) = 0;
 
     /*
 
@@ -70,7 +68,7 @@ public:
     </table>
 
     */
-    virtual void OnPageMessage_DeliveryFailed(IN PageMessage *pPageMessage) = 0;
+    virtual void OnPageMessage_DeliveryFailed(IN PageMessage* pPageMessage) = 0;
 };
 
-#endif // _INTERFACE_ON_PAGE_MESSAGE_LISTENER_H_
+#endif  // _INTERFACE_ON_PAGE_MESSAGE_LISTENER_H_

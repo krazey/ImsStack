@@ -19,10 +19,7 @@
 class INamedNodeMap;
 class INode;
 
-
-
-class RegInfoRegistration
-    : public IRegInfoRegistration
+class RegInfoRegistration : public IRegInfoRegistration
 {
 public:
     RegInfoRegistration();
@@ -31,22 +28,22 @@ public:
 public:
     // IRegInfoRegistration interface
     virtual const SipAddress& GetAOR() const;
-    virtual IRegInfoContact* GetContact(IN CONST SipAddress &objContactUri) const;
+    virtual IRegInfoContact* GetContact(IN CONST SipAddress& objContactUri) const;
     virtual IMSList<IRegInfoContact*> GetContacts() const;
     virtual RegInfoContact* GetPriorContact() const;
     virtual IMS_SINT32 GetState() const;
 
-    IMS_BOOL Equals(IN INode *piNode) const;
-    IMS_BOOL Update(IN INode *piNode);
+    IMS_BOOL Equals(IN INode* piNode) const;
+    IMS_BOOL Update(IN INode* piNode);
 
     void DisplayRegInfo();
 
 private:
-    RegInfoContact* CheckNCreateContact(IN INode *piNode);
-    IMS_BOOL SetAOR(IN INamedNodeMap *piNodeMap);
-    IMS_BOOL SetContacts(IN INode *piNode);
-    IMS_BOOL SetId(IN INamedNodeMap *piNodeMap);
-    IMS_BOOL SetState(IN INamedNodeMap *piNodeMap);
+    RegInfoContact* CheckNCreateContact(IN INode* piNode);
+    IMS_BOOL SetAOR(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetContacts(IN INode* piNode);
+    IMS_BOOL SetId(IN INamedNodeMap* piNodeMap);
+    IMS_BOOL SetState(IN INamedNodeMap* piNodeMap);
 
 private:
     AString strId;
@@ -56,4 +53,4 @@ private:
     IMSList<RegInfoContact*> objContacts;
 };
 
-#endif // _REG_INFO_REGISTRATION_H_
+#endif  // _REG_INFO_REGISTRATION_H_

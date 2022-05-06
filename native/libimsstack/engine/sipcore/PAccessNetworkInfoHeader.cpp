@@ -34,9 +34,8 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL
-IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
-        IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader)
+PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeader(
+        IN IMS_SINT32 nSlotId, IN const AccessNetworkInfo& objAnInfo, OUT AString& strHeader)
 {
     if (!AccessNetworkInfoFormatter::Encode(objAnInfo, strHeader))
     {
@@ -50,7 +49,7 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
     {
         switch (objAnInfo.nType)
         {
-            case AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD: // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_3GPP_UTRAN_FDD:  // FALL-THROUGH
             case AccessNetworkInfo::TYPE_3GPP_UTRAN_TDD:
                 if (pSipConfigV->GetPredefinedPaniForUtran().GetLength() > 0)
                 {
@@ -58,7 +57,7 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
                     IMS_TRACE_D("PANI(utran) is overwritten by the pre-defined value", 0, 0, 0);
                 }
                 break;
-            case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD: // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_FDD:  // FALL-THROUGH
             case AccessNetworkInfo::TYPE_3GPP_E_UTRAN_TDD:
                 if (pSipConfigV->GetPredefinedPaniForEutran().GetLength() > 0)
                 {
@@ -68,10 +67,10 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
                 break;
 
                 // WIFI
-            case AccessNetworkInfo::TYPE_IEEE_802_11: // FALL-THROUGH
-            case AccessNetworkInfo::TYPE_IEEE_802_11A: // FALL-THROUGH
-            case AccessNetworkInfo::TYPE_IEEE_802_11B: // FALL-THROUGH
-            case AccessNetworkInfo::TYPE_IEEE_802_11G: // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
+            case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
             case AccessNetworkInfo::TYPE_IEEE_802_11N:
                 if (pSipConfigV->GetPredefinedPaniForWlan().GetLength() > 0)
                 {
@@ -87,10 +86,9 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeader(IN IMS_SINT32 nSlotId,
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection, IN const SipMethod& /*objMethod*/,
-        IN const SipProfile* pSipProfile, OUT AString& strHeader)
+PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
+        IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection,
+        IN const SipMethod& /*objMethod*/, IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     if (piConnection == IMS_NULL)
     {
@@ -134,9 +132,8 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 n
     return IMS_TRUE;
 }
 
-PUBLIC GLOBAL
-IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 nSlotId,
-        IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
+PUBLIC GLOBAL IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
+        IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr, IN const SipMethod& objMethod,
         IN const SipProfile* pSipProfile, OUT AString& strHeader)
 {
     INetworkConnection* piConnection =
@@ -144,16 +141,16 @@ IMS_BOOL PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(IN IMS_SINT32 n
 
     if (piConnection != IMS_NULL)
     {
-        return FormHeaderForOperatorSpecific(nSlotId,
-                piConnection, objMethod, pSipProfile, strHeader);
+        return FormHeaderForOperatorSpecific(
+                nSlotId, piConnection, objMethod, pSipProfile, strHeader);
     }
 
     return IMS_FALSE;
 }
 
-PUBLIC GLOBAL
-void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddress& objIpAddr,
-        IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg)
+PUBLIC GLOBAL void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId,
+        IN const IPAddress& objIpAddr, IN const SipProfile* pSipProfile,
+        IN_OUT ISipMessage*& piSipMsg)
 {
     if (piSipMsg == IMS_NULL)
     {
@@ -170,8 +167,8 @@ void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddre
 
     AString strHeader;
 
-    if (!FormHeaderForOperatorSpecific(nSlotId,
-            piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
+    if (!FormHeaderForOperatorSpecific(
+                nSlotId, piConnection, piSipMsg->GetMethod(), pSipProfile, strHeader))
     {
         return;
     }
@@ -193,16 +190,15 @@ void PAccessNetworkInfoHeader::SetHeader(IN IMS_SINT32 nSlotId, IN const IPAddre
     }
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::ReformPaniHeaderForInvalidMacAddress(
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForInvalidMacAddress(
         IN const AccessNetworkInfo& objAnInfo, IN_OUT AString& strPaniHeader)
 {
     switch (objAnInfo.nType)
     {
-        case AccessNetworkInfo::TYPE_IEEE_802_11: // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11A: // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11B: // FALL-THROUGH
-        case AccessNetworkInfo::TYPE_IEEE_802_11G: // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
         case AccessNetworkInfo::TYPE_IEEE_802_11N:
             strPaniHeader = "IEEE-802.11;i-wlan-node-id=000000000000";
             break;
@@ -211,8 +207,8 @@ void PAccessNetworkInfoHeader::ReformPaniHeaderForInvalidMacAddress(
     }
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::ReformPaniHeaderForLocalTimeZone(IN_OUT AString& strHeader)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForLocalTimeZone(
+        IN_OUT AString& strHeader)
 {
     if (strHeader.GetLength() == 0)
     {
@@ -236,9 +232,8 @@ void PAccessNetworkInfoHeader::ReformPaniHeaderForLocalTimeZone(IN_OUT AString& 
     }
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(IN IMS_SINT32 nSlotId,
-        IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(
+        IN IMS_SINT32 nSlotId, IN_OUT AString& strHeader, IN IMS_BOOL bUseUicc)
 {
     AString strCountry(AString::ConstEmpty());
 
@@ -276,9 +271,8 @@ void PAccessNetworkInfoHeader::ReformPaniHeaderForCountryCode(IN IMS_SINT32 nSlo
     }
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(
+        IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
 {
     if (piConnection == IMS_NULL)
     {
@@ -370,8 +364,8 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId,
             }
         }
 
-        if (piSipMsg->SetHeader(ISipHeader::UNKNOWN,
-                strLastPanInfo, strPlaniHeaderName) != IMS_SUCCESS)
+        if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strLastPanInfo, strPlaniHeaderName) !=
+                IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Setting %s header failed", strPlaniHeaderName.GetStr(), 0, 0);
         }
@@ -381,9 +375,8 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForPlani(IN IMS_SINT32 nSlotId,
     ////////
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(
+        IN IMS_SINT32 nSlotId, IN INetworkConnection* piConnection, IN_OUT ISipMessage*& piSipMsg)
 {
     if (piConnection == IMS_NULL)
     {
@@ -438,17 +431,16 @@ void PAccessNetworkInfoHeader::SetPrivateHeaderForPlci(IN IMS_SINT32 nSlotId,
         strLastKnownPanInfo.Append(pHeader->strParameter);
     }
 
-    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN,
-            strLastKnownPanInfo, strPlciHeaderName) != IMS_SUCCESS)
+    if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strLastKnownPanInfo, strPlciHeaderName) !=
+            IMS_SUCCESS)
     {
         IMS_TRACE_E(0, "Setting %s header failed", strPlciHeaderName.GetStr(), 0, 0);
     }
 }
 
-PRIVATE GLOBAL
-void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId,
-        IN INetworkConnection* piConnection,
-        IN const SipProfile* pSipProfile, IN_OUT ISipMessage*& piSipMsg)
+PRIVATE GLOBAL void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId,
+        IN INetworkConnection* piConnection, IN const SipProfile* pSipProfile,
+        IN_OUT ISipMessage*& piSipMsg)
 {
     (void)pSipProfile;
 
@@ -463,15 +455,14 @@ void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId,
     {
         return;
     }
-    else if (objMethod.Equals(SipMethod::ACK) &&
-            !SipFeatures::IsPaniHeaderForAckRequired(nSlotId))
+    else if (objMethod.Equals(SipMethod::ACK) && !SipFeatures::IsPaniHeaderForAckRequired(nSlotId))
     {
         return;
     }
 
     // If runtime condition is required, then use SipProfile.
-    IMS_BOOL bCniHeaderRequired = SipConfigProxy::IsCellularNetworkInfoHeaderRequired(
-            nSlotId, IMS_NULL/*pSipProfile*/);
+    IMS_BOOL bCniHeaderRequired =
+            SipConfigProxy::IsCellularNetworkInfoHeaderRequired(nSlotId, IMS_NULL /*pSipProfile*/);
     const AString strHeaderName("Cellular-Network-Info");
 
     if (!bCniHeaderRequired)
@@ -508,38 +499,36 @@ void PAccessNetworkInfoHeader::SetCniHeader(IN IMS_SINT32 nSlotId,
 
     if (piSipMsg->SetHeader(ISipHeader::UNKNOWN, strHeader, strHeaderName) != IMS_SUCCESS)
     {
-        IMS_TRACE_E(0, "SetCniHeader :: Setting %s header failed",
-                strHeaderName.GetStr(), 0, 0);
+        IMS_TRACE_E(0, "SetCniHeader :: Setting %s header failed", strHeaderName.GetStr(), 0, 0);
     }
 }
 
-PRIVATE GLOBAL
-IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(IN const AccessNetworkInfo& objAnInfo)
+PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsAccessNetworkTypeWiFi(
+        IN const AccessNetworkInfo& objAnInfo)
 {
     switch (objAnInfo.nType)
     {
-    case AccessNetworkInfo::TYPE_IEEE_802_11: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11A: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11B: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11G: // FALL-THROUGH
-    case AccessNetworkInfo::TYPE_IEEE_802_11N:
-        return IMS_TRUE;
-    default:
-        break;
+        case AccessNetworkInfo::TYPE_IEEE_802_11:   // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11A:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11B:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11G:  // FALL-THROUGH
+        case AccessNetworkInfo::TYPE_IEEE_802_11N:
+            return IMS_TRUE;
+        default:
+            break;
     }
 
     return IMS_FALSE;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL PAccessNetworkInfoHeader::IsCountryInfoRequiredForVoWiFi(IN IMS_SINT32 nSlotId,
-        IN const SipProfile* pSipProfile)
+PRIVATE GLOBAL IMS_BOOL PAccessNetworkInfoHeader::IsCountryInfoRequiredForVoWiFi(
+        IN IMS_SINT32 nSlotId, IN const SipProfile* pSipProfile)
 {
     (void)pSipProfile;
 
     // If runtime condition is required, then use SipProfile.
-    IMS_BOOL bCountryInfoRequired = SipConfigProxy::IsCountryInfoRequiredInPaniHeader(
-            nSlotId, IMS_NULL/*pSipProfile*/);
+    IMS_BOOL bCountryInfoRequired =
+            SipConfigProxy::IsCountryInfoRequiredInPaniHeader(nSlotId, IMS_NULL /*pSipProfile*/);
 
     return bCountryInfoRequired;
 }

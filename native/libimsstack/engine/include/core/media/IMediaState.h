@@ -17,8 +17,6 @@
 
 class SdpMediaParameter;
 
-
-
 class IMediaState
 {
 public:
@@ -42,4 +40,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_MEDIA_STATE_H_
+#endif  // _INTERFACE_MEDIA_STATE_H_

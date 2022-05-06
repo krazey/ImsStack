@@ -15,8 +15,8 @@ public:
      * @param strAppId an IMS application identifier
      * @param strServiceId an IMS service identifier
      */
-    virtual void RegContact_BindingAdded(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId) = 0;
+    virtual void RegContact_BindingAdded(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Notifies the application that the specified service is removed from this contact.
@@ -24,8 +24,8 @@ public:
      * @param strAppId an IMS application identifier
      * @param strServiceId an IMS service identifier
      */
-    virtual void RegContact_BindingRemoved(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId) = 0;
+    virtual void RegContact_BindingRemoved(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /**
      * @brief Notifies the application that the contact is in ACTIVE or just transit to ACTIVE
@@ -39,4 +39,4 @@ public:
     virtual void RegContact_OnTerminated() = 0;
 };
 
-#endif // _INTERFACE_REG_CONTACT_LISTENER_H_
+#endif  // _INTERFACE_REG_CONTACT_LISTENER_H_

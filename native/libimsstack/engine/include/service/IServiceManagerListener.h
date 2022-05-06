@@ -15,12 +15,10 @@
 
 class Service;
 
-
-
 class IServiceManagerListener
 {
 public:
-    virtual void ServiceClosed(IN Service *pService) = 0;
+    virtual void ServiceClosed(IN Service* pService) = 0;
 };
 
-#endif // _INTERFACE_SERVICE_MANAGER_LISTENER_H_
+#endif  // _INTERFACE_SERVICE_MANAGER_LISTENER_H_

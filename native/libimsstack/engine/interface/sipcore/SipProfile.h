@@ -24,14 +24,19 @@
 /**
  * @brief This class defines SIP profile for the run-time configuration of SIP engine.
  */
-class SipProfile :
-        public RCObject
+class SipProfile : public RCObject
 {
 public:
     /// Indicates that the value is not provisioned for configuration item of integer type
-    enum { NOT_PROVISIONED = (-10) };
+    enum
+    {
+        NOT_PROVISIONED = (-10)
+    };
     /// Default threshold length to switch from UDP to TCP
-    enum { TCP_CRITERION_LEN = 1300 };
+    enum
+    {
+        TCP_CRITERION_LEN = 1300
+    };
 
 public:
     inline SipProfile() :
@@ -50,7 +55,8 @@ public:
             m_nRegSubscription(NOT_PROVISIONED),
             m_nRegSubExpires(NOT_PROVISIONED),
             m_nConfigValue(0)
-    {}
+    {
+    }
     inline SipProfile(IN const SipProfile& other) :
             RCObject(other),
             m_nDefaultPort(other.m_nDefaultPort),
@@ -69,9 +75,9 @@ public:
             m_nRegSubscription(other.m_nRegSubscription),
             m_nRegSubExpires(other.m_nRegSubExpires),
             m_nConfigValue(other.m_nConfigValue)
-    {}
-    inline virtual ~SipProfile()
-    {}
+    {
+    }
+    inline virtual ~SipProfile() {}
 
 public:
     SipProfile& operator=(IN const SipProfile&) = delete;
@@ -89,24 +95,21 @@ public:
      *         #ISipConfig#DEVICE_ID_UUID_IMEI_V4\n
      *         #ISipConfig#DEVICE_ID_PREDEFINED
      */
-    inline IMS_SINT32 GetDeviceId() const
-    { return m_nDeviceId; }
+    inline IMS_SINT32 GetDeviceId() const { return m_nDeviceId; }
 
     /**
      * @brief Gets a pre-defined device id (+sip.instance).
      *
      * @return The pre-defined device id.
      */
-    inline const AString& GetPredefinedDeviceId() const
-    { return m_strDeviceId; }
+    inline const AString& GetPredefinedDeviceId() const { return m_strDeviceId; }
 
     /**
      * @brief Gets a SIP default port number.
      *
      * @return The port number.
      */
-    inline IMS_SINT32 GetPort() const
-    { return m_nDefaultPort; }
+    inline IMS_SINT32 GetPort() const { return m_nDefaultPort; }
 
     /**
      * @brief Gets the SIP features.
@@ -142,96 +145,84 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
-    inline IMS_SINT32 GetSipFeatureCaps() const
-    { return m_nSipFeatures; }
+    inline IMS_SINT32 GetSipFeatureCaps() const { return m_nSipFeatures; }
 
     /**
      * @brief Gets a default timer value for SIP timer T1.
      *
      * @return The timer value.
      */
-    inline IMS_SINT32 GetTimerValueT1() const
-    { return m_nTimerValueT1; }
+    inline IMS_SINT32 GetTimerValueT1() const { return m_nTimerValueT1; }
 
     /**
      * @brief Gets a default timer value for SIP timer T2.
      *
      * @return The timer value.
      */
-    inline IMS_SINT32 GetTimerValueT2() const
-    { return m_nTimerValueT2; }
+    inline IMS_SINT32 GetTimerValueT2() const { return m_nTimerValueT2; }
 
     /**
      * @brief Gets a tag prefix string.
      *
      * @return The tag prefix string.
      */
-    inline const AString& GetTagPrefix() const
-    { return m_strTagPrefix; }
+    inline const AString& GetTagPrefix() const { return m_strTagPrefix; }
 
     /**
      * @brief Gets a criteria length to convert a transport protocol from UDP to TCP.
      *
      * @return The TCP criteria length.
      */
-    inline IMS_SINT32 GetTcpCriterionLength() const
-    { return m_nTcpCriterionLength; }
+    inline IMS_SINT32 GetTcpCriterionLength() const { return m_nTcpCriterionLength; }
 
     /**
      * @brief Gets a SIP timer values.
      *
      * @return The SIP timer values.
      */
-    inline const SipTimerValues& GetTimerValues() const
-    { return m_objTimerValues; }
+    inline const SipTimerValues& GetTimerValues() const { return m_objTimerValues; }
 
     /**
      * @brief Gets an UA string for User-Agent/Server header.
      *
      * @return The UA string.
      */
-    inline const AString& GetUaString() const
-    { return m_strUaString; }
+    inline const AString& GetUaString() const { return m_strUaString; }
 
     /**
      * @brief Gets the allowed methods for IMS registration.
      *
      * @return The allowed SIP methods.
      */
-    inline const AStringArray& GetRegAllowMethods() const
-    { return m_objRegAllowMethods; }
+    inline const AStringArray& GetRegAllowMethods() const { return m_objRegAllowMethods; }
 
     /**
      * @brief Gets the expires value for IMS registration.
      *
      * @return The expires value for IMS registration.
      */
-    inline IMS_SINT32 GetRegExpires() const
-    { return m_nRegExpires; }
+    inline IMS_SINT32 GetRegExpires() const { return m_nRegExpires; }
 
     /**
      * @brief Gets the expires value for "reg" event package subscription.
      *
      * @return The expires value for "reg" event package subscription.
      */
-    inline IMS_SINT32 GetRegSubExpires() const
-    { return m_nRegSubExpires; }
+    inline IMS_SINT32 GetRegSubExpires() const { return m_nRegSubExpires; }
 
     /**
      * @brief Gets the reg-subscription configuration value.
      *
      * @return 1 if reg-subscription is supported. Otherwise, returns 0.
      */
-    inline IMS_SINT32 GetRegSubscription() const
-    { return m_nRegSubscription; }
+    inline IMS_SINT32 GetRegSubscription() const { return m_nRegSubscription; }
 
     /**
      * @brief Gets an UA string for IMS registration.
      *
      * @return The UA string for IMS registration.
      */
-    inline const AString& GetRegUaString() const
-    { return m_strRegUaString; }
+    inline const AString& GetRegUaString() const { return m_strRegUaString; }
 
     /**
      * @brief Sets the type of device id (+sip.instance).
@@ -245,8 +236,7 @@ public:
      *                  #ISipConfig#DEVICE_ID_UUID_IMEI_V4\n
      *                  #ISipConfig#DEVICE_ID_PREDEFINED
      */
-    inline void SetDeviceId(IN IMS_SINT32 nDeviceId)
-    { m_nDeviceId = nDeviceId; }
+    inline void SetDeviceId(IN IMS_SINT32 nDeviceId) { m_nDeviceId = nDeviceId; }
 
     /**
      * @brief Sets the pre-defined device id (+sip.instance).
@@ -254,15 +244,16 @@ public:
      * @param strDeviceId The pre-defined device id
      */
     inline void SetPredefinedDeviceId(IN const AString& strDeviceId)
-    { m_strDeviceId = strDeviceId; }
+    {
+        m_strDeviceId = strDeviceId;
+    }
 
     /**
      * @brief Sets the SIP default port number.
      *
      * @param nPort The default port number
      */
-    inline void SetPort(IN IMS_SINT32 nPort)
-    { m_nDefaultPort = nPort; }
+    inline void SetPort(IN IMS_SINT32 nPort) { m_nDefaultPort = nPort; }
 
     /**
      * @brief Sets the SIP features.
@@ -298,32 +289,28 @@ public:
      *         #ISipConfig#SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX\n
      *         #ISipConfig#SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN
      */
-    inline void SetSipFeatures(IN IMS_SINT32 nFeatures)
-    { m_nSipFeatures = nFeatures; }
+    inline void SetSipFeatures(IN IMS_SINT32 nFeatures) { m_nSipFeatures = nFeatures; }
 
     /**
      * @brief Sets the default SIP timer T1.
      *
      * @param nTimerValue The timer value
      */
-    inline void SetTimerValueT1(IN IMS_SINT32 nTimerValue)
-    { m_nTimerValueT1 = nTimerValue; }
+    inline void SetTimerValueT1(IN IMS_SINT32 nTimerValue) { m_nTimerValueT1 = nTimerValue; }
 
     /**
      * @brief Sets the default SIP timer T2.
      *
      * @param nTimerValue The timer value
      */
-    inline void SetTimerValueT2(IN IMS_SINT32 nTimerValue)
-    { m_nTimerValueT2 = nTimerValue; }
+    inline void SetTimerValueT2(IN IMS_SINT32 nTimerValue) { m_nTimerValueT2 = nTimerValue; }
 
     /**
      * @brief Sets the tag prefix string.
      *
      * @param strTagPrefix The tag prefix string
      */
-    inline void SetTagPrefix(IN const AString& strTagPrefix)
-    { m_strTagPrefix = strTagPrefix; }
+    inline void SetTagPrefix(IN const AString& strTagPrefix) { m_strTagPrefix = strTagPrefix; }
 
     /**
      * @brief Sets a criteria length to convert a transport protocol from UDP to TCP.
@@ -331,7 +318,9 @@ public:
      * @param nTcpCriterionLength The criteria length
      */
     inline void SetTcpCriterionLength(IN IMS_SINT32 nTcpCriterionLength)
-    { m_nTcpCriterionLength = nTcpCriterionLength; }
+    {
+        m_nTcpCriterionLength = nTcpCriterionLength;
+    }
 
     /**
      * @brief Sets a SIP timer values.
@@ -339,15 +328,16 @@ public:
      * @param objTimerValues The SIP timer values
      */
     inline void SetTimerValues(IN const SipTimerValues& objTimerValues)
-    { m_objTimerValues = objTimerValues; }
+    {
+        m_objTimerValues = objTimerValues;
+    }
 
     /**
      * @brief Sets an UA string for User-Agent/Server header.
      *
      * @param strUaString The UA string
      */
-    inline void SetUaString(IN const AString& strUaString)
-    { m_strUaString = strUaString; }
+    inline void SetUaString(IN const AString& strUaString) { m_strUaString = strUaString; }
 
     /**
      * @brief Sets the allowed methods for IMS registration.
@@ -355,47 +345,44 @@ public:
      * @param objAllowMethods The allowed SIP methods
      */
     inline void SetRegAllowMethods(IN const AStringArray& objAllowMethods)
-    { m_objRegAllowMethods = objAllowMethods; }
+    {
+        m_objRegAllowMethods = objAllowMethods;
+    }
 
     /**
      * @brief Sets the expires value for IMS registration.
      *
      * @param nExpires The expires value for IMS registration
      */
-    inline void SetRegExpires(IN IMS_SINT32 nExpires)
-    { m_nRegExpires = nExpires; }
+    inline void SetRegExpires(IN IMS_SINT32 nExpires) { m_nRegExpires = nExpires; }
 
     /**
      * @brief Sets the reg-subscription configuration value.
      *
      * @param nRegSub 1 if reg-subscription is supported, 0 if not supported
      */
-    inline void SetRegSubscription(IN IMS_SINT32 nRegSub)
-    { m_nRegSubscription = nRegSub; }
+    inline void SetRegSubscription(IN IMS_SINT32 nRegSub) { m_nRegSubscription = nRegSub; }
 
     /**
      * @brief Sets the expires value for "reg" event package subscription.
      *
      * @param nExpires The expires value for "reg" event package subscription
      */
-    inline void SetRegSubExpires(IN IMS_SINT32 nExpires)
-    { m_nRegSubExpires = nExpires; }
+    inline void SetRegSubExpires(IN IMS_SINT32 nExpires) { m_nRegSubExpires = nExpires; }
 
     /**
      * @brief Sets an UA string for IMS registration.
      *
      * @param strUaString The UA string for IMS registration
      */
-    inline void SetRegUaString(IN const AString& strUaString)
-    { m_strRegUaString = strUaString; }
+    inline void SetRegUaString(IN const AString& strUaString) { m_strRegUaString = strUaString; }
 
     /**
      * @brief Checks if SIP features are provisioned or not.
      *
      * @return If it's provisioned, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
-    inline IMS_BOOL IsSipFeatureProvisioned() const
-    { return m_nSipFeatures != NOT_PROVISIONED; }
+    inline IMS_BOOL IsSipFeatureProvisioned() const { return m_nSipFeatures != NOT_PROVISIONED; }
 
     /**
      * @brief Checks if the authentication algorithm is required or not.
@@ -403,7 +390,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsAuthenticationAlgorithmRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_AUTHENTICATION_ALGORITHM_PARAMETER);
+    }
 
     /**
      * @brief Checks if the Cellular-Network-Info header is required or not.
@@ -411,7 +400,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsCellularNetworkInfoHeaderRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CELLULAR_NETWORK_INFO_HEADER);
+    }
 
     /**
      * @brief Checks if the Contact header for all the 1xx responses should be added or not.
@@ -419,7 +410,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsContactInAll1xxRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_CONTACT_IN_ALL_1XX);
+    }
 
     /**
      * @brief Checks if the country information in P-Access-Network-Info header
@@ -428,7 +421,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsCountryInfoRequiredInPaniHeader() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_COUNTRY_INFO_IN_PANI_HEADER);
+    }
 
     /**
      * @brief Checks if the display name of SIP address should contain double quotation or not.
@@ -436,7 +431,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsDisplayNameDquotRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_DISPLAY_NAME_DQUOT);
+    }
 
     /**
      * @brief Checks if the Expires header in REGISTER request should be added or not.
@@ -444,7 +441,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsExpiresHeaderInRegRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_EXPIRES_HEADER_IN_REG);
+    }
 
     /**
      * @brief Checks if IPSec(IP Security) is configured or not.
@@ -452,7 +451,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsIpSecConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_IPSEC); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_IPSEC);
+    }
 
     /**
      * @brief Checks if GRUU (Globally Routable User-agent URI) is configured or not.
@@ -460,7 +461,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsGruuConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_GRUU); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_GRUU);
+    }
 
     /**
      * @brief Checks if "keep" parameter in Via header is configured or not.
@@ -468,7 +471,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsKeepAliveConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_KEEP); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_KEEP);
+    }
 
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
@@ -476,7 +481,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsMultipleRegConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_MULTIPLE_REG);
+    }
 
     /**
      * @brief Checks if the multiple registration ("reg-id" parameter) is configured or not.
@@ -484,7 +491,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsNoAcceptContactHeaderInBye() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_NO_ACCEPT_CONTACT_HEADER_IN_BYE);
+    }
 
     /**
      * @brief Checks if P-Access-Network-Info header in the initial registration
@@ -493,7 +502,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsPanInfoInInitialRegRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PANI_HEADER_IN_INITIAL_REG);
+    }
 
     /**
      * @brief Checks if P-Preferred-Identity header in "reg" subscription
@@ -502,7 +513,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsPPreferredIdInRegSubRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_PPI_HEADER_IN_REG_SUB);
+    }
 
     /**
      * @brief Checks if Route header in the registration should be added or not.
@@ -510,7 +523,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsRouteHeaderInRegRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_ROUTE_HEADER_IN_REG);
+    }
 
     /**
      * @brief Checks if "rport" parameter is configured or not.
@@ -518,7 +533,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsRportConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_RPORT); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_RPORT);
+    }
 
     /**
      * @brief Checks if the transport layer's error notification of SIP transaction
@@ -527,7 +544,9 @@ public:
      * @return If it's required, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsTransportErrorReportOnTxnRequired() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRANSPORT_ERROR_REPORT_ON_TXN);
+    }
 
     /**
      * @brief Checks if the device is in the trust domain or not.
@@ -535,7 +554,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsTrustDomainConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRUST_DOMAIN); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_TRUST_DOMAIN);
+    }
 
     /**
      * @brief Checks if the UDP fallback is configured or not
@@ -544,7 +565,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUdpFallbackConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UDP_FALLBACK); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UDP_FALLBACK);
+    }
 
     /**
      * @brief Checks if the UA string in SIP message should be added or not.
@@ -552,7 +575,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUserAgentConfigured() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_USER_AGENT); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_USER_AGENT);
+    }
 
     /**
      * @brief Checks if the SIP header for UA string should be determined
@@ -565,7 +590,9 @@ public:
      * @return If it's configured, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsUserAgentSetByContext() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_UA_SET_BY_CONTEXT);
+    }
 
     /**
      * @brief Checks if the SDP negotiation is required for non-RPR message.
@@ -576,7 +603,9 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsSdpNegotiationRequiredForNonRpr() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SDP_NEGOTIATION_REQUIRED_FOR_NON_RPR);
+    }
 
     /**
      * @brief Checks if the validation of Request-URI of the mid-dialog request is required.
@@ -586,8 +615,10 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsRequestUriValidationRequiredInMidDialog() const
-    { return HasFeature(ISipConfig::
-            SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG); }
+    {
+        return HasFeature(
+                ISipConfig::SIP_FEATURE_CAPS_REQUEST_URI_VALIDATION_REQUIRED_IN_MID_DIALOG);
+    }
 
     /**
      * @brief Checks if the session timer update is required when the session update is
@@ -599,7 +630,9 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsSessionTimerUpdateRequiredByReInvite() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SESSION_TIMER_UPDATE_REQUIRED_BY_REINVITE);
+    }
 
     /**
      * @brief Checks if the "+sip.instance" parameter should be included in the Contact header
@@ -611,8 +644,10 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsSipInstanceParamRequiredInContactForNonRegisterRequest() const
-    { return HasFeature(ISipConfig::
-            SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST); }
+    {
+        return HasFeature(ISipConfig::
+                        SIP_FEATURE_CAPS_SIP_INSTANCE_PARAM_REQUIRED_IN_CONTACT_FOR_NON_REGISTER_REQUEST);
+    }
 
     /**
      * @brief Checks if the Session-Id header is supported or not.
@@ -620,7 +655,9 @@ public:
      * @return IMS_TRUE if it's supported, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsSessionIdHeaderSupported() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_SUPPORT_SESSION_ID_HEADER);
+    }
 
     /**
      * @brief Checks if the invalid MAC address is required in PANI header on Wi-Fi.
@@ -628,8 +665,9 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsInvalidMacAddressRequiredInPaniHeader() const
-    { return HasFeature(ISipConfig::
-            SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_INVALID_MAC_ADDRESS_REQUIRED_IN_PANI_HEADER);
+    }
 
     /**
      * @brief Checks if the "local-time-zone" parameter is required in PANI header.
@@ -637,7 +675,9 @@ public:
      * @return IMS_TRUE if it's required, IMS_FALSE otherwise.
      */
     inline IMS_BOOL IsLocalTimeZoneRequiredInPaniHeader() const
-    { return HasFeature(ISipConfig::SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER); }
+    {
+        return HasFeature(ISipConfig::SIP_FEATURE_CAPS_LOCAL_TIME_ZONE_REQUIRED_IN_PANI_HEADER);
+    }
 
     // Runtime-Configuration {
     /**
@@ -647,8 +687,7 @@ public:
      *         Bitmasking of the following items:\n
      *         #CONFIG_IGNORE_RR_ON_IMPLICIT_ROUTE_REQUIRED
      */
-    inline IMS_SINT32 GetConfiguration() const
-    { return m_nConfigValue; }
+    inline IMS_SINT32 GetConfiguration() const { return m_nConfigValue; }
 
     /**
      * @brief Checks if the additional configuration is set or not.
@@ -658,7 +697,9 @@ public:
      *         Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsConfigurationSet(IN IMS_SINT32 nValue) const
-    { return (m_nConfigValue & nValue) != 0; }
+    {
+        return (m_nConfigValue & nValue) != 0;
+    }
 
     /**
      * @brief Sets the additional runtime configuration.
@@ -667,13 +708,14 @@ public:
      *               Bitmasking of the following items:\n
      *               #CONFIG_IGNORE_RR_ON_IMPLICIT_ROUTE_REQUIRED
      */
-    inline void SetConfiguration(IN IMS_SINT32 nValue)
-    { m_nConfigValue = nValue; }
+    inline void SetConfiguration(IN IMS_SINT32 nValue) { m_nConfigValue = nValue; }
     // }
 
 private:
     inline IMS_BOOL HasFeature(IN IMS_SINT32 nSipFeature) const
-    { return (m_nSipFeatures & nSipFeature) != 0; }
+    {
+        return (m_nSipFeatures & nSipFeature) != 0;
+    }
 
 public:
     /// Runtime configuration to control J180 layer

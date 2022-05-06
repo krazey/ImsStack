@@ -18,26 +18,23 @@
 
 class Method;
 
-
-
-class MethodManager
-    : public RCObject
+class MethodManager : public RCObject
 {
 public:
     MethodManager();
-    MethodManager(IN CONST MethodManager &objRHS);
+    MethodManager(IN CONST MethodManager& objRHS);
     virtual ~MethodManager();
 
 private:
-    MethodManager& operator=(IN CONST MethodManager &objRHS);
+    MethodManager& operator=(IN CONST MethodManager& objRHS);
 
 public:
-    IMS_BOOL AddMethod(IN Method *pMethod);
+    IMS_BOOL AddMethod(IN Method* pMethod);
     const IMSList<Method*>& GetMethods() const;
-    void RemoveMethod(IN Method *pMethod);
+    void RemoveMethod(IN Method* pMethod);
 
 private:
     IMSList<Method*> objMethods;
 };
 
-#endif // _METHOD_MANAGER_H_
+#endif  // _METHOD_MANAGER_H_

@@ -21,8 +21,6 @@ class ISipDialog;
 class ISipServerConnection;
 class IForkedDialogMethod;
 
-
-
 class ForkedDialogMethodManager
 {
 private:
@@ -33,21 +31,20 @@ private:
     ForkedDialogMethodManager& operator=(IN const ForkedDialogMethodManager& objRHS);
 
 public:
-    IMS_BOOL AddMethod(IN CONST AString &strName, IN IForkedDialogMethod *piMethod);
-    void RemoveMethod(IN CONST AString &strName);
+    IMS_BOOL AddMethod(IN CONST AString& strName, IN IForkedDialogMethod* piMethod);
+    void RemoveMethod(IN CONST AString& strName);
 
     static ForkedDialogMethodManager* GetInstance();
 
 private:
-    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection *piSSC,
-            IN ISipDialog *piOrigDialog);
+    IMS_BOOL HandleRequestWithinDialog(IN ISipServerConnection* piSSC, IN ISipDialog* piOrigDialog);
 
 private:
     friend class SIPConnectionNotifierManagerPrivate;
 
-    IMutex *piLock;
+    IMutex* piLock;
     // Name (identifier), Pointer of IForkedDialogMethod
     IMSMap<AString, IForkedDialogMethod*> objDialogMethods;
 };
 
-#endif // _FORKED_DIALOG_METHOD_MANAGER_H_
+#endif  // _FORKED_DIALOG_METHOD_MANAGER_H_

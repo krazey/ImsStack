@@ -24,19 +24,16 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-CoreServiceImpl::CoreServiceImpl(IN CoreService *pCoreService_)
-    : piCoreServiceListener(IMS_NULL)
-    , piDirectCoreServiceListener(IMS_NULL)
-    , pService(pCoreService_)
+CoreServiceImpl::CoreServiceImpl(IN CoreService* pCoreService_) :
+        piCoreServiceListener(IMS_NULL),
+        piDirectCoreServiceListener(IMS_NULL),
+        pService(pCoreService_)
 {
     pService->SetListener(this);
 }
 
-PUBLIC VIRTUAL
-CoreServiceImpl::~CoreServiceImpl()
+PUBLIC VIRTUAL CoreServiceImpl::~CoreServiceImpl()
 {
     if (pService != IMS_NULL)
     {
@@ -52,8 +49,7 @@ CoreServiceImpl::~CoreServiceImpl()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::Close()
+PRIVATE VIRTUAL void CoreServiceImpl::Close()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -71,8 +67,7 @@ void CoreServiceImpl::Close()
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AString& CoreServiceImpl::GetAppId() const
+PRIVATE VIRTUAL const AString& CoreServiceImpl::GetAppId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -84,8 +79,7 @@ const AString& CoreServiceImpl::GetAppId() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AString& CoreServiceImpl::GetScheme() const
+PRIVATE VIRTUAL const AString& CoreServiceImpl::GetScheme() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -97,8 +91,7 @@ const AString& CoreServiceImpl::GetScheme() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipAddress& CoreServiceImpl::GetAuthorizedUserId() const
+PRIVATE VIRTUAL const SipAddress& CoreServiceImpl::GetAuthorizedUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -110,8 +103,7 @@ const SipAddress& CoreServiceImpl::GetAuthorizedUserId() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipAddress& CoreServiceImpl::GetContactAddress() const
+PRIVATE VIRTUAL const SipAddress& CoreServiceImpl::GetContactAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -123,8 +115,7 @@ const SipAddress& CoreServiceImpl::GetContactAddress() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipAddress* CoreServiceImpl::GetContactAddressForOutgoingMessage() const
+PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetContactAddressForOutgoingMessage() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -136,8 +127,7 @@ const SipAddress* CoreServiceImpl::GetContactAddressForOutgoingMessage() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISipHeader* CoreServiceImpl::GetContactHeader(
+PRIVATE VIRTUAL ISipHeader* CoreServiceImpl::GetContactHeader(
         IN IMS_BOOL bPrivacy /* = IMS_FALSE */, IN IMS_BOOL bRequest /* = IMS_TRUE */,
         IN IMS_SINT32 nSIPMethod /* = (-1) SipMethod::INVALID */) const
 {
@@ -151,8 +141,7 @@ ISipHeader* CoreServiceImpl::GetContactHeader(
 Remarks
 
 */
-PRIVATE VIRTUAL
-IFeatureCaps* CoreServiceImpl::GetFeatureCaps() const
+PRIVATE VIRTUAL IFeatureCaps* CoreServiceImpl::GetFeatureCaps() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -164,8 +153,7 @@ IFeatureCaps* CoreServiceImpl::GetFeatureCaps() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IServiceFilterCriteria* CoreServiceImpl::GetFilterCriteria() const
+PRIVATE VIRTUAL IServiceFilterCriteria* CoreServiceImpl::GetFilterCriteria() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -177,8 +165,7 @@ IServiceFilterCriteria* CoreServiceImpl::GetFilterCriteria() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AStringArray& CoreServiceImpl::GetPathHeaders() const
+PRIVATE VIRTUAL const AStringArray& CoreServiceImpl::GetPathHeaders() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -190,8 +177,7 @@ const AStringArray& CoreServiceImpl::GetPathHeaders() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const IRegInfo* CoreServiceImpl::GetRegInfo() const
+PRIVATE VIRTUAL const IRegInfo* CoreServiceImpl::GetRegInfo() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -203,8 +189,7 @@ const IRegInfo* CoreServiceImpl::GetRegInfo() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const IPAddress& CoreServiceImpl::GetIPAddress() const
+PRIVATE VIRTUAL const IPAddress& CoreServiceImpl::GetIPAddress() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -216,8 +201,7 @@ const IPAddress& CoreServiceImpl::GetIPAddress() const
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL
-SipProfile* CoreServiceImpl::GetSIPProfile() const
+PRIVATE VIRTUAL SipProfile* CoreServiceImpl::GetSIPProfile() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -229,8 +213,7 @@ SipProfile* CoreServiceImpl::GetSIPProfile() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AStringArray& CoreServiceImpl::GetUserIdentities() const
+PRIVATE VIRTUAL const AStringArray& CoreServiceImpl::GetUserIdentities() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -242,8 +225,7 @@ const AStringArray& CoreServiceImpl::GetUserIdentities() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const AString& CoreServiceImpl::GetUserIdentity(IN IMS_SINT32 nScheme) const
+PRIVATE VIRTUAL const AString& CoreServiceImpl::GetUserIdentity(IN IMS_SINT32 nScheme) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -255,8 +237,7 @@ const AString& CoreServiceImpl::GetUserIdentity(IN IMS_SINT32 nScheme) const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipParameter* CoreServiceImpl::GetInstanceParameter() const
+PRIVATE VIRTUAL const SipParameter* CoreServiceImpl::GetInstanceParameter() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -268,8 +249,7 @@ const SipParameter* CoreServiceImpl::GetInstanceParameter() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipAddress* CoreServiceImpl::GetPublicGRUU() const
+PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetPublicGRUU() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -281,8 +261,7 @@ const SipAddress* CoreServiceImpl::GetPublicGRUU() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const SipAddress* CoreServiceImpl::GetTemporaryGRUU() const
+PRIVATE VIRTUAL const SipAddress* CoreServiceImpl::GetTemporaryGRUU() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -294,8 +273,7 @@ const SipAddress* CoreServiceImpl::GetTemporaryGRUU() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGRUUs() const
+PRIVATE VIRTUAL const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGRUUs() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -307,8 +285,7 @@ const IMSList<SipAddress*>& CoreServiceImpl::GetTemporaryGRUUs() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL CoreServiceImpl::IsBehindNAT() const
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::IsBehindNAT() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -320,8 +297,7 @@ IMS_BOOL CoreServiceImpl::IsBehindNAT() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL CoreServiceImpl::IsImsConnected() const
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::IsImsConnected() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -333,8 +309,7 @@ IMS_BOOL CoreServiceImpl::IsImsConnected() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL CoreServiceImpl::IsWithinTrustDomain() const
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::IsWithinTrustDomain() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -346,9 +321,8 @@ IMS_BOOL CoreServiceImpl::IsWithinTrustDomain() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL CoreServiceImpl::AddFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-        IN IMS_BOOL bRegRequired /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::AddFeatureTags(
+        IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -360,9 +334,8 @@ IMS_BOOL CoreServiceImpl::AddFeatureTags(IN CONST IMSList<AString> &objFeatureTa
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL CoreServiceImpl::RemoveFeatureTags(IN CONST IMSList<AString> &objFeatureTags,
-        IN IMS_BOOL bRegRequired /* = IMS_TRUE */)
+PRIVATE VIRTUAL IMS_BOOL CoreServiceImpl::RemoveFeatureTags(
+        IN CONST IMSList<AString>& objFeatureTags, IN IMS_BOOL bRegRequired /* = IMS_TRUE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -374,8 +347,7 @@ IMS_BOOL CoreServiceImpl::RemoveFeatureTags(IN CONST IMSList<AString> &objFeatur
 Remarks
  MULTI_REG_SIP_PROFILE
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::SetSIPProfile(IN SipProfile *pProfile)
+PRIVATE VIRTUAL void CoreServiceImpl::SetSIPProfile(IN SipProfile* pProfile)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -387,11 +359,10 @@ void CoreServiceImpl::SetSIPProfile(IN SipProfile *pProfile)
 Remarks
 
 */
-PRIVATE VIRTUAL
-ICapabilities* CoreServiceImpl::CreateCapabilities(IN CONST AString &strFrom,
-        IN CONST AString &strTo)
+PRIVATE VIRTUAL ICapabilities* CoreServiceImpl::CreateCapabilities(
+        IN CONST AString& strFrom, IN CONST AString& strTo)
 {
-    Capabilities *pCapabilities = pService->CreateCapabilities(strFrom, strTo);
+    Capabilities* pCapabilities = pService->CreateCapabilities(strFrom, strTo);
 
     //---------------------------------------------------------------------------------------------
 
@@ -400,7 +371,7 @@ ICapabilities* CoreServiceImpl::CreateCapabilities(IN CONST AString &strFrom,
         return IMS_NULL;
     }
 
-    CapabilitiesImpl *pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
+    CapabilitiesImpl* pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
 
     if (pCapabilitiesImpl == IMS_NULL)
     {
@@ -420,11 +391,10 @@ ICapabilities* CoreServiceImpl::CreateCapabilities(IN CONST AString &strFrom,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IPageMessage* CoreServiceImpl::CreatePageMessage(IN CONST AString &strFrom,
-        IN CONST AString &strTo)
+PRIVATE VIRTUAL IPageMessage* CoreServiceImpl::CreatePageMessage(
+        IN CONST AString& strFrom, IN CONST AString& strTo)
 {
-    PageMessage *pPageMessage = pService->CreatePageMessage(strFrom, strTo);
+    PageMessage* pPageMessage = pService->CreatePageMessage(strFrom, strTo);
 
     //---------------------------------------------------------------------------------------------
 
@@ -433,7 +403,7 @@ IPageMessage* CoreServiceImpl::CreatePageMessage(IN CONST AString &strFrom,
         return IMS_NULL;
     }
 
-    PageMessageImpl *pPageMessageImpl = new PageMessageImpl(pPageMessage);
+    PageMessageImpl* pPageMessageImpl = new PageMessageImpl(pPageMessage);
 
     if (pPageMessageImpl == IMS_NULL)
     {
@@ -453,11 +423,10 @@ IPageMessage* CoreServiceImpl::CreatePageMessage(IN CONST AString &strFrom,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IPublication* CoreServiceImpl::CreatePublication(IN CONST AString &strFrom,
-        IN CONST AString &strTo, IN CONST AString &strEvent)
+PRIVATE VIRTUAL IPublication* CoreServiceImpl::CreatePublication(
+        IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent)
 {
-    Publication *pPublication = pService->CreatePublication(strFrom, strTo, strEvent);
+    Publication* pPublication = pService->CreatePublication(strFrom, strTo, strEvent);
 
     //---------------------------------------------------------------------------------------------
 
@@ -466,7 +435,7 @@ IPublication* CoreServiceImpl::CreatePublication(IN CONST AString &strFrom,
         return IMS_NULL;
     }
 
-    PublicationImpl *pPublicationImpl = new PublicationImpl(pPublication);
+    PublicationImpl* pPublicationImpl = new PublicationImpl(pPublication);
 
     if (pPublicationImpl == IMS_NULL)
     {
@@ -486,11 +455,10 @@ IPublication* CoreServiceImpl::CreatePublication(IN CONST AString &strFrom,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IReference* CoreServiceImpl::CreateReference(IN CONST AString &strFrom,
-        IN CONST AString &strTo, IN CONST AString &strReferTo, IN CONST AString &strReferMethod)
+PRIVATE VIRTUAL IReference* CoreServiceImpl::CreateReference(IN CONST AString& strFrom,
+        IN CONST AString& strTo, IN CONST AString& strReferTo, IN CONST AString& strReferMethod)
 {
-    Reference *pReference = pService->CreateReference(strFrom, strTo, strReferTo, strReferMethod);
+    Reference* pReference = pService->CreateReference(strFrom, strTo, strReferTo, strReferMethod);
 
     //---------------------------------------------------------------------------------------------
 
@@ -499,7 +467,7 @@ IReference* CoreServiceImpl::CreateReference(IN CONST AString &strFrom,
         return IMS_NULL;
     }
 
-    ReferenceImpl *pReferenceImpl = new ReferenceImpl(pReference);
+    ReferenceImpl* pReferenceImpl = new ReferenceImpl(pReference);
 
     if (pReferenceImpl == IMS_NULL)
     {
@@ -519,10 +487,10 @@ IReference* CoreServiceImpl::CreateReference(IN CONST AString &strFrom,
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISession* CoreServiceImpl::CreateSession(IN CONST AString &strFrom, IN CONST AString &strTo)
+PRIVATE VIRTUAL ISession* CoreServiceImpl::CreateSession(
+        IN CONST AString& strFrom, IN CONST AString& strTo)
 {
-    SessionEx *pSession = pService->CreateSessionEx(strFrom, strTo);
+    SessionEx* pSession = pService->CreateSessionEx(strFrom, strTo);
 
     //---------------------------------------------------------------------------------------------
 
@@ -531,7 +499,7 @@ ISession* CoreServiceImpl::CreateSession(IN CONST AString &strFrom, IN CONST ASt
         return IMS_NULL;
     }
 
-    SessionImpl *pSessionImpl = new SessionImpl(pSession);
+    SessionImpl* pSessionImpl = new SessionImpl(pSession);
 
     if (pSessionImpl == IMS_NULL)
     {
@@ -551,11 +519,10 @@ ISession* CoreServiceImpl::CreateSession(IN CONST AString &strFrom, IN CONST ASt
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISubscription* CoreServiceImpl::CreateSubscription(IN CONST AString &strFrom,
-        IN CONST AString &strTo, IN CONST AString &strEvent)
+PRIVATE VIRTUAL ISubscription* CoreServiceImpl::CreateSubscription(
+        IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent)
 {
-    Subscription *pSubscription = pService->CreateSubscription(strFrom, strTo, strEvent);
+    Subscription* pSubscription = pService->CreateSubscription(strFrom, strTo, strEvent);
 
     //---------------------------------------------------------------------------------------------
 
@@ -564,7 +531,7 @@ ISubscription* CoreServiceImpl::CreateSubscription(IN CONST AString &strFrom,
         return IMS_NULL;
     }
 
-    SubscriptionImpl *pSubscriptionImpl = new SubscriptionImpl(pSubscription);
+    SubscriptionImpl* pSubscriptionImpl = new SubscriptionImpl(pSubscription);
 
     if (pSubscriptionImpl == IMS_NULL)
     {
@@ -584,8 +551,7 @@ ISubscription* CoreServiceImpl::CreateSubscription(IN CONST AString &strFrom,
 Remarks
 
 */
-PRIVATE VIRTUAL
-AString CoreServiceImpl::GetLocalUserId() const
+PRIVATE VIRTUAL AString CoreServiceImpl::GetLocalUserId() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -597,8 +563,7 @@ AString CoreServiceImpl::GetLocalUserId() const
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::SetListener(IN ICoreServiceListener *piListener)
+PRIVATE VIRTUAL void CoreServiceImpl::SetListener(IN ICoreServiceListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -610,8 +575,7 @@ void CoreServiceImpl::SetListener(IN ICoreServiceListener *piListener)
 Remarks
 
 */
-PRIVATE VIRTUAL
-ISIPConnectionFactory* CoreServiceImpl::CreateSIPConnectionFactory()
+PRIVATE VIRTUAL ISIPConnectionFactory* CoreServiceImpl::CreateSIPConnectionFactory()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -623,8 +587,7 @@ ISIPConnectionFactory* CoreServiceImpl::CreateSIPConnectionFactory()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::SetDirectListener(IN IDirectCoreServiceListener *piListener)
+PRIVATE VIRTUAL void CoreServiceImpl::SetDirectListener(IN IDirectCoreServiceListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -645,9 +608,8 @@ void CoreServiceImpl::SetDirectListener(IN IDirectCoreServiceListener *piListene
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_PageMessageReceived(IN CoreService *pService,
-        IN PageMessage *pMessage)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_PageMessageReceived(
+        IN CoreService* pService, IN PageMessage* pMessage)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -665,7 +627,7 @@ void CoreServiceImpl::OnCoreService_PageMessageReceived(IN CoreService *pService
         return;
     }
 
-    PageMessageImpl *pPageMessageImpl = new PageMessageImpl(pMessage);
+    PageMessageImpl* pPageMessageImpl = new PageMessageImpl(pMessage);
 
     if (pPageMessageImpl == IMS_NULL)
     {
@@ -685,9 +647,8 @@ void CoreServiceImpl::OnCoreService_PageMessageReceived(IN CoreService *pService
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_ReferenceReceived(IN CoreService *pService,
-        IN Reference *pReference)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_ReferenceReceived(
+        IN CoreService* pService, IN Reference* pReference)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -706,7 +667,7 @@ void CoreServiceImpl::OnCoreService_ReferenceReceived(IN CoreService *pService,
         return;
     }
 
-    ReferenceImpl *pReferenceImpl = new ReferenceImpl(pReference);
+    ReferenceImpl* pReferenceImpl = new ReferenceImpl(pReference);
 
     if (pReferenceImpl == IMS_NULL)
     {
@@ -726,9 +687,8 @@ void CoreServiceImpl::OnCoreService_ReferenceReceived(IN CoreService *pService,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_ServiceClosed(IN CoreService *pService,
-        IN ReasonInfo *pReasonInfo)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_ServiceClosed(
+        IN CoreService* pService, IN ReasonInfo* pReasonInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -752,9 +712,8 @@ void CoreServiceImpl::OnCoreService_ServiceClosed(IN CoreService *pService,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_SessionInvitationReceived(IN CoreService *pService,
-        IN SessionEx *pSession)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_SessionInvitationReceived(
+        IN CoreService* pService, IN SessionEx* pSession)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -773,7 +732,7 @@ void CoreServiceImpl::OnCoreService_SessionInvitationReceived(IN CoreService *pS
         return;
     }
 
-    SessionImpl *pSessionImpl = new SessionImpl(pSession);
+    SessionImpl* pSessionImpl = new SessionImpl(pSession);
 
     if (pSessionImpl == IMS_NULL)
     {
@@ -793,9 +752,8 @@ void CoreServiceImpl::OnCoreService_SessionInvitationReceived(IN CoreService *pS
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_UnsolicitedNotifyReceived(IN CoreService *pService,
-        IN Message *pNotify)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_UnsolicitedNotifyReceived(
+        IN CoreService* pService, IN Message* pNotify)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -819,9 +777,8 @@ void CoreServiceImpl::OnCoreService_UnsolicitedNotifyReceived(IN CoreService *pS
 Remarks
 
 */
-PRIVATE VIRTUAL
-void CoreServiceImpl::OnCoreService_CapabilityQueryReceived(IN CoreService *pService,
-        IN Capabilities *pCapabilities)
+PRIVATE VIRTUAL void CoreServiceImpl::OnCoreService_CapabilityQueryReceived(
+        IN CoreService* pService, IN Capabilities* pCapabilities)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -840,7 +797,7 @@ void CoreServiceImpl::OnCoreService_CapabilityQueryReceived(IN CoreService *pSer
         return;
     }
 
-    CapabilitiesImpl *pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
+    CapabilitiesImpl* pCapabilitiesImpl = new CapabilitiesImpl(pCapabilities);
 
     if (pCapabilitiesImpl == IMS_NULL)
     {
@@ -861,9 +818,8 @@ void CoreServiceImpl::OnCoreService_CapabilityQueryReceived(IN CoreService *pSer
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_SINT32 CoreServiceImpl::OnDirectCoreService_TransactionReceived(IN CoreService *pService,
-        IN ISIPConnectionFactory *piSCF)
+PRIVATE VIRTUAL IMS_SINT32 CoreServiceImpl::OnDirectCoreService_TransactionReceived(
+        IN CoreService* pService, IN ISIPConnectionFactory* piSCF)
 {
     //---------------------------------------------------------------------------------------------
 

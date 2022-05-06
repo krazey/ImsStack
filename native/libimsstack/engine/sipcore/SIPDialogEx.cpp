@@ -20,35 +20,32 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPDialogEx::SIPDialogEx(IN SIPDialogState *pDState_)
-    : SIPDialogBase(pDState_)
-    , bFlag_PermanentDialog(IMS_FALSE)
-    , bFlag_InitWithDelay(IMS_FALSE)
-    , bFlag_IsDialogTerminated(IMS_FALSE)
-    , pDialogUsage(IMS_NULL)
+SIPDialogEx::SIPDialogEx(IN SIPDialogState* pDState_) :
+        SIPDialogBase(pDState_),
+        bFlag_PermanentDialog(IMS_FALSE),
+        bFlag_InitWithDelay(IMS_FALSE),
+        bFlag_IsDialogTerminated(IMS_FALSE),
+        pDialogUsage(IMS_NULL)
 {
 }
 
 PUBLIC
-SIPDialogEx::SIPDialogEx(IN CONST SIPDialogEx &objRHS)
-    : SIPDialogBase(objRHS)
-    , bFlag_PermanentDialog(objRHS.bFlag_PermanentDialog)
-    , bFlag_InitWithDelay(objRHS.bFlag_InitWithDelay)
-    , bFlag_IsDialogTerminated(objRHS.bFlag_IsDialogTerminated)
-    , pDialogUsage(IMS_NULL)
+SIPDialogEx::SIPDialogEx(IN CONST SIPDialogEx& objRHS) :
+        SIPDialogBase(objRHS),
+        bFlag_PermanentDialog(objRHS.bFlag_PermanentDialog),
+        bFlag_InitWithDelay(objRHS.bFlag_InitWithDelay),
+        bFlag_IsDialogTerminated(objRHS.bFlag_IsDialogTerminated),
+        pDialogUsage(IMS_NULL)
 {
     // NOTE: If reference count is not used, you MUST implement this copy constructor.
 }
 
-PUBLIC VIRTUAL
-SIPDialogEx::~SIPDialogEx()
+PUBLIC VIRTUAL SIPDialogEx::~SIPDialogEx()
 {
     if (bFlag_PermanentDialog && !bFlag_IsDialogTerminated)
     {
-        SIPDialogState *pDState = GetDialogState();
+        SIPDialogState* pDState = GetDialogState();
 
         if (pDState != IMS_NULL)
         {
@@ -69,7 +66,7 @@ SIPDialogEx::~SIPDialogEx()
 }
 
 PUBLIC
-SIPDialogEx& SIPDialogEx::operator=(IN CONST SIPDialogEx &objRHS)
+SIPDialogEx& SIPDialogEx::operator=(IN CONST SIPDialogEx& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -95,7 +92,7 @@ SIPDialogEx& SIPDialogEx::operator=(IN CONST SIPDialogEx &objRHS)
 
 // For an initial requests
 PUBLIC
-IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod &objMethod)
+IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod& objMethod)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -103,10 +100,9 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod &objMethod)
     {
         pDialogUsage = new SIPDialogInviteUsage(this);
     }
-    else if (objMethod.Equals(SipMethod::SUBSCRIBE)
-            || objMethod.Equals(SipMethod::REFER))
+    else if (objMethod.Equals(SipMethod::SUBSCRIBE) || objMethod.Equals(SipMethod::REFER))
     {
-        SIPDialogSubscribeUsage *pSubscribeUsage = new SIPDialogSubscribeUsage(this);
+        SIPDialogSubscribeUsage* pSubscribeUsage = new SIPDialogSubscribeUsage(this);
 
         if (pSubscribeUsage == IMS_NULL)
         {
@@ -115,8 +111,8 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod &objMethod)
 
         if (!pSubscribeUsage->InitDialogUsage(objMethod))
         {
-            IMS_TRACE_E(0, "Initializing a dialog usage (%s) failed",
-                    objMethod.ToString().GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Initializing a dialog usage (%s) failed", objMethod.ToString().GetStr(),
+                    0, 0);
 
             delete pSubscribeUsage;
             return IMS_FALSE;
@@ -131,8 +127,8 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod &objMethod)
 
     if (pDialogUsage == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Instantiating a dialog usage (%s) failed",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Instantiating a dialog usage (%s) failed", objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
@@ -146,9 +142,9 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SipMethod &objMethod)
 
 // For a dialog request or incoming requests
 PUBLIC
-IMS_BOOL SIPDialogEx::InitDialog(IN CONST SIPMessageInfo &objMInfo)
+IMS_BOOL SIPDialogEx::InitDialog(IN CONST SIPMessageInfo& objMInfo)
 {
-    const SipMethod &objMethod = objMInfo.GetMethod();
+    const SipMethod& objMethod = objMInfo.GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -157,9 +153,8 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SIPMessageInfo &objMInfo)
         pDialogUsage = new SIPDialogInviteUsage(this);
     }
     // For a forked NOTIFY request, adds NOTIFY method checking
-    else if (objMethod.Equals(SipMethod::SUBSCRIBE)
-            || objMethod.Equals(SipMethod::REFER)
-            || objMethod.Equals(SipMethod::NOTIFY))
+    else if (objMethod.Equals(SipMethod::SUBSCRIBE) || objMethod.Equals(SipMethod::REFER) ||
+            objMethod.Equals(SipMethod::NOTIFY))
     {
         pDialogUsage = new SIPDialogSubscribeUsage(this);
     }
@@ -170,15 +165,15 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SIPMessageInfo &objMInfo)
 
     if (pDialogUsage == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Instantiating a dialog usage (%s) failed",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Instantiating a dialog usage (%s) failed", objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
     if (!pDialogUsage->InitDialogUsage(objMInfo))
     {
-        IMS_TRACE_E(0, "Initializing a dialog usage (%s) failed",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Initializing a dialog usage (%s) failed", objMethod.ToString().GetStr(), 0, 0);
 
         delete pDialogUsage;
         pDialogUsage = IMS_NULL;
@@ -190,7 +185,7 @@ IMS_BOOL SIPDialogEx::InitDialog(IN CONST SIPMessageInfo &objMInfo)
 }
 
 PUBLIC
-IMS_BOOL SIPDialogEx::InitDialogWithDelay(IN CONST SIPMessageInfo &objMInfo)
+IMS_BOOL SIPDialogEx::InitDialogWithDelay(IN CONST SIPMessageInfo& objMInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -209,7 +204,7 @@ IMS_BOOL SIPDialogEx::InitDialogWithDelay(IN CONST SIPMessageInfo &objMInfo)
 }
 
 PUBLIC
-IMS_BOOL SIPDialogEx::CompareTo(IN CONST SIPMessageInfo &objMInfo) const
+IMS_BOOL SIPDialogEx::CompareTo(IN CONST SIPMessageInfo& objMInfo) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -222,7 +217,7 @@ IMS_BOOL SIPDialogEx::CompareTo(IN CONST SIPMessageInfo &objMInfo) const
 }
 
 PUBLIC
-IMS_BOOL SIPDialogEx::Equals(IN SIPDialogEx *pDialogEx) const
+IMS_BOOL SIPDialogEx::Equals(IN SIPDialogEx* pDialogEx) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -270,7 +265,7 @@ void SIPDialogEx::TerminateDialogUsage()
 }
 
 PUBLIC
-IMS_SINT32 SIPDialogEx::UpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo)
+IMS_SINT32 SIPDialogEx::UpdateDialogDetails(IN CONST SIPMessageInfo& objMInfo)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -282,38 +277,36 @@ IMS_SINT32 SIPDialogEx::UpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo)
     return pDialogUsage->UpdateUsageDetails(objMInfo);
 }
 
-PUBLIC GLOBAL
-SIPDialogEx* SIPDialogEx::CreateDialog(IN CONST SipMethod &objMethod)
+PUBLIC GLOBAL SIPDialogEx* SIPDialogEx::CreateDialog(IN CONST SipMethod& objMethod)
 {
-    SIPDialogState *pDState = new SIPDialogState();
+    SIPDialogState* pDState = new SIPDialogState();
 
     //---------------------------------------------------------------------------------------------
 
     if (pDState == IMS_NULL)
     {
-        IMS_TRACE_E(0, "Instantiating a dialog state (%s) failed",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_E(
+                0, "Instantiating a dialog state (%s) failed", objMethod.ToString().GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    SIPDialogEx *pDialogEx = CreateDialog(pDState, objMethod);
+    SIPDialogEx* pDialogEx = CreateDialog(pDState, objMethod);
 
     if (pDialogEx == IMS_NULL)
     {
         delete pDState;
 
-        IMS_TRACE_E(0, "Instantiating a dialog (%s) failed",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_E(0, "Instantiating a dialog (%s) failed", objMethod.ToString().GetStr(), 0, 0);
         return IMS_NULL;
     }
 
     return pDialogEx;
 }
 
-PUBLIC GLOBAL
-SIPDialogEx* SIPDialogEx::CreateDialog(IN SIPDialogState *pDState, IN CONST SipMethod &objMethod)
+PUBLIC GLOBAL SIPDialogEx* SIPDialogEx::CreateDialog(
+        IN SIPDialogState* pDState, IN CONST SipMethod& objMethod)
 {
-    SIPDialogEx *pDialogEx = new SIPDialogEx(pDState);
+    SIPDialogEx* pDialogEx = new SIPDialogEx(pDState);
 
     //---------------------------------------------------------------------------------------------
 
@@ -332,11 +325,10 @@ SIPDialogEx* SIPDialogEx::CreateDialog(IN SIPDialogState *pDState, IN CONST SipM
     return pDialogEx;
 }
 
-PUBLIC GLOBAL
-SIPDialogEx* SIPDialogEx::CreateDialog(IN SIPDialogState *pDState,
-        IN CONST SIPMessageInfo &objMInfo)
+PUBLIC GLOBAL SIPDialogEx* SIPDialogEx::CreateDialog(
+        IN SIPDialogState* pDState, IN CONST SIPMessageInfo& objMInfo)
 {
-    SIPDialogEx *pDialogEx = new SIPDialogEx(pDState);
+    SIPDialogEx* pDialogEx = new SIPDialogEx(pDState);
 
     //---------------------------------------------------------------------------------------------
 
@@ -356,14 +348,13 @@ SIPDialogEx* SIPDialogEx::CreateDialog(IN SIPDialogState *pDState,
     return pDialogEx;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL SIPDialogEx::OnInit()
+PROTECTED VIRTUAL IMS_BOOL SIPDialogEx::OnInit()
 {
     //---------------------------------------------------------------------------------------------
 
     if (bFlag_PermanentDialog == IMS_FALSE)
     {
-        SIPDialogState *pDState = GetDialogState();
+        SIPDialogState* pDState = GetDialogState();
 
         if (pDState == IMS_NULL)
         {
@@ -381,14 +372,13 @@ IMS_BOOL SIPDialogEx::OnInit()
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void SIPDialogEx::OnTerminated()
+PROTECTED VIRTUAL void SIPDialogEx::OnTerminated()
 {
     //---------------------------------------------------------------------------------------------
 
     if (bFlag_PermanentDialog == IMS_TRUE)
     {
-        SIPDialogState *pDState = GetDialogState();
+        SIPDialogState* pDState = GetDialogState();
 
         if (pDState != IMS_NULL)
         {
@@ -401,8 +391,7 @@ void SIPDialogEx::OnTerminated()
     bFlag_IsDialogTerminated = IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_SINT32 SIPDialogEx::OnUpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo,
+PROTECTED VIRTUAL IMS_SINT32 SIPDialogEx::OnUpdateDialogDetails(IN CONST SIPMessageInfo& objMInfo,
         IN IMS_SINT32 nUsage, IN IMS_SINT32 nAction, IN IMS_SINT32 nTrigger)
 {
     IMS_SINT32 nUsageState = SIPDState::STATE_MAX;
@@ -411,19 +400,19 @@ IMS_SINT32 SIPDialogEx::OnUpdateDialogDetails(IN CONST SIPMessageInfo &objMInfo,
 
     switch (nUsage)
     {
-    case SIPDialogUsage::TYPE_INVITE:
-        nUsageState = SIPDialogInviteUsage::GetNextState(GetState(), nTrigger);
-        break;
+        case SIPDialogUsage::TYPE_INVITE:
+            nUsageState = SIPDialogInviteUsage::GetNextState(GetState(), nTrigger);
+            break;
 
-    case SIPDialogUsage::TYPE_SUBSCRIBE:
-        nUsageState = SIPDialogSubscribeUsage::GetNextState(GetState(), nTrigger);
-        break;
+        case SIPDialogUsage::TYPE_SUBSCRIBE:
+            nUsageState = SIPDialogSubscribeUsage::GetNextState(GetState(), nTrigger);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
-    SIPDialogState *pDState = GetDialogState();
+    SIPDialogState* pDState = GetDialogState();
 
     if (pDState == IMS_NULL)
     {

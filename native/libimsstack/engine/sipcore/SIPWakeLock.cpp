@@ -18,8 +18,8 @@
 Remarks
 
 */
-PUBLIC GLOBAL
-void SIPWakeLock::Acquire(IN CONST SipMethod &objMethod, IN IMS_UINT32 /* nTimeout = 0 */)
+PUBLIC GLOBAL void SIPWakeLock::Acquire(
+        IN CONST SipMethod& objMethod, IN IMS_UINT32 /* nTimeout = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -38,13 +38,10 @@ void SIPWakeLock::Acquire(IN CONST SipMethod &objMethod, IN IMS_UINT32 /* nTimeo
         // 2 seconds
         IMS_EVENT_SendEventForSlotId(IMS_EVENT_WAKE_LOCK, 0, 2000, IMS_SLOT_0);
     }
-    else if (objMethod.Equals(SipMethod::ACK)
-            || objMethod.Equals(SipMethod::PRACK)
-            || objMethod.Equals(SipMethod::OPTIONS)
-            || objMethod.Equals(SipMethod::MESSAGE)
-            || objMethod.Equals(SipMethod::REFER)
-            || objMethod.Equals(SipMethod::NOTIFY)
-            || objMethod.Equals(SipMethod::INFO))
+    else if (objMethod.Equals(SipMethod::ACK) || objMethod.Equals(SipMethod::PRACK) ||
+            objMethod.Equals(SipMethod::OPTIONS) || objMethod.Equals(SipMethod::MESSAGE) ||
+            objMethod.Equals(SipMethod::REFER) || objMethod.Equals(SipMethod::NOTIFY) ||
+            objMethod.Equals(SipMethod::INFO))
     {
         // 1 seconds
         IMS_EVENT_SendEventForSlotId(IMS_EVENT_WAKE_LOCK, 0, 1000, IMS_SLOT_0);
@@ -56,8 +53,7 @@ void SIPWakeLock::Acquire(IN CONST SipMethod &objMethod, IN IMS_UINT32 /* nTimeo
 Remarks
 
 */
-PUBLIC GLOBAL
-IMS_BOOL SIPWakeLock::IsSupported()
+PUBLIC GLOBAL IMS_BOOL SIPWakeLock::IsSupported()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -69,8 +65,7 @@ IMS_BOOL SIPWakeLock::IsSupported()
 Remarks
 
 */
-PUBLIC GLOBAL
-void SIPWakeLock::Release()
+PUBLIC GLOBAL void SIPWakeLock::Release()
 {
     //---------------------------------------------------------------------------------------------
 }

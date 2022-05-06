@@ -46,7 +46,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_EarlyMediaUpdated(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_EarlyMediaUpdated(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the UPDATE was not successfully delivered on the early state.
@@ -66,7 +66,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_EarlyMediaUpdateFailed(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the acknowledgement of the provisional response is received.
@@ -86,7 +86,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_EarlyMediaUpdateReceived(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the acknowledgement of the provisional response
@@ -107,7 +107,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_PRAckDelivered(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_PRAckDelivered(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the acknowledgement of the provisional response
@@ -128,7 +128,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_PRAckDeliveryFailed(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_PRAckDeliveryFailed(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the acknowledgement of the provisional response is received.
@@ -148,7 +148,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_PRAckReceived(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_PRAckReceived(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the RPR delivery is failed (no PRACK received).
@@ -167,7 +167,7 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_RPRDeliveryFailed(IN SessionEx *pSessionEx) = 0;
+    virtual void OnSessionEx_RPRDeliveryFailed(IN SessionEx* pSessionEx) = 0;
 
     /*
      Notifies the application that the reliable provisional response is received.
@@ -190,8 +190,8 @@ public:
     </table>
 
     */
-    virtual void OnSessionEx_RPRReceived(IN SessionEx *pSessionEx,
+    virtual void OnSessionEx_RPRReceived(IN SessionEx* pSessionEx,
             IN VirtualSession* pVirtualSession, IN IMS_UINT32 nIndex = 0xFFFFFFFF) = 0;
 };
 
-#endif // _INTERFACE_ON_SESSION_EX_LISTENER_H_
+#endif  // _INTERFACE_ON_SESSION_EX_LISTENER_H_

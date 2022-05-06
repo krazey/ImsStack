@@ -19,8 +19,7 @@ class IDirectCoreServiceListener;
  *
  * @see IServiceMethod, ICoreServiceListener
  */
-class ICoreService
-    : public IService
+class ICoreService : public IService
 {
 public:
     /**
@@ -31,8 +30,8 @@ public:
      * @param strTo The recipient SIP or TEL URI with an optional display name
      * @return Pointer to new ICapabilities.
      */
-    virtual ICapabilities* CreateCapabilities(IN CONST AString &strFrom,
-            IN CONST AString &strTo) = 0;
+    virtual ICapabilities* CreateCapabilities(
+            IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
 
     /**
      * @brief Creates a IPageMessage with strFrom as sender, addressed to strTo.
@@ -43,8 +42,7 @@ public:
      *              to send a IPageMessage to
      * @return Pointer to new IPageMessage.
      */
-    virtual IPageMessage* CreatePageMessage(IN CONST AString &strFrom,
-            IN CONST AString &strTo) = 0;
+    virtual IPageMessage* CreatePageMessage(IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
 
     /**
      * @brief Creates a IPublication for an event package with strFrom as sender
@@ -60,8 +58,8 @@ public:
      * @param strEvent The event package to publish event state information on
      * @return Pointer to new IPublication.
      */
-    virtual IPublication* CreatePublication(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent) = 0;
+    virtual IPublication* CreatePublication(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent) = 0;
 
     /**
      * @brief Creates a IReference with strFrom as sender, addressed to strTo and strReferTo
@@ -75,8 +73,8 @@ public:
      *                       e.g. "INVITE", "BYE" or null
      * @return Pointer to new IReference.
      */
-    virtual IReference* CreateReference(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strReferTo, IN CONST AString &strReferMethod) = 0;
+    virtual IReference* CreateReference(IN CONST AString& strFrom, IN CONST AString& strTo,
+            IN CONST AString& strReferTo, IN CONST AString& strReferMethod) = 0;
 
     /**
      * @brief Creates a ISession with strFrom as sender, with strTo as recipient.
@@ -89,7 +87,7 @@ public:
      * @param strTo The recipient SIP or TEL URI with an optional display name
      * @return Pointer to new ISession.
      */
-    virtual ISession* CreateSession(IN CONST AString &strFrom, IN CONST AString &strTo) = 0;
+    virtual ISession* CreateSession(IN CONST AString& strFrom, IN CONST AString& strTo) = 0;
 
     /**
      * @brief Creates a ISubscription for an event package with strFrom as sender
@@ -105,8 +103,8 @@ public:
      * @param strEvent The event package to subscribe state information on
      * @return Pointer to new ISubscription.
      */
-    virtual ISubscription* CreateSubscription(IN CONST AString &strFrom, IN CONST AString &strTo,
-            IN CONST AString &strEvent) = 0;
+    virtual ISubscription* CreateSubscription(
+            IN CONST AString& strFrom, IN CONST AString& strTo, IN CONST AString& strEvent) = 0;
 
     /**
      * @brief Returns the display name and public user identity for the ICoreService.
@@ -125,7 +123,7 @@ public:
      *
      * @param piListener Listener to be set, or null
      */
-    virtual void SetListener(IN ICoreServiceListener *piListener) = 0;
+    virtual void SetListener(IN ICoreServiceListener* piListener) = 0;
 
     //// IMS extensions
     /**
@@ -143,7 +141,7 @@ public:
      *
      * @param piListener Listener to be set, or null
      */
-    virtual void SetDirectListener(IN IDirectCoreServiceListener *piListener) = 0;
+    virtual void SetDirectListener(IN IDirectCoreServiceListener* piListener) = 0;
 
 public:
     /// Result of the direct transaction handling
@@ -162,4 +160,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_CORE_SERVICE_H_
+#endif  // _INTERFACE_CORE_SERVICE_H_

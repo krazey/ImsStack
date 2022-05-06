@@ -15,8 +15,6 @@
 
 #include "SIPTransportAddress.h"
 
-
-
 /*
 SIP transport listener interface
 
@@ -44,10 +42,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void Transport_PacketReceived(IN IMS_SINT32 nSlotId,
-            IN CONST ByteArray &objBuffer,
-            IN CONST SIPTransportAddress &objNearEnd,
-            IN CONST SIPTransportAddress &objFarEnd) = 0;
+    virtual void Transport_PacketReceived(IN IMS_SINT32 nSlotId, IN CONST ByteArray& objBuffer,
+            IN CONST SIPTransportAddress& objNearEnd, IN CONST SIPTransportAddress& objFarEnd) = 0;
 };
 
-#endif // _INTERFACE_SIP_TRANSPORT_LISTENER_H_
+#endif  // _INTERFACE_SIP_TRANSPORT_LISTENER_H_

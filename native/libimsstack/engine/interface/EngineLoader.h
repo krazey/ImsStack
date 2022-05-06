@@ -25,4 +25,4 @@ public:
     static void Uninitialize(IN IMS_SINT32 nSlotId);
 };
 
-#endif // _ENGINE_LOADER_H_
+#endif  // _ENGINE_LOADER_H_

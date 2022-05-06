@@ -17,8 +17,6 @@
 
 class ISipHeader;
 
-
-
 class EventPackage
 {
 public:
@@ -34,16 +32,19 @@ public:
     const AStringArray& GetMIMETypes() const;
 
     void SetDuration(IN IMS_SINT32 nDuration);
-    void SetEvent(IN CONST AString &strEvent);
-    void SetEventHeader(IN ISipHeader *piHeader);
-    void SetMIMETypes(IN CONST AStringArray &objMIMETypes);
+    void SetEvent(IN CONST AString& strEvent);
+    void SetEventHeader(IN ISipHeader* piHeader);
+    void SetMIMETypes(IN CONST AStringArray& objMIMETypes);
 
 private:
-    enum { DEFAULT_DURATION = 3600 };
+    enum
+    {
+        DEFAULT_DURATION = 3600
+    };
 
     // Event header
     AString strEvent;
-    ISipHeader *piEventHeader;
+    ISipHeader* piEventHeader;
 
     // In any case, MIN & MAX expiration value needs to be defined ...
 
@@ -58,4 +59,4 @@ private:
     // Allow-Events header : It will be set from the AppConfig.
 };
 
-#endif // _EVENT_PACKAGE_H_
+#endif  // _EVENT_PACKAGE_H_

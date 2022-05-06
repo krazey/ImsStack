@@ -17,8 +17,6 @@
 
 class IConnection;
 
-
-
 class Protocol
 {
 public:
@@ -26,12 +24,12 @@ public:
     virtual ~Protocol() = 0;
 
 public:
-    virtual IConnection* OpenPrim(IN const AString &strName);
-    virtual IConnection* OpenPrim(IN const AString &strScheme, IN const AString &strTarget,
-            IN const AString &strParams);
+    virtual IConnection* OpenPrim(IN const AString& strName);
+    virtual IConnection* OpenPrim(
+            IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams);
 
-    static void ParseName(IN const AString &strName, OUT AString &strScheme,
-            OUT AString &strTarget, OUT AString &strParams);
+    static void ParseName(IN const AString& strName, OUT AString& strScheme, OUT AString& strTarget,
+            OUT AString& strParams);
 };
 
-#endif // _PROTOCOL_H_
+#endif  // _PROTOCOL_H_

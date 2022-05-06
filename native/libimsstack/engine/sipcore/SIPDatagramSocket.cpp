@@ -21,20 +21,17 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPDatagramSocket::SIPDatagramSocket(IN IMS_SINT32 nSlotId)
-    : SIPSocket(nSlotId)
-    , piListener(IMS_NULL)
+SIPDatagramSocket::SIPDatagramSocket(IN IMS_SINT32 nSlotId) :
+        SIPSocket(nSlotId),
+        piListener(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPDatagramSocket::~SIPDatagramSocket()
+PUBLIC VIRTUAL SIPDatagramSocket::~SIPDatagramSocket()
 {
-    IMS_TRACE_D("DatagramSocket(D) :: (%s, %d)",
-            SipDebug::GetIp(objSA.GetIPAddress()), objSA.GetPort(), 0);
+    IMS_TRACE_D("DatagramSocket(D) :: (%s, %d)", SipDebug::GetIp(objSA.GetIPAddress()),
+            objSA.GetPort(), 0);
 }
 
 /*
@@ -42,9 +39,8 @@ SIPDatagramSocket::~SIPDatagramSocket()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPDatagramSocket::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPort /* = 0 */,
-        IN IMS_BOOL bSecure /* = IMS_FALSE */)
+PUBLIC VIRTUAL IMS_BOOL SIPDatagramSocket::Create(IN CONST IPAddress& objIPA,
+        IN IMS_UINT32 nPort /* = 0 */, IN IMS_BOOL bSecure /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -69,8 +65,9 @@ IMS_BOOL SIPDatagramSocket::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPo
     SetState(STATE_CONNECTING);
 
     IMS_TRACE_I("DatagramSocket(C) ::(%s , %d)",
-            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ?\
-            "xxx" : SipDebug::GetIp(objIPA), nPort, 0);
+            SIPRTConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
+                                                                    : SipDebug::GetIp(objIPA),
+            nPort, 0);
 
     ApplyIpSec();
 
@@ -82,14 +79,13 @@ IMS_BOOL SIPDatagramSocket::Create(IN CONST IPAddress &objIPA, IN IMS_UINT32 nPo
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SIPDatagramSocket::Send(IN CONST IMS_BYTE *pBuffer, IN IMS_SINT32 nBuffLen,
-        IN IMS_UINT32 nPort /* = 0 */, IN CONST IPAddress &objIPA /* = IPAddress::NONE */)
+PUBLIC VIRTUAL IMS_SINT32 SIPDatagramSocket::Send(IN CONST IMS_BYTE* pBuffer,
+        IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort /* = 0 */,
+        IN CONST IPAddress& objIPA /* = IPAddress::NONE */)
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((GetState() != STATE_CONNECTED)
-            && (GetState() != STATE_CONNECTING))
+    if ((GetState() != STATE_CONNECTED) && (GetState() != STATE_CONNECTING))
     {
         return ISocket::RESULT_ERROR;
     }
@@ -103,7 +99,7 @@ Remarks
 
 */
 PUBLIC
-void SIPDatagramSocket::SetListener(IN ISIPDatagramSocketListener *piListener)
+void SIPDatagramSocket::SetListener(IN ISIPDatagramSocketListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -115,15 +111,14 @@ void SIPDatagramSocket::SetListener(IN ISIPDatagramSocketListener *piListener)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_OnDataReceived(IN ISocket *piSocket)
+PROTECTED VIRTUAL void SIPDatagramSocket::Socket_OnDataReceived(IN ISocket* piSocket)
 {
     IMS_SINT32 nReadBytes;
     IMS_UINT32 nPort = 0;
     IPAddress objIPA;
 
     RCPtr<SIPMessageBuffer> pMessageBuffer = SIPMessageBuffer::GetInstance();
-    IMS_BYTE *pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
+    IMS_BYTE* pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 
     //---------------------------------------------------------------------------------------------
 
@@ -158,8 +153,7 @@ void SIPDatagramSocket::Socket_OnDataReceived(IN ISocket *piSocket)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_OnSendEnabled(IN ISocket *piSocket)
+PROTECTED VIRTUAL void SIPDatagramSocket::Socket_OnSendEnabled(IN ISocket* piSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -173,9 +167,8 @@ void SIPDatagramSocket::Socket_OnSendEnabled(IN ISocket *piSocket)
 Remarks
 
 */
-PROTECTED VIRTUAL
-void SIPDatagramSocket::Socket_OnClosed(IN ISocket *piSocket,
-        IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
+PROTECTED VIRTUAL void SIPDatagramSocket::Socket_OnClosed(
+        IN ISocket* piSocket, IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
 {
     //---------------------------------------------------------------------------------------------
 

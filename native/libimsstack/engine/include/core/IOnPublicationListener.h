@@ -16,8 +16,6 @@
 
 class Publication;
 
-
-
 /*
 
 This listener type is used to notify the application of the status of requested publications.
@@ -49,7 +47,7 @@ public:
     </table>
 
     */
-    virtual void OnPublication_Delivered(IN Publication *pPublication) = 0;
+    virtual void OnPublication_Delivered(IN Publication* pPublication) = 0;
 
     /*
 
@@ -69,7 +67,7 @@ public:
     </table>
 
     */
-    virtual void OnPublication_DeliveryFailed(IN Publication *pPublication) = 0;
+    virtual void OnPublication_DeliveryFailed(IN Publication* pPublication) = 0;
 
     /*
 
@@ -89,7 +87,7 @@ public:
     </table>
 
     */
-    virtual void OnPublication_Terminated(IN Publication *pPublication) = 0;
+    virtual void OnPublication_Terminated(IN Publication* pPublication) = 0;
 
     //// IMS Extenions
     /*
@@ -109,7 +107,7 @@ public:
     </table>
 
     */
-    virtual void OnPublication_RefreshStarted(IN Publication *pPublication) = 0;
+    virtual void OnPublication_RefreshStarted(IN Publication* pPublication) = 0;
 
     /*
      Notifies the application that the publication was terminated.
@@ -128,7 +126,7 @@ public:
     </table>
 
     */
-    virtual void OnPublication_RefreshCompleted(IN Publication *pPublication) = 0;
+    virtual void OnPublication_RefreshCompleted(IN Publication* pPublication) = 0;
 };
 
-#endif // _INTERFACE_ON_PUBLICATION_LISTENER_H_
+#endif  // _INTERFACE_ON_PUBLICATION_LISTENER_H_

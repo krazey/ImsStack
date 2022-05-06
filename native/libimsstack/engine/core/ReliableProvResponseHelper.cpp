@@ -18,14 +18,12 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOriginated_)
-    : bIsMobileOriginated(bIsMobileOriginated_)
-    , nState(STATE_IDLE)
-    , nRSeqNumber(1)
-    , nCSeqNumber(0)
+ReliableProvResponseHelper::ReliableProvResponseHelper(IN IMS_BOOL bIsMobileOriginated_) :
+        bIsMobileOriginated(bIsMobileOriginated_),
+        nState(STATE_IDLE),
+        nRSeqNumber(1),
+        nCSeqNumber(0)
 {
     IMS_TRACE_D("Constructor :: ReliableProvResponseHelper", 0, 0, 0);
 }
@@ -45,7 +43,7 @@ IMS_SINT32 ReliableProvResponseHelper::GetState() const
 }
 
 PUBLIC
-void ReliableProvResponseHelper::Initialize(IN ISipMessage *piSIPMsg)
+void ReliableProvResponseHelper::Initialize(IN ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -93,7 +91,7 @@ void ReliableProvResponseHelper::Initialize(IN ISipMessage *piSIPMsg)
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage *&piSIPMsg) const
+IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage*& piSIPMsg) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -117,7 +115,7 @@ IMS_BOOL ReliableProvResponseHelper::SetRAckHeader(IN_OUT ISipMessage *&piSIPMsg
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage *&piSIPMsg) const
+IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage*& piSIPMsg) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -139,7 +137,7 @@ IMS_BOOL ReliableProvResponseHelper::SetRSeqHeader(IN_OUT ISipMessage *&piSIPMsg
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage *piSIPMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -148,7 +146,7 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage *piS
         return IMS_FALSE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::PRACK))
     {
@@ -184,7 +182,7 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageReceived(IN ISipMessage *piS
 }
 
 PUBLIC
-IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage *piSIPMsg)
+IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -193,7 +191,7 @@ IMS_BOOL ReliableProvResponseHelper::UpdateOnMessageSent(IN ISipMessage *piSIPMs
         return IMS_FALSE;
     }
 
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     if (objMethod.Equals(SipMethod::PRACK))
     {
@@ -235,8 +233,8 @@ void ReliableProvResponseHelper::SetState(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("ReliableProvResponse :: %s to %s",
-            StateToString(this->nState), StateToString(nState), 0);
+    IMS_TRACE_I("ReliableProvResponse :: %s to %s", StateToString(this->nState),
+            StateToString(nState), 0);
 
     this->nState = nState;
 }
@@ -248,17 +246,17 @@ const IMS_CHAR* ReliableProvResponseHelper::StateToString(IN IMS_SINT32 nState)
 
     switch (nState)
     {
-    case STATE_IDLE:
-        return "STATE_IDLE";
-    case STATE_RPR_RECEIVED:
-        return "STATE_RPR_RECEIVED";
-    case STATE_PRACK_SENT:
-        return "STATE_PRACK_SENT";
-    case STATE_RPR_SENT:
-        return "STATE_RPR_SENT";
-    case STATE_PRACK_RECEIVED:
-        return "STATE_PRACK_RECEIVED";
-    default:
-        return "__INVALID__";
+        case STATE_IDLE:
+            return "STATE_IDLE";
+        case STATE_RPR_RECEIVED:
+            return "STATE_RPR_RECEIVED";
+        case STATE_PRACK_SENT:
+            return "STATE_PRACK_SENT";
+        case STATE_RPR_SENT:
+            return "STATE_RPR_SENT";
+        case STATE_PRACK_RECEIVED:
+            return "STATE_PRACK_RECEIVED";
+        default:
+            return "__INVALID__";
     }
 }

@@ -21,24 +21,21 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegInfoRegistration::RegInfoRegistration()
-    : strId(AString::ConstNull())
-    , nState(STATE_CREATED)
-    , objContacts(IMSList<RegInfoContact*>())
+RegInfoRegistration::RegInfoRegistration() :
+        strId(AString::ConstNull()),
+        nState(STATE_CREATED),
+        objContacts(IMSList<RegInfoContact*>())
 {
 }
 
-PUBLIC VIRTUAL
-RegInfoRegistration::~RegInfoRegistration()
+PUBLIC VIRTUAL RegInfoRegistration::~RegInfoRegistration()
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
     {
-        RegInfoContact *pContact = objContacts.GetAt(i);
+        RegInfoContact* pContact = objContacts.GetAt(i);
 
         if (pContact != IMS_NULL)
         {
@@ -46,26 +43,25 @@ RegInfoRegistration::~RegInfoRegistration()
         }
     }
 
-    IMS_TRACE_D("Destructor :: aor=%s, id=%s",
-            SipDebug::GetUri1(objAOR.ToString()).GetStr(), strId.GetStr(), 0);
+    IMS_TRACE_D("Destructor :: aor=%s, id=%s", SipDebug::GetUri1(objAOR.ToString()).GetStr(),
+            strId.GetStr(), 0);
 }
 
-PUBLIC VIRTUAL
-const SipAddress& RegInfoRegistration::GetAOR() const
+PUBLIC VIRTUAL const SipAddress& RegInfoRegistration::GetAOR() const
 {
     //---------------------------------------------------------------------------------------------
 
     return objAOR;
 }
 
-PUBLIC VIRTUAL
-IRegInfoContact* RegInfoRegistration::GetContact(IN CONST SipAddress &objContactUri) const
+PUBLIC VIRTUAL IRegInfoContact* RegInfoRegistration::GetContact(
+        IN CONST SipAddress& objContactUri) const
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
     {
-        RegInfoContact *pContact = objContacts.GetAt(i);
+        RegInfoContact* pContact = objContacts.GetAt(i);
 
         if (objContactUri.Equals(pContact->GetURI()))
         {
@@ -76,8 +72,7 @@ IRegInfoContact* RegInfoRegistration::GetContact(IN CONST SipAddress &objContact
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IMSList<IRegInfoContact*> RegInfoRegistration::GetContacts() const
+PUBLIC VIRTUAL IMSList<IRegInfoContact*> RegInfoRegistration::GetContacts() const
 {
     IMSList<IRegInfoContact*> objIContacts;
 
@@ -91,8 +86,7 @@ IMSList<IRegInfoContact*> RegInfoRegistration::GetContacts() const
     return objIContacts;
 }
 
-PUBLIC VIRTUAL
-RegInfoContact* RegInfoRegistration::GetPriorContact() const
+PUBLIC VIRTUAL RegInfoContact* RegInfoRegistration::GetPriorContact() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -101,11 +95,11 @@ RegInfoContact* RegInfoRegistration::GetPriorContact() const
         return IMS_NULL;
     }
 
-    RegInfoContact *pContact = objContacts.GetAt(0);
+    RegInfoContact* pContact = objContacts.GetAt(0);
 
     for (IMS_UINT32 i = 1; i < objContacts.GetSize(); ++i)
     {
-        RegInfoContact *pTmpContact = objContacts.GetAt(i);
+        RegInfoContact* pTmpContact = objContacts.GetAt(i);
 
         if (pContact->GetQValue() < pTmpContact->GetQValue())
         {
@@ -116,8 +110,7 @@ RegInfoContact* RegInfoRegistration::GetPriorContact() const
     return pContact;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 RegInfoRegistration::GetState() const
+PUBLIC VIRTUAL IMS_SINT32 RegInfoRegistration::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -125,7 +118,7 @@ IMS_SINT32 RegInfoRegistration::GetState() const
 }
 
 PUBLIC
-IMS_BOOL RegInfoRegistration::Equals(IN INode *piNode) const
+IMS_BOOL RegInfoRegistration::Equals(IN INode* piNode) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -140,14 +133,14 @@ IMS_BOOL RegInfoRegistration::Equals(IN INode *piNode) const
     }
 
     // Find "id" attribute & compares it
-    INamedNodeMap *piNodeMap = piNode->GetAttributes();
+    INamedNodeMap* piNodeMap = piNode->GetAttributes();
 
     if (piNodeMap == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    INode *piNode_Id = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    INode* piNode_Id = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     if (piNode_Id == IMS_NULL)
     {
@@ -168,13 +161,7 @@ IMS_BOOL RegInfoRegistration::Equals(IN INode *piNode) const
 
 void RegInfoRegistration::DisplayRegInfo()
 {
-    static const IMS_CHAR *pszState[] =
-    {
-        "CREATED",
-        "INIT",
-        "ACTIVE",
-        "TERMINATED"
-    };
+    static const IMS_CHAR* pszState[] = {"CREATED", "INIT", "ACTIVE", "TERMINATED"};
 
     //---------------------------------------------------------------------------------------------
 
@@ -184,28 +171,28 @@ void RegInfoRegistration::DisplayRegInfo()
     }
     else
     {
-        IMS_TRACE_I("REG :: id=%s, aor=%s, state=%s",
-                strId.GetStr(), SipDebug::GetUri1(objAOR.ToString()).GetStr(), pszState[nState]);
+        IMS_TRACE_I("REG :: id=%s, aor=%s, state=%s", strId.GetStr(),
+                SipDebug::GetUri1(objAOR.ToString()).GetStr(), pszState[nState]);
     }
 
     AString strTag;
 
     for (IMS_UINT32 i = 0; i < objContacts.GetSize(); ++i)
     {
-        RegInfoContact *pContact = objContacts.GetAt(i);
+        RegInfoContact* pContact = objContacts.GetAt(i);
 
         strTag.SetNumber(i);
 
         pContact->DisplayRegInfo(strTag);
     }
 
-    RegInfoContact *pContact = GetPriorContact();
+    RegInfoContact* pContact = GetPriorContact();
 
     pContact->DisplayRegInfo("Prior");
 }
 
 PUBLIC
-IMS_BOOL RegInfoRegistration::Update(IN INode *piNode)
+IMS_BOOL RegInfoRegistration::Update(IN INode* piNode)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -214,7 +201,7 @@ IMS_BOOL RegInfoRegistration::Update(IN INode *piNode)
         return IMS_FALSE;
     }
 
-    INamedNodeMap *piNodeMap = piNode->GetAttributes();
+    INamedNodeMap* piNodeMap = piNode->GetAttributes();
 
     if (piNodeMap == IMS_NULL)
     {
@@ -246,8 +233,8 @@ IMS_BOOL RegInfoRegistration::Update(IN INode *piNode)
         }
         else
         {
-            IMS_TRACE_I("REG :: aor=%s, id=%s",
-                    SipDebug::GetUri1(objAOR.ToString()).GetStr(), strId.GetStr(), 0);
+            IMS_TRACE_I("REG :: aor=%s, id=%s", SipDebug::GetUri1(objAOR.ToString()).GetStr(),
+                    strId.GetStr(), 0);
         }
     }
     else
@@ -265,7 +252,7 @@ IMS_BOOL RegInfoRegistration::Update(IN INode *piNode)
     piNode->DestroyNamedNodeMap(piNodeMap);
 
     // "contact" elements
-    INode *piNode_Contact = piNode->GetFirstChild();
+    INode* piNode_Contact = piNode->GetFirstChild();
 
     if (!SetContacts(piNode_Contact))
     {
@@ -276,13 +263,13 @@ IMS_BOOL RegInfoRegistration::Update(IN INode *piNode)
 }
 
 PRIVATE
-RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode *piNode)
+RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode* piNode)
 {
     //---------------------------------------------------------------------------------------------
 
     for (IMS_UINT32 j = 0; j < objContacts.GetSize(); ++j)
     {
-        RegInfoContact *pContact = objContacts.GetAt(j);
+        RegInfoContact* pContact = objContacts.GetAt(j);
 
         if (pContact->Equals(piNode))
         {
@@ -291,7 +278,7 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode *piNode)
     }
 
     // New contact updated...
-    RegInfoContact *pContact = new RegInfoContact();
+    RegInfoContact* pContact = new RegInfoContact();
 
     if (pContact == IMS_NULL)
     {
@@ -308,9 +295,9 @@ RegInfoContact* RegInfoRegistration::CheckNCreateContact(IN INode *piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetAOR(IN INamedNodeMap *piNodeMap)
+IMS_BOOL RegInfoRegistration::SetAOR(IN INamedNodeMap* piNodeMap)
 {
-    INode *piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_AOR);
+    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_AOR);
 
     //---------------------------------------------------------------------------------------------
 
@@ -331,13 +318,13 @@ IMS_BOOL RegInfoRegistration::SetAOR(IN INamedNodeMap *piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetContacts(IN INode *piNode)
+IMS_BOOL RegInfoRegistration::SetContacts(IN INode* piNode)
 {
     //---------------------------------------------------------------------------------------------
 
     while (piNode != IMS_NULL)
     {
-        RegInfoContact *pContact = CheckNCreateContact(piNode);
+        RegInfoContact* pContact = CheckNCreateContact(piNode);
 
         if (pContact != IMS_NULL)
         {
@@ -351,9 +338,9 @@ IMS_BOOL RegInfoRegistration::SetContacts(IN INode *piNode)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap *piNodeMap)
+IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap* piNodeMap)
 {
-    INode *piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
+    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_ID);
 
     //---------------------------------------------------------------------------------------------
 
@@ -369,9 +356,9 @@ IMS_BOOL RegInfoRegistration::SetId(IN INamedNodeMap *piNodeMap)
 }
 
 PRIVATE
-IMS_BOOL RegInfoRegistration::SetState(IN INamedNodeMap *piNodeMap)
+IMS_BOOL RegInfoRegistration::SetState(IN INamedNodeMap* piNodeMap)
 {
-    INode *piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
+    INode* piNode = piNodeMap->GetNamedItem(RegInfoConst::ATTR_STATE);
 
     //---------------------------------------------------------------------------------------------
 

@@ -21,19 +21,17 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-RemoteCapabilities::RemoteCapabilities()
-    : bAudioSupported(IMS_FALSE)
-    , bVideoSupported(IMS_FALSE)
-    , bFramedMediaSupported(IMS_FALSE)
-    , bApplicationSupported(IMS_FALSE)
-    , objAppSubTypes(IMSList<FeatureSet*>())
-    , objEvents(IMSList<FeatureSet*>())
-    , objICSIs(IMSList<FeatureSet*>())
-    , objIARIs(IMSList<FeatureSet*>())
-    , objFeatureTags(IMSList<FeatureSet*>())
+RemoteCapabilities::RemoteCapabilities() :
+        bAudioSupported(IMS_FALSE),
+        bVideoSupported(IMS_FALSE),
+        bFramedMediaSupported(IMS_FALSE),
+        bApplicationSupported(IMS_FALSE),
+        objAppSubTypes(IMSList<FeatureSet*>()),
+        objEvents(IMSList<FeatureSet*>()),
+        objICSIs(IMSList<FeatureSet*>()),
+        objIARIs(IMSList<FeatureSet*>()),
+        objFeatureTags(IMSList<FeatureSet*>())
 {
 }
 
@@ -50,9 +48,9 @@ RemoteCapabilities::~RemoteCapabilities()
 }
 
 PUBLIC
-IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString> &objCapabilities)
+IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString>& objCapabilities)
 {
-    FeatureSet *pFeatureSet;
+    FeatureSet* pFeatureSet;
     AString strName;
     AString strValue;
 
@@ -60,7 +58,7 @@ IMS_BOOL RemoteCapabilities::Create(IN CONST IMSList<AString> &objCapabilities)
 
     for (IMS_UINT32 i = 0; i < objCapabilities.GetSize(); ++i)
     {
-        const AString &strTemp = objCapabilities.GetAt(i);
+        const AString& strTemp = objCapabilities.GetAt(i);
         AString strElement = strTemp.MakeLower();
         IMS_SINT32 nCount = strElement.SplitF(TextParser::CHAR_EQUAL, strName, strValue);
 
@@ -217,8 +215,8 @@ Checks if a certain FeatureTag is supported by the remote device.
 
 */
 PUBLIC
-IMS_BOOL RemoteCapabilities::IsCompatible(IN CONST AppConfig *pAppConfig,
-        IN CONST AString &strServiceId) const
+IMS_BOOL RemoteCapabilities::IsCompatible(
+        IN CONST AppConfig* pAppConfig, IN CONST AString& strServiceId) const
 {
     IMS_BOOL bIsCompatible = IMS_TRUE;
 
@@ -230,38 +228,33 @@ IMS_BOOL RemoteCapabilities::IsCompatible(IN CONST AppConfig *pAppConfig,
     }
 
     // StreamAudio
-    if (pAppConfig->IsStreamMediaAudioSupported()
-        && !IsAudioSupported())
+    if (pAppConfig->IsStreamMediaAudioSupported() && !IsAudioSupported())
     {
         bIsCompatible = IMS_FALSE;
     }
     // StreamVideo
-    else if (pAppConfig->IsStreamMediaVideoSupported()
-        && !IsVideoSupported())
+    else if (pAppConfig->IsStreamMediaVideoSupported() && !IsVideoSupported())
     {
         bIsCompatible = IMS_FALSE;
     }
     // FramedMedia
-    else if (pAppConfig->IsFramedMediaSupported()
-        && !IsFramedMediaSupported())
+    else if (pAppConfig->IsFramedMediaSupported() && !IsFramedMediaSupported())
     {
         bIsCompatible = IMS_FALSE;
     }
     // BasicMedia
-    else if (pAppConfig->IsBasicMediaSupported()
-        && !IsBasicMediaCompatible(pAppConfig))
+    else if (pAppConfig->IsBasicMediaSupported() && !IsBasicMediaCompatible(pAppConfig))
     {
         bIsCompatible = IMS_FALSE;
     }
     // Event packages
-    else if (!pAppConfig->GetSupportedEventPackages().IsEmpty()
-        && !IsEventCompatible(pAppConfig))
+    else if (!pAppConfig->GetSupportedEventPackages().IsEmpty() && !IsEventCompatible(pAppConfig))
     {
         bIsCompatible = IMS_FALSE;
     }
     // CoreService capabilities
-    else if (!pAppConfig->GetCoreServiceConfigs().IsEmpty()
-        && !IsCoreServiceCompatible(pAppConfig, strServiceId))
+    else if (!pAppConfig->GetCoreServiceConfigs().IsEmpty() &&
+            !IsCoreServiceCompatible(pAppConfig, strServiceId))
     {
         bIsCompatible = IMS_FALSE;
     }
@@ -314,7 +307,7 @@ Checks if a certain application subtype is supported by the remote device.
 
 */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN CONST AString &strAppSubType) const
+IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN CONST AString& strAppSubType) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -323,7 +316,7 @@ IMS_BOOL RemoteCapabilities::IsAppSubTypeSupported(IN CONST AString &strAppSubTy
 
     for (IMS_UINT32 i = 0; i < objAppSubTypes.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objAppSubTypes.GetAt(i);
+        FeatureSet* pFeatureSet = objAppSubTypes.GetAt(i);
 
         if (pFeatureSet->Contains(strAppSubType))
             return IMS_TRUE;
@@ -338,7 +331,7 @@ Checks if a certain event is supported by the remote device.
 
 */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsEventSupported(IN CONST AString &strEvent) const
+IMS_BOOL RemoteCapabilities::IsEventSupported(IN CONST AString& strEvent) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -347,7 +340,7 @@ IMS_BOOL RemoteCapabilities::IsEventSupported(IN CONST AString &strEvent) const
 
     for (IMS_UINT32 i = 0; i < objEvents.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objEvents.GetAt(i);
+        FeatureSet* pFeatureSet = objEvents.GetAt(i);
 
         if (pFeatureSet->Contains(strEvent))
             return IMS_TRUE;
@@ -362,7 +355,7 @@ Checks if a certain IARI is supported by the remote device.
 
 */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsIARISupported(IN CONST AString &strIARI) const
+IMS_BOOL RemoteCapabilities::IsIARISupported(IN CONST AString& strIARI) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -371,7 +364,7 @@ IMS_BOOL RemoteCapabilities::IsIARISupported(IN CONST AString &strIARI) const
 
     for (IMS_UINT32 i = 0; i < objIARIs.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objIARIs.GetAt(i);
+        FeatureSet* pFeatureSet = objIARIs.GetAt(i);
 
         if (pFeatureSet->Contains(strIARI))
             return IMS_TRUE;
@@ -386,7 +379,7 @@ Checks if a certain ICSI is supported by the remote device.
 
 */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsICSISupported(IN CONST AString &strICSI) const
+IMS_BOOL RemoteCapabilities::IsICSISupported(IN CONST AString& strICSI) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -395,7 +388,7 @@ IMS_BOOL RemoteCapabilities::IsICSISupported(IN CONST AString &strICSI) const
 
     for (IMS_UINT32 i = 0; i < objICSIs.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objICSIs.GetAt(i);
+        FeatureSet* pFeatureSet = objICSIs.GetAt(i);
 
         if (pFeatureSet->Contains(strICSI))
             return IMS_TRUE;
@@ -410,7 +403,7 @@ Checks if a certain FeatureTag is supported by the remote device.
 
 */
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN CONST AString &strFeatureTag) const
+IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN CONST AString& strFeatureTag) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -421,7 +414,7 @@ IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN CONST AString &strFeatureT
 
     for (IMS_UINT32 i = 0; i < objFeatureTags.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objFeatureTags.GetAt(i);
+        FeatureSet* pFeatureSet = objFeatureTags.GetAt(i);
 
         if (pFeatureSet->Contains(&objFeature))
             return IMS_TRUE;
@@ -431,10 +424,10 @@ IMS_BOOL RemoteCapabilities::IsFeatureTagSupported(IN CONST AString &strFeatureT
 }
 
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig *pAppConfig) const
+IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig* pAppConfig) const
 {
     AString strLowerMimeType;
-    const AStringArray &objMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
+    const AStringArray& objMimeTypes = pAppConfig->GetBasicMediaMimeTypes();
 
     //---------------------------------------------------------------------------------------------
 
@@ -443,7 +436,7 @@ IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig *pAppConf
 
     for (IMS_SINT32 i = 0; i < objMimeTypes.GetCount(); ++i)
     {
-        const AString &strMimeType = objMimeTypes.GetElementAt(i);
+        const AString& strMimeType = objMimeTypes.GetElementAt(i);
 
         strLowerMimeType = strMimeType.MakeLower();
 
@@ -479,9 +472,9 @@ IMS_BOOL RemoteCapabilities::IsBasicMediaCompatible(IN CONST AppConfig *pAppConf
 }
 
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsEventCompatible(IN CONST AppConfig *pAppConfig) const
+IMS_BOOL RemoteCapabilities::IsEventCompatible(IN CONST AppConfig* pAppConfig) const
 {
-    const AStringArray &objEvents = pAppConfig->GetSupportedEventPackages();
+    const AStringArray& objEvents = pAppConfig->GetSupportedEventPackages();
 
     //---------------------------------------------------------------------------------------------
 
@@ -498,10 +491,10 @@ IMS_BOOL RemoteCapabilities::IsEventCompatible(IN CONST AppConfig *pAppConfig) c
 }
 
 PRIVATE
-IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(IN CONST AppConfig *pAppConfig,
-        IN CONST AString &strServiceId) const
+IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
+        IN CONST AppConfig* pAppConfig, IN CONST AString& strServiceId) const
 {
-    const IMSList<CoreServiceConfig*> &objCoreServiceConfigs = pAppConfig->GetCoreServiceConfigs();
+    const IMSList<CoreServiceConfig*>& objCoreServiceConfigs = pAppConfig->GetCoreServiceConfigs();
 
     //---------------------------------------------------------------------------------------------
 
@@ -511,7 +504,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(IN CONST AppConfig *pAppCon
     // For a dedicated service in the application
     if (!strServiceId.IsNULL())
     {
-        const CoreServiceConfig *pServiceConfig = pAppConfig->GetCoreServiceConfigEx(strServiceId);
+        const CoreServiceConfig* pServiceConfig = pAppConfig->GetCoreServiceConfigEx(strServiceId);
 
         if (pServiceConfig == IMS_NULL)
         {
@@ -522,9 +515,9 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(IN CONST AppConfig *pAppCon
     }
 
     // For all the services in the application
-    for (IMS_UINT32 i = 0; i <  objCoreServiceConfigs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objCoreServiceConfigs.GetSize(); ++i)
     {
-        const CoreServiceConfig *pServiceConfig = objCoreServiceConfigs.GetAt(i);
+        const CoreServiceConfig* pServiceConfig = objCoreServiceConfigs.GetAt(i);
 
         if (pServiceConfig == IMS_NULL)
         {
@@ -542,10 +535,10 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(IN CONST AppConfig *pAppCon
 
 PRIVATE
 IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
-        IN CONST CoreServiceConfig *pServiceConfig) const
+        IN CONST CoreServiceConfig* pServiceConfig) const
 {
     /// Evaluate the ICSIs
-    const IMSList<ServiceIdentifier> &objLocalICSIs = pServiceConfig->GetICSIs();
+    const IMSList<ServiceIdentifier>& objLocalICSIs = pServiceConfig->GetICSIs();
 
     //---------------------------------------------------------------------------------------------
 
@@ -553,7 +546,7 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
     {
         for (IMS_UINT32 i = 0; i < objLocalICSIs.GetSize(); ++i)
         {
-            const ServiceIdentifier &objICSI = objLocalICSIs.GetAt(i);
+            const ServiceIdentifier& objICSI = objLocalICSIs.GetAt(i);
 
             if (!IsICSISupported(objICSI.GetName()))
                 return IMS_FALSE;
@@ -563,20 +556,20 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
     /// Evaluates the IARI
     if (pServiceConfig->IsIARISupported())
     {
-        const ServiceIdentifier &objIARI = pServiceConfig->GetIARI();
+        const ServiceIdentifier& objIARI = pServiceConfig->GetIARI();
 
         if (!IsIARISupported(objIARI.GetName()))
             return IMS_FALSE;
     }
 
     /// Evaluates the feature-tags
-    const IMSList<ServiceIdentifier> &objLocalFeatureTags = pServiceConfig->GetFeatureTags();
+    const IMSList<ServiceIdentifier>& objLocalFeatureTags = pServiceConfig->GetFeatureTags();
 
     if (!objLocalFeatureTags.IsEmpty())
     {
         for (IMS_UINT32 i = 0; i < objLocalFeatureTags.GetSize(); ++i)
         {
-            const ServiceIdentifier &objFTag = objLocalFeatureTags.GetAt(i);
+            const ServiceIdentifier& objFTag = objLocalFeatureTags.GetAt(i);
 
             if (!IsFeatureTagSupported(objFTag.GetName()))
                 return IMS_FALSE;
@@ -586,8 +579,8 @@ IMS_BOOL RemoteCapabilities::IsCoreServiceCompatible(
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void RemoteCapabilities::RemoveAllFeatureSets(IN_OUT IMSList<FeatureSet*> &objFeatureSets)
+PRIVATE GLOBAL void RemoteCapabilities::RemoveAllFeatureSets(
+        IN_OUT IMSList<FeatureSet*>& objFeatureSets)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -596,7 +589,7 @@ void RemoteCapabilities::RemoveAllFeatureSets(IN_OUT IMSList<FeatureSet*> &objFe
 
     for (IMS_UINT32 i = 0; i < objFeatureSets.GetSize(); ++i)
     {
-        FeatureSet *pFeatureSet = objFeatureSets.GetAt(i);
+        FeatureSet* pFeatureSet = objFeatureSets.GetAt(i);
 
         if (pFeatureSet != IMS_NULL)
             delete pFeatureSet;

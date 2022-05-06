@@ -33,17 +33,15 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPDialog::SIPDialog(IN SIPDialogEx *pDialogEx_)
-    : pDialogEx(pDialogEx_)
+SIPDialog::SIPDialog(IN SIPDialogEx* pDialogEx_) :
+        pDialogEx(pDialogEx_)
 {
 }
 
 PUBLIC
-SIPDialog::SIPDialog(IN CONST SIPDialog &objRHS)
-    : pDialogEx(objRHS.pDialogEx)
+SIPDialog::SIPDialog(IN CONST SIPDialog& objRHS) :
+        pDialogEx(objRHS.pDialogEx)
 {
 }
 
@@ -55,7 +53,7 @@ SIPDialog::~SIPDialog()
 }
 
 PUBLIC
-SIPDialog& SIPDialog::operator=(IN CONST SIPDialog &objRHS)
+SIPDialog& SIPDialog::operator=(IN CONST SIPDialog& objRHS)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -83,14 +81,13 @@ Remarks
     Max-Forwards
 */
 PUBLIC
-SIPClientConnection* SIPDialog::CreateClientConnection(IN CONST AString &strMethod)
+SIPClientConnection* SIPDialog::CreateClientConnection(IN CONST AString& strMethod)
 {
     IMS_SINT32 nState = GetState();
 
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_EARLY)
-            && (nState != STATE_CONFIRMED))
+    if ((nState != STATE_EARLY) && (nState != STATE_CONFIRMED))
     {
         // BYE_REQUEST_ON_DIALOG_TERMINATED
         if (strMethod.Equals(SipMethod::ToName(SipMethod::BYE)))
@@ -134,7 +131,7 @@ SIPClientConnection* SIPDialog::CreateClientConnection(IN CONST AString &strMeth
         return IMS_NULL;
     }
 
-    SIPClientConnection *pSCC = new SIPClientConnection();
+    SIPClientConnection* pSCC = new SIPClientConnection();
 
     if (pSCC == IMS_NULL)
     {
@@ -239,17 +236,17 @@ IMS_SINT32 SIPDialog::GetState() const
 
     switch (pDialogEx->GetState())
     {
-    case SIPDState::STATE_TERMINATED:
-        return STATE_TERMINATED;
+        case SIPDState::STATE_TERMINATED:
+            return STATE_TERMINATED;
 
-    case SIPDState::STATE_EARLY:
-        return STATE_EARLY;
+        case SIPDState::STATE_EARLY:
+            return STATE_EARLY;
 
-    case SIPDState::STATE_CONFIRMED:
-        return STATE_CONFIRMED;
+        case SIPDState::STATE_CONFIRMED:
+            return STATE_CONFIRMED;
 
-    default:
-        return STATE_INIT;
+        default:
+            return STATE_INIT;
     }
 }
 
@@ -260,15 +257,15 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SIPDialog::IsSameDialog(IN CONST SIPDialog *pDialog)
+IMS_BOOL SIPDialog::IsSameDialog(IN CONST SIPDialog* pDialog)
 {
     //---------------------------------------------------------------------------------------------
 
     if (pDialog == IMS_NULL)
         return IMS_FALSE;
 
-    SIPDialogState *pDState = pDialogEx->GetDialogState();
-    SIPDialogState *pOtherDState = pDialog->pDialogEx->GetDialogState();
+    SIPDialogState* pDState = pDialogEx->GetDialogState();
+    SIPDialogState* pOtherDState = pDialog->pDialogEx->GetDialogState();
 
     if (!pDState->Equals(pOtherDState))
     {
@@ -286,8 +283,8 @@ Remarks
 
 */
 PUBLIC
-IMS_RESULT SIPDialog::SetContactParameter(IN CONST AString &strParameter,
-        IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
+IMS_RESULT SIPDialog::SetContactParameter(
+        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -311,7 +308,7 @@ Remarks
 
 */
 PRIVATE
-void SIPDialog::UpdateDialog(IN SIPDialogEx *pDialogEx)
+void SIPDialog::UpdateDialog(IN SIPDialogEx* pDialogEx)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -324,26 +321,23 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL SIPDialog::CheckMethodValidity(IN CONST SipMethod &objMethod) const
+IMS_BOOL SIPDialog::CheckMethodValidity(IN CONST SipMethod& objMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     // Case 1)
     //    Condition - subscribe usage & method except for INVITE/SUBSCRIBE/REFER/NOTIFY
-    if (!(pDialogEx->IsInviteUsage())
-            && !objMethod.Equals(SipMethod::INVITE)
-            && !objMethod.Equals(SipMethod::SUBSCRIBE)
-            && !objMethod.Equals(SipMethod::REFER)
-            && !objMethod.Equals(SipMethod::NOTIFY))
+    if (!(pDialogEx->IsInviteUsage()) && !objMethod.Equals(SipMethod::INVITE) &&
+            !objMethod.Equals(SipMethod::SUBSCRIBE) && !objMethod.Equals(SipMethod::REFER) &&
+            !objMethod.Equals(SipMethod::NOTIFY))
     {
-        IMS_TRACE_D("%s is not allowed in the subscribe usage",
-                objMethod.ToString().GetStr(), 0, 0);
+        IMS_TRACE_D(
+                "%s is not allowed in the subscribe usage", objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
     }
     // Case 2)
     //    Condition - invite usage & NOTIFY method
-    else if (pDialogEx->IsInviteUsage()
-            && objMethod.Equals(SipMethod::NOTIFY))
+    else if (pDialogEx->IsInviteUsage() && objMethod.Equals(SipMethod::NOTIFY))
     {
         IMS_TRACE_D("%s is not allowed in the invite usage", objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
@@ -358,24 +352,22 @@ Remarks
 
 */
 PRIVATE
-SIPDialogEx* SIPDialog::GetOptimumDialog(IN CONST SipMethod &objMethod) const
+SIPDialogEx* SIPDialog::GetOptimumDialog(IN CONST SipMethod& objMethod) const
 {
     //---------------------------------------------------------------------------------------------
 
     // Case 1)
     //    Condition - invite usage & method except for REFER/SUBSCRIBE
     //    Action - Use an invite usage as it is
-    if (pDialogEx->IsInviteUsage()
-            && !objMethod.Equals(SipMethod::SUBSCRIBE)
-            && !objMethod.Equals(SipMethod::REFER))
+    if (pDialogEx->IsInviteUsage() && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
+            !objMethod.Equals(SipMethod::REFER))
     {
         return pDialogEx.Get();
     }
     // Case 2)
     //    Condition - subscribe usage & NOTIFY method
     //    Action - Use an subscribe usage as it is
-    else if (!(pDialogEx->IsInviteUsage())
-            && objMethod.Equals(SipMethod::NOTIFY))
+    else if (!(pDialogEx->IsInviteUsage()) && objMethod.Equals(SipMethod::NOTIFY))
     {
         return pDialogEx.Get();
     }

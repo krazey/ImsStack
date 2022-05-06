@@ -19,15 +19,13 @@
 
 __IMS_TRACE_TAG_REG__;
 
-
-
 PUBLIC
-RegFlow::RegFlow(IN const RegKey& objRegKey_)
-    : objRegKey(objRegKey_)
-    , strCallId(AString::ConstNull())
-    , nCSeqValue(0)
-    , nSubscriber(NO_SUBSCRIBER)
-    , strSessionId(AString::ConstNull()) // HEADER_REQ_SESSION-ID
+RegFlow::RegFlow(IN const RegKey& objRegKey_) :
+        objRegKey(objRegKey_),
+        strCallId(AString::ConstNull()),
+        nCSeqValue(0),
+        nSubscriber(NO_SUBSCRIBER),
+        strSessionId(AString::ConstNull())  // HEADER_REQ_SESSION-ID
 {
     SipFactory::GenerateCallId(AString::ConstNull(), strCallId);
 
@@ -36,20 +34,20 @@ RegFlow::RegFlow(IN const RegKey& objRegKey_)
 }
 
 PUBLIC
-RegFlow::RegFlow(IN const RegFlow &objRHS)
-    : objRegKey(objRHS.objRegKey)
-    , strCallId(objRHS.strCallId)
-    , nCSeqValue(objRHS.nCSeqValue)
-    , nSubscriber(objRHS.nSubscriber)
-    , strSessionId(objRHS.strSessionId) // HEADER_REQ_SESSION-ID
+RegFlow::RegFlow(IN const RegFlow& objRHS) :
+        objRegKey(objRHS.objRegKey),
+        strCallId(objRHS.strCallId),
+        nCSeqValue(objRHS.nCSeqValue),
+        nSubscriber(objRHS.nSubscriber),
+        strSessionId(objRHS.strSessionId)  // HEADER_REQ_SESSION-ID
 {
 }
 
 PUBLIC
 RegFlow::~RegFlow()
 {
-    IMS_TRACE_D("Destructor :: %X, %s, %u",
-            nSubscriber, SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), nCSeqValue);
+    IMS_TRACE_D("Destructor :: %X, %s, %u", nSubscriber,
+            SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), nCSeqValue);
 }
 
 /*
@@ -58,7 +56,7 @@ Remarks
 
 */
 PUBLIC
-RegFlow& RegFlow::operator=(IN const RegFlow &objRHS)
+RegFlow& RegFlow::operator=(IN const RegFlow& objRHS)
 {
     if (this != &objRHS)
     {
@@ -151,7 +149,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL RegFlow::IsReserved(OUT IMS_UINT32 *pnSubscriber_ /* = IMS_NULL */) const
+IMS_BOOL RegFlow::IsReserved(OUT IMS_UINT32* pnSubscriber_ /* = IMS_NULL */) const
 {
     if (pnSubscriber_ != IMS_NULL)
     {
@@ -206,7 +204,7 @@ Remarks
 
 */
 PUBLIC
-void RegFlow::UpdateCallId(IN const IPAddress &objIP)
+void RegFlow::UpdateCallId(IN const IPAddress& objIP)
 {
     // Check if the Call-ID already contains '@' character
     if (strCallId.Contains('@'))

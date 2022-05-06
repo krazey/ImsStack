@@ -79,9 +79,9 @@ public:
      * @param nPortPc P-CSCF's client port
      * @param nPortPs P-CSCF's server port
      */
-    virtual void SetIpSecSa(IN IMS_SINT32 nSaType,
-            IN const IPAddress& objIpAddrU, IN IMS_SINT32 nPortUc, IN IMS_SINT32 nPortUs,
-            IN const IPAddress& objIpAddrP, IN IMS_SINT32 nPortPc, IN IMS_SINT32 nPortPs) = 0;
+    virtual void SetIpSecSa(IN IMS_SINT32 nSaType, IN const IPAddress& objIpAddrU,
+            IN IMS_SINT32 nPortUc, IN IMS_SINT32 nPortUs, IN const IPAddress& objIpAddrP,
+            IN IMS_SINT32 nPortPc, IN IMS_SINT32 nPortPs) = 0;
 
     /**
      * @brief Sets the listener to monitor the state of the IPSec security association.

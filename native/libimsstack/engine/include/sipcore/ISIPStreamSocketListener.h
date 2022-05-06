@@ -15,8 +15,6 @@
 
 class SIPSocket;
 
-
-
 /*
 SIP stream socket listener interface
 
@@ -44,7 +42,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void StreamSocket_ConnectionReceived(IN SIPSocket *pSocket) = 0;
+    virtual void StreamSocket_ConnectionReceived(IN SIPSocket* pSocket) = 0;
 
     /*
 
@@ -62,7 +60,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void StreamSocket_DataReceived(IN SIPSocket *pSocket, IN_OUT ByteArray &objBuffer) = 0;
+    virtual void StreamSocket_DataReceived(IN SIPSocket* pSocket, IN_OUT ByteArray& objBuffer) = 0;
 
     /*
 
@@ -80,7 +78,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void StreamSocket_KeepAliveExpired(IN SIPSocket *pSocket) = 0;
+    virtual void StreamSocket_KeepAliveExpired(IN SIPSocket* pSocket) = 0;
 
     /*
 
@@ -98,7 +96,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void StreamSocket_PassiveClosed(IN SIPSocket *pSocket) = 0;
+    virtual void StreamSocket_PassiveClosed(IN SIPSocket* pSocket) = 0;
 };
 
-#endif // _INTERFACE_SIP_STREAM_SOCKET_LISTENER_H_
+#endif  // _INTERFACE_SIP_STREAM_SOCKET_LISTENER_H_

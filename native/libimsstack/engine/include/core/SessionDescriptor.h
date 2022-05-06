@@ -40,65 +40,65 @@
 
 class ISessionState;
 
-
-
-class SessionDescriptor
-    : public ISessionDescriptor
+class SessionDescriptor : public ISessionDescriptor
 {
 public:
-    SessionDescriptor(IN ISessionState *piSessionState_);
+    SessionDescriptor(IN ISessionState* piSessionState_);
     virtual ~SessionDescriptor();
 
 private:
-    SessionDescriptor(IN CONST SessionDescriptor &objRHS);
-    SessionDescriptor& operator=(IN CONST SessionDescriptor &objRHS);
+    SessionDescriptor(IN CONST SessionDescriptor& objRHS);
+    SessionDescriptor& operator=(IN CONST SessionDescriptor& objRHS);
 
 private:
     // ISessionDescriptor interface implementations
-    virtual IMS_RESULT AddAttribute(IN CONST AString &strAttribute);
+    virtual IMS_RESULT AddAttribute(IN CONST AString& strAttribute);
     virtual IMSList<AString> GetAttributes() const;
     virtual AString GetProtocolVersion() const;
     virtual const AString& GetSessionId() const;
     virtual AString GetSessionInfo() const;
     virtual AString GetSessionName() const;
-    virtual IMS_RESULT RemoveAttribute(IN CONST AString &strAttribute);
-    virtual IMS_RESULT SetSessionInfo(IN CONST AString &strInfo);
-    virtual IMS_RESULT SetSessionName(IN CONST AString &strName);
+    virtual IMS_RESULT RemoveAttribute(IN CONST AString& strAttribute);
+    virtual IMS_RESULT SetSessionInfo(IN CONST AString& strInfo);
+    virtual IMS_RESULT SetSessionName(IN CONST AString& strName);
 
     //// IMS extensions
-    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN CONST AString &strAttrValue,
-            IN CONST AString &strType = AString::ConstNull());
+    virtual IMS_RESULT AddAttribute(IN IMS_SINT32 nType, IN CONST AString& strAttrValue,
+            IN CONST AString& strType = AString::ConstNull());
     virtual IMS_RESULT AddAttributeInt(IN IMS_SINT32 nType, IN IMS_SINT32 nAttrValue,
-            IN CONST AString &strType = AString::ConstNull());
+            IN CONST AString& strType = AString::ConstNull());
     virtual IMS_RESULT AddBandwidth(IN IMS_SINT32 nType, IN IMS_SINT32 nBandwidth,
-            IN CONST AString &strType = AString::ConstNull());
-    virtual const AString& GetAttribute(IN IMS_SINT32 nType,
-            IN CONST AString &strType = AString::ConstNull()) const;
-    virtual IMS_SINT32 GetAttributeInt(IN IMS_SINT32 nType,
-            IN CONST AString &strType = AString::ConstNull()) const;
-    virtual IMS_SINT32 GetBandwidth(IN IMS_SINT32 nType,
-            IN CONST AString &strType = AString::ConstNull()) const;
+            IN CONST AString& strType = AString::ConstNull());
+    virtual const AString& GetAttribute(
+            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const;
+    virtual IMS_SINT32 GetAttributeInt(
+            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const;
+    virtual IMS_SINT32 GetBandwidth(
+            IN IMS_SINT32 nType, IN CONST AString& strType = AString::ConstNull()) const;
     virtual IMS_SINT32 GetDirection() const;
     virtual const AString& GetSessionVersion() const;
     virtual const AString& GetUsername() const;
-    virtual IMS_RESULT RemoveAttribute(IN CONST SdpAttribute &objAttribute);
+    virtual IMS_RESULT RemoveAttribute(IN CONST SdpAttribute& objAttribute);
     virtual IMS_RESULT RemoveAttribute(IN IMS_SINT32 nType,
-            IN CONST AString &strAttrValue = AString::ConstNull(),
-            IN CONST AString &strType = AString::ConstNull());
+            IN CONST AString& strAttrValue = AString::ConstNull(),
+            IN CONST AString& strType = AString::ConstNull());
     virtual IMS_RESULT RemoveAllBandwidths();
-    virtual IMS_RESULT SetConnectionAddress(IN CONST AString &strAddress);
+    virtual IMS_RESULT SetConnectionAddress(IN CONST AString& strAddress);
     virtual IMS_RESULT SetDirection(IN IMS_SINT32 nDirection);
-    virtual IMS_RESULT SetOriginAddress(IN CONST AString &strAddress);
+    virtual IMS_RESULT SetOriginAddress(IN CONST AString& strAddress);
     virtual IPAddress GetLocalAddress() const;
     virtual IPAddress GetRemoteAddress() const;
     virtual const AString& GetRemoteAddressAsString() const;
 
 private:
-    enum { MAX_RESERVED_ATTRIBUTE = 17 };
+    enum
+    {
+        MAX_RESERVED_ATTRIBUTE = 17
+    };
 
     static const IMS_CHAR* RESERVED_ATTRIBUTE[MAX_RESERVED_ATTRIBUTE];
 
-    ISessionState *piSessionState;
+    ISessionState* piSessionState;
 };
 
-#endif // _SESSION_DESCRIPTOR_H_
+#endif  // _SESSION_DESCRIPTOR_H_

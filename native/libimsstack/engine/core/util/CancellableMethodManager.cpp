@@ -20,12 +20,10 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PRIVATE
-CancellableMethodManager::CancellableMethodManager()
-    : piLock(IMS_NULL)
-    , objCancellableMethods(IMSMap<AString, ICancellableMethod*>())
+CancellableMethodManager::CancellableMethodManager() :
+        piLock(IMS_NULL),
+        objCancellableMethods(IMSMap<AString, ICancellableMethod*>())
 {
     piLock = MutexService::GetMutexService()->CreateMutex();
 }
@@ -42,8 +40,8 @@ CancellableMethodManager::~CancellableMethodManager()
 }
 
 PUBLIC
-IMS_BOOL CancellableMethodManager::AddMethod(IN CONST AString &strName,
-        IN ICancellableMethod *piMethod)
+IMS_BOOL CancellableMethodManager::AddMethod(
+        IN CONST AString& strName, IN ICancellableMethod* piMethod)
 {
     LockGuard objLock(piLock);
 
@@ -53,7 +51,7 @@ IMS_BOOL CancellableMethodManager::AddMethod(IN CONST AString &strName,
 }
 
 PUBLIC
-void CancellableMethodManager::RemoveMethod(IN CONST AString &strName)
+void CancellableMethodManager::RemoveMethod(IN CONST AString& strName)
 {
     LockGuard objLock(piLock);
 
@@ -62,10 +60,9 @@ void CancellableMethodManager::RemoveMethod(IN CONST AString &strName)
     objCancellableMethods.Remove(strName);
 }
 
-PUBLIC GLOBAL
-CancellableMethodManager* CancellableMethodManager::GetInstance()
+PUBLIC GLOBAL CancellableMethodManager* CancellableMethodManager::GetInstance()
 {
-    static CancellableMethodManager *pCancellableMethodMngr = IMS_NULL;
+    static CancellableMethodManager* pCancellableMethodMngr = IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -78,7 +75,7 @@ CancellableMethodManager* CancellableMethodManager::GetInstance()
 }
 
 PRIVATE
-IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection *piSSC)
+IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection* piSSC)
 {
     LockGuard objLock(piLock);
 
@@ -90,7 +87,7 @@ IMS_BOOL CancellableMethodManager::HandleCancelRequest(IN ISipServerConnection *
         return IMS_FALSE;
     }
 
-    ICancellableMethod *piMethod = IMS_NULL;
+    ICancellableMethod* piMethod = IMS_NULL;
 
     for (IMS_UINT32 i = 0; i < objCancellableMethods.GetSize(); ++i)
     {

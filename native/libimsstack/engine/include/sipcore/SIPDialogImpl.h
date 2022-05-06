@@ -32,30 +32,27 @@
 
 class SIPDialog;
 
-
-
-class SIPDialogImpl
-    : public ISipDialog
+class SIPDialogImpl : public ISipDialog
 {
 public:
-    explicit SIPDialogImpl(IN SIPDialog *pDialog_);
+    explicit SIPDialogImpl(IN SIPDialog* pDialog_);
     virtual ~SIPDialogImpl();
 
 private:
     SIPDialogImpl();
-    SIPDialogImpl(IN CONST SIPDialogImpl &objRHS);
-    SIPDialogImpl& operator=(IN CONST SIPDialogImpl &objRHS);
+    SIPDialogImpl(IN CONST SIPDialogImpl& objRHS);
+    SIPDialogImpl& operator=(IN CONST SIPDialogImpl& objRHS);
 
 public:
     // ISipObject interface
     virtual void Destroy();
     // ISipDialog interface
     virtual ISipDialog* Clone() const;
-    virtual IMS_BOOL Equals(IN CONST ISipDialog *piDialog);
+    virtual IMS_BOOL Equals(IN CONST ISipDialog* piDialog);
     virtual AString GetDialogId();
-    virtual ISipClientConnection* GetNewClientConnection(IN CONST AString &strMethod);
+    virtual ISipClientConnection* GetNewClientConnection(IN CONST AString& strMethod);
     virtual IMS_SINT32 GetState() const;
-    virtual IMS_BOOL IsSameDialog(IN CONST ISipConnection *piSC);
+    virtual IMS_BOOL IsSameDialog(IN CONST ISipConnection* piSC);
     virtual AString GetComponent(IN IMS_SINT32 nType) const;
 
     //// IMS Extensions
@@ -63,15 +60,14 @@ public:
     virtual AString GetDialogIdEx();
     virtual const ISipHeader* GetContactHeader() const;
     // CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-    virtual IMS_RESULT SetContactParameter(IN CONST AString &strParameter,
-            IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
+    virtual IMS_RESULT SetContactParameter(
+            IN CONST AString& strParameter, IN IMS_SINT32 nOperation = 0 /* (0: ADD, 1: REMOVE) */);
     virtual void TerminateDialogUsage();
 
-    inline SIPDialog* GetDialog() const
-    { return pDialog; }
+    inline SIPDialog* GetDialog() const { return pDialog; }
 
 private:
-    SIPDialog *pDialog;
+    SIPDialog* pDialog;
 };
 
-#endif // _SIP_DIALOG_IMPL_H_
+#endif  // _SIP_DIALOG_IMPL_H_

@@ -13,8 +13,6 @@
 #ifndef _REG_INFO_CONST_H_
 #define _REG_INFO_CONST_H_
 
-
-
 class RegInfoConst
 {
 private:
@@ -67,4 +65,4 @@ public:
     static const IMS_CHAR ATTR_STATE_TERMINATED[];
 };
 
-#endif // _REG_INFO_CONST_H_
+#endif  // _REG_INFO_CONST_H_

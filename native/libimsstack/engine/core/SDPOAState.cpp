@@ -24,20 +24,14 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 class SessionCapabilities
 {
 public:
-    inline SessionCapabilities()
-    {
-    }
+    inline SessionCapabilities() {}
 
-    inline ~SessionCapabilities()
-    {
-    }
+    inline ~SessionCapabilities() {}
 
-    inline IMS_BOOL Create(IN CONST SdpSessionDescription &objSessionDesc)
+    inline IMS_BOOL Create(IN CONST SdpSessionDescription& objSessionDesc)
     {
         IMSList<SdpMediaDescription> objMediaDescs;
 
@@ -51,8 +45,8 @@ public:
         return IMS_TRUE;
     }
 
-    inline IMS_BOOL Create(IN CONST SdpSessionDescription &objSessionDesc,
-            IN CONST IMSList<SdpMediaDescription> &objMediaDescs)
+    inline IMS_BOOL Create(IN CONST SdpSessionDescription& objSessionDesc,
+            IN CONST IMSList<SdpMediaDescription>& objMediaDescs)
     {
         //-----------------------------------------------------------------------------------------
 
@@ -64,15 +58,9 @@ public:
         return IMS_TRUE;
     }
 
-    inline const SessionParameter& GetCapabilities() const
-    {
-        return objCapabilities;
-    }
+    inline const SessionParameter& GetCapabilities() const { return objCapabilities; }
 
-    inline SessionParameter& GetCapabilities()
-    {
-        return objCapabilities;
-    }
+    inline SessionParameter& GetCapabilities() { return objCapabilities; }
 
 #if 0
     inline SessionParameter* GetCapabilities() const
@@ -164,10 +152,8 @@ public:
     SessionParameter objCapabilities;
 };
 
-
-
-PRIVATE GLOBAL
-const IMS_SINT32 SDPOAState::STATE_SENT[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
+PRIVATE GLOBAL const IMS_SINT32
+SDPOAState::STATE_SENT[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
 {
     //STATE_IDLE
     {
@@ -254,8 +240,8 @@ const IMS_SINT32 SDPOAState::STATE_SENT[SDPOAState::STATE_MAX][SDPOAState::TRIGG
     }
 };
 
-PRIVATE GLOBAL
-const IMS_SINT32 SDPOAState::STATE_RECEIVED[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
+PRIVATE GLOBAL const IMS_SINT32
+SDPOAState::STATE_RECEIVED[SDPOAState::STATE_MAX][SDPOAState::TRIGGER_MAX] =
 {
     //STATE_IDLE
     {
@@ -342,8 +328,6 @@ const IMS_SINT32 SDPOAState::STATE_RECEIVED[SDPOAState::STATE_MAX][SDPOAState::T
     }
 };
 
-
-
 /*
 
 Remarks
@@ -351,21 +335,21 @@ Remarks
 */
 PUBLIC
 SDPOAState::SDPOAState(IN IMS_BOOL bSDPVersionCheck_ /* = IMS_TRUE */,
-        IN IMS_BOOL bAlwaysIncreaseSDPVersion_/* = IMS_FALSE*/)
-    : nState(STATE_IDLE)
-    , nOldState(STATE_IDLE)
-    , nMode(MODE_IDLE)
-    , bStateChanged(IMS_FALSE)
-    , bOfferProgress(IMS_FALSE)
-    , bProvisionalRespWithSdp(IMS_FALSE)
-    , bSDPVersionCheck(bSDPVersionCheck_)
-    , bAlwaysIncreaseSDPVersion(bAlwaysIncreaseSDPVersion_)
-    , pLastOfferMade(IMS_NULL)
-    , pCurrentView(IMS_NULL)
-    , pPeerView(IMS_NULL)
-    , pProposalView(IMS_NULL)
-    , pRefusedView(IMS_NULL)
-    , pCapabilities(new SessionCapabilities())
+        IN IMS_BOOL bAlwaysIncreaseSDPVersion_ /* = IMS_FALSE*/) :
+        nState(STATE_IDLE),
+        nOldState(STATE_IDLE),
+        nMode(MODE_IDLE),
+        bStateChanged(IMS_FALSE),
+        bOfferProgress(IMS_FALSE),
+        bProvisionalRespWithSdp(IMS_FALSE),
+        bSDPVersionCheck(bSDPVersionCheck_),
+        bAlwaysIncreaseSDPVersion(bAlwaysIncreaseSDPVersion_),
+        pLastOfferMade(IMS_NULL),
+        pCurrentView(IMS_NULL),
+        pPeerView(IMS_NULL),
+        pProposalView(IMS_NULL),
+        pRefusedView(IMS_NULL),
+        pCapabilities(new SessionCapabilities())
 {
 }
 
@@ -375,21 +359,21 @@ Remarks
 
 */
 PUBLIC
-SDPOAState::SDPOAState(IN CONST SDPOAState &objRHS)
-    : nState(objRHS.nState)
-    , nOldState(objRHS.nOldState)
-    , nMode(objRHS.nMode)
-    , bStateChanged(objRHS.bStateChanged)
-    , bOfferProgress(objRHS.bOfferProgress)
-    , bProvisionalRespWithSdp(objRHS.bProvisionalRespWithSdp)
-    , bSDPVersionCheck(objRHS.bSDPVersionCheck)
-    , bAlwaysIncreaseSDPVersion(objRHS.bAlwaysIncreaseSDPVersion)
-    , pLastOfferMade(IMS_NULL)
-    , pCurrentView(IMS_NULL)
-    , pPeerView(IMS_NULL)
-    , pProposalView(IMS_NULL)
-    , pRefusedView(IMS_NULL)
-    , pCapabilities(IMS_NULL)
+SDPOAState::SDPOAState(IN CONST SDPOAState& objRHS) :
+        nState(objRHS.nState),
+        nOldState(objRHS.nOldState),
+        nMode(objRHS.nMode),
+        bStateChanged(objRHS.bStateChanged),
+        bOfferProgress(objRHS.bOfferProgress),
+        bProvisionalRespWithSdp(objRHS.bProvisionalRespWithSdp),
+        bSDPVersionCheck(objRHS.bSDPVersionCheck),
+        bAlwaysIncreaseSDPVersion(objRHS.bAlwaysIncreaseSDPVersion),
+        pLastOfferMade(IMS_NULL),
+        pCurrentView(IMS_NULL),
+        pPeerView(IMS_NULL),
+        pProposalView(IMS_NULL),
+        pRefusedView(IMS_NULL),
+        pCapabilities(IMS_NULL)
 {
     if (objRHS.pLastOfferMade)
         pLastOfferMade = new SessionParameter(*(objRHS.pLastOfferMade));
@@ -415,8 +399,7 @@ SDPOAState::SDPOAState(IN CONST SDPOAState &objRHS)
 Remarks
 
 */
-PUBLIC VIRTUAL
-SDPOAState::~SDPOAState()
+PUBLIC VIRTUAL SDPOAState::~SDPOAState()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -445,8 +428,7 @@ SDPOAState::~SDPOAState()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SDPOAState::AbortProposal()
+PUBLIC VIRTUAL void SDPOAState::AbortProposal()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -469,15 +451,12 @@ void SDPOAState::AbortProposal()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::CreateProposalView()
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateProposalView()
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_IDLE)
-            && (nState != STATE_OFFER_RECEIVED)
-            && (nState != STATE_ESTABLISHED)
-            && (nState != STATE_OFFER_CHANGE_RECEIVED))
+    if ((nState != STATE_IDLE) && (nState != STATE_OFFER_RECEIVED) &&
+            (nState != STATE_ESTABLISHED) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
         return ISDPOAState::RESULT_INVALID_STATE;
@@ -504,8 +483,8 @@ IMS_SINT32 SDPOAState::CreateProposalView()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetSessionCurrentView(OUT SdpSessionParameter *&pSessionParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionCurrentView(
+        OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -532,8 +511,8 @@ IMS_SINT32 SDPOAState::GetSessionCurrentView(OUT SdpSessionParameter *&pSessionP
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetSessionPeerView(OUT SdpSessionParameter *&pSessionParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionPeerView(
+        OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -554,17 +533,14 @@ IMS_SINT32 SDPOAState::GetSessionPeerView(OUT SdpSessionParameter *&pSessionPara
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetSessionProposalView(OUT SdpSessionParameter *&pSessionParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetSessionProposalView(
+        OUT SdpSessionParameter*& pSessionParam) const
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_IDLE)
-            && (nState != STATE_OFFER_SENT)
-            && (nState != STATE_OFFER_RECEIVED)
-            && (nState != STATE_ESTABLISHED)
-            && (nState != STATE_OFFER_CHANGE_SENT)
-            && (nState != STATE_OFFER_CHANGE_RECEIVED))
+    if ((nState != STATE_IDLE) && (nState != STATE_OFFER_SENT) &&
+            (nState != STATE_OFFER_RECEIVED) && (nState != STATE_ESTABLISHED) &&
+            (nState != STATE_OFFER_CHANGE_SENT) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
         return ISDPOAState::RESULT_INVALID_STATE;
@@ -587,8 +563,7 @@ IMS_SINT32 SDPOAState::GetSessionProposalView(OUT SdpSessionParameter *&pSession
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::CreateMediaParameter(OUT SdpMediaParameter *&pMediaParam)
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::CreateMediaParameter(OUT SdpMediaParameter*& pMediaParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -618,9 +593,8 @@ IMS_SINT32 SDPOAState::CreateMediaParameter(OUT SdpMediaParameter *&pMediaParam)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetMediaCurrentView(IN IMS_SINT32 nMid,
-        OUT SdpMediaParameter *&pMediaParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaCurrentView(
+        IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -653,9 +627,8 @@ IMS_SINT32 SDPOAState::GetMediaCurrentView(IN IMS_SINT32 nMid,
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetMediaPeerView(IN IMS_SINT32 nMid,
-        OUT SdpMediaParameter *&pMediaParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaPeerView(
+        IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -685,8 +658,8 @@ IMS_SINT32 SDPOAState::GetMediaPeerView(IN IMS_SINT32 nMid,
 
             if (pMediaParam == IMS_NULL)
             {
-                IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposal view",
-                        nMid, 0, 0);
+                IMS_TRACE_E(0, "Can't find the media parameter (%d) from the proposal view", nMid,
+                        0, 0);
                 return ISDPOAState::RESULT_NOT_FOUND;
             }
         }
@@ -705,18 +678,14 @@ IMS_SINT32 SDPOAState::GetMediaPeerView(IN IMS_SINT32 nMid,
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_SINT32 SDPOAState::GetMediaProposalView(IN IMS_SINT32 nMid,
-        OUT SdpMediaParameter *&pMediaParam) const
+PUBLIC VIRTUAL IMS_SINT32 SDPOAState::GetMediaProposalView(
+        IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_IDLE)
-            && (nState != STATE_OFFER_SENT)
-            && (nState != STATE_OFFER_RECEIVED)
-            && (nState != STATE_ESTABLISHED)
-            && (nState != STATE_OFFER_CHANGE_SENT)
-            && (nState != STATE_OFFER_CHANGE_RECEIVED))
+    if ((nState != STATE_IDLE) && (nState != STATE_OFFER_SENT) &&
+            (nState != STATE_OFFER_RECEIVED) && (nState != STATE_ESTABLISHED) &&
+            (nState != STATE_OFFER_CHANGE_SENT) && (nState != STATE_OFFER_CHANGE_RECEIVED))
     {
         IMS_TRACE_E(0, "Invalid state (%d)", nState, 0, 0);
         return ISDPOAState::RESULT_INVALID_STATE;
@@ -745,8 +714,7 @@ IMS_SINT32 SDPOAState::GetMediaProposalView(IN IMS_SINT32 nMid,
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SDPOAState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
+PUBLIC VIRTUAL void SDPOAState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -770,8 +738,7 @@ void SDPOAState::MarkRejectedOrRemoved(IN IMS_SINT32 nMid)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void SDPOAState::RemoveMediaParameter(IN IMS_SINT32 nMid)
+PUBLIC VIRTUAL void SDPOAState::RemoveMediaParameter(IN IMS_SINT32 nMid)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -796,13 +763,12 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::CreateCapabilities(IN Service *pService, IN CONST AString &strUserID,
-        IN IMS_BOOL bMProf /* = IMS_FALSE */)
+IMS_BOOL SDPOAState::CreateCapabilities(
+        IN Service* pService, IN CONST AString& strUserID, IN IMS_BOOL bMProf /* = IMS_FALSE */)
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nState != STATE_IDLE)
-            && (nState != STATE_OFFER_RECEIVED))
+    if ((nState != STATE_IDLE) && (nState != STATE_OFFER_RECEIVED))
     {
         IMS_TRACE_E(0, "Not allowed to create SDP capabilities in state (%d)", nState, 0, 0);
         return IMS_FALSE;
@@ -819,26 +785,26 @@ IMS_BOOL SDPOAState::CreateCapabilities(IN Service *pService, IN CONST AString &
     {
         if (!pCapabilities->Create(objSessionDesc))
         {
-            IMS_TRACE_E(0, "Creating an SDP capabilities for only session-level description",
-                    0, 0, 0);
+            IMS_TRACE_E(
+                    0, "Creating an SDP capabilities for only session-level description", 0, 0, 0);
             return IMS_FALSE;
         }
     }
     else
     {
         // Read the media capabilities from the media profile
-        const CoreServiceConfig *pServiceConfig = pService->GetServiceConfig();
-        const AString &strMProf = (pServiceConfig != IMS_NULL) ? \
-                    pServiceConfig->GetMediaProfile() : AString::ConstNull();
-        const MediaConfig *pMediaConfig = ConfigurationManager::GetInstance()->GetMediaConfig(
-                pService->GetSlotId());
+        const CoreServiceConfig* pServiceConfig = pService->GetServiceConfig();
+        const AString& strMProf = (pServiceConfig != IMS_NULL) ? pServiceConfig->GetMediaProfile()
+                                                               : AString::ConstNull();
+        const MediaConfig* pMediaConfig =
+                ConfigurationManager::GetInstance()->GetMediaConfig(pService->GetSlotId());
         IMSList<SdpMediaDescription> objMediaDescs;
 
         if (pMediaConfig != IMS_NULL)
         {
             // StreamMedia (audio)
-            const AStringArray &objAudioProfile
-                    = pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::STREAM_AUDIO);
+            const AStringArray& objAudioProfile =
+                    pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::STREAM_AUDIO);
 
             if (!objAudioProfile.IsEmpty())
             {
@@ -854,8 +820,8 @@ IMS_BOOL SDPOAState::CreateCapabilities(IN Service *pService, IN CONST AString &
             }
 
             // StreamMedia (video)
-            const AStringArray &objVideoProfile
-                    = pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::STREAM_VIDEO);
+            const AStringArray& objVideoProfile =
+                    pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::STREAM_VIDEO);
 
             if (!objVideoProfile.IsEmpty())
             {
@@ -871,8 +837,8 @@ IMS_BOOL SDPOAState::CreateCapabilities(IN Service *pService, IN CONST AString &
             }
 
             // FramedMedia (message)
-            const AStringArray &objFramedProfile
-                    = pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::FRAMED);
+            const AStringArray& objFramedProfile =
+                    pMediaConfig->GetMediaProfile(strMProf, IMediaConfig::FRAMED);
 
             if (!objFramedProfile.IsEmpty())
             {
@@ -907,7 +873,7 @@ Remarks
 PUBLIC
 const SessionParameter* SDPOAState::GetCapabilities() const
 {
-    const SessionParameter &objSessionParam = pCapabilities->GetCapabilities();
+    const SessionParameter& objSessionParam = pCapabilities->GetCapabilities();
 
     //---------------------------------------------------------------------------------------------
 
@@ -977,7 +943,7 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::GetSDP(OUT AString &strSDP) const
+IMS_BOOL SDPOAState::GetSDP(OUT AString& strSDP) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -987,8 +953,7 @@ IMS_BOOL SDPOAState::GetSDP(OUT AString &strSDP) const
         return IMS_FALSE;
     }
 
-    if ((nState == STATE_OFFER_SENT)
-            || (nState == STATE_OFFER_CHANGE_SENT))
+    if ((nState == STATE_OFFER_SENT) || (nState == STATE_OFFER_CHANGE_SENT))
     {
         // Do not transmit the SDP
         IMS_TRACE_D("SDP Offer/Answer :: OFFER PROGRESSING ...", 0, 0, 0);
@@ -1028,13 +993,12 @@ IMS_BOOL SDPOAState::InitiateOffer(IN IMS_SINT32 nType)
     if ((nType <= OFFER_INVALID) || (nType >= OFFER_MAX))
         return IMS_FALSE;
 
-    if ((nState != STATE_IDLE)
-            && (nState != STATE_ESTABLISHED))
+    if ((nState != STATE_IDLE) && (nState != STATE_ESTABLISHED))
     {
         return IMS_FALSE;
     }
 
-    SessionParameter *pOffer = new SessionParameter();
+    SessionParameter* pOffer = new SessionParameter();
 
     if (pOffer == IMS_NULL)
     {
@@ -1204,7 +1168,7 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
+IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage* piSIPMsg)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -1216,7 +1180,7 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
 
     // In case of any pending SDP answer, the message may not include the SDP message body.
     // So, in here, checks the message if it includes the body or not
-    ISipMessageBodyPart *piBodyPart = piSIPMsg->GetSdpBodyPart();
+    ISipMessageBodyPart* piBodyPart = piSIPMsg->GetSdpBodyPart();
 
     if (piBodyPart == IMS_NULL)
     {
@@ -1224,8 +1188,8 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
         return SdpOfferAnswer::RESULT_NOT_CHANGED;
     }
 
-    const ByteArray &objSDP = piBodyPart->GetContent();
-    const IMS_CHAR *pSDPBody = reinterpret_cast<const IMS_CHAR*>(objSDP.GetData());
+    const ByteArray& objSDP = piBodyPart->GetContent();
+    const IMS_CHAR* pSDPBody = reinterpret_cast<const IMS_CHAR*>(objSDP.GetData());
 
     AString strSDP(pSDPBody, objSDP.GetLength());
     SdpParser objParser;
@@ -1236,8 +1200,8 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
                 SipDebug::GetCharA1(strSDP.GetStr(), 32, '\n'), 0, 0);
 
         // OA_STATE_ROLLBACK_FOR_MALFORMED_SDP
-        if ((nState == STATE_ESTABLISHED)
-                && ((nOldState == STATE_OFFER_SENT) || (nOldState == STATE_OFFER_CHANGE_SENT)))
+        if ((nState == STATE_ESTABLISHED) &&
+                ((nOldState == STATE_OFFER_SENT) || (nOldState == STATE_OFFER_CHANGE_SENT)))
         {
             // Ignore the SDP answer if SDP body part is malformed...
             SetState(nOldState);
@@ -1247,8 +1211,8 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
             else
                 SetOldState(STATE_ESTABLISHED);
         }
-        else if (((nState == STATE_OFFER_RECEIVED) && (nOldState == STATE_IDLE))
-                || ((nState == STATE_OFFER_CHANGE_RECEIVED) && (nOldState == STATE_ESTABLISHED)))
+        else if (((nState == STATE_OFFER_RECEIVED) && (nOldState == STATE_IDLE)) ||
+                ((nState == STATE_OFFER_CHANGE_RECEIVED) && (nOldState == STATE_ESTABLISHED)))
         {
             // Revert the Offer/Answer mode
             nMode = MODE_IDLE;
@@ -1263,9 +1227,9 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
 
     switch (nState)
     {
-    case STATE_ESTABLISHED:
+        case STATE_ESTABLISHED:
         {
-            SessionParameter *pPrevLastOfferMade = IMS_NULL;
+            SessionParameter* pPrevLastOfferMade = IMS_NULL;
 
             // Set the previous proposed view to the last offer made view
             if (nMode == MODE_OFFERER)
@@ -1282,16 +1246,15 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
 
             if (nMode == MODE_OFFERER)
             {
-                if ((nResult == SdpOfferAnswer::RESULT_NOT_DONE)
-                        || (nResult == SdpOfferAnswer::RESULT_FAILURE)
-                        || (nResult == SdpOfferAnswer::RESULT_NOT_FOUND))
+                if ((nResult == SdpOfferAnswer::RESULT_NOT_DONE) ||
+                        (nResult == SdpOfferAnswer::RESULT_FAILURE) ||
+                        (nResult == SdpOfferAnswer::RESULT_NOT_FOUND))
                 {
                     if ((pLastOfferMade != IMS_NULL) && (pPrevLastOfferMade != IMS_NULL))
                     {
-                        pPrevLastOfferMade->UpdateRemoteVersion(
-                                pLastOfferMade->GetRemoteVersion());
+                        pPrevLastOfferMade->UpdateRemoteVersion(pLastOfferMade->GetRemoteVersion());
 
-                        SessionParameter *pTemp = pLastOfferMade;
+                        SessionParameter* pTemp = pLastOfferMade;
 
                         pLastOfferMade = pPrevLastOfferMade;
                         pPrevLastOfferMade = IMS_NULL;
@@ -1323,13 +1286,13 @@ IMS_SINT32 SDPOAState::HandleOfferAnswer(IN CONST ISipMessage *piSIPMsg)
             return nResult;
         }
 
-    case STATE_OFFER_RECEIVED:
-    case STATE_OFFER_CHANGE_RECEIVED:
-        return HandleOffer(objParser);
+        case STATE_OFFER_RECEIVED:
+        case STATE_OFFER_CHANGE_RECEIVED:
+            return HandleOffer(objParser);
 
-    default:
-        IMS_TRACE_E(0, "SDP Offer/Answer :: INVALID STATE (%d)", nState, 0, 0);
-        break;
+        default:
+            IMS_TRACE_E(0, "SDP Offer/Answer :: INVALID STATE (%d)", nState, 0, 0);
+            break;
     }
 
     return SdpOfferAnswer::RESULT_NOT_CHANGED;
@@ -1408,18 +1371,18 @@ IMS_BOOL SDPOAState::RestoreState()
 
     switch (nState)
     {
-    case STATE_OFFER_SENT:
-    case STATE_OFFER_RECEIVED:
-        SetState(STATE_IDLE);
-        break;
+        case STATE_OFFER_SENT:
+        case STATE_OFFER_RECEIVED:
+            SetState(STATE_IDLE);
+            break;
 
-    case STATE_OFFER_CHANGE_SENT:
-    case STATE_OFFER_CHANGE_RECEIVED:
-        SetState(STATE_ESTABLISHED);
-        break;
+        case STATE_OFFER_CHANGE_SENT:
+        case STATE_OFFER_CHANGE_RECEIVED:
+            SetState(STATE_ESTABLISHED);
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return IMS_TRUE;
@@ -1432,10 +1395,10 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nMessageFlow,
+IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMessageFlow,
         IN IMS_BOOL bIsCallEstablished, IN IMS_BOOL bAllowOAForNonRPR /* = IMS_FALSE */)
 {
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
     IMS_SINT32 nTrigger = TRIGGER_NONE;
     IMS_BOOL bMessageWithSDP = (piSIPMsg->GetSdpBodyPart() != IMS_NULL) ? IMS_TRUE : IMS_FALSE;
 
@@ -1451,24 +1414,24 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
 
     switch (objMethod.ToInt())
     {
-    case SipMethod::INVITE:
-        nTrigger = TRIGGER_INVITE;
-        break;
-    case SipMethod::ACK:
-        nTrigger = TRIGGER_ACK;
-        break;
-    case SipMethod::PRACK:
-        nTrigger = TRIGGER_PRACK;
-        break;
-    case SipMethod::UPDATE:
-        nTrigger = TRIGGER_UPDATE;
-        break;
+        case SipMethod::INVITE:
+            nTrigger = TRIGGER_INVITE;
+            break;
+        case SipMethod::ACK:
+            nTrigger = TRIGGER_ACK;
+            break;
+        case SipMethod::PRACK:
+            nTrigger = TRIGGER_PRACK;
+            break;
+        case SipMethod::UPDATE:
+            nTrigger = TRIGGER_UPDATE;
+            break;
 
-    default:
-        // No Offer/Answer state transition
-        IMS_TRACE_D("SDP Offer/Answer :: No state transition (Method: %s)",
-                objMethod.ToString().GetStr(), 0, 0);
-        return IMS_TRUE;
+        default:
+            // No Offer/Answer state transition
+            IMS_TRACE_D("SDP Offer/Answer :: No state transition (Method: %s)",
+                    objMethod.ToString().GetStr(), 0, 0);
+            return IMS_TRUE;
     }
 
     IMS_SINT32 nOldState = GetState();
@@ -1501,8 +1464,9 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
                     // We don't have to revert the flag here.
                     // This is because there could be still more RPR's coming
                     // and all those should also be ignored.
-                    IMS_TRACE_D("SDP Offer/Answer :: Provisional response with SDP" \
-                            " on ESTABLISHED state", 0, 0, 0);
+                    IMS_TRACE_D("SDP Offer/Answer :: Provisional response with SDP"
+                                " on ESTABLISHED state",
+                            0, 0, 0);
                     return IMS_TRUE;
                 }
             }
@@ -1525,18 +1489,18 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
 
             if (nOldState == STATE_ESTABLISHED)
             {
-                if ((bProvisionalRespWithSdp == IMS_TRUE)
-                        && (objMethod.Equals(SipMethod::INVITE)))
+                if ((bProvisionalRespWithSdp == IMS_TRUE) && (objMethod.Equals(SipMethod::INVITE)))
                 {
                     // We revert back the flag now.
                     // This is because the transaction is complete now.
                     bProvisionalRespWithSdp = IMS_FALSE;
-                    IMS_TRACE_D("SDP Offer/Answer :: Final response received &" \
-                            " ProvisionalRespWithSDP on ESTABLISHED state", 0, 0, 0);
+                    IMS_TRACE_D("SDP Offer/Answer :: Final response received &"
+                                " ProvisionalRespWithSDP on ESTABLISHED state",
+                            0, 0, 0);
                     // Consider as the device received the changed offer
                     if (!bAllowOAForNonRPR)
                     {
-                        //4 It should be verified through more testing
+                        // 4 It should be verified through more testing
                         return IMS_TRUE;
                     }
                 }
@@ -1546,14 +1510,14 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
         }
         else
         {
-            if ((bProvisionalRespWithSdp == IMS_TRUE)
-                    && (objMethod.Equals(SipMethod::INVITE)))
+            if ((bProvisionalRespWithSdp == IMS_TRUE) && (objMethod.Equals(SipMethod::INVITE)))
             {
                 // We revert back the flag now.
                 // This is because the transaction is complete now.
                 bProvisionalRespWithSdp = IMS_FALSE;
-                IMS_TRACE_D("SDP Offer/Answer :: Final failure response received &" \
-                        " ProvisionalRespWithSDP", 0, 0, 0);
+                IMS_TRACE_D("SDP Offer/Answer :: Final failure response received &"
+                            " ProvisionalRespWithSDP",
+                        0, 0, 0);
             }
 
             nTrigger = TRIGGER_FAILURE_RESP;
@@ -1585,8 +1549,8 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
     }
 
     // 401/407 response to non-INVITE will be ignored when transiting the SDP Offer/Answer state
-    if ((nMessageFlow == MESSAGE_RECEIVED)
-            && (nTrigger == TRIGGER_FAILURE_RESP) && (!objMethod.Equals(SipMethod::INVITE)))
+    if ((nMessageFlow == MESSAGE_RECEIVED) && (nTrigger == TRIGGER_FAILURE_RESP) &&
+            (!objMethod.Equals(SipMethod::INVITE)))
     {
         IMS_SINT32 nStatusCode = piSIPMsg->GetStatusCode();
 
@@ -1625,17 +1589,15 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
             IMS_TRACE_D("SDP Offer/Answer :: SENT - STATE CHANGED", 0, 0, 0);
         }
 
-        if ((nUpdateState == STATE_OFFER_SENT)
-                || (nUpdateState == STATE_OFFER_CHANGE_SENT))
+        if ((nUpdateState == STATE_OFFER_SENT) || (nUpdateState == STATE_OFFER_CHANGE_SENT))
         {
             nMode = MODE_OFFERER;
         }
 
         // Case 1 : Initial offer sent, Case 2 : Initial offer received & its answer sent
-        if ((nUpdateState == STATE_OFFER_SENT)
-                || (nOldState == STATE_OFFER_RECEIVED))
+        if ((nUpdateState == STATE_OFFER_SENT) || (nOldState == STATE_OFFER_RECEIVED))
         {
-            //3 check the failure response
+            // 3 check the failure response
             SetCapabilities();
         }
     }
@@ -1649,9 +1611,8 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
             return IMS_FALSE;
         }
 
-        if (objMethod.Equals(SipMethod::UPDATE)
-                && (nTrigger == TRIGGER_SUCCESS_RESP)
-                && (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
+        if (objMethod.Equals(SipMethod::UPDATE) && (nTrigger == TRIGGER_SUCCESS_RESP) &&
+                (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
         {
             IMS_TRACE_I("SDP Offer/Answer :: Ignored; Stray SDP answer...", 0, 0, 0);
             return IMS_TRUE;
@@ -1666,16 +1627,15 @@ IMS_BOOL SDPOAState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 n
             IMS_TRACE_D("SDP Offer/Answer :: RECEIVED - STATE CHANGED", 0, 0, 0);
         }
 
-        if ((nUpdateState == STATE_OFFER_RECEIVED)
-                || (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
+        if ((nUpdateState == STATE_OFFER_RECEIVED) || (nUpdateState == STATE_OFFER_CHANGE_RECEIVED))
         {
             nMode = MODE_ANSWERER;
         }
     }
 
     // After the state changed, do something for the special cases.
-    if (((nTrigger == TRIGGER_RPR) || (nTrigger == TRIGGER_PROVISIONAL_RESP))
-            && (bStateChanged == IMS_TRUE))
+    if (((nTrigger == TRIGGER_RPR) || (nTrigger == TRIGGER_PROVISIONAL_RESP)) &&
+            (bStateChanged == IMS_TRUE))
     {
         // Set the flag for the provisional response with SDP.
         // This will be checked against when a 200 OK is sent or received.
@@ -1704,14 +1664,14 @@ Remarks
 */
 PUBLIC
 void SDPOAState::UpdateStateOnTransactionCompleted(
-        IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nMessageFlow)
+        IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMessageFlow)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) nMessageFlow;
+    (void)nMessageFlow;
 
-    if (piSIPMsg->GetMethod().Equals(SipMethod::INVITE)
-            && SipStatusCode::IsFinal(piSIPMsg->GetStatusCode()))
+    if (piSIPMsg->GetMethod().Equals(SipMethod::INVITE) &&
+            SipStatusCode::IsFinal(piSIPMsg->GetStatusCode()))
     {
         if (bProvisionalRespWithSdp)
         {
@@ -1753,7 +1713,6 @@ void SDPOAState::CreateRefusedView()
         pRefusedView = new SessionParameter(pCapabilities->GetCapabilities());
     }
 }
-
 
 /*
  Destroy a refused SDP view.
@@ -1863,9 +1822,9 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser &objParser)
+IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser& objParser)
 {
-    SessionParameter *pAnswer = new SessionParameter();
+    SessionParameter* pAnswer = new SessionParameter();
 
     //---------------------------------------------------------------------------------------------
 
@@ -1885,8 +1844,7 @@ IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser &objParser)
     }
 
     // Update the remote session version from the origin field
-    if ((nMode == MODE_OFFERER)
-            && (pLastOfferMade != IMS_NULL))
+    if ((nMode == MODE_OFFERER) && (pLastOfferMade != IMS_NULL))
     {
         pLastOfferMade->UpdateRemoteVersion(
                 pAnswer->GetSessionParameter().GetOrigin().GetSessionVersion());
@@ -1901,11 +1859,11 @@ IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser &objParser)
     }
 #endif
 
-    SessionParameter *pCurrentCapabilities = GetCurrentCapabilities();
+    SessionParameter* pCurrentCapabilities = GetCurrentCapabilities();
 
     IMS_TRACE_D("Current SDP version=%s",
-            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(),
-            0, 0);
+            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(), 0,
+            0);
 
     if (pAnswer->GetMediaCount() != pCurrentCapabilities->GetMediaCount())
     {
@@ -1918,8 +1876,7 @@ IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser &objParser)
 
     // Check if the remote view was changed or not
 
-    if ((GetNewProposalView() == IMS_NULL)
-            || (GetNewPeerView() == IMS_NULL))
+    if ((GetNewProposalView() == IMS_NULL) || (GetNewPeerView() == IMS_NULL))
     {
         delete pAnswer;
 
@@ -1929,8 +1886,8 @@ IMS_SINT32 SDPOAState::HandleAnswer(IN CONST SdpParser &objParser)
 
     // Now, do the negotiation with the session parameter
     IMS_SINT32 nOptions = 0;
-    IMS_SINT32 nOAResult = pCurrentCapabilities->ProcessAnswer(
-            pAnswer, pProposalView, pPeerView, nOptions);
+    IMS_SINT32 nOAResult =
+            pCurrentCapabilities->ProcessAnswer(pAnswer, pProposalView, pPeerView, nOptions);
 
     delete pAnswer;
 
@@ -1944,9 +1901,9 @@ Remarks
 
 */
 PUBLIC
-IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
+IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser& objParser)
 {
-    SessionParameter *pOffer = new SessionParameter();
+    SessionParameter* pOffer = new SessionParameter();
 
     //---------------------------------------------------------------------------------------------
 
@@ -1978,7 +1935,7 @@ IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
     // Check if the remote view was changed or not
 
     // Now, do the negotiation with the session parameter
-    SessionParameter *pCurrentCapabilities = GetCurrentCapabilities();
+    SessionParameter* pCurrentCapabilities = GetCurrentCapabilities();
 
     if (pCurrentCapabilities == IMS_NULL)
     {
@@ -1991,11 +1948,10 @@ IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
     IMS_SINT32 nOAResult;
 
     IMS_TRACE_D("Current SDP version=%s",
-            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(),
-            0, 0);
+            pCurrentCapabilities->GetSessionParameter().GetOrigin().GetSessionVersion().GetStr(), 0,
+            0);
 
-    if ((GetNewProposalView() == IMS_NULL)
-            || (GetNewPeerView() == IMS_NULL))
+    if ((GetNewProposalView() == IMS_NULL) || (GetNewPeerView() == IMS_NULL))
     {
         delete pOffer;
 
@@ -2004,8 +1960,7 @@ IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
 
     // If the initial offer & local capabilities does not exist,
     // then copies all the attributes from the offer
-    if ((nState == STATE_OFFER_RECEIVED)
-            && (pCurrentCapabilities->GetMediaCount() == 0))
+    if ((nState == STATE_OFFER_RECEIVED) && (pCurrentCapabilities->GetMediaCount() == 0))
     {
         nOAResult = pCurrentCapabilities->GenerateAnswer(pOffer, pProposalView, pPeerView);
     }
@@ -2025,16 +1980,16 @@ IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
             {
                 nOptions &= ~(SdpOfferAnswer::F_MEDIA_PARAM);
             }
-            else if ((nState == STATE_OFFER_CHANGE_RECEIVED)
-                    && (pCurrentView->GetMediaCount() == 0))
+            else if ((nState == STATE_OFFER_CHANGE_RECEIVED) &&
+                    (pCurrentView->GetMediaCount() == 0))
             {
                 nOptions &= ~(SdpOfferAnswer::F_MEDIA_PARAM);
             }
         }
 
         // Check if any changes are present in SDP from the session-version field in o-line.
-        if ((nState == STATE_OFFER_CHANGE_RECEIVED)
-                && (bSDPVersionCheck && pCurrentCapabilities->IsSameVersion(pOffer)))
+        if ((nState == STATE_OFFER_CHANGE_RECEIVED) &&
+                (bSDPVersionCheck && pCurrentCapabilities->IsSameVersion(pOffer)))
         {
             (*pProposalView) = (*pCurrentView);
             (*pPeerView) = (*pOffer);
@@ -2075,12 +2030,12 @@ IMS_SINT32 SDPOAState::HandleOffer(IN CONST SdpParser &objParser)
     }
     */
 
-    //if ((nOAResult == SdpOfferAnswer::RESULT_SUCCESS)
-    //        && ((nState == STATE_OFFER_RECEIVED)
-    //                || (nState == STATE_OFFER_CHANGE_RECEIVED)))
-    if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS)
-            || (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT))
-                && (nState == STATE_OFFER_CHANGE_RECEIVED))
+    // if ((nOAResult == SdpOfferAnswer::RESULT_SUCCESS)
+    //         && ((nState == STATE_OFFER_RECEIVED)
+    //                 || (nState == STATE_OFFER_CHANGE_RECEIVED)))
+    if (((nOAResult == SdpOfferAnswer::RESULT_SUCCESS) ||
+                (nOAResult == SdpOfferAnswer::RESULT_QOS_PRECONDITION_PRESENT)) &&
+            (nState == STATE_OFFER_CHANGE_RECEIVED))
     {
         // Increase the session version of the negotiated session
         pProposalView->GetSessionParameterNC().IncreaseSessionVersion();
@@ -2128,7 +2083,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetProposedView(IN SessionParameter *pSessionParam)
+void SDPOAState::SetProposedView(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2145,7 +2100,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetCurrentView(IN SessionParameter *pSessionParam)
+void SDPOAState::SetCurrentView(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2162,7 +2117,7 @@ Remarks
 
 */
 PRIVATE
-void SDPOAState::SetLastOfferMade(IN SessionParameter *pSessionParam)
+void SDPOAState::SetLastOfferMade(IN SessionParameter* pSessionParam)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -2183,8 +2138,8 @@ void SDPOAState::SetOldState(IN IMS_SINT32 nOldState)
 {
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("SDP Offer/Answer (OldState) :: %s to %s",
-            StateToString(this->nOldState), StateToString(nOldState), 0);
+    IMS_TRACE_I("SDP Offer/Answer (OldState) :: %s to %s", StateToString(this->nOldState),
+            StateToString(nOldState), 0);
 
     this->nOldState = nOldState;
 }
@@ -2200,8 +2155,8 @@ void SDPOAState::SetState(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
-    IMS_TRACE_I("SDP Offer/Answer :: %s to %s",
-            StateToString(this->nState), StateToString(nState), 0);
+    IMS_TRACE_I(
+            "SDP Offer/Answer :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
 
     this->nState = nState;
 }
@@ -2211,26 +2166,25 @@ void SDPOAState::SetState(IN IMS_SINT32 nState)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* SDPOAState::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* SDPOAState::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_IDLE:
-        return "STATE_IDLE";
-    case STATE_OFFER_SENT:
-        return "STATE_OFFER_SENT";
-    case STATE_OFFER_RECEIVED:
-        return "STATE_OFFER_RECEIVED";
-    case STATE_ESTABLISHED:
-        return "STATE_ESTABLISHED";
-    case STATE_OFFER_CHANGE_SENT:
-        return "STATE_OFFER_CHANGE_SENT";
-    case STATE_OFFER_CHANGE_RECEIVED:
-        return "STATE_OFFER_CHANGE_RECEIVED";
-    default:
-        return "__INVALID__";
+        case STATE_IDLE:
+            return "STATE_IDLE";
+        case STATE_OFFER_SENT:
+            return "STATE_OFFER_SENT";
+        case STATE_OFFER_RECEIVED:
+            return "STATE_OFFER_RECEIVED";
+        case STATE_ESTABLISHED:
+            return "STATE_ESTABLISHED";
+        case STATE_OFFER_CHANGE_SENT:
+            return "STATE_OFFER_CHANGE_SENT";
+        case STATE_OFFER_CHANGE_RECEIVED:
+            return "STATE_OFFER_CHANGE_RECEIVED";
+        default:
+            return "__INVALID__";
     }
 }

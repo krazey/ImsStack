@@ -21,60 +21,36 @@
 #include "SipParameter.h"
 #include "SipSecurityHeader.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_DIGEST[] = "digest";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_TLS[] = "tls";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_IKE[] = "ipsec-ike";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_MAN[] = "ipsec-man";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_3GPP[] = "ipsec-3gpp";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_ALG_HMAC_MD5_96[] = "hmac-md5-96";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_ALG_HMAC_SHA_1_96[] = "hmac-sha-1-96";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_PROT_AH[] = "ah";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_PROT_ESP[] = "esp";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_TRANS[] = "trans";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_TUN[] = "tun";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_UDP_ENC_TUN[] = "UDP-enc-tun";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_DES_EDE3_CBC[] = "des-ede3-cbc";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_AES_CBC[] = "aes-cbc";
-PUBLIC GLOBAL
-const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_NULL[] = "null";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_DIGEST[] = "digest";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_TLS[] = "tls";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_IKE[] = "ipsec-ike";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_MAN[] = "ipsec-man";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MECHANISM_IPSEC_3GPP[] = "ipsec-3gpp";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_ALG_HMAC_MD5_96[] = "hmac-md5-96";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_ALG_HMAC_SHA_1_96[] = "hmac-sha-1-96";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_PROT_AH[] = "ah";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_PROT_ESP[] = "esp";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_TRANS[] = "trans";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_TUN[] = "tun";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_MOD_UDP_ENC_TUN[] = "UDP-enc-tun";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_DES_EDE3_CBC[] = "des-ede3-cbc";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_AES_CBC[] = "aes-cbc";
+PUBLIC GLOBAL const IMS_CHAR SipSecurityHeader::P_VALUE_EALG_NULL[] = "null";
 
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_PREFERENCE[] = "q";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_ALGORITHM[] = "alg";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_PROTOCOL[] = "prot";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_MODE[] = "mod";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_ENCRYPTION_ALGORITHM[] = "ealg";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_SPI_C[] = "spi-c";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_SPI_S[] = "spi-s";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_PORT_C[] = "port-c";
-PRIVATE GLOBAL
-const IMS_CHAR SipSecurityHeader::P_NAME_PORT_S[] = "port-s";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_PREFERENCE[] = "q";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_ALGORITHM[] = "alg";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_PROTOCOL[] = "prot";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_MODE[] = "mod";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_ENCRYPTION_ALGORITHM[] = "ealg";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_SPI_C[] = "spi-c";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_SPI_S[] = "spi-s";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_PORT_C[] = "port-c";
+PRIVATE GLOBAL const IMS_CHAR SipSecurityHeader::P_NAME_PORT_S[] = "port-s";
 
 PUBLIC
-SipSecurityHeader::SipSecurityHeader(IN IMS_SINT32 nMechanism/* = MECHANISM_IPSEC_3GPP*/,
-        IN const AString& strMechanism/* = AString::ConstNull()*/,
-        IN IMS_BOOL bParameterRequired/* = IMS_TRUE*/) :
+SipSecurityHeader::SipSecurityHeader(IN IMS_SINT32 nMechanism /* = MECHANISM_IPSEC_3GPP*/,
+        IN const AString& strMechanism /* = AString::ConstNull()*/,
+        IN IMS_BOOL bParameterRequired /* = IMS_TRUE*/) :
         m_bParameterRequired(bParameterRequired),
         m_nMechanism(nMechanism),
         m_strMechanism(strMechanism),
@@ -116,9 +92,7 @@ SipSecurityHeader::SipSecurityHeader(IN const SipSecurityHeader& other) :
 }
 
 PUBLIC
-SipSecurityHeader::~SipSecurityHeader()
-{
-}
+SipSecurityHeader::~SipSecurityHeader() {}
 
 PUBLIC
 SipSecurityHeader& SipSecurityHeader::operator=(IN const SipSecurityHeader& other)
@@ -185,8 +159,8 @@ void SipSecurityHeader::SetPort(IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortS)
 }
 
 PUBLIC
-void SipSecurityHeader::SetSpi(IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS,
-        IN IMS_BOOL b3gppCompliant/* = IMS_TRUE*/)
+void SipSecurityHeader::SetSpi(
+        IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS, IN IMS_BOOL b3gppCompliant /* = IMS_TRUE*/)
 {
     m_nSpiC = nSpiC;
     m_nSpiS = nSpiS;
@@ -197,8 +171,8 @@ void SipSecurityHeader::SetSpi(IN IMS_UINT32 nSpiC, IN IMS_UINT32 nSpiS,
 }
 
 PUBLIC
-IMS_BOOL SipSecurityHeader::SetExtensionParameter(IN const AString& strName,
-        IN const AString& strValue)
+IMS_BOOL SipSecurityHeader::SetExtensionParameter(
+        IN const AString& strName, IN const AString& strValue)
 {
     IMS_SLONG nIndex = m_objExtensions.GetIndexOfKey(strName);
 
@@ -212,8 +186,8 @@ IMS_BOOL SipSecurityHeader::SetExtensionParameter(IN const AString& strName,
 }
 
 PUBLIC
-IMS_BOOL SipSecurityHeader::SetUnknownParameterValue(IN IMS_SINT32 nName,
-        IN const AString& strValue)
+IMS_BOOL SipSecurityHeader::SetUnknownParameterValue(
+        IN IMS_SINT32 nName, IN const AString& strValue)
 {
     IMS_SLONG nIndex = m_objUnknownParamValues.GetIndexOfKey(nName);
 
@@ -439,8 +413,7 @@ AString SipSecurityHeader::ToString() const
     return static_cast<const AStringBuffer&>(objBuffer).GetString();
 }
 
-PUBLIC GLOBAL
-SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN ISipHeader* piHeader)
+PUBLIC GLOBAL SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN ISipHeader* piHeader)
 {
     if (piHeader == IMS_NULL)
     {
@@ -449,8 +422,7 @@ SipSecurityHeader* SipSecurityHeader::FromSipHeader(IN ISipHeader* piHeader)
 
     IMS_SINT32 nType = piHeader->GetType();
 
-    if ((nType != ISipHeader::SECURITY_CLIENT) &&
-            (nType != ISipHeader::SECURITY_SERVER) &&
+    if ((nType != ISipHeader::SECURITY_CLIENT) && (nType != ISipHeader::SECURITY_SERVER) &&
             (nType != ISipHeader::SECURITY_VERIFY))
     {
         return IMS_NULL;

@@ -15,8 +15,6 @@
 
 class SIPConnectionNotifier;
 
-
-
 /*
 SIP server connection listener interface
 
@@ -50,7 +48,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnServerConnection_NotifyRequest(IN SIPConnectionNotifier *pSCN) = 0;
+    virtual void OnServerConnection_NotifyRequest(IN SIPConnectionNotifier* pSCN) = 0;
 
     //// IMS extensions
 
@@ -75,7 +73,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnServerConnection_NotifyForkedRequest(IN SIPConnectionNotifier *pSCN) = 0;
+    virtual void OnServerConnection_NotifyForkedRequest(IN SIPConnectionNotifier* pSCN) = 0;
 };
 
-#endif // _INTERFACE_ON_SIP_SERVER_CONNECTION_LISTENER_H_
+#endif  // _INTERFACE_ON_SIP_SERVER_CONNECTION_LISTENER_H_

@@ -40,8 +40,8 @@ public:
      *                1 - destroy indirectly (async.)
      * @param objLocalIp Specify local(bound) IP address to destroy a socket
      */
-    virtual void DestroyAllSockets(IN IMS_SINT32 nMethod = 0,
-            IN const IPAddress& objLocalIp = IPAddress::NONE) = 0;
+    virtual void DestroyAllSockets(
+            IN IMS_SINT32 nMethod = 0, IN const IPAddress& objLocalIp = IPAddress::NONE) = 0;
 
     /**
      * @brief Destroys the TCP client socket which matches with the specified

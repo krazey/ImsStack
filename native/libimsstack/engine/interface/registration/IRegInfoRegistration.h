@@ -23,7 +23,7 @@ public:
      * @param objContactUri the contact URI to be retrieved
      * @return Pointer to IRegInfoContact or null.
      */
-    virtual IRegInfoContact* GetContact(IN CONST SipAddress &objContactUri) const = 0;
+    virtual IRegInfoContact* GetContact(IN CONST SipAddress& objContactUri) const = 0;
 
     /**
      * @brief Returns all the contacts of this registration element.
@@ -64,4 +64,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REG_INFO_REGISTRATION_H_
+#endif  // _INTERFACE_REG_INFO_REGISTRATION_H_

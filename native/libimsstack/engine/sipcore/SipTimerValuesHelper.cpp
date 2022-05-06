@@ -23,14 +23,13 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-PUBLIC GLOBAL
-SipTimerValues SipTimerValuesHelper::GetValues(IN IMS_SINT32 nSlotId,
-        IN const SipProfile* pSipProfile/* = IMS_NULL*/,
-        IN IMS_SINT32 nTxnType/* = NON_INVITE_CLIENT*/)
+PUBLIC GLOBAL SipTimerValues SipTimerValuesHelper::GetValues(IN IMS_SINT32 nSlotId,
+        IN const SipProfile* pSipProfile /* = IMS_NULL*/,
+        IN IMS_SINT32 nTxnType /* = NON_INVITE_CLIENT*/)
 {
     SipTimerValues objTv;
-    const SipConfigV* pSipConfigV = DYNAMIC_CAST(const SipConfigV*,
-            SipConfigProxy::GetSipConfigV(nSlotId));
+    const SipConfigV* pSipConfigV =
+            DYNAMIC_CAST(const SipConfigV*, SipConfigProxy::GetSipConfigV(nSlotId));
 
     // If the timer values are not changed on runtime, do not set the timer values.
     if ((pSipProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&

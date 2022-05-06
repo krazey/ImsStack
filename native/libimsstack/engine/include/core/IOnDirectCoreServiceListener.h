@@ -18,8 +18,6 @@
 class CoreService;
 class ISIPConnectionFactory;
 
-
-
 /*
 
 IOnDirectCoreServiceListener interface
@@ -52,8 +50,8 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(IN CoreService *pService,
-            IN ISIPConnectionFactory *piSCF) = 0;
+    virtual IMS_SINT32 OnDirectCoreService_TransactionReceived(
+            IN CoreService* pService, IN ISIPConnectionFactory* piSCF) = 0;
 };
 
-#endif // _INTERFACE_ON_DIRECT_CORE_SERVICE_LISTENER_H_
+#endif  // _INTERFACE_ON_DIRECT_CORE_SERVICE_LISTENER_H_

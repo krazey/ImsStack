@@ -22,8 +22,6 @@ class SipProfile;
 class IRegBindingListener;
 class IRegInfo;
 
-
-
 /*
 
 IRegBinding interface
@@ -559,7 +557,7 @@ public:
     </table>
 
     */
-    virtual void SetListener(IN IRegBindingListener *piListener) = 0;
+    virtual void SetListener(IN IRegBindingListener* piListener) = 0;
 
 public:
     enum
@@ -574,4 +572,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_REG_BINDING_H_
+#endif  // _INTERFACE_REG_BINDING_H_

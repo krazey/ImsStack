@@ -13,8 +13,6 @@
 #ifndef _INTERFACE_FORKED_DIALOG_METHOD_H_
 #define _INTERFACE_FORKED_DIALOG_METHOD_H_
 
-
-
 class IForkedDialogMethod
 {
 public:
@@ -33,7 +31,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL ForkedDialog_Compare(IN ISipDialog *piOrigDialog) const = 0;
+    virtual IMS_BOOL ForkedDialog_Compare(IN ISipDialog* piOrigDialog) const = 0;
 
     /*
 
@@ -50,7 +48,7 @@ public:
     </table>
 
     */
-    virtual IMS_BOOL ForkedDialog_NotifyRequest(IN ISipServerConnection *piSSC) = 0;
+    virtual IMS_BOOL ForkedDialog_NotifyRequest(IN ISipServerConnection* piSSC) = 0;
 };
 
-#endif // _INTERFACE_FORKED_DIALOG_METHOD_H_
+#endif  // _INTERFACE_FORKED_DIALOG_METHOD_H_

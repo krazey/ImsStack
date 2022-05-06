@@ -132,8 +132,10 @@ public:
      *
      * @return Map of <key,value> pair.
      */
-    inline const IMSMap<AString,AString>& GetExtensionParameters() const
-    { return m_objExtensions; }
+    inline const IMSMap<AString, AString>& GetExtensionParameters() const
+    {
+        return m_objExtensions;
+    }
 
     /**
      * @brief Gets the unknown parameter value.
@@ -145,7 +147,7 @@ public:
      *              #SEC_P_EALG
      * @return Unknown parameter value.
      */
-    const AString& GetUnknownParameterValue(IN IMS_SINT32 nName/*SEC_P_XXX*/) const;
+    const AString& GetUnknownParameterValue(IN IMS_SINT32 nName /*SEC_P_XXX*/) const;
 
     /**
      * @brief Gets the unknown parameter values.
@@ -153,7 +155,9 @@ public:
      * @return All the unknown parameter values.
      */
     inline const IMSMap<IMS_SINT32, AString>& GetUnknownParameterValues() const
-    { return m_objUnknownParamValues; }
+    {
+        return m_objUnknownParamValues;
+    }
 
     /**
      * @brief Checks if the spi / port are present or not.
@@ -166,15 +170,16 @@ public:
      * @return If the given parameter is present, returns IMS_TRUE. Otherwise, returns IMS_FALSE.
      */
     inline IMS_BOOL IsParameterPresent(IN IMS_SINT32 nParam) const
-    { return ((m_nMechParams & nParam) != 0); }
+    {
+        return ((m_nMechParams & nParam) != 0);
+    }
 
     /**
      * @brief Sets "q" parameter value.
      *
      * @param strPreference "q" parameter value to be set
      */
-    inline void SetPreference(IN const AString& strPreference)
-    { m_strPreference = strPreference; }
+    inline void SetPreference(IN const AString& strPreference) { m_strPreference = strPreference; }
 
     /**
      * @brief Sets the integrity algorithm.
@@ -183,8 +188,7 @@ public:
      *                   #ALG_HMAC_SHA_1_96\n
      *                   #ALG_HMAC_MD5_96
      */
-    inline void SetAlgorithm(IN IMS_SINT32 nAlgorithm)
-    { m_nAlgorithm = nAlgorithm; }
+    inline void SetAlgorithm(IN IMS_SINT32 nAlgorithm) { m_nAlgorithm = nAlgorithm; }
 
     /**
      * @brief Sets the encryption algorithm.
@@ -195,7 +199,9 @@ public:
      *                             #EALG_NULL
      */
     inline void SetEncryptionAlgorithm(IN IMS_SINT32 nEncryptionAlgorithm)
-    { m_nEncryptionAlgorithm = nEncryptionAlgorithm; }
+    {
+        m_nEncryptionAlgorithm = nEncryptionAlgorithm;
+    }
 
     /**
      * @brief Sets the security mode.
@@ -204,8 +210,7 @@ public:
      *              #MODE_TRANSPORT\n
      *              #MODE_TUNNEL
      */
-    inline void SetMode(IN IMS_SINT32 nMode)
-    { m_nMode = nMode; }
+    inline void SetMode(IN IMS_SINT32 nMode) { m_nMode = nMode; }
 
     /**
      * @brief Sets the client / server port number.
@@ -222,8 +227,7 @@ public:
      *                  #PROTOCOL_ESP\n
      *                  #PROTOCOL_AH
      */
-    inline void SetProtocol (IN IMS_SINT32 nProtocol)
-    { m_nProtocol = nProtocol; }
+    inline void SetProtocol(IN IMS_SINT32 nProtocol) { m_nProtocol = nProtocol; }
 
     /**
      * @brief Sets the security parameter index.
@@ -241,8 +245,7 @@ public:
      * @param b3gppCompliant Flag to indicate that the SPI value is compliant with 3GPP or not
      *                       If it's IMS_TRUE, it's compliant with 3GPP specification.
      */
-    inline void SetSpiOption(IN IMS_BOOL b3gppCompliant)
-    { m_bSpi3gppCompliant = b3gppCompliant; }
+    inline void SetSpiOption(IN IMS_BOOL b3gppCompliant) { m_bSpi3gppCompliant = b3gppCompliant; }
 
     /**
      * @brief Sets the extension parameter.
@@ -252,8 +255,7 @@ public:
      * @return If the parameter is successfully set, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetExtensionParameter(IN const AString& strName,
-            IN const AString& strValue);
+    IMS_BOOL SetExtensionParameter(IN const AString& strName, IN const AString& strValue);
 
     /**
      * @brief Sets the unknown parameter.
@@ -267,8 +269,8 @@ public:
      * @return If the parameter is successfully set, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL SetUnknownParameterValue(IN IMS_SINT32 nName/*SEC_P_XXX*/,
-            IN const AString& strValue);
+    IMS_BOOL SetUnknownParameterValue(
+            IN IMS_SINT32 nName /*SEC_P_XXX*/, IN const AString& strValue);
 
     /**
      * @brief Returns the string representation of SIP security header.
@@ -312,7 +314,7 @@ public:
     enum
     {
         PROTOCOL_AH,
-        PROTOCOL_ESP, // default
+        PROTOCOL_ESP,  // default
         PROTOCOL_UNSPECIFIED,
         PROTOCOL_UNKNOWN
     };
@@ -320,9 +322,9 @@ public:
     /// Types of security mode
     enum
     {
-        MODE_TRANSPORT, // default
+        MODE_TRANSPORT,  // default
         MODE_TUNNEL,
-        MODE_UDP_ENC_TUN, // For the device behind of NAT
+        MODE_UDP_ENC_TUN,  // For the device behind of NAT
         MODE_UNSPECIFIED,
         MODE_UNKNOWN
     };
@@ -332,7 +334,7 @@ public:
     {
         EALG_DES_EDE3_CBC,
         EALG_AES_CBC,
-        EALG_NULL, // default
+        EALG_NULL,  // default
         EALG_UNSPECIFIED,
         EALG_UNKNOWN
     };
@@ -352,13 +354,16 @@ public:
     /// To check if those parameters are present or not
     enum
     {
-       PORT_C = 0x0001,
-       PORT_S = 0x0002,
-       SPI_C = 0x0004,
-       SPI_S = 0x0008
+        PORT_C = 0x0001,
+        PORT_S = 0x0002,
+        SPI_C = 0x0004,
+        SPI_S = 0x0008
     };
 
-    enum { SPI_MAX_DIGITS = 10 };
+    enum
+    {
+        SPI_MAX_DIGITS = 10
+    };
 
     static const IMS_CHAR P_VALUE_MECHANISM_DIGEST[];
     static const IMS_CHAR P_VALUE_MECHANISM_TLS[];
@@ -394,7 +399,7 @@ private:
     IMS_SINT32 m_nMechanism;
     AString m_strMechanism;
     AString m_strPreference;
-    IMS_SINT32 m_nAlgorithm; // Mandatory field
+    IMS_SINT32 m_nAlgorithm;  // Mandatory field
     IMS_SINT32 m_nProtocol;
     IMS_SINT32 m_nMode;
     IMS_SINT32 m_nEncryptionAlgorithm;

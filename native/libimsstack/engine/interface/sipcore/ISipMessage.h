@@ -25,8 +25,7 @@
  *
  * @see ISipMessageBodyPart
  */
-class ISipMessage :
-        public ISipObject
+class ISipMessage : public ISipObject
 {
 public:
     /**
@@ -82,8 +81,8 @@ public:
      * @param strName The header name, either in full or compact form
      * @return The number of header field will be returned.
      */
-    virtual IMS_SINT32 GetHeaderCount(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) const = 0;
+    virtual IMS_SINT32 GetHeaderCount(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Gets the header field value(s) of the specified header type.
@@ -95,8 +94,8 @@ public:
      * @return It returns the list of header field values (topmost first).\n
      *         If an error occurs, it returns the empty list.
      */
-    virtual IMSList<AString> GetHeaders(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) const = 0;
+    virtual IMSList<AString> GetHeaders(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Gets the SIP method.
@@ -165,8 +164,8 @@ public:
      *              a valid header name.
      * @param strName The header name, either in full or compact form
      */
-    virtual void RemoveHeader(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) = 0;
+    virtual void RemoveHeader(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) = 0;
 
     /**
      * @brief Sets a header value in the SIP message.
@@ -244,8 +243,8 @@ public:
      * @return If the specified header field exists, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL IsHeaderPresent(IN IMS_SINT32 nType,
-            IN const AString& strName = AString::ConstNull()) const = 0;
+    virtual IMS_BOOL IsHeaderPresent(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const = 0;
 
     /**
      * @brief Checks if the message is RPR (Reliable Provisional Response).

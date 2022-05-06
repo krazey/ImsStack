@@ -14,18 +14,10 @@
 #include "TextParser.h"
 #include "Protocol.h"
 
-
-
 PUBLIC
-Protocol::Protocol()
-{
-}
+Protocol::Protocol() {}
 
-PUBLIC VIRTUAL
-Protocol::~Protocol()
-{
-}
-
+PUBLIC VIRTUAL Protocol::~Protocol() {}
 
 /*
  Creates and opens a Connection; SIPConnection, Service, and so on.
@@ -40,8 +32,7 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PUBLIC VIRTUAL
-IConnection* Protocol::OpenPrim(IN const AString & /* strName */)
+PUBLIC VIRTUAL IConnection* Protocol::OpenPrim(IN const AString& /* strName */)
 {
     // throw exception
     return IMS_NULL;
@@ -60,9 +51,8 @@ Remarks
      ILLEGAL_ARGUMENT,
      CONNECTION_NOT_FOUND
 */
-PUBLIC VIRTUAL
-IConnection* Protocol::OpenPrim(IN const AString & /* strScheme */,
-        IN const AString & /* strTarget */, IN const AString & /* strParams */)
+PUBLIC VIRTUAL IConnection* Protocol::OpenPrim(IN const AString& /* strScheme */,
+        IN const AString& /* strTarget */, IN const AString& /* strParams */)
 {
     // throw exception
     return IMS_NULL;
@@ -74,9 +64,8 @@ IConnection* Protocol::OpenPrim(IN const AString & /* strScheme */,
 Remarks
 
 */
-PUBLIC GLOBAL
-void Protocol::ParseName(IN const AString &strName, OUT AString &strScheme,
-        OUT AString &strTarget, OUT AString &strParams)
+PUBLIC GLOBAL void Protocol::ParseName(IN const AString& strName, OUT AString& strScheme,
+        OUT AString& strTarget, OUT AString& strParams)
 {
     IMS_SINT32 nPosColon;
     IMS_SINT32 nPosSemiColon;

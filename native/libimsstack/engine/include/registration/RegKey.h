@@ -18,23 +18,25 @@
 class RegKey
 {
 public:
-    inline RegKey()
-        : nSlotId(IMS_SLOT_ANY)
-        , nFlowId(0)
-    {}
-    inline RegKey(IN IMS_SINT32 nSlotId_, IN IMS_UINT32 nFlowId_)
-        : nSlotId(nSlotId_)
-        , nFlowId(nFlowId_)
-    {}
-    inline RegKey(IN const RegKey &objRHS)
-        : nSlotId(objRHS.nSlotId)
-        , nFlowId(objRHS.nFlowId)
-    {}
-    inline ~RegKey()
-    {}
+    inline RegKey() :
+            nSlotId(IMS_SLOT_ANY),
+            nFlowId(0)
+    {
+    }
+    inline RegKey(IN IMS_SINT32 nSlotId_, IN IMS_UINT32 nFlowId_) :
+            nSlotId(nSlotId_),
+            nFlowId(nFlowId_)
+    {
+    }
+    inline RegKey(IN const RegKey& objRHS) :
+            nSlotId(objRHS.nSlotId),
+            nFlowId(objRHS.nFlowId)
+    {
+    }
+    inline ~RegKey() {}
 
 public:
-    inline RegKey& operator=(IN const RegKey &objRHS)
+    inline RegKey& operator=(IN const RegKey& objRHS)
     {
         if (this != &objRHS)
         {
@@ -47,18 +49,19 @@ public:
 
     // For IMSMap class
     inline IMS_BOOL operator<(IN const RegKey& objRHS)
-    { return GetHashCode() < objRHS.GetHashCode(); }
+    {
+        return GetHashCode() < objRHS.GetHashCode();
+    }
 
 public:
     inline IMS_BOOL Equals(IN const RegKey& objRHS) const
-    { return (nSlotId == objRHS.nSlotId) && (nFlowId == objRHS.nFlowId); }
-    inline IMS_UINT32 GetHashCode() const
-    { return (nSlotId * 997) + (nFlowId * 13); }
+    {
+        return (nSlotId == objRHS.nSlotId) && (nFlowId == objRHS.nFlowId);
+    }
+    inline IMS_UINT32 GetHashCode() const { return (nSlotId * 997) + (nFlowId * 13); }
 
-    inline IMS_UINT32 GetFlowId() const
-    { return nFlowId; }
-    inline IMS_SINT32 GetSlotId() const
-    { return nSlotId; }
+    inline IMS_UINT32 GetFlowId() const { return nFlowId; }
+    inline IMS_SINT32 GetSlotId() const { return nSlotId; }
 
     inline void Invalidate()
     {
@@ -72,13 +75,19 @@ private:
 };
 
 inline IMS_BOOL operator==(IN const RegKey& objK1, IN const RegKey& objK2)
-{ return objK1.Equals(objK2); }
+{
+    return objK1.Equals(objK2);
+}
 
 inline IMS_BOOL operator!=(IN const RegKey& objK1, IN const RegKey& objK2)
-{ return !objK1.Equals(objK2); }
+{
+    return !objK1.Equals(objK2);
+}
 
 // For IMSMap class
 inline IMS_BOOL operator<(IN const RegKey& objK1, IN const RegKey& objK2)
-{ return objK1.GetHashCode() < objK2.GetHashCode(); }
+{
+    return objK1.GetHashCode() < objK2.GetHashCode();
+}
 
-#endif // _REG_KEY_H_
+#endif  // _REG_KEY_H_

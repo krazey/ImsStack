@@ -102,7 +102,9 @@ public:
 
 public:
     inline static IMS_BOOL IsPortSpecified(IN IMS_SINT32 nPort)
-    { return ((nPort > 0) && (nPort < PORT_UNSPECIFIED)); }
+    {
+        return ((nPort > 0) && (nPort < PORT_UNSPECIFIED));
+    }
 
 public:
     //// Connection related constants

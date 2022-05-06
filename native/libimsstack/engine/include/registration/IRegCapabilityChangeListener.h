@@ -15,8 +15,6 @@
 
 #include "AString.h"
 
-
-
 class IRegCapabilityChangeListener
 {
 public:
@@ -38,8 +36,8 @@ public:
     </table>
 
     */
-    virtual void RegCapabilityChange_ServiceAdded(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId) = 0;
+    virtual void RegCapabilityChange_ServiceAdded(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 
     /*
      Notifies the application that the registration binding is updated by removing a service.
@@ -59,8 +57,8 @@ public:
     </table>
 
     */
-    virtual void RegCapabilityChange_ServiceRemoved(IN CONST AString &strAppId,
-            IN CONST AString &strServiceId) = 0;
+    virtual void RegCapabilityChange_ServiceRemoved(
+            IN CONST AString& strAppId, IN CONST AString& strServiceId) = 0;
 };
 
-#endif // _INTERFACE_REG_CAPABILITY_CHANGE_LISTENER_H_
+#endif  // _INTERFACE_REG_CAPABILITY_CHANGE_LISTENER_H_

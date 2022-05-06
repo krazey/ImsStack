@@ -22,21 +22,18 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-
-
 PUBLIC
-SIPClientTransmissionProxy::SIPClientTransmissionProxy()
-    : EngineActivity()
-    , pTV(IMS_NULL)
-    , pCTState(IMS_NULL)
-    , piListener(IMS_NULL)
-    , bIsResubmittedRequest(IMS_FALSE)
-    , pSocket(IMS_NULL)
+SIPClientTransmissionProxy::SIPClientTransmissionProxy() :
+        EngineActivity(),
+        pTV(IMS_NULL),
+        pCTState(IMS_NULL),
+        piListener(IMS_NULL),
+        bIsResubmittedRequest(IMS_FALSE),
+        pSocket(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-SIPClientTransmissionProxy::~SIPClientTransmissionProxy()
+PUBLIC VIRTUAL SIPClientTransmissionProxy::~SIPClientTransmissionProxy()
 {
     DestroyStreamSocket();
 }
@@ -46,22 +43,21 @@ SIPClientTransmissionProxy::~SIPClientTransmissionProxy()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL SIPClientTransmissionProxy::DispatchMessage(IN IMSMSG &objMSG)
+PUBLIC VIRTUAL IMS_BOOL SIPClientTransmissionProxy::DispatchMessage(IN IMSMSG& objMSG)
 {
     switch (objMSG.GetName())
     {
-    case AMSG_SEND_MESSAGE:
-        SendPendingMessage();
-        DestroyStreamSocket();
-        break;
+        case AMSG_SEND_MESSAGE:
+            SendPendingMessage();
+            DestroyStreamSocket();
+            break;
 
-    case AMSG_NOTIFY_TRANSPORT_ERROR:
-        NotifyTransportError(LONG_TO_INT(objMSG.nLparam));
-        break;
+        case AMSG_NOTIFY_TRANSPORT_ERROR:
+            NotifyTransportError(LONG_TO_INT(objMSG.nLparam));
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return IMS_TRUE;
@@ -130,7 +126,7 @@ Remarks
 
 */
 PUBLIC
-void SIPClientTransmissionProxy::SetListener(IN ISIPClientTransmissionListener *piListener)
+void SIPClientTransmissionProxy::SetListener(IN ISIPClientTransmissionListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -143,7 +139,7 @@ Remarks
 
 */
 PUBLIC
-void SIPClientTransmissionProxy::SetTimerValues(IN SipTimerValues *pTV)
+void SIPClientTransmissionProxy::SetTimerValues(IN SipTimerValues* pTV)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -156,22 +152,20 @@ Remarks
 
 */
 PUBLIC
-void SIPClientTransmissionProxy::SetTransactionState(IN SIPClientTransactionState *pCTState)
+void SIPClientTransmissionProxy::SetTransactionState(IN SIPClientTransactionState* pCTState)
 {
     //---------------------------------------------------------------------------------------------
 
     this->pCTState = pCTState;
 }
 
-
 /*
 
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPClientTransmissionProxy::Socket_NotifyError(IN SIPSocket *pSocket,
-        IN IMS_SINT32 nErrorCode)
+PRIVATE VIRTUAL void SIPClientTransmissionProxy::Socket_NotifyError(
+        IN SIPSocket* pSocket, IN IMS_SINT32 nErrorCode)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -195,8 +189,7 @@ void SIPClientTransmissionProxy::Socket_NotifyError(IN SIPSocket *pSocket,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void SIPClientTransmissionProxy::Socket_SendEnabled(IN SIPSocket *pSocket)
+PRIVATE VIRTUAL void SIPClientTransmissionProxy::Socket_SendEnabled(IN SIPSocket* pSocket)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -225,8 +218,8 @@ void SIPClientTransmissionProxy::DestroyStreamSocket()
 
     if (pSocket != IMS_NULL)
     {
-        SIPTransportHelper* pTransportHelper
-                = SIPFactoryProxy::GetInstance()->GetTransportHelper(GetSlotId());
+        SIPTransportHelper* pTransportHelper =
+                SIPFactoryProxy::GetInstance()->GetTransportHelper(GetSlotId());
         pTransportHelper->Destroy(pSocket, this);
         pSocket = IMS_NULL;
     }
@@ -240,8 +233,7 @@ Remarks
 PRIVATE
 IMS_BOOL SIPClientTransmissionProxy::IsUDPFallbackRequired() const
 {
-    SIPTransport *pTransport = (pCTState != IMS_NULL) ?\
-            pCTState->GetSIPTransport() : IMS_NULL;
+    SIPTransport* pTransport = (pCTState != IMS_NULL) ? pCTState->GetSIPTransport() : IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -252,8 +244,8 @@ IMS_BOOL SIPClientTransmissionProxy::IsUDPFallbackRequired() const
 
     IMS_SINT32 nProtocol = pTransport->GetProtocol(SIPTransport::TA_FAR);
 
-    return (!pTransport->IsTCPConnectionOnlyRequired()
-            && (nProtocol == SIPTransportAddress::PROTOCOL_TCP));
+    return (!pTransport->IsTCPConnectionOnlyRequired() &&
+            (nProtocol == SIPTransportAddress::PROTOCOL_TCP));
 }
 
 /*
@@ -264,7 +256,7 @@ Remarks
 PRIVATE
 IMS_BOOL SIPClientTransmissionProxy::IsUDPFallbackSupported() const
 {
-    SipProfile *pProfile = (pCTState != IMS_NULL) ? pCTState->GetSIPProfile() : IMS_NULL;
+    SipProfile* pProfile = (pCTState != IMS_NULL) ? pCTState->GetSIPProfile() : IMS_NULL;
 
     //---------------------------------------------------------------------------------------------
 
@@ -281,8 +273,8 @@ void SIPClientTransmissionProxy::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 {
     //---------------------------------------------------------------------------------------------
 
-    if ((nErrorCode == SIPSocket::ERROR_CONNECTION_TIMEDOUT)
-            || (nErrorCode == SIPSocket::ERROR_CONNECT_FAILED))
+    if ((nErrorCode == SIPSocket::ERROR_CONNECTION_TIMEDOUT) ||
+            (nErrorCode == SIPSocket::ERROR_CONNECT_FAILED))
     {
         // Change transport protocol to UDP
         if (pCTState != IMS_NULL)
@@ -296,8 +288,8 @@ void SIPClientTransmissionProxy::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 
     if (piListener != IMS_NULL)
     {
-        AString strError = SIPTransport::CreateSocketErrorMessage(
-                nErrorCode, SIPSocketAddress::SOCKET_NONE);
+        AString strError =
+                SIPTransport::CreateSocketErrorMessage(nErrorCode, SIPSocketAddress::SOCKET_NONE);
 
         piListener->ClientTransmission_NotifyError(SipError::TRANSPORT_ERROR, strError);
     }
@@ -317,8 +309,7 @@ IMS_RESULT SIPClientTransmissionProxy::PrepareStreamSocket()
 
     if (pSocket == IMS_NULL)
     {
-        SIPTransport *pTransport = (pCTState != IMS_NULL) ?\
-                pCTState->GetSIPTransport() : IMS_NULL;
+        SIPTransport* pTransport = (pCTState != IMS_NULL) ? pCTState->GetSIPTransport() : IMS_NULL;
 
         if (pTransport == IMS_NULL)
         {

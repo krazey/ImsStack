@@ -21,7 +21,7 @@ public:
      * @return Pointer to IConnection or null
      * @see IConnection
      */
-    static IConnection* Open(IN const AString &strName);
+    static IConnection* Open(IN const AString& strName);
 
     /**
      * @brief Creates IConnection interface using a specified scheme, target, and parameters.
@@ -34,8 +34,8 @@ public:
      * @return Pointer to IConnection or null
      * @see IConnection
      */
-    static IConnection* Open(IN const AString &strScheme, IN const AString &strTarget,
-            IN const AString &strParams);
+    static IConnection* Open(
+            IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams);
 };
 
-#endif // _CONNECTOR_H_
+#endif  // _CONNECTOR_H_

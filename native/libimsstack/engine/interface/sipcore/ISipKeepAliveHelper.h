@@ -25,8 +25,7 @@ class ISipKeepAliveHelperListener;
 /**
  * @brief This class provides a helper interface to control SIP keep-alive operations.
  */
-class ISipKeepAliveHelper :
-        public ISipObject
+class ISipKeepAliveHelper : public ISipObject
 {
 public:
     /**
@@ -44,23 +43,23 @@ public:
      */
     virtual void SetListener(IN ISipKeepAliveHelperListener* piListener) = 0;
 
-     /**
-      * @brief Sets the destination transport information to transmit the keep-alive packet.
-      *
-      * @param objIpAddr Destination IP address
-      * @param nPort Destination port number
-      */
+    /**
+     * @brief Sets the destination transport information to transmit the keep-alive packet.
+     *
+     * @param objIpAddr Destination IP address
+     * @param nPort Destination port number
+     */
     virtual void SetTransportTupleD(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort) = 0;
 
     /**
-      * @brief Sets the source transport information to transmit the keep-alive packet.
-      *
-      * @param objIpAddr Source IP address
-      * @param nPort Source port number (In case of TCP with no-ipsec, it MUST be 0)
-      * @param nProtocol Transport procotol to be sent\n
-      *                  #Sip#TRANSPORT_UDP\n
-      *                  #Sip#TRANSPORT_TCP
-      */
+     * @brief Sets the source transport information to transmit the keep-alive packet.
+     *
+     * @param objIpAddr Source IP address
+     * @param nPort Source port number (In case of TCP with no-ipsec, it MUST be 0)
+     * @param nProtocol Transport procotol to be sent\n
+     *                  #Sip#TRANSPORT_UDP\n
+     *                  #Sip#TRANSPORT_TCP
+     */
     virtual void SetTransportTupleS(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPort,
             IN IMS_SINT32 nProtocol = Sip::TRANSPORT_UDP) = 0;
 };

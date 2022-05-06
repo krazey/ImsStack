@@ -15,8 +15,6 @@
 
 class SIPClientConnection;
 
-
-
 /*
 SIP client connection listener interface
 
@@ -49,7 +47,7 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnClientConnection_NotifyResponse(IN SIPClientConnection *pSCC) = 0;
+    virtual void OnClientConnection_NotifyResponse(IN SIPClientConnection* pSCC) = 0;
 
     //// IMS extensions
 
@@ -75,8 +73,8 @@ public:
     ----------              ----------
     </table>
     */
-    virtual void OnClientConnection_NotifyForkedResponse(IN SIPClientConnection *pSCC,
-            IN SIPClientConnection *pForkedSCC) = 0;
+    virtual void OnClientConnection_NotifyForkedResponse(
+            IN SIPClientConnection* pSCC, IN SIPClientConnection* pForkedSCC) = 0;
 };
 
-#endif // _INTERFACE_ON_SIP_CLIENT_CONNECTION_LISTENER_H_
+#endif  // _INTERFACE_ON_SIP_CLIENT_CONNECTION_LISTENER_H_

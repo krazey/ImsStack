@@ -19,24 +19,21 @@
 class Service;
 class ServiceManagerPrivate;
 
-
-
-class ServiceManager
-    : public IServiceManagerListener
+class ServiceManager : public IServiceManagerListener
 {
 private:
     ServiceManager();
-    ServiceManager(IN const ServiceManager &objRHS);
-    ServiceManager& operator=(IN const ServiceManager &objRHS);
+    ServiceManager(IN const ServiceManager& objRHS);
+    ServiceManager& operator=(IN const ServiceManager& objRHS);
 
 public:
     virtual ~ServiceManager();
 
 public:
-    IMS_BOOL AttachService(IN Service *pService);
-    void DetachService(IN Service *pService);
-    Service* GetService(IN IMS_SINT32 nSlotId,
-            IN const AString& strAppId, IN const AString& strServiceId) const;
+    IMS_BOOL AttachService(IN Service* pService);
+    void DetachService(IN Service* pService);
+    Service* GetService(IN IMS_SINT32 nSlotId, IN const AString& strAppId,
+            IN const AString& strServiceId) const;
     const IMSList<Service*>& GetServices() const;
     IMSList<Service*> GetServices(IN IMS_SINT32 nSlotId) const;
 
@@ -44,13 +41,13 @@ public:
 
 private:
     // IServiceManagerListener interface
-    virtual void ServiceClosed(IN Service *pService);
+    virtual void ServiceClosed(IN Service* pService);
 
     IMS_BOOL StartUp();
     void CleanUp();
 
 private:
-    ServiceManagerPrivate *pSvcMngrP;
+    ServiceManagerPrivate* pSvcMngrP;
 };
 
-#endif // _SERVICE_MANAGER_H_
+#endif  // _SERVICE_MANAGER_H_

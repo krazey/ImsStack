@@ -17,53 +17,39 @@
 #include "SIPProtocol.h"
 #include "IMSCoreProtocol.h"
 
-#endif // ___IMS_DYNAMIC_BINDER___
+#endif  // ___IMS_DYNAMIC_BINDER___
 
 #include "ProtocolPermission.h"
-
-
 
 #ifdef ___IMS_DYNAMIC_BINDER___
 class ProtocolBinder
 {
 public:
-    inline ProtocolBinder(IN CONST AString &strName_, IN Protocol *pProtocol_)
-        : strName(strName_)
-        , pProtocol(pProtocol_)
+    inline ProtocolBinder(IN CONST AString& strName_, IN Protocol* pProtocol_) :
+            strName(strName_),
+            pProtocol(pProtocol_)
     {
     }
-    inline ~ProtocolBinder()
-    {
-    }
+    inline ~ProtocolBinder() {}
 
 public:
-    inline const AString& GetName() const
-    {
-        return strName;
-    }
-    inline Protocol* GetProtocol() const
-    {
-        return pProtocol;
-    }
+    inline const AString& GetName() const { return strName; }
+    inline Protocol* GetProtocol() const { return pProtocol; }
 
 private:
     AString strName;
-    Protocol *pProtocol;
+    Protocol* pProtocol;
 };
-
-
 
 class ProtocolPermissionPrivate
 {
 public:
-    inline ProtocolPermissionPrivate()
-    {
-    }
+    inline ProtocolPermissionPrivate() {}
     inline ~ProtocolPermissionPrivate()
     {
         for (IMS_UINT32 i = 0; i < objBinders.GetSize(); i++)
         {
-            ProtocolBinder *pBinder = objBinders.GetAt(i);
+            ProtocolBinder* pBinder = objBinders.GetAt(i);
 
             if (pBinder != IMS_NULL)
             {
@@ -86,23 +72,20 @@ class ProtocolPermissionPrivate
 
 struct ProtocolBinder
 {
-    const IMS_CHAR *pszName;
-    Protocol *pProtocol;
+    const IMS_CHAR* pszName;
+    Protocol* pProtocol;
 };
 
-static const ProtocolBinder PROTOCOL_BINDER[] =
-{
-    { IMSCore::CONNECTION_SCHEME, IMSCoreProtocol::GetInstance() },
-    { Sip::CONNECTION_SCHEME_SIP, SIPProtocol::GetInstance() }
-    //    { Sip::CONNECTION_SCHEME_SIPS, SIPProtocol::GetInstance() }
+static const ProtocolBinder PROTOCOL_BINDER[] = {
+        {IMSCore::CONNECTION_SCHEME, IMSCoreProtocol::GetInstance()},
+        {Sip::CONNECTION_SCHEME_SIP, SIPProtocol::GetInstance()    }
+  //    { Sip::CONNECTION_SCHEME_SIPS, SIPProtocol::GetInstance() }
 };
-#endif // ___IMS_DYNAMIC_BINDER___
-
-
+#endif  // ___IMS_DYNAMIC_BINDER___
 
 PRIVATE
-ProtocolPermission::ProtocolPermission()
-    : pProtocolPermissionP(IMS_NULL)
+ProtocolPermission::ProtocolPermission() :
+        pProtocolPermissionP(IMS_NULL)
 {
 }
 
@@ -122,13 +105,13 @@ Remarks
 
 */
 PUBLIC
-Protocol* ProtocolPermission::Lookup(IN const AString &strName)
+Protocol* ProtocolPermission::Lookup(IN const AString& strName)
 {
 #ifdef ___IMS_DYNAMIC_BINDER___
 
     for (IMS_UINT32 i = 0; i < pProtocolPermissionP->objBinders.GetSize(); i++)
     {
-        ProtocolBinder *pBinder = pProtocolPermissionP->objBinders.GetAt(i);
+        ProtocolBinder* pBinder = pProtocolPermissionP->objBinders.GetAt(i);
 
         if (pBinder != IMS_NULL)
         {
@@ -145,7 +128,7 @@ Protocol* ProtocolPermission::Lookup(IN const AString &strName)
 
     for (IMS_SINT32 i = 0; i < nNumOfBinder; ++i)
     {
-        const ProtocolBinder *pBinder = &(PROTOCOL_BINDER[i]);
+        const ProtocolBinder* pBinder = &(PROTOCOL_BINDER[i]);
 
         if (strName.EqualsIgnoreCase(pBinder->pszName))
         {
@@ -153,7 +136,7 @@ Protocol* ProtocolPermission::Lookup(IN const AString &strName)
         }
     }
 
-#endif // ___IMS_DYNAMIC_BINDER___
+#endif  // ___IMS_DYNAMIC_BINDER___
 
     return IMS_NULL;
 }
@@ -164,11 +147,11 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL ProtocolPermission::Register(IN const AString &strName, IN Protocol *pProtocol)
+IMS_BOOL ProtocolPermission::Register(IN const AString& strName, IN Protocol* pProtocol)
 {
 #ifdef ___IMS_DYNAMIC_BINDER___
 
-    ProtocolBinder *pBinder;
+    ProtocolBinder* pBinder;
 
     for (IMS_UINT32 i = 0; i < pProtocolPermissionP->objBinders.GetSize(); i++)
     {
@@ -199,10 +182,10 @@ IMS_BOOL ProtocolPermission::Register(IN const AString &strName, IN Protocol *pP
 
 #else
 
-    (void) strName;
-    (void) pProtocol;
+    (void)strName;
+    (void)pProtocol;
 
-#endif // ___IMS_DYNAMIC_BINDER___
+#endif  // ___IMS_DYNAMIC_BINDER___
 
     return IMS_TRUE;
 }
@@ -213,13 +196,13 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL ProtocolPermission::Deregister(IN const AString &strName)
+IMS_BOOL ProtocolPermission::Deregister(IN const AString& strName)
 {
 #ifdef ___IMS_DYNAMIC_BINDER___
 
     for (IMS_UINT32 i = 0; i < pProtocolPermissionP->objBinders.GetSize(); i++)
     {
-        ProtocolBinder *pBinder = pProtocolPermissionP->objBinders.GetAt(i);
+        ProtocolBinder* pBinder = pProtocolPermissionP->objBinders.GetAt(i);
 
         if (pBinder != IMS_NULL)
         {
@@ -235,9 +218,9 @@ IMS_BOOL ProtocolPermission::Deregister(IN const AString &strName)
 
 #else
 
-    (void) strName;
+    (void)strName;
 
-#endif // ___IMS_DYNAMIC_BINDER___
+#endif  // ___IMS_DYNAMIC_BINDER___
 
     return IMS_FALSE;
 }
@@ -247,10 +230,9 @@ IMS_BOOL ProtocolPermission::Deregister(IN const AString &strName)
 Remarks
 
 */
-PUBLIC GLOBAL
-ProtocolPermission* ProtocolPermission::GetInstance()
+PUBLIC GLOBAL ProtocolPermission* ProtocolPermission::GetInstance()
 {
-    static ProtocolPermission *pPotocolPermission = IMS_NULL;
+    static ProtocolPermission* pPotocolPermission = IMS_NULL;
 
     if (pPotocolPermission == IMS_NULL)
     {

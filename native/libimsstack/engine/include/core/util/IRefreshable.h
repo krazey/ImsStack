@@ -15,8 +15,6 @@
 
 class ISipClientConnection;
 
-
-
 /*
 
 Refreshable interface
@@ -45,8 +43,8 @@ public:
     </table>
 
     */
-    virtual void Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
-            IN IMS_SINT32 nCode = 0) = 0;
+    virtual void Refreshable_RefreshCompleted(
+            IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode = 0) = 0;
 
     /*
 
@@ -85,4 +83,4 @@ public:
     virtual void Refreshable_RefreshTerminated() = 0;
 };
 
-#endif // _INTERFACE_REFRESHABLE_H_
+#endif  // _INTERFACE_REFRESHABLE_H_

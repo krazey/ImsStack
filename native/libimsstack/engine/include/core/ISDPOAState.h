@@ -16,8 +16,6 @@
 #include "offeranswer/SdpSessionParameter.h"
 #include "offeranswer/SdpMediaParameter.h"
 
-
-
 /*
 
 SDPOAState interface
@@ -88,8 +86,7 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetSessionCurrentView(
-            OUT SdpSessionParameter *&pSessionParam) const = 0;
+    virtual IMS_SINT32 GetSessionCurrentView(OUT SdpSessionParameter*& pSessionParam) const = 0;
 
     /*
 
@@ -109,7 +106,7 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetSessionPeerView(OUT SdpSessionParameter *&pSessionParam) const = 0;
+    virtual IMS_SINT32 GetSessionPeerView(OUT SdpSessionParameter*& pSessionParam) const = 0;
 
     /*
 
@@ -129,7 +126,7 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetSessionProposalView(OUT SdpSessionParameter *&pSessionParam) const = 0;
+    virtual IMS_SINT32 GetSessionProposalView(OUT SdpSessionParameter*& pSessionParam) const = 0;
 
     /*
 
@@ -149,7 +146,7 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 CreateMediaParameter(OUT SdpMediaParameter *&pMediaParam) = 0;
+    virtual IMS_SINT32 CreateMediaParameter(OUT SdpMediaParameter*& pMediaParam) = 0;
 
     /*
 
@@ -169,8 +166,8 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetMediaCurrentView(IN IMS_SINT32 nMid,
-            OUT SdpMediaParameter *&pMediaParam) const = 0;
+    virtual IMS_SINT32 GetMediaCurrentView(
+            IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const = 0;
 
     /*
 
@@ -190,8 +187,8 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetMediaPeerView(IN IMS_SINT32 nMid,
-            OUT SdpMediaParameter *&pMediaParam) const = 0;
+    virtual IMS_SINT32 GetMediaPeerView(
+            IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const = 0;
 
     /*
 
@@ -211,8 +208,8 @@ public:
     </table>
 
     */
-    virtual IMS_SINT32 GetMediaProposalView(IN IMS_SINT32 nMid,
-            OUT SdpMediaParameter *&pMediaParam) const = 0;
+    virtual IMS_SINT32 GetMediaProposalView(
+            IN IMS_SINT32 nMid, OUT SdpMediaParameter*& pMediaParam) const = 0;
 
     /*
 
@@ -266,4 +263,4 @@ public:
     };
 };
 
-#endif // _INTERFACE_SDP_OFFER_ANSWER_STATE_H_
+#endif  // _INTERFACE_SDP_OFFER_ANSWER_STATE_H_

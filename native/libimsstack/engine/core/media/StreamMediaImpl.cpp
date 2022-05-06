@@ -19,18 +19,15 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-StreamMediaImpl::StreamMediaImpl(IN StreamMedia *pStreamMedia_)
-    : pStreamMediaProposal(IMS_NULL)
-    , pStreamMedia(pStreamMedia_)
+StreamMediaImpl::StreamMediaImpl(IN StreamMedia* pStreamMedia_) :
+        pStreamMediaProposal(IMS_NULL),
+        pStreamMedia(pStreamMedia_)
 {
     pStreamMedia->SetMediaListener(this);
 }
 
-PUBLIC VIRTUAL
-StreamMediaImpl::~StreamMediaImpl()
+PUBLIC VIRTUAL StreamMediaImpl::~StreamMediaImpl()
 {
     if (pStreamMediaProposal != IMS_NULL)
     {
@@ -39,10 +36,9 @@ StreamMediaImpl::~StreamMediaImpl()
     }
 }
 
-PRIVATE VIRTUAL
-IMS_BOOL StreamMediaImpl::Equals(IN CONST IMedia *piMedia) const
+PRIVATE VIRTUAL IMS_BOOL StreamMediaImpl::Equals(IN CONST IMedia* piMedia) const
 {
-    const StreamMediaImpl *pMediaImpl = DYNAMIC_CAST(const StreamMediaImpl*, piMedia);
+    const StreamMediaImpl* pMediaImpl = DYNAMIC_CAST(const StreamMediaImpl*, piMedia);
 
     //---------------------------------------------------------------------------------------------
 
@@ -54,16 +50,14 @@ IMS_BOOL StreamMediaImpl::Equals(IN CONST IMedia *piMedia) const
     return (this == pMediaImpl);
 }
 
-PRIVATE VIRTUAL
-IMedia* StreamMediaImpl::GetInterface()
+PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetInterface()
 {
     //---------------------------------------------------------------------------------------------
 
     return this;
 }
 
-PRIVATE VIRTUAL
-Media* StreamMediaImpl::GetMedia() const
+PRIVATE VIRTUAL Media* StreamMediaImpl::GetMedia() const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -71,18 +65,16 @@ Media* StreamMediaImpl::GetMedia() const
 }
 
 // IMedia interface
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaImpl::GetDirection() const
+PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetDirection() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->GetDirection();
 }
 
-PRIVATE VIRTUAL
-IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors() const
+PRIVATE VIRTUAL IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors() const
 {
-    const IMSList<MediaDescriptor*> &objMediaDescriptors = pStreamMedia->GetMediaDescriptors();
+    const IMSList<MediaDescriptor*>& objMediaDescriptors = pStreamMedia->GetMediaDescriptors();
 
     //---------------------------------------------------------------------------------------------
     /*
@@ -109,8 +101,8 @@ IMSList<IMediaDescriptor*> StreamMediaImpl::GetMediaDescriptors() const
     return objIMediaDescriptors;
 }
 
-PRIVATE VIRTUAL
-IMedia* StreamMediaImpl::GetProposal(IN IMS_BOOL bIMSExtension /* = IMS_TRUE */) const
+PRIVATE VIRTUAL IMedia* StreamMediaImpl::GetProposal(
+        IN IMS_BOOL bIMSExtension /* = IMS_TRUE */) const
 {
     //---------------------------------------------------------------------------------------------
 
@@ -129,56 +121,49 @@ IMedia* StreamMediaImpl::GetProposal(IN IMS_BOOL bIMSExtension /* = IMS_TRUE */)
     return pStreamMediaProposal;
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaImpl::GetState() const
+PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->GetState();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaImpl::GetUpdateState() const
+PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetUpdateState() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->GetUpdateState();
 }
 
-PRIVATE VIRTUAL
-IMS_RESULT StreamMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
+PRIVATE VIRTUAL IMS_RESULT StreamMediaImpl::SetDirection(IN IMS_SINT32 nDirection)
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->SetDirection(nDirection);
 }
 
-PRIVATE VIRTUAL
-IMediaDescriptor* StreamMediaImpl::GetMediaDescriptor() const
+PRIVATE VIRTUAL IMediaDescriptor* StreamMediaImpl::GetMediaDescriptor() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->GetMediaDescriptor();
 }
 
-PRIVATE VIRTUAL
-IMS_SINT32 StreamMediaImpl::GetType() const
+PRIVATE VIRTUAL IMS_SINT32 StreamMediaImpl::GetType() const
 {
     //---------------------------------------------------------------------------------------------
 
     return pStreamMedia->GetType();
 }
 
-PRIVATE VIRTUAL
-void StreamMediaImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
+PRIVATE VIRTUAL void StreamMediaImpl::RemoveMediaDescriptor(IN IMS_UINT32 nPosition)
 {
     //---------------------------------------------------------------------------------------------
 
     pStreamMedia->RemoveMediaDescriptor(nPosition);
 }
 
-PRIVATE VIRTUAL
-void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media *pMedia)
+PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media* pMedia)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -188,8 +173,8 @@ void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media *pMedia)
         return;
     }
 
-    StreamMediaProposal *pMediaProposal
-            = DYNAMIC_CAST(StreamMediaProposal*, pStreamMedia->GetProposal());
+    StreamMediaProposal* pMediaProposal =
+            DYNAMIC_CAST(StreamMediaProposal*, pStreamMedia->GetProposal());
 
     if (pMediaProposal == IMS_NULL)
     {
@@ -212,8 +197,7 @@ void StreamMediaImpl::OnMedia_FictitiousMediaCreated(IN Media *pMedia)
     }
 }
 
-PRIVATE VIRTUAL
-void StreamMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media *pMedia)
+PRIVATE VIRTUAL void StreamMediaImpl::OnMedia_FictitiousMediaDestroyed(IN Media* pMedia)
 {
     //---------------------------------------------------------------------------------------------
 

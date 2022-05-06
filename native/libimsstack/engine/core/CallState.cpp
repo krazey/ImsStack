@@ -20,10 +20,7 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
-PUBLIC GLOBAL
-IMS_SINT32 CallState::STATE_ON_SENT[CallState::STATE_MAX][CallState::MESSAGE_MAX] =
+PUBLIC GLOBAL IMS_SINT32 CallState::STATE_ON_SENT[CallState::STATE_MAX][CallState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -37,8 +34,8 @@ IMS_SINT32 CallState::STATE_ON_SENT[CallState::STATE_MAX][CallState::MESSAGE_MAX
     },
 };
 
-PUBLIC GLOBAL
-IMS_SINT32 CallState::STATE_ON_RECEIVED[CallState::STATE_MAX][CallState::MESSAGE_MAX] =
+PUBLIC GLOBAL IMS_SINT32
+CallState::STATE_ON_RECEIVED[CallState::STATE_MAX][CallState::MESSAGE_MAX] =
 {
     // STATE_INVALID
     {
@@ -51,20 +48,16 @@ IMS_SINT32 CallState::STATE_ON_RECEIVED[CallState::STATE_MAX][CallState::MESSAGE
         CallState::STATE_INVALID
     },
 };
-
-
 
 PUBLIC
-CallState::CallState()
-    : nState(STATE_IDLE)
+CallState::CallState() :
+        nState(STATE_IDLE)
 {
     InitializeStateTable();
 }
 
 PUBLIC
-CallState::~CallState()
-{
-}
+CallState::~CallState() {}
 
 PUBLIC
 IMS_SINT32 CallState::GetState() const
@@ -75,7 +68,7 @@ IMS_SINT32 CallState::GetState() const
 }
 
 PUBLIC
-IMS_BOOL CallState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nMode)
+IMS_BOOL CallState::UpdateState(IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nMode)
 {
     // MSG_MODE_CANCEL_RECEIVED, MSG_MODE_BYE_RECEIVED
     IMS_SINT32 nSIPMsg = TranslateMessage(piSIPMsg);
@@ -84,8 +77,8 @@ IMS_BOOL CallState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nM
 
     if (nSIPMsg == MESSAGE_INVALID)
     {
-        IMS_TRACE_I("CALL_STATE - NO TRANSITION (%s)",
-                piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
+        IMS_TRACE_I(
+                "CALL_STATE - NO TRANSITION (%s)", piSIPMsg->GetMethod().ToString().GetStr(), 0, 0);
         return IMS_TRUE;
     }
 
@@ -98,12 +91,11 @@ IMS_BOOL CallState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nM
      */
     if (piSIPMsg->GetType() == ISipMessage::TYPE_RESPONSE)
     {
-        const SipMethod &objMethod = piSIPMsg->GetMethod();
+        const SipMethod& objMethod = piSIPMsg->GetMethod();
 
-        if (objMethod.Equals(SipMethod::CANCEL)
-                || (objMethod.Equals(SipMethod::BYE)
-                    && (nState != STATE_BYE_SENT)
-                    && (nState != STATE_BYE_RECEIVED)))
+        if (objMethod.Equals(SipMethod::CANCEL) ||
+                (objMethod.Equals(SipMethod::BYE) && (nState != STATE_BYE_SENT) &&
+                        (nState != STATE_BYE_RECEIVED)))
         {
             IMS_TRACE_D("NO STATE TRANSITION - RESPONSE TO CANCELLING the INVITE", 0, 0, 0);
             return IMS_TRUE;
@@ -153,8 +145,8 @@ IMS_BOOL CallState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nM
             nState = STATE_ON_RECEIVED[nState][nSIPMsg];
 
             // ACK request to non-2xx will be sent by J180 automatically
-            if ((nState == STATE_INVITE_NON2XX_RECEIVED)
-                    || (nState == STATE_REINVITE_NON2XX_RECEIVED))
+            if ((nState == STATE_INVITE_NON2XX_RECEIVED) ||
+                    (nState == STATE_REINVITE_NON2XX_RECEIVED))
             {
                 if (STATE_ON_SENT[nState][MESSAGE_ACK] != STATE_INVALID)
                 {
@@ -175,8 +167,7 @@ IMS_BOOL CallState::UpdateState(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nM
     return IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void CallState::InitializeStateTable()
+PRIVATE GLOBAL void CallState::InitializeStateTable()
 {
     static IMS_BOOL bInitialized = IMS_FALSE;
     IMS_SINT32 i;
@@ -329,8 +320,7 @@ void CallState::InitializeStateTable()
     STATE_ON_RECEIVED[STATE_REINVITE_1XX_RECEIVED][MESSAGE_BYE] = STATE_BYE_RECEIVED;
     STATE_ON_RECEIVED[STATE_REINVITE_1XX_RECEIVED][MESSAGE_1XX] = STATE_REINVITE_1XX_RECEIVED;
     STATE_ON_RECEIVED[STATE_REINVITE_1XX_RECEIVED][MESSAGE_2XX] = STATE_REINVITE_2XX_RECEIVED;
-    STATE_ON_RECEIVED[STATE_REINVITE_1XX_RECEIVED][MESSAGE_NON2XX]
-            = STATE_REINVITE_NON2XX_RECEIVED;
+    STATE_ON_RECEIVED[STATE_REINVITE_1XX_RECEIVED][MESSAGE_NON2XX] = STATE_REINVITE_NON2XX_RECEIVED;
 
     // RECEIVED : STATE_REINVITE_2XX_RECEIVED
     STATE_ON_RECEIVED[STATE_REINVITE_2XX_RECEIVED][MESSAGE_BYE] = STATE_BYE_RECEIVED;
@@ -381,59 +371,39 @@ void CallState::InitializeStateTable()
     bInitialized = IMS_TRUE;
 }
 
-PRIVATE GLOBAL
-void CallState::PrintStateChanged(IN CONST ISipMessage *piSIPMsg, IN IMS_SINT32 nState,
-        IN IMS_SINT32 nNextState)
+PRIVATE GLOBAL void CallState::PrintStateChanged(
+        IN CONST ISipMessage* piSIPMsg, IN IMS_SINT32 nState, IN IMS_SINT32 nNextState)
 {
-    static const IMS_CHAR* STATE[] =
-    {
-        "STATE_INVALID",
-        "STATE_IDLE",
-        "STATE_INVITE_SENT",
-        "STATE_INVITE_1XX_RECEIVED",
-        "STATE_INVITE_2XX_RECEIVED",
-        "STATE_INVITE_NON2XX_RECEIVED",
-        "STATE_INVITE_RECEIVED",
-        "STATE_INVITE_1XX_SENT",
-        "STATE_INVITE_2XX_SENT",
-        "STATE_INVITE_NON2XX_SENT",
-        "STATE_REINVITE_SENT",
-        "STATE_REINVITE_1XX_RECEIVED",
-        "STATE_REINVITE_2XX_RECEIVED",
-        "STATE_REINVITE_NON2XX_RECEIVED",
-        "STATE_REINVITE_RECEIVED",
-        "STATE_REINVITE_1XX_SENT",
-        "STATE_REINVITE_2XX_SENT",
-        "STATE_REINVITE_NON2XX_SENT",
-        "STATE_ESTABLISHED",
-        "STATE_INVITE_CANCELLED",
-        "STATE_REINVITE_CANCELLED",
-        "STATE_BYE_SENT",
-        "STATE_BYE_RECEIVED",
-        "STATE_TERMINATED"
-    };
+    static const IMS_CHAR* STATE[] = {"STATE_INVALID", "STATE_IDLE", "STATE_INVITE_SENT",
+            "STATE_INVITE_1XX_RECEIVED", "STATE_INVITE_2XX_RECEIVED",
+            "STATE_INVITE_NON2XX_RECEIVED", "STATE_INVITE_RECEIVED", "STATE_INVITE_1XX_SENT",
+            "STATE_INVITE_2XX_SENT", "STATE_INVITE_NON2XX_SENT", "STATE_REINVITE_SENT",
+            "STATE_REINVITE_1XX_RECEIVED", "STATE_REINVITE_2XX_RECEIVED",
+            "STATE_REINVITE_NON2XX_RECEIVED", "STATE_REINVITE_RECEIVED", "STATE_REINVITE_1XX_SENT",
+            "STATE_REINVITE_2XX_SENT", "STATE_REINVITE_NON2XX_SENT", "STATE_ESTABLISHED",
+            "STATE_INVITE_CANCELLED", "STATE_REINVITE_CANCELLED", "STATE_BYE_SENT",
+            "STATE_BYE_RECEIVED", "STATE_TERMINATED"};
 
     AString strCallId = piSIPMsg->GetHeader(ISipHeader::CALL_ID);
 
     //-----------------------------------------------------------------------------------------
 
-    if (!((nState > STATE_INVALID) && (nState < STATE_MAX))
-            || !((nNextState > STATE_INVALID) && (nNextState < STATE_MAX)))
+    if (!((nState > STATE_INVALID) && (nState < STATE_MAX)) ||
+            !((nNextState > STATE_INVALID) && (nNextState < STATE_MAX)))
     {
-        IMS_TRACE_I("CALL_STATE : %s - %d >> %d",
-                SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), nState, nNextState);
+        IMS_TRACE_I("CALL_STATE : %s - %d >> %d", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+                nState, nNextState);
         return;
     }
 
-    IMS_TRACE_I("CALL_STATE : %s - %s >> %s",
-            SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), STATE[nState], STATE[nNextState]);
+    IMS_TRACE_I("CALL_STATE : %s - %s >> %s", SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'),
+            STATE[nState], STATE[nNextState]);
 }
 
-PRIVATE GLOBAL
-IMS_SINT32 CallState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
+PRIVATE GLOBAL IMS_SINT32 CallState::TranslateMessage(IN CONST ISipMessage* piSIPMsg)
 {
     IMS_SINT32 nMsgType = piSIPMsg->GetType();
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -453,10 +423,8 @@ IMS_SINT32 CallState::TranslateMessage(IN CONST ISipMessage *piSIPMsg)
     else if (nMsgType == ISipMessage::TYPE_RESPONSE)
     {
         // If the method is not INVITE/CANCEL/BYE/ACK, ignore the message for the call state
-        if (!objMethod.Equals(SipMethod::INVITE)
-                && !objMethod.Equals(SipMethod::CANCEL)
-                && !objMethod.Equals(SipMethod::ACK)
-                && !objMethod.Equals(SipMethod::BYE))
+        if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::CANCEL) &&
+                !objMethod.Equals(SipMethod::ACK) && !objMethod.Equals(SipMethod::BYE))
         {
             return MESSAGE_INVALID;
         }

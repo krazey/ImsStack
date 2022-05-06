@@ -22,8 +22,8 @@ public:
      * @return If default ordered user identities are changed, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    virtual IMS_BOOL RegUserIdentity_ReorderUserIdentities(IN CONST AStringArray &objUserIds,
-            OUT AStringArray &objReorderedUserIds) = 0;
+    virtual IMS_BOOL RegUserIdentity_ReorderUserIdentities(
+            IN CONST AStringArray& objUserIds, OUT AStringArray& objReorderedUserIds) = 0;
 };
 
-#endif // _INTERFACE_REG_USER_IDENTITY_NOTIFIER_H_
+#endif  // _INTERFACE_REG_USER_IDENTITY_NOTIFIER_H_

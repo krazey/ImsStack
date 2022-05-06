@@ -25,22 +25,19 @@
 
 __IMS_TRACE_TAG_IMS_CORE__;
 
-
-
 PUBLIC
-Publication::Publication(IN Service *pService, IN CONST AString &strEvent_)
-    : ServiceMethod(pService)
-    , nState(STATE_INACTIVE)
-    , strEvent(strEvent_)
-    , piListener(IMS_NULL)
-    , pPubState(IMS_NULL)
-    , piRefreshListener(IMS_NULL)
-    , pRefreshHelper(IMS_NULL)
+Publication::Publication(IN Service* pService, IN CONST AString& strEvent_) :
+        ServiceMethod(pService),
+        nState(STATE_INACTIVE),
+        strEvent(strEvent_),
+        piListener(IMS_NULL),
+        pPubState(IMS_NULL),
+        piRefreshListener(IMS_NULL),
+        pRefreshHelper(IMS_NULL)
 {
 }
 
-PUBLIC VIRTUAL
-Publication::~Publication()
+PUBLIC VIRTUAL Publication::~Publication()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -62,8 +59,7 @@ Publication::~Publication()
 Remarks
 
 */
-PUBLIC VIRTUAL
-void Publication::Destroy()
+PUBLIC VIRTUAL void Publication::Destroy()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -83,8 +79,7 @@ void Publication::Destroy()
 Remarks
  SIP_MESSAGE_MEDIATOR
 */
-PUBLIC VIRTUAL
-void Publication::SetMessageMediator(IN IMessageMediator *piMediator)
+PUBLIC VIRTUAL void Publication::SetMessageMediator(IN IMessageMediator* piMediator)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -127,8 +122,8 @@ IMS_SINT32 Publication::GetState() const
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_RESULT Publication::Publish(IN CONST ByteArray &objState, IN CONST AString &strContentType)
+PUBLIC VIRTUAL IMS_RESULT Publication::Publish(
+        IN CONST ByteArray& objState, IN CONST AString& strContentType)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -146,8 +141,8 @@ IMS_RESULT Publication::Publish(IN CONST ByteArray &objState, IN CONST AString &
         return IMS_FAILURE;
     }
 
-    if ((objState.IsNULL() && !strContentType.IsNULL())
-            || (!objState.IsNULL() && strContentType.IsNULL()))
+    if ((objState.IsNULL() && !strContentType.IsNULL()) ||
+            (!objState.IsNULL() && strContentType.IsNULL()))
     {
         IMS_TRACE_E(0, "One of the arguments is NULL", 0, 0, 0);
         IMS::SetLastError(IMSError::ILLEGAL_ARGUMENT);
@@ -165,14 +160,14 @@ IMS_RESULT Publication::Publish(IN CONST ByteArray &objState, IN CONST AString &
     // keep the request and after refresh is completed, try to send a PUBLISH request...
     if (pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        //1 : save all the information ? try to send later .... ???
-        //SetState(STATE_PENDING);
+        // 1 : save all the information ? try to send later .... ???
+        // SetState(STATE_PENDING);
 
-        //IMS::SetLastError(IMSError::NO_ERROR);
-        //return IMS_FAILURE;
+        // IMS::SetLastError(IMSError::NO_ERROR);
+        // return IMS_FAILURE;
     }
 
-    ISipClientConnection *piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
+    ISipClientConnection* piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
 
     if (piSCC == IMS_NULL)
     {
@@ -180,7 +175,7 @@ IMS_RESULT Publication::Publish(IN CONST ByteArray &objState, IN CONST AString &
         return IMS_FAILURE;
     }
 
-    ISipMessage *piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSIPMsg = piSCC->GetMessage();
 
     // Event header
     piSIPMsg->SetHeader(ISipHeader::EVENT, GetEvent());
@@ -224,7 +219,7 @@ IMS_RESULT Publication::Publish(IN CONST ByteArray &objState, IN CONST AString &
     // Set an additional message body part at the last position
     if (!objState.IsNULL() && !strContentType.IsNULL())
     {
-        ISipMessageBodyPart *piBodyPart = piSIPMsg->CreateBodyPart();
+        ISipMessageBodyPart* piBodyPart = piSIPMsg->CreateBodyPart();
 
         if (piBodyPart == IMS_NULL)
         {
@@ -272,7 +267,7 @@ Remarks
 
 */
 PUBLIC
-void Publication::SetListener(IN IOnPublicationListener *piListener)
+void Publication::SetListener(IN IOnPublicationListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -284,8 +279,7 @@ void Publication::SetListener(IN IOnPublicationListener *piListener)
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_RESULT Publication::Unpublish()
+PUBLIC VIRTUAL IMS_RESULT Publication::Unpublish()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -306,16 +300,16 @@ IMS_RESULT Publication::Unpublish()
     // keep the request and after refresh is completed, try to send a PUBLISH request...
     if (pPubState->GetOperation() == PubState::OPERATION_REFRESH)
     {
-        //4 : save all the information ? try to send later .... ???
-        //nPendingOperation = PubState::OPERATION_REMOVE;
+        // 4 : save all the information ? try to send later .... ???
+        // nPendingOperation = PubState::OPERATION_REMOVE;
 
-        //SetState(STATE_PENDING);
+        // SetState(STATE_PENDING);
 
-        //IMS::SetLastError(IMSError::NO_ERROR);
-        //return IMS_FAILURE;
+        // IMS::SetLastError(IMSError::NO_ERROR);
+        // return IMS_FAILURE;
     }
 
-    ISipClientConnection *piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
+    ISipClientConnection* piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
 
     if (piSCC == IMS_NULL)
     {
@@ -323,7 +317,7 @@ IMS_RESULT Publication::Unpublish()
         return IMS_FAILURE;
     }
 
-    ISipMessage *piSIPMsg = piSCC->GetMessage();
+    ISipMessage* piSIPMsg = piSCC->GetMessage();
 
     // Event header
     piSIPMsg->SetHeader(ISipHeader::EVENT, GetEvent());
@@ -366,7 +360,7 @@ Remarks
 
 */
 PUBLIC
-void Publication::SetRefreshListener(IN IRefreshListener *piListener)
+void Publication::SetRefreshListener(IN IRefreshListener* piListener)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -379,8 +373,8 @@ Remarks
 
 */
 PUBLIC
-void Publication::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
-        IN IMS_SINT32 nCriteriaInterval, IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
+void Publication::SetRefreshPolicy(IN IMS_SINT32 nPolicy, IN IMS_SINT32 nCriteriaInterval,
+        IN IMS_SINT32 nValueEorLT, IN IMS_SINT32 nValueGT)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -398,29 +392,29 @@ void Publication::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
 
     switch (nPolicy)
     {
-    case REFRESH_POLICY_NO_REFRESH:
-        pRefreshHelper->SetPolicy(RefreshHelper::POLICY_NO_REFRESH,
-                nCriteriaInterval, nValueEorLT, nValueGT);
-        break;
+        case REFRESH_POLICY_NO_REFRESH:
+            pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_NO_REFRESH, nCriteriaInterval, nValueEorLT, nValueGT);
+            break;
 
-    case REFRESH_POLICY_SPEC:
-        pRefreshHelper->SetPolicy(RefreshHelper::POLICY_SPEC,
-                nCriteriaInterval, nValueEorLT, nValueGT);
-        break;
+        case REFRESH_POLICY_SPEC:
+            pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_SPEC, nCriteriaInterval, nValueEorLT, nValueGT);
+            break;
 
-    case REFRESH_POLICY_REMAIN_TIME:
-        pRefreshHelper->SetPolicy(RefreshHelper::POLICY_REMAIN_TIME,
-                nCriteriaInterval, nValueEorLT, nValueGT);
-        break;
+        case REFRESH_POLICY_REMAIN_TIME:
+            pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_REMAIN_TIME, nCriteriaInterval, nValueEorLT, nValueGT);
+            break;
 
-    case REFRESH_POLICY_RATIO:
-        pRefreshHelper->SetPolicy(RefreshHelper::POLICY_RATIO,
-                nCriteriaInterval, nValueEorLT, nValueGT);
-        break;
+        case REFRESH_POLICY_RATIO:
+            pRefreshHelper->SetPolicy(
+                    RefreshHelper::POLICY_RATIO, nCriteriaInterval, nValueEorLT, nValueGT);
+            break;
 
-    default:
-        IMS_TRACE_E(0, "Invalid refresh policy (%d)", nPolicy, 0, 0);
-        break;
+        default:
+            IMS_TRACE_E(0, "Invalid refresh policy (%d)", nPolicy, 0, 0);
+            break;
     }
 }
 
@@ -429,52 +423,51 @@ void Publication::SetRefreshPolicy(IN IMS_SINT32 nPolicy,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL Publication::DispatchMessage(IN IMSMSG &objMSG)
+PRIVATE VIRTUAL IMS_BOOL Publication::DispatchMessage(IN IMSMSG& objMSG)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (objMSG.GetName())
     {
-    case AMSG_PUBLICATION_DELIVERED:
-        if (piListener != IMS_NULL)
-        {
-            piListener->OnPublication_Delivered(this);
-        }
-        return IMS_TRUE;
+        case AMSG_PUBLICATION_DELIVERED:
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnPublication_Delivered(this);
+            }
+            return IMS_TRUE;
 
-    case AMSG_PUBLICATION_DELIVERY_FAILED:
-        if (piListener != IMS_NULL)
-        {
-            piListener->OnPublication_DeliveryFailed(this);
-        }
-        return IMS_TRUE;
+        case AMSG_PUBLICATION_DELIVERY_FAILED:
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnPublication_DeliveryFailed(this);
+            }
+            return IMS_TRUE;
 
-    case AMSG_PUBLICATION_TERMINATED:
-        if (piListener != IMS_NULL)
-        {
-            piListener->OnPublication_Terminated(this);
-        }
-        return IMS_TRUE;
+        case AMSG_PUBLICATION_TERMINATED:
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnPublication_Terminated(this);
+            }
+            return IMS_TRUE;
 
-        //[2012/11/5]hyunho.shin : add refresh handler
-    case AMSG_PUBLICATION_REFRESH_STARTED:
-        if (piListener != IMS_NULL)
-        {
-            piListener->OnPublication_RefreshStarted(this);
-        }
-        return IMS_TRUE;
+            //[2012/11/5]hyunho.shin : add refresh handler
+        case AMSG_PUBLICATION_REFRESH_STARTED:
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnPublication_RefreshStarted(this);
+            }
+            return IMS_TRUE;
 
-    case AMSG_PUBLICATION_REFRESH_COMPLETED:
-        if (piListener != IMS_NULL)
-        {
-            piListener->OnPublication_RefreshCompleted(this);
-        }
-        return IMS_TRUE;
-        //[2012/11/5]hyunho.shin : end
+        case AMSG_PUBLICATION_REFRESH_COMPLETED:
+            if (piListener != IMS_NULL)
+            {
+                piListener->OnPublication_RefreshCompleted(this);
+            }
+            return IMS_TRUE;
+            //[2012/11/5]hyunho.shin : end
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return EngineActivity::DispatchMessage(objMSG);
@@ -486,8 +479,7 @@ Remarks
 
 */
 // IMS_AUTH_SIP_DIGEST
-PRIVATE VIRTUAL
-IMS_BOOL Publication::SendRequestToChallenge(IN ISipClientConnection *piSCC)
+PRIVATE VIRTUAL IMS_BOOL Publication::SendRequestToChallenge(IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -537,12 +529,11 @@ IMS_BOOL Publication::SendRequestToChallenge(IN ISipClientConnection *piSCC)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void Publication::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
+PRIVATE VIRTUAL void Publication::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
 {
     //---------------------------------------------------------------------------------------------
 
-    (void) nErrorCode;
+    (void)nErrorCode;
 
     SetState(STATE_INACTIVE);
     PostMessage(AMSG_PUBLICATION_TERMINATED, 0, 0);
@@ -555,8 +546,7 @@ void Publication::Exception_NotifyError(IN IMS_SINT32 nErrorCode)
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL Publication::InitInstance()
+PRIVATE VIRTUAL IMS_BOOL Publication::InitInstance()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -572,8 +562,8 @@ IMS_BOOL Publication::InitInstance()
 
         if (!pPubState->CreateEventPackage(strEvent))
         {
-            IMS_TRACE_E(0, "Creating an event package for an event (%s) failed",
-                    strEvent.GetStr(), 0, 0);
+            IMS_TRACE_E(0, "Creating an event package for an event (%s) failed", strEvent.GetStr(),
+                    0, 0);
             return IMS_FALSE;
         }
     }
@@ -597,11 +587,10 @@ IMS_BOOL Publication::InitInstance()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void Publication::NotifySIPResponse(IN ISipClientConnection *piSCC)
+PRIVATE VIRTUAL void Publication::NotifySIPResponse(IN ISipClientConnection* piSCC)
 {
-    ISipMessage *piSIPMsg = piSCC->GetMessage();
-    const SipMethod &objMethod = piSIPMsg->GetMethod();
+    ISipMessage* piSIPMsg = piSCC->GetMessage();
+    const SipMethod& objMethod = piSIPMsg->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
@@ -638,8 +627,7 @@ void Publication::NotifySIPResponse(IN ISipClientConnection *piSCC)
         // Do nothing ...
         return;
     }
-    else if ((nStatusCode == SipStatusCode::SC_401)
-            || (nStatusCode == SipStatusCode::SC_407))
+    else if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
     {
         // AUTH_SIP_DIGEST {
         // In case of other method except for REGISTER,
@@ -695,7 +683,7 @@ void Publication::NotifySIPResponse(IN ISipClientConnection *piSCC)
         pPubState->Clear();
     }
 
-    //4 check "nPendingOperation" member field
+    // 4 check "nPendingOperation" member field
 }
 
 /*
@@ -703,16 +691,15 @@ void Publication::NotifySIPResponse(IN ISipClientConnection *piSCC)
 Remarks
 
 */
-PRIVATE VIRTUAL
-void Publication::NotifySIPError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
-        IN CONST AString &strMessage)
+PRIVATE VIRTUAL void Publication::NotifySIPError(
+        IN ISipConnection* piSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
 {
-    const SipMethod &objMethod = piSC->GetMethod();
+    const SipMethod& objMethod = piSC->GetMethod();
 
     //---------------------------------------------------------------------------------------------
 
-    (void) nCode;
-    (void) strMessage;
+    (void)nCode;
+    (void)strMessage;
 
     if (!objMethod.Equals(SipMethod::PUBLISH))
     {
@@ -722,8 +709,7 @@ void Publication::NotifySIPError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
 
     IMS_SINT32 nOperation = pPubState->GetOperation();
 
-    if ((nOperation != PubState::NO_OPERATION)
-        && (nOperation != PubState::OPERATION_REFRESH))
+    if ((nOperation != PubState::NO_OPERATION) && (nOperation != PubState::OPERATION_REFRESH))
     {
         SetState(STATE_INACTIVE);
         PostMessage(AMSG_PUBLICATION_DELIVERY_FAILED, 0, 0);
@@ -744,9 +730,8 @@ void Publication::NotifySIPError(IN ISipConnection *piSC, IN IMS_SINT32 nCode,
 Remarks
 
 */
-PRIVATE VIRTUAL
-void Publication::Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
-        IN IMS_SINT32 nCode /* = 0 */)
+PRIVATE VIRTUAL void Publication::Refreshable_RefreshCompleted(
+        IN ISipClientConnection* piSCC, IN IMS_SINT32 nCode /* = 0 */)
 {
     //---------------------------------------------------------------------------------------------
 
@@ -780,8 +765,7 @@ void Publication::Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
         // AUTH_SIP_DIGEST {
         IMS_SINT32 nStatusCode = piSCC->GetStatusCode();
 
-        if ((nStatusCode == SipStatusCode::SC_401)
-                || (nStatusCode == SipStatusCode::SC_407))
+        if ((nStatusCode == SipStatusCode::SC_401) || (nStatusCode == SipStatusCode::SC_407))
         {
             // In case of other method except for REGISTER,
             // the UE only supports the authentication algorithm, MD5
@@ -819,8 +803,7 @@ void Publication::Refreshable_RefreshCompleted(IN ISipClientConnection *piSCC,
 Remarks
 
 */
-PRIVATE VIRTUAL
-IMS_BOOL Publication::Refreshable_RefreshStarted()
+PRIVATE VIRTUAL IMS_BOOL Publication::Refreshable_RefreshStarted()
 {
     IMS_BOOL bDoImplicitRefresh = IMS_TRUE;
     IMS_SINT32 nState = GetState();
@@ -840,18 +823,18 @@ IMS_BOOL Publication::Refreshable_RefreshStarted()
         pPubState->SetOperation(PubState::OPERATION_REFRESH);
 
         // Send a refresh request : PUBLISH
-        ISipClientConnection *piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
+        ISipClientConnection* piSCC = CreateConnection(SipMethod(SipMethod::PUBLISH));
 
         if (piSCC == IMS_NULL)
         {
             pPubState->SetOperation(PubState::NO_OPERATION);
 
-            IMS_TRACE_E(0, "Creating a new SIP connection for a publication refresh failed",
-                    0, 0, 0);
+            IMS_TRACE_E(
+                    0, "Creating a new SIP connection for a publication refresh failed", 0, 0, 0);
             return IMS_FALSE;
         }
 
-        ISipMessage *piSIPMsg = piSCC->GetMessage();
+        ISipMessage* piSIPMsg = piSCC->GetMessage();
 
         if (!pPubState->SetHeaders(piSIPMsg))
         {
@@ -889,8 +872,7 @@ IMS_BOOL Publication::Refreshable_RefreshStarted()
 Remarks
 
 */
-PRIVATE VIRTUAL
-void Publication::Refreshable_RefreshTerminated()
+PRIVATE VIRTUAL void Publication::Refreshable_RefreshTerminated()
 {
     //---------------------------------------------------------------------------------------------
 
@@ -925,18 +907,18 @@ void Publication::CloseConnection()
 
     switch (pPubState->GetOperation())
     {
-    case PubState::OPERATION_CREATE:
-    case PubState::OPERATION_MODIFY:
-        ServiceMethod::CloseConnection(IMessage::PUBLICATION_PUBLISH);
-        break;
+        case PubState::OPERATION_CREATE:
+        case PubState::OPERATION_MODIFY:
+            ServiceMethod::CloseConnection(IMessage::PUBLICATION_PUBLISH);
+            break;
 
-    case PubState::OPERATION_REMOVE:
-        ServiceMethod::CloseConnection(IMessage::PUBLICATION_UNPUBLISH);
-        break;
+        case PubState::OPERATION_REMOVE:
+            ServiceMethod::CloseConnection(IMessage::PUBLICATION_UNPUBLISH);
+            break;
 
-    default:
-        // Do nothing ...
-        break;
+        default:
+            // Do nothing ...
+            break;
     }
 
     pPubState->SetOperation(PubState::NO_OPERATION);
@@ -948,27 +930,27 @@ Remarks
 
 */
 PRIVATE
-void Publication::ReceiveResponse(IN ISipClientConnection *piSCC)
+void Publication::ReceiveResponse(IN ISipClientConnection* piSCC)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (pPubState->GetOperation())
     {
-    case PubState::OPERATION_CREATE:
-    case PubState::OPERATION_MODIFY:
-    // hansung.cho -2013/10/23- for handling refresh error
-    case PubState::OPERATION_REFRESH:
-    // hansung.cho -2013/10/23- for handling refresh error
-        UpdateResponseOnReceived(IMessage::PUBLICATION_PUBLISH, piSCC);
-        break;
+        case PubState::OPERATION_CREATE:
+        case PubState::OPERATION_MODIFY:
+        // hansung.cho -2013/10/23- for handling refresh error
+        case PubState::OPERATION_REFRESH:
+            // hansung.cho -2013/10/23- for handling refresh error
+            UpdateResponseOnReceived(IMessage::PUBLICATION_PUBLISH, piSCC);
+            break;
 
-    case PubState::OPERATION_REMOVE:
-        UpdateResponseOnReceived(IMessage::PUBLICATION_UNPUBLISH, piSCC);
-        break;
+        case PubState::OPERATION_REMOVE:
+            UpdateResponseOnReceived(IMessage::PUBLICATION_UNPUBLISH, piSCC);
+            break;
 
-    default:
-        // Do nothing ...
-        break;
+        default:
+            // Do nothing ...
+            break;
     }
 }
 
@@ -992,20 +974,19 @@ void Publication::SetState(IN IMS_SINT32 nState)
 Remarks
 
 */
-PRIVATE GLOBAL
-const IMS_CHAR* Publication::StateToString(IN IMS_SINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* Publication::StateToString(IN IMS_SINT32 nState)
 {
     //---------------------------------------------------------------------------------------------
 
     switch (nState)
     {
-    case STATE_INACTIVE:
-        return "STATE_INACTIVE";
-    case STATE_PENDING:
-        return "STATE_PENDING";
-    case STATE_ACTIVE:
-        return "STATE_ACTIVE";
-    default:
-        return "__INVALID__";
+        case STATE_INACTIVE:
+            return "STATE_INACTIVE";
+        case STATE_PENDING:
+            return "STATE_PENDING";
+        case STATE_ACTIVE:
+            return "STATE_ACTIVE";
+        default:
+            return "__INVALID__";
     }
 }

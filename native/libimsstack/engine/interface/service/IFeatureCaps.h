@@ -17,7 +17,7 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void AddFeature(IN CONST AString &strName, IN CONST AString &strValue) = 0;
+    virtual void AddFeature(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Adds an additional feature parameter for a Contact header
@@ -32,7 +32,7 @@ public:
      * @param nMessageType an SIP message type (0: request, 1: response, 2: any);
      *                     refer to @ref ISipMessage class
      */
-    virtual void AddFeature(IN CONST AString &strName, IN CONST AString &strValue,
+    virtual void AddFeature(IN CONST AString& strName, IN CONST AString& strValue,
             IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType = 2 /* ANY */) = 0;
 
     /**
@@ -43,7 +43,7 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void RemoveFeature(IN CONST AString &strName, IN CONST AString &strValue) = 0;
+    virtual void RemoveFeature(IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Removes an added feature parameter for a Contact header
@@ -58,7 +58,7 @@ public:
      * @param nMessageType an SIP message type (0: request, 1: response, 2: any);
      *                     refer to @ref ISipMessage class
      */
-    virtual void RemoveFeature(IN CONST AString &strName, IN CONST AString &strValue,
+    virtual void RemoveFeature(IN CONST AString& strName, IN CONST AString& strValue,
             IN IMS_SINT32 nSIPMethod, IN IMS_SINT32 nMessageType = 2 /* ANY */) = 0;
 
     /**
@@ -77,8 +77,8 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void AddExcludedFeatureForRegCaps(IN CONST AString &strName,
-            IN CONST AString &strValue) = 0;
+    virtual void AddExcludedFeatureForRegCaps(
+            IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Removes an added feature parameter to exclude a specific feature parameter
@@ -89,8 +89,8 @@ public:
      * @param strName the feature name
      * @param strValue the feature value
      */
-    virtual void RemoveExcludedFeatureForRegCaps(IN CONST AString &strName,
-            IN CONST AString &strValue) = 0;
+    virtual void RemoveExcludedFeatureForRegCaps(
+            IN CONST AString& strName, IN CONST AString& strValue) = 0;
 
     /**
      * @brief Removes all the excluded features for the RegCaps.
@@ -98,4 +98,4 @@ public:
     virtual void RemoveAllExcludedFeaturesForRegCaps() = 0;
 };
 
-#endif // _INTERFACE_FEATURE_CAPS_H_
+#endif  // _INTERFACE_FEATURE_CAPS_H_

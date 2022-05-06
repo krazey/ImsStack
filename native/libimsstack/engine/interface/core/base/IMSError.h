@@ -64,4 +64,4 @@ public:
     };
 };
 
-#endif // _IMS_ERROR_H_
+#endif  // _IMS_ERROR_H_

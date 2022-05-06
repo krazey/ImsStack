@@ -28,36 +28,34 @@ public:
     ~CallerCapability();
 
 private:
-    CallerCapability(IN CONST CallerCapability &objRHS);
-    CallerCapability& operator=(IN CONST CallerCapability &objRHS);
+    CallerCapability(IN CONST CallerCapability& objRHS);
+    CallerCapability& operator=(IN CONST CallerCapability& objRHS);
 
 public:
-    IMS_BOOL AddFeature(IN CONST Feature *pFeature);
-    IMS_BOOL AddFeature(IN CONST FeatureSet *pFeatureSet);
-    IMS_BOOL AddFeatures(IN CONST CallerCapability *pCC);
+    IMS_BOOL AddFeature(IN CONST Feature* pFeature);
+    IMS_BOOL AddFeature(IN CONST FeatureSet* pFeatureSet);
+    IMS_BOOL AddFeatures(IN CONST CallerCapability* pCC);
     void Clear();
-    IMS_BOOL Create(IN CONST AppConfig *pAppConfig,
-            IN CONST CoreServiceConfig *pServiceConfig,
+    IMS_BOOL Create(IN CONST AppConfig* pAppConfig, IN CONST CoreServiceConfig* pServiceConfig,
             IN CONST ISipConfigV* piSipConfigV);
-    IMS_BOOL Equals(IN CONST CallerCapability *pCC) const;
+    IMS_BOOL Equals(IN CONST CallerCapability* pCC) const;
     const IMSList<FeatureSet*>& GetFeatures() const;
-    IMS_BOOL HasFeature(IN CONST Feature *pFeature) const;
+    IMS_BOOL HasFeature(IN CONST Feature* pFeature) const;
     IMS_BOOL IsEmpty() const;
-    IMS_BOOL RemoveFeature(IN CONST Feature *pFeature);
-    IMS_BOOL RemoveFeature(IN CONST FeatureSet *pFeatureSet);
-    IMS_BOOL RemoveFeatures(IN CONST CallerCapability *pCC,
-            IN IMS_BOOL bRemoveRef = IMS_TRUE);
+    IMS_BOOL RemoveFeature(IN CONST Feature* pFeature);
+    IMS_BOOL RemoveFeature(IN CONST FeatureSet* pFeatureSet);
+    IMS_BOOL RemoveFeatures(IN CONST CallerCapability* pCC, IN IMS_BOOL bRemoveRef = IMS_TRUE);
     AString ToString() const;
 
 private:
-    IMS_BOOL Attach(IN CONST AString &strTag, IN CONST AString &strValue = AString::ConstNull());
-    void Detach(IN CONST AString &strTag);
-    FeatureSet* Lookup(IN CONST AString &strTag) const;
+    IMS_BOOL Attach(IN CONST AString& strTag, IN CONST AString& strValue = AString::ConstNull());
+    void Detach(IN CONST AString& strTag);
+    FeatureSet* Lookup(IN CONST AString& strTag) const;
 
-    IMS_SINT32 AddFeature(IN CONST AString &strTag);
-    IMS_SINT32 AddFeature(IN CONST AString &strTag, IN CONST AString &strValue);
-    IMS_SINT32 RemoveFeature(IN CONST AString &strTag);
-    IMS_SINT32 RemoveFeature(IN CONST AString &strTag, IN CONST AString &strValue);
+    IMS_SINT32 AddFeature(IN CONST AString& strTag);
+    IMS_SINT32 AddFeature(IN CONST AString& strTag, IN CONST AString& strValue);
+    IMS_SINT32 RemoveFeature(IN CONST AString& strTag);
+    IMS_SINT32 RemoveFeature(IN CONST AString& strTag, IN CONST AString& strValue);
 
 private:
     enum
@@ -70,4 +68,4 @@ private:
     IMSList<FeatureSet*> objContactFeatures;
 };
 
-#endif // _CALLER_CAPABILITY_H_
+#endif  // _CALLER_CAPABILITY_H_
