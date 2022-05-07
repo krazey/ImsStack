@@ -24,8 +24,6 @@
 #include "interface/IAosSubscriberManager.h"
 #include "interface/IAosSubscriberManagerListener.h"
 
-class AosStaticProfile;
-
 class AosSubscriberManager :
         public IAosSubscriberManager,
         public ISubscriberConfigListener,
@@ -181,6 +179,9 @@ private:
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;
 
     AString m_strTag;
+
+private:
+    friend class AosSubscriberManagerTest;
 };
 
 #endif  // AOS_SUBSCRIBER_MANAGERH_
