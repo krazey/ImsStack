@@ -1178,7 +1178,7 @@ IMS_BOOL SIPHeader::Decode(IN CONST AString& strBody_, IN IMS_BOOL bParseParamet
     {
         pAddress = new SipAddress(strBody);
 
-        if (SIPStack::IsAQUOTRequiredForAddressFormat(nType, strName))
+        if (SIPStack::IsAquotRequiredForAddressFormat(nType, strName))
         {
             pAddress->SetAquotRequired(IMS_TRUE);
         }

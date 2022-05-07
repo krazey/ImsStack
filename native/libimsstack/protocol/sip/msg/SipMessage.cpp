@@ -1522,7 +1522,7 @@ SIP_BOOL SipMessage::DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen)
 }
 
 /*Set Content-length Header*/
-SIP_VOID SipMessage::SetContentLengthHdr(SIP_UINT16 nLen, SIP_UINT32 nMsgOptions)
+SIP_VOID SipMessage::SetContentLengthHdr(SIP_UINT32 nLen, SIP_UINT32 nMsgOptions)
 {
     SipUnknownHeader* pUnknown = new SipUnknownHeader();
     if (pUnknown != SIP_NULL)
@@ -1670,6 +1670,15 @@ void SipMessage::AdjustContentLengthHdr()
     }
 
     pList->SipDelete();
+}
+
+void SipMessage::RemoveAllMessageBodies()
+{
+    if (m_pMsgBodyList != SIP_NULL)
+    {
+        m_pMsgBodyList->SipDelete();
+        m_pMsgBodyList = SIP_NULL;
+    }
 }
 
 SIP_UINT16 SipMessage::GetStatusCode() const

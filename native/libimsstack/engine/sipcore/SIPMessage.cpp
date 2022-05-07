@@ -693,7 +693,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPMessage::IsMessageRpr() const
 {
     //---------------------------------------------------------------------------------------------
 
-    return SIPStack::IsMessageRPR(pstMessage);
+    return SIPStack::IsMessageRpr(pstMessage);
 }
 
 /*
@@ -859,7 +859,7 @@ IMS_BOOL SIPMessage::CreateBodyParts()
     }
 
     // If message does not include a MIME body, do not parse the message body
-    if (!SIPStack::HasMIMEMessageBody(pstMessage))
+    if (!SIPStack::HasMimeMessageBody(pstMessage))
     {
         bBodyPartParsed = IMS_TRUE;
 
@@ -1197,7 +1197,7 @@ IMS_BOOL SIPMessage::ExtractBodyParts()
     {
         SipMsgBody* pstMsgBody = SIPStack::GetMessageBody(pstMessage, 0);
 
-        if (SIPStack::HasSDPMessageBody(pstMessage))
+        if (SIPStack::HasSdpMessageBody(pstMessage))
             pBodyPart = new SIPMessageBodyPart(pstMsgBody, IMS_TRUE);
         else
             pBodyPart = new SIPMessageBodyPart(pstMsgBody, IMS_FALSE);
@@ -1233,7 +1233,7 @@ IMS_BOOL SIPMessage::ExtractBodyParts()
                 return IMS_FALSE;
             }
 
-            if (SIPStack::IsMessageBodySDP(pstMsgBody))
+            if (SIPStack::IsMessageBodySdp(pstMsgBody))
                 pBodyPart = new SIPMessageBodyPart(pstMsgBody, IMS_TRUE);
             else
                 pBodyPart = new SIPMessageBodyPart(pstMsgBody, IMS_FALSE);

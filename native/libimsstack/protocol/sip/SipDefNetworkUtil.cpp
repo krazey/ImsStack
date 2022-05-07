@@ -62,29 +62,12 @@ SipDefNetworkUtil::~SipDefNetworkUtil()
 {
 }
 
-SIP_BOOL SipDefNetworkUtil::SendToNetwork(SipTransportBuffer* pTranspSipBuffer,
-        SipTransportParameter* pFinalTranspParam, ISipUserData* pUserData)
+SIP_BOOL SipDefNetworkUtil::SendToNetwork(SipTransportBuffer* pTransportBuffer,
+        SipTransportParameter* pTransportParam, ISipUserData* pUserData)
 {
-    (void)pTranspSipBuffer;
-    (void)pFinalTranspParam;
-    (void)pUserData;
-    return SIP_TRUE;
-}
-
-SIP_BOOL SipDefNetworkUtil::CheckTCPConnection(SipTransportParameter* pTransportParam,
-        ISipUserData* pUserData)
-{
+    (void)pTransportBuffer;
     (void)pTransportParam;
     (void)pUserData;
-
-    return SIP_TRUE;
-}
-SIP_BOOL SipDefNetworkUtil::AbortTransmission(SipTransportParameter* pTranspParam,
-        ISipUserData* pUserData)
-{
-    (void)pTranspParam;
-    (void)pUserData;
-
     return SIP_TRUE;
 }
 /****************************************************************************

@@ -1577,9 +1577,9 @@ IMS_BOOL SipAddress::Decode(IN const AString& strAddress, IN IMS_BOOL bParsePara
 
     if (pAddrSpec != IMS_NULL)
     {
-        if (SIPStack::IsUriSchemeSIP(pAddrSpec) || SIPStack::IsUriSchemeSIPS(pAddrSpec))
+        if (SIPStack::IsUriSchemeSip(pAddrSpec) || SIPStack::IsUriSchemeSips(pAddrSpec))
         {
-            if (SIPStack::IsUriSchemeSIP(pAddrSpec))
+            if (SIPStack::IsUriSchemeSip(pAddrSpec))
             {
                 m_strScheme = Sip::STR_SIP;
             }

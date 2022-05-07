@@ -37,8 +37,6 @@ SIPMessageBodyPart::SIPMessageBodyPart(
     if (pstMsgBody != IMS_NULL)
     {
         SIPStack::AddReference(pstMsgBody);
-
-        (void)SIPStack::CreateMIMEHeader(pstMsgBody);
         ExtractProperties();
     }
 }
@@ -72,8 +70,6 @@ SIPMessageBodyPart& SIPMessageBodyPart::operator=(IN CONST SIPMessageBodyPart& o
 
         pstMsgBody = objRHS.pstMsgBody;
         SIPStack::AddReference(pstMsgBody);
-
-        (void)SIPStack::CreateMIMEHeader(pstMsgBody);
 
         objOtherMimeHeaders = objRHS.objOtherMimeHeaders;
         objContent = objRHS.objContent;
@@ -173,7 +169,7 @@ PUBLIC VIRTUAL AString SIPMessageBodyPart::GetHeader(
         case CONTENT_TRANSFER_ENCODING:
         case CONTENT_ID:
         case CONTENT_DESCRIPTION:
-            return SIPStack::GetMIMEHeader(pstMsgBody, nType);
+            return SIPStack::GetMimeHeader(pstMsgBody, nType);
 
         case CONTENT_UNKNOWN:
             if (strName.IsNULL())
@@ -205,7 +201,7 @@ PUBLIC VIRTUAL void SIPMessageBodyPart::SetHeader(IN IMS_SINT32 nType, IN CONST 
         case CONTENT_TRANSFER_ENCODING:
         case CONTENT_ID:
         case CONTENT_DESCRIPTION:
-            if (!SIPStack::SetMIMEHeader(nType, strName, strValue, pstMsgBody))
+            if (!SIPStack::SetMimeHeader(nType, strName, strValue, pstMsgBody))
                 return;  // throw exception
             break;
 
@@ -266,7 +262,7 @@ IMS_BOOL SIPMessageBodyPart::FormMessageBody()
             strName = objOtherMimeHeaders.GetHeaderName(i);
             strBody = objOtherMimeHeaders.GetHeaderBodys(i);
 
-            if (!SIPStack::SetMIMEHeader(CONTENT_UNKNOWN, strName, strBody, pstMsgBody))
+            if (!SIPStack::SetMimeHeader(CONTENT_UNKNOWN, strName, strBody, pstMsgBody))
             {
                 return IMS_FALSE;
             }
@@ -294,7 +290,7 @@ void SIPMessageBodyPart::SetHeader(IN SipHeaderBase* pstHeader,
         case CONTENT_TRANSFER_ENCODING:
         case CONTENT_ID:
         case CONTENT_DESCRIPTION:
-            if (!SIPStack::SetMIMEHeader(nType, pstHeader, pstMsgBody))
+            if (!SIPStack::SetMimeHeader(nType, pstHeader, pstMsgBody))
                 return;  // throw exception
             break;
 
@@ -318,14 +314,14 @@ IMS_BOOL SIPMessageBodyPart::ExtractProperties()
 {
     AString strHeader;
 
-    IMS_SINT32 nHCount = SIPStack::GetMIMEHeaderCount(pstMsgBody, CONTENT_UNKNOWN);
+    IMS_SINT32 nHCount = SIPStack::GetMimeHeaderCount(pstMsgBody, CONTENT_UNKNOWN);
 
     //---------------------------------------------------------------------------------------------
 
     // Extract an additional MIME content headers
     for (IMS_SINT32 i = 0; i < nHCount; ++i)
     {
-        strHeader = SIPStack::GetMIMEHeader(pstMsgBody, CONTENT_UNKNOWN, i);
+        strHeader = SIPStack::GetMimeHeader(pstMsgBody, CONTENT_UNKNOWN, i);
 
         IMS_SINT32 nIndex = strHeader.GetIndexOf(TextParser::CHAR_COLON);
 

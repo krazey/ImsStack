@@ -139,6 +139,7 @@ public:
     static const IMS_CHAR STR_FROM_CHANGE[];
     static const IMS_CHAR STR_GRUU[];
     static const IMS_CHAR STR_MULTIPART[];
+    static const IMS_CHAR STR_MIXED[];
     static const IMS_CHAR STR_MULTIPART_MIXED[];
     static const IMS_CHAR STR_REFER[];
     static const IMS_CHAR STR_PENDING[];

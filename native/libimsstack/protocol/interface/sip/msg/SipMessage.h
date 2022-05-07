@@ -180,7 +180,7 @@ class SipMessage: public SipRefBase
         SipUnknownHeader* GetUnknownHdrObj(SIP_INT32 eType);
         SIP_BOOL HasHeader(SIP_INT32 eHdrType) const;
         SipHeaderList* GetHdrList(SIP_INT32 eHdrType);
-        SIP_VOID SetContentLengthHdr(SIP_UINT16 nLen, SIP_UINT32 nMsgOptions);
+        SIP_VOID SetContentLengthHdr(SIP_UINT32 nLen, SIP_UINT32 nMsgOptions);
         SIP_BOOL SetHdrList(SipHeaderList* pHeaderList);
         SIP_BOOL SetMsgBodyList(SipMsgBodyList* pMsgBodyList);
         inline SIP_UINT16 GetMsgBodyCount() const
@@ -204,6 +204,7 @@ class SipMessage: public SipRefBase
 #endif
 
         void AdjustContentLengthHdr();
+        void RemoveAllMessageBodies();
 
         // Utility methods
         SIP_UINT16 GetStatusCode() const;
