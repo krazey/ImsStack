@@ -244,8 +244,12 @@ public class ImsMmTelService extends MmTelFeature
     // SMS over IMS interfaces
     @Override
     public ImsSmsImplBase getSmsImplementation() {
-        // FIXME: P-GII
-        return super.getSmsImplementation();
+        if (!isReady()) {
+            log("Service not ready - getSmsImplementation");
+            return null;
+        }
+        ImsCallApp callApp = getCallApp();
+        return (callApp != null) ? callApp.getSmsInterface() : null;
     }
 
     @Override
