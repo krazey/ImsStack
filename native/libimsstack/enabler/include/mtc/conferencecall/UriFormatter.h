@@ -6,7 +6,9 @@ class IMtcCallContext;
 class UriFormatter
 {
 public:
-    static AString& GetReferToForInvite(OUT AString& strUri, IN IMtcCallContext& objContext);
+    static AString& GetReferToForInvite(
+            OUT AString& strUri, IN IMtcCallContext& objContext,
+            IN IMS_BOOL bEnforcePaid = IMS_FALSE);
     static AString& GetReferToForInvite(
             OUT AString& strUri, IN IMtcCallContext& objContext, IN const ConfUser* pConfUser);
     static AString& GetReferToForBye(

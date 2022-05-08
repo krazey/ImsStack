@@ -1,6 +1,8 @@
 #include "ServiceTrace.h"
 #include "ect/EctManager.h"
 #include "ect/EctController.h"
+#include "ect/BlindTransferController.h"
+#include "ect/ConsultativeTransferController.h"
 #include "helper/ObjectAsyncDestroyer.h"
 #include "IMtcContext.h"
 
@@ -23,7 +25,9 @@ EctManager::~EctManager()
 
 PUBLIC VIRTUAL void EctManager::OnEctCompleted()
 {
+    IMS_TRACE_D("OnEctCompleted", 0, 0, 0);
     m_objDestroyer.Destroy(m_pController);
+    m_pController = IMS_NULL;
 }
 
 PUBLIC
@@ -38,14 +42,12 @@ void EctManager::Transfer(IN CallKey nCallKey, IN const AString& strNumber)
 
     if (strNumber.GetLength() > 0)
     {
-        // TODO: BlindTransferController
-        m_pController = new EctController(m_objContext, nCallKey);
+        m_pController = new BlindTransferController(m_objContext, nCallKey, *this);
         m_pController->Transfer(strNumber);
     }
     else
     {
-        // TODO: ConsultativeTransferController
-        m_pController = new EctController(m_objContext, nCallKey);
+        m_pController = new ConsultativeTransferController(m_objContext, nCallKey, *this);
         m_pController->Transfer();
     }
 }

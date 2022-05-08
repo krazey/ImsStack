@@ -1,5 +1,8 @@
+#include "ServiceTimer.h"
 #include "ServiceTrace.h"
 #include "ect/EctController.h"
+#include "ect/IEctControllerListener.h"
+#include "ect/EctReference.h"
 #include "ImsTypeDef.h"
 #include "MtcDef.h"
 #include "IMtcContext.h"
@@ -12,69 +15,128 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey) :
+EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
+        IN IEctControllerListener& objListener) :
         m_objContext(objContext),
-        m_nTransferorKey(nCallKey)
+        m_nTransfereeKey(nCallKey),
+        m_objListener(objListener),
+        m_pReference(nullptr),
+        m_piTimer(IMS_NULL)
 {
     IMS_TRACE_D("+EctController", 0, 0, 0);
+    StartTimer();
 }
 
 PUBLIC
 EctController::~EctController()
 {
     IMS_TRACE_D("~EctController", 0, 0, 0);
+    StopTimer();
 }
 
-PUBLIC VIRTUAL void EctController::Transfer(IN const AString& strNumber)
+PUBLIC VIRTUAL void EctController::OnReferenceStarted()
 {
-    UNUSED_PARAM(strNumber);
-    IMS_TRACE_D("Transfer - blind [%s]", strNumber.GetStr(), 0, 0);
-
-    NotifyResult(IMS_FAILURE, FAIL_REASON_ECT_COMPLETED);
+    IMS_TRACE_D("OnReferenceStarted", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL void EctController::Transfer()
+PUBLIC VIRTUAL void EctController::OnReferenceStartFailed()
 {
-    IMS_TRACE_D("Transfer - consultative", 0, 0, 0);
-    if (IsValid() == IMS_FALSE)
+    IMS_TRACE_D("OnReferenceStartFailed", 0, 0, 0);
+    OnFailed();
+}
+
+PUBLIC VIRTUAL void EctController::OnReferenceUpdated(IN SipStatusCode nSipFragCode)
+{
+    IMS_TRACE_D("OnReferenceUpdated", 0, 0, 0);
+    if (SipStatusCode::IsFinalSuccess(nSipFragCode.ToInt()))
     {
-        NotifyResult(IMS_FAILURE, FAIL_REASON_ECT_COMPLETED);
+        OnCompleted();
+    }
+    else if (SipStatusCode::IsFinalFailure(nSipFragCode.ToInt()))
+    {
+        OnFailed();
+    }
+}
+
+PUBLIC VIRTUAL void EctController::Timer_TimerExpired(IN ITimer* piTimer)
+{
+    IMS_TRACE_D("Timer_TimerExpired", 0, 0, 0);
+    if (m_piTimer != piTimer)
+    {
         return;
     }
 
-    NotifyResult(IMS_SUCCESS, FAIL_REASON_ECT_COMPLETED);
+    OnFailed();
 }
 
 PROTECTED
-IMtcCall* EctController::GetTransferor() const
+IMtcCall* EctController::GetTransferee() const
 {
-    IMtcCall* piTransferor = m_objContext.GetCallManager().GetCallByCallKey(m_nTransferorKey);
-    if (m_nTransferorKey != piTransferor->GetKey())
+    IMtcCall* piTransferee = m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
+    if (m_nTransfereeKey != piTransferee->GetKey())
     {
         IMS_TRACE_E(0, "NullCall.", 0, 0, 0);
-        // What to do?
+        // TODO: What to do?
     }
 
-    return m_objContext.GetCallManager().GetCallByCallKey(m_nTransferorKey);
+    return m_objContext.GetCallManager().GetCallByCallKey(m_nTransfereeKey);
 }
 
-PROTECTED VIRTUAL IMS_BOOL EctController::IsValid() const
+PROTECTED VIRTUAL void EctController::OnCompleted()
 {
-    // TODO: base shouldn't do anything.
-    // TODO: need to consider the 3rd incoming call case?
-    if (m_objContext.GetCallManager().GetCalls().GetSize() == 2)
-    {
-        return IMS_TRUE;
-    }
+    NotifyResult(IMS_SUCCESS, FAIL_REASON_ECT_COMPLETED);
+    TerminateTransfereeCall();
+    m_objListener.OnEctCompleted();
+}
 
-    return IMS_FALSE;
+PROTECTED VIRTUAL void EctController::OnFailed()
+{
+    // TODO: Recover()?
+    NotifyResult(IMS_FAILURE, FAIL_REASON_ECT_COMPLETED);
+    m_objListener.OnEctCompleted();
 }
 
 PROTECTED
 void EctController::NotifyResult(
         IN IMS_RESULT nResult, IN IMS_SINT32 nReason /* = FAIL_REASON_NONE*/) const
 {
+    IMS_TRACE_D("NotifyResult", 0, 0, 0);
     // TODO: is reason meaningful? what kind of reason to be used for ECT failure?
-    MtcUiNotifier& objNotifier = GetTransferor()->GetCallContext().GetUiNotifier();
+    MtcUiNotifier& objNotifier = GetTransferee()->GetCallContext().GetUiNotifier();
     objNotifier.SendEctCompleted(nResult, FailReason(nReason));
+}
+
+PROTECTED
+void EctController::CreateReference()
+{
+    IMS_TRACE_I("CreateReference", 0, 0, 0);
+
+    m_pReference = std::make_unique<EctReference>(m_objContext, m_nTransfereeKey, *this);
+}
+
+PROTECTED
+void EctController::TerminateTransfereeCall()
+{
+    IMS_TRACE_I("TerminateTransfereeCall", 0, 0, 0);
+    GetTransferee()->Terminate(FailReason(FAIL_REASON_ECT_COMPLETED));
+}
+
+PROTECTED
+void EctController::StartTimer()
+{
+    m_piTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piTimer->SetTimer(TIME_WAIT_OPERATION_COMPLETE, this);
+}
+
+PROTECTED
+void EctController::StopTimer()
+{
+    if (m_piTimer == IMS_NULL)
+    {
+        return;
+    }
+
+    m_piTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piTimer);
+    m_piTimer = IMS_NULL;
 }
