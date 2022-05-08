@@ -451,11 +451,11 @@ PUBLIC VIRTUAL IMS_BOOL SIPClientTransport::UpdateDestinationInfo(IN SipMessage*
         return IMS_FALSE;
     }
 
-    if (SIPStack::IsUriSchemeSIP(pstAddrSpec) || SIPStack::IsUriSchemeSIPS(pstAddrSpec))
+    if (SIPStack::IsUriSchemeSip(pstAddrSpec) || SIPStack::IsUriSchemeSips(pstAddrSpec))
     {
         AString strTemp;
 
-        if (SIPStack::IsUriSchemeSIPS(pstAddrSpec))
+        if (SIPStack::IsUriSchemeSips(pstAddrSpec))
         {
             SetProtocol(SIPTransportAddress::PROTOCOL_TLS, TA_NEAR);
         }
@@ -527,7 +527,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPClientTransport::UpdateDestinationInfo(IN SipMessage*
         // set a default port number according to the URI format.
         if (SIPStack::IsLastErrorNoExist())
         {
-            if (SIPStack::IsUriSchemeSIPS(pstAddrSpec))
+            if (SIPStack::IsUriSchemeSips(pstAddrSpec))
             {
                 nFarPort = Sip::PORT_5061;
             }
@@ -639,7 +639,7 @@ PUBLIC VIRTUAL IMS_BOOL SIPClientTransport::UpdateDestinationInfo(IN SipMessage*
         //  In this case also, the message SHOULD go over TLS.
         SipAddrSpec* pstReqAddrSpec = SIPStack::GetRequestUri(pstMessage);
 
-        if ((pstReqAddrSpec != IMS_NULL) && SIPStack::IsUriSchemeSIPS(pstReqAddrSpec))
+        if ((pstReqAddrSpec != IMS_NULL) && SIPStack::IsUriSchemeSips(pstReqAddrSpec))
         {
             SetProtocol(SIPTransportAddress::PROTOCOL_TLS, TA_FAR);
         }
@@ -773,7 +773,7 @@ PRIVATE GLOBAL IMS_BOOL SIPClientTransport::IsSameHostAndPort(
     // Adjust the port number
     if (SIPStack::IsLastErrorNoExist())
     {
-        if (SIPStack::IsUriSchemeSIPS(pstAddrSpec1))
+        if (SIPStack::IsUriSchemeSips(pstAddrSpec1))
         {
             nPort1 = Sip::PORT_5061;
         }
@@ -795,7 +795,7 @@ PRIVATE GLOBAL IMS_BOOL SIPClientTransport::IsSameHostAndPort(
     // Adjust the port number
     if (SIPStack::IsLastErrorNoExist())
     {
-        if (SIPStack::IsUriSchemeSIPS(pstAddrSpec2))
+        if (SIPStack::IsUriSchemeSips(pstAddrSpec2))
         {
             nPort2 = Sip::PORT_5061;
         }

@@ -688,7 +688,7 @@ IMS_BOOL SIPTransactionState::Send(IN SipMessage* pSipMsg, IN SipTimerValues* pT
     // Store the transaction key here.
     if (pTxnKey != IMS_NULL)
     {
-        if (SIPStack::IsMessageRPR(pSipMsg))
+        if (SIPStack::IsMessageRpr(pSipMsg))
         {
             SIPStack::FreeTxnKey(pstRPRTxnKey);
             pstRPRTxnKey = pTxnKey;

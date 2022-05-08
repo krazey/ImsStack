@@ -1241,7 +1241,7 @@ void SIPClientTransactionState::CheckNSendAck()
 {
     //---------------------------------------------------------------------------------------------
 
-    if (!SIPStack::IsACKTransmissionRequiredForNon2XX())
+    if (!SIPStack::IsAckTransmissionRequiredForNon2XX())
     {
         // SIP stack takes care of the failure response for INVITE and sends ACK
         return;

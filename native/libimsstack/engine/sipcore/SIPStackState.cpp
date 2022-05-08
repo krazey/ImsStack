@@ -224,7 +224,7 @@ void SIPStackState::SetTransactionTimerValues(
     // For transaction layer handling
     // Initialize the retransmission initial timer values, timeout timer values,
     // and wait timer values.
-    SIPStack::SetTransactionTimerValues(pSIPProfile, pSipConfigV);
+    SIPStack::SetTransactionTimerValues(nSlotId, pSIPProfile, pSipConfigV);
 }
 
 /*

@@ -320,17 +320,6 @@ SIP_BOOL SipTxn::AbortTxn()
         }
     }
 
-    /* Inform to user for closing NW txn */
-    ISipNetworkUtil* pNetworkUtil = pUtil->GetNetwork();
-    if (pNetworkUtil != SIP_NULL)
-    {
-        if (m_pTranspInfo != SIP_NULL)
-        {
-            pNetworkUtil->AbortTransmission(m_pTranspInfo->GetMsgSentTranspParam(),
-                    m_pUserData);
-        }
-    }
-
     return SIP_TRUE;
 }
 

@@ -40,6 +40,7 @@ PUBLIC GLOBAL const IMS_CHAR Sip::STR_EARLY_SESSION[] = "early-session";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_FROM_CHANGE[] = "from-change";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_GRUU[] = "gruu";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_MULTIPART[] = "multipart";
+PUBLIC GLOBAL const IMS_CHAR Sip::STR_MIXED[] = "mixed";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_MULTIPART_MIXED[] = "multipart/mixed";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_REFER[] = "refer";
 PUBLIC GLOBAL const IMS_CHAR Sip::STR_SEC_AGREE[] = "sec-agree";

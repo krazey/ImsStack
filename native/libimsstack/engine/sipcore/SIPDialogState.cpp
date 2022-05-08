@@ -1331,7 +1331,7 @@ IMS_BOOL SIPDialogState::CreateRouteSet(IN CONST SIPMessageInfo& objMInfo)
             {
                 IMS_SINT32 nStatusCode = SIPStack::GetStatusCode(pstMessage);
 
-                if (!SIPStack::IsMessageRPR(pstMessage) &&
+                if (!SIPStack::IsMessageRpr(pstMessage) &&
                         SipStatusCode::IsProvisional(nStatusCode))
                 {
                     bPreloadedSet = IMS_TRUE;
@@ -2244,7 +2244,7 @@ PRIVATE GLOBAL IMS_BOOL SIPDialogState::IsTargetRefreshMessage(IN SipMessage* ps
         if (SipStatusCode::IsProvisional(nStatusCode))
         {
             // Check if the message is a reliable provisional response or not
-            if (SIPStack::IsMessageRPR(pstMessage) != IMS_TRUE)
+            if (SIPStack::IsMessageRpr(pstMessage) != IMS_TRUE)
             {
                 // Check if the message has a To-Tag or not
                 SipHeaderBase* pstHeader = SIPStack::GetHeader(pstMessage, ISipHeader::TO);
