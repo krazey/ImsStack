@@ -23,19 +23,19 @@
 class IMediaMsgHandler
 {
 public:
-    virtual void SendMessageToMediaService(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
-            IN ImsMediaMsgParamBase* pParam) = 0;
-/*
-    virtual void Destroy() = 0;
-    virtual IMSMSG& ConvertMessage(IN IMSMSG &objMsg) = 0;
-    virtual void SendMessageToUi(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-            IN IMS_UINT32 eResult) = 0;
-    virtual void OnRttReceivedInd(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
-            IN IUMediaRttDataParam* pParam) = 0;
-    virtual void OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
-            IN IMS_UINT32 eRttAudioInd) = 0;
-    virtual void OnDataUsageChanged(IN IMS_UINTP nSession, IN IMS_SINT32 eEvent,
-            IN IUMediaDataUsageInfoParam* pParam) = 0;
-*/
+    virtual void SendMessageToMediaService(
+            IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam) = 0;
+    /*
+        virtual void Destroy() = 0;
+        virtual IMSMSG& ConvertMessage(IN IMSMSG &objMsg) = 0;
+        virtual void SendMessageToUi(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
+                IN IMS_UINT32 eResult) = 0;
+        virtual void OnRttReceivedInd(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
+                IN IUMediaRttDataParam* pParam) = 0;
+        virtual void OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
+                IN IMS_UINT32 eRttAudioInd) = 0;
+        virtual void OnDataUsageChanged(IN IMS_UINTP nSession, IN IMS_SINT32 eEvent,
+                IN IUMediaDataUsageInfoParam* pParam) = 0;
+    */
 };
-#endif                                              /* _IMEDIA_MSG_HANDLER_H_ */
+#endif /* _IMEDIA_MSG_HANDLER_H_ */

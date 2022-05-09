@@ -22,8 +22,7 @@
 
 class ICarrierConfig;
 
-class AudioConfiguration
-        : public MediaConfiguration
+class AudioConfiguration : public MediaConfiguration
 {
 public:
     AudioConfiguration(MEDIA_CONTENT_TYPE eSessionType = MEDIA_TYPE_AUDIO);
@@ -62,7 +61,7 @@ public:
     enum
     {
         AUDIO_HALFRATE_SETTING = 10
-    };   // setting at "dm_operation_preferred_mode" Media DB table.
+    };  // setting at "dm_operation_preferred_mode" Media DB table.
 
     enum
     {
@@ -73,7 +72,7 @@ public:
     enum
     {
         DEFAULT_VOCODER_INTERFACE = 2
-    }; //[VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD.
+    };  //[VOCODER_INTERFACE] DEFAULT_VOCODER_INTERFACE is CVD.
 
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
 
@@ -81,7 +80,7 @@ public:
     static const IMS_SINT32 DEFAULT_MAX_PTIME = 240;
     static const IMS_SINT32 DEFAULT_MAX_RED = DEFAULT_MAX_PTIME - DEFAULT_PTIME;
     static const IMS_BOOL DEFAULT_BW_NEGO_OPERION = BW_OPTION_LOCAL_VALUE;
-    static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 184; // TODO_MEDIA check default value
+    static const IMS_SINT32 DEFAULT_AUDIO_DSCP = 184;  // TODO_MEDIA check default value
     static const IMS_SINT32 DEFAULT_JITTER_MIN = 4;
     static const IMS_SINT32 DEFAULT_JITTER_MAX = 9;
     static const IMS_SINT32 DEFAULT_JITTER_ADJUST = 4;
@@ -95,7 +94,7 @@ public:
     static const IMS_SINT32 DEFAULT_MODECHANGE_CAPABILITY = 1;
     static const IMS_SINT32 DEFAULT_MODECHANGE_PERIOD = 1;
     static const IMS_SINT32 DEFAULT_MODECHANGE_NEIGHBOR = 0;
-    #define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
+#define DEFAULT_CANDIDATE_ATTRIBUTE "1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"
 
 private:
     IMS_SINT32 m_nAudioPtime;
@@ -118,4 +117,4 @@ private:
     IMS_SINT32 m_nModeChangeNeighbor;
     IMSVector<AString> m_objAudioCandidateAttribute;
 };
-#endif                                              // _AUDIO_CONFIGURATION_H_
+#endif  // _AUDIO_CONFIGURATION_H_

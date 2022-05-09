@@ -20,8 +20,8 @@
 __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 
 PUBLIC
-CodecTelephoneEventConfig::CodecTelephoneEventConfig(IN IMS_SINT32 nType_,
-        IN IMS_SINT32 nPayloadTypeNum_) :
+CodecTelephoneEventConfig::CodecTelephoneEventConfig(
+        IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_) :
         CodecConfig(nType_, nPayloadTypeNum_),
         m_strEvents(DEFAULT_EVENT),
         m_nRedundancyCount(DEFAULT_REDUNDANT_COUNT),
@@ -30,27 +30,25 @@ CodecTelephoneEventConfig::CodecTelephoneEventConfig(IN IMS_SINT32 nType_,
     IMS_TRACE_D("+CodecTelephoneEventConfig Type[%d]", nType_, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
+PUBLIC VIRTUAL CodecTelephoneEventConfig::~CodecTelephoneEventConfig()
 {
     IMS_TRACE_D("~CodecTelephoneEventConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecTelephoneEventConfig::Create(IN ICarrierConfig* piCc)
 {
-    (void) piCc;
+    (void)piCc;
 
     m_strEvents = DEFAULT_EVENT;
     m_nRedundancyCount = DEFAULT_REDUNDANT_COUNT;
-    m_nSamplingRate = (GetPayloadType() == ImsCodec::AUDIO_TELEPHONE_EVENT) ?
-            DEFAULT_SAMPLING_RATE : DEFAULT_SAMPLING_RATE_WB;
+    m_nSamplingRate = (GetPayloadType() == ImsCodec::AUDIO_TELEPHONE_EVENT)
+            ? DEFAULT_SAMPLING_RATE
+            : DEFAULT_SAMPLING_RATE_WB;
 
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void CodecTelephoneEventConfig::ToDebugString() const
+PUBLIC VIRTUAL void CodecTelephoneEventConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 

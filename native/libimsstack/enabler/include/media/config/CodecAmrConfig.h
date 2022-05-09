@@ -19,8 +19,7 @@
 
 #include "config/CodecConfig.h"
 
-class CodecAmrConfig :
-        public CodecConfig
+class CodecAmrConfig : public CodecConfig
 {
 public:
     CodecAmrConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -54,47 +53,46 @@ public:
     static const IMS_BOOL DEFAULT_AMR_DTX = IMS_TRUE;
 
 private:
-
-/**
- *   Payload Num
- *      RTP Payload Number
- *      -1 means default value should be used.
- *      otherwise the value will be used for the rtp payload number
- *
- *   Mode Set
- *      If there are no value in objModeSets, it means 'mode-set' should be hided.
- *      Otherwise 'mode-set' will be presented in SDP
- *      and the values in objModeSets will be listed as 'mode-set' values.
- *
- *       AMR
- *          4.75 (0)
- *          5.15 (1)
- *          5.9 (2)
- *          6.7 (3)
- *          7.4 (4)
- *          7.95 (5)
- *          10.2 (6)
- *          12.2 (7)
- *       AMR-WB
- *          6.6 (0)
- *          8.85 (1)
- *          12.65 (2)
- *          14.25 (3)
- *          15.85 (4)
- *          18.25 (5)
- *          19.85 (6)
- *          23.05 (7)
- *          23.85 (8)
- *
- *   Other items
- *      -1 means that this item shold NOT be presented in SDP.
- *      If each item has other value, the item will be presented in SDP with the value.
- */
+    /**
+     *   Payload Num
+     *      RTP Payload Number
+     *      -1 means default value should be used.
+     *      otherwise the value will be used for the rtp payload number
+     *
+     *   Mode Set
+     *      If there are no value in objModeSets, it means 'mode-set' should be hided.
+     *      Otherwise 'mode-set' will be presented in SDP
+     *      and the values in objModeSets will be listed as 'mode-set' values.
+     *
+     *       AMR
+     *          4.75 (0)
+     *          5.15 (1)
+     *          5.9 (2)
+     *          6.7 (3)
+     *          7.4 (4)
+     *          7.95 (5)
+     *          10.2 (6)
+     *          12.2 (7)
+     *       AMR-WB
+     *          6.6 (0)
+     *          8.85 (1)
+     *          12.65 (2)
+     *          14.25 (3)
+     *          15.85 (4)
+     *          18.25 (5)
+     *          19.85 (6)
+     *          23.05 (7)
+     *          23.85 (8)
+     *
+     *   Other items
+     *      -1 means that this item shold NOT be presented in SDP.
+     *      If each item has other value, the item will be presented in SDP with the value.
+     */
 
     IMS_SINT32 m_nChannel;
-    IMS_UINT32 m_nModeSetList;    // 0 means support all mode set
+    IMS_UINT32 m_nModeSetList;  // 0 means support all mode set
     IMS_SINT32 m_nOctetAlign;
     IMS_SINT32 m_nSamplingRate;
     IMS_BOOL m_bDtx;
 };
-#endif                                              // _CODEC_AMR_CONFIG_H_
+#endif  // _CODEC_AMR_CONFIG_H_

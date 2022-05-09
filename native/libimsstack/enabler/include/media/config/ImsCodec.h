@@ -44,7 +44,7 @@ public:
     enum
     {
         VIDEO_NONE = 100,
-        VIDEO_AVC= 101,
+        VIDEO_AVC = 101,
         VIDEO_HEVC,
         VIDEO_MAX = 199
     };
@@ -58,4 +58,4 @@ public:
         TEXT_MAX = 299
     };
 };
-#endif                                              // _IMS_CODEC_H_
+#endif  // _IMS_CODEC_H_

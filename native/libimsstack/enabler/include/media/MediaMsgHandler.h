@@ -23,7 +23,7 @@
 
 class MediaMsgHandler
 {
-public :
+public:
     MediaMsgHandler(IMS_SINT32 _nAppId);
     virtual ~MediaMsgHandler();
 
@@ -33,20 +33,20 @@ public:
     void SetJniMediaSessionThread(IN JniMediaSessionThread* pThread);
     IMS_BOOL IsAvailableToSend();
     IMS_BOOL SendMessageToMediaService(IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam);
-/*
-    void SendMessageToUi(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-        IN IMS_UINT32 eResult);
-    void OnRttReceivedInd(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-        IN IUMediaRttDataParam* pParam);
-    void OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
-        IN IMS_UINT32 eRttAudioInd);
-    void OnDataUsageChanged(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
-        IN IUMediaDataUsageInfoParam* pParam);
-*/
+    /*
+        void SendMessageToUi(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
+            IN IMS_UINT32 eResult);
+        void OnRttReceivedInd(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
+            IN IUMediaRttDataParam* pParam);
+        void OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
+            IN IMS_UINT32 eRttAudioInd);
+        void OnDataUsageChanged(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
+            IN IUMediaDataUsageInfoParam* pParam);
+    */
     // == PRIVATE VARIABLE ============================================================
-private :
+private:
     IMS_SINT32 nAppId;
     AString strListenerThread;
     JniMediaSessionThread* m_pThread;
 };
-#endif                                              /* _MEDIA_MSG_HANDLER_H_ */
+#endif /* _MEDIA_MSG_HANDLER_H_ */

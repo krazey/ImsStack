@@ -35,9 +35,8 @@ public:
     IMS_SINT32 GetPayloadType() const;
 
 public:
-
 protected:
     IMS_SINT32 m_nCodec;
     IMS_SINT32 m_nPayloadType;
 };
-#endif                                              // _CODEC_CONFIG_H_
+#endif  // _CODEC_CONFIG_H_

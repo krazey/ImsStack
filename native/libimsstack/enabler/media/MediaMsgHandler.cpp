@@ -28,24 +28,25 @@ MediaMsgHandler::MediaMsgHandler(IMS_SINT32 _nAppId) :
         strListenerThread(AString::ConstNull()),
         m_pThread(IMS_NULL)
 {
-    (void) nAppId;
+    (void)nAppId;
     IMS_TRACE_I("+MediaMsgHandler()", 0, 0, 0);
 }
 
 PUBLIC
 MediaMsgHandler::~MediaMsgHandler()
 {
-    IMS_TRACE_I( "~MediaMsgHandler()", 0, 0, 0);
+    IMS_TRACE_I("~MediaMsgHandler()", 0, 0, 0);
 }
 
 PUBLIC
-void MediaMsgHandler::SetListener (IN CONST AString& strName)
+void MediaMsgHandler::SetListener(IN CONST AString& strName)
 {
     strListenerThread = strName;
 }
 
 PUBLIC
-void MediaMsgHandler::SetJniMediaSessionThread(IN JniMediaSessionThread* pThread) {
+void MediaMsgHandler::SetJniMediaSessionThread(IN JniMediaSessionThread* pThread)
+{
     m_pThread = pThread;
 }
 
@@ -62,37 +63,37 @@ IMS_BOOL MediaMsgHandler::IsAvailableToSend()
 }
 
 PUBLIC
-IMS_BOOL MediaMsgHandler::SendMessageToMediaService(IN IMS_SINT32 eEvent,
-        IN ImsMediaMsgParamBase* pParam)
+IMS_BOOL MediaMsgHandler::SendMessageToMediaService(
+        IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* pParam)
 {
-    IMS_TRACE_I("SendMessageToMediaService() eEvent[%d], strListenerThread[%s]",
-            eEvent, strListenerThread.GetStr(), 0);
+    IMS_TRACE_I("SendMessageToMediaService() eEvent[%d], strListenerThread[%s]", eEvent,
+            strListenerThread.GetStr(), 0);
 
-    if(!IsAvailableToSend())
+    if (!IsAvailableToSend())
     {
         return IMS_FALSE;
     }
 
     switch (eEvent)
     {
-    case IMMedia::REQUEST_OPEN_SESSION:
-        return m_pThread->OnOpenSession((ImsMediaMsgOpenConfigParam*)pParam);
-    case IMMedia::REQUEST_MODIFY_SESSION:
-        return m_pThread->OnModifySession((ImsMediaMsgConfigParam*)pParam);
-    case IMMedia::REQUEST_CLOSE_SESSION:
-        return m_pThread->OnCloseSession((ImsMediaMsgParamBase*)pParam);
-    case IMMedia::REQUEST_ADD_CONFIG:
-        return m_pThread->OnAddConfig((ImsMediaMsgConfigParam*)pParam);
-    case IMMedia::REQUEST_DELETE_CONFIG:
-        return m_pThread->OnDeleteConfig((ImsMediaMsgConfigParam*)pParam);
-    case IMMedia::REQUEST_CONFIRM_CONFIG:
-        return m_pThread->OnConfirmConfig((ImsMediaMsgConfigParam*)pParam);
-    case IMMedia::REQUEST_SEND_DTMF:
-        return m_pThread->OnSendDtmf((ImsMediaMsgDtmfParam*)pParam);
-    case IMMedia::REQUEST_SET_MEDIA_QUALITY:
-        return m_pThread->OnSetMediaQualityThreshold((ImsMediaMsgSetMediaQualityParam*)pParam);
-    default:
-        return IMS_TRUE;
+        case IMMedia::REQUEST_OPEN_SESSION:
+            return m_pThread->OnOpenSession((ImsMediaMsgOpenConfigParam*)pParam);
+        case IMMedia::REQUEST_MODIFY_SESSION:
+            return m_pThread->OnModifySession((ImsMediaMsgConfigParam*)pParam);
+        case IMMedia::REQUEST_CLOSE_SESSION:
+            return m_pThread->OnCloseSession((ImsMediaMsgParamBase*)pParam);
+        case IMMedia::REQUEST_ADD_CONFIG:
+            return m_pThread->OnAddConfig((ImsMediaMsgConfigParam*)pParam);
+        case IMMedia::REQUEST_DELETE_CONFIG:
+            return m_pThread->OnDeleteConfig((ImsMediaMsgConfigParam*)pParam);
+        case IMMedia::REQUEST_CONFIRM_CONFIG:
+            return m_pThread->OnConfirmConfig((ImsMediaMsgConfigParam*)pParam);
+        case IMMedia::REQUEST_SEND_DTMF:
+            return m_pThread->OnSendDtmf((ImsMediaMsgDtmfParam*)pParam);
+        case IMMedia::REQUEST_SET_MEDIA_QUALITY:
+            return m_pThread->OnSetMediaQualityThreshold((ImsMediaMsgSetMediaQualityParam*)pParam);
+        default:
+            return IMS_TRUE;
     }
 }
 

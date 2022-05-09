@@ -26,21 +26,18 @@ CodecPcmConfig::CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
     IMS_TRACE_D("+CodecPcmConfig Type[%d]", nType_, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CodecPcmConfig::~CodecPcmConfig()
+PUBLIC VIRTUAL CodecPcmConfig::~CodecPcmConfig()
 {
     IMS_TRACE_D("~CodecPcmConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecPcmConfig::Create(IN ICarrierConfig* piCc)
 {
-    (void) piCc;
+    (void)piCc;
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void CodecPcmConfig::ToDebugString() const
+PUBLIC VIRTUAL void CodecPcmConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 }

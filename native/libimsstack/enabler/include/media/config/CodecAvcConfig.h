@@ -19,8 +19,7 @@
 
 #include "config/CodecConfig.h"
 
-class CodecAvcConfig :
-        public CodecConfig
+class CodecAvcConfig : public CodecConfig
 {
 public:
     CodecAvcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -54,11 +53,11 @@ public:
     static const IMS_SINT32 DEFAULT_BITRATE = 384;
     static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = NON_INTERLEAVED_MODE;
     static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_FALSE;
-    #define DEFAULT_PROFILE_ID "42C00C"
-    #define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
+#define DEFAULT_PROFILE_ID "42C00C"
+#define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
     // send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]
 
-    #define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
+#define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
 
 private:
     IMS_SINT32 m_nResolutionWidth;
@@ -71,4 +70,4 @@ private:
     AString m_strImageAttr;
     AString m_strFrameSize;
 };
-#endif                                              // _CODEC_AVC_CONFIG_H_
+#endif  // _CODEC_AVC_CONFIG_H_

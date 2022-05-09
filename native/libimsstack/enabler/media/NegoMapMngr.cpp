@@ -29,11 +29,11 @@ __IMS_TRACE_TAG_USER_DECL__("MED.SP");
 
 // == PUBLIC METHOD ==============================================================
 PROTECTED
-IMS_BOOL NegoMapMngr::SetNegoMap(IN IMS_UINT32 nMediaNegoID,IN IMS_BOOL bRunning)
+IMS_BOOL NegoMapMngr::SetNegoMap(IN IMS_UINT32 nMediaNegoID, IN IMS_BOOL bRunning)
 {
     IMS_BOOL bTempRunning = IMS_FALSE;
 
-    if(nMediaNegoID == 0)
+    if (nMediaNegoID == 0)
     {
         return IMS_FALSE;
     }
@@ -41,7 +41,7 @@ IMS_BOOL NegoMapMngr::SetNegoMap(IN IMS_UINT32 nMediaNegoID,IN IMS_BOOL bRunning
     // Only nMediaNegoID value will be TRUE
     SetAllNegoMap(IMS_FALSE);
 
-    if(GetNegoMap(nMediaNegoID, bTempRunning) == IMS_TRUE)
+    if (GetNegoMap(nMediaNegoID, bTempRunning) == IMS_TRUE)
     {
         m_objNegoMap.SetValue(nMediaNegoID, bRunning);
         return IMS_TRUE;
@@ -52,10 +52,10 @@ IMS_BOOL NegoMapMngr::SetNegoMap(IN IMS_UINT32 nMediaNegoID,IN IMS_BOOL bRunning
 }
 
 PROTECTED
-IMS_BOOL NegoMapMngr::GetNegoMap(IN IMS_UINT32 nMediaNegoID, OUT IMS_BOOL &bRunning)
+IMS_BOOL NegoMapMngr::GetNegoMap(IN IMS_UINT32 nMediaNegoID, OUT IMS_BOOL& bRunning)
 {
     IMS_SLONG nIndex = m_objNegoMap.GetIndexOfKey(nMediaNegoID);
-    if( nIndex < 0)
+    if (nIndex < 0)
     {
         bRunning = IMS_FALSE;
         return IMS_FALSE;
@@ -69,7 +69,7 @@ IMS_BOOL NegoMapMngr::GetNegoMap(IN IMS_UINT32 nMediaNegoID, OUT IMS_BOOL &bRunn
 PROTECTED
 IMS_BOOL NegoMapMngr::SetAllNegoMap(IN IMS_BOOL bRunning)
 {
-    for(IMS_UINT32 n=0; n<m_objNegoMap.GetSize(); n++)
+    for (IMS_UINT32 n = 0; n < m_objNegoMap.GetSize(); n++)
     {
         m_objNegoMap.SetValueAt(n, bRunning);
     }
@@ -83,7 +83,7 @@ IMS_BOOL NegoMapMngr::ClearNegoMap()
     IMS_TRACE_D("NegoMapMngr::ClearNegoMap", 0, 0, 0);
     PrintCurrentRunningNego();
 
-    while(m_objNegoMap.GetSize() != 0)
+    while (m_objNegoMap.GetSize() != 0)
     {
         m_objNegoMap.RemoveAt(0);
     }
@@ -94,9 +94,9 @@ IMS_BOOL NegoMapMngr::ClearNegoMap()
 PROTECTED
 void NegoMapMngr::PrintCurrentRunningNego()
 {
-    for(IMS_UINT32 n=0; n<m_objNegoMap.GetSize(); n++)
+    for (IMS_UINT32 n = 0; n < m_objNegoMap.GetSize(); n++)
     {
-        if(m_objNegoMap.GetValueAt(n) == IMS_TRUE)
+        if (m_objNegoMap.GetValueAt(n) == IMS_TRUE)
         {
             IMS_TRACE_D("NegoMapMngr::PrintCurrentRunningNego - nMediaNegoID[%x]",
                     m_objNegoMap.GetKeyAt(n), 0, 0);

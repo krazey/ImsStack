@@ -25,36 +25,33 @@
 class INetworkConnection;
 class IMediaConnectionWatcher;
 
-class MediaResourceMngr :
-        public IMediaConnectionWatcherListener
+class MediaResourceMngr : public IMediaConnectionWatcherListener
 {
-// == Inner class  ========================================
-class PDNResource
-{
-public :
-    IMS_SINT32 nIsIPv6;            // -1 : No Information, 0 : IPv4, 1 : IPv6
-    AString strIPAddrOfIPv6;
-    AString strApnName;
-    IMS_BOOL m_bModemIPUpdated;
+    // == Inner class  ========================================
+    class PDNResource
+    {
+    public:
+        IMS_SINT32 nIsIPv6;  // -1 : No Information, 0 : IPv4, 1 : IPv6
+        AString strIPAddrOfIPv6;
+        AString strApnName;
+        IMS_BOOL m_bModemIPUpdated;
 
-public :
-    PDNResource() :
-            nIsIPv6(MEDIA_IP_NONE),
-            strIPAddrOfIPv6(AString::ConstNull()),
-            strApnName(AString::ConstNull()),
-            m_bModemIPUpdated(IMS_FALSE)
-    {};
-};
+    public:
+        PDNResource() :
+                nIsIPv6(MEDIA_IP_NONE),
+                strIPAddrOfIPv6(AString::ConstNull()),
+                strApnName(AString::ConstNull()),
+                m_bModemIPUpdated(IMS_FALSE){};
+    };
 
-// == Constructor, Destructor, Operator Overloading ========================================
+    // == Constructor, Destructor, Operator Overloading ========================================
 public:
     MediaResourceMngr(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     virtual ~MediaResourceMngr();
 
-protected :
-
+protected:
     // == PUBLIC METHOD ==============================================================
-public :
+public:
     virtual IMS_BOOL UpdatePdnResource(IN IMS_SINT32 nPDNType, IN IMS_BOOL nIsIPv6);
     virtual void ResetPdnResource(IN IMS_SINT32 nPDNType = PDN_IMS);
     virtual void UpdateAPN(IN MEDIA_SERVICE_TYPE eMediaServiceType, PDNResource* pLocalPdn);
@@ -63,14 +60,14 @@ public :
     virtual IMS_UINT32 AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_UINT32 nRangeEnd);
     virtual void ReleaseRtpPort(IN IMS_UINT32 nPort);
     /* IMediaConnectionWatcherListener Interface Impl */
-    virtual void NotifyMediaConnection(IN INetworkConnection *piNetConnection,
+    virtual void NotifyMediaConnection(IN INetworkConnection* piNetConnection,
             IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId);
     virtual void NotifyIPChanged(IMS_BOOL bIsIPv6);
     virtual void NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID);
     virtual IMediaConnectionWatcher* GetMediaConnectionWatcher();
-    virtual IMS_BOOL GetMediaConnectionWatcherInfo(IN IPAddress &objIpAddress,
-            OUT IMS_BOOL &bWIFICondition, OUT IMS_UINT32 &nNetworkInterfaceId);
-    virtual IMS_UINT32 GetRtpFragmentSize(IN IPAddress &objIpAddress);
+    virtual IMS_BOOL GetMediaConnectionWatcherInfo(IN IPAddress& objIpAddress,
+            OUT IMS_BOOL& bWIFICondition, OUT IMS_UINT32& nNetworkInterfaceId);
+    virtual IMS_UINT32 GetRtpFragmentSize(IN IPAddress& objIpAddress);
     // == PRIVATE METHOD ============================================================
     virtual INetworkConnection* GetNetConnection(IN MEDIA_SERVICE_TYPE eServiceType);
     virtual MEDIA_NETWORK_TYPE ConvertMediaNetworkType(IN IMS_SINT32 eRadioType);
@@ -81,7 +78,7 @@ public :
     virtual IMS_SINT32 GetSlotId();
 
     // == PRIVATE VARIABLE ============================================================
-protected :
+protected:
     IMS_SINT32 m_nSlotId;
     PDNResource m_objIMSPDN;
     PDNResource m_objEmergencyPDN;
@@ -89,10 +86,11 @@ protected :
     IMS_SINT32 m_nSupportedNetworkTypeFlag;
 
 public:
-    enum {
+    enum
+    {
         PDN_INTERNET,
         PDN_IMS,
         PDN_EMERGENCY,
-    };                                          // PDN Type
+    };  // PDN Type
 };
-#endif                                              /* _IMS_MEDIA_RESOURCE_MNGR_H_ */
+#endif /* _IMS_MEDIA_RESOURCE_MNGR_H_ */

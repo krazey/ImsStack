@@ -20,8 +20,7 @@
 #include "AString.h"
 #include "config/CodecConfig.h"
 
-class CodecTelephoneEventConfig :
-        public CodecConfig
+class CodecTelephoneEventConfig : public CodecConfig
 {
 public:
     CodecTelephoneEventConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -36,15 +35,14 @@ public:
     IMS_SINT32 GetRedundancyCount() const;
     IMS_SINT32 GetSamplingRate() const;
 
-    #define DEFAULT_EVENT "0-15"
+#define DEFAULT_EVENT "0-15"
     static const IMS_SINT32 DEFAULT_REDUNDANT_COUNT = 3;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE = 8000;
     static const IMS_SINT32 DEFAULT_SAMPLING_RATE_WB = 16000;
-
 
 private:
     AString m_strEvents;
     IMS_SINT32 m_nRedundancyCount;
     IMS_SINT32 m_nSamplingRate;
 };
-#endif                                              // _CODEC_TELEPHONE_EVENT_CONFIG_H_
+#endif  // _CODEC_TELEPHONE_EVENT_CONFIG_H_

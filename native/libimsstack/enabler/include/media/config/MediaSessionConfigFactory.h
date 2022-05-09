@@ -25,24 +25,24 @@
 
 class MediaSessionConfigFactory
 {
-private :
+private:
     MediaSessionConfigFactory();
 
-public :
+public:
     virtual ~MediaSessionConfigFactory();
 
     void CreateMediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType);
     void AddMediaSessionConfig(IN IMS_SINT32 nSlotId, IN MediaSessionConfig* mediaSessionConfig);
     void DestroyListSessionConfig(IN IMS_SINT32 nSlotId);
     IMSList<MediaSessionConfig*>* GetListSessionConfig(IN IMS_SINT32 nSlotId);
-    MediaSessionConfig* FindMediaSessionConfig(IN IMS_SINT32 nSlotId,
-            IN MEDIA_SERVICE_TYPE eServiceType);
+    MediaSessionConfig* FindMediaSessionConfig(
+            IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_TYPE eServiceType);
     void DestroySessionConfig(IN MediaSessionConfig* pMediaSessionConfig);
 
     static MediaSessionConfigFactory* GetInstance();
     static void ReleaseInstance(MediaSessionConfigFactory* pSessionConfigFactory);
 
-private :
+private:
     IMSMap<IMS_UINT32, IMSList<MediaSessionConfig*>*> m_mapListMediaSessionConfig;
 };
 

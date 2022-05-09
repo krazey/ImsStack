@@ -28,7 +28,7 @@ mmpf_uint32 MMPFBoardConfigInfo::GetAudioCodecSupport()
 {
     mmpf_uint32 eAudioCodecSupport = 0x00;
 
-    //Default Codec
+    // Default Codec
     eAudioCodecSupport |= MMPF_BC_SUPPORT_AUDIO_CODEC_AMR;
     eAudioCodecSupport |= MMPF_BC_SUPPORT_AUDIO_CODEC_AMRWB;
     eAudioCodecSupport |= MMPF_BC_SUPPORT_AUDIO_CODEC_G711;
@@ -81,13 +81,13 @@ mmpf_bool MMPFBoardConfigInfo::IsTargetOperator(const mmpf_str* /*target*/)
     return MMPF_FALSE;
 }
 
-//H.264
+// H.264
 void MMPFBoardConfigInfo::GetSpropParameterSet(mmpf_uint32 /*nWidth*/, mmpf_uint32 /*nHeight*/,
         mmpf_uint32 /*nProfile*/, mmpf_uint32 /*nLevel*/, mmpf_str* /*szBuffSpropparam*/)
 {
 }
 
-//HEVC - VPS,SPS,PPS
+// HEVC - VPS,SPS,PPS
 void MMPFBoardConfigInfo::GetHEVCConfigFrameSet(mmpf_uint32 /*nWidth*/, mmpf_uint32 /*nHeight*/,
         mmpf_uint32 /*nProfile*/, mmpf_uint32 /*nLevel*/, mmpf_str* /*szBuffSpropparam*/)
 {

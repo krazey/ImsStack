@@ -27,12 +27,11 @@ class AudioConfiguration;
 class VideoConfiguration;
 class TextConfiguration;
 
-class MediaSessionConfig :
-        public ICarrierConfigListener
+class MediaSessionConfig : public ICarrierConfigListener
 {
 public:
-    MediaSessionConfig(IN IMS_SINT32 nSlotId = 0,
-            IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
+    MediaSessionConfig(
+            IN IMS_SINT32 nSlotId = 0, IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
     virtual ~MediaSessionConfig();
 
     IMS_BOOL Create(IN IMS_SINT32 nSlotId);
@@ -78,4 +77,4 @@ private:
     IMS_BOOL m_bAnbrSupported;
     IMS_BOOL m_bSupportMultiConfigInEarlySession;
 };
-#endif // _MEDIA_SESSION_CONFIG_H_
+#endif  // _MEDIA_SESSION_CONFIG_H_

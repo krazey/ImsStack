@@ -34,8 +34,8 @@ public:
      * REPORT_NW_TONE_RTP_RECEIVE_STARTED
      * REPORT_NW_TONE_RTP_RECEIVE_FAILED
      */
-    virtual void MediaSession_Notify(IMS_UINT32 eReportType,
-            MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
+    virtual void MediaSession_Notify(
+            IMS_UINT32 eReportType, MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_INVALID) = 0;
 
     /**
      * REPORT_FAILURE
@@ -52,4 +52,4 @@ public:
     virtual void MediaSession_RTPInfo(IN IMediaRTPInfoMsgParam* pMsg) = 0;
     virtual void MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg) = 0;
 };
-#endif                                              /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */
+#endif /* _INTERFACE_MEDIA_SESSION_LISTENER_H_ */

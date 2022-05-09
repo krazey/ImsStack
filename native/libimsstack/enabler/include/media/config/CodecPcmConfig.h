@@ -19,8 +19,7 @@
 
 #include "config/CodecConfig.h"
 
-class CodecPcmConfig :
-        public CodecConfig
+class CodecPcmConfig : public CodecConfig
 {
 public:
     CodecPcmConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -31,4 +30,4 @@ public:
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
 };
-#endif                                              // _CODEC_PCM_CONFIG_H_
+#endif  // _CODEC_PCM_CONFIG_H_

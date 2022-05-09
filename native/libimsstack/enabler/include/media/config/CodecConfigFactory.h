@@ -33,12 +33,12 @@ private:
     CodecConfigFactory();
 
 public:
-    static CodecConfig* CreateAudioPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum);
-    static CodecConfig* CreateVideoPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum);
-    static CodecConfig* CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateAudioPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateVideoPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
+    static CodecConfig* CreateTextPayloadConfig(
+            ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum);
 };
 #endif
 // _CODEC_CONFIG_FACTORY_H_

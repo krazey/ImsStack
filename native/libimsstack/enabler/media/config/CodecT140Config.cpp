@@ -28,8 +28,7 @@ CodecT140Config::CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTyp
     IMS_TRACE_D("+CodecT140Config Type[%d]", nType_, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CodecT140Config::~CodecT140Config()
+PUBLIC VIRTUAL CodecT140Config::~CodecT140Config()
 {
     IMS_TRACE_D("~CodecT140Config", 0, 0, 0);
 }
@@ -59,7 +58,7 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
 
     if (GetCodec() == ImsCodec::TEXT_RED && m_nRedLevel <= 1)
     {
-        IMS_TRACE_E(0, "'red' attribute needs more than 1 of redundancy(%d>1)", m_nRedLevel , 0, 0);
+        IMS_TRACE_E(0, "'red' attribute needs more than 1 of redundancy(%d>1)", m_nRedLevel, 0, 0);
         return IMS_FALSE;
     }
     else if (GetCodec() == ImsCodec::TEXT_T140)
@@ -75,8 +74,7 @@ IMS_BOOL CodecT140Config::Create(IN ICarrierConfig* piCc)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void CodecT140Config::ToDebugString() const
+PUBLIC VIRTUAL void CodecT140Config::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 

@@ -21,8 +21,7 @@
 
 class ICarrierConfig;
 
-class TextConfiguration :
-        public MediaConfiguration
+class TextConfiguration : public MediaConfiguration
 {
 public:
     TextConfiguration(MEDIA_CONTENT_TYPE _eSessionType = MEDIA_TYPE_TEXT);
@@ -63,4 +62,4 @@ private:
     IMS_SINT32 nRedPayloadType;
     IMS_BOOL bTextCodecEmptyRedundantEnabled;
 };
-#endif                                              // _TEXT_CONFIGURATION_H_
+#endif  // _TEXT_CONFIGURATION_H_

@@ -25,12 +25,11 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 Remarks
 
 */
-PUBLIC GLOBAL
-CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum)
+PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
-    IMS_TRACE_D("CreateAudioPayloadConfig nCodec[%d], nPayloadTypeNum[%d]",
-            nCodec, nPayloadTypeNum, 0);
+    IMS_TRACE_D(
+            "CreateAudioPayloadConfig nCodec[%d], nPayloadTypeNum[%d]", nCodec, nPayloadTypeNum, 0);
 
     if (nCodec == ImsCodec::AUDIO_NONE)
     {
@@ -57,7 +56,7 @@ CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(ICarrierConfig* piCc, 
 
             pCodecConfig = pAMRConfig;
         }
-            break;
+        break;
         case ImsCodec::AUDIO_PCMA:
         case ImsCodec::AUDIO_PCMU:
         {
@@ -74,7 +73,7 @@ CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(ICarrierConfig* piCc, 
 
             pCodecConfig = pPCMConfig;
         }
-            break;
+        break;
         case ImsCodec::AUDIO_TELEPHONE_EVENT:
         case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
         {
@@ -91,7 +90,7 @@ CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(ICarrierConfig* piCc, 
 
             pCodecConfig = pTelephoneEventConfig;
         }
-            break;
+        break;
         case ImsCodec::AUDIO_EVS:
         {
             CodecEvsConfig* pEVSConfig = IMS_NULL;
@@ -113,9 +112,8 @@ CodecConfig* CodecConfigFactory::CreateAudioPayloadConfig(ICarrierConfig* piCc, 
     return pCodecConfig;
 }
 
-PUBLIC GLOBAL
-CodecConfig *CodecConfigFactory::CreateVideoPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum)
+PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateVideoPayloadConfig(
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::VIDEO_NONE)
     {
@@ -145,14 +143,13 @@ CodecConfig *CodecConfigFactory::CreateVideoPayloadConfig(ICarrierConfig* piCc, 
 
         case ImsCodec::VIDEO_HEVC:
             // pCodecConfig = new CodecHevcConfig(nCodec, nPayloadTypeNum);   //Need to add later
-        break;
+            break;
     }
     return pCodecConfig;
 }
 
-PUBLIC GLOBAL
-CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(ICarrierConfig* piCc, IMS_SINT32 nCodec,
-        IMS_SINT32 nPayloadTypeNum)
+PUBLIC GLOBAL CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(
+        ICarrierConfig* piCc, IMS_SINT32 nCodec, IMS_SINT32 nPayloadTypeNum)
 {
     if (nCodec == ImsCodec::TEXT_NONE)
     {
@@ -178,9 +175,9 @@ CodecConfig* CodecConfigFactory::CreateTextPayloadConfig(ICarrierConfig* piCc, I
 
             pCodecConfig = pT140Config;
         }
-            break;
+        break;
         case ImsCodec::TEXT_RED:
-            //Need to add later
+            // Need to add later
             break;
     }
     return pCodecConfig;

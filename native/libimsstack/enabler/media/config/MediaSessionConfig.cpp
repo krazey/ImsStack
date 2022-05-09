@@ -40,8 +40,7 @@ MediaSessionConfig::MediaSessionConfig(IN IMS_SINT32 nSlotId, IN MEDIA_SERVICE_T
     MediaSessionConfigFactory::GetInstance()->AddMediaSessionConfig(nSlotId, this);
 }
 
-PUBLIC VIRTUAL
-MediaSessionConfig::~MediaSessionConfig()
+PUBLIC VIRTUAL MediaSessionConfig::~MediaSessionConfig()
 {
     IMS_TRACE_D("~MediaSessionConfig()", 0, 0, 0);
 
@@ -65,10 +64,10 @@ IMS_BOOL MediaSessionConfig::Create(IN IMS_SINT32 nSlotId)
     // m_bIsSessLevelBW = piCc->GetBoolean(
     //     CarrierConfig::Assets::KEY_MEDIA_SESSION_LEVEL_BANDWIDTH_BOOL);
 
-    m_bAnbrSupported = piCc->GetBoolean(
-        CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
-    m_bSupportMultiConfigInEarlySession = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
+    m_bAnbrSupported =
+            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL);
+    m_bSupportMultiConfigInEarlySession =
+            piCc->GetBoolean(CarrierConfig::Assets::KEY_SUPPORT_MULTI_CONFIG_IN_EARLY_SESSION_BOOL);
 
     CreateAudioConfiguration(piCc);
     CreateVideoConfiguration(piCc);
@@ -90,8 +89,8 @@ PUBLIC
 void MediaSessionConfig::ToDebugString() const
 {
     IMS_TRACE_D("m_nServiceType(%d), m_bIsSessLevelBW(%d)", m_nServiceType, m_bIsSessLevelBW, 0);
-    IMS_TRACE_D("m_bAnbrSupported(%d), m_bSupportMultiConfigInEarlySession(%d)",
-            m_bAnbrSupported, m_bSupportMultiConfigInEarlySession, 0);
+    IMS_TRACE_D("m_bAnbrSupported(%d), m_bSupportMultiConfigInEarlySession(%d)", m_bAnbrSupported,
+            m_bSupportMultiConfigInEarlySession, 0);
 }
 
 PUBLIC
@@ -169,8 +168,7 @@ IMS_BOOL MediaSessionConfig::Update(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    if (!UpdateAudioConfiguration(piCc) ||
-            !UpdateVideoConfiguration(piCc) ||
+    if (!UpdateAudioConfiguration(piCc) || !UpdateVideoConfiguration(piCc) ||
             !UpdateTextConfiguration(piCc))
     {
         return IMS_FALSE;
@@ -179,11 +177,10 @@ IMS_BOOL MediaSessionConfig::Update(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-PRIVATE VIRTUAL
-void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
+PRIVATE VIRTUAL void MediaSessionConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
-    if (MediaSessionConfigFactory::GetInstance()->
-            FindMediaSessionConfig(nSlotId, m_nServiceType) == this)
+    if (MediaSessionConfigFactory::GetInstance()->FindMediaSessionConfig(nSlotId, m_nServiceType) ==
+            this)
     {
         ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
         Update(piCc);
@@ -195,7 +192,7 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("CreateAudioConfiguration()", 0, 0, 0);
 
-    AudioConfiguration *pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
+    AudioConfiguration* pConfig = new AudioConfiguration(MEDIA_TYPE_AUDIO);
 
     if (pConfig == IMS_NULL)
     {
@@ -204,7 +201,7 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0,"Creating an audio configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Creating an audio configuration failed", 0, 0, 0);
 
         delete pConfig;
         pConfig = IMS_NULL;
@@ -219,10 +216,9 @@ IMS_BOOL MediaSessionConfig::CreateAudioConfiguration(IN ICarrierConfig* piCc)
 PRIVATE
 IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 {
-
     IMS_TRACE_D("CreateVideoConfiguration()", 0, 0, 0);
 
-    VideoConfiguration *pConfig = new VideoConfiguration(MEDIA_TYPE_AUDIOVIDEO);
+    VideoConfiguration* pConfig = new VideoConfiguration(MEDIA_TYPE_AUDIOVIDEO);
 
     if (pConfig == IMS_NULL)
     {
@@ -231,7 +227,7 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0,"Creating an video configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Creating an video configuration failed", 0, 0, 0);
 
         delete pConfig;
         pConfig = IMS_NULL;
@@ -246,7 +242,7 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("CreateTextConfiguration()", 0, 0, 0);
 
-    TextConfiguration *pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
+    TextConfiguration* pConfig = new TextConfiguration(MEDIA_TYPE_TEXT);
 
     if (pConfig == IMS_NULL)
     {
@@ -255,7 +251,7 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
 
     if (!pConfig->Create(piCc))
     {
-        IMS_TRACE_E(0,"Creating an text configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Creating an text configuration failed", 0, 0, 0);
 
         delete pConfig;
         pConfig = IMS_NULL;
@@ -277,7 +273,7 @@ IMS_BOOL MediaSessionConfig::UpdateAudioConfiguration(IN ICarrierConfig* piCc)
 
     if (!m_pAudioConfig->Update(piCc))
     {
-        IMS_TRACE_E(0,"Updating an audio configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Updating an audio configuration failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -296,7 +292,7 @@ IMS_BOOL MediaSessionConfig::UpdateVideoConfiguration(IN ICarrierConfig* piCc)
 
     if (!m_pVideoConfig->Update(piCc))
     {
-        IMS_TRACE_E(0,"Updating a video configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Updating a video configuration failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -314,7 +310,7 @@ IMS_BOOL MediaSessionConfig::UpdateTextConfiguration(IN ICarrierConfig* piCc)
 
     if (!m_pTextConfig->Update(piCc))
     {
-        IMS_TRACE_E(0,"Updating a text configuration failed", 0, 0, 0);
+        IMS_TRACE_E(0, "Updating a text configuration failed", 0, 0, 0);
 
         return IMS_FALSE;
     }

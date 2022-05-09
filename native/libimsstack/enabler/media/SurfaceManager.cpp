@@ -30,15 +30,12 @@ class SurfaceManagerPrivate
 public:
     inline SurfaceManagerPrivate() :
             piLock(IMS_NULL),
-            objSurfaceMaps(IMSMap<IMS_UINTP, IMSList<IMS_UINTP> >()),
-            objSurfaceMapsForRemoval(IMSMap<IMS_UINTP, IMSList<IMS_UINTP> >())
+            objSurfaceMaps(IMSMap<IMS_UINTP, IMSList<IMS_UINTP>>()),
+            objSurfaceMapsForRemoval(IMSMap<IMS_UINTP, IMSList<IMS_UINTP>>())
     {
         piLock = MutexService::GetMutexService()->CreateMutex();
     }
-    inline ~SurfaceManagerPrivate()
-    {
-        MutexService::GetMutexService()->DestroyMutex(piLock);
-    }
+    inline ~SurfaceManagerPrivate() { MutexService::GetMutexService()->DestroyMutex(piLock); }
 
 private:
     SurfaceManagerPrivate(IN const SurfaceManagerPrivate& objRHS);
@@ -52,9 +49,9 @@ public:
     void RemovePendingSurfaces(IN IMS_UINTP nSession);
 
 private:
-    IMutex *piLock;
-    IMSMap<IMS_UINTP, IMSList<IMS_UINTP> > objSurfaceMaps;
-    IMSMap<IMS_UINTP, IMSList<IMS_UINTP> > objSurfaceMapsForRemoval;
+    IMutex* piLock;
+    IMSMap<IMS_UINTP, IMSList<IMS_UINTP>> objSurfaceMaps;
+    IMSMap<IMS_UINTP, IMSList<IMS_UINTP>> objSurfaceMapsForRemoval;
 };
 
 PUBLIC
@@ -123,8 +120,8 @@ void SurfaceManagerPrivate::RemoveSurface(IN IMS_UINTP nSession, IN IMS_UINTP nS
             IMSInterface_ReleaseSurface(nSurface);
             objSurfaces.RemoveAt(i);
 
-            IMS_TRACE_D("SurfaceManager :: RemoveSurface[%d], [%" PFLS_x "]",
-                    objSurfaces.GetSize(), nSurface, 0);
+            IMS_TRACE_D("SurfaceManager :: RemoveSurface[%d], [%" PFLS_x "]", objSurfaces.GetSize(),
+                    nSurface, 0);
 
             return;
         }
@@ -148,7 +145,7 @@ void SurfaceManagerPrivate::RemoveAll(IN IMS_UINTP nSession)
 
         if (nIndex >= 0)
         {
-           objSurfaceMapsForRemoval.RemoveAt(nIndex);
+            objSurfaceMapsForRemoval.RemoveAt(nIndex);
         }
 
         return;
@@ -171,8 +168,8 @@ void SurfaceManagerPrivate::RemoveAll(IN IMS_UINTP nSession)
         objSurfaceMapsForRemoval.RemoveAt(nIndex);
     }
 
-    IMS_TRACE_D("SurfaceManager :: RemoveAll - [%d][%d]",
-            objSurfaceMaps.GetSize(), objSurfaceMapsForRemoval.GetSize(), 0);
+    IMS_TRACE_D("SurfaceManager :: RemoveAll - [%d][%d]", objSurfaceMaps.GetSize(),
+            objSurfaceMapsForRemoval.GetSize(), 0);
 }
 
 PUBLIC
@@ -242,8 +239,8 @@ void SurfaceManagerPrivate::RemovePendingSurfaces(IN IMS_UINTP nSession)
         RemoveSurface(nSession, objSurfaces.GetAt(i));
     }
 
-    IMS_TRACE_D("RemovePendingSurfaces[%d], removedCount[%d]",
-        objSurfaceMapsForRemoval.GetSize(), objSurfaces.GetSize(), 0);
+    IMS_TRACE_D("RemovePendingSurfaces[%d], removedCount[%d]", objSurfaceMapsForRemoval.GetSize(),
+            objSurfaces.GetSize(), 0);
 }
 
 PRIVATE
@@ -258,8 +255,7 @@ SurfaceManager::~SurfaceManager()
     delete pPrivate;
 }
 
-PUBLIC GLOBAL
-SurfaceManager* SurfaceManager::GetInstance()
+PUBLIC GLOBAL SurfaceManager* SurfaceManager::GetInstance()
 {
     static SurfaceManager* pSurfaceManager = IMS_NULL;
 

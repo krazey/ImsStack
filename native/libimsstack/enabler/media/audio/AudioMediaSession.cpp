@@ -45,8 +45,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_D("+AudioMediaSession()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-AudioMediaSession::~AudioMediaSession()
+PUBLIC VIRTUAL AudioMediaSession::~AudioMediaSession()
 {
     IMS_TRACE_I("~AudioMediaSession()", 0, 0, 0);
 }
@@ -57,8 +56,7 @@ void AudioMediaSession::SetConfig(IN AudioConfiguration* pConfig)
     m_pConfig = pConfig;
 }
 
-PUBLIC IMS_BOOL
-AudioMediaSession::UpdateRtpConfig(
+PUBLIC IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile, IN AudioProfile* pNegoProfile)
 {
     if (pSrcProfile == IMS_NULL || pDestProfile == IMS_NULL || pNegoProfile == IMS_NULL)
@@ -112,17 +110,18 @@ AudioMediaSession::UpdateRtpConfig(
     {
         AudioProfile::Payload* pSrcPayload =
                 pSrcProfile->lstPayload.GetAt(pSrcProfile->nNegotiatedPayloadIndex);
-        if (pSrcPayload == IMS_NULL) return IMS_FALSE;
+        if (pSrcPayload == IMS_NULL)
+            return IMS_FALSE;
 
         m_objAudioConfig.setTxPayloadTypeNumber((int32_t)pSrcPayload->objRtpMap.nPayloadNum);
     }
 
-    //remote network parameters
+    // remote network parameters
     m_objAudioConfig.setRemoteAddress(
-                android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
+            android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
     m_objAudioConfig.setRemotePort(pDestProfile->nDataPort);
     m_objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
-    m_objAudioConfig.setMaxMtuBytes(1500); // NEXT_ITEM
+    m_objAudioConfig.setMaxMtuBytes(1500);  // NEXT_ITEM
 
     MediaManager* manager = MediaManager::GetInstance(m_nSlodId);
     if (manager != IMS_NULL)
@@ -155,9 +154,9 @@ AudioMediaSession::UpdateRtpConfig(
             m_objAudioConfig.getDscp(), m_objAudioConfig.getmaxMtuBytes(),
             m_objAudioConfig.getMediaDirection());
 
-    //RTCP
+    // RTCP
     RtcpConfig* pRtcpConfig = new RtcpConfig();
-    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name")); // TODO::MEDIA
+    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name"));  // TODO::MEDIA
     pRtcpConfig->setTransmitPort(pNegoProfile->nControlPort);
     if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
     {
@@ -168,7 +167,7 @@ AudioMediaSession::UpdateRtpConfig(
         pRtcpConfig->setIntervalSec(pNegoProfile->nRtcpInterval);
     }
 
-    //RTCP-XR
+    // RTCP-XR
     IMS_UINT32 nRtcpXrBlocks = 0;
     if (pNegoProfile->objRtcpXrAttr.bSupportVoipMatircs)
     {
@@ -197,8 +196,8 @@ AudioMediaSession::UpdateRtpConfig(
             objRtcpConfig.getTransmitPort(), objRtcpConfig.getIntervalSec(), 0);
 
     // Setting the codec properties
-    if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR")
-            || pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
+    if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR") ||
+            pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB"))
     {
         AudioProfile::AmrFmtp* pFmtp =
                 reinterpret_cast<AudioProfile::AmrFmtp*>(pNegoPayload->pFmtp);
@@ -218,7 +217,7 @@ AudioMediaSession::UpdateRtpConfig(
         m_objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
         m_objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
         m_objAudioConfig.setMaxPtimeMillis((int8_t)pNegoProfile->nMaxPtime);
-        //AMR DTX on/off by source codec
+        // AMR DTX on/off by source codec
         m_objAudioConfig.setDtxEnabled(IMS_TRUE);
 
         if (pSrcProfile->nNegotiatedPayloadIndex >= 0)
@@ -249,11 +248,11 @@ AudioMediaSession::UpdateRtpConfig(
             maxModeSet = 0;
         }
 
-        pAmrParams->setAmrMode((int32_t)static_cast<AmrParams::AmrMode>(maxModeSet));
+        pAmrParams->setAmrMode((int32_t) static_cast<AmrParams::AmrMode>(maxModeSet));
 
         // AMR padding mode
         pAmrParams->setOctetAligned(pFmtp->nOctetAlign);
-        pAmrParams->setMaxRedundancyMillis(0);     // TODO::MEDIA insert real value
+        pAmrParams->setMaxRedundancyMillis(0);  // TODO::MEDIA insert real value
         m_objAudioConfig.setAmrParams(*pAmrParams);
         delete pAmrParams;
 
@@ -276,16 +275,16 @@ AudioMediaSession::UpdateRtpConfig(
         m_objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
         m_objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
         m_objAudioConfig.setMaxPtimeMillis((int8_t)pNegoProfile->nMaxPtime);
-        //AMR DTX on/off by source codec
+        // AMR DTX on/off by source codec
         m_objAudioConfig.setDtxEnabled((IMS_BOOL)pFmtp->nDtx);
 
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
 
-        //tx side
+        // tx side
         pEvsParams->setUseHeaderFullOnlyOnTx((IMS_BOOL)pFmtp->nHfOnly);
 
-        //rx side
+        // rx side
         pEvsParams->setUseHeaderFullOnlyOnRx((IMS_BOOL)pDestFmtp->nHfOnly);
 
         IMS_SINT32 maxModeSet =
@@ -294,12 +293,12 @@ AudioMediaSession::UpdateRtpConfig(
         {
             maxModeSet = 0;
         }
-        //evs primary mode conversion
+        // evs primary mode conversion
         if (pFmtp->nEvsModeSwitch == 0)
-        {   //evs primary mode
+        {  // evs primary mode
             maxModeSet += EvsParams::EVS_MODE_9;
         }
-        pEvsParams->setEvsMode((int32_t)static_cast<EvsParams::EvsMode>(maxModeSet));
+        pEvsParams->setEvsMode((int32_t) static_cast<EvsParams::EvsMode>(maxModeSet));
 
         // update bandwidth
         IMS_SINT32 nEvsBandwidth = EvsParams::EVS_FULL_BAND;
@@ -309,12 +308,12 @@ AudioMediaSession::UpdateRtpConfig(
             nEvsBandwidth += EvsParams::EVS_SUPER_WIDE_BAND;
         }
         else if ((pFmtp->nBwList & 0x02) != 0)
-        { // Primary WB case
+        {  // Primary WB case
             nEvsBandwidth += EvsParams::EVS_WIDE_BAND;
         }
         else if ((pFmtp->nBwList & 0x01) != 0)
-        { // Primary NB case
-           nEvsBandwidth += EvsParams::EVS_NARROW_BAND;
+        {  // Primary NB case
+            nEvsBandwidth += EvsParams::EVS_NARROW_BAND;
         }
 
         // exception : evs AMR-WB IO mode
@@ -338,10 +337,9 @@ AudioMediaSession::UpdateRtpConfig(
         IMS_TRACE_D("UpdateRtpConfig() - EVS nBandwidth[0x%08x], TxCodecModeRequest[0x%08x]",
                 objEvsParams.getEvsBandwidth(), m_objAudioConfig.getTxCodecModeRequest(), 0);
     }
-    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU")
-            || pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
+    else if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU") ||
+            pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMA"))
     {
-
         if (pNegoPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("PCMU"))
         {
             m_objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_PCMA);
@@ -361,7 +359,7 @@ AudioMediaSession::UpdateRtpConfig(
     }
 
     IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], SamplingRateKHz[%d]",
-            m_objAudioConfig.getCodecType(), m_objAudioConfig.getSamplingRateKHz()*1000, 0);
+            m_objAudioConfig.getCodecType(), m_objAudioConfig.getSamplingRateKHz() * 1000, 0);
     IMS_TRACE_D("UpdateRtpConfig() - PtimeMillis[%d], MaxPtimeMillis[%d], DtxEnabled[%d]",
             m_objAudioConfig.getPtimeMillis(), m_objAudioConfig.getMaxPtimeMillis(),
             m_objAudioConfig.getDtxEnabled());
@@ -382,25 +380,25 @@ AudioMediaSession::UpdateRtpConfig(
     }
 
     IMS_TRACE_D("UpdateRtpConfig() - DtmfPayloadTypeNumber[%d], DtmfsamplingRateKHz[%d]",
-            m_objAudioConfig.getDtmfPayloadTypeNumber(),
-            m_objAudioConfig.getDtmfsamplingRateKHz(), 0);
+            m_objAudioConfig.getDtmfPayloadTypeNumber(), m_objAudioConfig.getDtmfsamplingRateKHz(),
+            0);
 
-    //jitter options // NEXT_ITEM
-/*
-    m_objAudioConfig.sessionParams.jitterBufferParams.minJitterBufferSizeMillis =
-            m_pConfig->GetJitterBufferMinSize();
-    m_objAudioConfig.sessionParams.jitterBufferParams.maxJitterBufferSizeMillis =
-            m_pConfig->GetJitterBufferMaxSize();
-    m_objAudioConfig.sessionParams.jitterBufferParams.jitterBufferAdjustTimerMillis = 80;
-    m_objAudioConfig.sessionParams.jitterBufferParams.bufferStepSizeMillis = 1;
+    // jitter options // NEXT_ITEM
+    /*
+        m_objAudioConfig.sessionParams.jitterBufferParams.minJitterBufferSizeMillis =
+                m_pConfig->GetJitterBufferMinSize();
+        m_objAudioConfig.sessionParams.jitterBufferParams.maxJitterBufferSizeMillis =
+                m_pConfig->GetJitterBufferMaxSize();
+        m_objAudioConfig.sessionParams.jitterBufferParams.jitterBufferAdjustTimerMillis = 80;
+        m_objAudioConfig.sessionParams.jitterBufferParams.bufferStepSizeMillis = 1;
 
-    IMS_TRACE_I("UpdateRtpConfig() - set JB min[%d], max[%d]",
-            m_objAudioConfig.sessionParams.jitterBufferParams.minJitterBufferSizeMillis,
-            m_objAudioConfig.sessionParams.jitterBufferParams.maxJitterBufferSizeMillis, 0);
-    IMS_TRACE_I("UpdateRtpConfig() - set JB th[%d],step[%d]",
-            m_objAudioConfig.sessionParams.jitterBufferParams.jitterBufferAdjustTimerMillis,
-            m_objAudioConfig.sessionParams.jitterBufferParams.bufferStepSizeMillis, 0);
-*/
+        IMS_TRACE_I("UpdateRtpConfig() - set JB min[%d], max[%d]",
+                m_objAudioConfig.sessionParams.jitterBufferParams.minJitterBufferSizeMillis,
+                m_objAudioConfig.sessionParams.jitterBufferParams.maxJitterBufferSizeMillis, 0);
+        IMS_TRACE_I("UpdateRtpConfig() - set JB th[%d],step[%d]",
+                m_objAudioConfig.sessionParams.jitterBufferParams.jitterBufferAdjustTimerMillis,
+                m_objAudioConfig.sessionParams.jitterBufferParams.bufferStepSizeMillis, 0);
+    */
     return IMS_TRUE;
 }
 
@@ -421,8 +419,8 @@ IMS_BOOL AudioMediaSession::UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold)
     {
         m_objMediaQualityThreshold.setRtpInactivityTimerMillis(
                 m_pConfig->GetRtpInactivityTimerMillis());
-        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis
-                (m_pConfig->GetRtcpInactivityTimerMillis());
+        m_objMediaQualityThreshold.setRtcpInactivityTimerMillis(
+                m_pConfig->GetRtcpInactivityTimerMillis());
         m_objMediaQualityThreshold.setRtpPacketLossDurationMillis(15000);
         m_objMediaQualityThreshold.setRtpPacketLossRate(30);
         m_objMediaQualityThreshold.setJitterDurationMillis(15000);

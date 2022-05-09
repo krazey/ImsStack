@@ -31,28 +31,24 @@ CodecConfig::CodecConfig(IN IMS_SINT32 nCodec_, IN IMS_SINT32 nPayloadTypeNum_) 
         m_nCodec(nCodec_),
         m_nPayloadType(nPayloadTypeNum_)
 {
-    IMS_TRACE_D("+CodecConfig : m_nCodec[%d], m_nPayloadType[%d]",
-            m_nCodec, m_nPayloadType, 0);
+    IMS_TRACE_D("+CodecConfig : m_nCodec[%d], m_nPayloadType[%d]", m_nCodec, m_nPayloadType, 0);
 }
 
-PUBLIC VIRTUAL
-CodecConfig::~CodecConfig()
+PUBLIC VIRTUAL CodecConfig::~CodecConfig()
 {
     IMS_TRACE_D("~CodecConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecConfig::Create(IN ICarrierConfig* piCc)
 {
-    (void) piCc;
+    (void)piCc;
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void CodecConfig::ToDebugString() const
+PUBLIC VIRTUAL void CodecConfig::ToDebugString() const
 {
-    IMS_TRACE_D("codec (%d, %s), payload (%d)",
-            m_nCodec, ImsCodec::CodecToString(m_nCodec), m_nPayloadType);
+    IMS_TRACE_D("codec (%d, %s), payload (%d)", m_nCodec, ImsCodec::CodecToString(m_nCodec),
+            m_nPayloadType);
 }
 
 PUBLIC

@@ -24,39 +24,35 @@
 
 class MediaSessionTypeNode
 {
-public :
+public:
     AString m_strIpAddr;
     IMS_SINT32 m_nPort;
     IMS_UINTP m_nNegoId;
     MEDIA_CONTENT_TYPE m_eMediaType;
 
-public :
+public:
     MediaSessionTypeNode() :
             m_strIpAddr(AString::ConstNull()),
             m_nPort(0),
             m_nNegoId(0),
-            m_eMediaType(MEDIA_TYPE_INVALID)
-    {};
+            m_eMediaType(MEDIA_TYPE_INVALID){};
 
-    MediaSessionTypeNode(IN AString strIpAddr, IN IMS_SINT32 nPort,
-            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType) :
+    MediaSessionTypeNode(IN AString strIpAddr, IN IMS_SINT32 nPort, IN IMS_UINTP nNegoId,
+            IN MEDIA_CONTENT_TYPE eMediaType) :
             m_strIpAddr(strIpAddr),
             m_nPort(nPort),
             m_nNegoId(nNegoId),
-            m_eMediaType(eMediaType)
-    {};
+            m_eMediaType(eMediaType){};
 };
 
-class MediaSession :
-        public IMediaSessionListener,
-        public IMediaSession
+class MediaSession : public IMediaSessionListener, public IMediaSession
 {
 public:
     enum SessionState
     {
         EARLY_SESSION = 0,
-        READY_TO_CONFIRM,    //session just become confirm
-        CONFIRMED_SESSION,  //in confirmed already
+        READY_TO_CONFIRM,   // session just become confirm
+        CONFIRMED_SESSION,  // in confirmed already
     };
 
     enum MediaSessionMsgType
@@ -107,7 +103,7 @@ public:
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir,
             IN IMS_SINT32 eTextDir = -1);
-    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID,IN ISession * pSession,
+    virtual IMS_BOOL NegotiateSDP(IN IMS_UINTP nNegoID, IN ISession* pSession,
             OUT IMS_SINT32* eAudioDir, OUT IMS_SINT32* eVideoDir, OUT IMS_SINT32* eTextDir,
             OUT MediaNego::MediaNegoResult& errorReason);
     virtual void FinalizeSDP(IN IMS_UINTP nNegoID, IN ISession* pSession);
@@ -126,19 +122,18 @@ public:
     // virtual AString GetNegotiatedCodec(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
     virtual IMS_SINT32 GetNegotiatedQuality(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
     virtual IMS_SINT32 GetNegotiatedCodecBitrate(IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE type);
-    //virtual IMS_SINT32 GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
-    //        IN MEDIA_CONTENT_TYPE type);
-    virtual MEDIA_DIRECTION GetNegotiatedDirection(IN IMS_UINTP nNegoId,
-            IN MEDIA_CONTENT_TYPE eMediaType);
+    // virtual IMS_SINT32 GetNegotiatedCodecBandwidth(IN IMS_UINTP nNegoId,
+    //         IN MEDIA_CONTENT_TYPE type);
+    virtual MEDIA_DIRECTION GetNegotiatedDirection(
+            IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType);
 
     // -- Additional function APIs ----------------------------------------------------------------
-    virtual void SetOptions(IN IMS_UINTP nNegoId, IN OptionType type,
-            IN IMS_SINT32 param1, IN IMS_SINT32 param2);
-    virtual void SetNetworkToneRTPTimer(IN MEDIA_CONTENT_TYPE eMediaType,
-            IN IMS_UINT32 nRtpTimer);
-    virtual IMS_BOOL SendMessage(IN IMSMSG &objMsg);
-    virtual IMS_BOOL SendDtmf(IN IMS_UINTP nNegoId, IN IMS_CHAR cDtmfCode,
-            IN IMS_SINT32 nDuration);
+    virtual void SetOptions(
+            IN IMS_UINTP nNegoId, IN OptionType type, IN IMS_SINT32 param1, IN IMS_SINT32 param2);
+    virtual void SetNetworkToneRTPTimer(IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_UINT32 nRtpTimer);
+    virtual IMS_BOOL SendMessage(IN IMSMSG& objMsg);
+    virtual IMS_BOOL SendDtmf(IN IMS_UINTP nNegoId, IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
+
 private:
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void UpdateRtpConfig(IN IMS_UINTP nNegoId);
@@ -169,26 +164,26 @@ protected:
     IMS_BOOL ProcessRun(IN IMS_UINTP nNegoId);
     void UpdateLocalAddress(IN IMS_UINTP nNegoId);
 
-    //IMediaSessionListener
+    // IMediaSessionListener
     virtual void MediaSession_SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult);
     virtual IMS_BOOL MediaSession_SendMsgToMediaManager(
             IN IMS_SINT32 eEvent, IN ImsMediaMsgParamBase* param);
     void CreateMediaSessionTypeNode(IN IMS_UINTP nNegoId, IN ISession* pSession);
     IMS_BOOL IsExistingTypeNode(IN AString strIpAddr, IN IMS_UINT32 nPort);
-    IMS_BOOL OnResponseOpenSession(IN IMSMSG &objMsg);
-    IMS_BOOL OnResponseModifySession(IN IMSMSG &objMsg);
-    IMS_BOOL OnResponseAddConfig(IN IMSMSG &objMsg);
-    IMS_BOOL OnResponseConfirmConfig(IN IMSMSG &objMsg);
-    IMS_BOOL OnNotifyFirstPacket(IN IMSMSG &objMsg);
-    IMS_BOOL OnNotifyMediaInactivity(IN IMSMSG &objMsg);
-    IMS_BOOL OnNofityPacketLoss(IN IMSMSG &objMsg);
-    IMS_BOOL OnNofityJitter(IN IMSMSG &objMsg);
-    IMS_BOOL OnNofityMediaQualityChange(IN IMSMSG &objMsg);
-    IMS_BOOL OnResponseSessionChanged(IN IMSMSG &objMsg);
-    IMS_BOOL OnNofityHeaderExtension(IN IMSMSG &objMsg);
-    IMS_BOOL OnNotifyQosInfo(IN IMSMSG &objMsg);
-    ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(IN AString strIpAddr,
-            IN IMS_SINT32 nPort);
+    IMS_BOOL OnResponseOpenSession(IN IMSMSG& objMsg);
+    IMS_BOOL OnResponseModifySession(IN IMSMSG& objMsg);
+    IMS_BOOL OnResponseAddConfig(IN IMSMSG& objMsg);
+    IMS_BOOL OnResponseConfirmConfig(IN IMSMSG& objMsg);
+    IMS_BOOL OnNotifyFirstPacket(IN IMSMSG& objMsg);
+    IMS_BOOL OnNotifyMediaInactivity(IN IMSMSG& objMsg);
+    IMS_BOOL OnNofityPacketLoss(IN IMSMSG& objMsg);
+    IMS_BOOL OnNofityJitter(IN IMSMSG& objMsg);
+    IMS_BOOL OnNofityMediaQualityChange(IN IMSMSG& objMsg);
+    IMS_BOOL OnResponseSessionChanged(IN IMSMSG& objMsg);
+    IMS_BOOL OnNofityHeaderExtension(IN IMSMSG& objMsg);
+    IMS_BOOL OnNotifyQosInfo(IN IMSMSG& objMsg);
+    ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
+            IN AString strIpAddr, IN IMS_SINT32 nPort);
     IMS_UINTP GetNegoIdfromRemoteAddress(IN AString strIpAddr, IN IMS_SINT32 nPort);
 
 protected:

@@ -23,13 +23,13 @@
 class NegoMapMngr
 {
 protected:
-    IMS_BOOL SetNegoMap(IN IMS_UINT32 nMediaNegoID,IN IMS_BOOL bRunning);
-    IMS_BOOL GetNegoMap(IN IMS_UINT32 nMediaNegoID, OUT IMS_BOOL &bRunning);
+    IMS_BOOL SetNegoMap(IN IMS_UINT32 nMediaNegoID, IN IMS_BOOL bRunning);
+    IMS_BOOL GetNegoMap(IN IMS_UINT32 nMediaNegoID, OUT IMS_BOOL& bRunning);
     IMS_BOOL SetAllNegoMap(IN IMS_BOOL bRunning);
     IMS_BOOL ClearNegoMap();
     void PrintCurrentRunningNego();
 
 protected:
-    IMSMap <IMS_UINT32, IMS_BOOL> m_objNegoMap;
+    IMSMap<IMS_UINT32, IMS_BOOL> m_objNegoMap;
 };
 #endif /* _NEGO_MAP_MNGR_H_ */

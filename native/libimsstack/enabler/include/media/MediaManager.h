@@ -29,9 +29,7 @@
 
 class JniMediaSession;
 
-class MediaManager :
-        public IMSActivityEx,
-        public IMediaManager
+class MediaManager : public IMSActivityEx, public IMediaManager
 {
 public:
     enum MessageType
@@ -51,22 +49,21 @@ public:
         IMS_SINTP nCallKey;
         MediaSession* pMediaSession;
         MediaMsgHandler* pMessageHandler;
-    public :
+
+    public:
         MediaSessionNode() :
                 nCallKey(0),
                 pMediaSession(IMS_NULL),
-                pMessageHandler(IMS_NULL)
-        {};
+                pMessageHandler(IMS_NULL){};
 
-        MediaSessionNode(IN IMS_SINTP callKey, IN MediaSession* pSession,
-                MediaMsgHandler* pHandler) :
+        MediaSessionNode(
+                IN IMS_SINTP callKey, IN MediaSession* pSession, MediaMsgHandler* pHandler) :
                 nCallKey(callKey),
                 pMediaSession(pSession),
-                pMessageHandler(pHandler)
-        {};
+                pMessageHandler(pHandler){};
     };
 
-public :
+public:
     static MediaManager* GetInstance(IN IMS_SINT32 nSlotId = 0);
     static AString GetThreadName(IN IMS_SINT32 nSlotId);
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
@@ -100,15 +97,14 @@ public :
 
     void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 
-
 private:
-    MediaManager(IN CONST AString &strName, IN IMS_SINT32 nSlotId);
+    MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId);
     virtual ~MediaManager();
-    MediaManager(IN const MediaManager &obj);
-    MediaManager& operator=(IN const MediaManager &obj);
+    MediaManager(IN const MediaManager& obj);
+    MediaManager& operator=(IN const MediaManager& obj);
 
     // == PROTECTED METHOD ==========================================================
-protected :
+protected:
     void ClearInternalMsgBuffer();
     void ClearMediaSessionNode();
     void DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex);
@@ -132,7 +128,7 @@ protected :
     virtual IMS_BOOL SendMessageToSessions(IN IMS_SINTP nCallKey, IMSMSG& objMsg);
 
     // == PRIVATE VARIABLE ============================================================
-protected :
+protected:
     static IMSMap<IMS_SINT32, MediaManager*> m_objMapMediaManager;
     IMS_SINT32 m_nSlotId;
     IMSList<MediaSessionNode*> m_lstSessionNode;
@@ -140,4 +136,4 @@ protected :
     IMSList<IMSMSG*> m_lstInternalMsgBuffer;
     IMS_BOOL m_bWaitResponse;
 };
-#endif                                              /* _MEDIA_MANAGER_H_ */
+#endif /* _MEDIA_MANAGER_H_ */

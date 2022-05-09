@@ -43,28 +43,28 @@ public:
 
     enum MMPF_BC_SUPPORT_AUDIO_CODEC
     {
-        MMPF_BC_SUPPORT_AUDIO_CODEC_AMR     = 0x01,
-        MMPF_BC_SUPPORT_AUDIO_CODEC_AMRWB   = 0x02,
-        MMPF_BC_SUPPORT_AUDIO_CODEC_EVS     = 0x04,
-        MMPF_BC_SUPPORT_AUDIO_CODEC_G711    = 0x08,
+        MMPF_BC_SUPPORT_AUDIO_CODEC_AMR = 0x01,
+        MMPF_BC_SUPPORT_AUDIO_CODEC_AMRWB = 0x02,
+        MMPF_BC_SUPPORT_AUDIO_CODEC_EVS = 0x04,
+        MMPF_BC_SUPPORT_AUDIO_CODEC_G711 = 0x08,
     };
 
 public:
-    static mmpf_int32   GetChipset();
-    static mmpf_uint32  GetAudioCodecSupport();
-    static mmpf_bool    IsAMRWBCodecSupport();
-    static mmpf_bool    IsEVSCodecSupport();
-    static mmpf_bool    IsMTKChipset();
-    static mmpf_bool    IsMTKVoNRSocketSupport();
-    static mmpf_bool    IsEVSSWBSupport();
-    static mmpf_bool    IsHEVCSupport();
-    static mmpf_bool    IsRTCPXRSupport();
-    static mmpf_bool    IsCHPSupport();
-    static mmpf_bool    IsTargetOperator(const mmpf_str* target);
-    static void GetSpropParameterSet(mmpf_uint32 nWidth, mmpf_uint32 nHeight,
-        mmpf_uint32 nProfile, mmpf_uint32 nLevel, mmpf_str* szBuffSpropparam);
-    static void GetHEVCConfigFrameSet(mmpf_uint32 nWidth, mmpf_uint32 nHeight,
-        mmpf_uint32 nProfile, mmpf_uint32 nLevel, mmpf_str* szBuffSpropparam);
+    static mmpf_int32 GetChipset();
+    static mmpf_uint32 GetAudioCodecSupport();
+    static mmpf_bool IsAMRWBCodecSupport();
+    static mmpf_bool IsEVSCodecSupport();
+    static mmpf_bool IsMTKChipset();
+    static mmpf_bool IsMTKVoNRSocketSupport();
+    static mmpf_bool IsEVSSWBSupport();
+    static mmpf_bool IsHEVCSupport();
+    static mmpf_bool IsRTCPXRSupport();
+    static mmpf_bool IsCHPSupport();
+    static mmpf_bool IsTargetOperator(const mmpf_str* target);
+    static void GetSpropParameterSet(mmpf_uint32 nWidth, mmpf_uint32 nHeight, mmpf_uint32 nProfile,
+            mmpf_uint32 nLevel, mmpf_str* szBuffSpropparam);
+    static void GetHEVCConfigFrameSet(mmpf_uint32 nWidth, mmpf_uint32 nHeight, mmpf_uint32 nProfile,
+            mmpf_uint32 nLevel, mmpf_str* szBuffSpropparam);
 };
 
-#endif // MMPF_BOARDCONFIGINFO_H_INCLUDED
+#endif  // MMPF_BOARDCONFIGINFO_H_INCLUDED

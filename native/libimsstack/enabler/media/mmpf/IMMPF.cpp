@@ -26,6 +26,4 @@ eMMPFResult IMMPF::releaseInterface(IMMPF* /*pMMPF*/)
     return MMPF_RESULT_ERR_INVALID_INTERFACE;
 }
 
-void IMMPF::CPInitialize()
-{
-}
+void IMMPF::CPInitialize() {}

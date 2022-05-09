@@ -26,49 +26,40 @@ BaseSession::BaseSession(IN IMS_SINT32 nSlodId) :
 {
 }
 
-PUBLIC VIRTUAL
-BaseSession::~BaseSession()
-{
-}
+PUBLIC VIRTUAL BaseSession::~BaseSession() {}
 
-PUBLIC VIRTUAL
-void BaseSession::SetNegoId(IMS_UINTP nNegoId)
+PUBLIC VIRTUAL void BaseSession::SetNegoId(IMS_UINTP nNegoId)
 {
     m_listNegoId.Append(nNegoId);
 }
 
-PUBLIC VIRTUAL
-void BaseSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
+PUBLIC VIRTUAL void BaseSession::SetServiceType(MEDIA_SERVICE_TYPE eServiceType)
 {
     m_pEnvironment->eServiceType = eServiceType;
 }
 
-PUBLIC VIRTUAL
-void BaseSession::SetMediaSessionListener(IN IMediaSessionListener* pListener)
+PUBLIC VIRTUAL void BaseSession::SetMediaSessionListener(IN IMediaSessionListener* pListener)
 {
     m_piMediaSessionListener = pListener;
 }
 
-PUBLIC VIRTUAL
-void BaseSession::SetMediaEnvironment(MediaEnvironment* pEnvironment)
+PUBLIC VIRTUAL void BaseSession::SetMediaEnvironment(MediaEnvironment* pEnvironment)
 {
     m_pEnvironment = pEnvironment;
 }
 
-PUBLIC VIRTUAL
-void BaseSession::SetDirection(MEDIA_DIRECTION eDir)
+PUBLIC VIRTUAL void BaseSession::SetDirection(MEDIA_DIRECTION eDir)
 {
-//    IMS_TRACE_D("BaseSession::SetDirection() - [%d]->[%d]", m_eEnforcedDirection, eDir, 0);
-// To Do, Media build
+    //    IMS_TRACE_D("BaseSession::SetDirection() - [%d]->[%d]", m_eEnforcedDirection, eDir, 0);
+    // To Do, Media build
     m_eEnforcedDirection = eDir;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL BaseSession::IsSameNegoId(IMS_UINTP nNegoId)
+PUBLIC VIRTUAL IMS_BOOL BaseSession::IsSameNegoId(IMS_UINTP nNegoId)
 {
     IMS_BOOL bRet = IMS_FALSE;
 
-    //check nego id
+    // check nego id
     for (IMS_UINT32 i = 0; i < m_listNegoId.GetSize(); i++)
     {
         if (nNegoId == m_listNegoId.GetAt(i))

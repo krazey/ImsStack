@@ -27,12 +27,11 @@
 
 using namespace android::telephony::imsmedia;
 
-class AudioMediaSession :
-        public BaseSession
+class AudioMediaSession : public BaseSession
 {
 private:
-    AudioMediaSession(IN const AudioMediaSession &obj);
-    AudioMediaSession& operator=(IN const AudioMediaSession &obj);
+    AudioMediaSession(IN const AudioMediaSession& obj);
+    AudioMediaSession& operator=(IN const AudioMediaSession& obj);
 
     // == PUBLIC METHOD ==============================================================
 public:
@@ -41,12 +40,12 @@ public:
     void SetConfig(IN AudioConfiguration* pConfig);
 
     /*
-    * Set AudioConfig for libimsmedia from src/dest/negotiated profile
-    * @param pSrcProfile : local profile of the SDP negotiation
-    * @param pDstProfile : peer profile of the SDP negotiation
-    * @param pNegotiatedProfile : negotiated profile of the SDP negotiation
-    * return IMS_BOOL : false for error, true for successful
-    */
+     * Set AudioConfig for libimsmedia from src/dest/negotiated profile
+     * @param pSrcProfile : local profile of the SDP negotiation
+     * @param pDstProfile : peer profile of the SDP negotiation
+     * @param pNegotiatedProfile : negotiated profile of the SDP negotiation
+     * return IMS_BOOL : false for error, true for successful
+     */
     IMS_BOOL UpdateRtpConfig(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
             IN AudioProfile* pNegoProfile);
     IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold);
@@ -54,44 +53,44 @@ public:
     void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);
 
     /*
-    * request OPEN_SESSION with updated AudioConfig
-    */
+     * request OPEN_SESSION with updated AudioConfig
+     */
     IMS_BOOL Open();
 
     /*
-    * request MODIFY_SESSION with updated AudioConfig
-    */
+     * request MODIFY_SESSION with updated AudioConfig
+     */
     IMS_BOOL Modify();
 
     /*
-    * request ADD_CONFIG with updated AudioConfig
-    */
+     * request ADD_CONFIG with updated AudioConfig
+     */
     IMS_BOOL Add();
 
     /*
-    * request DELETE_CONFIG with updated AudioConfig
-    */
+     * request DELETE_CONFIG with updated AudioConfig
+     */
     IMS_BOOL Delete();
 
     /*
-    * request CONFIRM_CONFIG with updated AudioConfig
-    */
+     * request CONFIRM_CONFIG with updated AudioConfig
+     */
     IMS_BOOL Confirm();
 
     /*
-    * request CLOSE_SESSION with updated AudioConfig
-    */
+     * request CLOSE_SESSION with updated AudioConfig
+     */
     IMS_BOOL Close();
 
     /*
-    * request SET_MEDIA_QUALITY with Audio Media qualityThreshold
-    */
+     * request SET_MEDIA_QUALITY with Audio Media qualityThreshold
+     */
     IMS_BOOL SetMediaQuality();
     IMS_BOOL SendDtmf(IN IMS_CHAR cDtmfCode, IN IMS_SINT32 nDuration);
-    //notification - do it later
-//    virtual void SendNotifyToListener(IN IMS_SINT32 nNotify);
-//    virtual void SendNotifyInfoToListener(IMS_SINT32 nEvent, AString strNotifyInfo = IMS_NULL,
-//        IMS_SINT32 nNotifyInfo = -1, IMS_BOOL bNotifyInfo = IMS_FALSE);
+    // notification - do it later
+    //    virtual void SendNotifyToListener(IN IMS_SINT32 nNotify);
+    //    virtual void SendNotifyInfoToListener(IMS_SINT32 nEvent, AString strNotifyInfo = IMS_NULL,
+    //        IMS_SINT32 nNotifyInfo = -1, IMS_BOOL bNotifyInfo = IMS_FALSE);
     virtual void SendEventToUi(IN IMS_SINT32 nEvent, IN IMS_SINT32 nResult);
 
 protected:
@@ -102,4 +101,4 @@ protected:
     IMS_SINT32 m_nLocalPort;
 };
 
-#endif                                              /* End of _IMS_AUDIO_MEDIA_SESSION_H_*/
+#endif /* End of _IMS_AUDIO_MEDIA_SESSION_H_*/

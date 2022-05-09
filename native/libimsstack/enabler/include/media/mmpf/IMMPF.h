@@ -33,16 +33,15 @@
 class IMMPFListener
 {
 public:
-    virtual ~IMMPFListener()
-    {}
+    virtual ~IMMPFListener() {}
 
 public:
     // response per request
-    virtual void OnResponse(const HMMPFSession hMMPFSession,
-            const eMMPFRequest nRequest, const eMMPFResponse eResponse) = 0;
+    virtual void OnResponse(const HMMPFSession hMMPFSession, const eMMPFRequest nRequest,
+            const eMMPFResponse eResponse) = 0;
     // notify from mmpf
-    virtual void OnNotify(const HMMPFSession hMMPFSession,
-            const eMMPFNotify nNotify, const tMMPFNotificationData* pNotifyData = NULL) = 0;
+    virtual void OnNotify(const HMMPFSession hMMPFSession, const eMMPFNotify nNotify,
+            const tMMPFNotificationData* pNotifyData = NULL) = 0;
 };
 
 /**
@@ -53,8 +52,7 @@ public:
 class IMMPF
 {
 public:
-    virtual ~IMMPF()
-    {}
+    virtual ~IMMPF() {}
 
 public:
     // Get / Release interface
@@ -65,8 +63,8 @@ public:
     virtual eMMPFResult setListener(MMPF_IN IMMPFListener* pListener) = 0;
     virtual eMMPFResult setProperty(MMPF_IN const HMMPFSession m_hMMPFSession,
             MMPF_IN const tMMPFProperty* pstProperty) = 0;
-    virtual eMMPFResult request(MMPF_IN const HMMPFSession m_hMMPFSession,
-            MMPF_IN const tMMPFRequest* pstRequest) = 0;
+    virtual eMMPFResult request(
+            MMPF_IN const HMMPFSession m_hMMPFSession, MMPF_IN const tMMPFRequest* pstRequest) = 0;
     // Media Session control methods
     // Single session application (ex. VT, VSC) doesn't need to call session control methods below.
     virtual HMMPFSession createMediaSession(eMMPFSessionType eSessionType) = 0;
@@ -76,5 +74,4 @@ public:
     static void CPInitialize();
 };
 
-
-#endif // MMPF_IMMPF_H_INCLUDED
+#endif  // MMPF_IMMPF_H_INCLUDED

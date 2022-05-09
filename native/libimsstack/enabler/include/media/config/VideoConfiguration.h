@@ -25,35 +25,34 @@ class ICarrierConfig;
  * @class   VideoConfiguration
  * @brief   Video Configuration class
  */
-class VideoConfiguration :
-        public MediaConfiguration
+class VideoConfiguration : public MediaConfiguration
 {
 public:
     enum
     {
-        FR_MODE_HIDE    = 0,
-        FR_MDOE_AUTO    = 1,
-        FR_MODE_MANUAL  = 2
+        FR_MODE_HIDE = 0,
+        FR_MDOE_AUTO = 1,
+        FR_MODE_MANUAL = 2
     };
     enum
     {
-        DB_RESOLUTION_QCIF_PR     = 0,
-        DB_RESOLUTION_QVGA_LS     = 1,
-        DB_RESOLUTION_QVGA_PR     = 2,
-        DB_RESOLUTION_VGA_LS      = 3,
-        DB_RESOLUTION_VGA_PR      = 4,
-        DB_RESOLUTION_QCIF_LS     = 5,
-        DB_RESOLUTION_CIF_LS      = 6,
-        DB_RESOLUTION_CIF_PR      = 7,
-        DB_RESOLUTION_SQCIF_LS    = 8,
-        DB_RESOLUTION_SQCIF_PR    = 9,
-        DB_RESOLUTION_SIF_LS      = 10,
-        DB_RESOLUTION_SIF_PR      = 11,
-        DB_RESOLUTION_HD_LS       = 12,
-        DB_RESOLUTION_HD_PR       = 13,
-        DB_RESOLUTION_FHD_LS      = 14,
-        DB_RESOLUTION_FHD_PR      = 15,
-        DB_RESOLUTION_MAX         = 99,
+        DB_RESOLUTION_QCIF_PR = 0,
+        DB_RESOLUTION_QVGA_LS = 1,
+        DB_RESOLUTION_QVGA_PR = 2,
+        DB_RESOLUTION_VGA_LS = 3,
+        DB_RESOLUTION_VGA_PR = 4,
+        DB_RESOLUTION_QCIF_LS = 5,
+        DB_RESOLUTION_CIF_LS = 6,
+        DB_RESOLUTION_CIF_PR = 7,
+        DB_RESOLUTION_SQCIF_LS = 8,
+        DB_RESOLUTION_SQCIF_PR = 9,
+        DB_RESOLUTION_SIF_LS = 10,
+        DB_RESOLUTION_SIF_PR = 11,
+        DB_RESOLUTION_HD_LS = 12,
+        DB_RESOLUTION_HD_PR = 13,
+        DB_RESOLUTION_FHD_LS = 14,
+        DB_RESOLUTION_FHD_PR = 15,
+        DB_RESOLUTION_MAX = 99,
     };
 
     enum
@@ -139,4 +138,4 @@ private:
     IMS_BOOL bVideoDropPFrameEnabled;
     IMS_SINT32 nVideoSamplingRate;
 };
-#endif                                              // _VIDEO_CONFIGURATION_H_
+#endif  // _VIDEO_CONFIGURATION_H_

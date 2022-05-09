@@ -19,8 +19,7 @@
 
 #include "config/CodecConfig.h"
 
-class CodecT140Config :
-        public CodecConfig
+class CodecT140Config : public CodecConfig
 {
 public:
     CodecT140Config(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -42,4 +41,4 @@ private:
     IMS_SINT32 m_nRedLevel;
     IMS_SINT32 m_nTextSamplingRate;
 };
-#endif                                              // _CODEC_T140_CONFIG_H_
+#endif  // _CODEC_T140_CONFIG_H_

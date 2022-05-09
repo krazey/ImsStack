@@ -23,23 +23,21 @@
 
 class MediaEnvironment
 {
-public :
+public:
     MEDIA_NETWORK_TYPE eNetworkType;
     MEDIA_SERVICE_TYPE eServiceType;
     IService* pIService;
 
-public :
+public:
     MediaEnvironment() :
             eNetworkType(MEDIA_NETWORK_NONE),
             eServiceType(MEDIA_SERVICE_DEFAULT),
-            pIService(IMS_NULL)
-    {};
+            pIService(IMS_NULL){};
 
     MediaEnvironment(MEDIA_NETWORK_TYPE eNetwork, MEDIA_SERVICE_TYPE eCapa, IService* service) :
             eNetworkType(eNetwork),
             eServiceType(eCapa),
-            pIService(service)
-    {};
+            pIService(service){};
     void Copy(IN MediaEnvironment* pEnvironment)
     {
         if (pEnvironment != IMS_NULL)
@@ -50,4 +48,4 @@ public :
         }
     };
 };
-#endif                                              /* _IMS_MEDIA_ENVIRONMENT_H_ */
+#endif /* _IMS_MEDIA_ENVIRONMENT_H_ */

@@ -71,19 +71,19 @@ public:
     // Bandwidth mode
     enum
     {
-        BW_MODE_HIDE        = 0,
-        BW_MODE_OPTIMAL     = 1,
-        BW_MODE_MAX         = 2,
-        BW_MODE_MANUAL      = 3,
-        BW_MODE_NEGOTIABLE  = 4,
+        BW_MODE_HIDE = 0,
+        BW_MODE_OPTIMAL = 1,
+        BW_MODE_MAX = 2,
+        BW_MODE_MANUAL = 3,
+        BW_MODE_NEGOTIABLE = 4,
     };
 
     // Bandwidth RS/RR mode
     enum
     {
-        BW_RS_RR_HIDE       = 0,
-        BW_RS_RR_PERCENT    = 1,
-        BW_RS_RR_MANUAL     = 2
+        BW_RS_RR_HIDE = 0,
+        BW_RS_RR_PERCENT = 1,
+        BW_RS_RR_MANUAL = 2
     };
 
     // Bandwidth type
@@ -123,11 +123,10 @@ public:
     // Video Resolution Loose Check mode
     enum
     {
-        USE_SELF_RESOLUTION_STRICTLY    = 0,
-        USE_PEER_RESOLUTION_RX_ONLY     = 1,
-        USE_PEER_RESOLUTION_TRX         = 2,
+        USE_SELF_RESOLUTION_STRICTLY = 0,
+        USE_PEER_RESOLUTION_RX_ONLY = 1,
+        USE_PEER_RESOLUTION_TRX = 2,
     };
-
 
     static const IMS_SINT32 DEFAULT_RTP_PORT = 50010;
     static const IMS_SINT32 DEFAULT_RTP_PORT_END = 50060;
@@ -157,4 +156,4 @@ protected:
     // Provisioned codecs
     IMSList<CodecConfig*> objCodecConfigs;
 };
-#endif                                              // _MEDIA_CONFIGURATION_H_
+#endif  // _MEDIA_CONFIGURATION_H_

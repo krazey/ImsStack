@@ -25,7 +25,7 @@
 #include "MediaConnectionWatcher.h"
 
 // == DEFINES =========================================================
-#define MEDIA_RESOURCEMNGR_IP_ADDR_LEN         46
+#define MEDIA_RESOURCEMNGR_IP_ADDR_LEN 46
 
 __IMS_TRACE_TAG_USER_DECL__("MED.RM");
 
@@ -56,8 +56,9 @@ IMS_BOOL MediaResourceMngr::UpdatePdnResource(IN IMS_SINT32 nPdnType, IN IMS_BOO
     {
         // Stetp 0-1. Only modem IP will be used in LTE ran
         // Get current Radio Network
-        IMS_SINT32 nRadioType = PhoneInfoService::GetPhoneInfoService()->
-                GetNetworkWatcher(m_nSlotId)->GetNetworkType();
+        IMS_SINT32 nRadioType = PhoneInfoService::GetPhoneInfoService()
+                                        ->GetNetworkWatcher(m_nSlotId)
+                                        ->GetNetworkType();
         IMS_TRACE_D("UpdatePdnResource() - nRadioType[%d], nSlotID[%u]", nRadioType, m_nSlotId, 0);
         if ((ConvertMediaNetworkType(nRadioType) & GetSupportedNetworkTypeFlag()) == 0)
         {
@@ -147,12 +148,11 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
 {
     const IMS_UINT32 RTP_PORT_MAX = 0xffff;
     IMS_UINT32 nInitialPort = 0;
-    IMS_UINT32 nTempPort    = 0;
+    IMS_UINT32 nTempPort = 0;
     IMS_UINT32 nChosenPort = 0;
     IMS_BOOL bFoundSamePort = IMS_FALSE;
 
-    IMS_TRACE_D("AcquireRtpPort() - nRangeStart[%d], nRangeEnd[%d]",
-            nRangeStart, nRangeEnd, 0);
+    IMS_TRACE_D("AcquireRtpPort() - nRangeStart[%d], nRangeEnd[%d]", nRangeStart, nRangeEnd, 0);
 
     // STEP 0. Exception handling : INVALID case
     if (nRangeStart > RTP_PORT_MAX || nRangeEnd > RTP_PORT_MAX)
@@ -161,10 +161,10 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
         return 0;
     }
     else if (nRangeStart > nRangeEnd)
-    {// when Start Port is bigger than End Port, swapping them.
-        nTempPort   = nRangeStart;
+    {  // when Start Port is bigger than End Port, swapping them.
+        nTempPort = nRangeStart;
         nRangeStart = nRangeEnd;
-        nRangeEnd   = nTempPort;
+        nRangeEnd = nTempPort;
     }
     // Exception handling : Only One Case
     else if (nRangeStart == nRangeEnd)
@@ -186,7 +186,8 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
     //      If found a same number, increase number and re-find.
     nChosenPort = nInitialPort;
 
-    do {
+    do
+    {
         bFoundSamePort = IMS_FALSE;
         for (IMS_UINT32 i = 0; i < m_lstUsedRtpPort.GetSize(); i++)
         {
@@ -219,7 +220,7 @@ IMS_UINT32 MediaResourceMngr::AcquireRtpPort(IN IMS_UINT32 nRangeStart, IN IMS_U
                 break;
             }
         }
-    } while(bFoundSamePort == IMS_TRUE);
+    } while (bFoundSamePort == IMS_TRUE);
 
     // STEP 4. Save a selected RTP port to list
     if (nChosenPort != 0)
@@ -243,22 +244,22 @@ void MediaResourceMngr::ReleaseRtpPort(IN IMS_UINT32 nPort)
         if (nListPort == nPort)
         {
             m_lstUsedRtpPort.RemoveAt(i);
-            IMS_TRACE_I("ReleaseRtpPort() - port[%d],list[%d],Size[%d]",
-                    nPort, i, m_lstUsedRtpPort.GetSize());
+            IMS_TRACE_I("ReleaseRtpPort() - port[%d],list[%d],Size[%d]", nPort, i,
+                    m_lstUsedRtpPort.GetSize());
             return;
         }
     }
 
     if (nPort != 0)
     {
-        IMS_TRACE_D("ReleaseRtpPort() - no matched port[%d], Size[%d]",
-                nPort, m_lstUsedRtpPort.GetSize(), 0);
+        IMS_TRACE_D("ReleaseRtpPort() - no matched port[%d], Size[%d]", nPort,
+                m_lstUsedRtpPort.GetSize(), 0);
     }
 }
 
 /* IMediaConnectionWatcherListener Interface Impl */
 PUBLIC
-void MediaResourceMngr::NotifyMediaConnection(IN INetworkConnection *piNetConnection,
+void MediaResourceMngr::NotifyMediaConnection(IN INetworkConnection* piNetConnection,
         IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId)
 {
     (void)piNetConnection;
@@ -281,7 +282,7 @@ PUBLIC
 VIRTUAL void MediaResourceMngr::NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID)
 {
     (void)nNetworkInferfaceID;
-    //IMS_TRACE_I("NotifyWifiEarlyRouteSetup", 0, 0, 0);
+    // IMS_TRACE_I("NotifyWifiEarlyRouteSetup", 0, 0, 0);
     return;
 }
 
@@ -293,11 +294,11 @@ IMediaConnectionWatcher* MediaResourceMngr::GetMediaConnectionWatcher()
 }
 
 PUBLIC
-IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress &objIpAddress,
-        OUT IMS_BOOL &bWIFICondition, OUT IMS_UINT32 &nNetworkInterfaceId)
+IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress& objIpAddress,
+        OUT IMS_BOOL& bWIFICondition, OUT IMS_UINT32& nNetworkInterfaceId)
 {
     IMediaConnectionWatcher* piMediaConnectionWatcher = IMS_NULL;
-    INetworkConnection *piNetConnection  = IMS_NULL;
+    INetworkConnection* piNetConnection = IMS_NULL;
     IMS_SINT32 nMediaConnectionType = IMediaConnectionWatcher::MEDIA_CONNECTION_INVALID;
     IMS_BOOL bRet = IMS_FALSE;
 
@@ -316,8 +317,8 @@ IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress &objIpAdd
         return bRet;
     }
 
-    piMediaConnectionWatcher->GetMediaConnectionType(objIpAddress,
-            piNetConnection, nMediaConnectionType, nNetworkInterfaceId);
+    piMediaConnectionWatcher->GetMediaConnectionType(
+            objIpAddress, piNetConnection, nMediaConnectionType, nNetworkInterfaceId);
     switch (nMediaConnectionType)
     {
         case IMediaConnectionWatcher::MEDIA_CONNECTION_MOBILE_EPDG:
@@ -339,15 +340,15 @@ IMS_BOOL MediaResourceMngr::GetMediaConnectionWatcherInfo(IN IPAddress &objIpAdd
 }
 
 PUBLIC
-IMS_UINT32 MediaResourceMngr::GetRtpFragmentSize(IN IPAddress &objIpAddress)
+IMS_UINT32 MediaResourceMngr::GetRtpFragmentSize(IN IPAddress& objIpAddress)
 {
     IMediaConnectionWatcher* piMediaConnectionWatcher = GetMediaConnectionWatcher();
     IMS_SINT32 nRtpFragmentSize = 0;
-    INetworkConnection *piNetConnection  = IMS_NULL;
+    INetworkConnection* piNetConnection = IMS_NULL;
     if (piMediaConnectionWatcher != IMS_NULL)
     {
-        piMediaConnectionWatcher->GetRtpFragmentSize(objIpAddress, piNetConnection,
-                nRtpFragmentSize);
+        piMediaConnectionWatcher->GetRtpFragmentSize(
+                objIpAddress, piNetConnection, nRtpFragmentSize);
     }
     return nRtpFragmentSize;
 }
@@ -364,8 +365,8 @@ INetworkConnection* MediaResourceMngr::GetNetConnection(IN MEDIA_SERVICE_TYPE eS
     }
     else
     {
-        pImsNetworkPolicy = NetworkServicePolicy::GetInstance()->GetPolicy(
-                NetworkPolicy::APN_IMS, m_nSlotId);
+        pImsNetworkPolicy =
+                NetworkServicePolicy::GetInstance()->GetPolicy(NetworkPolicy::APN_IMS, m_nSlotId);
     }
 
     if (pImsNetworkPolicy == IMS_NULL)
@@ -392,23 +393,23 @@ MEDIA_NETWORK_TYPE MediaResourceMngr::ConvertMediaNetworkType(IMS_SINT32 nRadioT
 
     switch (nRadioType)
     {
-        case INetworkWatcher::RADIOTECH_TYPE_LTE :
+        case INetworkWatcher::RADIOTECH_TYPE_LTE:
             eMediaNetwork = MEDIA_NETWORK_LTE;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_HSPAP :
+        case INetworkWatcher::RADIOTECH_TYPE_HSPAP:
             eMediaNetwork = MEDIA_NETWORK_HSPA_PLUS;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_UMTS :
-        case INetworkWatcher::RADIOTECH_TYPE_HSPA :
-        case INetworkWatcher::RADIOTECH_TYPE_HSDPA :
-        case INetworkWatcher::RADIOTECH_TYPE_HSUPA :
-        case INetworkWatcher::RADIOTECH_TYPE_CDMA :
+        case INetworkWatcher::RADIOTECH_TYPE_UMTS:
+        case INetworkWatcher::RADIOTECH_TYPE_HSPA:
+        case INetworkWatcher::RADIOTECH_TYPE_HSDPA:
+        case INetworkWatcher::RADIOTECH_TYPE_HSUPA:
+        case INetworkWatcher::RADIOTECH_TYPE_CDMA:
             eMediaNetwork = MEDIA_NETWORK_HSPA;
             break;
-        case INetworkWatcher::RADIOTECH_TYPE_EHRPD :
+        case INetworkWatcher::RADIOTECH_TYPE_EHRPD:
             eMediaNetwork = MEDIA_NETWORK_EHRPD;
             break;
-        default :
+        default:
             eMediaNetwork = MEDIA_NETWORK_LTE;
             break;
     }
@@ -419,27 +420,27 @@ MEDIA_NETWORK_TYPE MediaResourceMngr::ConvertMediaNetworkType(IMS_SINT32 nRadioT
 PUBLIC
 IMS_SINT32 MediaResourceMngr::GetSupportedNetworkTypeFlag()
 {
-    if (m_nSupportedNetworkTypeFlag == 0)   // initial check..
+    if (m_nSupportedNetworkTypeFlag == 0)  // initial check..
     {
         m_nSupportedNetworkTypeFlag |= (IMS_UINT32)MEDIA_NETWORK_LTE;
-    }   // TODO_MEDIA Need to be updated later for NR
+    }  // TODO_MEDIA Need to be updated later for NR
 
     IMS_TRACE_D("GetSupportedNetworkTypeFlag() - nSupportedNetworkTypeFlag[%d]",
             m_nSupportedNetworkTypeFlag, 0, 0);
 
-    return  m_nSupportedNetworkTypeFlag;
+    return m_nSupportedNetworkTypeFlag;
 }
 
 PUBLIC
 IMS_BOOL MediaResourceMngr::SetMediaConnectionWatcherListener()
 {
     IMS_TRACE_I("SetMediaConnectionWatcherListener()", 0, 0, 0);
-    IMediaConnectionWatcher *piMediaConnectionWatcher =
+    IMediaConnectionWatcher* piMediaConnectionWatcher =
             MediaResourceMngr::GetMediaConnectionWatcher();
 
     const NetworkPolicy* pImsNetworkPolicy = IMS_NULL;
-    pImsNetworkPolicy = NetworkServicePolicy::GetInstance()->GetPolicy(
-            NetworkPolicy::APN_IMS, m_nSlotId);
+    pImsNetworkPolicy =
+            NetworkServicePolicy::GetInstance()->GetPolicy(NetworkPolicy::APN_IMS, m_nSlotId);
 
     if (piMediaConnectionWatcher == IMS_NULL || pImsNetworkPolicy == IMS_NULL)
     {
@@ -451,15 +452,15 @@ IMS_BOOL MediaResourceMngr::SetMediaConnectionWatcherListener()
     IMS_UINT32 nNetworkInterfaceId;
     AString strPolicyName = pImsNetworkPolicy->GetName();
 
-    return piMediaConnectionWatcher->SetListener(this, strPolicyName, m_nSlotId,
-            nMediaConnectionType, nNetworkInterfaceId);
+    return piMediaConnectionWatcher->SetListener(
+            this, strPolicyName, m_nSlotId, nMediaConnectionType, nNetworkInterfaceId);
 }
 
 PUBLIC
 IMS_BOOL MediaResourceMngr::UnsetMediaConnectionWatcherListener()
 {
     IMS_TRACE_I("UnsetMediaConnectionWatcherListener()", 0, 0, 0);
-    IMediaConnectionWatcher *piMediaConnectionWatcher =
+    IMediaConnectionWatcher* piMediaConnectionWatcher =
             MediaResourceMngr::GetMediaConnectionWatcher();
 
     if (piMediaConnectionWatcher == IMS_NULL)

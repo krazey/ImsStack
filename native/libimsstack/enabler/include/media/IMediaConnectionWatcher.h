@@ -24,8 +24,9 @@ class IMediaConnectionWatcherListener;
 
 class IMediaConnectionWatcher
 {
-public :
-    enum {
+public:
+    enum
+    {
         MEDIA_CONNECTION_INVALID = -1,
 
         MEDIA_CONNECTION_MOBILE,
@@ -36,26 +37,26 @@ public :
     };
 
 public:
-    virtual IMS_BOOL GetMediaConnectionType(IN AString &strPDN, IN IMS_SINT32 nSlotId,
-            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
-            OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
-    virtual IMS_BOOL GetMediaConnectionType(IN IPAddress &objIpAddress,
-            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nMediaConnectionType,
-            OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
-    virtual IMS_BOOL GetMediaConnectionType(IN INetworkConnection *piNetConnection,
-            OUT IMS_SINT32 &nMediaConnectionType, OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
+    virtual IMS_BOOL GetMediaConnectionType(IN AString& strPDN, IN IMS_SINT32 nSlotId,
+            OUT INetworkConnection*& piNetConnection, OUT IMS_SINT32& nMediaConnectionType,
+            OUT IMS_UINT32& nNetworkInterfaceId) = 0;
+    virtual IMS_BOOL GetMediaConnectionType(IN IPAddress& objIpAddress,
+            OUT INetworkConnection*& piNetConnection, OUT IMS_SINT32& nMediaConnectionType,
+            OUT IMS_UINT32& nNetworkInterfaceId) = 0;
+    virtual IMS_BOOL GetMediaConnectionType(IN INetworkConnection* piNetConnection,
+            OUT IMS_SINT32& nMediaConnectionType, OUT IMS_UINT32& nNetworkInterfaceId) = 0;
+    virtual IMS_BOOL SetListener(IN IMediaConnectionWatcherListener* piListener, IN AString& strPDN,
+            IN IMS_SINT32 nSlotId, OUT IMS_SINT32& nMediaConnectionType,
+            OUT IMS_UINT32& nNetworkInterfaceId) = 0;
     virtual IMS_BOOL SetListener(IN IMediaConnectionWatcherListener* piListener,
-            IN AString &strPDN, IN IMS_SINT32 nSlotId, OUT IMS_SINT32 &nMediaConnectionType,
-            OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
-    virtual IMS_BOOL SetListener(IN IMediaConnectionWatcherListener* piListener,
-            IN IPAddress &objIpAddress, OUT IMS_SINT32 &nMediaConnectionType,
-            OUT IMS_UINT32 &nNetworkInterfaceId) = 0;
-    virtual IMS_BOOL GetRtpFragmentSize(IN AString &strPDN, IN IMS_SINT32 nSlotId,
-            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
-    virtual IMS_BOOL GetRtpFragmentSize(IN IPAddress &objIpAddress,
-            OUT INetworkConnection *&piNetConnection, OUT IMS_SINT32 &nRtpFragmentSize) = 0;
-    virtual IMS_BOOL GetRtpFragmentSize(IN INetworkConnection *piNetConnection,
-            OUT IMS_SINT32 &nRtpFragmentSize) = 0;
-    virtual IMS_BOOL ReleaseListener(IMediaConnectionWatcherListener *piListener) = 0;
+            IN IPAddress& objIpAddress, OUT IMS_SINT32& nMediaConnectionType,
+            OUT IMS_UINT32& nNetworkInterfaceId) = 0;
+    virtual IMS_BOOL GetRtpFragmentSize(IN AString& strPDN, IN IMS_SINT32 nSlotId,
+            OUT INetworkConnection*& piNetConnection, OUT IMS_SINT32& nRtpFragmentSize) = 0;
+    virtual IMS_BOOL GetRtpFragmentSize(IN IPAddress& objIpAddress,
+            OUT INetworkConnection*& piNetConnection, OUT IMS_SINT32& nRtpFragmentSize) = 0;
+    virtual IMS_BOOL GetRtpFragmentSize(
+            IN INetworkConnection* piNetConnection, OUT IMS_SINT32& nRtpFragmentSize) = 0;
+    virtual IMS_BOOL ReleaseListener(IMediaConnectionWatcherListener* piListener) = 0;
 };
-#endif  /* _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_H_ */
+#endif /* _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_H_ */

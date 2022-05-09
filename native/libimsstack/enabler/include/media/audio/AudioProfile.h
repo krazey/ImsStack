@@ -24,27 +24,26 @@
 
 class AudioProfile
 {
-public :
+public:
     class RtpMap
     {
-    public :
+    public:
         IMS_UINT32 nPayloadNum;
         AString strPayloadType;
         IMS_UINT32 nSamplingRate;
-        IMS_SINT32 nChannel;          // default is 1, if this value is -1 hide channel value at SDP
-    public :
+        IMS_SINT32 nChannel;  // default is 1, if this value is -1 hide channel value at SDP
+    public:
         RtpMap() :
                 nPayloadNum(0),
                 strPayloadType(AString::ConstNull()),
                 nSamplingRate(0),
-                nChannel(1)
-        {};
+                nChannel(1){};
     };
 
-public :
+public:
     class AmrFmtp
     {
-    public :
+    public:
         IMS_UINT32 nModeSetList;
         IMS_BOOL bSCREnable;
 
@@ -79,7 +78,7 @@ public :
         IMS_BOOL bShowPtime;
         IMS_BOOL bShowMaxPtime;
 
-    public :
+    public:
         AmrFmtp(IN AmrFmtp* pFmtp = NULL) :
                 nModeSetList(0),
                 bSCREnable(IMS_FALSE),
@@ -163,10 +162,11 @@ public :
             }
         };
     };
-public :
+
+public:
     class EvsFmtp
     {
-    public :
+    public:
         enum
         {
             // COMMON PARAMETER
@@ -197,31 +197,31 @@ public :
         // Common parameter
         IMS_SINT32 nPtime;
         IMS_SINT32 nMaxPtime;
-        IMS_UINT32 nDtx;            // 1(default) is turn on DTX
-        //IMS_UINT32 nDtx_Recv;     // 1(default) is turn on DTX
+        IMS_UINT32 nDtx;  // 1(default) is turn on DTX
+        // IMS_UINT32 nDtx_Recv;     // 1(default) is turn on DTX
         IMS_UINT32 nHfOnly;         // 0(default) is compact and hf format used,
-                                    //other is only hf format used
+                                    // other is only hf format used
         IMS_UINT32 nEvsModeSwitch;  // 0(default) is "primary mode start"
         IMS_SINT32 nMaxRed;
 
         // Primary parameter
-        IMS_UINT32 nBrList;     // EVS primary mode bitrate range (kbps)
-        IMS_SINT32 nBrSend;     // EVS primary mode bitrate range (kbps)
-                                //  - only send direction (used at sendrecv/sendonly direction)
-        IMS_SINT32 nBrRecv;     // EVS primary mode bitrate range (kbps)
-                                //  - only recv direction (used at sendrecv/recvonly direction)
-        IMS_UINT32 nBwList;     // bw has a value from the set
-                                //  : nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb, fb
+        IMS_UINT32 nBrList;  // EVS primary mode bitrate range (kbps)
+        IMS_SINT32 nBrSend;  // EVS primary mode bitrate range (kbps)
+                             //  - only send direction (used at sendrecv/sendonly direction)
+        IMS_SINT32 nBrRecv;  // EVS primary mode bitrate range (kbps)
+                             //  - only recv direction (used at sendrecv/recvonly direction)
+        IMS_UINT32 nBwList;  // bw has a value from the set
+                             //  : nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb, fb
         IMS_SINT32 nBwSend;
         IMS_SINT32 nBwRecv;
         IMS_SINT32 nCmr;
         // multiple mono ch is not supported yet..
-        IMS_SINT32 nChAwRecv;   // -1 is channel aware mode disable,
-                                // 0(default) is not used at the start of the session,
-                                // but it'll be changed using CMR or RTCP app.
-        IMS_SINT32 nReceivedChAwRecv;   // -1 is channel aware mode disable,
-                                        // 0(default) is not used at the start of the session,
-                                        // but it'll be changed using CMR or RTCP app.
+        IMS_SINT32 nChAwRecv;          // -1 is channel aware mode disable,
+                                       // 0(default) is not used at the start of the session,
+                                       // but it'll be changed using CMR or RTCP app.
+        IMS_SINT32 nReceivedChAwRecv;  // -1 is channel aware mode disable,
+                                       // 0(default) is not used at the start of the session,
+                                       // but it'll be changed using CMR or RTCP app.
         // AMR-WB IO parameter
         IMS_UINT32 nModeSetList;
         IMS_SINT32 nModeChangeCapability;
@@ -242,9 +242,9 @@ public :
         IMS_BOOL bShowModeChangeNeighbor;
         IMS_BOOL bShowBrList;
         IMS_BOOL bShowBwList;
-        IMS_BOOL bSendCmr;             //send cmr option
+        IMS_BOOL bSendCmr;  // send cmr option
 
-    public :
+    public:
         EvsFmtp(IN EvsFmtp* pFmtp = NULL) :
                 nPtime(DEFAULT_PTIME),
                 nMaxPtime(DEFAULT_MAXPTIME),
@@ -311,7 +311,7 @@ public :
             this->bShowMaxRed = pFmtp->bShowMaxRed;
             this->bShowCmr = pFmtp->bShowCmr;
             this->bShowChannelAwMode = pFmtp->bShowChannelAwMode;
-            this->bShowModeChangeCapability= pFmtp->bShowModeChangeCapability;
+            this->bShowModeChangeCapability = pFmtp->bShowModeChangeCapability;
             this->bShowModeChangePeriod = pFmtp->bShowModeChangePeriod;
             this->bShowModeChangeNeighbor = pFmtp->bShowModeChangeNeighbor;
             this->bShowBrList = pFmtp->bShowBrList;
@@ -320,19 +320,18 @@ public :
         };
     };
 
-public :
+public:
     class TelephoneEventFmtp
     {
-    public :
+    public:
         AString strEvents;
-    public :
+
+    public:
         TelephoneEventFmtp() :
-                strEvents("0-15")
-        {};
+                strEvents("0-15"){};
 
         TelephoneEventFmtp(IN AString events) :
-                strEvents(events)
-        {};
+                strEvents(events){};
 
         TelephoneEventFmtp(IN TelephoneEventFmtp* pFmtp)
         {
@@ -344,19 +343,19 @@ public :
         };
     };
 
-public :
+public:
     class Payload
     {
-    public :
+    public:
         RtpMap objRtpMap;
         void* pFmtp;
 
-    public :
+    public:
         Payload() :
-                pFmtp(IMS_NULL)
-        {};
+                pFmtp(IMS_NULL){};
 
-        ~Payload() {
+        ~Payload()
+        {
             if (objRtpMap.strPayloadType.EqualsIgnoreCase("AMR-WB") ||
                     objRtpMap.strPayloadType.EqualsIgnoreCase("AMR"))
             {
@@ -384,18 +383,19 @@ public :
                 }
             }
         };
+
     private:
         Payload(IN const Payload& obj);
         Payload& operator=(IN const Payload& obj);
 
-    public :
-        void SetRtpMap(IN IMS_UINT32 nPayloadNum,
-                IN AString strPayloadType, IN IMS_UINT32 nSamplingRate, IN IMS_UINT32 nChannel)
+    public:
+        void SetRtpMap(IN IMS_UINT32 nPayloadNum, IN AString strPayloadType,
+                IN IMS_UINT32 nSamplingRate, IN IMS_UINT32 nChannel)
         {
             objRtpMap.nPayloadNum = nPayloadNum;
-            objRtpMap.strPayloadType= strPayloadType;
-            objRtpMap.nSamplingRate= nSamplingRate;
-            objRtpMap.nChannel= nChannel;
+            objRtpMap.strPayloadType = strPayloadType;
+            objRtpMap.nSamplingRate = nSamplingRate;
+            objRtpMap.nChannel = nChannel;
         };
 
         void SetRtpMap(IN RtpMap* pRtpMap)
@@ -406,15 +406,15 @@ public :
             }
 
             objRtpMap.nPayloadNum = pRtpMap->nPayloadNum;
-            objRtpMap.strPayloadType= pRtpMap->strPayloadType;
-            objRtpMap.nSamplingRate= pRtpMap->nSamplingRate;
-            objRtpMap.nChannel= pRtpMap->nChannel;
+            objRtpMap.strPayloadType = pRtpMap->strPayloadType;
+            objRtpMap.nSamplingRate = pRtpMap->nSamplingRate;
+            objRtpMap.nChannel = pRtpMap->nChannel;
         };
     };
 
     class CapaNego
     {
-    public :
+    public:
         IMSMap<IMS_SINT32, AString> mapTransportCapa;
         IMSMap<IMS_SINT32, AString> mapAttributeCapa;
         IMSList<AString> lstPotentialConfig;
@@ -422,11 +422,10 @@ public :
         AString strNegotiatedAcfg;
         IMS_BOOL bIsAttCapaInPcfg;
 
-    public :
+    public:
         CapaNego() :
                 strNegotiatedAcfg(""),
-                bIsAttCapaInPcfg(IMS_FALSE)
-        {};
+                bIsAttCapaInPcfg(IMS_FALSE){};
     };
 
 public:
@@ -443,10 +442,9 @@ public:
                 bSupportStatisticMetrics(IMS_FALSE),
                 bSupportVoipMatircs(IMS_FALSE),
                 bSupportPacketLossRle(IMS_FALSE),
-                bSupportPacketDuplicatedRle(IMS_FALSE)
-        {};
+                bSupportPacketDuplicatedRle(IMS_FALSE){};
 
-        RTCPXRAttributes& operator = (const RTCPXRAttributes& p)
+        RTCPXRAttributes& operator=(const RTCPXRAttributes& p)
         {
             bSupportStatisticMetrics = p.bSupportStatisticMetrics;
             bSupportVoipMatircs = p.bSupportVoipMatircs;
@@ -456,8 +454,9 @@ public:
         }
     };
 
-public :
-    enum {
+public:
+    enum
+    {
         // COMMON PARAMETER
         DEFAULT_PTIME = -1,
         DEFAULT_MAXPTIME = -1,
@@ -466,7 +465,7 @@ public :
     IPAddress objIpAddr;
     IMS_UINT32 nDataPort;
     IMS_UINT32 nControlPort;
-    AString strTransportType;          // Default RTP/AVP
+    AString strTransportType;  // Default RTP/AVP
     IMS_UINT32 nRtcpInterval;
     IMS_SINT32 nBandwidthAs;
     IMS_SINT32 nBandwidthRs;
@@ -479,19 +478,19 @@ public :
     IMS_SINT32 nCandidatePriority;
     IMS_SINT32 nNegotiatedPayloadIndex;
     IMS_BOOL bIsOfferCase;
-    //SRTP parameter
+    // SRTP parameter
     CapaNego objCapaNego;
     IMS_BOOL bSupportSrtp;
     IMS_BOOL bSupportCapaNegoForSrtp;
     IMS_SINT32 nMasterKeyLifeTime;
-    eMMPFSrtpCryptoType     eSrtpCryptoType;
-    IMS_UINT8 szKey[32]; //MMPF_MAX_KEY_LEN 32
-    //RTCP-XR
+    eMMPFSrtpCryptoType eSrtpCryptoType;
+    IMS_UINT8 szKey[32];  // MMPF_MAX_KEY_LEN 32
+    // RTCP-XR
     IMS_BOOL bSupportRtcpXr;
     RTCPXRAttributes objRtcpXrAttr;
     IMS_BOOL bRtcpDisableBeforeSetup;
 
-public :
+public:
     AudioProfile() :
             objIpAddr(IPAddress::IPv6NONE),
             nDataPort(0),
@@ -513,11 +512,12 @@ public :
             bSupportCapaNegoForSrtp(IMS_FALSE),
             nMasterKeyLifeTime(0),
             eSrtpCryptoType(MMPF_SRTP_CRYPTO_TYPE_NONE),
-            szKey{0,},
+            szKey{
+                    0,
+            },
             bSupportRtcpXr(IMS_FALSE),
             objRtcpXrAttr(RTCPXRAttributes()),
-            bRtcpDisableBeforeSetup(IMS_FALSE)
-    {};
+            bRtcpDisableBeforeSetup(IMS_FALSE){};
 
     AudioProfile(AudioProfile* pProfile)
     {
@@ -556,7 +556,7 @@ public :
         this->nBandwidthRs = pProfile->nBandwidthRs;
         this->nBandwidthRr = pProfile->nBandwidthRr;
 
-        //RTCP-XR
+        // RTCP-XR
         this->bSupportRtcpXr = pProfile->bSupportRtcpXr;
         this->objRtcpXrAttr = pProfile->objRtcpXrAttr;
 
@@ -573,7 +573,7 @@ public :
             lstPayload.RemoveAt(0);
         }
 
-        for (IMS_UINT32 i=0; i<pProfile->lstPayload.GetSize(); i++)
+        for (IMS_UINT32 i = 0; i < pProfile->lstPayload.GetSize(); i++)
         {
             AudioProfile::Payload* pOldPayload = pProfile->lstPayload.GetAt(i);
             if (pOldPayload == IMS_NULL)
@@ -642,11 +642,11 @@ public :
         this->bIsOfferCase = pProfile->bIsOfferCase;
 
         this->objCapaNego = pProfile->objCapaNego;
-        //SRTP
+        // SRTP
         this->bSupportSrtp = pProfile->bSupportSrtp;
         this->bSupportCapaNegoForSrtp = pProfile->bSupportCapaNegoForSrtp;
         this->nMasterKeyLifeTime = pProfile->nMasterKeyLifeTime;
-        this->eSrtpCryptoType= pProfile->eSrtpCryptoType;
+        this->eSrtpCryptoType = pProfile->eSrtpCryptoType;
         IMS_MEM_Memcpy(this->szKey, pProfile->szKey, 32);
     };
 };

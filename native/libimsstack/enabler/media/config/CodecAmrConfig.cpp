@@ -32,14 +32,12 @@ CodecAmrConfig::CodecAmrConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
     IMS_TRACE_D("+CodecAmrConfig Type[%d]", nType_, 0, 0);
 }
 
-PUBLIC VIRTUAL
-CodecAmrConfig::~CodecAmrConfig()
+PUBLIC VIRTUAL CodecAmrConfig::~CodecAmrConfig()
 {
     IMS_TRACE_D("~CodecAmrConfig", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("Create - nCodec[%d %s]", m_nCodec, ImsCodec::CodecToString(m_nCodec), 0);
 
@@ -55,14 +53,12 @@ IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     if (m_nCodec == ImsCodec::AUDIO_AMR)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMR;
-        piCcBundle = piCc->GetBundle(
-                CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
+        piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRNB_PAYLOAD_DESCRIPTION_BUNDLE);
     }
     else if (m_nCodec == ImsCodec::AUDIO_AMR_WB)
     {
         m_nSamplingRate = DEFAULT_SAMPLING_RATE_AMRWB;
-        piCcBundle = piCc->GetBundle(
-                CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
+        piCcBundle = piCc->GetBundle(CarrierConfig::ImsVoice::KEY_AMRWB_PAYLOAD_DESCRIPTION_BUNDLE);
     }
 
     if (piCcBundle == IMS_NULL)
@@ -118,12 +114,11 @@ IMS_BOOL CodecAmrConfig::Create(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-void CodecAmrConfig::ToDebugString() const
+PUBLIC VIRTUAL void CodecAmrConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
-    IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), m_nOctetAlign(%d)",
-            m_nChannel, m_nModeSetList, m_nOctetAlign);
+    IMS_TRACE_D("m_nChannel(%d), mode-set(0x%04x), m_nOctetAlign(%d)", m_nChannel, m_nModeSetList,
+            m_nOctetAlign);
     IMS_TRACE_D("m_nSamplingRate(%d), m_bDtx(%d)", m_nSamplingRate, m_bDtx, 0);
 }
 
@@ -152,7 +147,7 @@ IMS_SINT32 CodecAmrConfig::GetModeSet() const
         return (-1);
     }
 
-    for (nModeSet = DEFAULT_MODESET_AMR_WB; nModeSet >= 0 ; nModeSet--)
+    for (nModeSet = DEFAULT_MODESET_AMR_WB; nModeSet >= 0; nModeSet--)
     {
         if (m_nModeSetList & (1 << nModeSet))
         {

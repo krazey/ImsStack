@@ -16,8 +16,7 @@
 
 #include "config/ImsCodec.h"
 
-PUBLIC GLOBAL
-const IMS_CHAR* ImsCodec::CodecToString(IN IMS_SINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* ImsCodec::CodecToString(IN IMS_SINT32 nType)
 {
     switch (nType)
     {

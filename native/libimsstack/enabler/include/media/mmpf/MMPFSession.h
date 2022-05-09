@@ -34,16 +34,15 @@
 class IMMPFSessionListener
 {
 public:
-    virtual ~IMMPFSessionListener()
-    {}
+    virtual ~IMMPFSessionListener() {}
 
 public:
     // response per request
-    virtual void OnResponse(const HMMPFSession hMMPFSession,
-        const eMMPFRequest nRequest, const eMMPFResponse eResponse) = 0;
+    virtual void OnResponse(const HMMPFSession hMMPFSession, const eMMPFRequest nRequest,
+            const eMMPFResponse eResponse) = 0;
     // notify from mmpf
-    virtual void OnNotify(const HMMPFSession hMMPFSession,
-        const eMMPFNotify nNotify, const tMMPFNotificationData* pNotifyData = NULL) = 0;
+    virtual void OnNotify(const HMMPFSession hMMPFSession, const eMMPFNotify nNotify,
+            const tMMPFNotificationData* pNotifyData = NULL) = 0;
 };
 
 /**
@@ -57,7 +56,7 @@ class MMPFSession
 public:
     static void Clear();
     static MMPFSession* create(MMPF_IN eMMPFInterfaceID eID = MMPF_INTERFACEID_MANAGER,
-        MMPF_IN eMMPFSessionType eSessionType=MMPF_SESSION_CORE);
+            MMPF_IN eMMPFSessionType eSessionType = MMPF_SESSION_CORE);
     static void destroy(MMPF_IN MMPFSession* pMMPFSession);
     eMMPFResult setListener(MMPF_IN IMMPFSessionListener* pListener);
     eMMPFResult setProperty(MMPF_IN const tMMPFProperty* pstProperty);
@@ -72,4 +71,4 @@ private:
     friend class MMPFSessionListener;
 };
 
-#endif // MMPF_MMPFSESSION_H_INCLUDED
+#endif  // MMPF_MMPFSESSION_H_INCLUDED

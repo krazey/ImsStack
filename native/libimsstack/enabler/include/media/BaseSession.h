@@ -32,13 +32,13 @@ public:
     virtual void SetMediaEnvironment(MediaEnvironment* pEnvironment);
     virtual void SetDirection(MEDIA_DIRECTION eDir);
     virtual IMS_BOOL IsSameNegoId(IMS_UINTP nNegoId);
-//    virtual IMS_BOOL IsSameRemoteNetwork(IPAddress address, IMS_UINT32 port);
-// do it later : IsSameRemoteNetwork is currently not used
+    //    virtual IMS_BOOL IsSameRemoteNetwork(IPAddress address, IMS_UINT32 port);
+    // do it later : IsSameRemoteNetwork is currently not used
 
 protected:
     IMS_SINT32 m_nSlodId;
     IMSList<IMS_UINTP> m_listNegoId;
-    IMediaSessionListener* m_piMediaSessionListener;        //to MediaSession
+    IMediaSessionListener* m_piMediaSessionListener;  // to MediaSession
     MediaEnvironment* m_pEnvironment;
     MEDIA_DIRECTION m_eEnforcedDirection;
 };

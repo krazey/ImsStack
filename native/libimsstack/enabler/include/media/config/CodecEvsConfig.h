@@ -20,14 +20,13 @@
 #include "AString.h"
 #include "config/CodecConfig.h"
 
-class CodecEvsConfig :
-        public CodecConfig
+class CodecEvsConfig : public CodecConfig
 {
 public:
     static const IMS_SINT32 NEED_TO_CHECK_I = 0;
     static const IMS_BOOL NEED_TO_CHECK_B = IMS_FALSE;
 
-    static const IMS_SINT32 DEFAULT_CHANNEL = NEED_TO_CHECK_I;                 // 1 == mono
+    static const IMS_SINT32 DEFAULT_CHANNEL = NEED_TO_CHECK_I;  // 1 == mono
     static const IMS_BOOL DEFAULT_DTX = NEED_TO_CHECK_B;
     static const IMS_BOOL DEFAULT_DTX_RECV = NEED_TO_CHECK_B;
     static const IMS_SINT32 DEFAULT_HF_ONLY = NEED_TO_CHECK_I;
@@ -110,20 +109,20 @@ public:
 private:
     IMS_SINT32 m_nChannel;
 
-    IMS_BOOL m_bDtx;                // 1(default) is turn on DTX
-    IMS_BOOL m_bDtxRecv;         // 1(default) is turn on DTX
-    IMS_SINT32 m_nHfOnly;             // 0(default) is compact and hf format used,
-                                    //  other is only hf format used
-    IMS_SINT32 m_nEvsModeSwitch;      // 0(default) is "primary mode start"
+    IMS_BOOL m_bDtx;              // 1(default) is turn on DTX
+    IMS_BOOL m_bDtxRecv;          // 1(default) is turn on DTX
+    IMS_SINT32 m_nHfOnly;         // 0(default) is compact and hf format used,
+                                  //  other is only hf format used
+    IMS_SINT32 m_nEvsModeSwitch;  // 0(default) is "primary mode start"
 
-    IMS_UINT32 m_nBrList;             // EVS primary mode bitrate range (kbps)
-    IMS_UINT32 m_nBwList;             // bw has a value from the set:
-                                    // nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb, fb
+    IMS_UINT32 m_nBrList;  // EVS primary mode bitrate range (kbps)
+    IMS_UINT32 m_nBwList;  // bw has a value from the set:
+                           // nb, wb, swb, fb, nb-wb, nb-swb, and nb-fb. nb, wb, swb, fb
     IMS_SINT32 m_nCmr;
-    IMS_SINT32 m_nChAwRecv;           // -1 is channel aware mode disable,
-                                    // 0(default) is not used at the start of the session,
-                                    // but it'll be changed using CMR or RTCP app.
+    IMS_SINT32 m_nChAwRecv;  // -1 is channel aware mode disable,
+                             // 0(default) is not used at the start of the session,
+                             // but it'll be changed using CMR or RTCP app.
     // AMR-WB IO parameter
     IMS_UINT32 m_nModeSetList;
 };
-#endif                                              // _CODEC_EVS_CONFIG_H_
+#endif  // _CODEC_EVS_CONFIG_H_

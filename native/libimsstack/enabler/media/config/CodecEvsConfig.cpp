@@ -46,8 +46,7 @@ CodecEvsConfig::CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeN
 Remarks
 
 */
-PUBLIC VIRTUAL
-CodecEvsConfig::~CodecEvsConfig()
+PUBLIC VIRTUAL CodecEvsConfig::~CodecEvsConfig()
 {
     IMS_TRACE_D("~CodecEvsConfig", 0, 0, 0);
 }
@@ -57,8 +56,7 @@ CodecEvsConfig::~CodecEvsConfig()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
@@ -66,8 +64,8 @@ IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-    ICarrierConfig* piCcBundle = piCc->GetBundle(
-            CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::ImsVoice::KEY_EVS_PAYLOAD_DESCRIPTION_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
@@ -89,20 +87,20 @@ IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 
     m_nChannel = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT);
     m_bDtx = piCcBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL);
-    m_bDtxRecv = piCcBundle->GetBoolean(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
+    m_bDtxRecv =
+            piCcBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
     m_nHfOnly = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
-    m_nEvsModeSwitch = piCcBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
+    m_nEvsModeSwitch =
+            piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
     m_nBrList = ConvertEvsBitrateToList(piCcBundle->GetIntArray(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY));
     m_nBwList = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT);
     m_nCmr = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT);
-    m_nChAwRecv = piCcBundle->GetInt(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
-// TODO_MEDIA
-//    m_nModeSetList = piCcBundle->GetString(
-//            CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT);
+    m_nChAwRecv =
+            piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
+    // TODO_MEDIA
+    //    m_nModeSetList = piCcBundle->GetString(
+    //            CarrierConfig::ImsVoice::KEY_EVS_AMRWB_IO_MODE_SET_INT);
     piCcSubBundle->ReleaseBundle();
     piCcSubBundle = IMS_NULL;
 
@@ -117,8 +115,7 @@ IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
 Remarks
 
 */
-PUBLIC VIRTUAL
-void CodecEvsConfig::ToDebugString() const
+PUBLIC VIRTUAL void CodecEvsConfig::ToDebugString() const
 {
     CodecConfig::ToDebugString();
 
@@ -143,7 +140,7 @@ IMS_UINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMSVector<IMS_SINT32> objB
         }
 
         IMS_TRACE_D("ConvertEvsBitrateToList nBitrate (%d) ", nBitrate, 0, 0);
-        nBitrateSet = ( nBitrateSet | ( 1 << nBitrate));
+        nBitrateSet = (nBitrateSet | (1 << nBitrate));
     }
 
     return (IMS_UINT32)nBitrateSet;
@@ -176,8 +173,8 @@ IMS_SINT32 CodecEvsConfig::GetEvsBitrateFromList(IN IMS_UINT32 nBitrateList) con
         return EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
     }
 
-    for (IMS_SINT32 nFindBitrate = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
-        nFindBitrate >= 0; nFindBitrate--)
+    for (IMS_SINT32 nFindBitrate = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS; nFindBitrate >= 0;
+            nFindBitrate--)
     {
         if (nBitrateList & (1 << nFindBitrate))
         {
@@ -289,7 +286,7 @@ IMS_SINT32 CodecEvsConfig::GetModeSet() const
         return DEFAULT_AMRWB_IO_MODESET;
     }
 
-    for (nModeSet = DEFAULT_AMRWB_IO_MODESET; nModeSet >= 0 ; nModeSet--)
+    for (nModeSet = DEFAULT_AMRWB_IO_MODESET; nModeSet >= 0; nModeSet--)
     {
         if (m_nModeSetList & (1 << nModeSet))
         {

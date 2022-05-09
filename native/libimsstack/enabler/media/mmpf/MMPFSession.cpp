@@ -20,12 +20,11 @@
 
 #include <mmpf/MMPFSession.h>
 
-class MMPFSessionListener :
-        public IMMPFListener
+class MMPFSessionListener : public IMMPFListener
 {
 public:
-    void OnResponse(const HMMPFSession /*hMMPFSession*/,
-            const eMMPFRequest /*nRequest*/, const eMMPFResponse /*eResponse*/)
+    void OnResponse(const HMMPFSession /*hMMPFSession*/, const eMMPFRequest /*nRequest*/,
+            const eMMPFResponse /*eResponse*/)
     {
         // no-op
     }
@@ -42,8 +41,8 @@ void MMPFSession::Clear()
     // no-op
 }
 
-MMPFSession* MMPFSession::create(MMPF_IN eMMPFInterfaceID /*eID*/,
-        MMPF_IN eMMPFSessionType /*eSessionType*/)
+MMPFSession* MMPFSession::create(
+        MMPF_IN eMMPFInterfaceID /*eID*/, MMPF_IN eMMPFSessionType /*eSessionType*/)
 {
     return nullptr;
 }
@@ -53,13 +52,9 @@ void MMPFSession::destroy(MMPF_IN MMPFSession* /*pMMPFSession*/)
     // no-op
 }
 
-MMPFSession::MMPFSession()
-{
-}
+MMPFSession::MMPFSession() {}
 
-MMPFSession::~MMPFSession()
-{
-}
+MMPFSession::~MMPFSession() {}
 
 mmpf_bool MMPFSession::Initialize(eMMPFSessionType /*eSessionType*/)
 {

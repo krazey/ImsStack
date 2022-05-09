@@ -24,9 +24,9 @@ class INetworkConnection;
 class IMediaConnectionWatcherListener
 {
 public:
-    virtual void NotifyMediaConnection(IN INetworkConnection *piNetConnection,
+    virtual void NotifyMediaConnection(IN INetworkConnection* piNetConnection,
             IN IMS_SINT32 nMediaConnectionType, IN IMS_UINT32 nNetworkInterfaceId) = 0;
     virtual void NotifyIPChanged(IMS_BOOL bIsIPv6) = 0;
     virtual void NotifyWifiEarlyRouteSetup(IN IMS_UINT32 nNetworkInferfaceID) = 0;
 };
-#endif  /* _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_LISTENER_H_ */
+#endif /* _INTERFACE_IMS_MEDIA_CONNECTION_WATCHER_LISTENER_H_ */

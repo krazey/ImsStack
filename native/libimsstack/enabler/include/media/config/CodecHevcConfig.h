@@ -19,8 +19,7 @@
 
 #include "config/CodecConfig.h"
 
-class CodecHevcConfig :
-        public CodecConfig
+class CodecHevcConfig : public CodecConfig
 {
 public:
     CodecHevcConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
@@ -53,8 +52,8 @@ public:
     static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_FALSE;
     static const IMS_SINT32 DEFAULT_HEVC_PROFILE = 1;
     static const IMS_SINT32 DEFAULT_HEVC_LEVEL = 93;
-    #define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
-    #define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
+#define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
+#define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
 
 private:
     IMS_SINT32 m_nResolutionWidth;
@@ -68,4 +67,4 @@ private:
     AString m_strImageAttr;
     AString m_strFrameSize;
 };
-#endif                                              // _CODEC_HEVC_CONFIG_H_
+#endif  // _CODEC_HEVC_CONFIG_H_

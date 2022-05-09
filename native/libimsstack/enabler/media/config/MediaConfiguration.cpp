@@ -39,28 +39,24 @@ MediaConfiguration::MediaConfiguration(MEDIA_CONTENT_TYPE _eSessionType) :
     IMS_TRACE_I("+MediaConfiguration sessiontype[%d]", _eSessionType, 0, 0);
 }
 
-PUBLIC VIRTUAL
-MediaConfiguration::~MediaConfiguration()
+PUBLIC VIRTUAL MediaConfiguration::~MediaConfiguration()
 {
     IMS_TRACE_I("~MediaConfiguration", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MediaConfiguration::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL MediaConfiguration::Create(IN ICarrierConfig* piCc)
 {
     (void)piCc;
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MediaConfiguration::Update(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL MediaConfiguration::Update(IN ICarrierConfig* piCc)
 {
     (void)piCc;
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL
-CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCodec) const
+PUBLIC VIRTUAL CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCodec) const
 {
     CodecConfig* pCodecConfig = IMS_NULL;
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); i++)
@@ -76,22 +72,20 @@ CodecConfig* MediaConfiguration::GetCodecConfig(IN IMS_UINT32 nCodec) const
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-const IMSList<CodecConfig*>& MediaConfiguration::GetCodecConfigs() const
+PUBLIC VIRTUAL const IMSList<CodecConfig*>& MediaConfiguration::GetCodecConfigs() const
 {
     return objCodecConfigs;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL MediaConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
+PROTECTED VIRTUAL IMS_BOOL MediaConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
 {
     (void)piCc;
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
-        IN IMS_UINT32 nCodecIndex, IN IMSVector<IMS_SINT32> objPayloadTypeArray)
+PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfig* piCc,
+        IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex,
+        IN IMSVector<IMS_SINT32> objPayloadTypeArray)
 {
     if (!GetCodecType(nCodec))
     {
@@ -112,27 +106,23 @@ IMS_UINT32 MediaConfiguration::MakeEachCodecs(IN ICarrierConfig* piCc, IN IMS_UI
     return nCodecIndex;
 }
 
-PROTECTED VIRTUAL
-IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 nCodec,
-        IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum)
+PROTECTED VIRTUAL IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc,
+        IN IMS_UINT32 nCodec, IN IMS_UINT32 nCodecIndex, IN IMS_SINT32 nPayloadTypeNum)
 {
     IMS_UINT32 nCodecType = GetCodecType(nCodec);
-    CodecConfig *pCodecConfig = IMS_NULL;
+    CodecConfig* pCodecConfig = IMS_NULL;
 
     if (nCodecType == ImsCodec::AUDIO_MAX)
     {
-        pCodecConfig =
-                CodecConfigFactory::CreateAudioPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateAudioPayloadConfig(piCc, nCodec, nPayloadTypeNum);
     }
     else if (nCodecType == ImsCodec::VIDEO_MAX)
     {
-        pCodecConfig =
-                CodecConfigFactory::CreateVideoPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateVideoPayloadConfig(piCc, nCodec, nPayloadTypeNum);
     }
     else if (nCodecType == ImsCodec::TEXT_MAX)
     {
-        pCodecConfig =
-                CodecConfigFactory::CreateTextPayloadConfig(piCc, nCodec, nPayloadTypeNum);
+        pCodecConfig = CodecConfigFactory::CreateTextPayloadConfig(piCc, nCodec, nPayloadTypeNum);
     }
 
     if (pCodecConfig == IMS_NULL)
@@ -159,31 +149,29 @@ IMS_UINT32 MediaConfiguration::MakeCodec(IN ICarrierConfig* piCc, IN IMS_UINT32 
     {
         nCodecIndex++;
         IMS_TRACE_D("MakeCodec Added PayloadNum[%d], CodecIndex[%d], nPayloadTypeNum[%d]",
-                pCodecConfig->GetPayloadType(),nCodecIndex, nPayloadTypeNum);
+                pCodecConfig->GetPayloadType(), nCodecIndex, nPayloadTypeNum);
     }
     else
     {
         IMS_TRACE_E(0, "MakeCodec fail, InsertAt PayloadNum[%d] nPayloadTypeNum[%d]",
-                pCodecConfig->GetPayloadType(),nCodecIndex, nPayloadTypeNum);
+                pCodecConfig->GetPayloadType(), nCodecIndex, nPayloadTypeNum);
         return nCodecIndex;
     }
     return nCodecIndex;
 }
 
-PROTECTED VIRTUAL
-void MediaConfiguration::ToDebugString() const
+PROTECTED VIRTUAL void MediaConfiguration::ToDebugString() const
 {
     IMS_TRACE_D("session_type[%d], nRtcpLiveInterval[%d], nRtcpInterval[%d]",
             (IMS_SINT32)eSessionType, nRtcpLiveInterval, nRtcpInterval);
     IMS_TRACE_D("nPortRtp[%d], nPortRtpEnd[%d], nPortRtcp[%d]", nPortRtp, nPortRtpEnd, nPortRtcp);
-    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps[%d]",
-            nAsBandwidthKbps, nRsBandwidthBps, nRrBandwidthBps);
+    IMS_TRACE_D("nAsBandwidthKbps[%d], nRsBandwidthBps[%d], nRrBandwidthBps[%d]", nAsBandwidthKbps,
+            nRsBandwidthBps, nRrBandwidthBps);
     IMS_TRACE_D("nRtpInactivityTimerMillis[%d], nRtcpInactivityTimerMillis[%d]",
             nRtpInactivityTimerMillis, nRtcpInactivityTimerMillis, 0);
 }
 
-PROTECTED VIRTUAL
-void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
+PROTECTED VIRTUAL void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
 {
     if (pCodecConfig == IMS_NULL)
     {
@@ -192,8 +180,8 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
 
     switch (pCodecConfig->GetCodec())
     {
-    case ImsCodec::AUDIO_AMR:
-    case ImsCodec::AUDIO_AMR_WB:
+        case ImsCodec::AUDIO_AMR:
+        case ImsCodec::AUDIO_AMR_WB:
         {
             CodecAmrConfig* pAMRConfig = IMS_NULL;
             pAMRConfig = reinterpret_cast<CodecAmrConfig*>(pCodecConfig);
@@ -204,8 +192,8 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::AUDIO_PCMA:
-    case ImsCodec::AUDIO_PCMU:
+        case ImsCodec::AUDIO_PCMA:
+        case ImsCodec::AUDIO_PCMU:
         {
             CodecPcmConfig* pPCMConfig = IMS_NULL;
             pPCMConfig = reinterpret_cast<CodecPcmConfig*>(pCodecConfig);
@@ -216,8 +204,8 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::AUDIO_TELEPHONE_EVENT:
-    case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
+        case ImsCodec::AUDIO_TELEPHONE_EVENT:
+        case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
         {
             CodecTelephoneEventConfig* pTelephoneEventConfig = IMS_NULL;
             pTelephoneEventConfig = reinterpret_cast<CodecTelephoneEventConfig*>(pCodecConfig);
@@ -228,7 +216,7 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::AUDIO_EVS:
+        case ImsCodec::AUDIO_EVS:
         {
             CodecEvsConfig* pEVSConfig = IMS_NULL;
             pEVSConfig = reinterpret_cast<CodecEvsConfig*>(pCodecConfig);
@@ -239,7 +227,7 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::VIDEO_AVC:
+        case ImsCodec::VIDEO_AVC:
         {
             CodecAvcConfig* pAvcConfig = IMS_NULL;
             pAvcConfig = reinterpret_cast<CodecAvcConfig*>(pCodecConfig);
@@ -250,7 +238,7 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::VIDEO_HEVC:
+        case ImsCodec::VIDEO_HEVC:
         {
             CodecHevcConfig* pHevcConfig = IMS_NULL;
             pHevcConfig = reinterpret_cast<CodecHevcConfig*>(pCodecConfig);
@@ -261,7 +249,7 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    case ImsCodec::TEXT_T140:
+        case ImsCodec::TEXT_T140:
         {
             CodecT140Config* pT140Config = IMS_NULL;
             pT140Config = reinterpret_cast<CodecT140Config*>(pCodecConfig);
@@ -272,13 +260,12 @@ void MediaConfiguration::ToDebugStringCodecs(IN CodecConfig* pCodecConfig) const
             }
         }
         break;
-    default :
-        break;
+        default:
+            break;
     }
 }
 
-PROTECTED VIRTUAL
-void MediaConfiguration::Clear()
+PROTECTED VIRTUAL void MediaConfiguration::Clear()
 {
     for (IMS_UINT32 i = 0; i < objCodecConfigs.GetSize(); ++i)
     {
@@ -297,24 +284,24 @@ void MediaConfiguration::Clear()
 PROTECTED
 IMS_UINT32 MediaConfiguration::GetCodecType(IN IMS_UINT32 nCodec) const
 {
-    switch(nCodec)
+    switch (nCodec)
     {
-    case ImsCodec::AUDIO_AMR:
-    case ImsCodec::AUDIO_AMR_WB:
-    case ImsCodec::AUDIO_PCMA:
-    case ImsCodec::AUDIO_PCMU:
-    case ImsCodec::AUDIO_TELEPHONE_EVENT:
-    case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
-    case ImsCodec::AUDIO_EVS:
-        return ImsCodec::AUDIO_MAX;
-    case ImsCodec::VIDEO_AVC:
-    case ImsCodec::VIDEO_HEVC:
-        return ImsCodec::VIDEO_MAX;
-    case ImsCodec::TEXT_T140:
-    case ImsCodec::TEXT_RED:
-        return ImsCodec::TEXT_MAX;
-    default:
-        return 0;
+        case ImsCodec::AUDIO_AMR:
+        case ImsCodec::AUDIO_AMR_WB:
+        case ImsCodec::AUDIO_PCMA:
+        case ImsCodec::AUDIO_PCMU:
+        case ImsCodec::AUDIO_TELEPHONE_EVENT:
+        case ImsCodec::AUDIO_TELEPHONE_EVENT_WB:
+        case ImsCodec::AUDIO_EVS:
+            return ImsCodec::AUDIO_MAX;
+        case ImsCodec::VIDEO_AVC:
+        case ImsCodec::VIDEO_HEVC:
+            return ImsCodec::VIDEO_MAX;
+        case ImsCodec::TEXT_T140:
+        case ImsCodec::TEXT_RED:
+            return ImsCodec::TEXT_MAX;
+        default:
+            return 0;
     }
 }
 
@@ -325,7 +312,7 @@ void MediaConfiguration::SetPorts(IN ICarrierConfig* piCc, IN const IMS_CHAR* ps
     if (!objPortRtp.IsEmpty())
     {
         nPortRtp = objPortRtp.GetAt(0);
-        nPortRtcp = nPortRtp+1;
+        nPortRtcp = nPortRtp + 1;
 
         if (objPortRtp.GetSize() > 1)
         {

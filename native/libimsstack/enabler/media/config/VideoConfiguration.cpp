@@ -55,8 +55,7 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
  * @brief   Destructor
  * @details
  */
-PUBLIC VIRTUAL
-VideoConfiguration::~VideoConfiguration()
+PUBLIC VIRTUAL VideoConfiguration::~VideoConfiguration()
 {
     IMS_TRACE_I("~VideoConfiguration", 0, 0, 0);
     Clear();
@@ -66,8 +65,7 @@ VideoConfiguration::~VideoConfiguration()
  * @brief   Create
  * @details
  */
-PUBLIC VIRTUAL
-IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
 {
     IMS_TRACE_D("Create", 0, 0, 0);
 
@@ -80,20 +78,19 @@ IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     SetPorts(piCc, CarrierConfig::ImsVt::KEY_VIDEO_PORT_RTP_INT_ARRAY);
     SetRtcpIntervals(piCc, CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INTERVAL_INT_ARRAY);
 
-    nAsBandwidthKbps = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT);
+    nAsBandwidthKbps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AS_BANDWIDTH_KBPS_INT);
     nRsBandwidthBps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RS_BANDWIDTH_BPS_INT);
     nRrBandwidthBps = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RR_BANDWIDTH_BPS_INT);
 
-    nRtpInactivityTimerMillis = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT);
-    nRtcpInactivityTimerMillis = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
+    nRtpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_INACTIVITY_TIMER_MILLIS_INT);
+    nRtcpInactivityTimerMillis =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
 
     // Video Configuration attributes
     nVideoRtpDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
-    nVideoSendPeriodicSpsPps = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
+    nVideoSendPeriodicSpsPps =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
 
     bVideoAvpfTrrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL);
     bVideoAvpfNackEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL);
@@ -101,23 +98,20 @@ IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     bVideoAvpfPliEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_PLI_BOOL);
     bVideoAvpfFirEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FIR_BOOL);
 
-    nVideoAvpfTmmbrDownIntervalSec = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT);
-    nVideoAvpfTmmbrUpIntervalSec = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_INTERVAL_SEC_INT);
-    nVideoAvpfTmmbrLossThresholdRatio = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_LOSS_THRESHOLD_RATIO_INT);
-    nVideoAvpfTmmbrMinBitrateKbps = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_MIN_BITRATE_KBPS_INT);
-    nVideoAvpfTmmbrBitrateLevel = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BITRATE_LEVEL_INT);
-    nVideoAvpfTmmbrUpLevel = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_LEVEL_INT);
+    nVideoAvpfTmmbrDownIntervalSec =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT);
+    nVideoAvpfTmmbrUpIntervalSec =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_INTERVAL_SEC_INT);
+    nVideoAvpfTmmbrLossThresholdRatio =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_LOSS_THRESHOLD_RATIO_INT);
+    nVideoAvpfTmmbrMinBitrateKbps =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_MIN_BITRATE_KBPS_INT);
+    nVideoAvpfTmmbrBitrateLevel =
+            piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BITRATE_LEVEL_INT);
+    nVideoAvpfTmmbrUpLevel = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_UP_LEVEL_INT);
 
-    nVideoIframeIntervalSec = piCc->GetInt(
-            CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
-    bVideoDropPFrameEnabled = piCc->GetBoolean(
-            CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL);
+    nVideoIframeIntervalSec = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
+    bVideoDropPFrameEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL);
 
     // nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
     if (!CreateCodecConfigs(piCc))
@@ -158,25 +152,24 @@ IMS_BOOL VideoConfiguration::Update(IN ICarrierConfig* piCc)
  * @details
  */
 
-PROTECTED VIRTUAL
-IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
+PROTECTED VIRTUAL IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CreateCodecConfigs : piCc is NULL", 0,0,0);
+        IMS_TRACE_E(0, "CreateCodecConfigs : piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    ICarrierConfig* piCcBundle = piCc->GetBundle(
-            CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::ImsVt::KEY_VIDEO_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IMSVector<IMS_SINT32> objAvcPayloadType = piCcBundle->GetIntArray(
-            CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
+    IMSVector<IMS_SINT32> objAvcPayloadType =
+            piCcBundle->GetIntArray(CarrierConfig::ImsVt::KEY_H264_PAYLOAD_TYPE_INT_ARRAY);
 
     // TODO_MEDIA need to add after creating HEVC in CarrierConfig
 
@@ -206,15 +199,14 @@ IMS_BOOL VideoConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
  * @brief   ToDebugString
  * @details Print ToDebugString
  */
-PROTECTED VIRTUAL
-void VideoConfiguration::ToDebugString() const
+PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
 {
-    //MediaConfiguration::ToDebugString();
+    // MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("nVideoRtpDscp(%d), nVideoSendPeriodicSpsPps(%d)",
-            nVideoRtpDscp, nVideoSendPeriodicSpsPps, 0);
-    IMS_TRACE_D("bVideoAvpfTrrEnabled(%d), bVideoAvpfNackEnabled(%d)",
-            bVideoAvpfTrrEnabled, bVideoAvpfNackEnabled, 0);
+    IMS_TRACE_D("nVideoRtpDscp(%d), nVideoSendPeriodicSpsPps(%d)", nVideoRtpDscp,
+            nVideoSendPeriodicSpsPps, 0);
+    IMS_TRACE_D("bVideoAvpfTrrEnabled(%d), bVideoAvpfNackEnabled(%d)", bVideoAvpfTrrEnabled,
+            bVideoAvpfNackEnabled, 0);
     IMS_TRACE_D("bVideoAvpfTmmbrEnabled(%d), bVideoAvpfPliEnabled(%d), bVideoAvpfFirEnabled(%d)",
             bVideoAvpfTmmbrEnabled, bVideoAvpfPliEnabled, bVideoAvpfFirEnabled);
     IMS_TRACE_D("nVideoAvpfTmmbrDownIntervalSec(%d), nVideoAvpfTmmbrUpIntervalSec(%d)",

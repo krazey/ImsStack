@@ -45,8 +45,7 @@ TextConfiguration::~TextConfiguration()
 Remarks
 
 */
-PUBLIC VIRTUAL
-IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
+PUBLIC VIRTUAL IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
@@ -63,9 +62,10 @@ IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
     nRsBandwidthBps = piCc->GetBoolean(CarrierConfig::ImsRtt::KEY_TEXT_RS_BANDWIDTH_BPS_INT);
 
     nRtpInactivityTimerMillis = piCc->GetInt(
-            CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT); // same with audio
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTP_INACTIVITY_TIMER_MILLIS_INT);  // same with audio
     nRtcpInactivityTimerMillis = piCc->GetInt(
-            CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT); // same with audio
+            CarrierConfig::ImsVoice::KEY_AUDIO_RTCP_INACTIVITY_TIMER_MILLIS_INT);  // same with
+                                                                                   // audio
 
     // Text Configuration attributes
     // TODO_MEDIA need to add after creating HEVC in CarrierConfig
@@ -78,7 +78,7 @@ IMS_BOOL TextConfiguration::Create(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
-   return IMS_TRUE;
+    return IMS_TRUE;
 }
 
 /*
@@ -109,18 +109,17 @@ IMS_BOOL TextConfiguration::Update(IN ICarrierConfig* piCc)
 Remarks
 
 */
-PROTECTED VIRTUAL
-IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
+PROTECTED VIRTUAL IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
 {
     if (piCc == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CreateCodecConfigs - piCc is NULL", 0,0,0);
+        IMS_TRACE_E(0, "CreateCodecConfigs - piCc is NULL", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    //MediaTextCodecCapabilityPayloadTypesBundle
-    ICarrierConfig* piCcBundle = piCc->GetBundle(
-        CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
+    // MediaTextCodecCapabilityPayloadTypesBundle
+    ICarrierConfig* piCcBundle =
+            piCc->GetBundle(CarrierConfig::ImsRtt::KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE);
 
     if (piCcBundle == IMS_NULL)
     {
@@ -146,8 +145,7 @@ IMS_BOOL TextConfiguration::CreateCodecConfigs(IN ICarrierConfig* piCc)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-void TextConfiguration::ToDebugString() const
+PROTECTED VIRTUAL void TextConfiguration::ToDebugString() const
 {
     MediaConfiguration::ToDebugString();
 
