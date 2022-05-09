@@ -1,5 +1,6 @@
 #include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "ICoreService.h"
 #include "dialogevent/IDialogEvent.h"
 #include "call/IMtcCallContext.h"
@@ -331,6 +332,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionForkedResponseReceived(
     m_objSessions.Add(piForkedSession, m_objContext.CreateSession(*piForkedSession));
     m_objContext.GetMediaManager().CreateMediaProfile(piForkedSession, IMS_TRUE, IMS_TRUE);
     m_objContext.GetPreconditionManager().CreateQos(piForkedSession);
+
+    OnSessionForked(piSession);
 
     // TODO: need any timer for the forked session?
 
@@ -693,6 +696,33 @@ void OutgoingState::OnStartFailed(IN ISession* piSession, IN const FailReason& o
     }
 
     m_objContext.GetUiNotifier().SendStartFailed(objReason);
+}
+
+PRIVATE
+void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
+{
+    if (m_objContext.GetConfigurationProxy().Is(
+            Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
+    {
+        return;
+    }
+
+    IMS_SINT32 nIndex = m_objSessions.GetIndexOfKey(piOriginSession);
+    if (nIndex < 0)
+    {
+        return;
+    }
+
+    IMS_TRACE_I("OnSessionForked : Terminate previous session", 0, 0, 0);
+
+    MtcSession* pOriginMtcSession = m_objSessions.GetValueAt(nIndex);
+    pOriginMtcSession->GetMessageSender().Terminate(
+            IMS_TRUE, FailReason(FAIL_REASON_SESSION_EARLYDIALOG));
+
+    m_objContext.GetMediaManager().DestroyMediaProfile(piOriginSession);
+    m_objContext.GetPreconditionManager().DestroyQos(piOriginSession);
+    delete pOriginMtcSession;
+    m_objSessions.RemoveAt(nIndex);
 }
 
 PRIVATE

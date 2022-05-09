@@ -60,6 +60,7 @@ private:
     void SendProgressing();
     void OnStarted(IN ISession* piSession);
     void OnStartFailed(IN ISession* piSession, IN const FailReason& objReason);
+    void OnSessionForked(IN ISession* piOriginSession);
     void DeleteInactiveSessions();
 
     IMSMap<ISession*, MtcSession*> m_objSessions;
