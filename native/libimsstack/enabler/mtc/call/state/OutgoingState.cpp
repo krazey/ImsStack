@@ -723,6 +723,7 @@ void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
     m_objContext.GetPreconditionManager().DestroyQos(piOriginSession);
     delete pOriginMtcSession;
     m_objSessions.RemoveAt(nIndex);
+    m_objContext.SetSession(m_objSessions.GetValueAt(0));
 }
 
 PRIVATE
