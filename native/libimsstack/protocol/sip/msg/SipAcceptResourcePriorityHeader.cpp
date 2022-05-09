@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipAcceptResourcePriorityHeader.cpp
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     : Saurabh Srivastava
- * E-mail id.    : saurabh31.srivastava@
- * Creation date   : April . 20, 2011
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipAcceptResourcePriorityHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -47,10 +21,10 @@
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader()
-    : SipHeaderBase(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY)
-    , m_pszNameSpace(SIP_NULL)
-    , m_pszRPriority(SIP_NULL)
+SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader() :
+        SipHeaderBase(SipHeaderBase::ACCEPT_RESOURCE_PRIORITY),
+        m_pszNameSpace(SIP_NULL),
+        m_pszRPriority(SIP_NULL)
 {
 }
 
@@ -64,10 +38,10 @@ SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader()
  * Side Effects  : none
  *****************************************************************************/
 SipAcceptResourcePriorityHeader::SipAcceptResourcePriorityHeader(
-        const SipAcceptResourcePriorityHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pszNameSpace(SipPf_Strdup(objHeader.m_pszNameSpace))
-    , m_pszRPriority(SipPf_Strdup(objHeader.m_pszRPriority))
+        const SipAcceptResourcePriorityHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pszNameSpace(SipPf_Strdup(objHeader.m_pszNameSpace)),
+        m_pszRPriority(SipPf_Strdup(objHeader.m_pszRPriority))
 {
 }
 /******************************************************************************
@@ -101,20 +75,20 @@ SipAcceptResourcePriorityHeader::~SipAcceptResourcePriorityHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SIP_BOOL SipAcceptResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipAcceptResourcePriorityHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if ((m_pszNameSpace == SIP_NULL) && (m_pszRPriority == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Namespace and Priority Missing",
-            SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Namespace and Priority Missing", SIP_ZERO, SIP_ZERO);
         return SIP_TRUE;
     }
 
     if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Namespace or Priority Missing",
-            SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Namespace or Priority Missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -205,20 +179,20 @@ SIP_BOOL SipAcceptResourcePriorityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT
 SIP_BOOL SipAcceptResourcePriorityHeader::IsValidHeader() const
 {
     if (((m_pszNameSpace == SIP_NULL) && (m_pszRPriority == SIP_NULL)) ||
-        ((m_pszNameSpace != SIP_NULL) && (m_pszRPriority != SIP_NULL)))
+            ((m_pszNameSpace != SIP_NULL) && (m_pszRPriority != SIP_NULL)))
     {
-         return SIP_TRUE;
+        return SIP_TRUE;
     }
     return SIP_FALSE;
 }
 
-SipHeaderBase* SipAcceptResourcePriorityHeader::GetNewObj(SIP_INT32 /*eHdr*/,
-        SipHeaderBase* pHeader)
+SipHeaderBase* SipAcceptResourcePriorityHeader::GetNewObj(
+        SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {
     if (pHeader != SIP_NULL)
     {
         return new SipAcceptResourcePriorityHeader(
-            *reinterpret_cast<SipAcceptResourcePriorityHeader*>(pHeader));
+                *reinterpret_cast<SipAcceptResourcePriorityHeader*>(pHeader));
     }
     return new SipAcceptResourcePriorityHeader();
 }

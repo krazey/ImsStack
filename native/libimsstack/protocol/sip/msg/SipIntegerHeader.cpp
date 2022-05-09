@@ -7,19 +7,17 @@
 
 #define MAX_LEN 20
 
-SipIntegerHeader::SipIntegerHeader(SIP_INT32 eHeaderType)
-    : SipHeaderBase(eHeaderType)
+SipIntegerHeader::SipIntegerHeader(SIP_INT32 eHeaderType) :
+        SipHeaderBase(eHeaderType)
 {
 }
 
-SipIntegerHeader::SipIntegerHeader(const SipIntegerHeader& objHeader)
-    : SipHeaderBase(objHeader)
+SipIntegerHeader::SipIntegerHeader(const SipIntegerHeader& objHeader) :
+        SipHeaderBase(objHeader)
 {
 }
 
-SipIntegerHeader::~SipIntegerHeader()
-{
-}
+SipIntegerHeader::~SipIntegerHeader() {}
 
 SIP_BOOL SipIntegerHeader::SetValueInt(const SIP_UINT32 nValue)
 {

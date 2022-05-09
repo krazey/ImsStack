@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipTriggerConsentHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           : Saurabh Srivastava
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : may. 10, 2011
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipTriggerConsentHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -32,23 +6,15 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
-SipTriggerConsentHeader::SipTriggerConsentHeader()
-    : SipHeaderBase(SipHeaderBase::TRIGGER_CONSENT)
-    , m_pSipUri(SIP_NULL)
+SipTriggerConsentHeader::SipTriggerConsentHeader() :
+        SipHeaderBase(SipHeaderBase::TRIGGER_CONSENT),
+        m_pSipUri(SIP_NULL)
 {
 }
 
-SipTriggerConsentHeader::SipTriggerConsentHeader(const SipTriggerConsentHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pSipUri(SIP_NULL)
+SipTriggerConsentHeader::SipTriggerConsentHeader(const SipTriggerConsentHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pSipUri(SIP_NULL)
 {
     if (objHeader.m_pSipUri != SIP_NULL)
     {
@@ -67,20 +33,19 @@ SipTriggerConsentHeader::~SipTriggerConsentHeader()
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL SipTriggerConsentHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipTriggerConsentHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if (m_pSipUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: SIP Uri missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "EncodeHdr: SIP Uri missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (m_pSipUri->EncodeSipUri(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: SIP Uri Encoding Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "EncodeHdr: SIP Uri Encoding Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return EncodeHeaderParameters(ppCurrPos, bParams);
@@ -102,7 +67,7 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     {
         return SIP_FALSE;
     }
-    if ( m_pSipUri != SIP_NULL)
+    if (m_pSipUri != SIP_NULL)
     {
         m_pSipUri->SipDelete();
     }
@@ -110,7 +75,6 @@ SIP_BOOL SipTriggerConsentHeader::SetSipUri(SipUri* pSipUri)
     m_pSipUri = pSipUri;
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipTriggerConsentHeader::DecodeHdr
@@ -125,8 +89,7 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -149,8 +112,8 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     {
         if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "DecodeHdr: Hdr Prm Decoding Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pTempPre;
@@ -161,18 +124,18 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
     m_pSipUri = new SipUri();
     if (m_pSipUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    //skip "sip:" from the user name
+    // skip "sip:" from the user name
     SIP_CHAR* pszSIPScheme = SIP_NULL;
 
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pszSIPScheme, COLON) == SIP_TRUE)
     {
         SIP_CHAR* pszTempScheme = sipCreateString(pStartPt, pszSIPScheme);
-        if (SipPf_Stricmp(pszTempScheme, "sip")== SIP_ZERO)
+        if (SipPf_Stricmp(pszTempScheme, "sip") == SIP_ZERO)
         {
             pStartPt = pszSIPScheme + 2;
             nDecLen -= SipPf_Strlen("sip:");
@@ -185,8 +148,8 @@ SIP_BOOL SipTriggerConsentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecL
 
     if (m_pSipUri->DecodeSipUri(pStartPt, nDecLen) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: SIP URI Decoding Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: SIP URI Decoding Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

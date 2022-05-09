@@ -9,14 +9,6 @@
 #include "msg/SipMessage.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 /******************************************************************************
  * Function name      : SipRequestLine::SipRequestLine
  *
@@ -26,10 +18,10 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipRequestLine::SipRequestLine()
-    : m_pszMethod(SIP_NULL)
-    , m_pReqUri(SIP_NULL)
-    , m_pszSipVersion(SIP_NULL)
+SipRequestLine::SipRequestLine() :
+        m_pszMethod(SIP_NULL),
+        m_pReqUri(SIP_NULL),
+        m_pszSipVersion(SIP_NULL)
 {
 }
 
@@ -42,11 +34,11 @@ SipRequestLine::SipRequestLine()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipRequestLine::SipRequestLine(SIP_CHAR* pszMethod, SipAddrSpec* pReqUri,
-        const SIP_CHAR * /*pszSipVersion*/)
-    : m_pszMethod(SipPf_Strdup(pszMethod))
-    , m_pReqUri(pReqUri)
-    , m_pszSipVersion(SipPf_Strdup(SIP_SIPVER))
+SipRequestLine::SipRequestLine(
+        SIP_CHAR* pszMethod, SipAddrSpec* pReqUri, const SIP_CHAR* /*pszSipVersion*/) :
+        m_pszMethod(SipPf_Strdup(pszMethod)),
+        m_pReqUri(pReqUri),
+        m_pszSipVersion(SipPf_Strdup(SIP_SIPVER))
 {
 }
 
@@ -59,10 +51,10 @@ SipRequestLine::SipRequestLine(SIP_CHAR* pszMethod, SipAddrSpec* pReqUri,
  *
  * Side Effects      : none
  *****************************************************************************/
-SipRequestLine::SipRequestLine(const SipRequestLine& objHeader)
-    : m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
-    , m_pReqUri(SIP_NULL)
-    , m_pszSipVersion(SipPf_Strdup(objHeader.m_pszSipVersion))
+SipRequestLine::SipRequestLine(const SipRequestLine& objHeader) :
+        m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod)),
+        m_pReqUri(SIP_NULL),
+        m_pszSipVersion(SipPf_Strdup(objHeader.m_pszSipVersion))
 {
     if (objHeader.m_pReqUri != SIP_NULL)
     {
@@ -111,20 +103,20 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
     /*check for existence of Method, request uri and version */
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_RequestLine: Method missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Method missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pReqUri == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_RequestLine: Request Uri missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Request Uri missing", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
     if (m_pszSipVersion == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_RequestLine: Sip Version missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_RequestLine: Sip Version missing", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -150,7 +142,6 @@ SIP_BOOL SipRequestLine::EncodeRequestLine(SIP_CHAR** ppCurrPos)
 
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipRequestLine::SetMethod
@@ -235,7 +226,6 @@ SipAddrSpec* SipRequestLine::GetReqUri()
  *****************************************************************************/
 SIP_BOOL SipRequestLine::IsValidComponent(const SIP_CHAR* pszComponent) const
 {
-
     if (SipPf_Stricmp(pszComponent, SIP_USER) == 0)
     {
         return SIP_TRUE;
@@ -287,8 +277,6 @@ SIP_BOOL SipRequestLine::IsValidComponent(const SIP_CHAR* pszComponent) const
     return SIP_FALSE;
 }
 
-
-
 /******************************************************************************
  * Function name      : SipRequestLine::DecodeRequestLine
  *
@@ -307,8 +295,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Create a NULL terminated String of Method*/
@@ -316,8 +303,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (m_pszMethod == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -329,8 +315,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -340,8 +325,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (m_pReqUri == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -350,11 +334,10 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
 
     /*Check for validity of Address Spec of Req URI */
 #ifdef SIP_STRICT_PARSING
-    if (IsValidAddress(pStartPt,  nTempLen) == SIP_FALSE)
+    if (IsValidAddress(pStartPt, nTempLen) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine: Address Spec is Invalid",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine: Address Spec is Invalid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -363,8 +346,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (m_pReqUri->DecodeAddrSpec(pStartPt, nTempLen) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Addr Spec decode failed",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine:Addr Spec decode failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     /*Take the ptr to the start of  Sip Version*/
@@ -374,8 +356,7 @@ SIP_BOOL SipRequestLine::DecodeRequestLine(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     if (m_pszSipVersion == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipRequestLine::DecodeRequestLine:Memory Allocation failed",
-                SIP_ZERO, SIP_ZERO);
+                "SipRequestLine::DecodeRequestLine:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

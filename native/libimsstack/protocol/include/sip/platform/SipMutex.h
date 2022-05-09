@@ -5,21 +5,21 @@
 
 class SipMutex
 {
-    public:
-        SipMutex();
-        virtual ~SipMutex();
+public:
+    SipMutex();
+    virtual ~SipMutex();
 
-    private:
-        SipMutex(const SipMutex& objRHS);
-        SipMutex& operator=(const SipMutex& objRHS);
+private:
+    SipMutex(const SipMutex& objRHS);
+    SipMutex& operator=(const SipMutex& objRHS);
 
-    public:
-        void Lock();
-        void TryLock();
-        void Unlock();
+public:
+    void Lock();
+    void TryLock();
+    void Unlock();
 
-    private:
-        void* pMutex;
+private:
+    void* pMutex;
 };
 
-#endif // __SIP_MUTEX_H__
+#endif  // __SIP_MUTEX_H__

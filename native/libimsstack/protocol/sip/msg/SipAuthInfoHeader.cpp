@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipAuthInfoHeader.cpp
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     : Saurabh Srivastava
- * E-mail id.    : saurabh31.srivastava@
- * Creation date   : may. 10, 2011
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipAuthInfoHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -32,21 +6,14 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-SipAuthInfoHeader::SipAuthInfoHeader()
-    : SipHeaderBase(SipHeaderBase::AUTHENTICATION_INFO)
-    , m_pAiInfo(SIP_NULL)
+SipAuthInfoHeader::SipAuthInfoHeader() :
+        SipHeaderBase(SipHeaderBase::AUTHENTICATION_INFO),
+        m_pAiInfo(SIP_NULL)
 {
 }
-SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pAiInfo(SIP_NULL)
+SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pAiInfo(SIP_NULL)
 {
     m_pAiInfo = new SipNameValue(*(objHeader.m_pAiInfo));
 }

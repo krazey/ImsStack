@@ -1,64 +1,8 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : sip_pf_memory.cpp
- * Purpose        :  memory Functions
- * Platform        : Windows OR Android
- * Author(s)        :
- * E-mail id.        :
- * Creation date     : may 14,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * may 14,10                        0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
 #include <malloc.h>
 #include <memory.h>
 #include <string.h>
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Global Extern Variables
- *****************************************************************************/
-
-/****************************************************************************
-  Global Variables
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Declaration [Static Functions]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Implementation [STARTS]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Implementation [ENDS]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Function Implementation [STARTS]
- *****************************************************************************/
 
 /******************************************************************************
  * Function name   : SipPf_Memset
@@ -74,7 +18,6 @@ SIP_VOID SipPf_Memset(SIP_VOID* pvMem_block, SIP_UCHAR uChars, SIP_SIZE_T nSize)
 {
     memset(pvMem_block, uChars, nSize);
 }
-
 
 /******************************************************************************
  * Function name   : SipPf_Memcpy
@@ -104,7 +47,7 @@ SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SI
  *****************************************************************************/
 SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize)
 {
-    return(memcmp(pvMem1, pvMem2, nSize));
+    return (memcmp(pvMem1, pvMem2, nSize));
 }
 
 /******************************************************************************
@@ -117,7 +60,7 @@ SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE
  *****************************************************************************/
 SIP_VOID SipPf_Free(SIP_VOID** ppvMem)
 {
-    //free(*ppvMem);
+    // free(*ppvMem);
     if (*ppvMem == SIP_NULL)
     {
         return;
@@ -139,8 +82,3 @@ SIP_VOID* SipPf_Realloc(SIP_VOID* pvMem_ptr, SIP_SIZE_T usNew_Size)
 {
     return realloc(pvMem_ptr, usNew_Size);
 }
-
-
-/****************************************************************************
-  Function Implementation [ENDS]
- *****************************************************************************/

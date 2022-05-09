@@ -1,20 +1,8 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20150218  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
 #include "sip_abnfUtil.h"
 #include "platform/sip_pf_memory.h"
 
 SIP_CHAR* sipSkipRwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
-    /*NULL validation*/
     if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))
     {
         return SIP_NULL;
@@ -65,7 +53,6 @@ SIP_CHAR* sipCreateString(const SIP_CHAR* pStartPt, const SIP_CHAR* pEndPt)
 
 SIP_CHAR* sipSkipFwLWS(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
-    /*NULL validation*/
     /*    LWS = [*WSP   CRLF]   1*WSP  ; linear whitespace  */
 
     if ((pStartPt == SIP_NULL) || (pEndPt == SIP_NULL))

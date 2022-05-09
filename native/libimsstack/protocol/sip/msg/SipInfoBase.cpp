@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipInfoBase.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
 #include "msg/SipInfoBase.h"
 #include "SipTrace.h"
 #include "sip_debug.h"
@@ -32,15 +6,8 @@
 
 extern SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN];
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-SipInfoBase::SipInfoBase(SIP_INT32 eHdrType)
-    : SipHeaderBase(eHdrType)
+SipInfoBase::SipInfoBase(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType)
 {
 }
 /******************************************************************************
@@ -52,8 +19,8 @@ SipInfoBase::SipInfoBase(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipInfoBase::SipInfoBase(const SipInfoBase& objHeader)
-    : SipHeaderBase(objHeader)
+SipInfoBase::SipInfoBase(const SipInfoBase& objHeader) :
+        SipHeaderBase(objHeader)
 {
 }
 
@@ -66,9 +33,7 @@ SipInfoBase::SipInfoBase(const SipInfoBase& objHeader)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipInfoBase::~SipInfoBase()
-{
-}
+SipInfoBase::~SipInfoBase() {}
 
 /******************************************************************************
  * Function name      : SipInfoBase::EncodeHdr
@@ -147,7 +112,7 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     delete[] pszValue;
 
-    SIP_INT32 nLen = pTemp-pStartPt;
+    SIP_INT32 nLen = pTemp - pStartPt;
     pStartPt = pTemp + SIP_TWO;
 
     pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
@@ -159,7 +124,7 @@ SIP_BOOL SipInfoBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return DecodeHeaderParameters(pTemp, pEndPt, SIP_SEMI);
     }
 
-    if (nLen != (nDecLen-3))
+    if (nLen != (nDecLen - 3))
     {
         return SIP_FALSE;
     }

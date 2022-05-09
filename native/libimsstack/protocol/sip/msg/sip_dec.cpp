@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : sip_dec.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           : Saurabh Srivastava
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
 #include "msg/sip_msgutil.h"
 #include "sip_pf_datatypes.h"
 #include "sip_debug.h"
@@ -33,16 +7,11 @@
 #include "msg/SipHeaders.h"
 #include "msg/SipMessage.h"
 #include "msg/SipHeaderBase.h"
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
+
 #define MAX__CONTACT_EXPIRES 4294967295
-
-#define SIP_MAX_HDR_LEN 32
-
+#define SIP_MAX_HDR_LEN      32
 
 extern SIPHdrAccess* gpHdrAccess;
-
 
 /******************************************************************************
  * Function name      : sipSkipRwWSP
@@ -67,9 +36,6 @@ SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     return pEndPt;
 }
 
-
-
-
 /******************************************************************************
  * Function name      : sipFindPostDelimiter
  *
@@ -79,8 +45,8 @@ SIP_CHAR* sipSkipRwWSP(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL sipFindPostDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc,
-        SIP_CHAR cDelimiter)
+SIP_BOOL sipFindPostDelimiter(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc, SIP_CHAR cDelimiter)
 {
     while (pStartPt <= pEndPt)
     {
@@ -93,9 +59,6 @@ SIP_BOOL sipFindPostDelimiter(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** p
     }
     return SIP_FALSE;
 }
-
-
-
 
 /*****************************************************************************
  * Function name      : sipGetUriType
@@ -119,7 +82,6 @@ SIP_INT32 sipGetUriType(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
     return SipUri::SCHEME_ABS;
 }
-
 
 /*****************************************************************************
  * Function name      : sipGetHdrType
@@ -147,17 +109,17 @@ SIP_INT32 sipGetHdrType(const SIP_CHAR* pszHdrName)
  *****************************************************************************/
 SIP_INT32 CheckAndGetHdrEnumType(SIP_INT32 nType)
 {
-    //support EXPIRES_ANY & EXPIRES_DATE
+    // support EXPIRES_ANY & EXPIRES_DATE
     if ((nType == SipHeaderBase::EXPIRES_ANY) || (nType == SipHeaderBase::EXPIRES_DATE))
     {
         nType = SipHeaderBase::EXPIRES_SEC;
-    }//support CONTACT_ANY & CONTACT_WILD
+    }  // support CONTACT_ANY & CONTACT_WILD
     else if ((nType == SipHeaderBase::CONTACT_ANY) || (nType == SipHeaderBase::CONTACT_WILD))
     {
         nType = SipHeaderBase::CONTACT;
-    }//Support for Retry-After Any & Sec header
+    }  // Support for Retry-After Any & Sec header
     else if ((nType == SipHeaderBase::RETRY_AFTER_ANY) ||
-             (nType == SipHeaderBase::RETRY_AFTER_DATE))
+            (nType == SipHeaderBase::RETRY_AFTER_DATE))
     {
         nType = SipHeaderBase::RETRY_AFTER_SEC;
     }

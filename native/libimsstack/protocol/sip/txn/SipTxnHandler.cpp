@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                 description
-   --------  --------------         ----------
-   20100000  syed.malgimani@        Created
-   20170110  vijay.nair@            Modified
-   </table>
-
-   Description
-
- */
-
 #include "txn/SipTxn.h"
 #include "msg/SipMessage.h"
 #include "txn/SipTxnHandler.h"
@@ -22,14 +9,8 @@
 #include "SipContextUtils.h"
 
 #ifdef SIP_TRACE_ENABLE
-static SIP_CHAR gszTxnTypeStr[SipTxn::INVALID_TXN+1][SIP_20] =
-{
-    "INV-CLI-TXN",
-    "INV-SER-TXN",
-    "NON-INV-CLI-TXN",
-    "NON-INV-SER-TXN",
-    "INVALID-TXN"
-};
+static SIP_CHAR gszTxnTypeStr[SipTxn::INVALID_TXN + 1][SIP_20] = {
+        "INV-CLI-TXN", "INV-SER-TXN", "NON-INV-CLI-TXN", "NON-INV-SER-TXN", "INVALID-TXN"};
 #endif
 
 static SIP_INT32 GetNonInvCliFsmEvt(SIP_UINT16 nStatusCode);
@@ -38,22 +19,21 @@ static SIP_INT32 GetInvCliFsmEvt(SIP_UINT16 nStatusCode);
 static SIP_INT32 GetInvSerFsmEvt(SIP_UINT16 nStatusCode);
 
 SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParameter* pTranspParam,
-        IN ISipUserData* pUserData, IN SipTxnKey** ppTxnKey, OUT SipTxnInfo* pTxnInfo, OUT
-        SIP_UINT16* pnError)
+        IN ISipUserData* pUserData, IN SipTxnKey** ppTxnKey, OUT SipTxnInfo* pTxnInfo,
+        OUT SIP_UINT16* pnError)
 {
-    SipTxnFsmData  objTxnFsmData(pSipMsg, pTranspParam, pUserData);
+    SipTxnFsmData objTxnFsmData(pSipMsg, pTranspParam, pUserData);
 
     SipTxnKey* pTxnKey = SIP_NULL;
     SIP_INT32 eTxnType = SipTxn::INVALID_TXN;
     /* Validate txn params from sip message and returns txn key and txn type */
     if (ValidateSendTxn(pSipMsg, &eTxnType, &pTxnKey, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                           "OnSendTxn:ValidateSendTxn Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTxn:ValidateSendTxn Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    //SetTxnType, InvCli, NonInvCli, InvSer and NonInvSer
+    // SetTxnType, InvCli, NonInvCli, InvSer and NonInvSer
     pTxnKey->SetTxnType(eTxnType);
 
     /* Get txn object from txn DB */
@@ -61,9 +41,8 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
     SIP_BOOL bTxnExist = SIP_FALSE;
     if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "OnSendTxn:GetTxnObjFromDb Fails \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTXN, "OnSendTxn:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
         delete pTxnKey;
         return SIP_FALSE;
     }
@@ -75,8 +54,8 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
         {
             *pnError = ETXN_ALREADYTRANSACTIONINPROCESSERROR;
 
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "OnSendTxn: Txn Already in Progress\n", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODTXN, "OnSendTxn: Txn Already in Progress\n", SIP_ZERO, SIP_ZERO);
 
             delete pTxnKey;
             return SIP_FALSE;
@@ -112,7 +91,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
                 return SIP_TRUE;
             }
         }
-    }/* end of txn not found */
+    } /* end of txn not found */
 
     /* Invoke FSM for Transaction state handling */
 
@@ -120,44 +99,41 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
     {
         case SipTxn::INV_CLI_TXN:
         case SipTxn::NON_INV_CLI_TXN:
-            {
-                /* Invoking client FSM to process and send request. It create new txn object */
-                if (HandleClientTxnSend(eTxnType, pTxnKey, &objTxnFsmData, pnError)
-                        == SIP_FALSE)
-                {
-                    delete pTxnKey;
-
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnSendTxn: HandleClientTxnSend fail", SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
-            }
-            break;
-        case SipTxn::INV_SER_TXN:
-        case SipTxn::NON_INV_SER_TXN:
-            {
-                /* Invokes server FSM to process and send response */
-                if (HandleServerTxnSend(eTxnType,
-                            pTxnKey, &objTxnFsmData, pnError) == SIP_FALSE)
-                {
-                    delete pTxnKey;
-
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnSendTxn: HandleServerTxnSend fail", SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
-            }
-            break;
-        default:
+        {
+            /* Invoking client FSM to process and send request. It create new txn object */
+            if (HandleClientTxnSend(eTxnType, pTxnKey, &objTxnFsmData, pnError) == SIP_FALSE)
             {
                 delete pTxnKey;
 
-                *pnError = SipTxn::INVALID_TXN;
-                SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,     "OnSendTxn: INVALID Txn Type",
-                        SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTxn: HandleClientTxnSend fail", SIP_ZERO,
+                        SIP_ZERO);
                 return SIP_FALSE;
             }
-            break;
+        }
+        break;
+        case SipTxn::INV_SER_TXN:
+        case SipTxn::NON_INV_SER_TXN:
+        {
+            /* Invokes server FSM to process and send response */
+            if (HandleServerTxnSend(eTxnType, pTxnKey, &objTxnFsmData, pnError) == SIP_FALSE)
+            {
+                delete pTxnKey;
+
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnSendTxn: HandleServerTxnSend fail", SIP_ZERO,
+                        SIP_ZERO);
+                return SIP_FALSE;
+            }
+        }
+        break;
+        default:
+        {
+            delete pTxnKey;
+
+            *pnError = SipTxn::INVALID_TXN;
+            SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnSendTxn: INVALID Txn Type", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+        break;
     }
 
     pTxnInfo->bTxnTerminated = objTxnFsmData.bTxnTerminated;
@@ -175,8 +151,7 @@ SIP_BOOL SipTxnHandler::OnSendTxn(SipMessage* pSipMsg, IN_OUT SipTransportParame
 SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
         IN ISipUserData* pUserData, OUT SipTxnInfo* pTxnInfo, OUT SIP_UINT16* pnError)
 {
-    SipTxnFsmData objTxnFsmData(
-            pSipMsg,
+    SipTxnFsmData objTxnFsmData(pSipMsg,
             SIP_NULL,  // Transport param
             pUserData);
 
@@ -194,67 +169,64 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
         return SIP_FALSE;
     }
 
-    //SetTxnType, InvCli, NonInvCli, InvSer and NonInvSer
+    // SetTxnType, InvCli, NonInvCli, InvSer and NonInvSer
     pTxnKey->SetTxnType(eTxnType);
 
     switch (eTxnType)
     {
         case SipTxn::INV_CLI_TXN:
         case SipTxn::NON_INV_CLI_TXN:
+        {
+            /* Invoking client FSM to process received response */
+            if (HandleClientTxnRecv(eTxnType, pTxnKey, &objTxnFsmData, IN_OUT pnError) == SIP_FALSE)
             {
-                /* Invoking client FSM to process received response */
-                if (HandleClientTxnRecv(eTxnType, pTxnKey,
-                        &objTxnFsmData, IN_OUT pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTxn:HandleClientTxnRecv fail", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODTXN, "OnRecvTxn:HandleClientTxnRecv fail", SIP_ZERO, SIP_ZERO);
 
-                    return SIP_FALSE;
-                }
-
-                /* INV Client Txn --> For INV 2xx case, txn is terminated */
-                if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
-                {
-                    /* stack manager to Notifies to Transaction User using registered listener
-                       and Delete Txn entry from DB and delete the instance*/
-                    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                            "OnRecvTxn: Client Txn Terminated", SIP_ZERO, SIP_ZERO);
-                }
+                return SIP_FALSE;
             }
-            break;
+
+            /* INV Client Txn --> For INV 2xx case, txn is terminated */
+            if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
+            {
+                /* stack manager to Notifies to Transaction User using registered listener
+                   and Delete Txn entry from DB and delete the instance*/
+                SIP_TRACE_NORMAL(
+                        ESIPTRACE_MODTXN, "OnRecvTxn: Client Txn Terminated", SIP_ZERO, SIP_ZERO);
+            }
+        }
+        break;
 
         case SipTxn::INV_SER_TXN:
         case SipTxn::NON_INV_SER_TXN:
+        {
+            /* For new request(no txn exist, pTxn is NULL), create new txn and process
+            request. For existing txn, it should be Failure ACK message, process the message */
+            if (HandleServerTxnRecv(eTxnType, pTxnKey, &objTxnFsmData, IN_OUT pnError) == SIP_FALSE)
             {
-                /* For new request(no txn exist, pTxn is NULL), create new txn and process
-                request. For existing txn, it should be Failure ACK message, process the message */
-                if (HandleServerTxnRecv(eTxnType, pTxnKey,
-                        &objTxnFsmData, IN_OUT pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTxn:HandleServerTxnRecv fail", SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
-
-                /* INV Serv Txn --> For TCP, on ACK recv Txn is terminated */
-                if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
-                {
-                    /* stack manager to Notifies to Transaction User using registered listener
-                       and Delete Txn entry from DB and delete the instance*/
-                    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                            "OnRecvTxn: Server Txn Terminated", SIP_ZERO, SIP_ZERO);
-                }
-            }
-            break;
-
-        default:
-            {
-                *pnError = SipTxn::INVALID_TXN;
-                SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnRecvTxn: INVALID Txn Type",
-                        SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODTXN, "OnRecvTxn:HandleServerTxnRecv fail", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
-            break;
+
+            /* INV Serv Txn --> For TCP, on ACK recv Txn is terminated */
+            if (objTxnFsmData.bTxnTerminated == SIP_TRUE)
+            {
+                /* stack manager to Notifies to Transaction User using registered listener
+                   and Delete Txn entry from DB and delete the instance*/
+                SIP_TRACE_NORMAL(
+                        ESIPTRACE_MODTXN, "OnRecvTxn: Server Txn Terminated", SIP_ZERO, SIP_ZERO);
+            }
+        }
+        break;
+
+        default:
+        {
+            *pnError = SipTxn::INVALID_TXN;
+            SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "OnRecvTxn: INVALID Txn Type", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+        break;
     }
 
     if ((eTxnType == SipTxn::INV_CLI_TXN) || (eTxnType == SipTxn::INV_SER_TXN))
@@ -283,14 +255,13 @@ SIP_BOOL SipTxnHandler::OnRecvTxn(IN SipMessage* pSipMsg, IN SipTxnKey* pTxnKey,
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTxnHandler::OnRecvTranspError(SIP_INT32 eTransErrro, SipTxnKey* pTxnKey,
-        SIP_UINT16* pnError)
+SIP_BOOL SipTxnHandler::OnRecvTranspError(
+        SIP_INT32 eTransErrro, SipTxnKey* pTxnKey, SIP_UINT16* pnError)
 {
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "OnRecvTranspError: pTxnKey  Null \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "OnRecvTranspError: pTxnKey  Null \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -300,17 +271,14 @@ SIP_BOOL SipTxnHandler::OnRecvTranspError(SIP_INT32 eTransErrro, SipTxnKey* pTxn
 
     if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "OnRecvTranspError:GetTxnObjFromDb Fails \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "OnRecvTranspError:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (pTxn == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "OnRecvTranspError: No SipTxn \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTranspError: No SipTxn \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -319,63 +287,58 @@ SIP_BOOL SipTxnHandler::OnRecvTranspError(SIP_INT32 eTransErrro, SipTxnKey* pTxn
     switch (eTxnType)
     {
         case SipTxn::INV_CLI_TXN:
+        {
+            if (pTxn->InvokeFsm(SipTxn::INV_CLI_TRANSP_ERROR_EVT, &eTransErrro, pnError) ==
+                    SIP_FALSE)
             {
-                if (pTxn->InvokeFsm(SipTxn::INV_CLI_TRANSP_ERROR_EVT,
-                        &eTransErrro, pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTranspError: INV-CLI-FSM fails\n",
-                            SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTranspError: INV-CLI-FSM fails\n",
+                        SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
             }
-            break;
+        }
+        break;
 
         case SipTxn::NON_INV_CLI_TXN:
+        {
+            if (pTxn->InvokeFsm(SipTxn::NON_INV_CLI_TRANSP_ERROR_EVT, &eTransErrro, pnError) ==
+                    SIP_FALSE)
             {
-                if (pTxn->InvokeFsm(SipTxn::NON_INV_CLI_TRANSP_ERROR_EVT,
-                        &eTransErrro, pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTranspError: Non-INV-CLI-FSM fails\n",
-                            SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTranspError: Non-INV-CLI-FSM fails\n",
+                        SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
             }
-            break;
+        }
+        break;
 
         case SipTxn::INV_SER_TXN:
+        {
+            if (pTxn->InvokeFsm(SipTxn::INV_SER_TRANSP_ERROR_EVT, &eTransErrro, pnError) ==
+                    SIP_FALSE)
             {
-                if (pTxn->InvokeFsm(SipTxn::INV_SER_TRANSP_ERROR_EVT,
-                        &eTransErrro, pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTranspError: INV-SERV-FSM fails\n",
-                            SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
-            }
-            break;
-        case SipTxn::NON_INV_SER_TXN:
-            {
-                if (pTxn->InvokeFsm(SipTxn::NON_INV_SER_TRANSP_ERROR_EVT,
-                        &eTransErrro, pnError) == SIP_FALSE)
-                {
-                    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                            "OnRecvTranspError: Non-INV-SER-FSM fails\n",
-                            SIP_ZERO, SIP_ZERO);
-                    return SIP_FALSE;
-                }
-            }
-            break;
-        default:
-            {
-                *pnError = SipTxn::INVALID_TXN;
-                SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                        "OnRecvTranspError: INVALID Txn Type\n",
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTranspError: INV-SERV-FSM fails\n",
                         SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
             }
-            break;
+        }
+        break;
+        case SipTxn::NON_INV_SER_TXN:
+        {
+            if (pTxn->InvokeFsm(SipTxn::NON_INV_SER_TRANSP_ERROR_EVT, &eTransErrro, pnError) ==
+                    SIP_FALSE)
+            {
+                SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "OnRecvTranspError: Non-INV-SER-FSM fails\n",
+                        SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
+            }
+        }
+        break;
+        default:
+        {
+            *pnError = SipTxn::INVALID_TXN;
+            SIP_DEBUG_STACKBUG(
+                    ESIPTRACE_MODTXN, "OnRecvTranspError: INVALID Txn Type\n", SIP_ZERO, SIP_ZERO);
+        }
+        break;
     }
 
     /* Notify Txn Termination, need not send retransmission */
@@ -386,8 +349,8 @@ SIP_BOOL SipTxnHandler::OnRecvTranspError(SIP_INT32 eTransErrro, SipTxnKey* pTxn
 
         DeleteTxn(pTxnKey);
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "OnRecvTranspError: Transaction Terminated\n", SIP_ZERO, SIP_ZERO);
+        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "OnRecvTranspError: Transaction Terminated\n", SIP_ZERO,
+                SIP_ZERO);
         return SIP_TRUE;
     }
     return SIP_TRUE;
@@ -402,8 +365,8 @@ SIP_BOOL SipTxnHandler::OnSendTranspError(SipTxnKey* pTxnKey)
 
     if (TerminateTxn(pTxnKey) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "OnSendTranspError: TerminateTxn Error", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "OnSendTranspError: TerminateTxn Error", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -414,23 +377,19 @@ SIP_BOOL SipTxnHandler::TerminateTxn(SipTxnKey* pTxnKey)
 {
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "TerminateTxn: pTxnKey NULL", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "TerminateTxn: pTxnKey NULL", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
-    SIP_BOOL bTxnExist = sip_cbk_releaseTransaction(
-            reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_REMOVE,
-            reinterpret_cast<SIP_VOID**>(&pOutTxnKey),
-            reinterpret_cast<SIP_VOID**>(&pTxn));
+    SIP_BOOL bTxnExist =
+            sip_cbk_releaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+                    reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "TerminateTxn: Txn Not existing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "TerminateTxn: Txn Not existing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -438,8 +397,7 @@ SIP_BOOL SipTxnHandler::TerminateTxn(SipTxnKey* pTxnKey)
     {
         if (pTxn->AbortTxn() == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "TerminateTxn: AbortTxn Fail", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "TerminateTxn: AbortTxn Fail", SIP_ZERO, SIP_ZERO);
         }
 
         ISipUserData* pUserData = pTxn->GetUserData();
@@ -467,23 +425,19 @@ SIP_BOOL SipTxnHandler::DeleteTxn(SipTxnKey* pTxnKey)
 {
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "DeleteTxn: pTxnKey NULL", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "DeleteTxn: pTxnKey NULL", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SipTxn* pTxn = SIP_NULL;
     SipTxnKey* pOutTxnKey = SIP_NULL;
-    SIP_BOOL bTxnExist = sip_cbk_releaseTransaction(
-            reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_REMOVE,
-            reinterpret_cast<SIP_VOID**>(&pOutTxnKey),
-            reinterpret_cast<SIP_VOID**>(&pTxn));
+    SIP_BOOL bTxnExist =
+            sip_cbk_releaseTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_REMOVE,
+                    reinterpret_cast<SIP_VOID**>(&pOutTxnKey), reinterpret_cast<SIP_VOID**>(&pTxn));
 
     if (bTxnExist == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "TerminateTxn: Txn Not existing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "TerminateTxn: Txn Not existing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -503,14 +457,12 @@ SIP_BOOL SipTxnHandler::DeleteTxn(SipTxnKey* pTxnKey)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTxnHandler::UpdateTxnDetails(SipTxnKey* pTxnKey, SipTransportInfo* pTranspInfo,
-        SIP_UINT16* pnError)
+SIP_BOOL SipTxnHandler::UpdateTxnDetails(
+        SipTxnKey* pTxnKey, SipTransportInfo* pTranspInfo, SIP_UINT16* pnError)
 {
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "UpdateTxnDetails: Key is Null \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "UpdateTxnDetails: Key is Null \n", SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
     }
@@ -519,8 +471,7 @@ SIP_BOOL SipTxnHandler::UpdateTxnDetails(SipTxnKey* pTxnKey, SipTransportInfo* p
     SIP_BOOL bTxnExist = SIP_TRUE;
     if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "UpdateTxnDetails: GetTxnObjFromDb failure \n",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "UpdateTxnDetails: GetTxnObjFromDb failure \n",
                 SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
@@ -528,28 +479,25 @@ SIP_BOOL SipTxnHandler::UpdateTxnDetails(SipTxnKey* pTxnKey, SipTransportInfo* p
 
     if (bTxnExist == SIP_NO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "UpdateTxnDetails: GetTxnObjFromDb no object \n",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "UpdateTxnDetails: GetTxnObjFromDb no object \n",
                 SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
     }
 
     pTxn->increment();
-    pTxn->UpdateTranspInfo(pTranspInfo );
+    pTxn->UpdateTranspInfo(pTranspInfo);
     pTxn->SipDelete();
     return SIP_TRUE;
 }
 
-PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(SIP_INT32 eMsgDir, SIP_INT32 eMethodType,
-        SIP_INT32 eMsgType)
+PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(
+        SIP_INT32 eMsgDir, SIP_INT32 eMethodType, SIP_INT32 eMsgType)
 {
-    if ((eMsgDir == SipTxn::INVALID_DIR) ||
-            (eMethodType == SipMessage::METHOD_INVALID) ||
+    if ((eMsgDir == SipTxn::INVALID_DIR) || (eMethodType == SipMessage::METHOD_INVALID) ||
             (eMsgType == SipMessage::TYPE_INVALID))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "GetTxnType: ETXN_INVALID", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "GetTxnType: ETXN_INVALID", SIP_ZERO, SIP_ZERO);
         return SipTxn::INVALID_TXN;
     }
 
@@ -558,8 +506,8 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(SIP_INT32 eMsgDir, SIP_INT32 eMethod
     {
         if (eMsgType == SipMessage::REQ_TYPE)
         {
-            if ((eMethodType == SipMessage::METHOD_INVITE)
-                    || (eMethodType == SipMessage::METHOD_ACK))
+            if ((eMethodType == SipMessage::METHOD_INVITE) ||
+                    (eMethodType == SipMessage::METHOD_ACK))
             {
                 eTxnType = SipTxn::INV_CLI_TXN;
             }
@@ -607,25 +555,21 @@ PRIVATE SIP_INT32 SipTxnHandler::GetTxnType(SIP_INT32 eMsgDir, SIP_INT32 eMethod
         }
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN," TxnType[%s]",gszTxnTypeStr[eTxnType], SIP_ZERO);
+    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, " TxnType[%s]", gszTxnTypeStr[eTxnType], SIP_ZERO);
     return eTxnType;
 }
 
-PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppTxn,
-    SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
+PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(
+        SipTxnKey* pTxnKey, SipTxn** ppTxn, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(
-            reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH,
-            SIP_NULL,
-            reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
+            TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
         /*  stack error */
         *pnError = ETXN_STACKERROR;
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "GetTxnObjFromDb: Stack Error,Db Status Error\n",
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "GetTxnObjFromDb: Stack Error,Db Status Error\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -637,18 +581,15 @@ PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppT
 PRIVATE SIP_BOOL SipTxnHandler::GetTxnObjFromDb(SipTxnKey* pTxnKey, SipTxn** ppTxn,
         SipTxnKey** ppOutTxnKey, SIP_BOOL* pbTxnExist, SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(
-            reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH,
-            reinterpret_cast<SIP_VOID**>(ppOutTxnKey),
-            reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist =
+            sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey), TXN_OPT_FETCH,
+                    reinterpret_cast<SIP_VOID**>(ppOutTxnKey), reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
         /*  stack error */
         *pnError = ETXN_STACKERROR;
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "GetTxnObjFromDb: Stack Error,Db Status Error\n",
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "GetTxnObjFromDb: Stack Error,Db Status Error\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -667,18 +608,18 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType, IN Si
         SIP_VOID* pUserData = pTxnFsmData->m_pUserData->GetUserData();
         if (pUserData != SIP_NULL)
         {
-            pSipTimerContext = ((SipTxnContext*) pUserData)->pSipTimerContext;
+            pSipTimerContext = ((SipTxnContext*)pUserData)->pSipTimerContext;
         }
     }
 
-    SipTxn* pTxn = new SipTxn(eTxnType, pTxnKey,
-            pTxnFsmData->m_pSipMsgIn, pSipTimerContext, pnError);
+    SipTxn* pTxn =
+            new SipTxn(eTxnType, pTxnKey, pTxnFsmData->m_pSipMsgIn, pSipTimerContext, pnError);
 
     /* checking for txn object null or error parameter value from txn constructor */
     if ((pTxn == SIP_NULL) || (*pnError == E_ERR_PF_MALLOCFAILED))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "HandleClientTxnSend --> memory fail",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "HandleClientTxnSend --> memory fail", SIP_ZERO, SIP_ZERO);
         if (pTxn != SIP_NULL)
         {
             pTxn->SipDelete();
@@ -700,8 +641,8 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnSend(IN SIP_INT32 eTxnType, IN Si
     if (pTxn->InvokeFsm(nEvent, pTxnFsmData, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "HandleClientTxnSend -> FSM handling fail eTxnType[%d] nEvent[%d]",
-                eTxnType, nEvent);
+                "HandleClientTxnSend -> FSM handling fail eTxnType[%d] nEvent[%d]", eTxnType,
+                nEvent);
         pTxn->SipDelete();
         return SIP_FALSE;
     }
@@ -718,18 +659,17 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
     SIP_BOOL bTxnExist = SIP_FALSE;
 
     /* Get Txn object from txn DB if exists */
-    if (GetTxnObjFromDb(pTxnKey, &pTxn,
-                &pOutTxnKey, &bTxnExist, pnError) == SIP_FALSE)
+    if (GetTxnObjFromDb(pTxnKey, &pTxn, &pOutTxnKey, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "HandleClientTxnRecv:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "HandleClientTxnRecv:GetTxnObjFromDb Fails \n",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if ((pTxn == SIP_NULL) || (bTxnExist == SIP_FALSE))
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "HandleClientTxnRecv:No Txn Exists", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTXN, "HandleClientTxnRecv:No Txn Exists", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     pTxn->increment();
@@ -770,10 +710,10 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnSend(IN SIP_INT32 eTxnType, IN Si
 
             if (pTimerContext != SIP_NULL)
             {
-                SipTxnTimerValues& objTimerValues = const_cast<SipTxnTimerValues&>(
-                        pTxn->GetSipTxnTimers());
-                objTimerValues.UpdateSipTimers(pTimerContext->nTimerOptions,
-                        pTimerContext->pTxnSipTxnTimers);
+                SipTxnTimerValues& objTimerValues =
+                        const_cast<SipTxnTimerValues&>(pTxn->GetSipTxnTimers());
+                objTimerValues.UpdateSipTimers(
+                        pTimerContext->nTimerOptions, pTimerContext->pTxnSipTxnTimers);
             }
         }
     }
@@ -793,15 +733,15 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnRecv(IN SIP_INT32 eTxnType, IN Si
     /* Get Txn object from txn DB if exists */
     if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "HandleClientTxnRecv:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "HandleClientTxnRecv:GetTxnObjFromDb Fails \n",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if ((pTxn == SIP_NULL) || (bTxnExist == SIP_FALSE))
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "HandleClientTxnRecv:No Txn Exists", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTXN, "HandleClientTxnRecv:No Txn Exists", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -824,8 +764,8 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleClientTxnRecv(IN SIP_INT32 eTxnType, IN Si
         pTxn->SipDelete();
 
         *pnError = EMSGERR_INVALIDSTATUSCODE;
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                           "HandleClientTxnRecv, Invalid Status Code", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "HandleClientTxnRecv, Invalid Status Code", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SIP_BOOL bStatus = pTxn->InvokeFsm(nEvent, pTxnFsmData, pnError);
@@ -842,11 +782,10 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
     SIP_BOOL bTxnExist = SIP_FALSE;
 
     /* Get Txn object from txn DB if exists */
-    if (GetTxnObjFromDb(pTxnKey, &pTxn,
-                &bTxnExist, pnError) == SIP_FALSE)
+    if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "HandleClientTxnRecv:GetTxnObjFromDb Fails \n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "HandleClientTxnRecv:GetTxnObjFromDb Fails \n",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -888,7 +827,7 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
             SIP_VOID* objUserData = pTxnFsmData->m_pUserData->GetUserData();
             if (objUserData != SIP_NULL)
             {
-                 pSipTimerContext = ((SipTxnContext*) objUserData)->pSipTimerContext;
+                pSipTimerContext = ((SipTxnContext*)objUserData)->pSipTimerContext;
             }
         }
 
@@ -906,8 +845,8 @@ PRIVATE SIP_BOOL SipTxnHandler::HandleServerTxnRecv(IN SIP_INT32 eTxnType, IN Si
     if (pTxn->InvokeFsm(nEvent, pTxnFsmData, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "HandleServerTxnRecv -> FSM handling fail eTxnType[%d] nEvent[%d]",
-                eTxnType, nEvent);
+                "HandleServerTxnRecv -> FSM handling fail eTxnType[%d] nEvent[%d]", eTxnType,
+                nEvent);
 
         pTxn->SipDelete();
 
@@ -943,21 +882,19 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateRecvTxn(SipMessage* pSipMsg, IN SIP_INT3
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
     if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "ValidateRecvTxn: CheckTxnMadatoryParams fails\n",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "ValidateRecvTxn: CheckTxnMadatoryParams fails\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     *peTxnType = GetTxnType(SipTxn::RECV, eMethodType, eMsgType);
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "ValidateRecvTxn: TxnType[%s]", gszTxnTypeStr[*peTxnType], SIP_ZERO);
+    SIP_TRACE_NORMAL(
+            ESIPTRACE_MODTXN, "ValidateRecvTxn: TxnType[%s]", gszTxnTypeStr[*peTxnType], SIP_ZERO);
 
     if (*peTxnType == SipTxn::INVALID_TXN)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "ValidateRecvTxn: Invalid Txn", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "ValidateRecvTxn: Invalid Txn", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -973,8 +910,8 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
     if (CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnHandler: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnHandler: CheckTxnMadatoryParams fails\n",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -982,25 +919,22 @@ PRIVATE SIP_BOOL SipTxnHandler::ValidateSendTxn(IN SipMessage* pSipMsg, OUT SIP_
 
     if (eTxnType == SipTxn::INVALID_TXN)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnHandler: Invalid Txn\n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnHandler: Invalid Txn\n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-
 
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, pnError);
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnHandler:key Creation Fails \n",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "SipTxnHandler:key Creation Fails \n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     else if (*pnError == EERR_MALLOCFAILED)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnHandler:key Creation Fails \n", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "SipTxnHandler:key Creation Fails \n", SIP_ZERO, SIP_ZERO);
         delete pTxnKey;
         return SIP_FALSE;
     }

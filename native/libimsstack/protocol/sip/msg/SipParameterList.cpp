@@ -1,32 +1,3 @@
-/***********************************************************
- * Project Name : SIP_RTP
- * Group        : MSG-2
- * Security     : Confidential
- ***********************************************************/
-
-/**********************************************************
- * Filename          : SipParameterList.cpp
- * Purpose           :
- * Platform          : Windows XP
- * Author(s)         : Saurabh Srivastava
- * E-mail id.        : saurabh31.srivastava@
- * Creation date     : July 26, 2010
- *
- * Modifications:
- * 1. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0a
- *
- * 2. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0b
- **********************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipParameterList.h"
 #include "msg/SipAddrSpec.h"
 #include "msg/SipRequestLine.h"
@@ -37,15 +8,8 @@
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
 
-SIP_CHAR gaszAuthInfo[SIP_AINFO_CNT][SIP_AINFO_LEN]={"nextnonce","qop","rspauth","cnonce","nc"};
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
+SIP_CHAR gaszAuthInfo[SIP_AINFO_CNT][SIP_AINFO_LEN] = {
+        "nextnonce", "qop", "rspauth", "cnonce", "nc"};
 
 /******************************************************************************
  * Function name      : SipParameterList::Add
@@ -58,7 +22,7 @@ SIP_CHAR gaszAuthInfo[SIP_AINFO_CNT][SIP_AINFO_LEN]={"nextnonce","qop","rspauth"
  *****************************************************************************/
 SipParameterList::~SipParameterList()
 {
-    while(m_objPrmList.IsEmpty() != SIP_TRUE)
+    while (m_objPrmList.IsEmpty() != SIP_TRUE)
     {
         delete m_objPrmList.Top();
         m_objPrmList.Pop();
@@ -74,9 +38,9 @@ SipParameterList::~SipParameterList()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipParameterList::SipParameterList()
-    : m_objPrmList(SipVector<SipNameValue*>())
-    , m_eHdrType(SipHeaderBase::TYPE_INVALID)
+SipParameterList::SipParameterList() :
+        m_objPrmList(SipVector<SipNameValue*>()),
+        m_eHdrType(SipHeaderBase::TYPE_INVALID)
 {
 }
 
@@ -89,9 +53,9 @@ SipParameterList::SipParameterList()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipParameterList::SipParameterList(SIP_INT32 eHdrType)
-    : m_objPrmList(SipVector<SipNameValue*>())
-    , m_eHdrType(eHdrType)
+SipParameterList::SipParameterList(SIP_INT32 eHdrType) :
+        m_objPrmList(SipVector<SipNameValue*>()),
+        m_eHdrType(eHdrType)
 {
 }
 
@@ -104,9 +68,9 @@ SipParameterList::SipParameterList(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipParameterList::SipParameterList(const SipParameterList& objPrmList)
-    : m_objPrmList(SipVector<SipNameValue*>())
-    , m_eHdrType(objPrmList.m_eHdrType)
+SipParameterList::SipParameterList(const SipParameterList& objPrmList) :
+        m_objPrmList(SipVector<SipNameValue*>()),
+        m_eHdrType(objPrmList.m_eHdrType)
 {
     SIP_UINT32 nSize = objPrmList.m_objPrmList.GetSize();
 
@@ -130,7 +94,6 @@ SipParameterList::SipParameterList(const SipParameterList& objPrmList)
     }
 }
 
-
 /******************************************************************************
  * Function name      : SipParameterList::Add
  *
@@ -144,23 +107,19 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName)
 {
     if (pszName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Add: NULL param received", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     SipNameValue* pNV = new SipNameValue();
     if (pNV == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_SipMsg: Malloc Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipEnc_SipMsg: Malloc Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     pNV->m_pszName = SipPf_Strdup(pszName);
     m_objPrmList.Add(pNV);
     return SIP_TRUE;
-
-
 }
 
 /******************************************************************************
@@ -176,8 +135,7 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
 {
     if (pszName == SIP_NULL || pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-            "Add: NULL param received", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -191,7 +149,7 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
         pNV = m_objPrmList.GetAt(nIndex);
         if (SipPf_Strcmp(pNV->m_pszName, pszName) == SIP_ZERO)
         {
-            //found the required node
+            // found the required node
             bFound = SIP_TRUE;
             break;
         }
@@ -203,8 +161,8 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
         pNV = new SipNameValue();
         if (pNV == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_SipMsg: Malloc Failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODENCODER, "SipEnc_SipMsg: Malloc Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pNV->m_pszName = SipPf_Strdup(pszName);
@@ -230,8 +188,8 @@ SIP_BOOL SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL  SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
-        SIP_INT32 ePrmType)
+SIP_BOOL SipParameterList::Add(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType)
 {
     (void)pszName;
     (void)pszValue;
@@ -239,7 +197,6 @@ SIP_BOOL  SipParameterList::Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValu
 
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipParameterList::Remove
@@ -254,8 +211,7 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
 {
     if (pszName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-            "Add: NULL param received", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Add: NULL param received", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -266,10 +222,9 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
     while (nIndex < nSize && bFound != SIP_TRUE)
     {
         SipNameValue* pNV = m_objPrmList.GetAt(nIndex);
-        if (SipPf_Strcmp(pNV->m_pszName,
-                    pszName) == 0)
+        if (SipPf_Strcmp(pNV->m_pszName, pszName) == 0)
         {
-            //found the required node
+            // found the required node
             bFound = SIP_TRUE;
             break;
         }
@@ -278,8 +233,8 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
 
     if (bFound == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SipEnc_SipMsg: Param Not found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "SipEnc_SipMsg: Param Not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -289,12 +244,12 @@ SIP_BOOL SipParameterList::Remove(const SIP_CHAR* pszName)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipParameterList::FindElement(const SIP_CHAR* pszName, SipNameValue*& pNmvl,
-        SIP_UINT32& nPos)
+SIP_BOOL SipParameterList::FindElement(
+        const SIP_CHAR* pszName, SipNameValue*& pNmvl, SIP_UINT32& nPos)
 {
     SIP_UINT32 nSize = m_objPrmList.GetSize();
 
-    for(SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
     {
         SipNameValue* pNmVl = m_objPrmList.GetAt(nIndex);
         if (SipPf_Stricmp(pszName, pNmVl->m_pszName) == 0)
@@ -316,8 +271,8 @@ SIP_BOOL SipParameterList::FindElement(const SIP_CHAR* pszName, SipNameValue*& p
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipParameterList::SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
-        SIP_UINT32 nPos)
+SIP_BOOL SipParameterList::SetParamValue(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
     if (pszName == SIP_NULL)
     {
@@ -343,7 +298,6 @@ SIP_BOOL SipParameterList::SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR
     /*If parameter already exists, update value*/
     if (pNmVl->m_valueList.IsEmpty() != SIP_TRUE)
     {
-
         if (pNmVl->m_valueList.GetSize() < nPos)
         {
             return SIP_FALSE;
@@ -385,8 +339,8 @@ SIP_BOOL SipParameterList::SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_CHAR* SipParameterList::GetParamValue(const SIP_CHAR* pszName,
-        SIP_UINT32 nPos /*default value is zero*/)
+SIP_CHAR* SipParameterList::GetParamValue(
+        const SIP_CHAR* pszName, SIP_UINT32 nPos /*default value is zero*/)
 {
     if (pszName == SIP_NULL)
     {
@@ -402,8 +356,7 @@ SIP_CHAR* SipParameterList::GetParamValue(const SIP_CHAR* pszName,
         return SIP_NULL;
     }
 
-    if ((pNmVl->m_valueList.IsEmpty() == SIP_TRUE) ||
-        (pNmVl->m_valueList.GetSize() < nPos))
+    if ((pNmVl->m_valueList.IsEmpty() == SIP_TRUE) || (pNmVl->m_valueList.GetSize() < nPos))
     {
         return SIP_NULL;
     }
@@ -478,8 +431,8 @@ SIP_BOOL SipParameterList::EncodeList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter)
     return SIP_TRUE;
 }
 
-SIP_BOOL SipParameterList::EncodeUriParamList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
-        IParameterComponent* m_pParameterComponent)
+SIP_BOOL SipParameterList::EncodeUriParamList(
+        SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter, IParameterComponent* m_pParameterComponent)
 {
     SIP_UINT32 nCount = m_objPrmList.GetSize();
 
@@ -506,14 +459,13 @@ SIP_BOOL SipParameterList::EncodeUriParamList(SIP_CHAR** ppCurrPos, SIP_CHAR cDe
  *
  * Side Effects      : none
  *****************************************************************************/
-SipNameValue::SipNameValue()
-    : m_pszName(SIP_NULL)
-    , m_valueList(SipVector<SIP_CHAR*>())
-    , m_ePrmType(SipParameters::GENERIC)
-    , m_Sep (',')
-    , m_eHdrType(SipHeaderBase::TYPE_INVALID)
+SipNameValue::SipNameValue() :
+        m_pszName(SIP_NULL),
+        m_valueList(SipVector<SIP_CHAR*>()),
+        m_ePrmType(SipParameters::GENERIC),
+        m_Sep(','),
+        m_eHdrType(SipHeaderBase::TYPE_INVALID)
 {
-
 }
 
 /******************************************************************************
@@ -525,14 +477,13 @@ SipNameValue::SipNameValue()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipNameValue::SipNameValue(SIP_INT32 eHdrType)
-    : m_pszName(SIP_NULL)
-    , m_valueList(SipVector<SIP_CHAR*>())
-    , m_ePrmType(SipParameters::GENERIC)
-    , m_Sep (',')
-    , m_eHdrType(eHdrType)
+SipNameValue::SipNameValue(SIP_INT32 eHdrType) :
+        m_pszName(SIP_NULL),
+        m_valueList(SipVector<SIP_CHAR*>()),
+        m_ePrmType(SipParameters::GENERIC),
+        m_Sep(','),
+        m_eHdrType(eHdrType)
 {
-
 }
 
 /******************************************************************************
@@ -544,12 +495,12 @@ SipNameValue::SipNameValue(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipNameValue::SipNameValue(const SipNameValue& objNmVl)
-    : m_pszName(SipPf_Strdup(objNmVl.m_pszName))
-    , m_valueList(SipVector<SIP_CHAR*>())
-    , m_ePrmType(objNmVl.m_ePrmType)
-    , m_Sep (objNmVl.m_Sep)
-    , m_eHdrType(SipHeaderBase::TYPE_INVALID)
+SipNameValue::SipNameValue(const SipNameValue& objNmVl) :
+        m_pszName(SipPf_Strdup(objNmVl.m_pszName)),
+        m_valueList(SipVector<SIP_CHAR*>()),
+        m_ePrmType(objNmVl.m_ePrmType),
+        m_Sep(objNmVl.m_Sep),
+        m_eHdrType(SipHeaderBase::TYPE_INVALID)
 {
     SIP_UINT32 nSize = objNmVl.m_valueList.GetSize();
 
@@ -582,13 +533,12 @@ SipNameValue::~SipNameValue()
     {
         delete[] m_pszName;
     }
-    while(m_valueList.IsEmpty() != SIP_TRUE)
+    while (m_valueList.IsEmpty() != SIP_TRUE)
     {
         delete m_valueList.Top();
         m_valueList.Pop();
     }
 }
-
 
 /******************************************************************************
  * Function name      : SipNameValue::SetSeparator
@@ -604,7 +554,6 @@ SIP_BOOL SipNameValue::SetSeparator(SIP_CHAR cSeparator)
     m_Sep = cSeparator;
     return SIP_TRUE;
 }
-
 
 SIP_BOOL SipNameValue::EncodeFromList(SIP_CHAR** ppCurrPos)
 {
@@ -636,8 +585,8 @@ SIP_BOOL SipNameValue::EncodeFromList(SIP_CHAR** ppCurrPos)
             SIP_CHAR* pszVal = m_valueList.GetAt(sLocalCount);
             if (pszVal == SIP_NULL)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                        "EncodeFromList: null value", SIP_ZERO, SIP_ZERO);
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODENCODER, "EncodeFromList: null value", SIP_ZERO, SIP_ZERO);
                 return SIP_FALSE;
             }
 
@@ -677,9 +626,8 @@ SIP_BOOL SipNameValue::EncodeFromList(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
-
-SIP_BOOL SipNameValue::EncodeFromUriList(SIP_CHAR** ppCurrPos,
-        IParameterComponent* pParameterComponent)
+SIP_BOOL SipNameValue::EncodeFromUriList(
+        SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent)
 {
     if (m_pszName == SIP_NULL)
     {
@@ -691,12 +639,12 @@ SIP_BOOL SipNameValue::EncodeFromUriList(SIP_CHAR** ppCurrPos,
 
     if (m_valueList.IsEmpty() != SIP_TRUE)
     {
-        //encode as name =  val
+        // encode as name =  val
         SIP_CHAR* pszVal = m_valueList.GetAt(SIP_ZERO);
         if (pszVal == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                    "SipNameValue::EncodeFromList: List err", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipNameValue::EncodeFromList: List err",
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -705,7 +653,7 @@ SIP_BOOL SipNameValue::EncodeFromUriList(SIP_CHAR** ppCurrPos,
 
         /*Do percentage Encoding of Value if Required*/
         if ((pParameterComponent != SIP_NULL) &&
-            (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))
+                (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))
         {
             SIP_CHAR* pszValTemp = SipPercentEncoding::DoPerEnc_Param(m_pszName, pszVal);
             SipPf_Strcpy(*ppCurrPos, pszValTemp);
@@ -721,9 +669,8 @@ SIP_BOOL SipNameValue::EncodeFromUriList(SIP_CHAR** ppCurrPos,
     return SIP_TRUE;
 }
 
-
-SIP_BOOL SipNameValue::EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
-        IParameterComponent* pParameterComponent)
+SIP_BOOL SipNameValue::EncodeFromUriHdrList(
+        SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent)
 {
     if (m_pszName == SIP_NULL)
     {
@@ -735,12 +682,12 @@ SIP_BOOL SipNameValue::EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
 
     if (m_valueList.IsEmpty() != SIP_TRUE)
     {
-        //encode as name =  val
+        // encode as name =  val
         SIP_CHAR* pszVal = m_valueList.GetAt(SIP_ZERO);
         if (pszVal == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                    "SipNameValue::EncodeFromList: List err", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipNameValue::EncodeFromList: List err",
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -749,10 +696,10 @@ SIP_BOOL SipNameValue::EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
 
         /*Do percentage Encoding of Value if Required*/
         if ((pParameterComponent != SIP_NULL) &&
-            (pParameterComponent->IsValidComponent(SIP_HEADERS) == SIP_TRUE))
+                (pParameterComponent->IsValidComponent(SIP_HEADERS) == SIP_TRUE))
         {
             SIP_CHAR* pszValTemp =
-                SipPercentEncoding::DoPerEnc_Param((SIP_CHAR *)SIP_HEADERS, pszVal);
+                    SipPercentEncoding::DoPerEnc_Param((SIP_CHAR*)SIP_HEADERS, pszVal);
             SipPf_Strcpy(*ppCurrPos, pszValTemp);
             delete[] pszValTemp;
         }
@@ -766,7 +713,6 @@ SIP_BOOL SipNameValue::EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
     return SIP_TRUE;
 }
 
-
 /******************************************************************************
  * Function name      : SipNameValue::DecUriNameVal
  *
@@ -776,8 +722,8 @@ SIP_BOOL SipNameValue::EncodeFromUriHdrList(SIP_CHAR** ppCurrPos,
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
-        IParameterComponent* pParameterComponent)
+SIP_BOOL SipNameValue::DecUriNameVal(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, IParameterComponent* pParameterComponent)
 {
     SIP_CHAR* pNameEnd = SIP_NULL;
 
@@ -790,8 +736,7 @@ SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
     if (m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-            "SipNameValue::DecUriNameVal: Memory Allocation Failed",
-            SIP_ZERO, SIP_ZERO);
+                "SipNameValue::DecUriNameVal: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -803,15 +748,14 @@ SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         if (pszValue == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipNameValue::DecUriNameVal: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecUriNameVal: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         SIP_CHAR* pszTempValue = SIP_NULL;
         /*Do percent Decoding of value if applicable*/
         if ((pParameterComponent != SIP_NULL) &&
-            (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))
+                (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))
         {
             pszTempValue = SipPercentEncoding::DoPercentDecoding(pszValue);
         }
@@ -823,8 +767,7 @@ SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         if (m_valueList.Add(pszTempValue) < SIP_ZERO)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipNameValue::DecUriNameVal:Adding in list failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecUriNameVal:Adding in list failed", SIP_ZERO, SIP_ZERO);
             delete[] pszTempValue;
             return SIP_FALSE;
         }
@@ -832,7 +775,6 @@ SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
 
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipNameValue::DecUriHdrNameVal
@@ -843,8 +785,8 @@ SIP_BOOL SipNameValue::DecUriNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipNameValue::DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
-        IParameterComponent* pParameterComponent)
+SIP_BOOL SipNameValue::DecUriHdrNameVal(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, IParameterComponent* pParameterComponent)
 {
     SIP_CHAR* pNameEnd = SIP_NULL;
 
@@ -853,12 +795,11 @@ SIP_BOOL SipNameValue::DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         pNameEnd = pEndPt;
     }
 
-    m_pszName = sipCreateString(pStartPt,  pNameEnd);
+    m_pszName = sipCreateString(pStartPt, pNameEnd);
     if (m_pszName == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-            "DecUriHdrNameVal: Memory Allocation Failed",
-            SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriHdrNameVal: Memory Allocation Failed",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -869,8 +810,7 @@ SIP_BOOL SipNameValue::DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         SIP_CHAR* pszValue = sipCreateString(pszValuePtr, pEndPt);
         if (pszValue == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriHdrNameVal: Memory Allocation Failed",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriHdrNameVal: Memory Allocation Failed",
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
@@ -878,7 +818,7 @@ SIP_BOOL SipNameValue::DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         SIP_CHAR* pszTempValue = SIP_NULL;
         /*Do percent Decoding of value if applicable*/
         if ((pParameterComponent != SIP_NULL) &&
-            (pParameterComponent->IsValidComponent(SIP_HEADERS) == SIP_TRUE))
+                (pParameterComponent->IsValidComponent(SIP_HEADERS) == SIP_TRUE))
         {
             pszTempValue = SipPercentEncoding::DoPercentDecoding(pszValue);
         }
@@ -889,8 +829,7 @@ SIP_BOOL SipNameValue::DecUriHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
         /*put the value in the value list*/
         if (m_valueList.Add(pszTempValue) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriHdrNameVal:Adding in list failed",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriHdrNameVal:Adding in list failed",
                     SIP_ZERO, SIP_ZERO);
             delete[] pszTempValue;
             return SIP_FALSE;
@@ -913,8 +852,7 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
 {
     if (pStartPt > pEndPt)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameValue::DecHdrNameVal: No Parameter Present",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipNameValue::DecHdrNameVal: No Parameter Present",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -926,12 +864,11 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     if (sipFindActualPos(pStartPt, pEndPt, &pNameEnd, &pTempNext, EQUAL) == SIP_FALSE)
     {
         /*in case No equal present => only name present*/
-        m_pszName = sipCreateString(pStartPt,  pEndPt);
+        m_pszName = sipCreateString(pStartPt, pEndPt);
         if (m_pszName == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipNameValue::DecHdrNameVal: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecHdrNameVal: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         return SIP_TRUE;
@@ -940,11 +877,9 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     /*Check For Double Equal Condition*/
     if (*pTempNext == EQUAL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameValue::DecHdrNameVal: Double Equal Present",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipNameValue::DecHdrNameVal: Double Equal Present",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
-
     }
 
     /*Update the value pointer*/
@@ -953,24 +888,22 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     /*Case of no value*/
     if (pszValuePtr > pEndPt)
     {
-        m_pszName = sipCreateString(pStartPt,  pNameEnd);
+        m_pszName = sipCreateString(pStartPt, pNameEnd);
         if (m_pszName == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameValue::DecHdrNameVal: Name Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecHdrNameVal: Name Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         return SIP_TRUE;
     }
 
-    m_pszName = sipCreateString(pStartPt,  pNameEnd);
+    m_pszName = sipCreateString(pStartPt, pNameEnd);
     if (m_pszName == SIP_NULL)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameValue::DecHdrNameVal: Name Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+                "SipNameValue::DecHdrNameVal: Name Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -990,16 +923,14 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         if (pszValue == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipNameValue::DecHdrNameVal: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecHdrNameVal: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*put the value in the value list*/
         if (m_valueList.Add(pszValue) < SIP_ZERO)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipNameValue::DecHdrNameVal:Adding in list failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipNameValue::DecHdrNameVal:Adding in list failed", SIP_ZERO, SIP_ZERO);
             delete[] pszValue;
             return SIP_FALSE;
         }
@@ -1013,7 +944,6 @@ SIP_BOOL SipNameValue::DecHdrNameVal(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
     }
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipParameterList::DecUriSipParameterList
@@ -1029,8 +959,7 @@ SIP_BOOL SipParameterList::DecUriSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
 {
     if (pStartPt > pEndPt)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecUriSipParameterList: No Value Present",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriSipParameterList: No Value Present",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -1048,15 +977,13 @@ SIP_BOOL SipParameterList::DecUriSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         if (pNmVl == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriSipParameterList: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "DecUriSipParameterList: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pNmVl->DecUriNameVal(pStartPt, pTempPos, pParameterComponent) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriSipParameterList: Name Val Decode fail",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriSipParameterList: Name Val Decode fail",
                     SIP_ZERO, SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
@@ -1064,8 +991,7 @@ SIP_BOOL SipParameterList::DecUriSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
 
         if (m_objPrmList.Add(pNmVl) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriSipParameterList: Append in list Failed",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriSipParameterList: Append in list Failed",
                     SIP_ZERO, SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
@@ -1080,16 +1006,13 @@ SIP_BOOL SipParameterList::DecUriSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
 
         if (pStartPt > pEndPt)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecUriSipParameterList: No Value Present",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecUriSipParameterList: No Value Present",
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
     return SIP_TRUE;
 }
-
-
 
 /******************************************************************************
  * Function name      : SipParameterList::DecUriHdrSipParameterList
@@ -1106,8 +1029,8 @@ SIP_BOOL SipParameterList::DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHA
     if (pStartPt > pEndPt)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipParameterList::DecUriHdrSipParameterList: No Value Present",
-                SIP_ZERO, SIP_ZERO);
+                "SipParameterList::DecUriHdrSipParameterList: No Value Present", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -1124,16 +1047,16 @@ SIP_BOOL SipParameterList::DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHA
         if (pNmVl == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipParameterList::DecUriSipParameterList: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipParameterList::DecUriSipParameterList: Memory Allocation Failed", SIP_ZERO,
+                    SIP_ZERO);
             return SIP_FALSE;
         }
 
         if (pNmVl->DecUriHdrNameVal(pStartPt, pTempPos, pParameterComponent) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipParameterList::DecUriSipParameterList: Name Val Decode fail",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipParameterList::DecUriSipParameterList: Name Val Decode fail", SIP_ZERO,
+                    SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
         }
@@ -1141,8 +1064,8 @@ SIP_BOOL SipParameterList::DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHA
         if (m_objPrmList.Add(pNmVl) < 0)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipParameterList::DecUriSipParameterList: Append in list Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipParameterList::DecUriSipParameterList: Append in list Failed", SIP_ZERO,
+                    SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
         }
@@ -1157,8 +1080,8 @@ SIP_BOOL SipParameterList::DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHA
         if (pStartPt > pEndPt)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipParameterList::DecUriSipParameterList: No Value Present",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipParameterList::DecUriSipParameterList: No Value Present", SIP_ZERO,
+                    SIP_ZERO);
             return SIP_FALSE;
         }
     }
@@ -1175,13 +1098,12 @@ SIP_BOOL SipParameterList::DecUriHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHA
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt,
-        SIP_CHAR cDelimiter)
+SIP_BOOL SipParameterList::DecHdrSipParameterList(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR cDelimiter)
 {
     if (pStartPt > pEndPt)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecHdrSipParameterList: No Value Present",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecHdrSipParameterList: No Value Present",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -1191,8 +1113,7 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         SIP_CHAR* pTempPre = SIP_NULL;
         SIP_CHAR* pTempNext = SIP_NULL;
 
-        if (sipFindActualPos(pStartPt, pEndPt,
-                &pTempPre, &pTempNext, cDelimiter) == SIP_FALSE)
+        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, cDelimiter) == SIP_FALSE)
         {
             pTempPre = pEndPt;
             pTempNext = pEndPt;
@@ -1202,8 +1123,7 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         if (pNmVl == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecHdrSipParameterList: Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "DecHdrSipParameterList: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -1213,26 +1133,24 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         {
             SIP_CHAR* pTempPrm = sipCreateString(pStartPt, pTempPt);
 
-            if (SipPf_Stricmp(pTempPrm, "method")== SIP_ZERO)
+            if (SipPf_Stricmp(pTempPrm, "method") == SIP_ZERO)
             {
                 SipNameValue* pNmVlMethod = SIP_NULL;
                 pNmVlMethod = new SipNameValue(m_eHdrType);
                 if (pNmVlMethod == SIP_NULL)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "DecHdrSipParameterList: Memory Allocation Failed",
-                        SIP_ZERO, SIP_ZERO);
+                            "DecHdrSipParameterList: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
                     delete[] pTempPrm;
                     delete pNmVl;
                     return SIP_FALSE;
                 }
 
                 SIP_CHAR* pQtnMark = SIP_NULL;
-                if (sipFindPreDelimiter(pTempPt+2, pTempPre, &pQtnMark, QMARK) == SIP_FALSE)
+                if (sipFindPreDelimiter(pTempPt + 2, pTempPre, &pQtnMark, QMARK) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "DecHdrSipParameterList: Question mark not Found",
-                            SIP_ZERO, SIP_ZERO);
+                            "DecHdrSipParameterList: Question mark not Found", SIP_ZERO, SIP_ZERO);
                     delete pNmVlMethod;
                     delete pNmVl;
                     delete[] pTempPrm;
@@ -1241,8 +1159,7 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
                 if (pNmVlMethod->DecHdrNameVal(pStartPt, pQtnMark) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "DecHdrSipParameterList:Name Value decode Failed",
-                            SIP_ZERO, SIP_ZERO);
+                            "DecHdrSipParameterList:Name Value decode Failed", SIP_ZERO, SIP_ZERO);
                     delete pNmVlMethod;
                     delete pNmVl;
                     delete[] pTempPrm;
@@ -1251,14 +1168,13 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
                 if (m_objPrmList.Add(pNmVlMethod) < 0)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                            "DecHdrSipParameterList: Append in list Failed",
-                            SIP_ZERO, SIP_ZERO);
+                            "DecHdrSipParameterList: Append in list Failed", SIP_ZERO, SIP_ZERO);
                     delete pNmVlMethod;
                     delete pNmVl;
                     delete[] pTempPrm;
                     return SIP_FALSE;
                 }
-                pStartPt = pQtnMark +2;
+                pStartPt = pQtnMark + 2;
             }
             delete[] pTempPrm;
         }
@@ -1266,15 +1182,13 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         if (pNmVl->DecHdrNameVal(pStartPt, pTempPre) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecHdrSipParameterList:Name Value decode Failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "DecHdrSipParameterList:Name Value decode Failed", SIP_ZERO, SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
         }
         if (m_objPrmList.Add(pNmVl) < SIP_ZERO)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecHdrSipParameterList: Append in list Failed",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecHdrSipParameterList: Append in list Failed",
                     SIP_ZERO, SIP_ZERO);
             delete pNmVl;
             return SIP_FALSE;
@@ -1288,27 +1202,24 @@ SIP_BOOL SipParameterList::DecHdrSipParameterList(SIP_CHAR* pStartPt, SIP_CHAR* 
         pStartPt = pTempNext;
         if (pStartPt > pEndPt)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecHdrSipParameterList: No Parameter Present",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecHdrSipParameterList: No Parameter Present",
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }
 
     return SIP_TRUE;
-
 }
 
 /* To Print all header parameters & their values*/
 /* Enable SIP_TRACE_ENABLE to log */
 SIP_VOID SipParameterList::PrintParams()
 {
-    //first search the list if the name exists
+    // first search the list if the name exists
     SIP_UINT32 nSize = m_objPrmList.GetSize();
     if (nSize <= SIP_ZERO)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER,
-                "PrintParams: Param List Empty", SIP_ZERO, SIP_ZERO);
+        SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "PrintParams: Param List Empty", SIP_ZERO, SIP_ZERO);
         return;
     }
 
@@ -1320,7 +1231,7 @@ SIP_VOID SipParameterList::PrintParams()
         if (pNV != SIP_NULL)
         {
             SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "PrintParams: Name of Param : %s",
-                            pNV->m_pszName, SIP_ZERO);
+                    pNV->m_pszName, SIP_ZERO);
 
             {
                 SIP_UINT32 nValSize = pNV->m_valueList.GetSize();
@@ -1335,7 +1246,7 @@ SIP_VOID SipParameterList::PrintParams()
                     SIP_TRACE_NORMAL(ESIPTRACE_MODDECODER, "PrintParams: Value of param : %s",
                             pElement, SIP_ZERO);
                 }
-             }
+            }
         }
         nIndex++;
     }
@@ -1344,7 +1255,8 @@ SIP_VOID SipParameterList::PrintParams()
 /*****************************************************************************
   SipParameters - Class Member Function Implementations
 *****************************************************************************/
-SipParameters::SipParameters() : pParameterList(new SipParameterList())
+SipParameters::SipParameters() :
+        pParameterList(new SipParameterList())
 {
 }
 
@@ -1402,8 +1314,8 @@ SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszVal
     return pParameterList->Add(pszName, pszValue);
 }
 
-SIP_BOOL SipParameters::AddParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
-        SIP_INT32 ePrmType)
+SIP_BOOL SipParameters::AddParam(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType)
 {
     if (pParameterList == SIP_NULL)
     {
@@ -1438,8 +1350,8 @@ SIP_VOID SipParameters::SetParameterList(SipParameterList* pSipPrm)
     pParameterList = pSipPrm;
 }
 
-SIP_BOOL SipParameters::SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR* pszValue,
-        SIP_UINT32 nPos)
+SIP_BOOL SipParameters::SetParamValue(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_UINT32 nPos)
 {
     if (pParameterList == SIP_NULL)
     {
@@ -1451,8 +1363,7 @@ SIP_BOOL SipParameters::SetParamValue(const SIP_CHAR* pszName, const SIP_CHAR* p
 
 SIP_BOOL SipParameters::IsParamExists(const SIP_CHAR* pszName, SIP_UINT32* pnPos)
 {
-    return (pParameterList != SIP_NULL) ?
-        pParameterList->IsParamExists(pszName, pnPos) : SIP_FALSE;
+    return (pParameterList != SIP_NULL) ? pParameterList->IsParamExists(pszName, pnPos) : SIP_FALSE;
 }
 
 SipParameterList* SipParameters::GetParameterList()

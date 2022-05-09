@@ -7,14 +7,14 @@ class SipContextUtils
 {
     SipContextUtils();
 
-    public:
-        virtual ~SipContextUtils();
+public:
+    virtual ~SipContextUtils();
 
-        static SipContextUtils* GetInstance();
-        static SIP_VOID Destruct();
+    static SipContextUtils* GetInstance();
+    static SIP_VOID Destruct();
 
-        SipTxnContext* Sip_CreateTxnContext();
-        void Sip_DestroyTxnContext(IN SipTxnContext* pContext);
+    SipTxnContext* Sip_CreateTxnContext();
+    void Sip_DestroyTxnContext(IN SipTxnContext* pContext);
 };
 
-#endif //__SIP_CONTEXT_UTILS_H__
+#endif  //__SIP_CONTEXT_UTILS_H__

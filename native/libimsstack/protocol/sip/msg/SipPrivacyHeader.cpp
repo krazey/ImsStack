@@ -1,42 +1,9 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipPrivacyHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipPrivacyHeader.h"
 #include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 /******************************************************************************
  * Function name      : SipPrivacyHeader::SipPrivacyHeader
  *
@@ -46,9 +13,9 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipPrivacyHeader::SipPrivacyHeader()
-    : SipHeaderBase(SipHeaderBase::PRIVACY)
-    , m_objPrivacyList(SipVector<SIP_CHAR*>())
+SipPrivacyHeader::SipPrivacyHeader() :
+        SipHeaderBase(SipHeaderBase::PRIVACY),
+        m_objPrivacyList(SipVector<SIP_CHAR*>())
 {
 }
 
@@ -61,12 +28,12 @@ SipPrivacyHeader::SipPrivacyHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_objPrivacyList(SipVector<SIP_CHAR*>())
+SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_objPrivacyList(SipVector<SIP_CHAR*>())
 {
     SIP_UINT32 nSize = objHeader.m_objPrivacyList.GetSize();
-    for(SIP_UINT32 nCount = SIP_ZERO; nCount < nSize ; nCount++)
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
         SIP_CHAR* pszTempVal = objHeader.m_objPrivacyList.GetAt(nCount);
         if (pszTempVal != SIP_NULL)
@@ -88,7 +55,7 @@ SipPrivacyHeader::SipPrivacyHeader(const SipPrivacyHeader& objHeader)
  *****************************************************************************/
 SipPrivacyHeader::~SipPrivacyHeader()
 {
-    while(m_objPrivacyList.IsEmpty() != SIP_TRUE)
+    while (m_objPrivacyList.IsEmpty() != SIP_TRUE)
     {
         delete m_objPrivacyList.Top();
         m_objPrivacyList.Pop();
@@ -114,7 +81,7 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
         return SIP_FALSE;
     }
 
-    for(SIP_UINT32 nIndex = SIP_ZERO; nIndex < nCount; nIndex++)
+    for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nCount; nIndex++)
     {
         SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(nIndex);
         if (nIndex != SIP_ZERO)
@@ -144,7 +111,6 @@ SIP_BOOL SipPrivacyHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = 
   {
   return SIP_TRUE;
   }*/
-
 
 /******************************************************************************
  * Function name      : SipPrivacyHeader::SetPrivacy
@@ -179,16 +145,15 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*"Privacy" HCOLON priv-value *(";" priv-value)*/
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipPrivacyHeader::DecodeHdr:Privacy Value Missing",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipPrivacyHeader::DecodeHdr:Privacy Value Missing",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    while(pStartPt < pEndPt)
+    while (pStartPt < pEndPt)
     {
-        SIP_CHAR* pTempPos= SIP_NULL;
+        SIP_CHAR* pTempPos = SIP_NULL;
 
         if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, SIP_SEMI) == SIP_FALSE)
         {
@@ -199,16 +164,14 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         if (pszPrivacy == SIP_NULL)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipPrivacyHeader::DecodeHdr:Memory Allocation failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipPrivacyHeader::DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
         if (m_objPrivacyList.Add(pszPrivacy) < SIP_ZERO)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "SipPrivacyHeader::DecodeHdr:Adding in list failed",
-                    SIP_ZERO, SIP_ZERO);
+                    "SipPrivacyHeader::DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
             delete[] pszPrivacy;
             return SIP_FALSE;
         }
@@ -224,8 +187,8 @@ SIP_BOOL SipPrivacyHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             if (pStartPt > pEndPt)
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "SipParameterList::DecHdrSipParameterList: No Parameter Present",
-                        SIP_ZERO, SIP_ZERO);
+                        "SipParameterList::DecHdrSipParameterList: No Parameter Present", SIP_ZERO,
+                        SIP_ZERO);
                 return SIP_FALSE;
             }
         }

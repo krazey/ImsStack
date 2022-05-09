@@ -1,28 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipPolicyContactHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           : sravanthi.panditi
- * E-mail id.            : sravanthi.panditi@
- * Creation date       : Feb . 05,2013
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
@@ -32,40 +7,27 @@
 #include "msg/SipAddrSpec.h"
 #include "msg/SipPolicyContactHeader.h"
 #include "msg/sip_msgutil.h"
-//#include "msg/sip_enc.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-//extern const SIP_CHAR    gaszSipHdr[][];
-
-
 
 /*constructor*/
-SipPolicyContactHeader::SipPolicyContactHeader()
-    : SipNameAddrHeader(SipHeaderBase::POLICY_CONTACT)
+SipPolicyContactHeader::SipPolicyContactHeader() :
+        SipNameAddrHeader(SipHeaderBase::POLICY_CONTACT)
 {
 }
 
-SipPolicyContactHeader::SipPolicyContactHeader(const SipPolicyContactHeader& objHeader)
-    : SipNameAddrHeader(objHeader)
+SipPolicyContactHeader::SipPolicyContactHeader(const SipPolicyContactHeader& objHeader) :
+        SipNameAddrHeader(objHeader)
 {
 }
-
 
 /*destructor*/
-SipPolicyContactHeader::~SipPolicyContactHeader()
-{
-}
+SipPolicyContactHeader::~SipPolicyContactHeader() {}
 
-SIP_BOOL SipPolicyContactHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipPolicyContactHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if (m_pNameAddr == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                    "Empty Addr Spec", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty Addr Spec", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -73,15 +35,14 @@ SIP_BOOL SipPolicyContactHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
 
     if (m_pNameAddr->EncodeNameAddr(ppCurrPos) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "sipEncodePolicyContactHdr: Addr Spec failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "sipEncodePolicyContactHdr: Addr Spec failed",
+                SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-/*This function has been added for Policy Contact Header Decoding purpose-- megha.r@*/
 /******************************************************************************
  * Function name      : SipPolicyContactHeader::DecodeHdr
  *
@@ -95,8 +56,8 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
 {
     if ((nDecLen == SIP_ZERO) || (m_pNameAddr == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer or nameAddr null", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "Empty buffer or nameAddr null", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -106,7 +67,7 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
         m_pNameAddr->SetParameterComponent(static_cast<IParameterComponent*>(this));
     }
 
-    //Check whether it is policyContact-info = LAQUOT policyContact-uri RAQUOT, if not Failure case
+    // Check whether it is policyContact-info = LAQUOT policyContact-uri RAQUOT, if not Failure case
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_INT32 nLen = SIP_ZERO;
@@ -114,37 +75,34 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     {
         if (m_pNameAddr->DecodeNameAddr(pStartPt, pTempPre) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "%d::DecodeHdr:Name Addr decoding failed",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "%d::DecodeHdr:Name Addr decoding failed",
                     GetHdrType(), SIP_ZERO);
             return SIP_FALSE;
         }
         /*Now find the start of Sip Prm*/
-        nLen = pTempPre-pStartPt;
+        nLen = pTempPre - pStartPt;
         pStartPt = pTempPre + SIP_TWO;
         pStartPt = sipSkipFwLWS(pStartPt, pEndPt);
         pTempPre = SIP_NULL;
         SIP_CHAR* pTempNext = SIP_NULL;
 
-        //added the condition ((*pStartPt)==';')
-        if (sipFindActualPos(pStartPt, pEndPt,
-                &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+        // added the condition ((*pStartPt)==';')
+        if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
         {
             if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
             {
-                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "%d::DecodeHdr: Prm decoding failed",
-                    GetHdrType(), SIP_ZERO);
+                SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "%d::DecodeHdr: Prm decoding failed",
+                        GetHdrType(), SIP_ZERO);
                 return SIP_FALSE;
             }
         }
         else
         {
-            if (nLen != (SIP_INT32(nDecLen-2)))
+            if (nLen != (SIP_INT32(nDecLen - 2)))
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                        "%d::DecodeHdr: Invalid Delimiter separating param",
-                        GetHdrType(), SIP_ZERO);
+                        "%d::DecodeHdr: Invalid Delimiter separating param", GetHdrType(),
+                        SIP_ZERO);
                 return SIP_FALSE;
             }
         }
@@ -152,14 +110,12 @@ SIP_BOOL SipPolicyContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
     else
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipNameAddr::DecodeNameAddr: Right Angle Not Found",
-                SIP_ZERO, SIP_ZERO);
+                "SipNameAddr::DecodeNameAddr: Right Angle Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     return SIP_TRUE;
 }
-
 
 SipHeaderBase* SipPolicyContactHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHeaderBase* pHeader)
 {

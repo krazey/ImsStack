@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipAcceptHeader.cpp
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     :
- * E-mail id.    : saurabh31.srivastava@
- * Creation date   : July. 27, 2010
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipAcceptHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -31,14 +5,6 @@
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name  : SipAcceptHeader::SipAcceptHeader
@@ -49,10 +15,10 @@
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAcceptHeader::SipAcceptHeader()
-    : SipHeaderBase(SipHeaderBase::ACCEPT)
-    , m_pszMType(SIP_NULL)
-    , m_pszMSubType(SIP_NULL)
+SipAcceptHeader::SipAcceptHeader() :
+        SipHeaderBase(SipHeaderBase::ACCEPT),
+        m_pszMType(SIP_NULL),
+        m_pszMSubType(SIP_NULL)
 {
 }
 
@@ -65,10 +31,10 @@ SipAcceptHeader::SipAcceptHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAcceptHeader::SipAcceptHeader(const SipAcceptHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pszMType(SipPf_Strdup(objHeader.m_pszMType))
-    , m_pszMSubType(SipPf_Strdup(objHeader.m_pszMSubType))
+SipAcceptHeader::SipAcceptHeader(const SipAcceptHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pszMType(SipPf_Strdup(objHeader.m_pszMType)),
+        m_pszMSubType(SipPf_Strdup(objHeader.m_pszMSubType))
 {
 }
 
@@ -128,7 +94,6 @@ SIP_BOOL SipAcceptHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Def
     return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
-
 /******************************************************************************
  * Function name  : SipAcceptHeader::SetMediaType
  *
@@ -168,7 +133,7 @@ SIP_BOOL SipAcceptHeader::SetMediaSubType(const SIP_CHAR* pszMSubType)
  *****************************************************************************/
 SIP_BOOL SipAcceptHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-   if (nDecLen == SIP_ZERO)
+    if (nDecLen == SIP_ZERO)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_TRUE;
@@ -223,7 +188,7 @@ SIP_BOOL SipAcceptHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 SIP_BOOL SipAcceptHeader::IsValidHeader() const
 {
     if (((m_pszMType == SIP_NULL) && (m_pszMSubType == SIP_NULL)) ||
-        ((m_pszMType != SIP_NULL) && (m_pszMSubType != SIP_NULL)))
+            ((m_pszMType != SIP_NULL) && (m_pszMSubType != SIP_NULL)))
     {
         if ((SipPf_Strcmp(m_pszMType, "*") == 0) && (SipPf_Strcmp(m_pszMSubType, "*") != 0))
         {

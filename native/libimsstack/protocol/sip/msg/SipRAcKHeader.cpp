@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipRAcKHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 26, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
 #include "msg/SipAddrSpec.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
@@ -33,15 +7,6 @@
 #include "msg/SipRAcKHeader.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 
 /******************************************************************************
  * Function name      : SipRAcKHeader::SipRAcKHeader
@@ -53,11 +18,11 @@
  * Side Effects      : none
  *****************************************************************************/
 
-SipRAcKHeader::SipRAcKHeader()
-    : SipHeaderBase(SipHeaderBase::RACK)
-    , m_nResponseNum(SIP_ZERO)
-    , m_nCSeqNum(SIP_ZERO)
-    , m_pszMethod(SIP_NULL)
+SipRAcKHeader::SipRAcKHeader() :
+        SipHeaderBase(SipHeaderBase::RACK),
+        m_nResponseNum(SIP_ZERO),
+        m_nCSeqNum(SIP_ZERO),
+        m_pszMethod(SIP_NULL)
 {
 }
 /******************************************************************************
@@ -70,11 +35,11 @@ SipRAcKHeader::SipRAcKHeader()
  * Side Effects      : none
  *****************************************************************************/
 
-SipRAcKHeader::SipRAcKHeader(const SipRAcKHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_nResponseNum(objHeader.m_nResponseNum)
-    , m_nCSeqNum(objHeader.m_nCSeqNum)
-    , m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
+SipRAcKHeader::SipRAcKHeader(const SipRAcKHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_nResponseNum(objHeader.m_nResponseNum),
+        m_nCSeqNum(objHeader.m_nCSeqNum),
+        m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
 {
 }
 
@@ -94,7 +59,6 @@ SipRAcKHeader::~SipRAcKHeader()
     {
         delete[] m_pszMethod;
     }
-
 }
 
 /******************************************************************************
@@ -111,13 +75,11 @@ SIP_BOOL SipRAcKHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 {
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Method missing", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Method missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%u %u %s", m_nResponseNum,
-            m_nCSeqNum, m_pszMethod);
+    SipPf_Sprintf(*ppCurrPos, (SIP_CHAR*)"%u %u %s", m_nResponseNum, m_nCSeqNum, m_pszMethod);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
     return SIP_TRUE;
@@ -153,8 +115,7 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -163,18 +124,16 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: LWS missing in RAcK",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pszResponseNum = sipCreateString(pStartPt, pTempPre);
     if (pszResponseNum == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -183,23 +142,23 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Skip Fw LWS And Get the Start of CSeq Num
       i.e. sent-by = host [ COLON port ]  */
-    pTempPre = pTempPre + SIP_ONE; // point to the start of LWS
+    pTempPre = pTempPre + SIP_ONE;  // point to the start of LWS
     pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     /*Now find the end of CSeq Num*/
     if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: LWS missing in RAcK", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pszCSeqNum = sipCreateString(pStartPt, pTempPre);
     if (pszCSeqNum == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -207,15 +166,15 @@ SIP_BOOL SipRAcKHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     delete[] pszCSeqNum;
 
     /*Update the start point*/
-    pTempPre = pTempPre + SIP_ONE; // point to the start of LWS
+    pTempPre = pTempPre + SIP_ONE;  // point to the start of LWS
     pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
     m_pszMethod = sipCreateString(pStartPt, pEndPt);
     if (m_pszMethod == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 

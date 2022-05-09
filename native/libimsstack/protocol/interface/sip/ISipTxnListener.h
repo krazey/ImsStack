@@ -5,15 +5,14 @@
 
 class ISipTxnListener
 {
-    public:
+public:
+    ISipTxnListener(){};
+    virtual ~ISipTxnListener(){};
 
-        ISipTxnListener(){};
-        virtual ~ISipTxnListener(){};
+    /* read only txn key */
+    virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, SIP_INT32 ms_TimerType) = 0;
 
-        /* read only txn key */
-        virtual SIP_BOOL TxnTimeout(ISipUserData* pUserData, SIP_INT32 ms_TimerType) = 0;
-
-        /* read only txn key */
-        virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData) = 0;
+    /* read only txn key */
+    virtual SIP_BOOL TxnTerminated(ISipUserData* pUserData) = 0;
 };
-#endif //__ISIPTXNLISTENER_H__
+#endif  //__ISIPTXNLISTENER_H__

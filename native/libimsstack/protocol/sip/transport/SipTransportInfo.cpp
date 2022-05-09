@@ -1,48 +1,17 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename          : sip_filename.cpp
- * Purpose           :
- * Platform          : Windows OR Android
- * Author(s)         :
- * E-mail id.        : name@
- * Creation date        : Month. Date,10
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 #include "sip_pf_datatypes.h"
 #include "msg/sip_comdef.h"
 #include "SipConfiguration.h"
 #include "transport/SipTransportInfo.h"
 #include "SipTrace.h"
 
-SipTransportInfo::SipTransportInfo(SipTransportParameter* pTranspParam,
-        SipTransportBuffer* pTransSipBuffer)
-    : m_cNumTimeReqSent(SIP_ZERO), m_pActualDestParam(SIP_NULL),
-    m_pTranspParam(SIP_NULL), m_pSentBuffer(SIP_NULL),
-    m_pSentSipMsg(SIP_NULL), m_bExceedMTU(SIP_FALSE)
+SipTransportInfo::SipTransportInfo(
+        SipTransportParameter* pTranspParam, SipTransportBuffer* pTransSipBuffer) :
+        m_cNumTimeReqSent(SIP_ZERO),
+        m_pActualDestParam(SIP_NULL),
+        m_pTranspParam(SIP_NULL),
+        m_pSentBuffer(SIP_NULL),
+        m_pSentSipMsg(SIP_NULL),
+        m_bExceedMTU(SIP_FALSE)
 {
     if (pTranspParam == SIP_NULL)
     {
@@ -51,7 +20,6 @@ SipTransportInfo::SipTransportInfo(SipTransportParameter* pTranspParam,
     m_pTranspParam = new SipTransportParameter(pTranspParam);
     m_pSentBuffer = pTransSipBuffer;
 }
-
 
 SipTransportInfo::~SipTransportInfo()
 {
@@ -76,7 +44,6 @@ SipTransportInfo::~SipTransportInfo()
         delete m_pSentSipMsg;
     }
 }
-
 
 SipTransportParameter* SipTransportInfo::GetMsgSentTranspParam()
 {

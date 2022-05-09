@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename      : SipAuthBase.h
- * Purpose     :
- * Platform      : Windows OR Android
- * Author(s)     : Saurabh Srivastava
- * E-mail id.    : saurabh31.srivastava
- * Creation date   : may. 09 ,2011
- *
- * Edit HisAlertry   Modification description(s)
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Saurabh      0.0a    Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipHeaderBase.h"
 #include "msg/SipAuthBase.h"
 #include "msg/SipParameterList.h"
@@ -31,32 +7,21 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 #include "platform/sip_pf_string.h"
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
 
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
 /*constructor*/
-SipAuthBase::SipAuthBase(SIP_INT32 eHdrType)
-    : SipHeaderBase(eHdrType)
-    , m_objAuthList(SipVector<SipNameValue*>())
+SipAuthBase::SipAuthBase(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
+        m_objAuthList(SipVector<SipNameValue*>())
 {
 }
 
-SipAuthBase::SipAuthBase(const SipAuthBase& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_objAuthList(SipVector<SipNameValue*>())
+SipAuthBase::SipAuthBase(const SipAuthBase& objHeader) :
+        SipHeaderBase(objHeader),
+        m_objAuthList(SipVector<SipNameValue*>())
 {
     SIP_UINT32 nSize = objHeader.m_objAuthList.GetSize();
 
-    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize ; nCount++)
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
         SipNameValue* pTempNmVl = objHeader.m_objAuthList.GetAt(nCount);
 
@@ -68,11 +33,10 @@ SipAuthBase::SipAuthBase(const SipAuthBase& objHeader)
     }
 }
 
-
 /*destructor*/
 SipAuthBase::~SipAuthBase()
 {
-    while(m_objAuthList.IsEmpty() != SIP_TRUE)
+    while (m_objAuthList.IsEmpty() != SIP_TRUE)
     {
         delete m_objAuthList.Top();
         m_objAuthList.Pop();
@@ -85,7 +49,7 @@ SIP_BOOL SipAuthBase::EncodeAuthList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter)
     SIP_UINT32 nCount = m_objAuthList.GetSize();
 
     //  enc for *( ";" uri-parameter )
-    while(nIndex < nCount)
+    while (nIndex < nCount)
     {
         SipNameValue* pParamNamValue = m_objAuthList.GetAt(nIndex);
 
@@ -127,9 +91,8 @@ SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_T
     return SIP_TRUE;
 }
 
-
-SIP_BOOL SipAuthBase::SetParams(const SIP_CHAR* pszName, const SIP_CHAR* pszVal,
-        SIP_BOOL bIsFeatureParam)
+SIP_BOOL SipAuthBase::SetParams(
+        const SIP_CHAR* pszName, const SIP_CHAR* pszVal, SIP_BOOL bIsFeatureParam)
 {
     SipNameValue* pNV = new SipNameValue();
 
@@ -166,12 +129,11 @@ SIP_BOOL SipAuthBase::SetParams(const SIP_CHAR* pszName, const SIP_CHAR* pszVal,
     return SIP_TRUE;
 }
 
-SIP_BOOL SipAuthBase::FindElement(const SIP_CHAR* pszName, SipNameValue *&pNmvl,
-        SIP_UINT32& nPos)
+SIP_BOOL SipAuthBase::FindElement(const SIP_CHAR* pszName, SipNameValue*& pNmvl, SIP_UINT32& nPos)
 {
     SIP_UINT32 nSize = m_objAuthList.GetSize();
 
-    for(SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
+    for (SIP_UINT32 nIndex = 0; nIndex < nSize; nIndex++)
     {
         SipNameValue* pNmVl = m_objAuthList.GetAt(nIndex);
         if (SipPf_Stricmp(pszName, pNmVl->m_pszName) == 0)
@@ -227,7 +189,6 @@ SIP_CHAR* SipAuthBase::GetAuthValue(const SIP_CHAR* pszName)
     return pszVal;
 }
 
-
 /******************************************************************************
  * Function name      : SipAuthBase::DecodeHdr
  *
@@ -266,7 +227,7 @@ SIP_BOOL SipAuthBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     pStartPt = sipSkipFwLWS(pTempPre, pEndPt);
     pTempPre = SIP_NULL;
 
-    while(pStartPt < pEndPt)
+    while (pStartPt < pEndPt)
     {
         SIP_CHAR* pTempNext = SIP_NULL;
 

@@ -6,18 +6,17 @@
 
 class SipTxnContext
 {
-    public:
-        SipTxnContext();
-        virtual ~SipTxnContext();
+public:
+    SipTxnContext();
+    virtual ~SipTxnContext();
 
-    private:
-        SipTxnContext(const SipTxnContext& objRHS);
-        SipTxnContext& operator=(const SipTxnContext& objRHS);
+private:
+    SipTxnContext(const SipTxnContext& objRHS);
+    SipTxnContext& operator=(const SipTxnContext& objRHS);
 
-    public:
-        SipTimerContext* pSipTimerContext;
-        SIP_VOID* pTxnContextData;
+public:
+    SipTimerContext* pSipTimerContext;
+    SIP_VOID* pTxnContextData;
 };
 
-
-#endif //__SIP_TXN_CONTEXT_H__
+#endif  //__SIP_TXN_CONTEXT_H__

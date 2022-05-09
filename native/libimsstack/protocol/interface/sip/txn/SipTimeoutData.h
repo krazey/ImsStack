@@ -1,15 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #ifndef _SIP_TXN_TIMEOUT_DATA_H
 #define _SIP_TXN_TIMEOUT_DATA_H
 
@@ -30,8 +18,7 @@ class SipTimeoutData
     SipTimeoutData& operator=(IN const SipTimeoutData& objRHS);
     SipTimeoutData(IN const SipTimeoutData& objRHS);
 
-    public:
-
+public:
     SipTimeoutData();
     SipTimeoutData(SIP_INT32 eTxnType, SIP_INT32 eTimerType, SipTxnKey* pTxnKey);
     virtual ~SipTimeoutData();

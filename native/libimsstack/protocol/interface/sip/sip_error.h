@@ -1,38 +1,13 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : sip_error.h
- * Purpose         :
- * Platform        : Windows OR Android
- * Author(s)        : Seema
- * E-mail id.        : seema.lijo@
- * Creation date     : may 3,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * may 3,2010          Seema              0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
 #ifndef __SIP_ERROR_H__
 #define __SIP_ERROR_H__
 
-#define    SIP_ERRORCODES_START        100
-#define    SIP_ERRORCODES_GAP            100
+#define SIP_ERRORCODES_START     100
+#define SIP_ERRORCODES_GAP       100
 
-#define    SIP_ERRORCODES_UTILS            (SIP_ERRORCODES_START+ (0*SIP_ERRORCODES_GAP))
-#define    SIP_ERRORCODES_TXNTRANSP        (SIP_ERRORCODES_START+ (1*SIP_ERRORCODES_GAP))
-#define    SIP_ERRORCODES_MSG                (SIP_ERRORCODES_START+ (2*SIP_ERRORCODES_GAP))
+#define SIP_ERRORCODES_UTILS     (SIP_ERRORCODES_START + (0 * SIP_ERRORCODES_GAP))
+#define SIP_ERRORCODES_TXNTRANSP (SIP_ERRORCODES_START + (1 * SIP_ERRORCODES_GAP))
+#define SIP_ERRORCODES_MSG       (SIP_ERRORCODES_START + (2 * SIP_ERRORCODES_GAP))
 
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
 typedef enum _SipEn_ErrorTypes
 {
     ESIPUTILERRSTART = SIP_ERRORCODES_UTILS,
@@ -80,15 +55,15 @@ typedef enum _SipEn_ErrorTypes
     EERR_STACKNOTINITIALIZED, /* Stack Error */
     ETXN_DBERROR,
     ETXN_ALREADYTRANSACTIONINPROCESSERROR = 0,
-    ETXN_TRANSMISSIONERROR, /* Request or Response error, Retransmitting Error */
-    ETXN_INTERNALERROR,     /* Error in restarting Timer */
-    ETXN_TRANPORTERROR,        /* Event to map the asynchronous error from Transport layer */
-    ETXN_TRANSACTIONCREATEERROR,/* Error during start of Transaction */
-    ETXN_TRANSACTIONERROR,        /* Error while sending response in server transaction */
+    ETXN_TRANSMISSIONERROR,      /* Request or Response error, Retransmitting Error */
+    ETXN_INTERNALERROR,          /* Error in restarting Timer */
+    ETXN_TRANPORTERROR,          /* Event to map the asynchronous error from Transport layer */
+    ETXN_TRANSACTIONCREATEERROR, /* Error during start of Transaction */
+    ETXN_TRANSACTIONERROR,       /* Error while sending response in server transaction */
     /* When Received Response doesn't find Transaction or
        When User wants to send response and there is no transaction*/
     ETXN_TRANSACTIONNOTFOUNDERROR,
-    ETXN_TRANSPORTINFOMISSINGERROR,/* Cannot send a Request in Server Transaction */
+    ETXN_TRANSPORTINFOMISSINGERROR, /* Cannot send a Request in Server Transaction */
     ETXN_TRANSACTIONINVALIDERROR,
     ETXN_TRANSACTION_NOTFOUND,
     ETXN_FSMEVENTERROR,
@@ -101,13 +76,13 @@ typedef enum _SipEn_ErrorTypes
        treat as 503 'Service Unavailable'*/
     ETXN_UDPTRANSPORTERROR,
     ETXN_TCPCONNECTIONERROR, /* TCP Connection Errors */
-    ETXN_INVALIDTXNHANDLE,    /* When Handle is Invalid */
-    ETRANSP_TYPEERROR,    /* Tranpsort Type Error */
-    ETRANSP_MISMATCHERROR,     /* Sent-by Value mismatch with actual sent request*/
+    ETXN_INVALIDTXNHANDLE,   /* When Handle is Invalid */
+    ETRANSP_TYPEERROR,       /* Tranpsort Type Error */
+    ETRANSP_MISMATCHERROR,   /* Sent-by Value mismatch with actual sent request*/
 
     ESIPMSGERRSTART = SIP_ERRORCODES_MSG,
 
-    EMSG_VIAHDRERROR,        /* Sent By Value is missing */
+    EMSG_VIAHDRERROR, /* Sent By Value is missing */
     /* Content Length Header is mandatory RFC 3261 Section:
        20.14 Content-Length*/
     EMSG_CONTENTLENHDRMISSINGERROR,
@@ -331,6 +306,6 @@ typedef enum _SipEn_ErrorTypes
 
     ETXN_ERROREND,
     ETXN_INVALID = -1
-}SipEn_ErrorTypes;
+} SipEn_ErrorTypes;
 
-#endif //__SIP_ERROR_H__
+#endif  //__SIP_ERROR_H__

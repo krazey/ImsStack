@@ -1,69 +1,45 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename          : sip_comdef.h
- * Purpose           :
- * Platform          : Windows OR Android
- * Author(s)         : Syed Malgimani
- * E-mail id.        : syed.malgimani@
- * Creation date     : May. 21,2010
- *
- * Edit History             Modification                                 Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            ---            Initial creation
-
- *****************************************************************************/
 #ifndef __SIP_COMDEF_H__
 #define __SIP_COMDEF_H__
+
 #include "sip_pf_datatypes.h"
-/****************************************************************************
-  Forward Declaration
- *****************************************************************************/
+
 class SipMessage;
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-#define INVITE_METHOD     "INVITE"
-#define ACK_METHOD         "ACK"
-#define OPTION_METHOD     "OPTIONS"
-#define BYE_METHOD         "BYE"
-#define CANCEL_METHOD     "CANCEL"
-#define REGISTER_METHOD "REGISTER"
-#define INFO_METHOD     "INFO"
-#define PRACK_METHOD     "PRACK"
-#define SUBSCRIBE_METHOD "SUBSCRIBE"
-#define NOTIFY_METHOD     "NOTIFY"
-#define UPDATE_METHOD     "UPDATE"
-#define MESSAGE_METHOD     "MESSAGE"
-#define REFER_METHOD     "REFER"
-#define PUBLISH_METHOD     "PUBLISH"
-#define SIP_SIPVERSION "SIP/2.0"
 
-#define SIP_SC_INVALID 0
-#define SIP_SC_100 100
-#define SIP_SC_200 200
-#define SIP_SC_300 300
-#define SIP_SC_400 400
-#define SIP_SC_500 500
-#define SIP_SC_600 600
-#define SIP_SC_MAX 700
+#define INVITE_METHOD                 "INVITE"
+#define ACK_METHOD                    "ACK"
+#define OPTION_METHOD                 "OPTIONS"
+#define BYE_METHOD                    "BYE"
+#define CANCEL_METHOD                 "CANCEL"
+#define REGISTER_METHOD               "REGISTER"
+#define INFO_METHOD                   "INFO"
+#define PRACK_METHOD                  "PRACK"
+#define SUBSCRIBE_METHOD              "SUBSCRIBE"
+#define NOTIFY_METHOD                 "NOTIFY"
+#define UPDATE_METHOD                 "UPDATE"
+#define MESSAGE_METHOD                "MESSAGE"
+#define REFER_METHOD                  "REFER"
+#define PUBLISH_METHOD                "PUBLISH"
+#define SIP_SIPVERSION                "SIP/2.0"
 
-#define SIP_PROVISIONAL_RESP(usRC)         (((usRC) >= (SIP_SC_100)) && ((usRC) < (SIP_SC_200)))
-#define SIP_SUCCESSFUL_RESP(usRC)          (((usRC) >= (SIP_SC_200)) && ((usRC) < (SIP_SC_300)))
-#define SIP_REDIRECTION_RESP(usRC)         (((usRC) >= (SIP_SC_300)) && ((usRC) < (SIP_SC_400)))
-#define SIP_CLIENT_FAILURE_RESP(usRC)      (((usRC) >= (SIP_SC_400)) && ((usRC) < (SIP_SC_500)))
-#define SIP_SERVER_FAILURE_RESP(usRC)      (((usRC) >= (SIP_SC_500)) && ((usRC) < (SIP_SC_600)))
-#define SIP_GLOBAL_FAILURE_RESP(usRC)      (((usRC) >= (SIP_SC_600)) && ((usRC) < (SIP_SC_MAX)))
+#define SIP_SC_INVALID                0
+#define SIP_SC_100                    100
+#define SIP_SC_200                    200
+#define SIP_SC_300                    300
+#define SIP_SC_400                    400
+#define SIP_SC_500                    500
+#define SIP_SC_600                    600
+#define SIP_SC_MAX                    700
+
+#define SIP_PROVISIONAL_RESP(usRC)    (((usRC) >= (SIP_SC_100)) && ((usRC) < (SIP_SC_200)))
+#define SIP_SUCCESSFUL_RESP(usRC)     (((usRC) >= (SIP_SC_200)) && ((usRC) < (SIP_SC_300)))
+#define SIP_REDIRECTION_RESP(usRC)    (((usRC) >= (SIP_SC_300)) && ((usRC) < (SIP_SC_400)))
+#define SIP_CLIENT_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_400)) && ((usRC) < (SIP_SC_500)))
+#define SIP_SERVER_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_500)) && ((usRC) < (SIP_SC_600)))
+#define SIP_GLOBAL_FAILURE_RESP(usRC) (((usRC) >= (SIP_SC_600)) && ((usRC) < (SIP_SC_MAX)))
 
 /* For all response except for SIP successful response */
-#define SIP_FAILURE_RESP(usRC)              ((usRC) >= (SIP_SC_300))
-#define SIP_NONPROVISIONAL_RESP(usRC)       ((usRC) >= (SIP_SC_200))
+#define SIP_FAILURE_RESP(usRC)        ((usRC) >= (SIP_SC_300))
+#define SIP_NONPROVISIONAL_RESP(usRC) ((usRC) >= (SIP_SC_200))
 
 /****************************************************************************
   Enum Declaration
@@ -71,27 +47,27 @@ class SipMessage;
 typedef enum _SipEn_HdrType
 {
     ESIPHDR_INVALID = SIP_INVALID,
-    ESIPHDR_ALLOW,//0
+    ESIPHDR_ALLOW,  // 0
     ESIPHDR_ALLOWEVENTS,
     ESIPHDR_AUTHORIZATION,
     ESIPHDR_CALLID,
-    ESIPHDR_CONTACT,/*Contact wild card contact normal*/
+    ESIPHDR_CONTACT, /*Contact wild card contact normal*/
     ESIPHDR_CONTACTWILD,
     ESIPHDR_CONTACTANY,
     ESIPHDR_CONTENTDISPOSITION,
     ESIPHDR_CONTENTENCODING,
     ESIPHDR_CONTENTLENGTH,
-    ESIPHDR_CONTENTTYPE,//10
+    ESIPHDR_CONTENTTYPE,  // 10
     ESIPHDR_CSEQ,
     ESIPHDR_EVENT,
-    ESIPHDR_EXPIRESDATE,/*expires date ,time*/
+    ESIPHDR_EXPIRESDATE, /*expires date ,time*/
     ESIPHDR_EXPIRESSEC,
     ESIPHDR_EXPIRESANY,
     ESIPHDR_ACCEPT,
-    ESIPHDR_MINEXPIRES, //added
+    ESIPHDR_MINEXPIRES,
     ESIPHDR_FROM,
     ESIPHDR_MAXFORWARDS,
-    ESIPHDR_MIMEVERSION,//20
+    ESIPHDR_MIMEVERSION,  // 20
     ESIPHDR_PRIVACY,
     ESIPHDR_PPREFERREDIDENTITY,
     ESIPHDR_PASSERTEDIDENTITY,
@@ -101,7 +77,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_PCALLEDPARTYID,
     ESIPHDR_PVISITEDNETWORKID,
     ESIPHDR_PCHRGFUNADDR,
-    ESIPHDR_PACCESSNETWORKINFO,//30
+    ESIPHDR_PACCESSNETWORKINFO,  // 30
     ESIPHDR_PCHARGINGVECTOR,
     ESIPHDR_SERVICEROUTE,
     ESIPHDR_HISTORYINFO,
@@ -111,7 +87,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_JOIN,
     ESIPHDR_SIPIFMATCH,
     ESIPHDR_SIPETAG,
-    ESIPHDR_PROXYAUTHENTICATE,//40
+    ESIPHDR_PROXYAUTHENTICATE,  // 40
     ESIPHDR_PROXYAUTHORIZATION,
     ESIPHDR_RACK,
     ESIPHDR_RECORDROUTE,
@@ -121,7 +97,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_REQUIRE,
     ESIPHDR_ROUTE,
     ESIPHDR_RSEQ,
-    ESIPHDR_SECURITYCLIENT,//50
+    ESIPHDR_SECURITYCLIENT,  // 50
     ESIPHDR_SECURITYVERIFY,
     ESIPHDR_SECURITYSERVER,
     ESIPHDR_SESSIONEXPIRES,
@@ -131,7 +107,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_TO,
     ESIPHDR_UNSUPPORTED,
     ESIPHDR_VIA,
-    ESIPHDR_WARNING,//60
+    ESIPHDR_WARNING,  // 60
     ESIPHDR_WWWAUTHENTICATE,
     ESIPHDR_UNKNOWN,
     ESIPHDR_RETRYAFTERDATE,
@@ -141,7 +117,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_RESOURCEPRIORITY,
     ESIPHDR_ACCEPTRESOURCEPRIORITY,
     ESIPHDR_DATE,
-    ESIPHDR_ACCEPTENCODING,//70
+    ESIPHDR_ACCEPTENCODING,  // 70
     ESIPHDR_ACCEPTLANGUAGE,
     ESIPHDR_ALERTINFO,
     ESIPHDR_ANSWERMODE,
@@ -151,7 +127,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_ERRORINFO,
     ESIPHDR_FLOWTIMER,
     ESIPHDR_IDENTITY,
-    ESIPHDR_IDENTITYINFO,//80
+    ESIPHDR_IDENTITYINFO,  // 80
     ESIPHDR_INREPLYTO,
     ESIPHDR_ORGANIZATION,
     ESIPHDR_PANSWERSTATE,
@@ -161,7 +137,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_PREFUSEDURILIST,
     ESIPHDR_PRIORITY,
     ESIPHDR_PRIVANSWERMODE,
-    ESIPHDR_PROXYREQUIRE,//90
+    ESIPHDR_PROXYREQUIRE,  // 90
     ESIPHDR_PSERVEDUSER,
     ESIPHDR_PUSERDATABASE,
     ESIPHDR_REASON,
@@ -171,7 +147,7 @@ typedef enum _SipEn_HdrType
     ESIPHDR_SERVER,
     ESIPHDR_SUBJECT,
     ESIPHDR_SUPPRESSIFMATCH,
-    ESIPHDR_TARGETDIALOG,//100
+    ESIPHDR_TARGETDIALOG,  // 100
     ESIPHDR_TRIGGERCONSENT,
     ESIPHDR_USERAGENT,
     ESIPHDR_FEATURECAPS,
@@ -181,23 +157,21 @@ typedef enum _SipEn_HdrType
     ESIPHDR_INFOPACKAGE,
     ESIPHDR_MAXBREADTH,
     ESIPHDR_PASSERTEDSERVICE,
-    ESIPHDR_POLICYCONTACT,//110
+    ESIPHDR_POLICYCONTACT,  // 110
     ESIPHDR_POLICYID,
     ESIPHDR_PPREFERREDSERVICE,
     ESIPHDR_RECVINFO,
     ESIPHDR_SESSIONID,
-    ESIPHDR_END //115
+    ESIPHDR_END  // 115
 
-
-}SipEn_HdrType;
-
+} SipEn_HdrType;
 
 typedef enum _SipEn_MsgType
 {
     ESIP_REQTYPE = 0,
     ESIP_RESPTYPE,
     ESIP_INVALIDTYPE,
-}SipEn_MsgType;
+} SipEn_MsgType;
 
 typedef enum _SipEn_BodyType
 {
@@ -207,19 +181,17 @@ typedef enum _SipEn_BodyType
     ESIPUNKNOWNBODY,
     ESIPMESSAGESUMMARYBODY,
     ESIPINVALIDBODY
-}SipEn_BodyType;
+} SipEn_BodyType;
 
 typedef enum _sipEn_StatusType
 {
-    SIPMSGWAITINGNO=0,
+    SIPMSGWAITINGNO = 0,
     SIPMSGWAITINGYES
 } sipEn_StatusType;
-
 
 /****************************************************************************
   Array Declaration
  *****************************************************************************/
-
 
 /****************************************************************************
   Structure Declaration
@@ -229,9 +201,8 @@ SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex);
 
 SIP_BOOL SipMemCheck(SIP_VOID* pvData, SIP_UINT16* pnError);
 
-SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType,
-        SIP_INT32* peMethodType);
+SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType);
 
 SIP_UINT32 GetRSeqNum(SipMessage* pSipMsg, SIP_INT32 eHdrType);
 
-#endif // __SIP_COMDEF_H__
+#endif  // __SIP_COMDEF_H__

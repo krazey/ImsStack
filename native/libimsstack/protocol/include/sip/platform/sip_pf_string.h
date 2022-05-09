@@ -1,61 +1,19 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : Sip_Pf_string.h
- * Purpose        :  string Functions
- * Platform        : Windows OR Android
- * Author(s)        :
- * E-mail id.        :
- * Creation date     : may 14,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * may 14,10                        0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
-
 #ifndef __SIP_PF_STRING_H__
 #define __SIP_PF_STRING_H__
 
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <Windows.h>
-//#include <utils/RefBase.h>
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
+#define SIP_TIME_MAX_SIZE 100
+#define SIP_NUM_SEC_HOURS 100000000
+#define SIP_NUM_SEC_MIN   60
+#define SIP_NUM_1000      1000
 
-#define SIP_TIME_MAX_SIZE            100
-#define SIP_NUM_SEC_HOURS             100000000
-#define SIP_NUM_SEC_MIN             60
-#define SIP_NUM_1000                1000
-
-#define SIP_TOLOWER(c)                ((((c )>= 'A') && ((c )<= 'Z')) ? ((c )- 'A' + 'a') : (c))
-#define SIP_TOUPPER(c)                ((((c )>= 'a') && ((c )<= 'z')) ? ((c )- 'a' + 'A') : (c))
-
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Structure Declaration
- *****************************************************************************/
+#define SIP_TOLOWER(c)    ((((c) >= 'A') && ((c) <= 'Z')) ? ((c) - 'A' + 'a') : (c))
+#define SIP_TOUPPER(c)    ((((c) >= 'a') && ((c) <= 'z')) ? ((c) - 'a' + 'A') : (c))
 
 /* Structure of SystemTimer */
 typedef struct _SipSt_Timestamp
@@ -68,11 +26,7 @@ typedef struct _SipSt_Timestamp
     SIP_UINT16 wMinute;
     SIP_UINT16 wSecond;
     SIP_UINT16 wMilliseconds;
-}SipSt_Timestamp;
-
-/****************************************************************************
-  Declaration of Functions
- *****************************************************************************/
+} SipSt_Timestamp;
 
 void SipPf_Snprintf(SIP_CHAR* pszBuffer, SIP_UINT32 nBuffSize, const SIP_CHAR* pszFormat, ...);
 void SipPf_Sprintf(SIP_CHAR* pszBuffer, const SIP_CHAR* pszFormat, ...);
@@ -234,8 +188,7 @@ SIP_INT16 SipPf_Stricmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource);
  *                       updated
  *
  ************************************************************/
-SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource,
-        SIP_UINT32 nNumChars);
+SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource, SIP_UINT32 nNumChars);
 
 /************************************************************
  * Function name    : SipPf_Strnicmp
@@ -255,8 +208,7 @@ SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource,
  *                       updated
  *
  ************************************************************/
-SIP_INT16 SipPf_Strnicmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource,
-        SIP_UINT32 nNumChars);
+SIP_INT16 SipPf_Strnicmp(const SIP_CHAR* pszDest, const SIP_CHAR* pszSource, SIP_UINT32 nNumChars);
 
 /************************************************************
  * Function name    : SipPf_Strstr

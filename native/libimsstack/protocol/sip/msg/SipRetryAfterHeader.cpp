@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipRetryAfterHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipRetryAfterHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -30,34 +6,21 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
 #define MAX_RETRY_AFTER_LEN 12
 
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
-
 /*constructor*/
-SipRetryAfterHeader::SipRetryAfterHeader()
-    : SipHeaderBase(SipHeaderBase::RETRY_AFTER_SEC)
-    , m_nDeltaSec(SIP_ZERO), m_pszComment(SIP_NULL)
+SipRetryAfterHeader::SipRetryAfterHeader() :
+        SipHeaderBase(SipHeaderBase::RETRY_AFTER_SEC),
+        m_nDeltaSec(SIP_ZERO),
+        m_pszComment(SIP_NULL)
 {
 }
 
 /*Copy constructor*/
-SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_nDeltaSec(objHeader.m_nDeltaSec)
-    , m_pszComment(SipPf_Strdup(objHeader.m_pszComment))
+SipRetryAfterHeader::SipRetryAfterHeader(const SipRetryAfterHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_nDeltaSec(objHeader.m_nDeltaSec),
+        m_pszComment(SipPf_Strdup(objHeader.m_pszComment))
 {
 }
 
@@ -72,8 +35,8 @@ SipRetryAfterHeader::~SipRetryAfterHeader()
 
 /*virtual methods*/
 /*Function for encoding of headers*/
-SIP_BOOL SipRetryAfterHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipRetryAfterHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     SIP_CHAR szLen[MAX_RETRY_AFTER_LEN];
     SipPf_Sprintf(szLen, (SIP_CHAR*)"%u", m_nDeltaSec);
@@ -125,7 +88,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (((bStatus == SIP_TRUE) && ((pTempPre+1) > pCommentEnd)) || (bStatus == SIP_FALSE))
+        if (((bStatus == SIP_TRUE) && ((pTempPre + 1) > pCommentEnd)) || (bStatus == SIP_FALSE))
         {
             if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
             {
@@ -143,17 +106,16 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         {
             return SIP_FALSE;
         }
-
     }
 
-    //if comment exists
+    // if comment exists
     if (pCommentStart != SIP_NULL)
     {
         m_pszComment = sipCreateString(pCommentStart, pCommentEnd);
         if (m_pszComment == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         pEndPt = pCommentStart - 2;
@@ -163,8 +125,8 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -173,8 +135,8 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         m_nDeltaSec = SipPf_Atoi_Unsigned(pszValue);
         if ((m_nDeltaSec > MAX_CSEQ) || (m_nDeltaSec == SIP_ZERO))
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Retry After value is not valid", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr:Retry After value is not valid",
+                    SIP_ZERO, SIP_ZERO);
             delete[] pszValue;
             return SIP_FALSE;
         }

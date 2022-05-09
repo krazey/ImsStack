@@ -1,24 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : sip_msgutil.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)             : Vijay Nair
- * E-mail id.            : vijay.nair@
- * Creation date         : Jan.7, 2015
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
 #include "sip_debug.h"
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
@@ -28,174 +7,144 @@
 
 SIPHdrAccess* SIPHdrAccess::s_pInstance = SIP_NULL;
 
-SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] =
-{
-    "Allow",//0
-    "Allow-Events",
-    "Authorization",
-    "Call-ID",
-    "Contact",
-    "Contact",
-    "Contact",
-    "Content-Disposition",
-    "Content-Encoding",
-    "Content-Length",
-    "Content-Type",//10
-    "CSeq",
-
-    "Event",
-    "Expires",
-    "Expires",
-    "Expires",
-    "Accept",
-    "Min-Expires",
-    "From",
-    "Max-Forwards",
-    "MIME-Version",//20
-    "Privacy",
-    "P-Preferred-Identity",
-    "P-Asserted-Identity",
-
-    "Min-SE",
-    "Path",
-    "P-Associated-URI",
-    "P-Called-Party-ID",
-    "P-Visited-Network-ID",
-    "P-Charging-Function-Addresses",
-    "P-Access-Network-Info",//30
-    "P-Charging-Vector",
-    "Service-Route",
-    "History-Info",
-
-    "Request-Disposition",
-    "Accept-Contact",
-    "Reject-Contact",
-    "Join",
-    "SIP-If-Match",
-    "SIP-ETag",
-    "Proxy-Authenticate",//40
-    "Proxy-Authorization",
-    "RAck",
-    "Record-Route",
-
-    "Referred-By",
-    "Refer-To",
-    "Replaces",
-    "Require",
-    "Route",
-    "RSeq",
-    "Security-Client",//50
-    "Security-Verify",
-    "Security-Server",
-    "Session-Expires",
-
-    "Subscription-State",
-    "Supported",
-    "Timestamp",
-    "To",
-    "Unsupported",
-    "Via",
-    "Warning",//60
-    "WWW-Authenticate",
-    "Unknown",
-    "Retry-After",
-    "Retry-After",
-    "Retry-After",
-    "P-Early-Media",
-
-    "Resource-Priority",
-    "Accept-Resource-Priority",
-    "Date",
-    "Accept-Encoding",//70
-    "Accept-Language",
-    "Alert-Info",
-    "Answer-Mode",
-    "Authentication-Info",
-    "Call-Info",
-    "Content-Language",
-
-    "Error-Info",
-    "Flow-Timer",
-    "Identity",
-    "Identity-Info",//80
-    "In-Reply-To",
-    "Organization",
-    "P-Answer-State",
-    "Permission-Missing",
-    "P-Media-Authorization",
-    "P-Profile-Key",
-
-    "P-Refused-URI-List",
-    "Priority",
-    "Priv-Answer-Mode",
-    "Proxy-Require",//90
-    "P-Served-User",
-    "P-User-Database",
-    "Reason",
-    "Refer-Sub",
-    "Reply-To",
-    "Response-Key",
-
-    "Server",
-    "Subject",
-    "Suppress-If-Match",
-    "Target-Dialog",//100
-    "Trigger-Consent",
-    "User-Agent",
-
-    "Feature-Caps",
-    "Geolocation",
-    "Geolocation-Error",
-    "Geolocation-Routing",
-    "Info-Package",
-    "Max-Breadth",
-    "P-Asserted-Service",
-    "Policy-Contact",//110
-
-    "Policy-ID",
-    "P-Preferred-Service",
-    "Recv-Info",
-    "Session-ID",
-    "UNKNOWN",  //115
+SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
+        "Allow",  // 0
+        "Allow-Events",
+        "Authorization",
+        "Call-ID",
+        "Contact",
+        "Contact",
+        "Contact",
+        "Content-Disposition",
+        "Content-Encoding",
+        "Content-Length",
+        "Content-Type",  // 10
+        "CSeq",
+        "Event",
+        "Expires",
+        "Expires",
+        "Expires",
+        "Accept",
+        "Min-Expires",
+        "From",
+        "Max-Forwards",
+        "MIME-Version",  // 20
+        "Privacy",
+        "P-Preferred-Identity",
+        "P-Asserted-Identity",
+        "Min-SE",
+        "Path",
+        "P-Associated-URI",
+        "P-Called-Party-ID",
+        "P-Visited-Network-ID",
+        "P-Charging-Function-Addresses",
+        "P-Access-Network-Info",  // 30
+        "P-Charging-Vector",
+        "Service-Route",
+        "History-Info",
+        "Request-Disposition",
+        "Accept-Contact",
+        "Reject-Contact",
+        "Join",
+        "SIP-If-Match",
+        "SIP-ETag",
+        "Proxy-Authenticate",  // 40
+        "Proxy-Authorization",
+        "RAck",
+        "Record-Route",
+        "Referred-By",
+        "Refer-To",
+        "Replaces",
+        "Require",
+        "Route",
+        "RSeq",
+        "Security-Client",  // 50
+        "Security-Verify",
+        "Security-Server",
+        "Session-Expires",
+        "Subscription-State",
+        "Supported",
+        "Timestamp",
+        "To",
+        "Unsupported",
+        "Via",
+        "Warning",  // 60
+        "WWW-Authenticate",
+        "Unknown",
+        "Retry-After",
+        "Retry-After",
+        "Retry-After",
+        "P-Early-Media",
+        "Resource-Priority",
+        "Accept-Resource-Priority",
+        "Date",
+        "Accept-Encoding",  // 70
+        "Accept-Language",
+        "Alert-Info",
+        "Answer-Mode",
+        "Authentication-Info",
+        "Call-Info",
+        "Content-Language",
+        "Error-Info",
+        "Flow-Timer",
+        "Identity",
+        "Identity-Info",  // 80
+        "In-Reply-To",
+        "Organization",
+        "P-Answer-State",
+        "Permission-Missing",
+        "P-Media-Authorization",
+        "P-Profile-Key",
+        "P-Refused-URI-List",
+        "Priority",
+        "Priv-Answer-Mode",
+        "Proxy-Require",  // 90
+        "P-Served-User",
+        "P-User-Database",
+        "Reason",
+        "Refer-Sub",
+        "Reply-To",
+        "Response-Key",
+        "Server",
+        "Subject",
+        "Suppress-If-Match",
+        "Target-Dialog",  // 100
+        "Trigger-Consent",
+        "User-Agent",
+        "Feature-Caps",
+        "Geolocation",
+        "Geolocation-Error",
+        "Geolocation-Routing",
+        "Info-Package",
+        "Max-Breadth",
+        "P-Asserted-Service",
+        "Policy-Contact",  // 110
+        "Policy-ID",
+        "P-Preferred-Service",
+        "Recv-Info",
+        "Session-ID",
+        "UNKNOWN",  // 115
 };
 
-const SIP_CHAR* gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] =
-{
-    "Content-Type",           /*CONTENT_TYPE*/
-    "Content-Disposition",    /*CONTENT_DISPOSITION*/
-    "Content-Encoding",       /*CONTENT_TRANSFER_ENCODING*/
-    "Content-ID",             /*CONTENT_ID*/
-    "Content-Description"     /*CONTENT_DESCRIPTION*/
+const SIP_CHAR* gaszSipContentHdr[SIP_CONTENT_HDRS_LEN] = {
+        "Content-Type",        /*CONTENT_TYPE*/
+        "Content-Disposition", /*CONTENT_DISPOSITION*/
+        "Content-Encoding",    /*CONTENT_TRANSFER_ENCODING*/
+        "Content-ID",          /*CONTENT_ID*/
+        "Content-Description"  /*CONTENT_DESCRIPTION*/
 };
-
 
 const SIP_CHAR gaszSipHdrCompact[21] = "abcdefijklmnorstuvxy";
-const SIP_INT16 gaszSipHdrCompactEnum[20] = {
-    SipHeaderBase::ACCEPT_CONTACT,
-    SipHeaderBase::REFERRED_BY,
-    SipHeaderBase::CONTENT_TYPE,
-    SipHeaderBase::REQUEST_DISPOSITION,
-    SipHeaderBase::CONTENT_ENCODING,
-    SipHeaderBase::FROM,
-    SipHeaderBase::CALL_ID,
-    SipHeaderBase::REJECT_CONTACT,
-    SipHeaderBase::SUPPORTED,
-    SipHeaderBase::CONTENT_LENGTH,
-    SipHeaderBase::CONTACT,
-    SipHeaderBase::IDENTITY_INFO,
-    SipHeaderBase::EVENT,
-    SipHeaderBase::REFER_TO,
-    SipHeaderBase::SUBJECT,
-    SipHeaderBase::TO,
-    SipHeaderBase::ALLOW_EVENTS,
-    SipHeaderBase::VIA,
-    SipHeaderBase::SESSION_EXPIRES,
-    SipHeaderBase::IDENTITY
-};
+const SIP_INT16 gaszSipHdrCompactEnum[20] = {SipHeaderBase::ACCEPT_CONTACT,
+        SipHeaderBase::REFERRED_BY, SipHeaderBase::CONTENT_TYPE, SipHeaderBase::REQUEST_DISPOSITION,
+        SipHeaderBase::CONTENT_ENCODING, SipHeaderBase::FROM, SipHeaderBase::CALL_ID,
+        SipHeaderBase::REJECT_CONTACT, SipHeaderBase::SUPPORTED, SipHeaderBase::CONTENT_LENGTH,
+        SipHeaderBase::CONTACT, SipHeaderBase::IDENTITY_INFO, SipHeaderBase::EVENT,
+        SipHeaderBase::REFER_TO, SipHeaderBase::SUBJECT, SipHeaderBase::TO,
+        SipHeaderBase::ALLOW_EVENTS, SipHeaderBase::VIA, SipHeaderBase::SESSION_EXPIRES,
+        SipHeaderBase::IDENTITY};
 
-
-
-SIPHdrAccess *gpHdrAccess = SIP_NULL;
+SIPHdrAccess* gpHdrAccess = SIP_NULL;
 
 /*****************************************************************************
  * Function name      : SetCharVar
@@ -226,7 +175,6 @@ SIP_BOOL SetCharVar(const SIP_CHAR* pszSource, SIP_CHAR*& pszDestination)
     }
     return SIP_TRUE;
 }
-
 
 /*****************************************************************************
  * Function name      : HasSpace
@@ -261,10 +209,9 @@ SIP_BOOL HasSpace(const SIP_CHAR* pszValue)
  *****************************************************************************/
 SIP_INT32 sipGetMsgType(SIP_CHAR* pszStartPoint)
 {
-    return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ?
-        SipMessage::RESP_TYPE : SipMessage::REQ_TYPE;
+    return (SipPf_Strncmp(SIP_SIPVER, pszStartPoint, SIP_FOUR) == 0) ? SipMessage::RESP_TYPE
+                                                                     : SipMessage::REQ_TYPE;
 }
-
 
 /*****************************************************************************
  * Function name      : sipFindTerminatingCRLF
@@ -275,8 +222,8 @@ SIP_INT32 sipGetMsgType(SIP_CHAR* pszStartPoint)
  *
  * Side Effects          : none
  *****************************************************************************/
-SIP_BOOL  sipFindTerminatingCRLF(SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint,
-        SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
+SIP_BOOL sipFindTerminatingCRLF(
+        SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint, SIP_CHAR** ppLocation, SIP_BOOL* pbHdrEnd)
 {
     /* To check two consecutive CRLF */
     SIP_UINT32 nStrlen = pEndPoint - pStartPoint;
@@ -292,13 +239,12 @@ SIP_BOOL  sipFindTerminatingCRLF(SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint,
 
     while (pNextPoint <= pEndPoint)
     {
-        if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) &&
-            (IS_WSP(*pStartPoint) == SIP_FALSE))
+        if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
         {
             *ppLocation = pPrevPoint2 - SIP_ONE;
             if (IS_CRLF(*pStartPoint, *pNextPoint))
             {
-               *pbHdrEnd = SIP_TRUE;
+                *pbHdrEnd = SIP_TRUE;
             }
             return SIP_TRUE;
         }
@@ -308,8 +254,7 @@ SIP_BOOL  sipFindTerminatingCRLF(SIP_CHAR* pStartPoint, SIP_CHAR* pEndPoint,
         pNextPoint = pStartPoint + SIP_ONE;
     }
     /*Check For one CRLF at Extream End*/
-    if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) &&
-        (IS_WSP(*pStartPoint) == SIP_FALSE))
+    if (IS_CRLF(*pPrevPoint2, *pPrevPoint1) && (IS_WSP(*pStartPoint) == SIP_FALSE))
     {
         *ppLocation = pPrevPoint2 - SIP_ONE;
         return SIP_TRUE;
@@ -383,7 +328,6 @@ SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
     }
 }
 
-
 /*****************************************************************************
  * Function name      : SIPHdrAccess :: SIPHdrAccess()
  *
@@ -410,7 +354,7 @@ SIPHdrAccess::SIPHdrAccess()
                 objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrType = nHdrIndex;
 
                 SipPf_Memset(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName, 0,
-                    SIP_MAX_HDR_LEN);
+                        SIP_MAX_HDR_LEN);
 
                 SipPf_Strncpy(objHdrLenRecord[nHdrLenIndex].objHeaders[nNoOfHdr].HdrName,
                         gaszSipHdr[nHdrIndex], SipPf_Strlen(gaszSipHdr[nHdrIndex]));
@@ -420,14 +364,13 @@ SIPHdrAccess::SIPHdrAccess()
     }
 }
 
-
 SIPHdrAccess* SIPHdrAccess::GetInstance()
 {
-     if (s_pInstance == SIP_NULL)
-     {
-         s_pInstance = new SIPHdrAccess();
-     }
-     return s_pInstance;
+    if (s_pInstance == SIP_NULL)
+    {
+        s_pInstance = new SIPHdrAccess();
+    }
+    return s_pInstance;
 }
 
 void SIPHdrAccess::DestroyInstance()
@@ -456,7 +399,7 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
     }
 
     SIP_INT32 nlen = SipPf_Strlen(pszRcvdHdrName);
-    if ( nlen >= SIP_MAX_HDR_LEN)
+    if (nlen >= SIP_MAX_HDR_LEN)
     {
         return SipHeaderBase::UNKNOWN;
     }
@@ -467,7 +410,7 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
 
     /*Content header are separately parsed based Content headers array gaszSipContentHdr
       and treated as known headers */
-    if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Content", SIP_SEVEN) == SIP_ZERO)
+    if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Content", SIP_SEVEN) == SIP_ZERO)
     {
         SIP_BOOL isContHdrFound = SIP_FALSE;
         for (SIP_INT32 nNContHdr = SIP_ZERO; nNContHdr < SIP_CONTENT_HDRS_LEN; nNContHdr++)
@@ -478,30 +421,29 @@ SIP_INT32 SIPHdrAccess::GetHdrType(const SIP_CHAR* pszRcvdHdrName)
                 break;
             }
         }
-        //Other Content headers treated as unknown headers like Content-Length.
+        // Other Content headers treated as unknown headers like Content-Length.
         if (isContHdrFound == SIP_FALSE)
         {
             return SipHeaderBase::UNKNOWN;
         }
-    } // Conversion for Expires / Retry-After Headers
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Expires", SIP_SEVEN) == SIP_ZERO)
+    }  // Conversion for Expires / Retry-After Headers
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Expires", SIP_SEVEN) == SIP_ZERO)
     {
         return SipHeaderBase::EXPIRES_SEC;
     }
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Retry-After", SIP_11) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Retry-After", SIP_11) == SIP_ZERO)
     {
         return SipHeaderBase::RETRY_AFTER_SEC;
     }
-    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR *)"Feature-Caps", SIP_12) == SIP_ZERO)
+    else if (SipPf_Strnicmp(pszRcvdHdrName, (SIP_CHAR*)"Feature-Caps", SIP_12) == SIP_ZERO)
     {
-       return SipHeaderBase::UNKNOWN;
+        return SipHeaderBase::UNKNOWN;
     }
 
-    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < objHdrLenRecord[nlen].NoOfEntries ;
-            nNoOfHdr++)
+    for (SIP_INT32 nNoOfHdr = SIP_ZERO; nNoOfHdr < objHdrLenRecord[nlen].NoOfEntries; nNoOfHdr++)
     {
-        if (SipPf_Stricmp(objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName,
-                pszRcvdHdrName) == SIP_ZERO)
+        if (SipPf_Stricmp(objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrName, pszRcvdHdrName) ==
+                SIP_ZERO)
         {
             return objHdrLenRecord[nlen].objHeaders[nNoOfHdr].HdrType;
         }
@@ -514,13 +456,14 @@ SIP_INT32 SIPHdrAccess::GetHdrTypeCompact(SIP_CHAR RcvdHdrName)
     SIP_CHAR lowHdrName = tolower(RcvdHdrName);
 
     /*Content-Length (l) header to be considered as unknown header to synch with Engine.*/
-    /*Other content headers which has compact form (type - c & encoding - e) are known headers in engine*/
+    /*Other content headers which has compact form (type - c & encoding - e) are known headers in
+     * engine*/
     if (lowHdrName == 'l')
     {
         return SipHeaderBase::UNKNOWN;
     }
 
-    SIP_CHAR* psztemp = (SIP_CHAR *)gaszSipHdrCompact;
+    SIP_CHAR* psztemp = (SIP_CHAR*)gaszSipHdrCompact;
     for (SIP_INT32 i = 0; (*psztemp != '\0'); i++)
     {
         if (*psztemp == lowHdrName)

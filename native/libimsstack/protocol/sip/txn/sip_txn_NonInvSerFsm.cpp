@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                 description
-   --------  --------------         ----------
-   20100000  syed.malgimani@        Created
-   20170110  vijay.nair@            Modified
-   </table>
-
-   Description
-
- */
-
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
@@ -33,25 +20,25 @@
 
 static SIP_BOOL NonInvSerFsm_NullFxn(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    (void)pnError; (void)pvData; (void)pTxn;
-    SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-            "NonInvSerFsm_NullFxn: Invalid Handling",
-            SIP_ZERO, SIP_ZERO);
+    (void)pnError;
+    (void)pvData;
+    (void)pTxn;
+    SIP_DEBUG_STACKBUG(
+            ESIPTRACE_MODTXN, "NonInvSerFsm_NullFxn: Invalid Handling", SIP_ZERO, SIP_ZERO);
     return SIP_FALSE;
 }
 
-static SIP_BOOL NonInvSer_Send2xx6xxResp(SipTxn* pTxn, void* pvData, SIP_UINT16* pnNewTxnState,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSer_Send2xx6xxResp(
+        SipTxn* pTxn, void* pvData, SIP_UINT16* pnNewTxnState, SIP_UINT16* pnError)
 {
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
     SipTransportParameter* pTransparam = pFsmData->m_pTranspParam;
 
     const SipTxnTimerValues& objSipTxnTimers = pTxn->GetSipTxnTimers();
     SIP_UINT32 nDurationTJ = objSipTxnTimers.GetTimerValue(SipTxn::TIMERJ);
 
     SIP_INT32 eTranspMsgSentProtocol = pTransparam->GetTranspProtocol();
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "NonInvSer_Send2xx6xxResp: Transport %d, TimerJ %d",
+    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "NonInvSer_Send2xx6xxResp: Transport %d, TimerJ %d",
             eTranspMsgSentProtocol, nDurationTJ);
 
     /* For Unreliable Transport : Start Timer J*/
@@ -59,8 +46,7 @@ static SIP_BOOL NonInvSer_Send2xx6xxResp(SipTxn* pTxn, void* pvData, SIP_UINT16*
     {
         if (pTxn->StartTxnTimer(SipTxn::TIMERJ, nDurationTJ, pnError) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                    "NonInvSer_Send2xx6xxResp: StartTxnTimer:Failed \n",
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "NonInvSer_Send2xx6xxResp: StartTxnTimer:Failed \n",
                     SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
@@ -76,16 +62,15 @@ static SIP_BOOL NonInvSer_Send2xx6xxResp(SipTxn* pTxn, void* pvData, SIP_UINT16*
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     SipTxnKey* pNewTxnKey = new SipTxnKey(pTxn->GetTxnKey(), pnError);
 
     if ((pNewTxnKey == SIP_NULL) || (*pnError == E_ERR_PF_MALLOCFAILED))
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "NonInvSerFsm_IdleStRecvNonInvReqEvt:pNewTxnKey memory fail",
-                SIP_ZERO, SIP_ZERO);
+                "NonInvSerFsm_IdleStRecvNonInvReqEvt:pNewTxnKey memory fail", SIP_ZERO, SIP_ZERO);
 
         if (pNewTxnKey != SIP_NULL)
         {
@@ -94,13 +79,13 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvDa
         return SIP_FALSE;
     }
 
-    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE,
-            SIP_NULL, reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
+    if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pNewTxnKey), TXN_OPT_CREATE, SIP_NULL,
+                reinterpret_cast<SIP_VOID**>(&pTxn)) == SIP_FALSE)
     {
         delete pNewTxnKey;
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "NonInvSerFsm_IdleStRecvNonInvReqEvt:Adding Txn into DB Fails \n",
-                SIP_ZERO, SIP_ZERO);
+                "NonInvSerFsm_IdleStRecvNonInvReqEvt:Adding Txn into DB Fails \n", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -130,14 +115,13 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvDa
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TRYING_ST);
 
     SipMessage* pMsgIn = pFsmData->m_pSipMsgIn;
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-         "NonInvSerFsm_IdleStRecvNonInvReqEvt: Method : %d",
-         pMsgIn->GetMethodType(), SIP_ZERO);
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "NonInvSerFsm_IdleStRecvNonInvReqEvt: Method : %d",
+            pMsgIn->GetMethodType(), SIP_ZERO);
 
     /*If PRACK message received, stop 18x retransmission timer if any*/
     if (pMsgIn->GetMethodType() == SipMessage::METHOD_PRACK)
     {
-        SipTxn* pInvSerTxn = SIP_NULL;//Corresponding INV Txn.
+        SipTxn* pInvSerTxn = SIP_NULL;  // Corresponding INV Txn.
 
         SipTxnUtil* pSipTxnUtil = SipTxnUtil::GetInstance();
         SIP_UINT32 nRseqNum = GetRSeqNum(pMsgIn, SipHeaderBase::RACK);
@@ -147,28 +131,29 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvDa
         if (pINVTxnKey != SIP_NULL)
         {
             if (sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pINVTxnKey), TXN_OPT_FETCH,
-                    SIP_NULL, reinterpret_cast<SIP_VOID**>(&pInvSerTxn)) == SIP_TRUE)
+                        SIP_NULL, reinterpret_cast<SIP_VOID**>(&pInvSerTxn)) == SIP_TRUE)
             {
                 if (pInvSerTxn != SIP_NULL)
                 {
                     SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                        "NonInvSerFsm_IdleStRecvNonInvReqEvt: FETCH Success Stopping Timer.",
-                        SIP_ZERO, SIP_ZERO);
+                            "NonInvSerFsm_IdleStRecvNonInvReqEvt: FETCH Success Stopping Timer.",
+                            SIP_ZERO, SIP_ZERO);
                     pInvSerTxn->StopTxnTimer();
                 }
                 if (pSipTxnUtil->DeleteTxnKey(pINVTxnKey, SIP_TRUE) == SIP_FALSE)
                 {
                     SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                        "NonInvSerFsm_IdleStRecvNonInvReqEvt:Deleting Txn Key from list Failed \n",
-                        SIP_ZERO, SIP_ZERO);
+                            "NonInvSerFsm_IdleStRecvNonInvReqEvt:Deleting Txn Key from list Failed "
+                            "\n",
+                            SIP_ZERO, SIP_ZERO);
                 }
                 pINVTxnKey = SIP_NULL;
             }
             else
             {
                 SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                     "NonInvSerFsm_IdleStRecvNonInvReqEvt, FETCH failure, can not stop Timer.",
-                     SIP_ZERO, SIP_ZERO);
+                        "NonInvSerFsm_IdleStRecvNonInvReqEvt, FETCH failure, can not stop Timer.",
+                        SIP_ZERO, SIP_ZERO);
             }
         }
         else
@@ -193,14 +178,15 @@ static SIP_BOOL NonInvSerFsm_IdleStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvDa
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_TryingStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_TryingStRecvNonInvReqEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
 
     /* This is receive of re-transmitted non-INVITE request.
-       since previous req is already passed to TU and response is not been send, ignore the request */
+       since previous req is already passed to TU and response is not been send, ignore the request
+     */
     pFsmData->m_pOutUserData = pTxn->GetUserData();
     pFsmData->eTxnStatus = SipTxn::STATUS_IGNORE_REQ;
 
@@ -208,11 +194,11 @@ static SIP_BOOL NonInvSerFsm_TryingStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pv
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_TryingStSend1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_TryingStSend1xxRespEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
 
     /* Fill FSM data for stack manager */
     pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
@@ -221,8 +207,8 @@ static SIP_BOOL NonInvSerFsm_TryingStSend1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvDa
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     SIP_UINT16 nNewTxnState = SIP_ZERO;
 
@@ -230,12 +216,12 @@ static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* p
     if (NonInvSer_Send2xx6xxResp(pTxn, pvData, &nNewTxnState, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "NonInvSerFsm_TryingStSend2xx6xxRespEvt: response processing fail",
-                SIP_ZERO, SIP_ZERO);
+                "NonInvSerFsm_TryingStSend2xx6xxRespEvt: response processing fail", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
     /* Fill FSM data for stack manager */
     if (nNewTxnState == SipTxn::NON_INV_SER_TERMINATED_ST)
     {
@@ -249,19 +235,21 @@ static SIP_BOOL NonInvSerFsm_TryingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* p
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_TryingStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_TryingStTranspErrorEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    (void)pnError; (void) pvData; (void) pTxn;
+    (void)pnError;
+    (void)pvData;
+    (void)pTxn;
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_ProceedingStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_ProceedingStRecvNonInvReqEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
@@ -273,12 +261,12 @@ static SIP_BOOL NonInvSerFsm_ProceedingStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_ProceedingStSend1xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_ProceedingStSend1xxRespEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pTxn;
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
 
     pFsmData->eTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
@@ -286,8 +274,8 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend1xxRespEvt(SipTxn* pTxn, SIP_VOID* 
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     SIP_UINT16 nNewTxnState;
 
@@ -295,8 +283,8 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOI
     if (NonInvSer_Send2xx6xxResp(pTxn, pvData, &nNewTxnState, pnError) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "NonInvSerFsm_ProceedingStSend2xx6xxRespEvt: response processing fail",
-                SIP_ZERO, SIP_ZERO);
+                "NonInvSerFsm_ProceedingStSend2xx6xxRespEvt: response processing fail", SIP_ZERO,
+                SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -313,19 +301,21 @@ static SIP_BOOL NonInvSerFsm_ProceedingStSend2xx6xxRespEvt(SipTxn* pTxn, SIP_VOI
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_ProceedingStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_ProceedingStTranspErrorEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    (void)pnError; (void) pvData; (void)pTxn;
+    (void)pnError;
+    (void)pvData;
+    (void)pTxn;
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_CompletedStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_CompletedStRecvNonInvReqEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
     (void)pnError;
-    SipTxnFsmData* pFsmData = (SipTxnFsmData*) pvData;
+    SipTxnFsmData* pFsmData = (SipTxnFsmData*)pvData;
 
     /* This is receive of re-transmitted non-INVITE request.
        stack manager to send last response */
@@ -337,19 +327,20 @@ static SIP_BOOL NonInvSerFsm_CompletedStRecvNonInvReqEvt(SipTxn* pTxn, SIP_VOID*
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_CompletedStTranspErrorEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_CompletedStTranspErrorEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    (void)pnError; (void)pvData, (void)pTxn;
+    (void)pnError;
+    (void)pvData, (void)pTxn;
     pTxn->StopTxnTimer();
     pTxn->SetTxnState(SipTxn::NON_INV_SER_TERMINATED_ST);
     return SIP_TRUE;
 }
 
-static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(SipTxn* pTxn, SIP_VOID* pvData,
-        SIP_UINT16* pnError)
+static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(
+        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError)
 {
-    SipTimeoutData* pTimeoutData = (SipTimeoutData *)pvData;
+    SipTimeoutData* pTimeoutData = (SipTimeoutData*)pvData;
 
     (void)pnError;
     (void)pTimeoutData;
@@ -359,62 +350,61 @@ static SIP_BOOL NonInvSerFsm_CompletedStTimer_J_TimeoutEvt(SipTxn* pTxn, SIP_VOI
     return SIP_TRUE;
 }
 
-SIP_BOOL (*gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_INVALID_ST+1]
-                                 [SipTxn::NON_INV_SER_INVALID_EVT+1])(
-        SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError) =
-{
-    /* Idle State:: S0*/
-    {
-        NonInvSerFsm_IdleStRecvNonInvReqEvt,    /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-        NonInvSerFsm_NullFxn
-    },
-    /* TRYING State:: S1*/
-    {
-        NonInvSerFsm_TryingStRecvNonInvReqEvt,    /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-        NonInvSerFsm_TryingStSend1xxRespEvt,    /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-        NonInvSerFsm_TryingStSend2xx6xxRespEvt,/* Send2xx6xxRespEvt */
-        NonInvSerFsm_TryingStTranspErrorEvt,    /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-        NonInvSerFsm_NullFxn
-    },
-    /* PROCEEDING State:: S2*/
-    {
-        NonInvSerFsm_ProceedingStRecvNonInvReqEvt,    /* RecvNonInvReqEvt */
-        NonInvSerFsm_ProceedingStSend1xxRespEvt,    /* Send1xxRespEvt */
-        NonInvSerFsm_ProceedingStSend2xx6xxRespEvt,/* Send2xx6xxRespEvt */
-        NonInvSerFsm_ProceedingStTranspErrorEvt,/* ranspnErrorEvt */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-        NonInvSerFsm_NullFxn
-    },
-    /* COMPLETED State:: S3*/
-    {
-        NonInvSerFsm_CompletedStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-        NonInvSerFsm_CompletedStTranspErrorEvt,    /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-        NonInvSerFsm_CompletedStTimer_J_TimeoutEvt,/* Timer_J_TimeoutEvt */
-        NonInvSerFsm_NullFxn
-    },
-    /* TERMINATED State:: S4*/
-    {
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-        NonInvSerFsm_NullFxn
-    },
-    /* Invalid State:: S5*/
-    {
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
-        NonInvSerFsm_NullFxn,                    /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
-        NonInvSerFsm_NullFxn
-    }
+SIP_BOOL (*gpfSipNonInvSerTxnFsm[SipTxn::NON_INV_SER_INVALID_ST + 1]
+                                [SipTxn::NON_INV_SER_INVALID_EVT + 1])
+(SipTxn* pTxn, SIP_VOID* pvData, SIP_UINT16* pnError) = {
+  /* Idle State:: S0*/
+        {
+            NonInvSerFsm_IdleStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+            NonInvSerFsm_NullFxn
+        },
+ /* TRYING State:: S1*/
+        {
+            NonInvSerFsm_TryingStRecvNonInvReqEvt, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+            NonInvSerFsm_TryingStSend1xxRespEvt, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+            NonInvSerFsm_TryingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
+            NonInvSerFsm_TryingStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+            NonInvSerFsm_NullFxn
+        },
+ /* PROCEEDING State:: S2*/
+        {
+            NonInvSerFsm_ProceedingStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
+            NonInvSerFsm_ProceedingStSend1xxRespEvt, /* Send1xxRespEvt */
+            NonInvSerFsm_ProceedingStSend2xx6xxRespEvt, /* Send2xx6xxRespEvt */
+            NonInvSerFsm_ProceedingStTranspErrorEvt, /* ranspnErrorEvt */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+            NonInvSerFsm_NullFxn
+        },
+ /* COMPLETED State:: S3*/
+        {
+            NonInvSerFsm_CompletedStRecvNonInvReqEvt, /* RecvNonInvReqEvt */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+            NonInvSerFsm_CompletedStTranspErrorEvt, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+            NonInvSerFsm_CompletedStTimer_J_TimeoutEvt, /* Timer_J_TimeoutEvt */
+            NonInvSerFsm_NullFxn
+        },
+ /* TERMINATED State:: S4*/
+        {
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+            NonInvSerFsm_NullFxn
+        },
+ /* Invalid State:: S5*/
+        {
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_RECV_NON_INV_REQ_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_1XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_SEND_2XX_6XX_RESP_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TRANSP_ERROR_EVT */
+            NonInvSerFsm_NullFxn, /* SipTxn::NON_INV_SER_TIMER_J_TIME_OUT_EVT */
+            NonInvSerFsm_NullFxn
+        }
 };

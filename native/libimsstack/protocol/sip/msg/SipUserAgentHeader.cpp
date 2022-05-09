@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipUserAgentHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipUserAgentHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -30,32 +6,17 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
 /*constructor*/
-SipUserAgentHeader::SipUserAgentHeader(SIP_INT32 eHdrType)
-    : SipHeaderBase(eHdrType)
-    , m_objProductList(SipVector<SIP_CHAR*>())
+SipUserAgentHeader::SipUserAgentHeader(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
+        m_objProductList(SipVector<SIP_CHAR*>())
 {
 }
 
-
 /*constructor*/
-SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_objProductList(SipVector<SIP_CHAR*>())
+SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_objProductList(SipVector<SIP_CHAR*>())
 {
     SIP_UINT32 nSize = objHeader.m_objProductList.GetSize();
     for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
@@ -69,17 +30,15 @@ SipUserAgentHeader::SipUserAgentHeader(const SipUserAgentHeader& objHeader)
     }
 }
 
-
 /*destructor*/
 SipUserAgentHeader::~SipUserAgentHeader()
 {
-    while(m_objProductList.IsEmpty() != SIP_TRUE)
+    while (m_objProductList.IsEmpty() != SIP_TRUE)
     {
         delete m_objProductList.Top();
         m_objProductList.Pop();
     }
 }
-
 
 /*virtual methods*/
 /*Function for encoding of headers*/
@@ -87,8 +46,7 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
 {
     if (m_objProductList.IsEmpty() == SIP_TRUE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "No header body", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No header body", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -107,7 +65,6 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-
 /*Sets */
 SIP_BOOL SipUserAgentHeader::AddProductNameVer(const SIP_CHAR* pszProduct)
 {
@@ -119,8 +76,7 @@ SIP_BOOL SipUserAgentHeader::AddProductNameVer(const SIP_CHAR* pszProduct)
     SIP_CHAR* pszTempProduct = SipPf_Strdup(pszProduct);
     if (pszTempProduct == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Malloc Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Malloc Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     m_objProductList.Add(pszTempProduct);
@@ -141,8 +97,7 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -160,9 +115,9 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
             pTempPos = pEndPt;
         }
 
-        //check LWS is between comment
+        // check LWS is between comment
         if (bStatus == SIP_TRUE &&
-            (pCommentStart < (pTempPos) && (pTempPos) < pCommentEnd) == SIP_TRUE)
+                (pCommentStart < (pTempPos) && (pTempPos) < pCommentEnd) == SIP_TRUE)
         {
             pStartPt = pCommentStart;
             pTempPos = pCommentEnd;
@@ -171,17 +126,16 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SIP_CHAR* pszUserAgent = sipCreateString(pStartPt, pTempPos);
         if (pszUserAgent == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Memory Allocation failed",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
         /*Put the value into list*/
         if (m_objProductList.Add(pszUserAgent) < SIP_ZERO)
         {
             delete[] pszUserAgent;
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "DecodeHdr:Adding in list failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 

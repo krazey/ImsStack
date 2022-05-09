@@ -3,9 +3,9 @@
 
 class SipEventContext
 {
-    public:
-        inline SipEventContext() {}
-        inline ~SipEventContext() {}
+public:
+    inline SipEventContext() {}
+    inline ~SipEventContext() {}
 };
 
-#endif //__SIP_EVENT_CONTEXT_H__
+#endif  //__SIP_EVENT_CONTEXT_H__

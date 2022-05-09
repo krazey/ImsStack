@@ -1,25 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename          : SipTransportInfo.hander.cpp
- * Purpose           : SIP Transport Functions : Ref: SipTransportInfo.handler.h
- * Platform          : Windows OR Android
- * Author(s)         : Syed Malgimani
- * E-mail id.        : syed.malgimani@
- * Creation date     : July. 26,2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * 26 Jul 10        syed            0.0a                    Initial creation
- * 26 Apr 11        birender        --                        Transport handling corrected
-
- *****************************************************************************/
 #include "transport/SipTransportHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "transport/SipTransportParameter.h"
@@ -33,23 +11,16 @@
 /*****************************************************************************
   Macro
  *****************************************************************************/
-#define SIP_TRANSP_TCP "TCP"
-#define SIP_TRANSP_UDP "UDP"
-#define SIP_TRANSP_TLS "TLS"
+#define SIP_TRANSP_TCP       "TCP"
+#define SIP_TRANSP_UDP       "UDP"
+#define SIP_TRANSP_TLS       "TLS"
 
-#define SIP_VIA_LINE_TCP "/TCP"
-#define SIP_VIA_LINE_UDP "/UDP"
-#define SIP_VIA_LINE_TLS "/TLS"
+#define SIP_VIA_LINE_TCP     "/TCP"
+#define SIP_VIA_LINE_UDP     "/UDP"
+#define SIP_VIA_LINE_TLS     "/TLS"
 
-#define SIP_VIA_ENC_FORMAT_1    "\r\nVia:"
-#define SIP_VIA_ENC_FORMAT_2    "\r\nv:"
-/*****************************************************************************
-  Extern Declaration
- *****************************************************************************/
-
-/*****************************************************************************
-  STATIC LOCAL VARUABLES.
- ******************************************************************************/
+#define SIP_VIA_ENC_FORMAT_1 "\r\nVia:"
+#define SIP_VIA_ENC_FORMAT_2 "\r\nv:"
 
 /****************************************************************************
   Member Function Implementations
@@ -73,15 +44,14 @@
  */
 SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
         IN SipTransportParameter* pTranspParam, IN SIP_CHAR* pSipBuffer,
-        IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo,
-        OUT SIP_UINT16* pnError)
+        IN SIP_UINT32 nSipBufferLen, OUT SipTransportInfo** ppTranspInfo, OUT SIP_UINT16* pnError)
 {
     (void)pnError;
 
     /* Input parameter validation */
     if ((pSipMsg == SIP_NULL) || (pTranspParam == SIP_NULL))
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,"SendMsg invalid params",0,0);
+        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "SendMsg invalid params", 0, 0);
         return SIP_FALSE;
     }
 
@@ -102,12 +72,12 @@ SIP_BOOL SipTransportHandler::OnSendTransp(IN SipMessage* pSipMsg,
 
     /*No need to check Message Size Constraint for Response type and ACK which is sent directly */
     if (((SipMessage::REQ_TYPE == eMsgType) && (SipMessage::METHOD_ACK == eMethod)) ||
-        (SipMessage::RESP_TYPE == eMsgType))
+            (SipMessage::RESP_TYPE == eMsgType))
     {
         /* Send Directly to N/W */
 
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP,
-                "OnSendTransp: Send Directly to NW", SIP_ZERO, SIP_ZERO);
+        SIP_TRACE_NORMAL(
+                ESIPTRACE_MODTRANSP, "OnSendTransp: Send Directly to NW", SIP_ZERO, SIP_ZERO);
 
         SipTransportInfo* pTranspInfo = new SipTransportInfo(pTranspParam, pTranspBuffer);
 
@@ -184,7 +154,7 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
         IN SipTransportParameter* pTranspParam, OUT SIP_INT32* peTxnStatus,
         OUT SIP_BOOL* pbTxnExist, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
-    (void) pTranspParam;
+    (void)pTranspParam;
 
     /* RFC 3261: Section 18.2.1
        Fetch value of the "sent-by" parameter in the top Via header field
@@ -198,15 +168,15 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
     SipTxnKey* pTxnKey = SIP_NULL;
     if (SIP_FALSE == GetTxnKeyFromSipMsg(pSipMsg, &pTxnKey, pnError))
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTransp: GetTxnKeyFromSipMsg fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTRANSP, "OnRecvTransp: GetTxnKeyFromSipMsg fail", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (pTxnKey->GetMsgType() == SipMessage::REQ_TYPE)
     {
         if ((SipPf_Strcmp(ACK_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS) ||
-            (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS))
+                (SipPf_Strcmp(INVITE_METHOD, pTxnKey->GetMethod()) == SIP_EQUALS))
         {
             pTxnKey->SetTxnType(SipTxn::INV_SER_TXN);
         }
@@ -232,8 +202,8 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
     SIP_BOOL bTxnExist = SIP_TRUE;
     if (GetTxnObjFromDb(pTxnKey, &pTxn, &bTxnExist, pnError) == SIP_FALSE)
     {
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTransp: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTRANSP, "OnRecvTransp: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
 
         delete pTxnKey;
         return SIP_FALSE;
@@ -250,8 +220,8 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
             SIP_UINT16 nStatusCode = pSipMsg->GetStatusCode();
 
             /* In case of retransmitted 2xx for INVITE, return as valid sip message */
-            if ((pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE)
-                    && SIP_SUCCESSFUL_RESP(nStatusCode))
+            if ((pSipMsg->GetMethodType() == SipMessage::METHOD_INVITE) &&
+                    SIP_SUCCESSFUL_RESP(nStatusCode))
             {
                 *peTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
             }
@@ -266,11 +236,11 @@ SIP_BOOL SipTransportHandler::OnRecvTransp(IN SipMessage* pSipMsg,
             *peTxnStatus = SipTxn::STATUS_NEW_REQ_RECVD;
         }
 
-        *ppTxnKey = pTxnKey;    // new instance
+        *ppTxnKey = pTxnKey;  // new instance
         return SIP_TRUE;
     }
 
-    *ppTxnKey = pTxnKey; // New instance
+    *ppTxnKey = pTxnKey;  // New instance
     *peTxnStatus = SipTxn::STATUS_VALID_MESSAGE;
 
     /* For Both Request and Response Notify Transaction Layer */
@@ -302,8 +272,8 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
     if (bTxnExist == SIP_NO)
     {
         /* Transaction for the response doesn't exist */
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: Transaction Not Found", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTRANSP, "OnRecvTanspError: Transaction Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -315,8 +285,8 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         pTxn->SipDelete();
 
         /*  stack error */
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTRANSP, "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
         *pnError = ETXN_STACKERROR;
         return SIP_FALSE;
     }
@@ -327,8 +297,8 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         pTxn->SipDelete();
 
         /*  stack error */
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(
+                ESIPTRACE_MODTRANSP, "OnRecvTanspError: sipFetchElement Error", SIP_ZERO, SIP_ZERO);
         *pnError = ETXN_STACKERROR;
         return SIP_FALSE;
     }
@@ -339,8 +309,7 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
         pTxn->SipDelete();
 
         SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "OnRecvTanspError: SipTransportInfo::PROTOCOL_INVALID\n",
-                SIP_ZERO, SIP_ZERO);
+                "OnRecvTanspError: SipTransportInfo::PROTOCOL_INVALID\n", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -350,16 +319,14 @@ SIP_BOOL SipTransportHandler::OnRecvTanspError(SIP_INT32 eTranspError, SipTxnKey
     {
         /* Switch to previous Transport Information as initially given by stack user */
         /* Change Protocol in Buffer */
-        SIP_BOOL bStatus = UpdateViaSipMsg(
-                pTranspInfo->GetSentSipMsg(),
-                pTranspInfo->GetTranspSipBuffer(),
-                SipTransportInfo::PROTOCOL_UDP);
+        SIP_BOOL bStatus = UpdateViaSipMsg(pTranspInfo->GetSentSipMsg(),
+                pTranspInfo->GetTranspSipBuffer(), SipTransportInfo::PROTOCOL_UDP);
         if (bStatus == SIP_FALSE)
         {
             pTxn->SipDelete();
 
-            SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                    "OnRecvTanspError: sipUpdateViaSipMsg Fails\n", SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP, "OnRecvTanspError: sipUpdateViaSipMsg Fails\n",
+                    SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -401,8 +368,8 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
     if (GetTxnObjFromDb(pInviteTxnKey, &pTxn, &bTxnExist, &nError) == SIP_FALSE)
     {
         bTxnExist = SIP_FALSE;
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP,
-                "IsInviteTxnPresentForAckTxn: GetTxnObjFromDb fail", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTRANSP, "IsInviteTxnPresentForAckTxn: GetTxnObjFromDb fail",
+                SIP_ZERO, SIP_ZERO);
     }
 
     delete pInviteTxnKey;
@@ -416,8 +383,8 @@ SIP_BOOL SipTransportHandler::IsInviteTxnPresentForAckTxn(IN SipTxnKey* pAckTxnK
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(SipMessage* pSipMsg,
-        SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
+PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(
+        SipMessage* pSipMsg, SipTransportBuffer* pSentBuffer, SIP_INT32 eChangeProto)
 {
     SIP_CHAR* pSipBuffer = pSentBuffer->GetSipBuffer();
     SIP_CHAR* pszTemp = SipPf_Strstr(pSipBuffer, SIP_VIA_ENC_FORMAT_1);
@@ -497,36 +464,36 @@ PRIVATE SIP_BOOL SipTransportHandler::UpdateViaSipMsg(SipMessage* pSipMsg,
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(IN SipMessage* pSipMsg,
-        OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
+PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(
+        IN SipMessage* pSipMsg, OUT SipTxnKey** ppTxnKey, OUT SIP_UINT16* pnError)
 {
     SIP_INT32 eMsgType = SipMessage::TYPE_INVALID;
     SIP_INT32 eMethodType = SipMessage::METHOD_INVALID;
 
     /* Check if it's proper to start Transaction Ref: RFC 3261 8.1.1.*/
-    SIP_BOOL bStatus  = CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType);
+    SIP_BOOL bStatus = CheckTxnMadatoryParams(pSipMsg, &eMsgType, &eMethodType);
     if (bStatus == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING ( ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO );
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
+                "GetTxnKeyFromSipMsg: CheckTxnMadatoryParams fails\n", SIP_ZERO, SIP_ZERO);
 
         return SIP_FALSE;
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg: eMsgType[%d], Method[%d]",
-            eMsgType, eMethodType);
+    SIP_TRACE_NORMAL(ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg: eMsgType[%d], Method[%d]", eMsgType,
+            eMethodType);
 
     SipTxnKey* pTxnKey = new SipTxnKey(pSipMsg, pnError);
     if (pTxnKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     else if (*pnError == EERR_MALLOCFAILED)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTRANSP,
-                "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTRANSP, "GetTxnKeyFromSipMsg:key Creation Fails", SIP_ZERO, SIP_ZERO);
         delete pTxnKey;
         return SIP_FALSE;
     }
@@ -535,28 +502,23 @@ PRIVATE SIP_BOOL SipTransportHandler::GetTxnKeyFromSipMsg(IN SipMessage* pSipMsg
     return SIP_TRUE;
 }
 
-
 /*****************************************************************************
  * Function name         : GetTxnObjFromDb
  * Description            : Fetches object from Database[Utility func within txn]
  * Preconditions/        :
  * Side Effects            :
  *****************************************************************************/
-PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey,
-        OUT SipTxn** ppTxn, OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
+PRIVATE SIP_BOOL SipTransportHandler::GetTxnObjFromDb(IN SipTxnKey* pTxnKey, OUT SipTxn** ppTxn,
+        OUT SIP_BOOL* pbTxnExist, OUT SIP_UINT16* pnError)
 {
-    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(
-            reinterpret_cast<SIP_VOID*>(pTxnKey),
-            TXN_OPT_FETCH,
-            SIP_NULL,
-            reinterpret_cast<SIP_VOID**>(ppTxn));
+    SIP_BOOL bTxnExist = sip_cbk_fetchTransaction(reinterpret_cast<SIP_VOID*>(pTxnKey),
+            TXN_OPT_FETCH, SIP_NULL, reinterpret_cast<SIP_VOID**>(ppTxn));
 
     if ((bTxnExist == SIP_YES) && (*ppTxn == SIP_NULL))
     {
         /*  stack error */
         *pnError = ETXN_STACKERROR;
-        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN,
-                "GetTxnObjFromDb: Stack Error,Db Status Error\n",
+        SIP_DEBUG_STACKBUG(ESIPTRACE_MODTXN, "GetTxnObjFromDb: Stack Error,Db Status Error\n",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }

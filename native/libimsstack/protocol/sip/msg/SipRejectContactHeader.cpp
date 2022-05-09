@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipRejectContactHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipHeaderBase.h"
 #include "msg/SipRejectContactHeader.h"
 #include "sip_error.h"
@@ -31,35 +7,20 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
 /*constructor*/
-SipRejectContactHeader::SipRejectContactHeader()
-    : SipHeaderBase(SipHeaderBase::REJECT_CONTACT)
+SipRejectContactHeader::SipRejectContactHeader() :
+        SipHeaderBase(SipHeaderBase::REJECT_CONTACT)
 {
 }
 
 /*constructor*/
-SipRejectContactHeader::SipRejectContactHeader(const SipRejectContactHeader& objHeader)
-    : SipHeaderBase(objHeader)
+SipRejectContactHeader::SipRejectContactHeader(const SipRejectContactHeader& objHeader) :
+        SipHeaderBase(objHeader)
 {
 }
 
 /*destructor*/
-SipRejectContactHeader::~SipRejectContactHeader()
-{
-}
+SipRejectContactHeader::~SipRejectContactHeader() {}
 
 SIP_BOOL SipRejectContactHeader::SetValue(const SIP_CHAR* pszContact)
 {
@@ -83,7 +44,7 @@ SIP_BOOL SipRejectContactHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLe
 {
     if (SipHeaderBase::DecodeHdr(pStartPt, nDecLen) == SIP_FALSE)
     {
-      return SIP_FALSE;
+        return SIP_FALSE;
     }
 
     const SIP_CHAR* pszValue = GetValue();

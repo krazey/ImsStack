@@ -1,15 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #include "txn/SipTxn.h"
 #include "txn/SipTimeoutData.h"
 #include "sip_error.h"
@@ -41,7 +29,7 @@ SipTimeoutData::~SipTimeoutData()
     m_pTxnKey = SIP_NULL;
 }
 
-SipTxnKey *SipTimeoutData::GetTxnKey() const
+SipTxnKey* SipTimeoutData::GetTxnKey() const
 {
     return m_pTxnKey;
 }

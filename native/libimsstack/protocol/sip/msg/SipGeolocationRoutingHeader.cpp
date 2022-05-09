@@ -1,30 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipGeolocationRoutingHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :    sravanthi.panditi
- * E-mail id.            : sravanthi.panditi@
- * Creation date       : Feb. 05, 2013
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
 #include "msg/SipGeolocationRoutingHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -32,14 +5,6 @@
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name      : SipGeolocationRoutingHeader::SipGeolocationRoutingHeader
@@ -50,9 +15,9 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipGeolocationRoutingHeader::SipGeolocationRoutingHeader()
-    : SipHeaderBase(SipHeaderBase::GEOLOCATION_ROUTING)
-    , m_pGeoLocationRoutingList(SIP_NULL)
+SipGeolocationRoutingHeader::SipGeolocationRoutingHeader() :
+        SipHeaderBase(SipHeaderBase::GEOLOCATION_ROUTING),
+        m_pGeoLocationRoutingList(SIP_NULL)
 {
 }
 
@@ -66,9 +31,9 @@ SipGeolocationRoutingHeader::SipGeolocationRoutingHeader()
  * Side Effects      : none
  *****************************************************************************/
 SipGeolocationRoutingHeader::SipGeolocationRoutingHeader(
-        const SipGeolocationRoutingHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pGeoLocationRoutingList(SIP_NULL)
+        const SipGeolocationRoutingHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pGeoLocationRoutingList(SIP_NULL)
 {
     if (objHeader.m_pGeoLocationRoutingList != SIP_NULL)
     {
@@ -102,8 +67,8 @@ SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pGeoLocationRoutingList == SIP_NULL)
     {

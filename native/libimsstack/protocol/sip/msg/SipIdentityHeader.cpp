@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipIdentityHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipIdentityHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -31,14 +5,6 @@
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name      : SipIdentityHeader::SipIdentityHeader
@@ -49,8 +15,8 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipIdentityHeader::SipIdentityHeader()
-    : SipHeaderBase(SipHeaderBase::IDENTITY)
+SipIdentityHeader::SipIdentityHeader() :
+        SipHeaderBase(SipHeaderBase::IDENTITY)
 {
 }
 
@@ -63,8 +29,8 @@ SipIdentityHeader::SipIdentityHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader)
-    : SipHeaderBase(objHeader)
+SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
+        SipHeaderBase(objHeader)
 {
 }
 
@@ -77,9 +43,7 @@ SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipIdentityHeader::~SipIdentityHeader()
-{
-}
+SipIdentityHeader::~SipIdentityHeader() {}
 
 /******************************************************************************
  * Function name      : SipIdentityHeader::EncodeHdr

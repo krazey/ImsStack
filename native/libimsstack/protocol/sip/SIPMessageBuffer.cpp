@@ -1,15 +1,3 @@
-/*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100409  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
 #include "ServiceMemory.h"
 #include "ServiceThread.h"
 #include "SystemConfig.h"

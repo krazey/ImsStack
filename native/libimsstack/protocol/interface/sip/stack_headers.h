@@ -1,9 +1,3 @@
-/*
- *
- * All the stack headers are included in this file
- *
- */
-
 #ifndef __STACK_HEADERS_H__
 #define __STACK_HEADERS_H__
 
@@ -16,4 +10,4 @@
 #include "SipContextUtils.h"
 #include "SipConfiguration.h"
 
-#endif // __STACK_HEADERS_H__
+#endif  // __STACK_HEADERS_H__

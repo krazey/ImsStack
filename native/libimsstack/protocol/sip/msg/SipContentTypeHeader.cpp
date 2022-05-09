@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipContentTypeHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipContentTypeHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -31,14 +5,6 @@
 #include "platform/sip_pf_string.h"
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name      : SipContentTypeHeader::SipContentTypeHeader
@@ -49,10 +15,10 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipContentTypeHeader::SipContentTypeHeader()
-    : SipHeaderBase(SipHeaderBase::CONTENT_TYPE)
-    , m_pszMType(SIP_NULL)
-    , m_pszMSubType(SIP_NULL)
+SipContentTypeHeader::SipContentTypeHeader() :
+        SipHeaderBase(SipHeaderBase::CONTENT_TYPE),
+        m_pszMType(SIP_NULL),
+        m_pszMSubType(SIP_NULL)
 {
 }
 
@@ -65,10 +31,10 @@ SipContentTypeHeader::SipContentTypeHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pszMType(SipPf_Strdup(objHeader.m_pszMType))
-    , m_pszMSubType(SipPf_Strdup(objHeader.m_pszMSubType))
+SipContentTypeHeader::SipContentTypeHeader(const SipContentTypeHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pszMType(SipPf_Strdup(objHeader.m_pszMType)),
+        m_pszMSubType(SipPf_Strdup(objHeader.m_pszMSubType))
 {
 }
 
@@ -102,8 +68,8 @@ SipContentTypeHeader::~SipContentTypeHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipContentTypeHeader::EncodeHdr(SIP_CHAR** ppCurrPos,
-        SIP_BOOL bParams /*Default = SIP_TRUE*/)
+SIP_BOOL SipContentTypeHeader::EncodeHdr(
+        SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
     {
@@ -184,7 +150,6 @@ SIP_CHAR* SipContentTypeHeader::GetBoundary()
     delete[] pszVal;
     return pszStripDquoteVal;
 }
-
 
 /******************************************************************************
  * Function name      :SipContentTypeHeader::DecodeHdr

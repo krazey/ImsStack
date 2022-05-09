@@ -1,33 +1,21 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #ifndef _SIP_TXN_COMMON_H
 #define _SIP_TXN_COMMON_H
 
 #include "sip_pf_datatypes.h"
 
 // SIP_TXN_POOL {
-#define TXN_OPT_FETCH 0
+#define TXN_OPT_FETCH  0
 #define TXN_OPT_CREATE 1
 #define TXN_OPT_REMOVE 2
 
-extern SIP_BOOL sip_cbk_fetchTransaction(IN SIP_VOID* pvTxnKey,
-        IN SIP_INT32 nOption, OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
-extern SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey,
-        IN SIP_INT32 nOption, OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
+extern SIP_BOOL sip_cbk_fetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
+extern SIP_BOOL sip_cbk_releaseTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
+        OUT SIP_VOID** ppvOutTxnKey, OUT SIP_VOID** ppvTxn);
 // }
 
 #define SIP_TXN_WAITING_TIME_FACTOR 64
-#define SIP_RETX_WAITING_TIME 32
+#define SIP_RETX_WAITING_TIME       32
 
 typedef enum _SipEn_MsgDir
 {
@@ -37,7 +25,7 @@ typedef enum _SipEn_MsgDir
     ETXN_RECV,
     ETXN_INVALIDDIR
 
-}SipEn_MsgDir;
+} SipEn_MsgDir;
 
 /* Type of Transaction is defined */
 typedef enum _SipEn_TxnType
@@ -48,7 +36,7 @@ typedef enum _SipEn_TxnType
     ETXN_NONINVSERTXN,
     ETXN_TXNTYPEINVALID
 
-}SipEn_TxnType;
+} SipEn_TxnType;
 
 typedef enum _SipEn_TxnStatus
 {
@@ -60,8 +48,8 @@ typedef enum _SipEn_TxnStatus
        Pls Note: On Receive of INVITE Failure response, stack send the failure ACK to network*/
     ETXNSTATUS_VALIDMESSAGE,
     /* Re-transmitted request is received in state where no action is required
-       Re-transmitted INVITE request or Retransmitted Failure ACK request received in confirmed state
-       Re-transmitted non-INVITE request received in Trying state*/
+       Re-transmitted INVITE request or Retransmitted Failure ACK request received in confirmed
+       state Re-transmitted non-INVITE request received in Trying state*/
     ETXNSTATUS_IGNOREREQ,
     /* Response received in state where no action is required
        INVITE 1xx received in completed state
@@ -71,7 +59,8 @@ typedef enum _SipEn_TxnStatus
     ETXNSTATUS_STRAYRESP,
     /* Re-transmitted req/resp are received in valid state
        For re-transmitted request, stack re-transmit the last response to network
-       In INVITE Client txn, retransmitted failure resp can be received for which failure ACK to be sent
+       In INVITE Client txn, retransmitted failure resp can be received for which failure ACK to be
+       sent
      */
     ETXNSTATUS_RETRANSMISSION,
     /* Error occurs when stack try to send message to the network */
@@ -83,7 +72,7 @@ typedef enum _SipEn_TxnStatus
     ETXNSTATUS_STRAYPRACK,
     ETXNSTATUS_INVALID
 
-}SipEn_TxnStatus;
+} SipEn_TxnStatus;
 
 typedef enum _SipEn_TimerType
 {
@@ -104,7 +93,7 @@ typedef enum _SipEn_TimerType
     ETXN_TIMEROTHER,
     ETXN_TIMERTYPEINVALID
 
-}SipEn_TimerType;
+} SipEn_TimerType;
 
 typedef enum _SipEn_TxnInvCliFsmEvt
 {
@@ -117,7 +106,7 @@ typedef enum _SipEn_TxnInvCliFsmEvt
     ETXNINVCLI_TRANSPERROREVT,
     ETXNINVCLI_INVALIDEVT
 
-}SipEn_TxnInvCliFsmEvt;
+} SipEn_TxnInvCliFsmEvt;
 
 /* States for INVITE Client FSM */
 typedef enum _SipEn_TxnInvCliFsmSt
@@ -129,7 +118,7 @@ typedef enum _SipEn_TxnInvCliFsmSt
     ETXNINVCLI_TERMINATEDST,
     ETXNINVCLI_INVALIDST
 
-}SipEn_TxnInvCliFsmSt;
+} SipEn_TxnInvCliFsmSt;
 
 typedef enum _SipEn_TxnInvSerFsmEvt
 {
@@ -143,7 +132,7 @@ typedef enum _SipEn_TxnInvSerFsmEvt
     ETXNINVSER_TIMERI_TIMEOUTEVT,
     ETXNINVSER_INVALIDEVT
 
-}SipEn_TxnInvSerFsmEvt;
+} SipEn_TxnInvSerFsmEvt;
 
 /* States for INVITE Server FSM */
 typedef enum _SipEn_TxnInvSerFsmSt
@@ -155,7 +144,7 @@ typedef enum _SipEn_TxnInvSerFsmSt
     ETXNINVSER_TERMINATEDST,
     ETXNINVSER_INVALIDST
 
-}SipEn_TxnInvSerFsmSt;
+} SipEn_TxnInvSerFsmSt;
 
 typedef enum _SipEn_TxnNonInvCliFsmEvt
 {
@@ -167,7 +156,7 @@ typedef enum _SipEn_TxnNonInvCliFsmEvt
     ETXNNONINVCLI_TIMER_K_TIMEOUTEVT,
     ETXNNONINVCLI_INVALIDEVT
 
-}SipEn_TxnNonInvCliFsmEvt;
+} SipEn_TxnNonInvCliFsmEvt;
 
 /* States for non-INVITE Client FSM */
 typedef enum _SipEn_TxnNonInvCliFsmSt
@@ -179,7 +168,7 @@ typedef enum _SipEn_TxnNonInvCliFsmSt
     ETXNNONINVCLI_TERMINATEDST,
     ETXNNONINVCLI_INVALIDST
 
-}SipEn_TxnNonInvCliFsmSt;
+} SipEn_TxnNonInvCliFsmSt;
 
 /* Events for non-INVITE Server FSM */
 typedef enum _SipEn_TxnNonInvSerFsmEvt
@@ -191,7 +180,7 @@ typedef enum _SipEn_TxnNonInvSerFsmEvt
     ETXNNONINVSER_TIMER_J_TIMEOUTEVT,
     ETXNNONINVSER_INVALIDEVT
 
-}SipEn_TxnNonInvSerFsmEvt;
+} SipEn_TxnNonInvSerFsmEvt;
 
 /* States for non-INVITE Server FSM */
 typedef enum _SipEn_TxnNonInvSerFsmSt
@@ -203,6 +192,6 @@ typedef enum _SipEn_TxnNonInvSerFsmSt
     ETXNNONINVSER_TERMINATEDST,
     ETXNNONINVSER_INVALIDST
 
-}SipEn_TxnNonInvSerFsmSt;
+} SipEn_TxnNonInvSerFsmSt;
 
 #endif
