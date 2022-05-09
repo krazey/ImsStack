@@ -55,6 +55,18 @@ void MtcMediaProfileManager::CreateMediaProfile(IN ISession* piSession, IN IMS_B
                 break;
             }
         }
+
+        if (nParamId == 0)
+        {
+            IMS_TRACE_D("CreateMediaProfile : the call has %d media profiles.",
+                    m_objMediaProfiles.GetSize(), 0, 0);
+
+            MediaProfile* pProfile = m_objMediaProfiles.GetValueAt(0);
+            if (pProfile)
+            {
+                nParamId = pProfile->nNegoId;
+            }
+        }
     }
 
     if (bOriginalProfile == IMS_FALSE)  // virtual early session
