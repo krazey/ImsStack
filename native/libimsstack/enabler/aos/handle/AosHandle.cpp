@@ -15,6 +15,7 @@
  */
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
+#include "CarrierConfig.h"
 #include "ImsMessage.h"
 #include "INetworkWatcher.h"
 
@@ -372,28 +373,16 @@ PUBLIC VIRTUAL void AosHandle::App_Notify()
     switch (GetState())
     {
         case STATE_DISCONNECTED:
-            if (m_piListener != IMS_NULL)
-            {
-                m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
-            }
+            m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
             break;
         case STATE_CONNECTING:
-            if (m_piListener != IMS_NULL)
-            {
-                m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
-            }
+            m_piListener->ImsAos_Disconnected(GetImsAosReason(m_nReason));
             break;
         case STATE_CONNECTED:
-            if (m_piListener != IMS_NULL)
-            {
-                m_piListener->ImsAos_Connected(GetFeatures(), 0);
-            }
+            m_piListener->ImsAos_Connected(GetFeatures(), 0);
             break;
         case STATE_DISCONNECTING:
-            if (m_piListener != IMS_NULL)
-            {
-                m_piListener->ImsAos_Disconnecting(GetImsAosReason(m_nReason));
-            }
+            m_piListener->ImsAos_Disconnecting(GetImsAosReason(m_nReason));
             break;
         default:
             break;
@@ -442,7 +431,13 @@ Remarks
 */
 PUBLIC VIRTUAL IMS_UINT32 AosHandle::GetFeatures()
 {
-    return IsImsConnected() ? m_objBindedFeatureTagList.GetFeatures() : ImsAosFeature::NONE;
+    if (!IsImsConnected())
+    {
+        return ImsAosFeature::NONE;
+    }
+
+    return (m_objBindedFeatureTagList.GetFeatures() &
+            ~(m_objBindedFeatureTagList.GetUnavailableFeatures()));
 }
 
 /*
@@ -851,7 +846,7 @@ Remarks
 
 */
 PROTECTED
-IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat)
+IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const
 {
     switch (nRat)
     {
@@ -864,6 +859,25 @@ IMS_BOOL AosHandle::IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT3
         default:
             return IMS_FALSE;
     }
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+IMS_BOOL AosHandle::IsServiceFeature(IN IMS_UINT32 nFeature) const
+{
+    for (IMS_UINT32 i = 0; i < m_objServiceFeatures.GetSize(); i++)
+    {
+        if (nFeature == m_objServiceFeatures.GetAt(i))
+        {
+            return IMS_TRUE;
+        }
+    }
+
+    return IMS_FALSE;
 }
 
 /*
@@ -961,6 +975,30 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
     }
 
     return nFeature;
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+IMS_UINT32 AosHandle::ConvertToAosFeature(IN IMS_UINT32 nConfigFeature)
+{
+    switch (nConfigFeature)
+    {
+        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_MMTEL:
+            return ImsAosFeature::MMTEL;
+
+        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_VIDEO:
+            return ImsAosFeature::VIDEO;
+
+        case CarrierConfig::Ims::UNAVAILABLE_FEATURE_TYPE_SMS:
+            return ImsAosFeature::SMSIP;
+
+        default:
+            return ImsAosFeature::NONE;
+    }
 }
 
 /*
@@ -1085,7 +1123,7 @@ void AosHandle::ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked
         m_objFeatureTagList.AddFeature(nFeature);
     }
 
-    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: [%s/%s] Updated feature = [%d]",
+    A_IMS_TRACE_D(APPPROFILE, "ProcessFeatureBlock :: [%s/%s] Updated feature = [%x]",
             m_strAppId.GetStr(), m_strServiceId.GetStr(), m_objFeatureTagList.GetFeatures());
 
     UpdateFeatureTags();
@@ -1126,6 +1164,49 @@ void AosHandle::ProcessCheckBlock(
         {
             ProcessFeatureTagChange();
         }
+    }
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+void AosHandle::ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd)
+{
+    A_IMS_TRACE_I(APPPROFILE, "ProcessUnavailableFeature :: nFeature[%d], bAdd[%s]", nFeature,
+            _TRACE_B_(bAdd), 0);
+
+    if (bAdd)
+    {
+        m_objFeatureTagList.AddUnavailableFeature(nFeature);
+    }
+    else
+    {
+        m_objFeatureTagList.RemoveUnavailableFeature(nFeature);
+    }
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+void AosHandle::ProcessUnavailableFeatureChanged()
+{
+    IMS_UINT32 nState = GetState();
+    A_IMS_TRACE_I(APPPROFILE,
+            "ProcessUnavailableFeatureChanged :: Unavailable feature has changed, nState [%s]",
+            StateToString(nState), 0, 0);
+
+    IAosRegistration* piRegistration = m_piAppContext->GetRegistration();
+    piRegistration->RequestCmd(IAosRegistration::CMD_UNAVAILABLE_FEATURE_TAG);
+
+    if (nState == STATE_CONNECTED && m_piListener != IMS_NULL)
+    {
+        m_piListener->ImsAos_Connected(GetFeatures(), 0);
     }
 }
 
@@ -1182,6 +1263,58 @@ PROTECTED VIRTUAL IMS_BOOL AosHandle::IsBlockForWifi(IN IMS_UINT32 /* nBlock */)
 Remarks
 
 */
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsUnavailableFeature(IN IMS_SINT32 nConfigFeature) const
+{
+    IMSVector<IMS_SINT32>& objConfigFeatures =
+            GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailable();
+
+    for (IMS_UINT32 i = 0; i < objConfigFeatures.GetSize(); i++)
+    {
+        if (objConfigFeatures.GetAt(i) == nConfigFeature)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsUnavailableFeature :: nConfigFeature[%d] is found",
+                    nConfigFeature, 0, 0);
+            return IMS_TRUE;
+        }
+    }
+
+    A_IMS_TRACE_D(APPPROFILE, "IsUnavailableFeature :: nConfigFeature[%d] is not found",
+            nConfigFeature, 0, 0);
+
+    return IMS_FALSE;
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL IMS_BOOL AosHandle::IsUnavailableFeaturePolicy(IN IMS_SINT32 nPolicy) const
+{
+    IMSVector<IMS_SINT32>& objPolicies =
+            GET_N_CONFIG(m_nSlotId)->GetRegWithFeatureTagUnavailablePolicy();
+
+    for (IMS_UINT32 i = 0; i < objPolicies.GetSize(); i++)
+    {
+        if (objPolicies.GetAt(i) == nPolicy)
+        {
+            A_IMS_TRACE_D(APPPROFILE, "IsUnavailableFeaturePolicy :: nPolicy[%d] is found", nPolicy,
+                    0, 0);
+            return IMS_TRUE;
+        }
+    }
+
+    A_IMS_TRACE_D(
+            APPPROFILE, "IsUnavailableFeaturePolicy :: nPolicy[%d] is not found", nPolicy, 0, 0);
+
+    return IMS_FALSE;
+}
+
+/*
+
+Remarks
+
+*/
 PROTECTED VIRTUAL void AosHandle::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& /* objNewCapabilities */)
 {
@@ -1206,6 +1339,17 @@ Remarks
 PROTECTED VIRTUAL void AosHandle::ProcessVopsStateChanged(IN IMS_UINT32 /*nState*/)
 {
     // Implemented in child
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL IMS_BOOL AosHandle::ProcessUnavailableFeatureForVops(IN IMS_UINT32 /*nState*/)
+{
+    // Implemented in child
+    return IMS_FALSE;
 }
 
 /*
@@ -1770,7 +1914,10 @@ PUBLIC VIRTUAL void AosHandle::Event_NotifyEvent(
     switch (nEvent)
     {
         case IMS_EVENT_IMS_VOICE_OVER_PS_STATE:
-            ProcessVopsStateChanged(nWParam);
+            if (!AosUtil::GetInstance()->IsWifiTest())
+            {
+                ProcessVopsStateChanged(nWParam);
+            }
             break;
 
         case IMS_EVENT_OMADM_UPDATED:

@@ -127,6 +127,8 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegPermanentErrMaxCount, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailable, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailablePolicy, (), (override));
 
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };

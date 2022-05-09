@@ -138,6 +138,8 @@ public:
     virtual IMSVector<IMS_SINT32>& GetRegPermanentErrMaxCount();
     virtual IMSVector<IMS_SINT32>& GetRegErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
 
 private:
     friend class AosBuildDirector;

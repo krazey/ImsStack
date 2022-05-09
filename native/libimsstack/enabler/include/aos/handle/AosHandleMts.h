@@ -29,8 +29,10 @@ public:
 protected:
     virtual void Init();
     virtual void CleanUp();
+
     virtual void InitializeServiceBlock();
     virtual void InitializeServiceFeature();
+
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
 

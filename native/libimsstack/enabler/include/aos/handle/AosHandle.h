@@ -158,13 +158,16 @@ protected:
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsEqualNetworkType(IN IMS_UINT32 nType, IN AosNetworkType eType) const;
     IMS_BOOL IsCapabilityExisted(IN IMS_UINT32 nCapabilities, IN AosCapability eCapability) const;
-    IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat);
+    IMS_BOOL IsNetworkTypeMatchedToRat(IMS_UINT32 nNetworkType, IMS_UINT32 nRat) const;
+    IMS_BOOL IsServiceFeature(IN IMS_UINT32 nFeature) const;
+
     IMS_UINT32 GetNetworkType() const;
     IMS_UINT32 GetMobileNetworkType() const;
-
     IMS_UINT32 GetBlock(IN IMS_UINT32 nEvent);
     IMS_UINT32 GetAosReason(IN IMS_UINT32 nFeature);
     IMS_UINT32 GetAosFeature(IN IMS_UINT32 nBlock);
+
+    IMS_UINT32 ConvertToAosFeature(IN IMS_UINT32 nConfigFeature);
 
     void AddBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
     void RemoveBlock(IN IMS_UINT32 nBlock, IN_OUT IMS_UINT32& nBlocks);
@@ -173,6 +176,8 @@ protected:
     void ProcessBlock(IN IMS_UINT32 nBlock, IN IMS_BOOL bAdded, IN IMS_BOOL bPreProcess = IMS_TRUE);
     void ProcessFeatureBlock(IN IMS_UINT32 nFeature, IN IMS_BOOL bBlocked);
     void ProcessCheckBlock(IN IMS_UINT32 nBlock = 0, IN IMS_BOOL bRunStateMachine = IMS_TRUE);
+    void ProcessUnavailableFeature(IN IMS_UINT32 nFeature, IN IMS_BOOL bAdd);
+    void ProcessUnavailableFeatureChanged();
 
     IMS_BOOL IsHandleBlocked(IN IMS_UINT32 nType) const;
     virtual IMS_BOOL IsHandleBlocked() const;
@@ -180,11 +185,14 @@ protected:
 
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
+    virtual IMS_BOOL IsUnavailableFeature(IN IMS_SINT32 nConfigFeature) const;
+    virtual IMS_BOOL IsUnavailableFeaturePolicy(IN IMS_SINT32 nPolicy) const;
 
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
+    virtual IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState);
 
     // State Machine
     virtual IMS_BOOL StateDisconnected(IN IMSMSG& objMSG);
@@ -287,6 +295,7 @@ protected:
     IMS_UINT32 m_nHoldingVopsState;
 
     IMSMap<IMS_UINT32, IMS_UINT32> m_objCapabilities;
+    IMSList<IMS_UINT32> m_objServiceFeatures;
 
     IMS_BOOL m_bNetSrvIn;
     IMS_UINT32 m_nNetworkType;

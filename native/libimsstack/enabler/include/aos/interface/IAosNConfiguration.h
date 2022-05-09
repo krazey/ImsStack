@@ -954,6 +954,23 @@ public:
      */
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime() = 0;
 
+    /**
+     * @brief Indicate the feature tags list that is included in registration
+     *        even though feature is not available.
+     *
+     * @return vector feature tags list
+     * @see FixedFeature
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
+
+    /**
+     * @brief Indicate the policy to include feature tag even though feature is not available.
+     *
+     * @return vector policy list
+     * @see FixPolicy
+     */
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
+
     enum
     {
         NOTIFY_TERMINATED_EXPIRED = 0x01,

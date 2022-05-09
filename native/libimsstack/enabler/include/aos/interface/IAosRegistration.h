@@ -173,6 +173,7 @@ public:
         CMD_ESMS_INIT,
         CMD_ESMS_DONE,
         CMD_DELAY_CLEAR_SOCKET,
+        CMD_UNAVAILABLE_FEATURE_TAG,
 
         /// nReason
         REASON_INIT_PCSCF_CLEAR = 30,

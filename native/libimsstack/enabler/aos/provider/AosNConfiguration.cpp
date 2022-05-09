@@ -563,6 +563,16 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetReregErrCodeWithRetr
     return m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime;
 }
 
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUnavailable()
+{
+    return m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailable;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUnavailablePolicy()
+{
+    return m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy;
+}
+
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     if (m_nSlotId != nSlotId)
@@ -718,6 +728,21 @@ void AosNConfiguration::InitBundle(IN const ICarrierConfig* piCc)
         m_objRegErrCodeWithRetryAfterTime.objReregistrationErrorCodeWithRetryAfterTime =
                 piCcBundle->GetIntArray(CarrierConfig::Assets::
                                 KEY_REREGISTRATION_ERROR_CODE_WITH_RETRY_AFTER_TIME_INT_ARRAY);
+        piCcBundle->ReleaseBundle();
+        piCcBundle = IMS_NULL;
+    }
+
+    // AosRegistrationWithFeatureTagUnavailableBundle
+    piCcBundle = piCc->GetBundle(
+            CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE);
+    if (piCcBundle != IMS_NULL)
+    {
+        m_objRegWithFeatureTagUnavailable
+                .objRegistrationWithFeatureTagUnavailable = piCcBundle->GetIntArray(
+                CarrierConfig::Assets::KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_INT_ARRAY);
+        m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy =
+                piCcBundle->GetIntArray(CarrierConfig::Assets::
+                                KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_POLICY_INT_ARRAY);
         piCcBundle->ReleaseBundle();
         piCcBundle = IMS_NULL;
     }

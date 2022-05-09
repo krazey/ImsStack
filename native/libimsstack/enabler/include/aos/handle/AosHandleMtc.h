@@ -59,8 +59,6 @@ protected:
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
-
-private:
-    IMS_UINT32 m_nVops;
+    virtual IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState);
 };
 #endif  // AOS_HANDLE_MTC_H_
