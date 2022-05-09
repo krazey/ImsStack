@@ -63,10 +63,7 @@ IMS_RESULT MessageSender::SendProvisionalResponse(IN IMS_SINT32 eStatusCode, IN 
 PUBLIC
 IMS_RESULT MessageSender::SendPrack()
 {
-    if (m_pFormatter == IMS_NULL)
-    {
-        CreateFormatter();
-    }
+    CreateFormatter();
 
     if (m_pFormatter->FormPrackMessage() != IMS_SUCCESS)
     {
@@ -171,10 +168,7 @@ IMS_RESULT MessageSender::Reject(IN const FailReason& objReason)
 PUBLIC
 IMS_RESULT MessageSender::SendAck()
 {
-    if (m_pFormatter == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
+    CreateFormatter();
 
     if (m_pFormatter->FormAckMessage() != IMS_SUCCESS)
     {
