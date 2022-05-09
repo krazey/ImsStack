@@ -36,20 +36,6 @@ public class UserAgent {
     private String mGBAProductToken;
 
     /**
-     * create UserAgent object by Builder
-     * @param Builder object includes all required values
-     * @return instance of UserAgent
-     */
-    private UserAgent(Builder builder) {
-        mTerminalVendor = builder.mTerminalVendor;
-        mTerminalVersion = builder.mTerminalVersion;
-        mTerminalName = builder.mTerminalName;
-        mClientVendor = builder.mClientVendor;
-        mClientVersion = builder.mClientVersion;
-        mSlotId = builder.mSlotId;
-    }
-
-    /**
      * set GBA product token which should be included UserAgent value if the AC server required
      * @param gbaProductToken product token
      */
@@ -67,13 +53,27 @@ public class UserAgent {
         String userAgent = PREFIX + " " + mTerminalVendor + "/" + mTerminalName + "-"
                 + mTerminalVersion + " " + mClientVendor + "/" + mClientVersion;
 
-        if (!mGBAProductToken.isEmpty()) {
+        if (mGBAProductToken != null && !mGBAProductToken.isEmpty()) {
             userAgent += ";" + mGBAProductToken;
         }
 
         logi("userAgent :" + userAgent);
 
         return userAgent;
+    }
+
+    /**
+     * create UserAgent object by Builder
+     * @param Builder object includes all required values
+     * @return instance of UserAgent
+     */
+    private UserAgent(Builder builder) {
+        mTerminalVendor = builder.mTerminalVendor;
+        mTerminalVersion = builder.mTerminalVersion;
+        mTerminalName = builder.mTerminalName;
+        mClientVendor = builder.mClientVendor;
+        mClientVersion = builder.mClientVersion;
+        mSlotId = builder.mSlotId;
     }
 
     /**

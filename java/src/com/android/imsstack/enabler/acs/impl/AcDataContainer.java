@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.PersistableBundle;
 import android.util.Log;
@@ -50,6 +51,21 @@ public class AcDataContainer {
 
         mFileName = LOCAL_FILE_NAME_PREF + subId + ".xml";
         readDataFromFile();
+    }
+
+    /**
+     * Get copied provisioning data
+     * @return PersistableBundle includes provisioning data, but if the internal provisioning data
+     * is not valid then the null is returned.
+     */
+    public @Nullable PersistableBundle getProvisioningData() {
+        if (mProvisioningData != null && !mProvisioningData.isEmpty()) {
+            return new PersistableBundle(mProvisioningData);
+        }
+
+        loge("getProvisioningData : but provisioning data is empty.");
+
+        return null;
     }
 
     /**
@@ -126,14 +142,6 @@ public class AcDataContainer {
      */
     public boolean isValidProvisioning() {
         return !(mProvisioningData == null || mProvisioningData.isEmpty());
-    }
-
-    /**
-     * Get copied provisioning data
-     * @return PersistableBundle includes provisioning data
-     */
-    public PersistableBundle getProvisioningData() {
-        return new PersistableBundle(mProvisioningData);
     }
 
     /**
