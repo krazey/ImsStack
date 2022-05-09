@@ -20,6 +20,7 @@
 // == INCLUDES =========================================================
 #include "IUMedia.h"
 #include "ServiceEvent.h"
+#include "ServiceTimer.h"
 #include "IEventListener.h"
 #include "IMSActivityEx.h"
 #include "MediaMsgHandler.h"
@@ -29,7 +30,7 @@
 
 class JniMediaSession;
 
-class MediaManager : public IMSActivityEx, public IMediaManager
+class MediaManager : public IMSActivityEx, public IMediaManager, public ITimerListener
 {
 public:
     enum MessageType
@@ -40,7 +41,6 @@ public:
         MSG_RESPONSE,
         MSG_RESPONSE_RELEASE_WAIT,
         MSG_NOTIFICATION,
-        MSG_OPERATION,
     };
 
     class MediaSessionNode
@@ -57,7 +57,7 @@ public:
                 pMessageHandler(IMS_NULL){};
 
         MediaSessionNode(
-                IN IMS_SINTP callKey, IN MediaSession* pSession, MediaMsgHandler* pHandler) :
+                IN IMS_SINTP callKey, IN MediaSession* pSession, IN MediaMsgHandler* pHandler) :
                 nCallKey(callKey),
                 pMediaSession(pSession),
                 pMessageHandler(pHandler){};
@@ -69,10 +69,10 @@ public:
     MediaMsgHandler* GetHandler(IN IMS_SINTP nCallKey);
     virtual void SetJniMediaSessionThread(IN IMS_SINTP nCallKey, IN JniMediaSessionThread* pThread);
 
-    enum
-    {
-        INTERNAL_SESSION_TERMINATED_IND = IMS_MSG_USER
-    };
+    /**
+     * ITimerListener interface implementation
+     */
+    virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
     /**
      *
@@ -96,27 +96,21 @@ public:
     MediaResourceMngr* GetResourceManager();
 
     void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    IMS_BOOL handleRequestMsg(
+            IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
+    IMS_BOOL OtherSessionHold(IN IMS_SINTP nCallKey);
 
 private:
+    static const IMS_UINT32 TIME_WAIT_MEDIA_RESPONSE = 5000;
+
     MediaManager(IN CONST AString& strName, IN IMS_SINT32 nSlotId);
     virtual ~MediaManager();
     MediaManager(IN const MediaManager& obj);
     MediaManager& operator=(IN const MediaManager& obj);
 
-    // == PROTECTED METHOD ==========================================================
-protected:
-    void ClearInternalMsgBuffer();
     void ClearMediaSessionNode();
     void DeleteMediaSessionNode(IN MediaSessionNode* pSessionNode, IMS_UINT32 nIndex);
-    MessageType parseMessageType(IN IMS_SINT32 eMsg);
-    IMS_BOOL handleRequestMsg(IN IMSMSG& objMsg);
-    IMS_BOOL handleResponseMsg(IN IMSMSG& objMsg);
-    IMS_BOOL handleNotificationMsg(IN IMSMSG& objMsg);
-    IMS_BOOL handleOperationMsg(IN IMSMSG& objMsg);
-    /**
-     *
-     */
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+
     /**
      *
      */
@@ -126,6 +120,17 @@ protected:
      *
      */
     virtual IMS_BOOL SendMessageToSessions(IN IMS_SINTP nCallKey, IMSMSG& objMsg);
+    MessageType CategorizeMessageType(IN IMS_SINT32 eMsg);
+    void StartTimer(IN IMS_UINT32 nTime);
+    void StopTimer();
+
+    // == PROTECTED METHOD ==========================================================
+protected:
+
+    /**
+     *
+     */
+    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
 
     // == PRIVATE VARIABLE ============================================================
 protected:
@@ -133,7 +138,6 @@ protected:
     IMS_SINT32 m_nSlotId;
     IMSList<MediaSessionNode*> m_lstSessionNode;
     MediaResourceMngr* m_pResourceMngr;
-    IMSList<IMSMSG*> m_lstInternalMsgBuffer;
-    IMS_BOOL m_bWaitResponse;
+    ITimer* m_piTimer;
 };
 #endif /* _MEDIA_MANAGER_H_ */

@@ -31,6 +31,38 @@ using namespace android::telephony::imsmedia;
 
 class IMMedia
 {
+
+#define IMMEDIA_CASE_ENUM(name) case name: return #name
+
+public:
+    static const IMS_CHAR* PrintMsg(IN IMS_SINT32 nMsg)
+    {
+        switch (nMsg)
+        {
+            IMMEDIA_CASE_ENUM(REQUEST_OPEN_SESSION);
+            IMMEDIA_CASE_ENUM(REQUEST_CLOSE_SESSION);
+            IMMEDIA_CASE_ENUM(REQUEST_MODIFY_SESSION);
+            IMMEDIA_CASE_ENUM(REQUEST_ADD_CONFIG);
+            IMMEDIA_CASE_ENUM(REQUEST_DELETE_CONFIG);
+            IMMEDIA_CASE_ENUM(REQUEST_CONFIRM_CONFIG);
+            IMMEDIA_CASE_ENUM(REQUEST_SEND_DTMF);
+            IMMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
+            IMMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
+            IMMEDIA_CASE_ENUM(RESPONSE_OPEN_SESSION);
+            IMMEDIA_CASE_ENUM(RESPONSE_SESSION_CHANGED);
+            IMMEDIA_CASE_ENUM(RESPONSE_MODIFY_SESSION);
+            IMMEDIA_CASE_ENUM(RESPONSE_ADD_CONFIG);
+            IMMEDIA_CASE_ENUM(RESPONSE_CONFIRM_CONFIG);
+            IMMEDIA_CASE_ENUM(NOTIFY_FIRST_PACKET);
+            IMMEDIA_CASE_ENUM(NOTIFY_HEADER_EXTENSION);
+            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_INACTIVITY);
+            IMMEDIA_CASE_ENUM(NOTIFY_PACKET_LOSS);
+            IMMEDIA_CASE_ENUM(NOTIFY_JITTER);
+            IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_QUALITY_CHANGE);
+        }
+        return "Unrecognized Msg";
+    }
+
 public:
     static const IMS_SINT32 MEDIA_MESSAGE_IDX_START = IMMEDIA + 0;
 
@@ -84,6 +116,10 @@ enum RtpError
     PORT_UNAVAILABLE = 5,
     /** The request is not supported by the implementation */
     REQUEST_NOT_SUPPORTED = 6,
+
+    // Additional for Ims Internal
+    /** The response is not received within certain time */
+    RESPONSE_WAIT_TIMEOUT = 7,
 };
 
 enum SessionType

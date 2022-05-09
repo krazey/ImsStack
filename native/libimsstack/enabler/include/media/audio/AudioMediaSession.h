@@ -48,6 +48,8 @@ public:
      */
     IMS_BOOL UpdateRtpConfig(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
             IN AudioProfile* pNegoProfile);
+    IMS_BOOL IsDirectionHold();
+    void HoldRtpConfig();
     IMS_BOOL UpdateMediaQualityThreshold(IN IMS_BOOL bIsHold);
     IMS_BOOL UpdateLocalEndPoint(IN AudioProfile* pNegoProfile);
     void UpdateLocalEndPoint(IN IPAddress objLocalAddr, IN IMS_UINT32 nPort);

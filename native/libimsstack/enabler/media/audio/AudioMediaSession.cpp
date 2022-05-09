@@ -45,7 +45,8 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_D("+AudioMediaSession()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL AudioMediaSession::~AudioMediaSession()
+PUBLIC VIRTUAL
+AudioMediaSession::~AudioMediaSession()
 {
     IMS_TRACE_I("~AudioMediaSession()", 0, 0, 0);
 }
@@ -56,7 +57,8 @@ void AudioMediaSession::SetConfig(IN AudioConfiguration* pConfig)
     m_pConfig = pConfig;
 }
 
-PUBLIC IMS_BOOL AudioMediaSession::UpdateRtpConfig(
+PUBLIC
+IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile, IN AudioProfile* pNegoProfile)
 {
     if (pSrcProfile == IMS_NULL || pDestProfile == IMS_NULL || pNegoProfile == IMS_NULL)
@@ -400,6 +402,21 @@ PUBLIC IMS_BOOL AudioMediaSession::UpdateRtpConfig(
                 m_objAudioConfig.sessionParams.jitterBufferParams.bufferStepSizeMillis, 0);
     */
     return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL AudioMediaSession::IsDirectionHold()
+{
+    IMS_UINT32 nDirection = m_objAudioConfig.getMediaDirection();
+    IMS_TRACE_D("IsDirectionHold() - m_objAudioConfig direction[%d]", nDirection, 0, 0);
+    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE) ? IMS_FALSE :
+        IMS_TRUE;
+}
+
+PUBLIC
+void AudioMediaSession::HoldRtpConfig()
+{
+    m_objAudioConfig.setMediaDirection((int32_t)RtpConfig::MEDIA_DIRECTION_RECEIVE_ONLY);
 }
 
 PUBLIC

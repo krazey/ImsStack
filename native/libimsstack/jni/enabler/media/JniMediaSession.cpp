@@ -32,7 +32,7 @@ JniMediaSession::JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSl
         m_piMediaManager(IMS_NULL),
         m_nCallKey(nCallKey)
 {
-    IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%" PFLS_u "]", m_nSlotId, nCallKey, 0);
+    IMS_TRACE_D("+JniMediaSession SlotId[%d], nCallKey[%d]", m_nSlotId, nCallKey, 0);
 
     Initialize(pfnNotifier, nNativeObject);
     m_piMediaManager = JniConnectorFactory::GetInstance()
@@ -214,7 +214,7 @@ void JniMediaSession::OnResponses(
     ImsMediaResponseConfigParam* pParam = new ImsMediaResponseConfigParam();
 
     pParam->m_eMediaType = ConvertToMediaType((SessionType)objParcel.readInt32());
-    IMS_TRACE_D("OnResponses() m_eMediaType=[%d], bNeedConfig[%d], m_nCallKey[%" PFLS_u "]",
+    IMS_TRACE_D("OnResponses() m_eMediaType=[%d], bNeedConfig[%d], m_nCallKey[%d]",
             pParam->m_eMediaType, bNeedConfig, m_nCallKey);
 
     if (bNeedConfig == IMS_TRUE)

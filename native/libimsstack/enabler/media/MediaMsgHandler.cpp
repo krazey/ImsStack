@@ -102,7 +102,7 @@ PUBLIC
 VIRTUAL void MediaMsgHandler::SendMessageToUi(
         IN IMS_UINTP nCallKey, IMS_SINT32 eEvent, IN IMS_UINT32 eResult)
 {
-    IMS_TRACE_I("SendMessageToUi() nCallKey[%" PFLS_u "], eEvent[%d], strListenerThread[%s]",
+    IMS_TRACE_I("SendMessageToUi() nCallKey[%d], eEvent[%d], strListenerThread[%s]",
             nCallKey, eEvent, strListenerThread.GetStr());
     IUMediaResultIndParam* pParam = new IUMediaResultIndParam();
     pParam->nAppId = nAppId;
@@ -117,7 +117,7 @@ PUBLIC
 VIRTUAL void MediaMsgHandler::OnRttReceivedInd(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
         IN IUMediaRttDataParam* pParam)
 {
-    IMS_TRACE_I( "OnRttReceivedInd() nCallKey[%" PFLS_u "], eEvent[%d], strListenerThread[%s]",
+    IMS_TRACE_I( "OnRttReceivedInd() nCallKey[%d], eEvent[%d], strListenerThread[%s]",
             nCallKey, eEvent, strListenerThread.GetStr());
 
     pParam->nAppId = nAppId;
@@ -131,7 +131,7 @@ PUBLIC
 void MediaMsgHandler::OnRttAudioIndicator(IN IMS_UINTP nCallKey, IN IMS_SINT32 eEvent,
         IN IMS_UINT32 eRttAudioInd)
 {
-    IMS_TRACE_I( "OnRttAudioIndicator() nCallKey[%" PFLS_u "], eEvent[%d], eRttAudioInd[%d]",
+    IMS_TRACE_I( "OnRttAudioIndicator() nCallKey[%d], eEvent[%d], eRttAudioInd[%d]",
             nCallKey, eEvent, eRttAudioInd);
 
     IUMediaResultIndParam* pParam = new IUMediaResultIndParam();
@@ -149,7 +149,7 @@ PUBLIC
 void MediaMsgHandler::OnDataUsageChanged(IN IMS_UINTP nCallKey, IMS_SINT32 eEvent,
         IN IUMediaDataUsageInfoParam* pParam)
 {
-    IMS_TRACE_I( "OnDataUsageChanged() nCallKey[%" PFLS_u "], eEvent[%d], strListenerThread[%s]",
+    IMS_TRACE_I( "OnDataUsageChanged() nCallKey[%d], eEvent[%d], strListenerThread[%s]",
             nCallKey, eEvent, strListenerThread.GetStr());
 
     IUMediaDataUsageInfoParam* param = new IUMediaDataUsageInfoParam();

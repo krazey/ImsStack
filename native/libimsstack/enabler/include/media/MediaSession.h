@@ -85,6 +85,10 @@ public:
     virtual void OnMediaResponse();
     // nofity from session
     void OnNotify(IN IMS_UINT32 eReportType, IN MEDIA_CONTENT_TYPE eMediaType);
+    IMS_BOOL IsHoldSession(IN IMS_UINTP nNegoId);
+    IMS_BOOL HoldSession();
+    void ReportToClient(IN RtpError eError, IN MEDIA_CONTENT_TYPE eMediaType);
+    IMS_SINTP GetCallKey() { return m_nCallKey; };
 
 public:
     /************************************************************/
@@ -138,8 +142,12 @@ private:
     IMS_BOOL CreateMediaConfig(IN MEDIA_SERVICE_TYPE eServiceType);
     void UpdateRtpConfig(IN IMS_UINTP nNegoId);
     void UpdateAudioRtpConfig(IN IMS_UINTP nNegoId);
+    void HoldRtpConfig();
+    void HoldAudioRtpConfig();
     void UpdateMediaQualityThreshold(IN IMS_UINTP nNegoId);
     void UpdateAudioQualityThreshold(IN IMS_UINTP nNegoId);
+    void UpdateMediaQualityThresholdForHold();
+    void UpdateAudioQualityThresholdForHold();
 
 protected:
     IMS_UINTP CreateMediaNego(IN IMS_UINTP nNegoId);
@@ -187,7 +195,6 @@ protected:
     IMS_UINTP GetNegoIdfromRemoteAddress(IN AString strIpAddr, IN IMS_SINT32 nPort);
 
 protected:
-    AString m_aStrTargetMediaManager;
     IMS_UINT32 m_nSlotId;
     IMS_SINTP m_nCallKey;
     IMediaSessionClientListener* m_pClientListener;
