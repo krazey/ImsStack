@@ -95,6 +95,10 @@ void AudioNego::Copy(IN AudioNego* pAudioNego)
     IMS_TRACE_I("Copy() - list size[%d]", pAudioNego->m_lstOaModel.GetSize(), 0, 0);
 
     MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
+    if (pMediaManager == IMS_NULL)
+    {
+        return;
+    }
     MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
 
     if (pResourceMngr != IMS_NULL)
@@ -132,13 +136,12 @@ void AudioNego::Copy(IN AudioNego* pAudioNego)
     OaModel* pOldOaModel = pAudioNego->m_lstOaModel.GetAt(0);
     pNewOaModel->pSrcProfile = new AudioProfile(pOldOaModel->pSrcProfile);
     m_lstOaModel.Append(pNewOaModel);
-    IMS_TRACE_I("Copy() - list size[%d]", m_lstOaModel.GetSize(), 0, 0);
+    IMS_TRACE_I("Copy() - m_lstOaModel.list size[%d]", m_lstOaModel.GetSize(), 0, 0);
 
     return;
 }
 
-PUBLIC
-void AudioNego::CreateProfiles(IN MediaEnvironment* pEnvironment)
+PUBLIC VIRTUAL void AudioNego::CreateProfiles(IN MediaEnvironment* pEnvironment)
 {
     if (pEnvironment == IMS_NULL)
     {
@@ -159,7 +162,7 @@ void AudioNego::CreateProfiles(IN MediaEnvironment* pEnvironment)
     AudioProfile* pProfile;
     AudioConfiguration* pConfig = pMediaSessionConfig->GetAudioConfiguration();
 
-    if (pConfig == NULL)
+    if (pConfig == IMS_NULL)
     {
         IMS_TRACE_E(0, "CreateProfiles() pConfig is NULL", 0, 0, 0);
     }
@@ -168,8 +171,7 @@ void AudioNego::CreateProfiles(IN MediaEnvironment* pEnvironment)
     AudioProfileConfigurer::CreateAudioProfile(pProfile, pEnvironment, pConfig, GetSlotId());
 }
 
-PUBLIC
-VIRTUAL void AudioNego::DestroyProfiles()
+PUBLIC VIRTUAL void AudioNego::DestroyProfiles()
 {
     while (m_objBaseProfile.lstPayload.GetSize() > 0)
     {
@@ -183,13 +185,16 @@ VIRTUAL void AudioNego::DestroyProfiles()
     }
 
     MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
-
-    if (pResourceMngr != IMS_NULL)
+    if (pMediaManager != IMS_NULL)
     {
-        if (m_objBaseProfile.nDataPort != 0)
+        MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+
+        if (pResourceMngr != IMS_NULL)
         {
-            pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
+            if (m_objBaseProfile.nDataPort != 0)
+            {
+                pResourceMngr->ReleaseRtpPort(m_objBaseProfile.nDataPort);
+            }
         }
     }
 }
@@ -199,8 +204,7 @@ PUBLIC VIRTUAL void AudioNego::SetMediaEnvironment(IN MediaEnvironment* pMediaEn
     m_pMediaEnvironment = pMediaEnvironment;
 }
 
-PUBLIC
-void AudioNego::SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType)
+PUBLIC VIRTUAL void AudioNego::SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType)
 {
     m_eSessionType = eSessionType;
 }
@@ -210,7 +214,7 @@ PUBLIC VIRTUAL IMS_BOOL AudioNego::FormSDP(IN NEGO_STATE eNegoState,
         IN ISessionDescriptor* pSessionDescriptor, OUT IMediaDescriptor* pDescriptor,
         IN MEDIA_CONTENT_TYPE eType, IN MEDIA_DIRECTION eDir)
 {
-    IMS_TRACE_D("FormSDP Enter", 0, 0, 0);
+    IMS_TRACE_D("FormSDP() eNegoState[%d], eType[%d], eDir[%d]", eNegoState, eType, eDir);
     switch (eNegoState)
     {
         case STATE_IDLE:
@@ -255,10 +259,8 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormOffer(IN ISessionDescriptor* pSessionD
     }
 
     // Step 3. Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileConfigurer::SetAudioRsRr(
-            pNewOaModel->pSrcProfile, GetConfig(), pNewOaModel->pSrcProfile->eDirection);
+    AudioProfileConfigurer::SetAudioRsRr(pNewOaModel->pSrcProfile, GetConfig());
 
-    pNewOaModel->pSrcProfile->bIsOfferCase = IMS_TRUE;
     m_lstOaModel.Append(pNewOaModel);
 
     // Step 5. Make the SDP from profile
@@ -277,11 +279,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSession
     IMS_TRACE_D("FormAnswer() enter. eType[%d], eDir[%d]", eType, eDir, 0);
 
     // Step 0. Handling exception case
-    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (m_lstOaModel.GetSize() == 0)
+    if (pSessionDescriptor == IMS_NULL || pDescriptor == IMS_NULL || m_lstOaModel.GetSize() == 0)
     {
         return IMS_FALSE;
     }
@@ -294,11 +292,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormAnswer(IN ISessionDescriptor* pSession
 
     // Getting OaModel from list
     OaModel* pNewOaModel = GetNegotiatedOaModel();
-    if (pNewOaModel == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-    if (pNewOaModel->IsAllProfileExist() == IMS_FALSE)
+    if (pNewOaModel == IMS_NULL || pNewOaModel->IsAllProfileExist() == IMS_FALSE)
     {
         return IMS_FALSE;
     }
@@ -453,8 +447,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
     }
 
     // Modify a RS/RR by conditions (for RTCP enable/disable)
-    AudioProfileConfigurer::SetAudioRsRr(
-            pNewOaModel->pSrcProfile, GetConfig(), pNewOaModel->pSrcProfile->eDirection);
+    AudioProfileConfigurer::SetAudioRsRr(pNewOaModel->pSrcProfile, GetConfig());
 
     // Modify a RTP/RTCP port if audio is not supported
     if (MEDIA_IS_CONTAINED_THIS_TYPE(eType, MEDIA_TYPE_AUDIO) != IMS_TRUE)
@@ -527,6 +520,8 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(
         return MEDIA_DIRECTION_INVALID;
     }
 
+    IMS_TRACE_I("NegotiateOffer() Entered", 0, 0, 0);
+
     // Step 1. Make new Offer/Answer model, and copy source profile
     OaModel* pNewOaModel = new OaModel();
     pNewOaModel->pSrcProfile = new AudioProfile(&m_objBaseProfile);
@@ -571,6 +566,8 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
         return MEDIA_DIRECTION_INVALID;
     }
 
+    IMS_TRACE_I("NegotiateAnswer() Entered", 0, 0, 0);
+
     // Step 1. Get the latest OAmodel from list
     OaModel* pNewOaModel = m_lstOaModel.GetAt(m_lstOaModel.GetSize() - 1);
     if (pNewOaModel == IMS_NULL)
@@ -580,7 +577,6 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
 
     // Step 2. Make a destination profile from SDP
     pNewOaModel->pDestProfile = new AudioProfile();
-
     if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pDestProfile) != IMS_TRUE)
     {
         delete pNewOaModel;
@@ -603,6 +599,7 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateAnswer(
     IMS_TRACE_D("NegotiateAnswer() - add session key in NewOaModel[%" PFLS_x "]",
             reinterpret_cast<IMS_SINTP>(pSessionDescriptor), 0, 0);
     pNewOaModel->nSessionDescriptorKey = reinterpret_cast<IMS_SINTP>(pSessionDescriptor);
+
     // Step 4. Return the direction of negotiated profile
     return pNewOaModel->pNegotiatedProfile->eDirection;
 }
@@ -626,7 +623,6 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateReanswer(
 
     // Step 2. Make a destination profile from SDP
     pNewOaModel->pDestProfile = new AudioProfile();
-
     if (MakeProfileFromSdp(pSessionDescriptor, pDescriptor, pNewOaModel->pDestProfile) != IMS_TRUE)
     {
         delete pNewOaModel;
@@ -635,7 +631,6 @@ PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateReanswer(
 
     // Step 3. Make a negotiated profile from Src&Dest profile
     pNewOaModel->pNegotiatedProfile = new AudioProfile();
-
     if (MakeNegotiatedProfile(pNewOaModel->pSrcProfile, pNewOaModel->pDestProfile, IMS_FALSE,
                 pNewOaModel->pNegotiatedProfile) != IMS_TRUE)
     {
@@ -717,6 +712,7 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
     {
         if ((nOaModelSize - i - 1) < MAX_OAMODEL_SIZE)
         {
+            IMS_TRACE_D("FinalizeSDP() - nOaModelSize is under 6", 0, 0, 0);
             break;
         }
 
@@ -725,11 +721,12 @@ PUBLIC VIRTUAL void AudioNego::FinalizeSDP(
         if (pDeleteCheckOaModel != IMS_NULL)
         {
             IMS_TRACE_D("FinalizeSDP() - remove old OaModel", 0, 0, 0);
-            if ((pDeleteCheckOaModel->nSessionDescriptorKey == nInputSessionDesciptorKey) &&
-                    (pDeleteCheckOaModel->bConfirmedSession == IMS_TRUE))
+            if (pDeleteCheckOaModel->nSessionDescriptorKey == nInputSessionDesciptorKey &&
+                    pDeleteCheckOaModel->bConfirmedSession == IMS_TRUE)
             {
                 break;
             }
+
             IMS_TRACE_D("FinalizeSDP() - Delete the oldest[%" PFLS_x "] OaModel",
                     pDeleteCheckOaModel, 0, 0);
             delete pDeleteCheckOaModel;
@@ -742,8 +739,12 @@ PUBLIC
 IMS_BOOL AudioNego::SetPort(IN IMS_UINT32 nPort)
 {
     MediaManager* pMediaManager = MediaManager::GetInstance(GetSlotId());
-    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
+    if (pMediaManager == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
 
+    MediaResourceMngr* pResourceMngr = pMediaManager->GetResourceManager();
     if (pResourceMngr == IMS_NULL)
     {
         return IMS_FALSE;
@@ -1813,20 +1814,14 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
     }
 
     // Step 6. Set candidate
-    if (pProfile->nCandidatePriority > 0 && pProfile->nDataPort != 0)
+    for (IMS_UINT32 nIndex = 0; nIndex < pProfile->objCandidateAttr.GetSize(); nIndex++)
     {
-        // Add attribute=candidate
-        AString strCandidate;
-
-        // form candidate attribute as string
-        // a=candidate:<foundation(1)> <component ID(RTP:1)>
-        // <transport(UDP)> <Priority(nCandPriority> <private-ip> <Port>
-        // <cand-type(typ)> <candidate-types(host)>
-        strCandidate.Sprintf("1 1 UDP %d %s %d typ host", pProfile->nCandidatePriority,
-                pDescriptor->GetLocalAddress().ToString().GetStr(), pProfile->nDataPort);
-
-        // Add Candidate Attribute to pIMediaDescriptor
-        pDescriptor->AddAttribute(SdpAttribute::CANDIDATE, strCandidate);
+        AString strCandidateAttr = pProfile->objCandidateAttr.GetAt(nIndex);
+        if (!strCandidateAttr.IsEmpty() && !strCandidateAttr.IsNULL())
+        {
+            strCandidateAttr.Sprintf("%d, %s", nIndex + 1, strCandidateAttr.GetStr());
+            pDescriptor->AddAttribute(SdpAttribute::CANDIDATE, strCandidateAttr);
+        }
     }
 
     // Step 7. RTCP-XR -- RTCP-XR is for VZW, not a negotiation target by VZW requirement
@@ -1859,11 +1854,11 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
         // add"ACFG" if it's a initial answer
         if (pProfile->objCapaNego.strNegotiatedAcfg.GetLength() > 0)
         {
-            AString strACFG;
+            AString strAcfg;
             IMS_TRACE_D("MakeSdpFromProfile() - strNegotiatedAcfg[%s]",
                     pProfile->objCapaNego.strNegotiatedAcfg.GetStr(), 0, 0);
-            strACFG.Sprintf("%s", pProfile->objCapaNego.strNegotiatedAcfg.GetStr());
-            pDescriptor->AddAttribute(SdpAttribute::ACFG, strACFG);
+            strAcfg.Sprintf("%s", pProfile->objCapaNego.strNegotiatedAcfg.GetStr());
+            pDescriptor->AddAttribute(SdpAttribute::ACFG, strAcfg);
         }
 
         // For Support SRTP Capa Nego
@@ -1941,8 +1936,10 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
     {
         return IMS_FALSE;
     }
+
     // IP
     pProfile->objIpAddr = pDescriptor->GetRemoteAddress();
+
     // data & control port
     pProfile->nDataPort = pDescriptor->GetRemotePort();
 
@@ -1999,15 +1996,15 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
     for (IMS_UINT32 i = 0; i < lstMediaFormat.GetSize(); i++)
     {
-        SdpAvCodec* pSDPCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
-        if (pSDPCodec == IMS_NULL)
+        SdpAvCodec* pSdpCodec = DYNAMIC_CAST(SdpAvCodec*, lstMediaFormat.GetAt(i));
+        if (pSdpCodec == IMS_NULL)
         {
             return IMS_FALSE;
         }
-        AString strCodecName = pSDPCodec->GetName();
-        AString strChannel = pSDPCodec->GetEncodingParameters();
+        AString strCodecName = pSdpCodec->GetName();
+        AString strChannel = pSdpCodec->GetEncodingParameters();
         IMS_UINT32 nChannel;
-        IMS_SINT32 nPayloadTypeNumber = pSDPCodec->GetPayloadType();
+        IMS_SINT32 nPayloadTypeNumber = pSdpCodec->GetPayloadType();
 
         if ((strChannel != IMS_NULL && strChannel.EqualsIgnoreCase("1")) &&
                 (strCodecName.EqualsIgnoreCase("AMR-WB") || strCodecName.EqualsIgnoreCase("AMR") ||
@@ -2021,7 +2018,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         }
 
         IMS_TRACE_D("MakeProfileFromSdp() - At[%d], PayloadType[%d], ClockRate[%d]", i,
-                pSDPCodec->GetPayloadType(), pSDPCodec->GetClockRate());
+                pSdpCodec->GetPayloadType(), pSdpCodec->GetClockRate());
 
         AudioProfile::Payload* pPayload = new AudioProfile::Payload();
         if (pPayload == IMS_NULL)
@@ -2030,13 +2027,13 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
         }
 
         pPayload->SetRtpMap(
-                pSDPCodec->GetPayloadType(), strCodecName, pSDPCodec->GetClockRate(), nChannel);
+                pSdpCodec->GetPayloadType(), strCodecName, pSdpCodec->GetClockRate(), nChannel);
 
         if (strCodecName.EqualsIgnoreCase("AMR-WB") || strCodecName.EqualsIgnoreCase("AMR"))
         {
             // Create AMR fmtp
             AudioProfile::AmrFmtp* pAmrFmtp = new AudioProfile::AmrFmtp();
-            GetFmtpFromString(pSDPCodec->GetFormatSpecificParameter(), pAmrFmtp);
+            GetFmtpFromString(pSdpCodec->GetFormatSpecificParameter(), pAmrFmtp);
             pPayload->pFmtp = pAmrFmtp;
         }
         else if (strCodecName.EqualsIgnoreCase("telephone-event"))
@@ -2046,10 +2043,10 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
 
             //[RFC4733] For backward compatibility, if no"events" parameter is received,
             // the sender SHOULD assume support for the DTMF events 0-15 but for no other events.
-            if (pSDPCodec->GetFormatSpecificParameter() != IMS_NULL &&
-                    pSDPCodec->GetFormatSpecificParameter().GetLength() > 0)
+            if (pSdpCodec->GetFormatSpecificParameter() != IMS_NULL &&
+                    pSdpCodec->GetFormatSpecificParameter().GetLength() > 0)
             {
-                pTeFmtp->strEvents = pSDPCodec->GetFormatSpecificParameter();
+                pTeFmtp->strEvents = pSdpCodec->GetFormatSpecificParameter();
             }
             else
             {
@@ -2063,7 +2060,7 @@ IMS_BOOL AudioNego::MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor
             // Create EVS fmtp
             AudioProfile::EvsFmtp* pEvsFmtp = new AudioProfile::EvsFmtp();
             // check and get EVS fmtp
-            GetFmtpFromString(pSDPCodec->GetFormatSpecificParameter(), pEvsFmtp);
+            GetFmtpFromString(pSdpCodec->GetFormatSpecificParameter(), pEvsFmtp);
             // set Fmpt to payload
             pPayload->pFmtp = pEvsFmtp;
         }
@@ -2697,7 +2694,7 @@ IMS_BOOL AudioNego::MakeNegotiatedProfile(IN AudioProfile* pSrcProfile,
         }
 
         // Step 8. Candidate Priority
-        pNegotiatedProfile->nCandidatePriority = pSrcProfile->nCandidatePriority;
+        pNegotiatedProfile->objCandidateAttr = pSrcProfile->objCandidateAttr;
         return IMS_TRUE;
     }
     else
@@ -4487,7 +4484,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
     if (lstAcfgAttr.GetSize() > 0)
     {
         pObjCapaNego->strNegotiatedAcfg = lstAcfgAttr.GetAt(0);
-        IMS_TRACE_I("GetCapaNegoValueFromSDP() - ACFG[%s]",
+        IMS_TRACE_I("GetCapaNegoValueFromSdp() - ACFG[%s]",
                 pObjCapaNego->strNegotiatedAcfg.GetStr(), 0, 0);
         return IMS_TRUE;
     }
@@ -4495,7 +4492,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
     // Get Potential configuration list (pcfg) -"'prio #' SP"t=Tcap #' SP 'a=Acap #'" pair
     pObjCapaNego->lstPotentialConfig = pDescriptor->GetAttributes(SdpAttribute::PCFG);
 
-    IMS_TRACE_I("GetCapaNegoValueFromSDP() - PcfgSize[%d], TcapSize[%d], AcapSize[%d]",
+    IMS_TRACE_I("GetCapaNegoValueFromSdp() - PcfgSize[%d], TcapSize[%d], AcapSize[%d]",
             pObjCapaNego->lstPotentialConfig.GetSize(), pObjCapaNego->mapTransportCapa.GetSize(),
             pObjCapaNego->mapAttributeCapa.GetSize());
 
@@ -4516,7 +4513,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
             if (j == 0)
             {
                 nTcapInitNum = lstSplitSpace.GetAt(j).ToInt32();
-                IMS_TRACE_I("GetCapaNegoValueFromSDP() - nTcapInitNum[%d]", nTcapInitNum, 0, 0);
+                IMS_TRACE_I("GetCapaNegoValueFromSdp() - nTcapInitNum[%d]", nTcapInitNum, 0, 0);
             }
             else
             {
@@ -4565,7 +4562,7 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
         if (strAcap.GetLength() != 0)
         {
             IMS_TRACE_I(
-                    "GetCapaNegoValueFromSDP() - add map[%d - %s]", nAcapNum, strAcap.GetStr(), 0);
+                    "GetCapaNegoValueFromSdp() - add map[%d - %s]", nAcapNum, strAcap.GetStr(), 0);
             pObjCapaNego->mapAttributeCapa.Add(nAcapNum, strAcap);
         }
     }
@@ -4576,13 +4573,13 @@ IMS_BOOL AudioNego::MakeCapaNegoProfileFromSdp(
 
     if (pObjCapaNego->mapTransportCapa.GetSize() == 0)
     {
-        IMS_TRACE_I("GetCapaNegoValueFromSDP() - Therer are no Tcap value in SDP", 0, 0, 0);
+        IMS_TRACE_I("GetCapaNegoValueFromSdp() - Therer are no Tcap value in SDP", 0, 0, 0);
         return IMS_FALSE;
     }
 
     if (pObjCapaNego->lstPotentialConfig.GetSize() == 0)
     {
-        IMS_TRACE_I("GetCapaNegoValueFromSDP() - Therer are no PCFG value in SDP", 0, 0, 0);
+        IMS_TRACE_I("GetCapaNegoValueFromSdp() - Therer are no PCFG value in SDP", 0, 0, 0);
         return IMS_FALSE;
     }
 
@@ -4597,7 +4594,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::MakeNegotiatedCapaNegoProfile(
 
     if (pSrcCapaNego == IMS_NULL || pDestCapaNego == IMS_NULL || pNegotiatedCapaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "AudioNego::MakeNegotiatedCapaNego() invalid argument, %" PFLS_x " %" PFLS_x,
+        IMS_TRACE_E(0, "MakeNegotiatedCapaNego() invalid argument, %" PFLS_x " %" PFLS_x,
                 pSrcCapaNego, pDestCapaNego, 0);
         return IMS_FALSE;
     }
@@ -4616,8 +4613,8 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::MakeNegotiatedCapaNegoProfile(
 
     if (pDestCapaNego->strNegotiatedAcfg.GetLength() > 0)
     {
-        IMS_TRACE_I("VideoNego::MakeNegotiatedCapaNego() ACFG - %s",
-                pDestCapaNego->strNegotiatedAcfg.GetStr(), 0, 0);
+        IMS_TRACE_I("MakeNegotiatedCapaNego() ACFG - %s", pDestCapaNego->strNegotiatedAcfg.GetStr(),
+                0, 0);
         return IMS_TRUE;
     }
 

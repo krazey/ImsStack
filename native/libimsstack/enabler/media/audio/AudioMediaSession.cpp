@@ -42,7 +42,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
         m_objLocalAddress(IPAddress::IPv6NONE),
         m_nLocalPort(0)
 {
-    IMS_TRACE_D("+AudioMediaSession()", 0, 0, 0);
+    IMS_TRACE_I("+AudioMediaSession()", 0, 0, 0);
 }
 
 PUBLIC VIRTUAL AudioMediaSession::~AudioMediaSession()
@@ -112,7 +112,9 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         AudioProfile::Payload* pSrcPayload =
                 pSrcProfile->lstPayload.GetAt(pSrcProfile->nNegotiatedPayloadIndex);
         if (pSrcPayload == IMS_NULL)
+        {
             return IMS_FALSE;
+        }
 
         m_objAudioConfig.setTxPayloadTypeNumber((int32_t)pSrcPayload->objRtpMap.nPayloadNum);
     }
@@ -122,13 +124,13 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
             android::String8(pDestProfile->objIpAddr.ToString().GetStr()));
     m_objAudioConfig.setRemotePort(pDestProfile->nDataPort);
     m_objAudioConfig.setDscp(m_pConfig->GetRtpDscp());
-    m_objAudioConfig.setMaxMtuBytes(1500);  // NEXT_ITEM
+    m_objAudioConfig.setMaxMtuBytes(1500);  // TODO_MEDIA NEXT_ITEM
 
-    MediaManager* manager = MediaManager::GetInstance(m_nSlodId);
-    if (manager != IMS_NULL)
+    MediaManager* pMediaManager = MediaManager::GetInstance(m_nSlodId);
+    if (pMediaManager != IMS_NULL)
     {
         m_objAudioConfig.setMaxMtuBytes(
-                manager->GetResourceManager()->GetRtpFragmentSize(pNegoProfile->objIpAddr));
+                pMediaManager->GetResourceManager()->GetRtpFragmentSize(pNegoProfile->objIpAddr));
     }
     m_objAudioConfig.setRxPayloadTypeNumber(pDestPayload->objRtpMap.nPayloadNum);
 
@@ -157,7 +159,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
 
     // RTCP
     RtcpConfig* pRtcpConfig = new RtcpConfig();
-    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name"));  // TODO::MEDIA
+    pRtcpConfig->setCanonicalName(android::String8("Canonical_Name"));  // TODO_MEDIA
     pRtcpConfig->setTransmitPort(pNegoProfile->nControlPort);
     if (pNegoProfile->nBandwidthRs == 0 && pNegoProfile->nBandwidthRr == 0)
     {

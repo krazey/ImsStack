@@ -1,0 +1,61 @@
+/**
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef _VIDEO_PROFILE_CONFIGURER_INTERFACE_H_
+#define _VIDEO_PROFILE_CONFIGURER_INTERFACE_H_
+
+#include "video/VideoProfile.h"
+
+#define VIDEO_MAX_CONFIG_LEN 256
+
+class MediaSession;
+class MediaEnvironment;
+class VideoProfile;
+
+class VideoProfileConfigurer
+{
+    // == PUBLIC METHOD ==============================================================
+public:
+    static IMS_BOOL CreateVideoProfile(OUT VideoProfile* pVideoProfile,
+            IN MediaEnvironment* pEnvironment, IN VideoConfiguration* pConfig,
+            IN IMS_SINT32 nSlotId);
+    static IMS_BOOL SetVideoRsRr(OUT VideoProfile* pVideoProfile, IN VideoConfiguration* pConfig);
+    static IMS_BOOL MakeNegotiatedBandwidth(IN VideoConfiguration* pConfig,
+            IN VideoProfile* pSrcProfile, IN VideoProfile* pDestProfile,
+            IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,
+            OUT VideoProfile* pNegotiatedProfile);
+    static VIDEO_PROFILE_AVC GetAvcProfileFromProfileLevelId(IN const AString& strProfileLevelId);
+    static IMS_UINT32 GetAvcLevelFromProfileLevelId(IN const AString& strProfileLevelId);
+    static IMS_BOOL UpdateVideoProfile(
+            OUT VideoProfile* pVideoProfile, IN MediaEnvironment* pEnvironment);
+    static void GetWidthHeightFromResolution(
+            IN VIDEO_RESOLUTION eResolIc, IN IMS_UINT32* nWidth, IN IMS_UINT32* nHeight);
+    static VIDEO_RESOLUTION GetResolutionFromWidthHeight(
+            IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight);
+    static VIDEO_RESOLUTION GetVideoResolution(IN IMS_UINT32 nConfigResolutionId);
+    /* TODO_MEDIA later sprop
+    static const IMS_CHAR* GetAvcSpropParameterSets(
+            IN VIDEO_RESOLUTION eResolution, IN VIDEO_PROFILE_AVC eProfileId, IN IMS_SINT32 nLevel);
+
+private:
+    const IMS_CHAR* GetHevcSpropParameterSets(IN IMS_SINT32 nConfigResolutionId,
+            IN VIDEO_PROFILE_HEVC eProfileId = HEVC_PROFILE_MAIN, IN IMS_SINT32 nLevel = 0);
+    */
+private:
+    IMS_CHAR m_strAvcSpropParameterSet[VIDEO_MAX_CONFIG_LEN];
+    IMS_CHAR m_strHevcSpropParameterSet[VIDEO_MAX_CONFIG_LEN];
+};
+#endif /* end of _VIDEO_PROFILE_CONFIGURER_INTERFACE_H_ */

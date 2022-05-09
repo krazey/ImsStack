@@ -75,11 +75,13 @@ public:
 
     static const IMS_SINT32 DEFAULT_VIDEO_DSCP = 40;
     static const IMS_SINT32 DEFAULT_SEND_PERIODIC_SPS_PPS = SEND_EVERY_TIME;
+    static const IMS_SINT32 DEFAULT_CVO_ID = -1;  // TODO_MEDIA need to check.
     static const IMS_BOOL DEFAULT_AVPF_TRR = IMS_FALSE;
     static const IMS_BOOL DEFAULT_AVPF_NACK = IMS_TRUE;
     static const IMS_BOOL DEFAULT_AVPF_TMMBR = IMS_TRUE;
     static const IMS_BOOL DEFAULT_AVPF_PLI = IMS_TRUE;
     static const IMS_BOOL DEFAULT_AVPF_FIR = IMS_TRUE;
+    static const IMS_BOOL DEFAULT_AVPF_CAPA_NEGO = MediaConfiguration::CAPNEG_OFFER_WITH_ACAP;
     static const IMS_SINT32 DEFAULT_TMMBR_DOWN_INTERVAL = 5;
     static const IMS_SINT32 DEFAULT_TMMBR_UP_INTERVAL = 10;
     static const IMS_SINT32 DEFAULT_TMMBR_LOSS_RATIO = 5;
@@ -88,7 +90,8 @@ public:
     static const IMS_SINT32 DEFAULT_TMMBR_UP_LEVEL = 1;
     static const IMS_SINT32 DEFAULT_I_FRAME_INTERVAL = 1;
     static const IMS_BOOL DEFAULT_DROP_P_FRAME = IMS_FALSE;
-    static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 9000;
+    static const IMS_SINT32 DEFAULT_CHANNEL = 1;
+    static const IMS_SINT32 DEFAULT_VIDEO_SAMPLING_RATE = 90000;
 
 public:
     VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType = MEDIA_TYPE_AUDIOVIDEO);
@@ -103,13 +106,16 @@ protected:
     virtual void ToDebugString() const;
 
 public:
-    IMS_SINT32 GetVideoRtpDscp() const;
+    IMS_SINT32 GetVideoDscp() const;
     IMS_SINT32 GetVideoSendPeriodicSpsPps() const;
+    IMS_SINT32 GetCvoId() const;
+    IMS_BOOL IsVideoAvpfEnabled() const;
     IMS_BOOL IsVideoAvpfTrrEnabled() const;
     IMS_BOOL IsbVideoAvpfNackEnabled() const;
     IMS_BOOL IsVideoAvpfTmmbrEnabled() const;
     IMS_BOOL IsVideoAvpfPliEnabled() const;
     IMS_BOOL IsVideoAvpfFirEnabled() const;
+    IMS_SINT32 GetSdpOfferCapNegoForAvpf() const;
     IMS_SINT32 GetVideoAvpfTmmbrDownIntervalSec() const;
     IMS_SINT32 GetVideoAvpfTmmbrUpIntervalSec() const;
     IMS_SINT32 GetVideoAvpfTmmbrLossThresholdRatio() const;
@@ -118,16 +124,22 @@ public:
     IMS_SINT32 GetVideoAvpfTmmbrUpLevel() const;
     IMS_SINT32 GetVideoIframeIntervalSec() const;
     IMS_BOOL IsVideoDropPFrameEnabled() const;
+    IMS_SINT32 GetChannel() const;
     IMS_SINT32 GetVideoSamplingRate() const;
 
+    // TODO_MEDIA temp for video
+    IMS_BOOL GetBandwidthNegoOption() const { return 0; }
+
 private:
-    IMS_SINT32 nVideoRtpDscp;
+    IMS_SINT32 nVideoDscp;
     IMS_SINT32 nVideoSendPeriodicSpsPps;
+    IMS_SINT32 nCvoId;
     IMS_BOOL bVideoAvpfTrrEnabled;
     IMS_BOOL bVideoAvpfNackEnabled;
     IMS_BOOL bVideoAvpfTmmbrEnabled;
     IMS_BOOL bVideoAvpfPliEnabled;
     IMS_BOOL bVideoAvpfFirEnabled;
+    IMS_SINT32 nSdpOfferCapNegoForAvpf;
     IMS_SINT32 nVideoAvpfTmmbrDownIntervalSec;
     IMS_SINT32 nVideoAvpfTmmbrUpIntervalSec;
     IMS_SINT32 nVideoAvpfTmmbrLossThresholdRatio;
@@ -136,6 +148,7 @@ private:
     IMS_SINT32 nVideoAvpfTmmbrUpLevel;
     IMS_SINT32 nVideoIframeIntervalSec;
     IMS_BOOL bVideoDropPFrameEnabled;
+    IMS_SINT32 nChannel;
     IMS_SINT32 nVideoSamplingRate;
 };
 #endif  // _VIDEO_CONFIGURATION_H_

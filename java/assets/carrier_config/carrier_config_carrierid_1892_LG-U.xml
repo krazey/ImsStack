@@ -66,6 +66,27 @@
         <item value="1254"/>
         <item value="1254"/>
     </int-array>
+    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+        <item value="480"/>
+        <item value="640"/>
+    </int-array>
+    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
+    <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
+        <item value="send [x=480,y=640] recv [x=480,y=640] "/>
+    </string-array>
+    <boolean name="imsvt.video_avpf_trr_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_nack_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_tmmbr_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_pli_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_fir_bool" value="false"/>
+    <int-array name="imsvt.h264_payload_type_int_array" num="1">
+        <item value="104"/>
+    </int-array>
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="639"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
+    <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

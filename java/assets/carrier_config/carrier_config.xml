@@ -218,6 +218,23 @@
         <item value="5"/>
         <item value="5"/>
     </int-array>
+<!-- media additional -->
+    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+        <item value="240"/>
+        <item value="320"/>
+    </int-array>
+    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C016</string>
+    <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
+        <item value="send [x=480,y=640] recv [x=480,y=640] "/>
+    </string-array>
+    <int-array name="imsvt.h264_payload_type_int_array" num="1">
+        <item value="104"/>
+    </int-array>
+    <int name="imsvt.video_as_bandwidth_kbps_int" value="639"/>
+    <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
+    <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
 
     <!-- Ut/Xcap -->
     <boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="false"/>
@@ -513,9 +530,6 @@
     <boolean name="ut_host_header_requires_port_number_bool" value="false"/>
     <int name="ut_xcap_apn_inactivity_timer_sec_int" value="120"/>
     <boolean name="ut_display_error_phrase_with_409_error_bool" value="false"/>
-    <boolean name="ut_omit_namespace_of_document_element_bool" value="true"/>
-    <boolean name="ut_omit_namespace_ss_bool" value="false"/>
-    <boolean name="ut_omit_namespace_cp_bool" value="false"/>
 
     <!-- Uce -->
     <boolean name="add_video_tag_contact_header_in_publish_bool" value="false"/>

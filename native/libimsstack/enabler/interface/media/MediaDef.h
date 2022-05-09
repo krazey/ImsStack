@@ -104,13 +104,6 @@ typedef enum
     AUDIO_CAL_TYPE_NOTUSED          = 99
 } AUDIO_CAL_TYPE;
 
-typedef enum
-{
-    MODE_NONE           = 0,
-    MODE_NEGOCAPA       = 1,
-    MODE_FULLCAPA       = 2
-}REOFFER_MODE;
-
 // GTT Mode
 typedef enum
 {

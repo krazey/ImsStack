@@ -28,13 +28,15 @@ __IMS_TRACE_TAG_USER_DECL__("MED.CONF");
 PUBLIC
 VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         MediaConfiguration(_nSessionType),
-        nVideoRtpDscp(DEFAULT_VIDEO_DSCP),
+        nVideoDscp(DEFAULT_VIDEO_DSCP),
         nVideoSendPeriodicSpsPps(DEFAULT_SEND_PERIODIC_SPS_PPS),
+        nCvoId(DEFAULT_CVO_ID),
         bVideoAvpfTrrEnabled(DEFAULT_AVPF_TRR),
         bVideoAvpfNackEnabled(DEFAULT_AVPF_NACK),
         bVideoAvpfTmmbrEnabled(DEFAULT_AVPF_TMMBR),
         bVideoAvpfPliEnabled(DEFAULT_AVPF_PLI),
         bVideoAvpfFirEnabled(DEFAULT_AVPF_FIR),
+        nSdpOfferCapNegoForAvpf(DEFAULT_AVPF_CAPA_NEGO),
         nVideoAvpfTmmbrDownIntervalSec(DEFAULT_TMMBR_DOWN_INTERVAL),
         nVideoAvpfTmmbrUpIntervalSec(DEFAULT_TMMBR_UP_INTERVAL),
         nVideoAvpfTmmbrLossThresholdRatio(DEFAULT_TMMBR_LOSS_RATIO),
@@ -43,6 +45,7 @@ VideoConfiguration::VideoConfiguration(IN MEDIA_CONTENT_TYPE _nSessionType) :
         nVideoAvpfTmmbrUpLevel(DEFAULT_TMMBR_UP_LEVEL),
         nVideoIframeIntervalSec(DEFAULT_I_FRAME_INTERVAL),
         bVideoDropPFrameEnabled(IMS_FALSE),
+        nChannel(DEFAULT_CHANNEL),
         nVideoSamplingRate(DEFAULT_VIDEO_SAMPLING_RATE)
 {
     IMS_TRACE_D("+VideoConfiguration eSessionType(%d)", eSessionType, 0, 0);
@@ -88,16 +91,17 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTCP_INACTIVITY_TIMER_MILLIS_INT);
 
     // Video Configuration attributes
-    nVideoRtpDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
+    nVideoDscp = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_RTP_DSCP_INT);
     nVideoSendPeriodicSpsPps =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_SEND_PERIODIC_SPS_PPS_INT);
-
+    // nCvoId = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_CVO_VALUE_INT); // TODO_MEDIA later
     bVideoAvpfTrrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TRR_BOOL);
     bVideoAvpfNackEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_NACK_BOOL);
     bVideoAvpfTmmbrEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_BOOL);
     bVideoAvpfPliEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_PLI_BOOL);
     bVideoAvpfFirEnabled = piCc->GetBoolean(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_FIR_BOOL);
-
+    // TODO_MEDIA need to check if it is needed for KR
+    // nSdpOfferCapNegoForAvpf = piCc->GetInt(CarrierConfig::Assets::KEY_VIDEO_XXX);
     nVideoAvpfTmmbrDownIntervalSec =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_AVPF_TMMBR_DOWN_INTERVAL_SEC_INT);
     nVideoAvpfTmmbrUpIntervalSec =
@@ -113,6 +117,7 @@ PUBLIC VIRTUAL IMS_BOOL VideoConfiguration::Create(IN ICarrierConfig* piCc)
     nVideoIframeIntervalSec = piCc->GetInt(CarrierConfig::ImsVt::KEY_VIDEO_IFRAME_INTERVAL_SEC_INT);
     bVideoDropPFrameEnabled = piCc->GetBoolean(CarrierConfig::Assets::KEY_VIDEO_DROP_P_FRAME_BOOL);
 
+    // nChannel = DEFAULT_CHANNEL; // already set by default at creator
     // nVideoSamplingRate = DEFAULT_VIDEO_SAMPLING_RATE; // already set by default at creator
     if (!CreateCodecConfigs(piCc))
     {
@@ -203,8 +208,8 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
 {
     // MediaConfiguration::ToDebugString();
 
-    IMS_TRACE_D("nVideoRtpDscp(%d), nVideoSendPeriodicSpsPps(%d)", nVideoRtpDscp,
-            nVideoSendPeriodicSpsPps, 0);
+    IMS_TRACE_D("nVideoDscp(%d), nVideoSendPeriodicSpsPps(%d), nCvoId(%d)", nVideoDscp,
+            nVideoSendPeriodicSpsPps, nCvoId);
     IMS_TRACE_D("bVideoAvpfTrrEnabled(%d), bVideoAvpfNackEnabled(%d)", bVideoAvpfTrrEnabled,
             bVideoAvpfNackEnabled, 0);
     IMS_TRACE_D("bVideoAvpfTmmbrEnabled(%d), bVideoAvpfPliEnabled(%d), bVideoAvpfFirEnabled(%d)",
@@ -224,13 +229,23 @@ PROTECTED VIRTUAL void VideoConfiguration::ToDebugString() const
 }
 
 /*!
- * @brief   GetVideoRtpDscp
+ * @brief   GetVideoDscp
  * @details
  */
 PUBLIC
-IMS_SINT32 VideoConfiguration::GetVideoRtpDscp() const
+IMS_SINT32 VideoConfiguration::GetVideoDscp() const
 {
-    return nVideoRtpDscp;
+    return nVideoDscp;
+}
+
+/*!
+ * @brief   GetCvoId
+ * @details
+ */
+PUBLIC
+IMS_SINT32 VideoConfiguration::GetCvoId() const
+{
+    return nCvoId;
 }
 
 /*!
@@ -241,6 +256,17 @@ PUBLIC
 IMS_SINT32 VideoConfiguration::GetVideoSendPeriodicSpsPps() const
 {
     return nVideoSendPeriodicSpsPps;
+}
+
+/*!
+ * @brief   IsVideoAvpfEnabled
+ * @details Get  avpf  enable
+ */
+PUBLIC
+IMS_BOOL VideoConfiguration::IsVideoAvpfEnabled() const
+{
+    return bVideoAvpfTrrEnabled || bVideoAvpfNackEnabled || bVideoAvpfTmmbrEnabled ||
+            bVideoAvpfPliEnabled || bVideoAvpfFirEnabled;
 }
 
 /*!
@@ -291,6 +317,16 @@ PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoAvpfFirEnabled() const
 {
     return bVideoAvpfFirEnabled;
+}
+
+/*!
+ * @brief   GetSdpOfferCapNegoForAvpf
+ * @details Get avpf sdp offer capa nego
+ */
+PUBLIC
+IMS_SINT32 VideoConfiguration::GetSdpOfferCapNegoForAvpf() const
+{
+    return nSdpOfferCapNegoForAvpf;
 }
 
 /*!
@@ -371,6 +407,16 @@ PUBLIC
 IMS_BOOL VideoConfiguration::IsVideoDropPFrameEnabled() const
 {
     return bVideoDropPFrameEnabled;
+}
+
+/*!
+ * @brief   GetChannel
+ * @details
+ */
+PUBLIC
+IMS_SINT32 VideoConfiguration::GetChannel() const
+{
+    return nChannel;
 }
 
 /*!

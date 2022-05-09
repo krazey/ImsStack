@@ -33,16 +33,6 @@ class JniMediaSession;
 class MediaManager : public IMSActivityEx, public IMediaManager, public ITimerListener
 {
 public:
-    enum MessageType
-    {
-        MSG_NONE = 0,
-        MSG_REQUEST,
-        MSG_REQUEST_SET_WAIT,
-        MSG_RESPONSE,
-        MSG_RESPONSE_RELEASE_WAIT,
-        MSG_NOTIFICATION,
-    };
-
     class MediaSessionNode
     {
     public:
@@ -96,6 +86,7 @@ public:
     MediaResourceMngr* GetResourceManager();
 
     void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    void OnVideoMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
     IMS_BOOL handleRequestMsg(
             IN IMS_SINT32 eEvent, IN IMS_SINTP nCallKey, IN ImsMediaMsgParamBase* param);
     IMS_BOOL OtherSessionHold(IN IMS_SINTP nCallKey);
@@ -119,8 +110,8 @@ private:
     /**
      *
      */
-    virtual IMS_BOOL SendMessageToSessions(IN IMS_SINTP nCallKey, IMSMSG& objMsg);
-    MessageType CategorizeMessageType(IN IMS_SINT32 eMsg);
+    virtual IMS_BOOL SendMessageToSessions(
+            IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
     void StartTimer(IN IMS_UINT32 nTime);
     void StopTimer();
 

@@ -126,6 +126,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     piCcBundle->ReleaseBundle();
     piCcBundle = IMS_NULL;
 
+    ToDebugString();
     return IMS_TRUE;
 }
 

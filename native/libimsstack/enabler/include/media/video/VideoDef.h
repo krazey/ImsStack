@@ -20,9 +20,8 @@
 typedef enum
 {
     VIDEO_CODEC_NONE = 0,
-    VIDEO_CODEC_H264,
-    VIDEO_CODEC_H263,
-    VIDEO_CODEC_H265,
+    VIDEO_CODEC_AVC,
+    VIDEO_CODEC_HEVC,
     VIDEO_CODEC_NOTUSED
 } VIDEO_CODEC;
 
@@ -49,23 +48,23 @@ typedef enum
     VIDEO_RESOLUTION_NOT_USED = 99,
 } VIDEO_RESOLUTION;
 
-typedef enum  // H264 profile
+typedef enum  // AVC profile
 {
-    H264_PROFILE_NONE = 0,
-    H264_PROFILE_CB,  // constrained baseline profile
-    H264_PROFILE_B,   // baseline profile
-    H264_PROFILE_M,   // main profile
-    H264_PROFILE_E,   // extended profile
-    H264_PROFILE_H,   // high profile
-    H264_PROFILE_NOT_USED
-} VIDEO_H264PROFILE;
-typedef enum  // H265 profile
+    AVC_PROFILE_NONE = 0,
+    AVC_PROFILE_CB,  // constrained baseline profile
+    AVC_PROFILE_B,   // baseline profile
+    AVC_PROFILE_M,   // main profile
+    AVC_PROFILE_E,   // extended profile
+    AVC_PROFILE_H,   // high profile
+    AVC_PROFILE_NOT_USED
+} VIDEO_PROFILE_AVC;
+typedef enum  // HEVC profile
 {
-    H265_PROFILE_NONE = 0,
-    H265_PROFILE_MAIN,
-    H265_PROFILE_MAIN10,
-    H265_PROFILE_NOT_USED
-} VIDEO_H265PROFILE;
+    HEVC_PROFILE_NONE = 0,
+    HEVC_PROFILE_MAIN,
+    HEVC_PROFILE_MAIN10,
+    HEVC_PROFILE_NOT_USED
+} VIDEO_PROFILE_HEVC;
 
 typedef enum
 {

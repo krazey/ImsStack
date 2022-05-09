@@ -30,12 +30,14 @@ public:
     virtual IMS_BOOL Create(IN ICarrierConfig* piCc);
     virtual void ToDebugString() const;
 
+    IMS_SINT32 GetChannel() const;
     IMS_SINT32 GetResolutionWidth() const;
     IMS_SINT32 GetResolutionHeight() const;
     IMS_SINT32 GetFramerate() const;
     IMS_SINT32 GetBitrate() const;
     IMS_SINT32 GetPacketizationMode() const;
     IMS_BOOL GetIncludeSpropParameterSets() const;
+    const AString& GetSpropParameterSets() const;
     const AString& GetProfileLevelId() const;
     const AString& GetImageAttr() const;
     const AString& GetFrameSize() const;
@@ -47,25 +49,30 @@ public:
         NON_INTERLEAVED_MODE = 1,
     };
 
+    static const IMS_SINT32 DEFAULT_CHANNEL = 0;
     static const IMS_SINT32 DEFAULT_RESOLUTION_WIDTH = 240;
     static const IMS_SINT32 DEFAULT_RESOLUTION_HEIGHT = 320;
     static const IMS_SINT32 DEFAULT_FRAMERATE = 15;
     static const IMS_SINT32 DEFAULT_BITRATE = 384;
     static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = NON_INTERLEAVED_MODE;
-    static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_FALSE;
-#define DEFAULT_PROFILE_ID "42C00C"
-#define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
-    // send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]
-
-#define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
+    static const IMS_BOOL DEFAULT_INCLUDE_SPROP = IMS_TRUE;
+#define DEFAULT_AVC_SPROP_PARAMS "Z0LAFukDwKMg,aM4G4g=="
+#define DEFAULT_AVC_PROFILE_ID   "42C00C"
+#define DEFAULT_AVC_IMAGE_ATTR \
+    "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
+#define DEFAULT_AVC_FRAME_SIZE "NEED_TO_CHECK"
 
 private:
+    IMS_SINT32 m_nChannel;
+
     IMS_SINT32 m_nResolutionWidth;
     IMS_SINT32 m_nResolutionHeight;
     IMS_SINT32 m_nFramerate;
     IMS_SINT32 m_nBitrate;
     IMS_SINT32 m_nPacketizationMode;
+
     IMS_BOOL m_bIncludeSpropParameterSets;
+    AString m_strSpropParameterSets;
     AString m_strProfileLevelId;
     AString m_strImageAttr;
     AString m_strFrameSize;

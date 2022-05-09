@@ -245,7 +245,7 @@ PROTECTED VIRTUAL void AudioConfiguration::ToDebugString() const
     IMS_TRACE_D("m_nModeChangeCapability(%d), m_nModeChangePeriod(%d), m_nModeChangeNeighbor(%d)",
             m_nModeChangeCapability, m_nModeChangePeriod, m_nModeChangeNeighbor);
 
-    for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objAudioCandidateAttribute.GetSize(); i++)
     {
         IMS_TRACE_D("m_objAudioCandidateAttribute[%d] : [%s]", i,
                 m_objAudioCandidateAttribute.GetAt(i).GetStr(), 0);

@@ -20,8 +20,8 @@
 #include "ImsSlot.h"
 #include "MediaDef.h"
 #include "audio/AudioNego.h"
-// #include "video/VideoNego.h"
-// #include "text/TextNego.h"
+#include "video/VideoNego.h"
+//#include "text/TextNego.h"
 
 class MediaNego : public ImsSlot
 {
@@ -33,6 +33,8 @@ public:
         ERROR_NO_CODEC_MATCHED,
         ERROR_IP_MISMATCH,
         ERROR_NO_AUDIO,
+        ERROR_NO_VIDEO,
+        ERROR_NO_TEXT,
     };
     MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
     ~MediaNego();
@@ -54,13 +56,17 @@ public:
     NEGO_STATE GetNegoState() { return m_eNegoState; }
     void SetAudioNego(AudioNego* pAudioNego) { m_pAudioNego = pAudioNego; }
     AudioNego* GetAudioNego() { return m_pAudioNego; }
+    void SetVideoNego(VideoNego* pVideoNego) { m_pVideoNego = pVideoNego; }
+    VideoNego* GetVideoNego() { return m_pVideoNego; }
+    // void SetTextNego(TextNego* pTextNego) { m_pTextNego = pTextNego; }
+    // TextNego* GetTextNego() { return m_pTextNego; }
     MEDIA_DIRECTION GetNegotiatedAudioDirection(void);
     MEDIA_DIRECTION GetNegotiatedVideoDirection(void);
     MEDIA_DIRECTION GetNegotiatedTextDirection(void);
     AUDIO_CODEC GetNegotiatedAudioQuality(void);
+    VIDEO_RESOLUTION GetNegotiatedVideoQuality(void);
+    // TEXT_CODEC GetNegotiatedTextQuality(void);    // TODO_MEDIA
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
-    void SetActiveProfile(IMS_BOOL bIsActive) { m_bIsActive = bIsActive; }
-    IMS_BOOL IsActiveProfile() { return m_bIsActive; };
 
 private:
     IMSList<IMedia*> GetIMediaListFromSession(
@@ -72,8 +78,8 @@ private:
 protected:
     NEGO_STATE m_eNegoState;
     AudioNego* m_pAudioNego;
-    // VideoNego* m_pVideoNego;
-    // TextNego*  m_pTextNego;
+    VideoNego* m_pVideoNego;
+    // TextNego*  m_pTextNego;  // TODO_MEDIA text
     MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bIsActive;

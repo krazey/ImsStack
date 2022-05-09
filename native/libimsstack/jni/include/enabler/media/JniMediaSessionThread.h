@@ -32,8 +32,8 @@ public:
 
     void SetSlotId(IN IMS_SINT32 nSlotId);
 
-    IMS_BOOL OnOpenSession(IN ImsMediaMsgOpenConfigParam* pParam);
-    IMS_BOOL OnModifySession(IN ImsMediaMsgConfigParam* pParam);
+    IMS_BOOL OnOpenSession(IN ImsMediaMsgParamBase* pParam);
+    IMS_BOOL OnModifySession(IN ImsMediaMsgParamBase* pParam);
     IMS_BOOL OnCloseSession(IN ImsMediaMsgParamBase* pParam);
     IMS_BOOL OnAddConfig(IN ImsMediaMsgConfigParam* pParam);
     IMS_BOOL OnDeleteConfig(IN ImsMediaMsgConfigParam* pParam);

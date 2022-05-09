@@ -77,11 +77,11 @@ IMS_BOOL MediaMsgHandler::SendMessageToMediaService(
     switch (eEvent)
     {
         case IMMedia::REQUEST_OPEN_SESSION:
-            return m_pThread->OnOpenSession((ImsMediaMsgOpenConfigParam*)pParam);
+            return m_pThread->OnOpenSession(pParam);
         case IMMedia::REQUEST_MODIFY_SESSION:
-            return m_pThread->OnModifySession((ImsMediaMsgConfigParam*)pParam);
+            return m_pThread->OnModifySession(pParam);
         case IMMedia::REQUEST_CLOSE_SESSION:
-            return m_pThread->OnCloseSession((ImsMediaMsgParamBase*)pParam);
+            return m_pThread->OnCloseSession(pParam);
         case IMMedia::REQUEST_ADD_CONFIG:
             return m_pThread->OnAddConfig((ImsMediaMsgConfigParam*)pParam);
         case IMMedia::REQUEST_DELETE_CONFIG:

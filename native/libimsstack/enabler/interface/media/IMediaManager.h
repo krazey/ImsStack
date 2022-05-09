@@ -28,6 +28,7 @@ public:
             IN JniMediaSessionThread* pThread) = 0;
 
     virtual void OnResponse(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
+    virtual void OnVideoMessage(IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam);
 };
 
 #endif

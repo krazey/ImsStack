@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-#ifndef _IMS_AUDIO_NEGO_H_
-#define _IMS_AUDIO_NEGO_H_
+#ifndef _IMS_VIDEO_NEGO_H_
+#define _IMS_VIDEO_NEGO_H_
 
 // == INCLUDES =========================================================
 #include "ImsSlot.h"
-
 #include "media/IMedia.h"
 #include "ISession.h"
 
 #include "MediaDef.h"
-#include "audio/AudioDef.h"
+#include "video/VideoDef.h"
 #include "MediaEnvironment.h"
 
-#include "audio/AudioProfile.h"
-#include "config/AudioConfiguration.h"
-#include "audio/AudioProfileConfigurer.h"
+#include "config/VideoConfiguration.h"
+#include "video/VideoProfile.h"
+#include "video/VideoProfileConfigurer.h"
 
-class AudioNego : public ImsSlot
+class MediaSession;
+
+class VideoNego : ImsSlot
 {
     // == INNER CLASS ================================================================
 public:
     class OaModel
     {
     public:
-        AudioProfile* pSrcProfile;
-        AudioProfile* pDestProfile;
-        AudioProfile* pNegotiatedProfile;
+        VideoProfile* pSrcProfile;
+        VideoProfile* pDestProfile;
+        VideoProfile* pNegotiatedProfile;
         IMS_SINTP nSessionDescriptorKey;
         IMS_BOOL bConfirmedSession;
 
@@ -51,17 +52,18 @@ public:
                 pNegotiatedProfile(IMS_NULL),
                 nSessionDescriptorKey(0),
                 bConfirmedSession(IMS_FALSE){};
-
         ~OaModel()
         {
             if (pSrcProfile != IMS_NULL)
             {
                 delete pSrcProfile;
             }
+
             if (pDestProfile != IMS_NULL)
             {
                 delete pDestProfile;
             }
+
             if (pNegotiatedProfile != IMS_NULL)
             {
                 delete pNegotiatedProfile;
@@ -88,17 +90,16 @@ public:
     };
 
     // == Constructor, Destructor, Operator Overloading ========================================
-protected:
-    AudioNego(IMS_SINT32 nSlotId = IMS_SLOT_0);
-
 public:
-    static AudioNego* Create(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
+    static VideoNego* Create(IN IMS_SINT32 nSlotID = IMS_SLOT_0,
             IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
-    virtual ~AudioNego();
+    virtual ~VideoNego();
+    void Copy(IN VideoNego* pVideoNego);
 
 private:
-    AudioNego(IN const AudioNego& obj);
-    AudioNego& operator=(IN const AudioNego& obj);
+    VideoNego(IN IMS_SINT32 nSlotID = IMS_SLOT_0);
+    VideoNego(IN const VideoNego& obj);
+    VideoNego& operator=(IN const VideoNego& obj);
 
     // == PUBLIC METHOD ==============================================================
 public:
@@ -106,16 +107,15 @@ public:
     virtual void DestroyProfiles();
     virtual void SetMediaEnvironment(IN MediaEnvironment* pEnvironment);
     virtual void SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType);
-    AudioConfiguration* GetConfig();
-    void Copy(IN AudioNego* pAudioNego);
-
+    VideoConfiguration* GetConfig();
     // -- Negotiation APIs -------------------------------------------------------------------------
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
             IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
+    virtual IMS_BOOL NegotiateSDP(NEGO_STATE eNegoState, IN IMS_BOOL bForking,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MEDIA_DIRECTION* eDir);
+
     virtual void FinalizeSDP(IN IMS_SINTP nSessionDescriptorKey, NEGO_STATE eNegoState);
 
     // -- Additional function APIs
@@ -123,28 +123,29 @@ public:
     IMS_BOOL SetPort(IN IMS_UINT32 nPort);
     IPAddress GetLocalAddr() { return m_objBaseProfile.objIpAddr; };
     IMS_UINT32 GetLocalPort() { return m_objBaseProfile.nDataPort; };
-
+    IMS_BOOL GetNegotiatedCvoResult();
     // -- Condition checking APIs
     // -------------------------------------------------------------------------
-    OaModel* GetNegotiatedOaModel(IMS_BOOL bCheckConfirmed = IMS_FALSE);
-    IMS_BOOL GetNegotiatedProfileSet(OUT AudioProfile*& pSrcProfile,
-            OUT AudioProfile*& pDestProfile, OUT AudioProfile*& pNegotiatedProfile);
-    MEDIA_DIRECTION GetNegotiatedDirection(void);
-    AUDIO_CODEC GetNegotiatedCodec(void);
-    AUDIO_CODEC_BITRATE GetNegotiatedAudioCodecRate(void);
-    IMS_BOOL HasNegotiatedDtmf(void);
-    IMS_SINT32 GetNegotiatedRtpPort(void);
-    IMS_SINT32 GetMediaBandwidth(void);
+    OaModel* GetNegotiatedOaModel(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
+    IMS_BOOL GetNegotiatedProfileSet(OUT VideoProfile*& pSrcProfile,
+            OUT VideoProfile*& pDestProfile, OUT VideoProfile*& pNegotiatedProfile);
+    MEDIA_DIRECTION GetNegotiatedDirection();
+    VIDEO_RESOLUTION GetNegotiatedResolution(IN IMS_BOOL bCheckConfirmed = IMS_FALSE);
+    IMS_SINT32 GetNegotiatedRtpPort();
+    IMS_SINT32 GetMediaBandwidth();
+    IMS_BOOL GetWidthHeightFromResolutionId(
+            IN VIDEO_RESOLUTION eResolutionId, OUT IMS_UINT32* pnWidth, OUT IMS_UINT32* pnHeight);
+    VIDEO_RESOLUTION GetAvcMaxResolutionFromLevel(IN IMS_UINT32 nLevel);
 
     // == PROTECTED METHOD ==========================================================
-protected:
+private:
     virtual IMS_BOOL FormOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
             IN MEDIA_DIRECTION eDir);
     virtual IMS_BOOL FormAnswer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
             IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL FormReoffer(IN ISessionDescriptor* pSessionDescriptor,
+    virtual IMS_BOOL FormReOffer(IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
             IN MEDIA_DIRECTION eDir);
     virtual MEDIA_DIRECTION NegotiateOffer(
@@ -153,60 +154,57 @@ protected:
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
     virtual MEDIA_DIRECTION NegotiateReanswer(
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor);
-    IMS_BOOL MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescriptor,
-            OUT IMediaDescriptor* pDescriptor, IN AudioProfile* pProfile);
+    IMS_BOOL MakeSdpFromProfile(IN ISessionDescriptor* pSessionDescriptor,
+            OUT IMediaDescriptor* pDescriptor, IN VideoProfile* pProfile);
     IMS_BOOL MakeProfileFromSdp(IN ISessionDescriptor* pSessionDescriptor,
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile* pProfile);
-    IMS_BOOL MakeNegotiatedProfile(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
-            IN IMS_BOOL bIsOfferReceived, OUT AudioProfile* pNegotiatedProfile);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::EvsFmtp* pFmtp);
-    IMS_BOOL FindEvsInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pBandwidthNegoList,
-            OUT IMS_UINT32* pBitrateNegoList, OUT IMS_UINT32* pModeSetNegoList);
-    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT AudioProfile::AmrFmtp* pFmtp);
-    IMS_BOOL FindAmrInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload,
-            IN IMS_BOOL bIsOfferReceived, OUT IMS_UINT32* pnNegoModeSetList);
-    IMS_BOOL FindPcmInProfile(IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
-    IMS_SINT32 CompareModeSet(IN AudioProfile::AmrFmtp* pSrcFmtp,
-            IN AudioProfile::AmrFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoModeSet);
-    IMS_BOOL CompareEvsBwBrMode(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, IN IMS_BOOL bIsOfferReceived,
-            OUT IMS_UINT32* nNegoBwList, OUT IMS_UINT32* nNegoBrList,
-            OUT IMS_UINT32* nNegoModeList);
-    IMS_BOOL CompareEvsBwBrModeLegacy(IN AudioProfile::EvsFmtp* pSrcFmtp,
-            IN AudioProfile::EvsFmtp* pDestFmtp, OUT IMS_UINT32* nNegoBwList,
-            OUT IMS_UINT32* nNegoBrList, OUT IMS_UINT32* nNegoModeList);
-    IMS_BOOL FindTelephoneEventInProfile(
-            IN AudioProfile* pProfile, IN AudioProfile::Payload* pPayload);
-    IMS_SINT32 FindPayloadIndexFromProfile(IN AString strCodecName, IN AudioProfile* pProfile,
-            IN AudioProfile::Payload* pPayload, IN IMS_BOOL isOfferReceivedCase);
-    void RearrangeModeSetByAs(
-            OUT AudioProfile::Payload* pPayload, IMS_BOOL bIpV6, IN IMS_SINT32 nAs);
+            IN IMediaDescriptor* pDescriptor, OUT VideoProfile* pProfile);
+    virtual IMS_BOOL MakeNegotiatedPayload(IN VideoProfile::Payload* pSrcPayload,
+            IN VideoProfile::Payload* pDstPayload, IN VideoConfiguration* pConfig,
+            OUT VideoProfile::Payload* pNegoPayload);
+    virtual IMS_BOOL MakeNegotiatedProfile(IN VideoProfile* pSrcProfile,
+            IN VideoProfile* pDestProfile, IN IMS_BOOL bIsOfferReceived,
+            OUT VideoProfile* pNegotiatedProfile);
+    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::AvcFmtp* pFmtp);
+    IMS_BOOL GetFmtpFromString(IN AString strFmtp, OUT VideoProfile::HevcFmtp* pFmtp);
+    virtual VideoProfile::Payload* FindPayloadInProfile(
+            IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
+    IMS_SINT32 FindPayloadIndexFromProfile(
+            IN VideoProfile* pProfile, IN VideoProfile::Payload* pPayload);
     MEDIA_DIRECTION UpdateDirectionToMine(
             IN MEDIA_DIRECTION ePeerDir, IN MEDIA_DIRECTION eSrcDir, IN IMS_BOOL bIsMtCase);
-    AString MakeCryptoAttributeFromSrtpProfile(IN AudioProfile* pProfile);
-    IMS_BOOL MakeSrtpProfileFromCapaNego(IN_OUT AudioProfile* pProfile);
-    IMS_BOOL MakeSrtpProfileFromCryptoAttr(OUT AudioProfile* pProfile, IN AString CryptoAttr);
+    IMS_BOOL GetAvpfFromAttributes(IN SdpMediaFormat* pMediaFormat,
+            IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
+    IMS_BOOL GetCorrectImageIndex(IN IMS_SINT32 nPayloadTypeNum, IN IMSList<AString> objAttributes,
+            OUT IMS_UINT32* nIndex);
+    VIDEO_RESOLUTION GetResolutionFromSdp(IN VIDEO_CODEC codecType, IN AString strImageAttrFromSdp,
+            IN AString strFrameSizeFromSdp, IN AString strSpropParam, IN IMS_SINT32 nQcif = -1);
+    IMS_BOOL GetWidthHeightFromSdp_ImageAttr(IN AString strImageAttrFromSdp,
+            OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
+    IMS_BOOL GetWidthHeightFromSdp_SpropParam(IN VIDEO_CODEC codecType, IN IMS_CHAR* szSprop,
+            OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
+    IMS_BOOL GetWidthHeightFromSdp_FrameSize(IN AString strFrameSizeFromSdp,
+            OUT IMS_UINT32* nImageWidth, OUT IMS_UINT32* nImageHeight);
+    VIDEO_RESOLUTION GetResolutionFromWidthHeight(IN IMS_UINT32 nWidth, IN IMS_UINT32 nHeight);
+    IMS_BOOL MakeImageAttributeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
+            OUT AString& strImageAttr);
+    IMS_BOOL MakeFrameSizeLine(IN IMS_UINT32 nPayloadType, IN VIDEO_RESOLUTION eResolutionId,
+            OUT AString& strFrameSize);
+    // -- CapaNego API ---------------------------------------------------------------
     IMS_BOOL MakeCapaNegoProfileFromSdp(
-            IN IMediaDescriptor* pDescriptor, OUT AudioProfile::CapaNego* pObjCapaNego);
-    IMS_BOOL MakeNegotiatedCapaNegoProfile(IN AudioProfile::CapaNego* pSrcCapaNego,
-            IN AudioProfile::CapaNego* pDestCapaNego,
-            OUT AudioProfile::CapaNego* pNegotiatedCapaNego);
+            IN IMediaDescriptor* pDescriptor, OUT VideoProfile::CapaNego* pObjCapaNego);
+    virtual IMS_BOOL MakeNegotiatedCapaNegoProfile(IN VideoProfile::CapaNego* pSrcCapaNego,
+            IN VideoProfile::CapaNego* pDestCapaNego,
+            OUT VideoProfile::CapaNego* pNegotiatedCapaNego);
+    IMS_BOOL CheckAvpfFromProfile(IN VideoProfile* pProfile);
+    IMS_BOOL GetAvpfFromAttributes_EX(IN IMediaDescriptor* pMediaDescriptor,
+            IN VideoProfile::CapaNego* pCapaNego, OUT VideoProfile::RtcpFbAttributes* pRtcpFbAttr);
 
-protected:
-    IMSList<OaModel*> m_lstOaModel;
-    AudioProfile m_objBaseProfile;
-    MediaEnvironment* m_pMediaEnvironment;
-
+    // == PROTECTED VARIABLE ==========================================================
 private:
+    IMSList<OaModel*> m_lstOaModel;
+    VideoProfile m_objBaseProfile;
+    MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
-    static const AString EVS_BR[12];
-    static const AString EVS_BW[4];
-    static const AString EVS_BW_LIST[9];
-
-public:
-    static const AString AUDIO_CODEC_BANDWIDTH_STRING[4];
-    static const AString AUDIO_CODEC_BITRATE_STRING[3][9];
+    IMS_BOOL m_bNegotiatedCvoResult;
 };
-#endif /* _IMS_AUDIO_NEGO_H_ */
+#endif /* _IMS_VIDEO_NEGO_H_ */

@@ -1,3 +1,18 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
+    <int-array name="imsvt.video_codec_attribute_resolution_int_array" num="2">
+        <item value="240"/>
+        <item value="320"/>
+    </int-array>
+    <int name="imsvt.video_codec_attribute_frame_rate_int" value="15"/>
+    <int name="imsvt.video_codec_attribute_packetization_mode_int" value="1"/>
+    <string name="imsvt.h264_video_codec_attribute_profile_level_id_string">42C00C</string>
+    <string-array name="imsvt.video_codec_image_attr_string_array" num="1">
+        <item value="send [x=640,y=480] recv [x=640,y=480]"/>
+    </string-array>
+    <boolean name="imsvt.video_avpf_trr_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_nack_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_tmmbr_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_pli_bool" value="false"/>
+    <boolean name="imsvt.video_avpf_fir_bool" value="false"/>
 </carrier_config>

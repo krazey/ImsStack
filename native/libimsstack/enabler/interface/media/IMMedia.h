@@ -18,21 +18,23 @@
 #define _IMMEDIA_H_
 
 #include <AudioConfig.h>
+#include <VideoConfig.h>
 #include <MediaQualityThreshold.h>
 #include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
 #include "IPAddress.h"
 #include "MediaDef.h"
 
-#define IMMEDIA IMS_MSG_BASE_STREAMEDMEDIA
+#define IMMEDIA     IMS_MSG_BASE_STREAMEDMEDIA
 #define IMMEDIA_IND IMMEDIA + 100
 
 using namespace android::telephony::imsmedia;
 
 class IMMedia
 {
-
-#define IMMEDIA_CASE_ENUM(name) case name: return #name
+#define IMMEDIA_CASE_ENUM(name) \
+    case name:                  \
+        return #name
 
 public:
     static const IMS_CHAR* PrintMsg(IN IMS_SINT32 nMsg)
@@ -59,13 +61,38 @@ public:
             IMMEDIA_CASE_ENUM(NOTIFY_PACKET_LOSS);
             IMMEDIA_CASE_ENUM(NOTIFY_JITTER);
             IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_QUALITY_CHANGE);
+            IMMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
+            IMMEDIA_CASE_ENUM(SETSURFACE_CMD);
+            IMMEDIA_CASE_ENUM(FARFRAME_IND);
+            IMMEDIA_CASE_ENUM(START_PREVIEW_CAMERA_CMD);
+            IMMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
+            IMMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
+            IMMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
+            IMMEDIA_CASE_ENUM(PEER_DIMENSION_CHANGED_IND);
+            IMMEDIA_CASE_ENUM(VIDEO_DATA_USAGE_CMD);
+            IMMEDIA_CASE_ENUM(VIDEO_DATA_USAGE_INFO_IND);
         }
         return "Unrecognized Msg";
     }
 
 public:
+    enum MessageType
+    {
+        MSG_NONE = 0,
+        MSG_REQUEST,
+        MSG_REQUEST_SET_WAIT,
+        MSG_RESPONSE,
+        MSG_RESPONSE_RELEASE_WAIT,
+        MSG_NOTIFICATION,
+
+        // for Video
+        MSG_VIDEO_REQUEST,
+        MSG_VIDEO_NOTIFICATION,
+    };
+
     static const IMS_SINT32 MEDIA_MESSAGE_IDX_START = IMMEDIA + 0;
 
+    // Requests
     static const IMS_SINT32 REQUEST_OPEN_SESSION = IMMEDIA + 1;
     static const IMS_SINT32 REQUEST_CLOSE_SESSION = IMMEDIA + 2;
     static const IMS_SINT32 REQUEST_MODIFY_SESSION = IMMEDIA + 3;
@@ -75,6 +102,12 @@ public:
     static const IMS_SINT32 REQUEST_SEND_DTMF = IMMEDIA + 7;
     static const IMS_SINT32 REQUEST_SET_MEDIA_QUALITY = IMMEDIA + 8;
     static const IMS_SINT32 REQUEST_HEADER_EXTENSION = IMMEDIA + 9;
+
+    // Requests for video
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IDX_START = IMMEDIA + 50;
+    static const IMS_SINT32 REQUEST_SET_PREVIEW_SURFACE = MEDIA_MESSAGE_VIDEO_IDX_START + 1;
+    static const IMS_SINT32 REQUEST_SET_DISPLAY_SURFACE = MEDIA_MESSAGE_VIDEO_IDX_START + 2;
+    static const IMS_SINT32 REQUEST_VIDEO_DATA_USAGE = MEDIA_MESSAGE_VIDEO_IDX_START + 3;
 
     static const IMS_SINT32 MEDIA_MESSAGE_IDX_END = IMMEDIA + 99;
 
@@ -94,7 +127,60 @@ public:
 
     static const IMS_SINT32 NOTIFY_QOS_INFO = IMMEDIA_IND + 20;
 
+    // Notifications for video
+    static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_START = IMMEDIA_IND + 50;
+    static const IMS_SINT32 PEER_DIMENSION_CHANGED_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 1;
+    static const IMS_SINT32 VIDEO_DATA_USAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 2;
+    static const IMS_SINT32 VIDEO_DATA_USAGE_INFO_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 3;
+    static const IMS_SINT32 SETSURFACE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 4;
+    static const IMS_SINT32 FARFRAME_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 5;
+    static const IMS_SINT32 START_PREVIEW_CAMERA_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 6;
+    static const IMS_SINT32 SELECT_CAMERA_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 7;
+    static const IMS_SINT32 CHANGE_CAMERA_ZOOM_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 8;
+    static const IMS_SINT32 SET_PAUSE_IMAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 9;
+
     static const IMS_SINT32 MEDIA_MESSAGE_IND_IDX_END = IMMEDIA_IND + 99;
+
+public:
+    static MessageType CategorizeMessageType(IN IMS_SINT32 nMsg)
+    {
+        MessageType nMsgType = MSG_NONE;
+
+        if (nMsg >= REQUEST_OPEN_SESSION && nMsg <= REQUEST_HEADER_EXTENSION)
+        {
+            nMsgType = MSG_REQUEST;
+
+            if (nMsg == REQUEST_OPEN_SESSION || nMsg == REQUEST_MODIFY_SESSION ||
+                    nMsg == REQUEST_ADD_CONFIG || nMsg == REQUEST_CONFIRM_CONFIG)
+            {
+                nMsgType = MSG_REQUEST_SET_WAIT;
+            }
+        }
+        else if (nMsg >= RESPONSE_OPEN_SESSION && nMsg <= NOTIFY_FIRST_PACKET)
+        {
+            nMsgType = MSG_RESPONSE;
+
+            if (nMsg == RESPONSE_OPEN_SESSION || nMsg == RESPONSE_MODIFY_SESSION ||
+                    nMsg == RESPONSE_ADD_CONFIG || nMsg == RESPONSE_CONFIRM_CONFIG)
+            {
+                nMsgType = MSG_RESPONSE_RELEASE_WAIT;
+            }
+        }
+        else if (nMsg >= NOTIFY_HEADER_EXTENSION && nMsg <= NOTIFY_QOS_INFO)
+        {
+            nMsgType = MSG_NOTIFICATION;
+        }
+        else if (nMsg >= REQUEST_SET_PREVIEW_SURFACE && nMsg <= REQUEST_VIDEO_DATA_USAGE)
+        {
+            nMsgType = MSG_VIDEO_REQUEST;
+        }
+        else if (nMsg >= SETSURFACE_CMD && nMsg <= VIDEO_DATA_USAGE_INFO_IND)
+        {
+            nMsgType = MSG_VIDEO_NOTIFICATION;
+        }
+
+        return nMsgType;
+    }
 };
 
 enum RtpError
@@ -117,9 +203,9 @@ enum RtpError
     /** The request is not supported by the implementation */
     REQUEST_NOT_SUPPORTED = 6,
 
-    // Additional for Ims Internal
+    // Additional for Ims Internal enums start from 20
     /** The response is not received within certain time */
-    RESPONSE_WAIT_TIMEOUT = 7,
+    RESPONSE_WAIT_TIMEOUT = 20,
 };
 
 enum SessionType
@@ -129,63 +215,82 @@ enum SessionType
     SESSION_TYPE_RTT = 2,
 };
 
+enum
+{
+    SURFACE_FAR = 1,
+    SURFACE_NEAR = 2,
+};
+
 class ImsMediaMsgParamBase
 {
 public:
     ImsMediaMsgParamBase() :
-            m_eMediaType(MEDIA_TYPE_INVALID)
-    {};
+            m_eMediaType(MEDIA_TYPE_INVALID){};
 
 public:
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
-class ImsMediaMsgSetMediaQualityParam :
-        public ImsMediaMsgParamBase
+class ImsMediaMsgSetMediaQualityParam : public ImsMediaMsgParamBase
 {
 public:
     ImsMediaMsgSetMediaQualityParam() :
-            m_objMediaQualityThreshold(MediaQualityThreshold())
-    {};
+            m_objMediaQualityThreshold(MediaQualityThreshold()){};
 
 public:
     MediaQualityThreshold m_objMediaQualityThreshold;
 };
 
-class ImsMediaMsgConfigParam :
-        public ImsMediaMsgParamBase
+class ImsMediaMsgConfigParam : public ImsMediaMsgParamBase
 {
 public:
     ImsMediaMsgConfigParam() :
-            m_objAudioConfig(AudioConfig())
-    {};
+            m_objAudioConfig(AudioConfig()){};
 
 public:
     AudioConfig m_objAudioConfig;
 };
 
-class ImsMediaMsgOpenConfigParam :
-        public ImsMediaMsgConfigParam
+class ImsMediaMsgOpenConfigParam : public ImsMediaMsgConfigParam
 {
 public:
     ImsMediaMsgOpenConfigParam() :
             m_objLocalAddress(IPAddress::IPv6NONE),
-            m_nLocalPort(0)
-    {};
+            m_nLocalPort(0){};
 
 public:
     IPAddress m_objLocalAddress;
     IMS_SINT32 m_nLocalPort;
 };
 
-class ImsMediaMsgDtmfParam :
-        public ImsMediaMsgParamBase
+class ImsMediaMsgVideoConfigParam : public ImsMediaMsgParamBase
+{
+public:
+    ImsMediaMsgVideoConfigParam() :
+            m_objVideoConfig(VideoConfig()){};
+
+public:
+    VideoConfig m_objVideoConfig;
+};
+
+class ImsMediaMsgVideoOpenConfigParam : public ImsMediaMsgVideoConfigParam
+{
+public:
+    ImsMediaMsgVideoOpenConfigParam() :
+            m_objLocalAddress(IPAddress::IPv6NONE),
+            m_nLocalPort(0){};
+
+public:
+    IPAddress m_objLocalAddress;
+    IMS_SINT32 m_nLocalPort;
+};
+
+class ImsMediaMsgDtmfParam : public ImsMediaMsgParamBase
 {
 public:
     ImsMediaMsgDtmfParam() :
             m_dtmfCode(-1),
-            m_nDuration(-1)
-    {};
+            m_nDuration(-1){};
 
 public:
     IMS_CHAR m_dtmfCode;
@@ -196,36 +301,32 @@ class ImsMediaResponseParamBase
 {
 public:
     ImsMediaResponseParamBase() :
-            m_eResult(NO_ERROR),
-            m_eMediaType(MEDIA_TYPE_INVALID)
-    {};
+            m_eResult(RtpError::NO_ERROR),
+            m_eMediaType(MEDIA_TYPE_INVALID){};
 
 public:
     RtpError m_eResult;
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
-class ImsMediaResponseConfigParam :
-        public ImsMediaResponseParamBase
+class ImsMediaResponseConfigParam : public ImsMediaResponseParamBase
 {
 public:
     ImsMediaResponseConfigParam() :
-            m_objAudioConfig(AudioConfig())
-    {};
+            m_objAudioConfig(AudioConfig()){};
 
 public:
     AudioConfig m_objAudioConfig;
 };
 
-class ImsMediaNotifyQosParam :
-        public ImsMediaResponseParamBase
+class ImsMediaNotifyQosParam : public ImsMediaResponseParamBase
 {
 public:
     ImsMediaNotifyQosParam() :
             m_objIpAddr(IPAddress::IPv6NONE),
             m_nPort(0),
-            m_bResult(IMS_FALSE)
-    {};
+            m_bResult(IMS_FALSE){};
+
 public:
     IPAddress m_objIpAddr;
     IMS_SINT32 m_nPort;
@@ -237,20 +338,19 @@ class ImsMediaNotifyInactivityParam
 public:
     ImsMediaNotifyInactivityParam() :
             m_eMediaProtocolType(MEDIA_PROTOCOL_NONE),
-            m_eMediaType(MEDIA_TYPE_INVALID)
-    {};
+            m_eMediaType(MEDIA_TYPE_INVALID){};
+
 public:
     MEDIA_TRANSPORT_PROTOCOL m_eMediaProtocolType;
     MEDIA_CONTENT_TYPE m_eMediaType;
 };
 
-class ImsMediaNotifyPacketParam :
-        public ImsMediaResponseParamBase
+class ImsMediaNotifyPacketParam : public ImsMediaResponseParamBase
 {
 public:
     ImsMediaNotifyPacketParam() :
-            m_nResponse(-1)
-    {};
+            m_nResponse(-1){};
+
 public:
     IMS_SINT32 m_nResponse;
 };
@@ -297,11 +397,64 @@ class ImsMediaBasicSessionInfoParam
 public:
     ImsMediaBasicSessionInfoParam() :
             m_nNegoId(0),
-            m_eMediaType(MEDIA_TYPE_AUDIO)
-    {};
+            m_eMediaType(MEDIA_TYPE_AUDIO){};
+
 public:
     IMS_UINTP m_nNegoId;
     MEDIA_CONTENT_TYPE m_eMediaType;
+};
+
+class ImsMediaVideoParam : public ImsMediaMsgParamBase
+{
+public:
+    ImsMediaVideoParam() :
+            nValue(-1){};
+
+public:
+    IMS_SINT32 nValue;
+};
+
+class ImsMediaSetSurfaceCmdParam : public ImsMediaMsgParamBase
+{
+public:
+    inline ImsMediaSetSurfaceCmdParam(IN CONST ImsMediaSetSurfaceCmdParam* pParam = NULL) :
+            ImsMediaMsgParamBase(),
+            nSurfaceType(0),
+            nSurfaceTx(0),
+            nSurfaceRx(0)
+    {
+        if (pParam == NULL)
+        {
+            return;
+        }
+
+        this->nSurfaceType = pParam->nSurfaceType;
+        this->nSurfaceTx = pParam->nSurfaceTx;
+        this->nSurfaceRx = pParam->nSurfaceRx;
+    }
+
+public:
+    IMS_SINT32 nSurfaceType;
+    IMS_SINTP nSurfaceTx;
+    IMS_SINTP nSurfaceRx;
+};
+
+class ImsMediaPreviewCameraCmdParam : public ImsMediaSetSurfaceCmdParam
+{
+public:
+    IMS_UINT32 nCamera;
+
+public:
+    ImsMediaPreviewCameraCmdParam(IN CONST ImsMediaPreviewCameraCmdParam* pParam = NULL) :
+            ImsMediaSetSurfaceCmdParam((ImsMediaSetSurfaceCmdParam*)pParam),
+            nCamera(0)
+    {
+        if (pParam == NULL)
+        {
+            return;
+        }
+        this->nCamera = pParam->nCamera;
+    }
 };
 
 #endif

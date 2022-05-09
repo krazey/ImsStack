@@ -77,6 +77,6 @@ TEST_F(AudioConfigurationTest, Getter) {
     EXPECT_EQ(pConfig->GetModeChangePeriod(), DEFAULT_MODECHANGE_PERIOD);
     EXPECT_EQ(pConfig->GetModeChangeNeighbor(), DEFAULT_MODECHANGE_NEIGHBOR);
 
-    IMSVector<AString> objCandidateArrt = pConfig->GetAudioCandidateAttribute();
-    EXPECT_EQ(objCandidateArrt[0], DEFAULT_CANDIDATE_ATTRIBUTE);
+    IMSVector<AString> objCandidateAttr = pConfig->GetAudioCandidateAttribute();
+    EXPECT_EQ(objCandidateAttr[0], DEFAULT_CANDIDATE_ATTRIBUTE);
 }

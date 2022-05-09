@@ -95,13 +95,13 @@ public:
     // -- WILL BE DELETED -------------------------------------------------------------------------
     // virtual MEDIA_SERVICE_TYPE GetMediaServiceType() = 0;
     // virtual void SetMediaServiceType(IN MEDIA_SERVICE_TYPE nService) = 0;
-    // virtual void SetSessionID(IMS_UINTP nSessionID) = 0;
+    // virtual void SetSessionId(IMS_UINTP nSessionID) = 0;
     // virtual IMS_UINTP GetSessionID() = 0;
     // virtual void SetHandlerListener(IN IMediaSessionHandlerListener*
     // pIMediaSessionHandlerListener) = 0; virtual IMS_BOOL    UpdateServiceType(IN
     // MEDIA_SERVICE_TYPE eServiceType) = 0; virtual void        SetAnalyzer(IN
-    // IAnalyzerCallSession* pAnalyzer) = 0; virtual IMS_BOOL SetCVOSupportValue(IN IMS_UINTP
-    // nNegoID, IN IMS_BOOL bIsSupportCVOMode) = 0; virtual IMS_BOOL    PauseVT() = 0; virtual
+    // IAnalyzerCallSession* pAnalyzer) = 0; virtual IMS_BOOL SetCvoSupportValue(IN IMS_UINTP
+    // nNegoID, IN IMS_BOOL bIsSupportCvoMode) = 0; virtual IMS_BOOL    PauseVT() = 0; virtual
     // IMS_BOOL    PreviewStart(IN IMS_UINTP nNegoID, IN IMS_UINTP nSurface, IN IMS_UINT32
     // nCameraId) = 0; virtual IMS_BOOL    PreviewStop(IN IMS_UINTP nNegoID) = 0; virtual IMS_BOOL
     // IsRunning(IMS_UINTP nNegoID) = 0;
@@ -146,7 +146,7 @@ public:
     // -- WILL Be Enabled on Phase2 ---------------------------------------------------------------
 
     // -- WILL Be Enabled on Phase3 ---------------------------------------------------------------
-    // virtual IMS_BOOL GetNegotiatedCVOResult(IN IMS_UINTP nNegoID) = 0;
+    // virtual IMS_BOOL GetNegotiatedCvoResult(IN IMS_UINTP nNegoID) = 0;
 
     // -- WILL Be Enabled on Q3 -------------------------------------------------------------------
 };

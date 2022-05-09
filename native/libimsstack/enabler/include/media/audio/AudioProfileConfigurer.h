@@ -30,8 +30,7 @@ public:
     static IMS_BOOL CreateAudioProfile(OUT AudioProfile* pAudioProfile,
             IN MediaEnvironment* pEnvironment, IN AudioConfiguration* pConfig,
             IN IMS_SINT32 nSlotId);
-    static IMS_BOOL SetAudioRsRr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig,
-            IN MEDIA_DIRECTION eDir);
+    static IMS_BOOL SetAudioRsRr(OUT AudioProfile* pAudioProfile, IN AudioConfiguration* pConfig);
     static IMS_BOOL MakeNegotiatedBandwidth(IN AudioConfiguration* pConfig,
             IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
             IN IMS_BOOL bIsOfferReceived, IN IMS_SINT32 nAsValueOfNegoticatedCodec,

@@ -29,7 +29,8 @@ static const IMS_SINT32 DEFAULT_BITRATE = CodecAvcConfig::DEFAULT_BITRATE;
 static const IMS_SINT32 DEFAULT_PACKETIZATION_MODE = CodecAvcConfig::DEFAULT_PACKETIZATION_MODE;
 static const IMS_BOOL DEFAULT_INCLUDE_SPROP = CodecAvcConfig::DEFAULT_INCLUDE_SPROP;
 #define DEFAULT_PROFILE_ID "42C00C"
-#define DEFAULT_IMAGE_ATTR "NEED_TO_CHECK"
+#define DEFAULT_IMAGE_ATTR \
+    "send [x=320,y=240] [x=640,y=480] recv [x=320,y=240] [x=640,y=480] [x=1280,y=720]"
 #define DEFAULT_FRAME_SIZE "NEED_TO_CHECK"
 
 class CodecAvcConfigTest : public ::testing::Test {

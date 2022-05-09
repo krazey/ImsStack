@@ -112,9 +112,9 @@ PUBLIC VIRTUAL IMS_BOOL CodecHevcConfig::Create(IN ICarrierConfig* piCc)
     //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_HEVC_LEVEL_INT);
 
     // m_strImageAttr = piCcSubBundle->GetString(
-    //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_H264_IMAGE_ATTR_STRING);
+    //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_AVC_IMAGE_ATTR_STRING);
     // m_strFrameSize = piCcSubBundle->GetString(
-    //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_H264_FRAME_SIZE_STRING);
+    //         CarrierConfig::ImsVt::KEY_VIDEO_CODEC_AVC_FRAME_SIZE_STRING);
 
     piCcSubBundle->ReleaseBundle();
     piCcSubBundle = IMS_NULL;

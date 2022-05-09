@@ -34,9 +34,9 @@ PUBLIC GLOBAL const IMS_CHAR* ImsCodec::CodecToString(IN IMS_SINT32 nType)
         case AUDIO_EVS:
             return "EVS";
         case VIDEO_AVC:
-            return "AVC";
+            return "H264";
         case VIDEO_HEVC:
-            return "HEVC";
+            return "H265";
         case TEXT_T140:
             return "t140";
         case TEXT_RED:

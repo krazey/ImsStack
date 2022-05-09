@@ -182,7 +182,7 @@ public:
             DEFAULT_BITRATELIST = 0,
 
             // PRIMARY PARAMETER
-            DEFAULT_BITRATE = -1,
+            // DEFAULT_BITRATE = -1,
             DEFAULT_BANDWIDTH = -1,
             DEFAULT_CMR = 0,
             DEFAULT_CHANNEL_AWMODE = 0,
@@ -478,7 +478,7 @@ public:
     IMS_SINT32 nPtime;
     IMS_SINT32 nMaxPtime;
     // Candidate
-    IMS_SINT32 nCandidatePriority;
+    IMSVector<AString> objCandidateAttr;
     IMS_SINT32 nNegotiatedPayloadIndex;
     IMS_BOOL bIsOfferCase;
     // SRTP parameter
@@ -507,7 +507,7 @@ public:
             eDirection(MEDIA_DIRECTION_INVALID),
             nPtime(0),
             nMaxPtime(0),
-            nCandidatePriority(-1),
+            objCandidateAttr(IMSVector<AString>()),
             nNegotiatedPayloadIndex(-1),
             bIsOfferCase(IMS_FALSE),
             objCapaNego(CapaNego()),
@@ -641,7 +641,7 @@ public:
         this->eDirection = pProfile->eDirection;
         this->nPtime = pProfile->nPtime;
         this->nMaxPtime = pProfile->nMaxPtime;
-        this->nCandidatePriority = pProfile->nCandidatePriority;
+        this->objCandidateAttr = pProfile->objCandidateAttr;
         this->bIsOfferCase = pProfile->bIsOfferCase;
 
         this->objCapaNego = pProfile->objCapaNego;

@@ -15,14 +15,21 @@
  */
 
 #define IMS_STL_USE
+#include <gui/Surface.h>
+#include <utils/String8.h>
+
 #include "ServiceTrace.h"
 #include "IMSProcess.h"
 
 #include "JniConnectorFactory.h"
 #include "JniMediaSession.h"
 #include "JniMediaSessionThread.h"
+#include "SurfaceManager.h"
 
 __IMS_TRACE_TAG_USER_DECL__("JNI.MEDIA");
+
+extern int IMSInterface_GetSurface(const android::String8& str8Class,
+        const android::String8& str8SurfaceName, long& nSurfaceObject);
 
 JniMediaSession::JniMediaSession(IN CBServiceNoti pfnNotifier, IN IMS_SINT32 nSlotId,
         IN IMS_SINTP nCallKey, IN IMS_SINTP nNativeObject) :
@@ -178,6 +185,21 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IMMedia::NOTIFY_QOS_INFO:
             OnNotifyQosInfo(nMsg, objParcel);
             break;
+        case IMMedia::SETSURFACE_CMD:
+            OnCmdSetSurface(nMsg, objParcel);
+            break;
+        case IMMedia::START_PREVIEW_CAMERA_CMD:
+            OnCmdStartPreviewCamera(nMsg, objParcel);
+            break;
+        case IMMedia::SELECT_CAMERA_CMD:
+            OnCmdSelectCamera(nMsg, objParcel);
+            break;
+        case IMMedia::CHANGE_CAMERA_ZOOM_CMD:
+            OnCmdChangeCameraZoom(nMsg, objParcel);
+            break;
+        case IMMedia::VIDEO_DATA_USAGE_CMD:
+            OnCmdVideoDataUsage(nMsg);
+            break;
         default:
             break;
     }
@@ -309,4 +331,103 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
     pParam->m_bResult = (IMS_BOOL)objParcel.readInt32();
 
     m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdSetSurface(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    IMS_SINT32 nCamera = objParcel.readInt32();
+    IMS_SINT32 nSurfacePresence = objParcel.readInt32();
+    IMS_SINT32 nSurfaceType = objParcel.readInt32();
+    IMS_SLONG nSurfaceObject = 0;
+
+    if (nSurfacePresence != 0)
+    {
+        android::String8 str8Class((const char16_t*)objParcel.readString16());
+        android::String8 str8SurfaceName((const char16_t*)objParcel.readString16());
+
+        if (IMSInterface_GetSurface(str8Class, str8SurfaceName, nSurfaceObject) < 0)
+        {
+            IMS_TRACE_E(0, "OnCmdStartPreviewCamera : can't get surface", 0, 0, 0);
+        }
+    }
+
+    ImsMediaPreviewCameraCmdParam* pParam = new ImsMediaPreviewCameraCmdParam();
+    pParam->nCamera = nCamera;
+    pParam->nSurfaceType = nSurfaceType;
+
+    if (nSurfaceType == SURFACE_NEAR)
+    {
+        pParam->nSurfaceTx = INT64_TO_SINTP(nSurfaceObject);
+    }
+    else if (nSurfaceType == SURFACE_FAR)
+    {
+        pParam->nSurfaceRx = INT64_TO_SINTP(nSurfaceObject);
+    }
+
+    SurfaceManager::GetInstance()->AddSurface(m_nCallKey, nSurfaceObject);
+
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdStartPreviewCamera(
+        IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    IMS_SINT32 nCamera = objParcel.readInt32();
+    IMS_SINT32 nSurfacePresence = objParcel.readInt32();
+    IMS_SINT32 nSurfaceType = objParcel.readInt32();
+    IMS_SLONG nSurfaceObject = 0;
+
+    if (nSurfacePresence != 0)
+    {
+        android::String8 str8Class((const char16_t*)objParcel.readString16());
+        android::String8 str8SurfaceName((const char16_t*)objParcel.readString16());
+
+        if (IMSInterface_GetSurface(str8Class, str8SurfaceName, nSurfaceObject) < 0)
+        {
+            IMS_TRACE_E(0, "OnCmdStartPreviewCamera : can't get surface", 0, 0, 0);
+        }
+    }
+
+    ImsMediaPreviewCameraCmdParam* pParam = new ImsMediaPreviewCameraCmdParam();
+    pParam->nCamera = nCamera;
+    pParam->nSurfaceType = nSurfaceType;
+
+    if (nSurfaceType == SURFACE_NEAR)
+    {
+        pParam->nSurfaceTx = INT64_TO_SINTP(nSurfaceObject);
+    }
+    else if (nSurfaceType == SURFACE_FAR)
+    {
+        pParam->nSurfaceRx = INT64_TO_SINTP(nSurfaceObject);
+    }
+
+    SurfaceManager::GetInstance()->AddSurface(m_nCallKey, nSurfaceObject);
+
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
+    pParam->nValue = objParcel.readInt32();
+
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
+{
+    ImsMediaVideoParam* pParam = new ImsMediaVideoParam();
+    pParam->nValue = objParcel.readInt32();
+
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnCmdVideoDataUsage(IN IMS_SINT32 nMsg)
+{
+    m_piMediaManager->OnVideoMessage(nMsg, m_nCallKey, IMS_NULL);
 }

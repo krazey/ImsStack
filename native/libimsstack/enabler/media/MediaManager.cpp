@@ -205,8 +205,29 @@ MediaResourceMngr* MediaManager::GetResourceManager()
 PUBLIC VIRTUAL void MediaManager::OnResponse(
         IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
-    IMSMSG objMsg(nMsg, nCallKey, pParam, IMS_NULL);
-    MessageService::PostMessage(GetThreadName(m_nSlotId), objMsg);
+    IMS_TRACE_I("OnResponse() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
+    if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
+    {
+        IMS_TRACE_E(0, "OnMessage() - Fail to process nMsg", 0, 0, 0);
+        return;
+    }
+
+    if (IMMedia::CategorizeMessageType(nMsg) == IMMedia::MSG_RESPONSE_RELEASE_WAIT)
+    {
+        IMS_TRACE_D("OnMessage() stop timer - got media framework response", 0, 0, 0);
+        StopTimer();
+    }
+}
+
+PUBLIC VIRTUAL void MediaManager::OnVideoMessage(
+        IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
+{
+    IMS_TRACE_I(
+            "OnVideoMessage() - MSG[%d, %s], CallKey[%d]", nMsg, IMMedia::PrintMsg(nMsg), nCallKey);
+    if (SendMessageToSessions(nMsg, nCallKey, pParam) != IMS_TRUE)
+    {
+        IMS_TRACE_E(0, "OnVideoMessage() - Fail to process nMsg", 0, 0, 0);
+    }
 }
 
 PUBLIC
@@ -216,19 +237,46 @@ IMS_BOOL MediaManager::handleRequestMsg(IN IMS_SINT32 eEvent, IN IMS_SINTP nCall
     IMS_TRACE_I("handleRequestMsg() - MSG[%d, %s], CallKey[%d]",
             eEvent, IMMedia::PrintMsg(eEvent), nCallKey);
 
+    MEDIA_CONTENT_TYPE eType = param->m_eMediaType;
+
     MediaSessionNode* pNode = FindSessionNode(nCallKey);
     if (pNode == IMS_NULL || pNode->pMessageHandler == IMS_NULL)
     {
         return IMS_FALSE;
     }
+
     if(pNode->pMessageHandler->SendMessageToMediaService(eEvent, param))
     {
         if (eEvent== IMMedia::REQUEST_CLOSE_SESSION)
         {
-            IMS_TRACE_D("handleRequestMsg() CloseSession is successfully sent to JNI", 0, 0, 0);
-            DestroySession(GetSession(nCallKey));
+            IMS_TRACE_D("handleRequestMsg() CloseSession type[%d] is successfully sent to JNI",
+                    eType, 0, 0);
+            MediaSession* pMediaSession = GetSession(nCallKey);
+            if (pMediaSession != IMS_NULL)
+            {
+                // TODO_MEDIA text
+                /*if (pMediaSession->IsTextExist())
+                {
+                    if (eType == MEDIA_TYPE_TEXT)
+                    {
+                        DestroySession(pMediaSession);
+                    }
+                }
+                else */
+                if (pMediaSession->IsVideoExist())
+                {
+                    if (eType == MEDIA_TYPE_VIDEO)
+                    {
+                        DestroySession(pMediaSession);
+                    }
+                }
+                else
+                {
+                    DestroySession(pMediaSession);
+                }
+            }
         }
-        else if (CategorizeMessageType(eEvent) == MSG_REQUEST_SET_WAIT)
+        else if (IMMedia::CategorizeMessageType(eEvent) == IMMedia::MSG_REQUEST_SET_WAIT)
         {
             IMS_TRACE_D("handleRequestMsg() start timer - wait media framework response", 0, 0, 0);
             StartTimer(TIME_WAIT_MEDIA_RESPONSE);
@@ -331,13 +379,13 @@ PRIVATE VIRTUAL MediaManager::MediaSessionNode* MediaManager::FindSessionNode(
 }
 
 PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
-        IN IMS_SINTP nCallKey, IMSMSG& objMsg)
+        IN IMS_SINT32 nMsg, IN IMS_SINTP nCallKey, IN IMS_UINTP pParam)
 {
-    MediaSession* pMediaSession = GetSession(nCallKey);  // Find next session
+    MediaSession* pMediaSession = GetSession(nCallKey);
     if (pMediaSession != IMS_NULL)
     {
-        IMS_TRACE_I("SendMessageToSessions() - CallKey[%d]", nCallKey, 0, 0);
-        if (pMediaSession->SendMessage(objMsg) == IMS_FALSE)
+        IMS_TRACE_I("SendMessageToSessions() - nMsg[%d], CallKey[%d]", nMsg, nCallKey, 0);
+        if (pMediaSession->SendMessage(nMsg, pParam) == IMS_FALSE)
         {
             IMS_TRACE_E(0, "SendMessageToSessions() - failed", 0, 0, 0);
             return IMS_FALSE;
@@ -345,40 +393,6 @@ PRIVATE VIRTUAL IMS_BOOL MediaManager::SendMessageToSessions(
     }
 
     return IMS_TRUE;
-}
-
-PRIVATE
-MediaManager::MessageType MediaManager::CategorizeMessageType(IN IMS_SINT32 nMsg)
-{
-    MessageType nMsgType = MSG_NONE;
-
-    if (nMsg >= IMMedia::REQUEST_OPEN_SESSION && nMsg <= IMMedia::REQUEST_HEADER_EXTENSION)
-    {
-        nMsgType = MSG_REQUEST;
-
-        if (nMsg == IMMedia::REQUEST_OPEN_SESSION || nMsg == IMMedia::REQUEST_MODIFY_SESSION ||
-                nMsg == IMMedia::REQUEST_ADD_CONFIG || nMsg == IMMedia::REQUEST_CONFIRM_CONFIG)
-        {
-            nMsgType = MSG_REQUEST_SET_WAIT;
-        }
-    }
-    else if (nMsg >= IMMedia::RESPONSE_OPEN_SESSION && nMsg <= IMMedia::NOTIFY_FIRST_PACKET)
-    {
-        nMsgType = MSG_RESPONSE;
-
-        if (nMsg == IMMedia::RESPONSE_OPEN_SESSION || nMsg == IMMedia::RESPONSE_MODIFY_SESSION ||
-                nMsg == IMMedia::RESPONSE_ADD_CONFIG || nMsg == IMMedia::RESPONSE_CONFIRM_CONFIG)
-        {
-            nMsgType = MSG_RESPONSE_RELEASE_WAIT;
-        }
-    }
-    else if (nMsg >= IMMedia::NOTIFY_HEADER_EXTENSION && nMsg <= IMMedia::NOTIFY_QOS_INFO)
-    {
-        nMsgType = MSG_NOTIFICATION;
-    }
-
-    IMS_TRACE_I("CategorizeMessageType() - nMsgType[%d]", nMsgType, 0, 0);
-    return nMsgType;
 }
 
 PRIVATE
@@ -410,18 +424,6 @@ void MediaManager::StopTimer()
 
 PROTECTED VIRTUAL IMS_BOOL MediaManager::OnMessage(IN IMSMSG& objMsg)
 {
-    IMS_TRACE_I("OnMessage() - MSG[%d, %s], CallKey[%d]",
-            objMsg.nMSG, IMMedia::PrintMsg(objMsg.nMSG), objMsg.nWparam);
-    if (SendMessageToSessions(objMsg.nWparam, objMsg) != IMS_TRUE)
-    {
-        IMS_TRACE_E(0, "OnMessage() - Fail to process nMsg", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    if (CategorizeMessageType(objMsg.nMSG) == MSG_RESPONSE_RELEASE_WAIT)
-    {
-        IMS_TRACE_D("OnMessage() stop timer - got media framework response", 0, 0, 0);
-        StopTimer();
-    }
+    (void)objMsg;
     return IMS_TRUE;
 }

@@ -245,6 +245,8 @@ IMS_BOOL MediaSessionConfig::CreateVideoConfiguration(IN ICarrierConfig* piCc)
         return IMS_FALSE;
     }
 
+    m_pVideoConfig = pConfig;
+
     return IMS_TRUE;
 }
 
@@ -268,6 +270,8 @@ IMS_BOOL MediaSessionConfig::CreateTextConfiguration(IN ICarrierConfig* piCc)
         pConfig = IMS_NULL;
         return IMS_FALSE;
     }
+
+    m_pTextConfig = pConfig;
 
     return IMS_TRUE;
 }

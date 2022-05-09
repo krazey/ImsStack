@@ -503,7 +503,14 @@ public class CarrierConfig {
                 KEY_PREFIX + "video_codec_hevc_profile_int_array";
         public static final String KEY_VIDEO_CODEC_HEVC_LEVEL_INT_ARRAY =
                 KEY_PREFIX + "video_codec_hevc_level_int_array";
-
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_PACKETIZATION_MODE_INT =
+                KEY_PREFIX + "video_codec_attribute_packetization_mode_int";
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_FRAME_RATE_INT =
+                KEY_PREFIX + "video_codec_attribute_frame_rate_int";
+        public static final String KEY_VIDEO_CODEC_ATTRIBUTE_RESOLUTION_INT_ARRAY =
+                KEY_PREFIX + "video_codec_attribute_resolution_int_array";
+        public static final String KEY_H264_VIDEO_CODEC_ATTRIBUTE_PROFILE_LEVEL_ID_STRING =
+                KEY_PREFIX + "h264_video_codec_attribute_profile_level_id_string";
     }
 
     public static class ImsWfc {
@@ -1117,7 +1124,7 @@ public class CarrierConfig {
         refineBundlesForIms();
         refineBundlesForImsRtt();
         refineBundlesForImsVoice();
-        refineBundlesForImsVt();
+        //refineBundlesForImsVt(); // TODO_MEDIA temp block waiting for bundle
         refineBundlesForAssets();
     }
 

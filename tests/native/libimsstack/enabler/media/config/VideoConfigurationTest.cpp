@@ -54,7 +54,7 @@ protected:
 };
 
 TEST_F(VideoConfigurationTest, GET_DEFAULT) {
-    EXPECT_EQ(pConfig->GetVideoRtpDscp(), DEFAULT_VIDEO_DSCP);
+    EXPECT_EQ(pConfig->GetVideoDscp(), DEFAULT_VIDEO_DSCP);
     EXPECT_EQ(pConfig->GetVideoSendPeriodicSpsPps(), DEFAULT_SEND_PERIODIC_SPS_PPS);
     EXPECT_EQ(pConfig->IsVideoAvpfTrrEnabled(), DEFAULT_AVPF_TRR);
     EXPECT_EQ(pConfig->IsbVideoAvpfNackEnabled(), DEFAULT_AVPF_NACK);

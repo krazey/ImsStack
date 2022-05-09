@@ -68,24 +68,6 @@ public:
     IMS_SINT32 GetRtcpInactivityTimerMillis() const;
 
 public:
-    // Bandwidth mode
-    enum
-    {
-        BW_MODE_HIDE = 0,
-        BW_MODE_OPTIMAL = 1,
-        BW_MODE_MAX = 2,
-        BW_MODE_MANUAL = 3,
-        BW_MODE_NEGOTIABLE = 4,
-    };
-
-    // Bandwidth RS/RR mode
-    enum
-    {
-        BW_RS_RR_HIDE = 0,
-        BW_RS_RR_PERCENT = 1,
-        BW_RS_RR_MANUAL = 2
-    };
-
     // Bandwidth type
     enum
     {

@@ -42,8 +42,8 @@ public:
     /*
      * Set AudioConfig for libimsmedia from src/dest/negotiated profile
      * @param pSrcProfile : local profile of the SDP negotiation
-     * @param pDstProfile : peer profile of the SDP negotiation
-     * @param pNegotiatedProfile : negotiated profile of the SDP negotiation
+     * @param pDestProfile : peer profile of the SDP negotiation
+     * @param pNegoProfile : negotiated profile of the SDP negotiation
      * return IMS_BOOL : false for error, true for successful
      */
     IMS_BOOL UpdateRtpConfig(IN AudioProfile* pSrcProfile, IN AudioProfile* pDestProfile,
