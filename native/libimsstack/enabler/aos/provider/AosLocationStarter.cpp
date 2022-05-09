@@ -36,7 +36,8 @@ AosLocationStarter::AosLocationStarter() :
         m_objVolteBlockReasons(IMSList<IMS_UINT32>()),
         m_objWfcBlockReasons(IMSList<IMS_UINT32>()),
         m_piStopDelayTimer(IMS_NULL),
-        m_piAppContext(IMS_NULL)
+        m_piAppContext(IMS_NULL),
+        m_piBlock(IMS_NULL)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosLocationStarter = %" PFLS_u "/%" PFLS_x,
             sizeof(AosLocationStarter), this, 0);
@@ -54,7 +55,10 @@ PUBLIC VIRTUAL AosLocationStarter::~AosLocationStarter()
 
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_WFC_SETTING_CHANGED, this, m_nSlotId);
 
-    m_piAppContext->GetBlock()->RemoveListener(this);
+    if (m_piBlock != IMS_NULL)
+    {
+        m_piBlock->RemoveListener(this);
+    }
 
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
     if (piLocation != IMS_NULL)
@@ -75,12 +79,12 @@ PUBLIC VIRTUAL void AosLocationStarter::SetSlotId(IN IMS_SINT32 nSlotId)
     m_strTag.Sprintf("%d", m_nSlotId);
 }
 
-PUBLIC VIRTUAL void AosLocationStarter::Init(IN IAosAppContext* piContext,
+PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::Init(IN IAosAppContext* piContext,
         IN IMS_UINT32 nPolicy /* = POLICY_START_ON_WFC_AVAILABILITY */)
 {
     if (m_bInitialized)
     {
-        return;
+        return IMS_FALSE;
     }
 
     m_bInitialized = IMS_TRUE;
@@ -89,12 +93,18 @@ PUBLIC VIRTUAL void AosLocationStarter::Init(IN IAosAppContext* piContext,
 
     InitFeatures(nPolicy);
 
-    m_piAppContext->GetBlock()->SetListener(this);
+    m_piBlock = m_piAppContext->GetBlock();
+    if (m_piBlock != IMS_NULL)
+    {
+        m_piBlock->SetListener(this);
+    }
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_WFC_SETTING_CHANGED, this, m_nSlotId);
+
+    return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void AosLocationStarter::SetPolicy(
+PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::SetPolicy(
         IN IMS_UINT32 nPolicy, IN IMS_SINT32 nOperation /* = 0 (add) */)
 {
     if (nOperation == 0)
@@ -102,6 +112,7 @@ PUBLIC VIRTUAL void AosLocationStarter::SetPolicy(
         if (IsFeatureDisabled(nPolicy))
         {
             EnableFeature(nPolicy);
+            return IMS_TRUE;
         }
     }
     else
@@ -109,10 +120,12 @@ PUBLIC VIRTUAL void AosLocationStarter::SetPolicy(
         if (IsFeatureEnabled(nPolicy))
         {
             DisableFeature(nPolicy);
+            return IMS_TRUE;
         }
     }
 
     A_IMS_TRACE_I(AOSTAG, "set policy (%0x)", GetFeatures(), 0, 0);
+    return IMS_FALSE;
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::IsPolicyEnabled(IN IMS_UINT32 nPolicy)
@@ -138,25 +151,26 @@ PUBLIC VIRTUAL void AosLocationStarter::AddBlockReason(
     }
 }
 
-PUBLIC VIRTUAL void AosLocationStarter::SetUpdateInterval(IN IMS_UINT32 nInterval)
+PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::SetUpdateInterval(IN IMS_UINT32 nInterval)
 {
     if (nInterval < DEFAULT_SHORT_UPDATE_INTERVAL)
     {
         A_IMS_TRACE_D(AOSTAG, "Update interval is too short!!", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     m_nDefaultUpdateInterval = nInterval;
+    return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL void AosLocationStarter::StartLocationInfoUpdate()
+PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::StartLocationInfoUpdate()
 {
-    Start();
+    return Start();
 }
 
-PUBLIC VIRTUAL void AosLocationStarter::StopLocationInfoUpdate()
+PUBLIC VIRTUAL IMS_BOOL AosLocationStarter::StopLocationInfoUpdate()
 {
-    Stop(DEFAULT_STOP_DELAY);
+    return Stop(DEFAULT_STOP_DELAY);
 }
 
 PRIVATE VIRTUAL void AosLocationStarter::OnFeatureEnabled(IN IMS_UINT32 nFeature)
@@ -226,16 +240,19 @@ void AosLocationStarter::HandleStartConditionChanged()
 {
     IMS_BOOL bStart = IMS_FALSE;
 
-    IAosBlock* piBlock = m_piAppContext->GetBlock();
+    if (m_piBlock == IMS_NULL)
+    {
+        return;
+    }
 
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_WFC_AVAILABILITY))
     {
-        if (piBlock->IsCleared(SERVICE_WIFI))
+        if (m_piBlock->IsCleared(SERVICE_WIFI))
         {
             bStart = IMS_TRUE;
         }
-        else if (piBlock->IsReasonBlocked(
+        else if (m_piBlock->IsReasonBlocked(
                          BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, IMS_TRUE, SERVICE_WIFI))
         {
             bStart = IMS_TRUE;
@@ -245,7 +262,7 @@ void AosLocationStarter::HandleStartConditionChanged()
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_ON_VOLTE_AVAILABLE))
     {
-        if (piBlock->IsCleared(SERVICE_CELLULAR))
+        if (m_piBlock->IsCleared(SERVICE_CELLULAR))
         {
             bStart = IMS_TRUE;
         }
@@ -265,7 +282,7 @@ void AosLocationStarter::HandleStartConditionChanged()
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_VOLTE_BLOCK_REASON))
     {
-        piBlock->GetBlockReasons(objBlocks, SERVICE_CELLULAR);
+        m_piBlock->GetBlockReasons(objBlocks, SERVICE_CELLULAR);
         if (!AosUtil::GetInstance()->IsElementExistInList(m_objVolteBlockReasons, objBlocks))
         {
             bStart = IMS_TRUE;
@@ -275,7 +292,7 @@ void AosLocationStarter::HandleStartConditionChanged()
     // TODO : Need to Config
     if (IsFeatureEnabled(POLICY_START_AFTER_CHECKING_WFC_BLOCK_REASON))
     {
-        piBlock->GetBlockReasons(objBlocks, SERVICE_WIFI);
+        m_piBlock->GetBlockReasons(objBlocks, SERVICE_WIFI);
         if (!AosUtil::GetInstance()->IsElementExistInList(m_objWfcBlockReasons, objBlocks))
         {
             bStart = IMS_TRUE;
@@ -293,7 +310,7 @@ void AosLocationStarter::HandleStartConditionChanged()
 }
 
 PRIVATE
-void AosLocationStarter::Start()
+IMS_BOOL AosLocationStarter::Start()
 {
     A_IMS_TRACE_I(AOSTAG, "Start", 0, 0, 0);
 
@@ -304,17 +321,19 @@ void AosLocationStarter::Start()
     {
         piLocation->StartLocationInfo(m_nDefaultUpdateInterval);
     }
+
+    return IMS_TRUE;
 }
 
 PRIVATE
-void AosLocationStarter::Stop(IN IMS_UINT32 nDelayTime)
+IMS_BOOL AosLocationStarter::Stop(IN IMS_UINT32 nDelayTime)
 {
     A_IMS_TRACE_I(AOSTAG, "Stop :: delay (%d)", nDelayTime, 0, 0);
 
     if (nDelayTime > 0)
     {
         StartTimer(TIMER_STOP_DELAY, nDelayTime * 1000);
-        return;
+        return IMS_FALSE;
     }
 
     ILocationInfo* piLocation = PhoneInfoService::GetPhoneInfoService()->GetLocationInfo(m_nSlotId);
@@ -322,6 +341,8 @@ void AosLocationStarter::Stop(IN IMS_UINT32 nDelayTime)
     {
         piLocation->StopLocationInfo();
     }
+
+    return IMS_TRUE;
 }
 
 PRIVATE
