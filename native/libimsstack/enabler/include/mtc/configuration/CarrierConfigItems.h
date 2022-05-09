@@ -79,19 +79,15 @@ public:
             nEmergency18xTimer(20000),
             nPolicyForEemergencyUrnEscvMapping(0)
     {
-        objSrvccTypes.Push(0);
-        objSrvccTypes.Push(1);
-        objSrvccTypes.Push(2);
-        objSrvccTypes.Push(3);
-        objShortCallCodes.Push(486);
-        objRejectCodeForCsfbs.Push(380);
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=1;text=\"User ends call\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=2;text=\"RTP/RTCP time-out\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=3;text=\"Media bearer loss\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=4;text=\"SIP timeout - no ACK\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=5;text=\"SIP response time-out\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=6;text=\"Call-setup time-out\"");
-        objCallTerminateReasonHeaders.Push("RELEASE_CAUSE;cause=7;text=\"Redirection failure\"");
+    }
+    ~CarrierConfigItems()
+    {
+        objSrvccTypes.Clear();
+        objShortCallCodes.Clear();
+        objRejectCodeForCsfbs.Clear();
+        objCallTerminateReasonHeaders.Clear();
+        objCallRejectReasonPhrases.Clear();
+        objPidfShortCodes.Clear();
     }
 
     CarrierConfigItems(IN const CarrierConfigItems&) = delete;             // not planed

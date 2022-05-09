@@ -2,6 +2,7 @@
 #define MTC_MESSAGE_FORMATTER_H_
 
 #include "MtcDef.h"
+#include "configuration/ConfigDef.h"
 
 class ICoreService;
 class IFeatureCaps;
@@ -79,6 +80,7 @@ private:
     void GetRejectPhrase(IN const FailReason& objReason, OUT AString& strPhrase);
     void GetUpdateReason(IN UpdateType eUpdateType, OUT AString& strReason);
     void GetTerminateReason(IN const FailReason& objReason, OUT AString& strReason);
+    AString GetTerminateReason(IN TerminateType eType);
 
     IMS_RESULT InitVariables(IN FormType eFormType);
     IMS_RESULT SetNextMessage();

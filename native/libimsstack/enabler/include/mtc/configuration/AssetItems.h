@@ -55,16 +55,15 @@ public:
             bIgnorePemHeader(IMS_FALSE),
             objInformationLevelOfGeolocationPidfs(IMSVector<IMS_SINT32>())
     {
-        objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Push(0);
-        objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Push(403);
-        objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Push(488);
-
-        objVilteToVolteRetryFailureResponseCodes.Push(488);
-
-        objInformationLevelOfGeolocationPidfs.Push(0);
-        objInformationLevelOfGeolocationPidfs.Push(0);
-        objInformationLevelOfGeolocationPidfs.Push(0);
-        objInformationLevelOfGeolocationPidfs.Push(0);
+    }
+    ~AssetItems()
+    {
+        objCarrierSpecificSipHeaders.Clear();
+        objCallMaintainingOnRegistrationSupendeds.Clear();
+        objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Clear();
+        objVilteToVolteRetryFailureResponseCodes.Clear();
+        objRegistrationDisconnectReasonToTerminateOngoingCalls.Clear();
+        objInformationLevelOfGeolocationPidfs.Clear();
     }
 
     AssetItems(IN const AssetItems&) = delete;             // not planed

@@ -2,6 +2,8 @@
 #include "call/IMtcCall.h"
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageFormatter.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "Const3GPP.h"
 #include "helper/MtcLocationObject.h"
 #include "helper/MtcSupplementaryService.h"
@@ -840,28 +842,48 @@ void MessageFormatter::GetTerminateReason(IN const FailReason& objReason, OUT AS
     switch (objReason.nReason)
     {
         case FAIL_REASON_SESSION_USERTERMINATE:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_1;
+            strReason = GetTerminateReason(TerminateType::USER_ENDS_CALL);
             break;
         case FAIL_REASON_MEDIA_NODATA:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_2;
+            strReason = GetTerminateReason(TerminateType::RTP_TIMEOUT);
             break;
         case FAIL_REASON_SESSION_PRECONDITION:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_3;
+            strReason = GetTerminateReason(TerminateType::MEDIA_BEARER_LOSS);
             break;
         case FAIL_REASON_SESSION_CANCELED:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_4;
+            strReason = GetTerminateReason(TerminateType::SIP_TIMEOUT);
             break;
         case FAIL_REASON_SESSION_RES_TIMEOUT:  // FALL_THROUGH
         case FAIL_REASON_TO_MO_PROGRESSING:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_5;
+            strReason = GetTerminateReason(TerminateType::SIP_RESPONSE_TIMEOUT);
             break;
         case FAIL_REASON_TO_MO_STARTED:
-            strReason = MessageUtil::STR_RELEASE_CAUSE_6;
+            strReason = GetTerminateReason(TerminateType::CALL_SETUP_TIMEOUT);
             break;
+
+        case FAIL_REASON_SESSION_EARLYDIALOG:
+            strReason = GetTerminateReason(TerminateType::TERMINATING_EARLY_DIALOG);
+            break;
+        case FAIL_REASON_SESSION_REFRESH_OUT:
+            strReason = GetTerminateReason(TerminateType::SESSION_RREFRESH_FAILURE);
+            break;
+        case FAIL_REASON_CONF_JOINED:
+            strReason = GetTerminateReason(TerminateType::CONFERENCE_CALL_JOINED);
+            break;
+
         default:
             strReason = AString::ConstNull();
             break;
     }
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+AString MessageFormatter::GetTerminateReason(IN TerminateType eType)
+{
+    return m_objContext.GetConfigurationProxy().GetStr(
+            Feature::CALL_TERMINATE_REASON_HEADER, static_cast<IMS_SINT32>(eType));
 }
 
 /* -------------------------------------------------------------------------------------------------
