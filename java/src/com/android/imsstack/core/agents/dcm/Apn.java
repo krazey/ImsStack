@@ -838,12 +838,15 @@ public abstract class Apn extends Handler implements IApn {
                     handleHandoverStart(networkType);
                     break;
                 case TelephonyManager.DATA_DISCONNECTING:
-                    IAosRegistration aosReg = AosFactory.getInstance().getAosRegistration(nSlotId);
-                    if (aosReg != null) {
-                        if (aosReg.getRegisteredNetworkType()
-                                != IAosRegistrationListener.NetworkType.NONE) {
-                            aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                                    IAosRegistration.Pcscf.CURRENT);
+                    if (eType.getType() == DCConstants.TYPE_IMS) {
+                        IAosRegistration aosReg =
+                                AosFactory.getInstance().getAosRegistration(nSlotId);
+                        if (aosReg != null) {
+                            if (aosReg.getRegisteredNetworkType()
+                                    != IAosRegistrationListener.NetworkType.NONE) {
+                                aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                                        IAosRegistration.Pcscf.CURRENT);
+                            }
                         }
                     }
                     break;
