@@ -253,8 +253,7 @@ PUBLIC VIRTUAL void MtcMediaManager::CreateMediaProfile(
     m_objProfileManager.CreateMediaProfile(piSession, bForked, bOrigin, m_piMediaSession);
 }
 
-PUBLIC
-void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
+PUBLIC VIRTUAL void MtcMediaManager::DestroyMediaProfile(IN ISession* piSession)
 {
     if (GetState() >= MediaState::TERMINATING)
     {
