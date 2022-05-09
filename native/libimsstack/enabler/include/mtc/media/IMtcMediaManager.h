@@ -64,6 +64,8 @@ public:
     virtual void CreateMediaProfile(
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) = 0;
 
+    virtual void DestroyMediaProfile(IN ISession* piSession) = 0;
+
     /**
      * @brief To check if the ringback tone is played with a locally generated tone.
      * @return If the ringback tone is a locally generated tone, return IMS_TRUE.
