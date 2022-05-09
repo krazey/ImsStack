@@ -19,14 +19,15 @@ public:
     ParticipantInfo(IN const ParticipantInfo&) = delete;
     ParticipantInfo& operator=(IN const ParticipantInfo&) = delete;
 
-    // AString GetLocalNumber() const;
+    AString GetLocalNumber() const;
     AString GetLocalUri() const;
+    AString GetRemoteNumber() const;
     AString GetRemoteUri() const;
     AString GetRemoteDisplayName() const;
     OipType GetOipType() const;
 
-    void SetRemoteNumber(IN const AString& strRemoteNumber);
-    void SetRemoteUri(IN const AString& strRemoteUri);
+    void UpdateFromRemoteNumber(IN const AString& strRemoteNumber);
+    void HandleRequest(IN IMS_UINT32 eMethod, IN const IMessage& objRequest);
 
 private:
     static const AString URI_SET_BY_IMS_ENGINE;
@@ -34,15 +35,16 @@ private:
     static const AString ANONYMOUS_DISPLAY_NAME;
 
     AString GetLocalUriForEmergencyCall() const;
+    AString GetRemoteNumberFromMessage(IN const IMessage& objMessage) const;
     AString GetRemoteUriForConferenceCall() const;
 
     AString GetMcc() const;
     AString GetMnc(IN IMS_UINT32 nLength) const;
 
-    AString m_strRemoteUri;
-    AString m_strRemoteDisplayName;
-
     IMtcCallContext& m_objContext;
+
+    AString m_strRemoteNumber;
+    AString m_strRemoteUri;
 };
 
 #endif

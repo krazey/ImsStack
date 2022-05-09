@@ -60,7 +60,7 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
         objCallInfo.strSessionIdHeader = GenerateSessionId();
     }
 
-    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget);
+    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
 
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
 
@@ -84,7 +84,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     objCallInfo.ePeerType = PeerType::MO;
     objCallInfo.eCallType = eCallType;
     objCallInfo.bConference = IMS_TRUE;
-    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget);  // TODO:
+    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);  // TODO:
 
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
 
@@ -107,7 +107,7 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     objCallInfo.ePeerType = PeerType::MO;
     objCallInfo.eCallType = eCallType;
     objCallInfo.bConference = IMS_TRUE;
-    m_objContext.GetParticipantInfo().SetRemoteNumber(strTarget);
+    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
 
     m_objOperationAfterBlockCheck = [&]()
     {
@@ -369,9 +369,7 @@ void IdleState::UpdateIncomingInformation(IN ISession* piSession)
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
 
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
-    AString strRemoteUri;
-    MessageUtil::GetRemoteUri(piSession, PeerType::MT, strRemoteUri);
-    m_objContext.GetParticipantInfo().SetRemoteUri(strRemoteUri);
+    m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
 
     AString strSessionId;
     MessageUtil::GetHeader(piMessage, ISipHeader::UNKNOWN, strSessionId, "Session-ID");
