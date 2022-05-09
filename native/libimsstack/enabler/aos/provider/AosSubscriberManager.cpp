@@ -177,25 +177,15 @@ const AStringArray& AosSubscriberManager::GetFakeImpus() const
     const ISubscriberConfig* piConfig =
             Configuration::GetInstance()->GetSubscriberConfig(ID_FAKE, m_nSlotId);
 
-    if (piConfig == IMS_NULL)
-    {
-        return AStringArray::ConstNull();
-    }
-
-    return piConfig->GetPublicUserIds();
+    return (piConfig != IMS_NULL) ? piConfig->GetPublicUserIds() : AStringArray::ConstNull();
 }
 
 PUBLIC
 const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
         IN IMS_SINT32 nType /*= IAosSubscriber::NORMAL*/) const
 {
-    if (nType == IAosSubscriber::FAKE)
-    {
-        // use the configuration from the pre-configured values.
-        return Configuration::GetInstance()->GetSubscriberConfig(ID_FAKE, m_nSlotId);
-    }
-
-    return Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
+    return Configuration::GetInstance()->GetSubscriberConfig(
+            (nType == IAosSubscriber::FAKE) ? ID_FAKE : AString::ConstNull(), m_nSlotId);
 }
 
 PRIVATE
@@ -212,8 +202,11 @@ void AosSubscriberManager::Init()
 
     SetConfigUpdateListener();
 
-    AosProvider::GetInstance()->GetService(m_nSlotId)->AddListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        piService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    }
 
     if (UpdateImsi())
     {
@@ -240,8 +233,11 @@ void AosSubscriberManager::CleanUp()
 {
     A_IMS_TRACE_D(AOSTAG, "CleanUp", 0, 0, 0);
 
-    AosProvider::GetInstance()->GetService(m_nSlotId)->RemoveListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    IAosService* piService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (piService != IMS_NULL)
+    {
+        piService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    }
 
     RemoveConfigUpdateListener();
 
@@ -403,6 +399,10 @@ void AosSubscriberManager::ConfigureAsDefault()
 {
     A_IMS_TRACE_I(AOSTAG, "ConfigureAsDefault", 0, 0, 0);
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
+    if (piSubsConfig == IMS_NULL)
+    {
+        return;
+    }
 
     if (IsIsim())
     {
@@ -467,6 +467,11 @@ PRIVATE
 void AosSubscriberManager::ConfigureAsFake()
 {
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig(IAosSubscriber::FAKE);
+    if (piSubsConfig == IMS_NULL)
+    {
+        return;
+    }
+
     const AStringArray& objPublicUserIds = piSubsConfig->GetPublicUserIds();
 
     if (objPublicUserIds.IsEmpty())
@@ -761,8 +766,10 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
 PRIVATE
 void AosSubscriberManager::RemoveImpu() const
 {
-    ISubscriberInfo* piSubsInfo =
-            PhoneInfoService::GetPhoneInfoService()->GetSubscriberInfo(m_nSlotId);
+    PhoneInfoService* pPhoneInfoService = PhoneInfoService::GetPhoneInfoService();
+    ISubscriberInfo* piSubsInfo = (pPhoneInfoService != IMS_NULL)
+            ? pPhoneInfoService->GetSubscriberInfo(m_nSlotId)
+            : IMS_NULL;
     if (piSubsInfo != null)
     {
         piSubsInfo->SetPreference("impu_list", "size", "0");
@@ -802,8 +809,12 @@ PRIVATE
 IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
 {
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-    IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
+    if (piSubsConfig == IMS_NULL)
+    {
+        return IMS_FALSE;
+    }
 
+    IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
     if (piConfigurable == IMS_NULL)
     {
         return IMS_FALSE;
@@ -837,6 +848,11 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
 PRIVATE
 IMS_UINT32 AosSubscriberManager::GetIdentity(IN Index eIndex) const
 {
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
+        return CarrierConfig::Ims::IMS_IDENTITY_PRIORITY_CONF;
+    }
+
     IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->GetImsIdentityPriority();
 
     if (objIdentityPriorities.IsEmpty() ||
