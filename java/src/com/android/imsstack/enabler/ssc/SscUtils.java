@@ -101,17 +101,7 @@ public final class SscUtils {
     }
 
     public static String getUtUserAgent(int slotId) {
-        int gbaType = SscConfig.getGbaMode(slotId);
-        String gbaString = null;
-        if (gbaType == SscConfig.GBA_ME) {
-            gbaString = "3gpp-gba";
-        } else if (gbaType == SscConfig.GBA_U) {
-            gbaString = "3gpp-gba-uicc";
-        } else if (gbaType == SscConfig.GBA_DIGEST) {
-            // TODO: Ut doesn't support digest
-            //gbaString = "3gpp-gba-digest";
-        }
-
+        final String gbaString = "3gpp-gba";
         String userAgent = SscConfig.getImsUserAgent(slotId);
         if (!TextUtils.isEmpty(gbaString)) {
             if (!TextUtils.isEmpty(userAgent)) {
