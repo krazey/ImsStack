@@ -94,13 +94,14 @@ public:
     inline void SetHeldByMe(IN IMS_BOOL bHeldByMe) override { m_objContext.SetHeldByMe(bHeldByMe); }
 
 private:
+    IMSList<AString> GetSupportedOptionTags() const;
+    void UpdateSessionProperty();
+
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
 
     MessageSender m_objMessageSender;
     MtcExtensionSet m_objExtensionSet;
-
-    IMSList<AString> GetSupportedOptionTags() const;
 };
 
 #endif

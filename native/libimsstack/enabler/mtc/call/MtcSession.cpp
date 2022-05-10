@@ -1,5 +1,8 @@
 #include "ServiceTrace.h"
+#include "ISession.h"
 #include "call/MtcSession.h"
+#include "configuration/ConfigDef.h"
+#include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
 
@@ -17,6 +20,7 @@ MtcSession::MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession) 
     {
         GetSipInterfaceFactory().GetISessionHolder()->AddISession(&m_objSession);
     }
+    UpdateSessionProperty();
 }
 
 PUBLIC VIRTUAL MtcSession::~MtcSession()
@@ -37,10 +41,25 @@ IMSList<AString> MtcSession::GetSupportedOptionTags() const
     lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_RPR);
     lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TARGET_DIALOG);
     lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TIMER);
-    if (/* TODO: Support precondition */ IMS_TRUE)
+
+    // TODO: check CallType.
+    if (m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
     {
         lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_PRECONDITION);
     }
 
     return lstOptionTags;
+}
+
+PRIVATE
+void MtcSession::UpdateSessionProperty()
+{
+    IMS_SINT32 nInterval =
+            m_objContext.GetConfigurationProxy().GetInt(Feature::SESSION_REFRESH_TRIGGER_INTERVAL);
+    if (nInterval > 0)
+    {
+        m_objSession.SetRefreshPolicy(ISession::REFRESH_POLICY_REMAIN_TIME, 0, 0, nInterval);
+    }
+
+    m_objSession.SetImplicitRoutingRequired(IMS_TRUE);
 }

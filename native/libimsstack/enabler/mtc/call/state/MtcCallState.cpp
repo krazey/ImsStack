@@ -404,7 +404,6 @@ IMS_RESULT MtcCallState::CreateISession()
     {
         return IMS_FAILURE;
     }
-    piSession->SetImplicitRoutingRequired(IMS_TRUE);
     m_objContext.SetSession(m_objContext.CreateSession(*piSession));
 
     return IMS_SUCCESS;
