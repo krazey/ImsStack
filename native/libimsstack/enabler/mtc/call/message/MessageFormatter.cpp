@@ -573,7 +573,8 @@ void MessageFormatter::SetPreconditionHeader()
     {
         case FormType::START:
         {
-            bInclude = IMS_TRUE;
+            bInclude = m_objContext.GetExtensionSet().IsAvailableOnLocal(
+                    MtcExtensionSet::OPTION_TAG_PRECONDITION);
         }
         break;
         case FormType::EARLY_UPDATE:
