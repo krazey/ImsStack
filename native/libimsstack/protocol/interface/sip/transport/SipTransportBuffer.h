@@ -5,7 +5,6 @@
 
 class SipTransportBuffer
 {
-
     /* Raw Message */
     SIP_CHAR* m_pSipBuffer;
     SIP_UINT32 m_nSipBufferLen;
@@ -13,16 +12,17 @@ class SipTransportBuffer
     SipTransportBuffer& operator=(IN const SipTransportBuffer& objRHS);
     SipTransportBuffer(IN const SipTransportBuffer& objRHS);
 
-    public:
-
-    SipTransportBuffer()
-        : m_pSipBuffer(SIP_NULL)
-        , m_nSipBufferLen(SIP_ZERO)
-    {}
-    SipTransportBuffer(SIP_CHAR* pSipBuffer, SIP_UINT32 nSipBufferLen)
-        : m_pSipBuffer(pSipBuffer)
-        , m_nSipBufferLen(nSipBufferLen)
-    {}
+public:
+    SipTransportBuffer() :
+            m_pSipBuffer(SIP_NULL),
+            m_nSipBufferLen(SIP_ZERO)
+    {
+    }
+    SipTransportBuffer(SIP_CHAR* pSipBuffer, SIP_UINT32 nSipBufferLen) :
+            m_pSipBuffer(pSipBuffer),
+            m_nSipBufferLen(nSipBufferLen)
+    {
+    }
     /* Free Message Buffer */
     virtual ~SipTransportBuffer()
     {
@@ -31,14 +31,8 @@ class SipTransportBuffer
             delete[] m_pSipBuffer;
         }
     }
-    SIP_CHAR* GetSipBuffer() const
-    {
-        return m_pSipBuffer;
-    }
-    SIP_UINT32 GetSipBufferLen() const
-    {
-        return m_nSipBufferLen;
-    }
+    SIP_CHAR* GetSipBuffer() const { return m_pSipBuffer; }
+    SIP_UINT32 GetSipBufferLen() const { return m_nSipBufferLen; }
 };
 
-#endif //__SIP_TRANSPORT_BUFFER_H__
+#endif  //__SIP_TRANSPORT_BUFFER_H__

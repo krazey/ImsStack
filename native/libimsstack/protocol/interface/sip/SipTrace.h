@@ -1,68 +1,33 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : SipTrace.h
- * Purpose        :  debug Functions
- * Platform        : Windows OR Android
- * Author(s)        : Seema
- * E-mail id.        : seema.lijo@
- * Creation date     : april 6,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * april 6,10          Seema              0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
-
-//SIP_TRACE_ENABLE to be set in settings to enable tracing
 #ifndef __SIP_TRACE_H__
 #define __SIP_TRACE_H__
+
 #include "sip_pf_datatypes.h"
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-#define SIP_TRACE_MAX_SIZE    2000
+#define SIP_TRACE_MAX_SIZE 2000
 
 #ifdef SIP_TRACE_ENABLE
-#define SIP_TRACE_MESSAGE(a,b,c,d)        SIP_TRACE_LOG(CAT_I,\
-        (SIP_CHAR*)__FILE__,__LINE__,\
-        (SIP_CHAR*) (b),(c),(d))
-#define SIP_TRACE_NORMAL(a,b,c,d)         SIP_TRACE_LOG(CAT_D,\
-        (SIP_CHAR*)__FILE__,__LINE__,\
-        (SIP_CHAR*) (b),(c),(d))
+#define SIP_TRACE_MESSAGE(a, b, c, d) \
+    SIP_TRACE_LOG(CAT_I, (SIP_CHAR*)__FILE__, __LINE__, (SIP_CHAR*)(b), (c), (d))
+#define SIP_TRACE_NORMAL(a, b, c, d) \
+    SIP_TRACE_LOG(CAT_D, (SIP_CHAR*)__FILE__, __LINE__, (SIP_CHAR*)(b), (c), (d))
 #else
-#define SIP_TRACE_MESSAGE(a,b,c,d)
-#define SIP_TRACE_NORMAL(a,b,c,d)
+#define SIP_TRACE_MESSAGE(a, b, c, d)
+#define SIP_TRACE_NORMAL(a, b, c, d)
 
 #endif
 
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-typedef enum   _SipEn_TraceTypes
+typedef enum _SipEn_TraceTypes
 {
     /*this enum when set tracks all messages     encoded and decoded*/
-    ESIPTRACE_TYPEMESSAGE = (1<<0),
+    ESIPTRACE_TYPEMESSAGE = (1 << 0),
     /*when set tracks data flow.eg:list of headers     parsed,message length etc*/
-    ESIPTRACE_TYPENORMAL = (1<<1),
-    ESIPTRACE_TYPEALL = 0x0F,    /* Set to print all the trace types */
+    ESIPTRACE_TYPENORMAL = (1 << 1),
+    ESIPTRACE_TYPEALL = 0x0F, /* Set to print all the trace types */
     ESIPTRACE_TYPEEND,
     ESIPTRACE_TYPENVALID = SIP_INVALID
-}SipEn_TraceTypes;
+} SipEn_TraceTypes;
 
-typedef enum    _SipEn_TraceModules
+typedef enum _SipEn_TraceModules
 {
     ESIPTRACE_MODFWK = 0,
     ESIPTRACE_MODTXN,
@@ -79,12 +44,7 @@ typedef enum    _SipEn_TraceModules
     ESIPTRACE_MODALL,
     ESIPTRACE_MODEND,
     ESIPTRACE_MODINVALID = SIP_INVALID
-}SipEn_TraceModules;
-
-
-/****************************************************************************
-  Declaration of Functions
- *****************************************************************************/
+} SipEn_TraceModules;
 
 /******************************************************************************
  * Function name    : SIP_TRACE_LOG
@@ -105,36 +65,35 @@ typedef enum    _SipEn_TraceModules
  * Side Effects    :
  * NOTE             :
  ******************************************************************************/
-void SIP_TRACE_LOG(SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine,
-        SIP_CHAR* pszFormat,...);
+void SIP_TRACE_LOG(
+        SIP_UINT32 nCategory, SIP_CHAR* pszFilename, SIP_INT32 nLine, SIP_CHAR* pszFormat, ...);
 
 class SipTrace
 {
-    public:
-        SipTrace();
-        virtual ~SipTrace();
+public:
+    SipTrace();
+    virtual ~SipTrace();
 
-        /* Enable Trace type for particular module */
-        SIP_BOOL EnableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
+    /* Enable Trace type for particular module */
+    SIP_BOOL EnableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
 
-        /* Enable Trace type for all module */
-        SIP_BOOL EnableTrace(SIP_UINT32 nTraceType);
+    /* Enable Trace type for all module */
+    SIP_BOOL EnableTrace(SIP_UINT32 nTraceType);
 
-        /* disable Trace type for particular module */
-        SIP_BOOL DisableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
+    /* disable Trace type for particular module */
+    SIP_BOOL DisableTrace(SipEn_TraceModules eModule, SIP_UINT32 nTraceType);
 
-        /* disable Trace type for all module */
-        SIP_BOOL DisableTrace(SIP_UINT32 nTraceType);
+    /* disable Trace type for all module */
+    SIP_BOOL DisableTrace(SIP_UINT32 nTraceType);
 
-        SIP_BOOL IsTraceEnable(SipEn_TraceModules eModule, SipEn_TraceTypes eTraceType);
+    SIP_BOOL IsTraceEnable(SipEn_TraceModules eModule, SipEn_TraceTypes eTraceType);
 
-    private:
-        SIP_INT16 m_ausModTrace[ESIPTRACE_MODEND];
-
+private:
+    SIP_INT16 m_ausModTrace[ESIPTRACE_MODEND];
 };
 
 void SipTrace_Construct();
 void SipTrace_Destruct();
 SipTrace* SipTrace_GetInstance();
 
-#endif //__SIP_TRACE_H__
+#endif  //__SIP_TRACE_H__

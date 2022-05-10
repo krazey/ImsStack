@@ -1,66 +1,7 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : sip_pf_string.c
- * Purpose        :  string Functions
- * Platform        : Windows OR Android
- * Author(s)        :
- * E-mail id.        :
- * Creation date     : may 14,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * may 14,10                        0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
-
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 #include "ServiceSystemTime.h"
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Global Extern Variables
- *****************************************************************************/
-
-/****************************************************************************
-  Global Variables
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Declaration [Static Functions]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Implementation [STARTS]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Local Function Implementation [ENDS]
- *****************************************************************************/
-
-
-/****************************************************************************
-  Function Implementation [STARTS]
- *****************************************************************************/
 
 /******************************************************************************
  * Function name    : SipPf_Sprintf
@@ -142,7 +83,6 @@ SIP_INT32 SipPf_Strlen(const SIP_CHAR* pszStr)
     return nCount;
 }
 
-
 /******************************************************************************
  * Function name    : SipPf_Strcpy
  * Description        :  This function copies source string to     destination
@@ -217,10 +157,7 @@ SIP_CHAR* SipPf_Strncpy(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc, SIP_UINT32 nN
     pszDest[nCopySize] = '\0';
 
     return pszDest;
-
 }
-
-
 
 /******************************************************************************
  * Function name    : SipPf_Strcat
@@ -304,7 +241,8 @@ SIP_CHAR* SipPf_Strncat(SIP_CHAR* pszDest, const SIP_CHAR* pszSrc, SIP_UINT32 nN
 < 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
- * Side Effects    : Preconditions for the function to be required, argument list that will be updated
+ * Side Effects    : Preconditions for the function to be required, argument list that will be
+updated
  *
  ****************************************************************************/
 SIP_INT16 SipPf_Strcmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
@@ -337,7 +275,8 @@ SIP_INT16 SipPf_Strcmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
 < 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
- * Side Effects    : Preconditions for the function to be required, argument list that will be updated
+ * Side Effects    : Preconditions for the function to be required, argument list that will be
+updated
  *
  ****************************************************************************/
 SIP_INT16 SipPf_Stricmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
@@ -373,7 +312,8 @@ SIP_INT16 SipPf_Stricmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2)
 < 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
- * Side Effects    : Preconditions for the function to be required, argument list that will be updated
+ * Side Effects    : Preconditions for the function to be required, argument list that will be
+updated
  *
  ****************************************************************************/
 SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2, SIP_UINT32 nNumChars)
@@ -410,7 +350,8 @@ SIP_INT16 SipPf_Strncmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2, SIP_UI
 < 0 : if pszStr1 < pszStr2
  * Argument          :
  * Preconditions/
- * Side Effects    : Preconditions for the function to be required, argument list that will be updated
+ * Side Effects    : Preconditions for the function to be required, argument list that will be
+updated
  *
  ****************************************************************************/
 SIP_INT16 SipPf_Strnicmp(const SIP_CHAR* pszStr1, const SIP_CHAR* pszStr2, SIP_UINT32 nNumChars)
@@ -520,7 +461,7 @@ SIP_CHAR* SipPf_Strdup(const SIP_CHAR* pszSrc)
     }
 
     *pszTarget = '\0';
-    SipPf_Memcpy(pszTarget, pszSrc, nSrcLen+1);
+    SipPf_Memcpy(pszTarget, pszSrc, nSrcLen + 1);
 
     return pszTarget;
 }
@@ -625,9 +566,7 @@ SIP_BOOL SipPf_Atoi_IsZero(const SIP_CHAR* pszStr)
         }
     }
     return SIP_TRUE;
-
 }
-
 
 /******************************************************************************
  * Function name    : SipPf_Itoa
@@ -726,13 +665,13 @@ SIP_CHAR* SipPf_Strrchr(SIP_CHAR* pszSrc, SIP_CHAR cChar)
             pszDest = (SIP_CHAR*)pszSrc;
         }
 
-        if ((*pszSrc) ==  SIP_NULL)
+        if ((*pszSrc) == SIP_NULL)
         {
             break;
         }
         pszSrc++;
 
-    }while (SIP_ONE);
+    } while (SIP_ONE);
 
     return (pszDest);
 }
@@ -756,14 +695,12 @@ SIP_CHAR* SipPf_StripFileName(SIP_CHAR* pszFileName)
 {
     SIP_CHAR* pTemp = SIP_NULL;
 
-//Device file path name will come with forward slash
-    pTemp = SipPf_Strrchr(pszFileName,'/');
+    // Device file path name will come with forward slash
+    pTemp = SipPf_Strrchr(pszFileName, '/');
     pTemp = pTemp + SIP_ONE;
-
 
     return pTemp;
 }
-
 
 SIP_BOOL SipPf_GetSystemTime(SipSt_Timestamp* pstTime)
 {
@@ -772,7 +709,8 @@ SIP_BOOL SipPf_GetSystemTime(SipSt_Timestamp* pstTime)
     ImsTime Time = pSysTime->GetLocalTime();
 
     pstTime->wYear = Date.nYear;
-    pstTime->wMonth = Date.nMonth;;
+    pstTime->wMonth = Date.nMonth;
+    ;
     pstTime->wDayOfWeek = 0;
     pstTime->wDay = Date.nDay;
     pstTime->wHour = Time.nHour;
@@ -789,35 +727,24 @@ SIP_VOID SipPf_GetTime(SIP_CHAR* pszTime)
 
     SipPf_GetSystemTime(&stTime);
 
-    SipPf_Sprintf(pszTime,(SIP_CHAR*)"[%d/%d/%d][%d:%d:%d:%d]",
-            stTime.wYear,
-            stTime.wMonth,
-            stTime.wDay,
-            stTime.wHour,
-            stTime.wMinute,
-            stTime.wSecond,
-            stTime.wMilliseconds);
+    SipPf_Sprintf(pszTime, (SIP_CHAR*)"[%d/%d/%d][%d:%d:%d:%d]", stTime.wYear, stTime.wMonth,
+            stTime.wDay, stTime.wHour, stTime.wMinute, stTime.wSecond, stTime.wMilliseconds);
     return;
 }
 
 SIP_VOID SipPf_GetRandomId(SIP_CHAR* pszRandomNum)
 {
-    SipSt_Timestamp stTime = {SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO,
-            SIP_ZERO, SIP_ZERO};
+    SipSt_Timestamp stTime = {
+            SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO, SIP_ZERO};
 
     /* calculate sys time and Get Random Number */
     SipPf_GetSystemTime(&stTime);
     /* Algorithm for generating random number */
-    SIP_INT32 nTotalMillisec = (stTime.wHour * SIP_NUM_SEC_HOURS )
-        + (stTime.wHour * SIP_NUM_SEC_MIN * SIP_NUM_SEC_MIN * SIP_NUM_1000)
-        + (stTime.wMinute * SIP_NUM_SEC_MIN * SIP_NUM_1000)
-        + (stTime.wSecond * SIP_NUM_1000)
-        +  stTime.wMilliseconds * SipPf_Rand();
+    SIP_INT32 nTotalMillisec = (stTime.wHour * SIP_NUM_SEC_HOURS) +
+            (stTime.wHour * SIP_NUM_SEC_MIN * SIP_NUM_SEC_MIN * SIP_NUM_1000) +
+            (stTime.wMinute * SIP_NUM_SEC_MIN * SIP_NUM_1000) + (stTime.wSecond * SIP_NUM_1000) +
+            stTime.wMilliseconds * SipPf_Rand();
     SIP_UINT32 nIdvalue = (SipPf_Rand() + nTotalMillisec);
     SipPf_Itoa(nIdvalue, (SIP_CHAR*)pszRandomNum, SIP_TEN);
     return;
 }
-
-/****************************************************************************
-  Function Implementation [ENDS]
- *****************************************************************************/

@@ -1,33 +1,3 @@
-/***********************************************************
- * Project Name : SIP_RTP
- * Group        : MSG-2
- * Security     : Confidential
- ***********************************************************/
-
-/**********************************************************
- * Filename          : SipHeaderList.cpp
- * Purpose           :
- * Platform          : Windows XP
- * Author(s)         : Saurabh Srivastava
- * E-mail id.        : saurabh31.srivastava@
- * Creation date     : July 26, 2010
- *
- * Modifications:
- * 1. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0a
- *
- * 2. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0b
- **********************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "msg/SipHeaderList.h"
 #include "msg/SipMessage.h"
@@ -37,17 +7,10 @@
 #include "SipTrace.h"
 #include "platform/sip_pf_string.h"
 
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-extern SipHeaderBase * (*gaFactoryArray[SipHeaderBase::TYPE_END+SIP_ONE])(SIP_INT32,
-                                                                           SipHeaderBase *);
+extern SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(
+        SIP_INT32, SipHeaderBase*);
 
 extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER_ATTRIBUTE_END];
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
 
 /******************************************************************************
  * Function name      : SipHeaderList::SipHeaderList
@@ -58,13 +21,12 @@ extern SIP_BOOL gHeaderAttributes[SipHeaderBase::TYPE_END][SipHeaderBase::HEADER
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderList::SipHeaderList(SIP_INT32 eHdrType)
-    : SipHeaderBase(eHdrType)
-    , m_headerList(SipVector<SipHeaderBase*>())
+SipHeaderList::SipHeaderList(SIP_INT32 eHdrType) :
+        SipHeaderBase(eHdrType),
+        m_headerList(SipVector<SipHeaderBase*>())
 {
 }
 
-
 /******************************************************************************
  * Function name      : SipHeaderList::SipHeaderList
  *
@@ -74,12 +36,11 @@ SipHeaderList::SipHeaderList(SIP_INT32 eHdrType)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList)
-    : SipHeaderBase(objHeaderList)
+SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList) :
+        SipHeaderBase(objHeaderList)
 {
-
     SIP_UINT32 nSize = objHeaderList.m_headerList.GetSize();
-    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize ; nCount++)
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
     {
         SipHeaderBase* pOldHdrBase = objHeaderList.m_headerList.GetAt(nCount);
         if (pOldHdrBase != SIP_NULL)
@@ -101,7 +62,6 @@ SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList)
     }
 }
 
-
 /******************************************************************************
  * Function name      : SipHeaderList::~SipHeaderList
  *
@@ -113,7 +73,7 @@ SipHeaderList::SipHeaderList(const SipHeaderList& objHeaderList)
  *****************************************************************************/
 SipHeaderList::~SipHeaderList()
 {
-    while(m_headerList.IsEmpty() != SIP_TRUE)
+    while (m_headerList.IsEmpty() != SIP_TRUE)
     {
         SipHeaderBase* pHeaderBase = m_headerList.Top();
         pHeaderBase->SipDelete();
@@ -130,7 +90,7 @@ SipHeaderList::~SipHeaderList()
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams/*= SIP_TRUE*/)
+SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*= SIP_TRUE*/)
 {
     return EncodeHdr(ppCurrPos, bParams, ESIPMSGOPT_NONE);
 }
@@ -223,7 +183,7 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
 SipHeaderBase* SipHeaderList::GetListObj()
 {
     SIP_INT32 eHdrType = GetHdrType();
-    return gaFactoryArray[eHdrType](eHdrType,SIP_NULL);
+    return gaFactoryArray[eHdrType](eHdrType, SIP_NULL);
 }
 /******************************************************************************
  * Function name      : SipHeaderList::GetListObj
@@ -234,7 +194,7 @@ SipHeaderBase* SipHeaderList::GetListObj()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase*pHdr)
+SipHeaderBase* SipHeaderList::GetListObj(SipHeaderBase* pHdr)
 {
     SIP_INT32 eHdrType = GetHdrType();
     return gaFactoryArray[eHdrType](eHdrType, pHdr);

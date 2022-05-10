@@ -1,35 +1,9 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename    : sip_comdef.cpp
- * Purpose     :
- * Platform    : Windows OR Android
- * Author(s)   :
- * E-mail id.    : name@
- * Creation date    : Month. Date,10
- *
- * Edit History     Modification         Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/sip_comdef.h"
 #include "msg/SipMessage.h"
 #include "SipTrace.h"
 #include "sip_debug.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
-
 
 SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex)
 {
@@ -38,7 +12,7 @@ SIP_UINT32 SipNPower(SIP_UINT16 nBase, SIP_UINT16 nIndex)
     while (nIndex)
     {
         nRes = nRes * nBase;
-        nIndex = nIndex -1;
+        nIndex = nIndex - 1;
     }
 
     return nRes;
@@ -69,8 +43,7 @@ SIP_BOOL SipMemCheck(SIP_VOID* pvData, SIP_UINT16* pnError)
  * Preconditions/
  * Side Effects    : None
  *****************************************************************************/
-SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType,
-        SIP_INT32* peMethodType)
+SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType, SIP_INT32* peMethodType)
 {
     SIP_INT32 eMsgType = pSipMsg->GetMsgType();
     if (eMsgType == SipMessage::TYPE_INVALID)
@@ -82,8 +55,8 @@ SIP_BOOL CheckTxnMadatoryParams(SipMessage* pSipMsg, SIP_INT32* peMsgType,
 
     if (eMethodType == SipMessage::METHOD_INVALID)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Invalid Method Type(%d != %d)",
-                eMethodType, pSipMsg->GetMethodType());
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "Invalid Method Type(%d != %d)", eMethodType,
+                pSipMsg->GetMethodType());
         return SIP_FALSE;
     }
 
@@ -143,7 +116,7 @@ SIP_UINT32 GetRSeqNum(SipMessage* pMessage, SIP_INT32 eHdrType)
     SIP_UINT32 nRSeqNum = 0;
 
     if (pMessage != SIP_NULL &&
-        (eHdrType == SipHeaderBase::RSEQ || eHdrType == SipHeaderBase::RACK))
+            (eHdrType == SipHeaderBase::RSEQ || eHdrType == SipHeaderBase::RACK))
     {
         SipHeaderBase* pHeader = pMessage->GetHeader(eHdrType, 0);
 

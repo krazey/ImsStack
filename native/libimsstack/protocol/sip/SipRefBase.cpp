@@ -1,37 +1,4 @@
-/***********************************************************
- * Project Name : SIP_RTP
- * Group        : MSG-2
- * Security     : Confidential
- ***********************************************************/
-
-/**********************************************************
- * Filename          : SipRefBase.cpp
- * Purpose           :
- * Platform          : Windows XP
- * Author(s)         : Saurabh Srivastava
- * E-mail id.        : saurabh31.srivastava@
- * Creation date     : July 26, 2010
- *
- * Modifications:
- * 1. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0a
- *
- * 2. Modified by    : <Name>
- *    Date           : <mmm. dd, yyyy> (E.g. Apr. 21, 2006)
- *    Description    :
- *    Version Number : 0.0b
- **********************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "SipRefBase.h"
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name      : SipRefBase::SipRefBase

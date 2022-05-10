@@ -1,15 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #ifndef _SIP_TXN_TIMER_VALUES_H
 #define _SIP_TXN_TIMER_VALUES_H
 
@@ -39,12 +27,12 @@ class SipTxnTimerValues
 
 public:
     SipTxnTimerValues();
-    virtual ~SipTxnTimerValues(){}
+    virtual ~SipTxnTimerValues() {}
 
     SIP_VOID SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur);
     SIP_UINT32 GetTimerValue(SIP_UINT32 nTimerType) const;
-    SIP_BOOL UpdateSipTimers(IN SIP_UINT32 nTimerOptions,
-        const IN SipTxnTimerValues* ptrTxnSipTxnTimers);
+    SIP_BOOL UpdateSipTimers(
+            IN SIP_UINT32 nTimerOptions, const IN SipTxnTimerValues* ptrTxnSipTxnTimers);
 
 private:
     SIP_BOOL IsTimerSet(IN SIP_UINT32 nTimerOptions, IN SIP_UINT32 nType);

@@ -4,14 +4,15 @@
 #include "sip_pf_datatypes.h"
 #include "ISipNetworkUtil.h"
 
-class SipDefNetworkUtil: public ISipNetworkUtil
+class SipDefNetworkUtil : public ISipNetworkUtil
 {
-    public:
-        SipDefNetworkUtil();
-        ~SipDefNetworkUtil();
-    public:
-        SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
-                SipTransportParameter* pTransportParam, ISipUserData* pUserData);
+public:
+    SipDefNetworkUtil();
+    ~SipDefNetworkUtil();
+
+public:
+    SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
+            SipTransportParameter* pTransportParam, ISipUserData* pUserData);
 };
 
-#endif // __ISIP_DEFNETWORKUTIL_H__
+#endif  // __ISIP_DEFNETWORKUTIL_H__

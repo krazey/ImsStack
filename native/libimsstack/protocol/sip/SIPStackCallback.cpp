@@ -1,15 +1,3 @@
-/*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20191224  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
 #include "IMSTypeDef.h"
 #include "SIPStackCallback.h"
 

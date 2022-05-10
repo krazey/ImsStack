@@ -1,22 +1,13 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #include "txn/SipTxn.h"
 #include "txn/SipTxnInfo.h"
 
-SipTxnInfo::SipTxnInfo()
-    : m_pSendSipMsg(SIP_NULL), m_pUserData(SIP_NULL),
-    m_pTranspInfo(SIP_NULL), eTxnStatus(SipTxn::STATUS_INVALID),
-    bTxnTerminated(SIP_FALSE), bTxnCreated(SIP_FALSE)
+SipTxnInfo::SipTxnInfo() :
+        m_pSendSipMsg(SIP_NULL),
+        m_pUserData(SIP_NULL),
+        m_pTranspInfo(SIP_NULL),
+        eTxnStatus(SipTxn::STATUS_INVALID),
+        bTxnTerminated(SIP_FALSE),
+        bTxnCreated(SIP_FALSE)
 {
 }
 

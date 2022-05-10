@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                 description
-   --------  --------------         ----------
-   20100000  syed.malgimani@        Created
-   20170110  vijay.nair@            Modified
-   </table>
-
-   Description
-
- */
-
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
 
@@ -23,29 +10,29 @@
 
 #include "IPAddress.h"
 
-#define SIP_MAX_HASH_BUCKETS     100
-#define SIP_MAX_HASH_ENTRIES     4000
-#define SIP_CALC_HASH_VAL_A      07777777777
-#define SIP_CALC_HASH_VAL_B     3
-#define SIP_CALC_HASH_VAL_C     28
-#define SIP_CALC_HASH_VAL_D     40
-#define SIP_CALC_HASH_VAL_E     0140
+#define SIP_MAX_HASH_BUCKETS 100
+#define SIP_MAX_HASH_ENTRIES 4000
+#define SIP_CALC_HASH_VAL_A  07777777777
+#define SIP_CALC_HASH_VAL_B  3
+#define SIP_CALC_HASH_VAL_C  28
+#define SIP_CALC_HASH_VAL_D  40
+#define SIP_CALC_HASH_VAL_E  0140
 
 extern SIP_VOID sip_cbk_displayTxnKey(IN SIP_VOID* pvTxnKey);
 
 /* Global Variable */
-static SipTxnDb *gpTxnDb = SIP_NULL;
+static SipTxnDb* gpTxnDb = SIP_NULL;
 
 SIP_UINT32 sipTxnCalculateHash(SIP_VOID* pvStrKey)
 {
     if (pvStrKey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(EERR_INVALIDPARAM,"sipCalculateHash: Key is Null", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(EERR_INVALIDPARAM, "sipCalculateHash: Key is Null", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     /* Prepare Key String = CallId */
-    SipTxnKey* pTxnKey = (SipTxnKey*) (pvStrKey);
+    SipTxnKey* pTxnKey = (SipTxnKey*)(pvStrKey);
     SIP_CHAR* pszCallId = pTxnKey->GetCallId();
     SIP_UINT16 nKeyLen = SipPf_Strlen(pszCallId);
 
@@ -77,15 +64,15 @@ SIP_CHAR sipTxnCompareHashKey(SIP_VOID* pvStoredKey, SIP_VOID* pvUserKey)
         return SIP_NOT_MATCH;
     }
 
-    SipTxnKey* pStoredKey = (SipTxnKey *)pvStoredKey;
-    SipTxnKey* pUserKey = (SipTxnKey *)pvUserKey;
+    SipTxnKey* pStoredKey = (SipTxnKey*)pvStoredKey;
+    SipTxnKey* pUserKey = (SipTxnKey*)pvUserKey;
     if (pUserKey->HasRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH) == SIP_TRUE)
     {
-        if (SipPf_Strcmp(pStoredKey->GetViaBranchParam(),
-                pUserKey->GetViaBranchParam()) != SIP_EQUALS)
+        if (SipPf_Strcmp(pStoredKey->GetViaBranchParam(), pUserKey->GetViaBranchParam()) !=
+                SIP_EQUALS)
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                    "sipCompareHashKey: Branch Parameter doesn't match", SIP_ZERO, SIP_ZERO);
+            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "sipCompareHashKey: Branch Parameter doesn't match",
+                    SIP_ZERO, SIP_ZERO);
             return SIP_NOT_MATCH;
         }
     }
@@ -104,7 +91,7 @@ SIP_CHAR sipTxnCompareHashKey(SIP_VOID* pvStoredKey, SIP_VOID* pvUserKey)
         }
     }
     else
-    { //487 retransmission issue.
+    {  // 487 retransmission issue.
         if (SipPf_Strcmp(pStoredKey->GetMethod(), CANCEL_METHOD) == SIP_ZERO)
         {
             return SIP_NOT_MATCH;
@@ -112,8 +99,8 @@ SIP_CHAR sipTxnCompareHashKey(SIP_VOID* pvStoredKey, SIP_VOID* pvUserKey)
 
         // Successful response & received ACK request : always new one
         // Test equipment issue: same transaction key - cseq / via-branch / from-tag / to-tag
-        if (pUserKey->GetTxnType() == SipTxn::INV_SER_TXN
-                && pStoredKey->GetTxnType() == SipTxn::INV_SER_TXN)
+        if (pUserKey->GetTxnType() == SipTxn::INV_SER_TXN &&
+                pStoredKey->GetTxnType() == SipTxn::INV_SER_TXN)
         {
             SIP_UINT16 nStoredStatusCode = pStoredKey->GetRespCode();
 
@@ -127,20 +114,20 @@ SIP_CHAR sipTxnCompareHashKey(SIP_VOID* pvStoredKey, SIP_VOID* pvUserKey)
     /*Host validation*/
     if (pUserKey->HasRule(SipTxnKey::RULE_COMPARE_VIA_BRANCH) == SIP_TRUE)
     {
-        IPAddress objStoredHost(AString((CONST IMS_CHAR *)pStoredKey->GetViaHost()));
-        IPAddress objRecevdHost(AString((CONST IMS_CHAR *)pUserKey->GetViaHost()));
+        IPAddress objStoredHost(AString((CONST IMS_CHAR*)pStoredKey->GetViaHost()));
+        IPAddress objRecevdHost(AString((CONST IMS_CHAR*)pUserKey->GetViaHost()));
         if (objStoredHost.Equals(objRecevdHost) == SIP_FALSE)
         {
-            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "sipCompareHashKey: VIA Host doesn't match", SIP_ZERO, SIP_ZERO);
+            SIP_TRACE_NORMAL(ESIPTRACE_MODTXN, "sipCompareHashKey: VIA Host doesn't match",
+                    SIP_ZERO, SIP_ZERO);
             return SIP_NOT_MATCH;
         }
     }
 
     if (SipPf_Strcmp(pStoredKey->GetFromTag(), pUserKey->GetFromTag()) != SIP_EQUALS)
     {
-        SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-                "sipCompareHashKey: SentByVal doesn't match", SIP_ZERO, SIP_ZERO);
+        SIP_TRACE_NORMAL(
+                ESIPTRACE_MODTXN, "sipCompareHashKey: SentByVal doesn't match", SIP_ZERO, SIP_ZERO);
         return SIP_NOT_MATCH;
     }
 
@@ -159,8 +146,8 @@ SIP_CHAR sipTxnCompareHashKey(SIP_VOID* pvStoredKey, SIP_VOID* pvUserKey)
     if (bACKFor2xxSent == SIP_TRUE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "txn-comparison: ACK for 2xx sent has same transaction identifiers",
-                SIP_ZERO, SIP_ZERO);
+                "txn-comparison: ACK for 2xx sent has same transaction identifiers", SIP_ZERO,
+                SIP_ZERO);
         return SIP_NOT_MATCH;
     }
 
@@ -176,8 +163,8 @@ SIP_VOID sipTxnFreeElement(SIP_VOID* pvHashElem)
         pTxn->SipDelete();
     }
 
-    SIP_TRACE_NORMAL(ESIPTRACE_MODTXN,
-            "sipTxnFreeElement: TxnObject is freed ", SIP_ZERO, SIP_ZERO);
+    SIP_TRACE_NORMAL(
+            ESIPTRACE_MODTXN, "sipTxnFreeElement: TxnObject is freed ", SIP_ZERO, SIP_ZERO);
 }
 
 /* Default free function to free the key in the hash table */
@@ -196,14 +183,8 @@ SipTxnDb::SipTxnDb()
 {
     SIP_UINT16 nError = SIP_ZERO;
 
-    m_pTxnHash = new SipHash (
-            sipTxnCalculateHash,
-            sipTxnCompareHashKey,
-            sipTxnFreeElement,
-            sipTxnFreeKey,
-            SIP_MAX_HASH_BUCKETS,
-            SIP_MAX_HASH_ENTRIES,
-            &nError);
+    m_pTxnHash = new SipHash(sipTxnCalculateHash, sipTxnCompareHashKey, sipTxnFreeElement,
+            sipTxnFreeKey, SIP_MAX_HASH_BUCKETS, SIP_MAX_HASH_ENTRIES, &nError);
 }
 
 SipTxnDb::~SipTxnDb()
@@ -230,8 +211,8 @@ SIP_BOOL SipTxnDb::FetchElement(SIP_VOID* pvKey, SIP_VOID** ppElement, SIP_UINT1
     return SIP_TRUE;
 }
 
-SIP_BOOL SipTxnDb::FetchElement(SIP_VOID* pvKey, SIP_VOID** ppElement, SIP_VOID** ppKey,
-        SIP_UINT16* pnError)
+SIP_BOOL SipTxnDb::FetchElement(
+        SIP_VOID* pvKey, SIP_VOID** ppElement, SIP_VOID** ppKey, SIP_UINT16* pnError)
 {
     /* Fetch Element increments Reference count */
     *ppElement = m_pTxnHash->Hash_Fetch(pvKey, ppKey, pnError);

@@ -8,13 +8,12 @@
 
 class ISipNetworkUtil
 {
-    public:
+public:
+    ISipNetworkUtil(){};
+    virtual ~ISipNetworkUtil(){};
 
-        ISipNetworkUtil(){};
-        virtual ~ISipNetworkUtil(){};
-
-        virtual SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
-                SipTransportParameter* pTransportParam, ISipUserData* pUserData) = 0;
+    virtual SIP_BOOL SendToNetwork(SipTransportBuffer* pTransportBuffer,
+            SipTransportParameter* pTransportParam, ISipUserData* pUserData) = 0;
 };
 
-#endif // __ISIPNETWORKUTIL_H__
+#endif  // __ISIPNETWORKUTIL_H__

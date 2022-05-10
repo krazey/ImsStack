@@ -1,28 +1,3 @@
-/******************************************************************************
- * Project Name   : SIP_RTP
- * Group    : IP-CS [MSG-2]
- * Security   : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename    : SipHash.cpp
- * Purpose     : Hash Utility Functions
- * Platform    : Windows OR Android
- * Author(s)   : Syed Malgimani
- * E-mail id.    : syed.malgimani@
- * Creation date   : May. 12,2010
- *
- * Edit History     Modification           Description(s)
- *
- * Date      Name    Version    Bug-ID    Description
- * ----------    ----------    -------    ------    -------------
- * Month. Date,10    Name       0.0a    ---    Initial creation
- * July,21,2010    Giridhar    0.0b    ---    Coverted to cpp
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
 #include "SipHash.h"

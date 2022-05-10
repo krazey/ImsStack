@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipRequestDispositionHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipRequestDispositionHeader.h"
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
@@ -32,44 +8,24 @@
 #include "msg/SipAddrSpec.h"
 #include "msg/sip_msgutil.h"
 
-SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {
-        "proxy","redirect","cancel",
-        "no-cancel","fork","no-fork","recurse",
-        "no-recurse","parallel" ,"sequential",
-        "queue","no-queue"
-};
-
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
+SIP_CHAR gaszDirectivesArray[SIP_DIRECTIVE_SIZE][SIP_DIRECTIVE_LEN] = {"proxy", "redirect",
+        "cancel", "no-cancel", "fork", "no-fork", "recurse", "no-recurse", "parallel", "sequential",
+        "queue", "no-queue"};
 
 /*constructor*/
-SipRequestDispositionHeader::SipRequestDispositionHeader()
-    : SipHeaderBase(SipHeaderBase::REQUEST_DISPOSITION)
+SipRequestDispositionHeader::SipRequestDispositionHeader() :
+        SipHeaderBase(SipHeaderBase::REQUEST_DISPOSITION)
 {
 }
 
 SipRequestDispositionHeader::SipRequestDispositionHeader(
-        const SipRequestDispositionHeader& objHeader)
-    : SipHeaderBase(objHeader)
+        const SipRequestDispositionHeader& objHeader) :
+        SipHeaderBase(objHeader)
 {
 }
 
 /*destructor*/
-SipRequestDispositionHeader::~SipRequestDispositionHeader()
-{
-}
+SipRequestDispositionHeader::~SipRequestDispositionHeader() {}
 
 /******************************************************************************
  * Function name      : SipRequestDispositionHeader::DecodeHdr
@@ -90,13 +46,11 @@ SIP_BOOL SipRequestDispositionHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 n
     const SIP_CHAR* pszValue = GetValue();
     if (pszValue == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Null value in header",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Null value in header", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    for(SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
+    for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
     {
         if (SipPf_Stricmp(gaszDirectivesArray[nCnt], pszValue) == 0)
         {
@@ -112,7 +66,7 @@ SipHeaderBase* SipRequestDispositionHeader::GetNewObj(SIP_INT32 /*eHdr*/, SipHea
     if (pHeader != SIP_NULL)
     {
         return new SipRequestDispositionHeader(
-            *reinterpret_cast<SipRequestDispositionHeader*>(pHeader));
+                *reinterpret_cast<SipRequestDispositionHeader*>(pHeader));
     }
     return new SipRequestDispositionHeader();
 }

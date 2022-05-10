@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : SipTrace.cpp
- * Purpose        :  debug Functions
- * Platform        : Windows OR Android
- * Author(s)        : Seema
- * E-mail id.        : seema.lijo@
- * Creation date     : april 6,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * april 6,10          Seema              0.0a            ---   Initial creation
-
- ******************************************************************************/
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
 #include "platform/sip_pf_string.h"
@@ -30,14 +6,7 @@
 #include "SipUtil.h"
 #include "sip_error.h"
 
-/****************************************************************************
-  Global Variables
- *****************************************************************************/
 SipTrace    *gpTrace = SIP_NULL;
-
-/****************************************************************************
-  Function Implementation [STARTS]
- *****************************************************************************/
 
 /******************************************************************************
  * Function name    : SipTrace
@@ -306,7 +275,3 @@ SipTrace* SipTrace_GetInstance()
     SipTrace* pTrace = gpTrace;
     return pTrace;
 }
-
-/****************************************************************************
-  global Function Implementation [ENDS]
- *****************************************************************************/

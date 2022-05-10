@@ -5,13 +5,7 @@
 #include "platform/sip_pf_string.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
 #define MAX_CSEQ_LEN 12
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 
 /******************************************************************************
  * Function name  : SipCSeqHeader::SipCSeqHeader
@@ -22,10 +16,10 @@
  *
  * Side Effects  : none
  *****************************************************************************/
-SipCSeqHeader::SipCSeqHeader()
-    : SipHeaderBase(SipHeaderBase::CSEQ)
-    , m_pszMethod(SIP_NULL)
-    , m_nSeq(SIP_ZERO)
+SipCSeqHeader::SipCSeqHeader() :
+        SipHeaderBase(SipHeaderBase::CSEQ),
+        m_pszMethod(SIP_NULL),
+        m_nSeq(SIP_ZERO)
 {
 }
 
@@ -38,10 +32,10 @@ SipCSeqHeader::SipCSeqHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SipCSeqHeader::SipCSeqHeader(const SipCSeqHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod))
-    , m_nSeq(objHeader.m_nSeq)
+SipCSeqHeader::SipCSeqHeader(const SipCSeqHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pszMethod(SipPf_Strdup(objHeader.m_pszMethod)),
+        m_nSeq(objHeader.m_nSeq)
 {
 }
 /******************************************************************************
@@ -164,8 +158,7 @@ SIP_BOOL SipCSeqHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
 SIP_BOOL SipCSeqHeader::IsValidHeader() const
 {
-    if ((m_pszMethod == SIP_NULL) ||
-        ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO)))
+    if ((m_pszMethod == SIP_NULL) || ((m_nSeq > MAX_CSEQ) || (m_nSeq == SIP_ZERO)))
     {
         return SIP_FALSE;
     }

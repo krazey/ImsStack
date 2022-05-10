@@ -1,15 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                description
-   --------  --------------        ----------
-   20170110  vijay.nair@           Created
-   </table>
-
-   Description
-
- */
-
 #include "sip_error.h"
 #include "SipTrace.h"
 #include "sip_debug.h"
@@ -19,20 +7,20 @@
 #include "txn/sip_txn_common.h"
 #include "txn/SipTxnTimerValues.h"
 
-SipTxnTimerValues::SipTxnTimerValues()
-    : m_nT1Value(SIP_ZERO)
-    , m_nT2Value(SIP_ZERO)
-    , m_nT4Value(SIP_ZERO)
-    , m_nTimerA_Value(SIP_ZERO)
-    , m_nTimerB_Value(SIP_ZERO)
-    , m_nTimerD_Value(SIP_ZERO)
-    , m_nTimerE_Value(SIP_ZERO)
-    , m_nTimerF_Value(SIP_ZERO)
-    , m_nTimerG_Value(SIP_ZERO)
-    , m_nTimerH_Value(SIP_ZERO)
-    , m_nTimerI_Value(SIP_ZERO)
-    , m_nTimerJ_Value(SIP_ZERO)
-    , m_nTimerK_Value(SIP_ZERO)
+SipTxnTimerValues::SipTxnTimerValues() :
+        m_nT1Value(SIP_ZERO),
+        m_nT2Value(SIP_ZERO),
+        m_nT4Value(SIP_ZERO),
+        m_nTimerA_Value(SIP_ZERO),
+        m_nTimerB_Value(SIP_ZERO),
+        m_nTimerD_Value(SIP_ZERO),
+        m_nTimerE_Value(SIP_ZERO),
+        m_nTimerF_Value(SIP_ZERO),
+        m_nTimerG_Value(SIP_ZERO),
+        m_nTimerH_Value(SIP_ZERO),
+        m_nTimerI_Value(SIP_ZERO),
+        m_nTimerJ_Value(SIP_ZERO),
+        m_nTimerK_Value(SIP_ZERO)
 {
     SipConfiguration* pConfig = SipConfiguration::GetInstance();
 
@@ -53,7 +41,7 @@ SipTxnTimerValues::SipTxnTimerValues()
 
 SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur)
 {
-    switch(nTimerType)
+    switch (nTimerType)
     {
         case SipTxn::TIMER1:
         {
@@ -128,7 +116,7 @@ SIP_VOID SipTxnTimerValues::SetTimerValue(SIP_UINT32 nTimerType, SIP_UINT32 nDur
 
 SIP_UINT32 SipTxnTimerValues::GetTimerValue(SIP_UINT32 nTimerType) const
 {
-    switch(nTimerType)
+    switch (nTimerType)
     {
         case SipTxn::TIMER1:
         {
@@ -201,25 +189,23 @@ SIP_UINT32 SipTxnTimerValues::GetTimerValue(SIP_UINT32 nTimerType) const
     return SIP_ZERO;
 }
 
-SIP_BOOL SipTxnTimerValues::UpdateSipTimers(IN SIP_UINT32 nTimerOptions,
-        const IN SipTxnTimerValues* ptrTxnSipTxnTimers)
+SIP_BOOL SipTxnTimerValues::UpdateSipTimers(
+        IN SIP_UINT32 nTimerOptions, const IN SipTxnTimerValues* ptrTxnSipTxnTimers)
 {
     if (ptrTxnSipTxnTimers == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER,
-                            "ptrTxnSipTxnTimers is NULL", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "ptrTxnSipTxnTimers is NULL", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     if (IsTimerSet(nTimerOptions, TV_ALL) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER,
-                "nTimerOptions is NOT set", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "nTimerOptions is NOT set", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER,
-            "UpdateSipTimers nTimerOptions(%X)", nTimerOptions, SIP_ZERO);
+    SIP_DEBUG_WARNING(
+            ESIPTRACE_MODTIMER, "UpdateSipTimers nTimerOptions(%X)", nTimerOptions, SIP_ZERO);
 
     if (IsTimerSet(nTimerOptions, TV_T1) == SIP_TRUE)
     {
@@ -281,9 +267,9 @@ SIP_VOID SipTxnTimerValues::PrintSIPTxnTimerValues() const
     SIP_CHAR const* pTimerVal =
             "(T1|T2|T4|A|B|D|E|F|G|H|I|J|K)=%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d|%d";
 
-    SipPf_Sprintf(szTimerLog, (SIP_CHAR *)pTimerVal, m_nT1Value, m_nT2Value, m_nT4Value,
-        m_nTimerA_Value, m_nTimerB_Value, m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value,
-        m_nTimerG_Value, m_nTimerH_Value, m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value);
+    SipPf_Sprintf(szTimerLog, (SIP_CHAR*)pTimerVal, m_nT1Value, m_nT2Value, m_nT4Value,
+            m_nTimerA_Value, m_nTimerB_Value, m_nTimerD_Value, m_nTimerE_Value, m_nTimerF_Value,
+            m_nTimerG_Value, m_nTimerH_Value, m_nTimerI_Value, m_nTimerJ_Value, m_nTimerK_Value);
 
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER,"SIPTimer%s", szTimerLog, SIP_ZERO);
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTIMER, "SIPTimer%s", szTimerLog, SIP_ZERO);
 }

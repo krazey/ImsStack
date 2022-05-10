@@ -6,14 +6,6 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 /******************************************************************************
  * Function name      : SipEventHeader::SipEventHeader
  *
@@ -23,13 +15,12 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipEventHeader::SipEventHeader()
-    : SipHeaderBase(SipHeaderBase::EVENT)
-    , m_pEventTemplateList(SIP_NULL)
+SipEventHeader::SipEventHeader() :
+        SipHeaderBase(SipHeaderBase::EVENT),
+        m_pEventTemplateList(SIP_NULL)
 {
 }
 
-
 /******************************************************************************
  * Function name      : SipEventHeader::SipEventHeader
  *
@@ -39,16 +30,15 @@ SipEventHeader::SipEventHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipEventHeader::SipEventHeader(const SipEventHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pEventTemplateList(SIP_NULL)
+SipEventHeader::SipEventHeader(const SipEventHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pEventTemplateList(SIP_NULL)
 {
     if (objHeader.m_pEventTemplateList != SIP_NULL)
     {
         m_pEventTemplateList = new SipParameterList(*(objHeader.m_pEventTemplateList));
     }
 }
-
 
 /******************************************************************************
  * Function name      : SipEventHeader::~SipEventHeader
@@ -89,7 +79,7 @@ SIP_BOOL SipEventHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Defa
     SipEnc_UpdateCurrPos(ppCurrPos);
     if (m_pEventTemplateList != SIP_NULL)
     {
-        SipVector<SipNameValue*> &sipList = m_pEventTemplateList->GetList();
+        SipVector<SipNameValue*>& sipList = m_pEventTemplateList->GetList();
         SIP_UINT32 nSize = sipList.GetSize();
         for (SIP_UINT32 nIndex = SIP_ZERO; nIndex < nSize; nIndex++)
         {
@@ -166,11 +156,10 @@ SIP_BOOL SipEventHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
         pTempPos = pTempPos + SIP_TWO;
 
-        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos,
-                pEndPt, SIP_DOT) == SIP_FALSE)
+        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Event Package Decoding Failed",
-                SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "Event Package Decoding Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }

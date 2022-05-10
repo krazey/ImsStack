@@ -1,14 +1,14 @@
 #include "platform/sip_pf_string.h"
 #include "transport/SipTransportParameter.h"
 
-SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam)
-    : m_pHostAddress(SIP_NULL)
-    , m_nPort(SIP_ZERO)
-    , m_nTranspProtocol(SIP_INVALID)
-    , m_nSockId(SIP_ZERO)
-    , m_bMulticastEnable(SIP_FALSE)
-    , m_cTTL(SIP_ZERO)
-    , m_nTranspIpType(SIP_INVALID)
+SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam) :
+        m_pHostAddress(SIP_NULL),
+        m_nPort(SIP_ZERO),
+        m_nTranspProtocol(SIP_INVALID),
+        m_nSockId(SIP_ZERO),
+        m_bMulticastEnable(SIP_FALSE),
+        m_cTTL(SIP_ZERO),
+        m_nTranspIpType(SIP_INVALID)
 {
     if (pTranspParam == SIP_NULL)
     {
@@ -21,31 +21,31 @@ SipTransportParameter::SipTransportParameter(SipTransportParameter* pTranspParam
     m_nSockId = pTranspParam->m_nSockId;
     m_bMulticastEnable = pTranspParam->m_bMulticastEnable;
     m_cTTL = pTranspParam->m_cTTL;
-    m_nTranspIpType = pTranspParam->m_nTranspIpType ;
+    m_nTranspIpType = pTranspParam->m_nTranspIpType;
 }
 
-SipTransportParameter::SipTransportParameter(SIP_CHAR* pHostAddress,
-        SIP_UINT16 nPort, SIP_INT32 eTranspProtocol)
-    : m_pHostAddress(SIP_NULL)
-    , m_nPort(nPort)
-    , m_nTranspProtocol(eTranspProtocol)
-    , m_nSockId(SIP_ZERO)
-    , m_bMulticastEnable(SIP_FALSE)
-    , m_cTTL(SIP_ZERO)
-    , m_nTranspIpType(SIP_INVALID)
+SipTransportParameter::SipTransportParameter(
+        SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol) :
+        m_pHostAddress(SIP_NULL),
+        m_nPort(nPort),
+        m_nTranspProtocol(eTranspProtocol),
+        m_nSockId(SIP_ZERO),
+        m_bMulticastEnable(SIP_FALSE),
+        m_cTTL(SIP_ZERO),
+        m_nTranspIpType(SIP_INVALID)
 {
     m_pHostAddress = SipPf_Strdup(pHostAddress);
 }
 
-SipTransportParameter::SipTransportParameter(SIP_CHAR* pHostAddress,
-        SIP_UINT16 nPort, SIP_INT32 eTranspProtocol, SIP_UINT32 nSockId)
-    : m_pHostAddress(SIP_NULL)
-    , m_nPort(nPort)
-    , m_nTranspProtocol(eTranspProtocol)
-    , m_nSockId(nSockId)
-    , m_bMulticastEnable(SIP_FALSE)
-    , m_cTTL(SIP_ZERO)
-    , m_nTranspIpType(SIP_INVALID)
+SipTransportParameter::SipTransportParameter(
+        SIP_CHAR* pHostAddress, SIP_UINT16 nPort, SIP_INT32 eTranspProtocol, SIP_UINT32 nSockId) :
+        m_pHostAddress(SIP_NULL),
+        m_nPort(nPort),
+        m_nTranspProtocol(eTranspProtocol),
+        m_nSockId(nSockId),
+        m_bMulticastEnable(SIP_FALSE),
+        m_cTTL(SIP_ZERO),
+        m_nTranspIpType(SIP_INVALID)
 {
     m_pHostAddress = SipPf_Strdup(pHostAddress);
 }

@@ -1,30 +1,6 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipHeaders.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)             : Vijay Nair
- * E-mail id.            : vijay.nair@
- * Creation date         : Jan 7, 2015
- *
- * Edit History         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
 #ifndef __SIP_HEADERS_H__
 #define __SIP_HEADERS_H__
 
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "SipRefBase.h"
 #include "msg/SipHeaderBase.h"
@@ -76,23 +52,18 @@
 #include "msg/SipStatusLine.h"
 #include "SipConfiguration.h"
 
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
 class SipHeaders
 {
-    //Request headers
-
     SipHeaderBase* m_HeaderArray[SipHeaderBase::TYPE_END + SIP_ONE];
 
-    public:
+public:
     SipHeaders();
     virtual ~SipHeaders();
     SIP_BOOL CopyHdrs(SipHeaders* pHdrs);
     SIP_BOOL EncodeHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
-    SIP_BOOL DecodeHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName,
-            SIP_CHAR** ppHdrBody);
+    SIP_BOOL DecodeHdrs(
+            SIP_CHAR* pStartPt, SIP_UINT32 nDecLen, SIP_CHAR** ppHdrName, SIP_CHAR** ppHdrBody);
 
     SipHeaderBase* getHdrObj(SIP_INT32 eHdrType);
 
@@ -108,12 +79,11 @@ class SipHeaders
     static SipHeaderBase* CreateCoreHdrObj(SIP_INT32 eHdrType);
     static SipHeaderBase* CloneHdrObj(SipHeaderBase* pHdr);
     static SIP_BOOL IsListHdr(SIP_INT32 eHdrType);
-    private:
+
+private:
     SIP_BOOL EncodeMandatoryHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
 
     SIP_BOOL EncodeContentHdrs(SIP_CHAR** ppCurrPos, SIP_UINT32 nMsgOptions);
-
-
 };
 
 /******************************************************************************
@@ -139,4 +109,4 @@ SIP_BOOL sipEncodeHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos, SIP_U
  *****************************************************************************/
 SIP_BOOL sipEncodeShortHdrName(SIP_INT32 eHdrType, SIP_CHAR** ppMsgBuffCurrPos);
 
-#endif //__SIP_HEADERS_H__
+#endif  //__SIP_HEADERS_H__

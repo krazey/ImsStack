@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                 description
-   --------  --------------         ----------
-   20100000  syed.malgimani@        Created
-   20170110  vijay.nair@            Modified
-   </table>
-
-   Description
-
- */
-
 #ifndef __SIP_TXN_H__
 #define __SIP_TXN_H__
 
@@ -26,306 +13,271 @@
 
 class SipTxn : public SipRefBase
 {
-    public:
-        enum
-        {
-            /* set by Stack User for sending request or response */
-            SEND = 0,
-            /* set by transport layer on receiving side of request or response */
-            RECV,
-            INVALID_DIR
-        };
+public:
+    enum
+    {
+        /* set by Stack User for sending request or response */
+        SEND = 0,
+        /* set by transport layer on receiving side of request or response */
+        RECV,
+        INVALID_DIR
+    };
 
-        /* Type of Transaction is defined */
-        enum
-        {
-            INV_CLI_TXN = 0,
-            INV_SER_TXN,
-            NON_INV_CLI_TXN,
-            NON_INV_SER_TXN,
-            INVALID_TXN
-        };
+    /* Type of Transaction is defined */
+    enum
+    {
+        INV_CLI_TXN = 0,
+        INV_SER_TXN,
+        NON_INV_CLI_TXN,
+        NON_INV_SER_TXN,
+        INVALID_TXN
+    };
 
-        enum
-        {
-            /* Request is received and no txn exist (Invite, Non-Invite, ACK) */
-            STATUS_NEW_REQ_RECVD = 0,
-            /* On recv of failure/success responses(INV & Non-INV) and
-            transaction exists in valid state
-            On recv of failure ACK,
-            Re-transmitted 2xx for Invite.
-            Pls Note: On Receive of INVITE Failure response, stack send the failure ACK to network*/
-            STATUS_VALID_MESSAGE,
-            /* Re-transmitted request is received in state where no action is required
-            Re-transmitted INVITE request or Retransmitted Failure ACK request received in
-            confirmed state Re-transmitted non-INVITE request received in Trying state*/
-            STATUS_IGNORE_REQ,
-            /* Response received in state where no action is required
-            INVITE 1xx received in completed state
-            Non-INVITE response is received in completed state */
-            STATUS_IGNORE_RESP,
-            /* No Txn exists when Non-INVITE responses or failure INVITE response is received */
-            STATUS_STRAY_RESP,
-            /* Re-transmitted req/resp are received in valid state
-            For re-transmitted request, stack re-transmit the last response to network
-            In INVITE Client txn, retransmitted failure resp can be received for which
-            failure ACK to be sent
-            */
-            STATUS_RETRANSMISSION,
-            /* Error occurs when stack try to send message to the network */
-            STATUS_ERROR_ON_SEND,
-            /* When txn handler fails to handle receive message --> failure conditions */
-            STATUS_INVALID_MESSAGE,
-            /*For Handling Stray 2xx*/
-            STATUS_2XX_STRAY_RESP,
-            STATUS_STRAY_PRACK,
-            STATUS_INVALID
+    enum
+    {
+        /* Request is received and no txn exist (Invite, Non-Invite, ACK) */
+        STATUS_NEW_REQ_RECVD = 0,
+        /* On recv of failure/success responses(INV & Non-INV) and
+        transaction exists in valid state
+        On recv of failure ACK,
+        Re-transmitted 2xx for Invite.
+        Pls Note: On Receive of INVITE Failure response, stack send the failure ACK to network*/
+        STATUS_VALID_MESSAGE,
+        /* Re-transmitted request is received in state where no action is required
+        Re-transmitted INVITE request or Retransmitted Failure ACK request received in
+        confirmed state Re-transmitted non-INVITE request received in Trying state*/
+        STATUS_IGNORE_REQ,
+        /* Response received in state where no action is required
+        INVITE 1xx received in completed state
+        Non-INVITE response is received in completed state */
+        STATUS_IGNORE_RESP,
+        /* No Txn exists when Non-INVITE responses or failure INVITE response is received */
+        STATUS_STRAY_RESP,
+        /* Re-transmitted req/resp are received in valid state
+        For re-transmitted request, stack re-transmit the last response to network
+        In INVITE Client txn, retransmitted failure resp can be received for which
+        failure ACK to be sent
+        */
+        STATUS_RETRANSMISSION,
+        /* Error occurs when stack try to send message to the network */
+        STATUS_ERROR_ON_SEND,
+        /* When txn handler fails to handle receive message --> failure conditions */
+        STATUS_INVALID_MESSAGE,
+        /*For Handling Stray 2xx*/
+        STATUS_2XX_STRAY_RESP,
+        STATUS_STRAY_PRACK,
+        STATUS_INVALID
 
-        };
+    };
 
-        enum
-        {
-            TIMER1 = 0,
-            TIMER2,
-            TIMER4,
-            TIMERA,
-            TIMERB,
-            TIMERC,
-            TIMERD,
-            TIMERE,
-            TIMERF,
-            TIMERG,
-            TIMERH,
-            TIMERI,
-            TIMERJ,
-            TIMERK,
-            TIMER_OTHER,
-            TIMER_TYPE_INVALID
-        };
+    enum
+    {
+        TIMER1 = 0,
+        TIMER2,
+        TIMER4,
+        TIMERA,
+        TIMERB,
+        TIMERC,
+        TIMERD,
+        TIMERE,
+        TIMERF,
+        TIMERG,
+        TIMERH,
+        TIMERI,
+        TIMERJ,
+        TIMERK,
+        TIMER_OTHER,
+        TIMER_TYPE_INVALID
+    };
 
-        enum
-        {
-            INV_CLI_SEND_INV_REQ_EVT = 0,
-            INV_CLI_TIMERA_B_TIME_OUT_EVT,
-            INV_CLI_TIMERD_TIME_OUT_EVT,
-            INV_CLI_RECV_1XX_RESP_EVT,
-            INV_CLI_RECV_2XX_RESP_EVT,
-            INV_CLI_RECV_3XX_6XX_RESP_EVT,
-            INV_CLI_TRANSP_ERROR_EVT,
-            INV_CLI_INVALID_EVT
-        };
+    enum
+    {
+        INV_CLI_SEND_INV_REQ_EVT = 0,
+        INV_CLI_TIMERA_B_TIME_OUT_EVT,
+        INV_CLI_TIMERD_TIME_OUT_EVT,
+        INV_CLI_RECV_1XX_RESP_EVT,
+        INV_CLI_RECV_2XX_RESP_EVT,
+        INV_CLI_RECV_3XX_6XX_RESP_EVT,
+        INV_CLI_TRANSP_ERROR_EVT,
+        INV_CLI_INVALID_EVT
+    };
 
-/* States for INVITE Client FSM */
-        enum
-        {
-            INV_CLI_IDLE_ST = 0,
-            INV_CLI_CALLING_ST,
-            INV_CLI_PROCEEDING_ST,
-            INV_CLI_COMPLETED_ST,
-            INV_CLI_TERMINATED_ST,
-            INV_CLI_INVALID_ST
-        };
+    /* States for INVITE Client FSM */
+    enum
+    {
+        INV_CLI_IDLE_ST = 0,
+        INV_CLI_CALLING_ST,
+        INV_CLI_PROCEEDING_ST,
+        INV_CLI_COMPLETED_ST,
+        INV_CLI_TERMINATED_ST,
+        INV_CLI_INVALID_ST
+    };
 
-        enum
-        {
-            INV_SER_RECV_INV_REQ_EVT = 0,
-            INV_SER_SEND_NON_100_PROV_RESP_EVT,
-            INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT,
-            INV_SER_SEND_2XX_SUCCESS_RESP_EVT,
-            INV_SER_TRANSP_ERROR_EVT,
-            INV_SER_RECV_ACK_REQ_EVT,
-            INV_SER_TIMER_G_H_TIME_OUT_EVT,
-            INV_SER_TIMER_I_TIME_OUT_EVT,
-            INV_SER_INVALID_EVT
-        };
+    enum
+    {
+        INV_SER_RECV_INV_REQ_EVT = 0,
+        INV_SER_SEND_NON_100_PROV_RESP_EVT,
+        INV_SER_SEND_3XX_6XX_FAILURE_RESP_EVT,
+        INV_SER_SEND_2XX_SUCCESS_RESP_EVT,
+        INV_SER_TRANSP_ERROR_EVT,
+        INV_SER_RECV_ACK_REQ_EVT,
+        INV_SER_TIMER_G_H_TIME_OUT_EVT,
+        INV_SER_TIMER_I_TIME_OUT_EVT,
+        INV_SER_INVALID_EVT
+    };
 
-        /* States for INVITE Server FSM */
-        enum
-        {
-            INV_SER_IDLE_ST = 0,
-            INV_SER_PROCEEDING_ST,
-            INV_SER_COMPLETED_ST,
-            INV_SER_CONFIRMED_ST,
-            INV_SER_TERMINATED_ST,
-            INV_SER_INVALID_ST
-        };
+    /* States for INVITE Server FSM */
+    enum
+    {
+        INV_SER_IDLE_ST = 0,
+        INV_SER_PROCEEDING_ST,
+        INV_SER_COMPLETED_ST,
+        INV_SER_CONFIRMED_ST,
+        INV_SER_TERMINATED_ST,
+        INV_SER_INVALID_ST
+    };
 
-        enum
-        {
-            NON_INV_CLI_SEND_NON_INV_REQ_EVT = 0,
-            NON_INV_CLI_TIMER_E_F_TIME_OUT_EVT,
-            NON_INV_CLI_RECV_1XX_RESP_EVT,
-            NON_INV_CLI_RECV_2XX_6XX_RESP_EVT,
-            NON_INV_CLI_TRANSP_ERROR_EVT,
-            NON_INV_CLI_TIMER_K_TIME_OUT_EVT,
-            NON_INV_CLI_INVALID_EVT
-        };
+    enum
+    {
+        NON_INV_CLI_SEND_NON_INV_REQ_EVT = 0,
+        NON_INV_CLI_TIMER_E_F_TIME_OUT_EVT,
+        NON_INV_CLI_RECV_1XX_RESP_EVT,
+        NON_INV_CLI_RECV_2XX_6XX_RESP_EVT,
+        NON_INV_CLI_TRANSP_ERROR_EVT,
+        NON_INV_CLI_TIMER_K_TIME_OUT_EVT,
+        NON_INV_CLI_INVALID_EVT
+    };
 
-        /* States for non-INVITE Client FSM */
-        enum
-        {
-            NON_INV_CLI_IDLE_ST = 0,
-            NON_INV_CLI_TRYING_ST,
-            NON_INV_CLI_PROCEEDING_ST,
-            NON_INV_CLI_COMPLETED_ST,
-            NON_INV_CLI_TERMINATED_ST,
-            NON_INV_CLI_INVALID_ST
-        };
+    /* States for non-INVITE Client FSM */
+    enum
+    {
+        NON_INV_CLI_IDLE_ST = 0,
+        NON_INV_CLI_TRYING_ST,
+        NON_INV_CLI_PROCEEDING_ST,
+        NON_INV_CLI_COMPLETED_ST,
+        NON_INV_CLI_TERMINATED_ST,
+        NON_INV_CLI_INVALID_ST
+    };
 
-        /* Events for non-INVITE Server FSM */
-        enum
-        {
-            NON_INV_SER_RECV_NON_INV_REQ_EVT = 0,
-            NON_INV_SER_SEND_1XX_RESP_EVT,
-            NON_INV_SER_SEND_2XX_6XX_RESP_EVT,
-            NON_INV_SER_TRANSP_ERROR_EVT,
-            NON_INV_SER_TIMER_J_TIME_OUT_EVT,
-            NON_INV_SER_INVALID_EVT
-        };
+    /* Events for non-INVITE Server FSM */
+    enum
+    {
+        NON_INV_SER_RECV_NON_INV_REQ_EVT = 0,
+        NON_INV_SER_SEND_1XX_RESP_EVT,
+        NON_INV_SER_SEND_2XX_6XX_RESP_EVT,
+        NON_INV_SER_TRANSP_ERROR_EVT,
+        NON_INV_SER_TIMER_J_TIME_OUT_EVT,
+        NON_INV_SER_INVALID_EVT
+    };
 
-        /* States for non-INVITE Server FSM */
-        enum
-        {
-            NON_INV_SER_IDLE_ST = 0,
-            NON_INV_SER_TRYING_ST,
-            NON_INV_SER_PROCEEDING_ST,
-            NON_INV_SER_COMPLETED_ST,
-            NON_INV_SER_TERMINATED_ST,
-            NON_INV_SER_INVALID_ST
-        };
+    /* States for non-INVITE Server FSM */
+    enum
+    {
+        NON_INV_SER_IDLE_ST = 0,
+        NON_INV_SER_TRYING_ST,
+        NON_INV_SER_PROCEEDING_ST,
+        NON_INV_SER_COMPLETED_ST,
+        NON_INV_SER_TERMINATED_ST,
+        NON_INV_SER_INVALID_ST
+    };
 
-    private:
-        /* Txn Type */
-        SIP_INT32 m_eTxnType;
+private:
+    /* Txn Type */
+    SIP_INT32 m_eTxnType;
 
-        /* Key which is stored in Txn Hash Table */
-        SipTxnKey* m_pTxnKey;
+    /* Key which is stored in Txn Hash Table */
+    SipTxnKey* m_pTxnKey;
 
-        SipMessage* m_pSipMsg;
+    SipMessage* m_pSipMsg;
 
-        /* SIP Transport */
-        SipTransportInfo* m_pTranspInfo;
+    /* SIP Transport */
+    SipTransportInfo* m_pTranspInfo;
 
-        /* User Specific Data or User Key Info */
-        ISipUserData* m_pUserData;
+    /* User Specific Data or User Key Info */
+    ISipUserData* m_pUserData;
 
-        /* FSM Current State */
-        SIP_UINT16 m_nTxnState;
+    /* FSM Current State */
+    SIP_UINT16 m_nTxnState;
 
-        /* Counter for Number of Retransmissions */
-        SIP_UINT16 m_nReTxCount;
+    /* Counter for Number of Retransmissions */
+    SIP_UINT16 m_nReTxCount;
 
-        /* Transaction Related Timers */
-        /* Type of Timer Started */
-        SIP_INT32 m_eTimerType;
-        /* Timer ID */
-        SIP_VOID* m_pvTimerId;
-        /* Maximum Timer Duration */
-        SIP_UINT32 m_nMaxDuration;
-        /* Total Duration of Timer Expired : Elapsed Time */
-        SIP_UINT32 m_nDurationExpired;
-        /* Current Value of Timer Duration */
-        SIP_UINT32 m_nCurrentDuration;
+    /* Transaction Related Timers */
+    /* Type of Timer Started */
+    SIP_INT32 m_eTimerType;
+    /* Timer ID */
+    SIP_VOID* m_pvTimerId;
+    /* Maximum Timer Duration */
+    SIP_UINT32 m_nMaxDuration;
+    /* Total Duration of Timer Expired : Elapsed Time */
+    SIP_UINT32 m_nDurationExpired;
+    /* Current Value of Timer Duration */
+    SIP_UINT32 m_nCurrentDuration;
 
-        SipTxnTimerValues objTxnTimerValues;
-    public:
-        SipTxn();
+    SipTxnTimerValues objTxnTimerValues;
 
-        SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
-                SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
+public:
+    SipTxn();
 
-        virtual ~SipTxn();
+    SipTxn(SIP_INT32 eTxnType, SipTxnKey* pTxnKey, SipMessage* pSipMsg,
+            SipTimerContext* pSipTxnTimerContext, SIP_UINT16* pnError);
 
-        SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
-        SIP_BOOL AbortTxn();
+    virtual ~SipTxn();
 
-        /* Abstract API to start Transaction Timer */
-        SIP_BOOL StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_UINT16* pnError);
+    SIP_BOOL InvokeFsm(SIP_UINT16 nEvent, SIP_VOID* pvData, SIP_UINT16* pnError);
+    SIP_BOOL AbortTxn();
 
-        SIP_BOOL StopTxnTimer();
+    /* Abstract API to start Transaction Timer */
+    SIP_BOOL StartTxnTimer(SIP_UINT32 eTimerType, SIP_UINT32 nDuration, SIP_UINT16* pnError);
 
-        SIP_BOOL PrepareACK(IN SipMessage* pSipRespMsg, IN SIP_BOOL bSetMsgBody,
-                OUT SipMessage** ppSipAckMsg);
+    SIP_BOOL StopTxnTimer();
 
-        SIP_VOID RemoveFromTxnPool();
+    SIP_BOOL PrepareACK(
+            IN SipMessage* pSipRespMsg, IN SIP_BOOL bSetMsgBody, OUT SipMessage** ppSipAckMsg);
 
-        SIP_BOOL UpdateTranspInfo(SipTransportInfo* pTranspInfo);
+    SIP_VOID RemoveFromTxnPool();
 
-        inline SIP_INT32 GetTxnType() const
-        {
-            return  m_eTxnType;
-        }
-        inline SipTxnKey* GetTxnKey()
-        {
-            return m_pTxnKey;
-        }
-        SipTransportInfo* GetTranspInfo();
-        inline SIP_UINT16 GetTxnState() const
-        {
-            return m_nTxnState;
-        }
+    SIP_BOOL UpdateTranspInfo(SipTransportInfo* pTranspInfo);
 
-        inline SIP_UINT16 GetReTxCount() const
-        {
-            return m_nReTxCount;
-        }
+    inline SIP_INT32 GetTxnType() const { return m_eTxnType; }
+    inline SipTxnKey* GetTxnKey() { return m_pTxnKey; }
+    SipTransportInfo* GetTranspInfo();
+    inline SIP_UINT16 GetTxnState() const { return m_nTxnState; }
 
-        inline SIP_UINT32 GetDurationExpired() const
-        {
-            return m_nDurationExpired;
-        }
+    inline SIP_UINT16 GetReTxCount() const { return m_nReTxCount; }
 
-        inline SIP_UINT32 GetMaxDuration() const
-        {
-            return m_nMaxDuration;
-        }
+    inline SIP_UINT32 GetDurationExpired() const { return m_nDurationExpired; }
 
-        inline SIP_UINT32 GetCurrentDuration() const
-        {
-            return m_nCurrentDuration;
-        }
+    inline SIP_UINT32 GetMaxDuration() const { return m_nMaxDuration; }
 
-        SIP_VOID* GetTimerId();
-        ISipUserData* GetUserData();
-        SIP_INT32 GetMsgSentProto();
-        inline const SipTxnTimerValues& GetSipTxnTimers() const
-        {
-            return objTxnTimerValues;
-        }
-        /* Fill Transaction Properties */
-        inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState)
-        {
-            m_nTxnState = nTxnState;
-        }
-        inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration)
-        {
-            m_nMaxDuration = nMaxDuration;
-        }
-        inline SIP_VOID SetCurrentDuration(SIP_UINT32 nCurDuration)
-        {
-            m_nCurrentDuration = nCurDuration;
-        }
-        inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId)
-        {
-            m_pvTimerId = pvTimerId;
-        }
-        SIP_BOOL SetUserData(ISipUserData* pUserData);
-        /* Increment Txn Count by one*/
-        inline SIP_VOID IncrTxnCount()
-        {
-            m_nReTxCount = m_nReTxCount + SIP_ONE;
-        }
+    inline SIP_UINT32 GetCurrentDuration() const { return m_nCurrentDuration; }
 
-        inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
-        {
-            m_nDurationExpired = m_nDurationExpired + nDuration;
-        }
+    SIP_VOID* GetTimerId();
+    ISipUserData* GetUserData();
+    SIP_INT32 GetMsgSentProto();
+    inline const SipTxnTimerValues& GetSipTxnTimers() const { return objTxnTimerValues; }
+    /* Fill Transaction Properties */
+    inline SIP_VOID SetTxnState(SIP_UINT16 nTxnState) { m_nTxnState = nTxnState; }
+    inline SIP_VOID SetMaxDuration(SIP_UINT32 nMaxDuration) { m_nMaxDuration = nMaxDuration; }
+    inline SIP_VOID SetCurrentDuration(SIP_UINT32 nCurDuration)
+    {
+        m_nCurrentDuration = nCurDuration;
+    }
+    inline SIP_VOID SetTimerId(SIP_VOID* pvTimerId) { m_pvTimerId = pvTimerId; }
+    SIP_BOOL SetUserData(ISipUserData* pUserData);
+    /* Increment Txn Count by one*/
+    inline SIP_VOID IncrTxnCount() { m_nReTxCount = m_nReTxCount + SIP_ONE; }
 
-        SIP_BOOL IsTxnTerminated();
+    inline SIP_VOID IncrDurationExpired(SIP_UINT32 nDuration)
+    {
+        m_nDurationExpired = m_nDurationExpired + nDuration;
+    }
 
-        SIP_VOID InitRetransmissionInfo();
+    SIP_BOOL IsTxnTerminated();
 
-        SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
+    SIP_VOID InitRetransmissionInfo();
+
+    SIP_VOID SetRespCode(SIP_UINT16 nRespCode);
 };
 
 /*Timer Callback API*/
@@ -333,4 +285,4 @@ SIP_VOID CbkTxnTimeout(SIP_VOID* pvobjTimeoutData, SIP_VOID* pvTimerId);
 
 SIP_VOID SipTxn_RemoveFromTxnPool(SipTxnKey* pTxnKey);
 
-#endif //__SIP_TXN_H__
+#endif  //__SIP_TXN_H__

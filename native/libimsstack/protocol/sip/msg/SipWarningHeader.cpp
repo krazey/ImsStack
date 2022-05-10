@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipWarningHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipWarningHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -30,39 +6,27 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
 #define MAX_WARN_LEN 12
 
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
 /*constructor*/
-SipWarningHeader::SipWarningHeader ()
-    : SipHeaderBase(SipHeaderBase::WARNING)
-    , m_nWarnCode(SIP_ZERO)
-    , m_pszWarnAgent(SIP_NULL)
-    , m_pszWarnText(SIP_NULL)
+SipWarningHeader::SipWarningHeader() :
+        SipHeaderBase(SipHeaderBase::WARNING),
+        m_nWarnCode(SIP_ZERO),
+        m_pszWarnAgent(SIP_NULL),
+        m_pszWarnText(SIP_NULL)
 {
 }
 
-SipWarningHeader::SipWarningHeader(const SipWarningHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_nWarnCode(objHeader.m_nWarnCode)
-    , m_pszWarnAgent(SipPf_Strdup(objHeader.m_pszWarnAgent))
-    , m_pszWarnText(SipPf_Strdup(objHeader.m_pszWarnText))
+SipWarningHeader::SipWarningHeader(const SipWarningHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_nWarnCode(objHeader.m_nWarnCode),
+        m_pszWarnAgent(SipPf_Strdup(objHeader.m_pszWarnAgent)),
+        m_pszWarnText(SipPf_Strdup(objHeader.m_pszWarnText))
 {
 }
 
 /*destructor*/
-SipWarningHeader::~SipWarningHeader ()
+SipWarningHeader::~SipWarningHeader()
 {
     if (m_pszWarnAgent != SIP_NULL)
     {
@@ -76,15 +40,14 @@ SipWarningHeader::~SipWarningHeader ()
     }
 }
 
-
 /*virtual methods*/
 /*Function for encoding of headers*/
 SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing Warn Agent or Warn Text", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing Warn Agent or Warn Text", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -131,7 +94,6 @@ SIP_BOOL SipWarningHeader::SetWarnText(const SIP_CHAR* pszWarnText)
     return SetCharVar(pszWarnText, m_pszWarnText);
 }
 
-
 /******************************************************************************
  * Function name      : SipWarningHeader::DecodeHdr
  *
@@ -145,8 +107,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -155,18 +116,15 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pszWarnCode = sipCreateString(pStartPt, pTempLoc);
     if (pszWarnCode == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -174,9 +132,8 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     delete[] pszWarnCode;
     if (m_nWarnCode > MAX_WARNCODE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:Warn code Value is not valid",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr:Warn code Value is not valid", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -186,18 +143,15 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     /*Find the endpoint of Warn Agent*/
     if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempLoc, SPACE) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Space Not Found",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "DecodeHdr: Space Not Found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     m_pszWarnAgent = sipCreateString(pStartPt, pTempLoc);
     if (m_pszWarnAgent == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -206,9 +160,8 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     m_pszWarnText = sipCreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -219,7 +172,7 @@ SIP_BOOL SipWarningHeader::IsValidHeader() const
 {
     if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
     {
-         return SIP_FALSE;
+        return SIP_FALSE;
     }
 
     return SIP_TRUE;

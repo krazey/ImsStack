@@ -7,10 +7,6 @@
 #include "msg/sip_msgutil.h"
 
 /****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
   Class Member Function Implementations
  *****************************************************************************/
 
@@ -23,12 +19,11 @@
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAllowEventsHeader::SipAllowEventsHeader()
-    : SipHeaderBase(SipHeaderBase::ALLOW_EVENTS)
-    , m_pEventTemplateList(SIP_NULL)
+SipAllowEventsHeader::SipAllowEventsHeader() :
+        SipHeaderBase(SipHeaderBase::ALLOW_EVENTS),
+        m_pEventTemplateList(SIP_NULL)
 {
 }
-
 
 /******************************************************************************
  * Function name  : SipAllowEventsHeader::SipAllowEventsHeader
@@ -39,16 +34,15 @@ SipAllowEventsHeader::SipAllowEventsHeader()
  *
  * Side Effects  : none
  *****************************************************************************/
-SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pEventTemplateList(SIP_NULL)
+SipAllowEventsHeader::SipAllowEventsHeader(const SipAllowEventsHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pEventTemplateList(SIP_NULL)
 {
     if (objHeader.m_pEventTemplateList != SIP_NULL)
     {
         m_pEventTemplateList = new SipParameterList(*(objHeader.m_pEventTemplateList));
     }
 }
-
 
 /******************************************************************************
  * Function name  : SipAllowEventsHeader::~SipAllowEventsHeader
@@ -88,8 +82,8 @@ SIP_BOOL SipAllowEventsHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParam
     SipPf_Strcpy(*ppCurrPos, pszValue);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    return (m_pEventTemplateList != SIP_NULL) ?
-        m_pEventTemplateList->EncodeList(ppCurrPos,SIP_DOT) : SIP_TRUE;
+    return (m_pEventTemplateList != SIP_NULL) ? m_pEventTemplateList->EncodeList(ppCurrPos, SIP_DOT)
+                                              : SIP_TRUE;
 }
 
 /******************************************************************************
@@ -140,8 +134,7 @@ SIP_BOOL SipAllowEventsHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
         /*Update the tempPos to the start of eventTamplate*/
         pTempPos = pTempPos + SIP_TWO;
-        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos,
-                pEndPt, SIP_DOT) == SIP_FALSE)
+        if (m_pEventTemplateList->DecUriSipParameterList(pTempPos, pEndPt, SIP_DOT) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr Prm Decoding Fail", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;

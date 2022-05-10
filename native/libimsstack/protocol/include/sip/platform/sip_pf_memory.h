@@ -1,64 +1,7 @@
-/******************************************************************************
- * Project Name    : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
- * Filename        : SipPf_memory.h
- * Purpose        :  memory Functions
- * Platform        : Windows OR Android
- * Author(s)        :
- * E-mail id.        :
- * Creation date     : may 14,2010
- *
- * Edit History             Modification                     Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * may 14,10                        0.0a            ---   Initial creation
- * July,21,2010        Giridhar        0.0b        ---            Coverted to cpp
-
- *****************************************************************************/
 #ifndef __SIP_PF_MEMORY_H__
 #define __SIP_PF_MEMORY_H__
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
+
 #include "sip_pf_datatypes.h"
-
-/****************************************************************************
-  Declaration of Functions
- *****************************************************************************/
-#if 0
-/******************************************************************************
- * Function name   :SipPf_Malloc
- * Description     :This function is use to allocate block of memory
- * Return type     :SIP_VOID
- * Arguments       :[IN]usMemBlockSize:Size of the memory block to be allocated
- * Side Effect     :None
- * NOTE            :None
- *******************************************************************************/
-
-SIP_VOID* SipPf_Malloc
-(
- SIP_SIZE_T usMemBlockSize
- );
-
-/******************************************************************************
- * Function name   :SipPf_MallocMemset
- * Description     :This function is use to allocate block of memory
- * Return type     :SIP_VOID
- * Arguments       :[IN]usMemBlockSize:Size of the memory block to be allocated
- * Side Effect     :None
- * NOTE            :None
- *******************************************************************************/
-
-SIP_VOID * SipPf_MallocMemset
-(
- SIP_SIZE_T usMemBlockSize
- );
-#endif
 
 /******************************************************************************
  * Function name   : SipPf_Memset
@@ -97,7 +40,6 @@ SIP_VOID SipPf_Memcpy(SIP_VOID* pvMem_Dest, const SIP_VOID* pvMem_Source, SIP_SI
  *****************************************************************************/
 SIP_UINT32 SipPf_Memcmp(const SIP_VOID* pvMem1, const SIP_VOID* pvMem2, SIP_SIZE_T nSize);
 
-
 /******************************************************************************
  * Function name   : SipPf_Free
  * Description     : This function is used to free memory block
@@ -135,6 +77,5 @@ SIP_VOID* SipPf_Realloc(SIP_VOID* pvMem_ptr, SIP_SIZE_T nNew_Size);
  *
  ****************************************************************************/
 SIP_VOID* SipPf_CleanMalloc(SIP_SIZE_T nMemBlockSize);
-
 
 #endif /*__SIP_PF_MEMORY_H__*/

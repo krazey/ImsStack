@@ -1,27 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipTimeStampHeader.h
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : giridhar.a@
- * Creation date       : July. 27,2010
- *
- * Edit HisAlertry         Modification description(s)
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Giridhar               0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipTimeStampHeader.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -30,32 +6,18 @@
 #include "SipConfiguration.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-
-/****************************************************************************
-  Enum Declaration
- *****************************************************************************/
-
-/****************************************************************************
-  Class Declaration Starts
- *****************************************************************************/
-
-
 /*constructor*/
-SipTimeStampHeader::SipTimeStampHeader()
-    : SipHeaderBase(SipHeaderBase::TIMESTAMP)
-    , m_pszTimeVal(SIP_NULL)
-    , m_pszDelay(SIP_NULL)
+SipTimeStampHeader::SipTimeStampHeader() :
+        SipHeaderBase(SipHeaderBase::TIMESTAMP),
+        m_pszTimeVal(SIP_NULL),
+        m_pszDelay(SIP_NULL)
 {
 }
 /*Copy Constructor*/
-SipTimeStampHeader::SipTimeStampHeader(const SipTimeStampHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_pszTimeVal(SipPf_Strdup(objHeader.m_pszTimeVal))
-    , m_pszDelay(SipPf_Strdup(objHeader.m_pszDelay))
+SipTimeStampHeader::SipTimeStampHeader(const SipTimeStampHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_pszTimeVal(SipPf_Strdup(objHeader.m_pszTimeVal)),
+        m_pszDelay(SipPf_Strdup(objHeader.m_pszDelay))
 {
 }
 /*destructor*/
@@ -68,7 +30,7 @@ SipTimeStampHeader::~SipTimeStampHeader()
     }
     if (m_pszDelay != SIP_NULL)
     {
-        delete[] m_pszDelay ;
+        delete[] m_pszDelay;
         m_pszDelay = SIP_NULL;
     }
 }
@@ -91,8 +53,8 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     /*Encoding of DIGIT*/
     if (m_pszTimeVal == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "EncodeHdr: Missing TimeStamp ", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "EncodeHdr: Missing TimeStamp ", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -123,7 +85,6 @@ SIP_BOOL SipTimeStampHeader::SetDelay(const SIP_CHAR* pszDelay)
     return SetCharVar(pszDelay, m_pszDelay);
 }
 
-
 /******************************************************************************
  * Function name      : SipTimeStampHeader::DecodeHdr
  *
@@ -137,13 +98,12 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
     if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "Empty buffer", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTempPre  = SIP_NULL;
+    SIP_CHAR* pTempPre = SIP_NULL;
     /*Find the LWS i.e. End of Transport*/
     if (sipFindLWS(pStartPt, pEndPt, &pTempPre) == SIP_FALSE)
     {
@@ -153,9 +113,8 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     m_pszTimeVal = sipCreateString(pStartPt, pTempPre);
     if (m_pszTimeVal == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "DecodeHdr:Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -167,9 +126,8 @@ SIP_BOOL SipTimeStampHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         m_pszDelay = sipCreateString(pStartPt, pEndPt);
         if (m_pszDelay == SIP_NULL)
         {
-            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                    "DecodeHdr:Memory Allocation Failed",
-                    SIP_ZERO, SIP_ZERO);
+            SIP_DEBUG_WARNING(
+                    ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
     }

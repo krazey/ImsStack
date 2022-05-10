@@ -1,28 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipToHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
@@ -33,14 +8,6 @@
 #include "msg/SipToHeader.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 /******************************************************************************
  * Function name      : SipToHeader::SipToHeader
  *
@@ -50,8 +17,8 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipToHeader::SipToHeader()
-    : SipNameAddrHeader(SipHeaderBase::TO)
+SipToHeader::SipToHeader() :
+        SipNameAddrHeader(SipHeaderBase::TO)
 {
 }
 
@@ -64,8 +31,8 @@ SipToHeader::SipToHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipToHeader::SipToHeader(const SipToHeader& objHeader)
-    : SipNameAddrHeader(objHeader)
+SipToHeader::SipToHeader(const SipToHeader& objHeader) :
+        SipNameAddrHeader(objHeader)
 {
 }
 /******************************************************************************
@@ -77,9 +44,7 @@ SipToHeader::SipToHeader(const SipToHeader& objHeader)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipToHeader::~SipToHeader()
-{
-}
+SipToHeader::~SipToHeader() {}
 
 /******************************************************************************
  * Function name      : SipToHeader::GetTag
@@ -128,17 +93,15 @@ SIP_BOOL SipToHeader::SetTag(SIP_CHAR* pszToTag)
 
     if (pParameters == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SetTag: Memory Allocation Failed",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODDECODER, "SetTag: Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_BOOL bStatus = pParameters->AddParam("tag", pszToTag);
     if (bStatus == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "SetTag: Set Tag failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SetTag: Set Tag failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
     return SIP_TRUE;

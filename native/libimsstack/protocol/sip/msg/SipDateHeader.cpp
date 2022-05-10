@@ -1,76 +1,22 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipDateHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           :
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "msg/SipDateHeader.h"
 #include "platform/sip_pf_string.h"
 #include "SipTrace.h"
 #include "sip_debug.h"
 #include "msg/sip_msgutil.h"
-//#include "msg/sip_dec.h"
 #include "platform/sip_pf_string.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-#define MAX_WEEK_LEN 3
+#define MAX_WEEK_LEN  3
 #define MAX_MONTH_LEN 3
-#define STR_GMT "GMT"
-#define DATE_VAL 31
+#define STR_GMT       "GMT"
+#define DATE_VAL      31
+#define YEAR_VAL      1000
 
-#define YEAR_VAL 1000
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-const SIP_UINT16 TIME_VAL=60;
+const SIP_UINT16 TIME_VAL = 60;
 const SIP_UINT16 HOUR_VAL = 24;
-const SIP_CHAR gaszWeekday[][MAX_WEEK_LEN + SIP_ONE]=
-{
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-    "Sat",
-    "Sun"
-};
-const SIP_CHAR gaszMonth[][MAX_MONTH_LEN + SIP_ONE] =
-{
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec"
-};
+const SIP_CHAR gaszWeekday[][MAX_WEEK_LEN + SIP_ONE] = {
+        "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const SIP_CHAR gaszMonth[][MAX_MONTH_LEN + SIP_ONE] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 /*****************************************************************************
  * Function name      : sipGetWeekDayType
@@ -83,12 +29,11 @@ const SIP_CHAR gaszMonth[][MAX_MONTH_LEN + SIP_ONE] =
  *****************************************************************************/
 SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
 {
-    switch(pszWeekDay[0])
+    switch (pszWeekDay[0])
     {
         case 'M':
         case 'm':
-            if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::MONDAY], MAX_WEEK_LEN) == 0)
+            if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::MONDAY], MAX_WEEK_LEN) == 0)
             {
                 return SipDateHeader::MONDAY;
             }
@@ -96,42 +41,39 @@ SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
 
         case 'T':
         case 't':
-            if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::TUESDAY], MAX_WEEK_LEN) == 0)
+            if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::TUESDAY], MAX_WEEK_LEN) == 0)
             {
                 return SipDateHeader::TUESDAY;
             }
-            else if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::THURSDAY], MAX_WEEK_LEN) == 0)
+            else if (SipPf_Strnicmp(
+                             pszWeekDay, gaszWeekday[SipDateHeader::THURSDAY], MAX_WEEK_LEN) == 0)
             {
                 return SipDateHeader::THURSDAY;
             }
             break;
         case 'W':
         case 'w':
-            if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::WEDNESDAY], MAX_WEEK_LEN) == 0)
+            if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::WEDNESDAY], MAX_WEEK_LEN) ==
+                    0)
             {
                 return SipDateHeader::WEDNESDAY;
             }
             break;
         case 'F':
         case 'f':
-            if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::FRIDAY], MAX_WEEK_LEN) == 0)
+            if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::FRIDAY], MAX_WEEK_LEN) == 0)
             {
                 return SipDateHeader::FRIDAY;
             }
             break;
         case 'S':
         case 's':
-            if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::SATURDAY], MAX_WEEK_LEN) == 0)
+            if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::SATURDAY], MAX_WEEK_LEN) == 0)
             {
                 return SipDateHeader::SATURDAY;
             }
-            else if (SipPf_Strnicmp(pszWeekDay,
-                    gaszWeekday[SipDateHeader::SUNDAY], MAX_WEEK_LEN) == 0)
+            else if (SipPf_Strnicmp(pszWeekDay, gaszWeekday[SipDateHeader::SUNDAY], MAX_WEEK_LEN) ==
+                    0)
             {
                 return SipDateHeader::SUNDAY;
             }
@@ -152,43 +94,37 @@ SIP_INT32 sipGetWeekDayType(SIP_CHAR* pszWeekDay)
  *****************************************************************************/
 SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
 {
-    switch(pszMonth[0])
+    switch (pszMonth[0])
     {
         case 'J':
         case 'j':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::JANUARY], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::JANUARY], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::JANUARY;
             }
-            else if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::JUNE], MAX_MONTH_LEN) == 0)
+            else if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::JUNE], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::JUNE;
             }
-            else if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::JULY], MAX_MONTH_LEN) == 0)
+            else if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::JULY], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::JULY;
             }
             break;
         case 'F':
         case 'f':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::FEBRUARY], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::FEBRUARY], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::FEBRUARY;
             }
             break;
         case 'M':
         case 'm':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::MARCH], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::MARCH], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::MARCH;
             }
-            else if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::MAY], MAX_MONTH_LEN) == 0)
+            else if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::MAY], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::MAY;
             }
@@ -196,21 +132,18 @@ SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
 
         case 'A':
         case 'a':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::APRIL], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::APRIL], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::APRIL;
             }
-            else if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::AUGUST], MAX_MONTH_LEN) == 0)
+            else if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::AUGUST], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::AUGUST;
             }
             break;
         case 's':
         case 'S':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::SEPTEMBER], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::SEPTEMBER], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::SEPTEMBER;
             }
@@ -218,24 +151,21 @@ SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
 
         case 'O':
         case 'o':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::OCTOBER], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::OCTOBER], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::OCTOBER;
             }
             break;
         case 'N':
         case 'n':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::NOVEMBER], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::NOVEMBER], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::NOVEMBER;
             }
             break;
         case 'D':
         case 'd':
-            if (SipPf_Strnicmp(pszMonth,
-                    gaszMonth[SipDateHeader::DECEMBER], MAX_MONTH_LEN) == 0)
+            if (SipPf_Strnicmp(pszMonth, gaszMonth[SipDateHeader::DECEMBER], MAX_MONTH_LEN) == 0)
             {
                 return SipDateHeader::DECEMBER;
             }
@@ -247,7 +177,6 @@ SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
     return SipDateHeader::UNKNOWN_MONTH;
 }
 
-
 /******************************************************************************
  * Function name      : SipDateHeader::SipDateHeader
  *
@@ -257,11 +186,15 @@ SIP_INT32 sipGetMonthType(SIP_CHAR* pszMonth)
  *
  * Side Effects      : none
  *****************************************************************************/
-SipDateHeader::SipDateHeader()
-    : SipHeaderBase(SipHeaderBase::DATE), m_nDate(SIP_ZERO)
-    , m_eMonth(SipDateHeader::UNKNOWN_MONTH), m_nYear(SIP_ZERO)
-    , m_nHour(SIP_ZERO), m_nMin(SIP_ZERO)
-    , m_nSec(SIP_ZERO), m_eWkDay(SipDateHeader::UNKNOWN_DAY)
+SipDateHeader::SipDateHeader() :
+        SipHeaderBase(SipHeaderBase::DATE),
+        m_nDate(SIP_ZERO),
+        m_eMonth(SipDateHeader::UNKNOWN_MONTH),
+        m_nYear(SIP_ZERO),
+        m_nHour(SIP_ZERO),
+        m_nMin(SIP_ZERO),
+        m_nSec(SIP_ZERO),
+        m_eWkDay(SipDateHeader::UNKNOWN_DAY)
 {
 }
 
@@ -274,9 +207,7 @@ SipDateHeader::SipDateHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipDateHeader::~SipDateHeader()
-{
-}
+SipDateHeader::~SipDateHeader() {}
 
 /******************************************************************************
  * Function name      : SipDateHeader::~SipDateHeader
@@ -287,16 +218,17 @@ SipDateHeader::~SipDateHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipDateHeader::SipDateHeader(const SipDateHeader& objHeader)
-    : SipHeaderBase(objHeader)
-    , m_nDate(objHeader.m_nDate)
-    , m_eMonth(objHeader.m_eMonth)
-    , m_nYear(objHeader.m_nYear), m_nHour(objHeader.m_nHour)
-    , m_nMin(objHeader.m_nMin), m_nSec(objHeader.m_nSec)
-    , m_eWkDay(objHeader.m_eWkDay)
+SipDateHeader::SipDateHeader(const SipDateHeader& objHeader) :
+        SipHeaderBase(objHeader),
+        m_nDate(objHeader.m_nDate),
+        m_eMonth(objHeader.m_eMonth),
+        m_nYear(objHeader.m_nYear),
+        m_nHour(objHeader.m_nHour),
+        m_nMin(objHeader.m_nMin),
+        m_nSec(objHeader.m_nSec),
+        m_eWkDay(objHeader.m_eWkDay)
 {
 }
-
 
 /******************************************************************************
  * Function name      : SipDateHeader::EncodeHdr
@@ -309,7 +241,7 @@ SipDateHeader::SipDateHeader(const SipDateHeader& objHeader)
  *****************************************************************************/
 SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (EncodeDate(ppCurrPos) ==  SIP_FALSE)
+    if (EncodeDate(ppCurrPos) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Date Encoding failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -317,7 +249,6 @@ SIP_BOOL SipDateHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP
 
     return SIP_TRUE;
 }
-
 
 SIP_BOOL SipDateHeader::EncodeWeek(SIP_CHAR** ppCurrPos)
 {
@@ -338,7 +269,7 @@ SIP_BOOL SipDateHeader::EncodeDate(SIP_CHAR** ppCurrPos)
 {
     SIP_CHAR* pMsgCurrPtr = *ppCurrPos;
 
-    //Date: Thu, 21 Feb 2002 13:02:03 GMT
+    // Date: Thu, 21 Feb 2002 13:02:03 GMT
     EncodeWeek(&pMsgCurrPtr);
 
     pMsgCurrPtr[0] = COMMA;
@@ -347,8 +278,7 @@ SIP_BOOL SipDateHeader::EncodeDate(SIP_CHAR** ppCurrPos)
     pMsgCurrPtr[0] = SPACE;
     pMsgCurrPtr++;
 
-    SipPf_Sprintf(pMsgCurrPtr, (SIP_CHAR*)"%02u %s %4u", m_nDate,
-            gaszMonth[m_eMonth], m_nYear);
+    SipPf_Sprintf(pMsgCurrPtr, (SIP_CHAR*)"%02u %s %4u", m_nDate, gaszMonth[m_eMonth], m_nYear);
     SipEnc_UpdateCurrPos(&pMsgCurrPtr);
 
     pMsgCurrPtr[0] = SPACE;
@@ -359,13 +289,12 @@ SIP_BOOL SipDateHeader::EncodeDate(SIP_CHAR** ppCurrPos)
     pMsgCurrPtr[0] = SPACE;
     pMsgCurrPtr++;
 
-    SipPf_Strcpy(pMsgCurrPtr,STR_GMT);
+    SipPf_Strcpy(pMsgCurrPtr, STR_GMT);
     SipEnc_UpdateCurrPos(&pMsgCurrPtr);
 
     *ppCurrPos = pMsgCurrPtr;
     return SIP_TRUE;
 }
-
 
 /******************************************************************************
  * Function name      : SipDateHeader::DecodeHdr
@@ -510,7 +439,7 @@ SIP_BOOL SipDateHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation failed", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    m_nHour= SipPf_Atoi(pszTempValue);
+    m_nHour = SipPf_Atoi(pszTempValue);
     delete[] pszTempValue;
 
     if (m_nHour >= HOUR_VAL)
@@ -582,7 +511,6 @@ SIP_BOOL SipDateHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     return SIP_TRUE;
 }
 
-
 /******************************************************************************
  * Function name      : SipDateHeader::SetDate
  *
@@ -601,7 +529,6 @@ SIP_BOOL SipDateHeader::SetDate(const SIP_UINT16 nDate)
     }
     return SIP_FALSE;
 }
-
 
 /******************************************************************************
  * Function name      : SipDateHeader::SetMonth
@@ -622,7 +549,6 @@ SIP_BOOL SipDateHeader::SetMonth(SIP_INT32 eMonth)
     return SIP_FALSE;
 }
 
-
 /******************************************************************************
  * Function name      : SipDateHeader::SetYear
  *
@@ -641,7 +567,6 @@ SIP_BOOL SipDateHeader::SetYear(const SIP_UINT16 nYear)
     }
     return SIP_FALSE;
 }
-
 
 /******************************************************************************
  * Function name      : SipDateHeader::SetHour
@@ -662,7 +587,6 @@ SIP_BOOL SipDateHeader::SetHour(const SIP_UINT16 nHour)
     return SIP_FALSE;
 }
 
-
 /******************************************************************************
  * Function name      : SipDateHeader::SetMinute
  *
@@ -680,7 +604,6 @@ SIP_BOOL SipDateHeader::SetMinute(const SIP_UINT16 nMin)
         return SIP_TRUE;
     }
     return SIP_FALSE;
-
 }
 
 /******************************************************************************
@@ -701,7 +624,6 @@ SIP_BOOL SipDateHeader::SetSecond(const SIP_UINT16 nSec)
     }
     return SIP_FALSE;
 }
-
 
 /******************************************************************************
  * Function name      : SipDateHeader::SetWkDay

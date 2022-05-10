@@ -1,28 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename              : SipFromHeader.cpp
- * Purpose               :
- * Platform              : Windows OR Android
- * Author(s)           : Saurabh Srivastava
- * E-mail id.            : saurabh31.srivastava@
- * Creation date       : July. 27, 2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * Month. Date,10        Name                 0.0a            Initial creation
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_string.h"
 #include "platform/sip_pf_memory.h"
@@ -33,14 +8,6 @@
 #include "msg/SipFromHeader.h"
 #include "msg/sip_msgutil.h"
 
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
-
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
-
 /******************************************************************************
  * Function name      : SipFromHeader::SipFromHeader
  *
@@ -50,8 +17,8 @@
  *
  * Side Effects      : none
  *****************************************************************************/
-SipFromHeader::SipFromHeader()
-    : SipNameAddrHeader(SipHeaderBase::FROM)
+SipFromHeader::SipFromHeader() :
+        SipNameAddrHeader(SipHeaderBase::FROM)
 {
 }
 
@@ -64,8 +31,8 @@ SipFromHeader::SipFromHeader()
  *
  * Side Effects      : none
  *****************************************************************************/
-SipFromHeader::SipFromHeader(const SipFromHeader& objHeader)
-    : SipNameAddrHeader(objHeader)
+SipFromHeader::SipFromHeader(const SipFromHeader& objHeader) :
+        SipNameAddrHeader(objHeader)
 {
 }
 /******************************************************************************

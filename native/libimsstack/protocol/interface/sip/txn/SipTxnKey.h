@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                 description
-   --------  --------------         ----------
-   20100000  syed.malgimani@        Created
-   20170110  vijay.nair@            Modified
-   </table>
-
-   Description
-
- */
-
 #ifndef __SIP_TXN_KEY_H__
 #define __SIP_TXN_KEY_H__
 
@@ -66,79 +53,28 @@ public:
 
     SIP_VOID Init(SipTxnKey* pTxnKey, SIP_UINT16* pnError);
 
-    inline void AddRule(SIP_UINT32 nRule)
-    {
-        m_nRules |= nRule;
-    }
-    inline void RemoveRule(SIP_UINT32 nRule)
-    {
-        m_nRules &= (~nRule);
-    }
+    inline void AddRule(SIP_UINT32 nRule) { m_nRules |= nRule; }
+    inline void RemoveRule(SIP_UINT32 nRule) { m_nRules &= (~nRule); }
     inline SIP_BOOL HasRule(SIP_UINT32 nRule) const
     {
         return ((m_nRules & nRule) != 0) ? SIP_TRUE : SIP_FALSE;
     }
-    inline SIP_UINT32 GetRules() const
-    {
-        return m_nRules;
-    }
-    inline SIP_VOID SetRules(SIP_UINT32 nRules)
-    {
-        m_nRules = nRules;
-    }
+    inline SIP_UINT32 GetRules() const { return m_nRules; }
+    inline SIP_VOID SetRules(SIP_UINT32 nRules) { m_nRules = nRules; }
 
-    inline SIP_CHAR* GetCallId() const
-    {
-        return m_pszCallId;
-    }
-    inline SIP_CHAR* GetFromTag() const
-    {
-        return m_pszFromTag;
-    }
-    inline SIP_CHAR* GetMethod() const
-    {
-        return m_pszMethod;
-    }
-    inline SipAddrSpec* GetRequestUri() const
-    {
-        return m_pRequestUri;
-    }
-    inline SIP_CHAR* GetToTag() const
-    {
-        return m_pszToTag;
-    }
-    inline SIP_CHAR* GetViaBranchParam() const
-    {
-        return m_pszViaBranchParam;
-    }
-    inline SIP_CHAR* GetViaHost() const
-    {
-        return m_pszViaHost;
-    }
-    inline SIP_UINT32 GetCSeqNum() const
-    {
-        return m_nCseqNum;
-    }
-    inline SIP_INT32 GetMsgType() const
-    {
-        return m_eMsgType;
-    }
-    inline SIP_UINT16 GetViaHostPort() const
-    {
-        return m_nViaHostPort;
-    }
-    inline SIP_UINT32 GetRSeq() const
-    {
-        return m_nRSeqNum;
-    }
-    inline SIP_UINT16 GetRespCode() const
-    {
-        return m_nRespCode;
-    }
-    inline SIP_INT32 GetTxnType() const
-    {
-        return m_eTxnType;
-    }
+    inline SIP_CHAR* GetCallId() const { return m_pszCallId; }
+    inline SIP_CHAR* GetFromTag() const { return m_pszFromTag; }
+    inline SIP_CHAR* GetMethod() const { return m_pszMethod; }
+    inline SipAddrSpec* GetRequestUri() const { return m_pRequestUri; }
+    inline SIP_CHAR* GetToTag() const { return m_pszToTag; }
+    inline SIP_CHAR* GetViaBranchParam() const { return m_pszViaBranchParam; }
+    inline SIP_CHAR* GetViaHost() const { return m_pszViaHost; }
+    inline SIP_UINT32 GetCSeqNum() const { return m_nCseqNum; }
+    inline SIP_INT32 GetMsgType() const { return m_eMsgType; }
+    inline SIP_UINT16 GetViaHostPort() const { return m_nViaHostPort; }
+    inline SIP_UINT32 GetRSeq() const { return m_nRSeqNum; }
+    inline SIP_UINT16 GetRespCode() const { return m_nRespCode; }
+    inline SIP_INT32 GetTxnType() const { return m_eTxnType; }
 
     SIP_VOID SetCallId(const SIP_CHAR* pszCallId);
     SIP_VOID SetFromTag(const SIP_CHAR* pszFromTag);
@@ -147,30 +83,12 @@ public:
     SIP_VOID SetToTag(const SIP_CHAR* pszToTag);
     SIP_VOID SetViaBranchParam(const SIP_CHAR* pszViaBranchParam);
     SIP_VOID SetViaHost(const SIP_CHAR* pszViaHost);
-    inline SIP_VOID SetCseqNum(SIP_UINT32 nCseqNum)
-    {
-        m_nCseqNum = nCseqNum;
-    }
-    inline SIP_VOID SetMsgType(SIP_INT32 eMsgType)
-    {
-        m_eMsgType = eMsgType;
-    }
-    inline SIP_VOID SetViaHostPort(SIP_UINT16 nViaHostPort)
-    {
-        m_nViaHostPort = nViaHostPort;
-    }
-    inline SIP_VOID SetRSeq(SIP_UINT32 nRseqNum)
-    {
-        m_nRSeqNum = nRseqNum;
-    }
-    inline SIP_VOID SetRespCode(SIP_UINT16 nStatusCode)
-    {
-        m_nRespCode = nStatusCode;
-    }
-    inline SIP_VOID SetTxnType(SIP_INT32 eTxnType)
-    {
-        m_eTxnType = eTxnType;
-    }
+    inline SIP_VOID SetCseqNum(SIP_UINT32 nCseqNum) { m_nCseqNum = nCseqNum; }
+    inline SIP_VOID SetMsgType(SIP_INT32 eMsgType) { m_eMsgType = eMsgType; }
+    inline SIP_VOID SetViaHostPort(SIP_UINT16 nViaHostPort) { m_nViaHostPort = nViaHostPort; }
+    inline SIP_VOID SetRSeq(SIP_UINT32 nRseqNum) { m_nRSeqNum = nRseqNum; }
+    inline SIP_VOID SetRespCode(SIP_UINT16 nStatusCode) { m_nRespCode = nStatusCode; }
+    inline SIP_VOID SetTxnType(SIP_INT32 eTxnType) { m_eTxnType = eTxnType; }
 
     SIP_INT32 CompareKeys(SipTxnKey* pGeneratedKey);
     SIP_INT32 CompareKeysForRPR(SipTxnKey* pGeneratedKey);
@@ -179,4 +97,4 @@ private:
     SIP_VOID Clear();
 };
 
-#endif //__SIP_TXN_KEY_H__
+#endif  //__SIP_TXN_KEY_H__

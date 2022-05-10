@@ -5,13 +5,12 @@
 
 class ISipLoggerUtil
 {
-    public:
+public:
+    ISipLoggerUtil(){};
+    virtual ~ISipLoggerUtil(){};
 
-        ISipLoggerUtil(){};
-        virtual ~ISipLoggerUtil(){};
-
-        virtual SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile,
-                SIP_UINT16 nLine, const SIP_CHAR* pszFormat, ...) = 0;
+    virtual SIP_VOID DumpLog(SIP_UINT32 nCategory, const SIP_CHAR* pszFile, SIP_UINT16 nLine,
+            const SIP_CHAR* pszFormat, ...) = 0;
 };
 
-#endif // __ISIPLOGGERUTIL_H__
+#endif  // __ISIPLOGGERUTIL_H__

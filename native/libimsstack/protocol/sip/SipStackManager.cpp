@@ -1,29 +1,3 @@
-/******************************************************************************
- * Project Name     : SIP_RTP
- * Group            : IP-CS [MSG-2]
- * Security         : Confidential
- *****************************************************************************/
-
-/******************************************************************************
-
- * Filename          : SipStackManager.cpp
- * Purpose           : This file define all the APIs for stack manager for accessing txn/transport layer
- * Platform          : Windows OR Android
- * Author(s)         :
- * E-mail id.        : name@
- * Creation date        : 29-Jul-2010
- *
- * Edit History             Modification                         Description(s)
- *
- * Date                Name            Version        Bug-ID        Description
- * ----------        ----------        -------        ------        -------------
- * 29 Jul 10        syed            0.0a                    Initial creation
- * 26 Apr 11        birender        --                        Control flow for txn and transport is modified
- *****************************************************************************/
-
-/*****************************************************************************
-  Header Inclusions
- *****************************************************************************/
 #include "sip_pf_datatypes.h"
 #include "platform/sip_pf_memory.h"
 #include "msg/sip_comdef.h"
@@ -36,20 +10,11 @@
 #include "SipUtil.h"
 #include "SIPMessageBuffer.h"
 
-//#include "ServiceTrace.h"
-//__IMS_TRACE_TAG_SIP__;
-
-/****************************************************************************
-  Macro Definitions
- *****************************************************************************/
 extern SIP_VOID sip_cbk_preProcessMessageSentByStack(IN SIP_VOID* pSipMsg,
         IN ISipUserData* pUserData);
 extern SIP_VOID sip_cbk_postProcessMessageSentByStack(IN SIP_VOID* pSipMsg,
         IN SIP_CHAR* pBuffer, IN SIP_UINT32 nBufferLen, IN ISipUserData* pUserData);
 
-/****************************************************************************
-  Class Member Function Implementations
- *****************************************************************************/
 static SipStackManager* gpStackMngr =  SIP_NULL;
 
 /******************************************************************************

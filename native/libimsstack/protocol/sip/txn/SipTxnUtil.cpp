@@ -1,16 +1,3 @@
-/*
-   Author
-   <table>
-   date      author                  description
-   --------  --------------          ----------
-    20100000  syed.malgimani@        Created
-   20170110  vijay.nair@             Modified
-   </table>
-
-   Description
-
- */
-
 #include "SipTrace.h"
 #include "sip_error.h"
 #include "sip_debug.h"
@@ -30,8 +17,8 @@ SipTxnUtil* SipTxnUtil::m_pSipTxnUtil = SIP_NULL;
 /*
  * Description        : This function is constructor for class SipTxnUtil
  */
-SipTxnUtil::SipTxnUtil()
-        : m_txnKeyList(SipVector<SipTxnKey*>())
+SipTxnUtil::SipTxnUtil() :
+        m_txnKeyList(SipVector<SipTxnKey*>())
 {
 }
 
@@ -40,11 +27,11 @@ SipTxnUtil::SipTxnUtil()
  */
 SipTxnUtil* SipTxnUtil::GetInstance()
 {
-     if (m_pSipTxnUtil == SIP_NULL)
-     {
-         m_pSipTxnUtil = new SipTxnUtil();
-     }
-     return m_pSipTxnUtil;
+    if (m_pSipTxnUtil == SIP_NULL)
+    {
+        m_pSipTxnUtil = new SipTxnUtil();
+    }
+    return m_pSipTxnUtil;
 }
 
 /*
@@ -54,8 +41,7 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
 {
     if (pUserTxnkey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::SearchTxnKey: Txn Object is Null",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnUtil::SearchTxnKey: Txn Object is Null",
                 SIP_ZERO, SIP_ZERO);
         return SIP_NULL;
     }
@@ -84,14 +70,13 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
         {
             pUserTxnkey->SetRules(nStoredRules);
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::SearchTxnKey: Element Retrieval from List Failed",
-                SIP_ZERO, SIP_ZERO);
+                    "SipTxnUtil::SearchTxnKey: Element Retrieval from List Failed", SIP_ZERO,
+                    SIP_ZERO);
             return SIP_NULL;
         }
 
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-            "SipTxnUtil::SearchTxnKey, CallID: %s, From Tag: %s.",
-            pStoredTxnKey->GetCallId(), pStoredTxnKey->GetFromTag());
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnUtil::SearchTxnKey, CallID: %s, From Tag: %s.",
+                pStoredTxnKey->GetCallId(), pStoredTxnKey->GetFromTag());
 
         if (pStoredTxnKey->CompareKeysForRPR(pUserTxnkey) != SIP_MATCHES)
         {
@@ -105,9 +90,8 @@ SipTxnKey* SipTxnUtil::SearchTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckRSeq)
 
     pUserTxnkey->SetRules(nStoredRules);
 
-    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::SearchTxnKey: Element Not Found in the List",
-                SIP_ZERO, SIP_ZERO);
+    SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnUtil::SearchTxnKey: Element Not Found in the List",
+            SIP_ZERO, SIP_ZERO);
 
     return SIP_NULL;
 }
@@ -133,8 +117,7 @@ SIP_BOOL SipTxnUtil::AddTxnKey(SipTxnKey* pTxnKey)
 {
     if (m_txnKeyList.Add(pTxnKey) < 0)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER,
-                "SipTxnUtil::AddTxnKey:Adding in list failed",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "SipTxnUtil::AddTxnKey:Adding in list failed",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -146,8 +129,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
 {
     if (pUserTxnkey == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::DeleteTxnKey: Txn Object is Null",
+        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN, "SipTxnUtil::DeleteTxnKey: Txn Object is Null",
                 SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
@@ -155,9 +137,8 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
     SIP_UINT32 nSize = m_txnKeyList.GetSize();
     if (nSize <= SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::DeleteTxnKey: List Size Zero",
-                SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODTXN, "SipTxnUtil::DeleteTxnKey: List Size Zero", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -179,8 +160,8 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
         {
             pUserTxnkey->SetRules(nStoredRules);
             SIP_DEBUG_WARNING(ESIPTRACE_MODTXN,
-                "SipTxnUtil::DeleteTxnKey: Element Retrieval from List Failed",
-                SIP_ZERO, SIP_ZERO);
+                    "SipTxnUtil::DeleteTxnKey: Element Retrieval from List Failed", SIP_ZERO,
+                    SIP_ZERO);
             return SIP_FALSE;
         }
 
@@ -189,7 +170,7 @@ SIP_BOOL SipTxnUtil::DeleteTxnKey(SipTxnKey* pUserTxnkey, SIP_BOOL bCheckToTag)
             sip_cbk_displayTxnKey((SIP_VOID*)pStoredTxnKey);
             pStoredTxnKey->SipDelete();
             m_txnKeyList.RemoveAt(nIndex - SIP_ONE);
-            //Check again if further elements matches for the same txn key.
+            // Check again if further elements matches for the same txn key.
             nIndex--;
             nSize--;
         }
