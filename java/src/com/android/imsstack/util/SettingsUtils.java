@@ -4,7 +4,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.net.Uri;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
@@ -81,25 +80,6 @@ public final class SettingsUtils {
     public static int getLocationMode(ContentResolver cr) {
         return Settings.Secure.getInt(cr, Settings.Secure.LOCATION_MODE,
                 Settings.Secure.LOCATION_MODE_OFF);
-    }
-
-    /**
-         *0 = Wifi -> 3G : Not allowed
-         *1 = Wifi -> 3G : Ask for access
-         *2 = Wifi -> 3G : Access allowed
-         */
-    public static int getPreferredNetworkMode(ContentResolver cr) {
-        return Settings.Global.getInt(cr,
-            Settings.Global.PREFERRED_NETWORK_MODE +
-                SubscriptionManager.getDefaultSubscriptionId(),
-            MSimUtils.PREFERRED_NETWORK_MODE);
-    }
-
-    public static int getPreferredNetworkMode(ContentResolver cr, int slotId) {
-        int subId = MSimUtils.getSubId(slotId);
-        return Settings.Global.getInt(cr,
-            Settings.Global.PREFERRED_NETWORK_MODE + subId,
-            MSimUtils.PREFERRED_NETWORK_MODE);
     }
 
     public static int getTtyMode(ContentResolver cr) {

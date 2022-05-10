@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.service;
 
 import android.content.ContentResolver;
@@ -5,61 +21,38 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.provider.Settings;
-import android.telephony.RadioAccessFamily;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.RegiProcessAgent;
-import com.android.imsstack.core.agents.agentif.IRegiProcess;
-import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SettingsUtils;
-import com.android.internal.telephony.RILConstants;
 
+/** this class is the interface for the call setting */
 public class CallSettingService implements ICallSettingService {
-
-    public final static class VoWIFI {
-        // ATT only feature
-        public final static Uri CONTENT_URI_AID = Uri.parse(
-            "content://com.xxx.wfcprovider/wfcconfig_att");
-        public final static String KEY_ADDRESSID = "AID";
-
-        public final static int MODE_WIFI_ONLY = 0;
-        public final static int MODE_CELL_PREF = 1;
-        public final static int MODE_WIFI_PREF = 2;
-
-        public final static int MODE_ROAMING_CELL_PREF = 0;
-        public final static int MODE_ROAMING_WIFI_PREF = 1;
-    }
-
     // constants
-    private final static int DISABLED = 0;
-    private final static int ENABLED = 1;
-
+    private static final int DISABLED = 0;
+    private static final int ENABLED = 1;
     private ContentObserver mVoLTESettingObserver = null;
     private ContentObserver mVoWIFISettingObserver = null;
     private ContentObserver mMobileDataSettingObserver = null;
@@ -68,11 +61,9 @@ public class CallSettingService implements ICallSettingService {
     private ContentObserver mVoLTERoamingObserver = null;
     private ContentObserver mVoWIFIPreferenceObserver = null;
     private ContentObserver mVoWIFIRoamingSetObserver = null;
-    private ContentObserver mNetworkModeSettingObserver = null;
     private ContentObserver mDataRoamingSettingObserver = null;
     private ContentObserver mRttModeSettingObserver = null;
     private ContentObserver mVoWIFINetworkPreferenceObserver = null;
-
     private RegistrantList mVoLTESettingRegistrants = new RegistrantList();
     private RegistrantList mVoWIFISettingRegistrants = new RegistrantList();
     private RegistrantList mVideoCallSettingRegistrants = new RegistrantList();
@@ -81,12 +72,9 @@ public class CallSettingService implements ICallSettingService {
     private RegistrantList mVoWIFIPreferenceRegistrants = new RegistrantList();
     private RegistrantList mVoWIFIRoamingSetRegistrants = new RegistrantList();
     private RegistrantList mMobileDataSettingRegistrants = new RegistrantList();
-    private RegistrantList mNetworkModeSettingRegistrants = new RegistrantList();
     private RegistrantList mDataRoamingSettingRegistrants = new RegistrantList();
     private RegistrantList mRttModeSettingRegistrants = new RegistrantList();
     private RegistrantList mVoWIFINetworkPreferenceRegistrants = new RegistrantList();
-
-    private SubscriptionListenerProxy mSubscriptionListener = null;
     private IVoLteService mVoLteService = null;
     private boolean mVoLTESet = false;
     private boolean mVoWIFISet = false;
@@ -100,11 +88,9 @@ public class CallSettingService implements ICallSettingService {
     private int mVoWIFINetworkPreference = -1; // 0: wifi only /1: cellular pref. /2: wifi pref.
     private int mNetworkMode = -1;
     private int mRttMode = -1;
-
     public CallSettingService() {
     }
 
-    // IService interface {
     @Override
     public boolean start(IVoLteService voLteService) {
         mVoLteService = voLteService;
@@ -117,31 +103,12 @@ public class CallSettingService implements ICallSettingService {
 
         AgentFactory.setAgentForMIms(this, AgentFactory.CALL_SETTING, getSlotId());
 
-        if (mSubscriptionListener == null) {
-            mSubscriptionListener = new SubscriptionListenerProxy();
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-
-            if (subs != null) {
-                subs.addListener(mSubscriptionListener);
-            }
-        }
-
         return true;
     }
 
     @Override
     public void cleanup(Context context) {
         ImsLog.d(getSlotId(), "");
-
-        if (mSubscriptionListener != null) {
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
-
-            if (subs != null) {
-                subs.removeListener(mSubscriptionListener);
-            }
-
-            mSubscriptionListener = null;
-        }
 
         unregisterObserver(mVoLTESettingObserver);
         mVoLTESettingObserver = null;
@@ -157,8 +124,6 @@ public class CallSettingService implements ICallSettingService {
         mVoWIFIPreferenceObserver = null;
         unregisterObserver(mVoWIFIRoamingSetObserver);
         mVoWIFIRoamingSetObserver = null;
-        unregisterObserver(mNetworkModeSettingObserver);
-        mNetworkModeSettingObserver = null;
         unregisterObserver(mDataRoamingSettingObserver);
         mDataRoamingSettingObserver = null;
         unregisterObserver(mRttModeSettingObserver);
@@ -170,9 +135,7 @@ public class CallSettingService implements ICallSettingService {
     @Override
     public void update(Context context) {
     }
-    // }
 
-    // IAgent interface {
     @Override
     public void init(Context context) {
     }
@@ -180,9 +143,7 @@ public class CallSettingService implements ICallSettingService {
     @Override
     public void cleanup() {
     }
-    // }
 
-    // ISystemAPIWifiCalling interface {
     @Override
     public int isWifiCallingEnabled4Sys() {
         return isVoWIFIEnabled() ? 1 : 0;
@@ -205,7 +166,6 @@ public class CallSettingService implements ICallSettingService {
                 "",
                 getSlotId());
     }
-    // }
 
     @Override
     public boolean isVoLTEUsedForHDVoice() {
@@ -286,7 +246,6 @@ public class CallSettingService implements ICallSettingService {
         registerVideoCallRoamingSetObserver();
     }
 
-
     @Override
     public void registerForVoLTESetChanged(Handler h, int what, Object obj) {
         if (h != null) {
@@ -330,15 +289,6 @@ public class CallSettingService implements ICallSettingService {
         }
 
         registerVoWIFIRoamingSetObserver();
-    }
-
-    @Override
-    public void registerForNetworkModeSettingChanged(Handler h, int what, Object obj) {
-        if (h != null) {
-            mNetworkModeSettingRegistrants.add(new Registrant(h, what, obj));
-        }
-
-        registerNetworkModeSettingObserver();
     }
 
     @Override
@@ -466,18 +416,6 @@ public class CallSettingService implements ICallSettingService {
     }
 
     @Override
-    public void unregisterForNetworkModeSettingChanged(Handler h) {
-        if (h != null) {
-            mNetworkModeSettingRegistrants.remove(h);
-        }
-
-        if (mNetworkModeSettingRegistrants.size() == 0) {
-            unregisterObserver(mNetworkModeSettingObserver);
-            mNetworkModeSettingObserver = null;
-        }
-    }
-
-    @Override
     public void unregisterForDataRoamingSettingChanged(Handler h) {
         if (h != null) {
             mDataRoamingSettingRegistrants.remove(h);
@@ -515,15 +453,7 @@ public class CallSettingService implements ICallSettingService {
 
     @Override
     public boolean isNetworkMode3GOnly() {
-        boolean networkMode3GOnly = false;
-        int networkMode = MSimUtils.getNetworkMode(getContext().getContentResolver(), getSlotId());
-
-        if (networkMode < TelephonyManager.NETWORK_MODE_LTE_CDMA_EVDO) {
-            networkMode3GOnly = true;
-        }
-
-        ImsLog.d(getSlotId(), "NetworkMode 3G only : " + networkMode3GOnly);
-        return networkMode3GOnly;
+        return false;
     }
 
     private void registerMobileDataSettingObserver() {
@@ -591,7 +521,6 @@ public class CallSettingService implements ICallSettingService {
 
         onVideoCallRoamingSetChanged();
     }
-
 
     private void registerVoLTESetObserver() {
         ImsLog.d(getSlotId(), "");
@@ -742,29 +671,6 @@ public class CallSettingService implements ICallSettingService {
         notifySystemEventForVoWIFIRoaming();
     }
 
-    private void registerNetworkModeSettingObserver() {
-        ImsLog.d(getSlotId(), "");
-
-        if (mNetworkModeSettingObserver != null) {
-            ImsLog.d(getSlotId(), "Observer: network mode is already registered");
-            return;
-        }
-
-        mNetworkModeSettingObserver = new ContentObserver(new Handler()) {
-            @Override
-            public void onChange(boolean bChange) {
-                super.onChange(bChange);
-                onNetworkModeChanged();
-            }
-        };
-
-        SettingsUtils.registerObserverForGlobal(getContext().getContentResolver(),
-                Settings.Global.PREFERRED_NETWORK_MODE + MSimUtils.getSubId(getSlotId()),
-                mNetworkModeSettingObserver);
-
-        onNetworkModeChanged();
-    }
-
     private void registerDataRoamingSettingObserver() {
         ImsLog.d(getSlotId(), "");
 
@@ -833,7 +739,7 @@ public class CallSettingService implements ICallSettingService {
 
         if (uri != null) {
             try {
-               getContext().getContentResolver().registerContentObserver(uri, true,
+                getContext().getContentResolver().registerContentObserver(uri, true,
                         mVoWIFINetworkPreferenceObserver);
             } catch (Exception e) {
                 ImsLog.e(getSlotId(), e.toString());
@@ -852,21 +758,12 @@ public class CallSettingService implements ICallSettingService {
             return isVoLTEEnabled();
         }
 
-        //if (OperatorInfo.isKrOpen() && ImsProperties.MODEL.contains("G910N")) {
         if (OperatorInfo.isKrOpen()) {
             return true;
         }
 
         ContentResolver cr = getContext().getContentResolver();
         boolean bVolteRoamingEnabled = SettingsUtils.isRoamingHDVoiceEnabled(cr);
-
-        if (isSupport5G()) {
-            if (ImsGlobal.isOperator(getSlotId(), "SKT")) {
-                return bVolteRoamingEnabled;
-            }
-            return true;
-        }
-
         boolean bLTERoamingEnabled = SettingsUtils.isDataLteRoaming(cr);
 
         ImsLog.d(getSlotId(), "HDVoiceRoamingSetting - HDVoiceEnabled : "
@@ -905,10 +802,7 @@ public class CallSettingService implements ICallSettingService {
             bVolteEnable = true;
         }
 
-        //KT MQI (Mobile Quality Information) API
         ImsLog.d(getSlotId(), "KT MQI - VoLTE Setting : " + (bVolteEnable ? "On" : "Off"));
-        //setMobileQualityInfo(1, bVolteEnable ? 1 : 0, "");
-
         return bVolteEnable;
     }
 
@@ -920,7 +814,6 @@ public class CallSettingService implements ICallSettingService {
         return SettingsUtils.getWFCImsMode(getContext(), getSlotId());
     }
 
-    // Sprint ONLY {
     private Uri getCarrierDBUriForVoWIFI() {
         if (ImsGlobal.isOperator(getSlotId(), "SPR")) {
             return Uri.parse("content://com.android.imsstack.node/ims_node");
@@ -937,13 +830,12 @@ public class CallSettingService implements ICallSettingService {
             String networkPreference = DBUtils.CP.getString(getContext().getContentResolver(),
                                     uri, selection, "value", "WIFI");
 
-            return ("CELL".equalsIgnoreCase(networkPreference) ?
-                        ImsEventDef.MODE_CELLULAR_PREFERRED: ImsEventDef.MODE_WFC_PREFERRED);
+            return ("CELL".equalsIgnoreCase(networkPreference)
+                    ? ImsEventDef.MODE_CELLULAR_PREFERRED : ImsEventDef.MODE_WFC_PREFERRED);
         }
 
         return ImsEventDef.MODE_WFC_PREFERRED;
     }
-    // }
 
     private String getVoWIFIAddressID() {
         String value = null;
@@ -991,10 +883,6 @@ public class CallSettingService implements ICallSettingService {
         return ImsEventDef.IMS_RTT_MODE_NONE;
     }
 
-    private boolean isSupport5G() {
-        return (RILConstants.PREFERRED_NETWORK_MODE == RILConstants.NETWORK_MODE_NR_LTE_GSM_WCDMA);
-    }
-
     private boolean isMobileDataEnabled() {
         return SettingsUtils.isMobileDataEnabled(getContext().getContentResolver());
     }
@@ -1004,10 +892,7 @@ public class CallSettingService implements ICallSettingService {
     }
 
     private boolean isNetworkModeSupportsCDMA(int nNetworkMode) {
-        int nwModeRaf = RadioAccessFamily.getRafFromNetworkType(nNetworkMode);
-        return (((nwModeRaf & RadioAccessFamily.RAF_IS95A) == RadioAccessFamily.RAF_IS95A)
-                || ((nwModeRaf & RadioAccessFamily.RAF_IS95B) == RadioAccessFamily.RAF_IS95B)
-                || ((nwModeRaf & RadioAccessFamily.RAF_1xRTT) == RadioAccessFamily.RAF_1xRTT));
+        return false;
     }
 
     private boolean isVoLTEEnabled() {
@@ -1071,11 +956,9 @@ public class CallSettingService implements ICallSettingService {
         ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
 
         if (system != null) {
-            system.notifyEvent(
-                    ImsEventDef.IMS_EVENT_MOBILE_DATA_SETTING,
-                    mMobileDataEnabled ?
-                    ImsEventDef.IMS_MOBILE_DATA_SETTING_ON :
-                    ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
+            system.notifyEvent(ImsEventDef.IMS_EVENT_MOBILE_DATA_SETTING, mMobileDataEnabled
+                        ? ImsEventDef.IMS_MOBILE_DATA_SETTING_ON :
+                        ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
         }
     }
 
@@ -1237,7 +1120,7 @@ public class CallSettingService implements ICallSettingService {
 
         if (system != null) {
             system.notifyEvent(ImsEventDef.IMS_EVENT_WFC_SETTING_CHANGED,
-                isVoWIFIEnabled() ? 1 : 0, mVoWIFINetworkPreference);
+                    isVoWIFIEnabled() ? 1 : 0, mVoWIFINetworkPreference);
         }
     }
 
@@ -1255,11 +1138,11 @@ public class CallSettingService implements ICallSettingService {
 
         mMobileDataSettingRegistrants.notifyResult(Boolean.valueOf(enabled));
 
-        DBUtils.CP.putString(getContext().getContentResolver()
-                        , ProviderInterface.Setting.CONTENT_URI
-                        , ProviderInterface.Setting.MOBILE_DATA_SETTING
-                        , enabled ? "true" : "false"
-                        , ImsDbController.selectForSlot(getSlotId()));
+        DBUtils.CP.putString(getContext().getContentResolver(),
+                ProviderInterface.Setting.CONTENT_URI,
+                ProviderInterface.Setting.MOBILE_DATA_SETTING,
+                enabled ? "true" : "false",
+                ImsDbController.selectForSlot(getSlotId()));
 
         notifySystemEventForMobileData();
     }
@@ -1284,15 +1167,14 @@ public class CallSettingService implements ICallSettingService {
 
         mVideoCallSettingRegistrants.notifyResult(mVideoCallSet);
 
-        DBUtils.CP.putString(getContext().getContentResolver()
-                        , ProviderInterface.Setting.CONTENT_URI
-                        , ProviderInterface.Setting.VIDEO_SETTING
-                        , mVideoCallSet ? "true" : "false"
-                        , ImsDbController.selectForSlot(getSlotId()));
+        DBUtils.CP.putString(getContext().getContentResolver(),
+                ProviderInterface.Setting.CONTENT_URI,
+                ProviderInterface.Setting.VIDEO_SETTING,
+                mVideoCallSet ? "true" : "false",
+                ImsDbController.selectForSlot(getSlotId()));
 
         notifySystemEventForVideoCall();
     }
-
 
     private void onVideoCallRoamingSetChanged() {
         boolean setValue = isVideoCallRoamingSetEnabled();
@@ -1315,17 +1197,17 @@ public class CallSettingService implements ICallSettingService {
 
         mVideoCallRoamingSettingRegistrants.notifyResult(mVideoCallRoamingSet);
 
-        DBUtils.CP.putString(getContext().getContentResolver()
-                            , ProviderInterface.Setting.CONTENT_URI
-                            , ProviderInterface.Setting.VIDEO_SETTING
-                            , mVideoCallRoamingSet ? "true" : "false"
-                            , ImsDbController.selectForSlot(getSlotId()));
+        DBUtils.CP.putString(getContext().getContentResolver(),
+                ProviderInterface.Setting.CONTENT_URI,
+                ProviderInterface.Setting.VIDEO_SETTING,
+                mVideoCallRoamingSet ? "true" : "false",
+                ImsDbController.selectForSlot(getSlotId()));
 
         notifySystemEventForVideoCallRoaming();
     }
 
     private boolean isRoaming() {
-        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
+        IDCNetWatcher dcnw = (IDCNetWatcher) DCFactory.getDC(
                 DCFactory.NETWORK_WATCHER, getSlotId());
         return (dcnw != null) ? dcnw.isRoaming() : false;
     }
@@ -1335,7 +1217,6 @@ public class CallSettingService implements ICallSettingService {
         int nEvent = ImsEventDef.IMS_EVENT_VOLTE_SETTING;
         int nParam1 = -1;
 
-        // variation according to operators -- start
         if (ImsGlobal.isOperator(getSlotId(), "KT")) {
             bValue = getVoLTESetForKT();
         } else if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
@@ -1344,7 +1225,6 @@ public class CallSettingService implements ICallSettingService {
         } else {
             bValue = isVoLTEEnabled();
         }
-        // end
 
         switch(nEvent) {
             case ImsEventDef.IMS_EVENT_VOIP_SETTING:
@@ -1371,15 +1251,14 @@ public class CallSettingService implements ICallSettingService {
 
         mVoLTESet = bValue;
 
-        // send Registrants
         mVoLTESettingRegistrants.notifyResult(mVoLTESet);
 
         if (ImsGlobal.isOperator(getSlotId(), "VZW")) {
-            DBUtils.CP.putString(getContext().getContentResolver()
-                                , ProviderInterface.Setting.CONTENT_URI
-                                , ProviderInterface.Setting.VOIP_SETTING
-                                , mVoLTESet ? "true" : "false"
-                                , ImsDbController.selectForSlot(getSlotId()));
+            DBUtils.CP.putString(getContext().getContentResolver(),
+                    ProviderInterface.Setting.CONTENT_URI,
+                    ProviderInterface.Setting.VOIP_SETTING,
+                    mVoLTESet ? "true" : "false",
+                    ImsDbController.selectForSlot(getSlotId()));
         }
 
         ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
@@ -1423,40 +1302,6 @@ public class CallSettingService implements ICallSettingService {
         mVoWIFISettingRegistrants.notifyResult(mVoWIFISet);
 
         notifySystemEventForVoWIFI();
-    }
-
-    private void onNetworkModeChanged() {
-        int currNetworkMode = MSimUtils.getNetworkMode(
-                getContext().getContentResolver(), getSlotId());
-
-        ImsLog.i(getSlotId(), "NetworkMode : " + mNetworkMode + " >> " + currNetworkMode);
-
-        ISystem system = SystemInterface.getInstance().getSystem(getSlotId());
-
-        if (system != null) {
-            if (mNetworkMode != currNetworkMode) {
-                mNetworkMode = currNetworkMode;
-
-                if (isRoaming()) {
-                    if (ImsGlobal.isCountry(getSlotId(), "KR")
-                            && isNetworkMode3GOnly(mNetworkMode)) {
-                        IRegiProcess rpa = RegiProcessAgent.getInstance(getSlotId());
-                        if (rpa != null && rpa.isRegistered()) {
-                            system.notifyEvent(ImsEventDef.IMS_EVENT_REG_CONTROL,
-                                ImsEventDef.IMS_REG_CONTROL_STOP, 0);
-                        }
-                    }
-                }
-
-                system.notifyEvent(ImsEventDef.IMS_EVENT_NETWORK_MODE_SETTING,
-                        isNetworkMode3GOnly(mNetworkMode) ? ImsEventDef.IMS_NETWORK_MODE_OFF
-                        : ImsEventDef.IMS_NETWORK_MODE_ON, 0);
-
-                system.notifyEvent(ImsEventDef.IMS_EVENT_NETWORK_MODE_SUPPORTS_CDMA,
-                    (isNetworkModeSupportsCDMA(mNetworkMode) ? ImsEventDef.IMS_CDMA_SUPPORTED
-                        : ImsEventDef.IMS_CDMA_NOT_SUPPORTED), 0);
-            }
-        }
     }
 
     private void onDataRoamingSettingChanged() {
@@ -1523,14 +1368,13 @@ public class CallSettingService implements ICallSettingService {
 
             if (mVoLTESet != voLteSet) {
                 mVoLTESet = voLteSet;
-                // send Registrants
                 mVoLTESettingRegistrants.notifyResult(mVoLTESet);
             }
         }
     }
 
     private void updateForVoWIFIRoamingSetting(boolean roaming) {
-        if (mVoWIFIRoamingSetObserver == null ) {
+        if (mVoWIFIRoamingSetObserver == null) {
             return;
         }
 
@@ -1603,32 +1447,17 @@ public class CallSettingService implements ICallSettingService {
         return (mVoLteService != null) ? mVoLteService.getSlotID() : (-1);
     }
 
-    private void updateObserverForCurrentUser(int subId, int phoneId) {
-        // Network mode settings
-        if (mNetworkModeSettingObserver != null) {
-            ImsLog.d(getSlotId(), "Observer: network mode");
+    /** this class is the vowifi related data */
+    public static final class VoWIFI {
+        public static final  Uri CONTENT_URI_AID = Uri.parse(
+                "content://com.xxx.wfcprovider/wfcconfig_att");
+        public static final  String KEY_ADDRESSID = "AID";
 
-            unregisterObserver(mNetworkModeSettingObserver);
-            SettingsUtils.registerObserverForGlobal(
-                    getContext().getContentResolver(),
-                    Settings.Global.PREFERRED_NETWORK_MODE + subId,
-                    mNetworkModeSettingObserver);
-        }
-    }
+        public static final int MODE_WIFI_ONLY = 0;
+        public static final int MODE_CELL_PREF = 1;
+        public static final int MODE_WIFI_PREF = 2;
 
-    private final class SubscriptionListenerProxy extends SubscriptionListener {
-        @Override
-        public void onCarrierConfigChanged(int phoneId, int subId) {
-            if (getSlotId() != phoneId) {
-                return;
-            }
-
-            ImsLog.i(getSlotId(), "onCarrierConfigChanged :: subId="
-                    + subId + ", phoneId=" + phoneId);
-
-            if (subId != MSimUtils.INVALID_SUB_ID) {
-                updateObserverForCurrentUser(subId, phoneId);
-            }
-        }
+        public static final int MODE_ROAMING_CELL_PREF = 0;
+        public static final int MODE_ROAMING_WIFI_PREF = 1;
     }
 }

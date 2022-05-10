@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents.dcm;
 
 import android.content.Context;
@@ -11,10 +27,11 @@ import com.android.imsstack.core.agents.dcmif.EApnReqState;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.EIpVersion;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.util.ImsLog;
 
+/**
+ * this is data connection class for xcap
+ */
 public class ApnXcap extends Apn {
 
     // Constants--------------------------------------------------
@@ -40,18 +57,18 @@ public class ApnXcap extends Apn {
 
     @Override
     public boolean connect() {
-        if (isApnEmployed() == false) {
-            ImsLog.w(nSlotId, "apn is not employed");
+        if (!isApnEmployed()) {
+            ImsLog.w(mSlotId, "apn is not employed");
             return false;
         }
 
         if (mAPNState == EApnReqState.APN_REQUEST_DONE) {
-            ImsLog.i(nSlotId, "apn request is already done");
+            ImsLog.i(mSlotId, "apn request is already done");
             return true;
         }
 
         if (mESMCausePermanentFailure) {
-            ImsLog.w(nSlotId, "permanent apn block because of esm until next bootup.");
+            ImsLog.w(mSlotId, "permanent apn block because of esm until next bootup.");
             return false;
         }
 
@@ -65,7 +82,7 @@ public class ApnXcap extends Apn {
     @Override
     public void disconnect(int nTimeAfterRecover) {
         if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
-            ImsLog.w(nSlotId, "apn request is not done");
+            ImsLog.w(mSlotId, "apn request is not done");
             return;
         }
 
@@ -81,12 +98,12 @@ public class ApnXcap extends Apn {
             setDataState(dataState);
         }
 
-        sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
+        sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
     }
 
     // Private/Protected methods ---------------------------------
     protected void initializeApn() {
-        eType = EApnType.XCAP;
+        mType = EApnType.XCAP;
 
         registerHandler(EVENT_NETWORK_AVAILABLE,
                 new Handle_EVENT_NETWORK_AVAILABLE());
@@ -128,24 +145,24 @@ public class ApnXcap extends Apn {
             int curDataState = TelephonyManager.DATA_CONNECTED;
 
             if (mAPNState != EApnReqState.APN_REQUEST_DONE) {
-                ImsLog.w(nSlotId, "apn is not requested, ignore event");
+                ImsLog.w(mSlotId, "apn is not requested, ignore event");
                 return;
             }
 
             // Check to get Ipv6
             if (mApnProtocol != ApnSetting.PROTOCOL_IP) {
-                if (procWaitingLocalAddressForIpv6() == true) {
-                    ImsLog.i("can't obtain IPv6, wait " +
-                            OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL + "ms");
+                if (procWaitingLocalAddressForIpv6()) {
+                    ImsLog.i("can't obtain IPv6, wait "
+                            + OBTAIN_IPV6_ADDRESS_DELAY_INTERVAL + "ms");
                     return;
                 }
             }
 
             if (mDataState != curDataState) {
-                ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + curDataState);
+                ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
-                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_CONNECTED);
+                sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_CONNECTED);
             }
         }
     }
@@ -160,11 +177,11 @@ public class ApnXcap extends Apn {
             }
 
             if (mDataState != curDataState) {
-                ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + curDataState);
+                ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + curDataState);
 
                 setDataState(curDataState);
 
-                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_DISCONNECTED);
+                sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_DISCONNECTED);
 
                 disconnect(0);
             }
@@ -174,16 +191,16 @@ public class ApnXcap extends Apn {
     private class Handle_EVENT_IP_CHANGED implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
-            ImsLog.i(nSlotId, "ip is changed");
+            ImsLog.i(mSlotId, "ip is changed");
 
             if (getDataState() == TelephonyManager.DATA_CONNECTED) {
 
                 if (!isIPChanged()) {
-                    ImsLog.i(nSlotId, "ip is changed but ip address is same");
+                    ImsLog.i(mSlotId, "ip is changed but ip address is same");
                     return;
                 }
 
-                sendDataStateUpdateMessage(eType, EDataState.DATA_STATE_IP_CHANGED);
+                sendDataStateUpdateMessage(mType, EDataState.DATA_STATE_IP_CHANGED);
                 return;
             }
 
@@ -201,7 +218,7 @@ public class ApnXcap extends Apn {
     private class Handle_EVENT_WAITING_LOCAL_ADDRESS_IPV6 implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
-            ImsLog.i(nSlotId, "apn is delayed, data is updated");
+            ImsLog.i(mSlotId, "apn is delayed, data is updated");
             updateDataState();
         }
     }
@@ -209,23 +226,23 @@ public class ApnXcap extends Apn {
     private class Handle_EVENT_AIRPLANE_MODE_CHANGED implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
-            AsyncResult ar = (AsyncResult)msg.obj;
+            AsyncResult ar = (AsyncResult) msg.obj;
 
             if (ar == null) {
-                ImsLog.d(nSlotId, "ar is null");
+                ImsLog.d(mSlotId, "ar is null");
                 return;
             }
 
-            Boolean radiooff = (Boolean)ar.result;
+            Boolean radiooff = (Boolean) ar.result;
 
             if (radiooff == null) {
-                ImsLog.d(nSlotId, "radiooff is null");
+                ImsLog.d(mSlotId, "radiooff is null");
                 return;
             }
 
-            ImsLog.i(nSlotId, "airplane mode = " + radiooff.booleanValue());
+            ImsLog.i(mSlotId, "airplane mode = " + radiooff.booleanValue());
 
-            if (radiooff.booleanValue() == true) {
+            if (radiooff.booleanValue()) {
                 disconnect(0);
             }
         }
@@ -234,7 +251,7 @@ public class ApnXcap extends Apn {
     private class Handle_EVENT_DATA_CONNECTION_FAILED implements MsgProcInterface {
         @Override
         public void procMsg(Message msg) {
-            ImsLog.d(nSlotId, "");
+            ImsLog.d(mSlotId, "");
 
             if (msg == null) {
                 return;
@@ -246,15 +263,15 @@ public class ApnXcap extends Apn {
             }
 
             if (msg.obj == null) {
-                ImsLog.w(nSlotId, "msg.obj is null");
+                ImsLog.w(mSlotId, "msg.obj is null");
                 return;
             }
 
-            int causeCode = (int)msg.obj;
+            int causeCode = (int) msg.obj;
             if (mDcSettings != null) {
-                if (mDcSettings.isPermanentFailure(eType, causeCode)) {
+                if (mDcSettings.isPermanentFailure(mType, causeCode)) {
                     mESMCausePermanentFailure = true;
-                    notifyPdnConnectionFailed(eType);
+                    notifyPdnConnectionFailed(mType);
                 }
             }
         }

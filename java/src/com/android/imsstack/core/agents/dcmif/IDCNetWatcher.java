@@ -1,9 +1,31 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents.dcmif;
 
 import android.os.Handler;
 
+/**
+ * this class is the inferface about data connection watcher
+ */
 public interface IDCNetWatcher extends IDC {
 
+    /**
+     * this class is data object to notify
+     */
     class NotiObj {
         public EApnType   eApnType;
         public EDataState eDataState;
@@ -47,11 +69,6 @@ public interface IDCNetWatcher extends IDC {
      * Return data service state stored in DCNetWatcher object
      */
     int getDataServiceState();
-
-    /**
-     * Return NR state stored in DCNetWatcher object
-     */
-    int getNrState();
 
     /**
      * Return network type stored in DCNetWatcher object
@@ -212,7 +229,7 @@ public interface IDCNetWatcher extends IDC {
     /**
      *     registerForDataStateChanged
      *
-     *     Register/De-register listener to receive data state changed event
+     *     Register listener to receive data state changed event
      *
      *        Register "h" of Handler
      *        The "h" will get message with "what" of event
@@ -236,91 +253,152 @@ public interface IDCNetWatcher extends IDC {
      * @return
      */
     void registerForDataStateChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive data state changed event
+     */
     void unregisterForDataStateChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive data service state changed event
+     * Registerlistener to receive data service state changed event
      */
     void registerForDataServiceStateChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive data service state changed event
+     */
     void unregisterForDataServiceStateChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive RAT changed event
+     * Register listener to receive RAT changed event
      */
     void registerForRatChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive RAT changed event
+     */
     void unregisterForRatChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive voice RAT changed event
+     * Register listener to receive voice RAT changed event
      */
     void registerForVoiceRatChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive voice RAT changed event
+     */
     void unregisterForVoiceRatChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive roaming state changed event
+     * Register listener to receive roaming state changed event
      */
     void registerForRoamingStateChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive roaming state changed event
+     */
     void unregisterForRoamingStateChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive voice roaming state changed event
+     * Register listener to receive voice roaming state changed event
      */
     void registerForVoiceRoamingStateChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive voice roaming state changed event
+     */
     void unregisterForVoiceRoamingStateChanged(Handler h);
 
      /**
-     * Register/De-register listener to receive voice roaming type changed event
+     * Register listener to receive voice roaming type changed event
      */
     void registerForVoiceRoamingTypeChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive voice roaming type changed event
+     */
     void unregisterForVoiceRoamingTypeChanged(Handler h);
 
      /**
-     * Register/De-register listener to receive data roaming type changed event
+     * Register listener to receive data roaming type changed event
      */
     void registerForDataRoamingTypeChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive data roaming type changed event
+     */
     void unregisterForDataRoamingTypeChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive airplane mode changed event
+     * Register listener to receive airplane mode changed event
      */
     void registerForAirplaneModeChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive airplane mode changed event
+     */
     void unregisterForAirplaneModeChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive network operator changed event
+     * Register listener to receive network operator changed event
      */
     void registerForNetworkOperatorChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive network operator changed event
+     */
     void unregisterForNetworkOperatorChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive CS call state changed event
+     * Register listener to receive CS call state changed event
      */
     void registerForCsCallStatusChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive CS call state changed event
+     */
     void unregisterForCsCallStatusChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive precise CS call state changed event
+     * Register listener to receive precise CS call state changed event
      */
     void registerForPreciseCsCallStatusChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive precise CS call state changed event
+     */
     void unregisterForPreciseCsCallStatusChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive Voice of PS changed event
+     * Register listener to receive Voice of PS changed event
      */
     void registerForImsVopsChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive Voice of PS changed event
+     */
     void unregisterForImsVopsChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive power off changed event
+     * Register listener to receive power off changed event
      */
     void registerForPowerOffChanged(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive power off changed event
+     */
     void unregisterForPowerOffChanged(Handler h);
 
     /**
-     * Register/De-register listener to receive pdn connection fail event
+     * Register listener to receive pdn connection fail event
      * This api is used to handle XCAP pdn connection fail case, for now.
      */
     void registerForPdnConnectionFailed(Handler h, int what, Object obj);
+
+    /**
+     * De-register listener to receive pdn connection fail event
+     * This api is used to handle XCAP pdn connection fail case, for now.
+     */
     void unregisterForPdnConnectionFailed(Handler h);
 
     /**
