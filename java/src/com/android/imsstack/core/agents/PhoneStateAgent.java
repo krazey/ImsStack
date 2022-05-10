@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
@@ -14,7 +30,6 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IPhoneState;
 import com.android.imsstack.core.agents.agentif.IPhoneStateNotifier;
 import com.android.imsstack.core.agents.agentif.ISubscription;
@@ -42,8 +57,8 @@ public final class PhoneStateAgent implements IPhoneState,
         PhoneStateNotifier.EventObserver {
     private final Object mLock = new Object();
     private Context mContext;
-    private final Set<PhoneStateNotifier> mPhoneStateNotifiers
-            = new CopyOnWriteArraySet<PhoneStateNotifier>();
+    private final Set<PhoneStateNotifier> mPhoneStateNotifiers =
+            new CopyOnWriteArraySet<PhoneStateNotifier>();
     private final PhoneStateEvents mEvents = new PhoneStateEvents();
     private final PhoneStateHandler mHandler;
     private SubscriptionListenerProxy mSubscriptionListener;
@@ -65,7 +80,7 @@ public final class PhoneStateAgent implements IPhoneState,
 
         mSubscriptionListener = new SubscriptionListenerProxy();
 
-        ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+        ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
         if (isub != null) {
             isub.addListener(mSubscriptionListener);
         }
@@ -76,7 +91,7 @@ public final class PhoneStateAgent implements IPhoneState,
         mHandler.removeCallbacksAndMessages(null);
 
         if (mSubscriptionListener != null) {
-            ISubscription isub = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+            ISubscription isub = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
             if (isub != null) {
                 isub.removeListener(mSubscriptionListener);
             }
@@ -120,7 +135,7 @@ public final class PhoneStateAgent implements IPhoneState,
      */
     @Override
     public void addNotifier(IPhoneStateNotifier notifier) {
-        boolean isChanged = mPhoneStateNotifiers.add((PhoneStateNotifier)notifier);
+        boolean isChanged = mPhoneStateNotifiers.add((PhoneStateNotifier) notifier);
 
         if (isChanged && (notifier != null) && (notifier.getEvents() != 0)) {
             updateImsEvents(notifier, notifier.getEvents(), notifier.getEvents());
@@ -133,7 +148,7 @@ public final class PhoneStateAgent implements IPhoneState,
      */
     @Override
     public void removeNotifier(IPhoneStateNotifier notifier) {
-        boolean isChanged = mPhoneStateNotifiers.remove((PhoneStateNotifier)notifier);
+        boolean isChanged = mPhoneStateNotifiers.remove((PhoneStateNotifier) notifier);
 
         if (isChanged && (notifier != null) && (notifier.getEvents() != 0)) {
             updateImsEvents(notifier, 0, 0);
@@ -153,7 +168,7 @@ public final class PhoneStateAgent implements IPhoneState,
     @Override
     public void onPhoneStateEventChanged(IPhoneStateNotifier notifier,
             int events, int newEvents) {
-        if (!mPhoneStateNotifiers.contains((PhoneStateNotifier)notifier)) {
+        if (!mPhoneStateNotifiers.contains((PhoneStateNotifier) notifier)) {
             return;
         }
 
@@ -215,21 +230,21 @@ public final class PhoneStateAgent implements IPhoneState,
         }
 
         if ((events & PhoneStateEvents.LISTEN_SERVICE_STATE) != 0) {
-            ServiceState serviceState = (mPhoneStateListener != null ) ?
-                    mPhoneStateListener.getServiceState() : null;
+            ServiceState serviceState = (mPhoneStateListener != null)
+                    ? mPhoneStateListener.getServiceState() : null;
 
             if (serviceState != null) {
-                PhoneStateNotifier psn = (PhoneStateNotifier)notifier;
+                PhoneStateNotifier psn = (PhoneStateNotifier) notifier;
                 psn.notifyServiceState(serviceState);
             }
         }
 
         if ((events & PhoneStateEvents.LISTEN_CALL_STATE) != 0) {
-            PhoneCallState callState = (mPhoneStateListener != null ) ?
-                    mPhoneStateListener.getCallState() : null;
+            PhoneCallState callState = (mPhoneStateListener != null)
+                    ? mPhoneStateListener.getCallState() : null;
 
             if (callState != null) {
-                PhoneStateNotifier psn = (PhoneStateNotifier)notifier;
+                PhoneStateNotifier psn = (PhoneStateNotifier) notifier;
                 psn.notifyCallState(callState.getState(), callState.getIncomingNumber());
             }
         }
@@ -245,7 +260,7 @@ public final class PhoneStateAgent implements IPhoneState,
             List<String> pcscf = mHandler.getPcscf();
 
             if (pcscf != null) {
-                PhoneStateNotifier psn = (PhoneStateNotifier)notifier;
+                PhoneStateNotifier psn = (PhoneStateNotifier) notifier;
                 psn.notifyPcscfUpdated(pcscf);
             }
         }
@@ -265,7 +280,8 @@ public final class PhoneStateAgent implements IPhoneState,
                 return;
             }
 
-            ImsLog.i(mSlotId, "listenForPhoneStateEventChanged :: subId=" + mPhoneStateListener.getSubId());
+            ImsLog.i(mSlotId, "listenForPhoneStateEventChanged :: subId="
+                        + mPhoneStateListener.getSubId());
             setActivePhoneStateListener();
         }
     }
@@ -274,7 +290,7 @@ public final class PhoneStateAgent implements IPhoneState,
         synchronized (mLock) {
             int slotId = MSimUtils.getSlotId(subId);
             if (mSlotId != slotId) {
-                ISubscription isub = (ISubscription)AgentFactory.getAgent(
+                ISubscription isub = (ISubscription) AgentFactory.getAgent(
                         AgentFactory.SUBSCRIPTION);
 
                 if (isub == null) {
@@ -382,9 +398,10 @@ public final class PhoneStateAgent implements IPhoneState,
         return new PhoneStateListener();
     }
 
-    private static int getAccessNetworkTechnology(ServiceState ss) {
-        NetworkRegistrationInfo nri = ss.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+    private static int getDataAccessNetworkTechnology(ServiceState ss) {
+        final NetworkRegistrationInfo nri = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
         if (nri != null) {
             return nri.getAccessNetworkTechnology();
         }
@@ -392,60 +409,23 @@ public final class PhoneStateAgent implements IPhoneState,
         return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
-    private static int getDataNetworkType(ServiceState ss) {
-        final NetworkRegistrationInfo iwlanRegInfo = ss.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+    private static int getVoiceAccessNetworkTechnology(ServiceState ss) {
+        final NetworkRegistrationInfo nri = ss.getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (nri != null) {
+            return nri.getAccessNetworkTechnology();
+        }
+
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+    }
+
+    private static int getDataRegistrationState(ServiceState ss) {
         final NetworkRegistrationInfo wwanRegInfo = ss.getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
-        if (iwlanRegInfo == null || !iwlanRegInfo.isInService()) {
-            return (wwanRegInfo != null) ? wwanRegInfo.getAccessNetworkTechnology() :
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN;
-        }
-
-        if ((wwanRegInfo != null && !wwanRegInfo.isInService()) || ss.isIwlanPreferred()) {
-            return iwlanRegInfo.getAccessNetworkTechnology();
-        }
-
-        return (wwanRegInfo != null) ? wwanRegInfo.getAccessNetworkTechnology() :
-                TelephonyManager.NETWORK_TYPE_UNKNOWN;
-    }
-
-    private static int getDataRegState(ServiceState ss) {
-        final NetworkRegistrationInfo iwlanRegInfo = ss.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
-        final NetworkRegistrationInfo wwanRegInfo = ss.getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-
-        int nriState = NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
-
-        if (iwlanRegInfo == null || !iwlanRegInfo.isInService()) {
-            nriState = (wwanRegInfo != null) ? wwanRegInfo.getRegistrationState() :
-                    NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
-        } else if ((wwanRegInfo != null && !wwanRegInfo.isInService()) ||
-                ss.isIwlanPreferred()) {
-            nriState = iwlanRegInfo.getRegistrationState();
-        } else if (wwanRegInfo != null) {
-            nriState = wwanRegInfo.getRegistrationState();
-        }
-
-        return nriStateToServiceState(nriState, ss, wwanRegInfo);
-    }
-
-    private static int nriStateToServiceState(int nriState, ServiceState ss,
-            NetworkRegistrationInfo wwanRegInfo) {
-        int retState = ServiceState.STATE_OUT_OF_SERVICE;
-
-        if (ss.getState() == ServiceState.STATE_POWER_OFF) {
-            retState = ServiceState.STATE_POWER_OFF;
-        } else if (nriState == NetworkRegistrationInfo.REGISTRATION_STATE_HOME ||
-                nriState == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING) {
-            retState = ServiceState.STATE_IN_SERVICE;
-        } else if (wwanRegInfo != null && wwanRegInfo.isEmergencyEnabled()) {
-            retState = ServiceState.STATE_EMERGENCY_ONLY;
-        }
-
-        return retState;
+        return (wwanRegInfo != null) ? wwanRegInfo.getRegistrationState() :
+                NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
     }
 
     private final class PhoneStateHandler extends Handler implements Executor {
@@ -491,7 +471,7 @@ public final class PhoneStateAgent implements IPhoneState,
         private static final int SS_NETWORK_OPERATOR = 0x00100000;
         private static final int SS_ALL = 0x00111111;
 
-        private final int mSubId_;
+        private final int mSubId;
         private ServiceState mServiceState = null;
         private PhoneCallState mCallState = new PhoneCallState();
         private boolean mDisposed = false;
@@ -505,12 +485,12 @@ public final class PhoneStateAgent implements IPhoneState,
         private SrvccStateListener mSrvccStateListener = null;
         private PreciseDataConnectionStateListener mPreciseDataConnectionStateListener = null;
 
-        public PhoneStateListener() {
-            mSubId_ = MSimUtils.INVALID_SUB_ID;
+        PhoneStateListener() {
+            mSubId = MSimUtils.INVALID_SUB_ID;
         }
 
-        public PhoneStateListener(int subId) {
-            mSubId_ = subId;
+        PhoneStateListener(int subId) {
+            mSubId = subId;
             ImsLog.i(mSlotId, "PhoneStateListener :: subId=" + subId);
         }
 
@@ -621,7 +601,7 @@ public final class PhoneStateAgent implements IPhoneState,
         }
 
         public int getSubId() {
-            return mSubId_;
+            return mSubId;
         }
 
         public PhoneCallState getCallState() {
@@ -672,7 +652,7 @@ public final class PhoneStateAgent implements IPhoneState,
                 tm.registerTelephonyCallback(mHandler, mCellInfoListener);
             }
 
-            if ((events & PhoneStateEvents.LISTEN_SIGNAL_STRENGTHS) !=0) {
+            if ((events & PhoneStateEvents.LISTEN_SIGNAL_STRENGTHS) != 0) {
                 mSignalStrengthsListener = new SignalStrengthsListener();
                 tm.registerTelephonyCallback(mHandler, mSignalStrengthsListener);
             }
@@ -787,15 +767,15 @@ public final class PhoneStateAgent implements IPhoneState,
                 changedStates |= SS_VOICE_REG_STATE;
             }
 
-            if (getAccessNetworkTechnology(oldSS) != getAccessNetworkTechnology(newSS)) {
+            if (getVoiceAccessNetworkTechnology(oldSS) != getVoiceAccessNetworkTechnology(newSS)) {
                 changedStates |= SS_VOICE_RAT;
             }
 
-            if (getDataRegState(oldSS) != getDataRegState(newSS)) {
+            if (getDataRegistrationState(oldSS) != getDataRegistrationState(newSS)) {
                 changedStates |= SS_DATA_REG_STATE;
             }
 
-            if (getDataNetworkType(oldSS) != getDataNetworkType(newSS)) {
+            if (getDataAccessNetworkTechnology(oldSS) != getDataAccessNetworkTechnology(newSS)) {
                 changedStates |= SS_DATA_RAT;
             }
 
@@ -810,16 +790,26 @@ public final class PhoneStateAgent implements IPhoneState,
             return changedStates;
         }
 
+        private int getDataNetwork() {
+            TelephonyManager tm = getTelephonyManager(getSubId());
+            if (tm != null) {
+                return tm.getDataNetworkType();
+            }
+
+            return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        }
+
         private void updateCellularDataRAT(ServiceState serviceState) {
             if (serviceState == null) {
                 return;
             }
 
-            int dataRAT = getDataNetworkType(serviceState);
+            int dataRAT = getDataNetwork();
 
             if (dataRAT == TelephonyManager.NETWORK_TYPE_IWLAN) {
                 NetworkRegistrationInfo networkRegInfo = serviceState.getNetworkRegistrationInfo(
-                    NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+                        NetworkRegistrationInfo.DOMAIN_PS,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
 
                 mCellularDataRAT = (networkRegInfo == null || !networkRegInfo.isRegistered())
                         ? TelephonyManager.NETWORK_TYPE_UNKNOWN
@@ -833,7 +823,7 @@ public final class PhoneStateAgent implements IPhoneState,
     }
 
     private final class SubscriptionListenerProxy extends SubscriptionListener {
-        public SubscriptionListenerProxy() {
+        SubscriptionListenerProxy() {
         }
 
         @Override

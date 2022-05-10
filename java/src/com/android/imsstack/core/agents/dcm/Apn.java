@@ -1,5 +1,22 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.imsstack.core.agents.dcm;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
@@ -20,7 +37,6 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.MsgProcInterface;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
-import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.DCConstants;
 import com.android.imsstack.core.agents.dcmif.EApnReqState;
@@ -41,7 +57,6 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
-import com.android.net.module.util.LinkPropertiesUtils;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -52,6 +67,9 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * This class is for providing the data connection interface
+ */
 public abstract class Apn extends Handler implements IApn {
 
     // Constants--------------------------------------------------
@@ -82,40 +100,87 @@ public abstract class Apn extends Handler implements IApn {
     // Variables--------------------------------------------------
     protected static final Hashtable<Integer, String> sEventToString;
 
+    static {
+        sEventToString = new Hashtable<Integer, String>();
+
+        // Network callbacks
+        sEventToString.put(EVENT_NETWORK_AVAILABLE,
+                "NETWORK_AVAILABLE");
+        sEventToString.put(EVENT_NETWORK_BLOCKED_STATUS_CHANGED,
+                "NETWORK_BLOCKED_STATUS_CHANGED");
+        sEventToString.put(EVENT_NETWORK_CAPABILITIES_CHANGED,
+                "NETWORK_CAPABILITIES_CHANGED");
+        sEventToString.put(EVENT_NETWORK_LINK_PROPERTIES_CHANGED,
+                "NETWORK_LINK_PROPERTIES_CHANGED");
+        sEventToString.put(EVENT_NETWORK_LOSING,
+                "NETWORK_LOSING");
+        sEventToString.put(EVENT_NETWORK_UNAVAILABLE,
+                "NETWORK_UNAVAILABLE");
+        sEventToString.put(EVENT_NETWORK_LOST,
+                "NETWORK_LOST");
+
+        sEventToString.put(EVENT_IP_CHANGED,
+                "IP_CHANGED");
+        sEventToString.put(EVENT_PCSCF_CHANGED,
+                "PCSCF_CHANGED");
+        sEventToString.put(EVENT_WAITING_LOCAL_ADDRESS_IPV6,
+                "WAITING_LOCAL_ADDRESS_IPV6");
+        sEventToString.put(EVENT_NOTIFY_DATA_STATE_CHANGED,
+                "NOTIFY_DATA_STATE_CHANGED");
+        sEventToString.put(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
+                "PRECISE_DATA_CONNECTION_STATE_CHANGED");
+        sEventToString.put(EVENT_DATA_CONNECTION_FAILED,
+                "DATA_CONNECTION_FAILED");
+
+        sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
+                "AIRPLANE_MODE_CHANGED");
+        sEventToString.put(EVENT_WIFI_STATE_CHANGED,
+                "WIFI_STATE_CHANGED");
+        sEventToString.put(EVENT_VOWIFI_SETTING_CHANGED,
+                "VOWIFI_SETTING_CHANGED");
+        sEventToString.put(EVENT_VOWIFI_PREF_CHANGED,
+                "VOWIFI_PREF_CHANGED");
+        sEventToString.put(EVENT_VOWIFI_ROAMING_PREF_CHANGED,
+                "VOWIFI_ROAMING_PREF_CHANGED");
+    }
+
     protected Context        mContext;
     protected IDCSettings    mDcSettings;
     protected IDCNetWatcher  mDcNetWatcher;
-    protected int            nSlotId = 0;
-
-    protected EApnType       eType;
+    protected int            mSlotId = 0;
+    protected EApnType       mType;
     protected EApnReqState   mAPNState = EApnReqState.APN_REQUEST_IDLE;
     protected int            mDataState = TelephonyManager.DATA_DISCONNECTED;
     protected String         mApnString = null;
     protected int            mApnProtocol = ApnSetting.PROTOCOL_IPV4V6;
     protected int            mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
     protected int            mPreciseDcState = TelephonyManager.DATA_UNKNOWN;
-
     protected int            mIpcanCategory = IPCAN_CATEGORY_MOBILE;
-    protected Hashtable<Integer, MsgProcInterface> mapMsgHandler
-            = new Hashtable<Integer, MsgProcInterface>();
+    protected Hashtable<Integer, MsgProcInterface> mMapMsgHandler =
+            new Hashtable<Integer, MsgProcInterface>();
     protected ImsNetworkCallback mNetworkCallback = null;
     protected ImsNetworkCallback mNetworkMonitoringCallback = null;
-
     protected int mApnEmployCount = 0;
-
     protected boolean mESMCausePermanentFailure = false;
-
     protected boolean mIsMonitoringCallbackRegistered = false;
-
     private int mSubId = MSimUtils.INVALID_SUB_ID;
     private ApnSubscriptionListener mSubscriptionListener = null;
-    private Set<ApnStateListener> mApnStateListeners
-            = new CopyOnWriteArraySet<ApnStateListener>();
+    private Set<ApnStateListener> mApnStateListeners =
+            new CopyOnWriteArraySet<ApnStateListener>();
+
+    protected Apn(Context context, int slotId) {
+        mContext = context;
+        mSlotId = slotId;
+        mDcSettings = (IDCSettings) DCFactory.getDC(DCFactory.SETTING, mSlotId);
+        mDcNetWatcher = (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+
+        registerEvent();
+    }
 
     // Interface implementation methods --------------------------
     @Override
     public void cleanup() {
-        ImsLog.d(nSlotId, "clean up");
+        ImsLog.d(mSlotId, "clean up");
 
         unregisterSubscription();
 
@@ -138,7 +203,7 @@ public abstract class Apn extends Handler implements IApn {
 
         Message msg = Message.obtain();
         msg.what = EVENT_NOTIFY_DATA_STATE_CHANGED;
-        msg.obj = new IDCNetWatcher.NotiObj(eType, EDataState.DATA_STATE_DISCONNECTED);
+        msg.obj = new IDCNetWatcher.NotiObj(mType, EDataState.DATA_STATE_DISCONNECTED);
         handleMessage(msg);
     }
 
@@ -147,23 +212,18 @@ public abstract class Apn extends Handler implements IApn {
         // pumping to hash table.
         // Apn class provide simple event pumping table through "registerHandler" api
         // for derived classes
-        MsgProcInterface msgProcess = mapMsgHandler.get(msg.what);
+        MsgProcInterface msgProcess = mMapMsgHandler.get(msg.what);
 
         if (msgProcess == null) {
-            ImsLog.w(nSlotId, "Apn :: no proc - apn=" + eType + ", msg=" + msg.what
+            ImsLog.w(mSlotId, "Apn :: no proc - apn=" + mType + ", msg=" + msg.what
                     + ", proc=" + sEventToString.get(msg.what));
             return;
         }
 
-        ImsLog.i(nSlotId, "Apn :: apn=" + eType + ", msg=" + msg.what
+        ImsLog.i(mSlotId, "Apn :: apn=" + mType + ", msg=" + msg.what
                 + ", proc=" + sEventToString.get(msg.what));
 
         msgProcess.procMsg(msg);
-    }
-
-    @Override
-    public void setSettings(IDCSettings dcSettings) {
-        this.mDcSettings = dcSettings;
     }
 
     @Override
@@ -172,13 +232,18 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
-    public void setNetWatcher(IDCNetWatcher dcNetWatcher) {
-        this.mDcNetWatcher = dcNetWatcher;
+    public void setSettings(IDCSettings dcSettings) {
+        this.mDcSettings = dcSettings;
     }
 
     @Override
     public IDCNetWatcher getNetWatcher() {
         return mDcNetWatcher;
+    }
+
+    @Override
+    public void setNetWatcher(IDCNetWatcher dcNetWatcher) {
+        this.mDcNetWatcher = dcNetWatcher;
     }
 
     @Override
@@ -217,7 +282,7 @@ public abstract class Apn extends Handler implements IApn {
         if (mApnString != null) {
             return mApnString;
         }
-        return eType.getString();
+        return mType.getString();
     }
 
     @Override
@@ -227,7 +292,7 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         if (mNetworkMonitoringCallback != null) {
-            ImsLog.i(nSlotId, "mNetworkMonitoringCallback not null");
+            ImsLog.i(mSlotId, "mNetworkMonitoringCallback not null");
             return mNetworkMonitoringCallback.isNetworkConnected();
         }
 
@@ -239,6 +304,12 @@ public abstract class Apn extends Handler implements IApn {
         return this.mDataState;
     }
 
+    protected void setDataState(int newState) {
+        if (mDataState != newState) {
+            mDataState = newState;
+        }
+    }
+
     @Override
     public int getIpcanCategory() {
         return mIpcanCategory;
@@ -248,12 +319,12 @@ public abstract class Apn extends Handler implements IApn {
     public int getIpVersion() {
         int ipVersion = EIpVersion.IPV6V4.getInt();
         if (mDcSettings != null) {
-            if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
-                if (mDcSettings.getEmergencyPreferredIpVersion() ==
-                        CarrierConfig.Ims.IPV4_PREFERRED) {
+            if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+                if (mDcSettings.getEmergencyPreferredIpVersion()
+                        == CarrierConfig.Ims.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
-            } else if (eType.getType() == DCConstants.TYPE_IMS) {
+            } else if (mType.getType() == DCConstants.TYPE_IMS) {
                 if (mDcSettings.getPreferredIpVersion() == CarrierConfig.Ims.IPV4_PREFERRED) {
                     ipVersion = EIpVersion.IPV4V6.getInt();
                 }
@@ -264,7 +335,7 @@ public abstract class Apn extends Handler implements IApn {
 
     @Override
     public int getSlotId() {
-        return this.nSlotId;
+        return this.mSlotId;
     }
 
     @Override
@@ -317,7 +388,7 @@ public abstract class Apn extends Handler implements IApn {
 
     @Override
     public String toString() {
-        return ", ApnType= " + eType
+        return ", ApnType= " + mType
                 + ", DataState= " + mDataState
                 + ", APNState= " + mAPNState;
     }
@@ -325,7 +396,7 @@ public abstract class Apn extends Handler implements IApn {
     // Private/Protected methods ---------------------------------
     //---------------------------------------------------------------------
     protected void registerCallback(int events) {
-        ImsLog.i(nSlotId, "type = " + eType.getString());
+        ImsLog.i(mSlotId, "type = " + mType.getString());
 
         ConnectivityManager cm = (mContext == null) ? null :
                 mContext.getSystemService(ConnectivityManager.class);
@@ -340,27 +411,27 @@ public abstract class Apn extends Handler implements IApn {
         nrb.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         if (MSimUtils.isMultiSimEnabled()) {
-            mSubId = MSimUtils.getSubId(nSlotId);
+            mSubId = MSimUtils.getSubId(mSlotId);
             registerSubscription();
 
             nrb.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
-                    .setSubscriptionId(MSimUtils.getSubId(nSlotId)).build());
+                    .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build());
         }
 
-        if (eType.getType() == DCConstants.TYPE_IMS) {
+        if (mType.getType() == DCConstants.TYPE_IMS) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-        } else if (eType.getType() == DCConstants.TYPE_INTERNET) {
+        } else if (mType.getType() == DCConstants.TYPE_INTERNET) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-        } else if (eType.getType() == DCConstants.TYPE_XCAP) {
+        } else if (mType.getType() == DCConstants.TYPE_XCAP) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP).build();
-        } else if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
+        } else if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS).build();
         }
 
         if (mNetworkMonitoringCallback == null) {
             mNetworkMonitoringCallback = new ImsNetworkCallback(
-                    mContext, eType.getType(), events, this);
-            mNetworkMonitoringCallback.setSlotId(nSlotId);
+                    mContext, mType.getType(), events, this);
+            mNetworkMonitoringCallback.setSlotId(mSlotId);
         } else {
             mNetworkMonitoringCallback.setEvents(events);
         }
@@ -372,7 +443,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void unregisterCallback() {
-        ImsLog.i(nSlotId, "type = " + eType.getString());
+        ImsLog.i(mSlotId, "type = " + mType.getString());
 
         ConnectivityManager cm = (mContext == null) ? null :
                 mContext.getSystemService(ConnectivityManager.class);
@@ -393,7 +464,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void requestNetwork() {
-        ImsLog.i(nSlotId, "type = " + eType.getString());
+        ImsLog.i(mSlotId, "type = " + mType.getString());
         ConnectivityManager cm = (mContext == null) ? null :
                 mContext.getSystemService(ConnectivityManager.class);
 
@@ -409,10 +480,10 @@ public abstract class Apn extends Handler implements IApn {
         if (MSimUtils.isMultiSimEnabled()) {
             boolean setSubId = true;
 
-            if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
-                ISubscription isub = (ISubscription)AgentFactory.getAgent(
+            if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
+                ISubscription isub = (ISubscription) AgentFactory.getAgent(
                         AgentFactory.SUBSCRIPTION);
-                int subId = MSimUtils.getSubId(nSlotId);
+                int subId = MSimUtils.getSubId(mSlotId);
 
                 if ((isub != null) && isub.isAllSimAbsentOrLocked()
                         && !MSimUtils.isValidSubId(subId)) {
@@ -422,23 +493,23 @@ public abstract class Apn extends Handler implements IApn {
 
             if (setSubId) {
                 nrb.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
-                        .setSubscriptionId(MSimUtils.getSubId(nSlotId)).build());
+                        .setSubscriptionId(MSimUtils.getSubId(mSlotId)).build());
             }
         }
 
-        if (eType.getType() == DCConstants.TYPE_IMS) {
+        if (mType.getType() == DCConstants.TYPE_IMS) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_IMS).build();
-        } else if (eType.getType() == DCConstants.TYPE_INTERNET) {
+        } else if (mType.getType() == DCConstants.TYPE_INTERNET) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
-        } else if (eType.getType() == DCConstants.TYPE_XCAP) {
+        } else if (mType.getType() == DCConstants.TYPE_XCAP) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_XCAP).build();
-        } else if (eType.getType() == DCConstants.TYPE_EMERGENCY) {
+        } else if (mType.getType() == DCConstants.TYPE_EMERGENCY) {
             nr = nrb.addCapability(NetworkCapabilities.NET_CAPABILITY_EIMS).build();
         }
 
         if (mNetworkCallback == null) {
-            mNetworkCallback = new ImsNetworkCallback(mContext, eType.getType(), this);
-            mNetworkCallback.setSlotId(nSlotId);
+            mNetworkCallback = new ImsNetworkCallback(mContext, mType.getType(), this);
+            mNetworkCallback.setSlotId(mSlotId);
         }
 
         if (nr != null) {
@@ -447,7 +518,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void releaseNetwork() {
-        ImsLog.d(nSlotId, "type = " + eType.getString());
+        ImsLog.d(mSlotId, "type = " + mType.getString());
 
         ConnectivityManager cm = (mContext == null) ? null :
                 mContext.getSystemService(ConnectivityManager.class);
@@ -468,7 +539,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void registerHandler(int evt, MsgProcInterface proc) {
-        mapMsgHandler.put(evt, proc);
+        mMapMsgHandler.put(evt, proc);
     }
 
     protected void registerEvent() {
@@ -478,24 +549,18 @@ public abstract class Apn extends Handler implements IApn {
                 new Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED());
     }
 
-    protected void setAPNReqState(EApnReqState s) {
-        mAPNState = s;
-    }
-
     protected EApnReqState getAPNReqState() {
         return mAPNState;
     }
 
-    protected void setDataState(int newState) {
-        if (mDataState != newState) {
-            mDataState = newState;
-        }
+    protected void setAPNReqState(EApnReqState s) {
+        mAPNState = s;
     }
 
     protected void registerSubscription() {
         if (mSubscriptionListener == null) {
             mSubscriptionListener = new ApnSubscriptionListener();
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+            ISubscription subs = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
             if (subs != null) {
                 subs.addListener(mSubscriptionListener);
             }
@@ -504,7 +569,7 @@ public abstract class Apn extends Handler implements IApn {
 
     protected void unregisterSubscription() {
         if (mSubscriptionListener != null) {
-            ISubscription subs = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
+            ISubscription subs = (ISubscription) AgentFactory.getAgent(AgentFactory.SUBSCRIPTION);
             if (subs != null) {
                 subs.removeListener(mSubscriptionListener);
             }
@@ -512,22 +577,13 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    protected Apn(Context context, int slotId) {
-        mContext = context;
-        nSlotId = slotId;
-        mDcSettings = (IDCSettings)DCFactory.getDC(DCFactory.SETTING, nSlotId);
-        mDcNetWatcher = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, nSlotId);
-
-        registerEvent();
-    }
-
     protected boolean isVoWifiSupported() {
         return FeatureConfig.isEnabled(getSlotId(), FeatureConfig.VOWIFI);
     }
 
     protected int getIpcanCategory(int networkType) {
-        return (networkType == TelephonyManager.NETWORK_TYPE_IWLAN) ?
-                IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
+        return (networkType == TelephonyManager.NETWORK_TYPE_IWLAN)
+                ? IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
     }
 
     protected boolean notifyDataConnectionIpcanChanged(int networkType) {
@@ -537,22 +593,22 @@ public abstract class Apn extends Handler implements IApn {
             return false;
         }
 
-        ImsLog.i(nSlotId, "type = " + eType.getString() + " , old cat = "
+        ImsLog.i(mSlotId, "type = " + mType.getString() + " , old cat = "
                 + mIpcanCategory + " , curr cat = " + category);
 
         mIpcanCategory = category;
 
-        ISystem system = SystemInterface.getInstance().getSystem(nSlotId);
+        ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
 
         if (system != null) {
-            system.notifyDataConnectionIpcanChanged(eType.getType(), mIpcanCategory);
+            system.notifyDataConnectionIpcanChanged(mType.getType(), mIpcanCategory);
         }
 
         return true;
     }
 
     protected void notifyPdnConnectionFailed(EApnType apnType) {
-        ImsLog.i(nSlotId, "apnType : " + apnType);
+        ImsLog.i(mSlotId, "apnType : " + apnType);
 
         //notify to watcher
         if (mDcNetWatcher != null) {
@@ -569,14 +625,14 @@ public abstract class Apn extends Handler implements IApn {
         }
 
         NetworkInfo netInfo = null;
-        IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, nSlotId);
+        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
 
         if (dcapn != null) {
-            netInfo = cm.getNetworkInfo(dcapn.getNetworkByCapability(eType.getType()));
+            netInfo = cm.getNetworkInfo(dcapn.getNetworkByCapability(mType.getType()));
         }
 
         if (netInfo == null) {
-            ImsLog.w(nSlotId, "NetworkInfo is null");
+            ImsLog.w(mSlotId, "NetworkInfo is null");
             return TelephonyManager.DATA_DISCONNECTED;
         }
 
@@ -593,10 +649,10 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean hasLocalAddress(int version) {
-        IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, nSlotId);
+        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
 
         if (dcapn != null) {
-            String ip = dcapn.getLocalAddress(eType.getType(), version);
+            String ip = dcapn.getLocalAddress(mType.getType(), version);
 
             if (ip != null) {
                 return true;
@@ -607,11 +663,11 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean isIPChanged() {
-        IDCApn dcapn = (IDCApn)DCFactory.getDC(DCFactory.APN, nSlotId);
+        IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
 
         if (dcapn != null) {
-            String cachedIP = dcapn.getCachedLocalAddress(eType.getType());
-            String ip = dcapn.getLocalAddress(eType.getType(), 0);
+            String cachedIP = dcapn.getCachedLocalAddress(mType.getType());
+            String ip = dcapn.getLocalAddress(mType.getType(), 0);
 
             if (cachedIP == null || ip == null) {
                 return true;
@@ -627,31 +683,31 @@ public abstract class Apn extends Handler implements IApn {
         int dataState = getDataStateFromCM();
 
         if (mDataState != dataState) {
-            ImsLog.i(nSlotId, "data state :: " + mDataState + " >> " + dataState);
+            ImsLog.i(mSlotId, "data state :: " + mDataState + " >> " + dataState);
 
             setDataState(dataState);
             if (mDataState == TelephonyManager.DATA_CONNECTED) {
                 notifyDataConnectionIpcanChanged(mNetworkType);
             }
-            sendDataStateUpdateMessage(eType, EDataState.convertIntTypeToEnum(
+            sendDataStateUpdateMessage(mType, EDataState.convertIntTypeToEnum(
                     (EDataState.convertFromTMtoImsType(mDataState))));
         }
     }
 
     protected void updateNetworkType() {
-        ImsLog.i(nSlotId, "Update connected data network type");
+        ImsLog.i(mSlotId, "Update connected data network type");
 
-        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(nSlotId));
+        TelephonyManager tm = AppContext.getTelephonyManager(MSimUtils.getSubId(mSlotId));
         if (tm != null) {
             mNetworkType = tm.getDataNetworkType();
         } else {
-            ImsLog.i(nSlotId, "TelephonyManager is null");
+            ImsLog.i(mSlotId, "TelephonyManager is null");
         }
     }
 
     protected boolean isApnEmployed() {
         if (mApnEmployCount > 0) {
-            ImsLog.d(nSlotId, "apn is employed (" + mApnEmployCount + ")");
+            ImsLog.d(mSlotId, "apn is employed (" + mApnEmployCount + ")");
             return true;
         }
 
@@ -669,7 +725,7 @@ public abstract class Apn extends Handler implements IApn {
      * @return
      */
     protected void sendDataStateUpdateMessage(EApnType apnType, EDataState dataState) {
-        ImsLog.i(nSlotId, "apnType : " + apnType + ", state : " + dataState);
+        ImsLog.i(mSlotId, "apnType : " + apnType + ", state : " + dataState);
 
         //notify to watcher
         if (mDcNetWatcher != null) {
@@ -685,8 +741,8 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected boolean handleIpcanCategory(int networkType) {
-        if ((eType.getType() != DCConstants.TYPE_IMS)
-                && (eType.getType() != DCConstants.TYPE_EMERGENCY)) {
+        if ((mType.getType() != DCConstants.TYPE_IMS)
+                && (mType.getType() != DCConstants.TYPE_EMERGENCY)) {
             return false;
         }
 
@@ -701,7 +757,7 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     protected void handleCarrierConfigChanged(int phoneId, int subId) {
-        if (nSlotId != phoneId || subId == mSubId) {
+        if (mSlotId != phoneId || subId == mSubId) {
             return;
         }
 
@@ -718,9 +774,9 @@ public abstract class Apn extends Handler implements IApn {
      * Notifies the application that IPCAN category is changed.
      */
     protected void notifyIpcanCategoryChanged(int ipcanCategory) {
-        ImsLog.i(nSlotId, "notifyIpcanCategoryChanged");
+        ImsLog.i(mSlotId, "notifyIpcanCategoryChanged");
         for (ApnStateListener l : mApnStateListeners) {
-            l.onIpcanCategoryChanged(eType.getType(), ipcanCategory);
+            l.onIpcanCategoryChanged(mType.getType(), ipcanCategory);
         }
     }
 
@@ -728,198 +784,15 @@ public abstract class Apn extends Handler implements IApn {
      * Notifies the application that data handover information is changed.
      */
     protected void notifyHandoverInfoChanged(int handoverState, int networkType, int failCause) {
-        ImsLog.i(nSlotId, "notifyHandoverInfoChanged");
+        ImsLog.i(mSlotId, "notifyHandoverInfoChanged");
         for (ApnStateListener l : mApnStateListeners) {
             l.onHandoverInfoChanged(handoverState, networkType, failCause);
         }
     }
 
     /**
-    *  Handle_EVENT_NOTIFY_DATA_STATE_CHANGED
-    *
-    *        common DATA_STATE_NOTIFICATION handling logic from android PhoneState
-    *        IMS / Emergency APN nothing different to handle current event.
-    *        if we need specific control, child class just need override this.
-    * @param
-    * @return
-    */
-    protected class Handle_EVENT_NOTIFY_DATA_STATE_CHANGED implements MsgProcInterface {
-
-        @Override
-        public void procMsg(Message msg) {
-            // Ignore DataState Change During ShutDown
-            if ((mDcNetWatcher != null) && (mDcNetWatcher.isDoingOffRadio() == true)) {
-                ImsLog.w(nSlotId, "radio is doing off");
-                return;
-            }
-
-            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj)msg.obj;
-            if (res == null) {
-                return;
-            }
-
-            // Do not use dataState vi intent
-            EApnType apnType = res.eApnType;
-            EDataState dataState = res.eDataState;
-
-            ISystem system = SystemInterface.getInstance().getSystem(nSlotId);
-            if (system == null) {
-                return;
-            }
-
-            if (dataState == EDataState.DATA_STATE_CONNECT_FAILED) {
-                ImsLog.w(nSlotId, "Data Connection failed : apnType=" + apnType);
-                system.notifyDataConnectionFailed(apnType.getType());
-                return;
-            }
-
-            ImsLog.i(nSlotId, "apnType=" + apnType
-                    + " : " + apnType.getString() + ", dataState=" + dataState);
-
-            system.notifyDataConnectionStateChanged(
-                    apnType.getType(), dataState.getState());
-        }
-    }
-
-    protected class Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED
-            implements MsgProcInterface {
-        @Override
-        public void procMsg(Message msg) {
-            if (msg.obj == null) {
-                ImsLog.w(nSlotId, "msg.obj is null");
-                return;
-            }
-            PreciseDataConnectionState dataConnectionState = (PreciseDataConnectionState)msg.obj;
-            ApnSetting apnSetting = dataConnectionState.getApnSetting();
-            int dataState = dataConnectionState.getState();
-            int networkType = dataConnectionState.getNetworkType();
-            int causeCode = dataConnectionState.getLastCauseCode();
-
-            if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-                ImsLog.w(nSlotId, "Unknown network type");
-                return;
-            }
-
-            switch (dataState) {
-                case TelephonyManager.DATA_CONNECTED:
-                    if (mPreciseDcState == TelephonyManager.DATA_HANDOVER_IN_PROGRESS) {
-                        if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-                            ImsLog.w(nSlotId, "Not handle handover from unknown network");
-                            break;
-                        }
-
-                        if (isIpcanChanged(networkType)) {
-                            // Notify handover is successful
-                            handleHandoverSuccess(networkType);
-                        } else {
-                            // Notify handover failure
-                            handleHandoverFailure(networkType, causeCode);
-                        }
-                    } else {
-                        // update APN string
-                        String strApn = apnSetting.getApnName();
-                        if (strApn != null && !strApn.equals("(null)")) {
-                            mApnString = strApn;
-                        }
-                        // update APN protocol
-                        if ((mDcNetWatcher != null) && mDcNetWatcher.isRoaming()){
-                            mApnProtocol = apnSetting.getRoamingProtocol();
-                        } else {
-                            mApnProtocol = apnSetting.getProtocol();
-                        }
-                    }
-                    if (mNetworkType != networkType) {
-                        // update network type
-                        ImsLog.i(nSlotId, "network type :: "+ mNetworkType +" >> "+ networkType);
-                        mNetworkType = networkType;
-                    }
-                    break;
-                case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
-                    handleHandoverStart(networkType);
-                    break;
-                case TelephonyManager.DATA_DISCONNECTING:
-                    if (eType.getType() == DCConstants.TYPE_IMS) {
-                        IAosRegistration aosReg =
-                                AosFactory.getInstance().getAosRegistration(nSlotId);
-                        if (aosReg != null) {
-                            if (aosReg.getRegisteredNetworkType()
-                                    != IAosRegistrationListener.NetworkType.NONE) {
-                                aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                                        IAosRegistration.Pcscf.CURRENT);
-                            }
-                        }
-                    }
-                    break;
-                case TelephonyManager.DATA_DISCONNECTED:
-                    if (mPreciseDcState == TelephonyManager.DATA_CONNECTING &&
-                            causeCode != DataFailCause.NONE) {
-                        // initial connection failure
-                        handleInitialConnectionFailure(causeCode);
-                    }
-                    mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
-                    break;
-                default:
-                    // no-op
-                    break;
-            }
-
-            // update PreciseDataConnectionState
-            mPreciseDcState = dataState;
-        }
-
-        private void handleHandoverStart(int networkType) {
-            ImsLog.i(nSlotId, "handleHandoverStart");
-            notifyHandoverInfoChanged(HANDOVER_START, networkType, DataFailCause.NONE);
-        }
-
-        private void handleHandoverSuccess(int networkType) {
-            ImsLog.i(nSlotId, "handleHandoverSuccess");
-            notifyHandoverInfoChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
-            handleIpcanCategory(networkType);
-        }
-
-        private void handleHandoverFailure(int networkType, int causeCode) {
-            ImsLog.i(nSlotId, "handleHandoverFailure");
-            notifyHandoverInfoChanged(HANDOVER_FAILURE, networkType, causeCode);
-        }
-
-        private void handleInitialConnectionFailure(int causeCode) {
-            ImsLog.i(nSlotId, "handleInitialConnectionFailed");
-
-            Message msg = Message.obtain();
-            msg.what = EVENT_DATA_CONNECTION_FAILED;
-            msg.obj = causeCode;
-            sendMessage(msg);
-        }
-
-        private boolean isIpcanChanged(int networkToCheck) {
-            int currentType = (mNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN) ?
-                    IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
-            int checkType = (networkToCheck == TelephonyManager.NETWORK_TYPE_IWLAN) ?
-                    IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
-
-            if (currentType == checkType) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-
-    /* ---------------------------------------------------------------------------------------------
-        Listener class - SubscriptionListener
-    --------------------------------------------------------------------------------------------- */
-    private final class ApnSubscriptionListener extends SubscriptionListener {
-        public ApnSubscriptionListener() {
-            ImsLog.d("ApnSubscriptionListener");
-        }
-
-        @Override
-        public void onCarrierConfigChanged(int phoneId, int subId) {
-            handleCarrierConfigChanged(phoneId, subId);
-        }
-    }
-
+     * This class is for network callback interface
+     */
     public static class ImsNetworkCallback extends ConnectivityManager.NetworkCallback {
         public static final int EVENT_AVAILABLE = 0x00000001;
         public static final int EVENT_LOSING = 0x00000002;
@@ -955,6 +828,9 @@ public abstract class Apn extends Handler implements IApn {
             mTarget = target;
         }
 
+        /**
+         * clear up this class
+         */
         public void cleanUp() {
             mEvents = 0;
             if (mTarget != null) {
@@ -1103,7 +979,7 @@ public abstract class Apn extends Handler implements IApn {
 
             if (ImsLog.DBG) {
                 ImsLog.d(mSlotId, "network=" + network + ", linkProperties=" + linkProperties
-                    + ", ipChanged=" + ipChanged);
+                        + ", ipChanged=" + ipChanged);
             } else {
                 ImsLog.i(mSlotId, "netwokr=" + network + ", ipChanged=" + ipChanged);
             }
@@ -1143,16 +1019,15 @@ public abstract class Apn extends Handler implements IApn {
             boolean bChanged = false;
 
             bChanged = ((mCachedLinkProperties != null) && (newLinkProperties != null)
-                    && !LinkPropertiesUtils.isIdenticalAddresses(
-                            mCachedLinkProperties, newLinkProperties));
+                    && !isIdenticalAddresses(mCachedLinkProperties, newLinkProperties));
 
             if (bChanged) {
                 String[] cachedAddress = null;
                 String[] newAddress = null;
 
-                if (mCachedLinkProperties != null ) {
-                    Collection<LinkAddress> cachedlinkAddresses
-                            = mCachedLinkProperties.getLinkAddresses();
+                if (mCachedLinkProperties != null) {
+                    Collection<LinkAddress> cachedlinkAddresses =
+                            mCachedLinkProperties.getLinkAddresses();
                     if (cachedlinkAddresses.isEmpty()) {
                         ImsLog.w(mSlotId, "cached LinkAddresses is empty, ");
 
@@ -1171,8 +1046,8 @@ public abstract class Apn extends Handler implements IApn {
                 }
 
                 if (newLinkProperties != null) {
-                    Collection<LinkAddress> newlinkAddresses
-                            = newLinkProperties.getLinkAddresses();
+                    Collection<LinkAddress> newlinkAddresses =
+                            newLinkProperties.getLinkAddresses();
                     if (newlinkAddresses.isEmpty()) {
                         ImsLog.w(mSlotId, "new LinkAddresses is empty, ");
                         return false;
@@ -1191,11 +1066,9 @@ public abstract class Apn extends Handler implements IApn {
                 int nSize = 0;
                 if (cachedAddress.length != newAddress.length) {
                     return true;
-                }
-                else {
+                } else {
                     nSize = newAddress.length;
                 }
-
 
                 for (int i = 0; i < nSize; i++) {
                     boolean bIsSame = false;
@@ -1306,7 +1179,7 @@ public abstract class Apn extends Handler implements IApn {
                 if (netAddress instanceof Inet6Address) {
 
                     String ip6Addr = netAddress.getHostAddress();
-                    ImsLog.i(mSlotId, "ip6Address - " + ip6Addr );
+                    ImsLog.i(mSlotId, "ip6Address - " + ip6Addr);
 
                     boolean bSame = false;
                     for (int j = 0; j < i; j++) {
@@ -1317,14 +1190,14 @@ public abstract class Apn extends Handler implements IApn {
 
                     if (!bSame) {
                         addr[i] = ip6Addr;
-                        ImsLog.i(mSlotId, "saved ip6Address - [" + i + "]" + addr[i] );
+                        ImsLog.i(mSlotId, "saved ip6Address - [" + i + "]" + addr[i]);
                         i++;
                     }
                 }
 
                 if (netAddress instanceof Inet4Address) {
                     String ip4Addr = netAddress.getHostAddress();
-                    ImsLog.i(mSlotId, "ip4Address - " + ip4Addr );
+                    ImsLog.i(mSlotId, "ip4Address - " + ip4Addr);
 
                     boolean bSame = false;
                     for (int j = 0; j < i; j++) {
@@ -1335,7 +1208,7 @@ public abstract class Apn extends Handler implements IApn {
 
                     if (!bSame) {
                         addr[i] = ip4Addr;
-                        ImsLog.i(mSlotId, "saved ip4Address - [" + i + "]" + addr[i] );
+                        ImsLog.i(mSlotId, "saved ip4Address - [" + i + "]" + addr[i]);
                         i++;
                     }
                 }
@@ -1410,6 +1283,14 @@ public abstract class Apn extends Handler implements IApn {
             return addr;
         }
 
+        private boolean isIdenticalAddresses(@NonNull LinkProperties left,
+                @NonNull LinkProperties right) {
+            final Collection<InetAddress> leftAddresses = left.getAddresses();
+            final Collection<InetAddress> rightAddresses = right.getAddresses();
+            return (leftAddresses.size() == rightAddresses.size())
+                    ? leftAddresses.containsAll(rightAddresses) : false;
+        }
+
         private void printAddress(String prifix, String[] addresses) {
             StringBuffer sb = new StringBuffer();
             sb.append(prifix + " : ");
@@ -1441,47 +1322,185 @@ public abstract class Apn extends Handler implements IApn {
         }
     }
 
-    static {
-        sEventToString = new Hashtable<Integer, String>();
+    /**
+    *  Handle_EVENT_NOTIFY_DATA_STATE_CHANGED
+    *
+    *        common DATA_STATE_NOTIFICATION handling logic from android PhoneState
+    *        IMS / Emergency APN nothing different to handle current event.
+    *        if we need specific control, child class just need override this.
+    * @param
+    * @return
+    */
+    protected class Handle_EVENT_NOTIFY_DATA_STATE_CHANGED implements MsgProcInterface {
 
-        // Network callbacks
-        sEventToString.put(EVENT_NETWORK_AVAILABLE,
-                "NETWORK_AVAILABLE");
-        sEventToString.put(EVENT_NETWORK_BLOCKED_STATUS_CHANGED,
-                "NETWORK_BLOCKED_STATUS_CHANGED");
-        sEventToString.put(EVENT_NETWORK_CAPABILITIES_CHANGED,
-                "NETWORK_CAPABILITIES_CHANGED");
-        sEventToString.put(EVENT_NETWORK_LINK_PROPERTIES_CHANGED,
-                "NETWORK_LINK_PROPERTIES_CHANGED");
-        sEventToString.put(EVENT_NETWORK_LOSING,
-                "NETWORK_LOSING");
-        sEventToString.put(EVENT_NETWORK_UNAVAILABLE,
-                "NETWORK_UNAVAILABLE");
-        sEventToString.put(EVENT_NETWORK_LOST,
-                "NETWORK_LOST");
+        @Override
+        public void procMsg(Message msg) {
+            // Ignore DataState Change During ShutDown
+            if (mDcNetWatcher != null && mDcNetWatcher.isDoingOffRadio()) {
+                ImsLog.w(mSlotId, "radio is doing off");
+                return;
+            }
 
-        sEventToString.put(EVENT_IP_CHANGED,
-                "IP_CHANGED");
-        sEventToString.put(EVENT_PCSCF_CHANGED,
-                "PCSCF_CHANGED");
-        sEventToString.put(EVENT_WAITING_LOCAL_ADDRESS_IPV6,
-                "WAITING_LOCAL_ADDRESS_IPV6");
-        sEventToString.put(EVENT_NOTIFY_DATA_STATE_CHANGED,
-                "NOTIFY_DATA_STATE_CHANGED");
-        sEventToString.put(EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED,
-                "PRECISE_DATA_CONNECTION_STATE_CHANGED");
-        sEventToString.put(EVENT_DATA_CONNECTION_FAILED,
-                "DATA_CONNECTION_FAILED");
+            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj) msg.obj;
+            if (res == null) {
+                return;
+            }
 
-        sEventToString.put(EVENT_AIRPLANE_MODE_CHANGED,
-                "AIRPLANE_MODE_CHANGED");
-        sEventToString.put(EVENT_WIFI_STATE_CHANGED,
-                "WIFI_STATE_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_SETTING_CHANGED,
-                "VOWIFI_SETTING_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_PREF_CHANGED,
-                "VOWIFI_PREF_CHANGED");
-        sEventToString.put(EVENT_VOWIFI_ROAMING_PREF_CHANGED,
-                "VOWIFI_ROAMING_PREF_CHANGED");
+            // Do not use dataState vi intent
+            EApnType apnType = res.eApnType;
+            EDataState dataState = res.eDataState;
+
+            ISystem system = SystemInterface.getInstance().getSystem(mSlotId);
+            if (system == null) {
+                return;
+            }
+
+            if (dataState == EDataState.DATA_STATE_CONNECT_FAILED) {
+                ImsLog.w(mSlotId, "Data Connection failed : apnType=" + apnType);
+                system.notifyDataConnectionFailed(apnType.getType());
+                return;
+            }
+
+            ImsLog.i(mSlotId, "apnType=" + apnType
+                    + " : " + apnType.getString() + ", dataState=" + dataState);
+
+            system.notifyDataConnectionStateChanged(
+                    apnType.getType(), dataState.getState());
+        }
+    }
+
+    protected class Handle_EVENT_PRECISE_DATA_CONNECTION_STATE_CHANGED
+            implements MsgProcInterface {
+        @Override
+        public void procMsg(Message msg) {
+            if (msg.obj == null) {
+                ImsLog.w(mSlotId, "msg.obj is null");
+                return;
+            }
+            PreciseDataConnectionState dataConnectionState = (PreciseDataConnectionState) msg.obj;
+            ApnSetting apnSetting = dataConnectionState.getApnSetting();
+            int dataState = dataConnectionState.getState();
+            int networkType = dataConnectionState.getNetworkType();
+            int causeCode = dataConnectionState.getLastCauseCode();
+
+            if (networkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                ImsLog.w(mSlotId, "Unknown network type");
+                return;
+            }
+
+            switch (dataState) {
+                case TelephonyManager.DATA_CONNECTED:
+                    if (mPreciseDcState == TelephonyManager.DATA_HANDOVER_IN_PROGRESS) {
+                        if (mNetworkType == TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                            ImsLog.w(mSlotId, "Not handle handover from unknown network");
+                            break;
+                        }
+
+                        if (isIpcanChanged(networkType)) {
+                            // Notify handover is successful
+                            handleHandoverSuccess(networkType);
+                        } else {
+                            // Notify handover failure
+                            handleHandoverFailure(networkType, causeCode);
+                        }
+                    } else {
+                        // update APN string
+                        String strApn = apnSetting.getApnName();
+                        if (strApn != null && !strApn.equals("(null)")) {
+                            mApnString = strApn;
+                        }
+                        // update APN protocol
+                        if ((mDcNetWatcher != null) && mDcNetWatcher.isRoaming()) {
+                            mApnProtocol = apnSetting.getRoamingProtocol();
+                        } else {
+                            mApnProtocol = apnSetting.getProtocol();
+                        }
+                    }
+                    if (mNetworkType != networkType) {
+                        // update network type
+                        ImsLog.i(mSlotId, "network type :: " + mNetworkType + " >> " + networkType);
+                        mNetworkType = networkType;
+                    }
+                    break;
+                case TelephonyManager.DATA_HANDOVER_IN_PROGRESS:
+                    handleHandoverStart(networkType);
+                    break;
+                case TelephonyManager.DATA_DISCONNECTING:
+                    if (mType.getType() == DCConstants.TYPE_IMS) {
+                        IAosRegistration aosReg =
+                                AosFactory.getInstance().getAosRegistration(mSlotId);
+                        if (aosReg != null) {
+                            if (aosReg.getRegisteredNetworkType()
+                                    != IAosRegistrationListener.NetworkType.NONE) {
+                                aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
+                                        IAosRegistration.Pcscf.CURRENT);
+                            }
+                        }
+                    }
+                    break;
+                case TelephonyManager.DATA_DISCONNECTED:
+                    if (mPreciseDcState == TelephonyManager.DATA_CONNECTING
+                                && causeCode != DataFailCause.NONE) {
+                        // initial connection failure
+                        handleInitialConnectionFailure(causeCode);
+                    }
+                    mNetworkType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
+                    break;
+                default:
+                    // no-op
+                    break;
+            }
+
+            // update PreciseDataConnectionState
+            mPreciseDcState = dataState;
+        }
+
+        private void handleHandoverStart(int networkType) {
+            ImsLog.i(mSlotId, "handleHandoverStart");
+            notifyHandoverInfoChanged(HANDOVER_START, networkType, DataFailCause.NONE);
+        }
+
+        private void handleHandoverSuccess(int networkType) {
+            ImsLog.i(mSlotId, "handleHandoverSuccess");
+            notifyHandoverInfoChanged(HANDOVER_SUCCESS, networkType, DataFailCause.NONE);
+            handleIpcanCategory(networkType);
+        }
+
+        private void handleHandoverFailure(int networkType, int causeCode) {
+            ImsLog.i(mSlotId, "handleHandoverFailure");
+            notifyHandoverInfoChanged(HANDOVER_FAILURE, networkType, causeCode);
+        }
+
+        private void handleInitialConnectionFailure(int causeCode) {
+            ImsLog.i(mSlotId, "handleInitialConnectionFailed");
+
+            Message msg = Message.obtain();
+            msg.what = EVENT_DATA_CONNECTION_FAILED;
+            msg.obj = causeCode;
+            sendMessage(msg);
+        }
+
+        private boolean isIpcanChanged(int networkToCheck) {
+            int currentType = (mNetworkType == TelephonyManager.NETWORK_TYPE_IWLAN)
+                    ? IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
+            int checkType = (networkToCheck == TelephonyManager.NETWORK_TYPE_IWLAN)
+                    ? IPCAN_CATEGORY_WLAN : IPCAN_CATEGORY_MOBILE;
+
+            return (currentType != checkType);
+        }
+    }
+
+    /* ---------------------------------------------------------------------------------------------
+        Listener class - SubscriptionListener
+    --------------------------------------------------------------------------------------------- */
+    private final class ApnSubscriptionListener extends SubscriptionListener {
+        ApnSubscriptionListener() {
+            ImsLog.d("ApnSubscriptionListener");
+        }
+
+        @Override
+        public void onCarrierConfigChanged(int phoneId, int subId) {
+            handleCarrierConfigChanged(phoneId, subId);
+        }
     }
 }
