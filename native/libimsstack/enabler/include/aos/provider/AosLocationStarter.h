@@ -38,17 +38,17 @@ public:
     virtual IMS_SINT32 GetSlotId() const;
     virtual void SetSlotId(IN IMS_SINT32 nSlotId);
 
-    virtual void Init(
+    virtual IMS_BOOL Init(
             IN IAosAppContext* piContext, IN IMS_UINT32 nPolicy = POLICY_START_ON_WFC_AVAILABILITY);
-    virtual void SetPolicy(
+    virtual IMS_BOOL SetPolicy(
             IN IMS_UINT32 nPolicy, IN IMS_SINT32 nOperation = 0 /* (0: add, 1: remove) */);
     virtual IMS_BOOL IsPolicyEnabled(IN IMS_UINT32 nPolicy);
 
     virtual void AddBlockReason(
             IN BLOCK_REASON eReason, IN IMS_SINT32 nType = TYPE_VOLTE /* (0: VoLTE, 1: WFC) */);
-    virtual void SetUpdateInterval(IN IMS_UINT32 nInterval);
-    virtual void StartLocationInfoUpdate();
-    virtual void StopLocationInfoUpdate();
+    virtual IMS_BOOL SetUpdateInterval(IN IMS_UINT32 nInterval);
+    virtual IMS_BOOL StartLocationInfoUpdate();
+    virtual IMS_BOOL StopLocationInfoUpdate();
 
 private:
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
@@ -61,8 +61,8 @@ private:
     virtual void OnFeatureDisabled(IN IMS_UINT32 nFeature);
 
     void HandleStartConditionChanged();
-    void Start();
-    void Stop(IN IMS_UINT32 nDelayTime);
+    IMS_BOOL Start();
+    IMS_BOOL Stop(IN IMS_UINT32 nDelayTime);
     void StartTimer(IN IMS_UINT32 nType, IN IMS_UINT32 nDuration);
     void StopTimer(IN IMS_UINT32 nType);
 
@@ -83,8 +83,12 @@ private:
     IMSList<IMS_UINT32> m_objWfcBlockReasons;
     ITimer* m_piStopDelayTimer;
     IAosAppContext* m_piAppContext;
+    IAosBlock* m_piBlock;
 
     AString m_strTag;
+
+private:
+    friend class AosLocationStarterTest;
 };
 
 #endif  // AOS_LOCATION_STARTER_H_
