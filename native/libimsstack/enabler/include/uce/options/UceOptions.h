@@ -27,6 +27,9 @@ public:
             IN IMS_UINT32 nResponse, IN AString reason, IN IMS_UINT32 ownCapabilities);
     void AoSDisconnected();
     IMS_UINT32 GetCapability(IMSList<AString> objContactList);
+    void SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIARITag);
+    void SetICSIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strICSITag);
+    void SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, IN AString& strTag);
 
 protected:
     // ICapabilitiesListener
@@ -40,9 +43,6 @@ private:
     void SendOptionsCommandError(IN IMS_UINT32 code);
     void OptionsTerminated();
     void DestroyCapabilities();
-    void SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIARITag);
-    void SetICSIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strICSITag);
-    void SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, IN AString& strTag);
 
 public:
     enum
@@ -74,12 +74,14 @@ public:
         FEATURE_TAG_CHATBOT_VERSION_V2 = (0x01000000),        // no type
     };
 
+protected:
+    IMS_UINT32 m_nKey;
+    IMS_BOOL m_bIsSendingRequest;
+
 private:
     AString m_strManagerName;
     ICoreService* m_piCoreService;
     ICapabilities* m_piCapabilities;
-    IMS_UINT32 m_nKey;
-    IMS_BOOL m_bIsSendingRequest;
     IMS_SINT32 m_nSimSlot;
     AString m_strMSISDN;
 };

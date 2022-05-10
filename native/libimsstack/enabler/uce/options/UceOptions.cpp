@@ -23,11 +23,11 @@ PUBLIC
 UceOptions::UceOptions(IN CONST AString& strManagerName, IN ICoreService* piCoreService,
         IN ICapabilities* piCapabilities, IN IMS_UINT32 nKey, IN IMS_BOOL isSendingRequest,
         IN IMS_SINT32 nSimSlot) :
+        m_nKey(nKey),
+        m_bIsSendingRequest(isSendingRequest),
         m_strManagerName(strManagerName),
         m_piCoreService(piCoreService),
         m_piCapabilities(piCapabilities),
-        m_nKey(nKey),
-        m_bIsSendingRequest(isSendingRequest),
         m_nSimSlot(nSimSlot)
 {
     m_nSimSlot = nSimSlot;
@@ -264,174 +264,6 @@ IMS_UINT32 UceOptions::GetCapability(IMSList<AString> objContactList)
     return capabilities;
 }
 
-PROTECTED VIRTUAL void UceOptions::CapabilityQueryDelivered(IN ICapabilities* piCapabilities_)
-{
-    // received success response to options request
-    if (piCapabilities_ == IMS_NULL || (m_piCapabilities != piCapabilities_))
-    {
-        IMS_TRACE_I("CapabilityQueryDelivered:piCapabilities_ is null", 0, 0, 0);
-        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
-        OptionsTerminated();
-        return;
-    }
-
-    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
-    if (piMessage == IMS_NULL)
-    {
-        IMS_TRACE_I("CapabilityQueryDelivered:piMessage is null", 0, 0, 0);
-        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
-        OptionsTerminated();
-        return;
-    }
-
-    ISipMessage* piSIPMessage = piMessage->GetMessage();
-    if (piSIPMessage == IMS_NULL)
-    {
-        IMS_TRACE_I("CapabilityQueryDelivered:piSIPMessage is null", 0, 0, 0);
-        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
-        OptionsTerminated();
-        return;
-    }
-
-    IMSList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
-    IMS_UINT32 capabilities = GetCapability(objContactList);
-    SendOptionsResponseInd(piMessage->GetStatusCode(), piMessage->GetReasonPhrase(), capabilities);
-    OptionsTerminated();
-}
-
-PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilities* piCapabilities_)
-{
-    // received failure response to options request
-    if (piCapabilities_ == IMS_NULL || (m_piCapabilities != piCapabilities_))
-    {
-        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piCapabilities_ is null", 0, 0, 0);
-        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
-        OptionsTerminated();
-        return;
-    }
-
-    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
-    if (piMessage == IMS_NULL)
-    {
-        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piMessage is null", 0, 0, 0);
-        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
-        OptionsTerminated();
-        return;
-    }
-
-    ISipMessage* piSIPMessage = piMessage->GetMessage();
-    if (piSIPMessage == IMS_NULL)
-    {
-        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piSIPMessage is null", 0, 0, 0);
-        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
-        OptionsTerminated();
-        return;
-    }
-    SendOptionsResponseInd(piMessage->GetStatusCode(), piMessage->GetReasonPhrase(), 0);
-    OptionsTerminated();
-}
-
-PRIVATE
-void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage)
-{
-    IService* piService = (IService*)m_piCoreService;
-    AString strMyContact = AString::ConstEmpty();
-
-    if (piService->GetPublicGRUU() == IMS_NULL)
-    {
-        strMyContact.Append(piService->GetContactAddress().ToString());
-    }
-    else
-    {
-        strMyContact.Append(piService->GetPublicGRUU()->ToString());
-        piSIPMessage->AddHeader(ISipHeader::SUPPORTED, "gruu");
-    }
-
-    if (!strMyContact.Contains(TextParser::CHAR_LAQUOT))
-    {
-        strMyContact.Prepend(TextParser::CHAR_LAQUOT);
-        strMyContact.Append(TextParser::CHAR_RAQUOT);
-    }
-
-    AString strIari = AString::ConstEmpty();
-    SetIARIFeatureTag(capabilities, strIari);
-    if (!strIari.IsEmpty())
-    {
-        strMyContact.Append(TextParser::CHAR_SEMICOLON);
-        strMyContact.Append("+g.3gpp.iari-ref=");  // iari service start
-        strMyContact.Append(TextParser::STR_DQUOTE);
-        strMyContact.Append(strIari);
-        strMyContact.Append(TextParser::STR_DQUOTE);  // iari service end
-    }
-
-    AString strIcsi = AString::ConstEmpty();
-    SetICSIFeatureTag(capabilities, strIcsi);
-    if (!strIcsi.IsEmpty())
-    {
-        strMyContact.Append(TextParser::CHAR_SEMICOLON);
-        strMyContact.Append("+g.3gpp.icsi-ref=");  // icsi service start
-        strMyContact.Append(TextParser::STR_DQUOTE);
-        strMyContact.Append(strIcsi);
-        strMyContact.Append(TextParser::STR_DQUOTE);  // icsi service end
-    }
-
-    AString strNoType = AString::ConstEmpty();
-    SetNoTypeFeatureTag(capabilities, strNoType);
-
-    if (!strNoType.IsEmpty())
-    {
-        strMyContact.Append(TextParser::CHAR_SEMICOLON);
-        strMyContact.Append(strNoType);
-    }
-
-    piSIPMessage->SetHeader(ISipHeader::CONTACT_NORMAL, strMyContact);
-}
-
-void UceOptions::SendOptionsResponseInd(
-        IN IMS_SINT32 nResponseCode, IN AString reason, IN IMS_UINT32 capabilities)
-{
-    IMS_TRACE_I("SendOptionsResponseInd:key[%d], code[%d], reason[%s]", m_nKey, nResponseCode,
-            reason.GetStr());
-    IUceOptionsResponseIndPrm* pParam = new IUceOptionsResponseIndPrm();
-
-    pParam->m_nKey = m_nKey;
-    pParam->m_nResponseCode = nResponseCode;
-    pParam->m_strReason = reason;
-    pParam->m_nTheirCaps = capabilities;
-
-    IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_RESPONSE_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
-}
-
-void UceOptions::SendOptionsCommandError(IN IMS_UINT32 code)
-{
-    IMS_TRACE_I("SendOptionsCommandError:key[%d], error[%d]", m_nKey, code, 0);
-    IUceOptionsCmdErrorIndPrm* pParam = new IUceOptionsCmdErrorIndPrm();
-    pParam->m_nKey = m_nKey;
-    pParam->m_nCommandError = code;
-
-    IMSMSG objUIMsg(
-            IUUceService::UCE_OPTIONS_CMD_ERROR_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
-    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
-}
-
-void UceOptions::OptionsTerminated()
-{
-    IMS_TRACE_I("OptionsTerminated:send UCE_OPTIONS_DELETED_IND to manager", 0, 0, 0);
-
-    IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_DELETED_IND, 0, m_nKey);
-    MessageService::PostMessage(m_strManagerName, objUIMsg);
-}
-
-void UceOptions::DestroyCapabilities()
-{
-    if (m_piCapabilities != IMS_NULL)
-    {
-        m_piCapabilities->Destroy();
-        m_piCapabilities = IMS_NULL;
-    }
-}
-
 void UceOptions::SetIARIFeatureTag(IN IMS_UINT32 capabilities, IN AString& strIARITag)
 {
     if ((capabilities & FEATURE_TAG_DP) > 0)
@@ -579,5 +411,176 @@ void UceOptions::SetNoTypeFeatureTag(IN IMS_UINT32 capabilities, IN AString& str
     if (!strTag.IsEmpty())
     {
         strTag.Erase(strTag.GetLength() - 1, 1);
+    }
+}
+
+PROTECTED VIRTUAL void UceOptions::CapabilityQueryDelivered(IN ICapabilities* piCapabilities)
+{
+    // received success response to options request
+    if (piCapabilities == IMS_NULL || (m_piCapabilities != piCapabilities))
+    {
+        IMS_TRACE_I("CapabilityQueryDelivered:piCapabilities_ is null", 0, 0, 0);
+        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        OptionsTerminated();
+        return;
+    }
+
+    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
+    if (piMessage == IMS_NULL)
+    {
+        IMS_TRACE_I("CapabilityQueryDelivered:piMessage is null", 0, 0, 0);
+        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        OptionsTerminated();
+        return;
+    }
+
+    ISipMessage* piSIPMessage = piMessage->GetMessage();
+    if (piSIPMessage == IMS_NULL)
+    {
+        IMS_TRACE_I("CapabilityQueryDelivered:piSIPMessage is null", 0, 0, 0);
+        SendOptionsCommandError(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        OptionsTerminated();
+        return;
+    }
+
+    IMSList<AString> objContactList = piSIPMessage->GetHeaders(ISipHeader::CONTACT_NORMAL);
+    IMS_UINT32 capabilities = GetCapability(objContactList);
+    SendOptionsResponseInd(piMessage->GetStatusCode(), piMessage->GetReasonPhrase(), capabilities);
+    OptionsTerminated();
+}
+
+PROTECTED VIRTUAL void UceOptions::CapabilityQueryDeliveryFailed(IN ICapabilities* piCapabilities)
+{
+    // received failure response to options request
+    if (piCapabilities == IMS_NULL || (m_piCapabilities != piCapabilities))
+    {
+        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piCapabilities_ is null", 0, 0, 0);
+        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
+        OptionsTerminated();
+        return;
+    }
+
+    IMessage* piMessage = m_piCapabilities->GetPreviousResponse(IMessage::CAPABILITIES_QUERY);
+    if (piMessage == IMS_NULL)
+    {
+        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piMessage is null", 0, 0, 0);
+        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
+        OptionsTerminated();
+        return;
+    }
+
+    ISipMessage* piSIPMessage = piMessage->GetMessage();
+    if (piSIPMessage == IMS_NULL)
+    {
+        IMS_TRACE_I("CapabilityQueryDeliveryFailed:piSIPMessage is null", 0, 0, 0);
+        SendOptionsResponseInd(SipStatusCode::SC_408, "Request Timeout", 0);
+        OptionsTerminated();
+        return;
+    }
+    SendOptionsResponseInd(piMessage->GetStatusCode(), piMessage->GetReasonPhrase(), 0);
+    OptionsTerminated();
+}
+
+PRIVATE
+void UceOptions::SetContactHeader(IN IMS_UINT32 capabilities, ISipMessage* piSIPMessage)
+{
+    IService* piService = (IService*)m_piCoreService;
+    AString strMyContact = AString::ConstEmpty();
+
+    if (piService->GetPublicGRUU() == IMS_NULL)
+    {
+        strMyContact.Append(piService->GetContactAddress().ToString());
+    }
+    else
+    {
+        strMyContact.Append(piService->GetPublicGRUU()->ToString());
+        piSIPMessage->AddHeader(ISipHeader::SUPPORTED, "gruu");
+    }
+
+    if (!strMyContact.Contains(TextParser::CHAR_LAQUOT))
+    {
+        strMyContact.Prepend(TextParser::CHAR_LAQUOT);
+        strMyContact.Append(TextParser::CHAR_RAQUOT);
+    }
+
+    AString strIari = AString::ConstEmpty();
+    SetIARIFeatureTag(capabilities, strIari);
+    if (!strIari.IsEmpty())
+    {
+        strMyContact.Append(TextParser::CHAR_SEMICOLON);
+        strMyContact.Append("+g.3gpp.iari-ref=");  // iari service start
+        strMyContact.Append(TextParser::STR_DQUOTE);
+        strMyContact.Append(strIari);
+        strMyContact.Append(TextParser::STR_DQUOTE);  // iari service end
+    }
+
+    AString strIcsi = AString::ConstEmpty();
+    SetICSIFeatureTag(capabilities, strIcsi);
+    if (!strIcsi.IsEmpty())
+    {
+        strMyContact.Append(TextParser::CHAR_SEMICOLON);
+        strMyContact.Append("+g.3gpp.icsi-ref=");  // icsi service start
+        strMyContact.Append(TextParser::STR_DQUOTE);
+        strMyContact.Append(strIcsi);
+        strMyContact.Append(TextParser::STR_DQUOTE);  // icsi service end
+    }
+
+    AString strNoType = AString::ConstEmpty();
+    SetNoTypeFeatureTag(capabilities, strNoType);
+
+    if (!strNoType.IsEmpty())
+    {
+        strMyContact.Append(TextParser::CHAR_SEMICOLON);
+        strMyContact.Append(strNoType);
+    }
+
+    piSIPMessage->SetHeader(ISipHeader::CONTACT_NORMAL, strMyContact);
+}
+
+void UceOptions::SendOptionsResponseInd(
+        IN IMS_SINT32 nResponseCode, IN AString reason, IN IMS_UINT32 capabilities)
+{
+    IMS_TRACE_I("SendOptionsResponseInd:key[%d], code[%d], reason[%s]", m_nKey, nResponseCode,
+            reason.GetStr());
+    IUceOptionsResponseIndPrm* pParam = new IUceOptionsResponseIndPrm();
+
+    pParam->m_nKey = m_nKey;
+    pParam->m_nResponseCode = nResponseCode;
+    pParam->m_strReason = reason;
+    pParam->m_nTheirCaps = capabilities;
+
+    IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_RESPONSE_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    m_nKey = 0;
+}
+
+void UceOptions::SendOptionsCommandError(IN IMS_UINT32 code)
+{
+    IMS_TRACE_I("SendOptionsCommandError:key[%d], error[%d]", m_nKey, code, 0);
+    IUceOptionsCmdErrorIndPrm* pParam = new IUceOptionsCmdErrorIndPrm();
+    pParam->m_nKey = m_nKey;
+    pParam->m_nCommandError = code;
+
+    IMSMSG objUIMsg(
+            IUUceService::UCE_OPTIONS_CMD_ERROR_IND, 0, reinterpret_cast<IMS_UINTP>(pParam));
+    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+    m_nKey = 0;
+}
+
+void UceOptions::OptionsTerminated()
+{
+    IMS_TRACE_I("OptionsTerminated:send UCE_OPTIONS_DELETED_IND to manager", 0, 0, 0);
+    m_bIsSendingRequest = IMS_FALSE;
+
+    IMSMSG objUIMsg(IUUceService::UCE_OPTIONS_DELETED_IND, 0, m_nKey);
+    MessageService::PostMessage(m_strManagerName, objUIMsg);
+}
+
+void UceOptions::DestroyCapabilities()
+{
+    if (m_piCapabilities != IMS_NULL)
+    {
+        m_piCapabilities->Destroy();
+        m_piCapabilities = IMS_NULL;
     }
 }
