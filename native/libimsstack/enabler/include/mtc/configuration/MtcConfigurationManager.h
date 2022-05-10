@@ -105,7 +105,7 @@ public:
     IMS_SINT32 GetEmergencyTCallTimer() const;
     IMS_SINT32 GetEmergencyRingbackTimer() const;
     IMS_SINT32 GetEmergency18xTimer() const;
-    IMS_SINT32 GetPolicyForEemergencyUrnEscvMapping() const;
+    IMS_SINT32 GetPolicyForEmergencyUrnEscvMapping() const;
 
     // asset - separated?
     IMS_BOOL IsCheckConferenceEventPackageVersion() const;
@@ -120,11 +120,11 @@ public:
     IMS_SINT32 GetPreAlertingTimer() const;
     IMS_SINT32 GetPolicyForTcallTimerExpiryOfVolteCall() const;
     IMS_SINT32 GetPolicyForTcallTimerExpiryOfVolteEmergencyCall() const;
-    IMS_SINT32 GetPolicyForTcallTimerExpiryOfViwifiCall() const;
+    IMS_SINT32 GetPolicyForTcallTimerExpiryOfVowifiCall() const;
     IMS_BOOL IsCarrierSpecificSipHeader(IN const AString& strHeader) const;
     IMS_BOOL IsCheckAvchangeFeatureForCallConvertingCapability() const;
     IMS_BOOL IsSupportRegistrationRecoveryForFailureOfSessionRefresh() const;
-    IMS_BOOL IsCallMaintainingOnRegistrationSupended(
+    IMS_BOOL IsCallMaintainingOnRegistrationSuspended(
             IN IMS_SINT32 nSuspendType) const;  // AoSReason?
     IMS_BOOL IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(IN IMS_SINT32 nCode) const;
     IMS_BOOL IsUseMcidSupplementaryService() const;

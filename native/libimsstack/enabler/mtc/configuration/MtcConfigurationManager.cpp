@@ -511,9 +511,9 @@ IMS_SINT32 MtcConfigurationManager::GetEmergency18xTimer() const
 }
 
 PUBLIC
-IMS_SINT32 MtcConfigurationManager::GetPolicyForEemergencyUrnEscvMapping() const
+IMS_SINT32 MtcConfigurationManager::GetPolicyForEmergencyUrnEscvMapping() const
 {
-    return m_objCarrierConfig.nPolicyForEemergencyUrnEscvMapping;
+    return m_objCarrierConfig.nPolicyForEmergencyUrnEscvMapping;
 }
 
 // ASSETs
@@ -590,9 +590,9 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVolteEmergency
 }
 
 PUBLIC
-IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfViwifiCall() const
+IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVowifiCall() const
 {
-    return m_objAsset.nPolicyForTcallTimerExpiryOfViwifiCall;
+    return m_objAsset.nPolicyForTcallTimerExpiryOfVowifiCall;
 }
 
 PUBLIC
@@ -621,12 +621,12 @@ IMS_BOOL MtcConfigurationManager::IsSupportRegistrationRecoveryForFailureOfSessi
 }
 
 PUBLIC
-IMS_BOOL MtcConfigurationManager::IsCallMaintainingOnRegistrationSupended(
+IMS_BOOL MtcConfigurationManager::IsCallMaintainingOnRegistrationSuspended(
         IN IMS_SINT32 nSuspendType) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objCallMaintainingOnRegistrationSupendeds.GetSize(); i++)
+    for (IMS_UINT32 i = 0; i < m_objAsset.objCallMaintainingOnRegistrationSuspendeds.GetSize(); i++)
     {
-        if (m_objAsset.objCallMaintainingOnRegistrationSupendeds.GetAt(i) == nSuspendType)
+        if (m_objAsset.objCallMaintainingOnRegistrationSuspendeds.GetAt(i) == nSuspendType)
         {
             return IMS_TRUE;
         }

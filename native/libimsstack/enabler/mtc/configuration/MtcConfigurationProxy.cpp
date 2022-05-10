@@ -186,8 +186,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
             return m_objManager.IsShortCallCode(nAdditionalInfo);
         case Feature::REJECT_CODE_FOR_CSFB:
             return m_objManager.IsRejectCodeForCsfb(nAdditionalInfo);
-        case Feature::CALL_MAINTAINING_ON_REGISTRATION_SUPENDED:
-            return m_objManager.IsCallMaintainingOnRegistrationSupended(nAdditionalInfo);
+        case Feature::CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED:
+            return m_objManager.IsCallMaintainingOnRegistrationSuspended(nAdditionalInfo);
         case Feature::REQUIRING_EMERGENCY_CALL_WHEN_VIDEO_EMERGENCY_CALL_FAILED:
             return m_objManager.IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(
                     nAdditionalInfo);
@@ -278,8 +278,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_objManager.GetEmergencyRingbackTimer();
         case Feature::EMERGENCY_18X_TIMER:
             return m_objManager.GetEmergency18xTimer();
-        case Feature::POLICY_FOR_EEMERGENCY_URN_ESCV_MAPPING:
-            return m_objManager.GetPolicyForEemergencyUrnEscvMapping();
+        case Feature::POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING:
+            return m_objManager.GetPolicyForEmergencyUrnEscvMapping();
         case Feature::CONFERENCE_DROP_REFER_TO_URI_SOURCE_TYPE:
             return m_objManager.GetConferenceDropReferToUriSourceType();
         case Feature::MEDIA_TYPE_FOR_OFFERLESS_REINVITE:
@@ -294,8 +294,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_objManager.GetPolicyForTcallTimerExpiryOfVolteCall();
         case Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL:
             return m_objManager.GetPolicyForTcallTimerExpiryOfVolteEmergencyCall();
-        case Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VIWIFI_CALL:
-            return m_objManager.GetPolicyForTcallTimerExpiryOfViwifiCall();
+        case Feature::POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL:
+            return m_objManager.GetPolicyForTcallTimerExpiryOfVowifiCall();
         case Feature::WIFI_EMERGENCY_18X_TIMER:
             return m_objManager.GetWifiEmergency18xTimer();
         case Feature::MAXIMUM_WAIT_TIMER_FOR_GEOLOCATION_PIDF_INFO:

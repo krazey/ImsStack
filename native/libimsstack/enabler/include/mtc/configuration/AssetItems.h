@@ -21,11 +21,11 @@ public:
             nPreAlertingTimer(0),
             nPolicyForTcallTimerExpiryOfVolteCall(2),
             nPolicyForTcallTimerExpiryOfVolteEmergencyCall(2),
-            nPolicyForTcallTimerExpiryOfViwifiCall(0),
+            nPolicyForTcallTimerExpiryOfVowifiCall(0),
             objCarrierSpecificSipHeaders(IMSVector<AString>()),
             bCheckAvchangeFeatureForCallConvertingCapability(IMS_FALSE),
             bSupportRegistrationRecoveryForFailureOfSessionRefresh(IMS_FALSE),
-            objCallMaintainingOnRegistrationSupendeds(IMSVector<IMS_SINT32>()),
+            objCallMaintainingOnRegistrationSuspendeds(IMSVector<IMS_SINT32>()),
             objRequiringEmergencyCallWhenVideoEmergencyCallFaileds(IMSVector<IMS_SINT32>()),
             bUseMcidSupplementaryService(IMS_FALSE),
             bUseMmcSupplementaryService(IMS_FALSE),
@@ -59,7 +59,7 @@ public:
     ~AssetItems()
     {
         objCarrierSpecificSipHeaders.Clear();
-        objCallMaintainingOnRegistrationSupendeds.Clear();
+        objCallMaintainingOnRegistrationSuspendeds.Clear();
         objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.Clear();
         objVilteToVolteRetryFailureResponseCodes.Clear();
         objRegistrationDisconnectReasonToTerminateOngoingCalls.Clear();
@@ -82,11 +82,11 @@ public:
     IMS_SINT32 nPreAlertingTimer;
     IMS_SINT32 nPolicyForTcallTimerExpiryOfVolteCall;
     IMS_SINT32 nPolicyForTcallTimerExpiryOfVolteEmergencyCall;
-    IMS_SINT32 nPolicyForTcallTimerExpiryOfViwifiCall;
+    IMS_SINT32 nPolicyForTcallTimerExpiryOfVowifiCall;
     IMSVector<AString> objCarrierSpecificSipHeaders;
     IMS_BOOL bCheckAvchangeFeatureForCallConvertingCapability;
     IMS_BOOL bSupportRegistrationRecoveryForFailureOfSessionRefresh;
-    IMSVector<IMS_SINT32> objCallMaintainingOnRegistrationSupendeds;               // name?
+    IMSVector<IMS_SINT32> objCallMaintainingOnRegistrationSuspendeds;              // name?
     IMSVector<IMS_SINT32> objRequiringEmergencyCallWhenVideoEmergencyCallFaileds;  // name?
     IMS_BOOL bUseMcidSupplementaryService;
     IMS_BOOL bUseMmcSupplementaryService;

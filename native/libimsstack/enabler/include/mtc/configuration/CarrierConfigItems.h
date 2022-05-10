@@ -77,7 +77,7 @@ public:
             nEmergencyTCallTimer(10000),
             nEmergencyRingbackTimer(10000),
             nEmergency18xTimer(20000),
-            nPolicyForEemergencyUrnEscvMapping(0)
+            nPolicyForEmergencyUrnEscvMapping(0)
     {
     }
     ~CarrierConfigItems()
@@ -173,7 +173,7 @@ public:
     IMS_SINT32 nEmergencyTCallTimer;
     IMS_SINT32 nEmergencyRingbackTimer;
     IMS_SINT32 nEmergency18xTimer;
-    IMS_SINT32 nPolicyForEemergencyUrnEscvMapping;
+    IMS_SINT32 nPolicyForEmergencyUrnEscvMapping;
 };
 
 #endif

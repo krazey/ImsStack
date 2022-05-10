@@ -209,7 +209,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT);
     objItems.nEmergency18xTimer =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT);
-    objItems.nPolicyForEemergencyUrnEscvMapping = piCc->GetInt(
+    objItems.nPolicyForEmergencyUrnEscvMapping = piCc->GetInt(
             CarrierConfig::ImsEmergency::KEY_POLICY_FOR_EMERGENCY_URN_ESCV_MAPPING_INT);
 }
 
@@ -242,7 +242,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
             CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_CALL_INT);
     objItems.nPolicyForTcallTimerExpiryOfVolteEmergencyCall = piCc->GetInt(
             CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOLTE_EMERGENCY_CALL_INT);
-    objItems.nPolicyForTcallTimerExpiryOfViwifiCall = piCc->GetInt(
+    objItems.nPolicyForTcallTimerExpiryOfVowifiCall = piCc->GetInt(
             CarrierConfig::Assets::KEY_POLICY_FOR_TCALL_TIMER_EXPIRY_OF_VOWIFI_CALL_INT);
     objItems.objCarrierSpecificSipHeaders = piCc->GetStringArray(
             CarrierConfig::Assets::KEY_CARRIER_SPECIFIC_SIP_HEADERS_STRING_ARRAY);
@@ -251,7 +251,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByAsset(
     objItems.bSupportRegistrationRecoveryForFailureOfSessionRefresh =
             piCc->GetBoolean(CarrierConfig::Assets::
                             KEY_SUPPORT_REGISTRATION_RECOVERY_FOR_FAILURE_OF_SESSION_REFRESH_BOOL);
-    objItems.objCallMaintainingOnRegistrationSupendeds = piCc->GetIntArray(CarrierConfig::Assets::
+    objItems.objCallMaintainingOnRegistrationSuspendeds = piCc->GetIntArray(CarrierConfig::Assets::
                     KEY_POLICY_FOR_CALL_MAINTAINING_ON_REGISTRATION_SUSPENDED_INT_ARRAY);
     objItems.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds = piCc->GetIntArray(
             CarrierConfig::Assets::
