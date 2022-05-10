@@ -17,12 +17,12 @@
 #include "IMSTypeDef.h"
 #include "ImsMessageDef.h"
 
-#define MSG_THREAD_BASE 0                   // for thread operation
+#define MSG_THREAD_BASE                 0   // for thread operation
 #define MSG_THREAD_RECEIVED_NOTIFY_RLMI 50  // received notify msg include rlmi xml body.
 #define MSG_THREAD_RECEIVED_NOTIFY_PIDF 51  // received notify msg include pidf xml body.
-#define MSG_THREAD_PARSERED_XML_RLMI 52     // rlmi xml parser is done
-#define MSG_THREAD_PARSERED_XML_PIDF 53     // pidf xml parser is done
-#define MSG_THREAD_NOTIFY_COMPLETED 54
+#define MSG_THREAD_PARSERED_XML_RLMI    52  // rlmi xml parser is done
+#define MSG_THREAD_PARSERED_XML_PIDF    53  // pidf xml parser is done
+#define MSG_THREAD_NOTIFY_COMPLETED     54
 
 class UceNamespace
 {

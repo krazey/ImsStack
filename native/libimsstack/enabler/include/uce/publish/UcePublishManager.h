@@ -21,10 +21,10 @@
 #include "base/IMessageMediator.h"
 
 #define GET_MESSAGE_FROM_RESPONSE IMS_TRUE
-#define GET_MESSAGE_FOR_REQUEST IMS_FALSE
+#define GET_MESSAGE_FOR_REQUEST   IMS_FALSE
 
-#define INITIAL IMS_FALSE
-#define REFRESH IMS_TRUE
+#define INITIAL                   IMS_FALSE
+#define REFRESH                   IMS_TRUE
 
 class ICoreService;
 class IPublication;
@@ -112,7 +112,10 @@ public:
     IMS_BOOL AosConnected(IMS_UINT32 conectedService);  // AoS-connected
     IMS_BOOL AosDisConnected();                         // AoS-disconnected
     IMS_BOOL AosDisConnecting();                        // AoS-disconnecting
-    void ClosedService();                               // core service closed
+    IMS_BOOL ClosedService();                           // core service closed
+
+    void SetState(IMS_UINT32 _eState);
+
 protected:
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
     // IPublicationListener - start
@@ -194,8 +197,8 @@ private:
 
     void SendPendingPublishRequest();
     void ClearPendingPublishRequest();
-
-    IMS_BOOL SetState(IMS_UINT32 _eState);
+    IMS_UINT32 GetKey();
+    IMS_UINT32 GetState();
     const IMS_CHAR* StateToString(IMS_UINT32 _eState);
     /* ------------------------------------------------------------------------------------------
         Variables
@@ -236,9 +239,12 @@ protected:
     {
         SC_NO_RESPONSE = 4
     };
+    IMS_UINT32 m_eState;
+    IMS_UINT32 m_nKey;
+    IMS_BOOL m_bReceivedUnPublishRequest;
+    IPublicationData* m_pPendingPublicationData;
 
 private:
-    IMS_UINT32 m_nKey;
     AString m_strPidfXml;
     AString m_strEtag;
     IMS_UINT32 m_nCapability;
@@ -248,7 +254,6 @@ private:
     IPublication* m_piPublication;
     AString m_strAppName;
 
-    IMS_UINT32 m_eState;
     // variable that caches the configuration value.
     IMSVector<IMS_SINT32> m_objExponentialRetryTimeSec;
     // saving registered service for add feature tags to contact header.
@@ -259,8 +264,6 @@ private:
     // publish request with a compressed body fails, the publish request is
     // retried with the original body.
     IMS_BOOL m_bReceivedFailResponse;
-    IPublicationData* m_pPendingPublicationData;
-    IMS_BOOL m_bReceivedUnPublishRequest;
     IMS_BOOL m_bSetPublishStarted;
     IMS_BOOL m_bUnpublishSent;
 

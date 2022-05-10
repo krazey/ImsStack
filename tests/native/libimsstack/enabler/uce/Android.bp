@@ -1,0 +1,13 @@
+cc_test {
+    name: "ImsStackNativeEnablerUceTests",
+    defaults: [
+        "imsstack_native_test_enabler_defaults",
+    ],
+    srcs: [
+        "**/*.cpp",
+    ],
+    cflags: [
+        "-Wno-unused-parameter",
+    ],
+    test_config: "ImsStackNativeEnablerUceTests.xml",
+}
