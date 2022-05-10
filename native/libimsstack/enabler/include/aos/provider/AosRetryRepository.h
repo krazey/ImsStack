@@ -34,14 +34,17 @@ public:
         TYPE_EMERGENCY
     };
 
-private:
     virtual IMS_BOOL IncreaseRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL);
     virtual void ResetRetryCount(IN IMS_UINT32 nType = TYPE_NORMAL);
 
+private:
     AString m_strTag;
 
     IMS_SINT32 m_nSlotId;
     IMS_SINT32 m_nRetryCount;
     IMS_SINT32 m_nEmergencyRetryCount;
+
+private:
+    friend class AosRetryRepositoryTest;
 };
 #endif  // AOS_RETRYREPOSITORY_H_
