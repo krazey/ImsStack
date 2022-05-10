@@ -34,8 +34,7 @@ MtsFactory::~MtsFactory()
     m_objMtsApp.Clear();
 }
 
-PUBLIC GLOBAL
-MtsFactory* MtsFactory::GetInstance()
+PUBLIC GLOBAL MtsFactory* MtsFactory::GetInstance()
 {
     static MtsFactory* s_pFactory = IMS_NULL;
 
@@ -67,7 +66,6 @@ void MtsFactory::StartMts(IN IMS_SINT32 nSlotId)
         return;
     }
     MtsApp->Start();
-
 }
 
 PUBLIC

@@ -18,11 +18,8 @@
 
 __IMS_TRACE_TAG_COM_SMS__;
 
-MtsService::MtsService(
-        IN const AString& strMtsAppId,
-        IN const AString& strServiceId,
-        IN IMS_SINT32 nSlotId,
-        IN MtsDynamicLoader* pMtsDynamicLoader) :
+MtsService::MtsService(IN const AString& strMtsAppId, IN const AString& strServiceId,
+        IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader) :
         IMSService(AString::ConstNull()),
         m_strAppId(strMtsAppId),
         m_strServiceId(strServiceId),
@@ -42,7 +39,7 @@ MtsService::~MtsService()
 
 PRIVATE
 void MtsService::Init(
-        IN const AString &strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId)
+        IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_I("Init", 0, 0, 0);
 
@@ -63,8 +60,8 @@ void MtsService::Init(
     AString aStrParams;
     aStrParams.Sprintf("%s=%s", "serviceId", GetId().GetStr());
 
-    m_piCoreService = DYNAMIC_CAST(ICoreService*,
-            (Connector::Open(IMSCore::CONNECTION_SCHEME, GetAppId(), aStrParams)));
+    m_piCoreService = DYNAMIC_CAST(
+            ICoreService*, (Connector::Open(IMSCore::CONNECTION_SCHEME, GetAppId(), aStrParams)));
 
     if (m_piCoreService == IMS_NULL)
     {
@@ -156,16 +153,15 @@ PUBLIC
 void MtsService::CoreService_ReferenceReceived(
         IN ICoreService* piService, IN IReference* piReference)
 {
-    (void) piService;
-    (void) piReference;
+    (void)piService;
+    (void)piReference;
 
     IMS_TRACE_I("CoreService_ReferenceReceived : Service Name = %s", GetName().GetStr(), 0, 0);
     return;
 }
 
 PUBLIC
-void MtsService::CoreService_ServiceClosed(
-        IN ICoreService* piService, IN IReasonInfo* piReasonInfo)
+void MtsService::CoreService_ServiceClosed(IN ICoreService* piService, IN IReasonInfo* piReasonInfo)
 {
     (void)piService;
     (void)piReasonInfo;
@@ -231,10 +227,7 @@ void MtsService::ImsAos_Connected(IN IMS_UINT32 /*nFeatures*/, IN IMS_UINT32 /*n
 }
 
 PUBLIC
-void MtsService::ImsAos_Connecting()
-{
-
-}
+void MtsService::ImsAos_Connecting() {}
 
 PUBLIC
 void MtsService::ImsAos_Disconnected(IN IMS_UINT32 nReason)
@@ -313,8 +306,8 @@ void MtsService::ImsAos_Resumed()
 }
 
 PUBLIC
-void MtsService::IMSAoSApp_NotifySpecificMessage(IN IMS_UINT32 nMsg,
-        IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
+void MtsService::IMSAoSApp_NotifySpecificMessage(
+        IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
 {
     if (m_pMtsDynamicLoader == IMS_NULL)
     {
@@ -323,7 +316,6 @@ void MtsService::IMSAoSApp_NotifySpecificMessage(IN IMS_UINT32 nMsg,
     }
 
     MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
-
 
     if (pMtsServiceState != IMS_NULL)
     {
@@ -353,10 +345,10 @@ void MtsService::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 
 PUBLIC
 void MtsService::ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
-    (void) nType;
-    (void) nState;
+    (void)nType;
+    (void)nState;
 
-    IMS_TRACE_I("MtsService::IMSAoSAppMonitor_Notify - nType [%d], nInfo [%d]", nType, nState,0);
+    IMS_TRACE_I("MtsService::IMSAoSAppMonitor_Notify - nType [%d], nInfo [%d]", nType, nState, 0);
 }
 
 PUBLIC

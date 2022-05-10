@@ -6,8 +6,8 @@
 class MtsStrName final
 {
 public:
-    MtsStrName(){}
-    ~MtsStrName(){}
+    MtsStrName() {}
+    ~MtsStrName() {}
 
     AString GetMtsAppId();
     AString GetMtsServiceId();

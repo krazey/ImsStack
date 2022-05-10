@@ -12,8 +12,7 @@ class IPageMessage;
 class MtsDynamicLoader;
 class MtsSmUtils;
 
-class MtsMessageController final :
-        public IMSActivityEx
+class MtsMessageController final : public IMSActivityEx
 {
 public:
     MtsMessageController(IN IMS_SINT32 nSlotID, MtsDynamicLoader* pMtsDynamicLoader);
@@ -40,7 +39,7 @@ public:
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
     void SendMtsMessage(IN IUSendSmsRequestParam* pSendParam, IN IMS_BOOL bIsSmsEServiceType);
-    void ReceiveMtsMessage(IN IPageMessage* piPageMessage,  IN IMS_BOOL bIsSmsEServiceType);
+    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bIsSmsEServiceType);
 
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
     ICoreService* GetICoreService();
@@ -51,7 +50,7 @@ public:
 
 protected:
     // IMSActivityEx
-    IMS_BOOL OnMessage(IN IMSMSG &objMSG);
+    IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
 private:
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
@@ -60,7 +59,7 @@ public:
     enum
     {
         MESSAGE_TYPE_RECEIVE = 0,
-        MESSAGE_TYPE_SEND    = 1,
+        MESSAGE_TYPE_SEND = 1,
     };
 
     enum
@@ -81,23 +80,23 @@ public:
     };
 
 protected:
-    IMS_SINT32                      m_nSlotId;
+    IMS_SINT32 m_nSlotId;
 
 public:
-    IMS_BOOL                        m_bProcessingMsg;
-    IMS_UINT32                      m_nCallTypeMsg;
-    IMS_UINT32                      m_nCallStateMsg;
+    IMS_BOOL m_bProcessingMsg;
+    IMS_UINT32 m_nCallTypeMsg;
+    IMS_UINT32 m_nCallStateMsg;
 
 private:
-    AString                         m_strLastRcvIpsmgwAddr;
-    IMSList<IMtsMessage*>           m_objMsgList;
-    IMtsMessageControllerListener*  m_piMtsMessageControllerListener;
-    IMSList<IMtsMessage*>           m_objRPAckedMsgs;
-    IMtsService*                    m_piMtsService;
+    AString m_strLastRcvIpsmgwAddr;
+    IMSList<IMtsMessage*> m_objMsgList;
+    IMtsMessageControllerListener* m_piMtsMessageControllerListener;
+    IMSList<IMtsMessage*> m_objRPAckedMsgs;
+    IMtsService* m_piMtsService;
 
 protected:
-    MtsSmUtils*                     m_pMtsSmUtils;
-    MtsDynamicLoader*               m_pMtsDynamicLoader;
+    MtsSmUtils* m_pMtsSmUtils;
+    MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 
 #endif

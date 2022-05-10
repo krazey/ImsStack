@@ -12,11 +12,8 @@ public:
     ~MtsSipFormUtils();
 
     static MtsSipFormUtils* GetInstance(IN IMS_SINT32 nSlotId);
-    IMS_BOOL FormDestination(
-            IN const IMS_CHAR* szMDN,
-            IN const IMS_BOOL bIsAckorError,
-            IN const AString& strLastIpSmgw,
-            OUT AString& strDest);
+    IMS_BOOL FormDestination(IN const IMS_CHAR* szMDN, IN const IMS_BOOL bIsAckorError,
+            IN const AString& strLastIpSmgw, OUT AString& strDest);
     AString FormContentTypeEnumToStr(IN IMS_UINT32 nType);
     IMS_UINT32 FormContentTypeStrToEnum(IN AString strContentType);
     void UpdateFormatFromDb();
@@ -47,9 +44,9 @@ public:
     IMS_UINT32 m_nMtsFormat;
 
 protected:
-    MtsDialingPlan*     m_pMtsDialingPlan;
-    AString             m_strPsi;
-    IMS_SINT32          m_nSlotId;
+    MtsDialingPlan* m_pMtsDialingPlan;
+    AString m_strPsi;
+    IMS_SINT32 m_nSlotId;
 };
 
 #endif

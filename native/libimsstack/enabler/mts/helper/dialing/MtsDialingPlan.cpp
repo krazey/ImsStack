@@ -8,8 +8,8 @@
 __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
-MtsDialingPlan::MtsDialingPlan(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberFormat,
-        IN const AString& strScheme) :
+MtsDialingPlan::MtsDialingPlan(
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberFormat, IN const AString& strScheme) :
         m_nSlotId(nSlotId),
         m_nNumberFormat(nNumberFormat),
         m_strScheme(strScheme),
@@ -24,14 +24,10 @@ MtsDialingPlan::MtsDialingPlan(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberForma
 }
 
 PUBLIC
-MtsDialingPlan::~MtsDialingPlan()
-{
-}
+MtsDialingPlan::~MtsDialingPlan() {}
 
 PUBLIC
-AString MtsDialingPlan::Translate(
-        IN const AString& strNumber,
-        IN IMS_BOOL bAquot /* = IMS_TRUE */,
+AString MtsDialingPlan::Translate(IN const AString& strNumber, IN IMS_BOOL bAquot /* = IMS_TRUE */,
         IN IMS_BOOL bUssi /* = IMS_FALSE*/)
 {
     if (strNumber.GetLength() == 0)
@@ -42,8 +38,8 @@ AString MtsDialingPlan::Translate(
 
     AString strLog;
 
-    IMS_TRACE_D("Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0,
-            0);
+    IMS_TRACE_D(
+            "Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
 
     AStringBuffer objUri(128);
 
@@ -151,9 +147,7 @@ Remarks
 
 */
 PUBLIC
-AString MtsDialingPlan::Translate(
-        IN const AString& strNumber,
-        IN const AString& strScheme,
+AString MtsDialingPlan::Translate(IN const AString& strNumber, IN const AString& strScheme,
         IN IMS_BOOL bAquot /* = IMS_TRUE */)
 {
     if (strScheme.GetLength() == 0)
@@ -169,10 +163,10 @@ AString MtsDialingPlan::Translate(
 
     AString strLog;
 
-    (void) strLog;
+    (void)strLog;
 
-    IMS_TRACE_D("Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0,
-            0);
+    IMS_TRACE_D(
+            "Dialed number :: %s", UtilService::GetLogString(strNumber, strLog, 3).GetStr(), 0, 0);
 
     AStringBuffer objUri(128);
 
@@ -263,24 +257,19 @@ AString MtsDialingPlan::Translate(
 }
 
 PUBLIC
-AString MtsDialingPlan::TranslateEx(
-        IN const AString& strNumber,
-        IN IMS_SINT32 nFlags /*= FLAG_NONE */,
-        IN IMS_BOOL bAquot /*= IMS_TRUE*/,
+AString MtsDialingPlan::TranslateEx(IN const AString& strNumber,
+        IN IMS_SINT32 nFlags /*= FLAG_NONE */, IN IMS_BOOL bAquot /*= IMS_TRUE*/,
         IN IMS_BOOL bUssi /*= IMS_FALSE*/)
 {
-    (void) nFlags;
+    (void)nFlags;
     return Translate(strNumber, bAquot, bUssi);
 }
 
 PUBLIC
-AString MtsDialingPlan::TranslateEx(
-        IN const AString& strNumber,
-        IN const AString& strScheme,
-        IN IMS_SINT32 nFlags /*= FLAG_NONE*/,
-        IN IMS_BOOL bAquot /*= IMS_TRUE*/)
+AString MtsDialingPlan::TranslateEx(IN const AString& strNumber, IN const AString& strScheme,
+        IN IMS_SINT32 nFlags /*= FLAG_NONE*/, IN IMS_BOOL bAquot /*= IMS_TRUE*/)
 {
-    (void) nFlags;
+    (void)nFlags;
     return Translate(strNumber, strScheme, bAquot);
 }
 
@@ -348,7 +337,7 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
     }
 
     INetworkConnection* piConnection =
-            NetworkService::GetNetworkService()->FindConnection(strProfile);
+            NetworkService::GetNetworkService()->FindConnection(strProfile, m_nSlotId);
 
     if (piConnection == IMS_NULL)
     {
@@ -357,7 +346,7 @@ AccessNetworkInfo* MtsDialingPlan::GetAccessNetworkInfo(IN_OUT AccessNetworkInfo
 
     piConnection->GetAccessNetworkInfo(objAni);
 
-    return& objAni;
+    return &objAni;
 }
 
 PROTECTED
@@ -389,11 +378,8 @@ IMS_BOOL MtsDialingPlan::TranslateAsLocal(IN const AString& strNumber, OUT AStri
 }
 
 PROTECTED
-IMS_BOOL MtsDialingPlan::FormNonTelUri(
-        IN const AString& strNumber,
-        IN IMS_BOOL bAquot,
-        OUT AStringBuffer& objUri,
-        IN const AString& strScheme /* = AString::ConstNull() */)
+IMS_BOOL MtsDialingPlan::FormNonTelUri(IN const AString& strNumber, IN IMS_BOOL bAquot,
+        OUT AStringBuffer& objUri, IN const AString& strScheme /* = AString::ConstNull() */)
 {
     if (strScheme.GetLength() != 0)
     {
@@ -465,9 +451,7 @@ IMS_BOOL MtsDialingPlan::FormNonTelUri(
 }
 
 PROTECTED
-IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(
-        IN const AString& strNumber,
-        OUT AStringBuffer& objUri,
+IMS_BOOL MtsDialingPlan::FormUssiNonTelUri(IN const AString& strNumber, OUT AStringBuffer& objUri,
         IN const AString& strScheme /* = AString::ConstNull() */)
 {
     IMS_TRACE_I("FormUssiNonTelUri", 0, 0, 0);
@@ -535,8 +519,7 @@ IMS_SINT32 MtsDialingPlan::TranslateScheme(IN const AString& /* strNumber */) co
     return SCHEME_UNKNOWN;
 }
 
-PROTECTED GLOBAL
-IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString& strDial)
+PROTECTED GLOBAL IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString& strDial)
 {
     /*
      * global-number-digits := "+" *phonedigit DIGIT *phonedigit
@@ -581,8 +564,7 @@ IMS_SINT32 MtsDialingPlan::GetDialedNumberFormat(IN const AString& strDial)
     }
 }
 
-PROTECTED GLOBAL
-IMS_BOOL MtsDialingPlan::IsVisualSeparator(IN IMS_CHAR szCh)
+PROTECTED GLOBAL IMS_BOOL MtsDialingPlan::IsVisualSeparator(IN IMS_CHAR szCh)
 {
     // "-", ".", "(", ")"
     if ((szCh == '-') || (szCh == '.') || (szCh == '(') || (szCh == ')'))

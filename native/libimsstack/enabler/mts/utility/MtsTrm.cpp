@@ -34,7 +34,6 @@ MtsTrm::MtsTrm(IN IMS_SINT32 nSlotId) :
             m_piTrm = IMS_NULL;
         }
     }
-
 }
 
 PUBLIC
@@ -54,13 +53,11 @@ MtsTrm::~MtsTrm()
     StopTimer();
 }
 
-PUBLIC GLOBAL
-MtsTrm* MtsTrm::GetInstance(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL MtsTrm* MtsTrm::GetInstance(IN IMS_SINT32 nSlotId)
 {
-
     if (nSlotId < 0 || nSlotId > 1)
     {
-        IMS_TRACE_E(0,"MtsTrm::GetInstance() Error! Invalid SlotId:%d", nSlotId,0,0);
+        IMS_TRACE_E(0, "MtsTrm::GetInstance() Error! Invalid SlotId:%d", nSlotId, 0, 0);
         nSlotId = 0;
     }
 
@@ -180,7 +177,6 @@ void MtsTrm::Set(IN IMS_BOOL bStart)
         if (m_bIsTrmSet)
         {
             StartTimer(MTS_TRM_TIME_STOP_DELAY);
-
         }
     }
 }
@@ -193,8 +189,8 @@ void MtsTrm::StartTimer(IN IMS_UINT32 nDuration)
         StopTimer();
     }
 
-    m_piMtsTrmTimer = MtsUtils::GetInstance()->StartTimer(nDuration, this,
-            "TIMER_MTS_TRM_TIME_STOP_DELAY");
+    m_piMtsTrmTimer =
+            MtsUtils::GetInstance()->StartTimer(nDuration, this, "TIMER_MTS_TRM_TIME_STOP_DELAY");
 }
 
 PRIVATE

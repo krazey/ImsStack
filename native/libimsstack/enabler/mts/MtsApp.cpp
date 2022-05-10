@@ -52,12 +52,12 @@ MtsApp::MtsApp(IN IMS_SINT32 nSlotId) :
 PUBLIC
 MtsApp::~MtsApp()
 {
-    IMS_TRACE_I( "~MtsApp", 0, 0, 0 );
+    IMS_TRACE_I("~MtsApp", 0, 0, 0);
 
-    //Remove MtsUtils
+    // Remove MtsUtils
     DestroyMtsUtils();
 
-    //Remove Mts Service
+    // Remove Mts Service
     RemoveMtsService();
     RemoveMtsClient(m_nSlotId);
 
@@ -73,7 +73,6 @@ MtsApp::~MtsApp()
         MtsTrm::DestroyMtsTrm(m_nSlotId);
         m_bTrmBlock = IMS_FALSE;
         m_pMtsAppTrm = IMS_NULL;
-
     }
 
     if (m_pCallTracker != IMS_NULL)
@@ -83,34 +82,33 @@ MtsApp::~MtsApp()
     }
 }
 
-PUBLIC VIRTUAL
-void MtsApp::Start()
+PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start : m_nSlotId : [%d]", m_nSlotId, 0, 0);
 
-    //MtsUtils
+    // MtsUtils
     /*===================*/
     CreateMtsUtils(m_nSlotId);
 
-    //MtsService
+    // MtsService
     /*===================*/
     CreateMtsService(m_nSlotId);
 
-    //MtsMessageController
+    // MtsMessageController
     /*===================*/
     CreateMtsMessageController(m_nSlotId, m_pMtsDynamicLoader);
 
-    //MtsClient
+    // MtsClient
     /*===================*/
     CreateMtsClient(m_nSlotId);
     m_pMtsClient->SetServiceState(m_pMtsServiceState);
 
-    //AndroidJavaWms
+    // AndroidJavaWms
     /*===================*/
     IMtsClient* piClient = MtsClientFactory::GetIMtsJavaClient(m_nSlotId);
     piClient->Init();
 
-    //Update IP Config & Make MtsServiceState
+    // Update IP Config & Make MtsServiceState
     GetSmOverIpConfigInfo(m_nSlotId);
 
     m_pCallTracker = new MtsCallTracker(m_nSlotId);
@@ -120,8 +118,7 @@ void MtsApp::Start()
     }
 }
 
-PUBLIC VIRTUAL
-void MtsApp::Stop()
+PUBLIC VIRTUAL void MtsApp::Stop()
 {
     IMS_TRACE_I("SMS Stop : m_nSlotId : [%d]", m_nSlotId, 0, 0);
 
@@ -137,8 +134,7 @@ void MtsApp::Stop()
     }
 }
 
-PUBLIC GLOBAL
-IMSApp* MtsApp::GetInstance(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL IMSApp* MtsApp::GetInstance(IN IMS_SINT32 nSlotId)
 {
     return new MtsApp(nSlotId);
 }
@@ -152,8 +148,7 @@ void MtsApp::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
     }
 }
 
-PUBLIC VIRTUAL
-void MtsApp::RequestRegistrationSwitch(
+PUBLIC VIRTUAL void MtsApp::RequestRegistrationSwitch(
         IN IUSendSmsRequestParam* /*pToBeSentSms*/, IN IMS_BOOL /*bIsSmsEServiceType*/)
 {
     IMS_TRACE_D("MtsApp::RequestRegistrationSwitch", 0, 0, 0);
@@ -171,8 +166,7 @@ MtsServiceState* MtsApp::GetMtsServiceState()
     return pMtsServiceState;
 }
 
-PUBLIC VIRTUAL
-void MtsApp::MtsMessageController_NoTransaction()
+PUBLIC VIRTUAL void MtsApp::MtsMessageController_NoTransaction()
 {
     IMS_TRACE_I("MtsApp::MtsMessageController_NoTransaction()", 0, 0, 0);
 
@@ -203,15 +197,13 @@ void MtsApp::MtsMessageController_NoTransaction()
     }
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnPreprocess(IN IMSMSG& /*objMSG*/)
+PROTECTED VIRTUAL IMS_BOOL MtsApp::OnPreprocess(IN IMSMSG& /*objMSG*/)
 {
     IMS_TRACE_I("MtsApp::OnPreprocess : AppName=%s", GetName().GetStr(), 0, 0);
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
+PROTECTED VIRTUAL IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
 {
     IMS_TRACE_I("MtsApp::OnMessage : nMSG=%d", objMSG.nMSG, 0, 0);
 
@@ -222,8 +214,8 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
         if (pParam == IMS_NULL)
         {
             IMS_TRACE_E(0, "Send request parameter is invalid", 0, 0, 0);
-            m_pMtsClient->ReportTransmissionResult(MtsClient::MO_IMS_PERM_FAILURE,
-                    IMtsClient::SMSFORMAT_INVALID, 0, m_nSlotId);
+            m_pMtsClient->ReportTransmissionResult(
+                    MtsClient::MO_IMS_PERM_FAILURE, IMtsClient::SMSFORMAT_INVALID, 0, m_nSlotId);
             return IMS_TRUE;
         }
 
@@ -249,7 +241,7 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
 
         if (pParam == IMS_NULL)
         {
-            IMS_TRACE_E(0, "pParam for a received message is invalid", 0,0,0);
+            IMS_TRACE_E(0, "pParam for a received message is invalid", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -279,21 +271,18 @@ IMS_BOOL MtsApp::OnMessage(IN IMSMSG& objMSG)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL
-IMS_BOOL MtsApp::OnPostprocess(IN IMSMSG& /*objMSG*/)
+PROTECTED VIRTUAL IMS_BOOL MtsApp::OnPostprocess(IN IMSMSG& /*objMSG*/)
 {
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL
-IIMSActivityControl* MtsApp::GetController()
+PROTECTED VIRTUAL IIMSActivityControl* MtsApp::GetController()
 {
     IMS_TRACE_I("MtsApp::GetController : AppName=%s", GetName().GetStr(), 0, 0);
     return IMS_NULL;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsApp::Control(
+PUBLIC VIRTUAL IMS_BOOL MtsApp::Control(
         IN IMS_UINT32 nCmdType, IN IMS_UINTP /*nInParam*/, OUT IMS_UINTP* /*pnOutParam*/)
 {
     IMS_TRACE_I("Control : App[%s] Cmd[%d]", GetName().GetStr(), nCmdType, 0);
@@ -340,7 +329,7 @@ void MtsApp::GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId)
      * TODO: check carrier configuration
      * KEY_SMS_OVER_IMS_SUPPORTED_BOOL && KEY_SMS_OVER_IMS_SUPPORTED_RATS_INT_ARRAY
      */
-    (void) nSlotId;
+    (void)nSlotId;
     IMS_BOOL bSmsOverIpNetwork = IMS_TRUE;
 
     MtsServiceState* pMtsServiceState = m_pMtsDynamicLoader->GetMtsServiceState();
@@ -363,8 +352,7 @@ void MtsApp::GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId)
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::CreateMtsService(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL void MtsApp::CreateMtsService(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_I("CreateMtsService nSlotId : [%d]", nSlotId, 0, 0);
 
@@ -373,10 +361,8 @@ void MtsApp::CreateMtsService(IN IMS_SINT32 nSlotId)
         IMS_TRACE_E(0, "can't make CreateMtsService", 0, 0, 0);
     }
 
-    m_pMtsService = new MtsService(
-            m_pMtsDynamicLoader->GetMtsStrName()->GetMtsAppId(),
-            m_pMtsDynamicLoader->GetMtsStrName()->GetMtsServiceId(),
-            m_nSlotId,
+    m_pMtsService = new MtsService(m_pMtsDynamicLoader->GetMtsStrName()->GetMtsAppId(),
+            m_pMtsDynamicLoader->GetMtsStrName()->GetMtsServiceId(), m_nSlotId,
             m_pMtsDynamicLoader);
 
     if (m_pMtsService != IMS_NULL)
@@ -389,8 +375,7 @@ void MtsApp::CreateMtsService(IN IMS_SINT32 nSlotId)
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::CreateMtsClient(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL void MtsApp::CreateMtsClient(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_I("CreateMtsClient : [%d]", nSlotId, 0, 0);
     m_pMtsClient = MtsClient::GetInstance(nSlotId);
@@ -401,8 +386,7 @@ void MtsApp::CreateMtsClient(IN IMS_SINT32 nSlotId)
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::RemoveMtsClient(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL void MtsApp::RemoveMtsClient(IN IMS_SINT32 nSlotId)
 {
     if (m_pMtsClient == IMS_NULL)
     {
@@ -416,8 +400,7 @@ void MtsApp::RemoveMtsClient(IN IMS_SINT32 nSlotId)
     m_pMtsClient = IMS_NULL;
 }
 
-PROTECTED VIRTUAL
-void MtsApp::CreateMtsMessageController(
+PROTECTED VIRTUAL void MtsApp::CreateMtsMessageController(
         IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader)
 {
     m_pMtsMessageController = new MtsMessageController(nSlotId, pMtsDynamicLoader);
@@ -432,8 +415,7 @@ void MtsApp::CreateMtsMessageController(
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::CreateMtsUtils(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL void MtsApp::CreateMtsUtils(IN IMS_SINT32 nSlotId)
 {
     m_pMtsDynamicLoader = new MtsDynamicLoader(nSlotId);
 
@@ -450,8 +432,7 @@ void MtsApp::CreateMtsUtils(IN IMS_SINT32 nSlotId)
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::DestroyMtsUtils()
+PROTECTED VIRTUAL void MtsApp::DestroyMtsUtils()
 {
     IMS_TRACE_I("DestroyMtsUtils", 0, 0, 0);
 
@@ -467,8 +448,7 @@ void MtsApp::DestroyMtsUtils()
     }
 }
 
-PROTECTED VIRTUAL
-void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PROTECTED VIRTUAL void MtsApp::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 {
     IMS_TRACE_I("MtsApp::CallTracker_StateChanged, nType = [%d], nState = [%d]", nType, nState, 0);
 }
@@ -497,9 +477,7 @@ void MtsApp::SetSlotId(IN IMS_SINT32 nSlotId)
     IMS_TRACE_I("SetSlotId : [%d]", m_nSlotId, 0, 0);
 }
 
-
-PROTECTED VIRTUAL
-void MtsApp::Trm_PriorityChanged()
+PROTECTED VIRTUAL void MtsApp::Trm_PriorityChanged()
 {
     if (m_pMtsAppTrm->IsReady())
     {

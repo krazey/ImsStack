@@ -16,16 +16,14 @@ MtsConfigurationManager::MtsConfigurationManager() :
 }
 
 PUBLIC
-MtsConfigurationManager::~MtsConfigurationManager()
-{
-}
+MtsConfigurationManager::~MtsConfigurationManager() {}
 
 PUBLIC
 void MtsConfigurationManager::Init()
 {
     IMS_TRACE_I("Init", 0, 0, 0);
-    ICarrierConfig* piCc = ConfigService::GetConfigService()
-            ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+    ICarrierConfig* piCc =
+            ConfigService::GetConfigService()->GetCarrierConfig(ThreadService::GetCurrentSlotId());
     piCc->AddListener(this);
 
     UpdateMtsConfig(piCc);
@@ -40,16 +38,15 @@ void MtsConfigurationManager::UpdateMtsConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::ImsSms::KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL);
     m_objCarrierConfig.nSmsOverImsFormat =
             piCc->GetBoolean(CarrierConfig::ImsSms::KEY_SMS_OVER_IMS_FORMAT_INT);
-
 }
 
-PUBLIC VIRTUAL
-void MtsConfigurationManager::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
+PUBLIC VIRTUAL void MtsConfigurationManager::CarrierConfig_NotifyConfigChanged(
+        IN IMS_SINT32 nSlotId)
 {
     if (nSlotId == ThreadService::GetCurrentSlotId())
     {
-        ICarrierConfig* piCc = ConfigService::GetConfigService()
-                ->GetCarrierConfig(ThreadService::GetCurrentSlotId());
+        ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(
+                ThreadService::GetCurrentSlotId());
         UpdateMtsConfig(piCc);
     }
 }

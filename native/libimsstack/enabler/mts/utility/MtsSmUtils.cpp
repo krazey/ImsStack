@@ -9,7 +9,6 @@ PUBLIC
 MtsSmUtils::MtsSmUtils()
 {
     IMS_TRACE_I("+MtsSmUtils", 0, 0, 0);
-
 }
 
 PUBLIC
@@ -18,8 +17,7 @@ MtsSmUtils::~MtsSmUtils()
     IMS_TRACE_I("~MtsSmUtils", 0, 0, 0);
 }
 
-PUBLIC GLOBAL
-MtsSmUtils* MtsSmUtils::GetInstance(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL MtsSmUtils* MtsSmUtils::GetInstance(IN IMS_SINT32 nSlotId)
 {
     static MtsSmUtils* m_pMtsSmUtil = IMS_NULL;
 
@@ -92,7 +90,9 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
         return;
     }
 
-    IMS_CHAR szTemp[3] = {0,};
+    IMS_CHAR szTemp[3] = {
+            0,
+    };
     AString strSmsMsg = AString::ConstNull();
 
     for (IMS_SINT32 i = 0; i < objSmsData.GetLength(); i++)
@@ -106,42 +106,40 @@ void MtsSmUtils::PrintSmsDataBurst(IN const ByteArray& objSmsData)
             strSmsMsg.GetStr(), 0);
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti)
+PUBLIC GLOBAL const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp(IN const IMS_SINT32 nMti)
 {
     switch (nMti)
     {
-    case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_MS:
-        return "MTS_3GPP_MTI_RP_DATA_From_MS";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_N:
-        return "MTS_3GPP_MTI_RP_DATA_From_N";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_MS:
-        return "MTS_3GPP_MTI_RP_ACK_From_MS";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_N:
-        return "MTS_3GPP_MTI_RP_ACK_From_N";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_MS:
-        return "MTS_3GPP_MTI_RP_ERROR_From_MS";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_N:
-        return "MTS_3GPP_MTI_RP_ERROR_From_N";
-    case MtsSmUtils::MTS_3GPP_MTI_RP_SMMA:
-        return "MTS_3GPP_MTI_RP_SMMA";
-    default:
-        return "SMS 3GPP MTI INFO INVALID";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_MS:
+            return "MTS_3GPP_MTI_RP_DATA_From_MS";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_DATA_From_N:
+            return "MTS_3GPP_MTI_RP_DATA_From_N";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_MS:
+            return "MTS_3GPP_MTI_RP_ACK_From_MS";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_ACK_From_N:
+            return "MTS_3GPP_MTI_RP_ACK_From_N";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_MS:
+            return "MTS_3GPP_MTI_RP_ERROR_From_MS";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_ERROR_From_N:
+            return "MTS_3GPP_MTI_RP_ERROR_From_N";
+        case MtsSmUtils::MTS_3GPP_MTI_RP_SMMA:
+            return "MTS_3GPP_MTI_RP_SMMA";
+        default:
+            return "SMS 3GPP MTI INFO INVALID";
     }
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti)
+PUBLIC GLOBAL const IMS_CHAR* MtsSmUtils::GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti)
 {
     switch (nMti)
     {
-    case MtsSmUtils::MTS_3GPP2_MTI_SMS_POINT_TO_POINT:
-        return "MTS_3GPP2_MTI_SMS_POINT_TO_POINT";
-    case MtsSmUtils::MTS_3GPP2_MTI_SMS_BROADCAST:
-        return "MTS_3GPP2_MTI_SMS_BROADCAST";
-    case MtsSmUtils::MTS_3GPP2_MTI_SMS_ACKNOWLEDGE:
-        return "MTS_3GPP2_MTI_SMS_ACKNOWLEDGE";
-    default:
-        return "SMS 3GPP2 MTI INFO INVALID";
+        case MtsSmUtils::MTS_3GPP2_MTI_SMS_POINT_TO_POINT:
+            return "MTS_3GPP2_MTI_SMS_POINT_TO_POINT";
+        case MtsSmUtils::MTS_3GPP2_MTI_SMS_BROADCAST:
+            return "MTS_3GPP2_MTI_SMS_BROADCAST";
+        case MtsSmUtils::MTS_3GPP2_MTI_SMS_ACKNOWLEDGE:
+            return "MTS_3GPP2_MTI_SMS_ACKNOWLEDGE";
+        default:
+            return "SMS 3GPP2 MTI INFO INVALID";
     }
 }

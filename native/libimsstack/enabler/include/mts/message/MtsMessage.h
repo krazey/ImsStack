@@ -7,24 +7,16 @@
 #include "message/MtsMessageController.h"
 #include "base/IMessageMediator.h"
 
-class MtsMessage final :
-        public IMtsMessage,
-        public IPageMessageListener,
-        public IMessageMediator
+class MtsMessage final : public IMtsMessage, public IPageMessageListener, public IMessageMediator
 {
 public:
-    MtsMessage(
-            IN IMS_SINT32 nSlotId,
-            IN MtsMessageController* pMtsMessageController,
+    MtsMessage(IN IMS_SINT32 nSlotId, IN MtsMessageController* pMtsMessageController,
             IN IMS_BOOL bIsSmsEServiceType);
     ~MtsMessage();
 
     // IMtsMessage
-    void SendMessage(
-            IN IPageMessage* piPageMessage,
-            IN const AString& strDestination,
-            IN const IMS_UINT32 nSmsType,
-            IN const ByteArray& objSms) override;
+    void SendMessage(IN IPageMessage* piPageMessage, IN const AString& strDestination,
+            IN const IMS_UINT32 nSmsType, IN const ByteArray& objSms) override;
     void ReceiveMessage(IN IPageMessage* piPageMessage, IN const AString& strImpu) override;
     void Retry_MtsMessageInPending() override;
     IMS_BOOL IsReceivedMessage() override;
@@ -48,8 +40,8 @@ public:
     IMS_RESULT MessageMediator_AdjustMessage(
             IN_OUT ISipMessage* piSIPMsg, IN IMS_SINT32 nMessage) override;
 
-    IMS_BOOL ConstructSendMessage(IN IMessage* piMessage, IN const ByteArray& objSms,
-            IN const IMS_UINT32 nSmsType);
+    IMS_BOOL ConstructSendMessage(
+            IN IMessage* piMessage, IN const ByteArray& objSms, IN const IMS_UINT32 nSmsType);
     AString GetPreviousCallId(IN const ByteArray& objSms);
     void SetSendMsgInfo(IN const ByteArray& objSms, IN const IMS_UINT32 nSmsType);
     IMS_BOOL HandleDeliveryResponse(IN IMessage* piMessage);
@@ -71,8 +63,8 @@ protected:
     void SetDestination(IN const AString& strDestination);
     IMS_UINT32 GetContentType() const;
     void GetUserPartFromUris(IN const AString& strUri, OUT AString& strUserPart) const;
-    IMS_BOOL GetSmsgwFromReceivedMessage(IN const IPageMessage* piPageMessage,
-            OUT AString& strSmsgw);
+    IMS_BOOL GetSmsgwFromReceivedMessage(
+            IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
     IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
     void MtsClient_ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType);
@@ -89,21 +81,21 @@ public:
     };
 
 protected:
-    IPageMessage*           m_piPageMessage;
-    AString                 m_strDestination;
-    IMS_BOOL                m_bIsSmsEServiceType;
+    IPageMessage* m_piPageMessage;
+    AString m_strDestination;
+    IMS_BOOL m_bIsSmsEServiceType;
 
-    //SMS Msg Info
-    IMS_UINT32              m_nSmsFormat;
-    IMS_SINT32              m_nMrOfRp;
-    IMS_SINT32              m_nSmsTrxType;
-    IMS_SINT32              m_nMti;
-    IMS_SINT32              m_nSmSize;
+    // SMS Msg Info
+    IMS_UINT32 m_nSmsFormat;
+    IMS_SINT32 m_nMrOfRp;
+    IMS_SINT32 m_nSmsTrxType;
+    IMS_SINT32 m_nMti;
+    IMS_SINT32 m_nSmSize;
 
-    IMS_SINT32              m_nSeqId;
-    AString                 m_strImpu;
-    IMS_UINT32              m_nSlotId;
-    MtsMessageController*   m_pMtsMessageController;
+    IMS_SINT32 m_nSeqId;
+    AString m_strImpu;
+    IMS_UINT32 m_nSlotId;
+    MtsMessageController* m_pMtsMessageController;
 };
 
 #endif

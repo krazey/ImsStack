@@ -8,7 +8,6 @@
 #include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
 
-
 #include "IMtsCallTrackerListener.h"
 
 #include "utility/MtsTrm.h"
@@ -118,16 +117,16 @@ public:
     };
 
 protected:
-    IMS_SINT32              m_nSlotId;
-    IMSList<MtsService*>    m_lstMtsServices;
-    MtsClient*              m_pMtsClient;
-    MtsService*             m_pMtsService;
-    MtsMessageController*   m_pMtsMessageController;
-    MtsDynamicLoader*       m_pMtsDynamicLoader;
-    MtsServiceState*        m_pMtsServiceState;
-    MtsCallTracker*         m_pCallTracker;
-    MtsTrm*                 m_pMtsAppTrm;
-    IMS_BOOL                m_bTrmBlock;
+    IMS_SINT32 m_nSlotId;
+    IMSList<MtsService*> m_lstMtsServices;
+    MtsClient* m_pMtsClient;
+    MtsService* m_pMtsService;
+    MtsMessageController* m_pMtsMessageController;
+    MtsDynamicLoader* m_pMtsDynamicLoader;
+    MtsServiceState* m_pMtsServiceState;
+    MtsCallTracker* m_pCallTracker;
+    MtsTrm* m_pMtsAppTrm;
+    IMS_BOOL m_bTrmBlock;
 };
 
 #endif

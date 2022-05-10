@@ -60,7 +60,7 @@ public:
     };
 
 private:
-    static MtsSmUtils*  m_pMtsSmUtil;
+    static MtsSmUtils* m_pMtsSmUtil;
 };
 
 #endif

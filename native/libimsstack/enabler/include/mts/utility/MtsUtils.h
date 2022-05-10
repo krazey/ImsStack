@@ -13,9 +13,7 @@ public:
     static MtsUtils* GetInstance();
     static const IMS_CHAR* RegTimerToString(IN IMS_UINT32 nType);
 
-    ITimer* StartTimer(
-            IN IMS_UINT32 nDuration,
-            IN ITimerListener* piListener,
+    ITimer* StartTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener,
             IN AString strLog /* = AString("") */);
     void StopTimer(IN ITimer*& piTimer, IN AString strLog /* = AString("") */);
 
@@ -39,8 +37,8 @@ public:
     static const IMS_CHAR PROPERTY_SCBM_MODE[];
 
 private:
-    static MtsUtils*    m_pMtsUtils;
-    IMS_BOOL            m_bIsScbm;
+    static MtsUtils* m_pMtsUtils;
+    IMS_BOOL m_bIsScbm;
 };
 
 #endif

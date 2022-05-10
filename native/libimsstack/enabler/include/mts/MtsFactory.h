@@ -22,12 +22,11 @@ public:
     MtsApp* GetMtsApp(IN IMS_SINT32 nSlotId);
     IMS_UINT32 GetMtsAppListSize();
 
-
 private:
     IMtsApp* CreateMtsApp(IN IMS_SINT32 nSlotId);
 
 private:
-    IMSMap<IMS_SINT32, IMtsApp*>    m_objMtsApp;
+    IMSMap<IMS_SINT32, IMtsApp*> m_objMtsApp;
 };
 
 #endif

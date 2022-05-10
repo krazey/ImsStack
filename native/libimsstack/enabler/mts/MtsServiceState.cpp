@@ -71,8 +71,8 @@ void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 
     if (m_bIsImsConnected)
     {
-        IImsAos* piImsAos = ImsAos::GetImsAos(AString("ims.app.mts"),
-                AString("ims.service.mts"), m_nSlotId);
+        IImsAos* piImsAos =
+                ImsAos::GetImsAos(AString("ims.app.mts"), AString("ims.service.mts"), m_nSlotId);
 
         if (piImsAos == IMS_NULL)
         {
@@ -118,7 +118,7 @@ void MtsServiceState::SetImsSuspendState(IN IMS_BOOL bState)
         return;
     }
 
-    m_bIsImsSuspend = bState; //if IMSAoSApp_OnImsSuspended. block mo service
+    m_bIsImsSuspend = bState;  // if IMSAoSApp_OnImsSuspended. block mo service
 
     IMS_TRACE_I("MtsServiceState:: IMS Suspend State is (%s)", _TRACE_B_(m_bIsImsSuspend), 0, 0);
 
@@ -146,8 +146,8 @@ void MtsServiceState::SetTemporaryServiceBlocked(IN IMS_BOOL bBlocked)
 {
     m_bIsTemporaryBlocked = bBlocked;
 
-    IMS_TRACE_I("MtsServiceState:: Service Blocked State is (%s)",
-            _TRACE_B_(m_bIsTemporaryBlocked), 0, 0);
+    IMS_TRACE_I("MtsServiceState:: Service Blocked State is (%s)", _TRACE_B_(m_bIsTemporaryBlocked),
+            0, 0);
 }
 
 PUBLIC
@@ -289,12 +289,12 @@ void MtsServiceState::OnImsResumed()
 }
 
 PUBLIC
-void MtsServiceState::NotifySpecificMessage(IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam,
-        IN IMS_UINT32 nLparam)
+void MtsServiceState::NotifySpecificMessage(
+        IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam)
 {
-    (void) nMsg;
-    (void) nWparam;
-    (void) nLparam;
+    (void)nMsg;
+    (void)nWparam;
+    (void)nLparam;
 
     IMS_TRACE_I("MtsServiceState::NotifySpecificMessage()", 0, 0, 0);
 }
@@ -304,19 +304,19 @@ IMS_SINT32 MtsServiceState::GetServiceState()
 {
     IMS_SINT32 nState = IMtsClient::STATE_NOTREADY;
 
-     if (m_bIsImsConnected)
-     {
-         if (m_bIsImsSuspend || (!m_bIsSmsOverIpConf) || m_bIsAosRegModAdmin)
-         {
-             nState = IMtsClient::STATE_LIMITED;
-         }
-         else
-         {
-             nState = IMtsClient::STATE_READY;
-         }
-     }
+    if (m_bIsImsConnected)
+    {
+        if (m_bIsImsSuspend || (!m_bIsSmsOverIpConf) || m_bIsAosRegModAdmin)
+        {
+            nState = IMtsClient::STATE_LIMITED;
+        }
+        else
+        {
+            nState = IMtsClient::STATE_READY;
+        }
+    }
 
-     return nState;
+    return nState;
 }
 
 PUBLIC

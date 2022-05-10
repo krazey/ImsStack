@@ -49,12 +49,8 @@ MtsSipFormUtils* MtsSipFormUtils::GetInstance(IN IMS_SINT32 nSlotId)
     return s_pMtsSipFormUtils;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsSipFormUtils::FormDestination(
-        IN const IMS_CHAR* szMDN,
-        IN const IMS_BOOL bIsAckorError,
-        IN const AString& strLastIpSmgw,
-        OUT AString& strDest)
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const IMS_CHAR* szMDN,
+        IN const IMS_BOOL bIsAckorError, IN const AString& strLastIpSmgw, OUT AString& strDest)
 {
     IMS_TRACE_I("FormDestination: szMDN = %s", szMDN, 0, 0);
 
@@ -87,13 +83,13 @@ IMS_BOOL MtsSipFormUtils::FormDestination(
             return IMS_FALSE;
         }
 
-        //Update the format
+        // Update the format
         UpdateFormatFromDb();
 
         if (MtsSipFormUtils::UpdatePsiFromDb() == IMS_FALSE)
         {
-            IMS_TRACE_I("FormDestination - PSI from SIM is wrong, so we wil make PSI by SMSC", 0,
-                    0, 0);
+            IMS_TRACE_I(
+                    "FormDestination - PSI from SIM is wrong, so we wil make PSI by SMSC", 0, 0, 0);
             // TODO: AT&T Operator needs tel URI when PSI is not available
             strDest = m_pMtsDialingPlan->Translate(strMDN_, IMS_TRUE);
         }
@@ -128,17 +124,17 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN IMS_UINT32 nType)
 
     switch (nType)
     {
-    case MtsSmUtils::MTS_SMS_FORMAT_3GPP :
-        strContentType = AString("application/vnd.3gpp.sms");
-        break;
+        case MtsSmUtils::MTS_SMS_FORMAT_3GPP:
+            strContentType = AString("application/vnd.3gpp.sms");
+            break;
 
-    case MtsSmUtils::MTS_SMS_FORMAT_3GPP2 :
-        strContentType = AString("application/vnd.3gpp2.sms");
-        break;
+        case MtsSmUtils::MTS_SMS_FORMAT_3GPP2:
+            strContentType = AString("application/vnd.3gpp2.sms");
+            break;
 
-    default:
-        IMS_TRACE_E(0, "This ContentType Enum vaule is not supportive", 0, 0, 0);
-        break;
+        default:
+            IMS_TRACE_E(0, "This ContentType Enum vaule is not supportive", 0, 0, 0);
+            break;
     }
 
     IMS_TRACE_D("FormContentTypeEnumToStr (%d) to (%s)", nType, strContentType.GetStr(), 0);
@@ -169,16 +165,15 @@ IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN AString strContentType)
     return nType;
 }
 
-PUBLIC VIRTUAL
-void MtsSipFormUtils::UpdateFormatFromDb()
+PUBLIC VIRTUAL void MtsSipFormUtils::UpdateFormatFromDb()
 {
     // TODO: this method is deprecated. It will be removed.
-    IMS_TRACE_I( "UpdateFormatFromDb", 0, 0, 0 );
+    IMS_TRACE_I("UpdateFormatFromDb", 0, 0, 0);
 
     if (m_nMtsFormat == MtsSmUtils::MTS_SMS_FORMAT_3GPP ||
             m_nMtsFormat == MtsSmUtils::MTS_SMS_FORMAT_3GPP2)
     {
-        IMS_TRACE_I( "UpdateFormatFromDb : m_nMtsFormat is already set", 0, 0, 0 );
+        IMS_TRACE_I("UpdateFormatFromDb : m_nMtsFormat is already set", 0, 0, 0);
         return;
     }
 
@@ -200,23 +195,20 @@ void MtsSipFormUtils::UpdateFormatFromDb()
     IMS_TRACE_D("MtsSipFormUtils::UpdateFormatFromDb: Format value (%d)", m_nMtsFormat, 0, 0);
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsSipFormUtils::UpdatePsiFromDb()
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::UpdatePsiFromDb()
 {
     // TODO: This is a deprecated method. There will be new implementation for getting PSI value
-    IMS_TRACE_I( "UpdatePsiFromDb slot ID [%d]", m_nSlotId, 0, 0 );
+    IMS_TRACE_I("UpdatePsiFromDb slot ID [%d]", m_nSlotId, 0, 0);
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_SINT32 MtsSipFormUtils::GetSlotId()
+PUBLIC VIRTUAL IMS_SINT32 MtsSipFormUtils::GetSlotId()
 {
     IMS_TRACE_D("GetSlotId[%d]", m_nSlotId, 0, 0);
     return m_nSlotId;
 }
 
-PUBLIC VIRTUAL
-AString MtsSipFormUtils::ValidateAndUpdatePsi()
+PUBLIC VIRTUAL AString MtsSipFormUtils::ValidateAndUpdatePsi()
 {
     AStringBuffer objURI(128);
     IMS_SINT32 strSheme = CheckScheme(m_strPsi);
@@ -238,13 +230,15 @@ AString MtsSipFormUtils::ValidateAndUpdatePsi()
     }
     else if (strSheme == SCHEME_SIP || strSheme == SCHEME_SIPS)
     {
-        //General form - sip:user:password@host:port;uri-parameters
+        // General form - sip:user:password@host:port;uri-parameters
         SipAddress* pTempDest = new SipAddress(m_strPsi);
 
         if (pTempDest == IMS_NULL)
         {
-            IMS_TRACE_E(0, "MtsSipFormUtils::ValidateAndUpdatePsi: Fail to get Host. "
-                    "PSI is not updated", 0, 0, 0);
+            IMS_TRACE_E(0,
+                    "MtsSipFormUtils::ValidateAndUpdatePsi: Fail to get Host. "
+                    "PSI is not updated",
+                    0, 0, 0);
             objURI.Append(m_strPsi);
             return static_cast<const AStringBuffer&>(objURI).GetString();
         }
@@ -252,9 +246,9 @@ AString MtsSipFormUtils::ValidateAndUpdatePsi()
         if ((pTempDest->GetHost() != IMS_NULL) && !IsIpAddress(pTempDest->GetHost().GetStr()) &&
                 IsNumberFormat(pTempDest->GetHost().GetStr()))
         {
-            //Host which is number format means that user info is empty, so try to re-form
-            const ISubscriberConfig* piSubsConfig = Configuration::GetInstance()
-                    ->GetSubscriberConfig(m_nSlotId);
+            // Host which is number format means that user info is empty, so try to re-form
+            const ISubscriberConfig* piSubsConfig =
+                    Configuration::GetInstance()->GetSubscriberConfig(m_nSlotId);
             IMSList<SipParameter*> objParameters = pTempDest->GetParameters();
 
             if (piSubsConfig != IMS_NULL)
@@ -262,14 +256,14 @@ AString MtsSipFormUtils::ValidateAndUpdatePsi()
                 if (objParameters.IsEmpty())
                 {
                     // Add HomeDomain to existing PSI
-                    objURI.Sprintf("%s@%s", m_strPsi.GetStr(), piSubsConfig->GetHomeDomainName()
-                            .GetStr());
+                    objURI.Sprintf(
+                            "%s@%s", m_strPsi.GetStr(), piSubsConfig->GetHomeDomainName().GetStr());
                 }
                 else
                 {
                     // Re-form. Add scheme & user
-                    objURI.Sprintf( "%s:%s", pTempDest->GetScheme().GetStr(),pTempDest->GetHost()
-                            .GetStr());
+                    objURI.Sprintf("%s:%s", pTempDest->GetScheme().GetStr(),
+                            pTempDest->GetHost().GetStr());
 
                     for (IMS_UINT32 i = 0; i < objParameters.GetSize(); ++i)
                     {
@@ -281,13 +275,13 @@ AString MtsSipFormUtils::ValidateAndUpdatePsi()
                         if (IsTelUrlParam(pParameter->GetName()))
                         {
                             // Add tel url parameter in user part. phone-context, postd, isub, tsp
-                            objURI.Sprintf("%s;%s", objURI.GetString().GetStr(), pParameter
-                                    ->ToString().GetStr());
+                            objURI.Sprintf("%s;%s", objURI.GetString().GetStr(),
+                                    pParameter->ToString().GetStr());
                         }
                     }
                     // Add HomeDomain
-                    objURI.Sprintf("%s@%s", objURI.GetString().GetStr(), piSubsConfig
-                            ->GetHomeDomainName().GetStr());
+                    objURI.Sprintf("%s@%s", objURI.GetString().GetStr(),
+                            piSubsConfig->GetHomeDomainName().GetStr());
                 }
                 // Add user param because user part is number format
                 objURI.Append(";user=phone");
@@ -305,8 +299,7 @@ AString MtsSipFormUtils::ValidateAndUpdatePsi()
     return static_cast<const AStringBuffer&>(objURI).GetString();
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strParam) const
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strParam) const
 {
     if (strParam.Equals("isub") || strParam.Equals("postd") || strParam.Equals("phone-context") ||
             strParam.Equals("tsp"))
@@ -316,8 +309,7 @@ IMS_BOOL MtsSipFormUtils::IsTelUrlParam(IN const AString& strParam) const
     return IMS_FALSE;
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial) const
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial) const
 {
     // global-number-digits := "+" *phonedigit DIGIT *phonedigit
     // local-number-digits := *phonedigit-hex (HEXDIG / "*" / "#") *phonedigit-hex
@@ -358,8 +350,7 @@ IMS_BOOL MtsSipFormUtils::IsNumberFormat(IN const AString& strDial) const
     }
 }
 
-PUBLIC VIRTUAL
-IMS_BOOL MtsSipFormUtils::IsIpAddress(IN const AString& strIp) const
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::IsIpAddress(IN const AString& strIp) const
 {
     IPAddress objHost;
 
@@ -395,15 +386,13 @@ IMS_SINT32 MtsSipFormUtils::CheckScheme(IN const AString& strNumber) const
     return SCHEME_UNKNOWN;
 }
 
-PROTECTED VIRTUAL
-MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nSlotId)
+PROTECTED VIRTUAL MtsDialingPlan* MtsSipFormUtils::GetDialingPlan(IN IMS_SINT32 nSlotId)
 {
-    IMS_TRACE_E(0,"MtsSipFormUtils::GetDialingPlan : nSlotId[%d]", nSlotId, 0, 0);
+    IMS_TRACE_E(0, "MtsSipFormUtils::GetDialingPlan : nSlotId[%d]", nSlotId, 0, 0);
     return m_pMtsDialingPlan;
 }
 
-PRIVATE GLOBAL
-IMS_BOOL MtsSipFormUtils::IsVisualSeparator(IN IMS_CHAR ch)
+PRIVATE GLOBAL IMS_BOOL MtsSipFormUtils::IsVisualSeparator(IN IMS_CHAR ch)
 {
     // "-", ".", "(", ")"
     if ((ch == '-') || (ch == '.') || (ch == '(') || (ch == ')'))

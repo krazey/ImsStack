@@ -9,9 +9,7 @@
 class IMtsClient;
 class MtsApp;
 
-class MtsClient final :
-        public ITimerListener,
-        public IMtsClientListener
+class MtsClient final : public ITimerListener, public IMtsClientListener
 {
 private:
     MtsClient(IN IMS_SINT32 nSlotId);
@@ -26,16 +24,10 @@ public:
 
     IMS_UINT32 PassReceivedMessage(
             IN const ByteArray& objSms, IN const IMS_UINT32 nSmsType, IN IMS_SINT32 nSlotId);
-    void ReportTransmissionResult(
-            IN IMS_UINT32 nResponse,
-            IN IMS_UINT32 nSmsType,
-            IN IMS_SINT32 nSeqId = -1,
-            IN IMS_SINT32 nSlotId = -1);
-    void ReportTransmissionFailureWithRetryTime(
-            IN const IMS_UINT32 nSmsType,
-            IN const IMS_UINT8 nRetryTime,
-            IN IMS_SINT32 nSeqId = -1,
-            IN IMS_SINT32 nSlotId = -1);
+    void ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType,
+            IN IMS_SINT32 nSeqId = -1, IN IMS_SINT32 nSlotId = -1);
+    void ReportTransmissionFailureWithRetryTime(IN const IMS_UINT32 nSmsType,
+            IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1, IN IMS_SINT32 nSlotId = -1);
 
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType, IN IMS_SINT32 nSlotId);
     void SetTempRetryAfterValue(IN IMS_UINT8 nValue);
@@ -46,7 +38,7 @@ public:
     void StopTimer(IN IMS_UINT32 nType);
 
     // ITimerListener
-    void Timer_TimerExpired(IN ITimer *piTimer) override;
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
     // IMtsClientListener
     void Client_SendMo(IN IMSWMS_UINTP nWparam_, IN IWMSSmsSendRequestParam* nLparam) override;
@@ -77,16 +69,16 @@ public:
     // TIMER item definitions
     enum
     {
-        TIMER_SMS_CALLBACK_MODE    = 10
+        TIMER_SMS_CALLBACK_MODE = 10
     };
 
 protected:
-    IMS_SINT32          m_nSlotId;
-    IMSList<MtsApp*>    m_lstMtsApp;
-    MtsServiceState*    m_pMtsServiceState;
+    IMS_SINT32 m_nSlotId;
+    IMSList<MtsApp*> m_lstMtsApp;
+    MtsServiceState* m_pMtsServiceState;
 
 private:
-    IMS_UINT8           m_nTempRetryAfterValue;
+    IMS_UINT8 m_nTempRetryAfterValue;
 };
 
 #endif

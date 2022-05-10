@@ -21,9 +21,9 @@ private:
     void DestroyAll();
 
 protected:
-    MtsServiceState*    m_pMtsServiceState;
-    MtsSipFormUtils*    m_pMtsSipFormUtils;
-    MtsStrName*         m_pMtsStrName;
+    MtsServiceState* m_pMtsServiceState;
+    MtsSipFormUtils* m_pMtsSipFormUtils;
+    MtsStrName* m_pMtsStrName;
 };
 
 #endif

@@ -8,11 +8,9 @@
 
 __IMS_TRACE_TAG_COM_SMS__;
 
-PUBLIC GLOBAL
-const IMS_CHAR MtsUtils::PROPERTY_RIL_ECCLIST[] = "ril.ecclist";
+PUBLIC GLOBAL const IMS_CHAR MtsUtils::PROPERTY_RIL_ECCLIST[] = "ril.ecclist";
 
-PUBLIC GLOBAL
-const IMS_CHAR MtsUtils::PROPERTY_FEATURESET_SMSTO911[] =
+PUBLIC GLOBAL const IMS_CHAR MtsUtils::PROPERTY_FEATURESET_SMSTO911[] =
         "persist.product.xxx.sms.smsto911.enable";
 
 const IMS_CHAR MtsUtils::PROPERTY_SCBM_MODE[] = "persist.product.xxx.sms.smsto911.scbm.state";
@@ -30,8 +28,7 @@ MtsUtils::~MtsUtils()
     IMS_TRACE_I("~MtsUtils", 0, 0, 0);
 }
 
-PUBLIC GLOBAL
-MtsUtils* MtsUtils::GetInstance()
+PUBLIC GLOBAL MtsUtils* MtsUtils::GetInstance()
 {
     static MtsUtils* pMtsUtils = IMS_NULL;
 
@@ -43,8 +40,7 @@ MtsUtils* MtsUtils::GetInstance()
     return pMtsUtils;
 }
 
-PUBLIC GLOBAL
-const IMS_CHAR* MtsUtils::RegTimerToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* MtsUtils::RegTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -56,16 +52,14 @@ const IMS_CHAR* MtsUtils::RegTimerToString(IN IMS_UINT32 nType)
 }
 
 PUBLIC
-ITimer* MtsUtils::StartTimer(
-        IN IMS_UINT32 nDuration,
-        IN ITimerListener* piListener,
+ITimer* MtsUtils::StartTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener,
         IN AString strLog /* = AString("") */)
 {
     ITimer* piTimer = TimerService::GetTimerService()->CreateTimer();
     IMS_UINTP nID = piTimer->SetTimer(nDuration, piListener);
 
-    IMS_TRACE_I("StartTimer :: id (%p) , type (%s) , duration (%d)", nID, strLog.GetStr(),
-            nDuration);
+    IMS_TRACE_I(
+            "StartTimer :: id (%p) , type (%s) , duration (%d)", nID, strLog.GetStr(), nDuration);
 
     return piTimer;
 }
@@ -91,8 +85,8 @@ IMS_BOOL MtsUtils::IsEccNumber(IN const IMSWMS_CHAR* strDstAddr, IMS_SINT32 nSlo
     IMS_BOOL bIsEccNumber = IMS_FALSE;
     AString strDestAddr(strDstAddr);
 
-    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)
-            ->IsEmergencyNumber(strDestAddr))
+    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)->IsEmergencyNumber(
+                strDestAddr))
     {
         IMS_TRACE_I("IsEccNumber:This Number( %s ) is a ECC Number from PhoneInfoService",
                 strDestAddr.GetStr(), 0, 0);
@@ -102,8 +96,10 @@ IMS_BOOL MtsUtils::IsEccNumber(IN const IMSWMS_CHAR* strDstAddr, IMS_SINT32 nSlo
     AString strEccListStr = "";
     IMSList<AString> eccList = strEccListStr.Split(',');
 
-    for ( IMS_UINT32 i = 0; i < eccList.GetSize(); i++ ) {
-        if (eccList.GetAt(i).Equals(strDestAddr)) {
+    for (IMS_UINT32 i = 0; i < eccList.GetSize(); i++)
+    {
+        if (eccList.GetAt(i).Equals(strDestAddr))
+        {
             bIsEccNumber = IMS_TRUE;
             break;
         }
@@ -127,8 +123,8 @@ IMS_BOOL MtsUtils::IsEpdgConnected(IN MtsService* pMtsService)
 PUBLIC
 IMS_BOOL MtsUtils::IsSupportFeature(IN const IMSWMS_CHAR* pszProperty)
 {
-    IMS_BOOL bIsSupportProperty = AString("true").Equals(UtilService::GetUtilService()
-            ->GetSystemProperty()->Get(AString(pszProperty)));
+    IMS_BOOL bIsSupportProperty = AString("true").Equals(
+            UtilService::GetUtilService()->GetSystemProperty()->Get(AString(pszProperty)));
     IMS_TRACE_I("IsSupportFeature: bIsSupportProperty = %d", bIsSupportProperty, 0, 0);
     return bIsSupportProperty;
 }
@@ -140,7 +136,7 @@ void MtsUtils::SetScbm(IN IMS_BOOL bIsScbmTimerStatus)
     IMS_TRACE_I("SetScbm: %d", bIsScbmTimerStatus, 0, 0);
 
     // FIXME: SCBM
- }
+}
 
 PUBLIC
 IMS_BOOL MtsUtils::GetScbm()

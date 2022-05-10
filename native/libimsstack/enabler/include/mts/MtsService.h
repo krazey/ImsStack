@@ -20,10 +20,7 @@ class MtsService final :
         public IMtsService
 {
 public:
-    MtsService(
-            IN const AString& strMtsAppId,
-            IN const AString& strServiceId,
-            IN IMS_SINT32 nSlotId,
+    MtsService(IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId,
             IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsService();
 
@@ -70,17 +67,16 @@ protected:
     AString& GetAppId();
 
 private:
-    void Init(
-            IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
+    void Init(IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
     void DeInit();
 
 protected:
-    IImsAos*            m_piImsAos;
-    AString             m_strAppId;
-    AString             m_strServiceId;
-    IMS_UINT32          m_nSlotId;
-    ICoreService*       m_piCoreService;
-    MtsDynamicLoader*   m_pMtsDynamicLoader;
+    IImsAos* m_piImsAos;
+    AString m_strAppId;
+    AString m_strServiceId;
+    IMS_UINT32 m_nSlotId;
+    ICoreService* m_piCoreService;
+    MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 
 #endif

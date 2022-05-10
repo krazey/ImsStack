@@ -6,8 +6,7 @@
 
 class ICarrierConfig;
 
-class MtsConfigurationManager final :
-        public ICarrierConfigListener
+class MtsConfigurationManager final : public ICarrierConfigListener
 {
 public:
     MtsConfigurationManager();
@@ -22,8 +21,8 @@ public:
     void CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId) override;
 
     // sms configurations
-    IMS_BOOL IsSmsCsfbRetryOnFailure() const; // KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL
-    IMS_SINT32 GetSmsOverImsFormat() const; // KEY_SMS_OVER_IMS_FORMAT_INT
+    IMS_BOOL IsSmsCsfbRetryOnFailure() const;  // KEY_SMS_CSFB_RETRY_ON_FAILURE_BOOL
+    IMS_SINT32 GetSmsOverImsFormat() const;    // KEY_SMS_OVER_IMS_FORMAT_INT
 
 private:
     MtsCarrierConfigItems m_objCarrierConfig;

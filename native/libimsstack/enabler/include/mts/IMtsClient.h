@@ -10,21 +10,14 @@ public:
     virtual IMSWMS_RESULT Init() = 0;
     virtual IMSWMS_RESULT Release() = 0;
     virtual IMSWMS_UINT32 GetFeature() = 0;
-    virtual IMSWMS_UINT32 ReportMtSMS(
-            IN IMSWMS_UINT32 smsformat,
-            IN IMSWMS_UINT32 smslength,
-            IN CONST IMSWMS_BYTE* smsdata,
-            IN IMSWMS_SINT32 nSlotID) = 0;
-    virtual IMSWMS_RESULT ReportMoStatus(
-            IN IMSWMS_UINT32 reason,
-            IN IMSWMS_UINT32 smsformat,
-            IN IMSWMS_UINT8 nRetryAfter = 0,
-            IN IMSWMS_SINT32 nSeqId = -1,
+    virtual IMSWMS_UINT32 ReportMtSMS(IN IMSWMS_UINT32 smsformat, IN IMSWMS_UINT32 smslength,
+            IN CONST IMSWMS_BYTE* smsdata, IN IMSWMS_SINT32 nSlotID) = 0;
+    virtual IMSWMS_RESULT ReportMoStatus(IN IMSWMS_UINT32 reason, IN IMSWMS_UINT32 smsformat,
+            IN IMSWMS_UINT8 nRetryAfter = 0, IN IMSWMS_SINT32 nSeqId = -1,
             IN IMSWMS_SINT32 nSlotID = -1) = 0;
     virtual void SetListener(IN IMtsClientListener* iscl) = 0;
 
 public:
-
     // State of Service
     enum
     {
@@ -49,13 +42,14 @@ public:
     enum
     {
         MO_SUCCESS = 1,
-        MO_IMS_TEMP_FAILURE = 2,              /* sending the sms failed but it's still ok to retry to send the sms. */
+        MO_IMS_TEMP_FAILURE =
+                2, /* sending the sms failed but it's still ok to retry to send the sms. */
         MO_IMS_PERM_FAILURE = 3,
         /* sending the sms failed and it's not possible to retry to send the sms.
                                                        sms over ims service is still supportive. */
         MO_IMS_LIMITEDSMSSVCREGI = 4,
-        /* ims is currently registered with imsi based uri. it means the administrative sms service mode.
-                                                       phone is in a situation that sending sms is not allowed. */
+        /* ims is currently registered with imsi based uri. it means the administrative sms service
+           mode. phone is in a situation that sending sms is not allowed. */
         // MO_IMS_REQUEST_RETRY_TIMER = 5    // Check Mts Retry-After Header
     };
 

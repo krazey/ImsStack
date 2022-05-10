@@ -7,8 +7,7 @@
 class MtsDialingPlan final
 {
 public:
-    MtsDialingPlan(
-            IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberFormat, IN const AString& strScheme);
+    MtsDialingPlan(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nNumberFormat, IN const AString& strScheme);
     ~MtsDialingPlan();
 
 private:
@@ -17,26 +16,16 @@ private:
     MtsDialingPlan& operator=(IN const MtsDialingPlan& objRHS);
 
 public:
-    AString Translate(
-            IN const AString& strNumber,
-            IN IMS_BOOL bAquot = IMS_TRUE,
+    AString Translate(IN const AString& strNumber, IN IMS_BOOL bAquot = IMS_TRUE,
             IN IMS_BOOL bUssi = IMS_FALSE);
-    AString Translate(
-            IN const AString& strNumber,
-            IN const AString& strScheme,
+    AString Translate(IN const AString& strNumber, IN const AString& strScheme,
             IN IMS_BOOL bAquot = IMS_TRUE);
 
     // To translate the dialed number based on the emergency flag
-    AString TranslateEx(
-            IN const AString& strNumber,
-            IN IMS_SINT32 nFlags = FLAG_NONE,
-            IN IMS_BOOL bAquot = IMS_TRUE,
-            IN IMS_BOOL bUssi = IMS_FALSE);
-    AString TranslateEx(
-            IN const AString& strNumber,
-            IN const AString& strScheme,
-            IN IMS_SINT32 nFlags = FLAG_NONE,
-            IN IMS_BOOL bAquot = IMS_TRUE);
+    AString TranslateEx(IN const AString& strNumber, IN IMS_SINT32 nFlags = FLAG_NONE,
+            IN IMS_BOOL bAquot = IMS_TRUE, IN IMS_BOOL bUssi = IMS_FALSE);
+    AString TranslateEx(IN const AString& strNumber, IN const AString& strScheme,
+            IN IMS_SINT32 nFlags = FLAG_NONE, IN IMS_BOOL bAquot = IMS_TRUE);
 
     IMS_SINT32 GetDialingPolicy() const;
     IMS_SINT32 GetNumberFormat() const;
@@ -91,18 +80,18 @@ public:
     };
 
 protected:
-    IMS_SINT32          m_nSlotId;
+    IMS_SINT32 m_nSlotId;
 
 private:
     // local / global
-    IMS_SINT32          m_nNumberFormat;
-    AString             m_strScheme;
+    IMS_SINT32 m_nNumberFormat;
+    AString m_strScheme;
 
     // For policy to consist of phone-context URI parameter;
     // Refer to ImsIdentity::DIALING_POLICY_XXX
-    IMS_SINT32          m_nDialingPolicy;
+    IMS_SINT32 m_nDialingPolicy;
     // For geo-local number format, it is used to get the access network information
-    AString             m_strNetworkProfile;
+    AString m_strNetworkProfile;
 };
 
 #endif

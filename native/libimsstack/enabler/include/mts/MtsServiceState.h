@@ -45,18 +45,18 @@ public:
     IMS_SINT32 GetSlotId();
 
 protected:
-    IMS_SINT32  m_nMtsServiceState;
+    IMS_SINT32 m_nMtsServiceState;
 
-    //Check Condition for SMS SERVICE MODE
-    IMS_BOOL                m_bIsImsConnected; //if Connected true enable sms mo/mt service.
-    IMS_BOOL                m_bIsAosRegModAdmin; //if Mod Admin true. block mo service.
-    IMS_BOOL                m_bIsImsSuspend; //if IMSAoSApp_IMSSuspended true. block mo service
-    //if sms_over_ip_network Ind is false. block mo service
-    IMS_BOOL                m_bIsSmsOverIpConf;
-    IMS_BOOL                m_bIsTemporaryBlocked;
-    IMS_UINT32              m_nConnectedServices;
-    IMS_SINT32              m_nSlotId;
-    MtsMessageController*   m_pMtsMessageController;
+    // Check Condition for SMS SERVICE MODE
+    IMS_BOOL m_bIsImsConnected;    // if Connected true enable sms mo/mt service.
+    IMS_BOOL m_bIsAosRegModAdmin;  // if Mod Admin true. block mo service.
+    IMS_BOOL m_bIsImsSuspend;      // if IMSAoSApp_IMSSuspended true. block mo service
+    // if sms_over_ip_network Ind is false. block mo service
+    IMS_BOOL m_bIsSmsOverIpConf;
+    IMS_BOOL m_bIsTemporaryBlocked;
+    IMS_UINT32 m_nConnectedServices;
+    IMS_SINT32 m_nSlotId;
+    MtsMessageController* m_pMtsMessageController;
 };
 
 #endif

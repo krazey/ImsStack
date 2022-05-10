@@ -21,12 +21,11 @@ __IMS_TRACE_TAG_COM_SMS__;
 LOCAL
 MtsClient* s_pMtsClient[] = {IMS_NULL, IMS_NULL};
 
-PUBLIC GLOBAL
-MtsClient* MtsClient::GetInstance(IN IMS_SINT32 nSlotId)
+PUBLIC GLOBAL MtsClient* MtsClient::GetInstance(IN IMS_SINT32 nSlotId)
 {
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
-        IMS_TRACE_E(0,"MtsClient::GetInstance() Error! Invalid SlotId:%d", nSlotId,0,0);
+        IMS_TRACE_E(0, "MtsClient::GetInstance() Error! Invalid SlotId:%d", nSlotId, 0, 0);
         nSlotId = 0;
     }
 
@@ -92,7 +91,7 @@ IMS_UINT32 MtsClient::PassReceivedMessage(
         return MtsClient::MT_FAILURE;
     }
 
-    if (objSms.GetLength() > 255) // WMS_MAX_LEN
+    if (objSms.GetLength() > 255)  // WMS_MAX_LEN
     {
         IMS_TRACE_E(0, "Too Large RPDU(%d)", objSms.GetLength(), 0, 0);
         return MtsClient::MT_FAILURE;
@@ -120,11 +119,8 @@ IMS_UINT32 MtsClient::PassReceivedMessage(
 }
 
 PUBLIC
-void MtsClient::ReportTransmissionResult(
-        IN IMS_UINT32 nResponse,
-        IN IMS_UINT32 nSmsType,
-        IN IMS_SINT32 nSeqId /*= -1*/,
-        IN IMS_SINT32 nSlotId)
+void MtsClient::ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType,
+        IN IMS_SINT32 nSeqId /*= -1*/, IN IMS_SINT32 nSlotId)
 {
     IMtsClient* pIMtsClient = GetIMtsClient(nSlotId);
 
@@ -171,11 +167,8 @@ void MtsClient::ReportTransmissionResult(
 }
 
 PUBLIC
-void MtsClient::ReportTransmissionFailureWithRetryTime(
-        IN const IMS_UINT32 nSmsType,
-        IN const IMS_UINT8 nRetryTime,
-        IN IMS_SINT32 nSeqId /*= -1*/,
-        IN IMS_SINT32 nSlotId)
+void MtsClient::ReportTransmissionFailureWithRetryTime(IN const IMS_UINT32 nSmsType,
+        IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId /*= -1*/, IN IMS_SINT32 nSlotId)
 {
     IMS_UINT32 nResultCode = IMtsClient::MO_IMS_TEMP_FAILURE;
     IMtsClient* pIMtsClient = IMS_NULL;
@@ -207,9 +200,9 @@ void MtsClient::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType, IN IMS_
 
 // TODO: VZW SCBM mode timer
 PUBLIC
-void MtsClient::Timer_TimerExpired(IN ITimer *piTimer)
+void MtsClient::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    (void) piTimer;
+    (void)piTimer;
 }
 
 // TODO: VZW SCBM mode timer
@@ -263,8 +256,7 @@ void MtsClient::RemoveIMtsClient(IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-void MtsClient::Client_SendMo(
-        IN IMSWMS_UINTP /*nWparam_*/, IN IWMSSmsSendRequestParam* nLparam)
+void MtsClient::Client_SendMo(IN IMSWMS_UINTP /*nWparam_*/, IN IWMSSmsSendRequestParam* nLparam)
 {
     IMS_TRACE_I("Client_SendMo() nLparam->m_nSlotId (%d)", nLparam->m_nSlotId, 0, 0);
     IMSMSG objMSG(IUMts::MTS_MO_SEND_REQUEST, 0, reinterpret_cast<IMSWMS_UINTP>(nLparam));
@@ -278,8 +270,8 @@ void MtsClient::Client_SendMo(
     else
     {
         IMS_TRACE_E(0, "pMtsApp is NULL", 0, 0, 0);
-        ReportTransmissionResult(MtsClient::MO_IMS_PERM_FAILURE, nLparam->m_nSmsType,
-                nLparam->m_nSeqId, m_nSlotId);
+        ReportTransmissionResult(
+                MtsClient::MO_IMS_PERM_FAILURE, nLparam->m_nSmsType, nLparam->m_nSeqId, m_nSlotId);
     }
 }
 
@@ -289,7 +281,7 @@ IMtsClient* MtsClient::GetIMtsClient(IN IMS_SINT32 nSlotId)
     IMtsClient* piClient = IMS_NULL;
     if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
     {
-        IMS_TRACE_E(0,"MtsClient::GetIMtsClient() Error! Invalid SlotId:%d", nSlotId,0,0);
+        IMS_TRACE_E(0, "MtsClient::GetIMtsClient() Error! Invalid SlotId:%d", nSlotId, 0, 0);
         return IMS_NULL;
     }
 

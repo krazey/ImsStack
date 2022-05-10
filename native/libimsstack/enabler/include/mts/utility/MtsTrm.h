@@ -10,9 +10,7 @@ public:
     virtual void Trm_PriorityChanged() = 0;
 };
 
-class MtsTrm final :
-        public ITrmListener,
-        public ITimerListener
+class MtsTrm final : public ITrmListener, public ITimerListener
 {
 public:
     MtsTrm(IN IMS_SINT32 nSlotId_);
@@ -36,7 +34,7 @@ private:
     void Trm_NotifyServicePriorityChanged();
 
     // ITimerListener Interface
-    void Timer_TimerExpired(IN ITimer *piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer);
 
 private:
     IMS_SINT32 m_nSlotId;
