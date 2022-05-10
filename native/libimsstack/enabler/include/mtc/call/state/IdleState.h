@@ -54,8 +54,6 @@ private:
     CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
 
-    IMS_RESULT SendStartMessage();
-
     AString GenerateSessionId();
     IMSList<AString> GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers);
     void SetResourceListForConference(

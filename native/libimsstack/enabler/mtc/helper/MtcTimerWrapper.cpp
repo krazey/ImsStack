@@ -26,6 +26,11 @@ PUBLIC VIRTUAL void MtcTimerWrapper::Timer_TimerExpired(IN ITimer* piTimer)
         if (pTimer->piTimer == piTimer)
         {
             m_piListener->OnTimerExpired(pTimer->eType);
+
+            TimerService::GetTimerService()->DestroyTimer(pTimer->piTimer);
+            delete pTimer;
+            m_lstTimers.RemoveAt(i);
+
             break;
         }
     }

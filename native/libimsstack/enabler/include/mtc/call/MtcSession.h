@@ -20,6 +20,8 @@ public:
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
 
+    IMS_RESULT SendStart();
+
     inline ISession& GetISession() override { return m_objSession; }
     inline MessageSender& GetMessageSender() override { return m_objMessageSender; }
     inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; };

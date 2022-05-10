@@ -5,6 +5,7 @@
 #include "dialogevent/IDialogEvent.h"
 #include "call/IMtcCallContext.h"
 #include "media/IMtcMediaManager.h"
+#include "ImsAosParameter.h"
 #include "ISession.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
@@ -23,6 +24,7 @@
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipStatusCode.h"
+#include "helper/MtcAosConnector.h"
 #include "helper/MtcSupplementaryService.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
@@ -37,7 +39,8 @@ PUBLIC
 OutgoingState::OutgoingState(IN IMtcCallContext& objContext) :
         MtcCallState(CallStateName::OUTGOING, objContext),
         m_objSessions(IMSMap<ISession*, MtcSession*>()),
-        m_bRemoteAlerted(IMS_FALSE)
+        m_bRemoteAlerted(IMS_FALSE),
+        m_nSilentRedialCount(0)
 {
 }
 
@@ -62,7 +65,11 @@ PUBLIC VIRTUAL CallStateName OutgoingState::Terminate(IN const FailReason& objRe
     FailReason objConvertedReason(objReason);
     objConvertedReason.nReason = ConvertTerminateReasonToFailReason(objReason.nReason);
 
-    HandleCancel(&m_objContext.GetSession()->GetISession(), objConvertedReason);
+    MtcSession* pSession = m_objContext.GetSession();
+    if (pSession != IMS_NULL)
+    {
+        HandleCancel(&pSession->GetISession(), objConvertedReason);
+    }
 
     m_objContext.GetUiNotifier().SendStartFailed(objConvertedReason);
     return CallStateName::TERMINATING;
@@ -80,11 +87,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::HandleSrvccFailure(IN UpdateType eUp
 
     m_objSessions.GetValueAt(nLast)->GetMessageSender().SendEarlyUpdate(eUpdateType);
 
-    return GetStateName();
-}
-
-PUBLIC VIRTUAL CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 /* nType */)
-{
     return GetStateName();
 }
 
@@ -206,13 +208,17 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
-    m_objContext.GetMediaManager().Terminate();
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
     FailReason objReason = StartErrorHandler(m_objContext).Handle(piResponse);
 
-    OnStartFailed(piSession, objReason);
+    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_SILENT)
+    {
+        return HandleSilentRetry(objReason);
+    }
 
+    m_objContext.GetMediaManager().Terminate();
+    OnStartFailed(piSession, objReason);
     return CallStateName::TERMINATING;
 }
 
@@ -552,6 +558,18 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
     return GetStateName();
 }
 
+PUBLIC
+CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
+{
+    switch (nType)
+    {
+        case TimerType::TIMER_RETRY_AFTER:
+            return ContinueSilentRetry();
+        default:
+            return GetStateName();
+    }
+}
+
 PRIVATE
 IMS_RESULT OutgoingState::SendPrack(IN ISession* piSession)
 {
@@ -602,14 +620,85 @@ void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& ob
         return;
     }
     */
-    m_objSessions.GetValue(piSession)->GetMessageSender().Terminate(IMS_FALSE, objReason);
+    if (m_objSessions.GetIndexOfKey(piSession) >= 0)
+    {
+        m_objSessions.GetValue(piSession)->GetMessageSender().Terminate(IMS_FALSE, objReason);
+    }
 }
 
 PRIVATE
-void OutgoingState::HandleRetryAfter(IN const FailReason& objReason)
+CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
 {
-    IMS_SINT32 nRetryAfter = objReason.nExtra * 1000;
-    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_RETRY_AFTER, nRetryAfter);
+    IMS_TRACE_D("HandleSilentRetry", 0, 0, 0);
+
+    if (m_nSilentRedialCount >= m_objContext.GetConfigurationProxy().GetInt(
+            Feature::SILENT_REDIAL_MAX_RETRY_COUNT))
+    {
+        IMS_TRACE_D("HandleRetrySilent : Max retry count[%d] reached", m_nSilentRedialCount, 0, 0);
+        m_objContext.GetUiNotifier().SendStartFailed(objReason);
+        m_objContext.GetMediaManager().Terminate();
+        // TODO: Trigger initial registeration if requird (by config?)
+        return CallStateName::TERMINATING;
+    }
+    m_nSilentRedialCount += 1;
+
+    MtcSession* pSession = m_objContext.GetSession();
+    if (pSession != IMS_NULL)
+    {
+        m_objContext.SetSession(IMS_NULL);
+        m_objSessions.Remove(&pSession->GetISession());
+        delete pSession;
+    }
+
+    /* TODO: Policy: retry timer */
+    IMS_SINT32 nRetryAfterSecond = objReason.nExtra;
+    if (nRetryAfterSecond <= 0)
+    {
+        return ContinueSilentRetry();
+    }
+    else
+    {
+        m_objContext.GetTimer().Start(
+                TimerType::TIMER_RETRY_AFTER, nRetryAfterSecond * 1000);
+    }
+
+    /* TODO: Policy: LTE
+    m_objContext.GetAosConnector(m_objContext.GetService().GetServiceType())
+            ->Control(ImsAosControl::FALLBACK_TO_LTE_AND_LET_ME_KNOW_IT);
+    */
+
+   return GetStateName();
+}
+
+PRIVATE
+CallStateName OutgoingState::ContinueSilentRetry()
+{
+    IMS_TRACE_D("ContinueRetrySilent", 0, 0, 0);
+
+    if (CreateISession() == IMS_FAILURE)
+    {
+        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        m_objContext.GetMediaManager().Terminate();
+        return CallStateName::TERMINATING;
+    }
+    MtcSession* pSession = m_objContext.GetSession();
+    if (pSession)
+    {
+        m_objSessions.Add(&pSession->GetISession(), pSession);
+    }
+
+    m_objContext.GetMediaManager().CreateMediaProfile(
+            &pSession->GetISession(), IMS_FALSE, IMS_TRUE);
+    m_objContext.GetPreconditionManager().CreateQos(GetISession());
+
+    if (pSession->SendStart() == IMS_FAILURE)
+    {
+        m_objContext.GetMediaManager().Terminate();
+        m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
+        return CallStateName::TERMINATING;
+    }
+
+    return GetStateName();
 }
 
 PRIVATE
@@ -683,12 +772,6 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 PRIVATE
 void OutgoingState::OnStartFailed(IN ISession* piSession, IN const FailReason& objReason)
 {
-    if (objReason.nReason == FAIL_REASON_SESSION_RETRY_SILENT)
-    {
-        HandleRetryAfter(objReason);
-        return;
-    }
-
     if (objReason.nReason == FAIL_REASON_SESSION_RETRY_R_RAT &&
             objReason.nExtra == CODE_EMERGENCYSERVICE_COUNTRY_SPECIFIC)
     {
