@@ -90,7 +90,10 @@ END_STATE_MSG_MAP()
 */
 UcePublishManager::UcePublishManager(
         IN ICoreService* _piCoreService, IN CONST AString& strAppName, IN IMS_SINT32 nSimSlot) :
+        m_eState(IDLE),
         m_nKey(0),
+        m_bReceivedUnPublishRequest(IMS_FALSE),
+        m_pPendingPublicationData(IMS_NULL),
         m_strPidfXml(AString::ConstNull()),
         m_strEtag(AString::ConstNull()),
         m_nCapability(0),
@@ -98,14 +101,11 @@ UcePublishManager::UcePublishManager(
         m_piCoreService(_piCoreService),
         m_piPublication(IMS_NULL),
         m_strAppName(strAppName),
-        m_eState(IDLE),
         m_objExponentialRetryTimeSec(IMSVector<IMS_SINT32>()),
         m_nConnectedServices(0),
         m_bAoSConnected(IMS_FALSE),
         m_nExtended(1),
         m_bReceivedFailResponse(IMS_FALSE),
-        m_pPendingPublicationData(IMS_NULL),
-        m_bReceivedUnPublishRequest(IMS_FALSE),
         m_bSetPublishStarted(IMS_FALSE),
         m_bUnpublishSent(IMS_FALSE),
         m_pExponentialTimer(IMS_NULL),
@@ -119,7 +119,7 @@ UcePublishManager::UcePublishManager(
     if (m_piCoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "[ERROR]UcePublishManager:ICoreService is NULL", 0, 0, 0);
-        return;
+        // return;
     }
     LoadConfigValue();
     SetState(IDLE);
@@ -443,10 +443,26 @@ IMS_BOOL UcePublishManager::AosDisConnecting()
     return OnStateMessage(objMsg);
 }
 
-void UcePublishManager::ClosedService()
+IMS_BOOL UcePublishManager::ClosedService()
 {
     IMSMSG objMsg(SERVICE_CLOSED, 0, 0);
-    OnStateMessage(objMsg);
+    return OnStateMessage(objMsg);
+}
+
+void UcePublishManager::SetState(IMS_UINT32 _eState)
+{
+    IMS_TRACE_I("SetState - State : [ %s ] -> [ %s ]", StateToString(m_eState),
+            StateToString(_eState), 0);
+    m_eState = _eState;
+    if (m_eState == PUBLISHED || m_eState == REFRESHING)
+    {
+        SetPublishStateToAoS(PUBLISH_STARTED);
+    }
+    else
+    {
+        SetPublishStateToAoS(PUBLISH_STOPPED);
+    }
+    IMSStateMachine::SetState(_eState);
 }
 
 PROTECTED
@@ -747,6 +763,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
     {
         IMS_TRACE_I("StatePUBLISHING_Failed:ISipMessage is null", 0, 0, 0);
         SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        SetState(ON);
         return IMS_TRUE;
     }
 
@@ -755,6 +772,7 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
     {
         IMS_TRACE_I("StatePUBLISHING_Failed:IPublishResponseData is null", 0, 0, 0);
         SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
+        SetState(ON);
         return IMS_TRUE;
     }
 
@@ -773,7 +791,10 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
     SendPublishResponseInd(m_nKey, pResponseData->m_nResponseCode, pResponseData->m_strReason,
             pResponseData->m_nReasonCause, pResponseData->m_strReasonText, m_strEtag, bNeedToRetry);
     m_nKey = 0;
-    SetState(ON);
+    if (!bNeedToRetry)
+    {
+        SetState(ON);
+    }
     return IMS_TRUE;
 }
 
@@ -1978,21 +1999,14 @@ void UcePublishManager::ClearPendingPublishRequest()
     }
 }
 
-IMS_BOOL UcePublishManager::SetState(IMS_UINT32 _eState)
+IMS_UINT32 UcePublishManager::GetKey()
 {
-    IMS_TRACE_I("SetState - State : [ %s ] -> [ %s ]", StateToString(m_eState),
-            StateToString(_eState), 0);
-    m_eState = _eState;
-    if (m_eState == PUBLISHED || m_eState == REFRESHING)
-    {
-        SetPublishStateToAoS(PUBLISH_STARTED);
-    }
-    else
-    {
-        SetPublishStateToAoS(PUBLISH_STOPPED);
-    }
-    IMSStateMachine::SetState(_eState);
-    return IMS_TRUE;
+    return m_nKey;
+}
+
+IMS_UINT32 UcePublishManager::GetState()
+{
+    return m_eState;
 }
 
 const IMS_CHAR* UcePublishManager::StateToString(IMS_UINT32 _eState)
