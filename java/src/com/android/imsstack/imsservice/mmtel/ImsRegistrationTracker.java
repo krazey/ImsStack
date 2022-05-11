@@ -2,16 +2,11 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.imsstack.core.CommonStarter;
@@ -19,12 +14,13 @@ import com.android.imsstack.core.ICommonPackageListener;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
-import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
+import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
 import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.util.ImsLog;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +36,7 @@ public final class ImsRegistrationTracker {
     private RegTracker mRegTracker;
     private MmTelCapabilityTracker mMmTelCapabilityTracker;
     private int mFeatures = FeatureTagMask.NONE;
+    private List<Pair<Integer, Integer>> mCapabilities;
 
     public ImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl,
             ImsConfigImpl config) {
@@ -49,6 +46,7 @@ public final class ImsRegistrationTracker {
         mFeatures = FeatureTagMask.NONE;
         mMmTelCapabilityTracker = new MmTelCapabilityTracker(config);
         mRegTracker = new RegTracker();
+        mCapabilities = new ArrayList<Pair<Integer, Integer>>();
 
         mRegImpl.setRegistrationTracker(this);
     }
@@ -59,6 +57,7 @@ public final class ImsRegistrationTracker {
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
         mMmTelCapabilityTracker.clear();
+        mCapabilities.clear();
     }
 
     public ImsRegistrationImpl getRegistration() {
@@ -151,12 +150,64 @@ public final class ImsRegistrationTracker {
 
     public void changeCapabilities(List<CapabilityPair> enabledCaps,
             List<CapabilityPair> disabledCaps) {
-        logi("changeCapabilities::enabledCaps.size " + enabledCaps.size() +
-                " disabledCaps.size " + disabledCaps.size());
-        CapabilityPairs capabilityPairs = new CapabilityPairs();
+        logi("changeCapabilities::enabledCaps "
+                + enabledCaps + " disabledCaps " + disabledCaps);
+
+        for (int i = 0; i < disabledCaps.size(); ++i) {
+            CapabilityPair capability = disabledCaps.get(i);
+            for (int j = 0; j < mCapabilities.size(); j++) {
+                Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
+                if ((capabilityPair.first == capability.getRadioTech())
+                        && (capabilityPair.second == capability.getCapability())) {
+                    logi("Remove disabledCapabilities::NetworkType "
+                            + capability.getRadioTech() + " Capability "
+                            + capability.getCapability());
+                    mCapabilities.remove(capabilityPair);
+                    break;
+                }
+            }
+        }
+
         for (int i = 0; i < enabledCaps.size(); ++i) {
             CapabilityPair capability = enabledCaps.get(i);
-            capabilityPairs.addCapability(capability.getRadioTech(), capability.getCapability());
+            boolean alreadyExist = false;
+
+            logi("Size of mCapabilities" + mCapabilities.size());
+            for (int j = 0; j < mCapabilities.size(); j++) {
+                Pair<Integer, Integer> capabilityPair = mCapabilities.get(j);
+                if ((capabilityPair.first == capability.getRadioTech())
+                        && (capabilityPair.second == capability.getCapability())) {
+                    logi("Add EnabledCapabilities alreadyExist");
+                    alreadyExist = true;
+                }
+            }
+            if (!alreadyExist) {
+                int radioTech = capability.getRadioTech();
+                int capabilityType = capability.getCapability();
+                mCapabilities.add(new Pair<>(radioTech, capabilityType));
+                logi("Add EnabledCapabilities::NetworkType "
+                        + radioTech + " Capability " + capabilityType);
+            }
+        }
+
+        CapabilityPairs capabilityPairs = new CapabilityPairs();
+        for (int i = 0; i < mCapabilities.size(); i++) {
+            Pair<Integer, Integer> finalcapability = mCapabilities.get(i);
+            int radioTech = finalcapability.first;
+            int capability = finalcapability.second;
+
+            capabilityPairs.addCapability(radioTech, capability);
+            logi("changeCapabilities::finalCaps networkType"
+                    + radioTech + " Capability " + capability);
+
+            if (((radioTech == IAosRegistrationListener.NetworkType.LTE)
+                    && (capability == IAosRegistrationListener.Capability.VIDEO))
+                    || ((radioTech == IAosRegistrationListener.NetworkType.NR)
+                    && (capability == IAosRegistrationListener.Capability.VIDEO))) {
+                ImsLog.d("Add Capability - IWLAN-VIDEO");
+                capabilityPairs.addCapability(IAosRegistrationListener.NetworkType.IWLAN,
+                        IAosRegistrationListener.Capability.VIDEO);
+            }
         }
         mRegTracker.changeCapabilities(capabilityPairs);
     }
