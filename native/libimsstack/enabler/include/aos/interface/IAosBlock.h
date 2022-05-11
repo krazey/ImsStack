@@ -132,14 +132,14 @@ public:
      *
      * @param
      */
-    virtual void SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
+    virtual IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
 
     /**
      * @brief
      *
      * @param
      */
-    virtual void ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
+    virtual IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) = 0;
 
     /**
      * @brief
@@ -153,7 +153,7 @@ public:
      *
      * @param
      */
-    virtual void PrintBlockReasons() = 0;
+    virtual IMS_BOOL PrintBlockReasons() = 0;
 
     /**
      * @brief

@@ -10,11 +10,12 @@ class MockIAosBlock : public IAosBlock {
 public:
     MOCK_METHOD(void, SetListener, (IN IAosBlockListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosBlockListener* piListener), (override));
-    MOCK_METHOD(void, SetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify), (override));
-    MOCK_METHOD(void, ResetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
+    MOCK_METHOD(IMS_BOOL, SetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
+            (override));
+    MOCK_METHOD(IMS_BOOL, ResetBlockReason, (IN BLOCK_REASON eReason, IN IMS_BOOL bNotify),
             (override));
     MOCK_METHOD(void, ClearAllBlockReasons, (), (override));
-    MOCK_METHOD(void, PrintBlockReasons, (), (override));
+    MOCK_METHOD(IMS_BOOL, PrintBlockReasons, (), (override));
     MOCK_METHOD(void, GetBlockReasons, (OUT IMSList<IMS_UINT32>& objReasons,
             IN SERVICE_TYPE eType), (override));
     MOCK_METHOD(IMS_BOOL, IsReasonBlocked, (IN BLOCK_REASON eReason, IN IMS_BOOL bOnlyEnabled,

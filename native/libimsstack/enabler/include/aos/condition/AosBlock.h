@@ -32,10 +32,10 @@ public:
     void SetListener(IN IAosBlockListener* piListener) override;
     void RemoveListener(IN IAosBlockListener* piListener) override;
 
-    void SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
-    void ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
+    IMS_BOOL SetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
+    IMS_BOOL ResetBlockReason(IN BLOCK_REASON eReason, IN IMS_BOOL bNotify = IMS_TRUE) override;
     void ClearAllBlockReasons() override;
-    void PrintBlockReasons() override;
+    IMS_BOOL PrintBlockReasons() override;
 
     void GetBlockReasons(
             OUT IMSList<IMS_UINT32>& objReasons, IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
@@ -45,7 +45,6 @@ public:
 
     IMS_BOOL IsCleared(IN SERVICE_TYPE eType = SERVICE_CELLULAR) override;
 
-    IMS_BOOL IsListened(IN IAosBlockListener* piListener);
     static const IMS_CHAR* BlockReasonToString(IN IMS_UINT32 nReason);
 
 private:
@@ -74,5 +73,9 @@ private:
 
     AString m_strTag;
     IMSList<IMS_UINT32> objServiceBlockReasons;
+
+private:
+    friend class AosBlockTest;
 };
+
 #endif  // AOS_BLOCK_H_
