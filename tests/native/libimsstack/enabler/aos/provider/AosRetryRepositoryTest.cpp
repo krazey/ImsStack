@@ -27,35 +27,40 @@ using ::testing::Return;
 
 const IMS_SINT32 SLOT_ID = 0;
 
-class AosRetryRepositoryTest : public ::testing::Test {
+class AosRetryRepositoryTest : public ::testing::Test
+{
 public:
     AosRetryRepository* pAosRetryRepository;
-    MockIAosNConfiguration objMockAosConfig;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         pAosRetryRepository = new AosRetryRepository(SLOT_ID);
         ASSERT_TRUE(pAosRetryRepository != nullptr);
-
-        AosProvider::GetInstance()->SetNConfiguration(
-                static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
     }
 
-    virtual void TearDown() override {
+    virtual void TearDown() override
+    {
         if (pAosRetryRepository) {
             delete pAosRetryRepository;
         }
     }
 
-    void SetRetryCount(IN IMS_SINT32 nRetryCount, IN IMS_SINT32 nEmergencyRetryCount) {
+    void SetRetryCount(IN IMS_SINT32 nRetryCount, IN IMS_SINT32 nEmergencyRetryCount)
+    {
         pAosRetryRepository->m_nRetryCount = nRetryCount;
         pAosRetryRepository->m_nEmergencyRetryCount = nEmergencyRetryCount;
     }
 };
 
-TEST_F(AosRetryRepositoryTest, IncreaseCount) {
-    EXPECT_CALL(objMockAosConfig, GetSpecificRegistrationErrorMaxCount())
-        .WillRepeatedly(Return(5));
+TEST_F(AosRetryRepositoryTest, IncreaseCount)
+{
+    IAosNConfiguration* pOriginAosNConfiguration = AosProvider::GetInstance()->GetNConfiguration();
+    MockIAosNConfiguration objMockAosConfig;
+    AosProvider::GetInstance()->SetNConfiguration(
+            static_cast<IAosNConfiguration*>(&objMockAosConfig), SLOT_ID);
+
+    EXPECT_CALL(objMockAosConfig, GetSpecificRegistrationErrorMaxCount()).WillRepeatedly(Return(5));
 
     SetRetryCount(0, 0);
     EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
@@ -69,4 +74,6 @@ TEST_F(AosRetryRepositoryTest, IncreaseCount) {
     EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_NORMAL));
     EXPECT_FALSE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
     EXPECT_TRUE(pAosRetryRepository->IncreaseRetryCount(AosRetryRepository::TYPE_EMERGENCY));
+
+    AosProvider::GetInstance()->SetNConfiguration(pOriginAosNConfiguration, SLOT_ID);
 }
