@@ -18,23 +18,24 @@ package com.android.imsstack.enabler.acs.impl;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ISubscription;
-import com.android.imsstack.enabler.acs.IACServiceImplCallback;
+import com.android.imsstack.enabler.acs.IAcServiceImplCallback;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.ArrayList;
 
 /**
- * This class handles the multiple IACServiceImplCallback regardless of the Slot ID and Sub ID.
+ * This class handles the multiple IAcServiceImplCallback regardless of the Slot ID and Sub ID.
  */
 public class CallbackManager {
-    private final ArrayList<IACServiceImplCallback> mCallbackList =
-            new ArrayList<IACServiceImplCallback>();
+    private final ArrayList<IAcServiceImplCallback> mCallbackList =
+            new ArrayList<IAcServiceImplCallback>();
     private final Object mLock = new Object();
 
     // TODO : need to check, mSubId is required?
     private int mSlotId;
     private int mSubId;
+
 
     /**
      * create CallbackManager instance
@@ -66,7 +67,7 @@ public class CallbackManager {
      * register callback object.
      * @param callback callback instance to be registered
      */
-    public void registerCallback(IACServiceImplCallback callback) {
+    public void registerCallback(IAcServiceImplCallback callback) {
         synchronized (mLock) {
             if (!mCallbackList.contains(callback)) {
                 mCallbackList.add(callback);
@@ -81,7 +82,7 @@ public class CallbackManager {
      * unregister callback object.
      * @param callback callback instance to be unregistered
      */
-    public void unregisterCallback(IACServiceImplCallback callback) {
+    public void unregisterCallback(IAcServiceImplCallback callback) {
         synchronized (mLock) {
             if (mCallbackList.contains(callback)) {
                 mCallbackList.remove(callback);
@@ -101,7 +102,7 @@ public class CallbackManager {
         ImsLog.i("[" + mSlotId + "] " + "notify onReceivedProvisioning " + isDeProvision);
 
         synchronized (mLock) {
-            for (IACServiceImplCallback cb : mCallbackList) {
+            for (IAcServiceImplCallback cb : mCallbackList) {
                 if (cb != null) {
                     cb.onReceivedProvisioning(data, isDeProvision);
                 }
@@ -111,13 +112,13 @@ public class CallbackManager {
 
     /**
      * notify receiving pre-provisioning data
-     * @param data has provisioning.xml
+     * @param data has pre-provisioning.xml
      */
     public void notifyOnReceivedPreProvisioning(byte[] data) {
         ImsLog.i("[" + mSlotId + "] " + "notify onReceivedPreProvisioning");
 
         synchronized (mLock) {
-            for (IACServiceImplCallback cb : mCallbackList) {
+            for (IAcServiceImplCallback cb : mCallbackList) {
                 if (cb != null) {
                     cb.onReceivedPreProvisioning(data);
                 }
@@ -135,7 +136,7 @@ public class CallbackManager {
                 + errorCode + " error string : " + errorString);
 
         synchronized (mLock) {
-            for (IACServiceImplCallback cb : mCallbackList) {
+            for (IAcServiceImplCallback cb : mCallbackList) {
                 if (cb != null) {
                     cb.onReceivedError(errorCode, errorString);
                 }

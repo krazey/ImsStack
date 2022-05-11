@@ -21,7 +21,7 @@ import android.annotation.NonNull;
 /**
  * The container of RCS application related configs.
  */
-public class ACServiceClientInfo {
+public class AcServiceClientInfo {
     private String mRcsVersion;
     private String mRcsProfile;
     private String mClientVendor;
@@ -29,7 +29,7 @@ public class ACServiceClientInfo {
     private boolean mRcsEnabledByUser;
 
     /**
-     * Create a ACServiceClientInfo object.
+     * Create a AcServiceClientInfo object.
      * @param rcsVersion The parameter identifies the RCS version supported
      * by the client. Refer to GSMA RCC.07 "rcs_version" parameter.
      * @param rcsProfile Identifies a fixed set of RCS services that are
@@ -41,7 +41,7 @@ public class ACServiceClientInfo {
      * @param isRcsEnabledByUser The current user setting for weather or not the user has
      * enabled or disabled RCS.
      */
-    public ACServiceClientInfo(@NonNull String rcsVersion,
+    public AcServiceClientInfo(@NonNull String rcsVersion,
             @NonNull String rcsProfile,
             @NonNull String clientVendor, @NonNull String clientVersion,
             boolean isRcsEnabledByUser) {

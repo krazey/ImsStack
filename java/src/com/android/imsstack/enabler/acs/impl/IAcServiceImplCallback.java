@@ -17,9 +17,9 @@
 package com.android.imsstack.enabler.acs;
 
 /**
- * Callback for ACService status changes.
+ * Callback for AcService status changes.
  */
-public interface IACServiceImplCallback {
+public interface IAcServiceImplCallback {
     /**
      * If override method, then the notification will be transferred when the device receives
      * the provisioning data from service provider server

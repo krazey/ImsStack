@@ -18,7 +18,7 @@ import android.content.Context;
 import android.os.PersistableBundle;
 import android.util.Log;
 
-import com.android.imsstack.enabler.acs.ACServiceClientInfo;
+import com.android.imsstack.enabler.acs.AcServiceClientInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,8 +32,8 @@ import java.io.FileOutputStream;
  *    last updated time each provisioning data : condition which provisioning data will be removed
  *    etc.
  */
-public class AcSConfigContainer {
-    private static final String TAG = "ACSConfigContainer";
+public class ConfigContainer {
+    private static final String TAG = "ConfigContainer";
     private static final String LOCAL_FILE_NAME = "rcs_provisioning_config.xml";
     private static final String LOCAL_KEY_PREFIX = "key_";
     private static final String LOCAL_KEY_RCS_VERSION = "key_rcs_version";
@@ -44,13 +44,13 @@ public class AcSConfigContainer {
     private static final String LOCAL_KEY_VALIDATION_TIME = "key_validation_time";
     private static final String LOCAL_KEY_LAST_UPDATE_TIME = "key_last_updated_time";
 
-    private static AcSConfigContainer sInstance;
+    private static ConfigContainer sInstance;
 
     private final Context mContext;
 
     private PersistableBundle mConfig;
 
-    private AcSConfigContainer(Context context) {
+    private ConfigContainer(Context context) {
         mContext = context;
         readDataFromFile();
     }
@@ -58,20 +58,20 @@ public class AcSConfigContainer {
     /**
      * get the instance
      */
-    public static AcSConfigContainer getInstance(Context context) {
+    public static ConfigContainer getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new AcSConfigContainer(context);
+            sInstance = new ConfigContainer(context);
         }
 
         return sInstance;
     }
 
     /**
-     * update ACServiceClientInfo for subId
+     * update AcServiceClientInfo for subId
      * @param subId subscribe Id
      * @param clientInfo container has client information
      */
-    public void updateClientInfo(int subId, ACServiceClientInfo clientInfo) {
+    public void updateClientInfo(int subId, AcServiceClientInfo clientInfo) {
         String key = LOCAL_KEY_PREFIX + subId;
 
         PersistableBundle pb = getDataForSubscription(key);
@@ -85,16 +85,16 @@ public class AcSConfigContainer {
     }
 
     /**
-     * get ACServiceClientInfo for subId
+     * get AcServiceClientInfo for subId
      * @param subId subscribe Id
      * @return container has client information corresponding to subId
      */
-    public ACServiceClientInfo getClientInfo(int subId) {
+    public AcServiceClientInfo getClientInfo(int subId) {
         String key = LOCAL_KEY_PREFIX + subId;
 
         PersistableBundle pb = getDataForSubscription(key);
 
-        return new ACServiceClientInfo(
+        return new AcServiceClientInfo(
                 pb.getString(LOCAL_KEY_RCS_VERSION),
                 pb.getString(LOCAL_KEY_RCS_PROFILE),
                 pb.getString(LOCAL_KEY_CLIENT_VENDOR),

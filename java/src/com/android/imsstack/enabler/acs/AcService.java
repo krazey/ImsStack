@@ -29,14 +29,14 @@ import java.util.concurrent.Executor;
  * Provide interface for ACService(Auto Configuration Service) client to retrieve Provisioning xml
  * from service provider.
   */
-public class ACService {
+public class AcService {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "STATE_TYPE_", flag = true, value = {
             STATE_TYPE_NONE,
             STATE_TYPE_READY,
             STATE_TYPE_PROGRESS
     })
-    public @interface ACServiceStateFlag {}
+    public @interface AcServiceStateFlag {}
 
     public static final int STATE_TYPE_NONE = 0;
     public static final int STATE_TYPE_READY = 1;
@@ -45,12 +45,12 @@ public class ACService {
     /**
      * The callback for Provisioning changes.
      */
-    public static class ACServiceCallback {
-        private static class Callback implements IACServiceImplCallback {
-            private final ACServiceCallback mLocalCallback;
+    public static class AcServiceCallback {
+        private static class Callback implements IAcServiceImplCallback {
+            private final AcServiceCallback mLocalCallback;
             private Executor mExecutor;
 
-            private Callback(ACServiceCallback serviceCallback) {
+            private Callback(AcServiceCallback serviceCallback) {
                 mLocalCallback = serviceCallback;
             }
 
@@ -76,7 +76,7 @@ public class ACService {
 
         private final Callback mCallback = new Callback(this);
 
-        public final IACServiceImplCallback getCallback() {
+        public final IAcServiceImplCallback getCallback() {
             return mCallback;
         }
 
@@ -112,34 +112,34 @@ public class ACService {
         public void onReceivedError(int errorCode, String errorString) {}
     }
 
-    private static final String TAG = "ACServiceImplBase";
-    private static final SparseArray<ACService> INSTANCES = new SparseArray<ACService>();
+    private static final String TAG = "AcServiceImplBase";
+    private static final SparseArray<AcService> INSTANCES = new SparseArray<AcService>();
 
-    //private ACServiceImpl mACServiceImpl;
+    //private AcServiceImpl mAcServiceImpl;
     private int mPhoneId;
 
-    private ACService(int phoneId) {
+    private AcService(int phoneId) {
         mPhoneId = phoneId;
 
-        //mAcServiceImpl = new ACServiceImpl(phoneId);
+        //mAcServiceImpl = new AcServiceImpl(phoneId);
     }
 
     /**
-     * Returns a ACService for phoneId specified and IllegalArgumentException will be
+     * Returns a AcService for phoneId specified and IllegalArgumentException will be
      * thrown if the phoneId is not valid.
-     * @param phoneId The ID of the Phone or SIM Slot that this ACService will use.
-     * @return Instance of the ACService
+     * @param phoneId The ID of the Phone or SIM Slot that this AcService will use.
+     * @return Instance of the AcService
      */
-    public static ACService getInstance(int phoneId) {
+    public static AcService getInstance(int phoneId) {
         if (!SubscriptionManager.isValidPhoneId(phoneId)) {
             throw new IllegalArgumentException("Invalid PhoneId");
         }
 
-        ACService acService;
+        AcService acService;
         synchronized (INSTANCES) {
             acService = INSTANCES.get(phoneId);
             if (acService == null) {
-                acService = new ACService(phoneId);
+                acService = new AcService(phoneId);
                 INSTANCES.put(phoneId, acService);
             }
         }
@@ -148,15 +148,15 @@ public class ACService {
     }
 
     /**
-     * Register a new ACServiceCallback to listen to changes of provisioning
+     * Register a new AcServiceCallback to listen to changes of provisioning
      * @param executor The executor to call the callback method
      * @param serviceCallback The callback to be registered.
      * @return true if the registration callback process is success, or false otherwise.
      */
     public boolean setCallback(@NonNull Executor executor,
-            @NonNull ACServiceCallback serviceCallback) {
+            @NonNull AcServiceCallback serviceCallback) {
         serviceCallback.setExecutor(executor);
-        //mACServiceImpl.setCallback(mSubId, serviceCallback.getCallback());
+        //mAcServiceImpl.setCallback(mSubId, serviceCallback.getCallback());
         return true;
     }
 
@@ -165,8 +165,8 @@ public class ACService {
      * removed, this callback will automatically be removed.
      * @param serviceCallback The callback to be removed.
      */
-    public void removeCallback(@NonNull ACServiceCallback serviceCallback) {
-        //mACServiceImpl.removeCallBack(mSubId, serviceCallback.getCallback());
+    public void removeCallback(@NonNull AcServiceCallback serviceCallback) {
+        //mAcServiceImpl.removeCallBack(mSubId, serviceCallback.getCallback());
     }
 
     /**
@@ -175,18 +175,18 @@ public class ACService {
      * @param clientInfo RCS client configuration
      * @return true if the operation is success, or false otherwise.
      */
-    public boolean setClientInfo(@NonNull ACServiceClientInfo clientInfo) {
-        //mACServiceImpl.setClientInfo(mSubId, clientInfo);
+    public boolean setClientInfo(@NonNull AcServiceClientInfo clientInfo) {
+        //mAcServiceImpl.setClientInfo(mSubId, clientInfo);
         return true;
     }
 
     /**
      * Reconfiguration triggered by the caller
-     * @return true if the ACService module can to request provisioning and the result will be
+     * @return true if the AcService module can to request provisioning and the result will be
      * notified by callback, or false otherwise.
      */
     public boolean start() {
-        // return mACServiceImpl.start();
+        // return mAcServiceImpl.start();
         return false;
     }
 
@@ -195,7 +195,7 @@ public class ACService {
      * running. (before called the registered callback)
      */
     public void stop() {
-        // mACServiceImpl.stop();
+        // mAcServiceImpl.stop();
     }
 
     /**
@@ -204,22 +204,22 @@ public class ACService {
      * @param isCompressed The xml file is compressed in gzip format
      */
     public void notifyProvisioningReceived(byte[] data, boolean isCompressed) {
-        // mACServiceImpl.notifyConfigDataReceived(data, isCompressed);
+        // mAcServiceImpl.notifyConfigDataReceived(data, isCompressed);
     }
 
     /**
      * The provisioning xml through notifyConfigDataReceived() is not available anymore.
      */
     public void notifyProvisioningRemoved() {
-        // mACServiceImpl.notifyConfigDataRemoved();
+        // mAcServiceImpl.notifyConfigDataRemoved();
     }
 
     /**
-     * Get the state of ACService module
-     * @return The state is defined in ACServiceSateFlag
+     * Get the state of AcService module
+     * @return The state is defined in AcServiceSateFlag
      */
-    public @ACServiceStateFlag int getState() {
-        // return mACServiceImpl.getState()
+    public @AcServiceStateFlag int getState() {
+        // return mAcServiceImpl.getState()
         return STATE_TYPE_NONE;
     }
 }
