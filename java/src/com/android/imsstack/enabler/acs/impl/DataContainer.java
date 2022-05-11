@@ -30,11 +30,11 @@ import java.util.Set;
 /**
  * This class handles the RCS provisioning XML data and is created based on sub ID
  */
-public class AcDataContainer {
+public class DataContainer {
     public  static final int VERSION_UNKNOWN = -99;
-    public  static final long VALIDITY_UNKNOWN = -99l;
+    public  static final long VALIDITY_UNKNOWN = -99L;
 
-    private static final String TAG = AcDataContainer.class.getSimpleName();
+    private static final String TAG = DataContainer.class.getSimpleName();
     private static final String LOCAL_FILE_NAME_PREF = "rcs_provisioning_data_";
     private static final String VERSION = "version";
     private static final String VALIDITY = "validity";
@@ -45,7 +45,7 @@ public class AcDataContainer {
 
     private PersistableBundle mProvisioningData;
 
-    public AcDataContainer(Context context, int subId) {
+    public DataContainer(Context context, int subId) {
         mContext = context;
         mSubId = subId;
 
