@@ -33,7 +33,7 @@ public:
     AosConnector(IN IAosAppContext* piAppContext);
     virtual ~AosConnector();
 
-    virtual void Start();
+    virtual IMS_BOOL Start();
     virtual void Stop();
     virtual void Stop(IN IMS_SINT32 nDelayTimeSec);
 
@@ -65,11 +65,25 @@ public:
         REASON_OTHERS
     };
 
-    // RequestCmd
     enum
     {
-        CMD_BLOCK = 0,
-        CMD_UNBLOCK
+        TIMER_IPV6 = 0,
+        TIMER_STOP_DELAY,
+        TIMER_READY_RECOVERY
+    };
+
+    enum
+    {
+        PENDING_NONE = 0x0,
+        PENDING_IPV6_DELAY = 0x1,
+        PENDING_PCSCF_CONFIG_READY = 0x2
+    };
+
+    enum
+    {
+        LISTENER_TYPE_ACTIVATED = 0,
+        LISTENER_TYPE_DEACTIVATED,
+        LISTENER_TYPE_UPDATED
     };
 
 protected:
@@ -122,31 +136,9 @@ protected:
     // ITimerListener
     virtual void Timer_TimerExpired(IN ITimer* piTimer);
 
-    friend class AosApplication;
     virtual void CleanUp();
 
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
-
-    enum
-    {
-        TIMER_IPV6 = 0,
-        TIMER_STOP_DELAY,
-        TIMER_READY_RECOVERY
-    };
-
-    enum
-    {
-        PENDING_NONE = 0x0,
-        PENDING_IPV6_DELAY = 0x1,
-        PENDING_PCSCF_CONFIG_READY = 0x2
-    };
-
-    enum
-    {
-        LISTENER_TYPE_ACTIVATED = 0,
-        LISTENER_TYPE_DEACTIVATED,
-        LISTENER_TYPE_UPDATED
-    };
 
 protected:
     IAosAppContext* m_piAppContext;
@@ -174,5 +166,9 @@ protected:
     static const IMS_UINT32 READY_RECOVERY_BASE_TIME = 20;     // 20 Sec.
     static const IMS_UINT32 READY_RECOVERY_MAX_TIME = 1800;    // 1800 Sec.
     static const IMS_UINT32 IPV6_ADDRESS_WAIT_TIME_SEC = 4;    // 4 Sec.
+
+protected:
+    friend class AosApplication;
+    friend class AosConnectorTest;
 };
 #endif  // AOS_CONNECTOR_H_

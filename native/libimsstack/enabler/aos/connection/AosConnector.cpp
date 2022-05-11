@@ -62,12 +62,17 @@ AosConnector::AosConnector(IN IAosAppContext* piAppContext) :
             sizeof(AosConnector), this);
 
     m_piConnection = m_piAppContext->GetConnection();
-    m_piConnection->SetListener(this);
-
-    SetEmergencyType(m_piConnection->GetConnectionType() == NetworkPolicy::APN_EMERGENCY);
+    if (m_piConnection != IMS_NULL)
+    {
+        m_piConnection->SetListener(this);
+        SetEmergencyType(m_piConnection->GetConnectionType() == NetworkPolicy::APN_EMERGENCY);
+    }
 
     m_piPcscf = m_piAppContext->GetPcscf();
-    m_piPcscf->SetListener(this);
+    if (m_piPcscf != IMS_NULL)
+    {
+        m_piPcscf->SetListener(this);
+    }
 
     m_pUtil = AosUtil::GetInstance();
 }
@@ -88,7 +93,7 @@ PUBLIC VIRTUAL AosConnector::~AosConnector()
 Remarks
 
 */
-PUBLIC VIRTUAL void AosConnector::Start()
+PUBLIC VIRTUAL IMS_BOOL AosConnector::Start()
 {
     A_IMS_TRACE_I(APPPROFILE, "Start :: ready (%s) , connector is pending (%s)",
             _TRACE_B_(m_nState == STATE_READY), _TRACE_B_(IsPending()), 0);
@@ -99,16 +104,17 @@ PUBLIC VIRTUAL void AosConnector::Start()
     {
         A_IMS_TRACE_D(APPPROFILE, "Start :: already ready", 0, 0, 0);
         Notify(LISTENER_TYPE_ACTIVATED);
-        return;
+        return IMS_FALSE;
     }
 
     if (IsPending())
     {
         A_IMS_TRACE_D(APPPROFILE, "Start :: connector is pending", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     m_piConnection->Activate();
+    return IMS_TRUE;
 }
 
 /*
