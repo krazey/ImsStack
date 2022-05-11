@@ -16,22 +16,21 @@
 #include <gtest/gtest.h>
 #include "msg/SipRAcKHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipRAcKHeaderTest : public ::testing::Test {
-
+class SipRAcKHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipRAcKHeaderTest, IsValidHeader) {
-    SipRAcKHeader *pHeader = reinterpret_cast<SipRAcKHeader*>(
+TEST_F(SipRAcKHeaderTest, IsValidHeader)
+{
+    SipRAcKHeader* pHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -44,14 +43,17 @@ TEST_F(SipRAcKHeaderTest, IsValidHeader) {
     pHeader->SipDelete();
 }
 
-TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr) {
-    SipRAcKHeader *pHeader = reinterpret_cast<SipRAcKHeader*>(
+TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr)
+{
+    SipRAcKHeader* pHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
@@ -65,10 +67,9 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr) {
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"212 7", 5));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"212 7 ", 6));
 
-
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"7183 1 INVITE", 13));
 
-    SipRAcKHeader *pCopyHeader = reinterpret_cast<SipRAcKHeader*>(
+    SipRAcKHeader* pCopyHeader = reinterpret_cast<SipRAcKHeader*>(
             SipRAcKHeader::GetNewObj(SipHeaderBase::RACK, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
     pHeader->SipDelete();
@@ -78,4 +79,4 @@ TEST_F(SipRAcKHeaderTest, EncodeHdrAndDecodeHdr) {
     pCopyHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

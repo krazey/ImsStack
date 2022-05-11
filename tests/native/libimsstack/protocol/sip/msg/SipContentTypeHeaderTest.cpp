@@ -16,29 +16,28 @@
 #include <gtest/gtest.h>
 #include "msg/SipContentTypeHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipContentTypeHeaderTest : public ::testing::Test {
-
+class SipContentTypeHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipContentTypeHeaderTest, CopyConstructor) {
-    SipContentTypeHeader *pHeader = reinterpret_cast<SipContentTypeHeader*>(
+TEST_F(SipContentTypeHeaderTest, CopyConstructor)
+{
+    SipContentTypeHeader* pHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
     EXPECT_EQ(SIP_TRUE, pHeader->SetSubMediaType("mediaSubType"));
 
-    SipContentTypeHeader *pCopyHeader = reinterpret_cast<SipContentTypeHeader*>(
+    SipContentTypeHeader* pCopyHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
 
@@ -50,8 +49,9 @@ TEST_F(SipContentTypeHeaderTest, CopyConstructor) {
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipContentTypeHeaderTest, IsValidHeader) {
-    SipContentTypeHeader *pHeader = reinterpret_cast<SipContentTypeHeader*>(
+TEST_F(SipContentTypeHeaderTest, IsValidHeader)
+{
+    SipContentTypeHeader* pHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -82,12 +82,15 @@ TEST_F(SipContentTypeHeaderTest, IsValidHeader) {
     pHeader = nullptr;
 }
 
-TEST_F(SipContentTypeHeaderTest, EncodeHdr) {
+TEST_F(SipContentTypeHeaderTest, EncodeHdr)
+{
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
-    SipContentTypeHeader *pHeader = reinterpret_cast<SipContentTypeHeader*>(
+    SipContentTypeHeader* pHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -121,7 +124,7 @@ TEST_F(SipContentTypeHeaderTest, EncodeHdr) {
 
     /* Encode accept with value and parameters */
     pHeader->InitParameters(SIP_NULL);
-    SipParameters *pParameters = pHeader->GetParameters();
+    SipParameters* pParameters = pHeader->GetParameters();
     pParameters->AddParam("param-name", "param-value");
 
     EXPECT_EQ(SIP_TRUE, pHeader->EncodeHdr(&pBuff));
@@ -131,8 +134,9 @@ TEST_F(SipContentTypeHeaderTest, EncodeHdr) {
     pHeader = nullptr;
 }
 
-TEST_F(SipContentTypeHeaderTest, DecodeHdr) {
-    SipContentTypeHeader *pHeader = reinterpret_cast<SipContentTypeHeader*>(
+TEST_F(SipContentTypeHeaderTest, DecodeHdr)
+{
+    SipContentTypeHeader* pHeader = reinterpret_cast<SipContentTypeHeader*>(
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -150,18 +154,18 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr) {
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     /* Decode only value and parameters, with double quote included for param
      * value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)
-            "application/sdp;boundary=\"unique-boundary-1\"", 44));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr((char*)"application/sdp;boundary=\"unique-boundary-1\"", 44));
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 
-    SipParameters *pParameters = pHeader->GetParameters();
+    SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList *pSipParameterList = pParameters->GetParameterList();
+    SipParameterList* pSipParameterList = pParameters->GetParameterList();
     ASSERT_TRUE(pSipParameterList != nullptr);
 
     EXPECT_EQ(1, pSipParameterList->GetCount());
-    SIP_CHAR *pBoundary = pHeader->GetBoundary();
+    SIP_CHAR* pBoundary = pHeader->GetBoundary();
     ASSERT_TRUE(pBoundary != nullptr);
 
     EXPECT_STREQ("unique-boundary-1", pBoundary);
@@ -173,8 +177,8 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr) {
             SipContentTypeHeader::GetNewObj(SipHeaderBase::CONTENT_TYPE, nullptr));
     /* Decode only value and parameters, without double quote included for param
      * value */
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)
-            "application/sdp;boundary=unique-boundary-2", 42));
+    EXPECT_EQ(
+            SIP_TRUE, pHeader->DecodeHdr((char*)"application/sdp;boundary=unique-boundary-2", 42));
     EXPECT_STREQ("application", pHeader->GetMediaType());
     EXPECT_STREQ("sdp", pHeader->GetSubMediaType());
 
@@ -193,4 +197,4 @@ TEST_F(SipContentTypeHeaderTest, DecodeHdr) {
     pHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

@@ -16,29 +16,28 @@
 #include <gtest/gtest.h>
 #include "msg/SipAcceptHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipAcceptHeaderTest : public ::testing::Test {
-
+class SipAcceptHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipAcceptHeaderTest, CopyConstructor) {
-    SipAcceptHeader *pHeader = reinterpret_cast<SipAcceptHeader*>(
+TEST_F(SipAcceptHeaderTest, CopyConstructor)
+{
+    SipAcceptHeader* pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaType("mediaType"));
     EXPECT_EQ(SIP_TRUE, pHeader->SetMediaSubType("mediaSubType"));
 
-    SipAcceptHeader *pCopyHeader = reinterpret_cast<SipAcceptHeader*>(
+    SipAcceptHeader* pCopyHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
 
@@ -50,8 +49,9 @@ TEST_F(SipAcceptHeaderTest, CopyConstructor) {
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipAcceptHeaderTest, IsValidHeader) {
-    SipAcceptHeader *pHeader = reinterpret_cast<SipAcceptHeader*>(
+TEST_F(SipAcceptHeaderTest, IsValidHeader)
+{
+    SipAcceptHeader* pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -109,12 +109,15 @@ TEST_F(SipAcceptHeaderTest, IsValidHeader) {
     pHeader = nullptr;
 }
 
-TEST_F(SipAcceptHeaderTest, EncodeHdr) {
+TEST_F(SipAcceptHeaderTest, EncodeHdr)
+{
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
-    SipAcceptHeader *pHeader = reinterpret_cast<SipAcceptHeader*>(
+    SipAcceptHeader* pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -148,7 +151,7 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr) {
 
     /* Encode accept with value and parameters */
     pHeader->InitParameters(SIP_NULL);
-    SipParameters *pParameters = pHeader->GetParameters();
+    SipParameters* pParameters = pHeader->GetParameters();
     pParameters->AddParam("param-name", "param-value");
     pParameters->AddParam("q", "0.1");
 
@@ -159,8 +162,9 @@ TEST_F(SipAcceptHeaderTest, EncodeHdr) {
     pHeader = nullptr;
 }
 
-TEST_F(SipAcceptHeaderTest, DecodeHdr) {
-    SipAcceptHeader *pHeader = reinterpret_cast<SipAcceptHeader*>(
+TEST_F(SipAcceptHeaderTest, DecodeHdr)
+{
+    SipAcceptHeader* pHeader = reinterpret_cast<SipAcceptHeader*>(
             SipAcceptHeader::GetNewObj(SipHeaderBase::ACCEPT, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -181,14 +185,14 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr) {
     EXPECT_STREQ("application", pHeader->GetMType());
     EXPECT_STREQ("sdp", pHeader->GetMSubType());
 
-    SipParameters *pParameters = pHeader->GetParameters();
+    SipParameters* pParameters = pHeader->GetParameters();
     ASSERT_TRUE(pParameters != nullptr);
-    SipParameterList *pSipParameterList = pParameters->GetParameterList();
+    SipParameterList* pSipParameterList = pParameters->GetParameterList();
     ASSERT_TRUE(pSipParameterList != nullptr);
 
     EXPECT_EQ(2, pSipParameterList->GetCount());
 
-    SipNameValue *pNameVal = pSipParameterList->GetNameValNode(0);
+    SipNameValue* pNameVal = pSipParameterList->GetNameValNode(0);
     EXPECT_STREQ("q", pNameVal->m_pszName);
     EXPECT_EQ(1, pNameVal->m_valueList.GetSize());
     EXPECT_STREQ("0.4", pNameVal->m_valueList.GetAt(0));
@@ -209,4 +213,4 @@ TEST_F(SipAcceptHeaderTest, DecodeHdr) {
     pHeader = SIP_NULL;
 }
 
-} // namespace android
+}  // namespace android

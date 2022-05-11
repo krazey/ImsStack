@@ -16,33 +16,32 @@
 #include <gtest/gtest.h>
 #include "msg/SipAcceptResourcePriorityHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipAcceptResourcePriorityHeaderTest : public ::testing::Test {
-
+class SipAcceptResourcePriorityHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipAcceptResourcePriorityHeaderTest, CopyConstructor) {
-    SipAcceptResourcePriorityHeader *pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
+TEST_F(SipAcceptResourcePriorityHeaderTest, CopyConstructor)
+{
+    SipAcceptResourcePriorityHeader* pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace("namespace"));
     EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority("r-priority"));
 
-    SipAcceptResourcePriorityHeader *pCopyHeader =
+    SipAcceptResourcePriorityHeader* pCopyHeader =
             reinterpret_cast<SipAcceptResourcePriorityHeader*>(
-            SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, pHeader));
+                    SipAcceptResourcePriorityHeader::GetNewObj(
+                            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
@@ -53,14 +52,17 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, CopyConstructor) {
     pCopyHeader->SipDelete();
 }
 
-TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeHdr) {
+TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeHdr)
+{
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
-    SipAcceptResourcePriorityHeader *pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
+    SipAcceptResourcePriorityHeader* pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header allowed */
@@ -76,7 +78,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeHdr) {
 
     pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Only r-priority present, fail */
     EXPECT_EQ(SIP_TRUE, pHeader->SetRPriority("r-priority"));
@@ -87,7 +89,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeHdr) {
 
     pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* namespace and r-priority present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->SetNameSpace("namespace"));
@@ -99,10 +101,11 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, EncodeHdr) {
     pHeader->SipDelete();
 }
 
-TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr) {
-    SipAcceptResourcePriorityHeader *pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
+TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr)
+{
+    SipAcceptResourcePriorityHeader* pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     /* Empty header allowed */
@@ -118,7 +121,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr) {
 
     pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Only (DOT)r-priority present, fail */
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)".r-priority", 11));
@@ -127,7 +130,7 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr) {
 
     pHeader = reinterpret_cast<SipAcceptResourcePriorityHeader*>(
             SipAcceptResourcePriorityHeader::GetNewObj(
-            SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
+                    SipHeaderBase::ACCEPT_RESOURCE_PRIORITY, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
     /* Both namespace and r-priority present, success */
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"namespace.r-priority", 20));
@@ -136,4 +139,4 @@ TEST_F(SipAcceptResourcePriorityHeaderTest, DecodeHdr) {
     pHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

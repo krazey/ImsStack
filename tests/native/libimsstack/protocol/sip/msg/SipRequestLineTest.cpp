@@ -18,28 +18,27 @@
 #include "msg/SipAddrSpec.h"
 #include "msg/SipRequestLine.h"
 
-namespace android {
+namespace android
+{
 
-class SipRequestLineTest : public ::testing::Test {
-
+class SipRequestLineTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipRequestLineTest, CopyConstructor) {
-    SipRequestLine *pRequestLine = new SipRequestLine();
+TEST_F(SipRequestLineTest, CopyConstructor)
+{
+    SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
     pRequestLine->SetSipVersion(SIP_SIPVER);
     pRequestLine->SetMethod("INVITE");
 
-    SipAddrSpec *pSipAddrSpec = new SipAddrSpec();
+    SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     EXPECT_EQ(SIP_TRUE, pSipAddrSpec->DecodeAddrSpec((char*)"sip:user@host", 13));
@@ -47,14 +46,14 @@ TEST_F(SipRequestLineTest, CopyConstructor) {
     pRequestLine->SetReqUri(pSipAddrSpec);
     pSipAddrSpec->SipDelete();
 
-    SipRequestLine *pCopyRequestLine = new SipRequestLine(*pRequestLine);
+    SipRequestLine* pCopyRequestLine = new SipRequestLine(*pRequestLine);
     ASSERT_TRUE(pCopyRequestLine != nullptr);
 
     pSipAddrSpec->SipDelete();
     pRequestLine->SipDelete();
 
     pSipAddrSpec = pCopyRequestLine->GetReqUri();
-    SipUri *pSipUri = pSipAddrSpec->GetSipUri();
+    SipUri* pSipUri = pSipAddrSpec->GetSipUri();
     EXPECT_STREQ("user", pSipUri->GetUser());
     EXPECT_STREQ("host", pSipUri->GetHost());
 
@@ -63,8 +62,9 @@ TEST_F(SipRequestLineTest, CopyConstructor) {
     pCopyRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, IsValidComponent) {
-    SipRequestLine *pRequestLine = new SipRequestLine();
+TEST_F(SipRequestLineTest, IsValidComponent)
+{
+    SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pRequestLine->IsValidComponent(nullptr));
@@ -92,12 +92,15 @@ TEST_F(SipRequestLineTest, IsValidComponent) {
     pRequestLine = nullptr;
 }
 
-TEST_F(SipRequestLineTest, EncodeRequestLine) {
+TEST_F(SipRequestLineTest, EncodeRequestLine)
+{
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
-    SipRequestLine *pRequestLine = new SipRequestLine();
+    SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
     /* Empty request line, fail */
@@ -107,7 +110,7 @@ TEST_F(SipRequestLineTest, EncodeRequestLine) {
     pRequestLine->SetMethod("INVITE");
     EXPECT_EQ(SIP_FALSE, pRequestLine->EncodeRequestLine(&pBuff));
 
-    SipAddrSpec *pSipAddrSpec = new SipAddrSpec();
+    SipAddrSpec* pSipAddrSpec = new SipAddrSpec();
     ASSERT_TRUE(pSipAddrSpec != nullptr);
 
     /* method and addrspec present and no sip version, fail */
@@ -131,8 +134,9 @@ TEST_F(SipRequestLineTest, EncodeRequestLine) {
     pRequestLine->SipDelete();
 }
 
-TEST_F(SipRequestLineTest, DecodeRequestLine) {
-    SipRequestLine *pRequestLine = new SipRequestLine();
+TEST_F(SipRequestLineTest, DecodeRequestLine)
+{
+    SipRequestLine* pRequestLine = new SipRequestLine();
     ASSERT_TRUE(pRequestLine != nullptr);
 
     EXPECT_EQ(SIP_FALSE, pRequestLine->DecodeRequestLine((char*)"", 0));
@@ -151,4 +155,4 @@ TEST_F(SipRequestLineTest, DecodeRequestLine) {
     pRequestLine->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

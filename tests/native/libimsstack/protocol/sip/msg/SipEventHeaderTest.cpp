@@ -16,36 +16,35 @@
 #include <gtest/gtest.h>
 #include "msg/SipEventHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipEventHeaderTest : public ::testing::Test {
-
+class SipEventHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr) {
-    SipHeaderBase *pHeader =
-            SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
+TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr)
+{
+    SipHeaderBase* pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"event-package", 13));
 
-    SipHeaderBase *pCopyHeader =
-            SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
+    SipHeaderBase* pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
     pHeader->SipDelete();
@@ -76,8 +75,9 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr) {
     pHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
-    EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)
-            "event-package.event-template;event-param-name=event-param-value", 63));
+    EXPECT_EQ(SIP_TRUE,
+            pHeader->DecodeHdr(
+                    (char*)"event-package.event-template;event-param-name=event-param-value", 63));
 
     pCopyHeader = SipEventHeader::GetNewObj(SipHeaderBase::EVENT, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
@@ -93,4 +93,4 @@ TEST_F(SipEventHeaderTest, EncodeHdrAndDecodeHdr) {
     pCopyHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android
