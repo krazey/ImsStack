@@ -793,7 +793,7 @@ public class DCNetWatcher implements IDCNetWatcher {
                             ? wwanRegInfo.getRegistrationState()
                             : NetworkRegistrationInfo
                                     .REGISTRATION_STATE_NOT_REGISTERED_OR_SEARCHING;
-        } else if ((wwanRegInfo != null && !wwanRegInfo.isRegistered()) || ss.isIwlanPreferred()) {
+        } else if (wwanRegInfo != null && !wwanRegInfo.isRegistered()) {
             nriState = iwlanRegInfo.getRegistrationState();
         } else if (wwanRegInfo != null) {
             nriState = wwanRegInfo.getRegistrationState();
