@@ -8,7 +8,7 @@ public final class Log {
     private static int sAdminDebug = -1;
 
     static {
-        if (!android.os.Build.IS_USER) {
+        if (!"user".equals(android.os.Build.TYPE)) {
             sDebug = 1;
         }
     }

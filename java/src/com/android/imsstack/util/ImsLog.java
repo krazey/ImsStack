@@ -6,7 +6,7 @@ import android.text.TextUtils;
 import java.util.Arrays;
 
 public final class ImsLog {
-    public static final boolean DBG = !android.os.Build.IS_USER;
+    public static final boolean DBG = !"user".equals(android.os.Build.TYPE);
 
     private static final int OPT_MEDIUM_SERIAL = 0x00010000;
     private static final int OPT_HIDE_PRIVACY = 0x00000100;

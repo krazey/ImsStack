@@ -5,11 +5,6 @@ import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Locale;
-import java.util.Set;
-
 /**
  * This class provides the wrapper APIs for system/vendor properties.
  */
@@ -43,10 +38,6 @@ public final class ImsProperties {
 
         public static int getInt(String key, int def) {
             return SystemProperties.getInt(key, def);
-        }
-
-        public static void set(String key, String value) {
-            SystemProperties.set(key, value);
         }
     }
 

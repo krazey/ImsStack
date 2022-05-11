@@ -11,11 +11,10 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.IVoltePackageListener;
-import com.android.imsstack.core.OperatorInfo;
+import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
-import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPITelephonySubscriber;
 import com.android.imsstack.system.SystemInterface;
@@ -249,13 +248,15 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
 
     @Override
     public String getPhoneNumber() {
-        if ("VZW".equals(OperatorInfo.getOperator(mSlotId))) {
-            TelephonyManager tm = getTelephonyManagerOnSimConfig();
-            return (tm != null) ? tm.getMsisdn() : null;
-        }
+        // If the phone type is CDMA-LTE,
+        // CarrierConfigManager#KEY_USE_USIM_BOOL may need to be enabled
+        // to read the phone number from USIM application.
+        int subId = MSimUtils.getSubId(mSlotId);
+        SubscriptionManager sm = AppContext.getSystemService(SubscriptionManager.class);
 
-        TelephonyManager tm = getTelephonyManagerOnSimConfig();
-        return (tm != null) ? tm.getLine1Number() : null;
+        return (sm != null)
+                ? sm.getPhoneNumber(subId, SubscriptionManager.PHONE_NUMBER_SOURCE_UICC)
+                : null;
     }
 
     @Override

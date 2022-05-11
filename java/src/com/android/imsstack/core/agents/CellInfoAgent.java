@@ -13,7 +13,6 @@ package com.android.imsstack.core.agents;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.CellIdentityGsm;
@@ -32,9 +31,7 @@ import android.text.TextUtils;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.dcm.DCFactory;
-import com.android.imsstack.core.agents.dcm.DCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.FeatureUtils;
@@ -47,6 +44,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 public class CellInfoAgent implements ICellInfo {
     private static final int FEATURE_NONE = 0x00000000;
@@ -105,7 +104,7 @@ public class CellInfoAgent implements ICellInfo {
     /**
      * To listen messages like the network status change.
      */
-    private Handler mCellInfoHandler;
+    private CellInfoHandler mCellInfoHandler;
 
     private enum ENetworkCategory {
         LTE,
@@ -329,12 +328,6 @@ public class CellInfoAgent implements ICellInfo {
 
         if (tm != null) {
             tm.unregisterTelephonyCallback(listener);
-
-            if (MSimUtils.isMultiSimEnabled()) {
-                setCellInfoListRate(Integer.MAX_VALUE);
-            } else {
-                tm.setCellInfoListRate(Integer.MAX_VALUE);
-            }
         }
     }
 
@@ -342,13 +335,7 @@ public class CellInfoAgent implements ICellInfo {
         TelephonyManager tm = AppContext.getTelephonyManager(listener.getSubId());
 
         if (tm != null) {
-            tm.registerTelephonyCallback(new HandlerExecutor(mCellInfoHandler), listener);
-
-            if (MSimUtils.isMultiSimEnabled()) {
-                setCellInfoListRate(0);
-            } else {
-                tm.setCellInfoListRate(0);
-            }
+            tm.registerTelephonyCallback(mCellInfoHandler, listener);
         }
     }
 
@@ -891,10 +878,6 @@ public class CellInfoAgent implements ICellInfo {
         return false;
     }
 
-    private void setCellInfoListRate(int rateInMillis) {
-        // no-op
-    }
-
     private final class CellInfoListener extends TelephonyCallback implements
         TelephonyCallback.CellInfoListener {
 
@@ -924,9 +907,16 @@ public class CellInfoAgent implements ICellInfo {
         }
     }
 
-    private class CellInfoHandler extends Handler {
+    private class CellInfoHandler extends Handler implements Executor {
         public CellInfoHandler(Looper looper) {
             super(looper);
+        }
+
+        @Override
+        public void execute(Runnable command) {
+            if (!post(command)) {
+                throw new RejectedExecutionException(this + " is shutting down");
+            }
         }
 
         @Override
