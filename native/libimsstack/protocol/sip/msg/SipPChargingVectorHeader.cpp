@@ -32,6 +32,22 @@ SipPChargingVectorHeader::~SipPChargingVectorHeader()
 }
 
 /*virtual methods*/
+SIP_BOOL SipPChargingVectorHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pChargingVectorList == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Missing body", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pChargingVectorList->EncodeFromList(objBuffer) == SIP_FALSE)
+    {
+        return SIP_FALSE;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipPChargingVectorHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)

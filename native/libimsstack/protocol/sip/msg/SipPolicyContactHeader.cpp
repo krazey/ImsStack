@@ -22,6 +22,25 @@ SipPolicyContactHeader::SipPolicyContactHeader(const SipPolicyContactHeader& obj
 /*destructor*/
 SipPolicyContactHeader::~SipPolicyContactHeader() {}
 
+SIP_BOOL SipPolicyContactHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pNameAddr == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty addr-spec", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    m_pNameAddr->SetParameterComponent(DYNAMIC_CAST(IParameterComponent*, this));
+
+    if (m_pNameAddr->Encode(objBuffer, SIP_TRUE) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding name-addr failed", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 SIP_BOOL SipPolicyContactHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {

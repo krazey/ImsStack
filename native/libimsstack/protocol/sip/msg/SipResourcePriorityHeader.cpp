@@ -58,6 +58,20 @@ SipResourcePriorityHeader::~SipResourcePriorityHeader()
     }
 }
 
+SIP_BOOL SipResourcePriorityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL) )
+    {
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszNameSpace;
+    objBuffer += SIP_DOT;
+    objBuffer += m_pszRPriority;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipResourcePriorityHeader::EncodeHdr
  *

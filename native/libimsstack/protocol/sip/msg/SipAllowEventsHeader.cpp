@@ -61,6 +61,22 @@ SipAllowEventsHeader::~SipAllowEventsHeader()
     }
 }
 
+SIP_BOOL SipAllowEventsHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if (pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing event package", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += pszValue;
+
+    return (m_pEventTemplateList != SIP_NULL) ?
+            m_pEventTemplateList->EncodeList(objBuffer, SIP_DOT) : SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name  : SipAllowEventsHeader::EncodeHdr
  *

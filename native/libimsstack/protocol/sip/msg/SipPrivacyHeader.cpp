@@ -62,6 +62,31 @@ SipPrivacyHeader::~SipPrivacyHeader()
     }
 }
 
+SIP_BOOL SipPrivacyHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    SIP_UINT32 nSize = m_objPrivacyList.GetSize();
+
+    if (nSize == 0)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty privacy values", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+    {
+        const SIP_CHAR* pszPrivacy = m_objPrivacyList.GetAt(i);
+
+        if (i != SIP_ZERO)
+        {
+            objBuffer += SIP_SEMI;
+        }
+
+        objBuffer += pszPrivacy;
+    }
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipPrivacyHeader::EncodeHdr
  *

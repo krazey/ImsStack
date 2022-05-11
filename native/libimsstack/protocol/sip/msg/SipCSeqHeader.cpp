@@ -55,6 +55,21 @@ SipCSeqHeader::~SipCSeqHeader()
     }
 }
 
+SIP_BOOL SipCSeqHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if (m_pszMethod == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing CSeq method", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_nSeq;
+    objBuffer += SPACE;
+    objBuffer += m_pszMethod;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name  : SipCSeqHeader::EncodeHdr
  *

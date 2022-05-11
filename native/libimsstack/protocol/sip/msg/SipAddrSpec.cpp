@@ -353,6 +353,118 @@ SIP_BOOL SipUri::RemoveHdrParam(const SIP_CHAR* pszName)
     return SIP_FALSE;
 }
 
+SIP_BOOL SipUri::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pszUser != SIP_NULL)
+    {
+        if ((m_pParameterComponent != SIP_NULL) &&
+                m_pParameterComponent->IsValidComponent(SIP_USER))
+        {
+            SIP_CHAR* pszTempUser =
+                    SipPercentEncoding::DoPerEnc_UserAndHeader(m_pszUser, (SIP_CHAR*)SIP_USER);
+            objBuffer += pszTempUser;
+            delete[] pszTempUser;
+        }
+        else
+        {
+            objBuffer += m_pszUser;
+        }
+
+        if (m_pszPassword != SIP_NULL)
+        {
+            objBuffer += COLON;
+
+            if ((m_pParameterComponent != SIP_NULL) &&
+                    m_pParameterComponent->IsValidComponent(SIP_PASSWORD))
+            {
+                SIP_CHAR* pszTempPassword = SipPercentEncoding::DoPerEnc_Password(m_pszPassword);
+                objBuffer += pszTempPassword;
+                delete[] pszTempPassword;
+            }
+            else
+            {
+                objBuffer += m_pszPassword;
+            }
+        }
+
+        objBuffer += ATRATE;
+    }
+
+    if (m_pszHost != SIP_NULL)
+    {
+        if (m_eHostType == SipAddrSpec::HOST_IPV6)
+        {
+            objBuffer += LEFT_SQUARE;
+            objBuffer += m_pszHost;
+            objBuffer += RIGHT_SQUARE;
+        }
+        else if ((m_pParameterComponent != SIP_NULL) &&
+                (m_pParameterComponent->IsValidComponent(SIP_HOST)))
+        {
+            SIP_CHAR* pszTempHost = SipPercentEncoding::DoPerEnc_Host(m_pszHost);
+            objBuffer += pszTempHost;
+            delete[] pszTempHost;
+        }
+        else
+        {
+            objBuffer += m_pszHost;
+        }
+
+        if ((m_nPort != SIP_ZERO) && (m_nPort != SIP_UNSPECIFIED_PORT))
+        {
+            objBuffer += COLON;
+            objBuffer += m_nPort;
+        }
+    }
+    else
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "Encode: Host value is missing", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if ((bParams == SIP_TRUE) && (m_pUriParamList != SIP_NULL))
+    {
+        m_pUriParamList->EncodeUriParamList(objBuffer, SIP_SEMI, m_pParameterComponent);
+    }
+
+    // "?"   header   *( "&"   header )
+    if (m_pUriHdrParamList != SIP_NULL)
+    {
+        SipVector<SipNameValue*>& objHeaders = m_pUriHdrParamList->GetList();
+
+        if (objHeaders.IsEmpty() == SIP_TRUE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                    "Encode: No URI header parameters", SIP_ZERO, SIP_ZERO);
+            return SIP_TRUE;
+        }
+
+        objBuffer += QMARK;
+
+        SIP_UINT32 nSize = objHeaders.GetSize();
+
+        SIP_TRACE_NORMAL(ESIPTRACE_MODENCODER, "Encode: URI headers=%d", nSize, SIP_ZERO);
+
+        for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+        {
+            SipNameValue* pNameValue = objHeaders.GetAt(i);
+
+            if (pNameValue != SIP_NULL)
+            {
+                if (i != SIP_ZERO)
+                {
+                    objBuffer += AMPERSAND;
+                }
+
+                pNameValue->EncodeFromUriHdrList(objBuffer, m_pParameterComponent);
+            }
+        }
+    }
+
+    return SIP_TRUE;
+}
+
 /********************************************************************************
   Encode a sip uri
  ********************************************************************************/
@@ -574,6 +686,40 @@ SIP_BOOL SipAddrSpec::SetAbsUri(const SIP_CHAR* pszSipUri)
     return SetCharVar(pszSipUri, m_pszAbsUri);
 }
 
+SIP_BOOL SipAddrSpec::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pSipUri != SIP_NULL)
+    {
+        if (m_eUriType == SipUri::SCHEME_SIP)
+        {
+            objBuffer += SIP_SIP_ENC;
+        }
+        else if (m_eUriType == SipUri::SCHEME_SIPS)
+        {
+            objBuffer += SIP_SIPS_ENC;
+        }
+
+        m_pSipUri->SetParameterComponent(m_pParameterComponent);
+
+        if (m_pSipUri->Encode(objBuffer, bParams) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "SipUri: Encoding error", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+    }
+    else if (m_pszAbsUri != SIP_NULL)
+    {
+        objBuffer += m_pszAbsUri;
+    }
+    else
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No URI for encoding", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipAddrSpec::EncodeAddrSpec
  *
@@ -723,6 +869,41 @@ SIP_VOID SipNameAddr::SetParameterComponent(IParameterComponent* pParameterCompo
     {
         m_pAddrSpec->SetParameterComponent(pParameterComponent);
     }
+}
+
+SIP_BOOL SipNameAddr::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pAddrSpec == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No addr-spec", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pszDispName != SIP_NULL)
+    {
+        objBuffer += m_pszDispName;
+
+        // FIX_MESSAGE_ENCODING_OPERATION
+        //  Add LWS between the display name and left angle quote ('<').
+        //  First, check the display name if it has a double quotation.
+        //  If present, just do normal procedure. Else, add the display name and space.
+        //  But, we will always add the space after the display name.
+        objBuffer += SPACE;
+    }
+
+    objBuffer += LEFT_ANGLE;
+
+    m_pAddrSpec->SetParameterComponent(m_pParameterComponent);
+
+    if (m_pAddrSpec->Encode(objBuffer, bParams) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding addr-spec failed", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += RIGHT_ANGLE;
+
+    return SIP_TRUE;
 }
 
 /******************************************************************************
@@ -1092,7 +1273,7 @@ SIP_BOOL SipUri::DecodeSipUri(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         }
 
         if (m_pUriHdrParamList->DecUriHdrSipParameterList(
-                    pHeaderStart, pEndPt, AMPERSEND, m_pParameterComponent) == SIP_FALSE)
+                    pHeaderStart, pEndPt, AMPERSAND, m_pParameterComponent) == SIP_FALSE)
         {
             SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Hdr prm Decode Failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;

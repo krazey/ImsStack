@@ -59,6 +59,22 @@ SipContentTypeHeader::~SipContentTypeHeader()
     }
 }
 
+SIP_BOOL SipContentTypeHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if ((m_pszMType == SIP_NULL) || (m_pszMSubType == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "Missing media type or sub-type", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszMType;
+    objBuffer += SLASH;
+    objBuffer += m_pszMSubType;
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipContentTypeHeader::EncodeHdr
  *

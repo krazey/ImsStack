@@ -59,6 +59,29 @@ SipUnknownHeader::~SipUnknownHeader()
     }
 }
 
+SIP_BOOL SipUnknownHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pszHdrName == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Missing header name", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszHdrName;
+    objBuffer += COLON;
+    objBuffer += SPACE;
+    objBuffer += m_pszHdrValue;
+
+    if (bParams == SIP_TRUE)
+    {
+        // Later, if the unknown header parses the header parameters,
+        // enable the following code.
+        // return EncodeParameters(objBuffer);
+    }
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipUnknownHeader::EncodeHdr
  *

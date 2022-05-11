@@ -230,6 +230,28 @@ SipDateHeader::SipDateHeader(const SipDateHeader& objHeader) :
 {
 }
 
+SIP_BOOL SipDateHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    // Date: Thu, 21 Feb 2002 13:02:03 GMT
+    objBuffer += gaszWeekday[m_eWkDay];
+    objBuffer += COMMA;
+    objBuffer += SPACE;
+
+    AString strDateTime;
+    strDateTime.Sprintf("%02u %s %4u", m_nDate, gaszMonth[m_eMonth], m_nYear);
+
+    objBuffer += strDateTime;
+    objBuffer += SPACE;
+
+    strDateTime.Sprintf("%02u:%02u:%02u", m_nHour, m_nMin, m_nSec);
+
+    objBuffer += strDateTime;
+    objBuffer += SPACE;
+    objBuffer += STR_GMT;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipDateHeader::EncodeHdr
  *

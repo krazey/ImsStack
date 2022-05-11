@@ -18,6 +18,11 @@ public:
     SipBadHeader(const SipBadHeader& objHeader);
 
     /*virtual methods*/
+    inline SIP_BOOL Encode(AStringBuffer& /*objBuffer*/, SIP_BOOL /*bParams*/) const override
+    {
+        return SIP_TRUE;
+    }
+
     /*Function for encoding of headers*/
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 

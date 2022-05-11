@@ -26,6 +26,22 @@ SipAuthInfoHeader::~SipAuthInfoHeader()
     }
 }
 
+SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if (m_pAiInfo == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing auth-info", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pAiInfo->EncodeFromList(objBuffer) == SIP_FALSE)
+    {
+        return SIP_FALSE;
+    }
+
+    return SIP_TRUE;
+}
+
 SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
     if (m_pAiInfo == SIP_NULL)

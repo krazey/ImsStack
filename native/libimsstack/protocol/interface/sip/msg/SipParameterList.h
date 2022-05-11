@@ -1,6 +1,8 @@
 #ifndef __SIP_PARAMETER_LIST_H__
 #define __SIP_PARAMETER_LIST_H__
 
+#include "AStringBuffer.h"
+
 #include "SipRefBase.h"
 #include "msg/sip_comdef.h"
 #include "SipPercentEncoding.h"
@@ -31,11 +33,16 @@ public:
     SIP_BOOL SetSeparator(SIP_CHAR cSeparator);
 
     SIP_BOOL EncodeFromUriList(
+            AStringBuffer& objBuffer, IParameterComponent* pParameterComponent = SIP_NULL) const;
+    SIP_BOOL EncodeFromUriList(
             SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent = SIP_NULL);
 
     SIP_BOOL EncodeFromUriHdrList(
+            AStringBuffer& objBuffer, IParameterComponent* pParameterComponent = SIP_NULL) const;
+    SIP_BOOL EncodeFromUriHdrList(
             SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent = SIP_NULL);
 
+    SIP_BOOL EncodeFromList(AStringBuffer& objBuffer) const;
     SIP_BOOL EncodeFromList(SIP_CHAR** ppCurrPos);
 };
 
@@ -57,8 +64,11 @@ public:
 
     SIP_BOOL Add(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType);
 
+    SIP_BOOL EncodeList(AStringBuffer& objBuffer, SIP_CHAR cDelimiter) const;
     SIP_BOOL EncodeList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter);
 
+    SIP_BOOL EncodeUriParamList(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
+            IParameterComponent* pParameterComponent = SIP_NULL) const;
     SIP_BOOL EncodeUriParamList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter,
             IParameterComponent* pParameterComponent = SIP_NULL);
 

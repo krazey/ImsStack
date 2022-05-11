@@ -34,6 +34,20 @@ SipRetryAfterHeader::~SipRetryAfterHeader()
 }
 
 /*virtual methods*/
+SIP_BOOL SipRetryAfterHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    objBuffer += m_nDeltaSec;
+
+    if (m_pszComment != SIP_NULL)
+    {
+        objBuffer += LPARAN;
+        objBuffer += m_pszComment;
+        objBuffer += RPARAN;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipRetryAfterHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)

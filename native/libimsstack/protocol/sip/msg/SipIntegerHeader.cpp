@@ -47,6 +47,19 @@ SIP_UINT32 SipIntegerHeader::GetValueInt() const
     return SipPf_Atoi(GetValue());
 }
 
+SIP_BOOL SipIntegerHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if ((pszValue == SIP_NULL) && (GetHdrType() == SipHeaderBase::CONTENT_LENGTH))
+    {
+        objBuffer += "0";
+        return SIP_TRUE;
+    }
+
+    return SipHeaderBase::Encode(objBuffer, bParams);
+}
+
 SIP_BOOL SipIntegerHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
     const SIP_CHAR* pszValue = GetValue();

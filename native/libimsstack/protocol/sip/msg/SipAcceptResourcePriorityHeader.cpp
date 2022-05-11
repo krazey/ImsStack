@@ -66,6 +66,30 @@ SipAcceptResourcePriorityHeader::~SipAcceptResourcePriorityHeader()
     }
 }
 
+SIP_BOOL SipAcceptResourcePriorityHeader::Encode(
+        AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if ((m_pszNameSpace == SIP_NULL) && (m_pszRPriority == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing namespace and priority",
+                SIP_ZERO, SIP_ZERO);
+        return SIP_TRUE;
+    }
+
+    if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing namespace or priority",
+                SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszNameSpace;
+    objBuffer += SIP_DOT;
+    objBuffer += m_pszRPriority;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name  : SipAcceptResourcePriorityHeader::EncodeHdr
  *

@@ -17,7 +17,7 @@
 #define QMARK                      '?'
 #define EQUAL                      '='
 #define DQUOTE                     '"'
-#define AMPERSEND                  '&'
+#define AMPERSAND                  '&'
 #define BACKSLASH                  '\\'
 #define LEFT_ANGLE                 '<'
 #define RIGHT_ANGLE                '>'

@@ -413,6 +413,31 @@ SipNameValue* SipParameterList::GetParamNode(const SIP_CHAR* pszName, SIP_UINT32
     return pNmVl;
 }
 
+SIP_BOOL SipParameterList::EncodeList(AStringBuffer& objBuffer, SIP_CHAR cDelimiter) const
+{
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    // *( ";" uri-parameter )
+    while (nIndex < nSize)
+    {
+        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+
+        objBuffer += cDelimiter;
+
+        if (pNameValue->EncodeFromList(objBuffer) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                    "EncodeList: Encoding parameter is failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        nIndex++;
+    }
+
+    return SIP_TRUE;
+}
+
 SIP_BOOL SipParameterList::EncodeList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter)
 {
     SIP_UINT32 nCount = m_objPrmList.GetSize();
@@ -428,6 +453,32 @@ SIP_BOOL SipParameterList::EncodeList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter)
         pstParamNamValue->EncodeFromList(ppCurrPos);
         nIndex++;
     }
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipParameterList::EncodeUriParamList(AStringBuffer& objBuffer, SIP_CHAR cDelimiter,
+        IParameterComponent* pParameterComponent /*= SIP_NULL*/) const
+{
+    SIP_UINT32 nSize = m_objPrmList.GetSize();
+    SIP_UINT32 nIndex = SIP_ZERO;
+
+    // *( ";" uri-parameter )
+    while (nIndex < nSize)
+    {
+        SipNameValue* pNameValue = m_objPrmList.GetAt(nIndex);
+
+        objBuffer += cDelimiter;
+
+        if (pNameValue->EncodeFromUriList(objBuffer, pParameterComponent) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                    "EncodeUriParamList: Encoding URI parameter is failed", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        nIndex++;
+    }
+
     return SIP_TRUE;
 }
 
@@ -555,6 +606,58 @@ SIP_BOOL SipNameValue::SetSeparator(SIP_CHAR cSeparator)
     return SIP_TRUE;
 }
 
+SIP_BOOL SipNameValue::EncodeFromList(AStringBuffer& objBuffer) const
+{
+    if (m_pszName == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszName;
+
+    if (m_valueList.IsEmpty() != SIP_TRUE)
+    {
+        objBuffer += EQUAL;
+
+        if (m_ePrmType == SipParameters::FEATURE)
+        {
+            objBuffer += DQUOTE;
+        }
+
+        SIP_UINT32 nSize = m_valueList.GetSize();
+        SIP_UINT32 nIndex = SIP_ZERO;
+
+        while (nIndex < nSize)
+        {
+            const SIP_CHAR* pszValue = m_valueList.GetAt(nIndex);
+
+            if (pszValue == SIP_NULL)
+            {
+                SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                        "EncodeFromList: Value is null", SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
+            }
+
+            objBuffer += pszValue;
+
+            // Condition to prevent last put of separator
+            if (nIndex < (nSize - SIP_ONE))
+            {
+                objBuffer += m_Sep;
+            }
+
+            nIndex++;
+        }
+
+        if (m_ePrmType == SipParameters::FEATURE)
+        {
+            objBuffer += DQUOTE;
+        }
+    }
+
+    return SIP_TRUE;
+}
+
 SIP_BOOL SipNameValue::EncodeFromList(SIP_CHAR** ppCurrPos)
 {
     if (m_pszName == SIP_NULL)
@@ -626,6 +729,45 @@ SIP_BOOL SipNameValue::EncodeFromList(SIP_CHAR** ppCurrPos)
     return SIP_TRUE;
 }
 
+SIP_BOOL SipNameValue::EncodeFromUriList(AStringBuffer& objBuffer,
+        IParameterComponent* pParameterComponent /*= SIP_NULL*/) const
+{
+    if (m_pszName == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszName;
+
+    if (m_valueList.IsEmpty() != SIP_TRUE)
+    {
+        SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
+
+        if (pszValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                    "EncodeFromUriList: Value is null", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        objBuffer += EQUAL;
+
+        if ((pParameterComponent != SIP_NULL) &&
+                (pParameterComponent->IsValidComponent(m_pszName) == SIP_TRUE))
+        {
+            SIP_CHAR* pszTempValue = SipPercentEncoding::DoPerEnc_Param(m_pszName, pszValue);
+            objBuffer += pszTempValue;
+            delete[] pszTempValue;
+        }
+        else
+        {
+            objBuffer += pszValue;
+        }
+    }
+
+    return SIP_TRUE;
+}
+
 SIP_BOOL SipNameValue::EncodeFromUriList(
         SIP_CHAR** ppCurrPos, IParameterComponent* pParameterComponent)
 {
@@ -664,6 +806,47 @@ SIP_BOOL SipNameValue::EncodeFromUriList(
             SipPf_Strcpy(*ppCurrPos, pszVal);
         }
         SipEnc_UpdateCurrPos(ppCurrPos);
+    }
+
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipNameValue::EncodeFromUriHdrList(AStringBuffer& objBuffer,
+        IParameterComponent* pParameterComponent /*= SIP_NULL*/) const
+{
+    if (m_pszName == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszName;
+
+    if (m_valueList.IsEmpty() != SIP_TRUE)
+    {
+        // Encode as 'name=value'
+        SIP_CHAR* pszValue = m_valueList.GetAt(SIP_ZERO);
+
+        if (pszValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                    "EncodeFromUriHdrList: Value is null", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        objBuffer += EQUAL;
+
+        if ((pParameterComponent != SIP_NULL) &&
+                (pParameterComponent->IsValidComponent(SIP_HEADERS) == SIP_TRUE))
+        {
+            SIP_CHAR* pszTempValue =
+                    SipPercentEncoding::DoPerEnc_Param((SIP_CHAR*)SIP_HEADERS, pszValue);
+            objBuffer += pszTempValue;
+            delete[] pszTempValue;
+        }
+        else
+        {
+            objBuffer += pszValue;
+        }
     }
 
     return SIP_TRUE;

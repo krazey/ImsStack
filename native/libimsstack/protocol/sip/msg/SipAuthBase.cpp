@@ -70,6 +70,43 @@ SIP_BOOL SipAuthBase::EncodeAuthList(SIP_CHAR** ppCurrPos, SIP_CHAR cDelimiter)
 }
 
 /*virtual methods*/
+SIP_BOOL SipAuthBase::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if (pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing scheme", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += pszValue;
+    objBuffer += SPACE;
+
+    SIP_UINT32 nIndex = SIP_ZERO;
+    SIP_UINT32 nSize = m_objAuthList.GetSize();
+
+    // *( ";" uri-parameter )
+    while (nIndex < nSize)
+    {
+        SipNameValue* pNameValue = m_objAuthList.GetAt(nIndex);
+
+        if (nIndex > 0)
+        {
+            objBuffer += COMMA;
+        }
+
+        if (pNameValue->EncodeFromList(objBuffer) == SIP_FALSE)
+        {
+            return SIP_FALSE;
+        }
+
+        nIndex++;
+    }
+
+    return SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipAuthBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {

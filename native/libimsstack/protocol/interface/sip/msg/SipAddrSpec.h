@@ -1,6 +1,8 @@
 #ifndef __SIP_ADDR_SPEC_H__
 #define __SIP_ADDR_SPEC_H__
 
+#include "AStringBuffer.h"
+
 #include "sip_pf_datatypes.h"
 #include "SipRefBase.h"
 #include "msg/SipParameterList.h"
@@ -87,6 +89,7 @@ public:
     SIP_BOOL AddHeader(const SIP_CHAR* pszName);
     SIP_BOOL AddHeader(const SIP_CHAR* pszName, const SIP_CHAR* pszValue);
 
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
 
@@ -122,6 +125,9 @@ public:
 
     SipAddrSpec(const SipAddrSpec& objAddressSpec);
     ~SipAddrSpec();
+
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
+
     /*Function for encoding*/
     SIP_BOOL EncodeAddrSpec(SIP_CHAR** ppCurrPos) const;
 
@@ -159,6 +165,8 @@ public:
     virtual ~SipNameAddr();
 
     SIP_BOOL SetAddrSpec(SipAddrSpec* pSipAddrSpec);
+
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeNameAddr(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/

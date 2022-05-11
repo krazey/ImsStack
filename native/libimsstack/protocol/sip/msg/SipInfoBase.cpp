@@ -35,6 +35,23 @@ SipInfoBase::SipInfoBase(const SipInfoBase& objHeader) :
  *****************************************************************************/
 SipInfoBase::~SipInfoBase() {}
 
+SIP_BOOL SipInfoBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if (pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += LEFT_ANGLE;
+    objBuffer += pszValue;
+    objBuffer += RIGHT_ANGLE;
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipInfoBase::EncodeHdr
  *

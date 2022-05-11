@@ -57,6 +57,38 @@ SipEventHeader::~SipEventHeader()
     }
 }
 
+SIP_BOOL SipEventHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if (pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing event package", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += pszValue;
+
+    if (m_pEventTemplateList != SIP_NULL)
+    {
+        SipVector<SipNameValue*>& objNameValues = m_pEventTemplateList->GetList();
+        SIP_UINT32 nSize = objNameValues.GetSize();
+
+        for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+        {
+            SipNameValue* pNameValue = objNameValues.GetAt(i);
+
+            if (pNameValue != SIP_NULL)
+            {
+                objBuffer += SIP_DOT;
+                objBuffer += pNameValue->m_pszName;
+            }
+        }
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipEventHeader::EncodeHdr
  *

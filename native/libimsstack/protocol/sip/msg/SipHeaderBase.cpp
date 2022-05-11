@@ -244,6 +244,32 @@ SIP_BOOL SipHeaderBase::EncodeHeaderParameters(
     return SIP_TRUE;
 }
 
+SIP_BOOL SipHeaderBase::EncodeParameters(AStringBuffer& objBuffer) const
+{
+    SipParameterList* pParameterList =
+            (m_pParameters != SIP_NULL) ? m_pParameters->GetParameterList() : SIP_NULL;
+
+    if (pParameterList != SIP_NULL)
+    {
+        return pParameterList->EncodeList(objBuffer, SIP_SEMI);
+    }
+
+    return SIP_TRUE;
+}
+
+SIP_BOOL SipHeaderBase::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Empty header body", SIP_ZERO, SIP_ZERO);
+        return gHeaderAttributes[m_eHdrType][HEADER_EMPTY_BODY_ALLOWED];
+    }
+
+    objBuffer += m_pszValue;
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 SIP_BOOL SipHeaderBase::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)
 {
     if (m_pszValue == SIP_NULL)
@@ -476,6 +502,25 @@ SIP_BOOL SipNameAddrHeader::SetNameAddr(SipNameAddr* pSipNameAddr)
     pSipNameAddr->increment();
     m_pNameAddr = pSipNameAddr;
     return SIP_TRUE;
+}
+
+SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pNameAddr == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing name-addr", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    m_pNameAddr->SetParameterComponent(DYNAMIC_CAST(IParameterComponent*, this));
+
+    if (m_pNameAddr->Encode(objBuffer, SIP_TRUE) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encoding name-addr failed", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
 SIP_BOOL SipNameAddrHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)

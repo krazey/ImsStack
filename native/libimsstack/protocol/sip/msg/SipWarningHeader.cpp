@@ -41,6 +41,34 @@ SipWarningHeader::~SipWarningHeader()
 }
 
 /*virtual methods*/
+SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "Missing warn-agent or warn-text", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_nWarnCode;
+    objBuffer += SPACE;
+    objBuffer += m_pszWarnAgent;
+    objBuffer += SPACE;
+
+    if (HasSpace(m_pszWarnText))
+    {
+        objBuffer += DQUOTE;
+        objBuffer += m_pszWarnText;
+        objBuffer += DQUOTE;
+    }
+    else
+    {
+        objBuffer += m_pszWarnText;
+    }
+
+    return SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {

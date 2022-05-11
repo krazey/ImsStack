@@ -151,6 +151,8 @@ public:
     virtual ~SipHeaderBase();
     SIP_VOID InitParameters(SipParameters* pParameters);
     SIP_BOOL EncodeHeaderParameters(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
+    SIP_BOOL EncodeParameters(AStringBuffer& objBuffer) const;
+    virtual SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams = SIP_TRUE);
     virtual SIP_BOOL EncodeHdr(
             SIP_CHAR** ppMsgBuffCurrPos, SIP_BOOL bParams, SIP_UINT32 nMsgOptions)
@@ -186,6 +188,7 @@ public:
     SIP_BOOL SetNameAddr(SipNameAddr* pSipNameAddr);
     SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
     SipNameAddr* GetNameAddr();
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
     virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
     SIP_BOOL IsPercentEncHdr() const;

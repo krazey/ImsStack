@@ -32,6 +32,24 @@ SipTriggerConsentHeader::~SipTriggerConsentHeader()
 }
 
 /*virtual methods*/
+SIP_BOOL SipTriggerConsentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pSipUri == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Missing SipUri", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    if (m_pSipUri->Encode(objBuffer, SIP_TRUE) == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
+                "Encode: Encoding SipUri failed", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipTriggerConsentHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL bParams /*Default = SIP_TRUE*/)

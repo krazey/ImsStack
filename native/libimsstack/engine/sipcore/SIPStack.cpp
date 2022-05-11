@@ -35,8 +35,6 @@
 
 __IMS_TRACE_TAG_SIP__;
 
-#define SIP_HEADER_SIZE 1024
-
 extern void SIPStackTxnLayer_Initialize();
 extern SIP_VOID sip_cbk_onTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 eTimerType);
 
@@ -152,21 +150,12 @@ LOCAL void DeleteStackString(IN SIP_CHAR*& pszStr)
 }
 
 LOCAL IMS_BOOL FormAddrSpec(IN const SipAddrSpec* pAddrSpec,
-        IN IMS_BOOL /*bParams*/, OUT AStringBuffer& objStringBuffer)
+        IN IMS_BOOL bParams, OUT AStringBuffer& objStringBuffer)
 {
-    IMS_CHAR szAddrSpec[SIP_HEADER_SIZE];
-    IMS_MEM_Memset(szAddrSpec, 0x0, sizeof(szAddrSpec));
-
-    IMS_CHAR* pszAddrSpec = szAddrSpec;
-
-    // FIXME: needs to be checked "bParams"
-
-    if (pAddrSpec->EncodeAddrSpec(&pszAddrSpec) == SIP_FALSE)
+    if (pAddrSpec->Encode(objStringBuffer, bParams ? SIP_TRUE : SIP_FALSE) == SIP_FALSE)
     {
         return IMS_FALSE;
     }
-
-    objStringBuffer = szAddrSpec;
 
     return IMS_TRUE;
 }
@@ -923,29 +912,26 @@ GLOBAL IMS_BOOL EncodeHeaderBody(
     if (pHeader == IMS_NULL)
     {
         SIPStackError(EERR_INVALIDPARAM);
+        strHeaderBody = AString::ConstNull();
         return IMS_FALSE;
     }
 
-    SipHeaderBase* pTempHeader = const_cast<SipHeaderBase*>(pHeader);
-    AString strHeaderName;
-    IMS_CHAR szBuffer[SIP_HEADER_SIZE] = {0};
-    IMS_CHAR* pszBuffer = szBuffer;
-
-    pTempHeader->EncodeHdr(&pszBuffer, bParams ? SIP_TRUE : SIP_FALSE);
-
-    AString strTotalHeaderBody(szBuffer);
-
-    if (pTempHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
+    if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
     {
-        if (!strTotalHeaderBody.SplitF(TextParser::CHAR_COLON, strHeaderName, strHeaderBody))
-        {
-            return IMS_FALSE;
-        }
+        SipUnknownHeader* pUnknownHeader = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
+        strHeaderBody = pUnknownHeader->GetHeaderValue();
+        return IMS_TRUE;
     }
-    else
+
+    AStringBuffer objBuffer(512);
+
+    if (pHeader->Encode(objBuffer, bParams ? SIP_TRUE : SIP_FALSE) == SIP_FALSE)
     {
-        strHeaderBody = strTotalHeaderBody;
+        strHeaderBody = AString::ConstNull();
+        return SIP_FALSE;
     }
+
+    strHeaderBody = static_cast<const AStringBuffer&>(objBuffer).GetString();
 
     return IMS_TRUE;
 }
@@ -4757,14 +4743,11 @@ GLOBAL void DisplayUnknownHeaders(IN SipMessage* pMessage)
 
             if (pReason != SIP_NULL)
             {
-                IMS_CHAR acHdrValue[SIP_HEADER_SIZE] = {
-                        0,
-                };
-                IMS_CHAR* pszHdrValue = &acHdrValue[0];
+                AStringBuffer objBuffer(128);
 
-                if (pReason->EncodeHdr(&pszHdrValue) == SIP_TRUE)
+                if (pReason->Encode(objBuffer, SIP_TRUE) == SIP_TRUE)
                 {
-                    IMS_TRACE_I("\t(K) Reason: %s", acHdrValue, 0, 0);
+                    IMS_TRACE_I("\t(K) Reason: %s", objBuffer.GetCharString(), 0, 0);
                 }
 
                 pReason->SipDelete();

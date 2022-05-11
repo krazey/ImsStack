@@ -78,6 +78,54 @@ SipViaHeader::~SipViaHeader()
     }
 }
 
+SIP_BOOL SipViaHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (m_pszProtocolName == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing protocol", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszProtocolName;
+    objBuffer += SLASH;
+
+    if (m_pszProtocolVer == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing protocol version", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszProtocolVer;
+    objBuffer += SLASH;
+
+    if (m_pszTransport == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing transport protocol", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += m_pszTransport;
+    objBuffer += SPACE;
+
+    // sent-by = host [ COLON port ]
+    if (m_pszHost == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing host", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    // IPV6: m_pszHost already includes the square brackets.
+    objBuffer += m_pszHost;
+
+    if (m_nPort != SIP_ZERO)
+    {
+        objBuffer += COLON;
+        objBuffer += m_nPort;
+    }
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipViaHeader::EncodeHdr
  *

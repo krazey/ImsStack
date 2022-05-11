@@ -14,6 +14,7 @@ public:
     ~SipInfoBase();
 
     /*virtual methods*/
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     /*Function for encoding of headers*/
     SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
 

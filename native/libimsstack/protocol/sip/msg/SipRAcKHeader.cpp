@@ -61,6 +61,22 @@ SipRAcKHeader::~SipRAcKHeader()
     }
 }
 
+SIP_BOOL SipRAcKHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if (m_pszMethod == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing method", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    AString strValue;
+    strValue.Sprintf("%u %u %s", m_nResponseNum, m_nCSeqNum, m_pszMethod);
+
+    objBuffer += strValue;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipRAcKHeader::EncodeHdr
  *

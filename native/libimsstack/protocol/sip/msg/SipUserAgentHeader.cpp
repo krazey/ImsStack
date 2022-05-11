@@ -41,6 +41,31 @@ SipUserAgentHeader::~SipUserAgentHeader()
 }
 
 /*virtual methods*/
+SIP_BOOL SipUserAgentHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    if (m_objProductList.IsEmpty() == SIP_TRUE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "No header body", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    SIP_UINT32 nSize = m_objProductList.GetSize();
+
+    for (SIP_UINT32 i = SIP_ZERO; i < nSize; i++)
+    {
+        if (i != SIP_ZERO)
+        {
+            objBuffer += SPACE;
+        }
+
+        const SIP_CHAR* pszValue = m_objProductList.GetAt(i);
+
+        objBuffer += pszValue;
+    }
+
+    return SIP_TRUE;
+}
+
 /*Function for encoding of headers*/
 SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {

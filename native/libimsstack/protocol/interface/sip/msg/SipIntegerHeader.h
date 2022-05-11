@@ -15,6 +15,7 @@ public:
     virtual ~SipIntegerHeader();
     SIP_BOOL SetValueInt(const SIP_UINT32 nContLen);
     SIP_UINT32 GetValueInt() const;
+    SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppszCurrPos, SIP_BOOL bParams = SIP_TRUE);
     virtual SIP_BOOL DecodeHdr(SIP_CHAR* pszStartPt, SIP_UINT32 nDecLen);
     static SipHeaderBase* GetNewObj(SIP_INT32 eHeaderType, SipHeaderBase* pHeader);

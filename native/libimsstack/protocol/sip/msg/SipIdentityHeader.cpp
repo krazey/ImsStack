@@ -45,6 +45,23 @@ SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
  *****************************************************************************/
 SipIdentityHeader::~SipIdentityHeader() {}
 
+SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+{
+    const SIP_CHAR* pszValue = GetValue();
+
+    if (pszValue == SIP_NULL)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
+    objBuffer += DQUOTE;
+    objBuffer += pszValue;
+    objBuffer += DQUOTE;
+
+    return SIP_TRUE;
+}
+
 /******************************************************************************
  * Function name      : SipIdentityHeader::EncodeHdr
  *
