@@ -2,7 +2,6 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.android.imsstack.util.ImsLog;
 
@@ -22,7 +21,6 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
     public void readFromParcel(Parcel source) {
 
         callKey = 0;
-        callMtcKey = 0;
 
         int callType = source.readInt();
 
@@ -55,7 +53,6 @@ public class IncomingRejectedMtcCall extends IncomingMtcCall implements Parcelab
         logTag = "";
 
         ImsLog.d("callKey : " + callKey
-                + " callMtcKey : " + callMtcKey
                 + " OIPType : " + OIPType
                 + " callerPartyNum : " + callerPartyNum
                 + " cna : " + cna

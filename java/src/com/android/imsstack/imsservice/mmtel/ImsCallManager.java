@@ -11,7 +11,6 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import android.content.Context;
 import android.database.ContentObserver;
 import android.os.PowerManager;
 import android.telephony.ims.ImsCallProfile;
@@ -24,9 +23,7 @@ import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
-import com.android.imsstack.enabler.mtc.IUMtcService;
 import com.android.imsstack.enabler.mtc.IncomingCallInfo;
-import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
@@ -36,7 +33,6 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
 import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -474,7 +470,7 @@ public class ImsCallManager {
         updateCallProfileOnSingleCall();
     }
 
-    private void onCallReceived(final ImsCallSessionImpl session) {
+    private void onCallPreIncomingReceived(final ImsCallSessionImpl session) {
         if (mMmTelCallListener == null) {
             rejectAndDestroyCall(session, false);
             return;
@@ -482,13 +478,22 @@ public class ImsCallManager {
 
         addPendingSession(session);
 
+        logi("IncomingCall :: callId=" + session.getCallId() + ", phoneId=" + getPhoneId());
+    }
+
+    private void onCallIncomingReceived(final ImsCallSessionImpl session) {
+        if (mMmTelCallListener == null) {
+            rejectAndDestroyCall(session, true);
+            return;
+        }
+
         try {
-            logi("IncomingCall :: callId=" + session.getCallId()
+            logi("onCallIncomingReceived :: callId=" + session.getCallId()
                     + ", phoneId=" + getPhoneId());
 
             mMmTelCallListener.onIncomingCallReceived(session);
         } catch (Throwable t) {
-            loge("onCallReceived :: exception occurred, drop the incoming call", t);
+            loge("onCallIncomingReceived :: exception occurred, drop the incoming call", t);
             rejectAndDestroyCall(session, true);
         }
     }
@@ -779,21 +784,24 @@ public class ImsCallManager {
             }
 
             switch (event) {
-            case CALL_EVENT_CREATE:
-                onCallCreate((ImsCallSessionImpl)session);
-                break;
-            case CALL_EVENT_DESTROY:
-                onCallDestroy((ImsCallSessionImpl)session);
-                break;
-            case CALL_EVENT_ESTABLISHING: // FALL-THROUGH
-            case CALL_EVENT_RINGING: // FALL-THROUGH
-            case CALL_EVENT_ACCEPT: // FALL-THROUGH
-            case CALL_EVENT_ESTABLISHED: // FALL-THROUGH
-            case CALL_EVENT_UPDATED: // FALL-THROUGH
-            case CALL_EVENT_TERMINATING: // FALL-THROUGH
-            case CALL_EVENT_TERMINATED: // FALL-THROUGH
-            default:
-                break;
+                case CALL_EVENT_CREATE:
+                    onCallCreate((ImsCallSessionImpl) session);
+                    break;
+                case CALL_EVENT_DESTROY:
+                    onCallDestroy((ImsCallSessionImpl) session);
+                    break;
+                case CALL_EVENT_INCOMING_RECEIVED:
+                    onCallIncomingReceived((ImsCallSessionImpl) session);
+                    break;
+                case CALL_EVENT_ESTABLISHING: // FALL-THROUGH
+                case CALL_EVENT_RINGING: // FALL-THROUGH
+                case CALL_EVENT_ACCEPT: // FALL-THROUGH
+                case CALL_EVENT_ESTABLISHED: // FALL-THROUGH
+                case CALL_EVENT_UPDATED: // FALL-THROUGH
+                case CALL_EVENT_TERMINATING: // FALL-THROUGH
+                case CALL_EVENT_TERMINATED: // FALL-THROUGH
+                default:
+                    break;
             }
         }
     }
@@ -816,32 +824,22 @@ public class ImsCallManager {
         }
 
         @Override
-        public void onIncomingCallReceived(MtcApp app, long callObject,
-                IncomingMtcCall incomingCall) {
-            MtcCall call = mMtcApp.getPendingCall(callObject, true);
+        public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
+            MtcCall call = mMtcApp.getPendingCall(nativeCallObject);
 
             if (call == null) {
                 // fatal error
                 return;
             }
 
-            ImsCallProfile profile = ImsCallUtils.createCallProfileFromIncomingCallInfo(
-                    mCallContext, incomingCall);
+            ImsCallProfile profile = new ImsCallProfile();
             String callId = createCallId();
 
             ImsCallSessionImpl callSession = new ImsCallSessionImpl(
                     mCallContext, mCT, call, callId, profile, false);
 
-            onCallReceived(callSession);
-
-            if (incomingCall.isAutoRejectedCall()) {
-                return;
-            }
-
-            // Unlock JNI event loop if it's locked
-            call.startJNIEventLoop();
+            onCallPreIncomingReceived(callSession);
         }
-
         @Override
         public void onIncomingCallInfoReceived(IncomingCallInfo incomingCallInfo) {
             logi("onIncomingCallInfoReceived");

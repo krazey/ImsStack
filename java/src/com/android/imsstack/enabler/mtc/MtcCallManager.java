@@ -115,20 +115,16 @@ public final class MtcCallManager implements ICallStateTracker {
         mCallStateNotifier.onCallCreated(call);
     }
 
-    // For incoming call
-    public synchronized void attachIncomingCall(Call call) {
+    /**
+     * Adds pending call for incoming call.
+     */
+    public synchronized void attachPreIncomingCall(Call call) {
         if (call == null) {
             return;
         }
 
         CallNode node = new CallNode(call);
-
-        node.setCallState(CallTracker.CALL_STATE_RINGING);
-
         mPendingCallNodes.add(node);
-
-        doCallStateChanged();
-        mCallStateNotifier.onCallCreated(call);
     }
 
     public synchronized void closeAllCalls(boolean terminate) {
@@ -160,13 +156,11 @@ public final class MtcCallManager implements ICallStateTracker {
         return null;
     }
 
-    public synchronized Call getPendingCall(long callId, boolean moveToActiveCall) {
+    /**
+     * Gets pending call for incoming call.
+     */
+    public synchronized Call getPendingCall(long callId) {
         CallNode node = getPendingCallNode(callId);
-
-        if ((node != null) && moveToActiveCall) {
-            mCallNodes.add(node);
-            mPendingCallNodes.remove(node);
-        }
 
         return (node != null) ? node.mCall : null;
     }
@@ -441,6 +435,18 @@ public final class MtcCallManager implements ICallStateTracker {
                 ", pendingCalls=" + mPendingCallNodes.size());
     }
 
+    private synchronized void onCallIncomingReceived(Call call) {
+        CallNode node = getCallNode(call.getNativeCallId());
+
+        if (node != null) {
+            mPendingCallNodes.remove(node);
+            mCallNodes.add(node);
+            node.setCallState(CallTracker.CALL_STATE_RINGING);
+            doCallStateChanged();
+            mCallStateNotifier.onCallCreated(call);
+        }
+    }
+
     private void postAndRunTask(Runnable task) {
         mContext.getExecutor().execute(task);
     }
@@ -677,35 +683,38 @@ public final class MtcCallManager implements ICallStateTracker {
             }
 
             switch (event) {
-            case CALL_EVENT_CREATE:
-                onCallCreate((Call)call);
-                break;
-            case CALL_EVENT_ESTABLISHING:
-                onCallEstablishing((Call)call);
-                break;
-            case CALL_EVENT_RINGING:
-                onCallRinging((Call)call);
-                break;
-            case CALL_EVENT_ACCEPT:
-                onCallAccept((Call)call);
-                break;
-            case CALL_EVENT_ESTABLISHED:
-                onCallEstablished((Call)call);
-                break;
-            case CALL_EVENT_UPDATED:
-                onCallUpdated((Call)call);
-                break;
-            case CALL_EVENT_TERMINATING:
-                onCallTerminating((Call)call);
-                break;
-            case CALL_EVENT_TERMINATED:
-                onCallTerminated((Call)call);
-                break;
-            case CALL_EVENT_DESTROY:
-                onCallDestroy((Call)call);
-                break;
-            default:
-                break;
+                case CALL_EVENT_CREATE:
+                    onCallCreate((Call) call);
+                    break;
+                case CALL_EVENT_ESTABLISHING:
+                    onCallEstablishing((Call) call);
+                    break;
+                case CALL_EVENT_RINGING:
+                    onCallRinging((Call) call);
+                    break;
+                case CALL_EVENT_ACCEPT:
+                    onCallAccept((Call) call);
+                    break;
+                case CALL_EVENT_ESTABLISHED:
+                    onCallEstablished((Call) call);
+                    break;
+                case CALL_EVENT_UPDATED:
+                    onCallUpdated((Call) call);
+                    break;
+                case CALL_EVENT_TERMINATING:
+                    onCallTerminating((Call) call);
+                    break;
+                case CALL_EVENT_TERMINATED:
+                    onCallTerminated((Call) call);
+                    break;
+                case CALL_EVENT_DESTROY:
+                    onCallDestroy((Call) call);
+                    break;
+                case CALL_EVENT_INCOMING_RECEIVED:
+                    onCallIncomingReceived((Call) call);
+                    break;
+                default:
+                    break;
             }
         }
     }

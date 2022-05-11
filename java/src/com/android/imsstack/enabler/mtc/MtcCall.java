@@ -11,7 +11,6 @@
 
 package com.android.imsstack.enabler.mtc;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -138,6 +137,13 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         public void onCallUpdateResumeReceived(MtcCall call,
                 CallInfo callInfo, MediaInfo mediaInfo, SuppInfo suppInfo) {
+            // no-op
+        }
+
+        /**
+         * When incoming call received, notify ImsCallManager.
+         */
+        public void onCallIncomingReceived(MtcCall call, IncomingMtcCall incomingCall) {
             // no-op
         }
 
@@ -1563,164 +1569,173 @@ public class MtcCall extends Call implements ConferenceTracker {
             }
 
             switch (msg) {
-            case IUMtcCall.PROGRESSING: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-                int alerting = parcel.readInt();
+                case IUMtcCall.PROGRESSING: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+                    int alerting = parcel.readInt();
 
-                onProgressing(callInfo, mediaInfo, suppInfo, (alerting == 1) ? true : false);
-                break;
-            }
-            case IUMtcCall.STARTED: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onStarted(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.START_FAILED: {
-                FailInfo failInfo = new FailInfo(parcel);
-
-                onStartFailed(failInfo);
-                break;
-            }
-            case IUMtcCall.TERMINATED: {
-                FailInfo failInfo = new FailInfo(parcel);
-
-                onTerminated(failInfo);
-                break;
-            }
-            case IUMtcCall.HELD: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onHeld(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.HOLD_FAILED: {
-                FailInfo failInfo = new FailInfo(parcel);
-
-                onHoldFailed(failInfo);
-                break;
-            }
-            case IUMtcCall.HELD_BY: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onHeldBy(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.RESUMED: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onResumed(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.RESUME_FAILED: {
-                FailInfo failInfo = new FailInfo(parcel);
-
-                onResumeFailed(failInfo);
-                break;
-            }
-            case IUMtcCall.RESUMED_BY: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onResumedBy(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.UPDATED_BY: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onUpdatedBy(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.UPDATED: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onUpdated(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.UPDATE_FAILED: {
-                FailInfo failInfo = new FailInfo(parcel);
-
-                onUpdateFailed(failInfo);
-                break;
-            }
-            case IUMtcCall.INCOMING_UPDATE: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onIncomingUpdate(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.INCOMING_RESUME: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-
-                onIncomingResume(callInfo, mediaInfo, suppInfo);
-                break;
-            }
-            case IUMtcCall.ECT_COMPLETED: {
-                int result = parcel.readInt();
-                FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
-
-                onEctCompleted(result, failInfo);
-                break;
-            }
-            case IUMtcCall.REPLACED_BY: {
-                CallInfo callInfo = new CallInfo(parcel);
-                MediaInfo mediaInfo = new MediaInfo(parcel);
-                SuppInfo suppInfo = new SuppInfo(parcel);
-                long newNativeCallId = parcel.readLong();
-                int typeForReplacedBy = parcel.readInt();
-
-                onReplacedBy(callInfo, mediaInfo, suppInfo, newNativeCallId, typeForReplacedBy);
-                break;
-            }
-            case IUMtcCall.CALL_PUSH_COMPLETED: {
-                int result = parcel.readInt();
-                FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
-
-                onCallPushCompleted(result, failInfo);
-                break;
-            }
-            case IUMtcCall.NOTIFY_INFO: {
-                int type = parcel.readInt();
-                String strValue = parcel.readString();
-                int intValue = parcel.readInt();
-                boolean boolValue = (parcel.readInt() == 1);
-
-                onNotifyInfo(type, strValue, intValue, boolValue);
-                break;
-            }
-            case IUMtcCall.CODEC_INFO_UPDATED: {
-                // TODO: needs to be deleted
-                break;
-            }
-            default:
-                if (MtcConference.isMessageForConference(msg)) {
-                    try {
-                        mConference.handleMessage(msg, parcel);
-                    } catch (Throwable t) {
-                        loge("MtcConference#handleMessage :: " + t.toString());
-                        t.printStackTrace();
-                    }
+                    onProgressing(callInfo, mediaInfo, suppInfo, (alerting == 1) ? true : false);
+                    break;
                 }
-                break;
+                case IUMtcCall.STARTED: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onStarted(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.START_FAILED: {
+                    FailInfo failInfo = new FailInfo(parcel);
+
+                    onStartFailed(failInfo);
+                    break;
+                }
+                case IUMtcCall.TERMINATED: {
+                    FailInfo failInfo = new FailInfo(parcel);
+
+                    onTerminated(failInfo);
+                    break;
+                }
+                case IUMtcCall.HELD: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onHeld(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.HOLD_FAILED: {
+                    FailInfo failInfo = new FailInfo(parcel);
+
+                    onHoldFailed(failInfo);
+                    break;
+                }
+                case IUMtcCall.HELD_BY: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onHeldBy(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.RESUMED: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onResumed(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.RESUME_FAILED: {
+                    FailInfo failInfo = new FailInfo(parcel);
+
+                    onResumeFailed(failInfo);
+                    break;
+                }
+                case IUMtcCall.RESUMED_BY: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onResumedBy(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.UPDATED_BY: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onUpdatedBy(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.UPDATED: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onUpdated(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.UPDATE_FAILED: {
+                    FailInfo failInfo = new FailInfo(parcel);
+
+                    onUpdateFailed(failInfo);
+                    break;
+                }
+                case IUMtcCall.INCOMING_UPDATE: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onIncomingUpdate(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.INCOMING_RESUME: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+
+                    onIncomingResume(callInfo, mediaInfo, suppInfo);
+                    break;
+                }
+                case IUMtcCall.INCOMING_CALL_RECEIVED: {
+
+                    IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
+
+                    updateCallExtras(incomingCall);
+
+                    onIncomingCallReceived(incomingCall);
+                    break;
+                }
+                case IUMtcCall.ECT_COMPLETED: {
+                    int result = parcel.readInt();
+                    FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
+
+                    onEctCompleted(result, failInfo);
+                    break;
+                }
+                case IUMtcCall.REPLACED_BY: {
+                    CallInfo callInfo = new CallInfo(parcel);
+                    MediaInfo mediaInfo = new MediaInfo(parcel);
+                    SuppInfo suppInfo = new SuppInfo(parcel);
+                    long newNativeCallId = parcel.readLong();
+                    int typeForReplacedBy = parcel.readInt();
+
+                    onReplacedBy(callInfo, mediaInfo, suppInfo, newNativeCallId, typeForReplacedBy);
+                    break;
+                }
+                case IUMtcCall.CALL_PUSH_COMPLETED: {
+                    int result = parcel.readInt();
+                    FailInfo failInfo = (result == 0) ? new FailInfo(parcel) : null;
+
+                    onCallPushCompleted(result, failInfo);
+                    break;
+                }
+                case IUMtcCall.NOTIFY_INFO: {
+                    int type = parcel.readInt();
+                    String strValue = parcel.readString();
+                    int intValue = parcel.readInt();
+                    boolean boolValue = (parcel.readInt() == 1);
+
+                    onNotifyInfo(type, strValue, intValue, boolValue);
+                    break;
+                }
+                case IUMtcCall.CODEC_INFO_UPDATED: {
+                    // TODO: needs to be deleted
+                    break;
+                }
+                default:
+                    if (MtcConference.isMessageForConference(msg)) {
+                        try {
+                            mConference.handleMessage(msg, parcel);
+                        } catch (Throwable t) {
+                            loge("MtcConference#handleMessage :: " + t.toString());
+                            t.printStackTrace();
+                        }
+                    }
+                    break;
             }
         }
 
@@ -2059,6 +2074,17 @@ public class MtcCall extends Call implements ConferenceTracker {
             if (mListener != null) {
                 mListener.onCallUpdateResumeReceived(
                         MtcCall.this, callInfo, mediaInfo, suppInfo);
+            }
+        }
+
+        private void onIncomingCallReceived(IncomingMtcCall incomingCall) {
+            logi("INCOMING_CALL_RECEIVED");
+
+            mCT.updateCallState(
+                    MtcCall.this, CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
+
+            if (mListener != null) {
+                mListener.onCallIncomingReceived(MtcCall.this, incomingCall);
             }
         }
 

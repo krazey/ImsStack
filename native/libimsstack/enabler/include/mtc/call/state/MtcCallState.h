@@ -149,6 +149,7 @@ protected:
 
     CallStateName RejectIncomingAndToTerminating(IN const FailReason& objFailReason);
 
+    void SendPreIncomingCallReceived();
     void SendIncomingCallReceived();
     void SendStarted();
     void SendIncomingUpdate(IN CallType eCallType);

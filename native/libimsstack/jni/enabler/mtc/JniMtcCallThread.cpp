@@ -242,6 +242,30 @@ void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason
     SendData2Java(objParcel);
 }
 
+void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallInfo* pCallInfo,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+            IN ParticipantInfo* pParticipantInfo)
+{
+    IMS_TRACE_D("OnIncomingCallReceived", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::INCOMING_CALL_RECEIVED);
+    objParcel.writeInt32(nCallKey);
+
+    JniMtcUtils::WriteCallInfoToParcel(pCallInfo, objParcel);
+    JniMtcUtils::WriteMediaInfoToParcel(pMediaInfo, objParcel);
+
+    /* Display Info  // TODO: ParticipantInfo to be included in CallInfo? */
+    // Need to set callee number when the "child number" is used.
+    objParcel.writeInt32(static_cast<IMS_SINT32>(pParticipantInfo->GetOipType()));
+    objParcel.writeString16(android::String16(AString::ConstNull().GetStr()));
+    objParcel.writeString16(android::String16(pParticipantInfo->GetRemoteNumber().GetStr()));
+
+    /* Supp Info */
+    JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
+
+    SendData2Java(objParcel);
+}
+
 PRIVATE
 void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN CallInfo* pCallInfo,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)

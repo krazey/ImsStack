@@ -18,17 +18,32 @@ PUBLIC
 MtcUiNotifier::~MtcUiNotifier() {}
 
 PUBLIC
-void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
-        IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-        IN ParticipantInfo& objParticipantInfo)
+void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 {
     if (!m_pServiceThread)
+    {
+        IMS_TRACE_E(0, "SendPreIncomingCallReceived : Not available", 0, 0, 0);
+        return;
+    }
+
+    m_pServiceThread->OnPreIncomingCallReceived(nKey);
+}
+
+PUBLIC
+void MtcUiNotifier::SendIncomingCallReceived(
+        IN CallKey nKey,
+        IN CallInfo& objCallInfo,
+        IN MediaInfo& objMediaInfo,
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+        IN ParticipantInfo& objParticipantInfo)
+{
+    if (!IsAvailableToSend())
     {
         IMS_TRACE_E(0, "SendIncomingCallReceived : Not available", 0, 0, 0);
         return;
     }
 
-    m_pServiceThread->OnIncomingCallReceived(
+    m_pCallThread->OnIncomingCallReceived(
             nKey, &objCallInfo, &objMediaInfo, objSuppServices, &objParticipantInfo);
 }
 

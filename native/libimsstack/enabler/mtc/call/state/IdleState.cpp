@@ -232,6 +232,9 @@ PRIVATE
 CallStateName IdleState::ContinueHandleIncoming()
 {
     IMS_TRACE_D("ContinueHandleIncoming", 0, 0, 0);
+
+    SendPreIncomingCallReceived();
+
     ISession* piSession = GetISession();
 
     UpdateIncomingInformation(piSession);

@@ -16,7 +16,7 @@ public class IUMtcService {
     // Event : IMS to UI
     public static final int SERVICE_CHANGED                = (EVENT_I2U + 1);
     public static final int E_SERVICE_CHANGED            = (EVENT_I2U + 2);
-    public static final int INCOMING_CALL            = (EVENT_I2U + 3);
+    public static final int PRE_INCOMING_CALL            = (EVENT_I2U + 3);
     public static final int INCOMING_CALL_INFO            = (EVENT_I2U + 4);
     public static final int AUTO_REJECTED_CALL            = (EVENT_I2U + 5);
 

@@ -423,14 +423,8 @@ void MtcCallState::InitMediaSession(IN MediaInfo* pMediaInfo /* = IMS_NULL*/)
     {
         objMediaManager.SetMediaInfo(*pMediaInfo);
     }
-    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
-    {
-        objMediaManager.CreateMediaSession(m_objContext.GetUiNotifier().GetJniMediaThread());
-    }
-    else
-    {
-        objMediaManager.CreateMediaSession(IMS_NULL);
-    }
+
+    objMediaManager.CreateMediaSession(m_objContext.GetUiNotifier().GetJniMediaThread());
 
     objMediaManager.CreateMediaProfile(
             &m_objContext.GetSession()->GetISession(), IMS_FALSE, IMS_TRUE);
@@ -594,13 +588,23 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const FailReason& 
 }
 
 PROTECTED
+void MtcCallState::SendPreIncomingCallReceived()
+{
+    IMS_TRACE_D("SendIncomingCallReceived", 0, 0, 0);
+
+    m_objContext.GetUiNotifier().SendPreIncomingCallReceived(m_objContext.GetCallKey());
+}
+
+PROTECTED
 void MtcCallState::SendIncomingCallReceived()
 {
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(), objMediaInfo,
+    m_objContext.GetUiNotifier().SendIncomingCallReceived(
+            m_objContext.GetCallKey(),
+            m_objContext.GetCallInfo(),
+            objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo());
 }

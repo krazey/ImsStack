@@ -24,7 +24,6 @@ import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
 import com.android.imsstack.enabler.mtc.dialogs.IUDialogs;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListener;
-import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.Closeable;
@@ -64,8 +63,7 @@ public class MtcApp implements Closeable {
         /**
          * Notifies the application when the incoming call is received from the network.
          */
-        public void onIncomingCallReceived(MtcApp app, long callObject,
-                IncomingMtcCall incomingCall) {
+        public void onPreIncomingCallReceived(MtcApp app, long nativeCallObject) {
             // no-op
         }
 
@@ -156,10 +154,13 @@ public class MtcApp implements Closeable {
         }
     }
 
-    public MtcCall getPendingCall(long callId, boolean moveToActiveCall) {
+    /**
+     * Gets pending call for incoming call.
+     */
+    public MtcCall getPendingCall(long callId) {
         logi("getPendingCall :: callId=" + Long.toHexString(callId));
 
-        MtcCall call = (MtcCall)mCM.getPendingCall(callId, moveToActiveCall);
+        MtcCall call = (MtcCall) mCM.getPendingCall(callId);
 
         if (call == null) {
             return null;
@@ -313,68 +314,73 @@ public class MtcApp implements Closeable {
             logi("MtcApp::Mtc-MSG=" + msg);
 
             switch (msg) {
-            case IUMtcService.INCOMING_CALL: // FALL-THROUGH
-            case IUMtcService.INCOMING_CALL_INFO: // FALL-THROUGH
-            case IUMtcService.AUTO_REJECTED_CALL: // FALL-THROUGH
-            case IUDialogs.NOTIFY_DIALOG_INFO:
-                onMessageForCallApp(msg, parcel);
-                break;
-            case IUMtcService.SERVICE_CHANGED: // FALL-THROUGH
-            case IUMtcService.E_SERVICE_CHANGED:
-                onMessageForRegApp(msg, parcel);
-                break;
-            default:
-                // no-op
-                break;
+                case IUMtcService.PRE_INCOMING_CALL: // FALL-THROUGH
+                case IUMtcService.INCOMING_CALL_INFO: // FALL-THROUGH
+                case IUMtcService.AUTO_REJECTED_CALL: // FALL-THROUGH
+                case IUDialogs.NOTIFY_DIALOG_INFO: // FALL-THROUGH
+                    onMessageForCallApp(msg, parcel);
+                    break;
+                case IUMtcService.SERVICE_CHANGED: // FALL-THROUGH
+                case IUMtcService.E_SERVICE_CHANGED:
+                    onMessageForRegApp(msg, parcel);
+                    break;
+                default:
+                    // no-op
+                    break;
             }
         }
 
         private void onMessageForCallApp(int msg, Parcel parcel) {
-            if (msg == IUMtcService.INCOMING_CALL) {
-                IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
-                long callObject = incomingCall.callMtcKey;
+            if (msg == IUMtcService.PRE_INCOMING_CALL) {
+                long nativeCallObject = parcel.readLong();
+                String logTag = parcel.readString();
 
-                if (callObject == 0) {
+                ImsLog.d("[" + logTag + "] callKey : " + nativeCallObject);
+
+                if (nativeCallObject == 0) {
                     loge("No call object");
                     return;
                 }
 
-                MtcCall call = new MtcCall(mContext,
-                        mCM.getCallTracker(), callObject,
-                        MtcCallInfo.isConference(incomingCall.callInfo) ?
-                                MtcCall.FLAG_CONFERENCE : 0, mCM.getVacantCallIndex(),
-                                incomingCall.logTag);
-
-                call.updateCallExtras(incomingCall);
+                MtcCall call = new MtcCall(mContext, mCM.getCallTracker(), nativeCallObject,
+                        MtcCall.FLAG_LOCK_JNI_EVENT_LOOP, mCM.getVacantCallIndex(), logTag);
+                call.startJNIEventLoop();
 
                 if (mCallListener != null) {
-                    mCM.attachIncomingCall(call);
-                    mCallListener.onIncomingCallReceived(
-                            MtcApp.this, callObject, incomingCall);
+                    mCM.attachPreIncomingCall(call);
+                    mCallListener.onPreIncomingCallReceived(MtcApp.this, nativeCallObject);
                 } else {
                     rejectAndCloseCall(call);
                 }
             }
-            else if (msg == IUMtcService.INCOMING_CALL_INFO) {
-                IncomingCallInfo incomingCallInfo = new IncomingCallInfo(parcel);
+            // TODO : consider how to handle this msg.
+            // else if (msg == IUMtcService.INCOMING_CALL_INFO) {
+            //     IncomingCallInfo incomingCallInfo = new IncomingCallInfo(parcel);
 
-                if (mCallListener != null) {
-                    mCallListener.onIncomingCallInfoReceived(incomingCallInfo);
-                }
-            }
-            else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
-                IncomingRejectedMtcCall incomingCall = new IncomingRejectedMtcCall(parcel);
-                MtcCall call = new MtcCall(mContext,
-                        mCM.getCallTracker(), 0/*callObject*/, 0, mCM.getVacantCallIndex(),
-                                incomingCall.logTag);
+            //     if (mCallListener != null) {
+            //         mCallListener.onIncomingCallInfoReceived(incomingCallInfo);
+            //     }
+            // }
+            // else if (msg == IUMtcService.AUTO_REJECTED_CALL) {
+            //     IncomingRejectedMtcCall incomingCall = new IncomingRejectedMtcCall(parcel);
+            //     MtcCall call = new MtcCall(mContext,
+            //             mCM.getCallTracker(), 0/*callObject*/, 0, mCM.getVacantCallIndex(),
+            //                     incomingCall.logTag);
 
-                call.updateCallExtras(incomingCall);
+            //     MtcCall call = getPendingCall(incomingCall.callMtcKey, false);
 
-                if (mCallListener != null) {
-                    mCM.attachIncomingCall(call);
-                    mCallListener.onIncomingCallReceived(MtcApp.this, 0, incomingCall);
-                }
-            }
+            //     if (call == null) {
+            //         loge("No pending Mtc call");
+            //         return;
+            //     }
+
+            //     call.updateCallExtras(incomingCall);
+
+            //     if (mCallListener != null) {
+            //         mCM.attachIncomingCall(call);
+            //         //mCallListener.onIncomingCallReceived(MtcApp.this, 0, incomingCall);
+            //     }
+            // }
             else if (msg == IUDialogs.NOTIFY_DIALOG_INFO) {
                 DialogsInfo dialogsInfo = new DialogsInfo(parcel);
 

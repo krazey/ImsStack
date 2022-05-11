@@ -46,6 +46,7 @@ import com.android.imsstack.enabler.mtc.FailInfo;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.IUMtcService;
+import com.android.imsstack.enabler.mtc.IncomingMtcCall;
 import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.enabler.mtc.MtcCallInfo;
@@ -148,23 +149,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
             if (mCallProfile.mServiceType != ImsCallProfile.SERVICE_TYPE_NORMAL) {
                 mMoPendingCall = new MoPendingCall(mCallProfile.mServiceType);
-            }
-        } else {
-            // For Google native behavior
-            // Set local call profile as local capability for audio quality
-            mLocalCallProfile.mMediaProfile.mAudioQuality = mCallContext.getMediaCapabilities(
-                    mCallProfile.mCallType, ICallContext.MEDIA_AUDIO);
-
-            if (ImsCallUtils.isVideoCall(mCallProfile.mCallType)) {
-                mLocalCallProfile.mMediaProfile.mVideoQuality = mCallContext.getMediaCapabilities(
-                        mCallProfile.mCallType, ICallContext.MEDIA_VIDEO);
-            }
-
-            if (profile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_HD_VOICE, false)
-                    || profile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_UHD_VOICE, false)) {
-                mRemoteCallProfile.mRestrictCause = ImsCallProfile.CALL_RESTRICT_CAUSE_NONE;
-            } else {
-                mRemoteCallProfile.mRestrictCause = ImsCallProfile.CALL_RESTRICT_CAUSE_HD;
             }
         }
 
@@ -4221,6 +4205,39 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             }
 
             rejectSessionUpdateAsync(call, 0, "onCallUpdateResumeReceived");
+        }
+
+        @Override
+        public void onCallIncomingReceived(MtcCall call, IncomingMtcCall incomingCall) {
+            if (!call.equals(mCall)) {
+                return;
+            }
+
+            ImsCallProfile profile = ImsCallUtils.createCallProfileFromIncomingCallInfo(
+                    mCallContext, incomingCall);
+            initCallProfile(profile);
+
+            // For Google native behavior
+            // Set local call profile as local capability for audio quality
+            mLocalCallProfile.mMediaProfile.mAudioQuality = mCallContext.getMediaCapabilities(
+                    mCallProfile.mCallType, ICallContext.MEDIA_AUDIO);
+
+            if (ImsCallUtils.isVideoCall(mCallProfile.mCallType)) {
+                mLocalCallProfile.mMediaProfile.mVideoQuality = mCallContext.getMediaCapabilities(
+                        mCallProfile.mCallType, ICallContext.MEDIA_VIDEO);
+            }
+
+            if (profile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_HD_VOICE, false)
+                    || profile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_UHD_VOICE, false)) {
+                mRemoteCallProfile.mRestrictCause = ImsCallProfile.CALL_RESTRICT_CAUSE_NONE;
+            } else {
+                mRemoteCallProfile.mRestrictCause = ImsCallProfile.CALL_RESTRICT_CAUSE_HD;
+            }
+
+            updateCallExtraForRatType(mCallProfile, true);
+
+            mCT.updateCallState(ImsCallSessionImpl.this,
+                    CallTracker.CALL_EVENT_INCOMING_RECEIVED, null);
         }
 
         @Override

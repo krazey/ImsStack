@@ -3,6 +3,7 @@
 
 #include "BaseService.h"
 #include "BaseServiceThread.h"
+#include "call/ParticipantInfo.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
 #include "IMSMap.h"
@@ -61,6 +62,10 @@ public:
     void OnConferenceParticipantsInfoChanged(IN const IMSList<ConfUser*>& objUsers);
 
     void OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);
+
+    void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallInfo* pCallInfo,
+            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+            IN ParticipantInfo* pParticipantInfo);
 
 private:
     void SetCallDetails(IN_OUT android::Parcel& objParcel, IN CallInfo* pCallInfo,

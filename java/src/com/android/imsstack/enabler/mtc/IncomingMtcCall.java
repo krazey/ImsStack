@@ -2,7 +2,6 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.android.imsstack.util.ImsLog;
 
@@ -11,7 +10,6 @@ public class IncomingMtcCall implements Parcelable {
     // Intent parameter
 
     public int callKey;
-    public long callMtcKey;
 
     public CallInfo callInfo;
     public MediaInfo mediaInfo;
@@ -46,7 +44,6 @@ public class IncomingMtcCall implements Parcelable {
     public IncomingMtcCall(IncomingMtcCall incomingCall) {
 
         callKey = incomingCall.callKey;
-        callMtcKey = incomingCall.callMtcKey;
 
         OIPType = incomingCall.OIPType;
         calleePartyNum = incomingCall.calleePartyNum;
@@ -61,7 +58,6 @@ public class IncomingMtcCall implements Parcelable {
         logTag = incomingCall.logTag;
 
         ImsLog.d("callKey : " + callKey
-                + " callMtcKey : " + callMtcKey
                 + " OIPType : " + OIPType
                 + " calleePartyNum : " + calleePartyNum
                 + " callerPartyNum : " + callerPartyNum
@@ -73,30 +69,6 @@ public class IncomingMtcCall implements Parcelable {
         readFromParcel(source);
     }
 
-    public IncomingMtcCall(long MtcKey, CallInfo _callInfo, MediaInfo _mediaInfo,
-            SuppInfo _suppInfo) {
-
-        callKey = 0;
-        callMtcKey = MtcKey;
-
-        OIPType = OIPTYPE_IDENTITY;
-        calleePartyNum = "";
-        callerPartyNum = "";
-
-        callInfo = new CallInfo(_callInfo);
-        mediaInfo = new MediaInfo(_mediaInfo);
-        suppInfo = new SuppInfo(_suppInfo);
-
-        logTag = "";
-
-        ImsLog.d("callKey : " + callKey
-                + " callMtcKey : " + callMtcKey
-                + " OIPType : " + OIPType
-                + " calleePartyNum : " + calleePartyNum
-                + " callerPartyNum : " + callerPartyNum
-                 );
-    }
-
     public boolean isAutoRejectedCall() {
 
         return false;
@@ -105,7 +77,6 @@ public class IncomingMtcCall implements Parcelable {
     public void readFromParcel(Parcel source) {
 
         callKey = source.readInt();
-        callMtcKey = source.readLong();
 
         callInfo = new CallInfo(source);
         mediaInfo = new MediaInfo(source);
@@ -119,7 +90,6 @@ public class IncomingMtcCall implements Parcelable {
         logTag = source.readString();
 
         ImsLog.d("[" + logTag + "]callKey : " + callKey
-                + " callMtcKey : " + callMtcKey
                 + " OIPType : " + OIPType
                 + " calleePartyNum : " + calleePartyNum
                 + " callerPartyNum : " + callerPartyNum
@@ -131,7 +101,6 @@ public class IncomingMtcCall implements Parcelable {
         ImsLog.i("");
 
         dest.writeInt(callKey);
-        dest.writeLong(callMtcKey);
 
         callInfo.writeToParcel(dest, 1);
         mediaInfo.writeToParcel(dest, 1);
@@ -147,11 +116,6 @@ public class IncomingMtcCall implements Parcelable {
     public void setCallKey(int key) {
         callKey = key;
         ImsLog.i("setCallKey : " + callKey);
-    }
-
-    public void setCallMtcKey(long MtcKey) {
-        callMtcKey = MtcKey;
-        ImsLog.i("callMtcKey : " + callMtcKey);
     }
 
     public int describeContents() {
