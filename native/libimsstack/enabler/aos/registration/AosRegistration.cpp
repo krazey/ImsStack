@@ -4943,6 +4943,16 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
         return IMS_FALSE;
     }
 
+    if (nMessage == IMessageMediator::MESSAGE_RESUBMIT)
+    {
+        piSipMsg->RemoveHeader(ISipHeader::UNKNOWN, SipHeaderName::CONTENT_ID);
+        piSipMsg->RemoveHeader(ISipHeader::CONTENT_TYPE);
+        piSipMsg->RemoveHeader(ISipHeader::CONTENT_LENGTH);
+
+        // Removes the previous message body
+        piSipMsg->RemoveBodyParts();
+    }
+
     GeolocationPidfCreator* pPidfCreator =
             GeolocationHelper::GetInstance()->GetPidfCreator(m_nSlotId);
 
@@ -4953,20 +4963,18 @@ PROTECTED VIRTUAL IMS_BOOL AosRegistration::AddLocationHeaderBody(
 
     ByteArray objContent;
 
-    if (!pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent))
+    if (!pPidfCreator->CreateWithoutPosition(
+                AString::ConstNull(), IMS_FALSE, IMS_FALSE, objContent))
     {
         return IMS_FALSE;
     }
 
-    if (nMessage == IMessageMediator::MESSAGE_RESUBMIT)
+    /* if needed, asset will be added
+    if (!pPidfCreator->CreateWithPosition(AString::ConstNull(), objContent))
     {
-        piSipMsg->RemoveHeader(ISipHeader::UNKNOWN, SipHeaderName::CONTENT_ID);
-        piSipMsg->RemoveHeader(ISipHeader::CONTENT_TYPE);
-        piSipMsg->RemoveHeader(ISipHeader::CONTENT_LENGTH);
-
-        // Removes the previous message body
-        piSipMsg->RemoveBodyParts();
+        return IMS_FALSE;
     }
+    */
 
     ISipMessageBodyPart* piBodyPart = piSipMsg->CreateBodyPart();
 
