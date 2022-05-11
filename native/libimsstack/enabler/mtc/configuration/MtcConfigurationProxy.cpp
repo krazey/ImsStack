@@ -47,7 +47,7 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_objManager.IsMultiendpointSupported();
         case Feature::SESSION_TIMER_SUPPORTED:
             return m_objManager.IsSessionTimerSupported();
-        case Feature::PRACK_SUPPORTED_FOR18X:
+        case Feature::PRACK_SUPPORTED_FOR_18X:
             return m_objManager.IsPrackSupportedFor18x();
         case Feature::VOICE_QOS_PRECONDITION_SUPPORTED:
             return m_objManager.IsVoiceQosPreconditionSupported();

@@ -167,6 +167,7 @@ protected:
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsCallWaiting() const;
+    IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
 
     IMtcCallContext& m_objContext;
 
