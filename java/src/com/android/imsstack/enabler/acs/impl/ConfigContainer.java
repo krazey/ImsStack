@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
+package com.android.imsstack.enabler.acs.impl;
+
 import android.content.Context;
 import android.os.PersistableBundle;
-import android.util.Log;
 
 import com.android.imsstack.enabler.acs.AcServiceClientInfo;
+import com.android.imsstack.util.ImsLog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +35,6 @@ import java.io.FileOutputStream;
  *    etc.
  */
 public class ConfigContainer {
-    private static final String TAG = "ConfigContainer";
     private static final String LOCAL_FILE_NAME = "rcs_provisioning_config.xml";
     private static final String LOCAL_KEY_PREFIX = "key_";
     private static final String LOCAL_KEY_RCS_VERSION = "key_rcs_version";
@@ -175,13 +176,13 @@ public class ConfigContainer {
                 FileInputStream inputStream = new FileInputStream(file);
                 mConfig = PersistableBundle.readFromStream(inputStream);
                 inputStream.close();
-                log("read config from file");
+                ImsLog.i("read config from file");
             } else {
                 mConfig = new PersistableBundle();
-                log("file is not exist");
+                ImsLog.i("file is not exist");
             }
         } catch (Exception e) {
-            log("readDataFromFile failed" + e.getMessage());
+            ImsLog.e(e.getMessage());
         }
     }
 
@@ -191,13 +192,9 @@ public class ConfigContainer {
             FileOutputStream outputStream = new FileOutputStream(file);
             mConfig.writeToStream(outputStream);
             outputStream.close();
-            log("save data to file");
+            ImsLog.i("save data to file");
         } catch (Exception e) {
-            log("saveDataToFile failed" + e.getMessage());
+            ImsLog.e(e.getMessage());
         }
-    }
-
-    private void log(String msg) {
-        Log.d(TAG, msg);
     }
 }

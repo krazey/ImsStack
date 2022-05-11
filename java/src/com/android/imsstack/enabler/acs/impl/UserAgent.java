@@ -17,13 +17,13 @@
 package com.android.imsstack.enabler.acs.impl;
 
 import android.telephony.SubscriptionManager;
-import android.util.Log;
+
+import com.android.imsstack.util.ImsLog;
 
 /**
  * This class handles the UserAgent value which is included ACS request
  */
 public class UserAgent {
-    private static final String TAG = UserAgent.class.getSimpleName();
     private static final String PREFIX = "IM-client/OMA1.0";
 
     private final String mTerminalVendor;
@@ -57,7 +57,7 @@ public class UserAgent {
             userAgent += ";" + mGBAProductToken;
         }
 
-        logi("userAgent :" + userAgent);
+        ImsLog.i("[" + mSlotId + "] " + "userAgent :" + userAgent);
 
         return userAgent;
     }
@@ -165,17 +165,5 @@ public class UserAgent {
 
             return new UserAgent(this);
         }
-    }
-
-    private void log(String msg) {
-        Log.d(TAG, "[" + mSlotId + "] " + msg);
-    }
-
-    private void logi(String msg) {
-        Log.i(TAG, "[" + mSlotId + "] " + msg);
-    }
-
-    private void loge(String msg) {
-        Log.e(TAG, "[" + mSlotId + "] " + msg);
     }
 }

@@ -75,7 +75,7 @@ public class CallbackManager {
             }
         }
 
-        ImsLog.i("[" + mSlotId + "] callback was registered already");
+        ImsLog.i("[" + mSlotId + "] " + "callback was registered already");
     }
 
     /**
