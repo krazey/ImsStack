@@ -36,7 +36,7 @@ public interface ITelephonySubscriber extends IAgent {
     String getCountryIso(boolean fromSim);
 
     /**
-     * Returns line1number via TelephonyManager. (Only VZW use getImei API)
+     * Returns line1number via TelephonyManager.
      */
     String getPhoneNumber();
 
@@ -51,7 +51,7 @@ public interface ITelephonySubscriber extends IAgent {
     String getSubscriberId();
 
     /**
-     * Returns deviceId via TelephonyManager. (Only VZW use getMsisdn API)
+     * Returns deviceId via TelephonyManager.
      */
     String getDeviceId();
 

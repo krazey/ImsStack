@@ -10,15 +10,18 @@ import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SimCarrierId;
 import com.android.imsstack.util.SODConfig;
+import com.android.imsstack.util.SimCarrierId;
 import com.android.internal.telephony.IccCardConstants;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,10 +31,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 /**
  * This class helps to load carrier codes from "config/carrier_code.xml".
@@ -242,9 +241,9 @@ public final class CarrierCodeLoader {
         Log.i(TAG, "CarrierCode(SimOperatorCountry): " + slotId +
                 " - op=" + operator + ", opSub=" + operatorSub + ", co=" + country);
 
-        operator = TextUtils.emptyIfNull(operator);
-        operatorSub = TextUtils.emptyIfNull(operatorSub);
-        country = TextUtils.emptyIfNull(country);
+        operator = emptyIfNull(operator);
+        operatorSub = emptyIfNull(operatorSub);
+        country = emptyIfNull(country);
 
         ImsPrivateProperties.Persistent.set(
                 ImsPrivateProperties.Persistent.KEY_SIM_OPERATOR,
@@ -547,40 +546,40 @@ public final class CarrierCodeLoader {
             String value = parser.getAttributeValue(i);
 
             switch (attribute) {
-            case CarrierCode.KEY_ICCID:
-                iccId = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_MCC:
-                mcc = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_MNC:
-                mnc = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_MVNO_TYPE:
-                mvnoType = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_MVNO_MATCH_DATA:
-                mvnoMatchData = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_CARRIER_CODE_FAST:
-                operatorFast = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_CARRIER_CODE_LATE:
-                operatorLate = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_CARRIER_CODE_SUB:
-                operatorSub = TextUtils.emptyIfNull(value);
-                break;
-            case CarrierCode.KEY_COUNTRY:
-                country = TextUtils.emptyIfNull(value);
-                break;
-            case "carrier": // FALL-THROUGH
-            case "suffix":
-                // no-op
-                break;
-            default:
-                Log.d(TAG, "Unknown attribute(" + i + "): " + attribute + "=" + value);
-                break;
+                case CarrierCode.KEY_ICCID:
+                    iccId = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_MCC:
+                    mcc = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_MNC:
+                    mnc = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_MVNO_TYPE:
+                    mvnoType = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_MVNO_MATCH_DATA:
+                    mvnoMatchData = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_CARRIER_CODE_FAST:
+                    operatorFast = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_CARRIER_CODE_LATE:
+                    operatorLate = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_CARRIER_CODE_SUB:
+                    operatorSub = emptyIfNull(value);
+                    break;
+                case CarrierCode.KEY_COUNTRY:
+                    country = emptyIfNull(value);
+                    break;
+                case "carrier": // FALL-THROUGH
+                case "suffix":
+                    // no-op
+                    break;
+                default:
+                    Log.d(TAG, "Unknown attribute(" + i + "): " + attribute + "=" + value);
+                    break;
             }
         }
 
@@ -837,4 +836,8 @@ public final class CarrierCodeLoader {
         return operator;
     }
     // }
+
+    private static String emptyIfNull(String s) {
+        return s == null ? "" : s;
+    }
 }

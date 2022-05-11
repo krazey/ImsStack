@@ -48,8 +48,7 @@ public class ISIMAgent implements IISIM {
 
     @Override
     public String[] getPcscf() {
-        TelephonyManager tm = getTelephonyManager();
-        return (tm != null) ? tm.getIsimPcscf() : null;
+        return null;
     }
 
     @Override

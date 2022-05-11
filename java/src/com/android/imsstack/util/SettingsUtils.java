@@ -424,15 +424,6 @@ public final class SettingsUtils {
         cr.registerContentObserver(Settings.Global.getUriFor(key), true, observer);
     }
 
-    public static void registerObserverForGlobalAsUser(ContentResolver cr,
-            String key, ContentObserver observer, int userId) {
-        if (cr == null) {
-            return;
-        }
-
-        cr.registerContentObserver(Settings.Global.getUriFor(key), true, observer, userId);
-    }
-
     public static void registerObserverForSecure(ContentResolver cr,
             String key, ContentObserver observer) {
         if (cr == null) {
@@ -442,15 +433,6 @@ public final class SettingsUtils {
         cr.registerContentObserver(Settings.Secure.getUriFor(key), true, observer);
     }
 
-    public static void registerObserverForSecureAsUser(ContentResolver cr,
-            String key, ContentObserver observer, int userId) {
-        if (cr == null) {
-            return;
-        }
-
-        cr.registerContentObserver(Settings.Secure.getUriFor(key), true, observer, userId);
-    }
-
     public static void registerObserverForSystem(ContentResolver cr,
             String key, ContentObserver observer) {
         if (cr == null) {
@@ -458,15 +440,6 @@ public final class SettingsUtils {
         }
 
         cr.registerContentObserver(Settings.System.getUriFor(key), true, observer);
-    }
-
-    public static void registerObserverForSystemAsUser(ContentResolver cr,
-            String key, ContentObserver observer, int userId) {
-        if (cr == null) {
-            return;
-        }
-
-        cr.registerContentObserver(Settings.System.getUriFor(key), true, observer, userId);
     }
 
     public static void unregisterObserver(ContentResolver cr, ContentObserver observer) {
