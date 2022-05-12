@@ -189,12 +189,15 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
-    if (SendStartMessage() == IMS_FAILURE)
+    if (m_objContext.GetSession()->SendStart() == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
+
+    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
 
     return CallStateName::OUTGOING;
 }
@@ -218,12 +221,15 @@ CallStateName IdleState::ContinueConference(
 
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
-    if (SendStartMessage() == IMS_FAILURE)
+    if (m_objContext.GetSession()->SendStart() == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
         return CallStateName::TERMINATING;
     }
+
+    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
+            m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
 
     return CallStateName::OUTGOING;
 }
@@ -293,34 +299,6 @@ CallStateName IdleState::ContinueHandleIncoming()
     }
 
     return CallStateName::INCOMING;
-}
-
-PRIVATE
-IMS_RESULT IdleState::SendStartMessage()
-{
-    // StartE911StartTimer(m_pSessInfo->eCallType); -> Configs to be redefined
-    if (m_objContext.GetMediaManager().FormSdp(GetISession(), CallType::VOIP) == IMS_FAILURE)
-    {
-        return IMS_FAILURE;
-    }
-
-    m_objContext.GetPreconditionManager().FormPreconditionSdp(GetISession(), IMS_FALSE);
-
-    MtcSession* pSession = m_objContext.GetSession();
-    if (pSession == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    if (pSession->GetMessageSender().Start() != IMS_SUCCESS)
-    {
-        return IMS_FAILURE;
-    }
-
-    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
-
-    return IMS_SUCCESS;
 }
 
 PRIVATE

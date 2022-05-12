@@ -5,6 +5,8 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
+#include "media/IMtcMediaManager.h"
+#include "precondition/IMtcPreconditionManager.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -27,6 +29,18 @@ PUBLIC VIRTUAL MtcSession::~MtcSession()
 {
     IMS_TRACE_I("~MtcSession", 0, 0, 0);
     GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(&m_objSession);
+}
+
+PUBLIC IMS_RESULT MtcSession::SendStart()
+{
+    if (m_objContext.GetMediaManager().FormSdp(&m_objSession, CallType::VOIP) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    m_objContext.GetPreconditionManager().FormPreconditionSdp(&m_objSession, IMS_FALSE);
+
+    return m_objMessageSender.Start();
 }
 
 PRIVATE

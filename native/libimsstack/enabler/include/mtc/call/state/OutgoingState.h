@@ -23,36 +23,33 @@ public:
     OutgoingState(IN const OutgoingState&) = delete;
     OutgoingState& operator=(IN const OutgoingState&) = delete;
 
-    virtual void OnEnter() override;
+    void OnEnter() override;
 
-    virtual CallStateName Terminate(IN const FailReason& objReason) override;
-    virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
+    CallStateName Terminate(IN const FailReason& objReason) override;
+    CallStateName HandleSrvccFailure(IN UpdateType eUpdateType) override;
 
-    virtual CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
+    CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
+    CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction) override;
 
-    virtual CallStateName QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType) override;
-    virtual CallStateName QosReserveFailed(
-            IN ISession* piSession, IN QosLossPolicy eNextAction) override;
-
-    virtual CallStateName SessionStarted(IN ISession* piSession) override;
-    virtual CallStateName SessionStartFailed(IN ISession* piSession) override;
-    virtual CallStateName SessionTerminated(IN ISession* piSession) override;
-    virtual CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
-    virtual CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
-    virtual CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
-    virtual CallStateName SessionForkedResponseReceived(
+    CallStateName SessionStarted(IN ISession* piSession) override;
+    CallStateName SessionStartFailed(IN ISession* piSession) override;
+    CallStateName SessionTerminated(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdated(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateFailed(IN ISession* piSession) override;
+    CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
+    CallStateName SessionForkedResponseReceived(
             IN ISession* piSession, IN ISession* piForkedSession) override;
-    virtual CallStateName SessionPRAckDelivered(IN ISession* piSession) override;
-    virtual CallStateName SessionPRAckDeliveryFailed(IN ISession* piSession) override;
-    virtual CallStateName SessionProvisionalResponseReceived(
+    CallStateName SessionPRAckDelivered(IN ISession* piSession) override;
+    CallStateName SessionPRAckDeliveryFailed(IN ISession* piSession) override;
+    CallStateName SessionProvisionalResponseReceived(
             IN ISession* piSession, IN IMS_UINT32 nIndex) override;
-    virtual CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
+    CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
 private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?
     void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
-    void HandleRetryAfter(IN const FailReason& objReason);
     IMS_BOOL IsRttCapable(IN IMessage* piMessage);
     void UpdateCallType(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bPeerView);
     void UpdateRemoteFeatures(IN IMessage* piMessage);
@@ -62,9 +59,12 @@ private:
     void OnStartFailed(IN ISession* piSession, IN const FailReason& objReason);
     void OnSessionForked(IN ISession* piOriginSession);
     void DeleteInactiveSessions();
+    CallStateName HandleSilentRetry(IN const FailReason& objReason);
+    CallStateName ContinueSilentRetry();
 
     IMSMap<ISession*, MtcSession*> m_objSessions;
     IMS_BOOL m_bRemoteAlerted;
+    IMS_SINT32 m_nSilentRedialCount;
 };
 
 #endif
