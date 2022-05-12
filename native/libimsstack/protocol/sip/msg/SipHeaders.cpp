@@ -17,9 +17,9 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipAllowEventsHeader::GetNewObj,                 // AllowEvent
         SipAuthBase::GetNewObj,                          // Authorization
         SipHeaderBase::GetNewObj,                        // CallId
-        SipContactHeader::GetNewObj,                     //    SipHeaderBase::CONTACT
-        SipContactHeader::GetNewObj,                     //    SipHeaderBase::CONTACT_WILD
-        SipContactHeader::GetNewObj,                     //    SipHeaderBase::CONTACT_ANY
+        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT
+        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_WILD
+        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::CONTACT_ANY
         SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_DISPOSITION
         SipHeaderBase::GetNewObj,                        //    SipHeaderBase::CONTENT_ENCODING
         SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::CONTENT_LENGTH
@@ -31,7 +31,7 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::EXPIRES_ANY
         SipAcceptHeader::GetNewObj,                      //     SipHeaderBase::ACCEPT
         SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MIN_EXPIRES //added
-        SipFromHeader::GetNewObj,                        //    SipHeaderBase::FROM
+        SipNameAddrHeader::GetNewObj,                    //    SipHeaderBase::FROM
         SipIntegerHeader::GetNewObj,                     //    SipHeaderBase::MAX_FORWARDS
         SipHeaderBase::GetNewObj,                        //    SipHeaderBase::MIME_VERSION,//20
         SipPrivacyHeader::GetNewObj,                     //    SipHeaderBase::PRIVACY,
@@ -48,8 +48,8 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::SERVICE_ROUTE,
         SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::HISTORY_INFO,
         SipRequestDispositionHeader::GetNewObj,      //    SipHeaderBase::REQUEST_DISPOSITION,
-        SipAcceptContactHeader::GetNewObj,           //    SipHeaderBase::ACCEPT_CONTACT,
-        SipRejectContactHeader::GetNewObj,           //    SipHeaderBase::REJECT_CONTACT,
+        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::ACCEPT_CONTACT,
+        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::REJECT_CONTACT,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::JOIN,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SIP_IF_MATCH,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SIP_ETAG,
@@ -70,7 +70,7 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUBSCRIPTION_STATE,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::SUPPORTED,
         SipTimeStampHeader::GetNewObj,               //    SipHeaderBase::TIMESTAMP,
-        SipToHeader::GetNewObj,                      //    SipHeaderBase::TO,
+        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::TO,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::UNSUPPORTED,
         SipViaHeader::GetNewObj,                     //    SipHeaderBase::VIA,
         SipWarningHeader::GetNewObj,                 //    SipHeaderBase::WARNING,//60
@@ -117,14 +117,14 @@ SipHeaderBase* (*gaFactoryArray[SipHeaderBase::TYPE_END + SIP_ONE])(SIP_INT32, S
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::TARGET_DIALOG,//100
         SipTriggerConsentHeader::GetNewObj,          //    SipHeaderBase::TRIGGER_CONSENT,
         SipUserAgentHeader::GetNewObj,               //    SipHeaderBase::USER_AGENT,
-        SipFeatureCapsHeader::GetNewObj,             //    SipHeaderBase::FEATURE_CAPS,
+        SipHeaderBase::GetNewObj,                    //    SipHeaderBase::FEATURE_CAPS,
         SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::GEOLOCATION,
         SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::GEOLOCATION_ERROR,
         SipGeolocationRoutingHeader::GetNewObj,      //    SipHeaderBase::GEOLOCATION_ROUTING,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::INFO_PACKAGE,//110
         SipIntegerHeader::GetNewObj,                 //    SipHeaderBase::MAX_BREADTH,
         SipPAssertedServiceHeader::GetNewObj,        //    SipHeaderBase::P_ASSERTED_SERVICE,
-        SipPolicyContactHeader::GetNewObj,           //    SipHeaderBase::POLICY_CONTACT,
+        SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::POLICY_CONTACT,
         SipNameAddrHeader::GetNewObj,                //    SipHeaderBase::POLICY_ID,
         SipPPreferredServiceHeader::GetNewObj,       //    SipHeaderBase::P_PREFERRED_SERVICE,
         SipHeaderBase::GetNewObj,                    //    SipHeaderBase::RECV_INFO,

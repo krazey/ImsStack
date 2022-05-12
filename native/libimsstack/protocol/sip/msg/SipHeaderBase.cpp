@@ -223,6 +223,16 @@ SIP_BOOL SipHeaderBase::IsValidHeader() const
 
 SIP_BOOL SipHeaderBase::SetValue(const SIP_CHAR* pszValue)
 {
+    if ((m_eHdrType == SipHeaderBase::ACCEPT_CONTACT) ||
+            (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
+            (m_eHdrType == SipHeaderBase::REJECT_CONTACT))
+    {
+        if ((pszValue != SIP_NULL) && (SipPf_Strcmp(pszValue, "*") != 0))
+        {
+            return SIP_FALSE;
+        }
+    }
+
     return SetCharVar(pszValue, m_pszValue);
 }
 
@@ -331,6 +341,17 @@ SIP_BOOL SipHeaderBase::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
     /*Now Decode the Value*/
     SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
+
+    if ((m_eHdrType == SipHeaderBase::ACCEPT_CONTACT) ||
+            (m_eHdrType == SipHeaderBase::FEATURE_CAPS) ||
+            (m_eHdrType == SipHeaderBase::REJECT_CONTACT))
+    {
+        if ((pszValue != SIP_NULL) && (SipPf_Strcmp(pszValue, "*") != 0))
+        {
+            return SIP_FALSE;
+        }
+    }
+
     if (SetValue(pszValue) == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation fail", SIP_ZERO, SIP_ZERO);
@@ -414,6 +435,20 @@ SipNameAddr* SipNameAddrHeader::GetNameAddr()
     return SIP_NULL;
 }
 
+SIP_CHAR* SipNameAddrHeader::GetTag()
+{
+    SipParameters* pParameters = GetParameters();
+
+    if (pParameters == SIP_NULL)
+    {
+        return SIP_NULL;
+    }
+
+    SipParameterList* pParameterList = pParameters->GetParameterList();
+
+    return (pParameterList != SIP_NULL) ? pParameterList->GetParamValue("tag") : SIP_NULL;
+}
+
 SIP_BOOL SipNameAddrHeader::IsValidComponent(const SIP_CHAR* pszComponent) const
 {
     SIP_INT32 eHdrType = GetHdrType();
@@ -443,7 +478,7 @@ SIP_BOOL SipNameAddrHeader::IsValidComponent(const SIP_CHAR* pszComponent) const
         }
         else if (SipPf_Stricmp(pszComponent, SIP_METHOD) == 0)
         {
-            return SIP_FALSE;
+            return SIP_TRUE;
         }
         else if (SipPf_Stricmp(pszComponent, SIP_MADDR_PRM) == 0)
         {
@@ -461,8 +496,7 @@ SIP_BOOL SipNameAddrHeader::IsValidComponent(const SIP_CHAR* pszComponent) const
         {
             return SIP_TRUE;
         }
-        else if ((eHdrType == SipHeaderBase::CONTACT) &&
-                (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0))
+        else if (SipPf_Stricmp(pszComponent, SIP_OTHER_PRM) == 0)
         {
             return SIP_TRUE;
         }
@@ -485,23 +519,6 @@ SIP_BOOL SipNameAddrHeader::IsPercentEncHdr() const
         return SIP_TRUE;
     }
     return SIP_FALSE;
-}
-
-SIP_BOOL SipNameAddrHeader::SetNameAddr(SipNameAddr* pSipNameAddr)
-{
-    if (pSipNameAddr == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    if (m_pNameAddr != SIP_NULL)
-    {
-        m_pNameAddr->SipDelete();
-    }
-
-    pSipNameAddr->increment();
-    m_pNameAddr = pSipNameAddr;
-    return SIP_TRUE;
 }
 
 SIP_BOOL SipNameAddrHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
@@ -550,6 +567,23 @@ SIP_BOOL SipNameAddrHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+
+    if (GetHdrType() == SipHeaderBase::CONTACT)
+    {
+        pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
+
+        if ((pStartPt == pEndPt) && (*pStartPt == ASTERISK))
+        {
+            if (SetValue("*") == SIP_FALSE)
+            {
+                SIP_DEBUG_WARNING(
+                        ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+                return SIP_FALSE;
+            }
+            return SIP_TRUE;
+        }
+    }
+
     SIP_CHAR* pTempPre = SIP_NULL;
     SIP_CHAR* pTempNext = SIP_NULL;
 

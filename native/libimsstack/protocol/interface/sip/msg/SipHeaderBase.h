@@ -185,9 +185,9 @@ public:
     SipNameAddrHeader(const SipNameAddrHeader& objSipNameAddrHeader);
     virtual ~SipNameAddrHeader();
     virtual SIP_BOOL IsValidComponent(const SIP_CHAR* pszComponent) const;
-    SIP_BOOL SetNameAddr(SipNameAddr* pSipNameAddr);
     SIP_BOOL SetAddrSpec(SipAddrSpec* pAddrSpec);
     SipNameAddr* GetNameAddr();
+    SIP_CHAR* GetTag();
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const override;
     virtual SIP_BOOL EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams = SIP_TRUE);
     virtual SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);

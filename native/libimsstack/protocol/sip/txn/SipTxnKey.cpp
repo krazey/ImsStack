@@ -147,7 +147,7 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     }
 
     /* Fetch To-Tag */
-    SipToHeader* pToHdr = (SipToHeader*)pSipMsg->GetHdrObj(SipHeaderBase::TO);
+    SipNameAddrHeader* pToHdr = (SipNameAddrHeader*)pSipMsg->GetHdrObj(SipHeaderBase::TO);
     if (pToHdr == SIP_NULL)
     {
         *pnError = EMSGERR_TOMISSING;
@@ -158,7 +158,7 @@ SipTxnKey::SipTxnKey(SipMessage* pSipMsg, SIP_UINT16* pnError) :
     pToHdr->SipDelete();
 
     /* Fetch From-Tag */
-    SipFromHeader* pFromHdr = (SipFromHeader*)pSipMsg->GetHdrObj(SipHeaderBase::FROM);
+    SipNameAddrHeader* pFromHdr = (SipNameAddrHeader*)pSipMsg->GetHdrObj(SipHeaderBase::FROM);
     if (pFromHdr == SIP_NULL)
     {
         *pnError = EMSGERR_FROMMISSING;

@@ -366,10 +366,10 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set 'From'     from INVITE Request */
-    SipFromHeader* pFromHdr = (SipFromHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::FROM);
+    SipNameAddrHeader* pFromHdr = (SipNameAddrHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::FROM);
     if (SIP_NULL != pFromHdr)
     {
-        SipFromHeader* pFrom = new SipFromHeader(*pFromHdr);
+        SipNameAddrHeader* pFrom = new SipNameAddrHeader(*pFromHdr);
         pFromHdr->SipDelete();
 
         bStatus = pSipAckMsg->SetHeader(pFrom);
@@ -409,10 +409,10 @@ SIP_BOOL SipTxn::PrepareACK(SipMessage* pSipRespMsg, /* IN */
     }
 
     /* Set 'To' from INVITE Response */
-    SipToHeader* pToHdr = (SipToHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::TO);
+    SipNameAddrHeader* pToHdr = (SipNameAddrHeader*)pSipRespMsg->GetHdrObj(SipHeaderBase::TO);
     if (pToHdr != SIP_NULL)
     {
-        SipToHeader* pTo = new SipToHeader(*pToHdr);
+        SipNameAddrHeader* pTo = new SipNameAddrHeader(*pToHdr);
         pToHdr->SipDelete();
 
         bStatus = pSipAckMsg->SetHeader(pTo);
