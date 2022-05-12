@@ -22,21 +22,6 @@
 
 class CodecEvsConfig : public CodecConfig
 {
-public:
-    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
-    static const IMS_BOOL NEED_TO_CHECK_B = IMS_FALSE;
-
-    static const IMS_SINT32 DEFAULT_CHANNEL = NEED_TO_CHECK_I;  // 1 == mono
-    static const IMS_BOOL DEFAULT_DTX = NEED_TO_CHECK_B;
-    static const IMS_BOOL DEFAULT_DTX_RECV = NEED_TO_CHECK_B;
-    static const IMS_SINT32 DEFAULT_HF_ONLY = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_BR_LIST = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_BW_LIST = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_CMR = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_CH_AW_RECV = NEED_TO_CHECK_I;
-    static const IMS_SINT32 DEFAULT_AMRWB_IO_MODESET = NEED_TO_CHECK_I;
-
 private:
     // EVS FrameType
     enum
@@ -77,6 +62,21 @@ public:
     };
 
 public:
+    static const IMS_SINT32 NEED_TO_CHECK_I = 0;
+
+    static const IMS_SINT32 DEFAULT_CHANNEL = 1;  // 1 == mono
+    static const IMS_BOOL DEFAULT_DTX = IMS_TRUE;
+    static const IMS_BOOL DEFAULT_DTX_RECV = IMS_TRUE;
+    static const IMS_SINT32 DEFAULT_HF_ONLY = 0;
+    static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = NEED_TO_CHECK_I;
+    static const IMS_SINT32 DEFAULT_BR_LIST = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
+    static const IMS_SINT32 DEFAULT_BW_LIST = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
+    static const IMS_SINT32 DEFAULT_CMR = 0;
+    static const IMS_SINT32 DEFAULT_CH_AW_RECV = 0;
+    static const IMS_SINT32 DEFAULT_AMRWB_IO_MODESET = NEED_TO_CHECK_I;
+    static const IMS_SINT32 CMR_NOT_PRESENT = -2;
+
+public:
     CodecEvsConfig(IN IMS_SINT32 nType_, IN IMS_SINT32 nPayloadTypeNum_);
     virtual ~CodecEvsConfig();
 
@@ -85,7 +85,7 @@ public:
     virtual void ToDebugString() const;
 
 private:
-    IMS_UINT32 ConvertEvsBitrateToList(IN IMSVector<IMS_SINT32> objBitrateList) const;
+    IMS_UINT32 ConvertEvsBitrateToList(IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd) const;
     IMS_UINT32 ConvertEvsBandwidthToList(IN AString strBandwidth) const;
     IMS_SINT32 GetEvsBandwidthFromList(IN IMS_UINT32 nBandwidthList) const;
     IMS_SINT32 GetEvsBitrateFromList(IN IMS_UINT32 nBitrateList) const;

@@ -173,6 +173,7 @@ public:
             DEFAULT_PTIME = -1,
             DEFAULT_MAXPTIME = -1,
             DEFAULT_DTX = 1,
+            DEFAULT_DTXRECV = 1,
             DEFAULT_HFMODE = 0,
             DEFAULT_EVSMODESWITCH = 0,
             DEFAULT_MAXRED = -1,
@@ -197,8 +198,8 @@ public:
         // Common parameter
         IMS_SINT32 nPtime;
         IMS_SINT32 nMaxPtime;
-        IMS_UINT32 nDtx;  // 1(default) is turn on DTX
-        // IMS_UINT32 nDtx_Recv;     // 1(default) is turn on DTX
+        IMS_UINT32 nDtx;            // 1(default) is turn on DTX
+        IMS_UINT32 nDtx_Recv;       // 1(default) is dependent on DTX
         IMS_UINT32 nHfOnly;         // 0(default) is compact and hf format used,
                                     // other is only hf format used
         IMS_UINT32 nEvsModeSwitch;  // 0(default) is "primary mode start"
@@ -249,6 +250,7 @@ public:
                 nPtime(DEFAULT_PTIME),
                 nMaxPtime(DEFAULT_MAXPTIME),
                 nDtx(DEFAULT_DTX),
+                nDtx_Recv(DEFAULT_DTXRECV),
                 nHfOnly(DEFAULT_HFMODE),
                 nEvsModeSwitch(DEFAULT_EVSMODESWITCH),
                 nMaxRed(DEFAULT_MAXRED),
@@ -287,6 +289,7 @@ public:
             this->nPtime = pFmtp->nPtime;
             this->nMaxPtime = pFmtp->nMaxPtime;
             this->nDtx = pFmtp->nDtx;
+            this->nDtx_Recv = pFmtp->nDtx_Recv;
             this->nHfOnly = pFmtp->nHfOnly;
             this->nEvsModeSwitch = pFmtp->nEvsModeSwitch;
             this->nMaxRed = pFmtp->nMaxRed;

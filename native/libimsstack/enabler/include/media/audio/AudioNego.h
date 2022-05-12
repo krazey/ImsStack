@@ -208,6 +208,7 @@ private:
     MEDIA_CONTENT_TYPE m_eSessionType;
     static const AString EVS_BR[12];
     static const AString EVS_BW[4];
+    static const AString EVS_BW_LIST[9];
 
 public:
     static const AString AUDIO_CODEC_BANDWIDTH_STRING[4];

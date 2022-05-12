@@ -86,16 +86,34 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     }
 
     m_nChannel = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CHANNELS_INT);
-    m_bDtx = piCcBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL);
-    m_bDtxRecv =
-            piCcBundle->GetBoolean(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL);
+    m_bDtx = piCcBundle->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_BOOL, IMS_TRUE);
+    m_bDtxRecv = piCcBundle->GetBoolean(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_DTX_RECV_BOOL, IMS_TRUE);
     m_nHfOnly = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_HF_ONLY_INT);
     m_nEvsModeSwitch =
             piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_MODE_SWITCH_INT);
-    m_nBrList = ConvertEvsBitrateToList(piCcBundle->GetIntArray(
-            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY));
-    m_nBwList = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT);
-    m_nCmr = piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT);
+    IMSVector<IMS_SINT32> objBitrateList = piCcBundle->GetIntArray(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BITRATE_INT_ARRAY);
+
+    IMS_SINT32 nBrStart = DEFAULT_BR_LIST;
+    IMS_SINT32 nBrEnd = DEFAULT_BR_LIST;
+
+    if (!objBitrateList.IsEmpty())
+    {
+        nBrStart = objBitrateList.GetAt(0);
+
+        if (objBitrateList.GetSize() > 1)
+        {
+            nBrEnd = objBitrateList.GetAt(1);
+        }
+    }
+
+    m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
+    m_nBwList = piCcBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT, DEFAULT_BW_LIST);
+    m_nCmr = piCcBundle->GetInt(
+            CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, CMR_NOT_PRESENT);
     m_nChAwRecv =
             piCcBundle->GetInt(CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CH_AW_RECV_INT);
     // TODO_MEDIA
@@ -121,23 +139,31 @@ PUBLIC VIRTUAL void CodecEvsConfig::ToDebugString() const
 
     IMS_TRACE_D("nChannel(%d), bDtx(%d), bDtxRecv(%d)", m_nChannel, m_bDtx, m_bDtxRecv);
     IMS_TRACE_D("nHfOnly(%d), nEvsModeSwitch(%d)", m_nHfOnly, m_nEvsModeSwitch, 0);
-    IMS_TRACE_D("nBrList(0x%04x), mBwList(0x%04x)", m_nBrList, m_nBwList, 0);
+    IMS_TRACE_D("nBrList(0x%04x), nBwList(%d)", m_nBrList, m_nBwList, 0);
     IMS_TRACE_D("nCmr(%d), nChAwRecv(%d), nModeSetList(%d)", m_nCmr, m_nChAwRecv, m_nModeSetList);
 }
 
 PRIVATE
-IMS_UINT32 CodecEvsConfig::ConvertEvsBitrateToList(IN IMSVector<IMS_SINT32> objBitrateList) const
+IMS_UINT32 CodecEvsConfig::ConvertEvsBitrateToList(
+        IN IMS_SINT32 nBrStart, IN IMS_SINT32 nBrEnd) const
 {
     IMS_SINT32 nBitrate = 0;
     IMS_UINT32 nBitrateSet = 0;
 
-    for (IMS_UINT32 i = 0; i < objBitrateList.GetSize(); ++i)
+    IMS_TRACE_D("ConvertEvsBitrateToList nBrStart(%d) nBrEnd(%d)", nBrStart, nBrEnd, 0);
+
+    if (nBrStart < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
+            nBrEnd < EVS_PRIMARY_MODE_BITRATE_5_9_KBPS ||
+            nBrStart > EVS_PRIMARY_MODE_BITRATE_128_0_KBPS ||
+            nBrEnd > EVS_PRIMARY_MODE_BITRATE_128_0_KBPS)
     {
-        nBitrate = objBitrateList.GetAt(i);
-        if (nBitrate < 0)
-        {
-            break;
-        }
+        nBrStart = DEFAULT_BR_LIST;
+        nBrEnd = DEFAULT_BR_LIST;
+    }
+
+    for (IMS_UINT32 i = nBrStart; i <= nBrEnd; i++)
+    {
+        nBitrate = i;
 
         IMS_TRACE_D("ConvertEvsBitrateToList nBitrate (%d) ", nBitrate, 0, 0);
         nBitrateSet = (nBitrateSet | (1 << nBitrate));

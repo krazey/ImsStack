@@ -31,11 +31,14 @@
 #define MAX_OAMODEL_SIZE     6
 #define EVS_BR_CNT           12
 #define EVS_BW_CNT           4
+#define EVS_BW_LIST_CNT      9
 
 __IMS_TRACE_TAG_USER_DECL__("MED.AN");
 const AString AudioNego::EVS_BR[EVS_BR_CNT] = {
         "5.9", "7.2", "8", "9.6", "13.2", "16.4", "24.4", "32", "48", "64", "96", "128"};
 const AString AudioNego::EVS_BW[EVS_BW_CNT] = {"nb", "wb", "swb", "fb"};
+const AString AudioNego::EVS_BW_LIST[EVS_BW_LIST_CNT] = {
+        "nb", "wb", "swb", "fb", "nb-wb", "nb-swb", "nb-fb", "wb-swb", "wb-fb"};
 const AString AudioNego::AUDIO_CODEC_BANDWIDTH_STRING[EVS_BW_CNT] = {"NB", "WB", "SWB", "FB"};
 const AString AudioNego::AUDIO_CODEC_BITRATE_STRING[3][9] = {
   // AMR NB
@@ -1260,8 +1263,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // octet-align
-            if (pAmrFmtp->nOctetAlign != AudioProfile::AmrFmtp::DEFAULT_OCTCTALIGN ||
-                    pAmrFmtp->bShow_OctetAlign == IMS_TRUE)
+            if (pAmrFmtp->bShow_OctetAlign == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1274,8 +1276,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // mode-cahnge-capability
-            if (pAmrFmtp->nModeChangeCapability == 2 ||
-                    pAmrFmtp->bShowModeChangeCapability == IMS_TRUE)
+            if (pAmrFmtp->bShowModeChangeCapability == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1288,7 +1289,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // mode-change-period
-            if (pAmrFmtp->nModeChangePeriod == 2 || pAmrFmtp->bShowModeChangePeriod == IMS_TRUE)
+            if (pAmrFmtp->bShowModeChangePeriod == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1301,9 +1302,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // mode-change-neighbor
-            if (pAmrFmtp->nModeChangeNeighbor !=
-                            AudioProfile::AmrFmtp::DEFAULT_MODECHANGE_NEIGHBOR ||
-                    pAmrFmtp->bShowModeChangeNeighbor == IMS_TRUE)
+            if (pAmrFmtp->bShowModeChangeNeighbor == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1316,8 +1315,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
             }
 
             // max-red
-            if (pAmrFmtp->nMaxRed != AudioProfile::AmrFmtp::DEFAULT_MAXRED ||
-                    pAmrFmtp->bShowMaxRed == IMS_TRUE)
+            if (pAmrFmtp->bShowMaxRed == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1329,6 +1327,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
 
+            /* TODO_MEDIA 26.114 mentioned it is needed, but no carrier wants this. so block these
+            // for now
             // ptime
             if (pAmrFmtp->nPtime != AudioProfile::AmrFmtp::DEFAULT_PTIME ||
                     pAmrFmtp->bShowPtime == IMS_TRUE)
@@ -1356,6 +1356,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strTemp.Sprintf("maxptime=%d", pAmrFmtp->nMaxPtime);
                 strFmtp.Append(strTemp);
             }
+            */
         }
         else if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
         {
@@ -1376,6 +1377,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 continue;
             }
 
+            /* TODO_MEDIA 26.114 mentioned it is needed, but no carrier wants this. so block these
+            // for now
             // ptime
             if (pEvsFmtp->nPtime != AudioProfile::EvsFmtp::DEFAULT_PTIME ||
                     pEvsFmtp->bShowPtime == IMS_TRUE)
@@ -1397,9 +1400,10 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strTemp.Sprintf("maxptime=%d", pEvsFmtp->nMaxPtime);
                 strFmtp.Append(strTemp);
             }
+            */
+
             // dtx
-            if (pEvsFmtp->nDtx != AudioProfile::EvsFmtp::DEFAULT_DTX ||
-                    pEvsFmtp->bShowDtx == IMS_TRUE)
+            if (pEvsFmtp->bShowDtx == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1410,9 +1414,8 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strTemp.Sprintf("dtx=%d", pEvsFmtp->nDtx);
                 strFmtp.Append(strTemp);
             }
-            // dtx
-            if (pEvsFmtp->nHfOnly != AudioProfile::EvsFmtp::DEFAULT_HFMODE ||
-                    pEvsFmtp->bShowHfOnly == IMS_TRUE)
+            // hf-only
+            if (pEvsFmtp->bShowHfOnly == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1424,8 +1427,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // evs mode switch
-            if (pEvsFmtp->nEvsModeSwitch != AudioProfile::EvsFmtp::DEFAULT_EVSMODESWITCH ||
-                    pEvsFmtp->bShowEvsModeSwitch == IMS_TRUE)
+            if (pEvsFmtp->bShowEvsModeSwitch == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1437,8 +1439,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // max-red
-            if (pEvsFmtp->nMaxRed != AudioProfile::EvsFmtp::DEFAULT_MAXRED ||
-                    pEvsFmtp->bShowMaxRed == IMS_TRUE)
+            if (pEvsFmtp->bShowMaxRed == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1450,50 +1451,19 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // bandwidth list
-            if ((pEvsFmtp->nBwList != 0) && (pEvsFmtp->bShowBwList))
+            if (pEvsFmtp->bShowBwList == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                 {
                     strFmtp.Append(";");
                 }
 
-                AString strTemp, strMode, strFirstBandwidth, strLastBandwidth;
-                IMS_UINT32 nBandwidthList;
-                IMS_UINT32 nBandwidthListTotalCnt = 0;
-
-                for (nBandwidthList = 0; nBandwidthList < EVS_BW_CNT; nBandwidthList++)
-                {
-                    IMS_UINT32 nMatch = (pEvsFmtp->nBwList) & (1 << nBandwidthList);
-                    if (nMatch)
-                    {
-                        if (strTemp.GetLength() > 0)
-                            strTemp.Append(",");
-                        strMode.Sprintf("%s", EVS_BW[nBandwidthList].GetStr());
-                        strTemp.Append(strMode);
-                        nBandwidthListTotalCnt++;
-
-                        if (nBandwidthListTotalCnt == 1)
-                        {
-                            strFirstBandwidth = EVS_BW[nBandwidthList];
-                        }
-
-                        strLastBandwidth = EVS_BW[nBandwidthList];
-                    }
-                }
-
-                if (nBandwidthListTotalCnt > 1)
-                {
-                    strTemp = "";
-                    strTemp.Append(strFirstBandwidth);
-                    strTemp.Append("-");
-                    strTemp.Append(strLastBandwidth);
-                }
-
+                AString strTemp;
                 strFmtp.Append("bw=");
-                strFmtp.Append(strTemp);
+                strFmtp.Append(EVS_BW_LIST[pEvsFmtp->nBwList]);
             }
             // bitrate list
-            if ((pEvsFmtp->nBrList != 0) && (pEvsFmtp->bShowBrList))
+            if (pEvsFmtp->bShowBrList == IMS_TRUE)
             {
                 if (strFmtp.GetLength() > 0)
                     strFmtp.Append(";");
@@ -1533,9 +1503,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // cmr
-            if ((pEvsFmtp->nCmr != AudioProfile::EvsFmtp::DEFAULT_CMR ||
-                        pEvsFmtp->bShowCmr == IMS_TRUE) &&
-                    (pEvsFmtp->nEvsModeSwitch != 1))
+            if (pEvsFmtp->bShowCmr == IMS_TRUE && pEvsFmtp->nEvsModeSwitch != 1)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1547,7 +1515,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // channel aware mode
-            if ((pEvsFmtp->bShowChannelAwMode == IMS_TRUE) && (pEvsFmtp->nEvsModeSwitch != 1))
+            if (pEvsFmtp->bShowChannelAwMode == IMS_TRUE && pEvsFmtp->nEvsModeSwitch != 1)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1587,10 +1555,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // mode change capa (AMR-IO mode)
-            if ((pEvsFmtp->nModeChangeCapability !=
-                                AudioProfile::EvsFmtp::DEFAULT_MODECHANGE_CAPABILITY ||
-                        pEvsFmtp->bShowModeChangeCapability == IMS_TRUE) &&
-                    (pEvsFmtp->nEvsModeSwitch == 1))
+            if (pEvsFmtp->bShowModeChangeCapability == IMS_TRUE && pEvsFmtp->nEvsModeSwitch == 1)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1602,9 +1567,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // mode change periode (AMR-IO mode)
-            if ((pEvsFmtp->nModeChangePeriod != AudioProfile::EvsFmtp::DEFAULT_MODECHANGE_PERIOD ||
-                        pEvsFmtp->bShowModeChangePeriod == IMS_TRUE) &&
-                    (pEvsFmtp->nEvsModeSwitch == 1))
+            if (pEvsFmtp->bShowModeChangePeriod == IMS_TRUE && pEvsFmtp->nEvsModeSwitch == 1)
             {
                 if (strFmtp.GetLength() > 0)
                 {
@@ -1616,10 +1579,7 @@ IMS_BOOL AudioNego::MakeSdpFromProfile(OUT ISessionDescriptor* pSessionDescripto
                 strFmtp.Append(strTemp);
             }
             // mode change neighbor (AMR-IO mode)
-            if ((pEvsFmtp->nModeChangeNeighbor !=
-                                AudioProfile::EvsFmtp::DEFAULT_MODECHANGE_NEIGHBOR ||
-                        pEvsFmtp->bShowModeChangeNeighbor == IMS_TRUE) &&
-                    (pEvsFmtp->nEvsModeSwitch == 1))
+            if (pEvsFmtp->bShowModeChangeNeighbor == IMS_TRUE && pEvsFmtp->nEvsModeSwitch == 1)
             {
                 if (strFmtp.GetLength() > 0)
                 {

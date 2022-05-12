@@ -300,21 +300,39 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
             pEvsFmtp->nBrList = pEvsConfig->GetBrList();
             pEvsFmtp->nBwList = pEvsConfig->GetBwList();
 
-            if (pConfig->GetModeChangeCapability() != -1)
+            if (pConfig->GetModeChangeCapability() == -1)  // Not Present
+            {
+                pEvsFmtp->nModeChangeCapability = AudioConfiguration::DEFAULT_MODECHANGE_CAPABILITY;
+            }
+            else
             {
                 pEvsFmtp->nModeChangeCapability = pConfig->GetModeChangeCapability();
                 pEvsFmtp->bShowModeChangeCapability = IMS_TRUE;
             }
-            if (pConfig->GetModeChangePeriod() != -1)
+
+            if (pConfig->GetModeChangePeriod() == -1)  // Not Present
+            {
+                pEvsFmtp->nModeChangePeriod = AudioConfiguration::DEFAULT_MODECHANGE_PERIOD;
+            }
+            else
             {
                 pEvsFmtp->nModeChangePeriod = pConfig->GetModeChangePeriod();
                 pEvsFmtp->bShowModeChangePeriod = IMS_TRUE;
             }
-            if (pConfig->GetModeChangeNeighbor() != -1)
+
+            if (pConfig->GetModeChangeNeighbor() == -1)  // Not Present
+            {
+                pEvsFmtp->nModeChangeNeighbor = AudioConfiguration::DEFAULT_MODECHANGE_NEIGHBOR;
+            }
+            else
             {
                 pEvsFmtp->nModeChangeNeighbor = pConfig->GetModeChangeNeighbor();
                 pEvsFmtp->bShowModeChangeNeighbor = IMS_TRUE;
             }
+
+            // TODO_MEDIA 26.114 mentioned it is needed, but no carrier wants this. so block these
+            // for now
+            /*
             if (pConfig->GetPtime() != -1)
             {
                 pEvsFmtp->nPtime = pConfig->GetPtime();
@@ -325,28 +343,46 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
                 pEvsFmtp->nMaxPtime = pConfig->GetMaxPtime();
                 pEvsFmtp->bShowMaxPtime = IMS_TRUE;
             }
+            */
             if (pConfig->GetMaxRed() != -1)
             {
                 pEvsFmtp->nMaxRed = pConfig->GetMaxRed();
                 pEvsFmtp->bShowMaxRed = IMS_TRUE;
             }
-            if (pEvsConfig->GetDtx() != -1)
+
+            pEvsFmtp->nDtx = pEvsConfig->GetDtx();
+            pEvsFmtp->bShowDtx = IMS_TRUE;
+
+            if (pEvsConfig->GetDtxRecv() == IMS_TRUE)  // true or Not Present
             {
-                pEvsFmtp->nDtx = pEvsConfig->GetDtx();
-                pEvsFmtp->bShowDtx = IMS_TRUE;
+                pEvsFmtp->nDtx_Recv = pEvsFmtp->nDtx;
             }
-            if (pEvsConfig->GetHfOnly() != -1)
+            else
+            {
+                pEvsFmtp->nDtx_Recv = pEvsConfig->GetDtxRecv();
+            }
+
+            if (pEvsConfig->GetHfOnly() == -1)  // Not Present
+            {
+                pEvsFmtp->nHfOnly = CodecEvsConfig::DEFAULT_HF_ONLY;
+            }
+            else
             {
                 pEvsFmtp->nHfOnly = pEvsConfig->GetHfOnly();
                 pEvsFmtp->bShowHfOnly = IMS_TRUE;
             }
+
             if (pEvsConfig->GetEvsModeSwitch() != -1)
             {
                 pEvsFmtp->nEvsModeSwitch = pEvsConfig->GetEvsModeSwitch();
                 pEvsFmtp->bShowEvsModeSwitch = IMS_TRUE;
             }
-            // TODO_MEDIA need to check carrier requirements regarding adding cmr= to SDP.
-            //            if (pEvsConfig->GetCmr() != -1)
+
+            if (pEvsConfig->GetCmr() == CodecEvsConfig::CMR_NOT_PRESENT)
+            {
+                pEvsFmtp->nCmr = CodecEvsConfig::DEFAULT_CMR;
+            }
+            else
             {
                 pEvsFmtp->nCmr = pEvsConfig->GetCmr();
                 pEvsFmtp->bShowCmr = IMS_TRUE;

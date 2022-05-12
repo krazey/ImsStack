@@ -45,8 +45,7 @@ AudioMediaSession::AudioMediaSession(IN IMS_SINT32 nSlotId) :
     IMS_TRACE_D("+AudioMediaSession()", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL
-AudioMediaSession::~AudioMediaSession()
+PUBLIC VIRTUAL AudioMediaSession::~AudioMediaSession()
 {
     IMS_TRACE_I("~AudioMediaSession()", 0, 0, 0);
 }
@@ -280,6 +279,9 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         // AMR DTX on/off by source codec
         m_objAudioConfig.setDtxEnabled((IMS_BOOL)pFmtp->nDtx);
 
+        // TODO_MEDIA need to add DtxRecv
+        // m_objAudioConfig.setDtxRecvEnabled((IMS_BOOL)pFmtp->nDtxRecv);
+
         EvsParams* pEvsParams = new EvsParams();
         pEvsParams->setChannelAwareMode((int8_t)pFmtp->nChAwRecv);
 
@@ -409,8 +411,8 @@ IMS_BOOL AudioMediaSession::IsDirectionHold()
 {
     IMS_UINT32 nDirection = m_objAudioConfig.getMediaDirection();
     IMS_TRACE_D("IsDirectionHold() - m_objAudioConfig direction[%d]", nDirection, 0, 0);
-    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE) ? IMS_FALSE :
-        IMS_TRUE;
+    return (nDirection == (IMS_UINT32)RtpConfig::MEDIA_DIRECTION_TRANSMIT_RECEIVE) ? IMS_FALSE
+                                                                                   : IMS_TRUE;
 }
 
 PUBLIC
