@@ -17,7 +17,8 @@
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.PersistableBundle;
-import android.util.Log;
+
+import com.android.imsstack.util.ImsLog;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,19 +35,20 @@ public class DataContainer {
     public  static final int VERSION_UNKNOWN = -99;
     public  static final long VALIDITY_UNKNOWN = -99L;
 
-    private static final String TAG = DataContainer.class.getSimpleName();
     private static final String LOCAL_FILE_NAME_PREF = "rcs_provisioning_data_";
     private static final String VERSION = "version";
     private static final String VALIDITY = "validity";
 
     private final Context mContext;
+    private final int mSlotId;
     private final int mSubId;
     private final String mFileName;
 
     private PersistableBundle mProvisioningData;
 
-    public DataContainer(Context context, int subId) {
+    public DataContainer(Context context, int slotId, int subId) {
         mContext = context;
+        mSlotId = slotId;
         mSubId = subId;
 
         mFileName = LOCAL_FILE_NAME_PREF + subId + ".xml";
@@ -63,7 +65,7 @@ public class DataContainer {
             return new PersistableBundle(mProvisioningData);
         }
 
-        loge("getProvisioningData : but provisioning data is empty.");
+        ImsLog.e("[" + mSlotId + "] " + "provisioning data is empty.");
 
         return null;
     }
@@ -78,7 +80,7 @@ public class DataContainer {
         if (mProvisioningData != null) {
             saveDataToFile();
         } else {
-            log("setProvisioningData : creating failed");
+            ImsLog.i("creating failed");
         }
     }
 
@@ -112,14 +114,14 @@ public class DataContainer {
      */
     public boolean updateVersionValidity(String data) {
         if (!isValidProvisioning()) {
-            log("updateVersionValidity : provisioning data is empty");
+            ImsLog.i("[" + mSlotId + "] " + "provisioning data is empty");
             return false;
         }
 
         // create new PersistableBundle from string
         PersistableBundle newProvisioningData = createPersistableBundleFromString(data);
         if (newProvisioningData == null) {
-            log("updateVersionValidity : create PersistableBundle failed from String");
+            ImsLog.i("[" + mSlotId + "] " + "create PersistableBundle failed from String");
             return false;
         }
 
@@ -128,11 +130,11 @@ public class DataContainer {
         long validity = getValidity(newProvisioningData);
         if (version != VERSION_UNKNOWN && validity != VALIDITY_UNKNOWN) {
             // update version at exist Provisioning data
-            log("updateVersionValidity : " + version + " " + validity);
+            ImsLog.i("[" + mSlotId + "] " + "updateVersionValidity : " + version + " " + validity);
             return setVersionValidity(version, validity);
         }
 
-        log("updateVersionValidity : update version failed");
+        ImsLog.i("[" + mSlotId + "] " + "update version failed");
         return false;
     }
 
@@ -160,15 +162,15 @@ public class DataContainer {
             mProvisioningData = PersistableBundle.readFromStream(inputStream);
             inputStream.close();
         } catch (FileNotFoundException e) {
-            log("readDataFromFile" + e.getMessage());
+            ImsLog.e("[" + mSlotId + "] " + e.getMessage());
         } catch (IOException e) {
-            log("readDataFromFile" + e.getMessage());
+            ImsLog.e("[" + mSlotId + "] " + e.getMessage());
         }
     }
 
     private void saveDataToFile() {
         if (!isValidProvisioning()) {
-            log("saveDataToFile : provisioning data is empty");
+            ImsLog.i("[" + mSlotId + "] " + "provisioning data is empty");
             return;
         }
 
@@ -177,9 +179,9 @@ public class DataContainer {
             FileOutputStream outputStream = new FileOutputStream(file);
             mProvisioningData.writeToStream(outputStream);
             outputStream.close();
-            log("saveDataToFile : " + mFileName);
+            ImsLog.d("[" + mSlotId + "] " + "file name : " + mFileName);
         } catch (IOException e) {
-            log("saveDataToFile : " + e.getMessage());
+            ImsLog.e("[" + mSlotId + "] " + e.getMessage());
         }
     }
 
@@ -191,7 +193,7 @@ public class DataContainer {
             inputStream.close();
             return out;
         } catch (IOException e) {
-            loge("createPersistableBundleFromString" + e.getMessage());
+            ImsLog.e("[" + mSlotId + "] " + "createPersistableBundleFromString" + e.getMessage());
         }
 
         return null;
@@ -245,13 +247,5 @@ public class DataContainer {
         }
 
         return false;
-    }
-
-    private void log(String msg) {
-        Log.d(TAG, "[" + mSubId + "] " + msg);
-    }
-
-    private void loge(String msg) {
-        Log.e(TAG, "[" + mSubId + "] " + msg);
     }
 }

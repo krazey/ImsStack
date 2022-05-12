@@ -30,7 +30,6 @@ import java.net.URLEncoder;
  * This class handles the HTTP and HTTPS Request URI for ACS request
  */
 public class RequestUri {
-    private static final String TAG = RequestUri.class.getSimpleName();
     private static final String DEFAULT_CHAT_SET = "UTF-8";
     private static final String PROTOCOL_HTTP = "http://";
     private static final String PROTOCOL_HTTPS = "https://";
@@ -107,7 +106,7 @@ public class RequestUri {
 
         try {
             url = new URL(PROTOCOL_HTTP + getAbsoluteUri());
-            ImsLog.d("URL : " + url.toString());
+            ImsLog.d("[" + mSlotId + "] " + "URL : " + url.toString());
         } catch (MalformedURLException e) {
             ImsLog.e(e.getMessage());
         }
@@ -124,7 +123,7 @@ public class RequestUri {
 
         try {
             url = new URL(PROTOCOL_HTTPS + getAbsoluteUri() + encodeParameters());
-            ImsLog.d("URL : " + url.toString());
+            ImsLog.d("[" + mSlotId + "] " + "URL : " + url.toString());
         } catch (MalformedURLException e) {
             ImsLog.e(e.getMessage());
         }
@@ -232,7 +231,7 @@ public class RequestUri {
                     URLEncoder.encode(mDefaultVvmApp, DEFAULT_CHAT_SET)));
 
         } catch (UnsupportedEncodingException e) {
-            ImsLog.e("encodeParameters : " + e.getMessage());
+            ImsLog.e("[" + mSlotId + "] " + "encodeParameters : " + e.getMessage());
             encodeParam = "";
         }
 
