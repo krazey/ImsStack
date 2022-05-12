@@ -357,6 +357,10 @@ PUBLIC VIRTUAL void AosRegistration::RequestCmd(
             ReportRegState();
             break;
 
+        case CMD_UNAVAILABLE_FEATURE_TAG:
+            UpdateDetailState(GetState());
+            break;
+
         default:
             break;
     }
@@ -905,7 +909,8 @@ IMS_UINT32 AosRegistration::GetRegFeatures()
 
         if (piHandle->GetRequestType() == IAosHandle::ATTACH && piHandle->IsRegBinded())
         {
-            nFeatures |= piHandle->GetBindedFeatureTagList().GetFeatures();
+            nFeatures |= (piHandle->GetBindedFeatureTagList().GetFeatures()) &
+                    (~piHandle->GetBindedFeatureTagList().GetUnavailableFeatures());
         }
     }
 
@@ -1901,7 +1906,7 @@ PROTECTED VIRTUAL void AosRegistration::AddFeatureTag(IN IAosHandle* piHandle)
     {
         AosFeatureTagList& objBindedList = piHandle->GetBindedFeatureTagList();
         objBindedList.Clear();
-        objBindedList.CopyFeatures(objList.GetFeatures());
+        objBindedList.CopyFeatures(objList);
     }
 
     if (piHandle->GetServiceType() == ImsAosService::MTC ||

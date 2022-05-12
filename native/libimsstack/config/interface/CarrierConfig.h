@@ -314,15 +314,17 @@ public:
         // Registration With Feature Tag Unavailable
         enum
         {
-            UNAVAILABLE_FEATRE_TYPE_MMTEL = 1,
-            UNAVAILABLE_FEATRE_TYPE_SMS = 2
+            UNAVAILABLE_FEATURE_TYPE_MMTEL = 1,
+            UNAVAILABLE_FEATURE_TYPE_VIDEO = 2,
+            UNAVAILABLE_FEATURE_TYPE_SMS = 3
         };
 
         // Registration With Feature Tag Policy Unavailable
         enum
         {
-            UNAVAILABLE_FEATRE_POLICY_VOPS = 1,
-            UNAVAILABLE_FEATRE_POLICY_3G = 2
+            UNAVAILABLE_FEATURE_POLICY_VOPS = 1,
+            UNAVAILABLE_FEATURE_POLICY_CAPABILITY = 2,
+            UNAVAILABLE_FEATURE_POLICY_3G = 3
         };
     };
 

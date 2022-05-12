@@ -68,26 +68,32 @@ public:
     void AddFeature(IN IMS_UINT32 nFeature);
     void RemoveFeature(IN IMS_UINT32 nFeature);
 
+    void AddUnavailableFeature(IN IMS_UINT32 nFeature);
+    void RemoveUnavailableFeature(IN IMS_UINT32 nFeature);
+
     IMS_UINT32 GetFeatures();
+    IMS_UINT32 GetUnavailableFeatures();
     void ClearFeatures();
     void ClearFeatureTags();
     void Clear();
 
     IMS_BOOL Equals(IN AosFeatureTagList& objTargetList);
     void Copy(IN AosFeatureTagList& objSourceList);
-    void CopyFeatures(IN IMS_UINT32 nFeatures);
+    void CopyFeatures(IN AosFeatureTagList& objSourceList);
     void CopyFeatureTags(IN IMSList<ImsAosFeatureTag*>& objFeatureTag);
 
     IMS_UINT32 GetSize();
     AosFeatureTag* GetAt(IN IMS_UINT32 nIndex);
 
-    IMS_BOOL HasFeature(IN IMS_UINT32 nFeature);
-    IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue);
+    IMS_BOOL HasUnavailableFeature(IN IMS_UINT32 nFeature) const;
+    IMS_BOOL HasFeature(IN IMS_UINT32 nFeature) const;
+    IMS_BOOL HasFeatureTag(IN const AString& strName, IN const AString& strValue) const;
 
     void PrintFeatureTagList();
 
 private:
     IMSList<AosFeatureTag*> m_objFeatureTagList;
     IMS_UINT32 m_nFeatures;
+    IMS_UINT32 m_nUnavailableFeatures;
 };
 #endif  // AOS_FEATURE_TAG_H_

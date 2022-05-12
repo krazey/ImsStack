@@ -153,7 +153,8 @@ Remarks
 */
 PUBLIC
 AosFeatureTagList::AosFeatureTagList() :
-        m_nFeatures(ImsAosFeature::NONE)
+        m_nFeatures(ImsAosFeature::NONE),
+        m_nUnavailableFeatures(ImsAosFeature::NONE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : AosFeatureTagList = %" PFLS_u "/%" PFLS_x,
             sizeof(AosFeatureTagList), this, 0);
@@ -263,6 +264,28 @@ Remarks
 
 */
 PUBLIC
+void AosFeatureTagList::AddUnavailableFeature(IN IMS_UINT32 nFeature)
+{
+    m_nUnavailableFeatures |= nFeature;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
+void AosFeatureTagList::RemoveUnavailableFeature(IN IMS_UINT32 nFeature)
+{
+    m_nUnavailableFeatures &= ~(nFeature);
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
 IMS_UINT32 AosFeatureTagList::GetFeatures()
 {
     return m_nFeatures;
@@ -274,9 +297,21 @@ Remarks
 
 */
 PUBLIC
+IMS_UINT32 AosFeatureTagList::GetUnavailableFeatures()
+{
+    return m_nUnavailableFeatures;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
 void AosFeatureTagList::ClearFeatures()
 {
     m_nFeatures = ImsAosFeature::NONE;
+    m_nUnavailableFeatures = ImsAosFeature::NONE;
 }
 
 /*
@@ -403,7 +438,7 @@ void AosFeatureTagList::Copy(IN AosFeatureTagList& objSourceList)
                 pFeatureTag->GetOption());
     }
 
-    CopyFeatures(objSourceList.GetFeatures());
+    CopyFeatures(objSourceList);
 }
 
 /*
@@ -412,9 +447,10 @@ Remarks
 
 */
 PUBLIC
-void AosFeatureTagList::CopyFeatures(IN IMS_UINT32 nFeatures)
+void AosFeatureTagList::CopyFeatures(IN AosFeatureTagList& objSourceList)
 {
-    m_nFeatures = nFeatures;
+    m_nFeatures = objSourceList.m_nFeatures;
+    m_nUnavailableFeatures = objSourceList.m_nUnavailableFeatures;
 }
 
 /*
@@ -463,7 +499,18 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTagList::HasFeature(IN IMS_UINT32 nFeature)
+IMS_BOOL AosFeatureTagList::HasUnavailableFeature(IN IMS_UINT32 nFeature) const
+{
+    return (m_nUnavailableFeatures & nFeature) > 0;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC
+IMS_BOOL AosFeatureTagList::HasFeature(IN IMS_UINT32 nFeature) const
 {
     return (m_nFeatures & nFeature) > 0;
 }
@@ -474,7 +521,8 @@ Remarks
 
 */
 PUBLIC
-IMS_BOOL AosFeatureTagList::HasFeatureTag(IN const AString& strName, IN const AString& strValue)
+IMS_BOOL AosFeatureTagList::HasFeatureTag(
+        IN const AString& strName, IN const AString& strValue) const
 {
     IMS_TRACE_I("HasFeatureTag :: name(%s) , value(%s)", strName.GetStr(), strValue.GetStr(), 0);
 

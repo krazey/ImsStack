@@ -28,6 +28,7 @@
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
     <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
+    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
 
    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
      <int-array name="specific_registration_error_code_int_array" num="2">
@@ -59,6 +60,15 @@
     <int-array name="permanent_pdn_failure_int_array" num="2">
         <item value="28"/>
         <item value="33"/>
+    </int-array>
+
+    <!-- KEY_REGISTRATION_WITH_FEATURE_TAG_UNAVAILABLE_BUNDLE -->
+    <int-array name="registration_with_feature_tag_unavailable_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+    <int-array name="registration_with_feature_tag_unavailable_policy_int_array" num="2">
+        <item value="1"/>
+        <item value="2"/>
     </int-array>
 
     <!-- Ut/Xcap AOSP -->
