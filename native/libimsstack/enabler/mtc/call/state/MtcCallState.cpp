@@ -525,9 +525,10 @@ IMS_RESULT MtcCallState::SendProvisionalResponse(IN IMS_BOOL bUserAlert)
 
     // TODO: determine the response code based on the configuration for KR carriers?
     IMS_SINT32 nStatusCode = bUserAlert ? SipStatusCode::SC_180 : SipStatusCode::SC_183;
+    IMS_BOOL bIncludeSdp = (eSetSdpResult == ResultSetSdp::SUCCESS) ? IMS_TRUE : IMS_FALSE;
 
     return m_objContext.GetSession()->GetMessageSender().SendProvisionalResponse(
-            nStatusCode, IsRprSupported(), eSetSdpResult == ResultSetSdp::SUCCESS, IsCallWaiting());
+            nStatusCode, IsNeedToReliable(bIncludeSdp), bIncludeSdp, IsCallWaiting());
 }
 
 PROTECTED
@@ -820,6 +821,27 @@ IMS_BOOL MtcCallState::IsCallWaiting() const
         {
             return IMS_TRUE;
         }
+    }
+
+    return IMS_FALSE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
+{
+    if (!IsRprSupported())
+    {
+        return IMS_FALSE;
+    }
+
+    if (bIncludeSdp)
+    {
+        return IMS_TRUE;
+    }
+
+    if (m_objContext.GetConfigurationProxy().Is(Feature::PRACK_SUPPORTED_FOR_18X))
+    {
+        return IMS_TRUE;
     }
 
     return IMS_FALSE;
