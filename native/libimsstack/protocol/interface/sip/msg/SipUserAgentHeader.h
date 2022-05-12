@@ -25,8 +25,6 @@ public:
     /*Function for decoding of headers*/
     SIP_BOOL DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
-    /*Sets */
-    SIP_BOOL AddProductNameVer(const SIP_CHAR* pszProduct);
     inline SIP_BOOL IsValidHeader() const
     {
         return (m_objProductList.IsEmpty() == SIP_FALSE) ? SIP_TRUE : SIP_FALSE;

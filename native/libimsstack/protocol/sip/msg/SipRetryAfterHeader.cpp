@@ -100,9 +100,15 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     SIP_BOOL bStatus = FindComment(pStartPt, pEndPt, pCommentStart, pCommentEnd);
 
+    if (bStatus == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid comment", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
+    }
+
     if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
     {
-        if (((bStatus == SIP_TRUE) && ((pTempPre + 1) > pCommentEnd)) || (bStatus == SIP_FALSE))
+        if ((pCommentEnd == SIP_NULL) || ((pTempPre + 1) > pCommentEnd))
         {
             if (DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI) == SIP_FALSE)
             {
@@ -116,7 +122,7 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     else
     {
         // if there is some extra string after comment ends
-        if ((bStatus == SIP_TRUE) && (pCommentEnd != pEndPt))
+        if ((pCommentEnd != SIP_NULL) && (pCommentEnd != pEndPt))
         {
             return SIP_FALSE;
         }
@@ -125,16 +131,25 @@ SIP_BOOL SipRetryAfterHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     // if comment exists
     if (pCommentStart != SIP_NULL)
     {
-        m_pszComment = sipCreateString(pCommentStart, pCommentEnd);
+        if ((pCommentStart + SIP_ONE) == pCommentEnd)
+        {
+            SetCharVar("", m_pszComment);
+        }
+        else
+        {
+            m_pszComment = sipCreateString(pCommentStart + SIP_ONE, pCommentEnd - SIP_ONE);
+        }
+
         if (m_pszComment == SIP_NULL)
         {
             SIP_DEBUG_WARNING(
                     ESIPTRACE_MODDECODER, "DecodeHdr:Memory Allocation failed", SIP_ZERO, SIP_ZERO);
             return SIP_FALSE;
         }
-        pEndPt = pCommentStart - 2;
+        pEndPt = pCommentStart - 1;
     }
 
+    pEndPt = sipSkipRwLWS(pStartPt, pEndPt);
     /*Now decode the delta sec value*/
     SIP_CHAR* pszValue = sipCreateString(pStartPt, pEndPt);
     if (pszValue == SIP_NULL)

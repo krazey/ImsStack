@@ -90,25 +90,6 @@ SIP_BOOL SipUserAgentHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     return SIP_TRUE;
 }
 
-/*Sets */
-SIP_BOOL SipUserAgentHeader::AddProductNameVer(const SIP_CHAR* pszProduct)
-{
-    if (pszProduct == SIP_NULL)
-    {
-        return SIP_FALSE;
-    }
-
-    SIP_CHAR* pszTempProduct = SipPf_Strdup(pszProduct);
-    if (pszTempProduct == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Malloc Failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    m_objProductList.Add(pszTempProduct);
-
-    return SIP_TRUE;
-}
-
 /******************************************************************************
  * Function name      : SipUserAgentHeader::DecodeHdr
  *
@@ -135,14 +116,20 @@ SIP_BOOL SipUserAgentHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     {
         SIP_BOOL bStatus = FindComment(pStartPt, pEndPt, pCommentStart, pCommentEnd);
 
+        if (bStatus == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid comment", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
         if (sipFindLWS(pStartPt, pEndPt, &pTempPos) == SIP_FALSE)
         {
             pTempPos = pEndPt;
         }
 
         // check LWS is between comment
-        if (bStatus == SIP_TRUE &&
-                (pCommentStart < (pTempPos) && (pTempPos) < pCommentEnd) == SIP_TRUE)
+        if ((pCommentStart != SIP_NULL) &&
+                ((pCommentStart < pTempPos) && (pTempPos < pCommentEnd)) == SIP_TRUE)
         {
             pStartPt = pCommentStart;
             pTempPos = pCommentEnd;

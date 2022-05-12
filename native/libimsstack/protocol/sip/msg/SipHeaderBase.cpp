@@ -205,11 +205,20 @@ SIP_BOOL SipHeaderBase::FindComment(
                 pszCommentEnd = pszCurrent;
                 return SIP_TRUE;
             }
+            if (nCount < 0)
+            {
+                break;
+            }
         }
         pszCurrent++;
     }
 
-    return SIP_FALSE;
+    if (nCount != 0)
+    {
+        return SIP_FALSE;
+    }
+
+    return SIP_TRUE;
 }
 
 SIP_BOOL SipHeaderBase::IsValidHeader() const
