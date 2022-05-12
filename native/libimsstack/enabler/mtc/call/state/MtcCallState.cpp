@@ -591,7 +591,7 @@ CallStateName MtcCallState::RejectIncomingAndToTerminating(IN const FailReason& 
 PROTECTED
 void MtcCallState::SendPreIncomingCallReceived()
 {
-    IMS_TRACE_D("SendIncomingCallReceived", 0, 0, 0);
+    IMS_TRACE_D("SendPreIncomingCallReceived", 0, 0, 0);
 
     m_objContext.GetUiNotifier().SendPreIncomingCallReceived(m_objContext.GetCallKey());
 }

@@ -50,7 +50,6 @@ public class IUMtcCall {
     public static final int INCOMING_RESUME         = (EVENT_I2U + 16);
     public static final int SET_PROPERTY            = (EVENT_I2U + 17);
     public static final int INCOMING_CALL_RECEIVED  = (EVENT_I2U + 18);
-    public static final int NOTIFY_REMOTE_MEDIA     = (EVENT_I2U + 19);
 
     public static final int ECT_COMPLETED           = (EVENT_I2U + 61);
     public static final int REPLACED_BY             = (EVENT_I2U + 62);

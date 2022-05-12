@@ -420,6 +420,13 @@ public class ImsCallManager {
     private void onCallDestroy(ImsCallSessionImpl session) {
         String key = session.getCallId();
 
+        synchronized (mPendingSessions) {
+            if (mPendingSessions.containsKey(key)) {
+                removePendingSession(session);
+                return;
+            }
+        }
+
         synchronized (mSessions) {
             ImsCallSessionImpl s = mSessions.remove(key);
 
