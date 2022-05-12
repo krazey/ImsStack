@@ -26,9 +26,9 @@ public:
             m_objRetryPublishResponse(IMSVector<IMS_SINT32>()),
             m_nRetryPublishResponseMaxCount(0),
             m_nRetryPublishResponseTimeSec(0),
-            m_objExponentialRetryPublishResponse(IMSVector<IMS_SINT32>()),
-            m_nExponentialRetryPublishResponseMaxCount(0),
-            m_objExponentialRetryPublishResponseTimeSec(IMSVector<IMS_SINT32>()),
+            m_objVariableRetryPublishResponse(IMSVector<IMS_SINT32>()),
+            m_nVariableRetryPublishResponseMaxCount(0),
+            m_objVariableRetryPublishResponseTimeSec(IMSVector<IMS_SINT32>()),
             m_objReAttemptRegistrationPublishResponse(IMSVector<IMS_SINT32>()),
             m_objReAttemptRegistrationSubscribeResponse(IMSVector<IMS_SINT32>())
     {
@@ -36,9 +36,9 @@ public:
 
         m_objRetryPublishResponse.Push(0);
 
-        m_objExponentialRetryPublishResponse.Push(0);
+        m_objVariableRetryPublishResponse.Push(0);
 
-        m_objExponentialRetryPublishResponseTimeSec.Push(0);
+        m_objVariableRetryPublishResponseTimeSec.Push(0);
 
         m_objReAttemptRegistrationPublishResponse.Push(403);
 
@@ -63,9 +63,9 @@ public:
     IMSVector<IMS_SINT32> m_objRetryPublishResponse;
     IMS_UINT32 m_nRetryPublishResponseMaxCount;
     IMS_UINT32 m_nRetryPublishResponseTimeSec;
-    IMSVector<IMS_SINT32> m_objExponentialRetryPublishResponse;
-    IMS_UINT32 m_nExponentialRetryPublishResponseMaxCount;
-    IMSVector<IMS_SINT32> m_objExponentialRetryPublishResponseTimeSec;
+    IMSVector<IMS_SINT32> m_objVariableRetryPublishResponse;
+    IMS_UINT32 m_nVariableRetryPublishResponseMaxCount;
+    IMSVector<IMS_SINT32> m_objVariableRetryPublishResponseTimeSec;
     IMSVector<IMS_SINT32> m_objReAttemptRegistrationPublishResponse;
     IMSVector<IMS_SINT32> m_objReAttemptRegistrationSubscribeResponse;
 };

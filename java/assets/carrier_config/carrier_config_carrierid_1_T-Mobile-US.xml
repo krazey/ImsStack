@@ -32,7 +32,37 @@
         <item value="421"/>
         <item value="422"/>
     </int-array>
-
+    <!-- Uce -->
+    <int name="imsuce.publish_refresh_ratio_int" value="85"/>
+    <boolean name="imsuce.subscribe_independent_of_publish_bool" value="true"/>
+    <boolean name="imsuce.encode_publish_body_bool" value="true"/>
+    <boolean name="imsuce.use_contact_header_in_publish_bool" value="true"/>
+    <boolean name="imsuce.use_contact_header_in_subscribe_bool" value="true"/>
+    <int-array name="imsuce.immediately_retry_publish_response_int_array" num="5">
+        <item value="400"/>
+        <item value="412"/>
+        <item value="415"/>
+        <item value="423"/>
+        <item value="489"/>
+    </int-array>
+    <int-array name="imsuce.fixed_time_retry_publish_response_int_array" num="8">
+        <item value="404"/>
+        <item value="413"/>
+        <item value="480"/>
+        <item value="486"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="600"/>
+        <item value="603"/>
+    </int-array>
+    <int name="imsuce.fixed_time_retry_publish_response_max_count_int" value="3"/>
+    <int name="imsuce.fixed_time_retry_publish_response_time_sec_int" value="3600"/>
+    <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_policy_int" value="3"/>
     <int-array name="specific_registration_error_number_multiplied_by_pcscf_number_int_array" num="2">

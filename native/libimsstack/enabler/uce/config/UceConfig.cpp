@@ -111,8 +111,8 @@ IMS_UINT32 UceConfig::GetIntValue(IN KEY_UCE_INT eKey, IN IMS_SINT32 nSimSlot)
         case KEY_RETRY_PUBLISH_RESPONSE_TIME_SEC:
             nRet = objUceAssetItems->m_nRetryPublishResponseTimeSec;
             break;
-        case KEY_EXPONENTIAL_RETRY_PUBLISH_RESPONSE_MAX_COUNT:
-            nRet = objUceAssetItems->m_nExponentialRetryPublishResponseMaxCount;
+        case KEY_VARIABLE_RETRY_PUBLISH_RESPONSE_MAX_COUNT:
+            nRet = objUceAssetItems->m_nVariableRetryPublishResponseMaxCount;
             break;
     }
     IMS_TRACE_D("GetIntValue:simSlot[%d], key[%s], value[%d]", nSimSlot, GetKeyString(eKey), nRet);
@@ -161,7 +161,7 @@ IMSVector<IMS_SINT32> UceConfig::GetExponentialRetryPublishRespTimeArray(IN IMS_
         return IMSVector<IMS_SINT32>();
     }
     IMSVector<IMS_SINT32> objExponentialRetryPublishResponseTimeSec =
-            m_objAssetMap.GetValue(nSimSlot)->m_objExponentialRetryPublishResponseTimeSec;
+            m_objAssetMap.GetValue(nSimSlot)->m_objVariableRetryPublishResponseTimeSec;
     return objExponentialRetryPublishResponseTimeSec;
 }
 
@@ -202,7 +202,7 @@ IMS_UINT32 UceConfig::GetPublishRetryType(IN IMS_SINT32 nResponseCode, IN IMS_SI
         }
     }
 
-    temporary = objUceAssetItems->m_objExponentialRetryPublishResponse;
+    temporary = objUceAssetItems->m_objVariableRetryPublishResponse;
     if (!temporary.IsEmpty())
     {
         for (IMS_UINT32 index = 0; index < temporary.GetSize(); index++)
@@ -250,6 +250,83 @@ IMS_BOOL UceConfig::IsImsRegistrationRequired(
     return IMS_FALSE;
 }
 
+void UceConfig::toString(IN IMS_SINT32 nSimSlot)
+{
+    if (m_objAssetMap.GetIndexOfKey(nSimSlot) < 0)
+    {
+        return;
+    }
+    IMS_TRACE_D("toString:slotId[%d]", nSimSlot, 0, 0);
+    UceAssetItems* objUceAssetItems = m_objAssetMap.GetValue(nSimSlot);
+    IMS_TRACE_D("ExpireValuePublish[%d], ExtendedExpireValuePublish[%d], PublishRefreshRatio[%d]",
+            objUceAssetItems->m_nExpireValuePublish,
+            objUceAssetItems->m_nExtendedExpireValuePublish,
+            objUceAssetItems->m_nPublishRefreshRatio);
+    IMS_TRACE_D("ExpireValueListSubscribe[%d], RlsUri[%s], SubscribeIndepedentOfPublish[%d]",
+            objUceAssetItems->m_nExpireValueListSubscribe, objUceAssetItems->m_strRlsUri.GetStr(),
+            objUceAssetItems->m_bSubscribeIndepedentOfPublish);
+    IMS_TRACE_D("AnonymousFetchMethod[%d], EncodePublishBody[%d], EncodeSubscribeBody[%d]",
+            objUceAssetItems->m_nAnonymousFetchMethod, objUceAssetItems->m_bEncodePublishBody,
+            objUceAssetItems->m_bEncodeSubscribeBody);
+    IMS_TRACE_D("UseContactHeaderInPublish[%d], UseContactHeaderInSubscribe[%d], "
+                "AddVideoTagContactHeaderInPublish[%d]",
+            objUceAssetItems->m_bUseContactHeaderInPublish,
+            objUceAssetItems->m_bUseContactHeaderInSubscribe,
+            objUceAssetItems->m_bAddVideoTagContactHeaderInPublish);
+
+    IMS_TRACE_D("ImmediatelyRetryPublishResponse size[%d]",
+            objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetSize(), 0, 0);
+    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetSize();
+            i++)
+    {
+        IMS_TRACE_D("ImmediatelyRetryPublishResponse index[%d], value[%d]", i,
+                objUceAssetItems->m_objImmediatelyRetryPublishResponse.GetValueAt(i), 0);
+    }
+    IMS_TRACE_D("ImmediatelyRetryPublishResponseMaxCount[%d]",
+            objUceAssetItems->m_nImmediatelyRetryPublishResponseMaxCount, 0, 0);
+
+    IMS_TRACE_D("RetryPublishResponse size[%d]",
+            objUceAssetItems->m_objRetryPublishResponse.GetSize(), 0, 0);
+    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objRetryPublishResponse.GetSize(); i++)
+    {
+        IMS_TRACE_D("RetryPublishResponse index[%d], value[%d]", i,
+                objUceAssetItems->m_objRetryPublishResponse.GetValueAt(i), 0);
+    }
+    IMS_TRACE_D("RetryPublishResponseMaxCount[%d], RetryPublishResponseTimeSec[%d]",
+            objUceAssetItems->m_nRetryPublishResponseMaxCount,
+            objUceAssetItems->m_nRetryPublishResponseTimeSec, 0);
+
+    IMS_TRACE_D("VariableRetryPublishResponse size[%d]",
+            objUceAssetItems->m_objVariableRetryPublishResponse.GetSize(), 0, 0);
+    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objVariableRetryPublishResponse.GetSize(); i++)
+    {
+        IMS_TRACE_D("VariableRetryPublishResponse index[%d], value[%d]", i,
+                objUceAssetItems->m_objVariableRetryPublishResponse.GetValueAt(i), 0);
+    }
+    IMS_TRACE_D("VariableRetryPublishResponseMaxCount[%d]",
+            objUceAssetItems->m_nVariableRetryPublishResponseMaxCount, 0, 0);
+    IMS_TRACE_D("VariableRetryPublishResponseTimeSec size[%d]",
+            objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetSize(), 0, 0);
+    for (IMS_UINT32 i = 0; i < objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetSize();
+            i++)
+    {
+        IMS_TRACE_D("VariableRetryPublishResponseTimeSec index[%d], value[%d]", i,
+                objUceAssetItems->m_objVariableRetryPublishResponseTimeSec.GetValueAt(i), 0);
+    }
+    for (IMS_UINT32 i = 0;
+            i < objUceAssetItems->m_objReAttemptRegistrationPublishResponse.GetSize(); i++)
+    {
+        IMS_TRACE_D("ReAttemptRegistrationPublishResponse index[%d], value[%d]", i,
+                objUceAssetItems->m_objReAttemptRegistrationPublishResponse.GetValueAt(i), 0);
+    }
+    for (IMS_UINT32 i = 0;
+            i < objUceAssetItems->m_objReAttemptRegistrationSubscribeResponse.GetSize(); i++)
+    {
+        IMS_TRACE_D("ReAttemptRegistrationSubscribeResponse index[%d], value[%d]", i,
+                objUceAssetItems->m_objReAttemptRegistrationSubscribeResponse.GetValueAt(i), 0);
+    }
+}
+
 PUBLIC VIRTUAL void UceConfig::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
 {
     ICarrierConfig* piCc = ConfigService::GetConfigService()->GetCarrierConfig(nSlotId);
@@ -287,7 +364,7 @@ const IMS_CHAR* UceConfig::GetKeyString(IN KEY_UCE_INT eKey)
             "KEY_IMMEDIATELY_RETRY_PUBLISH_RESPONSE_MAX_COUNT",
             "KEY_RETRY_PUBLISH_RESPONSE_MAX_COUNT",
             "KEY_RETRY_PUBLISH_RESPONSE_TIME_SEC",
-            "KEY_EXPONENTIAL_RETRY_PUBLISH_RESPONSE_MAX_COUNT",
+            "KEY_VARIABLE_RETRY_PUBLISH_RESPONSE_MAX_COUNT",
             "ERROR",
     };
     if (sizeof(pszIntKey) / sizeof(char*) <= eKey)
@@ -332,11 +409,11 @@ void UceConfig::Update(IN ICarrierConfig* piCc, IN IMS_SINT32 nSimSlot)
             CarrierConfig::ImsUce::KEY_FIXED_TIME_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT);
     objUceAssetItems->m_nRetryPublishResponseTimeSec =
             piCc->GetInt(CarrierConfig::ImsUce::KEY_FIXED_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT);
-    objUceAssetItems->m_objExponentialRetryPublishResponse = piCc->GetIntArray(
+    objUceAssetItems->m_objVariableRetryPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_INT_ARRAY);
-    objUceAssetItems->m_nExponentialRetryPublishResponseMaxCount = piCc->GetInt(
+    objUceAssetItems->m_nVariableRetryPublishResponseMaxCount = piCc->GetInt(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_MAX_COUNT_INT);
-    objUceAssetItems->m_objExponentialRetryPublishResponseTimeSec = piCc->GetIntArray(
+    objUceAssetItems->m_objVariableRetryPublishResponseTimeSec = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_VARIABLE_TIME_RETRY_PUBLISH_RESPONSE_TIME_SEC_INT_ARRAY);
     objUceAssetItems->m_objReAttemptRegistrationPublishResponse = piCc->GetIntArray(
             CarrierConfig::ImsUce::KEY_REATTEMPT_REGISTRATION_PUBLISH_RESPONSE_INT_ARRAY);

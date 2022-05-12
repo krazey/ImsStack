@@ -28,6 +28,19 @@
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
     <int name="ims.registration_retry_base_timer_millis_int" value="120000"/>
     <int name="ims.registration_retry_max_timer_millis_int" value="7200000"/>
+
+    <!-- Uce -->
+    <int name="imsuce.anonymous_fetch_method_int" value="0"/>
+    <boolean name="imsuce.use_expired_etag_bool" value="true"/>
+    <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="2">
+        <item value="403"/>
+        <item value="504"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="2">
+        <item value="403"/>
+        <item value="504"/>
+    </int-array>
+
     <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
 
    <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->

@@ -1755,7 +1755,7 @@ IMS_BOOL UcePublishManager::ProcessRetryResponseScenario()
 IMS_BOOL UcePublishManager::ProcessExponentialRetryResponseScenario()
 {
     IMS_UINT32 nExponentialRetryMaxCount = UceConfig::GetInstance()->GetIntValue(
-            UceConfig::KEY_EXPONENTIAL_RETRY_PUBLISH_RESPONSE_MAX_COUNT, m_nSimSlot);
+            UceConfig::KEY_VARIABLE_RETRY_PUBLISH_RESPONSE_MAX_COUNT, m_nSimSlot);
     if (nExponentialRetryMaxCount != 0)
     {
         if (m_nExponentialRetryCount >= nExponentialRetryMaxCount)
