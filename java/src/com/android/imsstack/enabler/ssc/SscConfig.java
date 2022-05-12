@@ -17,7 +17,6 @@
 package com.android.imsstack.enabler.ssc;
 
 import android.telephony.CarrierConfigManager;
-import android.text.TextUtils;
 
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -25,11 +24,10 @@ import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.util.ImsLog;
-
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.HashMap;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public final class SscConfig {
     // CarrierConfigManager.OIR_NOT_PROVISIONED;
@@ -263,8 +261,8 @@ public final class SscConfig {
         }
 
         return Arrays.stream(serverBasedServices).anyMatch(value -> {
-                    return value == CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL;
-                });
+            return value == CarrierConfigManager.ImsSs.SUPPLEMENTARY_SERVICE_CF_CFNL;
+        });
     }
 
     public static boolean isTls(int slotId) {
@@ -277,7 +275,14 @@ public final class SscConfig {
             return false;
         }
 
-        return Arrays.stream(permBlockCodes).anyMatch(value -> { return value == responseCode; });
+        return Arrays.stream(permBlockCodes).anyMatch(value -> {
+            if (value % 100 == 99) { // N99 case
+                if ((value / 100) == (responseCode / 100)) {
+                    return true;
+                }
+            }
+            return value == responseCode;
+        });
     }
 
     public static boolean isTemporaryErrorCode(int slotId, int responseCode) {
@@ -286,7 +291,14 @@ public final class SscConfig {
             return false;
         }
 
-        return Arrays.stream(tempBlockCodes).anyMatch(value -> { return value == responseCode; });
+        return Arrays.stream(tempBlockCodes).anyMatch(value -> {
+            if (value % 100 == 99) { // N99 case
+                if ((value / 100) == (responseCode / 100)) {
+                    return true;
+                }
+            }
+            return value == responseCode;
+        });
     }
 
     public static boolean isGbaSupported(int slotId) {
