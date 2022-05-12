@@ -208,6 +208,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
 PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionStartFailed", 0, 0, 0);
+    m_objContext.GetMediaManager().Terminate();
 
     IMessage* piResponse = MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START);
     FailReason objReason = StartErrorHandler(m_objContext).Handle(piResponse);
@@ -217,7 +218,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStartFailed(IN ISession* piSe
         return HandleSilentRetry(objReason);
     }
 
-    m_objContext.GetMediaManager().Terminate();
     OnStartFailed(piSession, objReason);
     return CallStateName::TERMINATING;
 }
@@ -636,7 +636,6 @@ CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
     {
         IMS_TRACE_D("HandleRetrySilent : Max retry count[%d] reached", m_nSilentRedialCount, 0, 0);
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
-        m_objContext.GetMediaManager().Terminate();
         // TODO: Trigger initial registeration if requird (by config?)
         return CallStateName::TERMINATING;
     }
@@ -678,7 +677,6 @@ CallStateName OutgoingState::ContinueSilentRetry()
     if (CreateISession() == IMS_FAILURE)
     {
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
-        m_objContext.GetMediaManager().Terminate();
         return CallStateName::TERMINATING;
     }
     MtcSession* pSession = m_objContext.GetSession();
@@ -687,8 +685,7 @@ CallStateName OutgoingState::ContinueSilentRetry()
         m_objSessions.Add(&pSession->GetISession(), pSession);
     }
 
-    m_objContext.GetMediaManager().CreateMediaProfile(
-            &pSession->GetISession(), IMS_FALSE, IMS_TRUE);
+    InitMediaSession();
     m_objContext.GetPreconditionManager().CreateQos(GetISession());
 
     if (pSession->SendStart() == IMS_FAILURE)
