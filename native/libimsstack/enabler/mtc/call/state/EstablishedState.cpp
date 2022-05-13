@@ -229,7 +229,7 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
     IMS_TRACE_D("FormAutoAccept", 0, 0, 0);
     MtcSession* pSession = m_objContext.GetSession();
 
-    AdjustDirectionWithHeldByMe();
+    AdjustDirectionWithHeldByMe(bWithoutOffer);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     // m_objContext.GetCallInfo().eCallType
@@ -254,31 +254,40 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 }
 
 PRIVATE
-void EstablishedState::AdjustDirectionWithHeldByMe()
+void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
 {
-    if (!m_objContext.IsHeldByMe())
-    {
-        return;
-    }
-
     MediaInfo objInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objInfo);
-    if (objInfo.eADir != DIRECTION_SEND_RECEIVE)
+
+    IMS_SINT32 eNewDir = objInfo.eADir;
+    if (bWithoutOffer)
     {
-        return;
+        eNewDir = DIRECTION_SEND_RECEIVE;
     }
 
-    objInfo.eADir = DIRECTION_SEND;
+    if (m_objContext.IsHeldByMe())
+    {
+        if (eNewDir == DIRECTION_SEND_RECEIVE)
+        {
+            eNewDir = DIRECTION_SEND;
+        }
+        else if (eNewDir == DIRECTION_RECEIVE)
+        {
+            eNewDir = DIRECTION_INACTIVE;
+        }
+    }
 
-    // TODO, needed?
+    objInfo.eADir = eNewDir;
+
+    // TODO
     /*
     if (objInfo.eVDir != DIRECTION_INVALID)
     {
-        objInfo.eVDir = DIRECTION_SEND;
+        objInfo.eVDir = ???;
     }
     if (objInfo.eTDir != DIRECTION_INVALID)
     {
-        objInfo.eTDir = DIRECTION_SEND;
+        objInfo.eTDir = eNewDir;
     }
     */
 

@@ -28,7 +28,7 @@ private:
     IMS_RESULT HandleReceivedUpdate(OUT CallStateName& eStateName);
     IMS_RESULT HandleReceivedUpdateWithoutOffer(OUT CallStateName& eStateName);
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
-    void AdjustDirectionWithHeldByMe();
+    void AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer);
     IMS_BOOL IsConferenceCallParticipant();
 };
 
