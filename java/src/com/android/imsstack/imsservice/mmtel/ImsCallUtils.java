@@ -18,6 +18,7 @@ import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
@@ -39,11 +40,8 @@ import com.android.imsstack.external.ims.ImsDialog;
 import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.external.ims.ImsReasonInfoEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFactory;
 import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsConstants;
-import com.android.imsstack.util.ImsPhoneUtils;
-import com.android.imsstack.util.ImsProperties;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -109,31 +107,10 @@ public class ImsCallUtils {
     private static final Hashtable<Integer, Integer> sReasonToSIPStatusCode;
     private static final Hashtable<Integer, String> sUserStatusToString;
 
-    public static void clearCallProfile(ImsCallProfile profile) {
-        if (profile != null) {
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
-            profile.mCallType = ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO;
-            profile.mRestrictCause = ImsCallProfile.CALL_RESTRICT_CAUSE_NONE;
-            profile.setCallerNumberVerificationStatus(
-                    ImsCallProfile.VERIFICATION_STATUS_NOT_VERIFIED);
-            profile.setEmergencyServiceCategories(
-                    EmergencyNumber.EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED);
-            profile.setEmergencyUrns(new ArrayList<String>());
-            profile.setEmergencyCallRouting(EmergencyNumber.EMERGENCY_CALL_ROUTING_UNKNOWN);
-            profile.setEmergencyCallTesting(false);
-            profile.setHasKnownUserIntentEmergency(false);
-            profile.mCallExtras.clear();
-
-            ImsCallMediaUtils.clearMediaProfile(profile.mMediaProfile);
-        }
-    }
-
     public static ImsCallProfile cloneCallProfile(final ImsCallProfile profile) {
-        ImsCallProfile newProfile = new ImsCallProfile();
-
-        newProfile.mServiceType = profile.mServiceType;
-        newProfile.mCallType = profile.mCallType;
-        newProfile.mRestrictCause = profile.mRestrictCause;
+        ImsCallProfile newProfile = new ImsCallProfile(profile.getServiceType(),
+                profile.getCallType());
+        newProfile.setCallRestrictCause(profile.getRestrictCause());
         newProfile.setCallerNumberVerificationStatus(profile.getCallerNumberVerificationStatus());
         newProfile.setEmergencyServiceCategories(profile.getEmergencyServiceCategories());
         newProfile.setEmergencyUrns(profile.getEmergencyUrns());
@@ -141,7 +118,7 @@ public class ImsCallUtils {
         newProfile.setEmergencyCallTesting(profile.isEmergencyCallTesting());
         newProfile.setHasKnownUserIntentEmergency(profile.hasKnownUserIntentEmergency());
         newProfile.updateCallExtras(profile);
-        newProfile.mMediaProfile.copyFrom(profile.mMediaProfile);
+        newProfile.getMediaProfile().copyFrom(profile.getMediaProfile());
 
         return newProfile;
     }
@@ -150,7 +127,7 @@ public class ImsCallUtils {
             int audioQuality, int audioDirection, int videoQuality, int videoDirection) {
         ImsCallProfile profile = new ImsCallProfile(serviceType, callType);
 
-        ImsCallMediaUtils.setMediaProfile(profile.mMediaProfile,
+        ImsCallMediaUtils.setMediaProfile(profile.getMediaProfile(),
                 audioQuality, audioDirection, videoQuality, videoDirection);
 
         return profile;
@@ -161,7 +138,7 @@ public class ImsCallUtils {
             int rttMode) {
         ImsCallProfile profile = new ImsCallProfile(serviceType, callType);
 
-        ImsCallMediaUtils.setMediaProfile(profile.mMediaProfile,
+        ImsCallMediaUtils.setMediaProfile(profile.getMediaProfile(),
                 audioQuality, audioDirection, videoQuality, videoDirection, rttMode);
 
         return profile;
@@ -169,22 +146,30 @@ public class ImsCallUtils {
 
     public static ImsCallProfile createCallProfileFromCallInfo(ICallContext context,
             final CallInfo ci, final MediaInfo mi) {
-        ImsCallProfile profile = new ImsCallProfile();
+
+        int callType = getProfileCallTypeFromCallInfo(ci);
         int serviceType = MtcCallInfo.getServiceType(ci);
 
         switch (serviceType) {
-        case IUMtcCall.SERVICETYPE_NORMAL:
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
-            break;
-        case IUMtcCall.SERVICETYPE_EMERGENCY:
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_EMERGENCY;
-            break;
-        default:
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NONE;
-            break;
+            case IUMtcCall.SERVICETYPE_NORMAL:
+                serviceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
+                break;
+            case IUMtcCall.SERVICETYPE_EMERGENCY:
+                serviceType = ImsCallProfile.SERVICE_TYPE_EMERGENCY;
+                break;
+            default:
+                serviceType = ImsCallProfile.SERVICE_TYPE_NONE;
+                break;
         }
 
-        profile.mCallType = getProfileCallTypeFromCallInfo(ci);
+        ImsStreamMediaProfile mediaProfile = ImsCallMediaUtils.getMediaProfileFromMediaInfo(mi);
+        if (CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO
+                && (callType == ImsCallProfile.CALL_TYPE_VT)) {
+            callType = ImsCallMediaUtils.getVideoCallType(mediaProfile);
+        }
+
+        ImsCallProfile profile = new ImsCallProfile(serviceType, callType, new Bundle(),
+                mediaProfile);
 
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CONFERENCE,
                 MtcCallInfo.isConference(ci));
@@ -192,13 +177,6 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_CONFERENCE_EVENT,
                 MtcCallInfo.isConferenceEventSupported(ci));
-
-        ImsCallMediaUtils.setMediaProfileFromMediaInfo(profile.mMediaProfile, mi);
-
-        if (CALL_TYPE_OVERRIDE_VT_FROM_MEDIA_INFO
-                && (profile.mCallType == ImsCallProfile.CALL_TYPE_VT)) {
-            profile.mCallType = ImsCallMediaUtils.getVideoCallType(profile.mMediaProfile);
-        }
 
         if (CallFeature.isHDVoiceDeterminedByAudioQuality(context.getSlotId())) {
             if (MtcCallUtils.isAudioHDQuality(mi.AQuality)) {
@@ -371,7 +349,7 @@ public class ImsCallUtils {
             si.addService_int(SuppInfo.TYPE_CALLERID, oir);
         }
 
-        Bundle oemExtras = profile.mCallExtras.getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
+        Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
 
         // CNAP (0 : default, 1 : presentation restricted, 2 : presentation not restricted)
         int cnap = getCallExtraInt(profile, oemExtras, ImsCallProfile.EXTRA_CNAP, -1);
@@ -442,13 +420,13 @@ public class ImsCallUtils {
 
     public static String getCallExtraFromOemExtras(ImsCallProfile profile,
             String key, String defaultValue) {
-        Bundle oemExtras = profile.mCallExtras.getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
+        Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
         return getCallExtra(profile, oemExtras, key, defaultValue);
     }
 
     public static boolean getCallExtraBooleanFromOemExtras(ImsCallProfile profile,
             String key, boolean defaultValue) {
-        Bundle oemExtras = profile.mCallExtras.getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
+        Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
         return getCallExtraBoolean(profile, oemExtras, key, defaultValue);
     }
 
@@ -644,7 +622,7 @@ public class ImsCallUtils {
 
     public static boolean isCallTypeChanged(ImsCallProfile profile, CallInfo ci) {
         return ((profile == null) || (ci == null)) ? false :
-                isCallTypeChanged(profile.mCallType, getProfileCallTypeFromCallInfo(ci));
+                isCallTypeChanged(profile.getCallType(), getProfileCallTypeFromCallInfo(ci));
     }
 
     public static boolean isCsSilentRedialRequired(ImsReasonInfo info) {
@@ -662,7 +640,7 @@ public class ImsCallUtils {
     }
 
     public static boolean isEmergencyCallViaWfc(ImsCallProfile profile) {
-        Bundle oemExtras = profile.mCallExtras.getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
+        Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
         boolean wifiCall = getCallExtraBoolean(profile,
                 oemExtras, ImsCallProfileEx.EXTRA_WIFI_CALL, false);
 
@@ -680,7 +658,7 @@ public class ImsCallUtils {
             return false;
         }
 
-        if (!isVideoCall(profile.mCallType)
+        if (!isVideoCall(profile.getCallType())
                 || !isVideoCall(getProfileCallTypeFromCallInfo(ci))) {
             return false;
         }
@@ -695,7 +673,7 @@ public class ImsCallUtils {
             return false;
         }
 
-        if (!isVideoCall(profile.mCallType)
+        if (!isVideoCall(profile.getCallType())
                 || !isVideoCall(getProfileCallTypeFromCallInfo(ci))) {
             return false;
         }
@@ -723,17 +701,17 @@ public class ImsCallUtils {
             return false;
         }
 
-        if (!isVideoCall(profile.mCallType)
+        if (!isVideoCall(profile.getCallType())
                 || !isVideoCall(getProfileCallTypeFromCallInfo(ci))) {
             return false;
         }
 
-        return ImsCallMediaUtils.isVideoProfileChanged(profile.mMediaProfile, mi);
+        return ImsCallMediaUtils.isVideoProfileChanged(profile.getMediaProfile(), mi);
     }
 
     public static void refineFailInfoForExtraCode(ImsCallProfile profile, FailInfo failInfo) {
         if (MtcCallUtils.isCallTerminatedByCSRetry(failInfo.Reason)
-                && ImsCallUtils.isVoiceCall(profile.mCallType)
+                && ImsCallUtils.isVoiceCall(profile.getCallType())
                 && (failInfo.Code <= IUMtcCall.Fail_Reason.CODE_1XRETRY_NONE)) {
             failInfo.Code = IUMtcCall.Fail_Reason.CODE_1XRETRY_SILENT_REDIAL;
         }
@@ -743,7 +721,7 @@ public class ImsCallUtils {
             ImsCallProfile profile, FailInfo failInfo) {
         if ((failInfo.Reason == IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_NOTSUPPORTED)
                 && (failInfo.Code == 415)
-                && ImsCallUtils.isVideoCall(profile.mCallType)
+                && ImsCallUtils.isVideoCall(profile.getCallType())
                 && ImsGlobal.isOperator(context.getSlotId(), "LGU")) {
             failInfo.Reason = IUMtcCall.Fail_Reason.FAIL_REASON_SESSION_RETRYVOLTE;
         }
@@ -764,7 +742,7 @@ public class ImsCallUtils {
             return;
         }
 
-        profile.mCallExtras.remove(key);
+        profile.getCallExtras().remove(key);
     }
 
     public static void setCallExtraIfPresent(ImsCallProfile inProfile,
@@ -773,7 +751,7 @@ public class ImsCallUtils {
             return;
         }
 
-        if (!inProfile.mCallExtras.containsKey(key)) {
+        if (!inProfile.getCallExtras().containsKey(key)) {
             // no-op if key does not exist
             return;
         }
@@ -807,15 +785,10 @@ public class ImsCallUtils {
                 MtcCallInfo.isRttCapable(ci));
         }
 
-        // FIXME: where should be defined?
-        if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_NONE) {
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
-        }
-
         int callType = getProfileCallTypeFromCallInfo(ci);
 
-        if (profile.mCallType != callType) {
-            profile.mCallType = callType;
+        if (profile.getCallType() != callType) {
+            profile.updateCallType(new ImsCallProfile(profile.getServiceType(), callType));
         }
     }
 
@@ -896,11 +869,8 @@ public class ImsCallUtils {
 
     public static void updateCallProfileOnSessionProgressing(ICallContext context,
             ImsCallProfile profile, final CallInfo callInfo, final SuppInfo suppInfo) {
-        if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_NONE) {
-            profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
-        }
-
-        profile.mCallType = getProfileCallTypeFromCallInfo(callInfo);
+        int callType = getProfileCallTypeFromCallInfo(callInfo);
+        profile.updateCallType(new ImsCallProfile(profile.getServiceType(), callType));
 
         // If MTC enabler sends necessary supp. services on session progressing,
         // then use updateCallProfileFromSuppInfo(...).

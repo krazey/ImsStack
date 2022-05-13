@@ -12,7 +12,6 @@
 package com.android.imsstack.imsservice.mmtel.videocall.base;
 
 import android.app.ActivityManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -246,7 +245,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
         if (mediaProfile != null) {
             videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.mVideoQuality);
+                    mediaProfile.getVideoQuality());
         }
 
         mPauseImageTask = new PauseImageTask(videoQuality);
@@ -597,7 +596,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         if (mediaProfile != null) {
             VideoDimension videoDimension = null;
             int videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.mVideoQuality);
+                    mediaProfile.getVideoQuality());
 
             if ((orientation == VideoCallUtils.ORIENTATION_PORTRAIT)
                     && !VideoCallUtils.isVideoPortrait(videoQuality)) {

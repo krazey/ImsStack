@@ -27,7 +27,6 @@ import com.android.imsstack.enabler.mtc.MediaInfo;
 import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 
 public final class ImsVideoCallSession implements IVideoCallSession {
@@ -66,7 +65,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     @Override
     public int getCallType() {
         final ImsCallProfile callProfile = getCallProfile();
-        return (callProfile != null) ? callProfile.mCallType : ImsCallProfile.CALL_TYPE_VOICE;
+        return (callProfile != null) ? callProfile.getCallType() : ImsCallProfile.CALL_TYPE_VOICE;
     }
 
     @Override
@@ -86,7 +85,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
     @Override
     public ImsStreamMediaProfile getStreamMediaProfile() {
         final ImsCallProfile callProfile = getCallProfile();
-        return (callProfile != null) ? callProfile.mMediaProfile : null;
+        return (callProfile != null) ? callProfile.getMediaProfile() : null;
     }
 
     @Override
@@ -148,14 +147,14 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         ImsCallProfile callProfile = getCallProfile();
         ImsStreamMediaProfile mediaProfile = createProposalMedia(proposalProfile, true);
         int callType = (callProfile != null) ?
-                callProfile.mCallType : ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO;
+                callProfile.getCallType() : ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO;
 
         if (ImsCallUtils.isVoiceCall(callType)
-                && (mediaProfile.mVideoQuality != ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
+                && (mediaProfile.getVideoQuality() != ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
             callType = ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE;
             setSessionModificationType(MODIFICATION_CALL_TYPE);
         } else if (ImsCallUtils.isVideoCall(callType)
-                && (mediaProfile.mVideoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
+                && (mediaProfile.getVideoQuality() == ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
             callType = ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO;
             setSessionModificationType(MODIFICATION_CALL_TYPE);
         } else {
@@ -203,20 +202,20 @@ public final class ImsVideoCallSession implements IVideoCallSession {
         }
 
         ImsStreamMediaProfile mediaProfile = createProposalMedia(responseProfile, false);
-        int callType = callProfile.mCallType;
+        int callType = callProfile.getCallType();
 
         if (ImsCallUtils.isVoiceCall(callType)
-                && (mediaProfile.mVideoQuality != ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
+                && (mediaProfile.getVideoQuality() != ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
             callType = ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE;
         } else if (ImsCallUtils.isVideoCall(callType)
-                && (mediaProfile.mVideoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
+                && (mediaProfile.getVideoQuality() == ImsStreamMediaProfile.VIDEO_QUALITY_NONE)) {
             callType = ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO;
         }
 
         boolean callTypeChanged = false;
 
         if (modificationType == MODIFICATION_CALL_TYPE) {
-            callTypeChanged = ImsCallUtils.isCallTypeChanged(callProfile.mCallType, callType);
+            callTypeChanged = ImsCallUtils.isCallTypeChanged(callProfile.getCallType(), callType);
 
             if (callTypeChanged
                     || CallFeature.isAcceptRequiredOnRejectingCallTypeChange(
@@ -426,23 +425,24 @@ public final class ImsVideoCallSession implements IVideoCallSession {
             return new ImsStreamMediaProfile();
         }
 
-        ImsStreamMediaProfile mediaProfile = new ImsStreamMediaProfile();
+        ImsStreamMediaProfile mediaProfile = callProfile.getMediaProfile();
         ImsStreamMediaProfile proposalMediaProfile = getProposedStreamMediaProfile();
-
-        mediaProfile.copyFrom(callProfile.mMediaProfile);
+        int audioQuality = mediaProfile.getAudioQuality();
+        int videoQuality = mediaProfile.getVideoQuality();
+        int videoDirection = mediaProfile.getVideoDirection();
 
         // Overwrites the audio/video quality information from the proposed media profile
         if (!sessionModificationRequest && (proposalMediaProfile != null)) {
-            if (mediaProfile.mAudioQuality != proposalMediaProfile.mAudioQuality) {
-                log("MediaProfile :: audioQuality - " + mediaProfile.mAudioQuality
-                        + " >> " + proposalMediaProfile.mAudioQuality);
-                mediaProfile.mAudioQuality = proposalMediaProfile.mAudioQuality;
+            if (mediaProfile.getAudioQuality() != proposalMediaProfile.getAudioQuality()) {
+                log("MediaProfile :: audioQuality - " + mediaProfile.getAudioQuality()
+                        + " >> " + proposalMediaProfile.getAudioQuality());
+                audioQuality = proposalMediaProfile.getAudioQuality();
             }
 
-            if (mediaProfile.mVideoQuality != proposalMediaProfile.mVideoQuality) {
-                log("MediaProfile :: videoQuality - " + mediaProfile.mVideoQuality
-                        + " >> " + proposalMediaProfile.mVideoQuality);
-                mediaProfile.mVideoQuality = proposalMediaProfile.mVideoQuality;
+            if (mediaProfile.getVideoQuality() != proposalMediaProfile.getVideoQuality()) {
+                log("MediaProfile :: videoQuality - " + mediaProfile.getVideoQuality()
+                        + " >> " + proposalMediaProfile.getVideoQuality());
+                videoQuality = proposalMediaProfile.getVideoQuality();
             }
         }
 
@@ -451,22 +451,24 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
         if (direction == MediaInfo.DIRECTION_INVALID) {
             // Audio only
-            mediaProfile.mVideoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
-            mediaProfile.mVideoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
+            videoDirection = ImsStreamMediaProfile.DIRECTION_INVALID;
+            videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_NONE;
         } else {
-            mediaProfile.mVideoDirection
+            videoDirection
                     = ImsCallMediaUtils.getDirectionFromMediaInfoForMediaProfile(direction);
 
             // Keep the current preferred media quality
 
             // If the current call is a voice call and the device receives the upgrade operation,
             // then we need to set the video quality to the maximum level.
-            if (mediaProfile.mVideoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE) {
-                mediaProfile.mVideoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_VGA_PORTRAIT;
+            if (videoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE) {
+                videoQuality = ImsStreamMediaProfile.VIDEO_QUALITY_VGA_PORTRAIT;
             }
         }
 
-        return mediaProfile;
+        return new ImsStreamMediaProfile(audioQuality,
+                mediaProfile.getAudioDirection(), videoQuality, videoDirection,
+                mediaProfile.getRttMode());
     }
 
     private ImsCallProfile getCallProfile() {

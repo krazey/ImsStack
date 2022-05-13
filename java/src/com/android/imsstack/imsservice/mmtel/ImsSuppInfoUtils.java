@@ -13,15 +13,12 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Bundle;
 import android.telephony.ims.ImsCallProfile;
-import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.enabler.mtc.SuppInfo;
-import com.android.imsstack.enabler.mtc.SuppInfoUtils;
 import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.SODConfig;
 
 /**
@@ -100,7 +97,7 @@ public final class ImsSuppInfoUtils {
 
         public static void addSuppInfoForIms(final ImsCallProfile profile,
                 SuppInfo outSuppInfo) {
-            Bundle oemCallExtras = profile.mCallExtras.getBundle(
+            Bundle oemCallExtras = profile.getCallExtras().getBundle(
                         ImsCallProfile.EXTRA_OEM_EXTRAS);
 
             // Checks if subaddress is set or not
@@ -119,7 +116,7 @@ public final class ImsSuppInfoUtils {
 
         public static void addSuppInfoForIms(final ImsCallProfile profile,
                 SuppInfo outSuppInfo) {
-            Bundle callExtras = profile.mCallExtras;
+            Bundle callExtras = profile.getCallExtras();
 
             if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
                 outSuppInfo.addService_bool(SUPP_TYPE_GEOLOCATION,
@@ -134,7 +131,7 @@ public final class ImsSuppInfoUtils {
 
         public static void addSuppInfoForIms(final ImsCallProfile profile,
                 SuppInfo outSuppInfo) {
-            Bundle callExtras = profile.mCallExtras;
+            Bundle callExtras = profile.getCallExtras();
 
             if (hasCallExtra(callExtras, EXTRA_GEOLOCATION)) {
                 outSuppInfo.addService_bool(SUPP_TYPE_GEOLOCATION,
@@ -185,8 +182,8 @@ public final class ImsSuppInfoUtils {
         if (ss != null) {
             outProfile.setCallExtra(key, ss.strValue);
         } else {
-            if (outProfile.mCallExtras != null) {
-                outProfile.mCallExtras.remove(key);
+            if (outProfile.getCallExtras() != null) {
+                outProfile.getCallExtras().remove(key);
             }
         }
     }
@@ -198,8 +195,8 @@ public final class ImsSuppInfoUtils {
         if (ss != null) {
             outProfile.setCallExtraBoolean(key, ss.boolValue);
         } else {
-            if (outProfile.mCallExtras != null) {
-                outProfile.mCallExtras.remove(key);
+            if (outProfile.getCallExtras() != null) {
+                outProfile.getCallExtras().remove(key);
             }
         }
     }
@@ -211,8 +208,8 @@ public final class ImsSuppInfoUtils {
         if (ss != null) {
             outProfile.setCallExtraInt(key, ss.intValue);
         } else {
-            if (outProfile.mCallExtras != null) {
-                outProfile.mCallExtras.remove(key);
+            if (outProfile.getCallExtras() != null) {
+                outProfile.getCallExtras().remove(key);
             }
         }
     }
