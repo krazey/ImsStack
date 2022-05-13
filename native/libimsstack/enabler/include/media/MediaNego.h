@@ -35,7 +35,6 @@ public:
         ERROR_NO_AUDIO,
     };
     MediaNego(IN IMS_SINT32 nSlotId = IMS_SLOT_0);
-    MediaNego(IN MediaNego* pMediaNego) { Copy(pMediaNego); }
     ~MediaNego();
 
 private:
@@ -62,23 +61,6 @@ public:
     IMediaDescriptor* GetMediaDescriptor(IN IMedia* pIMedia);
     void SetActiveProfile(IMS_BOOL bIsActive) { m_bIsActive = bIsActive; }
     IMS_BOOL IsActiveProfile() { return m_bIsActive; };
-    void Copy(IN MediaNego* pMediaNego)
-    {
-        if (pMediaNego == IMS_NULL)
-        {
-            return;
-        }
-        this->m_eNegoState = pMediaNego->m_eNegoState;
-        this->m_pAudioNego = AudioNego::Create(GetSlotId(), MEDIA_SERVICE_DEFAULT);
-        if (this->m_pAudioNego != IMS_NULL)
-        {
-            this->m_pAudioNego->Copy(pMediaNego->m_pAudioNego);
-        }
-        this->m_pMediaEnvironment = pMediaNego->m_pMediaEnvironment;
-        this->m_pMediaEnvironment->eServiceType = m_pMediaEnvironment->eServiceType;
-        this->m_eSessionType = pMediaNego->m_eSessionType;
-        this->m_bIsActive = pMediaNego->m_bIsActive;
-    }
 
 private:
     IMSList<IMedia*> GetIMediaListFromSession(

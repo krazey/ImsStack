@@ -56,7 +56,8 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         m_lstOaModel(IMSList<OaModel*>()),
         m_objBaseProfile(AudioProfile()),
         m_pMediaEnvironment(IMS_NULL),
-        m_eSessionType(MEDIA_TYPE_AUDIO)
+        m_eSessionType(MEDIA_TYPE_AUDIO),
+        m_bForking(IMS_FALSE)
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -83,6 +84,13 @@ GLOBAL PUBLIC AudioNego* AudioNego::Create(
 {
     (void)eServiceType;
     return new AudioNego(nSlotId);
+}
+
+PUBLIC
+void AudioNego::Forking(IN AudioNego* pAudioNego)
+{
+    m_bForking = IMS_TRUE;
+    Copy(pAudioNego);
 }
 
 PUBLIC
@@ -498,7 +506,7 @@ IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("NegotiateSDP() NegoState[%d]", eNegoState, 0, 0);
+    IMS_TRACE_I("NegotiateSDP() NegoState[%d], Forking[%d]", eNegoState, m_bForking, 0);
 
     *eDir = MEDIA_DIRECTION_INVALID;
     switch (eNegoState)
@@ -510,20 +518,21 @@ IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
             *eDir = NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_NEGOTIATED:
-            *eDir = NegotiateReanswer(pSessionDescriptor, pDescriptor);
+            if (m_bForking == IMS_TRUE)
+            {
+                *eDir = NegotiateReanswer(pSessionDescriptor, pDescriptor);
+                m_bForking = IMS_FALSE;
+            }
+            else
+            {
+                *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
+            }
             break;
         default:
             break;
     }
 
-    if (*eDir != MEDIA_DIRECTION_INVALID)
-    {
-        return IMS_TRUE;
-    }
-    else
-    {
-        return IMS_FALSE;
-    }
+    return (*eDir != MEDIA_DIRECTION_INVALID) ? IMS_TRUE : IMS_FALSE;
 }
 
 PROTECTED VIRTUAL MEDIA_DIRECTION AudioNego::NegotiateOffer(

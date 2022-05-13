@@ -102,9 +102,10 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
     IMS_TRACE_D("Forking() - nNegoId[%" PFLS_x "]", (IMS_UINTP)pMediaNego, 0, 0);
 
     m_eNegoState = STATE_OFFER_SENT;
+
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->Copy(pMediaNego->GetAudioNego());
+        m_pAudioNego->Forking(pMediaNego->GetAudioNego());
     }
 
     return IMS_TRUE;

@@ -100,7 +100,6 @@ public:
     static AudioNego* Create(IN IMS_SINT32 nSlotId = IMS_SLOT_0,
             IN MEDIA_SERVICE_TYPE eServiceType = MEDIA_SERVICE_DEFAULT);
     virtual ~AudioNego();
-    void Copy(IN AudioNego* pAudioNego);
 
 private:
     AudioNego(IN const AudioNego& obj);
@@ -113,6 +112,8 @@ public:
     virtual void SetMediaEnvironment(IN MediaEnvironment* pEnvironment);
     virtual void SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType);
     AudioConfiguration* GetConfig();
+    void Forking(IN AudioNego* pAudioNego);
+    void Copy(IN AudioNego* pAudioNego);
 
     // -- Negotiation APIs -------------------------------------------------------------------------
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
@@ -206,6 +207,7 @@ protected:
 
 private:
     MEDIA_CONTENT_TYPE m_eSessionType;
+    IMS_BOOL m_bForking;
     static const AString EVS_BR[12];
     static const AString EVS_BW[4];
     static const AString EVS_BW_LIST[9];
