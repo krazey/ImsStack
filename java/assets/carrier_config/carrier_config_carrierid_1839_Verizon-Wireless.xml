@@ -5,8 +5,11 @@
     <boolean name="allow_sip_instance_parameter_in_contact_for_non_register_request_bool" value="true"/>
     <boolean name="use_reset_when_closing_sip_tcp_connection_bool" value="true"/>
     <boolean name="set_sdp_direction_attribute_for_removed_media_bool" value="true"/>
-
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
+
+    <int-array name="ims.geolocation_pidf_in_sip_register_support_int_array" num="">
+    </int-array>
+
     <!-- Aos -->
     <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
     <boolean name="imssms.support_limited_admin_sms_mode_bool" value="true"/>
