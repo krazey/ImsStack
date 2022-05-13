@@ -17,98 +17,106 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "interface/MockIAosAppContext.h"
-#include "interface/MockIAosBlock.h"
-#include "interface/MockIAosServiceAvailableListener.h"
-
+#include "AoSReason.h"
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
 #include "interface/IAosServiceAvailableListener.h"
 #include "condition/AosBlock.h"
+#include "condition/AosCondition.h"
 #include "condition/AosServiceAvailable.h"
+
+#include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosBlock.h"
+#include "interface/MockIAosServiceAvailableListener.h"
 
 using ::testing::_;
 
-class AosServiceAvailableTest : public ::testing::Test {
+class AosServiceAvailableTest : public ::testing::Test
+{
 public:
     AosServiceAvailable* pAosServiceAvailable;
     AosBlock* pAosBlock;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         pAosServiceAvailable = new AosServiceAvailable(AString("AosServiceAvailable"));
         ASSERT_TRUE(pAosServiceAvailable != nullptr);
     }
 
-    virtual void TearDown() override {
-        if (pAosServiceAvailable) {
+    virtual void TearDown() override
+    {
+        if (pAosServiceAvailable)
+        {
             delete pAosServiceAvailable;
         }
-        if (pAosBlock) {
+        if (pAosBlock)
+        {
             delete pAosBlock;
         }
     }
 
-    void SetAppContext(IN IAosAppContext* piAppContext) {
+    void SetAppContext(IN IAosAppContext* piAppContext)
+    {
         pAosServiceAvailable->m_piAppContext = piAppContext;
     }
 
-    void SetListeners(IN IMSList<IAosServiceAvailableListener*> objListeners) {
+    void SetListeners(IN IMSList<IAosServiceAvailableListener*> objListeners)
+    {
         pAosServiceAvailable->m_objListeners = objListeners;
     }
 
-    IMSList<IAosServiceAvailableListener*> GetListeners() {
+    IMSList<IAosServiceAvailableListener*> GetListeners()
+    {
         return pAosServiceAvailable->m_objListeners;
     }
 
-    void SetAvailableLastNotified(IN IMS_BOOL bNotified) {
+    void SetAvailableLastNotified(IN IMS_BOOL bNotified)
+    {
         pAosServiceAvailable->m_bAvailableLastNotified = bNotified;
     }
 
-    void SetAosBlock(IN IAosBlock* piBlock) {
-        pAosServiceAvailable->m_piBlock = piBlock;
-    }
+    void SetAosBlock(IN IAosBlock* piBlock) { pAosServiceAvailable->m_piBlock = piBlock; }
 
-    IAosBlock* GetAosBlock() {
-        return pAosServiceAvailable->m_piBlock;
+    IAosBlock* GetAosBlock() { return pAosServiceAvailable->m_piBlock; }
+
+    void RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason)
+    {
+        pAosServiceAvailable->RequestCommand(nCommand, nReason);
     }
 };
 
-TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull) {
+TEST_F(AosServiceAvailableTest, Init_MemberContextIsNull)
+{
     SetAppContext(IMS_NULL);
 
     MockIAosAppContext objMockIAosAppContext;
-    EXPECT_CALL(objMockIAosAppContext, GetSlotId())
-        .Times(1);
-    EXPECT_CALL(objMockIAosAppContext, GetBlock())
-        .Times(1);
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(1);
+    EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(1);
 
     pAosServiceAvailable->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext));
 }
 
-TEST_F(AosServiceAvailableTest, Init_MemberContextIsNotNull) {
+TEST_F(AosServiceAvailableTest, Init_MemberContextIsNotNull)
+{
     MockIAosAppContext objMockIAosAppContext;
-    EXPECT_CALL(objMockIAosAppContext, GetSlotId())
-        .Times(0);
-    EXPECT_CALL(objMockIAosAppContext, GetBlock())
-        .Times(0);
+    EXPECT_CALL(objMockIAosAppContext, GetSlotId()).Times(0);
+    EXPECT_CALL(objMockIAosAppContext, GetBlock()).Times(0);
 
     SetAppContext(static_cast<IAosAppContext*>(&objMockIAosAppContext));
 
     pAosServiceAvailable->Init(static_cast<IAosAppContext*>(&objMockIAosAppContext));
 }
 
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, CleanUp) {
-// }
-
-TEST_F(AosServiceAvailableTest, SetListener_ParamIsNull) {
+TEST_F(AosServiceAvailableTest, SetListener_ParamIsNull)
+{
     pAosServiceAvailable->CleanUp();
     pAosServiceAvailable->SetListener(IMS_NULL);
     EXPECT_EQ(GetListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist) {
+TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist)
+{
     pAosServiceAvailable->CleanUp();
 
     IAosServiceAvailableListener* piListener = new MockIAosServiceAvailableListener();
@@ -122,7 +130,8 @@ TEST_F(AosServiceAvailableTest, SetListener_AlreadyExist) {
     EXPECT_EQ(GetListeners().GetSize(), 1);
 }
 
-TEST_F(AosServiceAvailableTest, SetListener_Success) {
+TEST_F(AosServiceAvailableTest, SetListener_Success)
+{
     pAosServiceAvailable->CleanUp();
 
     IAosServiceAvailableListener* piListener1 = new MockIAosServiceAvailableListener();
@@ -146,7 +155,8 @@ TEST_F(AosServiceAvailableTest, SetListener_Success) {
     EXPECT_EQ(GetListeners().GetSize(), 5);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull) {
+TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull)
+{
     pAosServiceAvailable->CleanUp();
 
     IAosServiceAvailableListener* piListener1 = new MockIAosServiceAvailableListener();
@@ -161,7 +171,8 @@ TEST_F(AosServiceAvailableTest, RemoveListener_ParamIsNull) {
     EXPECT_EQ(GetListeners().GetSize(), 2);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_NotExist) {
+TEST_F(AosServiceAvailableTest, RemoveListener_NotExist)
+{
     pAosServiceAvailable->CleanUp();
 
     IAosServiceAvailableListener* piListener1 = new MockIAosServiceAvailableListener();
@@ -185,7 +196,8 @@ TEST_F(AosServiceAvailableTest, RemoveListener_NotExist) {
     EXPECT_EQ(GetListeners().GetSize(), 2);
 }
 
-TEST_F(AosServiceAvailableTest, RemoveListener_Success) {
+TEST_F(AosServiceAvailableTest, RemoveListener_Success)
+{
     pAosServiceAvailable->CleanUp();
 
     IAosServiceAvailableListener* piListener1 = new MockIAosServiceAvailableListener();
@@ -224,29 +236,27 @@ TEST_F(AosServiceAvailableTest, RemoveListener_Success) {
     EXPECT_EQ(GetListeners().GetSize(), 0);
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore) {
+TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifySameAsBefore)
+{
     MockIAosBlock objMockIAosBlock;
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
     EXPECT_NE(GetAosBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _))
-        .Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons())
-        .Times(0);
+    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(0);
 
     SetAvailableLastNotified(IMS_TRUE);
     pAosServiceAvailable->RefreshServiceAvailablility();
 }
 
-TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners) {
+TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners)
+{
     MockIAosBlock objMockIAosBlock;
     SetAosBlock(static_cast<IAosBlock*>(&objMockIAosBlock));
 
     EXPECT_NE(GetAosBlock(), nullptr);
-    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _))
-        .Times(1);
-    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons())
-        .Times(1);
+    EXPECT_CALL(objMockIAosBlock, GetBlockReasons(_, _)).Times(1);
+    EXPECT_CALL(objMockIAosBlock, PrintBlockReasons()).Times(1);
 
     MockIAosServiceAvailableListener* pMockIListener1 = new MockIAosServiceAvailableListener();
     MockIAosServiceAvailableListener* pMockIListener2 = new MockIAosServiceAvailableListener();
@@ -258,26 +268,25 @@ TEST_F(AosServiceAvailableTest, RefreshServiceAvailablility_NotifyToListeners) {
     objListeners.Append(static_cast<IAosServiceAvailableListener*>(pMockIListener3));
     SetListeners(objListeners);
 
-    EXPECT_CALL(*pMockIListener1, ServiceAvailable_Changed())
-        .Times(1);
-    EXPECT_CALL(*pMockIListener2, ServiceAvailable_Changed())
-        .Times(1);
-    EXPECT_CALL(*pMockIListener3, ServiceAvailable_Changed())
-        .Times(1);
+    EXPECT_CALL(*pMockIListener1, ServiceAvailable_Changed()).Times(1);
+    EXPECT_CALL(*pMockIListener2, ServiceAvailable_Changed()).Times(1);
+    EXPECT_CALL(*pMockIListener3, ServiceAvailable_Changed()).Times(1);
 
     SetAvailableLastNotified(IMS_FALSE);
     pAosServiceAvailable->RefreshServiceAvailablility();
 }
 
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, IsAvailable) {
-// }
-
-TEST_F(AosServiceAvailableTest, HandleEvent_Valid) {
+TEST_F(AosServiceAvailableTest, HandleEvent_Valid)
+{
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 1, 1),
+            AosServiceAvailable::EVENT_AIRPLANE);
+    EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_AIRPLANE, 0, 1),
             AosServiceAvailable::EVENT_AIRPLANE);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 1, 1),
             AosServiceAvailable::EVENT_ROAMING);
+    EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_ROAMING, 0, 1),
+            AosServiceAvailable::EVENT_ROAMING);
+
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOLTE_SETTING, 1, 1),
             AosServiceAvailable::EVENT_VOLTE_SETTING);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(AosServiceAvailable::EVENT_VOPS, 1, 1),
@@ -296,15 +305,33 @@ TEST_F(AosServiceAvailableTest, HandleEvent_Valid) {
             AosServiceAvailable::EVENT_BLOCK);
 }
 
-TEST_F(AosServiceAvailableTest, HandleEvent_Invalid) {
+TEST_F(AosServiceAvailableTest, HandleEvent_Invalid)
+{
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(-1, 1, 1), -1);
     EXPECT_EQ(pAosServiceAvailable->HandleEvent(100, 1, 1), -1);
 }
 
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, StartToCheckNetworkConnection) {
-// }
+TEST_F(AosServiceAvailableTest, RequestCommand)
+{
+    pAosServiceAvailable->CleanUp();
 
-// Testing is not required.
-// TEST_F(AosServiceAvailableTest, StopToCheckNetworkConnection) {
-// }
+    MockIAosServiceAvailableListener objIListener1;
+    MockIAosServiceAvailableListener objIListener2;
+    MockIAosServiceAvailableListener objIListener3;
+
+    EXPECT_CALL(objIListener1, ServiceAvailable_RequestCommand(_, _)).Times(4);
+
+    EXPECT_CALL(objIListener2, ServiceAvailable_RequestCommand(_, _)).Times(4);
+
+    EXPECT_CALL(objIListener3, ServiceAvailable_RequestCommand(_, _)).Times(4);
+
+    pAosServiceAvailable->SetListener(static_cast<IAosServiceAvailableListener*>(&objIListener1));
+    pAosServiceAvailable->SetListener(static_cast<IAosServiceAvailableListener*>(&objIListener2));
+    pAosServiceAvailable->SetListener(static_cast<IAosServiceAvailableListener*>(&objIListener3));
+    EXPECT_EQ(GetListeners().GetSize(), 3);
+
+    RequestCommand(AosCondition::REQUEST_STOP, AoSReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_DESTROY, AoSReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_RECOVER, AoSReason::NOT_SPECIFIED);
+    RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
+}
