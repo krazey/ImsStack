@@ -47,19 +47,27 @@ void MtcTimerWrapper::Start(IN IMS_UINT32 eType, IN IMS_SINT32 nDuration)
 {
     if (IsActive(eType))
     {
-        IMS_TRACE_E(0, "[type:%d] timer is already running", eType, 0, 0);
+        IMS_TRACE_I("Start : Type:[%d] timer is already running >> re-start", eType, 0, 0);
+        Stop(eType);
+    }
+
+    if (nDuration < 0)
+    {
         return;
     }
 
-    MtcTimer* pTimer = new MtcTimer();
+    if (nDuration == 0)
+    {
+        // The ServiceTimer immediately, but asynchronously calls Timer_TimerExpired()
+        // This can be used as a Message Driven Asynchronous call instead of PostMessage();
+        // TODO: Does a user want synchronous call?
+    }
 
-    pTimer->eType = eType;
-    pTimer->nDuration = nDuration;
-    pTimer->piTimer = TimerService::GetTimerService()->CreateTimer();
-    pTimer->nId = pTimer->piTimer->SetTimer(nDuration, this);
+    MtcTimer* pTimer = new MtcTimer(eType);
+    pTimer->piTimer->SetTimer(nDuration, this);
     m_lstTimers.Append(pTimer);
 
-    IMS_TRACE_I("Start : ID[%" PFLS_u "] Type[%d] Duration[%d]", pTimer->nId, eType, nDuration);
+    IMS_TRACE_I("Start : Type[%d] Duration[%d]", eType, nDuration, 0);
 }
 
 PUBLIC
@@ -76,8 +84,6 @@ void MtcTimerWrapper::Stop(IN IMS_UINT32 eType)
 
         IMS_TRACE_I("Stop : Type[%d]", eType, 0, 0);
 
-        pTimer->piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(pTimer->piTimer);
         delete pTimer;
         m_lstTimers.RemoveAt(i);
 
@@ -92,16 +98,11 @@ void MtcTimerWrapper::StopAll()
 {
     IMS_UINT32 nSize = m_lstTimers.GetSize();
 
-    IMS_TRACE_I("AllStop : Size[%d]", nSize, 0, 0);
+    IMS_TRACE_I("StopAll : Size[%d]", nSize, 0, 0);
 
     for (IMS_UINT32 i = 0; i < nSize; i++)
     {
-        MtcTimer* pTimer = m_lstTimers.GetAt(i);
-        pTimer->piTimer->KillTimer();
-        TimerService::GetTimerService()->DestroyTimer(pTimer->piTimer);
-        pTimer->piTimer = IMS_NULL;
-        pTimer->nId = 0;
-        delete pTimer;
+        delete m_lstTimers.GetAt(i);
     }
 
     m_lstTimers.Clear();
