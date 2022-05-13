@@ -105,7 +105,7 @@ UcePublishManager::UcePublishManager(
         m_nConnectedServices(0),
         m_bAoSConnected(IMS_FALSE),
         m_nExtended(1),
-        m_bReceivedFailResponse(IMS_FALSE),
+        m_bEnablePIDFCompression(IMS_FALSE),
         m_bSetPublishStarted(IMS_FALSE),
         m_bUnpublishSent(IMS_FALSE),
         m_pExponentialTimer(IMS_NULL),
@@ -433,12 +433,14 @@ IMS_BOOL UcePublishManager::AosConnected(IMS_UINT32 conectedService)
 IMS_BOOL UcePublishManager::AosDisConnected()
 {
     m_nConnectedServices = 0;
+    m_bEnablePIDFCompression = IMS_FALSE;
     IMSMSG objMsg(AOS_DISCONNECTED, 0, 0);
     return OnStateMessage(objMsg);
 }
 
 IMS_BOOL UcePublishManager::AosDisConnecting()
 {
+    m_bEnablePIDFCompression = IMS_FALSE;
     IMSMSG objMsg(AOS_DISCONNECTING, 0, 0);
     return OnStateMessage(objMsg);
 }
@@ -506,7 +508,6 @@ void UcePublishManager::PublicationDeliveryFailed(IN IPublication* piPublication
         IMS_TRACE_I("PublicationDeliveryFailed:IPublication from Engine is not mine.", 0, 0, 0);
         return;
     }
-    m_bReceivedFailResponse = IMS_TRUE;
     IMSMSG objMsg(PUBLISH_FAILED, 0, 0);
     OnStateMessage(objMsg);
 }
@@ -591,6 +592,10 @@ IMS_BOOL UcePublishManager::StateIDLE_AoSConnected(IN IMSMSG& objMsg)
     (void)objMsg;
     IMS_TRACE_I("StateIDLE_AoSConnected:nConnectedApps [%08x]", m_nConnectedServices, 0, 0);
     m_bAoSConnected = IMS_TRUE;
+
+    m_bEnablePIDFCompression =
+            UceConfig::GetInstance()->GetBoolValue(UceConfig::KEY_ENCODE_PUBLISH_BODY, m_nSimSlot);
+
     SetState(ON);
     return IMS_TRUE;
 }
@@ -651,7 +656,6 @@ IMS_BOOL UcePublishManager::StateON_AoSDisConnected(IN IMSMSG& objMsg)
     StopTimer(TIMER_ALL);
     DestroyPublication();
     m_bAoSConnected = IMS_FALSE;
-    m_bReceivedFailResponse = IMS_FALSE;
     SetState(IDLE);
     return IMS_TRUE;
 }
@@ -689,7 +693,6 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_AoSDisConnected(IN IMSMSG& objMsg)
     m_strEtag = AString::ConstNull();
     DestroyPublication();
     m_bAoSConnected = IMS_FALSE;
-    m_bReceivedFailResponse = IMS_FALSE;
     m_bReceivedUnPublishRequest = IMS_FALSE;
     m_nImmediatelyRetryCount = 0;
     m_nRetryCount = 0;
@@ -774,6 +777,16 @@ IMS_BOOL UcePublishManager::StatePUBLISHING_Failed(IN IMSMSG& objMsg)
         SendPublishCommandErrorInd(m_nKey, IUUceService::COMMAND_CODE_GENERIC_FAILURE);
         SetState(ON);
         return IMS_TRUE;
+    }
+
+    if (m_bEnablePIDFCompression == IMS_TRUE)
+    {
+        m_bEnablePIDFCompression = IMS_FALSE;
+        StopTimer(TIMER_ALL);
+        m_strEtag = AString::ConstNull();
+        DestroyPublication();
+        SetState(ON);
+        return SendPublishRequest(m_nKey, m_strPidfXml, "", m_nCapability, m_nExtended);
     }
 
     IMS_BOOL bNeedToRetry = IMS_FALSE;
@@ -1456,9 +1469,7 @@ IMS_BOOL UcePublishManager::SetPidfXmlBody(ISipMessage* piMessage)
     }
 
     // TMO TRD 2020 4Q - GID-MTRREQ-480586
-    if (UceConfig::GetInstance()->GetBoolValue(UceConfig::KEY_ENCODE_PUBLISH_BODY, m_nSimSlot) ==
-                    IMS_TRUE &&
-            m_bReceivedFailResponse == IMS_FALSE)
+    if (m_bEnablePIDFCompression == IMS_TRUE)
     {
         ByteArray objCompressedContent;
         if (IMS_UTIL_ZLIB_Compress(objContent, objCompressedContent))

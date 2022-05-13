@@ -1,16 +1,5 @@
 /*
-    Author
-    <table>
-    date              author                        description
-    --------      --------------                ----------
-    20120525      saurabh31.srivastava@           Created
-    20121102    hyunho.shin@                   Re-Factorying
-    20130819    jaesik.kong@                   Re-Factorying for one source
-    </table>
-
-    Description - UcePublishManager.h
-
-*/
+ */
 
 #ifndef _UCE_PUBLISH_MANAGER_H_
 #define _UCE_PUBLISH_MANAGER_H_
@@ -263,7 +252,7 @@ private:
     // If TMUS supports the encoded body, the pidf xml must be gzipped. If a
     // publish request with a compressed body fails, the publish request is
     // retried with the original body.
-    IMS_BOOL m_bReceivedFailResponse;
+    IMS_BOOL m_bEnablePIDFCompression;
     IMS_BOOL m_bSetPublishStarted;
     IMS_BOOL m_bUnpublishSent;
 
