@@ -846,3 +846,56 @@ IMS_BOOL MtcCallState::IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const
 
     return IMS_FALSE;
 }
+
+PROTECTED
+void MtcCallState::StartTimer(IN IMS_UINT32 nType) const
+{
+    m_objContext.GetTimer().Start(nType, GetTimeInMilliseconds(nType));
+}
+
+PROTECTED
+void MtcCallState::StopTimer(IN IMS_UINT32 nType) const
+{
+    if (m_objContext.GetTimer().IsActive(nType))
+    {
+        m_objContext.GetTimer().Stop(nType);
+    }
+}
+
+PROTECTED
+IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
+{
+    IMS_BOOL bNormal = !m_objContext.GetCallInfo().bEmergency;
+    Feature eFeature = Feature::UNKNOWN;
+    switch (nType)
+    {
+        case TIMER_MO_1XX_WAIT:
+            eFeature = bNormal ? Feature::TIMER_18X : Feature::EMERGENCY_18X_TIMER;
+            break;
+        case TIMER_MO_NOANSWER:
+            eFeature = bNormal ? Feature::RINGBACK_TIMER : Feature::EMERGENCY_RINGBACK_TIMER;
+            break;
+        case TIMER_MT_ALERTING:
+            eFeature = Feature::RINGING_TIMER;
+            break;
+        case TIMER_MT_PRACK_WAIT:
+            // TODO: different purpose, but seems we can share. Or, any requirement exists?
+            eFeature = Feature::PRACK_UPDATE_RESPONSE_WAIT_TIMER;
+            break;
+        case TIMER_RETRY_AFTER:
+            // TODO: value must be millisec
+            // if silent redial uses 'Retry-After' header, it mustn't call StartTimer() here.
+            eFeature = Feature::SILENT_REDIAL_INTERVAL;
+            break;
+        case TIMER_CONVERT_USER_RESPONSE:
+            eFeature = Feature::CONVERT_USER_RESPONSE_TIMER;
+            break;
+        case TIMER_CONVERT_REMOTE_RESPONSE:
+            eFeature = Feature::CONVERT_REMOTE_RESPONSE_TIMER;
+            break;
+        default:
+            return -1;
+    }
+
+    return m_objContext.GetConfigurationProxy().GetInt(eFeature);
+}

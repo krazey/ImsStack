@@ -7,11 +7,11 @@
 
 class IMtcTimerListener;
 
-class MtcTimerWrapper : public ITimerListener
+class MtcTimerWrapper final : public ITimerListener
 {
 public:
-    MtcTimerWrapper();
-    virtual ~MtcTimerWrapper();
+    explicit MtcTimerWrapper();
+    ~MtcTimerWrapper();
     MtcTimerWrapper(IN const MtcTimerWrapper&) = delete;
     MtcTimerWrapper& operator=(IN const MtcTimerWrapper&) = delete;
 

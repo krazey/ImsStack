@@ -11,10 +11,13 @@ MtcTimerWrapper::MtcTimerWrapper() :
         m_lstTimers(IMSList<MtcTimer*>()),
         m_piListener(IMS_NULL)
 {
+    IMS_TRACE_D("+MtcTimerWrapper", 0, 0, 0);
 }
 
-PUBLIC VIRTUAL MtcTimerWrapper::~MtcTimerWrapper()
+PUBLIC
+MtcTimerWrapper::~MtcTimerWrapper()
 {
+    IMS_TRACE_D("~MtcTimerWrapper", 0, 0, 0);
     StopAll();
 }
 
@@ -25,12 +28,10 @@ PUBLIC VIRTUAL void MtcTimerWrapper::Timer_TimerExpired(IN ITimer* piTimer)
         MtcTimer* pTimer = m_lstTimers.GetAt(i);
         if (pTimer->piTimer == piTimer)
         {
-            m_piListener->OnTimerExpired(pTimer->eType);
-
-            TimerService::GetTimerService()->DestroyTimer(pTimer->piTimer);
+            IMS_UINT32 eType = pTimer->eType;
             delete pTimer;
             m_lstTimers.RemoveAt(i);
-
+            m_piListener->OnTimerExpired(eType);
             break;
         }
     }

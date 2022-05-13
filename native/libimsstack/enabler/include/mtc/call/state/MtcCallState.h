@@ -109,25 +109,22 @@ public:
 protected:
     enum TimerType
     {
-        TIMER_WAIT_TERMINATED,
-        TIMER_SRVCC_TERMINATED,
-        TIMER_E911_LTE_OPEN,
-        TIMER_E911_WIFI_OPEN,
-        TIMER_E911_LTE_START,
-        TIMER_E911_WIFI_START,
-
-        TIMER_E911_LTE_RINGBACK,
-        TIMER_E911_WIFI_RINGBACK,
-        TIMER_RETRY_AFTER,
-        TIMER_RETRY_MESSAGE,
-
+        // TODO: differentiate 100 and 183?
+        // Currently, MTC isn't being notified about 100 Trying response.
         TIMER_MO_1XX_WAIT,
         TIMER_MO_NOANSWER,
         TIMER_MT_ALERTING,
         TIMER_MT_PRACK_WAIT,
 
+        TIMER_RETRY_AFTER,
+
         TIMER_CONVERT_USER_RESPONSE,
         TIMER_CONVERT_REMOTE_RESPONSE,
+
+        TIMER_E911_LTE_OPEN,
+        TIMER_E911_WIFI_OPEN,
+        TIMER_E911_LTE_START,
+        TIMER_E911_WIFI_START,
     };
 
     void HandleTerminate(IN const FailReason& objReason);
@@ -158,7 +155,6 @@ protected:
     void UpdatePreconditionCapability(
             IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
     void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
-    // TODO: more params required?
     IMS_RESULT NegotiateExtension(
             IN MtcSession* pMtcSession, IN IMessage* piMessage, IN IMS_UINT32 eMethod);
 
@@ -168,6 +164,11 @@ protected:
     IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
+
+    // TODO: move these into MtcTimerWrapper? Is it used by All MTC classes?
+    void StartTimer(IN IMS_UINT32 nType) const;
+    void StopTimer(IN IMS_UINT32 nType) const;
+    IMS_SINT32 GetTimeInMilliseconds(IN IMS_UINT32 nType) const;
 
     IMtcCallContext& m_objContext;
 

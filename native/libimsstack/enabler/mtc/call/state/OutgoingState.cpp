@@ -286,12 +286,10 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     NegotiateExtension(
             m_objSessions.GetValue(piSession), piMessage, IMessage::SESSION_EARLY_UPDATE);
 
-    m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
+    // TODO: which operator requires this?
+    // m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
 
-    // TODO: can this go into OnSdpReceived()?
     m_objContext.GetMediaManager().HandleRingBackTone(piSession, piMessage);
-
-    // TODO: RFC 6337.
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -423,8 +421,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionProvisionalResponseReceived", 0, 0, 0);
-    m_objContext.GetTimer().Stop(TIMER_MO_1XX_WAIT);
-    m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
+    StopTimer(TIMER_MO_1XX_WAIT);
+    StartTimer(TIMER_MO_NOANSWER);
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
@@ -482,8 +480,8 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
     IMS_TRACE_D("SessionRPRReceived", 0, 0, 0);
-    m_objContext.GetTimer().Stop(TIMER_MO_1XX_WAIT);
-    m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
+    StopTimer(TIMER_MO_1XX_WAIT);
+    StartTimer(TIMER_MO_NOANSWER);
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
@@ -563,6 +561,22 @@ CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {
     switch (nType)
     {
+        case TIMER_MO_1XX_WAIT:
+        {
+            // TODO: fail reason name.
+            FailReason objReason(FAIL_REASON_TO_MO_PROGRESSING);
+            HandleCancel(GetISession(), objReason);
+            OnStartFailed(GetISession(), objReason);
+            return CallStateName::TERMINATING;
+        }
+        case TIMER_MO_NOANSWER:
+        {
+            // TODO: fail reason name.
+            FailReason objReason(FAIL_REASON_TO_MO_STARTED);
+            HandleCancel(GetISession(), objReason);
+            OnStartFailed(GetISession(), objReason);
+            return CallStateName::TERMINATING;
+        }
         case TimerType::TIMER_RETRY_AFTER:
             return ContinueSilentRetry();
         default:
@@ -600,7 +614,7 @@ PRIVATE
 void OutgoingState::HandleCancel(IN ISession* piSession, IN const FailReason& objReason)
 {
     IMS_TRACE_D("HandleCancel", 0, 0, 0);
-    m_objContext.GetTimer().Stop(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
+    StopTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
     if (objReason.nReason == FAIL_REASON_SESSION_EARLYDIALOG)
     {
