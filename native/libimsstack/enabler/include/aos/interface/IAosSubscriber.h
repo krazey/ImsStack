@@ -55,8 +55,8 @@ public:
 protected:
     friend class AosBuildDirector;
     friend class AosAppContext;
-    virtual void Init() = 0;
-    virtual void CleanUp() = 0;
+    virtual IMS_BOOL Init() = 0;
+    virtual IMS_BOOL CleanUp() = 0;
 };
 
 #endif  // INTERFACE_AOS_SUBSCRIBER_H_
