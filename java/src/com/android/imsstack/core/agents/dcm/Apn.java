@@ -361,6 +361,11 @@ public abstract class Apn extends Handler implements IApn {
     }
 
     @Override
+    public void resetESMCausePermanentFailure() {
+        mESMCausePermanentFailure = false;
+    }
+
+    @Override
     public Network getCachedNetwork() {
         if (mNetworkCallback != null) {
             return mNetworkCallback.getCachedNetwork();
