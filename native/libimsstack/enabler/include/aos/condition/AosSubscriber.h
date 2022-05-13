@@ -40,8 +40,8 @@ public:
 
 private:
     // IAosSubscriber
-    void Init() override;
-    void CleanUp() override;
+    IMS_BOOL Init() override;
+    IMS_BOOL CleanUp() override;
     void Notify(IN IMS_UINT32 nState);
 
     // IAosSubscriberManagerListener

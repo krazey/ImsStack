@@ -91,21 +91,21 @@ PUBLIC VIRTUAL const ISubscriberConfig* AosSubscriber::GetSubscriberConfig(
 }
 
 PRIVATE
-void AosSubscriber::Init()
+IMS_BOOL AosSubscriber::Init()
 {
     m_eRegType = m_piAppContext->GetRegistration()->GetRegType();
 
     const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
 
     // check IMS Service ON/OFF
-    if (!piSubsConfig->IsServiceAllowed())
+    if (piSubsConfig != IMS_NULL && !piSubsConfig->IsServiceAllowed())
     {
         m_piAppContext->GetBlock()->SetBlockReason(BLOCK_IMS_DISABLED);
     }
 
     if (m_piSubscriberManager == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     if (m_eRegType == AosRegistrationType::FAKE)
@@ -117,16 +117,18 @@ void AosSubscriber::Init()
         m_piSubscriberManager->AddListener(this);
     }
     A_IMS_TRACE_D(APPPROFILE, "Init - AddListener :: (%" PFLS_X ")", this, 0, 0);
+
+    return IMS_TRUE;
 }
 
 PRIVATE
-void AosSubscriber::CleanUp()
+IMS_BOOL AosSubscriber::CleanUp()
 {
     A_IMS_TRACE_D(APPPROFILE, "CleanUp", 0, 0, 0);
 
     if (m_piSubscriberManager == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     if (m_eRegType == AosRegistrationType::FAKE)
@@ -137,6 +139,8 @@ void AosSubscriber::CleanUp()
     {
         m_piSubscriberManager->RemoveListener(this);
     }
+
+    return IMS_TRUE;
 }
 
 PRIVATE
