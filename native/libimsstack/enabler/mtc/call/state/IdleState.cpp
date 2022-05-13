@@ -196,8 +196,7 @@ CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
         return CallStateName::TERMINATING;
     }
 
-    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
+    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
     return CallStateName::OUTGOING;
 }
@@ -228,8 +227,7 @@ CallStateName IdleState::ContinueConference(
         return CallStateName::TERMINATING;
     }
 
-    m_objContext.GetTimer().Start(MtcCallState::TimerType::TIMER_MO_1XX_WAIT,
-            m_objContext.GetConfigurationProxy().GetInt(Feature::TIMER_18X));
+    StartTimer(MtcCallState::TimerType::TIMER_MO_1XX_WAIT);
 
     return CallStateName::OUTGOING;
 }
