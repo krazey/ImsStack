@@ -268,6 +268,8 @@ public class ApnXcap extends Apn {
             }
 
             int causeCode = (int) msg.obj;
+            ImsLog.w(mSlotId, "SM cause : " + causeCode);
+
             if (mDcSettings != null) {
                 if (mDcSettings.isPermanentFailure(mType, causeCode)) {
                     mESMCausePermanentFailure = true;

@@ -24,7 +24,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.dcm.DCFactory;
@@ -33,21 +32,20 @@ import com.android.imsstack.core.agents.dcmif.EDataState;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.enabler.ssc.SscConfig;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.Hashtable;
-import java.util.List;
 
 public class SscNetConnection implements ISscNetConnection {
-    // Constants--------------------------------------------------
-    protected static final int EVENT_DATA_STATE_CHANGED = 1001;
-    protected static final int EVENT_CONNECION_TIMER_EXPIRED = 1002;
+    protected static final int EVENT_PDN_DATA_STATE_CHANGED = 1001;
+    protected static final int EVENT_PDN_CONNECTION_FAILED = 1002;
+    protected static final int EVENT_PDN_CONNECTION_TIMEOUT = 1003;
+    protected static final int EVENT_PDN_CONNECTION_EXPIRED = 1004;
 
-    protected static final long DISCONNECTION_TIMER_VALUE = 1000;
+    protected static final long DISCONNECTION_DELAY = 1000; // 1 sec
+    protected static final long PDN_CONNECTION_TIMEOUT_TIMER = 30 * 1000; // 30 sec
 
-    // Variables--------------------------------------------------
     protected Handler mSscTransactionHandler = null;
     protected Handler mSscNetConnectionHandler = null;
 
@@ -56,48 +54,46 @@ public class SscNetConnection implements ISscNetConnection {
 
     protected EDataState mDataState = EDataState.DATA_STATE_DISCONNECTED;
     protected EApnType mApnType = null;
-    protected long mConnectionTimer = 120 * 1000;
+    protected long mConnectionInactivityTimer = 120 * 1000;
 
-    // Hashtabale to store alarmTimer Id
-    private Hashtable<Integer, Integer>timerIdTable = new Hashtable<Integer, Integer>();
+    private Hashtable<Integer, Integer> mTimerIdTable = new Hashtable<Integer, Integer>();
 
     public SscNetConnection(int slotId) {
         mSlotId = slotId;
     }
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
     @Override
     public void init(Context context, EApnType apnType) {
-        mContext = context;
-        if (mContext == null) {
+        if (context == null) {
             ImsLog.e("Context is null");
             return;
         }
 
+        mContext = context;
         mApnType = apnType;
 
-        HandlerThread handlerThread = new HandlerThread("HandlerName");
+        HandlerThread handlerThread = new HandlerThread("SscNetConnectionHandler");
         handlerThread.start();
-
         mSscNetConnectionHandler = new SscNetConnectionHandler(handlerThread.getLooper());
 
-        IDCNetWatcher netWatcher
-                = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
-        if (netWatcher != null) {
-            netWatcher.registerForDataStateChanged(
-                    mSscNetConnectionHandler, EVENT_DATA_STATE_CHANGED, null);
+        IDCNetWatcher dnw = (IDCNetWatcher) DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
+        if (dnw != null) {
+            dnw.registerForDataStateChanged(mSscNetConnectionHandler,
+                    EVENT_PDN_DATA_STATE_CHANGED, null);
+            dnw.registerForPdnConnectionFailed(mSscNetConnectionHandler,
+                    EVENT_PDN_CONNECTION_FAILED, null);
         }
 
-        mConnectionTimer = SscConfig.getXcapApnInactivityTimer(mSlotId);
+        mConnectionInactivityTimer = SscConfig.getXcapApnInactivityTimer(mSlotId);
     }
 
     @Override
     public void cleanup(Context recentCnx) {
-        IDCNetWatcher netWatcher
+        IDCNetWatcher dnw
                 = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
-        if (netWatcher != null) {
-            netWatcher.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
+        if (dnw != null) {
+            dnw.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
+            dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
         }
     }
 
@@ -114,15 +110,13 @@ public class SscNetConnection implements ISscNetConnection {
         IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, mSlotId);
         if (dcGovApnCtrl != null) {
             dataState = dcGovApnCtrl.getDataState(mApnType.getType());
-        }
-        else {
+        } else {
             dataState = EDataState.convertFromTMtoImsType(TelephonyManager.DATA_DISCONNECTED);
         }
-        mDataState = EDataState.convertIntTypeToEnum(dataState);
 
-        ImsLog.i("SlotId : " + mSlotId
-                + ", ApnType : " + mApnType.getType()
-                + ", DataState : " + dataState + "/" + mDataState);
+        mDataState = EDataState.convertIntTypeToEnum(dataState);
+        ImsLog.i("SlotId : " + mSlotId + ", ApnType : " + mApnType.getType()  + ", DataState : "
+                + dataState + "/" + mDataState);
 
         if (EDataState.DATA_STATE_CONNECTED == mDataState) {
             return true;
@@ -151,14 +145,12 @@ public class SscNetConnection implements ISscNetConnection {
             return false;
         }
 
-        if (dcGovApnCtrl.connect(mApnType.getType(), IApn.IPCAN_CATEGORY_MOBILE)) {
-            // Timer value can be set as db item.
-            startTimer(mConnectionTimer, EVENT_CONNECION_TIMER_EXPIRED);
-            return true;
-        }
-        else {
+        if (!dcGovApnCtrl.connect(mApnType.getType(), IApn.IPCAN_CATEGORY_MOBILE)) {
             return false;
         }
+
+        startTimer(PDN_CONNECTION_TIMEOUT_TIMER, EVENT_PDN_CONNECTION_TIMEOUT);
+        return true;
     }
 
     public boolean isPDNAvailable() {
@@ -174,11 +166,11 @@ public class SscNetConnection implements ISscNetConnection {
 
         int otherSlotId = mSlotId == 0 ? 1 : 0;
         IDCApn dcGovApnCtrl = (IDCApn)DCFactory.getDC(DCFactory.APN, otherSlotId);
-
         if (dcGovApnCtrl == null) {
             ImsLog.e(mSlotId, "dcGovApnCtrl for other slot is null, PDN available");
             return true;
         }
+
         IApn apnCtrl = dcGovApnCtrl.getApnControl(mApnType.getType());
         if (apnCtrl == null) {
             ImsLog.e(mSlotId, "apnCtrl for other slot is null, PDN available");
@@ -191,6 +183,7 @@ public class SscNetConnection implements ISscNetConnection {
             ImsLog.e(mSlotId, "XCAP PDN for other slot is connected, PDN not available");
             return false;
         }
+
         return true;
     }
 
@@ -198,8 +191,11 @@ public class SscNetConnection implements ISscNetConnection {
     public void disconnect() {
         ImsLog.d("");
 
-        if (mApnType == null) {
-            ImsLog.e("mApnType is null");
+        stopTimer(true, EVENT_PDN_CONNECTION_TIMEOUT);
+        stopTimer(true, EVENT_PDN_CONNECTION_EXPIRED);
+
+        if (mApnType != EApnType.XCAP) {
+            ImsLog.e("Don't need to disconnect unless XCAP APN");
             return;
         }
 
@@ -218,46 +214,36 @@ public class SscNetConnection implements ISscNetConnection {
     @Override
     public void refreshConnectionTimer() {
         ImsLog.d(mSlotId, "");
-        startTimer(mConnectionTimer, EVENT_CONNECION_TIMER_EXPIRED);
+        startTimer(mConnectionInactivityTimer, EVENT_PDN_CONNECTION_EXPIRED);
     }
 
     private void startTimer(long duration, int eventNum) {
         ImsLog.d("EventNumber : " + eventNum + ", Time : " + duration);
 
         IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
-
         if (atm == null) {
             ImsLog.e("AlamTimerManager is null");
             return;
         }
 
         int timerId = atm.getTimerId();
-
         if (timerId <= 0) {
             ImsLog.e("Retry timer id is invalid");
             return;
         }
 
-        if (timerIdTable == null) {
-            ImsLog.e("timerIdTable is null");
-            return;
-        }
-
-        // If same event time is exist,
-        // 1) stop that event timer and remove it from table
-        if(timerIdTable.containsKey(eventNum)) {
+        if (mTimerIdTable.containsKey(eventNum)) {
             ImsLog.i("Restart Timer with Event " + eventNum);
             stopTimer(true, eventNum);
-            timerIdTable.remove(eventNum);
+            mTimerIdTable.remove(eventNum);
         }
 
-        // 2) start event timer with new value
         atm.registerForTimerExpired(timerId, mSscNetConnectionHandler, eventNum, null);
 
-        timerIdTable.put(eventNum, timerId);
+        mTimerIdTable.put(eventNum, timerId);
         if (!atm.startTimer(timerId, duration)) {
             stopTimer(false, eventNum);
-            ImsLog.e(" Starting a validity timer failed");
+            ImsLog.e("Starting a timer failed");
             return;
         }
 
@@ -267,25 +253,12 @@ public class SscNetConnection implements ISscNetConnection {
     private void stopTimer(boolean stopRequired, int eventNum) {
         ImsLog.d("EventNumber : " + eventNum);
 
-        Integer timerId = -1;
-
-        if (timerIdTable == null) {
-            ImsLog.e("timerIdTable is null");
-            return;
-        }
-
-        timerId = timerIdTable.get(eventNum);
-
-        if (timerId == null) {
-            return;
-        }
-
-        if (timerId <= 0) {
+        Integer timerId = mTimerIdTable.get(eventNum);
+        if (timerId == null || timerId <= 0) {
             return;
         }
 
         IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
-
         if (atm == null) {
             ImsLog.e(" AlamTimerManager is null");
             return;
@@ -296,19 +269,13 @@ public class SscNetConnection implements ISscNetConnection {
         }
 
         atm.unregisterForTimerExpired(timerId, mSscNetConnectionHandler);
-
-        timerIdTable.put(eventNum, -1);
+        mTimerIdTable.remove(eventNum);
     }
 
     protected SscNetConnection() {
     }
 
-
-    // Interface implementation methods --------------------------
-    // Private/Protected methods ---------------------------------
-    //-------------------------------------------------------------
     protected final class SscNetConnectionHandler extends Handler {
-
         public SscNetConnectionHandler(Looper looper) {
             super(looper);
         }
@@ -323,55 +290,87 @@ public class SscNetConnection implements ISscNetConnection {
             ImsLog.d("received a message[" + msg.what + "]");
 
             switch (msg.what) {
-            case EVENT_DATA_STATE_CHANGED:
-                proc_dataStateChanged(msg);
-                break;
-            case EVENT_CONNECION_TIMER_EXPIRED:
-                proc_connectionTimerExpired();
-                break;
-            default:
-                break;
+                case EVENT_PDN_DATA_STATE_CHANGED:
+                    proc_dataStateChanged(msg);
+                    break;
+                case EVENT_PDN_CONNECTION_FAILED:
+                    proc_connectionFailed(msg);
+                    break;
+                case EVENT_PDN_CONNECTION_TIMEOUT:
+                    proc_connectionTimeout();
+                    break;
+                case EVENT_PDN_CONNECTION_EXPIRED:
+                    proc_connectionTimerExpired();
+                    break;
+                default:
+                    break;
             }
         }
 
         private void proc_dataStateChanged(Message msg) {
-            AsyncResult ar = (AsyncResult)msg.obj;
+            AsyncResult ar = (AsyncResult) msg.obj;
             if (ar == null) {
                 return;
             }
 
-            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj)ar.result;
+            IDCNetWatcher.NotiObj res = (IDCNetWatcher.NotiObj) ar.result;
             if (res == null) {
                 return;
             }
 
             EApnType apnType = res.eApnType;
-            EDataState dataState = res.eDataState;
-
-            if (mApnType == null) {
-                ImsLog.e("mApnType is null");
-                return;
-            }
-
-            if (mSscTransactionHandler == null) {
-                ImsLog.e("mSscTransactionHandler is null");
-                return;
-            }
-
-            ImsLog.i("apnType[" + apnType + "], state[" + dataState + "]");
-
-            if (apnType == mApnType) {
-                mDataState = dataState;
-                // If the handler is needed...
-                if (dataState == EDataState.DATA_STATE_CONNECTED) {
-                    // notify data connected event only
-                    mSscTransactionHandler.sendEmptyMessage(EVENT_DATA_STATE_CHANGED);
-                } else if (dataState == EDataState.DATA_STATE_DISCONNECTED) {
-                    startTimer(DISCONNECTION_TIMER_VALUE, EVENT_CONNECION_TIMER_EXPIRED);
-                }
-            } else {
+            if (mApnType == null || mApnType != apnType) {
                 ImsLog.e("apnType(" + mApnType + ") is not matched : [" + apnType + "]");
+                return;
             }
+
+            ImsLog.i("apnType[" + apnType + "], state[" + res.eDataState + "]");
+            mDataState = res.eDataState;
+            if (mDataState == EDataState.DATA_STATE_CONNECTED) {
+                stopTimer(true, EVENT_PDN_CONNECTION_TIMEOUT);
+                startTimer(mConnectionInactivityTimer, EVENT_PDN_CONNECTION_EXPIRED);
+                if (mSscTransactionHandler != null) {
+                    mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_DATA_STATE_CHANGED);
+                }
+            } else if (mDataState == EDataState.DATA_STATE_DISCONNECTED) {
+                startTimer(DISCONNECTION_DELAY, EVENT_PDN_CONNECTION_EXPIRED);
+            }
+        }
+
+        private void proc_connectionFailed(Message msg) {
+            AsyncResult ar = (AsyncResult) msg.obj;
+            if (ar == null) {
+                return;
+            }
+
+            EApnType apnType = (EApnType) ar.result;
+            if (apnType == null) {
+                return;
+            }
+
+            ImsLog.d("ApnType : " + apnType.toString());
+            // Change only for XCAP apn type.
+            if (apnType == EApnType.XCAP) {
+                IDCApn dcapn = (IDCApn) DCFactory.getDC(DCFactory.APN, mSlotId);
+                IApn apn = (dcapn != null) ? dcapn.getApnControl(apnType.getType()) : null;
+                boolean isPermanentFailure = (apn != null)
+                        ? apn.isESMCausePermanentFailure() : false;
+                // TODO: Need to check KEY_UT_SM_CAUSE_TEMPORARY_BLOCK_INT_ARRAY
+                SscServiceStateAgent.getInstance().setPdnConnectionFailed(mSlotId,
+                        isPermanentFailure);
+                if (mSscTransactionHandler != null) {
+                    mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTION_FAILED);
+                }
+                disconnect();
+            }
+        }
+
+        private void proc_connectionTimeout() {
+            SscServiceStateAgent.getInstance().setPdnConnectionTimeout(mSlotId, true);
+            if (mSscTransactionHandler != null) {
+                mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTION_TIMEOUT);
+            }
+            disconnect();
         }
 
         private void proc_connectionTimerExpired() {
