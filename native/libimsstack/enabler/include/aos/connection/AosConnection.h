@@ -35,7 +35,6 @@ public:
     virtual IMS_UINT32 GetState();
 
     virtual IMS_SINT32 GetConnectionType();
-    virtual IMS_SINT32 GetPreferredIpVersion();
 
     virtual void SetListener(IN IAosConnectionListener* piListener);
     virtual void RemoveListener(IN IAosConnectionListener* piListener);
@@ -91,18 +90,18 @@ protected:
     // NetworkPolicy::APN_IMS
     IMS_SINT32 m_nCnxType;
 
-    IMS_SINT32 m_nCnxIpPriority;
-
     INetworkConnection* m_piConnection;
 
     IMS_UINT32 m_nState;
 
     IMS_BOOL m_bActivationRequested;
-    IMS_BOOL m_bOnDemandControl;
 
     IMSList<IAosConnectionListener*> m_objListeners;
 
     AString m_strTag;
+
+protected:
+    friend class AosConnectionTest;
 };
 
 #endif  // AOS_CONNECTION_H_

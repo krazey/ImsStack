@@ -40,13 +40,10 @@ AosConnection::AosConnection(IN IAosAppContext* piAppContext) :
         m_piContext(piAppContext),
         m_nSlotId(piAppContext->GetSlotId()),
         m_nCnxType(NetworkPolicy::APN_NONE),
-        m_nCnxIpPriority(0),
         m_piConnection(IMS_NULL),
         m_nState(STATE_IDLE),
-        m_bActivationRequested(IMS_FALSE),
-        m_bOnDemandControl(IMS_FALSE)
+        m_bActivationRequested(IMS_FALSE)
 {
-    m_nCnxIpPriority = 64;
     m_nCnxType = piAppContext->GetStaticProfile()->GetConnectionType();
 
     m_strTag.Sprintf("%d:%s.cnx", m_nSlotId, piAppContext->GetStaticProfile()->GetId().GetStr());
@@ -159,16 +156,6 @@ Remarks
 PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetConnectionType()
 {
     return m_nCnxType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 AosConnection::GetPreferredIpVersion()
-{
-    return m_nCnxIpPriority;
 }
 
 /*
