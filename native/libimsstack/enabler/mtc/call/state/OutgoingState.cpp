@@ -589,6 +589,7 @@ IMS_RESULT OutgoingState::SendPrack(IN ISession* piSession)
 {
     IMS_TRACE_D("SendPrack", 0, 0, 0);
 
+    // Not supporting to send Offer in PRACK.
     if (SetSdpToSend(IMS_FALSE, piSession) == ResultSetSdp::FAILURE)
     {
         return IMS_FAILURE;

@@ -212,8 +212,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
         return GetStateName();
     }
 
-    // TODO: RFC 6337 offer/answer check.
-
     if (SendResponseToEarlyUpdate(SipStatusCode::SC_200, m_objContext.GetSession()) == IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
@@ -235,14 +233,10 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPRAckReceived(IN ISession* pi
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
-        if (SendResponseToPrack(SipStatusCode::SC_488) == IMS_FAILURE)
-        {
-            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
-        }
-        return GetStateName();
+        SendResponseToPrack(SipStatusCode::SC_200);
+        // According to RFC 6337, UE must send re-offer.
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
     }
-
-    // TODO: RFC 6337 offer/answer check.
 
     if (SendResponseToPrack(SipStatusCode::SC_200) == IMS_FAILURE)
     {

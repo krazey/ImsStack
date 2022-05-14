@@ -162,6 +162,7 @@ protected:
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsInvalidOfferAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsPreviewOfAnswer(IN ISession* piSession, IN const IMessage* piMessage) const;
+    IMS_BOOL IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const;
     IMS_BOOL IsCallWaiting() const;
     IMS_BOOL IsNeedToReliable(IN IMS_BOOL bIncludeSdp) const;
 
