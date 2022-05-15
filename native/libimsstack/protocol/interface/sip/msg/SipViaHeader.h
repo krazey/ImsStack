@@ -62,8 +62,6 @@ public:
 
     const SIP_CHAR* GetBranch() const;
 
-    SIP_BOOL SetRecvdParam(const SIP_CHAR* pszRecvd);
-
     SIP_BOOL SetBranchParam(const SIP_CHAR* pszBranch);
     SIP_BOOL IsValidHeader() const;
 };
