@@ -437,6 +437,11 @@ IMS_SINT32 MtcCallState::OnSdpReceived(IN ISession* piSession, IN IMessage* piMe
     if (MessageUtil::HasSdp(piMessage) == IMS_FALSE)
     {
         IMS_TRACE_D("OnSdpReceived - No SDP received.", 0, 0, 0);
+        if (IsAnswerMandatory(piSession, piMessage))
+        {
+            IMS_TRACE_E(0, "Answer must be included.", 0, 0, 0);
+            return FAIL_REASON_MEDIA_NEGOFAIL;
+        }
         return FAIL_REASON_NONE;
     }
 
@@ -470,7 +475,7 @@ ResultSetSdp MtcCallState::SetSdpToSend(
         IN IMS_BOOL bAllowReOffer, IN ISession* piSession /* = IMS_NULL*/)
 {
     // TODO: RFC 6337 instead of bAllowReOffer?
-
+    // Need 'Method'/'Request or Response' information of the message to be sent
     if (piSession == IMS_NULL)
     {
         piSession = GetISession();
@@ -735,11 +740,11 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
             if ((nConfig & ISession::CONFIG_IGNORE_SDP_IN_SUBSEQUENT_RESPONSE) !=
                     ISession::CONFIG_NONE)
             {
-                IMS_TRACE_I("IsOfferToIgnore - Ignore a subsequent OFFER in a response", 0, 0, 0);
+                IMS_TRACE_I("IsNeedToIgnore - Ignore a subsequent OFFER in a response", 0, 0, 0);
                 return IMS_TRUE;
             }
 
-            IMS_TRACE_I("IsOfferToIgnore - Handle a subsequent OFFER in a response", 0, 0, 0);
+            IMS_TRACE_I("IsNeedToIgnore - Handle a subsequent OFFER in a response", 0, 0, 0);
             return IMS_FALSE;
         }
     }
@@ -747,7 +752,7 @@ IMS_BOOL MtcCallState::IsNeedToIgnore(IN ISession* piSession, IN const IMessage*
     if (piMessage->GetMethod().Equals(SipMethod::ACK))
     {
         // TODO: isn't this invalid so need to terminate the call drop?
-        IMS_TRACE_I("IsOfferToIgnore - Offer is included in ACK", 0, 0, 0);
+        IMS_TRACE_I("IsNeedToIgnore - Offer is included in ACK", 0, 0, 0);
         return IMS_TRUE;
     }
 
@@ -758,8 +763,6 @@ PROTECTED
 IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
         IN ISession* piSession, IN const IMessage* piMessage) const
 {
-    // TODO: check if no SDP in OFFER_SENT state.
-
     NegotiationState eState = m_objContext.GetMediaManager().GetNegotiationState(piSession);
     if (eState == NegotiationState::STATE_OFFER_RECEIVED)
     {
@@ -771,6 +774,7 @@ IMS_BOOL MtcCallState::IsInvalidOfferAnswer(
     {
         if (piMessage->GetMethod().Equals(SipMethod::INVITE) == IMS_FALSE)
         {
+            // Regarding INVITE case, IsNeedToIgnore() should control.
             if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
             {
                 IMS_TRACE_E(0, "invalid Offer is received.", 0, 0, 0);
@@ -807,6 +811,54 @@ IMS_BOOL MtcCallState::IsPreviewOfAnswer(IN ISession* piSession, IN const IMessa
 
     IMS_TRACE_I("IsPreviewOfAnswer it's a preview. wait the real Answer", 0, 0, 0);
     return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsAnswerMandatory(IN ISession* piSession, IN const IMessage* piMessage) const
+{
+    if (m_objContext.GetMediaManager().GetNegotiationState(piSession) !=
+            NegotiationState::STATE_OFFER_SENT)
+    {
+        return IMS_FALSE;
+    }
+
+    SipMethod eMethod = piMessage->GetMethod();
+    if (eMethod.Equals(SipMethod::INVITE))
+    {
+        if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
+        {
+            if (piMessage->GetStatusCode() == SipStatusCode::SC_200)
+            {
+                // RFC 6337. Table 1. Case 1
+                return IMS_TRUE;
+            }
+        }
+        return IMS_FALSE;
+    }
+
+    if (eMethod.Equals(SipMethod::ACK))
+    {
+        // RFC 6337. Table 1. Case 2
+        return IMS_TRUE;
+    }
+
+    if (eMethod.Equals(SipMethod::PRACK))
+    {
+        // RFC 6337. Table 1. Case 4, 5
+        return IMS_TRUE;
+    }
+
+    if (eMethod.Equals(SipMethod::UPDATE))
+    {
+        if (piMessage->GetMessage()->GetType() == ISipMessage::TYPE_RESPONSE)
+        {
+            // RFC 6337. Table 1. Case 6
+            return IMS_TRUE;
+        }
+        return IMS_FALSE;
+    }
+
+    return IMS_FALSE;
 }
 
 PROTECTED
