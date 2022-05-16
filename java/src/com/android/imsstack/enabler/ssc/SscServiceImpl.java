@@ -24,7 +24,6 @@ import android.os.Process;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
-import android.telephony.ims.ImsSsInfo.Builder;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -40,10 +39,8 @@ import com.android.imsstack.enabler.ssc.data.CfServiceQueryData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CwServiceData;
 import com.android.imsstack.enabler.ssc.data.ErrorResponseData;
-import com.android.imsstack.enabler.ssc.data.OirServiceData;
 import com.android.imsstack.enabler.ssc.data.OipServiceData;
-import com.android.imsstack.enabler.ssc.data.TirServiceData;
-import com.android.imsstack.enabler.ssc.data.TipServiceData;
+import com.android.imsstack.enabler.ssc.data.OirServiceData;
 import com.android.imsstack.enabler.ssc.data.SscData;
 import com.android.imsstack.enabler.ssc.data.SscRequestData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
@@ -51,9 +48,10 @@ import com.android.imsstack.enabler.ssc.data.SscRuleData;
 import com.android.imsstack.enabler.ssc.data.SscRuleElement;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.enabler.ssc.data.TipServiceData;
+import com.android.imsstack.enabler.ssc.data.TirServiceData;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterfaceBase;
 import com.android.imsstack.util.ImsLog;
-
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
@@ -1063,40 +1061,31 @@ public class SscServiceImpl extends UtInterfaceBase {
             ImsLog.d("");
 
             if (data == null) {
-                ImsLog.e("SscServiceData is null !!!");
+                ImsLog.e("SscServiceData is null");
                 return null;
             }
 
             if (data.getSsType() != ESsType.OCB && data.getSsType() != ESsType.ICB) {
-                ImsLog.e("Invalid SStype");
+                ImsLog.e("Invalid SsType");
                 return null;
             }
 
             CbServiceData cbData = (CbServiceData)data;
-            if (cbData.getRuleSet() == null) {
-                ImsLog.e("CB ruleset is null !!!");
+            if (cbData.getRuleSet() == null || cbData.getRuleSet().size() <= 0) {
+                ImsLog.e("CB ruleset is null or empty");
                 ImsSsInfo cbInfo[] = new ImsSsInfo[1];
 
-                // No RuleSet case
-                cbInfo[0] = new ImsSsInfo();
-                // Disabled
-                cbInfo[0].mStatus = 0;
+                // No RuleSet case : status_disable
+                cbInfo[0] = new ImsSsInfo.Builder(SscConstant.STATUS_DISABLE).build();
                 return cbInfo;
             }
 
             int ruleSetSize = cbData.getRuleSet().size();
-            if (ruleSetSize <= 0) {
-                ImsLog.e("CallBarring Data is null !!!");
-                return null;
-            }
-
             ImsSsInfo cbInfo[] = new ImsSsInfo[ruleSetSize];
-
-            // 1. Setting RuleSet
             for (int i = 0; i < ruleSetSize; i++) {
-                cbInfo[i] = new ImsSsInfo();
                 SscRuleData ruleData = cbData.getRuleSet().get(i);
-                setCallBarringInfo(cbInfo[i], ruleData);
+                cbInfo[i] = new ImsSsInfo.Builder(ruleData.getState()).build();
+                ImsLog.d(cbInfo[i].toString());
             }
 
             return cbInfo;
@@ -1147,16 +1136,6 @@ public class SscServiceImpl extends UtInterfaceBase {
             return icbInfo;
         }
 */
-        private void setCallBarringInfo(ImsSsInfo ssInfo, SscRuleData ruleData) {
-            if (ssInfo != null && ruleData != null) {
-                ssInfo.mStatus = ruleData.getState();
-                /* ImsStack-Build_Ut
-                ssInfo.mServiceClass = ruleData.getServiceClass(); */
-                ImsLog.d("CB.mStatus : " + ssInfo.mStatus);
-            } else {
-                ImsLog.e("ImsSsInfo and SscRuleData are null");
-            }
-        }
 /*
         private void setIncomingCallBarringInfo(ImsIcbInfo ssInfo, SscRuleData ruleData) {
             if (ssInfo != null && ruleData != null) {
@@ -1172,68 +1151,54 @@ public class SscServiceImpl extends UtInterfaceBase {
         private ImsCallForwardInfo[] createCallForwardInfo(SscServiceData data) {
             ImsLog.d("");
 
-            // FIXME ::get CF data from SscServiceData
             if (data.getSsType() != ESsType.CF) {
                 ImsLog.e("Invalid SStype");
                 return null;
             }
 
             CfServiceData cfData = (CfServiceData)data;
-            if (cfData.getRuleSet() == null) {
-                ImsLog.e("CF ruleset is null !!!");
+            if (cfData.getRuleSet() == null || cfData.getRuleSet().size() <= 0) {
+                ImsLog.e("CF ruleset is null or empty");
                 ImsCallForwardInfo cfInfo[] = new ImsCallForwardInfo[1];
                 // No RuleSet case
-                cfInfo[0] = new ImsCallForwardInfo();
-                // Can't verify mCondition because Ruleset does not exist
-                cfInfo[0].mCondition = cfData.getCondition();
-                // Disabled
-                cfInfo[0].mStatus = 0;
+                cfInfo[0] = new ImsCallForwardInfo(cfData.getCondition(),
+                        SscConstant.STATUS_DISABLE, ImsCallForwardInfo.TYPE_OF_ADDRESS_UNKNOWN,
+                        SscServiceClassUtil.SERVICE_CLASS_NONE, "", 0);
 
                 return cfInfo;
             }
 
             int ruleSetSize = cfData.getRuleSet().size();
-            if (ruleSetSize <= 0 && cfData.getNoReplyTimer() <= 0) {
-                ImsLog.e("CallForwarding Data is null !!!");
-                return null;
-            }
-
             ImsCallForwardInfo cfInfo[] = new ImsCallForwardInfo[ruleSetSize];
-
-            // 1. Setting RuleSet
             for (int i = 0; i < ruleSetSize; i++) {
-                cfInfo[i] = new ImsCallForwardInfo();
                 SscRuleData ruleData = cfData.getRuleSet().get(i);
+                int reason = ruleData.getSsCondition();
+                int status = ruleData.getState();
+                int serviceClass = ruleData.getServiceClass();
+
+                String number = getValueOfElement(SscXmlFormat.TARGET, ruleData.getActionList());
+                if (TextUtils.isEmpty(number)) {
+                    number = "";
+                    // IR92 - in case of empty target, consider CF is disabled
+                    status = SscConstant.STATUS_DISABLE;
+                }
+
+                int toA = ImsCallForwardInfo.TYPE_OF_ADDRESS_UNKNOWN;
+                if (number.startsWith("+")) {
+                    toA = ImsCallForwardInfo.TYPE_OF_ADDRESS_INTERNATIONAL;
+                }
+
+                int noplyTimerSec = -1;
                 if (ruleData.getSsCondition() == SscConstant.CONDITION_CFNR) {
                     cfInfo[i].mTimeSeconds = cfData.getNoReplyTimer();
-                } else {
-                    cfInfo[i].mTimeSeconds = -1;
                 }
-                setCallForwardInfo(cfInfo[i], ruleData);
+
+                cfInfo[i] = new ImsCallForwardInfo(reason, status, toA, serviceClass, number,
+                        noplyTimerSec);
+                ImsLog.d(cfInfo[i].toString());
             }
 
             return cfInfo;
-        }
-
-        private void setCallForwardInfo(ImsCallForwardInfo cfInfo, SscRuleData ruleData) {
-            cfInfo.mCondition = ruleData.getSsCondition();
-            cfInfo.mStatus = ruleData.getState();
-            String strNumber = getValueOfElement(SscXmlFormat.TARGET, ruleData.getActionList());
-            cfInfo.mServiceClass = ruleData.getServiceClass();
-
-            if (strNumber != null) {
-                if (strNumber.isEmpty()) {
-                    // For IR92
-                    cfInfo.mStatus = SscConstant.STATUS_DISABLE;
-                }
-                cfInfo.mNumber =  strNumber;
-            } else {
-                cfInfo.mNumber = "";
-            }
-
-            ImsLog.d("condition : " + cfInfo.mCondition + ", status : " + cfInfo.mStatus
-                    + ", number : " + cfInfo.mNumber + ", noReplyTImer : " + cfInfo.mTimeSeconds
-                    + ", serviceClass : " + cfInfo.mServiceClass);
         }
 
         private String getValueOfElement(String key, ArrayList<SscRuleElement> elementList) {
@@ -1257,10 +1222,9 @@ public class SscServiceImpl extends UtInterfaceBase {
                 ImsLog.e("Invalid SStype");
                 return null;
             }
-            // Call Waiting pass only one param
+
             ImsSsInfo[] ssInfo = new ImsSsInfo[1];
-            ssInfo[0] = new ImsSsInfo();
-            ssInfo[0].mStatus = data.getState();
+            ssInfo[0] = new ImsSsInfo.Builder(data.getState()).build();
 
             return ssInfo;
         }
