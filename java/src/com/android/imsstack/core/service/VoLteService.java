@@ -2,7 +2,6 @@ package com.android.imsstack.core.service;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.CarrierConfigManager;
@@ -22,8 +21,8 @@ import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.IRegiProcess;
-import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISIMState;
+import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
@@ -32,7 +31,6 @@ import com.android.imsstack.core.agents.dcm.DCGov;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.ImsDbController;
@@ -53,8 +51,8 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
 import com.android.imsstack.provider.ImsStateController;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.CarrierConfigUtils;
@@ -62,8 +60,6 @@ import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.SettingsUtils;
 
 import java.lang.ref.WeakReference;
@@ -425,7 +421,8 @@ public class VoLteService implements IVoLteService {
         ISIMState stg = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotID);
 
         if (stg != null) {
-            stg.requestPSIInfo();
+            // Do not need to call the deprecated PSI value request
+            //stg.requestPSIInfo();
 
             if (stg.isIccLoaded()) {
                 IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotID);
