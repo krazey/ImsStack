@@ -26,6 +26,7 @@ import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
+
 import com.android.imsstack.enabler.media.AudioSessionCallbackHandler;
 import com.android.imsstack.enabler.media.MediaConstants;
 import com.android.imsstack.enabler.media.MediaManagerHelper;
@@ -33,6 +34,7 @@ import com.android.imsstack.enabler.media.MediaSession;
 import com.android.imsstack.enabler.media.MediaSocket;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +99,7 @@ public class AudioSessionHandler  {
              */
             case MediaConstants.REQUEST_OPEN_SESSION:
             {
-                String localIpAddress = parcel.readString16();
+                String localIpAddress = parcel.readString();
                 int localPortNumber = parcel.readInt();
                 ImsLog.v("localIpAddress= " + localIpAddress
                         + " localPortNumber= " + localPortNumber);

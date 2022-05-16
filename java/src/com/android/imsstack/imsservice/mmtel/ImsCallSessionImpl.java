@@ -5,7 +5,6 @@
     --------    --------------          ----------
     20131015    hwangoo.park@           Created
     </table>
-
     Description
 */
 
@@ -26,10 +25,10 @@ import android.telephony.ims.ImsCallSessionListener;
 import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.ImsVideoCallProvider;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.text.TextUtils;
 
-import com.android.ims.internal.IImsVideoCallProvider;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -1030,8 +1029,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     @Override
-    public IImsVideoCallProvider getVideoCallProvider() {
-        return mVideoCallProvider.getInterface();
+    public ImsVideoCallProvider getImsVideoCallProvider() {
+        return mVideoCallProvider;
     }
 
     @Override
