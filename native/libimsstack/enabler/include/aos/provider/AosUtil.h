@@ -117,5 +117,8 @@ private:
 
     IMS_BOOL m_bIsMtkChipset;
     IMS_BOOL m_bIsWifiTest;
+
+private:
+    friend class AosUtilTest;
 };
 #endif  // AOS_UTIL_H_
