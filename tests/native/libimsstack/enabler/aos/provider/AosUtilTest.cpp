@@ -17,27 +17,57 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "IMSList.h"
+#include "INetworkWatcher.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "msg/SipMessage.h"
+#include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
 
-class AosUtilTest : public ::testing::Test {
+using ::testing::Return;
+
+class AosUtilTest : public ::testing::Test
+{
 public:
     AosUtil* pAosUtil;
 
 protected:
-    virtual void SetUp() override {
+    virtual void SetUp() override
+    {
         pAosUtil = new AosUtil();
         ASSERT_TRUE(pAosUtil != nullptr);
     }
 
-    virtual void TearDown() override {
-        if (pAosUtil) {
+    virtual void TearDown() override
+    {
+        if (pAosUtil)
+        {
             delete pAosUtil;
         }
     }
+
+    void SetMtkChipset(IN IMS_SINT32 bIsMtkChipset) { pAosUtil->m_bIsMtkChipset = bIsMtkChipset; }
+
+    void SetWiFiTest(IN IMS_SINT32 bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
 };
 
-TEST_F(AosUtilTest, SetRetryTimeDuration) {
+TEST_F(AosUtilTest, checkSipMsg)
+{
+    EXPECT_EQ(-1, pAosUtil->GetResponseCode(IMS_NULL));
+
+    MockISipMessage objMockSipMsg;
+
+    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(403));
+    EXPECT_EQ(403, pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(200));
+    EXPECT_EQ(200, pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, SetRetryTimeDuration)
+{
+    EXPECT_EQ(30, pAosUtil->CalculateUpperBoundTime(30, 1800, 0));
     EXPECT_LE(30, pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
     EXPECT_GE(1800, pAosUtil->CalculateUpperBoundTime(30, 1800, 1));
 
@@ -46,7 +76,8 @@ TEST_F(AosUtilTest, SetRetryTimeDuration) {
     EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 1));
 }
 
-TEST_F(AosUtilTest, SetRetryTimeDurationExecption) {
+TEST_F(AosUtilTest, SetRetryTimeDurationExecption)
+{
     EXPECT_EQ(1800, pAosUtil->CalculateUpperBoundTime(30, 1800, 30));
     EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(30, 1800, 30));
 
@@ -57,8 +88,8 @@ TEST_F(AosUtilTest, SetRetryTimeDurationExecption) {
     EXPECT_GE(1800, pAosUtil->WaitTimeForFlowRecovery(1800, 1800, 30));
 }
 
-TEST_F(AosUtilTest, CompareList) {
-
+TEST_F(AosUtilTest, CompareList)
+{
     AStringArray leftArray;
     leftArray.AddElement("1234@ims.google.com");
     leftArray.AddElement("sip:1234@ims.google.com");
@@ -86,6 +117,10 @@ TEST_F(AosUtilTest, CompareList) {
     EXPECT_TRUE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_FALSE));
     EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArray, rightArray, IMS_FALSE));
 
+    leftArray.AddElement("+1234@ims.google.com");
+    EXPECT_FALSE(pAosUtil->IsListEqual(leftArray, rightArray, IMS_FALSE));
+    EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArray, rightArray, IMS_FALSE));
+
     EXPECT_TRUE(pAosUtil->IsListEqual(leftArrayOutOfOrder, rightArray, IMS_FALSE));
     EXPECT_FALSE(pAosUtil->IsListEquivalent(leftArrayOutOfOrder, rightArray, IMS_FALSE));
     EXPECT_FALSE(pAosUtil->IsListAllDifferent(leftArrayOutOfOrder, rightArray, IMS_FALSE));
@@ -98,8 +133,8 @@ TEST_F(AosUtilTest, CompareList) {
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_FALSE));
 }
 
-TEST_F(AosUtilTest, CompareListIPv4) {
-
+TEST_F(AosUtilTest, CompareListIPv4)
+{
     AStringArray leftArray;
     leftArray.AddElement("10.168.219.102");
     leftArray.AddElement("10.168.219.104");
@@ -139,8 +174,8 @@ TEST_F(AosUtilTest, CompareListIPv4) {
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
 }
 
-TEST_F(AosUtilTest, CompareListIPv6) {
-
+TEST_F(AosUtilTest, CompareListIPv6)
+{
     AStringArray leftArray;
     leftArray.AddElement("fd29:cc43:7fb9:2:20c:29ff:fe66:b4c7");
     leftArray.AddElement("240a:3:4400:3420::7");
@@ -180,7 +215,8 @@ TEST_F(AosUtilTest, CompareListIPv6) {
     EXPECT_FALSE(pAosUtil->IsStrExistInList(leftArrayNotExist, rightArray, IMS_TRUE));
 }
 
-TEST_F(AosUtilTest, ManageIntList) {
+TEST_F(AosUtilTest, ManageIntList)
+{
     IMSList<IMS_UINT32> reasons;
     IMSList<IMS_UINT32> compareReasons;
     IMSList<IMS_UINT32> combineReasons;
@@ -203,9 +239,11 @@ TEST_F(AosUtilTest, ManageIntList) {
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     EXPECT_TRUE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
+    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
 
     pAosUtil->AddElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, reasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
+    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
 
     pAosUtil->RemoveElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(compareReasons, reasons));
@@ -213,6 +251,7 @@ TEST_F(AosUtilTest, ManageIntList) {
     pAosUtil->RemoveElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
     pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
     EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, compareReasons));
+    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
 
     pAosUtil->CombineLists(reasons, compareReasons, combineReasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));
@@ -223,4 +262,30 @@ TEST_F(AosUtilTest, ManageIntList) {
     pAosUtil->RemoveElementToList(BLOCK_CELLULAR_VOPS_OFF, combineReasons);
     pAosUtil->RemoveElementToList(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE, combineReasons);
     EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, combineReasons));
+}
+
+TEST_F(AosUtilTest, checkNetworkType)
+{
+    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_NR));
+    EXPECT_TRUE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(pAosUtil->IsSupportedNetworkType(NW_REPORT_RADIO_WCDMA));
+
+    EXPECT_TRUE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_LTE));
+    EXPECT_TRUE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_NR));
+    EXPECT_FALSE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_WLAN));
+    EXPECT_FALSE(pAosUtil->IsSupportedNetworkTypeForCellular(NW_REPORT_RADIO_GSM));
+}
+
+TEST_F(AosUtilTest, checkSet)
+{
+    SetMtkChipset(IMS_TRUE);
+    EXPECT_TRUE(pAosUtil->IsMtkChipset());
+    SetMtkChipset(IMS_FALSE);
+    EXPECT_FALSE(pAosUtil->IsMtkChipset());
+
+    SetWiFiTest(IMS_TRUE);
+    EXPECT_TRUE(pAosUtil->IsWifiTest());
+    SetWiFiTest(IMS_FALSE);
+    EXPECT_FALSE(pAosUtil->IsWifiTest());
 }
