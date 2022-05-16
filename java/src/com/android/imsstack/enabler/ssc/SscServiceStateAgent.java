@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.ssc;
 
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.util.ImsLog;
-
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
@@ -27,11 +26,11 @@ public class SscServiceStateAgent {
     private static SscServiceStateAgent sSscServiceStateAgent = new SscServiceStateAgent();
     private HashMap<Integer, SscServiceState> mSscServiceState = new HashMap<>();
 
-    public static SscServiceStateAgent getInstance() {
+    protected static SscServiceStateAgent getInstance() {
         return sSscServiceStateAgent;
     }
 
-    public void init(int slotId) {
+    protected void init(int slotId) {
         if (OperatorInfo.isSlotIdValid(slotId) != true) {
             ImsLog.w("Invalid SlotId(" + slotId + ")");
             return;
@@ -40,7 +39,7 @@ public class SscServiceStateAgent {
         setSscServiceState(slotId, new SscServiceState());
     }
 
-    public void deInit(int slotId) {
+    protected void deInit(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState != null) {
             serviceState.deInit();
@@ -74,7 +73,7 @@ public class SscServiceStateAgent {
         mSscServiceState.remove(slotId);
     }
 
-    public boolean isUtAvailable(int slotId) {
+    protected boolean isUtAvailable(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("isUtAvailable()");
@@ -84,8 +83,7 @@ public class SscServiceStateAgent {
         return serviceState.isUtAvailable();
     }
 
-    // This method called by Transaction
-    public void setErrorResponseCode(int slotId, int responseCode) {
+    protected void setErrorResponseCode(int slotId, int responseCode) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setErrorResponseCode()");
@@ -95,8 +93,17 @@ public class SscServiceStateAgent {
         serviceState.setErrorResponseCode(responseCode);
     }
 
-    // This method called by HTTPConnection
-    public void setDnsQueryFailed(int slotId, boolean input) {
+    protected void setPdnConnectionFailed(int slotId, boolean isPermanent) {
+        SscServiceState serviceState = getSscServiceState(slotId);
+        if (serviceState == null) {
+            ImsLog.i("setPdnConnectionFailed()");
+            return;
+        }
+
+        serviceState.setPdnConnectionFailed(isPermanent);
+    }
+
+    protected void setDnsQueryFailed(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setDnsQueryFailed()");
@@ -106,7 +113,7 @@ public class SscServiceStateAgent {
         serviceState.setDnsQueryFailed(input);
     }
 
-    public void setGbaRequestFailed(int slotId, boolean input) {
+    protected void setGbaRequestFailed(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setGbaRequestFailed()");
@@ -116,17 +123,17 @@ public class SscServiceStateAgent {
         serviceState.setGbaRequestFailed(input);
     }
 
-    public void setPdnConnectionTimerExpired(int slotId, boolean input) {
+    protected void setPdnConnectionTimeout(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("setPdnConnectionTimerExpired()");
+            ImsLog.i("setPdnConnectionTimeout()");
             return;
         }
 
-        serviceState.setPdnConnectionTimerExpired(input);
+        serviceState.setPdnConnectionTimeout(input);
     }
 
-    public void setSocketConnectionExpired(int slotId, boolean input) {
+    protected void setSocketConnectionExpired(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setSocketConnectionExpired()");
@@ -136,7 +143,7 @@ public class SscServiceStateAgent {
         serviceState.setSocketConnectionExpired(input);
     }
 
-    public void setAllSrvAddrTried(int slotId, boolean input) {
+    protected void setAllSrvAddrTried(int slotId, boolean input) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("setAllSrvAddrTried()");
@@ -146,7 +153,7 @@ public class SscServiceStateAgent {
         serviceState.setAllSrvAddrTried(input);
     }
 
-    public boolean getDnsQueryFailed(int slotId) {
+    protected boolean getDnsQueryFailed(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("getDnsQueryFailed()");
@@ -156,7 +163,7 @@ public class SscServiceStateAgent {
         return serviceState.getDnsQueryFailed();
     }
 
-    public boolean getGbaRequestFailed(int slotId) {
+    protected boolean getGbaRequestFailed(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("getGbaRequestFailed()");
@@ -166,17 +173,17 @@ public class SscServiceStateAgent {
         return serviceState.getGbaRequestFailed();
     }
 
-    public boolean getPdnConnectionTimerExpired(int slotId) {
+    protected boolean getPdnConnectionTimeout(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
-            ImsLog.i("getPdnConnectionTimerExpired()");
+            ImsLog.i("getPdnConnectionTimeout()");
             return true;
         }
 
-        return serviceState.getPdnConnectionTimerExpired();
+        return serviceState.getPdnConnectionTimeout();
     }
 
-    public boolean getSocketConnectionExpired(int slotId) {
+    protected boolean getSocketConnectionExpired(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("getSocketConnectionExpired()");
@@ -186,7 +193,7 @@ public class SscServiceStateAgent {
         return serviceState.getSocketConnectionExpired();
     }
 
-    public boolean getAllSrvAddrTried(int slotId) {
+    protected boolean getAllSrvAddrTried(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("getAllSrvAddrTried()");
@@ -196,7 +203,7 @@ public class SscServiceStateAgent {
         return serviceState.getAllSrvAddrTried();
     }
 
-    public boolean getPdnConnectionFailed(int slotId) {
+    protected boolean getPdnConnectionFailed(int slotId) {
         SscServiceState serviceState = getSscServiceState(slotId);
         if (serviceState == null) {
             ImsLog.i("getPdnConnectionFailed()");

@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.os.Looper;
-import android.testing.TestableLooper;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,6 +95,14 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
+    public void testSetPdnConnectionFailed() {
+        final boolean input = true;
+        mSscServiceStateAgent.setPdnConnectionFailed(SLOT_0, input);
+
+        verify(mockSscServiceState).setPdnConnectionFailed(eq(input));
+    }
+
+    @Test
     public void testSetDnsQueryFailed() {
         final boolean input = true;
         mSscServiceStateAgent.setDnsQueryFailed(SLOT_0, input);
@@ -112,11 +119,11 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
-    public void testSetPdnConnectionTimerExpired() {
+    public void testSetPdnConnectionTimeout() {
         final boolean input = false;
-        mSscServiceStateAgent.setPdnConnectionTimerExpired(SLOT_0, input);
+        mSscServiceStateAgent.setPdnConnectionTimeout(SLOT_0, input);
 
-        verify(mockSscServiceState).setPdnConnectionTimerExpired(eq(input));
+        verify(mockSscServiceState).setPdnConnectionTimeout(eq(input));
     }
 
     @Test
@@ -150,10 +157,10 @@ public class SscServiceStateAgentTest {
     }
 
     @Test
-    public void testGetPdnConnectionTimerExpired() {
-        mSscServiceStateAgent.getPdnConnectionTimerExpired(SLOT_0);
+    public void testGetPdnConnectionTimeout() {
+        mSscServiceStateAgent.getPdnConnectionTimeout(SLOT_0);
 
-        verify(mockSscServiceState).getPdnConnectionTimerExpired();
+        verify(mockSscServiceState).getPdnConnectionTimeout();
     }
 
     @Test

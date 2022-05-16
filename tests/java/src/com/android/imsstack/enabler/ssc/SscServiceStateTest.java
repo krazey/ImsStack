@@ -30,6 +30,11 @@ import android.telephony.CarrierConfigManager;
 import com.android.imsstack.core.agents.AlarmTimerAgent;
 import com.android.imsstack.core.agents.ConfigAgent;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
+import com.android.imsstack.core.agents.dcm.Apn;
+import com.android.imsstack.core.agents.dcm.DCNetWatcher;
+import com.android.imsstack.core.agents.dcmif.EApnType;
+import com.android.imsstack.core.agents.dcmif.IApn;
+import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.config.CarrierConfig;
 
 import org.junit.After;
@@ -49,8 +54,10 @@ public class SscServiceStateTest {
     private final int mBlockTimer = 1;
 
     @Mock private AlarmTimerAgent mMockAlarmTimer;
+    @Mock private Apn mMockApn;
     @Mock private CarrierConfig mMockCarrierConfig;
     @Mock private ConfigAgent mMockConfigAgent;
+    @Mock private DCNetWatcher mMockDcNetWatcher;
 
     @Before
     public void setup() {
@@ -142,6 +149,27 @@ public class SscServiceStateTest {
         mSscServiceState.setErrorResponseCode(errorCode);
         assertEquals(false, mSscServiceState.isUtAvailable());
         verifyNoMoreInteractions(mMockAlarmTimer);
+        handleAirplaneModeOn();
+    }
+
+    @Test
+    public void testSetPdnConnectionFailed_temporaryCause() {
+        assertEquals(true, mSscServiceState.isUtAvailable());
+
+        mSscServiceState.setPdnConnectionFailed(false);
+        verify(mMockAlarmTimer).startTimer(eq((long) mTimerId), eq((long) mBlockTimer * 60 * 1000));
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        handleBlockTimerExpired();
+    }
+
+    @Test
+    public void testSetPdnConnectionFailed_permanentCause() {
+        assertEquals(true, mSscServiceState.isUtAvailable());
+
+        mSscServiceState.setPdnConnectionFailed(true);
+        assertEquals(false, mSscServiceState.isUtAvailable());
+        verifyNoMoreInteractions(mMockAlarmTimer);
+        handleAirplaneModeOn();
     }
 
     @Test
@@ -165,12 +193,12 @@ public class SscServiceStateTest {
     }
 
     @Test
-    public void testSetPdnConnectionTimerExpired() {
+    public void testSetPdnConnectionTimeout() {
         assertEquals(true, mSscServiceState.isUtAvailable());
 
-        mSscServiceState.setPdnConnectionTimerExpired(true);
+        mSscServiceState.setPdnConnectionTimeout(true);
         handleTemporaryBlockReason();
-        assertEquals(true, mSscServiceState.getPdnConnectionTimerExpired());
+        assertEquals(true, mSscServiceState.getPdnConnectionTimeout());
         handleBlockTimerExpired();
     }
 
@@ -182,17 +210,6 @@ public class SscServiceStateTest {
         handleTemporaryBlockReason();
         assertEquals(true, mSscServiceState.getSocketConnectionExpired());
         handleBlockTimerExpired();
-    }
-
-    @Test
-    public void testPdnConnectionFailure_permanentSmCause() {
-        // TODO: need mock Apn class
-    }
-
-    @Test
-    public void testPdnConnectionFailure_temporarySmCause() {
-        // TODO: need mock Apn class
-        // getPdnConnectionFailed()
     }
 
     private Message getMessage(int what) {
@@ -210,10 +227,29 @@ public class SscServiceStateTest {
         assertEquals(true, mSscServiceState.isUtAvailable());
     }
 
+    private void handleAirplaneModeOn() {
+        when(mMockDcNetWatcher.isAirplaneMode()).thenReturn(true);
+        mSscServiceState.mHandler
+                .handleMessage(getMessage(SscServiceState.EVENT_AIRPLANE_MODE_CHANGED));
+
+        verify(mMockApn).resetESMCausePermanentFailure();
+        assertEquals(true, mSscServiceState.isUtAvailable());
+    }
+
     private class FakeSscServiceState extends SscServiceState {
         @Override
         protected IAlarmTimer getTimerAgent() {
             return mMockAlarmTimer;
+        }
+
+        @Override
+        protected IApn getApn(EApnType apnType) {
+            return mMockApn;
+        }
+
+        @Override
+        protected IDCNetWatcher getDcNetWatcher() {
+            return mMockDcNetWatcher;
         }
     }
 }

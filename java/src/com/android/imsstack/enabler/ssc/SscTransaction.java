@@ -24,7 +24,6 @@ import android.util.Pair;
 
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.TRMAgent;
-import com.android.imsstack.core.agents.agentif.IAlarmTimer;
 import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
@@ -38,28 +37,8 @@ import org.w3c.dom.Document;
 import java.lang.ref.WeakReference;
 
 public class SscTransaction {
-    // Constants--------------------------------------------------
-    public static final int EVENT_DATA_STATE_CHANGED        = 1001;
-    //public static final int EVENT_REQUEST_SUCCESS           = 1002;
-    //public static final int EVENT_REQUEST_FAILED            = 1003;
+    public static final int EVENT_SRV_RETRY_REQUIRED        = 1001;
 
-    public static final int EVENT_CONNECTION_TIMER_EXPIRED  = 1101;
-
-    //public static final int EVENT_CONNECTION_FAILED         = 2001;
-    //public static final int EVENT_DATA_IS_NOT_VALID         = 2002;
-    //public static final int EVENT_AUTHENTICATION_FAILED     = 2003;
-    //public static final int EVENT_DB_UPDATE_FAILED          = 2004;
-    //public static final int EVENT_START_PUT_TRANSACTION     = 2005;
-    //public static final int EVENT_GOT_HTTP_REQUEST_RESPONSE = 2006;
-    public static final int EVENT_SRV_RETRY_REQUIRED        = 2007;
-
-    protected static final int CONNECTION_TIMER_VALUE       = 5000;
-    protected static final int CONNECTION_RETRY_NUMBER      = 5;
-
-    protected static final int HTTP_GET_REQUEST             = 10000;
-    protected static final int HTTP_PUT_REQUEST             = 10001;
-
-    // Variables--------------------------------------------------
     protected SscXmlGov mXMLGov = null;
 
     protected Handler mTransactionHandler = null;
@@ -68,7 +47,6 @@ public class SscTransaction {
     protected Thread mSscTransactionThread = null;
     protected MmtelTransaction mTransaction = null;
 
-    protected int mConnectionRetryCounter = 0;
     protected int mEventNumber = 0;
     protected int mTransactionId = 0;
     protected ESsType mSsType = ESsType.NONE;
@@ -77,8 +55,6 @@ public class SscTransaction {
     protected int mTimerId = -1;
     protected int mSlotId = -1;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
     public SscTransaction(int slotId, Handler handler) {
         mSlotId = slotId;
         mSscServiceImplHandler = handler;
@@ -100,8 +76,7 @@ public class SscTransaction {
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
         mSsType = data.getSsType();
-        mRequestType = HTTP_GET_REQUEST;
-        mConnectionRetryCounter = CONNECTION_RETRY_NUMBER;
+        mRequestType = SscHttpConnection.HTTP_GET_REQUEST;
         mSscTransactionThread.start();
     }
 
@@ -113,8 +88,7 @@ public class SscTransaction {
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
         mSsType = data.getSsType();
-        mRequestType = HTTP_PUT_REQUEST;
-        mConnectionRetryCounter = CONNECTION_RETRY_NUMBER;
+        mRequestType = SscHttpConnection.HTTP_PUT_REQUEST;
         mSscTransactionThread.start();
     }
 
@@ -165,12 +139,8 @@ public class SscTransaction {
 
             ImsLog.d("SscTransactionThread is running ... (" + android.os.Process.myTid() + ")");
             mTransactionHandler = new TransactionHandler(SscTransaction);
-            ISscNetConnectionGov netConnectionGov = SscNetConnectionGov.getInstance();
-            ISscHttpConnectionGov httpConnection = SscHttpConnectionGov.getInstance();
-
-            // TODO : null checking???
-            netConnectionGov.setTransactionHandler(mSlotId, mTransactionHandler);
-            httpConnection.setTransactionHandler(mSlotId, mTransactionHandler);
+            SscNetConnectionGov.getInstance().setTransactionHandler(mSlotId, mTransactionHandler);
+            SscHttpConnectionGov.getInstance().setTransactionHandler(mSlotId, mTransactionHandler);
             mTransaction.startTransaction();
 
             Looper.loop();
@@ -216,9 +186,7 @@ public class SscTransaction {
                 netConnectionGov.refreshConnectionTimer(mSlotId);
             } else {
                 ImsLog.i(mSlotId, "PDN is not connected. Trying to Connect");
-                if (netConnectionGov.connect(mSlotId)) {
-                    startConnectionTimer(CONNECTION_TIMER_VALUE, mSsType);
-                } else {
+                if (!netConnectionGov.connect(mSlotId)) {
                     ImsLog.i(mSlotId, "PDN connection fail");
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 }
@@ -426,53 +394,6 @@ public class SscTransaction {
         return true;
     }
 
-    // Timer for waiting pdn connection
-    protected void startConnectionTimer(int duration, ESsType ssType) {
-        IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
-        if (atm == null) {
-            ImsLog.e("AlamTimerManager is null");
-            return;
-        }
-
-        mTimerId = atm.getTimerId();
-        if (mTimerId <= 0) {
-            ImsLog.e("Validity timer id is invalid");
-            return;
-        }
-
-        atm.registerForTimerExpired(mTimerId, mTransactionHandler, EVENT_CONNECTION_TIMER_EXPIRED,
-                (Object)ssType);
-
-        if (!atm.startTimer(mTimerId, duration)) {
-            stopConnectionTimer(false);
-            ImsLog.d("Starting a validity timer failed");
-            return;
-        }
-
-        ImsLog.i("Validity timer is started :: slotId/tid=" + mSlotId + "/" + mTimerId
-                + ", duration=" + duration);
-    }
-
-    protected void stopConnectionTimer(boolean stopRequired) {
-        if (mTimerId <= 0) {
-            return;
-        }
-
-        IAlarmTimer atm = (IAlarmTimer)AgentFactory.getAgent(AgentFactory.ALARM_TIMER, mSlotId);
-        if (atm == null) {
-            ImsLog.e("AlamTimerManager is null");
-            return;
-        }
-
-        if (stopRequired) {
-            atm.stopTimer(mTimerId);
-        }
-
-        atm.unregisterForTimerExpired(mTimerId, mTransactionHandler);
-
-        mTimerId = (-1);
-    }
-
     public static class TransactionHandler extends Handler {
         private final WeakReference<SscTransaction> mService;
 
@@ -493,67 +414,35 @@ public class SscTransaction {
         ImsLog.d("SscTransactionHandler - what=" + msg.what);
 
         switch (msg.what) {
-        case EVENT_DATA_STATE_CHANGED:
-            ImsLog.d("Data state has changed");
-            stopConnectionTimer(true);
-//            restart connection timer
-//            startConnectionTimer(CONNECTION_TIMER_VALUE);
-            if (mSscTransactionThread == null) {
-                ImsLog.e("mSscTransactionThread is null");
-                return;
-            }
-
-            // All request retry counter is consumed,
-            // then request triggered by UI only can be reset the retry counter value.
-//            mConnectionRetryCounter = 2;
-
-            mTransaction.startTransaction();
-            break;
-
-        case EVENT_CONNECTION_TIMER_EXPIRED:
-            ImsLog.d("Connection Timer Expired");
-            ImsLog.w("mConnectionRetryCounter : " + mConnectionRetryCounter);
-
-            if (SscServiceStateAgent.getInstance().getPdnConnectionFailed(mSlotId)) {
-                ImsLog.d("XCAP PDN connection failed - stop transaction");
-
-                stopConnectionTimer(true);
-
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-            } else if (mConnectionRetryCounter > 0) {
-                mConnectionRetryCounter--;
-                mTransaction.startTransaction();
-            } else {
-                ISscNetConnectionGov netConnectionGov = SscNetConnectionGov.getInstance();
-                if (netConnectionGov != null) {
-                    netConnectionGov.disconnect(mSlotId);
+            case SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED:
+                ImsLog.d("Data state has changed");
+                if (mSscTransactionThread == null) {
+                    ImsLog.e("mSscTransactionThread is null");
+                    return;
                 }
-                stopConnectionTimer(true);
-                SscServiceStateAgent.getInstance().setPdnConnectionTimerExpired(mSlotId, true);
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-            }
-            break;
-/*
-        case EVENT_GOT_HTTP_REQUEST_RESPONSE :
-            ImsLog.d("GOT_HTTP_REQUEST_RESPONSE");
-            String strResponseMsg = (String) msg.obj;
-            ImsLog.d("strResponseMsg : " + strResponseMsg);
-            break;
-*/
-        case EVENT_SRV_RETRY_REQUIRED :
-            /* TODO: check when implementing NAPTR/SRV
-            if (SscServiceStateAgent.getInstance().getAllSrvAddrTried(mSlotId) == true) {
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-            } else {
-                SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);
                 mTransaction.startTransaction();
-            }
-             */
-            break;
-
-        default:
-            ImsLog.e("Unhanddled Message :" + msg.what);
-            break;
+                break;
+            case SscNetConnection.EVENT_PDN_CONNECTION_FAILED:
+                ImsLog.d("Connection Failed");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                break;
+            case SscNetConnection.EVENT_PDN_CONNECTION_TIMEOUT:
+                ImsLog.d("Connection Timeout");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                break;
+            /* TODO: check when implementing NAPTR/SRV
+            case EVENT_SRV_RETRY_REQUIRED:
+                if (SscServiceStateAgent.getInstance().getAllSrvAddrTried(mSlotId) == true) {
+                    sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                } else {
+                    SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);
+                    mTransaction.startTransaction();
+                }
+                break;
+            */
+            default:
+                ImsLog.e("Unhanddled Message :" + msg.what);
+                break;
         }
     }
 }
