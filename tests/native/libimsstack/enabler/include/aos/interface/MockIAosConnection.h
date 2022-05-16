@@ -14,7 +14,6 @@ public:
     MOCK_METHOD(void, Deactivate, (), (override));
     MOCK_METHOD(IMS_UINT32, GetState, (), (override));
     MOCK_METHOD(IMS_SINT32, GetConnectionType, (), (override));
-    MOCK_METHOD(IMS_SINT32, GetPreferredIpVersion, (), (override));
     MOCK_METHOD(void, SetListener, (IN IAosConnectionListener* piListener), (override));
     MOCK_METHOD(void, RemoveListener, (IN IAosConnectionListener* piListener), (override));
     MOCK_METHOD(IMS_SINT32, GetMtu, (), (override));

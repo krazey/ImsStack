@@ -30,7 +30,6 @@ public:
     virtual IMS_UINT32 GetState() = 0;
 
     virtual IMS_SINT32 GetConnectionType() = 0;
-    virtual IMS_SINT32 GetPreferredIpVersion() = 0;
 
     virtual void SetListener(IN IAosConnectionListener* piListener) = 0;
     virtual void RemoveListener(IN IAosConnectionListener* piListener) = 0;
