@@ -273,6 +273,8 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         if ((callAttributes & FLAG_MO) != 0) {
             setDetails(Details.MO, true);
+        } else {
+            setDetails(Details.ON_PRE_INCOMING, true);
         }
 
         if ((callAttributes & FLAG_EMERGENCY) != 0) {
@@ -1564,8 +1566,6 @@ public class MtcCall extends Call implements ConferenceTracker {
             } else if (!isTerminatedEvent && isTerminated()) {
                 // Don't handle any events from now.
                 log("Call is already terminated");
-                // FIXME: Is it correct to return here?
-                // return;
             }
 
             switch (msg) {
@@ -1681,6 +1681,7 @@ public class MtcCall extends Call implements ConferenceTracker {
                     break;
                 }
                 case IUMtcCall.INCOMING_CALL_RECEIVED: {
+                    setDetails(Details.ON_PRE_INCOMING, false);
 
                     IncomingMtcCall incomingCall = new IncomingMtcCall(parcel);
 
@@ -1827,7 +1828,9 @@ public class MtcCall extends Call implements ConferenceTracker {
             // To handle the glare condition or wait for the media resource release
             mTerminationReason = new FailInfo(failInfo);
 
-            mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
+            if (!isOnPreIncoming()) {
+                mCT.updateCallState(MtcCall.this, CallTracker.CALL_EVENT_TERMINATED, null);
+            }
 
             if (mListener != null) {
                 mListener.onCallStartFailed(MtcCall.this, failInfo);

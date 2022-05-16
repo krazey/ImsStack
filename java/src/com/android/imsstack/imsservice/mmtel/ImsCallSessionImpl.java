@@ -3396,6 +3396,13 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
+            if (call.isOnPreIncoming()) {
+                log("closeInternal on ON_PRE_INCOMING");
+                setState(ImsCallSession.State.TERMINATED);
+                closeInternal(ImsCallSessionImpl.this);
+                return;
+            }
+
             ImsCallUtils.removeCallExtra(mCallProfile, ImsCallProfileEx.EXTRA_MO_ALERTING);
 
             ImsCallUtils.refineFailInfoForReason(mCallContext, mCallProfile, failInfo);
@@ -4341,37 +4348,33 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 return;
             }
 
-            if (type == IUMtcCall.NOTIFY_REMOTE_MEDIA) {
-                // send intent for 3rd party application
-            } else {
-                log("onCallInfoUpdated :: type=" + type + ", strValue=" + strValue
-                        + ", intValue=" + intValue + ", boolValue=" + booleanValue);
+            log("onCallInfoUpdated :: type=" + type + ", strValue=" + strValue
+                    + ", intValue=" + intValue + ", boolValue=" + booleanValue);
 
-                if (type == IUMtcCall.INFO_TYPE_USSD) {
-                    mCallback.invokeUssdMessageReceived(
-                            ImsCallSessionImpl.this, intValue, strValue);
-                } else if ((type == IUMtcCall.INFO_TYPE_MEDIA_VIDEO_LOWEST_BIT_RATE)
-                        || (type == IUMtcCall.INFO_TYPE_MEDIA_VIDEO_NO_DATA)) {
-                    if (mVideoCallSession != null) {
-                        mVideoCallSession.handleCallSessionEvent(type);
-                    }
-                } else if (type == IUMtcCall.INFO_TYPE_MEDIA_DTMF_RECEIVED) {
-                    boolean sendDtmfTone = false;
+            if (type == IUMtcCall.INFO_TYPE_USSD) {
+                mCallback.invokeUssdMessageReceived(
+                        ImsCallSessionImpl.this, intValue, strValue);
+            } else if ((type == IUMtcCall.INFO_TYPE_MEDIA_VIDEO_LOWEST_BIT_RATE)
+                    || (type == IUMtcCall.INFO_TYPE_MEDIA_VIDEO_NO_DATA)) {
+                if (mVideoCallSession != null) {
+                    mVideoCallSession.handleCallSessionEvent(type);
+                }
+            } else if (type == IUMtcCall.INFO_TYPE_MEDIA_DTMF_RECEIVED) {
+                boolean sendDtmfTone = false;
 
-                    if (CallFeature.isReceivedDtmfTonePlayRequired(mCallContext.getSlotId())) {
-                        sendDtmfTone = true;
+                if (CallFeature.isReceivedDtmfTonePlayRequired(mCallContext.getSlotId())) {
+                    sendDtmfTone = true;
 
-                        if (ImsGlobal.isOperator(mCallContext.getSlotId(), "VZW")) {
-                            if (!ImsCallUtils.isEmergencyCall(mCallProfile)) {
-                                sendDtmfTone = false;
-                            }
+                    if (ImsGlobal.isOperator(mCallContext.getSlotId(), "VZW")) {
+                        if (!ImsCallUtils.isEmergencyCall(mCallProfile)) {
+                            sendDtmfTone = false;
                         }
                     }
+                }
 
-                    if (sendDtmfTone) {
-                        char dtmf = strValue.charAt(0);
-                        mCallback.invokeDtmfReceived(ImsCallSessionImpl.this, dtmf);
-                    }
+                if (sendDtmfTone) {
+                    char dtmf = strValue.charAt(0);
+                    mCallback.invokeDtmfReceived(ImsCallSessionImpl.this, dtmf);
                 }
             }
         }

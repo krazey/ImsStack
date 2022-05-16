@@ -413,8 +413,10 @@ public final class MtcCallManager implements ICallStateTracker {
 
         if (node != null) {
             mPendingCallNodes.remove(node);
-            doCallStateChanged();
-            mCallStateNotifier.onCallDestroyed(call);
+            if (!call.isOnPreIncoming()) {
+                doCallStateChanged();
+                mCallStateNotifier.onCallDestroyed(call);
+            }
             logi("onCallDestroyed :: pendingCalls=" + mPendingCallNodes.size());
             return;
         }
@@ -436,7 +438,7 @@ public final class MtcCallManager implements ICallStateTracker {
     }
 
     private synchronized void onCallIncomingReceived(Call call) {
-        CallNode node = getCallNode(call.getNativeCallId());
+        CallNode node = getPendingCallNode(call.getNativeCallId());
 
         if (node != null) {
             mPendingCallNodes.remove(node);

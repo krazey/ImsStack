@@ -271,6 +271,10 @@ public class Call implements Closeable {
         return mCallDetails.is(Details.TERMINATED_BY_AUTO_REJECTED_CALL);
     }
 
+    public boolean isOnPreIncoming() {
+        return mCallDetails.is(Details.ON_PRE_INCOMING);
+    }
+
     public void setCallConnectionId(int ccId) {
         setCallExtraInt(EXTRA_CALL_CONNECTION_ID, ccId);
     }
@@ -529,6 +533,11 @@ public class Call implements Closeable {
          * as it is rejected by IMS internal logic without alerting to UI.
          */
         public static final int TERMINATED_BY_AUTO_REJECTED_CALL = 0x00000100;
+        /**
+         * Indicates that this call is pre-incoming status.
+         * This status will be maintained until receiving INCOMING_CALL_RECEIVED event.
+         */
+        public static final int ON_PRE_INCOMING = 0x00000200;
 
         private int mDetails = NONE;
 
@@ -567,6 +576,8 @@ public class Call implements Closeable {
             sb.append(is(ONCE_IN_CALL) ? "Y" : "N");
             sb.append(", mo=");
             sb.append(is(MO) ? "Y" : "N");
+            sb.append(", onPreIncoming=");
+            sb.append(is(ON_PRE_INCOMING) ? "Y" : "N");
             sb.append(" ]");
 
             return sb.toString();
