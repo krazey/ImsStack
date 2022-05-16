@@ -18,7 +18,6 @@ package com.android.imsstack.enabler.acs;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.telephony.SubscriptionManager;
 import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
@@ -131,10 +130,6 @@ public class AcService {
      * @return Instance of the AcService
      */
     public static AcService getInstance(int phoneId) {
-        if (!SubscriptionManager.isValidPhoneId(phoneId)) {
-            throw new IllegalArgumentException("Invalid PhoneId");
-        }
-
         AcService acService;
         synchronized (INSTANCES) {
             acService = INSTANCES.get(phoneId);
