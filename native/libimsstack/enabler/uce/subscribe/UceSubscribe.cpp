@@ -60,6 +60,7 @@ UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN CONST AString& str
         m_strAppName(strAppName),
         m_nSimSlot(nSimSlot),
         m_nConnectedServices(conectedService),
+        m_strRemoteUser(AString::ConstNull()),
         m_eState(ON),
         m_pUceXmlDocumentHelperThread(IMS_NULL),
         m_nThreadRunningCompleted(0),
@@ -67,7 +68,6 @@ UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN CONST AString& str
         m_nAnonymousMethod(0),
         m_eQueryType(QUERY_CAPABILITY_TYPE_NONE),
         m_bSubscriptionTerminated(IMS_FALSE),
-        m_strRemoteUser(AString::ConstNull()),
         m_strUceSubscribeManagerName(strManagerName),
         m_pRLMIComposer(IMS_NULL),
         m_nWaitNotiTimerValue(15000),
@@ -79,7 +79,7 @@ UceSubscribe::UceSubscribe(IN ICoreService* piCoreService, IN CONST AString& str
     if (m_piCoreService == IMS_NULL)
     {
         IMS_TRACE_E(0, "[ERROR]UceSubscribe - m_piCoreService is NULL", 0, 0, 0);
-        return;
+        // return;
     }
     m_strXMLDocumentHelperThreadName =
             AString().Sprintf("UceXmlDocumentHelperThread%d", GetSlotId());
@@ -438,10 +438,14 @@ IMS_BOOL UceSubscribe::OnMessage(IN IMSMSG& objMsg)
 
     IMSList<AString> objPidfXmls = *(IMSList<AString>*)objMsg.nLparam;
 
-    if (pNonCapabilities->GetSize() != 0)
+    if (pNonCapabilities != IMS_NULL)
     {
-        SendSubscribeResourceTerminatedInd(pNonCapabilities);
+        if (pNonCapabilities->GetSize() != 0)
+        {
+            SendSubscribeResourceTerminatedInd(pNonCapabilities);
+        }
     }
+
     if (objPidfXmls.GetSize() != 0)
     {
         SendPresenceNotifyInd(objPidfXmls);
@@ -563,14 +567,14 @@ IMS_BOOL UceSubscribe::StateON_SingleSubscribeRequested(IN IMSMSG& objMsg)
     }
     if (CreateSubscription(m_strRemoteUser) != IMS_TRUE)
     {
-        IMS_TRACE_I("StateON_SingleSubscritionReq:CreateSubscription() is failed", 0, 0, 0);
+        IMS_TRACE_I("StateON_SingleSubscribeRequested:CreateSubscription() is failed", 0, 0, 0);
         SendSubscribeCommandErrorInd(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
         SubscribeTerminated();
         return IMS_TRUE;
     }
     if (SetHeaderForSingleSubscription(GetISIPMessage()) != IMS_TRUE)
     {
-        IMS_TRACE_I("StateON_SingleSubscritionReq:SetHeaderForSingleSubscription() is "
+        IMS_TRACE_I("StateON_SingleSubscribeRequested:SetHeaderForSingleSubscription() is "
                     "failed",
                 0, 0, 0);
         SendSubscribeCommandErrorInd(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
@@ -579,12 +583,13 @@ IMS_BOOL UceSubscribe::StateON_SingleSubscribeRequested(IN IMSMSG& objMsg)
     }
     if (SendSingleSubscribe() != IMS_TRUE)
     {
-        IMS_TRACE_I("StateON_SingleSubscritionReq:SendSingleSubscribe() is failed", 0, 0, 0);
+        IMS_TRACE_I("StateON_SingleSubscribeRequested:SendSingleSubscribe() is failed", 0, 0, 0);
         SendSubscribeCommandErrorInd(IUUceService::COMMAND_CODE_GENERIC_FAILURE);
         SubscribeTerminated();
         return IMS_TRUE;
     }
     SetState(SUBSCRIBING);
+    CreateXMLDocumentHelperThread();
     return IMS_TRUE;
 }
 
@@ -641,6 +646,7 @@ IMS_BOOL UceSubscribe::StateON_ListSubscribeRequested(IN IMSMSG& objMsg)
     }
     IMS_TRACE_I("Send list users size [%d]", m_objRemoteUsers.GetSize(), 0, 0);
     SetState(SUBSCRIBING);
+    CreateXMLDocumentHelperThread();
     return IMS_TRUE;
 }
 
@@ -725,7 +731,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeFailed(IN IMSMSG& objMsg)
         IMS_TRACE_I("StateSUBSCRIBING_SubscribeFailed:IMessage is null", 0, 0, 0);
         SendSubscribeResponseInd(nErrorResponse, "Request Timeout", 0, "");
         SubscribeTerminated();
-        SetState(ON);
         return IMS_TRUE;
     }
     ISipMessage* piSIPMessage = piMessage->GetMessage();
@@ -734,7 +739,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeFailed(IN IMSMSG& objMsg)
         IMS_TRACE_I("StateSUBSCRIBING_SubscribeFailed:ISipMessage is null", 0, 0, 0);
         SendSubscribeResponseInd(nErrorResponse, "Request Timeout", 0, "");
         SubscribeTerminated();
-        SetState(ON);
         return IMS_TRUE;
     }
 
@@ -787,7 +791,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeFailed(IN IMSMSG& objMsg)
         SendSubscribeResponseInd(nErrorResponse, "Request Timeout", 0, "");
     }
     SubscribeTerminated();
-    SetState(ON);
     return IMS_TRUE;
 }
 
@@ -800,7 +803,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_SubscribeTerminated(IN IMSMSG& objMsg)
     {
         SendSubscribeResponseInd(SipStatusCode::SC_408, "Request Timeout", 0, "");
         SubscribeTerminated();
-        SetState(ON);
     }
     else
     {
@@ -831,7 +833,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBING_NotifyReceived(IN IMSMSG& objMsg)
     {
         SendSubscribeResponseInd(SipStatusCode::SC_408, "Request Timeout", 0, "");
         SubscribeTerminated();
-        SetState(ON);
         return IMS_TRUE;
     }
     IMS_TRACE_I("StateSUBSCRIBING_NotifyInd:m_nThreadRunningCompleted [%d]",
@@ -848,7 +849,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_AoSDisConnected(IN IMSMSG& objMsg)
     {
         SendSubscribeTerminatedInd();
         SubscribeTerminated();
-        SetState(ON);
     }
     else
     {
@@ -868,7 +868,6 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_SubscribeTerminated(IN IMSMSG& objMsg)
     {
         SendSubscribeTerminatedInd();
         SubscribeTerminated();
-        SetState(ON);
     }
     else
     {
@@ -900,12 +899,19 @@ IMS_BOOL UceSubscribe::StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg)
     if (HandleNotifyInd(piSIPMessage) == IMS_FALSE && m_nThreadRunningCompleted == 0)
     {
         SubscribeTerminated();
-        SetState(ON);
         return IMS_TRUE;
     }
     IMS_TRACE_I("StateSUBSCRIBED_NotifyReceived:nThreadRunningCompleted [%d]",
             m_nThreadRunningCompleted, 0, 0);
     return IMS_TRUE;
+}
+
+void UceSubscribe::SetState(IMS_UINT32 _eState)
+{
+    IMS_TRACE_I(
+            "SetState:State [ %s ] -> [ %s ]", StateToString(m_eState), StateToString(_eState), 0);
+    m_eState = _eState;
+    IMSStateMachine::SetState(m_eState);
 }
 
 PRIVATE
@@ -926,7 +932,7 @@ void UceSubscribe::CreateXMLDocumentHelperThread()
         m_pUceXmlDocumentHelperThread = new UceXmlDocumentHelperThread(GetName(), m_nSimSlot);
         if (m_pUceXmlDocumentHelperThread != IMS_NULL)
         {
-            m_pUceXmlDocumentHelperThread->Start(m_strXMLDocumentHelperThreadName);
+            m_pUceXmlDocumentHelperThread->Start(m_strXMLDocumentHelperThreadName, m_nKey);
         }
     }
 }
@@ -986,32 +992,6 @@ void UceSubscribe::SubscribeTerminated()
     IMSMSG objUIMsg(IUUceService::UCE_SUBSCRIBE_DELETED_IND, 0, reinterpret_cast<IMS_UINTP>(this));
     MessageService::PostMessage(m_strUceSubscribeManagerName, objUIMsg);
     SetState(ON);
-}
-
-IMS_BOOL UceSubscribe::SetState(IMS_UINT32 _eState)
-{
-    IMS_TRACE_I("SetState:State [ %s ] -> [ %s ]", StateToString(), StateToString(m_eState), 0);
-    m_eState = _eState;
-    IMSStateMachine::SetState(m_eState);
-    return IMS_TRUE;
-}
-
-const IMS_CHAR* UceSubscribe::StateToString()
-{
-    static const char* szState[] = {
-            "ON",
-            "SUBSCRIBING",
-            "SUBSCRIBED",
-            "ERROR",
-    };
-
-    if (sizeof(szState) / sizeof(char*) - 1 <= m_eState)
-    {
-        IMS_TRACE_E(0, "StateToString:State Error", 0, 0, 0);
-        return szState[sizeof(szState) / sizeof(char*) - 1];
-    }
-
-    return szState[m_eState];
 }
 
 const IMS_CHAR* UceSubscribe::StateToString(IMS_UINT32 _eState)
@@ -1557,13 +1537,11 @@ void UceSubscribe::HandleWaitingNotifyMessageTimer()
         SendSubscribeResponseInd(SipStatusCode::SC_200, "OK", 0, "");
         SendSubscribeTerminatedInd();
         SubscribeTerminated();
-        SetState(ON);
     }
     else if (GetState() == SUBSCRIBED)
     {
         SendSubscribeTerminatedInd();
         SubscribeTerminated();
-        SetState(ON);
     }
 }
 

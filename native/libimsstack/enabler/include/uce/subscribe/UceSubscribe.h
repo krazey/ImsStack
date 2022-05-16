@@ -93,6 +93,8 @@ protected:
     virtual IMS_BOOL StateSUBSCRIBED_SubscribeTerminated(IN IMSMSG& objMsg);
     virtual IMS_BOOL StateSUBSCRIBED_NotifyReceived(IN IMSMSG& objMsg);
 
+    void SetState(IMS_UINT32 _eState);
+
 private:
     void LoadConfigValue();
     void CreateXMLDocumentHelperThread();
@@ -100,8 +102,7 @@ private:
     IMS_BOOL CreateSubscription(IN CONST AString& strToURI);
     void DestroySubscription();
     void SubscribeTerminated();
-    IMS_BOOL SetState(IMS_UINT32 _eState);
-    const IMS_CHAR* StateToString(void);
+
     const IMS_CHAR* StateToString(IMS_UINT32 _eState);
 
     void SendSubscribeResponseInd(IMS_SINT32 nResponseCode, AString strReason,
@@ -153,6 +154,9 @@ protected:
     AString m_strAppName;
     IMS_SINT32 m_nSimSlot;
     IMS_UINT32 m_nConnectedServices;
+    AString m_strRemoteUser;
+    IMSList<AString> m_objRemoteUsers;
+    IMS_UINT32 m_eState;
 
     enum INTERNAL_MSG
     {
@@ -172,17 +176,13 @@ private:
         QUERY_CAPABILITY_TYPE_SINGLE,
         QUERY_CAPABILITY_TYPE_LIST,
     };
-    IMS_UINT32 m_eState;
     UceXmlDocumentHelperThread* m_pUceXmlDocumentHelperThread;
     AString m_strXMLDocumentHelperThreadName;
     IMS_SINT32 m_nThreadRunningCompleted;
-
     AString m_strExpireValueInListSub;
     IMS_UINT32 m_nAnonymousMethod;
     IMS_UINT32 m_eQueryType;
     IMS_BOOL m_bSubscriptionTerminated;
-    AString m_strRemoteUser;
-    IMSList<AString> m_objRemoteUsers;
     AString m_strUceSubscribeManagerName;  // deleted
     UceRlmiComposer* m_pRLMIComposer;
     IMS_UINT32 m_nWaitNotiTimerValue;
