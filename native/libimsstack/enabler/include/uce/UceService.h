@@ -1,16 +1,5 @@
 /*
-    Author
-    <table>
-    date              author                        description
-    --------      --------------                ----------
-    20120524    saurabh31.srivastava@           Created
-    20121102    hyunho.shin@                   Re-Factorying
-    20130819    jaesik.kong@                   Re-Factorying for one source
-    </table>
-
-    Description
-
-*/
+ */
 
 #ifndef _UCE_SERVICE_H_
 #define _UCE_SERVICE_H_
@@ -54,10 +43,10 @@ protected:
             IN ICoreService* piService, IN IMessage* piNotify);
     virtual void CoreService_CapabilityQueryReceived(
             IN ICoreService* piService, IN ICapabilities* piCapabilities);
-
-private:
     void EnableManager();
     void DisableManager();
+
+private:
     void EnableCoreService();
     void DisableCoreService();
     // related to options
@@ -73,12 +62,14 @@ private:
         VARIABLE
     ---------------------------------------------------------------------------------------------
   */
+protected:
+    UceSubscribeManager* m_pUceSubscribeManager;
+    UcePublishManager* m_pUcePublishManager;
+    UceOptionsManager* m_pUceOptionsManager;
+
 private:
     IMS_SINT32 m_nSlotId;
     ICoreService* m_piCoreService;
     AString m_strAppName;
-    UceSubscribeManager* m_pUceSubscribeManager;
-    UcePublishManager* m_pUcePublishManager;
-    UceOptionsManager* m_pUceOptionsManager;
 };
 #endif /* _UCE_SERVICE_H_ */

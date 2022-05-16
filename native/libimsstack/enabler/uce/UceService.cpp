@@ -26,12 +26,12 @@ __IMS_TRACE_TAG_USER_DECL__("UCE");
 PUBLIC
 UceService::UceService(IN CONST AString& strAppName, IN CONST IMS_SINT32 nSlotId) :
         IMSService(AString::ConstNull()),
-        m_nSlotId(nSlotId),
-        m_piCoreService(IMS_NULL),
-        m_strAppName(strAppName),
         m_pUceSubscribeManager(IMS_NULL),
         m_pUcePublishManager(IMS_NULL),
-        m_pUceOptionsManager(IMS_NULL)
+        m_pUceOptionsManager(IMS_NULL),
+        m_nSlotId(nSlotId),
+        m_piCoreService(IMS_NULL),
+        m_strAppName(strAppName)
 {
     IMS_TRACE_I("UCE_M : UceService = %" PFLS_u, sizeof(UceService), 0, 0);
     EnableCoreService();
@@ -242,7 +242,6 @@ void UceService::CoreService_CapabilityQueryReceived(
     OptionsReceived(piService, piCapabilities);
 }
 
-PRIVATE
 void UceService::EnableManager()
 {
     if (m_pUceSubscribeManager == IMS_NULL)
@@ -284,6 +283,7 @@ void UceService::DisableManager()
     }
 }
 
+PRIVATE
 void UceService::EnableCoreService()
 {
     IMS_TRACE_I("EnableCoreService", 0, 0, 0);
