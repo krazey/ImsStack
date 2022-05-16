@@ -97,6 +97,11 @@ PUBLIC VIRTUAL void MtcCall::Attach(
     // TODO: will be removed and JniConnector will provide the getters.
     m_objUiNotifier.SetJniCallThread(pJniMtcCallThread);
     m_objUiNotifier.SetJniMediaThread(pJniMediaThread);
+
+    if (m_objCallInfo.ePeerType == PeerType::MT)
+    {
+        OnAttached();
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::Detach()
@@ -938,4 +943,16 @@ void MtcCall::SetVideoCapable(IN ISession* piSession)
 
         GetCallInfo().bVideoCapable = MessageUtil::IsVideoFeatureIncluded(piMessage);
     }
+}
+
+PRIVATE
+void MtcCall::OnAttached()
+{
+    IMS_TRACE_I("OnAttached : key[%" PFLS_x "]", m_nKey, 0, 0);
+
+    m_objStateMachine.RunStateOperation(
+            [&](MtcCallState* pState)
+            {
+                return pState->OnAttached();
+            });
 }

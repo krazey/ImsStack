@@ -113,7 +113,7 @@ public class ImsCallManager {
         boolean offline = false;
         boolean ussi = false;
 
-        int sessionAttributes = MtcCall.FLAG_MO | MtcCall.FLAG_LOCK_JNI_EVENT_LOOP;
+        int sessionAttributes = MtcCall.FLAG_MO;
 
         if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
@@ -172,8 +172,6 @@ public class ImsCallManager {
         callSession.setCallConnectionId(ccId);
         ImsCallConnectionIds.add(mCallContext.getSlotId(), ccId);
 
-        // Unlock JNI event loop if it's locked
-        call.startJNIEventLoop();
         call.open(wifi, emergency, offline, ussi);
 
         return callSession;

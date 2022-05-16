@@ -105,6 +105,7 @@ public:
     virtual CallStateName QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction);
 
     virtual CallStateName OnInternalFailure();
+    virtual CallStateName OnAttached();
 
 protected:
     enum TimerType

@@ -174,6 +174,68 @@ PUBLIC VIRTUAL CallStateName IdleState::OnBlockChecked(IN IMtcBlockChecker::Resu
     }
 }
 
+PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
+{
+    ISession* piSession = GetISession();
+
+    UpdateIncomingInformation(piSession);
+
+    InitMediaSession();
+
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+    if (NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_START) ==
+            IMS_FAILURE)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
+    }
+
+    m_objContext.GetCallInfo().eCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE);
+    if (m_objContext.GetCallInfo().eCallType == CallType::UNKNOWN)
+    {
+        // UE must send full media list for the incoming INVITE w/o SDP
+        // TODO: but, let us optimize.
+        m_objContext.GetCallInfo().eCallType = CallType::VOIP;
+        m_objContext.GetMediaManager().UpdateMediaDirection(
+                MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
+    }
+
+    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
+    objPreconditionManager.CreateQos(piSession);
+    UpdatePreconditionCapability(piSession, piMessage, IMS_FALSE);
+
+    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+    }
+
+    // TODO: OnPreconditionReceived()
+    // need to check the nego state?
+    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
+    {
+        objPreconditionManager.StartQosTimer(piSession);
+    }
+
+    if (IsRprSupported())
+    {
+        if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
+        {
+            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+        }
+
+        // m_objContext.GetTimer().Start(TIMER_MT_PRACK_WAIT,
+        //         UCCONFIG_GET_INT(m_nSlotID, SESSION_TIME_MT_PRACKWAIT) * 1000);
+    }
+    else
+    {
+        IMS_TRACE_D("HandleIncoming - RPR is not supported.", 0, 0, 0);
+
+        SendIncomingCallReceived();
+        return CallStateName::ALERTING;
+    }
+
+    return CallStateName::INCOMING;
+}
+
 PRIVATE
 CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 {
@@ -239,64 +301,7 @@ CallStateName IdleState::ContinueHandleIncoming()
 
     SendPreIncomingCallReceived();
 
-    ISession* piSession = GetISession();
-
-    UpdateIncomingInformation(piSession);
-
-    InitMediaSession();
-
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    if (NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_START) ==
-            IMS_FAILURE)
-    {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
-    }
-
-    m_objContext.GetCallInfo().eCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE);
-    if (m_objContext.GetCallInfo().eCallType == CallType::UNKNOWN)
-    {
-        // UE must send full media list for the incoming INVITE w/o SDP
-        // TODO: but, let us optimize.
-        m_objContext.GetCallInfo().eCallType = CallType::VOIP;
-        m_objContext.GetMediaManager().UpdateMediaDirection(
-                MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
-    }
-
-    IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
-    objPreconditionManager.CreateQos(piSession);
-    UpdatePreconditionCapability(piSession, piMessage, IMS_FALSE);
-
-    if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
-    {
-        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
-    }
-
-    // TODO: OnPreconditionReceived()
-    // need to check the nego state?
-    if (!objPreconditionManager.IsResourceReserved(piSession, QosCheckType::LOCAL_STATUS))
-    {
-        objPreconditionManager.StartQosTimer(piSession);
-    }
-
-    if (IsRprSupported())
-    {
-        if (SendProvisionalResponse(IMS_FALSE) == IMS_FAILURE)
-        {
-            return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
-        }
-
-        // m_objContext.GetTimer().Start(TIMER_MT_PRACK_WAIT,
-        //         UCCONFIG_GET_INT(m_nSlotID, SESSION_TIME_MT_PRACKWAIT) * 1000);
-    }
-    else
-    {
-        IMS_TRACE_D("ContinueHandleIncoming - RPR is not supported.", 0, 0, 0);
-
-        SendIncomingCallReceived();
-        return CallStateName::ALERTING;
-    }
-
-    return CallStateName::INCOMING;
+    return GetStateName();
 }
 
 PRIVATE

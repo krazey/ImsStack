@@ -130,18 +130,17 @@ public class MtcApp implements Closeable {
             }
         }
 
-        if (callAttributes == 0) {
-            loge("Invalid createCall");
-            return null;
-        }
-
         long nativeCallObject = JNIIms.getInterface(IUIMS.MTC_CALL, mContext.getSlotId());
 
         MtcCall call = new MtcCall(
                 mContext, mCM.getCallTracker(), nativeCallObject, callAttributes,
                 mCM.getVacantCallIndex(), "");
 
-        mCM.attachCall(call);
+        if (call.isMO()) {
+            mCM.attachCall(call);
+        } else {
+            mCM.attachPreIncomingCall(call);
+        }
 
         return call;
     }
@@ -332,23 +331,14 @@ public class MtcApp implements Closeable {
 
         private void onMessageForCallApp(int msg, Parcel parcel) {
             if (msg == IUMtcService.PRE_INCOMING_CALL) {
-                long nativeCallObject = parcel.readLong();
+                long nativeCallKey = parcel.readLong();
                 String logTag = parcel.readString();
 
-                ImsLog.d("[" + logTag + "] callKey : " + nativeCallObject);
+                MtcCall call = createCall(0);
 
-                if (nativeCallObject == 0) {
-                    loge("No call object");
-                    return;
-                }
-
-                MtcCall call = new MtcCall(mContext, mCM.getCallTracker(), nativeCallObject,
-                        MtcCall.FLAG_LOCK_JNI_EVENT_LOOP, mCM.getVacantCallIndex(), logTag);
-                call.startJNIEventLoop();
-
-                if (mCallListener != null) {
-                    mCM.attachPreIncomingCall(call);
-                    mCallListener.onPreIncomingCallReceived(MtcApp.this, nativeCallObject);
+                if (mCallListener != null && call != null) {
+                    mCallListener.onPreIncomingCallReceived(MtcApp.this, call.getNativeCallId());
+                    call.attach(nativeCallKey);
                 } else {
                     rejectAndCloseCall(call);
                 }
