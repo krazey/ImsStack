@@ -3,6 +3,9 @@ cc_test {
     defaults: [
         "imsstack_native_test_protocol_defaults",
     ],
+    cflags: [
+        "-DSIP_BADMESSAGE_PARSING",
+    ],
     srcs: [
         "**/*.cpp",
     ],
