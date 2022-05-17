@@ -251,6 +251,12 @@ public final class AgentFactory {
     }
 
     public void initAgentsForSlot(Context context, int slotId) {
+        SystemCallAgent sca = mSystemCallAgents.get(slotId);
+
+        if (sca == null) {
+            mSystemCallAgents.put(slotId, new SystemCallAgent(slotId));
+        }
+
         ArrayMap<Class<?>, IAgent> agents = mAgentsForSlot.valueAt(slotId);
 
         if (agents != null) {
