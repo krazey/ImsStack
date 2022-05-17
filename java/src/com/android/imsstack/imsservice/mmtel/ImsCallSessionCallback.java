@@ -18,7 +18,6 @@ import android.telephony.ims.ImsConferenceState;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsStreamMediaProfile;
 import android.telephony.ims.ImsSuppServiceNotification;
-import android.telephony.ims.aidl.IImsCallSessionListener;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 
 import com.android.imsstack.util.ImsLog;
@@ -93,7 +92,7 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
-                    logi("invokeStarted :: " + profile.mMediaProfile);
+                    logi("invokeStarted :: " + profile.getMediaProfile());
 
                     mListener.callSessionInitiated(profile);
                 } catch (Throwable t) {
@@ -646,8 +645,11 @@ public class ImsCallSessionCallback {
                         return;
                     }
 
+                    ImsReasonInfo reasonInfo = new ImsReasonInfo(ImsReasonInfo.CODE_UNSPECIFIED,
+                            ImsReasonInfo.CODE_UNSPECIFIED, null);
+
                     mListener.callSessionHandover(
-                            srcAccessTech, targetAccessTech, new ImsReasonInfo());
+                            srcAccessTech, targetAccessTech, reasonInfo);
                 } catch (Throwable t) {
                     log(t, "invokeHandover");
                     closeSession(session, t);

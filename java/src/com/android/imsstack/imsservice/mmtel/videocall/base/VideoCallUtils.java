@@ -21,10 +21,8 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Formatter;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -166,7 +164,7 @@ public class VideoCallUtils {
 
     public static int getNegotiatedVideoQuality(ImsCallProfile profile,
             int videoCapabilities) {
-        int videoQuality = profile.mMediaProfile.mVideoQuality;
+        int videoQuality = profile.getMediaProfile().getVideoQuality();
 
         if (videoQuality == ImsStreamMediaProfile.VIDEO_QUALITY_NONE) {
             return MediaInfo.VIDEO_QUALITY_NONE;

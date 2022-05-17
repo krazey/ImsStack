@@ -115,7 +115,7 @@ public class ImsCallManager {
 
         int sessionAttributes = MtcCall.FLAG_MO | MtcCall.FLAG_LOCK_JNI_EVENT_LOOP;
 
-        if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
+        if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
             sessionAttributes |= MtcCall.FLAG_EMERGENCY;
             emergency = true;
 
@@ -127,12 +127,11 @@ public class ImsCallManager {
                 wifi = true;
             } else if (isNormalCallRequiredForEmergencyCall(profile)) {
                 emergency = false;
-                profile.mServiceType = ImsCallProfile.SERVICE_TYPE_NORMAL;
                 profile.setCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL, true);
             } else if (ImsCallUtils.isEmergencyCallRedialed(profile)) {
                 offline = true;
             }
-        } else if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_NORMAL) {
+        } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NORMAL) {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
                 ussi = true;
@@ -141,15 +140,15 @@ public class ImsCallManager {
             if (ImsRegUtils.isImsRegisteredOnWifi(mCallContext)) {
                 wifi = true;
             }
-        } else if (profile.mServiceType == ImsCallProfile.SERVICE_TYPE_NONE) {
+        } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NONE) {
             offline = true;
         }
 
-        if (ImsCallUtils.isVideoCall(profile.mCallType)) {
+        if (ImsCallUtils.isVideoCall(profile.getCallType())) {
             sessionAttributes |= MtcCall.FLAG_VIDEO_CALL;
         }
 
-        if (profile.mMediaProfile.isRttCall()) {
+        if (profile.getMediaProfile().isRttCall()) {
             sessionAttributes |= MtcCall.FLAG_RTT;
         }
 
@@ -321,7 +320,7 @@ public class ImsCallManager {
         IDCNetWatcher dcnw = mCallContext.getDCNetWatcher();
         boolean is3GNetwork = (dcnw != null) ? dcnw.is3G() : false;
 
-        if (ImsCallUtils.isVideoCall(profile.mCallType)
+        if (ImsCallUtils.isVideoCall(profile.getCallType())
                 && is3GNetwork
                 && ImsGlobal.isCountry(mCallContext.getSlotId(), "KR")) {
             return true;
@@ -507,7 +506,7 @@ public class ImsCallManager {
 
     private void onCallInfoReceived(final ImsCallProfile profile) {
         mIncomingCallInfo = profile;
-        logi("onCallInfoReceived :: calltype=" + mIncomingCallInfo.mCallType);
+        logi("onCallInfoReceived :: calltype=" + mIncomingCallInfo.getCallType());
     }
 
     private void postAndRunTask(Runnable task) {
@@ -854,10 +853,10 @@ public class ImsCallManager {
             if (incomingCallInfo.mOIR == IncomingCallInfo.OIPTYPE_INVALID) {
                 removeIncomingCallInfo();
             } else {
-                ImsCallProfile profile = new ImsCallProfile();
-
-                profile.mCallType = ImsCallUtils.getProfileCallTypeFromCallInfo(
+                int callType = ImsCallUtils.getProfileCallTypeFromCallInfo(
                         incomingCallInfo.mVideoCapable, incomingCallInfo.mCallType);
+                ImsCallProfile profile = new ImsCallProfile(ImsCallProfile.SERVICE_TYPE_NORMAL,
+                        callType);
                 profile.setCallExtraInt(ImsCallProfile.EXTRA_OIR, incomingCallInfo.mOIR);
                 profile.setCallExtraInt(ImsCallProfile.EXTRA_CNAP, incomingCallInfo.mCNAP);
                 profile.setCallExtra(ImsCallProfile.EXTRA_OI, incomingCallInfo.mOI);

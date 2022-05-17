@@ -569,7 +569,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
             boolean reversedDimension) {
         if (mediaProfile != null) {
             int videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.mVideoQuality);
+                    mediaProfile.getVideoQuality());
 
             if (reversedDimension) {
                 return VideoCallUtils.getReversedVideoDimension(videoQuality);
@@ -691,7 +691,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
 
             if (mediaProfile != null) {
                 int videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                        mediaProfile.mVideoQuality);
+                        mediaProfile.getVideoQuality());
 
                 logi("Enforce changePeerDimensions on media started; videoQuality="
                         + videoQuality);
