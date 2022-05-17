@@ -34,8 +34,7 @@ Remarks
 PUBLIC
 AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
-        AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
-        m_bSmsOverIp(IMS_TRUE)
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMts), this);
@@ -132,10 +131,16 @@ Remarks
 */
 PROTECTED VIRTUAL void AosHandleMts::InitializeServiceBlock()
 {
-    A_IMS_TRACE_I(APPPROFILE, "InitializeServiceBlock :: m_bSmsOverIp(%s)", _TRACE_B_(m_bSmsOverIp),
-            0, 0);
+    IAosNConfiguration* piConfig = GET_N_CONFIG(m_nSlotId);
 
-    if (!GET_N_CONFIG(m_nSlotId)->IsSmsOverIpEnabled())
+    IMS_BOOL bSmsOverImsSupported = piConfig->IsSmsOverImsSupported();
+    IMS_BOOL bSmsOverIpEnabled = piConfig->IsSmsOverIpEnabled();
+
+    A_IMS_TRACE_I(APPPROFILE,
+            "InitializeServiceBlock :: bSmsOverImsSupported(%s), bSmsOverIpEnabled(%s)",
+            _TRACE_B_(bSmsOverImsSupported), _TRACE_B_(bSmsOverIpEnabled), 0);
+
+    if (!bSmsOverImsSupported || !bSmsOverIpEnabled)
     {
         AddBlock(BLOCK_SMS_OVER_IP_NETWORK_INDICATION, m_nBlocks);
         m_bBlocked = IMS_TRUE;
