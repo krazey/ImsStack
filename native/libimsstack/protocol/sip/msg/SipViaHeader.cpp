@@ -313,40 +313,6 @@ const SIP_CHAR* SipViaHeader::GetBranch() const
 
     return pParameterList->GetParamValue("branch");
 }
-/******************************************************************************
- * Function name      : SipViaHeader::SetRecvdParam
- *
- * Description     :
- *
- * Preconditions      :
- *
- * Side Effects      : none
- *****************************************************************************/
-
-SIP_BOOL SipViaHeader::SetRecvdParam(const SIP_CHAR* pszRecvd)
-{
-    SipParameters* pParameters = GetParameters();
-
-    if (pParameters == SIP_NULL)
-    {
-        InitParameters(SIP_NULL);
-        pParameters = GetParameters();
-    }
-
-    if (pParameters == SIP_NULL)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-
-    const SIP_CHAR* pszTempRcvd = "received";
-    if (pParameters->AddParam(pszTempRcvd, pszRecvd) == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Set Received failed", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    return SIP_TRUE;
-}
 
 /******************************************************************************
  * Function name      : SipViaHeader::SetRecvdParam
@@ -431,13 +397,15 @@ SIP_BOOL SipViaHeader::DecHostPort(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt)
         return SIP_FALSE;
     }
 
-    if (m_eHostType != SipAddrSpec::HOST_IPV6)
+    IPAddress objIpAddr;
+    if (objIpAddr.Parse(AString(m_pszHost)) == SIP_TRUE)
     {
-        IPAddress objIpAddr;
-        if (objIpAddr.Parse(AString(m_pszHost)) == SIP_TRUE)
-        {
-            m_eHostType = SipAddrSpec::HOST_IPV4;
-        }
+        m_eHostType = objIpAddr.IsIPv6Address() ? SipAddrSpec::HOST_IPV6 : SipAddrSpec::HOST_IPV4;
+    }
+    else if (m_eHostType == SipAddrSpec::HOST_IPV6)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Invalid Host[IPV6]", SIP_ZERO, SIP_ZERO);
+        return SIP_FALSE;
     }
 
     pStartPt = pTempPre;
