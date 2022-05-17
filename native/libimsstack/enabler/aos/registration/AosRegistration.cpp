@@ -1921,11 +1921,9 @@ PROTECTED VIRTUAL void AosRegistration::AddFeatureTagForMtc(
 {
     // If bFinalFeatureTag is true, the extra header shouldn't be added
     // because it manages as reference count
-    if ((nRegFeatures & ImsAosFeature::VIDEO) > 0)
-    {
-        m_pUtil->UpdateFeatureTagOptions(
-                ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO, IMS_TRUE, m_nSlotId);
-    }
+    m_pUtil->UpdateFeatureTagOptions(ISipConfigV::FEATURE_TAG_MEDIA_STREAM_VIDEO,
+            (nRegFeatures & ImsAosFeature::VIDEO) > 0, m_nSlotId);
+
     if (((nRegFeatures & ImsAosFeature::TEXT) > 0) && bFinalFeatureTag == IMS_FALSE)
     {
         m_piRegContact->AddExtraCapability(AosString::STR_RTT_FEATURE, AString::ConstNull());
@@ -1937,6 +1935,11 @@ PROTECTED VIRTUAL void AosRegistration::AddFeatureTagForMtc(
     if ((nRegFeatures & ImsAosFeature::VERSTAT) > 0)
     {
         m_piRegContact->AddHeaderParameter(AosString::STR_VERSTAT_FEATURE);
+    }
+
+    if ((nRegFeatures & ImsAosFeature::VIDEO) == 0)
+    {
+        m_piRegContact->RecalculateCallerCapabilities();
     }
 }
 
