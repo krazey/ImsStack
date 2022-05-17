@@ -1,7 +1,6 @@
 package com.android.imsstack.imsservice;
 
 import android.annotation.Nullable;
-import android.telephony.ims.aidl.IImsServiceController;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.feature.RcsFeature;
@@ -12,7 +11,11 @@ import android.telephony.ims.stub.SipTransportImplBase;
 
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Implements ImsService to provide VoLTE/Emergency/RCS features.
@@ -188,5 +191,18 @@ public class ImsService extends android.telephony.ims.ImsService {
 
     private static void logi(String s) {
         Log.i(Log.TAG, "[GII-IMPL] " + s);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter printWriter, String[] args) {
+        super.dump(fd, printWriter, args);
+
+        IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
+        pw.println("--------ImsService--------");
+
+        ImsServiceController isc = ImsServiceController.getInstance();
+        if (isc != null) {
+            isc.dump(pw);
+        }
     }
 }

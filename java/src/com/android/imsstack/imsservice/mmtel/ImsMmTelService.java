@@ -2,7 +2,6 @@ package com.android.imsstack.imsservice.mmtel;
 
 import android.os.Bundle;
 import android.os.Message;
-import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.feature.CapabilityChangeRequest;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
@@ -14,14 +13,16 @@ import android.telephony.ims.stub.ImsMultiEndpointImplBase;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsSmsImplBase;
 import android.telephony.ims.stub.ImsUtImplBase;
-import com.android.ims.ImsManager;
 
+import com.android.ims.ImsManager;
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
+import com.android.imsstack.util.IndentingPrintWriter;
+import com.android.imsstack.util.LocalLog;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ import java.util.List;
  */
 public class ImsMmTelService extends MmTelFeature
         implements ImsServiceRecord.Listener, ImsRegistrationTracker.CapabilityUpdateListener {
+    private static final int LOG_SIZE = 50;
+
     private final IContext mIContext;
     private final MmTelFeatureCapabilityListener mFeatureCapabilityListener
             = new MmTelFeatureCapabilityListener();
@@ -37,6 +40,7 @@ public class ImsMmTelService extends MmTelFeature
     private boolean mReady = false;
     private CapabilityCallbackProxy mCapabilityCallback;
     private ImsRegistrationTracker mRegTracker;
+    private final LocalLog mLocalLog = new LocalLog(LOG_SIZE);
 
     public ImsMmTelService(IContext context) {
         mIContext = context;
@@ -70,6 +74,7 @@ public class ImsMmTelService extends MmTelFeature
 
     public void binderDied() {
         logi("ImsMmTelService :: binderDied - slotId=" + mIContext.getSlotId());
+        mLocalLog.log("binderDied");
 
         if (!isReady()) {
             // Do nothing
@@ -155,6 +160,7 @@ public class ImsMmTelService extends MmTelFeature
         // Ut off -> SscServiceImpl
         mCapabilityCallback = c;
         mRegTracker.changeCapabilities(enabledCaps, disabledCaps);
+        mLocalLog.log("changeEnabledCapabilities " + enabledCaps + ", " + disabledCaps);
     }
 
     @Override
@@ -372,5 +378,22 @@ public class ImsMmTelService extends MmTelFeature
             ImsCallApp callApp = getCallApp();
             //FIXME: updateDialogState to multiendpoint
         }
+    }
+
+    /** Dump this instance into a readable format for dumpsys usage. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("ImsMmTelService:");
+        pw.increaseIndent();
+
+        pw.println("slotId=" + mIContext.getSlotId());
+        pw.println("featureState=" + getFeatureState());
+
+        // Local logs
+        pw.println("Most recent logs:");
+        pw.increaseIndent();
+        mLocalLog.dump(pw);
+        pw.decreaseIndent();
+
+        pw.decreaseIndent();
     }
 }

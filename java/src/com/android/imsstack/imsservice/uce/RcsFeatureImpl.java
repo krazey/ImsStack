@@ -27,6 +27,7 @@ import android.telephony.ims.stub.RcsCapabilityExchangeImplBase;
 
 import com.android.imsstack.enabler.IContext;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.IndentingPrintWriter;
 
 public class RcsFeatureImpl extends RcsFeature {
     private final IContext mIContext;
@@ -150,5 +151,14 @@ public class RcsFeatureImpl extends RcsFeature {
     }
     private static void logi(String s) {
         ImsLog.i("[GII-IMPL] " + s);
+    }
+
+    /** Dump this instance into a readable format for dumpsys usage. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("RcsFeatureImpl:");
+        pw.increaseIndent();
+        pw.println("slotId=" + mIContext.getSlotId());
+        pw.println("featureState=" + getFeatureState());
+        pw.decreaseIndent();
     }
 }

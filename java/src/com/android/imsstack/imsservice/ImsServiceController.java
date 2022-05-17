@@ -6,7 +6,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.telephony.TelephonyManager;
-import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.RcsFeature;
 
 import com.android.imsstack.imsservice.base.ImsContext;
@@ -14,6 +13,7 @@ import com.android.imsstack.imsservice.mmtel.ImsMmTelService;
 import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
 import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
 import com.android.imsstack.imsservice.uce.RcsFeatureImpl;
+import com.android.imsstack.util.IndentingPrintWriter;
 import com.android.imsstack.util.Log;
 
 import java.util.concurrent.Executor;
@@ -227,5 +227,18 @@ public class ImsServiceController {
             } finally {
             }
         }
+    }
+
+    /** Dump this instance into a readable format for dumpsys usage. */
+    public void dump(IndentingPrintWriter pw) {
+        pw.println("ImsServiceController:");
+        pw.increaseIndent();
+        for (ImsMmTelService mmTel : mMmTelServices) {
+            mmTel.dump(pw);
+        }
+        for (RcsFeatureImpl rcs : mRcsFeature) {
+            rcs.dump(pw);
+        }
+        pw.decreaseIndent();
     }
 }
