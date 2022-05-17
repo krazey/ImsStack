@@ -54,9 +54,6 @@ public:
 
     SIP_BOOL SetPassword(const SIP_CHAR* pszPass);
 
-    SIP_BOOL SetHost(const SIP_CHAR* pszHost);
-
-    inline SIP_VOID SetPortNum(SIP_UINT16 nPort) { m_nPort = nPort; }
     /*Get methods*/
     inline const SIP_CHAR* GetUser() const { return m_pszUser; }
 
@@ -79,21 +76,9 @@ public:
         return (m_pUriHdrParamList != SIP_NULL) ? m_pUriHdrParamList->GetCount() : SIP_ZERO;
     }
 
-    /*Add only name*/
-    SIP_BOOL AddUriParam(const SIP_CHAR* pszName);
-
-    SIP_BOOL AddUriParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue);
-
-    // This api may not be required .. re-check
-    SIP_BOOL AddUriParam(const SIP_CHAR* pszName, const SIP_CHAR* pszValue, SIP_INT32 ePrmType);
-    SIP_BOOL AddHeader(const SIP_CHAR* pszName);
-    SIP_BOOL AddHeader(const SIP_CHAR* pszName, const SIP_CHAR* pszValue);
-
     SIP_BOOL Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const;
     SIP_BOOL EncodeSipUri(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSipUri(SIP_CHAR** ppCurrPos);
-
-    SIP_BOOL RemoveUriParam(const SIP_CHAR* pszName);
 
     SIP_BOOL RemoveHdrParam(const SIP_CHAR* pszName);
     SIP_VOID SetParameterComponent(IParameterComponent* pParameterComponent);
@@ -136,9 +121,6 @@ public:
     /*function for getting the header type*/
     inline SIP_INT32 GetUriScheme() const { return m_eUriType; }
 
-    /*set methods*/
-    SIP_BOOL SetSipUri(SipUri* pSipUri, SIP_INT32 eUriType);
-
     SipUri* GetSipUri();
 
     SIP_BOOL SetAbsUri(const SIP_CHAR* pszSipUri);
@@ -174,11 +156,10 @@ public:
 
     SipAddrSpec* GetAddrSpec();
 
-    /*set methods*/
     SIP_BOOL SetDisplayName(const SIP_CHAR* pszDisplayName);
 
     SIP_VOID SetParameterComponent(IParameterComponent* pParameterComponent);
-    /*Get Display Name*/
+
     inline const SIP_CHAR* GetDisplayName() const { return m_pszDispName; }
 };
 

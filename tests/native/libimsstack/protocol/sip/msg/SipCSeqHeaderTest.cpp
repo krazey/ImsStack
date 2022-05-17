@@ -16,22 +16,21 @@
 #include <gtest/gtest.h>
 #include "msg/SipCSeqHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipCSeqHeaderTest : public ::testing::Test {
-
+class SipCSeqHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipCSeqHeaderTest, IsValidHeader) {
-    SipCSeqHeader *pHeader = reinterpret_cast<SipCSeqHeader*>(
+TEST_F(SipCSeqHeaderTest, IsValidHeader)
+{
+    SipCSeqHeader* pHeader = reinterpret_cast<SipCSeqHeader*>(
             SipCSeqHeader::GetNewObj(SipHeaderBase::CSEQ, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
@@ -48,14 +47,17 @@ TEST_F(SipCSeqHeaderTest, IsValidHeader) {
     pHeader->SipDelete();
 }
 
-TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr) {
-    SipCSeqHeader *pHeader = reinterpret_cast<SipCSeqHeader*>(
+TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr)
+{
+    SipCSeqHeader* pHeader = reinterpret_cast<SipCSeqHeader*>(
             SipCSeqHeader::GetNewObj(SipHeaderBase::CSEQ, nullptr));
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
@@ -69,7 +71,7 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr) {
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"1 INVITE", 8));
 
-    SipCSeqHeader *pCopyHeader = reinterpret_cast<SipCSeqHeader*>(
+    SipCSeqHeader* pCopyHeader = reinterpret_cast<SipCSeqHeader*>(
             SipCSeqHeader::GetNewObj(SipHeaderBase::CSEQ, pHeader));
     ASSERT_TRUE(pCopyHeader != nullptr);
     pHeader->SipDelete();
@@ -79,4 +81,4 @@ TEST_F(SipCSeqHeaderTest, EncodeHdrAndDecodeHdr) {
     pCopyHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

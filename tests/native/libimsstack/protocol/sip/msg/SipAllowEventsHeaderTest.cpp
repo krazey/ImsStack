@@ -16,35 +16,35 @@
 #include <gtest/gtest.h>
 #include "msg/SipAllowEventsHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipAllowEventsHeaderTest : public ::testing::Test {
-
+class SipAllowEventsHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr) {
-    SipHeaderBase *pHeader =
-            SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
+TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr)
+{
+    SipHeaderBase* pHeader = SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, nullptr);
     ASSERT_TRUE(pHeader != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
     EXPECT_EQ(SIP_FALSE, pHeader->EncodeHdr(&pBuff));
     EXPECT_EQ(SIP_FALSE, pHeader->DecodeHdr((char*)"", 0));
 
     EXPECT_EQ(SIP_TRUE, pHeader->DecodeHdr((char*)"event-package", 13));
 
-    SipHeaderBase *pCopyHeader =
+    SipHeaderBase* pCopyHeader =
             SipAllowEventsHeader::GetNewObj(SipHeaderBase::ALLOW_EVENTS, pHeader);
     ASSERT_TRUE(pCopyHeader != nullptr);
 
@@ -74,4 +74,4 @@ TEST_F(SipAllowEventsHeaderTest, EncodeHdrAndDecodeHdr) {
     pCopyHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

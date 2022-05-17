@@ -17,26 +17,27 @@
 #include "msg/SipHeaders.h"
 #include "msg/SipUnknownHeader.h"
 
-namespace android {
+namespace android
+{
 
-class SipUnknownHeaderTest : public ::testing::Test {
-
+class SipUnknownHeaderTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipUnknownHeaderTest, EncodeHdr) {
+TEST_F(SipUnknownHeaderTest, EncodeHdr)
+{
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
-    SipUnknownHeader *pUnknownHeader = reinterpret_cast<SipUnknownHeader*>(
+    SipUnknownHeader* pUnknownHeader = reinterpret_cast<SipUnknownHeader*>(
             SipHeaders::CreateCoreHdrObj(SipHeaderBase::UNKNOWN));
     ASSERT_TRUE(pUnknownHeader != nullptr);
 
@@ -63,4 +64,4 @@ TEST_F(SipUnknownHeaderTest, EncodeHdr) {
     pUnknownHeader->SipDelete();
 }
 
-} // namespace android
+}  // namespace android

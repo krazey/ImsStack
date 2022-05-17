@@ -17,27 +17,28 @@
 #include "sip_abnfUtil.h"
 #include "msg/SipStatusLine.h"
 
-namespace android {
+namespace android
+{
 
-class SipStatusLineTest : public ::testing::Test {
-
+class SipStatusLineTest : public ::testing::Test
+{
 public:
-
 protected:
-    virtual void SetUp() override {
-    }
+    virtual void SetUp() override {}
 
-    virtual void TearDown() override {
-    }
+    virtual void TearDown() override {}
 };
 
-TEST_F(SipStatusLineTest, EncodeStatusLine) {
-    SipStatusLine *pStatusLine = new SipStatusLine();
+TEST_F(SipStatusLineTest, EncodeStatusLine)
+{
+    SipStatusLine* pStatusLine = new SipStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
 
     const int BUFFER_SIZE = 4096;
-    char aBuffer[BUFFER_SIZE] = {0, };
-    char *pBuff = &(aBuffer[0]);
+    char aBuffer[BUFFER_SIZE] = {
+            0,
+    };
+    char* pBuff = &(aBuffer[0]);
 
     /* Empty object, fail */
     EXPECT_EQ(SIP_FALSE, pStatusLine->EncodeStatusLine(&pBuff));
@@ -86,8 +87,9 @@ TEST_F(SipStatusLineTest, EncodeStatusLine) {
     pStatusLine->SipDelete();
 }
 
-TEST_F(SipStatusLineTest, DecodeStatusLine) {
-    SipStatusLine *pStatusLine = new SipStatusLine();
+TEST_F(SipStatusLineTest, DecodeStatusLine)
+{
+    SipStatusLine* pStatusLine = new SipStatusLine();
     ASSERT_TRUE(pStatusLine != nullptr);
 
     /* Empty buffer, fail */
@@ -108,4 +110,4 @@ TEST_F(SipStatusLineTest, DecodeStatusLine) {
     pStatusLine->SipDelete();
 }
 
-} // namespace android
+}  // namespace android
