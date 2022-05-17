@@ -145,7 +145,11 @@ public class SscUrl {
         switch (data.getSsType()) {
             case CF:
                 if (data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
-                    updateUri += getCfnrTimerUri(data);
+                    if (SscXmlFormat.getIsNoReplyTimerOmitted(slotId)) {
+                        updateUri += getServiceUri(data);
+                    } else {
+                        updateUri += getCfnrTimerUri(data);
+                    }
                 } else {
                     if (data.getState() == SscConstant.ACTION_ACTIVATION ||
                             data.getState() == SscConstant.ACTION_DEACTIVATION) {
