@@ -305,21 +305,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         pEvsParams->setEvsMode((int32_t) static_cast<EvsParams::EvsMode>(maxModeSet));
 
         // update bandwidth
-        IMS_SINT32 nEvsBandwidth = EvsParams::EVS_FULL_BAND;
-
-        if ((pFmtp->nBwList & 0x04) != 0)
-        {
-            nEvsBandwidth += EvsParams::EVS_SUPER_WIDE_BAND;
-        }
-        else if ((pFmtp->nBwList & 0x02) != 0)
-        {  // Primary WB case
-            nEvsBandwidth += EvsParams::EVS_WIDE_BAND;
-        }
-        else if ((pFmtp->nBwList & 0x01) != 0)
-        {  // Primary NB case
-            nEvsBandwidth += EvsParams::EVS_NARROW_BAND;
-        }
-
+        IMS_SINT32 nEvsBandwidth = pFmtp->nBwList;
         // exception : evs AMR-WB IO mode
         if (pFmtp->nEvsModeSwitch == 1)
         {
