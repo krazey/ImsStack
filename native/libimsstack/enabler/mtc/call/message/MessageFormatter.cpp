@@ -812,10 +812,34 @@ void MessageFormatter::GetRejectPhrase(IN const FailReason& objReason, OUT AStri
 {
     switch (objReason.nReason)
     {
+        case REJECT_REASON_DECLINE_USER:
+            /*strPhrase = GetRejectPhrase(RejectType::USER_DECLINE);*/
+            break;
+        case REJECT_REASON_BUSY_ISCSCALL:
+            strPhrase = GetRejectPhrase(RejectType::ON_CS_CALL);
+            break;
+        case REJECT_REASON_BUSY_NORMAL:
+        case REJECT_REASON_BUSY_ALERTING:
+        case REJECT_REASON_BUSY_ESTABLISHING:
+            strPhrase = GetRejectPhrase(RejectType::ON_CONNECTING_CALL);
+            break;
+        case REJECT_REASON_BUSY_MAXCALL:
+            strPhrase = GetRejectPhrase(RejectType::EXCEEDS_MAX_CALL);
+            break;
+        case REJECT_REASON_TO_MT_NOANSWER:
+            strPhrase = GetRejectPhrase(RejectType::NO_ANSWER_BY_USER);
+            break;
+        case REJECT_REASON_SESSION_UPDATE:
+            strPhrase = GetRejectPhrase(RejectType::ON_CONVERTING);
+            break;
+        case REJECT_REASON_MEDIA_NEGOFAIL:
+            strPhrase = GetRejectPhrase(RejectType::NEGOTIATION_FAILURE);
+            break;
         default:
             strPhrase = AString::ConstNull();
             break;
     }
+    IMS_TRACE_D("GetRejectPhrase [%s]", strPhrase.GetStr(), 0, 0);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -878,6 +902,8 @@ void MessageFormatter::GetTerminateReason(IN const FailReason& objReason, OUT AS
             strReason = AString::ConstNull();
             break;
     }
+
+    IMS_TRACE_D("GetTerminateReason [%s]", strReason.GetStr(), 0, 0);
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -887,6 +913,15 @@ AString MessageFormatter::GetTerminateReason(IN TerminateType eType)
 {
     return m_objContext.GetConfigurationProxy().GetStr(
             Feature::CALL_TERMINATE_REASON_HEADER, static_cast<IMS_SINT32>(eType));
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PRIVATE
+AString MessageFormatter::GetRejectPhrase(IN RejectType eType)
+{
+    return m_objContext.GetConfigurationProxy().GetStr(
+            Feature::CALL_REJECT_REASON_PHRASE, static_cast<IMS_SINT32>(eType));
 }
 
 /* -------------------------------------------------------------------------------------------------

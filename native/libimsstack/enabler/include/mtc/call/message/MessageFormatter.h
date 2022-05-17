@@ -81,6 +81,7 @@ private:
     void GetUpdateReason(IN UpdateType eUpdateType, OUT AString& strReason);
     void GetTerminateReason(IN const FailReason& objReason, OUT AString& strReason);
     AString GetTerminateReason(IN TerminateType eType);
+    AString GetRejectPhrase(IN RejectType eType);
 
     IMS_RESULT InitVariables(IN FormType eFormType);
     IMS_RESULT SetNextMessage();
