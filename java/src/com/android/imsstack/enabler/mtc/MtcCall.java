@@ -41,8 +41,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     public static final int FLAG_MO = 0x00000010;
     // For RTT call
     public static final int FLAG_RTT = 0x00000020;
-    // Guarantee the logic to start JNI event loop after call is ready.
-    public static final int FLAG_LOCK_JNI_EVENT_LOOP = 0x00010000;
 
     /**
      * Listener interface for call operations via proxy
@@ -254,7 +252,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     private final CallTracker mCT;
     private final MtcConference mConference;
     private final MtcMediaSession mMediaSession;
-    private MtcLock mJNIEventLock = null;
     private MtcCall.Listener mListener = null;
     private MtcCall.RttSessionListener mRttListener = null;
     private MtcCallInfo mCallInfo = null;
@@ -309,11 +306,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     MediaInfo.DIRECTION_INVALID,
                     MediaInfo.DIRECTION_INVALID,
                     MediaInfo.GTTMODE_INVALID);
-
-        if ((callAttributes & FLAG_LOCK_JNI_EVENT_LOOP) != 0) {
-            mJNIEventLock = new MtcLock();
-            mJNIEventLock.lock();
-        }
 
         JNIIms.setListener(getNativeCallId(), mNativeListener);
 
@@ -372,11 +364,6 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         if (!hasDetails(Details.DETACHED)) {
             mCT.updateCallState(this, CallTracker.CALL_EVENT_DESTROY, null);
-        }
-
-        if (mJNIEventLock != null) {
-            mJNIEventLock.unlock();
-            mJNIEventLock = null;
         }
     }
 
@@ -661,12 +648,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         }
     }
 
-    public void startJNIEventLoop() {
-        if (mJNIEventLock != null) {
-            mJNIEventLock.unlock();
-        }
-    }
-
     public void open(boolean wifi, boolean emergency, boolean offline, boolean ussi) {
         Parcel parcel = Parcel.obtain();
 
@@ -767,6 +748,20 @@ public class MtcCall extends Call implements ConferenceTracker {
         mCT.updateCallState(this, CallTracker.CALL_EVENT_ESTABLISHING, null);
 
         notifyInitiating();
+    }
+
+    /**
+     * need to notify the Native to process remain works for incoming call after
+     * receiving pre-incoming event completed.
+     */
+    public void attach(long nativeCallKey) {
+        log("attach for incoming");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(IUMtcCall.ATTACH);
+        parcel.writeLong(nativeCallKey);
+
+        sendRequest(parcel);
     }
 
     public void alertUser() {
@@ -1524,8 +1519,6 @@ public class MtcCall extends Call implements ConferenceTracker {
     private class JNIImsListenerProxy implements JNIImsListener {
         @Override
         public void onMessage(Parcel parcel) {
-            waitForReady();
-
             byte[] data = parcel.marshall();
 
             if (data == null) {
@@ -2164,18 +2157,6 @@ public class MtcCall extends Call implements ConferenceTracker {
                     mListener.onCallInfoUpdated(
                             MtcCall.this, type, strValue, intValue, boolValue);
                 }
-            }
-        }
-
-        private void waitForReady() {
-            if (mJNIEventLock == null) {
-                return;
-            }
-
-            if (mJNIEventLock.isLocked()) {
-                log("JNI event looper is locked");
-                mJNIEventLock.waitForReady();
-                log("JNI event looper is unlocked");
             }
         }
     }

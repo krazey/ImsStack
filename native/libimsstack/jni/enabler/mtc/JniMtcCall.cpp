@@ -90,13 +90,6 @@ void JniMtcCall::Initialize()
 
     m_pThread->SetSlotId(m_nSlotId);  // TODO: required?
     m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), m_pfnNotifier);
-
-    if (m_nCallKey == -1)
-    {
-        // Attach will be done once OPEN is called.
-        return;
-    }
-    Attach();
 }
 
 PROTECTED VIRTUAL IMS_BOOL JniMtcCall::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
@@ -121,6 +114,10 @@ PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
     {
         case IuMtcCall::OPEN:
             Open(objParcel);
+            break;
+
+        case IuMtcCall::ATTACH:
+            Attach(objParcel);
             break;
 
         case IuMtcCall::START:
@@ -214,6 +211,16 @@ void JniMtcCall::Attach()
     m_pJniMediaSession = new JniMediaSession(
             m_pfnNotifier, m_nSlotId, m_nCallKey, reinterpret_cast<IMS_SINTP>(this));
     m_objCallController.Attach(m_nCallKey, m_pThread, m_pJniMediaSession->GetThread());
+}
+
+PRIVATE
+void JniMtcCall::Attach(IN const android::Parcel& objParcel)
+{
+    m_nCallKey = objParcel.readInt64();
+
+    IMS_TRACE_D("Attach for incoming (%" PFLS_d ")", m_nCallKey, 0, 0);
+
+    Attach();
 }
 
 PRIVATE

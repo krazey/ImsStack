@@ -315,6 +315,11 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnInternalFailure()
     return CallStateName::TERMINATING;
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::OnAttached()
+{
+    return GetStateName();
+}
+
 PROTECTED
 void MtcCallState::HandleTerminate(IN const FailReason& objReason)
 {

@@ -27,6 +27,7 @@ protected:
 
 private:
     void Attach();
+    void Attach(IN const android::Parcel& objParcel);
     void Open(IN const android::Parcel& objParcel);
     void Start(IN const android::Parcel& objParcel);
     void OnUserAlert(IN const android::Parcel& objParcel);  // naming...

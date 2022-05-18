@@ -25,7 +25,7 @@ public class IUMtcCall {
     public static final int SEND_USSD           = (EVENT_U2I + 16);
     // Google_IMS_IF :: USSD }
     public static final int REQUEST_ECT         = (EVENT_U2I + 61);
-    public static final int REQUEST_CALL_PUSH    = (EVENT_U2I + 62);
+    public static final int REQUEST_CALL_PUSH   = (EVENT_U2I + 62);
     public static final int CANCEL_CALL_PUSH    = (EVENT_U2I + 63);
     public static final int REQUEST_ECT_BLIND   = (EVENT_U2I + 64);
     public static final int ATTACH              = (EVENT_U2I + 98);

@@ -193,6 +193,7 @@ private:
     CallKey CreateCallKey();
     void OnInternalFailure();
     void SetVideoCapable(IN ISession* piSession);
+    void OnAttached();
 
     IMtcContext& m_objContext;
     IMtcService& m_objService;

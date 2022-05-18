@@ -38,15 +38,12 @@ void JniMtcServiceThread::OnServiceChanged(IN IMS_SINT32 eStatus, IN IMS_SINT32 
 }
 
 PUBLIC
-void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_UINTP nCallKey)
+void JniMtcServiceThread::OnPreIncomingCallReceived(IN IMS_ULONG nCallKey)
 {
     IMS_TRACE_D("OnPreIncomingCallReceived", 0, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcService::PRE_INCOMING_CALL);
-
-    // this object will be released by IMSInterface
-    JniMtcCall* pMtcCall = new JniMtcCall(pfnNotifier, static_cast<IMS_SINTP>(nCallKey), m_nSlotId);
-    objParcel.writeInt64(reinterpret_cast<IMS_SINTP>(pMtcCall));
+    objParcel.writeInt64(nCallKey);
 
     objParcel.writeString16(android::String16(AString("MTCLOG").GetStr())); // TODO: Log.
 
