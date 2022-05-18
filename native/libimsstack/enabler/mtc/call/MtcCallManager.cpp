@@ -128,7 +128,8 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsInConference()
 PUBLIC VIRTUAL void MtcCallManager::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
         IN Type /* eType */, IN IMS_BOOL /* bEmergency */, IN IMS_SINT32 /* nReason */)
 {
-    IMS_TRACE_D("OnCallStateChanged [%x] [%d]", nCallKey, static_cast<IMS_SINT32>(eState), 0);
+    IMS_TRACE_D(
+            "OnCallStateChanged : key[%d] state[%d]", nCallKey, static_cast<IMS_SINT32>(eState), 0);
 
     if (eState == State::TERMINATING)
     {

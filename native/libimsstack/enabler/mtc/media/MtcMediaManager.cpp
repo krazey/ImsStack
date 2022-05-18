@@ -27,12 +27,12 @@ MtcMediaManager::MtcMediaManager(IN IMtcCallContext& objContext) :
         m_eState(MediaState::IDLE),
         m_eOldState(MediaState::IDLE)
 {
-    IMS_TRACE_D("+MtcMediaManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
+    IMS_TRACE_D("+MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 }
 
 PUBLIC VIRTUAL MtcMediaManager::~MtcMediaManager()
 {
-    IMS_TRACE_D("~MtcMediaManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
+    IMS_TRACE_D("~MtcMediaManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
 
     m_pCallListener = IMS_NULL;
     m_pQosListener = IMS_NULL;

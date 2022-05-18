@@ -45,7 +45,7 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN Call
         m_objPreconditionManager(MtcPreconditionManager(*this)),
         m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy()))
 {
-    IMS_TRACE_D("+MtcCall key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
     m_objCallInfo.eServiceType = objService.GetServiceType();
 
@@ -55,14 +55,14 @@ MtcCall::MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN Call
 
 PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
-    IMS_TRACE_D("~MtcCall key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_D("~MtcCall key[%d]", m_nKey, 0, 0);
     delete m_pSession;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(
         IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
-    IMS_TRACE_I("HandleIncoming : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("HandleIncoming : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL || pServiceThread == IMS_NULL)
     {
@@ -86,7 +86,7 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
 PUBLIC VIRTUAL void MtcCall::Attach(
         IN JniMtcCallThread* pJniMtcCallThread, IN JniMediaSessionThread* pJniMediaThread)
 {
-    IMS_TRACE_I("Attach : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Attach : key[%d]", m_nKey, 0, 0);
 
     if (pJniMtcCallThread == IMS_NULL)
     {
@@ -101,14 +101,14 @@ PUBLIC VIRTUAL void MtcCall::Attach(
 
 PUBLIC VIRTUAL void MtcCall::Detach()
 {
-    IMS_TRACE_I("Detach : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Detach : key[%d]", m_nKey, 0, 0);
     m_objUiNotifier.SetJniCallThread(IMS_NULL);
 }
 
 PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strTarget,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
-    IMS_TRACE_I("Start : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Start : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -126,7 +126,7 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 
 PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
 {
-    IMS_TRACE_I("HandleUserAlert : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("HandleUserAlert : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -137,7 +137,7 @@ PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
 
 PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("Accept : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Accept : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -148,7 +148,7 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
 
 PUBLIC VIRTUAL void MtcCall::Reject(IN const FailReason& objReason)
 {
-    IMS_TRACE_I("Reject : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Reject : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -159,7 +159,7 @@ PUBLIC VIRTUAL void MtcCall::Reject(IN const FailReason& objReason)
 
 PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("Hold : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Hold : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -176,7 +176,7 @@ PUBLIC VIRTUAL void MtcCall::Hold(IN MediaInfo* pMediaInfo)
 
 PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("Resume : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Resume : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -193,7 +193,7 @@ PUBLIC VIRTUAL void MtcCall::Resume(IN MediaInfo* pMediaInfo)
 
 PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("AcceptResume : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("AcceptResume : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -210,7 +210,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptResume(IN CallType eCallType, IN MediaInfo* p
 
 PUBLIC VIRTUAL void MtcCall::RejectResume(IN const FailReason& objReason)
 {
-    IMS_TRACE_I("RejectResume : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("RejectResume : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -221,7 +221,7 @@ PUBLIC VIRTUAL void MtcCall::RejectResume(IN const FailReason& objReason)
 
 PUBLIC VIRTUAL void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("Convert : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Convert : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -238,7 +238,7 @@ PUBLIC VIRTUAL void MtcCall::Convert(IN CallType eCallType, IN MediaInfo* pMedia
 
 PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
-    IMS_TRACE_I("AcceptConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("AcceptConvert : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -255,7 +255,7 @@ PUBLIC VIRTUAL void MtcCall::AcceptConvert(IN CallType eCallType, IN MediaInfo* 
 
 PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const FailReason& objReason)
 {
-    IMS_TRACE_I("RejectConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("RejectConvert : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -266,7 +266,7 @@ PUBLIC VIRTUAL void MtcCall::RejectConvert(IN const FailReason& objReason)
 
 PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const FailReason& objReason)
 {
-    IMS_TRACE_I("CancelConvert : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("CancelConvert : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -277,7 +277,7 @@ PUBLIC VIRTUAL void MtcCall::CancelConvert(IN const FailReason& objReason)
 
 PUBLIC VIRTUAL void MtcCall::Terminate(IN const FailReason& objReason)
 {
-    IMS_TRACE_I("Terminate : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("Terminate : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -288,7 +288,7 @@ PUBLIC VIRTUAL void MtcCall::Terminate(IN const FailReason& objReason)
 
 PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration)
 {
-    IMS_TRACE_I("SendDtmf : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SendDtmf : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -299,7 +299,7 @@ PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32
 
 PUBLIC VIRTUAL void MtcCall::SendUssi(IN const AString& strUssi)
 {
-    IMS_TRACE_I("SendUssi : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SendUssi : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -312,7 +312,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const ASt
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN IMSList<ConfUser*> lstUsers)
 {
-    IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
     if (pMediaInfo == IMS_NULL)
     {
@@ -331,7 +331,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(IN CallType eCallType, IN const ASt
 PUBLIC VIRTUAL void MtcCall::StartConference(
         IN CallType eCallType, IN const AString& strTarget, IN IMSList<ConfUser*> lstUsers)
 {
-    IMS_TRACE_I("StartConference : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("StartConference : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -342,7 +342,7 @@ PUBLIC VIRTUAL void MtcCall::StartConference(
 
 PUBLIC VIRTUAL void MtcCall::HandleSrvccSuccess()
 {
-    IMS_TRACE_I("HandleSrvccSuccess : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("HandleSrvccSuccess : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -353,7 +353,7 @@ PUBLIC VIRTUAL void MtcCall::HandleSrvccSuccess()
 
 PUBLIC VIRTUAL void MtcCall::HandleSrvccFailure(IN UpdateType eUpdateType)
 {
-    IMS_TRACE_I("HandleSrvccFailure : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("HandleSrvccFailure : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -392,7 +392,7 @@ PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 
 PUBLIC VIRTUAL void MtcCall::SessionAlerting(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionAlerting : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionAlerting : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -410,7 +410,7 @@ PUBLIC VIRTUAL void MtcCall::SessionAlerting(IN ISession* piSession)
 PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
         IN ISession* piSession, IN IReference* piReference)
 {
-    IMS_TRACE_I("SessionReferenceReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionReferenceReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL || piReference == IMS_NULL)
     {
@@ -438,7 +438,7 @@ PUBLIC VIRTUAL void MtcCall::SessionReferenceReceived(
 
 PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionStarted : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionStarted : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -457,7 +457,7 @@ PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionStartFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionStartFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -474,7 +474,7 @@ PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionTerminated : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionTerminated : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -491,7 +491,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionUpdated(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionUpdated : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionUpdated : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -508,7 +508,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdated(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionUpdateFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionUpdateFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionUpdateFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -525,7 +525,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdateFailed(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionUpdateReceived(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionUpdateReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionUpdateReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -542,7 +542,7 @@ PUBLIC VIRTUAL void MtcCall::SessionUpdateReceived(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionCancelDelivered(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionCancelDelivered : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionCancelDelivered : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -559,7 +559,7 @@ PUBLIC VIRTUAL void MtcCall::SessionCancelDelivered(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionCancelDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionCancelDeliveryFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -576,7 +576,7 @@ PUBLIC VIRTUAL void MtcCall::SessionCancelDeliveryFailed(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionEarlyMediaUpdated : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionEarlyMediaUpdated : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -593,7 +593,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdated(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionEarlyMediaUpdateFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionEarlyMediaUpdateFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -610,7 +610,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateFailed(IN ISession* piSessio
 
 PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionEarlyMediaUpdateReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionEarlyMediaUpdateReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -628,7 +628,7 @@ PUBLIC VIRTUAL void MtcCall::SessionEarlyMediaUpdateReceived(IN ISession* piSess
 PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
         IN ISession* piSession, IN ISession* piForkedSession)
 {
-    IMS_TRACE_I("SessionForkedResponseReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionForkedResponseReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL || piForkedSession == IMS_NULL)
     {
@@ -657,7 +657,7 @@ PUBLIC VIRTUAL void MtcCall::SessionForkedResponseReceived(
 
 PUBLIC VIRTUAL void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionPRAckDelivered : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionPRAckDelivered : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -674,7 +674,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPRAckDelivered(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionPRAckDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionPRAckDeliveryFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -691,7 +691,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPRAckDeliveryFailed(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionPRAckReceived(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionPRAckReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionPRAckReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -709,7 +709,7 @@ PUBLIC VIRTUAL void MtcCall::SessionPRAckReceived(IN ISession* piSession)
 PUBLIC VIRTUAL void MtcCall::SessionProvisionalResponseReceived(
         IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
-    IMS_TRACE_I("SessionProvisionalResponseReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionProvisionalResponseReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -726,7 +726,7 @@ PUBLIC VIRTUAL void MtcCall::SessionProvisionalResponseReceived(
 
 PUBLIC VIRTUAL void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
 {
-    IMS_TRACE_I("SessionRPRDeliveryFailed : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionRPRDeliveryFailed : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -743,7 +743,7 @@ PUBLIC VIRTUAL void MtcCall::SessionRPRDeliveryFailed(IN ISession* piSession)
 
 PUBLIC VIRTUAL void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex)
 {
-    IMS_TRACE_I("SessionRPRReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionRPRReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -761,7 +761,7 @@ PUBLIC VIRTUAL void MtcCall::SessionRPRReceived(IN ISession* piSession, IN IMS_U
 PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
         IN ISession* piSession, IN ISipServerConnection* piSipServerConnection)
 {
-    IMS_TRACE_I("SessionTransactionReceived : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("SessionTransactionReceived : key[%d]", m_nKey, 0, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -779,7 +779,7 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
 PUBLIC VIRTUAL IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
         IN_OUT ISipMessage* piSipMessage, IN IMS_SINT32 nMessage)
 {
-    IMS_TRACE_I("MessageMediator_AdjustMessage : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("MessageMediator_AdjustMessage : key[%d]", m_nKey, 0, 0);
 
     if (piSipMessage == IMS_NULL)
     {
@@ -798,7 +798,7 @@ PUBLIC VIRTUAL IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
 
 PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
 {
-    IMS_TRACE_I("OnTimerExpired : key[%" PFLS_x "] type[%d]", m_nKey, nType, 0);
+    IMS_TRACE_I("OnTimerExpired : key[%d] type[%d]", m_nKey, nType, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -809,7 +809,7 @@ PUBLIC VIRTUAL void MtcCall::OnTimerExpired(IN IMS_SINT32 nType)
 
 PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResult)
 {
-    IMS_TRACE_I("OnBlockChecked : key[%" PFLS_x "] result[%d]", m_nKey,
+    IMS_TRACE_I("OnBlockChecked : key[%d] result[%d]", m_nKey,
             static_cast<IMS_SINT32>(objResult.eStatus), 0);
 
     m_objStateMachine.RunStateOperation(
@@ -821,7 +821,7 @@ PUBLIC VIRTUAL void MtcCall::OnBlockChecked(IN IMtcBlockChecker::Result objResul
 
 PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 eMediaType)
 {
-    IMS_TRACE_I("QosReserved : key[%" PFLS_x "] MediaType[%d]", m_nKey, eMediaType, 0);
+    IMS_TRACE_I("QosReserved : key[%d] MediaType[%d]", m_nKey, eMediaType, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -838,7 +838,7 @@ PUBLIC VIRTUAL void MtcCall::QosReserved(IN ISession* piSession, IN IMS_UINT32 e
 
 PUBLIC VIRTUAL void MtcCall::QosReserveFailed(IN ISession* piSession, IN QosLossPolicy eNextAction)
 {
-    IMS_TRACE_I("QosReserveFailed : key[%" PFLS_x "] NextAction[%d]", m_nKey, eNextAction, 0);
+    IMS_TRACE_I("QosReserveFailed : key[%d] NextAction[%d]", m_nKey, eNextAction, 0);
 
     if (piSession == IMS_NULL)
     {
@@ -876,8 +876,8 @@ PUBLIC VIRTUAL MtcCallState* MtcCall::CreateState(IN CallStateName eState)
 
 PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
 {
-    IMS_TRACE_I("OnStateTransition : key[%" PFLS_x "] state[%d]", m_nKey,
-            static_cast<IMS_SINT32>(eState), 0);
+    IMS_TRACE_I(
+            "OnStateTransition : key[%d] state[%d]", m_nKey, static_cast<IMS_SINT32>(eState), 0);
 
     GetCallStateProxy().UpdateCallState(m_nKey, m_objCallInfo, eState);
 }
@@ -894,7 +894,7 @@ CallKey MtcCall::CreateCallKey()
 PRIVATE
 void MtcCall::OnInternalFailure()
 {
-    IMS_TRACE_I("OnInternalFailure : key[%" PFLS_x "]", m_nKey, 0, 0);
+    IMS_TRACE_I("OnInternalFailure : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
