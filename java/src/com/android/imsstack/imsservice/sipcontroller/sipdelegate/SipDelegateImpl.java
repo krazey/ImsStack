@@ -90,10 +90,8 @@ public class SipDelegateImpl implements SipDelegate , ISipDelegateIncomingMessag
     @Override
     public void sendMessage(@NonNull SipMessage message, long configVersion) {
         Log.i(LOG_TAG, "sendMessage");
-        String viaTransactionId =
-                SipMessageParsingUtils.getTransactionId(message.getHeaderSection());
-        String callId = SipMessageParsingUtils.getCallId(message.getHeaderSection());
-
+        String viaTransactionId = message.getViaBranchParameter();
+        String callId = message.getCallIdParameter();
         mOnGoingSipSessions.add(callId);
         mViaTransactionIds.add(viaTransactionId);
         mViaTransactionIdAndCallId.put(viaTransactionId, callId);
