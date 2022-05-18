@@ -35,8 +35,5 @@ protected:
 
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
-
-private:
-    IMS_BOOL m_bSmsOverIp;
 };
 #endif  // AOS_HANDLE_MTS_H_
