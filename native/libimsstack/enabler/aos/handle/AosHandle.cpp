@@ -513,6 +513,13 @@ PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 Remarks
 
 */
+PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL /*bReady*/, IN IMS_UINT32 /*nService*/) {}
+
+/*
+
+Remarks
+
+*/
 PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMS_UINT32 /*nFeatures*/)
 {
     // It is for SipController so it will be overridden in AosSipController

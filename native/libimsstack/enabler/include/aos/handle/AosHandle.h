@@ -100,6 +100,7 @@ public:
     virtual IMS_BOOL IsImsSuspended();
     virtual void SetListener(IN IImsAosListener* piListener);
     virtual void SetMonitor(IN IImsAosMonitor* piMonitor);
+    virtual void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService);
     virtual void UpdateFeature(IN IMS_UINT32 nFeatures);
     virtual void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag);
 

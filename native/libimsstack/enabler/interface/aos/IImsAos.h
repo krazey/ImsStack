@@ -107,6 +107,14 @@ public:
     virtual void SetMonitor(IN IImsAosMonitor* piMonitor) = 0;
 
     /**
+     * @brief Set the service ready for registering the listener to get the enabler information
+     *
+     * @param bReady enabler service is started or not
+     * @param nService @see ImsAosService
+     */
+    virtual void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) = 0;
+
+    /**
      * @brief Update the features for registration procedure. If features are changed
      *        and reigistration is done, reregistration is tried with the changed features.
      *
