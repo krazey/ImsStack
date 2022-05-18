@@ -30,13 +30,12 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
-import android.testing.TestableLooper;
 import android.telephony.CarrierConfigManager;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsSsInfo;
+import android.testing.TestableLooper;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.ConfigAgent;
@@ -47,10 +46,6 @@ import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtListener;
 
-import java.io.StringReader;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -60,9 +55,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
+
+import java.io.StringReader;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 @RunWith(JUnit4.class)
 @TestableLooper.RunWithLooper
@@ -105,8 +104,8 @@ public class SscServiceImplTest {
     private String errorPhrase = "";
     private String forwardNumber = "tel:+1234567890";
     private String defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
-    private int httpGetResponse = SscConstant.HTTP_NOT_MODIFIED;
-    private int httpErrorResponse = SscConstant.HTTP_CONFLICT;
+    private int mHttpSuccessResponse = 200;
+    private int mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
 
     @Before
     public void setup() {
@@ -164,7 +163,7 @@ public class SscServiceImplTest {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(true);
-        httpErrorResponse = SscConstant.HTTP_CONFLICT;
+        mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         errorPhrase = "check error phrase";
 
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
@@ -187,7 +186,7 @@ public class SscServiceImplTest {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfig.Assets.KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL)))
                 .thenReturn(false);
-        httpErrorResponse = SscConstant.HTTP_CONFLICT;
+        mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
         errorPhrase = "check error phrase";
 
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
@@ -209,7 +208,7 @@ public class SscServiceImplTest {
         when(mockCarrierConfig.getBoolean(
                 eq(CarrierConfigManager.ImsSs.KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL)))
                 .thenReturn(true);
-        httpErrorResponse = SscConstant.HTTP_CONFLICT;
+        mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
 
         int tId = mSscServiceImpl.queryCallForward(SscConstant.CONDITION_CFU, "");
         processEntireXmlDocQueryAsFailure();
@@ -861,12 +860,12 @@ public class SscServiceImplTest {
         assertEquals(capturedData.getSsType(), ESsType.NONE);
         assertEquals(capturedData.getEventNumber(), SscConstant.EVENT_SSC_BASE);
 
-        capturedData.setResponseCode(httpErrorResponse);
+        capturedData.setResponseCode(mHttpErrorResponse);
 
         Message msg = Message.obtain();
         msg.what = SscConstant.EVENT_SSC_BASE;
         SscRequestResult rr = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
-                SscConstant.REQUEST_FAILURE, httpErrorResponse, -1);
+                SscConstant.REQUEST_FAILURE, mHttpErrorResponse, -1);
         if (!TextUtils.isEmpty(errorPhrase)) {
             rr.setSscServiceData(new ErrorResponseData(SLOT_0, capturedData.getSsType(),
                     capturedData.getEventNumber(), capturedData.getTransactionId(),
@@ -891,12 +890,12 @@ public class SscServiceImplTest {
             assertEquals(capturedData.getCondition(), validCondition);
         }
 
-        capturedData.setResponseCode(httpGetResponse);
+        capturedData.setResponseCode(mHttpSuccessResponse);
 
         Message msg = Message.obtain();
         msg.what = capturedData.getEventNumber();
         SscRequestResult rr = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
-                SscConstant.REQUEST_SUCCESS, httpGetResponse, -1);
+                SscConstant.REQUEST_SUCCESS, mHttpSuccessResponse, -1);
         rr.setSscServiceData(SscXmlGov.getInstance(SLOT_0)
                 .parseXMLStream(capturedData, createEntireXmldoc()));
         msg.obj = rr;
@@ -918,12 +917,12 @@ public class SscServiceImplTest {
             assertEquals(capturedData.getCondition(), validCondition);
         }
 
-        capturedData.setResponseCode(httpErrorResponse);
+        capturedData.setResponseCode(mHttpErrorResponse);
 
         Message msg = Message.obtain();
         msg.what = capturedData.getEventNumber();
         msg.obj = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
-                SscConstant.REQUEST_FAILURE, httpErrorResponse, -1);
+                SscConstant.REQUEST_FAILURE, mHttpErrorResponse, -1);
 
         mCallbackHandler.sendMessage(msg);
     }
@@ -967,12 +966,12 @@ public class SscServiceImplTest {
             assertEquals(capturedData.getCondition(), validCondition);
         }
 
-        capturedData.setResponseCode(httpErrorResponse);
+        capturedData.setResponseCode(mHttpErrorResponse);
 
         Message msg = Message.obtain();
         msg.what = capturedData.getEventNumber();
         msg.obj = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
-                SscConstant.REQUEST_FAILURE, httpErrorResponse, -1);
+                SscConstant.REQUEST_FAILURE, mHttpErrorResponse, -1);
 
         mCallbackHandler.sendMessage(msg);
     }

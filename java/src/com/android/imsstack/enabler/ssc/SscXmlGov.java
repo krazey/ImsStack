@@ -16,12 +16,13 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
+import com.android.imsstack.util.ImsLog;
 
-import java.io.InputStream;
-import java.io.StringReader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import java.io.StringWriter;
 import java.util.HashMap;
 
@@ -34,9 +35,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 public class SscXmlGov {
     private static HashMap<Integer, SscXmlGov> sUtXmlGovs = new HashMap<>();
@@ -86,16 +84,11 @@ public class SscXmlGov {
     }
 
     public SscServiceData parseXMLStream(SscServiceQueryData queryData, Document document) {
-        int slotId = queryData.getSlotId();
-        if (queryData.getResponseCode() == SscConstant.HTTP_NOT_MODIFIED) {
-            // use previous XML data when 304 case
-            document = mSimservDoc;
-        }
-
         if (document == null) {
             return null;
         }
 
+        int slotId = queryData.getSlotId();
         Element rootElement = document.getDocumentElement();
         if (rootElement != null) {
             ImsLog.d(slotId, "\n" + getStringFromDoc(rootElement));

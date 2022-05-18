@@ -20,29 +20,28 @@ import android.content.Context;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.util.ImsLog;
 
-import java.io.InputStream;
+import org.w3c.dom.Document;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.UnknownHostException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
 
 public class SscHttpConnection implements ISscHttpConnection {
     // Constants--------------------------------------------------
@@ -152,10 +151,6 @@ public class SscHttpConnection implements ISscHttpConnection {
                 mConnection.setRequestMethod("GET");
                 mConnection.setRequestProperty("Connection", "Keep-Alive");
                 mConnection.setDoInput(true);
-                if (!TextUtils.isEmpty(SscAuthAgent.getInstance(mSlotId).getETag())) {
-                    mConnection.setRequestProperty(
-                        "If-None-Match", SscAuthAgent.getInstance(mSlotId).getETag());
-                }
                 displayHeaders(true, body);
                 mConnection.connect();
             } else if (requestType == HTTP_PUT_REQUEST) {

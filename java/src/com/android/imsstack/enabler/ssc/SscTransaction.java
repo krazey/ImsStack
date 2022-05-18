@@ -152,8 +152,7 @@ public class SscTransaction {
         if (SscConfig.isSrvRecordsRequired(mSlotId) == false) {
             return false;
         }
-        if (responseCode == SscConstant.HTTP_NOT_MODIFIED ||
-                responseCode == SscConstant.HTTP_PRECONDITION_FAILURE) {
+        if (responseCode == SscConstant.HTTP_PRECONDITION_FAILURE) {
             return false;
         }
         if (responseCode < 200 || responseCode >= 500 ||
@@ -292,8 +291,7 @@ public class SscTransaction {
             mData.setResponseCode(responseCode);
             int resultState = SscConstant.REQUEST_SUCCESS;
 
-            if ((responseCode != SscConstant.HTTP_NOT_MODIFIED)
-                    && (responseCode < 200 || responseCode >= 300)) {
+            if (responseCode < 200 || responseCode >= 300) {
                 ImsLog.d(mSlotId, "not received 200 OK");
                 resultState = SscConstant.REQUEST_FAILURE;
                 SscServiceStateAgent.getInstance().setErrorResponseCode(mSlotId, responseCode);
@@ -301,7 +299,7 @@ public class SscTransaction {
 
             Document doc = httpConnection.getInputStream(mSlotId);
             SscServiceData dataFromServer = null;
-            if (doc != null || responseCode == SscConstant.HTTP_NOT_MODIFIED) {
+            if (doc != null) {
                 if (mData.getSsType() == ESsType.NONE && responseCode == 200) {
                     mXMLGov.setXmlData(doc);
                 }
