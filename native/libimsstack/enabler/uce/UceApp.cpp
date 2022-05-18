@@ -291,13 +291,15 @@ void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpc
             IMS_UINT32 registeredFeatures = pIImsAosInfo->GetImsFeatures();
             if (registeredFeatures & ImsAosFeature::VIDEO)
             {
-                m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_VIDEO;
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_VIDEO;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_VIDEO;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Video tag", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::STANDALONE_MSG)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CPM_MSG;
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CPM_LARGEMSG;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_CPM_MSG;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_CPM_LARGEMSG;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Standalone Message", 0, 0, 0);
@@ -305,36 +307,42 @@ void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpc
 
             if (registeredFeatures & ImsAosFeature::CHAT_SESSION)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CPM_SESSION;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_CPM_SESSION;
                 IMS_TRACE_I("ImsAosMonitor_Connected -CPM Session", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::FILE_TRANSFER)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_HTTPFT;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_HTTPFT;
                 IMS_TRACE_I("ImsAosMonitor_Connected -FT via HTTP", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::FILE_TRANSFER_VIA_SMS)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_FTSMS;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_FTSMS;
                 IMS_TRACE_I("ImsAosMonitor_Connected -FT via SMS", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::CALL_COMPOSER_ENRICHED_CALLING)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CALL_COMPOSER;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_CALL_COMPOSER;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Call Composer", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::GEO_PUSH)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_GEOPUSH;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_GEOPUSH;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Geolocation Push", 0, 0, 0);
             }
 
             if (registeredFeatures & ImsAosFeature::GEO_PUSH_VIA_SMS)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_GEOSMS;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_GEOSMS;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Geo push via SMS", 0, 0, 0);
             }
@@ -369,6 +377,7 @@ void UceApp::ImsAosMonitor_Connected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpc
 
             if (registeredFeatures & ImsAosFeature::PRESENCE)
             {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_PRESENCE;
                 m_RegisteredServiceForEnabler |= CONNECTED_SERVICE_PRESENCE;
                 IMS_TRACE_I("ImsAosMonitor_Connected -Presence", 0, 0, 0);
             }

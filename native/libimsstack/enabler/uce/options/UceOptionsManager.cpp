@@ -30,6 +30,8 @@ UceOptionsManager::UceOptionsManager(
     m_nSimSlot = simSlotId;
     IMS_TRACE_D("UCE_M : UceOptionsManager = %" PFLS_u, sizeof(UceOptionsManager), 0, 0);
     IMS_TRACE_I("UceOptionsManager", 0, 0, 0);
+    m_objSentUceOptionsMap = IMSMap<IMS_UINT32, UceOptions*>();
+    m_objReceivedUceOptionsMap = IMSMap<IMS_UINT32, UceOptions*>();
 }
 
 PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
@@ -39,7 +41,7 @@ PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
     UceOptions* pUceOptions = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objSentUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objSentUceOptionsMap.GetValue(i);
+        pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             delete pUceOptions;
@@ -49,7 +51,7 @@ PUBLIC VIRTUAL UceOptionsManager::~UceOptionsManager()
     m_objSentUceOptionsMap.Clear();
     for (IMS_UINT32 i = 0; i < m_objReceivedUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objReceivedUceOptionsMap.GetValue(i);
+        pUceOptions = m_objReceivedUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             delete pUceOptions;
@@ -82,7 +84,13 @@ IMS_BOOL UceOptionsManager::SendOptionsResponse(IN IMS_UINT32 nKey, IN IMS_UINT3
         IN AString reason, IN IMS_UINT32 ownCapabilities)
 {
     UceOptions* pOptions = IMS_NULL;
-    pOptions = m_objReceivedUceOptionsMap.GetValue(nKey);
+    IMS_SLONG nIndex = m_objReceivedUceOptionsMap.GetIndexOfKey(nKey);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_I("SendOptionsResponse:Not handle the key[%d]", nKey, 0, 0);
+        return IMS_FALSE;
+    }
+    pOptions = m_objReceivedUceOptionsMap.GetValueAt(nIndex);
     if (pOptions == IMS_NULL)
     {
         IMS_TRACE_I("SendOptionsResponse:Not handle the key[%d]", nKey, 0, 0);
@@ -137,7 +145,7 @@ void UceOptionsManager::ClosedService()
     UceOptions* pUceOptions = IMS_NULL;
     for (IMS_UINT32 i = 0; i < m_objSentUceOptionsMap.GetSize(); i++)
     {
-        pUceOptions = m_objSentUceOptionsMap.GetValue(i);
+        pUceOptions = m_objSentUceOptionsMap.GetValueAt(i);
         if (pUceOptions != IMS_NULL)
         {
             pUceOptions->AoSDisconnected();
@@ -154,9 +162,14 @@ PROTECTED VIRTUAL IMS_BOOL UceOptionsManager::OnMessage(IN IMSMSG& objMsg)
         return IMS_FALSE;
     }
     IMS_UINT32 nKey = objMsg.nLparam;
-
     UceOptions* pOptions = IMS_NULL;
-    pOptions = m_objSentUceOptionsMap.GetValue(nKey);
+    IMS_SLONG nIndex = m_objSentUceOptionsMap.GetIndexOfKey(nKey);
+    if (nIndex < 0)
+    {
+        IMS_TRACE_I("OnMessage:Not handle the key[%d]", nKey, 0, 0);
+        return IMS_FALSE;
+    }
+    pOptions = m_objSentUceOptionsMap.GetValueAt(nIndex);
     if (pOptions == IMS_NULL)
     {
         IMS_TRACE_I("OnMessage:Not handle the key[%d]", nKey, 0, 0);
