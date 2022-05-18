@@ -43,6 +43,9 @@ public class SscNetConnection implements ISscNetConnection {
     protected static final int EVENT_PDN_CONNECTION_TIMEOUT = 1003;
     protected static final int EVENT_PDN_CONNECTION_EXPIRED = 1004;
 
+    protected static final int EVENT_PDN_CONNECTED = 2001;
+    protected static final int EVENT_PDN_DISCONNECTED = 2002;
+
     protected static final long DISCONNECTION_DELAY = 1000; // 1 sec
     protected static final long PDN_CONNECTION_TIMEOUT_TIMER = 30 * 1000; // 30 sec
 
@@ -330,10 +333,13 @@ public class SscNetConnection implements ISscNetConnection {
                 stopTimer(true, EVENT_PDN_CONNECTION_TIMEOUT);
                 startTimer(mConnectionInactivityTimer, EVENT_PDN_CONNECTION_EXPIRED);
                 if (mSscTransactionHandler != null) {
-                    mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_DATA_STATE_CHANGED);
+                    mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_CONNECTED);
                 }
             } else if (mDataState == EDataState.DATA_STATE_DISCONNECTED) {
                 startTimer(DISCONNECTION_DELAY, EVENT_PDN_CONNECTION_EXPIRED);
+                if (mSscTransactionHandler != null) {
+                    mSscTransactionHandler.sendEmptyMessage(EVENT_PDN_DISCONNECTED);
+                }
             }
         }
 
