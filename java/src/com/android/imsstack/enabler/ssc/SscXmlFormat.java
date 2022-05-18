@@ -25,6 +25,7 @@ import java.util.HashMap;
 
 public class SscXmlFormat {
     private static class UtXmlData {
+        private boolean mIsNoReplyTimerOmitted = false;
         private boolean mIsNoReplyTimerInRule = false;
         private boolean mIsCfnlProvisioned = false;
         private String mNsSsPrefix = "";
@@ -33,25 +34,41 @@ public class SscXmlFormat {
         private HashMap<String, HashMap<Integer, String>> mAudioRuleIds = new HashMap<>();
         private HashMap<String, HashMap<Integer, String>> mVideoRuleIds = new HashMap<>();
 
-        public void setIsNoReplyTimerInRule(boolean isNoReplyTimerInRule) {
+        private void setIsNoReplyTimerOmitted(boolean isNoReplyTimerOmitted) {
+            mIsNoReplyTimerOmitted = isNoReplyTimerOmitted;
+        }
+
+        private void setIsNoReplyTimerInRule(boolean isNoReplyTimerInRule) {
             mIsNoReplyTimerInRule = isNoReplyTimerInRule;
         }
 
-        public void setIsCfnlProvisioned(boolean isCfnlProvisioned) {
+        private void setIsCfnlProvisioned(boolean isCfnlProvisioned) {
             mIsCfnlProvisioned = isCfnlProvisioned;
         }
 
-        public boolean getIsNoReplyTimerInRule() {
+        private boolean getIsNoReplyTimerOmitted() {
+            return mIsNoReplyTimerOmitted;
+        }
+
+        private boolean getIsNoReplyTimerInRule() {
             return mIsNoReplyTimerInRule;
         }
 
-        public boolean getIsCfnlProvisioned() {
+        private boolean getIsCfnlProvisioned() {
             return mIsCfnlProvisioned;
         }
 
-        public HashMap<String, String> getTags() { return mTags; }
-        public HashMap<String, HashMap<Integer, String>> getAudioRuleIds() { return mAudioRuleIds; }
-        public HashMap<String, HashMap<Integer, String>> getVideoRuleIds() { return mVideoRuleIds; }
+        private HashMap<String, String> getTags() {
+            return mTags;
+        }
+
+        private HashMap<String, HashMap<Integer, String>> getAudioRuleIds() {
+            return mAudioRuleIds;
+        }
+
+        private HashMap<String, HashMap<Integer, String>> getVideoRuleIds() {
+            return mVideoRuleIds;
+        }
     };
 
     private static HashMap<Integer, UtXmlData> mXmlDatas = new HashMap<>();
@@ -181,7 +198,7 @@ public class SscXmlFormat {
         return namespace + ":" + elementName;
     }
 
-    public static void setTag(int slotId, String tagName, String namespace) {
+    protected static void setTag(int slotId, String tagName, String namespace) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;
@@ -200,7 +217,7 @@ public class SscXmlFormat {
         }
     }
 
-    public static String getSsElement(int slotId, String elementName) {
+    protected static String getSsElement(int slotId, String elementName) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return elementName;
@@ -214,7 +231,7 @@ public class SscXmlFormat {
         return tag;
     }
 
-    public static String getCpElement(int slotId, String elementName) {
+    protected static String getCpElement(int slotId, String elementName) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return NS_CP_PREFIX + elementName;
@@ -228,7 +245,7 @@ public class SscXmlFormat {
         return tag;
     }
 
-    public static void displayTags(int slotId) {
+    protected static void displayTags(int slotId) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             ImsLog.d("wrong slot - " + slotId);
@@ -238,7 +255,7 @@ public class SscXmlFormat {
         xmlData.getTags().forEach((name, ns) -> { ImsLog.d( "Name:" + name + ", NS: " + ns ); });
     }
 
-    public static void setRuleId(int slotId, int mediaType, String serviceName, int condition,
+    protected static void setRuleId(int slotId, int mediaType, String serviceName, int condition,
             String ruleId) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
@@ -262,7 +279,7 @@ public class SscXmlFormat {
                 ", condition : " + condition + ", ruleId : " + ruleId);
     }
 
-    public static String getRuleId(int slotId, int mediaType, String serviceName,
+    protected static String getRuleId(int slotId, int mediaType, String serviceName,
             int condition) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
@@ -284,7 +301,25 @@ public class SscXmlFormat {
         return services.get(serviceName).get(condition);
     }
 
-    public static boolean getIsNoReplyTimerInRule(int slotId) {
+    protected static boolean getIsNoReplyTimerOmitted(int slotId) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return false;
+        }
+
+        return xmlData.getIsNoReplyTimerOmitted();
+    }
+
+    protected static void setIsNoReplyTimerOmitted(int slotId, boolean isNoReplyTimerOmitted) {
+        UtXmlData xmlData = getXmlData(slotId);
+        if (xmlData == null) {
+            return;
+        }
+
+        xmlData.setIsNoReplyTimerOmitted(isNoReplyTimerOmitted);
+    }
+
+    protected static boolean getIsNoReplyTimerInRule(int slotId) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return false;
@@ -293,7 +328,7 @@ public class SscXmlFormat {
         return xmlData.getIsNoReplyTimerInRule();
     }
 
-    public static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
+    protected static void setIsNoReplyTimerInRule(int slotId, boolean isNoReplyTimerInRule) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;
@@ -302,7 +337,7 @@ public class SscXmlFormat {
         xmlData.setIsNoReplyTimerInRule(isNoReplyTimerInRule);
     }
 
-    public static boolean getIsCfnlProvisioned(int slotId) {
+    protected static boolean getIsCfnlProvisioned(int slotId) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return false;
@@ -311,7 +346,7 @@ public class SscXmlFormat {
         return xmlData.getIsCfnlProvisioned();
     }
 
-    public static void setIsCfnlProvisioned(int slotId, boolean isCfnlProvisioned) {
+    protected static void setIsCfnlProvisioned(int slotId, boolean isCfnlProvisioned) {
         UtXmlData xmlData = getXmlData(slotId);
         if (xmlData == null) {
             return;

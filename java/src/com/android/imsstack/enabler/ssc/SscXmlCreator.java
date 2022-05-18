@@ -22,11 +22,11 @@ import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.Hashtable;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.util.Hashtable;
 
 public class SscXmlCreator {
     protected Hashtable<ESsType, IXmlCreator> mXMLCreatorTable = null;
@@ -275,6 +275,10 @@ public class SscXmlCreator {
         @Override
         public Element createXMLElement(Document doc, SscServiceData data) {
             if (data.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
+                if (SscXmlFormat.getIsNoReplyTimerOmitted(data.getSlotId())) {
+                    return createNoReplyTimer(doc, data);
+                }
+
                 return updateNoReplyTimer(doc, data);
             }
 
@@ -392,20 +396,45 @@ public class SscXmlCreator {
             String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
             Element noReplyTimerElement = getElementByTagName(rootElement, noReplyTimerTag);
             if (noReplyTimerElement == null) {
-                noReplyTimerElement = doc.createElement(noReplyTimerTag);
-                String serviceTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.CD);
-                Element serviceElement = getElementByTagName(rootElement, serviceTag);
-                if (serviceElement == null) {
-                    ImsLog.d(serviceTag + " is null");
-                    return null;
-                }
-                serviceElement.appendChild(noReplyTimerElement);
+                ImsLog.d(noReplyTimerTag + " is null");
+                return null;
             }
 
             CfServiceUpdateData cfData = (CfServiceUpdateData) data;
             noReplyTimerElement.setTextContent(Integer.toString(cfData.getReplyTimer()));
 
             return noReplyTimerElement;
+        }
+
+        private Element createNoReplyTimer(Document doc, SscServiceData data) {
+            int slotId = data.getSlotId();
+            ImsLog.d(slotId, "");
+
+            Element rootElement = doc.getDocumentElement();
+            if (rootElement == null) {
+                return null;
+            }
+
+            String serviceTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.CD);
+            Element cfServiceElement = getElementByTagName(rootElement, serviceTag);
+            if (cfServiceElement == null) {
+                ImsLog.d(serviceTag + " is null");
+                return null;
+            }
+
+            String noReplyTimerTag = SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER);
+            if (getElementByTagName(rootElement, noReplyTimerTag) != null) {
+                ImsLog.d("noReplyTimer is already inserted. Don't create it again");
+                return null;
+            }
+
+            Element noReplyTimerElement = doc.createElement(noReplyTimerTag);
+            cfServiceElement.appendChild(noReplyTimerElement);
+
+            CfServiceUpdateData cfData = (CfServiceUpdateData) data;
+            noReplyTimerElement.setTextContent(Integer.toString(cfData.getReplyTimer()));
+
+            return cfServiceElement;
         }
 
         private String makeValueInTargetTo(int slotId, String number) {

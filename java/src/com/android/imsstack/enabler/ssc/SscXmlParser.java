@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.ContentValues;
 import android.text.TextUtils;
 
 import com.android.imsstack.enabler.ssc.data.CbServiceData;
@@ -33,12 +32,12 @@ import com.android.imsstack.enabler.ssc.data.TipServiceData;
 import com.android.imsstack.enabler.ssc.data.TirServiceData;
 import com.android.imsstack.util.ImsLog;
 
-import java.util.ArrayList;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
 
 public class SscXmlParser {
     public SscXmlParser() {
@@ -200,6 +199,7 @@ public class SscXmlParser {
         NodeList timerList = rootElement.getElementsByTagName(
                 SscXmlFormat.getSsElement(slotId, SscXmlFormat.NOREPLYTIMER));
         if (timerList.getLength() == 0) {
+            SscXmlFormat.setIsNoReplyTimerOmitted(slotId, true);
             SscXmlFormat.setIsNoReplyTimerInRule(slotId, false);
             return;
         }

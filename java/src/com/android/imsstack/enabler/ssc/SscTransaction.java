@@ -26,6 +26,7 @@ import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.TRMAgent;
 import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
+import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
 import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
@@ -37,7 +38,7 @@ import org.w3c.dom.Document;
 import java.lang.ref.WeakReference;
 
 public class SscTransaction {
-    public static final int EVENT_SRV_RETRY_REQUIRED        = 1001;
+    public static final int EVENT_SRV_RETRY_REQUIRED = 1001;
 
     protected SscXmlGov mXMLGov = null;
 
@@ -357,6 +358,16 @@ public class SscTransaction {
                 dataFromServer = mXMLGov.parseXMLStream(mData, doc);
                 if (dataFromServer == null) {
                     ImsLog.e(mSlotId, "dataFromServer is null");
+                }
+            }
+
+            if (resultState == SscConstant.REQUEST_SUCCESS) {
+                if (mData instanceof CfServiceUpdateData) {
+                    if (mData.getCondition() == SscConstant.CONDITION_CFNR_TIMER) {
+                        if (SscXmlFormat.getIsNoReplyTimerOmitted(mSlotId)) {
+                            SscXmlFormat.setIsNoReplyTimerOmitted(mSlotId, false);
+                        }
+                    }
                 }
             }
 

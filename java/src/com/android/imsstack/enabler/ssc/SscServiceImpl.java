@@ -1190,7 +1190,7 @@ public class SscServiceImpl extends UtInterfaceBase {
 
                 int noplyTimerSec = -1;
                 if (ruleData.getSsCondition() == SscConstant.CONDITION_CFNR) {
-                    cfInfo[i].mTimeSeconds = cfData.getNoReplyTimer();
+                    noplyTimerSec = cfData.getNoReplyTimer();
                 }
 
                 cfInfo[i] = new ImsCallForwardInfo(reason, status, toA, serviceClass, number,
