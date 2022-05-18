@@ -854,10 +854,22 @@
         <item>T-Mobile</item>
         <item>AT&amp;T</item>
         <item>Verizon</item>
+        <item>KT</item>
+        <item>SK-Telecom</item>
         <item>LGU+</item>
         <item>Airtel</item>
         <item>Vodafone-IN</item>
         <item>Reliance-Jio</item>
+        <item>Docomo</item>
+        <item>KDDI(au)</item>
+        <item>SoftBank</item>
+        <item>Bell</item>
+        <item>Bell-MTS</item>
+        <item>Bell-SKC</item>
+        <item>Rogers</item>
+        <item>Telus</item>
+        <item>Freedom</item>
+        <item>Videotron</item>
     </string-array>
 
     <string-array name="carrier_config_carrier_id_value">
@@ -865,9 +877,21 @@
         <item>1</item>
         <item>1187</item>
         <item>1839</item>
+        <item>1890</item>
+        <item>1891</item>
         <item>1892</item>
         <item>1961</item>
         <item>1963</item>
         <item>2018</item>
+        <item>850</item>
+        <item>1581</item>
+        <item>1894</item>
+        <item>576</item>
+        <item>578</item>
+        <item>580</item>
+        <item>1403</item>
+        <item>1404</item>
+        <item>1895</item>
+        <item>2008</item>
     </string-array>
 </resources>
