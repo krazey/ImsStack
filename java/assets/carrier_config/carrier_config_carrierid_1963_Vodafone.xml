@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
-    <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
-    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
+    <!-- Ims General -->
+    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <!-- Aos -->
+
+    <!-- Aos -->
+    <int-array name="ims.ims_identity_priority_int_array" num="2">
         <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
         <item value="2"/>
+    </int-array>
+
+    <!--Ut/Xcap Assets -->
+    <int name="ut_oir_network_default_operation_int" value="1"/>
+
+    <!-- USSD overIMS if volte registered -->
+    <int name="carrier_ussd_method_int" value="1">
+
+    <!-- Ringing timer and Ringback timer -->
+    <int name="ringing_timer_millis_int" value="60000"/>
+    <int name="ringback_timer_millis_int" value="60000"/>
+
+    <int-array name="imsvoice.srvcc_type_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="3"/>
     </int-array>
 </carrier_config>

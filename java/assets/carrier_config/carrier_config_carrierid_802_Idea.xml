@@ -10,22 +10,14 @@
     <int name="imswfc.registration_private_header_int" value="2"/>
 
     <!-- Ut/Xcap AOSP -->
-    <int name="gba_mode_int" value="1"/>
     <boolean name="carrier_supports_ss_over_ut_bool" value="true"/>
-    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
-    <int name="imsss.ut_transport_type_int" value="1"/>
-    <int name="imsss.ut_as_server_port_int" value="7077"/>
-    <int name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="false"/>
-
-    <!-- Ut/Xcap -->
-    <!--<boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="true"/>-->
-    <boolean name="ut_omit_namespace_cp_bool" value="true"/>
-    <!--<string  name="imsss.ut_as_server_fqdn_string"
+    <!-- <string name="imsss.ut_as_server_fqdn_string"
                 value="xcap.ims.mncXXX.mccYYY.pub.3gppnetwork.org"/> -->
+    <!-- Ut supported over LTE only.
+      If vowifi registered then device should change mode to LTE for Ut -->
+    <int-array name="imsss.xcap_over_ut_supported_rats_int_array" num="1">
+        <item value="3"/>
+    </int-array>
     <!--Ut/Xcap Assets -->
     <int name="ut_oir_network_default_operation_int" value="1"/>
-
-    <!-- Do not retry SMS in CS on failure -->
-    <int name="imssms.sms_csfb_retry_on_failure_bool" value="false"/>
-
 </carrier_config>

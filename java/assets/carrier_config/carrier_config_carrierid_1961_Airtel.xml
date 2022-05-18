@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
-    <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
-    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
-        <item value="0"/>
-        <item value="1"/>
-    </int-array>
-    <int-array name="ims.ipsec_encryption_algorithms_int_array" num="3">
-        <item value="0"/>
-        <item value="1"/>
-        <item value="2"/>
-    </int-array>
+    <!-- Ims General -->
+    <boolean name="allow_unknown_country_element_for_geolocation_pidf_bool" value="false"/>
+    <!-- Aos -->
     <boolean name="sms_over_ims_available_without_voice_capability_bool" value="false"/>
+
+    <!-- USIM -->
+    <int-array name="ims.ims_identity_priority_int_array" num="1">
+        <item value="1"/>
+    </int-array>
+
+    <!-- LAST ACCESS NETWORK  INFO-->
+    <int name="imswfc.registration_private_header_int" value="2"/>
+
+    <!-- Ut/Xcap AOSP - Ut not supported -->
+    <boolean name="imsss.use_csfb_on_xcap_over_ut_failure_bool" value="true"/>
+
+    <!--Ut/Xcap Assets -->
+    <int name="ut_oir_network_default_operation_int" value="1"/>
+
+    <int-array name="imsvoice.srvcc_type_int_array" num="3">
+        <item value="0"/>
+        <item value="1"/>
+        <item value="3"/>
+    </int-array>
+    <int name="imsvoice.mo_call_request_timeout_millis_int" value="8000"/>
+
+    <int-array name="imsvoice.reject_code_for_csfb_int_array" num="1">
+        <item value="380"/>
+    </int-array>
+
+
+    <!-- MTC emergency call -->
+    <boolean name="imswfc.emergency_call_over_emergency_pdn_bool" value="true"/>
 </carrier_config>
