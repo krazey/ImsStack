@@ -20,13 +20,13 @@ MtcPreconditionManager::MtcPreconditionManager(IN IMtcCallContext& objContext) :
         m_pListener(IMS_NULL),
         m_objContext(objContext)
 {
-    IMS_TRACE_D("+MtcPreconditionManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
+    IMS_TRACE_D("+MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(this);
 }
 
 PUBLIC VIRTUAL MtcPreconditionManager::~MtcPreconditionManager()
 {
-    IMS_TRACE_D("~MtcPreconditionManager Callkey[%" PFLS_x "]", m_objContext.GetCallKey(), 0, 0);
+    IMS_TRACE_D("~MtcPreconditionManager Callkey[%d]", m_objContext.GetCallKey(), 0, 0);
     m_objContext.GetMediaManager().SetQosListener(IMS_NULL);
     DestroyAll();
 }

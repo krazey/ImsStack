@@ -177,7 +177,7 @@ void MergeController::ProcessMergeWithoutRefer(IN IMSList<ConfUser*>& objUsers)
 PRIVATE
 void MergeController::UpdateUserStateBySessionTerminated(IN IMS_UINTP nCallKey)
 {
-    IMS_TRACE_I("UpdateUserStateBySessionTerminated : [%" PFLS_x "]", nCallKey, 0, 0);
+    IMS_TRACE_I("UpdateUserStateBySessionTerminated : key[%d]", nCallKey, 0, 0);
 
     // KDDI
     for (IMS_UINT32 i = 0; i < m_objParticipantList.GetSize(); i++)
