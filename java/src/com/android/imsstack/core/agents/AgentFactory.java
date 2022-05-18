@@ -219,6 +219,7 @@ public final class AgentFactory {
 
         if (agents != null) {
             synchronized(mLock) {
+                agents.put(SimInterface.class, new SimAgent(slotId));
                 agents.put(ConfigInterface.class, new ConfigAgent(slotId));
                 agents.put(IpSecInterface.class, new IpSecAgent(slotId));
                 agents.put(SubsInfoInterface.class, new SubsInfoAgent(slotId));
