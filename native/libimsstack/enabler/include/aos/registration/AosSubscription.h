@@ -75,11 +75,14 @@ protected:
     virtual IMS_BOOL ProcessFailureResponse_504();
     virtual IMS_BOOL IsRetryActionDueToRetrycounter();
     virtual IMS_BOOL IsSubscriptionTerminated(IN IMS_SINT32 nStatusCode);
+
+public:
     virtual IMS_BOOL IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationWithNextPcscfRequired(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsInitialRegistrationRequiredInWifi(IN IMS_SINT32 nStatusCode);
     virtual IMS_BOOL IsResubscriptionStopped(IN IMS_SINT32 nStatusCode);
 
+protected:
     virtual void RequestCommand(IN IMS_SINT32 nReason, IN IMS_SINT32 nCommand);
 
     virtual IMS_BOOL ProcessFailed_StatusCode(IN IMS_SINT32 nStatusCode, IN IMS_BOOL bIsRefreshed);
@@ -199,6 +202,9 @@ private:
     static const IMS_UINT32 REFRESH_POLICY_CRITERIA_INTERVAL_FOR_RETRY = 1200;
     static const IMS_UINT32 REFRESH_POLICY_RATIO_VALUE_BELOW_THE_CRITERIA = 50;
     static const IMS_UINT32 REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA = 600;
+
+private:
+    friend class AosSubscriptionTest;
 };
 
 #endif  // AOS_SUBSCRIPTION_H_

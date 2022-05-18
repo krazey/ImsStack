@@ -47,9 +47,9 @@ protected:
         }
     }
 
-    void SetMtkChipset(IN IMS_SINT32 bIsMtkChipset) { pAosUtil->m_bIsMtkChipset = bIsMtkChipset; }
+    void SetMtkChipset(IN IMS_BOOL bIsMtkChipset) { pAosUtil->m_bIsMtkChipset = bIsMtkChipset; }
 
-    void SetWiFiTest(IN IMS_SINT32 bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
+    void SetWiFiTest(IN IMS_BOOL bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
 };
 
 TEST_F(AosUtilTest, checkSipMsg)

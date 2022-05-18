@@ -512,7 +512,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsSubscriptionTerminated(IN IMS_SINT
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(IN IMS_SINT32 nStatusCode)
 {
     IMS_SINT32 nRetryInfoRegRequired =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetRetryCountSubErrorRegRequired();
@@ -547,7 +547,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequired(IN IMS
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequired(
         IN IMS_SINT32 nStatusCode)
 {
     IMSVector<IMS_SINT32>& objErrRegRequiredWithNextPcscf =
@@ -571,7 +571,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRe
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
         IN IMS_SINT32 nStatusCode)
 {
     IMSVector<IMS_SINT32>& objErrRegRequiredInWifi =
@@ -598,7 +598,7 @@ PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
     return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
+PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsResubscriptionStopped(IN IMS_SINT32 nStatusCode)
 {
     IMSVector<IMS_SINT32>& objErrResubStopped =
             GET_N_CONFIG(m_piContext->GetSlotId())->GetSubErrorStoppingResub();
