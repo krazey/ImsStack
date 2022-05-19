@@ -29,11 +29,12 @@ import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
+import com.android.imsstack.core.agents.Usat;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.dcmif.ApnStateListener;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
-import com.android.imsstack.core.service.serviceif.IUSATService;
 import com.android.imsstack.enabler.mtc.Call;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.CallInfo;
@@ -65,6 +66,7 @@ import com.android.imsstack.imsservice.mmtel.internal.ConferenceProxy;
 import com.android.imsstack.imsservice.mmtel.videocall.ImsVideoCallProviderFactory;
 import com.android.imsstack.imsservice.mmtel.videocall.base.ImsVideoCallProviderBase;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.SimUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -1628,8 +1630,8 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
     }
 
     private boolean isUsatBasedCallRequired() {
-        IUSATService usat = mCallContext.getUSATService();
-        return (usat != null) ? usat.isUSATSupported() : false;
+        UsatInterface usat = mCallContext.getUsatInterface();
+        return (usat != null) ? usat.isServiceAvailable(Usat.SERVICE_CALL_CONTROL) : false;
     }
 
     private void notifyCallEventForVideoCallSession(final int event) {
@@ -2947,92 +2949,99 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         }
     }
 
-    private class UsatBasedCall implements IUSATService.USATListener {
-        private static final int CALL_ALLOWED = 0;
-        /** NOT_USED
-        private static final int CALL_NOT_ALLOWED = 1;
-        */
-        private static final int CALL_ALLOWED_TARGET_MODIFIED = 2;
-
-        private String mCallee = null;
+    private class UsatBasedCall implements Usat.Listener {
         private boolean mStartDone;
-        private int mTid = IUSATService.INVALID_ID;
+        private Usat.CallControlCommand mCcCmd = null;
 
         public UsatBasedCall() {
         }
 
-        /**
-         * Callback for call allowance.
-         *
-         * param response the response (0: allowed, 1: not-allowed, 2: target-modified) from USAT
-         * param modifiedInfo the modified target number if it's call allowance operation
-         */
         @Override
-        public void onNotifyCallAllowed(int response, String modifiedInfo) {
-            log("onNotifyCallAllowed :: response=" + response
-                    + ", targetNumber=" + ImsLog.hiddenString(modifiedInfo)
-                    + ", tid=" + mTid);
+        public void onCommandResponse(Usat.CommandResponse response) {
+            Usat.CallControlCommandResponse cmdRes = (Usat.CallControlCommandResponse) response;
+            Usat.CallControlCommand cmd = (Usat.CallControlCommand) cmdRes.getCommand();
 
-            if (mTid == IUSATService.INVALID_ID) {
-                // Already handled
+            synchronized (mLock) {
+                if (!cmd.equals(mCcCmd)) {
+                    loge("Command mismatched - " + cmd);
+                    return;
+                }
+            }
+
+            log("onCommandResponse :: cmd=" + cmd + ", result=" + cmdRes.getResult()
+                    + ", dialedString=" + ImsLog.hiddenString(cmdRes.getDialedString()));
+
+            if (cmdRes.getResult() == Usat.RESULT_NOT_ALLOWED) {
+                notifyCallStartFailed(ImsReasonInfo.CODE_UNSPECIFIED);
                 return;
             }
 
-            mTid = IUSATService.INVALID_ID;
+            String dialedString = cmd.getDialedString();
 
-            if (response == CALL_ALLOWED) {
-                // OFFLINE_DIALING
-                if (!startMoPendingCall(mCallee, mCallProfile)) {
-                    // Normal call
-                    startInternal(mCallee, mCallProfile);
+            if (cmdRes.getResult() == Usat.RESULT_ALLOWED_WITH_MODIFICATION) {
+                dialedString = cmdRes.getDialedString();
+                int reasonCode = getReasonCodeForUsatCallControlType(cmd.getCcType(),
+                        cmdRes.getCcType(), cmd.getMediaType(), dialedString);
+
+                if (reasonCode == ImsReasonInfo.CODE_UNSPECIFIED) {
+                    reasonCode = getReasonCodeForUsatMediaType(
+                            cmd.getMediaType(), cmdRes.getMediaType());
                 }
 
-                synchronized (mLock) {
-                    mStartDone = true;
+                if (reasonCode != ImsReasonInfo.CODE_UNSPECIFIED) {
+                    notifyCallStartFailed(reasonCode);
+                    return;
                 }
-            } else if ((response == CALL_ALLOWED_TARGET_MODIFIED)
-                    && !TextUtils.isEmpty(modifiedInfo)) {
-                // To replace the originating identity if it's changed by UICC
-                if (CallFeature.isUsatChangedCalleeNumberDisplayed(mCallContext.getSlotId())) {
-                    mCallProfile.setCallExtra(ImsCallProfile.EXTRA_OI, modifiedInfo);
-                    // This will be used in onCallStarted callback.
-                    mRemoteCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
-                            ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
 
-                    String[] callExtraKeys = new String[] { ImsCallProfile.EXTRA_OI };
-                    mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                if (TextUtils.isEmpty(dialedString)) {
+                    // Use the original dialed string if this is not present.
+                    dialedString = cmd.getDialedString();
                 } else {
-                    mCallProfile.setCallExtra(EXTRA_USAT_OI, mCallee);
-                }
+                    // To replace the originating identity if it's changed by UICC
+                    if (CallFeature.isUsatChangedCalleeNumberDisplayed(mCallContext.getSlotId())) {
+                        mCallProfile.setCallExtra(ImsCallProfile.EXTRA_OI, dialedString);
+                        // This will be used in onCallStarted callback.
+                        mRemoteCallProfile.setCallExtraInt(ImsCallProfile.EXTRA_OIR,
+                                ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED);
 
-                // OFFLINE_DIALING
-                if (!startMoPendingCall(modifiedInfo, mCallProfile)) {
-                    // Normal call
-                    startInternal(modifiedInfo, mCallProfile);
+                        String[] callExtraKeys = new String[] { ImsCallProfile.EXTRA_OI };
+                        mCallback.invokeUpdated(ImsCallSessionImpl.this, mCallProfile);
+                    } else {
+                        mCallProfile.setCallExtra(EXTRA_USAT_OI, cmd.getDialedString());
+                    }
                 }
+            }
 
-                synchronized (mLock) {
-                    mStartDone = true;
-                }
-            } else {
-                notifyCallStartFailed();
+            // OFFLINE_DIALING
+            if (!startMoPendingCall(dialedString, mCallProfile)) {
+                // Normal call
+                startInternal(dialedString, mCallProfile);
+            }
+
+            synchronized (mLock) {
+                mStartDone = true;
+                mCcCmd = null;
             }
         }
 
         public void dispose() {
-            if (mTid != IUSATService.INVALID_ID) {
-                IUSATService usat = mCallContext.getUSATService();
+            synchronized (mLock) {
+                if (mCcCmd != null) {
+                    UsatInterface usat = mCallContext.getUsatInterface();
 
-                if (usat != null) {
-                    usat.abortTransaction(mTid);
+                    if (usat != null) {
+                        usat.cancelCommand(mCcCmd);
+                    }
+
+                    mCcCmd = null;
                 }
-
-                mTid = IUSATService.INVALID_ID;
             }
         }
 
         public boolean isIdle() {
-            return (mCallee == null);
+            synchronized (mLock) {
+                return (mCcCmd == null);
+            }
         }
 
         public boolean isStartDone() {
@@ -3044,37 +3053,112 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
         public void start(String callee) {
             log("start");
 
-            mCallee = callee;
+            UsatInterface usat = mCallContext.getUsatInterface();
 
-            // It's handled by posting the callback to obtain cell location properly.
-            postAndRunTask(new Runnable() {
-                @Override
-                public void run() {
-                    if (notifyCallStartFailedIfAlreadyTerminated()) {
-                        return;
-                    }
-
-                    IUSATService usat = mCallContext.getUSATService();
-
-                    if (usat != null) {
-                        mTid = usat.isCallAllowedByUSAT(mCallee, UsatBasedCall.this);
-                    }
-
-                    if (mTid == IUSATService.INVALID_ID) {
-                        notifyCallStartFailed();
-                    }
+            if (usat == null) {
+                // OFFLINE_DIALING
+                if (!startMoPendingCall(callee, mCallProfile)) {
+                    // Normal call
+                    startInternal(callee, mCallProfile);
                 }
-            });
+                return;
+            }
+
+            int networkType = mCallProfile.getCallExtraInt(
+                    ImsCallProfile.EXTRA_CALL_NETWORK_TYPE,
+                    TelephonyManager.NETWORK_TYPE_LTE);
+            int mediaType = ImsCallUtils.isVoiceCall(mCallProfile.getCallType())
+                    ? Usat.MEDIA_TYPE_VOICE : Usat.MEDIA_TYPE_VIDEO;
+            int ccType = Usat.CALL_CONTROL_TYPE_MO_CALL;
+            int dialString = mCallProfile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING,
+                    ImsCallProfile.DIALSTRING_NORMAL);
+
+            if (dialString == ImsCallProfile.DIALSTRING_USSD) {
+                ccType = Usat.CALL_CONTROL_TYPE_USSD;
+
+                if (SimUtils.contains12KeysOnly(callee)) {
+                    // TODO: check "USSD string data object supported in Call Control".
+                    log("Usat: cc-type is changed from USSD to SS.");
+                    ccType = Usat.CALL_CONTROL_TYPE_SS;
+                }
+            }
+
+            mCcCmd = usat.createCallControlCommand(
+                    ccType, callee, networkType, mediaType, this);
+
+            usat.sendCommand(mCcCmd);
         }
 
-        private void notifyCallStartFailed() {
+        private void notifyCallStartFailed(int specificReasonCode) {
             if ((mCall != null) && (mListenerProxy != null)) {
+                if (specificReasonCode != ImsReasonInfo.CODE_UNSPECIFIED) {
+                    setTerminationReason(specificReasonCode);
+                }
+
                 FailInfo failInfo = new FailInfo(
                         IUMtcCall.Fail_Reason.FAIL_REASON_SERVICE_NOTSUPPORTCALL, 0, "");
 
                 mListenerProxy.onCallStartFailed(mCall, failInfo);
             }
+
+            synchronized (mLock) {
+                mCcCmd = null;
+            }
         }
+    }
+
+    private static int getReasonCodeForUsatCallControlType(int oldCcType, int newCcType,
+            int mediaType, String dialString) {
+        if (oldCcType == Usat.CALL_CONTROL_TYPE_MO_CALL) {
+            if (mediaType == Usat.MEDIA_TYPE_VIDEO) {
+                if (newCcType == Usat.CALL_CONTROL_TYPE_SS) {
+                    return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_SS;
+                } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
+                    return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_USSD;
+                } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
+                        && SimUtils.containsWildValue(dialString)) {
+                    return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_DIAL_VIDEO;
+                }
+            } else {
+                if (newCcType == Usat.CALL_CONTROL_TYPE_SS) {
+                    return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_SS;
+                } else if (newCcType == Usat.CALL_CONTROL_TYPE_USSD) {
+                    return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_USSD;
+                } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
+                        && SimUtils.containsWildValue(dialString)) {
+                    return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
+                }
+            }
+        } else if (oldCcType == Usat.CALL_CONTROL_TYPE_SS) {
+            // Originally, this was dialed as USSD, so it can be handled properly
+            // for all the call control types except for the exceptional case.
+            if ((newCcType == Usat.CALL_CONTROL_TYPE_SS
+                    || newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL)
+                            && SimUtils.containsWildValue(dialString)) {
+                return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
+            }
+        } else if (oldCcType == Usat.CALL_CONTROL_TYPE_USSD) {
+            if (newCcType == Usat.CALL_CONTROL_TYPE_SS) {
+                return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_SS;
+            } else if (newCcType == Usat.CALL_CONTROL_TYPE_MO_CALL
+                    && SimUtils.containsWildValue(dialString)) {
+                return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL;
+            }
+        }
+
+        return ImsReasonInfo.CODE_UNSPECIFIED;
+    }
+
+    private static int getReasonCodeForUsatMediaType(int oldMediaType, int newMediaType) {
+        if (oldMediaType == Usat.MEDIA_TYPE_VOICE
+                && newMediaType == Usat.MEDIA_TYPE_VIDEO) {
+            return ImsReasonInfo.CODE_DIAL_MODIFIED_TO_DIAL_VIDEO;
+        } else if (oldMediaType == Usat.MEDIA_TYPE_VIDEO
+                && newMediaType == Usat.MEDIA_TYPE_VOICE) {
+            return ImsReasonInfo.CODE_DIAL_VIDEO_MODIFIED_TO_DIAL;
+        }
+
+        return ImsReasonInfo.CODE_UNSPECIFIED;
     }
 
     private class SrvccStateListenerProxy implements ISrvccStateListener {

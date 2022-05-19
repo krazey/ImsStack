@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.android.imsstack.core.ICommonPackageListener;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
@@ -38,6 +39,9 @@ public interface IBaseContext extends IContext {
 
     public ILocationAgent getLocationAgent();
     public IUSATService getUSATService();
+
+    /** Returns the USAT interface. */
+    UsatInterface getUsatInterface();
 
     public boolean isCommonPackageReady();
     public void addCommonPackageListener(ICommonPackageListener listener);

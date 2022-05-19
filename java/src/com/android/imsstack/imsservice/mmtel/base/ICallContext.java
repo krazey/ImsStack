@@ -1,6 +1,5 @@
 package com.android.imsstack.imsservice.mmtel.base;
 
-import com.android.imsstack.core.service.serviceif.IUSATService;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 
