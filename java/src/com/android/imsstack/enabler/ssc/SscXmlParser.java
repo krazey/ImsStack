@@ -255,7 +255,11 @@ public class SscXmlParser {
 
         NodeList childNodeList = xeNodeList.item(0).getChildNodes();
         for (int i = 0; i < childNodeList.getLength(); i++) {
-            Element element = (Element)childNodeList.item(i);
+            if (childNodeList.item(i).getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+
+            Element element = (Element) childNodeList.item(i);
             Node phraseNode = element.getAttributes().getNamedItem(SscXmlFormat.PHRASE);
             String errorPhrase = (phraseNode != null) ? phraseNode.getTextContent() : null;
             if (TextUtils.isEmpty(errorPhrase) == false) {
