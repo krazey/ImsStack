@@ -4,10 +4,16 @@
     <!-- Ims General -->
     <boolean name="ims.allow_algorithm_parameter_in_sip_authorization_header_bool" value="true"/>
     <boolean name="ims.use_sip_user_agent_header_only_for_ua_string_bool" value="true"/>
+
     <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="true"/>
-    <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/>
-    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="2">
-        <item value="0"/>
+    <!-- IPSEC_ON -->
+    <!-- <boolean name="ims.allow_sip_p_access_network_info_header_in_initial_register_bool" value="false"/> -->
+
+    <boolean name="ims.sip_over_ipsec_enabled_bool" value="false"/>
+    <!-- IPSEC_ON -->
+    <!-- <boolean name="ims.sip_over_ipsec_enabled_bool" value="true"/> -->
+
+    <int-array name="ims.ipsec_authentication_algorithms_int_array" num="1">
         <item value="1"/>
     </int-array>
     <int-array name="ims.ipsec_encryption_algorithms_int_array" num="1">
@@ -16,12 +22,26 @@
     <int-array name="ims.ims_identity_priority_int_array" num="1">
         <item value="0"/>
     </int-array>
+    <!-- IPSEC_ON -->
+    <!-- <int-array name="ims.pcscf_discovery_method_int_array" num="1"> -->
+    <!--     <item value="1"/> -->
+    <!-- </int-array> -->
+
+    <!-- Aos -->
+    <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
     <boolean name="support_sdp_precondition_bool" value="false"/>
     <boolean name="sdp_negotiation_required_for_non_rpr_bool" value="true"/>
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+
+    <!-- Aos -->
+    <!-- KEY_SUBSCRIPTION_TERMINATED_ERROR_CODE_FOR_REG_EVENT_BUNDLE -->
+    <int name="subscription_terminated_error_code_for_reg_event_retry_max_count_int" value="1"/>
+    <int-array name="subscription_terminated_error_code_for_reg_event_int_array" num="1">
+        <item value="489"/>
+    </int-array>
 
     <!-- Media -->
     <boolean name="audio_hold_with_direction_inactive_bool" value="true"/>
