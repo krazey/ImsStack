@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.ImsPhoneProxyApi;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
@@ -16,8 +17,6 @@ import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.DBUtils;
-import com.android.imsstack.util.FeatureUtils;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.HashMap;
@@ -92,7 +91,7 @@ public class CallStateNotificationService implements
         mTestModeEnabled = isTestModeEnabled();
         mIPPApi = new ImsPhoneProxyApi(getSlotId());
 
-        mAvailableForNrSaMode = FeatureUtils.isVoNRSupported();
+        mAvailableForNrSaMode = CapabilityConfigs.isVoNrEnabled(getSlotId());
 
         if (mAvailableForNrSaMode) {
             mHandler = new MessageHandler();

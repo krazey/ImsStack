@@ -16,10 +16,7 @@ import com.android.imsstack.system.SystemConfig;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
-import com.android.imsstack.util.ImsFeature;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
@@ -27,7 +24,6 @@ import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SODConfig;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -41,7 +37,6 @@ public class CommonStarter {
     private static final String TAG = "ImsStack_CommonStarter";
 
     private static CommonStarter sCS = null;
-    private static boolean sInitGlobal = false;
 
     private boolean mJNIReady = false;
     private boolean mCommonAgentReady = false;
@@ -62,13 +57,6 @@ public class CommonStarter {
         }
 
         return sCS;
-    }
-
-    public static void initGlobal(Context appContext) {
-        if (!sInitGlobal) {
-            FeatureUtils.init(appContext);
-            sInitGlobal = true;
-        }
     }
 
     public int getState(int slotId) {
@@ -208,8 +196,6 @@ public class CommonStarter {
         DCFactory.createDC(context, slotId);
         DCFactory.initDC(context, slotId);
 
-        CapaAgent.getInstance().init(context, slotId);
-
         ConfigLoader.updateCarrierConfig(slotId);
 
         setStateOnStart(slotId);
@@ -225,8 +211,6 @@ public class CommonStarter {
         notifyPackageStop(slotId);
 
         Context context = AppContext.get();
-
-        CapaAgent.getInstance().deinit(slotId);
 
         DCFactory.cleanUpDC(slotId);
 
@@ -261,27 +245,10 @@ public class CommonStarter {
         }
 
         mCommonAgentReady = true;
-        CapaAgent.getInstance().start();
     }
 
     public void updateImsFeatures(Context context, int slotId, boolean notifyFeatureChanged) {
-        // No need to consider SIM slot
-        // because feature indicates the device's capabilities.
-        String prefOperator = ImsPrivateProperties.Persistent.get(
-                ImsPrivateProperties.Persistent.KEY_PREF_OPERATOR, 0);
-        String prefCountry = ImsPrivateProperties.Persistent.get(
-                ImsPrivateProperties.Persistent.KEY_PREF_COUNTRY, 0);
-
-        if (ImsFeature.reloadFeatures(context, prefOperator, prefCountry)) {
-            FeatureUtils.updateAll(context);
-
-            if (notifyFeatureChanged) {
-                SystemConfig.setConfigurationEvent(
-                        SystemConfig.EVENT_FEATURE_PERMISSIONS_CHANGED);
-            }
-        }
-
-        if (FeatureUtils.isVoNRSupported()) {
+        if (CapabilityConfigs.isVoNrEnabled(slotId)) {
             if ("KR".equals(ImsProperties.TARGET_COUNTRY)) {
                 int nrUeCapability = ImsPhoneProxyApi.getNrUeCapability(slotId, 0/*use default*/);
                 Log.d(TAG, "NrUeCapability: 0x" + Integer.toHexString(nrUeCapability));

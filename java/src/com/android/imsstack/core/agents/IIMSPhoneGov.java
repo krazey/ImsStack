@@ -11,6 +11,7 @@ import android.telephony.CellInfo;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
@@ -19,24 +20,22 @@ import com.android.imsstack.core.agents.agentif.IRegiProcess;
 import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.system.IJNIUpCallEvt;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIIMSPhone;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.MSimUtils;
 
 import java.util.Arrays;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class IIMSPhoneGov {
     /** Internal events */
@@ -357,10 +356,8 @@ public final class IIMSPhoneGov {
             boolean isAllowed = false;
 
             // check to update reg state for SA
-            if (type == ImsEventDef.IMS_LTE_SA_UPDATE_CURRENT_REG_STATE)
-            {
-                if (FeatureUtils.isVoNRSupported())
-                {
+            if (type == ImsEventDef.IMS_LTE_SA_UPDATE_CURRENT_REG_STATE) {
+                if (CapabilityConfigs.isVoNrEnabled(slotID)) {
                     IRegiProcess rp = RegiProcessAgent.getInstance(slotID);
                     if (rp != null) {
                         rp.updateCurrentRegistration();
@@ -390,10 +387,7 @@ public final class IIMSPhoneGov {
                     case ImsEventDef.IMS_LTE_DEACTIVATE_IMS_PDN: // FALL-THROUGH
                     case ImsEventDef.IMS_LTE_CSFB_PREF_SUB_STATE: // FALL-THROUGH
                     case ImsEventDef.IMS_LTE_UPDATE_CURRENT_REG_STATE:
-                        if (FeatureUtils.isHVolteSupported(mContext)
-                                || FeatureUtils.isCdmaLessSupported(mContext)) {
-                            isAllowed = true;
-                        }
+                        isAllowed = true;
                         break;
 
                     default:
@@ -420,10 +414,7 @@ public final class IIMSPhoneGov {
                 switch (type) {
                     case ImsEventDef.IMS_LTE_CSFB_PREF_SUB_STATE: // FALL-THROUGH
                     case ImsEventDef.IMS_LTE_UPDATE_CURRENT_REG_STATE:
-                        if (FeatureUtils.isHVolteSupported(mContext)
-                                || FeatureUtils.isCdmaLessSupported(mContext)) {
-                            isAllowed = true;
-                        }
+                        isAllowed = true;
                         break;
 
                     default:
@@ -435,20 +426,6 @@ public final class IIMSPhoneGov {
                 switch (type) {
                     case ImsEventDef.IMS_LTE_SR_REJECT_WITH_EMM:
                         isAllowed = true;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            if (ImsGlobal.equalsOperatorCountry("CT", "CN", op, co)) { // CT_HVOLTE
-                switch (type) {
-                    case ImsEventDef.IMS_LTE_CSFB_PREF_SUB_STATE: // FALL-THROUGH
-                    case ImsEventDef.IMS_LTE_UPDATE_CURRENT_REG_STATE:
-                        if (FeatureUtils.isHVolteSupported(mContext)) {
-                            isAllowed = true;
-                        }
                         break;
 
                     default:

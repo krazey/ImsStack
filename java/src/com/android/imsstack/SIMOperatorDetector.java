@@ -19,8 +19,8 @@ import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SimCarrierId;
 import com.android.imsstack.util.SODConfig;
+import com.android.imsstack.util.SimCarrierId;
 import com.android.internal.telephony.IccCardConstants;
 
 import java.util.ArrayList;
@@ -639,18 +639,6 @@ public class SIMOperatorDetector {
                     Log.d(TAG, "NonVoLteSim: VoLTE is enabled for IMS e-call");
                     bVoLTE = true;
                     bVoLteEmergency = true;
-
-                    if (ImsUtils.isSmsOnlyEnabledByPlatform(mContext)) {
-                        if (isKrOpen()) {
-                            SODConfig.Sim sim = getSim(slotId).getSimInfo();
-
-                            if (!isSmsOverImsSupported(sim.getOperator(), sim.getCountry())) {
-                                Log.d(TAG, "SmsOnly: SMSoIMS not supports");
-                                bVoLTE = false;
-                                bVoLteEmergency = false;
-                            }
-                        }
-                    }
                 }
             }
 

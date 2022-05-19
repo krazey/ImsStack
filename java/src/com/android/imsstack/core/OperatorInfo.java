@@ -13,7 +13,6 @@ import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
 import com.android.imsstack.system.SystemConfig;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
@@ -546,12 +545,6 @@ public class OperatorInfo {
             }
         }
 
-        // IMS_SMSONLY
-        if (FeatureUtils.isSMSOnlySupported(AppContext.get())) {
-            sDevice.setOperatorBasedOn(SODConfig.SMS_ONLY);
-            profile.setConfigPostfix("SMSONLY");
-        }
-
         if (ImsProperties.TARGET_OPERATOR.equals("CRK")) {
             profile.setConfigPostfix("CRK");
         }
@@ -696,7 +689,7 @@ public class OperatorInfo {
                 }
             }
 
-            if (FeatureUtils.isVoNRSupported()) {
+            if (CapabilityConfigs.isVoNrEnabled(currentSlotId)) {
                 int nrUeCapability = ImsUtils.getNrUeCapability(currentSlotId);
 
                 if (ImsUtils.has(nrUeCapability, ImsUtils.NR_UE_CAPABILITY_I_SA)) {
@@ -751,23 +744,15 @@ public class OperatorInfo {
 
     private static int adjustServiceFeatures(int slotId, int serviceFeatures) {
         if (isSupportVoLteEmergency(slotId)) {
-            if (ImsUtils.isSmsOnlyEnabledByPlatform(AppContext.get())) {
-                Log.i(TAG, "SystemConfig :: SmsOnly enabled");
+            Log.i(TAG, "SystemConfig :: VoLTE enabled for e-call");
+            serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
 
-                serviceFeatures &= ~(SystemConfig.FEATURE_S_VOLTE);
-                serviceFeatures &= ~(SystemConfig.FEATURE_S_VT);
-                serviceFeatures &= ~(SystemConfig.FEATURE_S_VOWIFI);
-            } else {
-                Log.i(TAG, "SystemConfig :: VoLTE enabled for e-call");
-                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE;
-
-                if (!"KR".equals(ImsProperties.TARGET_COUNTRY)) {
-                    serviceFeatures |= SystemConfig.FEATURE_S_VOLTE_EMERGENCY;
-                }
-
-                serviceFeatures &= ~(SystemConfig.FEATURE_S_VT);
-                serviceFeatures &= ~(SystemConfig.FEATURE_S_VOWIFI);
+            if (!"KR".equals(ImsProperties.TARGET_COUNTRY)) {
+                serviceFeatures |= SystemConfig.FEATURE_S_VOLTE_EMERGENCY;
             }
+
+            serviceFeatures &= ~(SystemConfig.FEATURE_S_VT);
+            serviceFeatures &= ~(SystemConfig.FEATURE_S_VOWIFI);
         }
         /* FIXME: check if the below logic is required or not
         else if (ImsUtils.isEmergencyCallEnabledOnServiceRestricted()

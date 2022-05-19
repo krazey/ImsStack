@@ -7,7 +7,6 @@ import android.util.ArrayMap;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SODConfig;
@@ -348,21 +347,15 @@ public final class CarrierCodeLoader {
             return;
         }
 
-        // [system|product]/etc
-        if (existFile(ImsUtils.getCupssConfigDir(), CARRIER_CODE_FILE)) {
-            mFileName = ImsUtils.getCupssConfigDir() + "/" + CARRIER_CODE_FILE;
-            mIsAsset = false;
-        } else {
-            // assets/CarrierCode/[CA|KR|US]
-            mFileName = "CarrierCode/" + ImsProperties.TARGET_COUNTRY + "/";
+        // assets/CarrierCode/[CA|KR|US]
+        mFileName = "CarrierCode/" + ImsProperties.TARGET_COUNTRY + "/";
 
-            if (SODConfig.equalsOperator(ImsProperties.TARGET_OPERATOR, "TRF")) {
-                mFileName += "TRF/";
-            }
-
-            mFileName += CARRIER_CODE_FILE;
-            mIsAsset = true;
+        if (SODConfig.equalsOperator(ImsProperties.TARGET_OPERATOR, "TRF")) {
+            mFileName += "TRF/";
         }
+
+        mFileName += CARRIER_CODE_FILE;
+        mIsAsset = true;
 
         if (Log.isDebuggable()) {
             Log.d(TAG, "CarrierCodeLoader: " + mFileName);

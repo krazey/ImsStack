@@ -164,14 +164,6 @@
             android:singleUser="true"
             android:syncable="false"
             android:writePermission="com.android.imsstack.permission.WRITE_IMS_STATE" />
-        <!-- ImsFeature -->
-        <provider
-            android:name=".provider.ImsFeatureProvider"
-            android:authorities="com.android.imsstack.provider.ims_feature"
-            android:exported="true"
-            android:multiprocess="false"
-            android:singleUser="true"
-            android:syncable="false" />
     </application>
 
     <uses-sdk android:minSdkVersion="31" />

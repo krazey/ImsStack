@@ -5,26 +5,27 @@ import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.OperatorInfo;
-import com.android.imsstack.external.ims.ImsExternalFeature;
 import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Locale;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 //1. Example for External folder :
 ///ImsConstants.IMS_STORAGE_ROOT_DIR/xml/configuration.LGU.KR.xml

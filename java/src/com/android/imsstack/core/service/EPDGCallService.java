@@ -1,10 +1,8 @@
 package com.android.imsstack.core.service;
 
 import android.content.Context;
-import android.net.NetworkCapabilities;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.mtc.Call;
@@ -15,6 +13,7 @@ import com.android.imsstack.enabler.mtc.MtcCall;
 import com.android.imsstack.internal.imsservice.CallUtils;
 import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.util.ImsLog;
+import com.android.imsstack.util.ImsUtils;
 
 import java.util.ArrayList;
 
@@ -68,7 +67,7 @@ public class EPDGCallService implements IService {
             return false;
         }
 
-        if (FeatureConfig.isEnabled(getSlotId(), FeatureConfig.VOWIFI)) {
+        if (ImsUtils.isWfcEnabledByPlatform(mVoLteService.getContext(), getSlotId())) {
             return true;
         }
 

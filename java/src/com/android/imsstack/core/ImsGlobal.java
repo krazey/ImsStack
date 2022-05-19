@@ -8,13 +8,12 @@ import android.os.Looper;
 import android.telephony.CarrierConfigManager;
 
 import com.android.ims.ImsManager;
-import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.CarrierConfigUtils;
 import com.android.imsstack.util.ImsUtils;
-import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.MSimUtils;
+import com.android.imsstack.util.MessageExecutor;
 import com.android.imsstack.util.SODConfig;
 
 public class ImsGlobal extends ContextWrapper {
@@ -110,10 +109,7 @@ public class ImsGlobal extends ContextWrapper {
     }
 
     public static boolean isWfcSettingEditable(int slotId) {
-        return isOperatorCountry(slotId, "TMO", "US")
-                || isOperator(slotId, "MPCS")
-                || isOperatorCountry(slotId, "TRF", "US")
-                || FeatureConfig.isEnabled(slotId, FeatureConfig.VOWIFI);
+        return isWfcEnabled(ImsGlobal.getInstance(), slotId);
     }
 
     // OPERATOR_COUNTRY {

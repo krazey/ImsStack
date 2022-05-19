@@ -1,10 +1,9 @@
 package com.android.imsstack.core.config;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -16,20 +15,16 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
-import com.android.imsstack.external.ims.ImsExternalFeature;
-import com.android.imsstack.external.ims.ImsFeatureProvider;
+import com.android.imsstack.test.menu.SettingUtil;
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.DBUtils;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
-import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SimCarrierId;
-import com.android.imsstack.test.menu.SettingUtil;
 
 import java.util.HashMap;
 import java.util.StringTokenizer;
@@ -176,8 +171,7 @@ public class ProviderDBUpdateHelper {
         }
 
         if (isIMSIChanged(context)) {
-            setFeatureTagsForKR(context);
-            setImsFeatureForSmsOnly(context);
+            // no-op
         }
 
         // Operator Specific update
@@ -285,17 +279,6 @@ public class ProviderDBUpdateHelper {
             return false;
         }
 
-        boolean isDeviceVtEnabled = ImsFeatureProvider.hasVt(context);
-        int enabledService = ProviderInterface.Subscriber.AdminServices.VOLTE;
-
-        if (isDeviceVtEnabled) {
-            enabledService |= ProviderInterface.Subscriber.AdminServices.VILTE;
-        }
-
-        DBUtils.DB.ImmediateMode.putHex(mSlotId,
-                mImsDb, ProviderInterface.Subscriber.TABLE_NAME,
-                ProviderInterface.Subscriber.SERVICES, enabledService);
-
         release();
 
         return true;
@@ -371,17 +354,7 @@ public class ProviderDBUpdateHelper {
         }
 
         setCustomUserAgentHeader(context);
-
-        if (FeatureUtils.isSMSOnlySupported(context)) {
-            setDeviceMode_VZW(context, 2);
-        } else if (FeatureUtils.isCdmaLessSupported(context)) {
-            setDeviceMode_VZW(context, 3);
-        } else {
-            if (!FeatureUtils.isHVolteSupported(context)) {
-                setDeviceMode_VZW(context, 0);
-            }
-        }
-
+        setDeviceMode_VZW(context, 3);
         setTraceOption_VZW(context);
 
         release();
@@ -391,31 +364,6 @@ public class ProviderDBUpdateHelper {
 
     public boolean dbUpdateForVZWMVNOs (Context context) {
         if (!init(context)) {
-           release();
-           return false;
-        }
-
-        String laopBrand = "";
-
-        Log.i(TAG, "VZWMVNOs - LAOP_BRAND : " + laopBrand);
-
-        // LRA / OPEN / AMZ case
-        if ("LRACG".equalsIgnoreCase(laopBrand) ||
-                "NAO".equalsIgnoreCase(laopBrand) ||
-                "AMZ".equalsIgnoreCase(laopBrand)) {
-            if(ImsFeatureProvider.hasVt(context)) {
-                updateConfigForVT(true);
-            } else {
-                updateConfigForVT(false);
-            }
-
-            if (FeatureUtils.isVoWiFiSupported(context)) {
-                updateConfigForVoWiFi(true);
-            } else {
-                updateConfigForVoWiFi(false);
-            }
-        } else {
-           // default
            release();
            return false;
         }
@@ -1136,60 +1084,6 @@ public class ProviderDBUpdateHelper {
         }
     }
 
-    private void setFeatureTagsForKR(Context context) {
-        if (FeatureUtils.isVoLTEOnlySupported(context)) {
-            int featureTags = DBUtils.DB.getHex(mSlotId,
-                    mImsDb, ProviderInterface.SIP.TABLE_NAME_COM,
-                    ProviderInterface.SIP.FEATURE_TAGS, 0);
-
-            if (featureTags != 0) {
-                int currentFeatureTags = featureTags;
-
-                // Remove "video" feature tag
-                featureTags &= (~SIP_FEATURE_TAG_MEDIA_STREAM_VIDEO);
-
-                if (currentFeatureTags != featureTags) {
-                    DBUtils.DB.ImmediateMode.putHex(mSlotId,
-                            mImsDb, ProviderInterface.SIP.TABLE_NAME_COM,
-                            ProviderInterface.SIP.FEATURE_TAGS, featureTags);
-                }
-            }
-        }
-    }
-
-    private void setImsFeatureForSmsOnly(Context context) {
-        Cursor cursor = null;
-        try {
-            cursor = DBUtils.DB.getFirstCursor(mSlotId, mImsDb,
-                    ProviderInterface.FEATURE.TABLE_NAME);
-
-            if (cursor != null) {
-                int index = cursor.getColumnIndex(ProviderInterface.FEATURE.FEATURE_VOLTE);
-
-                if (index >= 0) {
-                    int dbValue = cursor.getInt(index);
-                    int featureValue = ImsFeatureProvider.hasVoLte(context) ? 1 : 0;
-
-                    if (dbValue != featureValue) {
-                        if (!DBUtils.DB.ImmediateMode.putInt(mSlotId, mImsDb,
-                                ProviderInterface.FEATURE.TABLE_NAME,
-                                ProviderInterface.FEATURE.FEATURE_VOLTE, featureValue)) {
-                            Log.d(TAG, "Failed to update FEATURE_VOLTE");
-                        }
-                    }
-                }
-            }
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
-
     private void setImsPropertyForKR(Context context) {
         ImsPrivateProperties.Ephemeral.set(ImsPrivateProperties.Ephemeral.KEY_KR_TTA_VERSION,
                 getTTAVersion(context), mSlotId);
@@ -1508,23 +1402,7 @@ public class ProviderDBUpdateHelper {
         }
 
         private String getMinorVersion() {
-            if (!ImsExternalFeature.FEATURE_VOLTE_OPEN) {
-                return "";
-            }
-
-            String co = ImsGlobal.getCountry(mSlotId);
-            if (ImsGlobal.equalsCountry(co, "KR")
-                    || ImsGlobal.equalsCountry(co, "US")
-                    || ImsGlobal.equalsCountry(co, "CA")) {
-                return "";
-            }
-
-            String swVersion = Build.VERSION.RELEASE;
-            if (swVersion.isEmpty()) {
-                return "";
-            }
-
-            return "." + swVersion;
+            return "";
         }
     }
 

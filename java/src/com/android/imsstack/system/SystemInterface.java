@@ -12,10 +12,8 @@ import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.jni.JNIIms;
 import com.android.imsstack.jni.JNIImsListenerEx;
 import com.android.imsstack.system.SystemConstants;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
-import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.ThreadMessageExecutor;
 
@@ -320,7 +318,6 @@ public class SystemInterface implements JNIImsListenerEx {
             result = handleSystemAPITRM(method, parcel);
             break;
 
-        case SystemConstants.GET_IMS_FEATURES: // FALL-THROUGH
         case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
         case SystemConstants.SET_PRIVATE_PROPERTY:
             result = handleSystemAPIConfiguration(method, parcel);
@@ -550,9 +547,6 @@ public class SystemInterface implements JNIImsListenerEx {
         Parcel result = Parcel.obtain();
 
         switch (method) {
-        case SystemConstants.GET_IMS_FEATURES:
-            result.writeInt(FeatureUtils.getFeatures());
-            break;
         case SystemConstants.GET_PRIVATE_PROPERTY: {
             int persistent = parcel.readInt();
             String key = parcel.readString();
@@ -693,7 +687,6 @@ public class SystemInterface implements JNIImsListenerEx {
         case SystemConstants.GET_EXTERNAL_STORAGE_PATH: //FALL-THROUGH
         case SystemConstants.GET_DEVICE_NAME: //FALL-THROUGH
         case SystemConstants.SET_TRM: //FALL-THROUGH
-        case SystemConstants.GET_IMS_FEATURES: // FALL-THROUGH
         case SystemConstants.GET_PRIVATE_PROPERTY: // FALL-THROUGH
         case SystemConstants.SET_PRIVATE_PROPERTY:
             return true;
@@ -771,8 +764,6 @@ public class SystemInterface implements JNIImsListenerEx {
                 "GET_PREFERENCE");
         sMethodToString.put(SystemConstants.SET_PREFERENCE,
                 "SET_PREFERENCE");
-        sMethodToString.put(SystemConstants.GET_IMS_FEATURES,
-                "GET_IMS_FEATURES");
         sMethodToString.put(SystemConstants.GET_PRIVATE_PROPERTY,
                 "GET_PRIVATE_PROPERTY");
         sMethodToString.put(SystemConstants.SET_PRIVATE_PROPERTY,

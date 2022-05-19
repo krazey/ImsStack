@@ -7,7 +7,6 @@ import android.content.res.Configuration;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.os.SystemClock;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -15,32 +14,24 @@ import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.VoLteFactory;
-import com.android.imsstack.core.carrier.CarrierCode;
 import com.android.imsstack.core.carrier.CarrierCodeLoader;
 import com.android.imsstack.core.carrier.ImsCarrierResolver;
-import com.android.imsstack.external.ims.ImsFeatureProvider;
 import com.android.imsstack.imsservice.ImsServiceController;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.ImsCarrierId;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsExtApi;
-import com.android.imsstack.util.ImsFeature;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.ImsUtils;
 import com.android.imsstack.util.Log;
 import com.android.imsstack.util.MSimUtils;
-import com.android.imsstack.util.SettingsUtils;
-import com.android.imsstack.util.SimCarrierId;
 import com.android.imsstack.util.SODConfig;
+import com.android.imsstack.util.SettingsUtils;
 import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public class ImsStackApp extends Application implements IStateInfoChangedObserver {
@@ -109,9 +100,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
         // so it should be initialized first at the creation time of IMS application.
         AppContext.init(this);
 
-        // DSDV-SV
-        MSimUtils.setSingleImsEnabledOnDsdv(this);
-
         // Initialize any static data
         ImsUtils.init();
 
@@ -123,11 +111,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
 
         for (int i = 0; i < simCount; i++) {
             ImsPrivateProperties.Ephemeral.removeAll(i);
-        }
-
-        if (ImsFeatureProvider.hasFeature(this, ImsFeature.FEATURE_DISABLE_IMS)) {
-            Log.i(TAG, "onCreate :: Ims disabled");
-            return;
         }
 
         sHandler = new IMSMngrHandler();
@@ -211,42 +194,16 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
             return;
         }
 
-        if (MSimUtils.isSingleImsEnabledOnDsdv()
-                && !MSimUtils.isSlotIdForSingleImsOnDsdv(slotId)) {
-            int imsSlotId = MSimUtils.getSlotIdForSingleImsOnDsdv();
-
-            Log.i(TAG, "DSDV-SV :: Ims enabled on SIM" + imsSlotId);
-
-            sSOD.setSimState(slotId, ss);
-
-            if (sSOD.isSIMLoaded(ss) || sSOD.isSIMLocked(ss)) {
-                if (sSOD.isSIMAbsent(slotId)
-                        || sSOD.isSIMLoaded(slotId)
-                        || sSOD.isSIMLocked(slotId)) {
-                    sSOD.setSimState(slotId, 0x00);
-                    sSOD.setSimState(slotId, ss);
-                }
-
-                procSimStateChanged(imsSlotId, getSimState(imsSlotId), subId);
-            } else if (sSOD.isSIMAbsent(ss)) {
-                if (!sSOD.isSIMRemoved(slotId)) {
-                    procSimStateChanged(imsSlotId, getSimState(imsSlotId), subId);
-                }
-            }
-            return;
-        }
-
         if (sSOD.isSIMLoaded(ss) || sSOD.isSIMLocked(ss)) {
             procSimStateChanged(slotId, ss, subId);
 
-            if (!MSimUtils.isSingleImsEnabledOnDsdv() && (sSOD.getMaxSlot() > 1)) {
+            if (sSOD.getMaxSlot() > 1) {
                 doSimStateChangedForOtherSlots(slotId);
             }
         } else if (sSOD.isSIMAbsent(ss)) {
             procSimStateChanged(slotId, ss, subId);
 
-            if (!MSimUtils.isSingleImsEnabledOnDsdv()
-                    && !sSOD.isSIMRemoved(slotId) && (sSOD.getMaxSlot() > 1)) {
+            if (!sSOD.isSIMRemoved(slotId) && (sSOD.getMaxSlot() > 1)) {
                 doSimStateChangedForOtherSlots(slotId);
             }
         } else if (sSOD.isSIMRemoved(ss)) {
@@ -774,24 +731,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
 
         displayCarrierConfigs(slotId, subId);
 
-        if (MSimUtils.isSingleImsEnabledOnDsdv()
-                && !MSimUtils.isSlotIdForSingleImsOnDsdv(slotId)) {
-            int imsSlotId = MSimUtils.getSlotIdForSingleImsOnDsdv();
-
-            Log.i(TAG, "DSDV-SV :: Ims enabled on SIM" + imsSlotId);
-
-            // Check whether other SIM slot is already loaded or not.
-            subId = MSimUtils.getSubId(imsSlotId);
-
-            if (!SubscriptionManager.isUsableSubscriptionId(subId)) {
-                return;
-            }
-
-            displayCarrierConfigs(imsSlotId, subId);
-            doSimEventOnCarrierConfigChanged(imsSlotId, true);
-            return;
-        }
-
         doSimEventOnCarrierConfigChanged(slotId, true);
 
         if (sSOD.getMaxSlot() > 1) {
@@ -919,10 +858,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
 
     private void loadConfigAndStartServices(int slotId, boolean initialStart,
             boolean voLteEnabled, boolean stopServicesIfRunning, boolean updateFeatures) {
-        if (initialStart) {
-            initGlobal();
-        }
-
         if (updateFeatures) {
             updateImsFeatures(slotId, false);
         }
@@ -1015,19 +950,7 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
 
         com.android.imsstack.core.ImsGlobal.create(this);
 
-        // GII-IMPL
-        // ImsService SHALL be started in here to bind with ImsResolver in Android Framework.
-        if (ImsUtils.isSmsOnlyEnabledByPlatform(this)) {
-            // If SMSoIMS feature is provided via ImsService, then it should be removed.
-            // Do not start ImsMMTelService in this moment.
-
-            // Start ImsService for enabling ImsConfig to DM client (VZW only)
-            if ("VZW".equalsIgnoreCase(sSOD.getOperator(slotId))) {
-                ImsServiceController.start(this, slotId);
-            }
-        } else {
-            ImsServiceController.start(this, slotId);
-        }
+        ImsServiceController.start(this, slotId);
 
         // TODO
         // Set Extra with slotId in Intent
@@ -1055,10 +978,6 @@ public class ImsStackApp extends Application implements IStateInfoChangedObserve
     private synchronized boolean isCommonAgentReady() {
         CommonStarter cs = CommonStarter.getInstance();
         return cs.isCommonAgentReady();
-    }
-
-    private synchronized void initGlobal() {
-        CommonStarter.initGlobal(this);
     }
 
     private synchronized void initCommonAgent() {

@@ -153,7 +153,6 @@ public class SystemConstants {
      */
     public static final int GET_PREFERENCE = CATEGORY_BASE + 701;
     public static final int SET_PREFERENCE = CATEGORY_BASE + 702;
-    public static final int GET_IMS_FEATURES = CATEGORY_BASE + 703;
     public static final int GET_PRIVATE_PROPERTY = CATEGORY_BASE + 704;
     public static final int SET_PRIVATE_PROPERTY = CATEGORY_BASE + 705;
     public static final int GET_CARRIER_CONFIG = CATEGORY_BASE + 706;

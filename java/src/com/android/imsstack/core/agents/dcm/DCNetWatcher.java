@@ -34,6 +34,7 @@ import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.telephony.VopsSupportInfo;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.ICallSetting;
 import com.android.imsstack.core.agents.agentif.IPhoneState;
@@ -51,7 +52,6 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsLog;
 
 /** This class is for providing the network information */
@@ -402,7 +402,7 @@ public class DCNetWatcher implements IDCNetWatcher {
 
     @Override
     public boolean isLteEmergencyOnly() {
-        if (FeatureUtils.isVoNRSupported()) {
+        if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
             return isEmergencyOnlyForVonr();
         }
 
@@ -907,7 +907,7 @@ public class DCNetWatcher implements IDCNetWatcher {
 
     private void setRatPolicy() {
         // NR RAT
-        if (FeatureUtils.isVoNRSupported()) {
+        if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
             mRatPolicy |= POLICY_RAT_5G;
         }
 

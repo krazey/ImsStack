@@ -3,6 +3,7 @@ package com.android.imsstack.core.agents;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.agents.agentif.IAgent;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
@@ -11,8 +12,6 @@ import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIVoNR;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.FeatureUtils;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 
 public class VoNRAgent implements IAgent, ISystemAPIVoNR {
@@ -55,7 +54,7 @@ public class VoNRAgent implements IAgent, ISystemAPIVoNR {
     public void init(Context context) {
         mContext = context;
 
-        if (FeatureUtils.isVoNRSupported()) {
+        if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
             ImsLog.d(mSlotId, "vonr is supported");
             mSystem = SystemInterface.getInstance().getSystem(mSlotId);
             if (mSystem != null) {

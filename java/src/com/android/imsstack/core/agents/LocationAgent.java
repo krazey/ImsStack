@@ -2,26 +2,20 @@
 package com.android.imsstack.core.agents;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.database.ContentObserver;
-import android.os.Handler;
-import android.os.Bundle;
-import android.os.Looper;
-import android.os.Message;
-import android.os.SystemClock;
-import android.os.UserHandle;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationRequest;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
-import android.provider.Settings;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.SystemClock;
 import android.telephony.ServiceState;
 import android.text.TextUtils;
 
@@ -36,16 +30,12 @@ import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.LocationInfo;
 import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.ISystemAPILocation;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.GeocoderProxy;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.LocationApi;
 import com.android.imsstack.util.MessageExecutor;
-import com.android.imsstack.util.SettingsUtils;
 import com.android.imsstack.util.SystemUtils;
 
 import java.util.ArrayList;

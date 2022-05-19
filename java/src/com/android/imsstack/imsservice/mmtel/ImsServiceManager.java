@@ -24,7 +24,6 @@ import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
 import com.android.imsstack.enabler.mtc.MtcStateUtils;
-import com.android.imsstack.external.ims.ImsExternalFeature;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.system.SystemConfig;
@@ -422,7 +421,7 @@ public final class ImsServiceManager {
             return;
         }
 
-        if (!ImsExternalFeature.FEATURE_VOLTE_OPEN) {
+        if (ImsConstants.USE_CARRIER_CONFIG) {
             return;
         }
 
@@ -710,10 +709,6 @@ public final class ImsServiceManager {
                 if ((isub != null)
                         && (slotId == isub.getSlotId())
                         && isub.isSimLoaded(slotId)) {
-                    checkImsServiceAvailabilityAndBroadcastServiceUpDown(slotId);
-                }
-            } else if (ImsExternalFeature.FEATURE_VOLTE_OPEN) {
-                if (!ImsConstants.USE_CARRIER_CONFIG) {
                     checkImsServiceAvailabilityAndBroadcastServiceUpDown(slotId);
                 }
             }

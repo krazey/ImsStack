@@ -7,10 +7,12 @@ import android.os.Message;
 import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
@@ -32,7 +34,7 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.config.FeatureConfig;
+import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.CallInfoService;
@@ -55,9 +57,7 @@ import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestMode;
-import com.android.imsstack.util.CarrierConfigUtils;
 import com.android.imsstack.util.DBUtils;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.SettingsUtils;
@@ -320,7 +320,7 @@ public class VoLteService implements IVoLteService {
 
                 lp.setAddressTolerableDistance(150);
             } else if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "VZW", "US")
-                    && FeatureConfig.isEnabled(getSlotID(), FeatureConfig.VOWIFI)) {
+                    && ImsGlobal.isWfcEnabled(mContext, getSlotID())) {
                 lp = locAgent.getLocationPolicy();
 
                 policy |= LocationPolicy.POLICY_LOCATION_NOT_ALLOWED_PERIODIC_POLLING;
@@ -338,7 +338,7 @@ public class VoLteService implements IVoLteService {
                 lp.setAddressTolerableDistance(3000);
                 lp.setDefaultUpdateInterval(3600);
             } else if (OperatorInfo.isEnablerTypeForNonOperator(mSlotID)
-                    && FeatureConfig.isEnabled(mSlotID, FeatureConfig.VOWIFI)) {
+                    && ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
                 lp = locAgent.getLocationPolicy();
 
                 policy = LocationPolicy.POLICY_INIT_REQUIRED_ON_GETTING_LAST_LOCATION;
@@ -407,7 +407,7 @@ public class VoLteService implements IVoLteService {
 
         if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "TMO", "US")) {
             // IMS_RTT {
-            if (FeatureUtils.isRttSupported(mContext)) {
+            if (CapabilityConfigs.isRttEnabled(mSlotID)) {
                 if (callSettingService != null) {
                     callSettingService.unregisterForRttModeSettingChanged(null);
                 }
@@ -474,7 +474,7 @@ public class VoLteService implements IVoLteService {
                     ImsEventDef.IMS_MOBILE_DATA_SETTING_OFF, 0);
 
             // IMS_RTT {
-            if (FeatureUtils.isRttSupported(mContext)) {
+            if (CapabilityConfigs.isRttEnabled(mSlotID)) {
                 ICallSettingService callSettingService
                         = (ICallSettingService)getService(IVoLteService.TYPE_CALLSETTING);
                 if (callSettingService != null) {
@@ -513,15 +513,13 @@ public class VoLteService implements IVoLteService {
                 initServiceProvisioningInfo(IUIMS.M_APP_UC | IUIMS.M_APP_VT);
             }
 
-            if (isRoamingSupported()) {
-                DCGov dcGov = (DCGov)DCFactory.getDC(DCFactory.GOVERNOR, mSlotID);
-                if (dcGov != null) {
-                    dcGov.activateDataConnection4Sys(EApnType.IMS.getType(),
-                            IApn.IPCAN_CATEGORY_MOBILE);
-                }
+            DCGov dcGov = (DCGov) DCFactory.getDC(DCFactory.GOVERNOR, mSlotID);
+            if (dcGov != null) {
+                dcGov.activateDataConnection4Sys(EApnType.IMS.getType(),
+                        IApn.IPCAN_CATEGORY_MOBILE);
             }
         } else if (OperatorInfo.isEnablerTypeForNonOperator(mSlotID)
-                && FeatureConfig.isEnabled(mSlotID, FeatureConfig.VOWIFI)) {
+                && ImsGlobal.isWfcEnabled(mContext, mSlotID)) {
             ICellInfo ci = (ICellInfo)AgentFactory.getAgent(AgentFactory.CELL_INFO, mSlotID);
             if (ci != null) {
                 ci.init(mContext);
@@ -552,28 +550,21 @@ public class VoLteService implements IVoLteService {
         }
     }
 
-    // Note : API to block support_roaming for a specific operator
-    protected boolean isRoamingSupported() {
-        return true;
-    }
-
     protected void updateRoamingCapability() {
         // TODO: VT Roaming
-        boolean carrierVoLteRoaming = CarrierConfigUtils.getBooleanForSlot(
-                CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, mSlotID);
-        boolean carrierVtRoaming = false;
-        boolean supportRoaming = false;
-
+        ConfigInterface config = AgentFactory.getInstance().getAgent(
+                ConfigInterface.class, mSlotID);
         int volteInRoaming = 0;
         int vtInRoaming = 0;
 
-        if (carrierVoLteRoaming) {
-            supportRoaming = isRoamingSupported();
-            if (supportRoaming) {
-                volteInRoaming
-                    = FeatureConfig.isEnabled(mSlotID, FeatureConfig.VOLTE_IN_ROAMING) ? 1 : 0;
-                vtInRoaming
-                    = FeatureConfig.isEnabled(mSlotID, FeatureConfig.VT_IN_ROAMING) ? 1 : 0;
+        if (config != null) {
+            CarrierConfig cc = config.getCarrierConfig();
+
+            if (cc != null) {
+                if (cc.getBoolean(CarrierConfigManager
+                        .ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, false)) {
+                    volteInRoaming = 1;
+                }
             }
         }
 
@@ -584,14 +575,12 @@ public class VoLteService implements IVoLteService {
         if (volteInRoaming != curVolteInRoaming) {
             ImsStateController.RoamingState.putVoLteRoamingForPhoneId(
                     mContext.getContentResolver(), volteInRoaming, mSlotID);
-            ImsLog.d("Updated  VOLTE_IN_ROAMING[ " + mSlotID + "/"
-                    + carrierVoLteRoaming + "/" + supportRoaming + "/" + volteInRoaming + "]");
+            ImsLog.d("Updated  VOLTE_IN_ROAMING[ " + mSlotID + "/" + volteInRoaming + "]");
         }
         if (vtInRoaming != curVtInRoaming) {
             ImsStateController.RoamingState.putVtRoamingForPhoneId(
                     mContext.getContentResolver(), vtInRoaming, mSlotID);
-            ImsLog.d("Updated  VT_IN_ROAMING[ " + mSlotID + "/"
-                    + carrierVtRoaming + "/" + supportRoaming + "/" + vtInRoaming + "]");
+            ImsLog.d("Updated  VT_IN_ROAMING[ " + mSlotID + "/" + vtInRoaming + "]");
         }
     }
 

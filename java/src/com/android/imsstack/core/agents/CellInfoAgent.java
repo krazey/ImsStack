@@ -28,13 +28,13 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.agentif.ICellInfo;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
@@ -468,7 +468,7 @@ public class CellInfoAgent implements ICellInfo {
             mCellInfo = mCellInfoGsm;
             mTimeStamp = mTimeStampGsm;
         } else if (updatedCellInfo == CELL_INFO_NR) {
-            if (FeatureUtils.isVoNRSupported()) {
+            if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
                 mNetworkType = TelephonyManager.NETWORK_TYPE_NR;
                 mCellInfo = mCellInfoNr;
                 mTimeStamp = mTimeStampNr;
@@ -477,7 +477,7 @@ public class CellInfoAgent implements ICellInfo {
             }
         } else {
             CellInfo recentCellInfo = null;
-            if (FeatureUtils.isVoNRSupported()) {
+            if (CapabilityConfigs.isVoNrEnabled(mSlotId)) {
                 recentCellInfo = getMostRecentCellInfoForVoNR(updatedCellInfo);
             } else {
                 if ((updatedCellInfo & CELL_INFO_LTE) != 0) {

@@ -5,6 +5,7 @@ import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 
+import com.android.imsstack.core.CapabilityConfigs;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
@@ -23,14 +24,11 @@ import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.JNIUpCallEvtManager;
-import com.android.imsstack.util.FeatureUtils;
-import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsExtApi;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsProperties;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class CallInfoService implements IService, ICallInfoService {
     /* RIL constants */
@@ -130,7 +128,7 @@ public class CallInfoService implements IService, ICallInfoService {
         ImsLog.i(getSlotId(), "");
 
         if (isRilCallStatusRequired()) {
-            mAvailableForNrSaMode = FeatureUtils.isVoNRSupported();
+            mAvailableForNrSaMode = CapabilityConfigs.isVoNrEnabled(getSlotId());
 
             setCallInfoForRIL(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -580,7 +578,7 @@ public class CallInfoService implements IService, ICallInfoService {
 
     private boolean isVoNRStatusUpdateRequired() {
 
-        if (FeatureUtils.isVoNRSupported()) {
+        if (CapabilityConfigs.isVoNrEnabled(getSlotId())) {
             // In VoNR case, native UC sets the information
             return false;
         }

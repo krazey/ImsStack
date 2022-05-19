@@ -40,7 +40,6 @@ import com.android.imsstack.external.ims.ImsDialog;
 import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.external.ims.ImsReasonInfoEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsConstants;
 
 import java.util.ArrayList;
@@ -390,16 +389,6 @@ public class ImsCallUtils {
 
             if (urn != null) {
                 si.addService_str(SuppInfo.TYPE_TARGET_URI, urn);
-            }
-        }
-
-        if (oemExtras != null) {
-            // VRBT
-            if (FeatureUtils.isVrbtSupported(context.getContext())
-                    && oemExtras.containsKey(ImsCallProfileEx.EXTRA_VRBT)
-                    && ImsGlobal.isOperator(context.getSlotId(), "KT")) {
-                si.addService_bool(SuppInfo.TYPE_VRBT,
-                        oemExtras.getBoolean(ImsCallProfileEx.EXTRA_VRBT, false));
             }
         }
 

@@ -48,7 +48,6 @@ import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCSettings;
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
@@ -580,10 +579,6 @@ public abstract class Apn extends Handler implements IApn {
             }
             mSubscriptionListener = null;
         }
-    }
-
-    protected boolean isVoWifiSupported() {
-        return FeatureConfig.isEnabled(getSlotId(), FeatureConfig.VOWIFI);
     }
 
     protected int getIpcanCategory(int networkType) {

@@ -1,7 +1,5 @@
 package com.android.imsstack.util;
 
-import com.android.imsstack.external.ims.ImsExternalFeature;
-
 /**
  * This class provides constant values for IMS.
  */
@@ -19,6 +17,5 @@ public final class ImsConstants {
 
     public static final boolean USE_GOOGLE_NATIVE_APPS = true;
 
-    public static final boolean USE_CARRIER_CONFIG
-            = !ImsExternalFeature.FEATURE_VOLTE_OPEN;
+    public static final boolean USE_CARRIER_CONFIG = true;
 }

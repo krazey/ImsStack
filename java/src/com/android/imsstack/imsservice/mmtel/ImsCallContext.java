@@ -27,7 +27,6 @@ import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.enabler.mtc.MtcApp;
 import com.android.imsstack.enabler.mtc.MtcServiceStateTracker;
-import com.android.imsstack.external.ims.ImsFeatureProvider;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.imsservice.mmtel.base.IFDNTracker;
@@ -42,7 +41,6 @@ import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.AppContext;
-import com.android.imsstack.util.FeatureUtils;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.MSimUtils;
@@ -346,10 +344,6 @@ public class ImsCallContext implements ICallContext {
 
     public int getAudioHDQuality() {
         if (CallFeature.isAudioEvsSupported(getSlotId())) {
-            if (ImsFeatureProvider.hasMediaEvsWb(mContext)) {
-                return ImsStreamMediaProfile.AUDIO_QUALITY_EVS_WB;
-            }
-
             return ImsStreamMediaProfile.AUDIO_QUALITY_EVS_SWB;
         }
 
@@ -357,7 +351,7 @@ public class ImsCallContext implements ICallContext {
     }
 
     public int getVideoHDQuality() {
-        if (FeatureUtils.isMediaHevcSupported(mContext)) {
+        if (CallFeature.isVideoHevcSupported(getSlotId())) {
             String videoQuality = ImsPrivateProperties.Ephemeral.get(
                     ImsPrivateProperties.Ephemeral.KEY_H265_VIDEO_QUALITY, "720p", getSlotId());
 

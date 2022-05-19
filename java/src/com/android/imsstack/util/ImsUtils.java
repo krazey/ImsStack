@@ -6,8 +6,6 @@ import android.os.Handler;
 import android.os.Process;
 
 import com.android.ims.ImsManager;
-import com.android.imsstack.external.ims.ImsExternalFeature;
-import com.android.imsstack.external.ims.ImsFeatureProvider;
 
 /**
  * This class provides the common utility methods for IMS services.
@@ -132,15 +130,7 @@ public final class ImsUtils {
     }
 
     public static boolean isEmergencyCallEnabledOnNonVoLteSim() {
-        // P OSU : !ImsExternalFeature.FEATURE_VOLTE_OPEN || (AU/OPEN)
-        // P OS : ALL (TBD)
-        if (!ImsExternalFeature.FEATURE_VOLTE_OPEN) {
-            return true;
-        }
-
-        String co = ImsProperties.TARGET_COUNTRY;
-
-        return "AU".equals(co);
+        return true;
     }
 
     /**
@@ -187,11 +177,6 @@ public final class ImsUtils {
                 : DevicePolicyManager.ENCRYPTION_STATUS_INACTIVE;
 
         return (status == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE);
-    }
-
-    /** Check if this device enables SMS over IMS only. */
-    public static boolean isSmsOnlyEnabledByPlatform(Context c) {
-        return ImsFeatureProvider.hasFeature(c, ImsFeature.FEATURE_SMSONLY);
     }
 
     /** APIs for ImsManager - starts */
@@ -352,10 +337,6 @@ public final class ImsUtils {
     }
     // CACHE_FOR_SERVICE_CAPS }
 
-    public static String getCupssConfigDir() {
-        return ImsExternalFeature.getCupssConfigDir();
-    }
-
     public static int getDefaultNrUeCapability() {
         int nrUeCapability = 0;
 
@@ -458,12 +439,7 @@ public final class ImsUtils {
             if ("US".equals(co)) {
                 if ("VZW".equals(op) || "CCT".equals(op) || "CHT".equals(op) || "VSB".equals(op)
                        || "TMO".equals(op) || "MPCS".equals(op) || "DISH".equals(op)) {
-                    boolean bVoLTEEnabled = ImsFeatureProvider.hasVoLte(c);
-                    boolean bVtEnabled = ImsFeatureProvider.hasVt(c);
-                    boolean bVoWiFiEnabled = ImsFeatureProvider.hasVoWiFi(c);
-
-                    sServiceCapsByDeviceConfig =
-                            new ServiceCaps(bVoLTEEnabled, bVtEnabled, bVoWiFiEnabled);
+                    sServiceCapsByDeviceConfig = new ServiceCaps(true, true, true);
                 }
             }
         }

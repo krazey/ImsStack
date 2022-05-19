@@ -4,24 +4,23 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 
-import com.android.imsstack.external.ims.ImsExternalFeature;
 import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.IOException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public class SmartConfigXMLLoader {
     private static final String TAG = "ImsStack_SmartConfigXMLLoader";

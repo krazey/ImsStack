@@ -16,11 +16,9 @@
 
 package com.android.imsstack.util;
 
-import android.content.Context;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 
-import com.android.imsstack.external.ims.ImsFeatureProvider;
 import com.android.internal.telephony.IccCardConstants;
 
 /**
@@ -149,7 +147,7 @@ public final class MSimUtils {
     }
 
     public static boolean isMultiImsEnabled() {
-        return MULTI_IMS || isSingleImsEnabledOnDsdv();
+        return MULTI_IMS;
     }
 
     /** multiple lte is enabled */
@@ -171,26 +169,6 @@ public final class MSimUtils {
     public static boolean isValidSubId(int subId) {
         return SubscriptionManager.isUsableSubscriptionId(subId);
     }
-
-    // DSDV-SV (Dual SIM Dual VoLTE - Single VoLTE) {
-    // Assume that slot-0 only supports VoLTE.
-    public static int getSlotIdForSingleImsOnDsdv() {
-        return DEFAULT_SLOT_ID;
-    }
-
-    public static boolean isSingleImsEnabledOnDsdv() {
-        return sSingleImsEnabledOnDsdv && isMultiLteEnabled();
-    }
-
-    /** support single ims on dsdv */
-    public static boolean isSlotIdForSingleImsOnDsdv(int slotId) {
-        return slotId == getSlotIdForSingleImsOnDsdv();
-    }
-
-    public static void setSingleImsEnabledOnDsdv(Context c) {
-        sSingleImsEnabledOnDsdv = ImsFeatureProvider.hasFeature(c, ImsFeature.FEATURE_DSDV_SV);
-    }
-    // }
 
     // DSSV-DV (Dual SIM Single VoLTE - Dual VoLTE for emergency {
     public static boolean isMultiImsEnabledOnDssv() {
