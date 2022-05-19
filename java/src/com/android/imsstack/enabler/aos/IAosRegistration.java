@@ -15,11 +15,11 @@
  */
 package com.android.imsstack.enabler.aos;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import android.annotation.IntRange;
 import android.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * This class provides the interworking interface between Java and native layer
@@ -84,8 +84,9 @@ public interface IAosRegistration {
      * @param pcscfOrder Type of int {@link Pcscf},
      * @see {@link #IAosRegistration.RequestType}
      * @see {@link #IAosRegistration.Pcscf}
+     * @see {@link #IAosRegistration.Cause}
      */
-    public void controlRegistration(int requestType, int pcscfOrder);
+    void controlRegistration(int requestType, int pcscfOrder, int cause);
 
     /**
      * This method is returns the network type in whtich the IMS registered.
@@ -112,6 +113,15 @@ public interface IAosRegistration {
         public static final int FIRST = 0;
         public static final int CURRENT = 1;
         public static final int NEXT = 2;
+    }
+
+    /**
+     * Cause
+     */
+    class Cause {
+        public static final int UNKNOWN = 0;
+        public static final int DATA = 1;
+        public static final int RADIO = 2;
     }
 
     /**

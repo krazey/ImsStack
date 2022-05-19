@@ -15,9 +15,11 @@
  */
 package com.android.imsstack.enabler.aos.service;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Parcel;
+import android.util.ArraySet;
 
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo;
@@ -33,11 +35,9 @@ import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 
-import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Parcel;
-import android.util.ArraySet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class AosService implements IAosRegistration, IAosInfo {
 
@@ -153,12 +153,13 @@ public class AosService implements IAosRegistration, IAosInfo {
     }
 
     @Override
-    public void controlRegistration(int requestType, int pcscfOrder) {
+    public void controlRegistration(int requestType, int pcscfOrder, int cause) {
         Parcel parcel = Parcel.obtain();
 
         parcel.writeInt(IIAosService.J2N_REQUEST_CONTROL_REGISTRATION);
         parcel.writeInt(requestType);
         parcel.writeInt(pcscfOrder);
+        parcel.writeInt(cause);
 
         sendRequest(parcel);
     }

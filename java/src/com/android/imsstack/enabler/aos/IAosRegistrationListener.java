@@ -15,8 +15,9 @@
  */
 package com.android.imsstack.enabler.aos;
 
-import java.util.Set;
 import android.net.Uri;
+
+import java.util.Set;
 
 public interface IAosRegistrationListener {
 
@@ -156,26 +157,21 @@ public interface IAosRegistrationListener {
          */
         public static final int CODE_UNSPECIFIED = 0;
         /**
+         * Indicates that the IMS registration is failed with fatal error such as 403 or 404
+         * on all P-CSCF addresses. The radio shall block the current PLMN or disable
+         * the RAT
+         */
+        public static final int CODE_PLMN_BLOCK = 1;
+        /**
+         * Indicates that the IMS registration on current PLMN failed multiple times.
+         * The radio shall block the current PLMN or disable the RAT during the time
+         * based on carrier requirement
+         */
+        public static final int CODE_PLMN_BLOCK_WITH_TIMEOUT = 2;
+        /**
          * IMS Registration error code
          */
-        public static final int CODE_REGISTRATION_ERROR = 1000;
-        /**
-         * Indicates the registration attempt on IWLAN failed due to IKEv2 authetication failure
-         * during tunnel establishment.
-         */
-        public static final int CODE_IKEV2_AUTH_FAILURE = 1408;
-        /**
-         * Call/IMS registration failed/dropped because of a RLF
-         */
-        public static final int CODE_RADIO_LINK_FAILURE = 1506;
-        /**
-         * Call/IMS registration failed/dropped because of radio link lost
-         */
-        public static final int CODE_RADIO_LINK_LOST = 1507;
-        /**
-         * The call Call/IMS registration failed because of a radio uplink issue
-         */
-        public static final int CODE_RADIO_UPLINK_FAILURE = 1508;
+        public static final int CODE_REGISTRATION_ERROR = 3;
     }
 
     /**

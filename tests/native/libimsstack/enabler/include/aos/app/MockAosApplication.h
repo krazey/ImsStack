@@ -166,7 +166,8 @@ public:
             (IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam), (override));
     MOCK_METHOD(void, Timer_TimerExpired, (IN ITimer * piTimer), (override));
     MOCK_METHOD(void, RegistrationControl_ControlRegistration,
-            (IN AosRegRequestType eType, IN AosPcscfOrder eOrder), (override));
+            (IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause),
+            (override));
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, CleanUp, (), (override));
 };

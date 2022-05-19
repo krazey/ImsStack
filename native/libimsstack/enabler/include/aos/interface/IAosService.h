@@ -57,7 +57,8 @@ public:
             IN IMS_SINT32 nSipCode, IN const AString& sipReason) = 0;
     virtual void NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
-    virtual void ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder) = 0;
+    virtual void ControlRegistration(
+            IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) = 0;
 
     /**
      * AosService(Java) -> IAosServiceSettingListener(Native)

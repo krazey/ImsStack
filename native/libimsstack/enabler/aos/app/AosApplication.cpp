@@ -2647,7 +2647,7 @@ PROTECTED VIRTUAL void AosApplication::Timer_TimerExpired(IN ITimer* piTimer)
 }
 
 PROTECTED VIRTUAL void AosApplication::RegistrationControl_ControlRegistration(
-        IN AosRegRequestType eType, IN AosPcscfOrder /* eOrder */)
+        IN AosRegRequestType eType, IN AosPcscfOrder /* eOrder */, IN AosControlCause /* eCause */)
 {
     if (eType == AosRegRequestType::START)
     {

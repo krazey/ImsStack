@@ -261,7 +261,7 @@ protected:
 
     // AosRegistrationControlListener
     virtual void RegistrationControl_ControlRegistration(
-            IN AosRegRequestType eType, IN AosPcscfOrder eOrder);
+            IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause);
 
 protected:
     enum

@@ -22,6 +22,7 @@
 
 enum class AosPcscfOrder;
 enum class AosRegRequestType;
+enum class AosControlCause;
 
 class IAosRegistrationControlListener
 {
@@ -33,7 +34,7 @@ public:
     virtual void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) = 0;
     virtual void RegistrationControl_ControlRegistration(
-            IN AosRegRequestType eType, IN AosPcscfOrder eOrder) = 0;
+            IN AosRegRequestType eType, IN AosPcscfOrder eOrder, IN AosControlCause eCause) = 0;
 };
 
 class AosRegistrationControlListener : public IAosRegistrationControlListener
@@ -45,8 +46,8 @@ public:
             IN IMS_SINT32 /*nSipCode*/, IN const AString& /*strTarget*/) override{};
     inline void RegistrationControl_NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& /*objCapabilities*/) override{};
-    inline void RegistrationControl_ControlRegistration(
-            IN AosRegRequestType /*nRequestType*/, IN AosPcscfOrder /*nPcscfOrder*/) override{};
+    inline void RegistrationControl_ControlRegistration(IN AosRegRequestType /*eType*/,
+            IN AosPcscfOrder /*eOrder*/, IN AosControlCause /*eCause*/) override{};
 };
 
 /**
@@ -67,6 +68,16 @@ enum class AosRegRequestType
     START = 0,
     REFRESH = 1,
     STOP = 2
+};
+
+/**
+ * Registration control cause
+ */
+enum class AosControlCause
+{
+    UNKNOWN = 0,
+    DATA = 1,
+    RADIO = 2
 };
 
 #endif  // INTERFACE_AOS_REGISTRATION_CONTROL_LISTENER_H_

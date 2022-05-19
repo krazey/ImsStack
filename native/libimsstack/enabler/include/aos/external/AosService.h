@@ -48,7 +48,8 @@ public:
             IN IMS_SINT32 nSipCode, IN const AString& sipReason) override;
     void NotifyCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities) override;
-    void ControlRegistration(IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder) override;
+    void ControlRegistration(
+            IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nCause) override;
 
     void NotifyAirplaneSetting(IN IMS_UINT32 nIsOn) override;
     void NotifyDataRoamingSetting(IN IMS_UINT32 nIsAllowed) override;

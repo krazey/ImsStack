@@ -305,7 +305,8 @@ void JniAosService::ControlRegistration(IN const android::Parcel& objParcel)
 {
     if (Attach())
     {
-        m_piAosService->ControlRegistration(objParcel.readInt32(), objParcel.readInt32());
+        m_piAosService->ControlRegistration(
+                objParcel.readInt32(), objParcel.readInt32(), objParcel.readInt32());
     }
 }
 

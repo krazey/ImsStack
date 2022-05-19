@@ -240,10 +240,10 @@ PUBLIC VIRTUAL void AosService::NotifyCapabilitiesChanged(
 }
 
 PUBLIC VIRTUAL void AosService::ControlRegistration(
-        IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder)
+        IN IMS_SINT32 nRequestType, IN IMS_SINT32 nPcscfOrder, IN IMS_SINT32 nControlCause)
 {
-    IMS_TRACE_I("ControlRegistration :: nRequestType(%d), nPcscfOrder(%d)", nRequestType,
-            nPcscfOrder, 0);
+    IMS_TRACE_I("ControlRegistration :: nRequestType(%d), nPcscfOrder(%d), nControlCause(%d)",
+            nRequestType, nPcscfOrder, nControlCause);
     for (IMS_UINT32 i = 0; i < m_objAosRegistrationControlListeners.GetSize(); ++i)
     {
         IAosRegistrationControlListener* piListener = m_objAosRegistrationControlListeners.GetAt(i);
@@ -252,7 +252,8 @@ PUBLIC VIRTUAL void AosService::ControlRegistration(
         {
             piListener->RegistrationControl_ControlRegistration(
                     static_cast<AosRegRequestType>(nRequestType),
-                    static_cast<AosPcscfOrder>(nPcscfOrder));
+                    static_cast<AosPcscfOrder>(nPcscfOrder),
+                    static_cast<AosControlCause>(nControlCause));
         }
     }
 }

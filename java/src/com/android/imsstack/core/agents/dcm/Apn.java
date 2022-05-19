@@ -1438,7 +1438,8 @@ public abstract class Apn extends Handler implements IApn {
                             if (aosReg.getRegisteredNetworkType()
                                     != IAosRegistrationListener.NetworkType.NONE) {
                                 aosReg.controlRegistration(IAosRegistration.RequestType.STOP,
-                                        IAosRegistration.Pcscf.CURRENT);
+                                        IAosRegistration.Pcscf.CURRENT,
+                                        IAosRegistration.Cause.DATA);
                             }
                         }
                     }
