@@ -189,7 +189,7 @@ public class UsatAgent extends Handler implements UsatInterface {
             return;
         }
 
-        ImsLog.d(getSlotId(), "USAT: sendCommand - " + command);
+        ImsLog.i(getSlotId(), "USAT: sendCommand - " + command);
 
         synchronized (mLock) {
             mCommands.put(command.getCid(), command);
@@ -200,7 +200,8 @@ public class UsatAgent extends Handler implements UsatInterface {
 
     @Override
     public void handleMessage(@NonNull Message msg) {
-        ImsLog.d(getSlotId(), "USAT: handleMessage - msg=" + msg.what);
+        ImsLog.i(getSlotId(), "USAT: handleMessage - msg=" + msg.what);
+
         switch (msg.what) {
             case EVENT_SEND_COMMAND: {
                 Usat.Command cmd = (Usat.Command) msg.obj;
@@ -259,7 +260,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         removeCommand(response.getCommand());
 
         if (isCommandAborted(response.getCommand())) {
-            ImsLog.d(getSlotId(), "USAT: command is already aborted - " + response.getCommand());
+            ImsLog.i(getSlotId(), "USAT: command is already aborted - " + response.getCommand());
             return;
         }
 
@@ -293,7 +294,7 @@ public class UsatAgent extends Handler implements UsatInterface {
         }
 
         if (!result.isOk()) {
-            ImsLog.d(getSlotId(), "USAT: Call-control failed - " + result);
+            ImsLog.w(getSlotId(), "USAT: call-control failed - " + result);
         }
 
         Usat.CallControlCommandResponse cmdResponse =
@@ -301,6 +302,8 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
+        } else {
+            ImsLog.i(getSlotId(), "USAT: call-control command aborted");
         }
     }
 
@@ -326,17 +329,17 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         if (ccType == Usat.CALL_CONTROL_TYPE_MO_CALL) {
             if (!writeAddress(buffer, cmd.getDialedString())) {
-                ImsLog.d(getSlotId(), "USAT: writing address failed");
+                ImsLog.w(getSlotId(), "USAT: writing address failed");
                 return null;
             }
         } else if (ccType == Usat.CALL_CONTROL_TYPE_SS) {
             if (!writeSsString(buffer, cmd.getDialedString())) {
-                ImsLog.d(getSlotId(), "USAT: writing SS string failed");
+                ImsLog.w(getSlotId(), "USAT: writing SS string failed");
                 return null;
             }
         } else if (ccType == Usat.CALL_CONTROL_TYPE_USSD) {
             if (!writeUssdString(buffer, cmd.getDialedString())) {
-                ImsLog.d(getSlotId(), "USAT: writing USSD string failed");
+                ImsLog.w(getSlotId(), "USAT: writing USSD string failed");
                 return null;
             }
         }
@@ -389,7 +392,6 @@ public class UsatAgent extends Handler implements UsatInterface {
     private Usat.CallControlCommandResponse decodeCommandResponseForCallControl(
             Usat.CallControlCommand cmd, UsatResult result) {
         if (isCommandAborted(cmd)) {
-            ImsLog.d(getSlotId(), "USAT: command is already aborted - " + cmd);
             return null;
         }
 
@@ -414,7 +416,7 @@ public class UsatAgent extends Handler implements UsatInterface {
                 // Malformed data format. Do not allow the call.
                 cmdResult = Usat.RESULT_NOT_ALLOWED;
             } else {
-                ImsLog.d(getSlotId(), "USAT: response data objects=" + dataObjects.size());
+                ImsLog.i(getSlotId(), "USAT: response data objects=" + dataObjects.size());
 
                 if (dataObjects.isEmpty()) {
                     cmdResult = Usat.RESULT_NOT_ALLOWED;
@@ -487,12 +489,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: MO-SMS-control - encodedCommand=" + encodedCommand
+            ImsLog.d(getSlotId(), "USAT: mo-sms-control - encodedCommand=" + encodedCommand
                     + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.d(getSlotId(), "USAT: MO-SMS-control failed - " + result);
+            ImsLog.w(getSlotId(), "USAT: mo-sms-control failed - " + result);
         }
 
         Usat.MoSmsControlCommandResponse cmdResponse =
@@ -500,6 +502,8 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
+        } else {
+            ImsLog.i(getSlotId(), "USAT: mo-sms-control command aborted");
         }
     }
 
@@ -545,12 +549,12 @@ public class UsatAgent extends Handler implements UsatInterface {
         UsatResult result = createUsatResult(response);
 
         if (ImsLog.DBG) {
-            ImsLog.d(getSlotId(), "USAT: SMS-PP-download - encodedCommand=" + encodedCommand
+            ImsLog.d(getSlotId(), "USAT: sms-pp-download - encodedCommand=" + encodedCommand
                     + ", response=" + response + ", result=" + result);
         }
 
         if (!result.isOk()) {
-            ImsLog.d(getSlotId(), "USAT: SMS-PP-download failed - " + result);
+            ImsLog.w(getSlotId(), "USAT: sms-pp-download failed - " + result);
         }
 
         Usat.SmsPpDownloadCommandResponse cmdResponse =
@@ -558,6 +562,8 @@ public class UsatAgent extends Handler implements UsatInterface {
 
         if (cmdResponse != null) {
             notifyCommandResponse(cmdResponse);
+        } else {
+            ImsLog.i(getSlotId(), "USAT: sms-pp-download command aborted");
         }
     }
 

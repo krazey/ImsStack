@@ -41,7 +41,7 @@ public interface UsatInterface {
      *               {@link #CALL_CONTROL_TYPE_SS},
      *               {@link #CALL_CONTROL_TYPE_USSD}.
      * @param dialedString The dialed string - address or SS string or USSD string.
-     * @param networkType The network type that the call is performed. Valid values are
+     * @param networkType The network type that the call is performed on. Valid values are
      *                    {@link TelephonyManager#NETWORK_TYPE_UNKNOWN},
      *                    {@link TelephonyManager#NETWORK_TYPE_NR},
      *                    {@link TelephonyManager#NETWORK_TYPE_LTE},
@@ -65,7 +65,7 @@ public interface UsatInterface {
      *
      * @param rpDestAddress The RP_Destination_Address.
      * @param tpDestAddress The TP_Destination_Address.
-     * @param networkType The network type that the call is performed. Valid values are
+     * @param networkType The network type that the call is performed on. Valid values are
      *                    {@link TelephonyManager#NETWORK_TYPE_UNKNOWN},
      *                    {@link TelephonyManager#NETWORK_TYPE_NR},
      *                    {@link TelephonyManager#NETWORK_TYPE_LTE},

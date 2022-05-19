@@ -18,6 +18,8 @@ package com.android.imsstack.core.agents;
 
 import android.annotation.IntDef;
 
+import com.android.imsstack.util.ImsLog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -169,7 +171,11 @@ public interface Usat {
 
         @Override
         public String toString() {
-            return "[ Usat.Command: cid=" + mCid + ", serviceType=" + mServiceType + " ]";
+            return new StringBuilder("[ Usat.Command:")
+                    .append(" cid=").append(mCid)
+                    .append(", serviceType=").append(mServiceType)
+                    .append(", aborted=").append(mAborted)
+                    .append(" ]").toString();
         }
     }
 
@@ -244,6 +250,17 @@ public interface Usat {
         public @MediaType int getMediaType() {
             return mMediaType;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.CallControl: ")
+                    .append(super.toString())
+                    .append(", ccType=").append(mCcType)
+                    .append(", dialedString=").append(ImsLog.hiddenString(mDialedString))
+                    .append(", networkType=").append(mNetworkType)
+                    .append(", mediaType=").append(mMediaType)
+                    .append(" ]").toString();
+        }
     }
 
     /**
@@ -297,6 +314,16 @@ public interface Usat {
          */
         public int getNetworkType() {
             return mNetworkType;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.MoSmsControl: ")
+                    .append(super.toString())
+                    .append(", rpDstAddress=").append(ImsLog.hiddenString(mRpDestinationAddress))
+                    .append(", tpDstAddress=").append(ImsLog.hiddenString(mTpDestinationAddress))
+                    .append(", networkType=").append(mNetworkType)
+                    .append(" ]").toString();
         }
     }
 
@@ -354,6 +381,17 @@ public interface Usat {
         public String getOriginatingAddress() {
             return mOriginatingAddress;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.SmsPpDownload: ")
+                    .append(super.toString())
+                    .append(", rpOrigAddress=").append(ImsLog.hiddenString(mRpOriginatingAddress))
+                    .append(", uriTruncated=").append(mUriTruncated)
+                    .append(", tpdu=").append((mTpdu != null) ? mTpdu.length : 0)
+                    .append(" origAddress=").append(ImsLog.hiddenString(mOriginatingAddress))
+                    .append(" ]").toString();
+        }
     }
 
     /**
@@ -389,6 +427,13 @@ public interface Usat {
          */
         public @Result int getResult() {
             return mResult;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.Response:")
+                    .append(" result=").append(mResult)
+                    .append(" ]").toString();
         }
     }
 
@@ -441,6 +486,16 @@ public interface Usat {
         public @MediaType int getMediaType() {
             return mMediaType;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.CallControl: ")
+                    .append(super.toString())
+                    .append(", ccType=").append(mCcType)
+                    .append(", dialedString=").append(ImsLog.hiddenString(mDialedString))
+                    .append(", mediaType=").append(mMediaType)
+                    .append(" ]").toString();
+        }
     }
 
     /**
@@ -474,17 +529,26 @@ public interface Usat {
         public String getTpDestinationAddress() {
             return mTpDestinationAddress;
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.MoSmsControl: ")
+                    .append(super.toString())
+                    .append(", rpDstAddress=").append(ImsLog.hiddenString(mRpDestinationAddress))
+                    .append(", tpDstAddress=").append(ImsLog.hiddenString(mTpDestinationAddress))
+                    .append(" ]").toString();
+        }
     }
 
     /**
      * USAT command response for SMS-PP download.
      */
     class SmsPpDownloadCommandResponse extends CommandResponse {
-        private final byte[] mResponseData;
+        private final byte[] mData;
 
-        SmsPpDownloadCommandResponse(Command command, @Result int result, byte[] responseData) {
+        SmsPpDownloadCommandResponse(Command command, @Result int result, byte[] data) {
             super(command, result);
-            mResponseData = responseData;
+            mData = data;
         }
 
         /**
@@ -500,8 +564,16 @@ public interface Usat {
          * @return The response data from the UICC.
          *         The length of this data is 1 to 128 if present.
          */
-        public byte[] getResponseData() {
-            return mResponseData;
+        public byte[] getData() {
+            return mData;
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("[ Usat.SmsPpDownload: ")
+                    .append(super.toString())
+                    .append(", data=").append((mData != null) ? mData.length : 0)
+                    .append(" ]").toString();
         }
     }
 
