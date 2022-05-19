@@ -24,7 +24,6 @@
 #include "helper/sipinterfaceholder/ReferenceInterfaceHolder.h"
 #include "ect/IEctReferenceListener.h"
 
-
 #include "ect/EctReference.h"
 // TODO: move UriFormatter to common part.
 #include "conferencecall/UriFormatter.h"
@@ -47,8 +46,7 @@ EctReference::EctReference(IN IMtcContext& objContext, IN CallKey nTransfereeKey
 PUBLIC EctReference::~EctReference()
 {
     IMS_TRACE_I("~EctReference", 0, 0, 0);
-    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->ReleaseIReference(
-            m_piReference);
+    m_objContext.GetSipInterfaceFactory().GetIReferenceHolder()->ReleaseIReference(m_piReference);
 }
 
 PUBLIC VIRTUAL void EctReference::ReferenceDelivered(IN IReference* piReference)
@@ -84,8 +82,7 @@ PUBLIC VIRTUAL void EctReference::ReferenceDeliveryFailed(IN IReference* piRefer
     m_objListener.OnReferenceStartFailed();
 }
 
-PUBLIC VIRTUAL void EctReference::ReferenceNotify(
-        IN IReference* piReference, IN IMessage* piNotify)
+PUBLIC VIRTUAL void EctReference::ReferenceNotify(IN IReference* piReference, IN IMessage* piNotify)
 {
     (void)piReference;
 
@@ -207,8 +204,7 @@ AString EctReference::GetReferToUri(IN const IMtcCall* piTransferTargetCall) con
 PRIVATE
 AString EctReference::GetReferToUri(IN const AString& strTransferTarget) const
 {
-    return m_objContext.GetDialingPlan().GetToUri(
-            strTransferTarget, CallInfo(), Scheme::SIP);
+    return m_objContext.GetDialingPlan().GetToUri(strTransferTarget, CallInfo(), Scheme::SIP);
 }
 PRIVATE
 void EctReference::SetReplaces(IN IMtcCall* piTransferTargetCall)

@@ -20,9 +20,8 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 const IMS_CHAR UriFormatter::STR_USER_PHONE[] = ";user=phone";
 
-PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(
-        OUT AString& strUri, IN IMtcCallContext& objContext,
-        IN IMS_BOOL bEnforcePaid/* = IMS_FALSE*/)
+PUBLIC GLOBAL AString& UriFormatter::GetReferToForInvite(OUT AString& strUri,
+        IN IMtcCallContext& objContext, IN IMS_BOOL bEnforcePaid /* = IMS_FALSE*/)
 {
     if (bEnforcePaid || ConferenceConfigurationWrapper::IsPaidPreferred())
     {

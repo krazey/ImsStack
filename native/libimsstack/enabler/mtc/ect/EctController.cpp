@@ -15,8 +15,8 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-EctController::EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
-        IN IEctControllerListener& objListener) :
+EctController::EctController(
+        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
         m_objContext(objContext),
         m_nTransfereeKey(nCallKey),
         m_objListener(objListener),

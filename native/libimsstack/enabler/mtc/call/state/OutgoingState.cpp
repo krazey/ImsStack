@@ -646,8 +646,8 @@ CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
 {
     IMS_TRACE_D("HandleSilentRetry", 0, 0, 0);
 
-    if (m_nSilentRedialCount >= m_objContext.GetConfigurationProxy().GetInt(
-            Feature::SILENT_REDIAL_MAX_RETRY_COUNT))
+    if (m_nSilentRedialCount >=
+            m_objContext.GetConfigurationProxy().GetInt(Feature::SILENT_REDIAL_MAX_RETRY_COUNT))
     {
         IMS_TRACE_D("HandleRetrySilent : Max retry count[%d] reached", m_nSilentRedialCount, 0, 0);
         m_objContext.GetUiNotifier().SendStartFailed(objReason);
@@ -672,8 +672,7 @@ CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
     }
     else
     {
-        m_objContext.GetTimer().Start(
-                TimerType::TIMER_RETRY_AFTER, nRetryAfterSecond * 1000);
+        m_objContext.GetTimer().Start(TimerType::TIMER_RETRY_AFTER, nRetryAfterSecond * 1000);
     }
 
     /* TODO: Policy: LTE
@@ -681,7 +680,7 @@ CallStateName OutgoingState::HandleSilentRetry(IN const FailReason& objReason)
             ->Control(ImsAosControl::FALLBACK_TO_LTE_AND_LET_ME_KNOW_IT);
     */
 
-   return GetStateName();
+    return GetStateName();
 }
 
 PRIVATE
@@ -797,7 +796,7 @@ PRIVATE
 void OutgoingState::OnSessionForked(IN ISession* piOriginSession)
 {
     if (m_objContext.GetConfigurationProxy().Is(
-            Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
+                Feature::MAINTAIN_MULTIPLE_EARLY_SESSIONS_BY_FORKING))
     {
         return;
     }
