@@ -21,7 +21,7 @@ class IAosCallTrackerListener;
 class IAosCallTracker
 {
 public:
-    virtual IMS_BOOL IsCSCallActive() const = 0;
+    virtual IMS_BOOL IsCsCallActive() const = 0;
     virtual IMS_BOOL IsNormalCallActive() const = 0;
     virtual IMS_BOOL IsEmergencyCallActive() const = 0;
 
@@ -33,8 +33,8 @@ public:
     virtual IMS_UINT32 GetCallState(IN IMS_UINT32 nType) const = 0;
     virtual IMS_UINT32 GetSessionType(IN IMS_UINT32 nType) const = 0;
 
-    virtual void SetCSCallStateWatchMode() = 0;
-    virtual void SetActiveCSCallState(IN IMS_UINT32 nActiveCSState) = 0;
+    virtual void SetCsCallStateWatchMode() = 0;
+    virtual void SetActiveCsCallState(IN IMS_UINT32 nActiveCsState) = 0;
 
     virtual void SetListener(IN IAosCallTrackerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosCallTrackerListener* piListener) = 0;

@@ -33,7 +33,7 @@ public:
     AosCallTracker(IN IMS_SINT32 nSlotId_);
     virtual ~AosCallTracker();
 
-    virtual IMS_BOOL IsCSCallActive() const;
+    virtual IMS_BOOL IsCsCallActive() const;
     virtual IMS_BOOL IsNormalCallActive() const;
     virtual IMS_BOOL IsEmergencyCallActive() const;
     virtual IMS_BOOL IsVideoCallingActive() const;
@@ -42,8 +42,8 @@ public:
     virtual IMS_UINT32 GetCallState(IN IMS_UINT32 nType) const;
     virtual IMS_UINT32 GetSessionType(IN IMS_UINT32 nType) const;
 
-    virtual void SetCSCallStateWatchMode();
-    virtual void SetActiveCSCallState(IN IMS_UINT32 nActiveCSState);
+    virtual void SetCsCallStateWatchMode();
+    virtual void SetActiveCsCallState(IN IMS_UINT32 nActiveCsState);
 
     virtual void SetListener(IN IAosCallTrackerListener* piListener);
     virtual void RemoveListener(IN IAosCallTrackerListener* piListener);
@@ -62,7 +62,7 @@ protected:
 
     void Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
-    virtual void ProcessCSChanged(IN IMS_UINT32 nState);
+    virtual void ProcessCsChanged(IN IMS_UINT32 nState);
     virtual void ProcessEmergencyChanged(IN IMS_SINTP nKey, IN IMS_UINT32 nState);
     virtual void ProcessNormalChanged(
             IN IMS_SINTP nKey, IN IMS_UINT32 nState, IN IMS_SINT32 nSessionType);
@@ -84,20 +84,21 @@ protected:
     void PrintSessionType(IN IMS_UINT32 nSessType);
 
 protected:
-    IMS_SINT32 nSlotId;
-    IMS_UINT32 nCSState;
-    IMS_UINT32 nNormalState;
-    IMS_UINT32 nEmergencyState;
-    IMS_UINT32 nNormalSessionType;
-    IMS_UINT32 nActiveCSState;
+    IMS_SINT32 m_nSlotId;
+    IMS_UINT32 m_nCsState;
+    IMS_UINT32 m_nNormalState;
+    IMS_UINT32 m_nEmergencyState;
+    IMS_UINT32 m_nNormalSessionType;
+    IMS_UINT32 m_nActiveCsState;
 
-    IMSMap<IMS_SINTP, IMS_UINT32> objNormalCalls;
-    IMSMap<IMS_SINTP, IMS_UINT32> objEmergencyCalls;
-    IMSMap<IMS_SINTP, IMS_UINT32> objNormalSessionTypes;
+    IMSMap<IMS_SINTP, IMS_UINT32> m_objNormalCalls;
+    IMSMap<IMS_SINTP, IMS_UINT32> m_objEmergencyCalls;
+    IMSMap<IMS_SINTP, IMS_UINT32> m_objNormalSessionTypes;
 
-    IMSList<IAosCallTrackerListener*> objListeners;
+    IMSList<IAosCallTrackerListener*> m_objListeners;
 
 private:
-    AString strTag;
+    AString m_strTag;
 };
+
 #endif  // AOS_CALL_TRACKER_H_
