@@ -481,7 +481,8 @@ PUBLIC GLOBAL IMS_BOOL AudioProfileConfigurer::CreateAudioProfile(OUT AudioProfi
     pAudioProfile->nBandwidthAs = pConfig->GetAsBandwidthKbps();
 
     SetAudioRsRr(pAudioProfile, pConfig, MEDIA_DIRECTION_SEND_RECEIVE);
-
+    IMS_TRACE_D("CreateAudioProfile() - nPtime[%d], nMaxPtime[%d]", pAudioProfile->nPtime,
+            pAudioProfile->nMaxPtime, 0);
     IMS_TRACE_D("CreateAudioProfile() - AS[%d], RR[%d], RS[%d]", pAudioProfile->nBandwidthAs,
             pAudioProfile->nBandwidthRr, pAudioProfile->nBandwidthRs);
     IMS_TRACE_D("CreateAudioProfile() Ended. PayloadSize[%d]", pAudioProfile->lstPayload.GetSize(),

@@ -217,7 +217,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         }
         m_objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
         m_objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        m_objAudioConfig.setMaxPtimeMillis((int8_t)pNegoProfile->nMaxPtime);
+        m_objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
         // AMR DTX on/off by source codec
         m_objAudioConfig.setDtxEnabled(IMS_TRUE);
 
@@ -275,7 +275,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         m_objAudioConfig.setCodecType((int32_t)AudioConfig::CODEC_EVS);
         m_objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
         m_objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        m_objAudioConfig.setMaxPtimeMillis((int8_t)pNegoProfile->nMaxPtime);
+        m_objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
         // AMR DTX on/off by source codec
         m_objAudioConfig.setDtxEnabled((IMS_BOOL)pFmtp->nDtx);
 
@@ -340,7 +340,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         }
         m_objAudioConfig.setSamplingRateKHz((int8_t)(pNegoPayload->objRtpMap.nSamplingRate / 1000));
         m_objAudioConfig.setPtimeMillis((int8_t)pNegoProfile->nPtime);
-        m_objAudioConfig.setMaxPtimeMillis((int8_t)pNegoProfile->nMaxPtime);
+        m_objAudioConfig.setMaxPtimeMillis((int32_t)pNegoProfile->nMaxPtime);
     }
     else
     {
@@ -348,7 +348,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         return IMS_FALSE;
     }
 
-    IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], SamplingRateKHz[%d]",
+    IMS_TRACE_D("UpdateRtpConfig() - CodecType[%d], SamplingRate[%d]",
             m_objAudioConfig.getCodecType(), m_objAudioConfig.getSamplingRateKHz() * 1000, 0);
     IMS_TRACE_D("UpdateRtpConfig() - PtimeMillis[%d], MaxPtimeMillis[%d], DtxEnabled[%d]",
             m_objAudioConfig.getPtimeMillis(), m_objAudioConfig.getMaxPtimeMillis(),
@@ -364,7 +364,7 @@ IMS_BOOL AudioMediaSession::UpdateRtpConfig(
         if (pPayload->objRtpMap.strPayloadType.EqualsIgnoreCase("telephone-event"))
         {
             m_objAudioConfig.setDtmfPayloadTypeNumber(pPayload->objRtpMap.nPayloadNum);
-            m_objAudioConfig.setDtmfsamplingRateKHz(pPayload->objRtpMap.nSamplingRate);
+            m_objAudioConfig.setDtmfsamplingRateKHz(pPayload->objRtpMap.nSamplingRate / 1000);
             break;
         }
     }
