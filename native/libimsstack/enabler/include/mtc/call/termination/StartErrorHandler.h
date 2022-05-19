@@ -37,6 +37,7 @@ private:
     FailReason Handle380Response(IN const IMessage& objMessage) const;
 
     FailReason Handle4xxResponse(IN const IMessage& objMessage) const;
+    FailReason Handle403Response() const;
     FailReason Handle404Response() const;
     FailReason Handle407Response() const;
 
@@ -53,7 +54,7 @@ private:
     IMS_BOOL IsIpcanResourceUnavailable(IN const IMessage& objMessage) const;
     IMS_BOOL HasEmergencyServiceTypeInBody(IN const IMessage& objMessage) const;
 
-    void RecoverRegistration() const;
+    void ControlAos(IMS_UINT32 nCommand) const;
     AString GetPathHeader() const;
     AString GetLastPathHeader() const;
     AString GetServiceRouteHeader() const;
