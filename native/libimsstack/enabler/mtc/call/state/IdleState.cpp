@@ -131,6 +131,13 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
 
     m_objContext.SetSession(m_objContext.CreateSession(*piSession));
 
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
+    if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
+            !MessageUtil::HasSdp(piMessage))
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NEGOFAIL));
+    }
+
     m_objOperationAfterBlockCheck = [&]()
     {
         return ContinueHandleIncoming();
