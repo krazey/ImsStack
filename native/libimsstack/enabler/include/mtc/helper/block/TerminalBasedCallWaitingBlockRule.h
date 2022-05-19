@@ -1,16 +1,17 @@
 #ifndef TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
 #define TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
 
+#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 
+class IMtcCallContext;
 class IMtcCallManager;
 
 class TerminalBasedCallWaitingBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit TerminalBasedCallWaitingBlockRule(
-            IN IMtcService& objService, IN IMtcCallManager& objCallManager);
+    explicit TerminalBasedCallWaitingBlockRule(IN IMtcCallContext& objContext);
     virtual ~TerminalBasedCallWaitingBlockRule();
     TerminalBasedCallWaitingBlockRule(IN const TerminalBasedCallWaitingBlockRule&) = delete;
     TerminalBasedCallWaitingBlockRule& operator=(

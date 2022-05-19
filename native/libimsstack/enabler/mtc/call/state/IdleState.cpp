@@ -27,7 +27,6 @@
 #include "helper/block/VopsBlockRule.h"
 #include "helper/block/TerminalBasedCallWaitingBlockRule.h"
 #include "call/MtcUiNotifier.h"
-#include "ServicePhoneInfo.h"
 #include "ServiceSystemTime.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
@@ -376,20 +375,12 @@ IMSList<IMtcBlockRule*> IdleState::GetIncomingCallBlockRules()
 {
     IMSList<IMtcBlockRule*> lstRules;
 
-    lstRules.Append(
-            new VopsBlockRule(m_objContext.GetService(), m_objContext.GetImsEventReceiver()));
-    lstRules.Append(new NetworkBlockRule(m_objContext.GetService(),
-            *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(m_objContext.GetSlotId())));
-    lstRules.Append(new ProcessingCallBlockRule(m_objContext.GetCallManager()));
-
-    if (m_objContext.GetService().GetServiceType() != ServiceType::EMERGENCY)
-    {
-        lstRules.Append(new CsCallBlockRule(m_objContext.GetImsEventReceiver()));
-    }
-
-    lstRules.Append(new CallCountBlockRule(3, m_objContext.GetCallManager()));
-    lstRules.Append(new TerminalBasedCallWaitingBlockRule(
-            m_objContext.GetService(), m_objContext.GetCallManager()));
+    lstRules.Append(new VopsBlockRule(m_objContext));
+    lstRules.Append(new NetworkBlockRule(m_objContext));
+    lstRules.Append(new ProcessingCallBlockRule(m_objContext));
+    lstRules.Append(new CsCallBlockRule(m_objContext));
+    lstRules.Append(new CallCountBlockRule(m_objContext));
+    lstRules.Append(new TerminalBasedCallWaitingBlockRule(m_objContext));
 
     return lstRules;
 }
@@ -399,7 +390,14 @@ IMSList<IMtcBlockRule*> IdleState::GetOutgoingCallBlockRules()
 {
     IMSList<IMtcBlockRule*> lstRules;
 
-    // TODO:
+    // IMS call won't be initiated if
+    // - VoPS is 0 or can be ignored
+    // - The current network is N/A.
+
+    // TODO: SSAC
+    lstRules.Append(new ProcessingCallBlockRule(m_objContext));
+    lstRules.Append(new CsCallBlockRule(m_objContext));
+    lstRules.Append(new CallCountBlockRule(m_objContext));
 
     return lstRules;
 }

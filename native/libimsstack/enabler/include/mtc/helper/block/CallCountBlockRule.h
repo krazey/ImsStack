@@ -1,15 +1,17 @@
 #ifndef CALL_COUNT_BLOCK_RULE_H_
 #define CALL_COUNT_BLOCK_RULE_H_
 
+#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 
+class IMtcCallContext;
 class IMtcCallManager;
 
 class CallCountBlockRule final : public IMtcBlockRule
 {
 public:
-    explicit CallCountBlockRule(IN IMS_UINT32 nMaxCount, IN IMtcCallManager& objCallManager);
+    explicit CallCountBlockRule(IN IMtcCallContext& objContext);
     virtual ~CallCountBlockRule();
     CallCountBlockRule(IN const CallCountBlockRule&) = delete;
     CallCountBlockRule& operator=(IN const CallCountBlockRule&) = delete;
@@ -19,8 +21,9 @@ public:
 private:
     IMS_UINT32 GetActiveCallCount(IN const IMSList<IMtcCall*> lstCalls);
 
-    const IMS_UINT32 m_nMaxCount;
     IMtcCallManager& m_objCallManager;
+    const IMS_UINT32 m_nMaxCallCount;
+    const PeerType m_ePeerType;
 };
 
 #endif

@@ -1,12 +1,14 @@
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "helper/block/ProcessingCallBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-ProcessingCallBlockRule::ProcessingCallBlockRule(IN IMtcCallManager& objCallManager) :
-        m_objCallManager(objCallManager)
+ProcessingCallBlockRule::ProcessingCallBlockRule(IN IMtcCallContext& objContext) :
+        m_objCallManager(objContext.GetCallManager()),
+        m_ePeerType(objContext.GetCallInfo().ePeerType)
 {
 }
 
@@ -17,27 +19,64 @@ PUBLIC VIRTUAL ProcessingCallBlockRule::Result ProcessingCallBlockRule::Check(
 {
     IMSList<IMtcCall*> lstCalls = m_objCallManager.GetCalls();
 
+    if (m_ePeerType == PeerType::MO)
+    {
+        return CheckForOutgoingCall(lstCalls);
+    }
+    else
+    {
+        return CheckForIncomingCall(lstCalls);
+    }
+}
+
+PRIVATE
+ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForOutgoingCall(
+        IN const IMSList<IMtcCall*>& lstCalls)
+{
     if (IsOtherIdleCallExists(lstCalls))
     {
-        IMS_TRACE_I("Check : Idle call exists", 0, 0, 0);
+        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
+    }
+
+    if (IsIncomingCallExists(lstCalls))
+    {
+        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
+    }
+
+    if (IsOutgoingCallExists(lstCalls))
+    {
+        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_IN_SETUP));
+    }
+
+    if (IsEmergencyCallExists(m_objCallManager))
+    {
+        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_UNAVAILABLE));
+    }
+
+    return Result(Result::Status::UNBLOCKED);
+}
+
+PRIVATE
+ProcessingCallBlockRule::Result ProcessingCallBlockRule::CheckForIncomingCall(
+        IN const IMSList<IMtcCall*>& lstCalls)
+{
+    if (IsOtherIdleCallExists(lstCalls))
+    {
         return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_NORMAL));
     }
 
     if (IsIncomingCallExists(lstCalls))
     {
-        IMS_TRACE_I("Check : Incoming call exists", 0, 0, 0);
         return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ALERTING));
     }
 
     if (IsOutgoingCallExists(lstCalls))
     {
-        IMS_TRACE_I("Check : Outgoing call exists", 0, 0, 0);
         return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ESTABLISHING));
     }
 
     if (IsEmergencyCallExists(m_objCallManager))
     {
-        IMS_TRACE_I("Check : Emergency call exists", 0, 0, 0);
         return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_ISEMERGENCY));
     }
 
@@ -58,6 +97,7 @@ IMS_BOOL ProcessingCallBlockRule::IsOtherIdleCallExists(IN const IMSList<IMtcCal
 
             if (nCount >= 2)  // 1 for current (checking) call, 1 for existing call
             {
+                IMS_TRACE_I("IsOtherIdleCallExists : Idle call exists", 0, 0, 0);
                 return IMS_TRUE;
             }
         }
@@ -73,6 +113,7 @@ IMS_BOOL ProcessingCallBlockRule::IsIncomingCallExists(IN const IMSList<IMtcCall
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
         if (eState == IMtcCall::State::INCOMING || eState == IMtcCall::State::ALERTING)
         {
+            IMS_TRACE_I("IsIncomingCallExists : Incoming call exists", 0, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -87,6 +128,7 @@ IMS_BOOL ProcessingCallBlockRule::IsOutgoingCallExists(IN const IMSList<IMtcCall
         IMtcCall::State eState = lstCalls.GetAt(nIndex)->GetState();
         if (eState == IMtcCall::State::OUTGOING)
         {
+            IMS_TRACE_I("IsOutgoingCallExists : Outgoing call exists", 0, 0, 0);
             return IMS_TRUE;
         }
     }
@@ -96,5 +138,10 @@ IMS_BOOL ProcessingCallBlockRule::IsOutgoingCallExists(IN const IMSList<IMtcCall
 PRIVATE
 IMS_BOOL ProcessingCallBlockRule::IsEmergencyCallExists(IN IMtcCallManager& objCallManager)
 {
-    return objCallManager.GetCallsByServiceType(ServiceType::EMERGENCY).GetSize() > 0;
+    if (objCallManager.GetCallsByServiceType(ServiceType::EMERGENCY).GetSize() > 0)
+    {
+        IMS_TRACE_I("IsEmergencyCallExists : Emergency call exists", 0, 0, 0);
+        return IMS_TRUE;
+    }
+    return IMS_FALSE;
 }

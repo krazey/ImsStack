@@ -1,15 +1,16 @@
 #include "INetworkWatcher.h"
 #include "ServicePhoneInfo.h"
+#include "call/IMtcCallContext.h"
 #include "helper/MtcAosConnector.h"
 #include "helper/block/NetworkBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-NetworkBlockRule::NetworkBlockRule(
-        IN const IMtcService& objService, IN INetworkWatcher& objNetWatcherInfo) :
-        m_objService(objService),
-        m_objNetWatcherInfo(objNetWatcherInfo)
+NetworkBlockRule::NetworkBlockRule(IN IMtcCallContext& objContext) :
+        m_objService(objContext.GetService()),
+        m_objNetWatcherInfo(GetNetWatcherInfo(objContext.GetSlotId())),
+        m_ePeerType(objContext.GetCallInfo().ePeerType)
 {
 }
 
@@ -30,7 +31,15 @@ PUBLIC VIRTUAL NetworkBlockRule::Result NetworkBlockRule::Check(
     }
 
     IMS_TRACE_I("Check : Network type[%d] is not applicable", nNetworkType, 0, 0);
-    return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+
+    if (m_ePeerType == PeerType::MO)
+    {
+        return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SESSION_NOTACCEPTABLEHERE));
+    }
+    else
+    {
+        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_SESSION_NOTACCEPTABLEHERE));
+    }
 }
 
 PRIVATE
@@ -46,4 +55,11 @@ IMS_BOOL NetworkBlockRule::IsWifiRegistered(IN MtcAosConnector* pAosConnector)
             pAosConnector ? pAosConnector->GetRegisteredNetworkType() : NW_REPORT_RADIO_INVALID;
 
     return nAosRegisteredNetworkType == NW_REPORT_RADIO_WLAN;
+}
+
+PRIVATE
+INetworkWatcher& NetworkBlockRule::GetNetWatcherInfo(IN IMS_SINT32 nSlotId)
+{
+    // Not null
+    return *PhoneInfoService::GetPhoneInfoService()->GetNetworkWatcher(nSlotId);
 }

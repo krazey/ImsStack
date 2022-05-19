@@ -1,4 +1,5 @@
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "helper/block/TerminalBasedCallWaitingBlockRule.h"
 
@@ -6,10 +7,11 @@ __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
 TerminalBasedCallWaitingBlockRule::TerminalBasedCallWaitingBlockRule(
-        IN IMtcService& objService, IN IMtcCallManager& objCallManager) :
-        m_objService(objService),
-        m_objCallManager(objCallManager)
+        IN IMtcCallContext& objContext) :
+        m_objService(objContext.GetService()),
+        m_objCallManager(objContext.GetCallManager())
 {
+    IMS_ASSERT(objContext.GetCallInfo().ePeerType == PeerType::MT);
 }
 
 PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlockRule() {}
@@ -17,16 +19,19 @@ PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::~TerminalBasedCallWaitingBlock
 PUBLIC VIRTUAL TerminalBasedCallWaitingBlockRule::Result TerminalBasedCallWaitingBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (GetActiveCallCount(m_objCallManager.GetCalls()) > 0)
+    if (GetActiveCallCount(m_objCallManager.GetCalls()) <= 0)
     {
-        if (m_objService.IsTerminalBasedCallWaitingEnabled() == IMS_FALSE)
-        {
-            IMS_TRACE_I("Check : Terminal based call waiting is not enabled", 0, 0, 0);
-            return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_DECLINE_CW));
-        }
+        return Result(Result::Status::UNBLOCKED);
     }
 
-    return Result(Result::Status::UNBLOCKED);
+    if (m_objService.IsTerminalBasedCallWaitingEnabled())
+    {
+        return Result(Result::Status::UNBLOCKED);
+    }
+
+    IMS_TRACE_I("Check : Terminal based call waiting is not enabled", 0, 0, 0);
+
+    return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_DECLINE_CW));
 }
 
 PRIVATE

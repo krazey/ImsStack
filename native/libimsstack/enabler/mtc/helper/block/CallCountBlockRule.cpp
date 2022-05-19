@@ -1,14 +1,15 @@
 #include "call/IMtcCall.h"
+#include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "helper/block/CallCountBlockRule.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-CallCountBlockRule::CallCountBlockRule(
-        IN IMS_UINT32 nMaxCount, IN IMtcCallManager& objCallManager) :
-        m_nMaxCount(nMaxCount),
-        m_objCallManager(objCallManager)
+CallCountBlockRule::CallCountBlockRule(IN IMtcCallContext& objContext) :
+        m_objCallManager(objContext.GetCallManager()),
+        m_nMaxCallCount(3),  // TODO: use config
+        m_ePeerType(objContext.GetCallInfo().ePeerType)
 {
 }
 
@@ -17,10 +18,18 @@ PUBLIC VIRTUAL CallCountBlockRule::~CallCountBlockRule() {}
 PUBLIC VIRTUAL CallCountBlockRule::Result CallCountBlockRule::Check(
         IN IMtcBlockRuleCheckListener& /* objListener */)
 {
-    if (GetActiveCallCount(m_objCallManager.GetCalls()) > m_nMaxCount)
+    if (GetActiveCallCount(m_objCallManager.GetCalls()) > m_nMaxCallCount)
     {
-        IMS_TRACE_I("Check : Max call count[%d] reached", m_nMaxCount, 0, 0);
-        return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_MAXCALL));
+        IMS_TRACE_I("Check : Max call count[%d] reached", m_nMaxCallCount, 0, 0);
+
+        if (m_ePeerType == PeerType::MO)
+        {
+            return Result(Result::Status::BLOCKED, FailReason(FAIL_REASON_SERVICE_MAXCALL));
+        }
+        else
+        {
+            return Result(Result::Status::BLOCKED, FailReason(REJECT_REASON_BUSY_MAXCALL));
+        }
     }
 
     return Result(Result::Status::UNBLOCKED);
