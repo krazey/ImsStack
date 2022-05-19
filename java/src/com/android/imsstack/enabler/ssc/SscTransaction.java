@@ -66,7 +66,11 @@ public class SscTransaction {
         ImsLog.d(mSlotId, "");
         if (mTransactionHandler != null) {
             mTransactionHandler.getLooper().quit();
+            mTransactionHandler = null;
         }
+
+        SscNetConnectionGov.getInstance().setTransactionHandler(mSlotId, null);
+        SscHttpConnectionGov.getInstance().setTransactionHandler(mSlotId, null);
     }
 
     public void startGetTransaction(SscServiceQueryData data) {
@@ -423,13 +427,17 @@ public class SscTransaction {
         ImsLog.d("SscTransactionHandler - what=" + msg.what);
 
         switch (msg.what) {
-            case SscNetConnection.EVENT_PDN_DATA_STATE_CHANGED:
-                ImsLog.d("Data state has changed");
+            case SscNetConnection.EVENT_PDN_CONNECTED:
+                ImsLog.d("PDN Connected");
                 if (mSscTransactionThread == null) {
                     ImsLog.e("mSscTransactionThread is null");
                     return;
                 }
                 mTransaction.startTransaction();
+                break;
+            case SscNetConnection.EVENT_PDN_DISCONNECTED:
+                ImsLog.d("PDN Disconnected");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 break;
             case SscNetConnection.EVENT_PDN_CONNECTION_FAILED:
                 ImsLog.d("Connection Failed");
