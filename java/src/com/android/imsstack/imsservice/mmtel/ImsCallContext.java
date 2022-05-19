@@ -1,6 +1,5 @@
 package com.android.imsstack.imsservice.mmtel;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,10 +7,12 @@ import android.telephony.ims.ImsStreamMediaProfile;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.CommonStarter;
-import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.ICommonPackageListener;
+import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
+import com.android.imsstack.core.agents.UsatInterface;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.ISharedState;
@@ -234,6 +235,17 @@ public class ImsCallContext implements ICallContext {
 
         if (vs != null) {
             return (IUSATService)vs.getService(IVoLteService.TYPE_USAT);
+        }
+
+        return null;
+    }
+
+    @Override
+    public UsatInterface getUsatInterface() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, getSlotId());
+
+        if (sim != null) {
+            return sim.getUsatInterface();
         }
 
         return null;

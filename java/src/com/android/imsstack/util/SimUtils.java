@@ -15,6 +15,8 @@
  */
 package com.android.imsstack.util;
 
+import android.telephony.PhoneNumberUtils;
+
 /**
  * This class provides the helper APIs for SIM interworking.
  */
@@ -22,6 +24,14 @@ public final class SimUtils {
     private static final char[] HEX_CHARS = {
         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
     };
+
+    /**
+     * BCD values 'C', 'D' and 'E' are never sent across the radio interface.
+     *     - PAUSE(‘,’), WILD(‘N’), WAIT(‘;’)
+     */
+    private static final char PAUSE = ',';
+    private static final char WILD = 'N';
+    private static final char WAIT = ';';
 
     /**
      * Converts a byte array into a hexadecimal string.
@@ -111,5 +121,47 @@ public final class SimUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Checks if the specified string contains the wild values or not.
+     *
+     * @param s The string to be evaluated.
+     * @return true if it contains wild values, false otherwise.
+     */
+    public static boolean containsWildValue(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < s.length(); ++i) {
+            char c = s.charAt(i);
+
+            if (c == PAUSE || c == WILD || c == WAIT) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the specified string only consists of ISO-LATIN characters 0-9, *, #.
+     *
+     * @param s The string to be evaluated.
+     * @return true if it only contains 12 keys, false otherwise.
+     */
+    public static boolean contains12KeysOnly(String s) {
+        if (s == null || s.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < s.length(); ++i) {
+            if (!PhoneNumberUtils.is12Key(s.charAt(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
