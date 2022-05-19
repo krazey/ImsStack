@@ -22,7 +22,6 @@ public:
     JniMtcCallThread* GetThread();
 
 protected:
-    virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const override;
     void HandleMessage(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel) override;
 
 private:

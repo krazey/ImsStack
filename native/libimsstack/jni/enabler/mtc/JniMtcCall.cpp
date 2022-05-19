@@ -92,19 +92,6 @@ void JniMtcCall::Initialize()
     m_pThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), m_pfnNotifier);
 }
 
-PROTECTED VIRTUAL IMS_BOOL JniMtcCall::IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const
-{
-    switch (nMsg)
-    {
-        case IuMtcCall::OPEN:
-        case IuMtcCall::ATTACH:
-            // case IuMtcCall::CLOSE:
-            return IMS_FALSE;
-        default:
-            return IMS_TRUE;
-    }
-}
-
 PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
         IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel)
 {
