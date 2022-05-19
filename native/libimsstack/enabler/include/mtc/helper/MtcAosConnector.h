@@ -27,6 +27,10 @@ public:
     }
     inline IMS_BOOL IsImsConnected() const { return m_objImsAos.IsImsConnected(); }
     inline IMS_BOOL IsImsSuspended() const { return m_objImsAos.IsImsSuspended(); }
+    inline void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) const
+    {
+        m_objImsAos.SetReady(bReady, nService);
+    }
     inline void UpdateFeature(IN IMS_UINT32 nFeatures) const
     {
         m_objImsAos.UpdateFeature(nFeatures);

@@ -50,6 +50,15 @@ PUBLIC VIRTUAL MtcService::~MtcService()
         m_pJniService->SetMtcService(IMS_NULL);
     }
 
+    if (m_eType == ServiceType::NORMAL)
+    {
+        m_pAosConnector->SetReady(IMS_FALSE, ImsAosService::MTC);
+    }
+    else
+    {
+        m_pAosConnector->SetReady(IMS_FALSE, ImsAosService::EMERGENCY_MTC);
+    }
+
     delete m_pAosConnector;
 }
 
@@ -144,6 +153,14 @@ PUBLIC VIRTUAL void MtcService::ImsAos_Connected(IN IMS_UINT32 nFeatures, IN IMS
     m_eStatus = ServiceStatus::SERVICE_ACTIVE;
     m_objAosEventHandler.OnConnected(
             nFeatures, nIpcan, m_pJniService ? m_pJniService->GetThread() : IMS_NULL);
+    if (m_eType == ServiceType::NORMAL)
+    {
+        m_pAosConnector->SetReady(IMS_TRUE, ImsAosService::MTC);
+    }
+    else
+    {
+        m_pAosConnector->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTC);
+    }
 }
 
 PUBLIC VIRTUAL void MtcService::ImsAos_Connecting() {}
