@@ -84,14 +84,12 @@ private:
     IMS_BOOL IsIsimRecoveryAllowed() const;
     IMS_BOOL IsTimerRunning(IN IMS_UINT32 nType) const;
     IMS_BOOL IsSupportFallback(IN IMS_UINT32 nIdentity) const;
-
-    IMS_BOOL GetImpuFromNormalRegistration(OUT AStringArray& objImpus) const;
     IMS_UINT32 GetIsimAt() const;
 
     void ClearIsimRecovery();
 
-    void ConfigureAsDefault();
-    void ConfigureAsFake();
+    IMS_BOOL ConfigureAsDefault();
+    IMS_BOOL ConfigureAsFake();
 
     IMS_BOOL CheckIsimValues();
 
@@ -105,8 +103,8 @@ private:
 
     IMS_BOOL ProcessFallback(IN IMS_BOOL bToUsim);
     IMS_BOOL ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi);
-    void ProcessPhoneNumberAvailable(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
-    void ProcessIsimStateChange(IN IsimState eState);
+    IMS_BOOL ProcessPhoneNumberAvailable(IN IMS_BOOL bIsRefresh, IN PhoneNumberState eState);
+    IMS_BOOL ProcessIsimStateChange(IN IsimState eState);
     void ProcessIsimRecovery();
     void ProcessPhoneRestarted();
     void ProcessIccLoadedWaitingTimerExpired();
@@ -148,7 +146,6 @@ private:
     // Log
     static const IMS_CHAR* UpdateEventToString(IN IMS_UINT32 nEvent);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
-    static const IMS_CHAR* TypeToString(IN AosRegistrationType eType);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 private:
@@ -156,6 +153,9 @@ private:
 
     IMSList<IAosSubscriberManagerListener*> m_objListeners;
     IMSList<IAosSubscriberManagerListener*> m_objMonitorListeners;
+
+    const ISubscriberConfig* m_piSubscriberConfig;
+    const ISubscriberConfig* m_piSubscriberConfigFake;
 
     IMS_BOOL m_bIsim;
     IMS_BOOL m_bUsim;
@@ -176,6 +176,7 @@ private:
     static const IMS_UINT32 ISIM_RECOVERY_MAX_COUNT = 2;
     static const IMS_UINT32 ISIM_RECOVERY_DEFAULT_INTERVAL = 2;
     static const IMS_UINT32 PHONE_RESTART_RECOVERY_INTERVAL = 15000;
+    static const IMS_UINT32 DEFAULT_ISIM_INDEX_FOR_IMPU = 1;
     static const IMS_SINT32 USIM_MSISDN_LENGTH = 10;
 
     AString m_strTag;

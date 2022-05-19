@@ -35,7 +35,7 @@
 
 __IMS_TRACE_TAG_USER_DECL__("AOS");
 
-#define AOSTAG m_strTag.GetStr()
+#define AOSTAG  m_strTag.GetStr()
 #define ID_FAKE "fake"
 
 PUBLIC
@@ -43,6 +43,8 @@ AosSubscriberManager::AosSubscriberManager(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
         m_objListeners(IMSList<IAosSubscriberManagerListener*>()),
         m_objMonitorListeners(IMSList<IAosSubscriberManagerListener*>()),
+        m_piSubscriberConfig(IMS_NULL),
+        m_piSubscriberConfigFake(IMS_NULL),
         m_bIsim(IMS_FALSE),
         m_bUsim(IMS_FALSE),
         m_bUsimFallback(IMS_FALSE),
@@ -174,10 +176,8 @@ const AStringArray& AosSubscriberManager::GetConfiguredImpus(
 PUBLIC
 const AStringArray& AosSubscriberManager::GetFakeImpus() const
 {
-    const ISubscriberConfig* piConfig =
-            Configuration::GetInstance()->GetSubscriberConfig(ID_FAKE, m_nSlotId);
-
-    return (piConfig != IMS_NULL) ? piConfig->GetPublicUserIds() : AStringArray::ConstNull();
+    return (m_piSubscriberConfigFake != IMS_NULL) ? m_piSubscriberConfigFake->GetPublicUserIds()
+                                                  : AStringArray::ConstNull();
 }
 
 PUBLIC
@@ -191,11 +191,19 @@ const ISubscriberConfig* AosSubscriberManager::GetSubscriberConfig(
 PRIVATE
 void AosSubscriberManager::Init()
 {
-    const ISubscriberConfig* piSubsConfig =
-            Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
-    if (piSubsConfig != IMS_NULL)
+    if (m_piSubscriberConfig == IMS_NULL)
     {
-        piSubsConfig->SetListener(this);
+        m_piSubscriberConfig = GetSubscriberConfig();
+    }
+
+    if (m_piSubscriberConfigFake == IMS_NULL)
+    {
+        m_piSubscriberConfigFake = GetSubscriberConfig(IAosSubscriber::FAKE);
+    }
+
+    if (m_piSubscriberConfig != IMS_NULL)
+    {
+        m_piSubscriberConfig->SetListener(this);
     }
 
     UpdateImsIdentity(GetIdentity(Index::FIRST));
@@ -241,11 +249,11 @@ void AosSubscriberManager::CleanUp()
 
     RemoveConfigUpdateListener();
 
-    const ISubscriberConfig* piSubsConfig =
-            Configuration::GetInstance()->GetSubscriberConfig(AString::ConstNull(), m_nSlotId);
-    if (piSubsConfig != IMS_NULL)
+    m_piSubscriberConfigFake = IMS_NULL;
+    if (m_piSubscriberConfig != IMS_NULL)
     {
-        piSubsConfig->RemoveListener(this);
+        m_piSubscriberConfig->RemoveListener(this);
+        m_piSubscriberConfig = IMS_NULL;
     }
 
     m_objMonitorListeners.Clear();
@@ -346,46 +354,19 @@ IMS_BOOL AosSubscriberManager::IsTimerRunning(IN IMS_UINT32 nType) const
 PRIVATE
 IMS_BOOL AosSubscriberManager::IsSupportFallback(IN IMS_UINT32 nIdentity) const
 {
-    IMSVector<IMS_SINT32> objIdentityPriorities = GET_N_CONFIG(m_nSlotId)->GetImsIdentityPriority();
-
     return (GetIdentity(Index::SECOND) == nIdentity);
-}
-
-PRIVATE
-IMS_BOOL AosSubscriberManager::GetImpuFromNormalRegistration(OUT AStringArray& objImpus) const
-{
-    IRegistration* piRegistration = RegistrationManager::GetInstance()->GetRegistration(
-            m_nSlotId, static_cast<IMS_UINT32>(AosRegistrationFlowId::NORMAL));
-
-    if (piRegistration == IMS_NULL)
-    {
-        A_IMS_TRACE_D(AOSTAG, "IRegistration is failed", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    // get IMPU from P-Associated-URI header
-    SipAddress objSipAddress = piRegistration->GetAuthorizedAOR();
-    AString strImpu = objSipAddress.ToString();
-
-    A_IMS_TRACE_D(AOSTAG, "IMPU (%s) from P-Associated-URI", strImpu.GetStr(), 0, 0);
-
-    if (strImpu.GetLength() == 0)
-    {
-        return IMS_FALSE;
-    }
-
-    objImpus.AddElement(strImpu);
-    return IMS_TRUE;
 }
 
 PRIVATE
 IMS_UINT32 AosSubscriberManager::GetIsimAt() const
 {
-    IMS_UINT32 nIndex = GET_N_CONFIG(m_nSlotId)->GetIsimIndexForImpu();
+    IMS_UINT32 nIndex = (GET_N_CONFIG(m_nSlotId) != IMS_NULL)
+            ? GET_N_CONFIG(m_nSlotId)->GetIsimIndexForImpu()
+            : DEFAULT_ISIM_INDEX_FOR_IMPU;
     A_IMS_TRACE_I(AOSTAG, "GetIsimAt :: (%d)", nIndex, 0, 0);
 
     return nIndex;
-};
+}
 
 PRIVATE
 void AosSubscriberManager::ClearIsimRecovery()
@@ -395,50 +376,50 @@ void AosSubscriberManager::ClearIsimRecovery()
 }
 
 PRIVATE
-void AosSubscriberManager::ConfigureAsDefault()
+IMS_BOOL AosSubscriberManager::ConfigureAsDefault()
 {
     A_IMS_TRACE_I(AOSTAG, "ConfigureAsDefault", 0, 0, 0);
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-    if (piSubsConfig == IMS_NULL)
+
+    if (m_piSubscriberConfig == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
     if (IsIsim())
     {
-        if (!piSubsConfig->IsProvisioningDone())
+        if (!m_piSubscriberConfig->IsProvisioningDone())
         {
             A_IMS_TRACE_D(AOSTAG, "ConfigureAsDefault :: Provisioning is not done", 0, 0, 0);
-            return;
+            return IMS_FALSE;
         }
 
         if (!GetImpuFromIsim(m_objPuids))
         {
-            return;
+            return IMS_FALSE;
         }
     }
     else if (IsUsim())
     {
         if (!GetTemporaryImpu(m_objPuids, IMS_TRUE))
         {
-            return;
+            return IMS_FALSE;
         }
     }
     else
     {
         // if ISIM & USIM is false, IMPU is configured from CONF
-        IMS_SINT32 nIndex = piSubsConfig->GetIndexOfPrimaryPublicUserId();
-        AStringArray objPublicUserIds = piSubsConfig->GetPublicUserIds();
+        IMS_SINT32 nIndex = m_piSubscriberConfig->GetIndexOfPrimaryPublicUserId();
+        AStringArray objPublicUserIds = m_piSubscriberConfig->GetPublicUserIds();
         AString strImpu;
         if (objPublicUserIds.GetCount() > nIndex)
         {
-            strImpu = piSubsConfig->GetPublicUserIds().GetElementAt(nIndex);
+            strImpu = m_piSubscriberConfig->GetPublicUserIds().GetElementAt(nIndex);
         }
 
         if (strImpu.GetLength() == 0)
         {
             A_IMS_TRACE_I(AOSTAG, "Getting IMPU has failed", 0, 0, 0);
-            return;
+            return IMS_FALSE;
         }
 
         m_objPuids.AddElement(strImpu);
@@ -460,24 +441,26 @@ void AosSubscriberManager::ConfigureAsDefault()
                 m_objPuids.GetElementAt(0).GetStr(), 0, 0);
 
         NotifyState(IAosSubscriber::READY);
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
-void AosSubscriberManager::ConfigureAsFake()
+IMS_BOOL AosSubscriberManager::ConfigureAsFake()
 {
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig(IAosSubscriber::FAKE);
-    if (piSubsConfig == IMS_NULL)
+    if (m_piSubscriberConfigFake == IMS_NULL)
     {
-        return;
+        return IMS_FALSE;
     }
 
-    const AStringArray& objPublicUserIds = piSubsConfig->GetPublicUserIds();
+    const AStringArray& objPublicUserIds = m_piSubscriberConfigFake->GetPublicUserIds();
 
     if (objPublicUserIds.IsEmpty())
     {
         A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: PUIDs are empty", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake", 0, 0, 0);
@@ -486,15 +469,16 @@ void AosSubscriberManager::ConfigureAsFake()
     if (strImpu.GetLength() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "ConfigureAsFake :: IMPU is failed", 0, 0, 0);
+        return IMS_FALSE;
     }
-    else
-    {
-        m_objPuidsForFake.AddElement(strImpu);
-        SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
 
-        A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: IMPU(%s) is provisioned", strImpu.GetStr(), 0, 0);
-        NotifyMonitorState(IAosSubscriber::READY);
-    }
+    m_objPuidsForFake.AddElement(strImpu);
+    SetProvisioned(IMS_TRUE, IAosSubscriber::FAKE);
+
+    A_IMS_TRACE_D(AOSTAG, "ConfigureAsFake :: IMPU(%s) is provisioned", strImpu.GetStr(), 0, 0);
+    NotifyMonitorState(IAosSubscriber::READY);
+
+    return IMS_TRUE;
 }
 
 PRIVATE
@@ -502,16 +486,14 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
 {
     A_IMS_TRACE_D(AOSTAG, "CheckIsimValues", 0, 0, 0);
 
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-
-    if (!piSubsConfig->IsIsimSupported())
+    if (!m_piSubscriberConfig->IsIsimSupported())
     {
         return IMS_FALSE;
     }
 
-    const AStringArray& objImpus = piSubsConfig->GetPublicUserIds();
-    const AString& strImpi = piSubsConfig->GetPrivateUserId();
-    const AString& strHomeDomainName = piSubsConfig->GetHomeDomainName();
+    const AStringArray& objImpus = m_piSubscriberConfig->GetPublicUserIds();
+    const AString& strImpi = m_piSubscriberConfig->GetPrivateUserId();
+    const AString& strHomeDomainName = m_piSubscriberConfig->GetHomeDomainName();
 
     if (objImpus.IsEmpty())
     {
@@ -582,12 +564,11 @@ IMS_BOOL AosSubscriberManager::CheckIsimValues()
 PRIVATE
 IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
 {
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
     AStringArray objValidImpus;
 
-    for (IMS_SINT32 nAt = 0; nAt < piSubsConfig->GetPublicUserIds().GetCount(); ++nAt)
+    for (IMS_SINT32 nAt = 0; nAt < m_piSubscriberConfig->GetPublicUserIds().GetCount(); ++nAt)
     {
-        const AString& strTemp = piSubsConfig->GetPublicUserIds().GetElementAt(nAt);
+        const AString& strTemp = m_piSubscriberConfig->GetPublicUserIds().GetElementAt(nAt);
         if (strTemp.GetLength() != 0)
         {
             objValidImpus.AddElement(strTemp);
@@ -595,11 +576,16 @@ IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
     }
 
     A_IMS_TRACE_I(AOSTAG, "GetImpuFromIsim :: total size (%d) , valid size (%d)",
-            piSubsConfig->GetPublicUserIds().GetCount(), objValidImpus.GetCount(), 0);
+            m_piSubscriberConfig->GetPublicUserIds().GetCount(), objValidImpus.GetCount(), 0);
 
     if (objValidImpus.GetCount() == 0)
     {
         A_IMS_TRACE_I(AOSTAG, "No valid IMPU", 0, 0, 0);
+        return IMS_FALSE;
+    }
+
+    if (GET_N_CONFIG(m_nSlotId) == IMS_NULL)
+    {
         return IMS_FALSE;
     }
 
@@ -637,7 +623,7 @@ IMS_BOOL AosSubscriberManager::GetImpuFromIsim(OUT AStringArray& objImpus) const
         return (objImpus.GetCount() > 0) ? IMS_TRUE : IMS_FALSE;
     }
 
-    AString strImpu = piSubsConfig->GetPublicUserIds().GetElementAt(
+    AString strImpu = m_piSubscriberConfig->GetPublicUserIds().GetElementAt(
             (objValidImpus.GetCount() == 1) ? 0 : GetIsimAt());
 
     if (strImpu.GetLength() == 0)
@@ -662,8 +648,6 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
 {
     // according to IR.92, generate temp identities
     A_IMS_TRACE_I(AOSTAG, "GetTemporaryImpu", 0, 0, 0);
-
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
 
     // create IMPU
     AString strImpu = ImsIdentity::CreateTemporaryPublicUserId(m_nSlotId);
@@ -690,7 +674,7 @@ IMS_BOOL AosSubscriberManager::GetTemporaryImpu(OUT AStringArray& objImpus, IN I
     }
 
     // update SubscriberConfig
-    IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
+    IConfigurable* piConfigurable = m_piSubscriberConfig->GetConfigurable();
 
     // IMPU
     if (!piConfigurable->Update(IConfigurable::CP_I_IMPU_0, strImpu))
@@ -808,13 +792,12 @@ IMS_BOOL AosSubscriberManager::UpdateImsi() const
 PRIVATE
 IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
 {
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-    if (piSubsConfig == IMS_NULL)
+    if (m_piSubscriberConfig == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
+    IConfigurable* piConfigurable = m_piSubscriberConfig->GetConfigurable();
     if (piConfigurable == IMS_NULL)
     {
         return IMS_FALSE;
@@ -836,8 +819,8 @@ IMS_BOOL AosSubscriberManager::UpdateImsIdentity(IN IMS_UINT32 nIdentity)
         return IMS_FALSE;
     }
 
-    SetIsim(piSubsConfig->IsIsimSupported());
-    SetUsim(piSubsConfig->IsUsimSupported());
+    SetIsim(m_piSubscriberConfig->IsIsimSupported());
+    SetUsim(m_piSubscriberConfig->IsUsimSupported());
 
     A_IMS_TRACE_I(AOSTAG, "UpdateImsIdentity :: ISIM(%s),USIM(%s) are updated", _TRACE_B_(IsIsim()),
             _TRACE_B_(IsUsim()), 0);
@@ -929,8 +912,7 @@ IMS_BOOL AosSubscriberManager::ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi
 
     if (strTemp.GetLength() != 0)
     {
-        const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-        IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
+        IConfigurable* piConfigurable = m_piSubscriberConfig->GetConfigurable();
 
         piConfigurable->Update(IConfigurable::CP_I_SUBSCRIPTION_ATTRIBUTE_ISIM, "false");
 
@@ -947,26 +929,26 @@ IMS_BOOL AosSubscriberManager::ProcessFallbackToImsiBasedIsim(IN IMS_SINT32 nCpi
 }
 
 PRIVATE
-void AosSubscriberManager::ProcessPhoneNumberAvailable(
+IMS_BOOL AosSubscriberManager::ProcessPhoneNumberAvailable(
         IN IMS_BOOL /*bIsRefresh*/, IN PhoneNumberState /*eState*/)
 {
     if (IsTimerRunning(TIMER_PHONE_RESTART_RECOVERY))
     {
         A_IMS_TRACE_I(AOSTAG, "phone restart timer is running", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     if (!IsReady())
     {
         A_IMS_TRACE_I(AOSTAG, "state is not ready, start again", 0, 0, 0);
         Restart();
-        return;
+        return IMS_FALSE;
     }
 
     if (IsIsim() || !IsUsim())
     {
         A_IMS_TRACE_I(AOSTAG, "updating usim is not processed", 0, 0, 0);
-        return;
+        return IMS_FALSE;
     }
 
     const AStringArray& objImpus = GetConfiguredImpus();
@@ -977,7 +959,7 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(
 
         if (strImpu.GetLength() == 0)
         {
-            return;
+            return IMS_FALSE;
         }
 
         A_IMS_TRACE_D(AOSTAG, "primary IMPU(%s) is provisioned", strImpu.GetStr(), 0, 0);
@@ -987,7 +969,7 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(
 
         if (strTemporaryImpu.GetLength() == 0)
         {
-            return;
+            return IMS_FALSE;
         }
 
         A_IMS_TRACE_D(AOSTAG, "temporary IMPU(%s) is provisioned", strTemporaryImpu.GetStr(), 0, 0);
@@ -995,7 +977,7 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(
         if (strImpu.EqualsIgnoreCase(strTemporaryImpu))
         {
             A_IMS_TRACE_I(AOSTAG, "the temporary impu is same as previous impu", 0, 0, 0);
-            return;
+            return IMS_FALSE;
         }
         else
         {
@@ -1004,18 +986,24 @@ void AosSubscriberManager::ProcessPhoneNumberAvailable(
             NotifyState(IAosSubscriber::REFRESH_STARTED);
             Restart();
             UpdateImsi();
+            return IMS_TRUE;
         }
     }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
-void AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
+IMS_BOOL AosSubscriberManager::ProcessIsimStateChange(IN IsimState eState)
 {
     if (eState == IsimState::LOADED || eState == IsimState::REFRESH_STARTED ||
             eState == IsimState::REFRESH_COMPLETED)
     {
         ProcessFallback(IMS_FALSE);
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
@@ -1071,9 +1059,8 @@ void AosSubscriberManager::ProcessIsimRecoveryTimerExpired()
 {
     StopTimer(TIMER_ISIM_RECOVERY);
 
-    const ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
     IConfigurable* piConfigurable =
-            (piSubsConfig != IMS_NULL) ? piSubsConfig->GetConfigurable() : IMS_NULL;
+            (m_piSubscriberConfig != IMS_NULL) ? m_piSubscriberConfig->GetConfigurable() : IMS_NULL;
 
     if (piConfigurable != IMS_NULL)
     {
@@ -1115,8 +1102,7 @@ void AosSubscriberManager::SetConfigUpdateListener()
     // Implement the child class
 
     /* Set Listener - IConfigUpdateListener (examples)
-        ISubscriberConfig* piSubsConfig = GetSubscriberConfig();
-        IConfigurable* piConfigurable = piSubsConfig->GetConfigurable();
+        IConfigurable* piConfigurable = m_piSubscriberConfig->GetConfigurable();
         piConfigurable->AddListener(IConfigurable::CP_I_SUBSCRIBER_ALL, this);
     */
 }
@@ -1570,24 +1556,6 @@ PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::TimerToString(IN IMS_UINT32
 
         default:
             return "__INVALID__";
-    }
-}
-
-PRIVATE GLOBAL const IMS_CHAR* AosSubscriberManager::TypeToString(IN AosRegistrationType eType)
-{
-    switch (eType)
-    {
-        case AosRegistrationType::NORMAL:
-            return "Normal";
-
-        case AosRegistrationType::EMERGENCY:
-            return "Emergency";
-
-        case AosRegistrationType::FAKE:
-            return "Fake";
-
-        default:
-            return "Invalid";
     }
 }
 
