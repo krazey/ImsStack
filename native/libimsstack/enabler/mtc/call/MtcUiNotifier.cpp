@@ -30,11 +30,8 @@ void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 }
 
 PUBLIC
-void MtcUiNotifier::SendIncomingCallReceived(
-        IN CallKey nKey,
-        IN CallInfo& objCallInfo,
-        IN MediaInfo& objMediaInfo,
-        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
+        IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN ParticipantInfo& objParticipantInfo)
 {
     if (!IsAvailableToSend())

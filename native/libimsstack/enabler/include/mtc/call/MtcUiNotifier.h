@@ -32,11 +32,8 @@ public:
     inline JniMediaSessionThread* GetJniMediaThread() { return m_pMediaThread; }
 
     void SendPreIncomingCallReceived(IN CallKey nKey);
-    void SendIncomingCallReceived(
-            IN CallKey nKey,
-            IN CallInfo& objCallInfo,
-            IN MediaInfo& objMediaInfo,
-            IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+    void SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
+            IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN ParticipantInfo& objParticipantInfo);
     void SendStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);

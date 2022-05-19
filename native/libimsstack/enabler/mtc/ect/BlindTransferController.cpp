@@ -12,8 +12,8 @@
 __IMS_TRACE_TAG_COM_MTC__;
 
 PUBLIC
-BlindTransferController::BlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,
-        IN IEctControllerListener& objListener) :
+BlindTransferController::BlindTransferController(
+        IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
         EctController(objContext, nCallKey, objListener)
 {
     IMS_TRACE_D("+BlindTransferController", 0, 0, 0);

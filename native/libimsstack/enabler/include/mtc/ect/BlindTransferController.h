@@ -7,8 +7,7 @@ class IMtcContext;
 class IMtcCall;
 class IEctControllerListener;
 
-class BlindTransferController :
-        public EctController
+class BlindTransferController : public EctController
 {
 public:
     explicit BlindTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,

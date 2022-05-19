@@ -480,7 +480,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Terminate()
     {
         IMS_TRACE_D("Terminate : nothing to terminate for media.", 0, 0, 0);
         return;
-
     }
 
     m_piMediaSession->Terminate();

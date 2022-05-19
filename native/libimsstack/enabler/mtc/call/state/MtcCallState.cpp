@@ -612,10 +612,8 @@ void MtcCallState::SendIncomingCallReceived()
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    m_objContext.GetUiNotifier().SendIncomingCallReceived(
-            m_objContext.GetCallKey(),
-            m_objContext.GetCallInfo(),
-            objMediaInfo,
+    m_objContext.GetUiNotifier().SendIncomingCallReceived(m_objContext.GetCallKey(),
+            m_objContext.GetCallInfo(), objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices(),
             m_objContext.GetParticipantInfo());
 }

@@ -12,9 +12,7 @@ class IMtcCall;
 class IEctControllerListener;
 class EctReference;
 
-class EctController :
-        public IEctReferenceListener,
-        public ITimerListener
+class EctController : public IEctReferenceListener, public ITimerListener
 {
 public:
     explicit EctController(IN IMtcContext& objContext, IN CallKey nCallKey,
@@ -39,7 +37,7 @@ protected:
 
     IMtcCall* GetTransferee() const;
     inline virtual IMS_BOOL IsValid() const { return IMS_FALSE; }
-    virtual void OnCompleted(); // TODO: OnSucceeded?
+    virtual void OnCompleted();  // TODO: OnSucceeded?
     virtual void OnFailed();
 
     void NotifyResult(IN IMS_RESULT nResult, IN IMS_SINT32 nReason = FAIL_REASON_NONE) const;

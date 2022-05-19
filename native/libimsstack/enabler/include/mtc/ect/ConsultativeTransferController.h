@@ -7,8 +7,7 @@ class IMtcContext;
 class IMtcCall;
 class IEctControllerListener;
 
-class ConsultativeTransferController :
-        public EctController
+class ConsultativeTransferController : public EctController
 {
 public:
     explicit ConsultativeTransferController(IN IMtcContext& objContext, IN CallKey nCallKey,

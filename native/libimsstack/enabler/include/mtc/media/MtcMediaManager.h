@@ -55,7 +55,7 @@ public:
     virtual void CreateMediaProfile(
             IN ISession* piSession, IN IMS_BOOL bForked, IN IMS_BOOL bOriginalProfile) override;
     virtual void DestroyMediaProfile(IN ISession* piSession) override;
-    void DestroyAllMediaProfiles();                    // called when terminate media
+    void DestroyAllMediaProfiles();  // called when terminate media
 
     /* Local Tone - public or private */
     void SetLocalTone(IN IMS_BOOL bLocalTone);  // private?

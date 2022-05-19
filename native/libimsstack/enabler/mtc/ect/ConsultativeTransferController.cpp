@@ -15,7 +15,7 @@ PUBLIC
 ConsultativeTransferController::ConsultativeTransferController(
         IN IMtcContext& objContext, IN CallKey nCallKey, IN IEctControllerListener& objListener) :
         EctController(objContext, nCallKey, objListener),
-        m_nTransferTargetKey(-1) //NullCall
+        m_nTransferTargetKey(-1)  // NullCall
 {
     IMS_TRACE_D("+ConsultativeTransferController", 0, 0, 0);
 }
@@ -85,6 +85,7 @@ void ConsultativeTransferController::TerminateTransferTargetCall()
     // according to 3GPP 24.629, the TransferTarget sends BYE
     // so Transferror should wait.
     // It could be 'not safe' to send BYE to TransferTarget.
-    m_objContext.GetCallManager().GetCallByCallKey(m_nTransferTargetKey)
+    m_objContext.GetCallManager()
+            .GetCallByCallKey(m_nTransferTargetKey)
             ->Terminate(FailReason(FAIL_REASON_ECT_COMPLETED));
 }
