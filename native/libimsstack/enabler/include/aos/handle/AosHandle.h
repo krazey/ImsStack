@@ -142,6 +142,30 @@ public:
         APP_STATE_DISCONNECTING
     };
 
+    enum
+    {
+        BLOCK_NONE = 0,
+
+        // Capabilities
+        BLOCK_VOLTE_CAPABILITY = 0x1,
+        BLOCK_VILTE_CAPABILITY = 0x2,
+        BLOCK_SMS_CAPABILITY = 0x4,
+
+        // Network
+        BLOCK_NETWORK = 0x8,
+        BLOCK_VOPS = 0x10,
+
+        // DM
+        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x20,
+
+        // Reg
+        BLOCK_LIMITED_REGISTRATION = 0x40,
+
+        // VoWiFi
+        BLOCK_VOWIFI_CAPABILITY = 0x80,
+        BLOCK_VIWIFI_CAPABILITY = 0x100
+    };
+
 protected:
     virtual void Init();
     virtual void CleanUp();
@@ -232,30 +256,6 @@ protected:
         HANDLE_MSG_INVALID
     };
 
-    enum
-    {
-        BLOCK_NONE = 0,
-
-        // Capabilities
-        BLOCK_VOLTE_CAPABILITY = 0x1,
-        BLOCK_VILTE_CAPABILITY = 0x2,
-        BLOCK_SMS_CAPABILITY = 0x4,
-
-        // Network
-        BLOCK_NETWORK = 0x8,
-        BLOCK_VOPS = 0x10,
-
-        // DM
-        BLOCK_SMS_OVER_IP_NETWORK_INDICATION = 0x20,
-
-        // Reg
-        BLOCK_LIMITED_REGISTRATION = 0x40,
-
-        // VoWiFi
-        BLOCK_VOWIFI_CAPABILITY = 0x80,
-        BLOCK_VIWIFI_CAPABILITY = 0x100
-    };
-
 protected:
     IAosAppContext* m_piAppContext;
 
@@ -304,5 +304,8 @@ protected:
     IMS_UINT32 m_nAppState;
 
     AString m_strTag;
+
+private:
+    friend class AosHandleTest;
 };
 #endif  // AOS_HANDLE_H_

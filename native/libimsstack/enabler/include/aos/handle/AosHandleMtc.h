@@ -60,5 +60,8 @@ protected:
     virtual void ProcessNetworkChanged();
     virtual void ProcessVopsStateChanged(IN IMS_UINT32 nState);
     virtual IMS_BOOL ProcessUnavailableFeatureForVops(IN IMS_UINT32 nState);
+
+private:
+    friend class AosHandleMtcTest;
 };
 #endif  // AOS_HANDLE_MTC_H_
