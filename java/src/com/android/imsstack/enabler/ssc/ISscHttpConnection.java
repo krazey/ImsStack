@@ -16,15 +16,37 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.os.Handler;
-
 import org.w3c.dom.Document;
 
+/**
+ * Provide the interface to manage a HTTP/HTTPS request and TCP socket with specific network type
+ */
 public interface ISscHttpConnection {
-    public void close();
-    public int  sendRequest(int requestType, String requestURI, String body);
-    public void setCredentialOnChallenge(String body);
-    public void setTransactionHandler(Handler handler);
-    public void setXuiValue(String xui);
-    public Document getInputStream();
+
+    /**
+     * Disconnect current socket connection
+     */
+    void close();
+
+    /**
+     * Sending HTTP/HTTPS request to requestUri with body
+     *
+     * @param requestType The request type, any one of HTTP PUT or HTTP GET
+     * @param requestUri The URI used for HTTP request
+     * @param body The XML body that is set in HTTP PUT request
+     * @return The HTTP response code from HTTP server. If it fails to send HTTP request, return -1
+     */
+    int sendRequest(int requestType, String requestUri, String body);
+
+    /**
+     * Set XUI value to add in X-3GPP-Intended-Identity header
+     *
+     * @param xui The identity value getting from P-Asserted-URI of IMS registration
+     */
+    void setXuiValue(String xui);
+
+    /**
+     * Returns XML data received from HTTP server
+     */
+    Document getInputStream();
 }

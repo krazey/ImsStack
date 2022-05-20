@@ -69,8 +69,7 @@ public class SscTransaction {
             mTransactionHandler = null;
         }
 
-        SscNetConnectionGov.getInstance().setTransactionHandler(mSlotId, null);
-        SscHttpConnectionGov.getInstance().setTransactionHandler(mSlotId, null);
+        SscNetConnectionGov.getInstance().setCallbackHandler(mSlotId, null);
     }
 
     public void startGetTransaction(SscServiceQueryData data) {
@@ -144,8 +143,7 @@ public class SscTransaction {
 
             ImsLog.d("SscTransactionThread is running ... (" + android.os.Process.myTid() + ")");
             mTransactionHandler = new TransactionHandler(SscTransaction);
-            SscNetConnectionGov.getInstance().setTransactionHandler(mSlotId, mTransactionHandler);
-            SscHttpConnectionGov.getInstance().setTransactionHandler(mSlotId, mTransactionHandler);
+            SscNetConnectionGov.getInstance().setCallbackHandler(mSlotId, mTransactionHandler);
             mTransaction.startTransaction();
 
             Looper.loop();

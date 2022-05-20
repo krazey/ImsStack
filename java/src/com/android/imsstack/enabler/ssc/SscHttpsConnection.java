@@ -16,15 +16,13 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
-import android.net.Network;
-
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -37,8 +35,8 @@ import javax.net.ssl.X509TrustManager;
 public class SscHttpsConnection extends SscHttpConnection {
     private SscSslSocketFactory mSscSocketFactory = null;
 
-    public SscHttpsConnection(int slotId, Context context, EApnType apntype) {
-        super(slotId, context, apntype);
+    public SscHttpsConnection(int slotId, EApnType apntype) {
+        super(slotId, apntype);
         mSscSocketFactory = new SscSslSocketFactory();
     }
 
@@ -59,8 +57,7 @@ public class SscHttpsConnection extends SscHttpConnection {
         return cipherSuite;
     }
 
-    private final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier()
-    {
+    private static final HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }

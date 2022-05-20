@@ -16,10 +16,8 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.os.Handler;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.dcm.DCFactory;
@@ -44,7 +42,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 public class SscHttpConnection implements ISscHttpConnection {
-    // Constants--------------------------------------------------
     protected static final int REQUEST_FAILED = -1;
 
     protected static final int HTTP_GET_REQUEST = 10000;
@@ -53,10 +50,6 @@ public class SscHttpConnection implements ISscHttpConnection {
 
     private final int HTTP_CONNECTION_TIMEOUT = 25 * 1000;
     private final int HTTP_READ_TIMEOUT = 10 * 1000;
-
-    // Variables--------------------------------------------------
-    protected Context mContext = null;
-    protected Handler mTransactionHandler = null;
 
     protected HttpURLConnection mConnection = null;
     protected URL mConnectionUrl = null;
@@ -69,13 +62,10 @@ public class SscHttpConnection implements ISscHttpConnection {
 
     protected int mSlotId = -1;
 
-    // Static loading materials ----------------------------------
-    // Public methods --------------------------------------------
-    public SscHttpConnection(int slotId, Context context, EApnType apntype) {
-        ImsLog.d("slotId/context/apntype : " + slotId + "/" + context + "/" + apntype);
+    public SscHttpConnection(int slotId, EApnType apntype) {
+        ImsLog.d("slotId/context/apntype : " + slotId + "/" + apntype);
 
         mSlotId = slotId;
-        mContext = context;
         mApnType = apntype;
     }
 
@@ -168,19 +158,7 @@ public class SscHttpConnection implements ISscHttpConnection {
 
             responseCode = mConnection.getResponseCode();
             ImsLog.i("Response Code : " + responseCode);
-/*
-            Message msg = Message.obtain();
-            msg.what = SscTransaction.EVENT_GOT_HTTP_REQUEST_RESPONSE;
-            String strResponse = mConnection.getResponseMessage();
-            msg.obj = strResponse;
 
-            if (mTransactionHandler != null) {
-                mTransactionHandler.sendMessage(msg);
-            } else {
-                ImsLog.e("mTransactionHandler is null");
-                return REQUEST_FAILED;
-            }
-*/
             String strResponse = mConnection.getResponseMessage();
             ImsLog.i("Response Message : " + strResponse);
 
@@ -240,24 +218,6 @@ public class SscHttpConnection implements ISscHttpConnection {
     }
 
     @Override
-    public void setCredentialOnChallenge(String body) {
-        ImsLog.i("");
-/* TODO_JS : http digest?
-        ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
-        String response = authAgent.calculateResponse(mXui,
-                SscConfig.MMTel.getAuthPassword(mSlotId), body);
-        if (response == null) {
-            ImsLog.e("RESPONSE is null");
-        }
- */
-    }
-
-    @Override
-    public void setTransactionHandler(Handler handler) {
-        mTransactionHandler = handler;
-    }
-
-    @Override
     public void setXuiValue(String xui) {
         mXui = xui;
     }
@@ -267,8 +227,6 @@ public class SscHttpConnection implements ISscHttpConnection {
         return mDoc;
     }
 
-    // Interface implementation methods --------------------------
-    // Private/Protected methods ---------------------------------
     /**
      * displayHeaders
      *     This method MUST be called after all the connection information setting is complete.
