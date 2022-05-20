@@ -1,27 +1,19 @@
 package com.android.imsstack.imsservice.mmtel;
 
-import android.content.ContentResolver;
-import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Message;
-import android.telephony.CarrierConfigManager;
-import android.telephony.TelephonyManager;
 import android.telephony.ims.feature.MmTelFeature;
-import com.android.ims.ImsConfig;
 
+import com.android.ims.ImsConfig;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.IWifiState;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
-import com.android.imsstack.enabler.mtc.IUMtcService;
-import com.android.imsstack.enabler.mtc.MtcStateUtils;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.IUtServiceStateListener;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
-import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Arrays;

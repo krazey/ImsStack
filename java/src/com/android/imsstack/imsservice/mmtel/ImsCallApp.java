@@ -169,11 +169,6 @@ public class ImsCallApp extends ImsApp {
                 logi("ImsCallApp - already binded; phoneId=" + getPhoneId());
 
                 mRegTracker.refreshCallRegistrationState();
-
-                if (MSimUtils.isMultiSimEnabled()) {
-                    MtcStateUtils.initializeImsStateForSubscriptionChanged(
-                            mCallContext.getContext(), getPhoneId());
-                }
                 return;
             }
 
@@ -189,11 +184,6 @@ public class ImsCallApp extends ImsApp {
 
             if (mUt != null) {
                 mUt.init();
-            }
-
-            if (MSimUtils.isMultiSimEnabled()) {
-                MtcStateUtils.initializeImsStateForSubscriptionChanged(
-                        mCallContext.getContext(), getPhoneId());
             }
 
             mFeatureManager.updateFeaturesOnServiceUpDown(true);

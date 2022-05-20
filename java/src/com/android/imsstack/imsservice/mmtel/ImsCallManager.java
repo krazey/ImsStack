@@ -11,7 +11,6 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import android.database.ContentObserver;
 import android.os.PowerManager;
 import android.telephony.ims.ImsCallProfile;
 import android.telephony.ims.ImsCallSession;
@@ -31,7 +30,7 @@ import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.internal.SrvccStateTracker;
-import com.android.imsstack.provider.ImsStateController;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.Map;
@@ -693,18 +692,16 @@ public class ImsCallManager {
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class WifiCallWakeLock extends ContentObserver {
-        private int mCallState = ImsStateController.STATE_INACTIVE;
+    private class WifiCallWakeLock implements ImsStateStore.Listener {
+        private int mCallState = ImsStateStore.STATE_INACTIVE;
         private ImsWakeLock mWakeLock = null;
 
         public WifiCallWakeLock() {
-            super(mCallContext.getDefaultHandler());
             init();
         }
 
         public void clear() {
-            ImsStateController.CallState.unregisterObserver(
-                    mCallContext.getContext().getContentResolver(), this);
+            ImsStateStore.getCallState(mCallContext.getPhoneId()).removeListener(this);
 
             clearLock();
             mWakeLock = null;
@@ -717,16 +714,15 @@ public class ImsCallManager {
         }
 
         public void init() {
-            mCallState = ImsStateController.STATE_INACTIVE;
+            mCallState = ImsStateStore.STATE_INACTIVE;
 
             createLock();
 
-            ImsStateController.CallState.registerObserver(
-                    mCallContext.getContext().getContentResolver(), this);
+            ImsStateStore.getCallState(mCallContext.getPhoneId()).addListener(this);
         }
 
         public void initStateAndLock() {
-            mCallState = ImsStateController.STATE_INACTIVE;
+            mCallState = ImsStateStore.STATE_INACTIVE;
 
             clearLock();
             mWakeLock = null;
@@ -735,18 +731,15 @@ public class ImsCallManager {
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            final int callState = ImsStateController.CallState.getConnectedCallOnWifiForPhoneId(
-                    mCallContext.getContext().getContentResolver(),
-                    mCallContext.getPhoneId());
+        public void onStateChanged() {
+            final int callState = ImsStateStore.getCallState(
+                    mCallContext.getPhoneId()).getConnectedCallOnWifi();
 
             if (mCallState != callState) {
                 mCallState = callState;
 
                 if (mWakeLock != null) {
-                    if (mCallState != ImsStateController.STATE_ACTIVE) {
+                    if (mCallState != ImsStateStore.STATE_ACTIVE) {
                         mWakeLock.release(this);
                     } else {
                         mWakeLock.acquire(this);

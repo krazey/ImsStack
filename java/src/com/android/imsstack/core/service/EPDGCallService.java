@@ -10,8 +10,8 @@ import com.android.imsstack.enabler.mtc.CallStateListener;
 import com.android.imsstack.enabler.mtc.FailInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.internal.imsservice.CallUtils;
-import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.ImsUtils;
 
@@ -165,8 +165,7 @@ public class EPDGCallService implements IService {
             return;
         }
 
-        final int regState = ImsStateController.RegState.getNetworkTypeForPhoneId(
-                c.getContentResolver(), getSlotId());
+        final int regState = ImsStateStore.getRegState(getSlotId()).getNetworkType();
 
         if (regState == 0) {
             return;

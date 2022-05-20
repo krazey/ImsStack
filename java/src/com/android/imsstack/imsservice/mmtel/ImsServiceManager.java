@@ -23,7 +23,6 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.SubscriptionListener;
 import com.android.imsstack.core.config.FeatureConfig;
 import com.android.imsstack.core.config.FeatureTable;
-import com.android.imsstack.enabler.mtc.MtcStateUtils;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.system.SystemConfig;
@@ -78,10 +77,6 @@ public final class ImsServiceManager {
 
         if (subs != null) {
             subs.addListener(mSubscriptionListener);
-
-            if (subs.isSimLoadCompleted()) {
-                MtcStateUtils.updateSubId(mContext);
-            }
         }
 
         mCommonPackageListener = new CommonPackageListener();
@@ -372,8 +367,6 @@ public final class ImsServiceManager {
                 switchImsService(oldPhoneId, phoneId);
             }
         }
-
-        MtcStateUtils.updateSubId(mContext);
     }
 
     private void switchImsService(int oldPhoneId, int newPhoneId) {
@@ -698,7 +691,6 @@ public final class ImsServiceManager {
         @Override
         public void onSimLoadCompleted(int slotId) {
             logi("onSimLoadCompleted :: slotId=" + slotId);
-            MtcStateUtils.updateSubId(mContext);
 
             // If DDS slot is not in LOADED state (such as LOCKED),
             // call-frw may not determine the operator which supports VoLTE.

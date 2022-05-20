@@ -11,13 +11,10 @@
 
 package com.android.imsstack.imsservice.mmtel;
 
-import android.content.Context;
-import android.telephony.TelephonyManager;
-
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IWifiState;
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.provider.ImsStateController;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 
 /**
  * IMS registration related utility methods.
@@ -26,10 +23,9 @@ public class ImsRegUtils {
     public static boolean isImsRegisteredOnWifi(IBaseContext context) {
         IWifiState ws = (IWifiState)AgentFactory.getAgent(AgentFactory.WIFI_STATE);
         boolean isWifiConnected = (ws != null) ? ws.isWifiConnected() : false;
-        int networkType = ImsStateController.RegState.getNetworkTypeForPhoneId(
-                context.getContext().getContentResolver(), context.getPhoneId());
+        boolean isNetworkTypeWifi =
+                ImsStateStore.getRegState(context.getPhoneId()).isNetworkTypeWifi();
 
-        return isWifiConnected
-                && (networkType == TelephonyManager.NETWORK_TYPE_IWLAN);
+        return isWifiConnected && isNetworkTypeWifi;
     }
 }

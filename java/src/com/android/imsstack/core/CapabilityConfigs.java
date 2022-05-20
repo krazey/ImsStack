@@ -136,6 +136,24 @@ public final class CapabilityConfigs {
     }
 
     /**
+     * Checks if the carrier supports VoLTE roaming or not.
+     *
+     * @param slotId The slot-id to be checked.
+     * @return true if the carrier supports VoLTE roaming, false otherwise.
+     */
+    public static boolean isVoLteRoamingEnabled(int slotId) {
+        CarrierConfig cc = getCarrierConfig(slotId);
+
+        if (cc != null) {
+            return cc.getBoolean(
+                    CarrierConfigManager.ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL,
+                    false);
+        }
+
+        return false;
+    }
+
+    /**
      * Gets the CarrierConfig for the specified slot.
      *
      * @param slotId The slot-id to be retrieved.
