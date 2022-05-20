@@ -29,6 +29,8 @@ import android.telephony.imsmedia.EvsParams;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.RtcpConfig;
 import android.telephony.imsmedia.RtpConfig;
+import android.telephony.imsmedia.VideoConfig;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -94,7 +96,21 @@ public class MediaTestUtils {
     private static final int JITTER_PERIOD = 1000;
     private static final int JITTER_THRESHOLD = 1000;
 
-    public static void assertParcelEquals(Parcel testParcel, Parcel actualParcel) {
+    // VideoConfig
+    private static final int VIDEO_FRAMERATE = 15;
+    private static final int VIDEO_BITRATE = 384;
+    private static final int IDR_INTERVAL = 1;
+    private static final int CAMERA_ID = 0;
+    private static final int CAMERA_ZOOM = 5;
+    static final int RESOLUTION_WIDTH = 240;
+    static final int RESOLUTION_HEIGHT = 320;
+    private static final String IMAGE_PATH = "data/user_de/0/com.android.imsstack/testvideo.jpg";
+    private static final int CVO_VALUE = 2;
+    private static final int RTCP_FB_TYPES =
+            VideoConfig.RTPFB_NACK | VideoConfig.RTPFB_TMMBR | VideoConfig.RTPFB_TMMBN;
+    static final long DATA_BYTES = 200;
+
+    static void assertParcelEquals(Parcel testParcel, Parcel actualParcel) {
         byte[] testByte = testParcel.marshall();
         testParcel.recycle();
         testParcel = null;
@@ -104,7 +120,7 @@ public class MediaTestUtils {
         assertArrayEquals(testByte,actualByte);
     }
 
-    public static AudioConfig createAudioConfig() {
+    static AudioConfig createAudioConfig() {
         return new AudioConfig.Builder()
                 .setMediaDirection(RtpConfig.MEDIA_DIRECTION_TRANSMIT_RECEIVE)
                 .setAccessNetwork(AccessNetworkType.EUTRAN)
@@ -155,7 +171,7 @@ public class MediaTestUtils {
             .build();
     }
 
-    public static List<RtpHeaderExtension> createRtpExtensions() {
+    static List<RtpHeaderExtension> createRtpExtensions() {
         byte[] testBytes = new byte[MAX_BYTES];
         testBytes[0] = BYTE_DATA;
         ArrayList extensions = new ArrayList<RtpHeaderExtension>();
@@ -163,7 +179,7 @@ public class MediaTestUtils {
         return extensions;
     }
 
-    public static CallQuality createCallQuality() {
+    static CallQuality createCallQuality() {
         return  new CallQuality(
                 DOWNLINK_CALLQUALITY_LEVEL,
                 UPLINK_CALLQUALITY_LEVEL,
@@ -178,7 +194,7 @@ public class MediaTestUtils {
                 CODEC_TYPE);
     }
 
-    public static MediaQualityThreshold createMediaQualityThreshold() {
+    static MediaQualityThreshold createMediaQualityThreshold() {
         return new MediaQualityThreshold.Builder()
                 .setRtpInactivityTimerMillis(RTP_TIMEOUT)
                 .setRtcpInactivityTimerMillis(RTCP_TIMEOUT)
@@ -186,6 +202,39 @@ public class MediaTestUtils {
                 .setPacketLossThreshold(PACKET_LOSS_RATE)
                 .setJitterPeriodMillis(JITTER_PERIOD)
                 .setJitterThresholdMillis(JITTER_THRESHOLD)
+                .build();
+    }
+
+    static VideoConfig createVideoConfig() {
+        return new VideoConfig.Builder()
+                .setMediaDirection(RtpConfig.MEDIA_DIRECTION_TRANSMIT_RECEIVE)
+                .setAccessNetwork(AccessNetworkType.EUTRAN)
+                .setRemoteRtpAddress(
+                        new InetSocketAddress(
+                                InetAddresses.parseNumericAddress(REMOTE_RTP_ADDRESS),
+                                REMOTE_RTP_PORT))
+                .setRtcpConfig(createRtcpConfig())
+                .setMaxMtuBytes(MAX_MTU_BYTES)
+                .setDscp(DSCP)
+                .setRxPayloadTypeNumber(RX_PAYLOAD)
+                .setTxPayloadTypeNumber(TX_PAYLOAD)
+                .setSamplingRateKHz(SAMPLING_RATE)
+                .setVideoMode(VideoConfig.VIDEO_MODE_RECORDING)
+                .setCodecType(VideoConfig.VIDEO_CODEC_AVC)
+                .setFramerate(VIDEO_FRAMERATE)
+                .setBitrate(VIDEO_BITRATE)
+                .setCodecProfile(VideoConfig.AVC_PROFILE_BASELINE)
+                .setCodecLevel(VideoConfig.AVC_LEVEL_12)
+                .setIntraFrameIntervalSec(IDR_INTERVAL)
+                .setPacketizationMode(VideoConfig.MODE_NON_INTERLEAVED)
+                .setCameraId(CAMERA_ID)
+                .setCameraZoom(CAMERA_ZOOM)
+                .setResolutionWidth(RESOLUTION_WIDTH)
+                .setResolutionHeight(RESOLUTION_HEIGHT)
+                .setPauseImagePath(IMAGE_PATH)
+                .setDeviceOrientationDegree(VideoConfig.ORIENTATION_DEGREE_0)
+                .setCvoValue(CVO_VALUE)
+                .setRtcpFbTypes(RTCP_FB_TYPES)
                 .build();
     }
 }

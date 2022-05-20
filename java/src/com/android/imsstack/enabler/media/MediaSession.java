@@ -13,29 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.imsstack.enabler.media;
 
 import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
+
 import com.android.imsstack.enabler.IBaseContext;
-import com.android.imsstack.enabler.media.AudioSessionHandler;
-import com.android.imsstack.enabler.media.IMediaListener;
-import com.android.imsstack.enabler.media.MediaManagerHelper;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.concurrent.Executor;
 
-/**
- * This manages Media Sessions
- */
+/** This manages Media Sessions */
 public class MediaSession {
 
     private MtcMediaSession mMtcMediaSession;
     private final IBaseContext mContext;
     private AudioSessionHandler mAudioSessionHandler;
+    private VideoSessionHandler mVideoSessionHandler;
     private final MediaListener mMediaListener;
     private final MediaManagerHelper mMediaManager;
 
@@ -50,10 +47,10 @@ public class MediaSession {
 
     @VisibleForTesting
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
-        ImsMediaManager imsMediaManager, Executor executor) {
+            ImsMediaManager imsMediaManager, Executor executor) {
         mContext = context;
-        mMediaManager = new MediaManagerHelper(context.getContext(), this,
-                imsMediaManager, executor);
+        mMediaManager =
+                new MediaManagerHelper(context.getContext(), this, imsMediaManager, executor);
         mMediaListener = new MediaListener();
         initMtcMediaSession(mtcMediaSession);
         ImsLog.v("MediaSession created");
@@ -74,9 +71,20 @@ public class MediaSession {
         mAudioSessionHandler = audioSessionHandler;
     }
 
+    @VisibleForTesting
+    void setVideoSessionHandler(VideoSessionHandler videoSessionHandler) {
+        mVideoSessionHandler = videoSessionHandler;
+    }
+
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
             mAudioSessionHandler = new AudioSessionHandler(this, mMediaManager);
+        }
+    }
+
+    private void createVideoSession() {
+        if (mVideoSessionHandler == null) {
+            mVideoSessionHandler = new VideoSessionHandler(this, mMediaManager);
         }
     }
 
@@ -87,18 +95,14 @@ public class MediaSession {
         }
     }
 
-    /**
-     * Sends response to media enabler native
-     */
+    /** Sends response to media enabler native */
     public void sendRequest(Parcel parcel) {
         if (mMtcMediaSession != null) {
             mMtcMediaSession.sendRequest(parcel);
         }
     }
 
-    /**
-     * Returns slotId
-     */
+    /** Returns slotId */
     public int getSlotId() {
         return mContext.getSlotId();
     }
@@ -109,10 +113,10 @@ public class MediaSession {
         public void onMediaMessage(Parcel parcel) {
             final int requestType = parcel.readInt();
             final int sessionType = parcel.readInt();
-            ImsLog.v("requestType=" + requestType + ", sessionType=" +sessionType);
+            ImsLog.v("requestType=" + requestType + ", sessionType=" + sessionType);
 
             switch (sessionType) {
-            case ImsMediaSession.SESSION_TYPE_AUDIO:
+                case ImsMediaSession.SESSION_TYPE_AUDIO:
                 {
                     createAudioSession();
                     if (mAudioSessionHandler != null) {
@@ -121,19 +125,22 @@ public class MediaSession {
                 }
                 break;
 
-            case ImsMediaSession.SESSION_TYPE_VIDEO:
+                case ImsMediaSession.SESSION_TYPE_VIDEO:
                 {
-                    ImsLog.v("SESSION_TYPE_VIDEO :: TODO");
+                    createVideoSession();
+                    if (mVideoSessionHandler != null) {
+                        mVideoSessionHandler.onImsMediaVideoMessage(requestType, parcel);
+                    }
                 }
                 break;
 
-            case ImsMediaSession.SESSION_TYPE_RTT:
+                case ImsMediaSession.SESSION_TYPE_RTT:
                 {
                     ImsLog.v("SESSION_TYPE_RTT :: TODO");
                 }
                 break;
 
-            default:
+                default:
                 {
                     ImsLog.e("Invalid SessionType");
                 }
