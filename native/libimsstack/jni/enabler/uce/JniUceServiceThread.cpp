@@ -252,7 +252,6 @@ PROTECTED VIRTUAL IMS_BOOL JniUceServiceThread::OnMessage(IN IMSMSG& objMSG)
         }
         break;
         case IUUceService::UCE_IMS_AGENT_DISCONNECTED_IND:
-            IMS_TRACE_I("IUUceService::UCE_IMS_AGENT_DISCONNECTED_IND", 0, 0, 0);
             break;
         case IUUceService::UCE_IMS_AGENT_REFRESHED_IND:
         {
