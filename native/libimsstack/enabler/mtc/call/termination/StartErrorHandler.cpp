@@ -1,4 +1,5 @@
 #include "CallInfo.h"
+#include "CarrierConfig.h"
 #include "IMessage.h"
 #include "Ims3gpp.h"
 #include "ImsAosParameter.h"
@@ -129,7 +130,7 @@ FailReason StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) c
             return FailReason(FAIL_REASON_SESSION_SERVER_AUTH,
                     MessageUtil::GetCauseFromReasonHeader(&objMessage));
         case SipStatusCode::SC_403:
-            return FailReason(FAIL_REASON_SESSION_FORBIDDEN, nStatusCode);
+            return Handle403Response();
         case SipStatusCode::SC_404:
             return Handle404Response();
         case SipStatusCode::SC_406:
@@ -171,6 +172,28 @@ FailReason StartErrorHandler::Handle4xxResponse(IN const IMessage& objMessage) c
 }
 
 PRIVATE
+FailReason StartErrorHandler::Handle403Response() const
+{
+    const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+            Feature::POLICY_FOR_403_RESPONSE_FOR_INVITE);
+    switch (nPolicy)
+    {
+        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL:
+            break;
+
+        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_RECOVER_REGISTRATION:
+            ControlAos(ImsAosControl::REGISTER_REINITIATE);
+            break;
+
+        case CarrierConfig::ImsVoice::SIP_403_POLICY_TERMINATE_CALL_AND_REFRESH_REGISTRATION:
+            ControlAos(ImsAosControl::REGISTER_REFRESH);
+            break;
+    }
+
+    return FailReason(FAIL_REASON_SESSION_FORBIDDEN, SipStatusCode::SC_403);
+}
+
+PRIVATE
 FailReason StartErrorHandler::Handle404Response() const
 {
     if (m_objContext.GetCallInfo().bUssi)
@@ -186,7 +209,7 @@ FailReason StartErrorHandler::Handle404Response() const
 PRIVATE
 FailReason StartErrorHandler::Handle407Response() const
 {
-    RecoverRegistration();  // FIXME: INVITE auth
+    ControlAos(ImsAosControl::REGISTER_REINITIATE);  // FIXME: INVITE auth
     return FailReason(FAIL_REASON_SESSION_SERVERERROR, SipStatusCode::SC_407);
 }
 
@@ -255,10 +278,25 @@ FailReason StartErrorHandler::Handle504Response(IN const IMessage& objMessage) c
     {
         if (MessageUtil::IsInitialRegistrationRequired(&objMessage))
         {
-            // TODO: Which AoS control command is corresponding to each config?
-            // IMS_SINT32 nRegistrationRestorationMode = m_objContext.GetConfigurationProxy()
-            //         .GetInt(Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE);
-            RecoverRegistration();
+            const IMS_SINT32 nPolicy = m_objContext.GetConfigurationProxy().GetInt(
+                    Feature::REGISTRATION_RESTORATION_MODE_ON_504_FOR_INVITE);
+            switch (nPolicy)
+            {
+                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_NOT_AVAILABLE:
+                    break;
+
+                case CarrierConfig::ImsVoice::
+                        REGISTRATION_RESTORATION_INITIAL_REGISTER_WITH_NEXT_PCSCF:
+                    ControlAos(ImsAosControl::PCSCF_NEXT);
+                    break;
+
+                case CarrierConfig::ImsVoice::REGISTRATION_RESTORATION_RECOVER_REGISTRATION:
+                    // If there is an operator that requires PDN reconnect, AoS I/F should be added.
+                case CarrierConfig::ImsVoice::
+                        REGISTRATION_RESTORATION_RECOVER_REGISTRATION_WITHOUT_PDN_RECONNECT:
+                    ControlAos(ImsAosControl::REGISTER_REINITIATE);
+                    break;
+            }
         }
     }
 
@@ -354,12 +392,12 @@ IMS_BOOL StartErrorHandler::HasEmergencyServiceTypeInBody(IN const IMessage& obj
 }
 
 PRIVATE
-void StartErrorHandler::RecoverRegistration() const
+void StartErrorHandler::ControlAos(IMS_UINT32 nCommand) const
 {
     MtcAosConnector* pAosConnector = GetAosConnector();
     if (pAosConnector)
     {
-        pAosConnector->Control(ImsAosControl::PCSCF_NEXT);
+        pAosConnector->Control(nCommand);
     }
 }
 
