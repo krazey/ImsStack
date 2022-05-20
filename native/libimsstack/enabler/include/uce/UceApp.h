@@ -74,6 +74,7 @@ private:
     static AString GetUceAppName(IN IMS_SINT32 nSlotId);
     void SetPublishStatusToAos(IN IMS_BOOL bIsPublishStarted);
     void SendRegistrationRecoveryRequestToAos(IN IMS_UINT32 nAosControlType);
+    void ImsRegistrationCheck(void);
     /* ------------------------------------------------------------------------------------------
         Variables
     ---------------------------------------------------------------------------------------------

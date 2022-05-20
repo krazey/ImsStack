@@ -106,6 +106,14 @@ public class UceAgent extends Thread implements IUceJNIListener {
      */
     public void setListener(UceEventListener listener) {
         mUceEventListener = listener;
+        if (mImsRegistered && mUceEventListener != null) {
+            int mCapaTriggerType = getCapabilityUpdateTriggerType(mRegistrationTech);
+            try {
+                mUceEventListener.onRequestPublishCapabilities(mCapaTriggerType);
+            } catch (Exception e) {
+                ImsLog.e("Exception:" + e.toString());
+            }
+        }
     }
 
     /**
@@ -231,6 +239,7 @@ public class UceAgent extends Thread implements IUceJNIListener {
 
         mUceConfiguration = new UceConfiguration(mSlotId);
         mUceConfiguration.init();
+        imsRegistrationStatusCheck();
     }
 
     private void deInitialize() {
@@ -405,7 +414,6 @@ public class UceAgent extends Thread implements IUceJNIListener {
         };
     }
 
-
     private void imsRegistered(int registrationTech, long connectedServices) {
         mUcePublishRequestController.setImsRegistrationStatus(mImsRegistered);
         mUcePublishRequestController.setUseExpiredEtag(mUceConfiguration.isUseExpiredEtag());
@@ -465,6 +473,17 @@ public class UceAgent extends Thread implements IUceJNIListener {
                 break;
         }
         return type;
+    }
+
+    private void imsRegistrationStatusCheck() {
+        ImsLog.d("imsRegistrationStatusCheck");
+        if (mImsRegistered) {
+            return;
+        }
+        Parcel parcel = Parcel.obtain();
+
+        parcel.writeInt(UceMessage.UCE_GET_IMS_REGISTRATION_CMD);
+        mUceJNI.sendMessage(mSlotId, parcel);
     }
 
     @Override

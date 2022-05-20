@@ -36,6 +36,9 @@ public class UceMessage {
     public static final int UCE_SEND_OPTIONS_CMD                            = (UCE_EVENT_U2I + 4);
     public static final int UCE_SEND_OPTIONS_RESP_CMD                       = (UCE_EVENT_U2I + 5);
 
+    // Registration Commands
+    public static final int UCE_GET_IMS_REGISTRATION_CMD                    = (UCE_EVENT_U2I + 6);
+
     /*
      * Indications
      */

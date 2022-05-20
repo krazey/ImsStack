@@ -189,6 +189,12 @@ void JniUceService::HandleMessage(int nMsg, const Parcel& pParcel)
             MessageService::PostMessage(m_strTarget, objMSG);
         }
         break;
+        case IUUceService::UCE_GET_IMS_REGISTRATION_CMD:
+        {
+            IMSMSG objMSG(nMsg, 0, 0);
+            MessageService::PostMessage(m_strTarget, objMSG);
+        }
+        break;
         default:
             IMS_TRACE_E(0, "unknown message : %d", nMsg, 0, 0);
             break;

@@ -36,7 +36,8 @@ public:
     // Options Commands
     static const IMS_SINT32 UCE_SEND_OPTIONS_CMD = UI2UCEAPP + 4;
     static const IMS_SINT32 UCE_SEND_OPTIONS_RESP_CMD = UI2UCEAPP + 5;
-
+    // Registration Commands
+    static const IMS_SINT32 UCE_GET_IMS_REGISTRATION_CMD = UI2UCEAPP + 6;
     /*
      * Indications
      */

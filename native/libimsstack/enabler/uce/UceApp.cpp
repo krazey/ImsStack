@@ -20,7 +20,7 @@
 __IMS_TRACE_TAG_USER_DECL__("UCE");
 
 /* -------------------------------------------------------------------------------------------------
-    ConstrEABtor, DestrEABtor
+    Constructor, Destructor
 -------------------------------------------------------------------------------------------------
 */
 UceApp::UceApp(IN CONST IMS_SINT32 nSlotId, IN CONST AString& strAppName) :
@@ -113,6 +113,12 @@ IMS_BOOL UceApp::OnMessage(IN IMSMSG& objMSG)
             SendRegistrationRecoveryRequestToAos(nParam);
         }
         break;
+
+        case IUUceService::UCE_GET_IMS_REGISTRATION_CMD:
+            IMS_TRACE_D("UCE_GET_IMS_REGISTRATION_CMD", 0, 0, 0);
+            ImsRegistrationCheck();
+            break;
+
         default:
             if (m_pUceService != IMS_NULL)
             {
@@ -254,7 +260,7 @@ void UceApp::ImsAos_Disconnected(IN IMS_UINT32 nReason)
     }
     m_eAoSStatus = AOS_DISCONNECTED;
     IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_DISCONNECTED_IND, 0, 0);
-    MessageService::PostMessage(AString("JNIUCEServiceThread"), objUIMsg);
+    MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
 
     if (m_pUceService != IMS_NULL)
     {
@@ -598,5 +604,109 @@ void UceApp::SendRegistrationRecoveryRequestToAos(IN IMS_UINT32 nAosControlType)
     if (m_piImsAos != IMS_NULL)
     {
         m_piImsAos->Control(nAosControlType);
+    }
+}
+
+PRIVATE
+void UceApp::ImsRegistrationCheck()
+{
+    IMS_TRACE_D("ImsRegistrationCheck", 0, 0, 0);
+    if (m_eAoSStatus != AOS_CONNECTED)
+    {
+        IMS_TRACE_D("ImsRegistrationCheck : send UCE_IMS_AGENT_DISCONNECTED_IND", 0, 0, 0);
+        IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_DISCONNECTED_IND, 0, 0);
+        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
+        return;
+    }
+
+    if (m_piImsAos != null)
+    {
+        IMS_UINT32 m_RegisteredServiceForJAVA = 0;
+        IImsAosInfo* pIImsAosInfo = m_piImsAos->GetAosInfo();
+        if (pIImsAosInfo != IMS_NULL)
+        {
+            IMS_UINT32 registeredFeatures = pIImsAosInfo->GetImsFeatures();
+            if (registeredFeatures & ImsAosFeature::VIDEO)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_VIDEO;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Video tag", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::STANDALONE_MSG)
+            {
+                m_RegisteredServiceForJAVA |=
+                        CONNECTED_SERVICE_CPM_MSG | CONNECTED_SERVICE_CPM_LARGEMSG;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Standalone Message", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CHAT_SESSION)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CPM_SESSION;
+                IMS_TRACE_I("ImsAosMonitor_Connected -CPM Session", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::FILE_TRANSFER)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_HTTPFT;
+                IMS_TRACE_I("ImsAosMonitor_Connected -FT via HTTP", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::FILE_TRANSFER_VIA_SMS)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_FTSMS;
+                IMS_TRACE_I("ImsAosMonitor_Connected -FT via SMS", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CALL_COMPOSER_ENRICHED_CALLING)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CALL_COMPOSER;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Call Composer", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::GEO_PUSH)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_GEOPUSH;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Geolocation Push", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::GEO_PUSH_VIA_SMS)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_GEOSMS;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Geo push via SMS", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CHATBOT_COMMUNICATION_USING_SESSION)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CHATBOT;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Chatbot Session", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CHATBOT_COMMUNICATION_USING_STANDALONE_MSG)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CHATBOT_STANDALONE_MSG;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Chatbot Standalone message", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CHATBOT_VERSION_SUPPORTED)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CHATBOT_V1;
+                IMS_TRACE_I("ImsAosMonitor_Connected -botVersion=#1", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::CHATBOT_VERSION_V2_SUPPORTED)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_CHATBOT_V2;
+                IMS_TRACE_I("ImsAosMonitor_Connected -botVersion=#1,#2", 0, 0, 0);
+            }
+
+            if (registeredFeatures & ImsAosFeature::PRESENCE)
+            {
+                m_RegisteredServiceForJAVA |= CONNECTED_SERVICE_PRESENCE;
+                IMS_TRACE_I("ImsAosMonitor_Connected -Presence", 0, 0, 0);
+            }
+        }
+        IMSMSG objUIMsg(IUUceService::UCE_IMS_AGENT_CONNECTED_IND, m_RegisteredServiceForJAVA,
+                m_RegisteredNetwork);
+        MessageService::PostMessage(AString("JniUceServiceThread"), objUIMsg);
     }
 }
