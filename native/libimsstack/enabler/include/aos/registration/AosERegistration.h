@@ -71,7 +71,7 @@ protected:
     virtual void Registration_Terminated(IN IMS_SINT32 nReason);
 
     /// IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
 
 protected:
     IMS_BOOL m_bReinitiationRequested;

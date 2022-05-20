@@ -513,7 +513,22 @@ PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL /*bReady*/, IN IMS_UINT32 /*nService*/) {}
+PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
+{
+    if (nService != ImsAosService::MTC)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_D(
+            APPPROFILE, "SetReady :: bReady[%s], nService(%d)", _TRACE_B_(bReady), nService, 0);
+
+    IAosCallTracker* piCallTracker = AosProvider::GetInstance()->GetCallTracker(m_nSlotId);
+    if (piCallTracker != IMS_NULL)
+    {
+        piCallTracker->SetMtcReady();
+    }
+}
 
 /*
 
@@ -540,9 +555,10 @@ PUBLIC VIRTUAL void AosHandle::UpdateFeature(IN IMSList<ImsAosFeatureTag*>& /*ob
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosHandle::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
-    A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType, nState, 0);
+    A_IMS_TRACE_D(APPPROFILE, "CallTracker_StateChanged :: nType=%d, nState=%d", nType,
+            static_cast<IMS_UINT32>(eState), 0);
     // Implemented in child
 }
 

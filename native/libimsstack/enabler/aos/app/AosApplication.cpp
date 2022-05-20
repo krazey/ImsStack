@@ -2489,14 +2489,14 @@ PROTECTED VIRTUAL void AosApplication::Registration_PreNotify(IN IMS_UINT32 nPre
 }
 
 PROTECTED VIRTUAL void AosApplication::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+        IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_NORMAL)
     {
         return;
     }
 
-    IMS_BOOL bCurrState = (nState > IAosCallTracker::STATE_IDLE) ? IMS_TRUE : IMS_FALSE;
+    IMS_BOOL bCurrState = (eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE;
     if (IsImsCall() != bCurrState)
     {
         SetImsCall(bCurrState);
@@ -2511,7 +2511,7 @@ PROTECTED VIRTUAL void AosApplication::CallTracker_StateChanged(
         }
     }
 
-    if (nState == IAosCallTracker::STATE_RINGING)
+    if (eState == CallState::RINGING)
     {
         m_piRegistration->RequestCmd(IAosRegistration::CMD_CLEAR_SERVER_SOCKET_ERROR_COUNT, 0);
     }

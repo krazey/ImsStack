@@ -109,7 +109,7 @@ protected:
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // IAosCallTrackerListener
-    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) override;
 
     // IAosNetTrackerListener
     void NetTracker_StatusChanged() override;

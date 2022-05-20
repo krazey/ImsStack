@@ -4867,14 +4867,14 @@ PROTECTED VIRTUAL void AosRegistration::Block_Changed(
 }
 
 PROTECTED VIRTUAL void AosRegistration::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+        IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_NORMAL)
     {
         return;
     }
 
-    SetImsCall((nState > IAosCallTracker::STATE_IDLE) ? IMS_TRUE : IMS_FALSE);
+    SetImsCall((eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE);
 
     if (!IsImsCall() && IsHeldByCall())
     {

@@ -13,13 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "IMSVector.h"
 #include "ServiceTrace.h"
 #include "ServiceEvent.h"
 #include "ImsEventDef.h"
 
-// #include "UCConnector.h" _UC_TO_MTC_
-
+#include "../../interface/mtc/MtcConnector.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosCallTrackerListener.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosService.h"
 #include "provider/AosUtil.h"
 #include "provider/AosCallTracker.h"
@@ -29,22 +32,17 @@ __IMS_TRACE_TAG_USER_DECL__("AOS");
 
 #define AOSTAG m_strTag.GetStr()
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AosCallTracker::AosCallTracker(IN IMS_SINT32 nSlotId) :
         m_nSlotId(nSlotId),
-        m_nCsState(STATE_IDLE),
-        m_nNormalState(STATE_IDLE),
-        m_nEmergencyState(STATE_IDLE),
-        m_nNormalSessionType(SESSION_TYPE_NONE),
-        m_nActiveCsState(STATE_IDLE),
-        m_objNormalCalls(IMSMap<IMS_SINTP, IMS_UINT32>()),
-        m_objEmergencyCalls(IMSMap<IMS_SINTP, IMS_UINT32>()),
-        m_objNormalSessionTypes(IMSMap<IMS_SINTP, IMS_UINT32>()),
+        m_eCsState(CallState::IDLE),
+        m_eNormalState(CallState::IDLE),
+        m_eEmergencyState(CallState::IDLE),
+        m_nNormalCallType(static_cast<IMS_UINT32>(CallType::UNKNOWN)),
+        m_eActiveCsState(CallState::IDLE),
+        m_objNormalCalls(IMSMap<CallKey, CallState>()),
+        m_objEmergencyCalls(IMSMap<CallKey, CallState>()),
+        m_objNormalCallTypes(IMSMap<CallKey, CallType>()),
         m_objListeners(IMSList<IAosCallTrackerListener*>())
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [SLOT%d] AosCallTracker = %" PFLS_u "/%" PFLS_x, m_nSlotId,
@@ -52,163 +50,109 @@ AosCallTracker::AosCallTracker(IN IMS_SINT32 nSlotId) :
 
     IMS_EVENT_AddListenerForSlotId(IMS_EVENT_CSCALL_STATE, this, m_nSlotId);
 
-    // listen the uc call tracker
-    // UCConnector::AddCallTrackerListener(m_nSlotId, this); _UC_TO_MTC_
-
     m_strTag.Sprintf("%d", m_nSlotId);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AosCallTracker::~AosCallTracker()
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_F : [SLOT%d] AosCallTracker = %" PFLS_u "/%" PFLS_x, m_nSlotId,
             sizeof(AosCallTracker), this);
 
-    // UCConnector::RemoveCallTrackerListener(m_nSlotId, this); _UC_TO_MTC_
     m_objListeners.Clear();
 
     AosProvider::GetInstance()->GetService(m_nSlotId)->RemoveListener(
             DYNAMIC_CAST(IAosServicePhoneListener*, this));
     IMS_EVENT_RemoveListenerForSlotId(IMS_EVENT_CSCALL_STATE, this, m_nSlotId);
+
+    MtcConnector::RemoveCallStateListener(m_nSlotId, DYNAMIC_CAST(IMtcCallStateListener*, this));
 }
 
-/*
+PUBLIC VIRTUAL void AosCallTracker::SetMtcReady() const
+{
+    A_IMS_TRACE_I(AOSTAG, "SetMtcReady", 0, 0, 0);
+    MtcConnector::AddCallStateListener(m_nSlotId, DYNAMIC_CAST(IMtcCallStateListener*, this));
+}
 
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosCallTracker::IsCsCallActive() const
 {
     A_IMS_TRACE_I(AOSTAG, "IsCsCallActive :: active (%s) , state (%d)",
-            _TRACE_B_(m_nCsState > m_nActiveCsState), m_nCsState, 0);
-    return (m_nCsState > m_nActiveCsState);
+            _TRACE_B_(m_eCsState > m_eActiveCsState), m_eCsState, 0);
+    return (m_eCsState > m_eActiveCsState);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosCallTracker::IsNormalCallActive() const
 {
     A_IMS_TRACE_I(AOSTAG, "IsNormalCallActive :: active (%s) , state (%d)",
-            _TRACE_B_(m_nNormalState > STATE_IDLE), m_nNormalState, 0);
-    return (m_nNormalState > STATE_IDLE);
+            _TRACE_B_(m_eNormalState > CallState::IDLE), m_eNormalState, 0);
+    return (m_eNormalState > CallState::IDLE);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosCallTracker::IsVideoCallingActive() const
 {
-    if (!AosUtil::GetInstance()->IsFeatureOn(SESSION_TYPE_VT, m_nNormalSessionType) ||
-            m_objNormalSessionTypes.IsEmpty())
+    if (!IsExistCallType(CallType::VT) || m_objNormalCallTypes.IsEmpty())
     {
         A_IMS_TRACE_I(AOSTAG, "IsVideoCallingActive(%s)", "false", 0, 0);
         return IMS_FALSE;
     }
 
-    IMS_BOOL bSessionActive = IMS_FALSE;
+    IMS_BOOL bIsActive = IMS_FALSE;
 
-    for (IMS_UINT32 nAt = 0; nAt < m_objNormalSessionTypes.GetSize(); ++nAt)
+    for (IMS_UINT32 nAt = 0; nAt < m_objNormalCallTypes.GetSize(); ++nAt)
     {
-        /* _UC_TO_MTC_
-        IMS_UINT32 nSessionType = m_objNormalSessionTypes.GetValueAt(nAt);
+        CallType eCallType = m_objNormalCallTypes.GetValueAt(nAt);
 
-        if (nSessionType != IUCCallListener::SESSIONTYPE_VT)
+        if (eCallType != CallType::VT)
         {
             continue;
         }
-        */
 
-        IMS_SINTP nSessionKey = m_objNormalSessionTypes.GetKeyAt(nAt);
-        IMS_UINT32 nSessionState = m_objNormalCalls.GetValue(nSessionKey);
+        CallKey eKey = m_objNormalCallTypes.GetKeyAt(nAt);
+        CallState eState = m_objNormalCalls.GetValue(eKey);
 
-        if (nSessionState == STATE_OFFHOOK)
+        if (eState == CallState::OFFHOOK)
         {
-            bSessionActive = IMS_TRUE;
+            bIsActive = IMS_TRUE;
             break;
         }
     }
 
-    A_IMS_TRACE_I(AOSTAG, "IsVideoCallingActive(%s)", _TRACE_B_(bSessionActive), 0, 0);
+    A_IMS_TRACE_I(AOSTAG, "IsVideoCallingActive(%s)", _TRACE_B_(bIsActive), 0, 0);
 
-    return bSessionActive;
+    return bIsActive;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL AosCallTracker::IsEmergencyCallActive() const
 {
     A_IMS_TRACE_I(AOSTAG, "IsEmergencyCallActive :: active (%s) , state (%d)",
-            _TRACE_B_(m_nEmergencyState > STATE_IDLE), m_nEmergencyState, 0);
-    return (m_nEmergencyState > STATE_IDLE);
+            _TRACE_B_(m_eEmergencyState > CallState::IDLE), m_eEmergencyState, 0);
+    return (m_eEmergencyState > CallState::IDLE);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 AosCallTracker::GetSlotId() const
 {
     return m_nSlotId;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_UINT32 AosCallTracker::GetCallState(IN IMS_UINT32 nType) const
+PUBLIC VIRTUAL CallState AosCallTracker::GetCallState(IN IMS_UINT32 nType) const
 {
     if (nType == TYPE_CS)
     {
-        return m_nCsState;
+        return m_eCsState;
     }
 
     if (nType == TYPE_NORMAL)
     {
-        return m_nNormalState;
+        return m_eNormalState;
     }
 
     if (nType == TYPE_EMERGENCY)
     {
-        return m_nEmergencyState;
+        return m_eEmergencyState;
     }
 
-    return STATE_IDLE;
+    return CallState::IDLE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_UINT32 AosCallTracker::GetSessionType(IN IMS_UINT32 nType) const
-{
-    if (nType == TYPE_NORMAL)
-    {
-        return m_nNormalSessionType;
-    }
-
-    return SESSION_TYPE_NONE;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosCallTracker::SetCsCallStateWatchMode()
 {
     A_IMS_TRACE_D(AOSTAG, "SetCsCallStateWatchMode", 0, 0, 0);
@@ -218,22 +162,12 @@ PUBLIC VIRTUAL void AosCallTracker::SetCsCallStateWatchMode()
             DYNAMIC_CAST(IAosServicePhoneListener*, this));
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void AosCallTracker::SetActiveCsCallState(IN IMS_UINT32 nActiveCsState)
+PUBLIC VIRTUAL void AosCallTracker::SetActiveCsCallState(IN CallState eActiveCsState)
 {
-    A_IMS_TRACE_D(AOSTAG, "SetActiveCsCallState :: (%d)", nActiveCsState, 0, 0);
-    this->m_nActiveCsState = nActiveCsState;
+    A_IMS_TRACE_D(AOSTAG, "SetActiveCsCallState :: (%d)", eActiveCsState, 0, 0);
+    m_eActiveCsState = eActiveCsState;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosCallTracker::SetListener(IN IAosCallTrackerListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
@@ -251,11 +185,6 @@ PUBLIC VIRTUAL void AosCallTracker::SetListener(IN IAosCallTrackerListener* piLi
     m_objListeners.Append(piListener);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void AosCallTracker::RemoveListener(IN IAosCallTrackerListener* piListener)
 {
     for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
@@ -273,38 +202,29 @@ PUBLIC VIRTUAL void AosCallTracker::RemoveListener(IN IAosCallTrackerListener* p
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosCallTracker::AddOrUpdateCall(
-        IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey, IN IMS_UINT32 nState)
+PRIVATE
+template <typename T>
+void AosCallTracker::AddOrUpdateCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue)
 {
-    IMS_SINT32 nAt = objCalls.GetIndexOfKey(nKey);
+    IMS_SINT32 nAt = objCalls.GetIndexOfKey(eKey);
 
     if (nAt >= 0)
     {
-        objCalls.SetValueAt(nAt, nState);
+        objCalls.SetValueAt(nAt, eValue);
         return;
     }
 
-    if (!objCalls.Add(nKey, nState))
+    if (!objCalls.Add(eKey, eValue))
     {
         A_IMS_TRACE_D(AOSTAG, "AddCall :: map error", 0, 0, 0);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosCallTracker::RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey)
+PRIVATE
+template <typename T>
+void AosCallTracker::RemoveCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey)
 {
-    IMS_SINT32 nAt = objCalls.GetIndexOfKey(nKey);
+    IMS_SINT32 nAt = objCalls.GetIndexOfKey(eKey);
 
     if (nAt < 0)
     {
@@ -314,151 +234,135 @@ void AosCallTracker::RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN I
     objCalls.RemoveAt(nAt);
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_UINT32 AosCallTracker::GetConvertedState(IN IMS_UINT32 nState)
+PRIVATE
+CallState AosCallTracker::GetConvertedState(IN IMtcCall::State eState)
 {
-    switch (nState)
+    switch (eState)
     {
-        /* _UC_TO_MTC_
-        case IUCCallListener::UC_CALL_STATE_IDLE:
-            return STATE_IDLE;
+        case IMtcCall::State::OUTGOING:
+            return CallState::RINGBACK;
 
-        case IUCCallListener::UC_CALL_STATE_TERMINATING:
-            return STATE_TERMINATING;
+        case IMtcCall::State::INCOMING:
+            return CallState::RINGING;
 
-        case IUCCallListener::UC_CALL_STATE_RINGBACK:
-            return STATE_RINGBACK;
+        case IMtcCall::State::ALERTING:
+            return CallState::ALERTING;
 
-        case IUCCallListener::UC_CALL_STATE_RINGING:
-            return STATE_RINGING;
+        case IMtcCall::State::ESTABLISHED:  // FALL-THROUGH
+        case IMtcCall::State::UPDATING:
+            return CallState::OFFHOOK;
 
-        case IUCCallListener::UC_CALL_STATE_ALERTING:
-            return STATE_ALERTING;
+        case IMtcCall::State::TERMINATING:
+            return CallState::TERMINATING;
 
-        case IUCCallListener::UC_CALL_STATE_OFFHOOK:
-            return STATE_OFFHOOK;
-        */
         default:
-            break;
+            return CallState::IDLE;
     }
-
-    return STATE_IDLE;
 }
 
-/*
+PRIVATE
+CallType AosCallTracker::GetConvertedType(IN Type eType)
+{
+    switch (eType)
+    {
+        case Type::VOIP:
+            return CallType::VOIP;
 
-Remarks
+        case Type::VT:
+            return CallType::VT;
 
-*/
-PROTECTED
-IMS_UINT32 AosCallTracker::GetTotalState(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls)
+        case Type::RTT:
+            return CallType::RTT;
+
+        case Type::VIDEO_RTT:
+            return CallType::VIDEO_RTT;
+
+        default:
+            return CallType::UNKNOWN;
+    }
+}
+
+PRIVATE
+CallState AosCallTracker::GetTotalState(IN IMSMap<CallKey, CallState>& objCalls)
 {
     if (objCalls.IsEmpty())
     {
-        return STATE_IDLE;
+        return CallState::IDLE;
     }
 
     if (objCalls.GetSize() > 1)
     {
-        return STATE_OFFHOOK;
+        return CallState::OFFHOOK;
     }
 
     return objCalls.GetValueAt(0);
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_UINT32 AosCallTracker::GetTotalSessionType(IN IMSMap<IMS_SINTP, IMS_UINT32>& objSessionTypes)
+PRIVATE
+IMS_UINT32 AosCallTracker::GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes)
 {
-    if (objSessionTypes.IsEmpty())
+    IMS_UINT32 nTotalCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
+
+    if (objCallTypes.IsEmpty())
     {
-        return SESSION_TYPE_NONE;
+        return nTotalCallType;
     }
 
-    IMS_UINT32 nTotalSessionType = SESSION_TYPE_NONE;
-
-    for (IMS_UINT32 nAt = 0; nAt < objSessionTypes.GetSize(); ++nAt)
+    for (IMS_UINT32 nAt = 0; nAt < objCallTypes.GetSize(); ++nAt)
     {
-        IMS_UINT32 nSessionType = objSessionTypes.GetValueAt(nAt);
+        CallType eCallType = objCallTypes.GetValueAt(nAt);
 
-        switch (nSessionType)
+        if (eCallType != CallType::UNKNOWN)
         {
-            /* _UC_TO_MTC_
-            case IUCCallListener::SESSIONTYPE_VOIP:
-                nTotalSessionType |= SESSION_TYPE_VOIP;
-                break;
-
-            case IUCCallListener::SESSIONTYPE_VIDEOSHARE:
-                nTotalSessionType |= Session_TYPE_VS;
-                break;
-
-            case IUCCallListener::SESSIONTYPE_VT:
-                nTotalSessionType |= SESSION_TYPE_VT;
-                break;
-            */
-            default:
-                break;
+            nTotalCallType |= 0x1 << static_cast<IMS_UINT32>(eCallType);
         }
     }
 
-    return nTotalSessionType;
+    return nTotalCallType;
 }
 
-/*
+PRIVATE
+IMS_BOOL AosCallTracker::IsExistCallType(IN CallType eCallType) const
+{
+    return (m_nNormalCallType & (0x1 << static_cast<IMS_UINT32>(eCallType)));
+}
 
-Remarks
-
-*/
-PROTECTED
-IMS_UINT32 AosCallTracker::GetState(IN IMS_UINT32 nType) const
+PRIVATE
+CallState AosCallTracker::GetState(IN IMS_UINT32 nType) const
 {
     if (nType == TYPE_CS)
     {
-        return m_nCsState;
+        return m_eCsState;
     }
 
     if (nType == TYPE_NORMAL)
     {
-        return m_nNormalState;
+        return m_eNormalState;
     }
 
     if (nType == TYPE_EMERGENCY)
     {
-        return m_nEmergencyState;
+        return m_eEmergencyState;
     }
 
-    return STATE_IDLE;
+    return CallState::IDLE;
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosCallTracker::SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PRIVATE
+void AosCallTracker::SetState(IN IMS_UINT32 nType, IN CallState eState)
 {
     switch (nType)
     {
         case TYPE_CS:
-            m_nCsState = nState;
+            m_eCsState = eState;
             break;
 
         case TYPE_NORMAL:
-            m_nNormalState = nState;
+            m_eNormalState = eState;
             break;
 
         case TYPE_EMERGENCY:
-            m_nEmergencyState = nState;
+            m_eEmergencyState = eState;
             break;
 
         default:
@@ -466,13 +370,8 @@ void AosCallTracker::SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void AosCallTracker::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PRIVATE
+void AosCallTracker::Notify(IN IMS_UINT32 nType, IN CallState eState)
 {
     for (IMS_UINT32 nAt = 0; nAt < m_objListeners.GetSize(); nAt++)
     {
@@ -480,100 +379,77 @@ void AosCallTracker::Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
 
         if (piListener != IMS_NULL)
         {
-            piListener->CallTracker_StateChanged(nType, nState);
+            piListener->CallTracker_StateChanged(nType, eState);
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::ProcessCsChanged(IN IMS_UINT32 nState)
+PRIVATE void AosCallTracker::ProcessCsChanged(IN CallState eState)
 {
-    if (m_nCsState != nState)
+    if (m_eCsState != eState)
     {
         A_IMS_TRACE_I(AOSTAG, "ProcessCsChanged :: old (%s) -> curr (%s)",
-                StateToString(m_nCsState), StateToString(nState), 0);
+                StateToString(m_eCsState), StateToString(eState), 0);
 
-        SetState(TYPE_CS, nState);
-        Notify(TYPE_CS, nState);
+        SetState(TYPE_CS, eState);
+        Notify(TYPE_CS, eState);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::ProcessEmergencyChanged(
-        IN IMS_SINTP nKey, IN IMS_UINT32 nState)
+PRIVATE void AosCallTracker::ProcessEmergencyChanged(IN CallKey eKey, IN CallState eState)
 {
-    if (nState == STATE_IDLE)
+    if (eState == CallState::IDLE)
     {
-        RemoveCall(m_objEmergencyCalls, nKey);
+        RemoveCall(m_objEmergencyCalls, eKey);
     }
     else
     {
-        AddOrUpdateCall(m_objEmergencyCalls, nKey, nState);
+        AddOrUpdateCall(m_objEmergencyCalls, eKey, eState);
     }
 
-    IMS_UINT32 nCurrState = GetTotalState(m_objEmergencyCalls);
+    CallState eCurrState = GetTotalState(m_objEmergencyCalls);
 
     A_IMS_TRACE_I(AOSTAG, "ProcessEmergencyChanged :: old (%s) -> curr (%s)",
-            StateToString(m_nEmergencyState), StateToString(nCurrState), 0);
+            StateToString(m_eEmergencyState), StateToString(eCurrState), 0);
 
-    if (m_nEmergencyState != nCurrState)
+    if (m_eEmergencyState != eCurrState)
     {
-        SetState(TYPE_EMERGENCY, nCurrState);
-        Notify(TYPE_EMERGENCY, nCurrState);
+        SetState(TYPE_EMERGENCY, eCurrState);
+        Notify(TYPE_EMERGENCY, eCurrState);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::ProcessNormalChanged(
-        IN IMS_SINTP nKey, IN IMS_UINT32 nState, IN IMS_SINT32 nSessionType)
+PRIVATE void AosCallTracker::ProcessNormalChanged(
+        IN CallKey nCallKey, IN CallState eCallState, IN CallType eCallType)
 {
-    IMS_UINT32 nSessType = (nSessionType < 0) ? 0 : static_cast<IMS_UINT32>(nSessionType);
-
-    if (nState == STATE_IDLE)
+    if (eCallState == CallState::IDLE)
     {
-        RemoveCall(m_objNormalCalls, nKey);
-        RemoveCall(m_objNormalSessionTypes, nKey);
+        RemoveCall(m_objNormalCalls, nCallKey);
+        RemoveCall(m_objNormalCallTypes, nCallKey);
     }
     else
     {
-        AddOrUpdateCall(m_objNormalCalls, nKey, nState);
-        AddOrUpdateCall(m_objNormalSessionTypes, nKey, nSessType);
+        AddOrUpdateCall(m_objNormalCalls, nCallKey, eCallState);
+        AddOrUpdateCall(m_objNormalCallTypes, nCallKey, eCallType);
     }
 
-    IMS_UINT32 nCurrState = GetTotalState(m_objNormalCalls);
-    IMS_UINT32 nCurrSessType = GetTotalSessionType(m_objNormalSessionTypes);
+    CallState eCurrState = GetTotalState(m_objNormalCalls);
+    IMS_UINT32 nCurrCallTypes = GetTotalCallType(m_objNormalCallTypes);
 
     A_IMS_TRACE_I(AOSTAG, "ProcessNormalChanged :: Old State(%s) -> Curr State(%s)",
-            StateToString(m_nNormalState), StateToString(nCurrState), 0);
-    PrintSessionType(nCurrSessType);
+            StateToString(m_eNormalState), StateToString(eCurrState), 0);
+    PrintCallTypes(nCurrCallTypes);
 
-    if ((m_nNormalState != nCurrState) || (m_nNormalSessionType != nCurrSessType))
+    if (m_eNormalState != eCurrState || m_nNormalCallType != nCurrCallTypes)
     {
-        SetState(TYPE_NORMAL, nCurrState);
-        m_nNormalSessionType = nCurrSessType;
+        SetState(TYPE_NORMAL, eCurrState);
+        m_nNormalCallType = nCurrCallTypes;
 
-        Notify(TYPE_NORMAL, nCurrState);
+        Notify(TYPE_NORMAL, eCurrState);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::Event_NotifyEvent(
+PRIVATE VIRTUAL void AosCallTracker::Event_NotifyEvent(
         IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam)
 {
     A_IMS_TRACE_I(AOSTAG, "Event_NotifyEvent :: [E(%d)/W(%d)/L(%d)]", nEvent, nWParam, nLParam);
@@ -582,15 +458,15 @@ PROTECTED VIRTUAL void AosCallTracker::Event_NotifyEvent(
     {
         if (nWParam == IMS_CSCALL_STATE_IDLE)
         {
-            ProcessCsChanged(STATE_IDLE);
+            ProcessCsChanged(CallState::IDLE);
         }
         else if (nWParam == IMS_CSCALL_STATE_INCOMING)
         {
-            ProcessCsChanged(STATE_RINGING);
+            ProcessCsChanged(CallState::RINGING);
         }
         else if (nWParam == IMS_CSCALL_STATE_ACTIVE)
         {
-            ProcessCsChanged(STATE_OFFHOOK);
+            ProcessCsChanged(CallState::OFFHOOK);
         }
     }
 }
@@ -603,119 +479,84 @@ PUBLIC VIRTUAL void AosCallTracker::ServicePhone_PreciseCallStateChanged(IN Prec
             eState == PreciseCallState::DIALING || eState == PreciseCallState::DISCONNECTED ||
             eState == PreciseCallState::DISCONNECTING)
     {
-        ProcessCsChanged(STATE_IDLE);
+        ProcessCsChanged(CallState::IDLE);
     }
     else if (eState == PreciseCallState::INCOMING || eState == PreciseCallState::WAITING ||
             eState == PreciseCallState::ALERTING)
     {
-        ProcessCsChanged(STATE_RINGING);
+        ProcessCsChanged(CallState::RINGING);
     }
     else if (eState == PreciseCallState::ACTIVE || eState == PreciseCallState::HOLDING)
     {
-        ProcessCsChanged(STATE_OFFHOOK);
+        ProcessCsChanged(CallState::OFFHOOK);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::ChangedCallState(IN IMS_UINTP nParam)
+PRIVATE VIRTUAL void AosCallTracker::OnCallStateChanged(IN CallKey nCallKey, IN State eState,
+        IN CallType eType, IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason)
 {
-    if (nParam == IMS_NULL)
+    CallState eCallState = GetConvertedState(eState);
+
+    AString strLog;
+    strLog.Sprintf("CallKey=%" PFLS_x ", State=%s, Type=%s, Emergency=%s, Reason=%d", nCallKey,
+            StateToString(eCallState), CallTypeToString(eType), _TRACE_B_(bEmergency), nReason);
+    A_IMS_TRACE_I(AOSTAG, "OnCallStateChanged :: (%s)", strLog.GetStr(), 0, 0);
+
+    if (bEmergency)
     {
+        ProcessEmergencyChanged(nCallKey, eCallState);
         return;
     }
-    /* _UC_TO_MTC_
-        IUCCallListenChangedStateParam *piState =
-                reinterpret_cast<IUCCallListenChangedStateParam*>(nParam);
 
-        if (piState->nKey == IMS_NULL)
-        {
-            delete piState;
-            return;
-        }
-
-        A_IMS_TRACE_I(AOSTAG, "ChangedCallState :: nKey (%p) , nService (%d) , nState (%d)",
-                piState->nKey, piState->eServiceType, piState->eState);
-
-        switch (piState->eServiceType)
-        {
-            case IUCCallListener::SERVICETYPE_VOIP: // FALL-THROUGH
-            case IUCCallListener::SERVICETYPE_VT: // FALL-THROUGH
-            case IUCCallListener::SERVICETYPE_UC:
-                ProcessNormalChanged(
-                    piState->nKey, GetConvertedState(piState->eState), piState->eSessionType);
-                break;
-
-            case IUCCallListener::SERVICETYPE_EMERGENCY:
-                ProcessEmergencyChanged(piState->nKey, GetConvertedState(piState->eState));
-                break;
-
-            default:
-                break;
-        }
-
-        delete piState;
-    */
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void AosCallTracker::ChangedCallTotalState(IN IMS_UINTP nParam)
-{
-    if (nParam == IMS_NULL)
+    switch (eType)
     {
-        return;
+        case Type::VOIP:  // FALL-THROUGH
+        case Type::VT:
+            ProcessNormalChanged(nCallKey, eCallState, eType);
+            break;
+
+        default:
+            break;
     }
-    /* _UC_TO_MTC_
-        IUCCallListenChangedTotalStateParam *piTotalState =
-                reinterpret_cast<IUCCallListenChangedTotalStateParam*>(nParam);
-
-        if (piTotalState->eState == IUCCallListener::UC_CALL_STATE_IDLE)
-        {
-            IMS_UINT32 nNormalCount = m_objNormalCalls.GetSize();
-            IMS_UINT32 nEmergencyCount = m_objEmergencyCalls.GetSize();
-            IMS_UINT32 nNormalSessTypeCount = m_objNormalSessionTypes.GetSize();
-
-            A_IMS_TRACE_I(AOSTAG,
-                "ChangedCallTotalState :: Count Normal(%d) , Emergency(%d), SessionType(%d)",
-                nNormalCount, nEmergencyCount, nNormalSessTypeCount);
-
-            if (nNormalCount > 0 || nNormalSessTypeCount > 0)
-            {
-                m_objNormalCalls.Clear();
-                m_objNormalSessionTypes.Clear();
-
-                SetState(TYPE_NORMAL, STATE_IDLE);
-                m_nNormalSessionType = SESSION_TYPE_NONE;
-
-                Notify(TYPE_NORMAL, STATE_IDLE);
-            }
-
-            if (nEmergencyCount > 0)
-            {
-                m_objEmergencyCalls.Clear();
-
-                SetState(TYPE_EMERGENCY, STATE_IDLE);
-                Notify(TYPE_EMERGENCY, STATE_IDLE);
-            }
-        }
-
-        delete piTotalState;
-    */
 }
 
-/*
+PRIVATE VIRTUAL void AosCallTracker::OnTotalCallStateChanged(IN State eState)
+{
+    CallState eCallState = GetConvertedState(eState);
+    A_IMS_TRACE_I(AOSTAG, "OnTotalCallStateChanged :: (%s)", StateToString(eCallState), 0, 0);
 
-Remarks
+    if (eCallState == CallState::IDLE)
+    {
+        IMS_UINT32 nNormalCount = m_objNormalCalls.GetSize();
+        IMS_UINT32 nEmergencyCount = m_objEmergencyCalls.GetSize();
+        IMS_UINT32 nNormalCallTypeCount = m_objNormalCallTypes.GetSize();
 
-*/
-PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
+        A_IMS_TRACE_I(AOSTAG,
+                "ChangedCallTotalState :: Count Normal(%d) , Emergency(%d), CallType(%d)",
+                nNormalCount, nEmergencyCount, nNormalCallTypeCount);
+
+        if (nNormalCount > 0 || nNormalCallTypeCount > 0)
+        {
+            m_objNormalCalls.Clear();
+            m_objNormalCallTypes.Clear();
+
+            SetState(TYPE_NORMAL, CallState::IDLE);
+            m_nNormalCallType = static_cast<IMS_UINT32>(CallType::UNKNOWN);
+
+            Notify(TYPE_NORMAL, CallState::IDLE);
+        }
+
+        if (nEmergencyCount > 0)
+        {
+            m_objEmergencyCalls.Clear();
+
+            SetState(TYPE_EMERGENCY, CallState::IDLE);
+            Notify(TYPE_EMERGENCY, CallState::IDLE);
+        }
+    }
+}
+
+PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
@@ -733,76 +574,97 @@ PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::TypeToString(IN IMS_UINT32 nTyp
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN IMS_UINT32 nState)
+PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::StateToString(IN CallState eState)
 {
-    switch (nState)
+    switch (eState)
     {
-        case STATE_IDLE:
-            return "STATE_IDLE";
+        case CallState::IDLE:
+            return "IDLE";
 
-        case STATE_TERMINATING:
-            return "STATE_TERMINATING";
+        case CallState::RINGBACK:
+            return "RINGBACK";
 
-        case STATE_RINGBACK:
-            return "STATE_RINGBACK";
+        case CallState::RINGING:
+            return "RINGING";
 
-        case STATE_RINGING:
-            return "STATE_RINGING";
+        case CallState::ALERTING:
+            return "ALERTING";
 
-        case STATE_ALERTING:
-            return "STATE_ALERTING";
+        case CallState::OFFHOOK:
+            return "OFFHOOK";
 
-        case STATE_OFFHOOK:
-            return "STATE_OFFHOOK";
+        case CallState::TERMINATING:
+            return "TERMINATING";
 
         default:
-            return "__INVALID__";
+            return "INVALID";
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED GLOBAL void AosCallTracker::PrintSessionType(IN IMS_UINT32 nSessType)
+PRIVATE GLOBAL const IMS_CHAR* AosCallTracker::CallTypeToString(IN CallType eType)
 {
-    AString strSessionTypes(AString::ConstEmpty());
-
-    if (AosUtil::GetInstance()->IsFeatureOn(SESSION_TYPE_VOIP, nSessType))
+    switch (eType)
     {
-        strSessionTypes.Append("VoIP");
+        case CallType::VOIP:
+            return "VOIP";
+
+        case CallType::VT:
+            return "VT";
+
+        case CallType::RTT:
+            return "RTT";
+
+        case CallType::VIDEO_RTT:
+            return "VIDEO_RTT";
+
+        default:
+            return "UNKNOWN";
+    }
+}
+
+PRIVATE GLOBAL void AosCallTracker::PrintCallTypes(IN IMS_UINT32 nCallTypes)
+{
+    AString strCallTypes(AString::ConstEmpty());
+
+    if (nCallTypes & (0x1 << static_cast<IMS_UINT32>(CallType::VOIP)))
+    {
+        strCallTypes.Append("VOIP");
     }
 
-    if (AosUtil::GetInstance()->IsFeatureOn(Session_TYPE_VS, nSessType))
+    if (nCallTypes & (0x1 << static_cast<IMS_UINT32>(CallType::VT)))
     {
-        if (strSessionTypes.GetLength() != 0)
+        if (strCallTypes.GetLength() != 0)
         {
-            strSessionTypes.Append(", ");
+            strCallTypes.Append(", ");
         }
 
-        strSessionTypes.Append("VideoShare");
+        strCallTypes.Append("VT");
     }
 
-    if (AosUtil::GetInstance()->IsFeatureOn(SESSION_TYPE_VT, nSessType))
+    if (nCallTypes & (0x1 << static_cast<IMS_UINT32>(CallType::RTT)))
     {
-        if (strSessionTypes.GetLength() != 0)
+        if (strCallTypes.GetLength() != 0)
         {
-            strSessionTypes.Append(", ");
+            strCallTypes.Append(", ");
         }
 
-        strSessionTypes.Append("VT");
+        strCallTypes.Append("RTT");
     }
 
-    if (strSessionTypes.GetLength() == 0)
+    if (nCallTypes & (0x1 << static_cast<IMS_UINT32>(CallType::VIDEO_RTT)))
     {
-        strSessionTypes.Append("NONE");
+        if (strCallTypes.GetLength() != 0)
+        {
+            strCallTypes.Append(", ");
+        }
+
+        strCallTypes.Append("VIDEO_RTT");
     }
 
-    A_IMS_TRACE_I(AOSTAG, "Session Types (%s)", strSessionTypes.GetStr(), 0, 0);
+    if (strCallTypes.GetLength() == 0)
+    {
+        strCallTypes.Append("NONE");
+    }
+
+    A_IMS_TRACE_I(AOSTAG, "Call Types (%s)", strCallTypes.GetStr(), 0, 0);
 }

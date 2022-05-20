@@ -92,15 +92,14 @@ PUBLIC VIRTUAL void AosHandleMtc::App_Notify()
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_NORMAL)
     {
         return;
     }
 
-    if (nState == IAosCallTracker::STATE_IDLE)
+    if (eState == CallState::IDLE)
     {
         if (!GET_N_CONFIG(m_nSlotId)->IsVopsIgnoredForVolteEnabled())
         {
@@ -112,7 +111,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(
 
                 if (!IsUnavailableFeaturePolicy(
                             CarrierConfig::Ims::UNAVAILABLE_FEATURE_POLICY_VOPS) ||
-                        !ProcessUnavailableFeatureForVops(nState))
+                        !ProcessUnavailableFeatureForVops(m_nHoldingVopsState))
                 {
                     ProcessBlock(BLOCK_VOPS, IMS_TRUE);
                 }
@@ -122,7 +121,7 @@ PUBLIC VIRTUAL void AosHandleMtc::CallTracker_StateChanged(
         }
     }
 
-    if (nState == IAosCallTracker::STATE_IDLE || nState == IAosCallTracker::STATE_OFFHOOK)
+    if (eState == CallState::IDLE || eState == CallState::OFFHOOK)
     {
         // VZW Req. - VZ_REQ_VOWIFI_6258874, VZ_REQ_VOWIFI_6258951
         UpdateFeatureTags();
