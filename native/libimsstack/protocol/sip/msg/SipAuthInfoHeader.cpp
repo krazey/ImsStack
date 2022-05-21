@@ -8,35 +8,76 @@
 
 SipAuthInfoHeader::SipAuthInfoHeader() :
         SipHeaderBase(SipHeaderBase::AUTHENTICATION_INFO),
-        m_pAiInfo(SIP_NULL)
+        m_pAuthInfoList(SipVector<SipNameValue*>())
 {
 }
 SipAuthInfoHeader::SipAuthInfoHeader(const SipAuthInfoHeader& objHeader) :
         SipHeaderBase(objHeader),
-        m_pAiInfo(SIP_NULL)
+        m_pAuthInfoList(SipVector<SipNameValue*>())
 {
-    m_pAiInfo = new SipNameValue(*(objHeader.m_pAiInfo));
+    SIP_UINT32 nSize = objHeader.m_pAuthInfoList.GetSize();
+
+    for (SIP_UINT32 nCount = SIP_ZERO; nCount < nSize; nCount++)
+    {
+        SipNameValue* pElement = objHeader.m_pAuthInfoList.GetAt(nCount);
+
+        if (pElement == SIP_NULL)
+        {
+            continue;
+        }
+
+        SipNameValue* pNmVl = new SipNameValue(*pElement);
+
+        if (pNmVl == SIP_NULL)
+        {
+            continue;
+        }
+
+        m_pAuthInfoList.Add(pNmVl);
+    }
 }
 
 SipAuthInfoHeader::~SipAuthInfoHeader()
 {
-    if (m_pAiInfo != SIP_NULL)
+    while (m_pAuthInfoList.IsEmpty() != SIP_TRUE)
     {
-        m_pAiInfo->SipDelete();
+        delete m_pAuthInfoList.Top();
+        m_pAuthInfoList.Pop();
     }
 }
 
 SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if (m_pAiInfo == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing auth-info", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Auth info missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    if (m_pAiInfo->EncodeFromList(objBuffer) == SIP_FALSE)
+    SIP_UINT32 nIndex = SIP_ZERO;
+    SIP_UINT32 nSize = m_pAuthInfoList.GetSize();
+
+    while (nIndex < nSize)
     {
-        return SIP_FALSE;
+        if (nIndex != SIP_ZERO)
+        {
+            objBuffer += COMMA;
+        }
+
+        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+
+        if (pNameValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value null", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        if (pNameValue->EncodeFromList(objBuffer) == SIP_FALSE)
+        {
+            return SIP_FALSE;
+        }
+
+        nIndex++;
     }
 
     return SIP_TRUE;
@@ -44,28 +85,46 @@ SIP_BOOL SipAuthInfoHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
 
 SIP_BOOL SipAuthInfoHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (m_pAiInfo == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Auth info missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
-    SIP_CHAR* pMsgCurrPtr = *ppCurrPos;
-    SIP_BOOL bStatus = m_pAiInfo->EncodeFromList(&pMsgCurrPtr);
-    if (bStatus == SIP_FALSE)
-    {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value Encode fail", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
-    }
-    *ppCurrPos = pMsgCurrPtr;
 
-    return bStatus;
+    SIP_UINT32 nIndex = SIP_ZERO;
+    SIP_UINT32 nSize = m_pAuthInfoList.GetSize();
+
+    while (nIndex < nSize)
+    {
+        if (nIndex != SIP_ZERO)
+        {
+            SIP_ENC_COMMA(*ppCurrPos);
+        }
+
+        SipNameValue* pNameValue = m_pAuthInfoList.GetAt(nIndex);
+
+        if (pNameValue == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value null", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        if (pNameValue->EncodeFromList(ppCurrPos) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Name Value Encode fail", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+        nIndex++;
+    }
+
+    return SIP_TRUE;
 }
 
-const SIP_CHAR* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nPos /*default value is zero*/)
+const SipNameValue* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nIndex /*default value is zero*/)
 {
-    if ((m_pAiInfo != SIP_NULL) && (nPos < m_pAiInfo->m_valueList.GetSize()))
+    if (nIndex < m_pAuthInfoList.GetSize())
     {
-        return m_pAiInfo->m_valueList.GetAt(nPos);
+        return m_pAuthInfoList.GetAt(nIndex);
     }
     return SIP_NULL;
 }
@@ -81,18 +140,50 @@ const SIP_CHAR* SipAuthInfoHeader::GetAiInfoVal(SIP_UINT32 nPos /*default value 
  *****************************************************************************/
 SIP_BOOL SipAuthInfoHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 {
-    m_pAiInfo = new SipNameValue(GetHdrType());
-    if (m_pAiInfo == SIP_NULL)
+    if (nDecLen == SIP_ZERO)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Failed", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Empty buffer", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    if (m_pAiInfo->DecHdrNameVal(pStartPt, pEndPt) == SIP_FALSE)
+
+    while (pStartPt <= pEndPt)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decoding fail", SIP_ZERO, SIP_ZERO);
-        return SIP_FALSE;
+        SIP_CHAR* pTempPos = SIP_NULL;
+
+        if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPos, COMMA) == SIP_FALSE)
+        {
+            pTempPos = pEndPt;
+        }
+
+        SipNameValue* pNmVl = new SipNameValue(GetHdrType());
+        if (pNmVl == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        if (pNmVl->DecUriNameVal(pStartPt, pTempPos, SIP_NULL) == SIP_FALSE)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Name Value Decode fail", SIP_ZERO, SIP_ZERO);
+            delete pNmVl;
+            return SIP_FALSE;
+        }
+
+        if (m_pAuthInfoList.Add(pNmVl) < SIP_ZERO)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Append in list Failed", SIP_ZERO, SIP_ZERO);
+            delete pNmVl;
+            return SIP_FALSE;
+        }
+
+        if (pTempPos == pEndPt)
+        {
+            return SIP_TRUE;
+        }
+
+        pStartPt = pTempPos + SIP_TWO;
     }
 
     return SIP_TRUE;

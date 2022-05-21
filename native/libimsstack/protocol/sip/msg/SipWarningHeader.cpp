@@ -43,10 +43,10 @@ SipWarningHeader::~SipWarningHeader()
 /*virtual methods*/
 SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
+    if (IsValidHeader() == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER,
-                "Missing warn-agent or warn-text", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(
+                ESIPTRACE_MODENCODER, "Missing warn-agent or warn-text", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
@@ -72,7 +72,7 @@ SIP_BOOL SipWarningHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/
 /*Function for encoding of headers*/
 SIP_BOOL SipWarningHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODENCODER, "Missing Warn Agent or Warn Text", SIP_ZERO, SIP_ZERO);
@@ -158,7 +158,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     m_nWarnCode = SipPf_Atoi(pszWarnCode);
     delete[] pszWarnCode;
-    if (m_nWarnCode > MAX_WARNCODE)
+    if ((m_nWarnCode < MIN_WARNCODE) || (m_nWarnCode > MAX_WARNCODE))
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODDECODER, "DecodeHdr:Warn code Value is not valid", SIP_ZERO, SIP_ZERO);
@@ -184,7 +184,7 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
     }
 
     /*Update the start point to the start of Warn text*/
-    pStartPt = pTempLoc + SIP_THREE;
+    pStartPt = pTempLoc + SIP_TWO;
     m_pszWarnText = sipCreateString(pStartPt, pEndPt);
     if (m_pszWarnText == SIP_NULL)
     {
@@ -198,7 +198,8 @@ SIP_BOOL SipWarningHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
 SIP_BOOL SipWarningHeader::IsValidHeader() const
 {
-    if ((m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
+    if (((m_nWarnCode < MIN_WARNCODE) || (m_nWarnCode > MAX_WARNCODE)) ||
+            (m_pszWarnAgent == SIP_NULL) || (m_pszWarnText == SIP_NULL))
     {
         return SIP_FALSE;
     }
