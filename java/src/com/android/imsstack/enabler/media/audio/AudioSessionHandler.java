@@ -29,12 +29,18 @@ import android.telephony.imsmedia.AudioSessionCallback;
 import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
+import android.util.Pair;
 
+import com.android.imsstack.core.agents.QosAgent;
+import com.android.imsstack.core.agents.QosAgent.ImsQosCallback;
+import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,24 +55,31 @@ public class AudioSessionHandler  {
     private final AudioSessionCallbackProxy mAudioSessionCallback;
     private ImsAudioSession mAudioSession;
     private int mAudioSessionId;
-    private DatagramSocket mRtpSocket, mRtcpSocket;
+    private Pair<DatagramSocket, DatagramSocket> mRtpSocket;
     private final AudioSessionCallbackHandler mAudioSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
     private final AudioMessageHandler mAudioMessageHandler;
+    private final IBaseContext mContext;
+    private QosAgent mAudioQosAgent;
+    private AudioImsQosCallback mAudioImsQosCallback;
+    private InetSocketAddress mRemoteAddress;
 
-    public AudioSessionHandler(
+    public AudioSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
+        mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mtcMediaInterface);
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         mAudioMessageHandler = new AudioMessageHandler(mMediaManager.getMediaLooper());
+        createQosAgent(mContext.getSlotId());
         ImsLog.d("AudioSessionHandler created");
     }
 
     @VisibleForTesting
-    public AudioSessionHandler(@NonNull MediaManagerHelper mediaManager,
-        @NonNull AudioSessionCallbackHandler audioCallbackHandler,
-        @NonNull ImsAudioSession audioSession) {
+    public AudioSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
+            @NonNull AudioSessionCallbackHandler audioCallbackHandler,
+            @NonNull ImsAudioSession audioSession) {
+        mContext = context;
         mMediaManager = mediaManager;
         mAudioSessionCallbackHandler = audioCallbackHandler;
         mAudioSession = audioSession;
@@ -78,6 +91,16 @@ public class AudioSessionHandler  {
     @VisibleForTesting
     void setAudioSession(@Nullable ImsAudioSession audioSession) {
         mAudioSession = audioSession;
+    }
+
+    @VisibleForTesting
+    void setAudioQosAgent(@Nullable QosAgent audioQosAgent) {
+        mAudioQosAgent = audioQosAgent;
+    }
+
+    @VisibleForTesting
+    void setRtpSocket(@Nullable Pair<DatagramSocket, DatagramSocket> rtpSocket) {
+        mRtpSocket = rtpSocket;
     }
 
     @VisibleForTesting
@@ -355,6 +378,32 @@ public class AudioSessionHandler  {
         }
     }
 
+    /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
+    private class AudioImsQosCallback implements ImsQosCallback {
+
+        @Override
+        public void onNotifyQosConnectionAvailable(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - connected");
+
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), true);
+            }
+        }
+
+        @Override
+        public void onNotifyQosConnectionLost(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - disconnected");
+
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), false);
+            }
+        }
+    }
+
     /**
      * Handles Audio Session requests received from Media Native
      *
@@ -439,26 +488,41 @@ public class AudioSessionHandler  {
         }
     }
 
+    private void createQosAgent(int slotId) {
+        if (mAudioQosAgent == null) {
+            mAudioQosAgent = new QosAgent(slotId);
+        }
+        if (mAudioImsQosCallback == null) {
+            mAudioImsQosCallback = new AudioImsQosCallback();
+        }
+        mAudioQosAgent.setCallback(mAudioImsQosCallback);
+    }
+
     private void handleAudioOpenSession(String localIpAddress, int localPortNumber) {
 
         if(mAudioSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
-                // TODO_MEDIA : ImsQOSManager to be used
-                mRtpSocket = MediaSocket.createDatagramSocket(localIpAddress,
-                    localPortNumber);
-                mRtcpSocket = MediaSocket.createDatagramSocket(localIpAddress,
-                    (localPortNumber+1));
 
-                if (mRtpSocket == null || mRtcpSocket == null) {
-                    ImsLog.e("socket creation failed");
+                mRtpSocket = mAudioQosAgent.createQosConnection(localIpAddress, localPortNumber);
+
+                if (mRtpSocket == null) {
+                    ImsLog.e("rtp socket creation failed");
                     if (mAudioSessionCallbackHandler != null) {
                         mAudioSessionCallbackHandler.openSessionResponse(
                             ImsMediaSession.RESULT_PORT_UNAVAILABLE);
                     }
                     return;
+                } else if (mRtpSocket.first == null || mRtpSocket.second == null) {
+                    ImsLog.e("rtp socket creation failed");
+                    closeSockets();
+                    if (mAudioSessionCallbackHandler != null) {
+                        mAudioSessionCallbackHandler.openSessionResponse(
+                                ImsMediaSession.RESULT_PORT_UNAVAILABLE);
+                    }
+                    return;
                 }
 
-                mMediaManager.openSession(mRtpSocket, mRtcpSocket,
+                mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_AUDIO, null, mAudioSessionCallback);
             }
             else {
@@ -496,15 +560,24 @@ public class AudioSessionHandler  {
     }
 
     private void closeSockets() {
-        // TODO_MEDIA: ImsQOSManager to be used
-        MediaSocket.closeDatagramSocket(mRtpSocket);
-        mRtpSocket = null;
-        MediaSocket.closeDatagramSocket(mRtcpSocket);
-        mRtcpSocket = null;
+        if (mRtpSocket != null) {
+            mAudioQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
+        }
     }
 
     private void handleAudioModifySession(AudioConfig audioConfig) {
         if (mAudioSession != null) {
+            InetSocketAddress remoteRtpAddress = audioConfig.getRemoteRtpAddress();
+            if (remoteRtpAddress != null) {
+                InetAddress remoteInetAddress = remoteRtpAddress.getAddress();
+                int remotePort = remoteRtpAddress.getPort();
+                if (remoteInetAddress != null && remotePort != 0
+                        && !remoteRtpAddress.equals(mRemoteAddress)) {
+                    mAudioQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
+                            remoteInetAddress.getHostAddress(), remotePort);
+                    mRemoteAddress = remoteRtpAddress;
+                }
+            }
             mAudioSession.modifySession(audioConfig);
         }
     }

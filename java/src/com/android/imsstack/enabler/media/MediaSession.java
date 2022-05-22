@@ -111,20 +111,22 @@ public class MediaSession implements IMediaConnectionObserver {
 
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
-            mAudioSessionHandler = new AudioSessionHandler(mMediaManager, mMtcMediaSession);
+            mAudioSessionHandler = new AudioSessionHandler(mContext, mMediaManager,
+                    mMtcMediaSession);
         }
     }
 
     private void createVideoSession() {
         if (mVideoSessionHandler == null) {
-            mVideoSessionHandler = new VideoSessionHandler(
-                    mMediaManager, mMtcMediaSession, mMtcMediaSession);
+            mVideoSessionHandler = new VideoSessionHandler(mContext, mMediaManager,
+                    mMtcMediaSession, mMtcMediaSession);
         }
     }
 
     private void createTextSession() {
         if (mTextSessionHandler == null) {
-            mTextSessionHandler = new TextSessionHandler(mMediaManager, mMtcMediaSession);
+            mTextSessionHandler = new TextSessionHandler(mContext, mMediaManager,
+                    mMtcMediaSession);
         }
     }
 
@@ -132,11 +134,6 @@ public class MediaSession implements IMediaConnectionObserver {
         if (mtcMediaInterface != null) {
             mtcMediaInterface.setMediaListener(mMediaListener);
         }
-    }
-
-    /** Returns slotId */
-    public int getSlotId() {
-        return mContext.getSlotId();
     }
 
     private class MediaListener implements IMediaListener {

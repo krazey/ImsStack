@@ -154,4 +154,22 @@ public class VideoSessionCallbackHandlerTest {
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
+
+    @Test
+    public void testNotifyQosInfo() {
+
+        Parcel testParcel = Parcel.obtain();
+
+        testParcel.writeInt(MediaConstants.NOTIFY_QOS_INFO);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        testParcel.writeString(MediaTestUtils.REMOTE_RTP_ADDRESS);
+        testParcel.writeInt(MediaTestUtils.REMOTE_RTP_PORT);
+        testParcel.writeBoolean(true);
+
+        mVideoSessionCallbackHandler.onNotifyQosInfo(MediaTestUtils.REMOTE_RTP_ADDRESS,
+                MediaTestUtils.REMOTE_RTP_PORT, true);
+
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
+        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
 }

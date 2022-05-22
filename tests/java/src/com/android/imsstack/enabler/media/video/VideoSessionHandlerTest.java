@@ -18,7 +18,11 @@ package com.android.imsstack.enabler.media;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,7 +36,9 @@ import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.VideoConfig;
 import android.telephony.imsmedia.VideoSessionCallback;
 import android.testing.TestableLooper;
+import android.util.Pair;
 
+import com.android.imsstack.core.agents.QosAgent;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 
@@ -44,6 +50,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.net.DatagramSocket;
 import java.util.concurrent.Executor;
 
 @RunWith(JUnit4.class)
@@ -69,6 +76,8 @@ public class VideoSessionHandlerTest {
     @Mock ImsVideoSession mMockVideoSession;
     @Mock ImsMediaManager mMockImsMediaManager;
     @Mock Executor mMockExecutor;
+    @Mock QosAgent mMockQosAgent;
+    @Mock DatagramSocket mMockRtpSocket;
 
     private VideoSessionHandler mVideoSessionHandler;
     private VideoSessionCallback mVideoSessionCallback;
@@ -77,19 +86,26 @@ public class VideoSessionHandlerTest {
     private IMediaListener mMediaListener;
     private VideoSessionHandler.VideoMessageHandler mHandler;
     private TestableLooper mLooper;
+    private Pair<DatagramSocket, DatagramSocket> mRtpSocketPair;
 
     @Before
     public void setUp() throws Exception {
         // Initialize Mock Objects
         MockitoAnnotations.initMocks(this);
         when(mMockBaseContext.getContext()).thenReturn(mMockContext);
+        mRtpSocketPair = new Pair<>(mMockRtpSocket, mMockRtpSocket);
+        when(mMockQosAgent.createQosConnection(anyString(), anyInt()))
+                .thenReturn(mRtpSocketPair);
+        doNothing().when(mMockQosAgent).destroyQosConnection(any(), any());
+        when(mMockQosAgent.updateQosConnection(any(), any(), anyString(), anyInt()))
+                .thenReturn(true);
 
         // create the instance to test
         mMediaSession = new MediaSession(mMockBaseContext, mMockMtcMediaSession,
                 mMockImsMediaManager, mMockExecutor);
         mMediaManager = mMediaSession.getMediaManager();
         mMediaListener = mMediaSession.getMediaListenerProxy();
-        mVideoSessionHandler = new VideoSessionHandler(mMediaManager,
+        mVideoSessionHandler = new VideoSessionHandler(mMockBaseContext, mMediaManager,
                 mMockMtcMediaSession, mMockVideoSessionCallbackHandler, mMockVideoSession);
         mMediaSession.setVideoSessionHandler(mVideoSessionHandler);
         mVideoSessionCallback = mVideoSessionHandler.getVideoSessionCallback();
@@ -110,7 +126,7 @@ public class VideoSessionHandlerTest {
     }
 
     @Test
-    public void testOpenSession() {
+    public void testOpenSessionSuccess() {
 
         Parcel testParcel = Parcel.obtain();
         testParcel.writeInt(MediaConstants.REQUEST_OPEN_SESSION);
@@ -121,12 +137,34 @@ public class VideoSessionHandlerTest {
         // OpenSession Received
         mVideoSessionHandler.setVideoSession(null);
         mMediaManager.setImsMediaConnected(true);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
-        verify(mMockVideoSessionCallbackHandler)
-                .openSessionResponse(eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
+        verify(mMockImsMediaManager).openSession(eq(mMockRtpSocket), eq(mMockRtpSocket),
+                eq(ImsMediaSession.SESSION_TYPE_VIDEO), eq(null), eq(mMockExecutor),
+                eq(mVideoSessionCallback));
+    }
 
-        // TODO_MEDIA : Socket creation success scenario to be verified
+    @Test
+    public void testOpenSessionFailures() {
+
+        Parcel testParcel = Parcel.obtain();
+        testParcel.writeInt(MediaConstants.REQUEST_OPEN_SESSION);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
+        testParcel.writeString(LOCAL_RTP_ADDRESS);
+        testParcel.writeInt(LOCAL_RTP_PORT);
+        testParcel.setDataPosition(0);
+
+        // OpenSession Received, but QosConnection returned null
+        mVideoSessionHandler.setVideoSession(null);
+        mMediaManager.setImsMediaConnected(true);
+        when(mMockQosAgent.createQosConnection(anyString(), anyInt()))
+                .thenReturn(null);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mMediaListener.onMediaMessage(testParcel);
+        processAllMessages();
+        verify(mMockVideoSessionCallbackHandler).openSessionResponse(
+                eq(ImsMediaSession.RESULT_PORT_UNAVAILABLE));
 
         /**
          * VideoSession was opened already, but OpenVideoSession requested again
@@ -147,7 +185,10 @@ public class VideoSessionHandlerTest {
         processAllMessages();
         verify(mMockVideoSessionCallbackHandler)
                 .openSessionResponse(eq(ImsMediaSession.RESULT_NOT_READY));
+    }
 
+    @Test
+    public void testOpenSessionResponses() {
         // OpenSession Success Received.
         when(mMockVideoSession.getSessionId()).thenReturn(SESSION_ID);
         mVideoSessionCallback.onOpenSessionSuccess(mMockVideoSession);
@@ -175,6 +216,8 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(MediaConstants.REQUEST_CLOSE_SESSION);
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         testParcel.setDataPosition(0);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockImsMediaManager).closeSession(eq(mMockVideoSession));
@@ -197,6 +240,8 @@ public class VideoSessionHandlerTest {
         testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
         videoConfig.writeToParcel(testParcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         testParcel.setDataPosition(0);
+        mVideoSessionHandler.setVideoQosAgent(mMockQosAgent);
+        mVideoSessionHandler.setRtpSocket(mRtpSocketPair);
         mMediaListener.onMediaMessage(testParcel);
         processAllMessages();
         verify(mMockVideoSession).modifySession(eq(videoConfig));

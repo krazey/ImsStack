@@ -260,4 +260,22 @@ public class AudioSessionCallbackHandlerTest {
         verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
+
+    @Test
+    public void testNotifyQosInfo() {
+
+        Parcel testParcel = Parcel.obtain();
+
+        testParcel.writeInt(MediaConstants.NOTIFY_QOS_INFO);
+        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
+        testParcel.writeString(MediaTestUtils.REMOTE_RTP_ADDRESS);
+        testParcel.writeInt(MediaTestUtils.REMOTE_RTP_PORT);
+        testParcel.writeBoolean(true);
+
+        mAudioSessionCallbackHandler.onNotifyQosInfo(MediaTestUtils.REMOTE_RTP_ADDRESS,
+                MediaTestUtils.REMOTE_RTP_PORT, true);
+
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
+        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
+    }
 }

@@ -27,13 +27,19 @@ import android.telephony.imsmedia.ImsVideoSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.VideoConfig;
 import android.telephony.imsmedia.VideoSessionCallback;
+import android.util.Pair;
 
+import com.android.imsstack.core.agents.QosAgent;
+import com.android.imsstack.core.agents.QosAgent.ImsQosCallback;
+import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.enabler.mtc.IMtcMediaVideoCallProvider;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
@@ -47,7 +53,7 @@ public class VideoSessionHandler {
     private final VideoSessionCallbackProxy mVideoSessionCallback;
     private ImsVideoSession mVideoSession;
     private int mVideoSessionId;
-    private DatagramSocket mRtpSocket, mRtcpSocket;
+    private Pair<DatagramSocket, DatagramSocket> mRtpSocket;
     private final VideoSessionCallbackHandler mVideoSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
     private IMtcMediaVideoCallProvider mMtcMediaVideoCallProvider;
@@ -55,24 +61,30 @@ public class VideoSessionHandler {
     private boolean mPreviewSurfaceSet, mDisplaySurfaceSet;
     private String mLocalIpAddress;
     private int mLocalPortNumber;
+    private final IBaseContext mContext;
+    private QosAgent mVideoQosAgent;
+    private VideoImsQosCallback mVideoImsQosCallback;
+    private InetSocketAddress mRemoteAddress;
 
-    public VideoSessionHandler(
+    public VideoSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider) {
+        mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
         mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mtcMediaInterface);
         mVideoSessionCallback = new VideoSessionCallbackProxy();
         mVideoMessageHandler = new VideoMessageHandler(mMediaManager.getMediaLooper());
+        createQosAgent(mContext.getSlotId());
         ImsLog.d("VideoSessionHandler created");
     }
 
     @VisibleForTesting
-    public VideoSessionHandler(
-            @NonNull MediaManagerHelper mediaManager,
+    public VideoSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
             @NonNull ImsVideoSession videoSession) {
+        mContext = context;
         mMediaManager = mediaManager;
         mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
         mVideoSessionCallbackHandler = videoCallbackHandler;
@@ -85,6 +97,16 @@ public class VideoSessionHandler {
     @VisibleForTesting
     void setVideoSession(@Nullable ImsVideoSession videoSession) {
         mVideoSession = videoSession;
+    }
+
+    @VisibleForTesting
+    void setVideoQosAgent(@Nullable QosAgent videoQosAgent) {
+        mVideoQosAgent = videoQosAgent;
+    }
+
+    @VisibleForTesting
+    void setRtpSocket(@Nullable Pair<DatagramSocket, DatagramSocket> rtpSocket) {
+        mRtpSocket = rtpSocket;
     }
 
     @VisibleForTesting
@@ -315,6 +337,32 @@ public class VideoSessionHandler {
         }
     }
 
+    /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
+    private class VideoImsQosCallback implements ImsQosCallback {
+
+        @Override
+        public void onNotifyQosConnectionAvailable(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - connected");
+
+            if (mVideoSessionCallbackHandler != null) {
+                mVideoSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), true);
+            }
+        }
+
+        @Override
+        public void onNotifyQosConnectionLost(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - disconnected");
+
+            if (mVideoSessionCallbackHandler != null) {
+                mVideoSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), false);
+            }
+        }
+    }
+
     /**
      * Handles Video Session requests received from Media Native
      *
@@ -374,17 +422,32 @@ public class VideoSessionHandler {
         }
     }
 
+    private void createQosAgent(int slotId) {
+        if (mVideoQosAgent == null) {
+            mVideoQosAgent = new QosAgent(slotId);
+        }
+        if (mVideoImsQosCallback == null) {
+            mVideoImsQosCallback = new VideoImsQosCallback();
+        }
+        mVideoQosAgent.setCallback(mVideoImsQosCallback);
+    }
+
     private void handleVideoOpenSession(VideoConfig videoConfig) {
 
         if (mVideoSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
-                // TODO_MEDIA : ImsQOSManager to be used
-                mRtpSocket = MediaSocket.createDatagramSocket(mLocalIpAddress, mLocalPortNumber);
-                mRtcpSocket =
-                        MediaSocket.createDatagramSocket(mLocalIpAddress, (mLocalPortNumber + 1));
+                mRtpSocket = mVideoQosAgent.createQosConnection(mLocalIpAddress, mLocalPortNumber);
 
-                if (mRtpSocket == null || mRtcpSocket == null) {
-                    ImsLog.e("socket creation failed");
+                if (mRtpSocket == null) {
+                    ImsLog.e("rtp socket creation failed");
+                    if (mVideoSessionCallbackHandler != null) {
+                        mVideoSessionCallbackHandler.openSessionResponse(
+                                ImsMediaSession.RESULT_PORT_UNAVAILABLE);
+                    }
+                    return;
+                } else if (mRtpSocket.first == null || mRtpSocket.second == null) {
+                    ImsLog.e("rtp socket creation failed");
+                    closeSockets();
                     if (mVideoSessionCallbackHandler != null) {
                         mVideoSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
@@ -394,7 +457,7 @@ public class VideoSessionHandler {
 
                 mPreviewSurfaceSet = true;
                 mDisplaySurfaceSet = true;
-                mMediaManager.openSession(mRtpSocket, mRtcpSocket,
+                mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_VIDEO, videoConfig, mVideoSessionCallback);
             } else {
                 ImsLog.d("ImsMediaManager is not ready");
@@ -427,15 +490,22 @@ public class VideoSessionHandler {
     }
 
     private void closeSockets() {
-        // TODO_MEDIA: ImsQOSManager to be used
-        MediaSocket.closeDatagramSocket(mRtpSocket);
-        mRtpSocket = null;
-        MediaSocket.closeDatagramSocket(mRtcpSocket);
-        mRtcpSocket = null;
+        mVideoQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
     }
 
     private void handleVideoModifySession(VideoConfig videoConfig) {
         if (mVideoSession != null) {
+            InetSocketAddress remoteRtpAddress = videoConfig.getRemoteRtpAddress();
+            if (remoteRtpAddress != null) {
+                InetAddress remoteInetAddress = remoteRtpAddress.getAddress();
+                int remotePort = remoteRtpAddress.getPort();
+                if (remoteInetAddress != null && remotePort != 0
+                        && !remoteRtpAddress.equals(mRemoteAddress)) {
+                    mVideoQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
+                            remoteInetAddress.getHostAddress(), remotePort);
+                    mRemoteAddress = remoteRtpAddress;
+                }
+            }
             mVideoSession.modifySession(videoConfig);
         }
     }

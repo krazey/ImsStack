@@ -27,12 +27,18 @@ import android.telephony.imsmedia.ImsTextSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
 import android.telephony.imsmedia.TextConfig;
 import android.telephony.imsmedia.TextSessionCallback;
+import android.util.Pair;
 
+import com.android.imsstack.core.agents.QosAgent;
+import com.android.imsstack.core.agents.QosAgent.ImsQosCallback;
+import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 /**
  * This manages text session by communicating between ImsStack and {@link ImsMediaManager}
@@ -44,24 +50,31 @@ public class TextSessionHandler  {
     private final TextSessionCallbackProxy mTextSessionCallback;
     private ImsTextSession mTextSession;
     private int mTextSessionId;
-    private DatagramSocket mRtpSocket, mRtcpSocket;
+    private Pair<DatagramSocket, DatagramSocket> mRtpSocket;
     private final TextSessionCallbackHandler mTextSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
     private final TextMessageHandler mTextMessageHandler;
+    private final IBaseContext mContext;
+    private QosAgent mTextQosAgent;
+    private TextImsQosCallback mTextImsQosCallback;
+    private InetSocketAddress mRemoteAddress;
 
-    public TextSessionHandler(
+    public TextSessionHandler(IBaseContext context,
             @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
+        mContext = context;
         mMediaManager = mediaManager;
         mTextSessionCallbackHandler = new TextSessionCallbackHandler(mtcMediaInterface);
         mTextSessionCallback = new TextSessionCallbackProxy();
         mTextMessageHandler = new TextMessageHandler(mMediaManager.getMediaLooper());
+        createQosAgent(mContext.getSlotId());
         ImsLog.d("TextSessionHandler created");
     }
 
     @VisibleForTesting
-    public TextSessionHandler(@NonNull MediaManagerHelper mediaManager,
+    public TextSessionHandler(IBaseContext context, @NonNull MediaManagerHelper mediaManager,
             @NonNull TextSessionCallbackHandler textCallbackHandler,
             @NonNull ImsTextSession textSession) {
+        mContext = context;
         mMediaManager = mediaManager;
         mTextSessionCallbackHandler = textCallbackHandler;
         mTextSession = textSession;
@@ -75,6 +88,15 @@ public class TextSessionHandler  {
         mTextSession = textSession;
     }
 
+    @VisibleForTesting
+    void setTextQosAgent(@Nullable QosAgent textQosAgent) {
+        mTextQosAgent = textQosAgent;
+    }
+
+    @VisibleForTesting
+    void setRtpSocket(@Nullable Pair<DatagramSocket, DatagramSocket> rtpSocket) {
+        mRtpSocket = rtpSocket;
+    }
     @VisibleForTesting
     TextSessionCallback getTextSessionCallback() {
         return mTextSessionCallback;
@@ -234,6 +256,32 @@ public class TextSessionHandler  {
         }
     }
 
+    /** Implements Interface to receive callbacks when the QoS is connected or disconnected. */
+    private class TextImsQosCallback implements ImsQosCallback {
+
+        @Override
+        public void onNotifyQosConnectionAvailable(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - connected");
+
+            if (mTextSessionCallbackHandler != null) {
+                mTextSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), true);
+            }
+        }
+
+        @Override
+        public void onNotifyQosConnectionLost(InetSocketAddress remoteAddress) {
+            ImsLog.i("ImsQosCallback - disconnected");
+
+            if (mTextSessionCallbackHandler != null) {
+                mTextSessionCallbackHandler.onNotifyQosInfo(
+                        remoteAddress.getAddress().getHostAddress(),
+                        remoteAddress.getPort(), false);
+            }
+        }
+    }
+
     /**
      * Handles Text Session requests received from Media Native
      *
@@ -298,18 +346,33 @@ public class TextSessionHandler  {
         }
     }
 
+    private void createQosAgent(int slotId) {
+        if (mTextQosAgent == null) {
+            mTextQosAgent = new QosAgent(slotId);
+        }
+        if (mTextImsQosCallback == null) {
+            mTextImsQosCallback = new TextImsQosCallback();
+        }
+        mTextQosAgent.setCallback(mTextImsQosCallback);
+    }
+
     private void handleTextOpenSession(String localIpAddress, int localPortNumber) {
 
         if (mTextSession == null) {
             if (mMediaManager.isImsMediaConnected()) {
-                // TODO MEDIA : ImsQOSManager to be used
-                mRtpSocket = MediaSocket.createDatagramSocket(localIpAddress,
-                    localPortNumber);
-                mRtcpSocket = MediaSocket.createDatagramSocket(localIpAddress,
-                    (localPortNumber + 1));
 
-                if (mRtpSocket == null || mRtcpSocket == null) {
-                    ImsLog.e("socket creation failed");
+                mRtpSocket = mTextQosAgent.createQosConnection(localIpAddress, localPortNumber);
+
+                if (mRtpSocket == null) {
+                    ImsLog.e("rtp socket creation failed");
+                    if (mTextSessionCallbackHandler != null) {
+                        mTextSessionCallbackHandler.openSessionResponse(
+                                ImsMediaSession.RESULT_PORT_UNAVAILABLE);
+                    }
+                    return;
+                } else if (mRtpSocket.first == null || mRtpSocket.second == null) {
+                    ImsLog.e("rtp socket creation failed");
+                    closeSockets();
                     if (mTextSessionCallbackHandler != null) {
                         mTextSessionCallbackHandler.openSessionResponse(
                                 ImsMediaSession.RESULT_PORT_UNAVAILABLE);
@@ -317,7 +380,7 @@ public class TextSessionHandler  {
                     return;
                 }
 
-                mMediaManager.openSession(mRtpSocket, mRtcpSocket,
+                mMediaManager.openSession(mRtpSocket.first, mRtpSocket.second,
                         ImsMediaSession.SESSION_TYPE_RTT, null, mTextSessionCallback);
             } else {
                 ImsLog.d("ImsMediaManager is not ready");
@@ -343,15 +406,24 @@ public class TextSessionHandler  {
     }
 
     private void closeSockets() {
-        // TODO MEDIA : ImsQOSManager to be used
-        MediaSocket.closeDatagramSocket(mRtpSocket);
-        mRtpSocket = null;
-        MediaSocket.closeDatagramSocket(mRtcpSocket);
-        mRtcpSocket = null;
+        if (mRtpSocket != null) {
+            mTextQosAgent.destroyQosConnection(mRtpSocket.first, mRtpSocket.second);
+        }
     }
 
     private void handleTextModifySession(TextConfig textConfig) {
         if (mTextSession != null) {
+            InetSocketAddress remoteRtpAddress = textConfig.getRemoteRtpAddress();
+            if (remoteRtpAddress != null) {
+                InetAddress remoteInetAddress = remoteRtpAddress.getAddress();
+                int remotePort = remoteRtpAddress.getPort();
+                if (remoteInetAddress != null && remotePort != 0
+                        && !remoteRtpAddress.equals(mRemoteAddress)) {
+                    mTextQosAgent.updateQosConnection(mRtpSocket.first, mRtpSocket.second,
+                            remoteInetAddress.getHostAddress(), remotePort);
+                    mRemoteAddress = remoteRtpAddress;
+                }
+            }
             mTextSession.modifySession(textConfig);
         }
     }
