@@ -7,8 +7,6 @@
     android:versionName="1.0.01">
 
     <!-- ims permission -->
-    <permission android:name="com.android.imsstack.permission.WRITE_IMS_STATE"
-        android:protectionLevel="signatureOrSystem" />
     <permission android:name="com.android.imsstack.permission.READ_IMS"
         android:protectionLevel="signatureOrSystem" />
     <permission android:name="com.android.imsstack.permission.WRITE_IMS"
@@ -40,7 +38,6 @@
 
     <uses-permission android:name="com.android.imsstack.permission.READ_IMS"/>
     <uses-permission android:name="com.android.imsstack.permission.WRITE_IMS"/>
-    <uses-permission android:name="com.android.imsstack.permission.WRITE_IMS_STATE"/>
 
     <!--  Application -->
     <application
@@ -154,16 +151,6 @@
             android:syncable="false"
             android:writePermission="com.android.imsstack.permission.WRITE_IMS"
             android:singleUser="true" />
-        <!-- Providers for external modules -->
-        <!-- ImsState -->
-        <provider
-            android:name=".provider.ImsStateProvider"
-            android:authorities="com.android.imsstack.provider.ims_state"
-            android:exported="true"
-            android:multiprocess="false"
-            android:singleUser="true"
-            android:syncable="false"
-            android:writePermission="com.android.imsstack.permission.WRITE_IMS_STATE" />
     </application>
 
     <uses-sdk android:minSdkVersion="31" />

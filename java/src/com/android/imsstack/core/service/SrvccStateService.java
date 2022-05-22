@@ -11,22 +11,20 @@
 
 package com.android.imsstack.core.service;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ImsPhoneStateListener;
 import com.android.imsstack.core.agents.agentif.IPhoneState;
 import com.android.imsstack.core.agents.agentif.IPhoneStateNotifier;
+import com.android.imsstack.core.agents.agentif.ImsPhoneStateListener;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
-import com.android.imsstack.provider.ImsStateController;
-import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPISRVCC;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.util.ImsLog;
 
@@ -196,34 +194,22 @@ public class SrvccStateService implements ISystemAPISRVCC, IService {
         return (mVoLteService != null) ? mVoLteService.getSlotID() : 0;
     }
 
-    private final class CallStateTracker extends ContentObserver {
-        private int mCallState = ImsStateController.STATE_INACTIVE;
+    private final class CallStateTracker implements ImsStateStore.Listener {
+        private int mCallState = ImsStateStore.STATE_INACTIVE;
 
         public CallStateTracker() {
-            super(ImsGlobal.getInstance().getDefaultHandler());
             init();
         }
 
         public void clear() {
-            Context c = getContext();
-
-            if (c != null) {
-                ImsStateController.VoLteState.unregisterObserver(c.getContentResolver(), this);
-
-            }
-
-            setCallState(ImsStateController.STATE_INACTIVE);
+            ImsStateStore.getCallState(getSlotId()).removeListener(this);
+            setCallState(ImsStateStore.STATE_INACTIVE);
         }
 
         public void init() {
-            Context c = getContext();
-
-            if (c != null) {
-                setCallState(ImsStateController.VoLteState.getCallStateForPhoneId(
-                        c.getContentResolver(), getSlotId()));
-
-                ImsStateController.VoLteState.registerObserver(c.getContentResolver(), this);
-            }
+            ImsStateStore.CallState callState = ImsStateStore.getCallState(getSlotId());
+            setCallState(callState.getState());
+            callState.addListener(this);
 
             if (isInCall()) {
                 startInternal();
@@ -231,20 +217,11 @@ public class SrvccStateService implements ISystemAPISRVCC, IService {
         }
 
         @Override
-        public void onChange(boolean selfChange) {
-            super.onChange(selfChange);
-
-            Context c = getContext();
-
-            if (c == null) {
-                return;
-            }
-
-            int callState = ImsStateController.VoLteState.getCallStateForPhoneId(
-                    c.getContentResolver(), getSlotId());
+        public void onStateChanged() {
+            int state = ImsStateStore.getCallState(getSlotId()).getState();
             boolean oldInCall = isInCall();
 
-            setCallState(callState);
+            setCallState(state);
 
             if (isInCall() && !oldInCall) {
                 startInternal();
@@ -256,7 +233,7 @@ public class SrvccStateService implements ISystemAPISRVCC, IService {
 
         public boolean isInCall() {
             synchronized (mLock) {
-                return mCallState != ImsStateController.STATE_INACTIVE;
+                return mCallState != ImsStateStore.STATE_INACTIVE;
             }
         }
 

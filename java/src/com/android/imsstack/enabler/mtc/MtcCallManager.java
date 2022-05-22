@@ -12,14 +12,13 @@
 package com.android.imsstack.enabler.mtc;
 
 import android.content.Context;
-import android.telephony.TelephonyManager;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IWifiState;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.telephony.TelephonyCallStateRegistry;
-import com.android.imsstack.provider.ImsStateController;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -604,10 +603,7 @@ public final class MtcCallManager implements ICallStateTracker {
             return false;
         }
 
-        int networkType = ImsStateController.RegState.getNetworkTypeForPhoneId(
-                mContext.getContext().getContentResolver(), mContext.getPhoneId());
-
-        return networkType == TelephonyManager.NETWORK_TYPE_IWLAN;
+        return ImsStateStore.getRegState(mContext.getPhoneId()).isNetworkTypeWifi();
     }
 
     private void updateConnectedCallOnWifi(final Call call, int state, String dbgString) {
@@ -636,8 +632,7 @@ public final class MtcCallManager implements ICallStateTracker {
         if (callStateUpdateRequired) {
             logi("updateConnectedCallOnWifi :: state=" + state + ", " + dbgString);
 
-            ImsStateController.CallState.putConnectedCallOnWifiForPhoneId(
-                    mContext.getContext().getContentResolver(), state, mContext.getPhoneId());
+            ImsStateStore.getCallState(mContext.getPhoneId()).setConnectedCallOnWifi(state);
         }
     }
 

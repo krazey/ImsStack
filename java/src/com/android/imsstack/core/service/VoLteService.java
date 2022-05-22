@@ -1,10 +1,8 @@
 package com.android.imsstack.core.service;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.telephony.CarrierConfigManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.CapabilityConfigs;
@@ -12,7 +10,6 @@ import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.VoLteFactory;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.ConfigInterface;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.SubsInfoInterface;
 import com.android.imsstack.core.agents.agentif.IBatteryState;
@@ -34,7 +31,6 @@ import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.config.CarrierConfig;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.CallInfoService;
@@ -52,7 +48,7 @@ import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
-import com.android.imsstack.provider.ImsStateController;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
@@ -264,8 +260,6 @@ public class VoLteService implements IVoLteService {
         if (gba != null) {
             gba.init(mContext);
         }
-
-        updateRoamingCapability();
     }
 
     protected void setOperatorSpecificLogic() {
@@ -491,8 +485,7 @@ public class VoLteService implements IVoLteService {
             }
         } else if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "VZW", "US")) {
             // check roaming support or test mode for lab test
-            boolean bRoamingEnabled = ImsStateController.RoamingState.getVoLteRoamingForPhoneId(
-                    mContext.getContentResolver(), mSlotID) == 1 ? true : false;
+            boolean bRoamingEnabled = CapabilityConfigs.isVoLteRoamingEnabled(mSlotID);
             if (bRoamingEnabled ||
                     (ImsTestMode.getInstance().getTestMode(mSlotID).getExtraTestmask() &
                         ImsTestMode.TEST_MASK_ROAMING_CONDITION) > 0) {
@@ -547,40 +540,6 @@ public class VoLteService implements IVoLteService {
             mBootHandler.sendEmptyMessageDelayed(EVENT_AOS_START, 100);
         } else {
             ImsLog.e("mBootHandler is null");
-        }
-    }
-
-    protected void updateRoamingCapability() {
-        // TODO: VT Roaming
-        ConfigInterface config = AgentFactory.getInstance().getAgent(
-                ConfigInterface.class, mSlotID);
-        int volteInRoaming = 0;
-        int vtInRoaming = 0;
-
-        if (config != null) {
-            CarrierConfig cc = config.getCarrierConfig();
-
-            if (cc != null) {
-                if (cc.getBoolean(CarrierConfigManager
-                        .ImsVoice.KEY_CARRIER_VOLTE_ROAMING_AVAILABLE_BOOL, false)) {
-                    volteInRoaming = 1;
-                }
-            }
-        }
-
-        int curVolteInRoaming = ImsStateController.RoamingState.getVoLteRoamingForPhoneId(
-                mContext.getContentResolver(), mSlotID);
-        int curVtInRoaming = ImsStateController.RoamingState.getVtRoamingForPhoneId(
-                mContext.getContentResolver(), mSlotID);
-        if (volteInRoaming != curVolteInRoaming) {
-            ImsStateController.RoamingState.putVoLteRoamingForPhoneId(
-                    mContext.getContentResolver(), volteInRoaming, mSlotID);
-            ImsLog.d("Updated  VOLTE_IN_ROAMING[ " + mSlotID + "/" + volteInRoaming + "]");
-        }
-        if (vtInRoaming != curVtInRoaming) {
-            ImsStateController.RoamingState.putVtRoamingForPhoneId(
-                    mContext.getContentResolver(), vtInRoaming, mSlotID);
-            ImsLog.d("Updated  VT_IN_ROAMING[ " + mSlotID + "/" + vtInRoaming + "]");
         }
     }
 
@@ -701,32 +660,27 @@ public class VoLteService implements IVoLteService {
             return;
         }
 
-        int volte = ImsStateController.STATE_ACTIVE;
-        int vt = ImsStateController.STATE_ACTIVE;
-        int wfc = ImsStateController.STATE_ACTIVE;
+        int voLte = ImsStateStore.STATE_ACTIVE;
+        int vt = ImsStateStore.STATE_ACTIVE;
+        int wfc = ImsStateStore.STATE_ACTIVE;
 
         if (ImsGlobal.isVoLteProvisioningRequired(mContext, phoneId)) {
             // Service availabilities are turned ON.
         } else {
             if (!ImsGlobal.isVoLteEnabled(mContext, phoneId)) {
-                volte = ImsStateController.STATE_INACTIVE;
+                voLte = ImsStateStore.STATE_INACTIVE;
             }
 
             if (!ImsGlobal.isVtEnabled(mContext, phoneId)) {
-                vt = ImsStateController.STATE_INACTIVE;
+                vt = ImsStateStore.STATE_INACTIVE;
             }
 
             if (!ImsGlobal.isWfcEnabled(mContext, phoneId)) {
-                wfc = ImsStateController.STATE_INACTIVE;
+                wfc = ImsStateStore.STATE_INACTIVE;
             }
         }
 
-        ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                mContext.getContentResolver(), volte, phoneId);
-        ImsStateController.VoLteState.putVtProvisionedForPhoneId(
-                mContext.getContentResolver(), vt, phoneId);
-        ImsStateController.VoLteState.putWfcProvisionedForPhoneId(
-                mContext.getContentResolver(), wfc, phoneId);
+        ImsStateStore.getMmTelState(phoneId).setProvisioned(voLte, vt, wfc);
     }
 
     protected void initServiceProvisioningInfo(int availableServices) {
@@ -736,12 +690,10 @@ public class VoLteService implements IVoLteService {
 
         if (subsInfo != null) {
             if (ImsConstants.USE_GOOGLE_NATIVE_APPS || subsInfo.isTestModeEnabled()) {
-                ContentResolver cr = mContext.getContentResolver();
+                ImsStateStore.getMmTelState(getSlotID()).setVoLteProvisioned(
+                        ImsStateStore.STATE_ACTIVE);
 
-                ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                    cr, ImsStateController.STATE_ACTIVE, mSlotID);
-
-                String soipEnableFromDB = DBUtils.CP.getString(cr
+                String soipEnableFromDB = DBUtils.CP.getString(mContext.getContentResolver()
                                             , ProviderInterface.SMS.CONTENT_URI
                                             , ImsDbController.selectForSlot(mSlotID)
                                             , ProviderInterface.SMS.SMS_OVER_IP_NETWORK

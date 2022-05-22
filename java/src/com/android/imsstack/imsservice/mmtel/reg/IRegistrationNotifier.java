@@ -2,9 +2,6 @@ package com.android.imsstack.imsservice.mmtel.reg;
 
 import android.annotation.NonNull;
 import android.net.Uri;
-import android.telephony.TelephonyManager;
-
-import com.android.imsstack.provider.ImsStateController;
 
 import java.util.Set;
 

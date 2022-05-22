@@ -20,7 +20,6 @@ import com.android.imsstack.core.agents.agentif.IRegiProcess;
 import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.provider.ImsStateController;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ISystemAPIIMSPhone;
@@ -1033,9 +1032,7 @@ public final class IIMSPhoneGov {
                         DCFactory.NETWORK_WATCHER, mSlotId);
 
                 if (dcnw != null && mContext != null && dcnw.isRoaming()) {
-                    if (ImsStateController.RoamingState.getVoLteRoamingForPhoneId(
-                                mContext.getContentResolver(), mSlotId)
-                                == ImsStateController.STATE_INACTIVE) {
+                    if (!CapabilityConfigs.isVoLteRoamingEnabled(mSlotId)) {
                         ImsLog.i(mSlotId, "volte is not supported in roaming");
 
                         for (int i = 0; i < imsConfig.length - 2; i++) {

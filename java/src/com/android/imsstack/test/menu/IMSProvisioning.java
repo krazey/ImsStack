@@ -7,12 +7,8 @@
 
 package com.android.imsstack.test.menu;
 
-import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -24,32 +20,23 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.imsstack.R;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.IPreference;
 import com.android.imsstack.core.config.ImsDbController;
 import com.android.imsstack.core.config.ProviderDBUpdateHelper;
 import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.ServiceSetting;
-import com.android.imsstack.enabler.IUIMS;
-import com.android.imsstack.provider.ImsStateController;
-import com.android.imsstack.system.ImsEventDef;
+import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.ImsEventDef;
 import com.android.imsstack.system.SystemInterface;
-import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.DBUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
@@ -57,12 +44,9 @@ import com.android.imsstack.util.ImsPrivateProperties;
 import com.android.imsstack.util.ImsProperties;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SettingsUtils;
-import com.android.imsstack.util.SODConfig;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 public class IMSProvisioning extends IMSSetting_BASE {
 
@@ -1717,11 +1701,10 @@ public class IMSProvisioning extends IMSSetting_BASE {
                             getApplicationContext().getString(R.string.ims_key_uc_tConfURI),
                             "sip:confserver@ims.testbed.com");
                 } else if (ImsGlobal.isOperator(getSlotID(), "VZW")) {
-                    ContentResolver cr = getApplicationContext().getContentResolver();
-                    ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
-                    ImsStateController.VoLteState.putVtProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
+                    ImsStateStore.getMmTelState(getSlotID()).setProvisioned(
+                            ImsStateStore.STATE_ACTIVE,
+                            ImsStateStore.STATE_ACTIVE,
+                            ImsStateStore.STATE_ACTIVE);
                     //IMS Settings > Test > Check VoPS Feature & Check VOIP Capability : OFF
                     updateImsDB(ProviderInterface.Setting.TABLE_NAME,
                             ProviderInterface.Setting.CHECK_VOPS_FEATURE, "false");
@@ -1814,11 +1797,10 @@ public class IMSProvisioning extends IMSSetting_BASE {
                 ImsLog.d("set configuration for test equipment");
                 if (ImsGlobal.isOperator(getSlotID(), "VZW")) {
                     //IMS Settings > Test > OMADM Provisioning > VLT & LVC : both ON
-                    ContentResolver cr = getApplicationContext().getContentResolver();
-                    ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
-                    ImsStateController.VoLteState.putVtProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
+                    ImsStateStore.getMmTelState(getSlotID()).setProvisioned(
+                            ImsStateStore.STATE_ACTIVE,
+                            ImsStateStore.STATE_ACTIVE,
+                            ImsStateStore.STATE_ACTIVE);
                 } else if (OperatorInfo.isEnablerTypeForNonOperator(getSlotID())) {
                     // SUSBCRIBE
                     int enabledFeatures = ProviderInterface.Subscriber.AdminFeatures.IMS;
@@ -2228,11 +2210,10 @@ public class IMSProvisioning extends IMSSetting_BASE {
 
             if (ImsGlobal.isOperator(getSlotID(), "VZW")) {
                 // IMS Settings > Test > OMADM Provisioning > VLT & LVC : both ON
-                ContentResolver cr = getApplicationContext().getContentResolver();
-                ImsStateController.VoLteState.putVoLteProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
-                ImsStateController.VoLteState.putVtProvisionedForPhoneId(
-                        cr, ImsStateController.STATE_ACTIVE, getSlotID());
+                ImsStateStore.getMmTelState(getSlotID()).setProvisioned(
+                        ImsStateStore.STATE_ACTIVE,
+                        ImsStateStore.STATE_ACTIVE,
+                        ImsStateStore.STATE_ACTIVE);
             }
 
             Toast.makeText(getApplicationContext(), "Need to be restarted",
