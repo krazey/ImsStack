@@ -29,7 +29,16 @@ PUBLIC VIRTUAL EstablishedState::~EstablishedState() {}
 PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Hold", 0, 0, 0);
-    // TODO, notify held if eADir is inactive
+
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
+    if (objMediaInfo.eADir == DIRECTION_INACTIVE)
+    {
+        m_objContext.SetHeldByMe(IMS_TRUE);
+        m_objContext.GetUiNotifier().SendHeld(&(m_objContext.GetCallInfo()), &objMediaInfo,
+                m_objContext.GetSupplementaryService().GetServices());
+        return GetStateName();
+    }
 
     if (HandleUpdate(UpdateType::HOLD, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
             IMS_FAILURE)
@@ -256,10 +265,10 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
 PRIVATE
 void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
 {
-    MediaInfo objInfo;
-    m_objContext.GetMediaManager().GetMediaInfo(objInfo);
+    MediaInfo objMediaInfo;
+    m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
 
-    IMS_SINT32 eNewDir = objInfo.eADir;
+    IMS_SINT32 eNewDir = objMediaInfo.eADir;
     if (bWithoutOffer)
     {
         eNewDir = DIRECTION_SEND_RECEIVE;
@@ -277,21 +286,21 @@ void EstablishedState::AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer)
         }
     }
 
-    objInfo.eADir = eNewDir;
+    objMediaInfo.eADir = eNewDir;
 
     // TODO
     /*
-    if (objInfo.eVDir != DIRECTION_INVALID)
+    if (objMediaInfo.eVDir != DIRECTION_INVALID)
     {
-        objInfo.eVDir = ???;
+        objMediaInfo.eVDir = ???;
     }
-    if (objInfo.eTDir != DIRECTION_INVALID)
+    if (objMediaInfo.eTDir != DIRECTION_INVALID)
     {
-        objInfo.eTDir = eNewDir;
+        objMediaInfo.eTDir = eNewDir;
     }
     */
 
-    m_objContext.GetMediaManager().SetMediaInfo(objInfo);
+    m_objContext.GetMediaManager().SetMediaInfo(objMediaInfo);
 }
 
 PRIVATE
