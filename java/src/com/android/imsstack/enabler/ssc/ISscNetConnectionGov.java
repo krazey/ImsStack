@@ -16,22 +16,49 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
 
-import java.io.InputStream;
-
+/**
+ * Provides the interface to manage SscNetConnection for each slot.
+ */
 public interface ISscNetConnectionGov {
-    public void init(int slotId, Context context, EApnType apnType, boolean bWiFi);
-    public ISscNetConnection get(int slotId);
 
-    public void init(int slotId, Context context, EApnType apnType);
-    public void cleanup(int slotId, Context recentCnx);
-    public boolean isConnected(int slotId);
-    public boolean connect(int slotId);
-    public void disconnect(int slotId);
-    public void setTransactionHandler(int slotId, Handler handler);
-    public void refreshConnectionTimer(int slotId);
+    /**
+     * Create a new SscNetConnection object and initialize with APN type for a given slotId
+     *
+     * @param apnType The type of network used for APN connection
+     */
+    void init(int slotId, EApnType apnType);
+
+    /**
+     * Call cleanup() of SscNetConnection for a given slotId
+     */
+    void cleanup(int slotId);
+
+    /**
+     *  Call isConnected() of SscNetConnection for a given slotId
+     */
+    boolean isConnected(int slotId);
+
+    /**
+     * Call connect() of SscNetConnection for a given slotId
+     */
+    boolean connect(int slotId);
+
+    /**
+     * Call disconnect() of SscNetConnection for a given slotId
+     */
+    void disconnect(int slotId);
+
+    /**
+     * Call setCallbackHandler() of SscNetConnection for a given slotId
+     */
+    void setCallbackHandler(int slotId, Handler handler);
+
+    /**
+     * Call refreshConnectionTimer() of SscNetConnection for a given slotId
+     */
+    void refreshConnectionTimer(int slotId);
 }

@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -52,7 +51,6 @@ public class SscNetConnection implements ISscNetConnection {
     protected Handler mSscTransactionHandler = null;
     protected Handler mSscNetConnectionHandler = null;
 
-    protected Context mContext = null;
     protected int mSlotId  = -1;
 
     protected EDataState mDataState = EDataState.DATA_STATE_DISCONNECTED;
@@ -66,13 +64,7 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @Override
-    public void init(Context context, EApnType apnType) {
-        if (context == null) {
-            ImsLog.e("Context is null");
-            return;
-        }
-
-        mContext = context;
+    public void init(EApnType apnType) {
         mApnType = apnType;
 
         HandlerThread handlerThread = new HandlerThread("SscNetConnectionHandler");
@@ -91,12 +83,19 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @Override
-    public void cleanup(Context recentCnx) {
+    public void cleanup() {
+        disconnect();
+
         IDCNetWatcher dnw
                 = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
         if (dnw != null) {
             dnw.unregisterForDataServiceStateChanged(mSscNetConnectionHandler);
             dnw.unregisterForPdnConnectionFailed(mSscNetConnectionHandler);
+        }
+
+        if (mSscNetConnectionHandler != null) {
+            mSscNetConnectionHandler.getLooper().quit();
+            mSscNetConnectionHandler = null;
         }
     }
 
@@ -156,13 +155,14 @@ public class SscNetConnection implements ISscNetConnection {
         return true;
     }
 
-    public boolean isPDNAvailable() {
+    @Override
+    public boolean isPdnAvailable() {
         ImsLog.d("");
 
         if (!MSimUtils.isMultiSimEnabled()) {
             return true;
         }
-        if (mApnType == null || !mApnType.equals(EApnType.XCAP) ) {
+        if (mApnType == null || !mApnType.equals(EApnType.XCAP)) {
             ImsLog.d(mSlotId, "it's not XCAP, PDN available");
             return true;
         }
@@ -210,7 +210,7 @@ public class SscNetConnection implements ISscNetConnection {
     }
 
     @Override
-    public void setTransactionHandler(Handler handler) {
+    public void setCallbackHandler(Handler handler) {
         mSscTransactionHandler = handler;
     }
 
@@ -278,7 +278,7 @@ public class SscNetConnection implements ISscNetConnection {
     protected SscNetConnection() {
     }
 
-    protected final class SscNetConnectionHandler extends Handler {
+    private final class SscNetConnectionHandler extends Handler {
         public SscNetConnectionHandler(Looper looper) {
             super(looper);
         }

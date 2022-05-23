@@ -175,25 +175,19 @@ public class SscServiceImpl extends UtInterfaceBase {
     };
 
     private void setNetworkType() {
-        // Set Network type
         ISscNetConnectionGov netConnGov = SscNetConnectionGov.getInstance();
         ISscHttpConnectionGov httpConnectionGov = SscHttpConnectionGov.getInstance();
 
         SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
                 SubsInfoInterface.class, mSlotId);
-        if (subsInfo != null && subsInfo.isTestModeEnabledForGcf()) {
-            netConnGov.init(mSlotId, mContext, EApnType.XCAP, false);
-            httpConnectionGov.open(mSlotId, mContext, EApnType.XCAP);
+        String pdntype = SscConfig.getUtPdnType(mSlotId);
+        ImsLog.d("pdntype = " + pdntype);
+        if (pdntype != null && pdntype.equals("mobile_internet")) {
+            netConnGov.init(mSlotId, EApnType.INTERNET);
+            httpConnectionGov.open(mSlotId, EApnType.INTERNET);
         } else {
-            String pdntype = SscConfig.getUtPdnType(mSlotId);
-            ImsLog.d("pdntype = " + pdntype);
-            if (pdntype != null && pdntype.equals("mobile_internet")) {
-                netConnGov.init(mSlotId, mContext, EApnType.INTERNET, false);
-                httpConnectionGov.open(mSlotId, mContext, EApnType.INTERNET);
-            } else {
-                netConnGov.init(mSlotId, mContext, EApnType.XCAP, false);
-                httpConnectionGov.open(mSlotId, mContext, EApnType.XCAP);
-            }
+            netConnGov.init(mSlotId, EApnType.XCAP);
+            httpConnectionGov.open(mSlotId, EApnType.XCAP);
         }
     }
 

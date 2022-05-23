@@ -16,20 +16,63 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.android.imsstack.core.agents.dcmif.EApnType;
 
-import java.io.InputStream;
-
+/**
+ * Provide the interface to manage a connection with apn type
+ */
 public interface ISscNetConnection {
-    public void init(Context context, EApnType apnType);
-    public void cleanup(Context recentCnx);
-    public boolean isConnected();
-    public boolean connect();
-    public boolean isPDNAvailable();
-    public void disconnect();
-    public void setTransactionHandler(Handler handler);
-    public void refreshConnectionTimer();
+
+    /**
+     * Initialize SscNetConnection with a given type
+     *
+     * @param apnType which means network capability of connection
+     */
+    void init(EApnType apnType);
+
+    /**
+     * Remove all handler registered to ohter class related to connection,
+     * and disconnect current connection if it's requested
+     */
+    void cleanup();
+
+    /**
+     * Return current connection state
+     *
+     * @return true if network of apnType is connected, otherwise false
+     */
+    boolean isConnected();
+
+    /**
+     * Request network connnection
+     *
+     * @return true if connection is requested, otherwise false
+     */
+    boolean connect();
+
+    /**
+     * Check if UICC that is inserted in other slot has a network connection or not
+     *
+     * @return true when other slot doesn't have a network connection, otherwise false
+     */
+    boolean isPdnAvailable();
+
+    /**
+     * Request network disconnection
+     */
+    void disconnect();
+
+    /**
+     * Set handler for connection state event meesages
+     *
+     * @param handler The handler to send the message to
+     */
+    void setCallbackHandler(Handler handler);
+
+    /**
+     * Extend timer to maintain current connection
+     */
+    void refreshConnectionTimer();
 }

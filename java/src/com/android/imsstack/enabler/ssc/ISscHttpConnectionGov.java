@@ -16,21 +16,41 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
-import android.os.Handler;
-
 import com.android.imsstack.core.agents.dcmif.EApnType;
 
 import org.w3c.dom.Document;
 
+/**
+ * Provides the interface to manage SscHttpConnection for each slot.
+ */
 public interface ISscHttpConnectionGov {
-    public void open(int slotId, Context context, EApnType apntype);
-    public ISscHttpConnection get(int slotId);
 
-    public void close(int slotId);
-    public int  sendRequest(int slotId, int requestType, String requestURI, String body);
-    public void setCredentialOnChallenge(int slotId, String body);
-    public void setTransactionHandler(int slotId, Handler handler);
-    public void setXuiValue(int slotId, String xui);
-    public Document getInputStream(int slotId);
+    /**
+     * Create a new SscHttpConnection or SscHttpsConnection object according to
+     * CarrierConfigManager.ImsSs.KEY_UT_TRANSPORT_TYPE_INT, and initialize with APN type
+     * for a given slotId
+     *
+     * @param apntype The network type that is used for socket connection
+     */
+    void open(int slotId, EApnType apntype);
+
+    /**
+     * Call close() of SscHttpConnection for a given slotId
+     */
+    void close(int slotId);
+
+    /**
+     * Call sendRequest() of SscHttpConnection for a given slotId
+     */
+    int  sendRequest(int slotId, int requestType, String requestUri, String body);
+
+    /**
+     * Call setXuiValue() of SscHttpConnection for a given slotId
+     */
+    void setXuiValue(int slotId, String xui);
+
+    /**
+     * Call getInputStream() of SscHttpConnection for a given slotId
+     */
+    Document getInputStream(int slotId);
 }

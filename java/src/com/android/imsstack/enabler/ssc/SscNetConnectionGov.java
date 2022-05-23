@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.content.Context;
 import android.os.Handler;
 
 import com.android.imsstack.core.OperatorInfo;
@@ -27,9 +26,8 @@ import java.util.HashMap;
 
 public class SscNetConnectionGov implements ISscNetConnectionGov {
     private static SscNetConnectionGov sSscNetConnectionGov = null;
-    protected Context mContext = null;
 
-    private HashMap<Integer, SscNetConnection> mSscNetConnection = new HashMap<>();
+    private HashMap<Integer, ISscNetConnection> mSscNetConnection = new HashMap<>();
 
     public static ISscNetConnectionGov getInstance() {
         if (sSscNetConnectionGov == null) {
@@ -40,58 +38,27 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
     }
 
     @Override
-    public void init(int slotId, Context context, EApnType apnType, boolean bWiFi) {
-        mContext = context;
-        if (mContext == null) {
-            ImsLog.e("Context is null");
-            return;
-        }
-
-        SscNetConnection netConnection = null;
-        if (bWiFi) {
-            netConnection = new SscNetConnectionWifi(slotId);
-        }
-        else {
+    public void init(int slotId, EApnType apnType) {
+        ISscNetConnection netConnection = get(slotId);
+        if (netConnection == null) {
             netConnection = new SscNetConnection(slotId);
+            mSscNetConnection.put(slotId, netConnection);
         }
-        netConnection.init(context, apnType);
-
-        mSscNetConnection.put(slotId, netConnection);
+        netConnection.init(apnType);
     }
 
     @Override
-    public ISscNetConnection get(int slotId) {
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return null;
-        }
-
-        if (mSscNetConnection.containsKey(slotId) != true) {
-            ImsLog.w("SscNetConnection for #" + slotId + "is not set...");
-            return null;
-        }
-
-        return mSscNetConnection.get(slotId);
-    }
-
-    public void init(int slotId, Context context, EApnType apnType) {
-        ISscNetConnection netConnection = get(slotId);
-        if (netConnection == null) {
-            ImsLog.i("init()");
-            return;
-        }
-        netConnection.init(context, apnType);
-    }
-
-    public void cleanup(int slotId, Context recentCnx) {
+    public void cleanup(int slotId) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
             ImsLog.i("cleanup()");
             return;
         }
-        netConnection.cleanup(recentCnx);
+        netConnection.cleanup();
+        mSscNetConnection.remove(slotId);
     }
 
+    @Override
     public boolean isConnected(int slotId) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
@@ -101,6 +68,7 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
         return netConnection.isConnected();
     }
 
+    @Override
     public boolean connect(int slotId) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
@@ -108,7 +76,7 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
             return false;
         }
 
-        if (!netConnection.isPDNAvailable()) {
+        if (!netConnection.isPdnAvailable()) {
             int otherSlotId = slotId == 0 ? 1 : 0;
             ISscNetConnection otherNetConnection = get(otherSlotId);
             if (otherNetConnection != null) {
@@ -120,6 +88,7 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
         return netConnection.connect();
     }
 
+    @Override
     public void disconnect(int slotId) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
@@ -129,15 +98,17 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
         netConnection.disconnect();
     }
 
-    public void setTransactionHandler(int slotId, Handler handler) {
+    @Override
+    public void setCallbackHandler(int slotId, Handler handler) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
-            ImsLog.i("setTransactionHandler()");
+            ImsLog.i("setCallbackHandler()");
             return;
         }
-        netConnection.setTransactionHandler(handler);
+        netConnection.setCallbackHandler(handler);
     }
 
+    @Override
     public void refreshConnectionTimer(int slotId) {
         ISscNetConnection netConnection = get(slotId);
         if (netConnection == null) {
@@ -145,5 +116,19 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
             return;
         }
         netConnection.refreshConnectionTimer();
+    }
+
+    private ISscNetConnection get(int slotId) {
+        if (!OperatorInfo.isSlotIdValid(slotId)) {
+            ImsLog.w("Invalid SlotId(" + slotId + ")");
+            return null;
+        }
+
+        if (!mSscNetConnection.containsKey(slotId)) {
+            ImsLog.w("SscNetConnection for #" + slotId + "is not set...");
+            return null;
+        }
+
+        return mSscNetConnection.get(slotId);
     }
 }

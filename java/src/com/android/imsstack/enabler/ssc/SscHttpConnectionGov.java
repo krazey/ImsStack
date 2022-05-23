@@ -20,11 +20,9 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
 
-import android.content.Context;
-import android.os.Handler;
+import org.w3c.dom.Document;
 
 import java.util.HashMap;
-import org.w3c.dom.Document;
 
 public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     private static SscHttpConnectionGov sSscHttpConnectionGov = null;
@@ -39,32 +37,16 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
         return sSscHttpConnectionGov;
     }
 
-    // Interface implementation methods --------------------------
     @Override
-    public void open(int slotId, Context context, EApnType apntype) {
+    public void open(int slotId, EApnType apntype) {
         SscHttpConnection httpConnection = null;
         if (SscConfig.isTls(slotId)) {
-            httpConnection = new SscHttpsConnection(slotId, context, apntype);
+            httpConnection = new SscHttpsConnection(slotId, apntype);
         } else {
-            httpConnection = new SscHttpConnection(slotId, context, apntype);
+            httpConnection = new SscHttpConnection(slotId, apntype);
         }
 
         mSscHttpConnection.put(slotId, httpConnection);
-    }
-
-    @Override
-    public ISscHttpConnection get(int slotId) {
-        if (OperatorInfo.isSlotIdValid(slotId) != true) {
-            ImsLog.w("Invalid SlotId(" + slotId + ")");
-            return null;
-        }
-
-        if (mSscHttpConnection.containsKey(slotId) != true) {
-            ImsLog.w("");
-            return null;
-        }
-
-        return mSscHttpConnection.get(slotId);
     }
 
     @Override
@@ -78,33 +60,13 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
     }
 
     @Override
-    public int sendRequest(int slotId, int requestType, String requestURI, String body) {
+    public int sendRequest(int slotId, int requestType, String requestUri, String body) {
         ISscHttpConnection httpConnection = get(slotId);
         if (httpConnection == null) {
             ImsLog.i("sendRequest()");
             return -1;
         }
-        return httpConnection.sendRequest(requestType, requestURI, body);
-    }
-
-    @Override
-    public void setCredentialOnChallenge(int slotId, String body) {
-        ISscHttpConnection httpConnection = get(slotId);
-        if (httpConnection == null) {
-            ImsLog.i("setCredentialOnChallenge()");
-            return;
-        }
-        httpConnection.setCredentialOnChallenge(body);
-    }
-
-    @Override
-    public void setTransactionHandler(int slotId, Handler handler) {
-        ISscHttpConnection httpConnection = get(slotId);
-        if (httpConnection == null) {
-            ImsLog.i("setTransactionHandler()");
-            return;
-        }
-        httpConnection.setTransactionHandler(handler);
+        return httpConnection.sendRequest(requestType, requestUri, body);
     }
 
     @Override
@@ -125,5 +87,19 @@ public class SscHttpConnectionGov implements ISscHttpConnectionGov {
             return null;
         }
         return httpConnection.getInputStream();
+    }
+
+    private ISscHttpConnection get(int slotId) {
+        if (!OperatorInfo.isSlotIdValid(slotId)) {
+            ImsLog.w("Invalid SlotId(" + slotId + ")");
+            return null;
+        }
+
+        if (!mSscHttpConnection.containsKey(slotId)) {
+            ImsLog.w("");
+            return null;
+        }
+
+        return mSscHttpConnection.get(slotId);
     }
 }
