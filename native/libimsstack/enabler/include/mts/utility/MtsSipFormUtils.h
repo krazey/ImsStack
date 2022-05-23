@@ -12,10 +12,10 @@ public:
     ~MtsSipFormUtils();
 
     static MtsSipFormUtils* GetInstance(IN IMS_SINT32 nSlotId);
-    IMS_BOOL FormDestination(IN const IMS_CHAR* szMDN, IN const IMS_BOOL bIsAckorError,
+    IMS_BOOL FormDestination(IN const AString& strTargetAddress, IN const IMS_BOOL bIsAckorError,
             IN const AString& strLastIpSmgw, OUT AString& strDest);
     AString FormContentTypeEnumToStr(IN IMS_UINT32 nType);
-    IMS_UINT32 FormContentTypeStrToEnum(IN AString strContentType);
+    IMS_UINT32 FormContentTypeStrToEnum(IN const AString& strContentType);
     void UpdateFormatFromDb();
     IMS_BOOL UpdatePsiFromDb();
     IMS_SINT32 GetSlotId();

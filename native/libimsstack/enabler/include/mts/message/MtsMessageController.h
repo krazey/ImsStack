@@ -3,8 +3,9 @@
 
 #include "IMSActivityEx.h"
 #include "ICoreService.h"
-#include "IMtsService.h"
-#include "IUMts.h"
+#include "IuMts.h"
+#include "MtsService.h"
+#include "../utility/MtsTrm.h"
 
 class IMtsMessage;
 class IMtsMessageControllerListener;
@@ -12,14 +13,16 @@ class IPageMessage;
 class MtsDynamicLoader;
 class MtsSmUtils;
 
-class MtsMessageController final : public IMSActivityEx
+class MtsMessageController final :
+        public IMSActivityEx,
+        public IMtsServiceListener,
+        public MtsTrmListener
 {
 public:
-    MtsMessageController(IN IMS_SINT32 nSlotID, MtsDynamicLoader* pMtsDynamicLoader);
+    MtsMessageController(IN IMS_SINT32 nSlotID, IN MtsService* pMtsService,
+            IN MtsDynamicLoader* pMtsDynamicLoader);
     ~MtsMessageController();
 
-    inline void RegisterService(IMtsService* piMtsService) { m_piMtsService = piMtsService; }
-    inline void UnRegisterService() { m_piMtsService = IMS_NULL; }
     void DestroyMtsMessage();
 
     void Add(IN IMtsMessage* piMtsMessage);
@@ -38,9 +41,6 @@ public:
     const AString& GetLastIpsmgwAddr();
     void SetLastIpsmgwAddr(IN const AString& strSmgwAddr);
 
-    void SendMtsMessage(IN IUSendSmsRequestParam* pSendParam, IN IMS_BOOL bIsSmsEServiceType);
-    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bIsSmsEServiceType);
-
     IMS_BOOL IsDeliverMessage(IN IPageMessage* piPageMessage);
     ICoreService* GetICoreService();
     MtsDynamicLoader* GetMtsUtils();
@@ -48,11 +48,32 @@ public:
     void SetCallStateType(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
     IMS_BOOL IsEmergencyCalling();
 
+    IMS_RESULT ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsFormat,
+            IN IMS_UINT8 nRetryAfter = 0, IN IMS_SINT32 nSeqId = -1);
+    IMS_UINT32 ReportMtSms(IN IMS_UINT32 nSmsFormat, IN IMS_UINT32 nSmsLength,
+            IN const IMS_BYTE* pbySmsData);
+
+    void ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType,
+            IN IMS_SINT32 nSeqId = -1);
+    void ReportTransmissionFailureWithRetryTime(IN const IMS_UINT32 nSmsType,
+            IN const IMS_UINT8 nRetryTime, IN IMS_SINT32 nSeqId = -1);
+
+    // IMtsServiceListener
+    virtual void NotifyMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
+    virtual void NotifyMtSms(IN IPageMessage* piMessage) override;
+
+    // MtsTrmListener
+    virtual void Trm_PriorityChanged();
+
 protected:
     // IMSActivityEx
     IMS_BOOL OnMessage(IN IMSMSG& objMSG);
 
 private:
+    void ReceiveMtsMessage(IN IPageMessage* piPageMessage, IN IMS_BOOL bIsSmsEServiceType);
+    void SendMtsMessage(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
+            IN const AString& strAddress, IN IMS_SINT32 nSeqId, IN IMS_BOOL bIsSmsEServiceType);
     void UpdateRPAckMap(IN IPageMessage* piPageMessage);
 
 public:
@@ -79,6 +100,35 @@ public:
         STATE_OFFHOOK = 5
     };
 
+    // State of Service
+    enum
+    {
+        STATE_INIT = 0,
+        STATE_READY,
+        STATE_LIMITED,
+        STATE_NOTREADY
+    };
+
+    enum
+    {
+        MO_INVALID = 0,
+        MO_SUCCESS = 1,
+        MO_IMS_TEMP_FAILURE = 2,
+        MO_IMS_PERM_FAILURE = 3,
+        MO_IMS_LIMITEDSMSSVCREGI = 4,
+        MO_RETRY_CS = 5,
+        MO_RETRY_CS_OR_SGS = 6
+    };
+
+    enum
+    {
+        MT_INVALID = 0,
+        MT_SUCCESS = 1,
+        MT_FAILURE = 2,
+        MT_SMS_FORMAT_FAILURE = 3,
+        MT_SMS_NODATA_FAILURE = 4
+    };
+
 protected:
     IMS_SINT32 m_nSlotId;
 
@@ -92,7 +142,9 @@ private:
     IMSList<IMtsMessage*> m_objMsgList;
     IMtsMessageControllerListener* m_piMtsMessageControllerListener;
     IMSList<IMtsMessage*> m_objRPAckedMsgs;
-    IMtsService* m_piMtsService;
+    MtsService* m_pMtsService;
+    MtsTrm* m_pMtsTrm;
+    IMS_BOOL m_bTrmBlock;
 
 protected:
     MtsSmUtils* m_pMtsSmUtils;

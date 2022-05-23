@@ -1,10 +1,10 @@
+#include "ServicePhoneInfo.h"
 #include "ServiceTrace.h"
 #include "ServiceTimer.h"
 #include "ServiceUtil.h"
 #include "IMSStrLib.h"
 #include "utility/MtsUtils.h"
-#include "MtsClient.h"
-#include "ServicePhoneInfo.h"
+
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -40,12 +40,12 @@ PUBLIC GLOBAL MtsUtils* MtsUtils::GetInstance()
     return pMtsUtils;
 }
 
-PUBLIC GLOBAL const IMS_CHAR* MtsUtils::RegTimerToString(IN IMS_UINT32 nType)
+PUBLIC GLOBAL const IMS_CHAR* MtsUtils::MtsTimerToString(IN IMS_UINT32 nType)
 {
     switch (nType)
     {
-        case MtsClient::TIMER_SMS_CALLBACK_MODE:
-            return "MtsClient : TIMER_SMS_CALLBACK_MODE";
+        case TIMER_MTS_CALLBACK_MODE:
+            return "TIMER_MTS_CALLBACK_MODE";
         default:
             return "__INVALID__";
     }
@@ -80,13 +80,13 @@ void MtsUtils::StopTimer(IN ITimer*& piTimer, IN AString strLog /* = AString("")
 }
 
 PUBLIC
-IMS_BOOL MtsUtils::IsEccNumber(IN const IMSWMS_CHAR* strDstAddr, IMS_SINT32 nSlotId)
+IMS_BOOL MtsUtils::IsEccNumber(IN const IMS_CHAR* strDstAddr, IMS_SINT32 nSlotId)
 {
     IMS_BOOL bIsEccNumber = IMS_FALSE;
     AString strDestAddr(strDstAddr);
 
-    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)->IsEmergencyNumber(
-                strDestAddr))
+    if (PhoneInfoService::GetPhoneInfoService()->GetCallInfo(nSlotId)
+            ->IsEmergencyNumber(strDestAddr))
     {
         IMS_TRACE_I("IsEccNumber:This Number( %s ) is a ECC Number from PhoneInfoService",
                 strDestAddr.GetStr(), 0, 0);
@@ -121,7 +121,7 @@ IMS_BOOL MtsUtils::IsEpdgConnected(IN MtsService* pMtsService)
 }
 
 PUBLIC
-IMS_BOOL MtsUtils::IsSupportFeature(IN const IMSWMS_CHAR* pszProperty)
+IMS_BOOL MtsUtils::IsSupportFeature(IN const IMS_CHAR* pszProperty)
 {
     IMS_BOOL bIsSupportProperty = AString("true").Equals(
             UtilService::GetUtilService()->GetSystemProperty()->Get(AString(pszProperty)));

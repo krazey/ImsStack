@@ -6,10 +6,14 @@
 #include "interface/aos/IImsAosListener.h"
 #include "interface/aos/IImsAosMonitor.h"
 #include "IMtsService.h"
+#include "IMtsServiceListener.h"
 
-#include "IUMts.h"
+#include "IuMts.h"
+#include "IuMtsService.h"
 
 class IImsAos;
+class JniMtsService;
+class JniMtsServiceThread;
 class MtsDynamicLoader;
 
 class MtsService final :
@@ -53,22 +57,31 @@ public:
     void ImsAosMonitor_Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState) override;
 
     // IMtsService
-    const AString& GetId() const;
-    ICoreService* GetICoreService();
+    void SetJniMtsService(IN JniMtsService* pJniMtsService) override;
+    void SendMoSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData,
+                IN const AString& strAddress, IN IMS_SINT32 nSeqId) override;
+    void SendMtResult(IN IMS_BOOL bMtResult) override;
+
+    void ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsformat, IN IMS_UINT8 nRetryAfter,
+            IN IMS_SINT32 nSeqId);
+    void ReportMtSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData);
 
     void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
-    void RequestRegistrationSwitch(
-            IN IUSendSmsRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
     void IMSAoSApp_NotifySpecificMessage(
             IN IMS_UINT32 nMsg, IN IMS_UINT32 nWparam, IN IMS_UINT32 nLparam);
     IMS_BOOL IsEpdgConnected();
 
+    const AString& GetId() const;
+    ICoreService* GetICoreService() const;
+    void SetListener(IN IMtsServiceListener* piMtsServiceListener);
+
 protected:
-    AString& GetAppId();
+    const AString& GetAppId() const;
 
 private:
     void Init(IN const AString& strMtsAppId, IN const AString& strServiceId, IN IMS_SINT32 nSlotId);
     void DeInit();
+    IMS_BOOL Attach();
 
 protected:
     IImsAos* m_piImsAos;
@@ -76,6 +89,8 @@ protected:
     AString m_strServiceId;
     IMS_UINT32 m_nSlotId;
     ICoreService* m_piCoreService;
+    IMtsServiceListener* m_piMtsServiceListener;
+    JniMtsService* m_pJniMtsService;
     MtsDynamicLoader* m_pMtsDynamicLoader;
 };
 

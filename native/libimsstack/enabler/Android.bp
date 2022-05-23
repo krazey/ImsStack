@@ -30,6 +30,13 @@ cc_library_headers {
 }
 
 cc_library_headers {
+    name: "libimsstack_enabler_mts_headers",
+    export_include_dirs: [
+        "include/mts",
+    ],
+}
+
+cc_library_headers {
     name: "libimsstack_enabler_aos_headers",
     export_include_dirs: [
         "include/aos",
@@ -55,6 +62,7 @@ cc_library_static {
         "libimsstack_protocol_headers",
     ] + [
         "libimsstack_jni_mtc_headers",
+        "libimsstack_jni_mts_headers",
         "libimsstack_jni_media_headers",
         "libimsstack_jni_aos_headers",
     ],

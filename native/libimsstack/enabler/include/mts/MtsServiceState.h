@@ -20,17 +20,15 @@ public:
     void SetMtsServiceState(IN IMS_SINT32 nServiceState);
     void SetConnectedServices(IN IMS_UINT32 nServices);
 
-    IMS_BOOL GetImsRegState();
-    IMS_BOOL GetImsRegMod();
-    IMS_BOOL GetImsSuspendState();
-    IMS_BOOL GetSmsOverIpState();
-    IMS_SINT32 GetMtsServiceState();
-    IMS_UINT32 GetConnectedServices();
-    MtsMessageController* GetMtsMessageController();
+    IMS_BOOL GetImsRegState() const;
+    IMS_BOOL GetImsRegMod() const;
+    IMS_BOOL GetImsSuspendState() const;
+    IMS_BOOL GetSmsOverIpState() const;
+    IMS_SINT32 GetMtsServiceState() const;
+    IMS_UINT32 GetConnectedServices() const;
     IMS_BOOL IsServiceConnected(IN IMS_UINT32 nService);
 
     void OnImsConnected();
-    void OnImsConnected(IN IUSendSmsRequestParam* pToBeSentSms);
     void OnImsDisconnected(IN IMS_UINT32 nReason);
     void OnImsDisconnecting(IN IMS_UINT32 nReason);
     void OnImsSuspended(IN IMS_UINT32 nReason);
@@ -42,7 +40,7 @@ public:
     IMS_BOOL IsMoServiceBlocked();
     IMS_BOOL IsMtServiceBlocked();
     IMS_BOOL IsTemporaryServiceBlocked();
-    IMS_SINT32 GetSlotId();
+    IMS_SINT32 GetSlotId() const;
 
 protected:
     IMS_SINT32 m_nMtsServiceState;

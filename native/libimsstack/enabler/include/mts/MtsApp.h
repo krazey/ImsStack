@@ -2,79 +2,51 @@
 #define MTS_APP_H_
 
 #include "IMSApp.h"
+#include "IMSService.h"
+#include "IMtsCallTrackerListener.h"
 #include "IMtsMessageControllerListener.h"
 #include "IMtsApp.h"
-#include "IMSService.h"
-#include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
+#include "utility/MtsDynamicLoader.h"
 
-#include "IMtsCallTrackerListener.h"
-
-#include "utility/MtsTrm.h"
-
-class MtsService;
-class MtsClient;
-class MtsMessageController;
-class MtsDynamicLoader;
-class MtsServiceState;
-class MtsCallTracker;
 class IMtsCallTracker;
+class MtsCallTracker;
+class MtsDynamicLoader;
+class MtsMessageController;
+class MtsService;
+class MtsServiceState;
 
 class MtsApp :
-        public IMtsApp,
         public IMSApp,
-        public IIMSActivityControl,
-        public IMtsMessageControllerListener,
-        public MtsTrmListener,
-        public IMtsCallTrackerListener
+        public IMtsApp,
+        public IMtsCallTrackerListener,
+        public IMtsMessageControllerListener
 {
 public:
     MtsApp(IN IMS_SINT32 nSlotId);
     virtual ~MtsApp();
 
-    static IMSApp* GetInstance(IN IMS_SINT32 nSlotId);
-    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
-    virtual void RequestRegistrationSwitch(
-            IN IUSendSmsRequestParam* pToBeSentSms, IN IMS_BOOL bIsSmsEServiceType);
+    void AddService(IN MtsService* pService);
     MtsServiceState* GetMtsServiceState();
+    void RemoveMtsServices();
+    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
 
     // IMtsApp
-    virtual void Start();
-    virtual void Stop();
-
-    // IIMSActivityControl
-    virtual IMS_BOOL Control(
-            IN IMS_UINT32 nCmdType, IN IMS_UINTP nInParam, OUT IMS_UINTP* pnOutParam);
+    virtual void Start() override;
+    virtual void Stop() override;
 
     // IMtsMessageControllerListener
     virtual void MtsMessageController_NoTransaction();
 
-    // MtsTrmListener
-    virtual void Trm_PriorityChanged();
-
     // IMtsCallTrackerListener
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
 
-protected:
-    // IMSApp
-    virtual IMS_BOOL OnPreprocess(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMSG);
-    virtual IMS_BOOL OnPostprocess(IN IMSMSG& objMSG);
-    virtual IIMSActivityControl* GetController();
-
-    virtual void CreateMtsService(IN IMS_SINT32 nSlotId);
-    virtual void CreateMtsClient(IN IMS_SINT32 nSlotId);
-    virtual void RemoveMtsClient(IN IMS_SINT32 nSlotId);
-    virtual void CreateMtsMessageController(
-            IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
-    virtual void CreateMtsUtils(IN IMS_SINT32 nSlotId);
-    virtual void DestroyMtsUtils();
-
-protected:
-    void AddService(IN MtsService* pService);
-    void RemoveMtsService();
-
 private:
+    void CreateMtsService(IN IMS_SINT32 nSlotId);
+    void CreateMtsMessageController(
+            IN IMS_SINT32 nSlotId, IN MtsDynamicLoader* pMtsDynamicLoader);
+    void CreateMtsUtils(IN IMS_SINT32 nSlotId);
+    void DestroyMtsUtils();
     void GetSmOverIpConfigInfo(IN IMS_SINT32 nSlotId);
     void SetSlotId(IN IMS_SINT32 nSlotId);
 
@@ -116,17 +88,21 @@ public:
         TIMER_SMS_CLIENT_RETRY = 0
     };
 
+    enum
+    {
+        SMSFORMAT_3GPP = 1,
+        SMSFORMAT_3GPP2,
+        SMSFORMAT_INVALID
+    };
+
 protected:
     IMS_SINT32 m_nSlotId;
     IMSList<MtsService*> m_lstMtsServices;
-    MtsClient* m_pMtsClient;
     MtsService* m_pMtsService;
     MtsMessageController* m_pMtsMessageController;
     MtsDynamicLoader* m_pMtsDynamicLoader;
     MtsServiceState* m_pMtsServiceState;
     MtsCallTracker* m_pCallTracker;
-    MtsTrm* m_pMtsAppTrm;
-    IMS_BOOL m_bTrmBlock;
 };
 
 #endif

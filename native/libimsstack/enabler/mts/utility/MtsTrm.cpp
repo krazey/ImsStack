@@ -3,7 +3,6 @@
 #include "ServicePhoneInfo.h"
 #include "utility/MtsTrm.h"
 #include "utility/MtsUtils.h"
-#include "MtsClient.h"
 #include "MtsApp.h"
 
 __IMS_TRACE_TAG_COM_SMS__;

@@ -4,7 +4,6 @@
 #include "IImsAos.h"
 #include "IImsAosInfo.h"
 #include "ImsAosParameter.h"
-#include "IMtsClient.h"
 #include "utility/MtsDynamicLoader.h"
 #include "MtsServiceState.h"
 #include "message/MtsMessageController.h"
@@ -15,7 +14,7 @@ __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsServiceState::MtsServiceState(IN IMS_SINT32 nSlotId) :
-        m_nMtsServiceState(IMtsClient::STATE_INIT),
+        m_nMtsServiceState(MtsMessageController::STATE_INIT),
         m_bIsImsConnected(IMS_FALSE),
         m_bIsAosRegModAdmin(IMS_FALSE),
         m_bIsImsSuspend(IMS_FALSE),
@@ -51,13 +50,6 @@ PUBLIC
 void MtsServiceState::SetImsRegConnected(IN IMS_BOOL bConnected)
 {
     IMS_UINT32 nType = IImsAosInfo::REG_MODE_UNKNOWN;
-    MtsMessageController* pMtsMessageController = GetMtsMessageController();
-
-    if (pMtsMessageController == IMS_NULL)
-    {
-        IMS_TRACE_E(0, "pMtsMessageController is null", 0, 0, 0);
-        return;
-    }
 
     IMS_TRACE_I("MtsServiceState::SetImsRegConnected() m_bIsImsConnected(%s)/bConnected(%s)",
             _TRACE_B_(m_bIsImsConnected), _TRACE_B_(bConnected), 0);
@@ -157,38 +149,38 @@ void MtsServiceState::SetMtsMessageController(IN MtsMessageController* pMtsMessa
 }
 
 PUBLIC
-IMS_SINT32 MtsServiceState::GetSlotId()
+IMS_SINT32 MtsServiceState::GetSlotId() const
 {
     IMS_TRACE_D("GetSlotId[%d]", m_nSlotId, 0, 0);
     return m_nSlotId;
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::GetImsRegState()
+IMS_BOOL MtsServiceState::GetImsRegState() const
 {
     return m_bIsImsConnected;
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::GetImsRegMod()
+IMS_BOOL MtsServiceState::GetImsRegMod() const
 {
     return m_bIsAosRegModAdmin;
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::GetImsSuspendState()
+IMS_BOOL MtsServiceState::GetImsSuspendState() const
 {
     return m_bIsImsSuspend;
 }
 
 PUBLIC
-IMS_BOOL MtsServiceState::GetSmsOverIpState()
+IMS_BOOL MtsServiceState::GetSmsOverIpState() const
 {
     return m_bIsSmsOverIpConf;
 }
 
 PUBLIC
-IMS_SINT32 MtsServiceState::GetMtsServiceState()
+IMS_SINT32 MtsServiceState::GetMtsServiceState() const
 {
     return m_nMtsServiceState;
 }
@@ -200,15 +192,9 @@ void MtsServiceState::SetMtsServiceState(IN IMS_SINT32 nServiceState)
 }
 
 PUBLIC
-IMS_UINT32 MtsServiceState::GetConnectedServices()
+IMS_UINT32 MtsServiceState::GetConnectedServices() const
 {
     return m_nConnectedServices;
-}
-
-PUBLIC
-MtsMessageController* MtsServiceState::GetMtsMessageController()
-{
-    return m_pMtsMessageController;
 }
 
 PUBLIC
@@ -231,30 +217,16 @@ void MtsServiceState::OnImsConnected()
     SetImsRegConnected(IMS_TRUE);
 }
 
-// TODO: consider of utilizing this method for VZW E911 SMS case
-PUBLIC
-void MtsServiceState::OnImsConnected(IN IUSendSmsRequestParam* /*pToBeSentSms*/)
-{
-    IMS_TRACE_I("MtsServiceState::OnImsConnected() For Only VZW", 0, 0, 0);
-}
-
 PUBLIC
 void MtsServiceState::OnImsDisconnected(IN IMS_UINT32 nReason)
 {
-    MtsMessageController* pMtsMessageController = IMS_NULL;
-
     IMS_TRACE_I("MtsServiceState::OnImsDisconnected() Reason is (%d)", nReason, 0, 0);
 
     SetImsSuspendState(IMS_FALSE);
     SetImsRegConnected(IMS_FALSE);
 
     // if ims data connection is disconnected, terminate all pending messages.
-    pMtsMessageController = GetMtsMessageController();
-
-    if (pMtsMessageController != IMS_NULL)
-    {
-        pMtsMessageController->TerminateAllPendingMessages(IMS_FALSE);
-    }
+    m_pMtsMessageController->TerminateAllPendingMessages(IMS_FALSE);
 }
 
 PUBLIC
@@ -266,18 +238,11 @@ void MtsServiceState::OnImsDisconnecting(IN IMS_UINT32 nReason)
 PUBLIC
 void MtsServiceState::OnImsSuspended(IN IMS_UINT32 nReason)
 {
-    MtsMessageController* pMtsMessageController = IMS_NULL;
-
     IMS_TRACE_I("MtsServiceState::OnImsSuspended() Reason is (%d)", nReason, 0, 0);
     SetImsSuspendState(IMS_TRUE);
 
     IMS_TRACE_I("Mts transaction permanent failure", 0, 0, 0);
-    pMtsMessageController = GetMtsMessageController();
-
-    if (pMtsMessageController != IMS_NULL)
-    {
-        pMtsMessageController->TerminateAllPendingMessages(IMS_TRUE);
-    }
+    m_pMtsMessageController->TerminateAllPendingMessages(IMS_TRUE);
 }
 
 PUBLIC
@@ -302,17 +267,17 @@ void MtsServiceState::NotifySpecificMessage(
 PUBLIC
 IMS_SINT32 MtsServiceState::GetServiceState()
 {
-    IMS_SINT32 nState = IMtsClient::STATE_NOTREADY;
+    IMS_SINT32 nState = MtsMessageController::STATE_NOTREADY;
 
     if (m_bIsImsConnected)
     {
         if (m_bIsImsSuspend || (!m_bIsSmsOverIpConf) || m_bIsAosRegModAdmin)
         {
-            nState = IMtsClient::STATE_LIMITED;
+            nState = MtsMessageController::STATE_LIMITED;
         }
         else
         {
-            nState = IMtsClient::STATE_READY;
+            nState = MtsMessageController::STATE_READY;
         }
     }
 
@@ -335,13 +300,13 @@ void MtsServiceState::UpdateServiceState()
 PUBLIC
 IMS_BOOL MtsServiceState::IsMoServiceBlocked()
 {
-    return (GetMtsServiceState() != IMtsClient::STATE_READY);
+    return (GetMtsServiceState() != MtsMessageController::STATE_READY);
 }
 
 PUBLIC
 IMS_BOOL MtsServiceState::IsMtServiceBlocked()
 {
-    return (GetMtsServiceState() == IMtsClient::STATE_NOTREADY);
+    return (GetMtsServiceState() == MtsMessageController::STATE_NOTREADY);
 }
 
 PUBLIC

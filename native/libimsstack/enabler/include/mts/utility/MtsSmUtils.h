@@ -2,7 +2,6 @@
 #define MTS_SM_UTIL_H_
 
 #include "ByteArray.h"
-#include "IMtsClient.h"
 
 class MtsSmUtils final
 {
@@ -20,13 +19,6 @@ public:
     static const IMS_CHAR* GetMtiStringFrom3gpp2(IN const IMS_SINT32 nMti);
 
 public:
-    enum
-    {
-        MTS_SMS_FORMAT_3GPP = IMtsClient::SMSFORMAT_3GPP,
-        MTS_SMS_FORMAT_3GPP2 = IMtsClient::SMSFORMAT_3GPP2,
-        MTS_SMS_FORMAT_INVALID = IMtsClient::SMSFORMAT_INVALID
-    };
-
     enum
     {
         MTS_SMS_TRX_TYPE_SEND = 1,
