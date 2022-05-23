@@ -27,6 +27,7 @@ static const IMS_BOOL DEFAULT_DTX = CodecEvsConfig::DEFAULT_DTX;
 static const IMS_BOOL DEFAULT_DTX_RECV = CodecEvsConfig::DEFAULT_DTX_RECV;
 static const IMS_SINT32 DEFAULT_HF_ONLY = CodecEvsConfig::DEFAULT_HF_ONLY;
 static const IMS_SINT32 DEFAULT_EVS_MODESWITCH = CodecEvsConfig::DEFAULT_EVS_MODESWITCH;
+static const IMS_SINT32 DEFAULT_BR = CodecEvsConfig::DEFAULT_BR;
 static const IMS_SINT32 DEFAULT_BR_LIST = CodecEvsConfig::DEFAULT_BR_LIST;
 static const IMS_SINT32 DEFAULT_BW_LIST = CodecEvsConfig::DEFAULT_BW_LIST;
 static const IMS_SINT32 DEFAULT_CMR = CodecEvsConfig::DEFAULT_CMR;
@@ -54,7 +55,7 @@ TEST_F(CodecEvsConfigTest, GET_DEFAULT) {
     EXPECT_EQ(pConfig->GetHfOnly(), DEFAULT_HF_ONLY);
     EXPECT_EQ(pConfig->GetEvsModeSwitch(), DEFAULT_EVS_MODESWITCH);
     EXPECT_EQ(pConfig->GetBrList(), DEFAULT_BR_LIST);
-    EXPECT_EQ(pConfig->GetBr(), 6);
+    EXPECT_EQ(pConfig->GetBr(), DEFAULT_BR);
     EXPECT_EQ(pConfig->GetBwList(), DEFAULT_BW_LIST);
     EXPECT_EQ(pConfig->GetBw(), 2);
     EXPECT_EQ(pConfig->GetCmr(), DEFAULT_CMR);
