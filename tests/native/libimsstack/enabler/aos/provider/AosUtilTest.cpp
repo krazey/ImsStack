@@ -227,6 +227,7 @@ TEST_F(AosUtilTest, ManageIntList)
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, reasons);
     pAosUtil->RemoveElementToList(BLOCK_CELLULAR_OUT_OF_SERVICE, reasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
+    pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, reasons);
 
     pAosUtil->AddElementToList(BLOCK_CELLULAR_AIRPLANE_MODE_ON, compareReasons);
     pAosUtil->AddElementToList(BLOCK_WIFI_AIRPLANE_MODE_ON, compareReasons);
@@ -252,6 +253,7 @@ TEST_F(AosUtilTest, ManageIntList)
     pAosUtil->AddElementToList(BLOCK_CELLULAR_VOPS_OFF, reasons);
     EXPECT_FALSE(pAosUtil->IsElementExistInList(reasons, compareReasons));
     EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_TRUE));
+    EXPECT_FALSE(pAosUtil->IsListEqual(reasons, compareReasons, IMS_FALSE));
 
     pAosUtil->CombineLists(reasons, compareReasons, combineReasons);
     EXPECT_TRUE(pAosUtil->IsElementExistInList(reasons, combineReasons));

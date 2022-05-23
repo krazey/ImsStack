@@ -136,7 +136,6 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::Start()
         default:
             A_IMS_TRACE_D(AOSTAG, "state is invalid", 0, 0, 0);
             return IMS_FALSE;
-            break;
     }
 
     if (!SendSubscribe())
@@ -574,13 +573,13 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationWithNextPcscfRequi
 PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
         IN IMS_SINT32 nStatusCode)
 {
-    IMSVector<IMS_SINT32>& objErrRegRequiredInWifi =
-            GET_N_CONFIG(m_piContext->GetSlotId())->GetVowifiSubErrorRegRequired();
     if (m_piContext->GetConnection()->IsEpdgEnabled() == IMS_FALSE)
     {
         return IMS_FALSE;
     }
 
+    IMSVector<IMS_SINT32>& objErrRegRequiredInWifi =
+            GET_N_CONFIG(m_piContext->GetSlotId())->GetVowifiSubErrorRegRequired();
     IMS_UINT32 nSize = objErrRegRequiredInWifi.GetSize();
     if (nSize > 0)
     {
