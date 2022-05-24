@@ -56,8 +56,7 @@ AudioNego::AudioNego(IMS_SINT32 nSlotId) :
         m_lstOaModel(IMSList<OaModel*>()),
         m_objBaseProfile(AudioProfile()),
         m_pMediaEnvironment(IMS_NULL),
-        m_eSessionType(MEDIA_TYPE_AUDIO),
-        m_bForking(IMS_FALSE)
+        m_eSessionType(MEDIA_TYPE_AUDIO)
 {
     IMS_TRACE_I("+AudioNego() - slot[%d]", nSlotId, 0, 0);
 }
@@ -84,13 +83,6 @@ GLOBAL PUBLIC AudioNego* AudioNego::Create(
 {
     (void)eServiceType;
     return new AudioNego(nSlotId);
-}
-
-PUBLIC
-void AudioNego::Forking(IN AudioNego* pAudioNego)
-{
-    m_bForking = IMS_TRUE;
-    Copy(pAudioNego);
 }
 
 PUBLIC
@@ -497,7 +489,7 @@ PROTECTED VIRTUAL IMS_BOOL AudioNego::FormReoffer(IN ISessionDescriptor* pSessio
 }
 
 PUBLIC
-IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
+IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
         IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
         OUT MEDIA_DIRECTION* eDir)
 {
@@ -506,27 +498,18 @@ IMS_BOOL AudioNego::NegotiateSDP(IN NEGO_STATE eNegoState,
         return IMS_FALSE;
     }
 
-    IMS_TRACE_I("NegotiateSDP() NegoState[%d], Forking[%d]", eNegoState, m_bForking, 0);
+    IMS_TRACE_I("NegotiateSDP() NegoState[%d], Forking[%d]", eNegoState, bForking, 0);
 
     *eDir = MEDIA_DIRECTION_INVALID;
     switch (eNegoState)
     {
         case STATE_IDLE:
+        case STATE_NEGOTIATED:
             *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
             break;
         case STATE_OFFER_SENT:
-            *eDir = NegotiateAnswer(pSessionDescriptor, pDescriptor);
-            break;
-        case STATE_NEGOTIATED:
-            if (m_bForking == IMS_TRUE)
-            {
-                *eDir = NegotiateReanswer(pSessionDescriptor, pDescriptor);
-                m_bForking = IMS_FALSE;
-            }
-            else
-            {
-                *eDir = NegotiateOffer(pSessionDescriptor, pDescriptor);
-            }
+            *eDir = (bForking == IMS_TRUE) ? NegotiateReanswer(pSessionDescriptor, pDescriptor)
+                                           : NegotiateAnswer(pSessionDescriptor, pDescriptor);
             break;
         default:
             break;

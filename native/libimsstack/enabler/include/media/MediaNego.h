@@ -77,6 +77,7 @@ protected:
     MediaEnvironment* m_pMediaEnvironment;
     MEDIA_CONTENT_TYPE m_eSessionType;
     IMS_BOOL m_bIsActive;
+    IMS_BOOL m_bForking;
 };
 
 #endif

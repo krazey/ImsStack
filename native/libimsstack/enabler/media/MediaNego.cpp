@@ -33,7 +33,8 @@ MediaNego::MediaNego(IN IMS_SINT32 nSlotId) :
         m_pAudioNego(IMS_NULL),
         m_pMediaEnvironment(IMS_NULL),
         m_eSessionType(MEDIA_TYPE_INVALID),
-        m_bIsActive(IMS_FALSE)
+        m_bIsActive(IMS_FALSE),
+        m_bForking(IMS_FALSE)
 {
     IMS_TRACE_I("MediaNego() - Slot[%d]", nSlotId, 0, 0);
 }
@@ -105,7 +106,8 @@ IMS_BOOL MediaNego::Forking(IN MediaNego* pMediaNego)
 
     if (m_pAudioNego != IMS_NULL)
     {
-        m_pAudioNego->Forking(pMediaNego->GetAudioNego());
+        m_bForking = IMS_TRUE;
+        m_pAudioNego->Copy(pMediaNego->GetAudioNego());
     }
 
     return IMS_TRUE;
@@ -355,12 +357,13 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDi
             {
                 if (m_pAudioNego == NULL)
                 {
-                    break;  // WBT issue : static_analysis_div 199496
+                    break;
                 }
                 if (pNegotiatedAudioDescriptor == NULL)
                 {
-                    if (m_pAudioNego->NegotiateSDP(GetNegoState(), pSession->GetSessionDescriptor(),
-                                pDescriptor, (MEDIA_DIRECTION*)eAudioDir) == IMS_TRUE)
+                    if (m_pAudioNego->NegotiateSDP(GetNegoState(), m_bForking,
+                                pSession->GetSessionDescriptor(), pDescriptor,
+                                (MEDIA_DIRECTION*)eAudioDir) == IMS_TRUE)
                     {
                         pNegotiatedAudioDescriptor = pDescriptor;
                         errorReason = NO_ERROR;
@@ -385,6 +388,7 @@ IMS_BOOL MediaNego::NegotiateSDP(IN ISession* pSession, OUT IMS_SINT32* eAudioDi
                 break;
         }
     }
+    m_bForking = IMS_FALSE;
 
     // check the result of negitation
     MediaSessionConfig* pMediaSessionConfig =
