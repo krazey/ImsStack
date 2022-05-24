@@ -112,14 +112,13 @@ public:
     virtual void SetMediaEnvironment(IN MediaEnvironment* pEnvironment);
     virtual void SetSessionType(IN MEDIA_CONTENT_TYPE eSessionType);
     AudioConfiguration* GetConfig();
-    void Forking(IN AudioNego* pAudioNego);
     void Copy(IN AudioNego* pAudioNego);
 
     // -- Negotiation APIs -------------------------------------------------------------------------
     virtual IMS_BOOL FormSDP(IN NEGO_STATE eNegoState, IN ISessionDescriptor* pSessionDescriptor,
             OUT IMediaDescriptor* pDescriptor, IN MEDIA_CONTENT_TYPE eType,
             IN MEDIA_DIRECTION eDir);
-    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState,
+    virtual IMS_BOOL NegotiateSDP(IN NEGO_STATE eNegoState, IN IMS_BOOL bForking,
             IN ISessionDescriptor* pSessionDescriptor, IN IMediaDescriptor* pDescriptor,
             OUT MEDIA_DIRECTION* eDir);
     virtual void FinalizeSDP(IN IMS_SINTP nSessionDescriptorKey, NEGO_STATE eNegoState);
@@ -207,7 +206,6 @@ protected:
 
 private:
     MEDIA_CONTENT_TYPE m_eSessionType;
-    IMS_BOOL m_bForking;
     static const AString EVS_BR[12];
     static const AString EVS_BW[4];
     static const AString EVS_BW_LIST[9];
