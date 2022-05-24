@@ -180,7 +180,7 @@ IMS_SINT32 CodecEvsConfig::GetEvsBandwidthFromList(IN IMS_UINT32 nBandwidthList)
         return EVS_BANDWIDTH_SWB;
     }
 
-    for (IMS_SINT32 nFindBandwidth = EVS_BANDWIDTH_FB; nFindBandwidth >= 0; nFindBandwidth--)
+    for (IMS_SINT32 nFindBandwidth = EVS_BANDWIDTH_MAX; nFindBandwidth >= 0; nFindBandwidth--)
     {
         if (nBandwidthList & (1 << nFindBandwidth))
         {
@@ -199,8 +199,7 @@ IMS_SINT32 CodecEvsConfig::GetEvsBitrateFromList(IN IMS_UINT32 nBitrateList) con
         return EVS_PRIMARY_MODE_BITRATE_24_4_KBPS;
     }
 
-    for (IMS_SINT32 nFindBitrate = EVS_PRIMARY_MODE_BITRATE_24_4_KBPS; nFindBitrate >= 0;
-            nFindBitrate--)
+    for (IMS_SINT32 nFindBitrate = EVS_PRIMARY_MODE_BITRATE_MAX; nFindBitrate >= 0; nFindBitrate--)
     {
         if (nBitrateList & (1 << nFindBitrate))
         {
