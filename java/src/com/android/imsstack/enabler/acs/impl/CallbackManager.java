@@ -81,17 +81,15 @@ public class CallbackManager {
             }
         }
 
-        ImsLog.i("[" + mSlotId + "] " + "callback was registered already");
+        ImsLog.i("[" + mSlotId + "] " + "callback already exist");
         return false;
     }
 
     /**
-     * unregister callback object. if there is no registered callback, throw the
-     * IllegalArgumentException.
+     * unregister callback object. if there is no registered callback
      * @param callback callback instance to be unregistered
      */
-    public void unregisterCallback(IAcServiceImplCallback callback) throws
-            IllegalArgumentException {
+    public void unregisterCallback(IAcServiceImplCallback callback) {
         synchronized (mLock) {
             if (mCallbackList.contains(callback)) {
                 mCallbackList.remove(callback);
@@ -99,7 +97,7 @@ public class CallbackManager {
             }
         }
 
-        throw new IllegalArgumentException("callback was not registered");
+        ImsLog.i("[" + mSlotId + "] " + "callback is not exist");
     }
 
     /**
@@ -152,7 +150,6 @@ public class CallbackManager {
             }
         }
     }
-
 
     /**
      * get number of callbacks
