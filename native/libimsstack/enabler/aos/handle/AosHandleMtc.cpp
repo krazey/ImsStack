@@ -82,9 +82,9 @@ PUBLIC VIRTUAL AosHandleMtc::~AosHandleMtc()
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandleMtc::App_Notify()
+PUBLIC VIRTUAL IMS_BOOL AosHandleMtc::App_Notify()
 {
-    AosHandle::App_Notify();
+    return AosHandle::App_Notify();
 }
 
 /*

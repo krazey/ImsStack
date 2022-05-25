@@ -24,7 +24,9 @@
 #include "interface/IAosHandle.h"
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
+#include "../../interface/aos/MockIImsAosListener.h"
 
+using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -35,6 +37,7 @@ public:
     AosHandle* m_pAosHandle;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
+    MockIImsAosListener m_objMockIImsAosListener;
 
     const AString m_strAppId = AString("ims.app.test");
     const AString m_strServiceId = AString("ims.service.test");
@@ -107,6 +110,12 @@ protected:
     }
 
     void SetHandleState(IN IMS_UINT32 nState) { m_pAosHandle->SetHandleState(nState); }
+
+    IImsAosListener* GetListener() { return m_pAosHandle->m_piListener; }
+
+    void SetNotify(IN IMS_BOOL bNotify) { m_pAosHandle->m_bNotify = bNotify; }
+
+    IMS_BOOL GetNotify() { return m_pAosHandle->m_bNotify; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -301,4 +310,108 @@ TEST_F(AosHandleTest, ProcessFeatureTagChange_STATE_CONNECTED)
     SetHandleState(AosHandle::STATE_CONNECTED);
 
     m_pAosHandle->ProcessFeatureTagChange();
+}
+
+TEST_F(AosHandleTest, SetListener_)
+{
+    IImsAosListener* piListener = static_cast<IImsAosListener*>(&m_objMockIImsAosListener);
+    m_pAosHandle->SetListener(piListener);
+    EXPECT_EQ(GetListener(), piListener);
+}
+
+TEST_F(AosHandleTest, App_Notify_Null_Listener)
+{
+    m_pAosHandle->SetListener(IMS_NULL);
+    ASSERT_EQ(GetListener(), nullptr);
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnecting(_)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_No_Notify)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_FALSE);
+    ASSERT_FALSE(GetNotify());
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnecting(_)).Times(0);
+    EXPECT_FALSE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTED)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_TRUE);
+    ASSERT_TRUE(GetNotify());
+
+    SetHandleState(AosHandle::STATE_DISCONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(1);
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_STATE_CONNECTING)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_TRUE);
+    ASSERT_TRUE(GetNotify());
+
+    SetHandleState(AosHandle::STATE_CONNECTING);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnected(_)).Times(1);
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_STATE_CONNECTED)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_TRUE);
+    ASSERT_TRUE(GetNotify());
+
+    SetHandleState(AosHandle::STATE_CONNECTED);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Connected(_, _)).Times(1);
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
+}
+
+TEST_F(AosHandleTest, App_Notify_STATE_DISCONNECTING)
+{
+    m_pAosHandle->SetListener(static_cast<IImsAosListener*>(&m_objMockIImsAosListener));
+    ASSERT_NE(GetListener(), nullptr);
+
+    SetNotify(IMS_TRUE);
+    ASSERT_TRUE(GetNotify());
+
+    SetHandleState(AosHandle::STATE_DISCONNECTING);
+    EXPECT_CALL(m_objMockIImsAosListener, ImsAos_Disconnecting(_)).Times(1);
+    EXPECT_TRUE(m_pAosHandle->App_Notify());
 }
