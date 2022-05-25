@@ -72,6 +72,7 @@ public:
     IMS_SINT32 GetPolicyFor403ResponseForInvite() const;
     IMS_SINT32 GetPolicyForCheckingQosWhileCallUpgrading() const;
     IMS_BOOL IsRejectOfferlessInvite() const;
+    IMS_SINT32 GetCallMaxCount() const;
     const AString GetCallTerminateReasonHeader(IN TerminateType eType) const;
     const AString GetCallRejectReasonPhrase(IN RejectType eType) const;
 

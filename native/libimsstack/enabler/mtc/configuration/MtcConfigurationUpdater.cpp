@@ -110,6 +110,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::ImsVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING_INT);
     objItems.bRejectOfferlessInvite =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL);
+    objItems.nCallMaxCount = piCc->GetInt(CarrierConfig::ImsVoice::KEY_CALL_MAX_COUNT);
     // termiate reason
     objItems.objCallTerminateReasonHeaders.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING));

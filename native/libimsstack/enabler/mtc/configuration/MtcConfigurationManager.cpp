@@ -340,6 +340,12 @@ IMS_BOOL MtcConfigurationManager::IsRejectOfferlessInvite() const
 }
 
 PUBLIC
+IMS_SINT32 MtcConfigurationManager::GetCallMaxCount() const
+{
+    return m_objCarrierConfig.nCallMaxCount;
+}
+
+PUBLIC
 const AString MtcConfigurationManager::GetCallTerminateReasonHeader(IN TerminateType eType) const
 {
     IMS_UINT32 nIndex = static_cast<IMS_UINT32>(eType);
