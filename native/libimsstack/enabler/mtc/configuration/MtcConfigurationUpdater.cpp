@@ -157,6 +157,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_BY_USER_STRING));
     objItems.objCallRejectReasonPhrases.Push(piCc->GetString(
             CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING));
+    objItems.objCallRejectReasonPhrases.Push(
+            piCc->GetString(CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT));
 
     // vt configurations
     objItems.bVideoOnDefaultBearerSupported =

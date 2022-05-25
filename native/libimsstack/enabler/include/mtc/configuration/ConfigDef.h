@@ -159,7 +159,8 @@ enum class RejectType
     ON_CONVERTING = 4,
     NEGOTIATION_FAILURE = 5,
     NO_ANSWER_BY_USER = 6,
-    VOWIFI_OFF = 7
+    VOWIFI_OFF = 7,
+    USER_REJECT = 8,
 };
 
 enum class CarrierSpecificHeader

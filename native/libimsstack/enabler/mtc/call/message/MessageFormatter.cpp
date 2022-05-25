@@ -813,7 +813,7 @@ void MessageFormatter::GetRejectPhrase(IN const FailReason& objReason, OUT AStri
     switch (objReason.nReason)
     {
         case REJECT_REASON_DECLINE_USER:
-            /*strPhrase = GetRejectPhrase(RejectType::USER_DECLINE);*/
+            strPhrase = GetRejectPhrase(RejectType::USER_REJECT);
             break;
         case REJECT_REASON_BUSY_ISCSCALL:
             strPhrase = GetRejectPhrase(RejectType::ON_CS_CALL);
@@ -839,6 +839,12 @@ void MessageFormatter::GetRejectPhrase(IN const FailReason& objReason, OUT AStri
             strPhrase = AString::ConstNull();
             break;
     }
+
+    if (strPhrase.GetLength() <= 0)
+    {
+        strPhrase = AString::ConstNull();
+    }
+
     IMS_TRACE_D("GetRejectPhrase [%s]", strPhrase.GetStr(), 0, 0);
 }
 

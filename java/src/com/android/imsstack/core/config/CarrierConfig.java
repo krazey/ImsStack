@@ -401,6 +401,8 @@ public class CarrierConfig {
                 KEY_PREFIX + "call_reject_reason_phrase_no_answer_by_user_string";
         public static final String KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING =
                 KEY_PREFIX + "call_reject_reason_phrase_vowifi_off_string";
+        public static final String KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT =
+                KEY_PREFIX + "call_reject_reason_phrase_user_reject";
         // Media
         public static final String KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL =
                 KEY_PREFIX + "media_anbr_capability_in_modem_bool";
