@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <carrier_config>
     <!-- Carrier configurations -->
+    <!-- Aos -->
+    <int name="ims.isim_index_for_impu_int" value="0"/>
 
     <!-- Assets: non-carrier configurations -->
     <!-- Ims General -->
