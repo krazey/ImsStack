@@ -25,6 +25,7 @@ import android.telephony.ims.ImsRegistrationAttributes;
 import android.telephony.ims.RegistrationManager;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 
+import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.imsservice.mmtel.reg.IRegistrationNotifier;
 import com.android.imsstack.imsservice.sipcontroller.ISipTransportBaseRegistrationListener;
@@ -147,9 +148,37 @@ public final class ImsRegistrationImpl extends ImsRegistrationImplBase
         }
     }
 
+    @Override
+    public void triggerDeregistration(@ImsDeregistrationReason int reason) {
+        if (mRegTracker != null) {
+            mRegTracker.onDeregistrationTriggered(convertToAosReasonCause(reason));
+        }
+    }
+
     public void setSipTransportBaseRegListener(
             ISipTransportBaseRegistrationListener sipTransportImplListener) {
         mSipTransportBaseRegListener = sipTransportImplListener;
+    }
+
+    private int convertToAosReasonCause(int reason) {
+        switch (reason) {
+            case REASON_SIM_REMOVED:
+                return IAosRegistration.Cause.RADIO_SIM_REMOVED;
+            case REASON_SIM_REFRESH:
+                return IAosRegistration.Cause.RADIO_SIM_REFRESH;
+            case REASON_ALLOWED_NETWORK_TYPES_CHANGED:
+                return IAosRegistration.Cause.RADIO_ALLOWED_NETWORK_TYPES_CHANGED;
+            case REASON_NON_IMS_CAPABLE_NETWORK:
+                return IAosRegistration.Cause.NON_IMS_CAPABLE_NETWORK;
+            case REASON_RADIO_POWER_OFF:
+                return IAosRegistration.Cause.RADIO_POWER_OFF;
+            case REASON_HANDOVER_FAILED:
+                return IAosRegistration.Cause.HANDOVER_FAILED;
+            case REASON_VOPS_NOT_SUPPORTED:
+                return IAosRegistration.Cause.VOPS_NOT_SUPPORTED;
+            default:
+                return IAosRegistration.Cause.UNKNOWN;
+        }
     }
 
     private static void logi(String s) {
