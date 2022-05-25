@@ -431,7 +431,7 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* pi
     }
     else if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
     {
-        UpdateLocalTone(piSession, piMessage);
+        UpdateLocalTone(piSession);
     }
 
     IMS_UINT32 nTimeWaitingNetworkTone = GetDurationWaitingNetworkTone(piSession, piMessage);
@@ -683,7 +683,7 @@ void MtcMediaManager::FinalizeMediaInfo(IN IMS_UINTP nNegoId)
 }
 
 PRIVATE
-void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMessage)
+void MtcMediaManager::UpdateLocalTone(IN ISession* piSession)
 {
     IMS_TRACE_D("UpdateLocalTone", 0, 0, 0);
     IMS_BOOL bUseLocalTone = IMS_FALSE;
@@ -719,9 +719,7 @@ void MtcMediaManager::UpdateLocalTone(IN ISession* piSession, IN IMessage* piMes
             case LOCAL_TONE_WITH_180_BY_FORCE:
             {
                 // Verizon
-                IMS_SINT32 nStatusCode =
-                        (piMessage) ? piMessage->GetStatusCode() : SipStatusCode::SC_INVALID;
-                bUseLocalTone = (nStatusCode == SipStatusCode::SC_180);
+                bUseLocalTone = IMS_TRUE;
                 break;
             }
             default:
