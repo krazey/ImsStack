@@ -69,6 +69,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsRegErrCodeWithRetryAfterTimeOnlyDefined, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired, (),
             (const, override));
+    MOCK_METHOD(IMS_BOOL, IsRegistrationEventForCatRequired, (), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
