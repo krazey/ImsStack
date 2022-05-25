@@ -227,8 +227,11 @@ PUBLIC VIRTUAL IMS_BOOL MediaSession::SetEnvironment(IN MediaEnvironment* pEnvir
     return IMS_TRUE;  // do it later
 }
 
-PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(IN IMS_UINTP nNegoId)
+PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(
+        IN IMS_UINTP nNegoId, IN MEDIA_CONTENT_TYPE eMediaType)
 {
+    IMS_TRACE_I("CreateProfile() - nNegoId[%d], MediaType[%d]", nNegoId, eMediaType, 0);
+
     IMS_UINTP nMediaNego = CreateMediaNego(nNegoId);
     if (nMediaNego == IMS_NULL)
     {
@@ -238,6 +241,16 @@ PUBLIC VIRTUAL IMS_UINTP MediaSession::CreateProfile(IN IMS_UINTP nNegoId)
     if (CreateAudioMediaSession(nMediaNego) == IMS_NULL)
     {
         return IMS_NULL;
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_VIDEO))
+    {
+        // TODO_MEDIA ADD VideoSession
+    }
+
+    if (MEDIA_IS_CONTAINED_THIS_TYPE(eMediaType, MEDIA_TYPE_TEXT))
+    {
+        // TODO_MEDIA ADD TextSession
     }
 
     ProcessOfferSdp(nMediaNego, nNegoId);
@@ -838,7 +851,7 @@ IMS_UINTP MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
     MediaNego* pMediaNego = new MediaNego(m_nSlotId);
     if (pMediaNego == IMS_NULL)
     {
-        IMS_TRACE_E(0, "CreateProfile() - fail to create MediaNego", 0, 0, 0);
+        IMS_TRACE_E(0, "CreateMediaNego() - fail to create MediaNego", 0, 0, 0);
         return IMS_NULL;
     }
     pMediaNego->Create(m_pEnvironment->eServiceType);
@@ -850,7 +863,7 @@ IMS_UINTP MediaSession::CreateMediaNego(IN IMS_UINTP nNegoId)
         MediaNego* objExistingNego = FindMediaNego(nNegoId);
         if (objExistingNego == IMS_NULL)
         {
-            IMS_TRACE_I("CreateProfile() - invalid negoId", 0, 0, 0);
+            IMS_TRACE_I("CreateMediaNego() - invalid negoId", 0, 0, 0);
             return IMS_NULL;
         }
         pMediaNego->Forking(objExistingNego);

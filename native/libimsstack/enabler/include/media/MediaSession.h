@@ -102,7 +102,8 @@ public:
     virtual IMS_BOOL SetEnvironment(IN MediaEnvironment* pEnvironment);
 
     // -- Negotiation APIs ------------------------------------------------------------------------
-    virtual IMS_UINTP CreateProfile(IN IMS_UINTP nNegoID);
+    virtual IMS_UINTP CreateProfile(
+            IN IMS_UINTP nNegoID, IN MEDIA_CONTENT_TYPE eMediaType = MEDIA_TYPE_AUDIO);
     virtual IMS_BOOL DestroyProfile(IN IMS_UINTP nNegoID);
     virtual IMS_BOOL FormSDP(IN IMS_UINTP nNegoID, OUT ISession* pSession,
             IN MEDIA_CONTENT_TYPE eMediaType, IN IMS_SINT32 eAudioDir, IN IMS_SINT32 eVideoDir,
