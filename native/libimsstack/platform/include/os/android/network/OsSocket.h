@@ -94,6 +94,7 @@ protected:
     void SetCloseReason(IN IMS_SINT32 nReason);
     IMS_SOCKET GetSocket() const;
     SOCKET_RESULT DoSocketRecovery();
+    void BindSocketToIpSecTransform();
     void UnbindSocketFromIpSecTransform(IN IMS_SOCKET hSocket);
 
 #ifdef _DEBUG
