@@ -32,6 +32,7 @@
 #include "interface/IAosAppContext.h"
 #include "interface/IAosNConfiguration.h"
 #include "interface/IAosConnection.h"
+#include "interface/IAosService.h"
 #include "provider/AosProvider.h"
 #include "provider/AosStaticProfile.h"
 #include "provider/AosRetryRepository.h"
@@ -932,7 +933,20 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Terminated(IN IMS_SIN
 
 PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 nState)
 {
-    (void)nState;
+    if (nState == IRegInfoContact::STATE_ACTIVE)
+    {
+        IMS_BOOL bCatSupported =
+                GET_N_CONFIG(m_piContext->GetSlotId())->IsRegistrationEventForCatRequired();
+        if (bCatSupported == IMS_TRUE)
+        {
+            IAosService* piService =
+                    AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
+            if (piService != IMS_NULL)
+            {
+                piService->NotifyRegEventState(AosRegEvent::ACTIVE);
+            }
+        }
+    }
 
     IMS_BOOL bSupported = GET_N_CONFIG(m_piContext->GetSlotId())
                                   ->IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired();
@@ -946,7 +960,19 @@ PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_Active(IN IMS_SINT32 
     }
 }
 
-PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_InvalidBody() {}
+PROTECTED VIRTUAL void AosSubscription::ProcessNotifyState_InvalidBody()
+{
+    IMS_BOOL bCatSupported =
+            GET_N_CONFIG(m_piContext->GetSlotId())->IsRegistrationEventForCatRequired();
+    if (bCatSupported == IMS_TRUE)
+    {
+        IAosService* piService = AosProvider::GetInstance()->GetService(m_piContext->GetSlotId());
+        if (piService != IMS_NULL)
+        {
+            piService->NotifyRegEventState(AosRegEvent::INVALID);
+        }
+    }
+}
 
 PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
         IN IMS_SINT32 nSubState, IN IMS_SINT32 nReasonParam, IN IMS_BOOL bHasBody)
