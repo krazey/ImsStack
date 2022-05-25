@@ -1,5 +1,4 @@
 #include "call/IMtcCallContext.h"
-#include "CallInfo.h"
 #include "IMessage.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"

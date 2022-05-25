@@ -73,12 +73,13 @@ const IMS_CHAR MessageUtil::STR_SUPPORTED[] = "supported";
 const IMS_CHAR MessageUtil::STR_TIMER[] = "timer";
 const IMS_CHAR MessageUtil::STR_URN[] = "urn";
 const IMS_CHAR MessageUtil::STR_VIDEO[] = "video";
+const IMS_CHAR MessageUtil::STR_TEXT[] = "text";
 
 const IMS_SINT32 MessageUtil::INVALID_INDEX = -1;
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL IMessage* MessageUtil::GetPreviousResponse(IN ISession* piSession,
+PUBLIC GLOBAL IMessage* MessageUtil::GetPreviousResponse(IN const ISession* piSession,
         IN IMS_SINT32 eServiceMethod, IN IMS_SINT32 nResponseIndex /*= INVALID_INDEX*/)
 {
     if (piSession == IMS_NULL)
@@ -1016,7 +1017,7 @@ PUBLIC GLOBAL IMS_BOOL MessageUtil::HasSdp(IN const IMessage* piMessage)
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL IMS_BOOL MessageUtil::IsFocusConf(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsFocusConf(IN const IMessage* piMessage)
 {
     IMSList<AString> lstHeaders;
     if (GetHeaders(piMessage, ISipHeader::CONTACT_NORMAL, lstHeaders) == IMS_FAILURE)
@@ -1357,11 +1358,21 @@ PUBLIC GLOBAL IMS_RESULT MessageUtil::SetResourceListByEntryUri(IN_OUT IMessage*
 
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL IMS_BOOL MessageUtil::IsVideoFeatureIncluded(IN IMessage* piMessage)
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsVideoFeatureIncluded(IN const IMessage* piMessage)
 {
     AString strContact;
     GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strContact);
     return ContainsTag(strContact, STR_VIDEO) &&
+            ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
+}
+
+/* -------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------- */
+PUBLIC GLOBAL IMS_BOOL MessageUtil::IsTextFeatureIncluded(IN const IMessage* piMessage)
+{
+    AString strContact;
+    GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strContact);
+    return ContainsTag(strContact, STR_TEXT) &&
             ContainsTag(strContact, AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
 }
 
@@ -1570,7 +1581,7 @@ PUBLIC GLOBAL ServiceType MessageUtil::CheckServiceType(IN IMessage* piMessage,
 /* -------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------- */
 PUBLIC GLOBAL CallType MessageUtil::GetCallType(
-        IN IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView)
+        IN const IMessage* piMessage, IN ISession* piSession, IN IMS_BOOL bPeerView)
 {
     if (HasSdp(piMessage))
     {

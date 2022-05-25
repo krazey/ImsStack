@@ -1,32 +1,16 @@
 #ifndef CALL_INFO_H_
 #define CALL_INFO_H_
 
-#include "AString.h"
 #include "IMSTypeDef.h"
 #include "IMtcService.h"
+#include "call/IMtcCall.h"
 
-enum class CallType
-{
-    UNKNOWN = 0,
-    VOIP = 1,
-    VT = 2,
-    RTT = 3,
-    VIDEO_RTT = 4,
-};
-
-enum class PeerType
-{
-    MO,
-    MT,
-};
-
-struct CallInfo
+struct JniCallInfo
 {
 public:
-    CallInfo() :
-            eCallType(CallType::VOIP),
-            ePeerType(PeerType::MO),
+    JniCallInfo() :
             eServiceType(ServiceType::NORMAL),
+            eCallType(CallType::VOIP),
             bWifi(IMS_FALSE),
             bEmergency(IMS_FALSE),
             bOffline(IMS_FALSE),
@@ -35,16 +19,13 @@ public:
             bConferenceEnabled(IMS_FALSE),
             bConferenceSubscriptionRequired(IMS_FALSE),
             bRttCapable(IMS_FALSE),
-            bVideoCapable(IMS_FALSE),
-            strRemoteUri(AString::ConstNull()),
-            strSessionIdHeader(AString::ConstNull())
+            bVideoCapable(IMS_FALSE)
     {
     }
 
-    CallInfo(IN const CallInfo& objRhs) :
-            eCallType(objRhs.eCallType),
-            ePeerType(objRhs.ePeerType),
+    JniCallInfo(IN const JniCallInfo& objRhs) :
             eServiceType(objRhs.eServiceType),
+            eCallType(objRhs.eCallType),
             bWifi(objRhs.bWifi),
             bEmergency(objRhs.bEmergency),
             bOffline(objRhs.bOffline),
@@ -53,19 +34,16 @@ public:
             bConferenceEnabled(objRhs.bConferenceEnabled),
             bConferenceSubscriptionRequired(objRhs.bConferenceSubscriptionRequired),
             bRttCapable(objRhs.bRttCapable),
-            bVideoCapable(objRhs.bVideoCapable),
-            strRemoteUri(objRhs.strRemoteUri),
-            strSessionIdHeader(objRhs.strSessionIdHeader)
+            bVideoCapable(objRhs.bVideoCapable)
     {
     }
 
-    CallInfo& operator=(IN const CallInfo& objRhs)
+    JniCallInfo& operator=(IN const JniCallInfo& objRhs)
     {
         if (this != &objRhs)
         {
-            eCallType = objRhs.eCallType;
-            ePeerType = objRhs.ePeerType;
             eServiceType = objRhs.eServiceType;
+            eCallType = objRhs.eCallType;
             bWifi = objRhs.bWifi;
             bEmergency = objRhs.bEmergency;
             bOffline = objRhs.bOffline;
@@ -75,17 +53,14 @@ public:
             bConferenceSubscriptionRequired = objRhs.bConferenceSubscriptionRequired;
             bRttCapable = objRhs.bRttCapable;
             bVideoCapable = objRhs.bVideoCapable;
-            strRemoteUri = objRhs.strRemoteUri;
-            strSessionIdHeader = objRhs.strSessionIdHeader;
         }
 
         return *this;
     }
 
 public:
-    CallType eCallType;
-    PeerType ePeerType;
     ServiceType eServiceType;
+    CallType eCallType;
 
     IMS_BOOL bWifi;
     IMS_BOOL bEmergency;
@@ -96,9 +71,6 @@ public:
     IMS_BOOL bConferenceSubscriptionRequired;
     IMS_BOOL bRttCapable;
     IMS_BOOL bVideoCapable;
-
-    AString strRemoteUri;
-    AString strSessionIdHeader;
 };
 
 #endif

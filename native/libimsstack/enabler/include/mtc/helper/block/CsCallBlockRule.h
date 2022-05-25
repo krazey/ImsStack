@@ -1,7 +1,6 @@
 #ifndef CS_CALL_BLOCK_RULE_H_
 #define CS_CALL_BLOCK_RULE_H_
 
-#include "CallInfo.h"
 #include "helper/block/IMtcBlockRule.h"
 
 class IMtcCallContext;

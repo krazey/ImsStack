@@ -3,11 +3,12 @@
 
 #include "IMSList.h"
 #include "IMSTypeDef.h"
+#include "call/IMtcCall.h"
 #include "call/IMtcSessionContext.h"
 #include "call/message/MessageSender.h"
 #include "call/extension/MtcExtensionSet.h"
-#include "CallInfo.h"
 
+class IMessage;
 class IMtcExtensionSet;
 class ISession;
 class MtcSipInterfaceFactory;
@@ -15,19 +16,27 @@ class MtcSipInterfaceFactory;
 class MtcSession final : public IMtcSessionContext
 {
 public:
-    MtcSession(IN IMtcCallContext& objContext, IN ISession& objSession);
+    explicit MtcSession(
+            IN IMtcCallContext& objContext, IN ISession& objSession, IN CallType eCallType);
     virtual ~MtcSession();
     MtcSession(IN const MtcSession&) = delete;
     MtcSession& operator=(IN const MtcSession&) = delete;
 
     IMS_RESULT SendStart();
 
+    void HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequest);
+    void HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objResponse);
+
+    inline void SetCallType(IN CallType eCallType) { m_eCallType = eCallType; }  // TODO: tmp method
+
+    inline CallType GetCallType() const override { return m_eCallType; }
+    inline IMS_BOOL IsVideoCapable() const override { return m_bVideoCapable; }
+    inline IMS_BOOL IsRttCapable() const override { return m_bRttCapable; }
     inline ISession& GetISession() override { return m_objSession; }
     inline MessageSender& GetMessageSender() override { return m_objMessageSender; }
-    inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; };
+    inline MtcExtensionSet& GetExtensionSet() override { return m_objExtensionSet; }
 
     inline IMS_UINTP GetCallKey() const override { return m_objContext.GetCallKey(); }
-    inline IMS_BOOL IsEct() const override { return m_objContext.IsEct(); }
     inline IMS_BOOL IsHeldByMe() const override { return m_objContext.IsHeldByMe(); }
     inline CallInfo& GetCallInfo() override { return m_objContext.GetCallInfo(); }
     inline ParticipantInfo& GetParticipantInfo() override
@@ -43,14 +52,15 @@ public:
         return m_objContext.GetPreconditionManager();
     }
     inline UpdatingInfo& GetUpdatingInfo() override { return m_objContext.GetUpdatingInfo(); }
-    inline MtcSession* CreateSession(IN ISession& objSession) override
+    inline MtcSession* CreateSession(IN ISession& objSession, IN CallType eCallType) override
     {
-        return m_objContext.CreateSession(objSession);
+        return m_objContext.CreateSession(objSession, eCallType);
     }
     inline IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override
     {
         return m_objContext.CreateBlockChecker(lstRules);
     }
+    inline JniCallInfo CreateJniCallInfo() override { return m_objContext.CreateJniCallInfo(); }
     inline void DeleteUpdatingInfo() override { return m_objContext.DeleteUpdatingInfo(); }
     inline MtcTimerWrapper& GetTimer() override { return m_objContext.GetTimer(); }
     inline MtcSupplementaryService& GetSupplementaryService() override
@@ -98,12 +108,20 @@ public:
 private:
     IMSList<AString> GetSupportedOptionTags() const;
     void UpdateSessionProperty();
+    void UpdateFromRemoteMessage(IN const IMessage& objMessage);
+    AString GenerateSessionId() const;
+    IMS_BOOL HasAosFeature(IMS_UINT32 nFeature);
 
     IMtcCallContext& m_objContext;
     ISession& m_objSession;
 
     MessageSender m_objMessageSender;
     MtcExtensionSet m_objExtensionSet;
+
+    CallType m_eCallType;
+    IMS_BOOL m_bVideoCapable;
+    IMS_BOOL m_bRttCapable;
+    AString m_strSessionIdHeader;
 };
 
 #endif

@@ -5,7 +5,6 @@
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "IMtcCall.h"
-#include "CallInfo.h"
 #include "IMtcService.h"
 
 class IMtcCallManager;

@@ -9,6 +9,7 @@
 #include "IMtcCallStateListener.h"
 
 class IMtcCallManager;
+struct CallInfo;
 
 struct CallStateDetails
 {
@@ -50,8 +51,8 @@ public:
     void AddListener(IN IMtcCallStateListener* pListener);
     void RemoveListener(IN IMtcCallStateListener* pListener);
 
-    void UpdateCallState(IN CallKey nCallkey, IN CallInfo& objCallInfo, IN IMtcCall::State eState,
-            IN IMS_SINT32 nReason = FAIL_REASON_NONE);
+    void UpdateCallState(IN CallKey nCallkey, IN IMtcCall::State eState, IN CallType eCallType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason = FAIL_REASON_NONE);
 
 protected:
     virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMsg) override;

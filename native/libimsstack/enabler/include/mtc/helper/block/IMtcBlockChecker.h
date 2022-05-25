@@ -2,7 +2,6 @@
 #define INTERFACE_MTC_BLOCK_CHECKER_H_
 
 #include "helper/block/IMtcBlockRule.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
 
 /*

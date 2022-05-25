@@ -1,4 +1,3 @@
-#include "CallInfo.h"
 #include "ICoreService.h"
 #include "IMessage.h"
 #include "ImsIdentity.h"

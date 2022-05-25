@@ -40,7 +40,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
         return GetStateName();
     }
 
-    if (HandleUpdate(UpdateType::HOLD, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
+    if (HandleUpdate(UpdateType::HOLD, m_objContext.GetSession()->GetCallType(), pMediaInfo) ==
             IMS_FAILURE)
     {
         // TODO
@@ -52,7 +52,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::Hold(IN MediaInfo* pMediaInfo)
 PUBLIC VIRTUAL CallStateName EstablishedState::Resume(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Resume", 0, 0, 0);
-    if (HandleUpdate(UpdateType::RESUME, m_objContext.GetCallInfo().eCallType, pMediaInfo) ==
+    if (HandleUpdate(UpdateType::RESUME, m_objContext.GetSession()->GetCallType(), pMediaInfo) ==
             IMS_FAILURE)
     {
         // TODO
@@ -102,6 +102,10 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionTerminated(IN ISession* pi
 PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession* piSession)
 {
     IMS_TRACE_D("SessionUpdateReceived", 0, 0, 0);
+
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_UPDATE);
+
+    m_objContext.GetSession()->HandleResponse(IMessage::SESSION_UPDATE, *piMessage);
     m_objContext.GetMediaManager().GetMediaInfo(m_objContext.GetUpdatingInfo().GetNegotiatedInfo());
 
     // TODO, conference
@@ -109,7 +113,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     IMS_RESULT eResult = IMS_SUCCESS;
     CallStateName eStateName = CallStateName::UPDATING;
 
-    if (MessageUtil::HasSdp(piSession->GetPreviousRequest(IMessage::SESSION_UPDATE)))
+    if (MessageUtil::HasSdp(piMessage))
     {
         eResult = HandleReceivedUpdate(eStateName);
     }

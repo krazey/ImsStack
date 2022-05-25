@@ -8,11 +8,11 @@
 #include "Sip.h"
 #include "SipAddress.h"
 #include "IMtcContext.h"
+#include "call/IMtcCall.h"
 #include "dialingplan/MtcDialingPlan.h"
 #include "dialingplan/EmergencyDialingPlan.h"
 #include "util/TextParser.h"
 #include "helper/MtcAosConnector.h"
-#include "CallInfo.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 

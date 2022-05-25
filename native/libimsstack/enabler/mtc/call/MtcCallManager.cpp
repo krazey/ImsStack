@@ -1,6 +1,7 @@
 #include "call/IMtcCall.h"
 #include "call/MtcCall.h"
 #include "call/MtcCallManager.h"
+#include "call/MtcSession.h"
 #include "call/NullCall.h"
 #include "helper/CallStateProxy.h"
 #include "interface/mtc/IMtcCallStateListener.h"
@@ -103,7 +104,7 @@ PUBLIC VIRTUAL IMSList<IMtcCall*> MtcCallManager::GetCallsByType(IN CallType eCa
     return GetCallsByFilter(
             [eCallType](MtcCall* pCall)
             {
-                return pCall->GetCallInfo().eCallType == eCallType;
+                return pCall->GetSession()->GetCallType() == eCallType;
             });
 }
 

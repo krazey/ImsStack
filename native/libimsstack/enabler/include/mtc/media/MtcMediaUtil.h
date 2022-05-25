@@ -7,7 +7,7 @@
 #include "IMtcService.h"
 #include "MtcDef.h"
 #include "MediaNego.h"
-#include "interface/mtc/CallInfo.h"
+#include "call/IMtcCall.h"
 
 class MtcMediaUtil
 {

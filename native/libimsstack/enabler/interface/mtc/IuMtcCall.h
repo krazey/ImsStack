@@ -4,9 +4,9 @@
 #include "FailReason.h"
 #include "ImsMessageDef.h"
 #include "ImsMessage.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
 #include "IMSMap.h"
+#include "call/IMtcCall.h"
 
 class IuMtcService;
 class IMtcService;

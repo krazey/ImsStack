@@ -5,7 +5,6 @@
 #include "IMSTypeDef.h"
 #include "call/state/MtcCallState.h"
 #include "helper/block/IMtcBlockChecker.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
 #include "precondition/QosDef.h"
 
@@ -59,7 +58,6 @@ private:
     IMSList<AString> GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers);
     void SetResourceListForConference(
             IN_OUT IMessage& objMessage, IN IMSList<AString>& lstEntryUris);
-    void UpdateIncomingInformation(IN ISession* piSession);
     IMSList<IMtcBlockRule*> GetIncomingCallBlockRules();
     IMSList<IMtcBlockRule*> GetOutgoingCallBlockRules();
     void SetAcceptContact(IN ISipMessage* piSipMessage);

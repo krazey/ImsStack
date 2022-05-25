@@ -1,7 +1,6 @@
 #ifndef NETWORK_BLOCK_RULE_H_
 #define NETWORK_BLOCK_RULE_H_
 
-#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 

@@ -42,9 +42,9 @@ PUBLIC VIRTUAL CallStateName AlertingState::HandleUserAlert()
 PUBLIC VIRTUAL CallStateName AlertingState::Accept(IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("Accept", 0, 0, 0);
-    IMS_BOOL bCallTypeChanged = m_objContext.GetCallInfo().eCallType != eCallType;
 
-    m_objContext.GetCallInfo().eCallType = eCallType;
+    IMS_BOOL bCallTypeChanged = m_objContext.GetSession()->GetCallType() != eCallType;
+    m_objContext.GetSession()->SetCallType(eCallType);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
     objMediaManager.SetMediaInfo(*pMediaInfo);
@@ -119,8 +119,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionStarted(IN ISession* piSessio
 {
     IMS_TRACE_D("SessionStarted - ACK received", 0, 0, 0);
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
-    UpdateCallTypeFromMessage(piMessage, piSession);
-    m_objContext.GetSession()->GetExtensionSet().HandleRequest(IMessage::SESSION_ACK, *piMessage);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_ACK, *piMessage);
 
     // TODO: need to check NegotiationState::STATE_OFFER_SENT?
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
@@ -159,8 +158,8 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     IMS_TRACE_D("SessionEarlyMediaUpdated", 0, 0, 0);
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
-    UpdateCallTypeFromMessage(piMessage, piSession);
-    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -195,9 +194,8 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
-
-    UpdateCallTypeFromMessage(piMessage, piSession);  // TODO: why only in AlertingState?
-    NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_EARLY_UPDATE);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
+    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -223,8 +221,7 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionPRAckReceived(IN ISession* pi
     // FIXME: It's same as IncomingState except QoS check and UI notifying
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_PRACK);
-
-    UpdateCallTypeFromMessage(piMessage, piSession);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_PRACK, *piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -258,16 +255,4 @@ IMS_RESULT AlertingState::SendAccept()
     }
 
     return m_objContext.GetSession()->GetMessageSender().Accept();
-}
-
-PRIVATE
-void AlertingState::UpdateCallTypeFromMessage(IN IMessage* piMessage, IN ISession* piSession)
-{
-    CallType eNewCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_FALSE);
-    if (eNewCallType != CallType::UNKNOWN)
-    {
-        IMS_TRACE_D("UpdateCallTypeFromMessage : [%d] -> [%d]",
-                m_objContext.GetCallInfo().eCallType, eNewCallType, 0);
-        m_objContext.GetCallInfo().eCallType = eNewCallType;
-    }
 }

@@ -6,7 +6,6 @@
 #include "MtcDef.h"
 #include "IMSMap.h"
 #include "IMSTypeDef.h"
-#include "CallInfo.h"
 #include "IMtcService.h"
 
 class CallContext;
@@ -19,11 +18,25 @@ class JniMtcServiceThread;
 class MediaInfo;
 class SuppService;
 class IMtcCallContext;
-enum class CallType;
 enum class UpdateType;
 struct FailReason;
 
 using CallKey = IMS_ULONG;
+
+enum class CallType
+{
+    UNKNOWN = 0,
+    VOIP = 1,
+    VT = 2,
+    RTT = 3,
+    VIDEO_RTT = 4,
+};
+
+enum class PeerType
+{
+    MO,
+    MT,
+};
 
 class IMtcCall
 {
@@ -122,6 +135,61 @@ public:
 
     // TODO:
     virtual IMtcCallContext& GetCallContext() const = 0;
+};
+
+struct CallInfo
+{
+public:
+    explicit CallInfo() :
+            ePeerType(PeerType::MO),
+            eInitialCallType(CallType::VOIP),
+            bWifi(IMS_FALSE),
+            bEmergency(IMS_FALSE),
+            bOffline(IMS_FALSE),
+            bUssi(IMS_FALSE),
+            bConference(IMS_FALSE),
+            bEct(IMS_FALSE)
+    {
+    }
+
+    explicit CallInfo(IN const CallInfo& objRhs) :
+            ePeerType(objRhs.ePeerType),
+            eInitialCallType(objRhs.eInitialCallType),
+            bWifi(objRhs.bWifi),
+            bEmergency(objRhs.bEmergency),
+            bOffline(objRhs.bOffline),
+            bUssi(objRhs.bUssi),
+            bConference(objRhs.bConference),
+            bEct(objRhs.bEct)
+    {
+    }
+
+    CallInfo& operator=(IN const CallInfo& objRhs)
+    {
+        if (this != &objRhs)
+        {
+            ePeerType = objRhs.ePeerType;
+            eInitialCallType = objRhs.eInitialCallType;
+            bWifi = objRhs.bWifi;
+            bEmergency = objRhs.bEmergency;
+            bOffline = objRhs.bOffline;
+            bUssi = objRhs.bUssi;
+            bConference = objRhs.bConference;
+            bEct = objRhs.bEct;
+        }
+
+        return *this;
+    }
+
+public:
+    PeerType ePeerType;
+    CallType eInitialCallType;
+    IMS_BOOL bWifi;
+    IMS_BOOL bEmergency;
+    IMS_BOOL bOffline;
+    IMS_BOOL bUssi;
+    IMS_BOOL bConference;
+    IMS_BOOL bEct;
 };
 
 #endif

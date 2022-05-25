@@ -8,7 +8,7 @@
 #include <binder/Parcel.h>
 #include "IMSMap.h"
 
-struct CallInfo;
+struct JniCallInfo;
 struct FailReason;
 class MediaInfo;
 class SuppService;
@@ -22,34 +22,34 @@ public:
 
     inline void SetSlotId(IN IMS_SINT32 nSlotId) { m_nSlotId = nSlotId; }
 
-    void OnStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void OnStartFailed(IN const FailReason& objReason);
-    void OnProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnProgressing(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN IMS_BOOL bAlerted = IMS_FALSE);
-    void OnHeld(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void OnHoldFailed(IN const FailReason& objReason);
-    void OnResumed(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void OnResumeFailed(IN const FailReason& objReason);
-    void OnHeldBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnHeldBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnResumedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void OnTerminated(IN const FailReason& objReason);
-    void OnIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnIncomingResume(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnIncomingUpdate(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnIncomingUpdate(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void OnUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void OnUpdateFailed(IN const FailReason& objReason);
-    void OnUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
 
-    void OnMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+    void OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN const IMSList<ConfUser*>& objUsers);
     void OnMergeFailed(IN const FailReason& objReason);
@@ -63,12 +63,12 @@ public:
 
     void OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason& objReason);
 
-    void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallInfo* pCallInfo,
+    void OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN ParticipantInfo* pParticipantInfo);
 
 private:
-    void SetCallDetails(IN_OUT android::Parcel& objParcel, IN CallInfo* pCallInfo,
+    void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);
 
 private:

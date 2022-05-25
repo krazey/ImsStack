@@ -1,7 +1,6 @@
 #ifndef PROCESSING_CALL_BLOCK_RULE_H_
 #define PROCESSING_CALL_BLOCK_RULE_H_
 
-#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 

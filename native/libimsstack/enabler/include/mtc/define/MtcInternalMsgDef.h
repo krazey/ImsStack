@@ -3,7 +3,6 @@
 
 #include "ImsMessageDef.h"
 #include "IMSTypeDef.h"
-#include "CallInfo.h"
 #include "IMtcService.h"
 #include "MtcDef.h"
 #include "ServiceTrace.h"

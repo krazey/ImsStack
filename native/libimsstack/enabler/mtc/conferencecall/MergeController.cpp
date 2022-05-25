@@ -5,7 +5,6 @@
 #include "conferencecall/ConferenceUtils.h"
 #include "call/IMtcCallContext.h"
 #include "IMSList.h"
-#include "CallInfo.h"
 #include "MtcDef.h"
 #include "conferencecall/ConferenceOperationQueue.h"
 #include "conferencecall/CallConnectionIdManager.h"

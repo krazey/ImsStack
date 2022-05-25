@@ -50,9 +50,6 @@ private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?
     void HandleCancel(IN ISession* piSession, IN const FailReason& objReason);
-    IMS_BOOL IsRttCapable(IN IMessage* piMessage);
-    void UpdateCallType(IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bPeerView);
-    void UpdateRemoteFeatures(IN IMessage* piMessage);
     void HandleCountrySpecificServiceUrn(IN IMessage* piMessage);
     void SendProgressing();
     void OnStarted(IN ISession* piSession);

@@ -312,8 +312,8 @@ void MessageFormatter::SetAcceptContactHeader()
     strAcceptContact.Append(AString(Const3GPP::ICSI_MMTEL).Replace(":", "%3A"));
     strAcceptContact.Append(TextParser::CHAR_DQUOT);
 
-    if (m_objContext.GetCallInfo().eCallType == CallType::VT ||
-            m_objContext.GetCallInfo().eCallType == CallType::VIDEO_RTT)
+    if (m_objContext.GetCallType() == CallType::VT ||
+            m_objContext.GetCallType() == CallType::VIDEO_RTT)
     {
         strAcceptContact.Append(TextParser::CHAR_SEMICOLON);
         strAcceptContact.Append(MessageUtil::STR_VIDEO);
@@ -547,7 +547,7 @@ void MessageFormatter::SetSupportedHeader()
                 m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
     }
 
-    if (m_objContext.IsEct())
+    if (m_objContext.GetCallInfo().bEct)
     {
         MessageUtil::AddValueIfNotExists(
                 m_piNextMessage, MessageUtil::STR_REPLACES, ISipHeader::SUPPORTED);

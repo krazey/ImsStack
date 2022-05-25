@@ -4,7 +4,6 @@
 #include "call/IMtcCall.h"
 #include "MtcDef.h"
 
-class IMtcCall;
 class IMtcCallContext;
 class CallConnectionIdManager;
 class ConferenceParticipantList;

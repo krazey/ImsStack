@@ -25,12 +25,12 @@ PUBLIC VIRTUAL JniMtcCallThread::~JniMtcCallThread()
 }
 
 PUBLIC
-void JniMtcCallThread::OnStarted(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnStarted(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::STARTED);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
@@ -44,24 +44,24 @@ void JniMtcCallThread::OnStartFailed(IN const FailReason& objReason)
 }
 
 PUBLIC
-void JniMtcCallThread::OnProgressing(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnProgressing(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN IMS_BOOL bAlerted /* = IMS_FALSE*/)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::PROGRESSING);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     objParcel.writeInt32(bAlerted ? 1 : 0);
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnHeld(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnHeld(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::HELD);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
@@ -75,12 +75,12 @@ void JniMtcCallThread::OnHoldFailed(IN const FailReason& objReason)
 }
 
 PUBLIC
-void JniMtcCallThread::OnResumed(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnResumed(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::RESUMED);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
@@ -94,22 +94,22 @@ void JniMtcCallThread::OnResumeFailed(IN const FailReason& objReason)
 }
 
 PUBLIC
-void JniMtcCallThread::OnHeldBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnHeldBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::HELD_BY);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnResumedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnResumedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::RESUMED_BY);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
@@ -123,32 +123,32 @@ void JniMtcCallThread::OnTerminated(IN const FailReason& objReason)
 }
 
 PUBLIC
-void JniMtcCallThread::OnIncomingResume(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnIncomingResume(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::INCOMING_RESUME);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnIncomingUpdate(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnIncomingUpdate(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::INCOMING_UPDATE);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnUpdated(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnUpdated(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::UPDATED);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
@@ -162,23 +162,23 @@ void JniMtcCallThread::OnUpdateFailed(IN const FailReason& objReason)
 }
 
 PUBLIC
-void JniMtcCallThread::OnUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnUpdatedBy(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::UPDATED_BY);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     SendData2Java(objParcel);
 }
 
 PUBLIC
-void JniMtcCallThread::OnMerged(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
+void JniMtcCallThread::OnMerged(IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
         IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN const IMSList<ConfUser*>& objUsers)
 {
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::CONF_MERGED);
-    SetCallDetails(objParcel, pCallInfo, pMediaInfo, objSuppServices);
+    SetCallDetails(objParcel, objCallInfo, pMediaInfo, objSuppServices);
     JniMtcUtils::WriteConfUsersToParcel(objUsers, objParcel);
     SendData2Java(objParcel);
 }
@@ -242,16 +242,17 @@ void JniMtcCallThread::OnEctCompleted(IN IMS_RESULT nResult, IN const FailReason
     SendData2Java(objParcel);
 }
 
-void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallInfo* pCallInfo,
-            IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
-            IN ParticipantInfo* pParticipantInfo)
+void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
+        IN const JniCallInfo& objCallInfo, IN MediaInfo* pMediaInfo,
+        IN const IMSMap<SuppType, SuppService*>& objSuppServices,
+        IN ParticipantInfo* pParticipantInfo)
 {
     IMS_TRACE_D("OnIncomingCallReceived", 0, 0, 0);
     Parcel objParcel;
     objParcel.writeInt32(IuMtcCall::INCOMING_CALL_RECEIVED);
     objParcel.writeInt32(nCallKey);
 
-    JniMtcUtils::WriteCallInfoToParcel(pCallInfo, objParcel);
+    JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(pMediaInfo, objParcel);
 
     /* Display Info  // TODO: ParticipantInfo to be included in CallInfo? */
@@ -267,10 +268,10 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey, IN CallInfo
 }
 
 PRIVATE
-void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN CallInfo* pCallInfo,
+void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN const JniCallInfo& objCallInfo,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)
 {
-    JniMtcUtils::WriteCallInfoToParcel(pCallInfo, objParcel);
+    JniMtcUtils::WriteCallInfoToParcel(objCallInfo, objParcel);
     JniMtcUtils::WriteMediaInfoToParcel(pMediaInfo, objParcel);
     JniMtcUtils::WriteSuppServicesToParcel(objSuppServices, objParcel);
 }

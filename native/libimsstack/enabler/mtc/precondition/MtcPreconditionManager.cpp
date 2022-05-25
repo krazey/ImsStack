@@ -217,7 +217,7 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
 {
     IMS_BOOL bSupport = IMS_FALSE;
 
-    CallType eCallType = m_objContext.GetCallInfo().eCallType;
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
     switch (eCallType)
     {
         case CallType::VOIP:
@@ -962,7 +962,7 @@ PRIVATE
 IMS_UINT32 MtcPreconditionManager::GetMediaTypesFromCallType()
 {
     IMS_UINT32 eMediaTypes = MEDIATYPE_NONE;
-    CallType eCallType = m_objContext.GetCallInfo().eCallType;
+    CallType eCallType = m_objContext.GetSession()->GetCallType();
 
     if (eCallType == CallType::UNKNOWN)
     {

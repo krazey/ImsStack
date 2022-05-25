@@ -3,9 +3,10 @@
 
 #include "IMSList.h"
 #include "IMSTypeDef.h"
+#include "IMtcCall.h"
 #include "IMtcContext.h"
+#include "JniCallInfo.h"
 
-class ParticipantInfo;
 class IMtcBlockChecker;
 class IMtcBlockRule;
 class IMtcMediaManager;
@@ -16,8 +17,8 @@ class MtcSession;
 class MtcSupplementaryService;
 class MtcTimerWrapper;
 class MtcUiNotifier;
+class ParticipantInfo;
 class UpdatingInfo;
-struct CallInfo;
 
 class IMtcCallContext : public IMtcContext
 {
@@ -25,7 +26,6 @@ public:
     virtual ~IMtcCallContext(){};
 
     virtual IMS_UINTP GetCallKey() const = 0;
-    virtual IMS_BOOL IsEct() const = 0;
     virtual IMS_BOOL IsHeldByMe() const = 0;
 
     virtual CallInfo& GetCallInfo() = 0;
@@ -42,8 +42,9 @@ public:
     virtual void SetSession(IN MtcSession* pSession) = 0;
     virtual void SetHeldByMe(IN IMS_BOOL bHeldByMe) = 0;
 
-    virtual MtcSession* CreateSession(IN ISession& objSession) = 0;
+    virtual MtcSession* CreateSession(IN ISession& objSession, IN CallType eCallType) = 0;
     virtual IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) = 0;
+    virtual JniCallInfo CreateJniCallInfo() = 0;
 
     virtual void DeleteUpdatingInfo() = 0;
 };

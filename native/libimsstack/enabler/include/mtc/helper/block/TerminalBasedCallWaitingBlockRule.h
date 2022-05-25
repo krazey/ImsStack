@@ -1,7 +1,6 @@
 #ifndef TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
 #define TERMINAL_BASED_CALL_WAITING_BLOCK_RULE_H_
 
-#include "CallInfo.h"
 #include "IMSTypeDef.h"
 #include "helper/block/IMtcBlockRule.h"
 

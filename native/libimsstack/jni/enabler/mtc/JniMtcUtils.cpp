@@ -2,6 +2,7 @@
 #include "AString.h"
 #include "FailReason.h"
 #include "IMSTypeDef.h"
+#include "JniCallInfo.h"
 #include "JniMtcUtils.h"
 #include "MtcDef.h"
 #include <binder/Parcel.h>
@@ -19,9 +20,9 @@ PUBLIC GLOBAL CallType JniMtcUtils::ReadCallType(IN const android::Parcel& objPa
     return static_cast<CallType>(objParcel.readInt32());
 }
 
-PUBLIC GLOBAL CallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
+PUBLIC GLOBAL JniCallInfo JniMtcUtils::ReadCallInfo(IN const Parcel& objParcel)
 {
-    CallInfo objCallInfo;
+    JniCallInfo objCallInfo;
 
     objCallInfo.eCallType = ReadCallType(objParcel);
     objCallInfo.bWifi = (objParcel.readInt32()) ? IMS_TRUE : IMS_FALSE;
@@ -90,27 +91,27 @@ PUBLIC GLOBAL IMSList<ConfUser*> JniMtcUtils::ReadConferenceParticipants(IN cons
 }
 
 PUBLIC GLOBAL void JniMtcUtils::WriteCallInfoToParcel(
-        IN CallInfo* pCallInfo, IN_OUT Parcel& objParcel)
+        IN const JniCallInfo& objCallInfo, IN_OUT Parcel& objParcel)
 {
-    objParcel.writeInt32(static_cast<IMS_SINT32>(pCallInfo->eServiceType));
-    objParcel.writeInt32(static_cast<IMS_SINT32>(pCallInfo->eCallType));
-    IMS_SINT32 bWifi = (pCallInfo->bWifi) ? 1 : 0;
+    objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eServiceType));
+    objParcel.writeInt32(static_cast<IMS_SINT32>(objCallInfo.eCallType));
+    IMS_SINT32 bWifi = (objCallInfo.bWifi) ? 1 : 0;
     objParcel.writeInt32(bWifi);
-    IMS_SINT32 bEmergency = (pCallInfo->bEmergency) ? 1 : 0;
+    IMS_SINT32 bEmergency = (objCallInfo.bEmergency) ? 1 : 0;
     objParcel.writeInt32(bEmergency);
-    IMS_SINT32 bOffline = (pCallInfo->bOffline) ? 1 : 0;
+    IMS_SINT32 bOffline = (objCallInfo.bOffline) ? 1 : 0;
     objParcel.writeInt32(bOffline);
-    IMS_SINT32 bUssi = (pCallInfo->bUssi) ? 1 : 0;
+    IMS_SINT32 bUssi = (objCallInfo.bUssi) ? 1 : 0;
     objParcel.writeInt32(bUssi);
-    IMS_SINT32 bConf = (pCallInfo->bConference) ? 1 : 0;  // nConf? nIsConf?
+    IMS_SINT32 bConf = (objCallInfo.bConference) ? 1 : 0;  // nConf? nIsConf?
     objParcel.writeInt32(bConf);
-    IMS_SINT32 bEnabledConf = (pCallInfo->bConferenceEnabled) ? 1 : 0;
+    IMS_SINT32 bEnabledConf = (objCallInfo.bConferenceEnabled) ? 1 : 0;
     objParcel.writeInt32(bEnabledConf);
-    IMS_SINT32 bConfSub = (pCallInfo->bConferenceSubscriptionRequired) ? 1 : 0;
+    IMS_SINT32 bConfSub = (objCallInfo.bConferenceSubscriptionRequired) ? 1 : 0;
     objParcel.writeInt32(bConfSub);
-    IMS_SINT32 bRttCapable = (pCallInfo->bRttCapable) ? 1 : 0;
+    IMS_SINT32 bRttCapable = (objCallInfo.bRttCapable) ? 1 : 0;
     objParcel.writeInt32(bRttCapable);
-    IMS_SINT32 bVideoCapable = (pCallInfo->bVideoCapable) ? 1 : 0;
+    IMS_SINT32 bVideoCapable = (objCallInfo.bVideoCapable) ? 1 : 0;
     objParcel.writeInt32(bVideoCapable);
 }
 

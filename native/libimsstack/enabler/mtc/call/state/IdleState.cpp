@@ -1,4 +1,3 @@
-#include "conferencecall/ConferenceConfigurationWrapper.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
 #include "dialingplan/MtcDialingPlan.h"
@@ -27,7 +26,6 @@
 #include "helper/block/VopsBlockRule.h"
 #include "helper/block/TerminalBasedCallWaitingBlockRule.h"
 #include "call/MtcUiNotifier.h"
-#include "ServiceSystemTime.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "utility/MessageUtil.h"
@@ -51,16 +49,9 @@ PUBLIC VIRTUAL CallStateName IdleState::Start(IN CallType eCallType, IN const AS
     IMS_TRACE_D("Start", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
-    CallInfo& objCallInfo = m_objContext.GetCallInfo();
-    objCallInfo.ePeerType = PeerType::MO;
-    objCallInfo.eCallType = eCallType;
-    if (m_objContext.GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
-    {
-        objCallInfo.strSessionIdHeader = GenerateSessionId();
-    }
-
+    m_objContext.GetCallInfo().eInitialCallType = eCallType;
+    m_objContext.GetCallInfo().ePeerType = PeerType::MO;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
-
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
 
     m_objOperationAfterBlockCheck = [&]()
@@ -79,12 +70,10 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(IN CallType eCallType,
     IMS_TRACE_D("StartConference", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::START_CONFERENCE;  // TODO: deprecated.
 
-    CallInfo& objCallInfo = m_objContext.GetCallInfo();
-    objCallInfo.ePeerType = PeerType::MO;
-    objCallInfo.eCallType = eCallType;
-    objCallInfo.bConference = IMS_TRUE;
-    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);  // TODO:
-
+    m_objContext.GetCallInfo().eInitialCallType = eCallType;
+    m_objContext.GetCallInfo().ePeerType = PeerType::MO;
+    m_objContext.GetCallInfo().bConference = IMS_TRUE;
+    m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
     m_objContext.GetSupplementaryService().UpdateOutgoingServices(objSuppServices);
 
     m_objOperationAfterBlockCheck = [&]()
@@ -102,10 +91,9 @@ PUBLIC VIRTUAL CallStateName IdleState::StartConference(
     IMS_TRACE_D("StartConference", 0, 0, 0);
     m_eConferenceStartType = ConferenceType::START_CONFERENCE;
 
-    CallInfo& objCallInfo = m_objContext.GetCallInfo();
-    objCallInfo.ePeerType = PeerType::MO;
-    objCallInfo.eCallType = eCallType;
-    objCallInfo.bConference = IMS_TRUE;
+    m_objContext.GetCallInfo().eInitialCallType = eCallType;
+    m_objContext.GetCallInfo().ePeerType = PeerType::MO;
+    m_objContext.GetCallInfo().bConference = IMS_TRUE;
     m_objContext.GetParticipantInfo().UpdateFromRemoteNumber(strTarget);
 
     m_objOperationAfterBlockCheck = [&]()
@@ -127,9 +115,14 @@ PUBLIC VIRTUAL CallStateName IdleState::HandleIncoming(
     m_eConferenceStartType = ConferenceType::NOT_CONFERENCE;
 
     m_objContext.GetCallInfo().ePeerType = PeerType::MT;
+    if (MessageUtil::IsFocusConf(piSession->GetPreviousRequest(IMessage::SESSION_START)))
+    {
+        m_objContext.GetCallInfo().bConference = IMS_TRUE;
+    }
+
     m_objContext.GetUiNotifier().SetJniServiceThread(pServiceThread);
 
-    m_objContext.SetSession(m_objContext.CreateSession(*piSession));
+    m_objContext.SetSession(m_objContext.CreateSession(*piSession, CallType::UNKNOWN));
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
     if (m_objContext.GetConfigurationProxy().Is(Feature::REJECT_OFFERLESS_INVITE) &&
@@ -184,26 +177,19 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
 {
     ISession* piSession = GetISession();
 
-    UpdateIncomingInformation(piSession);
-
     InitMediaSession();
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    if (NegotiateExtension(m_objContext.GetSession(), piMessage, IMessage::SESSION_START) ==
-            IMS_FAILURE)
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_START, *piMessage);
+    m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
+    m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
+
+    if (NegotiateExtension(m_objContext.GetSession(), piMessage) == IMS_FAILURE)
     {
         return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
     }
 
-    m_objContext.GetCallInfo().eCallType = MessageUtil::GetCallType(piMessage, piSession, IMS_TRUE);
-    if (m_objContext.GetCallInfo().eCallType == CallType::UNKNOWN)
-    {
-        // UE must send full media list for the incoming INVITE w/o SDP
-        // TODO: but, let us optimize.
-        m_objContext.GetCallInfo().eCallType = CallType::VOIP;
-        m_objContext.GetMediaManager().UpdateMediaDirection(
-                MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
-    }
+    m_objContext.GetCallInfo().eInitialCallType = m_objContext.GetSession()->GetCallType();
 
     IMtcPreconditionManager& objPreconditionManager = m_objContext.GetPreconditionManager();
     objPreconditionManager.CreateQos(piSession);
@@ -246,7 +232,7 @@ PRIVATE
 CallStateName IdleState::ContinueStart(IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("ContinueStart", 0, 0, 0);
-    if (CreateISession() == IMS_FAILURE)
+    if (CreateISession(m_objContext.GetCallInfo().eInitialCallType) == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
@@ -274,7 +260,7 @@ CallStateName IdleState::ContinueConference(
         IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers)
 {
     IMS_TRACE_D("ContinueConference", 0, 0, 0);
-    if (CreateISession() == IMS_FAILURE)
+    if (CreateISession(m_objContext.GetCallInfo().eInitialCallType) == IMS_FAILURE)
     {
         m_objContext.GetMediaManager().Terminate();
         m_objContext.GetUiNotifier().SendStartFailed(FailReason(FAIL_REASON_UNKNOWN));
@@ -311,17 +297,6 @@ CallStateName IdleState::ContinueHandleIncoming()
 }
 
 PRIVATE
-AString IdleState::GenerateSessionId()
-{
-    // Pseudo-random 128-bit system secret key
-    AString strSessionId;
-    strSessionId.Sprintf("%08x%08x%08x%08x", IMS_SYS_GetTimeInMicroSeconds(), IMS_SYS_GetRandom0(),
-            IMS_SYS_GetRandom0(), IMS_SYS_GetRandom0());
-
-    return strSessionId;
-}
-
-PRIVATE
 IMSList<AString> IdleState::GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers)
 {
     // TODO: Pass param as entry URIs for MtcCall I/F.
@@ -345,36 +320,6 @@ void IdleState::SetResourceListForConference(
     }
     objMessage.AddHeader(SipHeaderName::CONTENT_TYPE, "multipart/mixed");
     // messageSender->SetResourceListsBody(pIMessage, AString::ConstNull(), lstEntryUris, IMS_TRUE);
-}
-
-PRIVATE
-void IdleState::UpdateIncomingInformation(IN ISession* piSession)
-{
-    IMS_TRACE_D("UpdateIncomingInformation", 0, 0, 0);
-    if (piSession == IMS_NULL)
-    {
-        return;
-    }
-
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-
-    m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
-    m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
-
-    AString strSessionId;
-    MessageUtil::GetHeader(piMessage, ISipHeader::UNKNOWN, strSessionId, "Session-ID");
-    m_objContext.GetCallInfo().strSessionIdHeader = strSessionId;
-
-    if (MessageUtil::IsFocusConf(piMessage))
-    {
-        m_objContext.GetCallInfo().bConference = IMS_TRUE;
-        m_objContext.GetCallInfo().bConferenceSubscriptionRequired =
-                ConferenceConfigurationWrapper::IsConferenceSubscriptionRequired();
-    }
-
-    AString strContact;
-    MessageUtil::GetHeader(piMessage, ISipHeader::CONTACT_NORMAL, strContact);
-    m_objContext.GetCallInfo().bRttCapable = MessageUtil::ContainsTag(strContact, "text");
 }
 
 PRIVATE

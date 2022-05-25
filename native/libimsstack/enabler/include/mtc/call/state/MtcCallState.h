@@ -4,11 +4,10 @@
 #include "IMSList.h"
 #include "IMSTypeDef.h"
 #include "ISessionListener.h"
+#include "MtcDef.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "helper/block/IMtcBlockChecker.h"
-#include "CallInfo.h"
-#include "MtcDef.h"
 
 class AString;
 class IMtcCallContext;
@@ -131,7 +130,7 @@ protected:
     IMS_SINT32 ConvertTerminateReasonToFailReason(IN IMS_SINT32 eReason);
     void NotifyHoldResumeState();
 
-    IMS_RESULT CreateISession();
+    IMS_RESULT CreateISession(IN CallType eCallType);
     ISession* GetISession();
 
     void InitMediaSession(IN MediaInfo* pMediaInfo = IMS_NULL);
@@ -156,8 +155,7 @@ protected:
     void UpdatePreconditionCapability(
             IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
     void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
-    IMS_RESULT NegotiateExtension(
-            IN MtcSession* pMtcSession, IN IMessage* piMessage, IN IMS_UINT32 eMethod);
+    IMS_RESULT NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage);
 
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;
