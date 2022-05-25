@@ -345,25 +345,25 @@ PUBLIC VIRTUAL void AosHandle::App_StateChanged(IN IMS_UINT32 nState, IN IMS_UIN
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandle::App_Notify()
+PUBLIC VIRTUAL IMS_BOOL AosHandle::App_Notify()
 {
     if (m_piListener == IMS_NULL)
     {
         A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no listener", m_strAppId.GetStr(),
                 m_strServiceId.GetStr(), 0);
-        return;
+        return IMS_FALSE;
     }
 
     if (m_bNotify == IMS_FALSE)
     {
         A_IMS_TRACE_D(APPPROFILE, "App_Notify :: [%s/%s] no notification", m_strAppId.GetStr(),
                 m_strServiceId.GetStr(), 0);
-        return;
+        return IMS_FALSE;
     }
 
     if (!CheckAppNotificationAndSetAppState())
     {
-        return;
+        return IMS_FALSE;
     }
 
     A_IMS_TRACE_I(
@@ -385,10 +385,12 @@ PUBLIC VIRTUAL void AosHandle::App_Notify()
             m_piListener->ImsAos_Disconnecting(GetImsAosReason(m_nReason));
             break;
         default:
-            break;
+            return IMS_FALSE;
     }
 
     ReportRegState();
+
+    return IMS_TRUE;
 }
 
 /*

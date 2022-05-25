@@ -67,7 +67,7 @@ public:
 
     // AoSApp to AoSHandle
     virtual void App_StateChanged(IN IMS_UINT32 nState, IN IMS_UINT32 nReason = 0) = 0;
-    virtual void App_Notify() = 0;
+    virtual IMS_BOOL App_Notify() = 0;
 
     // AoSHandle to AoSHandle
     virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked) = 0;

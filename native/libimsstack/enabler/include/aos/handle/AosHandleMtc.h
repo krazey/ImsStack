@@ -26,7 +26,7 @@ public:
     virtual ~AosHandleMtc();
 
     // IAosHandle
-    virtual void App_Notify();
+    virtual IMS_BOOL App_Notify();
 
     // IAosCallTrackerListener
     virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
