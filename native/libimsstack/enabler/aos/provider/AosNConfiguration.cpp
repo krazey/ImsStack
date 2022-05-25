@@ -282,6 +282,11 @@ AosNConfiguration::IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() c
     return m_objSpecificRegErr.bSpecificRegErrRetryCountSharedForRegAndRegEvent;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegistrationEventForCatRequired() const
+{
+    return m_objCarrierConfig.bRegistrationEventForCatRequired;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);

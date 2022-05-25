@@ -314,6 +314,14 @@ public:
     virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const = 0;
 
     /**
+     * @brief Returns whether Registration event for CAT(Card Application Toolkit) is supported or
+     *        not
+     *
+     * @return IMS_BOOL Return whether to be applied or not
+     */
+    virtual IMS_BOOL IsRegistrationEventForCatRequired() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
