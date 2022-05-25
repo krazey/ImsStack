@@ -123,6 +123,7 @@
     <string name="imsvoice.call_reject_reason_phrase_negotiation_failure_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_no_answer_by_user_string"></string>
     <string name="imsvoice.call_reject_reason_phrase_vowifi_off_string"></string>
+    <string name="imsvoice.call_reject_reason_phrase_user_reject"></string>
 
     <!-- Emergency -->
     <int name="imsemergency.emergency_cellular_scan_timer_millis_int" value="5000"/>

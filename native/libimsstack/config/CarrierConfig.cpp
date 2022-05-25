@@ -603,6 +603,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_NO_ANSWER_
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_no_answer_by_user_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_VOWIFI_OFF_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_vowifi_off_string";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_REJECT_REASON_PHRASE_USER_REJECT[] =
+        KEY_IMS_VOICE_PREFIX "call_reject_reason_phrase_user_reject";
 // Media
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_MEDIA_ANBR_CAPABILITY_IN_MODEM_BOOL[] =
         KEY_IMS_VOICE_PREFIX "media_anbr_capability_in_modem_bool";
