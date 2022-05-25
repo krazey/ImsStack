@@ -42,10 +42,15 @@ public:
     MOCK_METHOD(void, SetFirstPcscfIndex, (), (override));
     MOCK_METHOD(IMS_BOOL, CheckAndProcessChangeFromPco, (), (override));
     MOCK_METHOD(IMS_UINT32, GetChangedType, (), (override));
-    MOCK_METHOD(void, RequestCmd, (IN IMS_UINT32 nType), (override));
     MOCK_METHOD(void, SetListener, (IN IAosPcscfListener * piListener), (override));
 
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, CleanUp, (), (override));
+};
+
+class MockIAosPcscfListener : public IAosPcscfListener
+{
+public:
+    MOCK_METHOD(void, Pcscf_NotifyResult, (IN IMS_BOOL bResult), (override));
 };
 #endif  // MOCK_I_AOS_PCSCF_H_

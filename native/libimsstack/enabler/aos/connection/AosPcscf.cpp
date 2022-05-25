@@ -50,6 +50,7 @@ AosPcscf::AosPcscf(IN IAosAppContext* piAppContext) :
         m_piAppContext(piAppContext),
         m_piListener(IMS_NULL),
         m_piDnsQueryRetryTimer(IMS_NULL),
+        m_piAosNConfig(IMS_NULL),
         m_eRegType(AosRegistrationType::NORMAL),
         m_nChangedType(TYPE_CHANGED_DIFFERENT),
         m_bIsConfigured(IMS_FALSE),
@@ -85,6 +86,7 @@ PROTECTED VIRTUAL void AosPcscf::Init()
     A_IMS_TRACE_D(APPPROFILE, "Init", 0, 0, 0);
 
     m_eRegType = m_piAppContext->GetRegistration()->GetRegType();
+    m_piAosNConfig = GET_N_CONFIG(m_piAppContext->GetSlotId());
 }
 
 /*
@@ -502,6 +504,11 @@ Remarks
 */
 PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
 {
+    if (m_objPcscfList.GetSize() == 0)
+    {
+        return -1;
+    }
+
     for (IMS_UINT32 nAt = m_nCurrentPcscfIndex + 1; nAt < m_objPcscfList.GetSize(); nAt++)
     {
         Pcscf* pPcscf = m_objPcscfList.GetAt(nAt);
@@ -511,7 +518,7 @@ PUBLIC VIRTUAL IMS_SINT32 AosPcscf::GetNextPcscfIndex()
         }
     }
 
-    if (GET_N_CONFIG(m_piAppContext->GetSlotId())->GetRegistrationRetryDefaultPolicy() ==
+    if (m_piAosNConfig->GetRegistrationRetryDefaultPolicy() ==
             CarrierConfig::Assets::DEFAULT_RETRY_POLICY_CIRCULAR_NEXT_PCSCF)
     {
         for (int nAt = 0; nAt <= m_nCurrentPcscfIndex; nAt++)
@@ -628,16 +635,6 @@ Remarks
 PUBLIC VIRTUAL IMS_UINT32 AosPcscf::GetChangedType()
 {
     return m_nChangedType;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void AosPcscf::RequestCmd(IN IMS_UINT32 nType)
-{
-    (void)nType;
 }
 
 /*
@@ -1064,7 +1061,7 @@ Remarks
 */
 PROTECTED VIRTUAL IMS_SINT32 AosPcscf::GetDefaultPcscfPort()
 {
-    return GET_N_CONFIG(m_piAppContext->GetSlotId())->GetPcscfPort();
+    return m_piAosNConfig->GetPcscfPort();
 }
 
 /*
@@ -1190,12 +1187,12 @@ Remarks
 PRIVATE
 IMS_SINT32 AosPcscf::GetPcscfPort()
 {
-    const ISubscriberConfig* piSubConfig = Configuration::GetInstance()->GetSubscriberConfig(
-            AString::ConstNull(), m_piAppContext->GetSlotId());
+    const ISubscriberConfig* piSubsConfig =
+            GetSubscriberConfig((IsFakeDiscoverySchemes()) ? IAosSubscriber::FAKE : -1);
 
-    if (piSubConfig != IMS_NULL)
+    if (piSubsConfig != IMS_NULL)
     {
-        ServerAddress* pServerAddress = piSubConfig->GetPcscfAddress();
+        ServerAddress* pServerAddress = piSubsConfig->GetPcscfAddress();
         if (pServerAddress != IMS_NULL)
             return pServerAddress->GetPort();
     }

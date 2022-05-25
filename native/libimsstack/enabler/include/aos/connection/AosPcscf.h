@@ -18,6 +18,7 @@
 
 #include "ITimer.h"
 #include "IPAddress.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosPcscf.h"
 #include "IConfigUpdateListener.h"
 #include "IEventListener.h"
@@ -196,8 +197,6 @@ public:
     virtual IMS_BOOL CheckAndProcessChangeFromPco();
     virtual IMS_UINT32 GetChangedType();
 
-    virtual void RequestCmd(IN IMS_UINT32 nType);
-
     virtual void SetListener(IN IAosPcscfListener* piListener);
 
 protected:
@@ -264,6 +263,7 @@ protected:
     IAosAppContext* m_piAppContext;
     IAosPcscfListener* m_piListener;
     ITimer* m_piDnsQueryRetryTimer;
+    IAosNConfiguration* m_piAosNConfig;
 
     AosRegistrationType m_eRegType;
     IMS_UINT32 m_nChangedType;
@@ -281,5 +281,8 @@ protected:
     IMSList<RetryHost*> m_objRetryHostList;
 
     AString m_strTag;
+
+protected:
+    friend class AosPcscfTest;
 };
 #endif  // AOS_PCSCF_H_

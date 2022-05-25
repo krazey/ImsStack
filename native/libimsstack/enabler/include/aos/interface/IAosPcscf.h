@@ -64,8 +64,6 @@ public:
     virtual IMS_BOOL CheckAndProcessChangeFromPco() = 0;
     virtual IMS_UINT32 GetChangedType() = 0;
 
-    virtual void RequestCmd(IN IMS_UINT32 nType) = 0;
-
     virtual void SetListener(IN IAosPcscfListener* piListener) = 0;
 
     enum
