@@ -86,7 +86,7 @@ protected:
     virtual void Condition_RequestCommand(IN IMS_UINT32 nCommand, IN IMS_UINT32 nReason = 0);
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
 
     static const IMS_UINT32 EPDN_RELEASE_DELAY_TIME_MILLIS = 2000;
 

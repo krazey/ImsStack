@@ -20,84 +20,92 @@
 #include "IMSMap.h"
 
 #include "IEventListener.h"
-// #include "IUCCallListener.h" _UC_TO_MTC_
 #include "interface/IAosCallTracker.h"
 #include "interface/IAosServicePhoneListener.h"
+#include "../../interface/mtc/IMtcCallStateListener.h"
 
 class AosServicePhoneListener;
 
-class AosCallTracker : public IAosCallTracker, public IEventListener, public AosServicePhoneListener
-//, public IUCCallListener _UC_TO_MTC_
+class AosCallTracker :
+        public IAosCallTracker,
+        public IEventListener,
+        public AosServicePhoneListener,
+        public IMtcCallStateListener
 {
 public:
     AosCallTracker(IN IMS_SINT32 nSlotId_);
     virtual ~AosCallTracker();
 
-    virtual IMS_BOOL IsCsCallActive() const;
-    virtual IMS_BOOL IsNormalCallActive() const;
-    virtual IMS_BOOL IsEmergencyCallActive() const;
-    virtual IMS_BOOL IsVideoCallingActive() const;
+    void SetMtcReady() const override;
 
-    virtual IMS_SINT32 GetSlotId() const;
-    virtual IMS_UINT32 GetCallState(IN IMS_UINT32 nType) const;
-    virtual IMS_UINT32 GetSessionType(IN IMS_UINT32 nType) const;
+    IMS_BOOL IsCsCallActive() const override;
+    IMS_BOOL IsNormalCallActive() const override;
+    IMS_BOOL IsEmergencyCallActive() const override;
+    IMS_BOOL IsVideoCallingActive() const override;
 
-    virtual void SetCsCallStateWatchMode();
-    virtual void SetActiveCsCallState(IN IMS_UINT32 nActiveCsState);
+    IMS_SINT32 GetSlotId() const override;
+    CallState GetCallState(IN IMS_UINT32 nType) const override;
 
-    virtual void SetListener(IN IAosCallTrackerListener* piListener);
-    virtual void RemoveListener(IN IAosCallTrackerListener* piListener);
+    void SetCsCallStateWatchMode() override;
+    void SetActiveCsCallState(IN CallState eActiveCsState) override;
 
-protected:
-    void AddOrUpdateCall(
-            IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey, IN IMS_UINT32 nState);
-    void RemoveCall(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls, IN IMS_SINTP nKey);
+    void SetListener(IN IAosCallTrackerListener* piListener) override;
+    void RemoveListener(IN IAosCallTrackerListener* piListener) override;
 
-    IMS_UINT32 GetConvertedState(IN IMS_UINT32 nState);
-    IMS_UINT32 GetTotalState(IN IMSMap<IMS_SINTP, IMS_UINT32>& objCalls);
-    IMS_UINT32 GetTotalSessionType(IN IMSMap<IMS_SINTP, IMS_UINT32>& objSessionTypes);
+private:
+    template <typename T>
+    void AddOrUpdateCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey, IN T eValue);
+    template <typename T>
+    void RemoveCall(IN IMSMap<CallKey, T>& objCalls, IN CallKey eKey);
 
-    IMS_UINT32 GetState(IN IMS_UINT32 nType) const;
-    void SetState(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    CallState GetConvertedState(IN IMtcCall::State eState);
+    CallType GetConvertedType(IN Type eType);
+    CallState GetTotalState(IN IMSMap<CallKey, CallState>& objCalls);
+    IMS_UINT32 GetTotalCallType(IN IMSMap<CallKey, CallType>& objCallTypes);
+    IMS_BOOL IsExistCallType(IN CallType eCallType) const;
 
-    void Notify(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    CallState GetState(IN IMS_UINT32 nType) const;
+    void SetState(IN IMS_UINT32 nType, IN CallState eState);
 
-    virtual void ProcessCsChanged(IN IMS_UINT32 nState);
-    virtual void ProcessEmergencyChanged(IN IMS_SINTP nKey, IN IMS_UINT32 nState);
-    virtual void ProcessNormalChanged(
-            IN IMS_SINTP nKey, IN IMS_UINT32 nState, IN IMS_SINT32 nSessionType);
+    void Notify(IN IMS_UINT32 nType, IN CallState eState);
+
+    void ProcessCsChanged(IN CallState eState);
+    void ProcessEmergencyChanged(IN CallKey eKey, IN CallState eState);
+    void ProcessNormalChanged(IN CallKey nCallKey, IN CallState eCallState, IN CallType eCallType);
 
     // IEventListener
-    virtual void Event_NotifyEvent(
-            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) override;
 
     // AosServicePhoneListener
-    virtual void ServicePhone_PreciseCallStateChanged(IN PreciseCallState eState);
+    void ServicePhone_PreciseCallStateChanged(IN PreciseCallState eState) override;
 
-    // IUCCallListener _UC_TO_MTC_
-    virtual void ChangedCallState(IN IMS_UINTP nParam);
-    virtual void ChangedCallTotalState(IN IMS_UINTP nParam);
+    // IMtcCallStateListener
+    void OnCallStateChanged(IN CallKey nCallKey, IN State eState, IN Type eType,
+            IN IMS_BOOL bEmergency, IN IMS_SINT32 nReason) override;
+    void OnTotalCallStateChanged(IN State eState) override;
 
     // Log
     static const IMS_CHAR* TypeToString(IN IMS_UINT32 nType);
-    static const IMS_CHAR* StateToString(IN IMS_UINT32 nState);
-    void PrintSessionType(IN IMS_UINT32 nSessType);
+    static const IMS_CHAR* StateToString(IN CallState eState);
+    static const IMS_CHAR* CallTypeToString(IN CallType eType);
 
-protected:
+    void PrintCallTypes(IN IMS_UINT32 nCallTypes);
+
+private:
     IMS_SINT32 m_nSlotId;
-    IMS_UINT32 m_nCsState;
-    IMS_UINT32 m_nNormalState;
-    IMS_UINT32 m_nEmergencyState;
-    IMS_UINT32 m_nNormalSessionType;
-    IMS_UINT32 m_nActiveCsState;
+    CallState m_eCsState;
+    CallState m_eNormalState;
+    CallState m_eEmergencyState;
+    IMS_UINT32 m_nNormalCallType;
+    CallState m_eActiveCsState;
 
-    IMSMap<IMS_SINTP, IMS_UINT32> m_objNormalCalls;
-    IMSMap<IMS_SINTP, IMS_UINT32> m_objEmergencyCalls;
-    IMSMap<IMS_SINTP, IMS_UINT32> m_objNormalSessionTypes;
+    IMSMap<CallKey, CallState> m_objNormalCalls;
+    IMSMap<CallKey, CallState> m_objEmergencyCalls;
+    IMSMap<CallKey, CallType> m_objNormalCallTypes;
 
     IMSList<IAosCallTrackerListener*> m_objListeners;
 
-private:
     AString m_strTag;
 };
 

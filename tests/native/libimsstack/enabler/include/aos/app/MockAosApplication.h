@@ -159,8 +159,8 @@ public:
     MOCK_METHOD(void, Registration_StateChanged, (IN IMS_UINT32 nResult, IN IMS_UINT32 nReason),
             (override));
     MOCK_METHOD(void, Registration_PreNotify, (IN IMS_UINT32 nPreReason), (override));
-    MOCK_METHOD(void, CallTracker_StateChanged, (IN IMS_UINT32 nType, IN IMS_UINT32 nState),
-            (override));
+    MOCK_METHOD(
+            void, CallTracker_StateChanged, (IN IMS_UINT32 nType, IN CallState eState), (override));
     MOCK_METHOD(void, NetTracker_StatusChanged, (), (override));
     MOCK_METHOD(void, Event_NotifyEvent,
             (IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam), (override));

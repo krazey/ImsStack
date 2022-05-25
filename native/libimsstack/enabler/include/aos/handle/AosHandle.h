@@ -105,7 +105,7 @@ public:
     virtual void UpdateFeature(IN IMSList<ImsAosFeatureTag*>& objFeatureTag);
 
     // IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN IMS_UINT32 nState);
+    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
 
     // IAosNetTrackerListener
     virtual void NetTracker_StatusChanged();

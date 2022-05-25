@@ -444,14 +444,14 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 n
 }
 
 PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 m_nState)
+        IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_EMERGENCY)
     {
         return;
     }
 
-    IMS_BOOL bCurrState = (m_nState > IAosCallTracker::STATE_IDLE) ? IMS_TRUE : IMS_FALSE;
+    IMS_BOOL bCurrState = (eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE;
     if (IsImsCall() != bCurrState)
     {
         SetImsCall(bCurrState);

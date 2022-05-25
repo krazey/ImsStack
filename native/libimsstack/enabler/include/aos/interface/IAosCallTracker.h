@@ -17,10 +17,13 @@
 #define INTERFACE_AOS_CALL_TRACKER_H_
 
 class IAosCallTrackerListener;
+enum class CallState;
 
 class IAosCallTracker
 {
 public:
+    virtual void SetMtcReady() const = 0;
+
     virtual IMS_BOOL IsCsCallActive() const = 0;
     virtual IMS_BOOL IsNormalCallActive() const = 0;
     virtual IMS_BOOL IsEmergencyCallActive() const = 0;
@@ -30,11 +33,10 @@ public:
     virtual IMS_BOOL IsVideoCallingActive() const = 0;
 
     virtual IMS_SINT32 GetSlotId() const = 0;
-    virtual IMS_UINT32 GetCallState(IN IMS_UINT32 nType) const = 0;
-    virtual IMS_UINT32 GetSessionType(IN IMS_UINT32 nType) const = 0;
+    virtual CallState GetCallState(IN IMS_UINT32 nType) const = 0;
 
     virtual void SetCsCallStateWatchMode() = 0;
-    virtual void SetActiveCsCallState(IN IMS_UINT32 nActiveCsState) = 0;
+    virtual void SetActiveCsCallState(IN CallState eActiveCsState) = 0;
 
     virtual void SetListener(IN IAosCallTrackerListener* piListener) = 0;
     virtual void RemoveListener(IN IAosCallTrackerListener* piListener) = 0;
@@ -45,23 +47,16 @@ public:
         TYPE_NORMAL,
         TYPE_EMERGENCY
     };
-
-    enum
-    {
-        STATE_IDLE = 0,
-        STATE_TERMINATING = 1,
-        STATE_RINGBACK = 2,
-        STATE_RINGING = 3,
-        STATE_ALERTING = 4,
-        STATE_OFFHOOK = 5
-    };
-
-    enum
-    {
-        SESSION_TYPE_NONE = 0x00000000,
-        SESSION_TYPE_VOIP = 0x00000001,
-        Session_TYPE_VS = 0x00000002,
-        SESSION_TYPE_VT = 0x00000004
-    };
 };
+
+enum class CallState
+{
+    IDLE,
+    TERMINATING,
+    RINGBACK,
+    RINGING,
+    ALERTING,
+    OFFHOOK
+};
+
 #endif  // INTERFACE_AOS_CALL_TRACKER_H_

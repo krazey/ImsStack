@@ -369,14 +369,15 @@ PROTECTED VIRTUAL void AosCondition::Event_NotifyEvent(
 }
 
 PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+        IN IMS_UINT32 nType, IN CallState eState)
 {
     A_IMS_TRACE_I(APPPROFILE, "(%s) Call state [%d]",
-            nType == IAosCallTracker::TYPE_CS ? "CS" : "Normal", nState, 0);
+            nType == IAosCallTracker::TYPE_CS ? "CS" : "Normal", static_cast<IMS_UINT32>(eState),
+            0);
 
     if (nType == IAosCallTracker::TYPE_CS)
     {
-        if (nState == IAosCallTracker::STATE_OFFHOOK)
+        if (eState == CallState::OFFHOOK)
         {
             SetBlock(BLOCK_CSCALL_STARTED);
         }
@@ -386,7 +387,8 @@ PROTECTED VIRTUAL void AosCondition::CallTracker_StateChanged(
         }
     }
 
-    SendConditionEvent(AosServiceAvailable::EVENT_CALL, nType, nState, SERVICE_WIFI);
+    SendConditionEvent(
+            AosServiceAvailable::EVENT_CALL, nType, static_cast<IMS_UINT32>(eState), SERVICE_WIFI);
 }
 
 PROTECTED VIRTUAL void AosCondition::NetTracker_StatusChanged()

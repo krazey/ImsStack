@@ -324,8 +324,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessAppActivatedTimerExpired()
 {
     StopTimer(TIMER_APP_ACTIVATED);
 
-    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) !=
-            IAosCallTracker::STATE_OFFHOOK)
+    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) != CallState::OFFHOOK)
     {
         ProcessCleanAll();
     }
@@ -351,8 +350,7 @@ PROTECTED VIRTUAL void AosEApplication::ProcessAppTerminatedTimerExpired()
 {
     StopTimer(TIMER_APP_TERMINATED);
 
-    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) !=
-            IAosCallTracker::STATE_OFFHOOK)
+    if (m_piCallTracker->GetCallState(IAosCallTracker::TYPE_EMERGENCY) != CallState::OFFHOOK)
     {
         ProcessCleanAll();
     }
@@ -506,16 +504,16 @@ PROTECTED VIRTUAL void AosEApplication::Condition_RequestCommand(
 }
 
 PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
-        IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+        IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_EMERGENCY)
     {
         return;
     }
 
-    IMS_BOOL bCurrState = (nState > IAosCallTracker::STATE_IDLE) ? IMS_TRUE : IMS_FALSE;
+    IMS_BOOL bCurrState = (eState > CallState::IDLE) ? IMS_TRUE : IMS_FALSE;
 
-    if (IsImsCall() && (nState == IAosCallTracker::STATE_TERMINATING))
+    if (IsImsCall() && (eState == CallState::TERMINATING))
     {
         ProcessECallTerminating();
         m_bIsCallTerminating = IMS_TRUE;
@@ -534,7 +532,7 @@ PROTECTED VIRTUAL void AosEApplication::CallTracker_StateChanged(
         }
     }
 
-    if (nState == IAosCallTracker::STATE_IDLE)
+    if (eState == CallState::IDLE)
     {
         m_bIsCallTerminating = IMS_FALSE;
     }
