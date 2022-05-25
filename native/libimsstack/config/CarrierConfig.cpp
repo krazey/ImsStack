@@ -548,6 +548,8 @@ const IMS_CHAR CarrierConfig::ImsVoice::KEY_POLICY_FOR_CHECKING_QOS_WHILE_CALL_U
         KEY_IMS_VOICE_PREFIX "policy_for_checking_qos_while_call_upgrading_int";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_REJECT_OFFERLESS_INVITE_BOOL[] =
         KEY_IMS_VOICE_PREFIX "reject_offerless_invite_bool";
+const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_MAX_COUNT[] =
+        KEY_IMS_VOICE_PREFIX "call_max_count";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING[] =
         KEY_IMS_VOICE_PREFIX "call_terminate_reason_header_user_ends_call_string";
 const IMS_CHAR CarrierConfig::ImsVoice::KEY_CALL_TERMINATE_REASON_HEADER_RTP_TIMEOUT_STRING[] =

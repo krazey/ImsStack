@@ -21,8 +21,8 @@ private:
     IMS_UINT32 GetActiveCallCount(IN const IMSList<IMtcCall*> lstCalls);
 
     IMtcCallManager& m_objCallManager;
+    const CallInfo& m_objCallInfo;
     const IMS_UINT32 m_nMaxCallCount;
-    const PeerType m_ePeerType;
 };
 
 #endif

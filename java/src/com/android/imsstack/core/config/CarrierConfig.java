@@ -356,6 +356,7 @@ public class CarrierConfig {
                 KEY_PREFIX + "policy_for_checking_qos_while_call_upgrading_int";
         public static final String KEY_REJECT_OFFERLESS_INVITE_BOOL =
                 KEY_PREFIX + "reject_offerless_invite_bool";
+        public static final String KEY_CALL_MAX_COUNT = KEY_PREFIX + "call_max_count";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_USER_ENDS_CALL_STRING =
                 KEY_PREFIX + "call_terminate_reason_header_user_ends_call_string";
         public static final String KEY_CALL_TERMINATE_REASON_HEADER_RTP_TIMEOUT_STRING =

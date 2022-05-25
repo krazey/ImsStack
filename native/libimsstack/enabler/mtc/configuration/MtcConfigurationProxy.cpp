@@ -262,6 +262,8 @@ IMS_SINT32 MtcConfigurationProxy::GetInt(IN Feature eFeature) const
             return m_objManager.GetPolicyFor403ResponseForInvite();
         case Feature::POLICY_FOR_CHECKING_QOS_WHILE_CALL_UPGRADING:
             return m_objManager.GetPolicyForCheckingQosWhileCallUpgrading();
+        case Feature::CALL_MAX_COUNT:
+            return m_objManager.GetCallMaxCount();
         case Feature::CONVERT_REMOTE_RESPONSE_TIMER:
             return m_objManager.GetConvertRemoteResponseTimer();
         case Feature::CONVERT_USER_RESPONSE_TIMER:

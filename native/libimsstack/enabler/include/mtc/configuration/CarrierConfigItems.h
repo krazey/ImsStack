@@ -53,6 +53,7 @@ public:
             nPolicyFor403ResponseForInvite(1),
             nPolicyForCheckingQosWhileCallUpgrading(0),
             bRejectOfferlessInvite(IMS_FALSE),
+            nCallMaxCount(3),
             objCallTerminateReasonHeaders(IMSVector<AString>()),
             objCallRejectReasonPhrases(IMSVector<AString>()),
             bVideoOnDefaultBearerSupported(IMS_FALSE),
@@ -141,6 +142,7 @@ public:
     IMS_SINT32 nPolicyFor403ResponseForInvite;
     IMS_SINT32 nPolicyForCheckingQosWhileCallUpgrading;
     IMS_BOOL bRejectOfferlessInvite;
+    IMS_SINT32 nCallMaxCount;
     IMSVector<AString> objCallTerminateReasonHeaders;
     IMSVector<AString> objCallRejectReasonPhrases;
 
