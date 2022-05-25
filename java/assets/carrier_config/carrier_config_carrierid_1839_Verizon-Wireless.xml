@@ -155,8 +155,6 @@
     <int name="imsvoice.session_refresh_method_int" value="1"/>
     <int name="imsvoice.session_expires_timer_sec_int" value="300"/>
     <int name="imsvoice.minimum_session_expires_timer_sec_int" value="300"/>
-    <!-- TODO: can be 1/2 of the Session-Expires value(default 300s) -->
-    <int name="imsvoice.session_refresh_trigger_interval_millis_int" value="150000"/>
     <boolean name="imsvoice.validate_verstat_feature_in_registration_to_check_network_capability_bool" value="false"/>
     <int name="imsvoice.prack_update_response_wait_timer_millis_int" value="0"/>
     <int name="policy_for_local_ringback_tone_with_180_response_int" value="2"/>
