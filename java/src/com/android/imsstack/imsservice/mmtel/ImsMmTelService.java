@@ -277,7 +277,10 @@ public class ImsMmTelService extends MmTelFeature
             ImsUtils.updateImsManager();
         });
 
-        if (!isReady()) {
+        ImsServiceManager sm = ImsServiceManager.getDefault();
+        ImsCallApp callApp = sm.getCallApp(mIContext.getPhoneId());
+
+        if (!isReady() || callApp == null) {
             createCallApp();
         }
 
