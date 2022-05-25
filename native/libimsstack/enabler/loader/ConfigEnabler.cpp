@@ -81,6 +81,9 @@ void ConfigEnabler::Start()
             m_bUseResetWhenClosingSipTcpConnection = IMS_TRUE;
             objSocketOption.nValue = 0;
             piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
+
+            objSocketOption.nValue = 3;  // no shutdown
+            piRTConfigHelper->SetConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
         }
 
         // It's based on the Verizon's requirement, but it will be applied for all the carriers.
@@ -167,6 +170,9 @@ void ConfigEnabler::Stop()
         {
             objSocketOption.nValue = 0;
             piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_LINGER, &objSocketOption);
+
+            objSocketOption.nValue = 3;
+            piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_SHUTDOWN, &objSocketOption);
         }
 
         piRTConfigHelper->RemoveConfig(SipRtConfig::CONFIG_I_TCP_PORT_RANGE, IMS_NULL);

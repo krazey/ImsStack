@@ -487,7 +487,7 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
             ShutDown(((m_nOptionForShutdown < 0) ? SHUTDOWN_BOTH : m_nOptionForShutdown));
         }
 
-        IMS_SOCKET hSocketToBeClosed = m_hSocket;
+        IMS_SOCKET hClosedSocket = m_hSocket;
 
         // Release the socket event
         if (SelectEvent(0))
@@ -496,10 +496,10 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
             m_hSocket = INVALID_SOCKET;
         }
 
-        UnbindSocketFromIpSecTransform(hSocketToBeClosed);
-
-        if (close(hSocketToBeClosed) == SOCKET_ERROR)
+        if (close(hClosedSocket) == SOCKET_ERROR)
         {
+            UnbindSocketFromIpSecTransform(hClosedSocket);
+
             // do something
             IMS_SINT32 nError = errno;
 
@@ -521,6 +521,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Close()
             // What to do : returns SUCCESS or ERROR ?????
             return RESULT_ERROR;
         }
+
+        UnbindSocketFromIpSecTransform(hClosedSocket);
 
         // 100 ms : wait for socket closing ...
         usleep(100000);
@@ -1892,6 +1894,8 @@ PROTECTED VIRTUAL ISocket::SOCKET_RESULT OsSocket::Abort()
             }
         }
 
+        UnbindSocketFromIpSecTransform(m_hSocket);
+
         // Release the socket event
         if (SelectEvent(0))
         {
@@ -2245,7 +2249,7 @@ IMS_SOCKET OsSocket::GetSocket() const
 PROTECTED
 ISocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
 {
-    IMS_SOCKET hSocketToBeClosed = m_hSocket;
+    IMS_SOCKET hClosedSocket = m_hSocket;
 
     // Remove the existing socket (non-socket)
     if (SelectEvent(0))
@@ -2254,7 +2258,7 @@ ISocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
         m_hSocket = INVALID_SOCKET;
     }
 
-    UnbindSocketFromIpSecTransform(hSocketToBeClosed);
+    UnbindSocketFromIpSecTransform(hClosedSocket);
 
     if (Open(GetSocketType(), m_eAddressFamily) == RESULT_ERROR)
     {
@@ -2268,9 +2272,29 @@ ISocket::SOCKET_RESULT OsSocket::DoSocketRecovery()
         return RESULT_ERROR;
     }
 
-    // FIXME: UnbindSocketToIpSecTransform
+    BindSocketToIpSecTransform();
 
     return RESULT_SUCCESS;
+}
+
+PROTECTED
+void OsSocket::BindSocketToIpSecTransform()
+{
+    if (GetSocketType() != TYPE_DGRAM)
+    {
+        return;
+    }
+
+    INetworkIpSec* piIpSec = NetworkService::GetNetworkService()->GetIpSec();
+
+    if (piIpSec != IMS_NULL)
+    {
+        IMS_TRACE_I("BindSocketToIpSecTransform: socket=%d", m_hSocket, 0, 0);
+
+        SocketAddress objSockAddr(m_objSocketAddress, m_nSocketPort);
+
+        piIpSec->ApplyIpSecTransform(this, objSockAddr, IMS_NULL);
+    }
 }
 
 PROTECTED

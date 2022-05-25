@@ -23,10 +23,13 @@ __IMS_TRACE_TAG_CONF__;
 
 PRIVATE GLOBAL const IMS_CHAR SipConfig::TAG_PREFIX[] = "9009";
 
+// As default, TCP connection for SIP engine is not actively closed
+// even though the socket is not used to send or receive SIP packets for a long time.
+// So, m_nTvKeepAlive is set to TcpTimerValues::PERMANENT.
 PUBLIC
 SipConfig::TcpTimerValues::TcpTimerValues() :
         m_nTvConnectionWaiting(-1),
-        m_nTvKeepAlive(-1),
+        m_nTvKeepAlive(TcpTimerValues::PERMANENT),
         m_nTvWouldblockWaiting(-1)
 {
 }

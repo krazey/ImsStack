@@ -61,6 +61,7 @@ PUBLIC VIRTUAL AosIpsecHelper::~AosIpsecHelper()
 
     // Set Socket Operation related to IPSEC
     AosUtil::GetInstance()->SetSocketOptionLinger(-1, m_piContext->GetSlotId());
+    AosUtil::GetInstance()->SetSocketOptionShutDown(2 /*both*/, m_piContext->GetSlotId());
 
     if (m_pUeIpsecInfo != IMS_NULL)
     {
@@ -377,6 +378,7 @@ PUBLIC VIRTUAL void AosIpsecHelper::InitIpsec()
 {
     // set socket operation related to IPSEC
     AosUtil::GetInstance()->SetSocketOptionLinger(0, m_piContext->GetSlotId());
+    AosUtil::GetInstance()->SetSocketOptionShutDown(3 /*no shutdown*/, m_piContext->GetSlotId());
 }
 
 PUBLIC VIRTUAL IMS_BOOL AosIpsecHelper::IsEstablished()

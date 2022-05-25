@@ -34,6 +34,9 @@ import java.util.List;
 
 public class IpSecConnector {
     private static final int MAX_TRANSFORM = 4;
+    // ImsStack does not need to remove the binding between the socket and IpSec association,
+    // because its socket will not be reused anymore after closing it.
+    private static final boolean SUPPORT_REMOVE_IPSEC_TRANSFORM_PER_SOCKET = false;
 
     private final IpSecSaParameter mParam;
     private IpSecAlgorithm mEncryptionAlgorithm = null;
@@ -116,22 +119,24 @@ public class IpSecConnector {
             return;
         }
 
-        final IpSecManager ipm = context.getSystemService(IpSecManager.class);
+        if (SUPPORT_REMOVE_IPSEC_TRANSFORM_PER_SOCKET) {
+            final IpSecManager ipm = context.getSystemService(IpSecManager.class);
 
-        if (policy.getMode() == IpSecSaPolicy.MODE_TRANSPORT) {
-            try {
-                ipm.removeTransportModeTransforms(socketFd);
-            } catch (IllegalArgumentException
-                    | IllegalStateException
-                    | UnsupportedOperationException e) {
-                ImsLog.e("[IpSec] removeTransportMode: " + e.toString());
-                return;
-            } catch (Throwable t) {
-                ImsLog.e("[IpSec] removeTransportMode: " + t.toString());
-                return;
+            if (policy.getMode() == IpSecSaPolicy.MODE_TRANSPORT) {
+                try {
+                    ipm.removeTransportModeTransforms(socketFd);
+                } catch (IllegalArgumentException
+                        | IllegalStateException
+                        | UnsupportedOperationException e) {
+                    ImsLog.e("[IpSec] removeTransportMode: " + e.toString());
+                    return;
+                } catch (Throwable t) {
+                    ImsLog.e("[IpSec] removeTransportMode: " + t.toString());
+                    return;
+                }
+            } else if (policy.getMode() == IpSecSaPolicy.MODE_TUNNEL) {
+                // Do nothing...
             }
-        } else if (policy.getMode() == IpSecSaPolicy.MODE_TUNNEL) {
-            // Do nothing...
         }
     }
 
