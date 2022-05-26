@@ -295,24 +295,30 @@ PROTECTED VIRTUAL void AosCondition::RemoveServiceAvailable()
     }
 }
 
-PROTECTED VIRTUAL void AosCondition::AddAosServiceListener()
+PROTECTED VIRTUAL IMS_BOOL AosCondition::AddAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
         pService->AddListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
-PROTECTED VIRTUAL void AosCondition::RemoveAosServiceListener()
+PROTECTED VIRTUAL IMS_BOOL AosCondition::RemoveAosServiceListener()
 {
     IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
     if (pService != IMS_NULL)
     {
         pService->RemoveListener(DYNAMIC_CAST(IAosServiceSettingListener*, this));
         pService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 PROTECTED VIRTUAL void AosCondition::AddEventListener()

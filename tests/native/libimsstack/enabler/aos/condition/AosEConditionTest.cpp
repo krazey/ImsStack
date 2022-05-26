@@ -18,6 +18,7 @@
 #include <gmock/gmock.h>
 
 #include "interface/MockIAosAppContext.h"
+#include "interface/MockIAosConditionListener.h"
 
 #include "interface/IAosAppContext.h"
 #include "interface/IAosBlock.h"
@@ -27,6 +28,7 @@
 
 class IAosConditionListener;
 
+using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::Return;
 using ::testing::ReturnNull;
@@ -34,8 +36,8 @@ using ::testing::ReturnRef;
 
 class AosEConditionTest : public ::testing::Test {
 public:
-    AosECondition* pAosECondition;
-    AosBlock* pAosBlock;
+    AosECondition* m_pAosECondition;
+    AosBlock* m_pAosBlock;
 
 protected:
     virtual void SetUp() override {
@@ -54,79 +56,111 @@ protected:
             .Times(AnyNumber())
             .WillRepeatedly(ReturnNull());
 
-        pAosECondition = new AosECondition(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-        ASSERT_TRUE(pAosECondition != nullptr);
+        m_pAosECondition = new AosECondition(static_cast<IAosAppContext*>(&objMockIAosAppContext));
+        ASSERT_TRUE(m_pAosECondition != nullptr);
 
-        pAosBlock = new AosBlock(static_cast<IAosAppContext*>(&objMockIAosAppContext));
-        ASSERT_TRUE(pAosBlock != nullptr);
+        m_pAosBlock = new AosBlock(static_cast<IAosAppContext*>(&objMockIAosAppContext));
+        ASSERT_TRUE(m_pAosBlock != nullptr);
 
-        IAosBlock* piAosBlock = static_cast<IAosBlock*>(pAosBlock);
+        IAosBlock* piAosBlock = static_cast<IAosBlock*>(m_pAosBlock);
         SetAosBlock(piAosBlock);
     }
 
     virtual void TearDown() override {
-        if (pAosBlock) {
-            delete pAosBlock;
+        if (m_pAosBlock)
+        {
+            delete m_pAosBlock;
         }
-        if (pAosECondition) {
-            delete pAosECondition;
+        if (m_pAosECondition)
+        {
+            delete m_pAosECondition;
         }
     }
 
-    void SetAosBlock(IN IAosBlock* piBlock) {
-        pAosECondition->m_piBlock = piBlock;
+    void SetAosBlock(IN IAosBlock* piBlock) { m_pAosECondition->m_piBlock = piBlock; }
+
+    IMS_BOOL AddAosServiceListener() { return m_pAosECondition->AddAosServiceListener(); }
+
+    IMS_BOOL RemoveAosServiceListener() { return m_pAosECondition->RemoveAosServiceListener(); }
+
+    void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam)
+    {
+        m_pAosECondition->Block_Changed(nType, nParam);
     }
+
+    void ServicePhone_AosStart() { m_pAosECondition->ServicePhone_AosStart(); }
 };
 
-// Testing is not required.
-// TEST_F(AosEConditionTest, Constructor) {
-// }
-
-// Testing is not required.
-// TEST_F(AosEConditionTest, Destructor) {
-// }
-
 TEST_F(AosEConditionTest, IsReady) {
-    EXPECT_TRUE(pAosECondition->IsReady());
+    EXPECT_TRUE(m_pAosECondition->IsReady());
 
-    pAosECondition->SetBlock(BLOCK_AC_INCOMPLETED);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_AOS_INCOMPLETED);
-    EXPECT_FALSE(pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_AC_INCOMPLETED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_AUTHENTICATION_FAILED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_AOS_INCOMPLETED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
 
-    pAosECondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    EXPECT_FALSE(pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_CELLULAR_NO_NETWORK);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
 
-    pAosECondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_WIFI_BAD_CONNECTION);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_WIFI_COUNTRY_CODE_UNAVAILABLE);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->SetBlock(BLOCK_WIFI_AIRPLANE_MODE_ON);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
 
-    pAosECondition->ResetBlock(BLOCK_AC_INCOMPLETED);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->ResetBlock(BLOCK_AOS_INCOMPLETED);
-    EXPECT_FALSE(pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_AC_INCOMPLETED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_AUTHENTICATION_FAILED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_AOS_INCOMPLETED);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
 
-    pAosECondition->ResetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->ResetBlock(BLOCK_CELLULAR_NO_NETWORK);
-    EXPECT_FALSE(pAosECondition->IsReady());
-    pAosECondition->ResetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
-    EXPECT_TRUE(pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_NO_NETWORK);
+    EXPECT_FALSE(m_pAosECondition->IsReady());
+    m_pAosECondition->ResetBlock(BLOCK_CELLULAR_OUT_OF_SERVICE);
+    EXPECT_TRUE(m_pAosECondition->IsReady());
 
     IMSList<IMS_UINT32> objReason;
-    pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
+    m_pAosBlock->GetBlockReasons(objReason, SERVICE_WHOLE);
     EXPECT_EQ(objReason.GetSize(), 3);
 
-    EXPECT_TRUE(pAosECondition->IsReady());
+    EXPECT_TRUE(m_pAosECondition->IsReady());
+}
+
+TEST_F(AosEConditionTest, AddAosServiceListener_ServiceNull)
+{
+    EXPECT_FALSE(AddAosServiceListener());
+}
+
+TEST_F(AosEConditionTest, RemoveAosServiceListener_ServiceNull)
+{
+    EXPECT_FALSE(RemoveAosServiceListener());
+}
+
+TEST_F(AosEConditionTest, Block_Changed)
+{
+    MockIAosConditionListener objMockIAosConditionListener;
+    EXPECT_CALL(objMockIAosConditionListener, Condition_Changed(_)).Times(1);
+
+    m_pAosECondition->SetListener(
+            static_cast<IAosConditionListener*>(&objMockIAosConditionListener));
+    Block_Changed(1, 1);
+}
+
+TEST_F(AosEConditionTest, ServicePhone_AosStart)
+{
+    m_pAosBlock->SetBlockReason(BLOCK_AOS_INCOMPLETED);
+    EXPECT_TRUE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
+
+    ServicePhone_AosStart();
+    EXPECT_FALSE(m_pAosBlock->IsReasonBlocked(BLOCK_AOS_INCOMPLETED));
 }

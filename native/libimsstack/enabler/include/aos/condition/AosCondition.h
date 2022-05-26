@@ -98,8 +98,8 @@ protected:
     virtual void AddServiceAvailable();
     virtual void RemoveServiceAvailable();
 
-    virtual void AddAosServiceListener();
-    virtual void RemoveAosServiceListener();
+    virtual IMS_BOOL AddAosServiceListener();
+    virtual IMS_BOOL RemoveAosServiceListener();
 
     virtual void AddEventListener();
     virtual void RemoveEventListener();

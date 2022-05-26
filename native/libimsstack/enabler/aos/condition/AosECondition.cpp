@@ -50,16 +50,28 @@ PUBLIC VIRTUAL IMS_BOOL AosECondition::IsReady()
     return bReturn;
 }
 
-PRIVATE VIRTUAL void AosECondition::AddAosServiceListener()
+PRIVATE VIRTUAL IMS_BOOL AosECondition::AddAosServiceListener()
 {
-    AosProvider::GetInstance()->GetService(m_nSlotId)->AddListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (pService != IMS_NULL)
+    {
+        pService->AddListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
-PRIVATE VIRTUAL void AosECondition::RemoveAosServiceListener()
+PRIVATE VIRTUAL IMS_BOOL AosECondition::RemoveAosServiceListener()
 {
-    AosProvider::GetInstance()->GetService(m_nSlotId)->RemoveListener(
-            DYNAMIC_CAST(IAosServicePhoneListener*, this));
+    IAosService* pService = AosProvider::GetInstance()->GetService(m_nSlotId);
+    if (pService != IMS_NULL)
+    {
+        pService->RemoveListener(DYNAMIC_CAST(IAosServicePhoneListener*, this));
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 // IAosBlockListener
@@ -77,5 +89,5 @@ PRIVATE VIRTUAL void AosECondition::Block_Changed(IN IMS_UINT32 nType, IN IMS_UI
 PRIVATE VIRTUAL void AosECondition::ServicePhone_AosStart()
 {
     A_IMS_TRACE_D(APPPROFILE, "ServicePhone_AosStart()", 0, 0, 0);
-    m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_AOS_INCOMPLETED);
+    m_piBlock->ResetBlockReason(BLOCK_AOS_INCOMPLETED);
 }

@@ -33,8 +33,8 @@ private:
     inline void AddEventListener() final{};
     inline void RemoveEventListener() final{};
 
-    void AddAosServiceListener() final;
-    void RemoveAosServiceListener() final;
+    IMS_BOOL AddAosServiceListener() final;
+    IMS_BOOL RemoveAosServiceListener() final;
 
     // IAosBlockListener
     void Block_Changed(IN IMS_UINT32 nType, IN IMS_UINT32 nParam) final;
