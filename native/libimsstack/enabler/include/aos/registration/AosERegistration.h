@@ -24,56 +24,51 @@ public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
     virtual ~AosERegistration();
 
-    /// IAosRegistration
-    virtual void Start();
-    virtual void Update(
-            IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE, IN IMS_BOOL bExplicitUpdate = IMS_TRUE);
+    void Start() final;
+    void Update(IN IMS_BOOL bIgnoreRetryTimer = IMS_FALSE,
+            IN IMS_BOOL bExplicitUpdate = IMS_TRUE) final;
+    void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0) final;
 
-    virtual void RequestCmd(IN IMS_UINT32 nCmdType, IN IMS_UINT32 nReason = 0);
+private:
+    IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 
-protected:
-    /// IMSActivityEx
-    virtual IMS_BOOL OnMessage(IN IMSMSG& objMsg);
+    void Init() final;
 
-    /// Initialize
-    virtual void Init();
+    void ProcessAuthenticationFailed() final;
 
-    virtual IMS_BOOL IsFakeModeCondition();
-    virtual IMS_BOOL IsReinitiationRequested() const;
+    void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0) final;
+    void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0) final;
 
-    virtual void ProcessAuthenticationFailed();
+    void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
+    void ProcessStartFailed_TxnTimeout() final;
+    void ProcessStartFailed_Others(IN IMS_SINT32 nReason) final;
 
-    virtual void ProcessDefaultFlowRecovery_Start(IN IMS_SINT32 nStatusCode = 0);
-    virtual void ProcessDefaultFlowRecovery_Update(IN IMS_SINT32 nStatusCode = 0);
+    void ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode) final;
+    void ProcessUpdateFailed_TxnTimeout() final;
+    void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
-    virtual void ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode);
-    virtual void ProcessStartFailed_TxnTimeout();
-    virtual void ProcessStartFailed_Others(IN IMS_SINT32 nReason);
+    void ProcessTransactionTimerExpired() final;
 
-    virtual void ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode);
-    virtual void ProcessUpdateFailed_TxnTimeout();
-    virtual void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason);
+    void SetRefreshPolicy() final;
 
-    virtual void ProcessECallStarted();
-    virtual void ProcessFakeMode();
-    virtual void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
-    virtual void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
+    void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) final;
+    void Registration_Started() final;
+    void Registration_StartFailed(IN IMS_SINT32 nReason) final;
+    void Registration_Terminated(IN IMS_SINT32 nReason) final;
 
-    virtual void SetReinitiationRequested(IN IMS_BOOL bRequest);
+    void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) final;
 
-    /// Timer
-    virtual void ProcessTransactionTimerExpired();
+    IMS_BOOL IsFakeModeCondition();
+    IMS_BOOL IsReinitiationRequested() const;
 
-    /// IRegistrationListener
-    virtual void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh);
-    virtual void Registration_Started();
-    virtual void Registration_StartFailed(IN IMS_SINT32 nReason);
-    virtual void Registration_Terminated(IN IMS_SINT32 nReason);
+    void ProcessECallStarted();
+    void ProcessFakeMode();
+    void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
+    void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
 
-    /// IAosCallTrackerListener
-    virtual void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState);
+    void SetReinitiationRequested(IN IMS_BOOL bRequest);
 
-protected:
+private:
     IMS_BOOL m_bReinitiationRequested;
 };
 #endif  // AOS_E_REGISTRATION_H_

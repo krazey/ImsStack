@@ -16,6 +16,7 @@
 #include "ServiceTrace.h"
 
 #include "CarrierConfig.h"
+#include "IRegistration.h"
 #include "SipStatusCode.h"
 
 #include "interface/IAosAppContext.h"
@@ -135,7 +136,7 @@ PUBLIC VIRTUAL void AosERegistration::RequestCmd(
     AosRegistration::RequestCmd(nCmdType, nReason);
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
+PRIVATE VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
 {
     A_IMS_TRACE_I(REGID, "OnMessage :: (%s)",
             AosProvider::GetLog()->RegMessageToString(objMsg.nMSG), 0, 0);
@@ -160,7 +161,7 @@ PROTECTED VIRTUAL IMS_BOOL AosERegistration::OnMessage(IN IMSMSG& objMsg)
     return IMS_TRUE;
 }
 
-PROTECTED VIRTUAL void AosERegistration::Init()
+PRIVATE VIRTUAL void AosERegistration::Init()
 {
     A_IMS_TRACE_D(REGID, "Init", 0, 0, 0);
 
@@ -180,23 +181,12 @@ PROTECTED VIRTUAL void AosERegistration::Init()
     InitFeatures();
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosERegistration::IsFakeModeCondition()
-{
-    return m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
-            m_piContext->GetNetTracker()->IsEmergencyLteAttach();
-}
-
-PROTECTED VIRTUAL IMS_BOOL AosERegistration::IsReinitiationRequested() const
-{
-    return m_bReinitiationRequested;
-}
-
-PROTECTED VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
+PRIVATE VIRTUAL void AosERegistration::ProcessAuthenticationFailed()
 {
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
+PRIVATE VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
         IN IMS_SINT32 nStatusCode /* = 0 */)
 {
     (void)nStatusCode;
@@ -227,7 +217,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Start(
     ReportStateChanged(RESULT_FAILURE, REASON_FAILURE_GENERAL);
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
+PRIVATE VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
         IN IMS_SINT32 nStatusCode /* = 0 */)
 {
     (void)nStatusCode;
@@ -235,7 +225,7 @@ PROTECTED VIRTUAL void AosERegistration::ProcessDefaultFlowRecovery_Update(
     SetState(STATE_REFRESHSTOP);
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SINT32 nStatusCode)
 {
     A_IMS_TRACE_I(REGID, "ProcessStartFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
@@ -253,19 +243,19 @@ PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_StatusCode(IN IMS_SI
     }
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_TxnTimeout()
+PRIVATE VIRTUAL void AosERegistration::ProcessStartFailed_TxnTimeout()
 {
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
+PRIVATE VIRTUAL void AosERegistration::ProcessStartFailed_Others(IN IMS_SINT32 nReason)
 {
     (void)nReason;
 
     ProcessDefaultFlowRecovery_Start();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
+PRIVATE VIRTUAL void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_SINT32 nStatusCode)
 {
     A_IMS_TRACE_I(REGID, "ProcessUpdateFailed_StatusCode :: Code(%d) ", nStatusCode, 0, 0);
 
@@ -283,80 +273,19 @@ PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_StatusCode(IN IMS_S
     }
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_TxnTimeout()
+PRIVATE VIRTUAL void AosERegistration::ProcessUpdateFailed_TxnTimeout()
 {
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
+PRIVATE VIRTUAL void AosERegistration::ProcessUpdateFailed_Others(IN IMS_SINT32 nReason)
 {
     (void)nReason;
 
     ProcessDefaultFlowRecovery_Update();
 }
 
-PROTECTED VIRTUAL void AosERegistration::ProcessECallStarted()
-{
-    if (GetState() == STATE_REFRESHSTOP)
-    {
-        A_IMS_TRACE_I(REGID, "ProcessECallStarted :: re-reg is trying in refresh stop", 0, 0, 0);
-        ProcessRetryInRegStopped();
-    }
-}
-
-PROTECTED VIRTUAL void AosERegistration::ProcessFakeMode()
-{
-    A_IMS_TRACE_I(REGID, "ProcessFakeMode", 0, 0, 0);
-
-    SetFakeReg(IMS_TRUE);
-    SetMode(MODE_FAKE);
-    SetReinitiationRequested(IMS_TRUE);
-    PostMessage(MSG_REG_REINITIATE, 0, 0);
-}
-
-PROTECTED VIRTUAL void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered)
-{
-    A_IMS_TRACE_I(REGID, "ProcessFakeModeWithRegState", 0, 0, 0);
-
-    SetFakeReg(IMS_TRUE);
-    SetMode(MODE_FAKE);
-    SetReinitiationRequested(IMS_TRUE);
-    PostMessage(MSG_REG_REINITIATE_WITH_REG_STATE, bIsRegistered ? 1 : 0, 0);
-}
-
-PROTECTED VIRTUAL void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered)
-{
-    A_IMS_TRACE_I(REGID, "ProcessReinitiate - bIsRegistered [%s]",
-            (bIsRegistered == IMS_TRUE) ? "TRUE" : "FALSE", 0, 0);
-
-    Destroy();
-
-    if (!CreateRegistration())
-    {
-        ProcessUnpredictableFailure();
-        return;
-    }
-
-    if (bIsRegistered == IMS_TRUE)
-    {
-        SetState(STATE_REFRESHING);
-    }
-    else
-    {
-        SetState(STATE_REGISTERING);
-    }
-
-    ReportTryingState();
-}
-
-PROTECTED VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
-{
-    A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
-
-    m_bReinitiationRequested = bRequest;
-}
-
-PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
+PRIVATE VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
 {
     StopTimer(TIMER_TRANSACTION);
 
@@ -378,7 +307,12 @@ PROTECTED VIRTUAL void AosERegistration::ProcessTransactionTimerExpired()
     }
 }
 
-PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
+PRIVATE VIRTUAL void AosERegistration::SetRefreshPolicy()
+{
+    m_piRegistration->SetRefreshPolicy(IRegistration::REFRESH_POLICY_RATIO, 1200, 50, 50);
+}
+
+PRIVATE VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
         OUT IMS_BOOL& bDoImplicitRefresh)
 {
     A_IMS_TRACE_I(REGID, "Registration_RefreshTimerExpired", 0, 0, 0);
@@ -413,19 +347,19 @@ PROTECTED VIRTUAL void AosERegistration::Registration_RefreshTimerExpired(
     ReportTryingState();
 }
 
-PROTECTED VIRTUAL void AosERegistration::Registration_Started()
+PRIVATE VIRTUAL void AosERegistration::Registration_Started()
 {
     StopTimer(TIMER_TRANSACTION);
     AosRegistration::Registration_Started();
 }
 
-PROTECTED VIRTUAL void AosERegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
+PRIVATE VIRTUAL void AosERegistration::Registration_StartFailed(IN IMS_SINT32 nReason)
 {
     StopTimer(TIMER_TRANSACTION);
     AosRegistration::Registration_StartFailed(nReason);
 }
 
-PROTECTED VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 nReason)
+PRIVATE VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 nReason)
 {
     if (IsImsCall())
     {
@@ -443,7 +377,7 @@ PROTECTED VIRTUAL void AosERegistration::Registration_Terminated(IN IMS_SINT32 n
     }
 }
 
-PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
+PRIVATE VIRTUAL void AosERegistration::CallTracker_StateChanged(
         IN IMS_UINT32 nType, IN CallState eState)
 {
     if (nType != IAosCallTracker::TYPE_EMERGENCY)
@@ -462,4 +396,76 @@ PROTECTED VIRTUAL void AosERegistration::CallTracker_StateChanged(
             ProcessECallStarted();
         }
     }
+}
+
+PRIVATE IMS_BOOL AosERegistration::IsFakeModeCondition()
+{
+    return m_piContext->GetBlock()->IsReasonBlocked(BLOCK_SUBSCRIBER_INCOMPLETED) ||
+            m_piContext->GetNetTracker()->IsEmergencyLteAttach();
+}
+
+PRIVATE IMS_BOOL AosERegistration::IsReinitiationRequested() const
+{
+    return m_bReinitiationRequested;
+}
+
+PRIVATE void AosERegistration::ProcessECallStarted()
+{
+    if (GetState() == STATE_REFRESHSTOP)
+    {
+        A_IMS_TRACE_I(REGID, "ProcessECallStarted :: re-reg is trying in refresh stop", 0, 0, 0);
+        ProcessRetryInRegStopped();
+    }
+}
+
+PRIVATE void AosERegistration::ProcessFakeMode()
+{
+    A_IMS_TRACE_I(REGID, "ProcessFakeMode", 0, 0, 0);
+
+    SetFakeReg(IMS_TRUE);
+    SetMode(MODE_FAKE);
+    SetReinitiationRequested(IMS_TRUE);
+    PostMessage(MSG_REG_REINITIATE, 0, 0);
+}
+
+PRIVATE void AosERegistration::ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered)
+{
+    A_IMS_TRACE_I(REGID, "ProcessFakeModeWithRegState", 0, 0, 0);
+
+    SetFakeReg(IMS_TRUE);
+    SetMode(MODE_FAKE);
+    SetReinitiationRequested(IMS_TRUE);
+    PostMessage(MSG_REG_REINITIATE_WITH_REG_STATE, bIsRegistered ? 1 : 0, 0);
+}
+
+PRIVATE void AosERegistration::ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered)
+{
+    A_IMS_TRACE_I(REGID, "ProcessReinitiate - bIsRegistered [%s]",
+            (bIsRegistered == IMS_TRUE) ? "TRUE" : "FALSE", 0, 0);
+
+    Destroy();
+
+    if (!CreateRegistration())
+    {
+        ProcessUnpredictableFailure();
+        return;
+    }
+
+    if (bIsRegistered == IMS_TRUE)
+    {
+        SetState(STATE_REFRESHING);
+    }
+    else
+    {
+        SetState(STATE_REGISTERING);
+    }
+
+    ReportTryingState();
+}
+
+PRIVATE VIRTUAL void AosERegistration::SetReinitiationRequested(IN IMS_BOOL bRequest)
+{
+    A_IMS_TRACE_I(REGID, "SetReinitiationRequested :: (%s)", (bRequest) ? "ON" : "OFF", 0, 0);
+
+    m_bReinitiationRequested = bRequest;
 }

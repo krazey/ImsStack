@@ -70,6 +70,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired, (),
             (const, override));
     MOCK_METHOD(IMS_BOOL, IsRegistrationEventForCatRequired, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencyCallbackModeSupported, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsEmergencySmsOverImsSupported, (), (const, override));
 
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryBaseTime, (), (override));
     MOCK_METHOD(IMS_UINT32, GetRegistrationRetryMaxTime, (), (override));
@@ -130,6 +132,7 @@ public:
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetReregErrCodeWithRetryAfterTime, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailable, (), (override));
     MOCK_METHOD(IMSVector<IMS_SINT32>&, GetRegWithFeatureTagUnavailablePolicy, (), (override));
+    MOCK_METHOD(IMSVector<IMS_SINT32>&, GetEmergencyPcscfRetryWaitTime, (), (override));
 
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };

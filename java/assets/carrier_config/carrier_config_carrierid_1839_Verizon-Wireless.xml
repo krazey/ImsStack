@@ -20,40 +20,18 @@
 
     <int name="ims.preferred_ims_dscp_int" value="2"/>
 
+    <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
+        <item value="2"/>
+        <item value="2"/>
+    </int-array>
+
     <!-- KEY_NOTIFY_TERMINATED_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_BUNDLE -->
     <int name="ims.wait_time_for_initial_registration_on_terminated_state_of_reg_event_int" value="60"/>
     <int-array name="ims.event_to_follow_wait_time_for_initial_registration_on_terminated_state_of_reg_event_int_array" num="2">
         <item value="2"/>
         <item value="5"/>
     </int-array>
-    <!-- Uce -->
-    <int name="imsuce.expire_value_publish_sec_int" value="1200"/>
-    <int name="imsuce.extended_expire_value_publish_sec_int" value="86400"/>
-    <int name="imsuce.publish_refresh_ratio_int" value="90"/>
-    <int name="imsuce.expire_value_list_subscribe_sec_int" value="30"/>
-    <int name="imsuce.anonymous_fetch_method_int" value="1"/>
-    <int-array name="imsuce.immediately_retry_publish_response_int_array" num="1">
-        <item value="412"/>
-    </int-array>
-    <int-array name="imsuce.variable_time_retry_publish_response_int_array" num="4">
-        <item value="408"/>
-        <item value="500"/>
-        <item value="503"/>
-        <item value="603"/>
-    </int-array>
-    <int-array name="imsuce.variable_time_retry_publish_response_time_sec_int_array" num="5">
-        <item value="60"/>
-        <item value="120"/>
-        <item value="240"/>
-        <item value="480"/>
-        <item value="21600"/>
-    </int-array>
-    <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
-        <item value="403"/>
-    </int-array>
-    <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="1">
-        <item value="403"/>
-    </int-array>
+
     <!-- KEY_SPECIFIC_REGISTRATION_ERROR_BUNDLE -->
     <int name="specific_registration_error_final_type_int" value="2"/>
     <int name="specific_registration_error_policy_int" value="2"/>
@@ -194,5 +172,34 @@
     <boolean name="video_hold_with_direction_inactive_bool" value="true"/>
     <boolean name="text_hold_with_direction_inactive_bool" value="true"/>
     <boolean name="incoming_resume_event_support_bool" value="true"/>
+
+    <!-- Uce -->
+    <int name="imsuce.expire_value_publish_sec_int" value="1200"/>
+    <int name="imsuce.extended_expire_value_publish_sec_int" value="86400"/>
+    <int name="imsuce.publish_refresh_ratio_int" value="90"/>
+    <int name="imsuce.expire_value_list_subscribe_sec_int" value="30"/>
+    <int name="imsuce.anonymous_fetch_method_int" value="1"/>
+    <int-array name="imsuce.immediately_retry_publish_response_int_array" num="1">
+        <item value="412"/>
+    </int-array>
+    <int-array name="imsuce.variable_time_retry_publish_response_int_array" num="4">
+        <item value="408"/>
+        <item value="500"/>
+        <item value="503"/>
+        <item value="603"/>
+    </int-array>
+    <int-array name="imsuce.variable_time_retry_publish_response_time_sec_int_array" num="5">
+        <item value="60"/>
+        <item value="120"/>
+        <item value="240"/>
+        <item value="480"/>
+        <item value="21600"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_publish_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
+    <int-array name="imsuce.reattempt_registration_subscribe_response_int_array" num="1">
+        <item value="403"/>
+    </int-array>
 
 </carrier_config>

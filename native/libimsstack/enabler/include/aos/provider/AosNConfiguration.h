@@ -79,6 +79,8 @@ public:
     virtual IMS_BOOL IsRegErrCodeWithRetryAfterTimeOnlyDefined() const;
     virtual IMS_BOOL IsSpecificRegErrRetryCountSharedForRegAndRegEventRequired() const;
     virtual IMS_BOOL IsRegistrationEventForCatRequired() const;
+    virtual IMS_BOOL IsEmergencyCallbackModeSupported() const;
+    virtual IMS_BOOL IsEmergencySmsOverImsSupported() const;
 
     virtual IMS_UINT32 GetRegistrationRetryBaseTime();
     virtual IMS_UINT32 GetRegistrationRetryMaxTime();
@@ -141,6 +143,7 @@ public:
     virtual IMSVector<IMS_SINT32>& GetReregErrCodeWithRetryAfterTime();
     virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
     virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
+    virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime();
 
 private:
     friend class AosBuildDirector;

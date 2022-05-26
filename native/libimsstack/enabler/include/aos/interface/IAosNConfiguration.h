@@ -322,6 +322,22 @@ public:
     virtual IMS_BOOL IsRegistrationEventForCatRequired() const = 0;
 
     /**
+     * @brief Returns Flag specifying whether UE should enter Emergency CallBack Mode (ECBM)
+     *        after emergency call is ended.
+     *
+     * @return IMS_BOOL Return whether to be supported or not
+     */
+    virtual IMS_BOOL IsEmergencyCallbackModeSupported() const = 0;
+
+    /**
+     * @brief Returns Flag indicating whether or not sending emergency SMS messages over IMS
+     *        is supported when in LTE/limited LTE (Emergency only) service mode.
+     *
+     * @return IMS_BOOL Return whether to be supported or not
+     */
+    virtual IMS_BOOL IsEmergencySmsOverImsSupported() const = 0;
+
+    /**
      * @brief Get the registration retry base-time
      *
      *        This value defines as per RFC 5626 section 4.5
@@ -969,7 +985,7 @@ public:
      * @return vector feature tags list
      * @see FixedFeature
      */
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable();
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailable() = 0;
 
     /**
      * @brief Indicate the policy to include feature tag even though feature is not available.
@@ -977,7 +993,14 @@ public:
      * @return vector policy list
      * @see FixPolicy
      */
-    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy();
+    virtual IMSVector<IMS_SINT32>& GetRegWithFeatureTagUnavailablePolicy() = 0;
+
+    /**
+     * @brief Indicate the list of the time seconds waiting after the emergency registration is
+     *        failed and pcscf is changed
+     * @return vector retry wait time
+     */
+    virtual IMSVector<IMS_SINT32>& GetEmergencyPcscfRetryWaitTime() = 0;
 
     enum
     {

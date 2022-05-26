@@ -287,6 +287,16 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRegistrationEventForCatRequired() c
     return m_objCarrierConfig.bRegistrationEventForCatRequired;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencyCallbackModeSupported() const
+{
+    return m_objCarrierConfig.bEmergencyCallbackModeSupported;
+}
+
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsEmergencySmsOverImsSupported() const
+{
+    return m_objCarrierConfig.bSupportEmergencySmsOverIms;
+}
+
 PUBLIC VIRTUAL IMS_UINT32 AosNConfiguration::GetRegistrationRetryBaseTime()
 {
     return static_cast<IMS_UINT32>(m_objCarrierConfig.nRegistrationRetryBaseTimerMillis);
@@ -576,6 +586,11 @@ PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUna
 PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetRegWithFeatureTagUnavailablePolicy()
 {
     return m_objRegWithFeatureTagUnavailable.objRegistrationWithFeatureTagUnavailablePolicy;
+}
+
+PUBLIC VIRTUAL IMSVector<IMS_SINT32>& AosNConfiguration::GetEmergencyPcscfRetryWaitTime()
+{
+    return m_objAsset.objEmergencyPcscfRetryWaitTimeSec;
 }
 
 PRIVATE VIRTUAL void AosNConfiguration::CarrierConfig_NotifyConfigChanged(IN IMS_SINT32 nSlotId)
@@ -1013,6 +1028,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
             piCc->GetInt(CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CHANGE_INT);
     m_objAsset.bCdmalessFeatureTagRequired =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_CDMALESS_FEATURE_TAG_REQUIRED_BOOL);
+    m_objAsset.objEmergencyPcscfRetryWaitTimeSec = piCc->GetIntArray(
+            CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY);
 }
 
 PRIVATE

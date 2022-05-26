@@ -54,7 +54,8 @@ public:
             objSupportedRoamingRats(IMSVector<IMS_SINT32>()),
             nEmergencyPreferredIpType(CarrierConfig::Ims::IP_VERSION_6),
             nSipMessageThresholdForTransportChange(200),
-            bCdmalessFeatureTagRequired(IMS_FALSE)
+            bCdmalessFeatureTagRequired(IMS_FALSE),
+            objEmergencyPcscfRetryWaitTimeSec(IMSVector<IMS_SINT32>())
     {
     }
 
@@ -91,5 +92,6 @@ public:
     IMS_SINT32 nEmergencyPreferredIpType;
     IMS_SINT32 nSipMessageThresholdForTransportChange;
     IMS_BOOL bCdmalessFeatureTagRequired;
+    IMSVector<IMS_SINT32> objEmergencyPcscfRetryWaitTimeSec;
 };
 #endif  // AOS_ASSET_H_

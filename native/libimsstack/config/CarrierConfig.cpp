@@ -971,6 +971,8 @@ const IMS_CHAR CarrierConfig::Assets::KEY_SIP_MESSAGE_THRESHOLD_FOR_TRANSPORT_CH
         "sip_message_threshold_for_transport_change_int";
 const IMS_CHAR CarrierConfig::Assets::KEY_PERMANENT_PDN_FAILURE_INT_ARRAY[] =
         "permanent_pdn_failure_int_array";
+const IMS_CHAR CarrierConfig::Assets::KEY_EMERGENCY_PCSCF_RETRY_WAIT_TIME_SEC_INT_ARRAY[] =
+        "emergency_pcscf_retry_wait_time_sec_int_array";
 // Mtc
 const IMS_CHAR CarrierConfig::Assets::KEY_CHECK_CONFERENCE_EVENT_PACKAGE_VERSION_BOOL[] =
         "check_conference_event_package_version_bool";

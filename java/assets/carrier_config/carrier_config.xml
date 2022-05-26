@@ -398,6 +398,8 @@
     <int name="sip_message_threshold_for_transport_change_int" value="200"/>
     <int-array name="permanent_pdn_failure_int_array" num="0">
     </int-array>
+    <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="0">
+    </int-array>
 
     <!-- Mtc -->
     <boolean name="check_conference_event_package_version_bool" value="true"/>
