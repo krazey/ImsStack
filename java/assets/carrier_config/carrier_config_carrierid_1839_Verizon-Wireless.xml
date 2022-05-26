@@ -18,6 +18,7 @@
     <int name="ims.registration_actual_wait_time_policy_int" value="3"/>
     <int name="ims.registration_preferred_accesstype_feature_tag_int" value="0"/>
 
+    <boolean name="ims.registration_event_for_cat_required_bool" value="true"/>
     <int name="ims.preferred_ims_dscp_int" value="2"/>
 
     <int-array name="emergency_pcscf_retry_wait_time_sec_int_array" num="2">
