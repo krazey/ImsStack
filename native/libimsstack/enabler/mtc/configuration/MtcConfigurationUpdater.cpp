@@ -35,11 +35,11 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
     objItems.bSessionTimerSupported =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SESSION_TIMER_SUPPORTED_BOOL);
     objItems.nSessionPrivacyType =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_SESSION_PRIVACY_TYPE_INT);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_SESSION_PRIVACY_TYPE_INT);
     objItems.bPrackSupportedFor18x =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_PRACK_SUPPORTED_FOR_18X_BOOL);
     objItems.nConferenceSubscribeType =
-            piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT);
+            piCc->GetInt(CarrierConfig::ImsVoice::KEY_CONFERENCE_SUBSCRIBE_TYPE_INT);
     objItems.bVoiceQosPreconditionSupported =
             piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_VOICE_QOS_PRECONDITION_SUPPORTED_BOOL);
     objItems.bVoiceOnDefaultBearerSupported =
@@ -209,7 +209,7 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
     objItems.nEmergencyTCallTimer =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_TCALL_TIMER_MILLIS_INT);
     objItems.nEmergencyRingbackTimer =
-            piCc->GetBoolean(CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT);
+            piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_RINGBACK_TIMER_MILLIS_INT);
     objItems.nEmergency18xTimer =
             piCc->GetInt(CarrierConfig::ImsEmergency::KEY_EMERGENCY_18X_TIMER_MILLIS_INT);
     objItems.nPolicyForEmergencyUrnEscvMapping = piCc->GetInt(

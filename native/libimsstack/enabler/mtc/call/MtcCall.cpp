@@ -398,7 +398,7 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     objJniCallInfo.bConference = m_objCallInfo.bConference;
     objJniCallInfo.bConferenceEnabled = IMS_TRUE;  // TODO: Any meaning to use this?
     objJniCallInfo.bConferenceSubscriptionRequired =
-            m_objContext.GetConfigurationProxy().Is(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
+            m_objContext.GetConfigurationProxy().GetInt(Feature::CONFERENCE_SUBSCRIBE_TYPE) > -1;
     objJniCallInfo.bRttCapable = GetSession() ? GetSession()->IsRttCapable() : IMS_FALSE;
     objJniCallInfo.bVideoCapable = GetSession() ? GetSession()->IsVideoCapable() : IMS_FALSE;
 
