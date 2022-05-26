@@ -36,14 +36,14 @@ class AosNetTracker :
         public ITimerListener
 {
 public:
-    AosNetTracker(IN IAosAppContext* piAppContext_);
+    AosNetTracker(IN IAosAppContext* piAppContext);
     virtual ~AosNetTracker();
 
 public:
     // IAosNetTracker
     virtual IMS_BOOL IsServiceIN(IN IMS_UINT32 nType = TYPE_DEFAULT);
-    virtual IMS_BOOL IsDataIN();
-    virtual IMS_BOOL IsNetworkIN();
+    virtual IMS_BOOL IsDataIn();
+    virtual IMS_BOOL IsNetworkIn();
     virtual IMS_BOOL IsEmergencyLteAttach();
     virtual IMS_BOOL IsSuspended();
     virtual IMS_BOOL IsSessionContinuitySupported();
@@ -55,7 +55,7 @@ public:
     virtual IMS_UINT32 GetMobileVoiceNetworkType();
     virtual IMS_UINT32 GetNetworkType();
 
-    virtual void SetRATGuardTime(IN IMS_UINT32 nGuardTime);
+    virtual void SetRatGuardTime(IN IMS_UINT32 nGuardTime);
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime);
     virtual void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime);
 
@@ -66,7 +66,7 @@ public:
     virtual void NetworkWatcher_NotifyStatus(IN INetworkWatcher* piNetWatcherInfo);
 
     // IWifiWatcherListener
-    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* pIWifiWatcher);
+    virtual void WifiWatcher_NotifyStateChanged(IN IWifiWatcher* piWifiWatcher);
 
     // IEventListener
     virtual void Event_NotifyEvent(
@@ -82,7 +82,7 @@ private:
     void UpdateVoiceNetwork();
     void Notify();
 
-    void GetStatus(OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIN);
+    void GetStatus(OUT IMS_SINT32& nService, OUT IMS_UINT32& nRadioTech, OUT IMS_BOOL& bIsIn);
     IMS_UINT32 GetAccessPolicy() const;
 
     void ProcessNetworkChanged(IMS_SINT32 nReason);
@@ -98,7 +98,7 @@ private:
     IMS_BOOL IsEpdgEnabled() const;
     IMS_BOOL IsWlanEnabled() const;
     IMS_BOOL IsWifiConnected() const;
-    IMS_BOOL IsVoNRSupported();
+    IMS_BOOL IsVonrSupported();
     IMS_BOOL IsRoamingAccessPolicyRequired() const;
 
     void SetDataConnected(IN IMS_BOOL bConnected);
@@ -159,53 +159,53 @@ private:
     };
 
     // access_policy (ex 0x20000004)
-    IMS_UINT32 nCnxPolicy;
-    IMS_UINT32 nCnxPolicyInRoaming;
+    IMS_UINT32 m_nCnxPolicy;
+    IMS_UINT32 m_nCnxPolicyInRoaming;
 
-    INetworkWatcher* piNetWatcherInfo;
-    IWifiWatcher* piWifiWatcher;
-    //    IAosAppContext *piAppContext;
-    IAosConnection* piConnection;
-    AosUtil* pUtil;
+    INetworkWatcher* m_piNetWatcherInfo;
+    IWifiWatcher* m_piWifiWatcher;
+    IAosConnection* m_piConnection;
+    AosUtil* m_pUtil;
+    IAosNConfiguration* m_piAosNConfig;
 
-    IMS_SINT32 nSlotId;
-    IMS_SINT32 nNetServiceType;
-    IMS_UINT32 nNetRadioType;
-    IMS_UINT32 nChangingRat;
+    IMS_SINT32 m_nSlotId;
+    IMS_SINT32 m_nNetServiceType;
+    IMS_UINT32 m_nNetRadioType;
+    IMS_UINT32 m_nChangingRat;
 
-    IMS_UINT32 nNetVoiceRadioType;
-    IMS_UINT32 nNetChangingVoiceRadioType;
+    IMS_UINT32 m_nNetVoiceRadioType;
+    IMS_UINT32 m_nNetChangingVoiceRadioType;
 
     // IN or OUT (data service & radio tech)
-    IMS_BOOL bIsNetAvailable;
+    IMS_BOOL m_bIsNetAvailable;
 
     // roaming network
-    IMS_BOOL bIsRoaming;
+    IMS_BOOL m_bIsRoaming;
 
     // ePDG network (IPCAN_WLAN)
-    IMS_BOOL bIsEpdgEnabled;
+    IMS_BOOL m_bIsEpdgEnabled;
 
     // wifi network
-    IMS_BOOL bIsWifiConnected;
+    IMS_BOOL m_bIsWifiConnected;
 
     // mobile network
-    IMS_BOOL bIsDataConnected;
+    IMS_BOOL m_bIsDataConnected;
 
     // Guard Time Feature
-    IMS_UINT32 nFeature;
-    IMS_UINT32 nServiceInTime;
-    IMS_UINT32 nServiceOutTime;
-    IMS_UINT32 nRatTime;
-    IMS_UINT32 nVoiceRatGuardTime;
+    IMS_UINT32 m_nFeature;
+    IMS_UINT32 m_nServiceInTime;
+    IMS_UINT32 m_nServiceOutTime;
+    IMS_UINT32 m_nRatTime;
+    IMS_UINT32 m_nVoiceRatGuardTime;
 
-    ITimer* piServiceInTimer;
-    ITimer* piServiceOutTimer;
-    ITimer* piRatTimer;
-    ITimer* piVoiceRatTimer;
+    ITimer* m_piServiceInTimer;
+    ITimer* m_piServiceOutTimer;
+    ITimer* m_piRatTimer;
+    ITimer* m_piVoiceRatTimer;
 
-    IMSList<IAosNetTrackerListener*> objListeners;
+    IMSList<IAosNetTrackerListener*> m_objListeners;
 
-    AString strTag;
+    AString m_strTag;
 
     static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
     static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;

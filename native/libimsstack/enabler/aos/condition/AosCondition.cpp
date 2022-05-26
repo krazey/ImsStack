@@ -99,7 +99,7 @@ PUBLIC VIRTUAL void AosCondition::Start()
         if (piNetTracker != IMS_NULL)
         {
             piNetTracker->SetListener(this);
-            piNetTracker->SetRATGuardTime(RAT_CHANGE_GUARD_TIME_MILLIS);
+            piNetTracker->SetRatGuardTime(RAT_CHANGE_GUARD_TIME_MILLIS);
         }
     }
 
