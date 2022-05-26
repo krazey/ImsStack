@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.acs;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.content.Context;
 import android.util.SparseArray;
 
 import java.lang.annotation.Retention;
@@ -117,24 +118,25 @@ public class AcService {
     //private AcServiceImpl mAcServiceImpl;
     private int mPhoneId;
 
-    private AcService(int phoneId) {
+    private AcService(Context context, int phoneId) {
         mPhoneId = phoneId;
 
-        //mAcServiceImpl = new AcServiceImpl(phoneId);
+        //mAcServiceImpl = new AcServiceImpl(context, phoneId);
     }
 
     /**
      * Returns a AcService for phoneId specified and IllegalArgumentException will be
      * thrown if the phoneId is not valid.
+     * @param context The context of the application.
      * @param phoneId The ID of the Phone or SIM Slot that this AcService will use.
      * @return Instance of the AcService
      */
-    public static AcService getInstance(int phoneId) {
+    public static AcService getInstance(Context context, int phoneId) {
         AcService acService;
         synchronized (INSTANCES) {
             acService = INSTANCES.get(phoneId);
             if (acService == null) {
-                acService = new AcService(phoneId);
+                acService = new AcService(context, phoneId);
                 INSTANCES.put(phoneId, acService);
             }
         }
