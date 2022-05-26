@@ -6,6 +6,7 @@
 #include "IuMtcService.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
+#include "SipStatusCode.h"
 #include "call/MtcCall.h"
 #include "call/state/AlertingState.h"
 #include "call/state/EstablishedState.h"
@@ -65,7 +66,9 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
     {
         if (piSession != IMS_NULL)
         {
-            piSession->Reject();
+            IMS_TRACE_E(0, "pServiceThread is NULL", 0, 0, 0);
+            // based on 3GPP 24.237 8.2
+            piSession->Reject(SipStatusCode::SC_488);
             GetSipInterfaceFactory().GetISessionHolder()->AddISession(piSession);
             GetSipInterfaceFactory().GetISessionHolder()->ReleaseISession(piSession);
         }
