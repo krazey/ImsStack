@@ -161,6 +161,9 @@ public:
     IMS_SINT32 GetPolicyForLocalRingbackToneWith180Response() const;
 
 private:
+    IMS_BOOL ContainsValue(IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const;
+    IMS_BOOL ContainsValue(IN const IMSVector<AString>& lstList, IN const AString& strValue) const;
+
     CarrierConfigItems m_objCarrierConfig;
     AssetItems m_objAsset;
 };
