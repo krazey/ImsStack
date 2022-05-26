@@ -132,6 +132,14 @@ PUBLIC VIRTUAL void MtcService::CoreService_SessionInvitationReceived(
 {
     (void)piService;
     IMS_TRACE_I("CoreService_SessionInvitationReceived", 0, 0, 0);
+
+    if (m_pJniService == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "m_pJniService is NULL", 0, 0, 0);
+        m_objContext.GetCallController().HandleIncoming(this, piSession, IMS_NULL);
+        return;
+    }
+
     m_objContext.GetCallController().HandleIncoming(this, piSession, m_pJniService->GetThread());
 }
 
