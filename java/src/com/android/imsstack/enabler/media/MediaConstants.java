@@ -26,31 +26,43 @@ public class MediaConstants {
     public static final int IMS_MSG_BASE_MEDIA = 1400;
 
     // Requests
-    public static final int IMSMEDIA_REQUEST            = IMS_MSG_BASE_MEDIA;
-    public static final int REQUEST_OPEN_SESSION        = (IMSMEDIA_REQUEST + 1);
-    public static final int REQUEST_CLOSE_SESSION       = (IMSMEDIA_REQUEST + 2);
-    public static final int REQUEST_MODIFY_SESSION      = (IMSMEDIA_REQUEST + 3);
-    public static final int REQUEST_ADD_CONFIG          = (IMSMEDIA_REQUEST + 4);
-    public static final int REQUEST_DELETE_CONFIG       = (IMSMEDIA_REQUEST + 5);
-    public static final int REQUEST_CONFIRM_CONFIG      = (IMSMEDIA_REQUEST + 6);
-    public static final int REQUEST_SEND_DTMF           = (IMSMEDIA_REQUEST + 7);
-    public static final int REQUEST_SET_MEDIA_QUALITY   = (IMSMEDIA_REQUEST + 8);
-    public static final int REQUEST_HEADER_EXTENSION    = (IMSMEDIA_REQUEST + 9);
+    public static final int IMSMEDIA_REQUEST              = IMS_MSG_BASE_MEDIA;
+    public static final int REQUEST_OPEN_SESSION          = (IMSMEDIA_REQUEST + 1);
+    public static final int REQUEST_CLOSE_SESSION         = (IMSMEDIA_REQUEST + 2);
+    public static final int REQUEST_MODIFY_SESSION        = (IMSMEDIA_REQUEST + 3);
+    public static final int REQUEST_ADD_CONFIG            = (IMSMEDIA_REQUEST + 4);
+    public static final int REQUEST_DELETE_CONFIG         = (IMSMEDIA_REQUEST + 5);
+    public static final int REQUEST_CONFIRM_CONFIG        = (IMSMEDIA_REQUEST + 6);
+    public static final int REQUEST_SEND_DTMF             = (IMSMEDIA_REQUEST + 7);
+    public static final int REQUEST_SET_MEDIA_QUALITY     = (IMSMEDIA_REQUEST + 8);
+    public static final int REQUEST_HEADER_EXTENSION      = (IMSMEDIA_REQUEST + 9);
+
+    // Requests for video
+    public static final int IMSMEDIA_VIDEO_REQUEST        = (IMSMEDIA_REQUEST + 50);
+    public static final int REQUEST_SET_PREVIEW_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 1);
+    public static final int REQUEST_SET_DISPLAY_SURFACE   = (IMSMEDIA_VIDEO_REQUEST + 2);
+    public static final int REQUEST_VIDEO_DATA_USAGE      = (IMSMEDIA_VIDEO_REQUEST + 3);
 
     // Responses
-    public static final int IMSMEDIA_RESPONSE           = (IMSMEDIA_REQUEST + 100);
-    public static final int IMSMEDIA_MAX                = (IMSMEDIA_RESPONSE + 100);
-    public static final int RESPONSE_OPEN_SESSION       = (IMSMEDIA_RESPONSE + 1);
-    public static final int RESPONSE_SESSION_CHANGED    = (IMSMEDIA_RESPONSE + 2);
-    public static final int RESPONSE_MODIFY_SESSION     = (IMSMEDIA_RESPONSE + 3);
-    public static final int RESPONSE_ADD_CONFIG         = (IMSMEDIA_RESPONSE + 4);
-    public static final int RESPONSE_CONFIRM_CONFIG     = (IMSMEDIA_RESPONSE + 5);
+    public static final int IMSMEDIA_RESPONSE             = (IMSMEDIA_REQUEST + 100);
+    public static final int RESPONSE_OPEN_SESSION         = (IMSMEDIA_RESPONSE + 1);
+    public static final int RESPONSE_SESSION_CHANGED      = (IMSMEDIA_RESPONSE + 2);
+    public static final int RESPONSE_MODIFY_SESSION       = (IMSMEDIA_RESPONSE + 3);
+    public static final int RESPONSE_ADD_CONFIG           = (IMSMEDIA_RESPONSE + 4);
+    public static final int RESPONSE_CONFIRM_CONFIG       = (IMSMEDIA_RESPONSE + 5);
 
     // Notifications
-    public static final int NOTIFY_FIRST_PACKET         = (IMSMEDIA_RESPONSE + 6);
-    public static final int NOTIFY_HEADER_EXTENSION     = (IMSMEDIA_RESPONSE + 7);
-    public static final int NOTIFY_MEDIA_INACTIVITY     = (IMSMEDIA_RESPONSE + 8);
-    public static final int NOTIFY_PACKET_LOSS          = (IMSMEDIA_RESPONSE + 9);
-    public static final int NOTIFY_JITTER               = (IMSMEDIA_RESPONSE + 10);
-    public static final int NOTIFY_MEDIA_QUALITY_CHANGE = (IMSMEDIA_RESPONSE + 11);
+    public static final int NOTIFY_FIRST_PACKET           = (IMSMEDIA_RESPONSE + 6);
+    public static final int NOTIFY_HEADER_EXTENSION       = (IMSMEDIA_RESPONSE + 7);
+    public static final int NOTIFY_MEDIA_INACTIVITY       = (IMSMEDIA_RESPONSE + 8);
+    public static final int NOTIFY_PACKET_LOSS            = (IMSMEDIA_RESPONSE + 9);
+    public static final int NOTIFY_JITTER                 = (IMSMEDIA_RESPONSE + 10);
+    public static final int NOTIFY_MEDIA_QUALITY_CHANGE   = (IMSMEDIA_RESPONSE + 11);
+
+    // Notifications for video
+    public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 50);
+    public static final int NOTIFY_PEER_DIMENSION_CHANGED = (IMSMEDIA_VIDEO_RESPONSE + 1);
+    public static final int NOTIFY_VIDEO_DATA_USAGE       = (IMSMEDIA_VIDEO_RESPONSE + 2);
+
+    public static final int IMSMEDIA_MAX                  = (IMSMEDIA_RESPONSE + 100);
 };
