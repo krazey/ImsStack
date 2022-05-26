@@ -68,40 +68,6 @@ public class SscUrl {
         return url;
     }
 
-/*
-    private String getQueryCFRuleGCF(int slotId, ESsType sstype,
-            String xui, int serviceClass, int condition, int cfState)
-    {
-        ImsLog.d("");
-
-        String strURL = generateUrlAddress(slotId, false);
-
-        if (strURL == null) {
-            return null;
-        }
-
-        StringBuffer sb = new StringBuffer("/" + strURL.replace("http://", "")
-                        + "/simservs.ngn.etsi.org/users/" + xui
-                        + "/simservs.xml/~~/"
-                        + SscXmlFormat.getURLSS(slotId) + "simservs/"
-                        + SscXmlFormat.getURLSS(slotId) + sstype.getSSName());
-        // Add name space information
-        boolean bNotUsedSS = "".equals(SscXmlFormat.getURLSS(slotId));
-        boolean bNotUsedCP = "".equals(SscXmlFormat.getURLCP(slotId));
-
-        if (bNotUsedSS == false || bNotUsedCP == false) {
-            sb.append("?");
-            if (bNotUsedCP == false) {
-                sb.append("xmlns(cp=urn:ietf:params:xml:ns:common-policy)");
-            }
-            if (bNotUsedSS == false) {
-                sb.append("xmlns(ss=http://uri.etsi.org/ngn/params/xml/simservs/xcap)");
-            }
-        }
-
-        return sb.toString();
-    }
-*/
     public String getDocumentQueryUri(SscServiceQueryData data, String xui) {
         int slotId = data.getSlotId();
         String urlQuery = getQueryPrefixFromDB(slotId);

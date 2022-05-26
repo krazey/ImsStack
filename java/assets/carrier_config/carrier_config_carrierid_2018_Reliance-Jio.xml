@@ -21,4 +21,5 @@
 
     <!-- Ut/Xcap -->
     <!--<boolean name="imsss.xcap_root_uri_requires_srv_query_bool" value="true"/>-->
+    <boolean name="ut_omit_namespace_cp_bool" value="true"/>
 </carrier_config>

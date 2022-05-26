@@ -237,6 +237,19 @@ public final class SscConfig {
                 CarrierConfig.Assets.KEY_UT_TARGET_ADDRESS_ZERO_REPLACE_TO_COUNTRY_CODE_STRING);
     }
 
+    protected static boolean isOmitNamespaceOfDocumentElement(int slotId) {
+        return getBoolean(slotId,
+                CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL);
+    }
+
+    protected static boolean isOmitNamespaceSs(int slotId) {
+        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_SS_BOOL);
+    }
+
+    protected static boolean isOmitNamespaceCp(int slotId) {
+        return getBoolean(slotId, CarrierConfig.Assets.KEY_UT_OMIT_NAMESPACE_CP_BOOL);
+    }
+
     /* TODO: This isn't used now.
     public static boolean isHostHeaderRequiresPortNumber(int slotId) {
         return getBoolean(slotId,

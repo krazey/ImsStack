@@ -212,9 +212,7 @@ public class SscXmlFormat {
             xmlData.mNsCpPrefix = NS_CP_PREFIX;
         }
 
-        if (xmlData.getTags().containsKey(tagName) == false) {
-            xmlData.getTags().put(tagName, namespace);
-        }
+        xmlData.getTags().put(tagName, namespace);
     }
 
     protected static String getSsElement(int slotId, String elementName) {
