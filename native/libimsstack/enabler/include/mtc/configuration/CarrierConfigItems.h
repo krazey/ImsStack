@@ -10,6 +10,7 @@ struct CarrierConfigItems
 public:
     CarrierConfigItems() :
             nRequestUriType(0),
+            objSupportGeolocationPidfInSipInvite(IMSVector<IMS_SINT32>()),
             bSupportSipSessionIdHeader(IMS_FALSE),
             bIncludeCallerIdServiceCodesInSipInvite(IMS_FALSE),
             bMultiendpointSupported(IMS_FALSE),
@@ -97,6 +98,7 @@ public:
 public:
     // ims configurations
     IMS_SINT32 nRequestUriType;
+    IMSVector<IMS_SINT32> objSupportGeolocationPidfInSipInvite;
     IMS_BOOL bSupportSipSessionIdHeader;
 
     // audio configurations

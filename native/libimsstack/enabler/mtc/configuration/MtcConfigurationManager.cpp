@@ -58,6 +58,12 @@ IMS_SINT32 MtcConfigurationManager::GetRequestUriType() const
 }
 
 PUBLIC
+IMS_BOOL MtcConfigurationManager::IsSupportGeolocationPidfInSipInvite(IN IMS_SINT32 nType) const
+{
+    return ContainsValue(m_objCarrierConfig.objSupportGeolocationPidfInSipInvite, nType);
+}
+
+PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSupportSipSessionIdHeader() const
 {
     return m_objCarrierConfig.bSupportSipSessionIdHeader;
@@ -121,14 +127,7 @@ IMS_SINT32 MtcConfigurationManager::GetDedicatedBearerWaitTimer() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsSrvccType(IN IMS_SINT32 nType) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objSrvccTypes.GetSize(); i++)
-    {
-        if (m_objCarrierConfig.objSrvccTypes.GetAt(i) == nType)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objCarrierConfig.objSrvccTypes, nType);
 }
 
 PUBLIC
@@ -279,14 +278,7 @@ IMS_SINT32 MtcConfigurationManager::GetCallTypeAfterAudioAndVideoCallMerged() co
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsShortCallCode(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objShortCallCodes.GetSize(); i++)
-    {
-        if (m_objCarrierConfig.objShortCallCodes.GetAt(i) == nCode)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objCarrierConfig.objShortCallCodes, nCode);
 }
 
 PUBLIC
@@ -305,14 +297,7 @@ IMS_BOOL MtcConfigurationManager::IsAllowMultipleCallIncludingVideoCall() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRejectCodeForCsfb(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objRejectCodeForCsfbs.GetSize(); i++)
-    {
-        if (m_objCarrierConfig.objRejectCodeForCsfbs.GetAt(i) == nCode)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objCarrierConfig.objRejectCodeForCsfbs, nCode);
 }
 
 PUBLIC
@@ -449,14 +434,7 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyOnTextQosDeactivation() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsPidfShortCode(const AString& strCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objCarrierConfig.objPidfShortCodes.GetSize(); i++)
-    {
-        if (m_objCarrierConfig.objPidfShortCodes.GetAt(i).Equals(strCode))
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objCarrierConfig.objPidfShortCodes, strCode);
 }
 
 PUBLIC
@@ -604,14 +582,7 @@ IMS_SINT32 MtcConfigurationManager::GetPolicyForTcallTimerExpiryOfVowifiCall() c
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCarrierSpecificSipHeader(IN const AString& strHeader) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objCarrierSpecificSipHeaders.GetSize(); i++)
-    {
-        if (m_objAsset.objCarrierSpecificSipHeaders.GetAt(i).Equals(strHeader))
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objAsset.objCarrierSpecificSipHeaders, strHeader);
 }
 
 PUBLIC
@@ -630,29 +601,14 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsCallMaintainingOnRegistrationSuspended(
         IN IMS_SINT32 nSuspendType) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objCallMaintainingOnRegistrationSuspendeds.GetSize(); i++)
-    {
-        if (m_objAsset.objCallMaintainingOnRegistrationSuspendeds.GetAt(i) == nSuspendType)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objAsset.objCallMaintainingOnRegistrationSuspendeds, nSuspendType);
 }
 
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRequiringEmergencyCallWhenVideoEmergencyCallFailed(
         IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0;
-            i < m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.GetSize(); i++)
-    {
-        if (m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds.GetAt(i) == nCode)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objAsset.objRequiringEmergencyCallWhenVideoEmergencyCallFaileds, nCode);
 }
 
 PUBLIC
@@ -694,14 +650,7 @@ IMS_BOOL MtcConfigurationManager::IsAddReplaceHeaderForConference() const
 PUBLIC
 IMS_BOOL MtcConfigurationManager::IsVilteToVolteRetryFailureResponseCode(IN IMS_SINT32 nCode) const
 {
-    for (IMS_UINT32 i = 0; i < m_objAsset.objVilteToVolteRetryFailureResponseCodes.GetSize(); i++)
-    {
-        if (m_objAsset.objVilteToVolteRetryFailureResponseCodes.GetAt(i) == nCode)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(m_objAsset.objVilteToVolteRetryFailureResponseCodes, nCode);
 }
 
 PUBLIC
@@ -732,15 +681,8 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoingCall(
         IN IMS_SINT32 nReason) const
 {
-    for (IMS_UINT32 i = 0;
-            i < m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls.GetSize(); i++)
-    {
-        if (m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls.GetAt(i) == nReason)
-        {
-            return IMS_TRUE;
-        }
-    }
-    return IMS_FALSE;
+    return ContainsValue(
+            m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls, nReason);
 }
 
 PUBLIC
@@ -855,4 +797,32 @@ PUBLIC
 IMS_SINT32 MtcConfigurationManager::GetPolicyForLocalRingbackToneWith180Response() const
 {
     return m_objAsset.nPolicyForLocalRingbackToneWith180Response;
+}
+
+PRIVATE
+IMS_BOOL MtcConfigurationManager::ContainsValue(
+        IN const IMSVector<IMS_SINT32>& lstList, IN IMS_SINT32 nValue) const
+{
+    for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
+    {
+        if (lstList.GetAt(i) == nValue)
+        {
+            return IMS_TRUE;
+        }
+    }
+    return IMS_FALSE;
+}
+
+PRIVATE
+IMS_BOOL MtcConfigurationManager::ContainsValue(
+        IN const IMSVector<AString>& lstList, IN const AString& strValue) const
+{
+    for (IMS_UINT32 i = 0; i < lstList.GetSize(); i++)
+    {
+        if (lstList.GetAt(i).Equals(strValue))
+        {
+            return IMS_TRUE;
+        }
+    }
+    return IMS_FALSE;
 }

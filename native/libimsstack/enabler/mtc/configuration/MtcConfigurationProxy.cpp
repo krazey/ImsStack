@@ -180,6 +180,8 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature, IN IMS_SINT32 nAdditiona
 {
     switch (eFeature)
     {
+        case Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE:
+            return m_objManager.IsSupportGeolocationPidfInSipInvite(nAdditionalInfo);
         case Feature::SRVCC_TYPE:
             return m_objManager.IsSrvccType(nAdditionalInfo);
         case Feature::SHORT_CALL_CODE:

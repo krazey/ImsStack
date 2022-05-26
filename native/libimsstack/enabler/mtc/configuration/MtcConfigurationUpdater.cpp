@@ -24,6 +24,8 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
     IMS_TRACE_I("UpdateByCarrierConfig", 0, 0, 0);
 
     objItems.nRequestUriType = piCc->GetInt(CarrierConfig::Ims::KEY_REQUEST_URI_TYPE_INT);
+    objItems.objSupportGeolocationPidfInSipInvite = piCc->GetIntArray(
+            CarrierConfig::Ims::KEY_GEOLOCATION_PIDF_IN_SIP_INVITE_SUPPORT_INT_ARRAY);
     objItems.bSupportSipSessionIdHeader =
             piCc->GetBoolean(CarrierConfig::Ims::KEY_SUPPORT_SIP_SESSION_ID_HEADER_BOOL);
 
