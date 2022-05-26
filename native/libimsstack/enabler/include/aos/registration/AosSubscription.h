@@ -97,7 +97,6 @@ protected:
     virtual void SetRefreshPolicy();
     virtual void SetRetryTimer(IN IMS_BOOL bCheckRetryAfter);
     virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*> objContact);
-    virtual IMS_BOOL CheckRegInfoState(IN IRegInfoContact* piRegInfoContact, IN IMS_SINT32 nState);
     virtual IMS_BOOL CompareUriAssociatedWithContact(IN const SipAddress& objUri);
 
     virtual IMS_SINT32 ConvertRegInfoEvent(IN IMS_SINT32 nEvent);

@@ -882,15 +882,6 @@ PROTECTED VIRTUAL IRegInfoContact* AosSubscription::GetRegInfoContact(
     return piRegInfoContact;
 }
 
-PROTECTED VIRTUAL IMS_BOOL AosSubscription::CheckRegInfoState(
-        IN IRegInfoContact* piRegInfoContact, IN IMS_SINT32 nState)
-{
-    (void)piRegInfoContact;
-    (void)nState;
-
-    return IMS_TRUE;
-}
-
 PROTECTED VIRTUAL IMS_BOOL AosSubscription::CompareUriAssociatedWithContact(
         IN const SipAddress& objUri)
 {
@@ -1012,13 +1003,6 @@ PROTECTED VIRTUAL void AosSubscription::RegSubscription_NotifyReceived(
         {
             A_IMS_TRACE_I(
                     AOSTAG, "contact of reg info is not matched from contact address", 0, 0, 0);
-            return;
-        }
-
-        if (CheckRegInfoState(piRegInfoContact, piRegInfo->GetState()) == IMS_FALSE)
-        {
-            SetState(STATE_OFFLINE);
-            ReportState(REASON_SUB_TERMINATED, COMMAND_REG_TERMINATED);
             return;
         }
 
