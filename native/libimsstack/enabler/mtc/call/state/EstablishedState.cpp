@@ -138,7 +138,7 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
 
 PRIVATE
 IMS_RESULT EstablishedState::HandleUpdate(
-        IN UpdateType eUpdateType, IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
+        IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("HandleUpdate", 0, 0, 0);
     m_objContext.GetUpdatingInfo().SetModifier();
@@ -148,7 +148,7 @@ IMS_RESULT EstablishedState::HandleUpdate(
     MtcSession* pSession = m_objContext.GetSession();
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
 
-    if (objMediaManager.FormSdp(&(pSession->GetISession()), CallType::VOIP) == IMS_FAILURE)
+    if (objMediaManager.FormSdp(&(pSession->GetISession()), eCallType) == IMS_FAILURE)
     {
         // TODO
     }
@@ -187,9 +187,8 @@ IMS_RESULT EstablishedState::HandleReceivedUpdate(OUT CallStateName& eStateName)
 
     if (m_objContext.GetUpdatingInfo().IsNeedToAlert())
     {
-        CallType eCallType = CallType::VOIP;
-        // TODO, update CallType
-        SendIncomingUpdate(eCallType);
+        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
+                &m_objContext.GetSession()->GetISession()));
 
         return IMS_SUCCESS;
     }
@@ -245,8 +244,7 @@ IMS_RESULT EstablishedState::FormAutoAccept(IN IMS_BOOL bWithoutOffer)
     AdjustDirectionWithHeldByMe(bWithoutOffer);
 
     IMtcMediaManager& objMediaManager = m_objContext.GetMediaManager();
-    // m_objContext.GetCallInfo().eCallType
-    if (objMediaManager.FormSdp(&(pSession->GetISession()), CallType::VOIP) == IMS_FAILURE)
+    if (objMediaManager.FormSdp(&(pSession->GetISession()), pSession->GetCallType()) == IMS_FAILURE)
     {
         // TODO
     }

@@ -37,6 +37,7 @@ private:
     CallStateName HandleReceivedModificationSucceeded();
     void RecoverModificationFailure();
     void StopTimer();
+    void UpdateCallType();
 };
 
 #endif

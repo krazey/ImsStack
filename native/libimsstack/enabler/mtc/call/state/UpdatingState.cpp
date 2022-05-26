@@ -34,7 +34,7 @@ PUBLIC VIRTUAL void UpdatingState::OnExit()
 }
 
 PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
-        IN CallType /* eCallType */, IN MediaInfo* pMediaInfo)
+        IN CallType eCallType, IN MediaInfo* pMediaInfo)
 {
     IMS_TRACE_D("AcceptConvert", 0, 0, 0);
 
@@ -53,7 +53,7 @@ PUBLIC VIRTUAL CallStateName UpdatingState::AcceptConvert(
 
     m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
 
-    if (m_objContext.GetMediaManager().FormSdp(&objSession, CallType::VOIP) == IMS_FAILURE)
+    if (m_objContext.GetMediaManager().FormSdp(&objSession, eCallType) == IMS_FAILURE)
     {
         // TODO
     }
@@ -162,8 +162,6 @@ PUBLIC VIRTUAL CallStateName UpdatingState::SessionUpdated(IN ISession* /* piSes
         // TODO
     }
 
-    // TODO, update call type
-
     return HandleModificationSucceeded();
 }
 
@@ -270,8 +268,8 @@ IMS_RESULT UpdatingState::SendUpdate()
     m_objContext.GetMediaManager().SetMediaInfo(m_objContext.GetUpdatingInfo().GetModifyingInfo());
 
     MtcSession* pSession = m_objContext.GetSession();
-    if (m_objContext.GetMediaManager().FormSdp(&(pSession->GetISession()), CallType::VOIP) ==
-            IMS_FAILURE)
+    if (m_objContext.GetMediaManager().FormSdp(
+            &pSession->GetISession(), pSession->GetCallType()) == IMS_FAILURE)
     {
         // TODO
     }
@@ -325,9 +323,8 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
     if (m_objContext.GetUpdatingInfo().IsRequestedModifying() == IMS_FALSE &&
             m_objContext.GetUpdatingInfo().IsModified())
     {
-        CallType eCallType = CallType::VOIP;
-        // TODO, update CallType
-        SendIncomingUpdate(eCallType);
+        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
+                &m_objContext.GetSession()->GetISession()));
         return CallStateName::UPDATING;
     }
 
@@ -335,6 +332,8 @@ CallStateName UpdatingState::HandleRequestedModificationSucceeded()
     {
         return CallStateName::ESTABLISHED;
     }
+
+    UpdateCallType();
 
     MediaInfo objMediaInfo;
     m_objContext.GetMediaManager().GetMediaInfo(objMediaInfo);
@@ -362,9 +361,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 
     if (m_objContext.GetUpdatingInfo().IsModified())
     {
-        CallType eCallType = CallType::VOIP;
-        // TODO, update CallType
-        SendIncomingUpdate(eCallType);
+        SendIncomingUpdate(m_objContext.GetMediaManager().GetNegotiatedCallType(
+                &m_objContext.GetSession()->GetISession()));
         return CallStateName::UPDATING;
     }
 
@@ -372,6 +370,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
     {
         return CallStateName::ESTABLISHED;
     }
+
+    UpdateCallType();
 
     m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(), &objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices());
@@ -415,4 +415,21 @@ void UpdatingState::StopTimer()
     {
         m_objContext.GetTimer().Stop(TIMER_CONVERT_USER_RESPONSE);
     }
+}
+
+PRIVATE
+void UpdatingState::UpdateCallType()
+{
+    MtcSession* pSession = m_objContext.GetSession();
+    CallType eOldCallType = pSession->GetCallType();
+    CallType eNewCallType =
+            m_objContext.GetMediaManager().GetNegotiatedCallType(&pSession->GetISession());
+
+    if (eOldCallType == eNewCallType)
+    {
+        return;
+    }
+
+    pSession->SetCallType(eNewCallType);
+    IMS_TRACE_D("UpdateCallType : [%d] -> [%d]", eOldCallType, eNewCallType, 0);
 }
