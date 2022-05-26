@@ -35,5 +35,10 @@ public:
     /*Get methods*/
     inline const SIP_CHAR* GetHeaderName() const { return m_pszHdrName; }
     inline const SIP_CHAR* GetHeaderValue() const { return m_pszHdrValue; }
+
+    inline SIP_BOOL IsValidHeader() const
+    {
+        return (m_pszHdrName == SIP_NULL) ? SIP_FALSE : SIP_TRUE;
+    }
 };
 #endif  //__SIP_UNKNOWN_HEADER_H__
