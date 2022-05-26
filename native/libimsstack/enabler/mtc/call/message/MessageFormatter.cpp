@@ -546,12 +546,6 @@ void MessageFormatter::SetSupportedHeader()
         MessageUtil::AddValueIfNotExists(
                 m_piNextMessage, MessageUtil::STR_HISTINFO, ISipHeader::SUPPORTED);
     }
-
-    if (m_objContext.GetCallInfo().bEct)
-    {
-        MessageUtil::AddValueIfNotExists(
-                m_piNextMessage, MessageUtil::STR_REPLACES, ISipHeader::SUPPORTED);
-    }
 }
 
 /* -------------------------------------------------------------------------------------------------

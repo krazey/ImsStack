@@ -4,6 +4,7 @@
 #include "ISipHeader.h"
 #include "ServiceSystemTime.h"
 #include "ServiceTrace.h"
+#include "SipHeaderName.h"
 #include "call/MtcSession.h"
 #include "configuration/ConfigDef.h"
 #include "configuration/MtcConfigurationProxy.h"
@@ -39,7 +40,8 @@ MtcSession::MtcSession(
     m_bVideoCapable = HasAosFeature(ImsAosFeature::MMTEL) && HasAosFeature(ImsAosFeature::VIDEO);
     m_bRttCapable = HasAosFeature(ImsAosFeature::MMTEL) && HasAosFeature(ImsAosFeature::TEXT);
 
-    if (GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
+    if (m_objContext.GetCallInfo().ePeerType == PeerType::MO &&
+            GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
     {
         m_strSessionIdHeader = GenerateSessionId();
     }
@@ -68,18 +70,27 @@ void MtcSession::HandleRequest(IN IMS_UINT32 nMethod, IN const IMessage& objRequ
 {
     m_objExtensionSet.HandleRequest(nMethod, objRequest);
 
-    if (nMethod == IMessage::SESSION_START || nMethod == IMessage::SESSION_EARLY_UPDATE)
+    if (nMethod == IMessage::SESSION_START)
     {
-        UpdateFromRemoteMessage(objRequest);
+        if (GetConfigurationProxy().Is(Feature::SUPPORT_SIP_SESSION_ID_HEADER))
+        {
+            UpdateSessionIdFromMessage(objRequest);
+        }
     }
 
-    if (m_eCallType == CallType::UNKNOWN)
+    if (nMethod == IMessage::SESSION_START || nMethod == IMessage::SESSION_EARLY_UPDATE)
     {
-        // UE must send full media list for the incoming INVITE w/o SDP
-        // TODO: but, let us optimize.
-        m_eCallType = CallType::VOIP;
-        m_objContext.GetMediaManager().UpdateMediaDirection(
-                MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
+        UpdateCallTypeFromMessage(objRequest);
+        if (m_eCallType == CallType::UNKNOWN)
+        {
+            // UE must send full media list for the incoming INVITE w/o SDP
+            // TODO: but, let us optimize.
+            m_eCallType = CallType::VOIP;
+            m_objContext.GetMediaManager().UpdateMediaDirection(
+                    MEDIATYPE_AUDIO, DIRECTION_SEND_RECEIVE);
+        }
+
+        UpdateCapabilityFromMessage(objRequest);
     }
 }
 
@@ -90,7 +101,8 @@ void MtcSession::HandleResponse(IN IMS_UINT32 nMethod, IN const IMessage& objRes
 
     if (nMethod == IMessage::SESSION_START || nMethod == IMessage::SESSION_EARLY_UPDATE)
     {
-        UpdateFromRemoteMessage(objResponse);
+        UpdateCallTypeFromMessage(objResponse);
+        UpdateCapabilityFromMessage(objResponse);
     }
 }
 
@@ -129,7 +141,8 @@ void MtcSession::UpdateSessionProperty()
     m_objSession.SetImplicitRoutingRequired(IMS_TRUE);
 }
 
-void MtcSession::UpdateFromRemoteMessage(IN const IMessage& objMessage)
+PRIVATE
+void MtcSession::UpdateCallTypeFromMessage(IN const IMessage& objMessage)
 {
     CallType eNewCallType = MessageUtil::GetCallType(&objMessage, &m_objSession, IMS_TRUE);
     if (eNewCallType != CallType::UNKNOWN)
@@ -137,15 +150,35 @@ void MtcSession::UpdateFromRemoteMessage(IN const IMessage& objMessage)
         m_eCallType = eNewCallType;
     }
 
+    IMS_TRACE_D("UpdateCallTypeFromMessage : CallType[%d]", m_eCallType, 0, 0);
+}
+
+PRIVATE
+void MtcSession::UpdateCapabilityFromMessage(IN const IMessage& objMessage)
+{
     m_bVideoCapable = HasAosFeature(ImsAosFeature::MMTEL) && HasAosFeature(ImsAosFeature::VIDEO) &&
             MessageUtil::IsVideoFeatureIncluded(&objMessage);
     m_bRttCapable = HasAosFeature(ImsAosFeature::MMTEL) && HasAosFeature(ImsAosFeature::TEXT) &&
             MessageUtil::IsTextFeatureIncluded(&objMessage);
 
-    MessageUtil::GetHeader(&objMessage, ISipHeader::UNKNOWN, m_strSessionIdHeader, "Session-ID");
+    IMS_TRACE_D("UpdateCapabilityFromMessage : Video[%s] Rtt[%s]", _TRACE_B_(m_bVideoCapable),
+            _TRACE_B_(m_bRttCapable), 0);
+}
 
-    IMS_TRACE_D("UpdateFromRemoteMessage : CallType[%d] Video[%s] Rtt[%s]", m_eCallType,
-            _TRACE_B_(m_bVideoCapable), _TRACE_B_(m_bRttCapable));
+PRIVATE
+void MtcSession::UpdateSessionIdFromMessage(IN const IMessage& objMessage)
+{
+    AString strSessionIdHeader;
+    MessageUtil::GetHeader(
+            &objMessage, ISipHeader::UNKNOWN, strSessionIdHeader, SipHeaderName::SESSION_ID);
+
+    if (strSessionIdHeader.GetLength() <= 0)
+    {
+        return;
+    }
+
+    IMS_TRACE_D("UpdateSessionIdFromMessage : [%s]", m_strSessionIdHeader.GetStr(), 0, 0);
+    m_strSessionIdHeader = strSessionIdHeader;
 }
 
 PRIVATE

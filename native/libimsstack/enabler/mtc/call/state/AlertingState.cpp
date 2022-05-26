@@ -159,7 +159,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdated(IN ISession
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
-    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {
@@ -195,7 +194,6 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionEarlyMediaUpdateReceived(IN I
 
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
     m_objContext.GetSession()->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
-    NegotiateExtension(m_objContext.GetSession(), piMessage);
 
     if (OnSdpReceived(piSession, piMessage) != FAIL_REASON_NONE)
     {

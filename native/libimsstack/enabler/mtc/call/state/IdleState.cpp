@@ -184,7 +184,7 @@ PUBLIC VIRTUAL CallStateName IdleState::OnAttached()
     m_objContext.GetSupplementaryService().UpdateIncomingServices(piMessage);
     m_objContext.GetParticipantInfo().HandleRequest(IMessage::SESSION_START, *piMessage);
 
-    if (NegotiateExtension(m_objContext.GetSession(), piMessage) == IMS_FAILURE)
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
         return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_NOTSUPPORT));
     }

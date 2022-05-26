@@ -108,7 +108,10 @@ public:
 private:
     IMSList<AString> GetSupportedOptionTags() const;
     void UpdateSessionProperty();
-    void UpdateFromRemoteMessage(IN const IMessage& objMessage);
+    void UpdateCallTypeFromMessage(IN const IMessage& objMessage);
+    void UpdateCapabilityFromMessage(IN const IMessage& objMessage);
+    void UpdateSessionIdFromMessage(IN const IMessage& objMessage);
+
     AString GenerateSessionId() const;
     IMS_BOOL HasAosFeature(IMS_UINT32 nFeature);
 

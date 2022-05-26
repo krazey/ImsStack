@@ -161,7 +161,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionStarted(IN ISession* piSessio
     m_objContext.GetTimer().StopAll();
     m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
     m_objContext.GetSupplementaryService().UpdateTip(piMessage);
-    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage);
 
     if (MessageUtil::IsFocusConf(piMessage))
     {
@@ -270,7 +269,6 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
     IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_EARLY_UPDATE);
 
     m_objSessions.GetValue(piSession)->HandleRequest(IMessage::SESSION_EARLY_UPDATE, *piMessage);
-    NegotiateExtension(m_objSessions.GetValue(piSession), piMessage);
 
     // TODO: which operator requires this?
     // m_objContext.GetTimer().Start(TIMER_MO_NOANSWER, 60000);
@@ -417,7 +415,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionProvisionalResponseReceived(
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
     m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
 
-    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage) == IMS_FAILURE)
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -474,7 +472,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
     m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
 
-    if (NegotiateExtension(m_objSessions.GetValue(piSession), piMessage) == IMS_FAILURE)
+    if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
         FailReason objReason(FAIL_REASON_SERVICE_UNAVAILABLE);
         HandleCancel(piSession, objReason);
@@ -738,10 +736,7 @@ void OutgoingState::OnStarted(IN ISession* piSession)
 
     // TODO: stop call init timers
 
-    if (!m_objContext.GetCallInfo().bEct)
-    {
-        SendStarted();
-    }
+    SendStarted();
 }
 
 PRIVATE

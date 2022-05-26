@@ -147,8 +147,7 @@ public:
             bEmergency(IMS_FALSE),
             bOffline(IMS_FALSE),
             bUssi(IMS_FALSE),
-            bConference(IMS_FALSE),
-            bEct(IMS_FALSE)
+            bConference(IMS_FALSE)
     {
     }
 
@@ -159,8 +158,7 @@ public:
             bEmergency(objRhs.bEmergency),
             bOffline(objRhs.bOffline),
             bUssi(objRhs.bUssi),
-            bConference(objRhs.bConference),
-            bEct(objRhs.bEct)
+            bConference(objRhs.bConference)
     {
     }
 
@@ -175,7 +173,6 @@ public:
             bOffline = objRhs.bOffline;
             bUssi = objRhs.bUssi;
             bConference = objRhs.bConference;
-            bEct = objRhs.bEct;
         }
 
         return *this;
@@ -189,7 +186,6 @@ public:
     IMS_BOOL bOffline;
     IMS_BOOL bUssi;
     IMS_BOOL bConference;
-    IMS_BOOL bEct;
 };
 
 #endif

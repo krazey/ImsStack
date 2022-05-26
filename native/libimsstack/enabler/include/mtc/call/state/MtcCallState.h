@@ -155,7 +155,6 @@ protected:
     void UpdatePreconditionCapability(
             IN ISession* piSession, IN IMessage* piMessage, IN IMS_BOOL bCheckeSdp = IMS_TRUE);
     void SetLocalQosAvailableForWifiCalling(IN ISession* piSession);
-    IMS_RESULT NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage);
 
     IMS_BOOL IsRprSupported() const;
     IMS_BOOL IsNeedToIgnore(IN ISession* piSession, IN const IMessage* piMessage) const;

@@ -687,21 +687,6 @@ void MtcCallState::SetLocalQosAvailableForWifiCalling(IN ISession* piSession)
 }
 
 PROTECTED
-IMS_RESULT MtcCallState::NegotiateExtension(IN MtcSession* pMtcSession, IN IMessage* piMessage)
-{
-    if (piMessage == IMS_NULL || piMessage->GetMessage() == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
-
-    if (!pMtcSession->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
-    {
-        return IMS_FAILURE;
-    }
-    return IMS_SUCCESS;
-}
-
-PROTECTED
 IMS_BOOL MtcCallState::IsRprSupported() const
 {
     return m_objContext.GetSession()->GetExtensionSet().IsAvailableOnBoth(
