@@ -18,7 +18,53 @@
 
 #include "registration/AosRegistration.h"
 
-class AosERegistration : public AosRegistration
+class EmergencyModeInfo
+{
+public:
+    EmergencyModeInfo() :
+            m_bCheckEcbmForRefresh(IMS_FALSE),
+            m_bCheckScbmForRefresh(IMS_FALSE),
+            m_bECall(IMS_FALSE),
+            m_bEcbm(IMS_FALSE),
+            m_bScbm(IMS_FALSE),
+            m_bESms(IMS_FALSE)
+    {
+    }
+    virtual ~EmergencyModeInfo() {}
+
+    inline IMS_BOOL IsEcbmCheckedForRefresh() { return m_bCheckEcbmForRefresh; }
+    inline IMS_BOOL IsScbmCheckedForRefresh() { return m_bCheckScbmForRefresh; }
+    inline IMS_BOOL IsECall() { return m_bECall; }
+    inline IMS_BOOL IsEcbm() { return m_bEcbm; }
+    inline IMS_BOOL IsScbm() { return m_bScbm; }
+    inline IMS_BOOL IsESms() { return m_bESms; }
+
+    inline void SetEcbmCheckedForRefresh(IN IMS_BOOL bEcbmChecked)
+    {
+        m_bCheckEcbmForRefresh = bEcbmChecked;
+    }
+    inline void SetScbmCheckedForRefresh(IN IMS_BOOL bScbmChecked)
+    {
+        m_bCheckScbmForRefresh = bScbmChecked;
+    }
+    inline void SetECall(IN IMS_BOOL bECall) { m_bECall = bECall; }
+    inline void SetEcbm(IN IMS_BOOL bEcbm) { m_bEcbm = bEcbm; }
+    inline void SetScbm(IN IMS_BOOL bScbm) { m_bScbm = bScbm; }
+    inline void SetESms(IN IMS_BOOL bESms) { m_bESms = bESms; }
+
+public:
+    static const IMS_SINT32 EMERGENCY_CALLBACK_MODE_TIME = 300;
+
+private:
+    IMS_BOOL m_bCheckEcbmForRefresh;
+    IMS_BOOL m_bCheckScbmForRefresh;
+    IMS_BOOL m_bECall;
+    IMS_BOOL m_bEcbm;
+    IMS_BOOL m_bScbm;
+    IMS_BOOL m_bESms;
+};
+
+class AosERegistration : public AosRegistration, public IEventListener
 {
 public:
     AosERegistration(IN IAosAppContext* piAppContext, IN AString& strRegId);
@@ -33,6 +79,7 @@ private:
     IMS_BOOL OnMessage(IN IMSMSG& objMsg) final;
 
     void Init() final;
+    IMS_BOOL CreateRegistration() final;
 
     void ProcessAuthenticationFailed() final;
 
@@ -47,28 +94,47 @@ private:
     void ProcessUpdateFailed_TxnTimeout() final;
     void ProcessUpdateFailed_Others(IN IMS_SINT32 nReason) final;
 
+    void ProcessStopRetryTimerExpired() final;
     void ProcessTransactionTimerExpired() final;
 
     void SetRefreshPolicy() final;
 
+    void UpdateTransactionStarted() final;
+
     void Registration_RefreshTimerExpired(OUT IMS_BOOL& bDoImplicitRefresh) final;
     void Registration_Started() final;
+    void Registration_Updated() final;
     void Registration_StartFailed(IN IMS_SINT32 nReason) final;
     void Registration_Terminated(IN IMS_SINT32 nReason) final;
 
     void CallTracker_StateChanged(IN IMS_UINT32 nType, IN CallState eState) final;
 
+    void Event_NotifyEvent(
+            IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam) final;
+
+    IMS_UINT32 GetRetryTime();
+
+    void HandleECallState(IN IMS_UINT32 nState);
+    void HandleESmsState(IN IMS_UINT32 nState);
+    void HandleFakeMode(IN IMS_UINT32 nReason);
+
+    IMS_BOOL IsEcbmTimer() const;
     IMS_BOOL IsFakeModeCondition();
     IMS_BOOL IsReinitiationRequested() const;
+    IMS_BOOL IsRetryAllowed() const;
 
     void ProcessECallStarted();
+    void ProcessEMode();
     void ProcessFakeMode();
     void ProcessFakeModeWithRegState(IN IMS_BOOL bIsRegistered);
+    void ProcessRearrangePcscf();
     void ProcessReinitiateWithRegState(IN IMS_BOOL bIsRegistered);
 
     void SetReinitiationRequested(IN IMS_BOOL bRequest);
 
 private:
     IMS_BOOL m_bReinitiationRequested;
+
+    EmergencyModeInfo* pEModeInfo;
 };
 #endif  // AOS_E_REGISTRATION_H_
