@@ -153,6 +153,12 @@ public class VideoSessionHandler {
             }
                 break;
 
+            case MediaConstants.NOTIFY_MEDIA_DETACH:
+            {
+                handleVideoDisconnection();
+            }
+                break;
+
             default:
             {
                 ImsLog.e("Invalid RequestType");
@@ -202,11 +208,24 @@ public class VideoSessionHandler {
 
         if (mVideoSession != null) {
             mMediaManager.closeSession(mVideoSession);
+            closeSockets();
             mVideoSession = null;
         }
-        // TODO_MEDIA : ImsQOSManager to be used
+    }
+
+    private void handleVideoDisconnection() {
+        if (mVideoSession != null) {
+            closeSockets();
+            mVideoSession = null;
+        }
+    }
+
+    private void closeSockets() {
+        // TODO_MEDIA: ImsQOSManager to be used
         MediaSocket.closeDatagramSocket(mRtpSocket);
+        mRtpSocket = null;
         MediaSocket.closeDatagramSocket(mRtcpSocket);
+        mRtcpSocket = null;
     }
 
     private void handleVideoModifySession(VideoConfig videoConfig) {

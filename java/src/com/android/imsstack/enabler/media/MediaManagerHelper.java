@@ -22,10 +22,11 @@ import android.content.Context;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.RtpConfig;
-import com.android.imsstack.enabler.media.MediaSession;
+
 import com.android.imsstack.util.AppContext;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
+
 import java.net.DatagramSocket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -35,25 +36,25 @@ import java.util.concurrent.Executors;
  */
 public class MediaManagerHelper {
 
-    private MediaSession mMediaSession;
     private final Context mContext;
     private static boolean sIsImsMediaManagerReady;
     private static ImsMediaManager sImsMediaManager;
     private static Executor sExecutor;
+    private IMediaConnectionObserver mMediaObserver;
 
-    public MediaManagerHelper(MediaSession mediaSession) {
+    public MediaManagerHelper(IMediaConnectionObserver mediaObserver) {
 
-        mMediaSession = mediaSession;
+        mMediaObserver = mediaObserver;
         mContext = AppContext.get();
         createImsMediaManagerInstance();
     }
 
     @VisibleForTesting
-    public MediaManagerHelper(Context context, MediaSession mediaSession,
+    public MediaManagerHelper(Context context, IMediaConnectionObserver mediaObserver,
         ImsMediaManager imsMediaManager, Executor executor) {
 
         mContext = context;
-        mMediaSession = mediaSession;
+        mMediaObserver = mediaObserver;
         sImsMediaManager = imsMediaManager;
         sExecutor = executor;
     }
@@ -151,13 +152,18 @@ public class MediaManagerHelper {
         public void onConnected() {
             ImsLog.i("ImsMediaManager - connected");
             sIsImsMediaManagerReady = true;
+            if (mMediaObserver != null) {
+                mMediaObserver.onMediaConnected();
+            }
         }
 
         @Override
         public void onDisconnected() {
             ImsLog.i("ImsMediaManager - disconnected");
-            // TODO: call has to be disconnected
             sIsImsMediaManagerReady = false;
+            if (mMediaObserver != null) {
+                mMediaObserver.onMediaDisconnected();
+            }
             close();
         }
     }

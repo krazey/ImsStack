@@ -106,13 +106,13 @@ public class AudioSessionHandler  {
 
                 handleAudioOpenSession(localIpAddress, localPortNumber, null);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_CLOSE_SESSION:
             {
                 handleAudioCloseSession();
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_MODIFY_SESSION:
             {
@@ -120,7 +120,7 @@ public class AudioSessionHandler  {
 
                 handleAudioModifySession(audioConfig);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_ADD_CONFIG:
             {
@@ -128,7 +128,7 @@ public class AudioSessionHandler  {
 
                 handleAudioAddConfig(audioConfig);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_DELETE_CONFIG:
             {
@@ -136,7 +136,7 @@ public class AudioSessionHandler  {
 
                 handleAudioDeleteConfig(audioConfig);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_CONFIRM_CONFIG:
             {
@@ -144,7 +144,7 @@ public class AudioSessionHandler  {
 
                 handleAudioConfirmConfig(audioConfig);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_SEND_DTMF:
             {
@@ -154,7 +154,7 @@ public class AudioSessionHandler  {
 
                 handleAudioSendDtmf(dtmfDigit, duration);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_SET_MEDIA_QUALITY:
             {
@@ -164,7 +164,7 @@ public class AudioSessionHandler  {
 
                 handleAudioSetMediaQualityThreshold(threshold);
             }
-            break;
+                break;
 
             case MediaConstants.REQUEST_HEADER_EXTENSION:
             {
@@ -178,7 +178,13 @@ public class AudioSessionHandler  {
 
                 handleAudioSendHeaderExtension(rtpExtensions);
             }
-            break;
+                break;
+
+            case MediaConstants.NOTIFY_MEDIA_DETACH:
+            {
+                handleAudioDisconnection();
+            }
+                break;
 
             default:
             {
@@ -234,11 +240,24 @@ public class AudioSessionHandler  {
 
         if (mAudioSession != null) {
             mMediaManager.closeSession(mAudioSession);
+            closeSockets();
             mAudioSession = null;
         }
+    }
+
+    private void handleAudioDisconnection() {
+        if (mAudioSession != null) {
+            closeSockets();
+            mAudioSession = null;
+        }
+    }
+
+    private void closeSockets() {
         //TODO: ImsQOSManager to be used
         MediaSocket.closeDatagramSocket(mRtpSocket);
+        mRtpSocket = null;
         MediaSocket.closeDatagramSocket(mRtcpSocket);
+        mRtcpSocket = null;
     }
 
     private void handleAudioModifySession(AudioConfig audioConfig) {

@@ -58,6 +58,7 @@ public class MediaConstants {
     public static final int NOTIFY_PACKET_LOSS            = (IMSMEDIA_RESPONSE + 9);
     public static final int NOTIFY_JITTER                 = (IMSMEDIA_RESPONSE + 10);
     public static final int NOTIFY_MEDIA_QUALITY_CHANGE   = (IMSMEDIA_RESPONSE + 11);
+    public static final int NOTIFY_MEDIA_DETACH           = (IMSMEDIA_RESPONSE + 12);
 
     // Notifications for video
     public static final int IMSMEDIA_VIDEO_RESPONSE       = (IMSMEDIA_RESPONSE + 50);
