@@ -105,5 +105,13 @@ public:
     inline SIP_UINT16 GetSecond() const { return m_nSec; }
 
     inline SIP_INT32 GetWkDay() const { return m_eWkDay; }
+
+    inline SIP_BOOL IsValidHeader() const
+    {
+        return ((m_nDate == SIP_ZERO) || (m_eMonth == UNKNOWN_MONTH) || (m_nYear == SIP_ZERO) ||
+                       (m_eWkDay == UNKNOWN_DAY))
+                ? SIP_FALSE
+                : SIP_TRUE;
+    }
 };
 #endif  //__SIP_DATE_HEADER_H__

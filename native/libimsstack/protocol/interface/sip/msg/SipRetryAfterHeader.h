@@ -40,5 +40,7 @@ public:
     SIP_BOOL SetComment(const SIP_CHAR* pszComment);
     /*Gets */
     inline const SIP_CHAR* GetComment() const { return m_pszComment; }
+
+    inline SIP_BOOL IsValidHeader() const { return SIP_TRUE; }
 };
 #endif  //__SIP_RETRY_AFTER_HEADER_H__
