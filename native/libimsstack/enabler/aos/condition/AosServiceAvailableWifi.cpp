@@ -206,11 +206,11 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleRoamingChanged(IN IMS_UINT32
         if (m_bRoamingState)
         {
             RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
-            m_piAppContext->GetBlock()->SetBlockReason(BLOCK_WIFI_ROAMING);
+            m_piBlock->SetBlockReason(BLOCK_WIFI_ROAMING);
         }
         else
         {
-            m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_WIFI_ROAMING);
+            m_piBlock->ResetBlockReason(BLOCK_WIFI_ROAMING);
         }
     }
 }
@@ -226,11 +226,11 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleAirplaneModeChanged(IN IMS_U
 
     if (m_bAirplaneMode)
     {
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+        m_piBlock->SetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
+        m_piBlock->ResetBlockReason(BLOCK_WIFI_AIRPLANE_MODE_ON);
     }
 }
 
@@ -240,40 +240,39 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWfcSettingChanged(IN IMS_UIN
     if (nState == IMS_WFC_ON)
     {
         m_nVoWiFiSetting = IMS_TRUE;
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
+        m_piBlock->ResetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
     }
     else
     {
         m_nVoWiFiSetting = IMS_FALSE;
         ClearBadNetworkState();
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
+        m_piBlock->SetBlockReason(BLOCK_WIFI_VOWIFI_OFF);
     }
 }
 
 PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleWiFiConnectionChanged()
 {
-    IAosBlock* piBlock = m_piAppContext->GetBlock();
-    if (piBlock == IMS_NULL)
+    if (m_piBlock == IMS_NULL)
     {
         return;
     }
 
     if (m_bWiFiState == IMS_FALSE)
     {
-        piBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
+        m_piBlock->SetBlockReason(BLOCK_WIFI_NO_WIFI);
     }
     else
     {
-        piBlock->ResetBlockReason(BLOCK_WIFI_NO_WIFI);
+        m_piBlock->ResetBlockReason(BLOCK_WIFI_NO_WIFI);
     }
 
     if (m_nBadNetworkState == STATE_BAD_NETWORK_DETECTED)
     {
-        piBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+        m_piBlock->SetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     }
     else
     {
-        piBlock->ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
+        m_piBlock->ResetBlockReason(BLOCK_WIFI_BAD_CONNECTION);
     }
 }
 
@@ -299,8 +298,8 @@ PRIVATE VIRTUAL void AosServiceAvailableWifi::HandleLocationInfoChanged()
 
     if (!bIsCountrySame)
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_IMS_DISABLED);
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_AUTHENTICATION_FAILED);
+        m_piBlock->ResetBlockReason(BLOCK_IMS_DISABLED);
+        m_piBlock->ResetBlockReason(BLOCK_AUTHENTICATION_FAILED);
     }
 }
 
@@ -318,7 +317,7 @@ PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableWifi::CheckServiceAvailable()
         return IMS_FALSE;
     }
 
-    return m_piAppContext->GetBlock()->IsCleared(SERVICE_WIFI);
+    return m_piBlock->IsCleared(SERVICE_WIFI);
 }
 
 PRIVATE

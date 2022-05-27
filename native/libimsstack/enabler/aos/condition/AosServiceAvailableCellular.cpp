@@ -42,19 +42,18 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleNetworkStateChanged()
     A_IMS_TRACE_I(AOSTAG, "HandleNetworkStateChanged :: Is Service In - (%s)",
             _TRACE_B_(m_bNetworkServiceIn), 0, 0);
 
-    IAosBlock* piBlock = m_piAppContext->GetBlock();
-    if (piBlock == IMS_NULL)
+    if (m_piBlock == IMS_NULL)
     {
         return;
     }
 
     if (m_bNetworkServiceIn)
     {
-        piBlock->ResetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
     }
     else
     {
-        piBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
+        m_piBlock->SetBlockReason(BLOCK_CELLULAR_OUT_OF_SERVICE);
     }
 }
 
@@ -70,11 +69,11 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleRoamingChanged(IN IMS_UI
     if (m_bRoamingState)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_CELLULAR_ROAMING);
+        m_piBlock->SetBlockReason(BLOCK_CELLULAR_ROAMING);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_CELLULAR_ROAMING);
+        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_ROAMING);
     }
 }
 
@@ -89,11 +88,11 @@ PRIVATE VIRTUAL void AosServiceAvailableCellular::HandleAirplaneModeChanged(IN I
 
     if (m_bAirplaneMode)
     {
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        m_piBlock->SetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
+        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_AIRPLANE_MODE_ON);
     }
 }
 
@@ -110,11 +109,11 @@ void AosServiceAvailableCellular::HandleVolteSettingChanged(IN IMS_UINT32 nState
     if (m_bVolteSetting == IMS_FALSE)
     {
         RequestCommand(AosCondition::REQUEST_STOP, AoSReason::NOT_SPECIFIED);
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
+        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOLTE_OFF);
     }
 }
 
@@ -136,11 +135,11 @@ void AosServiceAvailableCellular::HandleVopsChanged(IN IMS_UINT32 nState)
     if (m_bVopsState == IMS_VOICE_OVER_PS_NOT_SUPPORTED)
     {
         RequestCommand(AosCondition::REQUEST_PDN_DISCONNECT, AoSReason::NOT_SPECIFIED);
-        m_piAppContext->GetBlock()->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        m_piBlock->SetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
     }
     else
     {
-        m_piAppContext->GetBlock()->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
+        m_piBlock->ResetBlockReason(BLOCK_CELLULAR_VOPS_OFF);
     }
 }
 
@@ -158,7 +157,7 @@ PRIVATE VIRTUAL IMS_BOOL AosServiceAvailableCellular::CheckServiceAvailable()
         return IMS_FALSE;
     }
 
-    return m_piAppContext->GetBlock()->IsCleared(SERVICE_CELLULAR);
+    return m_piBlock->IsCleared(SERVICE_CELLULAR);
 }
 
 PRIVATE
