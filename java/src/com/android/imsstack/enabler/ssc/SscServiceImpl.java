@@ -476,16 +476,30 @@ public class SscServiceImpl extends UtInterfaceBase {
             }
         }
 
+        switch (action) {
+            case SscConstant.ACTION_ACTIVATION:
+            case SscConstant.ACTION_REGISTRATION:
+                if (TextUtils.isEmpty(number)) {
+                    action = SscConstant.ACTION_ACTIVATION;
+                } else {
+                    action = SscConstant.ACTION_REGISTRATION;
+                }
+                break;
+            case SscConstant.ACTION_DEACTIVATION:
+            case SscConstant.ACTION_ERASURE:
+                // ignore cfnr timer when deactivation or erasure
+                timeSeconds = 0;
+                break;
+            default:
+                ImsLog.e("Invalid or Not Supported Action : " + action);
+                return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
+        }
+
         if (timeSeconds > 0) {
             if (timeSeconds < SscConstant.CFNR_TIMER_MIN
                     || timeSeconds > SscConstant.CFNR_TIMER_MAX) {
                 return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
             }
-        }
-
-        if (action < SscConstant.ACTION_DEACTIVATION || action > SscConstant.ACTION_ERASURE) {
-            ImsLog.e("Invalid or Not Supported Action : " + action);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
         }
 
         // Check valid service class or not
@@ -497,19 +511,6 @@ public class SscServiceImpl extends UtInterfaceBase {
 
         // remove service classes except voice and video
         serviceClass = SscServiceClassUtil.removeNotValidSC(serviceClass);
-
-        if (action == SscConstant.ACTION_ACTIVATION || action == SscConstant.ACTION_REGISTRATION) {
-            if (TextUtils.isEmpty(number)) {
-                action = SscConstant.ACTION_ACTIVATION;
-            } else {
-                action = SscConstant.ACTION_REGISTRATION;
-            }
-        }
-
-        if (condition < SscConstant.CONDITION_CFU || condition > SscConstant.CONDITION_CFNL) {
-            ImsLog.e("Invalid or Not Supported Condition : " + condition);
-            return (ImsReasonInfo.CODE_UT_OPERATION_NOT_ALLOWED * (-1));
-        }
 
         int tId = SscConfig.getNewTid();
         SscRequestData requestData = new SscRequestData(tId);
