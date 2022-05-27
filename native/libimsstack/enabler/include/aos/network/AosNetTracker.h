@@ -20,6 +20,7 @@
 #include "ITimer.h"
 #include "INetworkWatcher.h"
 #include "IWifiWatcher.h"
+#include "interface/IAosNConfiguration.h"
 #include "interface/IAosConnectionListener.h"
 #include "interface/IAosNetTracker.h"
 

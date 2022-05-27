@@ -542,7 +542,7 @@ void AosNetTracker::InitConfig()
             InitCnxPolicy(m_piAosNConfig->GetSmsOverImsSupportedRats());
         }
 
-        if (IsVoNRSupported())
+        if (IsVonrSupported())
         {
             m_nCnxPolicy |= NW_REPORT_RADIO_NR;
         }
@@ -1064,7 +1064,7 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL AosNetTracker::IsVoNRSupported()
+IMS_BOOL AosNetTracker::IsVonrSupported()
 {
     return m_piAosNConfig->IsImsOverNrEnabled();
 }
