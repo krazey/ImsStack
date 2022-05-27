@@ -61,7 +61,6 @@ PRIVATE
 FailReason StartErrorHandler::HandleResponse(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
 
     if (SipStatusCode::SC_300 <= nStatusCode && nStatusCode < SipStatusCode::SC_400)
     {
@@ -332,7 +331,6 @@ PRIVATE
 IMS_BOOL StartErrorHandler::IsRetry1xRequiredForEmergencyCall(IN const IMessage& objMessage) const
 {
     IMS_SINT32 nStatusCode = objMessage.GetStatusCode();
-    IMS_ASSERT(nStatusCode >= SipStatusCode::SC_300);
 
     if (nStatusCode == SipStatusCode::SC_407)
     {
