@@ -24,8 +24,8 @@ class IAosNetTracker
 {
 public:
     virtual IMS_BOOL IsServiceIN(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
-    virtual IMS_BOOL IsDataIN() = 0;
-    virtual IMS_BOOL IsNetworkIN() = 0;
+    virtual IMS_BOOL IsDataIn() = 0;
+    virtual IMS_BOOL IsNetworkIn() = 0;
     virtual IMS_BOOL IsEmergencyLteAttach() = 0;
     virtual IMS_BOOL IsSuspended() = 0;
     virtual IMS_BOOL IsSessionContinuitySupported() = 0;
@@ -42,7 +42,7 @@ public:
     */
     virtual IMS_UINT32 GetNetworkType() = 0;
 
-    virtual void SetRATGuardTime(IN IMS_UINT32 nGuardTime) = 0;
+    virtual void SetRatGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvOutGuardTime(IN IMS_UINT32 nGuardTime) = 0;
     virtual void SetSrvInGuardTime(IN IMS_UINT32 nGuardTime) = 0;
 
