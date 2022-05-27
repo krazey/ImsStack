@@ -870,6 +870,10 @@ public class CarrierConfig {
                 "ut_xcap_apn_inactivity_timer_sec_int";
         public static final String KEY_UT_DISPLAY_ERROR_PHRASE_WITH_409_ERROR_BOOL =
                 "ut_display_error_phrase_with_409_error_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_OF_DOCUMENT_ELEMENT_BOOL =
+                "ut_omit_namespace_of_document_element_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_SS_BOOL = "ut_omit_namespace_ss_bool";
+        public static final String KEY_UT_OMIT_NAMESPACE_CP_BOOL = "ut_omit_namespace_cp_bool";
         // Uce
         public static final String KEY_ADD_VIDEO_TAG_CONTACT_HEADER_IN_PUBLISH_BOOL =
                 "add_video_tag_contact_header_in_publish_bool";

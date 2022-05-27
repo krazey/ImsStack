@@ -229,7 +229,7 @@ public class SscXmlParser {
         updateRuleIds(slotId, rootElement);
         checkCfnrTimerPosition(slotId, rootElement);
         checkCfnlRuleExist(slotId, rootElement);
-        //SscXmlFormat.displayTags(queryData.getSlotId());
+        SscXmlFormat.displayTags(queryData.getSlotId());
     }
 
     private SscServiceData getErrorPhrase(SscServiceQueryData queryData, Document doc) {

@@ -40,7 +40,7 @@ import java.lang.ref.WeakReference;
 public class SscTransaction {
     public static final int EVENT_SRV_RETRY_REQUIRED = 1001;
 
-    protected SscXmlGov mXMLGov = null;
+    protected SscXmlGov mXmlGov = null;
 
     protected Handler mTransactionHandler = null;
     protected Handler mSscServiceImplHandler = null;
@@ -59,7 +59,7 @@ public class SscTransaction {
     public SscTransaction(int slotId, Handler handler) {
         mSlotId = slotId;
         mSscServiceImplHandler = handler;
-        mXMLGov = SscXmlGov.getInstance(slotId);
+        mXmlGov = SscXmlGov.getInstance(slotId);
     }
 
     public void close() {
@@ -302,10 +302,7 @@ public class SscTransaction {
             Document doc = httpConnection.getInputStream(mSlotId);
             SscServiceData dataFromServer = null;
             if (doc != null) {
-                if (mData.getSsType() == ESsType.NONE && responseCode == 200) {
-                    mXMLGov.setXmlData(doc);
-                }
-                dataFromServer = mXMLGov.parseXMLStream(mData, doc);
+                dataFromServer = mXmlGov.parseXmlStream(mData, doc);
             }
 
             if (dataFromServer == null) {
@@ -332,7 +329,7 @@ public class SscTransaction {
 
         @Override
         protected String getXmlBody() {
-            return mXMLGov.createXMLStream(mData);
+            return mXmlGov.createXmlStream(mData);
         }
 
         @Override
@@ -355,7 +352,7 @@ public class SscTransaction {
             SscServiceData dataFromServer = null;
             SscXmlGov.getInstance(mSlotId).updateXmlData(responseCode);
             if (resultState == SscConstant.REQUEST_FAILURE && doc != null) {
-                dataFromServer = mXMLGov.parseXMLStream(mData, doc);
+                dataFromServer = mXmlGov.parseXmlStream(mData, doc);
                 if (dataFromServer == null) {
                     ImsLog.e(mSlotId, "dataFromServer is null");
                 }

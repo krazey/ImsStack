@@ -104,7 +104,7 @@ public class SscServiceImplTest {
     private String errorPhrase = "";
     private String forwardNumber = "tel:+1234567890";
     private String defaultBehaviour = SscXmlFormat.PRESENTATION_NOT_RESTRICTED;
-    private int mHttpSuccessResponse = 200;
+    private int mHttpSuccessResponse = SscConstant.HTTP_OK;
     private int mHttpErrorResponse = SscConstant.HTTP_CONFLICT;
 
     @Before
@@ -840,7 +840,7 @@ public class SscServiceImplTest {
         capturedData.setResponseCode(200);
         Document doc = createEntireXmldoc();
         SscXmlGov.getInstance(SLOT_0).setXmlData(doc);
-        SscXmlGov.getInstance(SLOT_0).parseXMLStream(capturedData, doc);
+        SscXmlGov.getInstance(SLOT_0).parseXmlStream(capturedData, doc);
 
         Message msg = Message.obtain();
         msg.what = SscConstant.EVENT_SSC_BASE;
@@ -897,7 +897,7 @@ public class SscServiceImplTest {
         SscRequestResult rr = new SscRequestResult(SLOT_0, capturedData.getTransactionId(),
                 SscConstant.REQUEST_SUCCESS, mHttpSuccessResponse, -1);
         rr.setSscServiceData(SscXmlGov.getInstance(SLOT_0)
-                .parseXMLStream(capturedData, createEntireXmldoc()));
+                .parseXmlStream(capturedData, createEntireXmldoc()));
         msg.obj = rr;
 
         mCallbackHandler.sendMessage(msg);

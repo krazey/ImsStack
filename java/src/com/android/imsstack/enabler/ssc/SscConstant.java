@@ -115,7 +115,8 @@ public class SscConstant {
     public static final int REQUEST_FAILURE = 0;
     public static final int REQUEST_SUCCESS = 1;
 
-    // HTTP Error Code
+    // HTTP Response Code
+    public static final int HTTP_OK = 200;
     public static final int HTTP_NOT_MODIFIED = 304;
     public static final int HTTP_UNAUTHORIZED = 401;
     public static final int HTTP_CONFLICT = 409;

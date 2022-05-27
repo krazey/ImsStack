@@ -137,7 +137,7 @@ public class SscServiceImpl extends UtInterfaceBase {
         ImsLog.d(mSlotId, "");
 
         SscConfig.clear(mSlotId);
-        SscXmlGov.getInstance(mSlotId).setXmlData(null);
+        SscXmlGov.getInstance(mSlotId).clear();
 
         ISubscription subscription
                 = (ISubscription)AgentFactory.getAgent(AgentFactory.SUBSCRIPTION, mSlotId);
