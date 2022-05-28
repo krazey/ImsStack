@@ -15,7 +15,6 @@
  */
 #include <gtest/gtest.h>
 #include "sip_abnfUtil.h"
-#define SIP_BADMESSAGE_PARSING 1
 #include "msg/SipMessage.h"
 
 namespace android

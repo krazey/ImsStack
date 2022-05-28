@@ -14,9 +14,6 @@ cc_library_static {
     defaults: [
         "imsstack_native_defaults",
     ],
-    cflags: [
-        "-DSIP_BADMESSAGE_PARSING",
-    ],
     srcs: [
         "**/*.cpp",
     ],
