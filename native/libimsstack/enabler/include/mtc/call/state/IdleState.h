@@ -41,6 +41,10 @@ public:
     CallStateName OnBlockChecked(IN IMtcBlockChecker::Result objResult) override;
     CallStateName OnAttached() override;
 
+    CallStateName HandleIncomingUssi(
+            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread) override;
+    CallStateName OnUssiAttached() override;
+
 private:
     enum class ConferenceType
     {
@@ -53,6 +57,7 @@ private:
     CallStateName ContinueStart(IN MediaInfo* pMediaInfo);
     CallStateName ContinueConference(IN MediaInfo* pMediaInfo, IN IMSList<ConfUser*> lstUsers);
     CallStateName ContinueHandleIncoming();
+    CallStateName ContinueStartUssi(IN MediaInfo* pMediaInfo);
 
     AString GenerateSessionId();
     IMSList<AString> GetEntryUrisFromConferenceUsers(IN const IMSList<ConfUser*>& lstUsers);

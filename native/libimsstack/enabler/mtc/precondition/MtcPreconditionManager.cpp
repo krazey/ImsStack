@@ -240,6 +240,11 @@ PUBLIC VIRTUAL IMS_BOOL MtcPreconditionManager::IsPreconditionSupportedInLocal()
             break;
     }
 
+    if (m_objContext.GetCallInfo().bUssi)
+    {
+        bSupport = IMS_FALSE;
+    }
+
     IMS_TRACE_D("IsPreconditionSupportedInLocal : CallType[%d] Result[%s]", eCallType,
             _TRACE_B_(bSupport), 0);
     return bSupport;

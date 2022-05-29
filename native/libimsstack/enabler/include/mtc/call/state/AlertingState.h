@@ -43,6 +43,9 @@ public:
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
 
+    CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo) override;
+    CallStateName UssiStarted(IN ISession* piSession) override;
+
 private:
     IMS_RESULT SendAccept();
 };

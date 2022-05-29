@@ -22,6 +22,16 @@ public:
     CallStateName SessionTerminated(IN ISession* piSession) override;
     CallStateName SessionUpdateReceived(IN ISession* piSession) override;
 
+    CallStateName TerminateUssi(IN const FailReason& objReason) override;
+    CallStateName UssiTerminated(IN ISession* piSession) override;
+    CallStateName SendUssi(IN const AString& strUssi) override;
+    CallStateName UssiInfoReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
+    CallStateName NotifyResponseToUssiInfo(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc) override;
+    CallStateName NotifyErrorToUssiInfo(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
 private:
     IMS_RESULT HandleUpdate(
             IN UpdateType eUpdateType, IN CallType eCallType, IN MediaInfo* pMediaInfo);
@@ -30,6 +40,8 @@ private:
     IMS_RESULT FormAutoAccept(IN IMS_BOOL bWithoutOffer);
     void AdjustDirectionWithHeldByMe(IN IMS_BOOL bWithoutOffer);
     IMS_BOOL IsConferenceCallParticipant();
+
+    CallStateName TerminateUssiAfterInfoTransaction();
 };
 
 #endif

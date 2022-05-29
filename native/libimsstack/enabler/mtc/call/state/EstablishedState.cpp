@@ -1,3 +1,7 @@
+#include "IMessage.h"
+#include "ISipServerConnection.h"
+#include "ServiceTrace.h"
+
 #include "call/IMtcCallContext.h"
 #include "call/MtcSession.h"
 #include "call/MtcUiNotifier.h"
@@ -10,10 +14,10 @@
 #include "configuration/MtcConfigurationProxy.h"
 #include "helper/MtcSupplementaryService.h"
 #include "helper/MtcTimerWrapper.h"
-#include "IMessage.h"
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
-#include "ServiceTrace.h"
+#include "ussi/UssiController.h"
+#include "ussi/UssiDef.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -134,6 +138,116 @@ PUBLIC VIRTUAL CallStateName EstablishedState::SessionUpdateReceived(IN ISession
     }
 
     return eStateName;
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::TerminateUssi(IN const FailReason& /*objReason*/)
+{
+    IMS_TRACE_D("TerminateUssi", 0, 0, 0);
+
+    SendInfoForUssi(AString::ConstEmpty(), UssiError::CODE_1);
+    m_objContext.GetUssiController()->SetNextActionByTerminateUssi();
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSession)
+{
+    IMS_TRACE_D("UssiTerminated", 0, 0, 0);
+
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_TERMINATE);
+    UssiController* pUssiController = m_objContext.GetUssiController();
+
+    if (!pUssiController->IsByeForUssi(piMessage))
+    {
+        return SessionTerminated(piSession);
+    }
+
+    pUssiController->ParseUssiBodyAndCheckResult(
+            piMessage->GetMessage(), piMessage->GetMethod().ToInt());
+
+    m_objContext.GetMediaManager().Terminate();
+    m_objContext.GetUiNotifier().SendTerminated(TerminationHandler().Handle(*piSession));
+
+    return CallStateName::TERMINATING;
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::SendUssi(IN const AString& strUssi)
+{
+    IMS_TRACE_D("SendUssi", 0, 0, 0);
+
+    SendInfoForUssi(strUssi);
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::UssiInfoReceived(
+        IN ISession* piSession, IN ISipServerConnection* piSipServerConnection)
+{
+    IMS_TRACE_D("UssiInfoReceived", 0, 0, 0);
+    UNUSED_PARAM(piSession);
+    IMS_SINT32 nMethod = piSipServerConnection->GetMethod().ToInt();
+
+    if (nMethod != SipMethod::INFO)
+    {
+        SendTransactionResponse(piSipServerConnection, SipStatusCode::SC_200);
+        return GetStateName();
+    }
+
+    UssiController* pUssiController = m_objContext.GetUssiController();
+    if (!pUssiController->IsUssiInfoReceived(piSipServerConnection) ||
+            !pUssiController->HasXmlBodyInInfo(piSipServerConnection))
+    {
+        SendTransactionResponse(piSipServerConnection, SipStatusCode::SC_469, "Bad Info Package");
+        return GetStateName();
+    }
+
+    UssiResult objResult = pUssiController->ParseUssiBodyAndCheckResult(
+            piSipServerConnection->GetMessage(), nMethod);
+
+    SendTransactionResponse(piSipServerConnection, SipStatusCode::SC_200);
+
+    switch (objResult.eAction)
+    {
+        case UssiNextAction::SEND_INFO_WITH_ERROR_CODE:
+            SendInfoForUssi(AString::ConstEmpty(), objResult.eErrorCode);
+            break;
+        case UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT:
+            SendInfoForUssi(AString::ConstEmpty());
+            break;
+        default:
+            break;
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::NotifyResponseToUssiInfo(
+        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
+{
+    IMS_TRACE_D("NotifyResponseToUssiInfo", 0, 0, 0);
+    CallStateName eState = ClientConnection_NotifyResponse(piScc, piForkedScc);
+
+    if (m_objContext.GetUssiController()->GetLastResult().eAction ==
+            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE)
+    {
+        return TerminateUssiAfterInfoTransaction();
+    }
+
+    return eState;
+}
+
+PUBLIC VIRTUAL CallStateName EstablishedState::NotifyErrorToUssiInfo(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
+{
+    IMS_TRACE_D("NotifyErrorToUssiInfo", 0, 0, 0);
+    CallStateName eState = Error_NotifyError(piSc, nCode, strMessage);
+
+    if (m_objContext.GetUssiController()->GetLastResult().eAction ==
+            UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE)
+    {
+        return TerminateUssiAfterInfoTransaction();
+    }
+
+    return eState;
 }
 
 PRIVATE
@@ -331,4 +445,17 @@ IMS_BOOL EstablishedState::IsConferenceCallParticipant()
     }
 
     return IMS_FALSE;
+}
+
+PRIVATE
+CallStateName EstablishedState::TerminateUssiAfterInfoTransaction()
+{
+    IMS_TRACE_D("TerminateUssiAfterInfoTransaction", 0, 0, 0);
+
+    m_objContext.GetMediaManager().Terminate();
+    FailReason objReason(FAIL_REASON_UNKNOWN);
+    m_objContext.GetSession()->GetMessageSender().Terminate(IMS_TRUE, objReason);
+    m_objContext.GetUiNotifier().SendStartFailed(objReason);
+
+    return CallStateName::TERMINATING;
 }

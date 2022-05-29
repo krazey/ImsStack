@@ -613,6 +613,11 @@ void MessageFormatter::SetPreconditionHeader()
 PRIVATE
 void MessageFormatter::SetPEarlyMediaHeader()
 {
+    if (m_objContext.GetCallInfo().bUssi)
+    {
+        return;
+    }
+
     MessageUtil::AddValueIfNotExists(
             m_piNextMessage, MessageUtil::STR_SUPPORTED, ISipHeader::P_EARLY_MEDIA);
 }

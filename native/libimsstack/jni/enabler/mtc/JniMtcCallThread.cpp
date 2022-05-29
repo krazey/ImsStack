@@ -267,6 +267,19 @@ void JniMtcCallThread::OnIncomingCallReceived(IN IMS_UINTP nCallKey,
     SendData2Java(objParcel);
 }
 
+void JniMtcCallThread::OnInformationNotificationReceived(
+        IN IMS_UINT32 eType, IN const AString strValue, IN IMS_SINT32 nValue, IN IMS_BOOL bValue)
+{
+    Parcel objParcel;
+    objParcel.writeInt32(IuMtcCall::NOTIFY_INFO);
+    objParcel.writeInt32(eType);
+    objParcel.writeString16(android::String16(strValue.GetStr()));
+    objParcel.writeInt32(nValue);
+    objParcel.writeInt32(bValue);
+
+    SendData2Java(objParcel);
+}
+
 PRIVATE
 void JniMtcCallThread::SetCallDetails(IN_OUT Parcel& objParcel, IN const JniCallInfo& objCallInfo,
         IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices)

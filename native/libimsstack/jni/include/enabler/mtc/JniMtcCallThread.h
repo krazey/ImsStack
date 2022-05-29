@@ -67,6 +67,9 @@ public:
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
             IN ParticipantInfo* pParticipantInfo);
 
+    void OnInformationNotificationReceived(IN IMS_UINT32 nType, IN const AString strValue,
+            IN IMS_SINT32 nValue, IN IMS_BOOL bValue);
+
 private:
     void SetCallDetails(IN_OUT android::Parcel& objParcel, IN const JniCallInfo& objCallInfo,
             IN MediaInfo* pMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices);

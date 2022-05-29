@@ -51,7 +51,6 @@ private:
     IMS_BOOL GetCdivTarget(IN const SipAddress* pAddress, OUT AString& strTarget);
     IMS_SINT32 ConvertCdivCause(IN IMS_SINT32 nCause);
     IMS_SINT32 GetCallingNumVerificationResult(IN AString& strValue);
-    IMS_BOOL IsIncomingUssdCall(IN IMessage* piMessage);
     IMS_SINT32 GetCnvHeaderType(IN IMessage* piMessage);
     void LoadConfig();
     IMS_BOOL IsExist(IN SuppType suppType);

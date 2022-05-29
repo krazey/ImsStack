@@ -38,6 +38,7 @@ public:
 
     inline IMS_UINTP GetCallKey() const override { return m_objContext.GetCallKey(); }
     inline IMS_BOOL IsHeldByMe() const override { return m_objContext.IsHeldByMe(); }
+    inline IMS_BOOL IsUssi() const override { return m_objContext.IsUssi(); }
     inline CallInfo& GetCallInfo() override { return m_objContext.GetCallInfo(); }
     inline ParticipantInfo& GetParticipantInfo() override
     {
@@ -51,6 +52,7 @@ public:
     {
         return m_objContext.GetPreconditionManager();
     }
+    inline UssiController* GetUssiController() override { return m_objContext.GetUssiController(); }
     inline UpdatingInfo& GetUpdatingInfo() override { return m_objContext.GetUpdatingInfo(); }
     inline MtcSession* CreateSession(IN ISession& objSession, IN CallType eCallType) override
     {
@@ -61,6 +63,10 @@ public:
         return m_objContext.CreateBlockChecker(lstRules);
     }
     inline JniCallInfo CreateJniCallInfo() override { return m_objContext.CreateJniCallInfo(); }
+    inline ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) override
+    {
+        return m_objContext.CreateClientConnection(nMethod);
+    }
     inline void DeleteUpdatingInfo() override { return m_objContext.DeleteUpdatingInfo(); }
     inline MtcTimerWrapper& GetTimer() override { return m_objContext.GetTimer(); }
     inline MtcSupplementaryService& GetSupplementaryService() override

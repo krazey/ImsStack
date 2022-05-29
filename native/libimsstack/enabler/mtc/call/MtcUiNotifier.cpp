@@ -32,7 +32,7 @@ void MtcUiNotifier::SendPreIncomingCallReceived(IN CallKey nKey)
 }
 
 PUBLIC
-void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& /* objCallInfo */,
+void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& objCallInfo,
         IN MediaInfo& objMediaInfo, IN const IMSMap<SuppType, SuppService*>& objSuppServices,
         IN ParticipantInfo& objParticipantInfo)
 {
@@ -42,8 +42,11 @@ void MtcUiNotifier::SendIncomingCallReceived(IN CallKey nKey, IN CallInfo& /* ob
         return;
     }
 
-    m_pCallThread->OnIncomingCallReceived(nKey, m_objContext.CreateJniCallInfo(), &objMediaInfo,
-            objSuppServices, &objParticipantInfo);
+    JniCallInfo objJniCallInfo = m_objContext.CreateJniCallInfo();
+    objJniCallInfo.bUssi = objCallInfo.bUssi;
+
+    m_pCallThread->OnIncomingCallReceived(
+            nKey, objJniCallInfo, &objMediaInfo, objSuppServices, &objParticipantInfo);
 }
 
 PUBLIC
@@ -257,7 +260,7 @@ void MtcUiNotifier::SendUpdatedBy(IN CallInfo* /* pCallInfo */, IN MediaInfo* pM
 }
 
 PUBLIC
-void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType, IN IMS_UINTP nImsKey,
+void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType,
         IN AString strValue /*= AString::ConstNull() */, IN IMS_SINT32 nValue /*= -1 */,
         IN IMS_BOOL bValue /*= IMS_FALSE */)
 {
@@ -269,13 +272,7 @@ void MtcUiNotifier::SendNotifyInfo(IN IMS_UINT32 eType, IN IMS_UINTP nImsKey,
         return;
     }
 
-    IUUCSessionNotifyInfoParam* pParam = new IUUCSessionNotifyInfoParam();
-    // pParam->strUIKey = m_strUiKey;
-    pParam->nIMSKey = nImsKey;
-    pParam->eType = eType;
-    pParam->aStrValue = strValue;
-    pParam->nValue = nValue;
-    pParam->bValue = bValue;
+    m_pCallThread->OnInformationNotificationReceived(eType, strValue, nValue, bValue);
 }
 
 PUBLIC

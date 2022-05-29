@@ -16,6 +16,8 @@
 #include "media/IMtcMediaManager.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "ServiceTrace.h"
+#include "ussi/UssiController.h"
+#include "ussi/UssiDef.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -239,6 +241,48 @@ PUBLIC VIRTUAL CallStateName AlertingState::SessionRPRDeliveryFailed(IN ISession
 {
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_TO_MT_PRACK));
+}
+
+PUBLIC VIRTUAL CallStateName AlertingState::AcceptUssi(
+        IN CallType eCallType, IN MediaInfo* pMediaInfo)
+{
+    IMS_TRACE_D("AcceptUssi", 0, 0, 0);
+
+    m_objContext.GetSession()->SetCallType(eCallType);
+    m_objContext.GetMediaManager().SetMediaInfo(*pMediaInfo);
+
+    m_objContext.GetTimer().StopAll();
+
+    if (m_objContext.GetUssiController()->FormAcceptUssi() == IMS_FAILURE)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+    }
+
+    if (SendAccept() == IMS_FAILURE)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_SESSION_FAIL));
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
+{
+    IMS_TRACE_D("UssiStarted - ACK received", 0, 0, 0);
+    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_ACK);
+    m_objContext.GetSession()->HandleRequest(IMessage::SESSION_ACK, *piMessage);
+
+    UssiResult objResult = m_objContext.GetUssiController()->ParseUssiBodyAndCheckResult(
+            piMessage->GetMessage(), piMessage->GetMethod().ToInt());
+
+    SendStarted();
+
+    if (objResult.eAction != UssiNextAction::NOTHING)
+    {
+        SendInfoForUssi(AString::ConstEmpty(), objResult.eErrorCode);
+    }
+
+    return CallStateName::ESTABLISHED;
 }
 
 PRIVATE

@@ -3,7 +3,6 @@
 #include "FailReason.h"
 #include "ISession.h"
 #include "call/message/MessageSender.h"
-#include "call/message/UssiMessageFormatter.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -132,10 +131,7 @@ IMS_RESULT MessageSender::RespondToEarlyUpdate(IN IMS_SINT32 eStatusCode)
 PUBLIC
 IMS_RESULT MessageSender::Accept()
 {
-    if (m_pFormatter == IMS_NULL)
-    {
-        return IMS_FAILURE;
-    }
+    CreateFormatter();
 
     if (m_pFormatter->FormAcceptMessage() != IMS_SUCCESS)
     {
@@ -266,13 +262,6 @@ void MessageSender::CreateFormatter()
     if (bEmergency)
     {
         m_pFormatter = new EmergencyMessageFormatter(m_objContext);
-        return;
-    }
-
-    IMS_BOOL bUssi = IMS_FALSE;  // TODO
-    if (bUssi)
-    {
-        m_pFormatter = new UssiMessageFormatter(m_objContext);
         return;
     }
 

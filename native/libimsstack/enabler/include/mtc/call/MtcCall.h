@@ -5,6 +5,8 @@
 #include "IMSTypeDef.h"
 #include "IMtcContext.h"
 #include "ISessionListener.h"
+#include "ISipClientConnectionListener.h"
+#include "ISipErrorListener.h"
 #include "MtcDef.h"
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
@@ -21,21 +23,23 @@
 #include "helper/block/IMtcBlockChecker.h"
 #include "media/MtcMediaManager.h"
 #include "precondition/MtcPreconditionManager.h"
+#include "ussi/UssiController.h"
 
 class IMtcContext;
+class IMtcMediaManager;
+class IMtcPreconditionManager;
 class IMtcService;
 class IMutex;
 class IReference;
 class ISession;
-class IMtcMediaManager;
-class IMtcPreconditionManager;
 class JniMediaSessionThread;
 class JniMtcCallThread;
 class MessageSender;
 class MtcConfigurationProxy;
 class MtcDialingPlan;
-class MtcVonrManager;
 class MtcSipInterfaceFactory;
+class MtcVonrManager;
+class UssiController;
 struct FailReason;
 
 class MtcCall final :
@@ -47,7 +51,9 @@ class MtcCall final :
         public IMtcBlockCheckListener,
         public IMtcPreconditionListener,
         public IMtcCallStateFactory<MtcCallState, CallStateName>,
-        public IMtcCallStateWatcher<CallStateName>
+        public IMtcCallStateWatcher<CallStateName>,
+        public ISipClientConnectionListener,
+        public ISipErrorListener
 {
 public:
     MtcCall(IN IMtcContext& objContext, IN IMtcService& objService, IN const CallInfo& objCallInfo);
@@ -91,6 +97,7 @@ public:
 
     inline IMS_UINTP GetCallKey() const override { return m_nKey; }
     inline IMS_BOOL IsHeldByMe() const override { return m_bHeldByMe; }
+    inline IMS_BOOL IsUssi() const override { return m_objCallInfo.bUssi; }
     inline CallInfo& GetCallInfo() override { return m_objCallInfo; }
     inline ParticipantInfo& GetParticipantInfo() override { return m_objParticipantInfo; }
     inline MtcSession* GetSession() override { return m_pSession; }
@@ -101,10 +108,12 @@ public:
     {
         return m_objPreconditionManager;
     }
+    inline UssiController* GetUssiController() override { return m_pUssiController; }
     UpdatingInfo& GetUpdatingInfo() override;
     MtcSession* CreateSession(IN ISession& objSession, IN CallType eCallType) override;
     IMtcBlockChecker* CreateBlockChecker(IN const IMSList<IMtcBlockRule*>& lstRules) override;
     JniCallInfo CreateJniCallInfo() override;
+    ISipClientConnection* CreateClientConnection(IN IMS_SINT32 nMethod) override;
     void DeleteUpdatingInfo() override;
     inline MtcTimerWrapper& GetTimer() override { return m_objTimer; }
     inline MtcSupplementaryService& GetSupplementaryService() override
@@ -186,6 +195,11 @@ public:
     MtcCallState* CreateState(IN CallStateName eState) override;
     void OnStateTransition(IN CallStateName eState) override;
 
+    virtual void ClientConnection_NotifyResponse(IN ISipClientConnection* piScc,
+            IN ISipClientConnection* piForkedScc = IMS_NULL) override;
+    virtual void Error_NotifyError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
+
 private:
     static IMutex* s_pKeyCreationLock;
 
@@ -211,6 +225,7 @@ private:
     MtcMediaManager m_objMediaManager;
     MtcPreconditionManager m_objPreconditionManager;
     MtcSupplementaryService m_objSupplementaryService;
+    UssiController* m_pUssiController;
 };
 
 #endif

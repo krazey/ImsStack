@@ -125,11 +125,6 @@ PUBLIC
 void MtcCallController::HandleIncoming(
         IN IMtcService* pService, IN ISession* piSession, IN JniMtcServiceThread* pServiceThread)
 {
-    if (IsUssi(piSession))
-    {
-        // TODO: eCallType = IuMtcService::CALLTYPE_USSI;
-    }
-
     CallInfo objCallInfo;
     m_objCallManager.CreateCall(pService->GetServiceType(), objCallInfo)
             ->HandleIncoming(piSession, pServiceThread);
@@ -219,7 +214,7 @@ void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const FailReason& o
 }
 
 PUBLIC
-void MtcCallController::SendTransaction(IN CallKey nCallKey, IN const AString& strUssi)
+void MtcCallController::SendUssi(IN CallKey nCallKey, IN const AString& strUssi)
 {
     m_objCallManager.GetCallByCallKey(nCallKey)->SendUssi(strUssi);
 }
@@ -277,17 +272,4 @@ PUBLIC
 void MtcCallController::Transfer(IN CallKey nCallKey, IN const AString& strTarget)
 {
     m_objContext.GetEctManager()->Transfer(nCallKey, strTarget);
-}
-
-PRIVATE
-IMS_BOOL MtcCallController::IsUssi(IN ISession* piSession)
-{
-    IMessage* piMessage = piSession->GetPreviousRequest(IMessage::SESSION_START);
-    if (piMessage == IMS_NULL)
-    {
-        return IMS_FALSE;
-    }
-
-    return MessageUtil::ContainsValue(piMessage, USSDConstants::HEADER_USSD_PACKAGE,
-            ISipHeader::UNKNOWN, USSDConstants::HEADER_RECVINFO);
 }

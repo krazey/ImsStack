@@ -1,0 +1,495 @@
+#include "IMessage.h"
+#include "IMSList.h"
+#include "ISession.h"
+#include "ISipClientConnection.h"
+#include "ISipHeader.h"
+#include "ISipMessage.h"
+#include "ISipServerConnection.h"
+#include "SipHeaderName.h"
+#include "SipMethod.h"
+
+#include "call/IMtcCallManager.h"
+#include "call/MtcSession.h"
+#include "ussi/UssiConstants.h"
+#include "ussi/UssiController.h"
+#include "ussi/UssiDataCreator.h"
+#include "utility/MessageUtil.h"
+
+__IMS_TRACE_TAG_COM_MTC__;
+
+PUBLIC
+UssiController::UssiController(IN IMtcCallContext& objContext) :
+        m_objContext(objContext),
+        m_objEventNotifier(UssiEventNotifier(objContext)),
+        m_eUssiModeType(UssiModeType::NONE),
+        m_objLastResult(UssiResult(UssiNextAction::NOTHING, UssiError::CODE_NONE))
+{
+    IMS_TRACE_I("+UssiController", 0, 0, 0);
+}
+
+PUBLIC VIRTUAL UssiController::~UssiController()
+{
+    IMS_TRACE_I("~UssiController", 0, 0, 0);
+}
+
+PUBLIC GLOBAL IMS_BOOL UssiController::IsNetworkInitiatedUssi(IN IMessage* piMessage)
+{
+    IMS_BOOL bResult = IMS_TRUE;
+
+    if (!MessageUtil::ContainsValue(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
+            ISipHeader::UNKNOWN, UssiConstants::HEADER_RECVINFO))
+    {
+        bResult = IMS_FALSE;
+    }
+
+    if (!MessageUtil::ContainsValue(
+            piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::ACCEPT))
+    {
+        bResult = IMS_FALSE;
+    }
+
+    IMS_TRACE_D("IsNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL UssiController::HasValidXmlBodyForNetworkInitiatedUssi(IN IMessage* piMessage)
+{
+    IMS_BOOL bResult = IMS_TRUE;
+    if (!piMessage)
+    {
+        bResult = IMS_FALSE;
+    }
+    else
+    {
+        std::unique_ptr<UssiData> pParsedData =
+                std::unique_ptr<UssiData>(GetParsedUssiData(piMessage->GetMessage()));
+
+        if (!pParsedData || pParsedData->GetAnyExtension().GetUssiModeType() == UssiModeType::NONE)
+        {
+            bResult = IMS_FALSE;
+        }
+    }
+
+    IMS_TRACE_D("HasValidXmlBodyForNetworkInitiatedUssi : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL UssiController::IsByeForUssi(IN IMessage* piMessage)
+{
+    IMS_BOOL bResult = IMS_FALSE;
+    if (MessageUtil::ContainsValue(
+            piMessage, UssiConstants::HEADER_APPLICATION_USSDXML, ISipHeader::CONTENT_TYPE))
+    {
+        bResult = IMS_TRUE;
+    }
+
+    IMS_TRACE_D("IsByeForUssi : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL UssiController::IsUssiInfoReceived(IN ISipServerConnection* piSipServerConnection)
+{
+    IMS_BOOL bResult = IMS_TRUE;
+
+    if (!piSipServerConnection)
+    {
+        bResult = IMS_FALSE;
+    }
+    else
+    {
+        ISipMessage* piSipMessage = piSipServerConnection->GetMessage();
+        if (!piSipMessage)
+        {
+            bResult = IMS_FALSE;
+        }
+        else
+        {
+            IMSList<AString> lstHeaders =
+                    piSipMessage->GetHeaders(ISipHeader::UNKNOWN, SipHeaderName::INFO_PACKAGE);
+            for (IMS_UINT32 i = 0; i < lstHeaders.GetSize(); i++)
+            {
+                if (lstHeaders.GetAt(i).Contains(UssiConstants::HEADER_USSD_PACKAGE))
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    IMS_TRACE_D("IsUssiInfoReceived : %s", _TRACE_B_(bResult), 0, 0);
+    return bResult;
+}
+
+PUBLIC
+IMS_BOOL UssiController::HasXmlBodyInInfo(IN ISipServerConnection* piSipServerConnection)
+{
+    IMS_BOOL bResult = IMS_TRUE;
+    if (!piSipServerConnection)
+    {
+        bResult = IMS_FALSE;
+    }
+    else
+    {
+        std::unique_ptr<UssiData> pParsedData =
+                std::unique_ptr<UssiData>(GetParsedUssiData(piSipServerConnection->GetMessage()));
+        if (!pParsedData)
+        {
+            bResult = IMS_FALSE;
+        }
+    }
+
+    IMS_TRACE_D("HasXmlBodyInInfo : %s", _TRACE_B_(bResult), 0, 0);
+
+    return bResult;
+}
+
+PUBLIC
+UssiResult UssiController::ParseUssiBodyAndCheckResult(
+        IN ISipMessage* piSipMessage, IN IMS_SINT32 nReceivedMethod)
+{
+    UssiResult objResult(UssiNextAction::NOTHING, UssiError::CODE_NONE);
+    std::unique_ptr<UssiData> pParsedData =
+            std::unique_ptr<UssiData>(GetParsedUssiData(piSipMessage));
+
+    if (!pParsedData)
+    {
+        IMS_TRACE_D("ParseUssiBodyAndCheckResult : there's no xml body.", 0, 0, 0);
+        return objResult;
+    }
+
+    IMS_TRACE_D("ParseUssiBodyAndCheckResult : Method[%d] received.", nReceivedMethod, 0, 0);
+    UssiModeType eReceivedType = pParsedData->GetAnyExtension().GetUssiModeType();
+
+    if (nReceivedMethod == SipMethod::BYE)
+    {
+        eReceivedType = UssiModeType::NOTIFY;
+    }
+    else if (pParsedData->GetUssdString().GetLength() <= 0)
+    {
+        // if there's no ussd-string in the xml body.
+        objResult = UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE, UssiError::CODE_1);
+    }
+    else if (nReceivedMethod == SipMethod::ACK &&
+            m_objContext.GetCallManager().GetCalls().GetSize() > 1)
+    {
+        // if there's another call receiving network initiated ussi.
+        objResult = UssiResult(
+                UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_4);
+    }
+    else if (nReceivedMethod == SipMethod::INFO && IsUeInitiated())
+    {
+        // if UE receives INFo request during UE initiated ussi.
+        eReceivedType = UssiModeType::REQUEST;
+    }
+    else if (!IsUeInitiated() && eReceivedType == UssiModeType::NOTIFY)
+    {
+        // if received INFO or INVITE has USS-Notify element during network initiated ussi.
+        objResult = UssiResult(UssiNextAction::SEND_INFO_WITH_NOTIFY_ELEMENT, UssiError::CODE_NONE);
+    }
+
+    if (objResult.eErrorCode == UssiError::CODE_NONE)
+    {
+        NotifyUssiEvent(pParsedData->GetUssdString(), eReceivedType, pParsedData->GetErrorCode());
+    }
+
+    SetUssiModeTypeForNetworkInitiated(eReceivedType);
+    SetLastResult(objResult);
+
+    IMS_TRACE_D("ParseUssiBodyAndCheckResult : action[%d] error-code[%d] ussd mode[%d]",
+            m_objLastResult.eAction, m_objLastResult.eErrorCode, m_eUssiModeType);
+
+    return objResult;
+}
+
+PUBLIC
+IMS_RESULT UssiController::FormStartUssiRequest(IN const AString& strTargetNumber)
+{
+    IMS_TRACE_D("FormStartUssiRequest", 0, 0, 0);
+    IMessage* piMessage = m_objContext.GetSession()->GetISession().GetNextRequest();
+
+    if (FormHeadersForStartUssi(piMessage) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (FormStartUssiBody(piMessage->GetMessage(), strTargetNumber) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PUBLIC
+IMS_RESULT UssiController::FormAcceptUssi()
+{
+    IMS_TRACE_D("FormAcceptUssi", 0, 0, 0);
+    IMessage* piMessage = m_objContext.GetSession()->GetISession().GetNextRequest();
+
+    if (SetRecvInfoHeader(piMessage) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (SetAcceptHeader(piMessage) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PUBLIC
+IMS_RESULT UssiController::FormInfoRequest(IN ISipClientConnection* piSipClientConnection,
+        IN const AString& strUssdString, IN UssiError eErrorCode)
+{
+    IMS_TRACE_D("FormInfoRequest", 0, 0, 0);
+
+    if (FormHeadersForInfo(piSipClientConnection) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (FormBodyForInfo(piSipClientConnection->GetMessage(), strUssdString, eErrorCode) ==
+            IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PUBLIC
+void UssiController::SetNextActionByTerminateUssi()
+{
+    IMS_TRACE_D("SetNextActionByTerminateUssi", 0, 0, 0);
+    SetLastResult(
+            UssiResult(UssiNextAction::SEND_INFO_WITH_ERROR_CODE_AND_TERMINATE, UssiError::CODE_1));
+}
+
+PUBLIC
+UssiResult UssiController::GetLastResult() const
+{
+    return m_objLastResult;
+}
+
+PRIVATE
+IMS_RESULT UssiController::FormHeadersForStartUssi(IN IMessage* piMessage)
+{
+    IMS_TRACE_D("FormHeadersForStartUssi", 0, 0, 0);
+    if (SetRecvInfoHeader(piMessage) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (SetAcceptHeader(piMessage) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
+            ISipHeader::CONTENT_TYPE) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT UssiController::FormStartUssiBody(
+        IN ISipMessage* piSipMessage, IN const AString& strTarget)
+{
+    IMS_TRACE_D("FormStartUssiBody", 0, 0, 0);
+    if (!piSipMessage)
+    {
+        return IMS_FAILURE;
+    }
+
+    ISipMessageBodyPart* piBodyPart = piSipMessage->CreateBodyPart();
+    if (!piBodyPart)
+    {
+        return IMS_FAILURE;
+    }
+
+    piBodyPart->SetHeader(
+            ISipMessageBodyPart::CONTENT_TYPE, UssiConstants::HEADER_APPLICATION_USSDXML);
+    piBodyPart->SetHeader(
+            ISipMessageBodyPart::CONTENT_DISPOSITION, UssiConstants::HEADER_RENDER_HANDLING);
+
+    AStringBuffer objXML(UssiConstants::XML_BUFFER_SIZE);
+    UssiDataCreator::GetXmlBody(strTarget, objXML, UssiModeType::NONE);
+    piBodyPart->SetContent(objXML.GetString());
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT UssiController::SetRecvInfoHeader(IN IMessage* piMessage)
+{
+    IMS_TRACE_D("SetRecvInfoHeader", 0, 0, 0);
+    return MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_USSD_PACKAGE,
+            ISipHeader::UNKNOWN, SipHeaderName::RECV_INFO);
+}
+
+PRIVATE
+IMS_RESULT UssiController::SetAcceptHeader(IN IMessage* piMessage)
+{
+    IMS_TRACE_D("SetAcceptHeader", 0, 0, 0);
+    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_SDP,
+            ISipHeader::ACCEPT) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_IMSXML,
+            ISipHeader::ACCEPT) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_APPLICATION_USSDXML,
+            ISipHeader::ACCEPT) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (MessageUtil::AddValueIfNotExists(piMessage, UssiConstants::HEADER_MULTIPART_MIXED,
+            ISipHeader::ACCEPT) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT UssiController::FormHeadersForInfo(IN ISipClientConnection* piSipClientConnection)
+{
+    IMS_TRACE_D("FormHeadersForInfo", 0, 0, 0);
+    if (!piSipClientConnection)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (piSipClientConnection->SetHeader(UssiConstants::HEADER_INFO_PACKAGE,
+            UssiConstants::HEADER_USSD_PACKAGE) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_TYPE,
+            UssiConstants::HEADER_APPLICATION_USSDXML) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    if (piSipClientConnection->SetHeader(SipHeaderName::CONTENT_DISPOSITION,
+            UssiConstants::HEADER_INFO_PACKAGE) == IMS_FAILURE)
+    {
+        return IMS_FAILURE;
+    }
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+IMS_RESULT UssiController::FormBodyForInfo(
+        IN ISipMessage* piSipMessage, IN const AString& strUssdString, IN UssiError eErrorCode)
+{
+    IMS_TRACE_D("FormBodyForInfo", 0, 0, 0);
+    if (!piSipMessage)
+    {
+        return IMS_FAILURE;
+    }
+
+    ISipMessageBodyPart* piBodyPart = piSipMessage->CreateBodyPart();
+    if (!piBodyPart)
+    {
+        return IMS_FAILURE;
+    }
+
+    AStringBuffer objXML(UssiConstants::XML_BUFFER_SIZE);
+    UssiDataCreator::GetXmlBody(strUssdString, objXML, m_eUssiModeType, eErrorCode);
+    piBodyPart->SetContent(objXML.GetString());
+
+    return IMS_SUCCESS;
+}
+
+PRIVATE
+UssiData* UssiController::GetParsedUssiData(IN ISipMessage* piSipMessage)
+{
+    IMS_TRACE_D("GetParsedUssiData", 0, 0, 0);
+    if (!piSipMessage)
+    {
+        return IMS_NULL;
+    }
+
+    IMSList<ISipMessageBodyPart*> objBodyParts = piSipMessage->GetBodyParts();
+    if (objBodyParts.IsEmpty())
+    {
+        return IMS_NULL;
+    }
+
+    AString strUssiBody;
+
+    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); i++)
+    {
+        ISipMessageBodyPart* piBodyPart = objBodyParts.GetAt(i);
+        if (piBodyPart != IMS_NULL)
+        {
+            const ByteArray& objUssiBody = piBodyPart->GetContent();
+            strUssiBody = objUssiBody.ToString();
+            break;
+        }
+    }
+
+    UssiData* pUssiData = new UssiData();
+    if (!pUssiData->Parse(strUssiBody))
+    {
+        delete pUssiData;
+        return IMS_NULL;
+    }
+
+    return pUssiData;
+}
+
+PRIVATE
+void UssiController::NotifyUssiEvent(
+        IN AString strUssdString, IN UssiModeType eType, IN UssiError eErrorCode)
+{
+    IMS_TRACE_D("NotifyUssiEvent", 0, 0, 0);
+
+    if (eErrorCode != UssiError::CODE_NONE)
+    {
+        m_objEventNotifier.NotifyUssiError(strUssdString);
+    }
+    else
+    {
+        m_objEventNotifier.NotifyUssiResult(strUssdString, eType);
+    }
+}
+
+PRIVATE
+void UssiController::SetUssiModeTypeForNetworkInitiated(IN UssiModeType eType)
+{
+    if (!IsUeInitiated())
+    {
+        m_eUssiModeType = eType;
+    }
+}
+
+PRIVATE
+void UssiController::SetLastResult(IN UssiResult objResult)
+{
+    m_objLastResult = objResult;
+}
+
+PRIVATE
+IMS_BOOL UssiController::IsUeInitiated()
+{
+    return (m_objContext.GetCallInfo().ePeerType == PeerType::MO);
+}

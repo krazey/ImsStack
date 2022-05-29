@@ -120,7 +120,8 @@ IMSList<AString> MtcSession::GetSupportedOptionTags() const
     lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_TIMER);
 
     // TODO: check CallType.
-    if (m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
+    if (!m_objContext.GetCallInfo().bUssi &&
+            m_objContext.GetConfigurationProxy().Is(Feature::VOICE_QOS_PRECONDITION_SUPPORTED))
     {
         lstOptionTags.Append(MtcExtensionSet::OPTION_TAG_PRECONDITION);
     }
