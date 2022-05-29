@@ -37,6 +37,9 @@ private:
     IMS_BOOL m_bVolteSetting;
     IMS_BOOL m_bVopsState;
     IMS_BOOL m_bNetworkServiceIn;
+
+private:
+    friend class AosServiceAvailableCellurTest;
 };
 
 #endif  // AOS_SERVICE_AVAILABLE_CELLULAR_H_
