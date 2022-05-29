@@ -53,10 +53,10 @@ public class ImsSipTransport extends SipTransportImplBase {
     private final Context mContext;
     //New message executor for framework callback interfaces
     private Executor mCallBackExecutor;
-     //Ims base registration implementation
+    //Ims base registration implementation
     private final ImsRegistrationImpl mImsRegistrationBaseImpl;
     //Object used to send request to IMS native
-    public ISipTransportRemote  mISipTransportRemote;
+    public ISipTransportRemote mISipTransportRemote;
     /**
      * The active sip delegate manager for mSlotID.
      */
@@ -77,6 +77,7 @@ public class ImsSipTransport extends SipTransportImplBase {
 
     /**
      * Constructor for SipTransport
+     *
      * @param slotId for which sip transport is required
      * @param context context
      * @param sipTransportRequestExecutor executor used by sip transport
@@ -95,28 +96,36 @@ public class ImsSipTransport extends SipTransportImplBase {
     //END constructor methods
 
     //START base implementation
+
     /**
      * Create sip delegate for an application.
-     * @param subscriptionId The subscription ID associated with the requested {@link SipDelegate}.
-     * @param request A SIP delegate request containing the parameters that the remote RCS
-     * application wishes to use.
-     * @param dc A callback back to the remote application to be used to communicate state callbacks
-     *           for the SipDelegate.
-     * @param mc A callback back to the remote application to be used to send SIP messages to the
+     *
+     * @param subscriptionId The subscription ID associated with the requested
+     * {@link SipDelegate}.
+     * @param request A SIP delegate request containing the parameters that the remote
+     * RCS application wishes to use.
+     * @param delegateStateCallback A callback back to the remote application to be used
+     * to communicate state callbacks for the SipDelegate.
+     * @param delegateMessageCallback A callback back to the remote application to be used
+     * to send SIP messages to the
      */
     @Override
     public void createSipDelegate(int subscriptionId, @NonNull DelegateRequest request,
-            @NonNull DelegateStateCallback dc, @NonNull DelegateMessageCallback mc) {
+            @NonNull DelegateStateCallback delegateStateCallback,
+            @NonNull DelegateMessageCallback delegateMessageCallback) {
         if (SubscriptionManager.isValidSubscriptionId(subscriptionId) == false) {
             throw new IllegalArgumentException("Invalid subId: " + subscriptionId);
         }
-        if (request == null || dc ==null || mc == null) {
+        if (request == null || delegateStateCallback == null || delegateMessageCallback == null) {
             throw new IllegalArgumentException("Null parameter passed");
         }
-        createSipDelegateInternal(subscriptionId, request, dc, mc);
+        createSipDelegateInternal(subscriptionId, request, delegateStateCallback,
+                delegateMessageCallback);
     }
+
     /**
      * Destroy  sip delegate created for an application.
+     *
      * @param delegate The delegate to be destroyed.
      * @param reason The reason the remote connection to this {@link SipDelegate} is being
      */
@@ -127,11 +136,10 @@ public class ImsSipTransport extends SipTransportImplBase {
         }
         destroySipDelegateInternal(delegate, reason);
     }
-    //END base implementation
-    //START public methods
-    //START constructor methods
+
     /**
      * Create SipTransport for specific slot id.
+     *
      * @param slotId for which sip transport belongs to
      * @param context ims service context
      * @param callBackExecutor executor used for callback method execution
@@ -140,97 +148,118 @@ public class ImsSipTransport extends SipTransportImplBase {
      */
     public static ImsSipTransport createImsSipTransport(int slotId, Context context,
             Executor callBackExecutor, ImsRegistrationImpl registration) {
-       return new ImsSipTransport(slotId, context, new MessageExecutor("ImsSipTransport"),
-               callBackExecutor, registration);
+        return new ImsSipTransport(slotId, context, new MessageExecutor("ImsSipTransport"),
+                callBackExecutor, registration);
     }
+
     /**
-     *  Update config for all the active sip delegates.
+     * Update config for all the active sip delegates.
      */
     public void updateSipTransportConfigurationValues() {
         //Request from framework notify with latest configuration values.
         //The remote application will not be able to proceed sending SIP messages until after this
         //configuration is sent the first time.
-      if (mActiveSipDelegateManager != null && mSipTransportConfig != null ) {
-         for (SipDelegateImpl sipDelegate : mActiveSipDelegateManager.getActiveSipDelegateList()) {
+        if (mActiveSipDelegateManager != null && mSipTransportConfig != null) {
+            for (SipDelegateImpl sipDelegate :
+                    mActiveSipDelegateManager.getActiveSipDelegateList()) {
                 sipDelegate.updateSipDelegateConfig(mSipTransportConfig);
             }
         }
     }
+
     /**
      * Update the latest configuration value.
-     * @param sipTransportConfig
      */
     public void updateSipTransportConfig(SipDelegateConfiguration sipTransportConfig) {
         mSipTransportConfig = sipTransportConfig;
     }
+
     /**
      * Keep the status of each feature tag supported by IMS.
-     * @param registrationState
+     * @param registrationState contains state of the IMS feature tags associated with a SipDelegate
      */
-    public void updatedSipTransportFeatureTagsStates(DelegateRegistrationState
-            registrationState){
-        mSipTransportRegisteredTags.clear();
-        mSipTransportRegisteredTags.addAll(registrationState.getRegisteredFeatureTags());
+    public void updateSipTransportFeatureTagsStates(DelegateRegistrationState
+            registrationState) {
+        Log.i(LOG_TAG, "updatedSipTransportFeatureTagsStates");
+        if (registrationState != null) {
+            mSipTransportRegisteredTags.clear();
+            mSipTransportRegisteredTags.addAll(registrationState.getRegisteredFeatureTags());
 
-        mSipTransportDeregisteredTags.clear();
-        mSipTransportDeregisteredTags.addAll(registrationState.getDeregisteredFeatureTags());
+            mSipTransportDeregisteredTags.clear();
+            mSipTransportDeregisteredTags.addAll(registrationState.getDeregisteredFeatureTags());
 
-        mSipTransportDeregisteringTags.clear();
-        mSipTransportDeregisteringTags.addAll(registrationState.getDeregisteringFeatureTags());
+            mSipTransportDeregisteringTags.clear();
+            mSipTransportDeregisteringTags.addAll(registrationState.getDeregisteringFeatureTags());
+        } else {
+            Log.d(LOG_TAG, "updatedSipTransportFeatureTagsStates: registrationState is null");
+        }
     }
-    //END public methods
-    //START Getter methods
+
+    /**
+     * Get the active dialog list
+     *
+     * @return the active dialog list set
+     */
+    public Set<String> getActiveDialogList() {
+        return mActiveSipDelegateManager.getAllSipDelegateActiveDialogIds();
+    }
 
     /**
      * Get the ims core object which required to send commands to native
+     *
      * @return ims code object to send sip transport requests to native
      */
     public ISipTransportRemote getISipTransportRemote() {
         return mISipTransportRemote;
     }
+
     /**
      * Return the sip delegate manager handling sip delegate belongs to this sip transport.
+     *
      * @return active sip delegate manager of the sip transport.
      */
     public ActiveSipDelegateManager getActiveSipDelegateManager() {
         return mActiveSipDelegateManager;
     }
+
     /**
      * Get the sip delegate configuration associated with this sip transport
+     *
      * @return latest configuration
      */
     public SipDelegateConfiguration getSipTransportConfig() {
         return mSipTransportConfig;
     }
+
     /**
      * Get the latest configuration version which required to send the sip messages.
-     * @return
      */
-    public long getLatestConfigurationVersion(){
-        long configVersion  = -1;
-        if( mSipTransportConfig != null ) {
+    public long getLatestConfigurationVersion() {
+        long configVersion = -1;
+        if (mSipTransportConfig != null) {
             configVersion = mSipTransportConfig.getVersion();
         }
         return configVersion;
     }
+
     /**
      * Get the registered feature tags of all the sip delegates
+     *
      * @return the list of registered tags by this sip transport
      */
     public ArraySet<String> getSipTransportRegisteredTags() {
         return mSipTransportRegisteredTags;
     }
-    //END Getter methods
-    //START Private methods
+
     /**
      * Initialize the sip transport layer
      */
-    private void initializeSipTransport(){
+    private void initializeSipTransport() {
         Log.i(LOG_TAG, "initializeSipTransport");
         mActiveSipDelegateManager = new ActiveSipDelegateManager(mSlotId);
         mSipBaseTransportRegistrationHandler =
                 new SipTransportBaseRegistrationHandler(mSlotId);
-        if (mImsRegistrationBaseImpl !=null ) {
+        if (mImsRegistrationBaseImpl != null) {
             //Set the listener for Sip Transport registration related trigger
             mImsRegistrationBaseImpl.setSipTransportBaseRegListener(
                     mSipBaseTransportRegistrationHandler);
@@ -239,30 +268,35 @@ public class ImsSipTransport extends SipTransportImplBase {
         }
         //TODO SipTransportController initialization
     }
+
     /**
      * Create required sip delegate and notify caller with created sip delegate object
+     *
      * @param subscriptionId sub id for which SipDelegate needs to be created
      * @param request Request containing rcs tags for which delegate to be created.
-     * @param dc state call back
-     * @param mc message call back
+     * @param delegateStateCallback state call back
+     * @param delegateMessageCallback message call back
      */
     private void createSipDelegateInternal(int subscriptionId, DelegateRequest request,
-            DelegateStateCallback dc, DelegateMessageCallback mc) {
+            DelegateStateCallback delegateStateCallback,
+            DelegateMessageCallback delegateMessageCallback) {
         Log.i(LOG_TAG, "createSipDelegateInternal");
         // create SipDelegateRequestData object which holds request for this sipdelegate.
         SipDelegateRequestData delegateRequestData = new SipDelegateRequestData(subscriptionId,
-                request.getFeatureTags() , dc, mc);
+                request.getFeatureTags(), delegateStateCallback, delegateMessageCallback);
         Set<FeatureTagState> deniedTags = mActiveSipDelegateManager.
-                    getDeniedTagListFromRequest(request.getFeatureTags());
+                getDeniedTagListFromRequest(request.getFeatureTags());
 
-                SipDelegateImpl sipDelegate = new SipDelegateImpl(delegateRequestData, mSlotId);
+        SipDelegateImpl sipDelegate = new SipDelegateImpl(delegateRequestData, mSlotId);
         mActiveSipDelegateManager.addActiveSipDelegate(sipDelegate);
         mCallBackExecutor.execute(() -> {
-            dc.onCreated(sipDelegate, deniedTags);
+            delegateStateCallback.onCreated(sipDelegate, deniedTags);
         });
     }
+
     /**
      * Destroy the sip delegated
+     *
      * @param delegate to be destroyed
      * @param reason for which sip delegate will be requested to destroy
      */
@@ -272,7 +306,7 @@ public class ImsSipTransport extends SipTransportImplBase {
         SipDelegateImpl destroySipDelegate =
                 mActiveSipDelegateManager.getActiveSipDelegateImp(delegate);
 
-        if ( destroySipDelegate != null) {
+        if (destroySipDelegate != null) {
             mActiveSipDelegateManager.destroySipDelegate(delegate);
             mCallBackExecutor.execute(() -> {
                 destroySipDelegate.getDelegateRequestData().
@@ -283,5 +317,4 @@ public class ImsSipTransport extends SipTransportImplBase {
             Log.w(LOG_TAG, "destroySipDelegateInternal: Delegate not found");
         }
     }
-    //END Private methods
 }

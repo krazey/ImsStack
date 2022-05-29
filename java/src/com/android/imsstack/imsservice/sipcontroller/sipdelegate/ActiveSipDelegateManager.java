@@ -20,11 +20,15 @@ import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.stub.SipDelegate;
 import android.util.Log;
 
+import com.android.imsstack.imsservice.mmtel.ImsServiceManager;
+import com.android.imsstack.imsservice.mmtel.ImsServiceRecord;
+
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
 /**
  * This class will manage the active sip delegates {@link SipDelegateImpl}created by IMSService.
  * e.g. removing, updating feature tags, registration changes etc.
@@ -39,64 +43,75 @@ public class ActiveSipDelegateManager {
      * This hods list of all {@link SipDelegateImpl}'s created for applications.
      */
     private final List<SipDelegateImpl> mActiveSipDelegateList = new LinkedList<>();
+
     /**
      * Create the sip delegate manager for specific slot.
-     * @param slotId
      */
     public ActiveSipDelegateManager(int slotId) {
         mSlotId = slotId;
     }
+
     /**
      * Get the all the active sip delegate.
+     *
      * @return the {@link SipDelegateImpl} list.
      */
     public List<SipDelegateImpl> getActiveSipDelegateList() {
         return mActiveSipDelegateList;
     }
+
     /**
      * This holds the call id and mapping sip delegate.
      */
     private final Hashtable<String, SipDelegateImpl> mCallIdMappingSipDelegate = new Hashtable<>();
+
     /**
      * Add all active sip delegate created
+     *
      * @param sipDelegate delegate objected to be managed by delegate manager.
      */
     public synchronized void addActiveSipDelegate(SipDelegateImpl sipDelegate) {
         Log.i(LOG_TAG, "addActiveSipDelegate:" + sipDelegate);
         mActiveSipDelegateList.add(sipDelegate);
-        //TODO :  onConfigurationChanged should be called as soon as the
-        //   {@link SipDelegate} has access to these configuration parameters
+        ImsServiceRecord serviceRecord = ImsServiceManager.getServiceRecord(mSlotId);
+        if (serviceRecord != null && sipDelegate != null) {
+            sipDelegate.updateSipDelegateConfig(
+                    serviceRecord.getSipTransport().getSipTransportConfig());
+        }
     }
+
     /**
      * Get the active sip delegate implementation
-     * @param sipDelegate
+     *
      * @return return active sip delegate
      */
-    public synchronized SipDelegateImpl getActiveSipDelegateImp(SipDelegate sipDelegate){
+    public synchronized SipDelegateImpl getActiveSipDelegateImp(SipDelegate sipDelegate) {
         Log.i(LOG_TAG, "getActiveSipDelegateImp");
-        if ( mActiveSipDelegateList.contains(sipDelegate)) {
+        if (mActiveSipDelegateList.contains(sipDelegate)) {
             return mActiveSipDelegateList.get(mActiveSipDelegateList.indexOf(sipDelegate));
         }
         return null;
     }
+
     /**
      * Destroy the active sip delegate
+     *
      * @param sipDelegate to be destroyed
      * @return true if removal success else false.
      */
-    public synchronized boolean destroySipDelegate(SipDelegate sipDelegate){
+    public synchronized boolean destroySipDelegate(SipDelegate sipDelegate) {
         Log.i(LOG_TAG, "destroySipDelegate");
-        if (mActiveSipDelegateList.contains(sipDelegate)){
-            return mActiveSipDelegateList.remove(mActiveSipDelegateList.indexOf(sipDelegate))!=null;
+        if (mActiveSipDelegateList.contains(sipDelegate)) {
+            return mActiveSipDelegateList.remove(mActiveSipDelegateList.indexOf(sipDelegate))
+                    != null;
         } else {
             Log.e(LOG_TAG, "destroySipDelegate object not found");
         }
         return false;
     }
-     /**
+
+    /**
      * Returns the denied feature tag list
-     * @param requestTags
-     * @return
      */
     public Set<FeatureTagState> getDeniedTagListFromRequest(Set<String> requestTags) {
         Log.i(LOG_TAG, "getDeniedTagListFromRequest");
@@ -104,65 +119,70 @@ public class ActiveSipDelegateManager {
         // check how to handle all the denied tags errors.
         Set<FeatureTagState> deniedTagList = new HashSet<>();
         Set<String> allSupportedTags = getAllSipDelegatSupportedFeatureTags();
-        for(String featureTag: requestTags) {
-            if(allSupportedTags.contains(featureTag)) {
+        for (String featureTag : requestTags) {
+            if (allSupportedTags.contains(featureTag)) {
                 deniedTagList.add(new FeatureTagState(featureTag,
                         SipDelegateManager.DENIED_REASON_IN_USE_BY_ANOTHER_DELEGATE));
             }
         }
         return deniedTagList;
     }
+
     /**
      * Get all the delegate supported feature tags
+     *
      * @return total list of feture tags supported by sip delegates
      */
-    public Set<String> getAllSipDelegatSupportedFeatureTags(){
+    public Set<String> getAllSipDelegatSupportedFeatureTags() {
         Log.i(LOG_TAG, "getAllSipDelegatSupportedFeatureTags");
         Set<String> allSupportedTags = new HashSet<>();
         for (SipDelegateImpl sipDelegate : getActiveSipDelegateList()) {
             Log.i(LOG_TAG, "supported for feature tag:" +
                     sipDelegate.getSupportedFeatureTags());
-            if (sipDelegate.getSupportedFeatureTags()!=null ) {
+            if (sipDelegate.getSupportedFeatureTags() != null) {
                 sipDelegate.getSupportedFeatureTags().addAll(allSupportedTags);
             }
         }
         Log.i(LOG_TAG, "allSupportedTags:" + allSupportedTags);
         return allSupportedTags;
     }
+
     /**
      * Add the sip delegate to mapping callId. This can be used to send the message to respective
      * delegate object.
      */
     public synchronized void addActiveSipDelegate(String callId, SipDelegateImpl sipDelegate) {
         Log.i(LOG_TAG, "addActiveSipDelegate");
-        mCallIdMappingSipDelegate.put(callId,sipDelegate);
+        mCallIdMappingSipDelegate.put(callId, sipDelegate);
     }
+
     /**
      * Add the sip delegate to mapping callId. This can be used to send the message to respective
      * delegate object.
      */
     public synchronized void removeActiveSipDelegate(String callId) {
         Log.i(LOG_TAG, "removeActiveSipDelegate");
-        if ( mCallIdMappingSipDelegate!=null ) {
+        if (mCallIdMappingSipDelegate != null) {
             mCallIdMappingSipDelegate.remove(callId);
         }
     }
+
     /**
      * This API can be used to get the sipDelegate for the mapping callID.
+     *
      * @return the delegate object mapping with callid
      */
     public SipDelegateImpl getSipDelegateForCallId(String callId) {
         Log.i(LOG_TAG, "getSipDelegateForCallId for callid:" + callId);
         return mCallIdMappingSipDelegate.get(callId);
     }
+
     /**
      * Get the sip delegate which can handle this feature tags
-     * @param
-     * @return
      */
     public SipDelegateImpl getSipDelegateForSupportedFeatureTag(Set<String>
             featureTagsFromAcceptContact) {
-        if( featureTagsFromAcceptContact == null) {
+        if (featureTagsFromAcceptContact == null) {
             Log.i(LOG_TAG, "getSipDelegateForSupportedFeatureTag: "
                     + "Accept-Contact not contains feature tags");
             return null;
@@ -173,8 +193,8 @@ public class ActiveSipDelegateManager {
         for (SipDelegateImpl sipDelegate : getActiveSipDelegateList()) {
             Log.i(LOG_TAG, "supported for feature tag:" +
                     sipDelegate.getSupportedFeatureTags());
-            if (sipDelegate.getSupportedFeatureTags()!=null &&
-                    sipDelegate.getSupportedFeatureTags().stream()
+            if (sipDelegate.getSupportedFeatureTags() != null
+                    && sipDelegate.getSupportedFeatureTags().stream()
                             .anyMatch(featureTagsFromAcceptContact::contains)) {
                 //Found the SipDelegate Handling this feature tag:
                 Log.i(LOG_TAG, "Found the sip delegate which handles feature tags"
@@ -184,15 +204,17 @@ public class ActiveSipDelegateManager {
         }
         return null;
     }
+
     /**
      * This API can be used to get the sipDelegate for the mapping callID.
+     *
      * @return the delegate object mapping with callid
      */
     public SipDelegateImpl getSipDelegateForTransactionId(String transactionId) {
         Log.i(LOG_TAG, "getSipDelegateForTransactionId for transactionId:" + transactionId);
         for (SipDelegateImpl sipDelegate : getActiveSipDelegateList()) {
-            if (sipDelegate.getViaTransactionIds()!=null &&
-                    sipDelegate.getViaTransactionIds().contains(transactionId) ) {
+            if (sipDelegate.getViaTransactionIds() != null
+                    && sipDelegate.getViaTransactionIds().contains(transactionId)) {
                 //Found the SipDelegate Handling transactionId
                 Log.i(LOG_TAG, "Found the sip delegate which handles transactionId"
                         + sipDelegate);
@@ -200,5 +222,23 @@ public class ActiveSipDelegateManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Get all ongoing session callid list
+     *
+     * @return active dialog list
+     */
+    public Set<String> getAllSipDelegateActiveDialogIds() {
+        Log.i(LOG_TAG, "getAllSipDelegateActiveDialogIds");
+        Set<String> onGoingSessions = new HashSet<>();
+        for (SipDelegateImpl sipDelegate : getActiveSipDelegateList()) {
+            Log.i(LOG_TAG, "ongoing sessions:" + sipDelegate.getOngoingsipsessions());
+            if (sipDelegate.getOngoingsipsessions() != null) {
+                sipDelegate.getOngoingsipsessions().addAll(onGoingSessions);
+            }
+        }
+        Log.i(LOG_TAG, "onGoingSessions:" + onGoingSessions);
+        return onGoingSessions;
     }
 }
