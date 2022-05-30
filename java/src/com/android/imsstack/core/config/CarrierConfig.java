@@ -682,8 +682,8 @@ public class CarrierConfig {
         // }
         public static final String KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL =
                 "ignore_vops_for_volte_enable_bool";
-        public static final String KEY_SMS_OVER_IMS_AVAILABLE_IN_NO_VOPS_BOOL =
-                "sms_over_ims_available_in_no_vops_bool";
+        public static final String KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL =
+                "sms_over_ims_available_without_voice_capability_bool";
         public static final String KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL =
                 "ims_deregister_on_3g_networks_bool";
         public static final String KEY_REQUIRED_EMERGENCY_REGISTRATION_IN_ROAMING_BOOL =

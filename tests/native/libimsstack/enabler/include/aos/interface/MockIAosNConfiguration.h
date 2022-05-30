@@ -22,7 +22,8 @@
 #include "IMSTypeDef.h"
 #include "interface/IAosNConfiguration.h"
 
-class MockIAosNConfiguration : public IAosNConfiguration {
+class MockIAosNConfiguration : public IAosNConfiguration
+{
 public:
     MOCK_METHOD(IMS_SINT32, GetSlotId, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsSubscription, (), (const, override));
@@ -39,6 +40,7 @@ public:
     MOCK_METHOD(IMS_BOOL, IsSupportLimitedAdminSmsMode, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsTtySupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVopsIgnoredForVolteEnabled, (), (const, override));
+    MOCK_METHOD(IMS_BOOL, IsSmsOverImsAvailableWithoutVoiceCapability, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredEmergencyRegistrationInRoaming, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockBySetting, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsRequiredVolteBlockByAirplaneMode, (), (const, override));
@@ -57,8 +59,8 @@ public:
     MOCK_METHOD(IMS_BOOL, IsVerstatForRegistrationSupported, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsEmergencyCallBasedOnPauOfNormalRegistrationSupported, (),
             (const, override));
-    MOCK_METHOD(IMS_BOOL, IsRegistrationWhenIpcanChangedWithImsActiveCallHeld, (),
-            (const, override));
+    MOCK_METHOD(
+            IMS_BOOL, IsRegistrationWhenIpcanChangedWithImsActiveCallHeld, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsDeregisterOn3gNetworks, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsVideoOverWifiSupportedWithoutVoice, (), (const, override));
     MOCK_METHOD(IMS_BOOL, IsGeolocationPidfSupported, (IN IMS_SINT32 nGeolocationPidfType),
@@ -137,4 +139,4 @@ public:
     MOCK_METHOD(void, Init, (IN IMS_SINT32 nSlotId), (override));
 };
 
-#endif //MOCK_I_AOS_N_CONFIGURATION_H_
+#endif  // MOCK_I_AOS_N_CONFIGURATION_H_

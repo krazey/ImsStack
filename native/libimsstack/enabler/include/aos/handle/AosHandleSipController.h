@@ -13,33 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef AOS_HANDLE_MTS_H_
-#define AOS_HANDLE_MTS_H_
+#ifndef AOS_HANDLE_SIP_CONTROLLER_H_
+#define AOS_HANDLE_SIP_CONTROLLER_H_
 
 #include "handle/AosHandle.h"
+#include "IEventListener.h"
 
-class AosHandleMts : public AosHandle
+class AosHandleSipController : public AosHandle
 {
-    // Operation
 public:
-    AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
+    AosHandleSipController(IN IAosAppContext* piAppContext, IN const AString& strAppId,
             IN const AString& strServiceId, IN const IMS_SINT32 nServiceType);
-    virtual ~AosHandleMts();
+    virtual ~AosHandleSipController();
 
 protected:
     virtual void Init();
-    virtual void CleanUp();
-
-    virtual void InitializeServiceBlock();
-    virtual void InitializeServiceFeature();
-
-    virtual void ProcessCapabilitiesChanged(
-            IN const IMSMap<IMS_UINT32, IMS_UINT32>& objCapabilities);
-
-    virtual IMS_BOOL IsHandleBlocked() const;
-    virtual void Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked);
-
-private:
-    IMS_BOOL m_bMtcBlocked;
 };
-#endif  // AOS_HANDLE_MTS_H_
+#endif  // AOS_HANDLE_SIP_CONTROLLER_H_

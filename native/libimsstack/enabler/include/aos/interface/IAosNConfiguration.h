@@ -125,6 +125,13 @@ public:
     virtual IMS_BOOL IsVopsIgnoredForVolteEnabled() const = 0;
 
     /**
+     * @brief Check if Sms Over Ims is available without voice capability.
+     *
+     * @return IMS_TRUE if available, IMS_FALSE if not available.
+     */
+    virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const = 0;
+
+    /**
      * @brief Check if emergency registration is required in roaming
      *
      * @return IMS_TRUE if required, IMS_FALSE if not required.

@@ -54,6 +54,7 @@
     </int-array>
     <int-array name="ims.registration_permanent_error_max_count_int_array" num="0">
     </int-array>
+    <boolean name="ims.ims_single_registration_required_bool" value="false"/>
 
     <!-- Mtc -->
     <int name="imsvoice.18x_timer_millis_int" value="32000"/>
@@ -388,7 +389,7 @@
     </int-array>
 
     <boolean name="ignore_vops_for_volte_enable_bool" value="true"/>
-    <boolean name="sms_over_ims_available_in_no_vops_bool" value="false"/>
+    <boolean name="sms_over_ims_available_without_voice_capability_bool" value="true"/>
     <boolean name="ims_deregister_on_3g_networks_bool" value="false"/>
     <boolean name="required_emergency_registration_in_roaming_bool" value="false"/>
     <int-array name="clear_permanent_pdn_failure_int_array" num="3">

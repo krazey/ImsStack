@@ -34,7 +34,8 @@ Remarks
 PUBLIC
 AosHandleMts::AosHandleMts(IN IAosAppContext* piAppContext, IN const AString& strAppId,
         IN const AString& strServiceId, IN const IMS_SINT32 nServiceType) :
-        AosHandle(piAppContext, strAppId, strServiceId, nServiceType)
+        AosHandle(piAppContext, strAppId, strServiceId, nServiceType),
+        m_bMtcBlocked(IMS_FALSE)
 {
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosHandleMts = %" PFLS_u "/%" PFLS_x, strAppId.GetStr(),
             sizeof(AosHandleMts), this);
@@ -194,4 +195,46 @@ PROTECTED VIRTUAL void AosHandleMts::ProcessCapabilitiesChanged(
         m_objCapabilities.SetValue(nType, nCapabilities);
     }
     */
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL IMS_BOOL AosHandleMts::IsHandleBlocked() const
+{
+    IMS_BOOL bBlocked = AosHandle::IsHandleBlocked(BLOCK_SMS_CAPABILITY) ||
+            AosHandle::IsHandleBlocked(BLOCK_SMS_OVER_IP_NETWORK_INDICATION);
+
+    return (bBlocked || m_bMtcBlocked);
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED VIRTUAL void AosHandleMts::Handle_Notify(IN IMS_UINT32 nType, IN IMS_BOOL bBlocked)
+{
+    if (nType != ImsAosService::MTC)
+    {
+        return;
+    }
+
+    A_IMS_TRACE_I(
+            APPPROFILE, "Handle_Notify :: nType[%d], bBlocked[%s]", nType, _TRACE_B_(bBlocked), 0);
+
+    m_bMtcBlocked = bBlocked;
+
+    if (bBlocked != m_bBlocked)
+    {
+        IMS_BOOL bCurrentBlocked = IsHandleBlocked();
+        if (m_bBlocked != bCurrentBlocked)
+        {
+            m_bBlocked = bCurrentBlocked;
+            IMSMSG objMSG(HANDLE_MSG_BLOCK_STATUS, 0, 0);
+            OnStateMessage(objMSG);
+        }
+    }
 }

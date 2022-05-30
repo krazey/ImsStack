@@ -54,6 +54,7 @@ public:
     virtual IMS_BOOL IsSupportLimitedAdminSmsMode() const;
     virtual IMS_BOOL IsTtySupported() const;
     virtual IMS_BOOL IsVopsIgnoredForVolteEnabled() const;
+    virtual IMS_BOOL IsSmsOverImsAvailableWithoutVoiceCapability() const;
     virtual IMS_BOOL IsRequiredEmergencyRegistrationInRoaming() const;
     virtual IMS_BOOL IsRequiredVolteBlockBySetting() const;
     virtual IMS_BOOL IsRequiredVolteBlockByAirplaneMode() const;

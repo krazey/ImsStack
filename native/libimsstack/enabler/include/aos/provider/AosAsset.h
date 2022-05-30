@@ -42,7 +42,7 @@ public:
             objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf(
                     IMSVector<IMS_SINT32>()),
             bIgnoreVopsForVolteEnable(IMS_FALSE),
-            bSmsOverImsAvailableInNoVops(IMS_FALSE),
+            bSmsOverImsAvailableWithoutVoiceCapability(IMS_FALSE),
             bImsDeregisterOn3gNetworks(IMS_FALSE),
             bVideoOverWifiSupportedWithoutVoice(IMS_FALSE),
             bRequiredEmergencyRegistrationInRoaming(IMS_FALSE),
@@ -79,7 +79,7 @@ public:
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForStoppingByExpirationTime;
     IMSVector<IMS_SINT32> objSubscriptionErrorCodeForRegEventWithInitialRegistrationWithNextPcscf;
     IMS_BOOL bIgnoreVopsForVolteEnable;
-    IMS_BOOL bSmsOverImsAvailableInNoVops;
+    IMS_BOOL bSmsOverImsAvailableWithoutVoiceCapability;
     IMS_BOOL bImsDeregisterOn3gNetworks;
     IMS_BOOL bVideoOverWifiSupportedWithoutVoice;
     IMS_BOOL bRequiredEmergencyRegistrationInRoaming;

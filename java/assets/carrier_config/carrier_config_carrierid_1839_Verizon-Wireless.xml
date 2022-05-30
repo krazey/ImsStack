@@ -117,6 +117,7 @@
     <boolean name="video_over_wifi_supported_without_voice_bool" value="true"/>
     <boolean name="use_g_gsma_rcs_telephony_feature_tag_as_available_voice_call_type_bool" value="true"/>
     <boolean name="cdmaless_feature_tag_required_bool" value="true"/>
+    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

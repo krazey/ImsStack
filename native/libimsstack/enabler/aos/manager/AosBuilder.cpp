@@ -26,9 +26,7 @@
 #include "handle/AosHandleEmergencyMtc.h"
 #include "handle/AosHandleEmergencyMts.h"
 #include "handle/AosHandleUce.h"
-/* jryou@: AosHandleSipContoller will be added later
 #include "handle/AosHandleSipController.h"
-*/
 #include "registration/AosRegistration.h"
 #include "registration/AosERegistration.h"
 #include "condition/AosSubscriber.h"
@@ -126,17 +124,15 @@ PUBLIC VIRTUAL IAosHandle* AosBuilder::BuildHandle(
 
         return new AosHandleUce(piAppContext, strAppId, strSrvId, nType);
     }
-    /* jryou@: AosHandleSipController will be added later
     else if (strSrvId.EqualsIgnoreCase(
             ImsServiceConfig::GetServiceName(ImsServiceId::SIP_DELEGATE)))
     {
-        nType = IImsAosMonitor::SERVICE_SIP_CONTROLLER;
+        nType = ImsAosService::SIP_CONTROLLER;
         IMS_TRACE_D("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandleSipController)",
                 strAppId.GetStr(), strSrvId.GetStr(), 0);
 
         return new AosHandleSipController(piAppContext, strAppId, strSrvId, nType);
     }
-    */
 
     IMS_TRACE_I("BuildHandle :: App ID(%s) , Service ID(%s), Type (AosHandle)", strAppId.GetStr(),
             strSrvId.GetStr(), 0);

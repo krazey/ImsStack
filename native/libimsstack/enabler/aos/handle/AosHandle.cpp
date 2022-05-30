@@ -1184,7 +1184,7 @@ void AosHandle::ProcessCheckBlock(
             OnStateMessage(objMSG);
         }
 
-        ProcessBlockChanged();  // jryou: this was for update "cs,volte"
+        ProcessBlockChanged();
     }
     else
     {

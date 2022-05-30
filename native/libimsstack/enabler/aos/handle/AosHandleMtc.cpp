@@ -578,6 +578,24 @@ PROTECTED VIRTUAL IMS_BOOL AosHandleMtc::IsBlockForWifi(IN IMS_UINT32 nBlock) co
 Remarks
 
 */
+PROTECTED VIRTUAL void AosHandleMtc::ProcessBlockChanged()
+{
+    if (!GET_N_CONFIG(m_nSlotId)->IsSmsOverImsAvailableWithoutVoiceCapability())
+    {
+        IAosHandle* piHandleMts = m_piAppContext->GetHandle(ImsAosService::MTS);
+
+        if (piHandleMts != IMS_NULL)
+        {
+            piHandleMts->Handle_Notify(ImsAosService::MTC, m_bBlocked);
+        }
+    }
+}
+
+/*
+
+Remarks
+
+*/
 PROTECTED VIRTUAL void AosHandleMtc::ProcessCapabilitiesChanged(
         IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities)
 {

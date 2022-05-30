@@ -136,6 +136,11 @@ PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsVopsIgnoredForVolteEnabled() const
     return m_objAsset.bIgnoreVopsForVolteEnable;
 }
 
+PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsSmsOverImsAvailableWithoutVoiceCapability() const
+{
+    return m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability;
+}
+
 PUBLIC VIRTUAL IMS_BOOL AosNConfiguration::IsRequiredEmergencyRegistrationInRoaming() const
 {
     return m_objAsset.bRequiredEmergencyRegistrationInRoaming;
@@ -998,8 +1003,8 @@ void AosNConfiguration::InitConfig(IN const ICarrierConfig* piCc)
                     KEY_SUBSCRIPTION_ERROR_CODE_FOR_REG_EVENT_WITH_INITIAL_REGISTRATION_WITH_NEXT_PCSCF_INT_ARRAY);
     m_objAsset.bIgnoreVopsForVolteEnable =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IGNORE_VOPS_FOR_VOLTE_ENABLE_BOOL);
-    m_objAsset.bSmsOverImsAvailableInNoVops =
-            piCc->GetBoolean(CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_IN_NO_VOPS_BOOL);
+    m_objAsset.bSmsOverImsAvailableWithoutVoiceCapability = piCc->GetBoolean(
+            CarrierConfig::Assets::KEY_SMS_OVER_IMS_AVAILABLE_WITHOUT_VOICE_CAPABILITY_BOOL);
     m_objAsset.bImsDeregisterOn3gNetworks =
             piCc->GetBoolean(CarrierConfig::Assets::KEY_IMS_DEREGISTER_ON_3G_NETWORKS_BOOL);
     m_objAsset.bVideoOverWifiSupportedWithoutVoice = piCc->GetBoolean(

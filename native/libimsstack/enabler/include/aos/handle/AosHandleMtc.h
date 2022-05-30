@@ -55,6 +55,7 @@ protected:
     virtual IMS_BOOL IsBlockForMobile(IN IMS_UINT32 nBlock) const;
     virtual IMS_BOOL IsBlockForWifi(IN IMS_UINT32 nBlock) const;
 
+    virtual void ProcessBlockChanged();
     virtual void ProcessCapabilitiesChanged(
             IN const IMSMap<IMS_UINT32, IMS_UINT32>& objNewCapabilities);
     virtual void ProcessNetworkChanged();
