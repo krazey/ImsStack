@@ -170,6 +170,8 @@
 
 #define MAX_CSEQ           4294967295
 
+#define MIN_WARNCODE       100
+
 #define MAX_WARNCODE       999
 
 #define MAX_EXPIRES        4294967295

@@ -138,6 +138,11 @@ SIP_BOOL SipHeaderList::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams, SIP_UI
             return SIP_FALSE;
         }
 
+        if (pHeader->GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)
+        {
+            nMsgOptions = nMsgOptions | ESIPMSGOPT_ENCMULTILINE;
+        }
+
         if (pHeader->GetHdrType() == SipHeaderBase::UNKNOWN)
         {
             SIP_ENC_CRLF(*ppCurrPos);
@@ -302,7 +307,20 @@ SIP_BOOL SipHeaderList::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
         return gHeaderAttributes[GetHdrType()][HEADER_EMPTY_BODY_ALLOWED];
     }
 
+    if (GetHdrType() == SipHeaderBase::AUTHENTICATION_INFO)
+    {
+        SipHeaderBase* pHdrBase = GetListObj();
+        if (pHdrBase == SIP_NULL)
+        {
+            SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory allocation Fail", SIP_ZERO, SIP_ZERO);
+            return SIP_FALSE;
+        }
+
+        return pHdrBase->DecodeHdr(pStartPt, nDecLen);
+    }
+
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
+
     while (pStartPt <= pEndPt)
     {
         SIP_CHAR* pTempPre = SIP_NULL;

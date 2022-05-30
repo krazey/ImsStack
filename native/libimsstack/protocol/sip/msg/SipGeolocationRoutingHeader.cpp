@@ -60,7 +60,7 @@ SipGeolocationRoutingHeader::~SipGeolocationRoutingHeader()
 
 SIP_BOOL SipGeolocationRoutingHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if (m_pGeoLocationRoutingList == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Missing geolocation-route", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -81,7 +81,7 @@ SIP_BOOL SipGeolocationRoutingHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL 
 SIP_BOOL SipGeolocationRoutingHeader::EncodeHdr(
         SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if (m_pGeoLocationRoutingList == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "GeoLocation route missing", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;

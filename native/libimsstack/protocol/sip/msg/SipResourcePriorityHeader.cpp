@@ -60,7 +60,7 @@ SipResourcePriorityHeader::~SipResourcePriorityHeader()
 
 SIP_BOOL SipResourcePriorityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL) )
+    if (IsValidHeader() == SIP_FALSE)
     {
         return SIP_FALSE;
     }
@@ -83,7 +83,7 @@ SIP_BOOL SipResourcePriorityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*
  *****************************************************************************/
 SIP_BOOL SipResourcePriorityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
 {
-    if ((m_pszNameSpace == SIP_NULL) || (m_pszRPriority == SIP_NULL))
+    if (IsValidHeader() == SIP_FALSE)
     {
         return SIP_FALSE;
     }
