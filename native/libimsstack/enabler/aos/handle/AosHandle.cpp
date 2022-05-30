@@ -517,7 +517,7 @@ Remarks
 */
 PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
 {
-    if (nService != ImsAosService::MTC)
+    if (nService != ImsAosService::MTC || !bReady)
     {
         return;
     }
