@@ -91,6 +91,7 @@ private:
     IMS_SINT32 GetEvsBandwidthFromList(IN IMS_UINT32 nBandwidthList) const;
     IMS_SINT32 GetEvsBitrateFromList(IN IMS_UINT32 nBitrateList) const;
     IMS_SINT32 GetAmrIoModeSetFromList(IN IMS_UINT32 nAmrIoModeSet) const;
+    IMS_UINT32 CheckEvsBandwidthWithBitrate(IN IMS_UINT32 m_nBwList, IN IMS_UINT32 m_nBrList) const;
 
 public:
     IMS_SINT32 GetChannel() const;

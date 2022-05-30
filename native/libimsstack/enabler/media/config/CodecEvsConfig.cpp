@@ -112,6 +112,7 @@ PUBLIC VIRTUAL IMS_BOOL CodecEvsConfig::Create(IN ICarrierConfig* piCc)
     m_nBrList = ConvertEvsBitrateToList(nBrStart, nBrEnd);
     m_nBwList = piCcBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_BANDWIDTH_INT, DEFAULT_BW_LIST);
+    m_nBwList = CheckEvsBandwidthWithBitrate(m_nBwList, m_nBrList);
     m_nCmr = piCcBundle->GetInt(
             CarrierConfig::ImsVoice::KEY_EVS_CODEC_ATTRIBUTE_CMR_INT, CMR_NOT_PRESENT);
     m_nChAwRecv =
@@ -173,11 +174,75 @@ IMS_UINT32 CodecEvsConfig::ConvertEvsBitrateToList(
 }
 
 PRIVATE
+IMS_UINT32 CodecEvsConfig::CheckEvsBandwidthWithBitrate(
+        IN IMS_UINT32 nBwList, IN IMS_UINT32 nBrList) const
+{
+    IMS_TRACE_D("CheckEvsBandwidthWithBitrate nBwList(%d) nBrList(%d)", nBwList, nBrList, 0);
+
+    if ((nBrList & 0xFF8) == IMS_FALSE)
+    {
+        switch (nBwList)
+        {
+            case EVS_ENCODED_BW_TYPE_NB:
+            case EVS_ENCODED_BW_TYPE_WB:
+            case EVS_ENCODED_BW_TYPE_NB_WB:
+                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - no change", 0, 0, 0);
+                break;
+            case EVS_ENCODED_BW_TYPE_SWB:
+            case EVS_ENCODED_BW_TYPE_FB:
+                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - br and bw mismatched", 0, 0, 0);
+                // TODO Media - check to need to convert to WB or return error
+                break;
+            case EVS_ENCODED_BW_TYPE_NB_WB_SWB:
+                nBwList = EVS_ENCODED_BW_TYPE_NB_WB;
+                break;
+            case EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB:
+                nBwList = EVS_ENCODED_BW_TYPE_NB_WB;
+                break;
+            case EVS_ENCODED_BW_TYPE_WB_SWB:
+                nBwList = EVS_ENCODED_BW_TYPE_WB;
+                break;
+            case EVS_ENCODED_BW_TYPE_WB_SWB_FB:
+                nBwList = EVS_ENCODED_BW_TYPE_WB;
+                break;
+        }
+        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
+    }
+    else if ((nBrList & 0xFE0) == IMS_FALSE)
+    {
+        switch (nBwList)
+        {
+            case EVS_ENCODED_BW_TYPE_NB:
+            case EVS_ENCODED_BW_TYPE_WB:
+            case EVS_ENCODED_BW_TYPE_NB_WB:
+            case EVS_ENCODED_BW_TYPE_SWB:
+            case EVS_ENCODED_BW_TYPE_NB_WB_SWB:
+            case EVS_ENCODED_BW_TYPE_WB_SWB:
+                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - no change", 0, 0, 0);
+                break;
+            case EVS_ENCODED_BW_TYPE_FB:
+                IMS_TRACE_D("CheckEvsBandwidthWithBitrate - br and bw mismatched", 0, 0, 0);
+                // TODO Media - check to need to convert to WB or return error
+                break;
+            case EVS_ENCODED_BW_TYPE_NB_WB_SWB_FB:
+                nBwList = EVS_ENCODED_BW_TYPE_NB_WB_SWB;
+                break;
+            case EVS_ENCODED_BW_TYPE_WB_SWB_FB:
+                nBwList = EVS_ENCODED_BW_TYPE_WB_SWB;
+                break;
+        }
+        IMS_TRACE_D("CheckEvsBandwidthWithBitrate - changed bwList : %d", nBwList, 0, 0);
+    }
+
+    return nBwList;
+}
+
+PRIVATE
 IMS_SINT32 CodecEvsConfig::GetEvsBandwidthFromList(IN IMS_UINT32 nBandwidthList) const
 {
     if (nBandwidthList == 0)
     {
-        return EVS_BANDWIDTH_SWB;
+        return EVS_BANDWIDTH_WB;
     }
 
     for (IMS_SINT32 nFindBandwidth = EVS_BANDWIDTH_MAX; nFindBandwidth >= 0; nFindBandwidth--)
@@ -188,7 +253,7 @@ IMS_SINT32 CodecEvsConfig::GetEvsBandwidthFromList(IN IMS_UINT32 nBandwidthList)
         }
     }
 
-    return EVS_BANDWIDTH_SWB;
+    return EVS_BANDWIDTH_WB;
 }
 
 PRIVATE
