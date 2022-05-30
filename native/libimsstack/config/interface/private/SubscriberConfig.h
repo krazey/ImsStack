@@ -199,7 +199,7 @@ private:
     void WriteProvisioning();
     void ToDebugString();
 
-    static IMS_SINT32 ReadSubscriptionAttributes(IN ICarrierConfig* piCc);
+    IMS_SINT32 ReadSubscriptionAttributes(IN ICarrierConfig* piCc);
     static IMSVector<IMS_SINT32> ReadPcscfDiscoveryMethods(IN ICarrierConfig* piCc);
 
     static const IMS_CHAR* IsimStateToString(IN IMS_SINT32 nState);

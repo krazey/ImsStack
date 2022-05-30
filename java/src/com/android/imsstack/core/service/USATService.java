@@ -12,10 +12,7 @@ import com.android.imsstack.R;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.UICCHelper;
 import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.IntentWrapper;
-import com.android.imsstack.core.agents.SIMStateAgent;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCUtil;
@@ -27,10 +24,10 @@ import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.FailInfo;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.enabler.mtc.MtcCall;
+import com.android.imsstack.internal.imsservice.CallUtils;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsExtApi;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.internal.imsservice.CallUtils;
 import com.android.internal.telephony.PhoneConstants;
 
 import java.io.ByteArrayOutputStream;
@@ -77,7 +74,6 @@ public class USATService implements IUSATService {
     private static final int EVENT_CALL_CONTROL_ENVELOPE_RESPONSE = 1001;
     private static final int EVENT_IMS_PHONE_RESTARTED = 1002;
     private static final int EVENT_NUMBER_FORMAT_EXCEPTION = 1003;
-    private static final int EVENT_SIM_STATE_CHANGED = 1004;
     /** Max transacion id */
     private static final int MAX_TRANSACTION_ID = 0XFF;
 
@@ -102,12 +98,6 @@ public class USATService implements IUSATService {
         mVoLteService = voLteService;
 
         ImsLog.i(getSlotId(), "");
-
-        ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, getSlotId());
-
-        if (ss != null) {
-            ss.registerForSimStateChanged(mUSATHelperHandler, EVENT_SIM_STATE_CHANGED, null);
-        }
 
         if (STK_CALL_SETUP_AVAILABLE) {
             mCallListener = new USATCallStateListener();
@@ -147,12 +137,6 @@ public class USATService implements IUSATService {
         }
 
         notifyNotAllowedForAllTransactions();
-
-        ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, getSlotId());
-
-        if (ss != null) {
-            ss.unregisterForSimStateChanged(mUSATHelperHandler);
-        }
 
         mUSATHelperHandler.removeCallbacksAndMessages(null);
 
@@ -809,17 +793,6 @@ public class USATService implements IUSATService {
                 case EVENT_NUMBER_FORMAT_EXCEPTION:
                     notifyEnvelopeResponse(msg.arg1, ENVELOPE_RESPONSE_ALLOWED, null);
                     break;
-
-                case EVENT_SIM_STATE_CHANGED: {
-                    ISIMState ssg = (ISIMState)AgentFactory.getAgent(
-                            AgentFactory.SIM_STATE, getSlotId());
-
-                    if ((ssg != null) && ssg.isIccLoaded()) {
-                        ImsLog.d(getSlotId(), "SIM loaded, check USAT feature and ef_ust value");
-                        startInternal();
-                    }
-                    break;
-                }
 
                 default:
                     break;

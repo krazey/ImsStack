@@ -19,8 +19,8 @@ package com.android.imsstack.enabler.ssc;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
@@ -239,8 +239,8 @@ public class SscUrl {
         if (TextUtils.isEmpty(uriAddr)) {
             uriAddr = "xcap.";
 
-            IISIM isimAgent = (IISIM) AgentFactory.getAgent(AgentFactory.ISIM, slotId);
-            String impi = isimAgent != null ? isimAgent.getImpi() : null;
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+            String impi = sim != null ? sim.getIsimImpi() : null;
 
             if (subsInfo.isIsimEnabled() && !TextUtils.isEmpty(impi)) {
                 String substringImpi = impi.substring(impi.lastIndexOf("@") + 1, impi.length());

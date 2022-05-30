@@ -230,7 +230,7 @@ public:
         OPERATION_READ_RECORD = 0
     };
 
-    // ISIM events of platform layer (aligned with SIMStateAgent.java)
+    // ISIM events of platform layer (aligned with SimAgent.java)
     static const IMS_SINT32 NOTIFICATION_ISIM_STATE_REFRESH = 101;
     static const IMS_SINT32 NOTIFICATION_ISIM_STATE_CHANGED = 102;
     static const IMS_SINT32 NOTIFICATION_ISIM_READ_FILE_ATTRIBUTE = 103;

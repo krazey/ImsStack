@@ -901,7 +901,6 @@ public class SystemInterface implements JNIImsListenerEx {
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPISendEvent mISystemAPISendEvent;
         private ISystemAPISRVCC mISystemAPISRVCC;
-        private ISystemAPISIM mISystemAPISIM;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
         private ISystemAPIWifiCalling mISystemAPIWifiCalling;
@@ -971,13 +970,6 @@ public class SystemInterface implements JNIImsListenerEx {
         public void setISystemAPISRVCC(ISystemAPISRVCC api) {
             synchronized (mLockObj) {
                 mISystemAPISRVCC = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPISIM(ISystemAPISIM api) {
-            synchronized (mLockObj) {
-                mISystemAPISIM = api;
             }
         }
 
@@ -1318,15 +1310,8 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-        /**
-         * Notifies the events which are registered by the native modules.
-         *
-         * @param event the current event
-         * @param param1 the parameter related to the current event
-         * @param param2 the additional parameter related to the current event
-         */
         @Override
-         public void notifyISIMState(final int event, final String state) {
+         public void notifyIsimState(int event, String state) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1347,16 +1332,9 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-         /**
-         * Notifies the events which are registered by the native modules.
-         *
-         * @param event the current event
-         * @param param1 the parameter related to the current event
-         * @param param2 the additional parameter related to the current event
-         */
         @Override
-        public void notifyISIMFileAttributeResponse(
-                final int event, final int EF_type, final int size, final String[] values) {
+        public void notifyIsimFileAttributesResponse(int event,
+                int fileId, int size, String[] values) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1370,7 +1348,7 @@ public class SystemInterface implements JNIImsListenerEx {
                     parcel.writeInt(mSlotId);
                     parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
                     parcel.writeInt(event);
-                    parcel.writeInt(EF_type);
+                    parcel.writeInt(fileId);
                     parcel.writeInt(size);
                     for (int i = 0;  i < size; i++)
                     {
@@ -1382,16 +1360,9 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-        /**
-         * Notifies the events which are registered by the native modules.
-         *
-         * @param event the current event
-         * @param param1 the parameter related to the current event
-         * @param param2 the additional parameter related to the current event
-         */
         @Override
-        public void notifyISIMFileFileValueResponse(
-                final int event, final int EF_type, final int index, final String value) {
+        public void notifyIsimRecordResponse(int event,
+                int fileId, int index, String value) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1405,7 +1376,7 @@ public class SystemInterface implements JNIImsListenerEx {
                     parcel.writeInt(mSlotId);
                     parcel.writeInt(SystemConstants.NOTIFY_ISIM_EVENT);
                     parcel.writeInt(event);
-                    parcel.writeInt(EF_type);
+                    parcel.writeInt(fileId);
                     parcel.writeInt(index);
                     parcel.writeString(value);
 
@@ -1414,16 +1385,8 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-        /**
-         * Notifies the events which are registered by the native modules.
-         *
-         * @param event the current event
-         * @param param1 the parameter related to the current event
-         * @param param2 the additional parameter related to the current event
-         */
         @Override
-        public void notifyISIMAuthResponse(
-                final int event, final String response, final long owner) {
+        public void notifyIsimAuthenticationResponse(int event, String response, long owner) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1445,16 +1408,8 @@ public class SystemInterface implements JNIImsListenerEx {
             });
         }
 
-        /**
-         * Notifies the events which are registered by the native modules.
-         *
-         * @param event the current event
-         * @param param1 the parameter related to the current event
-         * @param param2 the additional parameter related to the current event
-         */
         @Override
-         public void notifyUSIMAuthResponse(
-                final int event, final String response, final long owner) {
+        public void notifyUsimAuthenticationResponse(int event, String response, long owner) {
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -1579,112 +1534,111 @@ public class SystemInterface implements JNIImsListenerEx {
             synchronized (mLockObj) {
                 switch (method) {
                     //mISystemAPICallInfo
-                case SystemConstants.IS_EMERGENCY_NUMBER: //FALL-THROUGH
-                case SystemConstants.GET_TTY_MODE: //FALL-THROUGH
-                case SystemConstants.GET_RTT_MODE: //FALL-THROUGH
-                case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
-                    result = handleSystemAPICallInfo(method, parcel);
-                    break;
+                    case SystemConstants.IS_EMERGENCY_NUMBER: //FALL-THROUGH
+                    case SystemConstants.GET_TTY_MODE: //FALL-THROUGH
+                    case SystemConstants.GET_RTT_MODE: //FALL-THROUGH
+                    case SystemConstants.GET_CALL_STATE_IN_OTHER_SLOT:
+                        result = handleSystemAPICallInfo(method, parcel);
+                        break;
                     //mISystemAPIIMSPhone
-                case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
-                    result = handleSystemAPIIMSPhone(method, parcel);
-                    break;
+                    case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
+                        result = handleSystemAPIIMSPhone(method, parcel);
+                        break;
                     //mISystemAPISRVCC
-                case SystemConstants.LISTEN_SRVCC_EVENT: //FALL-THROUGH
-                case SystemConstants.UNLISTEN_SRVCC_EVENT:
-                    result = handleSystemAPISRVCC(method, parcel);
-                    break;
+                    case SystemConstants.LISTEN_SRVCC_EVENT: //FALL-THROUGH
+                    case SystemConstants.UNLISTEN_SRVCC_EVENT:
+                        result = handleSystemAPISRVCC(method, parcel);
+                        break;
                     //mISystemAPINetwork 1 ~ 10
-                case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
-                case SystemConstants.DEACTIVATE_DATA_CONNECTION: //FALL-THROUGH
-                case SystemConstants.GET_ACCESS_NETWORK_INFO: //FALL-THROUGH
-                case SystemConstants.GET_APN_NAME: //FALL-THROUGH
-                case SystemConstants.GET_DATA_CONNECTION_STATE: //FALL-THROUGH
-                case SystemConstants.GET_HOST_BY_NAME: //FALL-THROUGH
-                case SystemConstants.GET_IFACE_ID: //FALL-THROUGH
-                case SystemConstants.GET_IFACE_NAME: //FALL-THROUGH
-                case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO: //FALL-THROUGH
-                case SystemConstants.GET_LOCAL_ADDRESS:
-                    result = handleSystemAPINetwork1(method, parcel);
-                    break;
+                    case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
+                    case SystemConstants.DEACTIVATE_DATA_CONNECTION: //FALL-THROUGH
+                    case SystemConstants.GET_ACCESS_NETWORK_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_APN_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_DATA_CONNECTION_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_HOST_BY_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_IFACE_ID: //FALL-THROUGH
+                    case SystemConstants.GET_IFACE_NAME: //FALL-THROUGH
+                    case SystemConstants.GET_LAST_ACCESS_NETWORK_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_LOCAL_ADDRESS:
+                        result = handleSystemAPINetwork1(method, parcel);
+                        break;
                     //mISystemAPINetwork 11 ~ 20
-                case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
-                case SystemConstants.GET_LTE_RSRP_STRENGTH: //FALL-THROUGH
-                case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
-                case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
-                case SystemConstants.GET_SERVICE_STATE: //FALL-THROUGH
-                case SystemConstants.IS_LTE_EMERGENCY_ONLY: //FALL-THROUGH
-                case SystemConstants.IS_MOBILE_DATA_ENABLED://FALL-THROUGH
-                case SystemConstants.SEND_PING_TO_HOST_ADDRESS: //FALL-THROUGH
-                case SystemConstants.GET_MOCN_PLMN_INFO: //FALL-THROUGH
-                case SystemConstants.GET_VOICE_SERVICE_STATE: //FALL-THROUGH
-                case SystemConstants.GET_MTU: //FALL-THROUGH
-                case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // FALL-THROUGH
-                case SystemConstants.BIND_SOCKET:
-                    result = handleSystemAPINetwork2(method, parcel, fd);
-                    break;
-                    //mISystemAPISIM
-                case SystemConstants.GET_ISIM_STATE: //FALL-THROUGH
-                case SystemConstants.READ_ISIM_FILE_ATTR: //FALL-THROUGH
-                case SystemConstants.READ_ISIM_RECORD: //FALL-THROUGH
-                case SystemConstants.REQUEST_ISIM_AUTH: //FALL-THROUGH
-                case SystemConstants.REQUEST_USIM_AUTH:
-                    result = handleSystemAPISIM(method, parcel);
-                    break;
+                    case SystemConstants.GET_IPCAN_CATEGORY: //FALL-THROUGH
+                    case SystemConstants.GET_LTE_RSRP_STRENGTH: //FALL-THROUGH
+                    case SystemConstants.GET_PCSCF_ADDRESSES: //FALL-THROUGH
+                    case SystemConstants.GET_ROAMING_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_SERVICE_STATE: //FALL-THROUGH
+                    case SystemConstants.IS_LTE_EMERGENCY_ONLY: //FALL-THROUGH
+                    case SystemConstants.IS_MOBILE_DATA_ENABLED://FALL-THROUGH
+                    case SystemConstants.SEND_PING_TO_HOST_ADDRESS: //FALL-THROUGH
+                    case SystemConstants.GET_MOCN_PLMN_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_VOICE_SERVICE_STATE: //FALL-THROUGH
+                    case SystemConstants.GET_MTU: //FALL-THROUGH
+                    case SystemConstants.IS_EMERGENCY_ATTACH_SUPPORTED: // FALL-THROUGH
+                    case SystemConstants.BIND_SOCKET:
+                        result = handleSystemAPINetwork2(method, parcel, fd);
+                        break;
+                    case SystemConstants.GET_ISIM_STATE: //FALL-THROUGH
+                    case SystemConstants.READ_ISIM_FILE_ATTR: //FALL-THROUGH
+                    case SystemConstants.READ_ISIM_RECORD: //FALL-THROUGH
+                    case SystemConstants.REQUEST_ISIM_AUTH: //FALL-THROUGH
+                    case SystemConstants.REQUEST_USIM_AUTH:
+                        result = handleSystemCallForSim(method, parcel);
+                        break;
                     //mISystemAPITelephonyState
-                case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
-                case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
-                case SystemConstants.GET_CALL_STATE:
-                    result = handleSystemAPITelephonyState(method, parcel);
-                    break;
+                    case SystemConstants.GET_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_VOICE_NETWORK_TYPE: //FALL-THROUGH
+                    case SystemConstants.GET_CALL_STATE:
+                        result = handleSystemAPITelephonyState(method, parcel);
+                        break;
                     //mISystemAPITelephonySubscriber
-                case SystemConstants.GET_DEVICE_ID: //FALL-THROUGH
-                case SystemConstants.GET_DEVICE_SOFTWARE_VERSION: //FALL-THROUGH
-                case SystemConstants.GET_PHONE_NUMBER: //FALL-THROUGH
-                case SystemConstants.GET_SUBSCRIBER_ID: //FALL-THROUGH
-                case SystemConstants.GET_MCC: //FALL-THROUGH
-                case SystemConstants.GET_MNC: //FALL-THROUGH
-                case SystemConstants.GET_OPERATOR: //FALL-THROUGH
-                case SystemConstants.GET_COUNTRY: //FALL-THROUGH
-                case SystemConstants.GET_NETWORK_COUNTRY: //FALL-THROUGH
-                case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM: //FALL-THROUGH
-                case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM: //FALL-THROUGH
-                case SystemConstants.GET_UICC_GBA_SUPPORT:
-                     result = handleSystemAPITelephonySubscriber(method, parcel);
-                     break;
+                    case SystemConstants.GET_DEVICE_ID: //FALL-THROUGH
+                    case SystemConstants.GET_DEVICE_SOFTWARE_VERSION: //FALL-THROUGH
+                    case SystemConstants.GET_PHONE_NUMBER: //FALL-THROUGH
+                    case SystemConstants.GET_SUBSCRIBER_ID: //FALL-THROUGH
+                    case SystemConstants.GET_MCC: //FALL-THROUGH
+                    case SystemConstants.GET_MNC: //FALL-THROUGH
+                    case SystemConstants.GET_OPERATOR: //FALL-THROUGH
+                    case SystemConstants.GET_COUNTRY: //FALL-THROUGH
+                    case SystemConstants.GET_NETWORK_COUNTRY: //FALL-THROUGH
+                    case SystemConstants.GET_EMERGENCY_NUM_LIST_FROM_SIM: //FALL-THROUGH
+                    case SystemConstants.GET_EMERGENCY_PRIORITY_FROM_MODEM: //FALL-THROUGH
+                    case SystemConstants.GET_UICC_GBA_SUPPORT:
+                        result = handleSystemAPITelephonySubscriber(method, parcel);
+                        break;
                     //mISystemAPIWifiCalling
-                case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
-                case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
-                case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
-                case SystemConstants.GET_WFC_ADDRESS_ID:
-                    result = handleSystemAPIWifiCalling(method, parcel);
-                    break;
+                    case SystemConstants.IS_WFC_ENABLED: //FALL-THROUGH
+                    case SystemConstants.GET_WFC_PREFERENCES: //FALL-THROUGH
+                    case SystemConstants.IS_WFC_PROVISIONED: //FALL-THROUGH
+                    case SystemConstants.GET_WFC_ADDRESS_ID:
+                        result = handleSystemAPIWifiCalling(method, parcel);
+                        break;
                     //mISystemAPILocation
-                case SystemConstants.START_LOCATION_INFO: //FALL-THROUGH
-                case SystemConstants.STOP_LOCATION_INFO: //FALL-THROUGH
-                case SystemConstants.GET_LOCATION_INFO: //FALL-THROUGH
-                case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
-                    result = handleSystemAPILocation(method, parcel);
-                    break;
+                    case SystemConstants.START_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.STOP_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.GET_LOCATION_INFO: //FALL-THROUGH
+                    case SystemConstants.MAKE_INSTATNT_LOCATION_INFO:
+                        result = handleSystemAPILocation(method, parcel);
+                        break;
                     // mISystemAPIVoNR
-                case SystemConstants.NOTIFY_CALL_STATE: //FALL-THROUGH
-                case SystemConstants.REQUEST_CALL_PREPERENCE: //FALL-THROUGH
-                case SystemConstants.SET_IMS_SESSION: //FALL-THROUGH
-                case SystemConstants.SET_IMS_SIGNALING: //FALL-THROUGH
-                case SystemConstants.SET_IMS_VOICE: //FALL-THROUGH
-                case SystemConstants.SET_UAC_CHECK: //FALL-THROUGH
-                case SystemConstants.SET_VOICE:
-                    result = handleSystemAPIVoNR(method, parcel);
-                    break;
-                case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
-                case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
-                case SystemConstants.APPLY_IPSEC_SA: // FALL-THROUGH
-                case SystemConstants.REMOVE_IPSEC_SA:
-                    result = handleSystemApiIpSec(method, parcel, fd);
-                    break;
-                default:
-                    result = handleSystemCall(method, parcel);
-                    break;
+                    case SystemConstants.NOTIFY_CALL_STATE: //FALL-THROUGH
+                    case SystemConstants.REQUEST_CALL_PREPERENCE: //FALL-THROUGH
+                    case SystemConstants.SET_IMS_SESSION: //FALL-THROUGH
+                    case SystemConstants.SET_IMS_SIGNALING: //FALL-THROUGH
+                    case SystemConstants.SET_IMS_VOICE: //FALL-THROUGH
+                    case SystemConstants.SET_UAC_CHECK: //FALL-THROUGH
+                    case SystemConstants.SET_VOICE:
+                        result = handleSystemAPIVoNR(method, parcel);
+                        break;
+                    case SystemConstants.ADD_IPSEC_SA_PARAMETER: // FALL-THROUGH
+                    case SystemConstants.REMOVE_IPSEC_SA_PARAMETER: // FALL-THROUGH
+                    case SystemConstants.APPLY_IPSEC_SA: // FALL-THROUGH
+                    case SystemConstants.REMOVE_IPSEC_SA:
+                        result = handleSystemApiIpSec(method, parcel, fd);
+                        break;
+                    default:
+                        result = handleSystemCall(method, parcel);
+                        break;
                 }
             }
 
@@ -2008,40 +1962,43 @@ public class SystemInterface implements JNIImsListenerEx {
             return result;
         }
 
-        private Parcel handleSystemAPISIM(int method, Parcel parcel) {
-            if (mISystemAPISIM == null) {
+        private Parcel handleSystemCallForSim(int method, Parcel parcel) {
+            if (mSystemCall == null) {
                 return null;
             }
 
             Parcel result = Parcel.obtain();
+
             switch (method) {
-            case SystemConstants.GET_ISIM_STATE:
-                result.writeString(mISystemAPISIM.getISIMState4Sys());
-                break;
-            case SystemConstants.READ_ISIM_FILE_ATTR:
-                int nFileField = parcel.readInt();
-                result.writeInt(mISystemAPISIM.readISIMFileAttributes4Sys(nFileField));
-                break;
-            case SystemConstants.READ_ISIM_RECORD:
-                int nRecordField = parcel.readInt();
-                int nIndex = parcel.readInt();
-                result.writeInt(mISystemAPISIM.readISIMRecord4Sys(nRecordField, nIndex));
-                break;
-            case SystemConstants.REQUEST_ISIM_AUTH: {
-                String nonce = parcel.readString();
-                long owner = parcel.readLong();
-                result.writeInt(mISystemAPISIM.requestISIMAuthentication4Sys(nonce, owner));
-                break;
-            }
-            case SystemConstants.REQUEST_USIM_AUTH: {
-                String nonce = parcel.readString();
-                long owner = parcel.readLong();
-                result.writeInt(mISystemAPISIM.requestUSIMAuthentication4Sys(nonce, owner));
-                break;
-            }
-            default:
-                result.recycle();
-                return null;
+                case SystemConstants.GET_ISIM_STATE:
+                    result.writeString(mSystemCall.getIsimState());
+                    break;
+                case SystemConstants.READ_ISIM_FILE_ATTR: {
+                    int fileId = parcel.readInt();
+                    result.writeInt(mSystemCall.readIsimFileAttributes(fileId));
+                    break;
+                }
+                case SystemConstants.READ_ISIM_RECORD: {
+                    int fileId = parcel.readInt();
+                    int index = parcel.readInt();
+                    result.writeInt(mSystemCall.readIsimRecord(fileId, index));
+                    break;
+                }
+                case SystemConstants.REQUEST_ISIM_AUTH: {
+                    String nonce = parcel.readString();
+                    long owner = parcel.readLong();
+                    result.writeInt(mSystemCall.requestIsimAuthentication(nonce, owner));
+                    break;
+                }
+                case SystemConstants.REQUEST_USIM_AUTH: {
+                    String nonce = parcel.readString();
+                    long owner = parcel.readLong();
+                    result.writeInt(mSystemCall.requestUsimAuthentication(nonce, owner));
+                    break;
+                }
+                default:
+                    result.recycle();
+                    return null;
             }
 
             return result;

@@ -20,8 +20,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.agentif.IAlarmTimer;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.core.agents.dcmif.IApn;
@@ -29,7 +30,6 @@ import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.imsservice.mmtel.ut.UtFactory;
 import com.android.imsstack.imsservice.mmtel.ut.base.UtInterface;
-import com.android.imsstack.util.ImsExtApi;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,8 +39,6 @@ public class SscServiceState {
     public static final int EVENT_UT_BLOCK_TIMER_EXPIRED = 1001;
     @VisibleForTesting
     public static final int EVENT_AIRPLANE_MODE_CHANGED = 1002;
-    @VisibleForTesting
-    public static final int EVENT_SIM_STATE_CHANGED = 1003;
 
     private int mSlotId = -1;
     private int mCurrentRat = -1;
@@ -66,9 +64,10 @@ public class SscServiceState {
             ImsLog.e("DCNetWatcher is null");
         }
 
-        ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
-        if (ss != null) {
-            ss.registerForSimStateChanged(mHandler, EVENT_SIM_STATE_CHANGED, null);
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.addListener((SscServiceStateHandler) mHandler);
         }
 
         updateUtServiceFeature();
@@ -83,9 +82,10 @@ public class SscServiceState {
             dnw.unregisterForAirplaneModeChanged(mHandler);
         }
 
-        ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
-        if (ss != null) {
-            ss.unregisterForSimStateChanged(mHandler);
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.removeListener((SscServiceStateHandler) mHandler);
         }
     }
 
@@ -344,7 +344,18 @@ public class SscServiceState {
         }
     }
 
-    private class SscServiceStateHandler extends Handler {
+    private class SscServiceStateHandler extends Handler implements Sim.Listener {
+        @Override
+        public void onSimCardStateChanged() {
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+            if (sim != null) {
+                if (sim.getSimCardState() == Sim.STATE_ABSENT) {
+                    resetAllUtStatus();
+                }
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             if (msg == null) {
@@ -374,18 +385,6 @@ public class SscServiceState {
                             resetUtBlock(SscConstant.BLOCK_REASON_PDN_CONNECTION_FAILURE_TEMP);
                             resetUtBlock(SscConstant.BLOCK_REASON_BY_RESPONSE_CODE_PERM);
                         }
-                    }
-                    break;
-                case EVENT_SIM_STATE_CHANGED:
-                    ISIMState ss = (ISIMState) AgentFactory.getAgent(AgentFactory.SIM_STATE,
-                            mSlotId);
-                    if (ss == null) {
-                        ImsLog.e("ISIMState is null");
-                        break;
-                    }
-
-                    if (ImsExtApi.Uicc.SIM_REMOVED.equalsIgnoreCase(ss.getIccState())) {
-                        resetAllUtStatus();
                     }
                     break;
                 default:

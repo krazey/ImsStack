@@ -2,8 +2,8 @@ package com.android.imsstack.core;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.IPreference;
 import com.android.imsstack.enabler.mtc.IUMtcCall;
 import com.android.imsstack.system.ImsEventDef;
@@ -11,7 +11,7 @@ import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
+import java.util.List;
 
 public class UICCHelper {
     // Constants--------------------------------------------------
@@ -189,34 +189,39 @@ public class UICCHelper {
     }
 
     private static String getSelectedImpu(int nSlotID) {
-        IISIM isimWrapper = (IISIM)AgentFactory.getAgent(AgentFactory.ISIM, nSlotID);
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, nSlotID);
 
-        if (isimWrapper == null) {
-            ImsLog.d("ISIMWrapper is null");
+        if (sim == null) {
+            ImsLog.d("SimInterface is null");
             return null;
         }
 
-        String[] impus = isimWrapper.getImpu();
-        if ((impus == null) || (impus.length < 1)) {
+        List<String> impuList = sim.getIsimImpu();
+
+        if (impuList.isEmpty()) {
             return null;
         }
 
-        ImsLog.w("IMPUs Size = " + impus.length);
+        ImsLog.w("IMPUs Size = " + impuList.size());
 
-        if ((impus[0] == null) || (impus[0].length() < IMPU_LENGTH_MINIMUM)) {
+        String impu = impuList.get(0);
+
+        if ((impu == null) || (impu.length() < IMPU_LENGTH_MINIMUM)) {
             return null;
         }
 
-        if (impus.length == 1) {
-            return impus[0];
+        if (impuList.size() == 1) {
+            return impu;
         }
 
-        if ((impus[1] == null) || (impus[1].length() < IMPU_LENGTH_MINIMUM)) {
+        impu = impuList.get(1);
+
+        if ((impu == null) || (impu.length() < IMPU_LENGTH_MINIMUM)) {
             ImsLog.w("impus[1] is invalid");
             return null;
         }
 
-        return impus[1];
+        return impu;
     }
 
     public static String getStringForCallConnected(int callConnectionId, boolean isMO) {

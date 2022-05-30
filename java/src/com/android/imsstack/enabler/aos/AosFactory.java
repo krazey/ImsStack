@@ -15,12 +15,12 @@
  */
 package com.android.imsstack.enabler.aos;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.android.imsstack.enabler.aos.service.AosService;
 import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Factory class to instantiate AoS components.
@@ -73,6 +73,32 @@ public class AosFactory {
         if (aosService != null) {
             aosService.stop();
             mAosServices.remove(slotId);
+        }
+    }
+
+    /**
+     * Initialize the AoS service.
+     *
+     * @param slotId The slot-id to be initialized.
+     */
+    public synchronized void init(int slotId) {
+        AosService aosService = (AosService) mAosServices.get(slotId);
+
+        if (aosService != null) {
+            aosService.init();
+        }
+    }
+
+    /**
+     * Clean up the AoS service.
+     *
+     * @param slotId The slot-id to be cleaned up.
+     */
+    public synchronized void cleanup(int slotId) {
+        AosService aosService = (AosService) mAosServices.get(slotId);
+
+        if (aosService != null) {
+            aosService.cleanup();
         }
     }
 

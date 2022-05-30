@@ -27,9 +27,7 @@ public final class AgentFactory {
     public static final int TRM = 8;
 
     // agents with slot id
-    public static final int ISIM = 9;
     public static final int SHARED_STATE = 10;
-    public static final int SIM_STATE = 11;
     public static final int PHONE_STATE = 13;
     public static final int TELEPHONY_STATE = 14;
     public static final int TELEPHONY_SUBSCRIBER = 15;
@@ -113,10 +111,8 @@ public final class AgentFactory {
         agents.put(PHONE_STATE, new PhoneStateAgent(slotId));
         agents.put(TELEPHONY_STATE, new TelephonyStateAgent(slotId));
         agents.put(TELEPHONY_SUBSCRIBER, new TelephonySubscriberAgent(slotId));
-        agents.put(ISIM, new ISIMAgent(slotId));
         agents.put(PHONE_CALL_DB, new PhoneCallDBAgent(slotId));
         agents.put(SHARED_STATE, new SharedStateAgent(slotId));
-        agents.put(SIM_STATE, new SIMStateAgent(slotId));
 
         // below types should be initialized and cleaned up from VoLTE package
         agents.put(CELL_INFO, new CellInfoAgent(slotId));
@@ -139,10 +135,8 @@ public final class AgentFactory {
         agentList.add(agents.get(PHONE_STATE));
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
-        agentList.add(agents.get(ISIM));
         agentList.add(agents.get(PHONE_CALL_DB));
         agentList.add(agents.get(SHARED_STATE));
-        agentList.add(agents.get(SIM_STATE));
         agentList.add(agents.get(VONR));
 
         for (int i = 0; i < agentList.size(); i++) {
@@ -177,10 +171,8 @@ public final class AgentFactory {
         agentList.add(agents.get(PHONE_STATE));
         agentList.add(agents.get(TELEPHONY_STATE));
         agentList.add(agents.get(TELEPHONY_SUBSCRIBER));
-        agentList.add(agents.get(ISIM));
         agentList.add(agents.get(PHONE_CALL_DB));
         agentList.add(agents.get(SHARED_STATE));
-        agentList.add(agents.get(SIM_STATE));
         agentList.add(agents.get(VONR));
 
         for (int i = 0; i < agentList.size(); i++) {

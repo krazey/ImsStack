@@ -174,53 +174,52 @@ public abstract class SystemNotifier {
     public abstract void notifyEvent(final int event, final int param1, final int param2);
 
     /**
-     * Notifies the ISIM events of the
+     * Notifies the ISIM state to the native module.
      *
-     * @param event the current event
-     * @param param1 the parameter related to the current event
-     * @param param2 the additional parameter related to the current event
+     * @param event The current event.
+     * @param state The current ISIM state.
      */
-    public abstract void notifyISIMState(final int event, final String state);
+    public abstract void notifyIsimState(int event, String state);
 
     /**
-     * Notifies the ISIM events of the
+     * Notifies the ISIM file attributes response to the native module.
      *
-     * @param event the current event
-     * @param param1 the parameter related to the current event
-     * @param param2 the additional parameter related to the current event
+     * @param event The current event.
+     * @param fileId The file id to be responded.
+     * @param size The size of the specified file id.
+     * @param values The content of the specified file id.
      */
-    public abstract void notifyISIMFileAttributeResponse(final int event, final int EF_type,
-        final int size, final String[] values);
+    public abstract void notifyIsimFileAttributesResponse(int event,
+            int fileId, int size, String[] values);
 
     /**
-     * Notifies the ISIM events of the
+     * Notifies the ISIM record response to the native module.
      *
-     * @param event the current event
-     * @param param1 the parameter related to the current event
-     * @param param2 the additional parameter related to the current event
+     * @param event The current event.
+     * @param fileId The file id to be responded.
+     * @param index The index of the specified file id.
+     * @param value The content of the specified file id.
      */
-    public abstract void notifyISIMFileFileValueResponse(final int event, final int EF_type,
-        final int index, final String value);
+    public abstract void notifyIsimRecordResponse(int event,
+            int fileId, int index, String value);
 
     /**
-     * Notifies the ISIM events of the
+     * Notifies the ISIM authentication response to the native module.
      *
-     * @param event the current event
-     * @param param1 the parameter related to the current event
-     * @param param2 the additional parameter related to the current event
+     * @param event The current event.
+     * @param response The ISIM authentication response.
+     * @param owner The owner of this request.
      */
-    public abstract void notifyISIMAuthResponse(
-            final int event, final String response, final long owner);
+    public abstract void notifyIsimAuthenticationResponse(int event, String response, long owner);
 
     /**
-     * Notifies the USIM events of the
+     * Notifies the USIM authentication response to the native module.
      *
-     * @param event the current event
-     * @param param1 the parameter related to the current event
-     * @param param2 the additional parameter related to the current event
+     * @param event The current event.
+     * @param response The USIM authentication response.
+     * @param owner The owner of this request.
      */
-    public abstract void notifyUSIMAuthResponse(
-            final int event, final String response, final long owner);
+    public abstract void notifyUsimAuthenticationResponse(int event, String response, long owner);
 
     /**
      * Checks if the specified event is registered or not.

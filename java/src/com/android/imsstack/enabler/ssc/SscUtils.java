@@ -20,11 +20,12 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.util.ImsLog;
 
+import java.util.List;
 import java.util.Locale;
 
 public final class SscUtils {
@@ -45,13 +46,15 @@ public final class SscUtils {
 
     public static String getImpu(int slotId) {
         // TODO: Get IMPU from UICC value that provided by IMS platform regardless of USIM or ISIM
-        IISIM isimAgent = (IISIM) AgentFactory.getAgent(AgentFactory.ISIM, slotId);
-        String[] impu = isimAgent != null ? isimAgent.getImpu() : null;
-        if (impu == null || impu.length == 0) {
-            ImsLog.w("IMPU is invalid !!!");
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+        List<String> impuList = sim != null ? sim.getIsimImpu() : null;
+
+        if (impuList.isEmpty()) {
+            ImsLog.w("IMPU is empty!!!");
             return null;
         }
-        return impu[0];
+
+        return impuList.get(0);
     }
 
     public static String getDomain(int slotId) {
@@ -64,8 +67,8 @@ public final class SscUtils {
 
         String domain = null;
         if (subsInfo.isIsimEnabled() == true) {
-            IISIM isimAgent = (IISIM) AgentFactory.getAgent(AgentFactory.ISIM, slotId);
-            String impi = isimAgent != null ? isimAgent.getImpi() : null;
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
+            String impi = sim != null ? sim.getIsimImpi() : null;
             if (impi == null || impi.isEmpty()) {
                 ImsLog.w("IMPI is invalid !!!");
                 return null;

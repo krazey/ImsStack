@@ -16,11 +16,10 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.core.agents.SubsInfoInterface;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
-import com.android.imsstack.core.agents.dcmif.IDC;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.core.agents.dcmif.IDCUtil;
@@ -29,16 +28,15 @@ import com.android.imsstack.util.ImsLog;
 import com.android.imsstack.util.MSimUtils;
 import com.android.imsstack.util.SettingsUtils;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Executor;
 
 public class DCUtil implements IDCUtil {
@@ -259,11 +257,11 @@ public class DCUtil implements IDCUtil {
 
     @Override
     public void updateAllCellInfoForcinglyOnLimitedServiceState() {
-        ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
         IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(DCFactory.NETWORK_WATCHER, mSlotId);
 
-        if ((ss != null && !ss.isIccLoaded()) ||
-                (dcnw != null && dcnw.isLteEmergencyOnly())) {
+        if ((sim != null && !sim.isSimLoaded())
+                || (dcnw != null && dcnw.isLteEmergencyOnly())) {
             TelephonyManager tm = null;
 
             if (MSimUtils.isMultiSimEnabled()) {

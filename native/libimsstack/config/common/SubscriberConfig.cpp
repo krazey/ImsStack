@@ -2644,9 +2644,15 @@ void SubscriberConfig::ToDebugString()
     IMS_TRACE_D("IMS subscriber's info (%d, %s) -- ends", GetSlotId(), GetId().GetStr(), 0);
 }
 
-PRIVATE GLOBAL IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
+PRIVATE
+IMS_SINT32 SubscriberConfig::ReadSubscriptionAttributes(IN ICarrierConfig* piCc)
 {
     IMS_SINT32 nSubsAttributes = SUBSCRIPTION_ATTRIBUTE_IMS;
+
+    if (!m_strId.Equals(GetDefaultId()))
+    {
+        return nSubsAttributes;
+    }
 
     IMSVector<IMS_SINT32> objIdentityPriorities =
             piCc->GetIntArray(CarrierConfig::Ims::KEY_IMS_IDENTITY_PRIORITY_INT_ARRAY);

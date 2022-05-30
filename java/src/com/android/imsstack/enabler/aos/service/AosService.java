@@ -21,6 +21,9 @@ import android.os.Message;
 import android.os.Parcel;
 import android.util.ArraySet;
 
+import com.android.imsstack.core.agents.AgentFactory;
+import com.android.imsstack.core.agents.Sim;
+import com.android.imsstack.core.agents.SimInterface;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfoListener;
@@ -39,7 +42,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class AosService implements IAosRegistration, IAosInfo {
+/**
+ * This class provides an interface to manage and control the AoS related information.
+ */
+public class AosService implements IAosRegistration, IAosInfo, Sim.Listener, Sim.IsimListener {
 
     public static final int EVENT_NATIVE_BOOT_COMPLETED = 1000;
     private AosServiceHandler mHandler;
@@ -92,6 +98,30 @@ public class AosService implements IAosRegistration, IAosInfo {
         JNIIms.releaseInterface(mNativeObject);
         mNativeObject = 0;
         mSlotId = MSimUtils.DEFAULT_SLOT_ID;
+    }
+
+    /**
+     * Initialize any necessasry information for AoS service.
+     */
+    public void init() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.addListener(this);
+            sim.addIsimListener(this);
+        }
+    }
+
+    /**
+     * Clean up the necessary information that was previously initialized for AoS service.
+     */
+    public void cleanup() {
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.removeListener(this);
+            sim.removeIsimListener(this);
+        }
     }
 
     @Override
@@ -277,6 +307,45 @@ public class AosService implements IAosRegistration, IAosInfo {
     @Override
     public void notifyPreciseCallState(int state) {
         sendRequest(IIAosService.J2N_NOTIFY_PRECISE_CALL_STATE, state);
+    }
+
+    @Override
+    public void onSimStateChanged() {
+        ImsLog.d(mSlotId, "AosService: onSimStateChanged");
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            if (sim.isSimLoaded()) {
+                notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
+            }
+        }
+    }
+
+    @Override
+    public void onIsimStateChanged() {
+        ImsLog.d(mSlotId, "AosService: onIsimStateChanged");
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            int isimState = sim.getIsimState();
+
+            switch (isimState) {
+                case Sim.ISIM_STATE_NOT_PRESENT:
+                    notifyIsimState(IsimState.NOT_PRESENT);
+                    break;
+                case Sim.ISIM_STATE_NOT_READY:
+                    notifyIsimState(IsimState.NOT_READY);
+                    break;
+                case Sim.ISIM_STATE_LOADED:
+                    notifyIsimState(IsimState.LOADED);
+                    break;
+                case Sim.ISIM_STATE_REFRESH_STARTED:
+                    notifyIsimState(IsimState.REFRESH_STARTED);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     private void sendRequest(int message, boolean isTrue) {
@@ -547,6 +616,33 @@ public class AosService implements IAosRegistration, IAosInfo {
         private void handleNativeBootCompleted() {
             ImsLog.d(mSlotId, "");
             notifyCapabilitiesChanged();
+
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+
+            if (sim != null) {
+                if (sim.isSimLoaded()) {
+                    notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
+                }
+
+                int isimState = sim.getIsimState();
+
+                switch (isimState) {
+                    case Sim.ISIM_STATE_NOT_PRESENT:
+                        notifyIsimState(IsimState.NOT_PRESENT);
+                        break;
+                    case Sim.ISIM_STATE_NOT_READY:
+                        notifyIsimState(IsimState.NOT_READY);
+                        break;
+                    case Sim.ISIM_STATE_LOADED:
+                        notifyIsimState(IsimState.LOADED);
+                        break;
+                    case Sim.ISIM_STATE_REFRESH_STARTED:
+                        notifyIsimState(IsimState.REFRESH_STARTED);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 

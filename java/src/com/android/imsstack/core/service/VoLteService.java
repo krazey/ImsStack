@@ -20,7 +20,6 @@ import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
 import com.android.imsstack.core.agents.agentif.IRegiProcess;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
@@ -47,7 +46,6 @@ import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.IUIMS;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
-import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
 import com.android.imsstack.internal.enabler.ImsStateStore;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.system.ImsEventDef;
@@ -412,19 +410,6 @@ public class VoLteService implements IVoLteService {
 
     protected void operatorSpecificImsBootCompleted() {
         ISystem system = SystemInterface.getInstance().getSystem(mSlotID);
-        ISIMState stg = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotID);
-
-        if (stg != null) {
-            // Do not need to call the deprecated PSI value request
-            //stg.requestPSIInfo();
-
-            if (stg.isIccLoaded()) {
-                IAosInfo aosInfo = AosFactory.getInstance().getAosInfo(mSlotID);
-                if (aosInfo != null) {
-                    aosInfo.notifyPhoneNumberState(false, PhoneNumberState.SIM_LOADED);
-                }
-            }
-        }
 
         if (ImsGlobal.equalsOperatorCountry(mOperator, mCountry, "ATT", "US")) {
             if (system != null) {

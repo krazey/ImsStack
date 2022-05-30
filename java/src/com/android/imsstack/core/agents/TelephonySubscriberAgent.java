@@ -12,7 +12,6 @@ import android.text.TextUtils;
 import com.android.imsstack.core.CommonStarter;
 import com.android.imsstack.core.IVoltePackageListener;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.agentif.IISIM;
 import com.android.imsstack.core.agents.agentif.ITelephonyState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.system.ISystem;
@@ -356,8 +355,8 @@ public class TelephonySubscriberAgent implements ITelephonySubscriber,
 
     @Override
     public boolean isUiccGbaSupported4Sys() {
-        IISIM isim = (IISIM)AgentFactory.getAgent(AgentFactory.ISIM, mSlotId);
-        return (isim != null) ? isim.isGbaSupported() : false;
+        SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+        return (sim != null) ? sim.isGbaAvailable() : false;
     }
 
     // Private/Protected methods ---------------------------------

@@ -17,7 +17,6 @@ import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.IRegiProcess;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.system.IJNIUpCallEvt;
@@ -865,32 +864,7 @@ public final class IIMSPhoneGov {
         }
 
         private void processPsiRecord(String psi) {
-            ISIMState ss = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
-
-            if (ss == null) {
-                return;
-            }
-
-            String strPSI = null;
-
-            try {
-                strPSI = convertPSIToString(psi);
-            } catch (StringIndexOutOfBoundsException e) {
-                ImsLog.d("Exception: " + e.toString());
-            } catch (NumberFormatException e) {
-                ImsLog.d("Exception: " + e.toString());
-            }
-
-            if (strPSI == null) {
-                if (ImsGlobal.isOperator(mSlotId, "KT")) {
-                    //EF_SMSP info
-                    strPSI = ss.getSMSPAddress();
-                } else {
-                    return;
-                }
-            }
-
-            ss.setPSIValueToDB(strPSI);
+            // no-op
         }
 
         private void processModemECCPriority(int param1) {

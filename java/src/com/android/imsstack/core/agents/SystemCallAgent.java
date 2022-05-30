@@ -17,8 +17,8 @@
 package com.android.imsstack.core.agents;
 
 import com.android.imsstack.core.config.CarrierConfig;
-import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.ISystem;
+import com.android.imsstack.system.IpSecSaParameter;
 import com.android.imsstack.system.SystemCallInterface;
 import com.android.imsstack.system.SystemInterface;
 
@@ -117,5 +117,92 @@ public class SystemCallAgent implements SystemCallInterface {
         if (ipsec != null) {
             ipsec.removeIpSecSa(ipSecId, spi, intFd, socketFd);
         }
+    }
+
+    /**
+     * Returns the ISIM state as a string.
+     *
+     * @return The ISIM state string.
+     */
+    @Override
+    public String getIsimState() {
+        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
+                SimInterface.class, mSlotId);
+        return (sim != null) ? sim.getIsimStateString() : "UNKNOWN";
+    }
+
+    /**
+     * Reads the file attributes of the specified ISIM record.
+     *
+     * @param fileId The file id to be read.
+     */
+    @Override
+    public int readIsimFileAttributes(int fileId) {
+        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
+                SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.readIsimFileAttributes(fileId);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Reads the value of the specified ISIM record.
+     *
+     * @param fileId The file id to be read.
+     * @param index The index of the record for the given file.
+     */
+    @Override
+    public int readIsimRecord(int fileId, int index) {
+        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
+                SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.readIsimRecord(fileId, index);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Returns the response of ISIM authentication for the specified application type.
+     *
+     * @param nonce The authentication challenge data, base64 encoded.
+     * @param owner The owner of this request.
+     */
+    @Override
+    public int requestIsimAuthentication(String nonce, long owner) {
+        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
+                SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.requestSimAuthentication(Sim.APP_TYPE_ISIM, nonce, owner);
+            return 1;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Returns the response of USIM authentication for the specified application type.
+     *
+     * @param nonce The authentication challenge data, base64 encoded.
+     * @param owner The owner of this request.
+     */
+    @Override
+    public int requestUsimAuthentication(String nonce, long owner) {
+        SimAgent sim = (SimAgent) AgentFactory.getInstance().getAgent(
+                SimInterface.class, mSlotId);
+
+        if (sim != null) {
+            sim.requestSimAuthentication(Sim.APP_TYPE_USIM, nonce, owner);
+            return 1;
+        }
+
+        return 0;
     }
 }

@@ -1,22 +1,17 @@
 package com.android.imsstack.core.agents;
 
-import android.content.Context;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
 
-import com.android.imsstack.core.agents.AgentFactory;
-import com.android.imsstack.core.agents.agentif.ISIMState;
 import com.android.imsstack.core.agents.agentif.ITelephonySubscriber;
 import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.enabler.aos.AosFactory;
 import com.android.imsstack.enabler.aos.IAosInfo;
 import com.android.imsstack.enabler.aos.IAosInfo.PhoneNumberState;
-import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.system.IJNIUpCallEvt;
 import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.system.ISystem;
-import com.android.imsstack.system.SystemInterface;
+import com.android.imsstack.system.JNIUpCallEvtManager;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -169,8 +164,8 @@ public class PhoneNumberAgent implements IVoLteAgent {
         }
 
         private boolean isSimLoaded() {
-            ISIMState ssg = (ISIMState)AgentFactory.getAgent(AgentFactory.SIM_STATE, mSlotId);
-            return (ssg != null) ? ssg.isIccLoaded() : false;
+            SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, mSlotId);
+            return (sim != null) ? sim.isSimLoaded() : false;
         }
 
         private void postEmptyMsgDelayed(int event, int interval) {

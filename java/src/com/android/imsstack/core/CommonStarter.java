@@ -201,6 +201,8 @@ public class CommonStarter {
         setStateOnStart(slotId);
 
         notifyPackageReady(slotId);
+
+        AosFactory.getInstance().init(slotId);
     }
 
     public void stopAgents(int slotId) {
@@ -209,6 +211,8 @@ public class CommonStarter {
         setStateOnStop(slotId);
 
         notifyPackageStop(slotId);
+
+        AosFactory.getInstance().cleanup(slotId);
 
         Context context = AppContext.get();
 

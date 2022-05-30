@@ -72,4 +72,44 @@ public interface SystemCallInterface {
      */
     void removeIpSecSa(int ipSecId, int spi, int intFd, FileDescriptor socketFd);
     ////}
+
+    //// SIM interface {
+    /**
+     * Returns the ISIM state as a string.
+     *
+     * @return The ISIM state string.
+     */
+    String getIsimState();
+
+    /**
+     * Reads the file attributes of the specified ISIM record.
+     *
+     * @param fileId The file id to be read.
+     */
+    int readIsimFileAttributes(int fileId);
+
+    /**
+     * Reads the value of the specified ISIM record.
+     *
+     * @param fileId The file id to be read.
+     * @param index The index of the record for the given file.
+     */
+    int readIsimRecord(int fileId, int index);
+
+    /**
+     * Returns the response of ISIM authentication for the specified application type.
+     *
+     * @param nonce The authentication challenge data, base64 encoded.
+     * @param owner The owner of this request.
+     */
+    int requestIsimAuthentication(String nonce, long owner);
+
+    /**
+     * Returns the response of USIM authentication for the specified application type.
+     *
+     * @param nonce The authentication challenge data, base64 encoded.
+     * @param owner The owner of this request.
+     */
+    int requestUsimAuthentication(String nonce, long owner);
+    ////}
 }
