@@ -353,6 +353,8 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
 
     if (m_objContext.GetUpdatingInfo().IsAlerted())
     {
+        UpdateCallType();
+
         m_objContext.GetUiNotifier().SendUpdated(&(m_objContext.GetCallInfo()), &objMediaInfo,
                 m_objContext.GetSupplementaryService().GetServices());
 
@@ -370,8 +372,6 @@ CallStateName UpdatingState::HandleReceivedModificationSucceeded()
     {
         return CallStateName::ESTABLISHED;
     }
-
-    UpdateCallType();
 
     m_objContext.GetUiNotifier().SendUpdatedBy(&m_objContext.GetCallInfo(), &objMediaInfo,
             m_objContext.GetSupplementaryService().GetServices());
