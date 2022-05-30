@@ -113,27 +113,23 @@ public class ImsCallApp extends ImsApp {
 
             // __TEST_MODE__ :: call over WiFi
             if (callType == ImsCallProfile.CALL_TYPE_VOICE_N_VIDEO) {
-                if (mRegTracker.isCallVoiceSupported()
-                        && mRegTracker.isCallVoiceAndVideoRegistered()) {
+                if (mRegTracker.isCallVoiceAndVideoRegistered()) {
                     return true;
                 }
             } else if (callType == ImsCallProfile.CALL_TYPE_VOICE) {
-                if (mRegTracker.isCallVoiceSupported()
-                        && (mRegTracker.isCallVoiceRegistered()
+                if ((mRegTracker.isCallVoiceRegistered()
                             || mRegTracker.isCallVoiceAndVideoRegistered())) {
                     return true;
                 }
             } else if (callType == ImsCallProfile.CALL_TYPE_VIDEO_N_VOICE) {
-                if (mRegTracker.isCallVideoSupported()
-                        && mRegTracker.isCallVoiceAndVideoRegistered()) {
+                if (mRegTracker.isCallVoiceAndVideoRegistered()) {
                     return true;
                 }
             } else if ((callType == ImsCallProfile.CALL_TYPE_VT)
                     || (callType == ImsCallProfile.CALL_TYPE_VT_TX)
                     || (callType == ImsCallProfile.CALL_TYPE_VT_RX)
                     || (callType == ImsCallProfile.CALL_TYPE_VT_NODIR)) {
-                if (mRegTracker.isCallVideoSupported()
-                        && mRegTracker.isCallVideoRegistered()) {
+                if (mRegTracker.isCallVideoRegistered()) {
                     return true;
                 }
             }
@@ -339,8 +335,7 @@ public class ImsCallApp extends ImsApp {
             // FIXME : need to add another conditions? (LTE system info. ?)
             videoCallCapable = true;
         } else {
-            if (mRegTracker.isCallVideoSupported()
-                    && (mRegTracker.isCallVideoRegistered()
+            if ((mRegTracker.isCallVideoRegistered()
                         || mRegTracker.isCallVoiceAndVideoRegistered())) {
                 videoCallCapable = true;
             }
@@ -381,7 +376,6 @@ public class ImsCallApp extends ImsApp {
             volteCallCapable = true;
         } else {
             if ((mCallContext.hasAccessBearerCapabilitiesForHDCall() || isAccessBearerUnknown())
-                    && mRegTracker.isCallVoiceSupported()
                     && (mRegTracker.isCallVoiceRegistered()
                         || mRegTracker.isCallVoiceAndVideoRegistered())) {
                 volteCallCapable = true;
