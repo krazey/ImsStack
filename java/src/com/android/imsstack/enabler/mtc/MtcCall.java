@@ -17,7 +17,6 @@ import android.os.Message;
 import android.os.Parcel;
 import android.text.TextUtils;
 
-import com.android.imsstack.core.service.serviceif.IUSATService;
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.jni.JNIIms;
@@ -1854,12 +1853,6 @@ public class MtcCall extends Call implements ConferenceTracker {
 
             if (mListener != null) {
                 mListener.onCallHoldFailed(MtcCall.this, failInfo);
-            }
-
-            IUSATService usat = mContext.getUSATService();
-
-            if (usat != null) {
-                usat.sendActiveCallStateToUICC(IUSATService.DISCONNECT_REASON_HOLD_FAIL);
             }
         }
 

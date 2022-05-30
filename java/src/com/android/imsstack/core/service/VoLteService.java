@@ -19,7 +19,6 @@ import com.android.imsstack.core.agents.agentif.IGBA;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgent;
 import com.android.imsstack.core.agents.agentif.ILocationAgentManager;
-import com.android.imsstack.core.agents.agentif.IRegiProcess;
 import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.agentif.LocationPolicy;
@@ -35,11 +34,8 @@ import com.android.imsstack.core.config.ProviderInterface;
 import com.android.imsstack.core.service.CallInfoService;
 import com.android.imsstack.core.service.CallSettingService;
 import com.android.imsstack.core.service.CallStateNotificationService;
-import com.android.imsstack.core.service.ECallStateService;
-import com.android.imsstack.core.service.EPDGCallService;
 import com.android.imsstack.core.service.SCMService;
 import com.android.imsstack.core.service.SrvccStateService;
-import com.android.imsstack.core.service.USATService;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
@@ -198,9 +194,6 @@ public class VoLteService implements IVoLteService {
         mServics.put(TYPE_SRVCCSTATE, new SrvccStateService());
         mServics.put(TYPE_ACBSKIP, new SCMService());
         mServics.put(TYPE_CALLINFO, new CallInfoService());
-        mServics.put(TYPE_EDPGCALL, new EPDGCallService());
-        mServics.put(TYPE_ECALLSTATE, new ECallStateService());
-        mServics.put(TYPE_USAT, new USATService());
         mServics.put(TYPE_CALLSTATENOTIFICATION, new CallStateNotificationService());
 
         for (int type = TYPE_DEFAULT; type < TYPE_MAX; type++) {
@@ -513,11 +506,6 @@ public class VoLteService implements IVoLteService {
             if (callSettingService != null) {
                 callSettingService.registerForVoWIFISetChanged(null, -1, null);
             }
-
-            IRegiProcess rp = (IRegiProcess)getService(IVoLteService.TYPE_REGIPROCESS);
-            if (rp != null) {
-                rp.setHandleNetworkModeRequired(isHandlingNetworkModeRequired());
-            }
         }
 
         if (mBootHandler != null) {
@@ -730,20 +718,6 @@ public class VoLteService implements IVoLteService {
         }
 
         return false;
-    }
-
-    /**
-     * Add here if it requires to handle network mode for IMS de-registration
-     */
-    private boolean isHandlingNetworkModeRequired() {
-        if (ImsGlobal.isOperator(mSlotID, "VDF")
-                || ImsGlobal.isOperator(mSlotID, "DTAG")
-                || ImsGlobal.isOperatorCountry(mSlotID, "ORG", "FR")
-                || ImsGlobal.isOperatorCountry(mSlotID, "O2", "DE")) {
-            return false;
-        }
-
-        return true;
     }
 
     /**
