@@ -45,6 +45,27 @@
 
     <!-- Media -->
     <boolean name="audio_hold_with_direction_inactive_bool" value="true"/>
+    <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
+        <item value="1230"/>
+        <item value="1236"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
+    <!-- <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
+    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+    <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
+    <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <int-array name="imsvt.video_port_rtp_int_array" num="2">
+        <item value="1254"/>
+        <item value="1254"/>
+    </int-array>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

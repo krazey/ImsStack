@@ -11,4 +11,27 @@
     <boolean name="support_sdp_precondition_bool" value="false"/>
     <boolean name="sdp_negotiation_required_for_non_rpr_bool" value="true"/>
     <boolean name="session_timer_update_required_in_session_update_by_reinvite_bool" value="false"/>
+
+    <!-- Media -->
+    <int-array name="imsvoice.audio_port_rtp_int_array" num="2">
+        <item value="7010"/>
+        <item value="7012"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_channels_int" value="1"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_bool" value="true"/>
+    <boolean name="imsvoice.evs_codec_attribute_dtx_recv_bool" value="true"/>
+    <!-- <int name="imsvoice.evs_codec_attribute_hf_only_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_mode_switch_int" value="0"/> -->
+    <int-array name="imsvoice.evs_codec_attribute_bitrate_int_array" num="2">
+        <item value="3"/>
+        <item value="6"/>
+    </int-array>
+    <int name="imsvoice.evs_codec_attribute_bandwidth_int" value="5"/>
+    <!-- <int name="imsvoice.codec_attribute_cmr_int" value="0"/> -->
+    <!-- <int name="imsvoice.evs_codec_attribute_ch_aw_recv_int" value="1"/> -->
+    <int name="imsvoice.evs_amrwb_io_mode_set_int" value="7"/>
+    <int-array name="imsvt.video_port_rtp_int_array" num="2">
+        <item value="7020"/>
+        <item value="7022"/>
+    </int-array>
 </carrier_config>
