@@ -94,7 +94,8 @@ private:
     SIP_INT32 mbitMask;
     SipHeaderList* m_pBadHdrList;
 #endif
-    SIP_BOOL UpdateMessage(SIP_UINT32 nMsgOptions);
+    SIP_BOOL EncodeMsgBodyAndUpdateContentHdrs(
+            SIP_UINT32 nMsgOptions, SIP_CHAR** ppMsgBody, SIP_UINT32& nMsgLen);
 
 public:
     SipMessage();
@@ -105,8 +106,6 @@ public:
             SIP_UINT32* pSipMsgLength, /* in-out parameter*/ SIP_UINT32 nMsgOptions);
 
     SIP_BOOL DecCompleteMsg(SIP_CHAR* pMsgBuff, SIP_UINT32 nMsgBuffLen);
-
-    SIP_BOOL DecodeMsg(SIP_CHAR* pStartPt, SIP_UINT32 nMsgBuffLen);
 
     SIP_BOOL DecMultiPartBody(SIP_CHAR* pBuffStart, SIP_CHAR* pBuffEnd, SIP_UINT32 nMsgBuffLen);
 
@@ -153,7 +152,6 @@ public:
     SipHeaderList* GetHdrList(SIP_INT32 eHdrType);
     SIP_VOID SetContentLengthHdr(SIP_UINT32 nLen, SIP_UINT32 nMsgOptions);
     SIP_BOOL SetHdrList(SipHeaderList* pHeaderList);
-    SIP_BOOL SetMsgBodyList(SipMsgBodyList* pMsgBodyList);
     inline SIP_UINT16 GetMsgBodyCount() const
     {
         return (m_pMsgBodyList != SIP_NULL) ? m_pMsgBodyList->GetMsgBodyCount() : SIP_ZERO;
@@ -180,6 +178,5 @@ public:
     SIP_UINT16 GetStatusCode() const;
 
     SipHeaderBase* GetHeader(SIP_INT32 nType, SIP_UINT32 nIndex);
-    SIP_INT32 GetHeaderCount(SIP_INT32 nType);
 };
 #endif  //__SIP_MESSAGE_H__

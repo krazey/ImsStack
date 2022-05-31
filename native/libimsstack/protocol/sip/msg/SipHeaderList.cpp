@@ -276,17 +276,17 @@ void SipHeaderList::RemoveHdr(SIP_UINT32 nIndex)
  *****************************************************************************/
 SipHeaderBase* SipHeaderList::GetObj(SIP_UINT32 nIndex)
 {
-    if (m_headerList.GetSize() < nIndex)
+    if (m_headerList.GetSize() <= nIndex)
     {
         return SIP_NULL;
     }
 
     SipHeaderBase* pHdr = m_headerList.GetAt(nIndex);
-    if (pHdr == SIP_NULL)
+    if (pHdr != SIP_NULL)
     {
-        return SIP_NULL;
+        pHdr->increment();
     }
-    pHdr->increment();
+
     return pHdr;
 }
 

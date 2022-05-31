@@ -183,12 +183,6 @@ typedef enum _SipEn_BodyType
     ESIPINVALIDBODY
 } SipEn_BodyType;
 
-typedef enum _sipEn_StatusType
-{
-    SIPMSGWAITINGNO = 0,
-    SIPMSGWAITINGYES
-} sipEn_StatusType;
-
 /****************************************************************************
   Array Declaration
  *****************************************************************************/

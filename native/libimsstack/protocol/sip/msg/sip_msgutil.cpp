@@ -5,6 +5,8 @@
 #include "msg/SipMessage.h"
 #include <ctype.h>
 
+#define NAME_CONTENT_TRANSFER_ENCODING "Content-Transfer-Encoding"
+
 SIPHdrAccess* SIPHdrAccess::s_pInstance = SIP_NULL;
 
 SIP_CHAR gaszSipHdr[][SIP_MAX_HDR_LEN] = {
@@ -326,6 +328,139 @@ SIP_VOID SipEnc_UpdateCurrPos(IN_OUT SIP_CHAR** ppMsgBuffer)
     {
         (*ppMsgBuffer)++;
     }
+}
+
+/******************************************************************************
+ * Function name      : sipFindCRLF
+ *
+ * Description     :
+ *
+ * Preconditions      :
+ *
+ * Side Effects      : none
+ *****************************************************************************/
+SIP_BOOL sipFindCrlf(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR** ppTempLoc)
+{
+    SIP_CHAR* pNext1Pt = pStartPt + SIP_ONE;
+    while (pNext1Pt <= pEndPt)
+    {
+        if (IS_CRLF(*pStartPt, *pNext1Pt))
+        {
+            *ppTempLoc = pStartPt - SIP_ONE;
+            return SIP_TRUE;
+        }
+        pStartPt++;
+        pNext1Pt++;
+    }
+    return SIP_FALSE;
+}
+
+/******************************************************************************
+ * Function name      : sipFindBodyEnd
+ *
+ * Description     :
+ *
+ * Preconditions      :
+ *
+ * Side Effects      : none
+ *****************************************************************************/
+SIP_CHAR* sipFindBodyEnd(
+        SIP_CHAR* pStartPt, SIP_CHAR* pEndPt, SIP_CHAR* pszBoundary, SIP_BOOL& bBodyEnd)
+{
+    if (pStartPt == SIP_NULL)
+    {
+        return SIP_NULL;
+    }
+
+    SIP_UINT16 nBoundaryLen = SipPf_Strlen(pszBoundary);
+    SIP_CHAR* pNextPt = pStartPt + SIP_ONE;
+    SIP_CHAR* pTempEndPt = pStartPt + nBoundaryLen + SIP_TWO;
+    SIP_CHAR* pEndNext = pTempEndPt + SIP_ONE;
+
+    while (pEndNext <= pEndPt)
+    {
+        if (IS_HYPHEN(*pStartPt) && IS_HYPHEN(*pNextPt))
+        {
+            SIP_CHAR* pTempStartPt = pStartPt + SIP_TWO;
+            if (SipPf_Strncmp(pTempStartPt, pszBoundary, nBoundaryLen) == SIP_ZERO)
+            {
+                if (IS_HYPHEN(*pTempEndPt) && IS_HYPHEN(*pEndNext))
+                {
+                    bBodyEnd = SIP_TRUE;
+                }
+
+                // Remove preceding CRLF: CRLF--boundary
+                // Start pointer: first '-'
+                return (pStartPt - SIP_TWO);
+            }
+        }
+        pStartPt++;
+        pNextPt = pStartPt + SIP_ONE;
+        pTempEndPt = pStartPt + nBoundaryLen + SIP_TWO;
+        pEndNext = pTempEndPt + SIP_ONE;
+    }
+    return SIP_NULL;
+}
+
+/*****************************************************************************
+ * Function name      : sipGetMIMEHdrType
+ *
+ * Description        :
+ *
+ * Preconditions      :
+ *
+ * Side Effects          : none
+ *****************************************************************************/
+SIP_INT32 sipGetMimeHdrType(SIP_CHAR* pszHdrName)
+{
+    if (pszHdrName == SIP_NULL)
+    {
+        return SipHeaderBase::UNKNOWN;
+    }
+
+    switch (pszHdrName[0])
+    {
+        case 'c':
+        case 'C':
+            if (SipPf_Stricmp(pszHdrName, "c") == 0)
+            {
+                return SipHeaderBase::CONTENT_TYPE;
+            }
+            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_TYPE]) == 0)
+            {
+                return SipHeaderBase::CONTENT_TYPE;
+            }
+            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_LENGTH]) == 0)
+            {
+                return SipHeaderBase::CONTENT_LENGTH;
+            }
+            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_DISPOSITION]) == 0)
+            {
+                return SipHeaderBase::CONTENT_DISPOSITION;
+            }
+            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_ENCODING]) == 0)
+            {
+                return SipHeaderBase::CONTENT_ENCODING;
+            }
+            else if (SipPf_Stricmp(pszHdrName, gaszSipHdr[SipHeaderBase::CONTENT_LANGUAGE]) == 0)
+            {
+                return SipHeaderBase::CONTENT_LANGUAGE;
+            }
+            else if (SipPf_Stricmp(pszHdrName, NAME_CONTENT_TRANSFER_ENCODING) == 0)
+            {
+                return SipHeaderBase::CONTENT_ENCODING;
+            }
+            break;
+
+            /*Apply same for all other headers*/
+
+        default:
+            break;
+
+            /*treat as unknown header*/
+    }
+    return SipHeaderBase::UNKNOWN;
+    /* go for unknown header check*/
 }
 
 /*****************************************************************************

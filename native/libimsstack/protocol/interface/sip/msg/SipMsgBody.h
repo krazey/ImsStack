@@ -37,9 +37,6 @@ public:
     SIP_BOOL DecodeMIMEHdrs(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen);
 
     SipHeaderBase* getNewMIMEHdrObj(SIP_INT32 eHdrType);
-    SipHeaderBase* GetContentType();
-    SipHeaderBase* GetContentEncoding();
-    SipHeaderBase* GetContentDisposition();
 
     SipHeaderBase* GetUnknownHdr(SIP_UINT32 nIndex);
     inline SIP_UINT32 GetUnknownHdrCount() const
@@ -55,7 +52,7 @@ public:
 /*Class for message body list*/
 class SipMsgBodyList : public SipRefBase
 {
-    SipVector<SipMsgBody*> m_objBodyList;  // SipMsgBody
+    SipVector<SipMsgBody*> m_objBodyList;
 
 public:
     SipMsgBodyList();
@@ -67,7 +64,8 @@ public:
 
     inline SIP_UINT32 GetMsgBodyCount() const { return m_objBodyList.GetSize(); }
 
-    SIP_UINT32 GetTotalBodyLen(SIP_CHAR* pszBoundary = SIP_NULL);
+    SIP_BOOL GetEncodedMessageBody(
+            SIP_CHAR** ppMsgBufer, SIP_UINT32& nMsgLen, SIP_CHAR* pszBoundary = SIP_NULL);
 
     SIP_BOOL EncodeBody(SIP_CHAR** ppMsgBuffCurrPos, SIP_CHAR* pszBoundary);
 
@@ -117,14 +115,13 @@ public:
     ~SipMsgBody();
 
     /*Function for encoding*/
-
-    SIP_BOOL EncodeMIMEHdrs(SIP_CHAR** ppCurrPos);
-
     SIP_BOOL EncodeSingleMsgBody(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL EncodeMIMEMsgBody(SIP_CHAR** ppCurrPos);
 
     SIP_BOOL EncodeMessageSummaryMsgBody(SIP_CHAR** ppCurrPos);
+
+    SIP_BOOL EncodeBody(SIP_CHAR** ppCurrPos);
 
     /*Function for decoding*/
     SIP_BOOL DecodeSingleMsgBody(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
@@ -142,6 +139,8 @@ public:
     /*Get Methods*/
 
     inline SIP_INT32 GetBodyType() const { return m_eBodyType; }
+
+    SipMsgBodyList* GetMessageBodyList();
 
     SipContentTypeHeader* GetContentType();
 
@@ -169,12 +168,17 @@ public:
 class SipSummaryLine;
 class SipMessageSummary : public SipRefBase
 {
-    sipEn_StatusType m_dStatus;
+    SIP_INT32 m_nStatus;
     SipAddrSpec* m_pAddrSpec;
     SipVector<SipSummaryLine*> m_objSummaryLineList; /* List of SummaryLine Class*/
     SipVector<SipNameValue*> m_objNameValueList;     // List of Name Values
 
 public:
+    enum
+    {
+        MSG_WAITING_NO = 0,
+        MSG_WAITING_YES
+    };
     SipMessageSummary();
     SipMessageSummary(const SipMessageSummary& objMessageSummary);
     virtual ~SipMessageSummary();
@@ -201,6 +205,7 @@ public:
     inline SIP_INT32 GetOldMessages() const { return oldMessages; }
     inline SIP_INT32 GetNewUrgentMessages() const { return newUrgentMessages; }
     inline SIP_INT32 GetOldUrgentMessages() const { return oldUrgentMessages; }
+    SIP_BOOL EncodeSummaryLine(SIP_CHAR** ppCurrPos);
     SIP_BOOL DecodeSummaryLine(SIP_CHAR* pStartPt, SIP_CHAR* pEndPt);
 };
 
