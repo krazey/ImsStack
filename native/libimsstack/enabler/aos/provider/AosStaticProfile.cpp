@@ -37,6 +37,8 @@ PUBLIC VIRTUAL AosStaticProfile::~AosStaticProfile() {}
 PUBLIC
 void AosStaticProfile::SetProflieType(IN Type eType)
 {
+    m_eProfileType = eType;
+
     if (eType == Type::NORMAL)
     {
         m_strId = AString("aos_normal");
