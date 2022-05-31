@@ -33,6 +33,7 @@
         <item value="421"/>
         <item value="422"/>
     </int-array>
+    <boolean name="ignore_vops_for_volte_enable_bool" value="false"/>
     <!-- Uce -->
     <int name="imsuce.publish_refresh_ratio_int" value="85"/>
     <boolean name="imsuce.subscribe_independent_of_publish_bool" value="true"/>
