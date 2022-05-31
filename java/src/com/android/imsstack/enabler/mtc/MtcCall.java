@@ -1187,9 +1187,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         removeCallExtra(EXTRA_VMS);
         removeCallExtra(EXTRA_CDIV_CAUSE);
         removeCallExtra(EXTRA_CNA);
-        removeCallExtra(EXTRA_CNA_EXT);
         removeCallExtra(EXTRA_CDIV_HISTORY);
-        removeCallExtra(EXTRA_MCID);
     }
 
     private void sendRequest(Parcel parcel) {
@@ -2256,12 +2254,8 @@ public class MtcCall extends Call implements ConferenceTracker {
 
         SuppInfoUtils.addKey(SuppInfo.TYPE_CNAP, EXTRA_CNA);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CNAP, SuppInfoUtils.TYPE_STRING);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_CNAPEX, EXTRA_CNA_EXT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_CNAPEX, SuppInfoUtils.TYPE_STRING);
         SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_HISTORY, SuppInfoUtils.TYPE_STRING);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_MCID, EXTRA_MCID);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_MCID, SuppInfoUtils.TYPE_STRING);
 
         // The below things are not managed for extra call information
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CW, SuppInfoUtils.TYPE_BOOLEAN);

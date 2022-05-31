@@ -88,10 +88,8 @@ public class Call implements Closeable {
     public static final String EXTRA_CNA = "cna";
     public static final String EXTRA_USSD = "ussd";
     // extensions
-    public static final String EXTRA_CNA_EXT = "cna_ext";
     public static final String EXTRA_CDIV_HISTORY = "cdiv_history";
     public static final String EXTRA_CONFERENCE_USER_ID = "conference_user_id";
-    public static final String EXTRA_MCID = "mcid";
 
     /**
      * Internal usages

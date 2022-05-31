@@ -24,7 +24,6 @@ import android.widget.Toast;
 import com.android.imsstack.R;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.MediaInfo;
-import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.util.ImsLog;
@@ -95,10 +94,7 @@ public final class ImsVideoCallSession implements IVideoCallSession {
 
     @Override
     public boolean isVrbtEnabled() {
-        final ImsCallProfile callProfile = getCallProfile();
-        return (callProfile != null)
-                ? callProfile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_VRBT, false)
-                : false;
+        return false;
     }
 
     @Override

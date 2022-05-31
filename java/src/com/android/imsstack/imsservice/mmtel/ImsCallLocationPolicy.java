@@ -235,11 +235,8 @@ public final class ImsCallLocationPolicy implements ICallLocationPolicy {
 
     private static boolean isWifiCall(IBaseContext context, ImsCallProfile profile) {
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            if (ImsCallUtils.isEmergencyCallViaWfc(profile)) {
-                return true;
-            } else {
-                return false;
-            }
+            //To-Do:- Need to find the way Emergency call Over VoWiFi
+            return true;
         } else if (ImsRegUtils.isImsRegisteredOnWifi(context)) {
             return true;
         }

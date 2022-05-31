@@ -18,7 +18,6 @@ import android.telephony.ims.ImsReasonInfo;
 
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.agents.ImsWakeLock;
-import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.enabler.mtc.CallTracker;
 import com.android.imsstack.enabler.mtc.ConferenceInfoHelper;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
@@ -120,16 +119,9 @@ public class ImsCallManager {
 
             // ECBM
             checkAndExitEcbm();
-
-            if (ImsCallUtils.isEmergencyCallViaWfc(profile)) {
-                sessionAttributes |= MtcCall.FLAG_WIFI_EMERGENCY;
-                wifi = true;
-            } else if (isNormalCallRequiredForEmergencyCall(profile)) {
-                emergency = false;
-                profile.setCallExtraBoolean(ImsCallProfile.EXTRA_EMERGENCY_CALL, true);
-            } else if (ImsCallUtils.isEmergencyCallRedialed(profile)) {
-                offline = true;
-            }
+             //To-Do:- Need to find the way Emergency call Over VoWiFi
+                //sessionAttributes |=  MtcCall.FLAG_WIFI_EMERGENCY;
+                //wifi = true;
         } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NORMAL) {
             if (profile.getCallExtraInt(ImsCallProfile.EXTRA_DIALSTRING, -1)
                     == ImsCallProfile.DIALSTRING_USSD) {
@@ -139,8 +131,6 @@ public class ImsCallManager {
             if (ImsRegUtils.isImsRegisteredOnWifi(mCallContext)) {
                 wifi = true;
             }
-        } else if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_NONE) {
-            offline = true;
         }
 
         if (ImsCallUtils.isVideoCall(profile.getCallType())) {
@@ -314,19 +304,6 @@ public class ImsCallManager {
         } while (newId == 0);
 
         return newCallId;
-    }
-
-    private boolean isNormalCallRequiredForEmergencyCall(ImsCallProfile profile) {
-        IDCNetWatcher dcnw = mCallContext.getDCNetWatcher();
-        boolean is3GNetwork = (dcnw != null) ? dcnw.is3G() : false;
-
-        if (ImsCallUtils.isVideoCall(profile.getCallType())
-                && is3GNetwork
-                && ImsGlobal.isCountry(mCallContext.getSlotId(), "KR")) {
-            return true;
-        }
-
-        return false;
     }
 
     private boolean isCallOverWifiSupported() {

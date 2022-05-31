@@ -34,8 +34,6 @@ import com.android.imsstack.enabler.mtc.MtcCallUtils;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.dialogs.DialogsInfo;
-import com.android.imsstack.external.ims.ImsCallProfileEx;
-import com.android.imsstack.external.ims.ImsConferenceStateEx;
 import com.android.imsstack.external.ims.ImsDialog;
 import com.android.imsstack.external.ims.ImsDialogState;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
@@ -100,6 +98,21 @@ public class ImsCallUtils {
     private static final String SOS_SERVICE_URN_MARINE = "urn:service:sos.marine";
     private static final String SOS_SERVICE_URN_MOUNTAIN = "urn:service:sos.mountain";
     private static final String SOS_SERVICE_URN_GENERIC = "urn:service:sos";
+    //To-Do: Need to check AOSP behaviour.
+    // for supplementary Service
+    public static final String EXTRA_CDIV_CAUSE = "cdiv_cause";
+    //  for Conference disconnect cause
+    public static final String DISCONNECTED_CAUSE = "disconnected_cause";
+    // for supplementary Service
+    public static final String EXTRA_CDIV_HISTORY = "cdiv_history";
+    //  rtt_avail : Indicates if the session is able to upgrade rtt during voice call
+    public static final String EXTRA_RTT_AVAIL = "rtt_avail";
+    /*subaddress : Indicates the sub-address when dialing the original number with *XXX.
+     *      09012341234*123*456
+     *      original-dialed-number: 09012341234
+     *      subaddress: 123*456
+     */
+    public static final String EXTRA_SUBADDRESS = "subaddress";
 
     private static final Hashtable<Integer, Integer> sMtcReasonToImsReason;
     private static final Hashtable<Integer, Integer> sReasonToSIPStatusCode;
@@ -173,8 +186,6 @@ public class ImsCallUtils {
                 MtcCallInfo.isConference(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 MtcCallInfo.isVideoCapable(ci));
-        profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_CONFERENCE_EVENT,
-                MtcCallInfo.isConferenceEventSupported(ci));
 
         boolean isAudioHD = MtcCallUtils.isAudioHDQuality(mi.AQuality);
         boolean isAudioUHD = MtcCallUtils.isAudioUHDQuality(mi.AQuality);
@@ -186,7 +197,7 @@ public class ImsCallUtils {
         }
 
         if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_RTT_AVAIL, ci.rttCapable);
+            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL, ci.rttCapable);
         }
 
         return profile;
@@ -260,7 +271,7 @@ public class ImsCallUtils {
         participant.putString(ImsConferenceState.ENDPOINT, endpoint);
         participant.putString(ImsConferenceState.DISPLAY_TEXT, displayText);
         participant.putInt(ImsConferenceState.SIP_STATUS_CODE, sipStatusCode);
-        participant.putInt(ImsConferenceStateEx.DISCONNECTED_CAUSE, disconnectedCause);
+        participant.putInt(ImsCallUtils.DISCONNECTED_CAUSE, disconnectedCause);
 
         return participant;
     }
@@ -355,22 +366,6 @@ public class ImsCallUtils {
             if (!TextUtils.isEmpty(cna)) {
                 si.addService_str(SuppInfo.TYPE_CNAP, cna);
             }
-
-            // KR operators: first 16 bytes of CNA
-            String cna_ext = getCallExtra(profile, oemExtras,
-                    ImsCallProfileEx.EXTRA_CNA_EXT, "");
-
-            if (!TextUtils.isEmpty(cna_ext)) {
-                si.addService_str(SuppInfo.TYPE_CNAPEX, cna_ext);
-            }
-        }
-
-        // KR operators: MCID
-        String mcid = getCallExtra(profile, oemExtras, ImsCallProfileEx.EXTRA_MCID, "");
-
-        if (!TextUtils.isEmpty(mcid)) {
-            si.addService_bool(SuppInfo.TYPE_MMC, true);
-            si.addService_str(SuppInfo.TYPE_MCID, mcid);
         }
 
         // "sos" URN for IMS emergency call
@@ -451,28 +446,10 @@ public class ImsCallUtils {
     }
 
     public static int getDisconnectedCauseFromUserStatus(int status) {
-        switch (status) {
-        case UsersInfo.USER_STATUS_REJECT:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_REJECT;
-        case UsersInfo.USER_STATUS_BUSY:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_BUSY;
-        case UsersInfo.USER_STATUS_SERVERERROR:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_SERVERERROR;
-        case UsersInfo.USER_STATUS_NOTSUPPORTED:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_NOTSUPPORTED;
-        case UsersInfo.USER_STATUS_NOTACCEPTABLE:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_NOTACCEPTABLE;
-        case UsersInfo.USER_STATUS_NOANSWER:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_NOANSWER;
-        case UsersInfo.USER_STATUS_NOTREACHABLE:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_NOTREACHABLE;
-        case UsersInfo.USER_STATUS_LOWBATTERY:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_LOWBATTERY;
-        case UsersInfo.USER_STATUS_FORBIDDEN:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_FORBIDDEN;
-        case UsersInfo.USER_STATUS_INTSERVERERROR:
-            return ImsConferenceStateEx.DISCONNECTED_CAUSE_INTSERVERERROR;
-        default:
+        if (status >= UsersInfo.USER_STATUS_REJECT
+                && status <= UsersInfo.USER_STATUS_INTSERVERERROR) {
+            return status;
+        } else {
             return 0;
         }
     }
@@ -628,19 +605,6 @@ public class ImsCallUtils {
         return false;
     }
 
-    public static boolean isEmergencyCallViaWfc(ImsCallProfile profile) {
-        Bundle oemExtras = profile.getCallExtras().getBundle(ImsCallProfile.EXTRA_OEM_EXTRAS);
-        boolean wifiCall = getCallExtraBoolean(profile,
-                oemExtras, ImsCallProfileEx.EXTRA_WIFI_CALL, false);
-
-        return wifiCall;
-    }
-
-    public static boolean isEmergencyCallRedialed(ImsCallProfile profile) {
-        return getCallExtraBooleanFromOemExtras(profile,
-                ImsCallProfileEx.EXTRA_RAT_CHANGED, false);
-    }
-
     public static boolean isHoldMediaOnVideoCall(ICallContext context,
             ImsCallProfile profile, CallInfo ci, MediaInfo mi) {
         if ((profile == null) || (ci == null)) {
@@ -770,12 +734,10 @@ public class ImsCallUtils {
                 MtcCallInfo.isConference(ci));
         profile.setCallExtraBoolean(ImsCallProfile.EXTRA_CALL_MODE_CHANGEABLE,
                 MtcCallInfo.isVideoCapable(ci));
-        profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_CONFERENCE_EVENT,
-                MtcCallInfo.isConferenceEventSupported(ci));
         profile.setCallExtra(ImsCallProfile.EXTRA_USSD,
                 MtcCallInfo.isUssi(ci) ? "true" : "false");
         if (CallFeature.isRttSupported(context.getSlotId())) {
-            profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_RTT_AVAIL,
+            profile.setCallExtraBoolean(ImsCallUtils.EXTRA_RTT_AVAIL,
                 MtcCallInfo.isRttCapable(ci));
         }
 
@@ -826,10 +788,13 @@ public class ImsCallUtils {
                 }
             } else if (MtcCallUtils.isSuppInfoInt(ss.type)) {
                 String key = getCallExtraNameForInt(context, ss.type);
-
-                if (key != null) {
-                    profile.setCallExtraInt(key,
-                            getCallExtraValueFromSuppInfo(ss.type, ss.intValue));
+                if (ss.type == SuppInfo.TYPE_CALLING_NUM_VERIFICATION) {
+                    int verStat =  getOIVerStatusFromCallingNumVerificationType(ss.intValue);
+                    if (verStat != -1) {
+                        profile.setCallerNumberVerificationStatus(verStat);
+                    }
+                } else {
+                    profile.setCallExtraInt(key, ss.intValue);
                 }
             } else if (MtcCallUtils.isSuppInfoString(ss.type)) {
                 String key = getCallExtraNameForString(context, ss.type);
@@ -838,21 +803,6 @@ public class ImsCallUtils {
                     profile.setCallExtra(key, ss.strValue);
                 }
             }
-        }
-
-        if (mmcPresent && profile.getCallExtra(ImsCallProfileEx.EXTRA_MCID, null) == null) {
-            // LGU+ case: "19;CNAP" / "30;CNAP2"
-            if (ImsGlobal.isOperator(context.getSlotId(), "LGU")) {
-                profile.setCallExtra(ImsCallProfileEx.EXTRA_MCID, "30;CNAP2");
-            }
-        }
-
-        // STIR/SHAKEN
-        int verStat = getVerificationStatusFromOIVerStatus(
-                profile.getCallExtraInt(ImsCallProfileEx.EXTRA_OI_VER_STATUS, -1));
-
-        if (verStat != -1) {
-            profile.setCallerNumberVerificationStatus(verStat);
         }
     }
 
@@ -865,14 +815,6 @@ public class ImsCallUtils {
             ImsCallProfile profile, final CallInfo callInfo, final SuppInfo suppInfo) {
         int callType = getProfileCallTypeFromCallInfo(callInfo);
         profile.updateCallType(new ImsCallProfile(profile.getServiceType(), callType));
-
-        // If MTC enabler sends necessary supp. services on session progressing,
-        // then use updateCallProfileFromSuppInfo(...).
-        for (SuppInfo.SuppService ss : suppInfo.objSuppService) {
-            if (ss.type == SuppInfo.TYPE_VRBT) {
-                profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_VRBT, ss.boolValue);
-            }
-        }
     }
 
     public static boolean isEmergencyPdnUsedForEmergencyCallViaWfc(ICallContext context) {
@@ -917,8 +859,6 @@ public class ImsCallUtils {
         case SuppInfo.TYPE_MMC:
             // no-op
             break;
-        case SuppInfo.TYPE_GTT:
-            return ImsCallProfileEx.EXTRA_GTT;
         default:
             // no-op
             break;
@@ -929,13 +869,11 @@ public class ImsCallUtils {
 
     private static String getCallExtraNameForInt(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-        case SuppInfo.TYPE_CDIV_CAUSE:
-            return ImsCallProfileEx.EXTRA_CDIV_CAUSE;
-        case SuppInfo.TYPE_CALLING_NUM_VERIFICATION:
-            return ImsCallProfileEx.EXTRA_OI_VER_STATUS;
-        default:
-            // no-op
-            break;
+            case SuppInfo.TYPE_CDIV_CAUSE:
+                return ImsCallUtils.EXTRA_CDIV_CAUSE;
+            default:
+                // no-op
+                break;
         }
 
         return ImsSuppInfoUtils.getCallExtraNameForInt(context, suppInfo);
@@ -943,48 +881,35 @@ public class ImsCallUtils {
 
     private static String getCallExtraNameForString(ICallContext context, int suppInfo) {
         switch (suppInfo) {
-        case SuppInfo.TYPE_CNAP:
-            return ImsCallProfile.EXTRA_CNA;
-        case SuppInfo.TYPE_CNAPEX:
-            return ImsCallProfileEx.EXTRA_CNA_EXT;
-        case SuppInfo.TYPE_CDIV_HISTORY:
-            return ImsCallProfileEx.EXTRA_CDIV_HISTORY;
-        case SuppInfo.TYPE_MCID:
-            return ImsCallProfileEx.EXTRA_MCID;
-        default:
-            // no-op
-            break;
+            case SuppInfo.TYPE_CNAP:
+                return ImsCallProfile.EXTRA_CNA;
+            case SuppInfo.TYPE_CDIV_HISTORY:
+                return ImsCallUtils.EXTRA_CDIV_HISTORY;
+            default:
+                // no-op
+                break;
         }
 
         return ImsSuppInfoUtils.getCallExtraNameForString(context, suppInfo);
     }
 
-    private static int getCallExtraValueFromSuppInfo(int type, int value) {
-        switch (type) {
-        case SuppInfo.TYPE_CALLING_NUM_VERIFICATION:
-            return getOIVerStatusFromCallingNumVerificationType(value);
-        default:
-            return value;
-        }
-    }
-
     private static int getDialogStateFromDialogsInfo(int state) {
         switch (state) {
-        case DialogsInfo.DIALOG_STATE_TRYING:
-            return ImsDialog.State.STATE_TRYING;
-        case DialogsInfo.DIALOG_STATE_PROCEEDING:
-            return ImsDialog.State.STATE_PROCEEDING;
-        case DialogsInfo.DIALOG_STATE_EARLY:
-            return ImsDialog.State.STATE_EARLY;
-        case DialogsInfo.DIALOG_STATE_CONFIRMED:
-            return ImsDialog.State.STATE_CONFIRMED;
-        case DialogsInfo.DIALOG_STATE_TERMINATED:
-            return ImsDialog.State.STATE_TERMINATED;
-        case DialogsInfo.DIALOG_STATE_ONHOLD:
-            return ImsDialog.State.STATE_ON_HOLD;
-        case DialogsInfo.DIALOG_STATE_IDLE: // FALL-THROUGH
-        default:
-            return ImsDialog.State.STATE_IDLE;
+            case DialogsInfo.DIALOG_STATE_TRYING:
+                return ImsDialog.State.STATE_TRYING;
+            case DialogsInfo.DIALOG_STATE_PROCEEDING:
+                return ImsDialog.State.STATE_PROCEEDING;
+            case DialogsInfo.DIALOG_STATE_EARLY:
+                return ImsDialog.State.STATE_EARLY;
+            case DialogsInfo.DIALOG_STATE_CONFIRMED:
+                return ImsDialog.State.STATE_CONFIRMED;
+            case DialogsInfo.DIALOG_STATE_TERMINATED:
+                return ImsDialog.State.STATE_TERMINATED;
+            case DialogsInfo.DIALOG_STATE_ONHOLD:
+                return ImsDialog.State.STATE_ON_HOLD;
+            case DialogsInfo.DIALOG_STATE_IDLE: // FALL-THROUGH
+            default:
+                return ImsDialog.State.STATE_IDLE;
         }
     }
 
@@ -1010,55 +935,40 @@ public class ImsCallUtils {
 
     private static int getOIRTypeFromTIPType(int tip) {
         switch (tip) {
-        case SuppInfo.TIP_RESTRICTED:
-            return ImsCallProfile.OIR_PRESENTATION_RESTRICTED;
-        case SuppInfo.TIP_IDENTITY:
-            return ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
-        default:
-            return ImsCallProfile.OIR_DEFAULT;
+            case SuppInfo.TIP_RESTRICTED:
+                return ImsCallProfile.OIR_PRESENTATION_RESTRICTED;
+            case SuppInfo.TIP_IDENTITY:
+                return ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED;
+            default:
+                return ImsCallProfile.OIR_DEFAULT;
         }
     }
 
     private static int getOIVerStatusFromCallingNumVerificationType(int cnv) {
         switch (cnv) {
-        case SuppInfo.CALLING_NUM_VERSTAT_VERIFIED:
-            return ImsCallProfileEx.OI_VER_STATUS_TN_VALIDATION_PASSED;
-        case SuppInfo.CALLING_NUM_VERSTAT_NOT_VERIFIED:
-            return ImsCallProfileEx.OI_VER_STATUS_TN_VALIDATION_FAILED;
-        case SuppInfo.CALLING_NUM_VERSTAT_NONE:
-            return ImsCallProfileEx.OI_VER_STATUS_NO_TN_VALIDATION;
-        default:
-            return (-1);
+            case SuppInfo.CALLING_NUM_VERSTAT_VERIFIED:
+                return ImsCallProfile.VERIFICATION_STATUS_PASSED;
+            case SuppInfo.CALLING_NUM_VERSTAT_NOT_VERIFIED:
+                return ImsCallProfile.VERIFICATION_STATUS_FAILED;
+            case SuppInfo.CALLING_NUM_VERSTAT_NONE:
+                return ImsCallProfile.VERIFICATION_STATUS_NOT_VERIFIED;
+            default:
+                return (-1);
         }
     }
 
     private static int getSuppInfoTypeForOIR(int oir) {
         switch (oir) {
-        case ImsCallProfile.OIR_DEFAULT:
-            return SuppInfo.CALLERID_NETWORK;
-        case ImsCallProfile.OIR_PRESENTATION_RESTRICTED:
-            return SuppInfo.CALLERID_RESTRICTED;
-        case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
-            return SuppInfo.CALLERID_IDENTITY;
-        default:
-            return (-1);
+            case ImsCallProfile.OIR_DEFAULT:
+                return SuppInfo.CALLERID_NETWORK;
+            case ImsCallProfile.OIR_PRESENTATION_RESTRICTED:
+                return SuppInfo.CALLERID_RESTRICTED;
+            case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
+                return SuppInfo.CALLERID_IDENTITY;
+            default:
+                return (-1);
         }
     }
-
-    private static int getVerificationStatusFromOIVerStatus(int status) {
-        switch (status) {
-        case ImsCallProfileEx.OI_VER_STATUS_TN_VALIDATION_PASSED:
-            return ImsCallProfile.VERIFICATION_STATUS_PASSED;
-        case ImsCallProfileEx.OI_VER_STATUS_TN_VALIDATION_FAILED:
-            return ImsCallProfile.VERIFICATION_STATUS_FAILED;
-        case ImsCallProfileEx.OI_VER_STATUS_NO_TN_VALIDATION:
-            return ImsCallProfile.VERIFICATION_STATUS_NOT_VERIFIED;
-        default:
-            return (-1);
-        }
-    }
-
-
 
     static {
         // Reason codes: from MtcCall to ImsCall

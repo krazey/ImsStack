@@ -17,7 +17,6 @@ import android.telephony.ims.ImsCallProfile;
 import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.enabler.mtc.SuppInfo;
-import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.util.SODConfig;
 
@@ -83,7 +82,7 @@ public final class ImsSuppInfoUtils {
         public static void addCallExtraForApp(final SuppInfo suppInfo,
                 ImsCallProfile outProfile) {
             setCallExtraInt(suppInfo, SuppInfo.TYPE_CDIV_CAUSE,
-                    ImsCallProfileEx.EXTRA_CDIV_CAUSE, outProfile);
+                    ImsCallUtils.EXTRA_CDIV_CAUSE, outProfile);
         }
 
         public static void addSuppInfoForIms(final ImsCallProfile profile,
@@ -102,7 +101,7 @@ public final class ImsSuppInfoUtils {
 
             // Checks if subaddress is set or not
             boolean isSubaddress = getCallExtraBoolean(
-                    oemCallExtras, ImsCallProfileEx.EXTRA_SUBADDRESS, false);
+                    oemCallExtras, ImsCallUtils.EXTRA_SUBADDRESS, false);
 
             if (isSubaddress) {
                 outSuppInfo.addService_bool(SUPP_TYPE_SUBADDRESS, true);

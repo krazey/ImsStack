@@ -54,7 +54,6 @@ import com.android.imsstack.enabler.mtc.MtcConference;
 import com.android.imsstack.enabler.mtc.SuppInfo;
 import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.enabler.mtc.reg.ImsServiceState;
-import com.android.imsstack.external.ims.ImsCallProfileEx;
 import com.android.imsstack.imsservice.mmtel.base.ICallContext;
 import com.android.imsstack.imsservice.mmtel.base.ICallLocationPolicy;
 import com.android.imsstack.imsservice.mmtel.base.ISrvccStateListener;
@@ -1886,8 +1885,10 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 ImsCallProfile.EXTRA_CALL_NETWORK_TYPE, ImsCallUtils.VAR_TYPE_INT, profile);
 
         // Calling number verification status
-        ImsCallUtils.setCallExtraIfPresent(mCallProfile,
-                ImsCallProfileEx.EXTRA_OI_VER_STATUS, ImsCallUtils.VAR_TYPE_INT, profile);
+        int verStat = mCallProfile.getCallerNumberVerificationStatus();
+        if (verStat != -1) {
+            profile.setCallerNumberVerificationStatus(verStat);
+        }
 
         // Operator specific
         // SKT
@@ -1906,7 +1907,7 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // ATT
         ImsCallUtils.setCallExtraIfPresent(mCallProfile,
-            ImsCallProfileEx.EXTRA_CDIV_CAUSE, ImsCallUtils.VAR_TYPE_INT, profile);
+                ImsCallUtils.EXTRA_CDIV_CAUSE, ImsCallUtils.VAR_TYPE_INT, profile);
     }
 
     private void setRttGttInfo(MediaInfo mi, boolean isRttOn) {
@@ -2035,16 +2036,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
         // FEATURE_CALL_PULL
         String actualCallee = null;
-        String dialogId = ImsCallUtils.getCallExtraFromOemExtras(
-                profile, ImsCallProfileEx.EXTRA_DIALOG_ID, null);
-
-        if (!TextUtils.isEmpty(dialogId)) {
-            log("startInternal :: callee is changed - "
-                    + ImsLog.hiddenString(callee) + " >> " + dialogId);
-            actualCallee = callee;
-            callee = dialogId;
-        }
-
         boolean isRttOn = false;
         if (CallFeature.isRttSupported(mCallContext.getSlotId())) {
             isRttOn = profile.getMediaProfile().isRttCall();
@@ -3157,10 +3148,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
 
     private int getApnType(ImsCallProfile profile) {
         if (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY) {
-            if (ImsCallUtils.isEmergencyCallViaWfc(mLocalCallProfile)) {
-                if (!ImsCallUtils.isEmergencyPdnUsedForEmergencyCallViaWfc(mCallContext)) {
-                    return EApnType.IMS.getType();
-                }
+            //To-Do:- Need to find the way Emergency call Over VoWiFi
+            if (!ImsCallUtils.isEmergencyPdnUsedForEmergencyCallViaWfc(mCallContext)) {
+                return EApnType.IMS.getType();
             }
             return EApnType.EMERGENCY.getType();
         } else {
@@ -3207,9 +3197,9 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 TelephonyManager.NETWORK_TYPE_UNKNOWN);
         int ratType = TelephonyManager.NETWORK_TYPE_UNKNOWN;
 
-        if (isInitialSet && ImsCallUtils.isEmergencyCallViaWfc(profile)) {
-            ratType = TelephonyManager.NETWORK_TYPE_IWLAN;
-        } else if (isInitialSet && mCallDetails.is(CallDetails.MO)
+        //To-Do:- Need to find the way Emergency call Over VoWiFi
+            //ratType = TelephonyManager.NETWORK_TYPE_IWLAN;
+        if (isInitialSet && mCallDetails.is(CallDetails.MO)
                 && (profile.getServiceType() == ImsCallProfile.SERVICE_TYPE_EMERGENCY)) {
             // Emergency call SHOULD be initiated via LTE
             // if there is no flag to indicate Wi-Fi calling.
@@ -3300,10 +3290,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                     mCallContext, mCallProfile, mediaInfo);
             updateCallExtraForHDVoice(mCallProfile, mediaInfo);
 
-            if (!mCallProfile.getCallExtraBoolean(ImsCallProfileEx.EXTRA_MO_ALERTING)) {
-                mCallProfile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_MO_ALERTING, alerting);
-            }
-
             // FIXME: MTC_NEW_IF - it should be changed to ImsCallProfile
             mCallback.invokeProgressing(ImsCallSessionImpl.this,
                     ImsCallMediaUtils.createMediaProfileFromMediaInfo(mediaInfo));
@@ -3347,8 +3333,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
             if (ccId > 0) {
                 mCall.setCallConnectionId(ccId);
             }
-
-            ImsCallUtils.removeCallExtra(mCallProfile, ImsCallProfileEx.EXTRA_MO_ALERTING);
 
             // MO call & OIR is overridden by USAT call control
             SuppInfo.SuppService ss = suppInfo.getService(SuppInfo.TYPE_TIP);
@@ -3396,8 +3380,6 @@ public class ImsCallSessionImpl extends ImsCallSessionImplBase {
                 closeInternal(ImsCallSessionImpl.this);
                 return;
             }
-
-            ImsCallUtils.removeCallExtra(mCallProfile, ImsCallProfileEx.EXTRA_MO_ALERTING);
 
             ImsCallUtils.refineCallReasonInfoForCode(mCallContext, mCallProfile, callReasonInfo);
             ImsCallUtils.refineCallReasonInfoForExtraCode(mCallProfile, callReasonInfo);
