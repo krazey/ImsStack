@@ -334,14 +334,6 @@
 // IMS_REG_CONTROL_PCSCF
 #define IMS_REG_CONTROL_PCSCF_SAME_CHANGED             (71)
 
-#define IMS_EVENT_SRVCC_NOTIFICATION                   (0x40000000)
-// WParam
-#define IMS_SRVCC_EVT_START                            (0x01)
-#define IMS_SRVCC_EVT_FAILURE                          (0x02)
-#define IMS_SRVCC_EVT_SUCCESS                          (0x03)
-#define IMS_SRVCC_EVT_CANCEL                           (0x04)
-#define IMS_SRVCC_CALLEVENT_NOTUSED                    (0x05)
-
 #define IMS_EVENT_IPCAN_HO_NOTIFICATION                (0x40000001)
 // WParam
 #define IMS_IPCAN_HANDOVER_UNKNOWN                     (0x00)

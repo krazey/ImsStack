@@ -209,12 +209,6 @@ public:
     static const IMS_UINT32 RESET_EVENT = CATEGORY_BASE + 803;
 
     ////
-    // SRVCC information
-    ////
-    static const IMS_UINT32 LISTEN_SRVCC_EVENT = CATEGORY_BASE + 1001;
-    static const IMS_UINT32 UNLISTEN_SRVCC_EVENT = CATEGORY_BASE + 1002;
-
-    ////
     // WFC information
     ////
     static const IMS_UINT32 IS_WFC_ENABLED = CATEGORY_BASE + 1101;

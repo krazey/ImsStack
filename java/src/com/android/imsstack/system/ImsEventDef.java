@@ -347,14 +347,6 @@ public class ImsEventDef
             // IMS_REG_CONTROL_PCSCF lParam
             public static final int IMS_REG_CONTROL_PCSCF_SAME_CHANGED = 71;
 
-    public static final int IMS_EVENT_SRVCC_NOTIFICATION = 0x40000000;
-        // wParam
-        public static final int IMS_SRVCC_EVT_START = 0x01;
-        public static final int IMS_SRVCC_EVT_FAILURE = 0x02;
-        public static final int IMS_SRVCC_EVT_SUCCESS = 0x03;
-        public static final int IMS_SRVCC_EVT_CANCEL = 0x04;
-        public static final int IMS_SRVCC_CALLEVENT_NOTUSED = 0x05;
-
     public static final int IMS_EVENT_IPCAN_HO_NOTIFICATION = 0x40000001;
         // wParam
         public static final int IMS_IPCAN_HANDOVER_UNKNOWN = 0x00;

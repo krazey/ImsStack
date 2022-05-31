@@ -26,7 +26,6 @@ public interface ISystem {
     public void setISystemAPIIMSPhone(ISystemAPIIMSPhone api);
     public void setISystemAPINetwork(ISystemAPINetwork api);
     public void setISystemAPISendEvent(ISystemAPISendEvent api);
-    public void setISystemAPISRVCC(ISystemAPISRVCC api);
     public void setISystemAPITelephonyState(ISystemAPITelephonyState api);
     public void setISystemAPITelephonySubscriber(ISystemAPITelephonySubscriber api);
     public void setISystemAPIWifiCalling(ISystemAPIWifiCalling api);

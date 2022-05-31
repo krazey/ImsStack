@@ -35,7 +35,6 @@ import com.android.imsstack.core.service.CallInfoService;
 import com.android.imsstack.core.service.CallSettingService;
 import com.android.imsstack.core.service.CallStateNotificationService;
 import com.android.imsstack.core.service.SCMService;
-import com.android.imsstack.core.service.SrvccStateService;
 import com.android.imsstack.core.service.serviceif.ICallSettingService;
 import com.android.imsstack.core.service.serviceif.IService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
@@ -191,7 +190,6 @@ public class VoLteService implements IVoLteService {
         ImsLog.i("");
 
         mServics.put(TYPE_CALLSETTING, new CallSettingService());
-        mServics.put(TYPE_SRVCCSTATE, new SrvccStateService());
         mServics.put(TYPE_ACBSKIP, new SCMService());
         mServics.put(TYPE_CALLINFO, new CallInfoService());
         mServics.put(TYPE_CALLSTATENOTIFICATION, new CallStateNotificationService());

@@ -710,10 +710,6 @@ public class SystemInterface implements JNIImsListenerEx {
                 "GET_TTY_MODE");
         sMethodToString.put(SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED,
                 "IS_IMS_VOICE_CALL_SUPPORTED");
-        sMethodToString.put(SystemConstants.LISTEN_SRVCC_EVENT,
-                "LISTEN_SRVCC_EVENT");
-        sMethodToString.put(SystemConstants.UNLISTEN_SRVCC_EVENT,
-                "UNLISTEN_SRVCC_EVENT");
         sMethodToString.put(SystemConstants.ACTIVATE_DATA_CONNECTION,
                 "ACTIVATE_DATA_CONNECTION");
         sMethodToString.put(SystemConstants.DEACTIVATE_DATA_CONNECTION,
@@ -900,7 +896,6 @@ public class SystemInterface implements JNIImsListenerEx {
         private ISystemAPIIMSPhone mISystemAPIIMSPhone;
         private ISystemAPINetwork mISystemAPINetwork;
         private ISystemAPISendEvent mISystemAPISendEvent;
-        private ISystemAPISRVCC mISystemAPISRVCC;
         private ISystemAPITelephonyState mISystemAPITelephonyState;
         private ISystemAPITelephonySubscriber mISystemAPITelephonySubscriber;
         private ISystemAPIWifiCalling mISystemAPIWifiCalling;
@@ -963,13 +958,6 @@ public class SystemInterface implements JNIImsListenerEx {
         public void setISystemAPISendEvent(ISystemAPISendEvent api) {
             synchronized (mLockObj) {
                 mISystemAPISendEvent = api;
-            }
-        }
-
-        @Override
-        public void setISystemAPISRVCC(ISystemAPISRVCC api) {
-            synchronized (mLockObj) {
-                mISystemAPISRVCC = api;
             }
         }
 
@@ -1544,11 +1532,6 @@ public class SystemInterface implements JNIImsListenerEx {
                     case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
                         result = handleSystemAPIIMSPhone(method, parcel);
                         break;
-                    //mISystemAPISRVCC
-                    case SystemConstants.LISTEN_SRVCC_EVENT: //FALL-THROUGH
-                    case SystemConstants.UNLISTEN_SRVCC_EVENT:
-                        result = handleSystemAPISRVCC(method, parcel);
-                        break;
                     //mISystemAPINetwork 1 ~ 10
                     case SystemConstants.ACTIVATE_DATA_CONNECTION: //FALL-THROUGH
                     case SystemConstants.DEACTIVATE_DATA_CONNECTION: //FALL-THROUGH
@@ -1702,28 +1685,6 @@ public class SystemInterface implements JNIImsListenerEx {
             switch (method) {
             case SystemConstants.IS_IMS_VOICE_CALL_SUPPORTED:
                 result.writeInt(mISystemAPIIMSPhone.isImsVoiceCallSupported4Sys());
-                break;
-            default:
-                result.recycle();
-                return null;
-            }
-
-            return result;
-        }
-
-        private Parcel handleSystemAPISRVCC(int method, Parcel parcel) {
-            if (mISystemAPISRVCC == null) {
-                return null;
-            }
-
-            Parcel result = Parcel.obtain();
-
-            switch (method) {
-            case SystemConstants.LISTEN_SRVCC_EVENT:
-                result.writeInt(mISystemAPISRVCC.listenSrvccEvent4Sys());
-                break;
-            case SystemConstants.UNLISTEN_SRVCC_EVENT:
-                result.writeInt(mISystemAPISRVCC.unlistenSrvccEvent4Sys());
                 break;
             default:
                 result.recycle();

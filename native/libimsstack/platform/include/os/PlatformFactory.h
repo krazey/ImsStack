@@ -31,7 +31,6 @@ class IMemHeap;
 class INetworkIpSec;
 class INetworkWatcher;
 class IPowerInfo;
-class ISrvcc;
 class ISubscriberInfo;
 class ISystemProperty;
 class ISystemTime;
@@ -116,9 +115,6 @@ public:
 
     static ICallInfo* CreateCallInfo(IN IMS_SINT32 nSlotId);
     static void DestroyCallInfo(IN ICallInfo*& piCallInfo);
-
-    static ISrvcc* CreateSrvcc(IN IMS_SINT32 nSlotId);
-    static void DestroySrvcc(IN ISrvcc*& piSrvcc);
 
     static ILocationInfo* CreateLocationInfo(IN IMS_SINT32 nSlotId);
     static void DestroyLocationInfo(IN ILocationInfo*& piLocationInfo);

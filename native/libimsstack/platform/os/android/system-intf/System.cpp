@@ -1392,18 +1392,6 @@ IMS_SINT32 System::ResetEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId)
 }
 
 PUBLIC
-IMS_SINT32 System::ListenSrvccEvent(IN IMS_SINT32 nSlotId)
-{
-    return GetInt(SystemConstants::LISTEN_SRVCC_EVENT, 0, nSlotId);
-}
-
-PUBLIC
-IMS_SINT32 System::UnlistenSrvccEvent(IN IMS_SINT32 nSlotId)
-{
-    return GetInt(SystemConstants::UNLISTEN_SRVCC_EVENT, 0, nSlotId);
-}
-
-PUBLIC
 IMS_BOOL System::IsWifiCallingEnabled(IN IMS_SINT32 nSlotId)
 {
     return (GetInt(SystemConstants::IS_WFC_ENABLED, 0, nSlotId) == 1);
