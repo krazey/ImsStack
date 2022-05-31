@@ -3,20 +3,16 @@ package com.android.imsstack.core;
 import android.content.Context;
 import android.content.Intent;
 
-import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.core.agents.IIMSPhoneGov;
 import com.android.imsstack.core.agents.LocationAgentManager;
 import com.android.imsstack.core.agents.PhoneNumberAgent;
-import com.android.imsstack.core.config.ECallConfigUtil;
+import com.android.imsstack.core.agents.agentif.IVoLteAgent;
 import com.android.imsstack.core.service.VoLteService;
 import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.system.ImsEventDef;
-import com.android.imsstack.system.SystemInterface;
 import com.android.imsstack.test.ImsTestHelper;
 import com.android.imsstack.test.ImsTestMode;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.MSimUtils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -71,8 +67,6 @@ public class VoLteFactory {
         IIMSPhoneGov.getGov().start(slotID);
         startAgents(slotID);
 
-        ECallConfigUtil.getInstance(slotID);
-
         if (ImsTestMode.getInstance().getTestMode(slotID).isGenericTestMode()) {
             ImsTestHelper.getInstance();
         }
@@ -99,8 +93,6 @@ public class VoLteFactory {
         if (ImsTestMode.getInstance().getTestMode(slotID).isGenericTestMode()) {
             ImsTestHelper.getInstance().cleanup();
         }
-
-        ECallConfigUtil.cleanup(slotID);
 
         stopAgents(slotID);
         IIMSPhoneGov.getGov().stop(slotID);

@@ -20,8 +20,6 @@ import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.service.serviceif.IUSATService;
-import com.android.imsstack.core.service.serviceif.IVoLteService;
 import com.android.imsstack.enabler.mtc.CallFeature;
 import com.android.imsstack.enabler.mtc.IECallStateTracker;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
@@ -211,17 +209,6 @@ public class ImsCallContext implements ICallContext {
 
         if (lam != null) {
             return lam.getAgent(getSlotId());
-        }
-
-        return null;
-    }
-
-    @Override
-    public IUSATService getUSATService() {
-        IVoLteService vs = VoLteFactory.getInstance().getService(getSlotId());
-
-        if (vs != null) {
-            return (IUSATService)vs.getService(IVoLteService.TYPE_USAT);
         }
 
         return null;

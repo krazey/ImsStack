@@ -16,7 +16,6 @@ import com.android.imsstack.core.ImsGlobal;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.agentif.IIMSPhoneAgent;
-import com.android.imsstack.core.agents.agentif.IRegiProcess;
 import com.android.imsstack.core.agents.dcm.DCFactory;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
 import com.android.imsstack.system.IJNIUpCallEvt;
@@ -352,19 +351,6 @@ public final class IIMSPhoneGov {
 
         private boolean isLteStateAllowed(int type, int slotID) {
             boolean isAllowed = false;
-
-            // check to update reg state for SA
-            if (type == ImsEventDef.IMS_LTE_SA_UPDATE_CURRENT_REG_STATE) {
-                if (CapabilityConfigs.isVoNrEnabled(slotID)) {
-                    IRegiProcess rp = RegiProcessAgent.getInstance(slotID);
-                    if (rp != null) {
-                        rp.updateCurrentRegistration();
-                    }
-                }
-
-                return false;
-            }
-
             String op = ImsGlobal.getOperator(slotID);
             String co = ImsGlobal.getCountry(slotID);
 
@@ -917,27 +903,6 @@ public final class IIMSPhoneGov {
         private void preprocImsPreferenceState(int systemMode, int regState) {
             // systemMode : LTE (8)
             // regState : VOIP or SMS+VOIP (1 or 3)
-            if (systemMode == 0x08/*REG_SYS_MODE_LTE*/
-                    && ((regState == 1) || (regState == 3))) {
-                IRegiProcess rp = RegiProcessAgent.getInstance(mSlotId);
-
-                if (rp != null) {
-                    if (rp.getRegServiceState() == ImsEventDef.IMS_REG_SERVICE_VOIP) {
-                        IDCNetWatcher dcnw = (IDCNetWatcher)DCFactory.getDC(
-                                DCFactory.NETWORK_WATCHER, mSlotId);
-
-                        if (dcnw != null
-                                && ((dcnw.getNetworkType() == TelephonyManager.NETWORK_TYPE_LTE)
-                                    || (dcnw.getNetworkType()
-                                        == TelephonyManager.NETWORK_TYPE_UNKNOWN))) {
-                            ImsLog.d(mSlotId, "update the current reg service");
-                            rp.updateCurrentRegService(ImsEventDef.IMS_REG_SERVICE_TYPE_UPDATE);
-                        } else {
-                            ImsLog.d(mSlotId, "update the current reg service, ignore(NO LTE)");
-                        }
-                    }
-                }
-            }
         }
 
         private void setDataToModem(int itemIndex, int param1, int param2, String paramEx) {

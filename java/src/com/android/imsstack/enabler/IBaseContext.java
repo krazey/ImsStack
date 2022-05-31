@@ -10,7 +10,6 @@ import com.android.imsstack.core.agents.agentif.ISharedState;
 import com.android.imsstack.core.agents.agentif.ISubscription;
 import com.android.imsstack.core.agents.dcmif.IDCApn;
 import com.android.imsstack.core.agents.dcmif.IDCNetWatcher;
-import com.android.imsstack.core.service.serviceif.IUSATService;
 import com.android.imsstack.enabler.mtc.IServiceStateTracker;
 import com.android.imsstack.system.ISystem;
 import com.android.imsstack.test.IImsTestMode;
@@ -38,7 +37,6 @@ public interface IBaseContext extends IContext {
     public IImsTestMode getTestMode();
 
     public ILocationAgent getLocationAgent();
-    public IUSATService getUSATService();
 
     /** Returns the USAT interface. */
     UsatInterface getUsatInterface();
