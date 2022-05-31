@@ -40,6 +40,7 @@ MediaSession::MediaSession(
         m_nCallKey(nCallKey),
         m_pClientListener(IMS_NULL),
         m_pEnvironment(IMS_NULL),
+        m_bSessionOpened(IMS_FALSE),
         m_nCommandBuffer(IMMedia::MEDIA_MESSAGE_IDX_START),
         m_eSessionState(EARLY_SESSION),
         m_objMapMediaNego(IMSMap<IMS_UINTP, MediaNego*>()),
