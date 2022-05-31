@@ -44,6 +44,7 @@ public class VideoSessionHandler {
     private DatagramSocket mRtpSocket, mRtcpSocket;
     private final VideoSessionCallbackHandler mVideoSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
+    private MediaSession.IMediaSurfaceHandler mSurfaceHandler;
 
     public VideoSessionHandler(
             @NonNull MediaSession mediaSession, @NonNull MediaManagerHelper mediaManager) {
@@ -51,6 +52,10 @@ public class VideoSessionHandler {
         mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mediaSession);
         mVideoSessionCallback = new VideoSessionCallbackProxy();
         ImsLog.d("VideoSessionHandler created");
+    }
+
+    public void setSurfaceHandler(MediaSession.IMediaSurfaceHandler handler) {
+        mSurfaceHandler = handler;
     }
 
     @VisibleForTesting
@@ -121,19 +126,15 @@ public class VideoSessionHandler {
                 break;
 
             case MediaConstants.REQUEST_SET_PREVIEW_SURFACE:
-            {
-                Surface surface = Surface.CREATOR.createFromParcel(parcel);
-
-                handleSetPreviewSurface(surface);
-            }
+                if (mSurfaceHandler != null) {
+                    handleSetPreviewSurface(mSurfaceHandler.getPreviewSurface());
+                }
                 break;
 
             case MediaConstants.REQUEST_SET_DISPLAY_SURFACE:
-            {
-                Surface surface = Surface.CREATOR.createFromParcel(parcel);
-
-                handleSetDisplaySurface(surface);
-            }
+                if (mSurfaceHandler != null) {
+                    handleSetDisplaySurface(mSurfaceHandler.getDisplaySurface());
+                }
                 break;
 
             case MediaConstants.REQUEST_SET_MEDIA_QUALITY:

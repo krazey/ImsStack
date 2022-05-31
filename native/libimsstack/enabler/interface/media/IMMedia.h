@@ -50,6 +50,9 @@ public:
             IMMEDIA_CASE_ENUM(REQUEST_SEND_DTMF);
             IMMEDIA_CASE_ENUM(REQUEST_SET_MEDIA_QUALITY);
             IMMEDIA_CASE_ENUM(REQUEST_HEADER_EXTENSION);
+            IMMEDIA_CASE_ENUM(REQUEST_SET_PREVIEW_SURFACE);
+            IMMEDIA_CASE_ENUM(REQUEST_SET_DISPLAY_SURFACE);
+            IMMEDIA_CASE_ENUM(REQUEST_VIDEO_DATA_USAGE);
             IMMEDIA_CASE_ENUM(RESPONSE_OPEN_SESSION);
             IMMEDIA_CASE_ENUM(RESPONSE_SESSION_CHANGED);
             IMMEDIA_CASE_ENUM(RESPONSE_MODIFY_SESSION);
@@ -63,14 +66,10 @@ public:
             IMMEDIA_CASE_ENUM(NOTIFY_MEDIA_QUALITY_CHANGE);
             IMMEDIA_CASE_ENUM(NOTIFY_QOS_INFO);
             IMMEDIA_CASE_ENUM(SETSURFACE_CMD);
-            IMMEDIA_CASE_ENUM(FARFRAME_IND);
-            IMMEDIA_CASE_ENUM(START_PREVIEW_CAMERA_CMD);
             IMMEDIA_CASE_ENUM(SELECT_CAMERA_CMD);
             IMMEDIA_CASE_ENUM(CHANGE_CAMERA_ZOOM_CMD);
             IMMEDIA_CASE_ENUM(SET_PAUSE_IMAGE_CMD);
-            IMMEDIA_CASE_ENUM(PEER_DIMENSION_CHANGED_IND);
-            IMMEDIA_CASE_ENUM(VIDEO_DATA_USAGE_CMD);
-            IMMEDIA_CASE_ENUM(VIDEO_DATA_USAGE_INFO_IND);
+            IMMEDIA_CASE_ENUM(CHANGE_ORIENTATION_CMD);
         }
         return "Unrecognized Msg";
     }
@@ -129,15 +128,11 @@ public:
 
     // Notifications for video
     static const IMS_SINT32 MEDIA_MESSAGE_VIDEO_IND_IDX_START = IMMEDIA_IND + 50;
-    static const IMS_SINT32 PEER_DIMENSION_CHANGED_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 1;
-    static const IMS_SINT32 VIDEO_DATA_USAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 2;
-    static const IMS_SINT32 VIDEO_DATA_USAGE_INFO_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 3;
-    static const IMS_SINT32 SETSURFACE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 4;
-    static const IMS_SINT32 FARFRAME_IND = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 5;
-    static const IMS_SINT32 START_PREVIEW_CAMERA_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 6;
-    static const IMS_SINT32 SELECT_CAMERA_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 7;
-    static const IMS_SINT32 CHANGE_CAMERA_ZOOM_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 8;
-    static const IMS_SINT32 SET_PAUSE_IMAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 9;
+    static const IMS_SINT32 SETSURFACE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 1;
+    static const IMS_SINT32 SELECT_CAMERA_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 2;
+    static const IMS_SINT32 CHANGE_CAMERA_ZOOM_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 3;
+    static const IMS_SINT32 SET_PAUSE_IMAGE_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 4;
+    static const IMS_SINT32 CHANGE_ORIENTATION_CMD = MEDIA_MESSAGE_VIDEO_IND_IDX_START + 5;
 
     static const IMS_SINT32 MEDIA_MESSAGE_IND_IDX_END = IMMEDIA_IND + 99;
 
@@ -174,7 +169,7 @@ public:
         {
             nMsgType = MSG_VIDEO_REQUEST;
         }
-        else if (nMsg >= SETSURFACE_CMD && nMsg <= VIDEO_DATA_USAGE_INFO_IND)
+        else if (nMsg >= SETSURFACE_CMD && nMsg <= CHANGE_ORIENTATION_CMD)
         {
             nMsgType = MSG_VIDEO_NOTIFICATION;
         }
@@ -224,8 +219,8 @@ enum
 class ImsMediaMsgParamBase
 {
 public:
-    ImsMediaMsgParamBase() :
-            m_eMediaType(MEDIA_TYPE_INVALID){};
+    ImsMediaMsgParamBase(MEDIA_CONTENT_TYPE type = MEDIA_TYPE_INVALID) :
+            m_eMediaType(type){};
 
 public:
     MEDIA_CONTENT_TYPE m_eMediaType;
@@ -354,6 +349,7 @@ public:
 public:
     IMS_SINT32 m_nResponse;
 };
+
 /*
 class ImsMediaNotifyQualityParam :
         public ImsMediaResponseParamBase
@@ -407,54 +403,25 @@ public:
 class ImsMediaVideoParam : public ImsMediaMsgParamBase
 {
 public:
-    ImsMediaVideoParam() :
-            nValue(-1){};
+    ImsMediaVideoParam(IMS_SINT32 value = -1) :
+            ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
+            nValue(value){};
 
 public:
     IMS_SINT32 nValue;
 };
 
-class ImsMediaSetSurfaceCmdParam : public ImsMediaMsgParamBase
+class ImsMediaVideoResolutionParam : public ImsMediaMsgParamBase
 {
 public:
-    inline ImsMediaSetSurfaceCmdParam(IN CONST ImsMediaSetSurfaceCmdParam* pParam = NULL) :
-            ImsMediaMsgParamBase(),
-            nSurfaceType(0),
-            nSurfaceTx(0),
-            nSurfaceRx(0)
-    {
-        if (pParam == NULL)
-        {
-            return;
-        }
-
-        this->nSurfaceType = pParam->nSurfaceType;
-        this->nSurfaceTx = pParam->nSurfaceTx;
-        this->nSurfaceRx = pParam->nSurfaceRx;
-    }
+    ImsMediaVideoResolutionParam(IMS_SINT32 value1 = -1, IMS_SINT32 value2 = -1) :
+            ImsMediaMsgParamBase(MEDIA_TYPE_VIDEO),
+            nWidth(value1),
+            nHeight(value2){};
 
 public:
-    IMS_SINT32 nSurfaceType;
-    IMS_SINTP nSurfaceTx;
-    IMS_SINTP nSurfaceRx;
-};
-
-class ImsMediaPreviewCameraCmdParam : public ImsMediaSetSurfaceCmdParam
-{
-public:
-    IMS_UINT32 nCamera;
-
-public:
-    ImsMediaPreviewCameraCmdParam(IN CONST ImsMediaPreviewCameraCmdParam* pParam = NULL) :
-            ImsMediaSetSurfaceCmdParam((ImsMediaSetSurfaceCmdParam*)pParam),
-            nCamera(0)
-    {
-        if (pParam == NULL)
-        {
-            return;
-        }
-        this->nCamera = pParam->nCamera;
-    }
+    IMS_SINT32 nWidth;
+    IMS_SINT32 nHeight;
 };
 
 #endif

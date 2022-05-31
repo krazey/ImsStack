@@ -18,6 +18,7 @@ package com.android.imsstack.enabler.media;
 import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
+import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
@@ -36,6 +37,25 @@ public class MediaSession {
     private final MediaListener mMediaListener;
     private final MediaManagerHelper mMediaManager;
 
+    /**
+     * interface of surface handler
+     */
+    public interface IMediaSurfaceHandler {
+        /**
+         * gets preview surface
+         *
+         * @return preview surface instance
+         */
+        Surface getPreviewSurface();
+
+        /**
+         * gets display surface
+         *
+         * @return display surface instance
+         */
+        Surface getDisplaySurface();
+    }
+
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
         ImsLog.v("MediaSession created");
         mContext = context;
@@ -49,8 +69,8 @@ public class MediaSession {
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
             ImsMediaManager imsMediaManager, Executor executor) {
         mContext = context;
-        mMediaManager =
-                new MediaManagerHelper(context.getContext(), this, imsMediaManager, executor);
+        mMediaManager = new MediaManagerHelper(context.getContext(), this,
+                imsMediaManager, executor);
         mMediaListener = new MediaListener();
         initMtcMediaSession(mtcMediaSession);
         ImsLog.v("MediaSession created");
@@ -85,6 +105,7 @@ public class MediaSession {
     private void createVideoSession() {
         if (mVideoSessionHandler == null) {
             mVideoSessionHandler = new VideoSessionHandler(this, mMediaManager);
+            mVideoSessionHandler.setSurfaceHandler(mMtcMediaSession);
         }
     }
 
@@ -116,35 +137,31 @@ public class MediaSession {
             ImsLog.v("requestType=" + requestType + ", sessionType=" + sessionType);
 
             switch (sessionType) {
-                case ImsMediaSession.SESSION_TYPE_AUDIO:
-                {
+                case ImsMediaSession.SESSION_TYPE_AUDIO: {
                     createAudioSession();
                     if (mAudioSessionHandler != null) {
                         mAudioSessionHandler.onImsMediaAudioMessage(requestType, parcel);
                     }
                 }
-                break;
+                    break;
 
-                case ImsMediaSession.SESSION_TYPE_VIDEO:
-                {
+                case ImsMediaSession.SESSION_TYPE_VIDEO: {
                     createVideoSession();
                     if (mVideoSessionHandler != null) {
                         mVideoSessionHandler.onImsMediaVideoMessage(requestType, parcel);
                     }
                 }
-                break;
+                    break;
 
-                case ImsMediaSession.SESSION_TYPE_RTT:
-                {
+                case ImsMediaSession.SESSION_TYPE_RTT: {
                     ImsLog.v("SESSION_TYPE_RTT :: TODO");
                 }
-                break;
+                    break;
 
-                default:
-                {
+                default: {
                     ImsLog.e("Invalid SessionType");
                 }
-                break;
+                    break;
             }
         }
     }

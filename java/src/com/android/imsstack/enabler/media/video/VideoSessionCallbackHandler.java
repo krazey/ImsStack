@@ -118,16 +118,8 @@ public class VideoSessionCallbackHandler {
      * @param height height of resolution changed.
      */
     public void peerDimensionChanged(final int width, final int height) {
-        ImsLog.v("peerDimensionChanged");
-
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(MediaConstants.NOTIFY_PEER_DIMENSION_CHANGED);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        parcel.writeInt(width);
-        parcel.writeInt(height);
-
-        getMediaSession().sendRequest(parcel);
+        ImsLog.v("peerDimensionChanged: width=" + width + ",height=" + height);
+        //TODO: send it to video provider
     }
 
     /**
@@ -172,14 +164,7 @@ public class VideoSessionCallbackHandler {
      * @param bytes bytes of send and received rtp video data.
      */
     public void onNotifyVideoDataUsage(long bytes) {
-        ImsLog.v("onNotifyVideoDataUsage");
-
-        Parcel parcel = Parcel.obtain();
-
-        parcel.writeInt(MediaConstants.NOTIFY_VIDEO_DATA_USAGE);
-        parcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        parcel.writeLong(bytes);
-
-        getMediaSession().sendRequest(parcel);
+        ImsLog.v("onNotifyVideoDataUsage: size=" + bytes);
+        // TODO: send it to video provider
     }
 }

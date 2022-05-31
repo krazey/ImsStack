@@ -1,13 +1,18 @@
-/*
-    Author
-    <table>
-    date        author                  description
-    --------    --------------          ----------
-    20150329    hwangoo.park@           Created
-    </table>
-
-    Description
-*/
+/**
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.imsstack.imsservice.mmtel.videocall.base;
 
@@ -17,7 +22,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.telecom.InCallService;
 import android.telecom.TelecomManager;
 import android.telecom.VideoProfile;
@@ -27,14 +31,11 @@ import android.text.TextUtils;
 import android.view.Surface;
 
 import com.android.imsstack.core.ImsGlobal;
-import com.android.imsstack.enabler.mtc.IUMtcMedia;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
-import com.android.imsstack.enabler.mtc.OnScreenDebugInfoVideo;
 import com.android.imsstack.imsservice.mmtel.call.IVideoCallSession;
 import com.android.imsstack.imsservice.mmtel.util.VideoDimension;
 import com.android.imsstack.util.ImsConstants;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.ImsPrivateProperties;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,14 +82,11 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
     private static final String SKT_T_PHONE = "com.skt.prod.dialer";
 
     private final IVideoCallSession mCallSession;
-    private MtcMediaSession mMediaSession = null;
     private MtcMediaSessionListenerProxy mListenerProxy = new MtcMediaSessionListenerProxy();
     private VideoDimension mVideoDimension = null;
-    private PauseImageTask mPauseImageTask = null;
     private boolean mPauseImageSet = false;
-    private boolean mIs3rdPartyDialerSetAsDefaultDialer = false;
-    private boolean mIsTPhone = false;
     private int mCallState = CALL_STATE_IDLE;
+    protected MtcMediaSession mMediaSession = null;
 
     public ImsVideoCallProviderBase(IVideoCallSession callSession,
             MtcMediaSession mediaSession) {
@@ -103,48 +101,11 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
             callSession.setVideoCallProvider(this);
             callSession.setEventListener(this);
         }
-
-        mIs3rdPartyDialerSetAsDefaultDialer = is3rdPartyDialerSetAsDefaultDialerForVideoCall();
-
-        if (isVideoCallFor3rdPartyDialer()) {
-            logi("Default dialer for video call is a 3rd party dialer");
-            mIsTPhone = SKT_T_PHONE.equals(getDefaultDialerPackage());
-        }
-
-        ImsPrivateProperties.Ephemeral.setBoolean(
-                ImsPrivateProperties.Ephemeral.KEY_THIRD_PARTY_DIALER_FOR_VIDEO_CALL,
-                isVideoCallFor3rdPartyDialer(), 0);
     }
 
-    /**
-     * FIXME: It needs to be checked how to pass the camera id.
-     * ImsCamera#CAMERA_REAR (0)
-     * ImsCamera#CAMERA_FRONT (1)
-     * ImsCamera#CAMERA_FRONT2 (2)
-     *      It's used for a special case to select front camera for video call.
-     */
     @Override
     public void onSetCamera(String cameraId) {
-        if (mMediaSession == null) {
-            // Exception handling
-            handleMediaSessionSelectCameraCompleted(
-                    IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            return;
-        }
-
-        if (cameraId == null) {
-            mMediaSession.selectCamera(CAMERA_ID_NONE);
-        } else {
-            int camId = getCameraIdInt(cameraId);
-
-            if (camId >= ImsCamera.CAMERA_REAR) {
-                mMediaSession.selectCamera(camId);
-            } else {
-                // Exception handling
-                handleMediaSessionSelectCameraCompleted(
-                        IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            }
-        }
+        // no op
     }
 
     @Override
@@ -212,7 +173,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     @Override
     public void onRequestCameraCapabilities() {
-        // no-op
+        //no op
     }
 
     @Override
@@ -228,178 +189,8 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     @Override
     public void onSetPauseImage(Uri uri) {
-        if ((mPauseImageTask != null)
-                && (mPauseImageTask.getStatus() != AsyncTask.Status.FINISHED)) {
-            log("PauseImageTask :: cancelling...");
-            mPauseImageTask.cancel(true);
-        }
-
-        if (uri == null) {
-            setPauseImageInternal(null);
-            return;
-        }
-
-        int videoQuality = 0;
-        ImsStreamMediaProfile mediaProfile
-                = (mCallSession != null) ? mCallSession.getStreamMediaProfile() : null;
-
-        if (mediaProfile != null) {
-            videoQuality = VideoCallUtils.getVideoQualityFromMediaProfileForMediaInfo(
-                    mediaProfile.getVideoQuality());
-        }
-
-        mPauseImageTask = new PauseImageTask(videoQuality);
-        mPauseImageTask.execute(uri);
+        // TODO : add implementation
     }
-
-    // [IMS][IMS_VT], 20150327, IMS_VIDEO_CALL {
-    // @Override
-    // @PRIVATE_IMS_API#Deprecated
-    public void onStopAudio() {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.stopAudio();
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onCaptureVideo(String file, int display) {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.captureVideo(file, display);
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onSetMultitaskingState(int state) {
-        mCallSession.setMultitaskingState(state);
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API (Deprecated from R-OS)
-    public void onStartBackground() {
-        if (mMediaSession == null) {
-            handleMediaSessionStartBackgroundCompleted(
-                    IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            return;
-        }
-
-        mMediaSession.startBackground();
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API (Deprecated from R-OS)
-    public void onStopBackground() {
-        if (mMediaSession == null) {
-            handleMediaSessionStopBackgroundCompleted(
-                    IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            return;
-        }
-
-        mMediaSession.stopBackground();
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API#Deprecated
-    public void onSetAlternativeImage(String file) {
-        if (mMediaSession == null) {
-            handleMediaSessionSetAlternativeImageCompleted(
-                    IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            return;
-        }
-
-        mPauseImageSet = true;
-        mMediaSession.setAlternativeImage(file);
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API#Deprecated
-    public void onClearAlternativeImage() {
-        if (mMediaSession == null) {
-            handleMediaSessionClearAlternativeImageCompleted(
-                    IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            return;
-        }
-
-        if (mPauseImageSet) {
-            mPauseImageSet = false;
-            mMediaSession.clearAlternativeImage();
-        } else {
-            log("Ignore clearAlternativeImage");
-            handleMediaSessionClearAlternativeImageCompleted(
-                    IUMtcMedia.Reason.REASON_NOERROR);
-        }
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API#Deprecated
-    public void onSetCameraBrightness(int brightness) {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.setCameraBrightness(brightness);
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onSetCameraOnOff(int onOff) {
-        mCallSession.setCameraSetting(onOff);
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onSwapDisplay() {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.swapDisplay();
-    }
-
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onUpdateDisplay(int display) {
-        if (mMediaSession == null) {
-            return;
-        }
-        mMediaSession.updateDisplay(display);
-    }
-
-    /**
-     * #DISPLAY_SIZE_NORMAL (0)
-     * #DISPLAY_SIZE_FULL (1)
-     */
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onSetDisplaySize(int display, int size) {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.setDisplaySize(display, size);
-    }
-
-    /**
-     * #ORIENTATION_0 (0)
-     * #ORIENTATION_90 (1)
-     * #ORIENTATION_180 (2)
-     * #ORIENTATION_270 (3)
-     */
-    // @Override
-    // @PRIVATE_IMS_API
-    public void onSetDisplayOrientation(int display, int orientation) {
-        if (mMediaSession == null) {
-            return;
-        }
-
-        mMediaSession.setDisplayOrientation(display, orientation);
-    }
-    // [IMS][IMS_VT], 20150327, IMS_VIDEO_CALL }
 
     @Override
     public void onCallEvent(int event) {
@@ -444,14 +235,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         return mCallSession;
     }
 
-    protected boolean isTPhone() {
-        return mIsTPhone;
-    }
-
-    protected boolean isVideoCallFor3rdPartyDialer() {
-        return mIs3rdPartyDialerSetAsDefaultDialer;
-    }
-
     protected int getCallState() {
         return mCallState;
     }
@@ -465,24 +248,24 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     protected void handleCallEvent(int event) {
         switch (event) {
-        case IVideoCallSession.EVENT_CALL_IDLE:
-            setCallState(CALL_STATE_IDLE);
-            break;
-        case IVideoCallSession.EVENT_CALL_INITIATING:
-            setCallState(CALL_STATE_INITIATING);
-            break;
-        case IVideoCallSession.EVENT_CALL_ALERTING:
-            setCallState(CALL_STATE_ALERTING);
-            break;
-        case IVideoCallSession.EVENT_CALL_ESTABLISHED:
-            setCallState(CALL_STATE_ESTABLISHED);
-            break;
-        case IVideoCallSession.EVENT_CALL_TERMINATED:
-            setCallState(CALL_STATE_TERMINATED);
-            break;
-        default:
-            // no-op
-            break;
+            case IVideoCallSession.EVENT_CALL_IDLE:
+                setCallState(CALL_STATE_IDLE);
+                break;
+            case IVideoCallSession.EVENT_CALL_INITIATING:
+                setCallState(CALL_STATE_INITIATING);
+                break;
+            case IVideoCallSession.EVENT_CALL_ALERTING:
+                setCallState(CALL_STATE_ALERTING);
+                break;
+            case IVideoCallSession.EVENT_CALL_ESTABLISHED:
+                setCallState(CALL_STATE_ESTABLISHED);
+                break;
+            case IVideoCallSession.EVENT_CALL_TERMINATED:
+                setCallState(CALL_STATE_TERMINATED);
+                break;
+            default:
+                // no-op
+                break;
         }
     }
 
@@ -512,46 +295,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         changePeerDimensions(getVideoWidth(videoResolution), getVideoHeight(videoResolution));
     }
 
-    protected void handleMediaSessionSelectCameraCompleted(final int result) {
-        int finalResult = 1;
-
-        if (result != IUMtcMedia.Reason.REASON_NOERROR) {
-            finalResult = 0;
-        }
-    }
-
-    protected void handleMediaSessionStartBackgroundCompleted(final int result) {
-        int finalResult = 1;
-
-        if (result != IUMtcMedia.Reason.REASON_NOERROR) {
-            finalResult = 0;
-        }
-    }
-
-    protected void handleMediaSessionStopBackgroundCompleted(final int result) {
-        int finalResult = 1;
-
-        if (result != IUMtcMedia.Reason.REASON_NOERROR) {
-            finalResult = 0;
-        }
-    }
-
-    protected void handleMediaSessionSetAlternativeImageCompleted(final int result) {
-        int finalResult = 1;
-
-        if (result != IUMtcMedia.Reason.REASON_NOERROR) {
-            finalResult = 0;
-        }
-    }
-
-    protected void handleMediaSessionClearAlternativeImageCompleted(final int result) {
-        int finalResult = 1;
-
-        if (result != IUMtcMedia.Reason.REASON_NOERROR) {
-            finalResult = 0;
-        }
-    }
-
     protected VideoDimension getCurrentVideoDimension() {
         return mVideoDimension;
     }
@@ -561,37 +304,10 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         mVideoDimension = new VideoDimension(width, height);
     }
 
-    protected void setPauseImageInternal(String file) {
-        if (mMediaSession == null) {
-            if (TextUtils.isEmpty(file)) {
-                handleMediaSessionClearAlternativeImageCompleted(
-                        IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            } else {
-                handleMediaSessionSetAlternativeImageCompleted(
-                        IUMtcMedia.Reason.REASON_EVENT_FAIL);
-            }
-            return;
-        }
-
-        if (TextUtils.isEmpty(file)) {
-            if (mPauseImageSet) {
-                mPauseImageSet = false;
-                mMediaSession.clearAlternativeImage();
-            } else {
-                log("Ignore clearAlternativeImage");
-                handleMediaSessionClearAlternativeImageCompleted(
-                        IUMtcMedia.Reason.REASON_NOERROR);
-            }
-        } else {
-            mPauseImageSet = true;
-            mMediaSession.setAlternativeImage(file);
-        }
-    }
-
     protected void updateReversedPeerDimensionFromMediaProfile(int orientation,
             boolean enforceUpdate) {
-        ImsStreamMediaProfile mediaProfile
-                = (mCallSession != null) ? mCallSession.getStreamMediaProfile() : null;
+        ImsStreamMediaProfile mediaProfile =
+                (mCallSession != null) ? mCallSession.getStreamMediaProfile() : null;
 
         if (mediaProfile != null) {
             VideoDimension videoDimension = null;
@@ -678,27 +394,27 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
 
     protected static int getOrientationForUC(int orientation) {
         switch (orientation) {
-        case ORIENTATION_90:
-            return MtcMediaSession.ORIENTATION_90;
-        case ORIENTATION_180:
-            return MtcMediaSession.ORIENTATION_180;
-        case ORIENTATION_270:
-            return MtcMediaSession.ORIENTATION_270;
-        default:
-            return MtcMediaSession.ORIENTATION_0;
+            case ORIENTATION_90:
+                return MtcMediaSession.ORIENTATION_90;
+            case ORIENTATION_180:
+                return MtcMediaSession.ORIENTATION_180;
+            case ORIENTATION_270:
+                return MtcMediaSession.ORIENTATION_270;
+            default:
+                return MtcMediaSession.ORIENTATION_0;
         }
     }
 
     protected static int getVideoResolution(int width, int height) {
-        return (int)(((width << 16) & 0xFFFF0000) | (height & 0x0000FFFF));
+        return (int) (((width << 16) & 0xFFFF0000) | (height & 0x0000FFFF));
     }
 
     protected static int getVideoHeight(int resolution) {
-        return (int)(resolution & 0x0000FFFF);
+        return (int) (resolution & 0x0000FFFF);
     }
 
     protected static int getVideoWidth(int resolution) {
-        return (int)((resolution >> 16) & 0x0000FFFF);
+        return (int) ((resolution >> 16) & 0x0000FFFF);
     }
 
     protected static String getDefaultDialerPackage() {
@@ -751,7 +467,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         for (ServiceInfo serviceInfo : infos) {
             if (serviceInfo.metaData != null
                     && serviceInfo.metaData.getBoolean(
-                        TelecomManager.METADATA_IN_CALL_SERVICE_UI, false)) {
+                            TelecomManager.METADATA_IN_CALL_SERVICE_UI, false)) {
                 // Package to display Call UI
                 log("3rd party dialer : packageName="
                         + serviceInfo.packageName + ", name=" + serviceInfo.name);
@@ -762,20 +478,6 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         return is3rdPartyCallUI;
     }
 
-    protected static int getCameraIdInt(String cameraId) {
-        try {
-            int camId = Integer.parseInt(cameraId);
-
-            if (camId >= ImsCamera.CAMERA_REAR) {
-                return camId;
-            }
-        } catch (NumberFormatException e) {
-            logi("Invalid cameraId=" + cameraId);
-        }
-
-        return (-1);
-    }
-
     protected static void log(String s) {
         ImsLog.d("[GII-IMPL] " + s);
     }
@@ -784,74 +486,7 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         ImsLog.i("[GII-IMPL] " + s);
     }
 
-    private class PauseImageTask extends AsyncTask<Uri, Void, String> {
-        private int mVideoQuality;
-
-        public PauseImageTask(int videoQuality) {
-            mVideoQuality = videoQuality;
-        }
-
-        // Save alternative image (in IMS internal storage) in background
-        @Override
-        protected String doInBackground(Uri... params) {
-            if (isCancelled()) {
-                logi("PauseImageTask :: already cancelled");
-                return null;
-            }
-
-            Uri uri = params[0];
-
-            logi("PauseImageTask :: uri=" + ImsLog.hiddenString(uri.toString())
-                    + ", videoQuality=" + mVideoQuality);
-
-            return VideoCallUtils.getPauseImageFile(uri, mVideoQuality);
-        }
-
-        @Override
-        protected void onPostExecute(String file) {
-            if (file == null) {
-                logi("PauseImageTask :: Uri is malformed or not found");
-                handleMediaSessionSetAlternativeImageCompleted(
-                        IUMtcMedia.Reason.REASON_EVENT_FAIL);
-                return;
-            }
-
-            setPauseImageInternal(file);
-        }
-
-        @Override
-        protected void onCancelled (String result) {
-            log("PauseImageTask :: onCancelled");
-        }
-    }
-
     private class MtcMediaSessionListenerProxy extends MtcMediaSession.Listener {
-        @Override
-        public void onMediaSessionAudioStarted(MtcMediaSession session) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionAudioStopped(MtcMediaSession session) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionAudioPaused(MtcMediaSession session) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionStarted(MtcMediaSession session) {
-            handleMediaSessionStarted();
-        }
-
-        @Override
-        public void onMediaSessionDebugInfoChanged(MtcMediaSession session,
-                OnScreenDebugInfoVideo debugInfo) {
-            // no-op
-        }
-
         @Override
         public void onMediaSessionDataUsageChanged(MtcMediaSession session,
                 long dataSize) {
@@ -870,97 +505,9 @@ public class ImsVideoCallProviderBase extends ImsVideoCallProvider
         }
 
         @Override
-        public void onMediaSessionPeerDisplayOrientationChanged(MtcMediaSession session,
-                final int orientation) {
-            handleMediaSessionPeerDisplayOrientationChanged(orientation);
-        }
-
-        @Override
         public void onMediaSessionPeerDimensionsChanged(MtcMediaSession session,
                 final int videoResolution) {
             handleMediaSessionPeerDimensionsChanged(videoResolution);
-        }
-
-        @Override
-        public void onMediaSessionSurfaceUpdateRequired(MtcMediaSession session) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionSelectCameraCompleted(MtcMediaSession session,
-                final int result) {
-            handleMediaSessionSelectCameraCompleted(result);
-        }
-
-        @Override
-        public void onMediaSessionSetCameraZoomCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionSetCameraBrightnessCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionCameraFrameReceived(MtcMediaSession session) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionStartBackgroundCompleted(MtcMediaSession session,
-                final int result) {
-            handleMediaSessionStartBackgroundCompleted(result);
-        }
-
-        @Override
-        public void onMediaSessionStopBackgroundCompleted(MtcMediaSession session,
-                final int result) {
-            handleMediaSessionStopBackgroundCompleted(result);
-        }
-
-        @Override
-        public void onMediaSessionCaptureVideoCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionSetAlternativeImageCompleted(MtcMediaSession session,
-                final int result) {
-            handleMediaSessionSetAlternativeImageCompleted(result);
-        }
-
-        @Override
-        public void onMediaSessionClearAlternativeImageCompleted(MtcMediaSession session,
-                final int result) {
-            handleMediaSessionClearAlternativeImageCompleted(result);
-        }
-
-        @Override
-        public void onMediaSessionSwapDisplayCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionUpdateDisplayCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionSetDisplaySizeCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
-        }
-
-        @Override
-        public void onMediaSessionSetDisplayOrientationCompleted(MtcMediaSession session,
-                final int result) {
-            // no-op
         }
     };
 }

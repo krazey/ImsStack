@@ -1585,7 +1585,7 @@ void MediaSession::ProcessOfferSdp(IN IMS_UINTP nNegoId)
     IMS_TRACE_I("ProcessOfferSdp() - nNegoId[%" PFLS_x "], m_bSessionOpened[%d]", nNegoId,
             m_bSessionOpened, 0);
 
-    if (m_eSessionState == EARLY_SESSION && !m_bSessionOpened)
+    if (m_eSessionState == EARLY_SESSION && m_bSessionOpened == IMS_FALSE)
     {
         m_nCommandBuffer = IMMedia::REQUEST_OPEN_SESSION;
         m_bSessionOpened = IMS_TRUE;
@@ -2133,14 +2133,6 @@ PROTECTED
 IMS_BOOL MediaSession::OnFarframeInd(IN IMS_UINTP pParam)
 {
     (void)pParam;
-    return IMS_TRUE;
-}
-
-PROTECTED
-IMS_BOOL MediaSession::OnStartPreviewCameraCmd(IN IMS_UINTP pParam)
-{
-    ImsMediaSetSurfaceCmdParam* pVideoParam = reinterpret_cast<ImsMediaSetSurfaceCmdParam*>(pParam);
-    delete pVideoParam;
     return IMS_TRUE;
 }
 

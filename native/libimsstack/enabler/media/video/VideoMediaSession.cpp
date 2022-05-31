@@ -38,19 +38,11 @@ PUBLIC VideoMediaSession::VideoMediaSession(IN IMS_SINT32 nSlotId) :
         m_objMediaQualityThreshold(MediaQualityThreshold()),
         m_objLocalAddress(IPAddress::IPv6NONE),
         m_nLocalPort(0),
-        m_nCameraId(0)
-// m_bGoToPendingForRestart(IMS_FALSE),
-// m_bConfSession(IMS_FALSE),
-// m_eSurfaceWaitingRequest(VideoAdaptor::REQUEST_INVALID),
-// m_eCameraWaiting(VideoAdaptor::REQUEST_INVALID),
-// m_eUpdatedType(UPDATED_NONE),
-// m_eHoldType(VIDEO_HOLD_PAUSE),
-// m_eMultiType(VIDEO_MULTI_PRE_ENCODED),
-// m_bDataReceivingStarted(IMS_FALSE),
-// m_bPreviewStarted(IMS_FALSE),
-// m_bIsConfirmedSession(IMS_FALSE),
-// m_bIsCheckMSGCBFlag(IMS_FALSE),
-// m_nPrevState(STATE_IDLE)
+        m_nCameraId(-1),
+        m_nCameraZoom(-1),
+        m_bPreviewSurfaceSet(IMS_FALSE),
+        m_bDisplaySurfaceSet(IMS_FALSE),
+        m_nState(STATE_IDLE)
 {
     IMS_TRACE_I("+VideoMediaSession()", 0, 0, 0);
 }
@@ -159,6 +151,12 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
             nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
             break;
     }
+
+    if (pNegoProfile->nDataPort == 0 || pSrcProfile->nDataPort == 0)
+    {
+        nVideoDerection = RtpConfig::MEDIA_DIRECTION_NO_FLOW;
+    }
+
     m_objVideoConfig.setMediaDirection((int32_t)nVideoDerection);
 
     IMS_TRACE_D("UpdateRtpConfig() - TxPayloadTypeNumber[%d], RxPayloadTypeNumber[%d]",
@@ -204,10 +202,7 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
         // public static final int VIDEO_MODE_RECORDING = 1;
         // public static final int VIDEO_MODE_PAUSE_IMAGE = 2;
 
-        m_objVideoConfig.setCodecType(VIDEO_CODEC_AVC);
-        // public static final int VIDEO_CODEC_AVC = 1 << 5;
-        // public static final int VIDEO_CODEC_HEVC = 1 << 6;
-
+        m_objVideoConfig.setCodecType(VideoConfig::CODEC_AVC);
         m_objVideoConfig.setFramerate(pFmtp->nFrameRate);
         m_objVideoConfig.setBitrate(pFmtp->nBitrate);
 
@@ -279,13 +274,21 @@ PUBLIC IMS_BOOL VideoMediaSession::UpdateRtpConfig(
 
         // TODO_MEDIA later
         m_objVideoConfig.setCameraId(m_nCameraId);
-        m_objVideoConfig.setCameraZoom(0);
+        m_objVideoConfig.setCameraZoom(m_nCameraZoom);
 
         IMS_UINT32 nWidth = 0;
         IMS_UINT32 nHeight = 0;
         VideoProfileConfigurer::GetWidthHeightFromResolution(pFmtp->eResolution, &nWidth, &nHeight);
-        m_objVideoConfig.setResolutionWidth(nWidth);
-        m_objVideoConfig.setResolutionHeight(nHeight);
+        if (nWidth < nHeight)
+        {
+            m_objVideoConfig.setResolutionWidth(nHeight);
+            m_objVideoConfig.setResolutionHeight(nWidth);
+        }
+        else
+        {
+            m_objVideoConfig.setResolutionWidth(nWidth);
+            m_objVideoConfig.setResolutionHeight(nHeight);
+        }
 
         // TODO_MEDIA later
         m_objVideoConfig.setPauseImagePath(android::String8("/image/path"));
@@ -460,12 +463,6 @@ IMS_BOOL VideoMediaSession::OnVideoMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pPa
         case IMMedia::SETSURFACE_CMD:
             bRet = OnSetSurfaceCmd(pParam);
             break;
-        case IMMedia::FARFRAME_IND:
-            bRet = OnFarframeInd(pParam);
-            break;
-        case IMMedia::START_PREVIEW_CAMERA_CMD:
-            bRet = OnStartPreviewCameraCmd(pParam);
-            break;
         case IMMedia::SELECT_CAMERA_CMD:
             bRet = OnSelectCameraCmd(pParam);
             break;
@@ -475,14 +472,8 @@ IMS_BOOL VideoMediaSession::OnVideoMessages(IN IMS_SINT32 nMsg, IN IMS_UINTP pPa
         case IMMedia::SET_PAUSE_IMAGE_CMD:
             bRet = OnSetPauseImageCmd(pParam);
             break;
-        case IMMedia::PEER_DIMENSION_CHANGED_IND:
-            bRet = OnPeerDimensionChangedInd(pParam);
-            break;
-        case IMMedia::VIDEO_DATA_USAGE_CMD:
-            bRet = OnVideoDataUsageCmd();
-            break;
-        case IMMedia::VIDEO_DATA_USAGE_INFO_IND:
-            bRet = OnVideoDataUsageInfoCmd(pParam);
+        case IMMedia::CHANGE_ORIENTATION_CMD:
+            bRet = OnChangeOrientation(pParam);
             break;
         default:
             break;
@@ -503,6 +494,18 @@ IMS_BOOL VideoMediaSession::Open()
         pParam->m_objVideoConfig = m_objVideoConfig;
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_OPEN_SESSION, pParam);
+
+        SetStateFromVideoMode(m_objVideoConfig.getVideoMode());
+
+        if (m_bPreviewSurfaceSet)
+        {
+            OnSetSurfaceCmd(reinterpret_cast<IMS_UINTP>(new ImsMediaVideoParam(SURFACE_NEAR)));
+        }
+
+        if (m_bDisplaySurfaceSet)
+        {
+            OnSetSurfaceCmd(reinterpret_cast<IMS_UINTP>(new ImsMediaVideoParam(SURFACE_FAR)));
+        }
     }
     return IMS_TRUE;
 }
@@ -518,51 +521,15 @@ IMS_BOOL VideoMediaSession::Modify()
         pParam->m_objVideoConfig = m_objVideoConfig;
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_MODIFY_SESSION, pParam);
-    }
-    return IMS_TRUE;
-}
 
-PUBLIC
-IMS_BOOL VideoMediaSession::Add()
-{
-    IMS_TRACE_I("Add()", 0, 0, 0);
-    if (m_piMediaSessionListener != IMS_NULL)
-    {
-        ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
-        pParam->m_objVideoConfig = m_objVideoConfig;
-        m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_ADD_CONFIG, pParam);
-    }
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL VideoMediaSession::Delete()
-{
-    IMS_TRACE_I("VideoMediaSession::Delete()", 0, 0, 0);
-    if (m_piMediaSessionListener != IMS_NULL)
-    {
-        ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
-        pParam->m_objVideoConfig = m_objVideoConfig;
-        m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_DELETE_CONFIG, pParam);
-    }
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL VideoMediaSession::Confirm()
-{
-    IMS_TRACE_I("Confirm()", 0, 0, 0);
-    if (m_piMediaSessionListener != IMS_NULL)
-    {
-        ImsMediaMsgVideoConfigParam* pParam = new ImsMediaMsgVideoConfigParam();
-        pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
-        pParam->m_objVideoConfig = m_objVideoConfig;
-        m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
-                IMMedia::REQUEST_CONFIRM_CONFIG, pParam);
+        if (m_objVideoConfig.getMediaDirection() != RtpConfig::MEDIA_DIRECTION_NO_FLOW)
+        {
+            SetStateFromVideoMode(m_objVideoConfig.getVideoMode());
+        }
+        else
+        {
+            m_nState = STATE_PAUSED;
+        }
     }
     return IMS_TRUE;
 }
@@ -577,6 +544,8 @@ IMS_BOOL VideoMediaSession::Close()
         pParam->m_eMediaType = MEDIA_TYPE_VIDEO;
         m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
                 IMMedia::REQUEST_CLOSE_SESSION, pParam);
+
+        m_nState = STATE_IDLE;
     }
     return IMS_TRUE;
 }
@@ -613,39 +582,77 @@ void VideoMediaSession::SendEventToUi(IMS_SINT32 nEvent, IMS_SINT32 nResult)
 PRIVATE
 IMS_BOOL VideoMediaSession::OnSetSurfaceCmd(IN IMS_UINTP pParam)
 {
-    (void)pParam;
-    return IMS_TRUE;
-}
+    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+    if (param != NULL)
+    {
+        IMS_TRACE_I("OnSetSurfaceCmd() - surface type[%d]", param->nValue, 0, 0);
+        if (m_piMediaSessionListener != IMS_NULL)
+        {
+            ImsMediaMsgParamBase newParam(MEDIA_TYPE_VIDEO);
+            if (param->nValue == SURFACE_FAR)
+            {
+                if (m_bDisplaySurfaceSet == IMS_FALSE)
+                {
+                    m_bDisplaySurfaceSet = IMS_TRUE;
 
-PRIVATE
-IMS_BOOL VideoMediaSession::OnFarframeInd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
-}
+                    if (m_nState == STATE_IDLE)
+                    {
+                        return IMS_TRUE;
+                    }
+                }
+                m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                        IMMedia::REQUEST_SET_DISPLAY_SURFACE, &newParam);
+            }
+            else
+            {
+                if (m_bPreviewSurfaceSet == IMS_FALSE)
+                {
+                    m_bPreviewSurfaceSet = IMS_TRUE;
 
-PRIVATE
-IMS_BOOL VideoMediaSession::OnStartPreviewCameraCmd(IN IMS_UINTP pParam)
-{
-    ImsMediaSetSurfaceCmdParam* pVideoParam = reinterpret_cast<ImsMediaSetSurfaceCmdParam*>(pParam);
-    delete pVideoParam;
-    return IMS_TRUE;
+                    if (m_nState == STATE_IDLE)
+                    {
+                        return IMS_TRUE;
+                    }
+                }
+                m_piMediaSessionListener->MediaSession_SendMsgToMediaManager(
+                        IMMedia::REQUEST_SET_PREVIEW_SURFACE, &newParam);
+            }
+        }
+        delete param;
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
 IMS_BOOL VideoMediaSession::OnSelectCameraCmd(IN IMS_UINTP pParam)
 {
-    ImsMediaVideoParam* pVideoParam = reinterpret_cast<ImsMediaVideoParam*>(pParam);
-    m_nCameraId = pVideoParam->nValue;
+    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
 
-    delete pVideoParam;
-    return IMS_TRUE;
+    if (param != NULL)
+    {
+        IMS_TRACE_I("OnSelectCameraCmd() - camera id[%d]", param->nValue, 0, 0);
+        m_nCameraId = param->nValue;
+        delete param;
+        return IMS_TRUE;
+    }
+
+    return IMS_FALSE;
 }
 
 PRIVATE
 IMS_BOOL VideoMediaSession::OnChangeCameraZoomCmd(IN IMS_UINTP pParam)
 {
-    (void)pParam;
+    ImsMediaVideoParam* param = reinterpret_cast<ImsMediaVideoParam*>(pParam);
+
+    if (param != NULL)
+    {
+        IMS_TRACE_I("OnChangeCameraZoomCmd() - camera zoom[%d]", param->nValue, 0, 0);
+        m_nCameraZoom = param->nValue;
+        delete param;
+        return IMS_TRUE;
+    }
     return IMS_TRUE;
 }
 
@@ -657,21 +664,24 @@ IMS_BOOL VideoMediaSession::OnSetPauseImageCmd(IN IMS_UINTP pParam)
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnPeerDimensionChangedInd(IN IMS_UINTP pParam)
+IMS_BOOL VideoMediaSession::OnChangeOrientation(IN IMS_UINTP pParam)
 {
     (void)pParam;
     return IMS_TRUE;
 }
 
 PRIVATE
-IMS_BOOL VideoMediaSession::OnVideoDataUsageCmd()
+void VideoMediaSession::SetStateFromVideoMode(IN IMS_SINT32 mode)
 {
-    return IMS_TRUE;
-}
-
-PRIVATE
-IMS_BOOL VideoMediaSession::OnVideoDataUsageInfoCmd(IN IMS_UINTP pParam)
-{
-    (void)pParam;
-    return IMS_TRUE;
+    switch (mode)
+    {
+        case VideoConfig::VIDEO_MODE_PREVIEW:
+            m_nState = STATE_PREVIEW;
+            break;
+        case VideoConfig::VIDEO_MODE_RECORDING:
+            m_nState = STATE_RECORDING;
+            break;
+        case VideoConfig::VIDEO_MODE_PAUSE_IMAGE:
+            m_nState = STATE_PAUSE_IMAGE;
+    }
 }

@@ -50,12 +50,9 @@ private:
     void OnResponseSessionChanged(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNofityHeaderExtension(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-
     void OnCmdSetSurface(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnCmdStartPreviewCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnCmdSelectCamera(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
     void OnCmdChangeCameraZoom(IN IMS_SINT32 nMsg, IN const android::Parcel& objParcel);
-    void OnCmdVideoDataUsage(IN IMS_SINT32 nMsg);
 
 private:
     JniMediaSessionThread* m_pThread;

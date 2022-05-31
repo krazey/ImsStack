@@ -241,11 +241,30 @@ IMS_BOOL JniMediaSessionThread::OnSetMediaQualityThreshold(
     objParcel.writeInt32(IMMedia::REQUEST_SET_MEDIA_QUALITY);
     objParcel.writeInt32((IMS_UINT32)ConvertToSessionType(pParam->m_eMediaType));
     pParam->m_objMediaQualityThreshold.writeToParcel(&objParcel);
-
     delete pParam;
-
     SendData2Java(objParcel, IMS_TRUE);
+    return IMS_TRUE;
+}
 
+PUBLIC
+IMS_BOOL JniMediaSessionThread::OnSetPreviewSurface()
+{
+    IMS_TRACE_D("OnSetPreviewSurface", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IMMedia::REQUEST_SET_PREVIEW_SURFACE);
+    objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
+    SendData2Java(objParcel, IMS_TRUE);
+    return IMS_TRUE;
+}
+
+PUBLIC
+IMS_BOOL JniMediaSessionThread::OnSetDisplaySurface()
+{
+    IMS_TRACE_D("OnSetDisplaySurface", 0, 0, 0);
+    Parcel objParcel;
+    objParcel.writeInt32(IMMedia::REQUEST_SET_DISPLAY_SURFACE);
+    objParcel.writeInt32((IMS_UINT32)SESSION_TYPE_VIDEO);
+    SendData2Java(objParcel, IMS_TRUE);
     return IMS_TRUE;
 }
 

@@ -92,7 +92,12 @@ IMS_BOOL MediaMsgHandler::SendMessageToMediaService(
             return m_pThread->OnSendDtmf((ImsMediaMsgDtmfParam*)pParam);
         case IMMedia::REQUEST_SET_MEDIA_QUALITY:
             return m_pThread->OnSetMediaQualityThreshold((ImsMediaMsgSetMediaQualityParam*)pParam);
+        case IMMedia::REQUEST_SET_PREVIEW_SURFACE:
+            return m_pThread->OnSetPreviewSurface();
+        case IMMedia::REQUEST_SET_DISPLAY_SURFACE:
+            return m_pThread->OnSetDisplaySurface();
         default:
+            IMS_TRACE_E(0, "SendMessageToMediaService() eEvent[%d], not handled", eEvent, 0, 0);
             return IMS_TRUE;
     }
 }

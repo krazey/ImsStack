@@ -40,6 +40,8 @@ public:
     IMS_BOOL OnConfirmConfig(IN ImsMediaMsgConfigParam* pParam);
     IMS_BOOL OnSendDtmf(IN ImsMediaMsgDtmfParam* pParam);
     IMS_BOOL OnSetMediaQualityThreshold(IN ImsMediaMsgSetMediaQualityParam* pParam);
+    IMS_BOOL OnSetPreviewSurface();
+    IMS_BOOL OnSetDisplaySurface();
 
 protected:
     virtual IMS_BOOL IsThreadSwitchingRequired(IN IMS_SINT32 nMsg) const;
