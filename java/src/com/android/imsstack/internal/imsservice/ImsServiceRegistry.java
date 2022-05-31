@@ -20,6 +20,7 @@ import android.telephony.ims.feature.MmTelFeature;
 import android.util.SparseArray;
 
 import com.android.imsstack.util.AppContext;
+import com.android.imsstack.util.ImsLog;
 
 import java.util.Objects;
 import java.util.Set;
@@ -42,17 +43,28 @@ public class ImsServiceRegistry {
          */
         default void onMmTelFeatureChanged() {
         }
+
+        /**
+         * Notifies the components who monitor the ImsService related data that
+         * IMS on/off is changed.
+         */
+        default void onImsOnOffChanged() {
+        }
     }
 
     // Maps a slot-id to a list of ImsServiceRegistry.
     private static SparseArray<ImsServiceRegistry> sImsServiceRegistrys = new SparseArray<>(2);
 
     private final Object mLock = new Object();
+    private final int mSlotId;
+    private boolean mImsEnabled;
     private MmTelFeature mMmTelFeature;
     private final MmTelFeatureRegistry mMmTelFeatureRegistry;
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
 
     ImsServiceRegistry(int slotId) {
+        mSlotId = slotId;
+        mImsEnabled = true;
         mMmTelFeature = null;
         mMmTelFeatureRegistry = new MmTelFeatureRegistry(slotId, mLock);
     }
@@ -107,6 +119,33 @@ public class ImsServiceRegistry {
     }
 
     /**
+     * Checks if IMS is enabled or disabled.
+     *
+     * @return true if IMS is enabled, false otherwise.
+     */
+    public boolean isImsEnabled() {
+        synchronized (mLock) {
+            return mImsEnabled;
+        }
+    }
+
+    /**
+     * Sets the IMS on/off status.
+     *
+     * @param enabled The IMS status to be turned on or off.
+     */
+    public void setImsEnabled(boolean enabled) {
+        synchronized (mLock) {
+            if (mImsEnabled != enabled) {
+                ImsLog.i(mSlotId, "setImsEnabled: " + mImsEnabled + " >> " + enabled);
+                mImsEnabled = enabled;
+
+                notifyImsOnOffChanged();
+            }
+        }
+    }
+
+    /**
      * Adds the listener to monitor the state of this class.
      *
      * @param listener The listener to be aded.
@@ -137,6 +176,14 @@ public class ImsServiceRegistry {
         AppContext.runTask(() -> {
             for (Listener l : mListeners) {
                 l.onMmTelFeatureChanged();
+            }
+        }, 0);
+    }
+
+    private void notifyImsOnOffChanged() {
+        AppContext.runTask(() -> {
+            for (Listener l : mListeners) {
+                l.onImsOnOffChanged();
             }
         }, 0);
     }
