@@ -15,10 +15,8 @@ import android.content.Context;
 
 import com.android.imsstack.imsservice.base.ImsContext;
 import com.android.imsstack.imsservice.sipcontroller.ImsSipTransport;
-import com.android.imsstack.internal.imsservice.GImsInterfaceRegistry;
-import com.android.imsstack.internal.imsservice.GImsServiceRegistry;
+import com.android.imsstack.internal.imsservice.ImsServiceRegistry;
 import com.android.imsstack.util.ImsLog;
-import com.android.imsstack.util.SettingsUtils;
 
 import java.util.concurrent.Executor;
 
@@ -35,7 +33,6 @@ public final class ImsServiceRecord {
     private ImsRegistrationTracker mRegTracker = null;
     private ImsCallApp mCallApp = null;
     private boolean mServiceUp = false;
-    private boolean mImsOn = true;
 
     //This is an implementation of SipTransport required for single registration support.
     private ImsSipTransport mSipTransport = null;
@@ -52,16 +49,9 @@ public final class ImsServiceRecord {
         mSlotId = phoneId;//NOTE: Slot id is used at ImsService to get service records mapped
         // phone id.
 
-        // The default setting will be obtained from the global settings,
-        // and the status will be reported at first.
-        mImsOn = SettingsUtils.isEnhanced4GModeEnabled(
-                mContext.getContext(), phoneId);
-        updateServiceRegistry();
-
         // Create ImsRegistrationImplBase object
         getRegistration();
         getRegistrationTracker();
-
      }
 
     /**
@@ -166,12 +156,6 @@ public final class ImsServiceRecord {
         }
     }
 
-    public boolean isImsOn() {
-        synchronized (mLock) {
-            return mImsOn;
-        }
-    }
-
     public boolean isServiceUp() {
         synchronized (mLock) {
             return mServiceUp;
@@ -201,37 +185,13 @@ public final class ImsServiceRecord {
     }
 
     public void disableIms() {
-        setImsOn(false);
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mContext.getSlotId());
+        isr.setImsEnabled(false);
     }
 
     public void enableIms() {
-        setImsOn(true);
-    }
-
-    private void setImsOn(boolean onOff) {
-        boolean changed = false;
-
-        synchronized (mLock) {
-            if (mImsOn != onOff) {
-                logi("setImsOn :: " + mImsOn + " >> " + onOff);
-                mImsOn = onOff;
-                changed = true;
-            }
-        }
-
-        if (changed) {
-            updateServiceRegistry();
-        }
-    }
-
-    private void updateServiceRegistry() {
-        GImsServiceRegistry gisr = GImsInterfaceRegistry.getInstance().getServiceRegistry();
-
-        if (isImsOn()) {
-            gisr.turnOnIms(mContext.getPhoneId());
-        } else {
-            gisr.turnOffIms(mContext.getPhoneId());
-        }
+        ImsServiceRegistry isr = ImsServiceRegistry.getInstance(mContext.getSlotId());
+        isr.setImsEnabled(true);
     }
 
     private static void log(String s) {

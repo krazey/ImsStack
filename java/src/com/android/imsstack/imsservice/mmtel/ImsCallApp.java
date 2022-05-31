@@ -22,8 +22,6 @@ import com.android.imsstack.imsservice.mmtel.base.IMmTelCallListener;
 import com.android.imsstack.imsservice.mmtel.base.IMmTelFeatureCapabilityListener;
 import com.android.imsstack.imsservice.mmtel.base.ImsApp;
 import com.android.imsstack.imsservice.mmtel.base.TtyModeTracker;
-import com.android.imsstack.internal.imsservice.GImsInterfaceRegistry;
-import com.android.imsstack.internal.imsservice.GImsInterfaceServiceRegistry;
 import com.android.imsstack.test.IImsTestMode;
 import com.android.imsstack.util.MSimUtils;
 
@@ -52,8 +50,6 @@ public class ImsCallApp extends ImsApp {
         mFeatureManager = new ImsFeatureManager(mCallContext, featureCapabilityListener);
         mCallManager = new ImsCallManager(mCallContext,
                 mCallContext.getMtcApp(), callListener);
-
-        setGImsInterfaceRegistry();
 
         // FIXME: remove later if SS control configuration is properly provided
         getUtInterface();
@@ -95,8 +91,6 @@ public class ImsCallApp extends ImsApp {
             mFeatureManager.dispose();
             mFeatureManager = null;
         }
-
-        clearGImsInterfaceRegistry();
 
         mCallContext.dispose();
 
@@ -284,22 +278,6 @@ public class ImsCallApp extends ImsApp {
         if (tmt != null) {
             tmt.setTtyMode(ttyMode);
         }
-    }
-
-    private void clearGImsInterfaceRegistry() {
-        GImsInterfaceRegistry giir = GImsInterfaceRegistry.getInstance();
-        GImsInterfaceServiceRegistry gisr = (GImsInterfaceServiceRegistry)giir.getServiceRegistry();
-
-        gisr.setCallStateTracker(getPhoneId(), null);
-        gisr.setServiceStateTracker(getPhoneId(), null);
-    }
-
-    private void setGImsInterfaceRegistry() {
-        GImsInterfaceRegistry giir = GImsInterfaceRegistry.getInstance();
-        GImsInterfaceServiceRegistry gisr = (GImsInterfaceServiceRegistry)giir.getServiceRegistry();
-
-        gisr.setCallStateTracker(getPhoneId(), mCallContext.getMtcApp().getCallManager());
-        gisr.setServiceStateTracker(getPhoneId(), mCallContext.getServiceStateTracker());
     }
 
     /**
