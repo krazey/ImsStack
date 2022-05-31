@@ -1037,6 +1037,9 @@ IMS_BOOL MediaSession::OnResponse(IN IMS_SINT32 nMsg, IN IMS_UINTP pParam)
         case IMMedia::NOTIFY_QOS_INFO:
             bRet = OnNotifyQosInfo(pParam);
             break;
+        case IMMedia::NOTIFY_MEDIA_DETACH:
+            bRet = OnNotifyMediaDetach();
+            break;
         default:
             break;
     }
@@ -2082,6 +2085,16 @@ IMS_BOOL MediaSession::OnNotifyQosInfo(IN IMS_UINTP pParam_)
 
     delete pParam;
     delete pBasicSessionInfo;
+    return IMS_TRUE;
+}
+
+PROTECTED
+IMS_BOOL MediaSession::OnNotifyMediaDetach()
+{
+    IMS_TRACE_I("OnNotifyMediaDetach()", 0, 0, 0);
+
+    m_pClientListener->MediaSession_Notify(REPORT_MEDIA_DETACH);
+
     return IMS_TRUE;
 }
 
