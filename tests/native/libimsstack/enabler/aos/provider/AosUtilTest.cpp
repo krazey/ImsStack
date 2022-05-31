@@ -16,16 +16,20 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+
+#include "../../../engine/interface/registration/MockIRegistration.h"
+#include "../../../engine/interface/sipcore/MockISipMessage.h"
+
 #include "IMSList.h"
 #include "INetworkWatcher.h"
 #include "ISipHeader.h"
 #include "ISipMessage.h"
 #include "msg/SipMessage.h"
-#include "../../../engine/interface/sipcore/MockISipMessage.h"
 #include "interface/IAosBlock.h"
 #include "provider/AosUtil.h"
 
 using ::testing::Return;
+using ::testing::ReturnNull;
 
 class AosUtilTest : public ::testing::Test
 {
@@ -52,7 +56,7 @@ protected:
     void SetWiFiTest(IN IMS_BOOL bIsWifiTest) { pAosUtil->m_bIsWifiTest = bIsWifiTest; }
 };
 
-TEST_F(AosUtilTest, checkSipMsg)
+TEST_F(AosUtilTest, GetResponseCode)
 {
     EXPECT_EQ(-1, pAosUtil->GetResponseCode(IMS_NULL));
 
@@ -63,6 +67,118 @@ TEST_F(AosUtilTest, checkSipMsg)
 
     EXPECT_CALL(objMockSipMsg, GetStatusCode()).WillRepeatedly(Return(200));
     EXPECT_EQ(200, pAosUtil->GetResponseCode(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, GetRetryAfterValue)
+{
+    MockISipMessage objMockSipMsg;
+    MockIRegistration objMockIRegistration;
+    EXPECT_CALL(objMockIRegistration, GetPreviousResponse())
+            .WillOnce(ReturnNull())
+            .WillRepeatedly(Return(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+
+    EXPECT_EQ(0, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+    EXPECT_EQ(0, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+
+    strHeader.Append("60");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::RETRY_AFTER_SEC, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+
+    EXPECT_EQ(60, pAosUtil->GetRetryAfterValue(static_cast<IRegistration*>(&objMockIRegistration)));
+}
+
+TEST_F(AosUtilTest, GetMinExpiresValue)
+{
+    EXPECT_EQ(-1, pAosUtil->GetMinExpiresValue(IMS_NULL));
+
+    MockISipMessage objMockSipMsg;
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(-1, pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    strHeader.Append("600");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::MIN_EXPIRES, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(600, pAosUtil->GetMinExpiresValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, GetKeepAliveValue)
+{
+    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(IMS_NULL));
+
+    MockISipMessage objMockSipMsg;
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    strHeader.Append("SIP/2.0/UDP 10.168.219.102");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(-1, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    strHeader.Append(";keep");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(0, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+
+    strHeader.Append("=30");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::VIA, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_EQ(30000, pAosUtil->GetKeepAliveValue(static_cast<ISipMessage*>(&objMockSipMsg)));
+}
+
+TEST_F(AosUtilTest, GetProxyFromContact)
+{
+    AString strUseProxy;
+    IMS_UINT32 nUseProxyPort;
+    EXPECT_FALSE(pAosUtil->GetProxyFromContact(IMS_NULL, strUseProxy, nUseProxyPort));
+
+    MockISipMessage objMockSipMsg;
+    AString strHeader = "";
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_FALSE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+
+    strHeader.Append("*");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_FALSE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+
+    strHeader = "";
+    strHeader.Append("1234");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+
+    strHeader = "";
+    strHeader.Append("sip:1234@ims.google.com:4500");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+
+    strHeader = "";
+    strHeader.Append("sip:1234@ims.google.com:65535");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
+
+    strHeader = "";
+    strHeader.Append("sip:1234@ims.google.com:8080");
+    EXPECT_CALL(objMockSipMsg, GetHeader(ISipHeader::CONTACT_NORMAL, 0, AString::ConstNull()))
+            .WillOnce(Return(strHeader));
+    EXPECT_TRUE(pAosUtil->GetProxyFromContact(
+            static_cast<ISipMessage*>(&objMockSipMsg), strUseProxy, nUseProxyPort));
 }
 
 TEST_F(AosUtilTest, SetRetryTimeDuration)
