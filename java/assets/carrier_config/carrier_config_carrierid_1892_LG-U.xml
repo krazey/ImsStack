@@ -87,6 +87,9 @@
     <int name="imsvt.video_as_bandwidth_kbps_int" value="639"/>
     <int name="imsvt.video_rs_bandwidth_bps_int" value="0"/>
     <int name="imsvt.video_rr_bandwidth_bps_int" value="2500"/>
+    <string-array name="imsvoice.audio_candidate_attribute_string_array" num="1">
+        <item value="1, UDP, 1119400811, 10.3.210.77, 7010, typ, host"/>
+    </string-array>
 
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>

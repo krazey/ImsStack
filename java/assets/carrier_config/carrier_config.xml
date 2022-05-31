@@ -155,15 +155,6 @@
     <boolean name="imsvoice.audio_rtcpxr_packet_duplicate_rle_bool" value="false"/>
     <int name="imsvoice.audio_ptime_int" value="20"/>
     <int name="imsvoice.audio_maxptime_int" value="240"/>
-    <string-array name="imsvoice.audio_candidate_attribute_string_array" num="7">
-        <item value="1"/>
-        <item value="UDP"/>
-        <item value="1119400811"/>
-        <item value="10.3.210.77"/>
-        <item value="7010"/>
-        <item value="typ"/>
-        <item value="host"/>
-    </string-array>
     <string name="imsvoice.evs_amrwb_io_mode_set_string" value=""/>
     <int name="imsvoice.codec_attribute_mode_change_capability_int" value="2"/>
     <boolean name="imsvt.video_sdp_answer_full_capability_bool" value="false"/>

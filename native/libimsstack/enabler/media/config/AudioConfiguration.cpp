@@ -106,6 +106,9 @@ PUBLIC VIRTUAL IMS_BOOL AudioConfiguration::Create(IN ICarrierConfig* piCc)
         }
     }
 
+    m_objAudioCandidateAttribute = piCc->GetStringArray(
+            CarrierConfig::ImsVoice::KEY_AUDIO_CANDIDATE_ATTRIBUTE_STRING_ARRAY);
+
     // rtcp-xr
     m_bAudioRtcpxrEnabled = piCc->GetBoolean(CarrierConfig::ImsVoice::KEY_AUDIO_RTCPXR_ENABLE_BOOL);
     m_bAudioRtcpxrStatisticsEnabled =
