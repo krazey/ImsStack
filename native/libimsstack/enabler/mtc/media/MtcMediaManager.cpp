@@ -422,6 +422,11 @@ PUBLIC VIRTUAL void MtcMediaManager::UpdatePemType(IN ISession* piSession, IN IM
 PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* piMessage,
         IN IMS_BOOL bEarly, IN IMS_BOOL bNegoUpdated /*= IMS_TRUE*/)
 {
+    if (bEarly && m_objContext.GetCallInfo().ePeerType == PeerType::MO)
+    {
+        UpdateLocalTone(piSession);
+    }
+
     if (GetNegotiationState(piSession) != NegotiationState::STATE_NEGOTIATED)
     {
         IMS_TRACE_D("Run : SDP is not negotiated, Don't run the media.", 0, 0, 0);
@@ -432,10 +437,6 @@ PUBLIC VIRTUAL void MtcMediaManager::Run(IN ISession* piSession, IN IMessage* pi
     {
         SetConfirmedSession(piSession);
         FinalizeSdp(piSession);
-    }
-    else if (m_objContext.GetCallInfo().ePeerType == PeerType::MO)
-    {
-        UpdateLocalTone(piSession);
     }
 
     IMS_UINT32 nTimeWaitingNetworkTone = GetDurationWaitingNetworkTone(piSession, piMessage);
