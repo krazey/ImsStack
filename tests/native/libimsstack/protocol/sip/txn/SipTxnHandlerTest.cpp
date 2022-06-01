@@ -18,7 +18,7 @@
 #include "txn/SipTxnHandler.h"
 #include "transport/SipTransportInfo.h"
 #include "IMSTypeDef.h"
-#include "SIPStackCallback.h"
+#include "SipStackCallback.h"
 #include "txn/SipTimeoutData.h"
 
 namespace android

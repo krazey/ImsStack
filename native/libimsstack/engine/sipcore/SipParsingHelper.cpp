@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SIPHeader.h"
+#include "SipHeader.h"
 #include "SipHeaderName.h"
-#include "SIPMessage.h"
+#include "SipMessage.h"
 #include "SipParsingHelper.h"
-#include "SIPPrivate.h"
+#include "SipPrivate.h"
 
 PUBLIC GLOBAL ISipHeader* SipParsingHelper::CreateHeader(IN const AString& strName)
 {

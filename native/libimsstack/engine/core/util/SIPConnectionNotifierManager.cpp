@@ -31,7 +31,7 @@
 #include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipConfigProxy.h"
-#include "SIPFactoryProxy.h"
+#include "SipFactoryProxy.h"
 #include "SipRoutingRejectNotifier.h"
 #include "Feature.h"
 #include "util/CallerPreference.h"

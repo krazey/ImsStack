@@ -16,16 +16,16 @@
 #include "ServiceMemory.h"
 
 #include "SipFactory.h"
-#include "SIPFactoryProxy.h"
+#include "SipFactoryProxy.h"
 #include "SipFeatures.h"
-#include "SIPIPSecState.h"
-#include "SIPKeepAliveHelper.h"
-#include "SIPMessageTracker.h"
-#include "SIPPacketTracker.h"
+#include "SipIpSecState.h"
+#include "SipKeepAliveHelper.h"
+#include "SipMessageTracker.h"
+#include "SipPacketTracker.h"
 #include "SipRoutingRejectNotifier.h"
-#include "SIPRTConfigHelper.h"
-#include "SIPTransportHelper.h"
-#include "SIPUtil.h"
+#include "SipRtConfigHelper.h"
+#include "SipTransportHelper.h"
+#include "SipUtils.h"
 
 PUBLIC GLOBAL ISipKeepAliveHelper* SipFactory::CreateKeepAliveHelper(IN IMS_SINT32 nSlotId)
 {

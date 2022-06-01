@@ -14,7 +14,7 @@
 #ifdef ___IMS_DYNAMIC_BINDER___
 #include "Protocol.h"
 #else
-#include "SIPProtocol.h"
+#include "SipProtocol.h"
 #include "IMSCoreProtocol.h"
 
 #endif  // ___IMS_DYNAMIC_BINDER___

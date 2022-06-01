@@ -17,8 +17,8 @@
 
 #include "Feature.h"
 #include "SipParameter.h"
-#include "SIPPrivate.h"
-#include "SIPUtil.h"
+#include "SipPrivate.h"
+#include "SipUtils.h"
 
 PUBLIC
 SipParameter::SipParameter() :

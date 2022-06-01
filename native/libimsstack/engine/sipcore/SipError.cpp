@@ -16,7 +16,7 @@
 #include "ServiceMemory.h"
 
 #include "SipError.h"
-#include "SIPPrivate.h"
+#include "SipPrivate.h"
 
 /**
  * Returns an SIP last error code

@@ -24,10 +24,10 @@
 #include "SipAddress.h"
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SIPHeader.h"
-#include "SIPPrivate.h"
-#include "SIPStackHeaders.h"
-#include "SIPUtil.h"
+#include "SipHeader.h"
+#include "SipPrivate.h"
+#include "SipStackHeaders.h"
+#include "SipUtils.h"
 
 __IMS_TRACE_TAG_SIP__;
 

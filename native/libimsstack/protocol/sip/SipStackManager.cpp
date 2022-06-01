@@ -8,7 +8,7 @@
 #include "transport/SipTransportHandler.h"
 #include "sip_debug.h"
 #include "SipUtil.h"
-#include "SIPMessageBuffer.h"
+#include "SipMessageBuffer.h"
 
 extern SIP_VOID sip_cbk_preProcessMessageSentByStack(IN SIP_VOID* pSipMsg,
         IN ISipUserData* pUserData);

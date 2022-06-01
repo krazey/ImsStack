@@ -11,7 +11,7 @@
 */
 
 #include "ServiceMemory.h"
-#include "StaticSIP.h"
+#include "StaticSip.h"
 #include "base/IMS.h"
 #include "EngineState.h"
 

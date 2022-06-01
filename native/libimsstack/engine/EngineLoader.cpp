@@ -9,7 +9,7 @@
     Description
 
 */
-#include "StaticSIP.h"
+#include "StaticSip.h"
 #include "base/IMS.h"
 #include "util/SIPConnectionNotifierManager.h"
 #include "base/SubscriberTracker.h"
