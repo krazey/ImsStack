@@ -3,7 +3,6 @@ package com.android.imsstack.imsservice.mmtel;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.net.Uri;
-import android.telephony.ims.ProvisioningManager;
 import android.telephony.ims.feature.CapabilityChangeRequest.CapabilityPair;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.feature.MmTelFeature;
@@ -19,7 +18,6 @@ import com.android.imsstack.enabler.aos.IAosRegistration;
 import com.android.imsstack.enabler.aos.IAosRegistration.CapabilityPairs;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener;
 import com.android.imsstack.enabler.aos.IAosRegistrationListener.FeatureTagMask;
-import com.android.imsstack.imsservice.mmtel.config.base.ConfigurationListener;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -36,17 +34,14 @@ public final class ImsRegistrationTracker {
     private final ImsRegistrationImpl mRegImpl;
     private ImsFeatureManager mFeatureManager;
     private RegTracker mRegTracker;
-    private MmTelCapabilityTracker mMmTelCapabilityTracker;
     private int mFeatures = FeatureTagMask.NONE;
     private List<Pair<Integer, Integer>> mCapabilities;
 
-    public ImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl,
-            ImsConfigImpl config) {
+    public ImsRegistrationTracker(IContext context, ImsRegistrationImpl regImpl) {
         mContext = context;
         mRegImpl = regImpl;
         mFeatureManager = null;
         mFeatures = FeatureTagMask.NONE;
-        mMmTelCapabilityTracker = new MmTelCapabilityTracker(config);
         mRegTracker = new RegTracker();
         mCapabilities = new ArrayList<Pair<Integer, Integer>>();
 
@@ -58,7 +53,6 @@ public final class ImsRegistrationTracker {
         mRegImpl.notifyDeregistered(0);
         mRegImpl.setRegistrationTracker(null);
         mRegTracker.clear();
-        mMmTelCapabilityTracker.clear();
         mCapabilities.clear();
     }
 
@@ -87,38 +81,24 @@ public final class ImsRegistrationTracker {
     }
 
     public boolean isCallRegistered() {
-        return mMmTelCapabilityTracker.isCallRegistered();
+        return (isCallVoiceRegistered() || isCallVideoRegistered());
     }
 
     public boolean isCallVideoRegistered() {
-        logi("ImsRegistrationTracker isCallVideoRegistered");
-        return mMmTelCapabilityTracker.isVideoRegistered();
+        return ((mFeatures & FeatureTagMask.VIDEO) != 0);
     }
 
     public boolean isCallVoiceRegistered() {
-        logi("ImsRegistrationTracker isCallVoiceRegistered");
-        return mMmTelCapabilityTracker.isVoiceRegistered();
+        return ((mFeatures & FeatureTagMask.MMTEL) != 0);
     }
 
     public boolean isCallVoiceAndVideoRegistered() {
-        return mMmTelCapabilityTracker.isVoiceAndVideoRegistered();
-    }
-
-    public boolean isCallVideoSupported() {
-        return mMmTelCapabilityTracker.isVideoSupported();
-    }
-
-    public boolean isCallVoiceSupported() {
-        return mMmTelCapabilityTracker.isVoiceSupported();
-    }
-
-    public boolean isWifiCallSupported() {
-        return mMmTelCapabilityTracker.isWfcEnabled();
+        return (isCallVoiceRegistered() && isCallVideoRegistered());
     }
 
     public void refreshCallRegistrationState() {
-        mMmTelCapabilityTracker.clear();
-        mMmTelCapabilityTracker.init();
+        mRegTracker.clear();
+        mRegTracker.init();
     }
 
     public void setFeatureManager(ImsFeatureManager featureManager) {
@@ -515,102 +495,6 @@ public final class ImsRegistrationTracker {
             mFeatureTags.put(FeatureTagMask.CHATBOT_ROLE, "+g.gsma.rcs.isbot");
             mFeatureTags.put(FeatureTagMask.PRESENCE,
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcse.dp\"");
-        }
-    }
-
-    private class MmTelCapabilityTracker extends ConfigurationListener {
-        private boolean mVoiceEnabled;
-        private boolean mVideoEnabled;
-        private boolean mWfcEnabled;
-        private final ImsConfigImpl mConfig;
-
-        public MmTelCapabilityTracker(ImsConfigImpl config) {
-            mConfig = config;
-            init();
-        }
-
-        public void clear() {
-            mVoiceEnabled = false;
-            mVideoEnabled = false;
-            mWfcEnabled = false;
-            mConfig.removeListener(this);
-        }
-
-        public void init() {
-            mConfig.addListener(this);
-
-            updateProvisioningValues(ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS);
-            updateProvisioningValues(ProvisioningManager.KEY_VT_PROVISIONING_STATUS);
-            updateProvisioningValues(ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE);
-
-            log("voiceEnabled=" + mVoiceEnabled
-                    + ", videoEnabled=" + mVideoEnabled
-                    + ", wfcEnabled=" + mWfcEnabled);
-        }
-
-        public boolean isVideoRegistered() {
-            return ((mFeatures & FeatureTagMask.VIDEO) != 0);
-        }
-
-        public boolean isVoiceRegistered() {
-            return ((mFeatures & FeatureTagMask.MMTEL) != 0);
-        }
-
-        public boolean isVoiceAndVideoRegistered() {
-            return (isVoiceRegistered() && isVideoRegistered());
-        }
-
-        public boolean isCallRegistered() {
-            return (isVoiceRegistered() || isVideoRegistered());
-        }
-
-        public boolean isVideoSupported() {
-            return mVideoEnabled;
-        }
-
-        public boolean isVoiceSupported() {
-            return mVoiceEnabled || mWfcEnabled;
-        }
-
-        public boolean isWfcEnabled() {
-            return mWfcEnabled;
-        }
-
-        @Override
-        public void onImsConfigurationChanged(int item) {
-            updateProvisioningValues(item);
-        }
-
-        private void updateProvisioningValues(int item) {
-            switch (item) {
-                case ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS:
-                    if (mConfig.getConfigInt(ProvisioningManager.KEY_VOLTE_PROVISIONING_STATUS) ==
-                            ProvisioningManager.PROVISIONING_VALUE_ENABLED) {
-                        mVoiceEnabled = true;
-                    } else {
-                        mVoiceEnabled = false;
-                    }
-                    break;
-                case ProvisioningManager.KEY_VT_PROVISIONING_STATUS:
-                    if (mConfig.getConfigInt(ProvisioningManager.KEY_VT_PROVISIONING_STATUS) ==
-                            ProvisioningManager.PROVISIONING_VALUE_ENABLED) {
-                        mVideoEnabled = true;
-                    } else {
-                        mVideoEnabled = false;
-                    }
-                    break;
-                case ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE:
-                    if (mConfig.getConfigInt(
-                            ProvisioningManager.KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE)
-                            == ProvisioningManager.PROVISIONING_VALUE_ENABLED) {
-                        mWfcEnabled = true;
-                    } else {
-                        mWfcEnabled = false;
-                    }
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

@@ -148,8 +148,7 @@ public final class ImsServiceRecord {
     public ImsRegistrationTracker getRegistrationTracker() {
         synchronized (mLock) {
             if (mRegTracker == null) {
-                mRegTracker = new ImsRegistrationTracker(mContext, getRegistration(),
-                        getConfig());
+                mRegTracker = new ImsRegistrationTracker(mContext, getRegistration());
             }
 
             return mRegTracker;
