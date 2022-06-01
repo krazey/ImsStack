@@ -171,12 +171,6 @@ public:
     IMS_SINT32 ResetEvent(IN IMS_SINT32 nEvent, IN IMS_SINT32 nSlotId);
 
     ////
-    // SRVCC information
-    ////
-    IMS_SINT32 ListenSrvccEvent(IN IMS_SINT32 nSlotId);
-    IMS_SINT32 UnlistenSrvccEvent(IN IMS_SINT32 nSlotId);
-
-    ////
     // WFC information
     ////
     IMS_BOOL IsWifiCallingEnabled(IN IMS_SINT32 nSlotId);

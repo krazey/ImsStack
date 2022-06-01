@@ -165,12 +165,6 @@ public class SystemConstants {
     public static final int RESET_EVENT = CATEGORY_BASE + 803;
 
     /**
-     * SRVCC information
-     */
-    public static final int LISTEN_SRVCC_EVENT = CATEGORY_BASE + 1001;
-    public static final int UNLISTEN_SRVCC_EVENT = CATEGORY_BASE + 1002;
-
-    /**
      * WFC information
      */
     public static final int IS_WFC_ENABLED = CATEGORY_BASE + 1101;

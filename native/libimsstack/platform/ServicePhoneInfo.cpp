@@ -32,7 +32,6 @@ public:
 public:
     ISubscriberInfo* GetSubscriberInfo(IN IMS_SINT32 nSlotId);
     INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId);
-    ISrvcc* GetSrvcc(IN IMS_SINT32 nSlotId);
     ICallInfo* GetCallInfo(IN IMS_SINT32 nSlotId);
     IIsim* GetIsim(IN IMS_SINT32 nSlotId);
     IUsim* GetUsim(IN IMS_SINT32 nSlotId);
@@ -42,7 +41,6 @@ public:
 private:
     ISubscriberInfo* m_piSubscriberInfo;
     INetworkWatcher* m_piNetworkWatcher;
-    ISrvcc* m_piSrvcc;
     ICallInfo* m_piCallInfo;
     IIsim* m_piIsim;
     IUsim* m_piUsim;
@@ -53,7 +51,6 @@ PUBLIC
 PhoneInfoHolder::PhoneInfoHolder() :
         m_piSubscriberInfo(IMS_NULL),
         m_piNetworkWatcher(IMS_NULL),
-        m_piSrvcc(IMS_NULL),
         m_piCallInfo(IMS_NULL),
         m_piIsim(IMS_NULL),
         m_piUsim(IMS_NULL),
@@ -66,7 +63,6 @@ PhoneInfoHolder::~PhoneInfoHolder()
 {
     PlatformFactory::DestroySubscriberInfo(m_piSubscriberInfo);
     PlatformFactory::DestroyNetworkWatcher(m_piNetworkWatcher);
-    PlatformFactory::DestroySrvcc(m_piSrvcc);
     PlatformFactory::DestroyCallInfo(m_piCallInfo);
     PlatformFactory::DestroyIsim(m_piIsim);
     PlatformFactory::DestroyUsim(m_piUsim);
@@ -93,17 +89,6 @@ INetworkWatcher* PhoneInfoHolder::GetNetworkWatcher(IN IMS_SINT32 nSlotId)
     }
 
     return m_piNetworkWatcher;
-}
-
-PUBLIC
-ISrvcc* PhoneInfoHolder::GetSrvcc(IN IMS_SINT32 nSlotId)
-{
-    if (m_piSrvcc == IMS_NULL)
-    {
-        m_piSrvcc = PlatformFactory::CreateSrvcc(nSlotId);
-    }
-
-    return m_piSrvcc;
 }
 
 PUBLIC
@@ -399,13 +384,6 @@ PUBLIC
 IWifiWatcher* PhoneInfoService::GetWifiWatcher()
 {
     return m_pPrivate->GetWifiWatcher();
-}
-
-PUBLIC
-ISrvcc* PhoneInfoService::GetSrvcc(IN IMS_SINT32 nSlotId)
-{
-    PhoneInfoHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
-    return pHolder->GetSrvcc(nSlotId);
 }
 
 PUBLIC

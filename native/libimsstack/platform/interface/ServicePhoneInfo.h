@@ -23,7 +23,6 @@
 #include "IPhoneInfoLocation.h"
 #include "IPhoneInfoPower.h"
 #include "IPhoneInfoSubscriber.h"
-#include "ISrvcc.h"
 #include "ITrm.h"
 #include "IUsim.h"
 #include "IWifiWatcher.h"
@@ -61,7 +60,6 @@ public:
     INetworkWatcher* GetNetworkWatcher(IN IMS_SINT32 nSlotId);
     IWifiWatcher* GetWifiWatcher();
 
-    ISrvcc* GetSrvcc(IN IMS_SINT32 nSlotId);
     ITrm* GetTrm();
 
     static PhoneInfoService* GetPhoneInfoService();

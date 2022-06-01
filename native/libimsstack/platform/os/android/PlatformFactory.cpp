@@ -35,7 +35,6 @@
 #include "device/OsPhoneInfoCall.h"
 #include "device/OsPowerInfo.h"
 #include "device/OsNetworkWatcher.h"
-#include "device/OsSrvcc.h"
 #include "device/OsSubscriberInfo.h"
 #include "device/OsTrm.h"
 #include "device/OsUsim.h"
@@ -366,23 +365,6 @@ PUBLIC GLOBAL void PlatformFactory::DestroyCallInfo(IN ICallInfo*& piPhoneInfoCa
     }
 
     piPhoneInfoCall = IMS_NULL;
-}
-
-PUBLIC GLOBAL ISrvcc* PlatformFactory::CreateSrvcc(IN IMS_SINT32 nSlotId)
-{
-    return new OsSrvcc(nSlotId);
-}
-
-PUBLIC GLOBAL void PlatformFactory::DestroySrvcc(IN ISrvcc*& piSrvcc)
-{
-    OsSrvcc* pSrvcc = DYNAMIC_CAST(OsSrvcc*, piSrvcc);
-
-    if (pSrvcc != IMS_NULL)
-    {
-        delete pSrvcc;
-    }
-
-    piSrvcc = IMS_NULL;
 }
 
 PUBLIC GLOBAL ILocationInfo* PlatformFactory::CreateLocationInfo(IN IMS_SINT32 nSlotId)
