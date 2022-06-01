@@ -38,7 +38,7 @@ SipTimeStampHeader::~SipTimeStampHeader()
 /*virtual methods*/
 SIP_BOOL SipTimeStampHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
 {
-    if (m_pszTimeVal == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Encode: Missing timestamp", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
@@ -70,7 +70,7 @@ SIP_BOOL SipTimeStampHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams 
     /*Encoding of header Value  i.e.
       "Timestamp" HCOLON 1*(DIGIT) [ "." *(DIGIT) ] [ LWS delay ]   */
     /*Encoding of DIGIT*/
-    if (m_pszTimeVal == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
         SIP_DEBUG_WARNING(
                 ESIPTRACE_MODENCODER, "EncodeHdr: Missing TimeStamp ", SIP_ZERO, SIP_ZERO);
