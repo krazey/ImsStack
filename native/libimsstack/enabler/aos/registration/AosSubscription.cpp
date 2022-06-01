@@ -829,7 +829,7 @@ PROTECTED VIRTUAL void AosSubscription::SetRefreshPolicy()
             REFRESH_POLICY_INTERVAL_VALUE_ABOVE_THE_CRITERIA);
 }
 
-PROTECTED VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
+PUBLIC VIRTUAL void AosSubscription::SetRetryTimer(IN IMS_BOOL bCheckRetryAfter)
 {
     if (bCheckRetryAfter == IMS_TRUE)
     {

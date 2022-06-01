@@ -95,7 +95,11 @@ protected:
     virtual IMS_SINT32 GetNextThrottlingTime(IN const IMSVector<IMS_SINT32>& objInterval);
     virtual void ProcessTimerExpired();
     virtual void SetRefreshPolicy();
+
+public:
     virtual void SetRetryTimer(IN IMS_BOOL bCheckRetryAfter);
+
+protected:
     virtual IRegInfoContact* GetRegInfoContact(IN const IMSList<IRegInfoContact*> objContact);
     virtual IMS_BOOL CompareUriAssociatedWithContact(IN const SipAddress& objUri);
 
