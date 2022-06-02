@@ -75,11 +75,6 @@ AosNetTracker::AosNetTracker(IN IAosAppContext* piAppContext) :
 
     IMS_TRACE_MEM("AOS_MEM", "AOS_M : [%s] AosNetTracker = %" PFLS_u "/%" PFLS_x, m_strTag.GetStr(),
             sizeof(AosNetTracker), this);
-
-    InitConfig();
-    InitObject();
-
-    Update();
 }
 
 /*
@@ -123,7 +118,7 @@ PUBLIC VIRTUAL AosNetTracker::~AosNetTracker()
 Remarks
 
 */
-PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceIN(IN IMS_UINT32 nType /* = TYPE_DEFAULT */)
+PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsServiceIn(IN IMS_UINT32 nType /* = TYPE_DEFAULT */)
 {
     if (nType == TYPE_WLAN)
     {
@@ -190,7 +185,7 @@ PUBLIC VIRTUAL IMS_BOOL AosNetTracker::IsSuspended()
         return IMS_FALSE;
     }
 
-    if (IsDataConnected() && !IsServiceIN(TYPE_MOBILE))
+    if (IsDataConnected() && !IsServiceIn(TYPE_MOBILE))
     {
         A_IMS_TRACE_I(CNXID, "Network Suspended", 0, 0, 0);
         return IMS_TRUE;
@@ -308,9 +303,7 @@ Remarks
 */
 PUBLIC VIRTUAL IMS_SINT32 AosNetTracker::GetMobileVoiceServiceState()
 {
-    return PhoneInfoService::GetPhoneInfoService()
-            ->GetNetworkWatcher(m_nSlotId)
-            ->GetNetVoiceServiceType();
+    return m_piNetWatcherInfo->GetNetVoiceServiceType();
 }
 
 /*
@@ -521,6 +514,19 @@ PUBLIC VIRTUAL void AosNetTracker::Event_NotifyEvent(
             // No operation
             break;
     }
+}
+
+/*
+
+Remarks
+
+*/
+PROTECTED
+void AosNetTracker::Init()
+{
+    InitConfig();
+    InitObject();
+    Update();
 }
 
 /*
@@ -971,17 +977,6 @@ Remarks
 
 */
 PRIVATE
-IMS_BOOL AosNetTracker::IsDomainAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nDomain)
-{
-    return ((nPolicy & 0x0000ff00) & (nDomain & 0x0000ff00));
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE
 IMS_BOOL AosNetTracker::IsNetworkChanged(IN IMS_UINT32 nCurrRat, IN IMS_SINT32 nCurrService)
 {
     if (m_pUtil->IsFeatureOn(FEATURE_RAT_GUARD, m_nFeature))
@@ -1402,35 +1397,6 @@ AString AosNetTracker::FeaturesToString()
         strFeature += "FEATURE_VOICE_RAT_GUARD | ";
 
     return strFeature;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE GLOBAL const IMS_CHAR* AosNetTracker::DomainTypeToString(IN IMS_UINT32 nState)
-{
-    switch (nState)
-    {
-        case (0x0100 << 0):
-            return "NW_REPORT_DOMAIN_NOSRV";
-
-        case (0x0100 << 1):
-            return "NW_REPORT_DOMAIN_CS";
-
-        case (0x0100 << 2):
-            return "NW_REPORT_DOMAIN_PS";
-
-        case (0x0100 << 3):
-            return "NW_REPORT_DOMAIN_CSPS";
-
-        case (0x0100 << 4):
-            return "NW_REPORT_DOMAIN_CAMPED";
-
-        default:
-            return "__INVALID__";
-    }
 }
 
 /*

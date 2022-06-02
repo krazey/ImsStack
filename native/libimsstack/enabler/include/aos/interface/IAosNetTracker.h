@@ -23,7 +23,7 @@ class IAosNetTrackerListener;
 class IAosNetTracker
 {
 public:
-    virtual IMS_BOOL IsServiceIN(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
+    virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT) = 0;
     virtual IMS_BOOL IsDataIn() = 0;
     virtual IMS_BOOL IsNetworkIn() = 0;
     virtual IMS_BOOL IsEmergencyLteAttach() = 0;
@@ -55,5 +55,9 @@ public:
         TYPE_MOBILE,
         TYPE_WLAN
     };
+
+protected:
+    friend class AosBuildDirector;
+    virtual void Init() = 0;
 };
 #endif  // INTERFACE_AOS_NET_TRACKER_H_

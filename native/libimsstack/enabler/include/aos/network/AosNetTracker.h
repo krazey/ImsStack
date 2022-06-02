@@ -42,7 +42,7 @@ public:
 
 public:
     // IAosNetTracker
-    virtual IMS_BOOL IsServiceIN(IN IMS_UINT32 nType = TYPE_DEFAULT);
+    virtual IMS_BOOL IsServiceIn(IN IMS_UINT32 nType = TYPE_DEFAULT);
     virtual IMS_BOOL IsDataIn();
     virtual IMS_BOOL IsNetworkIn();
     virtual IMS_BOOL IsEmergencyLteAttach();
@@ -73,6 +73,23 @@ public:
     virtual void Event_NotifyEvent(
             IN IMS_SINT32 nEvent, IN IMS_UINT32 nWParam, IN IMS_UINT32 nLParam);
 
+    enum
+    {
+        FEATURE_NONE = (0x0),
+        FEATURE_IN_GUARD = (0x01 << 0),
+        FEATURE_OUT_GUARD = (0x01 << 1),
+        FEATURE_RAT_GUARD = (0x01 << 2),
+        FEATURE_VOICE_RAT_GUARD = (0x01 << 3)
+    };
+
+    enum
+    {
+        TIMER_IN_GUARD = 100,
+        TIMER_OUT_GUARD,
+        TIMER_RAT_GUARD,
+        TIMER_VOICE_RAT_GUARD
+    };
+
 private:
     void InitConfig();
     void InitCnxPolicy(IN IMSVector<IMS_SINT32>& objRats);
@@ -91,7 +108,6 @@ private:
 
     IMS_BOOL IsRadioTechAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nRadioTech);
     IMS_BOOL IsServiceAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nService);
-    IMS_BOOL IsDomainAvailable(IN IMS_UINT32 nPolicy, IN IMS_UINT32 nDomain);
     IMS_BOOL IsNetworkChanged(IN IMS_UINT32 nCurrRat, IN IMS_SINT32 nCurrService);
 
     IMS_BOOL IsCnxTypeEqual(IN IMS_SINT32 nType) const;
@@ -129,27 +145,12 @@ private:
     // LOG
     AString FeaturesToString();
 
-    static const IMS_CHAR* DomainTypeToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* RadioTypeToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* ServiceTypeToString(IN IMS_UINT32 nState);
     static const IMS_CHAR* TimerToString(IN IMS_UINT32 nType);
 
-    enum
-    {
-        FEATURE_NONE = (0x0),
-        FEATURE_IN_GUARD = (0x01 << 0),
-        FEATURE_OUT_GUARD = (0x01 << 1),
-        FEATURE_RAT_GUARD = (0x01 << 2),
-        FEATURE_VOICE_RAT_GUARD = (0x01 << 3)
-    };
-
-    enum
-    {
-        TIMER_IN_GUARD = 100,
-        TIMER_OUT_GUARD,
-        TIMER_RAT_GUARD,
-        TIMER_VOICE_RAT_GUARD
-    };
+protected:
+    virtual void Init();
 
 private:
     enum
@@ -210,6 +211,9 @@ private:
 
     static const IMS_UINT32 SERVICE_IN_TIME_MILLI_SEC = 2000;
     static const IMS_UINT32 SERVICE_OUT_TIME_MILLI_SEC = 1000;
+
+private:
+    friend class AosNetTrackerTest;
 };
 
 #endif  // AOS_NET_TRACKER_H_

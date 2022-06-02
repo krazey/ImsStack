@@ -86,6 +86,7 @@ IAosAppContext* AosBuildDirector::ConstructAos(IN AosStaticProfile* pProfile)
     if (m_objNetTracker.GetIndexOfKey(pProfile->GetConnectionType()) < 0)
     {
         IAosNetTracker* piNetTracker = m_piBuilder->BuildNetTracker(piAppContext);
+        piNetTracker->Init();
         m_objNetTracker.Add(pProfile->GetConnectionType(), piNetTracker);
         piAppContext->SetNetTracker(piNetTracker);
     }
