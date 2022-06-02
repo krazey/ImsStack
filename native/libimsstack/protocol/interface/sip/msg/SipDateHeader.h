@@ -50,14 +50,6 @@ private:
 
     SIP_INT32 m_eWkDay;
 
-    SIP_BOOL EncodeWeek(SIP_CHAR** ppCurrPos);
-
-    SIP_BOOL EncodeMonth(SIP_CHAR** ppCurrPos);
-
-    SIP_BOOL EncodeTime(SIP_CHAR** ppCurrPos);
-
-    SIP_BOOL EncodeDate(SIP_CHAR** ppCurrPos);
-
 public:
     /*constructor*/
     SipDateHeader();
