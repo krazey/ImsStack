@@ -466,11 +466,21 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
 {
     IMS_TRACE_D("SessionRPRReceived", 0, 0, 0);
     StopTimer(TIMER_MO_1XX_WAIT);
-    StartTimer(TIMER_MO_NOANSWER);
 
     IMessage* piMessage =
             MessageUtil::GetPreviousResponse(piSession, IMessage::SESSION_START, nIndex);
     m_objSessions.GetValue(piSession)->HandleResponse(IMessage::SESSION_START, *piMessage);
+
+    if (m_objContext.GetConfigurationProxy().Is(
+            Feature::STOP_RINGBACK_TIMER_BY_183_WITH_SDP_BODY) &&
+            piMessage->GetStatusCode() == SipStatusCode::SC_183 && MessageUtil::HasSdp(piMessage))
+    {
+        StopTimer(TIMER_MO_NOANSWER);
+    }
+    else
+    {
+        StartTimer(TIMER_MO_NOANSWER);
+    }
 
     if (!m_objContext.GetSession()->GetExtensionSet().IsSupportRequiredExtensions(*piMessage))
     {
