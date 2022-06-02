@@ -24,6 +24,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.telephony.Rlog;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,9 +38,12 @@ public class SmsRelayLayer {
     private MtsController mMtsController = null;
     private final MtsControllerListenerProxy mMtsControllerListener =
             new MtsControllerListenerProxy();
-    public AtomicInteger mAtomicInt = new AtomicInteger(0);
     private final Object mLock = new Object();
-
+    //token-RPMessageReference synchronisation
+    public AtomicInteger mRPMR = new AtomicInteger();
+    public AtomicInteger mToken = new AtomicInteger();
+    public Map<Integer, Integer> mMoMRTokenMap = new ConcurrentHashMap<>();
+    public Map<Integer, Integer> mMTTokenMRMap = new ConcurrentHashMap<>();
     /**
      * Listener to handle the events sent from SmsRelayLayer
      */
@@ -126,7 +131,35 @@ public class SmsRelayLayer {
                 destinationAddress = smsc;
             }
 
-            int rpMR = (mAtomicInt.getAndIncrement()) % SmsUtils.MAX_RPMR_VALUE;
+            int rpMR = -1;
+            synchronized (mLock) {
+                if (rpType == SmsUtils.RP_DATA) {
+                    rpMR = getRPMessageReference();
+                    mMoMRTokenMap.put(rpMR, token);
+                } else if (rpType == SmsUtils.RP_ACK) {
+                    if (mMTTokenMRMap.containsKey(token)) {
+                        rpMR = mMTTokenMRMap.get(token);
+                        mMTTokenMRMap.remove(token);
+                    } else {
+                        Rlog.i(TAG, "No Corresponding Rp-Data for the RP-Ack");
+                        return SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST;
+                    }
+                } else if (rpType == SmsUtils.RP_ERROR) {
+                    if (mMTTokenMRMap.containsKey(token)) {
+                        rpMR = mMTTokenMRMap.get(token);
+                        mMTTokenMRMap.remove(token);
+                    } else {
+                        Rlog.i(TAG, "No Corresponding Rp-Data for the RP-Error");
+                        return SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST;
+                    }
+                } else if (rpType == SmsUtils.RP_SMMA) {
+                    rpMR = getRPMessageReference();
+                    mMoMRTokenMap.put(rpMR, token);
+                } else {
+                    Rlog.i(TAG, "Invalid message type");
+                    return SmsUtils.SMSRL_RESULT_INVALID_RP_MESSAGE_TYPE;
+                }
+            }
             SmsRPdu pdu = new SmsRPdu(rpMR, rpType, smsc, 0, tpdu);
             encodedPdu = pdu.getRpduByteArray();
             if (encodedPdu == null) {
@@ -148,6 +181,10 @@ public class SmsRelayLayer {
             Rlog.e(TAG, "Can not send sms: " + e.getMessage());
             return SmsUtils.SMSRL_RESULT_EXCEPTION;
         }
+    }
+
+    private int getRPMessageReference() {
+        return (mRPMR.incrementAndGet() % SmsUtils.MAX_RPMR_VALUE);
     }
 
     class MtsControllerListenerProxy extends MtsController.Listener {
@@ -184,14 +221,21 @@ public class SmsRelayLayer {
                                 + mtData.getMessageRef()
                                 + " Originating Address = "
                                 + mtData.getOrigAddr());
-
+                int messageRef = mtData.getMessageRef();
                 if (mtData.getMessageType() == SmsUtils.RP_ACK) {
-                    // FIXME: Validate RP_ACK and extract token for the same
                     synchronized (mLock) {
-                        listener.notifyRLReportIndication(token, 1, 0);
+                        if (mMoMRTokenMap.containsKey(messageRef)) {
+                            token = mMoMRTokenMap.get(messageRef);
+                            mMoMRTokenMap.remove(messageRef);
+                            listener.notifyRLReportIndication(token, 1, 0);
+                        } else {
+                            Rlog.i(TAG, "No Matching RP-Data for Rp-Ack");
+                            return mMtsController.MT_FAILURE;
+                        }
                     }
                 } else if (mtData.getMessageType() == SmsUtils.RP_DATA) {
                     tpdu = mtData.getUserData();
+                    token = mToken.incrementAndGet();
                     /** Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
                       * else the parser will throw exception. So prepending TPdu with
                       * RP-OriginatingAdrress.
@@ -203,6 +247,7 @@ public class SmsRelayLayer {
                     bo.write(tpdu, 0, tpdu.length);
                     byte[] frameworkPdu = bo.toByteArray();
                     synchronized (mLock) {
+                        mMTTokenMRMap.put(token, messageRef);
                         result = listener.notifyRLDataIndication(
                             token, smsFormat, SmsUtils.RP_DATA, frameworkPdu);
                         if (result != SmsUtils.RESULT_SUCCESS) {
