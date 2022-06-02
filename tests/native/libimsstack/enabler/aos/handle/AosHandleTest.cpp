@@ -25,9 +25,12 @@
 #include "interface/IAosHandle.h"
 #include "interface/MockIAosAppContext.h"
 #include "interface/MockIAosApplication.h"
+#include "interface/MockIAosCallTracker.h"
+#include "interface/MockIAosNetTracker.h"
 #include "../../interface/aos/MockIImsAosInfo.h"
 #include "../../interface/aos/MockIImsAosListener.h"
 #include "../../interface/aos/MockIImsAosMonitor.h"
+#include "provider/AosProvider.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -40,6 +43,8 @@ public:
     AosHandle* m_pAosHandle;
     MockIAosAppContext m_objMockIAosAppContext;
     MockIAosApplication m_objMockIAosApplication;
+    MockIAosCallTracker m_objMockIAosCallTracker;
+    MockIAosNetTracker m_objMockIAosNetTracker;
     MockIImsAosListener m_objMockIImsAosListener;
 
     const AString m_strAppId = AString("ims.app.test");
@@ -61,6 +66,10 @@ protected:
         EXPECT_CALL(m_objMockIAosAppContext, GetApp())
                 .Times(AnyNumber())
                 .WillRepeatedly(Return(&m_objMockIAosApplication));
+
+        EXPECT_CALL(m_objMockIAosAppContext, GetNetTracker())
+                .Times(AnyNumber())
+                .WillRepeatedly(Return(&m_objMockIAosNetTracker));
 
         m_pAosHandle = new AosHandle(static_cast<IAosAppContext*>(&m_objMockIAosAppContext),
                 m_strAppId, m_strServiceId, m_nServiceType);
@@ -130,6 +139,8 @@ protected:
     void SetSuspendedReason(IN IMS_UINT32 nReason) { m_pAosHandle->SetSuspendedReason(nReason); }
 
     IImsAosMonitor* GetMonitor() { return m_pAosHandle->m_piMonitor; }
+
+    void SetNetSrvIn(IMS_BOOL bNetSrvIn) { m_pAosHandle->m_bNetSrvIn = bNetSrvIn; }
 };
 
 TEST_F(AosHandleTest, Constructor)
@@ -549,4 +560,37 @@ TEST_F(AosHandleTest, SetMonitor_)
     IImsAosMonitor* piMonitor = static_cast<IImsAosMonitor*>(&objMockIImsAosMonitor);
     m_pAosHandle->SetMonitor(piMonitor);
     EXPECT_EQ(GetMonitor(), piMonitor);
+}
+
+TEST_F(AosHandleTest, SetReady_Not_Mtc)
+{
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTS));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTC));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::EMERGENCY_MTS));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::UCE));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::SIP_CONTROLLER));
+}
+
+TEST_F(AosHandleTest, SetReady_Mtc)
+{
+    AosProvider::GetInstance()->SetCallTracker(
+            static_cast<IAosCallTracker*>(&m_objMockIAosCallTracker), 0);
+    EXPECT_TRUE(m_pAosHandle->SetReady(IMS_TRUE, ImsAosService::MTC));
+    EXPECT_FALSE(m_pAosHandle->SetReady(IMS_FALSE, ImsAosService::MTC));
+}
+
+TEST_F(AosHandleTest, NetTracker_StatusChanged_)
+{
+    SetHandleState(AosHandle::STATE_CONNECTED);
+
+    EXPECT_CALL(m_objMockIAosNetTracker, IsSuspended())
+            .Times(2)
+            .WillOnce(Return(IMS_FALSE))
+            .WillOnce(Return(IMS_TRUE));
+
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_FALSE(m_pAosHandle->IsImsSuspended());
+
+    m_pAosHandle->NetTracker_StatusChanged();
+    EXPECT_TRUE(m_pAosHandle->IsImsSuspended());
 }

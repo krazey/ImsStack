@@ -111,8 +111,10 @@ public:
      *
      * @param bReady enabler service is started or not
      * @param nService @see ImsAosService
+     *
+     * @return If complete to set ready, returns IMS_TRUE.
      */
-    virtual void SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) = 0;
+    virtual IMS_BOOL SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService) = 0;
 
     /**
      * @brief Update the features for registration procedure. If features are changed

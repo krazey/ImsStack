@@ -515,11 +515,11 @@ PUBLIC VIRTUAL void AosHandle::SetMonitor(IN IImsAosMonitor* piMonitor)
 Remarks
 
 */
-PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
+PUBLIC VIRTUAL IMS_BOOL AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nService)
 {
     if (nService != ImsAosService::MTC || !bReady)
     {
-        return;
+        return IMS_FALSE;
     }
 
     A_IMS_TRACE_D(
@@ -529,7 +529,10 @@ PUBLIC VIRTUAL void AosHandle::SetReady(IN IMS_BOOL bReady, IN IMS_UINT32 nServi
     if (piCallTracker != IMS_NULL)
     {
         piCallTracker->SetMtcReady();
+        return IMS_TRUE;
     }
+
+    return IMS_FALSE;
 }
 
 /*
