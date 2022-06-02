@@ -37,6 +37,8 @@ AosHandleUce::AosHandleUce(IN IAosAppContext* piAppContext, IN const AString& st
     /* @jryou: temp blocked. Defined in VZWAoSHandle.
     AddConfig(CONFIG_LIMITED_MODE | CONFIG_SRLTE_MODE);
     */
+
+    m_bRegFeatureTagRequired = IMS_FALSE;
 }
 
 /*

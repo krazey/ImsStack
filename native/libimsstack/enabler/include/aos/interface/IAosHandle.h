@@ -40,6 +40,8 @@ public:
     virtual IMS_BOOL IsNetworkRegBinded() = 0;
     virtual void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind) = 0;
 
+    virtual IMS_BOOL IsRegFeatureTagRequired() = 0;
+
     virtual AosFeatureTagList& GetFeatureTagList() = 0;
     virtual AosFeatureTagList& GetBindedFeatureTagList() = 0;
 

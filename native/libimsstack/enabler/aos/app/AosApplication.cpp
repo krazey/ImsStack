@@ -686,7 +686,7 @@ PROTECTED VIRTUAL IMS_BOOL AosApplication::IsAllHandleDetached()
     {
         IAosHandle* piHandle = objHandles.GetValueAt(i);
 
-        if (piHandle->GetRequestType() != IAosHandle::DETACH)
+        if (piHandle->GetRequestType() == IAosHandle::ATTACH && piHandle->IsRegFeatureTagRequired())
         {
             return IMS_FALSE;
         }
@@ -746,7 +746,7 @@ PROTECTED VIRTUAL void AosApplication::CleanAll(IN IMS_UINT32 nOffReason /* = Ao
     m_piRegistration->Destroy();
 
     if (nOffReason == AoSReason::IMS_DISABLED || nOffReason == AoSReason::POWER_OFF ||
-            nOffReason == AoSReason::DATA_PERMANENTLY_FAILED)
+            nOffReason == AoSReason::DATA_PERMANENTLY_FAILED || IsAllDetached())
     {
         ProcessPdnDisconnect();
         ClearOffReason();

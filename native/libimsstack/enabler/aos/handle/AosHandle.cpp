@@ -91,6 +91,7 @@ AosHandle::AosHandle(IN IAosAppContext* piAppContext, IN const AString& strAppId
         m_nReqType(DETACH),
         m_bBind(IMS_FALSE),
         m_bNetworkBind(IMS_TRUE),
+        m_bRegFeatureTagRequired(IMS_TRUE),
         m_bNotify(IMS_FALSE),
         m_piListener(IMS_NULL),
         m_piMonitor(IMS_NULL),
@@ -249,6 +250,16 @@ PUBLIC VIRTUAL void AosHandle::SetNetworkRegBinded(IN IMS_BOOL bNetworkBind)
             m_strServiceId.GetStr(), (bNetworkBind) ? "ATTACHED" : "DETACHED");
 
     m_bNetworkBind = bNetworkBind;
+}
+
+/*
+
+Remarks
+
+*/
+PUBLIC VIRTUAL IMS_BOOL AosHandle::IsRegFeatureTagRequired()
+{
+    return m_bRegFeatureTagRequired;
 }
 
 /*

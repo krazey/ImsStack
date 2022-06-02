@@ -78,6 +78,8 @@ public:
     virtual IMS_BOOL IsNetworkRegBinded();
     virtual void SetNetworkRegBinded(IN IMS_BOOL bNetworkBind);
 
+    virtual IMS_BOOL IsRegFeatureTagRequired();
+
     virtual AosFeatureTagList& GetFeatureTagList();
     virtual AosFeatureTagList& GetBindedFeatureTagList();
 
@@ -277,6 +279,8 @@ protected:
     IMS_BOOL m_bBind;
     // m_bNetworkBind indicates whether the service is kept or removed in registration or not
     IMS_BOOL m_bNetworkBind;
+    // m_bRegFeatureTagRequired indicates whether the feature tag is required or not
+    IMS_BOOL m_bRegFeatureTagRequired;
 
     IMS_BOOL m_bNotify;
 
