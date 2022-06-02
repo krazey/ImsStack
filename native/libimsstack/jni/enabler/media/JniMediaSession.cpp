@@ -187,6 +187,9 @@ PROTECTED VIRTUAL void JniMediaSession::HandleMessage(
         case IMMedia::NOTIFY_QOS_INFO:
             OnNotifyQosInfo(nMsg, objParcel);
             break;
+        case IMMedia::NOTIFY_MEDIA_DETACH:
+            OnNotifyMediaDetach(nMsg);
+            break;
         case IMMedia::SETSURFACE_CMD:
             OnCmdSetSurface(nMsg, objParcel);
             break;
@@ -327,6 +330,12 @@ void JniMediaSession::OnNotifyQosInfo(IN IMS_SINT32 nMsg, IN const android::Parc
     pParam->m_bResult = (IMS_BOOL)objParcel.readInt32();
 
     m_piMediaManager->OnResponse(nMsg, m_nCallKey, reinterpret_cast<IMS_UINTP>(pParam));
+}
+
+PRIVATE
+void JniMediaSession::OnNotifyMediaDetach(IN IMS_SINT32 nMsg)
+{
+    m_piMediaManager->OnResponse(nMsg, m_nCallKey, IMS_NULL);
 }
 
 PRIVATE

@@ -164,19 +164,19 @@ typedef enum _REPORT_TYPE
 {
     REPORT_INVALID = -1,
     REPORT_SUCCESS = 0,
-    REPORT_FAILURE, // Failures, based on IMMedia.h - RtpError
-    REPORT_CLOSE_SESSION, // After sending CloseSession successfully to ImsMedia
-    REPORT_DATA_RECEIVE_FAILED, // No received RTP or RTCP Data - NOTIFY_MEDIA_INACTIVITY
-    REPORT_DATA_RECEIVE_STARTED, // NOTIFY_FIRST_PACKET
+    REPORT_FAILURE,               // Failures, based on IMMedia.h - RtpError
+    REPORT_CLOSE_SESSION,         // After sending CloseSession successfully to ImsMedia
+    REPORT_DATA_RECEIVE_FAILED,   // No received RTP or RTCP Data - NOTIFY_MEDIA_INACTIVITY
+    REPORT_DATA_RECEIVE_STARTED,  // NOTIFY_FIRST_PACKET
     REPORT_QOS,
     REPORT_VIDEO_LOWEST_BIT_RATE,
     REPORT_CHECK_RADIO_CONNECTION,
     REPORT_NW_TONE_RTP_RECEIVE_STARTED,
     REPORT_NW_TONE_RTP_RECEIVE_FAILED,
-    REPORT_RECEIVED_DTMF_EVENT,             // Received dtmf event
+    REPORT_RECEIVED_DTMF_EVENT,  // Received dtmf event
+    REPORT_MEDIA_DETACH,
     REPORT_NOTUSED
 } REPORT_TYPE;
-
 
 /*Must Sync with MMPFDefinition*/
 /********************************************************/

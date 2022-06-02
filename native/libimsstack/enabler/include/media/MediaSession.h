@@ -215,6 +215,7 @@ protected:
     IMS_BOOL OnResponseSessionChanged(IN IMS_UINTP pParam_);
     IMS_BOOL OnNofityHeaderExtension(IN IMS_UINTP pParam_);
     IMS_BOOL OnNotifyQosInfo(IN IMS_UINTP pParam_);
+    IMS_BOOL OnNotifyMediaDetach();
     ImsMediaBasicSessionInfoParam* GetBasicSessionInfofromRemoteArress(
             IN AString strIpAddr, IN IMS_SINT32 nPort);
     IMS_UINTP GetNegoIdfromRemoteAddress(IN AString strIpAddr, IN IMS_SINT32 nPort);
