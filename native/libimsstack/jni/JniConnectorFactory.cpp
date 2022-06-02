@@ -1,12 +1,14 @@
 #include "IMSMap.h"
 #include "call/MtcCallController.h"
 #include "IMtcService.h"
+#include "IMtsService.h"
 #include "JniAosService.h"
 #include "JniConnector.h"
 #include "JniConnectorFactory.h"
 #include "JniMediaSession.h"
 #include "JniMtcCall.h"
 #include "JniMtcService.h"
+#include "JniMtsService.h"
 #include "ServiceMutex.h"
 #include "ServiceTrace.h"
 #include "SystemConfig.h"
@@ -22,6 +24,7 @@ public:
             pAosServiceConnector(IMS_NULL),
             pMtcCallConnector(IMS_NULL),
             pMtcServiceConnector(IMS_NULL),
+            pMtsServiceConnector(IMS_NULL),
             pMediaSessionConnector(IMS_NULL)
     {
         IMS_TRACE_D("+Connectors", 0, 0, 0);
@@ -54,6 +57,15 @@ public:
         return pMtcServiceConnector;
     }
 
+    inline JniConnector<IMtsService, JniMtsService>* GetMtsServiceConnector()
+    {
+        if (pMtsServiceConnector == IMS_NULL)
+        {
+            pMtsServiceConnector = new JniConnector<IMtsService, JniMtsService>();
+        }
+        return pMtsServiceConnector;
+    }
+
     inline JniConnector<IMediaManager, JniMediaSession>* GetMediaSessionConnector()
     {
         if (pMediaSessionConnector == IMS_NULL)
@@ -71,6 +83,9 @@ public:
         delete pMtcServiceConnector;
         pMtcServiceConnector = IMS_NULL;
 
+        delete pMtsServiceConnector;
+        pMtsServiceConnector = IMS_NULL;
+
         delete pMediaSessionConnector;
         pMediaSessionConnector = IMS_NULL;
 
@@ -82,6 +97,7 @@ private:
     JniConnector<IAosService, JniAosService>* pAosServiceConnector;
     JniConnector<MtcCallController, JniMtcCall>* pMtcCallConnector;
     JniConnector<IMtcService, JniMtcService>* pMtcServiceConnector;
+    JniConnector<IMtsService, JniMtsService>* pMtsServiceConnector;
     JniConnector<IMediaManager, JniMediaSession>* pMediaSessionConnector;
 };
 
@@ -185,6 +201,15 @@ JniConnector<IMtcService, JniMtcService>* JniConnectorFactory::GetMtcServiceConn
     LockGuard objLock(m_piLock);
     IMS_TRACE_D("GetMtcServiceConnector", 0, 0, 0);
     return m_pConnectorHolder->GetConnectors(nSlotId)->GetMtcServiceConnector();
+}
+
+PUBLIC
+JniConnector<IMtsService, JniMtsService>* JniConnectorFactory::GetMtsServiceConnector(
+        IN IMS_SINT32 nSlotId)
+{
+    LockGuard objLock(m_piLock);
+    IMS_TRACE_D("GetMtsServiceConnector", 0, 0, 0);
+    return m_pConnectorHolder->GetConnectors(nSlotId)->GetMtsServiceConnector();
 }
 
 PUBLIC

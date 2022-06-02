@@ -1,10 +1,11 @@
 #include "AString.h"
 #include "IMSLib.h"
 #include "IMSStrLib.h"
+#include "IPAddress.h"
+#include "MtsApp.h"
 #include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipParameter.h"
-#include "IPAddress.h"
 #include "helper/dialing/MtsDialingPlan.h"
 #include "utility/MtsSipFormUtils.h"
 #include "utility/MtsSmUtils.h"
@@ -15,7 +16,7 @@ __IMS_TRACE_TAG_COM_SMS__;
 
 PUBLIC
 MtsSipFormUtils::MtsSipFormUtils(IN IMS_SINT32 nSlotId) :
-        m_nMtsFormat(MtsSmUtils::MTS_SMS_FORMAT_INVALID),
+        m_nMtsFormat(MtsApp::SMSFORMAT_INVALID),
         m_pMtsDialingPlan(IMS_NULL),
         m_strPsi(AString::ConstNull()),
         m_nSlotId(nSlotId)
@@ -49,10 +50,10 @@ MtsSipFormUtils* MtsSipFormUtils::GetInstance(IN IMS_SINT32 nSlotId)
     return s_pMtsSipFormUtils;
 }
 
-PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const IMS_CHAR* szMDN,
+PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const AString& strTargetAddress,
         IN const IMS_BOOL bIsAckorError, IN const AString& strLastIpSmgw, OUT AString& strDest)
 {
-    IMS_TRACE_I("FormDestination: szMDN = %s", szMDN, 0, 0);
+    IMS_TRACE_I("FormDestination: strTargetAddress = %s", strTargetAddress.GetStr(), 0, 0);
 
     if (bIsAckorError == IMS_TRUE)
     {
@@ -75,11 +76,9 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const IMS_CHAR* szMD
     }
     else
     {
-        AString strMDN_(szMDN);
-
-        if (strMDN_.IsEmpty())
+        if (strTargetAddress.IsEmpty())
         {
-            IMS_TRACE_E(0, "FormDestination : Peer MDN is not valid", 0, 0, 0);
+            IMS_TRACE_E(0, "FormDestination : Target address is not valid", 0, 0, 0);
             return IMS_FALSE;
         }
 
@@ -91,7 +90,7 @@ PUBLIC VIRTUAL IMS_BOOL MtsSipFormUtils::FormDestination(IN const IMS_CHAR* szMD
             IMS_TRACE_I(
                     "FormDestination - PSI from SIM is wrong, so we wil make PSI by SMSC", 0, 0, 0);
             // TODO: AT&T Operator needs tel URI when PSI is not available
-            strDest = m_pMtsDialingPlan->Translate(strMDN_, IMS_TRUE);
+            strDest = m_pMtsDialingPlan->Translate(strTargetAddress, IMS_TRUE);
         }
         else
         {
@@ -124,11 +123,11 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN IMS_UINT32 nType)
 
     switch (nType)
     {
-        case MtsSmUtils::MTS_SMS_FORMAT_3GPP:
+        case MtsApp::SMSFORMAT_3GPP:
             strContentType = AString("application/vnd.3gpp.sms");
             break;
 
-        case MtsSmUtils::MTS_SMS_FORMAT_3GPP2:
+        case MtsApp::SMSFORMAT_3GPP2:
             strContentType = AString("application/vnd.3gpp2.sms");
             break;
 
@@ -143,17 +142,17 @@ AString MtsSipFormUtils::FormContentTypeEnumToStr(IN IMS_UINT32 nType)
 }
 
 PUBLIC
-IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN AString strContentType)
+IMS_UINT32 MtsSipFormUtils::FormContentTypeStrToEnum(IN const AString& strContentType)
 {
-    IMS_UINT32 nType = MtsSmUtils::MTS_SMS_FORMAT_INVALID;
+    IMS_UINT32 nType = MtsApp::SMSFORMAT_INVALID;
 
     if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp.sms"))
     {
-        nType = MtsSmUtils::MTS_SMS_FORMAT_3GPP;
+        nType = MtsApp::SMSFORMAT_3GPP;
     }
     else if (IMS_TRUE == strContentType.MakeLower().Contains("application/vnd.3gpp2.sms"))
     {
-        nType = MtsSmUtils::MTS_SMS_FORMAT_3GPP2;
+        nType = MtsApp::SMSFORMAT_3GPP2;
     }
     else
     {
@@ -170,26 +169,27 @@ PUBLIC VIRTUAL void MtsSipFormUtils::UpdateFormatFromDb()
     // TODO: this method is deprecated. It will be removed.
     IMS_TRACE_I("UpdateFormatFromDb", 0, 0, 0);
 
-    if (m_nMtsFormat == MtsSmUtils::MTS_SMS_FORMAT_3GPP ||
-            m_nMtsFormat == MtsSmUtils::MTS_SMS_FORMAT_3GPP2)
+    if (m_nMtsFormat == MtsApp::SMSFORMAT_3GPP ||
+            m_nMtsFormat == MtsApp::SMSFORMAT_3GPP2)
     {
         IMS_TRACE_I("UpdateFormatFromDb : m_nMtsFormat is already set", 0, 0, 0);
         return;
     }
 
+    // TODO: configurable
     AString strFormat = "3gpp";
 
     if (strFormat == "3gpp")
     {
-        m_nMtsFormat = MtsSmUtils::MTS_SMS_FORMAT_3GPP;
+        m_nMtsFormat = MtsApp::SMSFORMAT_3GPP;
     }
     else if (strFormat == "3gpp2")
     {
-        m_nMtsFormat = MtsSmUtils::MTS_SMS_FORMAT_3GPP2;
+        m_nMtsFormat = MtsApp::SMSFORMAT_3GPP2;
     }
     else
     {
-        m_nMtsFormat = MtsSmUtils::MTS_SMS_FORMAT_INVALID;
+        m_nMtsFormat = MtsApp::SMSFORMAT_INVALID;
     }
 
     IMS_TRACE_D("MtsSipFormUtils::UpdateFormatFromDb: Format value (%d)", m_nMtsFormat, 0, 0);

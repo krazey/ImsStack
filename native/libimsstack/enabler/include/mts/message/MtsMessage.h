@@ -1,7 +1,7 @@
 #ifndef MTS_MESSAGE_H_
 #define MTS_MESSAGE_H_
 
-#include "IMtsMessage.h"
+#include "message/IMtsMessage.h"
 #include "IPageMessageListener.h"
 #include "IMessage.h"
 #include "message/MtsMessageController.h"
@@ -51,9 +51,8 @@ public:
     IMS_BOOL Result_ReceiveMessage(
             IN IPageMessage* piPageMessage, IMS_UINT32 nMtResult, IMS_BOOL bAdded);
     IMS_BOOL Processing_ReceiveMessage(
-            IN IPageMessage* piPageMessage, IN const AString& strImpu, ByteArray& objSms);
+            IN IPageMessage* piPageMessage, IN const AString& strImpu, OUT ByteArray& objSms);
     IMS_SINT32 GetSlotId();
-    MtsMessageController* GetMtsMessageController();
     void CleanMtsMessagewithReportResponse(
             IN IMS_UINT32 nResponse, IN IMS_BOOL bSendToAos = IMS_FALSE, IN IMS_UINT32 nType = 0);
     void CleanMtsMessage();
@@ -67,10 +66,11 @@ protected:
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
     IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
-    void MtsClient_ReportTransmissionResult(IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType);
-    void MtsClient_RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
+    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
 
 private:
+    void ReportTransmissionResultToMessageController(
+            IN IMS_UINT32 nResponse, IN IMS_UINT32 nSmsType);
     void SetTrmInfo(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSmsState);
 
 public:

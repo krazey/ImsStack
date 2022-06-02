@@ -8,11 +8,13 @@
 class IAosService;
 class MtcCallController;
 class IMtcService;
+class IMtsService;
 class JniAosService;
 class JniConnectorHolder;
 class JniMediaSession;
 class JniMtcCall;
 class JniMtcService;
+class JniMtsService;
 class IMediaManager;
 
 class JniConnectorFactory
@@ -30,6 +32,7 @@ public:
     JniConnector<IAosService, JniAosService>* GetAosServiceConnector(IN IMS_SINT32 nSlotId);
     JniConnector<MtcCallController, JniMtcCall>* GetMtcCallConnector(IN IMS_SINT32 nSlotId);
     JniConnector<IMtcService, JniMtcService>* GetMtcServiceConnector(IN IMS_SINT32 nSlotId);
+    JniConnector<IMtsService, JniMtsService>* GetMtsServiceConnector(IN IMS_SINT32 nSlotId);
     JniConnector<IMediaManager, JniMediaSession>* GetMediaSessionConnector(IN IMS_SINT32 nSlotId);
 
 private:

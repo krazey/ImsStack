@@ -6,155 +6,38 @@
 #include "ServiceTrace.h"
 #include "ServiceMessage.h"
 #include "IMSProcess.h"
-
-#include "IUMts.h"
-#include "IUMtsService.h"
+#include "IMtsService.h"
+#include "IuMts.h"
+#include "IuMtsService.h"
 #include "OsMutex.h"
+#include "JniConnectorFactory.h"
 #include "JniMtsService.h"
 #include "JniMtsServiceThread.h"
 #include "EnablerUtils.h"
 
-#define EAB_SOLUTION_SERVICE_ID_LEN 128
+using namespace android;
 
-__IMS_TRACE_TAG_USER_DECL__("JniMtsService");
+__IMS_TRACE_TAG_USER_DECL__("JNI.MTS");
 
-extern void androidJavaWms_SetJniMtsService(IN CBJniMtsService pCB);
-
-class JniMtsServicePrivate
+JniMtsService::JniMtsService(IN CBServiceNoti pCbServiceNoti, IN IMS_SINT32 nSlotId) :
+        m_nSlotId(nSlotId),
+        m_strThreadName(AString::ConstNull()),
+        m_piMtsService(IMS_NULL),
+        m_pJniMtsServiceThread(IMS_NULL)
 {
-public:
-    inline JniMtsServicePrivate() :
-            nMtResult(0),
-            bConditionAwaked(IMS_FALSE)
-    {
-        pthread_cond_init(&stSignal, IMS_NULL);
-    }
+    IMS_TRACE_D("+JniMtsService SlotId[%d]", m_nSlotId, 0, 0);
 
-    inline virtual ~JniMtsServicePrivate() { pthread_cond_destroy(&stSignal); }
-
-    inline static JniMtsServicePrivate* GetInstance()
-    {
-        static JniMtsServicePrivate* pPrivate = IMS_NULL;
-
-        if (pPrivate == IMS_NULL)
-        {
-            pPrivate = new JniMtsServicePrivate();
-        }
-
-        return pPrivate;
-    }
-
-    inline void AwakeCondition()
-    {
-        IMS_TRACE_I("AwakeCondition", 0, 0, 0);
-
-        objMutex4Signal.Lock();
-        bConditionAwaked = IMS_TRUE;
-        pthread_cond_signal(&stSignal);
-        objMutex4Signal.Unlock();
-    }
-
-    inline IMS_SINT32 GetMtResult() { return nMtResult; }
-
-    inline void SetMtResult(IN IMS_SINT32 nResult) { nMtResult = nResult; }
-
-    inline int WaitCondition()
-    {
-        IMS_SINT32 nWaitResult = -1;
-
-        objMutex4Signal.Lock();
-
-        if (bConditionAwaked)
-        {
-            nWaitResult = 1;
-            IMS_TRACE_I("WaitCondition :: condition is already awaked", 0, 0, 0);
-        }
-        else
-        {
-            nWaitResult = pthread_cond_wait(
-                    &stSignal, reinterpret_cast<pthread_mutex_t*>(objMutex4Signal.GetMutexObj()));
-            if (nWaitResult == 0)
-            {
-                // no_op
-            }
-        }
-
-        bConditionAwaked = IMS_FALSE;
-
-        objMutex4Signal.Unlock();
-
-        return nMtResult;
-    }
-
-private:
-    IMS_SINT32 nMtResult;
-    pthread_cond_t stSignal;
-    OsMutex objMutex4Signal;
-    IMS_BOOL bConditionAwaked;
-};
-
-static int jniSmsService_ReportSMS(IN IMS_UINT32 nType, IN IMS_UINTP pParam, IN IMS_UINT32 nSlotId)
-{
-    IMS_TRACE_I("jniSmsService_ReportSMS : nType (%d), slotid : (%d)", nType, nSlotId, 0);
-
-    IMS_SINT32 nResult = -1;
-
-    if (nType == IUMtsService::REPORT_MTS_MT_SMS)
-    {
-        IMSMSG objMsg(nType, 0, pParam);
-        MessageService::PostMessage(STR_MTS_SVC_THREAD_NAME[nSlotId], objMsg);
-
-        return JniMtsServicePrivate::GetInstance()->WaitCondition();
-    }
-
-    return nResult;
+    Initialize(pCbServiceNoti);
 }
 
-PUBLIC
-JniMtsService::JniMtsService(IN IMS_SINT32 nSlotId /*= 0*/) :
-        m_pJniMtsServiceThread(IMS_NULL),
-        m_nSlotId(nSlotId)
+JniMtsService::~JniMtsService()
 {
-    m_strTargetActivity = EnablerUtils::GetEnablerThreadName(nSlotId);
-    m_strTargetActivity.Append(".MtsApp");
-    IMS_TRACE_D("+JNISMSService [%s]", m_strTargetActivity.GetStr(), 0, 0);
-}
+    IMS_TRACE_D("~JniMtsService SlotId[%d]", m_nSlotId, 0, 0);
 
-PUBLIC
-JniMtsService::JniMtsService(IN CBServiceNoti pCBServiceNoti, IN IMS_SINT32 nSlotId /*= 0*/) :
-        m_pJniMtsServiceThread(IMS_NULL),
-        m_nSlotId(nSlotId)
-{
-    IMS_TRACE_I("JniMtsService : nSlotId[%d]", nSlotId, 0, 0);
-
-    if (pCBServiceNoti == IMS_NULL)
+    if (m_piMtsService)
     {
-        IMS_TRACE_E(0, "JniMtsService:pCBServiceNoti is null", 0, 0, 0);
-        return;
+        m_piMtsService->SetJniMtsService(IMS_NULL);
     }
-    m_strThreadName.Sprintf("%s", STR_MTS_SVC_THREAD_NAME[nSlotId]);
-
-    IMSProcess::GetInstance()->LoadAppThread(m_strThreadName, JniMtsServiceThread::GetInstance);
-
-    m_pJniMtsServiceThread = (JniMtsServiceThread*)(IMSProcess::GetInstance()->GetApplicationThread(
-            m_strThreadName));
-
-    if (m_pJniMtsServiceThread != IMS_NULL)
-    {
-        m_pJniMtsServiceThread->SetCallback(
-                reinterpret_cast<IMS_SINTP>(this), pCBServiceNoti, nSlotId);
-    }
-    else
-    {
-        IMS_TRACE_E(0, "can't create listener thread", 0, 0, 0);
-    }
-    JniMtsServicePrivate::GetInstance();
-    androidJavaWms_SetJniMtsService(jniSmsService_ReportSMS);
-}
-
-PUBLIC VIRTUAL JniMtsService::~JniMtsService()
-{
-    IMS_TRACE_I("~JniMtsService :", 0, 0, 0);
 
     if (m_pJniMtsServiceThread != IMS_NULL)
     {
@@ -163,56 +46,129 @@ PUBLIC VIRTUAL JniMtsService::~JniMtsService()
     }
 }
 
-PUBLIC VIRTUAL int JniMtsService::SendData(IN const Parcel& objParcel)
+PUBLIC VIRTUAL
+int JniMtsService::SendData(const Parcel& objParcel)
 {
-    int nMsg = objParcel.readInt32();
+    int nMessage = objParcel.readInt32();
 
-    HandleMessage(nMsg, objParcel);
+    if (IsThreadSwitchingRequired(nMessage))
+    {
+        SendDataUsingEnablerThread(objParcel, m_nSlotId);
+    }
+    else
+    {
+        HandleMessage(nMessage, objParcel);
+    }
 
     return 1;
 }
 
-PRIVATE
-void JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+PUBLIC
+void JniMtsService::SetMtsService(IN IMtsService* piMtsService)
 {
-    IMS_TRACE_I("HandleMessage :: msg = %d", nMsg, 0, 0);
+    IMS_TRACE_D("SetMtsService()", 0, 0, 0);
+    m_piMtsService = piMtsService;
+}
+
+PUBLIC
+JniMtsServiceThread* JniMtsService::GetThread() const
+{
+    return m_pJniMtsServiceThread;
+}
+
+PROTECTED VIRTUAL void
+JniMtsService::HandleMessage(IN IMS_SINT32 nMsg, IN const Parcel& objParcel)
+{
+    IMS_TRACE_D("HandleMessage() MSG=[%d]", nMsg, 0, 0);
 
     switch (nMsg)
     {
-        case IUMtsService::NOTI_MTSENABLER_SEND_MO_SMS:
-        {
-            IUMtsServiceSendMoSmsParam* pMoSms = new IUMtsServiceSendMoSmsParam();
-            pMoSms->nSmsFormat = objParcel.readInt32();
-            android::String8 astrEncodedData(objParcel.readString16());
-            android::String8 astrAddress(objParcel.readString16());
-            pMoSms->nSeqId = objParcel.readInt32();
-            AString strData = AString::FromBase64(astrEncodedData.string());
-            pMoSms->objData.Append(reinterpret_cast<const IMS_BYTE*>(strData.GetStr()),
-                    static_cast<IMS_SINT32>(strData.GetLength()));
-            pMoSms->strAddr = astrAddress.string();
+        case IuMtsService::NOTI_MTSENABLER_SEND_MO_SMS:
+            TriggerSendMoSms(objParcel);
+            break;
 
-            IMSMSG objMSG(nMsg, 0, reinterpret_cast<IMS_UINTP>(pMoSms));
-            AString aStrActivity = EnablerUtils::GetEnablerThreadName(m_nSlotId);
-            aStrActivity.Append(".AndroidJavaWms");
-            IMS_TRACE_I("m_strTargetActivity [%s]", aStrActivity.GetStr(), 0, 0);
-            MessageService::PostMessage(aStrActivity, objMSG);
-        }
-        break;
-
-        case IUMtsService::NOTI_MTSENABLER_SEND_MT_RESULT:
-        {
-            IMS_SINT32 nMtResult = objParcel.readInt32();
-
-            JniMtsServicePrivate::GetInstance()->SetMtResult(nMtResult);
-            IMS_TRACE_I("MT result = (%d)", nMtResult, 0, 0);
-            JniMtsServicePrivate::GetInstance()->AwakeCondition();
-        }
-        break;
+        case IuMtsService::NOTI_MTSENABLER_SEND_MT_RESULT:
+            NotifyMtResult(objParcel);
+            break;
 
         default:
-        {
-            IMS_TRACE_E(0, "unknown message : %d", nMsg, 0, 0);
-        }
-        break;
+            break;
     }
+}
+
+PRIVATE
+IMS_BOOL JniMtsService::Attach()
+{
+    IMS_BOOL bIsAttached = IMS_FALSE;
+
+    if (m_piMtsService)
+    {
+        IMS_TRACE_D("Attach()::Attached", 0, 0, 0);
+        return IMS_TRUE;
+    }
+
+    m_piMtsService = JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)
+            ->GetEnablerService();
+    if (m_piMtsService)
+    {
+        m_piMtsService->SetJniMtsService(this);
+        bIsAttached = IMS_TRUE;
+    }
+    else
+    {
+        JniConnectorFactory::GetInstance()->GetMtsServiceConnector(m_nSlotId)->SetJniService(this);
+    }
+
+    IMS_TRACE_I("Attach() :: %s", _TRACE_B_(bIsAttached), 0, 0);
+    return bIsAttached;
+}
+
+PRIVATE
+void JniMtsService::Initialize(IN CBServiceNoti pCbServiceNoti)
+{
+    if (pCbServiceNoti == IMS_NULL)
+    {
+        return;
+    }
+
+    m_strThreadName.Sprintf("JniMtsServiceThread_%d", m_nSlotId);
+
+    IMS_TRACE_D("Initialize()", 0, 0, 0);
+    auto fnEntry = []() -> BaseThread * { return new JniMtsServiceThread(); };
+
+    IMSProcess::GetInstance()->LoadThread(m_strThreadName, fnEntry);
+    m_pJniMtsServiceThread =
+            (JniMtsServiceThread*)(IMSProcess::GetInstance()->GetThread(m_strThreadName));
+
+    if (m_pJniMtsServiceThread == IMS_NULL)
+    {
+        IMS_TRACE_E(0, "JniMtsService : can't create listener thread", 0, 0, 0);
+        return;
+    }
+
+    m_pJniMtsServiceThread->SetCallback(reinterpret_cast<IMS_SINTP>(this), pCbServiceNoti);
+    Attach();
+}
+
+PRIVATE
+void JniMtsService::TriggerSendMoSms(IN const Parcel& objParcel)
+{
+    IMS_UINT32 nSmsFormat = objParcel.readInt32();
+    android::String8 strEncodedData(objParcel.readString16());
+    android::String8 strAddress_(objParcel.readString16());
+    IMS_SINT32 nSeqId = objParcel.readInt32();
+    AString strData = AString::FromBase64(strEncodedData.string());
+    ByteArray objData(reinterpret_cast<const IMS_BYTE*>(strData.GetStr()),
+            static_cast<IMS_SINT32>(strData.GetLength()));
+    AString strAddress = strAddress_.string();
+
+    m_piMtsService->SendMoSms(nSmsFormat, objData, strAddress, nSeqId);
+}
+
+PRIVATE
+void JniMtsService::NotifyMtResult(IN const Parcel& objParcel)
+{
+    IMS_SINT32 nMtResult = objParcel.readInt32();
+    IMS_TRACE_I("MT result = (%d)", nMtResult, 0, 0);
+    m_piMtsService->SendMtResult(nMtResult);
 }

@@ -2,6 +2,7 @@
 #include "ServiceTrace.h"
 #include "IMSStrLib.h"
 #include "utility/MtsSmUtils.h"
+#include "MtsApp.h"
 
 __IMS_TRACE_TAG_COM_SMS__;
 
@@ -58,11 +59,11 @@ IMS_SINT32 MtsSmUtils::GetMti(IN const IMS_UINT32 nSmsType, IN const IMS_BYTE* p
 {
     if (pbySmsData != IMS_NULL)
     {
-        if (nSmsType == MTS_SMS_FORMAT_3GPP)
+        if (nSmsType == MtsApp::SMSFORMAT_3GPP)
         {
             return static_cast<IMS_SINT32>(pbySmsData[0] & 0x07);
         }
-        else if (nSmsType == MTS_SMS_FORMAT_3GPP2)
+        else if (nSmsType == MtsApp::SMSFORMAT_3GPP2)
         {
             return static_cast<IMS_SINT32>(pbySmsData[0]);
         }

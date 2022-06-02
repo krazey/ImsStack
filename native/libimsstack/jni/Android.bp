@@ -8,6 +8,14 @@ cc_library_headers {
 }
 
 cc_library_headers {
+    name: "libimsstack_jni_mts_headers",
+    export_include_dirs: [
+        "include",
+        "include/enabler/mts",
+    ],
+}
+
+cc_library_headers {
     name: "libimsstack_jni_media_headers",
     export_include_dirs: [
         "include",
@@ -49,6 +57,7 @@ cc_library_static {
         "libimsstack_platform_os_android_system-intf_headers",
     ] + [
         "libimsstack_enabler_mtc_headers",
+        "libimsstack_enabler_mts_headers",
         "libimsstack_enabler_aos_headers",
     ],
     local_include_dirs: [

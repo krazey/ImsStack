@@ -11,7 +11,7 @@ public:
     ~MtsUtils();
 
     static MtsUtils* GetInstance();
-    static const IMS_CHAR* RegTimerToString(IN IMS_UINT32 nType);
+    static const IMS_CHAR* MtsTimerToString(IN IMS_UINT32 nType);
 
     ITimer* StartTimer(IN IMS_UINT32 nDuration, IN ITimerListener* piListener,
             IN AString strLog /* = AString("") */);
@@ -25,6 +25,11 @@ public:
     IMS_BOOL GetScbm();
 
 public:
+    enum
+    {
+        TIMER_MTS_CALLBACK_MODE = 10
+    };
+
     // error codes for received sms messages.
     enum
     {

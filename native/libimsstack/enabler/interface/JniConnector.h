@@ -5,9 +5,9 @@
 
 /*
     EnablerService : (mandatory) the class which receives message from Jni
-        (ex. AosService / EabApp / IMtcService)
+        (ex. AosService / EabApp / IMtcService / IMtsService)
     JniService : (mandatory) the JniService
-        (ex. JniMtcService / JniAosService/ JniEabService)
+        (ex. JniMtcService / JniAosService/ JniEabService / JniMtsService)
 */
 template <typename EnablerService, typename JniService>
 class JniConnector
