@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.imsstack.enabler.media;
 
 import android.os.Parcel;
@@ -28,7 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.util.concurrent.Executor;
 
 /** This manages Media Sessions */
-public class MediaSession {
+public class MediaSession implements IMediaConnectionObserver {
 
     private MtcMediaSession mMtcMediaSession;
     private final IBaseContext mContext;
@@ -54,6 +55,32 @@ public class MediaSession {
          * @return display surface instance
          */
         Surface getDisplaySurface();
+    }
+
+    /**
+     * Called by the ImsMediaManagerCallback when the ImsMedia service is connected.
+     */
+    @Override
+    public void onMediaConnected() {
+        ImsLog.v("handle ImsMedia Connected");
+    }
+
+    /**
+     * Called by the ImsMediaManagerCallback when the ImsMedia service is disconnected.
+     */
+    @Override
+    public void onMediaDisconnected() {
+        ImsLog.v("Handle ImsMedia disconnection");
+        if (mAudioSessionHandler != null) {
+            mAudioSessionHandler.onImsMediaAudioMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
+            Parcel parcel = Parcel.obtain();
+            parcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
+            sendRequest(parcel);
+        }
+
+        if (mVideoSessionHandler != null) {
+            mVideoSessionHandler.onImsMediaVideoMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
+        }
     }
 
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
