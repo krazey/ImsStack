@@ -29,7 +29,6 @@ public:
     void AddService(IN MtsService* pService);
     MtsServiceState* GetMtsServiceState();
     void RemoveMtsServices();
-    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
 
     // IMtsApp
     virtual void Start() override;

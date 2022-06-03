@@ -15,7 +15,6 @@
 #include "IPageMessage.h"
 #include "IuMts.h"
 #include "MtsApp.h"
-#include "MtsFactory.h"
 #include "message/IMtsMessage.h"
 #include "message/MtsMessage.h"
 #include "message/MtsMessageController.h"
@@ -931,17 +930,6 @@ IMS_SINT32 MtsMessage::GetRetryAfterValue(IN IMessage* piMessage)
     IMS_TRACE_I("Retry-After :: value=%d", nValue, 0, 0);
 
     return nValue;
-}
-
-PROTECTED
-void MtsMessage::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
-{
-    MtsApp* pMtsApp = MtsFactory::GetInstance()->GetMtsApp(m_nSlotId);
-
-    if (pMtsApp != IMS_NULL)
-    {
-        pMtsApp->RequestRegistrationRecovery(nRecoveryType);
-    }
 }
 
 PRIVATE

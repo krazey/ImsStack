@@ -95,14 +95,6 @@ PUBLIC void MtsApp::RemoveMtsServices()
     m_lstMtsServices.RemoveElementsAt(0, nSize);
 }
 
-PUBLIC void MtsApp::RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType)
-{
-    if (m_pMtsService != IMS_NULL)
-    {
-        m_pMtsService->RequestRegistrationRecovery(nRecoveryType);
-    }
-}
-
 PUBLIC VIRTUAL void MtsApp::Start()
 {
     IMS_TRACE_I("SMS Start : m_nSlotId : [%d]", m_nSlotId, 0, 0);

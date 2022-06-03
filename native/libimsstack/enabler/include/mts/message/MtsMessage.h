@@ -66,7 +66,6 @@ protected:
             IN const IPageMessage* piPageMessage, OUT AString& strSmsgw);
     void GetUriFromHeaders(IN const AString& strFromHdr, OUT AString& strUri) const;
     IMS_SINT32 GetRetryAfterValue(IN IMessage* piMessage);
-    void RequestRegistrationRecovery(IN IMS_SINT32 nRecoveryType);
 
 private:
     void ReportTransmissionResultToMessageController(
