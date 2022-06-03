@@ -34,8 +34,6 @@ PUBLIC VIRTUAL IMS_RESULT EmergencyMessageFormatter::FormStartMessage()
         return IMS_FAILURE;
     }
 
-    SetLocation();
-
     m_eNormalAosRegMode = GetAoSRegMode(ServiceType::NORMAL);
     m_eEmergencyAosRegMode = GetAoSRegMode(ServiceType::EMERGENCY);
     if ((m_eNormalAosRegMode == IImsAosInfo::REG_MODE_UNKNOWN) ||

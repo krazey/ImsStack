@@ -60,6 +60,7 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormStartMessage()
     SetSupportedHeader();
     SetPreconditionHeader();
     SetPEarlyMediaHeader();
+    SetLocation();
 
     return IMS_SUCCESS;
 }
@@ -253,17 +254,13 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailRe
 ------------------------------------------------------------------------------------------------- */
 PROTECTED VIRTUAL void MessageFormatter::SetLocation()
 {
-    ISipMessage* piSipMessage = m_piNextMessage->GetMessage();
-    if (piSipMessage == IMS_NULL)
+    MtcLocationObject objLocation(m_objContext);
+
+    if (!objLocation.IsGeolocationInfoRequired())
     {
         return;
     }
-
-    IMtcCall* piUcSession = IMS_NULL;  // TODO
-
-    UCLocationObject objLocation;
-    // TODO, avoid to use ISipMessage as parameter
-    objLocation.SetLocation(piUcSession, piSipMessage);
+    objLocation.SetLocationToMessage(*m_piNextMessage);
 }
 
 /* -------------------------------------------------------------------------------------------------

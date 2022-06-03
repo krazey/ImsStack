@@ -1,46 +1,46 @@
-/*
-    Author
-    <table>
-    date          author                        description
-    --------      --------------                ----------
-    20150415    il.won@                   Created
-    </table>
+#ifndef MTC_LOCATION_OBJECT_H_
+#define MTC_LOCATION_OBJECT_H_
 
-    Description
-
-*/
-
-#ifndef UC_LOCATION_OBJECT_H_
-#define UC_LOCATION_OBJECT_H_
-
+#include "ByteArray.h"
+#include "IMSTypeDef.h"
 #include "call/IMtcCall.h"
 
 class IMessage;
-class ISipMessage;
+class IMtcCallContext;
+class ISubscriberConfig;
 
-class UCLocationObject
+class MtcLocationObject final
 {
 public:
-    UCLocationObject();
-    virtual ~UCLocationObject();
+    explicit MtcLocationObject(IN IMtcCallContext& objContext);
+    ~MtcLocationObject();
 
 public:
-    virtual IMS_BOOL IsGeolocationInfoRequired(IN IMtcCall* pSession);
-    void SetLocation(IN IMtcCall* pSession, IN_OUT IMessage* piMessage,
-            IN IMS_BOOL bGeolocationRouting = IMS_FALSE);
-    void SetLocation(IN IMtcCall* pSession, IN_OUT ISipMessage* piSIPMessage,
-            IN IMS_BOOL bGeolocationRouting = IMS_FALSE);
+    IMS_BOOL IsGeolocationInfoRequired();
+
+    void SetLocationToMessage(
+            IN_OUT IMessage& objMessage, IN IMS_BOOL bGeolocationRouting = IMS_FALSE);
 
 private:
-    IMS_BOOL IsGeolocationPidfSupported(
-            IN IMS_SINT32 nSlotId, IN IMS_SINT32 nGeolocationPidfType) const;
+    static const IMS_CHAR CONTENT_TYPE_PIDF_XML[];
+    static const IMS_CHAR HEADER_GEOLOCATION[];
+    static const IMS_CHAR HEADER_GEOLOCATION_ROUTING[];
+    static const IMS_CHAR GEOLOCATION_ROUTING_NO[];
+    static const IMS_CHAR GEOLOCATION_ROUTING_YES[];
+    static const IMS_CHAR CONTENT_DISPOSITION_RENDER[];
+    static const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[];
 
-private:
-    static const IMS_CHAR STR_APPLICATION_PIDF_XML[];
-    static const IMS_CHAR STR_GEOLOCATION[];
-    static const IMS_CHAR STR_GEOLOCATION_ROUTING[];
-    static const IMS_CHAR STR_NO[];
-    static const IMS_CHAR STR_YES[];
+    AString CreateCid(IN const ISubscriberConfig& objSubscriberConfig) const;
+    ByteArray CreateLocationBody() const;
+
+    IMS_SINT32 GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo) const;
+    IMS_SINT32 GetInformationLevel() const;
+    AString GetGeolocationHeader(IN const AString& strCid) const;
+    AString GetContentLengthHeader(IN const ByteArray& objContent) const;
+    AString GetContentIdHeader(IN const AString& strCid) const;
+    AString GetContentDispositionHeader() const;
+
+    IMtcCallContext& m_objContext;
 };
 
-#endif  // UC_LOCATION_OBJECT_H_
+#endif
