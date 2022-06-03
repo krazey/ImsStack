@@ -16,13 +16,37 @@
 
 __IMS_TRACE_TAG_COM_MTC__;
 
-PRIVATE GLOBAL const IMS_CHAR MtcLocationObject::CONTENT_TYPE_PIDF_XML[] = "application/pidf+xml";
-const IMS_CHAR MtcLocationObject::HEADER_GEOLOCATION[] = "Geolocation";
-const IMS_CHAR MtcLocationObject::HEADER_GEOLOCATION_ROUTING[] = "Geolocation-Routing";
-const IMS_CHAR MtcLocationObject::GEOLOCATION_ROUTING_NO[] = "no";
-const IMS_CHAR MtcLocationObject::GEOLOCATION_ROUTING_YES[] = "yes";
-const IMS_CHAR MtcLocationObject::CONTENT_DISPOSITION_RENDER[] = "render";
-const IMS_CHAR MtcLocationObject::CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
+LOCAL const IMS_CHAR CONTENT_TYPE_PIDF_XML[] = "application/pidf+xml";
+LOCAL const IMS_CHAR GEOLOCATION_ROUTING_NO[] = "no";
+LOCAL const IMS_CHAR GEOLOCATION_ROUTING_YES[] = "yes";
+LOCAL const IMS_CHAR CONTENT_DISPOSITION_RENDER[] = "render";
+LOCAL const IMS_CHAR CONTENT_DISPOSITION_HANDLING_OPTIONAL[] = "handling=optional";
+
+LOCAL IMS_SINT32 GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo)
+{
+    if (objCallInfo.bWifi)
+    {
+        if (objCallInfo.bEmergency)
+        {
+            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
+        }
+        else
+        {
+            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI;
+        }
+    }
+    else
+    {
+        if (objCallInfo.bEmergency)
+        {
+            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
+        }
+        else
+        {
+            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
+        }
+    }
+}
 
 PUBLIC
 MtcLocationObject::MtcLocationObject(IN IMtcCallContext& objContext) :
@@ -32,10 +56,10 @@ MtcLocationObject::MtcLocationObject(IN IMtcCallContext& objContext) :
 
 PUBLIC MtcLocationObject::~MtcLocationObject() {}
 
-PUBLIC IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired()
+PUBLIC GLOBAL IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired(IN IMtcCallContext& objContext)
 {
-    IMS_SINT32 nType = GetGeolocationPidfAllowedType(m_objContext.GetCallInfo());
-    if (!m_objContext.GetConfigurationProxy().Is(
+    IMS_SINT32 nType = GetGeolocationPidfAllowedType(objContext.GetCallInfo());
+    if (!objContext.GetConfigurationProxy().Is(
             Feature::SUPPORT_GEOLOCATION_PIDF_IN_SIP_INVITE, nType))
     {
         return IMS_FALSE;
@@ -43,7 +67,7 @@ PUBLIC IMS_BOOL MtcLocationObject::IsGeolocationInfoRequired()
 
     return IMS_TRUE;
     // TODO: Check if we can remove this SuppType
-    // return m_objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
+    // return objContext.GetSupplementaryService().Get(SuppType::GEOLOCATION)->bValue;
 }
 
 PUBLIC
@@ -99,33 +123,6 @@ ByteArray MtcLocationObject::CreateLocationBody() const
     }
 
     return objContent;
-}
-
-PRIVATE
-IMS_SINT32 MtcLocationObject::GetGeolocationPidfAllowedType(IN const CallInfo& objCallInfo) const
-{
-    if (objCallInfo.bWifi)
-    {
-        if (objCallInfo.bEmergency)
-        {
-            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI;
-        }
-        else
-        {
-            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_WIFI;
-        }
-    }
-    else
-    {
-        if (objCallInfo.bEmergency)
-        {
-            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_EMERGENCY_ON_CELLULAR;
-        }
-        else
-        {
-            return CarrierConfig::Ims::GEOLOCATION_PIDF_FOR_NON_EMERGENCY_ON_CELLULAR;
-        }
-    }
 }
 
 PRIVATE

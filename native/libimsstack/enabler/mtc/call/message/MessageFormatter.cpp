@@ -254,13 +254,12 @@ PUBLIC VIRTUAL IMS_RESULT MessageFormatter::FormTerminateMessage(IN const FailRe
 ------------------------------------------------------------------------------------------------- */
 PROTECTED VIRTUAL void MessageFormatter::SetLocation()
 {
-    MtcLocationObject objLocation(m_objContext);
-
-    if (!objLocation.IsGeolocationInfoRequired())
+    if (!MtcLocationObject::IsGeolocationInfoRequired(m_objContext))
     {
         return;
     }
-    objLocation.SetLocationToMessage(*m_piNextMessage);
+
+    MtcLocationObject(m_objContext).SetLocationToMessage(*m_piNextMessage);
 }
 
 /* -------------------------------------------------------------------------------------------------
