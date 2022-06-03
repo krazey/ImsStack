@@ -1,96 +1,83 @@
-/*
- * author : aromi.kwak
- * version : 1.0
- * date : 2016.10
- * brief : Create USSDDataCreator
- */
-
+#include "MtcDef.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
 
 #include "configuration/ConfigDef.h"
 #include "ussi/UssiDataCreator.h"
 #include "ussi/UssiConstants.h"
-#include "ussi/UssiDataParser.h"
-#include "MtcDef.h"
+#include "ussi/UssiData.h"
+#include "ussi/UssiDef.h"
 
-__IMS_TRACE_TAG_COM_UC__;
+__IMS_TRACE_TAG_COM_MTC__;
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-PUBLIC GLOBAL void USSDDataCreator::GetXMLBody(IN const AString& strUSSDStr,
-        OUT AStringBuffer& objXML, IN IMS_SINT32 nSlotID,
-        IN IMS_UINT32 nUSSType /*= USSDDataParser::AnyExtension::USS_TYPE_NONE*/,
-        IN IMS_UINT32 nErrorCode /*= USSDDataParser::ERROR_CODE_NONE*/)
+PUBLIC GLOBAL void UssiDataCreator::GetXmlBody(IN const AString& strUssdString,
+        OUT AStringBuffer& objXml, IN UssiModeType eUssiModeType /*= UssiModeType::NONE*/,
+        IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
 {
-    objXML.Append(USSDConstants::XML_PROCESSING_INSTRUCTION);
-    objXML.Append(TextParser::CHAR_LF);
+    objXml.Append(UssiConstants::XML_PROCESSING_INSTRUCTION);
+    objXml.Append(TextParser::CHAR_LF);
 
-    objXML.Append(CreateStartElement(USSDConstants::ELEMENT_USSD_DATA));
-    objXML.Append(TextParser::CHAR_HTAB);
+    objXml.Append(CreateStartElement(UssiConstants::ELEMENT_USSD_DATA));
+    objXml.Append(TextParser::CHAR_HTAB);
 
-    // TODO, MTC BUILD
-    UNUSED_PARAM(nSlotID);
-    objXML.Append(
-            CreateAttribute(USSDConstants::ELEMENT_LANGUAGE, USSDConstants::ELEMENT_LANGUAGE_EN));
+    objXml.Append(
+            CreateAttribute(UssiConstants::ELEMENT_LANGUAGE, UssiConstants::ELEMENT_LANGUAGE_EN));
 
     // ussd-string
-    objXML.Append(TextParser::CHAR_HTAB);
-    objXML.Append(CreateAttribute(USSDConstants::ELEMENT_USSD_STRING, strUSSDStr));
+    objXml.Append(TextParser::CHAR_HTAB);
+    objXml.Append(CreateAttribute(UssiConstants::ELEMENT_USSD_STRING, strUssdString));
 
     // error-code
     AString strErrorCode = AString::ConstEmpty();
-    GetErrorCode(nErrorCode, strErrorCode);
+    GetErrorCode(eErrorCode, strErrorCode);
 
     if (strErrorCode.GetLength() > 0)
     {
-        objXML.Append(TextParser::CHAR_HTAB);
-        objXML.Append(CreateAttribute(USSDConstants::ELEMENT_ERROR_CODE, strErrorCode));
+        objXml.Append(TextParser::CHAR_HTAB);
+        objXml.Append(CreateAttribute(UssiConstants::ELEMENT_ERROR_CODE, strErrorCode));
     }
 
     // append extension of request type
-    if (nUSSType != USSDDataParser::AnyExtension::USS_TYPE_NONE)
+    if (eUssiModeType != UssiModeType::NONE)
     {
-        objXML.Append(TextParser::CHAR_HTAB);
-        objXML.Append(CreateStartElement(USSDConstants::ELEMENT_ANYEXT));
+        objXml.Append(TextParser::CHAR_HTAB);
+        objXml.Append(CreateStartElement(UssiConstants::ELEMENT_ANYEXT));
 
-        objXML.Append(TextParser::CHAR_HTAB);
-        objXML.Append(TextParser::CHAR_HTAB);
+        objXml.Append(TextParser::CHAR_HTAB);
+        objXml.Append(TextParser::CHAR_HTAB);
 
         AString strAttribute;
         strAttribute.Append(TextParser::CHAR_LAQUOT);
         // <UnstructuredSS-Request/>
-        if (nUSSType == USSDDataParser::AnyExtension::USS_TYPE_REQUEST)
+        if (eUssiModeType == UssiModeType::REQUEST)
         {
-            strAttribute.Append(USSDConstants::ELEMENT_USS_REQUEST);
+            strAttribute.Append(UssiConstants::ELEMENT_USS_REQUEST);
         }
         // <UnstructuredSS-Notify/>
-        else if (nUSSType == USSDDataParser::AnyExtension::USS_TYPE_NOTIFY)
+        else if (eUssiModeType == UssiModeType::NOTIFY)
         {
-            strAttribute.Append(USSDConstants::ELEMENT_USS_NOTIFY);
+            strAttribute.Append(UssiConstants::ELEMENT_USS_NOTIFY);
         }
         strAttribute.Append(TextParser::CHAR_SLASH);
         strAttribute.Append(TextParser::CHAR_RAQUOT);
         strAttribute.Append(TextParser::CHAR_LF);
 
-        objXML.Append(strAttribute);
-        objXML.Append(TextParser::CHAR_HTAB);
-        objXML.Append(CreateEndElement(USSDConstants::ELEMENT_ANYEXT));
+        objXml.Append(strAttribute);
+        objXml.Append(TextParser::CHAR_HTAB);
+        objXml.Append(CreateEndElement(UssiConstants::ELEMENT_ANYEXT));
     }
 
-    objXML.Append(CreateEndElement(USSDConstants::ELEMENT_USSD_DATA));
+    objXml.Append(CreateEndElement(UssiConstants::ELEMENT_USSD_DATA));
 
-    IMS_TRACE_D("GetXMLBody : [%s]", strUSSDStr.GetStr(), 0, 0);
+    IMS_TRACE_D("GetXmlBody : [%s]", strUssdString.GetStr(), 0, 0);
 }
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL const AString USSDDataCreator::CreateStartElement(
+PRIVATE GLOBAL const AString UssiDataCreator::CreateStartElement(
         IN const AString& strStartElementName)
 {
     if (strStartElementName.GetLength() <= 0)
     {
-        IMS_TRACE_I("CreateStartElement : Empty", 0, 0, 0);
+        IMS_TRACE_D("CreateStartElement : Empty", 0, 0, 0);
         return AString::ConstEmpty();
     }
 
@@ -106,14 +93,12 @@ PRIVATE GLOBAL const AString USSDDataCreator::CreateStartElement(
     return strStartElement;
 }
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL const AString USSDDataCreator::CreateAttribute(
+PRIVATE GLOBAL const AString UssiDataCreator::CreateAttribute(
         IN const AString& strAttributeName, IN const AString& strValue)
 {
     if (strAttributeName.GetLength() <= 0 || strValue.GetLength() <= 0)
     {
-        IMS_TRACE_I("CreateAttribute : Empty", 0, 0, 0);
+        IMS_TRACE_D("CreateAttribute : Empty", 0, 0, 0);
         return AString::ConstEmpty();
     }
 
@@ -134,13 +119,11 @@ PRIVATE GLOBAL const AString USSDDataCreator::CreateAttribute(
     return strAttribute;
 }
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL const AString USSDDataCreator::CreateEndElement(IN const AString& strEndElementName)
+PRIVATE GLOBAL const AString UssiDataCreator::CreateEndElement(IN const AString& strEndElementName)
 {
     if (strEndElementName.GetLength() <= 0)
     {
-        IMS_TRACE_I("CreateEndElement : Empty", 0, 0, 0);
+        IMS_TRACE_D("CreateEndElement : Empty", 0, 0, 0);
         return AString::ConstEmpty();
     }
 
@@ -157,28 +140,26 @@ PRIVATE GLOBAL const AString USSDDataCreator::CreateEndElement(IN const AString&
     return strEndElement;
 }
 
-/* ------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------- */
-PRIVATE GLOBAL void USSDDataCreator::GetErrorCode(
-        IN IMS_UINT32 nErrorCode, IN AString& strErrorCode)
+PRIVATE GLOBAL void UssiDataCreator::GetErrorCode(
+        IN UssiError eErrorCode, OUT AString& strErrorCode)
 {
-    if (nErrorCode == USSDDataParser::ERROR_CODE_NONE)
+    if (eErrorCode == UssiError::CODE_NONE)
     {
         return;
     }
 
-    switch (nErrorCode)
+    switch (eErrorCode)
     {
-        case USSDDataParser::ERROR_CODE_1:
+        case UssiError::CODE_1:
             strErrorCode = "1";
             break;
-        case USSDDataParser::ERROR_CODE_2:
+        case UssiError::CODE_2:
             strErrorCode = "2";
             break;
-        case USSDDataParser::ERROR_CODE_3:
+        case UssiError::CODE_3:
             strErrorCode = "3";
             break;
-        case USSDDataParser::ERROR_CODE_4:
+        case UssiError::CODE_4:
             strErrorCode = "4";
             break;
         default:

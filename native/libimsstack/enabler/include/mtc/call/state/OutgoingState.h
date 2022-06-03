@@ -46,6 +46,8 @@ public:
     CallStateName SessionRPRReceived(IN ISession* piSession, IN IMS_UINT32 nIndex) override;
     CallStateName OnTimerExpired(IN IMS_SINT32 nType) override;
 
+    CallStateName UssiStarted(IN ISession* piSession) override;
+
 private:
     IMS_RESULT SendPrack(IN ISession* piSession);  // TODO: Updating can use this also.
     IMS_RESULT SendAck(IN ISession* piSession);    // TODO: differs from UpdatingState::SendAck()?

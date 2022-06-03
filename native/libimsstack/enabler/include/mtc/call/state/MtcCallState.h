@@ -8,12 +8,15 @@
 #include "base/IMessageMediator.h"
 #include "call/IMtcCall.h"
 #include "helper/block/IMtcBlockChecker.h"
+#include "ussi/UssiDef.h"
 
 class AString;
+class IMessage;
 class IMtcCallContext;
 class IReference;
 class ISession;
-class IMessage;
+class ISipClientConnection;
+class ISipConnection;
 class ISipServerConnection;
 class JniMediaSessionThread;
 class JniMtcServiceThread;
@@ -65,9 +68,24 @@ public:
     virtual CallStateName CancelConvert(IN const FailReason& objReason);
     virtual CallStateName Terminate(IN const FailReason& objReason);
     virtual CallStateName SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration);
-    virtual CallStateName SendUssi(IN const AString& strUssi);
     virtual CallStateName HandleSrvccSuccess();
     virtual CallStateName HandleSrvccFailure(IN UpdateType eUpdateType);
+
+    virtual CallStateName HandleIncomingUssi(
+            IN ISession* piSession, IN JniMtcServiceThread* pServiceThread);
+    virtual CallStateName OnUssiAttached();
+    virtual CallStateName AcceptUssi(IN CallType eCallType, IN MediaInfo* pMediaInfo);
+    virtual CallStateName UssiStarted(IN ISession* piSession);
+    virtual CallStateName TerminateUssi(IN const FailReason& objReason);
+    virtual CallStateName UssiTerminated(IN ISession* piSession);
+
+    virtual CallStateName SendUssi(IN const AString& strUssi);
+    virtual CallStateName UssiInfoReceived(
+            IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
+    virtual CallStateName NotifyResponseToUssiInfo(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc);
+    virtual CallStateName NotifyErrorToUssiInfo(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
 
     virtual CallStateName SessionAlerting(IN ISession* piSession);
     virtual CallStateName SessionReferenceReceived(
@@ -105,6 +123,11 @@ public:
 
     virtual CallStateName OnInternalFailure();
     virtual CallStateName OnAttached();
+
+    virtual CallStateName ClientConnection_NotifyResponse(
+            IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc);
+    virtual CallStateName Error_NotifyError(
+            IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage);
 
 protected:
     enum TimerType
@@ -168,6 +191,11 @@ protected:
     void StartTimer(IN IMS_UINT32 nType) const;
     void StopTimer(IN IMS_UINT32 nType) const;
     IMS_SINT32 GetTimeInMilliseconds(IN IMS_UINT32 nType) const;
+
+    void SendInfoForUssi(
+            IN const AString& strUssdString, IN UssiError eErrorCode = UssiError::CODE_NONE);
+    void SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
+            IN IMS_UINT32 nResponseCode, IN const AString& strPhrase = AString::ConstEmpty());
 
     IMtcCallContext& m_objContext;
 

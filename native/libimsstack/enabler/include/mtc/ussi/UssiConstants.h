@@ -3,11 +3,8 @@
 
 #include "IMSTypeDef.h"
 
-class USSDConstants
+class UssiConstants
 {
-private:
-    USSDConstants();
-
 public:
     static const IMS_CHAR ELEMENT_USSD_DATA[];
     static const IMS_CHAR ELEMENT_LANGUAGE[];
@@ -33,4 +30,4 @@ public:
     static const IMS_SINT32 XML_BUFFER_SIZE;
 };
 
-#endif  // USSI_CONSTANTS_
+#endif

@@ -161,7 +161,7 @@ public:
     // Sends USSI. Nothing happens if the specified call isn't a USSI session.
     // - nIMSKey: Key of the call to be manipulated.
     // - aStrUSSI: USSI string.
-    void SendTransaction(IN CallKey nCallKey, IN const AString& strUssi);
+    void SendUssi(IN CallKey nCallKey, IN const AString& strUssi);
 
     // Handles conference call related IMS messages.
     /*
@@ -178,8 +178,6 @@ public:
     void Transfer(IN CallKey nCallKey, IN const AString& strTarget);
 
 private:
-    IMS_BOOL IsUssi(IN ISession* piSession);
-
     IMtcContext& m_objContext;
     IMtcCallManager& m_objCallManager;
 };

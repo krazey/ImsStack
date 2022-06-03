@@ -2,6 +2,7 @@
 #include "IMSTypeDef.h"
 #include "IReference.h"
 #include "ISession.h"
+#include "ISipClientConnection.h"
 #include "IuMtcCall.h"
 #include "IuMtcService.h"
 #include "ServiceMutex.h"
@@ -43,7 +44,8 @@ MtcCall::MtcCall(
         m_objUiNotifier(MtcUiNotifier(*this)),
         m_objMediaManager(MtcMediaManager(*this)),
         m_objPreconditionManager(MtcPreconditionManager(*this)),
-        m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy()))
+        m_objSupplementaryService(MtcSupplementaryService(objContext.GetConfigurationProxy())),
+        m_pUssiController(IMS_NULL)
 {
     IMS_TRACE_D("+MtcCall key[%d]", m_nKey, 0, 0);
 
@@ -55,6 +57,7 @@ PUBLIC VIRTUAL MtcCall::~MtcCall()
 {
     IMS_TRACE_D("~MtcCall key[%d]", m_nKey, 0, 0);
     delete m_pSession;
+    delete m_pUssiController;
 }
 
 PUBLIC VIRTUAL void MtcCall::HandleIncoming(
@@ -76,11 +79,24 @@ PUBLIC VIRTUAL void MtcCall::HandleIncoming(
         return;
     }
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->HandleIncoming(piSession, pServiceThread);
-            });
+    if (UssiController::IsNetworkInitiatedUssi(
+            piSession->GetPreviousRequest(IMessage::SESSION_START)))
+    {
+        m_pUssiController = new UssiController(*this);
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->HandleIncomingUssi(piSession, pServiceThread);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->HandleIncoming(piSession, pServiceThread);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::Attach(
@@ -122,6 +138,11 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
         return;
     }
 
+    if (IsUssi())
+    {
+        m_pUssiController = new UssiController(*this);
+    }
+
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
@@ -132,6 +153,11 @@ PUBLIC VIRTUAL void MtcCall::Start(IN CallType eCallType, IN const AString& strT
 PUBLIC VIRTUAL void MtcCall::HandleUserAlert()
 {
     IMS_TRACE_I("HandleUserAlert : key[%d]", m_nKey, 0, 0);
+
+    if (IsUssi())
+    {
+        return;
+    }
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
@@ -144,11 +170,22 @@ PUBLIC VIRTUAL void MtcCall::Accept(IN CallType eCallType, IN MediaInfo* pMediaI
 {
     IMS_TRACE_I("Accept : key[%d]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->Accept(eCallType, pMediaInfo);
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->AcceptUssi(eCallType, pMediaInfo);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->Accept(eCallType, pMediaInfo);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::Reject(IN const FailReason& objReason)
@@ -284,11 +321,22 @@ PUBLIC VIRTUAL void MtcCall::Terminate(IN const FailReason& objReason)
 {
     IMS_TRACE_I("Terminate : key[%d]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->Terminate(objReason);
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->TerminateUssi(objReason);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->Terminate(objReason);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration)
@@ -408,6 +456,25 @@ PUBLIC VIRTUAL JniCallInfo MtcCall::CreateJniCallInfo()
     return objJniCallInfo;
 }
 
+PUBLIC VIRTUAL ISipClientConnection* MtcCall::CreateClientConnection(IN IMS_SINT32 nMethod)
+{
+    if (!m_pSession)
+    {
+        return IMS_NULL;
+    }
+
+    ISipClientConnection* piSipClientConnection =
+            m_pSession->GetISession().CreateTransaction(nMethod);
+
+    if (piSipClientConnection)
+    {
+        piSipClientConnection->SetListener(this);
+        piSipClientConnection->SetErrorListener(this);
+    }
+
+    return piSipClientConnection;
+}
+
 PUBLIC VIRTUAL void MtcCall::DeleteUpdatingInfo()
 {
     delete m_pUpdatingInfo;
@@ -470,11 +537,22 @@ PUBLIC VIRTUAL void MtcCall::SessionStarted(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->SessionStarted(piSession);
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->UssiStarted(piSession);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->SessionStarted(piSession);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::SessionStartFailed(IN ISession* piSession)
@@ -504,11 +582,22 @@ PUBLIC VIRTUAL void MtcCall::SessionTerminated(IN ISession* piSession)
         return;
     }
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->SessionTerminated(piSession);
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->UssiTerminated(piSession);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->SessionTerminated(piSession);
+                });
+    }
 }
 
 PUBLIC VIRTUAL void MtcCall::SessionUpdated(IN ISession* piSession)
@@ -791,11 +880,22 @@ PUBLIC VIRTUAL void MtcCall::SessionTransactionReceived(
         return;
     }
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->SessionTransactionReceived(piSession, piSipServerConnection);
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->UssiInfoReceived(piSession, piSipServerConnection);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->SessionTransactionReceived(piSession, piSipServerConnection);
+                });
+    }
 }
 
 PUBLIC VIRTUAL IMS_RESULT MtcCall::MessageMediator_AdjustMessage(
@@ -906,6 +1006,62 @@ PUBLIC VIRTUAL void MtcCall::OnStateTransition(IN CallStateName eState)
             m_objCallInfo.bEmergency);
 }
 
+PUBLIC VIRTUAL void MtcCall::ClientConnection_NotifyResponse(
+        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc /*= IMS_NULL*/)
+{
+    IMS_TRACE_I("ClientConnection_NotifyResponse : key[%d]", m_nKey, 0, 0);
+    if (piScc == IMS_NULL)
+    {
+        OnInternalFailure();
+        return;
+    }
+
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->NotifyResponseToUssiInfo(piScc, piForkedScc);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->ClientConnection_NotifyResponse(piScc, piForkedScc);
+                });
+    }
+}
+
+PUBLIC VIRTUAL void MtcCall::Error_NotifyError(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
+{
+    IMS_TRACE_I("Error_NotifyError : key[%d]", m_nKey, 0, 0);
+    if (piSc == IMS_NULL)
+    {
+        OnInternalFailure();
+        return;
+    }
+
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->NotifyErrorToUssiInfo(piSc, nCode, strMessage);
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->Error_NotifyError(piSc, nCode, strMessage);
+                });
+    }
+}
+
 PRIVATE
 CallKey MtcCall::CreateCallKey()
 {
@@ -932,9 +1088,20 @@ void MtcCall::OnAttached()
 {
     IMS_TRACE_I("OnAttached : key[%" PFLS_x "]", m_nKey, 0, 0);
 
-    m_objStateMachine.RunStateOperation(
-            [&](MtcCallState* pState)
-            {
-                return pState->OnAttached();
-            });
+    if (IsUssi())
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->OnUssiAttached();
+                });
+    }
+    else
+    {
+        m_objStateMachine.RunStateOperation(
+                [&](MtcCallState* pState)
+                {
+                    return pState->OnAttached();
+                });
+    }
 }

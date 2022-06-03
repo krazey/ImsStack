@@ -65,9 +65,8 @@ public:
     void SendUpdateFailed(IN const FailReason& objReason);
     void SendUpdatedBy(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
-    void SendNotifyInfo(IN IMS_UINT32 eType, IN IMS_UINTP nImsKey,
-            IN AString strValue = AString::ConstNull(), IN IMS_SINT32 nValue = -1,
-            IN IMS_BOOL bValue = IMS_FALSE);
+    void SendNotifyInfo(IN IMS_UINT32 eType, IN AString strValue = AString::ConstNull(),
+            IN IMS_SINT32 nValue = -1, IN IMS_BOOL bValue = IMS_FALSE);
     void SendExpanded(IN CallInfo* pCallInfo, IN MediaInfo* pMediaInfo,
             IN const IMSMap<SuppType, SuppService*>& objSuppServices);
     void SendExpandFailed(IN const FailReason& objReason);

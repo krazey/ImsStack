@@ -159,6 +159,10 @@ PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
             RejectResume(objParcel);
             break;
 
+        case IuMtcCall::SEND_USSD:
+            SendUssi(objParcel);
+            break;
+
         case IuMtcCall::STARTCONF:
             StartGroupCall(objParcel);
             break;
@@ -316,6 +320,14 @@ PRIVATE
 void JniMtcCall::RejectResume(IN const android::Parcel& objParcel)
 {
     m_objCallController.RejectResume(m_nCallKey, FailReason(objParcel.readInt32()));
+}
+
+PRIVATE
+void JniMtcCall::SendUssi(IN const android::Parcel& objParcel)
+{
+    android::String8 str8(objParcel.readString16());
+    AString strUssi = str8.string();
+    m_objCallController.SendUssi(m_nCallKey, strUssi);
 }
 
 PRIVATE

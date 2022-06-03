@@ -1,3 +1,12 @@
+#include "IMessage.h"
+#include "ISipClientConnection.h"
+#include "ISipConnection.h"
+#include "ISipHeader.h"
+#include "IuMtcCall.h"
+#include "IuMtcService.h"
+#include "MtcDef.h"
+#include "SipStatusCode.h"
+#include "ISipServerConnection.h"
 #include "call/IMtcCallContext.h"
 #include "call/IMtcCallManager.h"
 #include "call/MtcSession.h"
@@ -11,16 +20,12 @@
 #include "helper/MtcTimerWrapper.h"
 #include "helper/sipinterfaceholder/MtcSipInterfaceFactory.h"
 #include "helper/sipinterfaceholder/SessionInterfaceHolder.h"
-#include "IMessage.h"
-#include "ISipHeader.h"
-#include "IuMtcCall.h"
-#include "IuMtcService.h"
 #include "media/IMtcMediaManager.h"
-#include "MtcDef.h"
 #include "precondition/IMtcPreconditionManager.h"
 #include "precondition/QosDef.h"
 #include "precondition/SdpPreconditionHelper.h"
-#include "SipStatusCode.h"
+#include "ussi/UssiController.h"
+#include "ussi/UssiDef.h"
 #include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
@@ -121,11 +126,6 @@ PUBLIC VIRTUAL CallStateName MtcCallState::SendDtmf(
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::SendUssi(IN CONST AString& /* strUssi */)
-{
-    return GetStateName();
-}
-
 PUBLIC VIRTUAL CallStateName MtcCallState::StartConference(IN CallType /* eCallType */,
         IN const AString&, IN MediaInfo* /* pMediaInfo */,
         IN const IMSMap<SuppType, SuppService*>& /* lstSuppServices */,
@@ -164,6 +164,61 @@ PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccSuccess()
 }
 
 PUBLIC VIRTUAL CallStateName MtcCallState::HandleSrvccFailure(IN UpdateType /* eUpdateType */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::HandleIncomingUssi(
+        IN ISession* /* piSession */, IN JniMtcServiceThread* /* pServiceThread */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnUssiAttached()
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::UssiStarted(IN ISession* /* piSession */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::AcceptUssi(
+        IN CallType /* eCallType */, IN MediaInfo* /* pMediaInfo */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::TerminateUssi(IN const FailReason& /* objReason */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::UssiTerminated(IN ISession* /* piSession */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::SendUssi(IN const AString& /* strUssi */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::UssiInfoReceived(
+        IN ISession* /* piSession */, IN ISipServerConnection* /* piSipServerConnection */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::NotifyResponseToUssiInfo(
+        IN ISipClientConnection* /* piScc */, IN ISipClientConnection* /* piForkedScc */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::NotifyErrorToUssiInfo(IN ISipConnection* /* piSc */,
+        IN IMS_SINT32 /* nCode */, IN const AString& /* strMessage */)
 {
     return GetStateName();
 }
@@ -317,6 +372,36 @@ PUBLIC VIRTUAL CallStateName MtcCallState::OnInternalFailure()
 
 PUBLIC VIRTUAL CallStateName MtcCallState::OnAttached()
 {
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::ClientConnection_NotifyResponse(
+        IN ISipClientConnection* piScc, IN ISipClientConnection* piForkedScc)
+{
+    UNUSED_PARAM(piForkedScc);
+    if (piScc->Receive() != IMS_SUCCESS)
+    {
+        return GetStateName();
+    }
+
+    IMS_SINT32 nStatusCode = piScc->GetStatusCode();
+
+    IMS_TRACE_D("ClientConnection_NotifyResponse : StatusCode[%d]", nStatusCode, 0, 0);
+
+    if (SipStatusCode::IsFinal(nStatusCode))
+    {
+        piScc->Close();
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(
+        IN ISipConnection* piSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
+{
+    IMS_TRACE_D("Error_NotifyError : Code[%d] Message[%s]", nCode, strMessage.GetStr(), 0);
+    piSc->Close();
+
     return GetStateName();
 }
 
@@ -921,4 +1006,46 @@ IMS_SINT32 MtcCallState::GetTimeInMilliseconds(IN IMS_UINT32 nType) const
     }
 
     return m_objContext.GetConfigurationProxy().GetInt(eFeature);
+}
+
+PROTECTED
+void MtcCallState::SendInfoForUssi(
+        IN const AString& strUssdString, IN UssiError eErrorCode /*= UssiError::CODE_NONE*/)
+{
+    IMS_TRACE_D("SendInfoForUssi", 0, 0, 0);
+    ISipClientConnection* piConnection = m_objContext.CreateClientConnection(SipMethod::INFO);
+    if (!piConnection)
+    {
+        return;
+    }
+
+    if (m_objContext.GetUssiController()->FormInfoRequest(
+            piConnection, strUssdString, eErrorCode) == IMS_SUCCESS)
+    {
+        piConnection->Send();
+    }
+    else
+    {
+        piConnection->Close();
+    }
+}
+
+PROTECTED
+void MtcCallState::SendTransactionResponse(IN ISipServerConnection* piSipServerConnection,
+        IN IMS_UINT32 nResponseCode, IN const AString& strPhrase /* = AString::ConstEmpty() */)
+{
+    IMS_TRACE_D("SendTransactionResponse", 0, 0, 0);
+    if (!piSipServerConnection)
+    {
+        return;
+    }
+
+    if (strPhrase.GetLength() > 0)
+    {
+        piSipServerConnection->SetReasonPhrase(strPhrase);
+    }
+
+    piSipServerConnection->InitResponse(nResponseCode);
+    piSipServerConnection->Send();
+    piSipServerConnection->Close();
 }

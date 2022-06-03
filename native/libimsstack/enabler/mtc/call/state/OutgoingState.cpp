@@ -539,6 +539,12 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionRPRReceived(
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
+{
+    IMS_TRACE_D("UssiStarted", 0, 0, 0);
+    return SessionStarted(piSession);
+}
+
 PUBLIC
 CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {

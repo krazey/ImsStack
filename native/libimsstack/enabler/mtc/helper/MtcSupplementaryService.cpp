@@ -1,20 +1,21 @@
-#include "ServiceTrace.h"
+#include "IMessage.h"
+#include "IMtcContext.h"
+#include "ISipHeader.h"
+#include "IuMtcService.h"
+#include "MtcDef.h"
 #include "ServiceThread.h"
+#include "ServiceTrace.h"
 #include "SipAddress.h"
 #include "SipHeaderName.h"
 #include "SipParameter.h"
 #include "SipParsingHelper.h"
-#include "IMessage.h"
-#include "IuMtcService.h"
-#include "helper/MtcSupplementaryService.h"
-#include "utility/MessageUtil.h"
-#include "ussi/UssiConstants.h"
+
 #include "configuration/ConfigDef.h"
-#include "MtcDef.h"
-#include "ISipHeader.h"
-#include "define/MtcStringDef.h"
-#include "IMtcContext.h"
 #include "configuration/MtcConfigurationProxy.h"
+#include "define/MtcStringDef.h"
+#include "helper/MtcSupplementaryService.h"
+#include "ussi/UssiController.h"
+#include "utility/MessageUtil.h"
 
 __IMS_TRACE_TAG_COM_MTC__;
 
@@ -283,10 +284,12 @@ IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
 PUBLIC
 IMS_BOOL MtcSupplementaryService::UpdateUssd(IN IMessage* piMessage)
 {
-    if (IsIncomingUssdCall(piMessage) == IMS_FALSE)
+    if (!UssiController::IsNetworkInitiatedUssi(piMessage))
     {
         return IMS_FALSE;
     }
+
+    IMS_TRACE_D("UpdateUssd", 0, 0, 0);
 
     Add(SuppType::USSD, AString("true"));
 
@@ -589,31 +592,6 @@ IMS_SINT32 MtcSupplementaryService::GetCallingNumVerificationResult(IN AString& 
 
     IMS_TRACE_D("GetCallingNumVerificationResult : result is [%d]", nVerstatResult, 0, 0);
     return nVerstatResult;
-}
-
-PRIVATE
-IMS_BOOL MtcSupplementaryService::IsIncomingUssdCall(IN IMessage* piMessage)
-{
-    if (piMessage == IMS_NULL)
-    {
-        IMS_TRACE_D("IsIncomingUSSDCall : piMessage is null..", 0, 0, 0);
-        return IMS_FALSE;
-    }
-
-    IMSList<AString> objAcceptHeaders;
-    MessageUtil::GetHeaders(piMessage, ISipHeader::ACCEPT, objAcceptHeaders);
-    for (IMS_UINT32 index = 0; index < objAcceptHeaders.GetSize(); index++)
-    {
-        AString strAcceptHeader = objAcceptHeaders.GetAt(index);
-
-        if (strAcceptHeader.Equals(USSDConstants::HEADER_APPLICATION_USSDXML))
-        {
-            IMS_TRACE_D("IsIncomingUSSDCall : Accept header has ussd+xml", 0, 0, 0);
-            return IMS_TRUE;
-        }
-    }
-
-    return IMS_FALSE;
 }
 
 PRIVATE
