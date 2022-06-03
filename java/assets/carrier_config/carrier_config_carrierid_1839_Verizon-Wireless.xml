@@ -122,6 +122,7 @@
     <!-- MTC default -->
     <int name="ims.request_uri_type_int" value="0"/>
     <boolean name="maintain_multiple_early_sessions_by_forking_bool" value="false"/>
+    <boolean name="stop_ringback_timer_by_183_with_sdp_body_bool" value="true"/>
     <boolean name="imsvoice.voice_qos_precondition_supported_bool" value="false"/>
     <boolean name="imsvoice.oip_source_from_header_bool" value="false"/>
     <int name="imsvoice.dedicated_bearer_wait_timer_millis_int" value="-1"/>
