@@ -681,6 +681,13 @@ PUBLIC
 IMS_BOOL MtcConfigurationManager::IsRegistrationDisconnectReasonToTerminateOngoingCall(
         IN IMS_SINT32 nReason) const
 {
+    if (ContainsValue(
+            m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls,
+            TERMINATE_BY_ANY_AOS_REASON))
+    {
+        return IMS_TRUE;
+    }
+
     return ContainsValue(
             m_objAsset.objRegistrationDisconnectReasonToTerminateOngoingCalls, nReason);
 }

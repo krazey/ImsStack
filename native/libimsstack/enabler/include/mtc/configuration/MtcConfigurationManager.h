@@ -166,6 +166,8 @@ private:
 
     CarrierConfigItems m_objCarrierConfig;
     AssetItems m_objAsset;
+
+    LOCAL const IMS_UINT32 TERMINATE_BY_ANY_AOS_REASON = 999;
 };
 
 #endif
