@@ -19,9 +19,9 @@ package com.android.imsstack.enabler.media;
 import android.os.Parcel;
 import android.telephony.imsmedia.ImsMediaManager;
 import android.telephony.imsmedia.ImsMediaSession;
-import android.view.Surface;
 
 import com.android.imsstack.enabler.IBaseContext;
+import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.enabler.mtc.MtcMediaSession;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
@@ -39,25 +39,6 @@ public class MediaSession implements IMediaConnectionObserver {
     private final MediaManagerHelper mMediaManager;
 
     /**
-     * interface of surface handler
-     */
-    public interface IMediaSurfaceHandler {
-        /**
-         * gets preview surface
-         *
-         * @return preview surface instance
-         */
-        Surface getPreviewSurface();
-
-        /**
-         * gets display surface
-         *
-         * @return display surface instance
-         */
-        Surface getDisplaySurface();
-    }
-
-    /**
      * Called by the ImsMediaManagerCallback when the ImsMedia service is connected.
      */
     @Override
@@ -73,9 +54,6 @@ public class MediaSession implements IMediaConnectionObserver {
         ImsLog.v("Handle ImsMedia disconnection");
         if (mAudioSessionHandler != null) {
             mAudioSessionHandler.onImsMediaAudioMessage(MediaConstants.NOTIFY_MEDIA_DETACH, null);
-            Parcel parcel = Parcel.obtain();
-            parcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
-            sendRequest(parcel);
         }
 
         if (mVideoSessionHandler != null) {
@@ -86,20 +64,22 @@ public class MediaSession implements IMediaConnectionObserver {
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession) {
         ImsLog.v("MediaSession created");
         mContext = context;
+        mMtcMediaSession = mtcMediaSession;
         mMediaManager = new MediaManagerHelper(this);
         createAudioSession();
         mMediaListener = new MediaListener();
-        initMtcMediaSession(mtcMediaSession);
+        setMtcMediaListener(mtcMediaSession);
     }
 
     @VisibleForTesting
     public MediaSession(IBaseContext context, MtcMediaSession mtcMediaSession,
             ImsMediaManager imsMediaManager, Executor executor) {
         mContext = context;
+        mMtcMediaSession = mtcMediaSession;
         mMediaManager = new MediaManagerHelper(context.getContext(), this,
                 imsMediaManager, executor);
         mMediaListener = new MediaListener();
-        initMtcMediaSession(mtcMediaSession);
+        setMtcMediaListener(mtcMediaSession);
         ImsLog.v("MediaSession created");
     }
 
@@ -125,28 +105,20 @@ public class MediaSession implements IMediaConnectionObserver {
 
     private void createAudioSession() {
         if (mAudioSessionHandler == null) {
-            mAudioSessionHandler = new AudioSessionHandler(this, mMediaManager);
+            mAudioSessionHandler = new AudioSessionHandler(mMediaManager, mMtcMediaSession);
         }
     }
 
     private void createVideoSession() {
         if (mVideoSessionHandler == null) {
-            mVideoSessionHandler = new VideoSessionHandler(this, mMediaManager);
-            mVideoSessionHandler.setSurfaceHandler(mMtcMediaSession);
+            mVideoSessionHandler = new VideoSessionHandler(
+                    mMediaManager, mMtcMediaSession, mMtcMediaSession);
         }
     }
 
-    private void initMtcMediaSession(MtcMediaSession mtcMediaSession) {
-        mMtcMediaSession = mtcMediaSession;
-        if (mtcMediaSession != null) {
-            mtcMediaSession.setMediaListener(mMediaListener);
-        }
-    }
-
-    /** Sends response to media enabler native */
-    public void sendRequest(Parcel parcel) {
-        if (mMtcMediaSession != null) {
-            mMtcMediaSession.sendRequest(parcel);
+    private void setMtcMediaListener(IMtcMediaInterface mtcMediaInterface) {
+        if (mtcMediaInterface != null) {
+            mtcMediaInterface.setMediaListener(mMediaListener);
         }
     }
 

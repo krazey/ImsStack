@@ -256,10 +256,7 @@ public class ImsVideoCallProviderImpl extends ImsVideoCallProviderBase {
     }
 
     @Override
-    protected void handleMediaSessionPeerDimensionsChanged(final int videoResolution) {
-        int width = getVideoWidth(videoResolution);
-        int height = getVideoHeight(videoResolution);
-
+    protected void handleMediaSessionPeerDimensionsChanged(final int width, final int height) {
         if ((width > 0) && (height > 0)) {
             setCurrentVideoDimension(width, height);
             super.changePeerDimensions(width, height);

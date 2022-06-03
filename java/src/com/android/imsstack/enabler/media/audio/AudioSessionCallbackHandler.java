@@ -23,10 +23,10 @@ import android.telephony.CallQuality;
 import android.telephony.ims.RtpHeaderExtension;
 import android.telephony.imsmedia.AudioConfig;
 import android.telephony.imsmedia.ImsMediaSession;
-import android.telephony.imsmedia.MediaQualityThreshold;
-import com.android.imsstack.enabler.media.MediaConstants;
-import com.android.imsstack.enabler.media.MediaSession;
+
+import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
+
 import java.util.List;
 
 /**
@@ -35,15 +35,15 @@ import java.util.List;
  */
 public class AudioSessionCallbackHandler {
 
-    private final MediaSession mMediaSession;
+    private final IMtcMediaInterface mMtcMediaInterface;
 
-    public AudioSessionCallbackHandler(@NonNull final MediaSession mediaSession){
-        mMediaSession = mediaSession;
+    public AudioSessionCallbackHandler(@NonNull final IMtcMediaInterface mtcMediaInterface) {
+        mMtcMediaInterface = mtcMediaInterface;
         ImsLog.v("Constructor - Exit");
     }
 
-    private final MediaSession getMediaSession() {
-        return mMediaSession;
+    private IMtcMediaInterface getMtcMediaInterface() {
+        return mMtcMediaInterface;
     }
 
     /**
@@ -55,12 +55,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.d("openSession Result=" + result);
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.RESPONSE_OPEN_SESSION);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -72,12 +71,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("sessionChanged");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.RESPONSE_SESSION_CHANGED);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(state);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -90,13 +88,12 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("modifySessionResponse");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.RESPONSE_MODIFY_SESSION);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -109,13 +106,12 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("addConfigResponse");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.RESPONSE_ADD_CONFIG);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -128,13 +124,12 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("confirmConfigResponse");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.RESPONSE_CONFIRM_CONFIG);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
         parcel.writeInt(result);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -145,12 +140,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("firstMediaPacketReceived");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_FIRST_PACKET);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         audioConfig.writeToParcel(parcel, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -162,7 +156,6 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("headerExtensionReceived");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_HEADER_EXTENSION);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(rtpExtensions.size());
@@ -173,7 +166,7 @@ public class AudioSessionCallbackHandler {
             }
         }
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -186,12 +179,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("onNotifyMediaInactivity");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_INACTIVITY);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(packetType);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -204,12 +196,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("onNotifyPacketLoss");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_PACKET_LOSS);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(packetLossPercentage);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -222,12 +213,11 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("onNotifyJitter");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_JITTER);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         parcel.writeInt(jitter);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
     }
 
     /**
@@ -239,11 +229,22 @@ public class AudioSessionCallbackHandler {
         ImsLog.v("mediaQualityChanged");
 
         Parcel parcel = Parcel.obtain();
-
         parcel.writeInt(MediaConstants.NOTIFY_MEDIA_QUALITY_CHANGE);
         parcel.writeInt(ImsMediaSession.SESSION_TYPE_AUDIO);
         callQuality.writeToParcel(parcel,  Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
 
-        getMediaSession().sendRequest(parcel);
+        getMtcMediaInterface().sendRequest(parcel);
+    }
+
+    /**
+     * Handles notification when when the ImsMedia service is disconnected
+     */
+    public void nofityMediaDetach() {
+        ImsLog.v("nofityMediaDetach");
+
+        Parcel parcel = Parcel.obtain();
+        parcel.writeInt(MediaConstants.NOTIFY_MEDIA_DETACH);
+
+        getMtcMediaInterface().sendRequest(parcel);
     }
 }

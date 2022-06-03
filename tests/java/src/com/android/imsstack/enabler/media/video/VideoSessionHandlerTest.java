@@ -86,7 +86,8 @@ public class VideoSessionHandlerTest {
         mMediaListener = mMediaSession.getMediaListenerProxy();
         mVideoSessionHandler =
                 new VideoSessionHandler(
-                        mMediaManager, mMockVideoSessionCallbackHandler, mMockVideoSession);
+                        mMediaManager, mMockMtcMediaSession, mMockVideoSessionCallbackHandler,
+                        mMockVideoSession);
         mMediaSession.setVideoSessionHandler(mVideoSessionHandler);
         mVideoSessionCallback = mVideoSessionHandler.getVideoSessionCallback();
     }
@@ -192,7 +193,7 @@ public class VideoSessionHandlerTest {
     public void testPeerDimensionChanged() {
         mVideoSessionCallback.onPeerDimensionChanged(
                 MediaTestUtils.RESOLUTION_WIDTH, MediaTestUtils.RESOLUTION_HEIGHT);
-        verify(mMockVideoSessionCallbackHandler)
+        verify(mMockMtcMediaSession)
                 .peerDimensionChanged(
                         eq(MediaTestUtils.RESOLUTION_WIDTH), eq(MediaTestUtils.RESOLUTION_HEIGHT));
     }

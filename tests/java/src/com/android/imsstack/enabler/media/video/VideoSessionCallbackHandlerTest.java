@@ -22,6 +22,8 @@ import android.os.Parcelable;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.VideoConfig;
 
+import com.android.imsstack.enabler.mtc.MtcMediaSession;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +36,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(JUnit4.class)
 public class VideoSessionCallbackHandlerTest {
 
-    @Mock MediaSession mMockMediaSession;
+    @Mock MtcMediaSession mMockMtcMediaSession;
     @Captor ArgumentCaptor<Parcel> mCaptorParcel;
 
     private VideoSessionCallbackHandler mVideoSessionCallbackHandler;
@@ -43,7 +45,7 @@ public class VideoSessionCallbackHandlerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         // create the instance to test
-        mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mMockMediaSession);
+        mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mMockMtcMediaSession);
     }
 
     @Test
@@ -56,7 +58,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -70,7 +72,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.openSessionResponse(ImsMediaSession.RESULT_NO_RESOURCES);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -85,7 +87,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.sessionChanged(ImsMediaSession.SESSION_STATE_OPEN);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -103,7 +105,7 @@ public class VideoSessionCallbackHandlerTest {
         mVideoSessionCallbackHandler.modifySessionResponse(
                 videoConfig, ImsMediaSession.RESULT_SUCCESS);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -119,7 +121,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.firstMediaPacketReceived(videoConfig);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -134,7 +136,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.onNotifyMediaInactivity(ImsMediaSession.PACKET_TYPE_RTP);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 
@@ -149,22 +151,7 @@ public class VideoSessionCallbackHandlerTest {
 
         mVideoSessionCallbackHandler.onNotifyPacketLoss(MediaTestUtils.PACKET_LOSS_PERCENT);
 
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
-        MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
-    }
-
-    @Test
-    public void testNotifyVideoDataUsage() {
-
-        Parcel testParcel = Parcel.obtain();
-
-        testParcel.writeInt(MediaConstants.NOTIFY_VIDEO_DATA_USAGE);
-        testParcel.writeInt(ImsMediaSession.SESSION_TYPE_VIDEO);
-        testParcel.writeLong(MediaTestUtils.DATA_BYTES);
-
-        mVideoSessionCallbackHandler.onNotifyVideoDataUsage(MediaTestUtils.DATA_BYTES);
-
-        verify(mMockMediaSession).sendRequest(mCaptorParcel.capture());
+        verify(mMockMtcMediaSession).sendRequest(mCaptorParcel.capture());
         MediaTestUtils.assertParcelEquals(testParcel, mCaptorParcel.getValue());
     }
 }

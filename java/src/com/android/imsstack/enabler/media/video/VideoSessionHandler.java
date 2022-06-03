@@ -26,6 +26,8 @@ import android.telephony.imsmedia.VideoConfig;
 import android.telephony.imsmedia.VideoSessionCallback;
 import android.view.Surface;
 
+import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
+import com.android.imsstack.enabler.mtc.IMtcMediaVideoCallProvider;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -44,26 +46,26 @@ public class VideoSessionHandler {
     private DatagramSocket mRtpSocket, mRtcpSocket;
     private final VideoSessionCallbackHandler mVideoSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
-    private MediaSession.IMediaSurfaceHandler mSurfaceHandler;
+    private IMtcMediaVideoCallProvider mMtcMediaVideoCallProvider;
 
     public VideoSessionHandler(
-            @NonNull MediaSession mediaSession, @NonNull MediaManagerHelper mediaManager) {
+            @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface,
+            IMtcMediaVideoCallProvider mtcMediaVideoCallProvider) {
         mMediaManager = mediaManager;
-        mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mediaSession);
+        mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
+        mVideoSessionCallbackHandler = new VideoSessionCallbackHandler(mtcMediaInterface);
         mVideoSessionCallback = new VideoSessionCallbackProxy();
         ImsLog.d("VideoSessionHandler created");
-    }
-
-    public void setSurfaceHandler(MediaSession.IMediaSurfaceHandler handler) {
-        mSurfaceHandler = handler;
     }
 
     @VisibleForTesting
     public VideoSessionHandler(
             @NonNull MediaManagerHelper mediaManager,
+            IMtcMediaVideoCallProvider mtcMediaVideoCallProvider,
             @NonNull VideoSessionCallbackHandler videoCallbackHandler,
             @NonNull ImsVideoSession videoSession) {
         mMediaManager = mediaManager;
+        mMtcMediaVideoCallProvider = mtcMediaVideoCallProvider;
         mVideoSessionCallbackHandler = videoCallbackHandler;
         mVideoSession = videoSession;
         mVideoSessionCallback = new VideoSessionCallbackProxy();
@@ -126,14 +128,14 @@ public class VideoSessionHandler {
                 break;
 
             case MediaConstants.REQUEST_SET_PREVIEW_SURFACE:
-                if (mSurfaceHandler != null) {
-                    handleSetPreviewSurface(mSurfaceHandler.getPreviewSurface());
+                if (mMtcMediaVideoCallProvider != null) {
+                    handleSetPreviewSurface(mMtcMediaVideoCallProvider.getPreviewSurface());
                 }
                 break;
 
             case MediaConstants.REQUEST_SET_DISPLAY_SURFACE:
-                if (mSurfaceHandler != null) {
-                    handleSetDisplaySurface(mSurfaceHandler.getDisplaySurface());
+                if (mMtcMediaVideoCallProvider != null) {
+                    handleSetDisplaySurface(mMtcMediaVideoCallProvider.getDisplaySurface());
                 }
                 break;
 
@@ -323,8 +325,8 @@ public class VideoSessionHandler {
         public void onPeerDimensionChanged(final int width, final int height) {
             ImsLog.d("Peer Dimensions Changed width[" + width + "] height[" + height + "]");
 
-            if (mVideoSessionCallbackHandler != null) {
-                mVideoSessionCallbackHandler.peerDimensionChanged(width, height);
+            if (mMtcMediaVideoCallProvider != null) {
+                mMtcMediaVideoCallProvider.peerDimensionChanged(width, height);
             }
         }
 

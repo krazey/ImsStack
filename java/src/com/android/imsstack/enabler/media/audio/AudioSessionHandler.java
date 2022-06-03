@@ -27,11 +27,7 @@ import android.telephony.imsmedia.ImsAudioSession;
 import android.telephony.imsmedia.ImsMediaSession;
 import android.telephony.imsmedia.MediaQualityThreshold;
 
-import com.android.imsstack.enabler.media.AudioSessionCallbackHandler;
-import com.android.imsstack.enabler.media.MediaConstants;
-import com.android.imsstack.enabler.media.MediaManagerHelper;
-import com.android.imsstack.enabler.media.MediaSession;
-import com.android.imsstack.enabler.media.MediaSocket;
+import com.android.imsstack.enabler.mtc.IMtcMediaInterface;
 import com.android.imsstack.util.ImsLog;
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -52,10 +48,10 @@ public class AudioSessionHandler  {
     private final AudioSessionCallbackHandler mAudioSessionCallbackHandler;
     private final MediaManagerHelper mMediaManager;
 
-    public AudioSessionHandler(@NonNull MediaSession mediaSession,
-                                @NonNull MediaManagerHelper mediaManager) {
+    public AudioSessionHandler(
+            @NonNull MediaManagerHelper mediaManager, IMtcMediaInterface mtcMediaInterface) {
         mMediaManager = mediaManager;
-        mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mediaSession);
+        mAudioSessionCallbackHandler = new AudioSessionCallbackHandler(mtcMediaInterface);
         mAudioSessionCallback = new AudioSessionCallbackProxy();
         ImsLog.d("AudioSessionHandler created");
     }
@@ -249,6 +245,9 @@ public class AudioSessionHandler  {
         if (mAudioSession != null) {
             closeSockets();
             mAudioSession = null;
+            if (mAudioSessionCallbackHandler != null) {
+                mAudioSessionCallbackHandler.nofityMediaDetach();
+            }
         }
     }
 
