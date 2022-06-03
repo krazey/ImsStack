@@ -28,9 +28,10 @@ MtcAosEventHandler::~MtcAosEventHandler()
 
 PUBLIC
 void MtcAosEventHandler::OnConnected(
-        IN IMS_UINT32 nFeatures, IN IMS_UINT32 /*nIpcan*/, IN JniMtcServiceThread* pServiceThread)
+        IN IMS_UINT32 nFeatures, IN IMS_UINT32 nIpcan, IN JniMtcServiceThread* pServiceThread)
 {
-    IMS_TRACE_I("OnConnected emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
+    IMS_TRACE_I("OnConnected emergency[%s] nIpcan[%d]", _TRACE_B_(m_objService.IsEmergency()),
+            nIpcan, 0);
 
     IMS_UINT32 nMmtelConnected =
             nFeatures & ImsAosFeature::MMTEL ? ImsAosFeature::MMTEL : ImsAosFeature::NONE;
@@ -57,6 +58,9 @@ PUBLIC
 void MtcAosEventHandler::OnDisconnecting(
         IN IMS_UINT32 nReason, IN MtcCallController& objCallController)
 {
+    IMS_TRACE_I("OnDisconnecting emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
+            nReason, 0);
+
     Key nKey;
     nKey.eServiceType = m_objService.GetServiceType();
     if (m_objConfiguration.Is(
@@ -70,12 +74,15 @@ PUBLIC
 void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
         IN MtcCallController& objCallController, IN JniMtcServiceThread* pServiceThread)
 {
+    IMS_TRACE_I("OnDisconnected emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
+            nReason, 0);
+
     Key nKey;
     nKey.eServiceType = m_objService.GetServiceType();
     if (m_objConfiguration.Is(
                 Feature::REGISTRATION_DISCONNECT_REASON_TO_TERMINATE_ONGOING_CALL, nReason))
     {
-        objCallController.RemoveCalls(KeyType::SERVICE_TYPE, nKey);
+        objCallController.TerminateCalls(KeyType::SERVICE_TYPE, nKey, nReason);
     }
 
     if (m_objService.IsEmergency())
@@ -94,17 +101,28 @@ void MtcAosEventHandler::OnDisconnected(IN IMS_UINT32 nReason,
 
 PUBLIC
 void MtcAosEventHandler::OnSuspended(
-        IN IMS_UINT32 /*nReason*/, IN MtcCallController& /*objCallController*/)
+        IN IMS_UINT32 nReason, IN MtcCallController& /*objCallController*/)
 {
+    IMS_TRACE_I("OnSuspended emergency[%s] nReason[%d]", _TRACE_B_(m_objService.IsEmergency()),
+            nReason, 0);
 }
 
 PUBLIC
-void MtcAosEventHandler::OnResumed() {}
-
-PUBLIC
-void MtcAosEventHandler::OnServiceConnected(IN IMS_UINT32 /*nServices*/, IN IMS_UINT32 /*nIpcan*/)
+void MtcAosEventHandler::OnResumed()
 {
+    IMS_TRACE_I("OnResumed emergency[%s]", _TRACE_B_(m_objService.IsEmergency()), 0, 0);
 }
 
 PUBLIC
-void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 /*nType*/, IN IMS_UINT32 /*nState*/) {}
+void MtcAosEventHandler::OnServiceConnected(IN IMS_UINT32 nServices, IN IMS_UINT32 nIpcan)
+{
+    IMS_TRACE_I("OnServiceConnected emergency[%s] nServices[%d] nIpcan[%d]",
+            _TRACE_B_(m_objService.IsEmergency()), nServices, nIpcan);
+}
+
+PUBLIC
+void MtcAosEventHandler::OnEventNotify(IN IMS_UINT32 nType, IN IMS_UINT32 nState)
+{
+    IMS_TRACE_I("OnEventNotify emergency[%s] nType[%d] nState[%d]",
+            _TRACE_B_(m_objService.IsEmergency()), nType, nState);
+}
