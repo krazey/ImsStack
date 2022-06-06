@@ -95,15 +95,23 @@ void MtsService::ReportMoStatus(IN IMS_UINT32 nReason, IN IMS_UINT32 nSmsformat,
         IN IMS_UINT8 nRetryAfter, IN IMS_SINT32 nSeqId)
 {
     IMS_TRACE_I("ReportMoStatus", 0, 0, 0);
-    m_pJniMtsService->GetThread()->ReportMoStatus(
-            nReason, nSmsformat, nRetryAfter, nSeqId, m_nSlotId);
+
+    if (Attach())
+    {
+        m_pJniMtsService->GetThread()->ReportMoStatus(
+                nReason, nSmsformat, nRetryAfter, nSeqId, m_nSlotId);
+    }
 }
 
 PUBLIC
 void MtsService::ReportMtSms(IN IMS_UINT32 nSmsFormat, IN const ByteArray& objData)
 {
     IMS_TRACE_I("ReportMtSms", 0, 0, 0);
-    m_pJniMtsService->GetThread()->ReportMtSms(nSmsFormat, objData, m_nSlotId);
+
+    if (Attach())
+    {
+        m_pJniMtsService->GetThread()->ReportMtSms(nSmsFormat, objData, m_nSlotId);
+    }
 }
 
 PUBLIC
