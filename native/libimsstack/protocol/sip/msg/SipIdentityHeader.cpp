@@ -16,7 +16,9 @@
  * Side Effects      : none
  *****************************************************************************/
 SipIdentityHeader::SipIdentityHeader() :
-        SipHeaderBase(SipHeaderBase::IDENTITY)
+        SipHeaderBase(SipHeaderBase::IDENTITY),
+        m_pSignedIdentityDigest(SIP_NULL),
+        m_pInfo(SIP_NULL)
 {
 }
 
@@ -30,7 +32,9 @@ SipIdentityHeader::SipIdentityHeader() :
  * Side Effects      : none
  *****************************************************************************/
 SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
-        SipHeaderBase(objHeader)
+        SipHeaderBase(objHeader),
+        m_pSignedIdentityDigest(SipPf_Strdup(objHeader.m_pSignedIdentityDigest)),
+        m_pInfo(SipPf_Strdup(objHeader.m_pInfo))
 {
 }
 
@@ -43,23 +47,48 @@ SipIdentityHeader::SipIdentityHeader(const SipIdentityHeader& objHeader) :
  *
  * Side Effects      : none
  *****************************************************************************/
-SipIdentityHeader::~SipIdentityHeader() {}
-
-SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*/) const
+SipIdentityHeader::~SipIdentityHeader()
 {
-    const SIP_CHAR* pszValue = GetValue();
-
-    if (pszValue == SIP_NULL)
+    if (m_pSignedIdentityDigest != SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
+        delete[] m_pSignedIdentityDigest;
+    }
+
+    if (m_pInfo != SIP_NULL)
+    {
+        delete[] m_pInfo;
+    }
+}
+
+SIP_BOOL SipIdentityHeader::SetSignedIdentityDigest(const SIP_CHAR* pszSignedIdentiDigest)
+{
+    return SetCharVar(pszSignedIdentiDigest, m_pSignedIdentityDigest);
+}
+
+SIP_BOOL SipIdentityHeader::SetInfo(const SIP_CHAR* pszInfo)
+{
+    return SetCharVar(pszInfo, m_pInfo);
+}
+
+SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL bParams) const
+{
+    if (IsValidHeader() == SIP_FALSE)
+    {
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Invalid header", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    objBuffer += DQUOTE;
-    objBuffer += pszValue;
-    objBuffer += DQUOTE;
+    objBuffer += m_pSignedIdentityDigest;
 
-    return SIP_TRUE;
+    objBuffer += SIP_SEMI;
+
+    objBuffer += "info";
+    objBuffer += EQUAL;
+    objBuffer += LEFT_ANGLE;
+    objBuffer += m_pInfo;
+    objBuffer += RIGHT_ANGLE;
+
+    return (bParams == SIP_TRUE) ? EncodeParameters(objBuffer) : SIP_TRUE;
 }
 
 /******************************************************************************
@@ -71,26 +100,32 @@ SIP_BOOL SipIdentityHeader::Encode(AStringBuffer& objBuffer, SIP_BOOL /*bParams*
  *
  * Side Effects      : none
  *****************************************************************************/
-SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL /*bParams = SIP_TRUE*/)
+SIP_BOOL SipIdentityHeader::EncodeHdr(SIP_CHAR** ppCurrPos, SIP_BOOL bParams)
 {
-    const SIP_CHAR* pszValue = GetValue();
-    if (pszValue == SIP_NULL)
+    if (IsValidHeader() == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Empty value", SIP_ZERO, SIP_ZERO);
+        SIP_DEBUG_WARNING(ESIPTRACE_MODENCODER, "Invalid header", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    /*Encode the Left DQoute*/
-    SIP_ENC_LDQUOT(*ppCurrPos);
-
-    /*Encoding of header Value*/
-    SipPf_Strcpy(*ppCurrPos, pszValue);
+    SipPf_Strcpy(*ppCurrPos, m_pSignedIdentityDigest);
     SipEnc_UpdateCurrPos(ppCurrPos);
 
-    /*Encode the right DQoute*/
-    SIP_ENC_RDQUOT(*ppCurrPos);
+    SIP_ENC_SEMI(*ppCurrPos);
 
-    return SIP_TRUE;
+    SipPf_Strcpy(*ppCurrPos, "info");
+    SipEnc_UpdateCurrPos(ppCurrPos);
+
+    SIP_ENC_EQUAL(*ppCurrPos);
+
+    SIP_ENC_LAQUOT(*ppCurrPos);
+
+    SipPf_Strcpy(*ppCurrPos, m_pInfo);
+    SipEnc_UpdateCurrPos(ppCurrPos);
+
+    SIP_ENC_RAQUOT(*ppCurrPos);
+
+    return EncodeHeaderParameters(ppCurrPos, bParams);
 }
 
 /******************************************************************************
@@ -112,35 +147,66 @@ SIP_BOOL SipIdentityHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 nDecLen)
 
     /*Find the position of First DQUOTE*/
     SIP_CHAR* pEndPt = pStartPt + nDecLen - SIP_ONE;
-    SIP_CHAR* pTemp = SIP_NULL;
+    SIP_CHAR* pTempPre = SIP_NULL;
+    SIP_CHAR* pTempNext = SIP_NULL;
 
-    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTemp, DQUOTE) == SIP_FALSE)
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "left DQUOTE not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    pStartPt = pTemp;
-    pTemp = SIP_NULL;
+    m_pSignedIdentityDigest = sipCreateString(pStartPt, pTempPre);
 
-    /*Find the position of Second DQUOTE*/
-    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTemp, DQUOTE) == SIP_FALSE)
+    if (m_pSignedIdentityDigest == SIP_NULL)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "right DQUOTE not found", SIP_ZERO, SIP_ZERO);
         return SIP_FALSE;
     }
 
-    SIP_CHAR* pszValue = sipCreateString(pStartPt, pTemp);
-    if (SIP_FALSE == SetValue(pszValue))
+    pStartPt = pTempNext;
+    pTempPre = SIP_NULL;
+    pTempNext = SIP_NULL;
+
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, EQUAL) == SIP_FALSE)
     {
-        SIP_DEBUG_WARNING(ESIPTRACE_MODDECODER, "Memory Allocation Fail", SIP_ZERO, SIP_ZERO);
-        if (pszValue != SIP_NULL)
-        {
-            delete[] pszValue;
-        }
         return SIP_FALSE;
     }
-    delete[] pszValue;
+
+    if (SipPf_Strncmp(pStartPt, "info", (pTempPre - pStartPt)) != SIP_ZERO)
+    {
+        return SIP_FALSE;
+    }
+
+    pStartPt = pTempNext;
+    pTempPre = SIP_NULL;
+    pTempNext = SIP_NULL;
+
+    if (sipFindPostDelimiter(pStartPt, pEndPt, &pTempPre, LEFT_ANGLE) == SIP_FALSE)
+    {
+        return SIP_FALSE;
+    }
+
+    pStartPt = pTempPre;
+    pTempPre = SIP_NULL;
+
+    if (sipFindPreDelimiter(pStartPt, pEndPt, &pTempPre, RIGHT_ANGLE) == SIP_FALSE)
+    {
+        return SIP_FALSE;
+    }
+
+    m_pInfo = sipCreateString(pStartPt, pTempPre);
+
+    if (m_pInfo == SIP_NULL)
+    {
+        return SIP_FALSE;
+    }
+
+    pStartPt = pTempPre + SIP_TWO;
+    pTempPre = SIP_NULL;
+
+    if (sipFindActualPos(pStartPt, pEndPt, &pTempPre, &pTempNext, SIP_SEMI) == SIP_TRUE)
+    {
+        return DecodeHeaderParameters(pTempNext, pEndPt, SIP_SEMI);
+    }
 
     return SIP_TRUE;
 }
