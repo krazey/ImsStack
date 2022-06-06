@@ -16,6 +16,7 @@
 
 package com.android.imsstack.imsservice.mmtel.sms;
 
+import android.telephony.SmsManager;
 import android.util.Base64;
 
 import com.android.imsstack.enabler.mts.MtsController;
@@ -23,7 +24,6 @@ import com.android.imsstack.imsservice.mmtel.ImsCallContext;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.telephony.Rlog;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -36,6 +36,7 @@ public class SmsRelayLayer {
     private final ImsCallContext mCallContext;
     private SmsTransferLayer mSmsTL = null;
     private MtsController mMtsController = null;
+    SmsRLStateMachine mSmsRLStateMachine = null;
     private final MtsControllerListenerProxy mMtsControllerListener =
             new MtsControllerListenerProxy();
     private final Object mLock = new Object();
@@ -45,6 +46,8 @@ public class SmsRelayLayer {
     public Map<Integer, Integer> mMoMRTokenMap = new ConcurrentHashMap<>();
     public Map<Integer, Integer> mMTTokenMRMap = new ConcurrentHashMap<>();
     private static final boolean VDBG = true;
+    public Map<Integer, SmsRLStateMachine> mTokenStateTrackerMap = new ConcurrentHashMap<>();
+
     /**
      * Listener to handle the events sent from SmsRelayLayer
      */
@@ -116,11 +119,17 @@ public class SmsRelayLayer {
         try {
             Rlog.d(TAG, "sendRPMessage");
             byte[] encodedPdu = null;
-            //TODO: To be fixed as per Bug Id: b/232048441
-            if (rpType == SmsUtils.RP_DATA) {
-                if (smsc == null || smsc.length() == 0) {
-                    Rlog.i(TAG, "SmscAddress is null");
-                    return SmsUtils.SMS_RESULT_INVALID_SMSC_ADDRESS;
+            String simSmscAddr = smsc;
+            int result = SmsUtils.SMSRL_RESULT_INVALID_STATE;
+            //FIXME: To be fixed as per Bug Id: b/232048441
+            if (smsc == null || smsc.length() == 0) {
+                int subId = mCallContext.getSubId();
+                simSmscAddr = SmsManager.getSmsManagerForContextAndSubscriptionId(null, subId)
+                                .getSmscAddress();
+                if (simSmscAddr == null || simSmscAddr.length() == 0) {
+                    Rlog.i(TAG, "getSmscAddress returned null");
+                    // hardcoding smsc address
+                    simSmscAddr = destinationAddress;
                 }
             }
 
@@ -137,6 +146,11 @@ public class SmsRelayLayer {
                 if (rpType == SmsUtils.RP_DATA) {
                     rpMR = getRPMessageReference();
                     mMoMRTokenMap.put(rpMR, token);
+                    SmsRPdu moRPDataPdu = new SmsRPdu(rpMR, rpType, simSmscAddr, 0, tpdu);
+                    mSmsRLStateMachine = new SmsRLStateMachine(token, SmsUtils.RP_DATA,
+                                    mMtsController, mCallContext, mListener, destinationAddress);
+                    mTokenStateTrackerMap.put(token, mSmsRLStateMachine);
+                    result  = mSmsRLStateMachine.onRPDataFromTL(moRPDataPdu);
                 } else if (rpType == SmsUtils.RP_ACK) {
                     if (mMTTokenMRMap.containsKey(token)) {
                         rpMR = mMTTokenMRMap.get(token);
@@ -145,6 +159,10 @@ public class SmsRelayLayer {
                         Rlog.i(TAG, "No Corresponding Rp-Data for the RP-Ack");
                         return SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST;
                     }
+                    mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
+                    SmsRPdu mtRPAckPdu = new SmsRPdu(rpMR, rpType, simSmscAddr, 0, tpdu);
+                    result = mSmsRLStateMachine.onRPAckFromTL(mtRPAckPdu);
+                    mTokenStateTrackerMap.remove(token);
                 } else if (rpType == SmsUtils.RP_ERROR) {
                     if (mMTTokenMRMap.containsKey(token)) {
                         rpMR = mMTTokenMRMap.get(token);
@@ -153,31 +171,24 @@ public class SmsRelayLayer {
                         Rlog.i(TAG, "No Corresponding Rp-Data for the RP-Error");
                         return SmsUtils.SMSRL_RESULT_TOKEN_DOES_NOT_EXIST;
                     }
+                    mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
+                    SmsRPdu mtRPErrorPdu = new SmsRPdu(rpMR, rpType, simSmscAddr, 0, tpdu);
+                    result = mSmsRLStateMachine.onRPErrorFromTL(mtRPErrorPdu);
+                    mTokenStateTrackerMap.remove(token);
                 } else if (rpType == SmsUtils.RP_SMMA) {
                     rpMR = getRPMessageReference();
-                    mMoMRTokenMap.put(rpMR, token);
+                    mMoMRTokenMap.put(rpMR , token);
+                    SmsRPdu moRPSmmaPdu = new SmsRPdu(rpMR, rpType, simSmscAddr, 0, tpdu);
+                    mSmsRLStateMachine = new SmsRLStateMachine(token, SmsUtils.RP_SMMA,
+                                    mMtsController, mCallContext, mListener, destinationAddress);
+                    mTokenStateTrackerMap.put(token, mSmsRLStateMachine);
+                    result = mSmsRLStateMachine.onRPDataFromTL(moRPSmmaPdu);
                 } else {
                     Rlog.i(TAG, "Invalid message type");
                     return SmsUtils.SMSRL_RESULT_INVALID_RP_MESSAGE_TYPE;
                 }
             }
-            SmsRPdu pdu = new SmsRPdu(rpMR, rpType, smsc, 0, tpdu);
-            encodedPdu = pdu.getRpduByteArray();
-            if (encodedPdu == null) {
-                Rlog.i(TAG, "Encoding Failed");
-                return SmsUtils.SMSRL_RESULT_PDU_ENCODING_FAILED;
-            }
-            String pdu64 = Base64.encodeToString(encodedPdu, Base64.DEFAULT);
-            boolean result = mMtsController.sendMessage(
-                            SmsUtils.FORMAT_INT_3GPP,
-                            pdu64,
-                            smsc,
-                            rpMR);
-            if (!result) {
-                Rlog.i(TAG, "failed to send Sms");
-                return SmsUtils.SMSRL_RESULT_MTS_CONTROLLER_FAILED;
-            }
-            return SmsUtils.RESULT_SUCCESS;
+            return result;
         } catch (RuntimeException e) {
             Rlog.e(TAG, "Can not send sms: " + e.getMessage());
             return SmsUtils.SMSRL_RESULT_EXCEPTION;
@@ -246,32 +257,23 @@ public class SmsRelayLayer {
                         if (mMoMRTokenMap.containsKey(messageRef)) {
                             token = mMoMRTokenMap.get(messageRef);
                             mMoMRTokenMap.remove(messageRef);
-                            listener.notifyRLReportIndication(token, 1, 0);
                         } else {
                             Rlog.i(TAG, "No Matching RP-Data for Rp-Ack");
                             return mMtsController.MT_FAILURE;
                         }
+                        mSmsRLStateMachine = mTokenStateTrackerMap.get(token);
+                        mSmsRLStateMachine.mRPduData = mtData;
+                        mSmsRLStateMachine.onRPAckFromNetwork(mtData);
+                        mTokenStateTrackerMap.remove(token);
                     }
                 } else if (mtData.getMessageType() == SmsUtils.RP_DATA) {
-                    tpdu = mtData.getUserData();
                     token = mToken.incrementAndGet();
-                    /** Framework's TPdu Parser expects the TPdu be prepended with SC-Address.
-                      * else the parser will throw exception. So prepending TPdu with
-                      * RP-OriginatingAdrress.
-                      */
-                    ByteArrayOutputStream bo = new ByteArrayOutputStream(tpdu.length);
-                    int originAddressLength  = pduData[SmsUtils.RPDU_ORIGIN_ADDR_LENGTH_INDEX];
-                    bo.write(originAddressLength);
-                    bo.write(pduData, SmsUtils.RPDU_ORIGIN_ADDR_VALUE_INDEX, originAddressLength);
-                    bo.write(tpdu, 0, tpdu.length);
-                    byte[] frameworkPdu = bo.toByteArray();
                     synchronized (mLock) {
                         mMTTokenMRMap.put(token, messageRef);
-                        result = listener.notifyRLDataIndication(
-                            token, smsFormat, SmsUtils.RP_DATA, frameworkPdu);
-                        if (result != SmsUtils.RESULT_SUCCESS) {
-                            return mMtsController.MT_FAILURE;
-                        }
+                        mSmsRLStateMachine = new SmsRLStateMachine(token, SmsUtils.RP_DATA,
+                                                mMtsController, mCallContext, mListener, null);
+                        mTokenStateTrackerMap.put(token, mSmsRLStateMachine);
+                        mSmsRLStateMachine.onRPDataFromNetwork(mtData);
                     }
                 }
                 //TODO: Implementation Pending for RP-ERROR
