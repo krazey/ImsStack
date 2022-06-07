@@ -180,4 +180,8 @@
     <boolean name="retry_emergency_call_over_emergency_pdn_with_next_pcscf_bool" value="true"/>
     <int name="wifi_emergency_18x_timer_millis_int" value="25000"/>
 
+    <!-- Media -->
+    <boolean name="audio_bw_nego_option_bool" value="true"/>
+    <int name="video_cvo_value_int" value="4"/>
+    <int name="video_sdp_offer_cap_nego_for_avpf_int" value="2"/>
 </carrier_config>

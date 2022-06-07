@@ -77,7 +77,7 @@ PUBLIC GLOBAL IMS_BOOL VideoProfileConfigurer::CreateVideoProfile(OUT VideoProfi
     //
     // Step 3. Setting profile type
     //
-    if (pConfig->IsVideoAvpfEnabled() && pConfig->GetSdpOfferCapNegoForAvpf())
+    if (pConfig->IsVideoAvpfEnabled() && pConfig->GetSdpOfferCapNegoForAvpf() == 0)
     {
         pVideoProfile->strTransportType = "RTP/AVPF";
     }
