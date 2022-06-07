@@ -590,7 +590,8 @@ PUBLIC VIRTUAL IMS_BOOL AosSubscription::IsInitialRegistrationRequiredInWifi(
                     ((nStatusCode / 100) == objErrRegRequiredInWifi.GetAt(i)))
             {
                 m_bIsErrChecked = IMS_TRUE;
-                IMS_TRACE_I("nothing to do until expiration time", 0, 0, 0);
+                IMS_TRACE_I("Request initial registration", 0, 0, 0);
+                RequestCommand(REASON_SUB_FAILED, COMMAND_REG_REQUIRED);
                 return IMS_TRUE;
             }
         }
