@@ -301,6 +301,7 @@ PUBLIC VIRTUAL CallStateName OutgoingState::SessionEarlyMediaUpdateReceived(IN I
         return CallStateName::TERMINATING;
     }
 
+    RunMedia(piSession, piMessage);
     SendProgressing();  // TODO: enforce remote alert to false?
     return GetStateName();
 }
