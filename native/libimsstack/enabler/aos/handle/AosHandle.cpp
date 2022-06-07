@@ -699,7 +699,7 @@ Remarks
 PROTECTED
 void AosHandle::SetReason(IN IMS_UINT32 nReason)
 {
-    this->m_nReason = nReason;
+    m_nReason = nReason;
 }
 
 /*
@@ -1005,6 +1005,7 @@ IMS_UINT32 AosHandle::GetAosFeature(IN IMS_UINT32 nBlock)
             nFeature = ImsAosFeature::VIDEO;
             break;
 
+        case BLOCK_SMS_CAPABILITY:  // FALL-THROUGH
         case BLOCK_SMS_OVER_IP_NETWORK_INDICATION:
             nFeature = ImsAosFeature::SMSIP;
             break;
