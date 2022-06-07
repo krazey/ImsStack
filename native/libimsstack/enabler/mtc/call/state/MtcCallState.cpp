@@ -200,7 +200,7 @@ PUBLIC VIRTUAL CallStateName MtcCallState::UssiTerminated(IN ISession* /* piSess
     return GetStateName();
 }
 
-PUBLIC VIRTUAL CallStateName MtcCallState::SendUssi(IN const AString& /* strUssi */)
+PUBLIC VIRTUAL CallStateName MtcCallState::SendUssd(IN const AString& /* strUssd */)
 {
     return GetStateName();
 }

@@ -51,7 +51,7 @@ public:
     inline void CancelConvert(IN const FailReason&) override {}
     inline void Terminate(IN const FailReason&) override {}
     inline void SendDtmf(IN const AString&, IN IMS_SINT32) override {}
-    inline void SendUssi(IN const AString&) override {}
+    inline void SendUssd(IN const AString&) override {}
     inline void HandleSrvccSuccess() override {}
     inline void HandleSrvccFailure(IN UpdateType) override {}
 

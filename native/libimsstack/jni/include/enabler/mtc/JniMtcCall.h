@@ -41,7 +41,7 @@ private:
     void CancelUpdate(IN const android::Parcel& objParcel);
     void AcceptResume(IN const android::Parcel& objParcel);
     void RejectResume(IN const android::Parcel& objParcel);
-    void SendUssi(IN const android::Parcel& objParcel);
+    void SendUssd(IN const android::Parcel& objParcel);
 
     void StartGroupCall(IN const android::Parcel& objParcel);
     void MergeToConference(IN const android::Parcel& objParcel);

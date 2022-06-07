@@ -360,7 +360,7 @@ public class ImsMmTelService extends MmTelFeature
             // EXTRA_USSD
             String isUSSD = incomingSession.getProperty(ImsCallProfile.EXTRA_USSD);
             if (isUSSD != null && isUSSD.equals("true")) {
-                extras.putBoolean(ImsManager.EXTRA_USSD, true);
+                extras.putBoolean(MmTelFeature.EXTRA_IS_USSD, true);
             }
 
             // EXTRA_IS_UNKNOWN_CALL
@@ -372,8 +372,10 @@ public class ImsMmTelService extends MmTelFeature
             // the incoming call is automatically rejected.
             notifyIncomingCall(incomingSession, extras);
 
-            // Notify user alerting to native UC logic
-            incomingSession.alertUser();
+            // Notify user alerting to native MTC logic if not USSD.
+            if (isUSSD == null || isUSSD.equals("false")) {
+                incomingSession.alertUser();
+            }
         }
 
         @Override

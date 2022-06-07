@@ -31,7 +31,6 @@ public:
     IMS_BOOL UpdateCdivCause(IN IMessage* piMessage);
     IMS_BOOL UpdateCdivHistory(IN IMessage* piMessage);
     IMS_BOOL UpdateCw(IN IMessage* piMessage);
-    IMS_BOOL UpdateUssd(IN IMessage* piMessage);
     IMS_BOOL UpdateVm(IN IMessage* piMessage);
     IMS_BOOL UpdateAnswerHold(IN IMessage* piMessage);
     IMS_BOOL UpdateMcid(IN IMessage* piMessage);

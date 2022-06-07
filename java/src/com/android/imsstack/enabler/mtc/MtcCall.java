@@ -1140,7 +1140,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         removeCallExtra(EXTRA_CNA);
         removeCallExtra(EXTRA_CNA_EXT);
         removeCallExtra(EXTRA_CDIV_HISTORY);
-        removeCallExtra(EXTRA_USSD);
         removeCallExtra(EXTRA_MCID);
     }
 
@@ -1347,6 +1346,7 @@ public class MtcCall extends Call implements ConferenceTracker {
         setCallExtraBoolean(EXTRA_CALL_MODE_CHANGEABLE, isVideoCapable(callInfo));
         setCallExtraBoolean(EXTRA_CONFERENCE_EVENT, mCallInfo.isConferenceEventSupported());
         setCallExtraBoolean(EXTRA_RTT_AVAIL, mCallInfo.isRttCapable());
+        setCallExtra(EXTRA_USSD, mCallInfo.isUssi() ? "true" : "false");
 
         updateCallExtraFromSuppInfo(suppInfo);
     }
@@ -2209,8 +2209,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CNAPEX, SuppInfoUtils.TYPE_STRING);
         SuppInfoUtils.addKey(SuppInfo.TYPE_CDIV_HISTORY, EXTRA_CDIV_HISTORY);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CDIV_HISTORY, SuppInfoUtils.TYPE_STRING);
-        SuppInfoUtils.addKey(SuppInfo.TYPE_USSD, EXTRA_USSD);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_USSD, SuppInfoUtils.TYPE_STRING);
         SuppInfoUtils.addKey(SuppInfo.TYPE_MCID, EXTRA_MCID);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_MCID, SuppInfoUtils.TYPE_STRING);
 
@@ -2220,7 +2218,6 @@ public class MtcCall extends Call implements ConferenceTracker {
         SuppInfoUtils.addValueType(SuppInfo.TYPE_ENFORCE_LT, SuppInfoUtils.TYPE_BOOLEAN);
 
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLERID, SuppInfoUtils.TYPE_INT);
-        SuppInfoUtils.addValueType(SuppInfo.TYPE_DIALSTRING, SuppInfoUtils.TYPE_INT);
         SuppInfoUtils.addValueType(SuppInfo.TYPE_CALLING_NUM_VERIFICATION, SuppInfoUtils.TYPE_INT);
 
         SuppInfoUtils.addValueType(SuppInfo.TYPE_DUALNUMBER, SuppInfoUtils.TYPE_STRING);

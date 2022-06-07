@@ -160,7 +160,7 @@ PROTECTED VIRTUAL void JniMtcCall::HandleMessage(
             break;
 
         case IuMtcCall::SEND_USSD:
-            SendUssi(objParcel);
+            SendUssd(objParcel);
             break;
 
         case IuMtcCall::STARTCONF:
@@ -323,11 +323,11 @@ void JniMtcCall::RejectResume(IN const android::Parcel& objParcel)
 }
 
 PRIVATE
-void JniMtcCall::SendUssi(IN const android::Parcel& objParcel)
+void JniMtcCall::SendUssd(IN const android::Parcel& objParcel)
 {
     android::String8 str8(objParcel.readString16());
-    AString strUssi = str8.string();
-    m_objCallController.SendUssi(m_nCallKey, strUssi);
+    AString strUssd = str8.string();
+    m_objCallController.SendUssd(m_nCallKey, strUssd);
 }
 
 PRIVATE

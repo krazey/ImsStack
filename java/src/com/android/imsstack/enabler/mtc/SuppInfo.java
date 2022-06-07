@@ -2,9 +2,7 @@ package com.android.imsstack.enabler.mtc;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.android.imsstack.enabler.mtc.conf.UsersInfo;
 import com.android.imsstack.util.ImsLog;
 
 import java.util.ArrayList;
@@ -31,26 +29,16 @@ public class SuppInfo implements Parcelable {
     public static final int TYPE_CDIV_CAUSE                 = 5; // int
     public static final int TYPE_CDIV_HISTORY               = 6; // String
     public static final int TYPE_CW                         = 7; // String
-    public static final int TYPE_USSD                       = 8;
-    public static final int TYPE_VM                         = 9; // boolean
-    public static final int TYPE_HD                         = 10; // boolean
-    public static final int TYPE_ANSWERHOLD                 = 11; // boolean
-    public static final int TYPE_MCID                       = 12; // boolean
-    public static final int TYPE_DUALNUMBER                 = 13; // String
-    public static final int TYPE_ENFORCE_LT                 = 14; // boolean
-    public static final int TYPE_TARGET_URI                 = 15; // String
-    public static final int TYPE_CALLING_NUM_VERIFICATION   = 16; // int
-    public static final int TYPE_VRBT                       = 17; // boolean
-    public static final int TYPE_TIP                        = 18; // int, String
-
-    // Google_IMS_IF :: DIALSTRING {
-    /**
-     * 0 or not present: Normal call
-     * 1: Call for SIP-based SS configuration
-     * 2: Call for USSD message
-     */
-    public static final int TYPE_DIALSTRING             = 16;   // int
-    // Google_IMS_IF :: DIALSTRING }
+    public static final int TYPE_VM                         = 8; // boolean
+    public static final int TYPE_HD                         = 9; // boolean
+    public static final int TYPE_ANSWERHOLD                 = 10; // boolean
+    public static final int TYPE_MCID                       = 11; // boolean
+    public static final int TYPE_DUALNUMBER                 = 12; // String
+    public static final int TYPE_ENFORCE_LT                 = 13; // boolean
+    public static final int TYPE_TARGET_URI                 = 14; // String
+    public static final int TYPE_CALLING_NUM_VERIFICATION   = 15; // int
+    public static final int TYPE_VRBT                       = 16; // boolean
+    public static final int TYPE_TIP                        = 17; // int, String
 
     // CallerID
     public static final int CALLERID_NONE           = 0;

@@ -158,10 +158,10 @@ public:
     // - failReason: Rejected reason.
     void RejectUpdate(IN CallKey nCallKey, IN const FailReason& objReason);
 
-    // Sends USSI. Nothing happens if the specified call isn't a USSI session.
+    // Sends USSD. Nothing happens if the specified call isn't a USSI session.
     // - nIMSKey: Key of the call to be manipulated.
-    // - aStrUSSI: USSI string.
-    void SendUssi(IN CallKey nCallKey, IN const AString& strUssi);
+    // - aStrUSSD: USSD string.
+    void SendUssd(IN CallKey nCallKey, IN const AString& strUssd);
 
     // Handles conference call related IMS messages.
     /*

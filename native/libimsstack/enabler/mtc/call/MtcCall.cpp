@@ -350,14 +350,14 @@ PUBLIC VIRTUAL void MtcCall::SendDtmf(IN const AString& strSignal, IN IMS_SINT32
             });
 }
 
-PUBLIC VIRTUAL void MtcCall::SendUssi(IN const AString& strUssi)
+PUBLIC VIRTUAL void MtcCall::SendUssd(IN const AString& strUssd)
 {
-    IMS_TRACE_I("SendUssi : key[%d]", m_nKey, 0, 0);
+    IMS_TRACE_I("SendUssd : key[%d]", m_nKey, 0, 0);
 
     m_objStateMachine.RunStateOperation(
             [&](MtcCallState* pState)
             {
-                return pState->SendUssi(strUssi);
+                return pState->SendUssd(strUssd);
             });
 }
 

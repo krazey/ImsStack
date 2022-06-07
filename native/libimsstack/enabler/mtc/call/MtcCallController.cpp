@@ -214,9 +214,9 @@ void MtcCallController::RejectUpdate(IN CallKey nCallKey, IN const FailReason& o
 }
 
 PUBLIC
-void MtcCallController::SendUssi(IN CallKey nCallKey, IN const AString& strUssi)
+void MtcCallController::SendUssd(IN CallKey nCallKey, IN const AString& strUssd)
 {
-    m_objCallManager.GetCallByCallKey(nCallKey)->SendUssi(strUssi);
+    m_objCallManager.GetCallByCallKey(nCallKey)->SendUssd(strUssd);
 }
 
 /*

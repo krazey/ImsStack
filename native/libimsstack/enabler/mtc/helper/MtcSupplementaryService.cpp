@@ -112,7 +112,6 @@ IMS_BOOL MtcSupplementaryService::UpdateIncomingServices(IN IMessage* piMessage)
     bUpdate |= UpdateCdivCause(piMessage);
     bUpdate |= UpdateCdivHistory(piMessage);
     bUpdate |= UpdateCw(piMessage);
-    bUpdate |= UpdateUssd(piMessage);
     bUpdate |= UpdateVm(piMessage);
     bUpdate |= UpdateAnswerHold(piMessage);
     bUpdate |= UpdateMcid(piMessage);
@@ -277,21 +276,6 @@ IMS_BOOL MtcSupplementaryService::UpdateCw(IN IMessage* piMessage)
     }
 
     Add(SuppType::CW, IMS_TRUE);
-
-    return IMS_TRUE;
-}
-
-PUBLIC
-IMS_BOOL MtcSupplementaryService::UpdateUssd(IN IMessage* piMessage)
-{
-    if (!UssiController::IsNetworkInitiatedUssi(piMessage))
-    {
-        return IMS_FALSE;
-    }
-
-    IMS_TRACE_D("UpdateUssd", 0, 0, 0);
-
-    Add(SuppType::USSD, AString("true"));
 
     return IMS_TRUE;
 }

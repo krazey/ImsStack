@@ -359,14 +359,6 @@ public class ImsCallUtils {
             }
         }
 
-        // DIALSTRING (0 or not present: default (normal call), 1: SS configuration, 2: USSD)
-        int dialstring = getSuppInfoTypeForDialString(
-                getCallExtraInt(profile, null, ImsCallProfile.EXTRA_DIALSTRING, -1));
-
-        if (dialstring != (-1)) {
-            si.addService_int(SuppInfo.TYPE_DIALSTRING, dialstring);
-        }
-
         // KR operators: MCID
         String mcid = getCallExtra(profile, oemExtras, ImsCallProfileEx.EXTRA_MCID, "");
 
@@ -759,6 +751,8 @@ public class ImsCallUtils {
                 MtcCallInfo.isVideoCapable(ci));
         profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_CONFERENCE_EVENT,
                 MtcCallInfo.isConferenceEventSupported(ci));
+        profile.setCallExtra(ImsCallProfile.EXTRA_USSD,
+                MtcCallInfo.isUssi(ci) ? "true" : "false");
         if (CallFeature.isRttSupported(context.getSlotId())) {
             profile.setCallExtraBoolean(ImsCallProfileEx.EXTRA_RTT_AVAIL,
                 MtcCallInfo.isRttCapable(ci));
@@ -936,8 +930,6 @@ public class ImsCallUtils {
             return ImsCallProfileEx.EXTRA_CDIV_HISTORY;
         case SuppInfo.TYPE_MCID:
             return ImsCallProfileEx.EXTRA_MCID;
-        case SuppInfo.TYPE_USSD:
-            return ImsCallProfile.EXTRA_USSD;
         default:
             // no-op
             break;
@@ -1026,19 +1018,6 @@ public class ImsCallUtils {
             return SuppInfo.CALLERID_RESTRICTED;
         case ImsCallProfile.OIR_PRESENTATION_NOT_RESTRICTED:
             return SuppInfo.CALLERID_IDENTITY;
-        default:
-            return (-1);
-        }
-    }
-
-    private static int getSuppInfoTypeForDialString(int dialstring) {
-        switch (dialstring) {
-        case ImsCallProfile.DIALSTRING_NORMAL:
-            return 0;
-        case ImsCallProfile.DIALSTRING_SS_CONF:
-            return 1;
-        case ImsCallProfile.DIALSTRING_USSD:
-            return 2;
         default:
             return (-1);
         }

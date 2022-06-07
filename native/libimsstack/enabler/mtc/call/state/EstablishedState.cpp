@@ -171,11 +171,11 @@ PUBLIC VIRTUAL CallStateName EstablishedState::UssiTerminated(IN ISession* piSes
     return CallStateName::TERMINATING;
 }
 
-PUBLIC VIRTUAL CallStateName EstablishedState::SendUssi(IN const AString& strUssi)
+PUBLIC VIRTUAL CallStateName EstablishedState::SendUssd(IN const AString& strUssd)
 {
     IMS_TRACE_D("SendUssi", 0, 0, 0);
 
-    SendInfoForUssi(strUssi);
+    SendInfoForUssi(strUssd);
     return GetStateName();
 }
 

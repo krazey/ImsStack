@@ -114,8 +114,8 @@ public:
     // Sends DTMF to the remote.
     virtual void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) = 0;
 
-    // Sends USSI. Does nothing if the call isn't a USSI call.
-    virtual void SendUssi(IN const AString& strUssi) = 0;
+    // Sends USSD. Does nothing if the call isn't a USSI call.
+    virtual void SendUssd(IN const AString& strUssd) = 0;
 
     // Notifies that the SRVCC was successful.
     virtual void HandleSrvccSuccess() = 0;

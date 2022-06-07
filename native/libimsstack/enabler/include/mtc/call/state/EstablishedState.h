@@ -24,7 +24,7 @@ public:
 
     CallStateName TerminateUssi(IN const FailReason& objReason) override;
     CallStateName UssiTerminated(IN ISession* piSession) override;
-    CallStateName SendUssi(IN const AString& strUssi) override;
+    CallStateName SendUssd(IN const AString& strUssd) override;
     CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection) override;
     CallStateName NotifyResponseToUssiInfo(

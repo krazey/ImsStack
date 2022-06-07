@@ -86,7 +86,7 @@ public:
     void CancelConvert(IN const FailReason& objReason) override;
     void Terminate(IN const FailReason& objReason) override;
     void SendDtmf(IN const AString& strSignal, IN IMS_SINT32 nDuration) override;
-    void SendUssi(IN const AString& strUssi) override;
+    void SendUssd(IN const AString& strUssd) override;
     void HandleSrvccSuccess() override;
     void HandleSrvccFailure(IN UpdateType eUpdateType) override;
 

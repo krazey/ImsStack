@@ -79,7 +79,7 @@ public:
     virtual CallStateName TerminateUssi(IN const FailReason& objReason);
     virtual CallStateName UssiTerminated(IN ISession* piSession);
 
-    virtual CallStateName SendUssi(IN const AString& strUssi);
+    virtual CallStateName SendUssd(IN const AString& strUssd);
     virtual CallStateName UssiInfoReceived(
             IN ISession* piSession, IN ISipServerConnection* piSipServerConnection);
     virtual CallStateName NotifyResponseToUssiInfo(
