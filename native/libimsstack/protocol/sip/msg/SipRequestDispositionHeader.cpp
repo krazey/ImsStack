@@ -52,7 +52,7 @@ SIP_BOOL SipRequestDispositionHeader::DecodeHdr(SIP_CHAR* pStartPt, SIP_UINT32 n
 
     for (SIP_UINT16 nCnt = 0; nCnt < SIP_DIRECTIVE_SIZE; nCnt++)
     {
-        if (SipPf_Stricmp(gaszDirectivesArray[nCnt], pszValue) == 0)
+        if (SipPf_Strcmp(gaszDirectivesArray[nCnt], pszValue) == 0)
         {
             return SIP_TRUE;
         }
