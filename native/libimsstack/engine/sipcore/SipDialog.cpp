@@ -1,91 +1,63 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100526  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class represents one SIP dialog. The SipDialog can be retrieved from a SipConnection
-    object, when it is available (at earliest after provisional 101~199 response).
-    Three SIP requests can open a dialog: INVITE, SUBSCRIBE/NOTIFY and REFER/NOTIFY.
-    An implementation compliant to this specification must support all of the following ways
-    of creating dialogs:
-    - INVITE-1xx-2xx-ACK will open a dialog. Subsequent SipClientConnection in the same dialog
-    can be obtained by calling GetNewClientConnection(...) method. The dialog is terminated
-    when the transaction BYE-200 OK is completed.
-    - SUBSCRIBE-200 OK (or matching NOTIFY) will open a dialog. Subsequent SipClientConnection
-    in the same dialog can be obtained by calling GetNewClientConnection(...) method.
-    The dialog is terminated when a notifier sends a NOTIFY request with a "Subscription-State"
-    of "terminated" and there are no other subscriptions alive in this dialog.
-    - REFER-matching NOTIFY will open a dialog. Subsequent SipClientConnection in the same dialog
-    can be obtained by calling GetNewClientConnection(...) method. The dialog is terminated
-    when a notifier sends a NOTIFY request with a "Subscription-State" of "terminated"
-    and there are no other subscriptions alive in this dialog.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
-#include "SipDebug.h"
+
 #include "SipClientConnection.h"
+#include "SipDebug.h"
 #include "SipDialog.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
-
-PUBLIC
-SipDialog::SipDialog(IN SipDialogEx* pDialogEx_) :
-        pDialogEx(pDialogEx_)
-{
-}
-
-PUBLIC
-SipDialog::SipDialog(IN CONST SipDialog& objRHS) :
-        pDialogEx(objRHS.pDialogEx)
-{
-}
 
 PUBLIC
 SipDialog::~SipDialog()
 {
     IMS_TRACE_D("Destructor :: SipDialog (%s)",
-            SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
+            SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0, 0);
 }
 
 PUBLIC
-SipDialog& SipDialog::operator=(IN CONST SipDialog& objRHS)
+SipDialog& SipDialog::operator=(IN const SipDialog& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        pDialogEx = objRHS.pDialogEx;
+        m_pDialogEx = other.m_pDialogEx;
     }
 
     return (*this);
 }
 
-/*
- Returns a new SipClientConnection in this dialog. The returned SipClientConnection will be
-in STATE_INITIALIZED state. The object is initialized with the given method and default headers.
-
-Remarks
- The following headers will be set by the method:
-    To
-    From
-    CSeq
-    Call-ID
-    Via
-    Route
-    Contact
-    Max-Forwards
-*/
+/**
+ * Returns a new SipClientConnection in this dialog. The returned SipClientConnection will be
+ * in STATE_INITIALIZED state. The object is initialized with the given method and default headers.
+ *
+ * The following headers will be set by the method:
+ *     To
+ *     From
+ *     CSeq
+ *     Call-ID
+ *     Via
+ *     Route
+ *     Contact
+ *     Max-Forwards
+ */
 PUBLIC
-SipClientConnection* SipDialog::CreateClientConnection(IN CONST AString& strMethod)
+SipClientConnection* SipDialog::CreateClientConnection(IN const AString& strMethod)
 {
     IMS_SINT32 nState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     if ((nState != STATE_EARLY) && (nState != STATE_CONFIRMED))
     {
@@ -101,13 +73,7 @@ SipClientConnection* SipDialog::CreateClientConnection(IN CONST AString& strMeth
         }
     }
 
-    if (strMethod.IsNULL())
-    {
-        SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
-        return IMS_NULL;
-    }
-
-    if (strMethod.IsEmpty())
+    if (strMethod.GetLength() == 0)
     {
         SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_NULL;
@@ -131,110 +97,52 @@ SipClientConnection* SipDialog::CreateClientConnection(IN CONST AString& strMeth
         return IMS_NULL;
     }
 
-    SipClientConnection* pSCC = new SipClientConnection();
+    SipClientConnection* pScc = new SipClientConnection();
 
-    if (pSCC == IMS_NULL)
+    if (pScc == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::NO_MEMORY);
         return IMS_NULL;
     }
 
-    if (pSCC->InitDialogRequest(objMethod, pNewDialogEx.Get()) != IMS_SUCCESS)
+    if (pScc->InitDialogRequest(objMethod, pNewDialogEx.Get()) != IMS_SUCCESS)
     {
-        delete pSCC;
+        delete pScc;
 
         SipPrivate::SetLastError(SipError::TRANSACTION_UNAVAILABLE);
         return IMS_NULL;
     }
 
-    return pSCC;
+    return pScc;
 }
 
-/*
- Returns the Call-ID component of this dialog.
-
-Remarks
-
-*/
-PUBLIC
-const AString& SipDialog::GetCallId() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogEx->GetDialogState()->GetCallId();
-}
-
-/*
- Returns the local contact address of this dialog.
-
-Remarks
-
-*/
-PUBLIC
-const ISipHeader* SipDialog::GetContactHeader() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogEx->GetDialogState()->GetContactHeader();
-}
-
-/*
- Returns the local-tag component of this dialog.
-
-Remarks
-
-*/
-PUBLIC
-AString SipDialog::GetLocalTag() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogEx->GetDialogState()->GetLocalTag();
-}
-
-/*
- Returns the remote-tag component of this dialog.
-
-Remarks
-
-*/
-PUBLIC
-AString SipDialog::GetRemoteTag() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogEx->GetDialogState()->GetRemoteTag();
-}
-
-/*
- Returns the state of the SIP dialog.
-
-Remarks
-- STATE_INITIALIZED
-    Internal state where the dialog has been created.
-    This state is not visible to the user, since the dialog can be fetched earliest
-    in the STATE_EARLY state.
- - STATE_EARLY
-    Provisional 101 ~ 199 response received or sent (with to-tag).
- - STATE_CONFIRMED
-    Final 2xx response received (or sent) for the original request.
-    NOTIFY confirming the subscription received (or sent).
- - STATE_TERMINATED
-    No response or error response (3xx ~ 6xx) received (or sent).
-    If the dialog is terminated with BYE or un-SUBSCRIBE, GetNewClientConnection(...) method
-    can't be called in this state.
-
-*/
+/**
+ * Returns the state of the SIP dialog.
+ *
+ * - STATE_INITIALIZED
+ *     Internal state where the dialog has been created.
+ *     This state is not visible to the user, since the dialog can be fetched earliest
+ *     in the STATE_EARLY state.
+ *  - STATE_EARLY
+ *     Provisional 101 ~ 199 response received or sent (with to-tag).
+ *  - STATE_CONFIRMED
+ *     Final 2xx response received (or sent) for the original request.
+ *     NOTIFY confirming the subscription received (or sent).
+ *  - STATE_TERMINATED
+ *     No response or error response (3xx ~ 6xx) received (or sent).
+ *     If the dialog is terminated with BYE or un-SUBSCRIBE, GetNewClientConnection(...) method
+ *     can't be called in this state.
+ */
 PUBLIC
 IMS_SINT32 SipDialog::GetState() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Check if the dialog usage is already in TERMINATED state
-    if (pDialogEx->IsDialogTerminated())
+    if (m_pDialogEx->IsDialogTerminated())
+    {
         return STATE_TERMINATED;
+    }
 
-    switch (pDialogEx->GetState())
+    switch (m_pDialogEx->GetState())
     {
         case SipDState::STATE_TERMINATED:
             return STATE_TERMINATED;
@@ -250,22 +158,19 @@ IMS_SINT32 SipDialog::GetState() const
     }
 }
 
-/*
- Compares if the given SipDialog equals or not.
-
-Remarks
-
-*/
+/**
+ * Compares if the given SipDialog equals or not.
+ */
 PUBLIC
-IMS_BOOL SipDialog::IsSameDialog(IN CONST SipDialog* pDialog)
+IMS_BOOL SipDialog::IsSameDialog(IN const SipDialog* pDialog)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pDialog == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    SipDialogState* pDState = pDialogEx->GetDialogState();
-    SipDialogState* pOtherDState = pDialog->pDialogEx->GetDialogState();
+    SipDialogState* pDState = m_pDialogEx->GetDialogState();
+    SipDialogState* pOtherDState = pDialog->m_pDialogEx->GetDialogState();
 
     if (!pDState->Equals(pOtherDState))
     {
@@ -273,61 +178,15 @@ IMS_BOOL SipDialog::IsSameDialog(IN CONST SipDialog* pDialog)
     }
 
     // Only check a dialog usage in this time ...
-    return pDialogEx->Equals(pDialog->pDialogEx.Get());
+    return m_pDialogEx->Equals(pDialog->m_pDialogEx.Get());
 }
 
-/*
-
-Remarks
- CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-
-*/
-PUBLIC
-IMS_RESULT SipDialog::SetContactParameter(
-        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogEx->GetDialogState()->SetContactParameter(strParameter, nOperation);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipDialog::TerminateDialogUsage()
-{
-    pDialogEx->TerminateDialogUsage();
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE
-void SipDialog::UpdateDialog(IN SipDialogEx* pDialogEx)
+IMS_BOOL SipDialog::CheckMethodValidity(IN const SipMethod& objMethod) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->pDialogEx = pDialogEx;
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE
-IMS_BOOL SipDialog::CheckMethodValidity(IN CONST SipMethod& objMethod) const
-{
-    //---------------------------------------------------------------------------------------------
-
     // Case 1)
     //    Condition - subscribe usage & method except for INVITE/SUBSCRIBE/REFER/NOTIFY
-    if (!(pDialogEx->IsInviteUsage()) && !objMethod.Equals(SipMethod::INVITE) &&
+    if (!(m_pDialogEx->IsInviteUsage()) && !objMethod.Equals(SipMethod::INVITE) &&
             !objMethod.Equals(SipMethod::SUBSCRIBE) && !objMethod.Equals(SipMethod::REFER) &&
             !objMethod.Equals(SipMethod::NOTIFY))
     {
@@ -337,7 +196,7 @@ IMS_BOOL SipDialog::CheckMethodValidity(IN CONST SipMethod& objMethod) const
     }
     // Case 2)
     //    Condition - invite usage & NOTIFY method
-    else if (pDialogEx->IsInviteUsage() && objMethod.Equals(SipMethod::NOTIFY))
+    else if (m_pDialogEx->IsInviteUsage() && objMethod.Equals(SipMethod::NOTIFY))
     {
         IMS_TRACE_D("%s is not allowed in the invite usage", objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
@@ -346,30 +205,23 @@ IMS_BOOL SipDialog::CheckMethodValidity(IN CONST SipMethod& objMethod) const
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-SipDialogEx* SipDialog::GetOptimumDialog(IN CONST SipMethod& objMethod) const
+SipDialogEx* SipDialog::GetOptimumDialog(IN const SipMethod& objMethod) const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Case 1)
     //    Condition - invite usage & method except for REFER/SUBSCRIBE
     //    Action - Use an invite usage as it is
-    if (pDialogEx->IsInviteUsage() && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
+    if (m_pDialogEx->IsInviteUsage() && !objMethod.Equals(SipMethod::SUBSCRIBE) &&
             !objMethod.Equals(SipMethod::REFER))
     {
-        return pDialogEx.Get();
+        return m_pDialogEx.Get();
     }
     // Case 2)
     //    Condition - subscribe usage & NOTIFY method
     //    Action - Use an subscribe usage as it is
-    else if (!(pDialogEx->IsInviteUsage()) && objMethod.Equals(SipMethod::NOTIFY))
+    else if (!(m_pDialogEx->IsInviteUsage()) && objMethod.Equals(SipMethod::NOTIFY))
     {
-        return pDialogEx.Get();
+        return m_pDialogEx.Get();
     }
     // Case 3)
     //    Condition - subscribe usage & INVITE method / invite usage & REFER/SUBSCRIBE method
@@ -380,6 +232,6 @@ SipDialogEx* SipDialog::GetOptimumDialog(IN CONST SipMethod& objMethod) const
     else
     {
         // After the request is sent, it will be updated by the client transaction
-        return SipDialogEx::CreateDialog(pDialogEx->GetDialogState(), objMethod);
+        return SipDialogEx::CreateDialog(m_pDialogEx->GetDialogState(), objMethod);
     }
 }

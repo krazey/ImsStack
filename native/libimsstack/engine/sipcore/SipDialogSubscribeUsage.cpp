@@ -1,29 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100309  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines a SUBSCRIBE dialog usage.
-        - Created by:
-        1) 200 class responses to SUBSCRIBE
-        2) 200 class responses to REFER
-        3) NOTIFY requests
-        - Destroyed by:
-        1) 200 class responses to NOTIFY-terminated
-        2) NOTIFY or refresh-SUBSCRIBE request timeout
-        3) Certain failure responses to NOTIFY or SUBSCRIBE
-        4) Expiration without refresh if network issues prevent the terminal NOTIFY from arriving
-        5) Anything that destroys a dialog and all its usages
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
+
 #include "ISipHeader.h"
 #include "SipDialogSubscribeUsage.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
@@ -71,83 +65,70 @@ SipDialogSubscribeUsage::STATE_TABLE[SipDState::STATE_MAX][SipDialogSubscribeUsa
 // clang-format on
 
 PUBLIC
-SipDialogSubscribeUsage::SipDialogSubscribeUsage(IN SipDialogBase* pDialog_) :
-        SipDialogUsage(SipDialogUsage::TYPE_SUBSCRIBE, pDialog_),
-        nSubState(SUB_STATE_INIT),
-        nMethod(METHOD_SUBSCRIBE),
-        strEvent(AString::ConstNull()),
-        strEventId(AString::ConstNull()),
-        nCSeqForNOTIFYWithTerminated(SipPrivate::INVALID_SEQ_NUM)
+SipDialogSubscribeUsage::SipDialogSubscribeUsage(IN SipDialogBase* pDialog) :
+        SipDialogUsage(SipDialogUsage::TYPE_SUBSCRIBE, pDialog),
+        m_nSubState(SUB_STATE_INIT),
+        m_nMethod(METHOD_SUBSCRIBE),
+        m_strEvent(AString::ConstNull()),
+        m_strEventId(AString::ConstNull()),
+        m_nCSeqForNotifyWithTerminated(SipPrivate::INVALID_SEQ_NUM)
 {
 }
 
 PUBLIC
-SipDialogSubscribeUsage::SipDialogSubscribeUsage(IN CONST SipDialogSubscribeUsage& objRHS) :
-        SipDialogUsage(objRHS),
-        nSubState(objRHS.nSubState),
-        nMethod(objRHS.nMethod),
-        strEvent(objRHS.strEvent),
-        strEventId(objRHS.strEventId),
-        nCSeqForNOTIFYWithTerminated(objRHS.nCSeqForNOTIFYWithTerminated)
+SipDialogSubscribeUsage::SipDialogSubscribeUsage(IN const SipDialogSubscribeUsage& other) :
+        SipDialogUsage(other),
+        m_nSubState(other.m_nSubState),
+        m_nMethod(other.m_nMethod),
+        m_strEvent(other.m_strEvent),
+        m_strEventId(other.m_strEventId),
+        m_nCSeqForNotifyWithTerminated(other.m_nCSeqForNotifyWithTerminated)
 {
 }
 
-PUBLIC VIRTUAL SipDialogSubscribeUsage::~SipDialogSubscribeUsage() {}
-
-PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN CONST SipMessageInfo& objMInfo)
+PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(
+        IN const SipMessageInfo& objMsgInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
     // For a forked NOTIFY request, checking to NOTIFY method is added
-    if (!objMInfo.GetMethod().Equals(SipMethod::SUBSCRIBE) &&
-            !objMInfo.GetMethod().Equals(SipMethod::REFER) &&
-            !objMInfo.GetMethod().Equals(SipMethod::NOTIFY))
+    if (!objMsgInfo.GetMethod().Equals(SipMethod::SUBSCRIBE) &&
+            !objMsgInfo.GetMethod().Equals(SipMethod::REFER) &&
+            !objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY))
     {
         IMS_TRACE_E(0, "OPERATION NOT ALLOWED : Can't create a subscribe dialog usage for %s",
-                objMInfo.GetMethod().ToString().GetStr(), 0, 0);
+                objMsgInfo.GetMethod().ToString().GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
-    if (objMInfo.GetMethod().Equals(SipMethod::REFER))
+    if (objMsgInfo.GetMethod().Equals(SipMethod::REFER))
     {
-        nMethod = METHOD_REFER;
-        strEvent = Sip::STR_REFER;
+        m_nMethod = METHOD_REFER;
+        m_strEvent = Sip::STR_REFER;
         // MULTIPLE_REFER
-        strEventId.SetNumber(SipStack::GetCSeqNumber(objMInfo.GetMessage()));
+        m_strEventId.SetNumber(SipStack::GetCSeqNumber(objMsgInfo.GetMessage()));
     }
     else
     {
         // Get Event header & set this info.
-        if (!SipStack::GetEventHeader(objMInfo.GetMessage(), strEvent, strEventId))
+        if (!SipStack::GetEventHeader(objMsgInfo.GetMessage(), m_strEvent, m_strEventId))
         {
             IMS_TRACE_E(0, "OPERATION FAILED : Getting Event Header failed", 0, 0, 0);
             return IMS_FALSE;
         }
     }
 
-    return SipDialogUsage::InitDialogUsage(objMInfo);
+    return SipDialogUsage::InitDialogUsage(objMsgInfo);
 }
 
-PUBLIC VIRTUAL SipDialogUsage* SipDialogSubscribeUsage::Clone() const
+PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(
+        IN const SipMessageInfo& objMsgInfo) const
 {
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = objMsgInfo.GetMethod();
 
-    return new SipDialogSubscribeUsage(*this);
-}
-
-PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(IN CONST SipMessageInfo& objMInfo) const
-{
-    const SipMethod& objMethod = objMInfo.GetMethod();
-
-    //---------------------------------------------------------------------------------------------
-
-    // Check only NOTIFY request ?????
-
-    if (objMethod.Equals(SipMethod::REFER) && (nMethod != METHOD_REFER))
+    if (objMethod.Equals(SipMethod::REFER) && (m_nMethod != METHOD_REFER))
     {
         return IMS_FALSE;
     }
-    else if (objMethod.Equals(SipMethod::SUBSCRIBE) && (nMethod != METHOD_SUBSCRIBE))
+    else if (objMethod.Equals(SipMethod::SUBSCRIBE) && (m_nMethod != METHOD_SUBSCRIBE))
     {
         return IMS_FALSE;
     }
@@ -155,32 +136,31 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(IN CONST SipMessageIn
     AString strTmpEvent;
     AString strTmpEventId;
 
-    if (!SipStack::GetEventHeader(objMInfo.GetMessage(), strTmpEvent, strTmpEventId))
+    if (!SipStack::GetEventHeader(objMsgInfo.GetMessage(), strTmpEvent, strTmpEventId))
     {
         IMS_TRACE_E(0, "NOT FOUND : Getting Event header failed (%s)",
                 objMethod.ToString().GetStr(), 0, 0);
         return IMS_FALSE;
     }
 
-    if (!this->strEvent.Equals(strTmpEvent))
+    if (!m_strEvent.Equals(strTmpEvent))
     {
-        IMS_TRACE_I(
-                "Event (%s , %s) is not matched", this->strEvent.GetStr(), strTmpEvent.GetStr(), 0);
+        IMS_TRACE_I("Event (%s , %s) is not matched", m_strEvent.GetStr(), strTmpEvent.GetStr(), 0);
         return IMS_FALSE;
     }
 
     // MULTIPLE_REFER
-    if ((nMethod == METHOD_REFER) && objMInfo.GetMethod().Equals(SipMethod::REFER) &&
-            (objMInfo.GetDirection() == SipMessageInfo::DIRECTION_OUTGOING) &&
+    if ((m_nMethod == METHOD_REFER) && objMsgInfo.GetMethod().Equals(SipMethod::REFER) &&
+            (objMsgInfo.GetDirection() == SipMessageInfo::DIRECTION_OUTGOING) &&
             (strTmpEventId.GetLength() == 0))
     {
-        strTmpEventId.SetNumber(SipStack::GetCSeqNumber(objMInfo.GetMessage()));
+        strTmpEventId.SetNumber(SipStack::GetCSeqNumber(objMsgInfo.GetMessage()));
     }
 
-    if (!this->strEventId.Equals(strTmpEventId))
+    if (!m_strEventId.Equals(strTmpEventId))
     {
         // MULTIPLE_REFER
-        if (nMethod == METHOD_REFER)
+        if (m_nMethod == METHOD_REFER)
         {
             if (strTmpEventId.GetLength() == 0)
             {
@@ -196,7 +176,7 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(IN CONST SipMessageIn
             }
         }
 
-        IMS_TRACE_I("Event id (%s , %s) is not matched", this->strEventId.GetStr(),
+        IMS_TRACE_I("Event id (%s , %s) is not matched", m_strEventId.GetStr(),
                 strTmpEventId.GetStr(), 0);
         return IMS_FALSE;
     }
@@ -207,8 +187,6 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::CompareTo(IN CONST SipMessageIn
 PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::Equals(IN SipDialogUsage* pDUsage) const
 {
     SipDialogSubscribeUsage* pDSubscribeUsage = DYNAMIC_CAST(SipDialogSubscribeUsage*, pDUsage);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pDSubscribeUsage == IMS_NULL)
     {
@@ -222,17 +200,17 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogSubscribeUsage::Equals(IN SipDialogUsage* pDUsa
     }
 
     // Check if the subscribe usage info. equals or not
-    if (nMethod != pDSubscribeUsage->nMethod)
+    if (m_nMethod != pDSubscribeUsage->m_nMethod)
     {
         return IMS_FALSE;
     }
 
-    if (!strEvent.Equals(pDSubscribeUsage->strEvent))
+    if (!m_strEvent.Equals(pDSubscribeUsage->m_strEvent))
     {
         return IMS_FALSE;
     }
 
-    if (!strEventId.Equals(pDSubscribeUsage->strEventId))
+    if (!m_strEventId.Equals(pDSubscribeUsage->m_strEventId))
     {
         return IMS_FALSE;
     }
@@ -244,51 +222,51 @@ PUBLIC VIRTUAL AString SipDialogSubscribeUsage::ToString() const
 {
     AString strValue;
 
-    strValue.Sprintf("DialogUsage: [%s|%s|%s]", (nMethod == METHOD_REFER) ? "REFER" : "SUBSCRIBE",
-            strEvent.GetStr(), strEventId.GetStr());
+    strValue.Sprintf("DialogUsage: [%s|%s|%s]", (m_nMethod == METHOD_REFER) ? "REFER" : "SUBSCRIBE",
+            m_strEvent.GetStr(), m_strEventId.GetStr());
 
     return strValue;
 }
 
 PUBLIC VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::UpdateUsageDetails(
-        IN CONST SipMessageInfo& objMInfo)
+        IN const SipMessageInfo& objMsgInfo)
 {
-    ::SipMessage* pstMessage = objMInfo.GetMessage();
-    const SipMethod& objMethod = objMInfo.GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
+    const SipMethod& objMethod = objMsgInfo.GetMethod();
 
     // Update Subscription-State header
-    if (SipStack::IsRequestMessage(pstMessage) && objMethod.Equals(SipMethod::NOTIFY))
+    if (SipStack::IsRequestMessage(pSipMsg) && objMethod.Equals(SipMethod::NOTIFY))
     {
         AString strSubState;
 
-        if (!SipStack::GetSubscriptionStateHeader(objMInfo.GetMessage(), strSubState))
+        if (!SipStack::GetSubscriptionStateHeader(objMsgInfo.GetMessage(), strSubState))
         {
             IMS_TRACE_E(0, "Getting Subscription-State header failed", 0, 0, 0);
             return SipPrivate::MESSAGE_FAILED;
         }
 
         if (strSubState.EqualsIgnoreCase(Sip::STR_ACTIVE))
-            nSubState = SUB_STATE_ACTIVE;
+        {
+            m_nSubState = SUB_STATE_ACTIVE;
+        }
         else if (strSubState.EqualsIgnoreCase(Sip::STR_PENDING))
-            nSubState = SUB_STATE_PENDING;
+        {
+            m_nSubState = SUB_STATE_PENDING;
+        }
         else if (strSubState.EqualsIgnoreCase(Sip::STR_TERMINATED))
         {
-            nSubState = SUB_STATE_TERMINATED;
-            nCSeqForNOTIFYWithTerminated = SipStack::GetCSeqNumber(objMInfo.GetMessage());
+            m_nSubState = SUB_STATE_TERMINATED;
+            m_nCSeqForNotifyWithTerminated = SipStack::GetCSeqNumber(objMsgInfo.GetMessage());
         }
     }
 
     // Update the shared dialog states
-    return SipDialogUsage::UpdateUsageDetails(objMInfo);
+    return SipDialogUsage::UpdateUsageDetails(objMsgInfo);
 }
 
 PUBLIC
-IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN CONST SipMethod& objMethod)
+IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN const SipMethod& objMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!objMethod.Equals(SipMethod::SUBSCRIBE) && !objMethod.Equals(SipMethod::REFER) &&
             !objMethod.Equals(SipMethod::NOTIFY))
     {
@@ -299,8 +277,8 @@ IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN CONST SipMethod& objMethod)
 
     if (objMethod.Equals(SipMethod::REFER))
     {
-        nMethod = METHOD_REFER;
-        strEvent = Sip::STR_REFER;
+        m_nMethod = METHOD_REFER;
+        m_strEvent = Sip::STR_REFER;
     }
 
     return IMS_TRUE;
@@ -309,31 +287,28 @@ IMS_BOOL SipDialogSubscribeUsage::InitDialogUsage(IN CONST SipMethod& objMethod)
 PUBLIC GLOBAL IMS_SINT32 SipDialogSubscribeUsage::GetNextState(
         IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((nTrigger < TRIGGER_INIT) || (nTrigger >= TRIGGER_MAX))
+    {
         return SipDState::STATE_MAX;
+    }
 
     return STATE_TABLE[nState][nTrigger];
 }
 
 PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
-        IN CONST SipMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger)
+        IN const SipMessageInfo& objMsgInfo, OUT IMS_SINT32& nTrigger)
 {
-    ::SipMessage* pstMessage = objMInfo.GetMessage();
-
+    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
     IMS_SINT32 nAction = SipDState::ACTION_TRANSIT_STATE;
-
-    //---------------------------------------------------------------------------------------------
 
     nTrigger = TRIGGER_INIT;
 
-    if (SipStack::IsRequestMessage(pstMessage))
+    if (SipStack::IsRequestMessage(pSipMsg))
     {
-        if (objMInfo.GetMethod().Equals(SipMethod::NOTIFY))
+        if (objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY))
         {
-            if ((nSubState == SUB_STATE_ACTIVE) || (nSubState == SUB_STATE_PENDING) ||
-                    (nSubState == SUB_STATE_TERMINATED))
+            if ((m_nSubState == SUB_STATE_ACTIVE) || (m_nSubState == SUB_STATE_PENDING) ||
+                    (m_nSubState == SUB_STATE_TERMINATED))
             {
                 nTrigger = TRIGGER_NOTIFY;
             }
@@ -341,9 +316,9 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
     }
     else
     {
-        nAction = GetActionForResponse(objMInfo);
+        nAction = GetActionForResponse(objMsgInfo);
 
-        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pstMessage);
+        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
         if (SipStatusCode::IsProvisional(nStatusCode))
         {
@@ -351,13 +326,13 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
         }
         else if (SipStatusCode::IsFinalSuccess(nStatusCode))
         {
-            if (nSubState == SUB_STATE_TERMINATED)
+            if (m_nSubState == SUB_STATE_TERMINATED)
             {
-                IMS_UINT32 nCSeq = SipStack::GetCSeqNumber(objMInfo.GetMessage());
+                IMS_UINT32 nCSeq = SipStack::GetCSeqNumber(objMsgInfo.GetMessage());
 
-                if ((nCSeqForNOTIFYWithTerminated == SipPrivate::INVALID_SEQ_NUM) ||
-                        (objMInfo.GetMethod().Equals(SipMethod::NOTIFY) &&
-                                (nCSeqForNOTIFYWithTerminated == nCSeq)))
+                if ((m_nCSeqForNotifyWithTerminated == SipPrivate::INVALID_SEQ_NUM) ||
+                        (objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY) &&
+                                (m_nCSeqForNotifyWithTerminated == nCSeq)))
                 {
                     nAction = SipDState::ACTION_TRANSIT_STATE;
                     nTrigger = TRIGGER_XXX_NOTIFY_TERMINATED;
@@ -394,13 +369,13 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
             // was installed by non-SUBSCRIBE means (such as an administrative interface).
             nTrigger = TRIGGER_NON_2XX;
 
-            if (nSubState == SUB_STATE_TERMINATED)
+            if (m_nSubState == SUB_STATE_TERMINATED)
             {
-                IMS_UINT32 nCSeq = SipStack::GetCSeqNumber(objMInfo.GetMessage());
+                IMS_UINT32 nCSeq = SipStack::GetCSeqNumber(objMsgInfo.GetMessage());
 
-                if ((nCSeqForNOTIFYWithTerminated == SipPrivate::INVALID_SEQ_NUM) ||
-                        (objMInfo.GetMethod().Equals(SipMethod::NOTIFY) &&
-                                (nCSeqForNOTIFYWithTerminated == nCSeq)))
+                if ((m_nCSeqForNotifyWithTerminated == SipPrivate::INVALID_SEQ_NUM) ||
+                        (objMsgInfo.GetMethod().Equals(SipMethod::NOTIFY) &&
+                                (m_nCSeqForNotifyWithTerminated == nCSeq)))
                 {
                     nAction = SipDState::ACTION_TRANSIT_STATE;
                     nTrigger = TRIGGER_XXX_NOTIFY_TERMINATED;
@@ -420,22 +395,9 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogSubscribeUsage::GetActionNTrigger(
     return nAction;
 }
 
-PROTECTED VIRTUAL IMS_BOOL SipDialogSubscribeUsage::IsUsageTerminated(
-        IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (GetNextState(nState, nTrigger) == SipDState::STATE_TERMINATED)
-        return IMS_TRUE;
-
-    return IMS_FALSE;
-}
-
 PROTECTED VIRTUAL const IMS_CHAR* SipDialogSubscribeUsage::TriggerToString(
         IN IMS_SINT32 nTrigger) const
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nTrigger)
     {
         case TRIGGER_1XX:

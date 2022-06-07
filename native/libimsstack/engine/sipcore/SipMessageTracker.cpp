@@ -1,67 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20120204  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "ISipMessageTrackerListener.h"
 #include "SipMessageTracker.h"
 
-PRIVATE
-SipMessageTracker::SipMessageTracker() :
-        piListener(IMS_NULL)
-{
-}
-
-PRIVATE VIRTUAL SipMessageTracker::~SipMessageTracker() {}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipMessageTracker::IsMessageTrackerEnabled() const
-{
-    return (piListener != IMS_NULL);
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipMessageTracker::NotifyMessageReceived(
-        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN CONST AString& strCallId)
+        IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN const AString& strCallId)
 {
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         return;
     }
 
-    if (objIncomingFilters.IsEmpty())
+    if (m_objIncomingFilters.IsEmpty())
     {
-        piListener->MessageTracker_NotifyMessageReceived(objMethod, nStatusCode, strCallId);
+        m_piListener->MessageTracker_NotifyMessageReceived(objMethod, nStatusCode, strCallId);
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objIncomingFilters.GetSize(); ++i)
         {
-            MessageFilter* pFilter = objIncomingFilters.GetAt(i);
+            MessageFilter* pFilter = m_objIncomingFilters.GetAt(i);
 
             if (pFilter != IMS_NULL)
             {
                 if (pFilter->Equals(objMethod, nStatusCode))
                 {
-                    piListener->MessageTracker_NotifyMessageReceived(
+                    m_piListener->MessageTracker_NotifyMessageReceived(
                             objMethod, nStatusCode, strCallId);
                     break;
                 }
@@ -70,36 +50,31 @@ void SipMessageTracker::NotifyMessageReceived(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipMessageTracker::NotifyMessageSent(IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
-        IN CONST AString& strCallId, IN IMS_SINT32 nErrorCode /* = 0 */)
+void SipMessageTracker::NotifyMessageSent(IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
+        IN const AString& strCallId, IN IMS_SINT32 nErrorCode /*= 0*/)
 {
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         return;
     }
 
-    if (objOutgoingFilters.IsEmpty())
+    if (m_objOutgoingFilters.IsEmpty())
     {
         if (nErrorCode == 0)
         {
-            piListener->MessageTracker_NotifyMessageSent(objMethod, nStatusCode, strCallId);
+            m_piListener->MessageTracker_NotifyMessageSent(objMethod, nStatusCode, strCallId);
         }
         else
         {
-            piListener->MessageTracker_NotifyMessageSentFailed(objMethod, nStatusCode, strCallId);
+            m_piListener->MessageTracker_NotifyMessageSentFailed(objMethod, nStatusCode, strCallId);
         }
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objOutgoingFilters.GetSize(); ++i)
         {
-            MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
+            MessageFilter* pFilter = m_objOutgoingFilters.GetAt(i);
 
             if (pFilter != IMS_NULL)
             {
@@ -107,12 +82,12 @@ void SipMessageTracker::NotifyMessageSent(IN CONST SipMethod& objMethod, IN IMS_
                 {
                     if (nErrorCode == 0)
                     {
-                        piListener->MessageTracker_NotifyMessageSent(
+                        m_piListener->MessageTracker_NotifyMessageSent(
                                 objMethod, nStatusCode, strCallId);
                     }
                     else
                     {
-                        piListener->MessageTracker_NotifyMessageSentFailed(
+                        m_piListener->MessageTracker_NotifyMessageSentFailed(
                                 objMethod, nStatusCode, strCallId);
                     }
                     break;
@@ -122,13 +97,8 @@ void SipMessageTracker::NotifyMessageSent(IN CONST SipMethod& objMethod, IN IMS_
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL SipMessageTracker::AddFilter(
-        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
+        IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
 {
     MessageFilter* pFilter = new MessageFilter(objMethod, nStatusCode);
 
@@ -139,7 +109,7 @@ PRIVATE VIRTUAL IMS_BOOL SipMessageTracker::AddFilter(
 
     if (bOutgoing)
     {
-        if (!objOutgoingFilters.Append(pFilter))
+        if (!m_objOutgoingFilters.Append(pFilter))
         {
             delete pFilter;
             return IMS_FALSE;
@@ -147,7 +117,7 @@ PRIVATE VIRTUAL IMS_BOOL SipMessageTracker::AddFilter(
     }
     else
     {
-        if (!objIncomingFilters.Append(pFilter))
+        if (!m_objIncomingFilters.Append(pFilter))
         {
             delete pFilter;
             return IMS_FALSE;
@@ -157,16 +127,11 @@ PRIVATE VIRTUAL IMS_BOOL SipMessageTracker::AddFilter(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(IN CONST SipMethod& objMethod)
+PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(IN const SipMethod& objMethod)
 {
-    for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize();)
+    for (IMS_UINT32 i = 0; i < m_objOutgoingFilters.GetSize();)
     {
-        MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
+        MessageFilter* pFilter = m_objOutgoingFilters.GetAt(i);
 
         if (pFilter == IMS_NULL)
         {
@@ -178,16 +143,16 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(IN CONST SipMethod& objMeth
         {
             delete pFilter;
 
-            objOutgoingFilters.RemoveAt(i);
+            m_objOutgoingFilters.RemoveAt(i);
             continue;
         }
 
         ++i;
     }
 
-    for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize();)
+    for (IMS_UINT32 i = 0; i < m_objIncomingFilters.GetSize();)
     {
-        MessageFilter* pFilter = objIncomingFilters.GetAt(i);
+        MessageFilter* pFilter = m_objIncomingFilters.GetAt(i);
 
         if (pFilter == IMS_NULL)
         {
@@ -199,7 +164,7 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(IN CONST SipMethod& objMeth
         {
             delete pFilter;
 
-            objIncomingFilters.RemoveAt(i);
+            m_objIncomingFilters.RemoveAt(i);
             continue;
         }
 
@@ -207,19 +172,14 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(IN CONST SipMethod& objMeth
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(
-        IN CONST SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
+        IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode, IN IMS_BOOL bOutgoing)
 {
     if (bOutgoing)
     {
-        for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize();)
+        for (IMS_UINT32 i = 0; i < m_objOutgoingFilters.GetSize();)
         {
-            MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
+            MessageFilter* pFilter = m_objOutgoingFilters.GetAt(i);
 
             if (pFilter == IMS_NULL)
             {
@@ -231,7 +191,7 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(
             {
                 delete pFilter;
 
-                objOutgoingFilters.RemoveAt(i);
+                m_objOutgoingFilters.RemoveAt(i);
                 continue;
             }
 
@@ -240,9 +200,9 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(
     }
     else
     {
-        for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize();)
+        for (IMS_UINT32 i = 0; i < m_objIncomingFilters.GetSize();)
         {
-            MessageFilter* pFilter = objIncomingFilters.GetAt(i);
+            MessageFilter* pFilter = m_objIncomingFilters.GetAt(i);
 
             if (pFilter == IMS_NULL)
             {
@@ -254,7 +214,7 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(
             {
                 delete pFilter;
 
-                objIncomingFilters.RemoveAt(i);
+                m_objIncomingFilters.RemoveAt(i);
                 continue;
             }
 
@@ -263,16 +223,11 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveFilter(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipMessageTracker::RemoveAllFilters()
 {
-    for (IMS_UINT32 i = 0; i < objIncomingFilters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objIncomingFilters.GetSize(); ++i)
     {
-        MessageFilter* pFilter = objIncomingFilters.GetAt(i);
+        MessageFilter* pFilter = m_objIncomingFilters.GetAt(i);
 
         if (pFilter != IMS_NULL)
         {
@@ -280,11 +235,11 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveAllFilters()
         }
     }
 
-    objIncomingFilters.Clear();
+    m_objIncomingFilters.Clear();
 
-    for (IMS_UINT32 i = 0; i < objOutgoingFilters.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objOutgoingFilters.GetSize(); ++i)
     {
-        MessageFilter* pFilter = objOutgoingFilters.GetAt(i);
+        MessageFilter* pFilter = m_objOutgoingFilters.GetAt(i);
 
         if (pFilter != IMS_NULL)
         {
@@ -292,15 +247,5 @@ PRIVATE VIRTUAL void SipMessageTracker::RemoveAllFilters()
         }
     }
 
-    objOutgoingFilters.Clear();
-}
-
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipMessageTracker::SetListener(IN ISipMessageTrackerListener* piListener)
-{
-    this->piListener = piListener;
+    m_objOutgoingFilters.Clear();
 }

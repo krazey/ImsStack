@@ -1,66 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090725  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "SipPrivate.h"
 #include "SipTxnContextData.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipTxnContextData::SipTxnContextData() :
-        pTxnState(IMS_NULL)
-{
-}
-
-PUBLIC
 SipTxnContextData::~SipTxnContextData()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Destructor :: SipTxnContextData (%" PFLS_x ")",
-            pTxnState.IsNull() ? 0 : pTxnState.Get(), 0, 0);
+            m_pTxnState.IsNull() ? 0 : m_pTxnState.Get(), 0, 0);
 
-    pTxnState = IMS_NULL;
-}
-
-PUBLIC
-const SipMethod& SipTxnContextData::GetMethod() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objMethod;
-}
-
-PUBLIC
-SipTransactionState* SipTxnContextData::GetTxnState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pTxnState.Get();
-}
-
-PUBLIC
-void SipTxnContextData::SetMethod(IN CONST SipMethod& objMethod)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->objMethod = objMethod;
-}
-
-PUBLIC
-void SipTxnContextData::SetTxnState(IN SipTransactionState* pTxnState)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->pTxnState = pTxnState;
+    m_pTxnState = IMS_NULL;
 }

@@ -1,60 +1,60 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
-
-    Description
-    This file contains constants representing SIP response codes as defined in RFC 3261
-    and extensions.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceMutex.h"
-#include "SipPrivate.h"
+
 #include "private/SipConfigV.h"
+
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipTxnContextData.h"
-#include "SipStackTransaction.h"
+#include "SipPrivate.h"
+#include "SipStack.h"
 #include "SipStackState.h"
+#include "SipStackTransaction.h"
+#include "SipTxnContextData.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PRIVATE
 SipStackState::SipStackState() :
-        piLock(IMS_NULL),
-        objTxnAggregate(IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>>())
+        m_piLock(IMS_NULL),
+        m_objTxnAggregate(IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>>())
 {
-    piLock = MutexService::GetMutexService()->CreateMutex();
+    m_piLock = MutexService::GetMutexService()->CreateMutex();
 }
 
 PUBLIC
 SipStackState::~SipStackState()
 {
     CleanUp();
-    MutexService::GetMutexService()->DestroyMutex(piLock);
+    MutexService::GetMutexService()->DestroyMutex(m_piLock);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipStackState::CleanUp()
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
 
-    IMS_TRACE_D("StackState - Number Of Transaction : (%d)", objTxnAggregate.GetSize(), 0, 0);
+    IMS_TRACE_D("StackState - Number Of Transaction : (%d)", m_objTxnAggregate.GetSize(), 0, 0);
 
-    if (!objTxnAggregate.IsEmpty())
+    if (!m_objTxnAggregate.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objTxnAggregate.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objTxnAggregate.GetSize(); ++i)
         {
-            IMSList<SipStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(i);
+            IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
 
             for (IMS_UINT32 j = 0; j < objTransactions.GetSize(); ++j)
             {
@@ -77,31 +77,19 @@ void SipStackState::CleanUp()
             }
         }
 
-        objTxnAggregate.Clear();
+        m_objTxnAggregate.Clear();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipStackState::StartUp()
 {
-    //---------------------------------------------------------------------------------------------
-
     // For transaction layer handling
     // Initialize the retransmission initial timer values, timeout timer values,
     // and wait timer values.
     SipStack::Initialize();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipStackState::AbortTransaction(IN ::SipTxnKey* pKey, IN SipTransactionState* pTxnState)
 {
@@ -136,16 +124,11 @@ IMS_BOOL SipStackState::AbortTransaction(IN ::SipTxnKey* pKey, IN SipTransaction
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipStackState::FetchTransaction(
         IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
     SipStackTransaction* pTransaction = FindTransaction(pKey);
 
     if (pTransaction == IMS_NULL)
@@ -168,16 +151,11 @@ IMS_BOOL SipStackState::FetchTransaction(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipStackState::ReleaseTransaction(
         IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption, OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn)
 {
-    LockGuard objLock(piLock);
+    LockGuard objLock(m_piLock);
     SipStackTransaction* pTransaction = RemoveTransaction(pKey, nOption);
 
     if (pTransaction == IMS_NULL)
@@ -199,21 +177,13 @@ IMS_BOOL SipStackState::ReleaseTransaction(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipStackState::SetTransactionTimerValues(
-        IN IMS_SINT32 nSlotId, IN CONST SipProfile* pSIPProfile)
+void SipStackState::SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile)
 {
     const SipConfigV* pSipConfigV =
             DYNAMIC_CAST(const SipConfigV*, SipConfigProxy::GetSipConfigV(nSlotId));
 
-    //---------------------------------------------------------------------------------------------
-
-    if ((pSIPProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
+    if ((pProfile == IMS_NULL) && (pSipConfigV != IMS_NULL) &&
             !pSipConfigV->IsTimerValueConfiguredOnRuntime())
     {
         // Do not update the transaction timer values in runtime...
@@ -224,33 +194,21 @@ void SipStackState::SetTransactionTimerValues(
     // For transaction layer handling
     // Initialize the retransmission initial timer values, timeout timer values,
     // and wait timer values.
-    SipStack::SetTransactionTimerValues(nSlotId, pSIPProfile, pSipConfigV);
+    SipStack::SetTransactionTimerValues(nSlotId, pProfile, pSipConfigV);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL SipStackState* SipStackState::GetInstance()
 {
-    static SipStackState* pStackState = IMS_NULL;
+    static SipStackState* s_pStackState = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pStackState == IMS_NULL)
+    if (s_pStackState == IMS_NULL)
     {
-        pStackState = new SipStackState();
+        s_pStackState = new SipStackState();
     }
 
-    return pStackState;
+    return s_pStackState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
 {
@@ -262,11 +220,11 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
     }
 
     IMS_UINT32 nKey = AString::GetHashCode(SipStack::TxnKey_GetCallId(pKey));
-    IMS_SLONG nKeyIndex = objTxnAggregate.GetIndexOfKey(nKey);
+    IMS_SLONG nKeyIndex = m_objTxnAggregate.GetIndexOfKey(nKey);
 
     if (nKeyIndex >= 0)
     {
-        IMSList<SipStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+        IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
         if (!objTransactions.Append(pTransaction))
         {
@@ -285,7 +243,7 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
         return IMS_FALSE;
     }
 
-    if (!objTxnAggregate.Add(nKey, objTransactions))
+    if (!m_objTxnAggregate.Add(nKey, objTransactions))
     {
         delete pTransaction;
         return IMS_FALSE;
@@ -294,16 +252,11 @@ IMS_BOOL SipStackState::AddTransaction(IN ::SipTxnKey* pKey, IN SipTxn* pTxn)
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 SipStackTransaction* SipStackState::FindTransaction(IN ::SipTxnKey* pKey)
 {
     IMS_UINT32 nKey = AString::GetHashCode(SipStack::TxnKey_GetCallId(pKey));
-    IMS_SLONG nKeyIndex = objTxnAggregate.GetIndexOfKey(nKey);
+    IMS_SLONG nKeyIndex = m_objTxnAggregate.GetIndexOfKey(nKey);
 
     if (nKeyIndex < 0)
     {
@@ -311,7 +264,7 @@ SipStackTransaction* SipStackState::FindTransaction(IN ::SipTxnKey* pKey)
         return IMS_NULL;
     }
 
-    IMSList<SipStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+    IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
@@ -328,16 +281,11 @@ SipStackTransaction* SipStackState::FindTransaction(IN ::SipTxnKey* pKey)
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption)
 {
     IMS_UINT32 nKey = AString::GetHashCode(SipStack::TxnKey_GetCallId(pKey));
-    IMS_SLONG nKeyIndex = objTxnAggregate.GetIndexOfKey(nKey);
+    IMS_SLONG nKeyIndex = m_objTxnAggregate.GetIndexOfKey(nKey);
 
     if (nKeyIndex < 0)
     {
@@ -347,7 +295,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
         return IMS_NULL;
     }
 
-    IMSList<SipStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(nKeyIndex);
+    IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(nKeyIndex);
 
     for (IMS_UINT32 i = 0; i < objTransactions.GetSize(); ++i)
     {
@@ -366,7 +314,7 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
                 if (objTransactions.IsEmpty())
                 {
                     // No element
-                    objTxnAggregate.RemoveAt(nKeyIndex);
+                    m_objTxnAggregate.RemoveAt(nKeyIndex);
                 }
 
                 // DEBUG ...
@@ -382,21 +330,14 @@ SipStackTransaction* SipStackState::RemoveTransaction(IN ::SipTxnKey* pKey, IN I
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_UINT32 SipStackState::GetTransactionCount() const
 {
     IMS_UINT32 nCount = 0;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objTxnAggregate.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTxnAggregate.GetSize(); ++i)
     {
-        const IMSList<SipStackTransaction*>& objTransactions = objTxnAggregate.GetValueAt(i);
+        const IMSList<SipStackTransaction*>& objTransactions = m_objTxnAggregate.GetValueAt(i);
 
         nCount += objTransactions.GetSize();
     }

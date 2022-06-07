@@ -18,6 +18,7 @@
 
 #include "IPAddress.h"
 #include "ISipConnection.h"
+#include "Sip.h"
 
 class Credential;
 class ISipAckPackage;
@@ -262,8 +263,8 @@ public:
      * @note RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
      */
     virtual void SetTransportTuple(IN const IPAddress& objIpAddr, IN IMS_SINT32 nPortS,
-            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = 0xFFFF,
-            IN IMS_SINT32 nTransportExt = 0 /*ANY*/) = 0;
+            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
+            IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY) = 0;
 };
 
 #endif

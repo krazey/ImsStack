@@ -431,17 +431,6 @@ IMS_BOOL SipAddress::Equals(IN const SipAddress& objAddress) const
 }
 
 PUBLIC
-const AString& SipAddress::GetDisplayName() const
-{
-    if (m_bIsWildcard)
-    {
-        return AString::ConstNull();
-    }
-
-    return m_strDisplayName;
-}
-
-PUBLIC
 const ISipHeader* SipAddress::GetHeader(
         IN IMS_SINT32 nType, IN const AString& strName /* = AString::ConstNull()*/) const
 {
@@ -479,17 +468,6 @@ const ISipHeader* SipAddress::GetHeader(
 }
 
 PUBLIC
-const AString& SipAddress::GetHost() const
-{
-    if (m_bIsWildcard)
-    {
-        return AString::ConstNull();
-    }
-
-    return m_strHostInfo;
-}
-
-PUBLIC
 const SipParameter* SipAddress::GetParameter(IN const AString& strName) const
 {
     for (IMS_UINT32 i = 0; i < m_objParams.GetSize(); ++i)
@@ -524,17 +502,6 @@ IMS_SINT32 SipAddress::GetPort() const
     }
 
     return m_nPort;
-}
-
-PUBLIC
-const AString& SipAddress::GetScheme() const
-{
-    if (m_bIsWildcard)
-    {
-        return AString::ConstNull();
-    }
-
-    return m_strScheme;
 }
 
 PUBLIC
@@ -597,17 +564,6 @@ AString SipAddress::GetUri() const
 }
 
 PUBLIC
-const AString& SipAddress::GetUser() const
-{
-    if (m_bIsWildcard)
-    {
-        return AString::ConstNull();
-    }
-
-    return m_strUserInfo;
-}
-
-PUBLIC
 const SipAddress::UserInfoPart* SipAddress::GetUserInfoPart() const
 {
     if (m_strUserInfo.GetLength() == 0)
@@ -652,39 +608,6 @@ const AString& SipAddress::GetUserPart() const
     }
 
     return m_strHostInfo;
-}
-
-PUBLIC
-IMS_BOOL SipAddress::IsSchemeSip() const
-{
-    if (m_bIsWildcard)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_strScheme.EqualsIgnoreCase(Sip::STR_SIP);
-}
-
-PUBLIC
-IMS_BOOL SipAddress::IsSchemeSips() const
-{
-    if (m_bIsWildcard)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_strScheme.EqualsIgnoreCase(Sip::STR_SIPS);
-}
-
-PUBLIC
-IMS_BOOL SipAddress::IsSchemeTel() const
-{
-    if (m_bIsWildcard)
-    {
-        return IMS_FALSE;
-    }
-
-    return m_strScheme.EqualsIgnoreCase(Sip::STR_TEL);
 }
 
 PUBLIC
@@ -1221,6 +1144,7 @@ PUBLIC GLOBAL IMS_SINT32 SipAddress::GetTelUriFormat(IN const AString& strResour
 PRIVATE
 IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
 {
+    // clang-format off
     static struct
     {
         const IMS_CHAR* pszName;
@@ -1235,6 +1159,7 @@ IMS_BOOL SipAddress::CompareSipUris(IN const SipAddress& objAddress) const
   { PARAM_TRANSPORT, 9 }
   */
     };
+    // clang-format on
 
     static const IMS_UINT32 MAX_SPECIAL_PARAMETER =
             sizeof(SPECIAL_PARAMETER) / sizeof(SPECIAL_PARAMETER[0]);
@@ -1837,6 +1762,5 @@ PRIVATE GLOBAL IMS_BOOL SipAddress::IsToken(IN const IMS_CHAR ch)
 PRIVATE GLOBAL IMS_BOOL SipAddress::IsVisualSeparator(IN const IMS_CHAR ch)
 {
     // "-", ".", "(", ")"
-
     return (ch == '-') || (ch == '.') || (ch == '(') || (ch == ')');
 }

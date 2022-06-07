@@ -18,6 +18,7 @@
 
 #include "IPAddress.h"
 #include "ImsAccessNetworkInfoType.h"
+#include "SipMethod.h"
 
 class INetworkConnection;
 class ISipMessage;

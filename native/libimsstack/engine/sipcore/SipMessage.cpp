@@ -1,18 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
+
 #include "SipMessage.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
@@ -20,56 +24,52 @@ namespace sipcore
 {
 
 PUBLIC
-SipMessage::SipMessage(IN IMS_SINT32 nType_ /* = ISipMessage::TYPE_REQUEST */) :
-        nType(nType_),
-        strRequestURI(AString::ConstNull()),
-        bBodyPartParsed(IMS_FALSE),
-        pstMessage(IMS_NULL)
+SipMessage::SipMessage(IN IMS_SINT32 nType /*= ISipMessage::TYPE_REQUEST*/) :
+        m_nType(nType),
+        m_strRequestUri(AString::ConstNull()),
+        m_bBodyPartParsed(IMS_FALSE),
+        m_pSipMsg(IMS_NULL)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pstMessage = SipStack::CreateMessage(nType);
+    m_pSipMsg = SipStack::CreateMessage(m_nType);
 }
 
 PUBLIC
-SipMessage::SipMessage(IN ::SipMessage* pstMessage_) :
-        nType(TYPE_ANY),
-        strRequestURI(AString::ConstNull()),
-        bBodyPartParsed(IMS_FALSE),
-        pstMessage(pstMessage_)
+SipMessage::SipMessage(IN ::SipMessage* pSipMsg) :
+        m_nType(TYPE_ANY),
+        m_strRequestUri(AString::ConstNull()),
+        m_bBodyPartParsed(IMS_FALSE),
+        m_pSipMsg(pSipMsg)
 {
     Init(IMS_FALSE);
 }
 
 PUBLIC
-SipMessage::SipMessage(IN ::SipMessage* pstMessage_, IN IMS_BOOL bMessageClone) :
-        nType(TYPE_ANY),
-        strRequestURI(AString::ConstNull()),
-        bBodyPartParsed(IMS_FALSE),
-        pstMessage(pstMessage_)
+SipMessage::SipMessage(IN ::SipMessage* pSipMsg, IN IMS_BOOL bMessageClone) :
+        m_nType(TYPE_ANY),
+        m_strRequestUri(AString::ConstNull()),
+        m_bBodyPartParsed(IMS_FALSE),
+        m_pSipMsg(pSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
-
     Init(bMessageClone);
 }
 
 PUBLIC VIRTUAL SipMessage::~SipMessage()
 {
-    //---------------------------------------------------------------------------------------------
+    SipStack::FreeMessage(m_pSipMsg);
 
-    SipStack::FreeMessage(pstMessage);
-
-    if (!objBodyParts.IsEmpty())
+    if (!m_objBodyParts.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+            SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
             if (pBodyPart != IMS_NULL)
+            {
                 delete pBodyPart;
+            }
         }
 
-        objBodyParts.Clear();
+        m_objBodyParts.Clear();
     }
 
 #ifdef __IMS_SIP_DEBUG__
@@ -77,85 +77,66 @@ PUBLIC VIRTUAL SipMessage::~SipMessage()
 #endif
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SipMessage& SipMessage::operator=(IN CONST SipMessage& objRHS)
+SipMessage& SipMessage::operator=(IN const SipMessage& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        SipStack::FreeMessage(pstMessage);
+        SipStack::FreeMessage(m_pSipMsg);
 
-        nType = objRHS.nType;
-        objMethod = objRHS.objMethod;
-        strRequestURI = objRHS.strRequestURI;
-        objStatusCode = objRHS.objStatusCode;
-        objUnknownHeaders = objRHS.objUnknownHeaders;
-        bBodyPartParsed = objRHS.bBodyPartParsed;
+        m_nType = other.m_nType;
+        m_objMethod = other.m_objMethod;
+        m_strRequestUri = other.m_strRequestUri;
+        m_objStatusCode = other.m_objStatusCode;
+        m_objUnknownHeaders = other.m_objUnknownHeaders;
+        m_bBodyPartParsed = other.m_bBodyPartParsed;
 
-        if (!objBodyParts.IsEmpty())
+        if (!m_objBodyParts.IsEmpty())
         {
-            for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
             {
-                SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+                SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
                 if (pBodyPart != IMS_NULL)
+                {
                     delete pBodyPart;
+                }
             }
 
-            objBodyParts.Clear();
+            m_objBodyParts.Clear();
         }
 
-        for (IMS_UINT32 i = 0; i < objRHS.objBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < other.m_objBodyParts.GetSize(); ++i)
         {
-            const SipMessageBodyPart* pBodyPart = objRHS.objBodyParts.GetAt(i);
+            const SipMessageBodyPart* pBodyPart = other.m_objBodyParts.GetAt(i);
             SipMessageBodyPart* pNewBodyPart =
                     DYNAMIC_CAST(SipMessageBodyPart*, pBodyPart->Clone());
 
             if (pNewBodyPart != IMS_NULL)
             {
-                objBodyParts.Append(pNewBodyPart);
+                m_objBodyParts.Append(pNewBodyPart);
             }
         }
 
-        pstMessage = objRHS.pstMessage;
+        m_pSipMsg = other.m_pSipMsg;
 
-        if (pstMessage != IMS_NULL)
+        if (m_pSipMsg != IMS_NULL)
         {
-            SipStack::AddReference(pstMessage);
+            SipStack::AddReference(m_pSipMsg);
         }
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipMessage::Destroy()
 {
-    //---------------------------------------------------------------------------------------------
-
     delete this;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL ISipMessage* SipMessage::Clone() const
 {
-    SipMessage* pNewMessage = new SipMessage(nType);
-
-    //---------------------------------------------------------------------------------------------
+    SipMessage* pNewMessage = new SipMessage(m_nType);
 
     if (pNewMessage == IMS_NULL)
     {
@@ -163,15 +144,15 @@ PUBLIC VIRTUAL ISipMessage* SipMessage::Clone() const
         return IMS_NULL;
     }
 
-    pNewMessage->objMethod = objMethod;
-    pNewMessage->strRequestURI = strRequestURI;
-    pNewMessage->objStatusCode = objStatusCode;
-    pNewMessage->objUnknownHeaders = objUnknownHeaders;
-    pNewMessage->bBodyPartParsed = bBodyPartParsed;
+    pNewMessage->m_objMethod = m_objMethod;
+    pNewMessage->m_strRequestUri = m_strRequestUri;
+    pNewMessage->m_objStatusCode = m_objStatusCode;
+    pNewMessage->m_objUnknownHeaders = m_objUnknownHeaders;
+    pNewMessage->m_bBodyPartParsed = m_bBodyPartParsed;
 
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
-        const SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+        const SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
         SipMessageBodyPart* pNewBodyPart = DYNAMIC_CAST(SipMessageBodyPart*, pBodyPart->Clone());
 
         if (pNewBodyPart == IMS_NULL)
@@ -182,7 +163,7 @@ PUBLIC VIRTUAL ISipMessage* SipMessage::Clone() const
             return IMS_NULL;
         }
 
-        if (!pNewMessage->objBodyParts.Append(pNewBodyPart))
+        if (!pNewMessage->m_objBodyParts.Append(pNewBodyPart))
         {
             delete pNewBodyPart;
             delete pNewMessage;
@@ -192,12 +173,12 @@ PUBLIC VIRTUAL ISipMessage* SipMessage::Clone() const
         }
     }
 
-    if (pstMessage != IMS_NULL)
+    if (m_pSipMsg != IMS_NULL)
     {
-        SipStack::FreeMessage(pNewMessage->pstMessage);
-        pNewMessage->pstMessage = SipStack::CloneMessage(pstMessage);
+        SipStack::FreeMessage(pNewMessage->m_pSipMsg);
+        pNewMessage->m_pSipMsg = SipStack::CloneMessage(m_pSipMsg);
 
-        if (pNewMessage->pstMessage == IMS_NULL)
+        if (pNewMessage->m_pSipMsg == IMS_NULL)
         {
             delete pNewMessage;
 
@@ -210,270 +191,213 @@ PUBLIC VIRTUAL ISipMessage* SipMessage::Clone() const
     return pNewMessage;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipMessage::AddHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-        IN CONST AString& strName /* = AString::ConstNull() */)
+PUBLIC VIRTUAL IMS_RESULT SipMessage::AddHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+        IN const AString& strName /*= AString::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.AddHeader(strName, strValue);
+        return m_objUnknownHeaders.AddHeader(strName, strValue);
     }
     else
     {
-        SipHeaderBase* pstHeader = SipStack::DecodeHeader(nType, strName, strValue);
+        SipHeaderBase* pSipHdr = SipStack::DecodeHeader(nType, strName, strValue);
 
-        if (pstHeader == IMS_NULL)
+        if (pSipHdr == IMS_NULL)
         {
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        if (!SipStack::AppendHeader(pstHeader, pstMessage))
+        if (!SipStack::AppendHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
 
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         return IMS_SUCCESS;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_UINT32 SipMessage::GetCSeqNumber() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipStack::GetCSeqNumber(pstMessage);
+    return SipStack::GetCSeqNumber(m_pSipMsg);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL AString SipMessage::GetHeader(IN IMS_SINT32 nType, IN IMS_SINT32 nIndex /* = 0 */,
-        IN CONST AString& strName /* = AString::ConstNull() */) const
+PUBLIC VIRTUAL AString SipMessage::GetHeader(IN IMS_SINT32 nType, IN IMS_SINT32 nIndex /*= 0*/,
+        IN const AString& strName /*= AString::ConstNull()*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.GetHeader(strName, nIndex);
+        return m_objUnknownHeaders.GetHeader(strName, nIndex);
     }
     else
     {
-        if (SipStack::GetHeaderCount(pstMessage, nType) == 0)
+        if (SipStack::GetHeaderCount(m_pSipMsg, nType) == 0)
         {
             return AString::ConstNull();
         }
 
-        SipHeaderBase* pstHeader = SipStack::GetHeader(pstMessage, nType, nIndex);
+        SipHeaderBase* pSipHdr = SipStack::GetHeader(m_pSipMsg, nType, nIndex);
         AString strHeader;
 
-        SipStack::EncodeHeaderBody(pstHeader, IMS_TRUE, strHeader);
+        SipStack::EncodeHeaderBody(pSipHdr, IMS_TRUE, strHeader);
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         return strHeader;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 SipMessage::GetHeaderCount(
-        IN IMS_SINT32 nType, IN CONST AString& strName /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
-    if (pstMessage == IMS_NULL)
+    if (m_pSipMsg == IMS_NULL)
+    {
         return 0;
+    }
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.GetHeaderCount(strName);
+        return m_objUnknownHeaders.GetHeaderCount(strName);
     }
     else
     {
-        return SipStack::GetHeaderCount(pstMessage, nType);
+        return SipStack::GetHeaderCount(m_pSipMsg, nType);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMSList<AString> SipMessage::GetHeaders(
-        IN IMS_SINT32 nType, IN CONST AString& strName /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.GetHeaders(strName);
+        return m_objUnknownHeaders.GetHeaders(strName);
     }
     else
     {
         IMSList<AString> objHeaders;
-        IMS_SINT32 nHCount = SipStack::GetHeaderCount(pstMessage, nType);
+        IMS_SINT32 nHCount = SipStack::GetHeaderCount(m_pSipMsg, nType);
         AString strHeader;
 
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeaderBase* pstHeader = SipStack::GetHeader(pstMessage, nType, i);
+            SipHeaderBase* pSipHdr = SipStack::GetHeader(m_pSipMsg, nType, i);
 
-            if (SipStack::IsValidHeader(pstHeader))
+            if (SipStack::IsValidHeader(pSipHdr))
             {
-                SipStack::EncodeHeaderBody(pstHeader, IMS_TRUE, strHeader);
+                SipStack::EncodeHeaderBody(pSipHdr, IMS_TRUE, strHeader);
 
                 if (!objHeaders.Append(strHeader))
                 {
-                    SipStack::FreeHeaderEx(pstHeader);
-                    return IMSList<AString>();  // ???, throw exception
+                    SipStack::FreeHeaderEx(pSipHdr);
+                    return IMSList<AString>();
                 }
             }
 
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
         }
 
         return objHeaders;
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipMessage::PrependHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-        IN CONST AString& strName /* = AString::ConstNull() */)
+PUBLIC VIRTUAL IMS_RESULT SipMessage::PrependHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+        IN const AString& strName /*= AString::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.PrependHeader(strName, strValue);
+        return m_objUnknownHeaders.PrependHeader(strName, strValue);
     }
     else
     {
-        SipHeaderBase* pstHeader = SipStack::DecodeHeader(nType, strName, strValue);
+        SipHeaderBase* pSipHdr = SipStack::DecodeHeader(nType, strName, strValue);
 
-        if (pstHeader == IMS_NULL)
+        if (pSipHdr == IMS_NULL)
         {
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        if (!SipStack::PrependHeader(pstHeader, pstMessage))
+        if (!SipStack::PrependHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
 
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         return IMS_SUCCESS;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipMessage::RemoveHeader(
-        IN IMS_SINT32 nType, IN CONST AString& strName /* = AString::ConstNull() */)
+        IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    SipPrivate::SetLastError(SipError::NO_ERROR);
-
-    if (SipStack::IsUnknownHeader(nType, strName))
-        objUnknownHeaders.RemoveHeader(strName);
-    else
-        SipStack::RemoveHeader(nType, pstMessage);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipMessage::SetHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-        IN CONST AString& strName /* = AString::ConstNull() */)
-{
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.SetHeader(strName, strValue);
+        m_objUnknownHeaders.RemoveHeader(strName);
     }
     else
     {
-        SipHeaderBase* pstHeader = SipStack::DecodeHeader(nType, strName, strValue);
+        SipStack::RemoveHeader(nType, m_pSipMsg);
+    }
+}
 
-        if (pstHeader == IMS_NULL)
+PUBLIC VIRTUAL IMS_RESULT SipMessage::SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+        IN const AString& strName /*= AString::ConstNull()*/)
+{
+    SipPrivate::SetLastError(SipError::NO_ERROR);
+
+    if (SipStack::IsUnknownHeader(nType, strName))
+    {
+        return m_objUnknownHeaders.SetHeader(strName, strValue);
+    }
+    else
+    {
+        SipHeaderBase* pSipHdr = SipStack::DecodeHeader(nType, strName, strValue);
+
+        if (pSipHdr == IMS_NULL)
         {
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        if (!SipStack::SetHeader(pstHeader, pstMessage))
+        if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
 
             SipPrivate::SetLastError(SipError::GENERAL_ERROR);
             return IMS_FAILURE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         return IMS_SUCCESS;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateBodyPart()
 {
     SipMessageBodyPart* pBodyPart = new SipMessageBodyPart(IMS_FALSE);
 
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (pBodyPart == IMS_NULL)
@@ -482,7 +406,7 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateBodyPart()
         return IMS_NULL;
     }
 
-    if (!objBodyParts.Append(pBodyPart))
+    if (!m_objBodyParts.Append(pBodyPart))
     {
         delete pBodyPart;
 
@@ -493,17 +417,10 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateBodyPart()
     return pBodyPart;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateSdpBodyPart()
 {
     SipMessageBodyPart* pBodyPart = new SipMessageBodyPart(IMS_TRUE);
 
-    //---------------------------------------------------------------------------------------------
-
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (pBodyPart == IMS_NULL)
@@ -512,7 +429,7 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateSdpBodyPart()
         return IMS_NULL;
     }
 
-    if (!objBodyParts.Prepend(pBodyPart))
+    if (!m_objBodyParts.Prepend(pBodyPart))
     {
         delete pBodyPart;
 
@@ -523,50 +440,38 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::CreateSdpBodyPart()
     return pBodyPart;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMSList<ISipMessageBodyPart*> SipMessage::GetBodyParts() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objBodyParts.IsEmpty())
+    if (m_objBodyParts.IsEmpty())
     {
         return IMSList<ISipMessageBodyPart*>();
     }
 
-    IMSList<ISipMessageBodyPart*> objSIPBodyParts;
+    IMSList<ISipMessageBodyPart*> objSipBodyParts;
 
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
-        SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+        SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
         if (!pBodyPart->IsSdpBodyPart())
         {
-            objSIPBodyParts.Append(pBodyPart);
+            objSipBodyParts.Append(pBodyPart);
         }
     }
 
-    return objSIPBodyParts;
+    return objSipBodyParts;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::GetSdpBodyPart() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objBodyParts.IsEmpty())
-        return IMS_NULL;
-
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    if (m_objBodyParts.IsEmpty())
     {
-        SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+        return IMS_NULL;
+    }
+
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
+    {
+        SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
         if (pBodyPart->IsSdpBodyPart())
         {
@@ -577,76 +482,62 @@ PUBLIC VIRTUAL ISipMessageBodyPart* SipMessage::GetSdpBodyPart() const
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMSList<ISipMessageBodyPart*> SipMessage::GetSdpBodyParts() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objBodyParts.IsEmpty())
+    if (m_objBodyParts.IsEmpty())
     {
         return IMSList<ISipMessageBodyPart*>();
     }
 
-    IMSList<ISipMessageBodyPart*> objSIPBodyParts;
+    IMSList<ISipMessageBodyPart*> objSipBodyParts;
 
-    for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
     {
-        SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+        SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
         if (pBodyPart->IsSdpBodyPart())
         {
-            objSIPBodyParts.Append(pBodyPart);
+            objSipBodyParts.Append(pBodyPart);
         }
     }
 
-    return objSIPBodyParts;
+    return objSipBodyParts;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipMessage::CopyHeadersAndBodyParts(IN CONST ISipMessage* piSIPMsg)
+PUBLIC VIRTUAL IMS_RESULT SipMessage::CopyHeadersAndBodyParts(IN const ISipMessage* piSipMsg)
 {
-    const SipMessage* pSIPMsg = DYNAMIC_CAST(const SipMessage*, piSIPMsg);
+    const SipMessage* pMessage = DYNAMIC_CAST(const SipMessage*, piSipMsg);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSIPMsg == IMS_NULL)
+    if (pMessage == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FAILURE;
     }
 
     // Overwrites any known headers
-    if (!SipStack::OverwriteHeaders(pSIPMsg->pstMessage, pstMessage))
+    if (!SipStack::OverwriteHeaders(pMessage->m_pSipMsg, m_pSipMsg))
     {
         SipPrivate::SetLastError(SipError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
     // Overwrites any unknown headers
-    if (!objUnknownHeaders.OverwriteHeaders(pSIPMsg->objUnknownHeaders))
+    if (!m_objUnknownHeaders.OverwriteHeaders(pMessage->m_objUnknownHeaders))
     {
         SipPrivate::SetLastError(SipError::GENERAL_ERROR);
         return IMS_FAILURE;
     }
 
     // Copy any message body parts if present
-    if (pSIPMsg->objBodyParts.IsEmpty())
+    if (pMessage->m_objBodyParts.IsEmpty())
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
         return IMS_SUCCESS;
     }
 
-    for (IMS_UINT32 i = 0; i < pSIPMsg->objBodyParts.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < pMessage->m_objBodyParts.GetSize(); ++i)
     {
-        const SipMessageBodyPart* pBodyPart = pSIPMsg->objBodyParts.GetAt(i);
+        const SipMessageBodyPart* pBodyPart = pMessage->m_objBodyParts.GetAt(i);
         SipMessageBodyPart* pNewBodyPart = new SipMessageBodyPart(pBodyPart->IsSdpBodyPart());
 
         if (pNewBodyPart == IMS_NULL)
@@ -656,7 +547,7 @@ PUBLIC VIRTUAL IMS_RESULT SipMessage::CopyHeadersAndBodyParts(IN CONST ISipMessa
 
         (*pNewBodyPart) = (*pBodyPart);
 
-        if (!objBodyParts.Append(pNewBodyPart))
+        if (!m_objBodyParts.Append(pNewBodyPart))
         {
             delete pNewBodyPart;
 
@@ -669,97 +560,55 @@ PUBLIC VIRTUAL IMS_RESULT SipMessage::CopyHeadersAndBodyParts(IN CONST ISipMessa
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipMessage::IsHeaderPresent(
-        IN IMS_SINT32 nType, IN CONST AString& strName /* = AString::ConstNull() */) const
+        IN IMS_SINT32 nType, IN const AString& strName /*= AString::ConstNull()*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (SipStack::IsUnknownHeader(nType, strName))
     {
-        return objUnknownHeaders.IsHeaderPresent(strName);
+        return m_objUnknownHeaders.IsHeaderPresent(strName);
     }
 
-    return SipStack::IsHeaderPresent(pstMessage, nType);
+    return SipStack::IsHeaderPresent(m_pSipMsg, nType);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipMessage::IsMessageRpr() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipStack::IsMessageRpr(pstMessage);
+    return SipStack::IsMessageRpr(m_pSipMsg);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipMessage::IsOptionRequired(IN CONST AString& strOption) const
+PUBLIC VIRTUAL IMS_BOOL SipMessage::IsOptionRequired(IN const AString& strOption) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipStack::IsOptionRequired(pstMessage, strOption);
+    return SipStack::IsOptionRequired(m_pSipMsg, strOption);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipMessage::IsOptionSupported(IN CONST AString& strOption) const
+PUBLIC VIRTUAL IMS_BOOL SipMessage::IsOptionSupported(IN const AString& strOption) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipStack::IsOptionSupported(pstMessage, strOption);
+    return SipStack::IsOptionSupported(m_pSipMsg, strOption);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipMessage::RemoveBodyParts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!objBodyParts.IsEmpty())
+    if (!m_objBodyParts.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+            SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
             if (pBodyPart != IMS_NULL)
                 delete pBodyPart;
         }
 
-        objBodyParts.Clear();
+        m_objBodyParts.Clear();
 
-        SipStack::RemoveAllMessageBodies(pstMessage);
+        SipStack::RemoveAllMessageBodies(m_pSipMsg);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL ByteArray SipMessage::ToByteArray(IN IMS_SINT32 nOptions /* = OPT_ALL */) const
+PUBLIC VIRTUAL ByteArray SipMessage::ToByteArray(IN IMS_SINT32 nOptions /*= OPT_ALL*/) const
 {
     ByteArray objMessage;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (!SipStack::EncodePartialMessage(pstMessage, nOptions, objMessage))
+    if (!SipStack::EncodePartialMessage(m_pSipMsg, nOptions, objMessage))
     {
         return ByteArray::ConstNull();
     }
@@ -767,50 +616,38 @@ PUBLIC VIRTUAL ByteArray SipMessage::ToByteArray(IN IMS_SINT32 nOptions /* = OPT
     return objMessage;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipMessageBodyPart* SipMessage::GetBodyPart() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objBodyParts.IsEmpty())
+    if (m_objBodyParts.IsEmpty())
+    {
         return IMS_NULL;
+    }
 
-    return objBodyParts.GetAt(0);
+    return m_objBodyParts.GetAt(0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipMessage::SetRequestUri(IN CONST AString& strURI)
+IMS_RESULT SipMessage::SetRequestUri(IN const AString& strUri)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (strURI.IsNULL() || strURI.IsEmpty())
+    if (strUri.IsNULL() || strUri.IsEmpty())
     {
         // Remove Request-URI if set previously
-        strRequestURI = AString::ConstNull();
+        m_strRequestUri = AString::ConstNull();
     }
     else
     {
-        SipAddrSpec* pstAddrSpec = SipStack::DecodeAddrSpec(strURI);
+        SipAddrSpec* pAddrSpec = SipStack::DecodeAddrSpec(strUri);
 
-        if (pstAddrSpec == IMS_NULL)
+        if (pAddrSpec == IMS_NULL)
         {
             SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
             return IMS_FAILURE;
         }
 
-        SipStack::EncodeAddrSpec(pstAddrSpec, IMS_TRUE, strRequestURI);
+        SipStack::EncodeAddrSpec(pAddrSpec, IMS_TRUE, m_strRequestUri);
 
-        SipStack::FreeAddrSpec(pstAddrSpec);
+        SipStack::FreeAddrSpec(pAddrSpec);
     }
 
     SipPrivate::SetLastError(SipError::NO_ERROR);
@@ -818,70 +655,58 @@ IMS_RESULT SipMessage::SetRequestUri(IN CONST AString& strURI)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipMessage::UpdateRequestUri()
 {
-    SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pstMessage);
+    SipAddrSpec* pAddrSpec = SipStack::GetRequestUri(m_pSipMsg);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pstAddrSpec == IMS_NULL)
+    if (pAddrSpec == IMS_NULL)
     {
         // Remove Request-URI if set previously
-        strRequestURI = AString::ConstNull();
+        m_strRequestUri = AString::ConstNull();
     }
     else
     {
-        SipStack::EncodeAddrSpec(pstAddrSpec, IMS_TRUE, strRequestURI);
-        SipStack::FreeAddrSpec(pstAddrSpec);
+        SipStack::EncodeAddrSpec(pAddrSpec, IMS_TRUE, m_strRequestUri);
+        SipStack::FreeAddrSpec(pAddrSpec);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessage::CreateBodyParts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bBodyPartParsed)
-        return IMS_TRUE;
-
-    if (objBodyParts.IsEmpty())
+    if (m_bBodyPartParsed)
     {
-        bBodyPartParsed = IMS_TRUE;
+        return IMS_TRUE;
+    }
+
+    if (m_objBodyParts.IsEmpty())
+    {
+        m_bBodyPartParsed = IMS_TRUE;
         return IMS_TRUE;
     }
 
     // If message does not include a MIME body, do not parse the message body
-    if (!SipStack::HasMimeMessageBody(pstMessage))
+    if (!SipStack::HasMimeMessageBody(m_pSipMsg))
     {
-        bBodyPartParsed = IMS_TRUE;
+        m_bBodyPartParsed = IMS_TRUE;
 
-        if (SipStack::IsMessageBodyCompressed(pstMessage))
+        if (SipStack::IsMessageBodyCompressed(m_pSipMsg))
         {
-            if (!SipStack::UncompressMessageBody(pstMessage))
+            if (!SipStack::UncompressMessageBody(m_pSipMsg))
             {
                 IMS_TRACE_E(0, "Uncompressing SIP message body failed", 0, 0, 0);
                 return IMS_FALSE;
             }
 
             // Clear the previous message body parts ...
-            while (!objBodyParts.IsEmpty())
+            while (!m_objBodyParts.IsEmpty())
             {
-                SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(0);
+                SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);
 
                 delete pBodyPart;
 
-                objBodyParts.RemoveAt(0);
+                m_objBodyParts.RemoveAt(0);
             }
 
             if (!ExtractBodyParts())
@@ -893,20 +718,20 @@ IMS_BOOL SipMessage::CreateBodyParts()
         return IMS_TRUE;
     }
 
-    if (!SipStack::DecodeMessageBody(pstMessage))
+    if (!SipStack::DecodeMessageBody(m_pSipMsg))
     {
         IMS_TRACE_E(0, "Parsing SIP message body failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
     // Clear the previous message body parts ...
-    while (!objBodyParts.IsEmpty())
+    while (!m_objBodyParts.IsEmpty())
     {
-        SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(0);
+        SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(0);
 
         delete pBodyPart;
 
-        objBodyParts.RemoveAt(0);
+        m_objBodyParts.RemoveAt(0);
     }
 
     if (!ExtractBodyParts())
@@ -914,31 +739,26 @@ IMS_BOOL SipMessage::CreateBodyParts()
         return IMS_FALSE;
     }
 
-    bBodyPartParsed = IMS_TRUE;
+    m_bBodyPartParsed = IMS_TRUE;
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessage::FormMessage()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pstMessage == IMS_NULL)
+    if (m_pSipMsg == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
     /*
      * Set properties
      *    In case of CSeq header, it will set by the SIP transaction with a correct value.
      */
-    if (nType == TYPE_REQUEST)
+    if (m_nType == TYPE_REQUEST)
     {
-        if (!SipStack::SetRequestLine(objMethod.ToString(), strRequestURI, pstMessage))
+        if (!SipStack::SetRequestLine(m_objMethod.ToString(), m_strRequestUri, m_pSipMsg))
         {
             return IMS_FALSE;
         }
@@ -946,38 +766,40 @@ IMS_BOOL SipMessage::FormMessage()
     else
     {
         if (!SipStack::SetStatusLine(
-                    objStatusCode.ToInt(), objStatusCode.GetReasonPhrase(), pstMessage))
+                    m_objStatusCode.ToInt(), m_objStatusCode.GetReasonPhrase(), m_pSipMsg))
         {
             return IMS_FALSE;
         }
     }
 
     // Set unknown headers
-    if (objUnknownHeaders.GetCount() > 0)
+    if (m_objUnknownHeaders.GetCount() > 0)
     {
         AString strName;
         AString strValue;
         IMS_BOOL bCompactForm =
                 ((SipPrivate::GetEncodingOptions() & SipPrivate::OPT_E_SHORTFORM) != 0);
 
-        for (IMS_SINT32 i = objUnknownHeaders.GetCount() - 1; i >= 0; --i)
+        for (IMS_SINT32 i = m_objUnknownHeaders.GetCount() - 1; i >= 0; --i)
         {
-            strName = objUnknownHeaders.GetHeaderName(i, bCompactForm);
-            strValue = objUnknownHeaders.GetHeaderBodys(i);
+            strName = m_objUnknownHeaders.GetHeaderName(i, bCompactForm);
+            strValue = m_objUnknownHeaders.GetHeaderBodys(i);
 
-            (void)SipStack::PrependUnknownHeader(strName, strValue, pstMessage);
+            (void)SipStack::PrependUnknownHeader(strName, strValue, m_pSipMsg);
         }
     }
 
     // Set message body parts
-    if (!objBodyParts.IsEmpty())
+    if (!m_objBodyParts.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
         {
-            SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+            SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
             if (pBodyPart == IMS_NULL)
+            {
                 continue;
+            }
 
             if (!pBodyPart->FormMessageBody())
             {
@@ -985,7 +807,7 @@ IMS_BOOL SipMessage::FormMessage()
                 continue;  // throw exception
             }
 
-            if (!SipStack::AppendMessageBody(pBodyPart->GetMessageBody(), pstMessage))
+            if (!SipStack::AppendMessageBody(pBodyPart->GetMessageBody(), m_pSipMsg))
             {
                 IMS_TRACE_E(0, "Appending a message body failed", 0, 0, 0);
                 continue;  // throw exception
@@ -994,7 +816,7 @@ IMS_BOOL SipMessage::FormMessage()
 
         // Do more things related to the message body handling
         //  : Content-Type / Content-Length and so on .
-        if (!SipStack::CorrectMessageBody(pstMessage))
+        if (!SipStack::CorrectMessageBody(m_pSipMsg))
         {
             IMS_TRACE_E(0, "Correcting SIP message body failed", 0, 0, 0);
             return IMS_FALSE;
@@ -1004,53 +826,48 @@ IMS_BOOL SipMessage::FormMessage()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessage::FormMessageOnChallenge()
 {
-    //---------------------------------------------------------------------------------------------
-
     // FIXME: need to improve the logic
 
-    while (SipStack::GetHeaderCount(pstMessage, ISipHeader::UNKNOWN) > 0)
+    while (SipStack::GetHeaderCount(m_pSipMsg, ISipHeader::UNKNOWN) > 0)
     {
-        SipStack::RemoveHeader(ISipHeader::UNKNOWN, pstMessage);
+        SipStack::RemoveHeader(ISipHeader::UNKNOWN, m_pSipMsg);
     }
 
     // Set unknown headers
-    if (objUnknownHeaders.GetCount() > 0)
+    if (m_objUnknownHeaders.GetCount() > 0)
     {
         AString strName;
         AString strValue;
         IMS_BOOL bCompactForm =
                 ((SipPrivate::GetEncodingOptions() & SipPrivate::OPT_E_SHORTFORM) != 0);
 
-        for (IMS_SINT32 i = 0; i < objUnknownHeaders.GetCount(); ++i)
+        for (IMS_SINT32 i = 0; i < m_objUnknownHeaders.GetCount(); ++i)
         {
-            strName = objUnknownHeaders.GetHeaderName(i, bCompactForm);
-            strValue = objUnknownHeaders.GetHeaderBodys(i);
+            strName = m_objUnknownHeaders.GetHeaderName(i, bCompactForm);
+            strValue = m_objUnknownHeaders.GetHeaderBodys(i);
 
-            (void)SipStack::PrependUnknownHeader(strName, strValue, pstMessage);
+            (void)SipStack::PrependUnknownHeader(strName, strValue, m_pSipMsg);
         }
     }
 
     // Set message body parts
-    if (!objBodyParts.IsEmpty())
+    if (!m_objBodyParts.IsEmpty())
     {
         // FIXME: need to improve the logic
         // Message body is formed in the re-submitted request
-        if (SipStack::GetMessageBodyCount(pstMessage) == 0)
+        if (SipStack::GetMessageBodyCount(m_pSipMsg) == 0)
         {
-            for (IMS_UINT32 i = 0; i < objBodyParts.GetSize(); ++i)
+            for (IMS_UINT32 i = 0; i < m_objBodyParts.GetSize(); ++i)
             {
-                SipMessageBodyPart* pBodyPart = objBodyParts.GetAt(i);
+                SipMessageBodyPart* pBodyPart = m_objBodyParts.GetAt(i);
 
                 if (pBodyPart == IMS_NULL)
+                {
                     continue;
+                }
 
                 if (!pBodyPart->FormMessageBody())
                 {
@@ -1058,7 +875,7 @@ IMS_BOOL SipMessage::FormMessageOnChallenge()
                     continue;  // throw exception
                 }
 
-                if (!SipStack::AppendMessageBody(pBodyPart->GetMessageBody(), pstMessage))
+                if (!SipStack::AppendMessageBody(pBodyPart->GetMessageBody(), m_pSipMsg))
                 {
                     IMS_TRACE_E(0, "Appending a message body failed", 0, 0, 0);
                     continue;  // throw exception
@@ -1068,7 +885,7 @@ IMS_BOOL SipMessage::FormMessageOnChallenge()
 
         // Do more things related to the message body handling
         //  : Content-Type / Content-Length and so on .
-        if (!SipStack::CorrectMessageBody(pstMessage))
+        if (!SipStack::CorrectMessageBody(m_pSipMsg))
         {
             IMS_TRACE_E(0, "Correcting SIP message body failed", 0, 0, 0);
             return IMS_FALSE;
@@ -1078,20 +895,15 @@ IMS_BOOL SipMessage::FormMessageOnChallenge()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessage::FormMessageOnRetransmission()
 {
     // Set message body parts
-    if (!objBodyParts.IsEmpty())
+    if (!m_objBodyParts.IsEmpty())
     {
         // Do more things related to the message body handling
         //  : Content-Type / Content-Length and so on .
-        if (!SipStack::CorrectMessageBody(pstMessage))
+        if (!SipStack::CorrectMessageBody(m_pSipMsg))
         {
             IMS_TRACE_E(0, "Correcting SIP message body failed", 0, 0, 0);
             return IMS_FALSE;
@@ -1101,73 +913,59 @@ IMS_BOOL SipMessage::FormMessageOnRetransmission()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL SipMessage* SipMessage::CreateMessage(IN CONST ByteArray& objMessage)
+PUBLIC GLOBAL SipMessage* SipMessage::CreateMessage(IN const ByteArray& objMessage)
 {
-    ::SipMessage* pstMessage = IMS_NULL;
-
-    //---------------------------------------------------------------------------------------------
+    ::SipMessage* pSipMsg = IMS_NULL;
 
     if (!SipStack::DecodeMessage(objMessage.GetData(), objMessage.GetLength(),
-                SipPrivate::OPTIONS_D_PARTIAL, pstMessage))
+                SipPrivate::OPTIONS_D_PARTIAL, pSipMsg))
     {
         return IMS_NULL;
     }
 
-    SipMessage* pSIPMsg = new SipMessage(pstMessage);
+    SipMessage* pMessage = new SipMessage(pSipMsg);
 
-    if (pSIPMsg == IMS_NULL)
+    if (pMessage == IMS_NULL)
     {
-        SipStack::FreeMessage(pstMessage);
+        SipStack::FreeMessage(pSipMsg);
         return IMS_NULL;
     }
 
-    SipStack::FreeMessage(pstMessage);
+    SipStack::FreeMessage(pSipMsg);
 
-    if (!pSIPMsg->CreateBodyParts())
+    if (!pMessage->CreateBodyParts())
     {
-        delete pSIPMsg;
+        delete pMessage;
         return IMS_NULL;
     }
 
-    return pSIPMsg;
+    return pMessage;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipMessage::Init(IN IMS_BOOL bMessageClone)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pstMessage != IMS_NULL)
+    if (m_pSipMsg != IMS_NULL)
     {
         if (bMessageClone)
         {
-            pstMessage = SipStack::CloneMessage(pstMessage);
+            m_pSipMsg = SipStack::CloneMessage(m_pSipMsg);
         }
         else
         {
-            SipStack::AddReference(pstMessage);
+            SipStack::AddReference(m_pSipMsg);
         }
     }
 
-    if (pstMessage != IMS_NULL)
+    if (m_pSipMsg != IMS_NULL)
     {
-        if (SipStack::IsRequestMessage(pstMessage))
+        if (SipStack::IsRequestMessage(m_pSipMsg))
         {
-            nType = TYPE_REQUEST;
+            m_nType = TYPE_REQUEST;
         }
         else
         {
-            nType = TYPE_RESPONSE;
+            m_nType = TYPE_RESPONSE;
         }
 
         ExtractProperties();
@@ -1176,50 +974,51 @@ void SipMessage::Init(IN IMS_BOOL bMessageClone)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipMessage::ExtractBodyParts()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pstMessage == IMS_NULL)
+    if (m_pSipMsg == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    IMS_SINT32 nBodyCount = SipStack::GetMessageBodyCount(pstMessage);
+    IMS_SINT32 nBodyCount = SipStack::GetMessageBodyCount(m_pSipMsg);
 
     if (nBodyCount == 0)
+    {
         return IMS_TRUE;
+    }
 
     SipMessageBodyPart* pBodyPart = IMS_NULL;
 
     if (nBodyCount == 1)
     {
-        SipMsgBody* pstMsgBody = SipStack::GetMessageBody(pstMessage, 0);
+        SipMsgBody* pMsgBody = SipStack::GetMessageBody(m_pSipMsg, 0);
 
-        if (SipStack::HasSdpMessageBody(pstMessage))
-            pBodyPart = new SipMessageBodyPart(pstMsgBody, IMS_TRUE);
+        if (SipStack::HasSdpMessageBody(m_pSipMsg))
+        {
+            pBodyPart = new SipMessageBodyPart(pMsgBody, IMS_TRUE);
+        }
         else
-            pBodyPart = new SipMessageBodyPart(pstMsgBody, IMS_FALSE);
+        {
+            pBodyPart = new SipMessageBodyPart(pMsgBody, IMS_FALSE);
+        }
 
         if (pBodyPart == IMS_NULL)
         {
-            SipStack::FreeMessageBody(pstMsgBody);
+            SipStack::FreeMessageBody(pMsgBody);
             return IMS_FALSE;
         }
 
-        SipStack::FreeMessageBody(pstMsgBody);
+        SipStack::FreeMessageBody(pMsgBody);
 
         // Set "Content-" headers
-        SipHeaderBase* pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::CONTENT_TYPE);
-        pBodyPart->SetHeader(pstHeader, ISipMessageBodyPart::CONTENT_TYPE);
+        SipHeaderBase* pSipHdr = SipStack::GetHeader(m_pSipMsg, ISipHeader::CONTENT_TYPE);
+        pBodyPart->SetHeader(pSipHdr, ISipMessageBodyPart::CONTENT_TYPE);
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
 
-        if (!objBodyParts.Append(pBodyPart))
+        if (!m_objBodyParts.Append(pBodyPart))
         {
             delete pBodyPart;
             return IMS_FALSE;
@@ -1229,27 +1028,31 @@ IMS_BOOL SipMessage::ExtractBodyParts()
     {
         for (IMS_SINT32 i = 0; i < nBodyCount; ++i)
         {
-            SipMsgBody* pstMsgBody = SipStack::GetMessageBody(pstMessage, i);
+            SipMsgBody* pMsgBody = SipStack::GetMessageBody(m_pSipMsg, i);
 
-            if (pstMsgBody == IMS_NULL)
+            if (pMsgBody == IMS_NULL)
             {
                 return IMS_FALSE;
             }
 
-            if (SipStack::IsMessageBodySdp(pstMsgBody))
-                pBodyPart = new SipMessageBodyPart(pstMsgBody, IMS_TRUE);
+            if (SipStack::IsMessageBodySdp(pMsgBody))
+            {
+                pBodyPart = new SipMessageBodyPart(pMsgBody, IMS_TRUE);
+            }
             else
-                pBodyPart = new SipMessageBodyPart(pstMsgBody, IMS_FALSE);
+            {
+                pBodyPart = new SipMessageBodyPart(pMsgBody, IMS_FALSE);
+            }
 
             if (pBodyPart == IMS_NULL)
             {
-                SipStack::FreeMessageBody(pstMsgBody);
+                SipStack::FreeMessageBody(pMsgBody);
                 return IMS_FALSE;
             }
 
-            SipStack::FreeMessageBody(pstMsgBody);
+            SipStack::FreeMessageBody(pMsgBody);
 
-            if (!objBodyParts.Append(pBodyPart))
+            if (!m_objBodyParts.Append(pBodyPart))
             {
                 delete pBodyPart;
                 return IMS_FALSE;
@@ -1260,55 +1063,43 @@ IMS_BOOL SipMessage::ExtractBodyParts()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipMessage::ExtractProperties()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((pstMessage == IMS_NULL) || (nType == TYPE_ANY))
-        return IMS_FALSE;
-
-    objMethod = SipStack::GetMethod(pstMessage);
-
-    if (nType == TYPE_REQUEST)
+    if ((m_pSipMsg == IMS_NULL) || (m_nType == TYPE_ANY))
     {
-        SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pstMessage);
+        return IMS_FALSE;
+    }
 
-        SipStack::EncodeAddrSpec(pstAddrSpec, IMS_TRUE, strRequestURI);
-        SipStack::FreeAddrSpec(pstAddrSpec);
+    m_objMethod = SipStack::GetMethod(m_pSipMsg);
+
+    if (m_nType == TYPE_REQUEST)
+    {
+        SipAddrSpec* pAddrSpec = SipStack::GetRequestUri(m_pSipMsg);
+
+        SipStack::EncodeAddrSpec(pAddrSpec, IMS_TRUE, m_strRequestUri);
+        SipStack::FreeAddrSpec(pAddrSpec);
     }
     else
     {
-        objStatusCode = SipStack::GetStatusCodeEx(pstMessage);
+        m_objStatusCode = SipStack::GetStatusCodeEx(m_pSipMsg);
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipMessage::ExtractUnknownHeaders()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pstMessage == IMS_NULL)
+    if (m_pSipMsg == IMS_NULL)
     {
         return IMS_FALSE;
     }
     else
     {
-        objUnknownHeaders.Clear();
+        m_objUnknownHeaders.Clear();
 
-        IMS_SINT32 nHCount = SipStack::GetHeaderCount(pstMessage, ISipHeader::UNKNOWN);
+        IMS_SINT32 nHCount = SipStack::GetHeaderCount(m_pSipMsg, ISipHeader::UNKNOWN);
 
         if (nHCount == 0)
         {
@@ -1317,12 +1108,12 @@ IMS_BOOL SipMessage::ExtractUnknownHeaders()
 
         for (IMS_SINT32 i = 0; i < nHCount; ++i)
         {
-            SipHeaderBase* pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::UNKNOWN, i);
+            SipHeaderBase* pSipHdr = SipStack::GetHeader(m_pSipMsg, ISipHeader::UNKNOWN, i);
 
-            objUnknownHeaders.AddHeader(SipStack::GetUnknownHeaderName(pstHeader),
-                    SipStack::GetUnknownHeaderBody(pstHeader));
+            m_objUnknownHeaders.AddHeader(SipStack::GetUnknownHeaderName(pSipHdr),
+                    SipStack::GetUnknownHeaderBody(pSipHdr));
 
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
         }
 
         return IMS_TRUE;

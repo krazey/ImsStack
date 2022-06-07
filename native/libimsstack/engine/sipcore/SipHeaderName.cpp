@@ -98,12 +98,10 @@ PUBLIC GLOBAL const IMS_CHAR SipHeaderName::FEATURE_CAPS[] = "Feature-Caps";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::FLOW_TIMER[] = "Flow-Timer";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::GEOLOCATION[] = "Geolocation";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::GEOLOCATION_ROUTING[] = "Geolocation-Routing";
-PUBLIC GLOBAL
-        // Compact Form : y
-        const IMS_CHAR SipHeaderName::IDENTITY[] = "Identity";
-PUBLIC GLOBAL
-        // Compact Form : n
-        const IMS_CHAR SipHeaderName::IDENTITY_INFO[] = "Identity-Info";
+// Compact Form : y
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IDENTITY[] = "Identity";
+// Compact Form : n
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IDENTITY_INFO[] = "Identity-Info";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::IN_REPLY_TO[] = "In-Reply-To";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::INFO_PACKAGE[] = "Info-Package";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::ORGANIZATION[] = "Organization";
@@ -127,9 +125,8 @@ PUBLIC GLOBAL const IMS_CHAR SipHeaderName::REPLY_TO[] = "Reply-To";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::RESPONSE_KEY[] = "Response-Key";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::SERVER[] = "Server";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::SESSION_ID[] = "Session-ID";
-PUBLIC GLOBAL
-        // Compact Form : s
-        const IMS_CHAR SipHeaderName::SUBJECT[] = "Subject";
+// Compact Form : s
+PUBLIC GLOBAL const IMS_CHAR SipHeaderName::SUBJECT[] = "Subject";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::SUPPRESS_IF_MATCH[] = "Suppress-If-Match";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::TARGET_DIALOG[] = "Target-Dialog";
 PUBLIC GLOBAL const IMS_CHAR SipHeaderName::TRIGGER_CONSENT[] = "Trigger-Consent";

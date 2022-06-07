@@ -1,21 +1,24 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_CONNECTION_NOTIFIER_IMPL_H_
+#define SIP_CONNECTION_NOTIFIER_IMPL_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_CONNECTION_NOTIFIER_IMPL_H_
-#define _SIP_CONNECTION_NOTIFIER_IMPL_H_
-
-#include "ISipConnectionNotifier.h"
-#include "IOnSipServerConnectionListener.h"
 #include "IOnSipConnectionNotifierErrorListener.h"
+#include "IOnSipServerConnectionListener.h"
+#include "ISipConnectionNotifier.h"
 
 class ISipServerConnectionListener;
 class SipConnectionNotifier;
@@ -26,59 +29,57 @@ class SipConnectionNotifierImpl :
         public IOnSipConnectionNotifierErrorListener
 {
 public:
-    explicit SipConnectionNotifierImpl(IN SipConnectionNotifier* pSCN_);
+    explicit SipConnectionNotifierImpl(IN SipConnectionNotifier* pScn);
     virtual ~SipConnectionNotifierImpl();
 
-private:
-    SipConnectionNotifierImpl(IN CONST SipConnectionNotifierImpl& objRHS);
-    SipConnectionNotifierImpl& operator=(IN CONST SipConnectionNotifierImpl& objRHS);
+    SipConnectionNotifierImpl(IN const SipConnectionNotifierImpl&) = delete;
+    SipConnectionNotifierImpl& operator=(IN const SipConnectionNotifierImpl&) = delete;
 
 public:
-    SipConnectionNotifier* GetConnectionNotifier() const;
+    inline SipConnectionNotifier* GetConnectionNotifier() const { return m_pScn; };
 
 private:
     // IConnection interface
-    virtual void Close();
+    void Close() override;
 
     // ISipConnectionNotifier interface
-    virtual ISipServerConnection* AcceptAndOpen();
-    virtual const IPAddress& GetLocalAddress() const;
-    virtual IMS_SINT32 GetLocalPort() const;
-    virtual void SetListener(IN ISipServerConnectionListener* piListener);
-    //// IMS extensions
-    virtual ISipServerConnection* AcceptAndOpen(OUT ISipDialog*& piOrigDialog);
-    virtual AString GetContactAddress() const;
+    ISipServerConnection* AcceptAndOpen() override;
+    const IPAddress& GetLocalAddress() const override;
+    IMS_SINT32 GetLocalPort() const override;
+    inline void SetListener(IN ISipServerConnectionListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
+    ISipServerConnection* AcceptAndOpen(OUT ISipDialog*& piOrigDialog) override;
+    AString GetContactAddress() const override;
+    SipProfile* GetSipProfile() const override;
+    IMS_SINT32 GetSlotId() const override;
+    IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const override;
+    IMS_RESULT ReserveTransportResource(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl) override;
+    IMS_RESULT RestoreTransportResource(
+            IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort) override;
+    void SetFromAndContact(IN const AString& strFrom, IN const AString& strDisplayName,
+            IN const AString& strUserInfo) override;
     // MULTI_REG_SIP_PROFILE
-    virtual SipProfile* GetSipProfile() const;
-    virtual IMS_SINT32 GetSlotId() const;
-    virtual IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const;
-    virtual IMS_RESULT ReserveTransportResource(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
-            IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl);
-    virtual IMS_RESULT RestoreTransportResource(
-            IN IMS_SINT32 nType, IN CONST IPAddress& objPeerIP, IN IMS_SINT32 nPeerPort);
-    virtual void SetFilter(IN CONST AString& strFilter);
-    virtual void SetFromAndContact(IN CONST AString& strFrom, IN CONST AString& strDisplayName,
-            IN CONST AString& strUserInfo);
-    // MULTI_REG_SIP_PROFILE
-    virtual void SetSipProfile(IN SipProfile* pProfile);
-    virtual void UpdatePortFlowControl(IN IMS_SINT32 nPort);
-    virtual void UpdatePortUc(IN IMS_SINT32 nPort);
-    virtual void AddErrorListener(IN ISipConnectionNotifierErrorListener* piListener);
-    virtual void RemoveErrorListener(IN ISipConnectionNotifierErrorListener* piListener);
+    void SetSipProfile(IN SipProfile* pProfile) override;
+    void UpdatePortFlowControl(IN IMS_SINT32 nPort) override;
+    void UpdatePortUc(IN IMS_SINT32 nPort) override;
+    void AddErrorListener(IN ISipConnectionNotifierErrorListener* piListener) override;
+    void RemoveErrorListener(IN ISipConnectionNotifierErrorListener* piListener) override;
 
     // IOnSipServerConnectionListener interface
-    virtual void OnServerConnection_NotifyRequest(IN SipConnectionNotifier* pSCN);
-    virtual void OnServerConnection_NotifyForkedRequest(IN SipConnectionNotifier* pSCN);
+    void OnServerConnection_NotifyRequest(IN SipConnectionNotifier* pScn) override;
+    void OnServerConnection_NotifyForkedRequest(IN SipConnectionNotifier* pScn) override;
 
     // IOnSipConnectionNotifierErrorListener interface
-    virtual void OnConnectionNotifierError_NotifyError(
-            IN SipConnectionNotifier* pSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void OnConnectionNotifierError_NotifyError(IN SipConnectionNotifier* pScn, IN IMS_SINT32 nCode,
+            IN const AString& strMessage) override;
 
 private:
-    ISipServerConnectionListener* piListener;
-    IMSList<ISipConnectionNotifierErrorListener*> objErrorListeners;
-
-    SipConnectionNotifier* pSCN;
+    SipConnectionNotifier* m_pScn;
+    ISipServerConnectionListener* m_piListener;
+    IMSList<ISipConnectionNotifierErrorListener*> m_objErrorListeners;
 };
 
-#endif  // _SIP_CONNECTION_NOTIFIER_IMPL_H_
+#endif

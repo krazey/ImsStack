@@ -1,16 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20140321  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "SipTxnKey.h"
 
 namespace sipcore
@@ -18,186 +22,70 @@ namespace sipcore
 
 PUBLIC
 SipTxnKey::SipTxnKey() :
-        objMethod(SipMethod::INVALID),
-        nStatusCode(0),
-        strViaBranch(AString::ConstNull()),
-        nCSeq(0),
-        nExtraInt(0),
-        strExtraString(AString::ConstNull())
+        m_objMethod(SipMethod::INVALID),
+        m_nStatusCode(0),
+        m_strViaBranch(AString::ConstNull()),
+        m_nCSeq(0),
+        m_nExtraInt(0),
+        m_strExtraString(AString::ConstNull())
 {
 }
 
 PUBLIC
-SipTxnKey::SipTxnKey(IN CONST SipMethod& objMethod_, IN IMS_SINT32 nStatusCode_,
-        IN CONST AString& strViaBranch_, IN IMS_UINT32 nCSeq_) :
-        objMethod(objMethod_),
-        nStatusCode(nStatusCode_),
-        strViaBranch(strViaBranch_),
-        nCSeq(nCSeq_),
-        nExtraInt(0),
-        strExtraString(AString::ConstNull())
+SipTxnKey::SipTxnKey(IN const SipMethod& objMethod, IN IMS_SINT32 nStatusCode,
+        IN const AString& strViaBranch, IN IMS_UINT32 nCSeq) :
+        m_objMethod(objMethod),
+        m_nStatusCode(nStatusCode),
+        m_strViaBranch(strViaBranch),
+        m_nCSeq(nCSeq),
+        m_nExtraInt(0),
+        m_strExtraString(AString::ConstNull())
 {
 }
 
 PUBLIC
-SipTxnKey::SipTxnKey(IN CONST SipTxnKey& objRHS) :
-        objMethod(objRHS.objMethod),
-        nStatusCode(objRHS.nStatusCode),
-        strViaBranch(objRHS.strViaBranch),
-        nCSeq(objRHS.nCSeq),
-        nExtraInt(objRHS.nExtraInt),
-        strExtraString(objRHS.strExtraString)
+SipTxnKey::SipTxnKey(IN const SipTxnKey& other) :
+        m_objMethod(other.m_objMethod),
+        m_nStatusCode(other.m_nStatusCode),
+        m_strViaBranch(other.m_strViaBranch),
+        m_nCSeq(other.m_nCSeq),
+        m_nExtraInt(other.m_nExtraInt),
+        m_strExtraString(other.m_strExtraString)
 {
 }
 
 PUBLIC
-SipTxnKey::~SipTxnKey() {}
-
-PUBLIC
-SipTxnKey& SipTxnKey::operator=(IN CONST SipTxnKey& objRHS)
+SipTxnKey& SipTxnKey::operator=(IN const SipTxnKey& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        objMethod = objRHS.objMethod;
-        nStatusCode = objRHS.nStatusCode;
-        strViaBranch = objRHS.strViaBranch;
-        nCSeq = objRHS.nCSeq;
+        m_objMethod = other.m_objMethod;
+        m_nStatusCode = other.m_nStatusCode;
+        m_strViaBranch = other.m_strViaBranch;
+        m_nCSeq = other.m_nCSeq;
 
-        nExtraInt = objRHS.nExtraInt;
-        strExtraString = objRHS.strExtraString;
+        m_nExtraInt = other.m_nExtraInt;
+        m_strExtraString = other.m_strExtraString;
     }
 
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipTxnKey::Equals(IN CONST SipTxnKey* pKey) const
+IMS_BOOL SipTxnKey::Equals(IN const SipTxnKey* pKey) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pKey == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!objMethod.Equals(pKey->objMethod) || (nCSeq != pKey->nCSeq) ||
-            !strViaBranch.Equals(pKey->strViaBranch))
+    if (!m_objMethod.Equals(pKey->m_objMethod) || (m_nCSeq != pKey->m_nCSeq) ||
+            !m_strViaBranch.Equals(pKey->m_strViaBranch))
     {
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SipTxnKey::GetExtraInt() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nExtraInt;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SipTxnKey::GetExtraString() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strExtraString;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const SipMethod& SipTxnKey::GetMethod() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objMethod;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SipTxnKey::GetCSeq() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nCSeq;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SipTxnKey::GetStatusCode() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nStatusCode;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const AString& SipTxnKey::GetViaBranch() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return strViaBranch;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTxnKey::SetExtraInt(IN IMS_SINT32 nExtraInt)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nExtraInt = nExtraInt;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTxnKey::SetExtraString(IN CONST AString& strExtraString)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->strExtraString = strExtraString;
 }
 
 }  // namespace sipcore

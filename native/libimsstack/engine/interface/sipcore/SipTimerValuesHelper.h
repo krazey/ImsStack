@@ -48,7 +48,7 @@ public:
      * @brief Creates SipTimerValues from the given information.
      *
      * @param nSlotId Current slot id
-     * @param pSipProfile SIP profile for this SIP transaction timer
+     * @param pProfile SIP profile for this SIP transaction timer
      * @param nTxnType SIP transaction type\n
      *                 #NON_INVITE_CLIENT\n
      *                 #NON_INVITE_SERVER\n
@@ -56,8 +56,7 @@ public:
      *                 #INVITE_SERVER
      * @return The newly created SipTimerValues.
      */
-    static SipTimerValues GetValues(IN IMS_SINT32 nSlotId,
-            IN const SipProfile* pSipProfile = IMS_NULL,
+    static SipTimerValues GetValues(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile = IMS_NULL,
             IN IMS_SINT32 nTxnType = NON_INVITE_CLIENT);
 };
 

@@ -16,9 +16,9 @@
 #ifndef SIP_STACK_HELPER_H_
 #define SIP_STACK_HELPER_H_
 
-#include "msg/SipAddrSpec.h"
-
 #include "AString.h"
+
+#include "msg/SipAddrSpec.h"
 
 class ISipHeader;
 
@@ -26,10 +26,10 @@ namespace SipStack
 {
 
 GLOBAL IMS_BOOL DecodeHeaderComponent(
-        IN CONST SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders);
+        IN const SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders);
 
 GLOBAL IMS_BOOL DecodeHeaderComponent(
-        IN CONST AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders);
+        IN const AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders);
 
 }  // namespace SipStack
 

@@ -1,39 +1,43 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
+
 #include "ISipErrorListener.h"
 #include "SipDialogImpl.h"
+#include "SipPrivate.h"
 #include "SipServerConnection.h"
 #include "SipServerConnectionImpl.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSSC_) :
-        piErrorListener(IMS_NULL),
-        pDialogImpl(IMS_NULL),
-        pSSC(pSSC_)
+SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSsc) :
+        m_pSsc(pSsc),
+        m_pDialogImpl(IMS_NULL),
+        m_piErrorListener(IMS_NULL)
 {
-    pSSC->SetErrorListener(this);
+    m_pSsc->SetErrorListener(this);
 
-    SipDialog* pDialog = pSSC->GetDialog();
+    SipDialog* pDialog = m_pSsc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
-        pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
+        m_pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
 
-        if (pDialogImpl == IMS_NULL)
+        if (m_pDialogImpl == IMS_NULL)
         {
             IMS_TRACE_E(0, "Allocating DialogImpl failed", 0, 0, 0);
         }
@@ -42,349 +46,174 @@ SipServerConnectionImpl::SipServerConnectionImpl(IN SipServerConnection* pSSC_) 
 
 PUBLIC VIRTUAL SipServerConnectionImpl::~SipServerConnectionImpl()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogImpl != IMS_NULL)
+    if (m_pDialogImpl != IMS_NULL)
     {
-        pDialogImpl->Destroy();
+        m_pDialogImpl->Destroy();
     }
 
-    if (pSSC != IMS_NULL)
+    if (m_pSsc != IMS_NULL)
     {
-        pSSC->SetErrorListener(IMS_NULL);
-        pSSC->Close();
+        m_pSsc->SetErrorListener(IMS_NULL);
+        m_pSsc->Close();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipServerConnectionImpl::Close()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogImpl != IMS_NULL)
+    if (m_pDialogImpl != IMS_NULL)
     {
-        pDialogImpl->Destroy();
-        pDialogImpl = IMS_NULL;
+        m_pDialogImpl->Destroy();
+        m_pDialogImpl = IMS_NULL;
     }
 
-    pSSC->SetErrorListener(IMS_NULL);
-    pSSC->Close();
-    pSSC = IMS_NULL;
+    m_pSsc->SetErrorListener(IMS_NULL);
+    m_pSsc->Close();
+    m_pSsc = IMS_NULL;
 
     delete this;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::AddHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->AddHeader(strName, strValue);
+    return m_pSsc->AddHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipDialog* SipServerConnectionImpl::GetDialog() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogImpl;
+    return m_pDialogImpl;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL AString SipServerConnectionImpl::GetHeader(
-        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
+        IN const AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetHeader(strName, nIndex);
+    return m_pSsc->GetHeader(strName, nIndex);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMSList<AString> SipServerConnectionImpl::GetHeaders(IN CONST AString& strName)
+PRIVATE VIRTUAL IMSList<AString> SipServerConnectionImpl::GetHeaders(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetHeaders(strName);
+    return m_pSsc->GetHeaders(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const SipMethod& SipServerConnectionImpl::GetMethod() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetMethod();
+    return m_pSsc->GetMethod();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const AString& SipServerConnectionImpl::GetReasonPhrase() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetReasonPhrase();
+    return m_pSsc->GetReasonPhrase();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const AString& SipServerConnectionImpl::GetRequestUri() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetRequestUri();
+    return m_pSsc->GetRequestUri();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipServerConnectionImpl::GetStatusCode() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetStatusCode();
+    return m_pSsc->GetStatusCode();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::RemoveHeader(IN CONST AString& strName)
+PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::RemoveHeader(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->RemoveHeader(strName);
+    return m_pSsc->RemoveHeader(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::Send()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->Send();
+    return m_pSsc->Send();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipServerConnectionImpl::SetErrorListener(IN ISipErrorListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piErrorListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::SetHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->SetHeader(strName, strValue);
+    return m_pSsc->SetHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const ByteArray& SipServerConnectionImpl::GetContent() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetContent();
+    return m_pSsc->GetContent();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::SetContent(IN CONST ByteArray& objContent)
+PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::SetContent(IN const ByteArray& objContent)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->SetContent(objContent);
+    return m_pSsc->SetContent(objContent);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 SipServerConnectionImpl::GetHeaderCount(IN CONST AString& strName) const
+PRIVATE VIRTUAL IMS_SINT32 SipServerConnectionImpl::GetHeaderCount(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetHeaderCount(strName);
+    return m_pSsc->GetHeaderCount(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipMessage* SipServerConnectionImpl::GetMessage() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetMessage();
+    return m_pSsc->GetMessage();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipServerConnectionImpl::GetSlotId() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->GetSlotId();
+    return m_pSsc->GetSlotId();
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PRIVATE VIRTUAL void SipServerConnectionImpl::SetSipProfile(IN SipProfile* pProfile)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSSC->SetSipProfile(pProfile);
+    m_pSsc->SetSipProfile(pProfile);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipServerConnectionImpl::SetTransactionTimerValues(
-        IN CONST SipTimerValues& objTV)
+        IN const SipTimerValues& objTimerValues)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSSC->SetTransactionTimerValues(objTV);
+    m_pSsc->SetTransactionTimerValues(objTimerValues);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::InitResponse(IN IMS_SINT32 nStatusCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->InitResponse(nStatusCode);
+    return m_pSsc->InitResponse(nStatusCode);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipServerConnectionImpl::SetReasonPhrase(
-        IN CONST AString& strReasonPhrase)
+        IN const AString& strReasonPhrase)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSSC->SetReasonPhrase(strReasonPhrase);
+    return m_pSsc->SetReasonPhrase(strReasonPhrase);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL SipServerConnectionImpl::IsSameTransaction(
-        IN CONST ISipServerConnection* piOngoingSSC) const
+        IN const ISipServerConnection* piOngoingSsc) const
 {
-    const SipServerConnectionImpl* pSSCImpl =
-            DYNAMIC_CAST(const SipServerConnectionImpl*, piOngoingSSC);
+    const SipServerConnectionImpl* pSscImpl =
+            DYNAMIC_CAST(const SipServerConnectionImpl*, piOngoingSsc);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSSCImpl == IMS_NULL)
+    if (pSscImpl == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
-    if (pSSCImpl->pSSC == IMS_NULL)
+    if (pSscImpl->m_pSsc == IMS_NULL)
     {
         // Ignore the CANCEL request
         // because the ongoing transaction is already completed or terminated.
         return IMS_FALSE;
     }
 
-    return pSSC->IsSameTransaction(pSSCImpl->pSSC);
+    return m_pSsc->IsSameTransaction(pSscImpl->m_pSsc);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipServerConnectionImpl::OnError_NotifyError(
-        IN SipConnection* pSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+        IN SipConnection* pSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSSC != pSC)
+    if (m_pSsc != pSc)
     {
         IMS_TRACE_E(0, "SSC MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piErrorListener == IMS_NULL)
+    if (m_piErrorListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    piErrorListener->Error_NotifyError(this, nCode, strMessage);
+    m_piErrorListener->Error_NotifyError(this, nCode, strMessage);
 }

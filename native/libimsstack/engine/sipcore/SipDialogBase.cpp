@@ -1,85 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100323  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines a base class for SIP dialog class.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "SipDialogBase.h"
 
-PUBLIC
-SipDialogBase::SipDialogBase(IN SipDialogState* pDState_) :
-        RCObject(),
-        pDState(pDState_)
+PUBLIC GLOBAL IMS_BOOL SipDialogBase::IsDialogCreatable(IN const SipMethod& objMethod)
 {
-}
-
-PUBLIC
-SipDialogBase::SipDialogBase(IN CONST SipDialogBase& objRHS) :
-        RCObject(objRHS),
-        pDState(objRHS.pDState)
-{
-}
-
-PUBLIC VIRTUAL SipDialogBase::~SipDialogBase() {}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-SipDialogBase& SipDialogBase::operator=(IN CONST SipDialogBase& objRHS)
-{
-    //---------------------------------------------------------------------------------------------
-
-    RCObject::operator=(objRHS);
-
-    return (*this);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-SipDialogState* SipDialogBase::GetDialogState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDState.Get();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SipDialogBase::GetState() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pDState->GetState();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL IMS_BOOL SipDialogBase::IsDialogCreatable(IN CONST SipMethod& objMethod)
-{
-    //---------------------------------------------------------------------------------------------
-
     if (objMethod.Equals(SipMethod::INVALID))
+    {
         return IMS_FALSE;
+    }
 
     // Check if the current method can create a dialog or not
     if (!objMethod.Equals(SipMethod::INVITE) && !objMethod.Equals(SipMethod::SUBSCRIBE) &&

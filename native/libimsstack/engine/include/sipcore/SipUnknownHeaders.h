@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_UNKNOWN_HEADERS_H_
-#define _SIP_UNKNOWN_HEADERS_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_UNKNOWN_HEADERS_H_
+#define SIP_UNKNOWN_HEADERS_H_
 
 #include "AString.h"
 
@@ -21,19 +24,19 @@ private:
     class Header
     {
     public:
-        explicit Header(IN CONST AString& strName_);
-        Header(IN CONST Header& objRHS);
+        explicit Header(IN const AString& strName);
+        Header(IN const Header& other);
         ~Header();
 
     public:
-        Header& operator=(IN CONST Header& objRHS);
+        Header& operator=(IN const Header& other);
 
     public:
-        void Clear();
-        IMS_BOOL Equals(IN CONST AString& strName) const;
+        inline void Clear() { objBodys.Clear(); }
+        IMS_BOOL Equals(IN const AString& strName) const;
 
     private:
-        void SetName(IN CONST AString& strName);
+        void SetName(IN const AString& strName);
 
     public:
         AString strCompactName;
@@ -43,34 +46,37 @@ private:
 
 public:
     SipUnknownHeaders();
-    SipUnknownHeaders(IN CONST SipUnknownHeaders& objRHS);
+    SipUnknownHeaders(IN const SipUnknownHeaders& other);
     ~SipUnknownHeaders();
 
 public:
-    SipUnknownHeaders& operator=(IN CONST SipUnknownHeaders& objRHS);
+    SipUnknownHeaders& operator=(IN const SipUnknownHeaders& other);
 
 public:
-    IMS_RESULT AddHeader(IN CONST AString& strName, IN CONST AString& strBody);
+    IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strBody);
     void Clear();
-    IMS_SINT32 GetCount() const;
-    AString GetHeader(IN CONST AString& strName, IN IMS_SINT32 nIndex = 0) const;
+    inline IMS_SINT32 GetCount() const { return m_objHeaders.GetSize(); }
+    AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0) const;
     AString GetHeaderBodys(IN IMS_SINT32 nPos) const;
-    AString GetHeaderBodys(IN CONST AString& strName) const;
-    IMS_SINT32 GetHeaderCount(IN CONST AString& strName) const;
+    AString GetHeaderBodys(IN const AString& strName) const;
+    IMS_SINT32 GetHeaderCount(IN const AString& strName) const;
     const AString& GetHeaderName(IN IMS_SINT32 nPos, IN IMS_BOOL bCompactForm = IMS_FALSE) const;
-    IMSList<AString> GetHeaders(IN CONST AString& strName) const;
-    IMS_BOOL IsHeaderPresent(IN CONST AString& strName) const;
-    IMS_BOOL OverwriteHeaders(IN CONST SipUnknownHeaders& objOther);
-    IMS_RESULT PrependHeader(IN CONST AString& strName, IN CONST AString& strBody);
-    void RemoveHeader(IN CONST AString& strName);
-    IMS_RESULT SetHeader(IN CONST AString& strName, IN CONST AString& strBody);
+    IMSList<AString> GetHeaders(IN const AString& strName) const;
+    inline IMS_BOOL IsHeaderPresent(IN const AString& strName) const
+    {
+        return (FindHeader(strName) != IMS_NULL);
+    }
+    IMS_BOOL OverwriteHeaders(IN const SipUnknownHeaders& objOther);
+    IMS_RESULT PrependHeader(IN const AString& strName, IN const AString& strBody);
+    void RemoveHeader(IN const AString& strName);
+    IMS_RESULT SetHeader(IN const AString& strName, IN const AString& strBody);
 
 private:
-    void DeleteHeader(IN CONST AString& strName);
-    Header* FindHeader(IN CONST AString& strName) const;
+    void DeleteHeader(IN const AString& strName);
+    Header* FindHeader(IN const AString& strName) const;
 
 private:
-    IMSList<Header*> objHeaders;
+    IMSList<Header*> m_objHeaders;
 };
 
-#endif  // _SIP_UNKNOWN_HEADERS_H_
+#endif

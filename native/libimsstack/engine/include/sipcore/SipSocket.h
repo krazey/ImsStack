@@ -1,83 +1,102 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_SOCKET_H_
-#define _SIP_SOCKET_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_SOCKET_H_
+#define SIP_SOCKET_H_
 
 #include "ImsSlot.h"
+
 #include "ISocket.h"
 #include "SipSocketAddress.h"
 
 class INetworkConnection;
-class ISipSocketListener;
 class ISipKeepAliveListener;
+class ISipSocketListener;
 
 class SipSocket : public ImsSlot, public ISocketListener
 {
 public:
-    explicit SipSocket(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType_ = SipSocketAddress::SOCKET_UDP);
+    explicit SipSocket(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType = SipSocketAddress::SOCKET_UDP);
     virtual ~SipSocket();
 
-private:
-    SipSocket(IN CONST SipSocket& objRHS);
-    SipSocket& operator=(IN CONST SipSocket& objRHS);
+    SipSocket(IN const SipSocket&) = delete;
+    SipSocket& operator=(IN const SipSocket&) = delete;
 
 public:
-    virtual SipSocket* Accept();
-    virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL);
-    virtual IMS_BOOL Connect();
+    inline virtual SipSocket* Accept() { return IMS_NULL; }
+    inline virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL)
+    {
+        ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), IMS_NULL, piAcceptedSocket);
+    }
+    inline virtual IMS_BOOL Connect() { return IMS_TRUE; }
     virtual IMS_BOOL Create(
-            IN CONST IPAddress& objIPA, IN IMS_UINT32 nPort = 0, IN IMS_BOOL bSecure = IMS_FALSE);
-    virtual IMS_BOOL Equals(IN CONST SipSocketAddress& objSA);
-    virtual IMS_BOOL Equals(IN CONST SipSocket& objSocket);
-    virtual void GetSockName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort);
-    virtual IMS_SINT32 Send(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            IN IMS_UINT32 nPort = 0, IN CONST IPAddress& objIPA = IPAddress::NONE);
-
+            IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0, IN IMS_BOOL bSecure = IMS_FALSE);
+    inline virtual IMS_BOOL Equals(IN const SipSocketAddress& objSockAddr)
+    {
+        return m_objSockAddr.Equals(objSockAddr);
+    }
+    inline virtual IMS_BOOL Equals(IN const SipSocket& objSocket)
+    {
+        return m_objSockAddr.Equals(objSocket.m_objSockAddr);
+    }
+    virtual void GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort);
+    inline virtual IMS_SINT32 Send(IN const IMS_BYTE* /*pBuffer*/, IN IMS_SINT32 /*nBuffLen*/,
+            IN IMS_UINT32 nPort = 0, IN const IPAddress& objIp = IPAddress::NONE)
+    {
+        (void)nPort;
+        (void)objIp;
+        return ISocket::RESULT_ERROR;
+    }
     virtual void NotifyForceClosed();
 
-    void GetPeerName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort);
+    void GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort);
     IMS_SINT32 RemoveListener(IN ISipSocketListener* piListener_);
-    void SetKeepAliveListener(IN ISipKeepAliveListener* piKeepAliveListener);
-    void SetListener(IN ISipSocketListener* piListener_);
+    inline void SetKeepAliveListener(IN ISipKeepAliveListener* piKeepAliveListener)
+    {
+        m_piKeepAliveListener = piKeepAliveListener;
+    }
+    void SetListener(IN ISipSocketListener* piListener);
     /** Same as ISocket::SetOption(...) */
     void SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue);
 
-    inline IMS_SINT32 GetState() const { return nState; }
-    inline IMS_SINT32 GetType() const { return objSA.GetType(); }
-    inline IMS_BOOL IsSocketForcinlyClosed() const { return bForcinglyClosed; }
+    inline IMS_SINT32 GetState() const { return m_nState; }
+    inline IMS_SINT32 GetType() const { return m_objSockAddr.GetType(); }
+    inline IMS_BOOL IsSocketForcinlyClosed() const { return m_bForcinglyClosed; }
 
 protected:
     // ISocketListener interface
-    virtual void Socket_OnDataReceived(IN ISocket* piSocket);
-    virtual void Socket_OnSendEnabled(IN ISocket* piSocket);
-    virtual void Socket_OnConnectionReceived(IN ISocket* piSocket);
-    virtual void Socket_OnConnected(IN ISocket* piSocket);
-    virtual void Socket_OnClosed(
-            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN);
+    inline void Socket_OnDataReceived(IN ISocket* /*piSocket*/) override {}
+    void Socket_OnSendEnabled(IN ISocket* piSocket) override;
+    inline void Socket_OnConnectionReceived(IN ISocket* /*piSocket*/) override {}
+    void Socket_OnConnected(IN ISocket* piSocket) override;
+    void Socket_OnClosed(
+            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
     void ApplyIpSecInternal(IN const SocketAddress& objLocal,
             IN const SocketAddress* pRemote = IMS_NULL, IN ISocket* piAcceptedSocket = IMS_NULL);
     void CloseSocket();
     void NotifyPongReceived();
-    void SetForcinglyClosed(IN IMS_BOOL bClosed);
+    inline void SetForcinglyClosed(IN IMS_BOOL bClosed) { m_bForcinglyClosed = bClosed; }
     void SetSocketOptionForTcpMaxSeg(
-            IN INetworkConnection* piConnection, IN CONST IPAddress& objLocalIP);
-    void SetSocketOptions(IN CONST IPAddress& objLocalIP, IN IMS_UINT32 nLocalPort);
+            IN INetworkConnection* piConnection, IN const IPAddress& objLocalIp);
+    void SetSocketOptions(IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort);
     void SetState(IN IMS_SINT32 nState);
 
     static void SetSocketOption(IN IMS_SINT32 nSlotId, IN ISocket* piSocket,
-            IN CONST IPAddress& objLocalIP, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
-            IN IMS_SINT32 nSocketOption, IN CONST IMS_CHAR* pszOptionName);
+            IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
+            IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName);
     static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
 public:
@@ -117,15 +136,15 @@ protected:
     // In case of TCP client socket, this information is set to the peer socket information.
     //    1) Connected by UA : Set at the calling time of Connect(...).
     //    2) Accepted by UA : Set at the calling time of Accept(...) using GetPeerName(...).
-    SipSocketAddress objSA;
+    SipSocketAddress m_objSockAddr;
 
-    ISocket* piSocket;
-    IMSList<ISipSocketListener*> objListeners;
-    ISipKeepAliveListener* piKeepAliveListener;
+    ISocket* m_piSocket;
+    IMSList<ISipSocketListener*> m_objListeners;
+    ISipKeepAliveListener* m_piKeepAliveListener;
 
 private:
-    IMS_SINT32 nState;
-    IMS_BOOL bForcinglyClosed;
+    IMS_SINT32 m_nState;
+    IMS_BOOL m_bForcinglyClosed;
 };
 
-#endif  // _SIP_SOCKET_H_
+#endif

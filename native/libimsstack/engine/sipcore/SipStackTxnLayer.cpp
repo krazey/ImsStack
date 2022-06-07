@@ -1,22 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SipStackHeaders.h"
-#include "SipTxnContextData.h"
-#include "SipStackState.h"
+
 #include "SipClientTransactionState.h"
-#include "SipTransactionTimer.h"
+#include "SipStackHeaders.h"
+#include "SipStackState.h"
 #include "SipStackTxnLayer.h"
+#include "SipTransactionTimer.h"
+#include "SipTxnContextData.h"
 
 // Implements the function prototypes for SIP stack transaction layer
 LOCAL SIP_BOOL SIPStackTxnLayer_FetchTransaction(IN SIP_VOID* pvTxnKey, IN SIP_INT32 nOption,
@@ -94,31 +99,32 @@ LOCAL SIP_BOOL SIPStackTxnLayer_ReleaseTransaction(IN SIP_VOID* pvInTxnKey, IN S
 LOCAL SIP_VOID* SIPStackTxnLayer_CreateAckRequest(
         IN SIP_VOID* pvRespMsg, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTC = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTCD = (pTC != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTC->pTxnContextData)
+    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
             : IMS_NULL;
-    SipClientTransactionState* pCTState = (pTCD != IMS_NULL)
-            ? reinterpret_cast<SipClientTransactionState*>(pTCD->GetTxnState())
+    SipClientTransactionState* pCtState = (pTxnContextData != IMS_NULL)
+            ? reinterpret_cast<SipClientTransactionState*>(pTxnContextData->GetTxnState())
             : IMS_NULL;
 
-    if (pCTState == IMS_NULL)
+    if (pCtState == IMS_NULL)
     {
         return IMS_NULL;
     }
 
     return reinterpret_cast<void*>(
-            pCTState->CreateAckRequest(reinterpret_cast<::SipMessage*>(pvRespMsg)));
+            pCtState->CreateAckRequest(reinterpret_cast<::SipMessage*>(pvRespMsg)));
 }
 
 LOCAL SIP_VOID SIPStackTxnLayer_PreProcessMessageSentByStack(
         IN SIP_VOID* pvSipMsg, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTC = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTCD = (pTC != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTC->pTxnContextData)
+    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
             : IMS_NULL;
-    SipTransactionState* pTState = (pTCD != IMS_NULL) ? pTCD->GetTxnState() : IMS_NULL;
+    SipTransactionState* pTState =
+            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
 
     if (pTState == IMS_NULL)
     {
@@ -131,11 +137,12 @@ LOCAL SIP_VOID SIPStackTxnLayer_PreProcessMessageSentByStack(
 LOCAL SIP_VOID SIPStackTxnLayer_PostProcessMessageSentByStack(IN SIP_VOID* pvSipMsg,
         IN SIP_CHAR* pcBuffer, IN SIP_UINT32 uiBufferLen, IN ISipUserData* pUserData)
 {
-    SipTxnContext* pTC = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
-    SipTxnContextData* pTCD = (pTC != IMS_NULL)
-            ? reinterpret_cast<SipTxnContextData*>(pTC->pTxnContextData)
+    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTxnContextData* pTxnContextData = (pTxnContext != IMS_NULL)
+            ? reinterpret_cast<SipTxnContextData*>(pTxnContext->pTxnContextData)
             : IMS_NULL;
-    SipTransactionState* pTState = (pTCD != IMS_NULL) ? pTCD->GetTxnState() : IMS_NULL;
+    SipTransactionState* pTState =
+            (pTxnContextData != IMS_NULL) ? pTxnContextData->GetTxnState() : IMS_NULL;
 
     if (pTState == IMS_NULL)
     {
@@ -154,31 +161,31 @@ LOCAL SIP_VOID SIPStackTxnLayer_DisplayTxnKey(IN SIP_VOID* pvTxnKey)
 
 LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IMS_SINT32 nTimerType)
 {
-    SipEn_TimerType enTimerType = static_cast<SipEn_TimerType>(nTimerType);
+    SipEn_TimerType eTimerType = static_cast<SipEn_TimerType>(nTimerType);
     /* TimerE--> non-INV retx
        ETXN_TIMERA --> INV retx
        ETXN_TIMERG --> INV response retx
     */
-    SipTxnContext* pTC = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
+    SipTxnContext* pTxnContext = reinterpret_cast<SipTxnContext*>(pUserData->GetUserData());
 
     // Clear user data to avoid double memory free by aborting the transaction
     // when SIP transaction timer is expired.
     pUserData->SetUserData(IMS_NULL);
 
-    if ((enTimerType == ETXN_TIMERD) || (enTimerType == ETXN_TIMERI) ||
-            (enTimerType == ETXN_TIMERJ) || (enTimerType == ETXN_TIMERK))
+    if ((eTimerType == ETXN_TIMERD) || (eTimerType == ETXN_TIMERI) || (eTimerType == ETXN_TIMERJ) ||
+            (eTimerType == ETXN_TIMERK))
     {
         // CSM moving from "Completed" to "Terminated".
         // This is a normal case and ignore these cases.
-        SipStack::DestroyTxnContext(pTC);
+        SipStack::DestroyTxnContext(pTxnContext);
         return;
     }
 
-    SipTransactionTimer::TimerExpired(enTimerType);
+    SipTransactionTimer::TimerExpired(eTimerType);
 
-    if (pTC != IMS_NULL)
+    if (pTxnContext != IMS_NULL)
     {
-        SipTxnContextData* pTxnContextData = (SipTxnContextData*)pTC->pTxnContextData;
+        SipTxnContextData* pTxnContextData = (SipTxnContextData*)pTxnContext->pTxnContextData;
 
         if (pTxnContextData != IMS_NULL)
         {
@@ -192,7 +199,7 @@ LOCAL SIP_VOID SIPStackTxnLayer_OnTimerExpired(IN ISipUserData* pUserData, IN IM
     }
 
     // Free the event context
-    SipStack::DestroyTxnContext(pTC);
+    SipStack::DestroyTxnContext(pTxnContext);
 }
 
 LOCAL SIP_BOOL SIPStackTxnLayer_StartTimer(IN SIP_UINT32 nDuration,
@@ -235,13 +242,19 @@ LOCAL SIP_BOOL SIPStackTxnLayer_StopTimer(IN SIP_VOID* pvHandle, OUT SIP_VOID** 
 // Initialization function for SIP transaction layer
 GLOBAL void SipStackTxnLayer_Initialize()
 {
-    static const SipStackCallbacks stCallbacks = {&SIPStackTxnLayer_FetchTransaction,
-            &SIPStackTxnLayer_ReleaseTransaction, &SIPStackTxnLayer_StartTimer,
-            &SIPStackTxnLayer_StopTimer, &SIPStackTxnLayer_OnTimerExpired,
-            &SIPStackTxnLayer_CreateAckRequest, &SIPStackTxnLayer_PreProcessMessageSentByStack,
-            &SIPStackTxnLayer_PostProcessMessageSentByStack, &SIPStackTxnLayer_DisplayTxnKey};
-
-    //---------------------------------------------------------------------------------------------
+    // clang-format off
+    static const SipStackCallbacks stCallbacks = {
+            &SIPStackTxnLayer_FetchTransaction,
+            &SIPStackTxnLayer_ReleaseTransaction,
+            &SIPStackTxnLayer_StartTimer,
+            &SIPStackTxnLayer_StopTimer,
+            &SIPStackTxnLayer_OnTimerExpired,
+            &SIPStackTxnLayer_CreateAckRequest,
+            &SIPStackTxnLayer_PreProcessMessageSentByStack,
+            &SIPStackTxnLayer_PostProcessMessageSentByStack,
+            &SIPStackTxnLayer_DisplayTxnKey
+        };
+    // clang-format on
 
     SipStackCallback_SetCallbacks(stCallbacks);
 }

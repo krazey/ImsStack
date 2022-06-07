@@ -1174,10 +1174,10 @@ GLOBAL IMS_BOOL IsUnknownHeader(IN_OUT IMS_SINT32& nType, IN const AString& strN
     return (nType == ISipHeader::UNKNOWN);
 }
 
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipHeaderBase* pHeader)
+GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader)
 {
     IMSList<SipParameter*> objParams;
-    SipParameters* pParams = GetParameters(pHeader, IMS_FALSE);
+    SipParameters* pParams = GetParameters(const_cast<SipHeaderBase*>(pHeader), IMS_FALSE);
 
     if (pParams != IMS_NULL)
     {
@@ -3081,7 +3081,7 @@ GLOBAL SipHeaderBase* GetUnknownHeader(
     return GetHeader(pMessage, nType, nIndex);
 }
 
-GLOBAL AString GetUnknownHeaderName(IN SipHeaderBase* pHeader)
+GLOBAL AString GetUnknownHeaderName(IN const SipHeaderBase* pHeader)
 {
     SIPStackError(EERR_NOERR);
 
@@ -3097,13 +3097,13 @@ GLOBAL AString GetUnknownHeaderName(IN SipHeaderBase* pHeader)
         return AString::ConstNull();
     }
 
-    SipUnknownHeader* pUnknown = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
+    const SipUnknownHeader* pUnknown = DYNAMIC_CAST(const SipUnknownHeader*, pHeader);
     AString strName(pUnknown->GetHeaderName());
 
     return strName;
 }
 
-GLOBAL AString GetUnknownHeaderBody(IN SipHeaderBase* pHeader)
+GLOBAL AString GetUnknownHeaderBody(IN const SipHeaderBase* pHeader)
 {
     SIPStackError(EERR_NOERR);
 
@@ -3119,7 +3119,7 @@ GLOBAL AString GetUnknownHeaderBody(IN SipHeaderBase* pHeader)
         return AString::ConstNull();
     }
 
-    SipUnknownHeader* pUnknown = DYNAMIC_CAST(SipUnknownHeader*, pHeader);
+    const SipUnknownHeader* pUnknown = DYNAMIC_CAST(const SipUnknownHeader*, pHeader);
     AString strValue(pUnknown->GetHeaderValue());
 
     return strValue;
@@ -4236,7 +4236,7 @@ GLOBAL IMS_BOOL GetEntityBody(IN ::SipMessage* pMessage, OUT AString& strEntityB
     IMS_UINT32 nBuffLen = pMessageBuffer->GetLength();
     IMS_CHAR* pTmpBuffer = reinterpret_cast<IMS_CHAR*>(pMessageBuffer->GetBuffer());
 
-    nMsgBodyCount = pstMessage->GetMsgBodyCount();
+    nMsgBodyCount = pMessage->GetMsgBodyCount();
 
     if (nMsgBodyCount == 0)
     {

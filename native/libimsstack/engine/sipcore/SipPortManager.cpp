@@ -1,28 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20151229  hwangoo.park@             Created
-    </table>
-
-    Description
-    This class provides the port information for SIP TCP/TLS transport protocol.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "ServiceTrace.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
+#include "ServiceTrace.h"
+
 #include "SipPortManager.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PRIVATE
 SipPortManager::SipPortManager() :
-        nPortC_Start(0),
-        nPortC_End(CLIENT_PORT_END),
-        nNextPortC(0)
+        m_nPortCStart(0),
+        m_nPortCEnd(CLIENT_PORT_END),
+        m_nNextPortC(0)
 {
 }
 
@@ -32,119 +36,85 @@ SipPortManager::~SipPortManager() {}
 PUBLIC
 void SipPortManager::Clear()
 {
-    //---------------------------------------------------------------------------------------------
+    m_nPortCStart = 0;
+    m_nPortCEnd = CLIENT_PORT_END;
 
-    nPortC_Start = 0;
-    nPortC_End = CLIENT_PORT_END;
-
-    nNextPortC = 0;
-}
-
-PUBLIC
-IMS_SINT32 SipPortManager::GetPortC(IN CONST IPAddress& objIP) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return SelectNextPortC(objIP);
-}
-
-PUBLIC
-IMS_BOOL SipPortManager::IsPortCProvisioned() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (nPortC_Start >= CLIENT_PORT_MIN) && (nPortC_End <= CLIENT_PORT_MAX);
+    m_nNextPortC = 0;
 }
 
 PUBLIC
 void SipPortManager::SetPortC(IN IMS_SINT32 nPortStart, IN IMS_SINT32 nPortEnd)
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("SetPortC :: Range (%d-%d)", nPortStart, nPortEnd, 0);
 
-    nPortC_Start = nPortStart;
-    nPortC_End = nPortEnd;
+    m_nPortCStart = nPortStart;
+    m_nPortCEnd = nPortEnd;
 
-    if ((nPortC_End <= 0) || (nPortC_End > CLIENT_PORT_MAX))
+    if ((m_nPortCEnd <= 0) || (m_nPortCEnd > CLIENT_PORT_MAX))
     {
-        nPortC_End = CLIENT_PORT_END;
+        m_nPortCEnd = CLIENT_PORT_END;
     }
-    else if (nPortC_Start >= nPortC_End)
+    else if (m_nPortCStart >= m_nPortCEnd)
     {
-        nPortC_Start = 0;
+        m_nPortCStart = 0;
     }
 
     // Select a starting random port number
     IMS_SINT32 nStartingPort =
-            static_cast<IMS_SINT32>(IMS_SYS_GetSRandom0()) % (nPortC_End - nPortC_Start);
+            static_cast<IMS_SINT32>(IMS_SYS_GetSRandom0()) % (m_nPortCEnd - m_nPortCStart);
 
-    nStartingPort += nPortC_Start;
+    nStartingPort += m_nPortCStart;
 
     SetNextPortC(nStartingPort);
 }
 
 PUBLIC GLOBAL SipPortManager* SipPortManager::GetInstance()
 {
-    static SipPortManager* pPortManager = IMS_NULL;
+    static SipPortManager* s_pPortManager = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pPortManager == IMS_NULL)
+    if (s_pPortManager == IMS_NULL)
     {
-        pPortManager = new SipPortManager();
+        s_pPortManager = new SipPortManager();
     }
 
-    return pPortManager;
+    return s_pPortManager;
 }
 
 PRIVATE
-IMS_SINT32 SipPortManager::GetNextPortC() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nNextPortC;
-}
-
-PRIVATE
-IMS_BOOL SipPortManager::IsPortAvailable(IN CONST IPAddress& objIP, IN IMS_SINT32 nPort) const
+IMS_BOOL SipPortManager::IsPortAvailable(IN const IPAddress& objIp, IN IMS_SINT32 nPort) const
 {
     NetworkService* pNetworkService = NetworkService::GetNetworkService();
-
-    //---------------------------------------------------------------------------------------------
 
     if (pNetworkService == IMS_NULL)
     {
         return IMS_TRUE;
     }
 
-    return pNetworkService->CheckIpAndPortAvailability(objIP, nPort, ISocket::TYPE_STREAM);
+    return pNetworkService->CheckIpAndPortAvailability(objIp, nPort, ISocket::TYPE_STREAM);
 }
 
 PRIVATE
-IMS_SINT32 SipPortManager::SelectNextPortC(IN CONST IPAddress& objIP) const
+IMS_SINT32 SipPortManager::SelectNextPortC(IN const IPAddress& objIp) const
 {
     IMS_SINT32 nSelectedPort = 0;
     IMS_SINT32 nCurrentPort = GetNextPortC();
 
-    //---------------------------------------------------------------------------------------------
-
     if (nCurrentPort <= 0)
     {
-        for (IMS_SINT32 i = (nPortC_Start + 1); i < nPortC_End; ++i)
+        for (IMS_SINT32 i = (m_nPortCStart + 1); i < m_nPortCEnd; ++i)
         {
-            if (IsPortAvailable(objIP, i))
+            if (IsPortAvailable(objIp, i))
             {
                 nSelectedPort = i;
                 break;
             }
         }
     }
-    else if (nCurrentPort < nPortC_End)
+    else if (nCurrentPort < m_nPortCEnd)
     {
-        for (IMS_SINT32 i = nCurrentPort; i < nPortC_End; ++i)
+        for (IMS_SINT32 i = nCurrentPort; i < m_nPortCEnd; ++i)
         {
-            if (IsPortAvailable(objIP, i))
+            if (IsPortAvailable(objIp, i))
             {
                 nSelectedPort = i;
                 break;
@@ -163,22 +133,20 @@ IMS_SINT32 SipPortManager::SelectNextPortC(IN CONST IPAddress& objIP) const
 PRIVATE
 void SipPortManager::SetNextPortC(IN IMS_SINT32 nPort) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nNextPortC != nPort)
+    if (m_nNextPortC != nPort)
     {
         // Round-robin
-        if (nPort == nPortC_End)
+        if (nPort == m_nPortCEnd)
         {
-            nPort = (nPortC_Start + 1);
+            nPort = (m_nPortCStart + 1);
         }
-        else if (nPort == nPortC_Start)
+        else if (nPort == m_nPortCStart)
         {
-            nPort = (nPortC_Start + 1);
+            nPort = (m_nPortCStart + 1);
         }
 
-        IMS_TRACE_D("SetNextPortC :: %d >> %d", nNextPortC, nPort, 0);
+        IMS_TRACE_D("SetNextPortC :: %d >> %d", m_nNextPortC, nPort, 0);
 
-        nNextPortC = nPort;
+        m_nNextPortC = nPort;
     }
 }

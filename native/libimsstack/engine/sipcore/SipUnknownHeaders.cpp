@@ -1,23 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
-#include "SipHeaderName.h"
+
 #include "SipHeader.h"
+#include "SipHeaderName.h"
+#include "SipPrivate.h"
 #include "SipUnknownHeaders.h"
 
 PUBLIC
-SipUnknownHeaders::Header::Header(IN CONST AString& strName_) :
+SipUnknownHeaders::Header::Header(IN const AString& strName_) :
         strCompactName(AString::ConstNull()),
         strName(AString::ConstNull())
 {
@@ -26,10 +30,10 @@ SipUnknownHeaders::Header::Header(IN CONST AString& strName_) :
 }
 
 PUBLIC
-SipUnknownHeaders::Header::Header(IN CONST SipUnknownHeaders::Header& objRHS) :
-        strCompactName(objRHS.strCompactName),
-        strName(objRHS.strName),
-        objBodys(objRHS.objBodys)
+SipUnknownHeaders::Header::Header(IN const SipUnknownHeaders::Header& other) :
+        strCompactName(other.strCompactName),
+        strName(other.strName),
+        objBodys(other.objBodys)
 {
 }
 
@@ -38,47 +42,37 @@ SipUnknownHeaders::Header::~Header() {}
 
 PUBLIC
 SipUnknownHeaders::Header& SipUnknownHeaders::Header::operator=(
-        IN CONST SipUnknownHeaders::Header& objRHS)
+        IN const SipUnknownHeaders::Header& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
-        strCompactName = objRHS.strCompactName;
-        strName = objRHS.strName;
-        objBodys = objRHS.objBodys;
+        strCompactName = other.strCompactName;
+        strName = other.strName;
+        objBodys = other.objBodys;
     }
 
     return (*this);
 }
 
 PUBLIC
-void SipUnknownHeaders::Header::Clear()
+IMS_BOOL SipUnknownHeaders::Header::Equals(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    objBodys.Clear();
-}
-
-PUBLIC
-IMS_BOOL SipUnknownHeaders::Header::Equals(IN CONST AString& strName) const
-{
-    //---------------------------------------------------------------------------------------------
-
     if (strName.IsNULL() || strName.IsEmpty())
+    {
         return IMS_FALSE;
+    }
 
     if (strCompactName.EqualsIgnoreCase(strName))
+    {
         return IMS_TRUE;
+    }
 
     return this->strName.EqualsIgnoreCase(strName);
 }
 
 PRIVATE
-void SipUnknownHeaders::Header::SetName(IN CONST AString& strName)
+void SipUnknownHeaders::Header::SetName(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Headers with a compact form : Subject (s), Identity (y), Identity-Info (n)
 
     if (strName.EqualsIgnoreCase(SipHeaderName::CF_SUBJECT))
@@ -100,7 +94,7 @@ void SipUnknownHeaders::Header::SetName(IN CONST AString& strName)
     {
         switch (strName[0])
         {
-            case 's':
+            case 's':  // FALL-THROUGH
             case 'S':
                 if (strName.EqualsIgnoreCase(SipHeaderName::SUBJECT))
                 {
@@ -110,7 +104,7 @@ void SipUnknownHeaders::Header::SetName(IN CONST AString& strName)
                 this->strName = strName;
                 break;
 
-            case 'i':
+            case 'i':  // FALL-THROUGH
             case 'I':
                 if (strName.EqualsIgnoreCase(SipHeaderName::IDENTITY))
                 {
@@ -135,21 +129,19 @@ PUBLIC
 SipUnknownHeaders::SipUnknownHeaders() {}
 
 PUBLIC
-SipUnknownHeaders::SipUnknownHeaders(IN CONST SipUnknownHeaders& objRHS)
+SipUnknownHeaders::SipUnknownHeaders(IN const SipUnknownHeaders& other)
 {
     Header* pNewHeader;
 
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
     {
-        const Header* pHeader = objRHS.objHeaders.GetAt(i);
+        const Header* pHeader = other.m_objHeaders.GetAt(i);
 
         pNewHeader = new Header(*pHeader);
 
         if (pNewHeader != IMS_NULL)
         {
-            objHeaders.Append(pNewHeader);
+            m_objHeaders.Append(pNewHeader);
         }
     }
 }
@@ -160,31 +152,24 @@ SipUnknownHeaders::~SipUnknownHeaders()
     Clear();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SipUnknownHeaders& SipUnknownHeaders::operator=(IN CONST SipUnknownHeaders& objRHS)
+SipUnknownHeaders& SipUnknownHeaders::operator=(IN const SipUnknownHeaders& other)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this != &objRHS)
+    if (this != &other)
     {
         Header* pNewHeader;
 
         Clear();
 
-        for (IMS_UINT32 i = 0; i < objRHS.objHeaders.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < other.m_objHeaders.GetSize(); ++i)
         {
-            const Header* pHeader = objRHS.objHeaders.GetAt(i);
+            const Header* pHeader = other.m_objHeaders.GetAt(i);
 
             pNewHeader = new Header(*pHeader);
 
             if (pNewHeader != IMS_NULL)
             {
-                objHeaders.Append(pNewHeader);
+                m_objHeaders.Append(pNewHeader);
             }
         }
     }
@@ -192,17 +177,10 @@ SipUnknownHeaders& SipUnknownHeaders::operator=(IN CONST SipUnknownHeaders& objR
     return (*this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipUnknownHeaders::AddHeader(IN CONST AString& strName, IN CONST AString& strBody)
+IMS_RESULT SipUnknownHeaders::AddHeader(IN const AString& strName, IN const AString& strBody)
 {
     Header* pHeader = FindHeader(strName);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pHeader == IMS_NULL)
     {
@@ -222,7 +200,7 @@ IMS_RESULT SipUnknownHeaders::AddHeader(IN CONST AString& strName, IN CONST AStr
             return IMS_FAILURE;
         }
 
-        if (!objHeaders.Append(pHeader))
+        if (!m_objHeaders.Append(pHeader))
         {
             delete pHeader;
 
@@ -242,70 +220,39 @@ IMS_RESULT SipUnknownHeaders::AddHeader(IN CONST AString& strName, IN CONST AStr
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipUnknownHeaders::Clear()
 {
-    //---------------------------------------------------------------------------------------------
-
-    while (!objHeaders.IsEmpty())
+    while (!m_objHeaders.IsEmpty())
     {
-        Header* pHeader = objHeaders.GetAt(0);
+        Header* pHeader = m_objHeaders.GetAt(0);
 
         if (pHeader != IMS_NULL)
+        {
             delete pHeader;
+        }
 
-        objHeaders.RemoveAt(0);
+        m_objHeaders.RemoveAt(0);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipUnknownHeaders::GetCount() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return objHeaders.GetSize();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-AString SipUnknownHeaders::GetHeader(
-        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */) const
+AString SipUnknownHeaders::GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex /*= 0*/) const
 {
     Header* pHeader = FindHeader(strName);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pHeader == IMS_NULL)
+    {
         return AString::ConstNull();
+    }
 
     return pHeader->objBodys.GetAt(nIndex);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 AString SipUnknownHeaders::GetHeaderBodys(IN IMS_SINT32 nPos) const
 {
-    Header* pHeader = objHeaders.GetAt(nPos);
-
-    //---------------------------------------------------------------------------------------------
+    Header* pHeader = m_objHeaders.GetAt(nPos);
 
     if (pHeader != IMS_NULL)
     {
@@ -329,20 +276,15 @@ AString SipUnknownHeaders::GetHeaderBodys(IN IMS_SINT32 nPos) const
     return AString::ConstEmpty();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-AString SipUnknownHeaders::GetHeaderBodys(IN CONST AString& strName) const
+AString SipUnknownHeaders::GetHeaderBodys(IN const AString& strName) const
 {
     Header* pHeader = FindHeader(strName);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pHeader == IMS_NULL)
+    {
         return AString::ConstNull();
+    }
 
     AString strBodys;
 
@@ -361,93 +303,60 @@ AString SipUnknownHeaders::GetHeaderBodys(IN CONST AString& strName) const
     return strBodys;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipUnknownHeaders::GetHeaderCount(IN CONST AString& strName) const
+IMS_SINT32 SipUnknownHeaders::GetHeaderCount(IN const AString& strName) const
 {
     Header* pHeader = FindHeader(strName);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pHeader == IMS_NULL)
+    {
         return 0;
+    }
 
     return pHeader->objBodys.GetSize();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 const AString& SipUnknownHeaders::GetHeaderName(
-        IN IMS_SINT32 nPos, IN IMS_BOOL bCompactForm /* = IMS_FALSE */) const
+        IN IMS_SINT32 nPos, IN IMS_BOOL bCompactForm /*= IMS_FALSE*/) const
 {
-    Header* pHeader = objHeaders.GetAt(nPos);
-
-    //---------------------------------------------------------------------------------------------
+    Header* pHeader = m_objHeaders.GetAt(nPos);
 
     if (pHeader != IMS_NULL)
     {
         if (bCompactForm)
+        {
             return (pHeader->strCompactName.GetLength() > 0) ? pHeader->strCompactName
                                                              : pHeader->strName;
+        }
         else
+        {
             return pHeader->strName;
+        }
     }
 
     return AString::ConstNull();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMSList<AString> SipUnknownHeaders::GetHeaders(IN CONST AString& strName) const
+IMSList<AString> SipUnknownHeaders::GetHeaders(IN const AString& strName) const
 {
     Header* pHeader = FindHeader(strName);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pHeader == IMS_NULL)
-        return IMSList<AString>();  // ???, Throw exception
+    {
+        return IMSList<AString>();
+    }
 
     return pHeader->objBodys;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipUnknownHeaders::IsHeaderPresent(IN CONST AString& strName) const
+IMS_BOOL SipUnknownHeaders::OverwriteHeaders(IN const SipUnknownHeaders& objOther)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return (FindHeader(strName) != IMS_NULL);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipUnknownHeaders::OverwriteHeaders(IN CONST SipUnknownHeaders& objOther)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objOther.objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < objOther.m_objHeaders.GetSize(); ++i)
     {
-        Header* pHeader = objOther.objHeaders.GetAt(i);
+        Header* pHeader = objOther.m_objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {
@@ -468,17 +377,10 @@ IMS_BOOL SipUnknownHeaders::OverwriteHeaders(IN CONST SipUnknownHeaders& objOthe
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipUnknownHeaders::PrependHeader(IN CONST AString& strName, IN CONST AString& strBody)
+IMS_RESULT SipUnknownHeaders::PrependHeader(IN const AString& strName, IN const AString& strBody)
 {
     Header* pHeader = FindHeader(strName);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pHeader == IMS_NULL)
     {
@@ -498,7 +400,7 @@ IMS_RESULT SipUnknownHeaders::PrependHeader(IN CONST AString& strName, IN CONST 
             return IMS_FAILURE;
         }
 
-        if (!objHeaders.Append(pHeader))
+        if (!m_objHeaders.Append(pHeader))
         {
             delete pHeader;
 
@@ -518,38 +420,28 @@ IMS_RESULT SipUnknownHeaders::PrependHeader(IN CONST AString& strName, IN CONST 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipUnknownHeaders::RemoveHeader(IN CONST AString& strName)
+void SipUnknownHeaders::RemoveHeader(IN const AString& strName)
 {
     Header* pHeader = FindHeader(strName);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pHeader == IMS_NULL)
+    {
         return;
+    }
 
     pHeader->objBodys.RemoveAt(0);
 
     if (pHeader->objBodys.GetSize() == 0)
+    {
         DeleteHeader(strName);
+    }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipUnknownHeaders::SetHeader(IN CONST AString& strName, IN CONST AString& strBody)
+IMS_RESULT SipUnknownHeaders::SetHeader(IN const AString& strName, IN const AString& strBody)
 {
     Header* pHeader = FindHeader(strName);
-
-    //---------------------------------------------------------------------------------------------
 
     if (pHeader == IMS_NULL)
     {
@@ -582,7 +474,7 @@ IMS_RESULT SipUnknownHeaders::SetHeader(IN CONST AString& strName, IN CONST AStr
             }
         }
 
-        if (!objHeaders.Append(pHeader))
+        if (!m_objHeaders.Append(pHeader))
         {
             delete pHeader;
 
@@ -613,45 +505,31 @@ IMS_RESULT SipUnknownHeaders::SetHeader(IN CONST AString& strName, IN CONST AStr
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void SipUnknownHeaders::DeleteHeader(IN CONST AString& strName)
+void SipUnknownHeaders::DeleteHeader(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
-        Header* pHeader = objHeaders.GetAt(i);
+        Header* pHeader = m_objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {
             if (pHeader->Equals(strName))
             {
                 delete pHeader;
-                objHeaders.RemoveAt(i);
+                m_objHeaders.RemoveAt(i);
                 return;
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-SipUnknownHeaders::Header* SipUnknownHeaders::FindHeader(IN CONST AString& strName) const
+SipUnknownHeaders::Header* SipUnknownHeaders::FindHeader(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objHeaders.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objHeaders.GetSize(); ++i)
     {
-        Header* pHeader = objHeaders.GetAt(i);
+        Header* pHeader = m_objHeaders.GetAt(i);
 
         if (pHeader != IMS_NULL)
         {

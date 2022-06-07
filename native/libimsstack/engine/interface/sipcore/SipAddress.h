@@ -150,7 +150,10 @@ public:
      * @return The display name if it is available.\n
      *         The null string if it is not available or the address is a special ("*") value.
      */
-    const AString& GetDisplayName() const;
+    inline const AString& GetDisplayName() const
+    {
+        return m_bIsWildcard ? AString::ConstNull() : m_strDisplayName;
+    }
 
     /**
      * @brief Returns a header of SIP address which matches with the specified header type.
@@ -177,7 +180,10 @@ public:
      * @return The host part of this address.\n
      *         The null string if the address is the special ("*") value.
      */
-    const AString& GetHost() const;
+    inline const AString& GetHost() const
+    {
+        return m_bIsWildcard ? AString::ConstNull() : m_strHostInfo;
+    }
 
     /**
      * @brief Returns the value associated with the named URI parameter.
@@ -212,7 +218,10 @@ public:
      * @return The scheme of this SIP address (sip/sips/tel/pres/im/...).\n
      *         The null string if the address is the special ("*") value.
      */
-    const AString& GetScheme() const;
+    inline const AString& GetScheme() const
+    {
+        return m_bIsWildcard ? AString::ConstNull() : m_strScheme;
+    }
 
     /**
      * @brief Returns the URI part of SIP address (without parameters).
@@ -234,7 +243,10 @@ public:
      * @return The user part of this SIP address.\n
      *         null string if the user part is missing or the address is the special ("*") value.
      */
-    const AString& GetUser() const;
+    inline const AString& GetUser() const
+    {
+        return m_bIsWildcard ? AString::ConstNull() : m_strUserInfo;
+    }
 
     /**
      * @brief Returns the pointer of UserInfoPart.
@@ -273,7 +285,10 @@ public:
      * @return If the scheme is SIP URI scheme, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsSchemeSip() const;
+    inline IMS_BOOL IsSchemeSip() const
+    {
+        return m_bIsWildcard ? IMS_FALSE : m_strScheme.EqualsIgnoreCase(Sip::STR_SIP);
+    }
 
     /**
      * @brief Checks if the scheme is SIPS URI scheme or not.
@@ -281,7 +296,10 @@ public:
      * @return If the scheme is SIPS URI scheme, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsSchemeSips() const;
+    inline IMS_BOOL IsSchemeSips() const
+    {
+        return m_bIsWildcard ? IMS_FALSE : m_strScheme.EqualsIgnoreCase(Sip::STR_SIPS);
+    }
 
     /**
      * @brief Checks if the scheme is TEL URI scheme or not.
@@ -289,7 +307,10 @@ public:
      * @return If the scheme is TEL URI scheme, returns IMS_TRUE.
      *         Otherwise, returns IMS_FALSE.
      */
-    IMS_BOOL IsSchemeTel() const;
+    inline IMS_BOOL IsSchemeTel() const
+    {
+        return m_bIsWildcard ? IMS_FALSE : m_strScheme.EqualsIgnoreCase(Sip::STR_TEL);
+    }
 
     /**
      * @brief Checks if the SIP address is for a service URN or not.

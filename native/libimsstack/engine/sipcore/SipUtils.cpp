@@ -1,29 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceSystemTime.h"
-// HEADER_REQ_SESSION-ID
-#include "ServicePhoneInfo.h"
-#include "SystemConfig.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "IMSHMAC.h"
 #include "IMSMD5.h"
 #include "IMSStrLib.h"
-#include "SipPrivate.h"
+#include "ServiceMemory.h"
+#include "ServicePhoneInfo.h"
+#include "ServiceSystemTime.h"
+#include "SystemConfig.h"
+
 #include "SipFeatures.h"
+#include "SipPrivate.h"
 #include "SipUtils.h"
 
 // HEADER_REQ_SESSION-ID
-PRIVATE GLOBAL AString* SipUtils::pFixedKeyForSessionId = IMS_NULL;
+PRIVATE GLOBAL AString* SipUtils::s_pFixedKeyForSessionId = IMS_NULL;
 
 PUBLIC GLOBAL AString SipUtils::GenerateBoundary()
 {
@@ -63,7 +66,7 @@ PUBLIC GLOBAL AString SipUtils::GenerateSessionId(
     AString strSecretKey;
     IMS_UINT32 nRandom = IMS_SYS_GetRandom0();
 
-    strSecretKey.Sprintf("%s%02x", pFixedKeyForSessionId[nSlotId].GetStr(), (nRandom % 0x100));
+    strSecretKey.Sprintf("%s%02x", s_pFixedKeyForSessionId[nSlotId].GetStr(), (nRandom % 0x100));
 
     // HMAC-SHA-1-128 (Call-ID, secret-key):
     // 128-bit result encoded using lowercase alphanumeric hex representation
@@ -99,12 +102,12 @@ PUBLIC GLOBAL AString SipUtils::GenerateTag(IN const AString& strMagicCookie)
 }
 
 PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
-        IN const IMS_CHAR* pszFromTag, IN const IMS_CHAR* pszCallID,
-        IN const IMS_CHAR* pszRequestURI, IN const IMS_CHAR* pszTopmostVia, IN IMS_SINT32 nCSeqNum,
+        IN const IMS_CHAR* pszFromTag, IN const IMS_CHAR* pszCallId,
+        IN const IMS_CHAR* pszRequestUri, IN const IMS_CHAR* pszTopmostVia, IN IMS_SINT32 nCSeqNum,
         IN const AString& strExtensionToken /* = AString::ConstNull() */)
 {
     const IMS_UCHAR COLON[2] = {':', '\0'};
-    MD5Context stMD5Ctx;
+    MD5Context stMd5Ctx;
     IMS_UCHAR ucTemp;
     IMS_UCHAR aucBranch[16];
     IMS_CHAR acViaBranch[32 + 1] = {
@@ -112,37 +115,37 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
     };
 
     // Calculate H(branch)
-    IMSMD5_Initialize(&stMD5Ctx);
+    IMSMD5_Initialize(&stMd5Ctx);
     IMSMD5_Update(
-            reinterpret_cast<const IMS_UCHAR*>(pszFromTag), IMS_StrLen(pszFromTag), &stMD5Ctx);
-    IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCallID), IMS_StrLen(pszCallID), &stMD5Ctx);
+            reinterpret_cast<const IMS_UCHAR*>(pszFromTag), IMS_StrLen(pszFromTag), &stMd5Ctx);
+    IMSMD5_Update(COLON, 1, &stMd5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszCallId), IMS_StrLen(pszCallId), &stMd5Ctx);
 
     if (pszToTag != IMS_NULL)
     {
-        IMSMD5_Update(COLON, 1, &stMD5Ctx);
+        IMSMD5_Update(COLON, 1, &stMd5Ctx);
         IMSMD5_Update(
-                reinterpret_cast<const IMS_UCHAR*>(pszToTag), IMS_StrLen(pszToTag), &stMD5Ctx);
+                reinterpret_cast<const IMS_UCHAR*>(pszToTag), IMS_StrLen(pszToTag), &stMd5Ctx);
     }
 
-    IMSMD5_Update(COLON, 1, &stMD5Ctx);
-    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszRequestURI), IMS_StrLen(pszRequestURI),
-            &stMD5Ctx);
+    IMSMD5_Update(COLON, 1, &stMd5Ctx);
+    IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszRequestUri), IMS_StrLen(pszRequestUri),
+            &stMd5Ctx);
 
     AString strCSeq;
     strCSeq.SetNumber(nCSeqNum);
-    IMSMD5_Update(COLON, 1, &stMD5Ctx);
+    IMSMD5_Update(COLON, 1, &stMd5Ctx);
     IMSMD5_Update(
-            reinterpret_cast<const IMS_UCHAR*>(strCSeq.GetStr()), strCSeq.GetLength(), &stMD5Ctx);
+            reinterpret_cast<const IMS_UCHAR*>(strCSeq.GetStr()), strCSeq.GetLength(), &stMd5Ctx);
 
     if (pszTopmostVia != IMS_NULL)
     {
-        IMSMD5_Update(COLON, 1, &stMD5Ctx);
+        IMSMD5_Update(COLON, 1, &stMd5Ctx);
         IMSMD5_Update(reinterpret_cast<const IMS_UCHAR*>(pszTopmostVia), IMS_StrLen(pszTopmostVia),
-                &stMD5Ctx);
+                &stMd5Ctx);
     }
 
-    IMSMD5_Finalize(&stMD5Ctx, aucBranch);
+    IMSMD5_Finalize(&stMd5Ctx, aucBranch);
 
     for (IMS_UINT32 i = 0; i < 16; i++)
     {
@@ -177,7 +180,7 @@ PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(IN const IMS_CHAR* pszToTag,
 }
 
 PUBLIC GLOBAL AString SipUtils::GenerateViaBranch(
-        IN const AString& strExtensionToken /* = AString::ConstNull() */)
+        IN const AString& strExtensionToken /*= AString::ConstNull()*/)
 {
     AString strViaBranch;
     ImsTime stTime = IMS_SYS_GetLocalTime();
@@ -204,31 +207,31 @@ PUBLIC GLOBAL void SipUtils::Init(IN IMS_SINT32 nSlotId)
     // HEADER_REQ_SESSION-ID
     if (SipFeatures::IsHeaderSessionIdRequired(nSlotId))
     {
-        if (pFixedKeyForSessionId == IMS_NULL)
+        if (s_pFixedKeyForSessionId == IMS_NULL)
         {
-            pFixedKeyForSessionId = new AString[SystemConfig::GetMaxSimSlot()];
+            s_pFixedKeyForSessionId = new AString[SystemConfig::GetMaxSimSlot()];
         }
 
         if ((nSlotId >= IMS_SLOT_0) && (nSlotId < SystemConfig::GetMaxSimSlot()))
         {
             // Generates pseudo-random 128-bit system secret key
             IDeviceInfo* piDeviceInfo = PhoneInfoService::GetPhoneInfoService()->GetDeviceInfo();
-            AString strIMEI;
+            AString strImei;
 
-            piDeviceInfo->GetDeviceId(nSlotId, strIMEI);
+            piDeviceInfo->GetDeviceId(nSlotId, strImei);
 
             // If the IMEI is less than 14,
             // we consider it to the invalid value and generate the random secret key
-            if (strIMEI.GetLength() < 14)
+            if (strImei.GetLength() < 14)
             {
                 IMS_UINT32 nR0 = IMS_SYS_GetRandom0();
 
-                pFixedKeyForSessionId[nSlotId].Sprintf(
+                s_pFixedKeyForSessionId[nSlotId].Sprintf(
                         "%08x%05x%x", nR0, IMS_SYS_GetTimeInMicroSeconds(), (nR0 % 0x10));
             }
             else
             {
-                pFixedKeyForSessionId[nSlotId] = strIMEI.GetSubStr(0, 14);
+                s_pFixedKeyForSessionId[nSlotId] = strImei.GetSubStr(0, 14);
             }
         }
     }

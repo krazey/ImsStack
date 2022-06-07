@@ -1,33 +1,37 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_CONNECTION_NOTIFIER_H_
-#define _SIP_CONNECTION_NOTIFIER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_CONNECTION_NOTIFIER_H_
+#define SIP_CONNECTION_NOTIFIER_H_
 
 #include "Connection.h"
 #include "ISipServerTransactionStateListener.h"
 #include "ISipSocketListener.h"
+#include "Sip.h"
 #include "SipProfile.h"
 #include "SipTransportAddress.h"
 
-class SipTransportHelper;
-class SipParameter;
-class SipSocket;
-class SipSocketAddress;
-class SipServerTransactionState;
+class IOnSipConnectionNotifierErrorListener;
+class IOnSipServerConnectionListener;
 class ISipDialog;
 class ISipServerConnection;
-class IOnSipServerConnectionListener;
-class IOnSipConnectionNotifierErrorListener;
+class SipParameter;
+class SipServerTransactionState;
+class SipSocket;
+class SipSocketAddress;
+class SipTransportHelper;
 
 class SipConnectionNotifier :
         public Connection,
@@ -35,74 +39,88 @@ class SipConnectionNotifier :
         public ISipSocketListener
 {
 public:
-    SipConnectionNotifier(IN IMS_SINT32 nScheme_, IN IMS_SINT32 nPort_,
-            IN CONST AString& strParams_, IN IMS_BOOL bSharedMode_ = IMS_FALSE);
+    SipConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort, IN const AString& strParams,
+            IN IMS_BOOL bSharedMode = IMS_FALSE);
     virtual ~SipConnectionNotifier();
 
-private:
-    SipConnectionNotifier(IN CONST SipConnectionNotifier& objRHS);
-    SipConnectionNotifier& operator=(IN CONST SipConnectionNotifier& objRHS);
+    SipConnectionNotifier(IN const SipConnectionNotifier&) = delete;
+    SipConnectionNotifier& operator=(IN const SipConnectionNotifier&) = delete;
 
 public:
     // IConnection interface
-    virtual void Close();
+    void Close() override;
 
     // ISipConnectionNotifier interface
     ISipServerConnection* AcceptAndOpen();
-    const IPAddress& GetLocalAddress() const;
-    IMS_SINT32 GetLocalPort() const;
-    void SetListener(IN IOnSipServerConnectionListener* piListener);
+    inline const IPAddress& GetLocalAddress() const { return m_objIpAddr; }
+    inline IMS_SINT32 GetLocalPort() const { return m_nPort; }
+    inline void SetListener(IN IOnSipServerConnectionListener* piListener)
+    {
+        m_piListener = piListener;
+    }
 
-    //// IMS extensions
     ISipServerConnection* AcceptAndOpen(OUT ISipDialog*& piOrigDialog);
     AString GetContactAddress() const;
-    // MULTI_REG_SIP_PROFILE
-    SipProfile* GetSipProfile() const;
+    inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
     IMS_BOOL IsTransportResourceReserved(IN IMS_SINT32 nType = TRANSPORT_ALL) const;
-    IMS_RESULT ReserveTransportResource(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
+    IMS_RESULT ReserveTransportResource(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
             IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFlowControl);
     IMS_RESULT RestoreTransportResource(
-            IN IMS_SINT32 nType, IN CONST IPAddress& objPeerIP, IN IMS_SINT32 nPeerPort);
-    void SetErrorListener(IN IOnSipConnectionNotifierErrorListener* piListener);
-    void SetFilter(IN CONST AString& strFilter);
-    void SetFromAndContact(IN CONST AString& strFrom, IN CONST AString& strDisplayName,
-            IN CONST AString& strUserInfo);
-    // MULTI_REG_SIP_PROFILE
-    void SetSipProfile(IN SipProfile* pProfile);
+            IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
+    inline void SetErrorListener(IN IOnSipConnectionNotifierErrorListener* piListener)
+    {
+        m_piErrorListener = piListener;
+    }
+    inline void SetFilter(IN const AString& strFilter) { m_strFilter = strFilter; }
+    void SetFromAndContact(IN const AString& strFrom, IN const AString& strDisplayName,
+            IN const AString& strUserInfo);
+    inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
     void UpdatePortFlowControl(IN IMS_SINT32 nPort);
     void UpdatePortUc(IN IMS_SINT32 nPort);
 
     // Extension methods
-    AString GetUserIdentity() const;
-    IMS_BOOL IsSameConnectionNotifier(IN CONST SipTransportAddress& objTA) const;
-    inline IMS_BOOL IsSharedMode() const { return (nMode == SHARED) ? IMS_TRUE : IMS_FALSE; }
+    inline AString GetUserIdentity() const
+    {
+        return AString("\"Anonymous\" <sip:anonymous@anonymous.invalid>");
+    }
+    IMS_BOOL IsSameConnectionNotifier(IN const SipTransportAddress& objTAddr) const;
+    inline IMS_BOOL IsSharedMode() const { return (m_nMode == SHARED) ? IMS_TRUE : IMS_FALSE; }
 
 protected:
     // ISipServerTransactionStateListener interface
-    virtual void ServerTransactionState_ForkedRequestReceived(
-            IN SipServerTransactionState* pSTState, IN SipDialogEx* pOrigDialogEx);
-    virtual void ServerTransactionState_RequestCreated(IN SipServerTransactionState* pSTState);
-    virtual void ServerTransactionState_RequestReceived(IN SipServerTransactionState* pSTState);
+    void ServerTransactionState_ForkedRequestReceived(
+            IN SipServerTransactionState* pStState, IN SipDialogEx* pOrigDialogEx) override;
+    void ServerTransactionState_RequestCreated(IN SipServerTransactionState* pStState) override;
+    void ServerTransactionState_RequestReceived(IN SipServerTransactionState* pStState) override;
 
     // ISipSocketListener interface
-    virtual void Socket_NotifyError(IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode);
-    virtual void Socket_SendEnabled(IN SipSocket* pSocket);
+    void Socket_NotifyError(IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode) override;
+    void Socket_SendEnabled(IN SipSocket* pSocket) override;
 
 private:
     void ClearTransportResource();
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
-    void ControlUDPClientReference(IN IMS_SINT32 nControl);
+    void ControlUdpClientReference(IN IMS_SINT32 nControl);
     IMS_BOOL CreateClientInitiatedConnection(IN IMS_SINT32 nPort, IN SipSocketAddress* pFarEnd);
     IMS_BOOL ConnectClientInitiatedConnection();
     void DestroyClientInitiatedConnection(IN IMS_SINT32 nPort);
-    void ExtractProperties(IN CONST AString& strParams);
+    void ExtractProperties(IN const AString& strParams);
     SipTransportHelper* GetTransportHelper() const;
-    IMS_BOOL IsClientInitiatedConnectionRequired() const;
-    IMS_BOOL IsIpSecRequired() const;
-    IMS_BOOL IsTcpConnectionOnlyRequired() const;
+    inline IMS_BOOL IsClientInitiatedConnectionRequired() const
+    {
+        return Sip::IsPortSpecified(m_nPortFlowControl);
+    }
+    inline IMS_BOOL IsIpSecRequired() const
+    {
+        return ((m_nTransportExt & Sip::TRANSPORT_EXT_IPSEC) != 0);
+    }
+    inline IMS_BOOL IsTcpConnectionOnlyRequired() const
+    {
+        return ((m_nTransportExt & Sip::TRANSPORT_EXT_TCP_ONLY) != 0);
+    }
 
     IMS_RESULT RestoreTransportResourceForClientInitiatedConnection(
-            IN CONST IPAddress& objPeerIP, IN IMS_SINT32 nPeerPort);
+            IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort);
     IMS_RESULT RestoreTransportResourceForServerConnection();
 
 private:
@@ -112,14 +130,14 @@ private:
         DEDICATED
     };
 
-    // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
+    /// FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     enum
     {
         CTRL_CREATE = 1,
         CTRL_DESTROY = 2
     };
 
-    // Error codes
+    /// Error codes
     enum
     {
         TRANSPORT_ERROR_TCP_CLIENT = 1,
@@ -127,7 +145,7 @@ private:
         TRANSPORT_ERROR_UDP_SERVER = 3
     };
 
-    // Types of transport resource
+    /// Types of transport resource
     enum
     {
         TRANSPORT_CLIENT_INITIATED_CONNECTION = 0x01,
@@ -135,24 +153,12 @@ private:
         TRANSPORT_ALL = (TRANSPORT_CLIENT_INITIATED_CONNECTION | TRANSPORT_SERVER_CONNECTION)
     };
 
-#ifdef __JSR180_ONLY__
-    struct UserProfile
-    {
-        // Active SIP user identity : From header
-        AString strFrom;
-
-        // Terminal SIP settings : Contact header
-        AString strDisplayName;
-        AString strUserInfo;
-    };
-#endif
-
     class ForkedTxnState
     {
     public:
-        ForkedTxnState(IN SipDialogEx* pDialogEx_, IN SipServerTransactionState* pSTState_) :
+        ForkedTxnState(IN SipDialogEx* pDialogEx_, IN SipServerTransactionState* pStState_) :
                 pDialogEx(pDialogEx_),
-                pSTState(pSTState_)
+                pStState(pStState_)
         {
         }
 
@@ -160,52 +166,44 @@ private:
 
     public:
         RCPtr<SipDialogEx> pDialogEx;
-        RCPtr<SipServerTransactionState> pSTState;
+        RCPtr<SipServerTransactionState> pStState;
     };
 
-    static IMS_SINT32* pGlobalSystemPort;
+    static IMS_SINT32* s_pGlobalSystemPort;
 
-    IMS_SINT32 nMode;  // Shared mode or Dedicated mode
-
+    IMS_SINT32 m_nMode;  // Shared mode or Dedicated mode
     // Connetor.open() info.
-    IMS_SINT32 nScheme;
-    IMS_SINT32 nPort;
-    IMS_SINT32 nTransportProtocol;  // UDP only / TCP only / Both (udp/tcp)
+    IMS_SINT32 m_nScheme;
+    IMS_SINT32 m_nPort;
+    IMS_SINT32 m_nTransportProtocol;  // UDP only / TCP only / Both (udp/tcp)
     // MULTI_REG_TRANSPORT
-    IMS_SINT32 nTransportExt;
-    AString strType;
-    AString strFilter;  // For PushRegistry
-    IMSList<SipParameter*> objParameters;
-
-#ifdef __JSR180_ONLY__
-    UserProfile stUserProfile;
-#endif
+    IMS_SINT32 m_nTransportExt;
+    AString m_strType;
+    AString m_strFilter;  // For PushRegistry
+    IMSList<SipParameter*> m_objParameters;
 
     // Identifier for IP connectivity
-    IPAddress objIPA;
-    IMS_SINT32 nPortC;
-    SipSocket* pSocket_UDP;
-    SipSocket* pSocket_TCP;
+    IPAddress m_objIpAddr;
+    IMS_SINT32 m_nPortC;
+    SipSocket* m_pSocketUdp;
+    SipSocket* m_pSocketTcp;
     // RFC5626_FLOW_CONTROL
-    IMS_SINT32 nPortFlowControl;
-
+    IMS_SINT32 m_nPortFlowControl;
     // FIX_MESSAGE_ORDER_ON_MIXED_TRANSPORT_USE
     // The patch grabs the reference of the datagram socket (UDP client socket)
     // to prevent misordering SIP messages when REG or re-REG is done.
     // It's only applied if IPSec is turned on and this assumes that
     // UDP transport protocol may be used in the near future.
-    SipSocket* pSocket_UDPClient;
+    SipSocket* m_pSocketUdpClient;
     // For client initiated connection (TCP_ONLY / FLOW_CONTROL)
-    SipSocket* pSocket_TCPClient;
-    SipSocketAddress* pSA_FarEnd;
-
-    // MULTI_REG_SIP_PROFILE
-    RCPtr<SipProfile> pSIPProfile;
+    SipSocket* m_pSocketTcpClient;
+    SipSocketAddress* m_pSockAddrFarEnd;
+    RCPtr<SipProfile> m_pSipProfile;
     // Queue for incoming request messages
-    IMSList<RCPtr<SipServerTransactionState>> objTxnStates;
-    IMSList<ForkedTxnState*> objForkedTxnStates;
-    IOnSipServerConnectionListener* piListener;
-    IOnSipConnectionNotifierErrorListener* piErrorListener;
+    IMSList<RCPtr<SipServerTransactionState>> m_objTxnStates;
+    IMSList<ForkedTxnState*> m_objForkedTxnStates;
+    IOnSipServerConnectionListener* m_piListener;
+    IOnSipConnectionNotifierErrorListener* m_piErrorListener;
 };
 
-#endif  // _SIP_CONNECTION_NOTIFIER_H_
+#endif

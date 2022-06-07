@@ -1,27 +1,32 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
-#include "ServiceTimer.h"
-#include "ServiceSystemTime.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ByteArray.h"
-#include "Connector.h"
+#include "ServiceMemory.h"
+#include "ServiceSystemTime.h"
+#include "ServiceTimer.h"
+
 #include "private/ConfigurationManager.h"
+
+#include "Connector.h"
 #include "ISipSocketListener.h"
 #include "ISipStreamSocketListener.h"
-#include "SipPrivate.h"
 #include "SipDebug.h"
-#include "SipRtConfigUtils.h"
 #include "SipMessageBuffer.h"
+#include "SipPrivate.h"
+#include "SipRtConfigUtils.h"
 #include "SipStreamSocket.h"
 
 __IMS_TRACE_TAG_SIP__;
@@ -29,73 +34,73 @@ __IMS_TRACE_TAG_SIP__;
 PUBLIC
 SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId) :
         SipSocket(nSlotId, SipSocketAddress::SOCKET_TCP_CLIENT),
-        bSecure(IMS_FALSE),
-        bSIPKeepAliveConfigured(IMS_FALSE),
-        piTxTimer(IMS_NULL),
-        nLastAliveTime(0),
-        piKeepAliveTimer(IMS_NULL),
-        piListener(IMS_NULL)
+        m_bSecure(IMS_FALSE),
+        m_bSipKeepAliveConfigured(IMS_FALSE),
+        m_piTxTimer(IMS_NULL),
+        m_nLastAliveTime(0),
+        m_piKeepAliveTimer(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
     if (pSipConfig != IMS_NULL)
     {
-        objTV_TCP = pSipConfig->GetTimerValueTCP();
+        m_objTcpTimerValues = pSipConfig->GetTimerValueTCP();
     }
     else
     {
-        objTV_TCP.m_nTvConnectionWaiting = CONNECTION_TIMER_VALUE;
-        objTV_TCP.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
-        objTV_TCP.m_nTvWouldblockWaiting = WOULDBLOCK_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvConnectionWaiting = CONNECTION_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvWouldblockWaiting = WOULDBLOCK_TIMER_VALUE;
     }
 }
 
 PUBLIC
-SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket_) :
+SipStreamSocket::SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket) :
         SipSocket(nSlotId, SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER),
-        bSecure(IMS_FALSE),
-        bSIPKeepAliveConfigured(IMS_FALSE),
-        piTxTimer(IMS_NULL),
-        nLastAliveTime(0),
-        piKeepAliveTimer(IMS_NULL),
-        piListener(IMS_NULL)
+        m_bSecure(IMS_FALSE),
+        m_bSipKeepAliveConfigured(IMS_FALSE),
+        m_piTxTimer(IMS_NULL),
+        m_nLastAliveTime(0),
+        m_piKeepAliveTimer(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
     const SipConfig* pSipConfig = ConfigurationManager::GetInstance()->GetSipConfig(nSlotId);
 
     if (pSipConfig != IMS_NULL)
     {
-        objTV_TCP = pSipConfig->GetTimerValueTCP();
+        m_objTcpTimerValues = pSipConfig->GetTimerValueTCP();
     }
     else
     {
-        objTV_TCP.m_nTvConnectionWaiting = CONNECTION_TIMER_VALUE;
-        objTV_TCP.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
-        objTV_TCP.m_nTvWouldblockWaiting = WOULDBLOCK_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvConnectionWaiting = CONNECTION_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
+        m_objTcpTimerValues.m_nTvWouldblockWaiting = WOULDBLOCK_TIMER_VALUE;
     }
 
-    piSocket = piSocket_;
+    m_piSocket = piSocket;
 
     SetState(STATE_CONNECTED);
 
-    if (piSocket != IMS_NULL)
+    if (m_piSocket != IMS_NULL)
     {
         IMS_UINT32 nPort;
-        IPAddress objIPA;
+        IPAddress objIp;
 
-        piSocket->GetPeerName(objIPA, nPort);
+        m_piSocket->GetPeerName(objIp, nPort);
 
-        objSA.SetPort(nPort);
-        objSA.SetIpAddress(objIPA);
+        m_objSockAddr.SetPort(nPort);
+        m_objSockAddr.SetIpAddress(objIp);
 
-        piSocket->SetListener(this);
+        m_piSocket->SetListener(this);
 
         // Gets the local IP address and port
-        objIPA = IPAddress::NONE;
+        objIp = IPAddress::NONE;
         nPort = 0;
-        piSocket->GetSockName(objIPA, nPort);
+        m_piSocket->GetSockName(objIp, nPort);
 
         // Check the socket option and set it if it is present...
-        SetSocketOptions(objIPA, nPort);
+        SetSocketOptions(objIp, nPort);
     }
 
     // Start a keep-alive timer
@@ -108,8 +113,8 @@ PUBLIC VIRTUAL SipStreamSocket::~SipStreamSocket()
     IMS_TRACE_D("StreamSocket(D) :: (FarEnd: %s, %d)",
             SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
                     ? "xxx"
-                    : SipDebug::GetIp(objSA.GetIpAddress()),
-            objSA.GetPort(), 0);
+                    : SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
+            m_objSockAddr.GetPort(), 0);
 
     StopTxTimer();
     StopKeepAliveTimer();
@@ -120,24 +125,17 @@ PUBLIC VIRTUAL void SipStreamSocket::ApplyIpSec(IN ISocket* /*piAcceptedSocket =
     IPAddress objIpAddr;
     IMS_UINT32 nPort = 0;
 
-    piSocket->GetSockName(objIpAddr, nPort);
+    m_piSocket->GetSockName(objIpAddr, nPort);
 
     SocketAddress objLocal(objIpAddr, static_cast<IMS_SINT32>(nPort));
 
-    ApplyIpSecInternal(objLocal, &(objSA.GetSocketAddress()));
-    ApplyIpSecInternal(objSA.GetSocketAddress(), &objLocal);
+    ApplyIpSecInternal(objLocal, &(m_objSockAddr.GetSocketAddress()));
+    ApplyIpSecInternal(m_objSockAddr.GetSocketAddress(), &objLocal);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Connect()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSocket == IMS_NULL)
+    if (m_piSocket == IMS_NULL)
     {
         return IMS_FALSE;
     }
@@ -147,13 +145,13 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Connect()
         return IMS_TRUE;
     }
 
-    IMS_SINT32 nResult = piSocket->Connect(objSA.GetIpAddress(), objSA.GetPort());
+    IMS_SINT32 nResult = m_piSocket->Connect(m_objSockAddr.GetIpAddress(), m_objSockAddr.GetPort());
 
     if (nResult == ISocket::RESULT_WOULDBLOCK)
     {
         SetState(STATE_CONNECTING);
 
-        if (StartTxTimer(objTV_TCP.m_nTvConnectionWaiting) != IMS_SUCCESS)
+        if (StartTxTimer(m_objTcpTimerValues.m_nTvConnectionWaiting) != IMS_SUCCESS)
         {
             IMS_TRACE_E(0, "Starting CONNECT_TIMER failed", 0, 0, 0);
         }
@@ -174,17 +172,10 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Connect()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(IN CONST IPAddress& objIPA,
-        IN IMS_UINT32 nPort /* = 0 */, IN IMS_BOOL bSecure /* = IMS_FALSE */)
+PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(
+        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!SipSocket::Create(objIPA, nPort, bSecure))
+    if (!SipSocket::Create(objIp, nPort, bSecure))
     {
         return IMS_FALSE;
     }
@@ -194,16 +185,16 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(IN CONST IPAddress& objIPA,
         return IMS_FALSE;
     }
 
-    if (piSocket->Bind(objIPA, nPort) == ISocket::RESULT_ERROR)
+    if (m_piSocket->Bind(objIp, nPort) == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
 
-    this->bSecure = bSecure;
+    m_bSecure = bSecure;
 
     IMS_TRACE_I("StreamSocket(C) :: (%s , %d)",
             SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
-                                                                    : SipDebug::GetIp(objIPA),
+                                                                    : SipDebug::GetIp(objIp),
             nPort, 0);
 
     ApplyIpSec();
@@ -211,37 +202,23 @@ PUBLIC VIRTUAL IMS_BOOL SipStreamSocket::Create(IN CONST IPAddress& objIPA,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort)
+PUBLIC VIRTUAL void SipStreamSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSocket != IMS_NULL)
+    if (m_piSocket != IMS_NULL)
     {
-        piSocket->GetSockName(objIPA, nPort);
+        m_piSocket->GetSockName(objIp, nPort);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        IN IMS_UINT32 nPort /* = 0 */, IN CONST IPAddress& objIPA /* = IPAddress::NONE */)
+PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
+        IN IMS_UINT32 nPort /*= 0*/, IN const IPAddress& objIp /*= IPAddress::NONE*/)
 {
     IMS_SINT32 nTotalSentBytes = 0;
     IMS_SINT32 nSentBytes;
     IMS_SINT32 nSendingBytes = nBuffLen;
 
-    //---------------------------------------------------------------------------------------------
-
     (void)nPort;
-    (void)objIPA;
+    (void)objIp;
 
     if (GetState() != STATE_CONNECTED)
     {
@@ -253,7 +230,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN CONST IMS_BYTE* pBuffer, IN I
 
     while (IMS_TRUE)
     {
-        nSentBytes = piSocket->Send(&pBuffer[nTotalSentBytes], nSendingBytes);
+        nSentBytes = m_piSocket->Send(&pBuffer[nTotalSentBytes], nSendingBytes);
 
         if (nSentBytes == ISocket::RESULT_ERROR)
         {
@@ -261,7 +238,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN CONST IMS_BYTE* pBuffer, IN I
         }
         else if (nSentBytes == ISocket::RESULT_WOULDBLOCK)
         {
-            StartTxTimer(objTV_TCP.m_nTvWouldblockWaiting);
+            StartTxTimer(m_objTcpTimerValues.m_nTvWouldblockWaiting);
             return nTotalSentBytes;
         }
         else
@@ -278,94 +255,40 @@ PUBLIC VIRTUAL IMS_SINT32 SipStreamSocket::Send(IN CONST IMS_BYTE* pBuffer, IN I
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipStreamSocket::NotifyForceClosed()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("StreamSocket(%p) is forcingly closed", this, 0, 0);
 
     StopTxTimer();
     StopKeepAliveTimer();
 
     SetForcinglyClosed(IMS_TRUE);
-    SipSocket::Socket_OnClosed(piSocket);
+    SipSocket::Socket_OnClosed(m_piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipStreamSocket::DisableKeepAlive()
 {
-    //---------------------------------------------------------------------------------------------
-
     StopKeepAliveTimer();
 
-    objTV_TCP.m_nTvKeepAlive = 0;
+    m_objTcpTimerValues.m_nTvKeepAlive = 0;
 
     IMS_TRACE_D("Keep-alive feature is disabled", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipStreamSocket::IsKeepAliveTimerActive() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (piKeepAliveTimer != IMS_NULL);
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipStreamSocket::IsKeepAlivePermanent() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // C1 : Configuration-based
     // C2 : Do not start a keep-alive timer if the socket is established by the remote end
-    return ((objTV_TCP.m_nTvKeepAlive == SipConfig::TcpTimerValues::PERMANENT) ||
-            ((objTV_TCP.m_nTvKeepAlive > 0) &&
+    return ((m_objTcpTimerValues.m_nTvKeepAlive == SipConfig::TcpTimerValues::PERMANENT) ||
+            ((m_objTcpTimerValues.m_nTvKeepAlive > 0) &&
                     (GetType() == SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER)));
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipStreamSocket::IsSecureSocket() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bSecure;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipStreamSocket::ReuseSocket()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (IsKeepAliveTimerActive() || IsKeepAlivePermanent())
     {
         IMS_TRACE_D("Stream socket is already having keep-alive timer", 0, 0, 0);
@@ -381,109 +304,69 @@ void SipStreamSocket::ReuseSocket()
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipStreamSocket::SetConfigForSipKeepAlive(IN IMS_BOOL bSIPKeepAlive)
+void SipStreamSocket::SetConfigForSipKeepAlive(IN IMS_BOOL bSipKeepAlive)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (bSIPKeepAliveConfigured != bSIPKeepAlive)
+    if (m_bSipKeepAliveConfigured != bSipKeepAlive)
     {
-        IMS_TRACE_D("SIPKeepAlive is changed; %s", _TRACE_B_(bSIPKeepAlive), 0, 0);
+        IMS_TRACE_D("SIPKeepAlive is changed; %s", _TRACE_B_(bSipKeepAlive), 0, 0);
 
-        bSIPKeepAliveConfigured = bSIPKeepAlive;
+        m_bSipKeepAliveConfigured = bSipKeepAlive;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipStreamSocket::SetFarEnd(IN CONST IPAddress& objIPA, IN IMS_UINT32 nPort)
+void SipStreamSocket::SetFarEnd(IN const IPAddress& objIp, IN IMS_UINT32 nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    objSA.SetPort(nPort);
-    objSA.SetIpAddress(objIPA);
+    m_objSockAddr.SetPort(nPort);
+    m_objSockAddr.SetIpAddress(objIp);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipStreamSocket::SetKeepAlivePolicy(IN IMS_SINT32 nPolicy)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_D("keep-alive policy is changed (%d >> %d)", m_objTcpTimerValues.m_nTvKeepAlive,
+            nPolicy, 0);
 
-    IMS_TRACE_D("keep-alive policy is changed (%d >> %d)", objTV_TCP.m_nTvKeepAlive, nPolicy, 0);
-
-    objTV_TCP.m_nTvKeepAlive = nPolicy;
+    m_objTcpTimerValues.m_nTvKeepAlive = nPolicy;
 
     // If the default value is set, it will be set to the value based on the configuration.
-    if (objTV_TCP.m_nTvKeepAlive == (-1))
+    if (m_objTcpTimerValues.m_nTvKeepAlive == (-1))
     {
         const SipConfig* pSipConfig =
                 ConfigurationManager::GetInstance()->GetSipConfig(GetSlotId());
 
         if (pSipConfig != IMS_NULL)
         {
-            objTV_TCP.m_nTvKeepAlive = pSipConfig->GetTimerValueTCP().m_nTvKeepAlive;
+            m_objTcpTimerValues.m_nTvKeepAlive = pSipConfig->GetTimerValueTCP().m_nTvKeepAlive;
         }
         else
         {
-            objTV_TCP.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
+            m_objTcpTimerValues.m_nTvKeepAlive = KEEPALIVE_TIMER_VALUE;
         }
     }
 
     // Adjust the keep-alive timer
-    if ((objTV_TCP.m_nTvKeepAlive == 0) ||
-            (objTV_TCP.m_nTvKeepAlive == SipConfig::TcpTimerValues::PERMANENT))
+    if ((m_objTcpTimerValues.m_nTvKeepAlive == 0) ||
+            (m_objTcpTimerValues.m_nTvKeepAlive == SipConfig::TcpTimerValues::PERMANENT))
     {
         StopKeepAliveTimer();
     }
-    else if (objTV_TCP.m_nTvKeepAlive > 0)
+    else if (m_objTcpTimerValues.m_nTvKeepAlive > 0)
     {
         StartKeepAliveTimer(0);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipStreamSocket::SetListener(IN ISipStreamSocketListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((piTxTimer != IMS_NULL) && (piTxTimer == piTimer))
+    if ((m_piTxTimer != IMS_NULL) && (m_piTxTimer == piTimer))
     {
         IMS_TRACE_D("TransmissionTimer Expired", 0, 0, 0);
 
         StopTxTimer();
 
-        IMSList<ISipSocketListener*> objTmpListeners = objListeners;
+        IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
         if (GetState() == STATE_CONNECTING)
         {
@@ -510,7 +393,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
             }
         }
     }
-    else if ((piKeepAliveTimer != IMS_NULL) && (piKeepAliveTimer == piTimer))
+    else if ((m_piKeepAliveTimer != IMS_NULL) && (m_piKeepAliveTimer == piTimer))
     {
         IMS_TRACE_D("KeepAliveTimer Expired", 0, 0, 0);
         // DEBUGGING messages...
@@ -518,7 +401,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
             IMS_TRACE_D("KeepAliveTimer - ends (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
         }
 
-        IMS_UINT32 nInactiveInterval = IMS_SYS_GetTimeInSeconds() - nLastAliveTime;
+        IMS_UINT32 nInactiveInterval = IMS_SYS_GetTimeInSeconds() - m_nLastAliveTime;
 
         // If the inactive interval is zero, it means that this socket was used a short time ago,
         // so, it needs to set the inactive interval to 1 second forcibly.
@@ -533,7 +416,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
         // Check the inactive interval of the socket.
         // In any case, we need to give the resolution for the elapsed time.
         if ((nInactiveInterval > 0) &&
-                (nInactiveInterval < static_cast<IMS_UINT32>(objTV_TCP.m_nTvKeepAlive)))
+                (nInactiveInterval < static_cast<IMS_UINT32>(m_objTcpTimerValues.m_nTvKeepAlive)))
         {
             // Re-start the KeepAlive timer
             StartKeepAliveTimer(nInactiveInterval);
@@ -544,26 +427,19 @@ PROTECTED VIRTUAL void SipStreamSocket::Timer_TimerExpired(IN ITimer* piTimer)
 
             StopKeepAliveTimer();
 
-            if ((piListener != IMS_NULL) && (objTV_TCP.m_nTvKeepAlive > 0))
+            if ((m_piListener != IMS_NULL) && (m_objTcpTimerValues.m_nTvKeepAlive > 0))
             {
-                piListener->StreamSocket_KeepAliveExpired(this);
+                m_piListener->StreamSocket_KeepAliveExpired(this);
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSocket)
 {
     IMS_SINT32 nReadBytes;
     RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_BYTE* pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
-
-    //---------------------------------------------------------------------------------------------
 
     IMS_MEM_Memset(pRecvBuffer, 0x00, pMessageBuffer->GetLength());
 
@@ -587,7 +463,7 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSock
         else
         {
             pRecvBuffer[nReadBytes] = '\0';
-            objMFraming.AppendPacket(pRecvBuffer, nReadBytes);
+            m_objMsgFraming.AppendPacket(pRecvBuffer, nReadBytes);
 
             if (nReadBytes < pMessageBuffer->GetLength())
             {
@@ -598,19 +474,19 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSock
     }
 
     if ((nReadBytes == ISocket::RESULT_ERROR) ||
-            ((nReadBytes == ISocket::RESULT_WOULDBLOCK) && (objMFraming.IsEmpty())))
+            ((nReadBytes == ISocket::RESULT_WOULDBLOCK) && (m_objMsgFraming.IsEmpty())))
     {
         return;
     }
 
     // Ignore any CRLF appearing before the start-line
-    if (objMFraming.IgnoreCrlf())
+    if (m_objMsgFraming.IgnoreCrlf())
     {
-        if (objMFraming.IsEmpty())
+        if (m_objMsgFraming.IsEmpty())
         {
             // Notifies application to receive "pong" (server-to-client message)
             // to "ping" (keep-alive)
-            if (bSIPKeepAliveConfigured)
+            if (m_bSipKeepAliveConfigured)
             {
                 NotifyPongReceived();
             }
@@ -618,40 +494,33 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnDataReceived(IN ISocket* piSock
         }
     }
 
-    if (objMFraming.IsEmpty())
+    if (m_objMsgFraming.IsEmpty())
     {
         return;
     }
 
-    if (piListener != IMS_NULL)
+    if (m_piListener != IMS_NULL)
     {
         ByteArray objRecvBuffer;
 
-        while (objMFraming.CheckCompleteMessage())
+        while (m_objMsgFraming.CheckCompleteMessage())
         {
-            if (!objMFraming.GetCompleteMessage(objRecvBuffer))
+            if (!m_objMsgFraming.GetCompleteMessage(objRecvBuffer))
             {
                 break;
             }
 
-            piListener->StreamSocket_DataReceived(this, objRecvBuffer);
+            m_piListener->StreamSocket_DataReceived(this, objRecvBuffer);
 
-            objMFraming.UpdateState();
+            m_objMsgFraming.UpdateState();
         }
     }
 
     SipSocket::Socket_OnDataReceived(piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipStreamSocket::Socket_OnSendEnabled(IN ISocket* piSocket)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_CONNECTING)
     {
         SetState(STATE_CONNECTED);
@@ -662,15 +531,8 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnSendEnabled(IN ISocket* piSocke
     SipSocket::Socket_OnSendEnabled(piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipStreamSocket::Socket_OnConnected(IN ISocket* piSocket)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (GetState() == STATE_CONNECTING)
     {
         StopTxTimer();
@@ -686,26 +548,20 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnConnected(IN ISocket* piSocket)
     SipSocket::Socket_OnConnected(piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipStreamSocket::Socket_OnClosed(
-        IN ISocket* piSocket, IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
+        IN ISocket* piSocket, IN IMS_SINT32 nReason /*= ISocket::CLOSE_REASON_UNKNOWN*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     StopTxTimer();
     StopKeepAliveTimer();
 
-    if (objListeners.IsEmpty())
+    if (m_objListeners.IsEmpty())
     {
         SipStreamSocket* pTmpSocket = this;
-        ISipStreamSocketListener* piTmpListener = piListener;
+        ISipStreamSocketListener* piTmpListener = m_piListener;
         IMS_BOOL bPassiveClosedNotification = IMS_FALSE;
 
-        if ((piListener != IMS_NULL) && (IsKeepAlivePermanent() || (objTV_TCP.m_nTvKeepAlive > 0)))
+        if ((m_piListener != IMS_NULL) &&
+                (IsKeepAlivePermanent() || (m_objTcpTimerValues.m_nTvKeepAlive > 0)))
         {
             bPassiveClosedNotification = IMS_TRUE;
         }
@@ -723,32 +579,25 @@ PROTECTED VIRTUAL void SipStreamSocket::Socket_OnClosed(
     SipSocket::Socket_OnClosed(piSocket, nReason);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_RESULT SipStreamSocket::StartTxTimer(IN IMS_SINT32 nDuration)
 {
-    //--------------------------------------------------------------------------------------------
-
     if (nDuration <= 0)
     {
         IMS_TRACE_D("Do not start the trasmission timer, TV (%d)", nDuration, 0, 0);
         return IMS_SUCCESS;
     }
 
-    if (piTxTimer == IMS_NULL)
+    if (m_piTxTimer == IMS_NULL)
     {
-        piTxTimer = TimerService::GetTimerService()->CreateTimer();
+        m_piTxTimer = TimerService::GetTimerService()->CreateTimer();
 
-        if (piTxTimer == IMS_NULL)
+        if (m_piTxTimer == IMS_NULL)
         {
             return IMS_FAILURE;
         }
 
-        piTxTimer->SetTimer(nDuration, this);
+        m_piTxTimer->SetTimer(nDuration, this);
 
         IMS_TRACE_D("Transmission Timer Started", 0, 0, 0);
     }
@@ -756,48 +605,35 @@ IMS_RESULT SipStreamSocket::StartTxTimer(IN IMS_SINT32 nDuration)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipStreamSocket::StopTxTimer()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piTxTimer == IMS_NULL)
+    if (m_piTxTimer == IMS_NULL)
     {
         return;
     }
 
     IMS_TRACE_D("Transmission Timer Stopped", 0, 0, 0);
 
-    piTxTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piTxTimer);
-    piTxTimer = IMS_NULL;
+    m_piTxTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piTxTimer);
+    m_piTxTimer = IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_RESULT SipStreamSocket::StartKeepAliveTimer(IN IMS_SINT32 nInactiveInterval)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objTV_TCP.m_nTvKeepAlive <= 0)
+    if (m_objTcpTimerValues.m_nTvKeepAlive <= 0)
     {
-        IMS_TRACE_D("Do not start a keep-alive timer, TV (%d)", objTV_TCP.m_nTvKeepAlive, 0, 0);
+        IMS_TRACE_D("Do not start a keep-alive timer, TV (%d)", m_objTcpTimerValues.m_nTvKeepAlive,
+                0, 0);
         return IMS_SUCCESS;
     }
 
-    if (nInactiveInterval >= objTV_TCP.m_nTvKeepAlive)
+    if (nInactiveInterval >= m_objTcpTimerValues.m_nTvKeepAlive)
     {
         // Run the KeepAlive timer during one second.
-        nInactiveInterval = objTV_TCP.m_nTvKeepAlive - 1000;
+        nInactiveInterval = m_objTcpTimerValues.m_nTvKeepAlive - 1000;
     }
 
     // If KEEP_ALIVE timer is present, kill it.
@@ -808,15 +644,15 @@ IMS_RESULT SipStreamSocket::StartKeepAliveTimer(IN IMS_SINT32 nInactiveInterval)
         IMS_TRACE_D("KeepAliveTimer - starts (%s)", IMS_SYS_GetTimeString().GetStr(), 0, 0);
     }
 
-    piKeepAliveTimer = TimerService::GetTimerService()->CreateTimer();
+    m_piKeepAliveTimer = TimerService::GetTimerService()->CreateTimer();
 
-    if (piKeepAliveTimer == IMS_NULL)
+    if (m_piKeepAliveTimer == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating a KeepAlive timer failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    piKeepAliveTimer->SetTimer(objTV_TCP.m_nTvKeepAlive - nInactiveInterval, this);
+    m_piKeepAliveTimer->SetTimer(m_objTcpTimerValues.m_nTvKeepAlive - nInactiveInterval, this);
 
     // In case of Accept & Connect, the last active duration will be a zero.
     if (nInactiveInterval == 0)
@@ -827,40 +663,26 @@ IMS_RESULT SipStreamSocket::StartKeepAliveTimer(IN IMS_SINT32 nInactiveInterval)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipStreamSocket::StopKeepAliveTimer()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piKeepAliveTimer == IMS_NULL)
+    if (m_piKeepAliveTimer == IMS_NULL)
     {
         return;
     }
 
-    piKeepAliveTimer->KillTimer();
-    TimerService::GetTimerService()->DestroyTimer(piKeepAliveTimer);
-    piKeepAliveTimer = IMS_NULL;
+    m_piKeepAliveTimer->KillTimer();
+    TimerService::GetTimerService()->DestroyTimer(m_piKeepAliveTimer);
+    m_piKeepAliveTimer = IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipStreamSocket::UpdateLastAliveTime()
 {
-    //--------------------------------------------------------------------------------------------
-
-    if (piKeepAliveTimer == IMS_NULL)
+    if (m_piKeepAliveTimer == IMS_NULL)
     {
         return;
     }
 
-    nLastAliveTime = IMS_SYS_GetTimeInSeconds();
+    m_nLastAliveTime = IMS_SYS_GetTimeInSeconds();
 }

@@ -106,12 +106,12 @@ PUBLIC GLOBAL void SipTransactionTimer::FreeTimer(IN void* pvTimerHandle)
     }
 }
 
-PUBLIC GLOBAL void SipTransactionTimer::TimerExpired(IN SipEn_TimerType enTimerType)
+PUBLIC GLOBAL void SipTransactionTimer::TimerExpired(IN SipEn_TimerType eTimerType)
 {
-    (void)enTimerType;
+    (void)eTimerType;
 
     IMS_TRACE_I(
-            "___ EXPIRED TIMER - TYPE (%s) ___", SipStack::GetTimerTypeAsString(enTimerType), 0, 0);
+            "___ EXPIRED TIMER - TYPE (%s) ___", SipStack::GetTimerTypeAsString(eTimerType), 0, 0);
 }
 
 PRIVATE VIRTUAL void SipTransactionTimer::Timer_TimerExpired(IN ITimer* piTimer)
