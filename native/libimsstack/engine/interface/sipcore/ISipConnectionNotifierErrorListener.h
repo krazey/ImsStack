@@ -16,6 +16,8 @@
 #ifndef INTERFACE_SIP_CONNECTION_NOTIFIER_ERROR_LISTENER_H_
 #define INTERFACE_SIP_CONNECTION_NOTIFIER_ERROR_LISTENER_H_
 
+#include "AString.h"
+
 class ISipConnectionNotifier;
 
 /**

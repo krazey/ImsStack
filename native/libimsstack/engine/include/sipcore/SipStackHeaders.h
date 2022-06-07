@@ -17,7 +17,7 @@
 #define SIP_STACK_HEADERS_H_
 
 #include "SipStack.h"
-#include "SipStackHelper.h"
 #include "SipStackCallback.h"
+#include "SipStackHelper.h"
 
 #endif

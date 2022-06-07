@@ -1,58 +1,63 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ByteArray.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceSystemTime.h"
-#include "ByteArray.h"
+
 #include "private/SipConfig.h"
+
 #include "ISipHeader.h"
 #include "ISipTransportErrorListener.h"
 #include "ISipTransportListener.h"
-#include "SipPrivate.h"
-#include "SipDebug.h"
 #include "SipConfigProxy.h"
+#include "SipDebug.h"
 #include "SipFactoryProxy.h"
-#include "SipRtConfigUtils.h"
-#include "SipPortManager.h"
 #include "SipMessageBuffer.h"
+#include "SipPortManager.h"
+#include "SipPrivate.h"
+#include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 #include "SipStreamSocket.h"
-#include "SipTransportHelper.h"
 #include "SipTransport.h"
+#include "SipTransportHelper.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipTransport::SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType_) :
+SipTransport::SipTransport(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType) :
         ImsSlot(nSlotId),
-        nType(nType_),
-        bExplicitTargetProtocol(IMS_FALSE),
-        bIsRetransmission(IMS_FALSE),
-        bTxnFlowControlRequired(IMS_TRUE),
-        nNearEnd_PortC(Sip::PORT_UNSPECIFIED),
-        pSendBuffer(IMS_NULL),
-        nTransportExt(Sip::TRANSPORT_EXT_ANY),
-        nPortFlowControl(Sip::PORT_UNSPECIFIED),
-        pSocket(IMS_NULL),
-        piErrorListener(IMS_NULL)
+        m_nType(nType),
+        m_bExplicitTargetProtocol(IMS_FALSE),
+        m_bIsRetransmission(IMS_FALSE),
+        m_bTxnFlowControlRequired(IMS_TRUE),
+        m_nNearEndPortC(Sip::PORT_UNSPECIFIED),
+        m_pSendBuffer(IMS_NULL),
+        m_nTransportExt(Sip::TRANSPORT_EXT_ANY),
+        m_nPortFlowControl(Sip::PORT_UNSPECIFIED),
+        m_pSocket(IMS_NULL),
+        m_piErrorListener(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL SipTransport::~SipTransport()
 {
-    if (pSendBuffer != IMS_NULL)
+    if (m_pSendBuffer != IMS_NULL)
     {
-        delete pSendBuffer;
+        delete m_pSendBuffer;
     }
 
     ReleaseSocket();
@@ -62,18 +67,11 @@ PUBLIC VIRTUAL SipTransport::~SipTransport()
 #endif
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipSocket* SipTransport::CreateTcpClientSocket()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((objTA_FarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TCP) &&
-            (objTA_FarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TLS))
+    if ((m_objFarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TCP) &&
+            (m_objFarEnd.GetProtocol() != SipTransportAddress::PROTOCOL_TLS))
     {
         IMS_TRACE_E(0, "Transport :: Protocol does not use TCP", 0, 0, 0);
         return IMS_NULL;
@@ -81,54 +79,54 @@ SipSocket* SipTransport::CreateTcpClientSocket()
 
     SipSocket* pSocket = IMS_NULL;
     // RFC5626_FLOW_CONTROL
-    IMS_SINT32 nTempPortC = nNearEnd_PortC;
+    IMS_SINT32 nTempPortC = m_nNearEndPortC;
 
     if (IsFlowControlPortConfigured())
     {
         IMS_TRACE_D("Transport :: Flow control (%d >> %d) will be applied", nTempPortC,
-                nPortFlowControl, 0);
+                m_nPortFlowControl, 0);
 
-        nTempPortC = nPortFlowControl;
+        nTempPortC = m_nPortFlowControl;
     }
 
     SipTransportHelper* pTransportHelper = GetTransportHelper();
 
-    SipSocketAddress objSA;
-    objSA.SetIpAddress(objTA_NearEnd.GetIpAddress());
-    objSA.SetPort(nTempPortC);
+    SipSocketAddress objSockAddr;
+    objSockAddr.SetIpAddress(m_objNearEnd.GetIpAddress());
+    objSockAddr.SetPort(nTempPortC);
 
-    if ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
+    if ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
     {
-        SipSocketAddress objSA_FarEnd;
+        SipSocketAddress objSockAddrFarEnd;
 
-        objSA.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
+        objSockAddr.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
 
-        objSA_FarEnd.SetIpAddress(objTA_FarEnd.GetIpAddress());
-        objSA_FarEnd.SetPort(objTA_FarEnd.GetPort());
-        objSA_FarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
+        objSockAddrFarEnd.SetIpAddress(m_objFarEnd.GetIpAddress());
+        objSockAddrFarEnd.SetPort(m_objFarEnd.GetPort());
+        objSockAddrFarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
 
         // First, check the accepted TCP connection to re-use the TCP connection
-        pSocket = pTransportHelper->OpenStreamSocket(objSA, objSA_FarEnd);
+        pSocket = pTransportHelper->OpenStreamSocket(objSockAddr, objSockAddrFarEnd);
 
-        objSA.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
-        objSA_FarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
+        objSockAddr.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
+        objSockAddrFarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
 
         if (pSocket == IMS_NULL)
         {
-            pSocket = pTransportHelper->OpenStreamSocket(objSA, objSA_FarEnd);
+            pSocket = pTransportHelper->OpenStreamSocket(objSockAddr, objSockAddrFarEnd);
         }
 
         if ((pSocket == IMS_NULL) && IsFlowControlPortConfigured() &&
                 IsTransactionFlowControlRequired())
         {
             IMS_TRACE_D("Transport :: TCP client (%s, %d) can't be created by flow control",
-                    SipDebug::GetIp(objSA.GetIpAddress()), objSA.GetPort(), 0);
+                    SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
             return IMS_NULL;
         }
 
         // For port range configuration
-        IMS_SINT32 nTCPPortC = 0;
+        IMS_SINT32 nTcpPortC = 0;
 
         if (pSocket == IMS_NULL)
         {
@@ -144,50 +142,51 @@ SipSocket* SipTransport::CreateTcpClientSocket()
 
                     if (pPortMngr->IsPortCProvisioned())
                     {
-                        pSocket = pTransportHelper->OpenStreamSocket(objSA, objSA_FarEnd);
+                        pSocket =
+                                pTransportHelper->OpenStreamSocket(objSockAddr, objSockAddrFarEnd);
 
                         if (pSocket == IMS_NULL)
                         {
-                            nTCPPortC = pPortMngr->GetPortC(objSA.GetIpAddress());
+                            nTcpPortC = pPortMngr->GetPortC(objSockAddr.GetIpAddress());
                         }
                     }
                 }
 
-                objSA.SetPort(nTCPPortC);
+                objSockAddr.SetPort(nTcpPortC);
             }
         }
 
         if (pSocket == IMS_NULL)
         {
-            if (nTCPPortC > 0)
+            if (nTcpPortC > 0)
             {
                 // Use the port number selected by the previous condition logic.
             }
-            else if (nTempPortC != objTA_NearEnd.GetPort())
+            else if (nTempPortC != m_objNearEnd.GetPort())
             {
-                objSA.SetPort(nTempPortC);
+                objSockAddr.SetPort(nTempPortC);
             }
             else
             {
                 if (IsTcpConnectionOnlyRequired())
                 {
                     IMS_TRACE_D("Transport :: TCP client connection is only required...", 0, 0, 0);
-                    objSA.SetPort(nTempPortC);
+                    objSockAddr.SetPort(nTempPortC);
                 }
                 else if (IsFlowControlPortConfigured())
                 {
                     IMS_TRACE_D("Transport :: Flow control is required", 0, 0, 0);
-                    objSA.SetPort(nTempPortC);
+                    objSockAddr.SetPort(nTempPortC);
                 }
             }
 
             // If the transport protocol is TLS, SSL socket will be created...
-            if (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
+            if (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
             {
-                objSA.SetSecure(IMS_TRUE);
+                objSockAddr.SetSecure(IMS_TRUE);
             }
 
-            pSocket = pTransportHelper->CreateStreamSocket(objSA, objSA_FarEnd);
+            pSocket = pTransportHelper->CreateStreamSocket(objSockAddr, objSockAddrFarEnd);
 
             if (pSocket == IMS_NULL)
             {
@@ -195,196 +194,116 @@ SipSocket* SipTransport::CreateTcpClientSocket()
                 IMS_TRACE_E(0, "Creating TCP client (FAR - %s, %d)",
                         SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
                                 ? "xxx"
-                                : SipDebug::GetIp(objSA_FarEnd.GetIpAddress()),
-                        objSA_FarEnd.GetPort(), 0);
+                                : SipDebug::GetIp(objSockAddrFarEnd.GetIpAddress()),
+                        objSockAddrFarEnd.GetPort(), 0);
                 return IMS_NULL;
             }
 
             IMS_TRACE_D("Transport :: TCP client (%s, %d) is created",
-                    SipDebug::GetIp(objSA.GetIpAddress()), objSA.GetPort(), 0);
+                    SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
         }
         else
         {
             IMS_TRACE_D("Transport :: TCP client (%s, %d) is created",
-                    SipDebug::GetIp(objSA.GetIpAddress()), nTempPortC, 0);
+                    SipDebug::GetIp(objSockAddr.GetIpAddress()), nTempPortC, 0);
         }
     }
 
     return pSocket;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipTransport::EncodeMessage(IN_OUT ::SipMessage*& pstMessage, OUT ByteArray& objBuffer)
+IMS_BOOL SipTransport::EncodeMessage(IN_OUT ::SipMessage*& pSipMsg, OUT ByteArray& objBuffer)
 {
     RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_SINT32 nBuffLen = pMessageBuffer->GetLength();
     IMS_BYTE* pBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 
-    //---------------------------------------------------------------------------------------------
-
     IMS_MEM_Memset(pBuffer, 0x00, nBuffLen);
 
-    if (!SipStack::EncodeMessage(pstMessage, SipPrivate::GetEncodingOptions(), pBuffer, nBuffLen))
+    if (!SipStack::EncodeMessage(pSipMsg, SipPrivate::GetEncodingOptions(), pBuffer, nBuffLen))
+    {
         return IMS_FALSE;
+    }
 
     objBuffer.Append(pBuffer, nBuffLen);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-const SipTransportAddress& SipTransport::GetAddress(IN IMS_SINT32 nTA /* = TA_NEAR */) const
+const SipTransportAddress& SipTransport::GetAddress(IN IMS_SINT32 nTaType /*= TA_NEAR*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        return objTA_NearEnd;
-    else
-        return objTA_FarEnd;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_SINT32 SipTransport::GetPortC() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nNearEnd_PortC;
-}
-
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL
-*/
-PUBLIC
-IMS_SINT32 SipTransport::GetPortFlowControl() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return nPortFlowControl;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-const IPAddress& SipTransport::GetIpAddress(IN IMS_SINT32 nTA /* = TA_NEAR */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
+    if (nTaType == TA_NEAR)
     {
-        return objTA_NearEnd.GetIpAddress();
+        return m_objNearEnd;
     }
     else
     {
-        return objTA_FarEnd.GetIpAddress();
+        return m_objFarEnd;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipTransport::GetPort(IN IMS_SINT32 nTA /* = TA_NEAR */) const
+const IPAddress& SipTransport::GetIpAddress(IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        return objTA_NearEnd.GetPort();
+    if (nTaType == TA_NEAR)
+    {
+        return m_objNearEnd.GetIpAddress();
+    }
     else
-        return objTA_FarEnd.GetPort();
+    {
+        return m_objFarEnd.GetIpAddress();
+    }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipTransport::GetProtocol(IN IMS_SINT32 nTA /* = TA_NEAR */) const
+IMS_SINT32 SipTransport::GetPort(IN IMS_SINT32 nTaType /*= TA_NEAR*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        return objTA_NearEnd.GetProtocol();
+    if (nTaType == TA_NEAR)
+    {
+        return m_objNearEnd.GetPort();
+    }
     else
-        return objTA_FarEnd.GetProtocol();
+    {
+        return m_objFarEnd.GetPort();
+    }
 }
 
-/*
-
-Remarks
- MULTI_REG_TRANSPORT
-*/
 PUBLIC
-IMS_SINT32 SipTransport::GetTransportExt() const
+IMS_SINT32 SipTransport::GetProtocol(IN IMS_SINT32 nTaType /*= TA_NEAR*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return nTransportExt;
+    if (nTaType == TA_NEAR)
+    {
+        return m_objNearEnd.GetProtocol();
+    }
+    else
+    {
+        return m_objFarEnd.GetProtocol();
+    }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTransport::InitRetransmissionFlag()
-{
-    //---------------------------------------------------------------------------------------------
-
-    bIsRetransmission = IMS_FALSE;
-}
-
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PUBLIC
 IMS_BOOL SipTransport::InitTransportDetails(
-        IN CONST SipTransport* pTransport, IN CONST SipProfile* pSIPProfile /* = IMS_NULL */)
+        IN const SipTransport* pTransport, IN const SipProfile* pProfile /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pTransport == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    bExplicitTargetProtocol = pTransport->bExplicitTargetProtocol;
-    bTxnFlowControlRequired = pTransport->bTxnFlowControlRequired;
-    nNearEnd_PortC = pTransport->nNearEnd_PortC;
-    objTA_NearEnd = pTransport->objTA_NearEnd;
-    objTA_FarEnd = pTransport->objTA_FarEnd;
+    m_bExplicitTargetProtocol = pTransport->m_bExplicitTargetProtocol;
+    m_bTxnFlowControlRequired = pTransport->m_bTxnFlowControlRequired;
+    m_nNearEndPortC = pTransport->m_nNearEndPortC;
+    m_objNearEnd = pTransport->m_objNearEnd;
+    m_objFarEnd = pTransport->m_objFarEnd;
 
     // MULTI_REG_TRANSPORT
-    nTransportExt = pTransport->nTransportExt;
+    m_nTransportExt = pTransport->m_nTransportExt;
     // RFC5626_FLOW_CONTROL
-    nPortFlowControl = pTransport->nPortFlowControl;
+    m_nPortFlowControl = pTransport->m_nPortFlowControl;
 
-    if (!ReserveResource(pSIPProfile))
+    if (!ReserveResource(pProfile))
     {
         return IMS_FALSE;
     }
@@ -392,17 +311,10 @@ IMS_BOOL SipTransport::InitTransportDetails(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /* pstMessage */)
+IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /*pSipMsg*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nType == TYPE_CLIENT)
+    if (m_nType == TYPE_CLIENT)
     {
         InitRetransmissionFlag();
     }
@@ -410,63 +322,16 @@ IMS_BOOL SipTransport::InitTransportOnMessageReceived(IN ::SipMessage* /* pstMes
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipTransport::IsIpSecRequired() const
+IMS_BOOL SipTransport::SendToNetwork(
+        IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_BOOL bNotifyError /*= IMS_TRUE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return (((nTransportExt & Sip::TRANSPORT_EXT_IPSEC) != 0) ||
-            ((nTransportExt & Sip::TRANSPORT_EXT_IPSEC_UDP_ENC) != 0));
-}
-
-/*
-
-Remarks
- MULTI_REG_TRANSPORT
-*/
-PUBLIC
-IMS_BOOL SipTransport::IsTcpConnectionOnlyRequired() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return ((nTransportExt & Sip::TRANSPORT_EXT_TCP_ONLY) != 0);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipTransport::IsTransactionFlowControlRequired() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bTxnFlowControlRequired;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipTransport::SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-        IN IMS_BOOL bNotifyError /* = IMS_TRUE */)
-{
-    //---------------------------------------------------------------------------------------------
-
     // Find a socket to send an SIP message
-    if (pSocket == IMS_NULL)
+    if (m_pSocket == IMS_NULL)
     {
-        pSocket = LookupSocket();
+        m_pSocket = LookupSocket();
 
-        if (pSocket == IMS_NULL)
+        if (m_pSocket == IMS_NULL)
         {
             IMS_TRACE_E(0, "Can't find a proper SIP socket information from the transport layer.",
                     0, 0, 0);
@@ -475,20 +340,22 @@ IMS_BOOL SipTransport::SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 n
     }
 
     // For an initial TCP client connection...
-    if (!pSocket->Connect())
+    if (!m_pSocket->Connect())
     {
         IMS_TRACE_E(0, "Connecting transport channel failed ...", 0, 0, 0);
         goto EXIT_SendToNetwork;
     }
 
-    if (pSocket->GetState() != SipSocket::STATE_CONNECTED)
+    if (m_pSocket->GetState() != SipSocket::STATE_CONNECTED)
     {
         IMS_TRACE_D("___ Waiting the establishment of transport channel ...", 0, 0, 0);
 
-        if (pSendBuffer != IMS_NULL)
-            delete pSendBuffer;
+        if (m_pSendBuffer != IMS_NULL)
+        {
+            delete m_pSendBuffer;
+        }
 
-        pSendBuffer = new ByteArray(pBuffer, nBuffLen);
+        m_pSendBuffer = new ByteArray(pBuffer, nBuffLen);
 
         return IMS_TRUE;
     }
@@ -496,227 +363,144 @@ IMS_BOOL SipTransport::SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 n
     if (!TransmitMessage(pBuffer, nBuffLen))
     {
         IMS_TRACE_E(0, "Transmitting SIP message to the destination (%s:%d) failed",
-                SipDebug::GetIp(objTA_FarEnd.GetIpAddress()), objTA_FarEnd.GetPort(), 0);
+                SipDebug::GetIp(m_objFarEnd.GetIpAddress()), m_objFarEnd.GetPort(), 0);
         goto EXIT_SendToNetwork;
     }
 
-    if (!bIsRetransmission)
+    if (!m_bIsRetransmission)
     {
-        bIsRetransmission = IMS_TRUE;
+        m_bIsRetransmission = IMS_TRUE;
     }
 
     return IMS_TRUE;
 
 EXIT_SendToNetwork:
-    if (bNotifyError && bIsRetransmission && (piErrorListener != IMS_NULL))
+    if (bNotifyError && m_bIsRetransmission && (m_piErrorListener != IMS_NULL))
     {
         AString strError;
 
         strError.Sprintf("%d Message retransmission failed", SipError::TRANSPORT_E_CODE_107);
-        piErrorListener->TransportError_NotifyError(SipSocket::ERROR_SEND_FAILED, strError);
+        m_piErrorListener->TransportError_NotifyError(SipSocket::ERROR_SEND_FAILED, strError);
     }
 
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipTransport::SetAddress(
-        IN CONST SipTransportAddress& objTA, IN IMS_SINT32 nTA /* = TA_NEAR */)
+        IN const SipTransportAddress& objTAddr, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        objTA_NearEnd = objTA;
+    if (nTaType == TA_NEAR)
+    {
+        m_objNearEnd = objTAddr;
+    }
     else
-        objTA_FarEnd = objTA;
+    {
+        m_objFarEnd = objTAddr;
+    }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipTransport::SetExplicitTargetProtocol(IN IMS_BOOL bExplicitTargetProtocol)
+void SipTransport::SetIpAddress(IN const IPAddress& objIp, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->bExplicitTargetProtocol = bExplicitTargetProtocol;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTransport::SetIpAddress(IN CONST IPAddress& objIPAddress, IN IMS_SINT32 nTA /* = TA_NEAR */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        objTA_NearEnd.SetIpAddress(objIPAddress);
+    if (nTaType == TA_NEAR)
+    {
+        m_objNearEnd.SetIpAddress(objIp);
+    }
     else
-        objTA_FarEnd.SetIpAddress(objIPAddress);
+    {
+        m_objFarEnd.SetIpAddress(objIp);
+    }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipTransport::SetListener(IN ISipTransportErrorListener* piListener)
+void SipTransport::SetPort(IN IMS_SINT32 nPort, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    piErrorListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTransport::SetPort(IN IMS_SINT32 nPort, IN IMS_SINT32 nTA /* = TA_NEAR */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        objTA_NearEnd.SetPort(nPort);
+    if (nTaType == TA_NEAR)
+    {
+        m_objNearEnd.SetPort(nPort);
+    }
     else
-        objTA_FarEnd.SetPort(nPort);
+    {
+        m_objFarEnd.SetPort(nPort);
+    }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipTransport::SetProtocol(IN IMS_SINT32 nProtocol, IN IMS_SINT32 nTA /* = TA_NEAR */)
+void SipTransport::SetProtocol(IN IMS_SINT32 nProtocol, IN IMS_SINT32 nTaType /*= TA_NEAR*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nTA == TA_NEAR)
-        objTA_NearEnd.SetProtocol(nProtocol);
+    if (nTaType == TA_NEAR)
+    {
+        m_objNearEnd.SetProtocol(nProtocol);
+    }
     else
-        objTA_FarEnd.SetProtocol(nProtocol);
+    {
+        m_objFarEnd.SetProtocol(nProtocol);
+    }
 }
 
-/*
-
-Remarks
-
-*/
+// RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
 PUBLIC
-void SipTransport::SetTransactionFlowControlRequired(IN IMS_BOOL bFlowControlRequired)
+void SipTransport::SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+        IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
+        IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {
-    //---------------------------------------------------------------------------------------------
+    m_objNearEnd.SetIpAddress(objIp);
+    m_objNearEnd.SetPort(nPortS);
 
-    bTxnFlowControlRequired = bFlowControlRequired;
-}
-
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
-*/
-PUBLIC
-void SipTransport::SetTransportTuple(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
-        IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC /* = Sip::PORT_UNSPECIFIED */,
-        IN IMS_SINT32 nTransportExt /* = 0 (ANY) */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    objTA_NearEnd.SetIpAddress(objIPA);
-    objTA_NearEnd.SetPort(nPortS);
-
-    nNearEnd_PortC = nPortC;
+    m_nNearEndPortC = nPortC;
 
     // RFC5626_FLOW_CONTROL
-    nPortFlowControl = nPortFC;
+    m_nPortFlowControl = nPortFc;
 
     // MULTI_REG_TRANSPORT
-    this->nTransportExt = nTransportExt;
+    m_nTransportExt = nTransportExt;
 
-    IMS_TRACE_D("SetTransportTuple: port-c=%d, port-fc=%d, transportExt=%08X", nPortC, nPortFC,
+    IMS_TRACE_D("SetTransportTuple: port-c=%d, port-fc=%d, transportExt=%08X", nPortC, nPortFc,
             nTransportExt);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipTransport::StoreResource()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Store the socket if and only if the transport protocol is TCP
-    if ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
+    if ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
     {
-        SipSocketAddress objSA;
-        SipSocketAddress objSA_FarEnd;
+        SipSocketAddress objSockAddr;
+        SipSocketAddress objSockAddrFarEnd;
 
-        objSA.SetIpAddress(objTA_NearEnd.GetIpAddress());
-        objSA.SetPort(objTA_NearEnd.GetPort());
-        objSA.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
+        objSockAddr.SetIpAddress(m_objNearEnd.GetIpAddress());
+        objSockAddr.SetPort(m_objNearEnd.GetPort());
+        objSockAddr.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
 
-        objSA_FarEnd.SetIpAddress(objTA_FarEnd.GetIpAddress());
-        objSA_FarEnd.SetPort(objTA_FarEnd.GetPort());
-        objSA_FarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
+        objSockAddrFarEnd.SetIpAddress(m_objFarEnd.GetIpAddress());
+        objSockAddrFarEnd.SetPort(m_objFarEnd.GetPort());
+        objSockAddrFarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER);
 
         // First, check the accepted TCP connection to re-use the TCP connection
-        pSocket = GetTransportHelper()->OpenStreamSocket(objSA, objSA_FarEnd);
+        m_pSocket = GetTransportHelper()->OpenStreamSocket(objSockAddr, objSockAddrFarEnd);
 
-        if (pSocket != IMS_NULL)
+        if (m_pSocket != IMS_NULL)
         {
-            pSocket->SetListener(this);
+            m_pSocket->SetListener(this);
 
             IMS_TRACE_D("Transport :: TCP connection is bound", 0, 0, 0);
         }
     }
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransport::FormViaHeader(
-        IN_OUT ::SipMessage*& /* pstMessage */, IN CONST SipProfile* /*pSIPProfile = IMS_NULL*/)
+PUBLIC VIRTUAL IMS_BOOL SipTransport::ReserveResource(IN const SipProfile* pProfile /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransport::ReserveResource(
-        IN CONST SipProfile* pSIPProfile /* = IMS_NULL*/)
-{
-    //---------------------------------------------------------------------------------------------
-
     if (!IsNetworkConnectionAvailable())
+    {
         return IMS_FALSE;
+    }
 
     // Check the validity of transport information (Type of transport & port number)
 
     // Reserve the socket resource
-    if (!ReserveSocket(pSIPProfile))
+    if (!ReserveSocket(pProfile))
     {
         ReleaseSocket();
         return IMS_FALSE;
@@ -725,42 +509,10 @@ PUBLIC VIRTUAL IMS_BOOL SipTransport::ReserveResource(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransport::UpdateDestinationInfo(IN ::SipMessage* /* pstMessage */,
-        IN IMS_BOOL /* bRoutingLR = IMS_TRUE */, IN SipAddrSpec* /* pstImplicitRoute = IMS_NULL */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipTransport::ValidateViaHeader(IN ::SipMessage* /* pstMessage */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return SipPrivate::MESSAGE_VALID;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL AString SipTransport::CreateSocketErrorMessage(
-        IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType /* = SipSocketAddress::SOCKET_NONE*/)
+        IN IMS_SINT32 nErrorCode, IN IMS_SINT32 nSocketType /*= SipSocketAddress::SOCKET_NONE*/)
 {
     AString strError(AString::ConstNull());
-
-    //---------------------------------------------------------------------------------------------
 
     switch (nErrorCode)
     {
@@ -795,94 +547,69 @@ PUBLIC GLOBAL AString SipTransport::CreateSocketErrorMessage(
     return strError;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL IMS_BOOL SipTransport::GetHostNPortFromViaHeader(
-        IN ::SipMessage* pstMessage, OUT AString& strHost, OUT IMS_SINT32& nPort)
+        IN ::SipMessage* pSipMsg, OUT AString& strHost, OUT IMS_SINT32& nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return SipStack::GetHostNPortFromViaHeader(pstMessage, strHost, nPort);
+    return SipStack::GetHostNPortFromViaHeader(pSipMsg, strHost, nPort);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void SipTransport::ParseHostNPort(
-        IN CONST AString& strHostNPort, OUT AString& strHost, OUT IMS_SINT32& nPort)
+        IN const AString& strHostNPort, OUT AString& strHost, OUT IMS_SINT32& nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
     SipStack::ParseHostNPort(strHostNPort, strHost, nPort);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSEND,
-        IN CONST SipTransportAddress& objTA_FarEnd, IN CONST IMS_CHAR* pszMessage,
+PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL bSend,
+        IN const SipTransportAddress& objFarEnd, IN const IMS_CHAR* pszMessage,
         IN IMS_SINT32 nLength)
 {
     // SEND or RECV:Message Length:Transport Type:IP address:Port
     // For example,
     //    SEND:    <<<==SEND:512:UDP:10.168.114.153:5060==
     //    RECV:    ==RECV:512:TCP:10.168.114.153:5060==>>>
-
-    const IMS_CHAR LOG_SEND[] = "<<<==SEND:%d:%s:%s:%d_s%d==";
-    const IMS_CHAR LOG_RECV[] = "==RECV:%d:%s:%s:%d_s%d==>>>";
-
-    const IMS_CHAR* pszFORMAT;
-    const IMS_CHAR* pszTRANSPORT;
-    AString strLOG;
-
-    //-----------------------------------------------------------------------------------------
+    const IMS_CHAR* pszFormat;
+    const IMS_CHAR* pszTransport;
+    AString strLog;
 
     // Summary of message -- starts
 
-    if (bSEND)
+    if (bSend)
     {
-        pszFORMAT = LOG_SEND;
+        pszFormat = "<<<==SEND:%d:%s:%s:%d_s%d==";
     }
     else
     {
-        pszFORMAT = LOG_RECV;
+        pszFormat = "==RECV:%d:%s:%s:%d_s%d==>>>";
     }
 
-    if (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP)
+    if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP)
     {
-        pszTRANSPORT = Sip::STR_UDP_CAPS;
+        pszTransport = Sip::STR_UDP_CAPS;
     }
-    else if (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP)
+    else if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP)
     {
-        pszTRANSPORT = Sip::STR_TCP_CAPS;
+        pszTransport = Sip::STR_TCP_CAPS;
     }
-    else if (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
+    else if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
     {
-        pszTRANSPORT = Sip::STR_TLS_CAPS;
+        pszTransport = Sip::STR_TLS_CAPS;
     }
     else
     {
-        pszTRANSPORT = "UNKNOWN";
+        pszTransport = "UNKNOWN";
     }
 
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(nSlotId))
     {
-        strLOG.Sprintf(pszFORMAT, nLength, pszTRANSPORT,
-                objTA_FarEnd.GetIpAddress().IsIPv6Address() ? "::" : "0.0.0.0",
-                objTA_FarEnd.GetPort(), nSlotId);
+        strLog.Sprintf(pszFormat, nLength, pszTransport,
+                objFarEnd.GetIpAddress().IsIPv6Address() ? "::" : "0.0.0.0", objFarEnd.GetPort(),
+                nSlotId);
     }
     else
     {
-        strLOG.Sprintf(pszFORMAT, nLength, pszTRANSPORT,
-                SipDebug::GetIp(objTA_FarEnd.GetIpAddress()), objTA_FarEnd.GetPort(), nSlotId);
+        strLog.Sprintf(pszFormat, nLength, pszTransport, SipDebug::GetIp(objFarEnd.GetIpAddress()),
+                objFarEnd.GetPort(), nSlotId);
     }
 
     // Summary of message -- ends
@@ -891,25 +618,18 @@ PUBLIC GLOBAL void SipTransport::PrintMessage(IN IMS_SINT32 nSlotId, IN IMS_BOOL
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(nSlotId))
     {
-        IMS_TRACE_SIP(strLOG.GetStr(), pszMessage, (nLength < 11) ? nLength : 11, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, (nLength < 11) ? nLength : 11, IMS_FALSE);
     }
     else
     {
-        IMS_TRACE_SIP(strLOG.GetStr(), pszMessage, nLength, IMS_FALSE);
+        IMS_TRACE_SIP(strLog.GetStr(), pszMessage, nLength, IMS_FALSE);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
         IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSocket != pSocket)
+    if (m_pSocket != pSocket)
     {
         IMS_TRACE_D("Socket_NotifyError() :: Socket not matched", 0, 0, 0);
         return;
@@ -917,41 +637,34 @@ PROTECTED VIRTUAL void SipTransport::Socket_NotifyError(
 
     NotifyTransportError(nErrorCode);
 
-    if (pSendBuffer != IMS_NULL)
+    if (m_pSendBuffer != IMS_NULL)
     {
-        delete pSendBuffer;
-        pSendBuffer = IMS_NULL;
+        delete m_pSendBuffer;
+        m_pSendBuffer = IMS_NULL;
     }
 
     ReleaseSocket();
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
 {
-    //---------------------------------------------------------------------------------------------
-
     (void)pSocket;
 
-    if (this->pSocket == IMS_NULL)
+    if (m_pSocket == IMS_NULL)
     {
         // Do nothing...
         IMS_TRACE_D("Socket NULL", 0, 0, 0);
         return;
     }
 
-    if (this->pSocket != pSocket)
+    if (m_pSocket != pSocket)
     {
         // Do nothing...
         IMS_TRACE_D("Socket not matched", 0, 0, 0);
         return;
     }
 
-    if (this->pSocket->GetState() != SipSocket::STATE_CONNECTED)
+    if (m_pSocket->GetState() != SipSocket::STATE_CONNECTED)
     {
         // Do nothing ...
         IMS_TRACE_D("Socket is not ready", 0, 0, 0);
@@ -959,139 +672,58 @@ PROTECTED VIRTUAL void SipTransport::Socket_SendEnabled(IN SipSocket* pSocket)
     }
 
     // In case of UDP transport, if the socket is created at the first, the below operation needs.
-    if (pSendBuffer != IMS_NULL)
+    if (m_pSendBuffer != IMS_NULL)
     {
-        if (!TransmitMessage(pSendBuffer->GetData(), pSendBuffer->GetLength()))
+        if (!TransmitMessage(m_pSendBuffer->GetData(), m_pSendBuffer->GetLength()))
         {
-            if (piErrorListener != IMS_NULL)
+            if (m_piErrorListener != IMS_NULL)
             {
                 AString strError;
 
                 strError.Sprintf("%d Message transmission failed", SipError::TRANSPORT_E_CODE_103);
-                piErrorListener->TransportError_NotifyError(SipSocket::ERROR_SEND_FAILED, strError);
+                m_piErrorListener->TransportError_NotifyError(
+                        SipSocket::ERROR_SEND_FAILED, strError);
             }
         }
         else
         {
             // If this message(first message) is successfully sent,
             // then the retransmission flag will be set in here.
-            if (!bIsRetransmission)
+            if (!m_bIsRetransmission)
             {
-                bIsRetransmission = IMS_TRUE;
+                m_bIsRetransmission = IMS_TRUE;
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipTransport::CorrectNearEndAddress()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Correct the port number with a default port if it does not explicitly
-    if (objTA_NearEnd.GetPort() == Sip::PORT_UNSPECIFIED)
+    if (m_objNearEnd.GetPort() == Sip::PORT_UNSPECIFIED)
     {
-        if (objTA_NearEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
+        if (m_objNearEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
         {
-            objTA_NearEnd.SetPort(Sip::PORT_5061);
+            m_objNearEnd.SetPort(Sip::PORT_5061);
         }
         else
         {
-            objTA_NearEnd.SetPort(Sip::PORT_5060);
+            m_objNearEnd.SetPort(Sip::PORT_5060);
         }
     }
-
-    // Set the local IP address
-#if 0
-    if (objTA_NearEnd.GetIpAddress().Equals(IPAddress::NONE))
-    {
-        objTA_NearEnd.SetIpAddress(piNetConnection->GetLocalAddress());
-    }
-#endif
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 SipTransportHelper* SipTransport::GetTransportHelper() const
 {
     return SipFactoryProxy::GetInstance()->GetTransportHelper(GetSlotId());
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_BOOL SipTransport::IsExplicitTargetProtocolSelected() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return bExplicitTargetProtocol;
-}
-
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL
-*/
-PROTECTED
-IMS_BOOL SipTransport::IsFlowControlPortConfigured() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    // FIXME: consider more cases
-    return Sip::IsPortSpecified(nPortFlowControl);
-}
-
-/*
-
-Remarks
-
-*/
-PROTECTED
-IMS_BOOL SipTransport::IsIPSecUDPEncRequired() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return ((nTransportExt & Sip::TRANSPORT_EXT_IPSEC_UDP_ENC) != 0);
-}
-
-/*
-
-Remarks
- MULTI_REG_TRANSPORT
-*/
-PROTECTED
-IMS_BOOL SipTransport::IsTargetProtocolConfigured() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (((nTransportExt & Sip::TRANSPORT_EXT_UDP) != 0) ||
-            ((nTransportExt & Sip::TRANSPORT_EXT_TCP) != 0) ||
-            ((nTransportExt & Sip::TRANSPORT_EXT_TLS) != 0));
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piErrorListener == IMS_NULL)
+    if (m_piErrorListener == IMS_NULL)
     {
         IMS_TRACE_D("Transport :: No Listener, Error (%d)", nErrorCode, 0, 0);
         return;
@@ -1101,10 +733,10 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 
     switch (nErrorCode)
     {
-        case SipSocket::ERROR_CLOSED:
-        case SipSocket::ERROR_CONNECT_FAILED:
+        case SipSocket::ERROR_CLOSED:          // FALL-THROUGH
+        case SipSocket::ERROR_CONNECT_FAILED:  // FALL-THROUGH
         case SipSocket::ERROR_DATA_CONNECTION_LOST:
-            if (pSocket == IMS_NULL)
+            if (m_pSocket == IMS_NULL)
             {
                 // no-op
                 return;
@@ -1118,119 +750,91 @@ void SipTransport::NotifyTransportError(IN IMS_SINT32 nErrorCode)
 
     if (nErrorCode == SipSocket::ERROR_CLOSED)
     {
-        nSocketType = pSocket->GetType();
+        nSocketType = m_pSocket->GetType();
     }
 
     AString strError = CreateSocketErrorMessage(nErrorCode, nSocketType);
 
     if (strError.GetLength() > 0)
     {
-        piErrorListener->TransportError_NotifyError(SipError::TRANSPORT_ERROR, strError);
+        m_piErrorListener->TransportError_NotifyError(SipError::TRANSPORT_ERROR, strError);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipTransport::IsNetworkConnectionAvailable() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (NetworkService::GetNetworkService()->FindConnection(objTA_NearEnd.GetIpAddress()) ==
+    if (NetworkService::GetNetworkService()->FindConnection(m_objNearEnd.GetIpAddress()) ==
             IMS_NULL)
     {
         IMS_TRACE_E(0, "Network (%s) is not available",
-                SipDebug::GetIp(objTA_NearEnd.GetIpAddress()), 0, 0);
+                SipDebug::GetIp(m_objNearEnd.GetIpAddress()), 0, 0);
         return IMS_FALSE;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 SipSocket* SipTransport::LookupSocket() const
 {
     SipTransportHelper* pTransportHelper = GetTransportHelper();
-    SipSocketAddress objSA;
+    SipSocketAddress objSockAddr;
 
-    //---------------------------------------------------------------------------------------------
-
-    if ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
+    if ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
     {
-        SipSocketAddress objSA_FarEnd;
+        SipSocketAddress objSockAddrFarEnd;
 
-        objSA.SetIpAddress(objTA_NearEnd.GetIpAddress());
-        objSA.SetPort(nNearEnd_PortC);
-        objSA.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
+        objSockAddr.SetIpAddress(m_objNearEnd.GetIpAddress());
+        objSockAddr.SetPort(m_nNearEndPortC);
+        objSockAddr.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
 
-        objSA_FarEnd.SetIpAddress(objTA_FarEnd.GetIpAddress());
-        objSA_FarEnd.SetPort(objTA_FarEnd.GetPort());
-        objSA_FarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
+        objSockAddrFarEnd.SetIpAddress(m_objFarEnd.GetIpAddress());
+        objSockAddrFarEnd.SetPort(m_objFarEnd.GetPort());
+        objSockAddrFarEnd.SetType(SipSocketAddress::SOCKET_TCP_CLIENT);
 
-        return pTransportHelper->OpenStreamSocket(objSA, objSA_FarEnd);
+        return pTransportHelper->OpenStreamSocket(objSockAddr, objSockAddrFarEnd);
     }
     else
     {
-        objSA.SetIpAddress(objTA_NearEnd.GetIpAddress());
-        objSA.SetPort(nNearEnd_PortC);
-        objSA.SetType(SipSocketAddress::SOCKET_UDP);
+        objSockAddr.SetIpAddress(m_objNearEnd.GetIpAddress());
+        objSockAddr.SetPort(m_nNearEndPortC);
+        objSockAddr.SetType(SipSocketAddress::SOCKET_UDP);
 
-        return pTransportHelper->Open(objSA);
+        return pTransportHelper->Open(objSockAddr);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipTransport::ReleaseSocket()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSocket != IMS_NULL)
+    if (m_pSocket != IMS_NULL)
     {
-        GetTransportHelper()->Destroy(pSocket, this);
-        pSocket = IMS_NULL;
+        GetTransportHelper()->Destroy(m_pSocket, this);
+        m_pSocket = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipTransport::ReserveSocket(IN CONST SipProfile* pSIPProfile /* = IMS_NULL*/)
+IMS_BOOL SipTransport::ReserveSocket(IN const SipProfile* pProfile /*= IMS_NULL*/)
 {
     // RFC5626_FLOW_CONTROL
-    IMS_SINT32 nTempPortC = nNearEnd_PortC;
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nTempPortC = m_nNearEndPortC;
 
     if (IsFlowControlPortConfigured())
     {
         IMS_TRACE_D("Transport :: Flow control (%d >> %d) will be applied", nTempPortC,
-                nPortFlowControl, 0);
+                m_nPortFlowControl, 0);
 
-        nTempPortC = nPortFlowControl;
+        nTempPortC = m_nPortFlowControl;
     }
 
     // If the transport has already the connected socket, do not reserve the socket again.
-    if (pSocket != IMS_NULL)
+    if (m_pSocket != IMS_NULL)
     {
         // Check if the port is same or not...
-        if (nType != TYPE_CLIENT)
+        if (m_nType != TYPE_CLIENT)
         {
             // In case of server transport & TCP protocol used
             IMS_TRACE_D(
@@ -1238,70 +842,70 @@ IMS_BOOL SipTransport::ReserveSocket(IN CONST SipProfile* pSIPProfile /* = IMS_N
             return IMS_TRUE;
         }
 
-        IPAddress objIPA;
+        IPAddress objIp;
         IMS_UINT32 nPort = 0;
-        IMS_BOOL bCheckTCPSocketReusability = IMS_FALSE;
+        IMS_BOOL bCheckTcpSocketReusability = IMS_FALSE;
 
-        pSocket->GetSockName(objIPA, nPort);
+        m_pSocket->GetSockName(objIp, nPort);
 
         if (nTempPortC == static_cast<IMS_SINT32>(nPort))
         {
-            if ((pSocket->GetType() == SipSocketAddress::SOCKET_UDP) &&
-                    (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP))
+            if ((m_pSocket->GetType() == SipSocketAddress::SOCKET_UDP) &&
+                    (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_UDP))
             {
                 // If the port is same, the socket will be re-used...
-                IMS_TRACE_D("Transport :: UDP client (%s, %d) is re-used", SipDebug::GetIp(objIPA),
+                IMS_TRACE_D("Transport :: UDP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
                         nPort, 0);
                 return IMS_TRUE;
             }
-            else if ((pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT) &&
-                    ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-                            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)))
+            else if ((m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT) &&
+                    ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+                            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)))
             {
-                bCheckTCPSocketReusability = IMS_TRUE;
+                bCheckTcpSocketReusability = IMS_TRUE;
             }
         }
         // Case: random port number for TCP connection
-        else if ((nTempPortC == 0) || (nTempPortC == objTA_NearEnd.GetPort()))
+        else if ((nTempPortC == 0) || (nTempPortC == m_objNearEnd.GetPort()))
         {
-            if ((pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT) &&
-                    ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-                            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)))
+            if ((m_pSocket->GetType() == SipSocketAddress::SOCKET_TCP_CLIENT) &&
+                    ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+                            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)))
             {
-                bCheckTCPSocketReusability = IMS_TRUE;
+                bCheckTcpSocketReusability = IMS_TRUE;
             }
         }
 
-        if (bCheckTCPSocketReusability)
+        if (bCheckTcpSocketReusability)
         {
-            IPAddress objPeerIPA;
+            IPAddress objPeerIp;
             IMS_UINT32 nPeerPort = 0;
 
-            pSocket->GetPeerName(objPeerIPA, nPeerPort);
+            m_pSocket->GetPeerName(objPeerIp, nPeerPort);
 
-            if (objPeerIPA.Equals(objTA_FarEnd.GetIpAddress()) &&
-                    (objTA_FarEnd.GetPort() == static_cast<IMS_SINT32>(nPeerPort)))
+            if (objPeerIp.Equals(m_objFarEnd.GetIpAddress()) &&
+                    (m_objFarEnd.GetPort() == static_cast<IMS_SINT32>(nPeerPort)))
             {
                 // If the port is same, the socket will be re-used...
-                IMS_TRACE_D("Transport :: TCP client (%s, %d) is re-used", SipDebug::GetIp(objIPA),
+                IMS_TRACE_D("Transport :: TCP client (%s, %d) is re-used", SipDebug::GetIp(objIp),
                         nPort, 0);
 
                 // MULTI_REG_SIP_PROFILE
-                SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+                SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, m_pSocket);
 
                 pStreamSocket->SetConfigForSipKeepAlive(
-                        SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pSIPProfile));
+                        SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pProfile));
                 return IMS_TRUE;
             }
             else
             {
-                IMS_TRACE_D("Transport :: TCP client (%s, %d) is matched", SipDebug::GetIp(objIPA),
+                IMS_TRACE_D("Transport :: TCP client (%s, %d) is matched", SipDebug::GetIp(objIp),
                         nPort, 0);
                 // LOG_EXCLUDING_SERVER_INFO
                 IMS_TRACE_D("Transport :: TCP client (peer) (%s, %d) is not matched",
                         SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId())
                                 ? "xxx"
-                                : SipDebug::GetIp(objPeerIPA),
+                                : SipDebug::GetIp(objPeerIp),
                         nPeerPort, 0);
             }
         }
@@ -1310,17 +914,17 @@ IMS_BOOL SipTransport::ReserveSocket(IN CONST SipProfile* pSIPProfile /* = IMS_N
         ReleaseSocket();
     }
 
-    if ((objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
-            (objTA_FarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
+    if ((m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
+            (m_objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
     {
-        pSocket = CreateTcpClientSocket();
+        m_pSocket = CreateTcpClientSocket();
 
-        if (pSocket == IMS_NULL)
+        if (m_pSocket == IMS_NULL)
         {
             return IMS_FALSE;
         }
 
-        SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, pSocket);
+        SipStreamSocket* pStreamSocket = DYNAMIC_CAST(SipStreamSocket*, m_pSocket);
 
         // RFC5626_FLOW_CONTROL
         if (IsFlowControlPortConfigured())
@@ -1333,67 +937,60 @@ IMS_BOOL SipTransport::ReserveSocket(IN CONST SipProfile* pSIPProfile /* = IMS_N
 
         // MULTI_REG_SIP_PROFILE
         pStreamSocket->SetConfigForSipKeepAlive(
-                SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pSIPProfile));
+                SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pProfile));
     }
     else
     {
-        SipSocketAddress objSA;
-        objSA.SetIpAddress(objTA_NearEnd.GetIpAddress());
-        objSA.SetPort(nTempPortC);
+        SipSocketAddress objSockAddr;
+        objSockAddr.SetIpAddress(m_objNearEnd.GetIpAddress());
+        objSockAddr.SetPort(nTempPortC);
 
         // Open the UDP client socket
-        objSA.SetType(SipSocketAddress::SOCKET_UDP);
+        objSockAddr.SetType(SipSocketAddress::SOCKET_UDP);
 
-        pSocket = GetTransportHelper()->Create(objSA);
+        m_pSocket = GetTransportHelper()->Create(objSockAddr);
 
-        if (pSocket == IMS_NULL)
+        if (m_pSocket == IMS_NULL)
         {
-            IMS_TRACE_E(0, "Creating UDP client (%s, %d)", SipDebug::GetIp(objSA.GetIpAddress()),
-                    objSA.GetPort(), 0);
+            IMS_TRACE_E(0, "Creating UDP client (%s, %d)",
+                    SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
             return IMS_FALSE;
         }
 
         IMS_TRACE_D("Transport :: UDP client (%s, %d) is created",
-                SipDebug::GetIp(objSA.GetIpAddress()), objSA.GetPort(), 0);
+                SipDebug::GetIp(objSockAddr.GetIpAddress()), objSockAddr.GetPort(), 0);
     }
 
-    pSocket->SetListener(this);
+    m_pSocket->SetListener(this);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipTransport::TransmitMessage(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+IMS_BOOL SipTransport::TransmitMessage(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
-    //---------------------------------------------------------------------------------------------
-
     // If SIP TX packet is blocked by the application,
     // don't send the packet via Socket.
     if (SipRtConfigUtils::IsFeatureSipTxPacketBlockedEnabled(GetSlotId()))
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, objTA_FarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
+        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
         return IMS_TRUE;
     }
 
     IMS_SINT32 nSentBytes =
-            pSocket->Send(pBuffer, nBuffLen, objTA_FarEnd.GetPort(), objTA_FarEnd.GetIpAddress());
+            m_pSocket->Send(pBuffer, nBuffLen, m_objFarEnd.GetPort(), m_objFarEnd.GetIpAddress());
 
     // DEBUGGING message ...
     {
-        PrintMessage(GetSlotId(), IMS_TRUE, objTA_FarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
+        PrintMessage(GetSlotId(), IMS_TRUE, m_objFarEnd, (const IMS_CHAR*)pBuffer, nBuffLen);
     }
 
     if (nSentBytes == ISocket::RESULT_ERROR)
     {
-        if (pSendBuffer != IMS_NULL)
+        if (m_pSendBuffer != IMS_NULL)
         {
-            delete pSendBuffer;
-            pSendBuffer = IMS_NULL;
+            delete m_pSendBuffer;
+            m_pSendBuffer = IMS_NULL;
         }
 
         IMS_TRACE_E(0, "Sending SIP message to the network failed", 0, 0, 0);
@@ -1405,17 +1002,19 @@ IMS_BOOL SipTransport::TransmitMessage(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32
 
         objBuffer.Append(&pBuffer[nSentBytes], nBuffLen - nSentBytes);
 
-        if (pSendBuffer != IMS_NULL)
-            delete pSendBuffer;
+        if (m_pSendBuffer != IMS_NULL)
+        {
+            delete m_pSendBuffer;
+        }
 
-        pSendBuffer = new ByteArray(objBuffer);
+        m_pSendBuffer = new ByteArray(objBuffer);
     }
     else
     {
-        if (pSendBuffer != IMS_NULL)
+        if (m_pSendBuffer != IMS_NULL)
         {
-            delete pSendBuffer;
-            pSendBuffer = IMS_NULL;
+            delete m_pSendBuffer;
+            m_pSendBuffer = IMS_NULL;
         }
     }
 

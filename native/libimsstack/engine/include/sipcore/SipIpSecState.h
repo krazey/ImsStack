@@ -1,65 +1,68 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20140304  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_IPSEC_STATE_H_
-#define _SIP_IPSEC_STATE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_IPSEC_STATE_H_
+#define SIP_IPSEC_STATE_H_
 
 #include "EngineActivity.h"
-#include "SipStackHeaders.h"
-#include "SipTxnKey.h"
-#include "SipTransportAddress.h"
 #include "ISipIpSecState.h"
+#include "SipStackHeaders.h"
+#include "SipTransportAddress.h"
+#include "SipTxnKey.h"
 
 class SipIpSecState : public EngineActivity, public ISipIpSecState
 {
 private:
-    class SA
+    class SecurityAssociation
     {
     public:
-        SA();
-        SA(IN CONST IPAddress& objIP_U_, IN IMS_SINT32 nPort_UC_, IN IMS_SINT32 nPort_US_,
-                IN CONST IPAddress& objIP_P_, IN IMS_SINT32 nPort_PC_, IN IMS_SINT32 nPort_PS_);
-        SA(IN CONST SA& objRHS);
-        ~SA();
+        SecurityAssociation();
+        SecurityAssociation(IN const IPAddress& objIpU_, IN IMS_SINT32 nPortUc_,
+                IN IMS_SINT32 nPortUs_, IN const IPAddress& objIpP_, IN IMS_SINT32 nPortPc_,
+                IN IMS_SINT32 nPortPs_);
+        SecurityAssociation(IN const SecurityAssociation& other);
+        ~SecurityAssociation();
 
-    private:
-        SA& operator=(IN CONST SA& objRHS);
+        SecurityAssociation& operator=(IN const SecurityAssociation&) = delete;
 
     public:
-        IMS_BOOL AddTransaction(IN CONST sipcore::SipTxnKey* pTxnKey);
-        IMS_BOOL CheckIPAddress(IN CONST SipTransportAddress& objNearEnd,
-                IN CONST SipTransportAddress& objFarEnd) const;
-        IMS_SINT32 GetSA(IN CONST SipTransportAddress& objNearEnd,
-                IN CONST SipTransportAddress& objFarEnd, IN IMS_SINT32 nDirection) const;
-        IMS_SINT32 GetState() const;
-        IMS_BOOL HasPendingTransaction() const;
-        IMS_BOOL RemoveTransaction(IN CONST sipcore::SipTxnKey* pTxnKey);
+        IMS_BOOL AddTransaction(IN const sipcore::SipTxnKey* pTxnKey);
+        IMS_BOOL CheckIpAddress(IN const SipTransportAddress& objNearEnd,
+                IN const SipTransportAddress& objFarEnd) const;
+        IMS_SINT32 GetSa(IN const SipTransportAddress& objNearEnd,
+                IN const SipTransportAddress& objFarEnd, IN IMS_SINT32 nDirection) const;
+        inline IMS_SINT32 GetState() const { return nState; }
+        inline IMS_BOOL HasPendingTransaction() const { return !objSipTxnKeys.IsEmpty(); }
+        IMS_BOOL RemoveTransaction(IN const sipcore::SipTxnKey* pTxnKey);
         void SetState(IN IMS_SINT32 nState);
 
     private:
         static const IMS_CHAR* StateToString(IN IMS_SINT32 nState);
 
     public:
-        // Direction of SA
+        /// Direction of SA
         enum
         {
-            SA_IN = 1,
-            SA_OUT = 2
+            DIRECTION_IN = 1,
+            DIRECTION_OUT = 2
         };
 
-        // SA pairs
+        /// SA pairs
         enum
         {
-            // src_port, dst_port, transport, direction
+            /// src_port, dst_port, transport, direction
             SA_START = 1,
 
             SA_PUC_PPS_U_OUT = SA_START,
@@ -72,52 +75,57 @@ private:
             SA_END
         };
 
-        IPAddress objIP_U;
-        IMS_SINT32 nPort_UC;
-        IMS_SINT32 nPort_US;
-        IPAddress objIP_P;
-        IMS_SINT32 nPort_PC;
-        IMS_SINT32 nPort_PS;
+        IPAddress objIpU;
+        IMS_SINT32 nPortUc;
+        IMS_SINT32 nPortUs;
+        IPAddress objIpP;
+        IMS_SINT32 nPortPc;
+        IMS_SINT32 nPortPs;
 
         IMS_SINT32 nState;
         // For tracking SIP transaction
-        IMSList<sipcore::SipTxnKey> objSAStat;
+        IMSList<sipcore::SipTxnKey> objSipTxnKeys;
     };
 
 public:
     SipIpSecState();
     virtual ~SipIpSecState();
 
-private:
-    SipIpSecState(IN CONST SipIpSecState& objRHS);
-    SipIpSecState& operator=(IN CONST SipIpSecState& objRHS);
+    SipIpSecState(IN const SipIpSecState&) = delete;
+    SipIpSecState& operator=(IN const SipIpSecState&) = delete;
 
 public:
-    IMS_BOOL IsIpSecEnabled() const;
-    void NotifyMessageReceived(IN CONST SipTransportAddress& objNearEnd,
-            IN CONST SipTransportAddress& objFarEnd, IN ::SipMessage* pstMessage);
-    void NotifyMessageSent(IN CONST SipTransportAddress& objNearEnd,
-            IN CONST SipTransportAddress& objFarEnd, IN ::SipMessage* pstMessage);
-    void NotifyMessageSentFailed(IN ::SipMessage* pstMessage);
-    void NotifyTransactionAborted(IN ::SipTxnKey* pstTxnKey);
+    inline IMS_BOOL IsIpSecEnabled() const
+    {
+        return (m_pNewSa != IMS_NULL) || (m_pOldSa != IMS_NULL);
+    }
+    void NotifyMessageReceived(IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd, IN ::SipMessage* pSipMsg);
+    void NotifyMessageSent(IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd, IN ::SipMessage* pSipMsg);
+    void NotifyMessageSentFailed(IN ::SipMessage* pSipMsg);
+    void NotifyTransactionAborted(IN ::SipTxnKey* pSipTxnKey);
 
 private:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    IMS_BOOL DispatchMessage(IN ImsMessage& objMsg) override;
 
     // ISipIpSecState class
-    virtual void ClearIpSecSa(IN IMS_SINT32 nSAType);
-    virtual IMS_SINT32 GetState(IN IMS_SINT32 nSAType) const;
-    virtual IMS_BOOL HasPendingTransaction(IN IMS_SINT32 nSAType) const;
-    virtual void SetIpSecSa(IN IMS_SINT32 nSAType, IN CONST IPAddress& objIP_U,
-            IN IMS_SINT32 nPort_UC, IN IMS_SINT32 nPort_US, IN CONST IPAddress& objIP_P,
-            IN IMS_SINT32 nPort_PC, IN IMS_SINT32 nPort_PS);
-    virtual void SetListener(IN ISipIpSecStateListener* piListener);
+    void ClearIpSecSa(IN IMS_SINT32 nSaType) override;
+    IMS_SINT32 GetState(IN IMS_SINT32 nSaType) const override;
+    IMS_BOOL HasPendingTransaction(IN IMS_SINT32 nSaType) const override;
+    void SetIpSecSa(IN IMS_SINT32 nSaType, IN const IPAddress& objIpU, IN IMS_SINT32 nPortUc,
+            IN IMS_SINT32 nPortUs, IN const IPAddress& objIpP, IN IMS_SINT32 nPortPc,
+            IN IMS_SINT32 nPortPs) override;
+    inline void SetListener(IN ISipIpSecStateListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
 
-    void NotifyMessageReceivedInternal(IN CONST SipTransportAddress& objNearEnd,
-            IN CONST SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
-    void NotifyMessageSentInternal(IN CONST SipTransportAddress& objNearEnd,
-            IN CONST SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
+    void NotifyMessageReceivedInternal(IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
+    void NotifyMessageSentInternal(IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd, IN sipcore::SipTxnKey* pTxnKey);
     void NotifyTransactionAbortedInternal(IN sipcore::SipTxnKey* pTxnKey);
 
 private:
@@ -127,10 +135,10 @@ private:
         AMSG_NOTIFY_STATE_CHANGED = AMSG_USER
     };
 
-    SA* pNewSA;
-    SA* pOldSA;
+    SecurityAssociation* m_pNewSa;
+    SecurityAssociation* m_pOldSa;
 
-    ISipIpSecStateListener* piListener;
+    ISipIpSecStateListener* m_piListener;
 };
 
-#endif  // _SIP_IPSEC_STATE_H_
+#endif

@@ -1,64 +1,43 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100707  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceTrace.h"
+
 #include "ISipHeader.h"
 #include "Sip.h"
-#include "SipStatusCode.h"
-#include "SipDebug.h"
 #include "SipClientTransactionState.h"
+#include "SipDebug.h"
 #include "SipForkedTransactionManager.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipForkedTransactionManager::SipForkedTransactionManager() :
-        RCObject(),
-        nStatusCode(SipStatusCode::SC_INVALID)
+IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCtState)
 {
-}
-
-PUBLIC
-SipForkedTransactionManager::SipForkedTransactionManager(
-        IN const SipForkedTransactionManager& objRHS) :
-        RCObject(objRHS),
-        nStatusCode(objRHS.nStatusCode)
-{
-}
-
-PUBLIC VIRTUAL SipForkedTransactionManager::~SipForkedTransactionManager() {}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCTState)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pTmpCTState = objTxnStates.GetAt(i);
+        const RCPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
 
-        if (pTmpCTState.Get() == pCTState)
+        if (pTmpCtState.Get() == pCtState)
         {
             // Already exists
             return IMS_TRUE;
         }
     }
 
-    if (!objTxnStates.Append(pCTState))
+    if (!m_objTxnStates.Append(pCtState))
     {
         return IMS_FALSE;
     }
@@ -66,103 +45,70 @@ IMS_BOOL SipForkedTransactionManager::Add(IN SipClientTransactionState* pCTState
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipForkedTransactionManager::IsEmpty() const
+SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* pSipMsg) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return objTxnStates.IsEmpty();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipForkedTransactionManager::IsTransactionCompleted() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return SipStatusCode::IsFinal(nStatusCode);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* pstMessage) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (pstMessage == IMS_NULL)
+    if (pSipMsg == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    if (objTxnStates.IsEmpty())
+    if (m_objTxnStates.IsEmpty())
     {
         return IMS_NULL;
     }
 
     // Not forked case
-    if (objTxnStates.GetSize() == 1)
+    if (m_objTxnStates.GetSize() == 1)
     {
-        const RCPtr<SipClientTransactionState>& pCTState = objTxnStates.GetAt(0);
+        const RCPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(0);
 
-        return pCTState.Get();
+        return pCtState.Get();
     }
 
-    SipHeaderBase* pstHeader;
+    SipHeaderBase* pSipHdr;
     AString strNewLocalTag;
     AString strNewRemoteTag;
     AString strCallId;
 
     // Call Id
-    pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::CALL_ID);
-    SipStack::EncodeHeaderBody(pstHeader, IMS_FALSE, strCallId);
-    SipStack::FreeHeaderEx(pstHeader);
+    pSipHdr = SipStack::GetHeader(pSipMsg, ISipHeader::CALL_ID);
+    SipStack::EncodeHeaderBody(pSipHdr, IMS_FALSE, strCallId);
+    SipStack::FreeHeaderEx(pSipHdr);
 
-    if (SipStack::IsRequestMessage(pstMessage))
+    if (SipStack::IsRequestMessage(pSipMsg))
     {
         // Get local tag
-        pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::TO);
+        pSipHdr = SipStack::GetHeader(pSipMsg, ISipHeader::TO);
 
-        strNewLocalTag = SipStack::GetParameter(pstHeader, Sip::STR_TAG);
-        SipStack::FreeHeaderEx(pstHeader);
+        strNewLocalTag = SipStack::GetParameter(pSipHdr, Sip::STR_TAG);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         // Get remote tag
-        pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::FROM);
+        pSipHdr = SipStack::GetHeader(pSipMsg, ISipHeader::FROM);
 
-        strNewRemoteTag = SipStack::GetParameter(pstHeader, Sip::STR_TAG);
-        SipStack::FreeHeaderEx(pstHeader);
+        strNewRemoteTag = SipStack::GetParameter(pSipHdr, Sip::STR_TAG);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
     else
     {
         // Get local tag
-        pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::FROM);
+        pSipHdr = SipStack::GetHeader(pSipMsg, ISipHeader::FROM);
 
-        strNewLocalTag = SipStack::GetParameter(pstHeader, Sip::STR_TAG);
-        SipStack::FreeHeaderEx(pstHeader);
+        strNewLocalTag = SipStack::GetParameter(pSipHdr, Sip::STR_TAG);
+        SipStack::FreeHeaderEx(pSipHdr);
 
         // Get remote tag
-        pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::TO);
+        pSipHdr = SipStack::GetHeader(pSipMsg, ISipHeader::TO);
 
-        strNewRemoteTag = SipStack::GetParameter(pstHeader, Sip::STR_TAG);
-        SipStack::FreeHeaderEx(pstHeader);
+        strNewRemoteTag = SipStack::GetParameter(pSipHdr, Sip::STR_TAG);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
-    for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pCTState = objTxnStates.GetAt(i);
-        SipDialogState* pDState = pCTState->GetDialog()->GetDialogState();
+        const RCPtr<SipClientTransactionState>& pCtState = m_objTxnStates.GetAt(i);
+        SipDialogState* pDState = pCtState->GetDialog()->GetDialogState();
 
         AString strLocalTag = pDState->GetLocalTag();
         AString strRemoteTag = pDState->GetRemoteTag();
@@ -174,48 +120,28 @@ SipClientTransactionState* SipForkedTransactionManager::Lookup(IN ::SipMessage* 
                         "(call-id=%s, local-tag=%s, remote-tag=%s)",
                     SipDebug::GetCharA1(strCallId.GetStr(), 8, '@'), strLocalTag.GetStr(),
                     strRemoteTag.GetStr());
-            return pCTState.Get();
+            return pCtState.Get();
         }
     }
 
-    const RCPtr<SipClientTransactionState>& pCTState =
-            objTxnStates.GetAt(objTxnStates.GetSize() - 1);
+    const RCPtr<SipClientTransactionState>& pCtState =
+            m_objTxnStates.GetAt(m_objTxnStates.GetSize() - 1);
 
-    return pCTState.Get();
+    return pCtState.Get();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipForkedTransactionManager::Remove(IN SipClientTransactionState* pCTState)
+void SipForkedTransactionManager::Remove(IN SipClientTransactionState* pCtState)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objTxnStates.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objTxnStates.GetSize(); ++i)
     {
-        const RCPtr<SipClientTransactionState>& pTmpCTState = objTxnStates.GetAt(i);
+        const RCPtr<SipClientTransactionState>& pTmpCtState = m_objTxnStates.GetAt(i);
 
-        if (pTmpCTState.Get() == pCTState)
+        if (pTmpCtState.Get() == pCtState)
         {
             // Found
-            objTxnStates.RemoveAt(i);
+            m_objTxnStates.RemoveAt(i);
             break;
         }
     }
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipForkedTransactionManager::SetTransactionCompleted(IN IMS_SINT32 nStatusCode)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->nStatusCode = nStatusCode;
 }

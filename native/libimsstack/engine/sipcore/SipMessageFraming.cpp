@@ -1,25 +1,29 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090903  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "IMSLib.h"
 #include "IMSStrLib.h"
-#include "SipPrivate.h"
+
 #include "SipHeaderName.h"
 #include "SipMessageFraming.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
-LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN CONST IMS_CHAR* pszEnd)
+LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN const IMS_CHAR* pszEnd)
 {
     while ((pszStart <= pszEnd) && IMS_ISSPACE(*pszStart))
     {
@@ -27,7 +31,7 @@ LOCAL inline void StripLeadingLWS(IN_OUT IMS_CHAR*& pszStart, IN CONST IMS_CHAR*
     }
 }
 
-LOCAL inline void StripTrailingLWS(IN CONST IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
+LOCAL inline void StripTrailingLWS(IN const IMS_CHAR* pszStart, IN_OUT IMS_CHAR*& pszEnd)
 {
     while ((pszEnd >= pszStart) && IMS_ISSPACE(*pszEnd))
     {
@@ -37,72 +41,62 @@ LOCAL inline void StripTrailingLWS(IN CONST IMS_CHAR* pszStart, IN_OUT IMS_CHAR*
 
 PUBLIC
 SipMessageFraming::SipMessageFraming() :
-        nState(STATE_IDLE),
-        nContentLength(0),
-        nOffset(0),
-        bGotBodyStart(IMS_FALSE),
-        objMessageBuffer(ByteArray::ConstNull())
+        m_nState(STATE_IDLE),
+        m_nContentLength(0),
+        m_nOffset(0),
+        m_bGotBodyStart(IMS_FALSE),
+        m_objMessageBuffer(ByteArray::ConstNull())
 {
 }
 
 PUBLIC
 SipMessageFraming::~SipMessageFraming() {}
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipMessageFraming::AppendPacket(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+IMS_BOOL SipMessageFraming::AppendPacket(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((pBuffer == IMS_NULL) || (nBuffLen <= 0))
-        return IMS_FALSE;
-
-    objMessageBuffer.Append(pBuffer, nBuffLen);
-
-    if ((nState == STATE_IDLE) && !IsEmpty())
     {
-        nState = STATE_CREATED;
+        return IMS_FALSE;
+    }
+
+    m_objMessageBuffer.Append(pBuffer, nBuffLen);
+
+    if ((m_nState == STATE_IDLE) && !IsEmpty())
+    {
+        m_nState = STATE_CREATED;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessageFraming::CheckCompleteMessage()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (IsEmpty())
+    {
         return IMS_FALSE;
+    }
 
-    if (nState == STATE_CREATED)
+    if (m_nState == STATE_CREATED)
     {
         // Skip SigComp operation
 
-        nState = STATE_CLEN;
+        m_nState = STATE_CLEN;
     }
 
-    if (nState == STATE_CLEN)
+    if (m_nState == STATE_CLEN)
     {
         // Parse the Content-Length header
         ParseContentLength();
     }
 
-    if (nState == STATE_BODY)
+    if (m_nState == STATE_BODY)
     {
         ParseMessageBody();
     }
 
-    if (nState == STATE_DONE)
+    if (m_nState == STATE_DONE)
     {
         return IMS_TRUE;
     }
@@ -110,47 +104,37 @@ IMS_BOOL SipMessageFraming::CheckCompleteMessage()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessageFraming::GetCompleteMessage(OUT ByteArray& objMessage) const
 {
-    //---------------------------------------------------------------------------------------------
-
     if (IsEmpty())
+    {
         return IMS_FALSE;
+    }
 
     // Clear the output buffer
     objMessage.Resize(0);
 
     // Copy one complete message from the receiving message buffer
-    objMessage.Append(objMessageBuffer.GetData(), nOffset);
+    objMessage.Append(m_objMessageBuffer.GetData(), m_nOffset);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipMessageFraming::IgnoreCrlf()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (objMessageBuffer.GetLength() < 2)
+    if (m_objMessageBuffer.GetLength() < 2)
+    {
         return IMS_FALSE;
+    }
 
-    const IMS_BYTE* pbyData = objMessageBuffer.GetData();
+    const IMS_BYTE* pbyData = m_objMessageBuffer.GetData();
 
     // CR LF
     if ((pbyData[0] == 0x0D) && (pbyData[1] == 0x0A))
     {
-        objMessageBuffer.Erase(0, 2);
+        m_objMessageBuffer.Erase(0, 2);
 
         IMS_TRACE_I("CRLF is ignored by SIP transport layer", 0, 0, 0);
 
@@ -160,37 +144,17 @@ IMS_BOOL SipMessageFraming::IgnoreCrlf()
     return IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-IMS_BOOL SipMessageFraming::IsEmpty() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return (objMessageBuffer.GetLength() == 0);
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipMessageFraming::UpdateState()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Check if the received packet has more message or not
-    if (objMessageBuffer.GetLength() > nOffset)
+    if (m_objMessageBuffer.GetLength() > m_nOffset)
     {
-        objMessageBuffer.Erase(0, nOffset);
+        m_objMessageBuffer.Erase(0, m_nOffset);
     }
-    else if (objMessageBuffer.GetLength() == nOffset)
+    else if (m_objMessageBuffer.GetLength() == m_nOffset)
     {
-        objMessageBuffer.Resize(0);
+        m_objMessageBuffer.Resize(0);
     }
     else
     {
@@ -200,8 +164,8 @@ void SipMessageFraming::UpdateState()
     // If the buffer starts with white spaces, it will be discarded.
     if (!IsEmpty())
     {
-        const IMS_BYTE* pbyData = objMessageBuffer.GetData();
-        IMS_SINT32 nDataLen = objMessageBuffer.GetLength();
+        const IMS_BYTE* pbyData = m_objMessageBuffer.GetData();
+        IMS_SINT32 nDataLen = m_objMessageBuffer.GetLength();
         IMS_SINT32 nIndex = 0;
         IMS_SINT32 nWSPCount = 0;
 
@@ -222,37 +186,34 @@ void SipMessageFraming::UpdateState()
 
         if (nWSPCount > 0)
         {
-            objMessageBuffer.Erase(0, nWSPCount);
+            m_objMessageBuffer.Erase(0, nWSPCount);
             IMS_TRACE_I("MessageFraming :: WSP(%d/%d) is discarded", nWSPCount, nDataLen, 0);
         }
     }
 
     if (IsEmpty())
-        nState = STATE_IDLE;
+    {
+        m_nState = STATE_IDLE;
+    }
     else
-        nState = STATE_CREATED;
+    {
+        m_nState = STATE_CREATED;
+    }
 
-    nContentLength = 0;
-    nOffset = 0;
-    bGotBodyStart = IMS_FALSE;
+    m_nContentLength = 0;
+    m_nOffset = 0;
+    m_bGotBodyStart = IMS_FALSE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipMessageFraming::ParseContentLength()
 {
     const IMS_CHAR acCF_CLEN[2] = {SipHeaderName::CF_CONTENT_LENGTH, '\0'};
 
-    IMS_CHAR* pStart = reinterpret_cast<IMS_CHAR*>(objMessageBuffer.GetData() + nOffset);
-    IMS_CHAR* pEnd = pStart + objMessageBuffer.GetLength() - nOffset;  // over 1 byte
+    IMS_CHAR* pStart = reinterpret_cast<IMS_CHAR*>(m_objMessageBuffer.GetData() + m_nOffset);
+    IMS_CHAR* pEnd = pStart + m_objMessageBuffer.GetLength() - m_nOffset;  // over 1 byte
     IMS_CHAR* pCurrentPos;
     IMS_CHAR* pTemp;
-
-    //---------------------------------------------------------------------------------------------
 
     pCurrentPos = pStart;
 
@@ -264,7 +225,9 @@ void SipMessageFraming::ParseContentLength()
     pTemp = IMS_StrStr(pCurrentPos, TextParser::STR_CRLFCRLF);
 
     if (pTemp != IMS_NULL)
+    {
         pEnd = (pTemp + 4);  // pEnd moves behind CRLF
+    }
 
     if (pStart == pEnd)
     {
@@ -274,7 +237,7 @@ void SipMessageFraming::ParseContentLength()
     // Skip the first line: Request-Line or Status-Line
     // This check is just done for one time.
     // NOTE: SHALL we handle the single line message ???
-    if (nOffset == 0)
+    if (m_nOffset == 0)
     {
         // Skips the leading empty lines
         while (pCurrentPos < pEnd)
@@ -318,7 +281,7 @@ void SipMessageFraming::ParseContentLength()
     if (pCurrentPos >= pEnd)
     {
         // Ends parsing
-        nOffset += (pEnd - pStart);
+        m_nOffset += (pEnd - pStart);
         return;
     }
 
@@ -346,7 +309,7 @@ void SipMessageFraming::ParseContentLength()
         if (pCurrentPos >= pEnd)
         {
             // Ends parsing
-            nOffset += (pHeaderStart - pStart);
+            m_nOffset += (pHeaderStart - pStart);
             return;
         }
         // LOOKUP HEADER NAME -- ends
@@ -398,7 +361,7 @@ void SipMessageFraming::ParseContentLength()
                 if (pCurrentPos >= pEnd)
                 {
                     // Ends parsing
-                    nOffset += (pHeaderStart - pStart);
+                    m_nOffset += (pHeaderStart - pStart);
                     return;
                 }
 
@@ -411,19 +374,19 @@ void SipMessageFraming::ParseContentLength()
                 StripLeadingLWS(pHeaderBodyStart, pHeaderBodyEnd);
                 StripTrailingLWS(pHeaderBodyStart, pHeaderBodyEnd);
 
-                AString strCLEN(pHeaderBodyStart, pHeaderBodyEnd - pHeaderBodyStart + 1);
+                AString strContentLength(pHeaderBodyStart, pHeaderBodyEnd - pHeaderBodyStart + 1);
 
-                nContentLength = strCLEN.ToInt32();
+                m_nContentLength = strContentLength.ToInt32();
 
-                IMS_TRACE_I("MessageFraming :: Content-Length: %s >> %d", strCLEN.GetStr(),
-                        nContentLength, 0);
+                IMS_TRACE_I("MessageFraming :: Content-Length: %s >> %d", strContentLength.GetStr(),
+                        m_nContentLength, 0);
 
                 // Store the current position to parse message body continuously
                 // For backward-compatibility : 3 -> nBodyEndOffset
-                nOffset += ((pCurrentPos - nBodyEndOffset) - pStart);
+                m_nOffset += ((pCurrentPos - nBodyEndOffset) - pStart);
 
                 // Update the parsing state
-                nState = STATE_BODY;
+                m_nState = STATE_BODY;
                 break;
             }
             // CHECK HEADER NAME -- ends
@@ -453,7 +416,7 @@ void SipMessageFraming::ParseContentLength()
             if (pCurrentPos >= pEnd)
             {
                 // Ends parsing
-                nOffset += (pHeaderStart - pStart);
+                m_nOffset += (pHeaderStart - pStart);
                 return;
             }
             // SKIP HEADER BODY -- ends
@@ -461,21 +424,14 @@ void SipMessageFraming::ParseContentLength()
     } while (IMS_TRUE);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipMessageFraming::ParseMessageBody()
 {
-    IMS_CHAR* pBodyStart = (IMS_CHAR*)(objMessageBuffer.GetData() + nOffset);
-    IMS_CHAR* pBodyEnd = (IMS_CHAR*)(objMessageBuffer.GetData() + objMessageBuffer.GetLength());
+    IMS_CHAR* pBodyStart = (IMS_CHAR*)(m_objMessageBuffer.GetData() + m_nOffset);
+    IMS_CHAR* pBodyEnd = (IMS_CHAR*)(m_objMessageBuffer.GetData() + m_objMessageBuffer.GetLength());
     IMS_CHAR* pCurrentPos = pBodyStart;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (bGotBodyStart == IMS_FALSE)
+    if (m_bGotBodyStart == IMS_FALSE)
     {
         IMS_BOOL bDoubleCRLF = IMS_FALSE;
 
@@ -506,52 +462,52 @@ void SipMessageFraming::ParseMessageBody()
         {
             if (bDoubleCRLF)
             {
-                bGotBodyStart = IMS_TRUE;
+                m_bGotBodyStart = IMS_TRUE;
             }
             else
             {
                 IMS_TRACE_D("MessageFraming :: No D-CRLF [offset=%d, bodyStart=%c, cPos=%c]",
-                        nOffset, (pBodyStart != IMS_NULL) ? *pBodyStart : '\0',
+                        m_nOffset, (pBodyStart != IMS_NULL) ? *pBodyStart : '\0',
                         (pCurrentPos != IMS_NULL) ? *pCurrentPos : '\0');
 
                 // We didn't find CRLFCRLF (start position of message body)
-                nOffset += pCurrentPos - pBodyStart;
+                m_nOffset += pCurrentPos - pBodyStart;
                 return;
             }
         }
         else
         {
-            bGotBodyStart = IMS_TRUE;
+            m_bGotBodyStart = IMS_TRUE;
         }
     }
 
-    nOffset += pCurrentPos - pBodyStart;
+    m_nOffset += pCurrentPos - pBodyStart;
 
-    if ((pCurrentPos == pBodyEnd) && (nContentLength == 0))
+    if ((pCurrentPos == pBodyEnd) && (m_nContentLength == 0))
     {
         // WE GOT THE COMPLETE MESSAGE W/O MESSAGE BODY.
-        nState = STATE_DONE;
+        m_nState = STATE_DONE;
         return;
     }
 
-    IMS_SINT32 nCLEN = (pBodyEnd - pCurrentPos);
+    IMS_SINT32 nContentLength = (pBodyEnd - pCurrentPos);
 
-    if (nCLEN < nContentLength)
+    if (nContentLength < m_nContentLength)
     {
         /*
          * We need to wait more message.
          * The offset field indicates the start position of the message body
          * when looks at the buffer int the next time.
          */
-        IMS_TRACE_I("MessageFraming :: Waiting more body part - clen=%d, rx=%d", nContentLength,
-                nCLEN, 0);
+        IMS_TRACE_I("MessageFraming :: Waiting more body part - clen=%d, rx=%d", m_nContentLength,
+                nContentLength, 0);
         return;
     }
 
     // The caller MUST check the length of raw buffer & offset.
     // It moves the start position to the first position of the next message.
-    nOffset += nContentLength;
+    m_nOffset += m_nContentLength;
 
     // WE GOT THE COMPLETE MESSAGE W/ MESSAGE BODY.
-    nState = STATE_DONE;
+    m_nState = STATE_DONE;
 }

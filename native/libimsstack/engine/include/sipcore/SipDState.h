@@ -1,26 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100319  hwangoo.park@             Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_D_STATE_H_
+#define SIP_D_STATE_H_
 
-    Description
+#include "ImsTypeDef.h"
 
-*/
-
-#ifndef _SIP_D_STATE_H_
-#define _SIP_D_STATE_H_
-
-#include "IMSTypeDef.h"
-
-/*
-
-Example
-
-See Also
-*/
 class SipDState
 {
 public:
@@ -70,7 +67,7 @@ public:
     - un-SUBSCRIBE
     */
 
-    // State of Dialog
+    /// State of Dialog
     enum
     {
         STATE_INIT = 0,
@@ -82,7 +79,7 @@ public:
         STATE_MAX
     };
 
-    // MAIN events for a dialog processing when message is received
+    /// MAIN events for a dialog processing when message is received
     enum
     {
         ACTION_IGNORE = 0,
@@ -91,7 +88,7 @@ public:
         ACTION_DESTROY_DIALOG = 3
     };
 
-    // TRIGGER events for dialog state transition
+    /// TRIGGER events for dialog state transition
     enum
     {
         TRIGGER_INIT = 0
@@ -100,4 +97,4 @@ public:
     };
 };
 
-#endif  // _SIP_D_STATE_H_
+#endif

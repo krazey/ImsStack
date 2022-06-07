@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_MESSAGE_BODY_PART_H_
-#define _SIP_MESSAGE_BODY_PART_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_MESSAGE_BODY_PART_H_
+#define SIP_MESSAGE_BODY_PART_H_
 
 #include "ISipMessageBodyPart.h"
 #include "SipStackHeaders.h"
@@ -20,44 +23,42 @@
 class SipMessageBodyPart : public ISipMessageBodyPart
 {
 public:
-    SipMessageBodyPart(IN IMS_BOOL bSDPBody_ = IMS_FALSE);
-    SipMessageBodyPart(IN SipMsgBody* pstMsgBody_, IN IMS_BOOL bSDPBody_ = IMS_FALSE);
+    SipMessageBodyPart(IN IMS_BOOL bSdpBody = IMS_FALSE);
+    SipMessageBodyPart(IN SipMsgBody* pMsgBody, IN IMS_BOOL bSdpBody = IMS_FALSE);
     virtual ~SipMessageBodyPart();
 
-private:
-    SipMessageBodyPart(IN CONST SipMessageBodyPart& objRHS);
+    SipMessageBodyPart(IN const SipMessageBodyPart&) = delete;
 
 public:
-    SipMessageBodyPart& operator=(IN CONST SipMessageBodyPart& objRHS);
+    SipMessageBodyPart& operator=(IN const SipMessageBodyPart& other);
 
 public:
     // ISipObject interface
-    virtual void Destroy();
+    void Destroy() override;
     // ISipMessageBodyPart interface
-    virtual ISipMessageBodyPart* Clone() const;
-    virtual void CopyFrom(IN CONST ISipMessageBodyPart* piBodyPart);
-    virtual AString GetHeader(
-            IN IMS_SINT32 nType, IN CONST AString& strName = AString::ConstNull()) const;
-    virtual void SetHeader(IN IMS_SINT32 nType, IN CONST AString& strValue,
-            IN CONST AString& strName = AString::ConstNull());
-    inline virtual const ByteArray& GetContent() const { return objContent; }
-    virtual void SetContent(IN CONST ByteArray& objContent);
+    ISipMessageBodyPart* Clone() const override;
+    void CopyFrom(IN const ISipMessageBodyPart* piBodyPart) override;
+    AString GetHeader(
+            IN IMS_SINT32 nType, IN const AString& strName = AString::ConstNull()) const override;
+    void SetHeader(IN IMS_SINT32 nType, IN const AString& strValue,
+            IN const AString& strName = AString::ConstNull()) override;
+    inline const ByteArray& GetContent() const override { return m_objContent; }
+    void SetContent(IN const ByteArray& objContent) override;
 
     IMS_BOOL FormMessageBody();
-    void SetHeader(IN SipHeaderBase* pstHeader,
-            IN IMS_SINT32 nType = ISipMessageBodyPart::CONTENT_UNKNOWN);
-    inline SipMsgBody* GetMessageBody() const { return pstMsgBody; }
-    inline IMS_BOOL IsSdpBodyPart() const { return bSDPBody; }
+    void SetHeader(
+            IN SipHeaderBase* pSipHdr, IN IMS_SINT32 nType = ISipMessageBodyPart::CONTENT_UNKNOWN);
+    inline SipMsgBody* GetMessageBody() const { return m_pMsgBody; }
+    inline IMS_BOOL IsSdpBodyPart() const { return m_bSdpBody; }
 
 private:
     IMS_BOOL ExtractProperties();
 
 private:
-    IMS_BOOL bSDPBody;
-    SipMsgBody* pstMsgBody;
-    SipUnknownHeaders objOtherMimeHeaders;
-
-    ByteArray objContent;
+    IMS_BOOL m_bSdpBody;
+    SipUnknownHeaders m_objOtherMimeHeaders;
+    ByteArray m_objContent;
+    SipMsgBody* m_pMsgBody;
 };
 
-#endif  // _SIP_MESSAGE_BODY_PART_H_
+#endif

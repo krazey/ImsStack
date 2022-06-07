@@ -1,23 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_TRANSACTION_STATE_H_
-#define _SIP_TRANSACTION_STATE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_TRANSACTION_STATE_H_
+#define SIP_TRANSACTION_STATE_H_
 
 #include "IPAddress.h"
 #include "RCObject.h"
+
+#include "Sip.h"
 #include "SipDialogEx.h"
-#include "SipTimerValues.h"
 #include "SipProfile.h"
+#include "SipTimerValues.h"
 
 class INetworkConnection;
 class ISipTransactionStateListener;
@@ -28,52 +33,53 @@ class SipTransactionState : public RCObject
 {
 public:
     SipTransactionState();
-    explicit SipTransactionState(IN SipDialogEx* pDialogEx_);
-    SipTransactionState(IN const SipTransactionState& objRHS);
+    explicit SipTransactionState(IN SipDialogEx* pDialogEx);
+    SipTransactionState(IN const SipTransactionState& other);
     virtual ~SipTransactionState();
 
-private:
-    SipTransactionState& operator=(IN const SipTransactionState& objRHS);
+    SipTransactionState& operator=(IN const SipTransactionState&) = delete;
 
 public:
     virtual void Abort();
     virtual void Terminate();
     virtual IMS_SINT32 CheckMessageValidity();
-    virtual IMS_BOOL FormMessage();
-    virtual IMS_BOOL InitTxnDetails(IN CONST SipTransactionState* pTState);
+    inline virtual IMS_BOOL FormMessage() { return IMS_TRUE; }
+    virtual IMS_BOOL InitTxnDetails(IN const SipTransactionState* pTState);
     virtual void NotifyTimerExpired();
     virtual void PostProcessMessageSentByStack(
-            IN ::SipMessage* pstSipMsg, IN const ByteArray& objBuffer);
-    virtual void PreProcessMessageSentByStack(IN ::SipMessage* pstSipMsg);
-    virtual IMS_BOOL Send(IN SipTimerValues* pTV = IMS_NULL);
+            IN ::SipMessage* pSipMsg, IN const ByteArray& objBuffer);
+    virtual void PreProcessMessageSentByStack(IN ::SipMessage* pSipMsg);
+    virtual IMS_BOOL Send(IN SipTimerValues* pTimerValues = IMS_NULL);
     virtual IMS_RESULT RetransmitMessage();
     virtual IMS_BOOL UpdateTransportDetails();
 
-    inline SipDialogEx* GetDialog() const { return pDialogEx.Get(); }
-    inline ::SipMessage* GetMessage() const { return pstMessage; }
-    inline ::SipMessage* GetLastMessage() const { return pstLastMessage; }
-    // MULTI_REG_SIP_PROFILE
-    inline SipProfile* GetSipProfile() const { return pSIPProfile.Get(); }
-    inline SipTransport* GetSipTransport() const { return pTransport; }
-    inline ::SipTxnKey* GetTxnKey() const { return pstTxnKey; }
+    inline SipDialogEx* GetDialog() const { return m_pDialogEx.Get(); }
+    inline ::SipMessage* GetMessage() const { return m_pSipMsg; }
+    inline ::SipMessage* GetLastMessage() const { return m_pLastSipMsg; }
+    inline SipProfile* GetSipProfile() const { return m_pSipProfile.Get(); }
+    inline SipTransport* GetSipTransport() const { return m_pTransport; }
+    inline ::SipTxnKey* GetTxnKey() const { return m_pTxnKey; }
     IMS_SINT32 GetSlotId() const;
     IMS_BOOL IsIpSecRequired() const;
-    // MULTI_REG_SIP_PROFILE
-    void SetSipProfile(IN SipProfile* pProfile);
-    void SetTransactionListener(IN ISipTransactionStateListener* piListener);
+    inline void SetSipProfile(IN SipProfile* pProfile) { m_pSipProfile = pProfile; }
+    inline void SetTransactionListener(IN ISipTransactionStateListener* piListener)
+    {
+        m_piListener = piListener;
+    }
     void SetTransportListener(IN ISipTransportErrorListener* piListener);
-    void SetTransportTuple(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
-            IN IMS_SINT32 nPortFC = 0xFFFF, IN IMS_SINT32 nTransportExt = 0 /* ANY */);
+    void SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+            IN IMS_SINT32 nPortFc = Sip::PORT_UNSPECIFIED,
+            IN IMS_SINT32 nTransportExt = Sip::TRANSPORT_EXT_ANY);
 
-    IMS_BOOL SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen);
-    void UpdateMessage(IN ::SipMessage* pstMessage);
+    IMS_BOOL SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen);
+    void UpdateMessage(IN ::SipMessage* pSipMsg);
 
 protected:
     virtual SipTransactionState* Clone();
 
-    IMS_BOOL Send(IN ::SipMessage* pstMessage, IN SipTimerValues* pTV);
-    void SetTimerValues(IN SipTimerValues* pTV, IN_OUT SipTxnContext*& pstTxnContext);
-    void SetFlowControlOption(IN CONST SipMethod& objMethod);
+    IMS_BOOL Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTimerValues);
+    void SetTimerValues(IN SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext);
+    void SetFlowControlOption(IN const SipMethod& objMethod);
 
 public:
     enum
@@ -92,20 +98,18 @@ public:
     };
 
 protected:
-    IMS_SINT32 nType;   // CLIENT or SERVER
-    IMS_SINT32 nClass;  // Class of transaction (INVITE/non-INVITE/Overlap)
-    IMS_UINT32 nCSeqNumber;
-    // MULTI_REG_SIP_PROFILE
-    RCPtr<SipProfile> pSIPProfile;
-    ISipTransactionStateListener* piListener;
+    IMS_SINT32 m_nType;   // CLIENT or SERVER
+    IMS_SINT32 m_nClass;  // Class of transaction (INVITE/non-INVITE/Overlap)
+    IMS_UINT32 m_nCSeqNumber;
+    RCPtr<SipProfile> m_pSipProfile;
+    ISipTransactionStateListener* m_piListener;
+    RCPtr<SipDialogEx> m_pDialogEx;
+    SipTransport* m_pTransport;
 
-    RCPtr<SipDialogEx> pDialogEx;
-    SipTransport* pTransport;
-
-    ::SipMessage* pstMessage;
-    ::SipMessage* pstLastMessage;
-    ::SipTxnKey* pstTxnKey;
-    ::SipTxnKey* pstRPRTxnKey;
+    ::SipMessage* m_pSipMsg;
+    ::SipMessage* m_pLastSipMsg;
+    ::SipTxnKey* m_pTxnKey;
+    ::SipTxnKey* m_pRprTxnKey;
 };
 
-#endif  // _SIP_TRANSACTION_STATE_H_
+#endif

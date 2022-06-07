@@ -1,31 +1,37 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_TRANSPORT_HELPER_H_
+#define SIP_TRANSPORT_HELPER_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_TRANSPORT_HELPER_H_
-#define _SIP_TRANSPORT_HELPER_H_
-
-// TCP active connection MUST be created at the start time of raw SIP message transmission.
 #include "IMSMap.h"
+
 #include "EngineActivity.h"
-#include "ISipTransportHelper.h"
 #include "ISipDatagramSocketListener.h"
 #include "ISipStreamSocketListener.h"
-#include "SipTransportAddress.h"
+#include "ISipTransportHelper.h"
 #include "SipSocketAddress.h"
+#include "SipTransportAddress.h"
 
+class ISipLocalDnsQueryListener;
 class ISipSocketListener;
 class ISipTransportListener;
-class ISipLocalDnsQueryListener;
 
+/**
+ * TCP active connection MUST be created at the start time of raw SIP message transmission.
+ */
 class SipTransportHelper :
         public EngineActivity,
         public ISipTransportHelper,
@@ -36,25 +42,24 @@ public:
     SipTransportHelper();
     virtual ~SipTransportHelper();
 
-private:
-    SipTransportHelper(IN CONST SipTransportHelper& objRHS);
-    SipTransportHelper& operator=(IN CONST SipTransportHelper& objRHS);
+    SipTransportHelper(IN const SipTransportHelper&) = delete;
+    SipTransportHelper& operator=(IN const SipTransportHelper&) = delete;
 
 public:
     // EngineActivity class
-    virtual IMS_BOOL DispatchMessage(IN IMSMSG& objMSG);
+    virtual IMS_BOOL DispatchMessage(IN ImsMessage& objMsg);
 
     // Only SipConnectionNotifier
     void Clear();
-    SipSocket* Create(IN CONST SipSocketAddress& objSA);
+    SipSocket* Create(IN const SipSocketAddress& objSockAddr);
     SipSocket* CreateStreamSocket(
-            IN CONST SipSocketAddress& objSA, IN CONST SipSocketAddress& objSA_FarEnd);
+            IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
     void Destroy(IN SipSocket*& pSocket, IN ISipSocketListener* piListener);
     void DestroyStreamSocket(
-            IN CONST SipSocketAddress& objSA, IN CONST SipSocketAddress& objSA_FarEnd);
-    SipSocket* Open(IN CONST SipSocketAddress& objSA);
+            IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
+    SipSocket* Open(IN const SipSocketAddress& objSockAddr);
     SipSocket* OpenStreamSocket(
-            IN CONST SipSocketAddress& objSA, IN CONST SipSocketAddress& objSA_FarEnd);
+            IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
     void SetListener(IN ISipTransportListener* piListener);
 
     // MULTI_REG_TRANSPORT
@@ -63,50 +68,51 @@ public:
     IMS_BOOL IsClientInitiatedConnection(IN SipSocket* pSocket) const;
 
     // LOCAL_DNS_QUERY
-    IMS_BOOL GetHostByName(IN CONST IPAddress& objLocalIP, IN CONST AString& strHostname,
-            OUT IPAddress& objHostIP);
+    IMS_BOOL GetHostByName(IN const IPAddress& objLocalIp, IN const AString& strHostname,
+            OUT IPAddress& objHostIp);
 
 private:
     // ISipTransportHelper
-    virtual void ApplyIpSecForServerSockets();
-    virtual void DestroyAllSockets(
-            IN IMS_SINT32 nMethod = 0, IN CONST IPAddress& objLocalIP = IPAddress::NONE);
-    virtual void DestroyTcpSocket(IN CONST IPAddress& objSrcIP, IN IMS_UINT32 nSrcPort,
-            IN CONST IPAddress& objDestIP, IN IMS_UINT32 nDestPort,
-            IN IMS_BOOL bIsConnectionByPeer = IMS_FALSE);
-    virtual void SetIpQos(IN SipRtConfig::IpQos* pIPQoS);
-    virtual void SetKeepAlivePolicy(IN CONST IPAddress& objSrcIP, IN IMS_UINT32 nSrcPort,
-            IN CONST IPAddress& objDestIP, IN IMS_UINT32 nDestPort,
-            IN IMS_SINT32 nPolicy = (-1) /* default */);
+    void ApplyIpSecForServerSockets() override;
+    void DestroyAllSockets(
+            IN IMS_SINT32 nMethod = 0, IN const IPAddress& objLocalIp = IPAddress::NONE) override;
+    void DestroyTcpSocket(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+            IN IMS_BOOL bIsConnectionByPeer = IMS_FALSE) override;
+    void SetIpQos(IN SipRtConfig::IpQos* pIpQos) override;
+    void SetKeepAlivePolicy(IN const IPAddress& objSrcIp, IN IMS_UINT32 nSrcPort,
+            IN const IPAddress& objDstIp, IN IMS_UINT32 nDstPort,
+            IN IMS_SINT32 nPolicy = (-1) /* default */) override;
     // LOCAL_DNS_QUERY
-    virtual void SetLocalDnsQueryListener(IN ISipLocalDnsQueryListener* piListener);
+    void SetLocalDnsQueryListener(IN ISipLocalDnsQueryListener* piListener) override;
 
     // ISipDatagramSocketListener
-    virtual void DatagramSocket_DataReceived(IN SipSocket* pSocket, IN CONST ByteArray& objBuffer,
-            IN CONST IPAddress& objIPA, IN IMS_SINT32 nPort);
+    void DatagramSocket_DataReceived(IN SipSocket* pSocket, IN const ByteArray& objBuffer,
+            IN const IPAddress& objIp, IN IMS_SINT32 nPort) override;
     // ISipStreamSocketListener
-    virtual void StreamSocket_ConnectionReceived(IN SipSocket* pSocket);
-    virtual void StreamSocket_DataReceived(IN SipSocket* pSocket, IN_OUT ByteArray& objBuffer);
-    virtual void StreamSocket_KeepAliveExpired(IN SipSocket* pSocket);
-    virtual void StreamSocket_PassiveClosed(IN SipSocket* pSocket);
+    void StreamSocket_ConnectionReceived(IN SipSocket* pSocket) override;
+    void StreamSocket_DataReceived(IN SipSocket* pSocket, IN_OUT ByteArray& objBuffer) override;
+    void StreamSocket_KeepAliveExpired(IN SipSocket* pSocket) override;
+    void StreamSocket_PassiveClosed(IN SipSocket* pSocket) override;
 
     IMS_BOOL AttachSocket(IN SipSocket* pSocket);
     IMS_BOOL IsSocketPresent(IN SipSocket* pSocket) const;
-    SipSocket* LookupSocket(IN CONST SipSocketAddress& objSA, IN IMS_BOOL bDetach = IMS_FALSE);
-    SipSocket* LookupSocket(IN CONST SipSocket& objSocket, IN IMS_BOOL bDetach = IMS_FALSE);
-    SipSocket* LookupStreamSocket(IN CONST SipSocketAddress& objSA);
+    SipSocket* LookupSocket(
+            IN const SipSocketAddress& objSockAddr, IN IMS_BOOL bDetach = IMS_FALSE);
+    SipSocket* LookupSocket(IN const SipSocket& objSocket, IN IMS_BOOL bDetach = IMS_FALSE);
+    SipSocket* LookupStreamSocket(IN const SipSocketAddress& objSockAddr);
     SipSocket* LookupStreamSocket(
-            IN CONST SipSocketAddress& objSA, IN CONST SipSocketAddress& objSA_FarEnd);
+            IN const SipSocketAddress& objSockAddr, IN const SipSocketAddress& objFarEnd);
 
 private:
-    // Event for message processing
+    /// Event for message processing
     enum
     {
         AMSG_PROCESS_MESSAGE = AMSG_USER,
         AMSG_DESTROY_ALL_SOCKETS
     };
 
-    // Result values for the completeness of a raw SIP message (TCP only)
+    /// Result values for the completeness of a raw SIP message (TCP only)
     enum
     {
         MESSAGE_ERROR = (-1),
@@ -114,40 +120,31 @@ private:
         MESSAGE_INCOMPLETE
     };
 
-    // Result values for SipComp module
-    enum
-    {
-        SIGCOMP_NO_COMP = (-3),
-        SIGCOMP_INCOMPLETE = (-2),
-        SIGCOMP_ERROR = (-1),
-        SIGCOMP_SUCCESS = 0
-    };
-
     class TransportBuffer
     {
         friend class SipTransportHelper;
 
-        ByteArray objData;
+        ByteArray m_objData;
         // Destination information of a message (on the basis of sender)
-        SipTransportAddress objTA_NearEnd;
+        SipTransportAddress m_objNearEnd;
         // Source information of a message (on the basis of sender)
-        SipTransportAddress objTA_FarEnd;
+        SipTransportAddress m_objFarEnd;
 
         inline TransportBuffer() {}
-        inline TransportBuffer(IN CONST TransportBuffer& objRHS) :
-                objData(objRHS.objData),
-                objTA_NearEnd(objRHS.objTA_NearEnd),
-                objTA_FarEnd(objRHS.objTA_FarEnd)
+        inline TransportBuffer(IN const TransportBuffer& other) :
+                m_objData(other.m_objData),
+                m_objNearEnd(other.m_objNearEnd),
+                m_objFarEnd(other.m_objFarEnd)
         {
         }
         inline ~TransportBuffer() {}
-        inline TransportBuffer& operator=(IN CONST TransportBuffer& objRHS)
+        inline TransportBuffer& operator=(IN const TransportBuffer& other)
         {
-            if (this != &objRHS)
+            if (this != &other)
             {
-                objData = objRHS.objData;
-                objTA_NearEnd = objRHS.objTA_NearEnd;
-                objTA_FarEnd = objRHS.objTA_FarEnd;
+                m_objData = other.m_objData;
+                m_objNearEnd = other.m_objNearEnd;
+                m_objFarEnd = other.m_objFarEnd;
             }
 
             return (*this);
@@ -157,17 +154,15 @@ private:
         void DisplayMessage(IN IMS_SINT32 nSlotId);
     };
 
-    IMSList<SipSocket*> objSockets;
-    IMSList<TransportBuffer*> objBuffers;
-    ISipTransportListener* piListener;
-
+    IMSList<SipSocket*> m_objSockets;
+    IMSList<TransportBuffer*> m_objBuffers;
+    ISipTransportListener* m_piListener;
     // MULTI_REG_TRANSPORT :: <Socket object's pointer, count>
-    IMSMap<IMS_UINTP, IMS_SINT32> objClientInitiatedConnections;
-
+    IMSMap<IMS_UINTP, IMS_SINT32> m_objClientInitiatedConnections;
     // LOCAL_DNS_QUERY
     // 1) Test purpose
     // 2) Using the application layer's DNS query result
-    ISipLocalDnsQueryListener* piDnsQueryListener;
+    ISipLocalDnsQueryListener* m_piDnsQueryListener;
 };
 
-#endif  // _SIP_TRANSPORT_HELPER_H_
+#endif

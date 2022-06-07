@@ -1,30 +1,35 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "NATHelper.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
-#include "NATHelper.h"
+
+#include "private/SipConfig.h"
+
 #include "ISipHeader.h"
-#include "SipPrivate.h"
-#include "SipFeatures.h"
-#include "SipDebug.h"
-#include "SipConfigProxy.h"
-#include "SipMessageBuffer.h"
-#include "SipUtils.h"
 #include "SipAddress.h"
+#include "SipClientTransport.h"
+#include "SipConfigProxy.h"
+#include "SipDebug.h"
+#include "SipFeatures.h"
+#include "SipMessageBuffer.h"
+#include "SipPrivate.h"
 #include "SipRtConfigUtils.h"
 #include "SipTransportHelper.h"
-#include "SipClientTransport.h"
-#include "private/SipConfig.h"
+#include "SipUtils.h"
 
 #define __IMS_DNS_QUERY_SIP__
 
@@ -33,18 +38,18 @@ __IMS_TRACE_TAG_SIP__;
 PUBLIC
 SipClientTransport::SipClientTransport(IN IMS_SINT32 nSlotId) :
         SipTransport(nSlotId, TYPE_CLIENT),
-        pServerSocket(IMS_NULL),
-        strExtensionTokenForViaBranch(AString::ConstNull())
+        m_pServerSocket(IMS_NULL),
+        m_strExtensionTokenForViaBranch(AString::ConstNull())
 {
 }
 
 PUBLIC
 SipClientTransport::~SipClientTransport()
 {
-    if (pServerSocket != IMS_NULL)
+    if (m_pServerSocket != IMS_NULL)
     {
-        GetTransportHelper()->Destroy(pServerSocket, this);
-        pServerSocket = IMS_NULL;
+        GetTransportHelper()->Destroy(m_pServerSocket, this);
+        m_pServerSocket = IMS_NULL;
     }
 
 #ifdef __IMS_SIP_DEBUG__
@@ -52,22 +57,15 @@ SipClientTransport::~SipClientTransport()
 #endif
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
-        IN_OUT ::SipMessage*& pstMessage, IN CONST SipProfile* pSIPProfile /* = IMS_NULL*/)
+        IN_OUT ::SipMessage*& pSipMsg, IN const SipProfile* pProfile /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Update transport information with a default values if not provisioned
     CorrectNearEndAddress();
 
     // Form Via header
     // If topmost Via header already exists, do not insert a Via header.
-    if (SipStack::GetHeaderCount(pstMessage, ISipHeader::VIA) > 0)
+    if (SipStack::GetHeaderCount(pSipMsg, ISipHeader::VIA) > 0)
     {
         IMS_TRACE_D("The Via header already exist", 0, 0, 0);
         return IMS_TRUE;
@@ -82,9 +80,13 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     strSentProtocol += TextParser::CHAR_SLASH;
 
     if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP)
+    {
         strSentProtocol += Sip::STR_TCP_CAPS;
+    }
     else if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
+    {
         strSentProtocol += Sip::STR_TLS_CAPS;
+    }
     else
     {
         // Overwrites the transport protocol by the local configuration...
@@ -107,8 +109,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
             }
             else
             {
-                IMS_SINT32 nTransportType =
-                        SipConfigProxy::GetTransportType(GetSlotId(), pSIPProfile);
+                IMS_SINT32 nTransportType = SipConfigProxy::GetTransportType(GetSlotId(), pProfile);
 
                 if (nTransportType == SipConfig::TRANSPORT_TYPE_TCP)
                 {
@@ -144,7 +145,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     IPAddress objLocalAddress(IPAddress::NONE);
 
     // IMS_IPSEC_UDP_ENC
-    if (IsIPSecUDPEncRequired())
+    if (IsIpSecUdpEncRequired())
     {
         if (NATHelper::IsNATResolverRequired())
         {
@@ -184,28 +185,28 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     strSentBy += TextParser::CHAR_COLON + strPort;
 
     // Create a Via branch
-    AString strBranch = SipUtils::GenerateViaBranch(strExtensionTokenForViaBranch);
+    AString strBranch = SipUtils::GenerateViaBranch(m_strExtensionTokenForViaBranch);
 
-    SipHeaderBase* pstHeader = SipStack::CreateViaHeader(strSentProtocol, strSentBy, strBranch);
+    SipHeaderBase* pSipHdr = SipStack::CreateViaHeader(strSentProtocol, strSentBy, strBranch);
 
-    if (pstHeader == IMS_NULL)
+    if (pSipHdr == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
     // "keep" parameter
-    if (SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pSIPProfile))
+    if (SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pProfile))
     {
-        if (!SipStack::SetParameter(pstHeader, Sip::STR_KEEP, AString::ConstNull()))
+        if (!SipStack::SetParameter(pSipHdr, Sip::STR_KEEP, AString::ConstNull()))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
     }
 
-    if (!SipStack::PrependHeader(pstHeader, pstMessage))
+    if (!SipStack::PrependHeader(pSipHdr, pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
@@ -220,26 +221,25 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
         IMS_MEM_Memset(pBuffer, 0x00, nBuffLen);
 
         // Apply the criteria of SIP message size
-        if (!SipStack::EncodeMessage(
-                    pstMessage, SipPrivate::GetEncodingOptions(), pBuffer, nBuffLen))
+        if (!SipStack::EncodeMessage(pSipMsg, SipPrivate::GetEncodingOptions(), pBuffer, nBuffLen))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
         IMS_TRACE_D(
                 "SipClientTransport :: transport protocol selection - length(%d)", nBuffLen, 0, 0);
 
-        if (nBuffLen > SipConfigProxy::GetTcpCriterionLength(GetSlotId(), pSIPProfile))
+        if (nBuffLen > SipConfigProxy::GetTcpCriterionLength(GetSlotId(), pProfile))
         {
             // The sent-protocol in Via header needs to modify with TCP.
             strSentProtocol = Sip::STR_SIP_VERSION;
             strSentProtocol += TextParser::CHAR_SLASH;
             strSentProtocol += Sip::STR_TCP_CAPS;
 
-            if (!SipStack::UpdateSentProtocol(pstMessage, strSentProtocol))
+            if (!SipStack::UpdateSentProtocol(pSipMsg, strSentProtocol))
             {
-                SipStack::FreeHeaderEx(pstHeader);
+                SipStack::FreeHeaderEx(pSipHdr);
                 return IMS_FALSE;
             }
 
@@ -253,19 +253,19 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     // "rport" parameter : UDP & unprotected port only
     IMS_SINT32 nPortC = GetPortC();
 
-    if (SipConfigProxy::IsRportConfigured(GetSlotId(), pSIPProfile) &&
+    if (SipConfigProxy::IsRportConfigured(GetSlotId(), pProfile) &&
             strSentProtocol.Contains(Sip::STR_UDP_CAPS) &&
             ((nPortC == 0) || (nPortC == Sip::PORT_UNSPECIFIED) ||
                     (objNearEnd.GetPort() == nPortC)))
     {
-        if (!SipStack::SetParameter(pstHeader, Sip::STR_RPORT, AString::ConstNull()))
+        if (!SipStack::SetParameter(pSipHdr, Sip::STR_RPORT, AString::ConstNull()))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // LOG_EXCLUDING_SERVER_INFO
     if (SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()))
@@ -277,17 +277,10 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::FormViaHeader(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
-        IN CONST SipProfile* pSIPProfile /* = IMS_NULL*/)
+        IN const SipProfile* pProfile /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!SipTransport::ReserveResource(pSIPProfile))
+    if (!SipTransport::ReserveResource(pProfile))
     {
         return IMS_FALSE;
     }
@@ -295,9 +288,9 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
     // If the keep-alive mechanism is applied and the configured transport protocol
     // is TCP/TLS, all the services will be provided by the TCP client socket
     // to support the keep-alive mechanism.
-    IMS_SINT32 nTransportType = SipConfigProxy::GetTransportType(GetSlotId(), pSIPProfile);
+    IMS_SINT32 nTransportType = SipConfigProxy::GetTransportType(GetSlotId(), pProfile);
 
-    if (SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pSIPProfile) &&
+    if (SipConfigProxy::IsKeepAliveConfigured(GetSlotId(), pProfile) &&
             (nTransportType == SipConfig::TRANSPORT_TYPE_TCP ||
                     nTransportType == SipConfig::TRANSPORT_TYPE_TLS))
     {
@@ -331,107 +324,100 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::ReserveResource(
     }
 
     // Reserves the listening sockets for incoming SIP message...
-    if (pServerSocket != IMS_NULL)
+    if (m_pServerSocket != IMS_NULL)
     {
         // If the near port number is changed, then destroy & create a TCP server socket.
-        IPAddress objIPA;
+        IPAddress objIpAddr;
         IMS_UINT32 nPort = 0;
 
-        pServerSocket->GetSockName(objIPA, nPort);
+        m_pServerSocket->GetSockName(objIpAddr, nPort);
 
         if (objNearEnd.GetPort() == static_cast<IMS_SINT32>(nPort))
         {
             return IMS_TRUE;
         }
 
-        GetTransportHelper()->Destroy(pServerSocket, this);
-        pServerSocket = IMS_NULL;
+        GetTransportHelper()->Destroy(m_pServerSocket, this);
+        m_pServerSocket = IMS_NULL;
     }
 
     // RFC5626_FLOW_CONTROL
     if (!IsFlowControlPortConfigured())
     {
-        SipSocketAddress objSA;
+        SipSocketAddress objSsa;
 
-        objSA.SetIpAddress(objNearEnd.GetIpAddress());
-        objSA.SetPort(objNearEnd.GetPort());
+        objSsa.SetIpAddress(objNearEnd.GetIpAddress());
+        objSsa.SetPort(objNearEnd.GetPort());
 
         if ((objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TCP) ||
                 (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS))
         {
-            objSA.SetType(SipSocketAddress::SOCKET_TCP);
+            objSsa.SetType(SipSocketAddress::SOCKET_TCP);
 
             // If the transport protocol is TLS, SSL socket will be created...
             if (objFarEnd.GetProtocol() == SipTransportAddress::PROTOCOL_TLS)
             {
-                objSA.SetSecure(IMS_TRUE);
+                objSsa.SetSecure(IMS_TRUE);
             }
         }
         else
         {
-            objSA.SetType(SipSocketAddress::SOCKET_UDP);
+            objSsa.SetType(SipSocketAddress::SOCKET_UDP);
         }
 
-        pServerSocket = GetTransportHelper()->Create(objSA);
+        m_pServerSocket = GetTransportHelper()->Create(objSsa);
 
-        if (pServerSocket == IMS_NULL)
+        if (m_pServerSocket == IMS_NULL)
         {
             IMS_TRACE_E(0, "Creating server socket (%s, %d, %d) failed",
-                    SipDebug::GetIp(objSA.GetIpAddress()), objSA.GetPort(), objSA.GetType());
+                    SipDebug::GetIp(objSsa.GetIpAddress()), objSsa.GetPort(), objSsa.GetType());
             return IMS_FALSE;
         }
 
         IMS_TRACE_D("ClientTransport :: server (%s, %d, %d) is created",
-                SipDebug::GetIp(objSA.GetIpAddress()), objSA.GetPort(), objSA.GetType());
+                SipDebug::GetIp(objSsa.GetIpAddress()), objSsa.GetPort(), objSsa.GetType());
 
-        pServerSocket->SetListener(this);
+        m_pServerSocket->SetListener(this);
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessage* pstMessage,
-        IN IMS_BOOL bRoutingLR /* = IMS_TRUE */, IN SipAddrSpec* pstImplicitRoute /* = IMS_NULL */)
+PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessage* pSipMsg,
+        IN IMS_BOOL bRoutingLr /*= IMS_TRUE*/, IN SipAddrSpec* pImplicitRoute /*= IMS_NULL*/)
 {
     const AString PARAM_TRANSPORT(SipAddress::PARAM_TRANSPORT);
-    SipAddrSpec* pstAddrSpec;
+
+    SipAddrSpec* pAddrSpec;
     IMS_BOOL bImplicitRoutingTransportRequired = IMS_FALSE;
     AString strImplicitRoutingTransport(AString::ConstNull());
 
-    //---------------------------------------------------------------------------------------------
-
     // When determining the destination (next hop), it has been set.
-    if (bRoutingLR)
+    if (bRoutingLr)
     {
-        pstAddrSpec = SipStack::GetAddrSpec(pstMessage, ISipHeader::ROUTE);
+        pAddrSpec = SipStack::GetAddrSpec(pSipMsg, ISipHeader::ROUTE);
     }
     else
     {
         // In case of REGISTER request, it does not require the Route header.
-        if (pstImplicitRoute != IMS_NULL)
+        if (pImplicitRoute != IMS_NULL)
         {
-            pstAddrSpec = pstImplicitRoute;
-            SipStack::AddReference(pstAddrSpec);
+            pAddrSpec = pImplicitRoute;
+            SipStack::AddReference(pAddrSpec);
 
             // Store the transport parameter if present
-            SipAddrSpec* pstReqUri = SipStack::GetRequestUri(pstMessage);
+            SipAddrSpec* pReqUri = SipStack::GetRequestUri(pSipMsg);
 
-            if (pstReqUri != IMS_NULL)
+            if (pReqUri != IMS_NULL)
             {
                 // FIXME: consider "sips" URI scheme
-                if (IsSameHostAndPort(pstAddrSpec, pstReqUri))
+                if (IsSameHostAndPort(pAddrSpec, pReqUri))
                 {
                     bImplicitRoutingTransportRequired = IMS_TRUE;
-                    strImplicitRoutingTransport =
-                            SipStack::GetParameter(pstReqUri, PARAM_TRANSPORT);
+                    strImplicitRoutingTransport = SipStack::GetParameter(pReqUri, PARAM_TRANSPORT);
                 }
 
-                SipStack::FreeAddrSpec(pstReqUri);
+                SipStack::FreeAddrSpec(pReqUri);
             }
 
             IMS_TRACE_I("IMPLICIT_ROUTE (%s,%s) will be applied...",
@@ -441,21 +427,21 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         else
         {
             // In case of strict routing or no route set.
-            pstAddrSpec = SipStack::GetRequestUri(pstMessage);
+            pAddrSpec = SipStack::GetRequestUri(pSipMsg);
         }
     }
 
-    if (pstAddrSpec == IMS_NULL)
+    if (pAddrSpec == IMS_NULL)
     {
         IMS_TRACE_E(0, "The target URI does not exist...", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (SipStack::IsUriSchemeSip(pstAddrSpec) || SipStack::IsUriSchemeSips(pstAddrSpec))
+    if (SipStack::IsUriSchemeSip(pAddrSpec) || SipStack::IsUriSchemeSips(pAddrSpec))
     {
         AString strTemp;
 
-        if (SipStack::IsUriSchemeSips(pstAddrSpec))
+        if (SipStack::IsUriSchemeSips(pAddrSpec))
         {
             SetProtocol(SipTransportAddress::PROTOCOL_TLS, TA_NEAR);
         }
@@ -463,14 +449,14 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         // If a transport parameter exists, check what the transport type is and update
         // both the destination info. as well as the topmost Via of the request being sent out.
         // IMPLICIT_ROUTING
-        if (!bRoutingLR && (pstImplicitRoute != IMS_NULL) && bImplicitRoutingTransportRequired)
+        if (!bRoutingLr && (pImplicitRoute != IMS_NULL) && bImplicitRoutingTransportRequired)
         {
             // Sets the transport protocol from the original routing information
             strTemp = strImplicitRoutingTransport;
         }
         else
         {
-            strTemp = SipStack::GetParameter(pstAddrSpec, PARAM_TRANSPORT);
+            strTemp = SipStack::GetParameter(pAddrSpec, PARAM_TRANSPORT);
         }
 
         if (!strTemp.IsNULL() && !strTemp.IsEmpty())
@@ -521,13 +507,13 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         AString strFarAddress;
         IMS_UINT32 nFarPort;
 
-        (void)SipStack::GetHostAndPort(pstAddrSpec, strFarAddress, nFarPort);
+        (void)SipStack::GetHostAndPort(pAddrSpec, strFarAddress, nFarPort);
 
         // If the port number does not exist,
         // set a default port number according to the URI format.
         if (SipStack::IsLastErrorNoExist())
         {
-            if (SipStack::IsUriSchemeSips(pstAddrSpec))
+            if (SipStack::IsUriSchemeSips(pAddrSpec))
             {
                 nFarPort = Sip::PORT_5061;
             }
@@ -550,18 +536,18 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
 #if defined(__IMS_DNS_QUERY_SIP__)
         // LOCAL_DNS_QUERY
-        const IPAddress& objIPA = GetIpAddress();
+        const IPAddress& objIpAddr = GetIpAddress();
         IMS_BOOL bDnsQueryRequired = IMS_FALSE;
 
         if (objFarAddress.IsUnknownAddress())
         {
             bDnsQueryRequired = IMS_TRUE;
 
-            IPAddress objHostIP;
+            IPAddress objHostIp;
 
-            if (GetTransportHelper()->GetHostByName(objIPA, strFarAddress, objHostIP))
+            if (GetTransportHelper()->GetHostByName(objIpAddr, strFarAddress, objHostIp))
             {
-                objFarAddress = objHostIP;
+                objFarAddress = objHostIp;
                 bDnsQueryRequired = IMS_FALSE;
             }
         }
@@ -570,47 +556,47 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         {
             // Do DNS query ...
             INetworkConnection* piConnection =
-                    NetworkService::GetNetworkService()->FindConnection(objIPA);
+                    NetworkService::GetNetworkService()->FindConnection(objIpAddr);
 
             if (piConnection == IMS_NULL)
             {
-                SipStack::FreeAddrSpec(pstAddrSpec);
+                SipStack::FreeAddrSpec(pAddrSpec);
 
                 IMS_TRACE_E(0, "Finding a network connection failed", 0, 0, 0);
                 return IMS_FALSE;
             }
 
-            IMSList<IPAddress> objIPAddresses;
-            IMS_SINT32 nIPVersion = 0;
+            IMSList<IPAddress> objIpAddrs;
+            IMS_SINT32 nIpVersion = 0;
 
-            if (objIPA.IsIPv4Address())
+            if (objIpAddr.IsIPv4Address())
             {
-                nIPVersion = IPAddress::IPV4;
+                nIpVersion = IPAddress::IPV4;
             }
-            else if (objIPA.IsIPv6Address())
+            else if (objIpAddr.IsIPv6Address())
             {
-                nIPVersion = IPAddress::IPV6;
+                nIpVersion = IPAddress::IPV6;
             }
 
-            if (piConnection->GetHostByName(strFarAddress, objIPAddresses, nIPVersion) <= 0)
+            if (piConnection->GetHostByName(strFarAddress, objIpAddrs, nIpVersion) <= 0)
             {
-                SipStack::FreeAddrSpec(pstAddrSpec);
+                SipStack::FreeAddrSpec(pAddrSpec);
 
                 IMS_TRACE_E(0, "Getting host address by the name (%s) failed",
                         SipDebug::GetIp(strFarAddress), 0, 0);
                 return IMS_FALSE;
             }
 
-            if (objIPAddresses.IsEmpty())
+            if (objIpAddrs.IsEmpty())
             {
-                SipStack::FreeAddrSpec(pstAddrSpec);
+                SipStack::FreeAddrSpec(pAddrSpec);
 
                 IMS_TRACE_E(0, "No entry in the DNS query (%s) result",
                         SipDebug::GetIp(strFarAddress), 0, 0);
                 return IMS_FALSE;
             }
 
-            objFarAddress = objIPAddresses.GetAt(0);
+            objFarAddress = objIpAddrs.GetAt(0);
         }
 #endif
 
@@ -618,7 +604,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
 
         // Check if an "maddr" parameter exists in the Requsest-URI.
         // If so, this request MUST be sent to the host in the "maddr" parameter.
-        strTemp = SipStack::GetParameter(pstAddrSpec, AString(SipAddress::PARAM_MADDR));
+        strTemp = SipStack::GetParameter(pAddrSpec, AString(SipAddress::PARAM_MADDR));
 
         if (strTemp.GetLength() > 0)
         {
@@ -627,7 +613,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         }
 
         // If a "method" parameter is present, it should be stripped out.
-        (void)SipStack::RemoveParameter(AString(SipAddress::PARAM_METHOD), pstAddrSpec);
+        (void)SipStack::RemoveParameter(AString(SipAddress::PARAM_METHOD), pAddrSpec);
 
         // TLS feature
         //  If the Request-URI contains SIPS scheme, then irrespective of the Target URI
@@ -637,14 +623,14 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         //  This is to handle the case in which the final destination is identified by a SIPS URI
         //  and the outbound proxy is a loose router having SIP URI.
         //  In this case also, the message SHOULD go over TLS.
-        SipAddrSpec* pstReqAddrSpec = SipStack::GetRequestUri(pstMessage);
+        SipAddrSpec* pReqAddrSpec = SipStack::GetRequestUri(pSipMsg);
 
-        if ((pstReqAddrSpec != IMS_NULL) && SipStack::IsUriSchemeSips(pstReqAddrSpec))
+        if ((pReqAddrSpec != IMS_NULL) && SipStack::IsUriSchemeSips(pReqAddrSpec))
         {
             SetProtocol(SipTransportAddress::PROTOCOL_TLS, TA_FAR);
         }
 
-        SipStack::FreeAddrSpec(pstReqAddrSpec);
+        SipStack::FreeAddrSpec(pReqAddrSpec);
 
         // LOG_EXCLUDING_SERVER_INFO
         IMS_TRACE_D("UpdateDestinationInfo :: IP (%s), Port (%d)",
@@ -659,25 +645,18 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
         IMS_TRACE_D("UpdateDestinationInfo :: No SIP/SIPS URI scheme (not implemented)", 0, 0, 0);
     }
 
-    SipStack::FreeAddrSpec(pstAddrSpec);
+    SipStack::FreeAddrSpec(pAddrSpec);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipClientTransport::ValidateViaHeader(IN ::SipMessage* pstMessage)
+PUBLIC VIRTUAL IMS_SINT32 SipClientTransport::ValidateViaHeader(IN ::SipMessage* pSipMsg)
 {
     // If the address / port in the topmost Via header does not matches
     // with the current transport information, the message SHOULD be discarded.
 
-    //---------------------------------------------------------------------------------------------
-
     // If more than one Via header field value is present, it SHOULD be discarded by UAC.
-    if (SipStack::GetHeaderCount(pstMessage, ISipHeader::VIA) != 1)
+    if (SipStack::GetHeaderCount(pSipMsg, ISipHeader::VIA) != 1)
     {
         SipPrivate::SetLastError(SipError::INVALID_MESSAGE);
         return SipPrivate::MESSAGE_DISCARDED;
@@ -686,7 +665,7 @@ PUBLIC VIRTUAL IMS_SINT32 SipClientTransport::ValidateViaHeader(IN ::SipMessage*
     IMS_SINT32 nPort = Sip::PORT_UNSPECIFIED;
     AString strHost;
 
-    if (!GetHostNPortFromViaHeader(pstMessage, strHost, nPort))
+    if (!GetHostNPortFromViaHeader(pSipMsg, strHost, nPort))
     {
         SipPrivate::SetLastError(SipError::INVALID_MESSAGE);
         return SipPrivate::MESSAGE_FAILED;
@@ -706,30 +685,10 @@ PUBLIC VIRTUAL IMS_SINT32 SipClientTransport::ValidateViaHeader(IN ::SipMessage*
     return SipPrivate::MESSAGE_VALID;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipClientTransport::SetExtensionTokenForViaBranch(IN CONST AString& strToken)
-{
-    //---------------------------------------------------------------------------------------------
-
-    strExtensionTokenForViaBranch = strToken;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
         IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pServerSocket != pSocket)
+    if (m_pServerSocket != pSocket)
     {
         IMS_TRACE_D("ClientTransport :: server socket is not matched", 0, 0, 0);
 
@@ -741,39 +700,30 @@ PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
 
     NotifyTransportError(nErrorCode);
 
-    if (pServerSocket != IMS_NULL)
+    if (m_pServerSocket != IMS_NULL)
     {
-        GetTransportHelper()->Destroy(pServerSocket, this);
-        pServerSocket = IMS_NULL;
+        GetTransportHelper()->Destroy(m_pServerSocket, this);
+        m_pServerSocket = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL IMS_BOOL SipClientTransport::IsSameHostAndPort(
-        IN SipAddrSpec* pstAddrSpec1, IN SipAddrSpec* pstAddrSpec2)
+        IN SipAddrSpec* pAddrSpec1, IN SipAddrSpec* pAddrSpec2)
 {
-    AString strHost1;
-    AString strHost2;
-    IMS_UINT32 nPort1;
-    IMS_UINT32 nPort2;
-
-    //---------------------------------------------------------------------------------------------
-
-    if ((pstAddrSpec1 == IMS_NULL) || (pstAddrSpec2 == IMS_NULL))
+    if ((pAddrSpec1 == IMS_NULL) || (pAddrSpec2 == IMS_NULL))
     {
         return IMS_FALSE;
     }
 
-    (void)SipStack::GetHostAndPort(pstAddrSpec1, strHost1, nPort1);
+    AString strHost1;
+    IMS_UINT32 nPort1;
+
+    (void)SipStack::GetHostAndPort(pAddrSpec1, strHost1, nPort1);
 
     // Adjust the port number
     if (SipStack::IsLastErrorNoExist())
     {
-        if (SipStack::IsUriSchemeSips(pstAddrSpec1))
+        if (SipStack::IsUriSchemeSips(pAddrSpec1))
         {
             nPort1 = Sip::PORT_5061;
         }
@@ -790,12 +740,15 @@ PRIVATE GLOBAL IMS_BOOL SipClientTransport::IsSameHostAndPort(
         }
     }
 
-    (void)SipStack::GetHostAndPort(pstAddrSpec2, strHost2, nPort2);
+    AString strHost2;
+    IMS_UINT32 nPort2;
+
+    (void)SipStack::GetHostAndPort(pAddrSpec2, strHost2, nPort2);
 
     // Adjust the port number
     if (SipStack::IsLastErrorNoExist())
     {
-        if (SipStack::IsUriSchemeSips(pstAddrSpec2))
+        if (SipStack::IsUriSchemeSips(pAddrSpec2))
         {
             nPort2 = Sip::PORT_5061;
         }
@@ -817,8 +770,8 @@ PRIVATE GLOBAL IMS_BOOL SipClientTransport::IsSameHostAndPort(
         return IMS_FALSE;
     }
 
-    IPAddress objIP1(strHost1);
-    IPAddress objIP2(strHost2);
+    IPAddress objIpAddr1(strHost1);
+    IPAddress objIpAddr2(strHost2);
 
-    return objIP1.Equals(objIP2);
+    return objIpAddr1.Equals(objIpAddr2);
 }

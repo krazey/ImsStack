@@ -1,24 +1,28 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20091126  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
 #include "TextParser.h"
-#include "SipPrivate.h"
-#include "SipManager.h"
-#include "SipConnectionNotifier.h"
-#include "SipConnectionNotifierImpl.h"
+
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
+#include "SipConnectionNotifier.h"
+#include "SipConnectionNotifierImpl.h"
+#include "SipManager.h"
+#include "SipPrivate.h"
 #include "SipProtocol.h"
 
 __IMS_TRACE_TAG_SIP__;
@@ -31,68 +35,53 @@ SipProtocol::SipProtocol() :
 
 PUBLIC VIRTUAL SipProtocol::~SipProtocol() {}
 
-/*
- Returns a singleton object of SIP protocol.
-
-Remarks
-
-*/
+/**
+ * Returns a singleton object of SIP protocol.
+ */
 PUBLIC GLOBAL SipProtocol* SipProtocol::GetInstance()
 {
-    static SipProtocol* pSIP = IMS_NULL;
+    static SipProtocol* s_pSipProtocol = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSIP == IMS_NULL)
+    if (s_pSipProtocol == IMS_NULL)
     {
-        pSIP = new SipProtocol();
+        s_pSipProtocol = new SipProtocol();
     }
 
-    return pSIP;
+    return s_pSipProtocol;
 }
 
-/*
- Creates and opens a SIP Connection.
-
-Remarks
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
-PRIVATE VIRTUAL IConnection* SipProtocol::OpenPrim(IN CONST AString& strName)
+/**
+ * Creates and opens a SIP Connection.
+ */
+PRIVATE VIRTUAL IConnection* SipProtocol::OpenPrim(IN const AString& strName)
 {
     AString strScheme;
     AString strTarget;
     AString strParams;
-
-    //---------------------------------------------------------------------------------------------
 
     Protocol::ParseName(strName, strScheme, strTarget, strParams);
 
     return OpenPrim(strScheme, strTarget, strParams);
 }
 
-/*
- Creates and opens a SIP Connection.
-
-Remarks
- It throws the error as follows:
-     ILLEGAL_ARGUMENT,
-     CONNECTION_NOT_FOUND
-*/
+/**
+ * Creates and opens a SIP Connection.
+ */
 PRIVATE VIRTUAL IConnection* SipProtocol::OpenPrim(
-        IN CONST AString& strScheme, IN CONST AString& strTarget, IN CONST AString& strParams)
+        IN const AString& strScheme, IN const AString& strTarget, IN const AString& strParams)
 {
     IMS_SINT32 nScheme;
-
-    //---------------------------------------------------------------------------------------------
 
     SipPrivate::SetLastError(SipError::NO_ERROR);
 
     if (strScheme.EqualsIgnoreCase(Sip::STR_SIP))
+    {
         nScheme = Sip::URI_SCHEME_SIP;
+    }
     else
+    {
         nScheme = Sip::URI_SCHEME_SIPS;
+    }
 
     // Check if it is SIP connection notifier or not
     if (strTarget.IsEmpty())
@@ -107,31 +96,31 @@ PRIVATE VIRTUAL IConnection* SipProtocol::OpenPrim(
     }
     else
     {
-        IMS_BOOL bOK = IMS_FALSE;
-        IMS_SINT32 nPort = strTarget.ToInt32(&bOK);
+        IMS_BOOL bOk = IMS_FALSE;
+        IMS_SINT32 nPort = strTarget.ToInt32(&bOk);
 
-        if (bOK == IMS_TRUE)
+        if (bOk == IMS_TRUE)
         {
             // SIP transaction notifier : dedicated mode
             return CreateConnectionNotifier(nScheme, nPort, strParams);
         }
         else
         {
-            AString strURI = strScheme + TextParser::CHAR_COLON + strTarget;
+            AString strUri = strScheme + TextParser::CHAR_COLON + strTarget;
 
             if (strParams.GetLength() > 0)
             {
-                strURI.Prepend(TextParser::CHAR_LAQUOT);
+                strUri.Prepend(TextParser::CHAR_LAQUOT);
 
-                strURI += TextParser::CHAR_SEMICOLON + strParams;
+                strUri += TextParser::CHAR_SEMICOLON + strParams;
 
-                strURI.Append(TextParser::CHAR_RAQUOT);
+                strUri.Append(TextParser::CHAR_RAQUOT);
             }
 
             // SIP client transaction
-            SipClientConnection* pSCC = new SipClientConnection(strURI);
+            SipClientConnection* pScc = new SipClientConnection(strUri);
 
-            if (pSCC == IMS_NULL)
+            if (pScc == IMS_NULL)
             {
                 SipPrivate::SetLastError(SipError::NO_MEMORY);
 
@@ -139,31 +128,29 @@ PRIVATE VIRTUAL IConnection* SipProtocol::OpenPrim(
                 return IMS_NULL;
             }
 
-            SipClientConnectionImpl* pSCCImpl = new SipClientConnectionImpl(pSCC);
+            SipClientConnectionImpl* pSccImpl = new SipClientConnectionImpl(pScc);
 
-            if (pSCCImpl == IMS_NULL)
+            if (pSccImpl == IMS_NULL)
             {
-                delete pSCC;
+                delete pScc;
                 SipPrivate::SetLastError(SipError::NO_MEMORY);
 
                 IMS_TRACE_E(0, "Allocating SCCImpl failed", 0, 0, 0);
                 return IMS_NULL;
             }
 
-            return pSCCImpl;
+            return pSccImpl;
         }
     }
 }
 
 PRIVATE
 IConnection* SipProtocol::CreateConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS_SINT32 nPort,
-        IN CONST AString& strParams, IN IMS_BOOL bSharedMode /* = IMS_FALSE */)
+        IN const AString& strParams, IN IMS_BOOL bSharedMode /* = IMS_FALSE */)
 {
-    SipConnectionNotifier* pSCN = new SipConnectionNotifier(nScheme, nPort, strParams, bSharedMode);
+    SipConnectionNotifier* pScn = new SipConnectionNotifier(nScheme, nPort, strParams, bSharedMode);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCN == IMS_NULL)
+    if (pScn == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::NO_MEMORY);
 
@@ -173,30 +160,30 @@ IConnection* SipProtocol::CreateConnectionNotifier(IN IMS_SINT32 nScheme, IN IMS
 
     if (SipPrivate::GetLastError() != SipError::NO_ERROR)
     {
-        delete pSCN;
+        delete pScn;
 
         IMS_TRACE_E(0, "Parsing the parameters for SCN failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    SipConnectionNotifierImpl* pSCNImpl = new SipConnectionNotifierImpl(pSCN);
+    SipConnectionNotifierImpl* pScnImpl = new SipConnectionNotifierImpl(pScn);
 
-    if (pSCNImpl == IMS_NULL)
+    if (pScnImpl == IMS_NULL)
     {
-        delete pSCN;
+        delete pScn;
         SipPrivate::SetLastError(SipError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Allocating SCNImpl failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    if (!SipManager::GetInstance()->AttachConnectionNotifier(pSCN))
+    if (!SipManager::GetInstance()->AttachConnectionNotifier(pScn))
     {
-        delete pSCNImpl;
+        delete pScnImpl;
 
         IMS_TRACE_E(0, "Attaching SCN failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    return pSCNImpl;
+    return pScnImpl;
 }

@@ -1,50 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-     This class represents one SIP dialog. The SipDialog can be retrieved from a SipConnection
-    object, when it is available (at earliest after provisional 101~199 response).
-    Three SIP requests can open a dialog: INVITE, SUBSCRIBE/NOTIFY and REFER/NOTIFY.
-    An implementation compliant to this specification must support all of the following ways
-    of creating dialogs:
-    - INVITE-1xx-2xx-ACK will open a dialog. Subsequent SipClientConnection in the same dialog
-    can be obtained by calling GetNewClientConnection(...) method. The dialog is terminated
-    when the transaction BYE-200 OK is completed.
-    - SUBSCRIBE-200 OK (or matching NOTIFY) will open a dialog. Subsequent SipClientConnection
-    in the same dialog can be obtained by calling GetNewClientConnection(...) method.
-    The dialog is terminated when a notifier sends a NOTIFY request with a "Subscription-State"
-    of "terminated" and there are no other subscriptions alive in this dialog.
-    - REFER-matching NOTIFY will open a dialog. Subsequent SipClientConnection in the same dialog
-    can be obtained by calling GetNewClientConnection(...) method. The dialog is terminated
-    when a notifier sends a NOTIFY request with a "Subscription-State" of "terminated"
-    and there are no other subscriptions alive in this dialog.
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
-#include "SipDialog.h"
+
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
+#include "SipDialog.h"
 #include "SipDialogImpl.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipDialogImpl::SipDialogImpl(IN SipDialog* pDialog_) :
-        pDialog(pDialog_)
+SipDialogImpl::SipDialogImpl(IN SipDialog* pDialog) :
+        m_pDialog(pDialog)
 {
 }
 
 PUBLIC VIRTUAL SipDialogImpl::~SipDialogImpl()
 {
-    if (pDialog != IMS_NULL)
+    if (m_pDialog != IMS_NULL)
     {
-        delete pDialog;
+        delete m_pDialog;
     }
 
 #ifdef __IMS_SIP_DEBUG__
@@ -52,36 +41,26 @@ PUBLIC VIRTUAL SipDialogImpl::~SipDialogImpl()
 #endif
 }
 
-/*
- Destroys its own resource.
-
-Remarks
-
-*/
+/**
+ * Destroys its own resource.
+ */
 PUBLIC VIRTUAL void SipDialogImpl::Destroy()
 {
-    //---------------------------------------------------------------------------------------------
-
     delete this;
 }
 
-/*
- Clones the SIP dialog object.
-
-Remarks
-
-*/
+/**
+ * Clones the SIP dialog object.
+ */
 PUBLIC VIRTUAL ISipDialog* SipDialogImpl::Clone() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialog == IMS_NULL)
+    if (m_pDialog == IMS_NULL)
     {
         IMS_TRACE_E(0, "NULL - Dialog", 0, 0, 0);
         return IMS_NULL;
     }
 
-    SipDialog* pNewDialog = new SipDialog(*pDialog);
+    SipDialog* pNewDialog = new SipDialog(*m_pDialog);
 
     if (pNewDialog == IMS_NULL)
     {
@@ -102,117 +81,104 @@ PUBLIC VIRTUAL ISipDialog* SipDialogImpl::Clone() const
     return pDialogImpl;
 }
 
-/*
- Compares if the specified ISipDialog equals or not.
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::Equals(IN CONST ISipDialog* piDialog)
+/**
+ * Compares if the specified ISipDialog equals or not.
+ */
+PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::Equals(IN const ISipDialog* piDialog)
 {
     const SipDialogImpl* pDialogImpl = DYNAMIC_CAST(const SipDialogImpl*, piDialog);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pDialogImpl == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    return pDialog->IsSameDialog(pDialogImpl->pDialog);
+    return m_pDialog->IsSameDialog(pDialogImpl->m_pDialog);
 }
 
-/*
- Returns the ID (Call-ID + Local Tag + Remote Tag) of the SIP dialog.
-
-Remarks
-
-*/
+/**
+ * Returns the ID (Call-ID + Local Tag + Remote Tag) of the SIP dialog.
+ */
 PUBLIC VIRTUAL AString SipDialogImpl::GetDialogId()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialog->GetState() == SipDialog::STATE_TERMINATED)
+    if (m_pDialog->GetState() == SipDialog::STATE_TERMINATED)
+    {
         return AString::ConstNull();
+    }
 
     // Call-ID + Local-Tag + Remote-Tag
-    return (pDialog->GetCallId() + pDialog->GetLocalTag() + pDialog->GetRemoteTag());
+    return (m_pDialog->GetCallId() + m_pDialog->GetLocalTag() + m_pDialog->GetRemoteTag());
 }
 
-/*
- Returns a new SipClientConnection in this dialog. The returned SipClientConnection will be
-in STATE_INITIALIZED state. The object is initialized with the given method and default headers.
-
-Remarks
- The following headers will be set by the method:
-    To
-    From
-    CSeq
-    Call-ID
-    Via
-    Route
-    Contact
-    Max-Forwards
-*/
+/**
+ * Returns a new SipClientConnection in this dialog. The returned SipClientConnection will be
+ * in STATE_INITIALIZED state. The object is initialized with the given method and default headers.
+ *
+ * The following headers will be set by the method:
+ *     To
+ *     From
+ *     CSeq
+ *     Call-ID
+ *     Via
+ *     Route
+ *     Contact
+ *     Max-Forwards
+ */
 PUBLIC VIRTUAL ISipClientConnection* SipDialogImpl::GetNewClientConnection(
-        IN CONST AString& strMethod)
+        IN const AString& strMethod)
 {
-    SipClientConnection* pSCC = pDialog->CreateClientConnection(strMethod);
+    SipClientConnection* pScc = m_pDialog->CreateClientConnection(strMethod);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCC == IMS_NULL)
+    if (pScc == IMS_NULL)
     {
         IMS_TRACE_E(
                 0, "Creating a new SIP client connection (%s) failed", strMethod.GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    SipClientConnectionImpl* pSCCImpl = new SipClientConnectionImpl(pSCC);
+    SipClientConnectionImpl* pSccImpl = new SipClientConnectionImpl(pScc);
 
-    if (pSCCImpl == IMS_NULL)
+    if (pSccImpl == IMS_NULL)
     {
-        delete pSCC;
+        delete pScc;
         SipPrivate::SetLastError(SipError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Allocating SCCImpl (%s) failed", strMethod.GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    if (pSCCImpl->InitDialogRequest() != IMS_SUCCESS)
+    if (pSccImpl->InitDialogRequest() != IMS_SUCCESS)
     {
-        delete pSCCImpl;
+        delete pSccImpl;
         SipPrivate::SetLastError(SipError::NO_MEMORY);
 
         IMS_TRACE_E(0, "Initializing Dialog info. (%s) failed", strMethod.GetStr(), 0, 0);
         return IMS_NULL;
     }
 
-    return pSCCImpl;
+    return pSccImpl;
 }
 
-/*
- Returns the state of the SIP dialog.
-
-Remarks
-    - STATE_INITIALIZED
-        Internal state where the dialog has been created.
-        This state is not visible to the user, since the dialog can be fetched earliest
-        in the STATE_EARLY state.
-    - STATE_EARLY
-        Provisional 101 ~ 199 response received or sent (with to-tag).
-    - STATE_CONFIRMED
-        Final 2xx response received (or sent) for the original request.
-        NOTIFY confirming the subscription received (or sent).
-    - STATE_TERMINATED
-        No response or error response (3xx ~ 6xx) received (or sent).
-        If the dialog is terminated with BYE or un-SUBSCRIBE, GetNewClientConnection(...) method
-        can't be called in this state.
-
-*/
+/**
+ * Returns the state of the SIP dialog.
+ *
+ * - STATE_INITIALIZED
+ *      Internal state where the dialog has been created.
+ *      This state is not visible to the user, since the dialog can be fetched earliest
+ *      in the STATE_EARLY state.
+ * - STATE_EARLY
+ *      Provisional 101 ~ 199 response received or sent (with to-tag).
+ * - STATE_CONFIRMED
+ *      Final 2xx response received (or sent) for the original request.
+ *      NOTIFY confirming the subscription received (or sent).
+ * - STATE_TERMINATED
+ *      No response or error response (3xx ~ 6xx) received (or sent).
+ *      If the dialog is terminated with BYE or un-SUBSCRIBE, GetNewClientConnection(...) method
+ *      can't be called in this state.
+ */
 PUBLIC VIRTUAL IMS_SINT32 SipDialogImpl::GetState() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    switch (pDialog->GetState())
+    switch (m_pDialog->GetState())
     {
         case SipDialog::STATE_TERMINATED:
             return ISipDialog::STATE_TERMINATED;
@@ -228,103 +194,83 @@ PUBLIC VIRTUAL IMS_SINT32 SipDialogImpl::GetState() const
     }
 }
 
-/*
- Compares if the given ISipConnection belongs to this dialog or not.
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::IsSameDialog(IN CONST ISipConnection* piSC)
+/**
+ * Compares if the given ISipConnection belongs to this dialog or not.
+ */
+PUBLIC VIRTUAL IMS_BOOL SipDialogImpl::IsSameDialog(IN const ISipConnection* piSc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSC == IMS_NULL)
+    if (piSc == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSC->GetDialog());
+    SipDialogImpl* pDialogImpl = DYNAMIC_CAST(SipDialogImpl*, piSc->GetDialog());
 
     if (pDialogImpl == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    return pDialog->IsSameDialog(pDialogImpl->pDialog);
+    return m_pDialog->IsSameDialog(pDialogImpl->m_pDialog);
 }
 
-/*
- Returns the component (call-id, local-tag, remote-tag) of this dialog.
-
-Remarks
-
-*/
+/**
+ * Returns the component (call-id, local-tag, remote-tag) of this dialog.
+ */
 PUBLIC VIRTUAL AString SipDialogImpl::GetComponent(IN IMS_SINT32 nType) const
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nType)
     {
         case COMPONENT_CALL_ID:
-            return pDialog->GetCallId();
+            return m_pDialog->GetCallId();
 
         case COMPONENT_LOCAL_TAG:
-            return pDialog->GetLocalTag();
+            return m_pDialog->GetLocalTag();
 
         case COMPONENT_REMOTE_TAG:
-            return pDialog->GetRemoteTag();
+            return m_pDialog->GetRemoteTag();
 
         default:
             return AString::ConstNull();
     }
 }
 
-/*
- Returns the ID (Call-ID + Local Tag + Remote Tag) of the SIP dialog.
-
-Remarks
- BYE_REQUEST_ON_DIALOG_TERMINATED
-*/
+/**
+ * Returns the ID (Call-ID + Local Tag + Remote Tag) of the SIP dialog.
+ *
+ * BYE_REQUEST_ON_DIALOG_TERMINATED
+ */
 PUBLIC VIRTUAL AString SipDialogImpl::GetDialogIdEx()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Call-ID + Local-Tag + Remote-Tag
-    return (pDialog->GetCallId() + pDialog->GetLocalTag() + pDialog->GetRemoteTag());
+    return (m_pDialog->GetCallId() + m_pDialog->GetLocalTag() + m_pDialog->GetRemoteTag());
 }
 
-/*
- Returns the local contact address of this dialog.
-
-Remarks
-
-*/
+/**
+ * Returns the local contact address of this dialog.
+ */
 PUBLIC VIRTUAL const ISipHeader* SipDialogImpl::GetContactHeader() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pDialog->GetContactHeader();
+    return m_pDialog->GetContactHeader();
 }
 
-/*
- Sets the contact header parameter on the early or confirmed state.
-
-Remarks
- CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
-
-*/
+/**
+ * Sets the contact header parameter on the early or confirmed state.
+ *
+ * CONTACT_HEADER_PARAMETER_CONTROL_FOR_MID_DIALOG_REQUEST
+ */
 PUBLIC VIRTUAL IMS_RESULT SipDialogImpl::SetContactParameter(
-        IN CONST AString& strParameter, IN IMS_SINT32 nOperation /* = 0 (0: ADD, 1: REMOVE) */)
+        IN const AString& strParameter, IN IMS_SINT32 nOperation /*= 0 (0: ADD, 1: REMOVE)*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pDialog->SetContactParameter(strParameter, nOperation);
+    return m_pDialog->SetContactParameter(strParameter, nOperation);
 }
 
-/*
- Terminates the SIP dialog usage explicitly.
-
-Remarks
- Use case) remove the dialog usage for "refer" event package subscription.
-
-*/
+/**
+ * Terminates the SIP dialog usage explicitly.
+ *
+ * Use case) remove the dialog usage for "refer" event package subscription.
+ */
 PUBLIC VIRTUAL void SipDialogImpl::TerminateDialogUsage()
 {
-    pDialog->TerminateDialogUsage();
+    m_pDialog->TerminateDialogUsage();
 }

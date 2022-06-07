@@ -1,20 +1,26 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20151229  hwangoo.park@             Created
-    </table>
-
-    Description
-    This class provides the port information for SIP TCP/TLS transport protocol.
-*/
-
-#ifndef _SIP_PORT_MANAGER_H_
-#define _SIP_PORT_MANAGER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_PORT_MANAGER_H_
+#define SIP_PORT_MANAGER_H_
 
 #include "IPAddress.h"
 
+/**
+ * @brief This class provides the port information for SIP TCP/TLS transport protocol.
+ */
 class SipPortManager
 {
 private:
@@ -22,21 +28,28 @@ private:
     ~SipPortManager();
 
 public:
+    SipPortManager(IN const SipPortManager&) = delete;
+    SipPortManager& operator=(IN const SipPortManager&) = delete;
+
+public:
     void Clear();
-    IMS_SINT32 GetPortC(IN CONST IPAddress& objIP) const;
-    IMS_BOOL IsPortCProvisioned() const;
+    inline IMS_SINT32 GetPortC(IN const IPAddress& objIp) const { return SelectNextPortC(objIp); }
+    inline IMS_BOOL IsPortCProvisioned() const
+    {
+        return (m_nPortCStart >= CLIENT_PORT_MIN) && (m_nPortCEnd <= CLIENT_PORT_MAX);
+    }
     void SetPortC(IN IMS_SINT32 nPortStart, IN IMS_SINT32 nPortEnd);
 
     static SipPortManager* GetInstance();
 
 private:
-    IMS_SINT32 GetNextPortC() const;
-    IMS_BOOL IsPortAvailable(IN CONST IPAddress& objIP, IN IMS_SINT32 nPort) const;
-    IMS_SINT32 SelectNextPortC(IN CONST IPAddress& objIP) const;
+    inline IMS_SINT32 GetNextPortC() const { return m_nNextPortC; }
+    IMS_BOOL IsPortAvailable(IN const IPAddress& objIp, IN IMS_SINT32 nPort) const;
+    IMS_SINT32 SelectNextPortC(IN const IPAddress& objIp) const;
     void SetNextPortC(IN IMS_SINT32 nPort) const;
 
 private:
-    // Port range as a default (not-inclusive).
+    /// Port range as a default (not-inclusive).
     enum
     {
         CLIENT_PORT_MIN = 1024,
@@ -46,19 +59,19 @@ private:
         CLIENT_PORT_END = CLIENT_PORT_MAX
     };
 
-    // Minimum Round-Robin Gap
-    // Do not re-use a source port that has been used in any of the previous 32 TCP sockets.
+    /// Minimum Round-Robin Gap
+    /// Do not re-use a source port that has been used in any of the previous 32 TCP sockets.
     enum
     {
         MIN_RR_GAP = 32
     };
 
     // Port range (not-inclusive)
-    IMS_SINT32 nPortC_Start;
-    IMS_SINT32 nPortC_End;
+    IMS_SINT32 m_nPortCStart;
+    IMS_SINT32 m_nPortCEnd;
 
     // Next client port number
-    mutable IMS_SINT32 nNextPortC;
+    mutable IMS_SINT32 m_nNextPortC;
 };
 
-#endif  // _SIP_PORT_MANAGER_H_
+#endif

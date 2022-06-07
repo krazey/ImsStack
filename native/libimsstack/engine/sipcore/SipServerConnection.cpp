@@ -1,69 +1,67 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
 #include "private/ConfigurationManager.h"
 #include "private/SipConfig.h"
-#include "SipPrivate.h"
-#include "SipFeatures.h"
+
 #include "SipConfigProxy.h"
 #include "SipDebug.h"
-#include "SipServerTransactionState.h"
+#include "SipFeatures.h"
+#include "SipPrivate.h"
 #include "SipServerConnection.h"
+#include "SipServerTransactionState.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipServerConnection::SipServerConnection(IN SipServerTransactionState* pSTState_) :
+SipServerConnection::SipServerConnection(IN SipServerTransactionState* pStState) :
         SipConnection(),
-        nState(STATE_CREATED),
-        pSTState(pSTState_)
+        m_nState(STATE_CREATED),
+        m_pStState(pStState)
 {
-    pSTState->SetTransactionListener(this);
-    pSTState->SetTransportListener(this);
+    m_pStState->SetTransactionListener(this);
+    m_pStState->SetTransportListener(this);
 }
 
 PUBLIC VIRTUAL SipServerConnection::~SipServerConnection()
 {
-    if ((nState == STATE_REQUEST_RECEIVED) || (nState == STATE_INITIALIZED) ||
-            (nState == STATE_PROVISIONAL_RESPONDED))
+    if ((m_nState == STATE_REQUEST_RECEIVED) || (m_nState == STATE_INITIALIZED) ||
+            (m_nState == STATE_PROVISIONAL_RESPONDED))
     {
-        pSTState->Abort();
+        m_pStState->Abort();
     }
 
-    pSTState->SetTransactionListener(IMS_NULL);
-    pSTState->SetTransportListener(IMS_NULL);
+    m_pStState->SetTransactionListener(IMS_NULL);
+    m_pStState->SetTransportListener(IMS_NULL);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipServerConnection::Close()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((nState == STATE_REQUEST_RECEIVED) || (nState == STATE_INITIALIZED) ||
-            (nState == STATE_PROVISIONAL_RESPONDED))
+    if ((m_nState == STATE_REQUEST_RECEIVED) || (m_nState == STATE_INITIALIZED) ||
+            (m_nState == STATE_PROVISIONAL_RESPONDED))
     {
-        pSTState->Abort();
+        m_pStState->Abort();
     }
-    else if ((nState == STATE_COMPLETED) && pMessage != IMS_NULL &&
-            pMessage->GetMethod().Equals(SipMethod::INVITE) &&
-            SipStatusCode::IsFinalSuccess(pMessage->GetStatusCode()))
+    else if ((m_nState == STATE_COMPLETED) && m_pMessage != IMS_NULL &&
+            m_pMessage->GetMethod().Equals(SipMethod::INVITE) &&
+            SipStatusCode::IsFinalSuccess(m_pMessage->GetStatusCode()))
     {
         // Terminate INVITE server transaction promptly
-        pSTState->Terminate();
+        m_pStState->Terminate();
     }
 
     SetState(STATE_TERMINATED);
@@ -71,17 +69,10 @@ PUBLIC VIRTUAL void SipServerConnection::Close()
     SipConnection::Close();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT SipServerConnection::AddHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
+    if (m_nState != STATE_INITIALIZED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -90,18 +81,11 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::AddHeader(
     return SipConnection::AddHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL AString SipServerConnection::GetHeader(
-        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
+        IN const AString& strName, IN IMS_SINT32 nIndex /*= 0*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Message is not initialized or the connection is closed
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
         return AString::ConstNull();
@@ -110,17 +94,10 @@ PUBLIC VIRTUAL AString SipServerConnection::GetHeader(
     return SipConnection::GetHeader(strName, nIndex);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMSList<AString> SipServerConnection::GetHeaders(IN CONST AString& strName)
+PUBLIC VIRTUAL IMSList<AString> SipServerConnection::GetHeaders(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Message is not initialized or the connection is closed
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         SipPrivate::SetLastError(SipError::NO_ERROR);
         return IMSList<AString>();
@@ -129,17 +106,10 @@ PUBLIC VIRTUAL IMSList<AString> SipServerConnection::GetHeaders(IN CONST AString
     return SipConnection::GetHeaders(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const SipMethod& SipServerConnection::GetMethod() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Message is not initialized or the connection is closed
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         return SipMethod::INVALID_METHOD;
     }
@@ -147,19 +117,12 @@ PUBLIC VIRTUAL const SipMethod& SipServerConnection::GetMethod() const
     return SipConnection::GetMethod();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const AString& SipServerConnection::GetReasonPhrase() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Status code is available if the state is in PROCEEDING, UNAUTHORIZED, and COMPLETED
     // Sync. problem : add the state checking (PROVISIONAL_RESPONDED, COMPLETED)
-    if ((nState != STATE_INITIALIZED) && (nState != STATE_PROVISIONAL_RESPONDED) &&
-            (nState != STATE_COMPLETED))
+    if ((m_nState != STATE_INITIALIZED) && (m_nState != STATE_PROVISIONAL_RESPONDED) &&
+            (m_nState != STATE_COMPLETED))
     {
         return AString::ConstNull();
     }
@@ -167,17 +130,10 @@ PUBLIC VIRTUAL const AString& SipServerConnection::GetReasonPhrase() const
     return SipConnection::GetReasonPhrase();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const AString& SipServerConnection::GetRequestUri() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Message is not initialized or the connection is closed
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         return AString::ConstNull();
     }
@@ -185,19 +141,12 @@ PUBLIC VIRTUAL const AString& SipServerConnection::GetRequestUri() const
     return SipConnection::GetRequestUri();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetStatusCode() const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Status code is available if the state is in PROCEEDING, UNAUTHORIZED, and COMPLETED
     // Sync. problem : add the state checking (PROVISIONAL_RESPONDED, COMPLETED)
-    if ((nState != STATE_INITIALIZED) && (nState != STATE_PROVISIONAL_RESPONDED) &&
-            (nState != STATE_COMPLETED))
+    if ((m_nState != STATE_INITIALIZED) && (m_nState != STATE_PROVISIONAL_RESPONDED) &&
+            (m_nState != STATE_COMPLETED))
     {
         return 0;
     }
@@ -205,16 +154,9 @@ PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetStatusCode() const
     return SipConnection::GetStatusCode();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipServerConnection::RemoveHeader(IN CONST AString& strName)
+PUBLIC VIRTUAL IMS_RESULT SipServerConnection::RemoveHeader(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
+    if (m_nState != STATE_INITIALIZED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -223,17 +165,10 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::RemoveHeader(IN CONST AString& st
     return SipConnection::RemoveHeader(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((nState != STATE_INITIALIZED) && (nState != STATE_PROVISIONAL_RESPONDED) &&
-            (nState != STATE_COMPLETED))
+    if ((m_nState != STATE_INITIALIZED) && (m_nState != STATE_PROVISIONAL_RESPONDED) &&
+            (m_nState != STATE_COMPLETED))
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -241,10 +176,10 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
 
     IMS_SINT32 nStatusCode = SipConnection::GetStatusCode();
 
-    if ((nState != STATE_INITIALIZED) && (SipConnection::GetMethod().Equals(SipMethod::INVITE)))
+    if ((m_nState != STATE_INITIALIZED) && (SipConnection::GetMethod().Equals(SipMethod::INVITE)))
     {
         if (!SipStatusCode::IsFinalSuccess(nStatusCode) &&
-                !(SipStatusCode::IsProvisional(nStatusCode) && pMessage->IsMessageRpr()))
+                !(SipStatusCode::IsProvisional(nStatusCode) && m_pMessage->IsMessageRpr()))
         {
             SipPrivate::SetLastError(SipError::INVALID_OPERATION);
             return IMS_FAILURE;
@@ -252,7 +187,7 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
 
         IMS_TRACE_I("Retransmission of %d to INVITE request is requested .....", nStatusCode, 0, 0);
 
-        if (!pMessage->FormMessageOnRetransmission())
+        if (!m_pMessage->FormMessageOnRetransmission())
         {
             SipPrivate::SetLastError(SipError::INVALID_MESSAGE);
             IMS_TRACE_E(0, "Forming SIP message for retransmission failed", 0, 0, 0);
@@ -260,16 +195,16 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
         }
 
         // Retransmission of a provisional (reliable) or final response to INVITE request
-        return pSTState->RetransmitMessage();
+        return m_pStState->RetransmitMessage();
     }
-    else if (nState == STATE_COMPLETED)
+    else if (m_nState == STATE_COMPLETED)
     {
         IMS_TRACE_E(0, "Sending a SIP response in STATE_COMPLETED is not allowed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
     // Throw exception - INVALID_MESSAGE if the message format was invalid
-    if (!pMessage->FormMessage())
+    if (!m_pMessage->FormMessage())
     {
         SipPrivate::SetLastError(SipError::INVALID_MESSAGE);
         return IMS_FAILURE;
@@ -280,7 +215,7 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
         // Remove to-tag parameter
     }
 
-    if (!pSTState->FormMessage())
+    if (!m_pStState->FormMessage())
     {
         IMS_TRACE_E(0, "FormMessage() failed", 0, 0, 0);
         return IMS_FAILURE;
@@ -288,10 +223,10 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
 
     if (SipFeatures::IsStandard2XXRetransmissionIntervalRequired(GetSlotId()))
     {
-        AdjustTimerHFor2XX();
+        AdjustTimerHFor2xx();
     }
 
-    if (!pSTState->Send(GetTransactionTimerValues()))
+    if (!m_pStState->Send(GetTransactionTimerValues()))
     {
         IMS_TRACE_E(0, "Send() failed", 0, 0, 0);
 
@@ -323,17 +258,10 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::Send()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT SipServerConnection::SetHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
+    if (m_nState != STATE_INITIALIZED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -342,16 +270,9 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::SetHeader(
     return SipConnection::SetHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL const ByteArray& SipServerConnection::GetContent() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_REQUEST_RECEIVED)
+    if (m_nState != STATE_REQUEST_RECEIVED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return ByteArray::ConstNull();
@@ -360,16 +281,9 @@ PUBLIC VIRTUAL const ByteArray& SipServerConnection::GetContent() const
     return SipConnection::GetContent();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_RESULT SipServerConnection::SetContent(IN CONST ByteArray& objContent)
+PUBLIC VIRTUAL IMS_RESULT SipServerConnection::SetContent(IN const ByteArray& objContent)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
+    if (m_nState != STATE_INITIALIZED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -378,18 +292,10 @@ PUBLIC VIRTUAL IMS_RESULT SipServerConnection::SetContent(IN CONST ByteArray& ob
     return SipConnection::SetContent(objContent);
 }
 
-// IMS extensions
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetHeaderCount(IN CONST AString& strName) const
+PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetHeaderCount(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
     // Message is not initialized or the connection is closed
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         return 0;
     }
@@ -397,32 +303,18 @@ PUBLIC VIRTUAL IMS_SINT32 SipServerConnection::GetHeaderCount(IN CONST AString& 
     return SipConnection::GetHeaderCount(strName);
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PUBLIC VIRTUAL void SipServerConnection::SetSipProfile(IN SipProfile* pProfile)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!pSTState.IsNull())
+    if (!m_pStState.IsNull())
     {
-        pSTState->SetSipProfile(pProfile);
+        m_pStState->SetSipProfile(pProfile);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT SipServerConnection::InitResponse(IN IMS_SINT32 nStatusCode)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if ((nState != STATE_REQUEST_RECEIVED) && (nState != STATE_PROVISIONAL_RESPONDED))
+    if ((m_nState != STATE_REQUEST_RECEIVED) && (m_nState != STATE_PROVISIONAL_RESPONDED))
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
@@ -440,13 +332,13 @@ IMS_RESULT SipServerConnection::InitResponse(IN IMS_SINT32 nStatusCode)
 
     InitMessage(IMS_NULL, sipcore::SipMessage::TYPE_RESPONSE);
 
-    pMessage->SetMethod(objMethod);
-    pMessage->SetStatusCode(nStatusCode);
-    pMessage->SetReasonPhrase(SipStatusCode::GetReasonPhrase(nStatusCode));
+    m_pMessage->SetMethod(objMethod);
+    m_pMessage->SetStatusCode(nStatusCode);
+    m_pMessage->SetReasonPhrase(SipStatusCode::GetReasonPhrase(nStatusCode));
 
-    pSTState->UpdateMessage(pMessage->GetMessage());
+    m_pStState->UpdateMessage(m_pMessage->GetMessage());
 
-    if (!pSTState->InitResponse(nStatusCode))
+    if (!m_pStState->InitResponse(nStatusCode))
     {
         SipPrivate::SetLastError(SipError::GENERAL_ERROR);
         return IMS_FAILURE;
@@ -459,41 +351,31 @@ IMS_RESULT SipServerConnection::InitResponse(IN IMS_SINT32 nStatusCode)
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_RESULT SipServerConnection::SetReasonPhrase(IN CONST AString& strReasonPhrase)
+IMS_RESULT SipServerConnection::SetReasonPhrase(IN const AString& strReasonPhrase)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState != STATE_INITIALIZED)
+    if (m_nState != STATE_INITIALIZED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FAILURE;
     }
 
     if (strReasonPhrase.GetLength() == 0)
-        pMessage->SetReasonPhrase(AString::ConstEmpty());
+    {
+        m_pMessage->SetReasonPhrase(AString::ConstEmpty());
+    }
     else
-        pMessage->SetReasonPhrase(strReasonPhrase);
+    {
+        m_pMessage->SetReasonPhrase(strReasonPhrase);
+    }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipServerConnection::IsSameTransaction(IN CONST SipServerConnection* pOngoingSSC) const
+IMS_BOOL SipServerConnection::IsSameTransaction(IN const SipServerConnection* pOngoingSsc) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (nState == STATE_TERMINATED)
+    if (m_nState == STATE_TERMINATED)
     {
         SipPrivate::SetLastError(SipError::INVALID_STATE);
         return IMS_FALSE;
@@ -508,46 +390,39 @@ IMS_BOOL SipServerConnection::IsSameTransaction(IN CONST SipServerConnection* pO
         return IMS_FALSE;
     }
 
-    if (pOngoingSSC == IMS_NULL)
+    if (pOngoingSsc == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::ILLEGAL_ARGUMENT);
         return IMS_FALSE;
     }
 
-    if ((pOngoingSSC->nState == STATE_COMPLETED) || (pOngoingSSC->nState == STATE_TERMINATED))
+    if ((pOngoingSsc->m_nState == STATE_COMPLETED) || (pOngoingSsc->m_nState == STATE_TERMINATED))
     {
         // Ignore the CANCEL request because the ongoing transaction is already completed or
         // terminated.
         IMS_TRACE_D("Server transaction is in %s state",
-                (pOngoingSSC->nState == STATE_COMPLETED) ? "COMPLETED" : "TERMINATED", 0, 0);
+                (pOngoingSsc->m_nState == STATE_COMPLETED) ? "COMPLETED" : "TERMINATED", 0, 0);
 
         // CANCEL_HANDLING_AFTER_200_OK_TO_INVITE
         // When INVITE_TXN_HANDLING_CORRECTION is disabled,
         // returns IMS_FALSE with SipError#NO_ERROR.
     }
 
-    return pSTState->IsSameTransaction(pOngoingSSC->pSTState.Get());
+    return m_pStState->IsSameTransaction(pOngoingSsc->m_pStState.Get());
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT SipServerConnection::InitRequest()
 {
-    //---------------------------------------------------------------------------------------------
+    m_pMessage = new sipcore::SipMessage(m_pStState->GetMessage());
 
-    pMessage = new sipcore::SipMessage(pSTState->GetMessage());
-
-    if (pMessage == IMS_NULL)
+    if (m_pMessage == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::NO_MEMORY);
         return IMS_FAILURE;
     }
 
-    SipDialogEx* pDialogEx = pSTState->GetDialog();
+    SipDialogEx* pDialogEx = m_pStState->GetDialog();
     IMS_SINT32 nState = pDialogEx->GetState();
 
     // Case 1) If the request is received inside of an existing dialog (it is not in INIT state)
@@ -556,12 +431,12 @@ IMS_RESULT SipServerConnection::InitRequest()
     //       or NOTIFY request to forked SUBSCRIBE request
     if ((nState != SipDState::STATE_INIT) ||
             ((nState == SipDState::STATE_INIT) &&
-                    (SipDialogBase::IsDialogCreatable(pMessage->GetMethod()) ||
-                            pMessage->GetMethod().Equals(SipMethod::NOTIFY))))
+                    (SipDialogBase::IsDialogCreatable(m_pMessage->GetMethod()) ||
+                            m_pMessage->GetMethod().Equals(SipMethod::NOTIFY))))
     {
-        pDialog = new SipDialog(pDialogEx);
+        m_pDialog = new SipDialog(pDialogEx);
 
-        if (pDialog == IMS_NULL)
+        if (m_pDialog == IMS_NULL)
         {
             SipPrivate::SetLastError(SipError::NO_MEMORY);
             return IMS_FAILURE;
@@ -586,24 +461,19 @@ IMS_RESULT SipServerConnection::InitRequest()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void SipServerConnection::AdjustTimerHFor2XX()
+void SipServerConnection::AdjustTimerHFor2xx()
 {
     const SipMethod& objMethod = SipConnection::GetMethod();
     IMS_SINT32 nStatusCode = SipConnection::GetStatusCode();
 
     if (objMethod.Equals(SipMethod::INVITE) && SipStatusCode::IsFinalSuccess(nStatusCode))
     {
-        SipTimerValues* pTV = GetTransactionTimerValues();
+        SipTimerValues* pTimerValues = GetTransactionTimerValues();
 
-        if (pTV != IMS_NULL)
+        if (pTimerValues != IMS_NULL)
         {
-            IMS_SINT32 nT1 = pTV->GetValue(SipTimerValues::TIMER_T1);
+            IMS_SINT32 nT1 = pTimerValues->GetValue(SipTimerValues::TIMER_T1);
 
             if (nT1 == 0)
             {
@@ -611,7 +481,7 @@ void SipServerConnection::AdjustTimerHFor2XX()
                         ConfigurationManager::GetInstance()->GetSipConfig(GetSlotId());
 
                 nT1 = SipConfigProxy::GetTimerValueT1(
-                        GetSlotId(), pSTState->GetSipProfile(), pSipConfig->GetSipConfigV());
+                        GetSlotId(), m_pStState->GetSipProfile(), pSipConfig->GetSipConfigV());
 
                 if (nT1 == 0)
                 {
@@ -621,37 +491,23 @@ void SipServerConnection::AdjustTimerHFor2XX()
             }
 
             IMS_TRACE_D("TimerH(2XX) is adjusted - %d >> %d",
-                    pTV->GetValue(SipTimerValues::TIMER_H), (nT1 * 64), 0);
+                    pTimerValues->GetValue(SipTimerValues::TIMER_H), (nT1 * 64), 0);
 
-            pTV->SetValue(SipTimerValues::TIMER_H, (nT1 * 64));
+            pTimerValues->SetValue(SipTimerValues::TIMER_H, (nT1 * 64));
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipServerConnection::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("SSC :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("SSC :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE GLOBAL const IMS_CHAR* SipServerConnection::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_CREATED:

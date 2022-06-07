@@ -1,100 +1,85 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
+
+#include "ISipClientTransactionStateListener.h"
 #include "ISipHeader.h"
-#include "SipPrivate.h"
-#include "SipDebug.h"
-#include "SipHeaderName.h"
-#include "SipFeatures.h"
+#include "PAccessNetworkInfoHeader.h"
+#include "SipAckPackage.h"
+#include "SipClientTransactionState.h"
+#include "SipClientTransport.h"
 #include "SipConfigProxy.h"
+#include "SipDebug.h"
+#include "SipDialogEx.h"
+#include "SipFactoryProxy.h"
+#include "SipFeatures.h"
+#include "SipHeaderName.h"
+#include "SipMessageTracker.h"
+#include "SipPrivate.h"
 #include "SipStackHeaders.h"
 #include "SipStackState.h"
 #include "SipTxnContextData.h"
 #include "SipUtils.h"
-#include "SipDialogEx.h"
-#include "ISipClientTransactionStateListener.h"
-#include "SipAckPackage.h"
-#include "SipFactoryProxy.h"
-// SIP_MESSAGE_TRACKER
-#include "SipMessageTracker.h"
-#include "SipClientTransport.h"
-#include "PAccessNetworkInfoHeader.h"
-#include "SipClientTransactionState.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipClientTransactionState::SipClientTransactionState(IN IMS_SINT32 nSlotId) :
         SipTransactionState(),
-        nRoutingType(TARGET_LR),
-        pstImplicitRoute(IMS_NULL),
-        piListener(IMS_NULL)
+        m_nRoutingType(TARGET_LR),
+        m_pImplicitRoute(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
-    nType = TYPE_CLIENT;
-
-    pTransport = new SipClientTransport(nSlotId);
+    m_nType = TYPE_CLIENT;
+    m_pTransport = new SipClientTransport(nSlotId);
 }
 
 PUBLIC VIRTUAL SipClientTransactionState::~SipClientTransactionState()
 {
-    SipStack::FreeAddrSpec(pstImplicitRoute);
+    SipStack::FreeAddrSpec(m_pImplicitRoute);
 
 #ifdef __IMS_SIP_DEBUG__
     IMS_TRACE_D("Destructor :: SipClientTransactionState", 0, 0, 0);
 #endif
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipClientTransactionState::Abort()
 {
-    //---------------------------------------------------------------------------------------------
-
     // FORKED_RESPONSE
     if (RemoveForkedTransaction() > 0)
+    {
         return;
+    }
 
     SipTransactionState::Abort();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 SipClientTransactionState::CheckMessageValidity()
 {
-    IMS_SINT32 nValidity;
-
-    //---------------------------------------------------------------------------------------------
-
     // Check the validity of transport information from the top Via header
-    nValidity = pTransport->ValidateViaHeader(pstMessage);
+    IMS_SINT32 nValidity = m_pTransport->ValidateViaHeader(m_pSipMsg);
 
     if (nValidity != SipPrivate::MESSAGE_VALID)
+    {
         return nValidity;
+    }
 
     return SipPrivate::MESSAGE_VALID;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessage()
 {
     // Update the transport information
@@ -104,7 +89,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessage()
         return IMS_FALSE;
     }
 
-    SipMethod objMethod = SipStack::GetMethod(pstMessage);
+    SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
 
     if (!SetDialogRelatedHeaders(objMethod))
     {
@@ -112,7 +97,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessage()
         return IMS_FALSE;
     }
 
-    if (!pTransport->FormViaHeader(pstMessage, GetSipProfile()))
+    if (!m_pTransport->FormViaHeader(m_pSipMsg, GetSipProfile()))
     {
         return IMS_FALSE;
     }
@@ -122,15 +107,8 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessage()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessageForResubmissionRequest()
 {
-    //---------------------------------------------------------------------------------------------
-
     // Update the transport information
     // 4 Checks if the sec-agree is supported or not
     if (!UpdateTransportDetails())
@@ -140,14 +118,14 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessageForResubmissionReq
     }
 
     // Remove the previous Via header from the message
-    SipStack::RemoveHeader(ISipHeader::VIA, pstMessage);
+    SipStack::RemoveHeader(ISipHeader::VIA, m_pSipMsg);
 
     // Remove the from-tag
     IMS_BOOL bFromTagRemovalRequired = IMS_TRUE;
 
-    if (!pDialogEx.IsNull())
+    if (!m_pDialogEx.IsNull())
     {
-        if (pDialogEx->GetState() == SipDState::STATE_CONFIRMED)
+        if (m_pDialogEx->GetState() == SipDState::STATE_CONFIRMED)
         {
             // Do not remove "from-tag" from From header within SIP dialog
             bFromTagRemovalRequired = IMS_FALSE;
@@ -156,28 +134,28 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessageForResubmissionReq
 
     if (bFromTagRemovalRequired)
     {
-        SipHeaderBase* pstFromHeader = SipStack::GetHeader(pstMessage, ISipHeader::FROM);
-        SipStack::RemoveParameter(Sip::STR_TAG, pstFromHeader);
-        SipStack::FreeHeaderEx(pstFromHeader);
+        SipHeaderBase* pFromHeader = SipStack::GetHeader(m_pSipMsg, ISipHeader::FROM);
+        SipStack::RemoveParameter(Sip::STR_TAG, pFromHeader);
+        SipStack::FreeHeaderEx(pFromHeader);
     }
 
-    SipMethod objMethod = SipStack::GetMethod(pstMessage);
+    SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
     AString strHBody;
 
     // Sets CSeq header field
-    strHBody.SetNumber(++nCSeqNumber);
+    strHBody.SetNumber(++m_nCSeqNumber);
     strHBody.Append(TextParser::CHAR_SP);
     strHBody.Append(objMethod.ToString());
 
-    SipHeaderBase* pstHeader = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
+    SipHeaderBase* pSipHdr = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstMessage))
+    if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     if (!SetDialogRelatedHeaders(objMethod))
     {
@@ -185,7 +163,7 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessageForResubmissionReq
         return IMS_FALSE;
     }
 
-    if (!pTransport->FormViaHeader(pstMessage, GetSipProfile()))
+    if (!m_pTransport->FormViaHeader(m_pSipMsg, GetSipProfile()))
     {
         return IMS_FALSE;
     }
@@ -195,53 +173,40 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::FormMessageForResubmissionReq
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::InitTxnDetails(
-        IN CONST SipTransactionState* pTState)
+        IN const SipTransactionState* pTState)
 {
-    const SipClientTransactionState* pCTState =
+    const SipClientTransactionState* pCtState =
             DYNAMIC_CAST(const SipClientTransactionState*, pTState);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pCTState == IMS_NULL)
+    if (pCtState == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    if (!SipTransactionState::InitTxnDetails(pCTState))
+    if (!SipTransactionState::InitTxnDetails(pCtState))
     {
         return IMS_FALSE;
     }
 
-    nRoutingType = pCTState->nRoutingType;
+    m_nRoutingType = pCtState->m_nRoutingType;
 
     // IMPLICIT_ROUTE
-    SipStack::FreeAddrSpec(pstImplicitRoute);
+    SipStack::FreeAddrSpec(m_pImplicitRoute);
 
-    if (pCTState->pstImplicitRoute != IMS_NULL)
+    if (pCtState->m_pImplicitRoute != IMS_NULL)
     {
-        pstImplicitRoute = pCTState->pstImplicitRoute;
-        SipStack::AddReference(pstImplicitRoute);
+        m_pImplicitRoute = pCtState->m_pImplicitRoute;
+        SipStack::AddReference(m_pImplicitRoute);
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::Send(IN SipTimerValues* pTV /* = IMS_NULL */)
+PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::Send(
+        IN SipTimerValues* pTimerValues /*= IMS_NULL*/)
 {
-    SipMethod objMethod = SipStack::GetMethod(pstMessage);
-
-    //---------------------------------------------------------------------------------------------
+    SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
 
     if (!UpdateTxnDetails(objMethod))
     {
@@ -249,49 +214,42 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::Send(IN SipTimerValues* pTV /
         return IMS_FALSE;
     }
 
-    return SipTransactionState::Send(pTV);
+    return SipTransactionState::Send(pTimerValues);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
 {
-    IMS_BOOL bRoutingLR = (nRoutingType == TARGET_LR) ? IMS_TRUE : IMS_FALSE;
+    IMS_BOOL bRoutingLr = (m_nRoutingType == TARGET_LR) ? IMS_TRUE : IMS_FALSE;
     IMS_BOOL bImplicitRouteRequired = IMS_FALSE;
     IMS_BOOL bCheckImplicitRouteUsage = IMS_FALSE;
-    IMS_BOOL bIgnoreLR = IMS_FALSE;
+    IMS_BOOL bIgnoreLr = IMS_FALSE;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pstImplicitRoute != IMS_NULL)
+    if (m_pImplicitRoute != IMS_NULL)
     {
-        if (nRoutingType == TARGET_NO_ROUTE)
+        if (m_nRoutingType == TARGET_NO_ROUTE)
         {
             bCheckImplicitRouteUsage = IMS_TRUE;
         }
-        else if (!pSIPProfile.IsNull() &&
-                pSIPProfile->IsConfigurationSet(
+        else if (!m_pSipProfile.IsNull() &&
+                m_pSipProfile->IsConfigurationSet(
                         SipProfile::CONFIG_IGNORE_RR_ON_IMPLICIT_ROUTE_REQUIRED))
         {
             bCheckImplicitRouteUsage = IMS_TRUE;
-            bIgnoreLR = IMS_TRUE;
+            bIgnoreLr = IMS_TRUE;
         }
     }
 
     // IMPLICIT_ROUTE
     if (bCheckImplicitRouteUsage)
     {
-        IMS_SINT32 nDialogState = pDialogEx->GetState();
+        IMS_SINT32 nDialogState = m_pDialogEx->GetState();
 
         if (nDialogState == SipDState::STATE_INIT)
         {
             bImplicitRouteRequired = IMS_TRUE;
         }
         // IMPLICIT_ROUTING_FOR_MID_DIALOG
-        else if (pDialogEx->IsInviteUsage() && (nDialogState == SipDState::STATE_CONFIRMED))
+        else if (m_pDialogEx->IsInviteUsage() && (nDialogState == SipDState::STATE_CONFIRMED))
         {
             bImplicitRouteRequired = IMS_TRUE;
         }
@@ -302,9 +260,9 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
             bImplicitRouteRequired = IMS_TRUE;
         }
         // BYE_REQUEST_ON_DIALOG_TERMINATED
-        else if (pDialogEx->IsInviteUsage() && (nDialogState == SipDState::STATE_TERMINATED))
+        else if (m_pDialogEx->IsInviteUsage() && (nDialogState == SipDState::STATE_TERMINATED))
         {
-            SipMethod objMethod = SipStack::GetMethod(pstMessage);
+            SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
 
             if (objMethod.Equals(SipMethod::BYE))
             {
@@ -312,15 +270,15 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
             }
         }
 
-        if (bImplicitRouteRequired && bIgnoreLR)
+        if (bImplicitRouteRequired && bIgnoreLr)
         {
-            bRoutingLR = IMS_FALSE;
+            bRoutingLr = IMS_FALSE;
             IMS_TRACE_I("ImplicitRoute :: Ignore route-set", 0, 0, 0);
         }
     }
 
-    if (!pTransport->UpdateDestinationInfo(pstMessage, bRoutingLR,
-                (bImplicitRouteRequired == IMS_TRUE) ? pstImplicitRoute : IMS_NULL))
+    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg, bRoutingLr,
+                (bImplicitRouteRequired == IMS_TRUE) ? m_pImplicitRoute : IMS_NULL))
     {
         return IMS_FALSE;
     }
@@ -328,26 +286,21 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransactionState::UpdateTransportDetails()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipClientTransactionState::AdjustTransportProtocolAsUdp()
 {
-    if (pTransport == IMS_NULL)
+    if (m_pTransport == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    SipStack::RemoveHeader(ISipHeader::VIA, pstMessage);
+    SipStack::RemoveHeader(ISipHeader::VIA, m_pSipMsg);
 
-    pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_NEAR);
-    pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_FAR);
-    pTransport->SetExplicitTargetProtocol(IMS_TRUE);
+    m_pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_NEAR);
+    m_pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_FAR);
+    m_pTransport->SetExplicitTargetProtocol(IMS_TRUE);
 
-    if (!pTransport->FormViaHeader(pstMessage, GetSipProfile()))
+    if (!m_pTransport->FormViaHeader(m_pSipMsg, GetSipProfile()))
     {
         return IMS_FALSE;
     }
@@ -355,232 +308,221 @@ IMS_BOOL SipClientTransactionState::AdjustTransportProtocolAsUdp()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-::SipMessage* SipClientTransactionState::CreateAckRequest(IN ::SipMessage* pstRespMessage)
+::SipMessage* SipClientTransactionState::CreateAckRequest(IN ::SipMessage* pRespSipMsg)
 {
     IMS_TRACE_D("CreateAckRequest", 0, 0, 0);
 
-    ::SipMessage* pstAckMessage = SipStack::CreateMessage(SipStack::SIP_MESSAGE_REQUEST);
+    ::SipMessage* pAckSipMsg = SipStack::CreateMessage(SipStack::SIP_MESSAGE_REQUEST);
 
-    if (pstAckMessage == IMS_NULL)
+    if (pAckSipMsg == IMS_NULL)
     {
         IMS_TRACE_E(0, "Creating an ACK request message failed", 0, 0, 0);
         return IMS_NULL;
     }
 
-    if (pstRespMessage == IMS_NULL)
+    if (pRespSipMsg == IMS_NULL)
     {
-        pstRespMessage = pstMessage;
+        pRespSipMsg = m_pSipMsg;
     }
 
     // Initializes ACK request message
-    if (!InitAck(pstAckMessage, pstRespMessage))
+    if (!InitAck(pAckSipMsg, pRespSipMsg))
     {
         IMS_TRACE_E(0, "Initializing ACK request failed", 0, 0, 0);
-        SipStack::FreeMessage(pstAckMessage);
+        SipStack::FreeMessage(pAckSipMsg);
         return IMS_NULL;
     }
 
-    return pstAckMessage;
+    return pAckSipMsg;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipClientTransactionState::InitCancel(IN CONST SipClientTransactionState* pInviteTState)
+IMS_BOOL SipClientTransactionState::InitCancel(IN const SipClientTransactionState* pInviteTState)
 {
-    SipHeaderBase* pstGetHdr;
-    SipHeaderBase* pstHeader;
+    SipHeaderBase* pPrevSipHdr;
+    SipHeaderBase* pSipHdr;
     SipMethod objMethod(SipMethod::CANCEL);
 
-    //---------------------------------------------------------------------------------------------
-
-    nClass = CLASS_REGULAR;
+    m_nClass = CLASS_REGULAR;
 
     SetSipProfile(pInviteTState->GetSipProfile());
 
     // Sets a SIP method name
-    SipStack::SetMethod(objMethod, pstMessage);
+    SipStack::SetMethod(objMethod, m_pSipMsg);
 
     // Sets a Request-URI field
-    SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pInviteTState->pstLastMessage);
+    SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pInviteTState->m_pLastSipMsg);
 
-    (void)SipStack::SetRequestUri(pstAddrSpec, pstMessage);
+    (void)SipStack::SetRequestUri(pstAddrSpec, m_pSipMsg);
     SipStack::FreeAddrSpec(pstAddrSpec);
 
     AString strHBody;
 
     // Sets CSeq header field
-    strHBody.SetNumber(pInviteTState->nCSeqNumber);
+    strHBody.SetNumber(pInviteTState->m_nCSeqNumber);
     strHBody.Append(TextParser::CHAR_SP);
     strHBody.Append(SipMethod::NAME[SipMethod::CANCEL]);
 
-    pstHeader = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
+    pSipHdr = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstMessage))
+    if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // Sets Max-Forwards header field
     strHBody.SetNumber(SipPrivate::MAX_HOP);
-    pstHeader = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
+    pSipHdr = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstMessage))
+    if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // Sets From header field
-    pstGetHdr = SipStack::GetHeader(pInviteTState->pstLastMessage, ISipHeader::FROM);
+    pPrevSipHdr = SipStack::GetHeader(pInviteTState->m_pLastSipMsg, ISipHeader::FROM);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstMessage))
+        if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets To header field
-    pstGetHdr = SipStack::GetHeader(pInviteTState->pstLastMessage, ISipHeader::TO);
+    pPrevSipHdr = SipStack::GetHeader(pInviteTState->m_pLastSipMsg, ISipHeader::TO);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
         // Remove To-Tag if the CANCEL transaction is for initial INVITE request
-        IMS_BOOL bInitialINVITE = IMS_TRUE;
+        IMS_BOOL bInitialInvite = IMS_TRUE;
 
-        if (!pInviteTState->pDialogEx.IsNull())
+        if (!pInviteTState->m_pDialogEx.IsNull())
         {
-            SipDialogState* pDState = pInviteTState->pDialogEx->GetDialogState();
+            SipDialogState* pDState = pInviteTState->m_pDialogEx->GetDialogState();
 
             if (pDState != IMS_NULL)
             {
                 if (pDState->GetState() == SipDState::STATE_CONFIRMED)
                 {
-                    bInitialINVITE = IMS_FALSE;
+                    bInitialInvite = IMS_FALSE;
                 }
             }
         }
 
-        if (bInitialINVITE)
+        if (bInitialInvite)
         {
-            (void)SipStack::RemoveParameter(AString(Sip::STR_TAG), pstHeader);
+            (void)SipStack::RemoveParameter(AString(Sip::STR_TAG), pSipHdr);
         }
 
-        if (!SipStack::SetHeader(pstHeader, pstMessage))
+        if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets Call-ID header field
-    pstGetHdr = SipStack::GetHeader(pInviteTState->pstLastMessage, ISipHeader::CALL_ID);
+    pPrevSipHdr = SipStack::GetHeader(pInviteTState->m_pLastSipMsg, ISipHeader::CALL_ID);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstMessage))
+        if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets Via header field
-    pstGetHdr = SipStack::GetHeader(pInviteTState->pstLastMessage, ISipHeader::VIA);
+    pPrevSipHdr = SipStack::GetHeader(pInviteTState->m_pLastSipMsg, ISipHeader::VIA);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstMessage))
+        if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Route
-    IMS_SINT32 nHCount = SipStack::GetHeaderCount(pInviteTState->pstLastMessage, ISipHeader::ROUTE);
+    IMS_SINT32 nHCount = SipStack::GetHeaderCount(pInviteTState->m_pLastSipMsg, ISipHeader::ROUTE);
 
     for (IMS_SINT32 i = 0; i < nHCount; i++)
     {
-        pstGetHdr = SipStack::GetHeader(pInviteTState->pstLastMessage, ISipHeader::ROUTE, i);
+        pPrevSipHdr = SipStack::GetHeader(pInviteTState->m_pLastSipMsg, ISipHeader::ROUTE, i);
 
-        if (SipStack::IsValidHeader(pstGetHdr))
+        if (SipStack::IsValidHeader(pPrevSipHdr))
         {
-            if (!SipStack::AppendHeader(pstGetHdr, pstMessage))
+            if (!SipStack::AppendHeader(pPrevSipHdr, m_pSipMsg))
             {
-                SipStack::FreeHeaderEx(pstGetHdr);
+                SipStack::FreeHeaderEx(pPrevSipHdr);
                 return IMS_FALSE;
             }
         }
 
-        SipStack::FreeHeaderEx(pstGetHdr);
+        SipStack::FreeHeaderEx(pPrevSipHdr);
     }
 
     // IMPLICIT_ROUTE
-    SipStack::FreeAddrSpec(pstImplicitRoute);
+    SipStack::FreeAddrSpec(m_pImplicitRoute);
 
-    if (pInviteTState->pstImplicitRoute != IMS_NULL)
+    if (pInviteTState->m_pImplicitRoute != IMS_NULL)
     {
-        pstImplicitRoute = pInviteTState->pstImplicitRoute;
-        SipStack::AddReference(pstImplicitRoute);
+        m_pImplicitRoute = pInviteTState->m_pImplicitRoute;
+        SipStack::AddReference(m_pImplicitRoute);
     }
 
     // Update the transport information
-    const SipTransportAddress& objNearTA =
-            pInviteTState->pTransport->GetAddress(SipTransport::TA_NEAR);
-    const SipTransportAddress& objFarTA =
-            pInviteTState->pTransport->GetAddress(SipTransport::TA_FAR);
+    const SipTransportAddress& objNearAddr =
+            pInviteTState->m_pTransport->GetAddress(SipTransport::TA_NEAR);
+    const SipTransportAddress& objFarAddr =
+            pInviteTState->m_pTransport->GetAddress(SipTransport::TA_FAR);
 
     // RFC5626_FLOW_CONTROL
-    pTransport->SetTransportTuple(objNearTA.GetIpAddress(), objNearTA.GetPort(),
-            pInviteTState->pTransport->GetPortC(), pInviteTState->pTransport->GetPortFlowControl(),
-            pInviteTState->pTransport->GetTransportExt());
+    m_pTransport->SetTransportTuple(objNearAddr.GetIpAddress(), objNearAddr.GetPort(),
+            pInviteTState->m_pTransport->GetPortC(),
+            pInviteTState->m_pTransport->GetPortFlowControl(),
+            pInviteTState->m_pTransport->GetTransportExt());
 
     // FIX_TRANSPORT_PROTOCOL
-    pTransport->SetProtocol(objNearTA.GetProtocol(), SipTransport::TA_NEAR);
-    pTransport->SetProtocol(objFarTA.GetProtocol(), SipTransport::TA_FAR);
+    m_pTransport->SetProtocol(objNearAddr.GetProtocol(), SipTransport::TA_NEAR);
+    m_pTransport->SetProtocol(objFarAddr.GetProtocol(), SipTransport::TA_FAR);
 
     // Create a dialog
-    pDialogEx = SipDialogEx::CreateDialog(objMethod);
+    m_pDialogEx = SipDialogEx::CreateDialog(objMethod);
 
-    if (pDialogEx.IsNull())
+    if (m_pDialogEx.IsNull())
     {
         return IMS_FALSE;
     }
@@ -588,16 +530,9 @@ IMS_BOOL SipClientTransactionState::InitCancel(IN CONST SipClientTransactionStat
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipClientTransactionState::InitRequest(IN CONST SipMethod& objMethod)
+IMS_BOOL SipClientTransactionState::InitRequest(IN const SipMethod& objMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
     // Set a mandatory headers in the INITIAL state
     //    - CSeq, Max-Forwards headers
     if (!SetMandatoryHeaders(objMethod))
@@ -606,9 +541,9 @@ IMS_BOOL SipClientTransactionState::InitRequest(IN CONST SipMethod& objMethod)
     }
 
     // Create a dialog usage according to the method
-    pDialogEx = SipDialogEx::CreateDialog(objMethod);
+    m_pDialogEx = SipDialogEx::CreateDialog(objMethod);
 
-    if (pDialogEx.IsNull())
+    if (m_pDialogEx.IsNull())
     {
         return IMS_FALSE;
     }
@@ -616,67 +551,60 @@ IMS_BOOL SipClientTransactionState::InitRequest(IN CONST SipMethod& objMethod)
     // FORKED_RESPONSE
     if (objMethod.Equals(SipMethod::INVITE))
     {
-        pForkedTxnMngr = new SipForkedTransactionManager();
+        m_pForkedTxnMngr = new SipForkedTransactionManager();
 
-        if (pForkedTxnMngr.IsNull())
+        if (m_pForkedTxnMngr.IsNull())
         {
             return IMS_FALSE;
         }
 
-        pForkedTxnMngr->Add(this);
+        m_pForkedTxnMngr->Add(this);
 
         // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
         // Grab the forked response manager when initiating the INVITE transaction
-        pPersistentForkedTxnMngr = pForkedTxnMngr;
+        m_pPersistentForkedTxnMngr = m_pForkedTxnMngr;
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipClientTransactionState::InitRequest(
-        IN CONST SipMethod& objMethod, IN SipDialogEx* pDialogEx)
+        IN const SipMethod& objMethod, IN SipDialogEx* pDialogEx)
 {
     SipDialogState* pDState;
 
-    //---------------------------------------------------------------------------------------------
-
     if (!objMethod.Equals(SipMethod::ACK))
     {
-        this->pDialogEx = pDialogEx;
-        pDState = this->pDialogEx->GetDialogState();
+        m_pDialogEx = pDialogEx;
+        pDState = m_pDialogEx->GetDialogState();
 
-        nCSeqNumber = pDState->GetNextCSeqNumber();
+        m_nCSeqNumber = pDState->GetNextCSeqNumber();
     }
     else
     {
-        pDState = this->pDialogEx->GetDialogState();
+        pDState = m_pDialogEx->GetDialogState();
 
         // For ACK transaction, reset the transport protocol to a default transport protocol
-        pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_NEAR);
-        pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_FAR);
+        m_pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_NEAR);
+        m_pTransport->SetProtocol(SipTransportAddress::PROTOCOL_UDP, SipTransport::TA_FAR);
     }
 
     // FORKED_RESPONSE
     if (objMethod.Equals(SipMethod::INVITE))
     {
-        pForkedTxnMngr = new SipForkedTransactionManager();
+        m_pForkedTxnMngr = new SipForkedTransactionManager();
 
-        if (pForkedTxnMngr.IsNull())
+        if (m_pForkedTxnMngr.IsNull())
         {
             return IMS_FALSE;
         }
 
-        pForkedTxnMngr->Add(this);
+        m_pForkedTxnMngr->Add(this);
 
         // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
         // Grab the forked response manager when initiating the INVITE transaction
-        pPersistentForkedTxnMngr = pForkedTxnMngr;
+        m_pPersistentForkedTxnMngr = m_pForkedTxnMngr;
     }
 
     // Set a mandatory headers in the INITIAL state
@@ -686,12 +614,12 @@ IMS_BOOL SipClientTransactionState::InitRequest(
         return IMS_FALSE;
     }
 
-    if (!pDState->InitRequest(objMethod, pstMessage))
+    if (!pDState->InitRequest(objMethod, m_pSipMsg))
     {
         return IMS_FALSE;
     }
 
-    if (!CorrectRouteHeader(pstMessage))
+    if (!CorrectRouteHeader(m_pSipMsg))
     {
         return IMS_FALSE;
     }
@@ -699,56 +627,43 @@ IMS_BOOL SipClientTransactionState::InitRequest(
     // P-Access-Network-Info header if required
     if (objMethod.Equals(SipMethod::ACK) && SipFeatures::IsPaniHeaderForAckRequired(GetSlotId()))
     {
-        SetPANIHeader(objMethod, pstMessage);
+        SetPaniHeader(objMethod, m_pSipMsg);
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 SipClientTransactionState::RemoveForkedTransaction()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!pForkedTxnMngr.IsNull())
+    if (!m_pForkedTxnMngr.IsNull())
     {
-        pForkedTxnMngr->Remove(this);
+        m_pForkedTxnMngr->Remove(this);
 
-        if (!pForkedTxnMngr->IsEmpty())
+        if (!m_pForkedTxnMngr->IsEmpty())
         {
-            pForkedTxnMngr = IMS_NULL;
+            m_pForkedTxnMngr = IMS_NULL;
             return 1;
         }
 
         // FIX_NO_ACK_RETRANSMISSION
-        if (pForkedTxnMngr->IsTransactionCompleted())
+        if (m_pForkedTxnMngr->IsTransactionCompleted())
         {
-            pForkedTxnMngr = IMS_NULL;
+            m_pForkedTxnMngr = IMS_NULL;
             return 1;
         }
 
-        pForkedTxnMngr = IMS_NULL;
+        m_pForkedTxnMngr = IMS_NULL;
     }
 
     return 0;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipClientTransactionState::SendWithCredentials(IN SipTimerValues* pTV /* = IMS_NULL */)
+IMS_BOOL SipClientTransactionState::SendWithCredentials(
+        IN SipTimerValues* pTimerValues /*= IMS_NULL*/)
 {
-    SipMethod objMethod = SipStack::GetMethod(pstMessage);
-
-    //---------------------------------------------------------------------------------------------
+    SipMethod objMethod = SipStack::GetMethod(m_pSipMsg);
 
     if (!UpdateTxnDetails(objMethod))
     {
@@ -757,35 +672,28 @@ IMS_BOOL SipClientTransactionState::SendWithCredentials(IN SipTimerValues* pTV /
     }
 
     // Updates the sequence number on the dialog state, EARLY / CONFIRMED
-    if (!pDialogEx.IsNull())
+    if (!m_pDialogEx.IsNull())
     {
-        if ((pDialogEx->GetState() == SipDState::STATE_EARLY) ||
-                (pDialogEx->GetState() == SipDState::STATE_CONFIRMED))
+        if ((m_pDialogEx->GetState() == SipDState::STATE_EARLY) ||
+                (m_pDialogEx->GetState() == SipDState::STATE_CONFIRMED))
         {
-            pDialogEx->GetDialogState()->UpdateLocalCSeq(nCSeqNumber);
+            m_pDialogEx->GetDialogState()->UpdateLocalCSeq(m_nCSeqNumber);
         }
         // BYE_REQUEST_ON_DIALOG_TERMINATED
         else if (objMethod.Equals(SipMethod::BYE) &&
-                (pDialogEx->GetState() == SipDState::STATE_TERMINATED))
+                (m_pDialogEx->GetState() == SipDState::STATE_TERMINATED))
         {
-            pDialogEx->GetDialogState()->UpdateLocalCSeq(nCSeqNumber);
+            m_pDialogEx->GetDialogState()->UpdateLocalCSeq(m_nCSeqNumber);
         }
     }
 
-    return SipTransactionState::Send(pTV);
+    return SipTransactionState::Send(pTimerValues);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipClientTransactionState::SetExtensionTokenForViaBranch(IN CONST AString& strToken)
+void SipClientTransactionState::SetExtensionTokenForViaBranch(IN const AString& strToken)
 {
-    SipClientTransport* pClientTransport = DYNAMIC_CAST(SipClientTransport*, pTransport);
-
-    //---------------------------------------------------------------------------------------------
+    SipClientTransport* pClientTransport = DYNAMIC_CAST(SipClientTransport*, m_pTransport);
 
     if (pClientTransport == IMS_NULL)
     {
@@ -795,81 +703,57 @@ void SipClientTransactionState::SetExtensionTokenForViaBranch(IN CONST AString& 
     pClientTransport->SetExtensionTokenForViaBranch(strToken);
 }
 
-/*
-
-Remarks
- IMPLICIT_ROUTE
-*/
 PUBLIC
-void SipClientTransactionState::SetImplicitRouteHeader(IN CONST AString& strRouteHeader)
+void SipClientTransactionState::SetImplicitRouteHeader(IN const AString& strRouteHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
-    SipStack::FreeAddrSpec(pstImplicitRoute);
-    pstImplicitRoute = IMS_NULL;
+    SipStack::FreeAddrSpec(m_pImplicitRoute);
+    m_pImplicitRoute = IMS_NULL;
 
     if (strRouteHeader.GetLength() > 0)
     {
-        pstImplicitRoute = SipStack::DecodeAddrSpec(strRouteHeader);
+        m_pImplicitRoute = SipStack::DecodeAddrSpec(strRouteHeader);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipClientTransactionState::UpdateRouteDetails(IN CONST SipMethod& objMethod)
+IMS_BOOL SipClientTransactionState::UpdateRouteDetails(IN const SipMethod& objMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!CorrectRouteHeader(pstMessage))
+    if (!CorrectRouteHeader(m_pSipMsg))
     {
         return IMS_FALSE;
     }
 
-    SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pstMessage);
+    SipAddrSpec* pAddrSpec = SipStack::GetRequestUri(m_pSipMsg);
 
     if (objMethod.Equals(SipMethod::REGISTER))
     {
         // Remove userinfo & password field if present
-        SipStack::RemoveUserAndPassword(pstAddrSpec);
+        SipStack::RemoveUserAndPassword(pAddrSpec);
     }
 
-    SipStack::FreeAddrSpec(pstAddrSpec);
+    SipStack::FreeAddrSpec(pAddrSpec);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pstMessage)
+IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pSipMsg)
 {
-    // Update the transaction information for incoming response
-    IMS_SINT32 nValidity;
-
-    //---------------------------------------------------------------------------------------------
-
     // Check the message validity - CSeq number
-    IMS_UINT32 nCSeqNum = SipStack::GetCSeqNumber(pstMessage);
+    IMS_UINT32 nCSeqNum = SipStack::GetCSeqNumber(pSipMsg);
 
-    if (nCSeqNumber != nCSeqNum)
+    if (m_nCSeqNumber != nCSeqNum)
     {
         // notify the error ???
-        IMS_TRACE_E(0, "Sequence number is not ordered - Current (%d), New (%d)", nCSeqNumber,
+        IMS_TRACE_E(0, "Sequence number is not ordered - Current (%d), New (%d)", m_nCSeqNumber,
                 nCSeqNum, 0);
         return SipPrivate::MESSAGE_DISCARDED;
     }
 
-    SipMethod objMethod = SipStack::GetMethod(pstMessage);
-    SipMessageInfo objMInfo(GetSlotId(), objMethod, pstMessage, SipMessageInfo::DIRECTION_INCOMING);
+    SipMethod objMethod = SipStack::GetMethod(pSipMsg);
+    SipMessageInfo objMsgInfo(GetSlotId(), objMethod, pSipMsg, SipMessageInfo::DIRECTION_INCOMING);
 
-    nValidity = pDialogEx->GetDialogState()->CheckToTagValidity(objMInfo);
+    IMS_SINT32 nValidity = m_pDialogEx->GetDialogState()->CheckToTagValidity(objMsgInfo);
 
     // FORKED_RESPONSE
     if (nValidity == SipPrivate::MESSAGE_VALID_FORKED)
@@ -878,7 +762,7 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pstMessage
         IMS_TRACE_I("__UAC__ :: _____ FORKED RESPONSE (%s) RECEIVED _____",
                 objMethod.ToString().GetStr(), 0, 0);
 
-        if (!HandleForkedResponse(objMInfo))
+        if (!HandleForkedResponse(objMsgInfo))
         {
             IMS_TRACE_E(0, "Handling a forked response failed", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
@@ -895,10 +779,10 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pstMessage
     }
 
     // If the message is valid, then update the response message
-    UpdateMessage(pstMessage);
+    UpdateMessage(pSipMsg);
 
     // Initialize the transport info. when the response message is received
-    pTransport->InitTransportOnMessageReceived(pstMessage);
+    m_pTransport->InitTransportOnMessageReceived(pSipMsg);
 
     // Validate the transport information
     nValidity = CheckMessageValidity();
@@ -909,7 +793,7 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pstMessage
         return nValidity;
     }
 
-    nValidity = pDialogEx->UpdateDialogDetails(objMInfo);
+    nValidity = m_pDialogEx->UpdateDialogDetails(objMsgInfo);
 
     if (nValidity != SipPrivate::MESSAGE_VALID)
     {
@@ -924,38 +808,33 @@ IMS_SINT32 SipClientTransactionState::HandleResponse(IN ::SipMessage* pstMessage
     }
 
     // FIX_NO_ACK_RETRANSMISSION
-    if (!pForkedTxnMngr.IsNull())
+    if (!m_pForkedTxnMngr.IsNull())
     {
-        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pstMessage);
+        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
         if (SipStatusCode::IsFinal(nStatusCode))
         {
-            pForkedTxnMngr->SetTransactionCompleted(nStatusCode);
+            m_pForkedTxnMngr->SetTransactionCompleted(nStatusCode);
         }
     }
 
     // Notify the response to SipClientConnection
-    if (piListener != IMS_NULL)
+    if (m_piListener != IMS_NULL)
     {
-        piListener->ClientTransactionState_ResponseReceived(pstMessage);
+        m_piListener->ClientTransactionState_ResponseReceived(pSipMsg);
     }
     else
     {
         IMS_TRACE_E(0, "No listener (%s)",
-                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
+                SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
                 0);
     }
 
     return SipPrivate::MESSAGE_VALID;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMessage* pSipMsg,
-        IN CONST SipTransportAddress& objFarEnd, OUT RCPtr<SipClientTransactionState>& pCTState)
+        IN const SipTransportAddress& objFarEnd, OUT RCPtr<SipClientTransactionState>& pCtState)
 {
     IMS_TRACE_I("SipClientTransactionState::MatchTransaction ... ", 0, 0, 0);
 
@@ -1000,6 +879,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     SIP_BOOL bStatus = SipStackManager::GetInstance()->OnRecvMessage(pSipMsg, &objTranspParam,
             &objUserData, reinterpret_cast<SIP_INT32*>(&eTxnStatus), &pTxnKey, &nError);
+
     if (bStatus == SIP_FALSE)
     {
         IMS_TRACE_E(nError, "OnRecvMessage() Failed", 0, 0, 0);
@@ -1047,8 +927,8 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
             IMS_TRACE_I("__UAC__ :: _____ REMOTE RETRANSMISSION _____", 0, 0, 0);
             return SipPrivate::MESSAGE_DISCARDED;
         }
-        case ETXNSTATUS_ERRORONSEND:
-        case ETXNSTATUS_INVALIDMESSAGE:
+        case ETXNSTATUS_ERRORONSEND:     // FALL-THROUGH
+        case ETXNSTATUS_INVALIDMESSAGE:  // FALL-THROUGH
         case ETXNSTATUS_INVALID:
         {
             IMS_TRACE_I("__UAC__ :: _____ PROCESSING FAILED _____", 0, 0, 0);
@@ -1063,7 +943,7 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     if (pTxnContext == IMS_NULL)
     {
-        IMS_TRACE_E(0, "pTxnContext is NULL", 0, 0, 0);
+        IMS_TRACE_E(0, "SipTxnContext is null", 0, 0, 0);
         return SipPrivate::MESSAGE_FAILED;
     }
 
@@ -1082,9 +962,9 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
         return SipPrivate::MESSAGE_FAILED;
     }
 
-    pCTState = DYNAMIC_CAST(SipClientTransactionState*, pTxnContextData->GetTxnState());
+    pCtState = DYNAMIC_CAST(SipClientTransactionState*, pTxnContextData->GetTxnState());
 
-    if (pCTState.IsNull())
+    if (pCtState.IsNull())
     {
         if (objUserData.GetDeleteFlag() == SIP_TRUE)
         {
@@ -1101,38 +981,38 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
 
     // FORKED_RESPONSE :: Check & look up the appropriate client transaction ...
     // FORKED_RESPONSE_TO_SUPPORT_EARLY_DIALOG_TERMINATION
-    RCPtr<SipForkedTransactionManager> pTmpFTM;
+    RCPtr<SipForkedTransactionManager> pTmpFtm;
 
-    if (!pCTState->pForkedTxnMngr.IsNull())
+    if (!pCtState->m_pForkedTxnMngr.IsNull())
     {
-        pTmpFTM = pCTState->pForkedTxnMngr;
+        pTmpFtm = pCtState->m_pForkedTxnMngr;
         IMS_TRACE_D("FTM :: Association with this transaction", 0, 0, 0);
     }
-    else if (!pCTState->pPersistentForkedTxnMngr.IsNull())
+    else if (!pCtState->m_pPersistentForkedTxnMngr.IsNull())
     {
-        pTmpFTM = pCTState->pPersistentForkedTxnMngr;
+        pTmpFtm = pCtState->m_pPersistentForkedTxnMngr;
         IMS_TRACE_D("FTM :: No association with this transaction, but choose it", 0, 0, 0);
     }
 
-    if (objMethod.Equals(SipMethod::INVITE) && !pTmpFTM.IsNull())
+    if (objMethod.Equals(SipMethod::INVITE) && !pTmpFtm.IsNull())
     {
-        SipClientTransactionState* pTmpCTState = pTmpFTM->Lookup(pSipMsg);
+        SipClientTransactionState* pTmpCtState = pTmpFtm->Lookup(pSipMsg);
 
-        if ((pTmpCTState != IMS_NULL) && (pTmpCTState != pCTState.Get()))
+        if ((pTmpCtState != IMS_NULL) && (pTmpCtState != pCtState.Get()))
         {
             IMS_TRACE_D("FTM :: The response is received via the other transaction", 0, 0, 0);
 
-            pCTState = pTmpCTState;
+            pCtState = pTmpCtState;
         }
     }
 
     // Update the transaction key if it is different
-    if ((pTxnKey != IMS_NULL) && (pTxnKey != pCTState->pstTxnKey))
+    if ((pTxnKey != IMS_NULL) && (pTxnKey != pCtState->m_pTxnKey))
     {
-        SipStack::FreeTxnKey(pCTState->pstTxnKey);
+        SipStack::FreeTxnKey(pCtState->m_pTxnKey);
 
-        pCTState->pstTxnKey = pTxnKey;
-        SipStack::AddReference(pCTState->pstTxnKey);
+        pCtState->m_pTxnKey = pTxnKey;
+        SipStack::AddReference(pCtState->m_pTxnKey);
     }
     else
     {
@@ -1148,36 +1028,29 @@ PUBLIC GLOBAL IMS_SINT32 SipClientTransactionState::MatchTransaction(IN ::SipMes
     // SIP_MESSAGE_TRACKER
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
-    if (pFactoryProxy->IsMessageTrackerEnabled(pCTState->GetSlotId()))
+    if (pFactoryProxy->IsMessageTrackerEnabled(pCtState->GetSlotId()))
     {
         SipMessageTracker* pMessageTracker =
-                pFactoryProxy->GetMessageTracker(pCTState->GetSlotId());
+                pFactoryProxy->GetMessageTracker(pCtState->GetSlotId());
 
         pMessageTracker->NotifyMessageReceived(objMethod, SipStack::GetStatusCode(pSipMsg),
-                AString(SipStack::TxnKey_GetCallId(pCTState->pstTxnKey)));
+                AString(SipStack::TxnKey_GetCallId(pCtState->m_pTxnKey)));
     }
 
     return SipPrivate::MESSAGE_VALID;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipClientTransactionState::CorrectRouteHeader(IN_OUT ::SipMessage*& pstMessage)
+IMS_BOOL SipClientTransactionState::CorrectRouteHeader(IN_OUT ::SipMessage*& pSipMsg)
 {
     // Get the topmost Route entry
-    SipAddrSpec* pstAddrSpec = SipStack::GetAddrSpec(pstMessage, ISipHeader::ROUTE);
+    SipAddrSpec* pAddrSpec = SipStack::GetAddrSpec(pSipMsg, ISipHeader::ROUTE);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pstAddrSpec == IMS_NULL)
+    if (pAddrSpec == IMS_NULL)
     {
         if (SipStack::IsLastErrorNoExist())
         {
-            nRoutingType = TARGET_NO_ROUTE;
+            m_nRoutingType = TARGET_NO_ROUTE;
             return IMS_TRUE;
         }
 
@@ -1188,59 +1061,51 @@ IMS_BOOL SipClientTransactionState::CorrectRouteHeader(IN_OUT ::SipMessage*& pst
     //    --> Request-URI is already set by the application or from To header
     const AString LR(Sip::STR_LR);
 
-    if (SipStack::HasParameter(pstAddrSpec, LR))
+    if (SipStack::HasParameter(pAddrSpec, LR))
     {
-        AString strLRValue = SipStack::GetParameter(pstAddrSpec, LR);
+        AString strLrValue = SipStack::GetParameter(pAddrSpec, LR);
 
-        if ((strLRValue.GetLength() == 0) || strLRValue.EqualsIgnoreCase("true"))
+        if ((strLrValue.GetLength() == 0) || strLrValue.EqualsIgnoreCase("true"))
         {
-            nRoutingType = TARGET_LR;
+            m_nRoutingType = TARGET_LR;
 
-            SipStack::FreeAddrSpec(pstAddrSpec);
+            SipStack::FreeAddrSpec(pAddrSpec);
             return IMS_TRUE;
         }
     }
 
-    nRoutingType = TARGET_SR;
+    m_nRoutingType = TARGET_SR;
 
     // Here, the top Route entry is a strict router:
     //    --> This addr-spec SHOULD be set in the Request-Line
-    SipAddrSpec* pstReqLineAddrSpec = SipStack::GetRequestUri(pstMessage);
+    SipAddrSpec* pReqLineAddrSpec = SipStack::GetRequestUri(pSipMsg);
+    SipHeaderBase* pRouteHeader = SipStack::CreateHeader(ISipHeader::ROUTE, pReqLineAddrSpec);
+    SipStack::FreeAddrSpec(pReqLineAddrSpec);
 
-    SipHeaderBase* pstRouteHeader = SipStack::CreateHeader(ISipHeader::ROUTE, pstReqLineAddrSpec);
-    SipStack::FreeAddrSpec(pstReqLineAddrSpec);
-
-    if (!SipStack::AppendHeader(pstRouteHeader, pstMessage))
+    if (!SipStack::AppendHeader(pRouteHeader, pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstRouteHeader);
-        SipStack::FreeAddrSpec(pstAddrSpec);
+        SipStack::FreeHeaderEx(pRouteHeader);
+        SipStack::FreeAddrSpec(pAddrSpec);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstRouteHeader);
+    SipStack::FreeHeaderEx(pRouteHeader);
 
     // Set the Request-URI from the addr-spec of the top Route entry
-    if (!SipStack::SetRequestUri(pstAddrSpec, pstMessage))
+    if (!SipStack::SetRequestUri(pAddrSpec, pSipMsg))
     {
-        SipStack::FreeAddrSpec(pstAddrSpec);
+        SipStack::FreeAddrSpec(pAddrSpec);
         return IMS_FALSE;
     }
 
-    SipStack::FreeAddrSpec(pstAddrSpec);
+    SipStack::FreeAddrSpec(pAddrSpec);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipClientTransactionState::CheckNSendAck()
 {
-    //---------------------------------------------------------------------------------------------
-
     if (!SipStack::IsAckTransmissionRequiredForNon2XX())
     {
         // SIP stack takes care of the failure response for INVITE and sends ACK
@@ -1248,54 +1113,47 @@ void SipClientTransactionState::CheckNSendAck()
     }
 
     // Check if non-2xx response to INVITE, then the client transaction needs to send ACK request.
-    IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pstMessage);
+    IMS_SINT32 nStatusCode = SipStack::GetStatusCode(m_pSipMsg);
 
     if (nStatusCode >= SipStatusCode::SC_300)
     {
-        ::SipMessage* pstAckMessage = SipStack::CreateMessage(SipStack::SIP_MESSAGE_REQUEST);
+        ::SipMessage* pAckSipMsg = SipStack::CreateMessage(SipStack::SIP_MESSAGE_REQUEST);
 
-        if (pstAckMessage == IMS_NULL)
+        if (pAckSipMsg == IMS_NULL)
         {
             IMS_TRACE_E(0, "Creating an ACK request message failed", 0, 0, 0);
             return;
         }
 
         // Initializes ACK request message
-        if (!InitAck(pstAckMessage, pstMessage))
+        if (!InitAck(pAckSipMsg, m_pSipMsg))
         {
             IMS_TRACE_E(0, "Initializing ACK request failed", 0, 0, 0);
-            SipStack::FreeMessage(pstAckMessage);
+            SipStack::FreeMessage(pAckSipMsg);
             return;
         }
 
         SipMethod objMethod(SipMethod::ACK);
-        SipMessageInfo objMInfo(
-                GetSlotId(), objMethod, pstAckMessage, SipMessageInfo::DIRECTION_OUTGOING);
+        SipMessageInfo objMsgInfo(
+                GetSlotId(), objMethod, pAckSipMsg, SipMessageInfo::DIRECTION_OUTGOING);
 
         // Update the Contact information
-        pDialogEx->UpdateDialogDetails(objMInfo);
+        m_pDialogEx->UpdateDialogDetails(objMsgInfo);
 
         // Store the last request message
-        // SipStack::FreeMessage(pstLastMessage);
-        // pstLastMessage = SipStack::CloneMessage(pstAckMessage);
+        // SipStack::FreeMessage(m_pLastSipMsg);
+        // m_pLastSipMsg = SipStack::CloneMessage(pAckSipMsg);
 
         IMS_TRACE_I("___ SENDING ACK REQUEST .....", 0, 0, 0);
-        SipTransactionState::Send(pstAckMessage, IMS_NULL);
+        SipTransactionState::Send(pAckSipMsg, IMS_NULL);
 
-        SipStack::FreeMessage(pstAckMessage);
+        SipStack::FreeMessage(pAckSipMsg);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL SipTransactionState* SipClientTransactionState::Clone()
 {
     SipClientTransactionState* pTxnState = new SipClientTransactionState(GetSlotId());
-
-    //---------------------------------------------------------------------------------------------
 
     if (pTxnState == IMS_NULL)
     {
@@ -1311,40 +1169,33 @@ PRIVATE VIRTUAL SipTransactionState* SipClientTransactionState::Clone()
     return pTxnState;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN CONST SipMessageInfo& objMInfo)
+IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN const SipMessageInfo& objMsgInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "No listener (%s)",
-                SipDebug::GetCharA1(pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
+                SipDebug::GetCharA1(m_pDialogEx->GetDialogState()->GetCallId().GetStr(), 8, '@'), 0,
                 0);
         return IMS_FALSE;
     }
 
-    RCPtr<SipClientTransactionState> pForkedCTState = new SipClientTransactionState(GetSlotId());
+    RCPtr<SipClientTransactionState> pForkedCtState = new SipClientTransactionState(GetSlotId());
 
-    if (pForkedCTState.IsNull())
+    if (pForkedCtState.IsNull())
     {
         return IMS_FALSE;
     }
 
     // Add the forked transaction to the forked transaction manager...
-    pForkedCTState->pForkedTxnMngr = pForkedTxnMngr;
+    pForkedCtState->m_pForkedTxnMngr = m_pForkedTxnMngr;
 
-    if (!pForkedCTState->pForkedTxnMngr.IsNull())
+    if (!pForkedCtState->m_pForkedTxnMngr.IsNull())
     {
-        pForkedCTState->pForkedTxnMngr->Add(pForkedCTState.Get());
+        pForkedCtState->m_pForkedTxnMngr->Add(pForkedCtState.Get());
     }
 
-    if (!pForkedCTState->InitTxnDetails(this))
+    if (!pForkedCtState->InitTxnDetails(this))
     {
         IMS_TRACE_E(0, "Initializing SIP client transaction state failed", 0, 0, 0);
         return IMS_FALSE;
@@ -1366,41 +1217,42 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN CONST SipMessageInfo
 
     // Initialize the dialog details for the forked message
     if (!pDState->InitDialogDetails(
-                SipDialogState::DIALOG_FORKED_RESPONSE, pDialogEx->GetDialogState()))
+                SipDialogState::DIALOG_FORKED_RESPONSE, m_pDialogEx->GetDialogState()))
     {
         IMS_TRACE_E(0, "Initializing a dialog details from the forked response message", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    pForkedCTState->pDialogEx = SipDialogEx::CreateDialog(pDState.Get(), objMInfo);
+    pForkedCtState->m_pDialogEx = SipDialogEx::CreateDialog(pDState.Get(), objMsgInfo);
 
-    if (pForkedCTState->pDialogEx.IsNull())
+    if (pForkedCtState->m_pDialogEx.IsNull())
     {
         return IMS_FALSE;
     }
 
-    SipMessageInfo objPrevMInfo(GetSlotId(), objMInfo.GetMethod(), GetLastMessage(),
+    SipMessageInfo objReqMsgInfo(GetSlotId(), objMsgInfo.GetMethod(), GetLastMessage(),
             SipMessageInfo::DIRECTION_OUTGOING);
 
-    if (pForkedCTState->pDialogEx->UpdateDialogDetails(objPrevMInfo) != SipPrivate::MESSAGE_VALID)
+    if (pForkedCtState->m_pDialogEx->UpdateDialogDetails(objReqMsgInfo) !=
+            SipPrivate::MESSAGE_VALID)
     {
         IMS_TRACE_E(0, "Updating a dialog details from the previous request message", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    if (pForkedCTState->pDialogEx->UpdateDialogDetails(objMInfo) != SipPrivate::MESSAGE_VALID)
+    if (pForkedCtState->m_pDialogEx->UpdateDialogDetails(objMsgInfo) != SipPrivate::MESSAGE_VALID)
     {
         IMS_TRACE_E(0, "Updating a dialog details from the forked response message", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    pForkedCTState->UpdateMessage(objMInfo.GetMessage());
+    pForkedCtState->UpdateMessage(objMsgInfo.GetMessage());
 
     // Initialize the transport info. when the response message is received
-    pForkedCTState->pTransport->InitTransportOnMessageReceived(objMInfo.GetMessage());
+    pForkedCtState->m_pTransport->InitTransportOnMessageReceived(objMsgInfo.GetMessage());
 
     // Validate the transport information
-    IMS_SINT32 nValidity = pForkedCTState->CheckMessageValidity();
+    IMS_SINT32 nValidity = pForkedCtState->CheckMessageValidity();
 
     if (nValidity != SipPrivate::MESSAGE_VALID)
     {
@@ -1409,233 +1261,220 @@ IMS_BOOL SipClientTransactionState::HandleForkedResponse(IN CONST SipMessageInfo
     }
 
     // Check if non-2xx response to INVITE, then the client transaction needs to send ACK request.
-    if (objMInfo.GetMethod().Equals(SipMethod::INVITE))
+    if (objMsgInfo.GetMethod().Equals(SipMethod::INVITE))
     {
-        pForkedCTState->CheckNSendAck();
+        pForkedCtState->CheckNSendAck();
     }
 
     // FIX_NO_ACK_RETRANSMISSION
-    if (!pForkedCTState->pForkedTxnMngr.IsNull())
+    if (!pForkedCtState->m_pForkedTxnMngr.IsNull())
     {
-        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(objMInfo.GetMessage());
+        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(objMsgInfo.GetMessage());
 
         if (SipStatusCode::IsFinal(nStatusCode))
         {
-            pForkedCTState->pForkedTxnMngr->SetTransactionCompleted(nStatusCode);
+            pForkedCtState->m_pForkedTxnMngr->SetTransactionCompleted(nStatusCode);
         }
     }
 
-    piListener->ClientTransactionState_ForkedResponseReceived(pForkedCTState.Get());
+    m_piListener->ClientTransactionState_ForkedResponseReceived(pForkedCtState.Get());
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipClientTransactionState::InitAck(
-        IN_OUT ::SipMessage*& pstAckMessage, IN ::SipMessage* pstRespMessage)
+        IN_OUT ::SipMessage*& pAckSipMsg, IN ::SipMessage* pRespSipMsg)
 {
-    SipHeaderBase* pstGetHdr;
-    SipHeaderBase* pstHeader;
-    SipMethod objMethodACK(SipMethod::ACK);
-
-    //---------------------------------------------------------------------------------------------
+    SipHeaderBase* pPrevSipHdr;
+    SipHeaderBase* pSipHdr;
+    SipMethod objMethodAck(SipMethod::ACK);
 
     // Sets SIP method name
-    SipStack::SetMethod(objMethodACK, pstAckMessage);
+    SipStack::SetMethod(objMethodAck, pAckSipMsg);
 
     // Sets a Request-URI field
-    SipAddrSpec* pstAddrSpec = SipStack::GetRequestUri(pstLastMessage);
-    (void)SipStack::SetRequestUri(pstAddrSpec, pstAckMessage);
-    SipStack::FreeAddrSpec(pstAddrSpec);
+    SipAddrSpec* pAddrSpec = SipStack::GetRequestUri(m_pLastSipMsg);
+    (void)SipStack::SetRequestUri(pAddrSpec, pAckSipMsg);
+    SipStack::FreeAddrSpec(pAddrSpec);
 
     AString strHBody;
 
     // Sets CSeq header field
-    strHBody.SetNumber(nCSeqNumber);
+    strHBody.SetNumber(m_nCSeqNumber);
     strHBody += TextParser::CHAR_SP;
     strHBody += SipMethod::NAME[SipMethod::ACK];
-    pstHeader = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
+    pSipHdr = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+    if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // Sets Max-Forwards header field
     strHBody.SetNumber(SipPrivate::MAX_HOP);
-    pstHeader = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
+    pSipHdr = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+    if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // Sets From header field
-    pstGetHdr = SipStack::GetHeader(pstLastMessage, ISipHeader::FROM);
+    pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::FROM);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+        if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets To header field
-    pstGetHdr = SipStack::GetHeader(pstLastMessage, ISipHeader::TO);
+    pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::TO);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+        if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
         // Update To-Tag from the last response message
-        pstGetHdr = SipStack::GetHeader(pstRespMessage, ISipHeader::TO);
+        pPrevSipHdr = SipStack::GetHeader(pRespSipMsg, ISipHeader::TO);
 
-        AString strToTag = SipStack::GetParameter(pstGetHdr, Sip::STR_TAG);
+        AString strToTag = SipStack::GetParameter(pPrevSipHdr, Sip::STR_TAG);
 
         if (!strToTag.IsNULL())
         {
-            (void)SipStack::SetParameter(pstHeader, Sip::STR_TAG, strToTag);
+            (void)SipStack::SetParameter(pSipHdr, Sip::STR_TAG, strToTag);
         }
 
-        SipStack::FreeHeaderEx(pstGetHdr);
-
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pPrevSipHdr);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets Call-ID header field
-    pstGetHdr = SipStack::GetHeader(pstLastMessage, ISipHeader::CALL_ID);
+    pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::CALL_ID);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+        if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets Via header field
-    pstGetHdr = SipStack::GetHeader(pstLastMessage, ISipHeader::VIA);
+    pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::VIA);
 
-    pstHeader = SipStack::CloneHeader(pstGetHdr);
-    SipStack::FreeHeaderEx(pstGetHdr);
+    pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
-    if (pstHeader != IMS_NULL)
+    if (pSipHdr != IMS_NULL)
     {
-        if (!SipStack::SetHeader(pstHeader, pstAckMessage))
+        if (!SipStack::SetHeader(pSipHdr, pAckSipMsg))
         {
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
             return IMS_FALSE;
         }
 
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
     }
 
     // Sets Route header field
-    IMS_SINT32 nHCount = SipStack::GetHeaderCount(pstLastMessage, ISipHeader::ROUTE);
+    IMS_SINT32 nHCount = SipStack::GetHeaderCount(m_pLastSipMsg, ISipHeader::ROUTE);
 
     for (IMS_SINT32 i = 0; i < nHCount; i++)
     {
-        pstGetHdr = SipStack::GetHeader(pstLastMessage, ISipHeader::ROUTE, i);
+        pPrevSipHdr = SipStack::GetHeader(m_pLastSipMsg, ISipHeader::ROUTE, i);
 
-        if (SipStack::IsValidHeader(pstGetHdr))
+        if (SipStack::IsValidHeader(pPrevSipHdr))
         {
-            if (!SipStack::AppendHeader(pstGetHdr, pstAckMessage))
+            if (!SipStack::AppendHeader(pPrevSipHdr, pAckSipMsg))
             {
-                SipStack::FreeHeaderEx(pstGetHdr);
+                SipStack::FreeHeaderEx(pPrevSipHdr);
                 return IMS_FALSE;
             }
         }
 
-        SipStack::FreeHeaderEx(pstGetHdr);
+        SipStack::FreeHeaderEx(pPrevSipHdr);
     }
 
     // Sets User-Agent header if it is present in the previous request
-    pstGetHdr = SipStack::GetUnknownHeader(pstLastMessage, SipHeaderName::USER_AGENT);
+    pPrevSipHdr = SipStack::GetUnknownHeader(m_pLastSipMsg, SipHeaderName::USER_AGENT);
 
-    if (SipStack::IsValidHeader(pstGetHdr))
+    if (SipStack::IsValidHeader(pPrevSipHdr))
     {
-        pstHeader = SipStack::CloneHeader(pstGetHdr);
+        pSipHdr = SipStack::CloneHeader(pPrevSipHdr);
 
-        if (pstHeader != IMS_NULL)
+        if (pSipHdr != IMS_NULL)
         {
             // Even if setting User-Agent is failed, it will proceed to send ACK request.
-            SipStack::SetHeader(pstHeader, pstAckMessage);
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::SetHeader(pSipHdr, pAckSipMsg);
+            SipStack::FreeHeaderEx(pSipHdr);
         }
     }
 
-    SipStack::FreeHeaderEx(pstGetHdr);
+    SipStack::FreeHeaderEx(pPrevSipHdr);
 
     // P-Access-Network-Info header if required
     if (SipFeatures::IsPaniHeaderForAckRequired(GetSlotId()))
     {
-        SetPANIHeader(objMethodACK, pstAckMessage);
+        SetPaniHeader(objMethodAck, pAckSipMsg);
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN CONST SipMethod& objMethod)
+IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN const SipMethod& objMethod)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogEx->GetState() == SipDState::STATE_INIT)
+    if (m_pDialogEx->GetState() == SipDState::STATE_INIT)
     {
         // Check if the Call-ID field is present or not
-        if (!SipStack::IsHeaderPresent(pstMessage, ISipHeader::CALL_ID))
+        if (!SipStack::IsHeaderPresent(m_pSipMsg, ISipHeader::CALL_ID))
         {
             // Add Call-ID in here
-            const IPAddress& objAddress = pTransport->GetIpAddress();
+            const IPAddress& objAddress = m_pTransport->GetIpAddress();
             AString strCallId = SipUtils::GenerateCallId(objAddress.ToString());
-            SipHeaderBase* pstHeader = SipStack::DecodeHeader(ISipHeader::CALL_ID, strCallId);
+            SipHeaderBase* pSipHdr = SipStack::DecodeHeader(ISipHeader::CALL_ID, strCallId);
 
-            if (pstHeader == IMS_NULL)
-                return IMS_FALSE;
-
-            if (!SipStack::SetHeader(pstHeader, pstMessage))
+            if (pSipHdr == IMS_NULL)
             {
-                SipStack::FreeHeaderEx(pstHeader);
                 return IMS_FALSE;
             }
 
-            SipStack::FreeHeaderEx(pstHeader);
+            if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
+            {
+                SipStack::FreeHeaderEx(pSipHdr);
+                return IMS_FALSE;
+            }
+
+            SipStack::FreeHeaderEx(pSipHdr);
 
             // HEADER_REQ_SESSION-ID
             if (SipFeatures::IsHeaderSessionIdRequired(GetSlotId()))
@@ -1645,13 +1484,13 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN CONST SipMethod& 
                 if (strSessionId.GetLength() > 0)
                 {
                     const AString SESSION_ID(SipHeaderName::SESSION_ID);
-                    SipHeaderBase* pstSessionId =
+                    SipHeaderBase* pSessionId =
                             SipStack::DecodeHeader(ISipHeader::UNKNOWN, SESSION_ID, strSessionId);
 
-                    if (pstSessionId != IMS_NULL)
+                    if (pSessionId != IMS_NULL)
                     {
-                        (void)SipStack::SetUnknownHeader(pstSessionId, SESSION_ID, pstMessage);
-                        SipStack::FreeHeaderEx(pstSessionId);
+                        (void)SipStack::SetUnknownHeader(pSessionId, SESSION_ID, m_pSipMsg);
+                        SipStack::FreeHeaderEx(pSessionId);
                     }
                 }
             }
@@ -1660,143 +1499,131 @@ IMS_BOOL SipClientTransactionState::SetDialogRelatedHeaders(IN CONST SipMethod& 
         // Set From-Tag
         if (!objMethod.Equals(SipMethod::CANCEL) && !objMethod.Equals(SipMethod::ACK))
         {
-            SipHeaderBase* pstHeader = SipStack::GetHeader(pstMessage, ISipHeader::FROM);
+            SipHeaderBase* pSipHdr = SipStack::GetHeader(m_pSipMsg, ISipHeader::FROM);
 
-            if (!SipStack::HasParameter(pstHeader, Sip::STR_TAG))
+            if (!SipStack::HasParameter(pSipHdr, Sip::STR_TAG))
             {
                 AString strTagVal = SipUtils::GenerateTag(
                         SipConfigProxy::GetTagPrefix(GetSlotId(), GetSipProfile()));
 
-                if (!SipStack::SetParameter(pstHeader, Sip::STR_TAG, strTagVal))
+                if (!SipStack::SetParameter(pSipHdr, Sip::STR_TAG, strTagVal))
                 {
-                    SipStack::FreeHeaderEx(pstHeader);
+                    SipStack::FreeHeaderEx(pSipHdr);
                     return IMS_FALSE;
                 }
             }
 
-            SipStack::FreeHeaderEx(pstHeader);
+            SipStack::FreeHeaderEx(pSipHdr);
         }
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipClientTransactionState::SetMandatoryHeaders(IN CONST SipMethod& objMethod)
+IMS_BOOL SipClientTransactionState::SetMandatoryHeaders(IN const SipMethod& objMethod)
 {
-    SipHeaderBase* pstHeader;
-
-    //---------------------------------------------------------------------------------------------
-
     if (objMethod.Equals(SipMethod::INVITE) || objMethod.Equals(SipMethod::ACK))
-        nClass = CLASS_INVITE;
+    {
+        m_nClass = CLASS_INVITE;
+    }
     else if (objMethod.Equals(SipMethod::PRACK))
-        nClass = CLASS_OVERLAP;
+    {
+        m_nClass = CLASS_OVERLAP;
+    }
     else
-        nClass = CLASS_REGULAR;
+    {
+        m_nClass = CLASS_REGULAR;
+    }
 
     AString strHBody;
 
     // Sets CSeq header field
-    strHBody.SetNumber(nCSeqNumber);
+    strHBody.SetNumber(m_nCSeqNumber);
     strHBody.Append(TextParser::CHAR_SP);
     strHBody.Append(objMethod.ToString());
 
-    pstHeader = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
+    SipHeaderBase* pSipHdr = SipStack::DecodeHeader(ISipHeader::CSEQ, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstMessage))
+    if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     // Sets Max-Forwards header field
     strHBody.SetNumber(SipPrivate::MAX_HOP);
-    pstHeader = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
+    pSipHdr = SipStack::DecodeHeader(ISipHeader::MAX_FORWARDS, strHBody);
 
-    if (!SipStack::SetHeader(pstHeader, pstMessage))
+    if (!SipStack::SetHeader(pSipHdr, m_pSipMsg))
     {
-        SipStack::FreeHeaderEx(pstHeader);
+        SipStack::FreeHeaderEx(pSipHdr);
         return IMS_FALSE;
     }
 
-    SipStack::FreeHeaderEx(pstHeader);
+    SipStack::FreeHeaderEx(pSipHdr);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-void SipClientTransactionState::SetPANIHeader(
-        IN CONST SipMethod& objMethod, IN_OUT ::SipMessage*& pstMessage)
+void SipClientTransactionState::SetPaniHeader(
+        IN const SipMethod& objMethod, IN_OUT ::SipMessage*& pSipMsg)
 {
-    AString strPANI;
+    AString strPani;
 
     if (PAccessNetworkInfoHeader::FormHeaderForOperatorSpecific(
-                GetSlotId(), pTransport->GetIpAddress(), objMethod, GetSipProfile(), strPANI))
+                GetSlotId(), m_pTransport->GetIpAddress(), objMethod, GetSipProfile(), strPani))
     {
-        if (strPANI.GetLength() > 0)
+        if (strPani.GetLength() > 0)
         {
-            SipHeaderBase* pstHeader = SipStack::DecodeHeader(
-                    ISipHeader::P_ACCESS_NETWORK_INFO, AString::ConstNull(), strPANI);
+            SipHeaderBase* pSipHdr = SipStack::DecodeHeader(
+                    ISipHeader::P_ACCESS_NETWORK_INFO, AString::ConstNull(), strPani);
 
-            if (pstHeader != IMS_NULL)
+            if (pSipHdr != IMS_NULL)
             {
-                SipStack::SetHeader(pstHeader, pstMessage);
-                SipStack::FreeHeaderEx(pstHeader);
+                SipStack::SetHeader(pSipHdr, pSipMsg);
+                SipStack::FreeHeaderEx(pSipHdr);
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
-IMS_BOOL SipClientTransactionState::UpdateTxnDetails(IN CONST SipMethod& objMethod)
+IMS_BOOL SipClientTransactionState::UpdateTxnDetails(IN const SipMethod& objMethod)
 {
     // Update the transaction information for outgoing request
-    SipMessageInfo objMInfo(GetSlotId(), objMethod, pstMessage, SipMessageInfo::DIRECTION_OUTGOING);
+    SipMessageInfo objMsgInfo(
+            GetSlotId(), objMethod, m_pSipMsg, SipMessageInfo::DIRECTION_OUTGOING);
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogEx->GetState() == SipDState::STATE_INIT)
+    if (m_pDialogEx->GetState() == SipDState::STATE_INIT)
     {
-        if (!pDialogEx->GetDialogState()->InitDialogDetails(pstMessage))
+        if (!m_pDialogEx->GetDialogState()->InitDialogDetails(m_pSipMsg))
         {
             return IMS_FALSE;
         }
 
         // Update the sequence number in the CSeq header if changed.
-        IMS_UINT32 nSeqNum = SipStack::GetCSeqNumber(pstMessage);
+        IMS_UINT32 nSeqNum = SipStack::GetCSeqNumber(m_pSipMsg);
 
         if (nSeqNum != SipPrivate::INVALID_SEQ_NUM)
-            nCSeqNumber = nSeqNum;
+        {
+            m_nCSeqNumber = nSeqNum;
+        }
     }
 
     // If the request can create a dialog usage, then update the state if changed
     if (SipDialogBase::IsDialogCreatable(objMethod))
     {
-        SipDialogState* pDState = pDialogEx->GetDialogState();
-        SipDialogEx* pTmpDialogEx = pDState->GetDialogUsage(objMInfo);
+        SipDialogState* pDState = m_pDialogEx->GetDialogState();
+        SipDialogEx* pTmpDialogEx = pDState->GetDialogUsage(objMsgInfo);
 
         // Not present; So, use a new dialog
         if (pTmpDialogEx == IMS_NULL)
         {
-            pDialogEx->InitDialogWithDelay(objMInfo);
+            m_pDialogEx->InitDialogWithDelay(objMsgInfo);
         }
         // Use an existing dialog
         else
@@ -1804,18 +1631,18 @@ IMS_BOOL SipClientTransactionState::UpdateTxnDetails(IN CONST SipMethod& objMeth
             IMS_TRACE_D("_____ UPDATE DIALOG  (%s:%s) _____", objMethod.ToString().GetStr(),
                     SipDebug::GetCharA1(pDState->GetCallId().GetStr(), 8, '@'), 0);
 
-            pDialogEx = pTmpDialogEx;
+            m_pDialogEx = pTmpDialogEx;
         }
     }
 
     // Update the Contact information
-    pDialogEx->UpdateDialogDetails(objMInfo);
+    m_pDialogEx->UpdateDialogDetails(objMsgInfo);
 
     // Store the last request message
     if (!objMethod.Equals(SipMethod::ACK))
     {
-        SipStack::FreeMessage(pstLastMessage);
-        pstLastMessage = SipStack::CloneMessage(pstMessage);
+        SipStack::FreeMessage(m_pLastSipMsg);
+        m_pLastSipMsg = SipStack::CloneMessage(m_pSipMsg);
     }
 
     return IMS_TRUE;

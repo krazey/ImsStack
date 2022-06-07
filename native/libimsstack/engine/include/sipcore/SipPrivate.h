@@ -1,23 +1,30 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090904  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_PRIVATE_H_
+#define SIP_PRIVATE_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_PRIVATE_H_
-#define _SIP_PRIVATE_H_
+#include "ServiceTrace.h"
 
 #include "Sip.h"
-#include "ServiceTrace.h"
 
 class SipPrivate
 {
+public:
+    SipPrivate() = delete;
+
 public:
     static void Init();
     static void Init(IN IMS_SINT32 nSlotId, IN IMS_SINT32 nEncodingOptions);
@@ -50,33 +57,33 @@ private:
     static IMS_SINT32 GetEncodingOptions(IN IMS_SINT32 nSlotId);
 
 public:
-    // Result values for the received message handling
+    /// Result values for the received message handling
     enum
     {
-        // Message is valid
+        /// Message is valid
         MESSAGE_VALID = 0,
-        // Forked response message received
+        /// Forked response message received
         MESSAGE_VALID_FORKED,
-        // Invalid message received in the current state
+        /// Invalid message received in the current state
         MESSAGE_INVALID,
         MESSAGE_INVALID_400,
-        // Method not allowed
+        /// Method not allowed
         MESSAGE_INVALID_405,
-        // Invalid message received & needs to be sent 481 response
+        /// Invalid message received & needs to be sent 481 response
         MESSAGE_INVALID_481,
         MESSAGE_INVALID_500,
-        // Message received is to be discarded. Reasons include:
-        // - Lower CSeq request
-        // - Response received with topmost Via having a "sent-by" field
-        //  which is not same as local host & port
-        // - Local retransmission of the final response for a transaction that was completed.
-        //
+        /// Message received is to be discarded. Reasons include:
+        /// - Lower CSeq request
+        /// - Response received with topmost Via having a "sent-by" field
+        ///  which is not same as local host & port
+        /// - Local retransmission of the final response for a transaction that was completed.
+        ///
         MESSAGE_DISCARDED,
-        // API failed due to some error while processing
+        /// API failed due to some error while processing
         MESSAGE_FAILED
     };
 
-    // Common options
+    /// Common options
     enum
     {
         OPT_REORDERHOP = 0x010,
@@ -88,7 +95,7 @@ public:
         OPT_PERMSGRETRANSCOUNT = 0x400
     };
 
-    // Encoding options
+    /// Encoding options
     enum
     {
         OPT_E_FULLFORM = 0x001,
@@ -97,7 +104,7 @@ public:
         OPT_E_SINGLE = 0x008,
     };
 
-    // Decoding options
+    /// Decoding options
     enum
     {
         OPT_D_BADMESSAGE = 0x01,
@@ -106,7 +113,7 @@ public:
         OPT_D_PARTIAL = 0x08
     };
 
-    // TODO:: configuration options (on the basis of transaction)
+    /// Configuration options (on the basis of transaction)
     enum
     {
         /*
@@ -140,11 +147,11 @@ public:
     static const IMS_UINT32 MAX_CSEQ_VALUE = 2147483647;
 
 private:
-    // Variable for global error code of J180
-    static IMS_SINT32* ERROR_CODE;  // 0 means there is no error
+    // Variable for global error code of sipcore
+    static IMS_SINT32* s_pnErrorCode;  // 0 means there is no error
 
     // SIP encoding options
-    static IMS_SINT32* ENCODING_OPTIONS;
+    static IMS_SINT32* s_pnEncodingOptions;
 };
 
-#endif  // _SIP_PRIVATE_H_
+#endif

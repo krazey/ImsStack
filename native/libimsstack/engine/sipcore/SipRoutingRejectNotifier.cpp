@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
-
 #include "ISipRoutingRejectListener.h"
 #include "SipRoutingRejectNotifier.h"
-
-PUBLIC
-SipRoutingRejectNotifier::SipRoutingRejectNotifier() {}
-
-PUBLIC VIRTUAL SipRoutingRejectNotifier::~SipRoutingRejectNotifier() {}
-
-PUBLIC
-IMS_BOOL SipRoutingRejectNotifier::IsNotificationRequired() const
-{
-    return !m_objListeners.IsEmpty();
-}
 
 PUBLIC
 void SipRoutingRejectNotifier::NotifyRequestReject(

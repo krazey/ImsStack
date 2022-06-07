@@ -1,74 +1,69 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "ServiceTrace.h"
-#include "SipPrivate.h"
-#include "ISipErrorListener.h"
+
 #include "ISipClientConnectionListener.h"
-#include "SipConnectionNotifierImpl.h"
-#include "SipDialogImpl.h"
+#include "ISipErrorListener.h"
 #include "SipClientConnection.h"
 #include "SipClientConnectionImpl.h"
+#include "SipConnectionNotifierImpl.h"
+#include "SipDialogImpl.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipClientConnectionImpl::SipClientConnectionImpl(IN SipClientConnection* pSCC_) :
-        piErrorListener(IMS_NULL),
-        piListener(IMS_NULL),
-        pDialogImpl(IMS_NULL),
-        pSCC(pSCC_)
+SipClientConnectionImpl::SipClientConnectionImpl(IN SipClientConnection* pScc) :
+        m_pScc(pScc),
+        m_pDialogImpl(IMS_NULL),
+        m_piErrorListener(IMS_NULL),
+        m_piListener(IMS_NULL)
 {
-    pSCC->SetErrorListener(this);
-    pSCC->SetListener(this);
+    m_pScc->SetErrorListener(this);
+    m_pScc->SetListener(this);
 }
 
 PUBLIC VIRTUAL SipClientConnectionImpl::~SipClientConnectionImpl()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogImpl != IMS_NULL)
+    if (m_pDialogImpl != IMS_NULL)
     {
-        pDialogImpl->Destroy();
+        m_pDialogImpl->Destroy();
     }
 
-    if (pSCC != IMS_NULL)
+    if (m_pScc != IMS_NULL)
     {
-        pSCC->SetErrorListener(IMS_NULL);
-        pSCC->SetListener(IMS_NULL);
-        pSCC->Close();
+        m_pScc->SetErrorListener(IMS_NULL);
+        m_pScc->SetListener(IMS_NULL);
+        m_pScc->Close();
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_RESULT SipClientConnectionImpl::InitDialogRequest()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCC == IMS_NULL)
+    if (m_pScc == IMS_NULL)
     {
         IMS_TRACE_E(0, "SCC is null", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (pDialogImpl == IMS_NULL)
+    if (m_pDialogImpl == IMS_NULL)
     {
-        SipDialog* pDialog = pSCC->GetDialog();
+        SipDialog* pDialog = m_pScc->GetDialog();
 
         if (pDialog == IMS_NULL)
         {
@@ -76,9 +71,9 @@ IMS_RESULT SipClientConnectionImpl::InitDialogRequest()
             return IMS_FAILURE;
         }
 
-        pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
+        m_pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
 
-        if (pDialogImpl == IMS_NULL)
+        if (m_pDialogImpl == IMS_NULL)
         {
             IMS_TRACE_E(0, "Creating SipDialogImpl failed", 0, 0, 0);
             return IMS_FAILURE;
@@ -88,153 +83,78 @@ IMS_RESULT SipClientConnectionImpl::InitDialogRequest()
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::Close()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pDialogImpl != IMS_NULL)
+    if (m_pDialogImpl != IMS_NULL)
     {
-        pDialogImpl->Destroy();
-        pDialogImpl = IMS_NULL;
+        m_pDialogImpl->Destroy();
+        m_pDialogImpl = IMS_NULL;
     }
 
-    pSCC->SetErrorListener(IMS_NULL);
-    pSCC->SetListener(IMS_NULL);
-    pSCC->Close();
-    pSCC = IMS_NULL;
+    m_pScc->SetErrorListener(IMS_NULL);
+    m_pScc->SetListener(IMS_NULL);
+    m_pScc->Close();
+    m_pScc = IMS_NULL;
 
     delete this;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::AddHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->AddHeader(strName, strValue);
+    return m_pScc->AddHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipDialog* SipClientConnectionImpl::GetDialog() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pDialogImpl;
+    return m_pDialogImpl;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL AString SipClientConnectionImpl::GetHeader(
-        IN CONST AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
+        IN const AString& strName, IN IMS_SINT32 nIndex /* = 0 */)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetHeader(strName, nIndex);
+    return m_pScc->GetHeader(strName, nIndex);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMSList<AString> SipClientConnectionImpl::GetHeaders(IN CONST AString& strName)
+PRIVATE VIRTUAL IMSList<AString> SipClientConnectionImpl::GetHeaders(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetHeaders(strName);
+    return m_pScc->GetHeaders(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const SipMethod& SipClientConnectionImpl::GetMethod() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetMethod();
+    return m_pScc->GetMethod();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const AString& SipClientConnectionImpl::GetReasonPhrase() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetReasonPhrase();
+    return m_pScc->GetReasonPhrase();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const AString& SipClientConnectionImpl::GetRequestUri() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetRequestUri();
+    return m_pScc->GetRequestUri();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipClientConnectionImpl::GetStatusCode() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetStatusCode();
+    return m_pScc->GetStatusCode();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::RemoveHeader(IN CONST AString& strName)
+PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::RemoveHeader(IN const AString& strName)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->RemoveHeader(strName);
+    return m_pScc->RemoveHeader(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Send()
 {
-    IMS_RESULT nResult = pSCC->Send();
+    IMS_RESULT nResult = m_pScc->Send();
 
     // in-dialog & dialogUsage used
     if (nResult == IMS_SUCCESS)
     {
-        SipDialog* pDialog = (pDialogImpl != IMS_NULL) ? pDialogImpl->GetDialog() : IMS_NULL;
-        SipDialog* pSccDialog = pSCC->GetDialog();
+        SipDialog* pDialog = (m_pDialogImpl != IMS_NULL) ? m_pDialogImpl->GetDialog() : IMS_NULL;
+        SipDialog* pSccDialog = m_pScc->GetDialog();
 
         if ((pSccDialog != IMS_NULL) && (pDialog != IMS_NULL) &&
                 (pDialog->GetState() == SipDialog::STATE_CONFIRMED))
@@ -251,188 +171,99 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Send()
     return nResult;
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipClientConnectionImpl::SetErrorListener(IN ISipErrorListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    piErrorListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetHeader(
-        IN CONST AString& strName, IN CONST AString& strValue)
+        IN const AString& strName, IN const AString& strValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetHeader(strName, strValue);
+    return m_pScc->SetHeader(strName, strValue);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const ByteArray& SipClientConnectionImpl::GetContent() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetContent();
+    return m_pScc->GetContent();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetContent(IN CONST ByteArray& objContent)
+PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetContent(IN const ByteArray& objContent)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetContent(objContent);
+    return m_pScc->SetContent(objContent);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_SINT32 SipClientConnectionImpl::GetHeaderCount(IN CONST AString& strName) const
+PRIVATE VIRTUAL IMS_SINT32 SipClientConnectionImpl::GetHeaderCount(IN const AString& strName) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetHeaderCount(strName);
+    return m_pScc->GetHeaderCount(strName);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipMessage* SipClientConnectionImpl::GetMessage() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetMessage();
+    return m_pScc->GetMessage();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipClientConnectionImpl::GetSlotId() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetSlotId();
+    return m_pScc->GetSlotId();
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::SetSipProfile(IN SipProfile* pProfile)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->SetSipProfile(pProfile);
+    m_pScc->SetSipProfile(pProfile);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransactionTimerValues(
-        IN CONST SipTimerValues& objTV)
+        IN const SipTimerValues& objTimerValues)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->SetTransactionTimerValues(objTV);
+    m_pScc->SetTransactionTimerValues(objTimerValues);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitAck()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->InitAck();
+    return m_pScc->InitAck();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipClientConnection* SipClientConnectionImpl::InitCancel()
 {
-    //---------------------------------------------------------------------------------------------
-
     // 3 To-Tag removal needs to be handled by the user because the re-INVITE may be cancelled
     // 3 Session implementation has the responsibility of the to-tag removal.
 
-    SipClientConnection* pCANCEL = pSCC->InitCancel();
+    SipClientConnection* pCancel = m_pScc->InitCancel();
 
-    if (pCANCEL == IMS_NULL)
+    if (pCancel == IMS_NULL)
     {
         return IMS_NULL;
     }
 
-    SipClientConnectionImpl* pCANCELImpl = new SipClientConnectionImpl(pCANCEL);
+    SipClientConnectionImpl* pCancelImpl = new SipClientConnectionImpl(pCancel);
 
-    if (pCANCELImpl == IMS_NULL)
+    if (pCancelImpl == IMS_NULL)
     {
         SipPrivate::SetLastError(SipError::CONNECTION_NOT_FOUND);
         return IMS_NULL;
     }
 
-    return pCANCELImpl;
+    return pCancelImpl;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
-        IN CONST AString& strMethod, IN ISipConnectionNotifier* piSCN)
+        IN const AString& strMethod, IN ISipConnectionNotifier* piScn)
 {
-    SipConnectionNotifierImpl* pSCNImpl = DYNAMIC_CAST(SipConnectionNotifierImpl*, piSCN);
-    SipConnectionNotifier* pSCN = IMS_NULL;
+    SipConnectionNotifierImpl* pScnImpl = DYNAMIC_CAST(SipConnectionNotifierImpl*, piScn);
+    SipConnectionNotifier* pScn = IMS_NULL;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCNImpl != IMS_NULL)
+    if (pScnImpl != IMS_NULL)
     {
-        pSCN = pSCNImpl->GetConnectionNotifier();
+        pScn = pScnImpl->GetConnectionNotifier();
     }
 
-    if (pSCC->InitRequest(strMethod, pSCN) != IMS_SUCCESS)
+    if (m_pScc->InitRequest(strMethod, pScn) != IMS_SUCCESS)
     {
         return IMS_FAILURE;
     }
 
-    SipDialog* pDialog = pSCC->GetDialog();
+    SipDialog* pDialog = m_pScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
-        pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
+        m_pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
 
-        if (pDialogImpl == IMS_NULL)
+        if (m_pDialogImpl == IMS_NULL)
         {
             IMS_TRACE_E(0, "Allocating DialogImpl failed", 0, 0, 0);
         }
@@ -441,276 +272,152 @@ PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitRequest(
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::Receive(IN IMS_SLONG /* nTimeout = 0 */)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->Receive();
+    return m_pScc->Receive();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetCredentials(
         IN IMSList<Credential>& objCredentials)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetCredentials(objCredentials);
+    return m_pScc->SetCredentials(objCredentials);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetCredentials(
-        IN CONST Credential& objCredential)
+        IN const Credential& objCredential)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetCredentials(objCredential);
+    return m_pScc->SetCredentials(objCredential);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipClientConnectionImpl::SetListener(
-        IN ISipClientConnectionListener* piListener)
+PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetRequestUri(IN const AString& strUri)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
+    return m_pScc->SetRequestUri(strUri);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetRequestUri(IN CONST AString& strURI)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetRequestUri(strURI);
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipGenericChallenge* SipClientConnectionImpl::GetAuthenticationChallenge(
         IN IMS_SINT32 nIndex /* = 0 */) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GetAuthenticationChallenge(nIndex);
+    return m_pScc->GetAuthenticationChallenge(nIndex);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipAckPackage* SipClientConnectionImpl::GrabAck()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->GrabAck();
+    return m_pScc->GrabAck();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::InitResubmissionRequest()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->InitResubmissionRequest();
+    return m_pScc->InitResubmissionRequest();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::RemoveAllChallenges()
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->RemoveAllChallenges();
+    m_pScc->RemoveAllChallenges();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::RemoveAllCredentials()
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->RemoveAllCredentials();
+    m_pScc->RemoveAllCredentials();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipClientConnectionImpl::SetAuthenticationChallenge(
         IN ISipGenericChallenge* piChallenge)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCC->SetAuthenticationChallenge(piChallenge);
+    return m_pScc->SetAuthenticationChallenge(piChallenge);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::SetExtensionTokenForViaBranch(
-        IN CONST AString& strToken)
+        IN const AString& strToken)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->SetExtensionTokenForViaBranch(strToken);
+    m_pScc->SetExtensionTokenForViaBranch(strToken);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::SetImplicitRouteHeader(
-        IN CONST AString& strRouteHeader)
+        IN const AString& strRouteHeader)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->SetImplicitRouteHeader(strRouteHeader);
+    m_pScc->SetImplicitRouteHeader(strRouteHeader);
 }
 
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
-*/
-PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN CONST IPAddress& objIPA,
-        IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC /* = 0xFFFF */,
-        IN IMS_SINT32 nTransportExt /* = 0 (ANY) */)
+PRIVATE VIRTUAL void SipClientConnectionImpl::SetTransportTuple(IN const IPAddress& objIp,
+        IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+        IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
+        IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCC->SetTransportTuple(objIPA, nPortS, nPortC, nPortFC, nTransportExt);
+    m_pScc->SetTransportTuple(objIp, nPortS, nPortC, nPortFc, nTransportExt);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::OnError_NotifyError(
-        IN SipConnection* pSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+        IN SipConnection* pSc, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCC != pSC)
+    if (m_pScc != pSc)
     {
         IMS_TRACE_E(0, "SCC MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piErrorListener == IMS_NULL)
+    if (m_piErrorListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    piErrorListener->Error_NotifyError(this, nCode, strMessage);
+    m_piErrorListener->Error_NotifyError(this, nCode, strMessage);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::OnClientConnection_NotifyResponse(
-        IN SipClientConnection* pSCC)
+        IN SipClientConnection* pScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSCC != pSCC)
+    if (m_pScc != pScc)
     {
         IMS_TRACE_E(0, "SCC MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    piListener->ClientConnection_NotifyResponse(this);
+    m_piListener->ClientConnection_NotifyResponse(this);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipClientConnectionImpl::OnClientConnection_NotifyForkedResponse(
-        IN SipClientConnection* pSCC, IN SipClientConnection* pForkedSCC)
+        IN SipClientConnection* pScc, IN SipClientConnection* pForkedScc)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSCC != pSCC)
+    if (m_pScc != pScc)
     {
         IMS_TRACE_E(0, "SCC MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
-        pForkedSCC->Close();
+        pForkedScc->Close();
 
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    SipClientConnectionImpl* pSCCImpl = new SipClientConnectionImpl(pForkedSCC);
+    SipClientConnectionImpl* pSccImpl = new SipClientConnectionImpl(pForkedScc);
 
-    if (pSCCImpl == IMS_NULL)
+    if (pSccImpl == IMS_NULL)
     {
-        pForkedSCC->Close();
+        pForkedScc->Close();
         return;
     }
 
-    SipDialog* pDialog = pForkedSCC->GetDialog();
+    SipDialog* pDialog = pForkedScc->GetDialog();
 
     if (pDialog != IMS_NULL)
     {
-        pSCCImpl->pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
+        pSccImpl->m_pDialogImpl = new SipDialogImpl(new SipDialog(*pDialog));
 
-        if (pSCCImpl->pDialogImpl == IMS_NULL)
+        if (pSccImpl->m_pDialogImpl == IMS_NULL)
         {
             IMS_TRACE_E(0, "Allocating DialogImpl failed", 0, 0, 0);
         }
     }
 
-    piListener->ClientConnection_NotifyResponse(this, pSCCImpl);
+    m_piListener->ClientConnection_NotifyResponse(this, pSccImpl);
 }

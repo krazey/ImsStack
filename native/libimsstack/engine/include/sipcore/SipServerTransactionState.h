@@ -1,58 +1,64 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_SERVER_TRANSACTION_STATE_H_
-#define _SIP_SERVER_TRANSACTION_STATE_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_SERVER_TRANSACTION_STATE_H_
+#define SIP_SERVER_TRANSACTION_STATE_H_
 
 #include "ITimer.h"
+
 #include "SipTransactionState.h"
 #include "SipTransportAddress.h"
 
 class SipServerTransactionState : public SipTransactionState, public ITimerListener
 {
 public:
-    SipServerTransactionState(IN IMS_SINT32 nSlotId, IN CONST SipTransportAddress& objNearEnd_,
-            IN CONST SipTransportAddress& objFarEnd_);
+    SipServerTransactionState(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd);
     virtual ~SipServerTransactionState();
 
-private:
-    SipServerTransactionState& operator=(IN CONST SipServerTransactionState& objRHS);
+    SipServerTransactionState& operator=(IN const SipServerTransactionState&) = delete;
 
 public:
-    virtual IMS_SINT32 CheckMessageValidity();
-    virtual IMS_BOOL FormMessage();
-    virtual IMS_BOOL Send(IN SipTimerValues* pTV = IMS_NULL);
-    virtual IMS_BOOL UpdateTransportDetails();
+    IMS_SINT32 CheckMessageValidity() override;
+    IMS_BOOL FormMessage() override;
+    IMS_BOOL Send(IN SipTimerValues* pTimerValues = IMS_NULL) override;
+    IMS_BOOL UpdateTransportDetails() override;
 
     IMS_BOOL InitResponse(IN IMS_SINT32 nStatusCode);
-    IMS_BOOL IsSameTransaction(IN CONST SipServerTransactionState* pSTState) const;
-    IMS_SINT32 MatchTransaction(IN ::SipMessage* pstMessage);
+    IMS_BOOL IsSameTransaction(IN const SipServerTransactionState* pStState) const;
+    IMS_SINT32 MatchTransaction(IN ::SipMessage* pSipMsg);
     void RejectRequest(
-            IN IMS_SINT32 nStatusCode, IN CONST AString& strReason = AString::ConstNull());
-    void SetDefaultContact(IN CONST AString& strContact);
+            IN IMS_SINT32 nStatusCode, IN const AString& strReason = AString::ConstNull());
+    inline void SetDefaultContact(IN const AString& strContact)
+    {
+        m_strDefaultContact = strContact;
+    }
     IMS_SINT32 HandleRequest(OUT RCPtr<SipDialogEx>& pOrigDialogEx);
 
 private:
     // ITimerListener interface
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    IMS_BOOL InitResponse(IN IMS_SINT32 nStatusCode, OUT ::SipMessage*& pstOutMessage);
+    IMS_BOOL InitResponse(IN IMS_SINT32 nStatusCode, OUT ::SipMessage*& pOutSipMsg);
     IMS_BOOL UpdateTxnDetails();
 
-    static IMS_BOOL Is100TryingResponseRequired(IN CONST SipMethod& objMethod);
-    static IMS_RESULT SendResponse100Trying(IN SipServerTransactionState* pSTState);
-    static void StartTimer100Trying(IN SipServerTransactionState* pSTState,
-            IN IMS_SINT32 nTimerInterval /* milli-seconds */);
-    static void StopTimer100Trying(IN SipServerTransactionState* pSTState);
+    static IMS_BOOL Is100TryingResponseRequired(IN const SipMethod& objMethod);
+    static IMS_RESULT SendResponse100Trying(IN SipServerTransactionState* pStState);
+    static void StartTimer100Trying(
+            IN SipServerTransactionState* pStState, IN IMS_SINT32 nTimerInterval /*milli-seconds*/);
+    static void StopTimer100Trying(IN SipServerTransactionState* pStState);
 
 private:
     enum
@@ -64,7 +70,7 @@ private:
         STATE_TERMINATED
     };
 
-    AString strDefaultContact;
+    AString m_strDefaultContact;
 
     // INVITE transaction
     //   The server transaction MUST generate a 100 (Trying) response unless it knows
@@ -72,7 +78,7 @@ private:
     //   it MAY generate a 100 (Tyring) response.
     // Non-INVITE transaction
     //   RFC 4320
-    ITimer* piTimer_100Trying;
+    ITimer* m_piTimer100Trying;
 };
 
-#endif  // _SIP_SERVER_TRANSACTION_STATE_H_
+#endif

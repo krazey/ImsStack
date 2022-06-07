@@ -1,25 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20100309  hwangoo.park@             Created
-    </table>
-
-    Description
-     This class defines an INVITE dialog usage.
-        - Created by:
-        1) Non-100 provisional responses to INVITE
-        2) 200 response to INVITE
-        - Destroyed by:
-        1) 200 responses to BYE
-        2) Certain failure responses to INVITE, UPDATE, PRACK, INFO or BYE
-        3) Anything that destroys a dialog and all its usages
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
+
 #include "SipDialogInviteUsage.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
@@ -66,32 +63,9 @@ SipDialogInviteUsage::STATE_TABLE[SipDState::STATE_MAX][SipDialogInviteUsage::TR
 };
 // clang-format on
 
-PUBLIC
-SipDialogInviteUsage::SipDialogInviteUsage(IN SipDialogBase* pDialog_) :
-        SipDialogUsage(SipDialogUsage::TYPE_INVITE, pDialog_)
+PUBLIC VIRTUAL IMS_BOOL SipDialogInviteUsage::CompareTo(IN const SipMessageInfo& objMsgInfo) const
 {
-}
-
-PUBLIC
-SipDialogInviteUsage::SipDialogInviteUsage(IN CONST SipDialogInviteUsage& objRHS) :
-        SipDialogUsage(objRHS)
-{
-}
-
-PUBLIC VIRTUAL SipDialogInviteUsage::~SipDialogInviteUsage() {}
-
-PUBLIC VIRTUAL SipDialogUsage* SipDialogInviteUsage::Clone() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return new SipDialogInviteUsage(*this);
-}
-
-PUBLIC VIRTUAL IMS_BOOL SipDialogInviteUsage::CompareTo(IN CONST SipMessageInfo& objMInfo) const
-{
-    const SipMethod& objMethod = objMInfo.GetMethod();
-
-    //---------------------------------------------------------------------------------------------
+    const SipMethod& objMethod = objMsgInfo.GetMethod();
 
     // CASE : subscribe usage & register usage
     if (objMethod.Equals(SipMethod::SUBSCRIBE) || objMethod.Equals(SipMethod::REFER) ||
@@ -103,49 +77,39 @@ PUBLIC VIRTUAL IMS_BOOL SipDialogInviteUsage::CompareTo(IN CONST SipMessageInfo&
     return IMS_TRUE;
 }
 
-PUBLIC VIRTUAL IMS_SINT32 SipDialogInviteUsage::UpdateUsageDetails(
-        IN CONST SipMessageInfo& objMInfo)
-{
-    //---------------------------------------------------------------------------------------------
-
-    // Update the shared dialog states
-    return SipDialogUsage::UpdateUsageDetails(objMInfo);
-}
-
 PUBLIC GLOBAL IMS_SINT32 SipDialogInviteUsage::GetNextState(
         IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((nTrigger < TRIGGER_INIT) || (nTrigger >= TRIGGER_MAX))
+    {
         return SipDState::STATE_MAX;
+    }
 
     return STATE_TABLE[nState][nTrigger];
 }
 
 PROTECTED VIRTUAL IMS_SINT32 SipDialogInviteUsage::GetActionNTrigger(
-        IN CONST SipMessageInfo& objMInfo, OUT IMS_SINT32& nTrigger)
+        IN const SipMessageInfo& objMsgInfo, OUT IMS_SINT32& nTrigger)
 {
-    ::SipMessage* pstMessage = objMInfo.GetMessage();
-
+    ::SipMessage* pSipMsg = objMsgInfo.GetMessage();
     IMS_SINT32 nAction = SipDState::ACTION_TRANSIT_STATE;
-
-    //---------------------------------------------------------------------------------------------
 
     nTrigger = TRIGGER_INIT;
 
-    if (SipStack::IsRequestMessage(pstMessage))
+    if (SipStack::IsRequestMessage(pSipMsg))
     {
-        if (objMInfo.GetMethod().Equals(SipMethod::BYE))
+        if (objMsgInfo.GetMethod().Equals(SipMethod::BYE))
+        {
             nTrigger = TRIGGER_BYE;
+        }
     }
     else
     {
-        const SipMethod& objMethod = objMInfo.GetMethod();
+        const SipMethod& objMethod = objMsgInfo.GetMethod();
 
-        nAction = GetActionForResponse(objMInfo);
+        nAction = GetActionForResponse(objMsgInfo);
 
-        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pstMessage);
+        IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
         if (SipStatusCode::IsProvisional(nStatusCode))
         {
@@ -193,22 +157,9 @@ PROTECTED VIRTUAL IMS_SINT32 SipDialogInviteUsage::GetActionNTrigger(
     return nAction;
 }
 
-PROTECTED VIRTUAL IMS_BOOL SipDialogInviteUsage::IsUsageTerminated(
-        IN IMS_SINT32 nState, IN IMS_SINT32 nTrigger) const
-{
-    //---------------------------------------------------------------------------------------------
-
-    if (GetNextState(nState, nTrigger) == SipDState::STATE_TERMINATED)
-        return IMS_TRUE;
-
-    return IMS_FALSE;
-}
-
 PROTECTED VIRTUAL const IMS_CHAR* SipDialogInviteUsage::TriggerToString(
         IN IMS_SINT32 nTrigger) const
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nTrigger)
     {
         case TRIGGER_1XX:

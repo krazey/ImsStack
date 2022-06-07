@@ -22,16 +22,9 @@
 namespace SipStack
 {
 
-/*
-
-Remarks
-
-*/
 GLOBAL IMS_BOOL DecodeHeaderComponent(
-        IN CONST SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders)
+        IN const SipAddrSpec* pAddrSpec, OUT IMSList<ISipHeader*>& objHeaders)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (pAddrSpec == IMS_NULL)
     {
         return IMS_FALSE;
@@ -98,17 +91,10 @@ GLOBAL IMS_BOOL DecodeHeaderComponent(
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 GLOBAL IMS_BOOL DecodeHeaderComponent(
-        IN CONST AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders)
+        IN const AString& strHeaders, OUT IMSList<ISipHeader*>& objHeaders)
 {
     IMSList<AString> objTokens = strHeaders.Split(TextParser::CHAR_AMPERSAND);
-
-    //---------------------------------------------------------------------------------------------
 
     if (objTokens.IsEmpty())
     {

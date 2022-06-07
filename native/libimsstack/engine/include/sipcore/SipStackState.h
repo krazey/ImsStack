@@ -1,41 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090302  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_STACK_STATE_H_
+#define SIP_STACK_STATE_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_STACK_STATE_H_
-#define _SIP_STACK_STATE_H_
-
-#include "IMSMap.h"
 #include "IMSList.h"
+#include "IMSMap.h"
 
 class IMutex;
 class SipProfile;
 class SipStackTransaction;
 class SipTransactionState;
 
-/*
-SIP stact state class
-
-Example
-
-See Also
-*/
 class SipStackState
 {
 private:
     SipStackState();
-    SipStackState(IN CONST SipStackState& objRHS);
 
 public:
     ~SipStackState();
+
+    SipStackState(IN const SipStackState&) = delete;
+    SipStackState& operator=(IN const SipStackState&) = delete;
 
 public:
     void CleanUp();
@@ -46,7 +44,7 @@ public:
             OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn);
     IMS_BOOL ReleaseTransaction(IN ::SipTxnKey* pKey, IN IMS_SINT32 nOption,
             OUT ::SipTxnKey*& pOutKey, OUT SipTxn*& pTxn);
-    void SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN CONST SipProfile* pSIPProfile);
+    void SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile);
 
     static SipStackState* GetInstance();
 
@@ -65,8 +63,8 @@ public:
     };
 
 private:
-    IMutex* piLock;
-    IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>> objTxnAggregate;
+    IMutex* m_piLock;
+    IMSMap<IMS_UINT32, IMSList<SipStackTransaction*>> m_objTxnAggregate;
 };
 
-#endif  // _SIP_STACK_STATE_H_
+#endif

@@ -1,50 +1,47 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#include "ServiceMemory.h"
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ByteArray.h"
+#include "ServiceMemory.h"
+
 #include "ISipDatagramSocketListener.h"
-#include "SipPrivate.h"
-#include "SipDebug.h"
-#include "SipRtConfigUtils.h"
-#include "SipMessageBuffer.h"
 #include "SipDatagramSocket.h"
+#include "SipDebug.h"
+#include "SipMessageBuffer.h"
+#include "SipPrivate.h"
+#include "SipRtConfigUtils.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipDatagramSocket::SipDatagramSocket(IN IMS_SINT32 nSlotId) :
         SipSocket(nSlotId),
-        piListener(IMS_NULL)
+        m_piListener(IMS_NULL)
 {
 }
 
 PUBLIC VIRTUAL SipDatagramSocket::~SipDatagramSocket()
 {
-    IMS_TRACE_D("DatagramSocket(D) :: (%s, %d)", SipDebug::GetIp(objSA.GetIpAddress()),
-            objSA.GetPort(), 0);
+    IMS_TRACE_D("DatagramSocket(D) :: (%s, %d)", SipDebug::GetIp(m_objSockAddr.GetIpAddress()),
+            m_objSockAddr.GetPort(), 0);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(IN CONST IPAddress& objIPA,
-        IN IMS_UINT32 nPort /* = 0 */, IN IMS_BOOL bSecure /* = IMS_FALSE */)
+PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(
+        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!SipSocket::Create(objIPA, nPort, bSecure))
+    if (!SipSocket::Create(objIp, nPort, bSecure))
     {
         return IMS_FALSE;
     }
@@ -54,19 +51,19 @@ PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(IN CONST IPAddress& objIPA,
         return IMS_FALSE;
     }
 
-    if (piSocket->Bind(objIPA, nPort) == ISocket::RESULT_ERROR)
+    if (m_piSocket->Bind(objIp, nPort) == ISocket::RESULT_ERROR)
     {
         return IMS_FALSE;
     }
 
-    objSA.SetPort(nPort);
-    objSA.SetIpAddress(objIPA);
+    m_objSockAddr.SetPort(nPort);
+    m_objSockAddr.SetIpAddress(objIp);
 
     SetState(STATE_CONNECTING);
 
     IMS_TRACE_I("DatagramSocket(C) ::(%s , %d)",
             SipRtConfigUtils::IsRoutingInfoHiddenInLog(GetSlotId()) ? "xxx"
-                                                                    : SipDebug::GetIp(objIPA),
+                                                                    : SipDebug::GetIp(objIp),
             nPort, 0);
 
     ApplyIpSec();
@@ -74,57 +71,29 @@ PUBLIC VIRTUAL IMS_BOOL SipDatagramSocket::Create(IN CONST IPAddress& objIPA,
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipDatagramSocket::Send(IN CONST IMS_BYTE* pBuffer,
-        IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort /* = 0 */,
-        IN CONST IPAddress& objIPA /* = IPAddress::NONE */)
+PUBLIC VIRTUAL IMS_SINT32 SipDatagramSocket::Send(IN const IMS_BYTE* pBuffer,
+        IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort /*= 0*/,
+        IN const IPAddress& objIp /*= IPAddress::NONE*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     if ((GetState() != STATE_CONNECTED) && (GetState() != STATE_CONNECTING))
     {
         return ISocket::RESULT_ERROR;
     }
 
-    return piSocket->SendTo(pBuffer, nBuffLen, objIPA, nPort);
+    return m_piSocket->SendTo(pBuffer, nBuffLen, objIp, nPort);
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipDatagramSocket::SetListener(IN ISipDatagramSocketListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnDataReceived(IN ISocket* piSocket)
 {
-    IMS_SINT32 nReadBytes;
-    IMS_UINT32 nPort = 0;
-    IPAddress objIPA;
-
     RCPtr<SipMessageBuffer> pMessageBuffer = SipMessageBuffer::GetInstance();
     IMS_BYTE* pRecvBuffer = pMessageBuffer->GetBuffer(GetSlotId());
 
-    //---------------------------------------------------------------------------------------------
-
     IMS_MEM_Memset(pRecvBuffer, 0x00, pMessageBuffer->GetLength());
 
-    nReadBytes = piSocket->ReceiveFrom(pRecvBuffer, pMessageBuffer->GetLength(), objIPA, nPort);
+    IMS_UINT32 nPort = 0;
+    IPAddress objIp;
+    IMS_SINT32 nReadBytes =
+            piSocket->ReceiveFrom(pRecvBuffer, pMessageBuffer->GetLength(), objIp, nPort);
 
     if (nReadBytes > 0)
     {
@@ -139,38 +108,23 @@ PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnDataReceived(IN ISocket* piSo
 
         ByteArray objRecvBuffer(pRecvBuffer, nReadBytes);
 
-        if (piListener != IMS_NULL)
+        if (m_piListener != IMS_NULL)
         {
-            piListener->DatagramSocket_DataReceived(this, objRecvBuffer, objIPA, nPort);
+            m_piListener->DatagramSocket_DataReceived(this, objRecvBuffer, objIp, nPort);
         }
     }
 
     SipSocket::Socket_OnDataReceived(piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnSendEnabled(IN ISocket* piSocket)
 {
-    //---------------------------------------------------------------------------------------------
-
     SetState(STATE_CONNECTED);
-
     SipSocket::Socket_OnSendEnabled(piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipDatagramSocket::Socket_OnClosed(
-        IN ISocket* piSocket, IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
+        IN ISocket* piSocket, IN IMS_SINT32 nReason /*= ISocket::CLOSE_REASON_UNKNOWN*/)
 {
-    //---------------------------------------------------------------------------------------------
-
     SipSocket::Socket_OnClosed(piSocket, nReason);
 }

@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ServiceMemory.h"
-
 #include "SipError.h"
 #include "SipPrivate.h"
 

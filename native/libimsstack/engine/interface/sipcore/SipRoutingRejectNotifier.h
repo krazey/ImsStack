@@ -26,8 +26,8 @@ class ISipServerConnection;
 class SipRoutingRejectNotifier : public ISipRoutingRejectNotifier
 {
 public:
-    SipRoutingRejectNotifier();
-    virtual ~SipRoutingRejectNotifier();
+    inline SipRoutingRejectNotifier() {}
+    inline virtual ~SipRoutingRejectNotifier() {}
 
     SipRoutingRejectNotifier(IN const SipRoutingRejectNotifier&) = delete;
     SipRoutingRejectNotifier& operator=(IN const SipRoutingRejectNotifier&) = delete;
@@ -38,7 +38,7 @@ public:
      *
      * @return IMS_TRUE if the notification is required, IMS_FALSE otherwise.
      */
-    IMS_BOOL IsNotificationRequired() const;
+    inline IMS_BOOL IsNotificationRequired() const { return !m_objListeners.IsEmpty(); }
 
     /**
      * Notifies the applications that the incoming SIP request will be rejected by the engine.

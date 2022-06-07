@@ -1,36 +1,40 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "StaticSip.h"
-#include "SipPrivate.h"
-#include "SipUtils.h"
-#include "SipDebug.h"
+
+#include "SipAckPackage.h"
+#include "SipClientConnectionImpl.h"
 #include "SipConfigProxy.h"
+#include "SipConnectionNotifierImpl.h"
+#include "SipDebug.h"
+#include "SipFactoryProxy.h"
+#include "SipManager.h"
+#include "SipMessageHandler.h"
+#include "SipPrivate.h"
 #include "SipStackHeaders.h"
 #include "SipStackState.h"
-#include "SipAckPackage.h"
-#include "SipFactoryProxy.h"
 #include "SipTransportHelper.h"
-#include "SipMessageHandler.h"
-#include "SipConnectionNotifierImpl.h"
-#include "SipClientConnectionImpl.h"
-#include "SipManager.h"
+#include "SipUtils.h"
+#include "StaticSip.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PRIVATE
 SipManager::SipManager() :
-        nState(STATE_INACTIVE)
+        m_nState(STATE_INACTIVE)
 {
     SipPrivate::Init();
 }
@@ -41,15 +45,10 @@ SipManager::~SipManager()
     CleanUp();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipManager::AttachDialogState(IN SipDialogState* pDState)
 {
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return IMS_FALSE;
@@ -63,65 +62,42 @@ IMS_BOOL SipManager::AttachDialogState(IN SipDialogState* pDState)
     IMS_TRACE_I("___ Attach::DialogState (%s)",
             SipDebug::GetCharA1(pDState->GetCallId().GetStr(), 8, '@'), 0, 0);
 
-    return objDialogStates.Append(pDState);
+    return m_objDialogStates.Append(pDState);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipManager::DetachDialogState(IN SipDialogState* pDState)
 {
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objDialogStates.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objDialogStates.GetSize(); ++i)
     {
-        SipDialogState* pTempDState = objDialogStates.GetAt(i);
+        SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
 
         if (pTempDState != IMS_NULL)
         {
-#if 1
             if (pTempDState == pDState)
             {
                 IMS_TRACE_I("___ Detach::DialogState (%s)",
                         SipDebug::GetCharA1(pDState->GetCallId().GetStr(), 8, '@'), 0, 0);
 
-                objDialogStates.RemoveAt(i);
+                m_objDialogStates.RemoveAt(i);
                 return;
             }
-#else
-            IMS_SINT32 nComparisonResult = pExistingDState->CompareTo(pDState, IMS_NULL, IMS_FALSE);
-
-            switch (nComparisonResult)
-            {
-                case SipDialogState::MATCHED:
-                    IMS_TRACE_I("___ Detach::DialogState (%s)",
-                            pExistingDState->GetCallId().GetStr(), 0, 0);
-                    objDialogStates.RemoveAt(n);
-                    return;
-            }
-#endif
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 RCPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
-        IN ::SipMessage* pstMessage, IN IMS_BOOL bCheckForked /* = IMS_FALSE */,
-        OUT IMS_BOOL* pbIsForked /* = IMS_NULL */)
+        IN ::SipMessage* pSipMsg, IN IMS_BOOL bCheckForked /*= IMS_FALSE*/,
+        OUT IMS_BOOL* pbIsForked /*= IMS_NULL*/)
 {
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return IMS_NULL;
@@ -132,14 +108,13 @@ RCPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
         (*pbIsForked) = IMS_FALSE;
     }
 
-    for (IMS_UINT32 i = 0; i < objDialogStates.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objDialogStates.GetSize(); ++i)
     {
-        SipDialogState* pTempDState = objDialogStates.GetAt(i);
+        SipDialogState* pTempDState = m_objDialogStates.GetAt(i);
 
         if (pTempDState != IMS_NULL)
         {
-            IMS_SINT32 nComparisonResult =
-                    pTempDState->CompareTo(pDState, pstMessage, bCheckForked);
+            IMS_SINT32 nComparisonResult = pTempDState->CompareTo(pDState, pSipMsg, bCheckForked);
 
             switch (nComparisonResult)
             {
@@ -177,78 +152,63 @@ RCPtr<SipDialogState> SipManager::LookupDialogState(IN SipDialogState* pDState,
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipManager::AttachConnectionNotifier(IN SipConnectionNotifier* pSCN)
+IMS_BOOL SipManager::AttachConnectionNotifier(IN SipConnectionNotifier* pScn)
 {
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    return objSCNs.Append(pSCN);
+    return m_objScns.Append(pScn);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipManager::DetachConnectionNotifier(IN SipConnectionNotifier* pSCN)
+void SipManager::DetachConnectionNotifier(IN SipConnectionNotifier* pScn)
 {
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objSCNs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objScns.GetSize(); ++i)
     {
-        SipConnectionNotifier* pTempSCN = objSCNs.GetAt(i);
+        SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
 
-        if (pTempSCN != IMS_NULL)
+        if (pTempScn != IMS_NULL)
         {
-            if (pTempSCN == pSCN)
+            if (pTempScn == pScn)
             {
-                objSCNs.RemoveAt(i);
+                m_objScns.RemoveAt(i);
                 return;
             }
         }
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-SipConnectionNotifier* SipManager::LookupConnectionNotifier(IN CONST SipTransportAddress& objTA,
-        IN CONST AString& strFilter /* = AString::ConstNull() */)
+SipConnectionNotifier* SipManager::LookupConnectionNotifier(IN const SipTransportAddress& objTAddr,
+        IN const AString& strFilter /*= AString::ConstNull()*/)
 {
     (void)strFilter;
 
-    if (nState != STATE_ACTIVE)
+    if (m_nState != STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return IMS_NULL;
     }
 
-    for (IMS_UINT32 i = 0; i < objSCNs.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objScns.GetSize(); ++i)
     {
-        SipConnectionNotifier* pTempSCN = objSCNs.GetAt(i);
+        SipConnectionNotifier* pTempScn = m_objScns.GetAt(i);
 
-        if (pTempSCN != IMS_NULL)
+        if (pTempScn != IMS_NULL)
         {
-            if (pTempSCN->IsSameConnectionNotifier(objTA))
+            if (pTempScn->IsSameConnectionNotifier(objTAddr))
             {
-                return pTempSCN;
+                return pTempScn;
             }
         }
     }
@@ -256,38 +216,28 @@ SipConnectionNotifier* SipManager::LookupConnectionNotifier(IN CONST SipTranspor
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL SipManager* SipManager::GetInstance()
 {
-    static SipManager* pSIPMngr = IMS_NULL;
+    static SipManager* s_pSipMngr = IMS_NULL;
 
-    if (pSIPMngr == IMS_NULL)
+    if (s_pSipMngr == IMS_NULL)
     {
-        pSIPMngr = new SipManager();
+        s_pSipMngr = new SipManager();
     }
 
-    return pSIPMngr;
+    return s_pSipMngr;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 IMS_BOOL SipManager::StartUp()
 {
-    if (nState == STATE_ACTIVE)
+    if (m_nState == STATE_ACTIVE)
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS ALREADY ACTIVE ...", 0, 0, 0);
         return IMS_TRUE;
     }
 
-    if (nState == STATE_PENDING)
+    if (m_nState == STATE_PENDING)
     {
         return IMS_FALSE;
     }
@@ -300,35 +250,30 @@ IMS_BOOL SipManager::StartUp()
 
     SipDebug::InitLogging();
 
-    nState = STATE_ACTIVE;
+    m_nState = STATE_ACTIVE;
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE
 void SipManager::CleanUp()
 {
-    if ((nState == STATE_INACTIVE) || (nState == STATE_PENDING))
+    if ((m_nState == STATE_INACTIVE) || (m_nState == STATE_PENDING))
     {
         IMS_TRACE_E(0, "... SIP MANAGER IS NOT ACTIVE ...", 0, 0, 0);
         return;
     }
 
-    nState = STATE_PENDING;
+    m_nState = STATE_PENDING;
 
     // Delete the dialog state info.
-    IMS_TRACE_D("___ Number of DialogState (%d)", objDialogStates.GetSize(), 0, 0);
+    IMS_TRACE_D("___ Number of DialogState (%d)", m_objDialogStates.GetSize(), 0, 0);
 
-    if (!objDialogStates.IsEmpty())
+    if (!m_objDialogStates.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objDialogStates.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objDialogStates.GetSize(); ++i)
         {
-            SipDialogState* pDState = objDialogStates.GetAt(i);
+            SipDialogState* pDState = m_objDialogStates.GetAt(i);
 
             if (pDState != IMS_NULL)
             {
@@ -336,36 +281,31 @@ void SipManager::CleanUp()
             }
         }
 
-        objDialogStates.Clear();
+        m_objDialogStates.Clear();
     }
 
-    IMS_TRACE_D("___ Number of ConnectionNotifier (%d)", objSCNs.GetSize(), 0, 0);
+    IMS_TRACE_D("___ Number of ConnectionNotifier (%d)", m_objScns.GetSize(), 0, 0);
 
-    if (!objSCNs.IsEmpty())
+    if (!m_objScns.IsEmpty())
     {
-        for (IMS_UINT32 i = 0; i < objSCNs.GetSize(); ++i)
+        for (IMS_UINT32 i = 0; i < m_objScns.GetSize(); ++i)
         {
-            SipConnectionNotifier* pSCN = objSCNs.GetAt(i);
+            SipConnectionNotifier* pScn = m_objScns.GetAt(i);
 
-            if (pSCN != IMS_NULL)
+            if (pScn != IMS_NULL)
             {
-                delete pSCN;
+                delete pScn;
             }
         }
 
-        objSCNs.Clear();
+        m_objScns.Clear();
     }
 
     SipStackState::GetInstance()->CleanUp();
 
-    nState = STATE_INACTIVE;
+    m_nState = STATE_INACTIVE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL IMS_BOOL StaticSip::Initialize()
 {
     if (!SipManager::GetInstance()->StartUp())
@@ -378,11 +318,6 @@ PUBLIC GLOBAL IMS_BOOL StaticSip::Initialize()
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void StaticSip::Uninitialize()
 {
     SipManager::GetInstance()->CleanUp();
@@ -390,11 +325,6 @@ PUBLIC GLOBAL void StaticSip::Uninitialize()
     IMS_TRACE_D(">>> SIP ENGINE IS SUCCESSFULLY UNLOADED <<<", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void StaticSip::InitializeForSlot(IN IMS_SINT32 nSlotId)
 {
     IMS_TRACE_D("InitializeForSlot :: slotId=%d", nSlotId, 0, 0);
@@ -421,11 +351,6 @@ PUBLIC GLOBAL void StaticSip::InitializeForSlot(IN IMS_SINT32 nSlotId)
     pTransportHelper->SetListener(SipMessageHandler::GetInstance());
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC GLOBAL void StaticSip::UninitializeForSlot(IN IMS_SINT32 nSlotId)
 {
     (void)nSlotId;

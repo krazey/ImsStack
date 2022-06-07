@@ -1,39 +1,44 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "CarrierConfig.h"
+#include "INetworkIpSec.h"
 #include "ServiceMemory.h"
 #include "ServiceNetwork.h"
 #include "ServiceUtil.h"
-#include "INetworkIpSec.h"
-#include "SipPrivate.h"
-#include "SipFeatures.h"
-#include "SipDebug.h"
-#include "SipRtConfigUtils.h"
+
 #include "ISipKeepAliveListener.h"
 #include "ISipSocketListener.h"
+#include "SipDebug.h"
+#include "SipFeatures.h"
+#include "SipPrivate.h"
+#include "SipRtConfigUtils.h"
 #include "SipSocket.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipSocket::SipSocket(
-        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType_ /* = SipSocketAddress::SOCKET_UDP */) :
+        IN IMS_SINT32 nSlotId, IN IMS_SINT32 nType /*= SipSocketAddress::SOCKET_UDP*/) :
         ImsSlot(nSlotId),
-        piSocket(IMS_NULL),
-        piKeepAliveListener(IMS_NULL),
-        nState(STATE_CREATED),
-        bForcinglyClosed(IMS_FALSE)
+        m_piSocket(IMS_NULL),
+        m_piKeepAliveListener(IMS_NULL),
+        m_nState(STATE_CREATED),
+        m_bForcinglyClosed(IMS_FALSE)
 {
-    objSA.SetType(nType_);
+    m_objSockAddr.SetType(nType);
 }
 
 PUBLIC VIRTUAL SipSocket::~SipSocket()
@@ -44,51 +49,15 @@ PUBLIC VIRTUAL SipSocket::~SipSocket()
 #endif
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL SipSocket* SipSocket::Accept()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_NULL;
-}
-
-PUBLIC VIRTUAL void SipSocket::ApplyIpSec(IN ISocket* piAcceptedSocket /*= IMS_NULL*/)
-{
-    ApplyIpSecInternal(objSA.GetSocketAddress(), IMS_NULL, piAcceptedSocket);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipSocket::Connect()
-{
-    //---------------------------------------------------------------------------------------------
-
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(IN CONST IPAddress& objIPA, IN IMS_UINT32 nPort /* = 0 */,
-        IN IMS_BOOL bSecure /* = IMS_FALSE */)
+PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(
+        IN const IPAddress& objIp, IN IMS_UINT32 nPort /*= 0*/, IN IMS_BOOL bSecure /*= IMS_FALSE*/)
 {
     INetworkConnection* piNetConnection =
-            NetworkService::GetNetworkService()->FindConnection(objIPA);
-
-    //---------------------------------------------------------------------------------------------
+            NetworkService::GetNetworkService()->FindConnection(objIp);
 
     if (piNetConnection == IMS_NULL)
     {
-        IMS_TRACE_E(0, "No data connection (%s)", SipDebug::GetIp(objIPA), 0, 0);
+        IMS_TRACE_E(0, "No data connection (%s)", SipDebug::GetIp(objIp), 0, 0);
         return IMS_FALSE;
     }
 
@@ -99,51 +68,52 @@ PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(IN CONST IPAddress& objIPA, IN IMS_UIN
 
     if (bSecure)
     {
-        piSocket = NetworkService::GetNetworkService()->CreateSslSocket(piNetConnection, IMS_NULL);
+        m_piSocket =
+                NetworkService::GetNetworkService()->CreateSslSocket(piNetConnection, IMS_NULL);
     }
     else
     {
-        piSocket = NetworkService::GetNetworkService()->CreateSocket(piNetConnection);
+        m_piSocket = NetworkService::GetNetworkService()->CreateSocket(piNetConnection);
     }
 
-    if (piSocket == IMS_NULL)
+    if (m_piSocket == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    piSocket->SetListener(this);
+    m_piSocket->SetListener(this);
 
-    ISocket::SOCKET_RESULT enResult;
-    ISocket::ADDRESS_FAMILY_ENTYPE enAddressFamily = ISocket::ADDRESS_FAMILY_INET;
+    ISocket::SOCKET_RESULT eResult;
+    ISocket::ADDRESS_FAMILY_ENTYPE eAddressFamily = ISocket::ADDRESS_FAMILY_INET;
 
-    if (!objIPA.IsIPv4Address())
+    if (!objIp.IsIPv4Address())
     {
-        enAddressFamily = ISocket::ADDRESS_FAMILY_INET6;
+        eAddressFamily = ISocket::ADDRESS_FAMILY_INET6;
     }
 
-    if (objSA.GetType() == SipSocketAddress::SOCKET_UDP)
+    if (m_objSockAddr.GetType() == SipSocketAddress::SOCKET_UDP)
     {
-        enResult = piSocket->Open(ISocket::TYPE_DGRAM, enAddressFamily);
+        eResult = m_piSocket->Open(ISocket::TYPE_DGRAM, eAddressFamily);
     }
     else
     {
-        enResult = piSocket->Open(ISocket::TYPE_STREAM, enAddressFamily);
+        eResult = m_piSocket->Open(ISocket::TYPE_STREAM, eAddressFamily);
     }
 
-    if (enResult != ISocket::RESULT_SUCCESS)
+    if (eResult != ISocket::RESULT_SUCCESS)
     {
-        NetworkService::GetNetworkService()->DestroySocket(piSocket);
-        piSocket = IMS_NULL;
+        NetworkService::GetNetworkService()->DestroySocket(m_piSocket);
+        m_piSocket = IMS_NULL;
         return IMS_FALSE;
     }
 
     // Check the socket option and set it if it is present...
-    SetSocketOptions(objIPA, nPort);
+    SetSocketOptions(objIp, nPort);
 
-    if ((objSA.GetType() != SipSocketAddress::SOCKET_UDP) &&
+    if ((m_objSockAddr.GetType() != SipSocketAddress::SOCKET_UDP) &&
             SipFeatures::IsSocketOptionRequiredForTcpMaxSeg(GetSlotId()))
     {
-        SetSocketOptionForTcpMaxSeg(piNetConnection, objIPA);
+        SetSocketOptionForTcpMaxSeg(piNetConnection, objIp);
     }
 
     SetState(STATE_INITIALIZED);
@@ -151,165 +121,72 @@ PUBLIC VIRTUAL IMS_BOOL SipSocket::Create(IN CONST IPAddress& objIPA, IN IMS_UIN
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipSocket::Equals(IN CONST SipSocketAddress& objSA)
+PUBLIC VIRTUAL void SipSocket::GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return this->objSA.Equals(objSA);
+    nPort = m_objSockAddr.GetPort();
+    objIp = m_objSockAddr.GetIpAddress();
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipSocket::Equals(IN CONST SipSocket& objSocket)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return this->objSA.Equals(objSocket.objSA);
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void SipSocket::GetSockName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort)
-{
-    //---------------------------------------------------------------------------------------------
-
-    nPort = objSA.GetPort();
-    objIPA = objSA.GetIpAddress();
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_SINT32 SipSocket::Send(IN CONST IMS_BYTE* /* pBuffer */,
-        IN IMS_SINT32 /* nBuffLen */, IN IMS_UINT32 /* nPort = 0 */,
-        IN CONST IPAddress& /* objIPA = IPAddress::NONE */)
-{
-    //---------------------------------------------------------------------------------------------
-
-    return ISocket::RESULT_ERROR;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipSocket::NotifyForceClosed()
 {
-    //---------------------------------------------------------------------------------------------
-
     IMS_TRACE_D("Socket(%p) is forcingly closed", this, 0, 0);
 
     SetForcinglyClosed(IMS_TRUE);
-    Socket_OnClosed(piSocket);
+    Socket_OnClosed(m_piSocket);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipSocket::GetPeerName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort)
+void SipSocket::GetPeerName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSocket != IMS_NULL)
+    if (m_piSocket != IMS_NULL)
     {
-        piSocket->GetPeerName(objIPA, nPort);
+        m_piSocket->GetPeerName(objIp, nPort);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_SINT32 SipSocket::RemoveListener(IN ISipSocketListener* piListener_)
+IMS_SINT32 SipSocket::RemoveListener(IN ISipSocketListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piListener = objListeners.GetAt(i);
+        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
-        if (piListener != IMS_NULL)
+        if (piTmpListener != IMS_NULL)
         {
-            if (piListener == piListener_)
+            if (piTmpListener == piListener)
             {
-                objListeners.RemoveAt(i);
+                m_objListeners.RemoveAt(i);
                 break;
             }
         }
     }
 
-    return objListeners.GetSize();
+    return m_objListeners.GetSize();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipSocket::SetKeepAliveListener(IN ISipKeepAliveListener* piKeepAliveListener)
+void SipSocket::SetListener(IN ISipSocketListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
-    this->piKeepAliveListener = piKeepAliveListener;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipSocket::SetListener(IN ISipSocketListener* piListener_)
-{
-    //---------------------------------------------------------------------------------------------
-
-    for (IMS_UINT32 i = 0; i < objListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objListeners.GetSize(); ++i)
     {
-        ISipSocketListener* piListener = objListeners.GetAt(i);
+        ISipSocketListener* piTmpListener = m_objListeners.GetAt(i);
 
-        if (piListener != IMS_NULL)
+        if (piTmpListener != IMS_NULL)
         {
-            if (piListener == piListener_)
+            if (piTmpListener == piListener)
             {
                 return;
             }
         }
     }
 
-    objListeners.Append(piListener_);
+    m_objListeners.Append(piListener);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piSocket == IMS_NULL)
+    if (m_piSocket == IMS_NULL)
     {
         return;
     }
@@ -319,32 +196,15 @@ void SipSocket::SetOption(IN IMS_SINT32 nOption, IN IMS_SINT32 nOptionValue)
         return;
     }
 
-    if (!piSocket->SetOption(nOption, nOptionValue))
+    if (!m_piSocket->SetOption(nOption, nOptionValue))
     {
         IMS_TRACE_E(0, "Setting socket option(%d=%d) failed", nOption, nOptionValue, 0);
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void SipSocket::Socket_OnDataReceived(IN ISocket* /*piSocket*/)
-{
-    //---------------------------------------------------------------------------------------------
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipSocket::Socket_OnSendEnabled(IN ISocket* /*piSocket*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = objListeners;
-
-    //---------------------------------------------------------------------------------------------
+    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
     for (IMS_UINT32 i = 0; i < objTmpListeners.GetSize(); ++i)
     {
@@ -357,26 +217,9 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnSendEnabled(IN ISocket* /*piSocket*/)
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED VIRTUAL void SipSocket::Socket_OnConnectionReceived(IN ISocket* /*piSocket*/)
-{
-    //---------------------------------------------------------------------------------------------
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipSocket::Socket_OnConnected(IN ISocket* /*piSocket*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = objListeners;
-
-    //---------------------------------------------------------------------------------------------
+    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
 
     for (IMS_UINT32 i = 0; i < objTmpListeners.GetSize(); ++i)
     {
@@ -389,19 +232,12 @@ PROTECTED VIRTUAL void SipSocket::Socket_OnConnected(IN ISocket* /*piSocket*/)
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL void SipSocket::Socket_OnClosed(
-        IN ISocket* /*piSocket*/, IN IMS_SINT32 nReason /* = ISocket::CLOSE_REASON_UNKNOWN */)
+        IN ISocket* /*piSocket*/, IN IMS_SINT32 nReason /*= ISocket::CLOSE_REASON_UNKNOWN*/)
 {
-    IMSList<ISipSocketListener*> objTmpListeners = objListeners;
+    IMSList<ISipSocketListener*> objTmpListeners = m_objListeners;
     IMS_SINT32 nErrorCode = ERROR_CLOSED;
     IMS_SINT32 nPrevState = GetState();
-
-    //---------------------------------------------------------------------------------------------
 
     SetState(STATE_TERMINATED);
 
@@ -441,17 +277,17 @@ void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
         if (piAcceptedSocket == IMS_NULL)
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, local-addr=(%s), remote-addr=(%s)",
-                    piSocket->GetSocketId(), objLocal.ToString().GetStr(),
+                    m_piSocket->GetSocketId(), objLocal.ToString().GetStr(),
                     (pRemote == IMS_NULL) ? "__NULL__" : pRemote->ToString().GetStr());
 
-            piIpSec->ApplyIpSecTransform(piSocket, objLocal, pRemote);
+            piIpSec->ApplyIpSecTransform(m_piSocket, objLocal, pRemote);
         }
         else
         {
             IMS_TRACE_D("ApplyIpSecInternal: socket=%d, serverSocket=%d",
-                    piAcceptedSocket->GetSocketId(), piSocket->GetSocketId(), 0);
+                    piAcceptedSocket->GetSocketId(), m_piSocket->GetSocketId(), 0);
 
-            piIpSec->ApplyIpSecTransform(piAcceptedSocket, piSocket);
+            piIpSec->ApplyIpSecTransform(piAcceptedSocket, m_piSocket);
         }
     }
 }
@@ -459,66 +295,39 @@ void SipSocket::ApplyIpSecInternal(IN const SocketAddress& objLocal,
 PROTECTED
 void SipSocket::CloseSocket()
 {
-    if (piSocket != IMS_NULL)
+    if (m_piSocket != IMS_NULL)
     {
-        piSocket->SetListener(IMS_NULL);
-        piSocket->Close();
-        NetworkService::GetNetworkService()->DestroySocket(piSocket);
-        piSocket = IMS_NULL;
+        m_piSocket->SetListener(IMS_NULL);
+        m_piSocket->Close();
+        NetworkService::GetNetworkService()->DestroySocket(m_piSocket);
+        m_piSocket = IMS_NULL;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipSocket::NotifyPongReceived()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piKeepAliveListener != IMS_NULL)
+    if (m_piKeepAliveListener != IMS_NULL)
     {
-        piKeepAliveListener->KeepAlive_PongReceived();
+        m_piKeepAliveListener->KeepAlive_PongReceived();
     }
 }
 
-/*
-
-Remarks
-
-*/
-PROTECTED
-void SipSocket::SetForcinglyClosed(IN IMS_BOOL bClosed)
-{
-    //---------------------------------------------------------------------------------------------
-
-    bForcinglyClosed = bClosed;
-}
-
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipSocket::SetSocketOptionForTcpMaxSeg(
-        IN INetworkConnection* piConnection, IN CONST IPAddress& objLocalIP)
+        IN INetworkConnection* piConnection, IN const IPAddress& objLocalIp)
 {
     // MSS(Max Segment Size) for TCP
     IMS_SINT32 nMss = piConnection->GetMtu();
-    IMS_BOOL bIPV6 = !objLocalIP.IsIPv4Address();
+    IMS_BOOL bIpV6 = !objLocalIp.IsIPv4Address();
     IMS_BOOL bWfcSupported = CarrierConfig::IsWfcEnabled(GetSlotId());
     IMS_SINT32 nOverhead = Sip::PACKET_OVERHEAD_ESP + Sip::PACKET_OVERHEAD_TCP;
 
-    //---------------------------------------------------------------------------------------------
-
     // Total overhead : esp + tcp + ip + edpg
-    nOverhead += (bIPV6 ? Sip::PACKET_OVERHEAD_IPV6 : Sip::PACKET_OVERHEAD_IPV4);
+    nOverhead += (bIpV6 ? Sip::PACKET_OVERHEAD_IPV6 : Sip::PACKET_OVERHEAD_IPV4);
     nOverhead += (bWfcSupported ? Sip::PACKET_OVERHEAD_EPDG : 0);
 
-    if (bIPV6 && bWfcSupported && (nMss > Sip::MTU_IPV6))
+    if (bIpV6 && bWfcSupported && (nMss > Sip::MTU_IPV6))
     {
         IMS_TRACE_I("MTU (IPv6) :: %d >> %d", nMss, Sip::MTU_IPV6, 0);
 
@@ -527,7 +336,7 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
 
     if (nMss <= 0)
     {
-        nMss = bIPV6 ? Sip::MTU_IPV6 : Sip::MTU_IPV4;
+        nMss = bIpV6 ? Sip::MTU_IPV6 : Sip::MTU_IPV4;
     }
 
     // MSS will be set to (MTU - lower layer's overhead)
@@ -539,42 +348,35 @@ void SipSocket::SetSocketOptionForTcpMaxSeg(
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-void SipSocket::SetSocketOptions(IN CONST IPAddress& objLocalIP, IN IMS_UINT32 nLocalPort)
+void SipSocket::SetSocketOptions(IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort)
 {
-    IMS_SINT32 nSocketType = objSA.GetType();
-
-    //---------------------------------------------------------------------------------------------
+    IMS_SINT32 nSocketType = m_objSockAddr.GetType();
 
     // REUSEADDR / LINGER / SHUTDOWN option for StreamSocket
     if (nSocketType != SipSocketAddress::SOCKET_UDP)
     {
-        SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+        SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                 SipRtConfig::CONFIG_I_REUSEADDR, ISocket::OPT_REUSEADDR, "OPT_REUSEADDR");
-        SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort, SipRtConfig::CONFIG_I_LINGER,
-                ISocket::OPT_LINGER, "OPT_LINGER");
-        SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+        SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
+                SipRtConfig::CONFIG_I_LINGER, ISocket::OPT_LINGER, "OPT_LINGER");
+        SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                 SipRtConfig::CONFIG_I_SHUTDOWN, ISocket::OPT_SHUTDOWN, "OPT_SHUTDOWN");
 
         // TCP_KEEPCNT / TCP_KEEPIDLE / TCP_KEEPINTVL option for StreamSocket (client only)
         if ((nSocketType == SipSocketAddress::SOCKET_TCP_CLIENT) ||
                 (nSocketType == SipSocketAddress::SOCKET_TCP_CLIENT_BY_PEER))
         {
-            SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+            SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                     SipRtConfig::CONFIG_I_KEEPALIVE, ISocket::OPT_KEEPALIVE, "OPT_KEEPALIVE");
 
-            SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+            SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                     SipRtConfig::CONFIG_I_TCP_KEEP_COUNT, ISocket::OPT_TCP_KEEPCNT,
                     "OPT_TCP_KEEPCNT");
-            SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+            SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                     SipRtConfig::CONFIG_I_TCP_KEEP_IDLE, ISocket::OPT_TCP_KEEPIDLE,
                     "OPT_TCP_KEEPIDLE");
-            SetSocketOption(GetSlotId(), piSocket, objLocalIP, nLocalPort,
+            SetSocketOption(GetSlotId(), m_piSocket, objLocalIp, nLocalPort,
                     SipRtConfig::CONFIG_I_TCP_KEEP_INTERVAL, ISocket::OPT_TCP_KEEPINTVL,
                     "OPT_TCP_KEEPINTVL");
         }
@@ -585,18 +387,18 @@ void SipSocket::SetSocketOptions(IN CONST IPAddress& objLocalIP, IN IMS_UINT32 n
     // IP-level QoS option
     if (pConfigHelper->IsItemConfigured(SipRtConfig::CONFIG_I_IP_QOS))
     {
-        const SipRtConfig::IpQos* pIPQoS = pConfigHelper->GetIpQos(objLocalIP, nLocalPort);
+        const SipRtConfig::IpQos* pIpQos = pConfigHelper->GetIpQos(objLocalIp, nLocalPort);
 
-        if (pIPQoS != IMS_NULL)
+        if (pIpQos != IMS_NULL)
         {
-            if (!piSocket->SetOption(ISocket::OPT_IP_QOS, pIPQoS->nValue))
+            if (!m_piSocket->SetOption(ISocket::OPT_IP_QOS, pIpQos->nValue))
             {
                 IMS_TRACE_E(0, "Setting IP-level QoS failed", 0, 0, 0);
             }
 
             if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
             {
-                IMS_TRACE_D("SipSocket :: OPT_IP_QOS (option=0x%02X)", pIPQoS->nValue, 0, 0);
+                IMS_TRACE_D("SipSocket :: OPT_IP_QOS (option=0x%02X)", pIpQos->nValue, 0, 0);
             }
         }
     }
@@ -606,73 +408,48 @@ void SipSocket::SetSocketOptions(IN CONST IPAddress& objLocalIP, IN IMS_UINT32 n
     }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipSocket::SetState(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
+    IMS_TRACE_I("SipSocket :: %s to %s", StateToString(m_nState), StateToString(nState), 0);
 
-    IMS_TRACE_I("SipSocket :: %s to %s", StateToString(this->nState), StateToString(nState), 0);
-
-    this->nState = nState;
+    m_nState = nState;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL void SipSocket::SetSocketOption(IN IMS_SINT32 nSlotId, IN ISocket* piSocket,
-        IN CONST IPAddress& objLocalIP, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
-        IN IMS_SINT32 nSocketOption, IN CONST IMS_CHAR* pszOptionName)
+        IN const IPAddress& objLocalIp, IN IMS_UINT32 nLocalPort, IN IMS_SINT32 nConfigItem,
+        IN IMS_SINT32 nSocketOption, IN const IMS_CHAR* pszOptionName)
 {
     SipRtConfigHelper* pConfigHelper = SipRtConfigUtils::GetConfigHelper(nSlotId);
 
-    //---------------------------------------------------------------------------------------------
-
     if (pConfigHelper->IsItemConfigured(nConfigItem))
     {
-        const SipRtConfig::SocketOption* pSO = pConfigHelper->GetSocketOption(nConfigItem);
-        const SipRtConfig::SocketOption* pDedicatedSO =
-                pConfigHelper->GetSocketOption(nConfigItem, objLocalIP, nLocalPort);
+        const SipRtConfig::SocketOption* pSockOpt = pConfigHelper->GetSocketOption(nConfigItem);
+        const SipRtConfig::SocketOption* pDedicatedSockOpt =
+                pConfigHelper->GetSocketOption(nConfigItem, objLocalIp, nLocalPort);
 
-        if (pDedicatedSO != IMS_NULL)
+        if (pDedicatedSockOpt != IMS_NULL)
         {
-            pSO = pDedicatedSO;
+            pSockOpt = pDedicatedSockOpt;
         }
 
-        if (pSO != IMS_NULL)
+        if (pSockOpt != IMS_NULL)
         {
-            if (!piSocket->SetOption(nSocketOption, pSO->nValue))
+            if (!piSocket->SetOption(nSocketOption, pSockOpt->nValue))
             {
                 IMS_TRACE_E(0, "Setting %s failed", pszOptionName, 0, 0);
             }
 
             if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
             {
-                IMS_TRACE_D("SipSocket :: %s (option=%d)", pszOptionName, pSO->nValue, 0);
+                IMS_TRACE_D("SipSocket :: %s (option=%d)", pszOptionName, pSockOpt->nValue, 0);
             }
         }
     }
-    else if (IMS_UTIL_SYS_PROP_IS_DEBUG_MODE())
-    {
-        IMS_TRACE_D("SipSocket :: %s is not configured", pszOptionName, 0, 0);
-    }
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED GLOBAL const IMS_CHAR* SipSocket::StateToString(IN IMS_SINT32 nState)
 {
-    //---------------------------------------------------------------------------------------------
-
     switch (nState)
     {
         case STATE_CREATED:

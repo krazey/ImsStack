@@ -1,297 +1,149 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
-#include "SipConnectionNotifier.h"
-#include "ISipServerConnectionListener.h"
+
 #include "ISipConnectionNotifierErrorListener.h"
+#include "ISipServerConnectionListener.h"
+#include "SipConnectionNotifier.h"
 #include "SipConnectionNotifierImpl.h"
+#include "SipPrivate.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
-SipConnectionNotifierImpl::SipConnectionNotifierImpl(IN SipConnectionNotifier* pSCN_) :
-        piListener(IMS_NULL),
-        pSCN(pSCN_)
+SipConnectionNotifierImpl::SipConnectionNotifierImpl(IN SipConnectionNotifier* pScn) :
+        m_pScn(pScn),
+        m_piListener(IMS_NULL)
 {
-    pSCN->SetListener(this);
-    pSCN->SetErrorListener(this);
+    m_pScn->SetListener(this);
+    m_pScn->SetErrorListener(this);
 }
 
 PUBLIC VIRTUAL SipConnectionNotifierImpl::~SipConnectionNotifierImpl()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pSCN != IMS_NULL)
+    if (m_pScn != IMS_NULL)
     {
-        pSCN->SetListener(IMS_NULL);
-        pSCN->SetErrorListener(IMS_NULL);
-        pSCN->Close();
+        m_pScn->SetListener(IMS_NULL);
+        m_pScn->SetErrorListener(IMS_NULL);
+        m_pScn->Close();
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC
-SipConnectionNotifier* SipConnectionNotifierImpl::GetConnectionNotifier() const
-{
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::Close()
 {
-    //---------------------------------------------------------------------------------------------
+    m_objErrorListeners.Clear();
 
-    objErrorListeners.Clear();
-
-    if (pSCN != IMS_NULL)
+    if (m_pScn != IMS_NULL)
     {
-        pSCN->SetListener(IMS_NULL);
-        pSCN->SetErrorListener(IMS_NULL);
-        pSCN->Close();
-        pSCN = IMS_NULL;
+        m_pScn->SetListener(IMS_NULL);
+        m_pScn->SetErrorListener(IMS_NULL);
+        m_pScn->Close();
+        m_pScn = IMS_NULL;
     }
 
     delete this;
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipServerConnection* SipConnectionNotifierImpl::AcceptAndOpen()
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->AcceptAndOpen();
+    return m_pScn->AcceptAndOpen();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL const IPAddress& SipConnectionNotifierImpl::GetLocalAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->GetLocalAddress();
+    return m_pScn->GetLocalAddress();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipConnectionNotifierImpl::GetLocalPort() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->GetLocalPort();
+    return m_pScn->GetLocalPort();
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipConnectionNotifierImpl::SetListener(
-        IN ISipServerConnectionListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL ISipServerConnection* SipConnectionNotifierImpl::AcceptAndOpen(
         OUT ISipDialog*& piOrigDialog)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->AcceptAndOpen(piOrigDialog);
+    return m_pScn->AcceptAndOpen(piOrigDialog);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL AString SipConnectionNotifierImpl::GetContactAddress() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->GetContactAddress();
+    return m_pScn->GetContactAddress();
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PRIVATE VIRTUAL SipProfile* SipConnectionNotifierImpl::GetSipProfile() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->GetSipProfile();
+    return m_pScn->GetSipProfile();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_SINT32 SipConnectionNotifierImpl::GetSlotId() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->GetSlotId();
+    return m_pScn->GetSlotId();
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_BOOL SipConnectionNotifierImpl::IsTransportResourceReserved(
-        IN IMS_SINT32 nType /* = TRANSPORT_ALL*/) const
+        IN IMS_SINT32 nType /*= TRANSPORT_ALL*/) const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->IsTransportResourceReserved(nType);
+    return m_pScn->IsTransportResourceReserved(nType);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipConnectionNotifierImpl::ReserveTransportResource(
-        IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
+        IN const IPAddress& objIp, IN IMS_SINT32 nPortS, IN IMS_SINT32 nPortC,
         IN IMS_SINT32 nPortFlowControl)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->ReserveTransportResource(objIPA, nPortS, nPortC, nPortFlowControl);
+    return m_pScn->ReserveTransportResource(objIp, nPortS, nPortC, nPortFlowControl);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL IMS_RESULT SipConnectionNotifierImpl::RestoreTransportResource(
-        IN IMS_SINT32 nType, IN CONST IPAddress& objPeerIP, IN IMS_SINT32 nPeerPort)
+        IN IMS_SINT32 nType, IN const IPAddress& objPeerIp, IN IMS_SINT32 nPeerPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pSCN->RestoreTransportResource(nType, objPeerIP, nPeerPort);
+    return m_pScn->RestoreTransportResource(nType, objPeerIp, nPeerPort);
 }
 
-/*
-
-Remarks
-
-*/
-PRIVATE VIRTUAL void SipConnectionNotifierImpl::SetFilter(IN CONST AString& strFilter)
-{
-    //---------------------------------------------------------------------------------------------
-
-    pSCN->SetFilter(strFilter);
-}
-
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::SetFromAndContact(
-        IN CONST AString& strFrom, IN CONST AString& strDisplayName, IN CONST AString& strUserInfo)
+        IN const AString& strFrom, IN const AString& strDisplayName, IN const AString& strUserInfo)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCN->SetFromAndContact(strFrom, strDisplayName, strUserInfo);
+    m_pScn->SetFromAndContact(strFrom, strDisplayName, strUserInfo);
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::SetSipProfile(IN SipProfile* pProfile)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCN->SetSipProfile(pProfile);
+    m_pScn->SetSipProfile(pProfile);
 }
 
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::UpdatePortFlowControl(IN IMS_SINT32 nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCN->UpdatePortFlowControl(nPort);
+    m_pScn->UpdatePortFlowControl(nPort);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::UpdatePortUc(IN IMS_SINT32 nPort)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pSCN->UpdatePortUc(nPort);
+    m_pScn->UpdatePortUc(nPort);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::AddErrorListener(
         IN ISipConnectionNotifierErrorListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objErrorListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener* piErrorListener = objErrorListeners.GetAt(i);
+        ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {
@@ -300,114 +152,86 @@ PRIVATE VIRTUAL void SipConnectionNotifierImpl::AddErrorListener(
         }
     }
 
-    objErrorListeners.Append(piListener);
+    m_objErrorListeners.Append(piListener);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::RemoveErrorListener(
         IN ISipConnectionNotifierErrorListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
     if (piListener == IMS_NULL)
     {
         return;
     }
 
-    for (IMS_UINT32 i = 0; i < objErrorListeners.GetSize(); ++i)
+    for (IMS_UINT32 i = 0; i < m_objErrorListeners.GetSize(); ++i)
     {
-        ISipConnectionNotifierErrorListener* piErrorListener = objErrorListeners.GetAt(i);
+        ISipConnectionNotifierErrorListener* piErrorListener = m_objErrorListeners.GetAt(i);
 
         if (piErrorListener == piListener)
         {
-            objErrorListeners.RemoveAt(i);
+            m_objErrorListeners.RemoveAt(i);
             break;
         }
     }
 
-    if (objErrorListeners.IsEmpty())
+    if (m_objErrorListeners.IsEmpty())
     {
         IMS_TRACE_D("SCNImpl :: No error listeners", 0, 0, 0);
     }
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::OnServerConnection_NotifyRequest(
-        IN SipConnectionNotifier* pSCN)
+        IN SipConnectionNotifier* pScn)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSCN != pSCN)
+    if (m_pScn != pScn)
     {
         IMS_TRACE_E(0, "SCN MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    piListener->ServerConnection_NotifyRequest(this);
+    m_piListener->ServerConnection_NotifyRequest(this);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::OnServerConnection_NotifyForkedRequest(
-        IN SipConnectionNotifier* pSCN)
+        IN SipConnectionNotifier* pScn)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSCN != pSCN)
+    if (m_pScn != pScn)
     {
         IMS_TRACE_E(0, "SCN MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (piListener == IMS_NULL)
+    if (m_piListener == IMS_NULL)
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    piListener->ServerConnection_NotifyRequest(this, IMS_TRUE);
+    m_piListener->ServerConnection_NotifyRequest(this, IMS_TRUE);
 }
 
-/*
-
-Remarks
-
-*/
 PRIVATE VIRTUAL void SipConnectionNotifierImpl::OnConnectionNotifierError_NotifyError(
-        IN SipConnectionNotifier* pSCN, IN IMS_SINT32 nCode, IN CONST AString& strMessage)
+        IN SipConnectionNotifier* pScn, IN IMS_SINT32 nCode, IN const AString& strMessage)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (this->pSCN != pSCN)
+    if (m_pScn != pScn)
     {
         IMS_TRACE_E(0, "SCN MISMATCHED", 0, 0, 0);
         return;
     }
 
-    if (objErrorListeners.IsEmpty())
+    if (m_objErrorListeners.IsEmpty())
     {
         IMS_TRACE_E(0, "NO LISTENER", 0, 0, 0);
         return;
     }
 
-    IMSList<ISipConnectionNotifierErrorListener*> objTempListeners = objErrorListeners;
+    IMSList<ISipConnectionNotifierErrorListener*> objTempListeners = m_objErrorListeners;
 
     for (IMS_UINT32 i = 0; i < objTempListeners.GetSize(); ++i)
     {

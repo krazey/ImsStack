@@ -1,20 +1,23 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_SERVER_CONNECTION_IMPL_H_
+#define SIP_SERVER_CONNECTION_IMPL_H_
 
-    Description
-
-*/
-
-#ifndef _SIP_SERVER_CONNECTION_IMPL_H_
-#define _SIP_SERVER_CONNECTION_IMPL_H_
-
-#include "ISipServerConnection.h"
 #include "IOnSipErrorListener.h"
+#include "ISipServerConnection.h"
 
 class SipDialogImpl;
 class SipServerConnection;
@@ -22,54 +25,54 @@ class SipServerConnection;
 class SipServerConnectionImpl : public ISipServerConnection, public IOnSipErrorListener
 {
 public:
-    explicit SipServerConnectionImpl(IN SipServerConnection* pSSC_);
+    explicit SipServerConnectionImpl(IN SipServerConnection* pSsc);
     virtual ~SipServerConnectionImpl();
 
-private:
-    SipServerConnectionImpl();
-    SipServerConnectionImpl(IN CONST SipServerConnectionImpl& objRHS);
-    SipServerConnectionImpl& operator=(IN CONST SipServerConnectionImpl& objRHS);
+    SipServerConnectionImpl() = delete;
+    SipServerConnectionImpl(IN const SipServerConnectionImpl&) = delete;
+    SipServerConnectionImpl& operator=(IN const SipServerConnectionImpl&) = delete;
 
 private:
     // IConnection interface implementation
-    virtual void Close();
+    void Close() override;
 
     // ISipConnection interface implementation
-    virtual IMS_RESULT AddHeader(IN CONST AString& strName, IN CONST AString& strValue);
-    virtual ISipDialog* GetDialog() const;
-    virtual AString GetHeader(IN CONST AString& strName, IN IMS_SINT32 nIndex = 0);
-    virtual IMSList<AString> GetHeaders(IN CONST AString& strName);
-    virtual const SipMethod& GetMethod() const;
-    virtual const AString& GetReasonPhrase() const;
-    virtual const AString& GetRequestUri() const;
-    virtual IMS_SINT32 GetStatusCode() const;
-    virtual IMS_RESULT RemoveHeader(IN CONST AString& strName);
-    virtual IMS_RESULT Send();
-    virtual void SetErrorListener(IN ISipErrorListener* piListener);
-    virtual IMS_RESULT SetHeader(IN CONST AString& strName, IN CONST AString& strValue);
-    virtual const ByteArray& GetContent() const;
-    virtual IMS_RESULT SetContent(IN CONST ByteArray& objContent);
-    virtual IMS_SINT32 GetHeaderCount(IN CONST AString& strName) const;
-    virtual ISipMessage* GetMessage() const;
-    virtual IMS_SINT32 GetSlotId() const;
-    // MULTI_REG_SIP_PROFILE
-    virtual void SetSipProfile(IN SipProfile* pProfile);
-    virtual void SetTransactionTimerValues(IN CONST SipTimerValues& objTV);
+    IMS_RESULT AddHeader(IN const AString& strName, IN const AString& strValue) override;
+    ISipDialog* GetDialog() const override;
+    AString GetHeader(IN const AString& strName, IN IMS_SINT32 nIndex = 0) override;
+    IMSList<AString> GetHeaders(IN const AString& strName) override;
+    const SipMethod& GetMethod() const override;
+    const AString& GetReasonPhrase() const override;
+    const AString& GetRequestUri() const override;
+    IMS_SINT32 GetStatusCode() const override;
+    IMS_RESULT RemoveHeader(IN const AString& strName) override;
+    IMS_RESULT Send() override;
+    inline void SetErrorListener(IN ISipErrorListener* piListener) override
+    {
+        m_piErrorListener = piListener;
+    }
+    IMS_RESULT SetHeader(IN const AString& strName, IN const AString& strValue) override;
+    const ByteArray& GetContent() const override;
+    IMS_RESULT SetContent(IN const ByteArray& objContent) override;
+    IMS_SINT32 GetHeaderCount(IN const AString& strName) const override;
+    ISipMessage* GetMessage() const override;
+    IMS_SINT32 GetSlotId() const override;
+    void SetSipProfile(IN SipProfile* pProfile) override;
+    void SetTransactionTimerValues(IN const SipTimerValues& objTimerValues) override;
 
     // ISIPServerTransaction interface
-    virtual IMS_RESULT InitResponse(IN IMS_SINT32 nStatusCode);
-    virtual IMS_RESULT SetReasonPhrase(IN CONST AString& strReasonPhrase);
-    virtual IMS_BOOL IsSameTransaction(IN CONST ISipServerConnection* piOngoingSSC) const;
+    IMS_RESULT InitResponse(IN IMS_SINT32 nStatusCode) override;
+    IMS_RESULT SetReasonPhrase(IN const AString& strReasonPhrase) override;
+    IMS_BOOL IsSameTransaction(IN const ISipServerConnection* piOngoingSsc) const override;
 
     // IOnSipErrorListener interface
-    virtual void OnError_NotifyError(
-            IN SipConnection* pSC, IN IMS_SINT32 nCode, IN CONST AString& strMessage);
+    void OnError_NotifyError(
+            IN SipConnection* pSc, IN IMS_SINT32 nCode, IN const AString& strMessage) override;
 
 private:
-    ISipErrorListener* piErrorListener;
-
-    SipDialogImpl* pDialogImpl;
-    SipServerConnection* pSSC;
+    SipServerConnection* m_pSsc;
+    SipDialogImpl* m_pDialogImpl;
+    ISipErrorListener* m_piErrorListener;
 };
 
-#endif  // _SIP_SERVER_CONNECTION_IMPL_H_
+#endif

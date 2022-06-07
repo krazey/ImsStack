@@ -17,6 +17,7 @@
 
 #include "SipStatusCode.h"
 
+// clang-format off
 PRIVATE GLOBAL const SipStatusCode::CodeTable SipStatusCode::CODE_TABLE[] = {
         {SipStatusCode::SC_100, "Trying"                          },
         {SipStatusCode::SC_180, "Ringing"                         },
@@ -93,9 +94,10 @@ PRIVATE GLOBAL const SipStatusCode::CodeTable SipStatusCode::CODE_TABLE[] = {
 
         {SipStatusCode::SC_MAX, IMS_NULL                          }
 };
+// clang-format on
 
 PUBLIC
-SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode /* = SC_INVALID*/) :
+SipStatusCode::SipStatusCode(IN IMS_SINT32 nCode /*= SC_INVALID*/) :
         m_nCode(nCode),
         m_strReasonPhrase(AString::ConstNull())
 {

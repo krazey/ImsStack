@@ -1,250 +1,199 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
-#include "SipPrivate.h"
-#include "SipTxnContextData.h"
-#include "SipStackState.h"
-#include "SipFactoryProxy.h"
-// SIP_PACKET_TRACKER
-#include "SipMessage.h"
+
 #include "ISipTransactionStateListener.h"
-#include "SipRtConfigUtils.h"
-// SIP_MESSAGE_TRACKER
-#include "SipMessageTracker.h"
-// SIP_PACKET_TRACKER
-#include "SipPacketTracker.h"
-// SIP_IPSEC_STATE
+#include "SipFactoryProxy.h"
 #include "SipIpSecState.h"
-#include "SipTransport.h"
+#include "SipMessage.h"
+#include "SipMessageTracker.h"
+#include "SipPacketTracker.h"
+#include "SipPrivate.h"
+#include "SipRtConfigUtils.h"
+#include "SipStackState.h"
 #include "SipTransactionState.h"
+#include "SipTransport.h"
+#include "SipTxnContextData.h"
 
 __IMS_TRACE_TAG_SIP__;
 
 PUBLIC
 SipTransactionState::SipTransactionState() :
         RCObject(),
-        nType(0),
-        nClass(CLASS_NONE),
-        nCSeqNumber(1)
-        // MULTI_REG_SIP_PROFILE
-        ,
-        pSIPProfile(IMS_NULL),
-        piListener(IMS_NULL),
-        pDialogEx(IMS_NULL),
-        pTransport(IMS_NULL),
-        pstMessage(IMS_NULL),
-        pstLastMessage(IMS_NULL),
-        pstTxnKey(IMS_NULL),
-        pstRPRTxnKey(IMS_NULL)
+        m_nType(0),
+        m_nClass(CLASS_NONE),
+        m_nCSeqNumber(1),
+        m_pSipProfile(IMS_NULL),
+        m_piListener(IMS_NULL),
+        m_pDialogEx(IMS_NULL),
+        m_pTransport(IMS_NULL),
+        m_pSipMsg(IMS_NULL),
+        m_pLastSipMsg(IMS_NULL),
+        m_pTxnKey(IMS_NULL),
+        m_pRprTxnKey(IMS_NULL)
 {
 }
 
 PUBLIC
-SipTransactionState::SipTransactionState(IN SipDialogEx* pDialogEx_) :
+SipTransactionState::SipTransactionState(IN SipDialogEx* pDialogEx) :
         RCObject(),
-        nType(0),
-        nClass(CLASS_NONE),
-        nCSeqNumber(1)
-        // MULTI_REG_SIP_PROFILE
-        ,
-        pSIPProfile(IMS_NULL),
-        piListener(IMS_NULL),
-        pDialogEx(pDialogEx_),
-        pTransport(IMS_NULL),
-        pstMessage(IMS_NULL),
-        pstLastMessage(IMS_NULL),
-        pstTxnKey(IMS_NULL),
-        pstRPRTxnKey(IMS_NULL)
+        m_nType(0),
+        m_nClass(CLASS_NONE),
+        m_nCSeqNumber(1),
+        m_pSipProfile(IMS_NULL),
+        m_piListener(IMS_NULL),
+        m_pDialogEx(pDialogEx),
+        m_pTransport(IMS_NULL),
+        m_pSipMsg(IMS_NULL),
+        m_pLastSipMsg(IMS_NULL),
+        m_pTxnKey(IMS_NULL),
+        m_pRprTxnKey(IMS_NULL)
 {
 }
 
 PUBLIC
-SipTransactionState::SipTransactionState(IN const SipTransactionState& objRHS) :
-        RCObject(objRHS),
-        nType(objRHS.nType),
-        nClass(objRHS.nClass),
-        nCSeqNumber(objRHS.nCSeqNumber)
-        // MULTI_REG_SIP_PROFILE
-        ,
-        pSIPProfile(objRHS.pSIPProfile),
-        piListener(objRHS.piListener),
-        pDialogEx(objRHS.pDialogEx),
-        pTransport(IMS_NULL),
-        pstMessage(IMS_NULL),
-        pstLastMessage(IMS_NULL),
-        pstTxnKey(IMS_NULL),
-        pstRPRTxnKey(IMS_NULL)
+SipTransactionState::SipTransactionState(IN const SipTransactionState& other) :
+        RCObject(other),
+        m_nType(other.m_nType),
+        m_nClass(other.m_nClass),
+        m_nCSeqNumber(other.m_nCSeqNumber),
+        m_pSipProfile(other.m_pSipProfile),
+        m_piListener(other.m_piListener),
+        m_pDialogEx(other.m_pDialogEx),
+        m_pTransport(IMS_NULL),
+        m_pSipMsg(IMS_NULL),
+        m_pLastSipMsg(IMS_NULL),
+        m_pTxnKey(IMS_NULL),
+        m_pRprTxnKey(IMS_NULL)
 {
     // NOTE: If reference count is not used, you MUST implement this copy constructor
 }
 
 PUBLIC VIRTUAL SipTransactionState::~SipTransactionState()
 {
-    //---------------------------------------------------------------------------------------------
+    if (m_pTransport != IMS_NULL)
+    {
+        delete m_pTransport;
+    }
 
-    if (pTransport != IMS_NULL)
-        delete pTransport;
-
-    SipStack::FreeMessage(pstLastMessage);
-    SipStack::FreeMessage(pstMessage);
-    SipStack::FreeTxnKey(pstTxnKey);
-    SipStack::FreeTxnKey(pstRPRTxnKey);
+    SipStack::FreeMessage(m_pLastSipMsg);
+    SipStack::FreeMessage(m_pSipMsg);
+    SipStack::FreeTxnKey(m_pTxnKey);
+    SipStack::FreeTxnKey(m_pRprTxnKey);
 
     IMS_TRACE_D("Destructor :: SipTransactionState", 0, 0, 0);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipTransactionState::Abort()
 {
-    ::SipTxnKey* pstAbortTxnKey = pstTxnKey;
+    ::SipTxnKey* pAbortTxnKey = m_pTxnKey;
 
-    //---------------------------------------------------------------------------------------------
-
-    if ((pstAbortTxnKey == IMS_NULL) && (nType == TYPE_CLIENT) && (pstLastMessage != IMS_NULL))
+    if ((pAbortTxnKey == IMS_NULL) && (m_nType == TYPE_CLIENT) && (m_pLastSipMsg != IMS_NULL))
     {
-        pstAbortTxnKey = SipStack::CreateTxnKey(pstLastMessage, SipStack::SIP_TXN_MSG_SENT);
-        pstTxnKey = pstAbortTxnKey;
+        pAbortTxnKey = SipStack::CreateTxnKey(m_pLastSipMsg, SipStack::SIP_TXN_MSG_SENT);
+        m_pTxnKey = pAbortTxnKey;
     }
 
-    // SIP_IPSEC_STATE
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
     if (pFactoryProxy->IsIpSecStateEnabled(GetSlotId()))
     {
-        SipIpSecState* pIPSecState = pFactoryProxy->GetIpSecState(GetSlotId());
-        pIPSecState->NotifyTransactionAborted(pstTxnKey);
+        SipIpSecState* pIpSecState = pFactoryProxy->GetIpSecState(GetSlotId());
+        pIpSecState->NotifyTransactionAborted(m_pTxnKey);
     }
 
     // Invoke the stack API to abort the transaction.
-    (void)SipStackState::GetInstance()->AbortTransaction(pstAbortTxnKey, this);
+    (void)SipStackState::GetInstance()->AbortTransaction(pAbortTxnKey, this);
 
-    if (pstRPRTxnKey != IMS_NULL)
+    if (m_pRprTxnKey != IMS_NULL)
     {
-        (void)SipStackState::GetInstance()->AbortTransaction(pstRPRTxnKey, this);
-        SipStack::FreeTxnKey(pstRPRTxnKey);
+        (void)SipStackState::GetInstance()->AbortTransaction(m_pRprTxnKey, this);
+        SipStack::FreeTxnKey(m_pRprTxnKey);
     }
 
-    SipStack::FreeTxnKey(pstTxnKey);
+    SipStack::FreeTxnKey(m_pTxnKey);
 }
 
-/*
- Terminates SIP transaction if it's not available anymore.
-
-Remarks
-
-*/
+/**
+ * @brief Terminates SIP transaction if it's not available anymore.
+ */
 PUBLIC VIRTUAL void SipTransactionState::Terminate()
 {
     IMS_TRACE_D("STS::Terminate", 0, 0, 0);
 
     // If there is ongoing transaction, it will be terminated promptly.
-    (void)SipStackState::GetInstance()->AbortTransaction(pstTxnKey, this);
+    (void)SipStackState::GetInstance()->AbortTransaction(m_pTxnKey, this);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_SINT32 SipTransactionState::CheckMessageValidity()
 {
-    //---------------------------------------------------------------------------------------------
-
     return SipPrivate::MESSAGE_VALID;
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransactionState::FormMessage()
+PUBLIC VIRTUAL IMS_BOOL SipTransactionState::InitTxnDetails(IN const SipTransactionState* pTState)
 {
-    // no-op
-    return IMS_TRUE;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransactionState::InitTxnDetails(IN CONST SipTransactionState* pTState)
-{
-    //---------------------------------------------------------------------------------------------
-
     if (pTState == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    nClass = pTState->nClass;
-    nCSeqNumber = pTState->nCSeqNumber;
-    // MULTI_REG_SIP_PROFILE
-    pSIPProfile = pTState->pSIPProfile;
-    pDialogEx = pTState->pDialogEx;
+    m_nClass = pTState->m_nClass;
+    m_nCSeqNumber = pTState->m_nCSeqNumber;
+    m_pSipProfile = pTState->m_pSipProfile;
+    m_pDialogEx = pTState->m_pDialogEx;
 
-    if (!pTransport->InitTransportDetails(pTState->pTransport))
+    if (!m_pTransport->InitTransportDetails(pTState->m_pTransport))
     {
         IMS_TRACE_E(0, "Initializing SIP transport details failed", 0, 0, 0);
         return IMS_FALSE;
     }
 
-    SipStack::FreeMessage(pstLastMessage);
-    SipStack::FreeMessage(pstMessage);
-    SipStack::FreeTxnKey(pstTxnKey);
-    SipStack::FreeTxnKey(pstRPRTxnKey);
+    SipStack::FreeMessage(m_pLastSipMsg);
+    SipStack::FreeMessage(m_pSipMsg);
+    SipStack::FreeTxnKey(m_pTxnKey);
+    SipStack::FreeTxnKey(m_pRprTxnKey);
 
-    pstMessage = pTState->pstMessage;
-    SipStack::AddReference(pstMessage);
+    m_pSipMsg = pTState->m_pSipMsg;
+    SipStack::AddReference(m_pSipMsg);
 
-    pstLastMessage = pTState->pstLastMessage;
-    SipStack::AddReference(pstLastMessage);
+    m_pLastSipMsg = pTState->m_pLastSipMsg;
+    SipStack::AddReference(m_pLastSipMsg);
 
-    pstTxnKey = pTState->pstTxnKey;
-    SipStack::AddReference(pstTxnKey);
+    m_pTxnKey = pTState->m_pTxnKey;
+    SipStack::AddReference(m_pTxnKey);
 
-    pstRPRTxnKey = pTState->pstRPRTxnKey;
-    SipStack::AddReference(pstRPRTxnKey);
+    m_pRprTxnKey = pTState->m_pRprTxnKey;
+    SipStack::AddReference(m_pRprTxnKey);
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL void SipTransactionState::NotifyTimerExpired()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (piListener != IMS_NULL)
-        piListener->TransactionState_TimerExpired();
+    if (m_piListener != IMS_NULL)
+    {
+        m_piListener->TransactionState_TimerExpired();
+    }
 }
 
-/*
- It's invoked by SIP stack after sending SIP message successfully.
-
-Remarks
-
-*/
+/**
+ * @brief It's invoked by SIP stack after sending SIP message successfully.
+ */
 PUBLIC VIRTUAL void SipTransactionState::PostProcessMessageSentByStack(
-        IN ::SipMessage* pstSipMsg, IN const ByteArray& objBuffer)
+        IN ::SipMessage* pSipMsg, IN const ByteArray& objBuffer)
 {
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
@@ -252,286 +201,189 @@ PUBLIC VIRTUAL void SipTransactionState::PostProcessMessageSentByStack(
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
         SipPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
-        sipcore::SipMessage objSIPMsg(pstSipMsg);
+        sipcore::SipMessage objMessage(pSipMsg);
 
-        pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_FALSE);
+        pPacketTracker->NotifyMessageSent(&objMessage, objBuffer, IMS_FALSE);
     }
 
     // SIP_IPSEC_STATE
     if (pFactoryProxy->IsIpSecStateEnabled(GetSlotId()))
     {
-        SipIpSecState* pIPSecState = pFactoryProxy->GetIpSecState(GetSlotId());
-        const SipTransportAddress& objNearEnd = pTransport->GetAddress(SipTransport::TA_NEAR);
-        const SipTransportAddress& objFarEnd = pTransport->GetAddress(SipTransport::TA_FAR);
+        SipIpSecState* pIpSecState = pFactoryProxy->GetIpSecState(GetSlotId());
+        const SipTransportAddress& objNearEnd = m_pTransport->GetAddress(SipTransport::TA_NEAR);
+        const SipTransportAddress& objFarEnd = m_pTransport->GetAddress(SipTransport::TA_FAR);
 
-        pIPSecState->NotifyMessageSent(objNearEnd, objFarEnd, pstSipMsg);
+        pIpSecState->NotifyMessageSent(objNearEnd, objFarEnd, pSipMsg);
     }
 }
 
-/*
- It's invoked by SIP stack before sending SIP message.
-
-Remarks
-
-*/
-PUBLIC VIRTUAL void SipTransactionState::PreProcessMessageSentByStack(IN ::SipMessage* pstSipMsg)
+/**
+ * @brief It's invoked by SIP stack before sending SIP message.
+ */
+PUBLIC VIRTUAL void SipTransactionState::PreProcessMessageSentByStack(IN ::SipMessage* pSipMsg)
 {
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
-    // SIP_MESSAGE_TRACKER
     if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
     {
         SipMessageTracker* pMessageTracker = pFactoryProxy->GetMessageTracker(GetSlotId());
-        const SipMethod objMethod = SipStack::GetMethod(pstSipMsg);
+        const SipMethod objMethod = SipStack::GetMethod(pSipMsg);
 
-        if (SipStack::IsRequestMessage(pstSipMsg))
+        if (SipStack::IsRequestMessage(pSipMsg))
         {
             pMessageTracker->NotifyMessageSent(
-                    objMethod, 0, pDialogEx->GetDialogState()->GetCallId());
+                    objMethod, 0, m_pDialogEx->GetDialogState()->GetCallId());
         }
         else
         {
-            pMessageTracker->NotifyMessageSent(objMethod, SipStack::GetStatusCode(pstSipMsg),
-                    pDialogEx->GetDialogState()->GetCallId());
+            pMessageTracker->NotifyMessageSent(objMethod, SipStack::GetStatusCode(pSipMsg),
+                    m_pDialogEx->GetDialogState()->GetCallId());
         }
     }
 
     // LOG_EXCLUDING_SERVER_INFO
-    if (SipStack::IsRequestMessage(pstSipMsg) &&
-            SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()))
+    if (SipStack::IsRequestMessage(pSipMsg) && SipRtConfigUtils::IsMessageHiddenInLog(GetSlotId()))
     {
-        SipStack::DisplayUnknownHeaders(pstSipMsg);
+        SipStack::DisplayUnknownHeaders(pSipMsg);
     }
 
     // Reset the retransmission flag when sending INVITE response
-    if ((this->nType == TYPE_SERVER) && (this->nClass == CLASS_INVITE))
+    if ((m_nType == TYPE_SERVER) && (m_nClass == CLASS_INVITE))
     {
-        pTransport->InitRetransmissionFlag();
+        m_pTransport->InitRetransmissionFlag();
     }
 }
 
-/*
-
-Remarks
-
-*/
-PUBLIC VIRTUAL IMS_BOOL SipTransactionState::Send(IN SipTimerValues* pTV /* = IMS_NULL */)
+PUBLIC VIRTUAL IMS_BOOL SipTransactionState::Send(IN SipTimerValues* pTimerValues /*= IMS_NULL*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    return Send(pstMessage, pTV);
+    return Send(m_pSipMsg, pTimerValues);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_RESULT SipTransactionState::RetransmitMessage()
 {
     ByteArray objBuffer;
 
-    //---------------------------------------------------------------------------------------------
-
-    if (pTransport == IMS_NULL)
+    if (m_pTransport == IMS_NULL)
     {
         IMS_TRACE_E(0, "Transport is already destroyed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (!pTransport->EncodeMessage(pstMessage, objBuffer))
+    if (!m_pTransport->EncodeMessage(m_pSipMsg, objBuffer))
     {
         IMS_TRACE_E(0, "Encoding ACK or 2xx to INVITE request (Retransmission) failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    if (!pTransport->SendToNetwork(objBuffer.GetData(), objBuffer.GetLength(), IMS_FALSE))
+    if (!m_pTransport->SendToNetwork(objBuffer.GetData(), objBuffer.GetLength(), IMS_FALSE))
     {
         IMS_TRACE_E(0, "Retransmitting ACK or 2xx to INVITE request failed", 0, 0, 0);
         return IMS_FAILURE;
     }
 
-    // SIP_PACKET_TRACKER
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
         SipPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
-        sipcore::SipMessage objSIPMsg(pstMessage);
+        sipcore::SipMessage objMessage(m_pSipMsg);
 
-        pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_TRUE);
+        pPacketTracker->NotifyMessageSent(&objMessage, objBuffer, IMS_TRUE);
     }
 
     return IMS_SUCCESS;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC VIRTUAL IMS_BOOL SipTransactionState::UpdateTransportDetails()
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (!pTransport->UpdateDestinationInfo(pstMessage))
+    if (!m_pTransport->UpdateDestinationInfo(m_pSipMsg))
+    {
         return IMS_FALSE;
+    }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_SINT32 SipTransactionState::GetSlotId() const
 {
-    return pTransport->GetSlotId();
+    return m_pTransport->GetSlotId();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipTransactionState::IsIpSecRequired() const
 {
-    //---------------------------------------------------------------------------------------------
-
-    return pTransport->IsIpSecRequired();
+    return m_pTransport->IsIpSecRequired();
 }
 
-/*
-
-Remarks
- MULTI_REG_SIP_PROFILE
-*/
-PUBLIC
-void SipTransactionState::SetSipProfile(IN SipProfile* pProfile)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->pSIPProfile = pProfile;
-}
-
-/*
-
-Remarks
-
-*/
-PUBLIC
-void SipTransactionState::SetTransactionListener(IN ISipTransactionStateListener* piListener)
-{
-    //---------------------------------------------------------------------------------------------
-
-    this->piListener = piListener;
-}
-
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipTransactionState::SetTransportListener(IN ISipTransportErrorListener* piListener)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pTransport->SetListener(piListener);
+    m_pTransport->SetListener(piListener);
 }
 
-/*
-
-Remarks
- RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
-*/
+// RFC5626_FLOW_CONTROL, MULTI_REG_TRANSPORT
 PUBLIC
-void SipTransactionState::SetTransportTuple(IN CONST IPAddress& objIPA, IN IMS_SINT32 nPortS,
-        IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFC /* = 0xFFFF */,
-        IN IMS_SINT32 nTransportExt /* = 0 (ANY) */)
+void SipTransactionState::SetTransportTuple(IN const IPAddress& objIp, IN IMS_SINT32 nPortS,
+        IN IMS_SINT32 nPortC, IN IMS_SINT32 nPortFc /*= Sip::PORT_UNSPECIFIED*/,
+        IN IMS_SINT32 nTransportExt /*= Sip::TRANSPORT_EXT_ANY*/)
 {
-    //---------------------------------------------------------------------------------------------
-
-    pTransport->SetTransportTuple(objIPA, nPortS, nPortC, nPortFC, nTransportExt);
+    m_pTransport->SetTransportTuple(objIp, nPortS, nPortC, nPortFc, nTransportExt);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-IMS_BOOL SipTransactionState::SendToNetwork(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
+IMS_BOOL SipTransactionState::SendToNetwork(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen)
 {
-    //---------------------------------------------------------------------------------------------
-
-    if (pTransport == IMS_NULL)
+    if (m_pTransport == IMS_NULL)
+    {
         return IMS_FALSE;
+    }
 
-    return pTransport->SendToNetwork(pBuffer, nBuffLen);
+    return m_pTransport->SendToNetwork(pBuffer, nBuffLen);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
-void SipTransactionState::UpdateMessage(IN ::SipMessage* pstMessage)
+void SipTransactionState::UpdateMessage(IN ::SipMessage* pSipMsg)
 {
-    //---------------------------------------------------------------------------------------------
+    SipStack::FreeMessage(m_pSipMsg);
 
-    SipStack::FreeMessage(this->pstMessage);
-
-    this->pstMessage = pstMessage;
-    SipStack::AddReference(this->pstMessage);
+    m_pSipMsg = pSipMsg;
+    SipStack::AddReference(m_pSipMsg);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED VIRTUAL SipTransactionState* SipTransactionState::Clone()
 {
-    //---------------------------------------------------------------------------------------------
-
     // The subclass MUST implement this method to create a new SipTransactionState (client/server)
-
     return IMS_NULL;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTV)
+IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* pTimerValues)
 {
-    SipTransportParameter objTranspParam;
-
     IMS_TRACE_D("Send", 0, 0, 0);
 
-    /* Fill transport details */
-    IMS_SINT32 nType = pTransport->GetProtocol(SipTransport::TA_FAR);
+    IMS_SINT32 nType = m_pTransport->GetProtocol(SipTransport::TA_FAR);
+    SipTransportParameter objTranspParam;
 
     if (nType == SipTransportAddress::PROTOCOL_TCP)
+    {
         objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TCP);
+    }
     else if (nType == SipTransportAddress::PROTOCOL_TLS)
+    {
         objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_TLS);
+    }
     else
+    {
         objTranspParam.setTranspProtocol(SipTransportInfo::PROTOCOL_UDP);
+    }
 
-    SipTransportAddress objTA = pTransport->GetAddress(SipTransport::TA_FAR);
+    const SipTransportAddress& objTAddr = m_pTransport->GetAddress(SipTransport::TA_FAR);
 
-    objTranspParam.setHostAddress(objTA.GetIpAddress().ToString().GetStr());
-    objTranspParam.setPort((IMS_UINT16)objTA.GetPort());
+    objTranspParam.setHostAddress(objTAddr.GetIpAddress().ToString().GetStr());
+    objTranspParam.setPort((IMS_UINT16)objTAddr.GetPort());
 
-    if (objTA.GetIpAddress().IsIPv4Address() == IMS_TRUE)
+    if (objTAddr.GetIpAddress().IsIPv4Address() == IMS_TRUE)
     {
         objTranspParam.setTanspIpType(SipTransportInfo::NETWORK_IPV4);
     }
@@ -541,14 +393,14 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
     }
 
     // Prepare User Data
-    SipTxnContext* pstTxnContext = SipStack::CreateTxnContext();
+    SipTxnContext* pTxnContext = SipStack::CreateTxnContext();
 
-    if (pstTxnContext == IMS_NULL)
+    if (pTxnContext == IMS_NULL)
     {
         return IMS_FALSE;
     }
 
-    SetTimerValues(pTV, pstTxnContext);
+    SetTimerValues(pTimerValues, pTxnContext);
 
     SipTxnContextData* pTxnContextData = new SipTxnContextData();
 
@@ -557,7 +409,7 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         IMS_BOOL bIsTxnStateSet = IMS_FALSE;
 
         // FIX_TXN_HANDLING_ON_401_407_TO_INVITE
-        if ((this->nType == TYPE_CLIENT) && (this->nClass == CLASS_INVITE))
+        if ((m_nType == TYPE_CLIENT) && (m_nClass == CLASS_INVITE))
         {
             IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
@@ -583,30 +435,29 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         }
     }
 
-    pstTxnContext->pTxnContextData = (SIP_VOID*)pTxnContextData;
+    pTxnContext->pTxnContextData = (SIP_VOID*)pTxnContextData;
 
     ISipUserData objUserData;
-    objUserData.SetUserData((SIP_VOID*)pstTxnContext);
+    objUserData.SetUserData((SIP_VOID*)pTxnContext);
 
     ByteArray objBuffer;
 
     // Form a raw SIP message
-    if (!pTransport->EncodeMessage(pSipMsg, objBuffer))
+    if (!m_pTransport->EncodeMessage(pSipMsg, objBuffer))
     {
-        SipStack::DestroyTxnContext(pstTxnContext);
+        SipStack::DestroyTxnContext(pTxnContext);
         IMS_TRACE_E(0, "Encoding SIP message failed", 0, 0, 0);
         return IMS_FALSE;  // throw exception : syntax error
     }
 
-    /* Reserver transport resources */
-    if (!pTransport->ReserveResource(GetSipProfile()))
+    // Reserver transport resources
+    if (!m_pTransport->ReserveResource(GetSipProfile()))
     {
-        SipStack::DestroyTxnContext(pstTxnContext);
+        SipStack::DestroyTxnContext(pTxnContext);
         IMS_TRACE_E(0, "Reserving the transport resource failed", 0, 0, 0);
         return IMS_FALSE;  // throw exception : network not available
     }
 
-    // SIP_MESSAGE_TRACKER
     SipFactoryProxy* pFactoryProxy = SipFactoryProxy::GetInstance();
 
     if (pFactoryProxy->IsMessageTrackerEnabled(GetSlotId()))
@@ -617,12 +468,12 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         if (SipStack::IsRequestMessage(pSipMsg))
         {
             pMessageTracker->NotifyMessageSent(
-                    objMethod, 0, pDialogEx->GetDialogState()->GetCallId());
+                    objMethod, 0, m_pDialogEx->GetDialogState()->GetCallId());
         }
         else
         {
             pMessageTracker->NotifyMessageSent(objMethod, SipStack::GetStatusCode(pSipMsg),
-                    pDialogEx->GetDialogState()->GetCallId());
+                    m_pDialogEx->GetDialogState()->GetCallId());
         }
     }
 
@@ -633,9 +484,9 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
     }
 
     // Reset the retransmission flag when sending INVITE response
-    if ((this->nType == TYPE_SERVER) && (this->nClass == CLASS_INVITE))
+    if ((m_nType == TYPE_SERVER) && (m_nClass == CLASS_INVITE))
     {
-        pTransport->InitRetransmissionFlag();
+        m_pTransport->InitRetransmissionFlag();
     }
 
     ::SipTxnKey* pTxnKey = IMS_NULL;
@@ -651,13 +502,13 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
             SipTxnContext* pOldTxnContext =
                     reinterpret_cast<SipTxnContext*>(objUserData.GetUserData());
 
-            if (pOldTxnContext != pstTxnContext)
+            if (pOldTxnContext != pTxnContext)
             {
                 SipStack::DestroyTxnContext(pOldTxnContext);
             }
         }
 
-        SipStack::DestroyTxnContext(pstTxnContext);
+        SipStack::DestroyTxnContext(pTxnContext);
     }
 
     if (bStatus == SIP_FALSE)
@@ -666,23 +517,21 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
         return IMS_FALSE;
     }
 
-    // SIP_PACKET_TRACKER
     if (pFactoryProxy->IsPacketTrackerEnabled(GetSlotId()))
     {
         SipPacketTracker* pPacketTracker = pFactoryProxy->GetPacketTracker(GetSlotId());
-        sipcore::SipMessage objSIPMsg(pSipMsg);
+        sipcore::SipMessage objMessage(pSipMsg);
 
-        pPacketTracker->NotifyMessageSent(&objSIPMsg, objBuffer, IMS_FALSE);
+        pPacketTracker->NotifyMessageSent(&objMessage, objBuffer, IMS_FALSE);
     }
 
-    // SIP_IPSEC_STATE
     if (pFactoryProxy->IsIpSecStateEnabled(GetSlotId()))
     {
-        SipIpSecState* pIPSecState = pFactoryProxy->GetIpSecState(GetSlotId());
-        const SipTransportAddress& objNearEnd = pTransport->GetAddress(SipTransport::TA_NEAR);
-        const SipTransportAddress& objFarEnd = pTransport->GetAddress(SipTransport::TA_FAR);
+        SipIpSecState* pIpSecState = pFactoryProxy->GetIpSecState(GetSlotId());
+        const SipTransportAddress& objNearEnd = m_pTransport->GetAddress(SipTransport::TA_NEAR);
+        const SipTransportAddress& objFarEnd = m_pTransport->GetAddress(SipTransport::TA_FAR);
 
-        pIPSecState->NotifyMessageSent(objNearEnd, objFarEnd, pSipMsg);
+        pIpSecState->NotifyMessageSent(objNearEnd, objFarEnd, pSipMsg);
     }
 
     // Store the transaction key here.
@@ -690,57 +539,47 @@ IMS_BOOL SipTransactionState::Send(IN ::SipMessage* pSipMsg, IN SipTimerValues* 
     {
         if (SipStack::IsMessageRpr(pSipMsg))
         {
-            SipStack::FreeTxnKey(pstRPRTxnKey);
-            pstRPRTxnKey = pTxnKey;
+            SipStack::FreeTxnKey(m_pRprTxnKey);
+            m_pRprTxnKey = pTxnKey;
         }
         else
         {
-            SipStack::FreeTxnKey(pstTxnKey);
-            pstTxnKey = pTxnKey;
+            SipStack::FreeTxnKey(m_pTxnKey);
+            m_pTxnKey = pTxnKey;
         }
 
-        if (pstTxnKey->GetTxnType() == ETXN_INVSERTXN)
+        if (m_pTxnKey->GetTxnType() == ETXN_INVSERTXN)
         {
             // If the method is INVITE, then store the txn key in the InvTxnKey.
             // This will be used when the application calls AbortCall().
             IMS_SINT32 nStatusCode = SipStack::GetStatusCode(pSipMsg);
 
             if (nStatusCode != SipStatusCode::SC_INVALID)
-                pstTxnKey->SetRespCode(static_cast<SIP_UINT16>(nStatusCode));
+            {
+                m_pTxnKey->SetRespCode(static_cast<SIP_UINT16>(nStatusCode));
+            }
         }
     }
 
     return IMS_TRUE;
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
 void SipTransactionState::SetTimerValues(
-        IN SipTimerValues* pTV, IN_OUT SipTxnContext*& pstTxnContext)
+        IN SipTimerValues* pTimerValues, IN_OUT SipTxnContext*& pTxnContext)
 {
-    //---------------------------------------------------------------------------------------------
-
-    SipStack::SetTimerValues(pTV, pstTxnContext);
+    SipStack::SetTimerValues(pTimerValues, pTxnContext);
 }
 
-/*
-
-Remarks
-
-*/
 PROTECTED
-void SipTransactionState::SetFlowControlOption(IN CONST SipMethod& objMethod)
+void SipTransactionState::SetFlowControlOption(IN const SipMethod& objMethod)
 {
     if (objMethod.Equals(SipMethod::REGISTER))
     {
-        pTransport->SetTransactionFlowControlRequired(IMS_FALSE);
+        m_pTransport->SetTransactionFlowControlRequired(IMS_FALSE);
     }
     else
     {
-        pTransport->SetTransactionFlowControlRequired(IMS_TRUE);
+        m_pTransport->SetTransactionFlowControlRequired(IMS_TRUE);
     }
 }

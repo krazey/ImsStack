@@ -1,38 +1,39 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_SERVER_TRANSPORT_H_
-#define _SIP_SERVER_TRANSPORT_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_SERVER_TRANSPORT_H_
+#define SIP_SERVER_TRANSPORT_H_
 
 #include "SipTransport.h"
 
 class SipServerTransport : public SipTransport
 {
 public:
-    SipServerTransport(IN IMS_SINT32 nSlotId, IN CONST SipTransportAddress& objTA_NearEnd_,
-            IN CONST SipTransportAddress& objTA_FarEnd_);
+    SipServerTransport(IN IMS_SINT32 nSlotId, IN const SipTransportAddress& objNearEnd,
+            IN const SipTransportAddress& objFarEnd);
     virtual ~SipServerTransport();
 
-private:
-    SipServerTransport(IN CONST SipServerTransport& objRHS);
-    SipServerTransport& operator=(IN CONST SipServerTransport& objRHS);
+    SipServerTransport(IN const SipServerTransport&) = delete;
+    SipServerTransport& operator=(IN const SipServerTransport&) = delete;
 
 public:
-    // MULTI_REG_SIP_PROFILE
-    virtual IMS_BOOL FormViaHeader(
-            IN_OUT ::SipMessage*& pstMessage, IN CONST SipProfile* pSIPProfile = IMS_NULL);
-    virtual IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pstMessage,
-            IN IMS_BOOL bRoutingLR = IMS_TRUE, IN SipAddrSpec* pstImplicitRoute = IMS_NULL);
-    virtual IMS_SINT32 ValidateViaHeader(IN ::SipMessage* pstMessage);
+    IMS_BOOL FormViaHeader(
+            IN_OUT ::SipMessage*& pSipMsg, IN const SipProfile* pProfile = IMS_NULL) override;
+    IMS_BOOL UpdateDestinationInfo(IN ::SipMessage* pSipMsg, IN IMS_BOOL bRoutingLr = IMS_TRUE,
+            IN SipAddrSpec* pImplicitRoute = IMS_NULL) override;
+    IMS_SINT32 ValidateViaHeader(IN ::SipMessage* pSipMsg) override;
 };
 
-#endif  // _SIP_SERVER_TRANSPORT_H_
+#endif

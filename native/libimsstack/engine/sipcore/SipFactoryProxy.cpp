@@ -1,17 +1,22 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20170621  hwangoo.park@             Created
-    </table>
-
-    Description
-
-*/
-
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "ServiceMemory.h"
 #include "SystemConfig.h"
+
+#include "SipFactoryProxy.h"
 #include "SipIpSecState.h"
 #include "SipKeepAliveHelper.h"
 #include "SipMessageTracker.h"
@@ -19,406 +24,348 @@
 #include "SipRoutingRejectNotifier.h"
 #include "SipRtConfigHelper.h"
 #include "SipTransportHelper.h"
-#include "SipFactoryProxy.h"
 
-PRIVATE GLOBAL SipFactoryProxy* SipFactoryProxy::pFactoryProxy = IMS_NULL;
+PRIVATE GLOBAL SipFactoryProxy* SipFactoryProxy::s_pFactoryProxy = IMS_NULL;
 
-class SIPFactoryHolder
+class SipFactoryHolder
 {
 public:
-    SIPFactoryHolder();
-    ~SIPFactoryHolder();
+    SipFactoryHolder();
+    ~SipFactoryHolder();
 
-private:
-    SIPFactoryHolder(IN const SIPFactoryHolder& objRHS);
-    SIPFactoryHolder& operator=(IN const SIPFactoryHolder& objRHS);
+    SipFactoryHolder(IN const SipFactoryHolder&) = delete;
+    SipFactoryHolder& operator=(IN const SipFactoryHolder&) = delete;
 
 public:
     inline SipIpSecState* GetIpSecState()
     {
-        if (pIPSecState == IMS_NULL)
+        if (m_pIpSecState == IMS_NULL)
         {
-            pIPSecState = new SipIpSecState();
+            m_pIpSecState = new SipIpSecState();
         }
 
-        return pIPSecState;
+        return m_pIpSecState;
     }
 
     inline SipMessageTracker* GetMessageTracker()
     {
-        if (pMessageTracker == IMS_NULL)
+        if (m_pMessageTracker == IMS_NULL)
         {
-            pMessageTracker = new SipMessageTracker();
+            m_pMessageTracker = new SipMessageTracker();
         }
 
-        return pMessageTracker;
+        return m_pMessageTracker;
     }
 
     inline SipPacketTracker* GetPacketTracker()
     {
-        if (pPacketTracker == IMS_NULL)
+        if (m_pPacketTracker == IMS_NULL)
         {
-            pPacketTracker = new SipPacketTracker();
+            m_pPacketTracker = new SipPacketTracker();
         }
 
-        return pPacketTracker;
+        return m_pPacketTracker;
     }
 
     inline SipRoutingRejectNotifier* GetRoutingRejectNotifier()
     {
-        if (pRoutingRejectNotifier == IMS_NULL)
+        if (m_pRoutingRejectNotifier == IMS_NULL)
         {
-            pRoutingRejectNotifier = new SipRoutingRejectNotifier();
+            m_pRoutingRejectNotifier = new SipRoutingRejectNotifier();
         }
 
-        return pRoutingRejectNotifier;
+        return m_pRoutingRejectNotifier;
     }
 
     inline SipRtConfigHelper* GetRtConfigHelper()
     {
-        if (pRTConfigHelper == IMS_NULL)
+        if (m_pRtConfigHelper == IMS_NULL)
         {
-            pRTConfigHelper = new SipRtConfigHelper();
+            m_pRtConfigHelper = new SipRtConfigHelper();
         }
 
-        return pRTConfigHelper;
+        return m_pRtConfigHelper;
     }
 
     inline SipTransportHelper* GetTransportHelper()
     {
-        if (pTransportHelper == IMS_NULL)
+        if (m_pTransportHelper == IMS_NULL)
         {
-            pTransportHelper = new SipTransportHelper();
+            m_pTransportHelper = new SipTransportHelper();
         }
 
-        return pTransportHelper;
+        return m_pTransportHelper;
     }
 
     inline void SetTokenGenerator(IN ISipTokenGenerator* piTokenGenerator)
     {
-        this->piTokenGenerator = piTokenGenerator;
+        m_piTokenGenerator = piTokenGenerator;
     }
 
     inline IMS_BOOL IsIpSecStateEnabled() const
     {
-        return (pIPSecState != IMS_NULL) && pIPSecState->IsIpSecEnabled();
+        return (m_pIpSecState != IMS_NULL) && m_pIpSecState->IsIpSecEnabled();
     }
     inline IMS_BOOL IsMessageTrackerEnabled() const
     {
-        return (pMessageTracker != IMS_NULL) && pMessageTracker->IsMessageTrackerEnabled();
+        return (m_pMessageTracker != IMS_NULL) && m_pMessageTracker->IsMessageTrackerEnabled();
     }
     inline IMS_BOOL IsPacketTrackerEnabled() const
     {
-        return (pPacketTracker != IMS_NULL) && pPacketTracker->IsPacketTrackerEnabled();
+        return (m_pPacketTracker != IMS_NULL) && m_pPacketTracker->IsPacketTrackerEnabled();
     }
     inline IMS_BOOL IsRoutingRejectNotifierEnabled() const
     {
-        return (pRoutingRejectNotifier != IMS_NULL) &&
-                pRoutingRejectNotifier->IsNotificationRequired();
+        return (m_pRoutingRejectNotifier != IMS_NULL) &&
+                m_pRoutingRejectNotifier->IsNotificationRequired();
     }
 
 private:
     void Clear();
 
 private:
-    SipIpSecState* pIPSecState;
-    SipMessageTracker* pMessageTracker;
-    SipPacketTracker* pPacketTracker;
-    SipRoutingRejectNotifier* pRoutingRejectNotifier;
-    SipRtConfigHelper* pRTConfigHelper;
-    SipTransportHelper* pTransportHelper;
-    ISipTokenGenerator* piTokenGenerator;
+    SipIpSecState* m_pIpSecState;
+    SipMessageTracker* m_pMessageTracker;
+    SipPacketTracker* m_pPacketTracker;
+    SipRoutingRejectNotifier* m_pRoutingRejectNotifier;
+    SipRtConfigHelper* m_pRtConfigHelper;
+    SipTransportHelper* m_pTransportHelper;
+    ISipTokenGenerator* m_piTokenGenerator;
 };
 
 PUBLIC
-SIPFactoryHolder::SIPFactoryHolder() :
-        pIPSecState(IMS_NULL),
-        pMessageTracker(IMS_NULL),
-        pPacketTracker(IMS_NULL),
-        pRoutingRejectNotifier(IMS_NULL),
-        pRTConfigHelper(IMS_NULL),
-        pTransportHelper(IMS_NULL),
-        piTokenGenerator(IMS_NULL)
+SipFactoryHolder::SipFactoryHolder() :
+        m_pIpSecState(IMS_NULL),
+        m_pMessageTracker(IMS_NULL),
+        m_pPacketTracker(IMS_NULL),
+        m_pRoutingRejectNotifier(IMS_NULL),
+        m_pRtConfigHelper(IMS_NULL),
+        m_pTransportHelper(IMS_NULL),
+        m_piTokenGenerator(IMS_NULL)
 {
 }
 
 PUBLIC
-SIPFactoryHolder::~SIPFactoryHolder()
+SipFactoryHolder::~SipFactoryHolder()
 {
     Clear();
 }
 
 PRIVATE
-void SIPFactoryHolder::Clear()
+void SipFactoryHolder::Clear()
 {
-    if (pIPSecState != IMS_NULL)
+    if (m_pIpSecState != IMS_NULL)
     {
-        delete pIPSecState;
-        pIPSecState = IMS_NULL;
+        delete m_pIpSecState;
+        m_pIpSecState = IMS_NULL;
     }
 
-    if (pMessageTracker != IMS_NULL)
+    if (m_pMessageTracker != IMS_NULL)
     {
-        delete pMessageTracker;
-        pMessageTracker = IMS_NULL;
+        delete m_pMessageTracker;
+        m_pMessageTracker = IMS_NULL;
     }
 
-    if (pPacketTracker != IMS_NULL)
+    if (m_pPacketTracker != IMS_NULL)
     {
-        delete pPacketTracker;
-        pPacketTracker = IMS_NULL;
+        delete m_pPacketTracker;
+        m_pPacketTracker = IMS_NULL;
     }
 
-    if (pRoutingRejectNotifier != IMS_NULL)
+    if (m_pRoutingRejectNotifier != IMS_NULL)
     {
-        delete pRoutingRejectNotifier;
-        pRoutingRejectNotifier = IMS_NULL;
+        delete m_pRoutingRejectNotifier;
+        m_pRoutingRejectNotifier = IMS_NULL;
     }
 
-    if (pTransportHelper != IMS_NULL)
+    if (m_pTransportHelper != IMS_NULL)
     {
-        delete pTransportHelper;
-        pTransportHelper = IMS_NULL;
+        delete m_pTransportHelper;
+        m_pTransportHelper = IMS_NULL;
     }
 
-    if (pRTConfigHelper != IMS_NULL)
+    if (m_pRtConfigHelper != IMS_NULL)
     {
-        delete pRTConfigHelper;
-        pRTConfigHelper = IMS_NULL;
+        delete m_pRtConfigHelper;
+        m_pRtConfigHelper = IMS_NULL;
     }
 
-    piTokenGenerator = IMS_NULL;
+    m_piTokenGenerator = IMS_NULL;
 }
 
-class SIPFactoryProxyPrivate
+class SipFactoryProxyPrivate
 {
 public:
-    SIPFactoryProxyPrivate();
-    ~SIPFactoryProxyPrivate();
+    SipFactoryProxyPrivate();
+    ~SipFactoryProxyPrivate();
 
-private:
-    SIPFactoryProxyPrivate(IN const SIPFactoryProxyPrivate& objRHS);
-    SIPFactoryProxyPrivate& operator=(IN const SIPFactoryProxyPrivate& objRHS);
+    SipFactoryProxyPrivate(IN const SipFactoryProxyPrivate&) = delete;
+    SipFactoryProxyPrivate& operator=(IN const SipFactoryProxyPrivate&) = delete;
 
 public:
-    inline SIPFactoryHolder* GetHolder(IN IMS_SINT32 nSlotId) const
+    inline SipFactoryHolder* GetHolder(IN IMS_SINT32 nSlotId) const
     {
         if ((nSlotId < IMS_SLOT_0) || (nSlotId >= SystemConfig::GetMaxSimSlot()))
         {
             nSlotId = IMS_SLOT_0;
         }
 
-        return ppHolder[nSlotId];
+        return m_ppHolder[nSlotId];
     }
 
 private:
-    SIPFactoryHolder** ppHolder;
+    SipFactoryHolder** m_ppHolder;
 };
 
 PUBLIC
-SIPFactoryProxyPrivate::SIPFactoryProxyPrivate() :
-        ppHolder(IMS_NULL)
+SipFactoryProxyPrivate::SipFactoryProxyPrivate() :
+        m_ppHolder(IMS_NULL)
 {
     IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
-    ppHolder = new SIPFactoryHolder*[nSimCount];
+    m_ppHolder = new SipFactoryHolder*[nSimCount];
 
     for (IMS_SINT32 i = 0; i < nSimCount; ++i)
     {
-        ppHolder[i] = new SIPFactoryHolder();
+        m_ppHolder[i] = new SipFactoryHolder();
     }
 }
 
 PUBLIC
-SIPFactoryProxyPrivate::~SIPFactoryProxyPrivate()
+SipFactoryProxyPrivate::~SipFactoryProxyPrivate()
 {
-    if (ppHolder != IMS_NULL)
+    if (m_ppHolder != IMS_NULL)
     {
         IMS_SINT32 nSimCount = SystemConfig::GetMaxSimSlot();
 
         for (IMS_SINT32 i = 0; i < nSimCount; ++i)
         {
-            if (ppHolder[i] != IMS_NULL)
+            if (m_ppHolder[i] != IMS_NULL)
             {
-                delete ppHolder[i];
+                delete m_ppHolder[i];
             }
         }
 
-        delete[] ppHolder;
+        delete[] m_ppHolder;
     }
 }
 
 PRIVATE
 SipFactoryProxy::SipFactoryProxy() :
-        pPrivate(new SIPFactoryProxyPrivate())
+        m_pPrivate(new SipFactoryProxyPrivate())
 {
 }
 
 PRIVATE
 SipFactoryProxy::~SipFactoryProxy()
 {
-    if (pPrivate != IMS_NULL)
+    if (m_pPrivate != IMS_NULL)
     {
-        delete pPrivate;
+        delete m_pPrivate;
     }
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipIpSecState* SipFactoryProxy::GetIpSecState(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetIpSecState();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipMessageTracker* SipFactoryProxy::GetMessageTracker(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetMessageTracker();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipPacketTracker* SipFactoryProxy::GetPacketTracker(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetPacketTracker();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipRoutingRejectNotifier* SipFactoryProxy::GetRoutingRejectNotifier(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetRoutingRejectNotifier();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipRtConfigHelper* SipFactoryProxy::GetRtConfigHelper(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetRtConfigHelper();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 SipTransportHelper* SipFactoryProxy::GetTransportHelper(IN IMS_SINT32 nSlotId)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->GetTransportHelper();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 void SipFactoryProxy::SetTokenGenerator(
         IN IMS_SINT32 nSlotId, IN ISipTokenGenerator* piTokenGenerator)
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     pHolder->SetTokenGenerator(piTokenGenerator);
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsIpSecStateEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsIpSecStateEnabled();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsMessageTrackerEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsMessageTrackerEnabled();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsPacketTrackerEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsPacketTrackerEnabled();
 }
 
-/*
-
-Remarks
-
-*/
 PUBLIC
 IMS_BOOL SipFactoryProxy::IsRoutingRejectNotifierEnabled(IN IMS_SINT32 nSlotId) const
 {
-    SIPFactoryHolder* pHolder = pPrivate->GetHolder(nSlotId);
+    SipFactoryHolder* pHolder = m_pPrivate->GetHolder(nSlotId);
     return pHolder->IsRoutingRejectNotifierEnabled();
 }
 
 PUBLIC GLOBAL void SipFactoryProxy::CreateInstance()
 {
-    if (pFactoryProxy == IMS_NULL)
+    if (s_pFactoryProxy == IMS_NULL)
     {
-        pFactoryProxy = new SipFactoryProxy();
+        s_pFactoryProxy = new SipFactoryProxy();
     }
 }
 
 PUBLIC GLOBAL void SipFactoryProxy::DestroyInstance()
 {
-    if (pFactoryProxy != IMS_NULL)
+    if (s_pFactoryProxy != IMS_NULL)
     {
-        delete pFactoryProxy;
-        pFactoryProxy = IMS_NULL;
+        delete s_pFactoryProxy;
+        s_pFactoryProxy = IMS_NULL;
     }
 }
 
 PUBLIC GLOBAL SipFactoryProxy* SipFactoryProxy::GetInstance()
 {
-    if (pFactoryProxy == IMS_NULL)
+    if (s_pFactoryProxy == IMS_NULL)
     {
         CreateInstance();
     }
 
-    return pFactoryProxy;
+    return s_pFactoryProxy;
 }

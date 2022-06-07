@@ -1,17 +1,20 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20131024  seungjin82.choi@          Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_PACKET_TRACKER_H_
-#define _SIP_PACKET_TRACKER_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_PACKET_TRACKER_H_
+#define SIP_PACKET_TRACKER_H_
 
 #include "ISipMessage.h"
 #include "ISipPacketTracker.h"
@@ -19,22 +22,31 @@
 class SipPacketTracker : public ISipPacketTracker
 {
 public:
-    SipPacketTracker();
-    virtual ~SipPacketTracker();
+    inline SipPacketTracker() :
+            m_piListener(IMS_NULL)
+    {
+    }
+    inline virtual ~SipPacketTracker() {}
+
+    SipPacketTracker(IN const SipPacketTracker&) = delete;
+    SipPacketTracker& operator=(IN const SipPacketTracker&) = delete;
 
 private:
     // ISipPacketTrackerListener class
-    virtual void SetListener(IN ISipPacketTrackerListener* piListener);
+    inline void SetListener(IN ISipPacketTrackerListener* piListener) override
+    {
+        m_piListener = piListener;
+    }
 
 public:
-    IMS_BOOL IsPacketTrackerEnabled() const;
+    inline IMS_BOOL IsPacketTrackerEnabled() const { return (m_piListener != IMS_NULL); }
     void NotifyMessageSent(
-            IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
+            IN ISipMessage* piSipMsg, IN const ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
     void NotifyMessageReceived(
-            IN ISipMessage* piSIPMsg, IN CONST ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
+            IN ISipMessage* piSipMsg, IN const ByteArray& objMsg, IN IMS_BOOL bIsRetransmission);
 
 public:
-    ISipPacketTrackerListener* piListener;
+    ISipPacketTrackerListener* m_piListener;
 };
 
-#endif  // _SIP_PACKET_TRACKER_H_
+#endif

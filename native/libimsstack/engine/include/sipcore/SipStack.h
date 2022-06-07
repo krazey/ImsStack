@@ -38,7 +38,7 @@ class SipTxnContextData;
 
 namespace SipStack
 {
-// Enumerations
+
 enum
 {
     /*
@@ -69,7 +69,7 @@ enum
     MESSAGE_SUCCESS
 };
 
-// Options for the selective SIP message encoding
+/// Options for the selective SIP message encoding
 enum
 {
     OPT_START_LINE = 0x01,
@@ -78,7 +78,7 @@ enum
     OPT_ALL = (OPT_START_LINE | OPT_HEADER_PART | OPT_BODY_PART)
 };
 
-// SIP message types
+/// SIP message types
 enum
 {
     SIP_MESSAGE_REQUEST = ::SipMessage::REQ_TYPE,
@@ -86,7 +86,7 @@ enum
     SIP_MESSAGE_ANY = ::SipMessage::TYPE_INVALID
 };
 
-// SIP transaction API called types
+/// SIP transaction API called types
 enum
 {
     SIP_TXN_MSG_SENT = 0,
@@ -94,8 +94,8 @@ enum
 };
 
 GLOBAL void Initialize();
-GLOBAL void SetTransactionTimerValues(IN IMS_SINT32 nSlotId, IN const SipProfile* pSipProfile,
-        IN const ISipConfigV* piSipConfigV);
+GLOBAL void SetTransactionTimerValues(
+        IN IMS_SINT32 nSlotId, IN const SipProfile* pProfile, IN const ISipConfigV* piSipConfigV);
 GLOBAL SipEn_ErrorTypes GetLastError();
 inline IMS_BOOL IsLastErrorNoExist()
 {
@@ -182,10 +182,10 @@ GLOBAL SipMsgBody* CloneMessageBody(IN SipMsgBody* pMsgBody);
 GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase* pHeader);
 GLOBAL SipHeaderBase* CopyHeader(IN SipHeaderBase* pDstHeader, IN SipHeaderBase* pSrcHeader);
 
-GLOBAL IMS_BOOL CorrectMessageBody(IN_OUT ::SipMessage*& pstMessage);
+GLOBAL IMS_BOOL CorrectMessageBody(IN_OUT ::SipMessage*& pMessage);
 
 GLOBAL SipHeaderBase* CreateHeader(IN IMS_SINT32 nType);
-GLOBAL SipHeaderBase* CreateHeader(IN IMS_SINT32 nType, IN SipAddrSpec* pstAddrSpec);
+GLOBAL SipHeaderBase* CreateHeader(IN IMS_SINT32 nType, IN SipAddrSpec* pAddrSpec);
 GLOBAL ::SipMessage* CreateMessage(IN IMS_SINT32 nType);
 GLOBAL SipMsgBody* CreateMessageBody();
 GLOBAL SipHeaderBase* CreateViaHeader(IN const AString& strSentProtocol,
@@ -210,7 +210,7 @@ GLOBAL IMS_BOOL EncodeMessage(IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions,
         OUT IMS_BYTE*& pBuffer, OUT IMS_SINT32& nBuffLen);
 GLOBAL IMS_BOOL EncodePartialMessage(
         IN ::SipMessage* pMessage, IN IMS_SINT32 nOptions, OUT ByteArray& objMessage);
-GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipHeaderBase* pHeader);
+GLOBAL IMSList<SipParameter*> ExtractParameters(IN const SipHeaderBase* pHeader);
 GLOBAL IMSList<SipParameter*> ExtractParameters(IN SipAddrSpec* pAddrSpec);
 GLOBAL IMSList<SipParameter*> ExtractParameters(IN const AString& strParams, IN IMS_CHAR cSep);
 
@@ -271,8 +271,8 @@ GLOBAL IMS_BOOL GetSubscriptionStateHeader(
         IN ::SipMessage* pMessage, OUT AString& strSubsState, OUT IMS_SINT32* pnExpires = IMS_NULL);
 GLOBAL SipHeaderBase* GetUnknownHeader(
         IN ::SipMessage* pMessage, IN const AString& strName, IN IMS_UINT32 nIndex = 0);
-GLOBAL AString GetUnknownHeaderName(IN SipHeaderBase* pHeader);
-GLOBAL AString GetUnknownHeaderBody(IN SipHeaderBase* pHeader);
+GLOBAL AString GetUnknownHeaderName(IN const SipHeaderBase* pHeader);
+GLOBAL AString GetUnknownHeaderBody(IN const SipHeaderBase* pHeader);
 GLOBAL AString GetViaBranchParameter(IN ::SipMessage* pMessage);
 GLOBAL IMS_SINT32 GetHdrEnumType(IN IMS_SINT32 nType);
 

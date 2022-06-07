@@ -1,22 +1,27 @@
 /*
-    Author
-    <table>
-    date      author                    description
-    --------  --------------            ----------
-    20090326  toastops@                 Created
-    </table>
-
-    Description
-
-*/
-
-#ifndef _SIP_STREAM_SOCKET_H_
-#define _SIP_STREAM_SOCKET_H_
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef SIP_STREAM_SOCKET_H_
+#define SIP_STREAM_SOCKET_H_
 
 #include "ITimer.h"
+
 #include "private/SipConfig.h"
-#include "SipSocket.h"
+
 #include "SipMessageFraming.h"
+#include "SipSocket.h"
 
 class ISipStreamSocketListener;
 
@@ -24,42 +29,41 @@ class SipStreamSocket : public SipSocket, public ITimerListener
 {
 public:
     explicit SipStreamSocket(IN IMS_SINT32 nSlotId);
-    SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket_);
+    SipStreamSocket(IN IMS_SINT32 nSlotId, IN ISocket* piSocket);
     virtual ~SipStreamSocket();
 
-private:
-    SipStreamSocket(IN CONST SipStreamSocket& objRHS);
-    SipStreamSocket& operator=(IN CONST SipStreamSocket& objRHS);
+    SipStreamSocket(IN const SipStreamSocket&) = delete;
+    SipStreamSocket& operator=(IN const SipStreamSocket&) = delete;
 
 public:
-    virtual void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL);
-    virtual IMS_BOOL Connect();
-    virtual IMS_BOOL Create(
-            IN CONST IPAddress& objIPA, IN IMS_UINT32 nPort = 0, IN IMS_BOOL bSecure = IMS_FALSE);
-    virtual void GetSockName(OUT IPAddress& objIPA, OUT IMS_UINT32& nPort);
-    virtual IMS_SINT32 Send(IN CONST IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen,
-            IN IMS_UINT32 nPort = 0, IN CONST IPAddress& objIPA = IPAddress::NONE);
-    virtual void NotifyForceClosed();
+    void ApplyIpSec(IN ISocket* piAcceptedSocket = IMS_NULL) override;
+    IMS_BOOL Connect() override;
+    IMS_BOOL Create(IN const IPAddress& objIp, IN IMS_UINT32 nPort = 0,
+            IN IMS_BOOL bSecure = IMS_FALSE) override;
+    void GetSockName(OUT IPAddress& objIp, OUT IMS_UINT32& nPort) override;
+    IMS_SINT32 Send(IN const IMS_BYTE* pBuffer, IN IMS_SINT32 nBuffLen, IN IMS_UINT32 nPort = 0,
+            IN const IPAddress& objIp = IPAddress::NONE) override;
+    void NotifyForceClosed() override;
 
     void DisableKeepAlive();
-    IMS_BOOL IsKeepAliveTimerActive() const;
+    inline IMS_BOOL IsKeepAliveTimerActive() const { return (m_piKeepAliveTimer != IMS_NULL); }
     IMS_BOOL IsKeepAlivePermanent() const;
-    IMS_BOOL IsSecureSocket() const;
+    inline IMS_BOOL IsSecureSocket() const { return m_bSecure; }
     void ReuseSocket();
-    void SetConfigForSipKeepAlive(IN IMS_BOOL bSIPKeepAlive);
-    void SetFarEnd(IN CONST IPAddress& objIPA, IN IMS_UINT32 nPort);
+    void SetConfigForSipKeepAlive(IN IMS_BOOL bSipKeepAlive);
+    void SetFarEnd(IN const IPAddress& objIp, IN IMS_UINT32 nPort);
     void SetKeepAlivePolicy(IN IMS_SINT32 nPolicy);
-    void SetListener(IN ISipStreamSocketListener* piListener);
+    inline void SetListener(IN ISipStreamSocketListener* piListener) { m_piListener = piListener; }
 
 protected:
     // ITimerListener interface
-    virtual void Timer_TimerExpired(IN ITimer* piTimer);
+    void Timer_TimerExpired(IN ITimer* piTimer) override;
 
-    virtual void Socket_OnDataReceived(IN ISocket* piSocket);
-    virtual void Socket_OnSendEnabled(IN ISocket* piSocket);
-    virtual void Socket_OnConnected(IN ISocket* piSocket);
-    virtual void Socket_OnClosed(
-            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN);
+    void Socket_OnDataReceived(IN ISocket* piSocket) override;
+    void Socket_OnSendEnabled(IN ISocket* piSocket) override;
+    void Socket_OnConnected(IN ISocket* piSocket) override;
+    void Socket_OnClosed(
+            IN ISocket* piSocket, IN IMS_SINT32 nReason = ISocket::CLOSE_REASON_UNKNOWN) override;
 
 private:
     IMS_RESULT StartTxTimer(IN IMS_SINT32 nDuration);
@@ -82,16 +86,16 @@ private:
         KEEPALIVE_TIMER_VALUE = 60000
     };
 
-    SipConfig::TcpTimerValues objTV_TCP;
-    SipMessageFraming objMFraming;
+    SipConfig::TcpTimerValues m_objTcpTimerValues;
+    SipMessageFraming m_objMsgFraming;
 
-    IMS_BOOL bSecure;
-    IMS_BOOL bSIPKeepAliveConfigured;
+    IMS_BOOL m_bSecure;
+    IMS_BOOL m_bSipKeepAliveConfigured;
 
-    ITimer* piTxTimer;
-    IMS_UINT32 nLastAliveTime;
-    ITimer* piKeepAliveTimer;
-    ISipStreamSocketListener* piListener;
+    ITimer* m_piTxTimer;
+    IMS_UINT32 m_nLastAliveTime;
+    ITimer* m_piKeepAliveTimer;
+    ISipStreamSocketListener* m_piListener;
 };
 
-#endif  // _SIP_STREAM_SOCKET_H_
+#endif
