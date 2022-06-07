@@ -433,7 +433,7 @@ PUBLIC VIRTUAL MtcSession* MtcCall::GetSession(IN const ISession* piSession)
         }
     }
 
-    IMS_TRACE_D(0, "GetSession : Not exists", 0, 0, 0);
+    IMS_TRACE_D("GetSession : Not exists", 0, 0, 0);
     return IMS_NULL;
 }
 
