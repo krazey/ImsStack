@@ -299,6 +299,7 @@ TEST_F(AosSubscriptionTest, checkInitialRegRequiredInWifi)
             .Times(AnyNumber())
             .WillRepeatedly(ReturnRef(objErrRegRequiredInWifi));
     EXPECT_TRUE(pAosSubscription->IsInitialRegistrationRequiredInWifi(403));
+    EXPECT_EQ(pAosSubscription->GetState(), AosSubscription::STATE_OFFLINE);
 
     objErrRegRequiredInWifi.Clear();
     objErrRegRequiredInWifi.Add(3);
