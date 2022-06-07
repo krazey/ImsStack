@@ -1,6 +1,8 @@
 #ifndef __SIP_MESSAGE_H__
 #define __SIP_MESSAGE_H__
 
+#define SIP_BADMESSAGE_PARSING
+
 #include "msg/SipHeaders.h"
 #include "msg/SipMsgBody.h"
 #include "msg/SipRequestLine.h"
