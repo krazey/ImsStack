@@ -496,11 +496,12 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
             }
             else
             {
-                // SIP/2.0/UDP
-                SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_NEAR);
-                // Update the destination info. scheme.
-                SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_FAR);
+                SetTransportProtocolByConfig();
             }
+        }
+        else
+        {
+            SetTransportProtocolByConfig();
         }
 
         // Set the destination address & port number
@@ -641,8 +642,9 @@ PUBLIC VIRTUAL IMS_BOOL SipClientTransport::UpdateDestinationInfo(IN ::SipMessag
     }
     else
     {
-        // TODO:: For TEL/IM/PRES URI scheme, we need to resolve the address using DNS query.
+        // For TEL/IM/PRES URI scheme, we need to resolve the address using DNS query.
         IMS_TRACE_D("UpdateDestinationInfo :: No SIP/SIPS URI scheme (not implemented)", 0, 0, 0);
+        SetTransportProtocolByConfig();
     }
 
     SipStack::FreeAddrSpec(pAddrSpec);
@@ -704,6 +706,39 @@ PROTECTED VIRTUAL void SipClientTransport::Socket_NotifyError(
     {
         GetTransportHelper()->Destroy(m_pServerSocket, this);
         m_pServerSocket = IMS_NULL;
+    }
+}
+
+PRIVATE
+void SipClientTransport::SetTransportProtocolByConfig()
+{
+    IMS_SINT32 nTransportType = SipConfigProxy::GetTransportType(GetSlotId());
+
+    IMS_TRACE_D("SetTransportProtocolByConfig: transportType=%d", nTransportType, 0, 0);
+
+    if (nTransportType == SipConfig::TRANSPORT_TYPE_UDP)
+    {
+        // SIP/2.0/UDP
+        SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_NEAR);
+        SetProtocol(SipTransportAddress::PROTOCOL_UDP, TA_FAR);
+        SetExplicitTargetProtocol(IMS_TRUE);
+    }
+    else if (nTransportType == SipConfig::TRANSPORT_TYPE_TCP)
+    {
+        // SIP/2.0/TCP
+        SetProtocol(SipTransportAddress::PROTOCOL_TCP, TA_NEAR);
+        SetProtocol(SipTransportAddress::PROTOCOL_TCP, TA_FAR);
+    }
+    else if (nTransportType == SipConfig::TRANSPORT_TYPE_DYNAMIC_UDP_TCP)
+    {
+        // Keep the current transport protocol and
+        // determine the transport protocol based on the size of SIP message.
+    }
+    else if (nTransportType == SipConfig::TRANSPORT_TYPE_TLS)
+    {
+        // SIP/2.0/TLS
+        SetProtocol(SipTransportAddress::PROTOCOL_TLS, TA_NEAR);
+        SetProtocol(SipTransportAddress::PROTOCOL_TLS, TA_FAR);
     }
 }
 

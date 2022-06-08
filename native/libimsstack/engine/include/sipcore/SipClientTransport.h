@@ -45,6 +45,7 @@ protected:
     void Socket_NotifyError(IN SipSocket* pSocket, IN IMS_SINT32 nErrorCode) override;
 
 private:
+    void SetTransportProtocolByConfig();
     static IMS_BOOL IsSameHostAndPort(IN SipAddrSpec* pAddrSpec1, IN SipAddrSpec* pAddrSpec2);
 
 private:
