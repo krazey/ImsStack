@@ -21,6 +21,7 @@ import android.os.Handler;
 import com.android.imsstack.core.OperatorInfo;
 import com.android.imsstack.core.agents.dcmif.EApnType;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.HashMap;
 
@@ -39,12 +40,9 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
 
     @Override
     public void init(int slotId, EApnType apnType) {
-        ISscNetConnection netConnection = get(slotId);
-        if (netConnection == null) {
-            netConnection = new SscNetConnection(slotId);
-            mSscNetConnection.put(slotId, netConnection);
-        }
-        netConnection.init(apnType);
+        SscNetConnection sscNetConnection = new SscNetConnection(slotId);
+        sscNetConnection.init(apnType);
+        setSscNetConnection(slotId, sscNetConnection);
     }
 
     @Override
@@ -116,6 +114,11 @@ public class SscNetConnectionGov implements ISscNetConnectionGov {
             return;
         }
         netConnection.refreshConnectionTimer();
+    }
+
+    @VisibleForTesting
+    protected void setSscNetConnection(int slotId, SscNetConnection sscNetConnection) {
+        mSscNetConnection.put(slotId, sscNetConnection);
     }
 
     private ISscNetConnection get(int slotId) {

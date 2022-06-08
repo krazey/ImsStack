@@ -19,7 +19,6 @@ package com.android.imsstack.enabler.ssc;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.util.ImsLog;
-import com.android.internal.annotations.VisibleForTesting;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -145,13 +144,12 @@ public class SscXmlGov {
         return getStringFromDoc(resultXml);
     }
 
-    @VisibleForTesting
-    protected void setXmlData(Document doc) {
+    private void setXmlData(Document doc) {
         mSimservDoc = doc;
     }
 
     private String removeNamespace(String document, String namespace) {
-        return document.replace(namespace, "");
+        return (document != null) ? document.replace(namespace, "") : null;
     }
 
     private String getStringFromDoc(Element xmlElement) {

@@ -16,6 +16,7 @@
 
 package com.android.imsstack.enabler.ssc;
 
+import android.telephony.TelephonyManager;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsSsInfo;
 import android.telephony.ims.stub.ImsUtImplBase;
@@ -135,4 +136,8 @@ public class SscConstant {
     public static final int BLOCK_REASON_BY_RESPONSE_CODE_PERM              = 0x00020000;
 
     public static final int BLOCK_REASON_NONE = 0;
+
+    // Telephony SIM Application type
+    public static final int APPTYPE_USIM = TelephonyManager.APPTYPE_USIM; // 2
+    public static final int APPTYPE_ISIM = TelephonyManager.APPTYPE_ISIM; // 5
 }

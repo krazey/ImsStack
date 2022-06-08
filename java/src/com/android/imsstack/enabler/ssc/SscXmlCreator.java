@@ -463,7 +463,7 @@ public class SscXmlCreator {
             if (!TextUtils.isEmpty(phoneContext)) {
                 domain = phoneContext;
             } else {
-                domain = SscUtils.getDomain(slotId);
+                domain = SscUtils.getInstance().getDomain(slotId);
             }
 
             if (domain == null) {

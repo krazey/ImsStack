@@ -25,6 +25,7 @@ import android.util.Pair;
 import com.android.imsstack.core.agents.AgentFactory;
 import com.android.imsstack.core.agents.TRMAgent;
 import com.android.imsstack.core.agents.agentif.IGBA;
+import com.android.imsstack.core.agents.agentif.ITRM;
 import com.android.imsstack.enabler.ssc.data.CbServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.CfServiceUpdateData;
 import com.android.imsstack.enabler.ssc.data.SscData;
@@ -32,6 +33,7 @@ import com.android.imsstack.enabler.ssc.data.SscRequestResult;
 import com.android.imsstack.enabler.ssc.data.SscServiceData;
 import com.android.imsstack.enabler.ssc.data.SscServiceQueryData;
 import com.android.imsstack.util.ImsLog;
+import com.android.internal.annotations.VisibleForTesting;
 
 import org.w3c.dom.Document;
 
@@ -46,12 +48,10 @@ public class SscTransaction {
     protected Handler mSscServiceImplHandler = null;
 
     protected Thread mSscTransactionThread = null;
-    protected MmtelTransaction mTransaction = null;
+    protected HttpTransaction mTransaction = null;
 
     protected int mEventNumber = 0;
     protected int mTransactionId = 0;
-    protected ESsType mSsType = ESsType.NONE;
-    protected int mRequestType = 0;
 
     protected int mTimerId = -1;
     protected int mSlotId = -1;
@@ -59,7 +59,7 @@ public class SscTransaction {
     public SscTransaction(int slotId, Handler handler) {
         mSlotId = slotId;
         mSscServiceImplHandler = handler;
-        mXmlGov = SscXmlGov.getInstance(slotId);
+        mXmlGov = getSscXmlGov();
     }
 
     public void close() {
@@ -79,8 +79,6 @@ public class SscTransaction {
         mTransaction = new GetTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
-        mSsType = data.getSsType();
-        mRequestType = SscHttpConnection.HTTP_GET_REQUEST;
         mSscTransactionThread.start();
     }
 
@@ -91,8 +89,6 @@ public class SscTransaction {
         mTransaction = new PutTransaction(data);
         mEventNumber = data.getEventNumber();
         mTransactionId = data.getTransactionId();
-        mSsType = data.getSsType();
-        mRequestType = SscHttpConnection.HTTP_PUT_REQUEST;
         mSscTransactionThread.start();
     }
 
@@ -122,27 +118,19 @@ public class SscTransaction {
         close();
     }
 
-    protected boolean isTrmAvailable() {
-        return TRMAgent.getInstance().isServiceAvailable(mSlotId, TRMAgent.SERVICE_UT);
-    }
-
-    protected boolean isTrmSupported() {
-        return TRMAgent.getInstance().isTRMSupported();
-    }
-
     protected final class SscTransactionThread extends Thread {
-        private SscTransaction SscTransaction = null;
+        private SscTransaction mSscTransaction = null;
 
         public SscTransactionThread(SscTransaction SscTransaction) {
             super("SscTransactionThread");
-            this.SscTransaction = SscTransaction;
+            this.mSscTransaction = SscTransaction;
         }
 
         public void run() {
             Looper.prepare();
 
             ImsLog.d("SscTransactionThread is running ... (" + android.os.Process.myTid() + ")");
-            mTransactionHandler = new TransactionHandler(SscTransaction);
+            mTransactionHandler = new TransactionHandler(mSscTransaction, Looper.myLooper());
             SscNetConnectionGov.getInstance().setCallbackHandler(mSlotId, mTransactionHandler);
             mTransaction.startTransaction();
 
@@ -150,7 +138,8 @@ public class SscTransaction {
         }
     }
 
-    protected boolean isSRVRetryRequired(int responseCode) {
+    /* TODO: check when implementing NAPTR/SRV
+    protected boolean isSrvRetryRequired(int responseCode) {
         if (SscConfig.isSrvRecordsRequired(mSlotId) == false) {
             return false;
         }
@@ -164,12 +153,14 @@ public class SscTransaction {
         }
         return false;
     }
+     */
 
-    abstract private class MmtelTransaction {
-        abstract protected String getRequestUri(String xui);
-        abstract protected String getXmlBody();
-        abstract protected String getPassword();
-        abstract protected void processResponse(ISscHttpConnectionGov httpConnection,
+    private abstract class HttpTransaction {
+        protected abstract int getRequestType();
+        protected abstract String getRequestUri(String xui);
+        protected abstract String getXmlBody();
+        protected abstract String getPassword();
+        protected abstract void processResponse(ISscHttpConnectionGov httpConnection,
                 int responseCode);
 
         public void startTransaction() {
@@ -199,14 +190,7 @@ public class SscTransaction {
         }
 
         private void sendRequest() {
-            String body = getXmlBody();
-            if (body == null) {
-                ImsLog.e(mSlotId, "Invalid body");
-                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
-                return;
-            }
-
-            String xui = SscXui.getXUI(mSlotId, getPassword());
+            String xui = getSscXui().getXui(mSlotId, getPassword());
             if (TextUtils.isEmpty(xui)) {
                 ImsLog.e(mSlotId, "Invalid XUI");
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
@@ -220,31 +204,44 @@ public class SscTransaction {
                 return;
             }
 
-            ISscHttpConnectionGov httpConnection = SscHttpConnectionGov.getInstance();
-            httpConnection.setXuiValue(mSlotId, xui);
-            getGbaKey(false);
+            String body = getXmlBody();
+            if (body == null) {
+                ImsLog.e(mSlotId, "Invalid body");
+                sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                return;
+            }
 
-            int responseCode = httpConnection.sendRequest(mSlotId, mRequestType, requestUri, body);
+            boolean gbaEnabled = SscConfig.isGbaSupported(mSlotId);
+            if (gbaEnabled) {
+                getGbaKey(false);
+            }
+
+            ISscHttpConnectionGov httpConnection = getSscHttpConnectionGov();
+            httpConnection.setXuiValue(mSlotId, xui);
+            int responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
+                    body);
             ImsLog.i(mSlotId, "response Code : " + responseCode);
 
             if (responseCode == SscConstant.HTTP_UNAUTHORIZED) {
-                if (SscConfig.isGbaSupported(mSlotId)) {
+                if (gbaEnabled) {
                     if (getGbaKey(true) == false) {
-                        SscServiceStateAgent.getInstance().setGbaRequestFailed(mSlotId, true);
+                        getSscServiceStateAgent().setGbaRequestFailed(mSlotId, true);
                         sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                         return;
                     }
 
-                    responseCode = httpConnection.sendRequest(mSlotId, mRequestType, requestUri,
+                    responseCode = httpConnection.sendRequest(mSlotId, getRequestType(), requestUri,
                             body);
                     if (responseCode == SscConstant.HTTP_UNAUTHORIZED) { // 401 again
-                        ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
+                        ISscAuthAgent authAgent = getSscAuthAgent();
                         authAgent.setIsCredentialInfoUpdated(false);
+                        sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
+                        return;
                     }
                 }
             }
-
-            if (isSRVRetryRequired(responseCode)) {
+            /* TODO: TODO: check when implementing NAPTR/SRV
+            if (isSrvRetryRequired(responseCode)) {
                 ImsLog.d(mSlotId, "SRV Retry Needed");
                 if (mTransactionHandler != null) {
                     mTransactionHandler.sendEmptyMessage(EVENT_SRV_RETRY_REQUIRED);
@@ -254,10 +251,10 @@ public class SscTransaction {
                 }
                 return;
             }
-
+            */
             if (responseCode == SscHttpConnection.REQUEST_FAILED) {
                 ImsLog.e(mSlotId, "Connection failed");
-                SscServiceStateAgent.getInstance().setSocketConnectionExpired(mSlotId, true);
+                getSscServiceStateAgent().setSocketConnectionExpired(mSlotId, true);
                 sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 return;
             }
@@ -266,7 +263,7 @@ public class SscTransaction {
         }
     }
 
-    protected class GetTransaction extends MmtelTransaction {
+    protected class GetTransaction extends HttpTransaction {
         SscServiceQueryData mData = null;
 
         public GetTransaction(SscServiceQueryData data) {
@@ -274,8 +271,13 @@ public class SscTransaction {
         }
 
         @Override
+        protected int getRequestType() {
+            return SscHttpConnection.HTTP_GET_REQUEST;
+        }
+
+        @Override
         protected String getRequestUri(String xui) {
-            return SscUrl.getInstance().getQueryUri(mData, xui);
+            return getSscUrl().getQueryUri(mData, xui);
         }
 
         @Override
@@ -296,7 +298,7 @@ public class SscTransaction {
             if (responseCode < 200 || responseCode >= 300) {
                 ImsLog.d(mSlotId, "not received 200 OK");
                 resultState = SscConstant.REQUEST_FAILURE;
-                SscServiceStateAgent.getInstance().setErrorResponseCode(mSlotId, responseCode);
+                getSscServiceStateAgent().setErrorResponseCode(mSlotId, responseCode);
             }
 
             Document doc = httpConnection.getInputStream(mSlotId);
@@ -315,7 +317,7 @@ public class SscTransaction {
         }
     }
 
-    protected class PutTransaction extends MmtelTransaction {
+    protected class PutTransaction extends HttpTransaction {
         SscServiceData mData = null;
 
         public PutTransaction(SscData SscData) {
@@ -323,8 +325,13 @@ public class SscTransaction {
         }
 
         @Override
+        protected int getRequestType() {
+            return SscHttpConnection.HTTP_PUT_REQUEST;
+        }
+
+        @Override
         protected String getRequestUri(String xui) {
-            return SscUrl.getInstance().getUpdateUri(mData, xui);
+            return getSscUrl().getUpdateUri(mData, xui);
         }
 
         @Override
@@ -345,12 +352,12 @@ public class SscTransaction {
             if (responseCode < 200 || responseCode >= 300) {
                 ImsLog.d(mSlotId, "not received 200 OK");
                 resultState = SscConstant.REQUEST_FAILURE;
-                SscServiceStateAgent.getInstance().setErrorResponseCode(mSlotId, responseCode);
+                getSscServiceStateAgent().setErrorResponseCode(mSlotId, responseCode);
             }
 
             Document doc = httpConnection.getInputStream(mSlotId);
             SscServiceData dataFromServer = null;
-            SscXmlGov.getInstance(mSlotId).updateXmlData(responseCode);
+            mXmlGov.updateXmlData(responseCode);
             if (resultState == SscConstant.REQUEST_FAILURE && doc != null) {
                 dataFromServer = mXmlGov.parseXmlStream(mData, doc);
                 if (dataFromServer == null) {
@@ -373,18 +380,76 @@ public class SscTransaction {
         }
     }
 
+    private boolean isTrmAvailable() {
+        return getTrmAgent().isServiceAvailable(mSlotId, TRMAgent.SERVICE_UT);
+    }
+
+    private boolean isTrmSupported() {
+        return getTrmAgent().isTRMSupported();
+    }
+
+    @VisibleForTesting
+    protected ITRM getTrmAgent() {
+        return TRMAgent.getInstance();
+    }
+
+    @VisibleForTesting
+    protected Handler getTransactionHandler() {
+        return mTransactionHandler;
+    }
+
+    @VisibleForTesting
+    protected SscXmlGov getSscXmlGov() {
+        return SscXmlGov.getInstance(mSlotId);
+    }
+
+    @VisibleForTesting
+    protected SscXui getSscXui() {
+        return SscXui.getInstance();
+    }
+
+    @VisibleForTesting
+    protected SscUrl getSscUrl() {
+        return SscUrl.getInstance();
+    }
+
+    @VisibleForTesting
+    protected SscServiceStateAgent getSscServiceStateAgent() {
+        return SscServiceStateAgent.getInstance();
+    }
+
+    @VisibleForTesting
+    protected SscUtils getSscUtils() {
+        return SscUtils.getInstance();
+    }
+
+    @VisibleForTesting
+    protected ISscHttpConnectionGov getSscHttpConnectionGov() {
+        return SscHttpConnectionGov.getInstance();
+    }
+
+    @VisibleForTesting
+    protected ISscAuthAgent getSscAuthAgent() {
+        return SscAuthAgent.getInstance(mSlotId);
+    }
+
+    @VisibleForTesting
+    protected IGBA getGbaAgent() {
+        return (IGBA) AgentFactory.getAgent(AgentFactory.GBA, mSlotId);
+    }
+
     private boolean getGbaKey(boolean isForced) {
-        IGBA gba = (IGBA) AgentFactory.getAgent(AgentFactory.GBA, mSlotId);
+        IGBA gba = getGbaAgent();
         if (gba == null) {
             return false;
         }
 
-        ISscAuthAgent authAgent = SscAuthAgent.getInstance(mSlotId);
+        ISscAuthAgent authAgent = getSscAuthAgent();
         if (authAgent.isCredentialInfoUpdated() == false) {
             return false;
         }
 
-        int appType = SscUtils.getTelephonySimType(mSlotId);
+        int appType = getSscUtils().getTelephonySimType(mSlotId);
         int gbaMode = SscConfig.getGbaMode(mSlotId);
         boolean isTls = SscConfig.isTls(mSlotId);
         String nafFqdn = authAgent.getNafFqdnFromRealm();
@@ -405,7 +470,8 @@ public class SscTransaction {
     public static class TransactionHandler extends Handler {
         private final WeakReference<SscTransaction> mService;
 
-        TransactionHandler(SscTransaction service) {
+        public TransactionHandler(SscTransaction service, Looper looper) {
+            super(looper);
             mService = new WeakReference<SscTransaction>(service);
         }
 
@@ -444,7 +510,7 @@ public class SscTransaction {
                 break;
             /* TODO: check when implementing NAPTR/SRV
             case EVENT_SRV_RETRY_REQUIRED:
-                if (SscServiceStateAgent.getInstance().getAllSrvAddrTried(mSlotId) == true) {
+                if (getSscServiceStateAgent().getAllSrvAddrTried(mSlotId) == true) {
                     sendFailMessageToServiceImpl(mEventNumber, mTransactionId);
                 } else {
                     SscAuthAgent.getInstance(mSlotId).setIsCredentialInfoUpdated(false);

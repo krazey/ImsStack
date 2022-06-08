@@ -839,7 +839,6 @@ public class SscServiceImplTest {
 
         capturedData.setResponseCode(200);
         Document doc = createEntireXmldoc();
-        SscXmlGov.getInstance(SLOT_0).setXmlData(doc);
         SscXmlGov.getInstance(SLOT_0).parseXmlStream(capturedData, doc);
 
         Message msg = Message.obtain();

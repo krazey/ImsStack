@@ -201,7 +201,7 @@ public class SscHttpConnection implements ISscHttpConnection {
             displayHeaders(false, "");
         } catch (UnknownHostException e) {
             ImsLog.e(e.toString());
-            SscServiceStateAgent.getInstance().setDnsQueryFailed(mSlotId, true);
+            //SscServiceStateAgent.getInstance().setDnsQueryFailed(mSlotId, true);
             return REQUEST_FAILED;
         } catch (Exception e) {
             ImsLog.e(e.toString());
@@ -371,7 +371,7 @@ public class SscHttpConnection implements ISscHttpConnection {
         //mConnection.setRequestProperty("Date"
         //            , DateUtils.formatDate(new Date(), DateUtils.PATTERN_RFC1123));
 
-        String userAgent = SscUtils.getUtUserAgent(mSlotId);
+        String userAgent = SscUtils.getInstance().getSscUserAgent(mSlotId);
         if (!TextUtils.isEmpty(userAgent)) {
             mConnection.setRequestProperty("User-Agent", userAgent);
         }

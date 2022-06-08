@@ -39,17 +39,13 @@ public class SscUrl {
     private final String URI_DOC = "/simservs.xml";
     private final String URI_NODE_SELECTOR_SEPARATOR = "/~~";
 
-    public static SscUrl sSscUrl = null;
+    private static SscUrl sSscUrl = new SscUrl();
 
-    public static SscUrl getInstance() {
-        if (sSscUrl == null) {
-            sSscUrl = new SscUrl();
-        }
-
+    protected static SscUrl getInstance() {
         return sSscUrl;
     }
 
-    public URL getConnectionUrl(int slotId, String query) {
+    protected URL getConnectionUrl(int slotId, String query) {
         String urlAddr = generateUrlAddress(slotId);
         if (TextUtils.isEmpty(urlAddr)) {
             ImsLog.e(slotId, "urlAddr is null");
@@ -68,7 +64,7 @@ public class SscUrl {
         return url;
     }
 
-    public String getDocumentQueryUri(SscServiceQueryData data, String xui) {
+    private String getDocumentQueryUri(SscServiceQueryData data, String xui) {
         int slotId = data.getSlotId();
         String urlQuery = getQueryPrefixFromDB(slotId);
         urlQuery += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
@@ -77,7 +73,7 @@ public class SscUrl {
         return urlQuery;
     }
 
-    public String getQueryUri(SscServiceQueryData data, String xui) {
+    protected String getQueryUri(SscServiceQueryData data, String xui) {
         int slotId = data.getSlotId();
         String querUri = getQueryPrefixFromDB(slotId);
         querUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC;
@@ -103,7 +99,7 @@ public class SscUrl {
         return querUri;
     }
 
-    public String getUpdateUri(SscServiceData data, String xui) {
+    protected String getUpdateUri(SscServiceData data, String xui) {
         int slotId = data.getSlotId();
         String updateUri = getQueryPrefixFromDB(slotId);
         updateUri += URI_AUID + URI_USERS + "/" + xui + URI_DOC + URI_NODE_SELECTOR_SEPARATOR;
@@ -295,7 +291,7 @@ public class SscUrl {
         return uriAddr;
     }
 
-    private static String getQueryPrefixFromDB(int slotId) {
+    private String getQueryPrefixFromDB(int slotId) {
         String urlQueryPrefix = SscConfig.getAuidPrefix(slotId);
         return (TextUtils.isEmpty(urlQueryPrefix)) ? "" :
                 (urlQueryPrefix.startsWith("/") ? urlQueryPrefix : "/" + urlQueryPrefix);

@@ -25,14 +25,22 @@ import com.android.imsstack.util.ImsLog;
 import java.util.Locale;
 
 public class SscXui {
+    private static SscXui sSscXui = new SscXui();
+
     private static final String IMPU_FILE_NAME = "impu_list";
     private static final String IMPU_LIST_SIZE = "size";
-
     private static final String XUI_TOP_PREFERRED = "top";
     private static final String XUI_SIP_PREFERRED = "sip";
     private static final String XUI_TEL_PREFERRED = "tel";
 
-    public static String getXUI(int slotId, String password) {
+    private SscXui() {
+    }
+
+    protected static SscXui getInstance() {
+        return sSscXui;
+    }
+
+    protected String getXui(int slotId, String password) {
         String xui = null;
 
         int paidListSize = getPAssociatedUriSize(slotId);
@@ -58,7 +66,7 @@ public class SscXui {
                 }
 
                 if (xui == null) {
-                    // in case of no preferred type, return top value
+                    // in case of no xui for preferred type, return top value
                     paid = getPAssociatedUriValue(slotId, 0);
                     if (paid != null) {
                         xui = paid;
@@ -68,14 +76,14 @@ public class SscXui {
         }
 
         if (xui == null) {
-            xui = SscUtils.getImpu(slotId);
+            xui = SscUtils.getInstance().getImpu(slotId);
         }
 
         ImsLog.d("XUI :" + xui);
         return setUserInfoWithPassword(xui, password);
     }
 
-    private static String setUserInfoWithPassword(String xui, String password) {
+    private String setUserInfoWithPassword(String xui, String password) {
         if (TextUtils.isEmpty(xui)) {
             return null;
         }
@@ -100,7 +108,7 @@ public class SscXui {
         return xuiWithPassword;
     }
 
-    private static int getPAssociatedUriSize(int slotId) {
+    private int getPAssociatedUriSize(int slotId) {
         IPreference pfa = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
         if (pfa == null) {
             return 0;
@@ -119,7 +127,7 @@ public class SscXui {
         return numberOfImpu;
     }
 
-    private static String getPAssociatedUriValue(int slotId, int index) {
+    private String getPAssociatedUriValue(int slotId, int index) {
         IPreference pfa = (IPreference)AgentFactory.getAgent(AgentFactory.PREFERENCE, slotId);
         if (pfa == null) {
             return null;

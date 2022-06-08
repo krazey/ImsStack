@@ -16,7 +16,6 @@
 
 package com.android.imsstack.enabler.ssc;
 
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import com.android.imsstack.core.agents.AgentFactory;
@@ -28,23 +27,34 @@ import com.android.imsstack.util.ImsLog;
 import java.util.List;
 import java.util.Locale;
 
-public final class SscUtils {
-    public static int getTelephonySimType(int slotId) {
+/**
+ * Provides the APIs for obtaining optimized data
+ */
+public class SscUtils {
+    private static SscUtils sSscUtils = new SscUtils();
+
+    private SscUtils() {
+    }
+
+    protected static SscUtils getInstance() {
+        return sSscUtils;
+    }
+
+    protected int getTelephonySimType(int slotId) {
         SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
                 SubsInfoInterface.class, slotId);
-
         if (subsInfo == null) {
-            return TelephonyManager.APPTYPE_ISIM;
+            return SscConstant.APPTYPE_ISIM;
         }
 
         if (subsInfo.isIsimEnabled()) {
-            return TelephonyManager.APPTYPE_ISIM;
+            return SscConstant.APPTYPE_ISIM;
         }
 
-        return TelephonyManager.APPTYPE_USIM;
+        return SscConstant.APPTYPE_USIM;
     }
 
-    public static String getImpu(int slotId) {
+    protected String getImpu(int slotId) {
         // TODO: Get IMPU from UICC value that provided by IMS platform regardless of USIM or ISIM
         SimInterface sim = AgentFactory.getInstance().getAgent(SimInterface.class, slotId);
         List<String> impuList = sim != null ? sim.getIsimImpu() : null;
@@ -57,10 +67,9 @@ public final class SscUtils {
         return impuList.get(0);
     }
 
-    public static String getDomain(int slotId) {
+    protected String getDomain(int slotId) {
         SubsInfoInterface subsInfo = AgentFactory.getInstance().getAgent(
                 SubsInfoInterface.class, slotId);
-
         if (subsInfo == null) {
             return null;
         }
@@ -103,7 +112,7 @@ public final class SscUtils {
         return domain;
     }
 
-    public static String getUtUserAgent(int slotId) {
+    protected String getSscUserAgent(int slotId) {
         final String gbaString = "3gpp-gba";
         String userAgent = SscConfig.getImsUserAgent(slotId);
         if (!TextUtils.isEmpty(gbaString)) {
