@@ -405,6 +405,32 @@ PUBLIC VIRTUAL CallStateName MtcCallState::Error_NotifyError(
     return GetStateName();
 }
 
+PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingMediaDataFailed(
+        IN IMS_UINT32 /* eMediaType */)
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnVideoLowestBitRate()
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingNetworkToneStarted()
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnReceivingNetworkToneFailed()
+{
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName MtcCallState::OnMediaFailed(IN FailReason /* objReason */)
+{
+    return GetStateName();
+}
+
 PROTECTED
 void MtcCallState::HandleTerminate(IN const FailReason& objReason)
 {
@@ -1032,4 +1058,48 @@ void MtcCallState::SendTransactionResponse(IN ISipServerConnection* piSipServerC
     piSipServerConnection->InitResponse(nResponseCode);
     piSipServerConnection->Send();
     piSipServerConnection->Close();
+}
+
+PROTECTED
+IMS_BOOL MtcCallState::IsCallEndNeededByAudioInactivity(IN IMS_UINT32 eMediaType) const
+{
+    IMS_TRACE_D("IsCallEndNeededByAudioInactivity", 0, 0, 0);
+
+    IMS_BOOL bNeedToEnd = IMS_FALSE;
+
+    if (eMediaType != MEDIATYPE_AUDIO)
+    {
+        return bNeedToEnd;
+    }
+
+    MtcConfigurationProxy& objConfigProxy = m_objContext.GetConfigurationProxy();
+    UpdatingInfo& objUpdatingInfo = m_objContext.GetUpdatingInfo();
+
+    if (objUpdatingInfo.IsHeld() || objUpdatingInfo.IsHeldBy())
+    {
+        // TODO: check configuration with protocol type. it will be updated.
+        bNeedToEnd = objConfigProxy.Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON,
+                CarrierConfig::Ims::RTCP_INACTIVITY_ON_HOLD);
+    }
+    else
+    {
+        if (m_objContext.GetService().IsEmergency())
+        {
+            // TODO: check configuration with protocol type. it will be updated.
+            bNeedToEnd = objConfigProxy.Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON,
+                                 CarrierConfig::Ims::E911_RTP_INACTIVITY_ON_CONNECTED) ||
+                    objConfigProxy.Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON,
+                            CarrierConfig::Ims::E911_RTCP_INACTIVITY_ON_CONNECTED);
+        }
+        else
+        {
+            // TODO: check configuration with protocol type. it will be updated.
+            bNeedToEnd = objConfigProxy.Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON,
+                                 CarrierConfig::Ims::RTP_INACTIVITY_ON_CONNECTED) ||
+                    objConfigProxy.Is(Feature::AUDIO_INACTIVITY_CALL_END_REASON,
+                            CarrierConfig::Ims::RTCP_INACTIVITY_ON_CONNECTED);
+        }
+    }
+
+    return bNeedToEnd;
 }

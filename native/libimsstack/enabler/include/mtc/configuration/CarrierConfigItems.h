@@ -27,6 +27,7 @@ public:
             strConferenceFactoryUri(AString::ConstEmpty()),
             bOipSourceFromHeader(IMS_FALSE),
             nMoCallRequestTimeout(5000),
+            objAudioInactivityCallEndReasons(IMSVector<IMS_SINT32>()),
             n18xTimer(32000),
             bSupportConferenceReferSubscribe(IMS_TRUE),
             bEnableConferenceSubscribeByParticipant(IMS_FALSE),
@@ -85,6 +86,7 @@ public:
     ~CarrierConfigItems()
     {
         objSrvccTypes.Clear();
+        objAudioInactivityCallEndReasons.Clear();
         objShortCallCodes.Clear();
         objRejectCodeForCsfbs.Clear();
         objCallTerminateReasonHeaders.Clear();
@@ -117,6 +119,7 @@ public:
     AString strConferenceFactoryUri;
     IMS_BOOL bOipSourceFromHeader;
     IMS_SINT32 nMoCallRequestTimeout;
+    IMSVector<IMS_SINT32> objAudioInactivityCallEndReasons;
     IMS_SINT32 n18xTimer;
     IMS_BOOL bSupportConferenceReferSubscribe;
     IMS_BOOL bEnableConferenceSubscribeByParticipant;

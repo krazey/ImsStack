@@ -5,9 +5,9 @@
 #include "media/MediaNego.h"
 
 class IMediaQosEventListener;
+class IMediaReportEventListener;
 class IMessage;
 class ISession;
-class IUCMediaListener;
 class JniMediaSessionThread;
 class MediaInfo;
 enum class CallType;
@@ -26,7 +26,7 @@ public:
      * @brief
      * @param pListener
      */
-    virtual void SetCallListener(IN IUCMediaListener* pListener) = 0;
+    virtual void SetMediaReportEventListener(IN IMediaReportEventListener* pListener) = 0;
 
     /**
      * @brief

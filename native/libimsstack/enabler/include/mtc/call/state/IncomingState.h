@@ -42,6 +42,9 @@ public:
     CallStateName SessionEarlyMediaUpdateReceived(IN ISession* piSession) override;
     CallStateName SessionPRAckReceived(IN ISession* piSession) override;
     CallStateName SessionRPRDeliveryFailed(IN ISession* piSession) override;
+
+    CallStateName OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType) override;
+    CallStateName OnMediaFailed(IN FailReason objReason) override;
 };
 
 #endif

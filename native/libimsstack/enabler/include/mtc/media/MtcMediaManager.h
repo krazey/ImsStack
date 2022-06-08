@@ -11,7 +11,7 @@
 #include "call/IMtcCallContext.h"
 
 #include "media/IMediaSessionClientListener.h"
-#include "media/IMtcMediaListener.h"
+#include "media/IMediaReportEventListener.h"
 #include "media/IMtcMediaManager.h"
 #include "media/MtcMediaProfileManager.h"
 
@@ -35,7 +35,7 @@ public: /* IMediaSessionClientListener */
     virtual void MediaSession_DRAInfo(IN IMediaDRAMsgParam* pMsg) override;
 
 public:
-    virtual void SetCallListener(IN IUCMediaListener* pListener) override;
+    virtual void SetMediaReportEventListener(IN IMediaReportEventListener* pListener) override;
     virtual void SetQosListener(IN IMediaQosEventListener* pListener) override;
 
     /* Media Info */
@@ -119,23 +119,18 @@ private:
     IMS_UINTP GetMediaNegoId(IN ISession* piSession);
     IMS_UINT32 GetDurationWaitingNetworkTone(IN ISession* piSession, IN IMessage* piMessage);
 
-    void HandleMediaSuccess();
-    void HandleReceivingRtpDataStarted();
-    void HandleReceivingRtpDataFailed();
-    void HandleMediaError();
+    void HandleReceivingMediaDataStarted(IN IMS_UINT32 eMediaType);
     void HandleReceivingNetworkToneStarted();
     void HandleReceivingNetworkToneFailed();
-    void HandleReceivedDtmfEvent();
 
 private:
-    IUCMediaListener* m_pCallListener;
+    IMediaReportEventListener* m_pMediaReportListener;
     IMediaQosEventListener* m_pQosListener;
     MtcMediaProfileManager m_objProfileManager;
     IMtcCallContext& m_objContext;
     MediaInfo* m_pMediaInfo;
     MediaInfo* m_pOldMediaInfo;
     IMS_BOOL m_bLocalTone;
-    IMS_UINT32 m_eRtpBlockedMediaTypes;  // m_bAudioRTPBlock, m_bVideoRTPBlock, m_bTextRTPBlock
     IMediaSession* m_piMediaSession;
     MediaState m_eState;
     MediaState m_eOldState;

@@ -545,6 +545,48 @@ PUBLIC VIRTUAL CallStateName OutgoingState::UssiStarted(IN ISession* piSession)
     return SessionStarted(piSession);
 }
 
+PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+
+    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    {
+        ISession* piSession = &m_objContext.GetSession()->GetISession();
+        FailReason objReason(FAIL_REASON_MEDIA_NODATA);
+        HandleCancel(piSession, objReason);
+        OnStartFailed(piSession, objReason);
+
+        return CallStateName::TERMINATING;
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneStarted()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneStarted", 0, 0, 0);
+    // TODO: send progressing with updated media info.
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName OutgoingState::OnReceivingNetworkToneFailed()
+{
+    IMS_TRACE_I("OnReceivingNetworkToneFailed", 0, 0, 0);
+    // TODO: send progressing with updated media info.
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName OutgoingState::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
+
+    ISession* piSession = &m_objContext.GetSession()->GetISession();
+    HandleCancel(piSession, objReason);
+    OnStartFailed(piSession, objReason);
+
+    return CallStateName::TERMINATING;
+}
+
 PUBLIC
 CallStateName OutgoingState::OnTimerExpired(IN IMS_SINT32 nType)
 {

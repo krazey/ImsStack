@@ -285,6 +285,34 @@ PUBLIC VIRTUAL CallStateName AlertingState::UssiStarted(IN ISession* piSession)
     return CallStateName::ESTABLISHED;
 }
 
+PUBLIC VIRTUAL CallStateName AlertingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+
+    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NODATA));
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName AlertingState::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
+
+    if (objReason.nReason == FAIL_REASON_MEDIA_CODEC)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_CODEC));
+    }
+    else if (objReason.nReason == FAIL_REASON_MEDIA_INITFAIL)
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_INITFAIL));
+    }
+
+    return GetStateName();
+}
+
 PRIVATE
 IMS_RESULT AlertingState::SendAccept()
 {

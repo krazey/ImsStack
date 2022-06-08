@@ -252,3 +252,33 @@ PUBLIC VIRTUAL CallStateName IncomingState::SessionRPRDeliveryFailed(IN ISession
     IMS_TRACE_D("SessionRPRDeliveryFailed", 0, 0, 0);
     return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_TO_MT_PRACK));
 }
+
+PUBLIC VIRTUAL CallStateName IncomingState::OnReceivingMediaDataFailed(IN IMS_UINT32 eMediaType)
+{
+    IMS_TRACE_I("OnReceivingMediaDataFailed", 0, 0, 0);
+
+    if (IsCallEndNeededByAudioInactivity(eMediaType))
+    {
+        return RejectIncomingAndToTerminating(FailReason(REJECT_REASON_MEDIA_NODATA));
+    }
+
+    return GetStateName();
+}
+
+PUBLIC VIRTUAL CallStateName IncomingState::OnMediaFailed(IN FailReason objReason)
+{
+    IMS_TRACE_I("OnMediaFailed", 0, 0, 0);
+
+    IMS_SINT32 nReason = REJECT_REASON_UNKNOWN;
+
+    if (objReason.nReason == FAIL_REASON_MEDIA_CODEC)
+    {
+        nReason = REJECT_REASON_MEDIA_CODEC;
+    }
+    else if (objReason.nReason == FAIL_REASON_MEDIA_INITFAIL)
+    {
+        nReason = REJECT_REASON_MEDIA_INITFAIL;
+    }
+
+    return RejectIncomingAndToTerminating(FailReason(nReason));
+}

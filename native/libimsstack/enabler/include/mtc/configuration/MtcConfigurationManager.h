@@ -46,6 +46,8 @@ public:
     const AString GetConferenceFactoryUri() const;     // KEY_CONFERENCE_FACTORY_URI_STRING
     IMS_BOOL IsOipSourceFromHeader() const;            // KEY_OIP_SOURCE_FROM_HEADER_BOOL
     IMS_SINT32 GetMoCallRequestTimeout() const;        // KEY_MO_CALL_REQUEST_TIMEOUT_MILLIS_INT
+    IMS_BOOL IsAudioInactivityCallEndReason(
+            IN IMS_SINT32 nReason) const;  // KEY_AUDIO_INACTIVITY_CALL_END_REASONS_INT_ARRAY
     IMS_SINT32 Get18xTimer() const;
     IMS_BOOL IsSupportConferenceReferSubscribe() const;
     IMS_BOOL IsEnableConferenceSubscribeByParticipant() const;
