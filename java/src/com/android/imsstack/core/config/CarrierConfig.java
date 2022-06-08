@@ -448,8 +448,6 @@ public class CarrierConfig {
                 KEY_PREFIX + "allow_text_with_video_bool";
         public static final String KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT =
                 KEY_PREFIX + "minimum_battery_level_for_limit_video_call_int";
-        public static final String KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL =
-                KEY_PREFIX + "support_video_text_feature_in_contact_header_simultaneously_bool";
         // Media
         public static final String KEY_HEVC_SUPPORT_BOOL =
                 KEY_PREFIX + "hevc_support_bool";

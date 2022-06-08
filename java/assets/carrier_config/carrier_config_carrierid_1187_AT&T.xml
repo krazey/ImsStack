@@ -192,7 +192,6 @@
     <boolean name="imsvt.support_early_session_bool" value="false"/>
     <boolean name="imsvt.allow_text_with_video_bool" value="false"/>
     <int name="imsvt.minimum_battery_level_for_limit_video_call_int" value="0"/>
-    <boolean name="imsvt.support_video_text_feature_in_contact_header_simultaneously_bool" value="true"/>
     <boolean name="imsrtt.text_on_default_bearer_supported_bool" value="true"/>
     <boolean name="imsrtt.text_qos_precondition_supported_bool" value="false"/>
     <int name="imsrtt.policy_on_text_qos_deactivation_int" value="1"/>

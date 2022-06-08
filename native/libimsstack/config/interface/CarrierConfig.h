@@ -805,8 +805,6 @@ public:
         static const IMS_CHAR KEY_SUPPORT_EARLY_SESSION_BOOL[];
         static const IMS_CHAR KEY_ALLOW_TEXT_WITH_VIDEO_BOOL[];
         static const IMS_CHAR KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT[];
-        static const IMS_CHAR
-                KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL[];
         // Media
         static const IMS_CHAR KEY_HEVC_SUPPORT_BOOL[];
         static const IMS_CHAR KEY_VIDEO_SDP_ANSWER_FULL_CAPABILITY_BOOL[];

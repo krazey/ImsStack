@@ -77,8 +77,6 @@ IMS_BOOL MtcConfigurationProxy::Is(IN Feature eFeature) const
             return m_objManager.IsSupportEarlySession();
         case Feature::ALLOW_TEXT_WITH_VIDEO:
             return m_objManager.IsAllowTextWithVideo();
-        case Feature::SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY:
-            return m_objManager.IsSupportVideoTextFeatureInContactHeaderSimultaneously();
         case Feature::TEXT_ON_DEFAULT_BEARER_SUPPORTED:
             return m_objManager.IsTextOnDefaultBearerSupported();
         case Feature::TEXT_QOS_PRECONDITION_SUPPORTED:

@@ -179,9 +179,6 @@ PRIVATE GLOBAL void MtcConfigurationUpdater::UpdateByCarrierConfig(
             piCc->GetBoolean(CarrierConfig::ImsVt::KEY_ALLOW_TEXT_WITH_VIDEO_BOOL);
     objItems.nMinimumBatteryLevelForLimitVideoCall =
             piCc->GetInt(CarrierConfig::ImsVt::KEY_MINIMUM_BATTERY_LEVEL_FOR_LIMIT_VIDEO_CALL_INT);
-    objItems.bSupportVideoTextFeatureInContactHeaderSimultaneously =
-            piCc->GetBoolean(CarrierConfig::ImsVt::
-                            KEY_SUPPORT_VIDEO_TEXT_FEATURE_IN_CONTACT_HEADER_SIMULTANEOUSLY_BOOL);
 
     // rtt configurations
     objItems.bTextOnDefaultBearerSupported =
